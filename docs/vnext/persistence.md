@@ -32,4 +32,4 @@ If neither primary nor backup is valid, loading fails without deleting the bad f
 
 The persisted payload is the complete v2 composition: player identity, personal wallet, actual location, event knowledge and the single runtime total_minutes value. The store implementation itself remains unchanged in this integration because its existing verified atomic file mechanics are schema-agnostic and already delegate schema validation to VNextWorldRuntime.restore().
 
-This boundary does not modify or replace FormalWorldSimulation persistence and never uses user://formal_world_1900.json.
+This boundary serves the isolated VNextWorldRuntime. The formal product uses FormalPersistence and its v15 snapshot; this boundary does not replace it and never uses user://formal_world_1900.json.

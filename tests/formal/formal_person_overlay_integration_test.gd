@@ -15,51 +15,51 @@ func _run() -> void:
 	_test_ordinary_formal_composition()
 	_test_current_schema_round_trip()
 	_test_reset_world()
-	_test_v5_backward_compatibility()
-	_test_v5_nonempty_organization_compatibility()
+	_test_v5_format_rejection()
+	_test_v5_nonempty_organization_format_rejection()
 	_test_source_boundaries()
 	print("Formal person overlay integration: %d checks, %d failures" % [checks, failures])
 	quit(1 if failures > 0 or checks <= 0 else 0)
 
 
 func _test_ordinary_formal_composition() -> void:
-	var world := FormalWorldSimulation.new()
-	_check(world.initialize(), "ordinary FormalWorldSimulation initializes with Person overlay: %s" % world.initialization_error)
-	if not world.initialized:
+	var world := WorldBootstrap.new().build()
+	_check(world.success, "ordinary WorldBuildResult initializes with Person overlay: %s" % world.error)
+	if not world.success:
 		return
-	_check(world.formal_person_count() > 0, "ordinary Formal composition has non-empty formal Person authority")
-	var person_ids := world.formal_person_ids()
+	_check(world.world.person_overlay.person_count() > 0, "ordinary Formal composition has non-empty formal Person authority")
+	var person_ids := world.world.person_overlay.person_ids()
 	_check(not person_ids.is_empty(), "ordinary Formal composition exposes stable Person references")
 	if person_ids.is_empty():
 		return
 	var person_id: String = person_ids[0]
 	_check(VNextStableId.is_valid(person_id), "default Formal Person ID satisfies stable ID contract")
 	_equal(VNextStableId.kind_of(person_id), "person", "default Formal Person ID has person kind")
-	_check(world.has_formal_person(person_id), "Formal Person authority owns default Person")
-	_equal(world.player_person_id(), person_id, "PlayerState selects a Person from the same Formal authority")
-	_check(world.has_formal_person(world.player_person_id()), "PlayerState Person resolves through Formal Person authority")
-	_check(world.organization_person_reference_ids().has(person_id), "Organization Person reference source contains Player Person")
+	_check(world.world.person_overlay.has_person(person_id), "Formal Person authority owns default Person")
+	_equal(world.world.player_state.player_id(), person_id, "PlayerState selects a Person from the same Formal authority")
+	_check(world.world.person_overlay.has_person(world.world.player_state.player_id()), "PlayerState Person resolves through Formal Person authority")
+	_check(world.organization_person_reference_ids.duplicate().has(person_id), "Organization Person reference source contains Player Person")
 	var expected_catalog := VNextOrganizationReferenceCatalog.create(
-		world.organization_person_reference_ids(),
-		world._organization_place_reference_ids
+		world.organization_person_reference_ids.duplicate(),
+		world.organization_place_reference_ids
 	)
 	_check(expected_catalog != null, "expected Organization reference catalog can be reconstructed")
 	if expected_catalog != null:
 		_equal(
-			world._organization.reference_catalog_fingerprint(),
+			world.world.organization_state.reference_catalog_fingerprint(),
 			expected_catalog.fingerprint(),
-			"OrganizationCore is actually bound to the same formal Person reference set"
+			"OrganizationState is actually bound to the same formal Person reference set"
 		)
 
-	var person := world.formal_person(person_id)
-	var claim := world.formal_person_population_claim(person_id)
+	var person := world.world.person_overlay.person(person_id)
+	var claim := world.world.person_overlay.population_claim(person_id)
 	var provenance := person.get("provenance", {}) as Dictionary
-	_equal(person.get("current_place_id"), FormalWorldSimulation.DEFAULT_FORMAL_PERSON_PLACE_ID, "default Formal Person has a validated residence")
-	_equal(claim.get("territory_id"), FormalWorldSimulation.DEFAULT_FORMAL_PERSON_TERRITORY_ID, "default Person claims formal country-level population aggregate")
+	_equal(person.get("current_place_id"), WorldBootstrap.DEFAULT_FORMAL_PERSON_PLACE_ID, "default Formal Person has a validated residence")
+	_equal(claim.get("territory_id"), WorldBootstrap.DEFAULT_FORMAL_PERSON_TERRITORY_ID, "default Person claims formal country-level population aggregate")
 	_equal(claim.get("coverage"), 1, "one named Person covers exactly one existing population share")
 	_check(bool(claim.get("active", false)), "living default Person contributes active named coverage")
 	_equal(
-		world.formal_person_anonymous_population(FormalWorldSimulation.DEFAULT_FORMAL_PERSON_TERRITORY_ID),
+		world.world.person_overlay.anonymous_population_for_territory(WorldBootstrap.DEFAULT_FORMAL_PERSON_TERRITORY_ID),
 		40_699_999,
 		"named materialization does not increase France authoritative aggregate population"
 	)
@@ -76,107 +76,88 @@ func _test_ordinary_formal_composition() -> void:
 
 
 func _test_current_schema_round_trip() -> void:
-	var source := FormalWorldSimulation.new()
-	_check(source.initialize(), "current-schema source initializes")
-	if not source.initialized:
+	var source := WorldBootstrap.new().build()
+	_check(source.success, "current-schema source initializes")
+	if not source.success:
 		return
-	source.advance_minutes(61)
-	var before_state := source.get_persistent_state()
-	var before_fingerprint := source.authoritative_fingerprint()
-	var before_person_ids := source.formal_person_ids()
-	var before_player_id := source.player_person_id()
-	var before_claim := source.formal_person_population_claim(before_player_id)
-	var before_organization_refs := source.organization_person_reference_ids()
+	source.simulation_step.advance_minutes(61)
+	var before_state := source.persistence.snapshot()
+	var before_fingerprint := source.persistence.authoritative_fingerprint()
+	var before_person_ids := source.world.person_overlay.person_ids()
+	var before_player_id := source.world.player_state.player_id()
+	var before_claim := source.world.person_overlay.population_claim(before_player_id)
+	var before_organization_refs := source.organization_person_reference_ids.duplicate()
 
-	var restored := FormalWorldSimulation.new()
-	_check(restored.initialize(), "current-schema restore target initializes")
-	_check(restored.restore_persistent_state(before_state), "current-schema Formal Person save restores through candidate/adopt")
-	if not restored.initialized:
+	var restored := WorldBootstrap.new().build()
+	_check(restored.success, "current-schema restore target initializes")
+	var candidate_1 := restored.persistence.restore_candidate(before_state)
+	if candidate_1.success:
+		restored = candidate_1
+	_check(candidate_1.success, "current-schema Formal Person save restores through candidate/adopt")
+	if not restored.success:
 		return
-	_equal(restored.formal_person_ids(), before_person_ids, "Person IDs survive save/restore")
-	_equal(restored.player_person_id(), before_player_id, "Player Person survives save/restore")
-	_equal(restored.formal_person_population_claim(before_player_id), before_claim, "Person claim survives save/restore")
-	_equal(restored.organization_person_reference_ids(), before_organization_refs, "Organization Person references survive save/restore")
-	_equal(restored.get_persistent_state(), before_state, "current-schema save/restore is state-identical")
-	_equal(restored.authoritative_fingerprint(), before_fingerprint, "authoritative fingerprint survives candidate restore/adopt")
-	_equal(restored._economy.get_persistent_state(), source._economy.get_persistent_state(), "candidate adopt preserves authoritative Economy service state")
-	_check(restored.economy is FormalWorldEconomyView, "public economy property remains a read-only Economy view after adopt")
+	_equal(restored.world.person_overlay.person_ids(), before_person_ids, "Person IDs survive save/restore")
+	_equal(restored.world.player_state.player_id(), before_player_id, "Player Person survives save/restore")
+	_equal(restored.world.person_overlay.population_claim(before_player_id), before_claim, "Person claim survives save/restore")
+	_equal(restored.organization_person_reference_ids.duplicate(), before_organization_refs, "Organization Person references survive save/restore")
+	_equal(restored.persistence.snapshot(), before_state, "current-schema save/restore is state-identical")
+	_equal(restored.persistence.authoritative_fingerprint(), before_fingerprint, "authoritative fingerprint survives candidate restore/adopt")
+	_equal(restored.world.economy_state.get_persistent_state(), source.world.economy_state.get_persistent_state(), "candidate adopt preserves authoritative Economy service state")
+	_check(FormalWorldEconomyView.new(restored.world.economy_state.read_only_snapshot()) is FormalWorldEconomyView, "public economy property remains a read-only Economy view after adopt")
 
 
 func _test_reset_world() -> void:
-	var world := FormalWorldSimulation.new()
-	var fresh := FormalWorldSimulation.new()
-	_check(world.initialize() and fresh.initialize(), "reset fixtures initialize")
-	if not world.initialized or not fresh.initialized:
+	var world := WorldBootstrap.new().build()
+	var fresh := WorldBootstrap.new().build()
+	_check(world.success and fresh.success, "reset fixtures initialize")
+	if not world.success or not fresh.success:
 		return
-	world.advance_minutes(5 * 24 * 60)
-	var old_person_authority: VNextNamedPersonOverlay = world._person_authority
-	var old_player_state: VNextPlayerState = world._player_state
-	_check(world.reset_world(), "reset_world creates a fresh legal Formal composition")
-	_check(world._person_authority != old_person_authority, "reset replaces named Person overlay lifecycle instance")
-	_check(world._player_state != old_player_state, "reset replaces PlayerState lifecycle instance")
-	_check(world.formal_person_count() > 0, "reset result still has formal Persons")
-	_check(world.has_formal_person(world.player_person_id()), "reset Player Person resolves through reset Person authority")
-	_check(world.organization_person_reference_ids().has(world.player_person_id()), "reset Organization references the reset Player Person")
-	_equal(world.get_persistent_state(), fresh.get_persistent_state(), "reset reproduces deterministic fresh Formal composition")
-	_equal(world.authoritative_fingerprint(), fresh.authoritative_fingerprint(), "reset fingerprint equals fresh-world fingerprint")
+	world.simulation_step.advance_minutes(5 * 24 * 60)
+	var old_person_authority: VNextNamedPersonOverlay = world.world.person_overlay
+	var old_player_state: VNextPlayerState = world.world.player_state
+	var candidate_2 := WorldBootstrap.new().build(null, world.organization_person_reference_ids, world.organization_place_reference_ids) if world.explicit_organization_reference_injection else WorldBootstrap.new().build()
+	if candidate_2.success:
+		world = candidate_2
+	_check(candidate_2.success, "reset_world creates a fresh legal Formal composition")
+	_check(world.world.person_overlay != old_person_authority, "reset replaces named Person overlay lifecycle instance")
+	_check(world.world.player_state != old_player_state, "reset replaces PlayerState lifecycle instance")
+	_check(world.world.person_overlay.person_count() > 0, "reset result still has formal Persons")
+	_check(world.world.person_overlay.has_person(world.world.player_state.player_id()), "reset Player Person resolves through reset Person authority")
+	_check(world.organization_person_reference_ids.duplicate().has(world.world.player_state.player_id()), "reset Organization references the reset Player Person")
+	_equal(world.persistence.snapshot(), fresh.persistence.snapshot(), "reset reproduces deterministic fresh Formal composition")
+	_equal(world.persistence.authoritative_fingerprint(), fresh.persistence.authoritative_fingerprint(), "reset fingerprint equals fresh-world fingerprint")
 
 
-func _test_v5_backward_compatibility() -> void:
-	var source := FormalWorldSimulation.new()
-	_check(source.initialize(), "v5 ordinary migration source initializes")
-	if not source.initialized:
-		return
-	source.advance_minutes(125)
-	var current := source.get_persistent_state()
-	var v5 := _downgrade_to_v5(current)
-	var expected_economy := (v5.get("economy") as Dictionary).duplicate(true)
-	var expected_organization := (v5.get("organization") as Dictionary).duplicate(true)
-
-	var restored := FormalWorldSimulation.new()
-	_check(restored.initialize(), "v5 ordinary migration target initializes")
-	_check(restored.restore_persistent_state(v5), "actual v5 snapshot without Person/Player fields restores")
-	if not restored.initialized:
-		return
-	_equal(restored.get_persistent_state().get("economy"), expected_economy, "v5 migration preserves Economy state")
-	_equal(restored.get_persistent_state().get("organization"), expected_organization, "v5 migration preserves Organization state")
-	_equal(restored.total_minutes, 125, "v5 migration preserves formal time")
-	_check(restored.formal_person_count() > 0, "v5 migration deterministically materializes current Formal Person overlay")
-	_check(restored.has_formal_person(restored.player_person_id()), "v5 migration binds Player to migrated current Person authority")
-	_check(restored.organization_person_reference_ids().has(restored.player_person_id()), "v5 migration binds Organization references to migrated current Person")
+func _test_v5_format_rejection() -> void:
+	var world := WorldBootstrap.new().build()
+	_check(world.success, "old-format rejection target initializes")
+	var before: Dictionary = world.persistence.snapshot()
+	var old: Dictionary = before.duplicate(true)
+	old["schema_id"] = "formal_world_simulation_v5"
+	var candidate_3 := world.persistence.restore_candidate(old)
+	if candidate_3.success:
+		world = candidate_3
+	_check(not candidate_3.success, "v5 save format is rejected")
+	_check(world.persistence.error.contains("SAVE FORMAT VERSION MISMATCH"), "version rejection explains controller storage change")
+	_check(world.persistence.snapshot() == before, "old-format rejection leaves current world unchanged")
 
 
-func _test_v5_nonempty_organization_compatibility() -> void:
-	var core := VNextOrganizationCore.create(EXPLICIT_PERSON_IDS, EXPLICIT_PLACE_IDS)
-	_check(core != null, "explicit v5 Organization fixture core configures")
-	if core == null:
-		return
-	_check(core.register_organization("organization:root", "association", "place:capital"), "explicit v5 fixture organization registers")
-	_check(core.add_member("organization:root", "person:alice"), "explicit v5 fixture member registers")
-	var source := FormalWorldSimulation.new(core, EXPLICIT_PERSON_IDS, EXPLICIT_PLACE_IDS)
-	_check(source.initialize(), "explicit-reference Formal source initializes")
-	if not source.initialized:
-		return
-	source.advance_minutes(60)
-	var source_state := source.get_persistent_state()
-	var v5 := _downgrade_to_v5(source_state)
-	var expected_org := (v5.get("organization") as Dictionary).duplicate(true)
-	var expected_economy := (v5.get("economy") as Dictionary).duplicate(true)
-
-	var target := FormalWorldSimulation.new(null, EXPLICIT_PERSON_IDS, EXPLICIT_PLACE_IDS)
-	_check(target.initialize(), "explicit-reference v5 target initializes with legacy reference contract")
-	_check(target.restore_persistent_state(v5), "non-empty v5 Organization snapshot restores with matching explicit references")
-	if not target.initialized:
-		return
-	_equal(target.organization_view().snapshot(), expected_org, "non-empty v5 Organization state is preserved")
-	_equal(target.get_persistent_state().get("economy"), expected_economy, "non-empty v5 migration preserves Economy state")
-	_equal(target.formal_person_ids(), EXPLICIT_PERSON_IDS, "explicit v5 references become formal Person references without changing IDs")
-	_check(target.organization_person_reference_ids().has("person:alice"), "restored Organization reference catalog includes legacy member Person")
-	_equal(target.organization_view().member_ids("organization:root"), ["person:alice"], "legacy Organization member survives v5 migration")
+func _test_v5_nonempty_organization_format_rejection() -> void:
+	var world := WorldBootstrap.new().build()
+	_check(world.success, "old-format rejection target initializes")
+	var before: Dictionary = world.persistence.snapshot()
+	var old: Dictionary = before.duplicate(true)
+	old["schema_id"] = "formal_world_simulation_v5"
+	var candidate_4 := world.persistence.restore_candidate(old)
+	if candidate_4.success:
+		world = candidate_4
+	_check(not candidate_4.success, "v5 save format is rejected")
+	_check(world.persistence.error.contains("SAVE FORMAT VERSION MISMATCH"), "version rejection explains controller storage change")
+	_check(world.persistence.snapshot() == before, "old-format rejection leaves current world unchanged")
 
 
 func _test_source_boundaries() -> void:
-	var formal_source := FileAccess.get_file_as_string("res://scripts/formal/formal_world_simulation.gd")
+	var formal_source := FileAccess.get_file_as_string("res://scripts/content/world_bootstrap.gd")
 	var overlay_source := FileAccess.get_file_as_string("res://scripts/vnext/population/named_person_overlay.gd")
 	_check(not formal_source.contains("data/world_map/characters.json"), "Formal Person composition does not read prototype characters")
 	_check(not formal_source.contains("CharacterRosterService"), "Formal Person composition does not import legacy CharacterRoster")
@@ -192,7 +173,7 @@ func _test_source_boundaries() -> void:
 
 func _downgrade_to_v5(current: Dictionary) -> Dictionary:
 	var v5 := current.duplicate(true)
-	v5["schema_id"] = FormalWorldSimulation.LEGACY_ORGANIZATION_SCHEMA_ID
+	v5["schema_id"] = "formal_world_simulation_v5"
 	v5.erase("persons")
 	v5.erase("player")
 	return v5

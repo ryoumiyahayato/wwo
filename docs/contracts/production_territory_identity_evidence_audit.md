@@ -1,5 +1,7 @@
 # Production Territory Identity Evidence Audit
 
+> 历史记录。下文“当前”仅指记录时的阶段；旧实现、命令及同步要求不再是开发指令。不得据此恢复已删除的宿主、UI、探针或审计门禁。现行入口、WorldState 与 v15 存档见 [当前架构](../ARCHITECTURE.md) 和 [存档格式](../SAVE_FORMAT.md)。
+
 Status: `PRODUCTION_TERRITORY_CATALOG_READY=NO`
 
 Base: `9254f087307eece5646c0180a8bc4d8328b38870`

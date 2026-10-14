@@ -13,6 +13,9 @@ config_version=5
 config/name="1900"
 config/version="0.001a"
 run/main_scene="res://scenes/formal/formal_world_menu.tscn"
+run/max_fps=60
+run/low_processor_mode=true
+run/low_processor_mode_sleep_usec=6900
 config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [display]
@@ -20,6 +23,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/size/resizable=true
+window/vsync/vsync_mode=1
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"

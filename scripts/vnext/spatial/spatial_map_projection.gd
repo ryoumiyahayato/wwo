@@ -1,9 +1,9 @@
 class_name VNextSpatialMapProjection
 extends RefCounted
-## Debug/test projection. It reads Spatial facts and owns no mutable world state.
+## Debug/test projection. It reads Spatial facts and TerritoryState control without owning either.
 
 
-func project(world: VNextSpatialWorld) -> Dictionary:
+func project(world: VNextSpatialWorld, territory: TerritoryState) -> Dictionary:
 	if world == null or not world.is_valid():
 		return {}
 	var catalog: VNextSpatialCatalog = world.catalog()
@@ -17,7 +17,7 @@ func project(world: VNextSpatialWorld) -> Dictionary:
 			"name": str(region.get("name", "")),
 			"sovereign_owner_id": str(facts.get("sovereign_owner_id", "")),
 			"administrative_parent_id": str(facts.get("administrative_parent_id", "")),
-			"military_controller_id": str(facts.get("military_controller_id", "")),
+			"controller_id": territory.get_controller(region_id),
 		})
 
 	var infrastructure: Array[Dictionary] = []
@@ -87,8 +87,8 @@ func project(world: VNextSpatialWorld) -> Dictionary:
 	}
 
 
-func build(world: VNextSpatialWorld) -> Dictionary:
-	return project(world)
+func build(world: VNextSpatialWorld, territory: TerritoryState) -> Dictionary:
+	return project(world, territory)
 
 
 func _port_status(world: VNextSpatialWorld, port_id: String) -> String:

@@ -11,12 +11,9 @@ on:
       - "tests/variable_state/formal_time_test_support.gd"
       - "docs/refactors/formal_time_behavior_baseline.md"
       - "scripts/formal/**"
-      - "scripts/ui_spikes/holographic_workspace/**"
-      - "scripts/v2_2/v2_datetime.gd"
-      - "scripts/alpha/**"
+      - "scripts/core/time/game_calendar.gd"
       - "scripts/core/data_record_utils.gd"
       - "scenes/formal/**"
-      - "shaders/ui_spikes/holographic_workspace/**"
       - "data/alpha/commodity_market_1900.json"
       - "data/alpha/historical_world_economy_1900.json"
       - "data/alpha/historical_world_economy_1900/**"
@@ -28,15 +25,6 @@ on:
       - "data/world_map/characters.json"
       - "project.godot"
       - "tools/run_validation.ps1"
-      - "tools/audit_variable_state.py"
-      - "tools/generate_variable_state_docs.py"
-      - "tools/render_variable_state_audit_summary.py"
-      - "tools/render_variable_state_member_inventory.py"
-      - "tools/render_variable_refactor_plan.py"
-      - "docs/refactors/variable_state_audit.md"
-      - "docs/refactors/variable_state_member_inventory.md"
-      - "docs/refactors/state_ownership_matrix.md"
-      - "docs/refactors/variable_refactor_plan.md"
   workflow_dispatch:
 
 permissions:
@@ -47,47 +35,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  audit-documents:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-
-      - name: Verify exact validation head
-        shell: bash
-        run: |
-          set -euo pipefail
-          expected="${{ github.event.pull_request.head.sha || github.sha }}"
-          actual="$(git rev-parse HEAD)"
-          test "$actual" = "$expected"
-
-      - name: Regenerate variable state audit documents
-        run: |
-          set -euo pipefail
-          python -B tools/audit_variable_state.py --root .
-          python tools/render_variable_state_audit_summary.py
-          python tools/render_variable_state_member_inventory.py
-          python tools/generate_variable_state_docs.py
-          python tools/render_variable_refactor_plan.py
-          test -s builds/variable-state-audit/variable_state_inventory.json
-          test -s builds/variable-state-audit/member_inventory.md
-          test -s docs/refactors/variable_state_audit.md
-          test -s docs/refactors/variable_state_member_inventory.md
-          test -s docs/refactors/state_ownership_matrix.md
-          test -s docs/refactors/variable_refactor_plan.md
-
-      - name: Verify audit documents remain unchanged
-        run: |
-          git diff --exit-code -- \
-            docs/refactors/variable_state_audit.md \
-            docs/refactors/variable_state_member_inventory.md \
-            docs/refactors/state_ownership_matrix.md \
-            docs/refactors/variable_refactor_plan.md
-
   formal-time-baseline:
     runs-on: windows-latest
     timeout-minutes: 60

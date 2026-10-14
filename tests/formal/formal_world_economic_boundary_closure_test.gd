@@ -10,9 +10,9 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var simulation := FormalWorldSimulation.new()
-	_check(simulation.initialize(), "formal composition initializes")
-	if simulation.initialized:
+	var simulation := WorldBootstrap.new().build()
+	_check(simulation.success, "formal composition initializes")
+	if simulation.success:
 		_check_source_loading_boundary()
 		_check_mutation_isolation(simulation)
 		_check_population_contract(simulation)
@@ -27,8 +27,8 @@ func _run() -> void:
 
 func _check_source_loading_boundary() -> void:
 	var service_source := FileAccess.get_file_as_string(
-		"res://scripts/formal/formal_world_economy_service.gd"
-	)
+		"res://scripts/world/formal_world_economy_state.gd"
+	) + FileAccess.get_file_as_string("res://scripts/simulation/formal_world_economy_simulation.gd")
 	_check(not service_source.contains("FileAccess"), "economy service cannot open source files")
 	_check(
 		not service_source.contains("political_units_1900.json"),
@@ -38,15 +38,11 @@ func _check_source_loading_boundary() -> void:
 		not service_source.contains("commodity_market_1900.json"),
 		"commodity evidence is loaded only by composition-owned catalog"
 	)
-	_check(
-		not service_source.contains("AlphaHistoricalWorldEconomyData.new"),
-		"historical bootstrap loader is not economy-owned"
-	)
 
 
-func _check_mutation_isolation(simulation: FormalWorldSimulation) -> void:
-	var before := simulation.get_persistent_state()
-	var view := simulation.economy
+func _check_mutation_isolation(simulation: WorldBuildResult) -> void:
+	var before := simulation.persistence.snapshot()
+	var view := FormalWorldEconomyView.new(simulation.world.economy_state.read_only_snapshot())
 	var copied_states := view.country_states
 	var economy_ids: Array = copied_states.keys()
 	economy_ids.sort()
@@ -62,19 +58,19 @@ func _check_mutation_isolation(simulation: FormalWorldSimulation) -> void:
 		copied_country["inventory"] = inventory
 		copied_states[economy_id] = copied_country
 	_check(
-		simulation.get_persistent_state() == before,
+		simulation.persistence.snapshot() == before,
 		"mutating observer copies cannot mutate authoritative economy"
 	)
 	var shipments_copy := view.shipments
 	shipments_copy.append({"shipment_id": "observer-only"})
 	_check(
-		simulation.get_persistent_state() == before,
+		simulation.persistence.snapshot() == before,
 		"mutating copied shipment list cannot mutate authoritative shipments"
 	)
 
 
-func _check_population_contract(simulation: FormalWorldSimulation) -> void:
-	var observation := simulation.economy.observation()
+func _check_population_contract(simulation: WorldBuildResult) -> void:
+	var observation := FormalWorldEconomyView.new(simulation.world.economy_state.read_only_snapshot()).observation()
 	var facts := observation.get("fact_sources", {}) as Dictionary
 	_check(not str(facts.get("population_revision", "")).is_empty(), "population revision exposed")
 	_check(not str(facts.get("population_fingerprint", "")).is_empty(), "population fingerprint exposed")
@@ -88,8 +84,8 @@ func _check_population_contract(simulation: FormalWorldSimulation) -> void:
 		_check(not state.has("urban_share_bp"), "economy dynamic state owns no urban demographic fact")
 
 
-func _check_static_dynamic_save_boundary(simulation: FormalWorldSimulation) -> void:
-	var economy_state := simulation.get_persistent_state().get("economy", {}) as Dictionary
+func _check_static_dynamic_save_boundary(simulation: WorldBuildResult) -> void:
+	var economy_state := simulation.persistence.snapshot().get("economy", {}) as Dictionary
 	_check(
 		str(economy_state.get("schema_id", "")) == "formal_world_economy_state_v6",
 		"production save uses market-scoped dynamic-only v6 schema"
@@ -110,9 +106,9 @@ func _check_static_dynamic_save_boundary(simulation: FormalWorldSimulation) -> v
 			_check(not state.has(forbidden), "dynamic save excludes static field %s" % forbidden)
 
 
-func _check_restore_references_and_atomicity(simulation: FormalWorldSimulation) -> void:
-	simulation.advance_minutes(25 * 60)
-	var before := simulation.get_persistent_state()
+func _check_restore_references_and_atomicity(simulation: WorldBuildResult) -> void:
+	simulation.simulation_step.advance_minutes(25 * 60)
+	var before := simulation.persistence.snapshot()
 	for field: String in ["static_evidence", "population_input"]:
 		var rejected := before.duplicate(true)
 		var economy_state := rejected.get("economy", {}) as Dictionary
@@ -120,23 +116,32 @@ func _check_restore_references_and_atomicity(simulation: FormalWorldSimulation) 
 		reference["revision"] = "invalid"
 		economy_state[field] = reference
 		rejected["economy"] = economy_state
-		_check(not simulation.restore_persistent_state(rejected), "%s revision mismatch rejected" % field)
-		_check(simulation.get_persistent_state() == before, "%s rejection is atomic" % field)
+		var candidate_1 := simulation.persistence.restore_candidate(rejected)
+		if candidate_1.success:
+			simulation = candidate_1
+		_check(not candidate_1.success, "%s revision mismatch rejected" % field)
+		_check(simulation.persistence.snapshot() == before, "%s rejection is atomic" % field)
 	var missing := before.duplicate(true)
 	var missing_economy := missing.get("economy", {}) as Dictionary
 	missing_economy.erase("static_evidence")
 	missing["economy"] = missing_economy
-	_check(not simulation.restore_persistent_state(missing), "missing static catalog reference rejected")
-	_check(simulation.get_persistent_state() == before, "missing catalog rejection is atomic")
+	var candidate_2 := simulation.persistence.restore_candidate(missing)
+	if candidate_2.success:
+		simulation = candidate_2
+	_check(not candidate_2.success, "missing static catalog reference rejected")
+	_check(simulation.persistence.snapshot() == before, "missing catalog rejection is atomic")
 
 
-func _check_v4_candidate_migration(simulation: FormalWorldSimulation) -> void:
-	var legacy_world := simulation.get_persistent_state()
-	legacy_world["economy"] = simulation.economy_regression_snapshot()
-	var restored := FormalWorldSimulation.new()
-	_check(restored.initialize(), "v4 migration target initializes")
-	_check(restored.restore_persistent_state(legacy_world), "v4 mixed-state save migrates through candidate")
-	var migrated_economy := restored.get_persistent_state().get("economy", {}) as Dictionary
+func _check_v4_candidate_migration(simulation: WorldBuildResult) -> void:
+	var legacy_world := simulation.persistence.snapshot()
+	legacy_world["economy"] = simulation.world.economy_state.legacy_regression_snapshot()
+	var restored := WorldBootstrap.new().build()
+	_check(restored.success, "v4 migration target initializes")
+	var candidate_3 := restored.persistence.restore_candidate(legacy_world)
+	if candidate_3.success:
+		restored = candidate_3
+	_check(candidate_3.success, "v4 mixed-state save migrates through candidate")
+	var migrated_economy := restored.persistence.snapshot().get("economy", {}) as Dictionary
 	_check(
 		str(migrated_economy.get("schema_id", "")) == "formal_world_economy_state_v6",
 		"v4 migration adopts market-scoped dynamic-only v6 state"
@@ -144,42 +149,48 @@ func _check_v4_candidate_migration(simulation: FormalWorldSimulation) -> void:
 	_check(not migrated_economy.has("history"), "v4 derived history is not adopted as authority")
 
 
-func _check_observer_contract(simulation: FormalWorldSimulation) -> void:
-	var observation := simulation.economy.observation()
-	_check(str(observation.get("domain_owner", "")) == "FormalWorldEconomyService", "observer names domain owner")
+func _check_observer_contract(simulation: WorldBuildResult) -> void:
+	var observation := FormalWorldEconomyView.new(simulation.world.economy_state.read_only_snapshot()).observation()
+	_check(str(observation.get("domain_owner", "")) == "FormalWorldEconomyState", "observer names domain owner")
 	_check(observation.get("fact_sources", {}) is Dictionary, "observer separates fact sources")
 	_check(observation.get("economic_state", {}) is Dictionary, "observer separates authoritative economic state")
 	_check(observation.get("derived_view", {}) is Dictionary, "observer separates derived views")
-	var before := simulation.get_persistent_state()
+	var before := simulation.persistence.snapshot()
 	(observation.get("economic_state", {}) as Dictionary).clear()
 	(observation.get("derived_view", {}) as Dictionary).clear()
-	_check(simulation.get_persistent_state() == before, "observer observation is detached from authority")
+	_check(simulation.persistence.snapshot() == before, "observer observation is detached from authority")
 
 
-func _check_second_initialization_fails(simulation: FormalWorldSimulation) -> void:
+func _check_second_initialization_fails(simulation: WorldBuildResult) -> void:
 	var catalog := FormalWorldEconomicEvidenceCatalog.new()
 	_check(
-		catalog.configure(simulation.provenance_gate()),
+		catalog.configure(simulation.world.provenance.gate()),
 		"economic evidence catalog initializes once through provenance gate"
 	)
 	_check(not catalog.configure(), "economic evidence catalog second initialization fails closed")
 	var static_view := FormalWorldEconomicStaticView.new(catalog.economic_snapshot())
 	var population_view := FormalWorldPopulationInputView.new(catalog.population_snapshot())
-	var service := FormalWorldEconomyService.new()
+	var service := FormalWorldEconomyState.new()
 	service.bind_authoritative_hour_source(func() -> int: return 0)
 	_check(
 		service.configure(
-			simulation.political_registry_view(),
-			simulation.market_registry_view(),
+			RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()),
+			simulation.world.market_registry_view,
 			static_view,
 			population_view
 		),
-		"economy owner initializes from immutable inputs"
+		"economy owner prepares immutable inputs"
 	)
+	_check(service.market_states.is_empty() and not service.is_configured(), "preparing inputs does not calculate opening state")
+	var computation := FormalWorldEconomySimulation.new(service)
+	_check(computation.initialize_state(), "simulation initializes current economy state")
+	var initialized_state := service.get_persistent_state()
+	_check(not computation.initialize_state(), "second opening calculation fails closed")
+	_check(service.get_persistent_state() == initialized_state, "rejected reinitialization preserves economy state")
 	_check(
 		not service.configure(
-			simulation.political_registry_view(),
-			simulation.market_registry_view(),
+			RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()),
+			simulation.world.market_registry_view,
 			static_view,
 			population_view
 		),

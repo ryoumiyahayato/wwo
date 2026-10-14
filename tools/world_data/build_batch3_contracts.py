@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build loader/data contracts, explicit flag coverage, and record signatures.
+"""Build explicit flag coverage and data record signatures.
 
-All relationships in this tool come from literal loader paths or existing
-source fields. It does not infer historical identities and never edits source.
+Relationships come from existing source fields. The retired runtime-loader
+contract has been removed. This tool never edits source.
 """
 
 from __future__ import annotations
@@ -10,7 +10,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import re
 from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable, Iterator, Mapping
@@ -32,9 +31,6 @@ except ModuleNotFoundError:
 
 
 SCHEMA_VERSION = "wwo_world_data_batch3_contracts_v1"
-RESOURCE_FILE_RE = re.compile(r"res://data/world_map/[A-Za-z0-9_./-]+\.json")
-RESOURCE_DIR_RE = re.compile(r"res://data/world_map/[A-Za-z0-9_./-]+/")
-DATA_MAP_ENTRY_RE = re.compile(r'"(?P<key>[^"]+)"\s*:\s*"(?P<resource>res://data/world_map/[^\"]+\.json)"')
 
 
 def read_json(path: Path) -> Any:
@@ -58,86 +54,6 @@ def sha256_lines(lines: list[str]) -> str:
 
 def resource_to_local_path(repository_root: Path, resource: str) -> Path:
     return repository_root / resource[6:]
-
-
-def build_loader_contract(repository_root: Path) -> dict[str, Any]:
-    script_roots = [repository_root / "scripts" / "world_map", repository_root / "scripts" / "formal"]
-    scripts = canonical_path_sort((path for root in script_roots for path in root.rglob("*.gd")), repository_root)
-    data_files = canonical_path_sort(repository_root.joinpath("data", "world_map").rglob("*.json"), repository_root)
-    data_file_resources = {"res://" + path.relative_to(repository_root).as_posix() for path in data_files}
-    file_references: list[dict[str, Any]] = []
-    directory_references: list[dict[str, Any]] = []
-    map_entries: list[dict[str, Any]] = []
-    script_hashes: list[str] = []
-
-    for script in scripts:
-        text = script.read_text(encoding="utf-8")
-        script_rel = script.relative_to(repository_root).as_posix()
-        script_hashes.append(f"{script_rel}\t{sha256_file(script)}")
-        file_resources = sorted(set(RESOURCE_FILE_RE.findall(text)))
-        directory_resources = sorted(set(RESOURCE_DIR_RE.findall(text)))
-        for resource in file_resources:
-            local = resource_to_local_path(repository_root, resource)
-            file_references.append(
-                {
-                    "script": script_rel,
-                    "resource": resource,
-                    "exists": local.is_file(),
-                }
-            )
-        for resource in directory_resources:
-            local = resource_to_local_path(repository_root, resource)
-            matches = canonical_path_sort(local.rglob("*.json"), repository_root) if local.is_dir() else []
-            directory_references.append(
-                {
-                    "script": script_rel,
-                    "resource": resource,
-                    "exists": local.is_dir(),
-                    "json_file_count": len(matches),
-                }
-            )
-        if script.name == "world_map_data_impl.gd":
-            for match in DATA_MAP_ENTRY_RE.finditer(text):
-                resource = match.group("resource")
-                local = resource_to_local_path(repository_root, resource)
-                map_entries.append(
-                    {
-                        "key": match.group("key"),
-                        "resource": resource,
-                        "exists": local.is_file(),
-                    }
-                )
-
-    direct_paths = sorted({reference["resource"] for reference in file_references})
-    missing_direct = sorted(resource for resource in direct_paths if resource not in data_file_resources)
-    missing_direct_records = sorted(
-        (reference["script"], reference["resource"])
-        for reference in file_references
-        if not reference["exists"]
-    )
-    missing_directories = sorted(
-        (reference["script"], reference["resource"])
-        for reference in directory_references
-        if not reference["exists"]
-    )
-    unused_direct_json = sorted(data_file_resources - set(direct_paths))
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "production_script_roots": ["scripts/world_map", "scripts/formal"],
-        "production_script_count": len(scripts),
-        "script_digest": sha256_lines(sorted(script_hashes)),
-        "data_json_count": len(data_files),
-        "literal_file_reference_count": len(file_references),
-        "literal_directory_reference_count": len(directory_references),
-        "literal_file_references": file_references,
-        "literal_directory_references": directory_references,
-        "world_map_data_loader_entries": map_entries,
-        "missing_direct_json_paths": missing_direct,
-        "missing_direct_references": missing_direct_records,
-        "missing_directory_references": missing_directories,
-        "not_directly_literal_referenced_json": unused_direct_json,
-        "contract_gate": "PASS" if not missing_direct_records and not missing_directories else "REVIEW_REQUIRED",
-    }
 
 
 def build_flag_coverage(repository_root: Path) -> dict[str, Any]:
@@ -239,13 +155,9 @@ def build_record_signatures(repository_root: Path, data_paths: Iterable[Path] | 
     }
 
 
-def build_gap_report(loader: Mapping[str, Any], flags: Mapping[str, Any], signatures: Mapping[str, Any]) -> dict[str, Any]:
+def build_gap_report(flags: Mapping[str, Any], signatures: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
-        "loader_contract_gaps": {
-            "missing_direct_references": loader.get("missing_direct_references", []),
-            "missing_directory_references": loader.get("missing_directory_references", []),
-        },
         "flag_coverage_gaps": {
             "missing_flag_records": flags.get("missing_flag_record_count", 0),
             "missing_assets": flags.get("missing_asset_count", 0),
@@ -300,19 +212,16 @@ def main() -> int:
     args = parse_args()
     root = args.root.resolve()
     output_dir = args.output_dir if args.output_dir.is_absolute() else root / args.output_dir
-    loader = build_loader_contract(root)
     flags = build_flag_coverage(root)
     signatures = build_record_signatures(root)
-    gap_report = build_gap_report(loader, flags, signatures)
+    gap_report = build_gap_report(flags, signatures)
     staging = build_staging(flags)
-    write_json(output_dir / "batch3_loader_contract.json", loader)
     write_json(output_dir / "batch3_historical_flag_coverage.json", flags)
     write_json(output_dir / "batch3_record_signature_manifest.json", signatures)
     write_json(output_dir / "batch3_gap_report.json", gap_report)
     write_json(output_dir / "batch3_staging_candidates.json", staging)
     gate_passed = (
-        loader["contract_gate"] == "PASS"
-        and not flags["catalog_errors"]
+        not flags["catalog_errors"]
         and flags["missing_flag_record_count"] == 0
         and flags["missing_asset_count"] == 0
         and flags["hash_mismatch_count"] == 0
@@ -320,9 +229,6 @@ def main() -> int:
     print(
         json.dumps(
             {
-                "loader_entries": len(loader["world_map_data_loader_entries"]),
-                "loader_missing_direct": len(loader["missing_direct_references"]),
-                "loader_missing_directories": len(loader["missing_directory_references"]),
                 "historical_units": flags["unit_count"],
                 "verified_or_documented_flag_units": flags["status_counts"].get("VERIFIED_ASSET", 0) + flags["status_counts"].get("DOCUMENTED_ABSENCE", 0),
                 "record_signature_files": signatures["data_json_count"],

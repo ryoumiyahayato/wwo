@@ -152,6 +152,8 @@ def label_rank(area: float, status: str) -> int:
 
 def main() -> int:
     snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
+    if snapshot.get("schema_version") != 1 or not isinstance(snapshot.get("features"), list):
+        raise ValueError("unsupported CShapes snapshot format")
     if snapshot.get("snapshot_date") != TARGET_DATE:
         raise ValueError("unexpected CShapes snapshot date")
     controllers = controller_map()
@@ -197,8 +199,8 @@ def main() -> int:
             "geometry_feature_id": feature["id"], "geometry_provider": "cshapes_2_0",
             "data_quality": "dated_historical_gis",
         })
-    if len(units) != 151 or len({unit["gwcode"] for unit in units}) != 151:
-        raise ValueError("political unit registry must cover exactly 151 CShapes units")
+    if not units or len(units) != len(snapshot["features"]) or len({unit["gwcode"] for unit in units}) != len(units):
+        raise ValueError("political unit registry must uniquely cover every CShapes input feature")
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     document = {
         "schema_version": 1, "snapshot_date": TARGET_DATE, "geometry_provider": "cshapes_2_0",

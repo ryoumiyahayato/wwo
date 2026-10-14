@@ -33,21 +33,22 @@ The matrix is static evidence only. It records candidate producer/consumer
 relationships and warns on broken references; it never infers a source or
 license and never modifies data or assets.
 
-## Historical Provenance source-byte contract
+## Formal historical catalog generation
 
-The Historical Provenance Foundation currently admits three textual JSON
-sources for byte-level content identity: the dated political-unit catalog, the
-CShapes 1900 snapshot, and the compact 1900 population aggregate table. These
-paths have an explicit repository `text eol=lf` contract in `.gitattributes`.
-The generator validates the checked-out bytes before hashing and fails closed
-if an admitted textual source contains CR/CRLF bytes; it never silently
-normalizes a source into a second valid identity. Future arbitrary or binary
-sources are not subject to this textual validation unless they are explicitly
-admitted to the textual-source set.
+Run `python tools/provenance/generate_historical_provenance.py` after changing
+formal historical inputs; run it with `--check` to compare parsed structures.
+The same generator includes political identities, the CShapes snapshot, bounded
+population inputs, Arabia/Gulf geography, historical authorities and Arabia
+coverage. Supplement builders emit source content, never mutate these catalogs.
 
-The runtime registry gate intentionally continues to hash the checked-out bytes
-verbatim. Therefore the generator hash definition and runtime hash definition
-remain identical: SHA-256 of the repository's canonical checked-out source
-bytes. The generated source registry and fact-evidence catalog have a separate
-`text eol=lf` formatting contract, and the generator writes their UTF-8 bytes
-with LF line endings deterministically.
+The registry and fact catalog use explicit v2 schema IDs. Internal source and
+assertion hash fields have been removed; source bindings and facts are compared
+as data. Unsupported schemas, missing fields and invalid references fail.
+LF/CRLF, object-key order and JSON whitespace do not change compatibility.
+Generated output uses sorted keys, UTF-8 and LF; `.gitattributes` is formatting
+policy, not a runtime content-admission contract.
+
+External artifact checksums (e.g. original CShapes archive or downloaded flag)
+remain byte-integrity metadata. Git revisions in historical audit reports are
+context, never runtime compatibility versions. Existing audit inventories are
+reports, not formal content inputs or a second registry.

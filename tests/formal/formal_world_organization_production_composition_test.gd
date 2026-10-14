@@ -9,16 +9,16 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var first := FormalWorldSimulation.new()
-	var second := FormalWorldSimulation.new()
-	_check(first.initialize(), "first production Formal world initializes")
-	_check(second.initialize(), "second production Formal world initializes")
-	if not first.initialized or not second.initialized:
+	var first := WorldBootstrap.new().build()
+	var second := WorldBootstrap.new().build()
+	_check(first.success, "first production Formal world initializes")
+	_check(second.success, "second production Formal world initializes")
+	if not first.success or not second.success:
 		_finish()
 		return
 
 	var expected_polity_ids: Array[String] = []
-	for record: Dictionary in first.historical_evidence_view().records():
+	for record: Dictionary in first.world.historical_evidence_view.records():
 		if (
 			str(record.get("status", "")) == "sovereign"
 			and str(record.get("relationship", "")) == "independent_state"
@@ -26,14 +26,14 @@ func _run() -> void:
 			expected_polity_ids.append(str(record.get("source_historical_id", "")))
 	expected_polity_ids.sort()
 
-	var evidence := first.organization_evidence_view()
-	var organizations := first.organization_view()
+	var evidence := first.world.organization_evidence_view
+	var organizations := FormalWorldOrganizationView.new(first.world.organization_state.snapshot())
 	var coverage := evidence.coverage_summary()
 
 	_equal(evidence.organization_count(), expected_polity_ids.size(), "eligible polity set determines production Organization count")
-	_equal(organizations.organization_count(), expected_polity_ids.size(), "OrganizationCore materializes exactly the eligible production set")
+	_equal(organizations.organization_count(), expected_polity_ids.size(), "OrganizationState materializes exactly the eligible production set")
 	_check(evidence.organization_count() > 0, "production Organization roster is non-empty")
-	_equal(int(coverage.get("political_unit_count", -1)), first.historical_evidence_view().record_count(), "coverage reports the full political evidence universe")
+	_equal(int(coverage.get("political_unit_count", -1)), first.world.historical_evidence_view.record_count(), "coverage reports the full political evidence universe")
 	_equal(int(coverage.get("eligible_governing_institution_count", -1)), expected_polity_ids.size(), "coverage reports eligible governing institutions")
 	_equal(int(coverage.get("materialized_organization_count", -1)), expected_polity_ids.size(), "coverage reports every eligible institution materialized")
 	_equal(int(coverage.get("historical_a_count", -1)), 0, "no unsupported historical-exact Organization claim is fabricated")
@@ -42,7 +42,7 @@ func _run() -> void:
 	_equal(int(coverage.get("prototype_d_count", -1)), 0, "prototype D organizations are excluded")
 	_equal(
 		int(coverage.get("deferred_for_evidence_count", -1)),
-		first.historical_evidence_view().record_count() - expected_polity_ids.size(),
+		first.world.historical_evidence_view.record_count() - expected_polity_ids.size(),
 		"non-eligible political units remain explicitly deferred for organization evidence"
 	)
 
@@ -66,10 +66,10 @@ func _run() -> void:
 			"production anchor records its political identity source fact: %s" % polity_id
 		)
 
-	_equal(first.organization_view().snapshot(), second.organization_view().snapshot(), "fresh production Organization composition is deterministic")
-	_equal(first.organization_evidence_view().fingerprint(), second.organization_evidence_view().fingerprint(), "composition evidence fingerprint is deterministic")
+	_equal(FormalWorldOrganizationView.new(first.world.organization_state.snapshot()).snapshot(), FormalWorldOrganizationView.new(second.world.organization_state.snapshot()).snapshot(), "fresh production Organization composition is deterministic")
+	_equal(first.world.organization_evidence_view.fingerprint(), second.world.organization_evidence_view.fingerprint(), "composition evidence fingerprint is deterministic")
 
-	var saved := first.get_persistent_state()
+	var saved := first.persistence.snapshot()
 	_check(saved.get("organization_composition", {}) is Dictionary, "save pins Organization composition evidence")
 	_equal(
 		str((saved.get("organization_composition", {}) as Dictionary).get("fingerprint", "")),

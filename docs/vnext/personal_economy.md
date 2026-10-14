@@ -22,7 +22,7 @@ Direct `VNextPersonalWallet.new()` is intentionally allowed only as an uninitial
 
 The wallet is the sole owner of its personal balance. This change does not add a wallet registry, `EconomyManager`, `LedgerManager`, context/service-locator object, or a second money owner.
 
-`FormalWorldEconomyService` remains a world-economy authority and is not used as a player-wallet owner. `AlphaLedgerService` remains quarantined legacy code. The reuse inventory classifies both as `REUSE_WITH_ADAPTER`; this task only carries forward already-verified behavioral constraints such as non-negative cash, rejection before mutation and transactional restore. No adapter is connected because doing so in this phase would introduce a second wallet/account authority.
+The formal product uses `FormalWorldEconomyState` for market state and `FormalWorldEconomySimulation` for settlement. Its personal money and accounts are owned by `FormalPersonalEconomyState` and `FormalLedgerState`. The retired Formal service and Alpha ledger are not adapter targets. This document describes the isolated vNext wallet API; it does not replace the formal account owners.
 
 ## API
 
@@ -70,4 +70,4 @@ balance_minor: <non-negative integer minor units>
 
 This PR does not modify `scripts/vnext/world_runtime.gd`, `scripts/vnext/persistence/**`, player-action work, travel work, event work, or the formal product. The wallet is an isolated vNext authority ready for a later composition task once the player/session owner and persistence composition rules are established.
 
-The repository variable-state generators are rerun whenever this production file changes. Their mechanically generated audit documents contain no manual ownership reinterpretation.
+The former variable-state generators and document synchronization requirement have been removed. This file does not require an audit-generation step.

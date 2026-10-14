@@ -8,6 +8,15 @@
 *.tmp
 *.bak
 
+# Local credentials and editor export secrets
+.env
+.env.*
+export_credentials.cfg
+*.pem
+*.key
+*.blend1
+*.blend2
+
 # Local builds and logs
 build/
 builds/
@@ -16,6 +25,7 @@ logs/
 
 # Local review and profiling output
 artifacts/
+local-artifacts/
 *.png.import
 *.jpg.import
 *.jpeg.import
@@ -26,3 +36,8 @@ artifacts/
 .DS_Store
 Thumbs.db
 data/staging/world_names/performance_benchmark.json
+
+# Regenerable Python and machine dictionary output
+__pycache__/
+*.pyc
+docs/generated/world_data_dictionary/dictionary.json

@@ -17,7 +17,7 @@ func _run() -> void:
 	_test_production_composition_and_detached_boundary()
 	_test_focused_case_lifecycle()
 	_test_step_size_invariance()
-	_test_v8_migration_without_fabricated_history()
+	_test_v8_rejection_without_fabricated_history()
 	_test_reset_lifecycle()
 	_test_production_zero_player_persistence_and_trajectory()
 	_cleanup_formal_save()
@@ -29,13 +29,13 @@ func _run() -> void:
 
 
 func _test_production_composition_and_detached_boundary() -> void:
-	var world := FormalWorldSimulation.new()
-	_check(world.initialize(), "production responsibility world initializes")
-	if not world.initialized:
+	var world := WorldBootstrap.new().build()
+	_check(world.success, "production responsibility world initializes")
+	if not world.success:
 		return
-	var organizations := world.organization_view()
-	var evidence := world.organization_evidence_view()
-	var responsibilities := world.organization_responsibility_view()
+	var organizations := FormalWorldOrganizationView.new(world.world.organization_state.snapshot())
+	var evidence := world.world.organization_evidence_view
+	var responsibilities := FormalWorldOrganizationResponsibilityView.new(world.world.organization_responsibility.read_only_snapshot())
 	_equal(
 		responsibilities.responsibility_count(),
 		evidence.organization_count(),
@@ -103,21 +103,21 @@ func _test_production_composition_and_detached_boundary() -> void:
 	var detached_snapshot := responsibilities.snapshot()
 	(detached_snapshot.get("responsibilities", []) as Array).clear()
 	_check(
-		world.organization_responsibility_view().responsibility_status(first_id)
+		FormalWorldOrganizationResponsibilityView.new(world.world.organization_responsibility.read_only_snapshot()).responsibility_status(first_id)
 		!= "MUTATED",
 		"responsibility query results are deeply detached"
 	)
 	_check(
-		world.organization_responsibility_query_port()
+		FormalWorldOrganizationResponsibilityView.new(world.world.organization_responsibility.read_only_snapshot())
 		is FormalWorldOrganizationResponsibilityView,
 		"Formal exposes one detached Organization responsibility query port"
 	)
 
 
 func _test_focused_case_lifecycle() -> void:
-	var world := FormalWorldSimulation.new()
-	_check(world.initialize(), "focused lifecycle fixture world initializes")
-	if not world.initialized:
+	var world := WorldBootstrap.new().build()
+	_check(world.success, "focused lifecycle fixture world initializes")
+	if not world.success:
 		return
 	var selected := _first_detailed_responsibility(world)
 	_check(not selected.is_empty(), "focused lifecycle finds a detailed Economy responsibility")
@@ -125,16 +125,16 @@ func _test_focused_case_lifecycle() -> void:
 		return
 	var organization_id := str(selected.get("organization_id", ""))
 	var represented_polity_id := str(selected.get("represented_polity_id", ""))
-	var runtime_polity_id := world.political_registry_view().runtime_id_for_source(
+	var runtime_polity_id := RuntimePoliticalEntityView.new(world.world.political_registry.snapshot()).runtime_id_for_source(
 		represented_polity_id
 	)
 	var economy_entity_id := str(selected.get("economy_entity_id", ""))
 	var service := FormalWorldOrganizationResponsibilityService.new()
 	_check(
 		service.configure(
-			world.organization_view(),
-			world.organization_evidence_view(),
-			world.political_registry_view(),
+			FormalWorldOrganizationView.new(world.world.organization_state.snapshot()),
+			world.world.organization_evidence_view,
+			RuntimePoliticalEntityView.new(world.world.political_registry.snapshot()),
 			_economy_fixture(0, runtime_polity_id, economy_entity_id, [], 10000),
 			0
 		),
@@ -149,8 +149,8 @@ func _test_focused_case_lifecycle() -> void:
 	_check(
 		service.review_settled_day(
 			24,
-			world.organization_view(),
-			world.political_registry_view(),
+			FormalWorldOrganizationView.new(world.world.organization_state.snapshot()),
+			RuntimePoliticalEntityView.new(world.world.political_registry.snapshot()),
 			_economy_fixture(24, runtime_polity_id, economy_entity_id, shortage_a, 9200)
 		),
 		"shortage day opens institutional attention"
@@ -171,8 +171,8 @@ func _test_focused_case_lifecycle() -> void:
 	_check(
 		service.review_settled_day(
 			48,
-			world.organization_view(),
-			world.political_registry_view(),
+			FormalWorldOrganizationView.new(world.world.organization_state.snapshot()),
+			RuntimePoliticalEntityView.new(world.world.political_registry.snapshot()),
 			_economy_fixture(48, runtime_polity_id, economy_entity_id, shortage_b, 9000)
 		),
 		"sustained shortage reviews same case"
@@ -194,8 +194,8 @@ func _test_focused_case_lifecycle() -> void:
 	_check(
 		service.review_settled_day(
 			72,
-			world.organization_view(),
-			world.political_registry_view(),
+			FormalWorldOrganizationView.new(world.world.organization_state.snapshot()),
+			RuntimePoliticalEntityView.new(world.world.political_registry.snapshot()),
 			_economy_fixture(72, runtime_polity_id, economy_entity_id, [], 10000)
 		),
 		"recovery closes active case"
@@ -220,8 +220,8 @@ func _test_focused_case_lifecycle() -> void:
 	_check(
 		service.review_settled_day(
 			96,
-			world.organization_view(),
-			world.political_registry_view(),
+			FormalWorldOrganizationView.new(world.world.organization_state.snapshot()),
+			RuntimePoliticalEntityView.new(world.world.political_registry.snapshot()),
 			_economy_fixture(96, runtime_polity_id, economy_entity_id, shortage_a, 9100)
 		),
 		"recurrent shortage opens a new episode"
@@ -247,9 +247,9 @@ func _test_focused_case_lifecycle() -> void:
 	)
 	_check(
 		restored_service.configure(
-			world.organization_view(),
-			world.organization_evidence_view(),
-			world.political_registry_view(),
+			FormalWorldOrganizationView.new(world.world.organization_state.snapshot()),
+			world.world.organization_evidence_view,
+			RuntimePoliticalEntityView.new(world.world.political_registry.snapshot()),
 			current_fixture,
 			96
 		),
@@ -258,9 +258,9 @@ func _test_focused_case_lifecycle() -> void:
 	_check(
 		restored_service.restore(
 			saved,
-			world.organization_view(),
-			world.organization_evidence_view(),
-			world.political_registry_view(),
+			FormalWorldOrganizationView.new(world.world.organization_state.snapshot()),
+			world.world.organization_evidence_view,
+			RuntimePoliticalEntityView.new(world.world.political_registry.snapshot()),
 			current_fixture,
 			96
 		),
@@ -273,9 +273,9 @@ func _test_focused_case_lifecycle() -> void:
 	var rejected := FormalWorldOrganizationResponsibilityService.new()
 	_check(
 		rejected.configure(
-			world.organization_view(),
-			world.organization_evidence_view(),
-			world.political_registry_view(),
+			FormalWorldOrganizationView.new(world.world.organization_state.snapshot()),
+			world.world.organization_evidence_view,
+			RuntimePoliticalEntityView.new(world.world.political_registry.snapshot()),
 			current_fixture,
 			96
 		),
@@ -284,9 +284,9 @@ func _test_focused_case_lifecycle() -> void:
 	_check(
 		not rejected.restore(
 			malformed,
-			world.organization_view(),
-			world.organization_evidence_view(),
-			world.political_registry_view(),
+			FormalWorldOrganizationView.new(world.world.organization_state.snapshot()),
+			world.world.organization_evidence_view,
+			RuntimePoliticalEntityView.new(world.world.political_registry.snapshot()),
 			current_fixture,
 			96
 		),
@@ -295,22 +295,22 @@ func _test_focused_case_lifecycle() -> void:
 
 
 func _test_step_size_invariance() -> void:
-	var bulk := FormalWorldSimulation.new()
-	var daily := FormalWorldSimulation.new()
-	var hourly := FormalWorldSimulation.new()
-	_check(bulk.initialize(), "bulk step-size world initializes")
-	_check(daily.initialize(), "daily step-size world initializes")
-	_check(hourly.initialize(), "hourly step-size world initializes")
-	if not bulk.initialized or not daily.initialized or not hourly.initialized:
+	var bulk := WorldBootstrap.new().build()
+	var daily := WorldBootstrap.new().build()
+	var hourly := WorldBootstrap.new().build()
+	_check(bulk.success, "bulk step-size world initializes")
+	_check(daily.success, "daily step-size world initializes")
+	_check(hourly.success, "hourly step-size world initializes")
+	if not bulk.success or not daily.success or not hourly.success:
 		return
-	bulk.advance_minutes(STEP_INVARIANCE_DAYS * MINUTES_PER_DAY)
+	bulk.simulation_step.advance_minutes(STEP_INVARIANCE_DAYS * MINUTES_PER_DAY)
 	for _day: int in range(STEP_INVARIANCE_DAYS):
-		daily.advance_minutes(MINUTES_PER_DAY)
+		daily.simulation_step.advance_minutes(MINUTES_PER_DAY)
 	for _hour: int in range(STEP_INVARIANCE_DAYS * 24):
-		hourly.advance_minutes(60)
-	var bulk_state := bulk.get_persistent_state()
-	var daily_state := daily.get_persistent_state()
-	var hourly_state := hourly.get_persistent_state()
+		hourly.simulation_step.advance_minutes(60)
+	var bulk_state := bulk.persistence.snapshot()
+	var daily_state := daily.persistence.snapshot()
+	var hourly_state := hourly.persistence.snapshot()
 	_equal(
 		bulk_state.get("economy"),
 		daily_state.get("economy"),
@@ -332,93 +332,50 @@ func _test_step_size_invariance() -> void:
 		"responsibility history is invariant between bulk and hourly advancement"
 	)
 	_equal(
-		bulk.authoritative_fingerprint(),
-		daily.authoritative_fingerprint(),
+		bulk.persistence.authoritative_fingerprint(),
+		daily.persistence.authoritative_fingerprint(),
 		"complete world fingerprint is invariant between bulk and daily advancement"
 	)
 	_equal(
-		bulk.authoritative_fingerprint(),
-		hourly.authoritative_fingerprint(),
+		bulk.persistence.authoritative_fingerprint(),
+		hourly.persistence.authoritative_fingerprint(),
 		"complete world fingerprint is invariant between bulk and hourly advancement"
 	)
 
 
-func _test_v8_migration_without_fabricated_history() -> void:
-	var source := FormalWorldSimulation.new()
-	_check(source.initialize(), "v8 migration source initializes")
-	if not source.initialized:
-		return
-	source.advance_minutes(20 * MINUTES_PER_DAY)
-	var legacy := source.get_persistent_state().duplicate(true)
-	legacy["schema_id"] = FormalWorldSimulation.PREVIOUS_SCHEMA_ID
-	legacy.erase("organization_responsibilities")
-	var migrated := FormalWorldSimulation.new()
-	_check(migrated.initialize(), "v8 migration target initializes")
-	_check(
-		migrated.restore_persistent_state(legacy),
-		"v8 world migrates to responsibility baseline"
-	)
-	if not migrated.initialized:
-		return
-	var migrated_snapshot := migrated.organization_responsibility_view().snapshot()
-	var migrated_coverage := migrated.organization_responsibility_view().coverage_summary()
-	_equal(
-		int(migrated_snapshot.get("baseline_hour", -1)),
-		20 * 24,
-		"v8 migration baseline starts at saved authoritative hour"
-	)
-	_equal(
-		int(migrated_coverage.get("total_review_count", -1)),
-		0,
-		"v8 migration fabricates no past responsibility reviews"
-	)
-	_equal(
-		int(migrated_coverage.get("attention_episodes_opened", -1)),
-		0,
-		"v8 migration fabricates no historical shortage episodes"
-	)
-	_equal(
-		int(migrated_coverage.get("cumulative_attention_days", -1)),
-		0,
-		"v8 migration fabricates no historical attention days"
-	)
-	for organization_id: String in migrated.organization_responsibility_view().organization_ids():
-		var record := migrated.organization_responsibility_view().responsibility_state(
-			organization_id
-		)
-		_equal(
-			int(record.get("last_reviewed_day", -2)),
-			-1,
-			"v8 migration does not claim a historical review: %s" % organization_id
-		)
-	migrated.advance_minutes(MINUTES_PER_DAY)
-	_equal(
-		int(
-			migrated.organization_responsibility_view().coverage_summary().get(
-				"total_review_count", -1
-			)
-		),
-		migrated.organization_responsibility_view().responsibility_count(),
-		"first post-migration day boundary begins normal review lifecycle"
-	)
+func _test_v8_rejection_without_fabricated_history() -> void:
+	var world := WorldBootstrap.new().build()
+	_check(world.success, "old-format rejection target initializes")
+	var before: Dictionary = world.persistence.snapshot()
+	var old: Dictionary = before.duplicate(true)
+	old["schema_id"] = "formal_world_simulation_v8"
+	var candidate_1 := world.persistence.restore_candidate(old)
+	if candidate_1.success:
+		world = candidate_1
+	_check(not candidate_1.success, "v8 save format is rejected")
+	_check(world.persistence.error.contains("SAVE FORMAT VERSION MISMATCH"), "version rejection explains controller storage change")
+	_check(world.persistence.snapshot() == before, "old-format rejection leaves current world unchanged")
 
 
 func _test_reset_lifecycle() -> void:
-	var world := FormalWorldSimulation.new()
-	_check(world.initialize(), "reset responsibility world initializes")
-	if not world.initialized:
+	var world := WorldBootstrap.new().build()
+	_check(world.success, "reset responsibility world initializes")
+	if not world.success:
 		return
-	world.advance_minutes(15 * MINUTES_PER_DAY)
+	world.simulation_step.advance_minutes(15 * MINUTES_PER_DAY)
 	_check(
-		int(world.organization_responsibility_view().coverage_summary().get("total_review_count", 0))
+		int(FormalWorldOrganizationResponsibilityView.new(world.world.organization_responsibility.read_only_snapshot()).coverage_summary().get("total_review_count", 0))
 		> 0,
 		"pre-reset responsibility state has review history"
 	)
-	_check(world.reset_world(), "Formal reset replaces responsibility lifecycle owner")
-	var view := world.organization_responsibility_view()
+	var candidate_2 := WorldBootstrap.new().build(null, world.organization_person_reference_ids, world.organization_place_reference_ids) if world.explicit_organization_reference_injection else WorldBootstrap.new().build()
+	if candidate_2.success:
+		world = candidate_2
+	_check(candidate_2.success, "Formal reset replaces responsibility lifecycle owner")
+	var view := FormalWorldOrganizationResponsibilityView.new(world.world.organization_responsibility.read_only_snapshot())
 	_equal(
 		view.responsibility_count(),
-		world.organization_evidence_view().organization_count(),
+		world.world.organization_evidence_view.organization_count(),
 		"reset recomposes deterministic production responsibility coverage"
 	)
 	_equal(
@@ -434,17 +391,14 @@ func _test_reset_lifecycle() -> void:
 
 
 func _test_production_zero_player_persistence_and_trajectory() -> void:
-	var world := FormalWorldSimulation.new()
-	_check(world.initialize(), "zero-player production world initializes")
-	if not world.initialized:
+	var world := WorldBootstrap.new().build()
+	_check(world.success, "zero-player production world initializes")
+	if not world.success:
 		return
-	var initial := world.get_persistent_state()
+	var initial := world.persistence.snapshot()
 	var initial_player := (initial.get("player", {}) as Dictionary).duplicate(true)
 	var initial_organization := (
 		initial.get("organization", {}) as Dictionary
-	).duplicate(true)
-	var initial_authority := (
-		initial.get("organization_authority", {}) as Dictionary
 	).duplicate(true)
 	var initial_military := (
 		initial.get("military_state", {}) as Dictionary
@@ -455,8 +409,8 @@ func _test_production_zero_player_persistence_and_trajectory() -> void:
 
 	var midpoint_day := -1
 	for day: int in range(1, TOTAL_DAYS + 1):
-		world.advance_minutes(MINUTES_PER_DAY)
-		var coverage := world.organization_responsibility_view().coverage_summary()
+		world.simulation_step.advance_minutes(MINUTES_PER_DAY)
+		var coverage := FormalWorldOrganizationResponsibilityView.new(world.world.organization_responsibility.read_only_snapshot()).coverage_summary()
 		if (
 			int(coverage.get("attention_episodes_opened", 0)) > 0
 			and int(coverage.get("open_case_count", 0)) > 0
@@ -470,27 +424,30 @@ func _test_production_zero_player_persistence_and_trajectory() -> void:
 	if midpoint_day <= 0:
 		return
 
-	var pre_save_world_fingerprint := world.authoritative_fingerprint()
+	var pre_save_world_fingerprint := world.persistence.authoritative_fingerprint()
 	var pre_save_responsibility_fingerprint := (
-		world.organization_responsibility_view().state_fingerprint()
+		FormalWorldOrganizationResponsibilityView.new(world.world.organization_responsibility.read_only_snapshot()).state_fingerprint()
 	)
-	var midpoint_state := world.get_persistent_state()
+	var midpoint_state := world.persistence.snapshot()
 	print("RESPONSIBILITY_PRE_SAVE_FINGERPRINT=%s" % pre_save_world_fingerprint)
 	print(
 		"RESPONSIBILITY_PRE_SAVE_STATE_FINGERPRINT=%s"
 		% pre_save_responsibility_fingerprint
 	)
 	_cleanup_formal_save()
-	var save_result := world.save_to_user()
+	var save_result := world.persistence.save_to_user()
 	_check(save_result.success, "nontrivial responsibility world saves through production save_to_user")
-	var restored := FormalWorldSimulation.new()
-	var load_result := restored.load_from_user()
+	var restored := WorldBootstrap.new().build()
+	var candidate_3 := restored.persistence.load_from_user()
+	if candidate_3.success:
+		restored = candidate_3
+	var load_result := candidate_3.operation
 	_check(load_result.success, "nontrivial responsibility world loads through production load_from_user")
 	if not load_result.success:
 		return
-	var post_load_world_fingerprint := restored.authoritative_fingerprint()
+	var post_load_world_fingerprint := restored.persistence.authoritative_fingerprint()
 	var post_load_responsibility_fingerprint := (
-		restored.organization_responsibility_view().state_fingerprint()
+		FormalWorldOrganizationResponsibilityView.new(restored.world.organization_responsibility.read_only_snapshot()).state_fingerprint()
 	)
 	print("RESPONSIBILITY_POST_LOAD_FINGERPRINT=%s" % post_load_world_fingerprint)
 	print(
@@ -508,21 +465,21 @@ func _test_production_zero_player_persistence_and_trajectory() -> void:
 		"production save/load preserves responsibility owner fingerprint exactly"
 	)
 	_equal(
-		restored.get_persistent_state(),
+		restored.persistence.snapshot(),
 		midpoint_state,
 		"production save/load preserves nontrivial responsibility snapshot exactly"
 	)
 
-	restored.advance_minutes((TOTAL_DAYS - midpoint_day) * MINUTES_PER_DAY)
-	var final_state := restored.get_persistent_state()
-	var final_fingerprint := restored.authoritative_fingerprint()
-	var reference := FormalWorldSimulation.new()
-	_check(reference.initialize(), "uninterrupted responsibility reference initializes")
-	if not reference.initialized:
+	restored.simulation_step.advance_minutes((TOTAL_DAYS - midpoint_day) * MINUTES_PER_DAY)
+	var final_state := restored.persistence.snapshot()
+	var final_fingerprint := restored.persistence.authoritative_fingerprint()
+	var reference := WorldBootstrap.new().build()
+	_check(reference.success, "uninterrupted responsibility reference initializes")
+	if not reference.success:
 		return
-	reference.advance_minutes(TOTAL_DAYS * MINUTES_PER_DAY)
-	var reference_state := reference.get_persistent_state()
-	var reference_fingerprint := reference.authoritative_fingerprint()
+	reference.simulation_step.advance_minutes(TOTAL_DAYS * MINUTES_PER_DAY)
+	var reference_state := reference.persistence.snapshot()
+	var reference_fingerprint := reference.persistence.authoritative_fingerprint()
 	print("RESPONSIBILITY_RESTORED_FINAL_FINGERPRINT=%s" % final_fingerprint)
 	print("RESPONSIBILITY_UNINTERRUPTED_FINAL_FINGERPRINT=%s" % reference_fingerprint)
 	_equal(
@@ -541,7 +498,7 @@ func _test_production_zero_player_persistence_and_trajectory() -> void:
 		"responsibility continuation matches uninterrupted institutional history"
 	)
 
-	var final_view := restored.organization_responsibility_view()
+	var final_view := FormalWorldOrganizationResponsibilityView.new(restored.world.organization_responsibility.read_only_snapshot())
 	var final_coverage := final_view.coverage_summary()
 	_check(
 		int(final_coverage.get("total_review_count", 0)) > 0,
@@ -571,12 +528,7 @@ func _test_production_zero_player_persistence_and_trajectory() -> void:
 	_equal(
 		final_state.get("organization"),
 		initial_organization,
-		"zero-player Organization monitoring leaves OrganizationCore unchanged"
-	)
-	_equal(
-		final_state.get("organization_authority"),
-		initial_authority,
-		"routine monitoring leaves OrganizationAuthority unchanged"
+		"zero-player Organization monitoring leaves OrganizationState unchanged"
 	)
 	_equal(
 		final_state.get("military_state"),
@@ -608,8 +560,8 @@ func _test_production_zero_player_persistence_and_trajectory() -> void:
 	print("FORMAL_ORGANIZATION_RESPONSIBILITY_PRODUCTION=%s" % JSON.stringify(diagnostic))
 
 
-func _first_detailed_responsibility(world: FormalWorldSimulation) -> Dictionary:
-	var view := world.organization_responsibility_view()
+func _first_detailed_responsibility(world: WorldBuildResult) -> Dictionary:
+	var view := FormalWorldOrganizationResponsibilityView.new(world.world.organization_responsibility.read_only_snapshot())
 	for organization_id: String in view.organization_ids():
 		var record := view.responsibility_state(organization_id)
 		if not str(record.get("economy_entity_id", "")).is_empty():
@@ -689,8 +641,8 @@ func _print_transition_diagnostic(
 
 func _cleanup_formal_save() -> void:
 	for path: String in [
-		FormalWorldSimulation.SAVE_PATH,
-		FormalWorldSimulation.SAVE_PATH + AtomicJsonFileStore.BACKUP_SUFFIX,
+		FormalPersistence.SAVE_PATH,
+		FormalPersistence.SAVE_PATH + AtomicJsonFileStore.BACKUP_SUFFIX,
 	]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))

@@ -1,536 +1,633 @@
 class_name FormalWorldApplication
-extends "res://scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_admin_runtime.gd"
-## Formal product scene. The map consumes a projection of current runtime
-## political identities; historical evidence remains available to history UI.
+extends Control
+## Scene assembly and UI action dispatch. Domain facts remain in their owners.
 
 const LAUNCH_MODE_META: StringName = &"formal_world_launch_mode"
-const PACKAGED_PROBE_ARGUMENT: String = "--wwo-player-baseline-probe"
-const PACKAGED_PROBE_ENTITY_ID: String = "state:country_fra"
-const PACKAGED_PROBE_FLAG_ID: String = "france_tricolour_1794"
+var historical_content: HistoricalLoader
+var _world: WorldState
+var _simulation_step: SimulationStep
+var _persistence: FormalPersistence
+var _save_dirty: bool = true
+var _departure_target: String = ""
+var _departure_was_paused: bool = true
+var _leaving: bool = false
+var _save_pending: bool = false
+var _map_dirty: bool = false
+var _economy_view_dirty: bool = true
+var _organization_view_dirty: bool = true
+var _economic_map_dirty: bool = false
+var _flag_date: String = ""
+var _ui_economy_day: int = -1
+var _ui_economy_revision: int = -1
+var _ui_politics: RuntimePoliticalEntityView
+var _ui_economy: FormalWorldEconomyView
+var _ui_organizations: FormalWorldOrganizationView
+var _ui_responsibilities: FormalWorldOrganizationResponsibilityView
+var _last_personal_transaction_id: String = ""
+var _last_living_record_id: String = ""
+@onready var map_renderer: GlobeRenderer = $GlobeRenderer
+@onready var map_controller: GlobeController = $GlobeController
+@onready var main_shell: MainShell = $MainShell
+@onready var time_control: TimeControl = $TimeControl
 
-var formal_simulation := FormalWorldSimulation.new()
-var economy_panel_open: bool = true
-var _formal_status: String = ""
-var _last_summary: Dictionary = {}
-var _packaged_probe_failures: int = 0
-var _immutable_historical_evidence_report: Dictionary = {}
-var _historical_evidence_surface_building: bool = false
+func _enter_tree() -> void:
+	var tree := get_tree()
+	if not tree.has_meta(FormalWorldMenu.PREPARED_MAP_META): return
+	var prepared := tree.get_meta(FormalWorldMenu.PREPARED_MAP_META) as GlobeRenderer
+	var controller := tree.get_meta(FormalWorldMenu.PREPARED_CONTROLLER_META) as GlobeController
+	historical_content = tree.get_meta(FormalWorldMenu.PREPARED_CONTENT_META) as HistoricalLoader
+	get_node("GlobeRenderer").free()
+	get_node("GlobeController").free()
+	controller.reparent(self)
+	prepared.reparent(self)
+	prepared.preserve_on_reparent = false
+	prepared.modulate = Color.WHITE
+	prepared.visible = true
+	for key: StringName in [FormalWorldMenu.PREPARED_MAP_META,FormalWorldMenu.PREPARED_CONTROLLER_META,FormalWorldMenu.PREPARED_CONTENT_META]:
+		tree.remove_meta(key)
 
+func _notification(what: int) -> void:
+	if what==NOTIFICATION_WM_CLOSE_REQUEST and is_node_ready(): _request_departure("quit")
 
 func _ready() -> void:
-	var formal_initialized := formal_simulation.initialize()
-	if formal_initialized:
-		_dated_units_document = {
-			"units": formal_simulation.historical_political_evidence_units(),
-		}
-		if not bind_historical_provenance_gate(formal_simulation.provenance_gate()):
-			_data_errors.append("正式世界未能绑定 HistoricalProvenanceGate")
-	_historical_evidence_surface_building = true
-	super._ready()
-	_historical_evidence_surface_building = false
-	_immutable_historical_evidence_report = super.historical_evidence_report()
-	if not formal_initialized:
-		_formal_status = "正式世界初始化失败：%s" % formal_simulation.initialization_error
-		_data_errors.append(_formal_status)
+	get_window().min_size = Vector2i(960,640)
+	get_tree().auto_accept_quit = false
+	main_shell.configure([],map_controller,time_control)
+	main_shell.action_requested.connect(_on_action_requested)
+	main_shell.refresh_requested.connect(_refresh_ui)
+	time_control.advance_requested.connect(_advance_world)
+	time_control.controls_changed.connect(main_shell.refresh_clock)
+	map_controller.appearance_changed.connect(_refresh_economic_map)
+	map_controller.selection_changed.connect(main_shell.map_selection_changed)
+	map_renderer.map_notice.connect(main_shell.show_feedback)
+	map_renderer.geographic_reference_selected.connect(func(reference: Dictionary) -> void:
+		if historical_content!=null: historical_content.remember_geographic_reference(reference))
+	map_renderer.place_content_ready.connect(_on_place_content_ready)
+	map_renderer.bind_controller(map_controller)
+	map_renderer.relief.decode_asset = GeographyLoader.decode_relief
+	map_renderer.input_blocked = main_shell.blocks_map
+	map_renderer.label_exclusions = main_shell.map_occlusions
+	main_shell.set_date(GameClock.new().current_date())
+	main_shell.show_feedback("正在准备正式地图。")
+	_update_map_visibility()
+	_assemble_world.call_deferred()
+
+func _assemble_world() -> void:
+	# Let the current scene and its existing globe viewport draw before assembly.
+	await get_tree().process_frame
+	if _leaving or not is_inside_tree(): return
+	var launch_mode := str(get_tree().get_meta(LAUNCH_MODE_META,"new"))
+	var built: WorldBuildResult = get_tree().get_meta(FormalWorldMenu.PREPARED_WORLD_META) as WorldBuildResult if get_tree().has_meta(FormalWorldMenu.PREPARED_WORLD_META) else null
+	if get_tree().has_meta(FormalWorldMenu.PREPARED_WORLD_META): get_tree().remove_meta(FormalWorldMenu.PREPARED_WORLD_META)
+	if built == null:
+		var livelihood := str(get_tree().get_meta(FormalWorldMenu.LIVELIHOOD_META,FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT)) if launch_mode=="new" else FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT
+		var native_mode: Variant = get_tree().get_meta(FormalWorldMenu.NATIVE_ECONOMY_META,"")
+		var native_settings: Dictionary = {}
+		if launch_mode=="new":
+			if native_mode=="stratified" or OS.get_cmdline_user_args().has("--formal-stratified-economy"):
+				native_settings = EconomyDevelopmentConfig.formal_stratified_request()
+			elif native_mode=="regional" or OS.get_cmdline_user_args().has("--formal-regional-economy"):
+				native_settings = EconomyDevelopmentConfig.formal_regional_request()
+			elif native_mode==true or native_mode=="limited" or OS.get_cmdline_user_args().has("--formal-native-economy"):
+				native_settings = EconomyDevelopmentConfig.formal_limited()
+		built = WorldBootstrap.new().build(null,[],[],livelihood,true,native_settings)
+	for key: StringName in [LAUNCH_MODE_META,FormalWorldMenu.NATIVE_ECONOMY_META,FormalWorldMenu.LIVELIHOOD_META]:
+		if get_tree().has_meta(key): get_tree().remove_meta(key)
+	if not built.success:
+		FormalWorldPresenter.show_initialization_error(main_shell,built.error)
 	else:
-		var launch_mode := str(get_tree().get_meta(LAUNCH_MODE_META, "new"))
-		if get_tree().has_meta(LAUNCH_MODE_META):
-			get_tree().remove_meta(LAUNCH_MODE_META)
-		if launch_mode == "load":
-			var result := _load_formal_state()
-			_formal_status = result.message
-			if _formal_status.is_empty():
-				_formal_status = (
-					"正式世界存档已恢复。"
-					if result.success
-					else "正式世界存档恢复失败；当前状态保持1900-01-01 00:00。"
-				)
+		_install_world(built,launch_mode in ["new","prepared_new"])
+		if launch_mode=="load": _load_world()
+		elif launch_mode=="prepared_load":
+			_save_dirty = false
+			FormalWorldPresenter.show_load_result(main_shell,built.operation)
 		else:
-			_formal_status = "新的1900正式世界已建立。"
-		_sync_political_presentation()
-		_last_summary = formal_simulation.world_summary()
-	queue_redraw()
-	if PACKAGED_PROBE_ARGUMENT in OS.get_cmdline_user_args():
-		_run_packaged_player_baseline_probe.call_deferred()
+			FormalWorldPresenter.show_new_world(main_shell)
+			if not _world.native_economy_error.is_empty():
+				push_warning("Native economy was not installed: " + _world.native_economy_error)
+				main_shell.show_feedback("经营资料加载失败：" + _world.native_economy_error)
+			elif _world.economy_r1 != null: main_shell.show_feedback("经营资料已就绪。", "person:native")
+	_update_map_visibility()
+	# Keep the carried painting until the installed map has drawn its first frame.
+	if get_tree().has_meta(FormalWorldMenu.PREPARED_LOADING_META):
+		var loading := get_tree().get_meta(FormalWorldMenu.PREPARED_LOADING_META) as Control
+		get_tree().remove_meta(FormalWorldMenu.PREPARED_LOADING_META)
+		await RenderingServer.frame_post_draw
+		if is_instance_valid(loading): loading.queue_free()
+
+func _install_world(built: WorldBuildResult, focus_opening: bool = false) -> void:
+	_world = built.world
+	# Former land selections are presentation history, not a reason to reject
+	# a world whose underlying land identities remain valid in its snapshot.
+	if map_controller.selected_place_id.begins_with("territory_unit:"):
+		map_controller.select(map_controller.selected_polity_id)
+	map_renderer.spatial_world = _world.spatial_world
+	_ui_politics = RuntimePoliticalEntityView.new(_world.political_registry.snapshot())
+	_economy_view_dirty = true
+	_organization_view_dirty = true
+	_flag_date = ""
+	_ui_economy_day = -1
+	_ui_economy_revision = -1
+	var personal := _world.personal_economy_state.person_economy(_world.player_state.player_id())
+	_last_personal_transaction_id = str((personal.get("recent_wage_transaction",{}) as Dictionary).get("transaction_id",""))
+	var living := _world.personal_economy_state.living_records(_world.player_state.player_id(),1)
+	_last_living_record_id = str(living[0].record_id) if not living.is_empty() else ""
+	_simulation_step = built.simulation_step
+	_persistence = built.persistence
+	if historical_content == null: historical_content = WorldBootstrap.prepare_presentation_content(_world.provenance)
+	main_shell.configure(historical_content.errors, map_controller, time_control)
+	var opening_person := _world.person_overlay.person(_world.player_state.player_id())
+	var opening_source := str((opening_person.get("provenance",{}) as Dictionary).get("opening_polity_source_id",WorldBootstrap.DEFAULT_FORMAL_PERSON_TERRITORY_ID if str(opening_person.get("claim_id",""))==WorldBootstrap.DEFAULT_FORMAL_PERSON_CLAIM_ID else str(opening_person.get("population_territory_id",""))))
+	var home_id := _world.political_registry_view.runtime_id_for_source(opening_source)
+	map_controller.begin_player_view(home_id)
+	if map_renderer.content != historical_content.geometry_content:
+		map_renderer.configure(historical_content.geometry_content, map_controller)
+	map_renderer.local_content = historical_content.local_spatial
+	map_renderer.strategic_content = historical_content.strategic_spatial
+	map_renderer.relief.decode_asset = GeographyLoader.decode_relief
+	_refresh_map()
+	if focus_opening:
+		map_renderer.focus_place(_world.spatial_catalog.get_place(str(opening_person.get("current_place_id",""))))
+	main_shell.refresh()
+
+func _advance_world(minutes: int) -> void:
+	if _simulation_step != null:
+		_on_world_changed(_simulation_step.advance_minutes(minutes))
+
+func _on_world_changed(change: Dictionary) -> void:
+	if change.has("success") and not bool(change["success"]):
+		FormalWorldPresenter.show_advance_error(main_shell, str(change["error"]))
+		main_shell.queue_redraw()
+		return
+	_save_dirty = true
+	if _persistence != null and _persistence.queued_save_result != null:
+		var result := _persistence.queued_save_result
+		_persistence.queued_save_result = null
+		_finish_save(result)
+		if _world==null or not is_inside_tree(): return
+	var economic_state_changed := _ui_economy_day!=int(_world.economy_state.total_hour/FormalWorldEconomyState.HOURS_PER_DAY) or _ui_economy_revision!=_world.economy_state._state_revision
+	_economy_view_dirty = _economy_view_dirty or economic_state_changed
+	_organization_view_dirty = _organization_view_dirty or bool(change.get("organization_responsibilities",false))
+	_economic_map_dirty = _economic_map_dirty or _economy_view_dirty
+	var date := _world.game_clock.current_date()
+	var date_key := HistoricalLoader._date_key(date)
+	var previous_date := map_renderer.political.display_date
+	var reference_changed := false
+	if date_key!=previous_date:
+		if historical_content.display_changes_between(previous_date,date_key):
+			reference_changed = true
+			_flag_date = ""
+			_refresh_map()
+		else:
+			map_renderer.political.display_date = date_key
+	# The economic overlay is refreshed only while it is the selected theme.
+	if bool(change.get("economy",false)): _refresh_economic_map()
+	if int(change.get("wages_paid",0)) > 0 or int(change.get("wages_failed",0)) > 0:
+		var personal := _world.personal_economy_state.person_economy(_world.player_state.player_id())
+		var receipt := personal.get("recent_wage_transaction",{}) as Dictionary
+		var transaction_id := str(receipt.get("transaction_id",""))
+		if not transaction_id.is_empty() and transaction_id != _last_personal_transaction_id:
+			_last_personal_transaction_id = transaction_id
+			main_shell.show_feedback("工资到账：+%s 模拟单位。" % receipt.amount,"person:accounts")
+		elif bool(personal.get("wage_unpaid",false)):
+			main_shell.show_feedback("自己的工资已到期，雇主储备不足。","person:accounts")
+	if bool(change.get("personal_life_changed",false)):
+		var living := _world.personal_economy_state.living_records(_world.player_state.player_id(),1)
+		if not living.is_empty() and str(living[0].record_id) != _last_living_record_id:
+			var record := living[0]
+			_last_living_record_id = str(record.record_id)
+			var message := "生活记录："+str(record.get("name_zh",""))
+			if str(record.kind) in ["arrangement_failed","native_failed"]:
+				message = "生活安排未完成："+str(record.get("reason","条件不足。"))
+			elif str(record.kind) == "native_delivery":
+				message = "商品已实际到货：%s %d %s。" % [record.name_zh,int(record.quantity),record.unit_name_zh]
+			elif str(record.kind) in ["consume","native_consume"]:
+				message = "消费已完成：%s %.3f %s。" % [record.name_zh,float(record.quantity_milli)/float(record.get("quantity_scale",1000)),record.get("unit_name_zh","")]
+			main_shell.show_feedback(message,"living:record:"+str(record.record_id))
+	main_shell.set_date(date)
+	var page := main_shell.current_page
+	var personal_changed := bool(change.get("personal_life_changed",false)) or bool(change.get("persons_changed",false)) or bool(change.get("native_changed",false)) or int(change.get("wages_paid",0))>0 or int(change.get("wages_failed",0))>0
+	if reference_changed or (page=="person" and personal_changed) or (page=="economy" and (economic_state_changed or bool(change.get("native_changed",false)))) or (page=="organization" and _organization_view_dirty):
+		main_shell.refresh()
+	elif date_key!=previous_date and not map_controller.selected_place_id.is_empty():
+		main_shell.refresh()
 
 
-func _run_packaged_player_baseline_probe() -> void:
-	await get_tree().process_frame
-	_packaged_probe_require(formal_simulation.initialized, "正式模拟未初始化")
-	_packaged_probe_require(_data_errors.is_empty(), "正式模拟产生数据错误")
-	_packaged_probe_require(_history_entity_by_id.size() == 146, "运行时政治实体数量不正确")
-	_packaged_probe_require(
-		formal_simulation.historical_evidence_view().record_count() == 151,
-		"历史政治证据数量不正确"
-	)
-	_packaged_probe_require(_missing_flag_record_ids.is_empty(), "历史旗帜资源存在缺失")
-	var evidence := historical_evidence_report()
-	_packaged_probe_require(
-		int(evidence.get("unresolved_flag_count", -1)) == 0,
-		"历史旗帜证据仍未完全解析"
-	)
+func _refresh_ui() -> void:
+	if _world == null: return
+	_prepare_ui_views(main_shell.current_page in ["person","economy","world","administration"] or not map_controller.selected_polity_id.is_empty(),main_shell.current_page in ["person","organization"])
+	var polity := CurrentWorldPoliticalProjection.polity_summary(map_controller.selected_polity_id,_ui_politics,_world.historical_evidence_view)
+	if polity.is_empty(): polity = map_renderer.political.records.get(map_controller.selected_polity_id,{}) as Dictionary
+	var dossier_visible := main_shell.current_page in ["world","administration"] or (main_shell.current_page=="map" and (not map_controller.selected_polity_id.is_empty() or not map_controller.selected_place_id.is_empty()))
+	var content := historical_content.resolve_world_page(_world.game_clock.current_date(),polity,map_controller.selected_place_id) if dossier_visible else WorldPageContent.new(HistoricalLoader._date_key(_world.game_clock.current_date()),{},{},{},null,{})
+	FormalWorldPresenter.refresh_ui(_world,main_shell,map_controller,content,_ui_politics,_ui_economy,_ui_organizations,_ui_responsibilities)
+	main_shell.world_page.set_spatial_context(_world.spatial_world)
+	var person := _world.person_overlay.person(_world.player_state.player_id())
+	var place := _world.spatial_world.get_place(str(person.get("current_place_id","")))
+	var local_polity := CurrentWorldPoliticalProjection.polity_summary(map_controller.player_polity_id,_ui_politics,_world.historical_evidence_view)
+	var current_date := HistoricalLoader._date_key(_world.game_clock.current_date())
+	if _flag_date!=current_date:
+		main_shell.set_view_polity(local_polity,historical_content.flag_texture(_world.game_clock.current_date(),str(local_polity.get("flag_id",""))))
+		_flag_date = current_date
+	if main_shell.current_page=="person":
+		main_shell.person_page.set_location_context(_world.spatial_world,_world.territory_state,CurrentWorldPoliticalProjection.polity_summary(_ui_politics.runtime_id_for_source(str(place.get("parent_country_id",""))),_ui_politics,_world.historical_evidence_view))
+		var market_id := _world.personal_economy_state.accessible_market_id(_world.player_state.player_id())
+		var market_aggregate := _ui_economy.economic_aggregate_id_for_market(market_id)
+		main_shell.person_page.available_market = not market_id.is_empty() and not _ui_economy.polity_ids_for_economy(market_aggregate).is_empty()
+	if main_shell.current_page=="world" and main_shell.world_page.index_open:
+		main_shell.world_page.set_index_context(CurrentWorldPoliticalProjection.map_units(_ui_politics,_world.historical_evidence_view))
+	var display_record := map_renderer.political.records.get(map_controller.selected_polity_id,{}) as Dictionary
+	if bool(display_record.get("display_only",false)):
+		var visual := map_renderer.political.resolved_visuals.get(map_controller.selected_polity_id,{}) as Dictionary
+		main_shell.world_page.refresh(display_record,content.place(),WorldPageContent.new(content.date(),content.profile(),content.administration(),content.flag() if not content.flag().is_empty() else visual,map_renderer.political.visual_textures.get(map_controller.selected_polity_id),content.place()))
 
-	_ensure_projection_cache()
-	var france_point := _country_screen_anchors.get(PACKAGED_PROBE_ENTITY_ID, Vector2.INF) as Vector2
-	_packaged_probe_require(
-		france_point != Vector2.INF,
-		"默认半球视角没有法兰西选择锚点"
-	)
-	if france_point != Vector2.INF:
-		_packaged_probe_mouse_button(france_point, true)
-		_packaged_probe_mouse_button(france_point, false)
-	await get_tree().process_frame
-	_packaged_probe_require(
-		selected_country_id == PACKAGED_PROBE_ENTITY_ID,
-		"打包产品地图点击未选择法兰西政治单元"
-	)
-	_packaged_probe_require(info_open, "打包产品实体选择没有打开详情反馈")
-	_packaged_probe_require(
-		not formal_simulation.polity_summary(PACKAGED_PROBE_ENTITY_ID).is_empty(),
-		"打包产品选中实体没有政经详情"
-	)
-	var imported_flags := _historical_imported_flag_texture_by_id as Dictionary
-	_packaged_probe_require(
-		imported_flags.get(PACKAGED_PROBE_FLAG_ID) is Texture2D,
-		"打包产品没有通过导入Texture2D解析法兰西历史旗帜"
-	)
+func _on_place_content_ready() -> void:
+	if historical_content == null: return
+	var errors: Array[String] = []
+	for content: LocalSpatialContent in [historical_content.strategic_spatial.content,historical_content.local_spatial.content]:
+		if content != null: errors.append_array(content.errors)
+	if not errors.is_empty(): main_shell.show_feedback("地图资料读取错误："+"; ".join(errors))
+	if not map_controller.selected_place_id.is_empty(): main_shell.refresh()
 
-	var date_before := _format_sim_datetime()
-	_packaged_probe_require(
-		await _packaged_probe_click_action("toggle_time_panel"),
-		"打包产品时间面板入口不可点击"
-	)
-	_packaged_probe_require(
-		await _packaged_probe_click_action("speed:4"),
-		"打包产品4倍速控件不可点击"
-	)
-	var clock := get_node("ClockTimer") as Timer
-	for _index: int in range(24):
-		clock.timeout.emit()
-	await get_tree().process_frame
-	_packaged_probe_require(
-		_format_sim_datetime() != date_before,
-		"打包产品时间推进没有改变可见日期"
-	)
-	_packaged_probe_require(
-		await _packaged_probe_click_action("toggle_pause"),
-		"打包产品暂停控件不可点击"
-	)
-	_packaged_probe_require(sim_paused, "打包产品暂停控件未暂停正式时间")
+func _refresh_map() -> void:
+	_prepare_ui_views(true,false)
+	var content := historical_content.resolve_map(_world.game_clock.current_date(),FormalWorldPresenter.map_units(_world,_ui_politics))
+	FormalWorldPresenter.refresh_map(_world,map_renderer,content,_ui_politics,_ui_economy)
+	_map_dirty = false
+	_economic_map_dirty = false
 
-	if _packaged_probe_failures > 0:
-		push_error(
-			"Packaged player baseline probe: %d failures" % _packaged_probe_failures
-		)
+func _prepare_ui_views(need_economy: bool, need_organizations: bool) -> void:
+	if need_economy and (_ui_economy==null or _economy_view_dirty):
+		_ui_economy = FormalWorldEconomyView.new(_world.economy_state.read_only_presentation_snapshot())
+		_ui_economy_day = int(_world.economy_state.total_hour/FormalWorldEconomyState.HOURS_PER_DAY)
+		_ui_economy_revision = _world.economy_state._state_revision
+		_economy_view_dirty = false
+	if need_organizations and (_ui_organizations==null or _organization_view_dirty):
+		_ui_organizations = FormalWorldOrganizationView.new(_world.organization_state.snapshot())
+		_ui_responsibilities = FormalWorldOrganizationResponsibilityView.new(_world.organization_responsibility.read_only_snapshot())
+		_organization_view_dirty = false
+
+func _refresh_economic_map() -> void:
+	if _world==null or not _economic_map_dirty or map_controller.administrative_map_active(): return
+	_prepare_ui_views(true,false)
+	map_renderer.refresh_economic_observation(_ui_politics,_world.historical_evidence_view,_ui_economy)
+	_economic_map_dirty = false
+
+func _on_action_requested(action: String) -> void:
+	if _leaving: return
+	if action in ["system:main_menu","system:quit"]:
+		_request_departure("menu" if action=="system:main_menu" else "quit")
+		return
+	elif action=="departure:cancel":
+		if not _departure_target.is_empty():
+			_departure_target = ""
+			time_control.paused = _departure_was_paused
+		return
+	elif action=="departure:discard":
+		_leave_world()
+		return
+	elif action=="departure:save":
+		if not _departure_target.is_empty(): _save_world(0)
+		return
+	elif action.begins_with("slot:save:"):
+		_save_world(int(action.trim_prefix("slot:save:")))
+		return
+	elif action.begins_with("slot:load:"):
+		_load_world(int(action.trim_prefix("slot:load:")))
+		return
+	elif action.begins_with("encyclopedia:country:"):
+		main_shell.remember_page()
+		map_controller.select(action.trim_prefix("encyclopedia:country:"))
+		main_shell.world_page.index_open = false
+		main_shell.set_page("world")
+		return
+	elif action=="encyclopedia:organizations":
+		main_shell.remember_page()
+		main_shell.organization_page.own_only = false
+		main_shell.organization_page.country_id = ""
+		main_shell.organization_page.selected_id = ""
+		main_shell.set_page("organization",false)
+		return
+	elif action.begins_with("map_mode:"):
+		map_controller.set_map_mode(action.trim_prefix("map_mode:"))
+	elif action.begins_with("time:"):
+		var command := action.trim_prefix("time:")
+		if command == "pause": time_control.toggle_pause()
+		else: time_control.set_speed(int(command))
+	elif _world != null and action.begins_with("native:"):
+		var result: Dictionary
+		if action.begins_with("native:business_buy:"):
+			var payload := main_shell.person_page.business_request(int(action.trim_prefix("native:business_buy:")))
+			result=LivelihoodAction.execute_current(_world,"buy",payload) if not payload.is_empty() else {"accepted":false,"reason":"KNOWN_ENTERPRISE_QUOTE_UNAVAILABLE"}
+		elif action.begins_with("native:business_activity:"):
+			var parts := action.trim_prefix("native:business_activity:").split("|")
+			result=LivelihoodAction.execute_current(_world,"set_activity_enabled",{"firm":parts[0],"site_id":parts[1],"activity_id":parts[2],"enabled":parts[3]=="1"}) if parts.size()==4 else {"accepted":false,"reason":"INVALID_ACTIVITY_INPUT"}
+		elif action == "native:residence":
+			var person := _world.player_state.player_id()
+			var place := _world.person_overlay.current_place(person)
+			result = LivelihoodAction.execute_current(_world, "request_residence", {"destination_unit_id": _world.population_state.unit_for_place(place), "place_id": place})
+		elif action.begins_with("native:travel:"):
+			result = LivelihoodAction.execute_current(_world, "travel", {"destination_place_id": action.trim_prefix("native:travel:")})
+		elif action.begins_with("native:collect:") or action.begins_with("native:collect_store:"):
+			var payload := {"shipment_id": action.trim_prefix("native:collect:").trim_prefix("native:collect_store:"), "quantity": main_shell.person_page.quantity_milli}
+			if action.begins_with("native:collect_store:"): payload["custody_mode"] = "STORED"
+			result = LivelihoodAction.execute_current(_world, "collect", payload)
+		elif action in ["native:store", "native:withdraw"]:
+			var person := _world.player_state.player_id()
+			result = LivelihoodAction.execute_current(_world, "store_goods" if action == "native:store" else "withdraw_goods", {"good": main_shell.person_page.selected_commodity_id.trim_prefix("native:"), "quantity": main_shell.person_page.quantity_milli, "place_id": _world.person_overlay.current_place(person)})
+		elif action.begins_with("native:freight:"):
+			var person := _world.player_state.player_id()
+			var good := main_shell.person_page.selected_commodity_id.trim_prefix("native:")
+			var options := _world.economy_r1.personal_freight_options(person, good)
+			var index := int(action.trim_prefix("native:freight:"))
+			result = {"accepted": false, "reason": "EXPIRED_FREIGHT_OPTION"}
+			if index >= 0 and index < options.size():
+				var offer := options[index] as Dictionary
+				result = LivelihoodAction.execute_current(_world, "send_personal_goods", {"good": good, "quantity": main_shell.person_page.quantity_milli, "from_place_id": offer["from_place_id"], "to_place_id": offer["to_place_id"], "path_id": offer["path_id"], "denomination": offer["denomination"], "max_freight": offer["freight_per_unit"]})
+		elif action.begins_with("native:investment_credit:"):
+			var parts := action.trim_prefix("native:investment_credit:").split("|", true, 2)
+			result = LivelihoodAction.execute_current(_world, "finance_investment", {"project_id": parts[0], "offer_id": parts[1], "amount": int(parts[2])}) if parts.size() == 3 and str(parts[2]).is_valid_int() else {"accepted": false, "reason": "INVALID_FINANCE_INPUT"}
+		elif action.begins_with("native:invest:") or action.begins_with("native:maintain:"):
+			var maintenance := action.begins_with("native:maintain:")
+			var id := action.trim_prefix("native:invest:").trim_prefix("native:maintain:")
+			var terms := _world.economy_r1._capital.template(str(_world.economy_r1._capital.assets.get(id, {}).get("template_id", "")) if maintenance else id)
+			result = LivelihoodAction.execute_current(_world, "maintain_capital" if maintenance else "invest", {("asset_id" if maintenance else "template_id"): id, "budget": terms.get("budget", 0)})
+		elif action.begins_with("native:project:") or action.begins_with("native:equipment:"):
+			var equipment := action.begins_with("native:equipment:")
+			var parts := action.trim_prefix("native:project:").trim_prefix("native:equipment:").split("|", true, 1)
+			result = LivelihoodAction.execute_current(_world, "capital_status" if equipment else "investment_status", {("asset_id" if equipment else "project_id"): parts[0], "status": parts[1]}) if parts.size() == 2 else {"accepted": false, "reason": "INVALID_CAPITAL_INPUT"}
+		elif action.begins_with("native:expand:"):
+			result = LivelihoodAction.execute_current(_world, "expand_configured_scope", {"extension_id": action.trim_prefix("native:expand:")})
+		elif action.begins_with("native:pause:") or action.begins_with("native:resume:"):
+			var operating := action.begins_with("native:resume:")
+			result = LivelihoodAction.execute_current(_world, "set_firm_operating", {"firm": action.trim_prefix("native:pause:").trim_prefix("native:resume:"), "operating": operating})
+		elif action == "native:leave_job":
+			result = LivelihoodAction.execute_current(_world, "leave_job", {})
+		elif action == "native:reenter":
+			result = LivelihoodAction.execute_current(_world, "reenter_scope", {"subject_id": _world.player_state.player_id()})
+		elif action.begins_with("native:retry_exit:"):
+			result = LivelihoodAction.execute_current(_world, "retry_scope_exit", {"request_id": action.trim_prefix("native:retry_exit:")})
+		elif action.begins_with("native:management_accept:"):
+			result = LivelihoodAction.execute_current(_world, "accept_firm_management", {"request_id": action.trim_prefix("native:management_accept:")})
+		elif action.begins_with("native:management:"):
+			var parts := action.trim_prefix("native:management:").split("|", true, 1)
+			result = LivelihoodAction.execute_current(_world, "request_firm_management", {"firm": parts[0], "successor": parts[1]}) if parts.size() == 2 else {"accepted": false, "reason": "INVALID_MANAGEMENT_INPUT"}
+		elif action.begins_with("native:site_pause:") or action.begins_with("native:site_resume:") or action.begins_with("native:site_close:"):
+			var parts := action.trim_prefix("native:site_pause:").trim_prefix("native:site_resume:").trim_prefix("native:site_close:").split("|", true, 1)
+			result = {"accepted": false, "reason": "INVALID_SITE_INPUT"}
+			if parts.size() == 2:
+				if action.begins_with("native:site_close:"): result = LivelihoodAction.execute_current(_world, "close_site", {"firm": parts[0], "site_id": parts[1]})
+				else:
+					var enabled := action.begins_with("native:site_resume:")
+					result = LivelihoodAction.execute_current(_world, "set_site_status", {"firm": parts[0], "site_id": parts[1], "enabled": enabled, "production_enabled": enabled, "accepting_business": enabled})
+		elif action.begins_with("native:wind_down:"):
+			result = LivelihoodAction.execute_current(_world, "wind_down_firm", {"firm": action.trim_prefix("native:wind_down:")})
+		elif action.begins_with("native:finish:"):
+			result = LivelihoodAction.execute_current(_world, "finish_firm", {"firm": action.trim_prefix("native:finish:")})
+		elif action.begins_with("native:exit:"):
+			result = LivelihoodAction.execute_current(_world, "request_scope_exit", {"subject_id": action.trim_prefix("native:exit:")})
+		elif action.begins_with("native:apply:"):
+			result = LivelihoodAction.execute_current(_world, "apply", {"job_id": action.trim_prefix("native:apply:")})
+		elif action == "native:work":
+			var employment := _world.personal_economy_state.person_economy(_world.player_state.player_id()).get("employment", {}) as Dictionary
+			result = LivelihoodAction.execute_current(_world, "work", {"hours": int(employment.get("work_hours_available", employment.get("work_hours_limit", 0)))})
+		elif action.begins_with("native:loss_confirm:"):
+			result = LivelihoodAction.execute_current(_world, "confirm_cargo_loss", {"loss_id": action.trim_prefix("native:loss_confirm:")})
+		elif action.begins_with("native:loss_release:"):
+			result = LivelihoodAction.execute_current(_world, "propose_cargo_disposition", {"loss_id": action.trim_prefix("native:loss_release:"), "mode": "RELEASE", "quantity": main_shell.person_page.quantity_milli, "basis": "EXPLICIT_PLAYER_CONTRACT_RELEASE_PROPOSAL", "authorizations": _world.economy_r1._cargo_fulfilment.action_authorizations(_world.player_state.player_id(),action.trim_prefix("native:loss_release:"),"RELEASE",main_shell.person_page.quantity_milli)})
+		elif action.begins_with("native:loss_replace:"):
+			result = LivelihoodAction.execute_current(_world, "propose_cargo_disposition", {"loss_id": action.trim_prefix("native:loss_replace:"), "mode": "REPLACE", "quantity": main_shell.person_page.quantity_milli, "fees": [], "basis": "EXPLICIT_PLAYER_NO_ADDITIONAL_FREIGHT_PROPOSAL", "authorizations": _world.economy_r1._cargo_fulfilment.action_authorizations(_world.player_state.player_id(),action.trim_prefix("native:loss_replace:"),"REPLACE",main_shell.person_page.quantity_milli)})
+		elif action.begins_with("native:disposition_confirm:"):
+			result = LivelihoodAction.execute_current(_world, "confirm_cargo_disposition", {"disposition_id": action.trim_prefix("native:disposition_confirm:"), "authorizations":_world.economy_r1._cargo_fulfilment.action_authorizations(_world.player_state.player_id(),"","",0,action.trim_prefix("native:disposition_confirm:"))})
+		elif action.begins_with("native:disposition_execute:"):
+			result = LivelihoodAction.execute_current(_world, "execute_cargo_disposition", {"disposition_id": action.trim_prefix("native:disposition_execute:"), "authorizations":_world.economy_r1._cargo_fulfilment.action_authorizations(_world.player_state.player_id(),"","",0,action.trim_prefix("native:disposition_execute:"),true)})
+		elif action.begins_with("native:cancel:"):
+			result = LivelihoodAction.execute_current(_world, "cancel", {"order_id": action.trim_prefix("native:cancel:")})
+		else:
+			result = {"accepted": false, "reason": "UNKNOWN_ACTION"}
+		if result.get("responsibility_changed", false): _save_dirty = true
+		var feedback := "行动未接受："+str(result.get("reason", "条件不足。"))
+		if result.get("accepted", false):
+			_save_dirty = true
+			feedback = "行动已接受，按正式时间履行。"
+			if result.get("reason") == "COLLECTED": feedback = "已领取 %d 单位；原订单付款与持有已记录。" % int(result["quantity"])
+			elif result.get("reason") in ["STORED", "WITHDRAWN", "PERSONAL_FREIGHT_ACCEPTED"]: feedback = "物品行动已接受："+str(result["reason"])+" · 数量 "+str(result["quantity"])
+			elif result.get("reason") == "TRAVEL_STARTED": feedback = "旅行已出发；到达前不能登记劳动。"
+			elif result.get("reason") == "QUEUED_FOR_ECONOMIC_BOUNDARY": feedback = "接管已排队："+PersonView.boundary_text(int(result["boundary_minute"]))
+			elif result.get("reason") == "RESIDENCE_QUEUED": feedback = "常住迁居已申请："+PersonView.boundary_text(int(result["boundary_minute"]))+"；生效前保留原统计归属。"
+			elif result.get("reason") == "EXIT_QUEUED": feedback = "退出已排队；边界确认无未结责任后，由旧宏观承担未来常住消费。"
+			elif result.get("reason") == "EXIT_DEFERRED": feedback = "退出延后，保留原归属："+str(result["responsibility_reason"])
+		main_shell.show_feedback(feedback, "person:goods" if action in ["native:store", "native:withdraw"] or action.begins_with("native:freight:") else "person:native")
+		main_shell.refresh()
+	elif _world != null and action in ["livelihood:terminate_wage", "livelihood:cancel_plan", "livelihood:convert_plan"]:
+		var payload: Dictionary = {}
+		var kind := "terminate_legacy_wage"
+		if action != "livelihood:terminate_wage":
+			payload["commodity_id"] = main_shell.person_page.selected_commodity_id
+			kind = "cancel_legacy_arrangement" if action == "livelihood:cancel_plan" else "convert_legacy_arrangement"
+			if kind == "convert_legacy_arrangement": payload["auto_buy_missing"] = bool(_world.personal_economy_state.arrangement(_world.player_state.player_id(), payload["commodity_id"]).get("auto_buy_missing", false))
+		var result := LivelihoodAction.execute_current(_world, kind, payload)
+		if result.get("accepted", false): _save_dirty = true
+		main_shell.show_feedback("生计变更已排队，原责任在生效前继续履行。" if result.get("accepted", false) else "未接受："+str(result.get("reason", "")), "person:goods" if action != "livelihood:terminate_wage" else "person:situation")
+		main_shell.refresh()
+	elif _world != null and action in ["purchase","consume","consumption:daily","consumption:autobuy"]:
+		var person_id := _world.player_state.player_id()
+		var personal := _world.personal_economy_state
+		var result: Dictionary
+		if action == "purchase":
+			var page := main_shell.economy_page
+			var market_id := _ui_economy.market_id_for_economic_aggregate(_ui_economy.economy_entity_for_polity(page.polity_id))
+			if personal.manages_native(person_id): market_id = page.selected_seller_site_id
+			result = personal.purchase(person_id,market_id,page.selected_commodity_id,page.quantity_milli,int(page.quote.get("unit_price",-1)),page.quote)
+			if bool(result.get("success",false)): main_shell.person_page.selected_commodity_id = page.selected_commodity_id
+		elif action == "consume":
+			result = personal.consume(person_id,main_shell.person_page.selected_commodity_id,main_shell.person_page.quantity_milli)
+		elif action == "consumption:autobuy":
+			var page := main_shell.person_page
+			var plan := personal.arrangement(person_id,page.selected_commodity_id)
+			result = {"success":false,"error":"请先设置每日安排。"} if plan.is_empty() else personal.set_daily_consumption(person_id,page.selected_commodity_id,int(plan.quantity_milli),true,not bool(plan.auto_buy_missing))
+		else:
+			var page := main_shell.person_page
+			result = personal.set_daily_consumption(person_id,page.selected_commodity_id,page.quantity_milli,personal.arrangement(person_id,page.selected_commodity_id).is_empty())
+		if bool(result.get("success",false)):
+			_save_dirty = true
+			var recent := personal.living_records(person_id,1)
+			if not recent.is_empty(): _last_living_record_id = str(recent[0].record_id)
+			var destination := "holding:select:"+main_shell.person_page.selected_commodity_id if action != "consume" else "living:record:"+_last_living_record_id
+			main_shell.show_feedback(str(result.message),destination)
+		else: main_shell.show_feedback("操作未完成："+str(result.get("error","条件不可用。")))
+		main_shell.refresh()
+	elif _world != null and action == "person:market":
+		var market_id := _world.personal_economy_state.accessible_market_id(_world.player_state.player_id())
+		var aggregate := _ui_economy.economic_aggregate_id_for_market(market_id)
+		var polity_ids := _ui_economy.polity_ids_for_economy(aggregate)
+		if polity_ids.is_empty(): main_shell.show_feedback("人物所在地没有可访问的正式交易市场。")
+		else:
+			main_shell.remember_page()
+			main_shell.economy_page.polity_id = polity_ids[0]
+			main_shell.economy_page.personal_market = true
+			main_shell.economy_page.show_native_statistics = false
+			main_shell.economy_page.commodity_page = 0
+			main_shell.economy_page.selected_commodity_id = ""
+			main_shell.economy_page.scope_label = "人物所在地已关联的经营地点" if _world.personal_economy_state.manages_native(_world.player_state.player_id()) else "国家市场统计范围 · 由人物所在地明确关联"
+			main_shell.economy_page.selected_seller_site_id = ""
+			main_shell.set_page("economy",false)
+	elif _world != null and action.begins_with("organization:open:"):
+		var id := action.trim_prefix("organization:open:")
+		if _world.organization_state.has_organization(id):
+			if main_shell.current_page!="organization" or main_shell.organization_page.selected_id!=id: main_shell.remember_page()
+			if main_shell.current_page=="person":
+				main_shell.organization_page.own_only = true
+				main_shell.organization_page.country_id = ""
+			main_shell.organization_page.selected_id = id
+			main_shell.set_page("organization",false)
+	elif _world != null and action.begins_with("economy:polity:"):
+		var id := action.trim_prefix("economy:polity:")
+		if _ui_economy != null and not _ui_economy.economy_entity_for_polity(id).is_empty():
+			main_shell.remember_page()
+			main_shell.economy_page.polity_id = id
+			main_shell.economy_page.personal_market = false
+			main_shell.economy_page.show_native_statistics = false
+			main_shell.economy_page.selected_commodity_id = ""
+			main_shell.economy_page.commodity_page = 0
+			main_shell.economy_page.scope_label = main_shell.world_page.selection_name() if main_shell.current_page in ["map","world"] else ""
+			main_shell.set_page("economy",false)
+	elif _world != null and action.begins_with("admin:select:"):
+		var id := action.trim_prefix("admin:select:")
+		var row := _world.spatial_world.administrative_identity(id)
+		if row.is_empty(): row = main_shell.world_page.administration_entry(id)
+		if not row.is_empty():
+			var detail_open := main_shell.current_page=="world"
+			map_controller.select(str(row.get("polity_id",map_controller.selected_polity_id)),id)
+			main_shell.set_page("world" if detail_open else "map")
+	elif _world != null and action.begins_with("place:open:"):
+		var place := _world.spatial_world.get_place(action.trim_prefix("place:open:"))
+		if not place.is_empty():
+			map_controller.select(_ui_politics.runtime_id_for_source(str(place.get("parent_country_id",""))),str(place.place_id))
+			main_shell.set_page("world")
 	else:
-		print("Packaged player baseline probe: title, world, polity, resource, and time passed")
-	get_tree().quit(1 if _packaged_probe_failures > 0 else 0)
+		match action:
+			"admin:focus":
+				if map_renderer.focus_administration(map_controller.selected_place_id): main_shell.set_page("map")
+			"admin:list":
+				map_controller.select(map_controller.selected_polity_id)
+				main_shell.set_page("administration")
+			"map:home_administration":
+				if _world == null: return
+				var home := _ui_politics.source_historical_id(map_controller.player_polity_id)
+				var document := historical_content.administration.administration_for(home,HistoricalLoader._date_key(_world.game_clock.current_date()))
+				var units := document.get("runtime_units",[]) as Array
+				if units.is_empty(): main_shell.show_feedback("本国尚无已接入的历史行政资料。")
+				else:
+					map_controller.select(map_controller.player_polity_id)
+					main_shell.world_page.selected_admin_id = ""
+					main_shell.set_page("administration")
+			"page_changed": _update_map_visibility()
+			"map:focus":
+				if map_controller.selected_place_id.begins_with("administrative_region:"):
+					if map_renderer.focus_administration(map_controller.selected_place_id): main_shell.set_page("map")
+					return
+				var place: Dictionary = {}
+				if _world != null and not map_controller.selected_place_id.is_empty():
+					place = _world.spatial_world.get_place(map_controller.selected_place_id)
+					if place.is_empty():
+						var polity := CurrentWorldPoliticalProjection.polity_summary(map_controller.selected_polity_id,_ui_politics,_world.historical_evidence_view)
+						place = historical_content.resolve_world_page(_world.game_clock.current_date(),polity,map_controller.selected_place_id).place()
+				if place.has("geometry") and str((place.geometry as Dictionary).get("type",""))=="Point":
+					place = {"lon_lat":(place.geometry as Dictionary).coordinates}
+				if not map_renderer.focus_place(place): map_renderer.focus_selection()
+				main_shell.set_page("map")
+			"person:focus":
+				if _world == null: return
+				var person := _world.person_overlay.person(_world.player_state.player_id())
+				var place := _world.spatial_world.get_place(str(person.get("current_place_id","")))
+				if map_renderer.focus_place(place):
+					map_controller.select(_ui_politics.runtime_id_for_source(str(place.get("parent_country_id",""))),str(place.get("place_id","")))
+					main_shell.set_page("map")
+				else: main_shell.show_feedback("人物所在地没有可用地图坐标，保留当前视角。","page:person")
+			"save": main_shell.open_slots("save")
+			"load": main_shell.open_slots("load")
+	main_shell.queue_redraw()
 
-
-func _packaged_probe_click_action(action: String) -> bool:
-	queue_redraw()
-	for _index: int in range(3):
-		await get_tree().process_frame
-	for index: int in range(_button_hits.size() - 1, -1, -1):
-		var record: Dictionary = _button_hits[index]
-		if str(record.get("action", "")) != action or not bool(record.get("enabled", false)):
-			continue
-		var rect: Rect2 = record.get("rect", Rect2()) as Rect2
-		_packaged_probe_mouse_button(rect.get_center(), true)
-		_packaged_probe_mouse_button(rect.get_center(), false)
-		await get_tree().process_frame
-		return true
-	return false
-
-
-func _packaged_probe_mouse_button(position: Vector2, pressed: bool) -> void:
-	var event := InputEventMouseButton.new()
-	event.button_index = MOUSE_BUTTON_LEFT
-	event.pressed = pressed
-	event.position = position
-	event.global_position = position
-	_gui_input(event)
-
-
-func _packaged_probe_require(condition: bool, message: String) -> void:
-	if condition:
+func _load_world(slot: int = 1) -> void:
+	if _persistence == null:
 		return
-	_packaged_probe_failures += 1
-	push_error("Packaged player baseline probe: " + message)
+	var candidate := _persistence.load_from_user(slot)
+	var result := candidate.operation
+	FormalWorldPresenter.show_load_result(main_shell, result)
+	if candidate.success:
+		_save_dirty = false
+		main_shell.close_slots()
+		if not candidate.world.political_registry.has_entity(map_controller.selected_polity_id):
+			map_controller.select("")
+		elif not map_controller.selected_place_id.is_empty() and candidate.world.spatial_world.get_place(map_controller.selected_place_id).is_empty() and candidate.world.spatial_world.administrative_land_summary(map_controller.selected_place_id).is_empty():
+			map_controller.select(map_controller.selected_polity_id)
+		_install_world(candidate)
 
+func _update_map_visibility() -> void:
+	# Pages are bounded workspaces; the uncovered map remains interactive.
+	map_renderer.visible = true
+	($Background as ColorRect).visible = true
+	map_controller.suspend_motion()
+	if _world != null and _map_dirty: _refresh_map()
 
-func _advance_simulation_minutes(minutes: int) -> void:
-	if formal_simulation.initialized and minutes > 0:
-		_last_summary = formal_simulation.advance_minutes(minutes)
-
-
-func _format_sim_datetime() -> String:
-	var value := formal_simulation.date_time()
-	if value.is_empty():
-		return "无效时间"
-	return "%04d年%02d月%02d日 %02d:%02d" % [
-		int(value.get("year", 0)),
-		int(value.get("month", 0)),
-		int(value.get("day", 0)),
-		int(value.get("hour", 0)),
-		int(value.get("minute", 0)),
-	]
-
-
-func _time_source_description() -> String:
-	return "正式模拟权威时间；半球与HUD仅派生显示"
-
-
-func _load_formal_state() -> SaveOperationResult:
-	var result := formal_simulation.load_from_user()
-	if result.success:
-		_sync_political_presentation()
-		_last_summary = formal_simulation.world_summary()
-	return result
-
-
-func _toggle_formal_economy_panel() -> void:
-	economy_panel_open = not economy_panel_open
-	queue_redraw()
-
-
-func _save_formal_state_from_ui() -> void:
-	var result := formal_simulation.save_to_user()
-	_formal_status = result.message
-	if _formal_status.is_empty():
-		_formal_status = (
-			"正式世界已保存。"
-			if result.success
-			else "正式世界保存失败。"
-		)
-	queue_redraw()
-
-
-func _load_formal_state_from_ui() -> void:
-	var result := formal_simulation.load_from_user()
-	_formal_status = result.message
-	if _formal_status.is_empty():
-		_formal_status = (
-			"正式世界存档已恢复。"
-			if result.success
-			else "没有可恢复的正式世界存档。"
-		)
-	if result.success:
-		_sync_political_presentation()
-		_last_summary = formal_simulation.world_summary()
-	queue_redraw()
-
-
-func _unhandled_key_input(event: InputEvent) -> void:
-	if not event is InputEventKey:
-		super._unhandled_key_input(event)
+func _request_departure(target: String) -> void:
+	if _save_pending: return
+	if _world==null or not _save_dirty:
+		_departure_target = target
+		_leave_world()
 		return
+	_departure_target = target
+	_departure_was_paused = time_control.paused
+	time_control.paused = true
+	map_controller.suspend_motion()
+	main_shell.show_departure(target)
 
-	var key_event := event as InputEventKey
-	if not key_event.pressed or key_event.echo:
-		super._unhandled_key_input(event)
+func _save_world(slot: int) -> void:
+	if _save_pending: return
+	if _persistence==null:
+		main_shell.show_feedback("世界尚未准备完成，无法保存。")
 		return
-
-	match key_event.keycode:
-		KEY_E:
-			_toggle_formal_economy_panel()
-		KEY_F5:
-			_save_formal_state_from_ui()
-		KEY_F9:
-			_load_formal_state_from_ui()
-		_:
-			super._unhandled_key_input(event)
-			return
-
-	get_viewport().set_input_as_handled()
-
-
-func _draw() -> void:
-	super._draw()
-	_draw_formal_world_status()
-	if economy_panel_open:
-		_draw_formal_polity_panel()
-
-
-func _draw_formal_world_status() -> void:
-	var size := get_viewport_rect().size
-	var rect := Rect2(330.0, size.y - 54.0, maxf(260.0, size.x - 660.0), 36.0)
-	_panel(
-		rect,
-		Color(0.018, 0.038, 0.043, 0.94),
-		Color(0.70, 0.62, 0.39, 0.34)
-	)
-	var fulfillment := int(_last_summary.get("fulfillment_bp", 0))
-	var text := "1900世界  政治单元 %d  高细节经济 %d  核心可玩 %d  背景单元 %d  满足 %.1f%%" % [
-		int(_last_summary.get("world_political_unit_count", 0)),
-		int(_last_summary.get("major_economy_count", 0)),
-		int(_last_summary.get("primary_playable_count", 0)),
-		int(_last_summary.get("background_polity_count", 0)),
-		float(fulfillment) / 100.0,
-	]
-	_draw_label(
-		rect.position + Vector2(14.0, 23.0),
-		text,
-		10,
-		Color(0.88, 0.88, 0.77, 0.98)
-	)
-	_draw_button(
-		Rect2(rect.end.x - 82.0, rect.position.y + 5.0, 72.0, 26.0),
-		"政经 E",
-		"formal_economy_toggle",
-		true
-	)
-
-
-func _draw_formal_polity_panel() -> void:
-	var size := get_viewport_rect().size
-	var width := clampf(size.x * 0.30, 330.0, 430.0)
-	var rect := Rect2(size.x - width - 18.0, 92.0, width, size.y - 170.0)
-	_panel(
-		rect,
-		Color(0.014, 0.031, 0.037, 0.975),
-		Color(0.78, 0.66, 0.38, 0.44)
-	)
-	_draw_formal_panel_header(rect)
-	var selected_id := _selected_polity_entity_id()
-	var polity := formal_simulation.polity_summary(selected_id)
-	_draw_polity_content(rect, selected_id, polity)
-	_draw_formal_panel_buttons(rect)
-
-
-func _draw_formal_panel_header(rect: Rect2) -> void:
-	_draw_label(
-		rect.position + Vector2(20.0, 31.0),
-		"正式世界政经",
-		17,
-		Color(0.95, 0.88, 0.67, 1.0)
-	)
-	_draw_label(
-		rect.position + Vector2(20.0, 54.0),
-		"146个运行时政治实体构成当前世界；151条历史证据保持只读。",
-		9,
-		Color(0.76, 0.81, 0.78, 0.95)
-	)
-
-
-func _draw_polity_content(
-	rect: Rect2, selected_id: String, polity: Dictionary
-) -> void:
-	var y := 86.0
-	if polity.is_empty():
-		_draw_label(
-			rect.position + Vector2(20.0, y),
-			"在半球上选择政治单元。",
-			11
-		)
+	var result := _persistence.save_to_user(slot)
+	if result.error_code=="queued":
+		_save_pending = true
+		main_shell.set_save_pending(true)
+		main_shell.show_feedback("正在等待当前游戏状态完成保存。")
 		return
-	_draw_label(
-		rect.position + Vector2(20.0, y),
-		str(polity.get("name_zh", polity.get("short_name_zh", selected_id))),
-		14
-	)
-	y += 24.0
-	var polity_lines: Array[String] = [
-		"层级：%s" % str(polity.get("playability_tier_zh", "背景政治单元")),
-		"地位：%s · %s" % [
-			str(polity.get("status", "unknown")),
-			str(polity.get("relationship", "")),
-		],
-	]
-	for relation_value: Variant in polity.get("authority_relations", []) as Array:
-		if relation_value is Dictionary:
-			polity_lines.append(
-				_authority_relation_label(relation_value as Dictionary)
-			)
-	y = _draw_panel_lines(
-		rect,
-		y,
-		polity_lines,
-		Color(0.82, 0.84, 0.78, 0.96),
-		10
-	)
-	y += 5.0
-	if bool(polity.get("has_detailed_economy", false)):
-		_draw_detailed_economy(rect, y, polity.get("economy", {}) as Dictionary)
+	_finish_save(result)
+
+func _finish_save(result: SaveOperationResult) -> void:
+	_save_pending = false
+	main_shell.set_save_pending(false)
+	if not result.success:
+		main_shell.show_save_error("保存失败："+result.message)
+		return
+	_save_dirty = false
+	main_shell.show_feedback("已保存。")
+	main_shell.close_slots()
+	if not _departure_target.is_empty(): _leave_world()
+
+func _leave_world() -> void:
+	if _departure_target.is_empty() or _leaving: return
+	_leaving = true
+	time_control.paused = true
+	map_controller.suspend_motion()
+	# Scene removal must not run inside MainShell's input/signal dispatch.
+	_finish_departure.call_deferred()
+
+func _finish_departure() -> void:
+	var target := _departure_target
+	var tree := get_tree()
+	if target=="quit":
+		tree.quit()
 	else:
-		_draw_background_polity_notice(rect, y)
-
-
-func _draw_detailed_economy(
-	rect: Rect2, y: float, country: Dictionary
-) -> void:
-	var totals := country.get("daily_totals", {}) as Dictionary
-	var economy_lines: Array[String] = [
-		"主要政权序位：%d" % int(country.get("rank", 0)),
-		"人口：%s" % _compact_integer(int(country.get("population", 0))),
-		"人均产出锚：%d（2011国际元口径）" % int(
-			country.get("income_per_capita", 0)
-		),
-		"城市化率：%.1f%%" % (
-			float(country.get("urban_share_bp", 0)) / 100.0
-		),
-		"数据状态：%.1f%% · %s" % [
-			float(country.get("overall_confidence_bp", 0)) / 100.0,
-			str(country.get("admission_status", "bounded_estimate")),
-		],
-		"当日满足率：%.1f%%" % (
-			float(totals.get("fulfillment_bp", 0)) / 100.0
-		),
-		"关联在途运输：%d" % int(country.get("active_shipments", 0)),
-	]
-	_draw_panel_lines(
-		rect,
-		y,
-		economy_lines,
-		Color(0.86, 0.87, 0.80, 0.98),
-		10
-	)
-
-
-func _draw_background_polity_notice(rect: Rect2, y: float) -> void:
-	_draw_label(
-		rect.position + Vector2(20.0, y),
-		"该单元属于背景世界：保留身份、来源元数据与经济映射，不运行高细节经济。",
-		9,
-		Color(0.91, 0.70, 0.45, 0.98)
-	)
-
-
-func _draw_panel_lines(
-	rect: Rect2,
-	y: float,
-	lines: Array[String],
-	color: Color,
-	font_size: int
-) -> float:
-	for line: String in lines:
-		_draw_label(
-			rect.position + Vector2(20.0, y),
-			line,
-			font_size,
-			color
-		)
-		y += 19.0
-	return y
-
-
-func _draw_formal_panel_buttons(rect: Rect2) -> void:
-	var button_y := rect.end.y - 38.0
-	_draw_button(
-		Rect2(rect.position.x + 18.0, button_y, 84.0, 26.0),
-		"保存 F5",
-		"formal_save",
-		true
-	)
-	_draw_button(
-		Rect2(rect.position.x + 110.0, button_y, 84.0, 26.0),
-		"读取 F9",
-		"formal_load",
-		true
-	)
-	_draw_button(
-		Rect2(rect.end.x - 88.0, button_y, 70.0, 26.0),
-		"关闭",
-		"formal_economy_toggle",
-		true
-	)
-	if not _formal_status.is_empty():
-		_draw_label(
-			rect.position + Vector2(20.0, rect.size.y - 51.0),
-			_formal_status,
-			8,
-			Color(0.72, 0.78, 0.72, 0.92)
-		)
-
-
-func _activate_button(action: String) -> void:
-	match action:
-		"formal_economy_toggle":
-			_toggle_formal_economy_panel()
-		"formal_save":
-			_save_formal_state_from_ui()
-		"formal_load":
-			_load_formal_state_from_ui()
-		_:
-			super._activate_button(action)
-
-
-func _selected_polity_entity_id() -> String:
-	if formal_simulation.has_polity(selected_country_id):
-		return selected_country_id
-
-	var home_id := _home_historical_entity_id()
-	if not home_id.begins_with("state:"):
-		home_id = formal_simulation.political_registry_view().runtime_id_for_source(
-			home_id
-		)
-	if formal_simulation.has_polity(home_id):
-		return home_id
-
-	if formal_simulation.has_polity("state:country_fra"):
-		return "state:country_fra"
-
-	return formal_simulation.first_polity_id()
-
-
-func _rebuild_historical_political_world() -> void:
-	if (
-		_historical_evidence_surface_building
-		or not formal_simulation.initialized
-	):
-		super._rebuild_historical_political_world()
-		return
-	var historical_document := _dated_units_document
-	_dated_units_document = {
-		"units": formal_simulation.current_world_political_units(),
-	}
-	super._rebuild_historical_political_world()
-	_dated_units_document = historical_document
-
-
-func _sync_political_presentation() -> void:
-	if not formal_simulation.initialized:
-		return
-	var previous_selection := selected_country_id
-	_rebuild_historical_political_world()
-	if formal_simulation.has_polity(previous_selection):
-		selected_country_id = previous_selection
-	else:
-		selected_country_id = ""
-		hover_country_id = ""
-		selected_historical_territory_iso = ""
-	_mark_projection_dirty()
-	queue_redraw()
-
-
-func historical_evidence_report() -> Dictionary:
-	if _immutable_historical_evidence_report.is_empty():
-		return super.historical_evidence_report()
-	return _immutable_historical_evidence_report.duplicate(true)
-
-
-func _authority_relation_label(relation: Dictionary) -> String:
-	var relation_names := {
-		"administration": "行政关系",
-		"occupation": "占领关系",
-		"protection": "保护关系",
-		"legacy_controller": "历史兼容关系",
-	}
-	var relation_type := str(relation.get("relation_type", ""))
-	return "%s：%s → %s（%s 至 %s）" % [
-		str(relation_names.get(relation_type, relation_type)),
-		str(relation.get("source_runtime_id", "")),
-		str(relation.get("target_runtime_id", "")),
-		str(relation.get("valid_from", "")),
-		str(relation.get("valid_to", "")),
-	]
-
-
-func _compact_integer(value: int) -> String:
-	if value >= 1000000000:
-		return "%.2f十亿" % (float(value) / 1000000000.0)
-	if value >= 1000000:
-		return "%.2f百万" % (float(value) / 1000000.0)
-	if value >= 1000:
-		return "%.1f千" % (float(value) / 1000.0)
-	return str(value)
+		for key: StringName in [FormalWorldMenu.PREPARED_WORLD_META,LAUNCH_MODE_META,FormalWorldMenu.PREPARED_MAP_META,FormalWorldMenu.PREPARED_CONTROLLER_META,FormalWorldMenu.PREPARED_CONTENT_META,FormalWorldMenu.PREPARED_LOADING_META,FormalWorldMenu.LIVELIHOOD_META,FormalWorldMenu.NATIVE_ECONOMY_META]:
+			if tree.has_meta(key):
+				var carried: Variant = tree.get_meta(key)
+				if carried is Node and is_instance_valid(carried) and (carried as Node).get_parent()==tree.root: (carried as Node).queue_free()
+				tree.remove_meta(key)
+		var error := tree.change_scene_to_file("res://scenes/formal/formal_world_menu.tscn")
+		if error!=OK:
+			_leaving = false
+			time_control.paused = _departure_was_paused
+			main_shell.show_save_error("无法返回主菜单："+error_string(error))

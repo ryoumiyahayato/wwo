@@ -13,7 +13,7 @@ static func backup_formal_save() -> Dictionary:
 	}
 	var artifacts: Dictionary = result["artifacts"] as Dictionary
 	for suffix: String in FORMAL_SAVE_ARTIFACT_SUFFIXES:
-		var path: String = FormalWorldSimulation.SAVE_PATH + suffix
+		var path: String = FormalPersistence.SAVE_PATH + suffix
 		var artifact := {
 			"exists": FileAccess.file_exists(path),
 			"read_error": false,
@@ -37,7 +37,7 @@ static func backup_formal_save() -> Dictionary:
 static func cleanup_formal_save() -> bool:
 	var success := true
 	for suffix: String in FORMAL_SAVE_ARTIFACT_SUFFIXES:
-		var path: String = FormalWorldSimulation.SAVE_PATH + suffix
+		var path: String = FormalPersistence.SAVE_PATH + suffix
 		if not FileAccess.file_exists(path):
 			continue
 		var error := DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
@@ -80,7 +80,7 @@ static func _restore_formal_save_artifact(
 ) -> bool:
 	if not exists:
 		return true
-	var file := FileAccess.open(FormalWorldSimulation.SAVE_PATH + suffix, FileAccess.WRITE)
+	var file := FileAccess.open(FormalPersistence.SAVE_PATH + suffix, FileAccess.WRITE)
 	if file == null:
 		return false
 	file.store_buffer(bytes)
@@ -89,29 +89,8 @@ static func _restore_formal_save_artifact(
 	return true
 
 
-static func hemisphere_state(application: FormalWorldApplication) -> Dictionary:
-	var value := application.formal_simulation.date_time()
-	return {
-		"year": int(value.get("year", 0)),
-		"month": int(value.get("month", 0)),
-		"day": int(value.get("day", 0)),
-		"hour": int(value.get("hour", -1)),
-		"minute": int(value.get("minute", -1)),
-		"paused": application.sim_paused,
-		"speed": application.sim_speed,
-	}
-
-
-static func hemisphere_total_hour(application: FormalWorldApplication) -> int:
-	return V2DateTime.to_total_hour(application.formal_simulation.date_time())
-
-
-static func hemisphere_total_minute(application: FormalWorldApplication) -> int:
-	return application.formal_simulation.total_minutes
-
-
-static func simulation_state(simulation: FormalWorldSimulation) -> Dictionary:
-	return simulation.get_persistent_state().duplicate(true)
+static func simulation_state(simulation: WorldBuildResult) -> Dictionary:
+	return simulation.persistence.snapshot().duplicate(true)
 
 
 static func first_semantic_difference(

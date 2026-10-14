@@ -2,8 +2,7 @@
 """Deterministic, read-only QA for the current world transport topology.
 
 This tool intentionally does not import Godot or any gameplay service.  It
-loads the accepted world-map JSON documents, mirrors the endpoint contract
-used by the current map loader, and builds an analysis-only graph.  It never
+loads the existing world-map JSON documents and builds an analysis-only graph.  It never
 writes under ``data/world_map``.  Output files are written only when an
 explicit output argument is supplied.
 """
@@ -25,10 +24,6 @@ from typing import Any, Iterable, Optional
 SCHEMA_VERSION = "world-transport-topology-audit/v1"
 DEFAULT_STARTING_MASTER = "unknown"
 WORLD_MAP_ROOT = Path("data/world_map")
-LOADER_PATHS = (
-    "scripts/world_map/internal/world_map_data_impl.gd",
-    "scripts/world_map/internal/world_map_canvas_impl.gd",
-)
 SOURCE_PATHS = (
     "data/world_map/countries.json",
     "data/world_map/regions.json",
@@ -384,69 +379,6 @@ def inventory_world_map(root: Path) -> tuple[list[dict[str, Any]], list[dict[str
                 parse_errors.append({"path": rel, "error": str(error)})
         inventory.append(entry)
     return inventory, parse_errors
-
-
-def loader_contract(root: Path) -> dict[str, Any]:
-    required: dict[str, list[str]] = {
-        "scripts/world_map/internal/world_map_data_impl.gd": [
-            '"ports": "res://data/world_map/ports.json"',
-            '"rail_segments": "res://data/world_map/rail_segments.json"',
-            '"road_segments": "res://data/world_map/road_segments.json"',
-            '"shipping_routes": "res://data/world_map/shipping_routes.json"',
-        ],
-        "scripts/world_map/internal/world_map_canvas_impl.gd": [
-            '_ports = _document_array("ports", "ports")',
-            '_rail_segments = _document_array("rail_segments", "segments")',
-            '_road_segments = _document_array("road_segments", "segments")',
-            '_shipping_routes = _document_array("shipping_routes", "routes")',
-            '_load_fixed_geometry_cache()',
-            '_build_transport_tie_cache()',
-        ],
-    }
-    files: list[dict[str, Any]] = []
-    missing_tokens: list[dict[str, str]] = []
-    for path_string in LOADER_PATHS:
-        path = root / Path(path_string)
-        try:
-            content = path.read_text(encoding="utf-8")
-        except (FileNotFoundError, OSError, UnicodeError) as error:
-            files.append({"path": path_string, "status": "FAIL", "error": str(error)})
-            for token in required.get(path_string, []):
-                missing_tokens.append({"path": path_string, "token": token})
-            continue
-        files.append(
-            {
-                "path": path_string,
-                "status": "PASS",
-                "sha256": sha256_bytes(content.encode("utf-8")),
-            }
-        )
-        for token in required.get(path_string, []):
-            if token not in content:
-                missing_tokens.append({"path": path_string, "token": token})
-    return {
-        "status": "PASS" if not missing_tokens else "FAIL",
-        "files": files,
-        "required_tokens": required,
-        "missing_tokens": missing_tokens,
-        "field_contract": {
-            mode: {
-                "source_path": spec["path"],
-                "collection": spec["collection"],
-                "endpoint_type": spec["endpoint_type"],
-                "from_key": spec["from_key"],
-                "to_key": spec["to_key"],
-            }
-            for mode, spec in sorted(MODE_SPECS.items())
-        },
-        "interpretation": {
-            "road_endpoints": "city",
-            "rail_endpoints": "city",
-            "shipping_endpoints": "port",
-            "transport_traversal": "undirected_analysis_assumption",
-            "geometry_cache": "index_aligned_with_source_records",
-        },
-    }
 
 
 def add_catalog_nodes(
@@ -1348,7 +1280,7 @@ def validate_geometry_cache(
                     node_id,
                     "P2" if bool(record.get("major", False)) else "P3",
                     f"Declared {node_type} is absent from the map geometry anchor cache; current loader fallback is Vector2.ZERO.",
-                    source_paths=[f"data/world_map/{'cities' if node_type == 'city' else 'ports'}.json", "data/world_map/map_geometry_cache.json", "scripts/world_map/internal/world_map_canvas_impl.gd"],
+                    source_paths=[f"data/world_map/{'cities' if node_type == 'city' else 'ports'}.json", "data/world_map/map_geometry_cache.json"],
                     evidence={"node_type": node_type, "major": bool(record.get("major", False))},
                     impacts=["Spatial"],
                     suggestion="Regenerate or explicitly review the geometry cache; do not hand-edit authoritative transport records to compensate.",
@@ -1379,7 +1311,7 @@ def candidate_fixes(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def source_manifest(root: Path) -> list[dict[str, Any]]:
     manifest: list[dict[str, Any]] = []
-    for path_string in (*SOURCE_PATHS, *LOADER_PATHS):
+    for path_string in SOURCE_PATHS:
         path = root / Path(path_string)
         entry: dict[str, Any] = {"path": path_string}
         if path.is_file():
@@ -1438,7 +1370,6 @@ def build_audit(root: Path, starting_master: str = DEFAULT_STARTING_MASTER) -> d
         for finding in finalized_findings
         if finding["check"] == "UNREACHABLE_MAJOR_NODE"
     })
-    loader = loader_contract(root)
     fatal_source_errors = source_errors + world_map_parse_errors
     summary = {
         "transport_node_count": len(cities) + len(ports),
@@ -1456,7 +1387,6 @@ def build_audit(root: Path, starting_master: str = DEFAULT_STARTING_MASTER) -> d
         "world_map_file_count": len(inventory),
         "world_map_json_parse_error_count": len(world_map_parse_errors),
         "source_error_count": len(source_errors),
-        "loader_contract": loader["status"],
         "production_world_data_modified": False,
     }
     top_problems = [
@@ -1470,7 +1400,6 @@ def build_audit(root: Path, starting_master: str = DEFAULT_STARTING_MASTER) -> d
         "scope": {
             "world_map_root": WORLD_MAP_ROOT.as_posix(),
             "source_paths": list(SOURCE_PATHS),
-            "loader_paths": list(LOADER_PATHS),
             "production_world_data_modified": False,
             "graph_role": "analysis_only",
             "directionality_assumption": "undirected_for_current_renderer_and_topology_QA; explicit directionality remains an ambiguity finding",
@@ -1484,7 +1413,6 @@ def build_audit(root: Path, starting_master: str = DEFAULT_STARTING_MASTER) -> d
         "source_manifest": source_manifest(root),
         "world_map_inventory": inventory,
         "source_errors": fatal_source_errors,
-        "loader_contract": loader,
         "summary": summary,
         "components": component_summary,
         "geometry_cache": cache_summary,
@@ -1504,8 +1432,7 @@ def render_markdown(audit: dict[str, Any]) -> str:
         "",
         "## Scope and safety boundary",
         "",
-        "This is a deterministic, read-only audit of the existing world-map transport source data and the current map loader contract. The graph is analysis-only; it is not a gameplay authority and does not integrate Economy, Military, or Spatial systems. No file under `data/world_map/` is rewritten by the tool.",
-        "The current loader registers source collections and draws transport geometry from index-aligned cached records; the audit records endpoint field semantics for QA but does not claim the renderer performs endpoint routing.",
+        "This is a read-only analysis of the existing world-map transport source data. The graph is analysis-only; it is not a gameplay authority and does not integrate Economy, Military, or Spatial systems. No file under `data/world_map/` is rewritten by the tool.",
         "",
         "Classification policy: `EXPECTED_ISOLATION` means the catalog gives no evidence that a connection is required; `SUSPICIOUS_ISOLATION` is a review-only signal based on explicit metadata or a documented coverage heuristic and does not prove authoritative data is wrong; `BROKEN_REFERENCE` is a concrete schema/reference/cache failure; `AMBIGUOUS` requires domain confirmation because the current data does not declare intent or directionality.",
         "Priority policy: P0-P3 are audit triage labels, not code-review severity. Sparse current coverage may explain isolated cities, ports, and split components; no finding authorizes automatic route creation or authoritative data repair.",
@@ -1528,15 +1455,7 @@ def render_markdown(audit: dict[str, Any]) -> str:
         f"| World-map JSON parse errors | {summary['world_map_json_parse_error_count']} |",
         f"| Production world data modified | **NO** |",
         "",
-        "## Loader contract",
-        "",
-        f"Static loader contract: **{audit['loader_contract']['status']}**. The current data loader registers ports, road segments, rail segments, and shipping routes; the map canvas reads the same collections and consumes index-aligned transport geometry from `map_geometry_cache.json`.",
-        "",
-        "| Loader file | Status |",
-        "| --- | --- |",
     ]
-    for file_record in audit["loader_contract"]["files"]:
-        lines.append(f"| `{file_record['path']}` | {file_record['status']} |")
     lines.extend(["", "## Connected components", ""])
     lines.extend([
         "| Mode | Catalog components | Nontrivial components | Largest |",

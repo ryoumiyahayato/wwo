@@ -2,8 +2,7 @@ class_name FormalWorldPersistenceDocument
 extends RefCounted
 ## Narrow persistence representation owned by Formal World.
 ##
-## JSON remains the outer file container so the existing atomic file boundary,
-## backup behavior, and legacy raw-JSON saves keep working. The authoritative
+## JSON remains the outer container for atomic writes and file backups. The authoritative
 ## snapshot itself is encoded with Godot's Variant binary representation so
 ## numeric Variant types and IEEE-754 float bits never pass through JSON's
 ## decimal-number parser.
@@ -28,16 +27,11 @@ static func encode(snapshot: Dictionary) -> Dictionary:
 
 
 static func decode(document: Dictionary) -> Dictionary:
-	# Legacy Formal saves are the authoritative snapshot at the JSON root.
-	if not document.has(FORMAT_FIELD):
-		return {
-			"success": true,
-			"legacy": true,
-			"snapshot": document,
-			"error": "",
-		}
-	if str(document.get(FORMAT_FIELD, "")) != FORMAT_ID:
-		return _fail("不支持的正式世界持久化格式")
+	var found: String = str(document.get(SNAPSHOT_SCHEMA_FIELD, document.get("schema_id", "missing")))
+	if str(document.get(FORMAT_FIELD, "missing")) != FORMAT_ID or found != FormalPersistence.SCHEMA_ID:
+		var failure: Dictionary = _fail("SAVE FORMAT VERSION MISMATCH\nExpected: %s / %s\nFound: %s / %s\nReason: Formal land geometry, sovereignty, current control and split lineage require spatial land fields; old saves cannot infer fine land." % [FORMAT_ID, FormalPersistence.SCHEMA_ID, document.get(FORMAT_FIELD, "missing"), found])
+		failure["error_code"] = "save_format_version_mismatch"
+		return failure
 	if typeof(document.get(SNAPSHOT_SCHEMA_FIELD, null)) != TYPE_STRING:
 		return _fail("正式世界持久化文档缺少快照版本")
 	if typeof(document.get(PAYLOAD_FIELD, null)) != TYPE_STRING:
@@ -52,11 +46,12 @@ static func decode(document: Dictionary) -> Dictionary:
 	if not decoded is Dictionary:
 		return _fail("正式世界精确载荷不是快照对象")
 	var snapshot := decoded as Dictionary
-	if str(snapshot.get("schema_id", "")) != str(document[SNAPSHOT_SCHEMA_FIELD]):
-		return _fail("正式世界精确载荷版本与外层文档不一致")
+	if str(snapshot.get("schema_id", "missing")) != FormalPersistence.SCHEMA_ID:
+		var failure: Dictionary = _fail("SAVE FORMAT VERSION MISMATCH\nExpected: %s\nFound: %s\nReason: Formal land geometry, sovereignty, current control and split lineage require spatial land fields; old saves cannot infer fine land." % [FormalPersistence.SCHEMA_ID, snapshot.get("schema_id", "missing")])
+		failure["error_code"] = "save_format_version_mismatch"
+		return failure
 	return {
 		"success": true,
-		"legacy": false,
 		"snapshot": snapshot,
 		"error": "",
 	}
@@ -65,7 +60,6 @@ static func decode(document: Dictionary) -> Dictionary:
 static func _fail(message: String) -> Dictionary:
 	return {
 		"success": false,
-		"legacy": false,
 		"snapshot": {},
 		"error": message,
 	}

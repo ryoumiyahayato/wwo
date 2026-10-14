@@ -38,33 +38,34 @@ class Batch2ArtifactTests(unittest.TestCase):
         cls.regression_manifest = batch2.build_regression_manifest(REPOSITORY_ROOT)
 
     def test_data_manifest_covers_all_json_without_parse_errors(self) -> None:
-        self.assertEqual(self.data_manifest["file_count"], 185)
+        paths = {path.relative_to(REPOSITORY_ROOT).as_posix() for path in (REPOSITORY_ROOT / "data/world_map").rglob("*.json")}
+        self.assertEqual(self.data_manifest["file_count"], len(paths))
         self.assertEqual(self.data_manifest["parse_errors"], [])
-        self.assertEqual(len(self.data_manifest["files"]), 185)
+        self.assertEqual({row["path"] for row in self.data_manifest["files"]}, paths)
         self.assertEqual(len(self.data_manifest["dataset_sha256"]), 64)
 
     def test_historical_flag_assets_match_referenced_hashes(self) -> None:
-        self.assertEqual(self.asset_manifest["record_count"], 61)
-        self.assertEqual(self.asset_manifest["referenced_asset_count"], 60)
-        self.assertEqual(self.asset_manifest["asset_file_count"], 60)
-        self.assertEqual(len(self.asset_manifest["verified_reference_ids"]), 60)
+        self.assertEqual(self.asset_manifest["record_count"], len(batch2.load_historical_flag_catalog(REPOSITORY_ROOT)[1]))
+        self.assertEqual(self.asset_manifest["referenced_asset_count"], len(self.asset_manifest["references"]))
+        self.assertEqual(self.asset_manifest["asset_file_count"], len(list((REPOSITORY_ROOT / "assets/historical_flags/1900").glob("*.png"))))
+        self.assertEqual(len(self.asset_manifest["verified_reference_ids"]), self.asset_manifest["referenced_asset_count"])
         self.assertEqual(self.asset_manifest["missing_assets"], [])
         self.assertEqual(self.asset_manifest["hash_mismatches"], [])
         self.assertEqual(self.asset_manifest["dimension_mismatches"], [])
         self.assertEqual(self.asset_manifest["orphan_assets"], [])
-        self.assertEqual(self.asset_manifest["rendered_dimension_counts"], {"288x192": 60})
+        self.assertEqual(sum(self.asset_manifest["rendered_dimension_counts"].values()), self.asset_manifest["referenced_asset_count"])
 
     def test_regression_manifest_is_machine_readable(self) -> None:
         fixture = REPOSITORY_ROOT / self.regression_manifest["fixture"]
         loaded = json.loads(fixture.read_text(encoding="utf-8"))
-        self.assertEqual(self.regression_manifest["case_count"], 6)
+        self.assertEqual(self.regression_manifest["case_count"], len(loaded["cases"]))
         self.assertEqual(self.regression_manifest["case_ids"], [case["id"] for case in loaded["cases"]])
         self.assertEqual(len(self.regression_manifest["fixture_sha256"]), 64)
 
     def test_asset_staging_contains_only_verified_references(self) -> None:
         staging = batch2.build_asset_staging(self.asset_manifest)
         self.assertFalse(staging["authoritative_source_modified"])
-        self.assertEqual(len(staging["entries"]), 60)
+        self.assertEqual(len(staging["entries"]), len(self.asset_manifest["verified_reference_ids"]))
         self.assertTrue(all(entry["asset_path"].startswith("res://assets/historical_flags/1900/") for entry in staging["entries"]))
         self.assertTrue(all(len(entry["sha256"]) == 64 for entry in staging["entries"]))
 

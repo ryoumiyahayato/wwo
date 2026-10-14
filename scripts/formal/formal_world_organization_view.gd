@@ -1,7 +1,7 @@
 class_name FormalWorldOrganizationView
 extends RefCounted
 
-## Detached, immutable-like query boundary for the authoritative OrganizationCore.
+## Detached, immutable-like query boundary for the authoritative OrganizationState.
 ## Every record returned to callers is deep-copied.
 
 var _snapshot: Dictionary = {}
@@ -9,7 +9,11 @@ var _organizations: Dictionary = {}
 
 
 func _init(snapshot_value: Dictionary = {}) -> void:
-	_snapshot = snapshot_value.duplicate(true)
+	_snapshot = {
+		"revision": int(snapshot_value.get("revision", 0)),
+		"state_fingerprint": str(snapshot_value.get("state_fingerprint", "")),
+		"organizations": (snapshot_value.get("organizations", []) as Array).duplicate(true),
+	}
 	var raw_organizations: Variant = _snapshot.get("organizations", [])
 	if typeof(raw_organizations) != TYPE_ARRAY:
 		return
@@ -117,30 +121,6 @@ func appointments_for_person(person_id: String) -> Array[Dictionary]:
 				record["organization_id"] = organization_id
 				output.append(record)
 	return output
-
-
-func has_capability(
-	person_id: String, organization_id: String, capability_id: String
-) -> bool:
-	if not is_organization_active(organization_id):
-		return false
-	if not capability_ids(organization_id).has(capability_id):
-		return false
-	for appointment_id: String in appointment_ids(organization_id):
-		var appointment_record := appointment(organization_id, appointment_id)
-		if str(appointment_record.get("person_id", "")) != person_id:
-			continue
-		if (
-			bool(appointment_record.get("requires_membership", false))
-			and not member_ids(organization_id).has(person_id)
-		):
-			continue
-		var position_record := position(
-			organization_id, str(appointment_record.get("position_id", ""))
-		)
-		if _sorted_strings(position_record.get("capability_ids", [])).has(capability_id):
-			return true
-	return false
 
 
 func snapshot() -> Dictionary:

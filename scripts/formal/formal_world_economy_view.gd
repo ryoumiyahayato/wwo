@@ -72,7 +72,7 @@ func country_summary(entity_id: String) -> Dictionary:
 
 
 func economy_entity_for_polity(polity_id: String) -> String:
-	return str(economy_by_polity_id.get(polity_id, ""))
+	return str((_snapshot.get("economy_by_polity_id", {}) as Dictionary).get(polity_id, ""))
 
 
 func polity_ids_for_economy(economy_id: String) -> Array[String]:
@@ -85,7 +85,7 @@ func polity_ids_for_economy(economy_id: String) -> Array[String]:
 
 func market_id_for_economic_aggregate(economic_aggregate_id: String) -> String:
 	return str(
-		economic_aggregate_states.get(economic_aggregate_id, {}).get(
+		(_snapshot.get("economic_aggregate_states", {}) as Dictionary).get(economic_aggregate_id, {}).get(
 			"pricing_market_id", ""
 		)
 	)
@@ -93,7 +93,7 @@ func market_id_for_economic_aggregate(economic_aggregate_id: String) -> String:
 
 func economic_aggregate_id_for_market(market_id: String) -> String:
 	return str(
-		market_states.get(market_id, {}).get(
+		(_snapshot.get("market_states", {}) as Dictionary).get(market_id, {}).get(
 			"source_economic_aggregate_id", ""
 		)
 	)
@@ -103,10 +103,14 @@ func market_registry() -> Dictionary:
 	return (_snapshot.get("market_registry", {}) as Dictionary).duplicate(true)
 
 
+func market_state(market_id: String) -> Dictionary:
+	return ((_snapshot.get("market_states", {}) as Dictionary).get(market_id, {}) as Dictionary).duplicate(true)
+
+
 func observation() -> Dictionary:
 	return {
 		"schema_id": str(_snapshot.get("schema_id", "")),
-		"domain_owner": "FormalWorldEconomyService",
+		"domain_owner": "FormalWorldEconomyState",
 		"state_revision": int(_snapshot.get("state_revision", 0)),
 		"fact_sources": (
 			(_snapshot.get("fact_sources", {}) as Dictionary).duplicate(true)

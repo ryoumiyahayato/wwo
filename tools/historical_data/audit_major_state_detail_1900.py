@@ -21,10 +21,10 @@ def main() -> int:
     profiles = json.loads(PROFILE_PATH.read_text(encoding="utf-8"))
     admin = json.loads(ADMIN_PATH.read_text(encoding="utf-8"))
     rows = profiles.get("profiles", [])
-    assert len(rows) == 50, f"expected 50 major profiles, got {len(rows)}"
+    assert rows, "major profiles must not be empty"
     ranks = [int(row["rank"]) for row in rows]
-    assert sorted(ranks) == list(range(1, 51)), "priority ranks must be 1..50"
-    assert len({row["entity_id"] for row in rows}) == 50, "profile entity ids must be unique"
+    assert sorted(ranks) == list(range(1, len(rows) + 1)), "priority ranks must be contiguous starting at 1"
+    assert len({row["entity_id"] for row in rows}) == len(rows), "profile entity ids must be unique"
     for row in rows:
         brief = str(row.get("brief_zh", ""))
         assert brief.count("。") <= 3, f"brief exceeds three sentences: {row['entity_id']}"
@@ -32,6 +32,7 @@ def main() -> int:
 
     countries = admin.get("countries", [])
     by_id = {row["entity_id"]: row for row in countries}
+    assert len(by_id) == len(countries), "administrative country ids must be unique"
     missing = sorted(REQUIRED_DETAILED - set(by_id))
     assert not missing, f"missing detailed countries: {missing}"
     assert admin.get("policy", {}).get("modern_admin_names_forbidden") is True

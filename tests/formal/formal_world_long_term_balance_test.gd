@@ -1,7 +1,5 @@
 extends SceneTree
-## Ten-year balance guard for the 146-entity runtime world and its
-## 50-polity high-detail economy. The two-country/eight-region fixture is not
-## instantiated anywhere in this test.
+## Ten-year balance guard for the formal runtime world and its market economy.
 
 const YEARS: int = 10
 const HOURS_PER_YEAR: int = 365 * 24
@@ -19,19 +17,22 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var simulation := FormalWorldSimulation.new()
+	var simulation := WorldBootstrap.new().build()
 	_check(
-		simulation.initialize(),
-		"正式半球长期经济可通过唯一时间源初始化：%s" % simulation.initialization_error
+		simulation.success,
+		"正式半球长期经济可通过唯一时间源初始化：%s" % simulation.error
 	)
 	if failures > 0:
 		_finish({})
 		return
-	var economy := simulation.economy
 	var started_usec := Time.get_ticks_usec()
+	var land := simulation.world.spatial_world.land_topology()
+	var land_before := land.snapshot()
+	var initial_market_count := simulation.world.market_registry.market_count()
 	var annual_fulfillment: Array[int] = []
 	for year: int in range(1, YEARS + 1):
-		var summary := simulation.advance_minutes(HOURS_PER_YEAR * 60)
+		simulation.simulation_step.advance_minutes(HOURS_PER_YEAR * 60)
+		var summary := simulation.world.economy_state.world_summary()
 		var fulfillment := int(summary.get("fulfillment_bp", -1))
 		annual_fulfillment.append(fulfillment)
 		_check(
@@ -43,27 +44,32 @@ func _run() -> void:
 			"第%d年完整政治世界仍存在" % year
 		)
 		_check(
-			int(summary.get("major_economy_count", 0)) == 50,
-			"第%d年主要政权高细节目录保持50个" % year
+			int(summary.get("major_economy_count", 0)) == initial_market_count,
+			"第%d年市场目录保持初始身份集合" % year
 		)
 	var elapsed_usec := Time.get_ticks_usec() - started_usec
-	var final_summary := simulation.world_summary()
+	_check(land.snapshot() == land_before, "十年循环不修改土地几何、身份或谱系")
+	var final_view := FormalWorldEconomyView.new(simulation.world.economy_state.read_only_snapshot())
+	var final_summary := simulation.world.economy_state.world_summary().merged({"world_political_unit_count": simulation.world.political_registry.entity_count(), "historical_political_record_count": simulation.world.historical_evidence.record_count(), "formal_person_count": simulation.world.person_overlay.person_count(), "background_polity_count": maxi(0, simulation.world.political_registry.entity_count() - int(simulation.world.economy_state.world_summary().get("detailed_polity_unit_count", 0)))})
 	_check(
 		int(final_summary.get("fulfillment_bp", -1)) >= MIN_FINAL_FULFILLMENT_BP,
 		"十年末世界需求满足率保持在30%以上"
 	)
-	_check(_state_is_numerically_sound(economy), "十年运行后价格、库存和日结状态有效")
-	_check(economy.routes.size() >= 30, "正式历史运输网络持续可用")
-	_check(economy.shipments.size() <= 5000, "在途运输队列保持有界")
-	var save_state := simulation.get_persistent_state()
+	_check(_state_is_numerically_sound(final_view), "十年运行后价格、库存和日结状态有效")
+	_check(final_view.routes.size() >= 30, "正式历史运输网络持续可用")
+	_check(final_view.shipments.size() <= 5000, "在途运输队列保持有界")
+	var save_state := simulation.persistence.snapshot()
 	var serialized_bytes := JSON.stringify(save_state).to_utf8_buffer().size()
 	_check(serialized_bytes < MAX_SAVE_BYTES, "十年正式世界存档小于20MB")
 	_check(elapsed_usec < MAX_ELAPSED_USEC, "十年正式世界模拟在CI安全时间内完成")
-	var restored := FormalWorldSimulation.new()
-	_check(restored.initialize(), "十年存档恢复目标可初始化")
-	_check(restored.restore_persistent_state(save_state), "十年正式世界存档可恢复")
+	var restored := WorldBootstrap.new().build()
+	_check(restored.success, "十年存档恢复目标可初始化")
+	var candidate_1 := restored.persistence.restore_candidate(save_state)
+	if candidate_1.success:
+		restored = candidate_1
+	_check(candidate_1.success, "十年正式世界存档可恢复")
 	_check(
-		restored.world_summary() == final_summary,
+		restored.world.economy_state.world_summary().merged({"world_political_unit_count": restored.world.political_registry.entity_count(), "historical_political_record_count": restored.world.historical_evidence.record_count(), "formal_person_count": restored.world.person_overlay.person_count(), "background_polity_count": maxi(0, restored.world.political_registry.entity_count() - int(restored.world.economy_state.world_summary().get("detailed_polity_unit_count", 0)))}) == final_summary,
 		"十年存档恢复后世界摘要等价"
 	)
 	_finish({
@@ -71,7 +77,7 @@ func _run() -> void:
 		"elapsed_usec": elapsed_usec,
 		"annual_fulfillment_bp": annual_fulfillment,
 		"save_state_bytes": serialized_bytes,
-		"active_shipments": economy.shipments.size(),
+		"active_shipments": final_view.shipments.size(),
 		"final_summary": final_summary,
 	})
 

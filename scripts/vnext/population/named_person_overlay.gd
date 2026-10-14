@@ -2,10 +2,13 @@ class_name VNextNamedPersonOverlay
 extends RefCounted
 ## Stable named-person coverage over an existing authoritative Population total
 ## query. This overlay owns identity/claim/lifecycle references only. It never
-## owns or mutates aggregate population totals, and it does not imply convergence
-## with the separate mutable territory Population authority.
+## owns aggregate totals. Formal composition additionally binds a statistical
+## Population state so materialization reserves one existing background person.
 
 const SNAPSHOT_SCHEMA_ID: String = "vnext_named_person_overlay_v1"
+## The retained population_territory_id wire field identifies the provider's
+## population unit. In Formal it is a major-economy statistical scope, not a
+## TerritoryUnitCatalog, current political entity or display geometry identity.
 const _SNAPSHOT_FIELDS: Array[String] = [
 	"schema_id",
 	"population_source_fingerprint",
@@ -27,6 +30,15 @@ var _population_source_fingerprint: String = ""
 var _persons_by_id: Dictionary = {}
 var _person_id_by_claim_id: Dictionary = {}
 var _last_error: String = ""
+var _population_state: FormalWorldPopulationState = null
+var _formal_world_ref: WeakRef
+
+
+func bind_population_state(state: FormalWorldPopulationState) -> bool:
+	if state == null or not state.is_configured() or _population_state != null or not _persons_by_id.is_empty():
+		return false
+	_population_state = state
+	return true
 
 
 static func create(
@@ -109,6 +121,14 @@ func is_alive(person_id: String) -> bool:
 func current_place(person_id: String) -> String:
 	return str((_persons_by_id.get(person_id, {}) as Dictionary).get("current_place_id", ""))
 
+## Travel changes physical presence without changing the person's statistical
+## population claim. Cross-unit migration needs its own host responsibility rule.
+func relocate(person_id: String, place_id: String) -> bool:
+	if not is_alive(person_id) or not _place_exists(place_id): return false
+	if _population_state != null and _population_state.place_support(place_id) == "UNKNOWN": return false
+	_persons_by_id[person_id]["current_place_id"] = place_id
+	return true
+
 
 func population_claim(person_id: String) -> Dictionary:
 	var record := _persons_by_id.get(person_id, {}) as Dictionary
@@ -168,6 +188,8 @@ func materialize(
 		"alive": true,
 		"provenance": provenance.duplicate(true),
 	}
+	if _population_state != null and not _population_state.materialize_named_person(person_id, population_territory_id, current_place_id):
+		return _fail(_population_state.error)
 	_persons_by_id[person_id] = record
 	_person_id_by_claim_id[claim_id] = person_id
 	return true
@@ -186,18 +208,16 @@ func snapshot() -> Dictionary:
 	var records: Array[Dictionary] = []
 	for person_id: String in person_ids():
 		records.append(person(person_id))
-	return {
-		"schema_id": SNAPSHOT_SCHEMA_ID,
-		"population_source_fingerprint": _population_source_fingerprint,
-		"persons": records,
-	}
+	var result := {"schema_id": SNAPSHOT_SCHEMA_ID, "population_source_fingerprint": _population_source_fingerprint, "persons": records}
+	return result
 
 
 func restore(snapshot_value: Dictionary) -> bool:
 	_last_error = ""
 	if not is_configured():
 		return _fail("named person overlay is not configured")
-	if not _has_exact_fields(snapshot_value, _SNAPSHOT_FIELDS):
+	var fields: Array[String] = _SNAPSHOT_FIELDS.duplicate()
+	if not _has_exact_fields(snapshot_value, fields):
 		return _fail("named person snapshot header is invalid")
 	if (
 		typeof(snapshot_value.get("schema_id")) != TYPE_STRING
@@ -262,6 +282,8 @@ func restore(snapshot_value: Dictionary) -> bool:
 		if int(active_claim_counts[territory_id]) > _population_total_for(territory_id):
 			return _fail("named person claims violate population conservation")
 
+	if _population_state != null and not _population_state.matches_person_records(candidate_persons):
+		return _fail("named persons differ from current Population coverage or place mapping")
 	_persons_by_id = candidate_persons
 	_person_id_by_claim_id = candidate_claims
 	return true
@@ -311,3 +333,72 @@ static func _has_exact_fields(value: Dictionary, expected_fields: Array[String])
 func _fail(message: String) -> bool:
 	_last_error = message
 	return false
+
+## Formal space owns journeys and location. The economy only reads attendance.
+func bind_formal_space(world: WorldState) -> void:
+	_formal_world_ref = weakref(world)
+
+func _formal_world() -> WorldState:
+	return _formal_world_ref.get_ref() as WorldState if _formal_world_ref != null else null
+
+static func valid_mobility_configuration(value: Variant) -> bool:
+	if not value is Dictionary or not FormalLedgerState.exact_fields(value, ["passages", "carry_limits", "npc_policies", "arrival_notices"]): return false
+	for key: String in ["passages", "npc_policies", "arrival_notices"]:
+		if not value[key] is Array or value[key].size() > 256: return false
+	if not value["carry_limits"] is Dictionary: return false
+	for commodity: Variant in value["carry_limits"]:
+		if not commodity is String or not FormalLedgerState.valid_amount(value["carry_limits"][commodity]): return false
+	var ids: Dictionary = {}
+	for row: Variant in value["passages"]:
+		if not row is Dictionary or not EconomySliceConfig._fields(row, ["id", "source_link_id", "from_place_id", "to_place_id", "minutes", "fee", "payee_account_id", "known_to", "basis"], ["shared_capacity"]) or not row["id"] is String or ids.has(row["id"]) or not row["source_link_id"] is String or not row["from_place_id"] is String or not row["to_place_id"] is String or row["from_place_id"] == row["to_place_id"] or not FormalLedgerState.valid_amount(row["minutes"]) or int(row["minutes"]) < 1 or not FormalLedgerState.valid_amount(row["fee"]) or not row["payee_account_id"] is String or not row["known_to"] is Array or row["basis"] != "EXPLICIT_DEVELOPMENT_PERSON_PASSAGE": return false
+		if row.has("shared_capacity"):
+			var shared: Variant=row["shared_capacity"]
+			if not shared is Dictionary or not FormalLedgerState.exact_fields(shared,["unit","numerator","denominator","basis"]) or not shared["unit"] is String or shared["unit"].is_empty() or not FormalLedgerState.valid_amount(shared["numerator"]) or shared["numerator"]<1 or not FormalLedgerState.valid_amount(shared["denominator"]) or shared["denominator"]<1 or shared["basis"]!="EXPLICIT_DEVELOPMENT_COMMON_PASSAGE": return false
+		ids[row["id"]] = true
+		var people: Dictionary = {}
+		for person: Variant in row["known_to"]:
+			if not person is String or people.has(person): return false
+			people[person] = true
+	var policies: Dictionary = {}
+	for policy: Variant in value["npc_policies"]:
+		if not policy is Dictionary or not FormalLedgerState.exact_fields(policy, ["person_id", "max_fee", "max_minutes", "cooldown_days", "max_trips"]) or not policy["person_id"] is String or policy["person_id"].is_empty() or policies.has(policy["person_id"]): return false
+		policies[policy["person_id"]] = true
+		for key: String in ["max_fee", "max_minutes", "cooldown_days", "max_trips"]:
+			if not FormalLedgerState.valid_amount(policy[key]): return false
+	for notice: Variant in value["arrival_notices"]:
+		if not notice is Dictionary or not FormalLedgerState.exact_fields(notice, ["place_id", "kind", "candidate"]) or not notice["place_id"] is String or notice["kind"] not in ["job", "supplier"] or not notice["candidate"] is String: return false
+	return true
+
+func configure_formal_mobility(value: Dictionary) -> bool:
+	var world := _formal_world()
+	return value.is_empty() or (world != null and world.person_travel != null and world.person_travel.configure_mobility(value))
+
+func is_travelling(person: String) -> bool:
+	var world := _formal_world()
+	return world != null and world.person_travel != null and world.person_travel.is_in_transit(person)
+
+func is_at_place(person: String, place: String) -> bool:
+	return is_alive(person) and not is_travelling(person) and current_place(person) == place
+
+func has_travel_action(id: String) -> bool:
+	var world := _formal_world()
+	return world != null and world.person_travel != null and world.person_travel.has_action(id)
+
+func travel_action_count() -> int:
+	var world := _formal_world()
+	return world.person_travel.action_count() if world != null and world.person_travel != null else 0
+
+func travel_view(person: String) -> Dictionary:
+	var world := _formal_world()
+	return world.person_travel.view(person) if world != null and world.person_travel != null else {}
+
+func arrival_notices(place: String) -> Array[Dictionary]:
+	var world := _formal_world()
+	return world.person_travel.arrival_notices(place) if world != null and world.person_travel != null else []
+
+
+## Population owns the single residence commit. Physical location stays unchanged.
+func commit_population_residence(owner: FormalWorldPopulationState, person_id: String, source: String, destination: String) -> bool:
+	if owner == null or owner != _population_state or not is_alive(person_id) or owner.unit_for_person(person_id) != source or _persons_by_id[person_id]["population_territory_id"] != source or owner.unit_for_place(current_place(person_id)) != destination or is_travelling(person_id): return false
+	_persons_by_id[person_id]["population_territory_id"] = destination
+	return true

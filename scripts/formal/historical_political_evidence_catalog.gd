@@ -4,7 +4,7 @@ extends RefCounted
 ## never a statement that an entity exists in the current simulated world.
 
 const DEFAULT_PATH: String = "res://data/world_map/historical/political_units_1900.json"
-const EXPECTED_RECORD_COUNT: int = 151
+const SCHEMA_VERSION: int = 1
 
 var initialization_error: String = ""
 var _configured: bool = false
@@ -38,15 +38,17 @@ func configure(
 	if parse_error != OK or not parser.data is Dictionary:
 		return _fail("历史政治证据 JSON 无效：%s" % path)
 	var document := parser.data as Dictionary
-	var units_value: Variant = document.get("units", [])
+	if document.get("schema_version") != SCHEMA_VERSION:
+		return _fail("Unsupported historical political evidence schema_version")
+	var units_value: Variant = document.get("units")
 	if not units_value is Array:
 		return _fail("历史政治证据缺少 units 数组")
 	var units := units_value as Array
 	if (
 		int(document.get("unit_count", -1)) != units.size()
-		or units.size() != EXPECTED_RECORD_COUNT
+		or units.is_empty()
 	):
-		return _fail("历史政治证据必须包含 %d 条记录" % EXPECTED_RECORD_COUNT)
+		return _fail("历史政治证据 unit_count 与实际记录不符或记录为空")
 
 	for unit_value: Variant in units:
 		if not unit_value is Dictionary:
@@ -184,7 +186,7 @@ func _is_valid_date(value: String) -> bool:
 		and month >= 1
 		and month <= 12
 		and day >= 1
-		and day <= V2DateTime.days_in_month(year, month)
+		and day <= GameCalendar.days_in_month(year, month)
 	)
 
 

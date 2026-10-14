@@ -18,8 +18,7 @@ const AUTHORITATIVE_DOMAIN_ORDER: Array[String] = [
 	"player",
 	"organization",
 	"organization_responsibilities",
-	"organization_authority",
-	"military_state",
+		"military_state",
 ]
 
 var failures: int = 0
@@ -31,16 +30,16 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var simulation := FormalWorldSimulation.new()
+	var simulation := WorldBootstrap.new().build()
 	_check(
-		simulation.initialize(),
-		"autonomous Formal world initializes: %s" % simulation.initialization_error
+		simulation.success,
+		"autonomous Formal world initializes: %s" % simulation.error
 	)
 	if failures > 0:
 		_finish({})
 		return
 
-	var initial_state := simulation.get_persistent_state()
+	var initial_state := simulation.persistence.snapshot()
 	var initial_player := (initial_state.get("player", {}) as Dictionary).duplicate(true)
 	var initial_runtime_politics := (
 		initial_state.get("runtime_politics", {}) as Dictionary
@@ -48,42 +47,45 @@ func _run() -> void:
 	var initial_organization := (
 		initial_state.get("organization", {}) as Dictionary
 	).duplicate(true)
-	var initial_organization_authority := (
-		initial_state.get("organization_authority", {}) as Dictionary
+	var initial_organization_facts := (
+		initial_state.get("organization", {}) as Dictionary
 	).duplicate(true)
 	var initial_military := (
 		initial_state.get("military_state", {}) as Dictionary
 	).duplicate(true)
-	var initial_economy := simulation.economy
+	var initial_economy := FormalWorldEconomyView.new(simulation.world.economy_state.read_only_snapshot())
 	var initial_markets := initial_economy.market_states
-	var initial_fingerprint := simulation.authoritative_fingerprint()
+	var initial_fingerprint := simulation.persistence.authoritative_fingerprint()
 	_check(not initial_fingerprint.is_empty(), "initial authoritative fingerprint exists")
 
 	# No PlayerState mutation and no player-facing domain entry point is invoked.
-	simulation.advance_minutes(SAVE_RESTORE_DAY * MINUTES_PER_DAY)
-	var midpoint_fingerprint := simulation.authoritative_fingerprint()
+	simulation.simulation_step.advance_minutes(SAVE_RESTORE_DAY * MINUTES_PER_DAY)
+	var midpoint_fingerprint := simulation.persistence.authoritative_fingerprint()
 	print("AUTONOMOUS_180D_PRE_SAVE_FINGERPRINT=%s" % midpoint_fingerprint)
 	_check(
 		midpoint_fingerprint != initial_fingerprint,
 		"world truth changes after 180 autonomous days without player input"
 	)
-	var midpoint_state := simulation.get_persistent_state()
+	var midpoint_state := simulation.persistence.snapshot()
 	_check(
 		(midpoint_state.get("player", {}) as Dictionary) == initial_player,
 		"player state remains untouched during autonomous advancement"
 	)
 
 	_cleanup_formal_save()
-	var save_result := simulation.save_to_user()
+	var save_result := simulation.persistence.save_to_user()
 	_check(save_result.success, "midpoint autonomous world saves through production save_to_user")
-	var restored := FormalWorldSimulation.new()
-	var load_result := restored.load_from_user()
+	var restored := WorldBootstrap.new().build()
+	var candidate_1 := restored.persistence.load_from_user()
+	if candidate_1.success:
+		restored = candidate_1
+	var load_result := candidate_1.operation
 	var restore_ok := load_result.success
 	_check(restore_ok, "fresh midpoint world loads through production load_from_user")
 	var post_restore_fingerprint := ""
 	if restore_ok:
-		var post_restore_state := restored.get_persistent_state()
-		post_restore_fingerprint = restored.authoritative_fingerprint()
+		var post_restore_state := restored.persistence.snapshot()
+		post_restore_fingerprint = restored.persistence.authoritative_fingerprint()
 		print("AUTONOMOUS_180D_POST_RESTORE_FINGERPRINT=%s" % post_restore_fingerprint)
 		if post_restore_fingerprint != midpoint_fingerprint:
 			_report_first_authoritative_difference(midpoint_state, post_restore_state)
@@ -100,17 +102,17 @@ func _run() -> void:
 		_finish({})
 		return
 
-	restored.advance_minutes((TOTAL_DAYS - SAVE_RESTORE_DAY) * MINUTES_PER_DAY)
-	var final_state := restored.get_persistent_state()
-	var final_fingerprint := restored.authoritative_fingerprint()
+	restored.simulation_step.advance_minutes((TOTAL_DAYS - SAVE_RESTORE_DAY) * MINUTES_PER_DAY)
+	var final_state := restored.persistence.snapshot()
+	var final_fingerprint := restored.persistence.authoritative_fingerprint()
 	print("AUTONOMOUS_365D_RESTORED_FINGERPRINT=%s" % final_fingerprint)
-	var final_economy := restored.economy
+	var final_economy := FormalWorldEconomyView.new(restored.world.economy_state.read_only_snapshot())
 	var final_markets := final_economy.market_states
 	var change_metrics := _economic_change_metrics(initial_markets, final_markets)
 	var activity_metrics := _economic_activity_metrics(final_state, final_economy)
 
 	_check(
-		int(restored.world_summary().get("total_hour", -1)) == TOTAL_DAYS * 24,
+		int(restored.world.economy_state.world_summary().merged({"world_political_unit_count": restored.world.political_registry.entity_count(), "historical_political_record_count": restored.world.historical_evidence.record_count(), "formal_person_count": restored.world.person_overlay.person_count(), "background_polity_count": maxi(0, restored.world.political_registry.entity_count() - int(restored.world.economy_state.world_summary().get("detailed_polity_unit_count", 0)))}).get("total_hour", -1)) == TOTAL_DAYS * 24,
 		"autonomous world reaches one full simulation year"
 	)
 	_check(
@@ -130,7 +132,7 @@ func _run() -> void:
 		"baseline autonomous loop leaves Organization unchanged"
 	)
 	_check(
-		(final_state.get("organization_authority", {}) as Dictionary) == initial_organization_authority,
+		(final_state.get("organization", {}) as Dictionary) == initial_organization_facts,
 		"baseline autonomous loop leaves Organization Authority unchanged"
 	)
 	_check(
@@ -169,12 +171,12 @@ func _run() -> void:
 	# A second uninterrupted run from the same initial world must converge to the
 	# exact same authoritative state. The selected loop currently uses no RNG, so
 	# there is no seed to hide or global random source to control.
-	var reference := FormalWorldSimulation.new()
-	_check(reference.initialize(), "determinism reference world initializes")
+	var reference := WorldBootstrap.new().build()
+	_check(reference.success, "determinism reference world initializes")
 	var reference_fingerprint := ""
-	if reference.initialized:
-		reference.advance_minutes(TOTAL_DAYS * MINUTES_PER_DAY)
-		reference_fingerprint = reference.authoritative_fingerprint()
+	if reference.success:
+		reference.simulation_step.advance_minutes(TOTAL_DAYS * MINUTES_PER_DAY)
+		reference_fingerprint = reference.persistence.authoritative_fingerprint()
 		print("AUTONOMOUS_365D_UNINTERRUPTED_FINGERPRINT=%s" % reference_fingerprint)
 		_check(
 			reference_fingerprint == final_fingerprint,
@@ -208,15 +210,15 @@ func _run() -> void:
 		"organization_state_changed": (
 			(final_state.get("organization", {}) as Dictionary) != initial_organization
 		),
-		"organization_authority_changed": (
-			(final_state.get("organization_authority", {}) as Dictionary)
-			!= initial_organization_authority
+		"organization_facts_changed": (
+			(final_state.get("organization", {}) as Dictionary)
+			!= initial_organization_facts
 		),
 		"military_state_changed": (
 			(final_state.get("military_state", {}) as Dictionary) != initial_military
 		),
 		"final_fulfillment_bp": int(
-			restored.world_summary().get("fulfillment_bp", -1)
+			restored.world.economy_state.world_summary().merged({"world_political_unit_count": restored.world.political_registry.entity_count(), "historical_political_record_count": restored.world.historical_evidence.record_count(), "formal_person_count": restored.world.person_overlay.person_count(), "background_polity_count": maxi(0, restored.world.political_registry.entity_count() - int(restored.world.economy_state.world_summary().get("detailed_polity_unit_count", 0)))}).get("fulfillment_bp", -1)
 		),
 		"pre_save_180d_authoritative_fingerprint": midpoint_fingerprint,
 		"post_restore_180d_authoritative_fingerprint": post_restore_fingerprint,
@@ -557,8 +559,8 @@ func _state_is_numerically_sound(economy: FormalWorldEconomyView) -> bool:
 
 func _cleanup_formal_save() -> void:
 	for path: String in [
-		FormalWorldSimulation.SAVE_PATH,
-		FormalWorldSimulation.SAVE_PATH + AtomicJsonFileStore.BACKUP_SUFFIX,
+		FormalPersistence.SAVE_PATH,
+		FormalPersistence.SAVE_PATH + AtomicJsonFileStore.BACKUP_SUFFIX,
 	]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(path))

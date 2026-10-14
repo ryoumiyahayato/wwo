@@ -129,7 +129,7 @@ def build_crosswalk(entities: list[dict[str, Any]], countries: list[dict[str, An
     return {
         "schema_id": "wwo_1900_canonical_crosswalk_v2",
         "snapshot_date": SNAPSHOT_DATE,
-        "scope": "All 61 aggregate historical entities in data/world_map/historical_political_entities_1900.json",
+        "scope": "All aggregate historical entities in data/world_map/historical_political_entities_1900.json",
         "classification_policy": {
             "code_resolution": "Member codes resolve only to current catalog IDs; no names or normalized names create authority.",
             "historical_identity": "Code resolution is not proof that a 1900 historical entity is the current catalog entity.",
@@ -151,8 +151,10 @@ def build(output_dir: Path) -> dict[str, Any]:
     historical = load_json(HISTORICAL_PATH)
     countries = load_json(COUNTRIES_PATH)
     crosswalk = build_crosswalk(historical["entities"], countries["countries"])
-    if len(crosswalk["records"]) != 61:
-        raise ValueError("historical aggregate entity count changed; refusing to generate a partial crosswalk")
+    input_ids = [entity["id"] for entity in historical["entities"]]
+    output_ids = [record["historical_entity_id"] for record in crosswalk["records"]]
+    if not input_ids or len(set(input_ids)) != len(input_ids) or sorted(output_ids) != sorted(input_ids):
+        raise ValueError("crosswalk must uniquely cover every input historical aggregate entity")
     output_dir.mkdir(parents=True, exist_ok=True)
     crosswalk_sha = write_json(output_dir / OUTPUT_NAME, crosswalk)
     schema_sha = sha256_file(SCHEMA_PATH)

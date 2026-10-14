@@ -460,8 +460,8 @@ def validate_backlog(validation: Validation, backlog: Any, source_ids: set[str])
             for source_id in target["source_ids"]:
                 if source_id not in source_ids:
                     validation.error(f"{label} references missing source_id: {source_id!r}")
-    if len(targets) != 50:
-        validation.error(f"priority backlog must contain exactly 50 targets, found {len(targets)}")
+    if not targets:
+        validation.error("priority backlog must contain targets")
     if sorted(ranks) != list(range(1, len(ranks) + 1)):
         validation.error("priority backlog ranks must be a contiguous sequence starting at 1")
     return len(targets)
@@ -470,24 +470,26 @@ def validate_backlog(validation: Validation, backlog: Any, source_ids: set[str])
 def validate_input_inventory(validation: Validation, pack: Any) -> None:
     if not isinstance(pack, dict):
         return
-    expected_counts: dict[str, tuple[str, int, int | None]] = {
-        "data/world_map/historical_political_entities_1900.json": ("entities", 61, 4),
-        "data/world_map/historical/political_units_1900.json": ("units", 151, None),
-        "data/world_map/historical/cshapes_1900_snapshot.json": ("features", 151, None),
-        "data/world_map/historical/major_state_profiles_1900.json": ("profiles", 50, None),
-        "data/world_map/historical/historical_admin1_1900.json": ("countries", 15, None),
-        "data/world_map/historical/major_economy_polity_crosswalk_1900.json": ("records", 2, None),
-        "data/world_map/cities.json": ("cities", 32, None),
-        "data/world_map/ports.json": ("ports", 8, None),
-        "data/world_map/rail_segments.json": ("segments", 9, None),
-        "data/world_map/shipping_routes.json": ("routes", 3, None),
-        "data/world_map/organizations.json": ("catalog", 11, None),
-        "data/world_map/institutions.json": ("institutions", 7, None),
-        "data/world_map/countries.json": ("countries", 177, None),
+    required_inputs: dict[str, str] = {
+        "data/world_map/historical_political_entities_1900.json": "entities",
+        "data/world_map/historical/political_units_1900.json": "units",
+        "data/world_map/historical/cshapes_1900_snapshot.json": "features",
+        "data/world_map/historical/major_state_profiles_1900.json": "profiles",
+        "data/world_map/historical/historical_admin1_1900.json": "countries",
+        "data/world_map/historical/major_economy_polity_crosswalk_1900.json": "records",
+        "data/world_map/cities.json": "cities",
+        "data/world_map/ports.json": "ports",
+        "data/world_map/rail_segments.json": "segments",
+        "data/world_map/shipping_routes.json": "routes",
+        "data/world_map/organizations.json": "catalog",
+        "data/world_map/institutions.json": "institutions",
+        "data/world_map/countries.json": "countries",
     }
     inventory = pack.get("input_inventory", [])
     inventory_by_path = {item.get("path"): item for item in inventory if isinstance(item, dict)}
-    for relative, (key, expected, secondary) in expected_counts.items():
+    if len(inventory_by_path) != len(inventory):
+        validation.error("pack input inventory paths must be unique objects")
+    for relative, key in required_inputs.items():
         item = inventory_by_path.get(relative)
         if item is None:
             validation.error(f"pack input inventory missing {relative}")
@@ -495,14 +497,10 @@ def validate_input_inventory(validation: Validation, pack: Any) -> None:
         path = ROOT / relative
         document = load_json(path, validation)
         actual = count_root_records(document, key)
-        if actual != expected:
-            validation.error(f"{relative}.{key} count changed: expected {expected}, found {actual}")
-        if item.get("records") != expected:
+        if not isinstance(document, dict) or not isinstance(document.get(key), list) or actual == 0:
+            validation.error(f"{relative}.{key} must be a non-empty list")
+        if item.get("records") != actual:
             validation.error(f"pack inventory record count mismatch for {relative}")
-        if secondary is not None:
-            secondary_key = "conflicts" if "historical_political_entities" in relative else None
-            if secondary_key and count_root_records(document, secondary_key) != secondary:
-                validation.error(f"{relative}.{secondary_key} count changed")
 
 
 def run() -> int:

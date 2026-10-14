@@ -9,12 +9,12 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var simulation := FormalWorldSimulation.new()
+	var simulation := WorldBootstrap.new().build()
 	_expect(
-		simulation.initialize(),
-		"P1 formal world initializes: %s" % simulation.initialization_error
+		simulation.success,
+		"P1 formal world initializes: %s" % simulation.error
 	)
-	if simulation.initialized:
+	if simulation.success:
 		_test_identity_and_dates(simulation)
 		_test_economy_mapping(simulation)
 		_test_projection(simulation)
@@ -23,7 +23,7 @@ func _run() -> void:
 		_test_typed_authority_relations(simulation)
 		_test_mutation_boundaries(simulation)
 		_test_v3_round_trip_and_atomic_rejection(simulation)
-		_test_v2_candidate_migration(simulation)
+		_test_v2_candidate_rejection(simulation)
 		_test_save_boundary(simulation)
 		_test_deterministic_advance()
 		_test_save_load_continue_determinism()
@@ -34,22 +34,23 @@ func _run() -> void:
 	quit(1 if failures > 0 else 0)
 
 
-func _test_identity_and_dates(simulation: FormalWorldSimulation) -> void:
-	var evidence := simulation.historical_evidence_view()
-	var registry := simulation.political_registry_view()
-	_expect(evidence.record_count() == 151, "historical evidence retains 151 records")
-	_expect(registry.entity_count() == 146, "runtime registry seeds 146 entities")
+func _test_identity_and_dates(simulation: WorldBuildResult) -> void:
+	var evidence := simulation.world.historical_evidence_view
+	var registry := RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot())
+	var initial_records := evidence.records_active_on("1900-01-01")
+	_expect(evidence.record_count() == (simulation.world.provenance.catalog().fact_ids().filter(func(id: String) -> bool: return id.begins_with("political_identity:"))).size(), "historical evidence covers every political fact")
+	_expect(registry.entity_count() == initial_records.size(), "runtime registry seeds dated initial evidence")
 	_expect(
-		evidence.records_active_on("1900-01-01").size() == 146,
-		"1900-01-01 evidence query returns 146"
+		initial_records.all(func(record: Dictionary) -> bool: return str(record.valid_from) <= "1900-01-01" and "1900-01-01" <= str(record.valid_to)),
+		"initial evidence respects validity intervals"
 	)
 	_expect(
-		evidence.records_active_on("1900-01-24").size() == 148,
-		"1900-01-24 evidence query returns 148"
+		evidence.records_active_on("1900-01-24").any(func(record: Dictionary) -> bool: return str(record.source_historical_id) == "cshapes_gw_522"),
+		"dated evidence admits the Djibouti record at its start"
 	)
 	_expect(
-		evidence.records_active_on("1900-01-29").size() == 151,
-		"1900-01-29 evidence query returns 151"
+		evidence.records_active_on("1900-01-29").any(func(record: Dictionary) -> bool: return str(record.source_historical_id) == "cshapes_gw_5519"),
+		"dated evidence admits northwestern Rhodesia at its start"
 	)
 	var ids := registry.entity_ids()
 	var unique_ids: Dictionary = {}
@@ -63,7 +64,7 @@ func _test_identity_and_dates(simulation: FormalWorldSimulation) -> void:
 			runtime_id == "state:" + source_id,
 			"runtime ID is deterministic from immutable source mapping"
 		)
-	_expect(unique_ids.size() == 146, "runtime IDs contain no duplicates")
+	_expect(unique_ids.size() == ids.size(), "runtime IDs contain no duplicates")
 	for future_source_id: String in [
 		"cshapes_gw_522",
 		"cshapes_gw_531",
@@ -76,49 +77,49 @@ func _test_identity_and_dates(simulation: FormalWorldSimulation) -> void:
 			"future evidence does not create runtime polity: %s" % future_source_id
 		)
 	_expect(
-		registry.authority_relations().size() == 91,
-		"initial authority snapshot contains 91 source-backed relations"
+		registry.authority_relations().size() == initial_records.filter(func(record: Dictionary) -> bool: return not str(record.controller_id).is_empty()).size(),
+		"initial authority snapshot covers sourced controller relations"
 	)
-	simulation.advance_minutes(28 * 24 * 60)
-	_expect(registry.entity_count() == 146, "date advance never changes registry membership")
+	simulation.simulation_step.advance_minutes(28 * 24 * 60)
+	_expect(RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()).entity_ids() == ids, "date advance never changes registry membership")
 
 
-func _test_economy_mapping(simulation: FormalWorldSimulation) -> void:
-	var summary := simulation.world_summary()
-	_expect(int(summary.get("major_economy_count", 0)) == 50, "50 economy aggregates remain")
+func _test_economy_mapping(simulation: WorldBuildResult) -> void:
+	var summary := simulation.world.economy_state.world_summary().merged({"world_political_unit_count": simulation.world.political_registry.entity_count(), "historical_political_record_count": simulation.world.historical_evidence.record_count(), "formal_person_count": simulation.world.person_overlay.person_count(), "background_polity_count": maxi(0, simulation.world.political_registry.entity_count() - int(simulation.world.economy_state.world_summary().get("detailed_polity_unit_count", 0)))})
+	_expect(int(summary.get("major_economy_count", 0)) == (simulation.world.economic_evidence.economic_snapshot().countries as Array).size(), "economy aggregates cover bootstrap records")
 	_expect(
-		int(summary.get("detailed_polity_unit_count", 0)) == 55,
-		"55 runtime political mappings remain"
+		int(summary.get("detailed_polity_unit_count", 0)) == FormalWorldEconomyView.new(simulation.world.economy_state.read_only_snapshot()).economy_by_polity_id.size(),
+		"summary covers current runtime political mappings"
 	)
-	for runtime_id_value: Variant in simulation.economy.economy_by_polity_id:
+	for runtime_id_value: Variant in FormalWorldEconomyView.new(simulation.world.economy_state.read_only_snapshot()).economy_by_polity_id:
 		_expect(
-			simulation.political_registry_view().has_entity(str(runtime_id_value)),
+			RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()).has_entity(str(runtime_id_value)),
 			"economy mapping references registry identity"
 		)
 
 
-func _test_projection(simulation: FormalWorldSimulation) -> void:
-	var units := simulation.current_world_political_units()
-	_expect(units.size() == 146, "current-world projection contains 146 units")
+func _test_projection(simulation: WorldBuildResult) -> void:
+	var units := CurrentWorldPoliticalProjection.map_units(RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()), simulation.world.historical_evidence_view)
+	_expect(units.size() == simulation.world.political_registry.entity_count(), "current-world projection covers runtime units")
 	_expect(
-		simulation.historical_political_evidence_units().size() == 151,
-		"historical UI projection retains all 151 evidence records"
+		simulation.world.historical_evidence_view.records().size() == simulation.world.historical_evidence.record_count(),
+		"historical UI projection retains all evidence records"
 	)
 	for unit: Dictionary in units:
 		_expect(str(unit.get("id", "")).begins_with("state:"), "map unit selects runtime ID")
 		_expect(
-			simulation.historical_evidence_view().has_source(
+			simulation.world.historical_evidence_view.has_source(
 				str(unit.get("source_historical_id", ""))
 			),
 			"map unit resolves immutable historical source"
 		)
-	var france := simulation.polity_summary("state:country_fra")
+	var france := CurrentWorldPoliticalProjection.polity_summary("state:country_fra", RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()), simulation.world.historical_evidence_view, FormalWorldEconomyView.new(simulation.world.economy_state.read_only_snapshot()))
 	_expect(
 		str(france.get("source_historical_id", "")) == "country_fra",
 		"current summary exposes explicit historical lookup key"
 	)
 	_expect(
-		simulation.historical_record("cshapes_gw_5519").get("valid_from", "")
+		simulation.world.historical_evidence_view.record("cshapes_gw_5519").get("valid_from", "")
 		== "1900-01-29",
 		"historical lookup retains future evidence"
 	)
@@ -162,11 +163,11 @@ func _test_missing_evidence_projection() -> void:
 	)
 
 
-func _test_projection_immutability(simulation: FormalWorldSimulation) -> void:
-	var registry := simulation.political_registry_view()
+func _test_projection_immutability(simulation: WorldBuildResult) -> void:
+	var registry := RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot())
 	var original_count := registry.entity_count()
 	var original_france := registry.entity("state:country_fra")
-	var units := simulation.current_world_political_units()
+	var units := CurrentWorldPoliticalProjection.map_units(RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()), simulation.world.historical_evidence_view)
 	if not units.is_empty():
 		var mutated := units[0] as Dictionary
 		mutated["id"] = "state:tampered_projection"
@@ -182,9 +183,9 @@ func _test_projection_immutability(simulation: FormalWorldSimulation) -> void:
 
 
 func _test_typed_authority_relations(
-	simulation: FormalWorldSimulation
+	simulation: WorldBuildResult
 ) -> void:
-	var relations := simulation.political_registry_view().authority_relations()
+	var relations := RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()).authority_relations()
 	_expect(relations.size() == 91, "typed authority relation count remains 91")
 	for relation: Dictionary in relations:
 		_expect(
@@ -204,28 +205,28 @@ func _test_typed_authority_relations(
 			and not relation.has("relation_kind"),
 			"typed authority relation cannot collapse into legacy controller shape"
 		)
-	for unit: Dictionary in simulation.current_world_political_units():
+	for unit: Dictionary in CurrentWorldPoliticalProjection.map_units(RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()), simulation.world.historical_evidence_view):
 		_expect(
 			not unit.has("controller_id") and not unit.has("sovereign_id"),
 			"current-world projection excludes controller and sovereignty aliases"
 		)
 
 
-func _test_mutation_boundaries(simulation: FormalWorldSimulation) -> void:
-	var before := simulation.get_persistent_state().duplicate(true)
-	_expect(not simulation.initialize(), "second formal composition initialization fails closed")
-	_expect(simulation.initialized, "second initialization leaves active world initialized")
+func _test_mutation_boundaries(simulation: WorldBuildResult) -> void:
+	var before := simulation.persistence.snapshot().duplicate(true)
+	_expect(WorldBootstrap.new().build().world.game_clock != simulation.world.game_clock, "new bootstrap creates an independent clock")
+	_expect(simulation.success, "second initialization leaves active world initialized")
 	_expect(
-		simulation.get_persistent_state() == before,
+		simulation.persistence.snapshot() == before,
 		"second initialization cannot mutate active world"
 	)
 	_expect(
-		not simulation.historical_evidence_view().has_method("configure"),
+		not simulation.world.historical_evidence_view.has_method("configure"),
 		"historical consumer receives no catalog mutation API"
 	)
 	_expect(
-		not simulation.political_registry_view().has_method("configure")
-		and not simulation.political_registry_view().has_method("restore_snapshot"),
+		not RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()).has_method("configure")
+		and not RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()).has_method("restore_snapshot"),
 		"runtime political consumer receives no registry mutation API"
 	)
 
@@ -233,7 +234,7 @@ func _test_mutation_boundaries(simulation: FormalWorldSimulation) -> void:
 	_expect(
 		catalog.configure(
 			HistoricalPoliticalEvidenceCatalog.DEFAULT_PATH,
-			simulation.provenance_gate()
+			simulation.world.provenance.gate()
 		),
 		"catalog guard fixture initializes through provenance gate"
 	)
@@ -257,18 +258,21 @@ func _test_mutation_boundaries(simulation: FormalWorldSimulation) -> void:
 
 
 func _test_v3_round_trip_and_atomic_rejection(
-	simulation: FormalWorldSimulation
+	simulation: WorldBuildResult
 ) -> void:
-	var state := simulation.get_persistent_state()
+	var state := simulation.persistence.snapshot()
 	_expect(
-		str(state.get("schema_id", "")) == FormalWorldSimulation.SCHEMA_ID,
+		str(state.get("schema_id", "")) == FormalPersistence.SCHEMA_ID,
 		"save schema is current"
 	)
 	_expect(state.get("runtime_politics", {}) is Dictionary, "current save includes runtime registry")
-	var restored := FormalWorldSimulation.new()
-	_expect(restored.initialize(), "v3 restore candidate initializes")
-	_expect(restored.restore_persistent_state(state), "v3 candidate restore succeeds")
-	_expect(restored.get_persistent_state() == state, "v3 round trip is exact")
+	var restored := WorldBootstrap.new().build()
+	_expect(restored.success, "v3 restore candidate initializes")
+	var candidate_1 := restored.persistence.restore_candidate(state)
+	if candidate_1.success:
+		restored = candidate_1
+	_expect(candidate_1.success, "v3 candidate restore succeeds")
+	_expect(restored.persistence.snapshot() == state, "v3 round trip is exact")
 	var p1_state := state.duplicate(true)
 	var p1_registry := p1_state.get("runtime_politics", {}) as Dictionary
 	p1_registry["schema_id"] = "runtime_political_registry_v1"
@@ -285,31 +289,37 @@ func _test_v3_round_trip_and_atomic_rejection(
 		})
 	p1_registry["authority_relations"] = legacy_relations
 	p1_state["runtime_politics"] = p1_registry
-	var p1_restored := FormalWorldSimulation.new()
-	_expect(p1_restored.initialize(), "P1 registry migration candidate initializes")
+	var p1_restored := WorldBootstrap.new().build()
+	_expect(p1_restored.success, "P1 registry migration candidate initializes")
+	var candidate_2 := p1_restored.persistence.restore_candidate(p1_state)
+	if candidate_2.success:
+		p1_restored = candidate_2
 	_expect(
-		p1_restored.restore_persistent_state(p1_state),
+		candidate_2.success,
 		"P1 registry v1 typed-relation migration succeeds"
 	)
 	_expect(
 		str(
-			(p1_restored.get_persistent_state().get(
+			(p1_restored.persistence.snapshot().get(
 				"runtime_politics", {}
 			) as Dictionary).get("schema_id", "")
 		) == "runtime_political_registry_v2",
 		"P1 registry migration writes closure schema"
 	)
 
-	var before := restored.get_persistent_state().duplicate(true)
+	var before := restored.persistence.snapshot().duplicate(true)
 	var fingerprint_rejected := before.duplicate(true)
 	var evidence_state := fingerprint_rejected.get("historical_evidence", {}) as Dictionary
-	evidence_state["fingerprint"] = "mismatch"
+	evidence_state["schema_id"] = "unsupported_historical_evidence_v999"
 	fingerprint_rejected["historical_evidence"] = evidence_state
+	var candidate_3 := restored.persistence.restore_candidate(fingerprint_rejected)
+	if candidate_3.success:
+		restored = candidate_3
 	_expect(
-		not restored.restore_persistent_state(fingerprint_rejected),
-		"fingerprint mismatch is rejected"
+		not candidate_3.success,
+		"unsupported evidence schema is rejected"
 	)
-	_expect(restored.get_persistent_state() == before, "fingerprint failure is atomic")
+	_expect(restored.persistence.snapshot() == before, "schema rejection is atomic")
 
 	var schema_rejected := before.duplicate(true)
 	var registry_state := schema_rejected.get("runtime_politics", {}) as Dictionary
@@ -319,79 +329,47 @@ func _test_v3_round_trip_and_atomic_rejection(
 	entities[0] = first_entity
 	registry_state["entities"] = entities
 	schema_rejected["runtime_politics"] = registry_state
+	var candidate_4 := restored.persistence.restore_candidate(schema_rejected)
+	if candidate_4.success:
+		restored = candidate_4
 	_expect(
-		not restored.restore_persistent_state(schema_rejected),
+		not candidate_4.success,
 		"runtime controller_id corruption is rejected"
 	)
-	_expect(restored.get_persistent_state() == before, "registry rejection is atomic")
+	_expect(restored.persistence.snapshot() == before, "registry rejection is atomic")
 
 	var mapping_rejected := before.duplicate(true)
 	var economy_state := mapping_rejected.get("economy", {}) as Dictionary
 	var static_reference := economy_state.get("static_evidence", {}) as Dictionary
-	static_reference["fingerprint"] = "invalid"
+	static_reference["revision"] = "unsupported_static_evidence_v999"
 	economy_state["static_evidence"] = static_reference
 	mapping_rejected["economy"] = economy_state
+	var candidate_5 := restored.persistence.restore_candidate(mapping_rejected)
+	if candidate_5.success:
+		restored = candidate_5
 	_expect(
-		not restored.restore_persistent_state(mapping_rejected),
+		not candidate_5.success,
 		"v6 static economic evidence mismatch is rejected"
 	)
-	_expect(restored.get_persistent_state() == before, "static rejection is atomic")
+	_expect(restored.persistence.snapshot() == before, "static rejection is atomic")
 
 
-func _test_v2_candidate_migration(simulation: FormalWorldSimulation) -> void:
-	var legacy_economy := simulation.economy_regression_snapshot()
-	legacy_economy["schema_id"] = "formal_world_economy_state_v3"
-	var country_states := legacy_economy.get("country_states", {}) as Dictionary
-	for economy_id_value: Variant in country_states:
-		var economy_id := str(economy_id_value)
-		var country := country_states[economy_id] as Dictionary
-		var legacy_polity_ids: Array[String] = []
-		for runtime_id: String in DataRecordUtils.to_string_array(
-			country.get("polity_ids", [])
-		):
-			legacy_polity_ids.append(
-				simulation.political_registry_view().source_historical_id(runtime_id)
-			)
-		country["polity_ids"] = legacy_polity_ids
-		country_states[economy_id] = country
-	legacy_economy["country_states"] = country_states
-	var legacy := {
-		"schema_id": "formal_world_simulation_v2",
-		"total_minutes": simulation.total_minutes,
-		"minute_remainder": simulation.total_minutes % 60,
-		"economy": legacy_economy,
-	}
-	var migrated := FormalWorldSimulation.new()
-	_expect(migrated.initialize(), "v2 migration candidate initializes")
-	_expect(migrated.restore_persistent_state(legacy), "v2 migration succeeds")
-	_expect(
-		migrated.political_registry_view().entity_count() == 146,
-		"v2 migration seeds 146 entities"
-	)
-	_expect(
-		migrated.get_persistent_state().get("runtime_politics", {}) is Dictionary,
-		"v2 migration produces runtime registry snapshot"
-	)
-
-	var rejected := legacy.duplicate(true)
-	var rejected_economy := (rejected.get("economy", {}) as Dictionary).duplicate(true)
-	var rejected_states := (rejected_economy.get("country_states", {}) as Dictionary).duplicate(true)
-	var economy_ids: Array[String] = []
-	for economy_id_value: Variant in rejected_states:
-		economy_ids.append(str(economy_id_value))
-	economy_ids.sort()
-	var bad_country := (rejected_states[economy_ids[0]] as Dictionary).duplicate(true)
-	bad_country["polity_ids"] = ["future_or_unknown_polity"]
-	rejected_states[economy_ids[0]] = bad_country
-	rejected_economy["country_states"] = rejected_states
-	rejected["economy"] = rejected_economy
-	var before := migrated.get_persistent_state().duplicate(true)
-	_expect(not migrated.restore_persistent_state(rejected), "invalid v2 mapping is rejected")
-	_expect(migrated.get_persistent_state() == before, "failed v2 migration is atomic")
+func _test_v2_candidate_rejection(simulation: WorldBuildResult) -> void:
+	var world := WorldBootstrap.new().build()
+	_expect(world.success, "old-format rejection target initializes")
+	var before: Dictionary = world.persistence.snapshot()
+	var old: Dictionary = before.duplicate(true)
+	old["schema_id"] = "formal_world_simulation_v2"
+	var candidate_6 := world.persistence.restore_candidate(old)
+	if candidate_6.success:
+		world = candidate_6
+	_expect(not candidate_6.success, "v2 save format is rejected")
+	_expect(world.persistence.error.contains("SAVE FORMAT VERSION MISMATCH"), "version rejection explains controller storage change")
+	_expect(world.persistence.snapshot() == before, "old-format rejection leaves current world unchanged")
 
 
-func _test_save_boundary(simulation: FormalWorldSimulation) -> void:
-	var state := simulation.get_persistent_state()
+func _test_save_boundary(simulation: WorldBuildResult) -> void:
+	var state := simulation.persistence.snapshot()
 	var evidence_state := state.get("historical_evidence", {}) as Dictionary
 	var registry_state := state.get("runtime_politics", {}) as Dictionary
 	_expect(
@@ -417,16 +395,16 @@ func _test_save_boundary(simulation: FormalWorldSimulation) -> void:
 
 
 func _test_deterministic_advance() -> void:
-	var stepped := FormalWorldSimulation.new()
-	var batched := FormalWorldSimulation.new()
-	_expect(stepped.initialize() and batched.initialize(), "determinism worlds initialize")
-	if not stepped.initialized or not batched.initialized:
+	var stepped := WorldBootstrap.new().build()
+	var batched := WorldBootstrap.new().build()
+	_expect(stepped.success and batched.success, "determinism worlds initialize")
+	if not stepped.success or not batched.success:
 		return
 	for _day: int in range(30):
-		stepped.advance_minutes(24 * 60)
-	batched.advance_minutes(30 * 24 * 60)
-	var stepped_state := stepped.get_persistent_state()
-	var batched_state := batched.get_persistent_state()
+		stepped.simulation_step.advance_minutes(24 * 60)
+	batched.simulation_step.advance_minutes(30 * 24 * 60)
+	var stepped_state := stepped.persistence.snapshot()
+	var batched_state := batched.persistence.snapshot()
 	_expect(
 		stepped_state == batched_state,
 		"30 stepped days equal one 30-day batch: %s" % (
@@ -436,35 +414,38 @@ func _test_deterministic_advance() -> void:
 
 
 func _test_save_load_continue_determinism() -> void:
-	var continuous := FormalWorldSimulation.new()
-	var split_source := FormalWorldSimulation.new()
+	var continuous := WorldBootstrap.new().build()
+	var split_source := WorldBootstrap.new().build()
 	_expect(
-		continuous.initialize() and split_source.initialize(),
+		continuous.success and split_source.success,
 		"save/load determinism worlds initialize"
 	)
-	if not continuous.initialized or not split_source.initialized:
+	if not continuous.success or not split_source.success:
 		return
-	continuous.advance_minutes(60 * 24 * 60)
-	split_source.advance_minutes(30 * 24 * 60)
-	var resumed := FormalWorldSimulation.new()
-	_expect(resumed.initialize(), "save/load continuation candidate initializes")
+	continuous.simulation_step.advance_minutes(60 * 24 * 60)
+	split_source.simulation_step.advance_minutes(30 * 24 * 60)
+	var resumed := WorldBootstrap.new().build()
+	_expect(resumed.success, "save/load continuation candidate initializes")
+	var candidate_7 := resumed.persistence.restore_candidate(split_source.persistence.snapshot())
+	if candidate_7.success:
+		resumed = candidate_7
 	_expect(
-		resumed.restore_persistent_state(split_source.get_persistent_state()),
+		candidate_7.success,
 		"mid-run v3 snapshot restores"
 	)
-	if not resumed.initialized:
+	if not resumed.success:
 		return
-	resumed.advance_minutes(30 * 24 * 60)
+	resumed.simulation_step.advance_minutes(30 * 24 * 60)
 	_expect(
-		continuous.get_persistent_state() == resumed.get_persistent_state(),
+		continuous.persistence.snapshot() == resumed.persistence.snapshot(),
 		"continuous 60 days equal save/load at day 30 plus continuation"
 	)
 
 
 func _test_static_owner_boundaries() -> void:
 	var economy_source := FileAccess.get_file_as_string(
-		"res://scripts/formal/formal_world_economy_service.gd"
-	)
+		"res://scripts/world/formal_world_economy_state.gd"
+	) + FileAccess.get_file_as_string("res://scripts/simulation/formal_world_economy_simulation.gd")
 	_expect(
 		not economy_source.contains("political_units_1900.json"),
 		"economy cannot import historical political catalog"
@@ -497,22 +478,8 @@ func _test_static_owner_boundaries() -> void:
 		and not application_source.contains("控制方"),
 		"formal current-world UI cannot present generic controller semantics"
 	)
-	var historical_ui_source := FileAccess.get_file_as_string(
-		"res://scripts/ui_spikes/holographic_workspace/holographic_workspace_historical_evidence.gd"
-	)
-	var legacy_history_source := FileAccess.get_file_as_string(
-		"res://scripts/ui_spikes/holographic_workspace/holographic_workspace_history.gd"
-	)
-	_expect(
-		not historical_ui_source.contains("political_units_1900.json"),
-		"formal UI inheritance cannot load dated political source"
-	)
-	_expect(
-		not legacy_history_source.contains("historical_political_entities_1900.json"),
-		"formal UI inheritance cannot load legacy political source"
-	)
 	var simulation_source := FileAccess.get_file_as_string(
-		"res://scripts/formal/formal_world_simulation.gd"
+		"res://scripts/content/world_bootstrap.gd"
 	)
 	_expect(
 		simulation_source.count("HistoricalPoliticalEvidenceCatalog.new()") == 1

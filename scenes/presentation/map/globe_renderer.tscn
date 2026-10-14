@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/presentation/map/globe_renderer.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/presentation/map/globe_surface.gd" id="2"]
+
+[node name="GlobeRenderer" type="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+clip_contents = true
+script = ExtResource("1")
+
+[node name="HemisphereViewportContainer" type="SubViewportContainer" parent="."]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="HemisphereViewport" type="SubViewport" parent="HemisphereViewportContainer"]
+transparent_bg = true
+own_world_3d = true
+size = Vector2i(1280, 720)
+render_target_update_mode = 1
+
+[node name="GlobeSurface" type="Node3D" parent="HemisphereViewportContainer/HemisphereViewport"]
+script = ExtResource("2")
+
+[node name="Surface" type="MeshInstance3D" parent="HemisphereViewportContainer/HemisphereViewport/GlobeSurface"]
+
+[node name="Moon" type="MeshInstance3D" parent="HemisphereViewportContainer/HemisphereViewport/GlobeSurface"]
+position = Vector3(1.18, 0.53, 0.08)
+rotation = Vector3(-0.08, 0.24, 0.0)
+
+[node name="Camera3D" type="Camera3D" parent="HemisphereViewportContainer/HemisphereViewport/GlobeSurface"]
+position = Vector3(0, 0, 2.35)
+projection = 1
+keep_aspect = 1
+size = 2.55
+near = 0.05
+far = 12.0
+current = true
+
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

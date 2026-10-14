@@ -1,0 +1,121 @@
+{
+  "source_registry": {
+    "schema_id": "historical_source_registry_v2",
+    "sources": [
+      {
+        "source_id": "noaa_etopo_2022_v1_60s_surface",
+        "title": "ETOPO 2022 15 Arc-Second Global Relief Model; v1 60s ice-surface global grid",
+        "publisher": "NOAA National Centers for Environmental Information",
+        "version": "2022-v1-60s-surface",
+        "license": "CC0-1.0",
+        "locator": "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/data/60s/60s_surface_elev_gtif/ETOPO_2022_v1_60s_N90W180_surface.tif",
+        "access_metadata": {
+          "source_date": "2022-10-01",
+          "retrieved_on": "2026-10-07T07:19:14Z",
+          "source_type": "PHYSICAL_REFERENCE",
+          "doi": "https://doi.org/10.25921/fd45-gt74",
+          "metadata_url": "https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ngdc.mgg.dem:etopo_2022",
+          "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "resolution": "60 arc-seconds (downsampled by NOAA from 15s); approx 1853m at equator",
+          "coverage": [
+            -180,
+            -90,
+            180,
+            90
+          ],
+          "horizontal_crs": "EPSG:4326 WGS84",
+          "vertical_datum": "EPSG:3855 EGM2008; elevations in metres; surface of Greenland/Antarctic ice sheets",
+          "polar_coverage": "Full global grid. Last three derivative rows per pole are longitude-invariant; not a historical ice reconstruction.",
+          "known_gaps": "NOAA declares no nodata cells in source grid. Composite observations, spatially variable accuracy, current ice/engineering and lake bathymetry cannot reconstruct 1900.",
+          "ocean_handling": "Negative elevations clipped to zero before derivation; no bathymetry, shoreline, land owner or water identity created. Below-sea-level land depressions also suppressed.",
+          "historical_applicability": "PHYSICAL_REFERENCE: broad mountain/plateau/plain forms only; not 1900 precise surface, ice, coast, settlement, land use, roads or population.",
+          "uncertainty": "Runtime region sampling about 9.8km north-south and longitude-dependent east-west; World about 39.1km. Not usable for slope/path/combat queries.",
+          "data_transformation": "Area box average DEM to 4096x2048; nonnegative elevation; periodic longitude Gaussian sigma .65; metric derivatives; two fixed lights and 6x visual slope exaggeration; log-height tint; R8 signed modulation; 1024x512 box-average LOD; no runtime elevation. Runtime RG8: red signed form, green quantized log-positive-height for unowned background only; no elevation values or ownership. Physical background is not a historical coastline.",
+          "source_assets": [
+            {
+              "file": "ETOPO_2022_v1_60s_N90W180_surface.tif",
+              "url": "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/data/60s/60s_surface_elev_gtif/ETOPO_2022_v1_60s_N90W180_surface.tif",
+              "bytes": 465969062,
+              "sha256": "9d27d4b8ea8e76977e2988bca667d7c8fa68b927355feffcddd6b4875a7fd08e",
+              "retrieved_utc": "2026-10-07T07:19:14Z"
+            },
+            {
+              "file": "user-guide-1.2.pdf",
+              "url": "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/docs/1.2%20ETOPO%202022%20User%20Guide.pdf",
+              "bytes": 852374,
+              "sha256": "6859a650a53446d62a502dc05d04f3b174b90f2e24f46069680924270c8d1642",
+              "retrieved_utc": "2026-10-07T07:19:17Z"
+            },
+            {
+              "file": "metadata.html",
+              "url": "https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ngdc.mgg.dem:etopo_2022",
+              "bytes": 53766,
+              "sha256": "84bb47da4d9fc78f47a9ebfbb7fef621dd8f675b6f4d14574d6662c56fcf41db",
+              "retrieved_utc": "2026-10-07T07:19:19Z"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "evidence_catalog": {
+    "schema_id": "historical_fact_evidence_catalog_v2",
+    "facts": [
+      {
+        "fact_id": "physical_relief:etopo_2022",
+        "domain": "physical_reference_content",
+        "subject_id": "physical_relief:global",
+        "value": {
+          "status": "PHYSICAL_REFERENCE",
+          "assets": [
+            {
+              "id": "physical_relief:world",
+              "path": "res://assets/maps/relief/world.bin",
+              "width": 1024,
+              "height": 512,
+              "format": "RG8",
+              "decoded_bytes": 1048576,
+              "bytes": 222345,
+              "sha256": "c3bf95716f980338ee93b3231f988fd9938a168dd8bbfedb405b4ebadb78bf3d",
+              "angular_pixel_degrees": 0.3515625,
+              "equatorial_pixel_m": 39092.020394601415
+            },
+            {
+              "id": "physical_relief:region",
+              "path": "res://assets/maps/relief/region.bin",
+              "width": 4096,
+              "height": 2048,
+              "format": "RG8",
+              "decoded_bytes": 16777216,
+              "bytes": 2354305,
+              "sha256": "041e407d49a1564fb25ce003c0033c8ac6117191706f61bedb1e7ce3cafce411",
+              "angular_pixel_degrees": 0.087890625,
+              "equatorial_pixel_m": 9773.005098650354
+            }
+          ],
+          "generator": "tools/map/build_global_relief.py:R1",
+          "representation": "Two finite static global RG8 LODs; shared source fact, no terrain simulation"
+        },
+        "unit": "presentation_relief",
+        "source_id": "noaa_etopo_2022_v1_60s_surface",
+        "source_version": "2022-v1-60s-surface",
+        "source_locator": "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/data/60s/60s_surface_elev_gtif/ETOPO_2022_v1_60s_N90W180_surface.tif",
+        "observation_period": {
+          "from": "1998-01-01",
+          "to": "2022-09-01"
+        },
+        "spatial_scope": {
+          "kind": "global",
+          "id": "earth"
+        },
+        "methodology": "Area box average DEM to 4096x2048; nonnegative elevation; periodic longitude Gaussian sigma .65; metric derivatives; two fixed lights and 6x visual slope exaggeration; log-height tint; R8 signed modulation; 1024x512 box-average LOD; no runtime elevation. Runtime RG8: red signed form, green quantized log-positive-height for unowned background only; no elevation values or ownership. Physical background is not a historical coastline.",
+        "confidence": 0.8,
+        "lower_bound": null,
+        "upper_bound": null,
+        "license": "CC0-1.0",
+        "review_status": "BOUNDED_ESTIMATE",
+        "generator": "tools/map/build_global_relief.py:R1"
+      }
+    ]
+  }
+}

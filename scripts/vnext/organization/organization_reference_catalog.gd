@@ -1,7 +1,7 @@
 class_name VNextOrganizationReferenceCatalog
 extends RefCounted
 
-## Detached read view over Person/Place identities. OrganizationCore does not
+## Detached read view over Person/Place identities. OrganizationState does not
 ## own either referenced domain and snapshots never serialize this catalog.
 
 var _person_ids: Dictionary = {}

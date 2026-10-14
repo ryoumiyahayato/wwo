@@ -175,11 +175,12 @@ func _test_territorial_mutation_and_projection() -> void:
 	var world := _world()
 	if world == null:
 		return
+	var territory: TerritoryState = _territory(world.catalog())
 	var initial: Dictionary = world.get_territorial_facts("northern_industrial_belt")
 	_equal(initial.get("sovereign_owner_id"), "country_fra", "region starts with legacy sovereign owner")
-	_equal(initial.get("military_controller_id"), "country_fra", "region starts with legacy military controller")
+	_equal(territory.get_controller("northern_industrial_belt"), "country_fra", "region starts with legacy military controller")
 	_check(world.set_sovereign_owner("northern_industrial_belt", "british_empire"), "sovereign owner mutation uses explicit API")
-	_check(world.set_military_controller("northern_industrial_belt", "british_empire"), "military controller mutation uses explicit API")
+	_check(territory.set_controller("northern_industrial_belt", "british_empire"), "military controller mutation uses explicit API")
 	_equal(world.get_territorial_facts("northern_industrial_belt").get("sovereign_owner_id"), "british_empire", "owner query reflects authoritative mutation")
 	var before_invalid: Dictionary = world.get_territorial_facts("northern_industrial_belt")
 	_check(not world.set_sovereign_owner("northern_industrial_belt", "country:not_real"), "unknown owner is rejected")
@@ -190,11 +191,11 @@ func _test_territorial_mutation_and_projection() -> void:
 	_check(world.set_administrative_parent("northern_industrial_belt", ""), "administrative parent can be cleared at boundary")
 
 	var projection := VNextSpatialMapProjection.new()
-	var before_projection: Dictionary = projection.project(world)
+	var before_projection: Dictionary = projection.project(world, territory)
 	var before_link: Dictionary = _record_by_id(before_projection.get("infrastructure", []), "rail_paris_lille")
 	_equal(before_link.get("status"), "operational", "projection exposes current infrastructure status")
 	_check(world.set_infrastructure_status("rail_paris_lille", VNextInfrastructureLinkState.STATUS_INTERRUPTED), "projection fixture interrupts rail link")
-	var after_projection: Dictionary = projection.project(world)
+	var after_projection: Dictionary = projection.project(world, territory)
 	var after_link: Dictionary = _record_by_id(after_projection.get("infrastructure", []), "rail_paris_lille")
 	_equal(after_link.get("status"), VNextInfrastructureLinkState.STATUS_INTERRUPTED, "projection synchronizes interrupted rail status")
 	var region_projection: Dictionary = _record_by_id(after_projection.get("regions", []), "northern_industrial_belt")
@@ -210,7 +211,6 @@ func _test_snapshot_restore_and_transactional_rejection() -> void:
 		return
 	_check(source.set_nominal_capacity("rail_paris_lille", 100), "snapshot fixture configures capacity")
 	_check(source.set_sovereign_owner("northern_industrial_belt", "british_empire"), "snapshot fixture changes owner")
-	_check(source.set_military_controller("northern_industrial_belt", "british_empire"), "snapshot fixture changes controller")
 	_check(source.request_capacity("snapshot_request", "rail_paris_lille", 0, 70).get("accepted", false), "snapshot fixture creates reservation")
 	var saved: Dictionary = source.snapshot()
 	_check(target.restore(saved), "complete spatial snapshot restores")
@@ -331,3 +331,11 @@ func _check(condition: bool, label: String) -> void:
 
 func _equal(actual: Variant, expected: Variant, label: String) -> void:
 	_check(actual == expected, label)
+
+func _territory(catalog: VNextSpatialCatalog) -> TerritoryState:
+	var territory := TerritoryState.new()
+	var controllers: Dictionary = {}
+	for place_id: String in catalog.place_map_ids():
+		controllers[place_id] = str(catalog.get_place(place_id)["parent_country_id"])
+	_check(territory.restore({"schema_id": TerritoryState.SCHEMA_ID, "controllers": controllers}, catalog.place_map_ids()), "fixture TerritoryState initializes")
+	return territory

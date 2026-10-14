@@ -1,8 +1,10 @@
 # 正式产品系统所有权基线
 
+> 历史记录。下文“当前”仅指记录时的阶段；旧实现、命令及同步要求不再是开发指令。不得据此恢复已删除的宿主、UI、探针或审计门禁。现行入口、WorldState 与 v15 存档见 [当前架构](../ARCHITECTURE.md) 和 [存档格式](../SAVE_FORMAT.md)。
+
 ## 目的
 
-本文固定 `0feed6add253cead359a9e41f85e09bdf84c24e7` 上 A–O 系统的当前 owner、读写边界、生命周期与持久化责任，并给出下一阶段应收敛到的唯一 owner。它是后续重构的约束基线，不授权本审计修改生产实现。
+本文记录 `0feed6add253cead359a9e41f85e09bdf84c24e7` 上 A–O 系统的 owner、读写边界、生命周期与当时的重构建议。该表已被现行架构取代，不约束当前开发，不指导重新引入已删除的 FormalWorldSimulation 或 FormalWorldEconomyService。
 
 PR #38 的 `docs/audits/variable_state_audit_20260803.md` 与 `artifacts/variable-state-audit.json` 是逐成员读写/持久化证据索引。本文件使用其证据定位重复或近似状态，但不因同名自动合并状态；动态调用、信号和 UI cache 仍需行为测试。
 

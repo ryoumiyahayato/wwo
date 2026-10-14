@@ -39,7 +39,6 @@ REPLAY_ARTIFACTS = (
     "batch2_regression_manifest.json",
     "batch3_gap_report.json",
     "batch3_historical_flag_coverage.json",
-    "batch3_loader_contract.json",
     "batch3_record_signature_manifest.json",
     "batch3_staging_candidates.json",
     "batch4_run_manifest.json",
@@ -56,12 +55,8 @@ def artifact_mismatches(generated: Path, tracked: Path) -> list[str]:
         name
         for name in REPLAY_ARTIFACTS
         if not (generated / name).is_file()
-        or canonical_bytes(generated / name) != canonical_bytes(tracked / name)
+        or json.loads((generated / name).read_text(encoding="utf-8")) != json.loads((tracked / name).read_text(encoding="utf-8"))
     ]
-
-
-def canonical_bytes(path: Path) -> bytes:
-    return path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
 
 
 class Batch4RunManifestTests(unittest.TestCase):
@@ -69,11 +64,13 @@ class Batch4RunManifestTests(unittest.TestCase):
         manifest = batch4.build_manifest(REPOSITORY_ROOT, OUTPUT_DIR)
         self.assertEqual(manifest["batch_scope"], ["BATCH 1", "BATCH 2", "BATCH 3", "BATCH 4"])
         self.assertFalse(manifest["authoritative_source_modified"])
-        self.assertEqual(manifest["batch_results"]["batch1"]["inventory_files"], 185)
+        inventory = json.loads((OUTPUT_DIR / "inventory.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["batch_results"]["batch1"]["inventory_files"], inventory["file_count"])
         self.assertEqual(manifest["batch_results"]["batch2"]["data_parse_errors"], 0)
-        self.assertEqual(manifest["batch_results"]["batch2"]["verified_flag_assets"], 60)
-        self.assertEqual(manifest["batch_results"]["batch3"]["loader_missing_direct_references"], 0)
-        self.assertEqual(manifest["batch_results"]["batch3"]["historical_units"], 151)
+        assets = json.loads((OUTPUT_DIR / "batch2_asset_manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["batch_results"]["batch2"]["verified_flag_assets"], len(assets["verified_reference_ids"]))
+        flags = json.loads((OUTPUT_DIR / "batch3_historical_flag_coverage.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["batch_results"]["batch3"]["historical_units"], flags["unit_count"])
 
     def test_final_gates_distinguish_clean_mechanical_gates_from_manual_findings(self) -> None:
         manifest = batch4.build_manifest(REPOSITORY_ROOT, OUTPUT_DIR)
@@ -82,7 +79,6 @@ class Batch4RunManifestTests(unittest.TestCase):
         self.assertEqual(gates["dangling_foreign_keys"], 0)
         self.assertEqual(gates["duplicate_catalog_ids"], 0)
         self.assertEqual(gates["flag_asset_gaps"], 0)
-        self.assertEqual(gates["loader_contract_gaps"], 0)
         expected_manual_findings = sum(
             1
             for finding in json.loads((OUTPUT_DIR / "findings.json").read_text(encoding="utf-8"))
@@ -115,7 +111,7 @@ class Batch4RunManifestTests(unittest.TestCase):
         second = batch4.build_manifest(REPOSITORY_ROOT, OUTPUT_DIR)
         self.assertEqual(first, second)
 
-    def test_official_generators_replay_tracked_artifacts_and_detect_mutation(self) -> None:
+    def test_official_generators_repeat_structured_results_and_detect_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             output = Path(temp_dir) / "artifacts"
             commands = [
@@ -160,11 +156,20 @@ class Batch4RunManifestTests(unittest.TestCase):
             self.assertEqual(results[1].returncode, 0, results[1].stderr)
             self.assertEqual(results[2].returncode, 0, results[2].stderr)
             self.assertEqual(results[3].returncode, 0, results[3].stderr)
-            self.assertEqual(artifact_mismatches(output, OUTPUT_DIR), [])
+            replay = Path(temp_dir) / "replay"
+            for command in commands:
+                repeated = [str(replay) if argument == str(output) else argument for argument in command]
+                result = subprocess.run(repeated, cwd=REPOSITORY_ROOT, capture_output=True, text=True, check=False)
+                self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(artifact_mismatches(output, replay), [])
 
             inventory = output / "inventory.json"
-            inventory.write_bytes(inventory.read_bytes() + b" ")
-            self.assertEqual(artifact_mismatches(output, OUTPUT_DIR), ["inventory.json"])
+            document = json.loads(inventory.read_text(encoding="utf-8"))
+            inventory.write_text(json.dumps(document, indent=4), encoding="utf-8")
+            self.assertEqual(artifact_mismatches(output, replay), [])
+            document["file_count"] += 1
+            inventory.write_text(json.dumps(document), encoding="utf-8")
+            self.assertEqual(artifact_mismatches(output, replay), ["inventory.json"])
 
 
 if __name__ == "__main__":

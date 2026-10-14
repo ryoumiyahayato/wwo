@@ -1,5 +1,7 @@
 # 变量冗余与架构重新整合审计
 
+> 历史记录。下文“当前”仅指记录时的阶段；旧实现、命令及同步要求不再是开发指令。不得据此恢复已删除的宿主、UI、探针或审计门禁。现行入口、WorldState 与 v15 存档见 [当前架构](ARCHITECTURE.md) 和 [存档格式](SAVE_FORMAT.md)。
+
 审计日期：2026-07-30  
 审计基线：`b24135a`  
 指定运行时：Godot `4.6.3.stable.official.7d41c59c4`，Compatibility  

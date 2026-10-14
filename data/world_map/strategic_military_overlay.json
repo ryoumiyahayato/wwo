@@ -101,7 +101,6 @@
         "steel",
         "rail_hub"
       ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 3500
     },
     {
@@ -114,7 +113,6 @@
         "rail_hub",
         "capital"
       ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 5000
     },
     {
@@ -125,7 +123,6 @@
         "food",
         "port_access"
       ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 2200
     },
     {
@@ -136,7 +133,6 @@
         "food",
         "port_access"
       ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 1800
     },
     {
@@ -147,7 +143,6 @@
         "food",
         "rail_hub"
       ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 1800
     },
     {
@@ -158,7 +153,6 @@
         "food",
         "port_access"
       ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 2100
     },
     {
@@ -169,7 +163,6 @@
         "food",
         "iron"
       ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 1600
     },
     {
@@ -181,7 +174,6 @@
         "rail_hub",
         "iron"
       ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 2600
     },
     {
@@ -193,7 +185,6 @@
         "port_access",
         "shipping_hub"
       ],
-      "initial_controller_id": "country_fra",
       "initial_garrison_personnel": 3000
     }
   ],
@@ -207,7 +198,6 @@
         "steel",
         "rail_hub"
       ],
-      "initial_controller_id": "country_bel",
       "initial_garrison_personnel": 3000
     },
     {
@@ -220,7 +210,6 @@
         "industry",
         "rail_hub"
       ],
-      "initial_controller_id": "german_empire",
       "initial_garrison_personnel": 5500
     },
     {
@@ -232,7 +221,6 @@
         "shipping_hub",
         "industry"
       ],
-      "initial_controller_id": "british_empire",
       "initial_garrison_personnel": 5000
     },
     {
@@ -243,7 +231,6 @@
         "iron",
         "rail_hub"
       ],
-      "initial_controller_id": "austro_hungarian_empire",
       "initial_garrison_personnel": 3600
     },
     {
@@ -254,7 +241,6 @@
         "port_access",
         "food"
       ],
-      "initial_controller_id": "ottoman_empire",
       "initial_garrison_personnel": 3300
     },
     {
@@ -266,7 +252,6 @@
         "coal",
         "rail_hub"
       ],
-      "initial_controller_id": "russian_empire",
       "initial_garrison_personnel": 6000
     },
     {
@@ -279,7 +264,6 @@
         "industry",
         "port_access"
       ],
-      "initial_controller_id": "united_states",
       "initial_garrison_personnel": 4200
     },
     {
@@ -291,7 +275,6 @@
         "coal",
         "port_access"
       ],
-      "initial_controller_id": "qing_empire",
       "initial_garrison_personnel": 4200
     },
     {
@@ -303,7 +286,6 @@
         "shipping_hub",
         "industry"
       ],
-      "initial_controller_id": "japanese_empire",
       "initial_garrison_personnel": 3800
     },
     {
@@ -314,7 +296,6 @@
         "food",
         "port_access"
       ],
-      "initial_controller_id": "argentine_republic",
       "initial_garrison_personnel": 2400
     }
   ],

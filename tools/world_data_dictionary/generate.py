@@ -95,17 +95,6 @@ DATASET_DESCRIPTIONS: dict[str, str] = {
 # that is known to consume a dataset even when the source uses an intermediate
 # loader rather than repeating the data path at every access site.
 SOURCE_DATASET_HINTS: dict[str, tuple[str, ...]] = {
-    "scripts/world_map/internal/world_map_canvas_impl.gd": (
-        "world_map.world_coastlines", "world_map.countries", "world_map.regions",
-        "world_map.cities", "world_map.ports", "world_map.rail_segments",
-        "world_map.road_segments", "world_map.shipping_routes",
-        "world_map.institutions", "world_map.organizations", "world_map.map_modes",
-        "world_map.map_geometry_cache",
-    ),
-    "scripts/ui_spikes/holographic_workspace/holographic_workspace_runtime.gd": (
-        "world_map.world_coastlines", "world_map.regions", "world_map.cities",
-        "world_map.institutions", "world_map.characters",
-    ),
     "scripts/vnext/politics/state_politics.gd": (
         "vnext.politics.state_politics_1900",
     ),

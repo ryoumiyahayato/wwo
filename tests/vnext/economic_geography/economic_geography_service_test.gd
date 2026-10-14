@@ -419,24 +419,24 @@ func _test_political_and_economy_decoupling() -> void:
 	_check(not authority_text.contains("sovereign_id"), "authority snapshot excludes sovereign identity")
 	_check(not authority_text.contains("polity"), "authority snapshot excludes polity membership")
 
-	var simulation := FormalWorldSimulation.new()
-	_check(simulation.initialize(), "formal Economy decoupling fixture initializes")
-	if not simulation.initialized:
+	var simulation := WorldBootstrap.new().build()
+	_check(simulation.success, "formal Economy decoupling fixture initializes")
+	if not simulation.success:
 		return
-	var formal_markets: Array[String] = simulation.market_registry_view().market_ids()
+	var formal_markets: Array[String] = simulation.world.market_registry_view.market_ids()
 	var formal_geography: VNextEconomicGeographyService = _service(
-		simulation.market_registry_view(),
+		simulation.world.market_registry_view,
 		[_assigned("territory_unit:alpha", formal_markets[0])]
 	)
 	var economy_before: Dictionary = (
-		simulation.get_persistent_state().get("economy", {}) as Dictionary
+		simulation.persistence.snapshot().get("economy", {}) as Dictionary
 	).duplicate(true)
 	var geography_remap: VNextEconomicGeographyCandidate = formal_geography.prepare_remap(
 		"territory_unit:alpha", formal_markets[1], formal_geography.revision()
 	)
 	_check(formal_geography.adopt_candidate(geography_remap), "geography-only remap succeeds")
 	_equal(
-		simulation.get_persistent_state().get("economy", {}),
+		simulation.persistence.snapshot().get("economy", {}),
 		economy_before,
 		"geography remap does not mutate Economy authoritative state"
 	)
@@ -450,8 +450,8 @@ func _test_static_owner_and_scope_boundaries() -> void:
 		"res://scripts/formal/formal_world_market_registry.gd"
 	)
 	var economy_source: String = FileAccess.get_file_as_string(
-		"res://scripts/formal/formal_world_economy_service.gd"
-	)
+		"res://scripts/world/formal_world_economy_state.gd"
+	) + FileAccess.get_file_as_string("res://scripts/simulation/formal_world_economy_simulation.gd")
 	for forbidden_field: String in ["controller_id", "sovereign_id", "polity_membership"]:
 		_check(
 			not geography_source.contains(forbidden_field),
@@ -506,9 +506,7 @@ func _catalog() -> VNextTerritoryUnitCatalog:
 
 
 func _market_registry() -> FormalWorldMarketRegistry:
-	var aggregate_ids: Array[String] = []
-	for index: int in FormalWorldMarketRegistry.EXPECTED_COMPATIBILITY_MARKET_COUNT:
-		aggregate_ids.append("economic_fixture_%02d" % index)
+	var aggregate_ids: Array[String] = ["economic_fixture_00", "economic_fixture_01", "economic_fixture_02"]
 	var registry := FormalWorldMarketRegistry.new()
 	return registry if registry.configure(aggregate_ids, []) else null
 

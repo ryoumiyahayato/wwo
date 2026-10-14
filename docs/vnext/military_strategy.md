@@ -5,7 +5,8 @@ world map or connecting to `scripts/vnext/world_runtime.gd`.
 
 ## Map reuse
 
-`VNextMilitaryMapAdapter` loads the existing `PrototypeV2Data` dataset:
+`VNextMilitaryMapAdapter` reads the supplied `VNextSpatialWorld.catalog()`.
+That catalog loads the existing geography and transport data:
 
 - `data/world_map/cities.json`
 - `data/world_map/countries.json`
@@ -59,13 +60,17 @@ equipment, training, organization, morale, supply, terrain defense, city
 defense, garrisons, and defense posture. Ratio thresholds classify an attack as
 attacker win, defender hold, or stalemate. Results expose an active/resolved war
 status, attacker/defender casualties, bounded mobilization pressure, loss
-records, and control changes. A win changes only the military state's region
-controller and control history. The formal map UI and political legitimacy are
-integration responsibilities.
+records, and control changes. A win updates the affected scope's place controllers
+in the supplied `TerritoryState` and appends battle provenance to military control
+history. Military state does not own a second controller table. The former fixture
+injection interface and fixture-history restore branch have been removed.
+
+The formal world composes these components. Its current `SimulationStep` does
+not automatically advance Military, and MainShell has no complete military command UI.
 
 ## Persistence and verification
 
-`VNextMilitaryState.snapshot()` stores dynamic formations, actions, controls,
+`VNextMilitaryState.snapshot()` stores dynamic formations, actions,
 garrisons, supply inputs, battle results, and control history. Restore validates
 schema, formation IDs, action IDs, action time ranges, map references when a map
 is provided, and finite supply/state values.

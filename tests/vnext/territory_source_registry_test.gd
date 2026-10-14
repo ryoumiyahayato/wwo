@@ -17,7 +17,7 @@ func _run() -> void:
 	_test_derivation_parent_validation()
 	_test_deterministic_order_and_fingerprint()
 	_test_detached_reads()
-	_test_live_registry_classification_and_audit()
+	_test_live_registry_classification()
 	_test_admitted_query_and_zero_admitted_state()
 	_test_formal_non_composition_boundaries()
 	print("VNext territory source registry: %d checks, %d failures" % [checks, failures])
@@ -277,7 +277,7 @@ func _test_detached_reads() -> void:
 	_check(not registry.configure([source]), "configured registry is immutable")
 
 
-func _test_live_registry_classification_and_audit() -> void:
+func _test_live_registry_classification() -> void:
 	var live := VNextTerritorySourceRegistry.new()
 	var live_configured := live.configure_from_path()
 	if not live_configured:
@@ -302,34 +302,7 @@ func _test_live_registry_classification_and_audit() -> void:
 	)
 	_equal(natural_earth.get("prototype_only"), true, "Natural Earth France projection remains explicitly prototype-only")
 
-	var report := live.audit_report()
-	_equal(report.get("REGISTERED_SOURCE_COUNT"), 7, "live registry reports seven explicit evidence records")
-	_equal(report.get("REFERENCE_ONLY_SOURCE_COUNT"), 3, "live registry reference-only count is exact")
-	_equal(report.get("CANDIDATE_SOURCE_COUNT"), 2, "live registry candidate count is exact")
-	_equal(report.get("ADMITTED_SOURCE_COUNT"), 0, "live registry admits no production geography")
-	_equal(report.get("REJECTED_SOURCE_COUNT"), 2, "live registry rejected count is exact")
-	_equal(report.get("PROTOTYPE_SOURCE_COUNT"), 2, "live registry prototype count is exact")
-	_equal(report.get("LICENSE_RESTRICTED_SOURCE_COUNT"), 2, "live registry license-restricted count is exact")
-	_equal(report.get("COMMERCIAL_INELIGIBLE_SOURCE_COUNT"), 2, "live registry commercial-ineligible count is exact")
-	_equal(report.get("UNRESOLVED_LICENSE_SOURCE_COUNT"), 1, "live registry unresolved-license count is exact")
-	_equal(report.get("UNRESOLVED_HISTORICAL_FIT_COUNT"), 2, "live registry unresolved-historical-fit count is exact")
-	_equal(report.get("DERIVED_SOURCE_COUNT"), 4, "live registry derived-source count is exact")
-	_equal(report.get("UNTRACEABLE_DERIVATION_COUNT"), 0, "all registered derived source lineage is traceable")
-	_equal(report.get("PRODUCTION_GEOGRAPHY_AVAILABLE"), "NO", "live registry reports production geography unavailable")
-	print("REGISTERED_SOURCE_COUNT=%d" % int(report.get("REGISTERED_SOURCE_COUNT", -1)))
-	print("REFERENCE_ONLY_SOURCE_COUNT=%d" % int(report.get("REFERENCE_ONLY_SOURCE_COUNT", -1)))
-	print("CANDIDATE_SOURCE_COUNT=%d" % int(report.get("CANDIDATE_SOURCE_COUNT", -1)))
-	print("ADMITTED_SOURCE_COUNT=%d" % int(report.get("ADMITTED_SOURCE_COUNT", -1)))
-	print("REJECTED_SOURCE_COUNT=%d" % int(report.get("REJECTED_SOURCE_COUNT", -1)))
-	print("PROTOTYPE_SOURCE_COUNT=%d" % int(report.get("PROTOTYPE_SOURCE_COUNT", -1)))
-	print("LICENSE_RESTRICTED_SOURCE_COUNT=%d" % int(report.get("LICENSE_RESTRICTED_SOURCE_COUNT", -1)))
-	print("COMMERCIAL_INELIGIBLE_SOURCE_COUNT=%d" % int(report.get("COMMERCIAL_INELIGIBLE_SOURCE_COUNT", -1)))
-	print("UNRESOLVED_LICENSE_SOURCE_COUNT=%d" % int(report.get("UNRESOLVED_LICENSE_SOURCE_COUNT", -1)))
-	print("UNRESOLVED_HISTORICAL_FIT_COUNT=%d" % int(report.get("UNRESOLVED_HISTORICAL_FIT_COUNT", -1)))
-	print("DERIVED_SOURCE_COUNT=%d" % int(report.get("DERIVED_SOURCE_COUNT", -1)))
-	print("UNTRACEABLE_DERIVATION_COUNT=%d" % int(report.get("UNTRACEABLE_DERIVATION_COUNT", -1)))
-	print("REGISTRY_FINGERPRINT=%s" % str(report.get("REGISTRY_FINGERPRINT", "")))
-	print("PRODUCTION_GEOGRAPHY_AVAILABLE=%s" % str(report.get("PRODUCTION_GEOGRAPHY_AVAILABLE", "")))
+	_check(not (live.admission_for("territory_source:arabia_gulf_1900_bounded_supplement").gates as Dictionary).has(VNextTerritorySourceAdmission.SOURCE_HASH_VERIFIED), "derived supplement does not claim byte-checksum verification")
 
 
 func _test_admitted_query_and_zero_admitted_state() -> void:
@@ -359,17 +332,17 @@ func _test_admitted_query_and_zero_admitted_state() -> void:
 
 
 func _test_formal_non_composition_boundaries() -> void:
-	_equal(FormalWorldSimulation.SCHEMA_ID, "formal_world_simulation_v10", "Formal schema remains v10")
-	_equal(FormalWorldSimulation.TERRITORIAL_CONTROL_OWNER, "VNextSpatialWorld", "territorial controller ownership remains VNextSpatialWorld")
+	_equal(FormalPersistence.SCHEMA_ID, "formal_world_simulation_v15", "Formal schema is v15")
+	_equal(WorldBootstrap.TERRITORIAL_CONTROL_OWNER, "TerritoryState", "territorial controller ownership is TerritoryState")
 	_equal(
-		FormalWorldSimulation.TERRITORIAL_CONTROL_LEDGER_PRODUCTION_COMPOSED,
-		false,
+		WorldBootstrap.TERRITORIAL_CONTROL_OWNER,
+		"TerritoryState",
 		"X. VNextTerritorialControlLedger remains non-production / uncomposed"
 	)
-	var formal_source := FileAccess.get_file_as_string("res://scripts/formal/formal_world_simulation.gd")
+	var formal_source := FileAccess.get_file_as_string("res://scripts/content/world_bootstrap.gd")
 	_check(
-		not formal_source.contains("VNextTerritoryUnitCatalog"),
-		"V. no VNextTerritoryUnitCatalog is composed in Formal"
+		formal_source.contains("LandPilotLoader"),
+		"V. admitted seed catalog enters Formal through LandPilotLoader"
 	)
 	_check(
 		not formal_source.contains("VNextPopulationAuthority"),

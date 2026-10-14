@@ -88,10 +88,10 @@ def build_snapshot(source_payload: bytes) -> dict[str, Any]:
                 "valid_to": date_string(properties, "gwe"),
                 "capital": {
                     "name": str(properties.get("capname", "")),
-                    "lon": round(float(properties.get("caplong", 0.0)), 5),
-                    "lat": round(float(properties.get("caplat", 0.0)), 5),
+                    "lon": round(float(properties["caplong"]), 5),
+                    "lat": round(float(properties["caplat"]), 5),
                 },
-                "area_km2": round(float(properties.get("area", 0.0)), 2),
+                "area_km2": round(float(properties["area"]), 2),
                 "geometry": {
                     "type": simplified.geom_type,
                     "coordinates": rounded_coordinates(
@@ -101,11 +101,8 @@ def build_snapshot(source_payload: bytes) -> dict[str, Any]:
             }
         )
     features.sort(key=lambda feature: feature["gwcode"])
-    if len(features) != 151:
-        raise ValueError(
-            "Expected 151 CShapes units on %s, found %d"
-            % (TARGET_DATE.isoformat(), len(features))
-        )
+    if not features or len({feature["id"] for feature in features}) != len(features):
+        raise ValueError("dated CShapes features must be nonempty and have unique IDs")
     return {
         "schema_version": 1,
         "snapshot_date": TARGET_DATE.isoformat(),

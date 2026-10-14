@@ -1,5 +1,7 @@
 # 正式产品差距登记（2026-08-04）
 
+> 历史记录。下文“当前”仅指记录时的阶段；旧实现、命令及同步要求不再是开发指令。不得据此恢复已删除的宿主、UI、探针或审计门禁。现行入口、WorldState 与 v15 存档见 [当前架构](../ARCHITECTURE.md) 和 [存档格式](../SAVE_FORMAT.md)。
+
 ## 范围与排序规则
 
 本登记固定于 `0feed6add253cead359a9e41f85e09bdf84c24e7`，与 `artifacts/formal-product-system-completeness.json` 的 `gaps` 一一对应。顺序是约束顺序，不是“最容易先做”的顺序：先建立唯一 owner 和事务边界，再增加需要持久化的新系统；先建立稳定 ID/历史语义，再增加旅行、政治或地图驱动经济。

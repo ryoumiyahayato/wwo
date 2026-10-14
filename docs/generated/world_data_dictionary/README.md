@@ -105,7 +105,7 @@ The list is sorted by risk/severity and stable dataset/field order. High-risk it
 
 ## Generated files
 
-- `dictionary.json`: machine-readable dictionary, evidence, relationships, and findings.
+- `dictionary.json`: machine-readable dictionary, evidence, relationships, and findings; generated on demand with `python tools/world_data_dictionary/generate.py --repo-root .` and intentionally omitted from the retained checkout outputs.
 - `README.md`: this index and the top ambiguity list.
 - `datasets/*.md`: one human-readable reference per logical dataset.
 

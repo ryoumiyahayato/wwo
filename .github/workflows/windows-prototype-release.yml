@@ -28,38 +28,6 @@ jobs:
           fetch-depth: 2
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Verify exact validation head
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
-          $actual = (git rev-parse HEAD).Trim()
-          if ($actual -ne $expected) {
-            throw "Validation checked out $actual but expected exact head $expected"
-          }
-
-      - name: Stamp executable identity
-        id: build_info
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $buildCode = (git rev-parse --short=4 HEAD).Trim().ToLowerInvariant()
-          $displayVersion = "v0.001a ($buildCode)"
-          $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-
-          $buildInfoPath = Join-Path $PWD 'scripts\core\build_info.gd'
-          $buildInfo = Get-Content -LiteralPath $buildInfoPath -Raw
-          $buildInfo = [regex]::Replace(
-            $buildInfo,
-            'const BUILD_CODE: String = "[^"]+"',
-            ('const BUILD_CODE: String = "' + $buildCode + '"')
-          )
-          [System.IO.File]::WriteAllText($buildInfoPath, $buildInfo, $utf8NoBom)
-
-          "build_code=$buildCode" >> $env:GITHUB_OUTPUT
-          "display_version=$displayVersion" >> $env:GITHUB_OUTPUT
-          Write-Host "Validating formal hemisphere 1900 $displayVersion"
-
       - name: Install Godot 4.6.3
         shell: pwsh
         run: |
@@ -110,10 +78,6 @@ jobs:
         shell: pwsh
         run: godot --headless --path . --script res://tests/formal/formal_world_long_term_balance_test.gd
 
-      - name: Run historical world data regression
-        shell: pwsh
-        run: godot --headless --path . --script res://tests/alpha/alpha_historical_world_economy_data_test.gd
-
       - name: Headless formal product startup
         shell: pwsh
         run: godot --headless --path . --quit-after 5
@@ -156,16 +120,6 @@ jobs:
           fetch-depth: 2
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Verify exact validation head
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $expected = "${{ github.event.pull_request.head.sha || github.sha }}"
-          $actual = (git rev-parse HEAD).Trim()
-          if ($actual -ne $expected) {
-            throw "Validation checked out $actual but expected exact head $expected"
-          }
-
       - name: Download validated Windows export
         uses: actions/download-artifact@v4
         with:
@@ -185,29 +139,6 @@ jobs:
             throw "Downloaded Windows export is unexpectedly small: $($export.Length) bytes"
           }
           Write-Host "Installer input: $($export.FullName) ($($export.Length) bytes)"
-
-      - name: Stamp installer identity
-        id: installer_build_info
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $buildCode = (git rev-parse --short=4 HEAD).Trim().ToLowerInvariant()
-          $displayVersion = "v0.001a ($buildCode)"
-          $installerPath = Join-Path $PWD 'packaging\windows\1900.iss'
-          $installer = Get-Content -LiteralPath $installerPath -Raw
-          $installer = [regex]::Replace(
-            $installer,
-            '#define MyAppVersion "[^"]+"',
-            ('#define MyAppVersion "' + $displayVersion + '"')
-          )
-          [System.IO.File]::WriteAllText(
-            $installerPath,
-            $installer,
-            (New-Object System.Text.UTF8Encoding($false))
-          )
-          "build_code=$buildCode" >> $env:GITHUB_OUTPUT
-          "display_version=$displayVersion" >> $env:GITHUB_OUTPUT
-          Write-Host "Compiling installer for 1900 $displayVersion"
 
       - name: Install Inno Setup 6.7.1
         shell: pwsh
@@ -331,7 +262,6 @@ jobs:
           removeArtifacts: true
           artifacts: builds/installer/1900-Prototype-Setup.exe
           body: |
-            版本：${{ steps.installer_build_info.outputs.display_version }}
             自动覆盖的 Windows 原型安装包。
             安装标识固定；再次安装会覆盖旧版本，不建立新的存档体系。
             对应提交：${{ github.sha }}

@@ -44,4 +44,4 @@ A vnext_world_runtime_v1 payload is not migrated or guessed into v2. It is rejec
 
 ## Explicit exclusions
 
-This foundation does not connect to FormalWorldSimulation, the current product UI, the formal save path, social systems, communication, organizations, careers, politics, law, AI or route planning. It does not introduce a universal mutable Context or a second runtime root.
+This foundation remains an isolated runtime with its own tests. The formal product root is WorldBootstrap / WorldState with GameClock, SimulationStep and FormalPersistence. The foundation does not own the formal UI or its save path and is not a replacement product root. The former FormalWorldSimulation has been deleted.

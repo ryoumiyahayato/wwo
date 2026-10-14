@@ -5,7 +5,7 @@ var failures := 0
 var map: VNextMilitaryMapAdapter
 var spatial: VNextSpatialWorld
 var _state_contexts: Dictionary = {}
-var service := VNextMilitaryService.new()
+var territory: TerritoryState
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -14,6 +14,7 @@ func _run() -> void:
 	spatial = VNextSpatialWorld.create_from_legacy_world_map()
 	_check(spatial != null and spatial.is_valid(), "authoritative Spatial world loads")
 	map = VNextMilitaryMapAdapter.new()
+	territory = _territory_from_catalog(spatial.catalog())
 	_check(map.load_existing_map(spatial), "R3 map loads")
 	if map != null and map.errors.is_empty():
 		_test_rolling_pipeline()
@@ -26,7 +27,7 @@ func _run() -> void:
 
 func _test_rolling_pipeline() -> void:
 	var state := _remote("formation:r3_abundant", "marseille", 2000, _abundant())
-	var route := map.find_route("paris", "marseille", [], "country_fra", state.region_controls, false)
+	var route := map.find_route("paris", "marseille", _territory_for(state), [], "country_fra", false)
 	var transit := maxi(1, int(route.get("duration_hours", 1)))
 	var max_food_inflight := 0
 	var delivered_food := 0.0
@@ -57,7 +58,7 @@ func _test_rolling_pipeline() -> void:
 
 func _test_capacity_and_source_limits() -> void:
 	var capacity_state := _remote("formation:r3_capacity", "rouen", 6000, _abundant())
-	var rail := map.find_route("paris", "rouen", ["rail"], "country_fra", capacity_state.region_controls, false)
+	var rail := map.find_route("paris", "rouen", _territory_for(capacity_state), ["rail"], "country_fra", false)
 	var link_id := str((rail.get("link_ids", []) as Array)[0])
 	var saved_capacity := float(spatial.infrastructure_state(link_id).get("nominal_capacity", 0.0))
 	_check(spatial.set_nominal_capacity(link_id, 40.0), "R3 Spatial capacity limit applies")
@@ -91,7 +92,7 @@ func _test_long_latency_high_capacity() -> void:
 		saved[link_id] = {"movement_hours": int(link.get("movement_hours", 1)), "nominal_capacity": nominal}
 		link["movement_hours"] = maxi(2, int(link.get("movement_hours", 1)) * 3)
 		_check(state_spatial.set_nominal_capacity(link_id, maxf(1.0, nominal * 30.0)), "R3 high Spatial capacity applies")
-	var route := state_map.find_route("paris", "marseille", [], "country_fra", state.region_controls, false)
+	var route := state_map.find_route("paris", "marseille", _territory_for(state), [], "country_fra", false)
 	var transit := int(route.get("duration_hours", 0))
 	var max_food := 0
 	var delivered := 0.0
@@ -116,7 +117,7 @@ func _test_pipeline_interrupt_restore_partition_determinism() -> void:
 	var interrupted := _remote("formation:r3_interrupt", "rouen", 2000, _abundant())
 	for _hour: int in range(4):
 		_check(_advance_one(interrupted), "pipeline warm-up before interruption")
-	var shipments := service.get_supply_shipments(interrupted)
+	var shipments := _service_for(interrupted).get_supply_shipments(interrupted)
 	_check(shipments.size() >= 4, "multiple shipments exist before interruption")
 	var first: Dictionary = shipments[0]
 	var edge := int(first.get("current_edge_index", 0))
@@ -150,9 +151,10 @@ func _test_pipeline_interrupt_restore_partition_determinism() -> void:
 	_check(not duplicate_completion, "capacity interruption does not settle tracked cargo")
 	var interrupted_snapshot := interrupted.snapshot()
 	var interruption_restored := VNextMilitaryState.new()
-	_check(interruption_restored.restore(interrupted_snapshot, map), "interrupted pipeline snapshot restores while capacity is zero")
+	_check(_restore_state(interruption_restored, interrupted_snapshot, interrupted), "interrupted pipeline snapshot restores while capacity is zero")
 	_check(interruption_restored.snapshot() == interrupted_snapshot, "interrupted pipeline restore is exact")
-	_check(spatial.set_nominal_capacity(link_id, saved_capacity) and spatial.restore_infrastructure(link_id), "R3 authoritative Spatial interruption recovers")
+	var resumed_spatial: VNextSpatialWorld = _context_for_state(interruption_restored)["spatial"] as VNextSpatialWorld
+	_check(spatial.set_nominal_capacity(link_id, saved_capacity) and spatial.restore_infrastructure(link_id) and resumed_spatial.set_nominal_capacity(link_id, saved_capacity) and resumed_spatial.restore_infrastructure(link_id), "R3 authoritative Spatial interruption recovers in both worlds")
 	_check(_advance_one(interrupted), "pipeline resumes after capacity recovery")
 	_check(_advance_one(interruption_restored), "restored pipeline resumes after capacity recovery")
 	_check(interrupted.snapshot() == interruption_restored.snapshot(), "interruption snapshot recovery matches continuous state")
@@ -163,7 +165,7 @@ func _test_pipeline_interrupt_restore_partition_determinism() -> void:
 	_check(_supply_count(continuous, "formation:r3_resume", "food") >= 2, "snapshot contains multiple same-resource shipments")
 	var snap := continuous.snapshot()
 	var restored := VNextMilitaryState.new()
-	_check(restored.restore(snap, map), "multiple in-flight pipeline snapshot restores")
+	_check(_restore_state(restored, snap, continuous), "multiple in-flight pipeline snapshot restores")
 	_check(restored.snapshot() == snap, "restored pipeline snapshot is exact")
 	var target := continuous.last_simulated_hour + 120
 	_check(bool(_advance_result(continuous, target).get("success", false)), "continuous pipeline continuation advances")
@@ -219,12 +221,11 @@ func _test_strict_restore_matrix() -> void:
 
 	var teleport_state := _new_state()
 	_check(bool(_advance_result(teleport_state, 1).get("success", false)), "control teleport fixture advances")
-	var teleport := teleport_state.snapshot()
-	(teleport.get("region_controls", {}) as Dictionary)["northern_industrial_belt"] = "country_bel"
-	_check(_rejected(teleport), "runtime controller change without provenance is rejected")
+	_check(_territory_for(teleport_state).set_controller("lille", "country_bel"), "territorial control changes on TerritoryState")
+	_check(teleport_state.is_valid(map, _territory_for(teleport_state)), "Military does not duplicate controller authority")
 
 	var active_reuse := valid.duplicate(true)
-	(active_reuse.get("battle_results", []) as Array).append({"action_id": action_id, "outcome":"attacker_win", "target_region_id":"northern_industrial_belt", "controller_country_id":"country_fra", "control_changed":false})
+	(active_reuse.get("battle_results", []) as Array).append({"action_id": action_id, "outcome":"attacker_win", "target_region_id":"northern_industrial_belt", "controller_id":"country_fra", "control_changed":false})
 	_check(_rejected(active_reuse), "active action cannot reuse retained battle identity")
 
 	var duplicate_lifecycle := valid.duplicate(true)
@@ -239,7 +240,6 @@ func _test_strict_restore_matrix() -> void:
 	_check(_rejected(battle_high), "next sequence below battle high-water is rejected")
 
 	var control_high := teleport_state.snapshot()
-	(control_high.get("region_controls", {}) as Dictionary)["northern_industrial_belt"] = "country_bel"
 	(control_high.get("control_history", []) as Array).append({"region_id":"northern_industrial_belt","previous_controller_id":"country_fra","controller_id":"country_bel","control_origin_controller_id":"country_fra","cause":"strategic_attack_victory","effective_hour":1,"context":"battle","source_action_id":"military_action:000500","source_action_kind":"attack","source_formation_id":"formation:provenance","source_target_region_id":"northern_industrial_belt","source_controller_id":"country_bel","source_preparation_end_hour":1})
 	control_high["next_action_sequence"] = 500
 	_check(_rejected(control_high), "next sequence below control source high-water is rejected")
@@ -290,8 +290,8 @@ func _test_strict_restore_matrix() -> void:
 
 func _remote(id: String, city: String, personnel: int, supply: Dictionary) -> VNextMilitaryState:
 	var state := _new_state()
-	_check(service.create_formation(state, map, id, "country_fra", city, personnel, {"equipment_factor":1.0}, 0.8, 0.8, 0.8), "remote formation created")
-	_check(service.set_supply_input(state, map, "paris_basin", supply), "remote source configured")
+	_check(_service_for(state).create_formation(state, map, id, "country_fra", city, personnel, {"equipment_factor":1.0}, 0.8, 0.8, 0.8), "remote formation created")
+	_check(_service_for(state).set_supply_input(state, map, "paris_basin", supply), "remote source configured")
 	return state
 
 func _new_state() -> VNextMilitaryState:
@@ -304,7 +304,9 @@ func _new_state() -> VNextMilitaryState:
 	map = state_map
 	var state := VNextMilitaryState.new()
 	_check(state.initialize(state_map), "R3 military state initializes")
-	_state_contexts[state.get_instance_id()] = {"spatial": state_spatial, "map": state_map}
+	var state_territory := _territory_from_catalog(state_spatial.catalog())
+	territory = state_territory
+	_state_contexts[state.get_instance_id()] = {"spatial": state_spatial, "map": state_map, "territory": state_territory, "service": VNextMilitaryService.new(state_territory, state_spatial.catalog())}
 	return state
 
 
@@ -324,44 +326,33 @@ func _advance_result(state: VNextMilitaryState, target_hour: int) -> Dictionary:
 	if state_spatial.current_hour() < state.last_simulated_hour:
 		if not state_spatial.advance_to_hour(state.last_simulated_hour):
 			return {"success": false}
-	return service.advance_to_hour(state, state_map, target_hour)
+	return _service_for(state).advance_to_hour(state, state_map, target_hour)
 
 
 func _context_for_state(state: VNextMilitaryState) -> Dictionary:
 	var key: int = state.get_instance_id()
-	if _state_contexts.has(key):
-		return _state_contexts[key] as Dictionary
-	var state_spatial := VNextSpatialWorld.create_from_legacy_world_map()
-	if state_spatial == null or not state_spatial.is_valid():
-		return {}
-	if not state_spatial.advance_to_hour(state.last_simulated_hour):
-		return {}
-	var state_map := VNextMilitaryMapAdapter.new()
-	if not state_map.load_existing_map(state_spatial):
-		return {}
-	var context := {"spatial": state_spatial, "map": state_map}
-	_state_contexts[key] = context
-	return context
+	assert(_state_contexts.has(key), "Missing explicit Military fixture context: %s" % key)
+	return _state_contexts[key] as Dictionary
 
 
 func _supply_count(state: VNextMilitaryState, formation_id: String, resource_id: String) -> int:
 	var count := 0
-	for shipment: Dictionary in service.get_supply_shipments(state):
+	for shipment: Dictionary in _service_for(state).get_supply_shipments(state):
 		if str(shipment.get("destination_formation_id", "")) == formation_id and str(shipment.get("resource_id", "")) == resource_id:
 			count += 1
 	return count
 
 func _find_supply_by_id(state: VNextMilitaryState, action_id: String) -> Dictionary:
-	for shipment: Dictionary in service.get_supply_shipments(state):
+	for shipment: Dictionary in _service_for(state).get_supply_shipments(state):
 		if str(shipment.get("action_id", "")) == action_id:
 			return shipment
 	return {}
 
 func _rejected(snapshot: Dictionary) -> bool:
 	var sentinel := _new_state()
-	_check(service.create_formation(sentinel, map, "formation:sentinel_r3", "country_fra", "paris", 100, {"equipment_factor":1.0}), "sentinel formation created")
+	_check(_service_for(sentinel).create_formation(sentinel, map, "formation:sentinel_r3", "country_fra", "paris", 100, {"equipment_factor":1.0}), "sentinel formation created")
 	var before := sentinel.snapshot()
-	return not sentinel.restore(snapshot, map) and sentinel.snapshot() == before
+	return not sentinel.restore(snapshot, map, spatial, _territory_for(sentinel)) and sentinel.snapshot() == before
 
 func _configure_r4_spatial_capacity_baseline(
 	state_spatial: VNextSpatialWorld, state_map: VNextMilitaryMapAdapter
@@ -395,3 +386,30 @@ func _check(condition: bool, label: String) -> void:
 		return
 	failures += 1
 	push_error("FAIL: " + label)
+
+func _territory_from_catalog(catalog: VNextSpatialCatalog) -> TerritoryState:
+	var territory := TerritoryState.new()
+	var controllers: Dictionary = {}
+	for place_id: String in catalog.place_map_ids():
+		controllers[place_id] = str(catalog.get_place(place_id)["parent_country_id"])
+	_check(territory.restore({"schema_id": TerritoryState.SCHEMA_ID, "controllers": controllers}, catalog.place_map_ids()), "fixture TerritoryState initializes")
+	return territory
+
+func _territory_for(state: VNextMilitaryState) -> TerritoryState:
+	return _context_for_state(state)["territory"] as TerritoryState
+
+func _service_for(state: VNextMilitaryState) -> VNextMilitaryService:
+	var context: Dictionary = _context_for_state(state)
+	return context["service"] as VNextMilitaryService
+
+func _restore_state(target: VNextMilitaryState, saved: Dictionary, source: VNextMilitaryState) -> bool:
+	var original: Dictionary = _context_for_state(source)
+	var restored_spatial := VNextSpatialWorld.create_from_legacy_world_map()
+	_check(restored_spatial.restore((original["spatial"] as VNextSpatialWorld).snapshot()), "fixture Spatial restores")
+	var restored_map := VNextMilitaryMapAdapter.new()
+	_check(restored_map.load_existing_map(restored_spatial), "fixture adapter binds restored Spatial")
+	var territory := TerritoryState.new()
+	_check(territory.restore(_territory_for(source).snapshot(), restored_spatial.catalog().place_map_ids()), "fixture Territory restores")
+	var context: Dictionary = {"spatial": restored_spatial, "map": restored_map, "territory": territory, "service": VNextMilitaryService.new(territory, restored_spatial.catalog())}
+	_state_contexts[target.get_instance_id()] = context
+	return target.restore(saved, restored_map, restored_spatial, territory)

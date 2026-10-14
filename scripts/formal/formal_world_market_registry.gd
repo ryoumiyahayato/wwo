@@ -5,7 +5,6 @@ extends RefCounted
 const REVISION: String = "formal_world_market_registry_v1"
 const STATE_SCHEMA_ID: String = "formal_world_market_state_v1"
 const SNAPSHOT_SCHEMA_ID: String = "formal_world_market_registry_snapshot_v1"
-const EXPECTED_COMPATIBILITY_MARKET_COUNT: int = 50
 
 var initialization_error: String = ""
 var _configured: bool = false
@@ -34,12 +33,8 @@ func configure(
 
 	var sorted_aggregate_ids := economic_aggregate_ids.duplicate()
 	sorted_aggregate_ids.sort()
-	if sorted_aggregate_ids.size() != EXPECTED_COMPATIBILITY_MARKET_COUNT:
-		return _fail(
-			"Formal compatibility market count must be %d" % (
-				EXPECTED_COMPATIBILITY_MARKET_COUNT
-			)
-		)
+	if sorted_aggregate_ids.is_empty():
+		return _fail("Formal market registry requires economic aggregate identities")
 	for economic_aggregate_id: String in sorted_aggregate_ids:
 		if (
 			economic_aggregate_id.is_empty()

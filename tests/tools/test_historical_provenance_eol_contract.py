@@ -1,159 +1,109 @@
-#!/usr/bin/env python3
-"""Regression coverage for the Historical Provenance source-byte contract."""
-
-from __future__ import annotations
-
-import hashlib
+"""Internal JSON formatting, explicit formats and formal supplement generation."""
 import importlib.util
 import json
-import subprocess
 import sys
+import tempfile
 import unittest
-from collections import Counter, defaultdict
 from pathlib import Path
-
-
+from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[2]
-GENERATOR_PATH = ROOT / "tools" / "provenance" / "generate_historical_provenance.py"
-SPEC = importlib.util.spec_from_file_location("historical_provenance_generator", GENERATOR_PATH)
-if SPEC is None or SPEC.loader is None:
-    raise RuntimeError("unable to load Historical Provenance generator")
+SPEC = importlib.util.spec_from_file_location('historical_provenance_generator', ROOT / 'tools/provenance/generate_historical_provenance.py')
 generator = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = generator
 SPEC.loader.exec_module(generator)
 
-GENERATED_PATHS = (
-    "data/provenance/historical_source_registry.json",
-    "data/provenance/historical_fact_evidence.json",
-)
-
-
-def repo_path(resource_path: str) -> Path:
-    return ROOT / resource_path.removeprefix("res://")
-
-
-def git_attributes(paths: list[str]) -> dict[str, dict[str, str]]:
-    completed = subprocess.run(
-        ["git", "check-attr", "text", "eol", "--", *paths],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    result: dict[str, dict[str, str]] = defaultdict(dict)
-    for line in completed.stdout.splitlines():
-        path, attribute, value = line.split(": ", 2)
-        result[path][attribute] = value
-    return dict(result)
-
-
 class HistoricalProvenanceEolContractTest(unittest.TestCase):
-    def test_admitted_text_sources_have_effective_lf_policy(self) -> None:
-        paths = [
-            path.removeprefix("res://")
-            for path in sorted(generator.CANONICAL_TEXTUAL_PROVENANCE_SOURCES)
-        ]
-        attributes = git_attributes(paths)
-        self.assertEqual(set(attributes), set(paths))
-        for path in paths:
-            self.assertEqual(attributes[path].get("text"), "set", path)
-            self.assertEqual(attributes[path].get("eol"), "lf", path)
-            self.assertNotIn(b"\r", (ROOT / path).read_bytes(), path)
+    def test_equivalent_internal_formats_generate_identical_catalogs(self):
+        expected = generator.build()
+        original = generator.local_path
+        paths = [generator.POLITICAL_PATH, generator.SPATIAL_PATH, generator.POPULATION_PATH, generator.POPULATION_MANIFEST_PATH] + ['res://data/world_map/historical/' + item[0] for item in generator.SUPPLEMENTS]
+        with tempfile.TemporaryDirectory() as tmp:
+            replacements = {}
+            for index, path in enumerate(paths):
+                document = json.loads(original(path).read_text(encoding='utf-8'))
+                replacements[path] = Path(tmp) / f'{index}.json'
+                replacements[path].write_bytes(json.dumps(dict(reversed(list(document.items()))), ensure_ascii=False, indent=4).replace('\n', '\r\n').encode('utf-8'))
+            with patch.object(generator, 'local_path', side_effect=lambda path: replacements.get(path, original(path))):
+                self.assertEqual(generator.build(), expected)
 
-    def test_generated_provenance_has_separate_lf_formatting_policy(self) -> None:
-        attributes = git_attributes(list(GENERATED_PATHS))
-        self.assertEqual(set(attributes), set(GENERATED_PATHS))
-        for path in GENERATED_PATHS:
-            self.assertEqual(attributes[path].get("text"), "set", path)
-            self.assertEqual(attributes[path].get("eol"), "lf", path)
-            self.assertNotIn(b"\r", (ROOT / path).read_bytes(), path)
+    def test_outputs_are_current_and_repeated_serialization_is_identical(self):
+        for name, document in zip(('historical_source_registry', 'historical_fact_evidence'), generator.build()):
+            self.assertEqual(document, json.loads((ROOT / f'data/provenance/{name}.json').read_text(encoding='utf-8')))
+            with tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / 'output.json'
+                generator.write_json(path, document)
+                first = path.read_bytes()
+                generator.write_json(path, document)
+                self.assertEqual(first, path.read_bytes())
+                self.assertNotIn(b'\r', first)
 
-    def test_generator_rejects_crlf_for_admitted_text_but_not_future_binary(self) -> None:
-        sample = b'{\r\n  "schema": 1\r\n}\r\n'
-        with self.assertRaisesRegex(
-            generator.ProvenanceSourceContractError,
-            "provenance source checkout violates canonical LF contract",
-        ):
-            generator.validate_provenance_source_bytes(generator.POPULATION_PATH, sample)
-        self.assertEqual(
-            generator.validate_provenance_source_bytes(
-                "res://data/provenance/future_binary_source.bin", sample
-            ),
-            sample,
-        )
-
-    def test_registry_hashes_are_exact_canonical_checked_out_bytes(self) -> None:
-        registry, _ = generator.build()
-        self.assertEqual(len(registry["sources"]), 3)
-        for source in registry["sources"]:
-            locator = source["locator"]
-            raw = repo_path(locator).read_bytes()
-            self.assertNotIn(b"\r", raw, locator)
-            self.assertEqual(source["content_hash"], hashlib.sha256(raw).hexdigest())
-            self.assertEqual(source["content_hash"], generator.file_sha256(locator))
-
-    def test_catalog_shape_review_statuses_and_source_values_are_unchanged(self) -> None:
+    def test_facts_cover_inputs_and_have_resolved_unique_source_bindings(self):
         registry, catalog = generator.build()
-        facts = catalog["facts"]
-        self.assertEqual(len(registry["sources"]), 3)
-        self.assertEqual(len(facts), 202)
-        self.assertEqual(
-            Counter(fact["domain"] for fact in facts),
-            Counter(
-                {
-                    "political_identity": 151,
-                    "population_aggregate": 50,
-                    "spatial_boundary": 1,
-                }
-            ),
-        )
-        statuses: dict[str, set[str]] = defaultdict(set)
-        for fact in facts:
-            statuses[fact["domain"]].add(fact["review_status"])
-        self.assertEqual(statuses["political_identity"], {"EVIDENCE_LINKED"})
-        self.assertEqual(statuses["population_aggregate"], {"BOUNDED_ESTIMATE"})
-        self.assertEqual(statuses["spatial_boundary"], {"EVIDENCE_LINKED"})
+        sources = {source['source_id']: source for source in registry['sources']}
+        facts = {fact['fact_id']: fact for fact in catalog['facts']}
+        self.assertEqual(len(sources), len(registry['sources']))
+        self.assertEqual(len(facts), len(catalog['facts']))
+        for fact in facts.values():
+            source = sources[fact['source_id']]
+            for key, target in (('source_version', 'version'), ('source_locator', 'locator'), ('license', 'license')):
+                self.assertEqual(fact[key], source[target])
+            generator.valid_period(fact['observation_period']['from'], fact['observation_period']['to'])
+            self.assertNotIn('input_hash', fact)
+            self.assertNotIn('output_hash', fact)
+        political = generator.read_json(generator.POLITICAL_PATH)
+        self.assertEqual({fact['subject_id'] for fact in facts.values() if fact['domain'] == 'political_identity'}, {unit['id'] for unit in political['units']})
+        for unit in political['units']:
+            value = facts['political_identity:' + unit['id']]['value']
+            self.assertEqual(value, {key: unit[key] for key in value})
+        for _, subject, domain, _ in generator.SUPPLEMENTS:
+            self.assertEqual(facts[domain + ':' + subject]['review_status'], 'APPROXIMATE')
+        self.assertIn('political_identity:country_fra', facts)
+        self.assertIn('political_identity:german_empire', facts)
 
-        facts_by_id = {fact["fact_id"]: fact for fact in facts}
-        political = json.loads(repo_path(generator.POLITICAL_PATH).read_text(encoding="utf-8"))
-        for unit in political["units"]:
-            expected = {
-                "controller_id": unit["controller_id"],
-                "geometry_feature_id": unit["geometry_feature_id"],
-                "id": unit["id"],
-                "relationship": unit["relationship"],
-                "source_name": unit["source_name"],
-                "status": unit["status"],
-                "valid_from": unit["valid_from"],
-                "valid_to": unit["valid_to"],
-            }
-            fact = facts_by_id[f"political_identity:{unit['id']}"]
-            self.assertEqual(fact["value"], expected)
+    def test_population_bounds_and_unknown_nulls_are_preserved(self):
+        _, catalog = generator.build()
+        facts = {fact['fact_id']: fact for fact in catalog['facts']}
+        population = generator.read_json(generator.POPULATION_PATH)
+        indexes = {field: index for index, field in enumerate(population['field_order'])}
+        expected_ids = set()
+        for row in population['rows']:
+            fact_id = 'population_aggregate:population:' + row[indexes['entity_id']]
+            expected_ids.add(fact_id)
+            fact = facts[fact_id]
+            for target, field in (('value', 'population_value'), ('lower_bound', 'population_lower'), ('upper_bound', 'population_upper')):
+                self.assertEqual(fact[target], row[indexes[field]])
+            self.assertEqual(fact['review_status'], 'BOUNDED_ESTIMATE')
+        self.assertEqual(expected_ids, {key for key in facts if key.startswith('population_aggregate:')})
+        unknown = generator.assertion('unknown', None, 'persons', {'from': '1900-01-01', 'to': '1900-01-01'}, {'kind': 'UNKNOWN', 'id': 'unknown'})
+        self.assertIsNone(unknown['value'])
+        self.assertIsNone(unknown['lower_bound'])
+        self.assertEqual(unknown['spatial_scope']['kind'], 'UNKNOWN')
 
-        population = json.loads(repo_path(generator.POPULATION_PATH).read_text(encoding="utf-8"))
-        indexes = {name: index for index, name in enumerate(population["field_order"])}
-        for row in population["rows"]:
-            entity_id = row[indexes["entity_id"]]
-            fact = facts_by_id[f"population_aggregate:population:{entity_id}"]
-            self.assertEqual(fact["value"], row[indexes["population_value"]])
-            self.assertEqual(fact["lower_bound"], row[indexes["population_lower"]])
-            self.assertEqual(fact["upper_bound"], row[indexes["population_upper"]])
-            self.assertEqual(
-                fact["confidence"], row[indexes["population_confidence_bp"]] / 10_000.0
-            )
+    def test_invalid_versions_duplicates_dates_and_references_fail(self):
+        with self.assertRaises(generator.ProvenanceSourceContractError):
+            generator.require_schema({'schema_version': 999}, 'schema_version', 1)
+        with self.assertRaises(generator.ProvenanceSourceContractError):
+            generator.unique_records([{'id': 'same'}, {'id': 'same'}], 'id')
+        for start, end in (('1900-02-30', '1900-03-01'), ('1901-01-01', '1900-01-01')):
+            with self.assertRaises((ValueError, generator.ProvenanceSourceContractError)):
+                generator.valid_period(start, end)
+        original = generator.read_json
+        def invalid_geometry(path):
+            document = original(path)
+            if path == generator.POLITICAL_PATH:
+                document['units'][0]['geometry_feature_id'] = 'missing_geometry'
+            return document
+        with patch.object(generator, 'read_json', side_effect=invalid_geometry):
+            with self.assertRaises(generator.ProvenanceSourceContractError):
+                generator.build()
+        def unsupported_manifest(path):
+            document = original(path)
+            if path == generator.POPULATION_MANIFEST_PATH:
+                document['schema_id'] = 'unsupported_population_manifest'
+            return document
+        with patch.object(generator, 'read_json', side_effect=unsupported_manifest):
+            with self.assertRaises(generator.ProvenanceSourceContractError):
+                generator.build()
 
-        spatial = json.loads(repo_path(generator.SPATIAL_PATH).read_text(encoding="utf-8"))
-        spatial_fact = facts_by_id["spatial_boundary:world_boundaries_1900_03_12"]
-        self.assertEqual(
-            spatial_fact["value"],
-            {
-                "feature_count": spatial["feature_count"],
-                "provider": spatial["provider"],
-                "snapshot_date": spatial["snapshot_date"],
-                "upstream_content_hash": spatial["source"]["source_sha256"],
-            },
-        )
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main(verbosity=2)

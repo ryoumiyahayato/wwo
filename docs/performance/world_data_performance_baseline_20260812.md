@@ -1,5 +1,7 @@
 # WWO WORLD DATA PERFORMANCE BASELINE — BATCH 1
 
+> 历史记录。下文“当前”仅指记录时的阶段；旧实现、命令及同步要求不再是开发指令。不得据此恢复已删除的宿主、UI、探针或审计门禁。现行入口、WorldState 与 v15 存档见 [当前架构](../ARCHITECTURE.md) 和 [存档格式](../SAVE_FORMAT.md)。
+
 Source-inventory baseline master: 83e4f305b52529625f4d86ad928bce451ea34b9f
 Branch: chore/world-data-performance-baseline-20260812
 

@@ -86,7 +86,7 @@ jobs:
             cat formal-economy-import.log
             exit 1
           fi
-      - name: Run formal world and isolated service regressions
+      - name: Run formal world regressions
         shell: bash
         run: |
           set -euo pipefail
@@ -94,15 +94,7 @@ jobs:
           tests=(
             tests/formal/formal_world_integration_test.gd
             tests/formal/formal_world_long_term_balance_test.gd
-            tests/alpha/alpha_historical_world_economy_data_test.gd
             tests/alpha/alpha_economy_ui_audit_test.gd
-            tests/alpha/alpha_commodity_market_test.gd
-            tests/alpha/alpha_economy_lifecycle_test.gd
-            tests/alpha/alpha_labor_enterprise_test.gd
-            tests/alpha/alpha_composition_smoke.gd
-            tests/alpha/alpha_save_and_migration_test.gd
-            tests/alpha/alpha_economy_integration_phase2_test.gd
-            tests/alpha/alpha_ai_economy_stability_test.gd
           )
           for test_script in "${tests[@]}"; do
             name="$(basename "${test_script}" .gd)"

@@ -1,0 +1,11 @@
+{
+  "policy_id": "player_livelihood_r1",
+  "basis": "GENERATED_SIMULATION_ASSUMPTION",
+  "denomination": "denomination:formal_simulation_minor_v1",
+  "opening_cash": 2500,
+  "wage_amount": 1000,
+  "pay_period_minutes": 10080,
+  "employer_reserve": 12000,
+  "employer_label": "背景工资雇佣部门",
+  "notice": "开局现金、工资及雇主储备是可重复的模拟条件，不代表历史人物财富或历史公司。"
+}

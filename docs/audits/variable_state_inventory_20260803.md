@@ -1,5 +1,7 @@
 # WWO 全仓库变量与状态可追溯清单（2026-08-03）
 
+> 历史记录。下文“当前”仅指记录时的阶段；旧实现、命令及同步要求不再是开发指令。不得据此恢复已删除的宿主、UI、探针或审计门禁。现行入口、WorldState 与 v15 存档见 [当前架构](../ARCHITECTURE.md) 和 [存档格式](../SAVE_FORMAT.md)。
+
 > 固定 Base：`277a6d801a6eae762e4f6963ceb995a909f80bd9`。由 `tools/audit_formal_variable_state.py` 确定性生成；静态候选不等于删除结论。
 
 ## 范围与限制

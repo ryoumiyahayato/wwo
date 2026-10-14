@@ -8,7 +8,7 @@ const EXPECTED_DIGESTS: Dictionary = {
 	30: "90408a5dbe3075b6f64b893e9314736be0116293f3e6196b9dd4f04029657133",
 	365: "c73d9ca3fe8e8bb114e43354beb53a6ace1b4704832e58dacdbcc27eed9e1286",
 }
-const SIMULATION_SCRIPT := preload("res://scripts/formal/formal_world_simulation.gd")
+const BOOTSTRAP_SCRIPT := preload("res://scripts/content/world_bootstrap.gd")
 
 var failures: int = 0
 var checks: int = 0
@@ -19,19 +19,21 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var simulation: Variant = SIMULATION_SCRIPT.new()
-	_check(simulation.initialize(), "golden economy world initializes")
-	if simulation.initialized:
+	for livelihood: String in [FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, FormalPersonalEconomyState.GENERAL_WAGE_LABOR]:
+		var simulation: WorldBuildResult = BOOTSTRAP_SCRIPT.new().build(null, [], [], livelihood)
+		_check(simulation.success, "golden economy world initializes: " + livelihood)
+		if not simulation.success:
+			continue
 		var previous_day := 0
 		for checkpoint_day: int in CHECKPOINT_DAYS:
 			for _day: int in range(previous_day, checkpoint_day):
-				simulation.advance_minutes(24 * 60)
-			var digest := _economic_digest(simulation.economy_regression_snapshot())
-			print("FORMAL_ECONOMY_GOLDEN_%d=%s" % [checkpoint_day, digest])
+				simulation.simulation_step.advance_minutes(24 * 60)
+			var digest := _economic_digest(simulation.world.economy_state.legacy_regression_snapshot())
+			print("FORMAL_ECONOMY_GOLDEN_%d=%s LIVELIHOOD=%s" % [checkpoint_day, digest, livelihood])
 			if EXPECTED_DIGESTS.has(checkpoint_day):
 				_check(
 					digest == str(EXPECTED_DIGESTS[checkpoint_day]),
-					"day %d economy matches trusted baseline" % checkpoint_day
+					"day %d economy matches trusted baseline: %s" % [checkpoint_day, livelihood]
 				)
 			previous_day = checkpoint_day
 	print("Formal world economy golden: %d checks, %d failures" % [checks, failures])

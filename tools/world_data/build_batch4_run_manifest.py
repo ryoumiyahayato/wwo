@@ -67,7 +67,6 @@ def build_manifest(repository_root: Path, output_dir: Path) -> dict[str, Any]:
     batch2_assets = load_optional(output_dir, "batch2_asset_manifest.json")
     batch2_corpus = load_optional(output_dir, "batch2_regression_manifest.json")
     batch2_gap = load_optional(output_dir, "batch2_gap_report.json")
-    batch3_loader = load_optional(output_dir, "batch3_loader_contract.json")
     batch3_flags = load_optional(output_dir, "batch3_historical_flag_coverage.json")
     batch3_signatures = load_optional(output_dir, "batch3_record_signature_manifest.json")
     batch3_gap = load_optional(output_dir, "batch3_gap_report.json")
@@ -118,9 +117,6 @@ def build_manifest(repository_root: Path, output_dir: Path) -> dict[str, Any]:
                 "manual_or_historical_items_remain": batch2_gap.get("manual_or_historical_items_remain"),
             },
             "batch3": {
-                "loader_entries": len(batch3_loader.get("world_map_data_loader_entries", [])),
-                "loader_missing_direct_references": len(batch3_loader.get("missing_direct_references", [])),
-                "loader_missing_directory_references": len(batch3_loader.get("missing_directory_references", [])),
                 "historical_units": batch3_flags.get("unit_count"),
                 "verified_or_documented_flag_units": sum(
                     value for key, value in batch3_flags.get("status_counts", {}).items() if key in ("VERIFIED_ASSET", "DOCUMENTED_ABSENCE")
@@ -143,7 +139,6 @@ def build_manifest(repository_root: Path, output_dir: Path) -> dict[str, Any]:
             "dangling_foreign_keys": dangling_reference_count(code_counts),
             "duplicate_catalog_ids": sum(code_counts.get(code, 0) for code in ("DUPLICATE_ID", "EMPTY_ID", "DUPLICATE_STABLE_ID")),
             "flag_asset_gaps": len(batch2_assets.get("missing_assets", [])) + len(batch2_assets.get("hash_mismatches", [])),
-            "loader_contract_gaps": len(batch3_loader.get("missing_direct_references", [])) + len(batch3_loader.get("missing_directory_references", [])),
             "manual_review_findings": code_counts.get("SELF_INTERSECTING_RING", 0) + code_counts.get("PLACEHOLDER_FOREIGN_KEY", 0),
         },
         "remaining_work": remaining_work,

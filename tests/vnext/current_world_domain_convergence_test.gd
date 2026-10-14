@@ -50,11 +50,11 @@ func _run() -> void:
 		"Population initializes independently"
 	)
 
-	var formal := FormalWorldSimulation.new()
-	_check(formal.initialize(), "Formal Economy fixture initializes")
-	if not formal.initialized:
+	var formal := WorldBootstrap.new().build()
+	_check(formal.success, "Formal Economy fixture initializes")
+	if not formal.success:
 		return
-	var market_ids: Array[String] = formal.market_registry_view().market_ids()
+	var market_ids: Array[String] = formal.world.market_registry_view.market_ids()
 	_check(market_ids.size() >= 2, "Formal Market registry exposes remap targets")
 	if market_ids.size() < 2:
 		return
@@ -62,7 +62,7 @@ func _run() -> void:
 	_check(
 		geography.configure(
 			catalog,
-			formal.market_registry_view(),
+			formal.world.market_registry_view,
 			[_assigned(TERRITORY_A, market_ids[0])]
 		),
 		"Economic Geography configures independently"
@@ -99,7 +99,7 @@ func _run() -> void:
 	_equal(control.authoritative_fingerprint(), control_before_transfer, "Population adopt preserves Control fingerprint")
 
 	var economy_before_remap: Dictionary = (
-		formal.get_persistent_state().get("economy", {}) as Dictionary
+		formal.persistence.snapshot().get("economy", {}) as Dictionary
 	).duplicate(true)
 	var geography_before_remap: String = geography.state_fingerprint()
 	var remap: VNextEconomicGeographyCandidate = geography.prepare_remap(
@@ -107,20 +107,20 @@ func _run() -> void:
 	)
 	_check(remap != null, "Economic Geography remap candidate prepares")
 	_equal(
-		formal.get_persistent_state().get("economy", {}),
+		formal.persistence.snapshot().get("economy", {}),
 		economy_before_remap,
 		"Economic Geography prepare preserves Economy state"
 	)
 	_check(remap != null and geography.adopt_candidate(remap), "Economic Geography remap candidate adopts")
 	_check(geography.state_fingerprint() != geography_before_remap, "remap changes Economic Geography fingerprint")
 	_equal(
-		formal.get_persistent_state().get("economy", {}),
+		formal.persistence.snapshot().get("economy", {}),
 		economy_before_remap,
 		"Economic Geography adopt preserves Economy state"
 	)
 
 	var formal_source: String = FileAccess.get_file_as_string(
-		"res://scripts/formal/formal_world_simulation.gd"
+		"res://scripts/content/world_bootstrap.gd"
 	)
 	for domain_type: String in [
 		"VNextTerritorialControlLedger",
@@ -132,7 +132,7 @@ func _run() -> void:
 		"res://scripts/vnext/territory/territorial_control_ledger.gd",
 		"res://scripts/vnext/population/population_authority.gd",
 		"res://scripts/vnext/economic_geography/economic_geography_service.gd",
-		"res://scripts/vnext/organization/organization_core.gd",
+		"res://scripts/world/organization_state.gd",
 	]:
 		var source: String = FileAccess.get_file_as_string(domain_path)
 		_check(

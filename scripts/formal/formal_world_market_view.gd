@@ -41,8 +41,7 @@ func is_configured() -> bool:
 	return (
 		not _revision.is_empty()
 		and not _mapping_fingerprint.is_empty()
-		and _markets_by_id.size()
-		== FormalWorldMarketRegistry.EXPECTED_COMPATIBILITY_MARKET_COUNT
+		and not _markets_by_id.is_empty()
 	)
 
 

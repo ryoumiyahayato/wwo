@@ -138,70 +138,6 @@ func production_geography_available() -> bool:
 	return _configured and not admitted_sources().is_empty()
 
 
-func audit_report() -> Dictionary:
-	var report: Dictionary = {
-		"REGISTERED_SOURCE_COUNT": 0,
-		"REFERENCE_ONLY_SOURCE_COUNT": 0,
-		"CANDIDATE_SOURCE_COUNT": 0,
-		"ADMITTED_SOURCE_COUNT": 0,
-		"REJECTED_SOURCE_COUNT": 0,
-		"PROTOTYPE_SOURCE_COUNT": 0,
-		"LICENSE_RESTRICTED_SOURCE_COUNT": 0,
-		"COMMERCIAL_INELIGIBLE_SOURCE_COUNT": 0,
-		"UNRESOLVED_LICENSE_SOURCE_COUNT": 0,
-		"UNRESOLVED_HISTORICAL_FIT_COUNT": 0,
-		"DERIVED_SOURCE_COUNT": 0,
-		"UNTRACEABLE_DERIVATION_COUNT": 0,
-		"REGISTRY_FINGERPRINT": "",
-		"PRODUCTION_GEOGRAPHY_AVAILABLE": "NO",
-	}
-	if not _configured:
-		return report
-	report["REGISTERED_SOURCE_COUNT"] = _ordered_ids.size()
-	for source_id: String in _ordered_ids:
-		var record := source_by_id(source_id)
-		match str(record.get("production_admission_status", "")):
-			VNextTerritorySourceRecord.STATUS_REFERENCE_ONLY:
-				report["REFERENCE_ONLY_SOURCE_COUNT"] = int(report["REFERENCE_ONLY_SOURCE_COUNT"]) + 1
-			VNextTerritorySourceRecord.STATUS_CANDIDATE:
-				report["CANDIDATE_SOURCE_COUNT"] = int(report["CANDIDATE_SOURCE_COUNT"]) + 1
-			VNextTerritorySourceRecord.STATUS_ADMITTED:
-				report["ADMITTED_SOURCE_COUNT"] = int(report["ADMITTED_SOURCE_COUNT"]) + 1
-			VNextTerritorySourceRecord.STATUS_REJECTED:
-				report["REJECTED_SOURCE_COUNT"] = int(report["REJECTED_SOURCE_COUNT"]) + 1
-		if bool(record.get("prototype_only", false)):
-			report["PROTOTYPE_SOURCE_COUNT"] = int(report["PROTOTYPE_SOURCE_COUNT"]) + 1
-		var license_restricted: bool = (
-			record.get("redistribution_allowed") == false
-			or record.get("derivative_work_allowed") == false
-			or record.get("commercial_use_allowed") == false
-			or record.get("share_alike_required") == true
-		)
-		if license_restricted:
-			report["LICENSE_RESTRICTED_SOURCE_COUNT"] = int(report["LICENSE_RESTRICTED_SOURCE_COUNT"]) + 1
-		if record.get("commercial_use_allowed") == false:
-			report["COMMERCIAL_INELIGIBLE_SOURCE_COUNT"] = int(report["COMMERCIAL_INELIGIBLE_SOURCE_COUNT"]) + 1
-		if (
-			str(record.get("license_id", "")).is_empty()
-			or str(record.get("license_url", "")).is_empty()
-			or record.get("redistribution_allowed") == null
-			or record.get("derivative_work_allowed") == null
-			or record.get("commercial_use_allowed") == null
-		):
-			report["UNRESOLVED_LICENSE_SOURCE_COUNT"] = int(report["UNRESOLVED_LICENSE_SOURCE_COUNT"]) + 1
-		if str(record.get("historical_fit_status", "")) == VNextTerritorySourceRecord.HISTORICAL_FIT_UNRESOLVED:
-			report["UNRESOLVED_HISTORICAL_FIT_COUNT"] = int(report["UNRESOLVED_HISTORICAL_FIT_COUNT"]) + 1
-		if str(record.get("derivation_kind", "")) != VNextTerritorySourceRecord.DERIVATION_RAW_EXTERNAL:
-			report["DERIVED_SOURCE_COUNT"] = int(report["DERIVED_SOURCE_COUNT"]) + 1
-		var admission := admission_for(source_id)
-		var gates: Dictionary = admission.get("gates", {}) as Dictionary
-		if str(gates.get(ADMISSION.DERIVATION_TRACEABLE, ADMISSION.UNRESOLVED)) != ADMISSION.PASS:
-			report["UNTRACEABLE_DERIVATION_COUNT"] = int(report["UNTRACEABLE_DERIVATION_COUNT"]) + 1
-	report["REGISTRY_FINGERPRINT"] = _fingerprint
-	report["PRODUCTION_GEOGRAPHY_AVAILABLE"] = "YES" if production_geography_available() else "NO"
-	return report
-
-
 func errors() -> Array[String]:
 	return _copy_strings(_errors)
 
@@ -210,17 +146,16 @@ func _source_hash_status(record: VNextTerritorySourceRecord) -> String:
 	var local_path := str(record.value("local_resource_path", ""))
 	var declared_hash := str(record.value("source_sha256", ""))
 	if local_path.is_empty():
-		return ADMISSION.UNRESOLVED
+		return ADMISSION.UNRESOLVED if record.derivation_kind() == VNextTerritorySourceRecord.DERIVATION_RAW_EXTERNAL else "RESOURCE_MISSING"
 	if not FileAccess.file_exists(local_path):
 		return "RESOURCE_MISSING"
+	# Only raw external artifacts have a byte-integrity contract. Derived
+	# repository content is validated by its loader and generator, not a digest.
+	if record.derivation_kind() != VNextTerritorySourceRecord.DERIVATION_RAW_EXTERNAL:
+		return "NOT_APPLICABLE"
 	if declared_hash.is_empty():
 		return ADMISSION.UNRESOLVED
-	var actual_hash: String
-	if local_path.get_extension().to_lower() == "json":
-		var canonical_text := FileAccess.get_file_as_string(local_path).replace("\r\n", "\n").replace("\r", "\n")
-		actual_hash = canonical_text.sha256_text()
-	else:
-		actual_hash = FileAccess.get_sha256(local_path)
+	var actual_hash := FileAccess.get_sha256(local_path)
 	return ADMISSION.PASS if actual_hash == declared_hash else "HASH_MISMATCH"
 
 

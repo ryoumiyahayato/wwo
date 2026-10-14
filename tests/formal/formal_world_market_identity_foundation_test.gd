@@ -10,9 +10,9 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var simulation := FormalWorldSimulation.new()
-	_check(simulation.initialize(), "formal composition initializes with market registry")
-	if simulation.initialized:
+	var simulation := WorldBootstrap.new().build()
+	_check(simulation.success, "formal composition initializes with market registry")
+	if simulation.success:
 		_check_identity_contract(simulation)
 		_check_invalid_identities()
 		_check_registry_guards(simulation)
@@ -24,10 +24,10 @@ func _run() -> void:
 	quit(1 if failures > 0 else 0)
 
 
-func _check_identity_contract(simulation: FormalWorldSimulation) -> void:
-	var markets := simulation.market_registry_view()
+func _check_identity_contract(simulation: WorldBuildResult) -> void:
+	var markets := simulation.world.market_registry_view
 	_check(markets.is_configured(), "market view is configured")
-	_check(markets.market_count() == 50, "exactly 50 compatibility markets exist")
+	_check(markets.market_count() == simulation.world.economic_static_view.countries().size(), "market identities cover the economic data set")
 	_check(
 		markets.revision() == FormalWorldMarketRegistry.REVISION,
 		"market revision is explicit"
@@ -90,48 +90,49 @@ func _check_invalid_identities() -> void:
 	_check(not MarketIdentity.new(missing_revision).is_valid(), "identity without revision is rejected")
 
 
-func _check_registry_guards(simulation: FormalWorldSimulation) -> void:
+func _check_registry_guards(simulation: WorldBuildResult) -> void:
 	var aggregate_ids: Array[String] = []
-	for record: Dictionary in simulation.market_registry_view().markets():
+	for record: Dictionary in simulation.world.market_registry_view.markets():
 		aggregate_ids.append(str(record.get("source_economic_aggregate_id", "")))
 	var duplicate_ids := aggregate_ids.duplicate()
 	duplicate_ids[duplicate_ids.size() - 1] = duplicate_ids[0]
 	var duplicate_registry := FormalWorldMarketRegistry.new()
 	_check(
 		not duplicate_registry.configure(
-			duplicate_ids, simulation.political_registry_view().entity_ids()
+			duplicate_ids, RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()).entity_ids()
 		),
 		"duplicate market identity input fails closed"
 	)
 	var registry := FormalWorldMarketRegistry.new()
 	_check(
 		registry.configure(
-			aggregate_ids, simulation.political_registry_view().entity_ids()
+			aggregate_ids, RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()).entity_ids()
 		),
 		"registry fixture initializes once"
 	)
 	var before := registry.read_only_snapshot()
 	_check(
 		not registry.configure(
-			aggregate_ids, simulation.political_registry_view().entity_ids()
+			aggregate_ids, RuntimePoliticalEntityView.new(simulation.world.political_registry.snapshot()).entity_ids()
 		),
 		"second market registry initialization fails"
 	)
 	_check(registry.read_only_snapshot() == before, "failed reconfiguration preserves registry")
-	var copied_markets := simulation.market_registry_view().markets()
+	var copied_markets := simulation.world.market_registry_view.markets()
 	copied_markets.clear()
 	_check(
-		simulation.market_registry_view().market_count() == 50,
+		simulation.world.market_registry_view.market_count() == aggregate_ids.size(),
 		"consumer mutation cannot alter market registry"
 	)
 
 
-func _check_economy_scope_and_observer(simulation: FormalWorldSimulation) -> void:
-	var economy := simulation.economy
-	_check(economy.market_states.size() == 50, "Economy owns 50 market-scoped states")
+func _check_economy_scope_and_observer(simulation: WorldBuildResult) -> void:
+	var economy := FormalWorldEconomyView.new(simulation.world.economy_state.read_only_snapshot())
+	var market_count := simulation.world.market_registry_view.market_count()
+	_check(economy.market_states.size() == market_count, "Economy owns one state per market")
 	_check(
-		economy.economic_aggregate_states.size() == 50,
-		"observer exposes 50 distinct economic aggregates"
+		economy.economic_aggregate_states.size() == market_count,
+		"observer exposes the current economic aggregate set"
 	)
 	for market_id_value: Variant in economy.market_states:
 		var market_id := str(market_id_value)
@@ -141,7 +142,7 @@ func _check_economy_scope_and_observer(simulation: FormalWorldSimulation) -> voi
 		_check(market_id != aggregate_id, "market state does not reuse aggregate ID")
 		_check(state.get("inventory", {}) is Dictionary, "inventory is market-scoped")
 		_check(state.get("prices", {}) is Dictionary, "prices are market-scoped")
-	var summary := simulation.country_summary("united_states_1900")
+	var summary := simulation.world.economy_state.country_summary("united_states_1900")
 	_check(str(summary.get("economic_aggregate_id", "")) == "united_states_1900", "summary names aggregate")
 	_check(
 		str(summary.get("market_id", ""))
@@ -161,11 +162,11 @@ func _check_economy_scope_and_observer(simulation: FormalWorldSimulation) -> voi
 	)
 
 
-func _check_persistence_and_atomicity(simulation: FormalWorldSimulation) -> void:
-	simulation.advance_minutes(30 * 24 * 60)
-	var state := simulation.get_persistent_state()
+func _check_persistence_and_atomicity(simulation: WorldBuildResult) -> void:
+	simulation.simulation_step.advance_minutes(30 * 24 * 60)
+	var state := simulation.persistence.snapshot()
 	_check(
-		str(state.get("schema_id", "")) == FormalWorldSimulation.SCHEMA_ID,
+		str(state.get("schema_id", "")) == FormalPersistence.SCHEMA_ID,
 		"world save schema is current"
 	)
 	var market_state := state.get("markets", {}) as Dictionary
@@ -183,12 +184,15 @@ func _check_persistence_and_atomicity(simulation: FormalWorldSimulation) -> void
 	)
 	_check(economy_state.has("market_states"), "economy save persists market-scoped dynamics")
 	_check(not economy_state.has("country_states"), "economy save excludes aggregate-as-market compatibility projection")
-	var restored := FormalWorldSimulation.new()
-	_check(restored.initialize(), "roundtrip candidate initializes")
-	_check(restored.restore_persistent_state(state), "market save roundtrip succeeds")
-	_check(restored.get_persistent_state() == state, "market save roundtrip is exact")
+	var restored := WorldBootstrap.new().build()
+	_check(restored.success, "roundtrip candidate initializes")
+	var candidate_1 := restored.persistence.restore_candidate(state)
+	if candidate_1.success:
+		restored = candidate_1
+	_check(candidate_1.success, "market save roundtrip succeeds")
+	_check(restored.persistence.snapshot() == state, "market save roundtrip is exact")
 
-	var before := simulation.get_persistent_state()
+	var before := simulation.persistence.snapshot()
 	for field: String in ["revision", "mapping_fingerprint"]:
 		var rejected := before.duplicate(true)
 		var rejected_markets := rejected.get("markets", {}) as Dictionary
@@ -197,36 +201,42 @@ func _check_persistence_and_atomicity(simulation: FormalWorldSimulation) -> void
 		else:
 			rejected_markets[field] = "invalid"
 		rejected["markets"] = rejected_markets
-		_check(not simulation.restore_persistent_state(rejected), "invalid market %s is rejected" % field)
-		_check(simulation.get_persistent_state() == before, "market rejection is atomic")
+		var candidate_2 := simulation.persistence.restore_candidate(rejected)
+		if candidate_2.success:
+			simulation = candidate_2
+		_check(not candidate_2.success, "invalid market %s is rejected" % field)
+		_check(simulation.persistence.snapshot() == before, "market rejection is atomic")
 	var copied_catalog := before.duplicate(true)
 	var copied_market_state := copied_catalog.get("markets", {}) as Dictionary
 	copied_market_state["projection_cache"] = []
 	copied_catalog["markets"] = copied_market_state
-	_check(not simulation.restore_persistent_state(copied_catalog), "market save rejects derived cache")
-	_check(simulation.get_persistent_state() == before, "derived-cache rejection is atomic")
+	var candidate_3 := simulation.persistence.restore_candidate(copied_catalog)
+	if candidate_3.success:
+		simulation = candidate_3
+	_check(not candidate_3.success, "market save rejects derived cache")
+	_check(simulation.persistence.snapshot() == before, "derived-cache rejection is atomic")
 
 
 func _check_deterministic_state() -> void:
-	var first := FormalWorldSimulation.new()
-	var second := FormalWorldSimulation.new()
-	_check(first.initialize() and second.initialize(), "determinism fixtures initialize")
-	if not first.initialized or not second.initialized:
+	var first := WorldBootstrap.new().build()
+	var second := WorldBootstrap.new().build()
+	_check(first.success and second.success, "determinism fixtures initialize")
+	if not first.success or not second.success:
 		return
-	first.advance_minutes(30 * 24 * 60)
-	second.advance_minutes(30 * 24 * 60)
+	first.simulation_step.advance_minutes(30 * 24 * 60)
+	second.simulation_step.advance_minutes(30 * 24 * 60)
 	_check(
-		first.market_registry_view().mapping_fingerprint()
-		== second.market_registry_view().mapping_fingerprint(),
+		first.world.market_registry_view.mapping_fingerprint()
+		== second.world.market_registry_view.mapping_fingerprint(),
 		"market mapping fingerprint is deterministic"
 	)
-	_check(first.get_persistent_state() == second.get_persistent_state(), "market-scoped state is deterministic")
+	_check(first.persistence.snapshot() == second.persistence.snapshot(), "market-scoped state is deterministic")
 
 
 func _check_static_ownership_audit() -> void:
 	var economy_source := FileAccess.get_file_as_string(
-		"res://scripts/formal/formal_world_economy_service.gd"
-	)
+		"res://scripts/world/formal_world_economy_state.gd"
+	) + FileAccess.get_file_as_string("res://scripts/simulation/formal_world_economy_simulation.gd")
 	_check(not economy_source.contains("MarketIdentity.new"), "Economy cannot create market identities")
 	_check(
 		not economy_source.contains("FormalWorldMarketRegistry.new"),

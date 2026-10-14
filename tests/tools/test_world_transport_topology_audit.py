@@ -232,14 +232,13 @@ class TransportTopologyAuditArtifactTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.audit = AUDIT.build_audit(ROOT, "4b738ab8b0a21e8685aae95381717e9efd2327a8")
 
-    def test_current_source_counts_and_loader_contract(self) -> None:
+    def test_current_source_counts(self) -> None:
         summary = self.audit["summary"]
         self.assertEqual(summary["transport_node_count"], 40)
         self.assertEqual(summary["road_edge_count"], 3)
         self.assertEqual(summary["rail_edge_count"], 9)
         self.assertEqual(summary["shipping_edge_count"], 3)
         self.assertEqual(summary["broken_reference_count"], 0)
-        self.assertEqual(self.audit["loader_contract"]["status"], "PASS")
 
     def test_current_findings_include_required_review_classes(self) -> None:
         checks = {finding["check"] for finding in self.audit["findings"]}

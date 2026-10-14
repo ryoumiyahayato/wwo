@@ -1,14 +1,10 @@
-# Holographic workspace UI spike
+# Holographic workspace UI spike — historical record
 
 ## Status
 
-This is an isolated, runnable Godot 4.6.3 UI spike. It does not replace the formal main interface.
+The spike scenes, runtime and dedicated workflow have been retired. This document records former behavior and does not provide a runnable or fallback UI.
 
-The formal entry remains:
-
-`run/main_scene="res://scenes/v2_3/v2_3_life_loop_menu.tscn"`
-
-The spike is verified in GitHub Actions with the official Godot 4.6.3 Linux build, GL Compatibility rendering, real mouse/key interaction probes, focused product regressions, Windows export and installer compilation.
+The current entry is `scenes/formal/formal_world_menu.tscn` → `scenes/formal/formal_world_main.tscn`. Current ownership and save behavior are described in [ARCHITECTURE.md](../ARCHITECTURE.md) and [SAVE_FORMAT.md](../SAVE_FORMAT.md). The verification descriptions below are historical coverage, not current checks or instructions.
 
 ## Global historical model
 
@@ -175,7 +171,7 @@ Spike time and HUD controls remain isolated and do not alter formal game systems
 
 ## Automated verification
 
-`.github/workflows/holographic-workspace-spike.yml` performs:
+The former dedicated workflow described the following historical coverage:
 
 1. deterministic global admin-1 generation and audit;
 2. project import and strict script parsing;
@@ -211,23 +207,6 @@ Real screenshots include:
 - Russian Empire holdings;
 - France focus, nine French macro regions and city view.
 
-## Run locally
-
-Open or run:
-
-`res://scenes/ui_spikes/holographic_workspace/holographic_workspace_spike.tscn`
-
-Suggested review:
-
-1. rotate the minimum global overview;
-2. toggle war boundaries;
-3. select and fit Nepal or Bhutan;
-4. select the German or Russian Empire and enter its territory hierarchy;
-5. inspect a first-level administrative region;
-6. return globally and enter France;
-7. review all nine French macro regions and a city;
-8. test F1/F2 and all four corner controls.
-
 ## Known limitations
 
 - historical political boundaries are approximate aggregations of modern geometry;
@@ -237,4 +216,4 @@ Suggested review:
 - only France has a dedicated hand-shaped macro-region and city sample;
 - other entities use the generic member-territory and modern admin-1 fallback hierarchy;
 - CI screenshots use 1280×720; manual review remains useful for additional window sizes and target hardware;
-- the isolated runtime is deliberately layered for the spike and should be decomposed before production integration.
+- the retired spike is not a production integration target.
