@@ -1,0 +1,2410 @@
+{
+  "case_id": "G_SCALE_8_named_dormant64",
+  "contention": "C0",
+  "days": 30,
+  "economics": {
+    "balances": {
+      "Baker": 8000,
+      "Baker2": 8000,
+      "Beaner": 8000,
+      "Dormant0": 1,
+      "Dormant1": 1,
+      "Dormant10": 1,
+      "Dormant11": 1,
+      "Dormant12": 1,
+      "Dormant13": 1,
+      "Dormant14": 1,
+      "Dormant15": 1,
+      "Dormant16": 1,
+      "Dormant17": 1,
+      "Dormant18": 1,
+      "Dormant19": 1,
+      "Dormant2": 1,
+      "Dormant20": 1,
+      "Dormant21": 1,
+      "Dormant22": 1,
+      "Dormant23": 1,
+      "Dormant24": 1,
+      "Dormant25": 1,
+      "Dormant26": 1,
+      "Dormant27": 1,
+      "Dormant28": 1,
+      "Dormant29": 1,
+      "Dormant3": 1,
+      "Dormant30": 1,
+      "Dormant31": 1,
+      "Dormant32": 1,
+      "Dormant33": 1,
+      "Dormant34": 1,
+      "Dormant35": 1,
+      "Dormant36": 1,
+      "Dormant37": 1,
+      "Dormant38": 1,
+      "Dormant39": 1,
+      "Dormant4": 1,
+      "Dormant40": 1,
+      "Dormant41": 1,
+      "Dormant42": 1,
+      "Dormant43": 1,
+      "Dormant44": 1,
+      "Dormant45": 1,
+      "Dormant46": 1,
+      "Dormant47": 1,
+      "Dormant48": 1,
+      "Dormant49": 1,
+      "Dormant5": 1,
+      "Dormant50": 1,
+      "Dormant51": 1,
+      "Dormant52": 1,
+      "Dormant53": 1,
+      "Dormant54": 1,
+      "Dormant55": 1,
+      "Dormant56": 1,
+      "Dormant57": 1,
+      "Dormant58": 1,
+      "Dormant59": 1,
+      "Dormant6": 1,
+      "Dormant60": 1,
+      "Dormant61": 1,
+      "Dormant62": 1,
+      "Dormant63": 1,
+      "Dormant7": 1,
+      "Dormant8": 1,
+      "Dormant9": 1,
+      "Farm": 8000,
+      "Person0": 30,
+      "Person1": 30,
+      "Person2": 30,
+      "Person3": 30,
+      "Person4": 30,
+      "Person5": 30,
+      "Person6": 30,
+      "Person7": 30
+    },
+    "feedback": true,
+    "limits": {
+      "Baker": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Baker2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Beaner": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant0": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant1": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant10": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant11": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant12": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant13": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant14": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant15": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant16": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant17": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant18": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant19": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant20": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant21": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant22": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant23": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant24": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant25": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant26": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant27": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant28": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant29": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant3": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant30": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant31": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant32": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant33": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant34": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant35": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant36": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant37": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant38": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant39": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant4": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant40": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant41": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant42": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant43": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant44": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant45": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant46": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant47": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant48": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant49": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant5": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant50": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant51": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant52": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant53": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant54": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant55": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant56": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant57": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant58": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant59": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant6": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant60": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant61": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant62": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant63": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant7": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant8": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Dormant9": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Farm": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person0": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person1": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person3": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person4": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person5": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person6": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person7": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      }
+    },
+    "mode": "N2",
+    "prices": {
+      "Baker2:bread": 4,
+      "Baker:bread": 3,
+      "Baker:soap": 2,
+      "Beaner:beans": 4,
+      "Farm:grain": 1
+    },
+    "terminal_prices": {},
+    "tick": 1
+  },
+  "enable_labor": true,
+  "events": [],
+  "firms": [
+    {
+      "capacities": {
+        "grain": 80
+      },
+      "firm_id": "Farm",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "grain": 320
+      },
+      "place_id": "farm",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "grain",
+          "output_quantity": 1,
+          "producer_id": "Farm"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 64,
+        "soap": 16
+      },
+      "firm_id": "Baker",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 192
+      },
+      "knowledge": {
+        "grain": [
+          "Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 112,
+        "soap": 32
+      },
+      "place_id": "west",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "Baker"
+        },
+        {
+          "inputs": [
+            [
+              "grain",
+              1
+            ]
+          ],
+          "output_commodity": "soap",
+          "output_quantity": 1,
+          "producer_id": "Baker"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 48
+      },
+      "firm_id": "Baker2",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 144
+      },
+      "knowledge": {
+        "grain": [
+          "Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 96
+      },
+      "place_id": "east",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "Baker2"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "beans": 64
+      },
+      "firm_id": "Beaner",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "beans": 128
+      },
+      "place_id": "west",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "beans",
+          "output_quantity": 1,
+          "producer_id": "Beaner"
+        }
+      ]
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person0",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person1",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person2",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person3",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person4",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person5",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person6",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person7",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant0",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant1",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant2",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant3",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant4",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant5",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant6",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant7",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant8",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant9",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant10",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant11",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant12",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant13",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant14",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant15",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant16",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant17",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant18",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant19",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant20",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant21",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant22",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant23",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant24",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant25",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant26",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant27",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant28",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant29",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant30",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant31",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant32",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant33",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant34",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant35",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant36",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant37",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant38",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant39",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant40",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant41",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant42",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant43",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant44",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant45",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant46",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant47",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant48",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant49",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant50",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant51",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant52",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant53",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant54",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant55",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant56",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant57",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant58",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant59",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant60",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant61",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant62",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    },
+    {
+      "active": false,
+      "capacities": {},
+      "firm_id": "Dormant63",
+      "firm_type": "DORMANT",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "elsewhere",
+      "recipes": []
+    }
+  ],
+  "food_satisfaction": {
+    "beans": 2,
+    "bread": 1
+  },
+  "goods": [
+    "grain",
+    "bread",
+    "beans",
+    "soap"
+  ],
+  "horizon": 5,
+  "households": [
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person0",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person1",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person2",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person3",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person4",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person5",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person6",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person7",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    }
+  ],
+  "inventory": {
+    "Baker": {
+      "beans": 0,
+      "bread": 96,
+      "grain": 160,
+      "soap": 24
+    },
+    "Baker2": {
+      "beans": 0,
+      "bread": 64,
+      "grain": 96,
+      "soap": 0
+    },
+    "Beaner": {
+      "beans": 96,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant0": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant1": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant10": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant11": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant12": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant13": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant14": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant15": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant16": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant17": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant18": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant19": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant2": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant20": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant21": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant22": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant23": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant24": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant25": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant26": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant27": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant28": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant29": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant3": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant30": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant31": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant32": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant33": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant34": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant35": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant36": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant37": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant38": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant39": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant4": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant40": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant41": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant42": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant43": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant44": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant45": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant46": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant47": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant48": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant49": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant5": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant50": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant51": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant52": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant53": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant54": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant55": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant56": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant57": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant58": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant59": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant6": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant60": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant61": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant62": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant63": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant7": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant8": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Dormant9": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Farm": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 240,
+      "soap": 0
+    },
+    "Person0": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person1": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person2": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person3": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person4": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person5": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person6": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person7": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    }
+  },
+  "jobs": [
+    {
+      "employer": "Beaner",
+      "hours": 2,
+      "id": "job-beans",
+      "place": "west",
+      "positions": 24,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "Baker",
+      "hours": 2,
+      "id": "job-bread",
+      "place": "west",
+      "positions": 16,
+      "skill": 1,
+      "wage_per_hour": 2
+    }
+  ],
+  "labor_hours_per_output": {
+    "Baker2:bread": 1,
+    "Baker:bread": 1,
+    "Baker:soap": 1,
+    "Beaner:beans": 1,
+    "Farm:grain": 1
+  },
+  "route_events": {},
+  "routes": [
+    {
+      "buyer_id": "Baker",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "Farm"
+    },
+    {
+      "buyer_id": "Baker2",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "Farm"
+    },
+    {
+      "buyer_id": "Person0",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person0",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person0",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person0",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person1",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person1",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person1",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person1",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person2",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person2",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person2",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person2",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person3",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person3",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person3",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person3",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person4",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person4",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person4",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person4",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person5",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person5",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person5",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person5",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person6",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person6",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person6",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person6",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person7",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person7",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person7",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person7",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    }
+  ],
+  "sinks": [],
+  "stock_horizon": 4
+}

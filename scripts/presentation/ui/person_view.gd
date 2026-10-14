@@ -10,6 +10,8 @@ var account_page: int = 0
 var native_scope_expanded: bool = false
 var capital_mode: bool = false
 var business_mode: bool = false
+var business_finance_mode: bool = false
+var business_finance_page: int = 0
 var business_firm_index: int = 0
 var business_site_index: int = 0
 var business_offer_page: int = 0
@@ -291,7 +293,7 @@ func _draw_native(shell: MainShell, rect: Rect2) -> void:
 			shell.button(Rect2(left.position.x+110,left.end.y-30,90,24), "岗位下一页", "person:native_jobs_next", (native_jobs_page+1)*job_page_size<jobs.size())
 	shell.card(right, "个人订单 / 在途")
 	shell.quantity_input(Rect2(right.position+Vector2(12,40),Vector2(144,26)),quantity_milli,"person:collection",1)
-	shell.label(right.position+Vector2(164,56), "领取 / 企业采购数量" if business_mode else "本次领取数量", 10)
+	shell.label(right.position+Vector2(164,56), "领取 / 企业资金数量" if business_mode and business_finance_mode else "领取 / 企业采购数量" if business_mode else "本次领取数量", 10)
 	y = right.position.y+86
 	var orders := _personal.get("orders", []) as Array
 	native_order_page = clampi(native_order_page, 0, maxi(0, orders.size()-1))
@@ -553,6 +555,10 @@ func business_request(index: int) -> Dictionary:
 	var offers := _business.get("offers",[]) as Array
 	return (offers[index].get("request",{}) as Dictionary).duplicate(true) if index>=0 and index<offers.size() else {}
 
+func business_finance_request() -> Dictionary:
+	var rows := _business.get("financial_actions",[]) as Array
+	return (rows[business_finance_page]["request"] as Dictionary).duplicate(true) if business_finance_page>=0 and business_finance_page<rows.size() else {}
+
 func _draw_business(shell: MainShell, rect: Rect2, start: float) -> void:
 	var y := start
 	if _business.is_empty():
@@ -575,6 +581,11 @@ func _draw_business(shell: MainShell, rect: Rect2, start: float) -> void:
 		shell.label(Vector2(rect.position.x+14,y),"可用 %d · 预留 %d · %s" % [int(cash["available"]),int(cash["reserved"]),currency],10,Color(0.82,0.86,0.79),rect.size.x-28)
 		y+=18
 	var site := _business["site"] as Dictionary
+	shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,23),"生产与采购" if business_finance_mode else "现金、欠薪与企业信用","person:business_finance")
+	y+=28
+	if business_finance_mode:
+		_draw_business_finance(shell,rect,y)
+		return
 	shell.label(Vector2(rect.position.x+14,y),"有效产能 %d · 实际工时 %d · 本日生产工时 %d" % [int(site["shared_capacity"]),int(site.get("plan",{}).get("labor_hours",0)),int(site.get("plan",{}).get("used_hours",0))],10)
 	y+=18
 	var activities := site["activities"] as Array
@@ -606,3 +617,31 @@ func _draw_business(shell: MainShell, rect: Rect2, start: float) -> void:
 	if offers.is_empty() and y+20<rect.end.y-34: shell.label(Vector2(rect.position.x+14,y),"尚无已知供应商报价。",11)
 	shell.button(Rect2(rect.position.x+12,rect.end.y-28,100,23),"报价上一页","person:business_offer_previous",business_offer_page>0)
 	shell.button(Rect2(rect.position.x+122,rect.end.y-28,100,23),"报价下一页","person:business_offer_next",business_offer_page+1<int(_business["offer_total"]))
+
+func _draw_business_finance(shell: MainShell, rect: Rect2, start: float) -> void:
+	var y := start
+	var finance := _business["finance"] as Dictionary
+	for currency: String in finance.get("matured_wages",{}):
+		var wages := finance["matured_wages"][currency] as Dictionary
+		shell.label(Vector2(rect.position.x+14,y),"到期欠薪 %d · 最久 %d 日 · %s" % [int(wages["amount"]),int(wages["arrears_days"]),currency],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=20
+	for loan: Dictionary in finance["credit_responsibilities"]["loans"]:
+		if y+38>rect.end.y-160: break
+		shell.label(Vector2(rect.position.x+14,y),str(loan["id"])+" · "+str(loan["status"])+" · 借方 "+str(loan["borrower"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=18
+		shell.label(Vector2(rect.position.x+14,y),"剩余本金 %d · 利息 %d · 到期日 %d" % [int(loan["remaining_principal"]),int(loan["remaining_interest"]),int(loan["due_day"])],10)
+		y+=20
+	var rows := _business.get("financial_actions",[]) as Array
+	if rows.is_empty():
+		shell.label(Vector2(rect.position.x+14,y),"没有本人可执行的企业借款或还款候选。",11)
+		return
+	business_finance_page=clampi(business_finance_page,0,rows.size()-1)
+	var row := rows[business_finance_page] as Dictionary
+	shell.label(Vector2(rect.position.x+14,y),"金额 %d（右侧数量输入） · %s" % [int(row["amount"]),row["denomination"]],10)
+	y+=24
+	shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,24),("借款 " if row["kind"]=="BORROW" else "偿还 ")+str(row["id"]),"native:business_finance",row["can_execute"])
+	y+=28
+	shell.label(Vector2(rect.position.x+14,y),str(row["reason"]),10)
+	if row["kind"]=="BORROW": shell.label(Vector2(rect.position.x+14,y+20),"固定利息 %d · 期限 %d 日" % [int(row["interest"]),int(row["duration_days"])],10)
+	shell.button(Rect2(rect.position.x+12,rect.end.y-28,100,23),"信用上一项","person:business_credit_previous",business_finance_page>0)
+	shell.button(Rect2(rect.position.x+122,rect.end.y-28,100,23),"信用下一项","person:business_credit_next",business_finance_page+1<rows.size())

@@ -131,7 +131,65 @@ static func formal_regional_request(person_ids: Array[String] = []) -> Dictionar
 
 ## Separate opt-in selection; does not restore or change any main-menu entry.
 static func formal_stratified_request(person_ids: Array[String] = []) -> Dictionary:
+	if OS.get_cmdline_user_args().has("--formal-liquidity-policy"): return formal_liquidity_request(person_ids)
 	return {"format": "HOST_REGION_SELECTION", "person_ids": person_ids.duplicate(), "select_people_at_sites": person_ids.is_empty(), "configuration": stratified_regional_template()}
+
+static func formal_liquidity_request(person_ids: Array[String] = []) -> Dictionary:
+	return {"format":"HOST_REGION_SELECTION","person_ids":person_ids.duplicate(),"select_people_at_sites":person_ids.is_empty(),"configuration":liquidity_regional_template()}
+
+## Explicit 60-day development commercial terms. Existing money/stock is unchanged.
+static func liquidity_regional_template() -> Dictionary:
+	var result := stratified_regional_template()
+	result["case_id"]="FORMAL_LIQUIDITY_REGIONAL_DEVELOPMENT"
+	var currency := FormalLedgerState.DENOMINATION
+	var upstream := "firm:regional_upstream"
+	var food := "firm:regional_food"
+	var textile := "firm:regional_textile"
+	var household := "firm:regional_household"
+	result["firm_finance_authorities"]=[]
+	for firm: String in [upstream,food,textile,household]:
+		result["firm_finance_authorities"].append({"id":"finance:development:"+firm,"firm":firm,"controller":firm,"operations":["offer_credit","accept_credit","repay_loan"],"currency":currency,"limit":100,"start_minute":0,"end_minute":90*1440,"root_authority":"","basis":"EXPLICIT_DEVELOPMENT_FIRM_FINANCE_AUTHORITY"})
+	result["firm_finance_authorities"].append({"id":"finance:development:player","firm":upstream,"controller":"HOST_SELECTED_PLAYER","operations":["offer_credit","accept_credit","repay_loan"],"currency":currency,"limit":100,"start_minute":0,"end_minute":90*1440,"root_authority":"","basis":"EXPLICIT_DEVELOPMENT_FIRM_FINANCE_AUTHORITY"})
+	for authority: Dictionary in result["firm_finance_authorities"]: authority["borrow_limits"]={"daily_principal":80,"max_debt":100,"max_interest":5}
+	result["credit_offers"]=[{"lender":upstream,"borrower":textile,"principal_limit":80,"denomination":currency,"interest":3,"duration_days":8,"valid_days":60,"requires_job":false},{"lender":upstream,"borrower":food,"principal_limit":60,"denomination":currency,"interest":2,"duration_days":8,"valid_days":60,"requires_job":false}]
+	result["npc_finance"]=[]
+	result["liquidity_policies"]=[]
+	for firm: String in [food,textile,household]:
+		result["npc_finance"].append({"actor":firm,"repay_due":true,"allow_exchange":false,"cash_floors":{currency:5},"borrow_limits":{currency:{"daily_principal":80,"max_debt":100,"max_interest":5}},"fx_limits":{}})
+		result["liquidity_policies"].append({"firm":firm,"currency":currency,"cash_floor":5,"protect_due_wages":true,"finance_due_wages":true,"pause_after_days":5,"recover_cash":30,"wind_down_after_days":20,"pause_investment":true,"basis":"EXPLICIT_DEVELOPMENT_LIQUIDITY_POLICY"})
+	result["labor_response_policies"]=[{"actor":"cohort:stratified:lyon_skilled","arrears_days":7,"basis":"EXPLICIT_DEVELOPMENT_LABOR_RESPONSE"}]
+	result["procurement_budgets"]=[]
+	for w: Dictionary in [{"id":"first","a":0,"b":20,"limit":35},{"id":"second","a":20,"b":60,"limit":55}]:
+		result["procurement_budgets"].append({"id":"budget:development:food_grain:"+w["id"],"subject":"organization:development_regional_food","root_authority":"development:food_grain_authority","denomination":currency,"category":"goods:grain","start_minute":w["a"]*1440,"end_minute":w["b"]*1440,"limit":w["limit"],"carryover":"RETAIN_ORIGINAL_WINDOW","priority":"EXISTING_ACTION_ORDER","basis":"EXPLICIT_DEVELOPMENT_PROCUREMENT_AUTHORITY"})
+	# Existing enterprises explicitly perform transport with their existing workers.
+	# No new cash account, worker or Spatial connection is created.
+	var unit := "development_link_payload_unit"
+	for good: Dictionary in result["goods"]: good["unit_weight"]={"numerator":1,"denominator":1,"unit":unit,"basis":"EXPLICIT_DEVELOPMENT_SHARED_LINK_LOAD_ASSUMPTION"}
+	var starts: Array[int]=[]
+	for date: int in range(0,61):
+		starts.append(date*1440);starts.append(date*1440+720)
+	result["transport_facilities"]=[]
+	for site: String in ["site:regional_upstream:lyon","site:regional_food:paris"]:
+		for kind: String in ["HANDLING_THROUGHPUT","BERTH_OCCUPANCY","STORAGE_OCCUPANCY"]:
+			var windows: Array[Dictionary]=[]
+			if kind=="HANDLING_THROUGHPUT":
+				for start: int in starts:
+					windows.append({"start_minute":start,"end_minute":start+60,"capacity":8})
+			else: windows.append({"start_minute":0,"end_minute":90*1440,"capacity":64 if kind=="STORAGE_OCCUPANCY" else 8})
+			result["transport_facilities"].append({"id":"facility:development:"+site+":"+kind,"site_id":site,"kind":kind,"unit":unit,"windows":windows,"basis":"EXPLICIT_DEVELOPMENT_TRANSPORT_FACILITY"})
+	result["shared_transport"]=[]
+	for route: Dictionary in result["routes"]:
+		if route.get("source_link_id")!="rail_paris_lyon": continue
+		var origin := "site:regional_food:paris" if route["from_place_id"]=="place:paris" else "site:regional_upstream:lyon"
+		var destination := "site:regional_upstream:lyon" if route["to_place_id"]=="place:lyon" else "site:regional_food:paris"
+		route["carrier"]=food if route["from_place_id"]=="place:paris" else upstream
+		var nodes := {"unloading_minutes":60,"unloading_hours_per_unit":1}
+		for k: String in ["origin_handling","origin_berth","destination_handling","destination_berth","destination_storage"]:
+			var site := origin if k.begins_with("origin") else destination
+			var kind := "HANDLING_THROUGHPUT" if k.ends_with("handling") else "BERTH_OCCUPANCY" if k.ends_with("berth") else "STORAGE_OCCUPANCY"
+			nodes[k]="facility:development:"+site+":"+kind
+		result["shared_transport"].append({"edge_id":route["id"],"source_link_id":"rail_paris_lyon","entry_minutes":starts.duplicate(),"weight_unit":unit,"vehicle_id":"vehicle:development:"+route["carrier"],"vehicle_payload":8,"handling_site":origin,"handling_hours_per_unit":1,"basis":"EXPLICIT_DEVELOPMENT_SHARED_LINK_LOAD_ASSUMPTION","window_minutes":60,"loading_minutes":60,"travel_minutes":660,"vehicle_hold_minutes":780,"node_resources":nodes,"legacy_node_limit_basis":"EXPLICIT_DAILY_BUSINESS_QUANTITY_LIMIT"})
+	return result
 
 ## Eight finite strata / 72 background people, using the same firms, goods and
 ## routes. Counts, occupations, rates and money are development assumptions.
@@ -282,6 +340,8 @@ static func resolve_regional(world: WorldState, request: Dictionary) -> Dictiona
 	# One explicitly selected developer manager can arrange bounded admissions.
 	if selected.has(world.player_state.player_id()) and not result["firms"].is_empty():
 		result["firms"][0]["manager"] = world.player_state.player_id()
+	for authority: Dictionary in result.get("firm_finance_authorities",[]):
+		if authority["controller"]=="HOST_SELECTED_PLAYER": authority["controller"]=world.player_state.player_id()
 	if not result.has("personal_storage"): result["personal_storage"] = _development_personal_storage(result)
 	if not result.has("commodity_mappings"): _install_commodity_crosswalk(result)
 	_install_lifecycle_configuration(result)

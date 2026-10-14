@@ -126,3 +126,11 @@ personal_storage 许可及承运路线公告可由既有 expand_scope 在正式�
 正式候选沿原 WorldBootstrap 构造宿主，再恢复 Organization、Ledger、Population、原生领域及人物旅行。配置中的 `development_organizations` 只描述明确的开发公司来源；已保存的组织身份和任命从组织状态恢复，不在加载时重新登记或发资源。派生的订单、收据、供应目录、路线、到期责任、活动项目和产能索引从权威记录重建，不另建缓存存档。
 
 缺少可选字段时沿各模块既有兼容分支读取。坏引用或时间、数量、权限来源不一致时拒绝候选；不替换活世界。未记录的历史损失、迁居、预算或共同资源安排不按当前位置及当前政策推测补造。默认旧经济入口及个人v2/v3、经济v6、Ledger历史语义保留。自然损耗率、全国接管、完整银行和军事Task6没有因这些字段而自动启用。
+
+### 企业资金压力增量
+
+可选 liquidity_policies、labor_response_policies、firm_finance_authorities 属于原生配置。没有字段时不推测历史策略或授予金融权限。经营和劳动决定沿原 commands、enterprise_changes、employment_ends、capital_formation.changes 保存，生效边界不改变。欠薪、贷款及物资仍由原业务状态恢复。
+
+企业金融动作保留 financial_authorization，包含实际控制者、企业、组织、操作、币种、金额、时间及原许可；可选借款限额和组织根授权证明也保留。finance_firm / finance_investment 的 delegated_by 与实际企业信用命令双向核对；内部动作ID不代替权限。恢复对照合同币种、实际金额及许可引用。后续明确授权不反向改写其生效前的旧债务。
+
+50日开发场景在第25日恢复真实未结订单、工资、逾期贷款及共享节点状态后继续推进。短行动检查另覆盖实际部分还款和授权金额不一致的拒绝。加载未放款、发工资、重新进入容量或补发初始资源。缺少新权限的未来行为会被拒绝，既有债务不会因此删除。

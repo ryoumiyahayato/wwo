@@ -29,15 +29,15 @@ func initialize_state() -> bool:
 
 
 func settle_hour_range(
-	previous_total_hour: int, current_total_hour: int
+	previous_total_hour: int, current_total_hour: int, include_observation: bool = true
 ) -> Dictionary:
 	if previous_total_hour < 0 or current_total_hour <= previous_total_hour:
-		return _state.world_summary()
+		return _state.world_summary() if include_observation else {}
 	assert(current_total_hour == _state.total_hour)
 	for crossed_hour: int in range(previous_total_hour + 1, current_total_hour + 1):
 		if crossed_hour % HOURS_PER_DAY == 0:
 			_settle_day(crossed_hour)
-	return _state.world_summary()
+	return _state.world_summary() if include_observation else {}
 
 
 func _initialize_country(record: Dictionary) -> void:

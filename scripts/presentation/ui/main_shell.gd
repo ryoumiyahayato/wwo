@@ -363,7 +363,18 @@ func _draw_polity_hud() -> void:
 			_flag_rect = flag_rect
 			_flag_texture = _view_flag
 			RenderingServer.canvas_item_clear(_flag_item)
-			RenderingServer.canvas_item_add_texture_rect(_flag_item,flag_rect,_view_flag.get_rid())
+			var points := PackedVector2Array()
+			var uvs := PackedVector2Array()
+			var indices := PackedInt32Array()
+			for column: int in range(9):
+				var u := float(column)/8.0
+				for v: float in [0.0,1.0]:
+					points.append(flag_rect.position+Vector2(u,v)*flag_rect.size)
+					uvs.append(Vector2(u,v))
+				if column<8:
+					var start := column*2
+					indices.append_array(PackedInt32Array([start,start+1,start+2,start+2,start+1,start+3]))
+			RenderingServer.canvas_item_add_triangle_array(_flag_item,indices,points,PackedColorArray([Color.WHITE]),uvs,PackedInt32Array(),PackedFloat32Array(),_view_flag.get_rid())
 	elif _flag_item.is_valid():
 		RenderingServer.canvas_item_clear(_flag_item)
 		_flag_texture = null
@@ -809,6 +820,10 @@ func _activate(action: String) -> void:
 		person_page.business_mode=not person_page.business_mode
 		person_page.capital_mode=false
 		refresh()
+	elif action=="person:business_finance":
+		person_page.business_finance_mode=not person_page.business_finance_mode
+	elif action.begins_with("person:business_credit_"):
+		person_page.business_finance_page=maxi(0,person_page.business_finance_page+(-1 if action.ends_with("previous") else 1))
 	elif action.begins_with("person:business_"):
 		var change := -1 if action.ends_with("previous") else 1
 		if action.contains("firm_"):

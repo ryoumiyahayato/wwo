@@ -1,6 +1,7 @@
 class_name EconomySliceConfig
 extends RefCounted
 const SharedTransport = preload("res://scripts/world/economy_shared_transport.gd")
+const Liquidity = preload("res://scripts/world/economy_liquidity_rules.gd")
 const Budget = preload("res://scripts/world/economy_procurement_budget.gd")
 const Cohorts = preload("res://scripts/world/economy_cohort_rules.gd")
 
@@ -15,7 +16,7 @@ const FIELDS: Array[String] = ["format", "case_id", "actors", "firms", "jobs", "
 const Credit = preload("res://scripts/world/economy_bilateral_credit.gd")
 const Exchange = preload("res://scripts/world/economy_currency_exchange.gd")
 const Assets = preload("res://scripts/world/economy_asset_market.gd")
-const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations"]
+const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations", "liquidity_policies", "labor_response_policies", "firm_finance_authorities"]
 ## Extra accounts declare finite minor-unit endowments, including zero accounts.
 ## FX offers use target-minor/source-minor rational rates and a fixed source fee.
 ## Routes are directed shared physical edges, with same-currency freight per unit.
@@ -53,6 +54,7 @@ static func is_multi(value: Dictionary) -> bool:
 static func valid(value: Dictionary) -> bool:
 	if not valid_development_organizations(value): return false
 	if not Budget.valid_rules(value.get("procurement_budgets", [])) or not SharedTransport.valid_configuration(value.get("shared_transport", [])) or not SharedTransport.valid_facilities(value.get("transport_facilities", [])): return false
+	if not Liquidity.valid(value): return false
 	if value.has("place_population_bindings") and (not value.get("host_personal_accounts", false) or not FormalWorldPopulationState.valid_place_population_bindings(value["place_population_bindings"])): return false
 	if value.has("commodity_mappings") and (not value.get("host_personal_accounts", false) or not CommodityMapping.valid_rows(value["commodity_mappings"])): return false
 	if value.has("residence_permissions"):
@@ -316,7 +318,7 @@ static func _finance(value: Dictionary, actors: Dictionary, firms: Dictionary, j
 			return false
 		var recipients: Dictionary = {}
 		for actor: Variant in row["known_to"]:
-			if not actor is String or not subjects.has(actor) or recipients.has(actor) or actor == row["carrier"] or (actors.has(actor) and actors[actor]["control"] == "dormant"):
+			if not actor is String or not subjects.has(actor) or recipients.has(actor) or (actor == row["carrier"] and not firms.has(actor)) or (actors.has(actor) and actors[actor]["control"] == "dormant"):
 				return false
 			recipients[actor] = true
 		ids[row["id"]] = true

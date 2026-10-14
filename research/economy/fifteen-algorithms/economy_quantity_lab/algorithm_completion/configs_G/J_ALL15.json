@@ -1,0 +1,1092 @@
+{
+  "assets": {
+    "cancellations": [
+      {
+        "day": 22,
+        "order": "joint-ask"
+      }
+    ],
+    "dividends": [
+      {
+        "asset": "BEAN",
+        "buffer": 600,
+        "day": 20,
+        "per_share": 1
+      },
+      {
+        "asset": "BEAN",
+        "buffer": 600,
+        "day": 28,
+        "per_share": 1
+      }
+    ],
+    "holdings": {
+      "BEAN": {
+        "Founder": 10
+      }
+    },
+    "issuers": {
+      "BEAN": "Beaner"
+    },
+    "known_assets": {
+      "ForeignCrew": [
+        "BEAN"
+      ],
+      "Founder": [
+        "BEAN"
+      ]
+    },
+    "message_delay": 2,
+    "orders": [
+      {
+        "actor": "Founder",
+        "asset": "BEAN",
+        "day": 1,
+        "id": "joint-ask",
+        "limit": 2,
+        "quantity": 6,
+        "side": "sell"
+      },
+      {
+        "actor": "ForeignCrew",
+        "asset": "BEAN",
+        "day": 3,
+        "id": "joint-bid",
+        "last_day": 20,
+        "limit": 3,
+        "quantity": 2,
+        "requires_public_receipts": true,
+        "side": "buy"
+      }
+    ],
+    "publication_interval": 7,
+    "total_shares": {
+      "BEAN": 10
+    }
+  },
+  "case_id": "J_ALL15",
+  "contention": "C0",
+  "credit": {
+    "adjustments": [],
+    "agreements": [
+      {
+        "borrower": "Ada",
+        "due_day": 18,
+        "id": "joint-loan",
+        "interest": 2,
+        "issue_day": 1,
+        "lender": "Lender",
+        "principal": 24,
+        "requires_job": true
+      }
+    ]
+  },
+  "currency": {
+    "account_currencies": {
+      "Ada": "LOCAL",
+      "Ada@FOREIGN": "FOREIGN",
+      "Baker": "LOCAL",
+      "Baker2": "LOCAL",
+      "Baker2@FOREIGN": "FOREIGN",
+      "Beaner": "LOCAL",
+      "FX": "LOCAL",
+      "FX@FOREIGN": "FOREIGN",
+      "Farm": "LOCAL",
+      "FarmCrew": "LOCAL",
+      "FarmCrew@FOREIGN": "FOREIGN",
+      "ForeignCrew": "LOCAL",
+      "ForeignCrew@FOREIGN": "FOREIGN",
+      "Founder": "LOCAL",
+      "Household": "LOCAL",
+      "Household@FOREIGN": "FOREIGN",
+      "Lender": "LOCAL",
+      "Transport": "LOCAL",
+      "Treasury": "LOCAL"
+    },
+    "dealer": "FX",
+    "fee": 1,
+    "fee_recipient": "Treasury",
+    "foreign": "FOREIGN",
+    "monetary_unit": 1,
+    "rate_denominator": 1,
+    "rate_numerator": 2
+  },
+  "days": 30,
+  "economics": {
+    "balances": {
+      "Ada": 0,
+      "Ada@FOREIGN": 0,
+      "Baker": 1000,
+      "Baker2": 1000,
+      "Baker2@FOREIGN": 0,
+      "Beaner": 1000,
+      "FX": 1000,
+      "FX@FOREIGN": 300,
+      "Farm": 1000,
+      "FarmCrew": 100,
+      "FarmCrew@FOREIGN": 0,
+      "ForeignCrew": 100,
+      "ForeignCrew@FOREIGN": 0,
+      "Founder": 0,
+      "Household": 0,
+      "Household@FOREIGN": 0,
+      "Lender": 1000,
+      "Transport": 0,
+      "Treasury": 0
+    },
+    "feedback": true,
+    "limits": {
+      "Ada": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Baker": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Baker2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Beaner": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "FX": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Farm": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "FarmCrew": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "ForeignCrew": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Founder": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Household": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Lender": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Transport": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Treasury": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      }
+    },
+    "mode": "N2",
+    "prices": {
+      "Baker2:bread": 1,
+      "Baker:bread": 3,
+      "Baker:soap": 2,
+      "Beaner:beans": 4,
+      "Farm:grain": 1
+    },
+    "terminal_prices": {},
+    "tick": 1
+  },
+  "enable_labor": true,
+  "enable_relations": true,
+  "events": [
+    {
+      "actor": "Ada",
+      "day": 7,
+      "good": "beans",
+      "kind": "supplier_message",
+      "observed_day": 2,
+      "seller": "Beaner"
+    }
+  ],
+  "firms": [
+    {
+      "capacities": {
+        "grain": 10
+      },
+      "firm_id": "Farm",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "grain": 40
+      },
+      "place_id": "farm",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "grain",
+          "output_quantity": 1,
+          "producer_id": "Farm"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 8,
+        "soap": 2
+      },
+      "firm_id": "Baker",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 24
+      },
+      "knowledge": {
+        "grain": [
+          "Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 14,
+        "soap": 4
+      },
+      "place_id": "west",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "Baker"
+        },
+        {
+          "inputs": [
+            [
+              "grain",
+              1
+            ]
+          ],
+          "output_commodity": "soap",
+          "output_quantity": 1,
+          "producer_id": "Baker"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 6
+      },
+      "firm_id": "Baker2",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 18
+      },
+      "knowledge": {
+        "grain": [
+          "Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 12
+      },
+      "place_id": "east",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "Baker2"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "beans": 8
+      },
+      "firm_id": "Beaner",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "beans": 16
+      },
+      "place_id": "west",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "beans",
+          "output_quantity": 1,
+          "producer_id": "Beaner"
+        }
+      ]
+    },
+    {
+      "capacities": {},
+      "firm_id": "Ada",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [],
+        "bread": [
+          "Baker2"
+        ],
+        "soap": []
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Household",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "FarmCrew",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker2"
+        ],
+        "soap": []
+      },
+      "output_targets": {},
+      "place_id": "farm",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "ForeignCrew",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker2"
+        ],
+        "soap": []
+      },
+      "output_targets": {},
+      "place_id": "east",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Transport",
+      "firm_type": "INTERMEDIARY",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "FX",
+      "firm_type": "INTERMEDIARY",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Treasury",
+      "firm_type": "INTERMEDIARY",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Lender",
+      "firm_type": "INTERMEDIARY",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Founder",
+      "firm_type": "INTERMEDIARY",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    }
+  ],
+  "food_satisfaction": {
+    "beans": 2,
+    "bread": 1
+  },
+  "goods": [
+    "grain",
+    "bread",
+    "beans",
+    "soap"
+  ],
+  "horizon": 5,
+  "households": [
+    {
+      "adults": 1,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Ada",
+      "known_fx": [
+        "FX"
+      ],
+      "known_jobs": [
+        "job-beans"
+      ],
+      "known_lenders": [
+        "Lender"
+      ],
+      "max_travel": 2,
+      "members": 1,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 2,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Household",
+      "known_fx": [
+        "FX"
+      ],
+      "known_jobs": [
+        "job-beans"
+      ],
+      "known_lenders": [
+        "Lender"
+      ],
+      "max_travel": 2,
+      "members": 2,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 1,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 4,
+      "id": "FarmCrew",
+      "known_fx": [
+        "FX"
+      ],
+      "known_jobs": [
+        "job-FarmCrew"
+      ],
+      "known_lenders": [],
+      "max_travel": 2,
+      "members": 1,
+      "optional_durable_per_member": 0,
+      "skill": 1
+    },
+    {
+      "adults": 1,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "ForeignCrew",
+      "known_fx": [
+        "FX"
+      ],
+      "known_jobs": [
+        "job-ForeignCrew"
+      ],
+      "known_lenders": [],
+      "max_travel": 2,
+      "members": 1,
+      "optional_durable_per_member": 0,
+      "skill": 1
+    }
+  ],
+  "inventory": {
+    "Ada": {
+      "beans": 0,
+      "bread": 2,
+      "grain": 0,
+      "soap": 0
+    },
+    "Baker": {
+      "beans": 0,
+      "bread": 12,
+      "grain": 20,
+      "soap": 3
+    },
+    "Baker2": {
+      "beans": 0,
+      "bread": 8,
+      "grain": 12,
+      "soap": 0
+    },
+    "Beaner": {
+      "beans": 12,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "FX": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Farm": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 30,
+      "soap": 0
+    },
+    "FarmCrew": {
+      "beans": 0,
+      "bread": 2,
+      "grain": 0,
+      "soap": 0
+    },
+    "ForeignCrew": {
+      "beans": 0,
+      "bread": 2,
+      "grain": 0,
+      "soap": 0
+    },
+    "Founder": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Household": {
+      "beans": 0,
+      "bread": 4,
+      "grain": 0,
+      "soap": 0
+    },
+    "Lender": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Transport": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Treasury": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    }
+  },
+  "jobs": [
+    {
+      "employer": "Beaner",
+      "hours": 2,
+      "id": "job-beans",
+      "pay_delay": 5,
+      "place": "west",
+      "positions": 3,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "Baker",
+      "hours": 2,
+      "id": "job-bread",
+      "place": "west",
+      "positions": 2,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "Farm",
+      "hours": 4,
+      "id": "job-FarmCrew",
+      "place": "farm",
+      "positions": 1,
+      "skill": 1,
+      "wage_per_hour": 1
+    },
+    {
+      "employer": "Baker2",
+      "hours": 2,
+      "id": "job-ForeignCrew",
+      "place": "east",
+      "positions": 1,
+      "skill": 1,
+      "wage_per_hour": 2
+    }
+  ],
+  "labor_hours_per_output": {
+    "Baker2:bread": 1,
+    "Baker:bread": 1,
+    "Baker:soap": 1,
+    "Beaner:beans": 1,
+    "Farm:grain": 1
+  },
+  "relation_ttl": 6,
+  "route_events": {},
+  "routes": [
+    {
+      "buyer_id": "Baker",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "Farm"
+    },
+    {
+      "buyer_id": "Baker2",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "Farm"
+    },
+    {
+      "buyer_id": "Ada",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Ada",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Ada",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Ada",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Household",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Household",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "FarmCrew",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "FarmCrew",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 2,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "ForeignCrew",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "ForeignCrew",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 2,
+      "seller_id": "Beaner"
+    }
+  ],
+  "sale_currency": {
+    "Baker2:bread": "FOREIGN"
+  },
+  "sinks": [],
+  "stock_horizon": 4,
+  "transport": {
+    "carrier": "Transport",
+    "edges": {
+      "east~east": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "east",
+        "to": "east"
+      },
+      "east~farm": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "east",
+        "to": "farm"
+      },
+      "east~west": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "east",
+        "to": "west"
+      },
+      "farm~east": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "farm",
+        "to": "east"
+      },
+      "farm~farm": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "farm",
+        "to": "farm"
+      },
+      "farm~west": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "farm",
+        "to": "west"
+      },
+      "west~east": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "west",
+        "to": "east"
+      },
+      "west~farm": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "west",
+        "to": "farm"
+      },
+      "west~west": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "west",
+        "to": "west"
+      }
+    },
+    "known_edges": {
+      "Ada": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "Baker": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "Baker2": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "Beaner": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "FX": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "Farm": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "FarmCrew": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "ForeignCrew": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "Founder": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "Household": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "Lender": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "Transport": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ],
+      "Treasury": [
+        "east~east",
+        "east~farm",
+        "east~west",
+        "farm~east",
+        "farm~farm",
+        "farm~west",
+        "west~east",
+        "west~farm",
+        "west~west"
+      ]
+    },
+    "paths": {
+      "Baker2>Ada:bread": [
+        [
+          "east~west"
+        ]
+      ],
+      "Baker2>FarmCrew:bread": [
+        [
+          "east~farm"
+        ]
+      ],
+      "Baker2>ForeignCrew:bread": [
+        [
+          "east~east"
+        ]
+      ],
+      "Baker2>Household:bread": [
+        [
+          "east~west"
+        ]
+      ],
+      "Baker>Ada:bread": [
+        [
+          "west~west"
+        ]
+      ],
+      "Baker>Ada:soap": [
+        [
+          "west~west"
+        ]
+      ],
+      "Baker>Household:bread": [
+        [
+          "west~west"
+        ]
+      ],
+      "Baker>Household:soap": [
+        [
+          "west~west"
+        ]
+      ],
+      "Beaner>Ada:beans": [
+        [
+          "west~west"
+        ]
+      ],
+      "Beaner>FarmCrew:beans": [
+        [
+          "west~farm"
+        ]
+      ],
+      "Beaner>ForeignCrew:beans": [
+        [
+          "west~east"
+        ]
+      ],
+      "Beaner>Household:beans": [
+        [
+          "west~west"
+        ]
+      ],
+      "Farm>Baker2:grain": [
+        [
+          "farm~east"
+        ]
+      ],
+      "Farm>Baker:grain": [
+        [
+          "farm~west"
+        ]
+      ]
+    }
+  }
+}

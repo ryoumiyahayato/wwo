@@ -1195,7 +1195,9 @@ func _sync_landmark_display() -> void:
 			_place_points[id] = point
 			visuals.append(visual)
 	var surface := local_content.content.surface_reference if visible and local_content!=null and local_content.content!=null and controller.region_camera.local_place_id==str(local_content.content.metadata.anchor_place_id) else {}
-	var lines: Array[Dictionary] = local_content.content.features if not surface.is_empty() and local_content.content.active_on(political.display_date) else []
+	var lines: Array[Dictionary] = []
+	if not surface.is_empty() and local_content.content.active_on(political.display_date):
+		lines.assign(local_content.content.features)
 	region_view.update_landmarks(visuals,controller.region_camera,size,surface,lines)
 	if controller.region_camera.local_active:
 		for id: String in _place_points:

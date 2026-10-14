@@ -1,0 +1,335 @@
+{
+  "case_id": "G_SCALE_8_cohort_dormant0",
+  "contention": "C0",
+  "days": 30,
+  "economics": {
+    "balances": {
+      "Baker": 8000,
+      "Baker2": 8000,
+      "Beaner": 8000,
+      "Cohort0": 240,
+      "Farm": 8000
+    },
+    "feedback": true,
+    "limits": {
+      "Baker": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Baker2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Beaner": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Cohort0": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Farm": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      }
+    },
+    "mode": "N2",
+    "prices": {
+      "Baker2:bread": 4,
+      "Baker:bread": 3,
+      "Baker:soap": 2,
+      "Beaner:beans": 4,
+      "Farm:grain": 1
+    },
+    "terminal_prices": {},
+    "tick": 1
+  },
+  "enable_labor": true,
+  "events": [],
+  "firms": [
+    {
+      "capacities": {
+        "grain": 80
+      },
+      "firm_id": "Farm",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "grain": 320
+      },
+      "place_id": "farm",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "grain",
+          "output_quantity": 1,
+          "producer_id": "Farm"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 64,
+        "soap": 16
+      },
+      "firm_id": "Baker",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 192
+      },
+      "knowledge": {
+        "grain": [
+          "Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 112,
+        "soap": 32
+      },
+      "place_id": "west",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "Baker"
+        },
+        {
+          "inputs": [
+            [
+              "grain",
+              1
+            ]
+          ],
+          "output_commodity": "soap",
+          "output_quantity": 1,
+          "producer_id": "Baker"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 48
+      },
+      "firm_id": "Baker2",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 144
+      },
+      "knowledge": {
+        "grain": [
+          "Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 96
+      },
+      "place_id": "east",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "Baker2"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "beans": 64
+      },
+      "firm_id": "Beaner",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "beans": 128
+      },
+      "place_id": "west",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "beans",
+          "output_quantity": 1,
+          "producer_id": "Beaner"
+        }
+      ]
+    },
+    {
+      "capacities": {},
+      "firm_id": "Cohort0",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    }
+  ],
+  "food_satisfaction": {
+    "beans": 2,
+    "bread": 1
+  },
+  "goods": [
+    "grain",
+    "bread",
+    "beans",
+    "soap"
+  ],
+  "horizon": 5,
+  "households": [
+    {
+      "adults": 24,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Cohort0",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 24,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    }
+  ],
+  "inventory": {
+    "Baker": {
+      "beans": 0,
+      "bread": 96,
+      "grain": 160,
+      "soap": 24
+    },
+    "Baker2": {
+      "beans": 0,
+      "bread": 64,
+      "grain": 96,
+      "soap": 0
+    },
+    "Beaner": {
+      "beans": 96,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Cohort0": {
+      "beans": 0,
+      "bread": 48,
+      "grain": 0,
+      "soap": 0
+    },
+    "Farm": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 240,
+      "soap": 0
+    }
+  },
+  "jobs": [
+    {
+      "employer": "Beaner",
+      "hours": 2,
+      "id": "job-beans",
+      "place": "west",
+      "positions": 24,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "Baker",
+      "hours": 2,
+      "id": "job-bread",
+      "place": "west",
+      "positions": 16,
+      "skill": 1,
+      "wage_per_hour": 2
+    }
+  ],
+  "labor_hours_per_output": {
+    "Baker2:bread": 1,
+    "Baker:bread": 1,
+    "Baker:soap": 1,
+    "Beaner:beans": 1,
+    "Farm:grain": 1
+  },
+  "route_events": {},
+  "routes": [
+    {
+      "buyer_id": "Baker",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "Farm"
+    },
+    {
+      "buyer_id": "Baker2",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "Farm"
+    },
+    {
+      "buyer_id": "Cohort0",
+      "capacity": 96,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Cohort0",
+      "capacity": 96,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Cohort0",
+      "capacity": 96,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Cohort0",
+      "capacity": 96,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    }
+  ],
+  "sinks": [],
+  "stock_horizon": 4
+}

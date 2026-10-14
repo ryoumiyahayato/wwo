@@ -31,6 +31,7 @@ const Credit = preload("res://scripts/world/economy_bilateral_credit.gd")
 const Exchange = preload("res://scripts/world/economy_currency_exchange.gd")
 const Assets = preload("res://scripts/world/economy_asset_market.gd")
 const Capital = preload("res://scripts/world/economy_capital_formation.gd")
+const Liquidity = preload("res://scripts/world/economy_liquidity_rules.gd")
 
 var error: String = ""
 var processing: bool = false
@@ -169,6 +170,7 @@ func bind(world: WorldState, settings: Dictionary, admission_minutes: Dictionary
 			if organization.is_empty(): organization=rule["subject"]
 			if grant.get("represented_entity") != organization: return _fail("Budget root belongs to another organization")
 
+	if not _validate_financial_composition(): return false
 	if not _shared.bind(self): return _fail(_shared.error if not _shared.error.is_empty() else "Shared transport lacks explicit host link, carrier work site, node facilities or windows")
 	_services = _spec["consumption"]
 	_management = {"scope_id": str(config.get("management_scope", {}).get("id", config["case_id"])), "status": "PREPARED", "activation_minute": 0}
@@ -719,6 +721,7 @@ func _accept(actor: String, command: Dictionary, internal: bool = false) -> Dict
 	var payload := command["payload"] as Dictionary
 	var result: Dictionary
 	match command["kind"]:
+		"finance_firm": result = _firm_finance_action(actor,payload,action_id)
 		"finance_investment": result = _capital_finance_action(actor, payload, action_id)
 		"invest", "investment_status", "capital_status", "maintain_capital": result = _capital.request(actor, payload, action_id, command["kind"])
 		"travel": result = _travel_action(actor, payload, action_id, internal)
@@ -777,6 +780,15 @@ func _post_initial_credit_offers() -> bool:
 
 
 func _credit_action(actor: String, command: Dictionary, internal: bool) -> Dictionary:
+	if _spec["firms"].has(actor):
+		var permission := _firm_credit_permission(actor,actor,command["kind"],command["payload"],internal)
+		if not permission.get("ok",false): return _result(false,permission["reason"])
+		var result := _execute_credit(actor,command,internal)
+		if result.get("accepted",false): result["financial_authorization"]=permission
+		return result
+	return _execute_credit(actor,command,internal)
+
+func _execute_credit(actor: String, command: Dictionary, internal: bool) -> Dictionary:
 	var payload := command["payload"] as Dictionary
 	var minute := int(command["minute"])
 	var action_id := str(command["action_id"])
@@ -1252,6 +1264,9 @@ func settle_day(settle_personal_arrangements: bool = true) -> bool:
 	phase = "OPERATIONS"
 	_decision_counts = {"day": day, "production_sites": 0, "resting_sites": 0, "household_searches": 0, "job_searches": 0, "cashless_households": 0, "covered_households": 0}
 	_prune_windows()
+	if not _npc_liquidity():
+		processing=false
+		return false
 	_plan_firms()
 	_update_job_postings()
 	phase = "LABOR"
@@ -1309,6 +1324,7 @@ func settle_day(settle_personal_arrangements: bool = true) -> bool:
 	phase = "READY"
 	_publish_site_reports()
 	_npc_invest()
+	_npc_labor_response()
 	if not uses_host_accounts(): _capital.boundary()
 	if uses_host_accounts(): _auto_work()
 	_prune_windows()
@@ -1598,6 +1614,7 @@ func _auto_work(people: Array[String] = [], decision: String = "") -> void:
 		if not _contracts.has(actor):
 			for job_id: String in _actors[actor]["known_jobs"]:
 				var job := _known_job(actor, job_id)
+				if not _npc_job_payable(actor,job_id): continue
 				if not _at_place(actor, job["place"]) and (not manages_person(actor) or not _npc_job_travel_possible(actor, job)): continue
 				var candidate := job_id+(":"+decision if not decision.is_empty() else "")
 				if _accept(actor, _auto_command(actor, "apply", {"job_id": job_id}, candidate), true)["accepted"]: break
@@ -1629,6 +1646,7 @@ func _auto_cohort_work(actor: String) -> void:
 		for id: String in _actors[actor]["known_jobs"]:
 			if not Cohorts.allows_job(_spec["actors"][actor], id) or not _contract_for(actor, id).is_empty(): continue
 			var job := _known_job(actor, id)
+			if not _npc_job_payable(actor,id): continue
 			if not _at_place(actor, job["place"]): continue
 			_accept(actor, _auto_command(actor, "apply", {"job_id": id}, id), true)
 			if Cohorts.free_span(_spec["actors"][actor], _contracts.get(actor, {})).y == 0: break
@@ -1696,7 +1714,13 @@ func _npc_job_travel_possible(person: String, job: Dictionary) -> bool:
 	return cash >= int(offer["fare"]) and int(job["wage_per_hour"])*int(job["hours"]) > int(offer["fare"])
 
 func _npc_cash_floor(policy: Dictionary, currency: String) -> int:
-	return int(policy.get("cash_floors", {}).get(currency, 0))
+	var floor_value := int(policy.get("cash_floors", {}).get(currency, 0))
+	return maxi(floor_value,_liquidity_cash_floor(policy.get("actor",""),currency))
+
+func _liquidity_cash_floor(firm: String, currency: String) -> int:
+	var terms := Liquidity.policy(config,firm)
+	if terms.is_empty() or terms["currency"]!=currency: return 0
+	return maxi(int(terms["cash_floor"]),_mature_wage_position(firm,currency)["amount"] if terms["protect_due_wages"] else 0)
 
 func _npc_financed_today(actor: String, currency: String, exchange: bool) -> int:
 	var total: int = 0
@@ -1790,6 +1814,9 @@ func _npc_exchange_procurement(actor: String, offer: Dictionary, quantity: int, 
 
 func _npc_borrow_procurement(actor: String, offer: Dictionary, quantity: int, unit_cost: int, policy: Dictionary, candidate: String, context: Dictionary) -> void:
 	var currency := str(offer["denomination"])
+	_borrow_for_shortfall(actor,currency,maxi(0,quantity*unit_cost-_world.ledger_state.available_balance(_account(actor,currency))),policy,candidate,context,unit_cost)
+
+func _borrow_for_shortfall(actor: String, currency: String, shortfall: int, policy: Dictionary, candidate: String, context: Dictionary, unit_cost: int=1) -> void:
 	if not policy["borrow_limits"].has(currency):
 		return
 	var view := _credit.visible(actor, _known_credit_lenders(actor), _world.game_clock.total_minutes(), true)
@@ -1801,19 +1828,18 @@ func _npc_borrow_procurement(actor: String, offer: Dictionary, quantity: int, un
 	if _repayment_days.get(actor) == day: return
 	var limits := policy["borrow_limits"][currency] as Dictionary
 	var daily := maxi(0, int(limits["daily_principal"]) - _npc_financed_today(actor, currency, false))
-	var held := maxi(0, _world.ledger_state.available_balance(_account(actor, currency)))
+	var held := maxi(0,_world.ledger_state.available_balance(_account(actor,currency)))
 	var quotes := view["offers"] as Array
 	quotes.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(str(a["id"]).trim_prefix("credit_offer:")) < int(str(b["id"]).trim_prefix("credit_offer:")))
 	for quote: Dictionary in quotes:
 		if quote["lender"] == actor or quote["denomination"] != currency or int(quote["interest"]) > int(limits["max_interest"]) or (quote["requires_job"] and not _contracts.has(actor)):
 			continue
 		var cap := mini(daily, mini(int(quote["available_quantity"]), maxi(0, int(limits["max_debt"]) - int(quote["interest"]))))
-		var funded_quantity := mini(quantity, int((held + cap) / unit_cost))
-		var amount := maxi(0, funded_quantity * unit_cost - held)
+		var amount := mini(shortfall,maxi(0,((held+cap)/unit_cost)*unit_cost-held))
 		if amount <= 0:
 			continue
 		var decision := context.duplicate(true)
-		decision.merge({"funded_quantity": funded_quantity, "cash_shortfall": amount, "fixed_interest": quote["interest"]})
+		decision.merge({"cash_shortfall": amount, "fixed_interest": quote["interest"]})
 		_npc_submit(actor, "accept_credit", {"offer_id": quote["id"], "amount": amount}, candidate + "|" + str(quote["id"]), decision)
 		return
 
@@ -2419,6 +2445,10 @@ func _procure_inputs() -> void:
 				var limit := _purchase_limit(firm, good, offer["denomination"], int(offer["price"]))
 				if limit >= int(offer["price"]):
 					wanted = _fund_procurement(firm, offer, wanted)
+					var terms := Liquidity.policy(config,firm)
+					if not terms.is_empty():
+						var protected := maxi(_npc_cash_floor(_finance_policy(firm),offer["denomination"]),_liquidity_cash_floor(firm,offer["denomination"]))
+						wanted=mini(wanted,maxi(0,_world.ledger_state.available_balance(_account(firm,offer["denomination"]))-protected)/(int(offer["price"])+int(offer["freight_per_unit"])))
 				offer = _offer(firm, offer["seller"], good, offer["route_id"], offer["seller_site"], site)
 				var payload := {"quote_id": offer["quote_id"], "seller": offer["seller"], "seller_site": offer["seller_site"], "buyer_site": site, "good": good, "quantity": wanted, "denomination": offer["denomination"], "max_price": limit, "path_id": offer["route_id"], "need_by_day": clampi(int(need["need_by_day"]), day, day + 30)}
 				_accept(firm, _auto_command(firm, "buy", payload, site + "|" + str(offer["seller_site"]) + "|" + good + "|" + str(offer["route_id"])), true)
@@ -2670,12 +2700,26 @@ func _firm_finance_view(firm: String) -> Dictionary:
 		var currency := str(payment["denomination"])
 		var own_account := _account(firm, currency)
 		var field: String = ""
+		if payment["kind"]=="loan_repayment":
+			var command_id := str(payment["transaction_id"]).trim_prefix("r1:loan_repayment:")
+			var recorded := _commands.get(command_id,{}).get("result",{}) as Dictionary
+			if FormalLedgerState.valid_amount(recorded.get("interest_paid")) and FormalLedgerState.valid_amount(recorded.get("principal_paid")) and int(recorded["interest_paid"])+int(recorded["principal_paid"])==int(payment["amount"]):
+				for part: String in ["interest","principal"]:
+					var category := "debt_"+part+"_paid" if payment["from_account_id"]==own_account else "loan_"+part+"_recovered"
+					if not result.has(category): result[category]={}
+					result[category][currency]=int(result[category].get(currency,0))+int(recorded[part+"_paid"])
 		if payment["kind"] == "loan_issue" and payment["to_account_id"] == own_account:
 			field = "loan_principal_received"
+		elif payment["kind"]=="loan_repayment" and payment["to_account_id"]==own_account:
+			field="loan_repayments_received"
+		elif payment["kind"]=="freight" and payment["from_account_id"]==own_account and payment["to_account_id"]==own_account:
+			field="internal_freight_transfers"
 		elif payment["kind"] == "goods":
 			field = "sales_received" if payment["to_account_id"] == own_account else "inputs_paid"
 		elif payment["kind"] in ["cargo_refund", "cargo_damages"]:
 			field = ("cargo_refunds_" if payment["kind"] == "cargo_refund" else "cargo_damages_") + ("received" if payment["to_account_id"] == own_account else "paid")
+		elif payment["kind"]=="freight" and payment["to_account_id"]==own_account:
+			field="freight_received"
 		elif payment["from_account_id"] == own_account:
 			match payment["kind"]:
 				"cargo_extra_freight": field = "cargo_extra_freight_paid"
@@ -2684,6 +2728,7 @@ func _firm_finance_view(firm: String) -> Dictionary:
 				"fx_fee": field = "fx_fees_paid"
 				"loan_repayment": field = "debt_payments"
 		if not field.is_empty():
+			if not result.has(field): result[field]={}
 			result[field][currency] = int(result[field].get(currency, 0)) + int(payment["amount"])
 	var incurred := _wage_days.get(firm, {}) as Dictionary
 	for date: int in range(int(result["window_start_day"]), day + 1):
@@ -2696,6 +2741,10 @@ func _firm_finance_view(firm: String) -> Dictionary:
 		result["wages_unpaid"][currency] = int(result["wages_unpaid"].get(currency, 0)) + int(claim["remaining"])
 	for account: Dictionary in _world.ledger_state.own_accounts(firm):
 		result["account_cash"][account["denomination"]] = {"balance": account["balance"], "reserved": _world.ledger_state.reserved_balance(account["account_id"]), "available": _world.ledger_state.available_balance(account["account_id"])}
+	result["matured_wages"]={}
+	for currency: String in result["account_cash"]: result["matured_wages"][currency]=_mature_wage_position(firm,currency)
+	result["credit_responsibilities"]=_credit.visible(firm,_known_credit_lenders(firm),_world.game_clock.total_minutes(),true)
+	result["liquidity_policy"]=Liquidity.policy(config,firm).duplicate(true)
 	return result
 
 func _site_operating_view(firm: String) -> Dictionary:
@@ -2916,6 +2965,7 @@ func restore(value: Dictionary) -> bool:
 	if not _shared.restore(value.get("shared_transport"), value): return _fail("Invalid shared entries, handling labor or vehicle references")
 	if not _validate_saved(value):
 		return false
+	if not _valid_financial_history(value): return _fail("Invalid enterprise financial authorization history")
 	var restored_credit := Credit.new()
 	restored_credit.bind(_world.ledger_state)
 	if not restored_credit.restore(value.get("credit"), value["commands"], _credit_subject_accounts(value["actors"]), _credit_information_dates(value), _world.game_clock.total_minutes()):
@@ -3563,14 +3613,15 @@ func _validate_saved(value: Dictionary) -> bool:
 		if command["kind"] in Credit.ACTIONS or command["kind"] in Exchange.ACTIONS or command["kind"] in Assets.ACTIONS:
 			var actor := str(entry["envelope"]["actor"])
 			var control := str(actors[actor]["control"]) if actors.has(actor) else "automatic"
-			if not entry["result"].get("reason") is String or control == "dormant" or (control == "player" and actor != _world.player_state.player_id()) or (control != "player" and not str(id).begins_with("auto:" + actor + ":")):
+			var delegated: bool=_delegated_firm_credit(value,entry)
+			if not entry["result"].get("reason") is String or control == "dormant" or (control == "player" and actor != _world.player_state.player_id()) or (control != "player" and not str(id).begins_with("auto:" + actor + ":") and not delegated):
 				return _fail("Financial action authority conflict")
-			if command["kind"] == "offer_credit" and control != "player" and entry["result"]["accepted"] and not _configured_credit_offer(actor, command):
+			if command["kind"] == "offer_credit" and control != "player" and entry["result"]["accepted"] and not _configured_credit_offer(actor, command) and not delegated:
 				return _fail("Saved lending terms differ from the lender's policy")
 		if is_multi():
 			var actor := str(entry["envelope"]["actor"])
 			var source := "firm" if _spec["firms"].has(actor) else str(actors[actor]["control"])
-			if entry["source"] != source or source == "dormant" or (source != "player" and not str(id).begins_with("auto:" + actor + ":")) or (source == "player" and actor != _world.player_state.player_id()):
+			if entry["source"] != source or source == "dormant" or (source != "player" and not str(id).begins_with("auto:" + actor + ":") and not _delegated_firm_credit(value,entry)) or (source == "player" and actor != _world.player_state.player_id()):
 				return _fail("Command authority provenance conflict")
 	for actor: Variant in value["work_queue"]:
 		if not _valid_work_queue(value, actor): return _fail("Invalid pending aggregate or named labor interval")
@@ -4429,7 +4480,7 @@ func business_view(actor: String, firm: String, site: String, quantity_value: in
 		offer["order_reason"]="FIRM_STOPPED_NEW_PROCUREMENT" if not _site_accepting(site) or _firm_winding_down(firm) else "CUMULATIVE_BUDGET_OR_WINDOW" if not _budget_ready(components) else permission.get("reason","") if not permission["ok"] else offer["reason"] if offer["reason"]!="OFFER" else "QUANTITY_EXCEEDS_CURRENT_OFFER" if offer["quantity"]<quantity_value else offer["reason"]
 		offer["request"]=payload
 		rows.append(offer)
-	return {"firm_id":firm,"site_id":site,"minute":_world.game_clock.total_minutes(),"finance":_firm_finance_view(firm),"site":_site_operating_view(site),"offers":rows,"offer_total":candidates.size(),"offer_offset":offset,"sites":_spec["firms"][firm]["sites"].duplicate(),"orders":_active_by_buyer.get(firm,{}).size(),"identity_basis":_business_identity_basis(firm)}
+	return {"firm_id":firm,"site_id":site,"minute":_world.game_clock.total_minutes(),"finance":_firm_finance_view(firm),"financial_actions":_business_credit_actions(actor,firm,quantity_value),"site":_site_operating_view(site),"offers":rows,"offer_total":candidates.size(),"offer_offset":offset,"sites":_spec["firms"][firm]["sites"].duplicate(),"orders":_active_by_buyer.get(firm,{}).size(),"identity_basis":_business_identity_basis(firm)}
 
 func _business_identity_basis(firm: String) -> String:
 	for row: Dictionary in config.get("development_organizations",[]):
@@ -7064,6 +7115,10 @@ func _npc_invest() -> void:
 		var site := str(terms["site_id"])
 		if not _spec["sites"].has(site) or firm_manager_at(firm, _world.game_clock.total_minutes()) != firm or not _site_producing(site) or _firm_winding_down(firm): continue
 		if _capital.active_count(firm) >= int(terms["max_projects"]): continue
+		var liquidity := Liquidity.policy(config,firm)
+		if not liquidity.is_empty():
+			var available := _world.ledger_state.available_balance(_account(firm,terms["denomination"]))
+			if _mature_wage_position(firm,terms["denomination"])["amount"]>0 or available-_due_credit_amount(firm,terms["denomination"])<int(terms["cash_floor"]): continue
 		var latest := int(_capital._firm_last_project.get(firm, -int(policy["cooldown_days"])*1440))
 		if day*1440-latest < int(policy["cooldown_days"])*1440: continue
 		var observed_days: Dictionary = {}
@@ -7106,9 +7161,7 @@ func _capital_finance_action(actor: String, payload: Dictionary, id: String) -> 
 	for offer: Dictionary in visible_offers:
 		if offer["id"] == payload["offer_id"] and offer["denomination"] == _capital.template(project["template_id"])["denomination"]: legal = true
 	if not legal: return _result(false, "UNKNOWN_ENTERPRISE_CREDIT_OFFER")
-	# Authorization is the current manager's accepted request. The borrower is
-	# the same enterprise, through the existing credit action and Ledger transfer.
-	var result := _accept(project["firm"], {"action_id": id+":enterprise_credit", "minute": _world.game_clock.total_minutes(), "kind": "accept_credit", "payload": {"offer_id": payload["offer_id"], "amount": payload["amount"]}}, true)
+	var result := _firm_finance_action(actor,{"firm":project["firm"],"operation":"accept_credit","terms":{"offer_id":payload["offer_id"],"amount":payload["amount"]}},id)
 	result["project_id"] = project["id"]
 	return result
 
@@ -7372,6 +7425,227 @@ func _refresh_loss_pending(order: Dictionary) -> void:
 			_shipments_by_destination_good.get(destination_key, {}).erase(cargo_id)
 			if _shipments_by_destination_good.get(destination_key, {}).is_empty(): _shipments_by_destination_good.erase(destination_key)
 	if _shipments_by_order.get(id, {}).is_empty(): _shipments_by_order.erase(id)
+
+func _mature_wage_position(firm: String, currency: String) -> Dictionary:
+	var amount := 0
+	var oldest := -1
+	for id: String in _open_wages_by_employer.get(firm,{}):
+		var w := _wages[id] as Dictionary
+		if w["denomination"]!=currency or w["due_day"]>day: continue
+		amount+=int(w["remaining"])
+		if int(w["remaining"])>0 and (oldest<0 or int(w["due_day"])<oldest): oldest=int(w["due_day"])
+	return {"amount":amount,"oldest_due_day":oldest,"arrears_days":day-oldest if oldest>=0 else 0}
+
+func _business_credit_actions(actor: String, firm: String, quantity_value: int) -> Array[Dictionary]:
+	var result: Array[Dictionary]=[]
+	var view := _credit.visible(firm,_known_credit_lenders(firm),_world.game_clock.total_minutes(),true)
+	for offer: Dictionary in view["offers"]:
+		if offer["lender"]==firm: continue
+		var terms := {"offer_id":offer["id"],"amount":quantity_value}
+		var permission := _firm_credit_permission(actor,firm,"accept_credit",terms,false)
+		var affordable: bool=quantity_value<=int(offer["available_quantity"])
+		result.append({"kind":"BORROW","id":offer["id"],"denomination":offer["denomination"],"amount":quantity_value,"available":offer["available_quantity"],"interest":offer["interest"],"duration_days":offer["duration_days"],"can_execute":permission["ok"] and affordable,"reason":permission.get("reason","OFFER" if affordable else "QUANTITY_EXCEEDS_FUNDED_CREDIT"),"request":{"firm":firm,"operation":"accept_credit","terms":terms}})
+	for loan: Dictionary in view["loans"]:
+		if loan["borrower"]!=firm: continue
+		var terms := {"loan_id":loan["id"],"amount":quantity_value}
+		var permission := _firm_credit_permission(actor,firm,"repay_loan",terms,false)
+		var affordable: bool=quantity_value<=int(loan["remaining"]) and quantity_value<=_world.ledger_state.available_balance(_account(firm,loan["denomination"]))
+		result.append({"kind":"REPAY","id":loan["id"],"denomination":loan["denomination"],"amount":quantity_value,"remaining":loan["remaining"],"due_day":loan["due_day"],"can_execute":permission["ok"] and affordable,"reason":permission.get("reason","OFFER" if affordable else "CASH_OR_REMAINING_DEBT_LIMIT"),"request":{"firm":firm,"operation":"repay_loan","terms":terms}})
+	return result
+
+func _due_credit_amount(firm: String, currency: String) -> int:
+	var amount := 0
+	for loan: Dictionary in _credit.visible(firm,_known_credit_lenders(firm),_world.game_clock.total_minutes(),true)["loans"]:
+		if loan["borrower"]==firm and loan["denomination"]==currency and loan["due_day"]<=day: amount+=int(loan["remaining"])
+	return amount
+
+func _validate_financial_composition() -> bool:
+	for p: Dictionary in config.get("firm_finance_authorities",[]):
+		var organization := str(_spec["firms"][p["firm"]].get("host_organization_id",""))
+		if organization.is_empty() or not _world.organization_state.has_organization(organization): return _fail("Financial authority has no actual commercial organization")
+		if _account(p["firm"],p["currency"]).is_empty(): return _fail("Financial authority currency has no enterprise account")
+		if p["controller"]!=p["firm"] and not _world.person_overlay.has_person(p["controller"]): return _fail("Financial controller has no actual person identity")
+		if p["basis"]=="HOST_ORGANIZATION_ROOT_AUTHORITY":
+			var grant := _world.organization_state.authority_grant(p["root_authority"])
+			if grant.is_empty() or grant.get("represented_entity")!=organization or grant.get("operation")!="economy.credit."+str(p["operations"][0]): return _fail("Financial root authority differs from its organization or operation")
+	return true
+
+func _firm_credit_permission(actor: String, firm: String, kind: String, payload: Dictionary, internal: bool) -> Dictionary:
+	var organization := str(_spec["firms"][firm].get("host_organization_id",""))
+	if organization.is_empty() and config.get("firm_finance_authorities",[]).is_empty():
+		return {"ok":true,"basis":"LEGACY_UNBOUND_DEVELOPMENT_ENTERPRISE","actor":actor,"firm":firm} if _manager(actor,firm) else {"ok":false,"reason":"NO_ENTERPRISE_FINANCIAL_AUTHORITY"}
+	if not organization.is_empty() and not _world.organization_state.is_organization_active(organization): return {"ok":false,"reason":"FINANCIAL_ORGANIZATION_INACTIVE"}
+	var raw_amount: Variant=payload.get("principal_limit",payload.get("amount",-1))
+	if not FormalLedgerState.valid_amount(raw_amount): return {"ok":false,"reason":"INVALID_FINANCIAL_AMOUNT"}
+	var amount := int(raw_amount)
+	var currency := str(payload.get("denomination",""))
+	var target := str(payload.get("borrower",""))
+	if kind=="accept_credit":
+		var offer := _credit._offers.get(payload.get("offer_id",""),{}) as Dictionary
+		currency=str(offer.get("denomination",""));target=str(offer.get("lender",""))
+	elif kind in ["repay_loan","impair_loan","forgive_loan"]:
+		var loan := _credit._loans.get(payload.get("loan_id",""),{}) as Dictionary
+		currency=str(loan.get("denomination",""));target=str(loan.get("lender","") if kind=="repay_loan" else loan.get("borrower",""))
+	if not FormalLedgerState.valid_amount(amount) or amount<1 or not FormalLedgerState.currency_id(currency): return {"ok":false,"reason":"INVALID_FINANCIAL_TERMS"}
+	var now := _world.game_clock.total_minutes()
+	for p: Dictionary in config.get("firm_finance_authorities",[]):
+		if p["firm"]!=firm or p["controller"]!=actor or kind not in p["operations"] or p["currency"]!=currency or amount>int(p["limit"]) or now<int(p["start_minute"]) or now>=int(p["end_minute"]): continue
+		if internal and actor!=firm: continue
+		if kind=="accept_credit" and p.has("borrow_limits"):
+			var limits := p["borrow_limits"] as Dictionary
+			var interest := int(_credit._offers.get(payload.get("offer_id",""),{}).get("interest",0))
+			var debt := 0
+			for loan: Dictionary in _credit.visible(firm,_known_credit_lenders(firm),now,true)["loans"]:
+				if loan["borrower"]==firm and loan["denomination"]==currency: debt+=int(loan["remaining"])
+			if interest>int(limits["max_interest"]): return {"ok":false,"reason":"CREDIT_INTEREST_ABOVE_AUTHORIZED_LIMIT"}
+			if amount>int(limits["daily_principal"])-_npc_financed_today(firm,currency,false): return {"ok":false,"reason":"ENTERPRISE_DAILY_PRINCIPAL_LIMIT"}
+			if amount+interest>maxi(0,int(limits["max_debt"])-debt): return {"ok":false,"reason":"ENTERPRISE_OUTSTANDING_DEBT_LIMIT"}
+		var proof := {"ok":true,"id":p["id"],"actor":actor,"firm":firm,"operation":kind,"currency":currency,"amount":amount,"minute":now,"basis":p["basis"],"root_authority":p["root_authority"],"organization_id":organization}
+		if p.has("borrow_limits"): proof["borrow_limits"]=p["borrow_limits"].duplicate(true)
+		if p["basis"]=="HOST_ORGANIZATION_ROOT_AUTHORITY":
+			if internal or not _world.person_overlay.has_person(actor): continue
+			var scope := {"operation":"economy.credit."+kind,"target":target,"place":_place(_primary_site(firm)),"category":"credit:"+currency,"amount":amount}
+			var context := _cargo_fulfilment._available_context(actor,firm,scope,p["root_authority"])
+			if context.is_empty(): continue
+			var authorization := _world.authorization_check.resolve_authority(context,scope["operation"],AuthorizationCheck.STAGE_DOMAIN_EXECUTION,target,scope["place"],scope["category"],float(amount),_world.game_clock.current_hour(),str(context.get("decision_id","")))
+			if authorization.get("status")!=AuthorizationCheck.ALLOWED or authorization.get("authority_id")!=p["root_authority"]: continue
+			proof["authorization"]=authorization
+		return proof
+	return {"ok":false,"reason":"NO_SEPARATE_ENTERPRISE_FINANCIAL_AUTHORITY"}
+
+func _firm_finance_action(actor: String, payload: Dictionary, id: String) -> Dictionary:
+	if not FormalLedgerState.exact_fields(payload,["firm","operation","terms"]) or not _spec["firms"].has(payload.get("firm")) or payload.get("operation") not in Liquidity.ACTIONS or not payload.get("terms") is Dictionary: return _result(false,"INVALID_ENTERPRISE_FINANCE")
+	var firm := str(payload["firm"])
+	var permission := _firm_credit_permission(actor,firm,payload["operation"],payload["terms"],false)
+	if not permission["ok"]: return _result(false,permission["reason"])
+	var inner := {"action_id":"auto:"+firm+":delegated:"+id+":enterprise_credit","minute":_world.game_clock.total_minutes(),"kind":payload["operation"],"payload":payload["terms"].duplicate(true)}
+	if _commands.has(inner["action_id"]): return _result(false,"ENTERPRISE_CREDIT_ACTION_CONFLICT")
+	var result := _execute_credit(firm,inner,false)
+	result["financial_authorization"]=permission
+	result["delegated_by"]=id
+	_commands[inner["action_id"]]={"envelope":{"actor":firm,"command":inner},"result":result.duplicate(true),"source":"firm"}
+	_index_command_access(_commands[inner["action_id"]])
+	return result
+
+func _valid_financial_history(saved: Dictionary) -> bool:
+	var commands := saved["commands"] as Dictionary
+	for entry: Dictionary in commands.values():
+		var command := entry["envelope"]["command"] as Dictionary
+		var firm := str(entry["envelope"]["actor"])
+		if not _spec["firms"].has(firm) or command["kind"] not in Liquidity.ACTIONS or not entry["result"].get("accepted",false): continue
+		if not entry["result"].has("financial_authorization"):
+			# A later explicit financial admission cannot rewrite older accepted debt.
+			for p: Dictionary in config.get("firm_finance_authorities",[]):
+				if p["firm"]==firm and int(command["minute"])>=int(p["start_minute"]): return false
+			continue
+		if not entry["result"]["financial_authorization"] is Dictionary: return false
+		var proof := entry["result"]["financial_authorization"] as Dictionary
+		if not FormalLedgerState.valid_amount(proof.get("amount")) and proof.get("basis")!="LEGACY_UNBOUND_DEVELOPMENT_ENTERPRISE": return false
+		if proof.get("basis")=="LEGACY_UNBOUND_DEVELOPMENT_ENTERPRISE":
+			if not str(_spec["firms"][firm].get("host_organization_id","")).is_empty() or proof.get("firm")!=firm or not _manager_at(proof.get("actor",""),firm,int(command["minute"])): return false
+			continue
+		var fields: Array[String]=["ok","id","actor","firm","operation","currency","amount","minute","basis","root_authority","organization_id"]
+		if proof.has("authorization"): fields.append("authorization")
+		if proof.has("borrow_limits"): fields.append("borrow_limits")
+		if not FormalLedgerState.exact_fields(proof,fields) or proof.get("ok")!=true or proof.get("firm")!=firm or proof.get("amount")!=command["payload"].get("principal_limit",command["payload"].get("amount")): return false
+		var currency := str(command["payload"].get("denomination",""))
+		if command["kind"]=="accept_credit": currency=str(saved.get("credit",{}).get("offers",{}).get(command["payload"].get("offer_id"),{}).get("denomination",""))
+		elif command["kind"] in ["repay_loan","impair_loan","forgive_loan"]: currency=str(saved.get("credit",{}).get("loans",{}).get(command["payload"].get("loan_id"),{}).get("denomination",""))
+		if proof["currency"]!=currency: return false
+		if proof["basis"]=="HOST_ORGANIZATION_ROOT_AUTHORITY":
+			var grant := _world.organization_state.authority_grant(proof["root_authority"])
+			if grant.is_empty() or grant.get("represented_entity")!=proof["organization_id"] or grant.get("operation")!="economy.credit."+str(command["kind"]) or not proof.get("authorization") is Dictionary or proof["authorization"].get("authority_id")!=proof["root_authority"]: return false
+		var found := false
+		for p: Dictionary in config.get("firm_finance_authorities",[]):
+			if p["id"]==proof.get("id") and p["firm"]==firm and p["controller"]==proof.get("actor") and proof.get("operation")==command["kind"] and command["kind"] in p["operations"] and proof.get("currency")==p["currency"] and proof.get("basis")==p["basis"] and proof.get("root_authority")==p["root_authority"] and proof.get("borrow_limits",{})==p.get("borrow_limits",{}) and proof.get("organization_id")==_spec["firms"][firm].get("host_organization_id","") and proof.get("minute")==command["minute"] and int(proof.get("amount",0))>0 and int(proof["amount"])<=int(p["limit"]) and int(command["minute"])>=int(p["start_minute"]) and int(command["minute"])<int(p["end_minute"]): found=true
+		if not found: return false
+	return true
+
+func _delegated_firm_credit(saved: Dictionary, entry: Dictionary) -> bool:
+	var firm := str(entry["envelope"]["actor"])
+	var inner := entry["envelope"]["command"] as Dictionary
+	if not _spec["firms"].has(firm) or inner["kind"] not in Credit.ACTIONS or not entry["result"].get("delegated_by") is String or not entry["result"].get("financial_authorization") is Dictionary: return false
+	var parent_id := str(entry["result"]["delegated_by"])
+	if inner["action_id"]!="auto:"+firm+":delegated:"+parent_id+":enterprise_credit": return false
+	var raw: Variant=saved["commands"].get(parent_id)
+	if not raw is Dictionary or not raw.get("result") is Dictionary or not raw.get("envelope") is Dictionary or not raw["envelope"].get("command") is Dictionary: return false
+	var parent := raw as Dictionary
+	if not parent["result"].get("accepted",false) or parent["envelope"]["command"].get("minute")!=inner["minute"] or parent["result"].get("financial_authorization")!=entry["result"]["financial_authorization"]: return false
+	var outer := parent["envelope"]["command"] as Dictionary
+	var source := str(parent["envelope"].get("actor",""))
+	if source!=entry["result"]["financial_authorization"].get("actor") or not outer.get("payload") is Dictionary: return false
+	if outer["kind"]=="finance_firm": return outer["payload"].get("firm")==firm and outer["payload"].get("operation")==inner["kind"] and outer["payload"].get("terms")==inner["payload"]
+	if outer["kind"]=="finance_investment":
+		var project := saved.get("capital_formation",{}).get("projects",{}).get(outer["payload"].get("project_id"),{}) as Dictionary
+		return project.get("firm")==firm and inner["kind"]=="accept_credit" and inner["payload"]=={"offer_id":outer["payload"].get("offer_id"),"amount":outer["payload"].get("amount")}
+	return false
+
+func _npc_liquidity() -> bool:
+	for p: Dictionary in config.get("liquidity_policies",[]):
+		var firm := str(p["firm"])
+		if firm_manager_at(firm,_world.game_clock.total_minutes())!=firm or firm_finished(firm): continue
+		var wages := _mature_wage_position(firm,p["currency"])
+		var policy := _finance_policy(firm)
+		if p["finance_due_wages"] and wages["amount"]>0 and not policy.is_empty():
+			var before := _world.ledger_state.available_balance(_account(firm,p["currency"]))
+			var shortfall := maxi(0,int(wages["amount"])-before)
+			_borrow_for_shortfall(firm,p["currency"],shortfall,policy,"mature_wages",{"purpose":"MATURED_WAGES","wage_amount":wages["amount"],"oldest_due_day":wages["oldest_due_day"]})
+			if _world.ledger_state.available_balance(_account(firm,p["currency"]))>before and not _pay_wages(): return false
+			wages=_mature_wage_position(firm,p["currency"])
+		var constrained: bool=wages["amount"]>0 and wages["arrears_days"]>=int(p["pause_after_days"])
+		if constrained and p["pause_investment"]:
+			for project_site: String in _spec["firms"][firm]["sites"]:
+				for project_id: String in _capital._active_by_site.get(project_site,[]):
+					var project := _capital.projects[project_id] as Dictionary
+					if project["status"]!="PAUSED": _npc_submit(firm,"investment_status",{"project_id":project_id,"status":"PAUSED"},project_id,{"purpose":"PRESERVE_MATURED_WAGE_RESPONSIBILITY"})
+		for site: String in _spec["firms"][firm]["sites"]:
+			if site_closed(site) or _firm_winding_down(firm): continue
+			var state := _site_state[site] as Dictionary
+			var recover: bool=not constrained and wages["amount"]==0 and _world.ledger_state.available_balance(_account(firm,p["currency"]))-_due_credit_amount(firm,p["currency"])>=int(p["recover_cash"]) and _own_liquidity_pause(site)
+			if (constrained and state["production_enabled"]) or (recover and not state["production_enabled"]):
+				_npc_submit(firm,"set_site_status",{"firm":firm,"site_id":site,"enabled":state["enabled"],"production_enabled":recover,"accepting_business":state["accepting_business"]},"liquidity:"+site,{"purpose":"LIQUIDITY_RECOVERY" if recover else "LIQUIDITY_PRODUCTION_PAUSE","wage_amount":wages["amount"],"arrears_days":wages["arrears_days"]})
+		if p["wind_down_after_days"]>0 and wages["amount"]>0 and wages["arrears_days"]>=int(p["wind_down_after_days"]) and not _firm_winding_down(firm):
+			_npc_submit(firm,"wind_down_firm",{"firm":firm},"liquidity:wind_down",{"purpose":"PERSISTENT_UNFUNDED_OBLIGATIONS"})
+		elif p["pause_investment"] and not constrained and wages["amount"]==0 and not _firm_winding_down(firm):
+			for project_site: String in _spec["firms"][firm]["sites"]:
+				for project_id: String in _capital._active_by_site.get(project_site,[]):
+					var project := _capital.projects[project_id] as Dictionary
+					var terms := _capital.template(project["template_id"])
+					var available := _world.ledger_state.available_balance(_account(firm,terms["denomination"]))-_due_credit_amount(firm,terms["denomination"])
+					if project["status"]=="PAUSED" and _own_liquidity_project_pause(project_id) and available>=maxi(int(p["recover_cash"]),int(terms["cash_floor"])+_capital.remaining_labor_budget(project)):
+						_npc_submit(firm,"investment_status",{"project_id":project_id,"status":"ACTIVE"},project_id,{"purpose":"LIQUIDITY_PROJECT_RECOVERY"})
+	return true
+
+func _own_liquidity_pause(site: String) -> bool:
+	var latest: Dictionary={}
+	for row: Dictionary in _enterprise_changes.values():
+		if row["status"]=="APPLIED" and row["payload"].get("site_id")==site and row["kind"]=="set_site_status" and (latest.is_empty() or row["effective_minute"]>latest["effective_minute"]): latest=row
+	return not latest.is_empty() and _commands.get(latest["id"],{}).get("result",{}).get("decision",{}).get("purpose")=="LIQUIDITY_PRODUCTION_PAUSE"
+
+func _own_liquidity_project_pause(project_id: String) -> bool:
+	var latest: Dictionary={}
+	for row: Dictionary in _capital.changes.values():
+		if row["status"]=="APPLIED" and row["kind"]=="investment_status" and row["payload"].get("project_id")==project_id and (latest.is_empty() or row["effective_minute"]>latest["effective_minute"]): latest=row
+	return not latest.is_empty() and _commands.get(latest["id"],{}).get("result",{}).get("decision",{}).get("purpose")=="PRESERVE_MATURED_WAGE_RESPONSIBILITY"
+
+func _npc_job_payable(actor: String, job: String) -> bool:
+	var p := Liquidity.labor_policy(config,actor)
+	if p.is_empty(): return true
+	for id: String in _wages_by_worker.get(actor,[]):
+		var w := _wages[id] as Dictionary
+		if _work_records[id]["job"]==job and w["remaining"]>0 and day-int(w["due_day"])>=int(p["arrears_days"]): return false
+	return true
+
+func _npc_labor_response() -> void:
+	# One explicitly configured group per day. Old wage claims remain with their employer.
+	for p: Dictionary in config.get("labor_response_policies",[]):
+		var actor := str(p["actor"])
+		if not _contracts.has(actor) or _employment_end_pending(actor): continue
+		var all_unpaid := true
+		for contract: Dictionary in _contract_rows(_contracts[actor]): all_unpaid=all_unpaid and not _npc_job_payable(actor,contract["job"])
+		if all_unpaid:
+			_npc_submit(actor,"leave_job",{},"wage_arrears",{"purpose":"OWN_MATURED_WAGE_ARREARS","waiting_days":p["arrears_days"]})
+			return
 
 func _release_loss_obligation(order: Dictionary, quantity: int, id: String) -> bool:
 	if quantity > int(order["pending"]) or not _budgets.change_ready(order["id"], order["delivered"], int(order["cancelled"])+quantity, order["quantity"]): return false

@@ -1,0 +1,590 @@
+{
+  "case_id": "D_supplier_info",
+  "contention": "C0",
+  "days": 30,
+  "economics": {
+    "balances": {
+      "Ada": 0,
+      "Baker": 1000,
+      "Baker2": 1000,
+      "Beaner": 1000,
+      "Farm": 1000,
+      "Household": 0,
+      "Transport": 0
+    },
+    "feedback": true,
+    "limits": {
+      "Ada": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Baker": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Baker2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Beaner": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Farm": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Household": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Transport": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      }
+    },
+    "mode": "N2",
+    "prices": {
+      "Baker2:bread": 4,
+      "Baker:bread": 3,
+      "Baker:soap": 2,
+      "Beaner:beans": 4,
+      "Farm:grain": 1
+    },
+    "terminal_prices": {},
+    "tick": 1
+  },
+  "enable_labor": true,
+  "events": [
+    {
+      "actor": "Ada",
+      "day": 7,
+      "good": "beans",
+      "kind": "supplier_message",
+      "observed_day": 2,
+      "seller": "Beaner"
+    }
+  ],
+  "firms": [
+    {
+      "capacities": {
+        "grain": 10
+      },
+      "firm_id": "Farm",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "grain": 40
+      },
+      "place_id": "farm",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "grain",
+          "output_quantity": 1,
+          "producer_id": "Farm"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 8,
+        "soap": 2
+      },
+      "firm_id": "Baker",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 24
+      },
+      "knowledge": {
+        "grain": [
+          "Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 14,
+        "soap": 4
+      },
+      "place_id": "west",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "Baker"
+        },
+        {
+          "inputs": [
+            [
+              "grain",
+              1
+            ]
+          ],
+          "output_commodity": "soap",
+          "output_quantity": 1,
+          "producer_id": "Baker"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 6
+      },
+      "firm_id": "Baker2",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 18
+      },
+      "knowledge": {
+        "grain": [
+          "Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 12
+      },
+      "place_id": "east",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "Baker2"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "beans": 8
+      },
+      "firm_id": "Beaner",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "beans": 16
+      },
+      "place_id": "west",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "beans",
+          "output_quantity": 1,
+          "producer_id": "Beaner"
+        }
+      ]
+    },
+    {
+      "capacities": {},
+      "firm_id": "Ada",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Household",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Transport",
+      "firm_type": "CARRIER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    }
+  ],
+  "food_satisfaction": {
+    "beans": 2,
+    "bread": 1
+  },
+  "goods": [
+    "grain",
+    "bread",
+    "beans",
+    "soap"
+  ],
+  "horizon": 5,
+  "households": [
+    {
+      "adults": 1,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Ada",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 1,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 2,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Household",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 2,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    }
+  ],
+  "inventory": {
+    "Ada": {
+      "beans": 0,
+      "bread": 2,
+      "grain": 0,
+      "soap": 0
+    },
+    "Baker": {
+      "beans": 0,
+      "bread": 12,
+      "grain": 20,
+      "soap": 3
+    },
+    "Baker2": {
+      "beans": 0,
+      "bread": 8,
+      "grain": 12,
+      "soap": 0
+    },
+    "Beaner": {
+      "beans": 12,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Farm": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 30,
+      "soap": 0
+    },
+    "Household": {
+      "beans": 0,
+      "bread": 4,
+      "grain": 0,
+      "soap": 0
+    },
+    "Transport": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    }
+  },
+  "jobs": [
+    {
+      "employer": "Beaner",
+      "hours": 2,
+      "id": "job-beans",
+      "place": "west",
+      "positions": 3,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "Baker",
+      "hours": 2,
+      "id": "job-bread",
+      "place": "west",
+      "positions": 2,
+      "skill": 1,
+      "wage_per_hour": 2
+    }
+  ],
+  "labor_hours_per_output": {
+    "Baker2:bread": 1,
+    "Baker:bread": 1,
+    "Baker:soap": 1,
+    "Beaner:beans": 1,
+    "Farm:grain": 1
+  },
+  "route_events": {},
+  "routes": [
+    {
+      "buyer_id": "Baker",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "Farm"
+    },
+    {
+      "buyer_id": "Baker2",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "Farm"
+    },
+    {
+      "buyer_id": "Ada",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Ada",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Ada",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Ada",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Household",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Household",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    }
+  ],
+  "sinks": [],
+  "stock_horizon": 4,
+  "transport": {
+    "carrier": "Transport",
+    "edges": {
+      "east-west": {
+        "capacity": 3,
+        "duration": 2,
+        "fee": 1,
+        "from": "east",
+        "to": "west"
+      },
+      "farm-road": {
+        "capacity": 6,
+        "duration": 1,
+        "fee": 1,
+        "from": "farm",
+        "to": "west"
+      },
+      "ferry": {
+        "capacity": 2,
+        "duration": 3,
+        "fee": 2,
+        "from": "east",
+        "to": "west"
+      },
+      "local": {
+        "capacity": 5,
+        "duration": 1,
+        "fee": 1,
+        "from": "west",
+        "to": "west"
+      },
+      "west-east": {
+        "capacity": 3,
+        "duration": 2,
+        "fee": 1,
+        "from": "west",
+        "to": "east"
+      }
+    },
+    "known_edges": {
+      "Ada": [
+        "local",
+        "farm-road",
+        "east-west",
+        "west-east",
+        "ferry"
+      ],
+      "Baker": [
+        "local",
+        "farm-road",
+        "east-west",
+        "west-east",
+        "ferry"
+      ],
+      "Baker2": [
+        "local",
+        "farm-road",
+        "east-west",
+        "west-east",
+        "ferry"
+      ],
+      "Beaner": [
+        "local",
+        "farm-road",
+        "east-west",
+        "west-east",
+        "ferry"
+      ],
+      "Farm": [
+        "local",
+        "farm-road",
+        "east-west",
+        "west-east",
+        "ferry"
+      ],
+      "Household": [
+        "local",
+        "farm-road",
+        "east-west",
+        "west-east",
+        "ferry"
+      ],
+      "Transport": [
+        "local",
+        "farm-road",
+        "east-west",
+        "west-east",
+        "ferry"
+      ]
+    },
+    "paths": {
+      "Baker2>Ada:bread": [
+        [
+          "east-west"
+        ],
+        [
+          "ferry"
+        ]
+      ],
+      "Baker2>Household:bread": [
+        [
+          "east-west"
+        ],
+        [
+          "ferry"
+        ]
+      ],
+      "Baker>Ada:bread": [
+        [
+          "local"
+        ]
+      ],
+      "Baker>Ada:soap": [
+        [
+          "local"
+        ]
+      ],
+      "Baker>Household:bread": [
+        [
+          "local"
+        ]
+      ],
+      "Baker>Household:soap": [
+        [
+          "local"
+        ]
+      ],
+      "Beaner>Ada:beans": [
+        [
+          "local"
+        ]
+      ],
+      "Beaner>Household:beans": [
+        [
+          "local"
+        ]
+      ],
+      "Farm>Baker2:grain": [
+        [
+          "farm-road",
+          "west-east"
+        ]
+      ],
+      "Farm>Baker:grain": [
+        [
+          "farm-road"
+        ]
+      ]
+    }
+  }
+}

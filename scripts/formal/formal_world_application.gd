@@ -17,6 +17,8 @@ var _economy_view_dirty: bool = true
 var _organization_view_dirty: bool = true
 var _economic_map_dirty: bool = false
 var _flag_date: String = ""
+var _ui_economy_day: int = -1
+var _ui_economy_revision: int = -1
 var _ui_politics: RuntimePoliticalEntityView
 var _ui_economy: FormalWorldEconomyView
 var _ui_organizations: FormalWorldOrganizationView
@@ -124,6 +126,8 @@ func _install_world(built: WorldBuildResult, focus_opening: bool = false) -> voi
 	_economy_view_dirty = true
 	_organization_view_dirty = true
 	_flag_date = ""
+	_ui_economy_day = -1
+	_ui_economy_revision = -1
 	var personal := _world.personal_economy_state.person_economy(_world.player_state.player_id())
 	_last_personal_transaction_id = str((personal.get("recent_wage_transaction",{}) as Dictionary).get("transaction_id",""))
 	var living := _world.personal_economy_state.living_records(_world.player_state.player_id(),1)
@@ -161,7 +165,8 @@ func _on_world_changed(change: Dictionary) -> void:
 		_persistence.queued_save_result = null
 		_finish_save(result)
 		if _world==null or not is_inside_tree(): return
-	_economy_view_dirty = _economy_view_dirty or bool(change.get("economy",false)) or bool(change.get("native_changed",false))
+	var economic_state_changed := _ui_economy_day!=int(_world.economy_state.total_hour/FormalWorldEconomyState.HOURS_PER_DAY) or _ui_economy_revision!=_world.economy_state._state_revision
+	_economy_view_dirty = _economy_view_dirty or economic_state_changed
 	_organization_view_dirty = _organization_view_dirty or bool(change.get("organization_responsibilities",false))
 	_economic_map_dirty = _economic_map_dirty or _economy_view_dirty
 	var date := _world.game_clock.current_date()
@@ -186,7 +191,7 @@ func _on_world_changed(change: Dictionary) -> void:
 			main_shell.show_feedback("工资到账：+%s 模拟单位。" % receipt.amount,"person:accounts")
 		elif bool(personal.get("wage_unpaid",false)):
 			main_shell.show_feedback("自己的工资已到期，雇主储备不足。","person:accounts")
-	if bool(change.get("personal_life_changed",false)) or bool(change.get("economy",false)):
+	if bool(change.get("personal_life_changed",false)):
 		var living := _world.personal_economy_state.living_records(_world.player_state.player_id(),1)
 		if not living.is_empty() and str(living[0].record_id) != _last_living_record_id:
 			var record := living[0]
@@ -202,7 +207,7 @@ func _on_world_changed(change: Dictionary) -> void:
 	main_shell.set_date(date)
 	var page := main_shell.current_page
 	var personal_changed := bool(change.get("personal_life_changed",false)) or bool(change.get("persons_changed",false)) or bool(change.get("native_changed",false)) or int(change.get("wages_paid",0))>0 or int(change.get("wages_failed",0))>0
-	if reference_changed or (page=="person" and personal_changed) or (page=="economy" and _economy_view_dirty) or (page=="organization" and _organization_view_dirty):
+	if reference_changed or (page=="person" and personal_changed) or (page=="economy" and (economic_state_changed or bool(change.get("native_changed",false)))) or (page=="organization" and _organization_view_dirty):
 		main_shell.refresh()
 	elif date_key!=previous_date and not map_controller.selected_place_id.is_empty():
 		main_shell.refresh()
@@ -254,6 +259,8 @@ func _refresh_map() -> void:
 func _prepare_ui_views(need_economy: bool, need_organizations: bool) -> void:
 	if need_economy and (_ui_economy==null or _economy_view_dirty):
 		_ui_economy = FormalWorldEconomyView.new(_world.economy_state.read_only_presentation_snapshot())
+		_ui_economy_day = int(_world.economy_state.total_hour/FormalWorldEconomyState.HOURS_PER_DAY)
+		_ui_economy_revision = _world.economy_state._state_revision
 		_economy_view_dirty = false
 	if need_organizations and (_ui_organizations==null or _organization_view_dirty):
 		_ui_organizations = FormalWorldOrganizationView.new(_world.organization_state.snapshot())
@@ -309,7 +316,10 @@ func _on_action_requested(action: String) -> void:
 		else: time_control.set_speed(int(command))
 	elif _world != null and action.begins_with("native:"):
 		var result: Dictionary
-		if action.begins_with("native:business_buy:"):
+		if action=="native:business_finance":
+			var payload := main_shell.person_page.business_finance_request()
+			if not payload.is_empty(): result=LivelihoodAction.execute_current(_world,"finance_firm",payload)
+		elif action.begins_with("native:business_buy:"):
 			var payload := main_shell.person_page.business_request(int(action.trim_prefix("native:business_buy:")))
 			result=LivelihoodAction.execute_current(_world,"buy",payload) if not payload.is_empty() else {"accepted":false,"reason":"KNOWN_ENTERPRISE_QUOTE_UNAVAILABLE"}
 		elif action.begins_with("native:business_activity:"):

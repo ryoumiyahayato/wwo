@@ -95,7 +95,7 @@ func _advance_minutes(minutes: int) -> Dictionary:
 		life_completed += int(living.completed)
 		life_failed += int(living.failed)
 		if boundary_hour > settled_through_hour:
-			_economy.settle_hour_range(settled_through_hour,boundary_hour)
+			_economy.settle_hour_range(settled_through_hour,boundary_hour,false)
 		_personal_economy.apply_livelihood_boundary()
 		if boundary_minute == next_day_boundary_hour*60:
 			# Finish the old day, commit residence, then admit/exit future economy scopes.
@@ -114,7 +114,7 @@ func _advance_minutes(minutes: int) -> Dictionary:
 		if not _synchronize_spatial_to_authoritative_hour():
 			return _error("Spatial failed at hour %d" % current_total_hour)
 		_economy.settle_hour_range(
-			settled_through_hour, current_total_hour
+			settled_through_hour, current_total_hour, false
 		)
 	if _economy_r1 != null and not _economy_r1.advance_time(): return _error(_economy_r1.error)
 	var elapsed_hours := current_total_hour - starting_total_hour

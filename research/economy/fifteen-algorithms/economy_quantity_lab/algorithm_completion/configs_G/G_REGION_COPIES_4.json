@@ -1,0 +1,1829 @@
+{
+  "case_id": "G_REGION_COPIES_4",
+  "contention": "C0",
+  "days": 30,
+  "economics": {
+    "balances": {
+      "Carrier": 0,
+      "R0/Baker": 1000,
+      "R0/Baker2": 1000,
+      "R0/Beaner": 1000,
+      "R0/Farm": 1000,
+      "R0/Household": 0,
+      "R1/Baker": 1000,
+      "R1/Baker2": 1000,
+      "R1/Beaner": 1000,
+      "R1/Farm": 1000,
+      "R1/Household": 0,
+      "R2/Baker": 1000,
+      "R2/Baker2": 1000,
+      "R2/Beaner": 1000,
+      "R2/Farm": 1000,
+      "R2/Household": 0,
+      "R3/Baker": 1000,
+      "R3/Baker2": 1000,
+      "R3/Beaner": 1000,
+      "R3/Farm": 1000,
+      "R3/Household": 0
+    },
+    "feedback": true,
+    "limits": {
+      "Carrier": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R0/Baker": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R0/Baker2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R0/Beaner": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R0/Farm": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R0/Household": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R1/Baker": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R1/Baker2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R1/Beaner": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R1/Farm": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R1/Household": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R2/Baker": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R2/Baker2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R2/Beaner": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R2/Farm": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R2/Household": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R3/Baker": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R3/Baker2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R3/Beaner": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R3/Farm": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "R3/Household": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      }
+    },
+    "mode": "N2",
+    "prices": {
+      "R0/Baker2:bread": 4,
+      "R0/Baker:bread": 3,
+      "R0/Baker:soap": 2,
+      "R0/Beaner:beans": 4,
+      "R0/Farm:grain": 1,
+      "R1/Baker2:bread": 4,
+      "R1/Baker:bread": 3,
+      "R1/Baker:soap": 2,
+      "R1/Beaner:beans": 4,
+      "R1/Farm:grain": 1,
+      "R2/Baker2:bread": 4,
+      "R2/Baker:bread": 3,
+      "R2/Baker:soap": 2,
+      "R2/Beaner:beans": 4,
+      "R2/Farm:grain": 1,
+      "R3/Baker2:bread": 4,
+      "R3/Baker:bread": 3,
+      "R3/Baker:soap": 2,
+      "R3/Beaner:beans": 4,
+      "R3/Farm:grain": 1
+    },
+    "terminal_prices": {},
+    "tick": 1
+  },
+  "enable_labor": true,
+  "events": [],
+  "firms": [
+    {
+      "capacities": {
+        "grain": 10
+      },
+      "firm_id": "R0/Farm",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "grain": 40
+      },
+      "place_id": "R0/farm",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "grain",
+          "output_quantity": 1,
+          "producer_id": "R0/Farm"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 8,
+        "soap": 2
+      },
+      "firm_id": "R0/Baker",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 24
+      },
+      "knowledge": {
+        "grain": [
+          "R0/Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 14,
+        "soap": 4
+      },
+      "place_id": "R0/west",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "R0/Baker"
+        },
+        {
+          "inputs": [
+            [
+              "grain",
+              1
+            ]
+          ],
+          "output_commodity": "soap",
+          "output_quantity": 1,
+          "producer_id": "R0/Baker"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 6
+      },
+      "firm_id": "R0/Baker2",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 18
+      },
+      "knowledge": {
+        "grain": [
+          "R0/Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 12
+      },
+      "place_id": "R0/east",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "R0/Baker2"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "beans": 8
+      },
+      "firm_id": "R0/Beaner",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "beans": 16
+      },
+      "place_id": "R0/west",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "beans",
+          "output_quantity": 1,
+          "producer_id": "R0/Beaner"
+        }
+      ]
+    },
+    {
+      "capacities": {},
+      "firm_id": "R0/Household",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "R0/Beaner"
+        ],
+        "bread": [
+          "R0/Baker",
+          "R0/Baker2"
+        ],
+        "soap": [
+          "R0/Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "R0/west",
+      "recipes": []
+    },
+    {
+      "capacities": {
+        "grain": 10
+      },
+      "firm_id": "R1/Farm",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "grain": 40
+      },
+      "place_id": "R1/farm",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "grain",
+          "output_quantity": 1,
+          "producer_id": "R1/Farm"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 8,
+        "soap": 2
+      },
+      "firm_id": "R1/Baker",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 24
+      },
+      "knowledge": {
+        "grain": [
+          "R1/Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 14,
+        "soap": 4
+      },
+      "place_id": "R1/west",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "R1/Baker"
+        },
+        {
+          "inputs": [
+            [
+              "grain",
+              1
+            ]
+          ],
+          "output_commodity": "soap",
+          "output_quantity": 1,
+          "producer_id": "R1/Baker"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 6
+      },
+      "firm_id": "R1/Baker2",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 18
+      },
+      "knowledge": {
+        "grain": [
+          "R1/Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 12
+      },
+      "place_id": "R1/east",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "R1/Baker2"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "beans": 8
+      },
+      "firm_id": "R1/Beaner",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "beans": 16
+      },
+      "place_id": "R1/west",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "beans",
+          "output_quantity": 1,
+          "producer_id": "R1/Beaner"
+        }
+      ]
+    },
+    {
+      "capacities": {},
+      "firm_id": "R1/Household",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "R1/Beaner"
+        ],
+        "bread": [
+          "R1/Baker",
+          "R1/Baker2"
+        ],
+        "soap": [
+          "R1/Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "R1/west",
+      "recipes": []
+    },
+    {
+      "capacities": {
+        "grain": 10
+      },
+      "firm_id": "R2/Farm",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "grain": 40
+      },
+      "place_id": "R2/farm",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "grain",
+          "output_quantity": 1,
+          "producer_id": "R2/Farm"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 8,
+        "soap": 2
+      },
+      "firm_id": "R2/Baker",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 24
+      },
+      "knowledge": {
+        "grain": [
+          "R2/Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 14,
+        "soap": 4
+      },
+      "place_id": "R2/west",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "R2/Baker"
+        },
+        {
+          "inputs": [
+            [
+              "grain",
+              1
+            ]
+          ],
+          "output_commodity": "soap",
+          "output_quantity": 1,
+          "producer_id": "R2/Baker"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 6
+      },
+      "firm_id": "R2/Baker2",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 18
+      },
+      "knowledge": {
+        "grain": [
+          "R2/Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 12
+      },
+      "place_id": "R2/east",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "R2/Baker2"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "beans": 8
+      },
+      "firm_id": "R2/Beaner",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "beans": 16
+      },
+      "place_id": "R2/west",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "beans",
+          "output_quantity": 1,
+          "producer_id": "R2/Beaner"
+        }
+      ]
+    },
+    {
+      "capacities": {},
+      "firm_id": "R2/Household",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "R2/Beaner"
+        ],
+        "bread": [
+          "R2/Baker",
+          "R2/Baker2"
+        ],
+        "soap": [
+          "R2/Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "R2/west",
+      "recipes": []
+    },
+    {
+      "capacities": {
+        "grain": 10
+      },
+      "firm_id": "R3/Farm",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "grain": 40
+      },
+      "place_id": "R3/farm",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "grain",
+          "output_quantity": 1,
+          "producer_id": "R3/Farm"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 8,
+        "soap": 2
+      },
+      "firm_id": "R3/Baker",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 24
+      },
+      "knowledge": {
+        "grain": [
+          "R3/Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 14,
+        "soap": 4
+      },
+      "place_id": "R3/west",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "R3/Baker"
+        },
+        {
+          "inputs": [
+            [
+              "grain",
+              1
+            ]
+          ],
+          "output_commodity": "soap",
+          "output_quantity": 1,
+          "producer_id": "R3/Baker"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 6
+      },
+      "firm_id": "R3/Baker2",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 18
+      },
+      "knowledge": {
+        "grain": [
+          "R3/Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 12
+      },
+      "place_id": "R3/east",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "R3/Baker2"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "beans": 8
+      },
+      "firm_id": "R3/Beaner",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "beans": 16
+      },
+      "place_id": "R3/west",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "beans",
+          "output_quantity": 1,
+          "producer_id": "R3/Beaner"
+        }
+      ]
+    },
+    {
+      "capacities": {},
+      "firm_id": "R3/Household",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "R3/Beaner"
+        ],
+        "bread": [
+          "R3/Baker",
+          "R3/Baker2"
+        ],
+        "soap": [
+          "R3/Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "R3/west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Carrier",
+      "firm_type": "CARRIER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {},
+      "place_id": "service",
+      "recipes": []
+    }
+  ],
+  "food_satisfaction": {
+    "beans": 2,
+    "bread": 1
+  },
+  "goods": [
+    "grain",
+    "bread",
+    "beans",
+    "soap"
+  ],
+  "horizon": 5,
+  "households": [
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "R0/Household",
+      "known_jobs": [
+        "R0/job-beans",
+        "R0/job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "R1/Household",
+      "known_jobs": [
+        "R1/job-beans",
+        "R1/job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "R2/Household",
+      "known_jobs": [
+        "R2/job-beans",
+        "R2/job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "R3/Household",
+      "known_jobs": [
+        "R3/job-beans",
+        "R3/job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    }
+  ],
+  "inventory": {
+    "Carrier": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "R0/Baker": {
+      "beans": 0,
+      "bread": 12,
+      "grain": 20,
+      "soap": 3
+    },
+    "R0/Baker2": {
+      "beans": 0,
+      "bread": 8,
+      "grain": 12,
+      "soap": 0
+    },
+    "R0/Beaner": {
+      "beans": 12,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "R0/Farm": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 30,
+      "soap": 0
+    },
+    "R0/Household": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "R1/Baker": {
+      "beans": 0,
+      "bread": 12,
+      "grain": 20,
+      "soap": 3
+    },
+    "R1/Baker2": {
+      "beans": 0,
+      "bread": 8,
+      "grain": 12,
+      "soap": 0
+    },
+    "R1/Beaner": {
+      "beans": 12,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "R1/Farm": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 30,
+      "soap": 0
+    },
+    "R1/Household": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "R2/Baker": {
+      "beans": 0,
+      "bread": 12,
+      "grain": 20,
+      "soap": 3
+    },
+    "R2/Baker2": {
+      "beans": 0,
+      "bread": 8,
+      "grain": 12,
+      "soap": 0
+    },
+    "R2/Beaner": {
+      "beans": 12,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "R2/Farm": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 30,
+      "soap": 0
+    },
+    "R2/Household": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "R3/Baker": {
+      "beans": 0,
+      "bread": 12,
+      "grain": 20,
+      "soap": 3
+    },
+    "R3/Baker2": {
+      "beans": 0,
+      "bread": 8,
+      "grain": 12,
+      "soap": 0
+    },
+    "R3/Beaner": {
+      "beans": 12,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "R3/Farm": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 30,
+      "soap": 0
+    },
+    "R3/Household": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    }
+  },
+  "jobs": [
+    {
+      "employer": "R0/Beaner",
+      "hours": 2,
+      "id": "R0/job-beans",
+      "place": "R0/west",
+      "positions": 3,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "R0/Baker",
+      "hours": 2,
+      "id": "R0/job-bread",
+      "place": "R0/west",
+      "positions": 2,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "R1/Beaner",
+      "hours": 2,
+      "id": "R1/job-beans",
+      "place": "R1/west",
+      "positions": 3,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "R1/Baker",
+      "hours": 2,
+      "id": "R1/job-bread",
+      "place": "R1/west",
+      "positions": 2,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "R2/Beaner",
+      "hours": 2,
+      "id": "R2/job-beans",
+      "place": "R2/west",
+      "positions": 3,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "R2/Baker",
+      "hours": 2,
+      "id": "R2/job-bread",
+      "place": "R2/west",
+      "positions": 2,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "R3/Beaner",
+      "hours": 2,
+      "id": "R3/job-beans",
+      "place": "R3/west",
+      "positions": 3,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "R3/Baker",
+      "hours": 2,
+      "id": "R3/job-bread",
+      "place": "R3/west",
+      "positions": 2,
+      "skill": 1,
+      "wage_per_hour": 2
+    }
+  ],
+  "labor_hours_per_output": {
+    "R0/Baker2:bread": 1,
+    "R0/Baker:bread": 1,
+    "R0/Baker:soap": 1,
+    "R0/Beaner:beans": 1,
+    "R0/Farm:grain": 1,
+    "R1/Baker2:bread": 1,
+    "R1/Baker:bread": 1,
+    "R1/Baker:soap": 1,
+    "R1/Beaner:beans": 1,
+    "R1/Farm:grain": 1,
+    "R2/Baker2:bread": 1,
+    "R2/Baker:bread": 1,
+    "R2/Baker:soap": 1,
+    "R2/Beaner:beans": 1,
+    "R2/Farm:grain": 1,
+    "R3/Baker2:bread": 1,
+    "R3/Baker:bread": 1,
+    "R3/Baker:soap": 1,
+    "R3/Beaner:beans": 1,
+    "R3/Farm:grain": 1
+  },
+  "route_events": {},
+  "routes": [
+    {
+      "buyer_id": "R0/Baker",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "R0/Farm"
+    },
+    {
+      "buyer_id": "R0/Baker2",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "R0/Farm"
+    },
+    {
+      "buyer_id": "R0/Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "R0/Baker"
+    },
+    {
+      "buyer_id": "R0/Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "R0/Baker2"
+    },
+    {
+      "buyer_id": "R0/Household",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "R0/Beaner"
+    },
+    {
+      "buyer_id": "R0/Household",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "R0/Baker"
+    },
+    {
+      "buyer_id": "R1/Baker",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "R1/Farm"
+    },
+    {
+      "buyer_id": "R1/Baker2",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "R1/Farm"
+    },
+    {
+      "buyer_id": "R1/Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "R1/Baker"
+    },
+    {
+      "buyer_id": "R1/Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "R1/Baker2"
+    },
+    {
+      "buyer_id": "R1/Household",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "R1/Beaner"
+    },
+    {
+      "buyer_id": "R1/Household",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "R1/Baker"
+    },
+    {
+      "buyer_id": "R2/Baker",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "R2/Farm"
+    },
+    {
+      "buyer_id": "R2/Baker2",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "R2/Farm"
+    },
+    {
+      "buyer_id": "R2/Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "R2/Baker"
+    },
+    {
+      "buyer_id": "R2/Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "R2/Baker2"
+    },
+    {
+      "buyer_id": "R2/Household",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "R2/Beaner"
+    },
+    {
+      "buyer_id": "R2/Household",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "R2/Baker"
+    },
+    {
+      "buyer_id": "R3/Baker",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "R3/Farm"
+    },
+    {
+      "buyer_id": "R3/Baker2",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "R3/Farm"
+    },
+    {
+      "buyer_id": "R3/Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "R3/Baker"
+    },
+    {
+      "buyer_id": "R3/Household",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "R3/Baker2"
+    },
+    {
+      "buyer_id": "R3/Household",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "R3/Beaner"
+    },
+    {
+      "buyer_id": "R3/Household",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "R3/Baker"
+    }
+  ],
+  "sinks": [],
+  "stock_horizon": 4,
+  "transport": {
+    "carrier": "Carrier",
+    "edges": {
+      "R0/east~east": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R0/east",
+        "to": "R0/east"
+      },
+      "R0/east~farm": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R0/east",
+        "to": "R0/farm"
+      },
+      "R0/east~west": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R0/east",
+        "to": "R0/west"
+      },
+      "R0/farm~east": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R0/farm",
+        "to": "R0/east"
+      },
+      "R0/farm~farm": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R0/farm",
+        "to": "R0/farm"
+      },
+      "R0/farm~west": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R0/farm",
+        "to": "R0/west"
+      },
+      "R0/west~east": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R0/west",
+        "to": "R0/east"
+      },
+      "R0/west~farm": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R0/west",
+        "to": "R0/farm"
+      },
+      "R0/west~west": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R0/west",
+        "to": "R0/west"
+      },
+      "R1/east~east": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R1/east",
+        "to": "R1/east"
+      },
+      "R1/east~farm": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R1/east",
+        "to": "R1/farm"
+      },
+      "R1/east~west": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R1/east",
+        "to": "R1/west"
+      },
+      "R1/farm~east": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R1/farm",
+        "to": "R1/east"
+      },
+      "R1/farm~farm": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R1/farm",
+        "to": "R1/farm"
+      },
+      "R1/farm~west": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R1/farm",
+        "to": "R1/west"
+      },
+      "R1/west~east": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R1/west",
+        "to": "R1/east"
+      },
+      "R1/west~farm": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R1/west",
+        "to": "R1/farm"
+      },
+      "R1/west~west": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R1/west",
+        "to": "R1/west"
+      },
+      "R2/east~east": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R2/east",
+        "to": "R2/east"
+      },
+      "R2/east~farm": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R2/east",
+        "to": "R2/farm"
+      },
+      "R2/east~west": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R2/east",
+        "to": "R2/west"
+      },
+      "R2/farm~east": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R2/farm",
+        "to": "R2/east"
+      },
+      "R2/farm~farm": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R2/farm",
+        "to": "R2/farm"
+      },
+      "R2/farm~west": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R2/farm",
+        "to": "R2/west"
+      },
+      "R2/west~east": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R2/west",
+        "to": "R2/east"
+      },
+      "R2/west~farm": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R2/west",
+        "to": "R2/farm"
+      },
+      "R2/west~west": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R2/west",
+        "to": "R2/west"
+      },
+      "R3/east~east": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R3/east",
+        "to": "R3/east"
+      },
+      "R3/east~farm": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R3/east",
+        "to": "R3/farm"
+      },
+      "R3/east~west": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R3/east",
+        "to": "R3/west"
+      },
+      "R3/farm~east": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R3/farm",
+        "to": "R3/east"
+      },
+      "R3/farm~farm": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R3/farm",
+        "to": "R3/farm"
+      },
+      "R3/farm~west": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R3/farm",
+        "to": "R3/west"
+      },
+      "R3/west~east": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R3/west",
+        "to": "R3/east"
+      },
+      "R3/west~farm": {
+        "capacity": 12,
+        "duration": 2,
+        "fee": 1,
+        "from": "R3/west",
+        "to": "R3/farm"
+      },
+      "R3/west~west": {
+        "capacity": 12,
+        "duration": 1,
+        "fee": 1,
+        "from": "R3/west",
+        "to": "R3/west"
+      }
+    },
+    "known_edges": {
+      "R0/Baker": [
+        "R0/farm~farm",
+        "R0/farm~west",
+        "R0/farm~east",
+        "R0/west~farm",
+        "R0/west~west",
+        "R0/west~east",
+        "R0/east~farm",
+        "R0/east~west",
+        "R0/east~east"
+      ],
+      "R0/Baker2": [
+        "R0/farm~farm",
+        "R0/farm~west",
+        "R0/farm~east",
+        "R0/west~farm",
+        "R0/west~west",
+        "R0/west~east",
+        "R0/east~farm",
+        "R0/east~west",
+        "R0/east~east"
+      ],
+      "R0/Beaner": [
+        "R0/farm~farm",
+        "R0/farm~west",
+        "R0/farm~east",
+        "R0/west~farm",
+        "R0/west~west",
+        "R0/west~east",
+        "R0/east~farm",
+        "R0/east~west",
+        "R0/east~east"
+      ],
+      "R0/Farm": [
+        "R0/farm~farm",
+        "R0/farm~west",
+        "R0/farm~east",
+        "R0/west~farm",
+        "R0/west~west",
+        "R0/west~east",
+        "R0/east~farm",
+        "R0/east~west",
+        "R0/east~east"
+      ],
+      "R0/Household": [
+        "R0/farm~farm",
+        "R0/farm~west",
+        "R0/farm~east",
+        "R0/west~farm",
+        "R0/west~west",
+        "R0/west~east",
+        "R0/east~farm",
+        "R0/east~west",
+        "R0/east~east"
+      ],
+      "R1/Baker": [
+        "R1/farm~farm",
+        "R1/farm~west",
+        "R1/farm~east",
+        "R1/west~farm",
+        "R1/west~west",
+        "R1/west~east",
+        "R1/east~farm",
+        "R1/east~west",
+        "R1/east~east"
+      ],
+      "R1/Baker2": [
+        "R1/farm~farm",
+        "R1/farm~west",
+        "R1/farm~east",
+        "R1/west~farm",
+        "R1/west~west",
+        "R1/west~east",
+        "R1/east~farm",
+        "R1/east~west",
+        "R1/east~east"
+      ],
+      "R1/Beaner": [
+        "R1/farm~farm",
+        "R1/farm~west",
+        "R1/farm~east",
+        "R1/west~farm",
+        "R1/west~west",
+        "R1/west~east",
+        "R1/east~farm",
+        "R1/east~west",
+        "R1/east~east"
+      ],
+      "R1/Farm": [
+        "R1/farm~farm",
+        "R1/farm~west",
+        "R1/farm~east",
+        "R1/west~farm",
+        "R1/west~west",
+        "R1/west~east",
+        "R1/east~farm",
+        "R1/east~west",
+        "R1/east~east"
+      ],
+      "R1/Household": [
+        "R1/farm~farm",
+        "R1/farm~west",
+        "R1/farm~east",
+        "R1/west~farm",
+        "R1/west~west",
+        "R1/west~east",
+        "R1/east~farm",
+        "R1/east~west",
+        "R1/east~east"
+      ],
+      "R2/Baker": [
+        "R2/farm~farm",
+        "R2/farm~west",
+        "R2/farm~east",
+        "R2/west~farm",
+        "R2/west~west",
+        "R2/west~east",
+        "R2/east~farm",
+        "R2/east~west",
+        "R2/east~east"
+      ],
+      "R2/Baker2": [
+        "R2/farm~farm",
+        "R2/farm~west",
+        "R2/farm~east",
+        "R2/west~farm",
+        "R2/west~west",
+        "R2/west~east",
+        "R2/east~farm",
+        "R2/east~west",
+        "R2/east~east"
+      ],
+      "R2/Beaner": [
+        "R2/farm~farm",
+        "R2/farm~west",
+        "R2/farm~east",
+        "R2/west~farm",
+        "R2/west~west",
+        "R2/west~east",
+        "R2/east~farm",
+        "R2/east~west",
+        "R2/east~east"
+      ],
+      "R2/Farm": [
+        "R2/farm~farm",
+        "R2/farm~west",
+        "R2/farm~east",
+        "R2/west~farm",
+        "R2/west~west",
+        "R2/west~east",
+        "R2/east~farm",
+        "R2/east~west",
+        "R2/east~east"
+      ],
+      "R2/Household": [
+        "R2/farm~farm",
+        "R2/farm~west",
+        "R2/farm~east",
+        "R2/west~farm",
+        "R2/west~west",
+        "R2/west~east",
+        "R2/east~farm",
+        "R2/east~west",
+        "R2/east~east"
+      ],
+      "R3/Baker": [
+        "R3/farm~farm",
+        "R3/farm~west",
+        "R3/farm~east",
+        "R3/west~farm",
+        "R3/west~west",
+        "R3/west~east",
+        "R3/east~farm",
+        "R3/east~west",
+        "R3/east~east"
+      ],
+      "R3/Baker2": [
+        "R3/farm~farm",
+        "R3/farm~west",
+        "R3/farm~east",
+        "R3/west~farm",
+        "R3/west~west",
+        "R3/west~east",
+        "R3/east~farm",
+        "R3/east~west",
+        "R3/east~east"
+      ],
+      "R3/Beaner": [
+        "R3/farm~farm",
+        "R3/farm~west",
+        "R3/farm~east",
+        "R3/west~farm",
+        "R3/west~west",
+        "R3/west~east",
+        "R3/east~farm",
+        "R3/east~west",
+        "R3/east~east"
+      ],
+      "R3/Farm": [
+        "R3/farm~farm",
+        "R3/farm~west",
+        "R3/farm~east",
+        "R3/west~farm",
+        "R3/west~west",
+        "R3/west~east",
+        "R3/east~farm",
+        "R3/east~west",
+        "R3/east~east"
+      ],
+      "R3/Household": [
+        "R3/farm~farm",
+        "R3/farm~west",
+        "R3/farm~east",
+        "R3/west~farm",
+        "R3/west~west",
+        "R3/west~east",
+        "R3/east~farm",
+        "R3/east~west",
+        "R3/east~east"
+      ]
+    },
+    "paths": {
+      "R0/Baker2>R0/Household:bread": [
+        [
+          "R0/east~west"
+        ]
+      ],
+      "R0/Baker>R0/Household:bread": [
+        [
+          "R0/west~west"
+        ]
+      ],
+      "R0/Baker>R0/Household:soap": [
+        [
+          "R0/west~west"
+        ]
+      ],
+      "R0/Beaner>R0/Household:beans": [
+        [
+          "R0/west~west"
+        ]
+      ],
+      "R0/Farm>R0/Baker2:grain": [
+        [
+          "R0/farm~east"
+        ]
+      ],
+      "R0/Farm>R0/Baker:grain": [
+        [
+          "R0/farm~west"
+        ]
+      ],
+      "R1/Baker2>R1/Household:bread": [
+        [
+          "R1/east~west"
+        ]
+      ],
+      "R1/Baker>R1/Household:bread": [
+        [
+          "R1/west~west"
+        ]
+      ],
+      "R1/Baker>R1/Household:soap": [
+        [
+          "R1/west~west"
+        ]
+      ],
+      "R1/Beaner>R1/Household:beans": [
+        [
+          "R1/west~west"
+        ]
+      ],
+      "R1/Farm>R1/Baker2:grain": [
+        [
+          "R1/farm~east"
+        ]
+      ],
+      "R1/Farm>R1/Baker:grain": [
+        [
+          "R1/farm~west"
+        ]
+      ],
+      "R2/Baker2>R2/Household:bread": [
+        [
+          "R2/east~west"
+        ]
+      ],
+      "R2/Baker>R2/Household:bread": [
+        [
+          "R2/west~west"
+        ]
+      ],
+      "R2/Baker>R2/Household:soap": [
+        [
+          "R2/west~west"
+        ]
+      ],
+      "R2/Beaner>R2/Household:beans": [
+        [
+          "R2/west~west"
+        ]
+      ],
+      "R2/Farm>R2/Baker2:grain": [
+        [
+          "R2/farm~east"
+        ]
+      ],
+      "R2/Farm>R2/Baker:grain": [
+        [
+          "R2/farm~west"
+        ]
+      ],
+      "R3/Baker2>R3/Household:bread": [
+        [
+          "R3/east~west"
+        ]
+      ],
+      "R3/Baker>R3/Household:bread": [
+        [
+          "R3/west~west"
+        ]
+      ],
+      "R3/Baker>R3/Household:soap": [
+        [
+          "R3/west~west"
+        ]
+      ],
+      "R3/Beaner>R3/Household:beans": [
+        [
+          "R3/west~west"
+        ]
+      ],
+      "R3/Farm>R3/Baker2:grain": [
+        [
+          "R3/farm~east"
+        ]
+      ],
+      "R3/Farm>R3/Baker:grain": [
+        [
+          "R3/farm~west"
+        ]
+      ]
+    }
+  }
+}

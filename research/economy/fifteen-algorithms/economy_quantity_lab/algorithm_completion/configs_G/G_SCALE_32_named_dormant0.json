@@ -1,0 +1,2722 @@
+{
+  "case_id": "G_SCALE_32_named_dormant0",
+  "contention": "C0",
+  "days": 30,
+  "economics": {
+    "balances": {
+      "Baker": 32000,
+      "Baker2": 32000,
+      "Beaner": 32000,
+      "Farm": 32000,
+      "Person0": 30,
+      "Person1": 30,
+      "Person10": 30,
+      "Person11": 30,
+      "Person12": 30,
+      "Person13": 30,
+      "Person14": 30,
+      "Person15": 30,
+      "Person16": 30,
+      "Person17": 30,
+      "Person18": 30,
+      "Person19": 30,
+      "Person2": 30,
+      "Person20": 30,
+      "Person21": 30,
+      "Person22": 30,
+      "Person23": 30,
+      "Person24": 30,
+      "Person25": 30,
+      "Person26": 30,
+      "Person27": 30,
+      "Person28": 30,
+      "Person29": 30,
+      "Person3": 30,
+      "Person30": 30,
+      "Person31": 30,
+      "Person4": 30,
+      "Person5": 30,
+      "Person6": 30,
+      "Person7": 30,
+      "Person8": 30,
+      "Person9": 30
+    },
+    "feedback": true,
+    "limits": {
+      "Baker": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Baker2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Beaner": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Farm": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person0": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person1": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person10": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person11": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person12": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person13": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person14": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person15": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person16": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person17": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person18": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person19": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person2": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person20": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person21": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person22": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person23": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person24": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person25": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person26": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person27": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person28": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person29": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person3": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person30": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person31": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person4": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person5": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person6": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person7": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person8": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      },
+      "Person9": {
+        "beans": 20,
+        "bread": 20,
+        "grain": 20,
+        "soap": 20
+      }
+    },
+    "mode": "N2",
+    "prices": {
+      "Baker2:bread": 4,
+      "Baker:bread": 3,
+      "Baker:soap": 2,
+      "Beaner:beans": 4,
+      "Farm:grain": 1
+    },
+    "terminal_prices": {},
+    "tick": 1
+  },
+  "enable_labor": true,
+  "events": [],
+  "firms": [
+    {
+      "capacities": {
+        "grain": 320
+      },
+      "firm_id": "Farm",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "grain": 1280
+      },
+      "place_id": "farm",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "grain",
+          "output_quantity": 1,
+          "producer_id": "Farm"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 256,
+        "soap": 64
+      },
+      "firm_id": "Baker",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 768
+      },
+      "knowledge": {
+        "grain": [
+          "Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 448,
+        "soap": 128
+      },
+      "place_id": "west",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "Baker"
+        },
+        {
+          "inputs": [
+            [
+              "grain",
+              1
+            ]
+          ],
+          "output_commodity": "soap",
+          "output_quantity": 1,
+          "producer_id": "Baker"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "bread": 192
+      },
+      "firm_id": "Baker2",
+      "firm_type": "PRODUCER",
+      "input_targets": {
+        "grain": 576
+      },
+      "knowledge": {
+        "grain": [
+          "Farm"
+        ]
+      },
+      "output_targets": {
+        "bread": 384
+      },
+      "place_id": "east",
+      "recipes": [
+        {
+          "inputs": [
+            [
+              "grain",
+              2
+            ]
+          ],
+          "output_commodity": "bread",
+          "output_quantity": 1,
+          "producer_id": "Baker2"
+        }
+      ]
+    },
+    {
+      "capacities": {
+        "beans": 256
+      },
+      "firm_id": "Beaner",
+      "firm_type": "PRODUCER",
+      "input_targets": {},
+      "knowledge": {},
+      "output_targets": {
+        "beans": 512
+      },
+      "place_id": "west",
+      "recipes": [
+        {
+          "inputs": [],
+          "output_commodity": "beans",
+          "output_quantity": 1,
+          "producer_id": "Beaner"
+        }
+      ]
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person0",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person1",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person2",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person3",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person4",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person5",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person6",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person7",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person8",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person9",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person10",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person11",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person12",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person13",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person14",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person15",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person16",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person17",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person18",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person19",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person20",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person21",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person22",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person23",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person24",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person25",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person26",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person27",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person28",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person29",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person30",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    },
+    {
+      "capacities": {},
+      "firm_id": "Person31",
+      "firm_type": "HOUSEHOLD",
+      "input_targets": {},
+      "knowledge": {
+        "beans": [
+          "Beaner"
+        ],
+        "bread": [
+          "Baker",
+          "Baker2"
+        ],
+        "soap": [
+          "Baker"
+        ]
+      },
+      "output_targets": {},
+      "place_id": "west",
+      "recipes": []
+    }
+  ],
+  "food_satisfaction": {
+    "beans": 2,
+    "bread": 1
+  },
+  "goods": [
+    "grain",
+    "bread",
+    "beans",
+    "soap"
+  ],
+  "horizon": 5,
+  "households": [
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person0",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person1",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person2",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person3",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person4",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person5",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person6",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person7",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person8",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person9",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person10",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person11",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person12",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person13",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person14",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person15",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person16",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person17",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person18",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person19",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person20",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person21",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person22",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person23",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person24",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person25",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person26",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person27",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person28",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person29",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person30",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    },
+    {
+      "adults": 3,
+      "choice": "substitute",
+      "food_per_member": 2,
+      "hours_per_worker": 2,
+      "id": "Person31",
+      "known_jobs": [
+        "job-beans",
+        "job-bread"
+      ],
+      "max_travel": 2,
+      "members": 3,
+      "optional_durable_per_member": 1,
+      "skill": 1
+    }
+  ],
+  "inventory": {
+    "Baker": {
+      "beans": 0,
+      "bread": 384,
+      "grain": 640,
+      "soap": 96
+    },
+    "Baker2": {
+      "beans": 0,
+      "bread": 256,
+      "grain": 384,
+      "soap": 0
+    },
+    "Beaner": {
+      "beans": 384,
+      "bread": 0,
+      "grain": 0,
+      "soap": 0
+    },
+    "Farm": {
+      "beans": 0,
+      "bread": 0,
+      "grain": 960,
+      "soap": 0
+    },
+    "Person0": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person1": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person10": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person11": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person12": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person13": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person14": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person15": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person16": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person17": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person18": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person19": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person2": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person20": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person21": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person22": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person23": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person24": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person25": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person26": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person27": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person28": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person29": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person3": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person30": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person31": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person4": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person5": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person6": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person7": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person8": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    },
+    "Person9": {
+      "beans": 0,
+      "bread": 6,
+      "grain": 0,
+      "soap": 0
+    }
+  },
+  "jobs": [
+    {
+      "employer": "Beaner",
+      "hours": 2,
+      "id": "job-beans",
+      "place": "west",
+      "positions": 96,
+      "skill": 1,
+      "wage_per_hour": 2
+    },
+    {
+      "employer": "Baker",
+      "hours": 2,
+      "id": "job-bread",
+      "place": "west",
+      "positions": 64,
+      "skill": 1,
+      "wage_per_hour": 2
+    }
+  ],
+  "labor_hours_per_output": {
+    "Baker2:bread": 1,
+    "Baker:bread": 1,
+    "Baker:soap": 1,
+    "Beaner:beans": 1,
+    "Farm:grain": 1
+  },
+  "route_events": {},
+  "routes": [
+    {
+      "buyer_id": "Baker",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "Farm"
+    },
+    {
+      "buyer_id": "Baker2",
+      "capacity": 10,
+      "commodity": "grain",
+      "lead_time": 1,
+      "seller_id": "Farm"
+    },
+    {
+      "buyer_id": "Person0",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person0",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person0",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person0",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person1",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person1",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person1",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person1",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person2",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person2",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person2",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person2",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person3",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person3",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person3",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person3",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person4",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person4",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person4",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person4",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person5",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person5",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person5",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person5",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person6",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person6",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person6",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person6",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person7",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person7",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person7",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person7",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person8",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person8",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person8",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person8",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person9",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person9",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person9",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person9",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person10",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person10",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person10",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person10",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person11",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person11",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person11",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person11",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person12",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person12",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person12",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person12",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person13",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person13",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person13",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person13",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person14",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person14",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person14",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person14",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person15",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person15",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person15",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person15",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person16",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person16",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person16",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person16",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person17",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person17",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person17",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person17",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person18",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person18",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person18",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person18",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person19",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person19",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person19",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person19",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person20",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person20",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person20",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person20",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person21",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person21",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person21",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person21",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person22",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person22",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person22",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person22",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person23",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person23",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person23",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person23",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person24",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person24",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person24",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person24",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person25",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person25",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person25",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person25",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person26",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person26",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person26",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person26",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person27",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person27",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person27",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person27",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person28",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person28",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person28",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person28",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person29",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person29",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person29",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person29",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person30",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person30",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person30",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person30",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person31",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    },
+    {
+      "buyer_id": "Person31",
+      "capacity": 12,
+      "commodity": "bread",
+      "lead_time": 2,
+      "seller_id": "Baker2"
+    },
+    {
+      "buyer_id": "Person31",
+      "capacity": 12,
+      "commodity": "beans",
+      "lead_time": 1,
+      "seller_id": "Beaner"
+    },
+    {
+      "buyer_id": "Person31",
+      "capacity": 12,
+      "commodity": "soap",
+      "lead_time": 1,
+      "seller_id": "Baker"
+    }
+  ],
+  "sinks": [],
+  "stock_horizon": 4
+}
