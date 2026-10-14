@@ -36,14 +36,14 @@ func configure(scene_name: String, seed_value: int = 71, supplied: Dictionary = 
 	env = F.setup(seed_value, config)
 	costs.construction_admission_ms = (Time.get_ticks_usec() - started) / 1000.0
 	observation.configure(env.state)
-	env.gameplay.participants.debug_calculations = true
+	env.gameplay.participants.debug_calculations = observation.enabled
 	env.information.observation_recorded.connect(observation.on_observation)
 	env.information.message_transition.connect(observation.on_message)
 	env.gameplay.transition.connect(observation.on_gameplay)
 	env.gameplay.transition.connect(_on_goal)
 	env.space.route_feedback.connect(_on_route)
 	env.decisions.input_issued.connect(_on_input)
-	env.lod.physical_event_sink = observation.physical
+	env.lod.physical_event_sink = observation.physical if observation.enabled else Callable()
 	started = Time.get_ticks_usec()
 	for side: String in ["blue", "red"]:
 		var ids: Array[String] = ["remote_" + side + "_0", "remote_" + side + "_1"]
@@ -155,6 +155,8 @@ func _on_route(unit_id: String, kind: String, cause: String) -> void:
 		"phase": -1, "kind": "local_route_feedback", "subject_ref": unit_id, "cause_refs": [cause], "detail": {"kind": kind}})
 
 func _on_input(actor: String, id: String, result: Dictionary) -> void:
+	if not observation.enabled:
+		return
 	var decision: Dictionary = env.decisions.result(id)
 	observation.input(actor, id, env.state.time, decision.proposal, decision.context, {"creation_validation": decision.creation_validation, "issued": result})
 
@@ -197,6 +199,8 @@ func balanced() -> bool:
 	return true
 
 func dispose() -> void:
+	env.decisions.dispose()
+	env.gameplay.operations.dispose()
 	env.lod.physical_event_sink = Callable()
 	env.information.observation_recorded.disconnect(observation.on_observation)
 	env.information.message_transition.disconnect(observation.on_message)

@@ -56,7 +56,7 @@ func own_input(id: String, time: float, choice: Dictionary) -> void:
 	_add({"kind": "person_input", "event_id": id, "effective_time": time, "learned_time": time, "intent": choice.duplicate(true)})
 
 static func safe_reason(reason: String) -> String:
-	return reason if reason in ["wrong_owner_or_layer", "executed_existing_role_input", "person_incapacitated", "input_not_due"] else ("intent_not_admitted" if not reason.is_empty() else "")
+	return reason if reason in ["wrong_owner_or_layer", "executed_existing_role_input", "person_incapacitated", "person_dead", "person_incapacitated_or_occupied", "input_not_due"] else ("intent_not_admitted" if not reason.is_empty() else "")
 
 func events(before: int = -1) -> Dictionary:
 	var oldest: int = cursor - timeline.size()
@@ -76,7 +76,7 @@ func view(receipts: Array, focus: String = "") -> Dictionary:
 	var knowledge: Dictionary = env.information.knowledge(actor, "", "", "", PAGE)
 	work.knowledge_records += knowledge.entries.size()
 	if not focus.is_empty() and focus != actor:
-		var subject: String = {"node_unit_000": "unit_000", "node_unit_001": "unit_001"}.get(focus, focus)
+		var subject: String = str(env.structure._nodes.get(focus, {}).get("unit_id", focus))
 		var selected: Array[Dictionary] = []
 		for claim: Dictionary in knowledge.entries:
 			if claim.subject_ref == subject:
@@ -88,10 +88,11 @@ func view(receipts: Array, focus: String = "") -> Dictionary:
 		body = env.gameplay.participants.view(actor)
 		work.personal_records += 1
 	work.receipt_records += receipts.size()
-	return {"view": "PERSON_VISIBLE", "person_id": actor, "role": env.people[actor].role, "time": env.state.time,
+	var person: Dictionary = env.structure._people[actor]
+	return {"view": "PERSON_VISIBLE", "person_id": actor, "role": person.role, "time": env.state.time,
 		"personal": body, "reports": knowledge, "events": events(), "own_receipts": receipts.duplicate(true),
 		"known_map": known_map.duplicate(true), "focus": focus,
-		"attemptable": ["wait", "take_cover"] if env.people[actor].role == "ordinary_soldier" else ["hold", "advance", "withdraw", "cancel"],
+		"attemptable": ["wait", "take_cover"] if person.role == "ordinary_soldier" else ["hold", "advance", "withdraw", "cancel"],
 		"known_targets": ["node_unit_000"] if actor == "squad" else (["node_unit_000", "node_unit_001"] if actor == "platoon" else (["blue_platoon", "blue_destination", "blue_company"] if actor == "company" else [])),
 		"input_note": "attempts still require existing cooldown, scope, delivery and execution checks"}
 

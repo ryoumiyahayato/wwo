@@ -157,18 +157,23 @@ func _input(op: String, args: Dictionary) -> Dictionary:
 			if not edge is String or edge.length() > 48:
 				return _error("invalid_path")
 		choice = World._goal(World.F.intent(args.intent, args.node, args.path), args.target)
+	return _submit_choice(op, args, choice)
+
+func _submit_choice(op: String, args: Dictionary, choice: Dictionary) -> Dictionary:
 	var id: String = str(args.id)
 	var identity: Dictionary = {"op": op, "args": args.duplicate(true)}
 	if world.env.state.public_pending():
 		return _error("PENDING_RETRY_WHEN_READY")
 	if receipts.has(id):
+		if receipts[id].get("owner_ref", actor) != actor:
+			return _error("command_id_already_used_in_session")
 		return {"ok": true, "duplicate": true, "receipt": _visible_receipt(id)} if receipts[id].identity == identity else _error("command_id_conflict")
 	if receipts.size() >= MAX_IDS:
 		return _error("input_identity_capacity")
 	var started: int = Time.get_ticks_usec() if measure else 0
 	var event_id: String = "live_" + sid + "_" + id
 	var receipt: Dictionary = {"id": id, "identity": identity, "event_id": event_id, "domain_id": "input_" + event_id,
-		"received_at": world.env.state.time, "status": "REQUEST_RECEIVED", "intent": choice.duplicate(true)}
+		"owner_ref": actor, "received_at": world.env.state.time, "status": "REQUEST_RECEIVED", "intent": choice.duplicate(true)}
 	receipts[id] = receipt
 	receipt_ids.append(id)
 	if projection:
@@ -268,7 +273,8 @@ func _receipt_page(before: int = -1) -> Dictionary:
 	var start: int = maxi(0, end - Reader.PAGE)
 	var records: Array[Dictionary] = []
 	for index: int in range(start, end):
-		records.append(_visible_receipt(receipt_ids[index]))
+		if receipts[receipt_ids[index]].get("owner_ref", actor) == actor:
+			records.append(_visible_receipt(receipt_ids[index]))
 	return {"records": records, "next_before": start if start > 0 else -1, "total": receipts.size()}
 
 func _read() -> Dictionary:

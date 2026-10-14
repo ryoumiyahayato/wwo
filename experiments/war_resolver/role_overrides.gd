@@ -30,6 +30,9 @@ func bind_structure(port: RefCounted) -> bool:
 func _node(id: String) -> Dictionary:
 	return _formations[id] if _structure_port == null else _structure_port.get_ref().node(id)
 
+func _person(id: String) -> Dictionary:
+	return _people[id] if _structure_port == null else _structure_port.get_ref().command_person(id)
+
 func _parent(id: String) -> String:
 	return str(_formations[id].get("parent", "")) if _structure_port == null else _structure_port.get_ref().parent(id)
 
@@ -127,7 +130,9 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 	var id: String = str(command.id)
 	if _accepted_ids.has(id):
 		return _reject("duplicate_command")
-	var person: Dictionary = _people[_player_id]
+	var person: Dictionary = _person(_player_id)
+	if _state.gameplay_port != null and not _state.gameplay_port.get_ref().participants.can_intend(_player_id):
+		return _reject("person_dead" if _state.gameplay_port.get_ref().participants.dead(_player_id) else "person_incapacitated_or_occupied")
 	var rank: int = ROLES.find(str(person.role))
 	var owner: String = str(person.formation_id)
 	if not _active(owner):
@@ -136,28 +141,90 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 	var target: String = str(command.get("target", ""))
 	var values: Dictionary = command.values
 	if kind == "local_action":
-		if rank != 0 or target != _player_id:
+		var embodied: bool = _state.gameplay_port != null and _state.gameplay_port.get_ref().participants._units.has(_player_id)
+		if (rank != 0 and not embodied) or target != _player_id:
 			return _reject("wrong_owner_or_layer")
-		if not _keys(values, ["action"]) or not values.get("action", "") in ["wait", "take_cover", "step_forward", "step_back"]:
+		if values.get("action", "") == "aid" and _state.gameplay_port != null:
+			var care_check: Dictionary = _state.gameplay_port.get_ref().medical.validate(_player_id, values)
+			if not care_check.ok:
+				return care_check
+		elif values.get("action", "") == "ammunition" and _state.gameplay_port != null:
+			var ammo_check: Dictionary = _state.gameplay_port.get_ref().tactics.validate_ammunition(_player_id, str(_state.gameplay_port.get_ref().participants._units.get(_player_id, "")), values)
+			if not ammo_check.ok:
+				return ammo_check
+		elif values.get("action", "") in ["relocate", "collect_remains", "place_remains", "rescue"] and _state.gameplay_port != null:
+			var body_check: Dictionary = _state.gameplay_port.get_ref().participants.validate_extended(_player_id, values)
+			if not body_check.ok:
+				return body_check
+		elif _state.gameplay_port != null and values.get("action", "") in _state.gameplay_port.get_ref().tactics.LOCAL_ACTIONS:
+			var combat_check: Dictionary = _state.gameplay_port.get_ref().tactics.validate_person(_player_id, values)
+			if not combat_check.ok:
+				return combat_check
+		elif not _keys(values, ["action"]) or not values.get("action", "") in ["wait", "take_cover", "step_forward", "step_back"]:
 			return _reject("invalid_local_action")
-		if _state.gameplay_port != null:
+		elif _state.gameplay_port != null:
 			var local_check: Dictionary = _state.gameplay_port.get_ref().participants.validate_action(_player_id, str(values.action))
 			if not local_check.ok:
 				return local_check
 	elif kind == "tactical_intent":
-		if rank != 1 or target != owner:
+		if values.has("gun_action") and _state.gameplay_port != null:
+			var gun: Dictionary = _state.gameplay_port.get_ref().tactics.guns.get(values.get("gun_ref", ""), {})
+			if rank < 1 or not _active(target) or not _structure_port.get_ref()._contains(owner, target) or not _structure_port.get_ref()._contains(target, str(_structure_port.get_ref()._unit_nodes.get(gun.get("unit_ref", ""), ""))):
+				return _reject("gun_support_requires_current_owned_scope")
+			var gun_check: Dictionary = _state.gameplay_port.get_ref().tactics.validate_gun(_player_id, values)
+			if not gun_check.ok:
+				return gun_check
+		elif rank != 1 or target != owner:
 			return _reject("wrong_owner_or_layer")
-		if not _keys(values, ["posture"]) or not values.get("posture", "") in ["hold", "advance", "support"]:
+		elif (values.has("fire_mode") or values.has("manoeuvre_action") or values.has("ammo_action") or values.has("rescue_order")) and _state.gameplay_port != null:
+			var fire_check: Dictionary = _state.gameplay_port.get_ref().tactics.validate_squad(_player_id, str(_node(target).unit_id), values)
+			if not fire_check.ok:
+				return fire_check
+		elif not _keys(values, ["posture"]) or not values.get("posture", "") in ["hold", "advance", "support"]:
 			return _reject("invalid_tactical_intent")
+		elif _state.gameplay_port != null and _state.gameplay_port.get_ref().tactics.manoeuvre_active(str(_node(target).unit_id)):
+			return _reject("road_parts_keep_their_accepted_roles_until_stopped_and_regrouped")
 	elif kind == "route_intent":
 		if _state.spatial_port == null or not _active(target) or not (rank == 1 and target == owner or rank >= 2 and (target == owner and rank >= 3 or _scope_children(owner).has(target))):
 			return _reject("wrong_owner_or_layer")
 		if _scope_leaves(target).is_empty() or values.size() != 2 or not _keys(values, ["path", "return_to_start"]) or not values.get("path") is Array or not values.get("return_to_start") is bool:
 			return _reject("invalid_route_intent")
 		for leaf: String in State.sorted_ids(_scope_leaves(target)):
+			if _state.gameplay_port != null and _state.gameplay_port.get_ref().tactics.manoeuvre_active(str(_node(leaf).unit_id)):
+				return _reject("regroup_road_parts_before_replacing_unit_route")
 			var route_check: Dictionary = _state.spatial_port.get_ref().validate_path(_unit(str(_node(leaf).unit_id)), values.path, values.return_to_start)
 			if not route_check.ok:
 				return route_check
+	elif kind == "operation_intent":
+		if _state.gameplay_port == null or not _active(target) or not (target == owner and rank >= 2 or _scope_children(owner).has(target) and rank >= 2):
+			return _reject("purpose_requires_current_office_or_direct_child")
+		var purpose_check: Dictionary = _state.gameplay_port.get_ref().operations.validate(_player_id, target, values, id)
+		if not purpose_check.ok:
+			return purpose_check
+	elif kind == "land_intent":
+		if _state.gameplay_port == null:
+			return _reject("ground_transport_algorithm_required")
+		var land_check: Dictionary = _state.gameplay_port.get_ref().land.validate(_player_id, target, values, id)
+		if not land_check.ok:
+			return land_check
+	elif kind == "naval_intent":
+		if _state.gameplay_port == null:
+			return _reject("surface_algorithm_required")
+		var naval_check: Dictionary = _state.gameplay_port.get_ref().sea.validate(_player_id, target, values, id)
+		if not naval_check.ok:
+			return naval_check
+	elif kind == "air_intent":
+		if _state.gameplay_port == null:
+			return _reject("aviation_algorithm_required")
+		var air_check: Dictionary = _state.gameplay_port.get_ref().air.validate(_player_id, target, values, id)
+		if not air_check.ok:
+			return air_check
+	elif kind == "reserve_intent":
+		if _state.gameplay_port == null:
+			return _reject("wrong_layer")
+		var reserve_check: Dictionary = _state.gameplay_port.get_ref().reserves.validate(_player_id, target, values, id)
+		if not reserve_check.ok:
+			return reserve_check
 	elif kind == "goal_intent":
 		if _state.gameplay_port == null:
 			return _reject("wrong_layer")
@@ -187,7 +254,7 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 		return _reject("input_not_due")
 	var affected: Array[String] = []
 	if kind != "local_action":
-		affected = State.sorted_ids(_scope_leaves(target))
+		affected = delivery_leaves(command)
 	if kind == "goal_intent":
 		var goal_units: Array[String] = []
 		for leaf: String in affected:
@@ -198,6 +265,12 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 	# Preflight every resource ID before committing anything, including clocks/IDs.
 	for leaf: String in affected:
 		var unit_id: String = str(_node(leaf).unit_id)
+		if _state.gameplay_port != null and kind in ["mission", "route_intent", "goal_intent"] and _state.gameplay_port.get_ref().tactics.movement_blocked(unit_id):
+			var moves: bool = kind == "mission" and values.get("posture", "") in ["advance", "withdraw"] or not values.get("path", []).is_empty() or kind == "goal_intent" and values.get("intent", "") != "cancel" and values.get("target_node", "") != _unit(unit_id).spatial.node
+			if moves:
+				return _reject("deployed_gun_requires_actual_packing_before_movement")
+		if _state.gameplay_port != null and _state.gameplay_port.get_ref().land._unit_jobs.has(unit_id):
+			return _reject("occupied_ground_carrier_requires_its_transport_command")
 		# Replacing a prerequisite needs explicit dependency migration semantics.
 		# Reject the whole command rather than orphaning reserves on an old ID.
 		if kind in ["mission", "route_intent"] and not (_state.mission_dependents.get(_unit(unit_id).mission_id, {}) as Dictionary).is_empty():
@@ -217,11 +290,23 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 		for leaf: String in affected:
 			_lod_port.get_ref().materialize_leaf(str(_node(leaf).unit_id), "subordinate_command")
 	var delta: Dictionary = {"units": {}, "missions": {}, "tactical_intents": {}, "command_coordination": {}, "personal_actions": {}}
+	var representation_change: Dictionary = {}
 	if kind == "local_action":
 		if _state.gameplay_port != null:
-			var personal_result: Dictionary = _state.gameplay_port.get_ref().participants.apply_action(_player_id, id, str(values.action))
+			var personal_result: Dictionary
+			if values.action == "aid":
+				personal_result = _state.gameplay_port.get_ref().medical.start(_player_id, id, values)
+			elif values.action == "ammunition":
+				personal_result = _state.gameplay_port.get_ref().tactics.ammunition_action(_player_id, str(_state.gameplay_port.get_ref().participants._units[_player_id]), id, values)
+			elif values.action in ["relocate", "collect_remains", "place_remains", "rescue"]:
+				personal_result = _state.gameplay_port.get_ref().participants.apply_extended(_player_id, id, values)
+			elif values.action in _state.gameplay_port.get_ref().tactics.LOCAL_ACTIONS:
+				personal_result = _state.gameplay_port.get_ref().tactics.personal(_player_id, id, values)
+			else:
+				personal_result = _state.gameplay_port.get_ref().participants.apply_action(_player_id, id, str(values.action))
 			assert(personal_result.ok)
 			delta.personal_actions[_player_id] = personal_result
+			representation_change = {"changed": personal_result.get("changed", []), "retired": personal_result.get("retired", [])}
 		else:
 			var unit: Dictionary = _unit(str(_node(owner).unit_id))
 			var personal: Dictionary = _personal_actions.get(_player_id, {"offset_km": 0.0}).duplicate(true)
@@ -233,10 +318,39 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 			_personal_actions[_player_id] = personal
 			delta.personal_actions[_player_id] = personal.duplicate(true)
 	elif kind == "tactical_intent":
-		var unit_id: String = str(_node(target).unit_id)
-		_state.tactical_intents[unit_id] = values.duplicate(true)
-		delta.tactical_intents[unit_id] = values.duplicate(true)
+		var unit_id: String = str(_state.gameplay_port.get_ref().tactics.guns[values.gun_ref].unit_ref) if values.has("gun_action") else str(_node(target).unit_id)
+		if values.has("gun_action"):
+			var result: Dictionary = _state.gameplay_port.get_ref().tactics.gun_action(_player_id, id, values)
+			if not result.ok:
+				return result
+		elif values.has("fire_mode") or values.has("manoeuvre_action") or values.has("ammo_action") or values.has("rescue_order"):
+			var result: Dictionary = _state.gameplay_port.get_ref().tactics.squad(_player_id, unit_id, id, values)
+			if not result.ok:
+				return result
+		else:
+			_state.tactical_intents[unit_id] = values.duplicate(true)
+			delta.tactical_intents[unit_id] = values.duplicate(true)
 		_state.wake(str(_state.units[unit_id].area_id))
+	elif kind == "operation_intent":
+		var purpose_result: Dictionary = _state.gameplay_port.get_ref().operations.apply(_player_id, target, values, id)
+		if not purpose_result.ok:
+			return purpose_result
+		delta.merge(purpose_result.state_delta)
+	elif kind == "land_intent":
+		var land_result: Dictionary = _state.gameplay_port.get_ref().land.apply(_player_id, values, id)
+		delta.merge(land_result.state_delta)
+		for unit_id: String in land_result.changed:
+			if _state.units.has(unit_id):
+				delta.units[unit_id] = _state.units[unit_id].duplicate(true)
+	elif kind == "naval_intent":
+		var naval_result: Dictionary = _state.gameplay_port.get_ref().sea.apply(_player_id, values, id)
+		if not naval_result.ok:
+			return naval_result
+		delta = naval_result.state_delta
+	elif kind == "air_intent":
+		delta = _state.gameplay_port.get_ref().air.apply(_player_id, values, id).state_delta
+	elif kind == "reserve_intent":
+		delta = _state.gameplay_port.get_ref().reserves.apply(_player_id, values, id)
 	elif kind == "goal_intent":
 		for leaf: String in affected:
 			var unit_id: String = str(_node(leaf).unit_id)
@@ -284,9 +398,23 @@ func apply(command: Dictionary, communication_owner: RefCounted = null, validate
 			_state.wake(str(unit.area_id))
 	_accepted_ids[id] = true
 	_next_input[_player_id] = _state.time + INPUT_SECONDS[rank]
-	return {"ok": true, "state_delta": delta, "event": {"kind": "role_override", "time": _state.time,
+	return {"ok": true, "state_delta": delta, "representation_change": representation_change, "event": {"kind": "role_override", "time": _state.time,
 		"id": id, "person_id": _player_id, "role": person.role, "layer": kind, "target": target,
 		"affected_squads": affected.size()}, "next_input_at": _next_input[_player_id]}
+
+func delivery_leaves(command: Dictionary) -> Array[String]:
+	if command.kind == "tactical_intent" and command.values.has("gun_ref") and _state.gameplay_port != null:
+		var gun: Dictionary = _state.gameplay_port.get_ref().tactics.guns.get(command.values.gun_ref, {})
+		var node: String = str(_structure_port.get_ref()._unit_nodes.get(gun.get("unit_ref", ""), ""))
+		return [node] if node != "" else []
+	if command.kind in ["air_intent", "naval_intent", "land_intent", "operation_intent"]:
+		return []
+	if command.kind != "reserve_intent":
+		return State.sorted_ids(_scope_leaves(str(command.target)))
+	var result: Array[String] = []
+	for id: String in _state.gameplay_port.get_ref().reserves.units(command.values):
+		result.append(str(_structure_port.get_ref()._unit_nodes[id]))
+	return result
 
 
 func _nearest_input(leaf: String, inputs: Dictionary) -> Dictionary:
@@ -307,7 +435,7 @@ func report() -> Dictionary:
 		return _reject("not_configured")
 	if not _binding_current():
 		return _reject("current_structure_binding_required")
-	var person: Dictionary = _people[_player_id]
+	var person: Dictionary = _person(_player_id)
 	var owner: String = str(person.formation_id)
 	if not _active(owner):
 		return _reject("position_retired")
@@ -349,7 +477,7 @@ func command_scope() -> Dictionary:
 		return _reject("not_configured")
 	if not _binding_current():
 		return _reject("current_structure_binding_required")
-	var person: Dictionary = _people[_player_id]
+	var person: Dictionary = _person(_player_id)
 	var owner: String = str(person.formation_id)
 	if not _active(owner):
 		return _reject("position_retired")
@@ -371,6 +499,7 @@ func command_scope() -> Dictionary:
 		targets.mission = eligible.duplicate()
 		targets.coordination = eligible.duplicate()
 		if _state.gameplay_port != null:
+			targets.tactical_intent = eligible.duplicate()
 			targets.goal_intent = eligible.duplicate()
 	return {"person_id": _player_id, "role": person.role, "formation_id": owner,
 		"targets": targets, "input_interval_seconds": INPUT_SECONDS[rank],
@@ -396,3 +525,16 @@ static func _number(value: Variant) -> bool:
 
 static func _reject(error: String) -> Dictionary:
 	return {"ok": false, "error": error}
+
+const RUNTIME_FIELDS: Array[String] = ["_formations", "_people", "_children", "_leaves", "_mission_inputs", "_coordination_inputs", "_accepted_ids", "_next_input", "_player_id", "_personal_actions"]
+
+func runtime_state() -> Dictionary:
+	return preload("res://experiments/war_resolver/battle_state.gd").capture_runtime_fields(self, RUNTIME_FIELDS)
+
+func restore_runtime(image: Dictionary) -> bool:
+	return preload("res://experiments/war_resolver/battle_state.gd").restore_runtime_fields(self, image, RUNTIME_FIELDS)
+
+func bind_runtime(state: State, lod: RefCounted, structure: RefCounted) -> void:
+	_state = state
+	_lod_port = weakref(lod)
+	_structure_port = weakref(structure)

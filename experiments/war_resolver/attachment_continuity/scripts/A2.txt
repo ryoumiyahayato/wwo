@@ -1,0 +1,20 @@
+look
+advance 5
+drain
+look
+advance 10
+drain
+look
+advance 32
+drain
+look
+advance 123
+drain
+intent new_order node_unit_000 advance B AB
+drain
+advance 15
+drain
+look
+auto 950 30
+look
+quit

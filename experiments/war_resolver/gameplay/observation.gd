@@ -2,6 +2,7 @@ extends RefCounted
 ## Committed query projections. Diagnostic truth never enters Context.
 const LIMIT: int = 4096
 var _state: WeakRef
+var enabled: bool = true
 var debug_records: Array[Dictionary] = []
 var person_records: Array[Dictionary] = []
 var dropped: int = 0
@@ -12,6 +13,8 @@ func configure(state: RefCounted) -> void:
 	_state = weakref(state)
 
 func record(value: Dictionary, holder: String = "") -> void:
+	if not enabled:
+		return
 	var diagnostic: Dictionary = value.duplicate(true)
 	diagnostic.view = "DEBUG_TRUTH"
 	debug_records.append(diagnostic)
@@ -34,11 +37,15 @@ func on_gameplay(value: Dictionary) -> void:
 		record(value)
 
 func on_observation(value: Dictionary) -> void:
+	if not enabled:
+		return
 	record({"event_id": "observed_" + str(value.id), "effective_time": value.observed_at, "learned_time": null,
 		"phase": -1, "kind": "observation_produced", "subject_ref": value.subject_ref, "actor_ref": value.observer_ref,
 		"cause_refs": [value.source_ref], "detail": value.duplicate(true)})
 
 func on_message(value: Dictionary) -> void:
+	if not enabled:
+		return
 	var pending: bool = value.status == "PENDING"
 	var command: bool = value.kind == "COMMAND"
 	var time: float = float(value.sent_at if pending else value.get("processed_at", value.delivery_time))
@@ -62,6 +69,8 @@ func on_message(value: Dictionary) -> void:
 		"subject_ref": value.recipient_ref, "actor_ref": actor, "cause_refs": causes, "detail": detail}, actor)
 
 func physical(value: Dictionary) -> void:
+	if not enabled:
+		return
 	if value.kind == "decision":
 		var decision: Dictionary = value.get("result", {})
 		if decision.get("status", "") == "REJECTED" and decision.has("context"):
@@ -82,6 +91,8 @@ func physical(value: Dictionary) -> void:
 		"cause_refs": [str(value.get("cause_ref", value.get("id", "shared_kernel")))], "detail": value.duplicate(true)})
 
 func input(actor: String, id: String, at: float, proposal: Dictionary, context: Dictionary, result: Dictionary) -> void:
+	if not enabled:
+		return
 	var claims: Array[String] = []
 	for claim: Dictionary in context.get("received_claims", []):
 		claims.append(str(claim.entry_id))

@@ -11,10 +11,64 @@ var _logistics: RefCounted
 var _context: Context = Context.new()
 var cost_probe: RefCounted = null
 var _persons: Dictionary = {}
+var _target_persons: Dictionary = {}
 var _events: Dictionary = {}
 var _pending: Dictionary = {}
 var _ready: Dictionary = {}
 var _cycles: Dictionary = {}
+const MAX_REASONS: int = 8
+const AUTO_HISTORY: int = 32
+var _autonomy: Dictionary = {}
+var _inflight: Dictionary = {}
+var _auto_serial: int = 0
+var _command_results: Dictionary = {}
+
+const RUNTIME_FIELDS: Array[String] = ["_target_persons", "_events", "_pending", "_ready", "_cycles", "_autonomy", "_inflight", "_auto_serial", "_command_results", "work"]
+const RuntimeAuto = preload("res://experiments/war_resolver/gameplay/autonomous_policy.gd")
+const RuntimeLegacy = preload("res://experiments/war_resolver/gameplay/policy.gd")
+const RuntimeLive = preload("res://experiments/war_resolver/interactive_observer/input_provider.gd")
+
+static func provider_state(provider: RefCounted) -> Dictionary:
+	var path: String = provider.get_script().resource_path
+	var kind: String = "auto" if path == "res://experiments/war_resolver/gameplay/autonomous_policy.gd" else "legacy" if path == "res://experiments/war_resolver/gameplay/policy.gd" else "live" if path == "res://experiments/war_resolver/interactive_observer/input_provider.gd" else ""
+	return {"kind": kind, "state": provider.runtime_state()} if not kind.is_empty() else {}
+
+static func restore_provider(image: Dictionary) -> RefCounted:
+	var provider: RefCounted = RuntimeAuto.new() if image.get("kind", "") == "auto" else RuntimeLegacy.new() if image.get("kind", "") == "legacy" else RuntimeLive.new() if image.get("kind", "") == "live" else null
+	return provider if provider != null and image.get("state") is Dictionary and provider.restore_runtime(image.state) else null
+
+func runtime_state() -> Dictionary:
+	if _state.settlement_pending:
+		return _state.pending_view()
+	var result: Dictionary = {"fields": State.capture_runtime_fields(self, RUNTIME_FIELDS), "persons": {}}
+	for person: String in _persons:
+		var provider: Dictionary = provider_state(_persons[person].provider)
+		if provider.is_empty():
+			return {"ok": false, "error": "unsupported_decision_provider"}
+		result.persons[person] = {"definition": _persons[person].definition.duplicate(true), "provider": provider}
+	return result
+
+func restore_runtime(state: State, information: RefCounted, structure: RefCounted, logistics: RefCounted, image: Dictionary) -> bool:
+	if not image.get("fields") is Dictionary or not image.get("persons") is Dictionary or not State.restore_runtime_fields(self, image.fields, RUNTIME_FIELDS):
+		return false
+	_state = state
+	_information = information
+	_structure = structure
+	_logistics = logistics
+	_context.configure(information, structure)
+	state.decision_port = weakref(self)
+	for person: String in image.persons:
+		var record: Dictionary = image.persons[person]
+		var provider: RefCounted = restore_provider(record.get("provider", {}))
+		if not information._roles.has(person) or not record.get("definition") is Dictionary or provider == null:
+			return false
+		_persons[person] = {"definition": record.definition.duplicate(true), "provider": provider}
+	for person: String in _pending:
+		if not _persons.has(person) or not _events.has(_pending[person]):
+			return false
+	information.message_transition.connect(_on_message)
+	information.observation_recorded.connect(_on_local_observation)
+	return true
 var work: Dictionary = {"decision_events_processed": 0, "decision_contexts_built": 0,
 	"knowledge_records_examined_for_decision": 0, "persons_examined": 0, "commands_issued_from_decision": 0,
 	"requests_issued_from_decision": 0, "urgent_decision_wakes": 0, "authority_checks": 0,
@@ -29,7 +83,93 @@ func configure(state: State, information: RefCounted, structure: RefCounted, log
 	_logistics = logistics
 	_context.configure(information, structure)
 	state.decision_port = weakref(self)
+	information.message_transition.connect(_on_message)
+	information.observation_recorded.connect(_on_local_observation)
 	return true
+
+func _on_local_observation(record: Dictionary) -> void:
+	if record.fact_kind == "ground_contact":
+		note_change(str(record.observer_ref), "ground_contact", str(record.id))
+
+func enable_autonomy(person: String, period: float = 600.0) -> bool:
+	if not _persons.has(person) or not is_finite(period) or period < float(_persons[person].definition.cadence):
+		return false
+	_autonomy[person] = {"period": period, "reasons": {}, "recent": [], "suspended": false}
+	note_change(person, "standing_order", person)
+	return true
+
+func suspend_autonomy(person: String, suspended: bool) -> void:
+	if not _autonomy.has(person):
+		return
+	_autonomy[person].suspended = suspended
+	if suspended and _pending.has(person) and _events[_pending[person]].get("autonomous", false):
+		_events[_pending[person]].status = "SUPERSEDED"
+		_pending.erase(person)
+	elif not suspended:
+		note_change(person, "control_released", person)
+
+func note_change(person: String, reason: String, reference: String) -> void:
+	if not _autonomy.has(person) or _autonomy[person].suspended:
+		return
+	var causes: Dictionary = _autonomy[person].reasons
+	var key: String = reason + ":" + reference
+	if not causes.has(key) and causes.size() >= MAX_REASONS:
+		causes.erase(causes.keys()[0])
+	causes[key] = {"reason": reason, "reference": reference, "learned_at": _state.time}
+	_queue_autonomy(person, maxf(_state.time + 5.0, float(_ready[person])))
+
+func _queue_autonomy(person: String, due: float) -> void:
+	if not _autonomy.has(person) or _autonomy[person].suspended:
+		return
+	if _state.gameplay_port != null and _state.gameplay_port.get_ref().focused_person == person:
+		return
+	if _pending.has(person):
+		var previous: Dictionary = _events[_pending[person]]
+		if not previous.get("autonomous", false) or float(previous.due) <= due:
+			return
+		previous.status = "SUPERSEDED"
+	_auto_serial += 1
+	var id: String = "autonomy_%s_%d" % [person, _auto_serial]
+	if _schedule(person, id, due, "").ok:
+		_events[id].autonomous = true
+
+func _on_message(message: Dictionary) -> void:
+	if message.get("communication_status", "") == "WAITING_LINK" and message.kind == "REPORT" and message.get("communication_holder", "") == message.sender_ref and _persons.has(message.sender_ref):
+		note_change(str(message.sender_ref), "own_send_waiting", str(message.id))
+	if message.kind == "REPORT" and message.status == "DELIVERED":
+		var person: String = str(message.recipient_ref)
+		for claim: Dictionary in message.claims:
+			if claim.fact_kind in ["objective", "unit_state", "unit_condition", "friendly_contact", "friendly_sea_contact", "route_observation", "depot_status", "route", "ammunition", "status", "person_status", "contact", "ground_contact", "recon_result", "air_contact", "air_track", "sea_contact", "air_status", "air_service", "sea_status", "supply_request", "supply_status", "land_supply_status", "operation_task", "operation_status"]:
+				note_change(person, str(claim.fact_kind), str(message.id))
+	elif message.kind == "COMMAND" and message.status in ["EXECUTED", "REJECTED", "UNCONFIRMED"]:
+		var person: String = str(message.sender_ref)
+		if not _command_results.has(person):
+			_command_results[person] = []
+		_command_results[person].append({"id": message.id, "status": message.status, "outcome": message.outcome.duplicate(true), "processed_at": message.processed_at})
+		while _command_results[person].size() > 16:
+			_command_results[person].pop_front()
+		if _inflight.get(person, "") == message.id:
+			_inflight.erase(person)
+			note_change(person, "command_result", str(message.id))
+
+func _continue_autonomy(person: String, record: Dictionary) -> void:
+	if not _autonomy.has(person) or not record.get("autonomous", false):
+		return
+	var recent: Array = _autonomy[person].recent
+	recent.append(str(record.id))
+	while recent.size() > AUTO_HISTORY:
+		_events.erase(recent.pop_front())
+	var due: float = _state.time + float(_autonomy[person].period)
+	if _state.gameplay_port != null:
+		for purpose: Dictionary in _state.gameplay_port.get_ref().operations.known_view(person):
+			if purpose.get("status", "") not in ["COMPLETE", "FAILED", "CANCELLED"] and float(purpose.get("deadline", INF)) > _state.time:
+				due = minf(due, float(purpose.deadline))
+				if purpose.get("domain", "") == "GROUND":
+					var contact: Dictionary = _information.contact_status(person, "unit", str(purpose.unit_ref), float(purpose.started_at))
+					for boundary: float in [float(contact.stale_at), float(contact.missing_at)]:
+						if boundary > _state.time:
+							due = minf(due, boundary)
+	_queue_autonomy(person, maxf(due, float(_ready[person])))
 
 func enroll(person: String, definition: Dictionary, provider: RefCounted) -> bool:
 	if _state == null or _persons.has(person) or not _information._roles.has(person) or not definition.get("cadence") is float or not is_finite(definition.cadence) or float(definition.cadence) <= 0.0 or not definition.get("targets") is Array or definition.targets.size() > 64 or not definition.get("standing_orders") is Dictionary or not definition.get("urgent") is bool or provider == null:
@@ -40,24 +180,86 @@ func enroll(person: String, definition: Dictionary, provider: RefCounted) -> boo
 		if not target is String or not _structure._nodes.has(target):
 			return false
 	_persons[person] = {"definition": definition.duplicate(true), "provider": provider}
+	for target: String in definition.targets:
+		if not _target_persons.has(target):
+			_target_persons[target] = {}
+		_target_persons[target][person] = true
 	_ready[person] = _state.time
 	return true
+
+func on_member_move(person: String, destination: String) -> void:
+	if _persons.has(person):
+		_add_target(person, destination)
+
+func on_position_changed(person: String, node_id: String) -> void:
+	if not _persons.has(person):
+		return
+	_add_target(person, node_id)
+	for child: String in _structure._children[node_id]:
+		_add_target(person, child)
+	note_change(person, "current_position_changed", node_id)
+	if _state.gameplay_port != null:
+		_state.gameplay_port.get_ref().operations.on_position_changed(person, node_id)
+		var orders: Dictionary = _state.gameplay_port.get_ref().operations.office_orders(node_id)
+		var standing: Dictionary = _persons[person].definition.standing_orders
+		for key: String in ["delivery_plan", "campaign_options", "reserve_candidates", "recon_asset_ref", "purposes"]:
+			standing.erase(key)
+		for key: String in orders:
+			standing[key] = orders[key]
+		_persons[person].definition.cadence = float(Roles.INPUT_SECONDS[Roles.ROLES.find(str(_structure.command_person(person).role))])
+		if _autonomy.has(person):
+			_autonomy[person].period = maxf(float(_autonomy[person].period), float(_persons[person].definition.cadence))
+
+func _add_target(person: String, target: String) -> void:
+	var targets: Array = _persons[person].definition.targets
+	if target in targets or targets.size() >= 64:
+		return
+	targets.append(target)
+	if not _target_persons.has(target):
+		_target_persons[target] = {}
+	_target_persons[target][person] = true
+
+func on_structure(record: Dictionary) -> void:
+	if not record.outcome.ok:
+		return
+	if _state.gameplay_port != null:
+		_state.gameplay_port.get_ref().operations.on_structure(record)
+	for node: String in record.outcome.get("affected_nodes", []):
+		if _structure.active(node):
+			continue
+		for person: String in _target_persons.get(node, {}):
+			_persons[person].definition.targets.erase(node)
+		_target_persons.erase(node)
+	for target: String in record.outcome.get("created_nodes", []):
+		var candidates: Dictionary = {}
+		for source: String in record.outcome.get("affected_nodes", []):
+			candidates.merge(_target_persons.get(source, {}))
+		candidates.merge(_target_persons.get(_structure.parent(target), {}))
+		for person: String in candidates:
+			if _structure._contains(str(_structure.command_person(person).formation_id), target):
+				_add_target(person, target)
 
 func reset_work() -> void:
 	for key: String in work:
 		work[key] = 0
+
+func dispose() -> void:
+	if _information != null and _information.message_transition.is_connected(_on_message):
+		_information.message_transition.disconnect(_on_message)
 
 func schedule(person: String, id: String, due: float) -> Dictionary:
 	if _state != null and _state.public_pending():
 		return _state.pending_view()
 	if _state == null or not _persons.has(person) or id.is_empty() or _events.has(id) or _pending.has(person) or not is_finite(due) or due < _state.time or due < float(_ready[person]):
 		return _reject("invalid_opportunity_or_cooldown")
+	if _state.gameplay_port != null and not _state.gameplay_port.get_ref().participants.can_intend(person):
+		return _reject("person_unavailable")
 	return _schedule(person, id, due, "")
 
 func start_cycle(person: String, prefix: String, first: float, period: float, end: float, maximum: int) -> Dictionary:
 	if _state != null and _state.public_pending():
 		return _state.pending_view()
-	if not _persons.has(person) or not _structure.active(str(_structure._people[person].formation_id)) or prefix.is_empty() or not is_finite(first) or not is_finite(period) or not is_finite(end) or first > end or period < float(_persons[person].definition.cadence) or maximum < 1 or maximum > 4096 or _cycles.get(person, {}).get("status", "") == "RUNNING":
+	if not _persons.has(person) or not _structure.active(str(_structure.command_person(person).formation_id)) or prefix.is_empty() or not is_finite(first) or not is_finite(period) or not is_finite(end) or first > end or period < float(_persons[person].definition.cadence) or maximum < 1 or maximum > 4096 or _cycles.get(person, {}).get("status", "") == "RUNNING":
 		return _reject("invalid_bounded_cycle")
 	var admitted: Dictionary = schedule(person, prefix + "_0", first)
 	if not admitted.ok:
@@ -128,7 +330,9 @@ func preview(person: String) -> Dictionary:
 	if not _persons.has(person):
 		return _reject("unknown_decision_person")
 	var next_time: float = float(_events[_pending[person]].due) if _pending.has(person) else -1.0
-	return _context.build(person, _state.time, _persons[person].definition, next_time, float(_ready[person]))
+	var context: Dictionary = _context.build(person, _state.time, _persons[person].definition, next_time, float(_ready[person]))
+	context.own_command_results = _command_results.get(person, []).duplicate(true)
+	return context
 
 func process_event(event: Dictionary) -> Dictionary:
 	if float(event.time) != _state.time or not accepts_event(str(event.id), event.payload, float(event.time)):
@@ -138,10 +342,23 @@ func process_event(event: Dictionary) -> Dictionary:
 	if record.status == "SUPERSEDED":
 		record.status = "SKIPPED_SUPERSEDED"
 		work.superseded_events_processed += 1
-		return _transition(record.duplicate(true))
+		var skipped: Dictionary = record.duplicate(true)
+		if record.get("autonomous", false):
+			_events.erase(record.id)
+		return _transition(skipped)
 	var person: String = str(record.person_id)
 	_pending.erase(person)
-	if _cycles.has(person) and (_cycles[person].status != "RUNNING" or not _structure.active(str(_structure._people[person].formation_id))):
+	if _state.gameplay_port != null and not _state.gameplay_port.get_ref().participants.can_intend(person):
+		record.status = "SKIPPED_PERSON_UNAVAILABLE"
+		if _cycles.has(person):
+			_cycles[person].status = "PAUSED"
+		_continue_autonomy(person, record)
+		return _transition(record.duplicate(true))
+	if record.get("autonomous", false) and _inflight.has(person):
+		record.status = "WAITING_PREVIOUS_COMMAND"
+		_continue_autonomy(person, record)
+		return _transition(record.duplicate(true))
+	if _cycles.has(person) and (_cycles[person].status != "RUNNING" or not _structure.active(str(_structure.command_person(person).formation_id))):
 		record.status = "SKIPPED_CYCLE_PAUSED_OR_RETIRED"
 		_cycles[person].status = "PAUSED"
 		return _transition(record.duplicate(true))
@@ -153,11 +370,15 @@ func process_event(event: Dictionary) -> Dictionary:
 	var cost_observed: bool = cost_probe != null and cost_probe.level2_enabled
 	var cost_started: int = Time.get_ticks_usec() if cost_observed else 0
 	var context: Dictionary = preview(person)
+	if _autonomy.has(person):
+		context.decision_reasons = _autonomy[person].reasons.values().duplicate(true)
+		_autonomy[person].reasons.clear()
 	if cost_observed:
 		cost_probe.subspan("decision_context", Time.get_ticks_usec()-cost_started, str(event.id), person, context.get("received_claims", []).size(), _events.size(), _state.time)
 	work.decision_contexts_built += 1
 	if not context.ok:
 		record.status = "REJECTED_CONTEXT"
+		_continue_autonomy(person, record)
 		return _transition(record.duplicate(true))
 	work.knowledge_records_examined_for_decision += context.received_claims.size()
 	cost_started = Time.get_ticks_usec() if cost_observed else 0
@@ -178,11 +399,19 @@ func process_event(event: Dictionary) -> Dictionary:
 	cost_started = Time.get_ticks_usec() if cost_observed else 0
 	if validated.ok:
 		record.issued_input = _issue(person, str(record.id), proposal.intent)
+		if record.issued_input.domain == "COMMUNICATION" and record.issued_input.result.get("ok", false):
+			_inflight[person] = str(record.issued_input.id)
+	if _persons[person].provider.has_method("on_result"):
+		_persons[person].provider.on_result(proposal, validated, record.get("issued_input", {}))
+	if _state.gameplay_port != null:
+		_state.gameplay_port.get_ref().operations.on_decision(person, proposal, validated, record.get("issued_input", {}))
+	if validated.ok:
 		input_issued.emit(person, str(record.id), record.issued_input.duplicate(true))
 	if cost_observed:
 		cost_probe.subspan("decision_issue_and_callback", Time.get_ticks_usec()-cost_started, str(event.id), person, context.received_claims.size(), _events.size(), _state.time)
 	cost_started = Time.get_ticks_usec() if cost_observed else 0
 	_continue_cycle(person)
+	_continue_autonomy(person, record)
 	var transition: Dictionary = _transition(record.duplicate(true))
 	if cost_observed:
 		cost_probe.subspan("decision_cycle_and_result", Time.get_ticks_usec()-cost_started, str(event.id), person, context.received_claims.size(), _events.size(), _state.time)
@@ -194,13 +423,18 @@ func _validate(person: String, id: String, intent: Dictionary, context: Dictiona
 	if intent.kind == "keep":
 		return {"ok": true} if intent.size() == 1 else _reject("invalid_keep_intent")
 	if intent.kind == "command":
-		if intent.size() != 5 or intent.get("command_kind") != context.command_kind or intent.get("target") not in context.command_targets or not intent.get("values") is Dictionary or not intent.get("channel_ref") is String:
+		var valid_target: bool = intent.get("target") in context.command_targets or intent.get("command_kind") == "operation_intent" and intent.get("target") == context.position_ref and "operation_intent" in context.coordination_kinds
+		if intent.size() != 5 or not (intent.get("command_kind") == context.command_kind or intent.get("command_kind") in context.coordination_kinds) or not valid_target or not intent.get("values") is Dictionary or not intent.get("channel_ref") is String:
 			return _reject("invalid_bounded_command_intent")
 		return _information.validate_intent(person, {"id": "input_" + id, "kind": intent.command_kind, "target": intent.target, "values": intent.values})
 	if intent.kind == "local_action":
 		if intent.size() != 2 or not intent.get("values") is Dictionary:
 			return _reject("invalid_personal_intent")
 		return _information.validate_intent(person, {"id": "input_" + id, "kind": "local_action", "target": person, "values": intent.values})
+	if intent.kind == "report_forward":
+		if intent.size() != 3 or not intent.get("message_ref") is String or not intent.get("recipient_ref") is String:
+			return _reject("explicit_received_report_forward_required")
+		return _information.validate_forward(person, str(intent.message_ref), str(intent.recipient_ref))
 	if intent.kind == "logistics_request":
 		if intent.size() != 4 or not context.authority_targets.has(intent.get("target", "")) or intent.get("resource_class") not in _logistics.CLASSES or not (intent.get("quantity") is float or intent.get("quantity") is int) or not is_finite(float(intent.quantity)) or float(intent.quantity) <= 0.0 or float(intent.quantity) > 100.0 or not _logistics._allowed(person, "formation", str(intent.target), 2):
 			return _reject("invalid_logistics_intent")
@@ -208,6 +442,18 @@ func _validate(person: String, id: String, intent: Dictionary, context: Dictiona
 	if intent.size() != 2 or not intent.get("values") is Dictionary:
 		return _reject("invalid_structure_intent")
 	var values: Dictionary = intent.values
+	if _structure.member_adjustments and values.get("operation", "") in _structure.Members.KINDS + _structure.Movements.KINDS + _structure.OFFICE_KINDS:
+		if values.size() != 3 or not values.get("parameters") is Dictionary or not (values.get("delay") is int or values.get("delay") is float) or not is_finite(float(values.delay)) or float(values.delay) < 1.0:
+			return _reject("invalid_future_member_adjustment")
+		var adjustment: Dictionary = _structure_request(id, values)
+		adjustment.person_id = person
+		return _structure._validate(adjustment, false)
+	if _structure.attachment_continuity and values.get("operation", "") == "revoke":
+		if values.size() != 3 or not context.authority_targets.has(values.get("target", "")) or not (values.get("delay") is float or values.get("delay") is int) or not is_finite(float(values.delay)) or float(values.delay) < 1.0:
+			return _reject("invalid_future_revoke")
+		var revoke: Dictionary = _structure_request(id, values)
+		revoke.person_id = person
+		return _structure._validate(revoke, false)
 	if values.size() != 4 or not context.authority_targets.has(values.get("target", "")) or not context.authority_targets.has(values.get("parent", "")) or not (values.get("delay") is float or values.get("delay") is int) or not is_finite(float(values.delay)) or float(values.delay) < 1.0 or not (values.get("duration") is float or values.get("duration") is int) or not is_finite(float(values.duration)) or float(values.duration) <= 0.0:
 		return _reject("invalid_future_attachment")
 	var request: Dictionary = _structure_request(id, values)
@@ -215,6 +461,10 @@ func _validate(person: String, id: String, intent: Dictionary, context: Dictiona
 	return _structure._validate(request, false)
 
 func _structure_request(id: String, values: Dictionary) -> Dictionary:
+	if _structure.member_adjustments and values.get("operation", "") in _structure.Members.KINDS + _structure.Movements.KINDS + _structure.OFFICE_KINDS:
+		return {"id": "input_" + id, "kind": values.operation, "effective_time": _state.time + float(values.delay), "values": values.parameters.duplicate(true)}
+	if _structure.attachment_continuity and values.get("operation", "") == "revoke":
+		return {"id": "input_" + id, "kind": "revoke", "effective_time": _state.time + float(values.delay), "values": {"target": values.target}}
 	return {"id": "input_" + id, "kind": "attach", "effective_time": _state.time + float(values.delay),
 		"values": {"target": values.target, "parent": values.parent, "until": _state.time + float(values.delay) + float(values.duration)}}
 
@@ -233,9 +483,18 @@ func _issue(person: String, id: String, intent: Dictionary) -> Dictionary:
 		domain = "PERSONAL"
 		result = _information.perform_local_action(person, {"id": "input_" + id, "kind": "local_action", "target": person, "values": intent.values})
 		work.commands_issued_from_decision += int(result.ok)
+	elif intent.kind == "report_forward":
+		domain = "INFORMATION"
+		result = _information.forward_report(person, str(intent.message_ref), str(intent.recipient_ref), "input_" + id)
 	elif intent.kind == "logistics_request":
 		domain = "LOGISTICS"
-		result = _logistics.submit(person, {"id": "input_" + id, "kind": "request", "target_kind": "formation", "target": intent.target, "resource_class": intent.resource_class, "quantity": intent.quantity})
+		var request: Dictionary = {"id": "input_" + id, "kind": "request", "target_kind": "formation", "target": intent.target, "resource_class": intent.resource_class, "quantity": intent.quantity}
+		if _persons[person].definition.standing_orders.get("physical_supply", false) and _structure._nodes[intent.target].has("unit_id"):
+			request.target_kind = "unit"
+			request.target = _structure._nodes[intent.target].unit_id
+		result = _logistics.submit(person, request)
+		if result.ok and request.target_kind == "unit":
+			_information.report_supply_request(self, person, str(request.id), request)
 		work.requests_issued_from_decision += int(result.ok)
 	else:
 		domain = "STRUCTURE"
@@ -263,7 +522,8 @@ func snapshot() -> Dictionary:
 	return result
 
 static func _transition(record: Dictionary) -> Dictionary:
-	return {"changed": [], "retired": [], "record": record}
+	var representation: Dictionary = record.get("issued_input", {}).get("result", {}).get("representation_change", {})
+	return {"changed": representation.get("changed", []), "retired": representation.get("retired", []), "record": record}
 
 static func _reject(error: String) -> Dictionary:
 	return {"ok": false, "error": error}

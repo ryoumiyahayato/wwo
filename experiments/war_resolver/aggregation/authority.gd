@@ -28,6 +28,26 @@ var _last_continuation: AdvanceWork = null
 var physical_event_sink: Callable
 var cost_probe: RefCounted = null
 
+func runtime_state() -> Dictionary:
+	if _continuation != null or _state.settlement_pending:
+		return {"ok": false, "status": "PENDING"}
+	return {"fields": State.capture_runtime_fields(self, ["work", "_owners", "_groups", "_area_groups", "_serial", "_generations", "_observed_areas", "materialization_events"]), "spatial": spatial.runtime_state()}
+
+func restore_runtime(state: State, image: Dictionary) -> bool:
+	if _state != null or not image.get("fields") is Dictionary or not image.get("spatial") is Dictionary:
+		return false
+	if not State.restore_runtime_fields(self, image.fields, ["work", "_owners", "_groups", "_area_groups", "_serial", "_generations", "_observed_areas", "materialization_events"]) or not spatial.restore_runtime(image.spatial):
+		return false
+	_state = state
+	state.settlement_owner = _token
+	state.materialization_port = weakref(self)
+	state.lod_work = work
+	spatial.settlement_state = weakref(state)
+	for leaf: String in _owners:
+		if not _groups.has(_owners[leaf]) or not state.units.has(_owners[leaf]) or not _groups[_owners[leaf]].leaf_refs.has(leaf):
+			return false
+	return true
+
 func configure(state: State) -> bool:
 	if _state != null or state.settlement_owner != null:
 		return false
@@ -75,6 +95,7 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	var first: Dictionary = {}
 	var mission: Dictionary = {}
 	var total_personnel: float = 0.0
+	var goal_count: int = 0
 	for id: String in ids:
 		work.leaf_records_examined += 1
 		if _state.gameplay_port != null and _state.gameplay_port.get_ref().requires_detail(id):
@@ -83,8 +104,12 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 			return {"ok": false, "error": "leaf_not_detailed"}
 		var unit: Dictionary = _state.units[id]
 		var current: Dictionary = _state.missions[unit.mission_id]
+		if current.has("goal_v1"):
+			if _state.unit_order_counts.has(id):
+				return {"ok": false, "error": "legacy_order_goal_migration_required"}
+			goal_count += 1
 		# Dependencies and pending local ownership remain detailed. No index migration.
-		if _state.coordination.has(id) or _state.tactical_intents.has(id) or _state.command_coordination.has(id) or not str(current.destination).is_empty() or not (_state.mission_dependents.get(unit.mission_id, {}) as Dictionary).is_empty():
+		if _state.coordination.has(id) or _state.tactical_intents.has(id) or _state.command_coordination.has(id) or not str(current.destination).is_empty() or not (_state.mission_dependents.get(unit.mission_id, {}) as Dictionary).is_empty() and not current.has("goal_v1"):
 			return {"ok": false, "error": "causal_detail_required"}
 		if first.is_empty():
 			first = unit
@@ -105,6 +130,10 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 		for key: String in ["posture", "objective", "direction", "status", "stop_suppression", "withdraw_cohesion"]:
 			if current[key] != mission[key]:
 				return {"ok": false, "error": "incompatible_mission"}
+		if current.has("goal_v1") and mission.has("goal_v1"):
+			for key: String in ["intent", "target_node", "dependency_state"]:
+				if current.goal_v1.get(key, "READY") != mission.goal_v1.get(key, "READY"):
+					return {"ok": false, "error": "different_goal_physical_policy"}
 		for key: String in ["readiness", "fatigue", "cohesion", "suppression"]:
 			if absf(float(unit.get(key, 0.0)) - float(first[key])) > CONDITION_SPREAD:
 				return {"ok": false, "error": "condition_requires_detail"}
@@ -119,6 +148,8 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 		total_personnel += float(unit.personnel_total)
 	if total_personnel <= 0.0:
 		return {"ok": false, "error": "empty_stock"}
+	if goal_count != 0 and goal_count != ids.size():
+		return {"ok": false, "error": "goal_cohort_requires_uniform_physical_policy"}
 	var basis: String = (source_formation + ":" + ":".join(ids)).sha256_text().substr(0, 16)
 	var was_active: bool = _state.active_areas.has(first.area_id)
 	var generation: int = int(_generations.get(basis, 0)) + 1
@@ -156,11 +187,23 @@ func coalesce(source_formation: String, leaf_ids: Array[String], level: String =
 	aggregate.distance_moved /= float(aggregate.personnel_total)
 	aggregate.position /= float(aggregate.personnel_total)
 	var aggregate_mission: Dictionary = mission.duplicate(true)
+	# Logical goals stay on stable leaves; one physical route settles the cohort.
+	aggregate_mission.erase("goal_v1")
+	if mission.has("goal_v1"):
+		aggregate_mission.summary_goal_policy = true
 	aggregate_mission.id = aggregate_id + "_mission"
 	aggregate.mission_id = aggregate_mission.id
 	_state.add_mission(aggregate_mission)
 	_groups[aggregate_id] = {"leaf_refs": images, "base": aggregate.duplicate(true),
 		"suspended_at": _state.time, "distribution": "unresolved_proportional_stock_deltas"}
+	var goal_refs: Dictionary = {}
+	if _state.gameplay_port != null:
+		for id: String in ids:
+			if _state.missions[images[id].mission_id].has("goal_v1"):
+				goal_refs[id] = images[id].mission_id
+	_groups[aggregate_id].goal_refs = goal_refs
+	if _state.gameplay_port != null:
+		_state.gameplay_port.get_ref().participants.coalesced(images, aggregate, _groups[aggregate_id])
 	if not _area_groups.has(first.area_id):
 		_area_groups[first.area_id] = {}
 	_area_groups[first.area_id][aggregate_id] = true
@@ -205,6 +248,8 @@ func preview_leaf(id: String) -> Dictionary:
 		var share: float = float(result.personnel_total) / float(base.personnel_total)
 		for key: String in stock_keys():
 			result[key] = float(macro.get(key, 0.0)) * share
+	if _state.gameplay_port != null:
+		_state.gameplay_port.get_ref().participants.project_personnel(id, result, group)
 	# Readiness/mobility are immutable capabilities in this kernel. Only elapsed
 	# fatigue/cohesion/suppression changes are allocated; do not add roundoff to them.
 	for key: String in ["fatigue", "cohesion", "suppression"]:
@@ -244,11 +289,12 @@ func materialize_leaf(id: String, reason: String = "leaf_query") -> Dictionary:
 	var base_weight: float = float(group.base.personnel_total)
 	var weight: float = float(result.personnel_total)
 	var current_mission: Dictionary = _state.missions[macro.mission_id]
-	var leaf_mission: Dictionary = _state.missions[result.mission_id].duplicate(true)
-	leaf_mission.id = "materialized_" + aggregate_id + "_" + id
-	leaf_mission.status = current_mission.status
-	_state.add_mission(leaf_mission)
-	result.mission_id = leaf_mission.id
+	if not group.get("goal_refs", {}).has(id):
+		var leaf_mission: Dictionary = _state.missions[result.mission_id].duplicate(true)
+		leaf_mission.id = "materialized_" + aggregate_id + "_" + id
+		leaf_mission.status = current_mission.status
+		_state.add_mission(leaf_mission)
+		result.mission_id = leaf_mission.id
 	for key: String in stock_keys():
 		macro[key] -= float(result[key])
 		group.base[key] -= float(initial.get(key, 0.0))
@@ -258,7 +304,10 @@ func materialize_leaf(id: String, reason: String = "leaf_query") -> Dictionary:
 			group.base[key] = (float(group.base[key]) * base_weight - float(initial.get(key, 0.0)) * weight) / (base_weight - weight)
 	if _state.logistics_port != null:
 		_state.logistics_port.get_ref().on_materialize(id, aggregate_id)
+	if _state.gameplay_port != null:
+		_state.gameplay_port.get_ref().participants.materialized(id, result, macro, group)
 	group.leaf_refs.erase(id)
+	group.get("goal_refs", {}).erase(id)
 	_owners.erase(id)
 	macro.contact_weight -= float(initial.get("tactical_weight", 1.0))
 	_state.units[id] = result
@@ -309,7 +358,7 @@ func prepare_event(event: Dictionary) -> Dictionary:
 		return _state.decision_port.get_ref().process_event(event)
 	if event.kind == "structure":
 		var result: Dictionary = _state.structure_port.get_ref().process_event(event)
-		if _state.logistics_port != null:
+		if _state.logistics_port != null and not result.get("representation_only", false):
 			_state.logistics_port.get_ref().on_structure(result)
 		return result
 	if event.kind == "communication":

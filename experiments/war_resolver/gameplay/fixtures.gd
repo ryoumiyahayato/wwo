@@ -5,6 +5,88 @@ const Goals = preload("res://experiments/war_resolver/gameplay/service.gd")
 const Info = preload("res://experiments/war_resolver/information/service.gd")
 const Decisions = preload("res://experiments/war_resolver/decision/service.gd")
 
+static func runtime_state(env: Dictionary) -> Dictionary:
+	if env.state.settlement_pending:
+		return env.state.pending_view()
+	var result: Dictionary = {"ok": true, "version": "war-environment-runtime-v5", "state": env.state.runtime_state(),
+		"lod": env.lod.runtime_state(), "structure": env.structure.runtime_state(), "logistics": env.logistics.runtime_state(),
+		"space": env.space.runtime_state(), "gameplay": env.gameplay.runtime_state(), "information": env.information.runtime_state(),
+		"decisions": env.decisions.runtime_state(), "roles": {}, "metadata": {}}
+	for key: String in ["state", "lod", "information", "decisions"]:
+		if result[key].get("ok", true) == false:
+			return result[key]
+	for person: String in env.roles:
+		result.roles[person] = env.roles[person].runtime_state()
+	for key: String in ["people", "nodes", "graph", "managed_units"]:
+		if env.has(key):
+			result.metadata[key] = env[key].duplicate(true)
+	return result
+
+static func restore_runtime(image: Dictionary) -> Dictionary:
+	if not image.get("ok", false) or image.get("version", "") != "war-environment-runtime-v5":
+		return {"ok": false, "error": "unsupported_runtime_checkpoint"}
+	for key: String in ["state", "lod", "structure", "logistics", "space", "gameplay", "information", "decisions", "roles", "metadata"]:
+		if not image.get(key) is Dictionary:
+			return {"ok": false, "error": "missing_runtime_module_" + key}
+	for key: String in image.metadata:
+		if key not in ["people", "nodes", "graph", "managed_units"]:
+			return {"ok": false, "error": "unsupported_environment_metadata"}
+	var state: F.State = F.State.new()
+	var lod: F.Authority = F.Authority.new()
+	var structure: F.Structure = F.Structure.new()
+	var logistics: F.Logistics = F.Logistics.new()
+	var space: F.Space = F.Space.new()
+	var gameplay: Goals = Goals.new()
+	var information: Info = Info.new()
+	var decisions: Decisions = Decisions.new()
+	if not state.restore_runtime(image.state) or not lod.restore_runtime(state, image.lod) or not structure.restore_runtime(image.structure):
+		return {"ok": false, "error": "invalid_state_lod_or_structure"}
+	structure.bind_runtime(state, lod)
+	if not logistics.restore_runtime(image.logistics) or not space.restore_runtime(image.space):
+		return {"ok": false, "error": "invalid_inventory_or_space"}
+	logistics.bind_runtime(state, lod, structure)
+	space.bind_runtime(state, lod)
+	if not space.valid_local_runtime():
+		return {"ok": false, "error": "invalid_local_space_continuation"}
+	if not gameplay.restore_runtime(state, lod, space, image.gameplay):
+		return {"ok": false, "error": "invalid_body_weapon_or_professional_state"}
+	var roles: Dictionary = {}
+	for person: String in image.roles:
+		var role: F.Roles = F.Roles.new()
+		if not structure._people.has(person) or not image.roles[person] is Dictionary or not role.restore_runtime(image.roles[person]) or role._player_id != person:
+			return {"ok": false, "error": "invalid_person_command_binding"}
+		role.bind_runtime(state, lod, structure)
+		roles[person] = role
+	if not information.restore_runtime(state, lod, structure, logistics, roles, image.information) or not decisions.restore_runtime(state, information, structure, logistics, image.decisions):
+		return {"ok": false, "error": "invalid_message_or_decision_continuation"}
+	var operation_active: bool = gameplay.operations._active
+	gameplay.operations._active = false
+	if operation_active:
+		gameplay.operations.activate()
+	var queued: Dictionary = {}
+	for event: Dictionary in state.events:
+		queued[event.id] = event
+		var port: RefCounted = {"gameplay": gameplay, "spatial": space, "structure": structure, "logistics": logistics, "communication": information, "decision": decisions}.get(event.kind)
+		if port != null and not port.accepts_event(str(event.id), event.payload, float(event.time)):
+			return {"ok": false, "error": "event_ticket_binding_missing_" + str(event.id)}
+	for id: String in gameplay.tactics._tickets:
+		if not queued.has(id):
+			return {"ok": false, "error": "unfinished_tactical_event_missing"}
+	for action: Dictionary in gameplay.participants._actions.values():
+		if action.status == "PENDING" and not queued.has(action.id):
+			return {"ok": false, "error": "unfinished_body_event_missing"}
+	for source: String in logistics._reserved:
+		if not logistics._depots.has(source):
+			return {"ok": false, "error": "reserved_source_missing"}
+		for resource: String in logistics._reserved[source]:
+			var quantity: float = float(logistics._reserved[source][resource])
+			if not is_finite(quantity) or quantity < -0.000001 or quantity > float(logistics._depots[source].stock.get(resource, 0.0)) + 0.000001:
+				return {"ok": false, "error": "reserved_stock_unavailable"}
+	var candidate: Dictionary = {"state": state, "lod": lod, "structure": structure, "logistics": logistics, "space": space,
+		"gameplay": gameplay, "information": information, "decisions": decisions, "roles": roles}
+	candidate.merge(image.metadata.duplicate(true))
+	return {"ok": true, "env": candidate}
+
 static func intent(kind: String, node: String, path: Array = [], returning: bool = false) -> Dictionary:
 	return {"intent": kind, "target_node": node, "path": path.duplicate(), "return_to_start": returning}
 
@@ -23,6 +105,20 @@ static func setup(seed_value: int = 71, config: Dictionary = {}) -> Dictionary:
 	graph.edges.bridge_BD.length_km = 0.08
 	graph.edges.AC.length_km = 0.3
 	graph.edges.CD.length_km = 0.26
+	if config.get("joint", false):
+		graph.nodes.A.airfield_open = true
+		graph.nodes.D.airfield_open = true
+		for land: String in ["A", "B", "C", "D"]:
+			graph.nodes[land].surface_bounds_km = [-1.0, -0.039999, 1.0, 1.0]
+		# The shoreline is y=-0.04; the declared water corridor stays below it.
+		for point: Array in [["PORT_B", [0.0, -0.06], "A"], ["SEA_M", [0.1, -0.06], ""], ["PORT_R", [0.2, -0.06], "D"], ["PORT_F", [0.12, -0.10], "B"]]:
+			graph.nodes[point[0]] = {"xy": point[1], "cell": "field", "scope": graph.nodes.A.scope, "ground": F.ground("water"),
+				"water": true, "port": point[2] != "", "port_open": true, "land_supply_node": point[2], "sea_visibility": 0.8, "sea_state": 0.2,
+				"surface_bounds_km": [-1.0, -1.0, 1.0, -0.04]}
+		for a: String in graph.nodes:
+			for b: String in graph.nodes:
+				if not graph.lanes.has(a + ":" + b):
+					graph.lanes[a + ":" + b] = {"observe": true, "fire": true}
 	var nodes: Dictionary = {"blue_company": {"echelon": "company", "parent": "", "side": "blue"},
 		"blue_platoon": {"echelon": "platoon", "parent": "blue_company", "side": "blue"},
 		"blue_destination": {"echelon": "platoon", "parent": "blue_company", "side": "blue"},
@@ -84,6 +180,8 @@ static func setup(seed_value: int = 71, config: Dictionary = {}) -> Dictionary:
 		"company": {"role": "company_commander", "formation_id": "blue_company"}}
 	if config.get("npc", false):
 		people.npc = {"role": "ordinary_soldier", "formation_id": "node_unit_000"}
+	if config.get("joint", false):
+		people.red_commander = {"role": "company_commander", "formation_id": "red_company"}
 	var lod: F.Authority = F.Authority.new()
 	assert(lod.configure(state))
 	var structure: F.Structure = F.Structure.new()
@@ -95,23 +193,45 @@ static func setup(seed_value: int = 71, config: Dictionary = {}) -> Dictionary:
 		roles[person] = role
 	var stocks: Dictionary = {}
 	for id: String in managed:
-		var motor: bool = bool(config.get("motor", false)) and state.units[id].side == "blue"
+		var motor: bool = bool(config.get("motor", false)) and state.units[id].side == "blue" or id in config.get("transport_motor_units", [])
 		stocks[id] = {"fuel": float(config.get("fuel", 8.0)) if motor else 0.0, "fuel_spent": 0.0,
+			"medical": float(config.get("medical_unit_stock", 0.0)) if id == "unit_001" else 0.0, "medical_spent": 0.0,
 			"spares": 4.0, "spares_spent": 0.0, "serviceable_equipment": 12.0, "damaged_equipment": 0.0,
 			"wear_damage": 0.0, "repair_restored": 0.0, "capability": {"fuel_dependent": motor,
 				"fuel_per_equipment_km": 0.2 if motor else 0.0, "spares_per_repair": 1.0, "wear_per_km": 0.0, "suppression_per_round": 0.12}}
 	var logistics: F.Logistics = F.Logistics.new()
-	assert(logistics.configure(state, lod, structure, stocks, {"source": {"owner_ref": "synthetic_warehouse", "allocation_scope": "blue_company", "stock": {"AMMUNITION": 100.0, "FUEL": 40.0, "SPARES": 20.0}}}, {}))
+	var depots: Dictionary = {"source": {"owner_ref": "synthetic_warehouse", "allocation_scope": "blue_company", "node_ref": "A", "stock": {"AMMUNITION": 100.0, "FUEL": 40.0, "SPARES": 20.0, "MEDICAL": float(config.get("medical_depot_stock", 0.0))}}}
+	var capacities: Dictionary = {}
+	if config.get("joint", false):
+		depots.red_source = {"owner_ref": "synthetic_red_warehouse", "allocation_scope": "red_company", "node_ref": "D", "stock": {"AMMUNITION": 100.0, "FUEL": 40.0, "SPARES": 20.0, "MEDICAL": 0.0}}
+		depots.front_source = {"owner_ref": "synthetic_forward_port_warehouse", "allocation_scope": "blue_company", "node_ref": "B", "stock": {"AMMUNITION": 0.0, "FUEL": 0.0, "SPARES": 0.0, "MEDICAL": 0.0}}
+		capacities = {"blue_port_repair": {"scope": "blue_company", "remaining": 1.0}, "front_port_repair": {"scope": "blue_company", "remaining": 1.0}, "red_port_repair": {"scope": "red_company", "remaining": 1.0}}
+	assert(logistics.configure(state, lod, structure, stocks, depots, capacities))
 	var space: F.Space = F.Space.new()
 	assert(space.configure(state, lod, graph.nodes, graph.edges, graph.lanes))
+	if config.get("joint", false):
+		assert(space.admit_waterways({"water_BM": {"from": "PORT_B", "to": "SEA_M", "length_km": 0.1, "open": true, "depth_km": 0.01, "water_only": true},
+			"water_MR": {"from": "SEA_M", "to": "PORT_R", "length_km": 0.1, "open": true, "depth_km": 0.01, "water_only": true},
+			"water_MF": {"from": "SEA_M", "to": "PORT_F", "length_km": 0.05, "open": true, "depth_km": 0.01, "water_only": true},
+			"water_BF": {"from": "PORT_B", "to": "PORT_F", "length_km": 0.18, "open": true, "depth_km": 0.01, "water_only": true}}))
 	for index: int in range(4):
 		var point: String = str(config.get("blue_point", "A")) if index == 0 else ("A" if index == 1 else str(config.get("red_point", "D")))
-		assert(space.admit_unit("unit_%03d" % index, point, "MOTORIZED" if config.get("motor", false) and index < 2 else "FOOT"))
+		assert(space.admit_unit("unit_%03d" % index, point, "MOTORIZED" if config.get("motor", false) and index < 2 or "unit_%03d" % index in config.get("transport_motor_units", []) else "FOOT"))
 	for index: int in range(extra_local):
 		assert(space.admit_unit("local_extra_%02d" % index, "A", "FOOT"))
 	var paths: Dictionary = {"A": [[], ["AB"], ["AC"]], "B": [[], ["AB"], ["bridge_BD"]],
 		"C": [[], ["AC"], ["AB", "AC"], ["CD"]], "D": [[], ["AB", "bridge_BD"], ["AC", "CD"], ["AB", "AC", "CD"], ["bridge_BD"], ["CD"]]}
 	var known: Dictionary = {}
+	paths.A.append(["bridge_BD", "AB"])
+	paths.B.append(["CD", "AC", "AB"])
+	paths.A.append(["bridge_BD", "CD", "AC"])
+	paths.B.append(["AC", "CD", "bridge_BD"])
+	paths.B.append(["CD", "bridge_BD"])
+	paths.B.append(["AC", "AB"])
+	paths.C.append(["bridge_BD", "CD"])
+	if config.get("joint", false):
+		for node: String in ["PORT_B", "SEA_M", "PORT_R", "PORT_F"]:
+			paths[node] = [[]] # Known point; never a land-road route.
 	for person: String in people:
 		known[person] = paths.duplicate(true)
 	var gameplay: Goals = Goals.new()
@@ -135,6 +255,8 @@ static func setup(seed_value: int = 71, config: Dictionary = {}) -> Dictionary:
 		"instant": {"senders": persons.duplicate(), "recipients": persons.duplicate(), "latency": 0.0, "available": true, "quality": 1.0, "command_scope": "blue_company"}}
 	channels.command.latency = float(config.get("command_latency", 15.0))
 	channels.report = {"senders": persons.duplicate(), "recipients": persons.duplicate(), "latency": float(config.get("report_latency", 47.0)), "available": true, "quality": 1.0, "command_scope": "blue_company"}
+	if config.get("joint", false):
+		channels.red_command = {"senders": ["red_commander"], "recipients": ["red_commander"], "latency": float(config.get("command_latency", 15.0)), "available": true, "quality": 1.0, "command_scope": "red_company"}
 	assert(information.configure(state, lod, structure, logistics, roles, sources, channels))
 	var decisions: Decisions = Decisions.new()
 	assert(decisions.configure(state, information, structure, logistics))

@@ -1,0 +1,36 @@
+attach a0 node_unit_000 blue_destination 5 295
+drain
+advance 300
+drain
+look
+attach a1 node_unit_000 blue_destination 5 895
+drain
+advance 300
+drain
+revoke r1 node_unit_000 5
+drain
+advance 5
+drain
+advance 295
+drain
+attach a2 node_unit_000 blue_destination 5 895
+drain
+auto 1800 30
+look
+advance 600
+drain
+attach a3 node_unit_000 blue_destination 5 295
+drain
+auto 2700 30
+advance 300
+drain
+attach a4 node_unit_000 blue_destination 5 295
+drain
+auto 3300 30
+advance 300
+drain
+attach a5 node_unit_000 blue_destination 5 295
+drain
+auto 86400 300
+look
+quit

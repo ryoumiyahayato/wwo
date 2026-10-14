@@ -1,0 +1,12 @@
+advance 10
+drain
+personal cover take_cover
+drain
+look
+advance 30
+drain
+personal follow wait
+drain
+auto 950 30
+look
+quit

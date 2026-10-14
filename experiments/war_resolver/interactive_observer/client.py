@@ -28,14 +28,59 @@ def parse(line: str) -> tuple[str, dict]:
     if not words:
         raise ValueError("empty_command")
     op, rest = words[0], words[1:]
+    if op in {"save_runtime", "load_runtime"}:
+        parts = line.strip().split(None, 1)
+        if len(parts) != 2:
+            raise ValueError("checkpoint_path_required")
+        return op, {"path": parts[1].strip('"')}
+    if op == "body":
+        parts = line.strip().split(None, 2)
+        if len(parts) != 3:
+            raise ValueError("body_parameters_required")
+        parameters = json.loads(parts[2])
+        if not isinstance(parameters, dict):
+            raise ValueError("body_parameters_must_be_object")
+        return op, {"id": parts[1], "parameters": parameters}
+    if op == "person_report" and len(rest) == 3:
+        return op, {"id": rest[0], "person": rest[1], "recipient": rest[2]}
+    if op == "combat_report" and len(rest) == 3:
+        return op, {"id": rest[0], "observation": rest[1], "recipient": rest[2]}
+    if op == "forward" and len(rest) == 3:
+        return op, {"id": rest[0], "message": rest[1], "recipient": rest[2]}
+    if op in {"task", "reserve", "air", "naval", "land", "operation", "tactics"}:
+        parts = line.strip().split(None, 3)
+        if len(parts) != 4:
+            raise ValueError("task_parameters_required")
+        parameters = json.loads(parts[3])
+        if not isinstance(parameters, dict):
+            raise ValueError("task_parameters_must_be_object")
+        return op, {"id": parts[1], "target": parts[2], "parameters": parameters}
+    if op in {"split_members", "merge_members", "detach_children", "coarsen", "propose_move", "propose_transport", "approve_move", "cancel_move", "accept_move", "redirect_move", "vacate_position", "appoint"}:
+        parts = line.strip().split(None, 3)
+        if len(parts) != 4:
+            raise ValueError("member_adjustment_parameters_required")
+        parameters = json.loads(parts[3])
+        if not isinstance(parameters, dict):
+            raise ValueError("member_adjustment_parameters_must_be_object")
+        return op, {"id": parts[1], "delay": float(parts[2]), "parameters": parameters}
+    if op == "transfer" and len(rest) == 5:
+        return op, {"id": rest[0], "delay": float(rest[4]),
+                    "parameters": {"person": rest[1], "source": rest[2], "destination": rest[3]}}
     if op in {"look", "status", "help", "pause", "quit"} and not rest:
         return op, {}
     if op in {"reports", "events", "receipts"} and len(rest) <= 1:
         return op, {"before": int(rest[0]) if rest else -1}
     if op == "focus" and len(rest) == 1:
         return op, {"subject": rest[0]}
+    if op == "continue_as" and len(rest) == 1:
+        return op, {"person": rest[0]}
     if op == "personal" and len(rest) == 2:
         return op, {"id": rest[0], "action": rest[1]}
+    if op == "attach" and len(rest) == 5:
+        return op, {"id": rest[0], "target": rest[1], "parent": rest[2],
+                    "delay": float(rest[3]), "duration": float(rest[4])}
+    if op == "revoke" and len(rest) == 3:
+        return op, {"id": rest[0], "target": rest[1], "delay": float(rest[2])}
     if op == "intent" and len(rest) in {4, 5}:
         return op, {"id": rest[0], "target": rest[1], "intent": rest[2], "node": "" if rest[2] == "cancel" and rest[3] == "-" else rest[3],
                     "path": rest[4].split(",") if len(rest) == 5 else []}
@@ -57,7 +102,8 @@ def parse(line: str) -> tuple[str, dict]:
 class Connection:
     def __init__(self, *, scene="S1", seed=71, actor="squad", session=None, quota=31,
                  godot=DEFAULT_GODOT, root=ROOT, diagnostic=None, measure=False,
-                 sleeping=0, bridge_clear=False, capture=False):
+                 sleeping=0, bridge_clear=False, capture=False,
+                 second_vessel_role="opponent", supply_responses=None, autonomy_mode="events", battlefield_actions=None):
         self.sid = session or ("local_" + uuid.uuid4().hex[:16])
         self.seq = 0
         self.capture = capture
@@ -70,10 +116,14 @@ class Connection:
         self.last_program = {}
         self.costs = {"io_seconds": 0.0, "format_seconds": 0.0}
         cmd = [str(godot), "--headless", "--path", str(root), "--script",
-               "res://experiments/war_resolver/interactive_observer/server.gd", "--",
+               ("res://experiments/war_resolver/attachment_continuity/server.gd"
+                if scene.startswith("A") else "res://experiments/war_resolver/interactive_observer/server.gd"), "--",
                f"--scene={scene}", f"--seed={seed}", f"--actor={actor}",
                f"--session={self.sid}", f"--quota={quota}", f"--sleeping={sleeping}",
-               f"--measure={str(measure).lower()}", f"--bridge_clear={str(bridge_clear).lower()}"]
+               f"--measure={str(measure).lower()}", f"--bridge_clear={str(bridge_clear).lower()}",
+               f"--second_vessel_role={second_vessel_role}", f"--autonomy_mode={autonomy_mode}",
+               "--supply_responses=" + json.dumps(supply_responses or {}, ensure_ascii=False),
+               "--battlefield_actions=" + json.dumps(battlefield_actions or {}, ensure_ascii=False)]
         if diagnostic:
             cmd.append(f"--diagnostic={Path(diagnostic).resolve()}")
         self.proc = subprocess.Popen(cmd, cwd=root, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -209,20 +259,62 @@ def format_person(row):
         lines.append(f"研究时钟 {program['clock']}；PENDING={program['pending']}；已提交{program['last_committed_time']:.3f}秒。")
     view = row.get("person")
     if view:
-        lines.append(f"人物 {view['person_id']}（{view['role']}）；身份固定。")
+        lines.append(f"当前控制人物 {view['person_id']}（永久军职 {view['role']}）。")
+        position = view.get("current_position")
+        if position:
+            if position["has_position"]:
+                lines.append(f"当前指挥岗位：{position['formation_id']} / {position['role']}；代理={position['acting']}。")
+            else:
+                lines.append("当前指挥岗位：无。")
+            lines.append("行政归属：" + str(position["membership_ref"]))
+        for node, office in view.get("authority", {}).get("positions", {}).items():
+            lines.append(f"范围内岗位 {node}：{office['person'] or '空缺'}；代理={office['acting']}。")
         body = view["personal"]
         if "health" in body:
             lines.append(f"本人状态 {body['state']}；伤病能力余量{body['health']:.6f}；伤病量{body['injury']:.6f}。")
+            lines.append("生命状态：" + str(body.get("life_state", "UNKNOWN")))
+            if body.get("bleeding"):
+                lines.append("持续出血：" + ("是" if body["bleeding"]["active"] else "已稳定"))
+            if body.get("treatment"):
+                lines.append("医疗状态：" + str(body["treatment"]["status"]))
+            if body.get("transport_ref"):
+                lines.append(f"转运 {body['transport_ref']}：{body.get('transport_status', '')}；搬运者 {body.get('carrier_ref', '')}。")
+            lines.append(("能力份额持有单位：" if body.get("command_post") else "所属行动小组：") + str(body["unit_ref"]))
+            lines.append("当前随组对象：" + (str(body.get("following_ref", body["unit_ref"])) if body["state"] == "FOLLOWING" else "尚未随组"))
+            if body.get("weapon"):
+                weapon = body["weapon"]
+                lines.append(f"武器 {weapon['profile']['role']}：{weapon['status']} / {weapon['mode']}；准备弹药{weapon['ready']:.3f}；已消耗{weapon['spent']:.3f}。")
         else:
             lines.append("本人伤病能力：未知。")
         lines.append("可尝试：" + ", ".join(view["attemptable"]))
+        for asset in view.get("air_assets", []):
+            lines.append(f"航空器 {asset['asset_ref']}：{asset['status']}；位置{asset['xy']}，高度{asset['altitude_km']:.3f}km；燃料{asset['fuel']:.3f}，载荷{asset['load']:.3f}。")
+        for vessel in view.get("vessels", []):
+            lines.append(f"舰艇 {vessel['vessel_ref']}：{vessel['status']}；位置{vessel['xy']}；燃料{vessel['fuel']:.3f}，弹药{vessel['ammunition']:.3f}，舰体{vessel['integrity']:.3f}。")
+        for transport in view.get("land_transports", []):
+            lines.append(f"陆运 {transport['transport_ref']}：{transport['status']}；已报告位置{transport.get('xy', [])}；承运单位{transport['carrier_ref']}；交接点{transport['target_node']}。")
+        for purpose in view.get("operations", []):
+            label = purpose.get("task_ref", "目的")
+            lines.append(f"作战 {purpose['operation_ref']} / {label}：{purpose['status']}；收到{purpose['learned_at']:.3f}秒。")
+        for move in view.get("movements", []):
+            lines.append(f"调动 {move['id']}：{move['status']}；约定地点{move['meeting']}；同行单位{move['physical_unit']}；{move['reason']}。")
+        for candidate in view.get("continuity_candidates", []):
+            lines.append(f"可接续人物 {candidate['person_ref']}；已有联系 {candidate['basis']}。")
         for claim in view["reports"]["entries"]:
-            lines.append(f"报告 {claim['fact_kind']} / {claim['subject_ref']}：观察{claim['observed_at']:.3f}秒，收到{claim['received_at']:.3f}秒；" + json.dumps(claim['claimed_value'], ensure_ascii=False))
+            lines.append(f"报告 {claim['message_id']} / {claim['fact_kind']} / {claim['subject_ref']}：观察{claim['observed_at']:.3f}秒，收到{claim['received_at']:.3f}秒；" + json.dumps(claim['claimed_value'], ensure_ascii=False))
         for receipt in view["own_receipts"]:
             lines.append(f"本人输入 {receipt['id']}：{receipt['status']}；受理时刻{receipt['received_at']:.3f}秒。")
+            if receipt.get("reason"):
+                lines.append("处理结果：" + str(receipt["reason"]))
+            if receipt.get("movement_ref"):
+                lines.append("调动引用：" + str(receipt["movement_ref"]))
     elif "receipt" in row:
         receipt = row["receipt"]
         lines.append(f"本人输入 {receipt['id']}：{receipt['status']}。重复={row.get('duplicate', False)}。")
+        if receipt.get("reason"):
+            lines.append("处理结果：" + str(receipt["reason"]))
+        if receipt.get("movement_ref"):
+            lines.append("调动引用：" + str(receipt["movement_ref"]))
     elif "page" in row:
         lines.append(json.dumps(row["page"], ensure_ascii=False))
     elif "commands" in row:
@@ -234,9 +326,9 @@ def format_person(row):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--scene", choices=["S1", "S2", "S3"], default="S1")
+    parser.add_argument("--scene", choices=["S1", "S2", "S3", "A1", "A2", "A3"], default="S1")
     parser.add_argument("--seed", type=int, default=71)
-    parser.add_argument("--actor", choices=["squad", "platoon", "soldier", "company"])
+    parser.add_argument("--actor", choices=["squad", "platoon", "soldier", "scout", "company", "recipient", "red_commander"])
     parser.add_argument("--session")
     parser.add_argument("--quota", type=int, choices=[0, 1, 7, 31], default=31)
     parser.add_argument("--godot", default=DEFAULT_GODOT)
@@ -248,11 +340,16 @@ def main(argv=None):
     parser.add_argument("--auto-look-every", type=int, default=0)
     parser.add_argument("--sleeping", type=int, choices=range(10001), default=0)
     parser.add_argument("--bridge-clear", action="store_true", help="Research-only construction counterfactual for S2")
+    parser.add_argument("--second-vessel-role", choices=["opponent", "escort"], default="opponent")
+    parser.add_argument("--autonomy-mode", choices=["events", "prototype"], default="events")
+    parser.add_argument("--supply-responses", type=json.loads, default={}, help="Finite NPC reactions to received sea/supply reports, by person ID")
+    parser.add_argument("--battlefield-actions", type=json.loads, default={}, help="Explicit existing weapon shares, gun crews, engineering capabilities and construction sites")
     args = parser.parse_args(argv)
-    actor = args.actor or {"S1": "squad", "S2": "platoon", "S3": "soldier"}[args.scene]
+    actor = args.actor or {"S1": "squad", "S2": "platoon", "S3": "soldier", "A1": "soldier", "A2": "recipient", "A3": "company"}[args.scene]
     connection = Connection(scene=args.scene, seed=args.seed, actor=actor, session=args.session, quota=args.quota,
                             godot=args.godot, diagnostic=args.diagnostic, measure=args.measure,
-                            sleeping=args.sleeping, bridge_clear=args.bridge_clear, capture=bool(args.record))
+                            sleeping=args.sleeping, bridge_clear=args.bridge_clear, capture=bool(args.record),
+                            second_vessel_role=args.second_vessel_role, supply_responses=args.supply_responses, autonomy_mode=args.autonomy_mode, battlefield_actions=args.battlefield_actions)
     count = 0
 
     def emit(row):

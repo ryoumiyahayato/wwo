@@ -1,14 +1,25 @@
 extends RefCounted
+signal transition(record: Dictionary)
+signal applying(event: Dictionary)
 ## Experimental military relations, not a formal Organization authority.
 const State = preload("res://experiments/war_resolver/battle_state.gd")
 const Roles = preload("res://experiments/war_resolver/role_overrides.gd")
-const Stocks: Array[String] = ["personnel_total", "effective", "casualties", "equipment", "equipment_lost", "ammunition", "ammo_spent"]
+const Members = preload("res://experiments/war_resolver/structure/member_adjustments.gd")
+const Movements = preload("res://experiments/war_resolver/structure/movements.gd")
+const OFFICE_KINDS: Array[String] = ["vacate_position", "appoint"]
+const Stocks: Array[String] = ["personnel_total", "effective", "casualties", "personnel_recovered", "equipment", "equipment_lost", "ammunition", "ammo_spent"]
 const EPS: float = 0.0000001
 const MIN_REMAINDER: float = 0.000001
 var _state: State
 var _lod: RefCounted
 var _nodes: Dictionary = {}
 var _people: Dictionary = {}
+var _node_people: Dictionary = {}
+var member_adjustments: bool = false
+var _members: Members = Members.new()
+var movements: Movements = Movements.new()
+var _positions: Dictionary = {}
+var _person_positions: Dictionary = {}
 var _children: Dictionary = {}
 var _leaves: Dictionary = {}
 var _unit_nodes: Dictionary = {}
@@ -19,6 +30,14 @@ var _retired: Dictionary = {}
 var _used_units: Dictionary = {}
 var _used_nodes: Dictionary = {}
 var history: Array[Dictionary] = []
+var attachment_continuity: bool = false
+var continuity_work: Dictionary = {"leaf_previews": 0, "dependency_records": 0, "relation_events": 0}
+
+func enable_attachment_continuity() -> bool:
+	if _state == null or _state.time != 0.0 or attachment_continuity or not history.is_empty():
+		return false
+	attachment_continuity = true
+	return true
 var work: Dictionary = {"structure_records_examined": 0, "structure_events_processed": 0,
 	"leaves_materialized_for_structure": 0, "aggregate_memberships_rebuilt": 0,
 	"authority_scopes_updated": 0, "relations_changed": 0}
@@ -36,6 +55,7 @@ func configure(state: State, lod: RefCounted, formations: Dictionary, people: Di
 	for id: String in _nodes:
 		_children[id] = {}
 		_leaves[id] = {}
+		_node_people[id] = {}
 		_used_nodes[id] = true
 	for id: String in _nodes:
 		var parent: String = str(_nodes[id].parent)
@@ -46,6 +66,14 @@ func configure(state: State, lod: RefCounted, formations: Dictionary, people: Di
 			_used_units[_nodes[id].unit_id] = true
 			for ancestor: String in _path(id):
 				_leaves[ancestor][id] = true
+	for id: String in _people:
+		_node_people[_people[id].formation_id][id] = true
+		if Roles.ROLES.find(str(_people[id].role)) > 0:
+			var node_id: String = str(_people[id].formation_id)
+			_positions[node_id] = {"person": id, "acting": false, "since": state.time, "cause": "initial_position"}
+			_person_positions[id] = node_id
+	_members.configure(self)
+	movements.configure(self)
 	_state.structure_port = weakref(self)
 	work = {"structure_records_examined": 0, "structure_events_processed": 0,
 		"leaves_materialized_for_structure": 0, "aggregate_memberships_rebuilt": 0,
@@ -55,11 +83,108 @@ func configure(state: State, lod: RefCounted, formations: Dictionary, people: Di
 func stock_keys() -> Array[String]:
 	return Stocks + _state.logistics_port.get_ref().EXTRA_STOCKS if _state.logistics_port != null else Stocks
 
+func command_person(person: String) -> Dictionary:
+	# Permanent role and membership stay in _people; only this office grants command.
+	var identity: Dictionary = _people[person]
+	var node_id: String = str(_person_positions.get(person, ""))
+	var available: bool = active(node_id)
+	if _state.gameplay_port != null:
+		var participants: RefCounted = _state.gameplay_port.get_ref().participants
+		if participants._units.has(person):
+			available = available and participants._member(person).actionable
+	return {"role": Roles.ROLES[Roles.ECHELONS.find(str(_nodes[node_id].echelon)) + 1] if available else "ordinary_soldier",
+		"formation_id": node_id if available else identity.formation_id, "has_position": available,
+		"permanent_role": identity.role, "membership_ref": identity.formation_id,
+		"acting": bool(_positions.get(node_id, {}).get("acting", false)) if available else false}
+
+func office_scope(person: String) -> String:
+	var position: Dictionary = command_person(person)
+	return str(position.formation_id) if position.has_position else ""
+
+func vacate_node(node_id: String, reason: String, cause: String) -> void:
+	if not _positions.has(node_id) or str(_positions[node_id].person).is_empty():
+		return
+	var person: String = str(_positions[node_id].person)
+	_person_positions.erase(person)
+	_positions[node_id] = {"person": "", "acting": false, "since": _state.time, "cause": cause, "reason": reason}
+	var record: Dictionary = {"id": "position_" + cause + "_" + node_id, "time": _state.time, "actor": person,
+		"outcome": {"ok": true, "kind": "position_vacant", "affected_nodes": [node_id], "position_people": [person], "reason": reason}}
+	if _state.decision_port != null:
+		_state.decision_port.get_ref().on_structure(record)
+	if attachment_continuity:
+		transition.emit(record)
+
+func on_personal_transition(record: Dictionary) -> void:
+	var person: String = str(record.get("actor_ref", ""))
+	if record.kind in ["personal_injury", "personal_death"] and _person_positions.has(person) and not _state.gameplay_port.get_ref().participants._member(person).actionable:
+		vacate_node(str(_person_positions[person]), "dead" if record.kind == "personal_death" else "incapacitated", str(record.event_id))
+
+func _validate_office(request: Dictionary) -> Dictionary:
+	var v: Dictionary = request.values
+	var target: String = str(v.get("node", ""))
+	if not active(target):
+		return _reject("active_command_position_required")
+	var actor: Dictionary = command_person(str(request.person_id))
+	var rank: int = Roles.ROLES.find(str(actor.role))
+	var target_rank: int = Roles.ECHELONS.find(str(_nodes[target].echelon)) + 1
+	var self_handover: bool = request.kind == "vacate_position" and _positions.get(target, {}).get("person", "") == request.person_id
+	if not self_handover and (rank <= target_rank or not _contains(str(actor.formation_id), target)):
+		return _reject("appointment_requires_current_superior")
+	if request.kind == "vacate_position":
+		return {"ok": true} if v.size() == 1 and _positions.get(target, {}).get("person", "") != "" else _reject("occupied_position_required")
+	if v.size() != 4 or not _keys(v, ["node", "person", "acting", "vacate_previous"]) or not v.get("acting") is bool or not v.get("vacate_previous") is bool or not _people.has(v.get("person", "")):
+		return _reject("explicit_existing_appointment_required")
+	if str(_positions.get(target, {}).get("person", "")) != "":
+		return _reject("vacate_current_incumbent_first")
+	var candidate: Dictionary = _people[v.person]
+	# One adjacent office step is permitted; permanent rank is never promoted.
+	if Roles.ROLES.find(str(candidate.role)) < target_rank - 1 or not active(str(candidate.formation_id)) or _nodes[candidate.formation_id].side != _nodes[target].side or not _contains(str(actor.formation_id), str(candidate.formation_id)):
+		return _reject("candidate_outside_eligible_existing_scope")
+	if _state.gameplay_port != null:
+		var p: RefCounted = _state.gameplay_port.get_ref().participants
+		if p._units.has(v.person):
+			if not p._member(v.person).actionable or movements._people.has(v.person):
+				return _reject("candidate_unavailable")
+			if target_rank == 1 and p._units[v.person] != _nodes[target].unit_id:
+				return _reject("squad_candidate_must_be_actual_member")
+	var previous: String = str(_person_positions.get(v.person, ""))
+	if not previous.is_empty() and (not v.vacate_previous or not _contains(str(actor.formation_id), previous)):
+		return _reject("explicit_previous_office_handover_required")
+	return {"ok": true}
+
+func _apply_office(request: Dictionary) -> Dictionary:
+	var v: Dictionary = request.values
+	var affected: Array[String] = []
+	if request.kind == "vacate_position":
+		affected.append(str(_positions[v.node].person))
+		vacate_node(str(v.node), "explicit_handover", str(request.id))
+	else:
+		var previous: String = str(_person_positions.get(v.person, ""))
+		if not previous.is_empty():
+			vacate_node(previous, "appointed_elsewhere", str(request.id))
+		_positions[v.node] = {"person": v.person, "acting": v.acting, "since": _state.time, "cause": request.id}
+		_person_positions[v.person] = v.node
+		affected.append(str(v.person))
+		if _state.decision_port != null:
+			_state.decision_port.get_ref().on_position_changed(str(v.person), str(v.node))
+	return {"ok": true, "kind": request.kind, "values": v.duplicate(true), "affected_nodes": [v.node], "position_people": affected}
+
+func move_person(person: String, destination: String) -> void:
+	var previous: String = str(_people[person].formation_id)
+	_node_people[previous].erase(person)
+	_node_people[destination][person] = true
+	_people[person].formation_id = destination
+	movements.on_member_move(person)
+	if _state.decision_port != null:
+		_state.decision_port.get_ref().on_member_move(person, destination)
+	if _state.information_port != null:
+		_state.information_port.get_ref().on_member_move(person, previous, destination)
+
 func owns_state(state: State) -> bool:
 	return state == _state
 
 func knows_identity(id: String) -> bool:
-	return _used_units.has(id)
+	return _used_units.has(id) or _used_nodes.has(id) or _people.has(id)
 
 func matches_admission(formations: Dictionary, people: Dictionary) -> bool:
 	return formations == _nodes and people == _people and history.is_empty()
@@ -122,6 +247,8 @@ func submit(person_id: String, command: Dictionary) -> Dictionary:
 	var valid: Dictionary = _validate(request, false)
 	if not valid.ok:
 		return valid
+	if attachment_continuity and request.kind == "revoke":
+		request.attachment_id = _attachments[request.values.target].id
 	_requests[command.id] = request
 	if request.kind == "attach":
 		var target: String = str(request.values.target)
@@ -143,6 +270,8 @@ func accepts_event(event_id: String, payload: Dictionary, due: float) -> bool:
 	return due == (float(request.values.until) if payload.get("expiry", false) else float(request.effective_time))
 
 func process_event(event: Dictionary) -> Dictionary:
+	if attachment_continuity:
+		applying.emit(event)
 	work.structure_events_processed += 1
 	var request: Dictionary = _requests[event.payload.request_id]
 	var changed: Dictionary = {}
@@ -158,12 +287,22 @@ func process_event(event: Dictionary) -> Dictionary:
 		else:
 			outcome = {"ok": true, "kind": "stale_expiry_noop"}
 	else:
-		outcome = _validate(request, true)
+		outcome = {"ok": true} if request.kind in ["move_depart", "move_transport_stop"] else _validate(request, true)
 		if request.kind == "attach":
 			_pending[request.values.target].erase(request.id)
 		if outcome.ok:
 			var values: Dictionary = request.values
-			if request.kind == "split":
+			if request.kind == "move_depart":
+				outcome = movements.depart(request, changed, retired)
+			elif request.kind == "move_transport_stop":
+				outcome = movements.stop_transport(request, changed)
+			elif request.kind in Movements.KINDS:
+				outcome = movements.apply(request, changed, retired)
+			elif request.kind in OFFICE_KINDS:
+				outcome = _apply_office(request)
+			elif request.kind in Members.KINDS:
+				outcome = _members.apply(request, changed, retired)
+			elif request.kind == "split":
 				if _nodes.has(values.source) and _nodes[values.source].echelon == "company":
 					_materialize(str(values.source), changed, retired)
 					_split_company(request, changed)
@@ -185,17 +324,56 @@ func process_event(event: Dictionary) -> Dictionary:
 				_materialize(str(values.target), changed, retired)
 				_reparent(str(values.target), str(_nodes[values.target].parent))
 				_attachments.erase(values.target)
-			outcome = {"ok": true, "kind": request.kind, "values": values.duplicate(true)}
+			if request.kind not in Members.KINDS and request.kind not in Movements.KINDS and request.kind not in OFFICE_KINDS and request.kind not in ["move_depart", "move_transport_stop"]:
+				outcome = {"ok": true, "kind": request.kind, "values": values.duplicate(true)}
+	if outcome.ok and request.kind in ["split", "merge"]:
+		var affected_nodes: Dictionary = {}
+		var created_nodes: Dictionary = {}
+		var fresh_root: String = str(request.values.get("new_node", "")) if request.kind == "split" else ""
+		for unit: String in changed.keys() + retired.keys():
+			var leaf: String = str(_unit_nodes.get(unit, ""))
+			for node: String in _path(leaf):
+				affected_nodes[node] = true
+				if not fresh_root.is_empty() and _contains(fresh_root, node):
+					created_nodes[node] = true
+		outcome.affected_nodes = State.sorted_ids(affected_nodes)
+		outcome.created_nodes = State.sorted_ids(created_nodes)
 	var record: Dictionary = {"id": event.id, "time": _state.time, "actor": request.person_id, "outcome": outcome.duplicate(true)}
 	history.append(record)
-	return {"changed": State.sorted_ids(changed), "retired": State.sorted_ids(retired), "record": record}
+	if _state.gameplay_port != null:
+		for id: String in retired:
+			if not _lod.has_leaf(id):
+				_state.gameplay_port.get_ref().prerequisites.on_retired(id)
+				movements.on_retired(id)
+	if _state.decision_port != null:
+		_state.decision_port.get_ref().on_structure(record)
+	if attachment_continuity:
+		continuity_work.relation_events += int(outcome.ok and outcome.get("kind", "") != "stale_expiry_noop")
+		transition.emit(record.duplicate(true))
+	return {"changed": State.sorted_ids(changed), "retired": State.sorted_ids(retired), "record": record, "representation_only": outcome.get("representation_only", false)}
 
 func _validate(request: Dictionary, executing: bool) -> Dictionary:
+	if _state.gameplay_port != null and not _state.gameplay_port.get_ref().participants.can_intend(str(request.person_id)):
+		return _reject("person_unavailable_for_structure_intent")
+	if request.kind in Movements.KINDS or request.kind in OFFICE_KINDS:
+		if not member_adjustments:
+			return _reject("member_adjustments_not_enabled")
+		if executing and float(request.effective_time) != _state.time:
+			return _reject("wrong_time_boundary")
+		return movements.validate(request, executing) if request.kind in Movements.KINDS else _validate_office(request)
+	if request.kind in Members.KINDS:
+		if not member_adjustments:
+			return _reject("member_adjustments_not_enabled")
+		return _members.validate(request, executing)
 	if _state.gameplay_port != null and _state.gameplay_port.get_ref().blocks_structure(str(request.kind), request.values):
 		return _reject("gameplay_identity_migration_not_supported")
+	if attachment_continuity and request.kind in ["attach", "revoke"]:
+		var continuity: Dictionary = _validate_continuity(request, executing)
+		if not continuity.ok:
+			return continuity
 	if executing and float(request.effective_time) != _state.time:
 		return _reject("wrong_time_boundary")
-	var person: Dictionary = _people[request.person_id]
+	var person: Dictionary = command_person(str(request.person_id))
 	var owner: String = str(person.formation_id)
 	if Roles.ROLES.find(str(person.role)) < 3 or not active(owner):
 		return _reject("structure_authority_required")
@@ -208,7 +386,7 @@ func _validate(request: Dictionary, executing: bool) -> Dictionary:
 		if not _leaf_scope(owner, str(values.get("source", ""))):
 			return _reject("outside_effective_scope")
 		var source: Dictionary = _lod.preview_leaf(str(values.source))
-		if not values.get("new_id") is String or not values.get("new_node") is String or str(values.new_id).is_empty() or str(values.new_node).is_empty() or _used_units.has(values.new_id) or _used_nodes.has(values.new_node) or _state.knows_unit(str(values.new_id)) or _state.unit_event_counts.has(values.new_id) or _state.missions.has("structure_" + str(request.id) + "_mission"):
+		if not values.get("new_id") is String or not values.get("new_node") is String or str(values.new_id).is_empty() or str(values.new_node).is_empty() or _state.identity_reserved(str(values.new_id)) or _state.identity_reserved(str(values.new_node)) or _state.unit_event_counts.has(values.new_id) or _state.missions.has("structure_" + str(request.id) + "_mission"):
 			return _reject("identity_collision")
 		if not _clear_leaf(str(values.source)):
 			return _reject("dependency_migration_required")
@@ -271,6 +449,29 @@ func _validate(request: Dictionary, executing: bool) -> Dictionary:
 		return _reject("wrong_time_boundary")
 	return {"ok": true}
 
+func _validate_continuity(request: Dictionary, executing: bool) -> Dictionary:
+	var target: String = str(request.values.get("target", ""))
+	if not active(target) or _nodes[target].echelon != "squad":
+		return _reject("continuity_requires_single_squad")
+	if executing and request.kind == "revoke" and str(_attachments.get(target, {}).get("id", "")) != str(request.get("attachment_id", "")):
+		return _reject("stale_attachment_revoke")
+	var unit_id: String = str(_nodes[target].unit_id)
+	var unit: Dictionary = _lod.preview_leaf(unit_id)
+	continuity_work.leaf_previews += 1
+	continuity_work.dependency_records += 4
+	if unit.is_empty():
+		return _reject("live_attachment_unit_required")
+	var gameplay: RefCounted = _state.gameplay_port.get_ref() if _state.gameplay_port != null else null
+	if _state.coordination.has(unit_id) and (gameplay == null or not gameplay.can_transfer_dependencies(unit_id)):
+		return _reject("attachment_special_preparation_policy_required")
+	if _state.command_coordination.has(unit_id) or _state.tactical_intents.has(unit_id):
+		return _reject("attachment_timed_or_tactical_policy_required")
+	if not (_state.mission_dependents.get(unit.mission_id, {}) as Dictionary).is_empty() and not _state.missions[unit.mission_id].has("goal_v1"):
+		return _reject("attachment_legacy_task_dependents_policy_required")
+	if _state.gameplay_port != null and _state.gameplay_port.get_ref().requires_detail(unit_id) and _lod.representation_of(unit_id) != unit_id:
+		return _reject("personal_goal_leaf_requires_detail")
+	return {"ok": true}
+
 func _current_mission(id: String, leaf: Dictionary) -> Dictionary:
 	var representation: String = _lod.representation_of(id)
 	work.structure_records_examined += 1
@@ -284,7 +485,7 @@ func _validate_company_split(request: Dictionary, owner: String) -> Dictionary:
 	var source: String = str(v.source)
 	if not _contains(owner, source) or not _contains(owner, str(_nodes[source].parent)) or _attachments.has(source) or _leaves[source].is_empty():
 		return _reject("company_split_requires_superior_scope")
-	if not v.get("new_id") is String or not v.get("new_node") is String or str(v.new_id).is_empty() or v.new_id != v.new_node or _used_nodes.has(v.new_id) or _used_units.has(v.new_id) or _state.knows_unit(str(v.new_id)) or _state.unit_event_counts.has(v.new_id):
+	if not v.get("new_id") is String or not v.get("new_node") is String or str(v.new_id).is_empty() or v.new_id != v.new_node or _state.identity_reserved(str(v.new_id)) or _state.unit_event_counts.has(v.new_id):
 		return _reject("identity_collision")
 	var total: Dictionary = {}
 	for key: String in stock_keys():
@@ -412,6 +613,7 @@ func _split(request: Dictionary, changed: Dictionary) -> void:
 	_used_units[fresh.id] = true
 	_children[values.new_node] = {}
 	_leaves[values.new_node] = {values.new_node: true}
+	_node_people[values.new_node] = {}
 	# A split follows both the permanent and current operational parent of source.
 	var operational: String = parent(source_node)
 	_children[operational][values.new_node] = true
@@ -429,6 +631,8 @@ func _merge(request: Dictionary, changed: Dictionary, retired: Dictionary) -> vo
 	var b: Dictionary = _state.units[request.values.donor]
 	for key: String in stock_keys():
 		a[key] = float(a.get(key, 0.0)) + float(b.get(key, 0.0))
+	if _state.gameplay_port != null:
+		_state.gameplay_port.get_ref().tactics.unit_merged(str(b.id), str(a.id))
 	for key: String in ["fatigue", "suppression", "distance_moved"]:
 		a[key] = maxf(float(a[key]), float(b[key]))
 	a.cohesion = minf(float(a.cohesion), float(b.cohesion))
@@ -439,6 +643,7 @@ func _merge(request: Dictionary, changed: Dictionary, retired: Dictionary) -> vo
 		_leaves[ancestor].erase(id)
 		work.authority_scopes_updated += 1
 	_children[parent(id)].erase(id)
+	_attachments.erase(id)
 	_state.units.erase(b.id)
 	_state.area_units[b.area_id].erase(b.id)
 	changed.erase(b.id)
@@ -487,3 +692,18 @@ static func _keys(value: Dictionary, allowed: Array) -> bool:
 
 static func _reject(error: String) -> Dictionary:
 	return {"ok": false, "error": error}
+
+const RUNTIME_FIELDS: Array[String] = ["_nodes", "_people", "_node_people", "member_adjustments", "_positions", "_person_positions", "_children", "_leaves", "_unit_nodes", "_requests", "_attachments", "_pending", "_retired", "_used_units", "_used_nodes", "history", "attachment_continuity", "continuity_work", "work"]
+
+func runtime_state() -> Dictionary:
+	return {"fields": State.capture_runtime_fields(self, RUNTIME_FIELDS), "movements": movements.runtime_state()}
+
+func restore_runtime(image: Dictionary) -> bool:
+	return image.get("fields") is Dictionary and image.get("movements") is Dictionary and State.restore_runtime_fields(self, image.fields, RUNTIME_FIELDS) and movements.restore_runtime(image.movements)
+
+func bind_runtime(state: State, lod: RefCounted) -> void:
+	_state = state
+	_lod = lod
+	_members.configure(self)
+	movements.configure(self)
+	state.structure_port = weakref(self)

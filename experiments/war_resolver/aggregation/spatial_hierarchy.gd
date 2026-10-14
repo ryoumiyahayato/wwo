@@ -1,7 +1,7 @@
 extends RefCounted
 var settlement_state: WeakRef = null
 ## Synthetic summaries only. A parent never calls a combat resolver.
-const STOCKS: Array[String] = ["personnel_total", "effective", "casualties", "equipment",
+const STOCKS: Array[String] = ["personnel_total", "effective", "casualties", "personnel_recovered", "equipment",
 	"equipment_lost", "ammunition", "ammo_spent"]
 var stock_keys: Array[String] = STOCKS.duplicate()
 var nodes: Dictionary = {}
@@ -88,3 +88,11 @@ func leaf_descendants(id: String) -> Array[String]:
 		for child: String in children:
 			result.append_array(leaf_descendants(child))
 	return result
+
+const RUNTIME_FIELDS: Array[String] = ["stock_keys", "nodes", "dirty", "counters"]
+
+func runtime_state() -> Dictionary:
+	return preload("res://experiments/war_resolver/battle_state.gd").capture_runtime_fields(self, RUNTIME_FIELDS)
+
+func restore_runtime(image: Dictionary) -> bool:
+	return preload("res://experiments/war_resolver/battle_state.gd").restore_runtime_fields(self, image, RUNTIME_FIELDS)

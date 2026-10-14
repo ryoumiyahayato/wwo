@@ -12,6 +12,55 @@ const COHESION_PER_LOSS: float = 0.5
 const SLEEP_EPSILON: float = 0.001
 
 
+func apply_capacity_loss(state: State, unit: Dictionary, loss: float, protected_override: float = -1.0, protected_serviceable_override: float = -1.0) -> float:
+	var protected: float = 0.0 if state.gameplay_port == null else state.gameplay_port.get_ref().tactics.protected_equipment(str(unit.id))
+	if protected_override >= 0.0:
+		protected = protected_override
+	protected = minf(protected, float(unit.equipment) if protected_override >= 0.0 else float(unit.get("serviceable_equipment", unit.equipment)))
+	var equipment_loss: float = minf(maxf(0.0, float(unit.equipment) - protected), loss)
+	unit.effective = maxf(0.0, float(unit.effective) - loss)
+	unit.casualties += loss
+	if unit.has("supply_capability"):
+		state.logistics_port.get_ref().lose_equipment(unit, equipment_loss, protected if protected_serviceable_override < 0.0 else protected_serviceable_override, protected)
+	unit.equipment -= equipment_loss
+	unit.equipment_lost += equipment_loss
+	state.totals.casualties += loss
+	state.totals.equipment_lost += equipment_loss
+	if state.gameplay_port != null:
+		state.gameplay_port.get_ref().land.on_capacity_loss(unit, equipment_loss)
+	return equipment_loss
+
+func direct_fire(state: State, unit: Dictionary, rounds: float, lethality: float, cause: String, effect_point: Array = [], radius: float = 0.000001, include_bodies: bool = true) -> void:
+	if state.gameplay_port != null and (state.gameplay_port.get_ref().tactics.manoeuvre_active(str(unit.id)) or state.gameplay_port.get_ref().tactics.has_separated_bodies(str(unit.id))):
+		state.gameplay_port.get_ref().tactics.support_fire(unit, rounds, lethality, cause, state.spatial_port.get_ref().xy(unit) if effect_point.is_empty() else effect_point, radius, include_bodies)
+		return
+	_direct_group_fire(state, unit, rounds, lethality, cause)
+
+func _direct_group_fire(state: State, unit: Dictionary, rounds: float, lethality: float, cause: String) -> void:
+	# The aerial pass supplies finite rounds; ground exposure and named losses
+	# remain the same allocation and capacity/equipment equations.
+	var plan: Dictionary = {"exposure": 0.65 * (1.0 - float(_terrain(state, unit).cover)), "commitment": 0.0}
+	if state.gameplay_port != null:
+		state.gameplay_port.get_ref().participants.prepare(unit, plan)
+	var dose: float = rounds * lethality
+	var loss: float = minf(float(unit.effective), dose * float(plan.exposure))
+	if plan.has("personal_ledger"):
+		plan.personal_ledger.cause_ref = cause
+		state.gameplay_port.get_ref().participants.incoming(plan, dose)
+		loss = state.gameplay_port.get_ref().participants.settle(unit, plan)
+	apply_capacity_loss(state, unit, loss)
+	unit.cohesion = clampf(float(unit.cohesion) - loss / maxf(float(unit.get("contact_weight", unit.get("tactical_weight", 1.0))), float(unit.personnel_total)) * COHESION_PER_LOSS, 0.0, 1.0)
+	unit.suppression = clampf(float(unit.suppression) + rounds * SUPPRESSION_PER_ROUND * float(plan.exposure) / maxf(1.0, float(unit.effective)), 0.0, 1.0)
+	if float(unit.effective) <= _effective_epsilon(state, unit):
+		unit.action = "disabled"
+		if state.gameplay_port != null:
+			state.gameplay_port.get_ref().on_unit_unavailable(str(unit.id))
+	if state.gameplay_port != null:
+		state.gameplay_port.get_ref().participants.after_movement(unit, plan)
+	state.wake(str(unit.area_id))
+	state.touched_units[unit.id] = true
+	state.contacts.erase(unit.area_id)
+
 func resolve_until(state: State, target_game_time: float, resolution_policy: String = DETAILED, owner: RefCounted = null) -> Dictionary:
 	if state.settlement_owner != null and state.settlement_owner != owner:
 		return {"ok": false, "error": "Settlement belongs to the LOD coordinator"}
@@ -45,6 +94,12 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 				var plan: Dictionary = plans[area_id][unit_id]
 				var unit: Dictionary = state.examine_unit(unit_id)
 				var mission: Dictionary = state.missions[unit.mission_id]
+				var prepared_eta: float = float(plan.get("fire_exhaustion_seconds", INF))
+				var part_eta: float = float(plan.get("part_movement_seconds", INF))
+				if part_eta > 0.000001:
+					boundary = minf(boundary, state.time + part_eta)
+				if prepared_eta > 0.000001:
+					boundary = minf(boundary, state.time + prepared_eta)
 				if float(plan.rounds) > 0.0 and float(unit.ammunition) > 0.000001:
 					var exhaustion: float = float(unit.ammunition) / float(plan.rounds) * 60.0
 					if exhaustion > 0.000001:
@@ -63,6 +118,9 @@ func resolve_until(state: State, target_game_time: float, resolution_policy: Str
 					var eta: float = (objective - float(unit.position)) / float(plan.speed) * 60.0
 					if eta > 0.000001:
 						boundary = minf(boundary, state.time + eta)
+		# Preparing an explicitly operated weapon can schedule its real reload/aim
+		# boundary. Settle only up to that event, including the ordinary advance path.
+		boundary = minf(boundary, state.next_event_time())
 		var minutes: float = (boundary - state.time) / 60.0
 		state.time = boundary
 		state.counters.segments += 1
@@ -150,7 +208,10 @@ func _process_due_one(state: State, log: Array[Dictionary], changes: Dictionary,
 		state.touched_units[payload.unit.id] = true
 		_update_control(state, str(payload.unit.area_id), log, area_changes)
 	elif event.kind == "coordination_release":
-		state.wake(str(state.examine_unit(str(payload.unit_id)).area_id))
+		if state.knows_unit(str(payload.unit_id)):
+			state.wake(str(state.examine_unit(str(payload.unit_id)).area_id))
+		else:
+			log.append({"time": state.time, "kind": "coordination_unit_retired", "id": event.id})
 	else:
 		var area: Dictionary = state.areas[payload.area_id]
 		for key: String in ["cover", "concealment", "visibility", "frontage", "movement_modifier"]:
@@ -162,8 +223,16 @@ func _process_due_one(state: State, log: Array[Dictionary], changes: Dictionary,
 
 
 func _posture(state: State, unit: Dictionary) -> String:
+	if state.gameplay_port != null:
+		var transport_posture: String = state.gameplay_port.get_ref().land.posture(str(unit.id))
+		if transport_posture != "":
+			return transport_posture
+	if state.coordination.get(unit.id, {}).get("retained", false):
+		return "reserve"
+	if state.spatial_port != null and state.spatial_port.get_ref().stationary_local(unit):
+		return "hold"
 	var mission: Dictionary = state.missions[unit.mission_id]
-	if state.gameplay_port != null and mission.has("goal_v1"):
+	if state.gameplay_port != null and (mission.has("goal_v1") or mission.get("summary_goal_policy", false)):
 		return state.gameplay_port.get_ref().posture(unit)
 	if mission.status != "active":
 		return "hold"
@@ -241,7 +310,10 @@ func _update_control(state: State, area_id: String, log: Array[Dictionary], area
 
 func _wake_dependents(state: State, mission_id: String) -> void:
 	for id: String in State.sorted_ids(state.mission_dependents.get(mission_id, {})):
-		state.wake(str(state.examine_unit(id).area_id))
+		if state.knows_unit(id):
+			state.wake(str(state.examine_unit(id).area_id))
+	if state.gameplay_port != null:
+		state.gameplay_port.get_ref().on_dependency_completed(mission_id)
 
 
 func summary(state: State, policy: String) -> Dictionary:

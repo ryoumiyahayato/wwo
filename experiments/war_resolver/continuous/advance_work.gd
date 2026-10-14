@@ -426,6 +426,12 @@ func _step() -> void:
 func _eta(id: String, plan: Dictionary, cell: String) -> void:
 	var unit: Dictionary = state.examine_unit(id)
 	var mission: Dictionary = state.missions[unit.mission_id]
+	var part_eta: float = float(plan.get("part_movement_seconds", INF))
+	if part_eta > 0.000001:
+		boundary = minf(boundary, segment_start + part_eta)
+	var prepared_eta: float = float(plan.get("fire_exhaustion_seconds", INF))
+	if prepared_eta > 0.000001:
+		boundary = minf(boundary, segment_start + prepared_eta)
 	if float(plan.rounds)>0.0 and float(unit.ammunition)>0.000001:
 		var exhaustion: float = float(unit.ammunition)/float(plan.rounds)*60.0
 		if exhaustion>0.000001:
@@ -469,6 +475,10 @@ func _event_scope(event: Dictionary) -> int:
 	var payload: Dictionary = event.payload
 	if event.kind == "communication":
 		var message: Dictionary = state.information_port.get_ref()._messages[payload.message_id]
+		if message.command.get("kind", "") in ["air_intent", "naval_intent"]:
+			return 1
+		if message.command.get("kind", "") == "reserve_intent":
+			return maxi(1, state.gameplay_port.get_ref().reserves.units(message.command.values).size())
 		return maxi(1, state.structure_port.get_ref()._leaves.get(message.command.get("target", ""), {}).size())
 	if event.kind == "structure":
 		var service: RefCounted = state.structure_port.get_ref()

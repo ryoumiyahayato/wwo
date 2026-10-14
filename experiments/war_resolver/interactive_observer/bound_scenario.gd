@@ -9,11 +9,13 @@ func configure_bound(scene: String, seed_value: int, actor: String, options: Dic
 	if actor not in allowed.get(scene, []):
 		return false
 	bound_actor = actor
+	observation.enabled = bool(options.get("diagnostic", false))
 	var supplied: Dictionary = {"variant": "condition" if options.get("bridge_clear", false) else "autonomous", "sleeping_areas": options.get("sleeping_areas", 0)}
 	if options.get("bridge_clear", false) and scene != "S2":
 		return false
 	if not configure(scene, seed_value, supplied) or not selected_script_disabled:
 		return false
+	env.gameplay.focused_person = actor
 	env.gameplay.participants.debug_calculations = bool(options.get("diagnostic", false))
 	if not options.get("diagnostic", false):
 		env.lod.physical_event_sink = Callable()

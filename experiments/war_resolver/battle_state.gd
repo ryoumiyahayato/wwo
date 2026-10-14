@@ -27,7 +27,7 @@ var active_areas: Dictionary = {}
 var touched_units: Dictionary = {}
 var touched_areas: Dictionary = {}
 var totals: Dictionary = {"personnel": 0.0, "ammunition": 0.0, "equipment": 0.0,
-	"casualties": 0.0, "ammo_spent": 0.0, "equipment_lost": 0.0}
+	"casualties": 0.0, "personnel_recovered": 0.0, "ammo_spent": 0.0, "equipment_lost": 0.0}
 var counters: Dictionary = {"areas_examined": 0, "units_examined": 0,
 	"contacts_resolved": 0, "events_processed": 0, "segments": 0}
 var events: Array[Dictionary] = []
@@ -43,13 +43,67 @@ var logistics_port: WeakRef = null
 var logistics_ledger: Dictionary = {}
 var structure_port: WeakRef = null
 var unit_event_counts: Dictionary = {}
+var unit_order_counts: Dictionary = {}
+
+# Runtime checkpoints are distinct from the diagnostic snapshot. Field lists
+# belong to each existing module; object ports are rebuilt on a new candidate.
+static func capture_runtime_fields(owner: Object, fields: Array) -> Dictionary:
+	var result: Dictionary = {}
+	for field: String in fields:
+		var value: Variant = owner.get(field)
+		result[field] = value.duplicate(true) if value is Dictionary or value is Array else value
+	return result
+
+static func restore_runtime_fields(owner: Object, image: Dictionary, fields: Array) -> bool:
+	if image.size() != fields.size():
+		return false
+	for field: String in fields:
+		if not image.has(field) or typeof(image[field]) != typeof(owner.get(field)):
+			return false
+	for field: String in fields:
+		var current: Variant = owner.get(field)
+		if current is Array:
+			current.assign(image[field].duplicate(true))
+		else:
+			owner.set(field, image[field].duplicate(true) if image[field] is Dictionary else image[field])
+	return true
+
+const RUNTIME_FIELDS: Array[String] = ["time", "seed", "random_state", "units", "areas", "missions", "coordination", "tactical_intents", "command_coordination", "mission_dependents", "contacts", "area_units", "active_areas", "touched_units", "touched_areas", "totals", "counters", "events", "event_ids", "logistics_ledger", "unit_event_counts", "unit_order_counts"]
+
+func runtime_state() -> Dictionary:
+	if settlement_pending or inside_kernel_work:
+		return {"ok": false, "status": "PENDING", "time": pending_committed_time}
+	return {"ok": true, "version": "war-runtime-v1", "fields": capture_runtime_fields(self, RUNTIME_FIELDS)}
+
+func restore_runtime(image: Dictionary) -> bool:
+	if not image.get("ok", false) or image.get("version", "") != "war-runtime-v1" or not image.get("fields") is Dictionary or not restore_runtime_fields(self, image.fields, RUNTIME_FIELDS):
+		return false
+	if not is_finite(time) or time < 0.0:
+		return false
+	var pending_ids: Dictionary = {}
+	for index: int in range(events.size()):
+		var event: Dictionary = events[index]
+		if not event.get("id") is String or not event_ids.has(event.id) or pending_ids.has(event.id) or not is_finite(float(event.get("time", -1.0))) or float(event.time) < time:
+			return false
+		pending_ids[event.id] = true
+		if index > 0 and _event_before(event, events[(index - 1) / 2]):
+			return false
+	for id: String in units:
+		var unit: Dictionary = units[id]
+		if unit.get("id", "") != id or not areas.has(unit.get("area_id", "")) or not missions.has(unit.get("mission_id", "")) or not area_units.get(unit.area_id, {}).has(id):
+			return false
+		for key: String in ["ammunition", "equipment", "effective"]:
+			if not is_finite(float(unit.get(key, -1.0))) or float(unit[key]) < -0.000001:
+				return false
+	pending_committed_time = time
+	return true
 
 
 func knows_unit(id: String) -> bool:
 	return units.has(id) or materialization_port != null and materialization_port.get_ref() != null and materialization_port.get_ref().has_leaf(id)
 
 func identity_reserved(id: String) -> bool:
-	return knows_unit(id) or structure_port != null and structure_port.get_ref() != null and structure_port.get_ref().knows_identity(id)
+	return knows_unit(id) or structure_port != null and structure_port.get_ref() != null and structure_port.get_ref().knows_identity(id) or logistics_port != null and logistics_port.get_ref() != null and logistics_port.get_ref()._assets.has(id)
 
 
 func add_area(record: Dictionary) -> void:
@@ -75,6 +129,7 @@ func add_unit(record: Dictionary) -> void:
 	assert(float(record.ammunition) >= 0.0 and float(record.equipment) >= 0.0)
 	assert(is_equal_approx(float(record.personnel_total), float(record.effective) + float(record.casualties)))
 	units[record.id] = record.duplicate(true)
+	units[record.id].personnel_recovered = 0.0
 	area_units[record.area_id][record.id] = true
 	totals.personnel += float(record.personnel_total)
 	totals.ammunition += float(record.ammunition) + float(record.ammo_spent)
@@ -170,6 +225,8 @@ func schedule_event(id: String, due: float, kind: String, payload: Dictionary) -
 			record.unit_ref = unit_ref
 		if structure_port != null:
 			unit_event_counts[unit_ref] = int(unit_event_counts.get(unit_ref, 0)) + 1
+			if kind == "order":
+				unit_order_counts[unit_ref] = int(unit_order_counts.get(unit_ref, 0)) + 1
 	events.append(record)
 	var index: int = events.size() - 1
 	while index > 0:
@@ -190,6 +247,10 @@ func next_event_time() -> float:
 func pop_event() -> Dictionary:
 	var result: Dictionary = events[0]
 	if result.has("unit_ref"):
+		if result.kind == "order":
+			unit_order_counts[result.unit_ref] -= 1
+			if int(unit_order_counts[result.unit_ref]) == 0:
+				unit_order_counts.erase(result.unit_ref)
 		unit_event_counts[result.unit_ref] -= 1
 		if int(unit_event_counts[result.unit_ref]) == 0:
 			unit_event_counts.erase(result.unit_ref)

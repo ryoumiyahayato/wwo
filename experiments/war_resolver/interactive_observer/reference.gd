@@ -1,6 +1,7 @@
 extends SceneTree
 ## Same recorded input and time requests, without person projection or pipe I/O.
 const Session = preload("res://experiments/war_resolver/interactive_observer/session.gd")
+const AttachedSession = preload("res://experiments/war_resolver/attachment_continuity/session.gd")
 const Audit = preload("res://experiments/war_resolver/interactive_observer/audit.gd")
 
 func _initialize() -> void:
@@ -13,6 +14,8 @@ func _initialize() -> void:
 		quit(2)
 		return
 	var session: Session = Session.new()
+	if str(input.scene).begins_with("A"):
+		session = AttachedSession.new()
 	if not session.configure(input.scene, int(input.seed), input.actor, input.session, int(input.quota),
 		{"projection": false, "diagnostic": false, "measure": true, "sleeping_areas": int(input.get("sleeping", 0)), "bridge_clear": input.get("bridge_clear", false)}):
 		quit(2)
