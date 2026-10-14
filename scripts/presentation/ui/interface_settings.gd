@@ -23,7 +23,7 @@ static func theme_parameters() -> Dictionary:
 			"muted":Color(0.65,0.73,0.72,1.0),
 			"teal":Color(0.39,0.57,0.56,0.72),
 			"status":Color(0.53,0.23,0.22,0.90),
-			"clock_radius":160.0,"title_size":16,"caption_size":11}}
+			"clock_radius":144.0,"title_size":16,"caption_size":11}}
 
 
 static func load_preferences() -> Dictionary:

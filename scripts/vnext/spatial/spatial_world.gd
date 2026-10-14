@@ -180,10 +180,18 @@ func pick_administration(lon_lat: Vector2, date: String, visible_ids: Array[Stri
 	# unchanged opening department must not intercept its displayed lower units.
 	if member != null and administrative_display_uses_members(str(member),date): return str(member)
 	var point := _land.from_geographic(lon_lat)
-	var candidates := loaded_administrative_boundary_ids(date)
-	candidates.sort_custom(func(a: String,b: String) -> bool: return int(_land_administrations[a].get("level",1))>int(_land_administrations[b].get("level",1)))
+	# Only installed units in this display demand participate. Preserve deepest
+	# level first and the original stable identity order within a level.
+	var candidates: Array[String] = []
+	for id: String in visible_ids:
+		if _land_boundaries.has(id) and _administrative_reference_visible(id,date): candidates.append(id)
+	candidates.sort_custom(func(a: String,b: String) -> bool:
+		var a_level := int(_land_administrations[a].get("level",1))
+		var b_level := int(_land_administrations[b].get("level",1))
+		return a_level>b_level if a_level!=b_level else a<b)
 	for id: String in candidates:
-		if not visible_ids.has(id): continue
+		var bounds := administrative_reference_bounds(id)
+		if bounds.has_area() and not bounds.grow(0.5).has_point(point): continue
 		if administrative_display_uses_members(id,date): continue
 		for rings: Array in _land_boundaries[id] as Array:
 			if not Geometry2D.is_point_in_polygon(point,rings[0]): continue

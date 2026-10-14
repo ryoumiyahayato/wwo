@@ -668,16 +668,24 @@ func _prepare_boundary_batches() -> void:
 func _draw_boundaries(regional: bool = false) -> void:
 	var replacement := _country_overlay_ready() if regional else false
 	for batch: Dictionary in region_view.boundaries if regional else _boundary_batches:
-		var material := batch.material as ShaderMaterial
+		var shown := not bool(batch.get("home_border",false)) or controller.administrative_map_active()
+		var coast_weight := 1.0
 		if regional:
-			RenderingServer.canvas_item_set_visible(batch.item,(not replacement or str(batch.get("kind",""))!="macro") and (not bool(batch.get("home_border",false)) or controller.administrative_map_active()))
+			shown = shown and (not replacement or str(batch.get("kind",""))!="macro")
+			if str(batch.get("kind", "")) == "coast" and not strategic_layer.active_lod.is_empty():
+				coast_weight = 1.0-MapScaleStyle.strategic_weight("coast",controller.region_camera.km_per_pixel*1000.0)
+				shown = shown and coast_weight>0.001
+		if shown!=bool(batch.get("visible",true)):
+			RenderingServer.canvas_item_set_visible(batch.item,shown)
+			batch["visible"] = shown
+		if not shown: continue
+		if regional:
 			_set_region_uniforms(batch)
 			if str(batch.get("kind", "")) == "coast":
 				var color := COAST_COLOR
-				if not strategic_layer.active_lod.is_empty(): color.a *= 1.0-MapScaleStyle.strategic_weight("coast",controller.region_camera.km_per_pixel*1000.0)
+				color.a *= coast_weight
 				_parameter(batch,"stroke_color",color)
 		else:
-			RenderingServer.canvas_item_set_visible(batch.item,not bool(batch.get("home_border",false)) or controller.administrative_map_active())
 			_parameter(batch, "globe_basis", controller.orientation())
 			_parameter(batch, "globe_center", _center)
 			_parameter(batch, "globe_radius", _radius)
@@ -864,6 +872,12 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT:
 		controller.begin_bearing(unit,_last_pointer)
 	var clicked := controller.handle_input(event, _globe_rect)
+	# A drag changes the camera, never the selected object. Picking every
+	# intermediate pointer duplicates projection work along fragmented shores.
+	if event is InputEventMouseMotion and (controller._dragging or controller._bearing_dragging):
+		controller.hover("", "")
+		accept_event()
+		return
 	if wheel:
 		if not was_regional and not unit.is_zero_approx():
 			_ensure_view()
@@ -933,6 +947,10 @@ func _polity_at(point: Vector2) -> String:
 	var distances: Dictionary = {}
 	for owner: String in owners:
 		var geometry := (_surface_batches[owner] as Dictionary).geometry as GlobeSurfaceBatch
+		var margin := 4.0*camera.km_per_pixel/RegionProjection.EARTH_RADIUS_KM if camera.active else 4.0/maxf(_radius,1.0)
+		if geometry.cull_axis.angle_to(unit)>geometry.cull_angle+margin:
+			distances[owner] = INF
+			continue
 		var distance := geometry.distance_region_point(unit,chart_point,camera) if camera.active else geometry.distance_screen_point(origin,inverse*Vector3.FORWARD,basis,point,_center,_radius)
 		distances[owner] = distance
 		if distance==0.0:
@@ -1195,7 +1213,8 @@ func _sync_landmark_display() -> void:
 			_place_points[id] = point
 			visuals.append(visual)
 	var surface := local_content.content.surface_reference if visible and local_content!=null and local_content.content!=null and controller.region_camera.local_place_id==str(local_content.content.metadata.anchor_place_id) else {}
-	var lines: Array[Dictionary] = local_content.content.features if not surface.is_empty() and local_content.content.active_on(political.display_date) else []
+	var lines: Array[Dictionary] = []
+	if not surface.is_empty() and local_content.content.active_on(political.display_date): lines.assign(local_content.content.features)
 	region_view.update_landmarks(visuals,controller.region_camera,size,surface,lines)
 	if controller.region_camera.local_active:
 		for id: String in _place_points:
@@ -1553,14 +1572,18 @@ func _clear_overlay_batches() -> void:
 	_overlay_batches.clear()
 
 func _update_overlay_batches(view: Rect2) -> void:
-	var wanted: Array[String] = []
-	for row: Dictionary in _overlay_demand: wanted.append(str(row.id))
+	var wanted: Dictionary = {}
+	for row: Dictionary in _overlay_demand: wanted[str(row.id)] = row
 	var colors := InterfaceSettings.theme_parameters()
 	var country_ready := _country_overlay_ready()
 	for id: String in _overlay_batches:
 		for batch: Dictionary in _overlay_batches[id]:
 			var show: bool = visible and controller.region_camera.active and wanted.has(id) and (str(batch.kind)!="country" or country_ready)
-			RenderingServer.canvas_item_set_visible(batch.item,show)
+			if show and batch.kind=="administration":
+				show = (wanted[id].bounds as Rect2).intersects(view.grow(_strategic_mpp()*8.0),true)
+			if show!=bool(batch.get("visible",false)):
+				RenderingServer.canvas_item_set_visible(batch.item,show)
+				batch["visible"] = show
 			if not show: continue
 			_parameter(batch,"region_mode",true)
 			_set_region_uniforms(batch)

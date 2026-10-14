@@ -206,25 +206,13 @@ static func portrait_cameo(canvas: CanvasItem, rect: Rect2, palette: Dictionary,
 	canvas.draw_colored_polygon(_ellipse_points(center,radii-Vector2(6,6)),palette.body as Color)
 	_closed_outline(canvas,outer,palette.highlight as Color if active else palette.metal as Color,1.1)
 	_closed_outline(canvas,_ellipse_points(center,radii-Vector2(5,5)),palette.highlight as Color,0.7)
-	# Quiet mirror facets stay within the oval and carry no portrait facts.
-	var glass := palette.teal as Color
-	glass.a = 0.18
-	canvas.draw_colored_polygon(_ellipse_points(center,radii-Vector2(7,7)),glass)
-	var reflection := palette.ivory as Color
-	reflection.a = 0.10
-	canvas.draw_colored_polygon(PackedVector2Array([center+Vector2(-18,-35),center+Vector2(-7,-43),center+Vector2(15,34),center+Vector2(4,40)]),reflection)
-	canvas.draw_arc(center,radii.x-8,PI*1.14,PI*1.56,18,palette.highlight as Color,0.6,true)
-	# A featureless study silhouette; no face, clothing or demographic claim.
+	# Only a centred head and connected shoulders occupy the interior.
 	var figure := palette.muted as Color
-	figure.a = 0.66
-	canvas.draw_colored_polygon(_ellipse_points(center+Vector2(0,-15),Vector2(9,12),24),figure)
-	var body := PackedVector2Array([Vector2(-5,-4),Vector2(5,-4),Vector2(7,3),Vector2(19,11),Vector2(22,26),Vector2(13,34),Vector2(0,37),Vector2(-13,34),Vector2(-22,26),Vector2(-19,11),Vector2(-7,3)])
+	figure.a = 0.90
+	canvas.draw_colored_polygon(_ellipse_points(center+Vector2(0,-12),Vector2(8,10),24),figure)
+	var body := PackedVector2Array([Vector2(-4,-4),Vector2(4,-4),Vector2(5,3),Vector2(16,9),Vector2(19,22),Vector2(10,27),Vector2(-10,27),Vector2(-19,22),Vector2(-16,9),Vector2(-5,3)])
 	for index: int in range(body.size()): body[index] += center
 	canvas.draw_colored_polygon(body,figure)
-	canvas.draw_line(center+Vector2(-13,31),center+Vector2(13,31),palette.teal as Color,0.8,true)
-	for side: float in [-1.0,1.0]:
-		_instrument_hub(canvas,center+Vector2(side*(radii.x-1),0),2.6,palette)
-	canvas.draw_arc(center+Vector2(0,radii.y-2),11,0,PI,16,palette.bronze as Color,3.0,true)
 
 static func portrait_action(canvas: CanvasItem, center: Vector2, palette: Dictionary, kind: String, active: bool) -> void:
 	var color := palette.highlight as Color if active else palette.muted as Color

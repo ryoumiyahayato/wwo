@@ -50,10 +50,9 @@ var _track_marker: Control
 var _clock_rect := Rect2()
 var _track_rect := Rect2()
 var _clock_draw_state: Array = []
-var _flag_item: RID
-var _flag_material: ShaderMaterial
-var _flag_rect := Rect2()
-var _flag_texture: Texture2D
+var _flag_canvas: TextureRect
+var _person_canvas: Control
+var _person_draw_state: Array = []
 var _date: Dictionary = {}
 var _content_errors: Array[String] = []
 var _view_polity: Dictionary = {}
@@ -89,10 +88,19 @@ func _ready() -> void:
 	add_child(_tooltip_timer)
 	_tooltip_timer.timeout.connect(func() -> void: _tooltip_visible = true; queue_redraw())
 	PANEL_BORDER.a = 0.30
+	_flag_canvas = TextureRect.new()
+	_flag_canvas.name = "CountryFlag"
+	_flag_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_flag_canvas.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_flag_canvas.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_flag_canvas.stretch_mode = TextureRect.STRETCH_SCALE
+	_flag_canvas.visible = false
+	add_child(_flag_canvas)
 	_clock_frame = _hud_canvas("ClockFrame",_draw_clock_frame)
 	_clock_values = _hud_canvas("ClockValues",_draw_clock_values)
 	_track_frame = _hud_canvas("HistoryFrame",_draw_track_frame)
 	_track_marker = _hud_canvas("HistoryTime",_draw_track_marker)
+	_person_canvas = _hud_canvas("PortraitCameo",_draw_person_contents)
 	resized.connect(refresh)
 
 func _hud_canvas(node_name: String, paint: Callable) -> Control:
@@ -104,7 +112,6 @@ func _hud_canvas(node_name: String, paint: Callable) -> Control:
 	return canvas
 
 func _exit_tree() -> void:
-	if _flag_item.is_valid(): RenderingServer.free_rid(_flag_item)
 	if _instrument_item.is_valid(): RenderingServer.free_rid(_instrument_item)
 
 func _update_instrument(center: Vector2, radius: float) -> void:
@@ -239,7 +246,7 @@ func _polity_rect() -> Rect2:
 
 func _person_rect() -> Rect2:
 	var bounds := _hud_bounds()
-	return Rect2(bounds.position.x,bounds.end.y-132,118,132)
+	return Rect2(bounds.position.x,bounds.end.y-144,108,144)
 
 func _time_rect() -> Rect2:
 	var radius := minf(float(_hud_style.clock_radius),size.x*0.22)
@@ -348,36 +355,13 @@ func _draw() -> void:
 func _draw_polity_hud() -> void:
 	var rect := _polity_rect()
 	_blocks.append(rect)
+	_flag_canvas.visible = _view_flag!=null
 	if _view_flag!=null:
-		if not _flag_item.is_valid():
-			_flag_material = ShaderMaterial.new()
-			_flag_material.shader = preload("res://shaders/presentation/ui/hud_flag.gdshader")
-			_flag_item = RenderingServer.canvas_item_create()
-			RenderingServer.canvas_item_set_parent(_flag_item,get_canvas_item())
-			RenderingServer.canvas_item_set_draw_behind_parent(_flag_item,true)
-			RenderingServer.canvas_item_set_material(_flag_item,_flag_material.get_rid())
 		var texture_size := _view_flag.get_size()
-		var flag_size := texture_size*minf(76.0/texture_size.x,48.0/texture_size.y)
-		var flag_rect := Rect2(rect.get_center()-flag_size*0.5,flag_size)
-		if flag_rect!=_flag_rect or _flag_texture!=_view_flag:
-			_flag_rect = flag_rect
-			_flag_texture = _view_flag
-			RenderingServer.canvas_item_clear(_flag_item)
-			var points := PackedVector2Array()
-			var uvs := PackedVector2Array()
-			var indices := PackedInt32Array()
-			for column: int in range(9):
-				var u := float(column)/8.0
-				for v: float in [0.0,1.0]:
-					points.append(flag_rect.position+Vector2(u,v)*flag_rect.size)
-					uvs.append(Vector2(u,v))
-				if column<8:
-					var start := column*2
-					indices.append_array(PackedInt32Array([start,start+1,start+2,start+2,start+1,start+3]))
-			RenderingServer.canvas_item_add_triangle_array(_flag_item,indices,points,PackedColorArray([Color.WHITE]),uvs,PackedInt32Array(),PackedFloat32Array(),_view_flag.get_rid())
-	elif _flag_item.is_valid():
-		RenderingServer.canvas_item_clear(_flag_item)
-		_flag_texture = null
+		var flag_size := (texture_size*minf(76.0/texture_size.x,48.0/texture_size.y)).round()
+		_flag_canvas.position = (rect.get_center()-flag_size*0.5).round()
+		_flag_canvas.size = flag_size
+		if _flag_canvas.texture!=_view_flag: _flag_canvas.texture = _view_flag
 	_hits.append({"rect":rect,"action":"navigation","enabled":not _view_polity.is_empty(),"tooltip":str(_view_polity.get("name_zh","国家资料未记录"))+"\n国家资料 · 市场 · 行政 · 组织架构"})
 
 func _draw_navigation() -> void:
@@ -390,22 +374,39 @@ func _draw_navigation() -> void:
 
 func _draw_person_hud() -> void:
 	var rect := _person_rect()
-	var portrait := Rect2(rect.position+Vector2(4,8),Vector2(76,116))
-	UIDrawing.portrait_cameo(self,portrait,_hud_style,_hover_action=="page:person" or current_page=="person")
+	var portrait := Rect2(rect.position+Vector2(16,0),Vector2(76,112))
+	var hover := _hover_action if _hover_action in ["page:person","person:accounts","person:organizations"] else ""
+	var state: Array = [rect,hover,current_page=="person"]
+	if state!=_person_draw_state:
+		_person_draw_state = state
+		_person_canvas.queue_redraw()
 	_hits.append({"rect":portrait,"action":"page:person","enabled":true,"ellipse_center":portrait.get_center(),"ellipse_radii":portrait.size*0.5,"tooltip":"人物详情"})
 	var actions: Array[Dictionary] = [{"kind":"details","action":"page:person","hint":"人物详情"},{"kind":"accounts","action":"person:accounts","hint":"财产与账务"},{"kind":"relations","action":"person:organizations","hint":"人物关系"}]
+	var centers: Array[Vector2] = [Vector2(20,115),Vector2(54,130),Vector2(88,115)]
 	for index: int in range(actions.size()):
 		var item := actions[index]
-		var center := rect.position+Vector2(98,25+index*39)
-		UIDrawing.portrait_action(self,center,_hud_style,str(item.kind),_hover_action==str(item.action))
+		var center := rect.position+centers[index]
 		_hits.append({"rect":Rect2(center-Vector2(14,14),Vector2(28,28)),"action":item.action,"enabled":true,"circle_center":center,"circle_radius":14.0,"tooltip":item.hint})
+
+func _draw_person_contents() -> void:
+	var rect := _person_rect()
+	UIDrawing.portrait_cameo(_person_canvas,Rect2(rect.position+Vector2(16,0),Vector2(76,112)),_hud_style,_hover_action=="page:person" or current_page=="person")
+	var actions: Array[Dictionary] = [{"kind":"details","action":"page:person"},{"kind":"accounts","action":"person:accounts"},{"kind":"relations","action":"person:organizations"}]
+	var centers: Array[Vector2] = [Vector2(20,115),Vector2(54,130),Vector2(88,115)]
+	# The three controls share the cameo's lower rim, outside the silhouette.
+	var bridge := PackedVector2Array([rect.position+Vector2(20,115),rect.position+Vector2(31,103),rect.position+Vector2(54,111),rect.position+Vector2(77,103),rect.position+Vector2(88,115)])
+	_person_canvas.draw_polyline(bridge,_hud_style.bronze as Color,2.0,true)
+	for index: int in range(actions.size()):
+		var item := actions[index]
+		var center := rect.position+centers[index]
+		UIDrawing.portrait_action(_person_canvas,center,_hud_style,str(item.kind),_hover_action==str(item.action))
 
 func _time_buttons() -> Array[Dictionary]:
 	var corner := Vector2(_time_rect().end.x,0)
-	var items: Array[Dictionary] = [{"rect":Rect2(corner+Vector2(-114,64),Vector2(54,25)),"text":"继续" if _time.paused else "暂停","action":"time:pause","selected":_time.paused,"tooltip":"继续时间" if _time.paused else "暂停时间"},{"rect":Rect2(corner+Vector2(-54,64),Vector2(46,25)),"text":"菜单","action":"system","selected":_system_open or _settings_open,"tooltip":"系统菜单 · Esc"}]
+	var items: Array[Dictionary] = [{"rect":Rect2(corner+Vector2(-99,58),Vector2(47,25)),"text":"继续" if _time.paused else "暂停","action":"time:pause","selected":_time.paused,"tooltip":"继续时间" if _time.paused else "暂停时间"},{"rect":Rect2(corner+Vector2(-47,58),Vector2(41,25)),"text":"菜单","action":"system","selected":_system_open or _settings_open,"tooltip":"系统菜单 · Esc"}]
 	for index: int in range(3):
 		var speed: int = [1,2,4][index]
-		items.append({"rect":Rect2(corner+Vector2(-94+index*30,96),Vector2(28,24)),"text":str(speed)+"×","action":"time:"+str(speed),"selected":_time.speed==speed,"tooltip":"时间速度 "+str(speed)+" 倍"})
+		items.append({"rect":Rect2(corner+Vector2(-84+index*28,90),Vector2(26,24)),"text":str(speed)+"×","action":"time:"+str(speed),"selected":_time.speed==speed,"tooltip":"时间速度 "+str(speed)+" 倍"})
 	return items
 
 func _draw_time_bar() -> void:
@@ -429,13 +430,12 @@ func _draw_clock_values() -> void:
 	var corner := Vector2(_clock_rect.end.x,0)
 	var minute := int(_date.get("hour",0))*60+int(_date.get("minute",0))
 	UIDrawing.quarter_clock_indicator(_clock_values,corner,_clock_rect.size.x,_hud_style,minute,_time.paused)
-	UIDrawing.label(_clock_values,_font,corner+Vector2(-124,12),"CHRONOMÈTRE",8,_hud_style.muted as Color,116)
+	UIDrawing.label(_clock_values,_font,corner+Vector2(-112,12),"CHRONOMÈTRE",8,_hud_style.muted as Color,116)
 	var day := "日期读取中" if _date.is_empty() else "%04d年%02d月%02d日" % [int(_date.year),int(_date.month),int(_date.day)]
-	UIDrawing.label(_clock_values,_font,corner+Vector2(-139,30),day,12,_hud_style.ivory as Color,132)
+	UIDrawing.label(_clock_values,_font,corner+Vector2(-116,29),day,12,_hud_style.ivory as Color,112)
 	var hour := "—" if _date.is_empty() else "%02d:%02d" % [int(_date.hour),int(_date.get("minute",0))]
-	UIDrawing.label(_clock_values,_font,corner+Vector2(-81,55),hour,22,_hud_style.ivory as Color,75)
-	_clock_values.draw_circle(corner+Vector2(-133,48),2,_hud_style.status as Color if _time.paused else _hud_style.teal as Color)
-	UIDrawing.label(_clock_values,_font,corner+Vector2(-126,52),"暂停" if _time.paused else "运行",10,_hud_style.muted as Color,40)
+	UIDrawing.label(_clock_values,_font,corner+Vector2(-80,54),hour,20,_hud_style.ivory as Color,75)
+	_clock_values.draw_circle(corner+Vector2(-101,47),2,_hud_style.status as Color if _time.paused else _hud_style.teal as Color)
 	for item: Dictionary in _time_buttons():
 		var rect := item.rect as Rect2
 		UIDrawing.instrument_button(_clock_values,rect,_hud_style,_hover_action==str(item.action),bool(item.selected))
