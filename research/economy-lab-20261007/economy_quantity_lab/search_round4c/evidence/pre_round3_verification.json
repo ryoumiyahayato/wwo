@@ -1,0 +1,69 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "status": "passed",
+  "checks": [
+    {
+      "name": "round3_tests",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-m",
+        "unittest",
+        "-v",
+        "test_order_commitment.py"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\order_round3",
+      "exit_code": 0,
+      "elapsed_seconds": 10.227103499997611,
+      "test_count": 18
+    },
+    {
+      "name": "replay_a",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\order_round3\\run_order_commitment_experiment.py",
+        "--output-dir",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round4c-pre\\round3-verification-pfxp8ds4\\replay_a",
+        "--execution-log",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round4c-pre\\round3-verification-pfxp8ds4\\replay_a_execution.json"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 2.864268400000583
+    },
+    {
+      "name": "replay_b",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\order_round3\\run_order_commitment_experiment.py",
+        "--output-dir",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round4c-pre\\round3-verification-pfxp8ds4\\replay_b",
+        "--execution-log",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round4c-pre\\round3-verification-pfxp8ds4\\replay_b_execution.json"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 3.5987500000010186
+    }
+  ],
+  "run_directory": "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round4c-pre\\round3-verification-pfxp8ds4",
+  "experiment_id": "order-commitment-round3",
+  "replay_a": {
+    "files_reproduced": 59,
+    "summary_sha256": "070ce92c76f6341d8ee9d1b484001ac0dad88e6280cabd8254808ee833f3d0ae",
+    "case_count": 14,
+    "simulated_case_days": 8400
+  },
+  "replay_b": {
+    "files_reproduced": 59,
+    "summary_sha256": "070ce92c76f6341d8ee9d1b484001ac0dad88e6280cabd8254808ee833f3d0ae",
+    "case_count": 14,
+    "simulated_case_days": 8400
+  },
+  "elapsed_seconds": 16.753482000000076,
+  "git_context": {
+    "base_commit": "be9dfd54999ff156e5881b501118a53f151d68c8",
+    "branch": "main",
+    "working_tree": "clean before Round4C"
+  }
+}

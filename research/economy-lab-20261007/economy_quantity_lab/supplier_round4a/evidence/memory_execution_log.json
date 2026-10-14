@@ -1,0 +1,70 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "case_count": 10,
+  "simulated_case_days": 6000,
+  "handshake_cases": 4,
+  "max_abs_quantity_residual": 0,
+  "max_abs_order_residual": 0,
+  "runs": [
+    {
+      "case_id": "normal_S0",
+      "seconds": 0.4279765999999654,
+      "tracemalloc_peak_bytes": 8347804,
+      "scope": "simulation+archived requests/events/rows; excludes export; Python allocations, not RSS"
+    },
+    {
+      "case_id": "normal_S1",
+      "seconds": 0.4490636999998969,
+      "tracemalloc_peak_bytes": 8339228,
+      "scope": "simulation+archived requests/events/rows; excludes export; Python allocations, not RSS"
+    },
+    {
+      "case_id": "shock_S0",
+      "seconds": 0.46805870000025607,
+      "tracemalloc_peak_bytes": 8745228,
+      "scope": "simulation+archived requests/events/rows; excludes export; Python allocations, not RSS"
+    },
+    {
+      "case_id": "shock_S1",
+      "seconds": 0.4806967000004079,
+      "tracemalloc_peak_bytes": 8678932,
+      "scope": "simulation+archived requests/events/rows; excludes export; Python allocations, not RSS"
+    },
+    {
+      "case_id": "shutdown_S0",
+      "seconds": 0.31658799999968323,
+      "tracemalloc_peak_bytes": 3372520,
+      "scope": "simulation+archived requests/events/rows; excludes export; Python allocations, not RSS"
+    },
+    {
+      "case_id": "shutdown_S1",
+      "seconds": 0.31004550000034214,
+      "tracemalloc_peak_bytes": 4407684,
+      "scope": "simulation+archived requests/events/rows; excludes export; Python allocations, not RSS"
+    },
+    {
+      "case_id": "full_shutdown_S0",
+      "seconds": 0.45028780000029656,
+      "tracemalloc_peak_bytes": 8563148,
+      "scope": "simulation+archived requests/events/rows; excludes export; Python allocations, not RSS"
+    },
+    {
+      "case_id": "full_shutdown_S1",
+      "seconds": 0.4726441999991948,
+      "tracemalloc_peak_bytes": 8599492,
+      "scope": "simulation+archived requests/events/rows; excludes export; Python allocations, not RSS"
+    },
+    {
+      "case_id": "overload_S0",
+      "seconds": 0.5586452999996254,
+      "tracemalloc_peak_bytes": 10826900,
+      "scope": "simulation+archived requests/events/rows; excludes export; Python allocations, not RSS"
+    },
+    {
+      "case_id": "overload_S1",
+      "seconds": 0.5936197000009997,
+      "tracemalloc_peak_bytes": 10816652,
+      "scope": "simulation+archived requests/events/rows; excludes export; Python allocations, not RSS"
+    }
+  ]
+}

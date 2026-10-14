@@ -1,0 +1,8 @@
+[
+  {
+    "day": 60,
+    "event": "SUPPLIER_DISCOVERED",
+    "supplier_id": "E",
+    "source": "fixture_information_event"
+  }
+]

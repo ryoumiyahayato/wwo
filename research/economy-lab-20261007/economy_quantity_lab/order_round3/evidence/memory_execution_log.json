@@ -1,0 +1,137 @@
+{
+  "case_count": 14,
+  "cases": [
+    {
+      "active_scan_visits": 2393,
+      "case_id": "normal_R0",
+      "elapsed_seconds": 0.3649402999999438,
+      "max_active_orders": 2,
+      "max_supplier_queue": 1,
+      "tracemalloc_peak_bytes": 7676076,
+      "tracemalloc_retained_bytes": 7675244
+    },
+    {
+      "active_scan_visits": 2991,
+      "case_id": "normal_R1",
+      "elapsed_seconds": 0.3638353000005736,
+      "max_active_orders": 2,
+      "max_supplier_queue": 1,
+      "tracemalloc_peak_bytes": 7671828,
+      "tracemalloc_retained_bytes": 7670996
+    },
+    {
+      "active_scan_visits": 2393,
+      "case_id": "normal_R2",
+      "elapsed_seconds": 0.3480944000002637,
+      "max_active_orders": 2,
+      "max_supplier_queue": 1,
+      "tracemalloc_peak_bytes": 7671500,
+      "tracemalloc_retained_bytes": 7670668
+    },
+    {
+      "active_scan_visits": 3783,
+      "case_id": "shock_R0",
+      "elapsed_seconds": 0.4025404999993043,
+      "max_active_orders": 11,
+      "max_supplier_queue": 10,
+      "tracemalloc_peak_bytes": 8094740,
+      "tracemalloc_retained_bytes": 8093908
+    },
+    {
+      "active_scan_visits": 8276,
+      "case_id": "shock_R1",
+      "elapsed_seconds": 0.438444200000049,
+      "max_active_orders": 23,
+      "max_supplier_queue": 22,
+      "tracemalloc_peak_bytes": 8135916,
+      "tracemalloc_retained_bytes": 8135084
+    },
+    {
+      "active_scan_visits": 3291,
+      "case_id": "shock_R2",
+      "elapsed_seconds": 0.38376789999983885,
+      "max_active_orders": 4,
+      "max_supplier_queue": 3,
+      "tracemalloc_peak_bytes": 8068492,
+      "tracemalloc_retained_bytes": 8067892
+    },
+    {
+      "active_scan_visits": 8413,
+      "case_id": "shutdown_R0",
+      "elapsed_seconds": 0.29980799999975716,
+      "max_active_orders": 4,
+      "max_supplier_queue": 4,
+      "tracemalloc_peak_bytes": 3869588,
+      "tracemalloc_retained_bytes": 3868756
+    },
+    {
+      "active_scan_visits": 608526,
+      "case_id": "shutdown_R1",
+      "elapsed_seconds": 5.824293099999522,
+      "max_active_orders": 551,
+      "max_supplier_queue": 551,
+      "tracemalloc_peak_bytes": 5122892,
+      "tracemalloc_retained_bytes": 5110356
+    },
+    {
+      "active_scan_visits": 6223,
+      "case_id": "shutdown_R2",
+      "elapsed_seconds": 0.38352599999961967,
+      "max_active_orders": 3,
+      "max_supplier_queue": 3,
+      "tracemalloc_peak_bytes": 5450732,
+      "tracemalloc_retained_bytes": 5449900
+    },
+    {
+      "active_scan_visits": 3627,
+      "case_id": "full_shutdown_R0",
+      "elapsed_seconds": 0.579925799999728,
+      "max_active_orders": 4,
+      "max_supplier_queue": 4,
+      "tracemalloc_peak_bytes": 7963668,
+      "tracemalloc_retained_bytes": 7962836
+    },
+    {
+      "active_scan_visits": 11912,
+      "case_id": "full_shutdown_R1",
+      "elapsed_seconds": 0.4709178000002794,
+      "max_active_orders": 31,
+      "max_supplier_queue": 31,
+      "tracemalloc_peak_bytes": 7968940,
+      "tracemalloc_retained_bytes": 7968508
+    },
+    {
+      "active_scan_visits": 3502,
+      "case_id": "full_shutdown_R2",
+      "elapsed_seconds": 0.43765480000001844,
+      "max_active_orders": 4,
+      "max_supplier_queue": 3,
+      "tracemalloc_peak_bytes": 8033148,
+      "tracemalloc_retained_bytes": 8032316
+    },
+    {
+      "active_scan_visits": 4748,
+      "case_id": "no_promise_shock_R1",
+      "elapsed_seconds": 0.509800599999835,
+      "max_active_orders": 11,
+      "max_supplier_queue": 10,
+      "tracemalloc_peak_bytes": 8043868,
+      "tracemalloc_retained_bytes": 8043036
+    },
+    {
+      "active_scan_visits": 10655,
+      "case_id": "no_promise_shutdown_R1",
+      "elapsed_seconds": 0.31917930000054184,
+      "max_active_orders": 4,
+      "max_supplier_queue": 4,
+      "tracemalloc_peak_bytes": 3838804,
+      "tracemalloc_retained_bytes": 3837972
+    }
+  ],
+  "elapsed_seconds": 11.926853800000572,
+  "max_abs_order_residual": 0,
+  "max_abs_quantity_residual": 0,
+  "memory_measurement": "per-case Python allocations during run_case; excludes prebuilt input cases; not process RSS",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "simulated_case_days": 8400
+}

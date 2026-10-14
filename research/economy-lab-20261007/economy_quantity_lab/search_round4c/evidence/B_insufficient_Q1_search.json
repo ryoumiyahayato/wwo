@@ -1,0 +1,125 @@
+{
+  "requests": [
+    {
+      "search_id": "B-coal-0001",
+      "buyer": "B",
+      "commodity": "coal",
+      "scope": "LOCAL",
+      "requested_day": 6,
+      "delivery_day": 7,
+      "result_limit": 3,
+      "status": "COMPLETED_NO_RESULTS"
+    },
+    {
+      "search_id": "B-coal-0002",
+      "buyer": "B",
+      "commodity": "coal",
+      "scope": "REGIONAL",
+      "requested_day": 7,
+      "delivery_day": 10,
+      "result_limit": 3,
+      "status": "COMPLETED"
+    }
+  ],
+  "events": [
+    {
+      "day": 6,
+      "event": "SEARCH_REQUESTED",
+      "buyer": "B",
+      "commodity": "coal",
+      "search_id": "B-coal-0001",
+      "scope": "LOCAL",
+      "requested_day": 6,
+      "delivery_day": 7,
+      "result_limit": 3,
+      "status": "PENDING"
+    },
+    {
+      "day": 7,
+      "event": "SEARCH_COMPLETED_NO_RESULTS",
+      "buyer": "B",
+      "commodity": "coal",
+      "search_id": "B-coal-0001",
+      "scope": "LOCAL",
+      "requested_day": 6,
+      "delivery_day": 7,
+      "result_limit": 3,
+      "results": []
+    },
+    {
+      "day": 7,
+      "event": "SEARCH_REQUESTED",
+      "buyer": "B",
+      "commodity": "coal",
+      "search_id": "B-coal-0002",
+      "scope": "REGIONAL",
+      "requested_day": 7,
+      "delivery_day": 10,
+      "result_limit": 3,
+      "status": "PENDING"
+    },
+    {
+      "day": 10,
+      "event": "SEARCH_COMPLETED",
+      "buyer": "B",
+      "commodity": "coal",
+      "search_id": "B-coal-0002",
+      "scope": "REGIONAL",
+      "requested_day": 7,
+      "delivery_day": 10,
+      "result_limit": 3,
+      "results": [
+        {
+          "supplier_id": "E",
+          "commodity": "coal",
+          "search_zone": "Z1",
+          "place_id": "place_E",
+          "route_available": true,
+          "nominal_lead_band": 4,
+          "advertised_capacity_band": "up_to_100",
+          "active": true,
+          "discoverability_channel": "DIRECTORY"
+        }
+      ]
+    }
+  ],
+  "query_audit": [
+    {
+      "commodity": "coal",
+      "scope": "LOCAL",
+      "zones": [
+        "Z0"
+      ],
+      "bucket_sizes": [
+        2
+      ],
+      "inspected_ids": [
+        "A",
+        "D"
+      ],
+      "result_ids": []
+    },
+    {
+      "commodity": "coal",
+      "scope": "REGIONAL",
+      "zones": [
+        "Z0",
+        "Z1",
+        "Z2"
+      ],
+      "bucket_sizes": [
+        2,
+        1,
+        0
+      ],
+      "inspected_ids": [
+        "A",
+        "D",
+        "E"
+      ],
+      "result_ids": [
+        "E"
+      ]
+    }
+  ]
+}

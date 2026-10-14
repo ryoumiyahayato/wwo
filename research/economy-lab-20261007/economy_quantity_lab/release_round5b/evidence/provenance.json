@@ -1,0 +1,55 @@
+{
+  "base": "98ead27160fec2eecb545f3bc9f67e690e13bbf1",
+  "round5_head": "0e4f529e52872ee0402e91771651152ceebfe49b",
+  "tag": "economy-lab-v0.5-demand-planning",
+  "tag_object": "efc79d4d086d3b82cdf107b91487e7266bb48d13",
+  "branch": "research/executable-planning-round5b",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "request_source": "C:\\Users\\agcrf\\.codex\\attachments\\f0016a4f-a95a-4cba-8755-646c576cf3dd\\已粘贴的文本.txt",
+  "request_raw_sha256": "2b54b4fdd48ff2cbbf4f348359e3ec67bb2fb4514f08bbdcee2c1f3c973f1fc6",
+  "request_lf_sha256": "d74d30011767b4be3e9c3b72e25760cfc3715f87c26454b8930df2a12c1bff7b",
+  "tests_old": 169,
+  "tests_new": 45,
+  "initial_generation_exit_code": 0,
+  "commands": [
+    "python verify_baseline.py",
+    "python verify_round3.py",
+    "python verify_round4a.py",
+    "python verify_round4b.py",
+    "python verify_round4c.py",
+    "python verify_round5.py",
+    "python -m unittest -v test_planning_release.py",
+    "python economy_quantity_lab/release_round5b/run_executable_planning_experiment.py --output-dir .local/round5b-published --execution-log .local/round5b-published_execution.json",
+    "python verify_round5b.py"
+  ],
+  "bulk_output_policy": "Full629-file output trees regenerated outside Git; frozen SHA-256 map includes file set. New generated CSV and JSON explicitly use UTF-8/LF. Only imported Round2 evidence keeps its historical newline compatibility policy.",
+  "exploratory": "round5b-initial uses earlier need decomposition and is not evidence. round5b-final preceded a prefix-test helper correction; freeze output has final source hashes. Prefix helper initially selected request day under wrong field; corrected request_day. Split pending/cargo originally shared a diagnostic lineage and overstated forward events; now lot indexes plus prior-boundary pending ancestry are separate. Neither correction changes procurement or physical results. Superseded wrapper l290bz1h rejected changed manifest; final frozen source requires two new exact replays. Final X0 test now compares all12 unchanged formal control scenarios for600days; superseded w0b_u9ba rejected changed test source manifest as intended. Final published matrix and two new full replays use frozen source.",
+  "economic_validity": "Accounts/tests do not validate economic realism; candidates not approved for WWO.",
+  "evidence_summary_sha256": "8768ac91cdd7db8eee354f1cd0591808e7ee4fff1e89637c990af8bf8e338016",
+  "final_verification": {
+    "status": "passed",
+    "tests": 45,
+    "exit_codes": [
+      0,
+      0,
+      0
+    ],
+    "replays": [
+      {
+        "files_reproduced": 629,
+        "summary_sha256": "8768ac91cdd7db8eee354f1cd0591808e7ee4fff1e89637c990af8bf8e338016",
+        "cases": 39,
+        "days": 23400,
+        "EXECUTABLE_PLANNING_GATE": "PASS"
+      },
+      {
+        "files_reproduced": 629,
+        "summary_sha256": "8768ac91cdd7db8eee354f1cd0591808e7ee4fff1e89637c990af8bf8e338016",
+        "cases": 39,
+        "days": 23400,
+        "EXECUTABLE_PLANNING_GATE": "PASS"
+      }
+    ],
+    "source_state": "Frozen working tree based on verified main; index hashes match all26 source fingerprints before commit."
+  }
+}

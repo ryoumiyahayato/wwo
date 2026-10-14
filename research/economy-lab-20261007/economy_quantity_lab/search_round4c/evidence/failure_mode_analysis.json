@@ -1,0 +1,23 @@
+{
+  "wide_last200": {
+    "E_offer_count": 200,
+    "E_offer_mean_max": 300,
+    "E_offer_min_max": 300,
+    "E_accepted_sum": 500,
+    "E_accepted_per_day": 2.5,
+    "mean_delivery": 7.81,
+    "zero_open_need_days": 200,
+    "final_global_position": "320",
+    "final_backlog": "1282"
+  },
+  "J_timing_Q0": {
+    "first_positive_C_after50": 50,
+    "first_positive_C_after_E_arrival": 63,
+    "post50_max_coal_on_hand": 160
+  },
+  "J_timing_Q1": {
+    "first_positive_C_after50": 50,
+    "first_positive_C_after_E_arrival": 53,
+    "post50_max_coal_on_hand": 160
+  }
+}

@@ -1,0 +1,14 @@
+day,event,route,order_id,accepted_day,promise_window_days,promised_dispatch_by_day,promise_status,ordered_quantity,quantity,pending_dispatch,in_transit,delivered,cancelled,shipment_id,dispatch_day,arrival_day
+1,accepted,B_C,1,1,null,null,UNPROMISED,40,40,40,0,0,0,null,null,null
+1,dispatched,B_C,1,1,null,null,NO_PENDING,40,40,0,40,0,0,1,1,2
+2,arrived,B_C,1,1,null,null,NO_PENDING,40,40,0,0,40,0,1,1,2
+2,accepted,A_B,2,2,null,null,UNPROMISED,80,80,80,0,0,0,null,null,null
+2,dispatched,A_B,2,2,null,null,NO_PENDING,80,80,0,80,0,0,2,2,4
+4,arrived,A_B,2,2,null,null,NO_PENDING,80,80,0,0,80,0,2,2,4
+50,accepted,A_B,98,50,null,null,UNPROMISED,80,80,80,0,0,0,null,null,null
+50,accepted,B_C,99,50,null,null,UNPROMISED,40,40,40,0,0,0,null,null,null
+50,dispatched,B_C,99,50,null,null,NO_PENDING,40,40,0,40,0,0,98,50,51
+51,arrived,B_C,99,50,null,null,NO_PENDING,40,40,0,0,40,0,98,50,51
+51,accepted,A_B,100,51,null,null,UNPROMISED,80,80,80,0,0,0,null,null,null
+54,accepted,B_C,106,54,null,null,UNPROMISED,40,40,40,0,0,0,null,null,null
+55,accepted,B_C,107,55,null,null,UNPROMISED,40,40,40,0,0,0,null,null,null

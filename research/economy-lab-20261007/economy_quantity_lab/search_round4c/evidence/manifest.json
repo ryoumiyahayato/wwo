@@ -1,0 +1,27 @@
+{
+  "base_commit": "be9dfd54999ff156e5881b501118a53f151d68c8",
+  "tag": "economy-lab-v0.4b-multi-supplier",
+  "cases": 18,
+  "simulated_case_days": 10800,
+  "extensibility_gate": "PASS",
+  "source_hashes": {
+    "economy_quantity_lab/search_round4c/supplier_directory.py": "11072806cb3cc4449a6f8c618699e8abac3ebb72f4cea90d7fb71c2864feb6db",
+    "economy_quantity_lab/search_round4c/supplier_pool.py": "49e3e4fee7a1928205eacd7e9942f496e5265577f02e28b1e8c51361325ae57a",
+    "economy_quantity_lab/search_round4c/search_simulation.py": "db1e55dfeae7c12afd731bd0edf9b1a1de3b2d7ae74a2afb53f6e5837e65b6ed",
+    "economy_quantity_lab/search_round4c/run_supplier_search_experiment.py": "86164fa716aee2506cb9719d35b1c2152ca24e7d17f4c3c1d056bf5daafebb1b",
+    "economy_quantity_lab/search_round4c/test_supplier_search.py": "bb9cc379ce8640cae5f0f9a88477eccab52f922cda2a44172f41c61cd4e32c3f",
+    "economy_quantity_lab/search_round4c/inputs/ROUND4C_REQUEST.md": "25a13469e318082969b1b6ec0d5f4d24677f97feedd082a66fb7117d72fa9829",
+    "economy_quantity_lab/economy.py": "b3c38c2d1daad39b955f9b9c98c1ac6d09a8a14a0562db16f525fabdb5ce1609",
+    "economy_quantity_lab/fixture.json": "cbc6a99fefb43c80a8e988361b78e2c946a51fa9c6136d9287c1039f0394e20e",
+    "economy_quantity_lab/multi_round4b/stock_admission.py": "79df59b1265e2a8696c785014b7ec3aed454b6d670e57633ab967c99f7726f84",
+    "economy_quantity_lab/multi_round4b/multi_supplier.py": "9f316ce9d43ac239647f96b844c9737d6cb6bea58f2a692cb4923d2c5d8d9ec3",
+    "economy_quantity_lab/multi_round4b/run_multi_supplier_experiment.py": "39f6bae6f9e16763e88172926a9cba54b395d63f0de65f098d826736162ac383",
+    "economy_quantity_lab/supplier_round4a/supplier_admission.py": "ba4c160c4e778ce97940ddc96a0c0905202c693b9752a3783bde36bc79f24896",
+    "economy_quantity_lab/supplier_round4a/run_supplier_admission_experiment.py": "eac73ae1015f86d2da376bbb9b8a519d52e46e3c0c0f02d27fdb4b77c64675b3",
+    "economy_quantity_lab/order_round3/commitment_adapter.py": "e42d40d8406367832a827236152796511576eb9e29512057bc2718015dd7e0dd",
+    "economy_quantity_lab/order_round3/order_commitment.py": "75b6360113b4c330068d2fa7b5aeb4aae7572e496389f5fbbce395f93563d6d8",
+    "economy_quantity_lab/order_round3/run_order_commitment_experiment.py": "30eab7ca1b9b712b3ebf3402305e3a894d756cf67c0545aaca1a51a9d1b10baf",
+    "economy_quantity_lab/inventory_round2/inventory_policy.py": "56717965b5e97103400a38300f719496002e1d0082e0a18ac0181a5c9fb9d5ea",
+    "economy_quantity_lab/inventory_round2/run_inventory_comparison.py": "16b5df9877c4a839d044df0c54f4cc42b3144c7fac69098ec19c7042251d7395"
+  }
+}

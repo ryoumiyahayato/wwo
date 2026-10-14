@@ -1,0 +1,983 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "strict_bytes": false,
+  "run_directory": "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round4b-pre\\verification-hsns2up7",
+  "status": "passed",
+  "checks": [
+    {
+      "name": "original_tests",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-m",
+        "unittest",
+        "-v",
+        "test_economy.py"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab",
+      "exit_code": 0,
+      "elapsed_seconds": 0.21285279999938211,
+      "test_count": 8
+    },
+    {
+      "name": "round2_tests",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-m",
+        "unittest",
+        "-v",
+        "test_inventory_comparison.py"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\inventory_round2",
+      "exit_code": 0,
+      "elapsed_seconds": 4.973609700000452,
+      "test_count": 9
+    },
+    {
+      "name": "baseline_reproduction",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "run_experiment.py",
+        "--output-dir",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round4b-pre\\verification-hsns2up7\\baseline"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab",
+      "exit_code": 0,
+      "elapsed_seconds": 0.1755696000000171
+    },
+    {
+      "name": "round2_comparison",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "run_inventory_comparison.py",
+        "--output-dir",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round4b-pre\\verification-hsns2up7\\round2",
+        "--execution-log",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round4b-pre\\verification-hsns2up7\\execution_log.json"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\inventory_round2",
+      "exit_code": 0,
+      "elapsed_seconds": 5.04055580000022
+    }
+  ],
+  "outputs": [
+    {
+      "source_path": "economy_quantity_lab/baseline.csv",
+      "expected_sha256": "828344fa8e1d3169451881ace97fec9c2f8466df8ab6d5c161f4477445d97aa8",
+      "raw_sha256": "828344fa8e1d3169451881ace97fec9c2f8466df8ab6d5c161f4477445d97aa8",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/baseline_order_trace.csv",
+      "expected_sha256": "4a8235217f2f433a2cd6da51d923c8f6baa63978cbf5c696195feb74ba80b2a3",
+      "raw_sha256": "4a8235217f2f433a2cd6da51d923c8f6baa63978cbf5c696195feb74ba80b2a3",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/transport_shock.csv",
+      "expected_sha256": "c163a79660e9d48e7336f22eff4cd6e34d3a126c5a28d4c8eff24537d203403b",
+      "raw_sha256": "c163a79660e9d48e7336f22eff4cd6e34d3a126c5a28d4c8eff24537d203403b",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/transport_shock_order_trace.csv",
+      "expected_sha256": "6ad6c4896e15f80cc253c65853108a4c5196d9ce1c36da8f1a6746d503232757",
+      "raw_sha256": "6ad6c4896e15f80cc253c65853108a4c5196d9ce1c36da8f1a6746d503232757",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_baseline/config.json",
+      "expected_sha256": "396bb174f5f3bacadc44526f958d5533e876ffd06ce601311eb94f5047d88023",
+      "raw_sha256": "754985b595ec00b709b515c4d04d79bbba06c4a6401e331adb8370593bc28ec6",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "396bb174f5f3bacadc44526f958d5533e876ffd06ce601311eb94f5047d88023"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_baseline/daily.csv",
+      "expected_sha256": "1aa772d6ceaaf63d80d2c74ac2b741a82607d574995e73aaedf92eb1ea4d8b10",
+      "raw_sha256": "1aa772d6ceaaf63d80d2c74ac2b741a82607d574995e73aaedf92eb1ea4d8b10",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_baseline/diagnostics.csv",
+      "expected_sha256": "873528a749e8304d32f23c93467bfa2806211d300aa8d4a7bdc9cc16df5721ff",
+      "raw_sha256": "873528a749e8304d32f23c93467bfa2806211d300aa8d4a7bdc9cc16df5721ff",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_baseline/event_evidence.csv",
+      "expected_sha256": "4021eb476619bedfe7e698f3a461f9715525996c6607aa8751020b86df21d7f0",
+      "raw_sha256": "4021eb476619bedfe7e698f3a461f9715525996c6607aa8751020b86df21d7f0",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_shock/config.json",
+      "expected_sha256": "9235eceed816c17d07d1f56cb9ba17f6631fc1fc5641d512f3ae35a4220b2fbc",
+      "raw_sha256": "d0df932cfc95d0c21843fe140a9060b053e19886001b80d36093fb55510abfa0",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "9235eceed816c17d07d1f56cb9ba17f6631fc1fc5641d512f3ae35a4220b2fbc"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_shock/daily.csv",
+      "expected_sha256": "52d1c8df6031fc1954ea114d9f942dfa4c6d1cbd4cd108c1bf719ed309a9857c",
+      "raw_sha256": "52d1c8df6031fc1954ea114d9f942dfa4c6d1cbd4cd108c1bf719ed309a9857c",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_shock/diagnostics.csv",
+      "expected_sha256": "7b03ce3d6b8090a8622ac9f7765f2cc4447268d11a1fa47f69e13b067320bcd4",
+      "raw_sha256": "7b03ce3d6b8090a8622ac9f7765f2cc4447268d11a1fa47f69e13b067320bcd4",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_shock/event_evidence.csv",
+      "expected_sha256": "a051f67aef624cafd10ae0350948955ce63252bd1b2ae3c91edd566754afa80e",
+      "raw_sha256": "a051f67aef624cafd10ae0350948955ce63252bd1b2ae3c91edd566754afa80e",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_baseline/config.json",
+      "expected_sha256": "3ba1a83a6adcd983d51ec904d53aa17c1a50e9a9316a0acb61cf17670dc3b093",
+      "raw_sha256": "15af697a7b7f24195bcd5d6a0ab6f3f5fe89a0d4f4eef723b76849f7a496d761",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "3ba1a83a6adcd983d51ec904d53aa17c1a50e9a9316a0acb61cf17670dc3b093"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_baseline/daily.csv",
+      "expected_sha256": "2134fe7959a890d1e18e9fe83000ace59cdaba40f8b4bfad624fe75a4974baef",
+      "raw_sha256": "2134fe7959a890d1e18e9fe83000ace59cdaba40f8b4bfad624fe75a4974baef",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_baseline/diagnostics.csv",
+      "expected_sha256": "675516c8f33268056d004092cd7d25c1061de15f0ddcfae1f92e0640cd17da9a",
+      "raw_sha256": "675516c8f33268056d004092cd7d25c1061de15f0ddcfae1f92e0640cd17da9a",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_baseline/event_evidence.csv",
+      "expected_sha256": "ccfa798b8d634a94c73ee701692ac3e6191857f0e5ec60d8fe888a6b417f1b41",
+      "raw_sha256": "ccfa798b8d634a94c73ee701692ac3e6191857f0e5ec60d8fe888a6b417f1b41",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_shock/config.json",
+      "expected_sha256": "d3e4b9bfc6cc694ba8b34461dbdf8212f1842e9a084790b08639886913675e2f",
+      "raw_sha256": "9c5de85a489f61454ff19b521e41faae409381bcfef9eeef6c06c53f319159c5",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "d3e4b9bfc6cc694ba8b34461dbdf8212f1842e9a084790b08639886913675e2f"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_shock/daily.csv",
+      "expected_sha256": "4c8a971746dda03c2dd27a4df15058fd6e5f346ba447d6cc84b6780e0ae010a0",
+      "raw_sha256": "4c8a971746dda03c2dd27a4df15058fd6e5f346ba447d6cc84b6780e0ae010a0",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_shock/diagnostics.csv",
+      "expected_sha256": "8affa802360f19dfea1771698c9dc1cf2d817adec73bf0c3ca426f081a60e9e7",
+      "raw_sha256": "8affa802360f19dfea1771698c9dc1cf2d817adec73bf0c3ca426f081a60e9e7",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_shock/event_evidence.csv",
+      "expected_sha256": "9343aeac09eb39cfd78109975ea0d0f26d3e614dfe0c359940409581d5584b91",
+      "raw_sha256": "9343aeac09eb39cfd78109975ea0d0f26d3e614dfe0c359940409581d5584b91",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_baseline/config.json",
+      "expected_sha256": "b387ef27fe336b324733ffafc6c8567723b47ff04c0ebb2b6aea70bba8dc9ffc",
+      "raw_sha256": "a141d0b92e489842f5a3ea6f25bd6c2c59d07cccab3ca9b75813b37da2ac76f4",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "b387ef27fe336b324733ffafc6c8567723b47ff04c0ebb2b6aea70bba8dc9ffc"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_baseline/daily.csv",
+      "expected_sha256": "201a30367b2d5a4463f940574d61f34ce648f73f4efb68ae540ef2557295daff",
+      "raw_sha256": "201a30367b2d5a4463f940574d61f34ce648f73f4efb68ae540ef2557295daff",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_baseline/diagnostics.csv",
+      "expected_sha256": "af68519646291298b726591fcae8a28b7c36fd1080f3c735dcd9af3a8f63167f",
+      "raw_sha256": "af68519646291298b726591fcae8a28b7c36fd1080f3c735dcd9af3a8f63167f",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_baseline/event_evidence.csv",
+      "expected_sha256": "d40c5fb4ae0e633be333f067810fe8f9e2d1ffc2ad5225e17130a27371258695",
+      "raw_sha256": "d40c5fb4ae0e633be333f067810fe8f9e2d1ffc2ad5225e17130a27371258695",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_shock/config.json",
+      "expected_sha256": "e4f344ec8e4c018af8a59b86bb89f08062477ec9fc8f9210b3600d6f67abdb46",
+      "raw_sha256": "2aede4868dbed91cdf7d328cfd43ca3b8e5f3edd6ee634dd81089fb30d13f57a",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "e4f344ec8e4c018af8a59b86bb89f08062477ec9fc8f9210b3600d6f67abdb46"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_shock/daily.csv",
+      "expected_sha256": "7bb26b86c1f2a8cc031d50149459debfe90f46b38537cdfa7c8d8849e8a5131f",
+      "raw_sha256": "7bb26b86c1f2a8cc031d50149459debfe90f46b38537cdfa7c8d8849e8a5131f",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_shock/diagnostics.csv",
+      "expected_sha256": "1f93c922bc9e2912567d21f0c4bf16579926feb52e9a350cf9074c294d5f8caf",
+      "raw_sha256": "1f93c922bc9e2912567d21f0c4bf16579926feb52e9a350cf9074c294d5f8caf",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_shock/event_evidence.csv",
+      "expected_sha256": "916e6e009ed15904b5d1bac72929136e0b357d186298874206385e0b65a641ea",
+      "raw_sha256": "916e6e009ed15904b5d1bac72929136e0b357d186298874206385e0b65a641ea",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_baseline/config.json",
+      "expected_sha256": "a4c14b740be1d7b18860b4bbf44b02167a791332cef370160a72676c81d21d35",
+      "raw_sha256": "f2b3783d673e56305dc9fc7673c68fd953dc3bd9cc337b626036b82b53a65709",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "a4c14b740be1d7b18860b4bbf44b02167a791332cef370160a72676c81d21d35"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_baseline/daily.csv",
+      "expected_sha256": "2134fe7959a890d1e18e9fe83000ace59cdaba40f8b4bfad624fe75a4974baef",
+      "raw_sha256": "2134fe7959a890d1e18e9fe83000ace59cdaba40f8b4bfad624fe75a4974baef",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_baseline/diagnostics.csv",
+      "expected_sha256": "675516c8f33268056d004092cd7d25c1061de15f0ddcfae1f92e0640cd17da9a",
+      "raw_sha256": "675516c8f33268056d004092cd7d25c1061de15f0ddcfae1f92e0640cd17da9a",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_baseline/event_evidence.csv",
+      "expected_sha256": "ccfa798b8d634a94c73ee701692ac3e6191857f0e5ec60d8fe888a6b417f1b41",
+      "raw_sha256": "ccfa798b8d634a94c73ee701692ac3e6191857f0e5ec60d8fe888a6b417f1b41",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_shock/config.json",
+      "expected_sha256": "e76886b2f959881e119f8c7b09d396ac5d37184d175ea4f4ce1265bb789a70f8",
+      "raw_sha256": "3843822088817dca63bbd0796498de93e72145b96d4dac3e677a2d02316f41ec",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "e76886b2f959881e119f8c7b09d396ac5d37184d175ea4f4ce1265bb789a70f8"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_shock/daily.csv",
+      "expected_sha256": "4c8a971746dda03c2dd27a4df15058fd6e5f346ba447d6cc84b6780e0ae010a0",
+      "raw_sha256": "4c8a971746dda03c2dd27a4df15058fd6e5f346ba447d6cc84b6780e0ae010a0",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_shock/diagnostics.csv",
+      "expected_sha256": "8affa802360f19dfea1771698c9dc1cf2d817adec73bf0c3ca426f081a60e9e7",
+      "raw_sha256": "8affa802360f19dfea1771698c9dc1cf2d817adec73bf0c3ca426f081a60e9e7",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_shock/event_evidence.csv",
+      "expected_sha256": "9343aeac09eb39cfd78109975ea0d0f26d3e614dfe0c359940409581d5584b91",
+      "raw_sha256": "9343aeac09eb39cfd78109975ea0d0f26d3e614dfe0c359940409581d5584b91",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_baseline/config.json",
+      "expected_sha256": "70d17d98a13aab221557fec429f10411994883f6683538767a5a328c38189a92",
+      "raw_sha256": "ee6ebca2fb1fe4e233ccf49e70c85853be71578e1d05a7a6586cc7636dad8184",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "70d17d98a13aab221557fec429f10411994883f6683538767a5a328c38189a92"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_baseline/daily.csv",
+      "expected_sha256": "8cb73ffb1071ffcc1c8a7018d855a59d0e84b4a357ec7a8487eee88297f9b79c",
+      "raw_sha256": "8cb73ffb1071ffcc1c8a7018d855a59d0e84b4a357ec7a8487eee88297f9b79c",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_baseline/diagnostics.csv",
+      "expected_sha256": "2d2e4ce1981416b575872824d66dd1718a1096ff1d4030b215b19e984117201c",
+      "raw_sha256": "2d2e4ce1981416b575872824d66dd1718a1096ff1d4030b215b19e984117201c",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_baseline/event_evidence.csv",
+      "expected_sha256": "3f724ab36b3df3dc70b0760ffb3520ee3b8caf9daf86058abed1c7b30eecd382",
+      "raw_sha256": "3f724ab36b3df3dc70b0760ffb3520ee3b8caf9daf86058abed1c7b30eecd382",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_shock/config.json",
+      "expected_sha256": "1964ae786745b0a50273be62a59f0287cf26c13ae4ad0e8fcadff8c62b9c976c",
+      "raw_sha256": "e44bfd9bc5d0f5a22c1c5332547417a7cb2a6d0755ecc6c401492570c79ba2d5",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "1964ae786745b0a50273be62a59f0287cf26c13ae4ad0e8fcadff8c62b9c976c"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_shock/daily.csv",
+      "expected_sha256": "73daee6a96755a93cb793586d3dea960bdb987c64f9acbea9bbdba883d6a670e",
+      "raw_sha256": "73daee6a96755a93cb793586d3dea960bdb987c64f9acbea9bbdba883d6a670e",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_shock/diagnostics.csv",
+      "expected_sha256": "d237e2469bc7136627e7c1dcaed2f7b85bebf5f2fa7245216d515e571b014362",
+      "raw_sha256": "d237e2469bc7136627e7c1dcaed2f7b85bebf5f2fa7245216d515e571b014362",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_shock/event_evidence.csv",
+      "expected_sha256": "9330d0bcc30c806a31e372eff7bfaf6ef13eb71b7a58e2c5d76a275234f58dfa",
+      "raw_sha256": "9330d0bcc30c806a31e372eff7bfaf6ef13eb71b7a58e2c5d76a275234f58dfa",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_baseline/config.json",
+      "expected_sha256": "12665dcfd14fc7591a03e91077bd49b8d127bebd59b1236f63d9ea9f43221d55",
+      "raw_sha256": "74fab2f71b68493f11ce739d0a2f392299c6e10f662e301f268b660e1f9c03d7",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "12665dcfd14fc7591a03e91077bd49b8d127bebd59b1236f63d9ea9f43221d55"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_baseline/daily.csv",
+      "expected_sha256": "2134fe7959a890d1e18e9fe83000ace59cdaba40f8b4bfad624fe75a4974baef",
+      "raw_sha256": "2134fe7959a890d1e18e9fe83000ace59cdaba40f8b4bfad624fe75a4974baef",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_baseline/diagnostics.csv",
+      "expected_sha256": "675516c8f33268056d004092cd7d25c1061de15f0ddcfae1f92e0640cd17da9a",
+      "raw_sha256": "675516c8f33268056d004092cd7d25c1061de15f0ddcfae1f92e0640cd17da9a",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_baseline/event_evidence.csv",
+      "expected_sha256": "ccfa798b8d634a94c73ee701692ac3e6191857f0e5ec60d8fe888a6b417f1b41",
+      "raw_sha256": "ccfa798b8d634a94c73ee701692ac3e6191857f0e5ec60d8fe888a6b417f1b41",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_shock/config.json",
+      "expected_sha256": "95c4ff2018b476b4f11b63480f2d7b2e5145bf63514a48f54beb9b5dffc304ef",
+      "raw_sha256": "b21e9eaf8a79e94ccf0996bc432964a6534a88b937823fc964cebd3d2a3e8095",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "95c4ff2018b476b4f11b63480f2d7b2e5145bf63514a48f54beb9b5dffc304ef"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_shock/daily.csv",
+      "expected_sha256": "4c8a971746dda03c2dd27a4df15058fd6e5f346ba447d6cc84b6780e0ae010a0",
+      "raw_sha256": "4c8a971746dda03c2dd27a4df15058fd6e5f346ba447d6cc84b6780e0ae010a0",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_shock/diagnostics.csv",
+      "expected_sha256": "8affa802360f19dfea1771698c9dc1cf2d817adec73bf0c3ca426f081a60e9e7",
+      "raw_sha256": "8affa802360f19dfea1771698c9dc1cf2d817adec73bf0c3ca426f081a60e9e7",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_shock/event_evidence.csv",
+      "expected_sha256": "9343aeac09eb39cfd78109975ea0d0f26d3e614dfe0c359940409581d5584b91",
+      "raw_sha256": "9343aeac09eb39cfd78109975ea0d0f26d3e614dfe0c359940409581d5584b91",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_baseline/config.json",
+      "expected_sha256": "f45f7bf6695b84ee9f7eabe834b8872768751db8629763c3fcb076e114b788c9",
+      "raw_sha256": "893d793d19a8eadf34aca626aea063a566fb9e7af81ffd95ae64aa5032745973",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "f45f7bf6695b84ee9f7eabe834b8872768751db8629763c3fcb076e114b788c9"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_baseline/daily.csv",
+      "expected_sha256": "b9da30cc66d1a6087a4429481cf71592ec1ccbe71f7f7f658fb9e5fb950cb145",
+      "raw_sha256": "b9da30cc66d1a6087a4429481cf71592ec1ccbe71f7f7f658fb9e5fb950cb145",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_baseline/diagnostics.csv",
+      "expected_sha256": "5f8e240668324aade841a529c7e5f8e9d0daab15570c492019c04d987ac8bd49",
+      "raw_sha256": "5f8e240668324aade841a529c7e5f8e9d0daab15570c492019c04d987ac8bd49",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_baseline/event_evidence.csv",
+      "expected_sha256": "335beb4fede4f63163fa81e4c065c5146659888ad3229966114165df4f114d3c",
+      "raw_sha256": "335beb4fede4f63163fa81e4c065c5146659888ad3229966114165df4f114d3c",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_shock/config.json",
+      "expected_sha256": "b9b1ea8af19771055077f192915c83084c3d83c3893d159ba2ebe040d699d573",
+      "raw_sha256": "c9654267ab998cd91847706b7c1978ec5ffd73eee1b87292bb6d38837ff805d8",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "b9b1ea8af19771055077f192915c83084c3d83c3893d159ba2ebe040d699d573"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_shock/daily.csv",
+      "expected_sha256": "0c01a5f4568c5b6e36cc9219f228ad19fff6749cd93d388b356486f8abcdf08a",
+      "raw_sha256": "0c01a5f4568c5b6e36cc9219f228ad19fff6749cd93d388b356486f8abcdf08a",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_shock/diagnostics.csv",
+      "expected_sha256": "2c94302d394850841d123158923eaf98cc83a1b07f44aa450f1fa923aa3f7321",
+      "raw_sha256": "2c94302d394850841d123158923eaf98cc83a1b07f44aa450f1fa923aa3f7321",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_shock/event_evidence.csv",
+      "expected_sha256": "04f20caed52ab1368d4055d55a6bd961ece6ab93e8c16734af47ec4d8991306f",
+      "raw_sha256": "04f20caed52ab1368d4055d55a6bd961ece6ab93e8c16734af47ec4d8991306f",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_baseline/config.json",
+      "expected_sha256": "074cb3eebd4f1e1e838c057033d6015e31510f6fff8d1a1fd6b363138a749546",
+      "raw_sha256": "c5d008e28abd53f040786e991bced38f1ca1d288bb591052a2ab8e3cde36dc32",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "074cb3eebd4f1e1e838c057033d6015e31510f6fff8d1a1fd6b363138a749546"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_baseline/daily.csv",
+      "expected_sha256": "fda0adbeb772db43251c7be7879098f4c378fb784f5b901e913acf66a266eae0",
+      "raw_sha256": "fda0adbeb772db43251c7be7879098f4c378fb784f5b901e913acf66a266eae0",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_baseline/diagnostics.csv",
+      "expected_sha256": "b8f8eef3e6e56336c8b7249b06fb1eade940aa31d7411a07e7ab7b0c7e1f1603",
+      "raw_sha256": "b8f8eef3e6e56336c8b7249b06fb1eade940aa31d7411a07e7ab7b0c7e1f1603",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_baseline/event_evidence.csv",
+      "expected_sha256": "b7c3e9975a41c8d8ea525ff8e77428b9c7173cad5354a10fcd533da2f3791088",
+      "raw_sha256": "b7c3e9975a41c8d8ea525ff8e77428b9c7173cad5354a10fcd533da2f3791088",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_shock/config.json",
+      "expected_sha256": "515d829d25f9ecc1adb1d9179a81e733add9fe950db7ffaad6d172f4e762f9b3",
+      "raw_sha256": "887f901c9ad2091b421813b11ccb699ef0776823993add7749b83d2f75a67d19",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "515d829d25f9ecc1adb1d9179a81e733add9fe950db7ffaad6d172f4e762f9b3"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_shock/daily.csv",
+      "expected_sha256": "f1280ec4294f708c27d5cfa1edf004f093b1aae6271a616ef0bc72cb6fc35335",
+      "raw_sha256": "f1280ec4294f708c27d5cfa1edf004f093b1aae6271a616ef0bc72cb6fc35335",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_shock/diagnostics.csv",
+      "expected_sha256": "9cfe9b2506981b61d3a59ed6d72074c06ba5fe48063cb15d0adf30d276f8f903",
+      "raw_sha256": "9cfe9b2506981b61d3a59ed6d72074c06ba5fe48063cb15d0adf30d276f8f903",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_shock/event_evidence.csv",
+      "expected_sha256": "2adc379f2b25405774e24f3a799193411f58861cb0ae549de1e3d3b06c86085b",
+      "raw_sha256": "2adc379f2b25405774e24f3a799193411f58861cb0ae549de1e3d3b06c86085b",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_baseline/config.json",
+      "expected_sha256": "c3ec8911f9bb650b2cb3548d8f783bf2f5a92b4b48d63498697c6703f7663a9b",
+      "raw_sha256": "de3669c08d25be606496377fe186161876ef66681e4d94ec17d41145dbfde925",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "c3ec8911f9bb650b2cb3548d8f783bf2f5a92b4b48d63498697c6703f7663a9b"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_baseline/daily.csv",
+      "expected_sha256": "fda0adbeb772db43251c7be7879098f4c378fb784f5b901e913acf66a266eae0",
+      "raw_sha256": "fda0adbeb772db43251c7be7879098f4c378fb784f5b901e913acf66a266eae0",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_baseline/diagnostics.csv",
+      "expected_sha256": "b8f8eef3e6e56336c8b7249b06fb1eade940aa31d7411a07e7ab7b0c7e1f1603",
+      "raw_sha256": "b8f8eef3e6e56336c8b7249b06fb1eade940aa31d7411a07e7ab7b0c7e1f1603",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_baseline/event_evidence.csv",
+      "expected_sha256": "b7c3e9975a41c8d8ea525ff8e77428b9c7173cad5354a10fcd533da2f3791088",
+      "raw_sha256": "b7c3e9975a41c8d8ea525ff8e77428b9c7173cad5354a10fcd533da2f3791088",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_shock/config.json",
+      "expected_sha256": "ee6e9e7dee17b3176af4748c3d32a4ad1e20385301ec86167e38c61aaa4dfe08",
+      "raw_sha256": "356ce82e4c211da9d41fd35477a0d707825f0799c2fbebc38eca24ecdd397884",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "ee6e9e7dee17b3176af4748c3d32a4ad1e20385301ec86167e38c61aaa4dfe08"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_shock/daily.csv",
+      "expected_sha256": "f1280ec4294f708c27d5cfa1edf004f093b1aae6271a616ef0bc72cb6fc35335",
+      "raw_sha256": "f1280ec4294f708c27d5cfa1edf004f093b1aae6271a616ef0bc72cb6fc35335",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_shock/diagnostics.csv",
+      "expected_sha256": "9cfe9b2506981b61d3a59ed6d72074c06ba5fe48063cb15d0adf30d276f8f903",
+      "raw_sha256": "9cfe9b2506981b61d3a59ed6d72074c06ba5fe48063cb15d0adf30d276f8f903",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_shock/event_evidence.csv",
+      "expected_sha256": "2adc379f2b25405774e24f3a799193411f58861cb0ae549de1e3d3b06c86085b",
+      "raw_sha256": "2adc379f2b25405774e24f3a799193411f58861cb0ae549de1e3d3b06c86085b",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_baseline/config.json",
+      "expected_sha256": "c4e90034eb0c39e93d57e3fe0aa250ae7ac19f3aaf7f7d41cd5d02eb992b882f",
+      "raw_sha256": "d64e4d63bf4ad1f213e33447e44ffbc51c4fb521044160af0942976b431eea26",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "c4e90034eb0c39e93d57e3fe0aa250ae7ac19f3aaf7f7d41cd5d02eb992b882f"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_baseline/daily.csv",
+      "expected_sha256": "e06cb6c36b43e7fd000f56585330183489e4ee1c4c09db9c5bc5b75bf97c65b7",
+      "raw_sha256": "e06cb6c36b43e7fd000f56585330183489e4ee1c4c09db9c5bc5b75bf97c65b7",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_baseline/diagnostics.csv",
+      "expected_sha256": "e7a3e9cfb83e76d3b26953586750ee6dea1d45d4c697b191861f5a6e97a9c872",
+      "raw_sha256": "e7a3e9cfb83e76d3b26953586750ee6dea1d45d4c697b191861f5a6e97a9c872",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_baseline/event_evidence.csv",
+      "expected_sha256": "7a71ae6a3e21ce4b8857de1e153f583ac0c3fe8bbb8645c2a114392fae8956c9",
+      "raw_sha256": "7a71ae6a3e21ce4b8857de1e153f583ac0c3fe8bbb8645c2a114392fae8956c9",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_shock/config.json",
+      "expected_sha256": "820d38eb64867a7464370923328883aef95fdfb8b39863bf3b791147aec6e29e",
+      "raw_sha256": "e77ae1bde25a4b646bcb1938e58a9e8597c28bced146a0ab1f344eb0c1da2659",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "820d38eb64867a7464370923328883aef95fdfb8b39863bf3b791147aec6e29e"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_shock/daily.csv",
+      "expected_sha256": "9b4c224bd573e77582e04aaead8a1c41cdcd46a0337e7a5a3b64dd8411a8479b",
+      "raw_sha256": "9b4c224bd573e77582e04aaead8a1c41cdcd46a0337e7a5a3b64dd8411a8479b",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_shock/diagnostics.csv",
+      "expected_sha256": "7841bb1f1e4564f1e506f974f138ae14ea3b0f05137df3f03508261cc7450832",
+      "raw_sha256": "7841bb1f1e4564f1e506f974f138ae14ea3b0f05137df3f03508261cc7450832",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_shock/event_evidence.csv",
+      "expected_sha256": "febd701f9be4f6a1fe0d4c506e4a1c0be233e45603affbe51ea53027f723ff89",
+      "raw_sha256": "febd701f9be4f6a1fe0d4c506e4a1c0be233e45603affbe51ea53027f723ff89",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_baseline/config.json",
+      "expected_sha256": "75b8fda2a317b199c5bbe818b2123cb8be7ea5b0f5cae102102c8899c3e61b23",
+      "raw_sha256": "d4c212a3c81af7c9a406db71ec66790b78ee2f9bc61d3e68fe71fa16622f9f0c",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "75b8fda2a317b199c5bbe818b2123cb8be7ea5b0f5cae102102c8899c3e61b23"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_baseline/daily.csv",
+      "expected_sha256": "5900454eae8737729d139d7c08f4a9b1ab82b0aeb2d57669545b6976f2a2ecaa",
+      "raw_sha256": "5900454eae8737729d139d7c08f4a9b1ab82b0aeb2d57669545b6976f2a2ecaa",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_baseline/diagnostics.csv",
+      "expected_sha256": "61a298abd8d06bc63accd1ea12a44ede031180c10fa8e290afd988d682f9a981",
+      "raw_sha256": "61a298abd8d06bc63accd1ea12a44ede031180c10fa8e290afd988d682f9a981",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_baseline/event_evidence.csv",
+      "expected_sha256": "558d1a507c1069fa84ed1b19fb0e4c290ee85fbf88ce9dc5c3321995c27d2a86",
+      "raw_sha256": "558d1a507c1069fa84ed1b19fb0e4c290ee85fbf88ce9dc5c3321995c27d2a86",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_shock/config.json",
+      "expected_sha256": "2f095160e3a26636ba59c9e64b5195adff2169e7b738d7eddf475430e58c21ae",
+      "raw_sha256": "e18bc3a0ba97d1f66a4a4b2b903d9bd0367997d6b59b284cc6b867feea66adbf",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "2f095160e3a26636ba59c9e64b5195adff2169e7b738d7eddf475430e58c21ae"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_shock/daily.csv",
+      "expected_sha256": "692fa19fef9ac514c0dfef1a21a1c8f766c00ea28d37608feadcad3be3920108",
+      "raw_sha256": "692fa19fef9ac514c0dfef1a21a1c8f766c00ea28d37608feadcad3be3920108",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_shock/diagnostics.csv",
+      "expected_sha256": "9595d3c5f1ee91cd5e0554460c8d8a69bb0ea6b3c68c9ef303483da69957e17d",
+      "raw_sha256": "9595d3c5f1ee91cd5e0554460c8d8a69bb0ea6b3c68c9ef303483da69957e17d",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_shock/event_evidence.csv",
+      "expected_sha256": "271ab398901a3c0763122a7d14f29b84b3fdc7f5360fedf30e18b96d601fb261",
+      "raw_sha256": "271ab398901a3c0763122a7d14f29b84b3fdc7f5360fedf30e18b96d601fb261",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_baseline/config.json",
+      "expected_sha256": "cda2c9ff14c16f3eb0e52871a8c3e208d9aefe19baf0cbb215026bcf87408423",
+      "raw_sha256": "86634c3f542f7f78353445c1741a5c9ced903ca35eddde5e291e8827d5628c04",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "cda2c9ff14c16f3eb0e52871a8c3e208d9aefe19baf0cbb215026bcf87408423"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_baseline/daily.csv",
+      "expected_sha256": "dfcff97d627151c7a4a47ebe683d455100ad1411aa05948466563e1b2178773e",
+      "raw_sha256": "dfcff97d627151c7a4a47ebe683d455100ad1411aa05948466563e1b2178773e",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_baseline/diagnostics.csv",
+      "expected_sha256": "fcb7470c1cc04a711c8301f0818f7251923ba2a6cd3086e080e034a9c84b9f75",
+      "raw_sha256": "fcb7470c1cc04a711c8301f0818f7251923ba2a6cd3086e080e034a9c84b9f75",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_baseline/event_evidence.csv",
+      "expected_sha256": "daf4e1afb9db9953a76009abe48e1f113339dec1a7a26f0e7013923028714f19",
+      "raw_sha256": "daf4e1afb9db9953a76009abe48e1f113339dec1a7a26f0e7013923028714f19",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_shock/config.json",
+      "expected_sha256": "906fc37f4340d8dc7398f4c6dcf763c67f8f5968df26dd47b47b3c0d82e26c59",
+      "raw_sha256": "a45dd5d68232985e91ece326cbaf849d31bb7fdd5f720b90f33b608576f19d87",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "906fc37f4340d8dc7398f4c6dcf763c67f8f5968df26dd47b47b3c0d82e26c59"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_shock/daily.csv",
+      "expected_sha256": "4e797e55f9ccb75f35781a335a43d0cea81354685495b2e67ae5b1d9925e4a00",
+      "raw_sha256": "4e797e55f9ccb75f35781a335a43d0cea81354685495b2e67ae5b1d9925e4a00",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_shock/diagnostics.csv",
+      "expected_sha256": "2d8f05ed957ac5a2b5a8629815182e2486335e09afc531408b63725e46880b4e",
+      "raw_sha256": "2d8f05ed957ac5a2b5a8629815182e2486335e09afc531408b63725e46880b4e",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_shock/event_evidence.csv",
+      "expected_sha256": "f4fd3a2cf7b36e6ecbcb48ebb68a76c936ae23f18b6af2e95f1cc1d86cb21bea",
+      "raw_sha256": "f4fd3a2cf7b36e6ecbcb48ebb68a76c936ae23f18b6af2e95f1cc1d86cb21bea",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_baseline/config.json",
+      "expected_sha256": "b9c839622df745e7277b8bbd9bbd9b04a1c0bb6d18eccba8105518859c885c5b",
+      "raw_sha256": "debc7feddd3154fb03c684861e636e17ee1793af45ffa8f8c1640636de5ee00e",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "b9c839622df745e7277b8bbd9bbd9b04a1c0bb6d18eccba8105518859c885c5b"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_baseline/daily.csv",
+      "expected_sha256": "bb2c371ba5edf8a033e5c91cae89184ce2287c0d93dc4bfd72a1b7232c33e396",
+      "raw_sha256": "bb2c371ba5edf8a033e5c91cae89184ce2287c0d93dc4bfd72a1b7232c33e396",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_baseline/diagnostics.csv",
+      "expected_sha256": "dffc32b9d7ee447a4f1ad02041189d5f1ddd57b6418c188a24116255bea68847",
+      "raw_sha256": "dffc32b9d7ee447a4f1ad02041189d5f1ddd57b6418c188a24116255bea68847",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_baseline/event_evidence.csv",
+      "expected_sha256": "cce39e8c1368f830c3fbd3c96dbeaad2f10db0e3c95b3f0716ee70ab6e9e2db5",
+      "raw_sha256": "cce39e8c1368f830c3fbd3c96dbeaad2f10db0e3c95b3f0716ee70ab6e9e2db5",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_shock/config.json",
+      "expected_sha256": "f360827863a7dbb3a419c038c2bfe9cec1ec7c40e57ae1b7d30c421108627b2d",
+      "raw_sha256": "7d9d90dbbc282a22bb90f7550df98347d81a9672affa39aa16efab983865df89",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "f360827863a7dbb3a419c038c2bfe9cec1ec7c40e57ae1b7d30c421108627b2d"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_shock/daily.csv",
+      "expected_sha256": "60b0c5e9386a1d9626cae6feef24aa1dc3b6dc6379ff8c64c3eee8bec619311c",
+      "raw_sha256": "60b0c5e9386a1d9626cae6feef24aa1dc3b6dc6379ff8c64c3eee8bec619311c",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_shock/diagnostics.csv",
+      "expected_sha256": "43f75a8e5dd6fe50e461b8143cf90ac1eb5dc61b0a2525e654561d544ede304e",
+      "raw_sha256": "43f75a8e5dd6fe50e461b8143cf90ac1eb5dc61b0a2525e654561d544ede304e",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_shock/event_evidence.csv",
+      "expected_sha256": "97bb8f427785ed8fa50eb9d37f150ead890459f467782b42b5c3cc022b70ec25",
+      "raw_sha256": "97bb8f427785ed8fa50eb9d37f150ead890459f467782b42b5c3cc022b70ec25",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_baseline/config.json",
+      "expected_sha256": "2392f08951b8e463d831ca19b2040e0d8cdd3af01631586a9b5f9a0a7abeed9b",
+      "raw_sha256": "d8d8211aeeb7d1923580a89971e0b8f5b0b367230408d39510f8f7f41e70b6f7",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "2392f08951b8e463d831ca19b2040e0d8cdd3af01631586a9b5f9a0a7abeed9b"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_baseline/daily.csv",
+      "expected_sha256": "7ac382d9d5ec12e6ca59ce72e461d85e216fa914c74cbbb5c78b133645e4a3be",
+      "raw_sha256": "7ac382d9d5ec12e6ca59ce72e461d85e216fa914c74cbbb5c78b133645e4a3be",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_baseline/diagnostics.csv",
+      "expected_sha256": "122c4ab0950515a0ca9c36fd389caff598435f4a6130b18ce09be58ef1438395",
+      "raw_sha256": "122c4ab0950515a0ca9c36fd389caff598435f4a6130b18ce09be58ef1438395",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_baseline/event_evidence.csv",
+      "expected_sha256": "0d981d15a649efadddaec30efe974a2145e40e54dedb1eb31b9a55dcd91a20d1",
+      "raw_sha256": "0d981d15a649efadddaec30efe974a2145e40e54dedb1eb31b9a55dcd91a20d1",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_shock/config.json",
+      "expected_sha256": "7a89abc29ba908df565c53c6d856ef978e607724c96973975b80bf415d08854e",
+      "raw_sha256": "ae41c2ae3f9f31eb99e4a408a6d09a8e4c8b7cc6ac8e3d818a8ed689c11857f1",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "7a89abc29ba908df565c53c6d856ef978e607724c96973975b80bf415d08854e"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_shock/daily.csv",
+      "expected_sha256": "f882556d36f14fdf230f71ec2b52dff6e27290e0bafb78000fe3e8f859b81dd5",
+      "raw_sha256": "f882556d36f14fdf230f71ec2b52dff6e27290e0bafb78000fe3e8f859b81dd5",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_shock/diagnostics.csv",
+      "expected_sha256": "24babb97f2fffe7f272db70daf693f23fd799afe45282ad4ad036f5f3c34b45e",
+      "raw_sha256": "24babb97f2fffe7f272db70daf693f23fd799afe45282ad4ad036f5f3c34b45e",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_shock/event_evidence.csv",
+      "expected_sha256": "917614450b5118731b9ca3a6bf7d21a0fc947a9dba612686ef41597057fb930c",
+      "raw_sha256": "917614450b5118731b9ca3a6bf7d21a0fc947a9dba612686ef41597057fb930c",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_baseline/config.json",
+      "expected_sha256": "f6ce78daa36435d670ee24b2afa83430294c756c7ea8b9504916fe67c95bc9c5",
+      "raw_sha256": "e5a9a39fcbd80b6416b6efc5bd62e2828e580e0587738f7846a060a0d48d7e11",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "f6ce78daa36435d670ee24b2afa83430294c756c7ea8b9504916fe67c95bc9c5"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_baseline/daily.csv",
+      "expected_sha256": "3697a0907387e71b0094ba8b6ac5b4808ded3b463763bc3d6db50af7b929c7f6",
+      "raw_sha256": "3697a0907387e71b0094ba8b6ac5b4808ded3b463763bc3d6db50af7b929c7f6",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_baseline/diagnostics.csv",
+      "expected_sha256": "0602582be44e486a78d97f66b4ede41a54d9737206d994f6b11c971e751f8ecb",
+      "raw_sha256": "0602582be44e486a78d97f66b4ede41a54d9737206d994f6b11c971e751f8ecb",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_baseline/event_evidence.csv",
+      "expected_sha256": "cdc63b3a8939dfdfa803623eed77a21692268ac3763b35e54074f24dae238de4",
+      "raw_sha256": "cdc63b3a8939dfdfa803623eed77a21692268ac3763b35e54074f24dae238de4",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_shock/config.json",
+      "expected_sha256": "4ad2c65faccde4542348e299381d4ffd26e17725bcc3a8464d251afb8eb19a57",
+      "raw_sha256": "97b9275e54ae92ffa15022354e1d71b4b32495eca4f559747214879d034c793f",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "4ad2c65faccde4542348e299381d4ffd26e17725bcc3a8464d251afb8eb19a57"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_shock/daily.csv",
+      "expected_sha256": "0c46556c2d042a2127e30386e6ec816af38c98ca76d9140c302f58d52d70e02a",
+      "raw_sha256": "0c46556c2d042a2127e30386e6ec816af38c98ca76d9140c302f58d52d70e02a",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_shock/diagnostics.csv",
+      "expected_sha256": "4992aba39ff080532ef397b2e2bf3b2fb53dc5044cfc192a16ed81e58143b2bf",
+      "raw_sha256": "4992aba39ff080532ef397b2e2bf3b2fb53dc5044cfc192a16ed81e58143b2bf",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_shock/event_evidence.csv",
+      "expected_sha256": "284b779802b0af57b98e262057173e250604d608dc24c33e5801328c30df453b",
+      "raw_sha256": "284b779802b0af57b98e262057173e250604d608dc24c33e5801328c30df453b",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/C_shutdown_H0/config.json",
+      "expected_sha256": "0c2076878f69e010a43febbf767616f5e55acccbf56bc3cac83506ecba92e6b0",
+      "raw_sha256": "e1663f66aa5adfa802530b3cf56089f5c5e395d396e1bba7306b05dd055b2562",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "0c2076878f69e010a43febbf767616f5e55acccbf56bc3cac83506ecba92e6b0"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/C_shutdown_H0/daily.csv",
+      "expected_sha256": "6985f5bd221df4e18de85945a564bf2ff6d7382e065c9645465ad301c7e1805c",
+      "raw_sha256": "6985f5bd221df4e18de85945a564bf2ff6d7382e065c9645465ad301c7e1805c",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/C_shutdown_H0/diagnostics.csv",
+      "expected_sha256": "ed3e947b63c5d6364e15bdd07e4310911c26d82a4be38336ded092f19db9c629",
+      "raw_sha256": "ed3e947b63c5d6364e15bdd07e4310911c26d82a4be38336ded092f19db9c629",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/C_shutdown_H0/event_evidence.csv",
+      "expected_sha256": "a1f88c943b1621abfc1576901e0f166eb3d3e5cd6b2fef606c460c4a53312a45",
+      "raw_sha256": "a1f88c943b1621abfc1576901e0f166eb3d3e5cd6b2fef606c460c4a53312a45",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover100_H0/config.json",
+      "expected_sha256": "911035b261e887507dc5651dd9cf8b8e0465f877397db588474719ff190eb04c",
+      "raw_sha256": "2d166ffc91f83533a01f0a6793ec3e89fa1c695ded975876cccc72072b6724b8",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "911035b261e887507dc5651dd9cf8b8e0465f877397db588474719ff190eb04c"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover100_H0/daily.csv",
+      "expected_sha256": "4c8a971746dda03c2dd27a4df15058fd6e5f346ba447d6cc84b6780e0ae010a0",
+      "raw_sha256": "4c8a971746dda03c2dd27a4df15058fd6e5f346ba447d6cc84b6780e0ae010a0",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover100_H0/diagnostics.csv",
+      "expected_sha256": "8affa802360f19dfea1771698c9dc1cf2d817adec73bf0c3ca426f081a60e9e7",
+      "raw_sha256": "8affa802360f19dfea1771698c9dc1cf2d817adec73bf0c3ca426f081a60e9e7",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover100_H0/event_evidence.csv",
+      "expected_sha256": "9343aeac09eb39cfd78109975ea0d0f26d3e614dfe0c359940409581d5584b91",
+      "raw_sha256": "9343aeac09eb39cfd78109975ea0d0f26d3e614dfe0c359940409581d5584b91",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover80_H0/config.json",
+      "expected_sha256": "1c27b8d977edf7eae76dbc9d834140b7036068f3cd731a7dcc6849e6ed5e650a",
+      "raw_sha256": "6a90777cfd842d0c8ed8d3a40ed135a11298255591d132152f48eaa3f81c6d5b",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "1c27b8d977edf7eae76dbc9d834140b7036068f3cd731a7dcc6849e6ed5e650a"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover80_H0/daily.csv",
+      "expected_sha256": "538832ee227d3f066228c81d7757abd2780e66ba11790df0b7a315cf0b98290d",
+      "raw_sha256": "538832ee227d3f066228c81d7757abd2780e66ba11790df0b7a315cf0b98290d",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover80_H0/diagnostics.csv",
+      "expected_sha256": "8c6782027ee387b033db51430b2a293c04c3cfb213c432e25fd8b1c7de6f5104",
+      "raw_sha256": "8c6782027ee387b033db51430b2a293c04c3cfb213c432e25fd8b1c7de6f5104",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover80_H0/event_evidence.csv",
+      "expected_sha256": "99798d602af39866bb65fbab588d0a27099b04b289f53cb58d680e2f8bc2f267",
+      "raw_sha256": "99798d602af39866bb65fbab588d0a27099b04b289f53cb58d680e2f8bc2f267",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/manifest.json",
+      "expected_sha256": "b2891427b5b7f3bd99fc67679b1f419bd3c8b9cb6c9156a4e2a4f33974ee714e",
+      "raw_sha256": "06248e5b30ad45659b5c7697789c5acc950b444baf5b2fc1d7b2bb9aeacc1a83",
+      "byte_for_byte": false,
+      "windows_json_lf_compatible": true,
+      "lf_sha256": "b2891427b5b7f3bd99fc67679b1f419bd3c8b9cb6c9156a4e2a4f33974ee714e"
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/period_summary.csv",
+      "expected_sha256": "90731e7f8baec95134c7651d4240a727fd74e8a9ac5fc7de872e733d7d38d336",
+      "raw_sha256": "90731e7f8baec95134c7651d4240a727fd74e8a9ac5fc7de872e733d7d38d336",
+      "byte_for_byte": true
+    },
+    {
+      "source_path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/summary.csv",
+      "expected_sha256": "02f43c06496eae20959a1ab89885942bc5dffe272cfb283c17ee70e3ae8c0d02",
+      "raw_sha256": "02f43c06496eae20959a1ab89885942bc5dffe272cfb283c17ee70e3ae8c0d02",
+      "byte_for_byte": true
+    }
+  ],
+  "baseline_id": "inventory-round2-2026-10-07",
+  "source_archive_sha256": "81ba17edae1c760322afb9da3a7f5a03de7cc66bc02964cf91a33c5a5213d0c2",
+  "source_files_verified": 156,
+  "case_count": 33,
+  "simulated_case_days": 19800,
+  "max_abs_quantity_residual": 0,
+  "summary_sha256": "02f43c06496eae20959a1ab89885942bc5dffe272cfb283c17ee70e3ae8c0d02",
+  "period_summary_sha256": "90731e7f8baec95134c7651d4240a727fd74e8a9ac5fc7de872e733d7d38d336",
+  "raw_matching_outputs": 105,
+  "windows_json_lf_matches": 34,
+  "elapsed_seconds": 10.657225000000835,
+  "git_context": {
+    "base": "307df8f4d64dc039e2d291082394178c1d556a58",
+    "branch": "main",
+    "working_tree": "clean before Round4B"
+  }
+}

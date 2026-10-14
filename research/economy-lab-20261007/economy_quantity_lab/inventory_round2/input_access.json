@@ -1,0 +1,40 @@
+{
+  "inputs": [
+    {
+      "file_name": "WWO_数量实验_独立复核.md",
+      "library_file_id": "libfile_52defb9117808191b99edda3c596fa32",
+      "bytes": 7512,
+      "sha256": "3e21e4f8e84ce9d161c107e7c0266558a2f89bb7fb51fcb241f6ba74dd902242",
+      "status": "complete text read via Library; saved consumer-local exact byte count"
+    },
+    {
+      "file_name": "WWO_Codex_第二轮库存控制对照提示词.md",
+      "library_file_id": "libfile_b425bf960c80819184797f58f6d71c45",
+      "bytes": 4887,
+      "sha256": "7eee66df6adebfd917912d04c3cbabb524e29f10f55908cc8a48e7b4fad91c32",
+      "status": "complete text read via Library; saved consumer-local exact byte count"
+    },
+    {
+      "file_name": "WWO_Codex_续做指令_库存控制候选与对照实验.md",
+      "library_file_id": "libfile_9e8225dce58c81918800e6a0006f21ac",
+      "bytes": 13201,
+      "sha256": "8bdd3b258b7e1be035fa4ba9115173e4d70f4621620460eaacfebd3d94debecf",
+      "status": "complete text read via Library; saved consumer-local exact byte count"
+    },
+    {
+      "file_name": "WWO_数量实验_独立复核包.zip",
+      "library_file_id": "libfile_5699ae123de48191a41811ce2c33aeed",
+      "expected_bytes": 93555,
+      "status": "unavailable locally after supported materialization plus bounded network-enabled retry",
+      "error": "library file transfer failed: download failed",
+      "missing_archive_members": [
+        "INDEPENDENT_REVIEW.md",
+        "audit/probe.py",
+        "audit/lead_aware_target_check.py",
+        "audit/independent_ledger_check.py",
+        "NEXT_CODEX_PROMPT.md"
+      ],
+      "fallback": "use preserved existing original Simulation; do not reconstruct audit/model from prose"
+    }
+  ]
+}

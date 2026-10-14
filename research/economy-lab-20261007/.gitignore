@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+/.local/
+/artifacts/
+/tmp/
+/temp/
+*.log
+# Future runs belong outside the immutable imported evidence tree.
+**/baseline_reproduction/
+**/replay*/
+**/clean_verify_*/
+**/inventory_comparison_round2.zip
+**/economy_quantity_lab.zip
+**/package_verification.json
+**/verification.json
+# Reports, summaries, provenance and the original evidence remain tracked.

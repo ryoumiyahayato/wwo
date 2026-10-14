@@ -1,0 +1,127 @@
+{
+  "five_stage": {
+    "commodities": 5,
+    "production_edges": 4,
+    "requirements": [
+      {
+        "requirement_id": "root/P4:g3:19",
+        "producer_id": "P4",
+        "commodity": "g3",
+        "required_qty": 6,
+        "need_by_day": 19,
+        "source_plan_id": "root"
+      },
+      {
+        "requirement_id": "root/P4:g3:19/P3:g2:18",
+        "producer_id": "P3",
+        "commodity": "g2",
+        "required_qty": 12,
+        "need_by_day": 18,
+        "source_plan_id": "root/P4:g3:19"
+      },
+      {
+        "requirement_id": "root/P4:g3:19/P3:g2:18/P2:g1:17",
+        "producer_id": "P2",
+        "commodity": "g1",
+        "required_qty": 24,
+        "need_by_day": 17,
+        "source_plan_id": "root/P4:g3:19/P3:g2:18"
+      },
+      {
+        "requirement_id": "root/P4:g3:19/P3:g2:18/P2:g1:17/P1:g0:16",
+        "producer_id": "P1",
+        "commodity": "g0",
+        "required_qty": 48,
+        "need_by_day": 16,
+        "source_plan_id": "root/P4:g3:19/P3:g2:18/P2:g1:17"
+      }
+    ],
+    "edges_traversed": 4
+  },
+  "branching": {
+    "requirements": [
+      {
+        "requirement_id": "root/factory:input_A:5",
+        "producer_id": "factory",
+        "commodity": "input_A",
+        "required_qty": 8,
+        "need_by_day": 5,
+        "source_plan_id": "root"
+      },
+      {
+        "requirement_id": "root/factory:input_B:5",
+        "producer_id": "factory",
+        "commodity": "input_B",
+        "required_qty": 12,
+        "need_by_day": 5,
+        "source_plan_id": "root"
+      }
+    ],
+    "edges_traversed": 2
+  },
+  "shared_input": {
+    "requirements": [
+      {
+        "requirement_id": "sinkX/X:raw:5",
+        "producer_id": "shared_pool",
+        "commodity": "raw",
+        "required_qty": 8,
+        "need_by_day": 5,
+        "source_plan_id": "sinkX",
+        "allocated": 8,
+        "uncovered": 0
+      },
+      {
+        "requirement_id": "sinkY/Y:raw:5",
+        "producer_id": "shared_pool",
+        "commodity": "raw",
+        "required_qty": 12,
+        "need_by_day": 5,
+        "source_plan_id": "sinkY",
+        "allocated": 2,
+        "uncovered": 10
+      }
+    ],
+    "allocated": 10,
+    "stock": 10
+  },
+  "multiple_sinks": {
+    "demands": [
+      {
+        "sink_id": "sink1",
+        "commodity": "final",
+        "received_day": 1,
+        "quantity": 7
+      },
+      {
+        "sink_id": "sink2",
+        "commodity": "final",
+        "received_day": 1,
+        "quantity": 9
+      }
+    ],
+    "aggregate": 16,
+    "requirements": [
+      {
+        "requirement_id": "root/factory:input_A:5",
+        "producer_id": "factory",
+        "commodity": "input_A",
+        "required_qty": 32,
+        "need_by_day": 5,
+        "source_plan_id": "root",
+        "allocated": 20,
+        "uncovered": 12
+      },
+      {
+        "requirement_id": "root/factory:input_B:5",
+        "producer_id": "factory",
+        "commodity": "input_B",
+        "required_qty": 48,
+        "need_by_day": 5,
+        "source_plan_id": "root",
+        "allocated": 40,
+        "uncovered": 8
+      }
+    ]
+  }
+}

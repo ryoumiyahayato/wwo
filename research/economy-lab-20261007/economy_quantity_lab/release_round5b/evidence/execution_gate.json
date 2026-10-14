@@ -1,0 +1,13 @@
+{
+  "EXECUTABLE_PLANNING_GATE": "PASS",
+  "checks": {
+    "accounts": true,
+    "active_bucket_bounds": true,
+    "cases": true,
+    "partial_cancel": true,
+    "confirmed_replacement": true,
+    "boundary_release": true,
+    "long_lead_release": true
+  },
+  "scope": "paired with correctness entry point; expression and tested semantics, not economic validity"
+}

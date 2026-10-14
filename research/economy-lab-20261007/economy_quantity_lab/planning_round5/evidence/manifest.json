@@ -1,0 +1,30 @@
+{
+  "base": "366fe77704ee3d4ec9088ba1c544c46096289e40",
+  "tag": "economy-lab-v0.4c-supplier-search",
+  "cases": 52,
+  "days": 31200,
+  "sources": {
+    "economy_quantity_lab/economy.py": "b3c38c2d1daad39b955f9b9c98c1ac6d09a8a14a0562db16f525fabdb5ce1609",
+    "economy_quantity_lab/multi_round4b/multi_supplier.py": "9f316ce9d43ac239647f96b844c9737d6cb6bea58f2a692cb4923d2c5d8d9ec3",
+    "economy_quantity_lab/multi_round4b/run_multi_supplier_experiment.py": "39f6bae6f9e16763e88172926a9cba54b395d63f0de65f098d826736162ac383",
+    "economy_quantity_lab/multi_round4b/stock_admission.py": "79df59b1265e2a8696c785014b7ec3aed454b6d670e57633ab967c99f7726f84",
+    "economy_quantity_lab/multi_round4b/test_multi_supplier.py": "dba198c32418bfa9af8dee19f3464fbb0d308dd5324c9b7324707aa95bf2d74e",
+    "economy_quantity_lab/order_round3/commitment_adapter.py": "e42d40d8406367832a827236152796511576eb9e29512057bc2718015dd7e0dd",
+    "economy_quantity_lab/order_round3/order_commitment.py": "75b6360113b4c330068d2fa7b5aeb4aae7572e496389f5fbbce395f93563d6d8",
+    "economy_quantity_lab/order_round3/run_order_commitment_experiment.py": "30eab7ca1b9b712b3ebf3402305e3a894d756cf67c0545aaca1a51a9d1b10baf",
+    "economy_quantity_lab/order_round3/test_order_commitment.py": "60d288a5f705e360dbe36fccf9b6d6c44651a2e6b7ed9781f4dd44a03bc29c99",
+    "economy_quantity_lab/planning_round5/demand_planning.py": "d6d5645001a8352b6b3a679b8a2ed4896b7ef1a3943f62659e09e76eeb13ed01",
+    "economy_quantity_lab/planning_round5/inputs/ROUND5_REQUEST.md": "88e24addbddc3bd49411e7ae643bc214b3172dba20b7ccbe8cfff9e4171cefd0",
+    "economy_quantity_lab/planning_round5/planning_simulation.py": "913013ea8b952a7b3151094292ef63ffc38503b314e8b0e994a4ee26892464e7",
+    "economy_quantity_lab/planning_round5/run_demand_planning_experiment.py": "71c209b6b96c34233ef6526a5ed7b78ad2aea788c1f5016aabb5bc06a21b41a7",
+    "economy_quantity_lab/planning_round5/test_demand_planning.py": "9f79e2b0bb2730e89c549e2e5df7a2d29caf8e30d935929faca0689c030301f3",
+    "economy_quantity_lab/search_round4c/run_supplier_search_experiment.py": "86164fa716aee2506cb9719d35b1c2152ca24e7d17f4c3c1d056bf5daafebb1b",
+    "economy_quantity_lab/search_round4c/search_simulation.py": "db1e55dfeae7c12afd731bd0edf9b1a1de3b2d7ae74a2afb53f6e5837e65b6ed",
+    "economy_quantity_lab/search_round4c/supplier_directory.py": "11072806cb3cc4449a6f8c618699e8abac3ebb72f4cea90d7fb71c2864feb6db",
+    "economy_quantity_lab/search_round4c/supplier_pool.py": "49e3e4fee7a1928205eacd7e9942f496e5265577f02e28b1e8c51361325ae57a",
+    "economy_quantity_lab/search_round4c/test_supplier_search.py": "bb9cc379ce8640cae5f0f9a88477eccab52f922cda2a44172f41c61cd4e32c3f",
+    "economy_quantity_lab/supplier_round4a/run_supplier_admission_experiment.py": "eac73ae1015f86d2da376bbb9b8a519d52e46e3c0c0f02d27fdb4b77c64675b3",
+    "economy_quantity_lab/supplier_round4a/supplier_admission.py": "ba4c160c4e778ce97940ddc96a0c0905202c693b9752a3783bde36bc79f24896",
+    "economy_quantity_lab/supplier_round4a/test_supplier_admission.py": "4f6c2acfd1120c389a7eddda4875ffbdece17c4c1e8bb71e0df4260002055c8c"
+  }
+}

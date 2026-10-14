@@ -1,0 +1,117 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "case_count": 18,
+  "simulated_case_days": 10800,
+  "max_abs_quantity_residual": 0,
+  "max_abs_order_residual": 0,
+  "runs": [
+    {
+      "case_id": "A_normal_Q0",
+      "seconds": 0.29688220000025467,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "A_normal_Q1",
+      "seconds": 0.28644619999977294,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "B_insufficient_Q0",
+      "seconds": 0.3075895000001765,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "B_insufficient_Q1",
+      "seconds": 0.3849377000005916,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "C_local_Q0",
+      "seconds": 0.31804030000057537,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "C_local_Q1",
+      "seconds": 0.2992314000002807,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "D_regional_Q0",
+      "seconds": 0.3086920000023383,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "D_regional_Q1",
+      "seconds": 0.3613487000002351,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "E_wide_Q0",
+      "seconds": 0.3140647000000172,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "E_wide_Q1",
+      "seconds": 0.3982937000000675,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "F_bad_Q0",
+      "seconds": 0.4109953000006499,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "F_bad_Q1",
+      "seconds": 0.39910299999974086,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "G_scale10",
+      "seconds": 0.23741049999807728,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "H_scale50",
+      "seconds": 0.4720517999994627,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "I_scale200",
+      "seconds": 1.4431714999991527,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "J_timing_Q0",
+      "seconds": 0.4169895000013639,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "J_timing_Q1",
+      "seconds": 0.2848324999977194,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "K_two_supplier_off",
+      "seconds": 0.20525040000211447,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction, physical simulation, indexed observation and archives; excludes file export; not RSS"
+    }
+  ]
+}
