@@ -58,6 +58,12 @@ func draw(shell: MainShell, rect: Rect2) -> void:
 		shell.label(Vector2(x,top+42),str(stats[index].value),23,Color(0.94,0.84,0.61),stat_width-14)
 	var table := Rect2(rect.position.x+20,top+70,rect.size.x-40,rect.size.y-213)
 	shell.label(table.position+Vector2(0,16),"商品行情",14)
+	if native_managed:
+		var notices:=_native_observation.get("commercial_information",[]) as Array
+		if not notices.is_empty():
+			var last:=notices.back() as Dictionary
+			shell.label(table.position+Vector2(100,16),"已收公告：%s · %s" % [str(last["item"]),"有效" if last["current_notice"] else "已失效"],10,Color(0.82,0.86,0.79),table.size.x-260)
+			if last["kind"]=="GOODS": shell.button(Rect2(table.end.x-148,table.position.y-2,146,23),"核对该店当前报价","commodity:select:native:"+str(last["item"])+"|"+str(last["site_id"]))
 	var y := table.position.y+39
 	shell.label(Vector2(table.position.x,y),"商品",11)
 	shell.label(Vector2(table.position.x+table.size.x*0.34,y),"单位",11)
@@ -108,7 +114,7 @@ func _draw_commodity(shell: MainShell, rect: Rect2) -> void:
 	shell.label(Vector2(x+174,y+99),"应付 "+str(quote.get("amount","未取得报价"))+" "+str(quote.get("denomination","模拟单位")),19,Color(0.94,0.84,0.61),rect.size.x-224)
 	if bool(item.get("sale_supported",false)): shell.button(Rect2(x,y+119,132,29),"购买","purchase",bool(quote.get("success",false)))
 	if not bool(quote.get("success",false)): shell.wrapped(Vector2(x,y+172),str(quote.get("error","当前不可购买。")),rect.size.x-48,12,3)
-	elif native_managed: shell.label(Vector2(x,y+172),"接受后预留资金；实际到货后取得物品。",11)
+	elif native_managed: shell.label(Vector2(x,y+172),"现场交付；取得后按原安排消费。" if quote.get("fulfilment")=="ONSITE_REAL_STOCK_HANDOVER" else "接受后预留资金；实际到货后取得物品。",11)
 
 func _draw_native_summary(shell: MainShell, rect: Rect2) -> void:
 	var area := Rect2(rect.position.x+20,rect.position.y+97,rect.size.x-40,rect.size.y-146)

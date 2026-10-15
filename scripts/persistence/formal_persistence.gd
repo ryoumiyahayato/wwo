@@ -269,7 +269,7 @@ func _restore_candidate_state(r: WorldBuildResult, state: Dictionary) -> bool:
 		r.error = "Host travel restore failed: "+r.world.person_travel.error
 		return false
 	if r.world.economy_r1 != null and not r.world.economy_r1.validate_transport_references():
-		r.error = "Shared transport candidate references failed: "+r.world.economy_r1.error
+		r.error = "Native host-reference validation failed: "+r.world.economy_r1.error
 		return false
 	if not state.has("person_travel"):
 		if r.world.economy_r1 != null and r.world.economy_r1.has_person_travel_responsibilities():

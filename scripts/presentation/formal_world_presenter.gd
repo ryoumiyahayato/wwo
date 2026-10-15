@@ -67,6 +67,10 @@ static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeCon
 			for key: String in ["known_jobs", "orders", "need_today", "managed_firms", "scope_changes", "management_incoming", "can_reenter"]:
 				personal[key] = native_view.get(key, [] if key != "need_today" else {})
 			personal["cargo_fulfilment"] = native_view.get("cargo_fulfilment", {})
+			personal["resident_services"] = native_view.get("resident_services", {})
+			personal["labor_market"] = native_view.get("labor_market", {})
+			personal["leases"] = native_view.get("leases", {})
+			personal["commercial_information"] = native_view.get("commercial_information", [])
 			personal["scope_options"] = world.economy_r1.scope_options(person_id) if world.economy_r1 != null else []
 			var managers := personal.get("managed_firms",[]) as Array
 			var business: Dictionary={}
@@ -118,6 +122,7 @@ static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeCon
 		if shell.current_page == "economy":
 			native_observation = world.economy_state.read_only_native_observation(person_id)
 			native_observation["cohort_observation"] = world.economy_state.read_only_cohort_observation(person_id, 16, shell.economy_page.cohort_statistics_page*16)
+			native_observation["commercial_information"] = world.economy_r1.commercial_information(person_id) if native_market and world.economy_r1 != null else []
 			native_observation["managed_sites"] = []
 			native_observation["employees"] = []
 			native_observation["enterprise_lifecycles"] = []

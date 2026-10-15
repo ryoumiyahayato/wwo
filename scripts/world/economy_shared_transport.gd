@@ -69,13 +69,19 @@ func _node_capacity(id: String, now: int) -> float:
 		if now >= int(window["start_minute"]) and now < int(window["end_minute"]): return float(window["capacity"])
 	return 0.0
 
-func _node_available(id: String, now: int) -> float:
+func _node_used(id: String, now: int) -> float:
 	var used := float(_node_throughput.get(id+"|"+str(now/60), 0.0)) if facilities[id]["kind"] == "HANDLING_THROUGHPUT" else 0.0
 	for use_id: String in _active_node_uses.keys():
 		var use := node_uses[use_id] as Dictionary
 		if int(use["end_minute"]) >= 0 and int(use["end_minute"]) <= now: _active_node_uses.erase(use_id); continue
 		if use["facility_id"] == id: used += float(use["amount"])-float(use["released_amount"])
-	return maxf(0.0, _node_capacity(id,now)-used)
+	return used+economy()._service_market.shared_occupancy(id,now)
+
+func _node_available(id: String, now: int) -> float:
+	return maxf(0.0, _node_capacity(id,now)-_node_used(id,now))
+
+func service_intake_ready(id: String, now: int) -> bool:
+	return facilities.has(id) and _node_used(id,now)<=_node_capacity(id,now)+VNextInfrastructureLinkState.CAPACITY_EPSILON
 
 func _node_amount(id: String, good: String, quantity_value: int) -> float:
 	return float(quantity_value)*weight(good,{"weight_unit":facilities[id]["unit"]})
@@ -307,6 +313,8 @@ func prepare_labor(capital_used: Dictionary) -> void:
 			hours += amount
 			if hours == wanted: break
 		handling[id] = {"day": e.day, "edge_id": edge_id, "hours": hours, "used": 0, "work": rows}
+		if e._costs.enabled:
+			for row: Dictionary in rows: e._costs.assign_work(row["work_id"], row["hours"], "HANDLING", id)
 		if not _hours.has(r["handling_site"]): _hours[r["handling_site"]] = {}
 		_hours[r["handling_site"]][e.day] = int(_hours[r["handling_site"]].get(e.day, 0))+hours
 		_total_hours[r["handling_site"]] = int(_total_hours.get(r["handling_site"], 0))+hours
@@ -332,6 +340,8 @@ func _prepare_arrival_labor(r: Dictionary, used: Dictionary) -> void:
 		hours+=amount
 		if hours==wanted: break
 	handling[id]={"day":e.day,"edge_id":r["edge_id"],"hours":hours,"used":0,"work":rows,"operation":"ARRIVAL"}
+	if e._costs.enabled:
+		for row: Dictionary in rows: e._costs.assign_work(row["work_id"], row["hours"], "HANDLING", id)
 	if not _hours.has(site): _hours[site]={}
 	_hours[site][e.day]=int(_hours[site].get(e.day,0))+hours
 	_total_hours[site]=int(_total_hours.get(site,0))+hours
@@ -478,7 +488,31 @@ func _restore_nodes(raw: Dictionary, saved: Dictionary) -> bool:
 				for event: Dictionary in other["releases"].values():
 					if event["minute"]<=use["minute"]: amount-=float(event["amount"])
 				occupied+=amount
+		occupied+=economy()._service_market.shared_occupancy(use["facility_id"],use["minute"])
 		if occupied>capacity_value+VNextInfrastructureLinkState.CAPACITY_EPSILON: return false
+	# A warehouse may be the only user of a mapped facility. Validate its real
+	# reservation/intake boundaries too, even when no cargo entered that node.
+	for facility_id: String in economy()._service_market._facility_history:
+		var mapped: String=economy()._service_market._facilities[facility_id]["shared_storage_id"]
+		if mapped.is_empty(): continue
+		var f:=facilities.get(mapped,{}) as Dictionary
+		if f.is_empty(): return false
+		var dates: Dictionary={}
+		for contract_id: String in economy()._service_market._facility_history[facility_id]:
+			var c:=economy()._service_market.contracts[contract_id] as Dictionary
+			dates[c["accepted_minute"]]=true
+			if c["started_minute"]>=0: dates[c["started_minute"]]=true
+		for minute: int in dates:
+			var capacity_value:=0.0
+			for window: Dictionary in f["windows"]:
+				if minute>=window["start_minute"] and minute<window["end_minute"]: capacity_value=float(window["capacity"])
+			var occupied: float=economy()._service_market.shared_occupancy(mapped,minute)
+			for use: Dictionary in source.values():
+				if use["facility_id"]!=mapped or use["minute"]>minute or (use["end_minute"]>=0 and use["end_minute"]<=minute): continue
+				occupied+=float(use["amount"])
+				for event: Dictionary in use["releases"].values():
+					if event["minute"]<=minute: occupied-=float(event["amount"])
+			if occupied>capacity_value+VNextInfrastructureLinkState.CAPACITY_EPSILON: return false
 	for entry: Dictionary in raw["entries"].values():
 		if not bindings.get(entry.get("edge_id"),{}).has("node_resources"): continue
 		var prefix := "node:"+str(entry["shipment_id"])+":"+str(entry["leg_index"])+":"

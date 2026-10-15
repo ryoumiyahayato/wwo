@@ -12,6 +12,13 @@ var capital_mode: bool = false
 var business_mode: bool = false
 var business_finance_mode: bool = false
 var business_finance_page: int = 0
+var lease_mode: bool = false
+var business_leases_mode: bool = false
+var lease_page: int = 0
+var resident_services_mode: bool = false
+var resident_service_page: int = 0
+var business_services_mode: bool = false
+var business_service_page: int = 0
 var business_firm_index: int = 0
 var business_site_index: int = 0
 var business_offer_page: int = 0
@@ -225,7 +232,26 @@ func _draw_native(shell: MainShell, rect: Rect2) -> void:
 	var right := Rect2(left.end.x+16, left.position.y, rect.end.x-left.end.x-36, left.size.y)
 	shell.card(left, "已知岗位 / 当前需要")
 	var y := left.position.y+50
-	if native_scope_expanded and business_mode:
+	var notices:=_personal.get("commercial_information",[]) as Array
+	if not notices.is_empty():
+		var last:=notices.back() as Dictionary
+		shell.label(Vector2(left.position.x+14,y),"已收到：%s · %s · %s" % [str(last["item"]),str(last["place_id"]),"公告有效" if last["current_notice"] else "历史公告"],10,Color(0.82,0.86,0.79),left.size.x-28)
+		y+=20
+		shell.button(Rect2(left.position.x+12,y,left.size.x-24,24),"查看本人已知的当前商品报价","person:market")
+		y+=30
+	if not _personal.get("leases",{}).get("enabled",false): lease_mode=false
+	if _personal.get("leases",{}).get("enabled",false):
+		shell.button(Rect2(left.position.x+12,y,left.size.x-24,24),"返回个人经济" if lease_mode else "住房使用与租金责任","lease_ui:personal_toggle")
+		y+=30
+	if not _personal.get("resident_services",{}).get("enabled",false): resident_services_mode=false
+	if _personal.get("resident_services",{}).get("enabled",false):
+		shell.button(Rect2(left.position.x+12,y,left.size.x-24,24),"返回岗位与需要" if resident_services_mode else "现场餐饮与个人服务","resident_service_ui:toggle")
+		y+=30
+	if lease_mode:
+		_draw_leases(shell,left,y,_personal.get("leases",{}),false)
+	elif resident_services_mode:
+		_draw_resident_services(shell,left,y)
+	elif native_scope_expanded and business_mode:
 		_draw_native_scope(shell,left,y)
 	else:
 		shell.label(Vector2(left.position.x+14,y), "管理："+str(_personal.get("management_scope_id", ""))+" · 所在地："+str(_personal.get("current_place_id", "")), 10, Color(0.82,0.86,0.79), left.size.x-28)
@@ -273,12 +299,18 @@ func _draw_native(shell: MainShell, rect: Rect2) -> void:
 			var employment := _personal.get("employment", {}) as Dictionary
 			var booking := _personal.get("work_booking", {}) as Dictionary
 			if not employment.is_empty():
+				shell.label(Vector2(left.position.x+14,y),"已接受时薪 %d · %s" % [int(employment.get("wage_per_hour",0)),str(employment.get("denomination",""))],10,Color(0.82,0.86,0.79),left.size.x-28)
+				y+=20
 				shell.label(Vector2(left.position.x+14,y), "工作地点："+str(employment.get("work_place_id", ""))+" · "+str(employment.get("site_id", "")), 10, Color(0.82,0.86,0.79), left.size.x-28)
 				y += 12
 				shell.button(Rect2(left.position.x+12,y,left.size.x-24,26), "已登记本期工作" if not booking.is_empty() else "登记工作 %d 小时" % int(employment.get("work_hours_available", employment.get("work_hours_limit",0))), "native:work", booking.is_empty() and bool(employment.get("can_work_now",false)))
 				y += 30
 				shell.button(Rect2(left.position.x+12,y,left.size.x-24,24), "申请结束未来劳动合同", "native:leave_job")
 				y += 32
+			for index: int in range((_personal.get("labor_market",{}).get("actions",[]) as Array).size()):
+				var row:=_personal["labor_market"]["actions"][index] as Dictionary
+				shell.button(Rect2(left.position.x+12,y,left.size.x-24,24),row["label"],"native:labor_action:"+str(index),row["can_execute"])
+				y+=28
 			var jobs: Array = _personal.get("known_jobs", [])
 			var job_page_size := maxi(1, int((left.end.y-y-42)/44))
 			native_jobs_page = clampi(native_jobs_page, 0, maxi(0, (jobs.size()-1)/job_page_size))
@@ -287,7 +319,7 @@ func _draw_native(shell: MainShell, rect: Rect2) -> void:
 				if y+40 > left.end.y-36: break
 				shell.label(Vector2(left.position.x+14,y), str(job["employer"])+" · "+str(job["place"]), 10, Color(0.82,0.86,0.79), left.size.x-28)
 				y += 10
-				shell.button(Rect2(left.position.x+12,y,left.size.x-24,25), "申请：%s · 名额 %d · 工资 %d / 小时" % [job["id"],int(job["positions"]),int(job["wage_per_hour"])], "native:apply:"+str(job["id"]), employment.is_empty() and int(job["positions"])>0)
+				shell.button(Rect2(left.position.x+12,y,left.size.x-24,25), "申请：%s · 名额 %d · 工资 %d / 小时" % [job["id"],int(job["positions"]),int(job["wage_per_hour"])], "native:apply:"+str(job["id"])+"|"+str(job.get("job_quote_id","")), employment.is_empty() and int(job["positions"])>0 and bool(job.get("quote_current",true)) and bool(job.get("recruiting",true)))
 				y += 44
 			shell.button(Rect2(left.position.x+12,left.end.y-30,90,24), "岗位上一页", "person:native_jobs_previous", native_jobs_page>0)
 			shell.button(Rect2(left.position.x+110,left.end.y-30,90,24), "岗位下一页", "person:native_jobs_next", (native_jobs_page+1)*job_page_size<jobs.size())
@@ -428,7 +460,7 @@ func _draw_native_scope(shell: MainShell, rect: Rect2, start_y: float) -> void:
 			break
 		var lifecycle := firm.get("lifecycle", {}) as Dictionary
 		if y+28 < rect.end.y-70:
-			shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,24), "停止生产采购，出售现有库存", "native:wind_down:"+str(firm["firm_id"]), lifecycle.get("status") != "FINISHED_NATIVE_IDENTITY_RETAINED")
+			shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,24), "停止生产采购，出售现有库存", "native:wind_down:"+str(firm["firm_id"]), (lifecycle.get("wind_down",{}).get("actions",[{}])[0].get("can_execute",false) if lifecycle.get("wind_down",{}).get("enabled",false) else lifecycle.get("status") != "FINISHED_NATIVE_IDENTITY_RETAINED"))
 			y += 28
 		shell.label(Vector2(rect.position.x+14,y), "管理者："+str(lifecycle.get("manager", ""))+" · "+str(lifecycle.get("status", "")), 10, Color(0.82,0.86,0.79), rect.size.x-28)
 		y += 12
@@ -510,7 +542,11 @@ func _draw_capital(shell: MainShell, rect: Rect2, y: float) -> void:
 	for site: Dictionary in entry["sites"]:
 		if site["id"] == row["site_id"]: lines.append("现时产能："+str(site["effective_capacity"])+" · 基础 "+str(site["base_capacity"]))
 	if entry["kind"] == "options":
-		lines.append("新增产能："+str(row["capacity"])+" · 兼容 "+str(row["activities"]))
+		if row.has("building"):
+			lines.append("新增可租空间："+str(row["capacity"])+" "+str(row["building"]["object"]["unit"]))
+			lines.append("建设依据："+str(row["building"]["permit"]["id"])+" · "+str(row.get("construction_reason","")))
+			lines.append("已知建造估算："+str(row.get("known_estimate",{})))
+		else:lines.append("新增产能："+str(row["capacity"])+" · 兼容 "+str(row["activities"]))
 		lines.append("所需资本品："+str(row["materials"]))
 		lines.append("施工："+str(row["hours"])+" 工时 · 最少 "+str(row["duration_minutes"])+" 分钟")
 		lines.append("预算上限："+str(row["budget"])+" · 保留资金 "+str(row["cash_floor"]))
@@ -521,7 +557,12 @@ func _draw_capital(shell: MainShell, rect: Rect2, y: float) -> void:
 		lines.append("原订单："+str(row["orders"]))
 		lines.append("施工工资责任："+str(row["wage_liability"])+" · "+str(row["reason"]))
 	else:
-		lines.append("设备能力："+str(row["capacity"])+" · "+str(row["activities"]))
+		if row.has("rental_use"):
+			var use:=row["rental_use"] as Dictionary
+			lines.append("建筑空间："+str(use["capacity"])+" "+str(use["unit"])+" · 当前可租 "+str(use["available"]))
+			lines.append("履约租金："+str(use["fulfilled_rent"])+" · 已收 "+str(use["received_cash"])+" · 欠收 "+str(use["rent_receivable"]))
+			lines.append("建设投入："+str(use.get("construction_cost",{}))+" · 未计折旧")
+		else:lines.append("设备能力："+str(row["capacity"])+" · "+str(row["activities"]))
 		lines.append("投入使用："+boundary_text(int(row["in_service_minute"])))
 		lines.append("形成项目："+str(row["project_id"]))
 	for line: String in lines:
@@ -559,6 +600,21 @@ func business_finance_request() -> Dictionary:
 	var rows := _business.get("financial_actions",[]) as Array
 	return (rows[business_finance_page]["request"] as Dictionary).duplicate(true) if business_finance_page>=0 and business_finance_page<rows.size() else {}
 
+func _business_service_actions() -> Array:
+	var rows: Array=(_business.get("services",{}).get("actions",[]) as Array).duplicate(true)
+	rows.append_array(_business.get("commercial_information",{}).get("actions",[]))
+	rows.append_array(_business.get("labor_market",{}).get("actions",[]))
+	rows.append_array(_business.get("wind_down",{}).get("actions",[]))
+	return rows
+
+func labor_request(index: int) -> Dictionary:
+	var rows:=_personal.get("labor_market",{}).get("actions",[]) as Array
+	return rows[index].duplicate(true) if index>=0 and index<rows.size() else {}
+
+func business_service_request(index: int) -> Dictionary:
+	var rows:=_business_service_actions()
+	return rows[index].duplicate(true) if index>=0 and index<rows.size() else {}
+
 func _draw_business(shell: MainShell, rect: Rect2, start: float) -> void:
 	var y := start
 	if _business.is_empty():
@@ -581,6 +637,19 @@ func _draw_business(shell: MainShell, rect: Rect2, start: float) -> void:
 		shell.label(Vector2(rect.position.x+14,y),"可用 %d · 预留 %d · %s" % [int(cash["available"]),int(cash["reserved"]),currency],10,Color(0.82,0.86,0.79),rect.size.x-28)
 		y+=18
 	var site := _business["site"] as Dictionary
+	if not _business.get("leases",{}).get("enabled",false): business_leases_mode=false
+	if _business.get("leases",{}).get("enabled",false):
+		shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,23),"返回经营信息" if business_leases_mode else "经营场地租约与出租责任","lease_ui:business_toggle")
+		y+=28
+		if business_leases_mode:
+			_draw_leases(shell,rect,y,_business["leases"],true)
+			return
+	if _business.get("services",{}).get("enabled",false) or _business.get("labor_market",{}).get("enabled",false):
+		shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,23),"返回经营信息" if business_services_mode else "服务、用工与经营处置" if _business.get("wind_down",{}).get("enabled",false) else "服务、招聘与商业公告" if _business.get("labor_market",{}).get("enabled",false) else "服务、商业公告与宣传","service_ui:toggle")
+		y+=28
+		if business_services_mode:
+			_draw_business_services(shell,rect,y)
+			return
 	shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,23),"生产与采购" if business_finance_mode else "现金、欠薪与企业信用","person:business_finance")
 	y+=28
 	if business_finance_mode:
@@ -588,6 +657,16 @@ func _draw_business(shell: MainShell, rect: Rect2, start: float) -> void:
 		return
 	shell.label(Vector2(rect.position.x+14,y),"有效产能 %d · 实际工时 %d · 本日生产工时 %d" % [int(site["shared_capacity"]),int(site.get("plan",{}).get("labor_hours",0)),int(site.get("plan",{}).get("used_hours",0))],10)
 	y+=18
+	var retail:=_business.get("retail",{}) as Dictionary
+	if not retail.is_empty():
+		shell.label(Vector2(rect.position.x+14,y),"门店营业余量 %d · 已分配工时 %d · 场地 %s" % [int(retail["available_sales_units"]),int(retail["allocated_hours"]),"有效" if retail["premises_allowed"] else "不可使用"],10)
+		y+=18
+		shell.label(Vector2(rect.position.x+14,y),"可售 %s · 在途 %s" % [str(retail["inventory"]),str(retail["incoming"])],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=18
+		shell.label(Vector2(rect.position.x+14,y),"近期销量 %s · 商品已知贡献 %s（未扣营业工资和租金）" % [str(retail["recent_sales"]),str(retail["operating_result"]["known_goods_contribution"])],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=18
+		shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,23),"暂停门店地点" if site["site_status"]["enabled"] else "恢复门店地点",("native:site_pause:" if site["site_status"]["enabled"] else "native:site_resume:")+str(_business["firm_id"])+"|"+str(_business["site_id"]))
+		y+=26
 	var activities := site["activities"] as Array
 	business_activity_page=clampi(business_activity_page,0,maxi(0,activities.size()-1))
 	for i: int in range(business_activity_page,mini(activities.size(),business_activity_page+1)):
@@ -621,6 +700,24 @@ func _draw_business(shell: MainShell, rect: Rect2, start: float) -> void:
 func _draw_business_finance(shell: MainShell, rect: Rect2, start: float) -> void:
 	var y := start
 	var finance := _business["finance"] as Dictionary
+	var costs := finance.get("direct_costs",{}) as Dictionary
+	if costs.get("enabled",false):
+		for currency: String in costs.get("sales_revenue",{}):
+			shell.label(Vector2(rect.position.x+14,y),"履约收入 %d · 已售已知直接成本 %d" % [int(costs["sales_revenue"][currency]),int(costs["sold_known_cost"].get(currency,0))],10,Color(0.82,0.86,0.79),rect.size.x-28)
+			y+=19
+			shell.label(Vector2(rect.position.x+14,y),"可比部分贡献 %d · %s" % [int(costs["contribution_after_known_refunds"].get(currency,0)),currency],10)
+			y+=19
+		shell.label(Vector2(rect.position.x+14,y),"未知 %d 笔 · 跨币不可比 %d 笔；非净利润。" % [int(costs.get("unknown_sales",0)),int(costs.get("incomparable_sales",0))],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=23
+		var currencies: Dictionary={}
+		for field: String in ["separate_transport_expense","handling_wages_incurred","loss_known_cost","refunds_confirmed_payable","damages_confirmed_payable"]:
+			for currency: String in costs.get(field,{}): currencies[currency]=true
+		for currency: String in currencies:
+			if y+42>rect.end.y-160: break
+			shell.label(Vector2(rect.position.x+14,y),"独立物流 %d · 装卸工资 %d · 已知物损 %d %s" % [int(costs.get("separate_transport_expense",{}).get(currency,0)),int(costs.get("handling_wages_incurred",{}).get(currency,0)),int(costs.get("loss_known_cost",{}).get(currency,0)),currency],10,Color(0.82,0.86,0.79),rect.size.x-28)
+			y+=19
+			shell.label(Vector2(rect.position.x+14,y),"待付退款 %d · 待付赔偿 %d；物损不指定最终责任方。" % [int(costs.get("refunds_confirmed_payable",{}).get(currency,0)),int(costs.get("damages_confirmed_payable",{}).get(currency,0))],10,Color(0.82,0.86,0.79),rect.size.x-28)
+			y+=23
 	for currency: String in finance.get("matured_wages",{}):
 		var wages := finance["matured_wages"][currency] as Dictionary
 		shell.label(Vector2(rect.position.x+14,y),"到期欠薪 %d · 最久 %d 日 · %s" % [int(wages["amount"]),int(wages["arrears_days"]),currency],10,Color(0.82,0.86,0.79),rect.size.x-28)
@@ -645,3 +742,141 @@ func _draw_business_finance(shell: MainShell, rect: Rect2, start: float) -> void
 	if row["kind"]=="BORROW": shell.label(Vector2(rect.position.x+14,y+20),"固定利息 %d · 期限 %d 日" % [int(row["interest"]),int(row["duration_days"])],10)
 	shell.button(Rect2(rect.position.x+12,rect.end.y-28,100,23),"信用上一项","person:business_credit_previous",business_finance_page>0)
 	shell.button(Rect2(rect.position.x+122,rect.end.y-28,100,23),"信用下一项","person:business_credit_next",business_finance_page+1<rows.size())
+
+func _draw_business_services(shell: MainShell, rect: Rect2, start: float) -> void:
+	var y:=start
+	var service:=_business["services"] as Dictionary
+	var closing:=_business.get("wind_down",{}) as Dictionary
+	if closing.get("enabled",false) and y+60<rect.end.y-100:
+		shell.label(Vector2(rect.position.x+14,y),"经营收尾："+str(closing["phase"])+" · "+str(closing["finish_reason"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=24
+		for claim: Dictionary in (closing.get("obligations",[]) as Array).slice(0,2):
+			if y+22>rect.end.y-100: break
+			shell.label(Vector2(rect.position.x+14,y),str(claim["kind"])+" · "+str(claim["remaining"])+" "+str(claim["currency"])+" · "+str(claim["state"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+			y+=22
+	var operating:=_business.get("finance",{}).get("direct_costs",{}).get("services",{}) as Dictionary
+	var currencies: Dictionary={}
+	for key: String in ["fulfilled_revenue","client_expense_incurred"]:
+		for currency: String in operating.get(key,{}): currencies[currency]=true
+	for currency: String in currencies:
+		if y+42>rect.end.y-130: break
+		shell.label(Vector2(rect.position.x+14,y),"服务履约收入 %d · 费用 %d · %s" % [int(operating.get("fulfilled_revenue",{}).get(currency,0)),int(operating.get("client_expense_incurred",{}).get(currency,0)),currency],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=18
+		shell.label(Vector2(rect.position.x+14,y),"已收 %d · 已付 %d；完整已结合同的已知直接贡献 %d，非净利润。" % [int(_business["finance"].get("service_fees_received",{}).get(currency,0))+int(_business["finance"].get("publication_fees_received",{}).get(currency,0)),int(_business["finance"].get("service_fees_paid",{}).get(currency,0))+int(_business["finance"].get("advertising_paid",{}).get(currency,0)),int(operating.get("known_contract_contribution",{}).get(currency,0))],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=24
+	var publicity:=_business.get("commercial_information",{}) as Dictionary
+	if publicity.get("enabled",false):
+		shell.label(Vector2(rect.position.x+14,y),"宣传费用 %s · 已付 %s（期间费用，非商品进价）" % [str(operating.get("advertising_expense_incurred",{})),str(operating.get("advertising_cash_paid",{}))],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=22
+		var notices:=publicity.get("announcements",[]) as Array
+		if not notices.is_empty():
+			var last:=notices.back() as Dictionary
+			shell.label(Vector2(rect.position.x+14,y),"最近公告：%s · 安排 %d · 送达主体 %d；送达不代表成交。" % [str(last["item"]),int(last["scheduled_recipients"]),int(last["delivered_recipients"])],10,Color(0.82,0.86,0.79),rect.size.x-28)
+			y+=20
+			var observed:=last.get("own_sales_observation",{}) as Dictionary
+			if last["kind"]=="GOODS":
+				shell.label(Vector2(rect.position.x+14,y),"公告后有限窗口交付 %d；不作为广告归因销量。" % int(observed.get("delivered_goods_quantity",0)),10,Color(0.82,0.86,0.79),rect.size.x-28)
+				y+=24
+	for job: Dictionary in _business.get("labor_market",{}).get("jobs",[]):
+		if y+44>rect.end.y-130: break
+		shell.label(Vector2(rect.position.x+14,y),"用工 %s：聘用 %d · 空缺 %d · 未来时薪 %d；旧合同另计。" % [job["job_id"],job["employed_workers"],job["vacancies"],job["current_quote"]["wage_per_hour"]],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=26
+		for accepted: Dictionary in job["contracts"]:
+			if y+24>rect.end.y-130: break
+			var c:=accepted["contract"] as Dictionary
+			shell.label(Vector2(rect.position.x+14,y),"实际合同 %s · %d人份 · 时薪 %d · %s" % [accepted["worker"],c["workers"],c.get("terms",{}).get("wage_per_hour",job["current_quote"]["wage_per_hour"]),c["denomination"]],10,Color(0.82,0.86,0.79),rect.size.x-28)
+			y+=22
+	var actions:=_business_service_actions()
+	business_service_page=clampi(business_service_page,0,maxi(0,actions.size()-1))
+	if not actions.is_empty():
+		var row:=actions[business_service_page] as Dictionary
+		shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,24),row["label"],"native:service_action:"+str(business_service_page),row["can_execute"])
+		y+=28
+		shell.label(Vector2(rect.position.x+14,y),str(row["reason"])+" · 执行时重新检查资金、授权、物资和设施。",10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=24
+	else:
+		shell.label(Vector2(rect.position.x+14,y),"尚无当前地点可执行的已知服务候选。",11)
+		y+=24
+	for c: Dictionary in service.get("contracts",[]):
+		if y+70>rect.end.y-36: break
+		shell.label(Vector2(rect.position.x+14,y),str(c["kind"])+" · "+str(c["status"])+" · "+str(c["id"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=18
+		shell.label(Vector2(rect.position.x+14,y),"履约 %d · 已付 %d · 未付 %d · 保管 %d · %s" % [int(c["earned"]),int(c["paid"]),int(c["payable"]),int(c["remaining_custody_quantity"]),c["denomination"]],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=18
+		shell.label(Vector2(rect.position.x+14,y),str(c["reason"])+(" · 实际服务份数 "+str(c["resident"]["fulfilled"])+" / "+str(c["quantity"]) if c.has("resident") else " · 发布工作与投递分开，不保证成交。" if c["kind"]=="ANNOUNCEMENT" else " · 商品及设备产权保留。"),10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=26
+	shell.button(Rect2(rect.position.x+12,rect.end.y-28,100,23),"经营上一项","service_ui:previous",business_service_page>0)
+	shell.button(Rect2(rect.position.x+122,rect.end.y-28,100,23),"经营下一项","service_ui:next",business_service_page+1<actions.size())
+
+func resident_service_request(index: int) -> Dictionary:
+	var rows:=_personal.get("resident_services",{}).get("actions",[]) as Array
+	return rows[index].duplicate(true) if index>=0 and index<rows.size() else {}
+func _draw_resident_services(shell: MainShell,rect: Rect2,start: float) -> void:
+	var view:=_personal.get("resident_services",{}) as Dictionary
+	var y:=start
+	shell.label(Vector2(rect.position.x+14,y),"同地预约 · 下个日界履行 · 不与本人劳动重叠",10,Color(0.82,0.86,0.79),rect.size.x-28)
+	y+=24
+	shell.label(Vector2(rect.position.x+14,y),"预约后仍需真实食品和人员；未履行不产生满足。",10,Color(0.82,0.86,0.79),rect.size.x-28)
+	y+=24
+	for target: Dictionary in view.get("targets",[]):
+		shell.label(Vector2(rect.position.x+14,y),str(target["need_id"])+"："+str(target["satisfied_people"])+" / "+str(target["required_people"])+" · 有效至 "+boundary_text(target["window_end"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=24
+	var actions:=view.get("actions",[]) as Array
+	resident_service_page=clampi(resident_service_page,0,maxi(0,actions.size()-1))
+	if not actions.is_empty():
+		var row:=actions[resident_service_page] as Dictionary
+		shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,25),row["label"],"native:resident_service_action:"+str(resident_service_page),row["can_execute"])
+		y+=32
+		for offer: Dictionary in view.get("offers",[]):
+			if offer["id"]==row["payload"].get("offer_id"):
+				shell.label(Vector2(rect.position.x+14,y),str(offer["place_id"])+" · 下期可预约 "+str(offer["available_capacity"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+				y+=24
+		shell.label(Vector2(rect.position.x+14,y),str(row["reason"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=34
+	for c: Dictionary in view.get("contracts",[]):
+		if y+54>rect.end.y-36: break
+		shell.label(Vector2(rect.position.x+14,y),str(c["kind"])+" · "+str(c["status"])+" · 已履行 "+str(c["resident"]["fulfilled"])+" / "+str(c["quantity"]),11,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=22
+		shell.label(Vector2(rect.position.x+14,y),"已付 "+str(c["paid"])+" / "+str(c["earned"])+" "+str(c["denomination"])+" · "+str(c["reason"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=32
+	shell.button(Rect2(rect.position.x+12,rect.end.y-28,100,23),"服务上一项","resident_service_ui:previous",resident_service_page>0)
+	shell.button(Rect2(rect.position.x+122,rect.end.y-28,100,23),"服务下一项","resident_service_ui:next",resident_service_page+1<actions.size())
+
+func lease_request(index:int,business:bool)->Dictionary:
+	var view:Dictionary=_business.get("leases",{}) if business else _personal.get("leases",{})
+	var rows:=view.get("actions",[]) as Array
+	return rows[index].duplicate(true) if index>=0 and index<rows.size() else {}
+func _draw_leases(shell:MainShell,rect:Rect2,start:float,view:Dictionary,business:bool)->void:
+	var y:=start
+	var housing:=view.get("housing",{}) as Dictionary
+	if not housing.is_empty():
+		shell.label(Vector2(rect.position.x+14,y),"住房目标 %d · 当前可用 %d · 上个日界满足 %d" % [housing["required_people"],housing["current_usable_people"],housing["last_day_satisfied"]],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=22
+		shell.label(Vector2(rect.position.x+14,y),"仅明确开发目标；不推断无家可归，不办理常住迁居。",10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=26
+	var actions:=view.get("actions",[]) as Array
+	lease_page=clampi(lease_page,0,maxi(0,actions.size()-1))
+	if not actions.is_empty():
+		var row:=actions[lease_page] as Dictionary
+		shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,25),row["label"],"native:lease_action:"+("business:" if business else "personal:")+str(lease_page),row["can_execute"])
+		y+=32
+		for q:Dictionary in view.get("quotes",[]):
+			if q["id"]==row["payload"].get("offer_id"):
+				shell.label(Vector2(rect.position.x+14,y),str(q["place_id"])+" · 可用 "+str(q["available"])+" "+str(q["unit"])+" · "+str(row["payload"].get("term_days",q["period_days"]))+"日",10,Color(0.82,0.86,0.79),rect.size.x-28)
+				y+=24
+		shell.label(Vector2(rect.position.x+14,y),str(row["reason"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=30
+	for c:Dictionary in view.get("contracts",[]):
+		if y+64>rect.end.y-38:break
+		shell.label(Vector2(rect.position.x+14,y),str(c["place_id"])+" · "+str(c["state"])+" · 使用份额 "+str(c["quantity"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=20
+		shell.label(Vector2(rect.position.x+14,y),"锁定 %d · 已发生 %d · 已付 %d · 到期未付 %d" % [c["total"],c["accrued"],c["paid"],c["payable"]],10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=20
+		shell.label(Vector2(rect.position.x+14,y),str(c["reason"])+" · "+str(c["denomination"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=24
+		if not c.get("asset_available",true) and y+24<rect.end.y-38:
+			shell.label(Vector2(rect.position.x+14,y),"建筑暂不可用；原合同、占用和欠款保留。",10,Color(0.85,0.73,0.65),rect.size.x-28)
+			y+=24
+	shell.button(Rect2(rect.position.x+12,rect.end.y-28,100,23),"租约上一项","lease_ui:previous",lease_page>0)
+	shell.button(Rect2(rect.position.x+122,rect.end.y-28,100,23),"租约下一项","lease_ui:next",lease_page+1<actions.size())
+

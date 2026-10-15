@@ -32,6 +32,13 @@ const Exchange = preload("res://scripts/world/economy_currency_exchange.gd")
 const Assets = preload("res://scripts/world/economy_asset_market.gd")
 const Capital = preload("res://scripts/world/economy_capital_formation.gd")
 const Liquidity = preload("res://scripts/world/economy_liquidity_rules.gd")
+const CostAllocation = preload("res://scripts/world/economy_cost_allocation.gd")
+const WindDown = preload("res://scripts/world/economy_wind_down.gd")
+const LaborMarket = preload("res://scripts/world/economy_labor_market.gd")
+const Commercial = preload("res://scripts/world/economy_commercial_information.gd")
+const Retail = preload("res://scripts/world/economy_retail_rules.gd")
+const Leases = preload("res://scripts/world/economy_lease_market.gd")
+const Services = preload("res://scripts/world/economy_service_market.gd")
 
 var error: String = ""
 var processing: bool = false
@@ -133,6 +140,13 @@ var _credit: Credit = Credit.new()
 var _exchange: Exchange = Exchange.new()
 var _assets: Assets = Assets.new()
 var _capital: Capital = Capital.new()
+var _costs: CostAllocation = CostAllocation.new()
+var _service_market: Services = Services.new()
+var _leases: Leases = Leases.new()
+var _retail: Retail = Retail.new()
+var _commercial: Commercial = Commercial.new()
+var _labor_market: LaborMarket = LaborMarket.new()
+var _wind_down: WindDown = WindDown.new()
 
 
 func bind(world: WorldState, settings: Dictionary, admission_minutes: Dictionary = {}) -> bool:
@@ -143,6 +157,14 @@ func bind(world: WorldState, settings: Dictionary, admission_minutes: Dictionary
 	_world = world
 	_capital.bind(self)
 	config = EconomySliceConfig.canonical(settings)
+	_costs.bind(self)
+	_lots.costs = _costs
+	_service_market.bind(self)
+	_retail.bind(self)
+	_commercial.bind(self)
+	_labor_market.bind(self)
+	_wind_down.bind(self)
+	_leases.bind(self)
 	_invalidate_configuration_queries()
 	_subject_activation = admission_minutes.duplicate(true)
 	_spec = EconomySliceConfig.normalize(config, world.person_overlay.person_ids())
@@ -151,6 +173,7 @@ func bind(world: WorldState, settings: Dictionary, admission_minutes: Dictionary
 	_lots.configure(_goods, _actor_ids_from_spec())
 	_budgets.configure(config.get("procurement_budgets", []))
 	_cargo_fulfilment.bind(self)
+	if not _leases.validate_host(): return _fail(_leases.error)
 	for rule: Dictionary in _budgets.rules:
 		var valid_subject: bool = _spec["firms"].has(rule["subject"])
 		for firm: String in _firm_ids():
@@ -570,7 +593,7 @@ func _deliver_messages() -> void:
 		if int(message["delivery_day"]) > day:
 			pending.append(message)
 			continue
-		if message["kind"] == "job_posting" and int(_receipts.get(message["id"], {}).get("version", 0)) >= int(message["version"]): continue
+		if message["kind"] == "job_posting" and _receipts.has(message["id"]) and int(_receipts[message["id"]].get("version", 0)) >= int(message["version"]): continue
 		if message["kind"] == "directory":
 			_deliver_directory(message)
 			continue
@@ -578,10 +601,16 @@ func _deliver_messages() -> void:
 		if message["kind"] == "site_report":
 			_site_reports[message["candidate"]] = message.duplicate(true)
 			continue
+		if message.get("source")=="commercial":
+			_commercial.adopted_message(message)
+			if message["kind"]=="service_offer":
+				_receipts[message["id"]]=message.duplicate(true)
+				continue
 		var known: Array = _actors[message["actor"]][key] if _actors.has(message["actor"]) else _firm_knowledge[_inventory_key(message["actor"])]
 		if not known.has(message["candidate"]):
 			known.append(message["candidate"])
 			known.sort()
+		if message.get("source")=="labor_market": _labor_market.adopted_message(message)
 		_receipts[message["id"]] = message.duplicate(true)
 	_messages = pending
 
@@ -720,7 +749,14 @@ func _accept(actor: String, command: Dictionary, internal: bool = false) -> Dict
 	if not advance_time(): return _result(false, error)
 	var payload := command["payload"] as Dictionary
 	var result: Dictionary
+	var restriction:=_wind_down.restriction(actor,command["kind"],payload)
+	if not restriction.is_empty(): return _result(false,restriction)
 	match command["kind"]:
+		"pay_enterprise_debt": result=_wind_down.request(actor,payload,action_id)
+		"set_job_offer", "propose_employment_terms", "accept_employment_terms": result=_labor_market.request(actor,command["kind"],payload,action_id)
+		"publish_notice", "withdraw_announcement", "set_publicity_policy": result=_commercial.request(actor,command["kind"],payload,action_id)
+		"request_lease", "handover_lease", "end_lease", "return_lease", "pay_lease", "set_lease_offer": result = _leases.request(actor,command["kind"],payload,action_id)
+		"request_service", "withdraw_service_goods", "cancel_service", "pause_service", "set_service_offer", "reschedule_service": result = _service_market.request(actor,command["kind"],payload,action_id)
 		"finance_firm": result = _firm_finance_action(actor,payload,action_id)
 		"finance_investment": result = _capital_finance_action(actor, payload, action_id)
 		"invest", "investment_status", "capital_status", "maintain_capital": result = _capital.request(actor, payload, action_id, command["kind"])
@@ -735,7 +771,7 @@ func _accept(actor: String, command: Dictionary, internal: bool = false) -> Dict
 		"request_scope_exit": result = _request_scope_exit(actor, payload, action_id)
 		"reenter_scope": result = _request_scope_reentry(actor, payload, action_id)
 		"retry_scope_exit": result = _retry_scope_exit(actor, payload)
-		"apply": result = _apply(actor, payload)
+		"apply": result = _apply(actor, payload,action_id)
 		"leave_job": result = _request_employment_end(actor, payload, action_id)
 		"request_firm_management", "accept_firm_management": result = _management_change_action(actor, payload, action_id, command["kind"])
 		"close_site", "finish_firm", "wind_down_firm": result = _request_operating_change(actor, payload, action_id, command["kind"])
@@ -756,9 +792,11 @@ func _accept(actor: String, command: Dictionary, internal: bool = false) -> Dict
 		"pay_dividend": result = _assets.dividend(actor, payload, int(command["minute"]), action_id)
 		_: result = _result(false, "UNKNOWN_ACTION")
 	_commands[action_id] = {"envelope": envelope, "result": result.duplicate(true)}
+	if _costs.enabled and command["kind"] in ["report_cargo_loss", "confirm_cargo_loss", "notify_cargo_loss", "propose_cargo_disposition", "confirm_cargo_disposition", "execute_cargo_disposition"]: _costs._scores_cache.clear()
 	_index_command_access(_commands[action_id])
 	if is_multi():
 		_commands[action_id]["source"] = "firm" if not _actors.has(actor) else "automatic" if internal else "player"
+	if result.get("accepted",false) and command["kind"]=="execute_cargo_disposition": _costs._scores_cache.clear()
 	if result.get("accepted", false) and command["kind"] in ["buy", "transfer_goods", "send_personal_goods", "execute_cargo_disposition", "collect", "report_cargo_loss", "confirm_cargo_loss"] and not processing:
 		if not _advance_shipments(true) or not _dispatch_transport(true): result["process_followup_error"] = error
 	return result
@@ -851,6 +889,9 @@ func _job(id: String) -> Dictionary:
 	if not job.is_empty():
 		job["denomination"] = job.get("denomination", FormalLedgerState.DENOMINATION)
 		job["positions"] = _job_postings.get(id, {}).get("positions", job["positions"])
+	if _labor_market.controls(id):
+		var q:=_labor_market.current(id)
+		job["wage_per_hour"]=q["wage_per_hour"]
 	if not is_multi():
 		job.erase("wage_delay")
 	return job
@@ -890,19 +931,25 @@ func _work_rows(actor: String) -> Array[Dictionary]:
 func _work_id(date: int, actor: String, job: String) -> String:
 	return "work:"+str(date)+":"+actor+(":"+job if not _cohort_profile(actor).is_empty() else "")
 
-func _valid_employment_container(value: Variant, actor: String, known: Array, commands: Dictionary) -> bool:
+func _valid_employment_container(value: Variant, actor: String, known: Array, commands: Dictionary, at_minute: int=-1) -> bool:
 	if not value is Dictionary or not _spec["actors"].has(actor): return false
 	var profile := _cohort_profile(actor)
 	var pooled: bool = not profile.is_empty()
 	if pooled and (not FormalLedgerState.exact_fields(value, ["allocations"]) or not value["allocations"] is Dictionary or value["allocations"].is_empty() or value["allocations"].size() > int(profile["max_jobs"])): return false
-	if not pooled and not FormalLedgerState.exact_fields(value, ["job", "workers", "denomination"]): return false
+	if not pooled and not EconomySliceConfig._fields(value, ["job", "workers", "denomination"], ["terms","employment_action_id"]): return false
 	var spans: Array[Vector2i] = []
 	var fields: Array[String] = ["job", "workers", "denomination"]
 	if pooled: fields.append("labor_start")
 	for contract: Dictionary in _contract_rows(value):
-		if not FormalLedgerState.exact_fields(contract, fields) or not contract["job"] is String or not _spec["jobs"].has(contract["job"]) or not known.has(contract["job"]) or not FormalLedgerState.valid_amount(contract["workers"]) or int(contract["workers"]) < 1: return false
-		var job := _job(contract["job"])
+		var actual_fields:=fields.duplicate()
+		if contract.has("terms") or contract.has("employment_action_id"): actual_fields.append_array(["terms","employment_action_id"])
+		if not FormalLedgerState.exact_fields(contract, actual_fields) or not contract["job"] is String or not _spec["jobs"].has(contract["job"]) or not known.has(contract["job"]) or not FormalLedgerState.valid_amount(contract["workers"]) or int(contract["workers"]) < 1: return false
+		var job := _labor_market.contract_job(contract)
 		if int(contract["workers"]) > Cohorts.labor_members(_spec["actors"][actor]) or int(_spec["actors"][actor]["skill"]) < int(job["skill"]) or contract["denomination"] != job["denomination"] or _account(actor, str(contract["denomination"])).is_empty(): return false
+		if not contract.has("terms") and _labor_market.controls(contract["job"]) and _labor_market.ready and _labor_market.pinned_source_exists(actor,contract["job"],commands,_world.game_clock.total_minutes() if at_minute<0 else at_minute): return false
+		if contract.has("terms"):
+			if not _labor_market.controls(contract["job"]) or not contract["terms"] is Dictionary or not contract["employment_action_id"] is String: return false
+			if _labor_market.ready and not _labor_market.valid_contract(contract,actor,commands,_world.game_clock.total_minutes() if at_minute<0 else at_minute): return false
 		if pooled:
 			if value["allocations"].get(contract["job"]) != contract or not Cohorts.allows_job(_spec["actors"][actor], contract["job"]) or not FormalLedgerState.valid_amount(contract["labor_start"]): return false
 			var span := Vector2i(int(contract["labor_start"]), int(contract["labor_start"])+int(contract["workers"]))
@@ -910,8 +957,8 @@ func _valid_employment_container(value: Variant, actor: String, known: Array, co
 			for previous: Vector2i in spans:
 				if span.x < previous.y and previous.x < span.y: return false
 			spans.append(span)
-			var formed: bool = false
-			for action: Dictionary in commands.values():
+			var formed: bool = contract.has("terms")
+			for action: Dictionary in ([] if formed else commands.values()):
 				var command := action.get("envelope", {}).get("command", {}) as Dictionary
 				var outcome := action.get("result", {}) as Dictionary
 				if action.get("envelope", {}).get("actor") == actor and command.get("kind") == "apply" and command.get("payload", {}).get("job_id") == contract["job"] and outcome.get("accepted") == true and outcome.get("workers") == contract["workers"] and outcome.get("labor_start") == contract["labor_start"]: formed = true
@@ -930,15 +977,16 @@ func _valid_work_queue(value: Dictionary, actor: String) -> bool:
 	for id: String in jobs:
 		var work: Variant = jobs[id]
 		var contract := Cohorts.contract(value["contracts"][actor], id)
-		if contract.is_empty() or not work is Dictionary or not FormalLedgerState.exact_fields(work, ["action_id", "day", "hours"]) or typeof(work["day"]) != TYPE_INT or int(work["day"]) != int(value["day"])+1 or not FormalLedgerState.valid_amount(work["hours"]) or int(work["hours"]) <= 0 or int(work["hours"]) > int(_job(id)["hours"])*int(contract["workers"]) or not _accepted_command(value, actor, work["action_id"], "work"): return false
+		if contract.is_empty() or not work is Dictionary or not FormalLedgerState.exact_fields(work, ["action_id", "day", "hours"]) or typeof(work["day"]) != TYPE_INT or int(work["day"]) != int(value["day"])+1 or not FormalLedgerState.valid_amount(work["hours"]) or int(work["hours"]) <= 0 or int(work["hours"]) > int(_labor_market.contract_job(contract)["hours"])*int(contract["workers"]) or not _accepted_command(value, actor, work["action_id"], "work"): return false
 		var command := value["commands"][work["action_id"]]["envelope"]["command"] as Dictionary
+		if _service_market._resident.work_conflict(actor,id,int(work["day"])): return false
 		if command["payload"].get("hours") != work["hours"] or (pooled and command["payload"].get("job_id") != id): return false
 		if uses_host_accounts() and (int(command["minute"])/1440 != int(value["day"]) or int(work["hours"]) > ((int(work["day"])*1440-int(command["minute"]))/60)*int(contract["workers"])): return false
 	return true
 
-func _apply(actor: String, payload: Dictionary) -> Dictionary:
+func _apply(actor: String, payload: Dictionary, action_id: String="") -> Dictionary:
 	if _legacy_wage_still_active(actor): return _result(false, "LEGACY_WAGE_TERMINATION_REQUIRED")
-	var optional: Array[String] = []
+	var optional: Array[String] = ["job_quote_id"]
 	if not _cohort_profile(actor).is_empty(): optional.append("workers")
 	if not EconomySliceConfig._fields(payload, ["job_id"], optional) or not payload["job_id"] is String or not (_actors[actor]["known_jobs"] as Array).has(payload["job_id"]):
 		return _result(false, "UNKNOWN_JOB")
@@ -950,8 +998,14 @@ func _apply(actor: String, payload: Dictionary) -> Dictionary:
 	var job := _job(payload["job_id"])
 	if _firm_winding_down(job["employer"]) or not _site_accepting(job["site_id"]):
 		return _result(false, "FIRM_STOPPED_NEW_BUSINESS")
-	if manages_person(actor) and _at_place(actor, job["place"]): _observe_local_posting(actor, job["id"])
-	if int(_job_postings[job["id"]]["version"]) > 0 and int(_receipts.get("posting:" + actor + ":" + str(job["id"]), {}).get("version", 0)) != int(_job_postings[job["id"]]["version"]):
+	var dynamic:=_labor_market.controls(job["id"]);var accepted_quote: Dictionary={}
+	if dynamic:
+		var result:=_labor_market.applicable(actor,job["id"],str(payload.get("job_quote_id","")))
+		if not result["accepted"]: return result
+		accepted_quote=result["quote"]
+	elif payload.has("job_quote_id"): return _result(false,"FIXED_JOB_HAS_NO_DYNAMIC_QUOTE")
+	if not dynamic and manages_person(actor) and _at_place(actor, job["place"]): _observe_local_posting(actor, job["id"])
+	if not dynamic and int(_job_postings[job["id"]]["version"]) > 0 and int(_receipts.get("posting:" + actor + ":" + str(job["id"]), {}).get("version", 0)) != int(_job_postings[job["id"]]["version"]):
 		return _result(false, "STALE_JOB_NOTICE")
 	if (_spec["actors"][actor]["kind"] != "named" and _place(actor) != job["place"]) or _account(actor, job["denomination"]).is_empty() or _account(job["employer"], job["denomination"]).is_empty():
 		return _result(false, "JOB_PLACE_OR_CURRENCY_ACCOUNT")
@@ -970,17 +1024,20 @@ func _apply(actor: String, payload: Dictionary) -> Dictionary:
 	if workers <= 0:
 		return _result(false, "NO_VACANCY")
 	var contract := {"job": job["id"], "workers": workers, "denomination": job["denomination"]}
+	if dynamic and not _labor_market.affordable(job["id"],job["wage_per_hour"],workers): return _result(false,"EMPLOYER_CURRENT_PAYROLL_CASH_PRESSURE")
+	if dynamic: _labor_market.lock_contract(contract,action_id,accepted_quote)
 	if profile.is_empty(): _contracts[actor] = contract
 	else:
 		contract["labor_start"] = span.x
 		if not _contracts.has(actor): _contracts[actor] = {"allocations": {}}
 		_contracts[actor]["allocations"][job["id"]] = contract
-	return {"accepted": true, "reason": "ACCEPTED", "workers": workers, "labor_start": span.x}
+	var result:={"accepted": true, "reason": "ACCEPTED", "workers": workers, "labor_start": span.x}
+	if dynamic: result["employment"]=contract.duplicate(true)
+	return result
 
 
 func _queue_work(actor: String, payload: Dictionary, action_id: String) -> Dictionary:
 	if _legacy_wage_still_active(actor): return _result(false, "LEGACY_WAGE_TERMINATION_REQUIRED")
-	if _employment_end_pending(actor): return _result(false, "EMPLOYMENT_END_PENDING")
 	var fields: Array[String] = ["hours"]
 	if not _cohort_profile(actor).is_empty(): fields.append("job_id")
 	if not FormalLedgerState.exact_fields(payload, fields) or typeof(payload["hours"]) != TYPE_INT or not _contracts.has(actor):
@@ -988,15 +1045,18 @@ func _queue_work(actor: String, payload: Dictionary, action_id: String) -> Dicti
 	var hours := int(payload["hours"])
 	var contract := _contract_for(actor, str(payload.get("job_id", _contracts[actor].get("job", ""))))
 	if contract.is_empty(): return _result(false, "NO_ALLOCATED_JOB")
+	var work_workers:=_workable_workers(actor,contract)
+	if work_workers<1: return _result(false,"EMPLOYMENT_END_PENDING")
+	if _service_market._resident.work_conflict(actor,contract["job"],day+1): return _result(false,"RESIDENT_SERVICE_MEMBER_INTERVAL_ALREADY_BOOKED")
 	if not _site_operating(_job(contract["job"])["site_id"]):
 		return _result(false, "WORK_SITE_STOPPED")
 	if manages_person(actor) and _world.person_travel != null and _world.person_travel.active(actor):
 		return _result(false, "PERSON_JOURNEY_NOT_COMPLETED")
 	if not _at_place(actor, _job(contract["job"])["place"]):
 		return _result(false, "OUTSIDE_JOB_PLACE")
-	if hours <= 0 or hours > int(_job(contract["job"])["hours"]) * int(contract["workers"]):
+	if hours <= 0 or hours > int(_labor_market.contract_job(contract)["hours"]) * work_workers:
 		return _result(false, "LABOR_LIMIT")
-	var wage := int(_job(contract["job"])["wage_per_hour"])
+	var wage := int(_labor_market.contract_job(contract)["wage_per_hour"])
 	if wage > 0 and hours > FormalLedgerState.MAX_AMOUNT / wage:
 		return _result(false, "WAGE_AMOUNT_BOUNDS")
 	if uses_host_accounts() and hours > (((day + 1) * 1440 - _world.game_clock.total_minutes()) / 60) * int(contract["workers"]):
@@ -1014,7 +1074,7 @@ func _queue_work(actor: String, payload: Dictionary, action_id: String) -> Dicti
 
 func _committed(seller: String, good: String) -> int:
 	var quantity := 0
-	for id: String in _lots._by_location.get("SITE|"+_inventory_key(seller), {}):
+	for id: String in _lots._by_location.get("SITE|"+_inventory_key(seller)+"#"+good, {}):
 		var p := _lots.portions[id] as Dictionary
 		if p["good"] == good and not str(p["reserved_for"]).is_empty(): quantity += int(p["remaining"])
 	return quantity
@@ -1030,19 +1090,30 @@ func _offer(actor: String, seller: String, good: String, path_id: String = "", s
 		buyer_site = _inventory_key(actor, buyer_site)
 	seller_site = _inventory_key(seller, seller_site)
 	buyer_site = _inventory_key(actor, buyer_site) if _spec["firms"].has(actor) else ""
+	if path_id == "onsite:"+seller_site: return _onsite_offer(actor,seller,seller_site,good)
 	var price := _price(seller_site, good)
 	var denomination := _sale_currency(seller)
 	var path := _route_for(actor, seller, path_id, buyer_site, seller_site) if known_path.is_empty() else known_path
 	var stock := maxi(0, int(_stocks[seller_site][good]) - _committed(seller_site, good))
-	var legs := _locked_legs(path, denomination) if not path.is_empty() else []
+	var legs: Array[Dictionary] = []
+	if not path.is_empty(): legs.assign(_locked_legs(path, denomination))
 	var freight := _freight(legs)
-	var limit := mini(stock, _route_available(path)) if not path.is_empty() and _site_accepting(seller_site) else 0
+	var limit := mini(stock, _route_available(path)) if not path.is_empty() and _site_selling(seller_site) else 0
 	for leg: Dictionary in legs:
 		if int(leg["freight_per_unit"]) > 0 and (str(leg["carrier_account"]).is_empty() or leg["carrier_account"] == _account(actor, denomination)):
 			limit = 0
 	var available := maxi(0, _world.ledger_state.available_balance(_account(actor, denomination)))
 	var quantity := mini(limit, available / (price + freight))
-	return {"quote_id": _quote_id(_world.game_clock.total_minutes(), actor, seller, good, str(path.get("id", "")), seller_site, buyer_site), "minute": _world.game_clock.total_minutes(), "seller": seller, "seller_site": seller_site, "buyer_site": buyer_site, "good": good, "price": price, "denomination": denomination, "quantity": quantity, "transport_quantity": limit, "freight_per_unit": freight, "route_id": path.get("id", ""), "route_legs": legs, "from_place_id": _place(seller_site), "to_place_id": _place(buyer_site if not buyer_site.is_empty() else actor), "earliest_arrival_day": day + 1 + _travel_days(legs), "eta_guaranteed": false, "reason": "FIRM_STOPPED_NEW_BUSINESS" if not _site_accepting(seller_site) else "NO_KNOWN_PATH" if path.is_empty() else "NO_UNCOMMITTED_STOCK" if stock==0 else "TRANSPORT_LIMIT_OR_CLOSED" if limit==0 else "INSUFFICIENT_AVAILABLE_CASH" if quantity==0 else "OFFER", "transport_basis": _path_basis(path)}
+	return {"quote_id": _quote_id(_world.game_clock.total_minutes(), actor, seller, good, str(path.get("id", "")), seller_site, buyer_site), "minute": _world.game_clock.total_minutes(), "seller": seller, "seller_site": seller_site, "buyer_site": buyer_site, "good": good, "price": price, "denomination": denomination, "quantity": quantity, "transport_quantity": limit, "freight_per_unit": freight, "route_id": path.get("id", ""), "route_legs": legs, "from_place_id": _place(seller_site), "to_place_id": _place(buyer_site if not buyer_site.is_empty() else actor), "earliest_arrival_day": day + 1 + _travel_days(legs), "eta_guaranteed": false, "reason": "FIRM_STOPPED_NEW_BUSINESS" if not _site_selling(seller_site) else "NO_KNOWN_PATH" if path.is_empty() else "NO_UNCOMMITTED_STOCK" if stock==0 else "TRANSPORT_LIMIT_OR_CLOSED" if limit==0 else "INSUFFICIENT_AVAILABLE_CASH" if quantity==0 else "OFFER", "transport_basis": _path_basis(path)}
+
+
+func _onsite_offer(actor: String, seller: String, site: String, good: String) -> Dictionary:
+	var why:=_retail.reason(actor,site,good)
+	var price:=_price(site,good);var currency:=_sale_currency(seller)
+	var stock:=maxi(0,int(_stocks[site][good])-_committed(site,good))
+	var limit:=mini(stock,_retail.limit(site)) if why=="OFFER" else 0
+	var quantity:=mini(limit,maxi(0,_world.ledger_state.available_balance(_account(actor,currency)))/maxi(1,price))
+	return {"quote_id":_quote_id(_world.game_clock.total_minutes(),actor,seller,good,"onsite:"+site,site,""),"minute":_world.game_clock.total_minutes(),"seller":seller,"seller_site":site,"buyer_site":"","good":good,"price":price,"denomination":currency,"quantity":quantity,"transport_quantity":limit,"freight_per_unit":0,"route_id":"onsite:"+site,"route_legs":[],"from_place_id":_place(site),"to_place_id":_place(actor),"earliest_arrival_day":day,"eta_guaranteed":true,"reason":why if why!="OFFER" else "NO_UNCOMMITTED_STOCK" if stock==0 else "INSUFFICIENT_AVAILABLE_CASH" if quantity==0 else "OFFER","transport_basis":[],"fulfilment":"ONSITE_REAL_STOCK_HANDOVER"}
 
 
 func _offers(actor: String, buyer_site: String = "", only_good: String = "") -> Array[Dictionary]:
@@ -1056,6 +1127,9 @@ func _offers(actor: String, buyer_site: String = "", only_good: String = "") -> 
 		if seen.has(candidate["site"] + "|" + candidate["good"]):
 			continue
 		seen[candidate["site"] + "|" + candidate["good"]] = true
+		if _actors.has(actor) and _retail.has_site(candidate["site"]):
+			offers.append(_onsite_offer(actor,candidate["seller"],candidate["site"],candidate["good"]))
+			if _at_place(actor,_place(candidate["site"])): continue
 		var paths := _paths_for(actor, _place(candidate["site"]), _place(observer), day)
 		if paths.is_empty():
 			offers.append(_offer(actor, candidate["seller"], candidate["good"], "", candidate["site"], buyer_site))
@@ -1092,7 +1166,7 @@ func _buy(actor: String, payload: Dictionary, action_id: String, internal: bool 
 	var known: Array = _actors[actor]["known_suppliers"] if _actors.has(actor) else _firm_knowledge[buyer_site]
 	if not known.has(seller + "|" + good + "|" + seller_site) and not (seller_site == _primary_site(seller) and known.has(seller + "|" + good)):
 		return _result(false, "UNKNOWN_SUPPLIER")
-	if not _site_accepting(seller_site) or (not buyer_site.is_empty() and not _site_accepting(buyer_site)):
+	if not _site_selling(seller_site) or (not buyer_site.is_empty() and not _site_accepting(buyer_site)):
 		return _result(false, "FIRM_STOPPED_NEW_BUSINESS")
 	var purpose := str(payload.get("purpose", "NEED"))
 	if purpose not in ["NEED", "HOLDING"] or (purpose == "HOLDING" and not _actors.has(actor)):
@@ -1100,6 +1174,7 @@ func _buy(actor: String, payload: Dictionary, action_id: String, internal: bool 
 	var category := str(payload.get("need_category", "food")) if _actors.has(actor) and purpose == "NEED" else ""
 	if _actors.has(actor) and purpose == "NEED" and _service(good, category) <= 0:
 		return _result(false, "GOOD_HAS_NO_HOUSEHOLD_USE")
+	if _actors.has(actor) and _retail.has_site(seller_site) and _at_place(actor,_place(seller_site)) and payload.get("path_id", "")!="onsite:"+seller_site: return _result(false,"LOCAL_STOREFRONT_REQUIRES_ONSITE_HANDOVER")
 	var offer := _offer(actor, seller, good, str(payload.get("path_id", "")), seller_site, buyer_site)
 	if payload["quote_id"] != offer["quote_id"]:
 		return _result(false, "EXPIRED_QUOTE")
@@ -1127,7 +1202,9 @@ func _admit(buyer: String, seller: String, good: String, requested: int, action_
 	seller_site = _inventory_key(seller, seller_site)
 	var price := _price(seller_site, good)
 	var denomination := _sale_currency(seller)
-	var route := _route_for(buyer, seller, path_id, buyer_site, seller_site)
+	var onsite: bool=path_id=="onsite:"+seller_site
+	if onsite and _retail.reason(buyer,seller_site,good)!="OFFER": return _result(false,_retail.reason(buyer,seller_site,good))
+	var route := {"id":path_id,"from_place_id":_place(seller_site),"to_place_id":_place(buyer),"edge_ids":[]} if onsite else _route_for(buyer, seller, path_id, buyer_site, seller_site)
 	if route.is_empty():
 		return _result(false, "NO_KNOWN_ROUTE")
 	var legs := _locked_legs(route, denomination)
@@ -1150,16 +1227,31 @@ func _admit(buyer: String, seller: String, good: String, requested: int, action_
 		var unit := _service(good, category)
 		eligible = mini(eligible, (needed + unit - 1) / unit)
 	var headroom := maxi(0, FormalLedgerState.MAX_AMOUNT - _exposure(_inventory_key(buyer, buyer_site), good))
-	var physical := mini(headroom, mini(eligible, mini(limit, _route_available(route))))
+	headroom=mini(headroom,_retail.headroom(_inventory_key(buyer,buyer_site),good))
+	var physical := mini(headroom, mini(eligible, mini(limit, _retail.limit(seller_site) if onsite else _route_available(route))))
 	var amount := mini(physical, int(_world.ledger_state.available_balance(buyer_account) / unit_cost))
 	var date := need_by if need_by >= 0 else day + int(_operations_policy(seller_site)["planning_horizon"])
 	if amount <= 0:
 		_observe_request(_inventory_key(buyer, buyer_site), seller_site, good, eligible, "", maxi(0, eligible - physical), maxi(0, physical - amount), 0, date, action_id)
 		return _result(false, "NO_STOCK" if limit == 0 else "INSUFFICIENT_CASH_OR_CAPACITY_OR_NEED")
+	var custody:="CARRIED"
+	if onsite and manages_person(buyer) and not _can_carry_extra(buyer,good,amount):
+		if _personal_storage_site(_place(seller_site),good).is_empty(): return _result(false,"COLLECTION_REQUIRES_STORAGE_OR_SMALLER_QUANTITY")
+		custody="STORED"
+	if onsite and next_shipment>=FormalLedgerState.MAX_AMOUNT: return _result(false,"RECEIPT_ID_LIMIT")
 	var id := "order:" + str(next_order)
 	var components := _budget_plan(buyer, denomination, good, legs, amount, true, price)
 	if not _budget_ready(components): return _result(false, "CUMULATIVE_BUDGET_OR_WINDOW")
 	if _lots.selection("SITE|"+seller_site, good, amount).is_empty(): return _result(false, "UNCOMMITTED_SOURCE_PORTIONS_UNAVAILABLE")
+	# Prepare all fallible adoption/payment checks before reserving an onsite sale.
+	if onsite:
+		var preview:={"id":id,"kind":"SALE","buyer":buyer,"seller":seller,"good":good,"quantity":amount,"price":price,"denomination":denomination,"buyer_account":buyer_account,"seller_account":seller_account,"seller_site":seller_site,"buyer_site":"","route_id":path_id,"route_legs":[],"from_place_id":_place(seller_site),"to_place_id":_place(buyer),"accepted_minute":_world.game_clock.total_minutes(),"accepted_day":day,"delivered":0,"pending":0,"transit":amount,"cancelled":0,"need_category":category,"action_id":action_id}
+		var receipt_id:="shipment:"+str(next_shipment)
+		if not _world.ledger_state.payment_ready("delivery:"+receipt_id,_delivery_legs(receipt_id,preview,amount),_world.game_clock.total_minutes()): return _result(false,"ONSITE_PAYMENT_NOT_ADOPTABLE")
+		if manages_person(buyer):
+			var source:=_personal_order_source(preview)
+			source.merge({"source_id":receipt_id,"shipment_id":receipt_id,"quantity":amount,"amount":amount*price,"transaction_ids":["r1:goods:"+receipt_id],"effective_minute":_world.game_clock.total_minutes(),"custody_mode":custody,"custody_place_id":_place(seller_site)},true)
+			if _world.personal_economy_state.prepare_native_source(buyer,source,"native_delivery").is_empty(): return _result(false,"INVALID_PERSONAL_DELIVERY_ADOPTION")
 	if not _world.ledger_state.reserve(id, buyer_account, amount * unit_cost):
 		return _result(false, "INSUFFICIENT_CASH")
 	var budget_committed := _budgets.commit(id, components)
@@ -1169,6 +1261,15 @@ func _admit(buyer: String, seller: String, good: String, requested: int, action_
 	next_order += 1
 	_orders[id] = {"id": id, "kind": "SALE", "seller_site": seller_site, "buyer_site": buyer_site, "need_category": category if _actors.has(buyer) else "", "buyer": buyer, "seller": seller, "good": good, "quantity": amount, "pending": amount, "transit": 0, "delivered": 0, "cancelled": 0, "price": price, "action_id": action_id, "accepted_day": day, "accepted_minute": _world.game_clock.total_minutes()}
 	_orders[id].merge({"denomination": denomination, "buyer_account": buyer_account, "seller_account": seller_account, "route_id": route["id"], "from_place_id": route["from_place_id"], "to_place_id": route["to_place_id"], "route_legs": legs})
+	if onsite:
+		_orders[id]["pending"]=0;_orders[id]["transit"]=amount
+		_active_orders.append(id);_index_order(id)
+		var receipt_bundle:={"id":"shipment:"+str(next_shipment),"order_id":id,"quantity":amount,"departures":[]}
+		next_shipment+=1
+		var delivered:=_deliver_shipment(receipt_bundle,_orders[id],"",-1,custody)
+		assert(delivered) # Prepared original Ledger, PersonalEconomy and StockLots adoption.
+		_observe_request(buyer,seller_site,good,eligible,id,maxi(0,eligible-physical),maxi(0,physical-amount),0,date,action_id)
+		return {"accepted":true,"reason":"ONSITE_DELIVERED","order_id":id,"quantity":amount,"price":price,"denomination":denomination,"route_id":path_id,"seller_site":seller_site,"buyer_site":""}
 	_pending_orders.append(id)
 	_active_orders.append(id)
 	_index_order(id)
@@ -1253,6 +1354,7 @@ func settle_day(settle_personal_arrangements: bool = true) -> bool:
 	for node: Dictionary in _transport["nodes"].values():
 		node["dispatched"] = 0
 	phase = "MESSAGES"
+	_commercial.advance_day()
 	_deliver_messages()
 	phase = "ARRIVALS"
 	if not _advance_shipments():
@@ -1276,8 +1378,8 @@ func settle_day(settle_personal_arrangements: bool = true) -> bool:
 	for actor: String in _sorted_ids(_work_queue):
 		for work: Dictionary in _work_rows(actor):
 			var contract := _contract_for(actor, work["job"])
-			var job := _job(work["job"])
-			if not _at_place(actor, job["place"]) or not _site_operating(job["site_id"]):
+			var job := _labor_market.contract_job(contract)
+			if not _at_place(actor, job["place"]) or not _site_operating(job["site_id"],_production_minute()):
 				# A future work booking does not permit labor from another host place.
 				_commands[work["action_id"]]["result"].merge({"completed": false, "settlement_reason": "OUTSIDE_JOB_PLACE_OR_TRAVELLING" if not _at_place(actor, job["place"]) else "WORK_SITE_STOPPED", "work_day": day})
 				continue
@@ -1286,11 +1388,13 @@ func settle_day(settle_personal_arrangements: bool = true) -> bool:
 			var amount := hours * int(job["wage_per_hour"])
 			_capital_work_ids.append(id)
 			_work_records[id] = {"actor": actor, "job": job["id"], "hours": hours, "day": day, "action_id": work["action_id"]}
+			if contract.has("employment_action_id"): _work_records[id]["employment_action_id"]=contract["employment_action_id"]
 			_index_employment_work(_work_records[id])
 			_labor[job["site_id"]] = int(_labor.get(job["site_id"], 0)) + hours
 			_totals[actor]["work_hours"] = int(_totals[actor]["work_hours"]) + hours
-			_wages[id] = {"id": id, "worker": actor, "employer": job["employer"], "hours": hours, "amount": amount, "remaining": amount, "work_day": day, "due_day": day + _wage_delay(job["id"]), "paid": 0}
+			_wages[id] = {"id": id, "worker": actor, "employer": job["employer"], "hours": hours, "amount": amount, "remaining": amount, "work_day": day, "due_day": day + int(job.get("wage_delay",_wage_delay(job["id"]))), "paid": 0}
 			_wages[id]["denomination"] = contract["denomination"]
+			_costs.observe_work(id)
 			if amount > 0:
 				_open_wages.append(id)
 				_index_wage(id)
@@ -1302,13 +1406,23 @@ func settle_day(settle_personal_arrangements: bool = true) -> bool:
 	phase = "CREDIT"
 	_credit.advance_day(day)
 	_npc_repay_debts()
+	_wind_down.npc_decisions()
 	phase = "CAPITAL_CONSTRUCTION"
 	_capital.build()
-	_shared.prepare_labor(_capital._last_build_work)
+	_service_market.build(_capital._last_build_work)
+	var shared_work:=_capital._last_build_work.duplicate()
+	for id: String in _service_market._last_work: shared_work[id]=int(shared_work.get(id,0))+int(_service_market._last_work[id])
+	_retail.prepare_labor(shared_work)
+	for id: String in _retail.last_work: shared_work[id]=int(shared_work.get(id,0))+int(_retail.last_work[id])
+	_shared.prepare_labor(shared_work)
 	phase = "PRODUCTION"
 	_produce()
 	phase = "PROCUREMENT"
+	_leases.advance_day()
+	_leases.npc_decisions("BEFORE_OPTIONAL_SERVICES_AND_GOODS")
+	_service_market._resident.npc_decisions()
 	_auto_purchase()
+	_leases.npc_decisions("AFTER_GOODS")
 	_procure_inputs()
 	_procure_capital()
 	phase = "DISPATCH"
@@ -1324,9 +1438,14 @@ func settle_day(settle_personal_arrangements: bool = true) -> bool:
 	phase = "READY"
 	_publish_site_reports()
 	_npc_invest()
+	_capital.npc_build()
+	_service_market.npc_decisions()
+	_commercial.npc_decisions()
 	_npc_labor_response()
+	_labor_market.worker_decisions()
+	_labor_market.npc_decisions()
 	if not uses_host_accounts(): _capital.boundary()
-	if uses_host_accounts(): _auto_work()
+	if uses_host_accounts() and _labor_market._rules.is_empty(): _auto_work()
 	_prune_windows()
 	processing = false
 	safe_boundary.emit()
@@ -1439,8 +1558,9 @@ func _deliver_shipment(shipment: Dictionary, order: Dictionary, collection_actio
 			receipt["custody_fact"] = fact
 	var legs := _delivery_legs(id, order, quantity)
 	var releases := {str(order["id"]): quantity * (int(order["price"]) + _freight(order["route_legs"]))}
-	var physical := _lots.selection("CARGO|"+shipment_id, order["good"], quantity)
+	var physical := _lots.reserved_selection(order["id"],quantity) if Retail.onsite(order) else _lots.selection("CARGO|"+shipment_id, order["good"], quantity)
 	if not _lots.ready(physical): return _fail("DELIVERY_SOURCE_PORTIONS_UNAVAILABLE")
+	var cost_ranges := _costs.ranges(physical)
 	if not _budgets.change_ready(order["id"], int(order["delivered"])+quantity, int(order["cancelled"]), int(order["quantity"])): return _fail("INVALID_BUDGET_FULFILMENT")
 	var prepared_personal: Dictionary = {}
 	if personal:
@@ -1462,7 +1582,7 @@ func _deliver_shipment(shipment: Dictionary, order: Dictionary, collection_actio
 	var custodian: String = order["buyer"] if personal and custody_mode == "CARRIED" else _personal_storage_site(order["to_place_id"], order["good"]) if personal else _destination(order)
 	var moved := _lots.move(physical, location, order["to_place_id"], _world.game_clock.total_minutes(), order["buyer"], "" if freight else id, "", custodian)
 	assert(not moved.is_empty())
-	_shared.release_storage(shipment_id,order["good"],quantity,"delivery:"+id)
+	if not Retail.onsite(order): _shared.release_storage(shipment_id,order["good"],quantity,"delivery:"+id)
 	var budget_settled := _budgets.settle("delivery:"+id, order["id"], int(order["delivered"])+quantity, int(order["cancelled"]), int(order["quantity"]))
 	assert(budget_settled)
 	if not freight: _change_incoming(order, -quantity)
@@ -1490,6 +1610,8 @@ func _deliver_shipment(shipment: Dictionary, order: Dictionary, collection_actio
 		else: _shipments.erase(shipment_id)
 	_delivery_receipts[id] = receipt
 	_index_delivery(receipt)
+	_retail.adopted(receipt,order)
+	_costs.delivery(id, order, cost_ranges, moved)
 	return true
 
 func _dispatch_transport(shared_only: bool = false) -> bool:
@@ -1602,7 +1724,7 @@ func _enter_transport_leg(shipment: Dictionary, order: Dictionary) -> void:
 func _auto_work(people: Array[String] = [], decision: String = "") -> void:
 	var subjects: Array[String] = people if not people.is_empty() else _actor_ids()
 	for actor: String in subjects:
-		if _actors[actor]["control"] != "automatic" or _employment_end_pending(actor) or _legacy_wage_still_active(actor): continue
+		if _actors[actor]["control"] != "automatic" or (_employment_end_pending(actor) and _cohort_profile(actor).is_empty()) or _legacy_wage_still_active(actor): continue
 		if not _cohort_profile(actor).is_empty():
 			_auto_cohort_work(actor)
 			continue
@@ -1612,14 +1734,14 @@ func _auto_work(people: Array[String] = [], decision: String = "") -> void:
 			observe_person_place(actor)
 			_collect_ready_cargo(actor)
 		if not _contracts.has(actor):
-			for job_id: String in _actors[actor]["known_jobs"]:
+			for job_id: String in _labor_market.ordered_jobs(actor,_actors[actor]["known_jobs"]):
 				var job := _known_job(actor, job_id)
 				if not _npc_job_payable(actor,job_id): continue
 				if not _at_place(actor, job["place"]) and (not manages_person(actor) or not _npc_job_travel_possible(actor, job)): continue
 				var candidate := job_id+(":"+decision if not decision.is_empty() else "")
-				if _accept(actor, _auto_command(actor, "apply", {"job_id": job_id}, candidate), true)["accepted"]: break
+				if _accept(actor, _auto_command(actor, "apply", _labor_market.apply_payload(actor,job_id), candidate), true)["accepted"]: break
 		if not _contracts.has(actor): continue
-		var job := _job(_contracts[actor]["job"])
+		var job := _labor_market.contract_job(_contracts[actor])
 		if not _site_operating(job["site_id"]): continue
 		if manages_person(actor) and not _at_place(actor, job["place"]):
 			if _npc_job_travel_possible(actor, job):
@@ -1639,23 +1761,25 @@ func _auto_cohort_work(actor: String) -> void:
 	var due: bool = day-search_day >= int(profile["job_search_days"])
 	for job: String in _actors[actor]["known_jobs"]:
 		var notice := _receipts.get("posting:"+actor+":"+job, _receipts.get("message:"+actor+":job:"+job, {})) as Dictionary
+		if _labor_market.controls(job): notice=_labor_market.latest_notice(actor,job)
 		if int(notice.get("delivery_day", -1)) > search_day: due = true
-	if free.y > 0 and due and _contract_rows(_contracts.get(actor, {})).size() < int(profile["max_jobs"]):
+	if free.y > 0 and due and not _employment_end_pending(actor) and _contract_rows(_contracts.get(actor, {})).size() < int(profile["max_jobs"]):
 		_cohort_search_day[actor] = day
 		_decision_counts["job_searches"] = int(_decision_counts.get("job_searches", 0))+1
-		for id: String in _actors[actor]["known_jobs"]:
+		for id: String in _labor_market.ordered_jobs(actor,_actors[actor]["known_jobs"]):
 			if not Cohorts.allows_job(_spec["actors"][actor], id) or not _contract_for(actor, id).is_empty(): continue
 			var job := _known_job(actor, id)
 			if not _npc_job_payable(actor,id): continue
 			if not _at_place(actor, job["place"]): continue
-			_accept(actor, _auto_command(actor, "apply", {"job_id": id}, id), true)
+			_accept(actor, _auto_command(actor, "apply", _labor_market.apply_payload(actor,id), id), true)
 			if Cohorts.free_span(_spec["actors"][actor], _contracts.get(actor, {})).y == 0: break
 	for contract: Dictionary in _contract_rows(_contracts.get(actor, {})):
-		var job := _job(contract["job"])
+		var job := _labor_market.contract_job(contract)
 		if not _site_operating(job["site_id"]) or not _at_place(actor, job["place"]): continue
 		if _work_queue.get(actor, {}).get("allocations", {}).has(job["id"]): continue
-		var hours := int(job["hours"])*int(contract["workers"])
-		if uses_host_accounts(): hours = mini(hours, (((day+1)*1440-_world.game_clock.total_minutes())/60)*int(contract["workers"]))
+		var work_workers:=_workable_workers(actor,contract)
+		var hours := int(job["hours"])*work_workers
+		if uses_host_accounts(): hours = mini(hours, (((day+1)*1440-_world.game_clock.total_minutes())/60)*work_workers)
 		if hours > 0 and _accept(actor, _auto_command(actor, "work", {"job_id": job["id"], "hours": hours}, job["id"]), true)["accepted"]:
 			if not uses_host_accounts(): _work_queue[actor]["allocations"][job["id"]]["day"] = day
 
@@ -1667,23 +1791,24 @@ func _pay_wages() -> bool:
 		_matured_wages.sort_custom(_wage_less)
 	for id: String in _matured_wages.duplicate():
 		var claim := _wages[id] as Dictionary
-		var currency := str(claim["denomination"])
-		var amount := mini(int(claim["remaining"]), _world.ledger_state.available_balance(_account(str(claim["employer"]), currency)))
-		if amount > 0:
-			var transaction_id := "r1:wage:" + id + ":" + str(claim["paid"])
-			if not _world.ledger_state.transfer(transaction_id, _account(str(claim["employer"]), currency), _account(str(claim["worker"]), currency), amount, _world.game_clock.total_minutes(), "wage", id):
-				return _fail(_world.ledger_state.error)
-			claim["remaining"] = int(claim["remaining"]) - amount
-			claim["paid"] = int(claim["paid"]) + amount
-			_observe_wage_payment(claim, amount)
-			if currency == FormalLedgerState.DENOMINATION:
-				_totals[claim["worker"]]["income"] = int(_totals[claim["worker"]]["income"]) + amount
-		if int(claim["remaining"]) == 0:
-			_open_wages.erase(id)
-			_open_wages_by_employer.get(claim["employer"], {}).erase(id)
-			_matured_wages.erase(id)
-			_wages_by_worker[claim["worker"]].erase(id)
+		if _wind_down.controls(claim["employer"]) and _firm_winding_down(claim["employer"]): continue
+		var amount := mini(int(claim["remaining"]), _world.ledger_state.available_balance(_account(str(claim["employer"]), claim["denomination"])))
+		if amount>0 and not _pay_wage_claim(id,amount): return false
 	return true
+
+func _pay_wage_claim(id: String, amount: int) -> bool:
+	var claim:=_wages.get(id,{}) as Dictionary
+	if claim.is_empty() or amount<1 or amount>claim["remaining"] or claim["due_day"]>day: return false
+	var currency:=str(claim["denomination"])
+	var transaction_id := "r1:wage:"+id+":"+str(claim["paid"])
+	if not _world.ledger_state.transfer(transaction_id,_account(claim["employer"],currency),_account(claim["worker"],currency),amount,_world.game_clock.total_minutes(),"wage",id): return _fail(_world.ledger_state.error)
+	claim["remaining"]=int(claim["remaining"])-amount;claim["paid"]=int(claim["paid"])+amount
+	_observe_wage_payment(claim,amount)
+	if currency==FormalLedgerState.DENOMINATION: _totals[claim["worker"]]["income"]=int(_totals[claim["worker"]]["income"])+amount
+	if claim["remaining"]==0:
+		_open_wages.erase(id);_open_wages_by_employer.get(claim["employer"],{}).erase(id);_matured_wages.erase(id);_wages_by_worker[claim["worker"]].erase(id)
+	return true
+
 
 func _finance_policy(actor: String) -> Dictionary:
 	for row: Dictionary in config.get("npc_finance", []):
@@ -1737,6 +1862,7 @@ func _npc_repay_debts() -> void:
 	var subjects := _actor_ids()
 	subjects.append_array(_firm_ids())
 	for actor: String in subjects:
+		if _wind_down.controls(actor) and _firm_winding_down(actor): continue
 		var policy := _finance_policy(actor)
 		if policy.is_empty() or not policy["repay_due"]:
 			continue
@@ -1878,12 +2004,13 @@ func _update_job_postings() -> void:
 			has_activity = has_activity or _site_state[firm]["activities"][activity["id"]]["enabled"]
 		active = active and has_activity
 		var managed: bool = _operations_policy(firm)["manage_jobs"]
-		active = active or (_site_operating(firm) and (_capital.labor_needed(firm) > 0 or _shared.labor_needed(firm) > 0) and not _firm_winding_down(_owner(firm)))
-		var wanted := int(_allocate_production(firm, FormalLedgerState.MAX_AMOUNT)["labor_used"])+_capital.labor_needed(firm)+_shared.labor_needed(firm)
+		active = active or (_site_operating(firm) and (_capital.labor_needed(firm) > 0 or _shared.labor_needed(firm) > 0 or _service_market.labor_needed(firm)>0 or _retail.labor_needed(firm)>0) and not _firm_winding_down(_owner(firm)))
+		var wanted := int(_allocate_production(firm, FormalLedgerState.MAX_AMOUNT)["labor_used"])+_capital.labor_needed(firm)+_shared.labor_needed(firm)+_service_market.labor_needed(firm)+_retail.labor_needed(firm)
 		var occupied := hired_by_site.get(firm, {}) as Dictionary
 		for job_id: String in occupied:
 			wanted = maxi(0, wanted - int(occupied[job_id]) * int(_spec["jobs"][job_id]["hours"]))
 		for id: String in jobs_by_site.get(firm, []):
+			if _labor_market.controls(id): continue
 			var job := _spec["jobs"][id] as Dictionary
 			var hired := int(occupied.get(id, 0))
 			var new_slots: int = mini(maxi(0, int(job["positions"]) - hired), (wanted + int(job["hours"]) - 1) / int(job["hours"]))
@@ -1905,6 +2032,7 @@ func _update_job_postings() -> void:
 				_messages.append({"id": notice_id, "actor": info["actor"], "kind": "job_posting", "candidate": id, "observed_day": day, "delivery_day": maxi(day + int(job.get("notice_delay", 1)), int(info["delivery_day"])), "version": posting["version"], "positions": total})
 
 func _known_job(actor: String, id: String) -> Dictionary:
+	if _labor_market.controls(id): return _labor_market.known_job(actor,id)
 	var job := _job(id)
 	if _operations_policy(job["site_id"])["manage_jobs"] or int(_job_postings[id]["version"]) > 0:
 		var notice := _receipts.get("posting:" + actor + ":" + id, {}) as Dictionary
@@ -1949,7 +2077,7 @@ func _initial_job_postings() -> Dictionary:
 	var result: Dictionary = {}
 	for id: String in _spec["jobs"]:
 		var job := _spec["jobs"][id] as Dictionary
-		result[id] = {"positions": 0 if _operations_policy(job["site_id"])["manage_jobs"] else job["positions"], "version": 0, "published_day": 0}
+		result[id] = _labor_market.posting(id) if _labor_market.controls(id) else {"positions": 0 if _operations_policy(job["site_id"])["manage_jobs"] else job["positions"], "version": 0, "published_day": 0}
 	return result
 
 func _received_pressure(firm: String, good: String) -> int:
@@ -1972,7 +2100,7 @@ func _observed_daily_orders(firm: String, good: String) -> int:
 	return (total + dates - 1) / dates
 
 func _site_has_production_decision(site: String) -> bool:
-	if not config["production_enabled"] or not _site_producing(site): return false
+	if not config["production_enabled"] or not _site_producing(site,_production_minute()): return false
 	for activity: Dictionary in _spec["sites"][site]["activities"]:
 		if _site_state[site]["activities"][activity["id"]]["enabled"] and _capital.capacity(site, _production_minute(), activity["id"]) >= int(activity["capacity_units"]): return true
 	return false
@@ -2000,7 +2128,7 @@ func _plan_firms() -> void:
 		var input_demands := _zero_goods()
 		var input_cover := _zero_goods()
 		for good: String in _goods:
-			urgent[good] = _committed(firm, good) + _received_pressure(firm, good) + _internal_request_pressure(firm, good) + _capital.goods_needed(firm, good)
+			urgent[good] = _committed(firm, good) + _received_pressure(firm, good) + _internal_request_pressure(firm, good) + _capital.goods_needed(firm, good)+_service_market.materials_needed(firm,good)
 			var gross := int(row["targets"][good]) + int(urgent[good]) + _observed_daily_orders(firm, good) * horizon
 			demand[good] = maxi(0, gross - _exposure(firm, good))
 			input_cover[good] = maxi(0, _exposure(firm, good) - gross)
@@ -2016,7 +2144,7 @@ func _plan_firms() -> void:
 				var yield_amount := int(activity["outputs"][good])
 				wanted = maxi(wanted, (int(demand[good]) + yield_amount - 1) / yield_amount)
 				priority += int(urgent[good])
-			var runnable: bool = config["production_enabled"] and _site_producing(firm) and _site_state[firm]["activities"][id]["enabled"] and _capital.capacity(firm, _production_minute(), id) >= int(activity["capacity_units"])
+			var runnable: bool = config["production_enabled"] and _site_producing(firm,_production_minute()) and _site_state[firm]["activities"][id]["enabled"] and _capital.capacity(firm, _production_minute(), id) >= int(activity["capacity_units"])
 			var desired := wanted if runnable else 0
 			candidates[id] = {"desired": desired, "schedule": [], "actual": 0, "priority": priority}
 			for good: String in activity["outputs"]:
@@ -2032,8 +2160,9 @@ func _plan_firms() -> void:
 					demand[good] = int(demand[good]) + maxi(0, prior + needed - int(input_cover[good])) - maxi(0, prior - int(input_cover[good]))
 					urgent[good] = int(urgent[good]) + priority
 		var ranked: Array[String] = []
-		ranked.assign(row["activity_order"])
-		ranked.sort_custom(func(a: String, b: String) -> bool: return int(candidates[a]["priority"]) > int(candidates[b]["priority"]) if candidates[a]["priority"] != candidates[b]["priority"] else row["activity_order"].find(a) < row["activity_order"].find(b))
+		ranked.assign(_production_order(firm))
+		var stable_order:=ranked.duplicate()
+		ranked.sort_custom(func(a: String, b: String) -> bool: return int(candidates[a]["priority"]) > int(candidates[b]["priority"]) if candidates[a]["priority"] != candidates[b]["priority"] else stable_order.find(a) < stable_order.find(b))
 		var remaining: Dictionary = {}
 		for id: String in candidates:
 			remaining[id] = candidates[id]["desired"]
@@ -2050,7 +2179,7 @@ func _plan_firms() -> void:
 			entry.erase("priority")
 		_plans[firm] = {"day": day, "activities": candidates, "labor_hours": 0}
 
-func _allocate_production(firm: String, available_hours: int) -> Dictionary:
+func _allocate_production(firm: String, available_hours: int, at_minute: int = -1) -> Dictionary:
 	var stock := (_stocks.get(firm, {}) as Dictionary).duplicate(true)
 	var allocations: Dictionary = {}
 	var hours := available_hours
@@ -2062,10 +2191,10 @@ func _allocate_production(firm: String, available_hours: int) -> Dictionary:
 		used_remaining[good] = FormalLedgerState.MAX_AMOUNT - int(_physical_totals[firm]["used"][good])
 		produced_remaining[good] = FormalLedgerState.MAX_AMOUNT - int(_physical_totals[firm]["produced"][good])
 	var plans := _plans.get(firm, {}).get("activities", {}) as Dictionary
-	for id: String in _spec["sites"][firm]["activity_order"]:
+	for id: String in _production_order(firm):
 		var activity := _activity(firm, id)
 		var quantity: int = 0
-		if plans.has(id) and config["production_enabled"] and _site_producing(firm) and _site_state[firm]["activities"][id]["enabled"]:
+		if plans.has(id) and config["production_enabled"] and _site_producing(firm,at_minute) and _site_state[firm]["activities"][id]["enabled"]:
 			quantity = mini(int(plans[id]["schedule"][0]["quantity"]), mini(hours / int(activity["hours"]), Capital.pool_available(pools, id) / int(activity["capacity_units"])))
 			quantity = _material_batches(firm, activity, stock, quantity)
 			# Stock and cumulative business quantities stay in ledger integer bounds.
@@ -2088,8 +2217,29 @@ func _allocate_production(firm: String, available_hours: int) -> Dictionary:
 			produced_remaining[good] = int(produced_remaining[good]) - produced
 	return {"batches": allocations, "stock": stock, "labor_used": available_hours - hours, "capacity_used": initial_capacity - Capital.pool_available(pools)}
 
+func _production_order(site: String) -> Array[String]:
+	var original: Array[String]=[]
+	original.assign(_spec["sites"][site]["activity_order"])
+	var ranked:=_costs.rank(site,original)
+	if ranked==original: return original
+	for id: String in original:
+		for other: String in original:
+			if id==other: continue
+			for good: String in _activity(site,other)["outputs"]:
+				if int(_activity(site,id)["materials"].get(good,0))>0: return original
+	var tie_order:=ranked.duplicate()
+	# Existing accepted obligations retain priority over optional margin ranking.
+	var urgent: Dictionary={}
+	for id: String in original:
+		urgent[id]=0
+		for good: String in _activity(site,id)["outputs"]:
+			urgent[id]+=int(_pending_by_key.get(site+"|"+good,0))
+	ranked.sort_custom(func(a: String,b: String) -> bool: return urgent[a]>urgent[b] if urgent[a]!=urgent[b] else tie_order.find(a)<tie_order.find(b))
+	return ranked
+
 
 func _input_good(firm: String, good: String) -> bool:
+	if _service_market.materials_needed(firm,good)>0: return true
 	if _spec["sites"][firm]["activities"].is_empty():
 		return true
 	for activity: Dictionary in _spec["sites"][firm]["activities"]:
@@ -2139,6 +2289,8 @@ func _input_need(firm: String, good: String) -> Dictionary:
 	var target := maxi(int(row["targets"][good]) + (_internal_request_pressure(firm, good) if row["activities"].is_empty() else 0), maxi(gross, rate * coverage_days))
 	if not _input_good(firm, good):
 		target = 0
+	target=maxi(target,_service_market.materials_needed(firm,good))
+	if _retail.has_site(firm): target=_retail.target(firm,good)
 	var free_stock := maxi(0, int(_stocks[firm][good]) - _committed(firm, good))
 	var incoming := maxi(0, _exposure(firm, good) - int(_stocks[firm][good]))
 	var dated: Dictionary = {}
@@ -2221,11 +2373,11 @@ func _produce() -> void:
 		for row: Dictionary in _plans[firm]["activities"].values():
 			if int(row["schedule"][0]["quantity"]) > 0: scheduled = true
 		if not scheduled:
-			_plans[firm]["labor_hours"] = hours+_capital.allocated_hours(firm, day)+_shared.allocated_hours(firm, day)
+			_plans[firm]["labor_hours"] = hours+_capital.allocated_hours(firm, day)+_shared.allocated_hours(firm, day)+_service_market.allocated_hours(firm,day)+_retail.allocated_hours(firm,day)
 			continue
-		var allocation := _allocate_production(firm, hours)
-		_plans[firm]["labor_hours"] = hours+_capital.allocated_hours(firm, day)+_shared.allocated_hours(firm, day)
-		for id: String in _spec["sites"][firm]["activity_order"]:
+		var allocation := _allocate_production(firm, hours, _production_minute())
+		_plans[firm]["labor_hours"] = hours+_capital.allocated_hours(firm, day)+_shared.allocated_hours(firm, day)+_service_market.allocated_hours(firm,day)+_retail.allocated_hours(firm,day)
+		for id: String in _production_order(firm):
 			var activity := _activity(firm, id)
 			var quantity := int(allocation["batches"][id])
 			var inputs: Array[Dictionary] = []
@@ -2235,6 +2387,7 @@ func _produce() -> void:
 					var rows := _lots.selection("SITE|"+firm, good, required)
 					assert(not rows.is_empty())
 					inputs.append_array(rows)
+			var cost_production := _costs.production(firm, id, quantity, inputs)
 			if not inputs.is_empty():
 				var consumed := _lots.consume(inputs, _world.game_clock.total_minutes())
 				assert(consumed)
@@ -2243,6 +2396,7 @@ func _produce() -> void:
 				if output > 0:
 					var created := _lots.create("production:"+str(day)+":"+firm+":"+id+":"+good, good, _good_units()[good], output, _owner(firm), "SITE|"+firm, _place(firm), _world.game_clock.total_minutes(), "ACTUAL_RECIPE_INPUTS_AND_LABOR", inputs)
 					assert(created)
+					_costs.output(cost_production, "production:"+str(day)+":"+firm+":"+id+":"+good)
 			_plans[firm]["activities"][id]["actual"] = quantity
 			_site_state[firm]["activities"][id]["batches"] = int(_site_state[firm]["activities"][id]["batches"]) + quantity
 			for good: String in _goods:
@@ -2260,6 +2414,7 @@ func _household_has_budget(actor: String) -> bool:
 	return not _finance_policy(actor).is_empty()
 
 func _household_offer_less(actor: String, a: Dictionary, b: Dictionary, category: String) -> bool:
+	if _retail.prefers(actor,a)!=_retail.prefers(actor,b): return _retail.prefers(actor,a)
 	var preference: Array = _cohort_profile(actor).get("goods_preference", {}).get(category, [])
 	if not preference.is_empty():
 		var first := preference.find(a["good"])
@@ -2443,12 +2598,16 @@ func _procure_inputs() -> void:
 				if wanted <= 0:
 					break
 				var limit := _purchase_limit(firm, good, offer["denomination"], int(offer["price"]))
+				wanted=_retail.procurement_limit(site,good,offer,wanted)
+				if wanted<=0: continue
 				if limit >= int(offer["price"]):
 					wanted = _fund_procurement(firm, offer, wanted)
 					var terms := Liquidity.policy(config,firm)
 					if not terms.is_empty():
 						var protected := maxi(_npc_cash_floor(_finance_policy(firm),offer["denomination"]),_liquidity_cash_floor(firm,offer["denomination"]))
 						wanted=mini(wanted,maxi(0,_world.ledger_state.available_balance(_account(firm,offer["denomination"]))-protected)/(int(offer["price"])+int(offer["freight_per_unit"])))
+				wanted=_retail.procurement_limit(site,good,offer,wanted)
+				if wanted<=0: continue
 				offer = _offer(firm, offer["seller"], good, offer["route_id"], offer["seller_site"], site)
 				var payload := {"quote_id": offer["quote_id"], "seller": offer["seller"], "seller_site": offer["seller_site"], "buyer_site": site, "good": good, "quantity": wanted, "denomination": offer["denomination"], "max_price": limit, "path_id": offer["route_id"], "need_by_day": clampi(int(need["need_by_day"]), day, day + 30)}
 				_accept(firm, _auto_command(firm, "buy", payload, site + "|" + str(offer["seller_site"]) + "|" + good + "|" + str(offer["route_id"])), true)
@@ -2475,7 +2634,8 @@ func _consume() -> bool:
 		var categories: Dictionary = {}
 		for category: String in _actor_categories(actor):
 			var required := _daily_need(actor, category)
-			var remaining := required
+			var service_satisfied:=mini(required,_service_market._resident.food_units(actor,day)) if category=="food" else 0
+			var remaining := required-service_satisfied
 			var used := _zero_goods()
 			var flow: bool = _spec["categories"][category]["mode"] == "flow"
 			for good: String in (_consumption_goods(category, actor) if required > 0 else []):
@@ -2496,6 +2656,9 @@ func _consume() -> bool:
 					_physical_totals[actor]["used"][good] = int(_physical_totals[actor]["used"][good]) + amount
 					_totals[actor]["categories"][category]["used_items"][good] = int(_totals[actor]["categories"][category]["used_items"][good]) + amount
 			categories[category] = {"required": required, "satisfied": required - remaining, "unmet": remaining, "used_items": used}
+			if service_satisfied>0:
+				categories[category]["service_satisfied"]=service_satisfied
+				_totals[actor]["categories"][category]["service_satisfied"]=int(_totals[actor]["categories"][category].get("service_satisfied",0))+service_satisfied
 			for field: String in ["required", "satisfied", "unmet"]:
 				_totals[actor]["categories"][category][field] = int(_totals[actor]["categories"][category][field]) + int(categories[category][field])
 		_needs[actor] = {"day": day, "categories": categories}
@@ -2526,10 +2689,17 @@ func visible(actor: String) -> Dictionary:
 		return {}
 	var result := _visible_subject(actor)
 	result["cargo_fulfilment"] = _cargo_fulfilment.visible(actor)
+	result["resident_services"] = _service_market._resident.personal_view(actor)
+	result["leases"] = _leases.view(actor,actor)
+	result["commercial_information"]=_commercial.visible(actor)
+	result["labor_market"]=_labor_market.worker_view(actor)
 	return result
 
 ## Native automatic-owner query; the external person query retains its current
 ## player/alive boundary. This view exposes only the named owner's responsibilities.
+func commercial_information(actor: String) -> Array[Dictionary]:
+	return _commercial.visible(actor) if _actors.has(actor) and _actors[actor]["control"]=="player" and personal_authorized(actor) else []
+
 func visible_internal(actor: String) -> Dictionary:
 	if not _spec["firms"].has(actor) and (not _actors.has(actor) or _actors[actor]["control"] != "automatic"):
 		return {}
@@ -2716,6 +2886,11 @@ func _firm_finance_view(firm: String) -> Dictionary:
 			field="internal_freight_transfers"
 		elif payment["kind"] == "goods":
 			field = "sales_received" if payment["to_account_id"] == own_account else "inputs_paid"
+		elif payment["kind"] == "lease_rent":
+			field = "rent_received" if payment["to_account_id"] == own_account else "rent_paid"
+		elif payment["kind"] == "service_fee":
+			var publication: bool=_service_market.contracts.get(payment.get("reference_id",""),{}).get("kind")=="ANNOUNCEMENT"
+			field = ("publication_fees_received" if payment["to_account_id"] == own_account else "advertising_paid") if publication else ("service_fees_received" if payment["to_account_id"] == own_account else "service_fees_paid")
 		elif payment["kind"] in ["cargo_refund", "cargo_damages"]:
 			field = ("cargo_refunds_" if payment["kind"] == "cargo_refund" else "cargo_damages_") + ("received" if payment["to_account_id"] == own_account else "paid")
 		elif payment["kind"]=="freight" and payment["to_account_id"]==own_account:
@@ -2745,6 +2920,9 @@ func _firm_finance_view(firm: String) -> Dictionary:
 	for currency: String in result["account_cash"]: result["matured_wages"][currency]=_mature_wage_position(firm,currency)
 	result["credit_responsibilities"]=_credit.visible(firm,_known_credit_lenders(firm),_world.game_clock.total_minutes(),true)
 	result["liquidity_policy"]=Liquidity.policy(config,firm).duplicate(true)
+	result["goods_purchases_paid"]=result["inputs_paid"].duplicate(true)
+	result["direct_costs"] = _costs.view(firm, window)
+	result["lease_obligations"] = _leases.finance_view(firm,window)
 	return result
 
 func _site_operating_view(firm: String) -> Dictionary:
@@ -2776,6 +2954,7 @@ func _site_operating_view(firm: String) -> Dictionary:
 		activity["plan"] = local
 		var conditions: Array[String]=[]
 		if not _site_operating(firm): conditions.append("SITE_NOT_OPERATING")
+		if not _leases.site_allowed(firm): conditions.append("NO_CURRENT_LEASE_USE_RIGHT")
 		elif not _site_producing(firm): conditions.append("PRODUCTION_PAUSED")
 		if not _site_state[firm]["activities"][id]["enabled"]: conditions.append("ACTIVITY_DISABLED")
 		if _capital.capacity(firm,_world.game_clock.total_minutes(),id)<activity["capacity_units"]: conditions.append("NO_COMPATIBLE_EQUIPMENT")
@@ -2836,7 +3015,7 @@ func _site_operating_view(firm: String) -> Dictionary:
 		committed[good] = _committed(firm, good)
 		free[good] = maxi(0, int(_stocks[firm][good]) - int(committed[good]))
 		incoming[good] = _exposure(firm, good) - int(_stocks[firm][good])
-	return {"firm_id": _owner(firm), "site_id": firm, "roles": _spec["sites"][firm]["roles"].duplicate(), "inventory": _stocks[firm].duplicate(true), "free_inventory": free, "committed_inventory": committed, "incoming": incoming, "known_suppliers": _firm_knowledge[firm].duplicate(), "offers": _offers(_owner(firm), firm), "delivered_report": (_site_reports.get(firm, {}) as Dictionary).duplicate(true), "host_organization_id": _spec["firms"][_owner(firm)].get("host_organization_id", ""), "manager": firm_manager_at(_owner(firm), _world.game_clock.total_minutes()), "management_basis": _firm_management_basis(_owner(firm)), "operating": _site_operating(firm), "site_status": _site_state[firm].duplicate(true), "stock_place_id": _place(firm), "population_unit_id": _world.population_state.unit_for_place(_place(firm)), "shared_capacity": site_capacity(firm), "base_capacity": _spec["sites"][firm]["capacity"], "capacity_pools": _capital.pools(firm, _world.game_clock.total_minutes()), "capacity_basis": "CONFIGURED_BASE_PLUS_ACTUAL_INSTALLED_CAPITAL", "activities": activities, "product_needs": product_needs, "plan": plan, "input_needs": needs, "job_postings": jobs, "quotations": prices, "cooperation": cooperation, "received_requests": received, "finances": _firm_finance_view(_owner(firm)), "supplier_search": searches, "pending_directory_results": pending}
+	return {"firm_id": _owner(firm), "site_id": firm, "roles": _spec["sites"][firm]["roles"].duplicate(), "inventory": _stocks[firm].duplicate(true), "free_inventory": free, "committed_inventory": committed, "incoming": incoming, "known_suppliers": _firm_knowledge[firm].duplicate(), "offers": _offers(_owner(firm), firm), "delivered_report": (_site_reports.get(firm, {}) as Dictionary).duplicate(true), "host_organization_id": _spec["firms"][_owner(firm)].get("host_organization_id", ""), "manager": firm_manager_at(_owner(firm), _world.game_clock.total_minutes()), "management_basis": _firm_management_basis(_owner(firm)), "operating": _site_operating(firm), "lease_use_allowed": _leases.site_allowed(firm), "site_status": _site_state[firm].duplicate(true), "stock_place_id": _place(firm), "population_unit_id": _world.population_state.unit_for_place(_place(firm)), "shared_capacity": site_capacity(firm), "base_capacity": _spec["sites"][firm]["capacity"], "capacity_pools": _capital.pools(firm, _world.game_clock.total_minutes()), "capacity_basis": "CONFIGURED_BASE_PLUS_ACTUAL_INSTALLED_CAPITAL", "activities": activities, "product_needs": product_needs, "plan": plan, "input_needs": needs, "job_postings": jobs, "quotations": prices, "cooperation": cooperation, "received_requests": received, "finances": _firm_finance_view(_owner(firm)), "supplier_search": searches, "pending_directory_results": pending}
 
 func _visible_subject(actor: String) -> Dictionary:
 	var payments := _world.ledger_state.own_transactions(actor)
@@ -2940,11 +3119,19 @@ func snapshot() -> Dictionary:
 	result["shared_transport"] = _shared.snapshot()
 	result["stock_lots"] = _lots.snapshot()
 	result["procurement_budget"] = _budgets.snapshot()
+	if _costs.enabled: result["cost_allocation"] = _costs.snapshot()
+	if config.has("service_market"): result["service_market"] = _service_market.snapshot()
+	if config.has("lease_market"): result["lease_market"] = _leases.snapshot()
+	if config.has("retail_sites"): result["retail"]=_retail.snapshot()
+	if config.has("commercial_information"): result["commercial_information"]=_commercial.snapshot()
+	if config.has("labor_market"): result["labor_market"]=_labor_market.snapshot()
 	return result
 
 func restore(value: Dictionary) -> bool:
 	value = value.duplicate(true)
+	_labor_market.ready=false
 	if not _restore_business_lifecycles(value): return false
+	if not _labor_market.restore(value.get("labor_market"),value): return _fail(_labor_market.error)
 	if not _capital.restore(value.get("capital_formation"), value): return _fail(_capital.error)
 	if uses_host_accounts():
 		if not value.has("scope_requests"): value["scope_requests"] = {}
@@ -2962,9 +3149,14 @@ func restore(value: Dictionary) -> bool:
 		if value["management"] != {"scope_id": _management["scope_id"], "status": "ACTIVE", "activation_minute": 0}:
 			return _fail("Native management lifecycle differs from its saved host responsibility")
 	if not _cargo_fulfilment.restore(value.get("cargo_fulfilment"), value): return _fail("Invalid loss, consent, replacement or cargo payment references")
+	if not _leases.restore(value.get("lease_market"),value): return _fail(_leases.error)
+	if not _commercial.restore(value.get("commercial_information"),value): return _fail(_commercial.error)
+	if not _service_market.restore(value.get("service_market"),value): return _fail(_service_market.error)
 	if not _shared.restore(value.get("shared_transport"), value): return _fail("Invalid shared entries, handling labor or vehicle references")
+	if not _retail.restore(value.get("retail"),value): return _fail(_retail.error)
 	if not _validate_saved(value):
 		return false
+	if not _wind_down.validate(value): return _fail(_wind_down.error)
 	if not _valid_financial_history(value): return _fail("Invalid enterprise financial authorization history")
 	var restored_credit := Credit.new()
 	restored_credit.bind(_world.ledger_state)
@@ -3002,7 +3194,10 @@ func restore(value: Dictionary) -> bool:
 			if o["kind"] != "PERSONAL_FREIGHT": _lots.create("legacy_cargo:"+str(cargo["id"]), o["good"], _good_units()[o["good"]], cargo["quantity"], o["seller"], "CARGO|"+str(cargo["id"]), cargo["place_id"], -1, "LEGACY_QUANTITY_BOUNDARY_AGE_COST_UNKNOWN")
 		for o: Dictionary in value["orders"].values():
 			if int(o["pending"]) > 0 and o["kind"] != "PERSONAL_FREIGHT" and not _lots.reserve(o["id"], "SITE|"+str(o["seller_site"]), o["good"], o["pending"], _world.game_clock.total_minutes()): return _fail("Legacy stock cannot support its sales commitments")
-	if not _budgets.restore(value.get("procurement_budget"), value["orders"], _world.ledger_state, _cargo_fulfilment.fee_contracts()): return _fail("Invalid procurement commitment/spending journal")
+	var extra_contracts:=_cargo_fulfilment.fee_contracts()
+	extra_contracts.merge(_service_market.budget_contracts())
+	extra_contracts.merge(_leases.budget_contracts())
+	if not _budgets.restore(value.get("procurement_budget"), value["orders"], _world.ledger_state, extra_contracts): return _fail("Invalid procurement commitment/spending journal")
 	_contracts = value["contracts"].duplicate(true)
 	_work_queue = value["work_queue"].duplicate(true)
 	_work_records = value["work_records"].duplicate(true)
@@ -3027,6 +3222,10 @@ func restore(value: Dictionary) -> bool:
 	_firm_knowledge = value["firm_knowledge"].duplicate(true) if is_multi() else {}
 	_transport = value["transport"].duplicate(true)
 	_delivery_receipts = value["delivery_receipts"].duplicate(true)
+	_costs = CostAllocation.new()
+	_costs.bind(self)
+	if not _costs.restore(value.get("cost_allocation")): return _fail("Invalid native cost provenance or allocation references")
+	_lots.costs = _costs
 	if not is_multi():
 		for firm: String in _firm_ids():
 			_firm_knowledge[_primary_site(firm)] = _spec["sites"][_primary_site(firm)]["suppliers"].duplicate()
@@ -3476,7 +3675,7 @@ func _validate_saved(value: Dictionary) -> bool:
 		return false
 	var fields: Array[String] = []
 	fields.assign(snapshot().keys())
-	for key: String in ["credit", "currency_exchange", "assets", "management", "stock_lots", "procurement_budget", "shared_transport", "cargo_fulfilment"]:
+	for key: String in ["credit", "currency_exchange", "assets", "management", "stock_lots", "procurement_budget", "shared_transport", "cargo_fulfilment", "cost_allocation", "service_market", "lease_market", "retail", "commercial_information", "labor_market"]:
 		if not value.has(key):
 			fields.erase(key)
 	# Older saves carry the research event cursor; accept it without runtime state.
@@ -3647,6 +3846,8 @@ func _validate_saved(value: Dictionary) -> bool:
 		if amount > 0:
 			var account_id := str(order["buyer_account"])
 			expected_reservations[id] = {"account_id": account_id, "amount": amount}
+	expected_reservations.merge(_service_market.cash_reservations())
+	expected_reservations.merge(_leases.cash_reservations())
 	if _world.ledger_state.snapshot()["r1_reservations"] != expected_reservations:
 		return _fail("R1 order reservations differ from host Ledger")
 	if not _validate_cargo_records(value, orders):
@@ -3657,12 +3858,12 @@ func _validate_saved(value: Dictionary) -> bool:
 		var claim: Variant = value["wages"][id]
 		var work: Variant = value["work_records"].get(id)
 		var historical := _employment_for_work(value, work) if work is Dictionary else {}
-		if not id is String or not claim is Dictionary or not work is Dictionary or not FormalLedgerState.exact_fields(claim, ["id", "worker", "employer", "hours", "amount", "remaining", "work_day", "due_day", "paid", "denomination"]) or not FormalLedgerState.exact_fields(work, ["actor", "job", "hours", "day", "action_id"]) or claim["id"] != id or not actors.has(claim["worker"]) or work["actor"] != claim["worker"] or _job(str(work["job"])).get("employer") != claim["employer"] or claim["denomination"] != _job(str(work["job"])).get("denomination"):
+		if not id is String or not claim is Dictionary or not work is Dictionary or not FormalLedgerState.exact_fields(claim, ["id", "worker", "employer", "hours", "amount", "remaining", "work_day", "due_day", "paid", "denomination"]) or not EconomySliceConfig._fields(work, ["actor", "job", "hours", "day", "action_id"],["employment_action_id"]) or claim["id"] != id or not actors.has(claim["worker"]) or work["actor"] != claim["worker"] or _job(str(work["job"])).get("employer") != claim["employer"] or claim["denomination"] != _job(str(work["job"])).get("denomination"):
 			return _fail("R1 wage has no real work or subject")
 		for key: String in ["hours", "amount", "remaining", "work_day", "due_day", "paid"]:
 			if not FormalLedgerState.valid_amount(claim[key]):
 				return _fail("Invalid R1 wage quantity")
-		if id != _work_id(int(claim["work_day"]), str(claim["worker"]), str(work["job"])) or int(claim["work_day"]) < 1 or int(claim["work_day"]) > int(value["day"]) or work["day"] != claim["work_day"] or work["hours"] != claim["hours"] or historical.is_empty() or historical.get("job") != work["job"] or int(claim["hours"]) <= 0 or int(claim["hours"]) > int(_job(work["job"])["hours"]) * int(historical["workers"]) or int(claim["amount"]) != int(claim["hours"]) * int(_job(work["job"])["wage_per_hour"]) or int(claim["paid"]) + int(claim["remaining"]) != int(claim["amount"]) or int(claim["due_day"]) != int(claim["work_day"]) + _wage_delay(work["job"]):
+		if id != _work_id(int(claim["work_day"]), str(claim["worker"]), str(work["job"])) or int(claim["work_day"]) < 1 or int(claim["work_day"]) > int(value["day"]) or work["day"] != claim["work_day"] or work["hours"] != claim["hours"] or historical.is_empty() or historical.get("job") != work["job"] or int(claim["hours"]) <= 0 or int(claim["hours"]) > int(_labor_market.contract_job(historical)["hours"]) * int(historical["workers"]) or int(claim["amount"]) != int(claim["hours"]) * int(_labor_market.contract_job(historical)["wage_per_hour"]) or int(claim["paid"]) + int(claim["remaining"]) != int(claim["amount"]) or int(claim["due_day"]) != int(claim["work_day"]) + int(_labor_market.contract_job(historical).get("wage_delay",_wage_delay(work["job"]))):
 			return _fail("R1 work/wage quantity or date conflict")
 		if not _accepted_command(value, work["actor"], work["action_id"], "work"):
 			return _fail("R1 wage work lacks accepted action")
@@ -3750,6 +3951,7 @@ func _validate_continuation(value: Dictionary, actors: Dictionary, stock: Dictio
 		for good: String in _goods:
 			var opening := int(_spec["actors"][actor]["stock"][good]) if actors.has(actor) else int(_spec["sites"][actor]["stock"][good])
 			var expected := opening + int(flows["produced"][good]) - int(flows["used"][good])
+			expected += _service_market.stock_delta(actor,good)
 			for p: Dictionary in value.get("stock_lots", {}).get("portions", {}).values():
 				if p["good"] == good and (p["location"] == "SITE|"+actor or p["location"] == "ACTOR|"+actor or (_declared_named(actor) and p["owner"] == actor)): expected -= int(p["lost"])
 
@@ -3781,10 +3983,10 @@ func _validate_continuation(value: Dictionary, actors: Dictionary, stock: Dictio
 				for good: String in _goods:
 					produced[good] = int(produced[good]) + batches * int(activity["outputs"].get(good, 0))
 					used[good] = int(used[good]) + batches * int(activity["materials"][good])
-			for good: String in _goods: used[good] = int(used[good]) + _capital.invested_goods(actor, good)
+			for good: String in _goods: used[good] = int(used[good]) + _capital.invested_goods(actor, good)+_service_market.consumed_goods(actor,good,value.get("stock_lots",{}).get("portions",{}))
 			if produced != flows["produced"] or used != flows["used"]:
 				return _fail("Physical flows differ from actual activity batch executions")
-			if hours+_capital.allocated_hours(actor)+_shared.allocated_hours(actor) > int(employer_hours.get(actor, 0)) or capacity > _capital.cumulative_capacity(actor, int(value["day"])) or (not config["production_enabled"] and capacity > 0):
+			if hours+_capital.allocated_hours(actor)+_shared.allocated_hours(actor)+_service_market.allocated_hours(actor)+_retail.allocated_hours(actor) > int(employer_hours.get(actor, 0)) or capacity > _capital.cumulative_capacity(actor, int(value["day"])) or (not config["production_enabled"] and capacity > 0):
 				return _fail("Activities exceed shared actual labor or equipment")
 	for key: Variant in value["request_window"]:
 		var parts := str(key).split("|")
@@ -3895,6 +4097,8 @@ func _configured_accounts() -> Dictionary:
 	return result
 
 func _valid_order_route(order: Dictionary) -> bool:
+	if Retail.onsite(order):
+		return _retail.has_site(order["seller_site"]) and order["kind"]=="SALE" and order["route_id"]=="onsite:"+str(order["seller_site"]) and _spec["actors"].has(order["buyer"]) and order["buyer_site"]=="" and order["seller"]==_owner(order["seller_site"]) and order["route_legs"]==[] and order["pending"]==0 and order["transit"]==0 and order["cancelled"]==0 and order["delivered"]==order["quantity"] and order["from_place_id"]==_place(order["seller_site"]) and order["to_place_id"]==order["from_place_id"] and order["denomination"]==_sale_currency(order["seller"]) and order["price"]>0 and _valid_locked_price(order) and order["buyer_account"]==_account(order["buyer"],order["denomination"]) and order["seller_account"]==_account(order["seller"],order["denomination"]) and not order.has("custody_fact")
 	if order["kind"] == "PERSONAL_FREIGHT": return _valid_personal_freight_order(order)
 	if order.has("custody_fact") or order.has("source_custody_site") or order.has("destination_custody_site"): return _fail("Sale cannot reinterpret a personal custody contract")
 	var transfer: bool = order["kind"] == "TRANSFER"
@@ -3936,6 +4140,7 @@ func _valid_delivery_payment(payment: Dictionary, order: Dictionary, receipts: D
 
 
 func _earliest_dispatch(order: Dictionary) -> int:
+	if Retail.onsite(order): return int(order["accepted_day"])
 	var buyer := str(order["buyer"])
 	var automatic: bool = _spec["firms"].has(buyer) or (_spec["actors"].has(buyer) and _spec["actors"][buyer]["control"] == "automatic")
 	if _shared.bindings.get(order["route_legs"][0]["edge_id"], {}).has("window_minutes"): return int(order["accepted_day"])
@@ -3975,7 +4180,7 @@ func _validate_cargo_records(value: Dictionary, orders: Dictionary) -> bool:
 			optional.assign(["departure_quantities", "loading_end_minute", "arrival_minute", "unloading_end_minute", "replacement_disposition_ids"])
 			if receipt: optional.append_array(["delivered_minute", "collection_action_id", "shipment_id", "custody_mode", "custody_place_id", "custody_fact"])
 			var base := _cargo_origin_id(cargo)
-			if not EconomySliceConfig._fields(cargo, fields, optional) or cargo["id"] != id or base != "shipment:" + str(int(base.trim_prefix("shipment:"))) or int(base.trim_prefix("shipment:")) <= 0 or int(base.trim_prefix("shipment:")) >= int(value["next_shipment"]) or not orders.has(cargo["order_id"]) or not FormalLedgerState.valid_amount(cargo["quantity"]) or (int(cargo["quantity"]) <= 0 and (receipt or _cargo_fulfilment.cargo_loss(base) <= 0)) or not cargo["departures"] is Array or cargo["departures"].is_empty(): return _fail("Invalid physical cargo identity or quantity")
+			if not EconomySliceConfig._fields(cargo, fields, optional) or cargo["id"] != id or base != "shipment:" + str(int(base.trim_prefix("shipment:"))) or int(base.trim_prefix("shipment:")) <= 0 or int(base.trim_prefix("shipment:")) >= int(value["next_shipment"]) or not orders.has(cargo["order_id"]) or not FormalLedgerState.valid_amount(cargo["quantity"]) or (int(cargo["quantity"]) <= 0 and (receipt or _cargo_fulfilment.cargo_loss(base) <= 0)) or not cargo["departures"] is Array or (cargo["departures"].is_empty() and not (receipt and Retail.onsite(orders[cargo["order_id"]]))): return _fail("Invalid physical cargo identity or quantity")
 			if id != base and (not receipt or (not cargo.has("collection_action_id") and _cargo_fulfilment.cargo_loss(base) <= 0) or id != base + ":part:" + str(int(str(id).get_slice(":part:", 1))) or int(str(id).get_slice(":part:", 1)) <= 0): return _fail("Invalid partial physical receipt")
 			var order := orders[cargo["order_id"]] as Dictionary
 			if cargo.has("replacement_disposition_ids"):
@@ -3983,6 +4188,11 @@ func _validate_cargo_records(value: Dictionary, orders: Dictionary) -> bool:
 				for replacement_id: Variant in cargo["replacement_disposition_ids"]:
 					var replacement: Variant = _cargo_fulfilment.dispositions.get(replacement_id)
 					if not replacement is Dictionary or replacement["status"] != "EXECUTED" or replacement["terms"]["mode"] != "REPLACE" or _cargo_fulfilment.losses[replacement["loss_id"]]["order_id"] != order["id"]: return _fail("Replacement attempt loses its original contract")
+			if Retail.onsite(order):
+				if not receipt or id!=base or value["shipments"].has(base) or delivered.has(order["id"]) or cargo["departures"]!=[] or cargo.get("delivered_minute")!=order["accepted_minute"] or cargo["delivered_day"]!=order["accepted_day"] or cargo["quantity"]!=order["quantity"] or cargo.has("collection_action_id") or cargo.has("replacement_disposition_ids") or cargo.has("shipment_id"): return _fail("Invalid onsite handover receipt")
+				if _declared_named(order["buyer"]) and (cargo.get("custody_mode") not in ["CARRIED","STORED"] or cargo.get("custody_place_id")!=order["to_place_id"]): return _fail("Onsite personal custody missing")
+				delivered[order["id"]]=cargo["quantity"]
+				continue
 			var legs := order["route_legs"] as Array
 			if not batches.has(base): batches[base] = {"base": base, "order_id": order["id"], "departures": cargo["departures"], "quantity": 0, "receipts": []}
 			var batch := batches[base] as Dictionary
@@ -4078,6 +4288,10 @@ func _valid_financial_batches(value: Dictionary) -> bool:
 			# later in the same candidate restore, against this exact Ledger.
 		elif id.begins_with("cargo:"):
 			if not _cargo_fulfilment.valid_payment_batch(id): return _fail("Orphan cargo disposition payment")
+		elif id.begins_with("lease_payment:"):
+			if not _leases.valid_payment_batch(id): return _fail("Orphan lease payment")
+		elif id.begins_with("service_payment:"):
+			if not _service_market.valid_payment_batch(id): return _fail("Orphan service payment")
 		elif id.begins_with("fx:fx_deal:"):
 			if not value.get("currency_exchange", {}).get("deals", {}).has(id.trim_prefix("fx:")):
 				return _fail("Orphan FX payment batch")
@@ -4095,6 +4309,8 @@ func _valid_financial_batches(value: Dictionary) -> bool:
 func _valid_message(message: Dictionary, actors: Dictionary) -> bool:
 	if not message.get("id") is String or not message.get("actor") is String or not message.get("candidate") is String or not FormalLedgerState.valid_amount(message.get("observed_day")) or not FormalLedgerState.valid_amount(message.get("delivery_day")) or int(message["delivery_day"]) < int(message["observed_day"]) or (not actors.has(message["actor"]) and not _spec["firms"].has(message["actor"]) and not _spec["sites"].has(message["actor"])):
 		return false
+	if message.get("source")=="commercial": return _commercial.message_valid(message)
+	if message.get("source")=="labor_market": return _labor_market.valid_message(message)
 	var actor := str(message["actor"])
 	var candidate := str(message["candidate"])
 	var fields: Array[String] = ["id", "actor", "kind", "candidate", "observed_day", "delivery_day"]
@@ -4160,6 +4376,9 @@ func _validate_operations(value: Dictionary) -> bool:
 		for amount: Variant in state.values():
 			if not FormalLedgerState.valid_amount(amount):
 				return _fail("Invalid job posting count or date")
+		if _labor_market.controls(id):
+			if state!=_labor_market.posting(id): return _fail("Dynamic job posting differs from effective quotation")
+			continue
 		var job := _spec["jobs"][id] as Dictionary
 		var occupied: int = 0
 		for contract: Dictionary in _all_contract_rows(value["contracts"]):
@@ -4175,7 +4394,7 @@ func _validate_operations(value: Dictionary) -> bool:
 		if not _operations_policy(job["site_id"])["manage_jobs"] and not operated and state != _initial_job_postings()[id]:
 			return _fail("Fixed job template was changed without an operating action")
 	for message: Dictionary in value["messages"]:
-		if message["kind"] == "job_posting" and (message["version"] != postings[message["candidate"]]["version"] or message["positions"] != postings[message["candidate"]]["positions"] or message["observed_day"] != postings[message["candidate"]]["published_day"]):
+		if message["kind"] == "job_posting" and message.get("source")!="labor_market" and (message["version"] != postings[message["candidate"]]["version"] or message["positions"] != postings[message["candidate"]]["positions"] or message["observed_day"] != postings[message["candidate"]]["published_day"]):
 			return _fail("Pending posting differs from its published version")
 	for message: Dictionary in value["receipts"].values():
 		if message["kind"] == "job_posting" and int(message["version"]) > int(postings[message["candidate"]]["version"]):
@@ -4250,7 +4469,7 @@ func _validate_operations(value: Dictionary) -> bool:
 			if total > int(local["desired"]) or int(local["actual"]) > int(local["schedule"][0]["quantity"]) or int(local["actual"]) > int(value["site_state"][firm]["activities"][id]["batches"]) or (not config["production_enabled"] and total > 0):
 				return _fail("Actual activity exceeds its scheduled intention")
 			hours += int(local["actual"]) * int(activity["hours"])
-		if hours+_capital.allocated_hours(firm, int(value["day"]))+_shared.allocated_hours(firm, int(value["day"])) > worked:
+		if hours+_capital.allocated_hours(firm, int(value["day"]))+_shared.allocated_hours(firm, int(value["day"]))+_service_market.allocated_hours(firm,int(value["day"]))+_retail.allocated_hours(firm,int(value["day"])) > worked:
 			return _fail("Production activities reused the same labor hours")
 		for capacity: int in capacities:
 			if capacity > _capital.capacity(firm, int(value["day"])*1440-1):
@@ -4299,7 +4518,7 @@ func _validate_transport(value: Dictionary) -> bool:
 		var holds: Dictionary = {}
 		var accepted: int = 0
 		for order: Dictionary in value["orders"].values():
-			if order["route_legs"][0]["edge_id"] != id:
+			if Retail.onsite(order) or order["route_legs"][0]["edge_id"] != id:
 				continue
 			if int(order["accepted_day"]) == int(value["day"]):
 				accepted += int(order["quantity"]) - int(order["cancelled"])
@@ -4480,7 +4699,7 @@ func business_view(actor: String, firm: String, site: String, quantity_value: in
 		offer["order_reason"]="FIRM_STOPPED_NEW_PROCUREMENT" if not _site_accepting(site) or _firm_winding_down(firm) else "CUMULATIVE_BUDGET_OR_WINDOW" if not _budget_ready(components) else permission.get("reason","") if not permission["ok"] else offer["reason"] if offer["reason"]!="OFFER" else "QUANTITY_EXCEEDS_CURRENT_OFFER" if offer["quantity"]<quantity_value else offer["reason"]
 		offer["request"]=payload
 		rows.append(offer)
-	return {"firm_id":firm,"site_id":site,"minute":_world.game_clock.total_minutes(),"finance":_firm_finance_view(firm),"financial_actions":_business_credit_actions(actor,firm,quantity_value),"site":_site_operating_view(site),"offers":rows,"offer_total":candidates.size(),"offer_offset":offset,"sites":_spec["firms"][firm]["sites"].duplicate(),"orders":_active_by_buyer.get(firm,{}).size(),"identity_basis":_business_identity_basis(firm)}
+	return {"firm_id":firm,"site_id":site,"minute":_world.game_clock.total_minutes(),"finance":_firm_finance_view(firm),"financial_actions":_business_credit_actions(actor,firm,quantity_value),"retail":_retail.view(site),"commercial_information":_commercial.business_view(actor,firm,site),"labor_market":_labor_market.business_view(actor,firm,site),"wind_down":_wind_down.view(actor,firm,quantity_value),"services":_service_market.business_view(actor,firm,site,quantity_value),"leases":_leases.view(actor,firm,site),"site":_site_operating_view(site),"offers":rows,"offer_total":candidates.size(),"offer_offset":offset,"sites":_spec["firms"][firm]["sites"].duplicate(),"orders":_active_by_buyer.get(firm,{}).size(),"identity_basis":_business_identity_basis(firm)}
 
 func _business_identity_basis(firm: String) -> String:
 	for row: Dictionary in config.get("development_organizations",[]):
@@ -4492,10 +4711,12 @@ func managed_firm(actor: String, firm: String) -> Dictionary:
 		return {}
 	var result := _visible_subject(firm)
 	result["cargo_fulfilment"] = _cargo_fulfilment.visible(actor)
+	result["resident_services"] = _service_market._resident.personal_view(actor)
+	result["leases"] = _leases.view(actor,firm,_primary_site(firm))
 	var employees: Array[Dictionary] = []
 	for worker: String in _contracts:
 		for contract: Dictionary in _contract_rows(_contracts[worker]):
-			var job := _job(contract["job"])
+			var job := _labor_market.contract_job(contract)
 			if job["employer"] == firm:
 				employees.append({"worker_id": worker, "job_id": job["id"], "site_id": job["site_id"], "work_place_id": job["place"], "workers": contract["workers"], "booked_work": _work_queue.get(worker, {}).get("allocations", {}).get(job["id"], {}).duplicate(true) if not _cohort_profile(worker).is_empty() else _work_queue.get(worker, {}).duplicate(true)})
 	result["employees"] = employees
@@ -4549,7 +4770,7 @@ func _validate_firm_state(value: Dictionary) -> bool:
 			if entry["result"].get(key) != payload[key]:
 				return _fail("Operating result differs from accepted action")
 		if kind == "wind_down_firm":
-			expected[firm]["operating"] = true
+			if not _wind_down.controls(firm): expected[firm]["operating"] = true
 			continue
 		if kind == "finish_firm":
 			expected[firm]["operating"] = false
@@ -4698,14 +4919,17 @@ func _known_suppliers(subject: String) -> Array:
 func _manager(actor: String, firm: String) -> bool:
 	return _manager_at(actor, firm, _world.game_clock.total_minutes())
 
-func _site_operating(site: String) -> bool:
-	return not site_closed(site) and _firm_operating(_owner(site)) and bool(_site_state.get(site, {}).get("enabled", false))
+func _site_operating(site: String, at_minute: int = -1) -> bool:
+	return not site_closed(site) and _firm_operating(_owner(site)) and bool(_site_state.get(site, {}).get("enabled", false)) and _leases.site_allowed(site,at_minute)
 
 func _site_accepting(site: String) -> bool:
 	return _site_operating(site) and bool(_site_state[site]["accepting_business"])
 
-func _site_producing(site: String) -> bool:
-	return not _firm_winding_down(_owner(site)) and _site_operating(site) and bool(_site_state[site]["production_enabled"])
+func _site_selling(site: String) -> bool:
+	return _site_accepting(site) and _wind_down.selling(site)
+
+func _site_producing(site: String, at_minute: int = -1) -> bool:
+	return not _firm_winding_down(_owner(site)) and _site_operating(site,at_minute) and bool(_site_state[site]["production_enabled"])
 
 func _initial_site_state() -> Dictionary:
 	var result: Dictionary = {}
@@ -4781,7 +5005,7 @@ func _household_position(actor: String, incoming: bool) -> Dictionary:
 		if incoming and _spec["categories"][category]["mode"] == "flow":
 			var elapsed := maxi(1, _managed_days(actor, day))
 			target = _need_total(actor, category, elapsed+int(config["stock_horizon"])-1)-_need_total(actor, category, elapsed-1)
-		var covered: int = 0
+		var covered: int = mini(target,_service_market._resident.planning_cover(actor)) if incoming and category=="food" else 0
 		if incoming:
 			for id: String in _active_by_buyer.get(actor, []):
 				var order := _orders[id] as Dictionary
@@ -4821,6 +5045,7 @@ func _transfer_goods(actor: String, payload: Dictionary, action_id: String, inte
 			return _result(false, "FREIGHT_CURRENCY_ACCOUNT")
 	var available := maxi(0, int(_stocks[payload["from_site"]][payload["good"]]) - _committed(payload["from_site"], payload["good"]))
 	var headroom := maxi(0, FormalLedgerState.MAX_AMOUNT - _exposure(payload["to_site"], payload["good"]))
+	headroom=mini(headroom,_retail.headroom(payload["to_site"],payload["good"]))
 	var quantity := mini(headroom, mini(int(payload["quantity"]), mini(available, _route_available(path))))
 	if freight > 0:
 		quantity = mini(quantity, mini(FormalLedgerState.MAX_AMOUNT / freight, _world.ledger_state.available_balance(account) / freight))
@@ -5068,11 +5293,12 @@ func _valid_need_totals(totals: Variant, actor: String, elapsed: int) -> bool:
 	return true
 
 func _valid_need_row(row: Variant, category: String, legacy: bool) -> bool:
-	if not row is Dictionary or not FormalLedgerState.exact_fields(row, ["required", "satisfied", "unmet", "used_items"]):
+	if not row is Dictionary or not EconomySliceConfig._fields(row, ["required", "satisfied", "unmet", "used_items"],["service_satisfied"]):
 		return false
 	for field: String in ["required", "satisfied", "unmet"]:
 		if not FormalLedgerState.valid_amount(row[field]):
 			return false
+	if not FormalLedgerState.valid_amount(row.get("service_satisfied",0)) or int(row.get("service_satisfied",0))>int(row["satisfied"]) or (category!="food" and row.get("service_satisfied",0)!=0): return false
 	if int(row["satisfied"]) + int(row["unmet"]) != int(row["required"]):
 		return false
 	if row["used_items"] == null:
@@ -5098,7 +5324,9 @@ func _valid_household_flows(value: Dictionary, actor: String, flows: Dictionary)
 			used[good] = int(used[good]) + int(row["used_items"][good])
 			service += int(row["used_items"][good]) * _service(good, category)
 			largest = maxi(largest, _service(good, category))
-		if int(row["satisfied"]) > service or service - int(row["satisfied"]) > int(value["day"]) * (largest - 1):
+		var resident:=int(row.get("service_satisfied",0))
+		if resident!=(_service_market._resident.food_total(actor,int(value["day"])) if category=="food" else 0): return _fail("Resident food satisfaction lacks actual service receipt")
+		if int(row["satisfied"])-resident > service or service - (int(row["satisfied"])-resident) > int(value["day"]) * (largest - 1):
 			return _fail("Flow need lacks actual usable item consumption")
 	return flows["produced"] == _zero_goods() and used == flows["used"]
 
@@ -5121,7 +5349,9 @@ func _valid_current_need(value: Dictionary, actor: String) -> bool:
 				held[good] = int(held[good]) + int(row["used_items"][good])
 			elif int(row["used_items"][good]) > int(value["totals"][actor]["categories"][category]["used_items"][good]):
 				return false
-		if int(row["satisfied"]) != mini(int(row["required"]), service):
+		var resident:=mini(int(row["required"]),_service_market._resident.food_units(actor,need_day)) if category=="food" else 0
+		if row.get("service_satisfied",0)!=resident: return false
+		if int(row["satisfied"]) != mini(int(row["required"]), service+resident):
 			return false
 	for good: String in _goods:
 		if int(held[good]) > int(value["stock"][actor][good]):
@@ -5241,7 +5471,7 @@ func personal_economy(person: String) -> Dictionary:
 	var contract := (_contracts.get(person, {}) as Dictionary).duplicate(true)
 	var employer: Dictionary = {}
 	if not contract.is_empty():
-		var job := _job(str(contract["job"]))
+		var job := _labor_market.contract_job(contract)
 		contract.merge({"wage_per_hour": job["wage_per_hour"], "site_id": job["site_id"], "payer_account_id": _account(job["employer"], job["denomination"]), "work_hours_limit": int(job["hours"]) * int(contract["workers"]), "work_place_id": job["place"], "at_workplace": _at_place(person, job["place"])})
 		var available_hours := mini(int(contract["work_hours_limit"]), (((day+1)*1440-_world.game_clock.total_minutes())/60)*int(contract["workers"]))
 		var travelling: bool = _world.person_travel != null and _world.person_travel.active(person)
@@ -5282,9 +5512,9 @@ func personal_market_rows(person: String, limit: int, offset: int) -> Array[Dict
 	for offer: Dictionary in _offers(person):
 		var key := str(offer["good"]) + "|" + str(offer["seller_site"])
 		var unit_cost := int(offer["price"]) + int(offer["freight_per_unit"])
-		if by_site.has(key) and int(by_site[key]["unit_cost"]) <= unit_cost: continue
+		if by_site.has(key) and (int(by_site[key]["inventory"])>0 or int(offer["quantity"])<=0) and int(by_site[key]["unit_cost"]) <= unit_cost: continue
 		var row := personal_commodity("native:" + str(offer["good"]))
-		row.merge({"price": offer["price"], "inventory": offer["quantity"], "seller_site": offer["seller_site"], "denomination": offer["denomination"], "unit_cost": unit_cost, "sale_basis": "KNOWN_NATIVE_SITE"})
+		row.merge({"price": offer["price"], "inventory": offer["quantity"], "seller_site": offer["seller_site"], "denomination": offer["denomination"], "unit_cost": unit_cost, "sale_basis": "KNOWN_ONSITE_STORE" if Retail.onsite(offer) else "KNOWN_NATIVE_SITE", "fulfilment":offer.get("fulfilment","TRANSPORT_CONTRACT"),"reason":offer["reason"]})
 		by_site[key] = row
 	var ids := by_site.keys()
 	ids.sort()
@@ -5300,10 +5530,11 @@ func personal_purchase_quote(person: String, market: String, commodity: String, 
 		return {"success": false, "error": "人物、原生商品单位或数量无效。", "quantity_scale": 1}
 	var offers: Array[Dictionary] = []
 	for offer: Dictionary in _offers(person, "", item["good"]):
-		if offer["good"] == item["good"] and (not market.begins_with("site:") or offer["seller_site"] == market) and not offer["route_legs"].is_empty():
+		if offer["good"] == item["good"] and (not market.begins_with("site:") or offer["seller_site"] == market) and (not offer["route_legs"].is_empty() or Retail.onsite(offer)):
 			offers.append(offer)
 	_annotate_costs(person, offers, quantity)
 	offers.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if (int(a["quantity"])>0)!=(int(b["quantity"])>0): return int(a["quantity"])>0
 		if a.get("compare_across_currencies", false) and (a.get("cost_comparison", {}).get("executable", false) or b.get("cost_comparison", {}).get("executable", false) or a["denomination"] != b["denomination"]): return _comparison_less(a, b)
 		var first := int(a["price"]) + int(a["freight_per_unit"])
 		var second := int(b["price"]) + int(b["freight_per_unit"])
@@ -5312,6 +5543,7 @@ func personal_purchase_quote(person: String, market: String, commodity: String, 
 		return {"success": false, "error": "没有已知的合法卖方及运输路径。", "quantity_scale": 1}
 	var offer := offers[0].duplicate(true)
 	var offered_quantity := int(offer["quantity"])
+	if offered_quantity<=0: return {"success":false,"error":offer["reason"],"quantity_scale":1}
 	var unit := int(offer["price"]) + int(offer["freight_per_unit"])
 	if quantity > FormalLedgerState.MAX_AMOUNT / unit:
 		return {"success": false, "error": "成交金额超过整数范围。", "quantity_scale": 1}
@@ -5328,7 +5560,7 @@ func personal_purchase(person: String, quote: Dictionary, quantity: int, id: Str
 	var result := _accept(person, command, automatic)
 	if not result["accepted"]:
 		return {"success": false, "error": result["reason"]}
-	return {"success": true, "source": _personal_order_source(_orders[result["order_id"]]), "message": "订单已接受。资金已预留，物品在实际交付后取得。"}
+	return {"success": true, "source": _personal_order_source(_orders[result["order_id"]]), "message": "现场交付完成。物品已取得，之后按原消费安排使用。" if Retail.onsite(_orders[result["order_id"]]) else "订单已接受。资金已预留，物品在实际交付后取得。"}
 
 func personal_incoming(person: String, commodity: String) -> int:
 	var quantity: int = 0
@@ -5528,6 +5760,8 @@ func background_responsibilities() -> Dictionary:
 	return result
 
 func owns_transaction(receipt: Dictionary) -> bool:
+	if receipt.get("kind")=="lease_rent": return _leases.valid_payment_batch(str(receipt.get("transaction_id","")))
+	if receipt.get("kind")=="service_fee": return _service_market.valid_payment_batch(str(receipt.get("transaction_id","")))
 	return str(receipt.get("transaction_id", "")).begins_with("r1:") or receipt.get("kind") in ["person_travel", "cargo_refund", "cargo_damages", "cargo_extra_freight", "goods", "freight", "loan_issue", "loan_repayment", "fx_principal", "fx_target", "fx_fee", "asset_trade", "dividend"] or (receipt.get("kind") == "wage" and str(receipt.get("reference_id", "")).begins_with("work:"))
 
 func next_person_action_id() -> String:
@@ -5870,6 +6104,8 @@ func _extension_reason(candidate: Dictionary) -> String:
 func apply_scope_boundary() -> void:
 	if not uses_host_accounts() or processing or _world.game_clock.total_minutes() != day*1440: return
 	_apply_business_boundary()
+	_labor_market.boundary()
+	if not _labor_market._rules.is_empty(): _auto_work()
 	_capital.boundary()
 	for id: String in _pending_scope_requests.duplicate():
 		var request := _scope_requests[id] as Dictionary
@@ -6187,7 +6423,7 @@ func cohort_observation(observer: String, limit: int = 16, offset: int = 0) -> D
 		for category: String in _totals[actor]["categories"]:
 			cumulative[category] = {}
 			for field: String in ["required", "satisfied", "unmet"]: cumulative[category][field] = _totals[actor]["categories"][category][field]
-		rows.append({"id": actor, "place_id": _place(actor), "population_unit_id": _population_unit(actor), "population_start": _spec["actors"][actor]["population_start"], "members": _actors[actor]["members"], "label": profile.get("label", "旧同质 cohort"), "occupation": profile.get("occupation", "LEGACY_UNSPECIFIED"), "basis": profile.get("basis", "LEGACY_CONFIGURATION"), "labor_members": workers, "employed": employed, "unemployed": workers-employed, "employment_basis": "ACTIVE_CONTRACT_WORKER_SHARES", "household_basis": "AGGREGATE_GROUP_BUDGET_NO_MEMBER_WELFARE_INFERENCE", "paid_wages_by_currency": _income_by_actor.get(actor, {}).duplicate(true), "matured_unpaid_by_currency": mature, "need_day": _needs.get(actor, {}).get("day", -1), "needs": today, "cumulative_needs": cumulative, "work_hours": _totals[actor]["work_hours"]})
+		rows.append({"id": actor, "place_id": _place(actor), "population_unit_id": _population_unit(actor), "population_start": _spec["actors"][actor]["population_start"], "members": _actors[actor]["members"], "label": profile.get("label", "旧同质 cohort"), "occupation": profile.get("occupation", "LEGACY_UNSPECIFIED"), "basis": profile.get("basis", "LEGACY_CONFIGURATION"), "labor_members": workers, "employed": employed, "unemployed": workers-employed, "employment_basis": "ACTIVE_CONTRACT_WORKER_SHARES", "household_basis": "AGGREGATE_GROUP_BUDGET_NO_MEMBER_WELFARE_INFERENCE", "paid_wages_by_currency": _income_by_actor.get(actor, {}).duplicate(true), "matured_unpaid_by_currency": mature, "need_day": _needs.get(actor, {}).get("day", -1), "needs": today, "cumulative_needs": cumulative, "service_targets": _service_market._resident.need_view(actor), "housing_use": _leases.housing_view(actor), "work_hours": _totals[actor]["work_hours"]})
 	return {"rows": rows, "total": ids.size(), "offset": offset, "limit": limit, "visibility": "PUBLIC_COHORT_AGGREGATES"}
 
 func regional_observation(observer: String) -> Dictionary:
@@ -6311,7 +6547,9 @@ func regional_observation(observer: String) -> Dictionary:
 			var currency := str(loan["denomination"])
 			debts[currency] = int(debts.get(currency, 0))+Credit._remaining(loan)
 	var rows: Array[Dictionary] = []
-	for id: String in _sorted_ids(regions): rows.append(regions[id])
+	for id: String in _sorted_ids(regions):
+		if not _labor_market._rules.is_empty(): regions[id]["labor_market"]=_labor_market.region_summary(id,{} if public_totals else allowed)
+		rows.append(regions[id])
 	return {"resident_population_by_unit": resident_counts, "unlocated_historical_consumption": unlocated_consumption, "regional_population_basis": "ACTUAL_ACTIVITY_NOT_RESIDENCE", "management": management_view(), "activity_schedule": _decision_counts.duplicate(true) if public_totals else {}, "day": day, "minute": _world.game_clock.total_minutes(), "regions": rows, "coverage": "PUBLISHED_REGION_TOTALS" if public_totals else "OBSERVER_AND_MANAGED_ENTERPRISES", "quantities": "NATIVE_GOOD_UNITS", "money": "BY_DENOMINATION", "macro_comparison": "SEPARATE_UNITS_NO_GDP_SUM"}
 
 func has_economic_action(id: String) -> bool:
@@ -6319,6 +6557,9 @@ func has_economic_action(id: String) -> bool:
 
 func person_has_work_booking(person: String) -> bool:
 	return _work_queue.has(person)
+
+func person_has_resident_service_booking(person: String) -> bool:
+	return _service_market._resident.booked(person)
 
 func automatic_person(person: String) -> bool:
 	return manages_person(person) and _actors[person]["control"] == "automatic"
@@ -6342,6 +6583,7 @@ func _collect_ready_cargo(person: String) -> void:
 
 func observe_person_place(person: String) -> void:
 	if not personal_authorized(person) or _world.person_overlay.is_travelling(person): return
+	_commercial.contact_local(person)
 	if _world.person_travel != null: _world.person_travel.observe_place(person)
 	for route: Dictionary in config.get("routes", []):
 		if route["from_place_id"] == _place(person) and route["to_place_id"] == _place(person) and not route["known_to"].has(person): route["known_to"].append(person)
@@ -6412,6 +6654,7 @@ func has_person_travel_responsibilities() -> bool:
 func _observe_local_posting(person: String, job_id: String) -> void:
 	var job := _job(job_id)
 	if not personal_authorized(person) or not _at_place(person, job["place"]): return
+	if _labor_market.controls(job_id): _labor_market.observe_person(person);return
 	var posting := _job_postings[job_id] as Dictionary
 	var id := "posting:"+person+":"+job_id
 	if int(posting["version"]) <= 0 or int(_receipts.get(id, {}).get("version", 0)) >= int(posting["version"]): return
@@ -6580,8 +6823,12 @@ func valid_plan_admission(person: String, request_id: String, minute: int) -> bo
 ## Only a debt/stock/contract-free named person has an existing legacy future
 ## consumption receiver. Cash and historical sources already live in the host.
 func _scope_exit_reason(subject: String, restored_history: bool = false) -> String:
+	var lease_reason:=_leases.keeper_reason(subject)
+	if not lease_reason.is_empty(): return lease_reason
 	var cargo_reason := _cargo_fulfilment.keeper_reason(subject)
 	if not cargo_reason.is_empty(): return cargo_reason
+	for id: String in _service_market._active:
+		if _service_market.contracts[id]["client"]==subject: return "SERVICE_CONTRACT_REMAINS_UNSETTLED"
 	if not _declared_named(subject): return "NO_LEGACY_ENTERPRISE_OR_COHORT_CONTRACT_AND_PROPERTY_RECEIVER"
 	if _contracts.has(subject) or _work_queue.has(subject): return "EMPLOYMENT_OR_WORK_REMAINS_ACTIVE"
 	for order: Dictionary in _orders.values():
@@ -6644,7 +6891,7 @@ func scope_subject_responsibilities(subject: String) -> Dictionary:
 	var labor: int = 0
 	for worker: String in _contracts:
 		for contract: Dictionary in _contract_rows(_contracts[worker]):
-			var job := _job(contract["job"])
+			var job := _labor_market.contract_job(contract)
 			if worker == subject or job["employer"] == subject or job["site_id"] == subject: labor += 1
 	var loans: Array[Dictionary] = []
 	for loan: Dictionary in _credit.visible(_owner(subject), [], _world.game_clock.total_minutes()).get("loans", []):
@@ -6734,7 +6981,13 @@ func _request_operating_change(actor: String, payload: Dictionary, id: String, k
 	for pending: String in _pending_enterprise_changes:
 		var change := _enterprise_changes[pending] as Dictionary
 		if change["firm"] == firm and change["kind"] == kind and change["payload"].get("site_id", "") == payload.get("site_id", ""): return _result(false, "OPERATING_CHANGE_ALREADY_PENDING")
+	var proof: Dictionary={}
+	if _wind_down.controls(firm) and (kind in ["wind_down_firm","close_site","finish_firm"] or (kind=="set_firm_operating" and payload["operating"])):
+		proof=_wind_down.permission(actor,firm,"resume" if kind=="set_firm_operating" else "decide")
+		if not proof["ok"]: return _result(false,proof["reason"])
+	if kind=="wind_down_firm" and _firm_winding_down(firm): return _result(false,"ALREADY_WINDING_DOWN")
 	var row := _new_enterprise_change(actor, kind, firm, payload, id)
+	if not proof.is_empty(): row["permission"]={"request":proof,"adoption":{}}
 	_enterprise_changes[id] = row
 	_pending_enterprise_changes.append(id)
 	var result := payload.duplicate(true)
@@ -6751,7 +7004,10 @@ func firm_finished(firm: String) -> bool:
 		if row["kind"] == "finish_firm" and row["status"] == "APPLIED" and row["firm"] == firm: return true
 	return false
 
-func _site_close_reason(site: String) -> String:
+func _site_close_reason(site: String, include_lease: bool = true) -> String:
+	if include_lease and not _leases.keeper_reason(site).is_empty(): return _leases.keeper_reason(site)
+	var service_reason:=_service_market.keeper_reason(site)
+	if not service_reason.is_empty(): return service_reason
 	var transport_reason:=_shared.site_keeper_reason(site)
 	if not transport_reason.is_empty(): return transport_reason
 	var capital_reason := _capital.keeper_reason(site)
@@ -6772,6 +7028,9 @@ func _site_close_reason(site: String) -> String:
 	return ""
 
 func _firm_finish_reason(firm: String) -> String:
+	if not _leases.keeper_reason(firm).is_empty(): return _leases.keeper_reason(firm)
+	var service_reason:=_service_market.keeper_reason(firm)
+	if not service_reason.is_empty(): return service_reason
 	var cargo_reason := _cargo_fulfilment.keeper_reason(firm)
 	if not cargo_reason.is_empty(): return cargo_reason
 	for asset: Dictionary in _capital.assets.values():
@@ -6801,9 +7060,18 @@ func _apply_business_boundary() -> void:
 		var row := _employment_ends[id] as Dictionary
 		if row["status"] == "QUEUED" and int(row["boundary_minute"]) <= now:
 			if _contracts.get(row["worker"]) == row["contract"] and not _work_queue.has(row["worker"]):
-				_contracts.erase(row["worker"])
+				if row.has("job_id"):
+					var c:=_contract_for(row["worker"],row["job_id"])
+					if row["workers"]<c["workers"]: c["workers"]=int(c["workers"])-int(row["workers"])
+					elif _contracts[row["worker"]].has("allocations"):
+						_contracts[row["worker"]]["allocations"].erase(row["job_id"])
+						if _contracts[row["worker"]]["allocations"].is_empty(): _contracts.erase(row["worker"])
+					else: _contracts.erase(row["worker"])
+				else: _contracts.erase(row["worker"])
+				_cohort_search_day.erase(row["worker"])
 				row["status"] = "APPLIED"
 				row["effective_minute"] = now
+				_labor_market.record_end(row)
 				_pending_employment_ends.erase(id)
 	for id: String in _pending_enterprise_changes.duplicate():
 		var row := _enterprise_changes[id] as Dictionary
@@ -6820,6 +7088,10 @@ func _apply_business_boundary() -> void:
 			if not organization.is_empty() and not _world.organization_state.is_organization_active(organization): reason = "HOST_ORGANIZATION_INACTIVE"
 		elif row["kind"] == "close_site": reason = _site_close_reason(row["payload"]["site_id"])
 		elif row["kind"] == "finish_firm": reason = _firm_finish_reason(row["firm"])
+		if reason.is_empty() and row["permission"].has("request"):
+			var proof:=_wind_down.permission(row["actor"],row["firm"],row["permission"]["request"]["operation"])
+			if not proof["ok"]: reason=proof["reason"]
+			else: row["permission"]["adoption"]=proof
 		if not reason.is_empty():
 			row["status"] = "DEFERRED"
 			row["reason"] = reason
@@ -6833,17 +7105,29 @@ func _apply_business_boundary() -> void:
 		elif row["kind"] == "close_site":
 			for flag: String in ["enabled", "production_enabled", "accepting_business"]: _site_state[row["payload"]["site_id"]][flag] = false
 		elif row["kind"] == "finish_firm": _firm_state[row["firm"]]["operating"] = false
-		elif row["kind"] == "wind_down_firm": _firm_state[row["firm"]]["operating"] = true
+		elif row["kind"] == "wind_down_firm" and not _wind_down.controls(row["firm"]): _firm_state[row["firm"]]["operating"] = true
 		row["status"] = "APPLIED"
 		row["effective_minute"] = now
 	_update_job_postings()
 
 func _request_employment_end(actor: String, payload: Dictionary, id: String) -> Dictionary:
 	if _employment_ends.size() >= 256: return _result(false, "EMPLOYMENT_HISTORY_LIMIT")
-	if payload != {} or not _contracts.has(actor) or _employment_end_pending(actor): return _result(false, "NO_ACTIVE_OWN_EMPLOYMENT")
+	if not EconomySliceConfig._fields(payload,[],["job_id","workers"]) or not _contracts.has(actor) or _employment_end_pending(actor): return _result(false, "NO_ACTIVE_OWN_EMPLOYMENT")
+	if not payload.is_empty():
+		var selected:=_contract_for(actor,str(payload.get("job_id","")))
+		if selected.is_empty() or not _labor_market.controls(selected["job"]) or not FormalLedgerState.valid_amount(payload.get("workers")) or payload["workers"]<1 or payload["workers"]>selected["workers"]: return _result(false,"INVALID_OWN_LABOR_SHARE_RELEASE")
 	_employment_ends[id] = {"worker": actor, "contract": _contracts[actor].duplicate(true), "boundary_minute": (day+1)*1440, "effective_minute": -1, "status": "QUEUED"}
+	if not payload.is_empty(): _employment_ends[id].merge(payload)
 	_pending_employment_ends.append(id)
 	return {"accepted": true, "reason": "EMPLOYMENT_END_QUEUED", "boundary_minute": (day+1)*1440}
+
+func _workable_workers(actor: String,contract: Dictionary) -> int:
+	for id: String in _pending_employment_ends:
+		var row:=_employment_ends[id] as Dictionary
+		if row["worker"]!=actor: continue
+		if not row.has("job_id"): return 0
+		if row["job_id"]==contract["job"]: return maxi(0,int(contract["workers"])-int(row["workers"]))
+	return int(contract["workers"])
 
 func _employment_end_pending(worker: String) -> bool:
 	for id: String in _pending_employment_ends:
@@ -6852,8 +7136,11 @@ func _employment_end_pending(worker: String) -> bool:
 
 func _employment_for_work(value: Dictionary, work: Dictionary) -> Dictionary:
 	var command := value["commands"].get(work.get("action_id"), {}).get("envelope", {}).get("command", {}) as Dictionary
+	if work.has("employment_action_id"): return _labor_market.work_contract(work,command,value["commands"])
+	if _labor_market.controls(str(work.get("job",""))) and _labor_market.pinned_source_exists(str(work.get("actor","")),work["job"],value["commands"],int(command.get("minute",-1))): return {}
 	for row: Dictionary in _employment_ends.values():
 		var contract := Cohorts.contract(row["contract"], str(work.get("job", "")))
+		if row.has("job_id") and row["job_id"]!=work.get("job"): continue
 		if row["worker"] == work.get("actor") and not contract.is_empty() and row["status"] == "APPLIED" and int(command.get("minute", -1)) < int(row["effective_minute"]) and int(work["day"])*1440 <= int(row["effective_minute"]): return contract
 	return Cohorts.contract(value["contracts"].get(work.get("actor"), {}), str(work.get("job", "")))
 
@@ -6883,7 +7170,7 @@ func enterprise_lifecycle_view(actor: String, firm: String) -> Dictionary:
 	var successors: Array[String] = []
 	for permit: Dictionary in config.get("firm_management_permissions", []):
 		if permit["firm"] == firm and permit["from_manager"] == firm_manager_at(firm, _world.game_clock.total_minutes()) and not _management_permission(firm, permit["from_manager"], permit["to_manager"]).is_empty(): successors.append(permit["to_manager"])
-	return {"manager": firm_manager_at(firm, _world.game_clock.total_minutes()), "status": "FINISHED_NATIVE_IDENTITY_RETAINED" if firm_finished(firm) else "PAUSED" if not _firm_operating(firm) else "WINDING_DOWN" if _firm_winding_down(firm) else "OPERATING", "changes": changes, "sites": sites, "successors": successors, "finish_reason": _firm_finish_reason(firm), "responsibilities": scope_subject_responsibilities(firm), "capital": _capital.view(firm)}
+	return {"manager": firm_manager_at(firm, _world.game_clock.total_minutes()), "status": "FINISHED_NATIVE_IDENTITY_RETAINED" if firm_finished(firm) else "PAUSED" if not _firm_operating(firm) else "WINDING_DOWN" if _firm_winding_down(firm) else "OPERATING", "changes": changes, "sites": sites, "successors": successors, "finish_reason": _firm_finish_reason(firm), "wind_down":_wind_down.view(actor,firm), "responsibilities": scope_subject_responsibilities(firm), "capital": _capital.view(firm)}
 
 func incoming_management_view(person: String) -> Array[Dictionary]:
 	var rows: Array[Dictionary] = []
@@ -6931,10 +7218,18 @@ func _restore_business_lifecycles(value: Dictionary) -> bool:
 			if row["actor"] != manager or int(row["requested_minute"]) < previous or int(row["effective_minute"]) <= previous: return _fail("Conflicting enterprise managerial succession")
 			manager = row["payload"]["successor"]
 			previous = row["effective_minute"]
+	for row: Dictionary in _enterprise_changes.values():
+		if not _wind_down.controls(row["firm"]) or row["kind"] not in ["wind_down_firm","close_site","finish_firm","set_firm_operating"] or (row["kind"]=="set_firm_operating" and not row["payload"].get("operating",false)): continue
+		var op: String="resume" if row["kind"]=="set_firm_operating" else "decide"
+		if not FormalLedgerState.exact_fields(row["permission"],["request","adoption"]) or not _wind_down.proof_valid(row["permission"]["request"],row["actor"],row["firm"],op,0,row["requested_minute"]): return _fail("Voluntary closure lacks its separate original authority")
+		if row["status"]=="APPLIED" and not _wind_down.proof_valid(row["permission"]["adoption"],row["actor"],row["firm"],op,0,row["effective_minute"]): return _fail("Voluntary closure lacks effective boundary authority")
 	for id: Variant in _employment_ends:
 		var row: Variant = _employment_ends[id]
 		var entry := value.get("commands", {}).get(id, {}) as Dictionary
-		if not row is Dictionary or not FormalLedgerState.exact_fields(row, ["worker", "contract", "boundary_minute", "effective_minute", "status"]) or not row["contract"] is Dictionary or not _spec["actors"].has(row["worker"]) or not _valid_employment_container(row["contract"], row["worker"], value.get("actors", {}).get(row["worker"], {}).get("known_jobs", []), value.get("commands", {})) or entry.get("envelope", {}).get("actor") != row["worker"] or entry.get("envelope", {}).get("command", {}).get("kind") != "leave_job" or entry["envelope"]["command"]["payload"] != {} or entry.get("result", {}).get("accepted") != true or row["status"] not in ["QUEUED", "APPLIED"] or not FormalLedgerState.valid_amount(row["boundary_minute"]) or row["boundary_minute"] != (int(entry["envelope"]["command"]["minute"])/1440+1)*1440: return _fail("Invalid ended employment authority")
+		if not row is Dictionary or not EconomySliceConfig._fields(row, ["worker", "contract", "boundary_minute", "effective_minute", "status"],["job_id","workers"]) or not row["contract"] is Dictionary or not _spec["actors"].has(row["worker"]) or not _valid_employment_container(row["contract"], row["worker"], value.get("actors", {}).get(row["worker"], {}).get("known_jobs", []), value.get("commands", {}),int(entry.get("envelope",{}).get("command",{}).get("minute",0))) or entry.get("envelope", {}).get("actor") != row["worker"] or entry.get("envelope", {}).get("command", {}).get("kind") != "leave_job" or entry["envelope"]["command"]["payload"] != ({"job_id":row["job_id"],"workers":row.get("workers")} if row.has("job_id") else {}) or entry.get("result", {}).get("accepted") != true or row["status"] not in ["QUEUED", "APPLIED"] or not FormalLedgerState.valid_amount(row["boundary_minute"]) or row["boundary_minute"] != (int(entry["envelope"]["command"]["minute"])/1440+1)*1440: return _fail("Invalid ended employment authority")
+		if row.has("job_id"):
+			var selected:=Cohorts.contract(row["contract"],row["job_id"])
+			if selected.is_empty() or not _labor_market.controls(row["job_id"]) or not FormalLedgerState.valid_amount(row.get("workers")) or row["workers"]<1 or row["workers"]>selected["workers"]: return _fail("Ended worker shares exceed original employment")
 		for contract: Dictionary in _contract_rows(row["contract"]):
 			var formed: bool = false
 			for action: Dictionary in value["commands"].values():
@@ -7070,6 +7365,8 @@ func capital_take_goods(site: String, materials: Dictionary, project_id: String 
 			var rows := _lots.selection("SITE|"+site, good, int(materials[good]))
 			if rows.is_empty(): return false
 			inputs.append_array(rows)
+	if not inputs.is_empty() and not _lots.ready(inputs): return false
+	if _costs.enabled and not project_id.is_empty(): _costs.capital_inputs(project_id, inputs)
 	if not inputs.is_empty() and not _lots.consume(inputs, _world.game_clock.total_minutes()): return false
 	if not project_id.is_empty(): _capital.projects[project_id]["material_sources"] = inputs.duplicate(true)
 	for good: String in materials:
@@ -7079,6 +7376,7 @@ func capital_take_goods(site: String, materials: Dictionary, project_id: String 
 func _procure_capital() -> void:
 	for id: String in _capital._active.duplicate():
 		var project := _capital.projects[id] as Dictionary
+		if _wind_down.controls(project["firm"]) and _firm_winding_down(project["firm"]): continue
 		if project["status"] == "PAUSED" or not project["materials"].is_empty(): continue
 		var site := str(project["site_id"])
 		var firm := str(project["firm"])
@@ -7135,6 +7433,7 @@ func _npc_invest() -> void:
 					pressure += amount
 		if observed_days.size() < int(policy["window_days"]) or pressure < int(policy["minimum_pressure"]): continue
 		var used := 0
+		if not _costs.investment_allowed(site): continue
 		for activity: Dictionary in _spec["sites"][site]["activities"]:
 			used += int(_plans.get(site, {}).get("activities", {}).get(activity["id"], {}).get("actual", 0))*int(activity["capacity_units"])
 		if used*100 < _capital.capacity(site, _production_minute())*int(policy["minimum_utilization_percent"]): continue
@@ -7167,7 +7466,7 @@ func _capital_finance_action(actor: String, payload: Dictionary, id: String) -> 
 
 
 func _request_retention_window(site: String) -> int:
-	var window := int(_operations_policy(site)["demand_window"])
+	var window := maxi(int(_operations_policy(site)["demand_window"]),maxi(_retail.observation_days(site),_commercial.observation_days(site)))
 	for row: Dictionary in config.get("capital_investment", {}).get("npc_policies", []):
 		if _capital.template(row["template_id"])["site_id"] == site: window = maxi(window, int(row["window_days"]))
 	return window
@@ -7299,6 +7598,10 @@ func _validate_physical_references() -> bool:
 		if int(p["remaining"]) <= 0: continue
 		var loc := str(p["location"])
 		if not str(p["reserved_for"]).is_empty():
+			if _service_market.contracts.has(p["reserved_for"]):
+				var c:=_service_market.contracts[p["reserved_for"]] as Dictionary
+				if c["kind"]!="STORAGE" or c["started_minute"]>=0 or c["status"]=="CANCELLED" or loc!="SITE|"+str(c["source_site"]) or p["owner"]!=c["client"] or p["good"]!=c["good"]: return _fail("Service reservation lost actual client stock")
+				continue
 			var order := _orders.get(p["reserved_for"], {}) as Dictionary
 			if order.is_empty() or order["kind"] == "PERSONAL_FREIGHT" or int(order["pending"]) <= 0 or loc != "SITE|"+str(order["seller_site"]) or p["owner"] != order["seller"] or p["good"] != order["good"]: return _fail("Physical reservation has no corresponding unfulfilled order")
 		if loc.begins_with("CARGO|"):
@@ -7306,6 +7609,10 @@ func _validate_physical_references() -> bool:
 			if not _shipments.has(id) or p["good"] != _orders[_shipments[id]["order_id"]]["good"] or p["place_id"] != _shipments[id]["place_id"]: return _fail("Physical cargo has an invalid shipment reference")
 			var order := _orders[_shipments[id]["order_id"]] as Dictionary
 			if p["owner"] != (order["buyer"] if order["kind"] == "PERSONAL_FREIGHT" else order["seller"]): return _fail("Cargo ownership differs from the original order")
+		elif loc.begins_with("SERVICE|"):
+			var id:=loc.trim_prefix("SERVICE|")
+			var c:=_service_market.contracts.get(id,{}) as Dictionary
+			if c.is_empty() or c["kind"]!="STORAGE" or c["started_minute"]<0 or p["owner"]!=c["client"] or p["good"]!=c["good"] or p["custodian"]!=c["provider_site"] or p["place_id"]!=_place(c["provider_site"]): return _fail("Commercial custody has no actual owner/provider contract")
 		elif loc.begins_with("SITE|"):
 			var id := loc.trim_prefix("SITE|")
 			if not _spec["sites"].has(id) or p["owner"] != _owner(id) or p["place_id"] != _place(id): return _fail("Physical site custody has an invalid owner/place")
@@ -7582,6 +7889,7 @@ func _delegated_firm_credit(saved: Dictionary, entry: Dictionary) -> bool:
 
 func _npc_liquidity() -> bool:
 	for p: Dictionary in config.get("liquidity_policies",[]):
+		if _wind_down.controls(p["firm"]) and _firm_winding_down(p["firm"]): continue
 		var firm := str(p["firm"])
 		if firm_manager_at(firm,_world.game_clock.total_minutes())!=firm or firm_finished(firm): continue
 		var wages := _mature_wage_position(firm,p["currency"])
@@ -7604,7 +7912,10 @@ func _npc_liquidity() -> bool:
 			var recover: bool=not constrained and wages["amount"]==0 and _world.ledger_state.available_balance(_account(firm,p["currency"]))-_due_credit_amount(firm,p["currency"])>=int(p["recover_cash"]) and _own_liquidity_pause(site)
 			if (constrained and state["production_enabled"]) or (recover and not state["production_enabled"]):
 				_npc_submit(firm,"set_site_status",{"firm":firm,"site_id":site,"enabled":state["enabled"],"production_enabled":recover,"accepting_business":state["accepting_business"]},"liquidity:"+site,{"purpose":"LIQUIDITY_RECOVERY" if recover else "LIQUIDITY_PRODUCTION_PAUSE","wage_amount":wages["amount"],"arrears_days":wages["arrears_days"]})
-		if p["wind_down_after_days"]>0 and wages["amount"]>0 and wages["arrears_days"]>=int(p["wind_down_after_days"]) and not _firm_winding_down(firm):
+		var closure_pending:=false
+		for change: String in _pending_enterprise_changes:
+			if _enterprise_changes[change]["firm"]==firm and _enterprise_changes[change]["kind"]=="wind_down_firm": closure_pending=true;break
+		if not closure_pending and p["wind_down_after_days"]>0 and wages["amount"]>0 and wages["arrears_days"]>=int(p["wind_down_after_days"]) and not _firm_winding_down(firm):
 			_npc_submit(firm,"wind_down_firm",{"firm":firm},"liquidity:wind_down",{"purpose":"PERSISTENT_UNFUNDED_OBLIGATIONS"})
 		elif p["pause_investment"] and not constrained and wages["amount"]==0 and not _firm_winding_down(firm):
 			for project_site: String in _spec["firms"][firm]["sites"]:
@@ -7696,6 +8007,8 @@ func owned_batch_rows(actor: String, subject: String, limit: int = 32, offset: i
 			row["person_travelling"] = _world.person_travel != null and _world.person_travel.active(owner)
 		row["source_basis"] = _lots.sources[p["source_id"]]["basis"]
 		row["formed_minute"] = _lots.sources[p["source_id"]]["formed_minute"]
+		if _costs.enabled:
+			row["cost"] = _costs.cost_of(_costs.ranges([{ "portion_id":id,"source_id":p["source_id"],"quantity":p["remaining"] }]))
 		result.append(row)
 		if result.size() >= mini(limit, 64): return result
 	return result
@@ -7738,6 +8051,11 @@ func _validate_personal_physical_partitions() -> bool:
 
 ## Called only after native, Spatial and host passenger candidate restoration.
 func validate_transport_references() -> bool:
+	if not _leases.validate_presence(): return _fail(_leases.error)
+	if not _retail.validate_presence(): return _fail(_retail.error)
+	if not _commercial.validate_presence(): return _fail(_commercial.error)
+	if not _labor_market.validate_presence(): return _fail(_labor_market.error)
+	if not _service_market._resident.validate_presence(): return _fail(_service_market._resident.error)
 	for id: String in _world.spatial_world._capacity._adoptions:
 		if id.begins_with("economy_entry:") and not _shared.entries.has(id): return _fail("Unowned native Spatial entry: "+id)
 		if id.begins_with("passenger_entry:") and (_world.person_travel==null or not _world.person_travel._shared_entries.has(id)): return _fail("Unowned passenger Spatial entry: "+id)

@@ -228,7 +228,7 @@ func transfer(transaction_id: String, source_id: String, destination_id: String,
 
 
 func _valid_kind(kind: String) -> bool:
-	return kind in ["opening_cash", "employer_reserve", "wage", "purchase"] or (_r1_enabled and kind in ["goods", "freight", "cargo_refund", "cargo_damages", "cargo_extra_freight", "loan_issue", "loan_repayment", "fx_principal", "fx_target", "fx_fee", "asset_trade", "dividend", "person_travel"])
+	return kind in ["opening_cash", "employer_reserve", "wage", "purchase"] or (_r1_enabled and kind in ["goods", "freight", "cargo_refund", "cargo_damages", "cargo_extra_freight", "loan_issue", "loan_repayment", "fx_principal", "fx_target", "fx_fee", "asset_trade", "dividend", "person_travel", "service_fee", "lease_rent"])
 
 
 func _payment_preparation_error(message: String) -> Dictionary:

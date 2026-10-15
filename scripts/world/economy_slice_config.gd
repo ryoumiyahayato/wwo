@@ -2,6 +2,13 @@ class_name EconomySliceConfig
 extends RefCounted
 const SharedTransport = preload("res://scripts/world/economy_shared_transport.gd")
 const Liquidity = preload("res://scripts/world/economy_liquidity_rules.gd")
+const CostAllocation = preload("res://scripts/world/economy_cost_allocation.gd")
+const WindDown = preload("res://scripts/world/economy_wind_down.gd")
+const LaborMarket = preload("res://scripts/world/economy_labor_market.gd")
+const Commercial = preload("res://scripts/world/economy_commercial_information.gd")
+const Retail = preload("res://scripts/world/economy_retail_rules.gd")
+const Leases = preload("res://scripts/world/economy_lease_market.gd")
+const Services = preload("res://scripts/world/economy_service_market.gd")
 const Budget = preload("res://scripts/world/economy_procurement_budget.gd")
 const Cohorts = preload("res://scripts/world/economy_cohort_rules.gd")
 
@@ -16,7 +23,7 @@ const FIELDS: Array[String] = ["format", "case_id", "actors", "firms", "jobs", "
 const Credit = preload("res://scripts/world/economy_bilateral_credit.gd")
 const Exchange = preload("res://scripts/world/economy_currency_exchange.gd")
 const Assets = preload("res://scripts/world/economy_asset_market.gd")
-const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations", "liquidity_policies", "labor_response_policies", "firm_finance_authorities"]
+const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations", "liquidity_policies", "labor_response_policies", "firm_finance_authorities", "cost_accounting", "service_market", "lease_market", "retail_sites", "commercial_information", "labor_market", "wind_down"]
 ## Extra accounts declare finite minor-unit endowments, including zero accounts.
 ## FX offers use target-minor/source-minor rational rates and a fixed source fee.
 ## Routes are directed shared physical edges, with same-currency freight per unit.
@@ -54,7 +61,7 @@ static func is_multi(value: Dictionary) -> bool:
 static func valid(value: Dictionary) -> bool:
 	if not valid_development_organizations(value): return false
 	if not Budget.valid_rules(value.get("procurement_budgets", [])) or not SharedTransport.valid_configuration(value.get("shared_transport", [])) or not SharedTransport.valid_facilities(value.get("transport_facilities", [])): return false
-	if not Liquidity.valid(value): return false
+	if not Liquidity.valid(value) or not CostAllocation.valid_configuration(value): return false
 	if value.has("place_population_bindings") and (not value.get("host_personal_accounts", false) or not FormalWorldPopulationState.valid_place_population_bindings(value["place_population_bindings"])): return false
 	if value.has("commodity_mappings") and (not value.get("host_personal_accounts", false) or not CommodityMapping.valid_rows(value["commodity_mappings"])): return false
 	if value.has("residence_permissions"):
@@ -237,7 +244,7 @@ static func valid(value: Dictionary) -> bool:
 	for actor: Dictionary in actors.values():
 		if not Cohorts.valid(actor, value, jobs): return false
 	var route: Variant = value["route"]
-	return route is Dictionary and FormalLedgerState.exact_fields(route, ["id", "place_id", "capacity", "delay", "basis"]) and route["id"] is String and str(route["id"]).begins_with("edge:") and _place(route["place_id"]) and route["basis"] == "SYNTHETIC" and _number(route["capacity"], 1) and _number(route["delay"], 1) and credit_parties_valid(value, actors, firms) and _finance(value, actors, firms, jobs, accounts) and _operations(value, actors, firms) and _lifecycle_configuration(value, actors, firms) and Capital.valid_configuration(value, normalize(value, []))
+	return route is Dictionary and FormalLedgerState.exact_fields(route, ["id", "place_id", "capacity", "delay", "basis"]) and route["id"] is String and str(route["id"]).begins_with("edge:") and _place(route["place_id"]) and route["basis"] == "SYNTHETIC" and _number(route["capacity"], 1) and _number(route["delay"], 1) and credit_parties_valid(value, actors, firms) and _finance(value, actors, firms, jobs, accounts) and _operations(value, actors, firms) and _lifecycle_configuration(value, actors, firms) and Capital.valid_configuration(value, normalize(value, [])) and Services.valid_configuration(value, normalize(value, [])) and Leases.valid_configuration(value, normalize(value, [])) and Retail.valid_configuration(value, normalize(value, [])) and Commercial.valid_configuration(value, normalize(value, [])) and LaborMarket.valid_configuration(value,normalize(value,[])) and WindDown.valid_configuration(value,normalize(value,[]))
 
 static func _fields(row: Dictionary, required: Array[String], optional: Array[String]) -> bool:
 	var fields := required.duplicate()

@@ -314,9 +314,35 @@ func _on_action_requested(action: String) -> void:
 		var command := action.trim_prefix("time:")
 		if command == "pause": time_control.toggle_pause()
 		else: time_control.set_speed(int(command))
+	elif action.begins_with("lease_ui:"):
+		if action=="lease_ui:personal_toggle": main_shell.person_page.lease_mode=not main_shell.person_page.lease_mode
+		elif action=="lease_ui:business_toggle": main_shell.person_page.business_leases_mode=not main_shell.person_page.business_leases_mode
+		else: main_shell.person_page.lease_page=maxi(0,main_shell.person_page.lease_page+(-1 if action.ends_with("previous") else 1))
+		main_shell.refresh()
+	elif action.begins_with("resident_service_ui:"):
+		if action=="resident_service_ui:toggle": main_shell.person_page.resident_services_mode=not main_shell.person_page.resident_services_mode
+		else: main_shell.person_page.resident_service_page=maxi(0,main_shell.person_page.resident_service_page+(-1 if action.ends_with("previous") else 1))
+		main_shell.refresh()
+	elif action.begins_with("service_ui:"):
+		if action=="service_ui:toggle": main_shell.person_page.business_services_mode=not main_shell.person_page.business_services_mode
+		else: main_shell.person_page.business_service_page=maxi(0,main_shell.person_page.business_service_page+(-1 if action.ends_with("previous") else 1))
+		main_shell.refresh()
 	elif _world != null and action.begins_with("native:"):
 		var result: Dictionary
-		if action=="native:business_finance":
+		if action.begins_with("native:lease_action:"):
+			var parts:=action.trim_prefix("native:lease_action:").split(":")
+			var row:=main_shell.person_page.lease_request(int(parts[1]),parts[0]=="business") if parts.size()==2 else {}
+			result=LivelihoodAction.execute_current(_world,row["kind"],row["payload"]) if not row.is_empty() else {"accepted":false,"reason":"LEASE_CANDIDATE_UNAVAILABLE"}
+		elif action.begins_with("native:labor_action:"):
+			var row:=main_shell.person_page.labor_request(int(action.trim_prefix("native:labor_action:")))
+			result=LivelihoodAction.execute_current(_world,row["kind"],row["payload"]) if not row.is_empty() else {"accepted":false,"reason":"EMPLOYMENT_PROPOSAL_UNAVAILABLE"}
+		elif action.begins_with("native:resident_service_action:"):
+			var row:=main_shell.person_page.resident_service_request(int(action.trim_prefix("native:resident_service_action:")))
+			result=LivelihoodAction.execute_current(_world,row["kind"],row["payload"]) if not row.is_empty() else {"accepted":false,"reason":"RESIDENT_SERVICE_CANDIDATE_UNAVAILABLE"}
+		elif action.begins_with("native:service_action:"):
+			var row:=main_shell.person_page.business_service_request(int(action.trim_prefix("native:service_action:")))
+			result=LivelihoodAction.execute_current(_world,row["kind"],row["payload"]) if not row.is_empty() else {"accepted":false,"reason":"SERVICE_CANDIDATE_UNAVAILABLE"}
+		elif action=="native:business_finance":
 			var payload := main_shell.person_page.business_finance_request()
 			if not payload.is_empty(): result=LivelihoodAction.execute_current(_world,"finance_firm",payload)
 		elif action.begins_with("native:business_buy:"):
@@ -390,7 +416,10 @@ func _on_action_requested(action: String) -> void:
 		elif action.begins_with("native:exit:"):
 			result = LivelihoodAction.execute_current(_world, "request_scope_exit", {"subject_id": action.trim_prefix("native:exit:")})
 		elif action.begins_with("native:apply:"):
-			result = LivelihoodAction.execute_current(_world, "apply", {"job_id": action.trim_prefix("native:apply:")})
+			var parts:=action.trim_prefix("native:apply:").split("|")
+			var payload:={"job_id":parts[0]}
+			if parts.size()==2 and not parts[1].is_empty(): payload["job_quote_id"]=parts[1]
+			result = LivelihoodAction.execute_current(_world, "apply", payload)
 		elif action == "native:work":
 			var employment := _world.personal_economy_state.person_economy(_world.player_state.player_id()).get("employment", {}) as Dictionary
 			result = LivelihoodAction.execute_current(_world, "work", {"hours": int(employment.get("work_hours_available", employment.get("work_hours_limit", 0)))})
