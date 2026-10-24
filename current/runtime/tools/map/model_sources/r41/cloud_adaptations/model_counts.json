@@ -1,0 +1,269 @@
+[
+  {
+    "key": "orange",
+    "drive_id": "1o4l1BGAYXh6pP_j9Jy157Z3OxCdt6wlg",
+    "original_file": "65_Theatre_of_Orange_Roman_Stage_Wall_France.glb",
+    "original_bytes": 50476,
+    "adapted_bytes": 83756,
+    "original_triangles": 1308,
+    "original_vertices": 1581,
+    "original_materials": 6,
+    "kept_source_materials": [
+      1,
+      2,
+      5
+    ],
+    "materials": 3,
+    "textures": 0,
+    "footprint_m": [
+      78.23529815673828,
+      53.61176681518555
+    ],
+    "height_m": 35.0,
+    "uniform_scale": 8.235293886653286,
+    "meshes": [
+      {
+        "name": "orange_Far",
+        "surfaces": 3,
+        "vertices": 1109,
+        "triangles": 607
+      },
+      {
+        "name": "orange_Near",
+        "surfaces": 3,
+        "vertices": 1784,
+        "triangles": 1104
+      }
+    ]
+  },
+  {
+    "key": "pisa",
+    "drive_id": "1RRsi3JjnXVxlmlTdp6qll5neSh1Hro_l",
+    "original_file": "10_Leaning_Tower_of_Pisa_Italy.glb",
+    "original_bytes": 76656,
+    "adapted_bytes": 194256,
+    "original_triangles": 2308,
+    "original_vertices": 2422,
+    "original_materials": 6,
+    "kept_source_materials": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "materials": 5,
+    "textures": 0,
+    "footprint_m": [
+      31.428569793701172,
+      30.951099395751953
+    ],
+    "height_m": 55.0,
+    "uniform_scale": 5.612244686326706,
+    "meshes": [
+      {
+        "name": "pisa_Far",
+        "surfaces": 5,
+        "vertices": 2913,
+        "triangles": 1229
+      },
+      {
+        "name": "pisa_Near",
+        "surfaces": 5,
+        "vertices": 4014,
+        "triangles": 2236
+      }
+    ]
+  },
+  {
+    "key": "parthenon",
+    "drive_id": "1AAXEB6qOJjPAFsvNvlXSr4rwCt0OIai0",
+    "original_file": "02_Parthenon_Athens.glb",
+    "original_bytes": 49112,
+    "adapted_bytes": 98476,
+    "original_triangles": 1088,
+    "original_vertices": 1583,
+    "original_materials": 6,
+    "kept_source_materials": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "materials": 5,
+    "textures": 0,
+    "footprint_m": [
+      30.645160675048828,
+      17.37764549255371
+    ],
+    "height_m": 15.0,
+    "uniform_scale": 2.6881720797654576,
+    "meshes": [
+      {
+        "name": "parthenon_Far",
+        "surfaces": 5,
+        "vertices": 1419,
+        "triangles": 591
+      },
+      {
+        "name": "parthenon_Near",
+        "surfaces": 5,
+        "vertices": 2020,
+        "triangles": 1076
+      }
+    ]
+  },
+  {
+    "key": "petra",
+    "drive_id": "1D66mrQ98lpY_d1HG-8f4d7WlGlIDzq40",
+    "original_file": "08_Petra_Treasury_Jordan.glb",
+    "original_bytes": 32676,
+    "adapted_bytes": 58984,
+    "original_triangles": 730,
+    "original_vertices": 987,
+    "original_materials": 6,
+    "kept_source_materials": [
+      3,
+      4,
+      5
+    ],
+    "materials": 3,
+    "textures": 0,
+    "footprint_m": [
+      28.96666717529297,
+      10.112000465393066
+    ],
+    "height_m": 39.5,
+    "uniform_scale": 5.266666729450226,
+    "meshes": [
+      {
+        "name": "petra_Far",
+        "surfaces": 3,
+        "vertices": 834,
+        "triangles": 368
+      },
+      {
+        "name": "petra_Near",
+        "surfaces": 3,
+        "vertices": 1193,
+        "triangles": 670
+      }
+    ]
+  },
+  {
+    "key": "taj_mahal",
+    "drive_id": "1GhO-s6RkUCBfIDwc8M0oLucG1gfFG1U2",
+    "original_file": "06_Taj_Mahal_India.glb",
+    "original_bytes": 67108,
+    "adapted_bytes": 167036,
+    "original_triangles": 2048,
+    "original_vertices": 2091,
+    "original_materials": 6,
+    "kept_source_materials": [
+      1,
+      2,
+      5
+    ],
+    "materials": 3,
+    "textures": 0,
+    "footprint_m": [
+      95.99388885498047,
+      84.8318099975586
+    ],
+    "height_m": 73.0,
+    "uniform_scale": 11.162079575810328,
+    "meshes": [
+      {
+        "name": "taj_mahal_Far",
+        "surfaces": 3,
+        "vertices": 2459,
+        "triangles": 1047
+      },
+      {
+        "name": "taj_mahal_Near",
+        "surfaces": 3,
+        "vertices": 3576,
+        "triangles": 1904
+      }
+    ]
+  },
+  {
+    "key": "temple_heaven",
+    "drive_id": "13GdDMjWRpD2BVh0dTTZgYYrScCoOR7m7",
+    "original_file": "05_Temple_of_Heaven_China.glb",
+    "original_bytes": 45096,
+    "adapted_bytes": 97496,
+    "original_triangles": 1252,
+    "original_vertices": 1372,
+    "original_materials": 6,
+    "kept_source_materials": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "materials": 5,
+    "textures": 0,
+    "footprint_m": [
+      62.62049102783203,
+      62.62049102783203
+    ],
+    "height_m": 38.000003814697266,
+    "uniform_scale": 5.483405418792798,
+    "meshes": [
+      {
+        "name": "temple_heaven_Far",
+        "surfaces": 5,
+        "vertices": 1296,
+        "triangles": 681
+      },
+      {
+        "name": "temple_heaven_Near",
+        "surfaces": 5,
+        "vertices": 1982,
+        "triangles": 1240
+      }
+    ]
+  },
+  {
+    "key": "hagia_sophia",
+    "drive_id": "1nQPeKyZgJCk0tXV14EtnVVFVOWR9ToDE",
+    "original_file": "18_Hagia_Sophia_Istanbul.glb",
+    "original_bytes": 47964,
+    "adapted_bytes": 136064,
+    "original_triangles": 1502,
+    "original_vertices": 1429,
+    "original_materials": 6,
+    "kept_source_materials": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "materials": 5,
+    "textures": 0,
+    "footprint_m": [
+      83.53133392333984,
+      70.91309356689453
+    ],
+    "height_m": 55.599998474121094,
+    "uniform_scale": 8.755905396748082,
+    "meshes": [
+      {
+        "name": "hagia_sophia_Far",
+        "surfaces": 5,
+        "vertices": 1979,
+        "triangles": 819
+      },
+      {
+        "name": "hagia_sophia_Near",
+        "surfaces": 5,
+        "vertices": 2814,
+        "triangles": 1490
+      }
+    ]
+  }
+]

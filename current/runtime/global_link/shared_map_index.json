@@ -1,0 +1,454 @@
+{
+  "schema": "wwo-readonly-map-subset-v1",
+  "source_root": "D:\\programs\\WWO\\wwo",
+  "physical_shards": [
+    {
+      "id": "physical_0_0",
+      "bounds": [
+        -180.0,
+        -90.0,
+        -90.0,
+        -60.0
+      ],
+      "compiled_asset": {
+        "batches": 4.0,
+        "bytes": 228995.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 3118.0,
+        "path": "res://data/strategic/physical_0_0.display"
+      }
+    },
+    {
+      "id": "physical_1_0",
+      "bounds": [
+        -90.0,
+        0.0,
+        -90.0,
+        -60.0
+      ],
+      "compiled_asset": {
+        "batches": 7.0,
+        "bytes": 462369.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 5504.0,
+        "path": "res://data/strategic/physical_1_0.display"
+      }
+    },
+    {
+      "id": "physical_2_0",
+      "bounds": [
+        0.0,
+        90.0,
+        -90.0,
+        -60.0
+      ],
+      "compiled_asset": {
+        "batches": 5.0,
+        "bytes": 286148.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 5292.0,
+        "path": "res://data/strategic/physical_2_0.display"
+      }
+    },
+    {
+      "id": "physical_3_0",
+      "bounds": [
+        90.0,
+        180.0,
+        -90.0,
+        -60.0
+      ],
+      "compiled_asset": {
+        "batches": 5.0,
+        "bytes": 288796.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 4250.0,
+        "path": "res://data/strategic/physical_3_0.display"
+      }
+    },
+    {
+      "id": "physical_0_1",
+      "bounds": [
+        -180.0,
+        -90.0,
+        -60.0,
+        -30.0
+      ],
+      "compiled_asset": {
+        "batches": 3.0,
+        "bytes": 7041.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 65.0,
+        "path": "res://data/strategic/physical_0_1.display"
+      }
+    },
+    {
+      "id": "physical_1_1",
+      "bounds": [
+        -90.0,
+        0.0,
+        -60.0,
+        -30.0
+      ],
+      "compiled_asset": {
+        "batches": 14.0,
+        "bytes": 831260.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 9440.0,
+        "path": "res://data/strategic/physical_1_1.display"
+      }
+    },
+    {
+      "id": "physical_2_1",
+      "bounds": [
+        0.0,
+        90.0,
+        -60.0,
+        -30.0
+      ],
+      "compiled_asset": {
+        "batches": 6.0,
+        "bytes": 63613.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 687.0,
+        "path": "res://data/strategic/physical_2_1.display"
+      }
+    },
+    {
+      "id": "physical_3_1",
+      "bounds": [
+        90.0,
+        180.0,
+        -60.0,
+        -30.0
+      ],
+      "compiled_asset": {
+        "batches": 10.0,
+        "bytes": 433546.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 4844.0,
+        "path": "res://data/strategic/physical_3_1.display"
+      }
+    },
+    {
+      "id": "physical_0_2",
+      "bounds": [
+        -180.0,
+        -90.0,
+        -30.0,
+        0.0
+      ],
+      "compiled_asset": {
+        "batches": 5.0,
+        "bytes": 74427.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 566.0,
+        "path": "res://data/strategic/physical_0_2.display"
+      }
+    },
+    {
+      "id": "physical_1_2",
+      "bounds": [
+        -90.0,
+        0.0,
+        -30.0,
+        0.0
+      ],
+      "compiled_asset": {
+        "batches": 13.0,
+        "bytes": 500609.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 6659.0,
+        "path": "res://data/strategic/physical_1_2.display"
+      }
+    },
+    {
+      "id": "physical_2_2",
+      "bounds": [
+        0.0,
+        90.0,
+        -30.0,
+        0.0
+      ],
+      "compiled_asset": {
+        "batches": 30.0,
+        "bytes": 437796.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 5536.0,
+        "path": "res://data/strategic/physical_2_2.display"
+      }
+    },
+    {
+      "id": "physical_3_2",
+      "bounds": [
+        90.0,
+        180.0,
+        -30.0,
+        0.0
+      ],
+      "compiled_asset": {
+        "batches": 26.0,
+        "bytes": 1402465.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 15495.0,
+        "path": "res://data/strategic/physical_3_2.display"
+      }
+    },
+    {
+      "id": "physical_0_3",
+      "bounds": [
+        -180.0,
+        -90.0,
+        0.0,
+        30.0
+      ],
+      "compiled_asset": {
+        "batches": 9.0,
+        "bytes": 301979.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 3315.0,
+        "path": "res://data/strategic/physical_0_3.display"
+      }
+    },
+    {
+      "id": "physical_1_3",
+      "bounds": [
+        -90.0,
+        0.0,
+        0.0,
+        30.0
+      ],
+      "compiled_asset": {
+        "batches": 50.0,
+        "bytes": 1081714.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 11703.0,
+        "path": "res://data/strategic/physical_1_3.display"
+      }
+    },
+    {
+      "id": "physical_2_3",
+      "bounds": [
+        0.0,
+        90.0,
+        0.0,
+        30.0
+      ],
+      "compiled_asset": {
+        "batches": 51.0,
+        "bytes": 937199.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 11559.0,
+        "path": "res://data/strategic/physical_2_3.display"
+      }
+    },
+    {
+      "id": "physical_3_3",
+      "bounds": [
+        90.0,
+        180.0,
+        0.0,
+        30.0
+      ],
+      "compiled_asset": {
+        "batches": 31.0,
+        "bytes": 1373340.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 14387.0,
+        "path": "res://data/strategic/physical_3_3.display"
+      }
+    },
+    {
+      "id": "physical_0_4",
+      "bounds": [
+        -180.0,
+        -90.0,
+        30.0,
+        60.0
+      ],
+      "compiled_asset": {
+        "batches": 17.0,
+        "bytes": 1154701.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 14497.0,
+        "path": "res://data/strategic/physical_0_4.display"
+      }
+    },
+    {
+      "id": "physical_1_4",
+      "bounds": [
+        -90.0,
+        0.0,
+        30.0,
+        60.0
+      ],
+      "compiled_asset": {
+        "batches": 26.0,
+        "bytes": 1551010.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 16737.0,
+        "path": "res://data/strategic/physical_1_4.display"
+      }
+    },
+    {
+      "id": "physical_2_4",
+      "bounds": [
+        0.0,
+        90.0,
+        30.0,
+        60.0
+      ],
+      "compiled_asset": {
+        "batches": 51.0,
+        "bytes": 1664849.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 20150.0,
+        "path": "res://data/strategic/physical_2_4.display"
+      }
+    },
+    {
+      "id": "physical_3_4",
+      "bounds": [
+        90.0,
+        180.0,
+        30.0,
+        60.0
+      ],
+      "compiled_asset": {
+        "batches": 15.0,
+        "bytes": 1019657.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 12019.0,
+        "path": "res://data/strategic/physical_3_4.display"
+      }
+    },
+    {
+      "id": "physical_0_5",
+      "bounds": [
+        -180.0,
+        -90.0,
+        60.0,
+        90.0
+      ],
+      "compiled_asset": {
+        "batches": 19.0,
+        "bytes": 1520236.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 17203.0,
+        "path": "res://data/strategic/physical_0_5.display"
+      }
+    },
+    {
+      "id": "physical_1_5",
+      "bounds": [
+        -90.0,
+        0.0,
+        60.0,
+        90.0
+      ],
+      "compiled_asset": {
+        "batches": 29.0,
+        "bytes": 2127846.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 22351.0,
+        "path": "res://data/strategic/physical_1_5.display"
+      }
+    },
+    {
+      "id": "physical_2_5",
+      "bounds": [
+        0.0,
+        90.0,
+        60.0,
+        90.0
+      ],
+      "compiled_asset": {
+        "batches": 20.0,
+        "bytes": 1562526.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 16639.0,
+        "path": "res://data/strategic/physical_2_5.display"
+      }
+    },
+    {
+      "id": "physical_3_5",
+      "bounds": [
+        90.0,
+        180.0,
+        60.0,
+        90.0
+      ],
+      "compiled_asset": {
+        "batches": 9.0,
+        "bytes": 625450.0,
+        "encoding": "GODOT_COMPRESSED_VARIANT_R37",
+        "faces": 7690.0,
+        "path": "res://data/strategic/physical_3_5.display"
+      }
+    }
+  ],
+  "source_files": [
+    "scripts/presentation/map/globe_projection.gd",
+    "scripts/presentation/map/globe_surface.gd",
+    "scripts/presentation/map/globe_controller.gd",
+    "scripts/presentation/map/region_projection.gd",
+    "scripts/presentation/map/region_camera.gd",
+    "scripts/presentation/map/globe_surface_batch.gd",
+    "shaders/presentation/map/france_surface.gdshaderinc",
+    "shaders/presentation/map/globe_boundary.gdshader",
+    "shaders/presentation/map/globe_water_surface.gdshader",
+    "shaders/presentation/map/hemisphere_surface.gdshader",
+    "shaders/presentation/map/local_chart.gdshaderinc",
+    "shaders/presentation/map/local_terrain.gdshader",
+    "shaders/presentation/map/moon_surface.gdshader",
+    "shaders/presentation/map/ocean_globe.gdshaderinc",
+    "shaders/presentation/map/political_surface.gdshader",
+    "shaders/presentation/map/regional_relief.gdshaderinc",
+    "shaders/presentation/map/relief_background.gdshader",
+    "shaders/presentation/map/solar_globe.gdshaderinc",
+    "shaders/presentation/map/terrain_palette.gdshaderinc",
+    "data/presentation/global_physical_relief.json",
+    "data/strategic/historical_reference_1900.display",
+    "data/world_map/cities.json",
+    "data/world_map/countries.json",
+    "data/presentation/country_label_layout_r3.json",
+    "data/presentation/political_border_display_r39.json",
+    "assets/maps/relief/world.bin",
+    "assets/maps/relief/region.bin",
+    "assets/maps/ocean/orbital_r24/pelagic_eddies_albedo.png",
+    "assets/maps/ocean/orbital_r24/polar_pack_ice_albedo.png",
+    "data/strategic/physical_0_0.display",
+    "data/strategic/physical_1_0.display",
+    "data/strategic/physical_2_0.display",
+    "data/strategic/physical_3_0.display",
+    "data/strategic/physical_0_1.display",
+    "data/strategic/physical_1_1.display",
+    "data/strategic/physical_2_1.display",
+    "data/strategic/physical_3_1.display",
+    "data/strategic/physical_0_2.display",
+    "data/strategic/physical_1_2.display",
+    "data/strategic/physical_2_2.display",
+    "data/strategic/physical_3_2.display",
+    "data/strategic/physical_0_3.display",
+    "data/strategic/physical_1_3.display",
+    "data/strategic/physical_2_3.display",
+    "data/strategic/physical_3_3.display",
+    "data/strategic/physical_0_4.display",
+    "data/strategic/physical_1_4.display",
+    "data/strategic/physical_2_4.display",
+    "data/strategic/physical_3_4.display",
+    "data/strategic/physical_0_5.display",
+    "data/strategic/physical_1_5.display",
+    "data/strategic/physical_2_5.display",
+    "data/strategic/physical_3_5.display",
+    "scripts/vnext/spatial/spatial_catalog.gd",
+    "data/world_map/regions.json",
+    "data/world_map/ports.json",
+    "data/world_map/road_segments.json",
+    "data/world_map/rail_segments.json",
+    "data/world_map/shipping_routes.json",
+    "scripts/vnext/identity/stable_id.gd",
+    "data/world_map/historical/cshapes_1900_snapshot.json",
+    "scripts/presentation/map/globe_boundary_batch.gd"
+  ]
+}

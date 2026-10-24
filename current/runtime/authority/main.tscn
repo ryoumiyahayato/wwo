@@ -1,0 +1,75 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://authority/application.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/presentation/map/globe_renderer.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/presentation/map/globe_controller.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/presentation/ui/main_shell.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/actions/time_control.gd" id="5"]
+[ext_resource type="Texture2D" path="res://assets/maps/background/galactic_chart.png" id="7"]
+
+[node name="FormalWorldMain" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="Background" type="TextureRect" parent="."]
+z_index = -10
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="GlobeController" type="Node" parent="."]
+script = ExtResource("3")
+
+[node name="TimeControl" type="Node" parent="."]
+script = ExtResource("5")
+
+[node name="GlobeRenderer" parent="." instance=ExtResource("2")]
+layout_mode = 1
+
+[node name="MainShell" type="Control" parent="."]
+z_index = 20
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4")
+
+[node name="HUDMargins" type="MarginContainer" parent="MainShell"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="HUDLayout" type="Control" parent="MainShell/HUDMargins"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ClockTimer" type="Timer" parent="TimeControl"]
+wait_time = 0.25
+autostart = true
+
+[connection signal="timeout" from="TimeControl/ClockTimer" to="TimeControl" method="tick"]
+

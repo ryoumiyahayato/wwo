@@ -1,0 +1,9 @@
+{
+  "baseline_file_count": 676,
+  "untouched": 674,
+  "modified": [
+    "project.godot",
+    "scripts/main.gd"
+  ],
+  "missing": []
+}

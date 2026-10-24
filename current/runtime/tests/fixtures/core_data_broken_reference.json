@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "countries": [],
+  "regions": [
+    {
+      "id": "region:orphan",
+      "name": "孤立地区",
+      "de_jure_country_id": "country:missing",
+      "population_group_ids": [],
+      "city_names": [],
+      "resources": {},
+      "infrastructure": {},
+      "organization_ids": [],
+      "social_influence": {}
+    }
+  ],
+  "control_units": [],
+  "population_groups": [],
+  "characters": [],
+  "organizations": [],
+  "relationships": [],
+  "actions": []
+}

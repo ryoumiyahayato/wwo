@@ -1,0 +1,59 @@
+{
+  "source_id": "ridgevale_5km_c1_20261020",
+  "seed": 20261020,
+  "height_shape": [
+    1251,
+    1251
+  ],
+  "height_bytes": 6260004,
+  "height_min": 4.671683311462402,
+  "height_max": 176.28590393066406,
+  "finite": true,
+  "placements": 117,
+  "counts": {
+    "house": 12,
+    "barn": 1,
+    "wall": 12,
+    "tree": 60,
+    "rock": 32
+  },
+  "routes": [
+    {
+      "id": "central_saddle",
+      "max_longitudinal_grade": 0.038889169692993164,
+      "max_cross_grade": 0.0
+    },
+    {
+      "id": "west_flank",
+      "max_longitudinal_grade": 0.07621073471839619,
+      "max_cross_grade": 0.02994161126840462
+    },
+    {
+      "id": "east_flank",
+      "max_longitudinal_grade": 0.06766543531163681,
+      "max_cross_grade": 0.027254527085474517
+    }
+  ],
+  "generated_sha256": {
+    "height_4m.f32": "92ee522fefe91adf878c188f49d84766e97a8ccf7ad3c570008d61a682459712",
+    "land_color.png": "9672efeaa208541088b58b6f9fd409b6327b86df835d154b4b5f6b2ce334fb38",
+    "land_control.png": "c6d6c054bb8c3927c0e5bd7fb00c57bf1dd050484106aa65bc6fc7ca66fb4119",
+    "map.json": "562f332e1b81a0346e3ab441e7a3d35c7614590f90afba606b29db3d8d52df86"
+  },
+  "reused_sha256": {
+    "cedar/assets/barn.glb": "05d2ca151ab45a2a1797073f87eca21858eb5afc1b3829c52639a4622aced45b",
+    "cedar/assets/house_0.glb": "f7ba56ed066817ca8fc275c9f26cce579c6b18ed84865505da726623fb6963db",
+    "cedar/assets/house_1.glb": "77b25673cb0868685240d38254b2740ac2aa6631462f0db70bee41d0c27551ad",
+    "cedar/assets/house_2.glb": "8d5d7744aa7fb11c13297cbd33c76043511ebb43578b430164c8ac3154f57904",
+    "cedar/assets/rock_0.glb": "2743643779e884c2aa7af7abb537db4b93f9f16d663cd5a04bc480c7b289eacb",
+    "cedar/assets/rock_1.glb": "30a860a0bd23dd05d5e89d3d773296e0c91d6262298a0917d41f0d3d7e501592",
+    "cedar/assets/rock_2.glb": "e38297642c1de56d387eb1a91a70c0c0a0628e43e6967feb00bf79211c9006b2",
+    "cedar/assets/tree_0.glb": "de845be2d8869753d980f9c90183e1833fdbb4b69889322d48549c15c34b2327",
+    "cedar/assets/tree_1.glb": "ed663e085a8c8616f65a7edf9c361a65861bd9de0dbfd1d586ec3d4673d6ca49",
+    "cedar/assets/tree_2.glb": "11433798bcbac0f408d26ccd32f7735909319b29436ba94ff5e7629148db0ade",
+    "cedar/assets/wall_4m.glb": "8ddd7ecf2f8a1a24382634f2157b3590f6defc3a94461258a488f7f2d5be96b4"
+  },
+  "engine_tested_by_generator": false,
+  "gui_tested_by_generator": false,
+  "android_tested": false
+}

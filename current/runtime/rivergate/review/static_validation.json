@@ -1,0 +1,33 @@
+{
+  "schema": "rivergate-static-check-v1",
+  "map_id": "rivergate_5km_b1",
+  "checks": 366,
+  "passed": 366,
+  "failed": [],
+  "asset_files": {
+    "height_float32_bytes": 6260004,
+    "river_profile_entries": 1001,
+    "scenery_placements": 299,
+    "road_count": 8
+  },
+  "terrain_height_minmax_m": [
+    0.4833334684371948,
+    236.5841522216797
+  ],
+  "river_depth_examples_m": {
+    "-1700": 4.026049995422364,
+    "-1200": 4.468332672119141,
+    "-200": 4.070907497406006,
+    "20": 4.2871923065185555,
+    "450": 4.49231538772583,
+    "850": 4.116473007202148,
+    "1400": 4.249769163131714,
+    "2100": 4.287829804420471
+  },
+  "ford_depth_m": 0.3029976654052735,
+  "bridge_deck_top_m": 14.36,
+  "main_spawn_height_m": 26.563587188720703,
+  "godot_import": "NOT_RUN",
+  "godot_driving": "NOT_RUN",
+  "android": "NOT_TESTED"
+}

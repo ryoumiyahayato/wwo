@@ -1,0 +1,1070 @@
+{
+  "status": "STATIC_PASS",
+  "check_count": 101,
+  "checks": [
+    {
+      "name": "height_byte_count",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_height_values",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "height_enclosed_by_new_world_bounds",
+      "ok": true,
+      "detail": [
+        -5.475295543670654,
+        173.5802459716797
+      ]
+    },
+    {
+      "name": "unique_static_ids",
+      "ok": true,
+      "detail": 370
+    },
+    {
+      "name": "declared_extent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "expected_placement_count",
+      "ok": true,
+      "detail": {
+        "house_0": 5,
+        "house_1": 5,
+        "house_2": 5,
+        "chapel": 1,
+        "barn": 4,
+        "tree_0": 90,
+        "tree_1": 90,
+        "tree_2": 90,
+        "rock_1": 12,
+        "rock_2": 12,
+        "rock_0": 11,
+        "hay_roll": 20,
+        "wall_4m": 25
+      }
+    },
+    {
+      "name": "collider_reference_for_every_placement",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no_new_prop_origin_inside_preserved_deployment_corridor",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "all_placement_values_finite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "glb_header_house_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_house_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_house_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_house_0",
+      "ok": true,
+      "detail": 984
+    },
+    {
+      "name": "glb_header_house_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_house_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_house_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_house_1",
+      "ok": true,
+      "detail": 984
+    },
+    {
+      "name": "glb_header_house_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_house_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_house_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_house_2",
+      "ok": true,
+      "detail": 984
+    },
+    {
+      "name": "glb_header_barn",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_barn",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_barn",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_barn",
+      "ok": true,
+      "detail": 1100
+    },
+    {
+      "name": "glb_header_chapel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_chapel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_chapel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_chapel",
+      "ok": true,
+      "detail": 1094
+    },
+    {
+      "name": "glb_header_tree_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_tree_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_tree_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_tree_0",
+      "ok": true,
+      "detail": 1116
+    },
+    {
+      "name": "glb_header_tree_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_tree_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_tree_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_tree_1",
+      "ok": true,
+      "detail": 1116
+    },
+    {
+      "name": "glb_header_tree_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_tree_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_tree_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_tree_2",
+      "ok": true,
+      "detail": 1116
+    },
+    {
+      "name": "glb_header_rock_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_rock_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_rock_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_rock_0",
+      "ok": true,
+      "detail": 80
+    },
+    {
+      "name": "glb_header_rock_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_rock_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_rock_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_rock_1",
+      "ok": true,
+      "detail": 80
+    },
+    {
+      "name": "glb_header_rock_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_rock_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_rock_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_rock_2",
+      "ok": true,
+      "detail": 80
+    },
+    {
+      "name": "glb_header_hay_roll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_hay_roll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_hay_roll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_hay_roll",
+      "ok": true,
+      "detail": 216
+    },
+    {
+      "name": "glb_header_wall_4m",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_wall_4m",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_wall_4m",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_wall_4m",
+      "ok": true,
+      "detail": 252
+    },
+    {
+      "name": "glb_header_tank_hull_dressing",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_tank_hull_dressing",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_tank_hull_dressing",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_tank_hull_dressing",
+      "ok": true,
+      "detail": 428
+    },
+    {
+      "name": "glb_header_tank_turret_dressing",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "self_contained_tank_turret_dressing",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "finite_valid_geometry_tank_turret_dressing",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "recorded_triangle_count_tank_turret_dressing",
+      "ok": true,
+      "detail": 336
+    },
+    {
+      "name": "texture_land_color.png",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "texture_land_control.png",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "texture_grass_detail.png",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "texture_soil_detail.png",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "texture_stone_detail.png",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_house_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_house_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_house_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_barn",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_chapel",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_tree_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_rock_0",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_tree_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_rock_1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_tree_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_rock_2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_hay_roll",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "collider_descriptor_wall_4m",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "detailed_mesh_uses_inherited_grid",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "separate_map_source_id",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "roads_finite",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "existing_runtime_change_allowlist",
+      "ok": true,
+      "detail": [
+        "scripts/main.gd",
+        "scripts/smoke_cloud.gd",
+        "modules/ai_armor/vehicle_damage_feedback.gd"
+      ]
+    },
+    {
+      "name": "unchanged_scripts/mobile_battle.gd",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unchanged_scripts/combat_effects.gd",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unchanged_scripts/vehicle_contact_resolver.gd",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unchanged_modules/vehicle_ammo/vehicle_ammo.gd",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unchanged_modules/vehicle_ammo/ammo_config.gd",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unchanged_modules/vehicle_fire_control/gunner_intent.gd",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unchanged_modules/infantry_ai/infantry_host.gd",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unchanged_modules/infantry_ai/infantry_actor.gd",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unchanged_modules/vehicle_crew/vehicle_crew_host.gd",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "unchanged_modules/terrain_damage/streamed_battle_terrain.gd",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "asset_statistics": [
+    {
+      "asset": "house_0.glb",
+      "triangles": 984,
+      "bytes": 22936,
+      "sha256": "f7ba56ed066817ca8fc275c9f26cce579c6b18ed84865505da726623fb6963db",
+      "surfaces": 1
+    },
+    {
+      "asset": "house_1.glb",
+      "triangles": 984,
+      "bytes": 22964,
+      "sha256": "77b25673cb0868685240d38254b2740ac2aa6631462f0db70bee41d0c27551ad",
+      "surfaces": 1
+    },
+    {
+      "asset": "house_2.glb",
+      "triangles": 984,
+      "bytes": 22964,
+      "sha256": "8d5d7744aa7fb11c13297cbd33c76043511ebb43578b430164c8ac3154f57904",
+      "surfaces": 1
+    },
+    {
+      "asset": "barn.glb",
+      "triangles": 1100,
+      "bytes": 25476,
+      "sha256": "05d2ca151ab45a2a1797073f87eca21858eb5afc1b3829c52639a4622aced45b",
+      "surfaces": 1
+    },
+    {
+      "asset": "chapel.glb",
+      "triangles": 1094,
+      "bytes": 25360,
+      "sha256": "5026809b05d2c6018e51b3f58d79cb29a0efc0dcd1d163a6b4c575f6df30f071",
+      "surfaces": 1
+    },
+    {
+      "asset": "tree_0.glb",
+      "triangles": 1116,
+      "bytes": 23972,
+      "sha256": "de845be2d8869753d980f9c90183e1833fdbb4b69889322d48549c15c34b2327",
+      "surfaces": 1
+    },
+    {
+      "asset": "tree_1.glb",
+      "triangles": 1116,
+      "bytes": 23972,
+      "sha256": "ed663e085a8c8616f65a7edf9c361a65861bd9de0dbfd1d586ec3d4673d6ca49",
+      "surfaces": 1
+    },
+    {
+      "asset": "tree_2.glb",
+      "triangles": 1116,
+      "bytes": 23968,
+      "sha256": "11433798bcbac0f408d26ccd32f7735909319b29436ba94ff5e7629148db0ade",
+      "surfaces": 1
+    },
+    {
+      "asset": "rock_0.glb",
+      "triangles": 80,
+      "bytes": 2636,
+      "sha256": "2743643779e884c2aa7af7abb537db4b93f9f16d663cd5a04bc480c7b289eacb",
+      "surfaces": 1
+    },
+    {
+      "asset": "rock_1.glb",
+      "triangles": 80,
+      "bytes": 2632,
+      "sha256": "30a860a0bd23dd05d5e89d3d773296e0c91d6262298a0917d41f0d3d7e501592",
+      "surfaces": 1
+    },
+    {
+      "asset": "rock_2.glb",
+      "triangles": 80,
+      "bytes": 2632,
+      "sha256": "e38297642c1de56d387eb1a91a70c0c0a0628e43e6967feb00bf79211c9006b2",
+      "surfaces": 1
+    },
+    {
+      "asset": "hay_roll.glb",
+      "triangles": 216,
+      "bytes": 5392,
+      "sha256": "5384ce2bcc423351e2d8e3cd689e9ace193c34f909e88ecefda2b56113cbc44f",
+      "surfaces": 1
+    },
+    {
+      "asset": "wall_4m.glb",
+      "triangles": 252,
+      "bytes": 6712,
+      "sha256": "8ddd7ecf2f8a1a24382634f2157b3590f6defc3a94461258a488f7f2d5be96b4",
+      "surfaces": 1
+    },
+    {
+      "asset": "tank_hull_dressing.glb",
+      "triangles": 428,
+      "bytes": 10616,
+      "sha256": "d588bc56b97a342bdb6e17d20dc5b5e47c4ebb7760c47006f621205f40e77c9f",
+      "surfaces": 1
+    },
+    {
+      "asset": "tank_turret_dressing.glb",
+      "triangles": 336,
+      "bytes": 8172,
+      "sha256": "5c52be8107dcd778d5d6eef58b849f114f561b826e728fab49095983c5a5c325",
+      "surfaces": 1
+    }
+  ],
+  "road_metrics": [
+    {
+      "road": 0,
+      "polyline_length_m": 2067.7622311965447,
+      "maximum_sampled_grade": 0.08221025193516455,
+      "note": "Numerical source-height audit; NOT actual vehicle driving."
+    },
+    {
+      "road": 1,
+      "polyline_length_m": 1514.4805053752875,
+      "maximum_sampled_grade": 0.26998568276996526,
+      "note": "Numerical source-height audit; NOT actual vehicle driving."
+    },
+    {
+      "road": 2,
+      "polyline_length_m": 1159.2171892093459,
+      "maximum_sampled_grade": 0.2102096809454782,
+      "note": "Numerical source-height audit; NOT actual vehicle driving."
+    },
+    {
+      "road": 3,
+      "polyline_length_m": 1090.5901594103461,
+      "maximum_sampled_grade": 0.21809092270302274,
+      "note": "Numerical source-height audit; NOT actual vehicle driving."
+    },
+    {
+      "road": 4,
+      "polyline_length_m": 531.0389708050218,
+      "maximum_sampled_grade": 0.31858823613662823,
+      "note": "Numerical source-height audit; NOT actual vehicle driving."
+    }
+  ],
+  "existing_runtime_comparison": [
+    {
+      "path": "scripts/ammo_profiles.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/armor_collision.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/battle_ai_presets.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/battle_hud_events.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/battle_live_history.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/battle_minimap.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/battle_performance_status.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/battle_scenery.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/battle_simulation_rate.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/combat.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/combat_effects.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/engagement_observer.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/machinegun_mount.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/main.gd",
+      "same": false
+    },
+    {
+      "path": "scripts/mobile_battle.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/mobile_render_budget.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/qa_capture.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/reticle.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/running_gear.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/smoke_cloud.gd",
+      "same": false
+    },
+    {
+      "path": "scripts/vehicle_contact_resolver.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/vehicle_ground_support.gd",
+      "same": true
+    },
+    {
+      "path": "scripts/visibility.gd",
+      "same": true
+    },
+    {
+      "path": "modules/ai_armor/armor_host.gd",
+      "same": true
+    },
+    {
+      "path": "modules/ai_armor/combat_audit.gd",
+      "same": true
+    },
+    {
+      "path": "modules/ai_armor/deployment_terrain.gd",
+      "same": true
+    },
+    {
+      "path": "modules/ai_armor/gunnery_solution.gd",
+      "same": true
+    },
+    {
+      "path": "modules/ai_armor/vehicle_damage_feedback.gd",
+      "same": false
+    },
+    {
+      "path": "modules/ai_armor/visual_contact.gd",
+      "same": true
+    },
+    {
+      "path": "modules/ai_safety/friendly_safety.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/battle_diagnostics.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/profile_actor.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/profile_armor.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/profile_brain.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/profile_combat.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/profile_contacts.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/profile_controls.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/profile_main.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/profile_navigation.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/profile_terrain.gd",
+      "same": true
+    },
+    {
+      "path": "modules/battle_diagnostics/profile_vfx.gd",
+      "same": true
+    },
+    {
+      "path": "modules/construction/autonomous_planner.gd",
+      "same": true
+    },
+    {
+      "path": "modules/construction/construction_host.gd",
+      "same": true
+    },
+    {
+      "path": "modules/construction/construction_system.gd",
+      "same": true
+    },
+    {
+      "path": "modules/construction/construction_view.gd",
+      "same": true
+    },
+    {
+      "path": "modules/construction/demo_host.gd",
+      "same": true
+    },
+    {
+      "path": "modules/construction/excavation_patch.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/character_detail_lod.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/diagnose_main_ai.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/infantry_actor.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/infantry_brain.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/infantry_host.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/infantry_navigation.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/infantry_stance.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/loot_fixture.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/skirmish_host.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_autonomous_search.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_character_detail_lod.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_crew_registry_loot.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_crew_route_loot.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_embarked_callback_boundaries.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_infantry_ai.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_infantry_physics.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_infantry_stance_candidate.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_loot_physics.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_minimap_visibility.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_opening_cover.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_physics_bridge.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_playable_locomotion.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_reconstructed_far_battle.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_suppression_profiles.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_target_fallback.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/test_weapon_drops.gd",
+      "same": true
+    },
+    {
+      "path": "modules/infantry_ai/weapon_drops.gd",
+      "same": true
+    },
+    {
+      "path": "modules/terrain_damage/streamed_battle_terrain.gd",
+      "same": true
+    },
+    {
+      "path": "modules/terrain_damage/terrain_damage.gd",
+      "same": true
+    },
+    {
+      "path": "modules/terrain_damage/test_terrain_damage.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_ammo/ammo_config.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_ammo/vehicle_ammo.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/crew_registry.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/diagnose_live_return.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/exit_clearance.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/player_infantry_controller.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/role_capability.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/test_batch_exit.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/test_commander_continuity.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/test_commander_pickup.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/test_crew.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/test_host.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/test_player_infantry_control.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/test_return.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/test_return_construction.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_crew/vehicle_crew_host.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_fire_control/gunner_intent.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_selector/vehicle_selector.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_weapons/short_rocket.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_weapons/test_vehicle_weapons.gd",
+      "same": true
+    },
+    {
+      "path": "modules/vehicle_weapons/weapon_presets.gd",
+      "same": true
+    }
+  ],
+  "engine_compile": "NOT_RUN",
+  "engine_render": "NOT_RUN",
+  "physics_runtime": "NOT_RUN",
+  "android": "NOT_TESTED",
+  "apk": "NOT_BUILT"
+}

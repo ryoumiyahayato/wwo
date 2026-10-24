@@ -1,0 +1,11 @@
+{
+  "height_min": -5.475295543670654,
+  "height_max": 173.5802459716797,
+  "finite_heights": true,
+  "building_count": 20,
+  "tree_count": 270,
+  "placements": 370,
+  "asset_count": 15,
+  "all_original_assets": true,
+  "engine_executed": false
+}

@@ -1,0 +1,90 @@
+{
+  "checks": 3114,
+  "courtyard_native_support_samples": 24,
+  "detail_native_lods": [
+    {
+      "base_index_bytes": 1512,
+      "base_indices": 756,
+      "kind": "wall_4m",
+      "lod_levels": 5,
+      "minimum_lod_index_bytes": 36
+    },
+    {
+      "base_index_bytes": 6696,
+      "base_indices": 3348,
+      "kind": "tree_0",
+      "lod_levels": 4,
+      "minimum_lod_index_bytes": 408
+    },
+    {
+      "base_index_bytes": 6696,
+      "base_indices": 3348,
+      "kind": "tree_1",
+      "lod_levels": 4,
+      "minimum_lod_index_bytes": 408
+    },
+    {
+      "base_index_bytes": 6696,
+      "base_indices": 3348,
+      "kind": "tree_2",
+      "lod_levels": 4,
+      "minimum_lod_index_bytes": 408
+    }
+  ],
+  "failures": [],
+  "native_ray_and_track_samples": 54,
+  "ok": true,
+  "route_profiles": [
+    {
+      "id": "central_saddle",
+      "max_cross_grade": 0.0,
+      "max_longitudinal_grade": 0.0388891696929932,
+      "samples": 405
+    },
+    {
+      "id": "west_flank",
+      "max_cross_grade": 0.0299465419135793,
+      "max_longitudinal_grade": 0.0761808803586828,
+      "samples": 607
+    },
+    {
+      "id": "east_flank",
+      "max_cross_grade": 0.0272483573742326,
+      "max_longitudinal_grade": 0.0676651126369606,
+      "samples": 614
+    }
+  ],
+  "scenery": {
+    "actors_created": 0,
+    "batches": 113,
+    "map_profile": "ridgevale-map-c1",
+    "placements": 186,
+    "static_damage": false,
+    "static_obstacles": 186
+  },
+  "scope": "Terrain and scenery only; no GUI, combat, Android, or GPU/FPS claim",
+  "source_id": "ridgevale_5km_c1_20261020",
+  "static_obstacle_probes": 538,
+  "streaming": {
+    "budget_exceeded": false,
+    "chunks_built_per_frame_limit": 1,
+    "loaded_chunks": 1,
+    "peak_loaded_chunks": 25,
+    "queued_chunks": 24,
+    "simulation_chunk_budget": 160,
+    "simulation_chunks": 0
+  },
+  "test": "ridgevale_native_contract",
+  "tree_material_policy": {
+    "changed_properties": [
+      "disable_receive_shadows"
+    ],
+    "non_tree_batches": 53,
+    "non_tree_original_material": true,
+    "tradeoff": "Trees no longer receive building, other-tree or self shadows; diffuse lighting and outward shadows remain",
+    "tree_batches": 60,
+    "tree_cast_shadows_preserved": true,
+    "tree_lod_bias_preserved": true,
+    "tree_receive_shadows_disabled": true
+  }
+}

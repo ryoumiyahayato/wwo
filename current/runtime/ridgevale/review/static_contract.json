@@ -1,0 +1,7 @@
+{
+  "test": "ridgevale_static_contract",
+  "ok": true,
+  "checks": 783,
+  "failures": [],
+  "scope": "Static numerical and conservative AABB checks only. Not GUI, native physics, gameplay or FPS evidence."
+}

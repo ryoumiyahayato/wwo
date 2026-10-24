@@ -1,0 +1,19 @@
+{
+  "scenario_id": "scenario:depot_1900_v1",
+  "source_id": "source:depot_1900_initial_v1",
+  "source_kind": "EXPLICIT_NEW_SCENARIO_NOT_HISTORICAL_INVENTORY",
+  "version": 1,
+  "year_min": 1900,
+  "year_max": 1900,
+  "place_id": "place:paris",
+  "owner_id": "organization:depot_1900_a",
+  "receiver_id": "organization:depot_1900_b",
+  "asset_id": "material:depot_1900_rifle_001",
+  "model_id": "generic_single_shot_rifle_1871",
+  "lot_id": "material:depot_1900_cartridges_001",
+  "round_type": "ball",
+  "initial_assets": 1,
+  "initial_rounds": 20,
+  "era_basis_url": "https://collection.powerhouse.com.au/object/247534",
+  "era_basis_note": "Single-shot breech-loading rifles existed before 1900. This fictional scenario does not assert French ownership of a museum specimen or historical stock. No ballistics or combat permission is supplied."
+}

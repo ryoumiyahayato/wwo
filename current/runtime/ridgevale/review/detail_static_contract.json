@@ -1,0 +1,63 @@
+{
+  "test": "ridgevale_existing_detail_static",
+  "ok": true,
+  "checks": 1560,
+  "failures": [],
+  "courtyard_profiles": [
+    {
+      "id": "west_0",
+      "max_longitudinal_grade": 0.21261978149414062,
+      "max_cross_grade": 0.04506077766418457,
+      "gate_width_m": 16.1,
+      "tested_apron_width_m": 10
+    },
+    {
+      "id": "west_1",
+      "max_longitudinal_grade": 0.24764561653137207,
+      "max_cross_grade": 0.003886556625366211,
+      "gate_width_m": 17.8,
+      "tested_apron_width_m": 10
+    },
+    {
+      "id": "west_2",
+      "max_longitudinal_grade": 0.17089462280273438,
+      "max_cross_grade": 0.03726119995117187,
+      "gate_width_m": 16.1,
+      "tested_apron_width_m": 10
+    },
+    {
+      "id": "east_0",
+      "max_longitudinal_grade": 0.2558631896972656,
+      "max_cross_grade": 0.0453458309173584,
+      "gate_width_m": 16.1,
+      "tested_apron_width_m": 10
+    },
+    {
+      "id": "east_1",
+      "max_longitudinal_grade": 0.31479954719543457,
+      "max_cross_grade": 0.003975272178649902,
+      "gate_width_m": 16.1,
+      "tested_apron_width_m": 10
+    },
+    {
+      "id": "east_2",
+      "max_longitudinal_grade": 0.23246550559997559,
+      "max_cross_grade": 0.037501049041748044,
+      "gate_width_m": 16.1,
+      "tested_apron_width_m": 10
+    }
+  ],
+  "minimum_new_prop_major_road_envelope_clearance_m": 16.648260003350565,
+  "max_new_wall_ground_spread_m": 0.3500660354495011,
+  "changed_surface_pixels": {
+    "land_color": 1343,
+    "land_control": 572
+  },
+  "budget": {
+    "placements": 186,
+    "added": 69,
+    "batches": 113,
+    "additional_batches": 19
+  },
+  "scope": "Numerical geometry/surface proof; native physics, GPU image, driving and AI require separate evidence."
+}

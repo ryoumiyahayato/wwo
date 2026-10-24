@@ -1,0 +1,63 @@
+{
+  "generator": "tools/map/build_landscape_modules_r40.py",
+  "license": "CC0-1.0; original WWO procedural geometry",
+  "units": "metres; original R12 maximum ground footprints retained; glTF Y up",
+  "meaning": "Abstract 19th-century style modules, not measured Paris or London buildings; no economic facility identity.",
+  "file_bytes": 979228,
+  "materials": 1,
+  "textures": 0,
+  "meshes": [
+    {
+      "name": "civic_hall",
+      "triangles": 2252
+    },
+    {
+      "name": "civic_hall_far",
+      "triangles": 68
+    },
+    {
+      "name": "london_gabled",
+      "triangles": 1488
+    },
+    {
+      "name": "london_terrace_far",
+      "triangles": 128
+    },
+    {
+      "name": "london_terrace",
+      "triangles": 1484
+    },
+    {
+      "name": "paris_corner",
+      "triangles": 3044
+    },
+    {
+      "name": "paris_mansard_far",
+      "triangles": 104
+    },
+    {
+      "name": "paris_mansard",
+      "triangles": 2948
+    },
+    {
+      "name": "quay_platform",
+      "triangles": 276
+    },
+    {
+      "name": "quay_platform_far",
+      "triangles": 60
+    },
+    {
+      "name": "sawtooth_workshop",
+      "triangles": 126
+    },
+    {
+      "name": "warehouse_far",
+      "triangles": 44
+    },
+    {
+      "name": "warehouse",
+      "triangles": 392
+    }
+  ]
+}

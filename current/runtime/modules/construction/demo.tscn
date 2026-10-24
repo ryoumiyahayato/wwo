@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://modules/construction/demo_host.gd" id="1"]
+[node name="ConstructionCatalog" type="Node3D"]
+script = ExtResource("1")

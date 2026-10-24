@@ -1,0 +1,47 @@
+{
+  "status": "SOURCE_WRITTEN_ENGINE_NOT_RUN",
+  "baseline": "reverse_joystick_20261019",
+  "changes_to_existing_files": [
+    {
+      "path": "CURRENT_CANDIDATE.md",
+      "baseline_sha256": "72cfc04730caf5f78d24e04795b148f43a2165d5b518399f88241c94e876e9d1",
+      "candidate_sha256": "53e6158ad76e3de2eb266b950d5679cc687a8cb5b0715b3d7e1912e8aab16810"
+    },
+    {
+      "path": "export_presets.cfg",
+      "baseline_sha256": "a6a8051f8f4dff94caa6695e3a014866348e1dbc1341db515a5bdbbb1b7d9ff0",
+      "candidate_sha256": "e56cc977e4db135b3b4a8985fdc128bfae3b66d35daab4672507d079097d5af8"
+    },
+    {
+      "path": "modules/ai_armor/vehicle_damage_feedback.gd",
+      "baseline_sha256": "cc154b4ccbf4f59a7bce3cbc08376164285b1216d8c1f0915ba25b221941b289",
+      "candidate_sha256": "79958afb4187aea277438f0fd0a1c0ab15c7fc49e2a78b541d2457fe2e5a5200"
+    },
+    {
+      "path": "project.godot",
+      "baseline_sha256": "88e16065fd7a6c7511a92039845665668b8b8967e203af0c15abf197c2929d14",
+      "candidate_sha256": "a3d3eb231361bdd13fbc015f709e84cd59c62c877e4a459db8a0246009cc198e"
+    },
+    {
+      "path": "scripts/main.gd",
+      "baseline_sha256": "358f2e5b3c4fdc3b2c2377a89eddd0caa84cbffa945a560d83c1125e5d23d77c",
+      "candidate_sha256": "c8d5ea3c449f94874a0124ea43941f0552cca3ffce6a0abeafadc39dbbd1e7ea"
+    },
+    {
+      "path": "scripts/smoke_cloud.gd",
+      "baseline_sha256": "ad0c7ee50202c2bbc173311af137fa93c0c452027677d394606a61de4e5888b7",
+      "candidate_sha256": "58a7f13e8c6ae7d5acf076b5056e82bdd925e4319d7e2cc48dce5b9394610272"
+    },
+    {
+      "path": "tests/vehicle_selector/test_vehicle_selector.gd",
+      "baseline_sha256": "1817ee21d70cc15fc3e851a87a6e3f14f179166e8f2d37634393c5309e4b8d9f",
+      "candidate_sha256": "8091fcbfb4cad92fe117a0c09510e749cbfec3426fd0d5f7a526e068bfcc5207"
+    }
+  ],
+  "new_tree": "cedar/",
+  "new_launchers": [
+    "Run-Cedar.ps1",
+    "run-cedar.sh"
+  ],
+  "native_tests": "SUPPLIED_NOT_EXECUTED"
+}

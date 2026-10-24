@@ -1,0 +1,29 @@
+{
+  "id": "ridgevale_existing_village_detail_v2",
+  "base_sha256": {
+    "generation_receipt.json": "75bdd075bdaa30c9ebf6dfcd5c71294deb1acfd45343d43b5c3a1f26a0c15998",
+    "land_color.png": "605388d098deb4893d75022bd86f9b858d1e7f4101c0488f39a49e28533e6450",
+    "land_control.png": "c6d6c054bb8c3927c0e5bd7fb00c57bf1dd050484106aa65bc6fc7ca66fb4119",
+    "map.json": "562f332e1b81a0346e3ab441e7a3d35c7614590f90afba606b29db3d8d52df86"
+  },
+  "output_sha256": {
+    "land_color.png": "aee4e86c28501e4f50f6683c4287a18b2759f5496ecb1362fcb195639ae7bb17",
+    "land_control.png": "e530e84ed151e91ec563dc0f0c6fb8ca8587722a784f51a0538fed65d6a57f46",
+    "map.json": "2bddc33a6a34ede904bdde127937b2f3f2e43139e8cdecbe5b83975418f5b623"
+  },
+  "height_preserved_sha256": "92ee522fefe91adf878c188f49d84766e97a8ccf7ad3c570008d61a682459712",
+  "base_placements": 117,
+  "added_placements": 69,
+  "total_placements": 186,
+  "base_batches": 94,
+  "final_batches": 113,
+  "added_batches": 19,
+  "added_full_detail_triangles": 32076,
+  "new_mesh_types": 0,
+  "ground_offset_range_m": [
+    -0.274778,
+    -0.027883
+  ],
+  "native_tested_by_generator": false,
+  "gui_tested_by_generator": false
+}

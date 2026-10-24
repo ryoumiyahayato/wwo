@@ -1,0 +1,11 @@
+{
+  "test": "ridgevale_deterministic_rebuild",
+  "ok": true,
+  "generated_sha256": {
+    "height_4m.f32": "92ee522fefe91adf878c188f49d84766e97a8ccf7ad3c570008d61a682459712",
+    "land_color.png": "9672efeaa208541088b58b6f9fd409b6327b86df835d154b4b5f6b2ce334fb38",
+    "land_control.png": "c6d6c054bb8c3927c0e5bd7fb00c57bf1dd050484106aa65bc6fc7ca66fb4119",
+    "map.json": "562f332e1b81a0346e3ab441e7a3d35c7614590f90afba606b29db3d8d52df86"
+  },
+  "note": "Final live assets and a complete independent generator run under review/rebuild_check are byte-identical. Live assets were not modified for this comparison."
+}

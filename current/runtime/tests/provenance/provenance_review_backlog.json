@@ -1,0 +1,3558 @@
+{
+  "schema_version": 1,
+  "backlog_kind": "wwo_provenance_review_backlog",
+  "audit_batch": "BATCH_3",
+  "audit_base_revision": "2d38f55b13fe018c0d158dd46b16bf24191035ad",
+  "source_manifest": "docs/data_sources/provenance_manifest.json",
+  "source_matrix": "docs/data_sources/provenance_reference_matrix.json",
+  "policy": {
+    "mechanically_safe_only": true,
+    "license_inference": false,
+    "authoritative_data_modification": false,
+    "automatic_asset_regeneration": false
+  },
+  "summary": {
+    "items": 196,
+    "top_priority": 120,
+    "source_missing_items": 3,
+    "generator_unknown_items": 5,
+    "broken_reference_items": 2
+  },
+  "items": [
+    {
+      "key": "file:data/world_map/map_geometry_cache.json",
+      "target_type": "file",
+      "path": "data/world_map/map_geometry_cache.json",
+      "priority": 120,
+      "issues": [
+        "GENERATOR_UNKNOWN",
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_MISSING",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "map_geometry_cache",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/world_map/map_geometry_cache.json:generated_by"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 1
+    },
+    {
+      "key": "edge:SOURCE_MISSING:data/world_map/historical/CShapes-2.0-ATTRIBUTION.md:tools/historical_data/build_cshapes_1900_snapshot.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
+      "owner": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py"
+      ],
+      "priority": 110,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL",
+        "SOURCE_MISSING"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:164"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 2
+    },
+    {
+      "key": "file:data/world_map/regions.json",
+      "target_type": "file",
+      "path": "data/world_map/regions.json",
+      "priority": 110,
+      "issues": [
+        "GENERATOR_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "map_or_geometry_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/world_map/regions.json:source"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 3
+    },
+    {
+      "key": "file:data/world_map/world_admin1.json",
+      "target_type": "file",
+      "path": "data/world_map/world_admin1.json",
+      "priority": 110,
+      "issues": [
+        "GENERATOR_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "map_or_geometry_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/world_map/world_admin1.json:source"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 4
+    },
+    {
+      "key": "file:data/world_map/world_coastlines.json",
+      "target_type": "file",
+      "path": "data/world_map/world_coastlines.json",
+      "priority": 110,
+      "issues": [
+        "GENERATOR_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "map_or_geometry_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/world_map/world_coastlines.json:source"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 5
+    },
+    {
+      "key": "file:data/alpha/commodity_market_1900.json",
+      "target_type": "file",
+      "path": "data/alpha/commodity_market_1900.json",
+      "priority": 107,
+      "issues": [
+        "GENERATOR_UNKNOWN",
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_LOCATOR_MISSING"
+      ],
+      "category": "historical_economy_or_transport",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/alpha/commodity_market_1900.json:source_groups"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 6
+    },
+    {
+      "key": "matrix:SOURCE_MISSING:['tools/historical_data/build_cshapes_1900_snapshot.py']:data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
+      "target_type": "reference",
+      "path": "data/world_map/historical/CShapes-2.0-ATTRIBUTION.md",
+      "owner": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py"
+      ],
+      "priority": 100,
+      "issues": [
+        "SOURCE_MISSING"
+      ],
+      "category": "repository_reference",
+      "action": "Verify the reference against repository history or an explicit generator record; otherwise retain the sentinel and mark unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:164"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 7
+    },
+    {
+      "key": "file:data/balance/map_rules.json",
+      "target_type": "file",
+      "path": "data/balance/map_rules.json",
+      "priority": 95,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "map_or_geometry_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 8
+    },
+    {
+      "key": "file:data/world_map/map_modes.json",
+      "target_type": "file",
+      "path": "data/world_map/map_modes.json",
+      "priority": 95,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "map_or_geometry_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 9
+    },
+    {
+      "key": "file:data/world_map/ports.json",
+      "target_type": "file",
+      "path": "data/world_map/ports.json",
+      "priority": 95,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "map_or_geometry_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 10
+    },
+    {
+      "key": "file:data/world_map/rail_segments.json",
+      "target_type": "file",
+      "path": "data/world_map/rail_segments.json",
+      "priority": 95,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "map_or_geometry_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 11
+    },
+    {
+      "key": "file:data/world_map/road_segments.json",
+      "target_type": "file",
+      "path": "data/world_map/road_segments.json",
+      "priority": 95,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "map_or_geometry_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 12
+    },
+    {
+      "key": "file:data/world_map/shipping_routes.json",
+      "target_type": "file",
+      "path": "data/world_map/shipping_routes.json",
+      "priority": 95,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "map_or_geometry_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 13
+    },
+    {
+      "key": "file:data/alpha/economy_integration_1900.json",
+      "target_type": "file",
+      "path": "data/alpha/economy_integration_1900.json",
+      "priority": 92,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "historical_economy_or_transport",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 14
+    },
+    {
+      "key": "file:data/alpha/historical_economy_coverage_1900.json",
+      "target_type": "file",
+      "path": "data/alpha/historical_economy_coverage_1900.json",
+      "priority": 92,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "historical_economy_or_transport",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 15
+    },
+    {
+      "key": "file:data/vnext/politics/state_politics_1900.json",
+      "target_type": "file",
+      "path": "data/vnext/politics/state_politics_1900.json",
+      "priority": 92,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "historical_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 16
+    },
+    {
+      "key": "matrix:BROKEN_REFERENCE:tests/provenance/test_provenance_validator.py:data/duplicate.json",
+      "target_type": "reference",
+      "path": "data/duplicate.json",
+      "owner": "tests/provenance/test_provenance_validator.py",
+      "priority": 90,
+      "issues": [
+        "BROKEN_REFERENCE"
+      ],
+      "category": "repository_reference",
+      "action": "Verify the reference against repository history or an explicit generator record; otherwise retain the sentinel and mark unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tests/provenance/test_provenance_validator.py:112"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 17
+    },
+    {
+      "key": "matrix:BROKEN_REFERENCE:tests/v2_2/v2_2_performance_guard_test.gd:data/prototype_v2/prototype_map_modes.json",
+      "target_type": "reference",
+      "path": "data/prototype_v2/prototype_map_modes.json",
+      "owner": "tests/v2_2/v2_2_performance_guard_test.gd",
+      "priority": 90,
+      "issues": [
+        "BROKEN_REFERENCE"
+      ],
+      "category": "repository_reference",
+      "action": "Verify the reference against repository history or an explicit generator record; otherwise retain the sentinel and mark unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tests/v2_2/v2_2_performance_guard_test.gd:60"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 18
+    },
+    {
+      "key": "file:data/balance/action_rules.json",
+      "target_type": "file",
+      "path": "data/balance/action_rules.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 19
+    },
+    {
+      "key": "file:data/balance/continuity_rules.json",
+      "target_type": "file",
+      "path": "data/balance/continuity_rules.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 20
+    },
+    {
+      "key": "file:data/balance/random_service.json",
+      "target_type": "file",
+      "path": "data/balance/random_service.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 21
+    },
+    {
+      "key": "file:data/balance/simulation_clock.json",
+      "target_type": "file",
+      "path": "data/balance/simulation_clock.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 22
+    },
+    {
+      "key": "file:data/balance/society_rules.json",
+      "target_type": "file",
+      "path": "data/balance/society_rules.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 23
+    },
+    {
+      "key": "file:data/characters/character_generation.json",
+      "target_type": "file",
+      "path": "data/characters/character_generation.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 24
+    },
+    {
+      "key": "file:data/scenarios/v2_2_lille_life_loop.json",
+      "target_type": "file",
+      "path": "data/scenarios/v2_2_lille_life_loop.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 25
+    },
+    {
+      "key": "file:data/scenarios/v2_3_lille_space_cognition.json",
+      "target_type": "file",
+      "path": "data/scenarios/v2_3_lille_space_cognition.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 26
+    },
+    {
+      "key": "file:data/v2_2/lille_demo_employment.json",
+      "target_type": "file",
+      "path": "data/v2_2/lille_demo_employment.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 27
+    },
+    {
+      "key": "file:data/v2_2/lille_demo_living_costs.json",
+      "target_type": "file",
+      "path": "data/v2_2/lille_demo_living_costs.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 28
+    },
+    {
+      "key": "file:data/v2_2/lille_demo_locations.json",
+      "target_type": "file",
+      "path": "data/v2_2/lille_demo_locations.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 29
+    },
+    {
+      "key": "file:data/v2_2/lille_demo_people.json",
+      "target_type": "file",
+      "path": "data/v2_2/lille_demo_people.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 30
+    },
+    {
+      "key": "file:data/v2_2/v2_2_balance.json",
+      "target_type": "file",
+      "path": "data/v2_2/v2_2_balance.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 31
+    },
+    {
+      "key": "file:data/v2_3/communication_channels.json",
+      "target_type": "file",
+      "path": "data/v2_3/communication_channels.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 32
+    },
+    {
+      "key": "file:data/v2_3/cross_border_locations.json",
+      "target_type": "file",
+      "path": "data/v2_3/cross_border_locations.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 33
+    },
+    {
+      "key": "file:data/v2_3/cross_border_travel_graph.json",
+      "target_type": "file",
+      "path": "data/v2_3/cross_border_travel_graph.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 34
+    },
+    {
+      "key": "file:data/v2_3/knowledge_rules.json",
+      "target_type": "file",
+      "path": "data/v2_3/knowledge_rules.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 35
+    },
+    {
+      "key": "file:data/v2_3/lille_finance.json",
+      "target_type": "file",
+      "path": "data/v2_3/lille_finance.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 36
+    },
+    {
+      "key": "file:data/v2_3/lille_locations.json",
+      "target_type": "file",
+      "path": "data/v2_3/lille_locations.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 37
+    },
+    {
+      "key": "file:data/v2_3/lille_travel_graph.json",
+      "target_type": "file",
+      "path": "data/v2_3/lille_travel_graph.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 38
+    },
+    {
+      "key": "file:data/v2_3/minute_clock.json",
+      "target_type": "file",
+      "path": "data/v2_3/minute_clock.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 39
+    },
+    {
+      "key": "file:data/v2_3/relationship_rules.json",
+      "target_type": "file",
+      "path": "data/v2_3/relationship_rules.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 40
+    },
+    {
+      "key": "file:data/v2_3/social_people.json",
+      "target_type": "file",
+      "path": "data/v2_3/social_people.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 41
+    },
+    {
+      "key": "file:data/v2_3/social_sandbox_rules.json",
+      "target_type": "file",
+      "path": "data/v2_3/social_sandbox_rules.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 42
+    },
+    {
+      "key": "file:data/v2_3/transport_modes.json",
+      "target_type": "file",
+      "path": "data/v2_3/transport_modes.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 43
+    },
+    {
+      "key": "file:data/v2_3/v2_3_balance.json",
+      "target_type": "file",
+      "path": "data/v2_3/v2_3_balance.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 44
+    },
+    {
+      "key": "file:data/world/demo_world.json",
+      "target_type": "file",
+      "path": "data/world/demo_world.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 45
+    },
+    {
+      "key": "file:data/world_map/characters.json",
+      "target_type": "file",
+      "path": "data/world_map/characters.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 46
+    },
+    {
+      "key": "file:data/world_map/cities.json",
+      "target_type": "file",
+      "path": "data/world_map/cities.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 47
+    },
+    {
+      "key": "file:data/world_map/countries.json",
+      "target_type": "file",
+      "path": "data/world_map/countries.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 48
+    },
+    {
+      "key": "file:data/world_map/country_flag_palettes.json",
+      "target_type": "file",
+      "path": "data/world_map/country_flag_palettes.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 49
+    },
+    {
+      "key": "file:data/world_map/institutions.json",
+      "target_type": "file",
+      "path": "data/world_map/institutions.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 50
+    },
+    {
+      "key": "file:data/world_map/name_pool_fr.json",
+      "target_type": "file",
+      "path": "data/world_map/name_pool_fr.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 51
+    },
+    {
+      "key": "file:data/world_map/organizations.json",
+      "target_type": "file",
+      "path": "data/world_map/organizations.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 52
+    },
+    {
+      "key": "file:data/world_map/relationships.json",
+      "target_type": "file",
+      "path": "data/world_map/relationships.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 53
+    },
+    {
+      "key": "file:data/world_map/world_activity.json",
+      "target_type": "file",
+      "path": "data/world_map/world_activity.json",
+      "priority": 88,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "game_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 54
+    },
+    {
+      "key": "file:data/alpha/historical_household_budgets_1900.json",
+      "target_type": "file",
+      "path": "data/alpha/historical_household_budgets_1900.json",
+      "priority": 82,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_LOCATOR_MISSING"
+      ],
+      "category": "historical_economy_or_transport",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/alpha/historical_household_budgets_1900.json:observed_anchor",
+        "tools/build_1900_world_economy_estimates.py:BUDGETS"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 55
+    },
+    {
+      "key": "file:data/alpha/historical_transport_network_1900.json",
+      "target_type": "file",
+      "path": "data/alpha/historical_transport_network_1900.json",
+      "priority": 82,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_LOCATOR_MISSING"
+      ],
+      "category": "historical_economy_or_transport",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/alpha/historical_transport_network_1900.json",
+        "tools/build_1900_world_economy_estimates.py:RIVERS",
+        "tools/build_1900_world_economy_estimates.py:SEA"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 56
+    },
+    {
+      "key": "file:data/alpha/historical_transport_network_1900/transport_compact.json",
+      "target_type": "file",
+      "path": "data/alpha/historical_transport_network_1900/transport_compact.json",
+      "priority": 82,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_LOCATOR_MISSING"
+      ],
+      "category": "historical_economy_or_transport",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/alpha/historical_transport_network_1900.json:compact_table_path",
+        "data/alpha/historical_transport_network_1900/transport_compact.json"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 57
+    },
+    {
+      "key": "file:data/alpha/historical_world_economy_1900.json",
+      "target_type": "file",
+      "path": "data/alpha/historical_world_economy_1900.json",
+      "priority": 82,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_LOCATOR_MISSING"
+      ],
+      "category": "historical_economy_or_transport",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/alpha/historical_world_economy_1900.json:source_manifest",
+        "tools/build_1900_world_economy_estimates.py:SOURCES"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 58
+    },
+    {
+      "key": "file:data/alpha/historical_world_economy_1900/countries_compact.json",
+      "target_type": "file",
+      "path": "data/alpha/historical_world_economy_1900/countries_compact.json",
+      "priority": 82,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_LOCATOR_MISSING"
+      ],
+      "category": "historical_economy_or_transport",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/alpha/historical_world_economy_1900.json:compact_country_table_path",
+        "data/alpha/historical_world_economy_1900/countries_compact.json"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 59
+    },
+    {
+      "key": "file:data/alpha/economy.json",
+      "target_type": "file",
+      "path": "data/alpha/economy.json",
+      "priority": 80,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "simulation_or_calibration_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 60
+    },
+    {
+      "key": "file:data/alpha/politics.json",
+      "target_type": "file",
+      "path": "data/alpha/politics.json",
+      "priority": 80,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "simulation_or_calibration_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 61
+    },
+    {
+      "key": "file:data/alpha/presets.json",
+      "target_type": "file",
+      "path": "data/alpha/presets.json",
+      "priority": 80,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "simulation_or_calibration_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 62
+    },
+    {
+      "key": "file:data/alpha/world.json",
+      "target_type": "file",
+      "path": "data/alpha/world.json",
+      "priority": 80,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "simulation_or_calibration_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 63
+    },
+    {
+      "key": "file:data/world_map/historical/historical_admin1_1900.json",
+      "target_type": "file",
+      "path": "data/world_map/historical/historical_admin1_1900.json",
+      "priority": 80,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "historical_administrative_data",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/world_map/historical/historical_admin1_1900.json:source_basis"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 64
+    },
+    {
+      "key": "file:data/world_map/historical/major_economy_polity_crosswalk_1900.json",
+      "target_type": "file",
+      "path": "data/world_map/historical/major_economy_polity_crosswalk_1900.json",
+      "priority": 80,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "historical_crosswalk",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/world_map/historical/major_economy_polity_crosswalk_1900.json:policy",
+        "data/world_map/historical/major_economy_polity_crosswalk_1900.json:records"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 65
+    },
+    {
+      "key": "file:data/world_map/historical/major_state_profiles_1900.json",
+      "target_type": "file",
+      "path": "data/world_map/historical/major_state_profiles_1900.json",
+      "priority": 80,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "historical_state_profiles",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/world_map/historical/major_state_profiles_1900.json:profiles"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 66
+    },
+    {
+      "key": "file:data/world_map/historical_political_entities_1900.json",
+      "target_type": "file",
+      "path": "data/world_map/historical_political_entities_1900.json",
+      "priority": 80,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "OBSOLETE_OR_LEGACY_CANDIDATE",
+        "PROVENANCE_INCOMPLETE",
+        "SOURCE_UNKNOWN"
+      ],
+      "category": "historical_legacy_registry",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "data/world_map/historical_political_entities_1900.json:approximation_notice",
+        "data/world_map/historical_political_entities_1900.json:prototype_only"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 67
+    },
+    {
+      "key": "file:assets/prototype_v2/README.md",
+      "target_type": "file",
+      "path": "assets/prototype_v2/README.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "project_visual_asset",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "assets/prototype_v2/README.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 68
+    },
+    {
+      "key": "file:docs/ALPHA_IMPLEMENTATION_AUDIT_2026-07-19.md",
+      "target_type": "file",
+      "path": "docs/ALPHA_IMPLEMENTATION_AUDIT_2026-07-19.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/ALPHA_IMPLEMENTATION_AUDIT_2026-07-19.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 69
+    },
+    {
+      "key": "file:docs/ALPHA_SYSTEMS.md",
+      "target_type": "file",
+      "path": "docs/ALPHA_SYSTEMS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/ALPHA_SYSTEMS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 70
+    },
+    {
+      "key": "file:docs/ARCHITECTURE.md",
+      "target_type": "file",
+      "path": "docs/ARCHITECTURE.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/ARCHITECTURE.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 71
+    },
+    {
+      "key": "file:docs/ARCHITECTURE_VARIABLE_REINTEGRATION_AUDIT_2026-07-30.md",
+      "target_type": "file",
+      "path": "docs/ARCHITECTURE_VARIABLE_REINTEGRATION_AUDIT_2026-07-30.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/ARCHITECTURE_VARIABLE_REINTEGRATION_AUDIT_2026-07-30.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 72
+    },
+    {
+      "key": "file:docs/BRANCH_CLEANUP_POLICY.md",
+      "target_type": "file",
+      "path": "docs/BRANCH_CLEANUP_POLICY.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/BRANCH_CLEANUP_POLICY.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 73
+    },
+    {
+      "key": "file:docs/CAUSALITY_AND_PLAYER_FEEDBACK.md",
+      "target_type": "file",
+      "path": "docs/CAUSALITY_AND_PLAYER_FEEDBACK.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/CAUSALITY_AND_PLAYER_FEEDBACK.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 74
+    },
+    {
+      "key": "file:docs/CODEX_AUDIT_REMEDIATION.md",
+      "target_type": "file",
+      "path": "docs/CODEX_AUDIT_REMEDIATION.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/CODEX_AUDIT_REMEDIATION.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 75
+    },
+    {
+      "key": "file:docs/COUNTRIES.md",
+      "target_type": "file",
+      "path": "docs/COUNTRIES.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/COUNTRIES.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 76
+    },
+    {
+      "key": "file:docs/DATA_MODEL.md",
+      "target_type": "file",
+      "path": "docs/DATA_MODEL.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/DATA_MODEL.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 77
+    },
+    {
+      "key": "file:docs/DECISIONS.md",
+      "target_type": "file",
+      "path": "docs/DECISIONS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/DECISIONS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 78
+    },
+    {
+      "key": "file:docs/DEMO_SCOPE.md",
+      "target_type": "file",
+      "path": "docs/DEMO_SCOPE.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/DEMO_SCOPE.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 79
+    },
+    {
+      "key": "file:docs/DEVELOPMENT_ROADMAP_REDESIGN.md",
+      "target_type": "file",
+      "path": "docs/DEVELOPMENT_ROADMAP_REDESIGN.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/DEVELOPMENT_ROADMAP_REDESIGN.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 80
+    },
+    {
+      "key": "file:docs/EVENT_AND_AI_SIMULATION.md",
+      "target_type": "file",
+      "path": "docs/EVENT_AND_AI_SIMULATION.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/EVENT_AND_AI_SIMULATION.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 81
+    },
+    {
+      "key": "file:docs/FAILURE_RECOVERY_AND_DIFFICULTY.md",
+      "target_type": "file",
+      "path": "docs/FAILURE_RECOVERY_AND_DIFFICULTY.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/FAILURE_RECOVERY_AND_DIFFICULTY.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 82
+    },
+    {
+      "key": "file:docs/GAME_DESIGN.md",
+      "target_type": "file",
+      "path": "docs/GAME_DESIGN.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/GAME_DESIGN.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 83
+    },
+    {
+      "key": "file:docs/GAME_VISION.md",
+      "target_type": "file",
+      "path": "docs/GAME_VISION.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/GAME_VISION.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 84
+    },
+    {
+      "key": "file:docs/HOUSEHOLD_AND_FAMILY_MODEL.md",
+      "target_type": "file",
+      "path": "docs/HOUSEHOLD_AND_FAMILY_MODEL.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/HOUSEHOLD_AND_FAMILY_MODEL.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 85
+    },
+    {
+      "key": "file:docs/INFORMATION_KNOWLEDGE_AND_MEDIA.md",
+      "target_type": "file",
+      "path": "docs/INFORMATION_KNOWLEDGE_AND_MEDIA.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/INFORMATION_KNOWLEDGE_AND_MEDIA.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 86
+    },
+    {
+      "key": "file:docs/KNOWN_GAPS.md",
+      "target_type": "file",
+      "path": "docs/KNOWN_GAPS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/KNOWN_GAPS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 87
+    },
+    {
+      "key": "file:docs/KNOWN_ISSUES.md",
+      "target_type": "file",
+      "path": "docs/KNOWN_ISSUES.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/KNOWN_ISSUES.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 88
+    },
+    {
+      "key": "file:docs/LAW_RIGHTS_AND_STATE_CAPACITY.md",
+      "target_type": "file",
+      "path": "docs/LAW_RIGHTS_AND_STATE_CAPACITY.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/LAW_RIGHTS_AND_STATE_CAPACITY.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 89
+    },
+    {
+      "key": "file:docs/MAP_DATA_AND_RENDERING.md",
+      "target_type": "file",
+      "path": "docs/MAP_DATA_AND_RENDERING.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/MAP_DATA_AND_RENDERING.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 90
+    },
+    {
+      "key": "file:docs/MAP_DENSITY_OPTIMIZATION_2026-07-22.md",
+      "target_type": "file",
+      "path": "docs/MAP_DENSITY_OPTIMIZATION_2026-07-22.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/MAP_DENSITY_OPTIMIZATION_2026-07-22.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 91
+    },
+    {
+      "key": "file:docs/MAP_DENSITY_REVIEW.md",
+      "target_type": "file",
+      "path": "docs/MAP_DENSITY_REVIEW.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/MAP_DENSITY_REVIEW.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 92
+    },
+    {
+      "key": "file:docs/P0_R1_VALIDATION.md",
+      "target_type": "file",
+      "path": "docs/P0_R1_VALIDATION.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/P0_R1_VALIDATION.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 93
+    },
+    {
+      "key": "file:docs/PERFORMANCE_BUDGET.md",
+      "target_type": "file",
+      "path": "docs/PERFORMANCE_BUDGET.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/PERFORMANCE_BUDGET.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 94
+    },
+    {
+      "key": "file:docs/PLANS.md",
+      "target_type": "file",
+      "path": "docs/PLANS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/PLANS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 95
+    },
+    {
+      "key": "file:docs/PLAYER_LAYERS_AND_PERMISSIONS.md",
+      "target_type": "file",
+      "path": "docs/PLAYER_LAYERS_AND_PERMISSIONS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/PLAYER_LAYERS_AND_PERMISSIONS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 96
+    },
+    {
+      "key": "file:docs/POLITICS_COALITIONS_AND_LEGITIMACY.md",
+      "target_type": "file",
+      "path": "docs/POLITICS_COALITIONS_AND_LEGITIMACY.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/POLITICS_COALITIONS_AND_LEGITIMACY.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 97
+    },
+    {
+      "key": "file:docs/PRODUCT_VISION.md",
+      "target_type": "file",
+      "path": "docs/PRODUCT_VISION.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/PRODUCT_VISION.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 98
+    },
+    {
+      "key": "file:docs/REGIONS.md",
+      "target_type": "file",
+      "path": "docs/REGIONS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/REGIONS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 99
+    },
+    {
+      "key": "file:docs/ROADMAP.md",
+      "target_type": "file",
+      "path": "docs/ROADMAP.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/ROADMAP.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 100
+    },
+    {
+      "key": "file:docs/SAVE_FORMAT.md",
+      "target_type": "file",
+      "path": "docs/SAVE_FORMAT.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/SAVE_FORMAT.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 101
+    },
+    {
+      "key": "file:docs/SIMULATION_QUALITY_REPAIR.md",
+      "target_type": "file",
+      "path": "docs/SIMULATION_QUALITY_REPAIR.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/SIMULATION_QUALITY_REPAIR.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 102
+    },
+    {
+      "key": "file:docs/SIMULATION_RULES.md",
+      "target_type": "file",
+      "path": "docs/SIMULATION_RULES.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/SIMULATION_RULES.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 103
+    },
+    {
+      "key": "file:docs/SOCIAL_ORGANIZATION_INSTITUTION_MODEL.md",
+      "target_type": "file",
+      "path": "docs/SOCIAL_ORGANIZATION_INSTITUTION_MODEL.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/SOCIAL_ORGANIZATION_INSTITUTION_MODEL.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 104
+    },
+    {
+      "key": "file:docs/SOCIAL_SANDBOX_CONFORMANCE_AUDIT_2026-07-20.md",
+      "target_type": "file",
+      "path": "docs/SOCIAL_SANDBOX_CONFORMANCE_AUDIT_2026-07-20.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/SOCIAL_SANDBOX_CONFORMANCE_AUDIT_2026-07-20.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 105
+    },
+    {
+      "key": "file:docs/SOCIAL_SANDBOX_PROMPT_ALIGNMENT.md",
+      "target_type": "file",
+      "path": "docs/SOCIAL_SANDBOX_PROMPT_ALIGNMENT.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/SOCIAL_SANDBOX_PROMPT_ALIGNMENT.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 106
+    },
+    {
+      "key": "file:docs/SOCIAL_SANDBOX_TEST_PROTOCOL.md",
+      "target_type": "file",
+      "path": "docs/SOCIAL_SANDBOX_TEST_PROTOCOL.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/SOCIAL_SANDBOX_TEST_PROTOCOL.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 107
+    },
+    {
+      "key": "file:docs/SPATIAL_REACH_TRAVEL_AND_COMMUNICATION.md",
+      "target_type": "file",
+      "path": "docs/SPATIAL_REACH_TRAVEL_AND_COMMUNICATION.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/SPATIAL_REACH_TRAVEL_AND_COMMUNICATION.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 108
+    },
+    {
+      "key": "file:docs/STATE_AND_LIFE_ECONOMY.md",
+      "target_type": "file",
+      "path": "docs/STATE_AND_LIFE_ECONOMY.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/STATE_AND_LIFE_ECONOMY.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 109
+    },
+    {
+      "key": "file:docs/TEST_PLAN.md",
+      "target_type": "file",
+      "path": "docs/TEST_PLAN.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/TEST_PLAN.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 110
+    },
+    {
+      "key": "file:docs/TIME_ATTENTION_AND_ACTIVITY_MODEL.md",
+      "target_type": "file",
+      "path": "docs/TIME_ATTENTION_AND_ACTIVITY_MODEL.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/TIME_ATTENTION_AND_ACTIVITY_MODEL.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 111
+    },
+    {
+      "key": "file:docs/UI_INFORMATION_ARCHITECTURE.md",
+      "target_type": "file",
+      "path": "docs/UI_INFORMATION_ARCHITECTURE.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/UI_INFORMATION_ARCHITECTURE.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 112
+    },
+    {
+      "key": "file:docs/V2_3_SOCIAL_SANDBOX_REUSE_AUDIT.md",
+      "target_type": "file",
+      "path": "docs/V2_3_SOCIAL_SANDBOX_REUSE_AUDIT.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/V2_3_SOCIAL_SANDBOX_REUSE_AUDIT.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 113
+    },
+    {
+      "key": "file:docs/WORLD_BIBLE.md",
+      "target_type": "file",
+      "path": "docs/WORLD_BIBLE.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/WORLD_BIBLE.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 114
+    },
+    {
+      "key": "file:docs/WORLD_CITY_DATA_POLICY.md",
+      "target_type": "file",
+      "path": "docs/WORLD_CITY_DATA_POLICY.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/WORLD_CITY_DATA_POLICY.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 115
+    },
+    {
+      "key": "file:docs/WORLD_MARKET_WAR_TECH.md",
+      "target_type": "file",
+      "path": "docs/WORLD_MARKET_WAR_TECH.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/WORLD_MARKET_WAR_TECH.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 116
+    },
+    {
+      "key": "file:docs/audits/formal_product_gap_register_20260804.md",
+      "target_type": "file",
+      "path": "docs/audits/formal_product_gap_register_20260804.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/audits/formal_product_gap_register_20260804.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 117
+    },
+    {
+      "key": "file:docs/audits/formal_product_system_completeness_20260804.md",
+      "target_type": "file",
+      "path": "docs/audits/formal_product_system_completeness_20260804.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/audits/formal_product_system_completeness_20260804.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 118
+    },
+    {
+      "key": "file:docs/audits/formal_product_system_inventory_20260804.md",
+      "target_type": "file",
+      "path": "docs/audits/formal_product_system_inventory_20260804.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/audits/formal_product_system_inventory_20260804.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 119
+    },
+    {
+      "key": "file:docs/audits/variable_cleanup_candidates_20260803.md",
+      "target_type": "file",
+      "path": "docs/audits/variable_cleanup_candidates_20260803.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/audits/variable_cleanup_candidates_20260803.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 120
+    },
+    {
+      "key": "file:docs/audits/variable_state_audit_20260803.md",
+      "target_type": "file",
+      "path": "docs/audits/variable_state_audit_20260803.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/audits/variable_state_audit_20260803.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 121
+    },
+    {
+      "key": "file:docs/audits/variable_state_inventory_20260803.md",
+      "target_type": "file",
+      "path": "docs/audits/variable_state_inventory_20260803.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/audits/variable_state_inventory_20260803.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 122
+    },
+    {
+      "key": "file:docs/data_sources/README.md",
+      "target_type": "file",
+      "path": "docs/data_sources/README.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/data_sources/README.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 123
+    },
+    {
+      "key": "file:docs/data_sources/provenance_reference_matrix.json",
+      "target_type": "file",
+      "path": "docs/data_sources/provenance_reference_matrix.json",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/data_sources/provenance_reference_matrix.json"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 124
+    },
+    {
+      "key": "file:docs/economy/1900_economy_integration_phase2.md",
+      "target_type": "file",
+      "path": "docs/economy/1900_economy_integration_phase2.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/economy/1900_economy_integration_phase2.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 125
+    },
+    {
+      "key": "file:docs/economy/1900_economy_integration_phase2_validation.md",
+      "target_type": "file",
+      "path": "docs/economy/1900_economy_integration_phase2_validation.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/economy/1900_economy_integration_phase2_validation.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 126
+    },
+    {
+      "key": "file:docs/economy/1900_economy_system_audit_report.md",
+      "target_type": "file",
+      "path": "docs/economy/1900_economy_system_audit_report.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/economy/1900_economy_system_audit_report.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 127
+    },
+    {
+      "key": "file:docs/economy/1900_economy_ui_ai_stability_audit.md",
+      "target_type": "file",
+      "path": "docs/economy/1900_economy_ui_ai_stability_audit.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/economy/1900_economy_ui_ai_stability_audit.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 128
+    },
+    {
+      "key": "file:docs/economy/1900_market_economy_implementation_report.md",
+      "target_type": "file",
+      "path": "docs/economy/1900_market_economy_implementation_report.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/economy/1900_market_economy_implementation_report.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 129
+    },
+    {
+      "key": "file:docs/economy/1900_world_data_methodology.md",
+      "target_type": "file",
+      "path": "docs/economy/1900_world_data_methodology.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/economy/1900_world_data_methodology.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 130
+    },
+    {
+      "key": "file:docs/economy/1900_world_data_status.md",
+      "target_type": "file",
+      "path": "docs/economy/1900_world_data_status.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/economy/1900_world_data_status.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 131
+    },
+    {
+      "key": "file:docs/economy/formal_world_integration.md",
+      "target_type": "file",
+      "path": "docs/economy/formal_world_integration.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/economy/formal_world_integration.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 132
+    },
+    {
+      "key": "file:docs/performance/alpha_three_year_performance_gate.md",
+      "target_type": "file",
+      "path": "docs/performance/alpha_three_year_performance_gate.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/performance/alpha_three_year_performance_gate.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 133
+    },
+    {
+      "key": "file:docs/performance/formal_time_d01_validation.md",
+      "target_type": "file",
+      "path": "docs/performance/formal_time_d01_validation.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/performance/formal_time_d01_validation.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 134
+    },
+    {
+      "key": "file:docs/refactors/formal_product_dependency_map.md",
+      "target_type": "file",
+      "path": "docs/refactors/formal_product_dependency_map.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/refactors/formal_product_dependency_map.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 135
+    },
+    {
+      "key": "file:docs/refactors/formal_product_system_ownership.md",
+      "target_type": "file",
+      "path": "docs/refactors/formal_product_system_ownership.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/refactors/formal_product_system_ownership.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 136
+    },
+    {
+      "key": "file:docs/refactors/formal_time_behavior_baseline.md",
+      "target_type": "file",
+      "path": "docs/refactors/formal_time_behavior_baseline.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/refactors/formal_time_behavior_baseline.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 137
+    },
+    {
+      "key": "file:docs/refactors/formal_time_single_source.md",
+      "target_type": "file",
+      "path": "docs/refactors/formal_time_single_source.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/refactors/formal_time_single_source.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 138
+    },
+    {
+      "key": "file:docs/refactors/state_ownership_matrix.md",
+      "target_type": "file",
+      "path": "docs/refactors/state_ownership_matrix.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/refactors/state_ownership_matrix.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 139
+    },
+    {
+      "key": "file:docs/refactors/variable_refactor_plan.md",
+      "target_type": "file",
+      "path": "docs/refactors/variable_refactor_plan.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/refactors/variable_refactor_plan.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 140
+    },
+    {
+      "key": "file:docs/refactors/variable_state_audit.md",
+      "target_type": "file",
+      "path": "docs/refactors/variable_state_audit.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/refactors/variable_state_audit.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 141
+    },
+    {
+      "key": "file:docs/refactors/variable_state_member_inventory.md",
+      "target_type": "file",
+      "path": "docs/refactors/variable_state_member_inventory.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/refactors/variable_state_member_inventory.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 142
+    },
+    {
+      "key": "file:docs/ui_spikes/holographic_workspace_spike.md",
+      "target_type": "file",
+      "path": "docs/ui_spikes/holographic_workspace_spike.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/ui_spikes/holographic_workspace_spike.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 143
+    },
+    {
+      "key": "file:docs/v2_2/V2_2_1_POLISH.md",
+      "target_type": "file",
+      "path": "docs/v2_2/V2_2_1_POLISH.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_2/V2_2_1_POLISH.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 144
+    },
+    {
+      "key": "file:docs/v2_2/V2_2_BALANCE_VALUES.md",
+      "target_type": "file",
+      "path": "docs/v2_2/V2_2_BALANCE_VALUES.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_2/V2_2_BALANCE_VALUES.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 145
+    },
+    {
+      "key": "file:docs/v2_2/V2_2_CLEANUP_MIGRATION.md",
+      "target_type": "file",
+      "path": "docs/v2_2/V2_2_CLEANUP_MIGRATION.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_2/V2_2_CLEANUP_MIGRATION.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 146
+    },
+    {
+      "key": "file:docs/v2_2/V2_2_IMPLEMENTATION_STATUS.md",
+      "target_type": "file",
+      "path": "docs/v2_2/V2_2_IMPLEMENTATION_STATUS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_2/V2_2_IMPLEMENTATION_STATUS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 147
+    },
+    {
+      "key": "file:docs/v2_2/V2_2_LIFE_LOOP.md",
+      "target_type": "file",
+      "path": "docs/v2_2/V2_2_LIFE_LOOP.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_2/V2_2_LIFE_LOOP.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 148
+    },
+    {
+      "key": "file:docs/v2_2/V2_2_SAVE_SCHEMA.md",
+      "target_type": "file",
+      "path": "docs/v2_2/V2_2_SAVE_SCHEMA.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_2/V2_2_SAVE_SCHEMA.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 149
+    },
+    {
+      "key": "file:docs/v2_2/V2_2_STATIC_AUDIT.md",
+      "target_type": "file",
+      "path": "docs/v2_2/V2_2_STATIC_AUDIT.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_2/V2_2_STATIC_AUDIT.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 150
+    },
+    {
+      "key": "file:docs/v2_2/V2_2_TEST_PLAN.md",
+      "target_type": "file",
+      "path": "docs/v2_2/V2_2_TEST_PLAN.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_2/V2_2_TEST_PLAN.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 151
+    },
+    {
+      "key": "file:docs/v2_2/V2_2_UI_BINDINGS.md",
+      "target_type": "file",
+      "path": "docs/v2_2/V2_2_UI_BINDINGS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_2/V2_2_UI_BINDINGS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 152
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_ARCHITECTURE_AUDIT.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_ARCHITECTURE_AUDIT.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_ARCHITECTURE_AUDIT.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 153
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_COMMUNICATION.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_COMMUNICATION.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_COMMUNICATION.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 154
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_IMPLEMENTATION_STATUS.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_IMPLEMENTATION_STATUS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_IMPLEMENTATION_STATUS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 155
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_KNOWLEDGE_MODEL.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_KNOWLEDGE_MODEL.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_KNOWLEDGE_MODEL.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 156
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_MIGRATION.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_MIGRATION.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_MIGRATION.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 157
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_RELATIONSHIPS.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_RELATIONSHIPS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_RELATIONSHIPS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 158
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_SAVE_SCHEMA.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_SAVE_SCHEMA.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_SAVE_SCHEMA.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 159
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_SPATIAL_MODEL.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_SPATIAL_MODEL.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_SPATIAL_MODEL.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 160
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_TEST_PLAN.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_TEST_PLAN.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_TEST_PLAN.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 161
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_TRAVEL_GRAPH.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_TRAVEL_GRAPH.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_TRAVEL_GRAPH.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 162
+    },
+    {
+      "key": "file:docs/v2_3/V2_3_UI_BINDINGS.md",
+      "target_type": "file",
+      "path": "docs/v2_3/V2_3_UI_BINDINGS.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/v2_3/V2_3_UI_BINDINGS.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 163
+    },
+    {
+      "key": "file:docs/vnext/core_loop_integration.md",
+      "target_type": "file",
+      "path": "docs/vnext/core_loop_integration.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/core_loop_integration.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 164
+    },
+    {
+      "key": "file:docs/vnext/event_knowledge.md",
+      "target_type": "file",
+      "path": "docs/vnext/event_knowledge.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/event_knowledge.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 165
+    },
+    {
+      "key": "file:docs/vnext/location_travel.md",
+      "target_type": "file",
+      "path": "docs/vnext/location_travel.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/location_travel.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 166
+    },
+    {
+      "key": "file:docs/vnext/organization_core.md",
+      "target_type": "file",
+      "path": "docs/vnext/organization_core.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/organization_core.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 167
+    },
+    {
+      "key": "file:docs/vnext/persistence.md",
+      "target_type": "file",
+      "path": "docs/vnext/persistence.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/persistence.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 168
+    },
+    {
+      "key": "file:docs/vnext/personal_economy.md",
+      "target_type": "file",
+      "path": "docs/vnext/personal_economy.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/personal_economy.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 169
+    },
+    {
+      "key": "file:docs/vnext/player_action.md",
+      "target_type": "file",
+      "path": "docs/vnext/player_action.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/player_action.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 170
+    },
+    {
+      "key": "file:docs/vnext/reuse_migration_inventory.md",
+      "target_type": "file",
+      "path": "docs/vnext/reuse_migration_inventory.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/reuse_migration_inventory.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 171
+    },
+    {
+      "key": "file:docs/vnext/runtime_foundation.md",
+      "target_type": "file",
+      "path": "docs/vnext/runtime_foundation.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/runtime_foundation.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 172
+    },
+    {
+      "key": "file:docs/vnext/spatial_infrastructure.md",
+      "target_type": "file",
+      "path": "docs/vnext/spatial_infrastructure.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/spatial_infrastructure.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 173
+    },
+    {
+      "key": "file:docs/vnext/stable_id_catalog.md",
+      "target_type": "file",
+      "path": "docs/vnext/stable_id_catalog.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/stable_id_catalog.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 174
+    },
+    {
+      "key": "file:docs/vnext/validation.md",
+      "target_type": "file",
+      "path": "docs/vnext/validation.md",
+      "priority": 70,
+      "issues": [
+        "LICENSE_UNKNOWN",
+        "PROVENANCE_INCOMPLETE"
+      ],
+      "category": "documentation",
+      "action": "Review explicit repository evidence and document only confirmed source/license/generator facts.",
+      "safety": "Do not infer a license, modify authoritative data, or regenerate a formal asset.",
+      "evidence": [
+        "docs/vnext/validation.md"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 175
+    },
+    {
+      "key": "edge:assets/historical_flags/1900:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:250"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 176
+    },
+    {
+      "key": "edge:data/world_map/historical/political_units_1900.json:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:250"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 177
+    },
+    {
+      "key": "edge:data/world_map/historical/CShapes-2.0-ATTRIBUTION.md:data/world_map/historical/cshapes_1900_snapshot.json:tools/historical_data/build_cshapes_1900_snapshot.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/cshapes_1900_snapshot.json",
+      "owner": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_cshapes_1900_snapshot.py:160",
+        "tools/historical_data/build_cshapes_1900_snapshot.py:25"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 178
+    },
+    {
+      "key": "edge:assets/historical_flags/1900:data/world_map/historical/flags_1900.json:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/flags_1900.json",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:249",
+        "tools/historical_data/build_1900_flag_registry.py:30"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 179
+    },
+    {
+      "key": "edge:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:data/world_map/historical/flags_1900.json:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/flags_1900.json",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:249",
+        "tools/historical_data/build_1900_flag_registry.py:30"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 180
+    },
+    {
+      "key": "edge:data/world_map/historical/political_units_1900.json:data/world_map/historical/flags_1900.json:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/flags_1900.json",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:249",
+        "tools/historical_data/build_1900_flag_registry.py:30"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 181
+    },
+    {
+      "key": "edge:assets/historical_flags/1900:data/world_map/historical/political_units_1900.json:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/political_units_1900.json",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:242"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 182
+    },
+    {
+      "key": "edge:data/world_map/historical/FLAG_ASSET_ATTRIBUTION.md:data/world_map/historical/political_units_1900.json:tools/historical_data/build_1900_flag_registry.py",
+      "target_type": "dependency_edge",
+      "path": "data/world_map/historical/political_units_1900.json",
+      "owner": [
+        "tools/historical_data/build_1900_flag_registry.py"
+      ],
+      "priority": 45,
+      "issues": [
+        "CANDIDATE_NOT_CANONICAL"
+      ],
+      "category": "candidate_dependency_edge",
+      "action": "Compare the candidate edge with the canonical manifest graph and promote only with explicit evidence.",
+      "safety": "Do not treat static path proximity as proof of derivation.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:242"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 183
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tests/tools/test_run_vnext_validation.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tests/tools/test_run_vnext_validation.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tests/tools/test_run_vnext_validation.py:105",
+        "tests/tools/test_run_vnext_validation.py:45"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 184
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tests/tools/test_variable_state_discovery.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tests/tools/test_variable_state_discovery.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tests/tools/test_variable_state_discovery.py:39"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 185
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/audit_formal_variable_state.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/audit_formal_variable_state.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/audit_formal_variable_state.py:1211"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 186
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/generate_variable_state_docs.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/generate_variable_state_docs.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/generate_variable_state_docs.py:61"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 187
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/historical_data/build_1900_flag_registry.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/historical_data/build_1900_flag_registry.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry.py:191"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 188
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/historical_data/build_1900_flag_registry_fast.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/historical_data/build_1900_flag_registry_fast.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/historical_data/build_1900_flag_registry_fast.py:137",
+        "tools/historical_data/build_1900_flag_registry_fast.py:218",
+        "tools/historical_data/build_1900_flag_registry_fast.py:235",
+        "tools/historical_data/build_1900_flag_registry_fast.py:239"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 189
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/historical_data/research_1900_sources.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/historical_data/research_1900_sources.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/historical_data/research_1900_sources.py:140",
+        "tools/historical_data/research_1900_sources.py:144"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 190
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/provenance/generate_regression_corpus.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/provenance/generate_regression_corpus.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/provenance/generate_regression_corpus.py:123"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 191
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/provenance/generate_review_backlog.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/provenance/generate_review_backlog.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/provenance/generate_review_backlog.py:193"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 192
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/provenance/scan_reference_matrix.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/provenance/scan_reference_matrix.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/provenance/scan_reference_matrix.py:548"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 193
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/render_variable_refactor_plan.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/render_variable_refactor_plan.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/render_variable_refactor_plan.py:88"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 194
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/render_variable_state_member_inventory.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/render_variable_state_member_inventory.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/render_variable_state_member_inventory.py:115"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 195
+    },
+    {
+      "key": "matrix:DYNAMIC_OUTPUT_UNRESOLVED:tools/world_map/generate_city_shards.py:<dynamic-output>",
+      "target_type": "reference",
+      "path": "<dynamic-output>",
+      "owner": "tools/world_map/generate_city_shards.py",
+      "priority": 40,
+      "issues": [
+        "DYNAMIC_OUTPUT_UNRESOLVED"
+      ],
+      "category": "repository_reference",
+      "action": "Resolve only from an explicit constant/path expression or repository evidence; otherwise retain the dynamic output as unresolved.",
+      "safety": "Review-only candidate. Do not create a replacement file or alter gameplay references automatically.",
+      "evidence": [
+        "tools/world_map/generate_city_shards.py:407",
+        "tools/world_map/generate_city_shards.py:434",
+        "tools/world_map/generate_city_shards.py:486",
+        "tools/world_map/generate_city_shards.py:487"
+      ],
+      "review_status": "REVIEW_REQUIRED",
+      "rank": 196
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "test": "village_yard_approach_grades",
+  "rows": [
+    {
+      "house": "house_00",
+      "max_yard_approach_grade": 0.19391381740571983
+    },
+    {
+      "house": "house_01",
+      "max_yard_approach_grade": 0.582080602645874
+    },
+    {
+      "house": "house_02",
+      "max_yard_approach_grade": 0.24564671516421008
+    },
+    {
+      "house": "house_03",
+      "max_yard_approach_grade": 0.5272741317749023
+    },
+    {
+      "house": "house_04",
+      "max_yard_approach_grade": 0.15536057949067947
+    },
+    {
+      "house": "house_05",
+      "max_yard_approach_grade": 0.24960827827453613
+    },
+    {
+      "house": "house_06",
+      "max_yard_approach_grade": 0.23698711395266134
+    },
+    {
+      "house": "house_07",
+      "max_yard_approach_grade": 0.6956498622894287
+    },
+    {
+      "house": "house_08",
+      "max_yard_approach_grade": 0.3127366304397923
+    },
+    {
+      "house": "house_09",
+      "max_yard_approach_grade": 0.6702203750610352
+    },
+    {
+      "house": "house_10",
+      "max_yard_approach_grade": 0.21678519248964706
+    },
+    {
+      "house": "house_11",
+      "max_yard_approach_grade": 0.350081205368042
+    }
+  ],
+  "maximum": 0.6956498622894287,
+  "production_traction_limit": 0.8390996,
+  "note": "Numerical terrain grades to a point14m on the road-facing side of each house center. Does not replace physical vehicle driving."
+}

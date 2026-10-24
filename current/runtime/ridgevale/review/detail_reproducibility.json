@@ -1,0 +1,10 @@
+{
+  "check": "independent-detail-rebuild-v2",
+  "ok": true,
+  "assets": {
+    "map.json": "2bddc33a6a34ede904bdde127937b2f3f2e43139e8cdecbe5b83975418f5b623",
+    "land_color.png": "aee4e86c28501e4f50f6683c4287a18b2759f5496ecb1362fcb195639ae7bb17",
+    "land_control.png": "e530e84ed151e91ec563dc0f0c6fb8ca8587722a784f51a0538fed65d6a57f46"
+  },
+  "height_regenerated": false
+}

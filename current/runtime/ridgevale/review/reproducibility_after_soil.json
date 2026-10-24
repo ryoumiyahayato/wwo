@@ -1,0 +1,6 @@
+{
+  "land_control.png": true,
+  "height_4m.f32": true,
+  "land_color.png": true,
+  "map.json": true
+}
