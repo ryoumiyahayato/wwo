@@ -49,5 +49,5 @@
 
 ## 后续补传与清理（2026-10-24）
 
-阶段：`UPLOAD_IN_PROGRESS`。地貌BIN和R57制作资料使用[私有草稿附件](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026)，不会成为正式游戏Release。已实际上传并回读 10/64 包。文件路径、分段偏移、提供方对象ID、大小及校验元数据仍使用[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)中的resource_supplement。全部大包在内存中串行处理，未新增磁盘ZIP；没有主动计算新哈希。
+阶段：`UPLOAD_IN_PROGRESS`。地貌BIN和R57制作资料使用[私有草稿附件](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026)，不会成为正式游戏Release。已实际上传并回读 20/64 包。文件路径、分段偏移、提供方对象ID、大小及校验元数据仍使用[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)中的resource_supplement。全部大包在内存中串行处理，未新增磁盘ZIP；没有主动计算新哈希。
 
