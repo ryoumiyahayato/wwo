@@ -1,7 +1,7 @@
 """Restore only from a downloaded manifest and authenticated GitHub packages.
 No original source path in the manifest is ever opened by this program.
 """
-import argparse, base64, gzip, hashlib, json, os, pathlib, re, subprocess, urllib.request, urllib.error, zipfile
+import argparse, base64, gzip, hashlib, json, os, pathlib, re, subprocess, urllib.request, urllib.error, zipfile, time, http.client
 P=pathlib.Path
 REPO='ryoumiyahayato/wwo'
 CURRENT='formal-combat-authority-20261024/'
@@ -12,24 +12,42 @@ def digest(p):
     with p.open('rb') as f:
         for b in iter(lambda:f.read(1024*1024),b''):h.update(b)
     return h.hexdigest()
-def download(package,destination):
-    if destination.exists():raise FileExistsError('A new cloud download directory is required: '+str(destination))
+def read_cloud_part(part):
     token=subprocess.check_output(['gh','auth','token'],text=True).strip()
-    h=hashlib.sha256();size=0
-    with destination.open('xb') as f:
-        for part in package.get('parts',[package]):
-            req=urllib.request.Request('https://api.github.com/repos/'+REPO+'/releases/assets/'+str(part['asset_id']),headers={'Authorization':'Bearer '+token,'Accept':'application/octet-stream','User-Agent':'WWO-Military-Cloud-Restore'})
+    for attempt in range(2):
+        try:
+            req=urllib.request.Request('https://api.github.com/repos/'+REPO+'/releases/assets/'+str(part['asset_id'])+'?download=1&nonce='+str(time.time_ns()),headers={'Authorization':'Bearer '+token,'Accept':'application/octet-stream','Cache-Control':'no-cache','User-Agent':'WWO-Military-Cloud-Restore'})
             try:response=urllib.request.build_opener(NoRedirect()).open(req,timeout=60)
             except urllib.error.HTTPError as e:
                 if e.code not in (301,302,303,307,308):raise
                 response=urllib.request.urlopen(urllib.request.Request(e.headers['Location']),timeout=120)
-            ph=hashlib.sha256();pn=0
             with response:
-                while True:
-                    b=response.read(1024*1024)
-                    if not b:break
-                    f.write(b);h.update(b);ph.update(b);size+=len(b);pn+=len(b)
-            if pn!=part['bytes'] or ph.hexdigest()!=part['sha256']:raise ValueError('Cloud segment differs: '+part['name'])
+                data=response.read(part['bytes']+1)
+            if len(data)!=part['bytes'] or hashlib.sha256(data).hexdigest()!=part['sha256']:raise ValueError('Cloud segment differs: '+part['name'])
+            return data
+        except (urllib.error.URLError,TimeoutError,http.client.IncompleteRead) as e:
+            if attempt:raise
+            print('RETRY_TRANSIENT_CLOUD_READ',part['name'],type(e).__name__,flush=True)
+def download(package,destination):
+    receipts=destination.parent/'.cloud-download-receipts.jsonl';known={}
+    if receipts.exists():
+        for line in receipts.read_text(encoding='utf-8').splitlines():
+            row=json.loads(line);known[row['name']]=row
+    parts=package.get('parts',[package]);h=hashlib.sha256();size=0;skip=0
+    if destination.exists():
+        with destination.open('rb') as existing:
+            for part in parts:
+                row=known.get(part['name'])
+                if not row or row['id']!=part['asset_id'] or row['sha256']!=part['sha256']:break
+                data=existing.read(part['bytes'])
+                if len(data)!=part['bytes'] or hashlib.sha256(data).hexdigest()!=part['sha256']:raise ValueError('Existing cloud-download segment differs')
+                h.update(data);size+=len(data);skip+=1
+            if existing.read(1):raise ValueError('Unrecorded partial download retained; not treated as verified')
+    with destination.open('ab' if destination.exists() else 'xb') as f:
+        for part in parts[skip:]:
+            data=read_cloud_part(part);f.write(data);f.flush();h.update(data);size+=len(data)
+            with receipts.open('a',encoding='utf-8') as log:log.write(json.dumps({'name':part['name'],'id':part['asset_id'],'sha256':part['sha256'],'bytes':part['bytes'],'time':time.time()})+'\n')
+            print('CLOUD_SEGMENT_VERIFIED',part['name'],len(data),flush=True)
     if size!=package['bytes'] or h.hexdigest()!=package['sha256']:raise ValueError('Cloud package checksum/length differs: '+package['name'])
     print('CLOUD_DOWNLOAD_VERIFIED',package['name'],size,flush=True)
 def main():
@@ -86,6 +104,12 @@ def main():
     changed,n=re.subn(rb'config/custom_user_dir_name="[^"]+"',('config/custom_user_dir_name="'+a.user_dir+'"').encode(),text)
     if n!=1:raise ValueError('Expected one dedicated user-directory setting')
     project.write_bytes(changed)
+    recovery_script=a.destination/'runtime/authority/recovery_checks.gd'
+    old=b'FileAccess.open("D:/programs/WWO/research/military/formal-combat-authority-20261024/run/recovery_checks.json",FileAccess.WRITE)'
+    new=b'FileAccess.open(task_root+"/recovery_checks.json",FileAccess.WRITE)'
+    original=recovery_script.read_bytes()
+    if original.count(old)!=1:raise ValueError('Expected the declared original recovery-report path')
+    recovery_script.write_bytes(original.replace(old,new))
     tools=a.destination/'tools';tools.mkdir(exist_ok=True)
     launcher='''param([string]$GodotExe='D:\\tools\\Godot-4.6.3\\Godot_v4.6.3-stable_win64.exe',[switch]$VerifyCold)
 $ErrorActionPreference='Stop'
@@ -97,7 +121,8 @@ $p=Start-Process -FilePath $GodotExe -ArgumentList $quoted -PassThru -WindowStyl
 exit $p.ExitCode
 '''
     (tools/'Run-Military.ps1').write_text(launcher,encoding='utf-8')
-    receipt={'repository':REPO,'archive_commit':a.archive_commit,'manifest_sha256':digest(a.manifest),'materialized_files':count,'materialized_bytes':bytes_,'all_restored_bytes_verified_before_allowed_changes':True,'old_source_reads':False,'resource_hardlinks_created':False,'allowed_changes':[{'file':'runtime/project.godot','field':'config/custom_user_dir_name','value':a.user_dir}],'packages':[{'name':n,'ids':[p['asset_id'] for p in packages[n].get('parts',[packages[n]])],'bytes':packages[n]['bytes'],'sha256':packages[n]['sha256']} for n in sorted(needed)],'entry':'tools/Run-Military.ps1','status':'FILE_RESTORE_VERIFIED_ENGINE_NOT_YET_RUN'}
+    receipt={'repository':REPO,'archive_commit':a.archive_commit,'manifest_sha256':digest(a.manifest),'materialized_files':count,'materialized_bytes':bytes_,'all_restored_bytes_verified_before_allowed_changes':True,'old_source_reads':False,'resource_hardlinks_created':False,'filesystem_policy':'new independent regular files; source READONLY/link flags are not reapplied','allowed_changes':[{'file':'runtime/project.godot','field':'config/custom_user_dir_name','value':a.user_dir},{'file':'runtime/authority/recovery_checks.gd','field':'report output path','value':'task_root + /recovery_checks.json; prevents writing into original military source'}],'packages':[{'name':n,'ids':[p['asset_id'] for p in packages[n].get('parts',[packages[n]])],'bytes':packages[n]['bytes'],'sha256':packages[n]['sha256']} for n in sorted(needed)],'entry':'tools/Run-Military.ps1','status':'FILE_RESTORE_VERIFIED_ENGINE_NOT_YET_RUN'}
+    receipt['critical_input_sha256']={rel:row['object'] for row,rel in selected if rel.startswith('private_state/') and P(rel).name in {'authority_success_portable.json','authority_revoked_portable.json','authority_success_formal.json','authority_revoked_formal.json'}}
     (a.destination/'RESTORE_RECEIPT.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2),encoding='utf-8')
     print('FILE_RESTORE_VERIFIED',count,bytes_,'PACKAGES',len(needed),flush=True)
 if __name__=='__main__':main()
