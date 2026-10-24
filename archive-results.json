@@ -2499,8 +2499,7 @@
     "historical APK originals missing; no new APK/EXE built",
     "existing muzzle interrupted-engine evidence replayed; no new process kill",
     "native automated recovery, not human GUI or Android acceptance",
-    "five mixed/shared old roots and external source library retained",
-    "own archive staging not removed until final cloud proof"
+    "five mixed/shared old roots and external source library retained"
   ],
   "second_download_interruption": {
     "operation": "second_fresh_cloud_download",
@@ -2538,5 +2537,39 @@
       "verified manifest delta 5.09 MiB"
     ],
     "source_archive_file_bytes_are_not_network_wire_bytes": true
+  },
+  "own_staging_cleanup": {
+    "cloud_results_commit_before_temp_cleanup": "f72bdb819af248e5fae1fe14f023f95986283bef",
+    "approved_roots": [
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-CloudVerify-20261024",
+        "files": 19,
+        "logical_bytes": 8002822
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military-archive-20261024",
+        "files": 27296,
+        "logical_bytes": 19850818016
+      }
+    ],
+    "removed_roots": [
+      "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-CloudVerify-20261024",
+      "D:\\programs\\WWO\\research\\military-archive-20261024"
+    ],
+    "removed_files": 27315,
+    "completed": true,
+    "no_fallback_used": true,
+    "free_bytes_before": {
+      "C": 92637900800,
+      "D": 117960978432
+    },
+    "free_bytes_after": {
+      "C": 92645896192,
+      "D": 137864425472
+    },
+    "observed_free_increase": {
+      "C": 7995392,
+      "D": 19903447040
+    }
   }
 }
