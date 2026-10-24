@@ -6035,10 +6035,9 @@
   "selected_count": 6700,
   "actual_reclaimed_bytes": 0,
   "delete_candidate_bytes": 671137,
-  "network_upload": "Git pack payload estimate from provider push progress in push_result; no binary channel upload; HTTPS overhead not measured",
+  "network_upload": "Initial push succeeded but exact pack byte count was not retained; source file bytes are not network transfer bytes. The verified-status closeout push reported 4.64 KiB; final inventory-only update measured separately in completion summary.",
   "git_storage": "not yet measured",
   "git_objects_before": "count: 7065\nsize: 125120\nin-pack: 28652\npacks: 3\nsize-pack: 206119\nprune-packable: 0\ngarbage: 1\nsize-garbage: 0\n",
-  "new_non_git_temp_bytes": 6781756,
   "git_objects_after": "count: 7182\nsize: 135021\nin-pack: 28652\npacks: 3\nsize-pack: 206119\nprune-packable: 0\ngarbage: 1\nsize-garbage: 0\n",
   "first_push_network_bytes": null,
   "first_push_network_limitation": "首推成功，但保留的进度尾部不含pack长度，不能恢复精确网络字节；237541612是选入原文件长度，不是网络量",
@@ -6049,9 +6048,12 @@
    "files": 6779,
    "logical_bytes": 135692646,
    "basis": "本轮helper创建时间之后新建的Git文件元数据；含首次写入和重用对象，不重复压缩；不计既有对象"
-  }
+  },
+  "new_non_git_temp_observed_peak_bytes": 6781756,
+  "closeout_push_pack_progress": "4.64 KiB, Git progress display, excludes HTTPS overhead",
+  "delete_candidate_bytes_total": 3536936,
+  "new_non_git_temp_bytes_before_final_commit": 3121695
  },
- "uploaded_commit": "5e61e2c9360bf74510dfd36861ea8b6b05baa796",
  "push_result": " Resolving deltas:   8% (161/2005)        \rremote: Resolving deltas:   9% (181/2005)        \rremote: Resolving deltas:  10% (201/2005)        \rremote: Resolving deltas:  11% (221/2005)        \rremote: Resolving deltas:  12% (241/2005)        \rremote: Resolving deltas:  13% (261/2005)        \rremote: Resolving deltas:  14% (281/2005)        \rremote: Resolving deltas:  15% (301/2005)        \rremote: Resolving deltas:  16% (321/2005)        \rremote: Resolving deltas:  17% (341/2005)        \rremote: Resolving deltas:  18% (361/2005)        \rremote: Resolving deltas:  19% (381/2005)        \rremote: Resolving deltas:  20% (401/2005)        \rremote: Resolving deltas:  21% (422/2005)        \rremote: Resolving deltas:  22% (442/2005)        \rremote: Resolving deltas:  23% (462/2005)        \rremote: Resolving deltas:  24% (482/2005)        \rremote: Resolving deltas:  25% (502/2005)        \rremote: Resolving deltas:  26% (522/2005)        \rremote: Resolving deltas:  27% (542/2005)        \rremote: Resolving deltas:  28% (562/2005)        \rremote: Resolving deltas:  29% (582/2005)        \rremote: Resolving deltas:  30% (602/2005)        \rremote: Resolving deltas:  31% (622/2005)        \rremote: Resolving deltas:  32% (642/2005)        \rremote: Resolving deltas:  33% (662/2005)        \rremote: Resolving deltas:  34% (682/2005)        \rremote: Resolving deltas:  35% (702/2005)        \rremote: Resolving deltas:  36% (722/2005)        \rremote: Resolving deltas:  37% (742/2005)        \rremote: Resolving deltas:  38% (762/2005)        \rremote: Resolving deltas:  39% (782/2005)        \rremote: Resolving deltas:  40% (802/2005)        \rremote: Resolving deltas:  41% (823/2005)        \rremote: Resolving deltas:  42% (843/2005)        \rremote: Resolving deltas:  43% (863/2005)        \rremote: Resolving deltas:  44% (883/2005)        \rremote: Resolving deltas:  45% (903/2005)        \rremote: Resolving deltas:  46% (923/2005)        \rremote: Resolving deltas:  47% (943/2005)        \rremote: Resolving deltas:  48% (963/2005)        \rremote: Resolving deltas:  49% (983/2005)        \rremote: Resolving deltas:  50% (1003/2005)        \rremote: Resolving deltas:  51% (1023/2005)        \rremote: Resolving deltas:  52% (1043/2005)        \rremote: Resolving deltas:  53% (1063/2005)        \rremote: Resolving deltas:  54% (1083/2005)        \rremote: Resolving deltas:  55% (1103/2005)        \rremote: Resolving deltas:  56% (1123/2005)        \rremote: Resolving deltas:  57% (1143/2005)        \rremote: Resolving deltas:  58% (1163/2005)        \rremote: Resolving deltas:  59% (1183/2005)        \rremote: Resolving deltas:  60% (1203/2005)        \rremote: Resolving deltas:  61% (1224/2005)        \rremote: Resolving deltas:  62% (1244/2005)        \rremote: Resolving deltas:  63% (1264/2005)        \rremote: Resolving deltas:  64% (1284/2005)        \rremote: Resolving deltas:  65% (1304/2005)        \rremote: Resolving deltas:  66% (1324/2005)        \rremote: Resolving deltas:  67% (1344/2005)        \rremote: Resolving deltas:  68% (1364/2005)        \rremote: Resolving deltas:  69% (1384/2005)        \rremote: Resolving deltas:  70% (1404/2005)        \rremote: Resolving deltas:  71% (1424/2005)        \rremote: Resolving deltas:  72% (1444/2005)        \rremote: Resolving deltas:  73% (1464/2005)        \rremote: Resolving deltas:  74% (1484/2005)        \rremote: Resolving deltas:  75% (1504/2005)        \rremote: Resolving deltas:  76% (1524/2005)        \rremote: Resolving deltas:  77% (1544/2005)        \rremote: Resolving deltas:  78% (1564/2005)        \rremote: Resolving deltas:  79% (1584/2005)        \rremote: Resolving deltas:  80% (1604/2005)        \rremote: Resolving deltas:  81% (1625/2005)        \rremote: Resolving deltas:  82% (1645/2005)        \rremote: Resolving deltas:  83% (1665/2005)        \rremote: Resolving deltas:  84% (1685/2005)        \rremote: Resolving deltas:  85% (1705/2005)        \rremote: Resolving deltas:  86% (1725/2005)        \rremote: Resolving deltas:  87% (1745/2005)        \rremote: Resolving deltas:  88% (1765/2005)        \rremote: Resolving deltas:  89% (1785/2005)        \rremote: Resolving deltas:  90% (1805/2005)        \rremote: Resolving deltas:  91% (1825/2005)        \rremote: Resolving deltas:  92% (1845/2005)        \rremote: Resolving deltas:  93% (1865/2005)        \rremote: Resolving deltas:  94% (1885/2005)        \rremote: Resolving deltas:  95% (1905/2005)        \rremote: Resolving deltas:  96% (1925/2005)        \rremote: Resolving deltas:  97% (1945/2005)        \rremote: Resolving deltas:  98% (1965/2005)        \rremote: Resolving deltas:  99% (1985/2005)        \rremote: Resolving deltas: 100% (2005/2005)        \rremote: Resolving deltas: 100% (2005/2005), completed with 69 local objects.        \nremote: \nremote: Create a pull request for 'archive/main-wwo-r57-g21-20261024' on GitHub by visiting:        \nremote:      https://github.com/ryoumiyahayato/wwo/pull/new/archive/main-wwo-r57-g21-20261024        \nremote: \n",
  "readback": {
   "commit": "5e61e2c9360bf74510dfd36861ea8b6b05baa796",
@@ -6167,5 +6169,25 @@
   "current_source": "本轮Git已修改/未跟踪的 scripts, scenes, shaders, tests, tools, docs, data, assets 及 AGENTS.md/project.godot/export_presets.cfg；排除 exclusions 所列资源、缓存及内部模型；原云端内容由基线继承",
   "full_file_list": "Git归档提交树和相对基线的diff是完整文件路径；清单按明确目录范围统计，selected_files只列证据及检查点映射",
   "retired": "tracked_retired_paths仅继承本地已退役状态，不恢复旧审计产物/着色器"
+ },
+ "initial_content_commit": "5e61e2c9360bf74510dfd36861ea8b6b05baa796",
+ "verified_status_commit": "04d3acc38d36616142c409a949ffd263075ee6f2",
+ "new_temporary_artifacts": {
+  "path": "D:\\programs\\WWO\\wwo\\local-artifacts\\main-wwo-archive-20261024",
+  "workline": "本轮主WWO归档",
+  "files": 3,
+  "bytes": 2865799,
+  "items": [
+   "archive_once.py",
+   "archive.index",
+   "README.md"
+  ],
+  "purpose": "一次性上传辅助、备用Git索引、云端README暂存副本",
+  "consumer": "本轮归档结束后无运行或重建消费者",
+  "replacement": "远端归档提交树和根README；辅助过程不属于游戏恢复依赖",
+  "disposition": "DELETE_CANDIDATE",
+  "upload": "UPLOADED_VERIFIED",
+  "verification": "README对应远端对象；索引可由提交树重建；临时辅助脚本不需归档",
+  "deletion": "未发现适用的既有获准清理入口，未执行删除；统一清单inventory.json本地KEEP"
  }
 }
