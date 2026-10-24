@@ -3,8 +3,16 @@ extends RefCounted
 ## Finite issued ownership, reserved asks, and immediate bilateral delivery.
 ## Managers are explicit configuration; ownership never grants cash authority.
 
+const CallMarket = preload("res://scripts/world/economy_equity_call_market.gd")
+var call_market := CallMarket.new()
+const Primary = preload("res://scripts/world/economy_equity_primary.gd")
+var primary := Primary.new()
+const Distribution = preload("res://scripts/world/economy_shareholder_cash_distribution.gd")
+var distribution := Distribution.new()
+const Corporate = preload("res://scripts/world/economy_corporate_finance_policy.gd")
+var corporate := Corporate.new()
 const SCHEMA_ID: String = "economy_asset_market_v1"
-const ACTIONS: Array[String] = ["sell_shares", "accept_share_order", "cancel_share_order", "pay_dividend"]
+const ACTIONS: Array[String] = ["sell_shares", "accept_share_order", "cancel_share_order", "pay_dividend", "bid_shares", "settle_share_bid", "publish_equity_report", "publish_share_issue", "subscribe_share_issue", "cancel_share_issue", "settle_share_issue", "declare_share_distribution", "settle_share_distribution", "review_corporate_finance"]
 const CONFIG_FIELDS: Array[String] = ["id", "issuer", "total_shares", "holders", "manager", "known_to"]
 const ORDER_FIELDS: Array[String] = ["id", "seller", "asset_id", "quantity", "remaining", "cancelled", "price", "denomination", "offered_minute", "expires_minute", "closed_minute", "closed_action", "status", "action_id"]
 const TRADE_FIELDS: Array[String] = ["id", "order_id", "buyer", "seller", "asset_id", "quantity", "price", "denomination", "minute", "action_id"]
@@ -22,7 +30,11 @@ var next_order: int = 1
 var next_trade: int = 1
 var next_dividend: int = 1
 
-func bind(ledger: FormalLedgerState, settings: Dictionary) -> void:
+func bind(ledger: FormalLedgerState, settings: Dictionary, economy: RefCounted=null) -> void:
+	call_market.bind(self,settings,economy)
+	primary.bind(self,settings,economy)
+	distribution.bind(self,settings,economy)
+	corporate.bind(self,settings,economy)
 	_ledger = ledger
 	_configured.clear()
 	for row: Dictionary in settings.get("assets", []):
@@ -43,6 +55,9 @@ func _known(actor: String, asset_id: String) -> bool:
 func sell(actor: String, payload: Dictionary, minute: int, action_id: String) -> Dictionary:
 	if not FormalLedgerState.exact_fields(payload, ["asset_id", "quantity", "price", "denomination", "valid_minutes"]) or not payload["asset_id"] is String or not _known(actor, payload["asset_id"]) or not _positive(payload["quantity"]) or not _positive(payload["price"]) or not _positive(payload["valid_minutes"]) or not FormalLedgerState.currency_id(payload["denomination"]):
 		return _result(false, "INVALID_OR_UNKNOWN_SHARE_OFFER")
+	if call_market.enabled():
+		var why: String=call_market.permission(actor,"SELL",payload,minute)
+		if not why.is_empty(): return _result(false,why)
 	var asset := _assets[payload["asset_id"]] as Dictionary
 	var amount := int(payload["quantity"])
 	if _ledger.owner_account(actor, payload["denomination"]).is_empty() or amount > int(asset["holders"].get(actor, 0)) - int(asset["reserved"].get(actor, 0)):
@@ -57,7 +72,8 @@ func sell(actor: String, payload: Dictionary, minute: int, action_id: String) ->
 	next_order += 1
 	return {"accepted": true, "reason": "ACCEPTED", "order_id": id, "quantity": amount}
 
-func accept(actor: String, payload: Dictionary, minute: int, action_id: String) -> Dictionary:
+func accept(actor: String, payload: Dictionary, minute: int, action_id: String, bid: Dictionary={}) -> Dictionary:
+	if call_market.enabled() and bid.is_empty(): return _result(false,"ACCEPTANCE_REQUIRES_DAILY_SHARE_CALL")
 	if not FormalLedgerState.exact_fields(payload, ["order_id", "quantity", "max_price", "denomination"]) or not payload["order_id"] is String or not _positive(payload["quantity"]) or not _positive(payload["max_price"]):
 		return _result(false, "INVALID_SHARE_ACCEPTANCE")
 	var order: Dictionary = _orders.get(payload["order_id"], {})
@@ -73,12 +89,14 @@ func accept(actor: String, payload: Dictionary, minute: int, action_id: String) 
 	var buyer_account := _ledger.owner_account(actor, order["denomination"])
 	var seller_account := _ledger.owner_account(seller, order["denomination"])
 	var cash := amount * int(order["price"])
-	if buyer_account.is_empty() or seller_account.is_empty() or _ledger.available_balance(buyer_account) < cash:
+	var releases: Dictionary={} if bid.is_empty() else {bid["id"]:amount*int(bid["price"])}
+	if buyer_account.is_empty() or seller_account.is_empty() or _ledger.available_balance(buyer_account)+int(releases.get(bid.get("id",""),0)) < cash:
 		return _result(false, "SHARE_BUYER_FUNDS_OR_ACCOUNT")
 	var id := "asset_trade:" + str(next_trade)
 	var trade := {"id": id, "order_id": order["id"], "buyer": actor, "seller": seller, "asset_id": order["asset_id"], "quantity": amount, "price": order["price"], "denomination": order["denomination"], "minute": minute, "action_id": action_id}
 	var legs: Array[Dictionary] = [_trade_leg(trade)]
-	if not _ledger.batch_payment(id, legs, minute):
+	if not bid.is_empty(): trade["bid_id"]=bid["id"]
+	if not _ledger.batch_payment(id, legs, minute, releases):
 		return {"accepted": false, "reason": "SHARE_PAYMENT_FAILED", "message": _ledger.error}
 	# All ownership and order bounds were resolved before cash commitment.
 	asset["holders"][seller] = int(asset["holders"][seller]) - amount
@@ -95,6 +113,7 @@ func accept(actor: String, payload: Dictionary, minute: int, action_id: String) 
 	return {"accepted": true, "reason": "ACCEPTED", "trade_id": id, "quantity": amount, "cash": cash}
 
 func cancel(actor: String, payload: Dictionary, minute: int, action_id: String) -> Dictionary:
+	if call_market.enabled() and call_market.bids.has(payload.get("order_id","")): return call_market.cancel(actor,payload,minute,action_id)
 	if not FormalLedgerState.exact_fields(payload, ["order_id"]) or not payload["order_id"] is String:
 		return _result(false, "INVALID_SHARE_CANCELLATION")
 	var order: Dictionary = _orders.get(payload["order_id"], {})
@@ -116,6 +135,7 @@ func _close(order: Dictionary, status: String, minute: int, action_id: String = 
 	order["closed_action"] = action_id
 
 func advance_time(minute: int) -> void:
+	if call_market.enabled(): call_market.advance_time(minute)
 	for expires: int in _expiry.keys():
 		if expires > minute:
 			continue
@@ -145,6 +165,7 @@ func _payments(asset: Dictionary, budget: int) -> Dictionary:
 	return {"valid": true, "amounts": result}
 
 func dividend(actor: String, payload: Dictionary, minute: int, action_id: String) -> Dictionary:
+	if call_market.enabled(): return _result(false,"DIVIDENDS_NOT_ENABLED_IN_CALL_EXPERIMENT")
 	if not FormalLedgerState.exact_fields(payload, ["asset_id", "budget", "denomination"]) or not payload["asset_id"] is String or not _configured.has(payload["asset_id"]) or not _positive(payload["budget"]) or not FormalLedgerState.currency_id(payload["denomination"]):
 		return _result(false, "INVALID_DIVIDEND")
 	var spec := _configured[payload["asset_id"]] as Dictionary
@@ -207,22 +228,35 @@ func visible(actor: String, minute: int) -> Dictionary:
 			dividends.append(row.duplicate(true))
 		elif row["payments"].has(actor):
 			dividends.append({"id": row["id"], "asset_id": row["asset_id"], "denomination": row["denomination"], "minute": row["minute"], "received": row["payments"][actor]})
-	return {"companies": companies, "holdings": holdings, "offers": offers, "own_orders": own, "trades": trades, "dividends": dividends}
+	var result: Dictionary={"companies": companies, "holdings": holdings, "offers": offers, "own_orders": own, "trades": trades, "dividends": dividends}
+	if call_market.enabled(): result["call_market"]=call_market.visible(actor,minute)
+	if primary.enabled(): result["primary"]=primary.visible(actor)
+	if distribution.enabled(): result["distribution"]=distribution.visible(actor)
+	return result
 
 func snapshot() -> Dictionary:
-	return {"schema_id": SCHEMA_ID, "assets": _assets.duplicate(true), "orders": _orders.duplicate(true), "trades": _trades.duplicate(true), "dividends": _dividends.duplicate(true), "next_order": next_order, "next_trade": next_trade, "next_dividend": next_dividend}
+	var result: Dictionary={"schema_id": SCHEMA_ID, "assets": _assets.duplicate(true), "orders": _orders.duplicate(true), "trades": _trades.duplicate(true), "dividends": _dividends.duplicate(true), "next_order": next_order, "next_trade": next_trade, "next_dividend": next_dividend}
+	if call_market.enabled(): result["call_market"]=call_market.snapshot()
+	if primary.enabled(): result["primary"]=primary.snapshot()
+	if distribution.enabled(): result["distributions"]=distribution.snapshot()
+	return result
 
-func restore(value: Variant, commands: Dictionary, minute: int) -> bool:
+func restore(value: Variant, commands: Dictionary, minute: int, native: Dictionary={}) -> bool:
+	var root_fields: Array[String]=["schema_id", "assets", "orders", "trades", "dividends", "next_order", "next_trade", "next_dividend"]
+	if call_market.enabled():
+		root_fields.append("call_market")
+	if primary.enabled(): root_fields.append("primary")
+	if distribution.enabled(): root_fields.append("distributions")
 	if value == null:
 		value = {"schema_id": SCHEMA_ID, "assets": {}, "orders": {}, "trades": {}, "dividends": {}, "next_order": 1, "next_trade": 1, "next_dividend": 1}
-	if not value is Dictionary or not FormalLedgerState.exact_fields(value, ["schema_id", "assets", "orders", "trades", "dividends", "next_order", "next_trade", "next_dividend"]) or value["schema_id"] != SCHEMA_ID:
+	if not value is Dictionary or not FormalLedgerState.exact_fields(value, root_fields) or value["schema_id"] != SCHEMA_ID:
 		return _fail("Unsupported saved assets")
 	for key: String in ["assets", "orders", "trades", "dividends"]:
 		if not value[key] is Dictionary:
 			return _fail("Invalid asset state container")
 	for id: Variant in value["assets"]:
 		var asset: Variant = value["assets"][id]
-		if not id is String or not _configured.has(id) or not asset is Dictionary or not FormalLedgerState.exact_fields(asset, ["id", "issuer", "total_shares", "holders", "reserved"]) or asset["id"] != id or asset["issuer"] != _configured[id]["issuer"] or not _positive(asset["total_shares"]) or asset["total_shares"] != _configured[id]["total_shares"] or not asset["holders"] is Dictionary or not asset["reserved"] is Dictionary:
+		if not id is String or not _configured.has(id) or not asset is Dictionary or not FormalLedgerState.exact_fields(asset, ["id", "issuer", "total_shares", "holders", "reserved"]) or asset["id"] != id or asset["issuer"] != _configured[id]["issuer"] or not _positive(asset["total_shares"]) or (asset["total_shares"] != _configured[id]["total_shares"] if not primary.enabled() else asset["total_shares"]>int(_configured[id]["total_shares"])+int(primary.config["max_new_shares"])) or not asset["holders"] is Dictionary or not asset["reserved"] is Dictionary:
 			return _fail("Invalid finite share registry")
 		for field: String in ["holders", "reserved"]:
 			for holder: Variant in asset[field]:
@@ -231,7 +265,8 @@ func restore(value: Variant, commands: Dictionary, minute: int) -> bool:
 	var by_action: Dictionary = {}
 	for key: String in ["order", "trade", "dividend"]:
 		var collection := "orders" if key == "order" else "trades" if key == "trade" else "dividends"
-		var fields: Array[String] = ORDER_FIELDS if key == "order" else TRADE_FIELDS if key == "trade" else DIVIDEND_FIELDS
+		var fields: Array[String] = (ORDER_FIELDS if key == "order" else TRADE_FIELDS if key == "trade" else DIVIDEND_FIELDS).duplicate()
+		if key=="trade" and call_market.enabled(): fields.append("bid_id")
 		if not _positive(value["next_" + key]) or value[collection].size() != int(value["next_" + key]) - 1:
 			return _fail("Missing asset settlement IDs")
 		for number: int in range(1, int(value["next_" + key])):
@@ -241,13 +276,20 @@ func restore(value: Variant, commands: Dictionary, minute: int) -> bool:
 				return _fail("Invalid asset record or duplicate action")
 			if not FormalLedgerState.currency_id(row["denomination"]):
 				return _fail("Unknown asset settlement currency")
-			var amounts: Array[String] = ["quantity", "remaining", "cancelled", "price", "offered_minute", "expires_minute"] if key == "order" else ["quantity", "price", "minute"] if key == "trade" else ["budget", "total_paid", "minute"]
+			var amounts: Array[String] = []
+			amounts.assign(["quantity", "remaining", "cancelled", "price", "offered_minute", "expires_minute"] if key == "order" else ["quantity", "price", "minute"] if key == "trade" else ["budget", "total_paid", "minute"])
 			for field: String in amounts:
 				if not FormalLedgerState.valid_amount(row[field]):
 					return _fail("Invalid asset amount or date")
 			if key == "order" and (typeof(row["closed_minute"]) != TYPE_INT or int(row["closed_minute"]) < -1 or int(row["closed_minute"]) > FormalLedgerState.MAX_AMOUNT or not row["closed_action"] is String or not row["status"] is String):
 				return _fail("Invalid share order closure")
 			by_action[row["action_id"]] = {"kind": key, "record": row}
+	if not primary.validate(value.get("primary"),commands,minute,native): return _fail(primary.error)
+	if not distribution.validate(value.get("distributions"),commands,minute,native): return _fail(distribution.error)
+	if not corporate.validate(native):return _fail(corporate.error)
+	if call_market.enabled():
+		if not call_market.validate_history(value,commands,minute,native): return _fail(call_market.error)
+		commands=call_market.verification_commands
 	# Derive actual ownership from genesis and accepted deliveries in saved action
 	# order. This is load reconciliation, and never executes a cash payment.
 	var assets := _initial_assets()
@@ -261,6 +303,13 @@ func restore(value: Variant, commands: Dictionary, minute: int) -> bool:
 		var entry := commands[action_id] as Dictionary
 		var command := entry["envelope"]["command"] as Dictionary
 		var kind := str(command["kind"])
+		if kind=="review_corporate_finance":continue # Validated against original facts by corporate policy.
+		if kind in Distribution.ACTIONS:
+			if entry["result"]["accepted"] and kind=="declare_share_distribution" and not distribution.registration_valid(action_id,assets[distribution.config["asset_id"]]): return _fail(distribution.error)
+			continue
+		if kind in Primary.ACTIONS:
+			if entry["result"]["accepted"] and kind=="settle_share_issue": primary.ownership_effect(action_id,assets,receipts)
+			continue
 		if kind not in ACTIONS or not entry["result"]["accepted"]:
 			continue
 		var actor := str(entry["envelope"]["actor"])
@@ -343,8 +392,9 @@ func restore(value: Variant, commands: Dictionary, minute: int) -> bool:
 			reserved[row["seller"]] = int(reserved.get(row["seller"], 0)) + int(row["remaining"])
 	if orders != value["orders"] or assets != value["assets"]:
 		return _fail("Saved ownership or share reservations conflict")
+	distribution.explain_payments(receipts)
 	for row: Dictionary in _ledger.transactions():
-		if row["kind"] in ["asset_trade", "dividend"] and not receipts.has(row["transaction_id"]):
+		if row["kind"] in ["asset_trade", "dividend", "equity_issue"] and not receipts.has(row["transaction_id"]):
 			return _fail("Unexplained asset cash payment")
 	_assets = assets
 	_orders = orders
@@ -367,7 +417,7 @@ func _saved_payment(id: String, legs: Array[Dictionary], minute: int, receipts: 
 			return _fail("Asset payment differs from Ledger")
 		receipts[leg["transaction_id"]] = true
 		ids.append(leg["transaction_id"])
-	if _ledger.payment_batch(id) != {"transactions": ids, "releases": {}, "minute": minute}:
+	if _ledger.payment_batch(id) != {"transactions": ids, "releases": call_market.trade_releases.get(id,{}), "minute": minute}:
 		return _fail("Asset payment lacks atomic settlement")
 	return true
 

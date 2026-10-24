@@ -23,16 +23,18 @@ static func flag_weight(mpp: float) -> float:
 	return 1.0
 
 static func relief_weight(mpp: float, map_mode: String) -> float:
-	# The 9.8 km reference cannot acquire finer terrain by camera magnification.
-	var weight := lerpf(0.10, 0.80, 1.0 - smoothstep(log(1500.0), log(16000.0), log(maxf(mpp, 1.0))))
-	weight *= lerpf(0.08, 1.0, smoothstep(log(50.0), log(350.0), log(maxf(mpp, 1.0))))
-	return weight * (1.0 if map_mode == "political" else 0.20)
+	# Keep broad ETOPO forms at close scales without claiming finer samples.
+	# LOCAL adds its admitted native relief over this continuous reference.
+	var weight := lerpf(0.26,0.84,1.0-smoothstep(log(1800.0),log(18000.0),log(maxf(mpp,1.0))))
+	if map_mode=="geographic": return lerpf(0.92,0.70,smoothstep(log(1800.0),log(18000.0),log(maxf(mpp,1.0))))
+	return weight * (1.0 if map_mode=="political" else 0.28)
 
 static func relief_detail_weight(mpp: float) -> float:
 	return 1.0 - smoothstep(log(4000.0), log(10000.0), log(maxf(mpp, 1.0)))
 
 static func political_weight(mpp: float) -> float:
-	return lerpf(0.42, 1.0, smoothstep(log(150.0), log(6000.0), log(maxf(mpp, 1.0))))
+	# Physical ground dominates near views; dated ink remains at strategic scales.
+	return lerpf(0.22, 1.0, smoothstep(log(150.0), log(6000.0), log(maxf(mpp, 1.0))))
 
 static func physical_weight(kind: String, mpp: float) -> float:
 	var begin := 4000.0 if kind == "rail" else 5500.0 if kind == "river" else PHYSICAL_MAX_MPP

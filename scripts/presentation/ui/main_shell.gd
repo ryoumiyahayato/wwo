@@ -1,5 +1,6 @@
 class_name MainShell
 extends Control
+const EconomicText = preload("res://scripts/presentation/ui/formal_economic_text.gd")
 signal action_requested(action: String)
 signal refresh_requested
 var PANEL_FILL: Color = InterfaceSettings.theme_parameters().panel as Color
@@ -33,6 +34,7 @@ var _notice_visible: bool = false
 var _notice_bounds := Rect2()
 var _system_open: bool = false
 var _settings_open: bool = false
+var _last_map_message: String = ""
 var _preferences: Dictionary = {}
 var _navigation_open: bool = false
 var _context_open: bool = true
@@ -57,6 +59,7 @@ var _quantity_scale: int = 1000
 var _button_font := UIDrawing.create_font()
 var _font: Font = preload("res://assets/fonts/map/EBGaramond-Medium.ttf")
 var _text_fonts: Dictionary = {}
+var _wrapped_text_cache: Dictionary = {}
 var _instrument_item: RID
 var _instrument_material: ShaderMaterial
 var _instrument_rect := Rect2()
@@ -80,6 +83,9 @@ var _controller: GlobeController
 var _time: TimeControl
 var person_page := PersonView.new()
 var economy_page := EconomyPage.new()
+var economic_map: FormalEconomyMapView
+var economic_data_available: bool = false
+var economic_hint_available: bool = false
 var organization_page := OrganizationPage.new()
 var world_page := WorldPage.new()
 
@@ -121,6 +127,9 @@ func _ready() -> void:
 	_track_marker = _hud_canvas("HistoryTime",_draw_track_marker)
 	_person_canvas = _hud_canvas("PortraitCameo",_draw_person_contents)
 	_initialize_messages()
+	economic_map = FormalEconomyMapView.new()
+	economic_map.name = "EconomicMapObservation"
+	add_child(economic_map)
 	resized.connect(refresh)
 
 func _hud_canvas(node_name: String, paint: Callable) -> Control:
@@ -189,6 +198,8 @@ func set_view_polity(polity: Dictionary, flag: Texture2D) -> void:
 func show_feedback(message: String, action: String = "", source: String = "system", level: String = "info", feedback_id: String = "") -> void:
 	status_message = message
 	feedback_action = action
+	# Slot dialogs cover ordinary notices. Keep a failed read visible there.
+	if level=="error" and not _slot_mode.is_empty(): _slot_error = message
 	if message.is_empty():
 		if _notice_tween!=null: _notice_tween.kill()
 		_hide_notice()
@@ -207,7 +218,19 @@ func show_feedback(message: String, action: String = "", source: String = "syste
 	queue_redraw()
 
 func show_map_feedback(message: String) -> void:
-	show_feedback(message,"","map")
+	if message==_last_map_message: return
+	_last_map_message = message
+	var level := "error" if "失败" in message or "无法" in message or "未安装" in message else "info"
+	# Preparation/installation of the same map is a changing status, not a
+	# stream of new events. Preserve errors and all domain notifications.
+	if level!="error" and not _messages.is_empty() and str(_messages.back().source)=="map" and str(_messages.back().level)!="error":
+		_messages.back()["message"] = message
+		status_message = message
+		_message_list_dirty = true
+		if _messages_open: _rebuild_message_rows()
+		_present_notice()
+		return
+	show_feedback(message,"","map",level,"map_status")
 
 func refresh() -> void:
 	refresh_requested.emit()
@@ -216,7 +239,7 @@ func refresh() -> void:
 func remember_page() -> void:
 	var entry := {"page":current_page,"organization":organization_page.selected_id,
 		"organization_scope":organization_page.own_only,"organization_country":organization_page.country_id,"organization_page":organization_page.page,
-		"person_section":person_page.section,"account_page":person_page.account_page,"inventory_page":person_page.inventory_page,"living_page":person_page.living_page,"holding":person_page.selected_commodity_id,"living_record":person_page.selected_record_id,
+		"native_tab":person_page.native_tab,"selected_job":person_page.selected_job_id,"wage_page":person_page.native_wage_page,"person_section":person_page.section,"account_page":person_page.account_page,"inventory_page":person_page.inventory_page,"living_page":person_page.living_page,"holding":person_page.selected_commodity_id,"living_record":person_page.selected_record_id,
 		"world_index":world_page.index_open,"world_category":world_page.index_category,
 		"economy_polity":economy_page.polity_id,"economy_scope":economy_page.scope_label,"personal_market":economy_page.personal_market,"commodity_page":economy_page.commodity_page,"commodity":economy_page.selected_commodity_id,"seller_site":economy_page.selected_seller_site_id}
 	if _history.is_empty() or _history.back()!=entry: _history.append(entry)
@@ -242,6 +265,9 @@ func go_back() -> void:
 	organization_page.country_id = str(previous.get("organization_country",""))
 	organization_page.page = int(previous.organization_page)
 	person_page.section = str(previous.person_section)
+	person_page.native_tab = str(previous.get("native_tab","jobs"))
+	person_page.selected_job_id = str(previous.get("selected_job",""))
+	person_page.native_wage_page = int(previous.get("wage_page",0))
 	person_page.account_page = int(previous.account_page)
 	person_page.inventory_page = int(previous.inventory_page)
 	person_page.living_page = int(previous.living_page)
@@ -268,7 +294,8 @@ func _close_popups() -> void:
 	_set_messages_open(false)
 
 func map_selection_changed() -> void:
-	_context_open = true
+	_context_open = _controller!=null and (not _controller.selected_polity_id.is_empty() or not _controller.selected_place_id.is_empty())
+	if not _context_open: world_page.clear_selection()
 	world_page.index_open = false
 	world_page.selected_admin_id = ""
 	refresh()
@@ -327,21 +354,24 @@ func workspace_rect() -> Rect2:
 	# Keep existing pages clear of the quadrant and taller portrait at 960x640.
 	var width := minf(900,bounds.size.x-_time_rect().size.x-12)
 	var height := maxf(300,bounds.size.y-248)
+	if current_page in ["person","economy"] and size.y>=700: height += 84
 	if current_page=="organization":
 		height = minf(height,340.0 if not organization_page.selected_id.is_empty() else 190.0+ceil(float(mini(9,organization_page.record_count()))/3.0)*66.0)
 	elif current_page=="world" and world_page.index_open and world_page.index_category in ["home","help","layers"]:
-		height = minf(height,310)
+		var pilot_layers := world_page.index_category=="layers" and not LocalSpatialLoader.internal_landmark_sources().is_empty()
+		height = minf(height,360.0 if pilot_layers else 310.0)
 	var right := minf(bounds.get_center().x+width*0.5,_time_rect().position.x-12)
 	return Rect2(right-width,bounds.position.y+94,width,height)
 
 func _map_menu_rect() -> Rect2:
-	var height := 205.0+(84.0 if not _controller.administrative_map_active() else 0.0)
+	var height := 269.0+(104.0 if _controller.map_mode in ["economic","fulfillment","shortage"] else 0.0)
 	var dock := _dock_rect()
 	return Rect2(size.x*0.5-165,maxf(12.0,dock.position.y-height-10),330,height)
 
 func _system_rect() -> Rect2:
 	var time := _time_rect()
-	return Rect2(time.position+Vector2(-48,time.size.y+10),Vector2(time.size.x+36,332 if _settings_open else 252))
+	var extent := Vector2(minf(280.0,size.x-24.0),332.0 if _settings_open else 252.0)
+	return Rect2(Vector2(size.x-extent.x-12.0,clampf(time.end.y+10.0,12.0,maxf(12.0,size.y-extent.y-12.0))),extent)
 
 func _country_menu_rect() -> Rect2:
 	return Rect2(_polity_rect().position+Vector2(0,74),Vector2(_left_width(),200))
@@ -355,6 +385,7 @@ func _confirm_rect() -> Rect2:
 
 func map_occlusions() -> Array[Rect2]:
 	var result: Array[Rect2] = [_polity_rect(),_person_rect(),_time_rect(),_message_handle_rect(),_dock_rect()]
+	if economic_map!=null: result.append_array(economic_map.occlusions())
 	if _messages_open: result.append(Rect2(_message_drawer.position,_message_drawer.size))
 	if _notice_visible and _notice_canvas.visible: result.append(_notice_rect())
 	if not _confirmation.is_empty() or not _slot_mode.is_empty(): return [Rect2(Vector2.ZERO,size)]
@@ -382,7 +413,9 @@ func _draw() -> void:
 				else: world_page.draw_details(self,rect)
 			"administration": world_page.draw_administration(self,rect)
 		button(Rect2(rect.end.x-80,rect.position.y+12,64,26),"返回","back")
-	elif world_page.has_selection() and _context_open:
+		if current_page in ["person","economy"]:
+			button(Rect2(rect.end.x-178,rect.position.y+12,88,26),"返回地图","page:map",true,false,12)
+	elif world_page.has_selection() and _context_open and not economic_map.visible:
 		var rect := _context_rect()
 		world_page.draw_card(self,rect)
 		button(Rect2(rect.end.x-34,rect.position.y+8,24,24),"×","context:close")
@@ -392,6 +425,10 @@ func _draw() -> void:
 	_draw_history_track()
 	_draw_feedback()
 	_draw_map_dock()
+	if current_page=="map" and _controller.map_mode in ["fulfillment","shortage"]:
+		label(Vector2(124,size.y-22),"国家商品统计 · 已结算资料；无资料地区保留地理底图" if economic_data_available else "国家商品统计 · 尚无当前国家日结资料；保留地理底图",12,INK)
+	elif current_page=="map" and _controller.map_mode in ["political","geographic"] and _controller.economic_supplements_enabled and economic_hint_available:
+		label(Vector2(124,size.y-38),"经济提示：青点·获准站点  金点·已知供货  蓝点·国家统计；点击地点查看",11,INK)
 	if _navigation_open: _draw_navigation()
 	if _map_modes_open: _draw_map_menus()
 	if _settings_open: _draw_settings()
@@ -519,7 +556,7 @@ func _draw_feedback() -> void:
 	if modal: return
 	_hits.append({"rect":_message_handle_rect(),"action":"messages:toggle","enabled":true,"tooltip":"消息记录"})
 	if _messages_open: _blocks.append(Rect2(_message_drawer.position,_message_drawer.size))
-	if _notice_visible: _blocks.append(_notice_rect())
+	if _notice_visible and _notice_link.visible: _blocks.append(_notice_rect())
 	var handle_hover := _hover_action=="messages:toggle"
 	if _message_handle.get_meta("hovered",false)!=handle_hover:
 		_message_handle.set_meta("hovered",handle_hover)
@@ -651,13 +688,14 @@ func _set_messages_open(value: bool) -> void:
 	queue_redraw()
 
 func _native_feedback_at(point: Vector2) -> bool:
-	return (_message_drawer.visible and Rect2(_message_drawer.position,_message_drawer.size).has_point(point) and not _message_handle_rect().has_point(point)) or (_notice_canvas.visible and _notice_rect().has_point(point))
+	return (_message_drawer.visible and Rect2(_message_drawer.position,_message_drawer.size).has_point(point) and not _message_handle_rect().has_point(point)) or (_notice_canvas.visible and _notice_link.visible and _notice_rect().has_point(point))
 
 func _message_source_name(source: String) -> String:
 	return str({"system":"系统反馈","map":"地图反馈","domain":"状态提示"}.get(source,"操作反馈"))
 
 func _rebuild_message_rows() -> void:
 	if _message_rows==null: return
+	var previous_scroll := _message_scroll.scroll_vertical
 	for child: Node in _message_rows.get_children():
 		_message_rows.remove_child(child)
 		child.queue_free()
@@ -673,7 +711,7 @@ func _rebuild_message_rows() -> void:
 		var separator := HSeparator.new()
 		separator.modulate = Color(0.58,0.47,0.29,0.28)
 		row.add_child(separator)
-	_message_scroll.scroll_vertical = 0
+	_message_scroll.set_deferred("scroll_vertical",previous_scroll)
 	_message_list_dirty = false
 
 func _present_notice() -> void:
@@ -683,6 +721,7 @@ func _present_notice() -> void:
 	_notice_body.text = str(record.message)
 	_notice_canvas.tooltip_text = str(record.message)
 	_notice_link.visible = not str(record.action).is_empty()
+	_notice_canvas.mouse_filter = Control.MOUSE_FILTER_STOP if _notice_link.visible else Control.MOUSE_FILTER_IGNORE
 	_notice_body.size.y = 29.0 if _notice_link.visible else 46.0
 	_notice_visible = true
 	_notice_canvas.visible = true
@@ -691,7 +730,7 @@ func _present_notice() -> void:
 	# Visual time is independent of GameClock and continues while it is paused.
 	_notice_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_ignore_time_scale(true)
 	_notice_tween.tween_property(_notice_canvas,"modulate:a",1.0,0.2).set_trans(Tween.TRANS_SINE)
-	_notice_tween.tween_interval(6.0)
+	_notice_tween.tween_interval(2.5 if str(record.source)=="map" and str(record.level)!="error" else 6.0)
 	_notice_tween.tween_property(_notice_canvas,"modulate:a",0.0,0.8).set_trans(Tween.TRANS_SINE)
 	_notice_tween.tween_callback(_hide_notice)
 
@@ -715,15 +754,21 @@ func _draw_map_menus() -> void:
 	block_panel(rect)
 	label(rect.position+Vector2(12,24),"地图模式",15,INK)
 	var y := rect.position.y+38
-	button(Rect2(rect.position.x+12,y,rect.size.x-24,27),"行政地图","map_mode:political",true,_controller.administrative_map_active())
+	button(Rect2(rect.position.x+12,y,rect.size.x-24,27),"地理地图","map_mode:geographic",true,_controller.map_mode=="geographic")
 	y += 32
-	button(Rect2(rect.position.x+12,y,rect.size.x-24,27),"经济地图 ▾" if not _controller.administrative_map_active() else "经济地图 ▸","map:economy_mode",true,not _controller.administrative_map_active())
+	button(Rect2(rect.position.x+12,y,rect.size.x-24,27),"政治地图","map_mode:political",true,_controller.administrative_map_active())
 	y += 32
-	if not _controller.administrative_map_active():
+	var economic := _controller.map_mode in ["economic","fulfillment","shortage"]
+	button(Rect2(rect.position.x+12,y,rect.size.x-24,27),"经济地图","map:economy_mode",true,_controller.map_mode=="economic")
+	y += 32
+	if economic:
 		button(Rect2(rect.position.x+28,y,rect.size.x-40,26),"商品供应满足率","map_mode:fulfillment",true,_controller.map_mode=="fulfillment")
 		button(Rect2(rect.position.x+28,y+30,rect.size.x-40,26),"商品供应缺口","map_mode:shortage",true,_controller.map_mode=="shortage")
-		label(Vector2(rect.position.x+28,y+76),"国家统计范围",10,INK)
-		y += 84
+		label(Vector2(rect.position.x+28,y+76),"国家统计范围 · 无资料不着色",10,INK)
+		label(Vector2(rect.position.x+28,y+94),"满足率：棕→绿；缺口：绿→红",10,INK)
+		y += 104
+	button(Rect2(rect.position.x+12,y,rect.size.x-24,27),"经济补充提示 · "+("开启" if _controller.economic_supplements_enabled else "关闭"),"map:economic_supplements",true,_controller.economic_supplements_enabled)
+	y += 32
 	for text: String in ["人口地图 · 不可用","军事地图 · 不可用","资源与产出地图 · 不可用"]:
 		button(Rect2(rect.position.x+12,y,rect.size.x-24,23),text,"",false)
 		y += 26
@@ -741,8 +786,9 @@ func _draw_settings() -> void:
 	block_panel(rect)
 	label(rect.position+Vector2(12,27),"设置",15,INK)
 	label(rect.position+Vector2(12,61),"主音量 · %d%%" % int(round(float(_preferences.volume)*100)),13,INK)
-	button(Rect2(rect.position+Vector2(12,73),Vector2(110,28)),"− 10%","settings:quieter")
-	button(Rect2(rect.position+Vector2(134,73),Vector2(110,28)),"＋ 10%","settings:louder")
+	var volume_width := (rect.size.x-36.0)*0.5
+	button(Rect2(rect.position+Vector2(12,73),Vector2(volume_width,28)),"− 10%","settings:quieter")
+	button(Rect2(rect.position+Vector2(24+volume_width,73),Vector2(volume_width,28)),"＋ 10%","settings:louder")
 	if AudioServer.get_bus_index("BGM")>=0:
 		button(Rect2(rect.position+Vector2(12,112),Vector2(rect.size.x-24,29)),"BGM · "+("开启" if bool(_preferences.bgm) else "关闭"),"settings:bgm",true,bool(_preferences.bgm))
 	button(Rect2(rect.position+Vector2(12,154),Vector2(rect.size.x-24,29)),"全屏" if bool(_preferences.fullscreen) else "窗口","settings:fullscreen")
@@ -787,10 +833,21 @@ func _draw_slots() -> void:
 	var y := rect.position.y+58
 	for row: Dictionary in _slots:
 		if _slot_mode=="save" and int(row.slot)==0: continue
-		button(Rect2(rect.position.x+20,y,rect.size.x-40,36),str(row.name),"slot:choose:"+str(row.slot),not _saving and (_slot_mode=="save" or not bool(row.empty)))
+		button(Rect2(rect.position.x+20,y,rect.size.x-104,36),str(row.name),"slot:choose:"+str(row.slot),not _saving and (_slot_mode=="save" or not bool(row.empty)))
+		button(Rect2(rect.end.x-76,y,56,36),"资料","slot:info:"+str(row.slot),not _saving and not bool(row.empty))
 		label(Vector2(rect.position.x+26,y+55),FormalPersistence.summary_text(row),11,INK,rect.size.x-52)
 		y += 70
 	button(Rect2(rect.end.x-84,rect.end.y-39,64,26),"返回","slots:close",not _saving)
+
+func _show_slot_info(row: Dictionary) -> void:
+	var dialog := AcceptDialog.new()
+	dialog.title = str(row.name)+" · 存档资料"
+	dialog.dialog_text = FormalPersistence.details_text(row)
+	dialog.dialog_autowrap = true
+	add_child(dialog)
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	dialog.popup_centered(Vector2i(mini(620,int(size.x)-40),mini(440,int(size.y)-40)))
 
 func _draw_confirmation() -> void:
 	_quantity_used = false
@@ -804,6 +861,11 @@ func _draw_confirmation() -> void:
 	if not str(_confirmation.get("error","")).is_empty():
 		wrapped(rect.position+Vector2(20,61),str(_confirmation.error),rect.size.x-40,11,2)
 		offset = 52.0
+	if str(_confirmation.kind)=="employment":
+		wrapped(rect.position+Vector2(20,66),str(_confirmation.get("body","")),rect.size.x-40,13,3)
+		button(Rect2(rect.position+Vector2(20,126),Vector2(rect.size.x-40,30)),"确认提交","confirm:employment",true,false,13)
+		button(Rect2(rect.position+Vector2(20,168),Vector2(rect.size.x-40,28)),"取消","confirm:cancel",true,false,13)
+		return
 	var departure := str(_confirmation.kind)=="departure"
 	var verb := "返回" if str(_confirmation.get("target",""))=="menu" else "退出"
 	button(Rect2(rect.position+Vector2(20,66+offset),Vector2(rect.size.x-40,30)),("保存并"+verb) if departure else ("覆盖"+str(_confirmation.get("slot_name",""))),("departure:save" if departure else "slot:save:"+str(_confirmation.slot)),not _saving)
@@ -867,6 +929,8 @@ func _back_layer(open_system: bool = true) -> bool:
 		action_requested.emit("admin:list")
 	elif current_page=="world" and world_page.index_open and world_page.index_category!="home":
 		world_page.index_category = "home"
+	elif economic_map!=null and economic_map.visible:
+		economic_map.back_requested.emit()
 	elif current_page!="map": go_back()
 	elif world_page.has_selection() and _context_open: _context_open = false
 	elif open_system: _system_open = true
@@ -899,7 +963,7 @@ func _input(event: InputEvent) -> void:
 				# Outside dragging remains map input. A simple dismissal click does
 				# not replace or clear the current geographic selection.
 				_drawer_outside_press = mouse.position
-			if _native_feedback_at(mouse.position):
+			if _native_feedback_at(mouse.position) or _native_economic_at(mouse.position):
 				_controller.suspend_motion()
 				return
 			if _quantity_input.visible and _quantity_input.get_global_rect().has_point(mouse.position):
@@ -913,7 +977,7 @@ func _input(event: InputEvent) -> void:
 					return
 		# Let native scroll/buttons process GUI input inside these regions. The
 		# renderer's input_blocked callback excludes exactly the same bounds.
-		if _native_feedback_at(mouse.position):
+		if _native_feedback_at(mouse.position) or _native_economic_at(mouse.position):
 			_controller.suspend_motion()
 			return
 		if blocks_map(mouse.position):
@@ -963,7 +1027,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _activate(action: String) -> void:
-	if action in ["purchase","consume","consumption:daily"] and (action != "consumption:daily" or not person_page.daily_enabled) and _quantity_input.visible:
+	if (action in ["purchase","consume","consumption:daily"] or action.begins_with("native:business_buy:")) and (action != "consumption:daily" or not person_page.daily_enabled) and _quantity_input.visible:
 		var text := _quantity_input.get_line_edit().text.strip_edges()
 		if not text.is_valid_float():
 			show_feedback("数量必须是正数，并符合商品数量精度。")
@@ -992,7 +1056,10 @@ func _activate(action: String) -> void:
 		_system_open = false
 		_navigation_open = false
 	elif action == "map:economy_mode":
-		_controller.set_map_mode(_controller.economic_mode)
+		_map_modes_open = false
+		action_requested.emit("map_mode:economic")
+	elif action == "map:economic_supplements":
+		_controller.toggle_economic_supplements()
 	elif action == "country:market":
 		economy_page.polity_id = str(_view_polity.get("id",""))
 		economy_page.selected_commodity_id = ""
@@ -1023,6 +1090,8 @@ func _activate(action: String) -> void:
 	elif action == "confirm:cancel":
 		close_confirmation()
 		action_requested.emit("departure:cancel")
+	elif action.begins_with("slot:info:"):
+		_show_slot_info(_slots[int(action.trim_prefix("slot:info:"))])
 	elif action.begins_with("slot:choose:"):
 		var slot := int(action.trim_prefix("slot:choose:"))
 		if _slot_mode=="load": action_requested.emit("slot:load:"+str(slot))
@@ -1067,14 +1136,30 @@ func _activate(action: String) -> void:
 		person_page.business_mode=not person_page.business_mode
 		person_page.capital_mode=false
 		refresh()
+	elif action=="person:business_finance":
+		person_page.business_finance_mode=not person_page.business_finance_mode
+	elif action in ["person:business_procurement","person:business_operations"]:
+		person_page.business_procurement_mode=action=="person:business_procurement"
+		refresh()
+	elif action.begins_with("person:business_credit_"):
+		person_page.business_finance_page=maxi(0,person_page.business_finance_page+(-1 if action.ends_with("previous") else 1))
+	elif action=="person:business_reset":
+		person_page.business_firm_id=""
+		person_page.business_site_id=""
+		person_page.business_firm_index=0
+		person_page.business_site_index=0
+		refresh()
 	elif action.begins_with("person:business_"):
 		var change := -1 if action.ends_with("previous") else 1
 		if action.contains("firm_"):
+			person_page.business_firm_id=""
+			person_page.business_site_id=""
 			person_page.business_firm_index=maxi(0,person_page.business_firm_index+change)
 			person_page.business_site_index=0
 			person_page.business_offer_page=0
 			person_page.business_activity_page=0
 		elif action.contains("site_"):
+			person_page.business_site_id=""
 			person_page.business_site_index=maxi(0,person_page.business_site_index+change)
 			person_page.business_offer_page=0
 			person_page.business_activity_page=0
@@ -1087,6 +1172,41 @@ func _activate(action: String) -> void:
 		refresh()
 	elif action in ["person:capital_previous", "person:capital_next"]:
 		person_page.capital_page = maxi(0, person_page.capital_page+(-1 if action=="person:capital_previous" else 1))
+		refresh()
+	elif action.begins_with("person:living_tab:"):
+		person_page.native_tab=action.trim_prefix("person:living_tab:")
+		person_page.native_scope_expanded=false
+		if person_page.native_tab!="other":
+			person_page.business_mode=false
+			person_page.lease_mode=false
+			person_page.resident_services_mode=false
+		refresh()
+	elif action.begins_with("person:job_select:"):
+		person_page.selected_job_id=action.trim_prefix("person:job_select:")
+		person_page.native_tab="job_detail"
+		refresh()
+	elif action=="person:job_diagnostics":
+		person_page.native_diagnostics=not person_page.native_diagnostics
+	elif action.begins_with("person:job_request:"):
+		var id:=action.trim_prefix("person:job_request:")
+		var job:=person_page.job_row(id)
+		if not person_page.can_apply(job):
+			show_feedback(person_page.job_reason(job))
+		else:
+			person_page.selected_job_id=id
+			_confirmation={"kind":"employment","title":"申请"+EconomicText.firm(job["employer"])+"工作？","body":"完成每期%d小时后应计%d %s；日结后延迟%d日到期。申请不等于已工作或已领薪。" % [int(job["hours"]),int(job["hours"])*int(job["wage_per_hour"]),EconomicText.currency(job["denomination"]),int(job["wage_delay"])],"action":"native:apply:"+id+"|"+str(job.get("job_quote_id",""))}
+	elif action=="person:leave_request":
+		var contract:=person_page._personal.get("employment",{}) as Dictionary
+		if not contract.is_empty() and not contract.get("end_pending",false):
+			_confirmation={"kind":"employment","title":"申请结束当前劳动合同？","body":"下次正式日界生效；此前仍占用岗位。已形成工资和已接受责任保留，不由其他雇主代偿。","action":"native:leave_job"}
+	elif action=="confirm:employment":
+		if _confirmation.get("kind")=="employment":
+			var request:=str(_confirmation.get("action",""))
+			_confirmation.clear()
+			_hits.clear()
+			action_requested.emit(request)
+	elif action in ["person:wage_previous","person:wage_next"]:
+		person_page.native_wage_page=maxi(0,person_page.native_wage_page+(-1 if action=="person:wage_previous" else 1))
 		refresh()
 	elif action == "person:native_scope":
 		person_page.native_scope_expanded = not person_page.native_scope_expanded
@@ -1179,6 +1299,9 @@ func _hit_contains(hit: Dictionary, point: Vector2) -> bool:
 	return true
 
 func blocks_map(point: Vector2) -> bool:
+	if economic_map!=null:
+		for rect: Rect2 in economic_map.occlusions():
+			if rect.has_point(point): return true
 	if _message_handle!=null and _message_handle.visible and _message_handle_rect().has_point(point): return true
 	if _message_drawer!=null and _native_feedback_at(point): return true
 	if _notice_canvas!=null and _notice_canvas.visible and _notice_rect().has_point(point): return true
@@ -1186,6 +1309,12 @@ func blocks_map(point: Vector2) -> bool:
 		if rect.has_point(point): return true
 	for hit: Dictionary in _hits:
 		if _hit_contains(hit,point): return true
+	return false
+
+func _native_economic_at(point: Vector2) -> bool:
+	if economic_map==null: return false
+	for rect: Rect2 in economic_map.occlusions():
+		if rect.has_point(point): return true
 	return false
 
 func date_text() -> String:
@@ -1206,24 +1335,29 @@ func label(point: Vector2, text: String, font_size: int = 12, color: Color = Col
 	UIDrawing.label(self,_text_fonts[text] as Font,point,text,font_size,color,width)
 
 func wrapped(point: Vector2, text: String, width: float, font_size: int = 12, max_lines: int = 4) -> void:
-	var line := ""
-	var row := 0
-	var font := GlobeLabels.font_for_name(_font,text)
-	for index: int in range(text.length()):
-		var character := text.substr(index,1)
-		if character == "\n" or (not line.is_empty() and font.get_string_size(line+character,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x > width):
-			label(point+Vector2(0,row*20),line,font_size,Color(0.82,0.86,0.79),width)
-			row += 1
-			line = ""
-			if row >= max_lines: return
-		if character != "\n": line += character
-	if not line.is_empty(): label(point+Vector2(0,row*20),line,font_size,Color(0.82,0.86,0.79),width)
+	var key := str(width)+"|"+str(font_size)+"|"+str(max_lines)+"|"+text
+	if not _wrapped_text_cache.has(key):
+		var lines: Array[String] = []
+		var line := ""
+		var font := GlobeLabels.font_for_name(_font,text)
+		for index: int in range(text.length()):
+			var character := text.substr(index,1)
+			if character=="\n" or (not line.is_empty() and font.get_string_size(line+character,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>width):
+				lines.append(line)
+				line=""
+				if lines.size()>=max_lines: break
+			if character!="\n": line+=character
+		if not line.is_empty() and lines.size()<max_lines: lines.append(line)
+		if _wrapped_text_cache.size()>=256: _wrapped_text_cache.clear()
+		_wrapped_text_cache[key]=lines
+	var rows:=_wrapped_text_cache[key] as Array
+	for row: int in rows.size(): label(point+Vector2(0,row*20),rows[row],font_size,Color(0.82,0.86,0.79),width)
 
-func button(rect: Rect2, text: String, action: String, enabled: bool = true, selected: bool = false) -> void:
+func button(rect: Rect2, text: String, action: String, enabled: bool = true, selected: bool = false, font_size: int = 11) -> void:
 	_hits.append({"rect":rect,"action":action,"enabled":enabled})
 	var hovered := enabled and _hover_action == action
 	panel(rect,Color(0.13,0.14,0.10,0.96) if selected else Color(0.07,0.10,0.08,0.96) if hovered else Color(0.035,0.052,0.043,0.88),Color(0.76,0.65,0.43,0.7) if selected or hovered else PANEL_BORDER)
-	UIDrawing.label(self,_button_font,rect.position+Vector2(9,minf(20,rect.size.y-4)),text,11,INK if enabled else Color(0.42,0.48,0.44),rect.size.x-18)
+	UIDrawing.label(self,_button_font,rect.position+Vector2(9,minf(20,rect.size.y-4)),text,font_size,INK if enabled else Color(0.42,0.48,0.44),rect.size.x-18)
 
 func heading(rect: Rect2, title: String, subtitle: String) -> void:
 	label(rect.position+Vector2(20,38),title,21,Color(0.96,0.88,0.67),rect.size.x-110)

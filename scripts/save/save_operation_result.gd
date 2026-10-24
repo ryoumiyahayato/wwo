@@ -6,6 +6,7 @@ var error_code: String = ""
 var message: String = ""
 var path: String = ""
 var snapshot: Dictionary = {}
+var save_metadata: Dictionary = {}
 
 
 static func ok(result_path: String, data: Dictionary = {}) -> SaveOperationResult:

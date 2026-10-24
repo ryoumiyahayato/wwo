@@ -1,5 +1,7 @@
 # 真实世界地图数据与 Godot 2D 渲染
 
+> 本文保存早期设计，不是当前运行路径说明。当前 WORLD 为球体观察，REGION 为等距方位投影，LOCAL 复用 REGION 的有限三维目标；不按本文恢复 Robinson 或旧网格。现行数据职责、用途与尺度边界见 [R26 地图语义契约](map/MAP_SEMANTIC_CONTRACT_R26.md)，运行组件见 [当前架构](ARCHITECTURE.md)。R27已将物理陆地与政治底网分离，现行资源和合成路径见 [R27独立物理基础](map/R27_INDEPENDENT_PHYSICAL_FOUNDATION.md)。
+
 状态：设计冻结 v1。正式方向是 1900 年真实世界地图；当前 10×8 架空网格只保留为技术历史，不继续扩充或美化。
 
 ## 1. 首版世界范围

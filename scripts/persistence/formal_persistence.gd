@@ -8,6 +8,7 @@ const ORGANIZATION_COMPOSITION_STATE_SCHEMA_ID: String = "formal_organization_co
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
 
 var error: String = ""
+var _save_metadata: Dictionary = {}
 var _economy_r1: EconomyR1Slice
 var _step_ref: WeakRef
 var _step: SimulationStep:
@@ -195,7 +196,7 @@ func _restore_candidate_state(r: WorldBuildResult, state: Dictionary) -> bool:
 	if not r.world.population_state.restore(state["population"]):
 		r.error = "SAVE CANDIDATE VALIDATION FAILED: " + r.world.population_state.error
 		return false
-	if not r.world.person_overlay.restore(state["persons"]) or not _bind_restored_person_references(r) or not r.world.player_state.restore(state["player"]):
+	if not r.world.person_overlay.restore(state["persons"]) or not _bind_restored_person_references(r,state) or not r.world.player_state.restore(state["player"]):
 		r.error = "SAVE CANDIDATE VALIDATION FAILED: Invalid persons/player snapshot or organization reference catalog"
 		return false
 	if state.has("economy_native"):
@@ -269,7 +270,7 @@ func _restore_candidate_state(r: WorldBuildResult, state: Dictionary) -> bool:
 		r.error = "Host travel restore failed: "+r.world.person_travel.error
 		return false
 	if r.world.economy_r1 != null and not r.world.economy_r1.validate_transport_references():
-		r.error = "Shared transport candidate references failed: "+r.world.economy_r1.error
+		r.error = "Native host-reference validation failed: "+r.world.economy_r1.error
 		return false
 	if not state.has("person_travel"):
 		if r.world.economy_r1 != null and r.world.economy_r1.has_person_travel_responsibilities():
@@ -287,7 +288,7 @@ func _restore_candidate_state(r: WorldBuildResult, state: Dictionary) -> bool:
 		return false
 	return true
 
-func _bind_restored_person_references(r: WorldBuildResult) -> bool:
+func _bind_restored_person_references(r: WorldBuildResult, state: Dictionary) -> bool:
 	# Additional named population does not implicitly enlarge Organization's
 	# configured reference scope. Every existing Organization reference must resolve.
 	if not r.explicit_organization_reference_injection:
@@ -297,6 +298,27 @@ func _bind_restored_person_references(r: WorldBuildResult) -> bool:
 		var origin := str((person.provenance as Dictionary).get("opening_place_id",WorldBootstrap.DEFAULT_FORMAL_PERSON_PLACE_ID))
 		if not r.world.spatial_catalog.has_place(origin): return false
 		r.organization_place_reference_ids = [origin]
+		var native: Variant=state.get("economy_native",{})
+		var configuration: Variant=native.get("config",{}) if native is Dictionary else {}
+		if configuration is Dictionary and configuration.has("opening_residents"):
+			if not EconomySliceConfig.valid(configuration): return false
+			for resident: Dictionary in configuration["opening_residents"]:
+				var identity := r.world.person_overlay.person(resident["person_id"])
+				if identity.get("claim_id") != resident["claim_id"] or identity.get("provenance",{}).get("opening_place_id") != resident["place_id"] or identity.get("basic_demographic_identity",{}).get("opening_cash_policy") != "ZERO_CASH_GENERATED_RESIDENT": return false
+				if resident["person_id"] not in r.organization_person_reference_ids: r.organization_person_reference_ids.append(resident["person_id"])
+			r.organization_person_reference_ids.sort()
+		if configuration is Dictionary and configuration.get("capital_resale",{}) is Dictionary and configuration.get("capital_resale",{}).has("authority_places"):
+			if not EconomySliceConfig.valid(configuration): return false
+			for capital_place: String in configuration["capital_resale"]["authority_places"]:
+				if not r.world.spatial_catalog.has_place(capital_place): return false
+				if capital_place not in r.organization_place_reference_ids: r.organization_place_reference_ids.append(capital_place)
+			r.organization_place_reference_ids.sort()
+		if configuration is Dictionary and configuration.has("corporate_decisions"):
+			if not EconomySliceConfig.valid(configuration):return false
+			var manager: String=configuration["corporate_decisions"]["controller"]
+			var manager_person: Dictionary=r.world.person_overlay.person(manager)
+			if manager_person.get("basic_demographic_identity",{}).get("opening_cash_policy")!="ZERO_CASH_DEVELOPMENT_CORPORATE_MANAGER":return false
+			if manager not in r.organization_person_reference_ids:r.organization_person_reference_ids.append(manager);r.organization_person_reference_ids.sort()
 	for person_id: String in r.organization_person_reference_ids:
 		if not r.world.person_overlay.has_person(person_id):
 			return false
@@ -329,7 +351,7 @@ func save_to_user(slot: int = 1) -> SaveOperationResult:
 		_pending_slot = slot
 		return SaveOperationResult.fail("queued", "保存已排队，等待正式世界完成当前推进。", path)
 	var snapshot := snapshot()
-	var persistence_document := FormalWorldPersistenceDocument.encode(snapshot)
+	var persistence_document := FormalWorldPersistenceDocument.encode(snapshot,_save_metadata)
 	if persistence_document.is_empty():
 		return SaveOperationResult.fail(
 			"encode_error",
@@ -340,6 +362,10 @@ func save_to_user(slot: int = 1) -> SaveOperationResult:
 	var politics := RuntimePoliticalEntityView.new(_political_registry.snapshot())
 	var polity := CurrentWorldPoliticalProjection.polity_summary(politics.runtime_id_for_source(str(player.get("population_territory_id",""))),politics,HistoricalPoliticalEvidenceView.new(_historical_evidence.read_only_snapshot()))
 	persistence_document["ui_summary"] = {"game_date":_game_clock.current_date(),"saved_at_unix":int(Time.get_unix_time_from_system()),"person_name":str(player.get("name_zh",player.get("name","姓名未记录"))),"country_name":str(polity.get("name_zh",""))}
+	# Display provenance for newly written saves only. This is not a format
+	# compatibility key and does not rewrite or migrate any existing file.
+	(persistence_document.ui_summary as Dictionary)["application_version"] = str(ProjectSettings.get_setting("application/config/version",""))
+	(persistence_document.ui_summary as Dictionary)["build_label"] = str(ProjectSettings.get_setting("application/config/build_label",""))
 	var write_error := AtomicJsonFileStore.write_verified(
 		path,
 		persistence_document,
@@ -353,6 +379,8 @@ func save_to_user(slot: int = 1) -> SaveOperationResult:
 			path
 		)
 	var result := SaveOperationResult.ok(path, snapshot)
+	_save_metadata = (persistence_document.save_metadata as Dictionary).duplicate(true)
+	result.save_metadata = _save_metadata.duplicate(true)
 	result.message = "正式世界已保存。"
 	return result
 
@@ -373,12 +401,12 @@ func load_from_user(slot: int = 1) -> WorldBuildResult:
 		empty.operation = SaveOperationResult.fail("not_found",empty.error,slot_path(slot))
 		return empty
 	var primary := _restore_snapshot_file(path)
-	if primary.success or primary.operation.error_code == "save_format_version_mismatch":
+	if primary.success or primary.operation.error_code in ["save_format_version_mismatch","save_migration_required"]:
 		if primary.success:
 			primary.operation.message = "正式世界存档已恢复。"
 		return primary
 	var backup := _restore_snapshot_file(path + AtomicJsonFileStore.BACKUP_SUFFIX)
-	if backup.success or backup.operation.error_code == "save_format_version_mismatch":
+	if backup.success or backup.operation.error_code in ["save_format_version_mismatch","save_migration_required"]:
 		if backup.success:
 			backup.operation.path = path
 			backup.operation.message = "主存档不可用，已读取安全备份"
@@ -406,24 +434,98 @@ static func slot_summaries() -> Array[Dictionary]:
 	var rows: Array[Dictionary] = []
 	for slot: int in range(5):
 		var path := existing_slot_path(slot)
-		var row := {"slot":slot,"name":slot_name(slot),"empty":path.is_empty(),"summary":{},"legacy":path==SAVE_PATH}
+		var row := {"slot":slot,"name":slot_name(slot),"empty":path.is_empty(),"summary":{},"legacy":path==SAVE_PATH,"can_read":false,"save_metadata":{}}
 		if not path.is_empty():
 			var actual := path if FileAccess.file_exists(path) else path+AtomicJsonFileStore.BACKUP_SUFFIX
-			var value: Variant = JSON.parse_string(FileAccess.get_file_as_string(actual))
-			if value is Dictionary: row.summary = (value as Dictionary).get("ui_summary",{})
+			var file := FileAccess.open(actual,FileAccess.READ)
+			var parser := JSON.new()
+			if file==null:
+				row["recognition"] = "存档读取失败"
+				row["read_reason"] = error_string(FileAccess.get_open_error())
+			else:
+				var parsed := parser.parse(file.get_as_text())
+				file.close()
+				if parsed!=OK or not parser.data is Dictionary:
+					row["recognition"] = "存档损坏"
+					row["read_reason"] = "JSON不完整或根节点无效；未改写文件。"
+				else:
+					var document := parser.data as Dictionary
+					var summary: Variant = document.get("ui_summary",{})
+					row.summary = summary if summary is Dictionary else {}
+					row["save_format"] = str(document.get("persistence_format","未记录"))
+					row["snapshot_schema"] = str(document.get("snapshot_schema_id",document.get("schema_id","未记录")))
+					var decoded := FormalWorldPersistenceDocument.decode(document)
+					row.can_read = bool(decoded.success)
+					row.save_metadata = FormalWorldPersistenceDocument.metadata(document)
+					if row.can_read:
+						row["recognition"] = _version_status(row.save_metadata as Dictionary)
+						row["read_reason"] = "格式与载荷检查通过，可以读取；载入时仍会校验完整世界状态。"
+					elif str(decoded.get("error_code",""))=="save_migration_required":
+						row["recognition"] = "旧版存档，需要转换"
+						row["read_reason"] = str(decoded.error)
+					else:
+						row["recognition"] = "版本不兼容" if str(decoded.get("error_code",""))=="save_format_version_mismatch" else "存档损坏"
+						row["read_reason"] = str(decoded.error)
 			row["saved_at_unix"] = FileAccess.get_modified_time(actual)
 		rows.append(row)
 	return rows
 
+static func _version_status(metadata: Dictionary) -> String:
+	var value: Variant = metadata.get("created_game_version")
+	if not value is Dictionary or _version_name(value as Dictionary)=="未知": return "旧版存档：创建版本未知"
+	var created := value as Dictionary
+	var current := FormalWorldPersistenceDocument.current_game_version()
+	if not str(created.get("build_id","")).is_empty() and created.build_id==current.build_id: return "当前版本"
+	if created.get("build_label","")==current.build_label and created.get("application_version","")==current.application_version: return "当前版本"
+	var sequence := int(created.get("build_sequence",0))
+	if sequence>int(current.build_sequence): return "较新版本存档，格式兼容"
+	return "旧版存档，可以读取" if sequence>0 else "其他版本存档，格式兼容"
+
+static func _version_name(version: Dictionary) -> String:
+	var label := str(version.get("build_label",""))
+	if not label.is_empty(): return label
+	var application := str(version.get("application_version",""))
+	return application if not application.is_empty() else "未知"
+
+static func _time_text(value: Variant) -> String:
+	if typeof(value) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(value)) or float(value)<=0.0: return "未知（旧档未记录）"
+	var time := Time.get_datetime_dict_from_unix_time(int(value)+int(Time.get_time_zone_from_system().bias)*60)
+	return "%04d-%02d-%02d %02d:%02d:%02d" % [time.year,time.month,time.day,time.hour,time.minute,time.second]
+
+static func details_text(row: Dictionary) -> String:
+	if bool(row.get("empty",true)): return "空存档"
+	var data := row.get("save_metadata",{}) as Dictionary
+	var creator: Variant = data.get("created_game_version")
+	var writer: Variant = data.get("last_saved_game_version")
+	var created := _version_name(creator as Dictionary) if creator is Dictionary else "未知（旧版存档：创建版本未知）"
+	var saved := _version_name(writer as Dictionary) if writer is Dictionary else "未知（旧档未记录）"
+	var format := str(row.get("save_format","未记录"))
+	var schema := str(row.get("snapshot_schema","未记录"))
+	var lines: Array[String] = [str(row.get("recognition","存档读取失败")),str(row.get("read_reason","")),
+		"创建游戏版本："+created,"最后保存版本："+saved,
+		"存档格式："+("精确存档第1版" if format==FormalWorldPersistenceDocument.FORMAT_ID else format),
+		"世界数据版本："+("第15版" if schema==SCHEMA_ID else schema),
+		"创建时间："+_time_text(data.get("created_at_unix")),"最后保存时间："+_time_text(data.get("last_saved_at_unix")),
+		"原始格式："+str(data.get("original_persistence_format",format))+" / "+str(data.get("original_snapshot_schema_id",schema))]
+	var raw_history: Variant = data.get("migration_history",[])
+	var history: Array = raw_history if raw_history is Array else []
+	lines.append("格式迁移：无记录；本版不自动转换存档。" if history.is_empty() else "格式迁移记录："+JSON.stringify(history))
+	return "\n".join(lines)
+
 static func summary_text(row: Dictionary) -> String:
 	if bool(row.get("empty",true)): return "空存档"
 	var info := row.get("summary",{}) as Dictionary
-	var parts: Array[String] = []
-	var date := info.get("game_date",{}) as Dictionary
-	if not date.is_empty(): parts.append("%04d-%02d-%02d %02d:%02d" % [date.year,date.month,date.day,date.hour,date.minute])
+	var parts: Array[String] = [str(row.get("recognition","存档读取失败"))]
+	var date_value: Variant = info.get("game_date",{})
+	var date: Dictionary = date_value if date_value is Dictionary else {}
+	var valid_date := date.has_all(["year","month","day","hour","minute"])
+	for field: String in ["year","month","day","hour","minute"]:
+		if typeof(date.get(field)) not in [TYPE_INT,TYPE_FLOAT]: valid_date = false
+	if valid_date: parts.append("%04d-%02d-%02d %02d:%02d" % [int(date.year),int(date.month),int(date.day),int(date.hour),int(date.minute)])
 	for key: String in ["person_name","country_name"]:
 		if not str(info.get(key,"")).is_empty(): parts.append(str(info[key]))
-	var unix := int(info.get("saved_at_unix",row.get("saved_at_unix",0)))
+	var raw_time: Variant = info.get("saved_at_unix",row.get("saved_at_unix",0))
+	var unix := int(raw_time) if typeof(raw_time) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(raw_time)) else 0
 	if unix>0:
 		var saved := Time.get_datetime_dict_from_unix_time(unix+int(Time.get_time_zone_from_system().bias)*60)
 		parts.append("保存于 %04d-%02d-%02d %02d:%02d" % [saved.year,saved.month,saved.day,saved.hour,saved.minute])
@@ -438,6 +540,7 @@ func _restore_snapshot_file(path: String) -> WorldBuildResult:
 		r.error = loaded.message
 		return r
 	r = restore_candidate(loaded.snapshot)
+	if r.success: r.persistence._save_metadata = loaded.save_metadata.duplicate(true)
 	r.operation = loaded if r.success else SaveOperationResult.fail("restore_error", r.error, path)
 	return r
 
@@ -483,7 +586,9 @@ func _read_snapshot_file(path: String) -> SaveOperationResult:
 			"正式世界持久化载荷不是快照对象",
 			path
 		)
-	return SaveOperationResult.ok(path, snapshot as Dictionary)
+	var result := SaveOperationResult.ok(path, snapshot as Dictionary)
+	result.save_metadata = (decoded.save_metadata as Dictionary).duplicate(true)
+	return result
 
 func bind_step(step: SimulationStep) -> void:
 	_step = step

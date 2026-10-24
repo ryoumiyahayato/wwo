@@ -1,0 +1,374 @@
+{
+  "source_registry": {
+    "schema_id": "historical_source_registry_v2",
+    "sources": [
+      {
+        "source_id": "canary_r45_modern_surface",
+        "title": "Spain modern geographic DSM and observed cover reference",
+        "publisher": "Copernicus / ESA / Airbus; ESA WorldCover consortium",
+        "version": "GLO90-COG+WorldCover2021-v200:R45",
+        "license": "Copernicus-DEM-GLO90+CC-BY-4.0",
+        "locator": "https://copernicus-dem-90m.s3.amazonaws.com/readme.html",
+        "access_metadata": {
+          "horizontal_crs": "EPSG:4326 WGS84-G1150; actual PixelIsPoint affine",
+          "vertical_datum": "EGM2008 EPSG:3855 orthometric metres",
+          "dem_type": "DSM, not bare-earth DTM",
+          "dem_epoch": "TanDEM-X 2011-2015; older gap-fill possible",
+          "cover_epoch": "ESA WorldCover 2021 v200",
+          "sampling": "Native GLO90 3-arcsecond latitude, variable longitude; averaged 6-arcsecond extraction; 1/512-degree display. Cover 16x categorical overview.",
+          "bounds_lon_lat": [
+            -20.0,
+            26.0,
+            -12.0,
+            30.0
+          ],
+          "historical_applicability": "Modern reference, no 1900 land-use, ownership, production or military facts.",
+          "france_shared_cores": [],
+          "licence_url": "https://dataspace.copernicus.eu/sites/default/files/media/files/2025-06/copernicus_contributing_mission_data_access_v2_cop_dem_licenses.pdf",
+          "cover_source": "https://esa-worldcover.org/en/data-access",
+          "cover_doi": "https://doi.org/10.5281/zenodo.7254221"
+        }
+      }
+    ]
+  },
+  "evidence_catalog": {
+    "schema_id": "historical_fact_evidence_catalog_v2",
+    "facts": [
+      {
+        "fact_id": "physical_relief:canary_r45",
+        "domain": "physical_reference_content",
+        "subject_id": "physical_relief:canary_r45",
+        "value": {
+          "status": "PHYSICAL_REFERENCE",
+          "assets": [
+            {
+              "id": "physical_relief:canary_r45_base",
+              "path": "res://assets/maps/relief/canary_r45_base.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 512,
+              "height": 256,
+              "decoded_bytes": 699052,
+              "bytes": 39178,
+              "bounds_lon_lat": [
+                -20.0,
+                26.0,
+                -12.0,
+                30.0
+              ],
+              "surface_role": "base",
+              "core_inset_degrees": 0,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4. Geographic feather separate.",
+              "display_spacing_degrees": [
+                0.015625,
+                0.015625
+              ],
+              "display_spacing_m_approx": [
+                1534.0524623116935,
+                1737.421875
+              ],
+              "surface_group": "canary_r45",
+              "surface_encoding": 4,
+              "surface_feather_degrees": [
+                0.6,
+                0.6,
+                0.6,
+                0.4
+              ]
+            },
+            {
+              "id": "physical_relief:canary_r45_26_-20",
+              "path": "res://assets/maps/relief/canary_r45_26_-20.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 37191,
+              "bounds_lon_lat": [
+                -20.0625,
+                25.9375,
+                -17.9375,
+                28.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4. Geographic feather separate.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                193.50677823657338,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                -20,
+                26,
+                -18,
+                28
+              ],
+              "surface_group": "canary_r45",
+              "surface_encoding": 4
+            },
+            {
+              "id": "physical_relief:canary_r45_26_-18",
+              "path": "res://assets/maps/relief/canary_r45_26_-18.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 48786,
+              "bounds_lon_lat": [
+                -18.0625,
+                25.9375,
+                -15.9375,
+                28.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4. Geographic feather separate.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                193.50677823657338,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                -18,
+                26,
+                -16,
+                28
+              ],
+              "surface_group": "canary_r45",
+              "surface_encoding": 4
+            },
+            {
+              "id": "physical_relief:canary_r45_26_-16",
+              "path": "res://assets/maps/relief/canary_r45_26_-16.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 198304,
+              "bounds_lon_lat": [
+                -16.0625,
+                25.9375,
+                -13.9375,
+                28.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4. Geographic feather separate.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                193.50677823657338,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                -16,
+                26,
+                -14,
+                28
+              ],
+              "surface_group": "canary_r45",
+              "surface_encoding": 4
+            },
+            {
+              "id": "physical_relief:canary_r45_26_-14",
+              "path": "res://assets/maps/relief/canary_r45_26_-14.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 790692,
+              "bounds_lon_lat": [
+                -14.0625,
+                25.9375,
+                -11.9375,
+                28.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4. Geographic feather separate.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                193.50677823657338,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                -14,
+                26,
+                -12,
+                28
+              ],
+              "surface_group": "canary_r45",
+              "surface_encoding": 4
+            },
+            {
+              "id": "physical_relief:canary_r45_28_-20",
+              "path": "res://assets/maps/relief/canary_r45_28_-20.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 23907,
+              "bounds_lon_lat": [
+                -20.0625,
+                27.9375,
+                -17.9375,
+                30.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4. Geographic feather separate.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                189.94792643626,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                -20,
+                28,
+                -18,
+                30
+              ],
+              "surface_group": "canary_r45",
+              "surface_encoding": 4
+            },
+            {
+              "id": "physical_relief:canary_r45_28_-18",
+              "path": "res://assets/maps/relief/canary_r45_28_-18.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 342266,
+              "bounds_lon_lat": [
+                -18.0625,
+                27.9375,
+                -15.9375,
+                30.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4. Geographic feather separate.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                189.94792643626,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                -18,
+                28,
+                -16,
+                30
+              ],
+              "surface_group": "canary_r45",
+              "surface_encoding": 4
+            },
+            {
+              "id": "physical_relief:canary_r45_28_-16",
+              "path": "res://assets/maps/relief/canary_r45_28_-16.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 195449,
+              "bounds_lon_lat": [
+                -16.0625,
+                27.9375,
+                -13.9375,
+                30.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4. Geographic feather separate.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                189.94792643626,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                -16,
+                28,
+                -14,
+                30
+              ],
+              "surface_group": "canary_r45",
+              "surface_encoding": 4
+            },
+            {
+              "id": "physical_relief:canary_r45_28_-14",
+              "path": "res://assets/maps/relief/canary_r45_28_-14.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 202705,
+              "bounds_lon_lat": [
+                -14.0625,
+                27.9375,
+                -11.9375,
+                30.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4. Geographic feather separate.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                189.94792643626,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                -14,
+                28,
+                -12,
+                30
+              ],
+              "surface_group": "canary_r45",
+              "surface_encoding": 4
+            }
+          ]
+        },
+        "unit": "presentation_relief",
+        "source_id": "canary_r45_modern_surface",
+        "source_version": "GLO90-COG+WorldCover2021-v200:R45",
+        "source_locator": "https://copernicus-dem-90m.s3.amazonaws.com/readme.html",
+        "observation_period": {
+          "from": "2011-01-01",
+          "to": "2021-12-31"
+        },
+        "spatial_scope": {
+          "kind": "geographic_reference",
+          "id": "canary_r45_finite_collars"
+        },
+        "methodology": "Existing R42 DEM resampling, metric hillshade, R43 independent observed-class tones, shared native mip packer. No political height clipping.",
+        "confidence": 0.8,
+        "lower_bound": null,
+        "upper_bound": null,
+        "license": "Copernicus-DEM-GLO90+CC-BY-4.0",
+        "review_status": "EVIDENCE_LINKED",
+        "generator": "tools/map/build_spain_surface_r45.py"
+      }
+    ]
+  }
+}

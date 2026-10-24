@@ -10,6 +10,7 @@ var resolved_visuals: Dictionary = {}
 var visual_textures: Dictionary = {}
 var boundary_features: Dictionary = {}
 var display_faces_by_feature: Dictionary = {}
+var _query_parts: Array[Dictionary] = []
 var region_frames: Dictionary = {}
 var display_accounting: Dictionary = {}
 var display_date: String = ""
@@ -21,6 +22,13 @@ var _display_document: Dictionary = {}
 var _bound_document: Dictionary = {}
 var _bound_owners: Dictionary = {}
 var _has_bound_geometry: bool = false
+
+func display_active(owner: String, geometry_period: Dictionary) -> bool:
+	# Dated display authority and dated source polygon are separate evidence.
+	# Only explicit display-only records may supply the predecessor interval.
+	var identity := records.get(owner,{}) as Dictionary
+	var period := identity if bool(identity.get("display_only",false)) else geometry_period
+	return period.is_empty() or display_date>=str(period.get("valid_from","")) and display_date<str(period.get("valid_to","9999-12-31"))
 
 func refresh(registry: RuntimePoliticalEntityView, evidence: HistoricalPoliticalEvidenceView, economy: FormalWorldEconomyView, place_records: Array[Dictionary], _time: Dictionary, geometry: MapGeometryContent, display: ResolvedMapContent) -> void:
 	records.clear()
@@ -98,11 +106,16 @@ func _prepare_cells(raw_cells: Array) -> Array[Dictionary]:
 		output.append({"outer": outer, "holes": holes, "bounds": GlobeProjection.lon_lat_bounds([outer])})
 	return output
 
-func refresh_economies(registry: RuntimePoliticalEntityView, evidence: HistoricalPoliticalEvidenceView, economy: FormalWorldEconomyView) -> void:
+func refresh_economies(registry: RuntimePoliticalEntityView, evidence: HistoricalPoliticalEvidenceView, economy: FormalWorldEconomyView, mode: String) -> bool:
 	# Economic observations do not change ownership, anchors or source meshes.
+	var appearance_changed := false
 	for owner: String in records:
 		if bool((records[owner] as Dictionary).get("is_runtime_polity",true)):
+			var previous := color(owner,mode)
+			var was_available := economic_available(owner)
 			economies[owner] = CurrentWorldPoliticalProjection.polity_summary(owner,registry,evidence,economy).get("economy",{})
+			appearance_changed = appearance_changed or previous!=color(owner,mode) or was_available!=economic_available(owner)
+	return appearance_changed
 
 func _ring(raw: Array) -> PackedVector2Array:
 	var ring := PackedVector2Array()
@@ -131,6 +144,60 @@ func _intersect_cell(ring: PackedVector2Array, cell: Dictionary) -> Array[Packed
 		if GlobeProjection.polygon_area(piece) > 0.0000000001:
 			output.append(shift.affine_inverse() * piece)
 	return output
+
+func bind_source_queries(meshes: Dictionary, force: bool = true) -> bool:
+	if not force and _has_bound_geometry and _bound_document==_display_document and _bound_owners==_whole_owner_by_feature: return false
+	_bound_document = _display_document
+	_bound_owners = _whole_owner_by_feature.duplicate()
+	_has_bound_geometry = true
+	_query_parts.clear()
+	display_faces_by_feature.clear()
+	for feature_id: String in meshes:
+		for source: Dictionary in (meshes[feature_id] as Dictionary).parts:
+			var part := source.duplicate()
+			part["scope_cells"] = _prepare_cells(_partial_scopes.get(feature_id,[]) as Array)
+			_query_parts.append(part)
+	return true
+
+func query_at(unit: Vector3) -> Dictionary:
+	var coordinate := RegionProjection.lon_lat(unit)
+	for index: int in range(_query_parts.size()-1,-1,-1):
+		var part := _query_parts[index]
+		if unit.angle_to(part.cull_axis as Vector3)>float(part.cull_angle)+0.000001: continue
+		var point := coordinate
+		point.x += 360.0*roundf(((part.bounds as Rect2).get_center().x-point.x)/360.0)
+		if not _contains_cell(point,part): continue
+		return {"found":true,"owner":_final_owner_at(point,[part])}
+	return {"found":false,"owner":""}
+
+func query_edge(point: Vector2, camera: RegionCamera, basis: Basis, center: Vector2, radius: float, unit: Vector3) -> String:
+	# Keep the existing four-pixel small-island/coast affordance using source
+	# ring segments; never prepare every historical face just for hovering.
+	var margin := 4.0*camera.km_per_pixel/RegionProjection.EARTH_RADIUS_KM if camera.active else 4.0/maxf(radius,1.0)
+	var best := 4.0
+	var owner := ""
+	for part: Dictionary in _query_parts:
+		if unit.angle_to(part.cull_axis as Vector3)>float(part.cull_angle)+margin: continue
+		var feature := str(part.feature_id)
+		if feature in _scope_features: continue
+		for line: PackedVector3Array in part.borders:
+			var segments: Array[PackedVector2Array] = []
+			if camera.active:
+				var segment := PackedVector2Array()
+				for vertex: Vector3 in line:
+					if vertex.dot(camera.tangent_frame.z)<0.0:
+						if segment.size()>1: segments.append(segment)
+						segment = PackedVector2Array()
+					else: segment.append(camera.project(vertex))
+				if segment.size()>1: segments.append(segment)
+			else: segments = GlobeProjection.project_line(line,basis,center,radius)
+			for segment: PackedVector2Array in segments:
+				for index: int in range(segment.size()-1):
+					var distance := point.distance_to(Geometry2D.get_closest_point_to_segment(point,segment[index],segment[index+1]))
+					if distance>=best: continue
+					best = distance
+					owner = str(_whole_owner_by_feature.get(feature,""))
+	return owner
 
 func bind_source_meshes(meshes: Dictionary, force: bool = true) -> bool:
 	if not force and _has_bound_geometry and _bound_document == _display_document and _bound_owners == _whole_owner_by_feature:
@@ -341,11 +408,18 @@ func _extract_final_edges(points: PackedVector2Array, cuts: Array[PackedVector2A
 	if line.size() > 1:
 		output.append({"points":GlobeProjection.to_unit_line(line),"owners":current_owners,"kind":"macro" if current_owners.size() == 2 else "coast"})
 
+func economic_available(entity_id: String) -> bool:
+	var totals := (economies.get(entity_id,{}) as Dictionary).get("daily_totals",{}) as Dictionary
+	var value: Variant = totals.get("fulfillment_bp")
+	return (value is int or value is float) and is_finite(float(value)) and float(value)>=0.0 and float(value)<=10000.0
+
 func color(entity_id: String, mode: String) -> Color:
+	if mode=="geographic": return Color("69745e")
 	if mode != "political":
 		var economy := economies.get(entity_id, {}) as Dictionary
 		var totals := economy.get("daily_totals", {}) as Dictionary
-		if totals.is_empty():
+		# Unknown is not zero, and these observations are not production output.
+		if mode not in ["fulfillment","shortage"] or not economic_available(entity_id):
 			return Color("465451")
 		var fulfillment := clampf(float(totals.get("fulfillment_bp", 0)) / 10000.0, 0.0, 1.0)
 		return Color("98654e").lerp(Color("689789"), fulfillment) if mode == "fulfillment" else Color("708e86").lerp(Color("b05f43"), 1.0 - fulfillment)

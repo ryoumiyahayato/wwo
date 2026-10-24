@@ -6,6 +6,7 @@ var sources: Dictionary = {}
 var portions: Dictionary = {}
 var losses: Dictionary = {}
 var next_id: int = 1
+var costs: RefCounted
 var _by_location: Dictionary = {}
 var _by_owner: Dictionary = {}
 var _reservations: Dictionary = {}
@@ -69,6 +70,7 @@ func _add(source: String, quantity: int, owner: String, location: String, place:
 	var s := sources[source] as Dictionary
 	var p := {"id": id, "parent_portion_id": parent, "source_id": source, "good": s["good"], "unit": s["unit"], "quantity": quantity, "remaining": quantity, "consumed": 0, "lost": 0, "moved": 0, "owner": owner, "custodian": custodian, "location": location, "place_id": place, "acquisition_id": acquisition, "reserved_for": reserved, "opened_minute": minute, "closed_minute": -1}
 	portions[id] = p
+	if costs != null: costs.portion_added(p)
 	_index(p, 1)
 	if not reserved.is_empty():
 		if not _reservations.has(reserved): _reservations[reserved] = {}
@@ -158,6 +160,7 @@ func record_loss(id: String, rows: Array[Dictionary], minute: int, basis: String
 	var fact := {"id": id, "portions": rows.duplicate(true), "minute": minute, "basis": basis, "process": process}
 	if losses.has(id): return losses[id] == fact
 	if id.is_empty() or basis.is_empty() or process.is_empty() or not ready(rows): return false
+	if costs != null: costs.lost(id, rows)
 	for r: Dictionary in rows: _subtract(portions[r["portion_id"]], int(r["quantity"]), "lost", minute)
 	losses[id] = fact
 	return true

@@ -88,12 +88,19 @@ func configure(policy: Dictionary, ledger: FormalLedgerState, clock: GameClock, 
 	var reserve := int(policy["employer_reserve"]) if livelihood == GENERAL_WAGE_LABOR else 0
 	if person_ids.size() > (FormalLedgerState.MAX_AMOUNT - reserve) / int(policy["opening_cash"]):
 		return _fail("Scenario opening budget exceeds integer bounds")
-	if not _ledger.configure(person_ids.size() * int(policy["opening_cash"]) + reserve):
+	var zero_opening: Array[String]=[]
+	for person_id: String in person_ids:
+		if _zero_cash_opening(persons.person(person_id)): zero_opening.append(person_id)
+	if not _ledger.configure((person_ids.size()-zero_opening.size()) * int(policy["opening_cash"]) + reserve):
 		return _fail(_ledger.error)
 	for person_id: String in person_ids:
 		var account_id := personal_account_id(person_id)
 		if _person_scope(person_id).is_empty() or not _ledger.open_account(account_id, person_id, "personal_cash"):
 			return _fail("Personal account requires an existing supported named person")
+		if person_id in zero_opening:
+			_person_accounts[person_id]=account_id
+			_runtime_accounts[person_id]=0
+			continue
 		if not _ledger.transfer("opening:" + person_id, FormalLedgerState.SOURCE_ACCOUNT, account_id, int(policy["opening_cash"]), 0, "opening_cash", person_id):
 			return _fail(_ledger.error)
 		_person_accounts[person_id] = account_id
@@ -108,6 +115,11 @@ func configure(policy: Dictionary, ledger: FormalLedgerState, clock: GameClock, 
 	error = ""
 	return true
 
+
+static func _zero_cash_opening(person: Dictionary) -> bool:
+	var demographic: Dictionary = person.get("basic_demographic_identity", {})
+	if demographic.get("opening_cash_policy") == "ZERO_CASH_DEVELOPMENT_CORPORATE_MANAGER": return true
+	return person.get("person_id") == "person:formal_generated_country_fra_0002" and demographic.get("opening_cash_policy") == "ZERO_CASH_GENERATED_RESIDENT" and demographic.get("opening_configuration_id") in ["FORMAL_PARIS_WORKSHOP_OPENING_R1", "FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1"]
 
 static func personal_account_id(person_id: String) -> String:
 	return "account:personal:" + person_id.trim_prefix("person:")
@@ -481,7 +493,7 @@ func restore(value: Dictionary, player_id: String) -> bool:
 			return _fail("Personal account owner or role mismatch")
 		var transaction_id := "opening:" + str(person_id)
 		if _runtime_accounts.has(person_id):
-			if not FormalLedgerState.valid_amount(_runtime_accounts[person_id]) or int(_runtime_accounts[person_id]) < 1 or int(_runtime_accounts[person_id]) > _clock.total_minutes() or not _ledger.transaction(transaction_id).is_empty(): return _fail("Runtime account cannot receive opening cash")
+			if not FormalLedgerState.valid_amount(_runtime_accounts[person_id]) or int(_runtime_accounts[person_id]) < 0 or (int(_runtime_accounts[person_id])==0 and not _zero_cash_opening(_persons.person(person_id))) or int(_runtime_accounts[person_id]) > _clock.total_minutes() or not _ledger.transaction(transaction_id).is_empty(): return _fail("Runtime account cannot receive opening cash")
 		else:
 			if not _receipt_matches(transaction_id, FormalLedgerState.SOURCE_ACCOUNT, accounts[person_id], int(_policy["opening_cash"]), 0, "opening_cash", person_id): return _fail("Missing or invalid opening cash transaction")
 			expected_transactions[transaction_id] = true

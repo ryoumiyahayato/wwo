@@ -1,24 +1,24 @@
 """Pinned offline physical display derivatives; no territorial identities.
 
 Run with the development-only Shapely environment. Raw GIS and libraries do not ship.
---output defaults to a review candidate; --apply publishes only after native review.
+--output defaults to a candidate; --apply writes the existing formal derivative paths.
+Physical-only generation never reads political source files.
 """
 from pathlib import Path
-import argparse, json, math, sys, zlib
-from shapely.geometry import shape, box, mapping, Polygon, LineString
-from shapely.ops import unary_union, transform
-from shapely import constrained_delaunay_triangles, set_precision
-from shapely.strtree import STRtree
+import argparse, json, math, sys, zlib, subprocess
+# Display compilation reads existing derivatives through the native encoder.
+# It neither imports GIS packages nor rebuilds the source land/ink partition.
+if '--compile-display' not in sys.argv:
+ from shapely.geometry import shape, box, mapping, Polygon, LineString
+ from shapely.ops import unary_union, transform
+ from shapely import constrained_delaunay_triangles, set_precision
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools/map'))
-from build_global_strategic import RIVERS, simple, fact
+if '--compile-display' not in sys.argv:
+ from build_global_strategic import RIVERS, simple, fact
 WORK=ROOT/'local-artifacts/geographic-foundation-r1'
 TAG='f1890d9f152c896d250a77557a5751a93d494776'
 TOLERANCES={'coarse':1500.0,'medium':300.0}
-DISPLAY_SKIN_MAX_M: float = 9000.0
-COAST_MASK_HALO_M: float = 6371008.8*(1.0-math.cos(math.radians(2.0)*0.5))*1.1
-STYLE_GEOMETRIES=[]
-STYLE_IDS=[]
 
 def read(p):return json.loads(p.read_text(encoding='utf8'))
 def write(p,d):
@@ -53,74 +53,113 @@ def river_lod(raw,tolerance):
 def source(id,title,assets,license='PUBLIC_DOMAIN'):
  return {'source_id':id,'title':title,'publisher':'Natural Earth / NACIS; Tom Patterson and Nathaniel Vaughn Kelso','version':'v5.1.2@'+TAG,'locator':'https://github.com/nvkelso/natural-earth-vector/tree/'+TAG,'license':license,'access_metadata':{'source_date':'2022-05-13','retrieved_on':'2026-10-09','source_type':'PHYSICAL_REFERENCE','historical_applicability':'Modern generalized physical reference only; not circa1900 shoreline, engineering, water level or political evidence','usage_status':'Public domain Natural Earth; full GIS excluded from release','source_scale':'1:10,000,000 (not 10 metres)','geographic_accuracy':'Not quantified by provider','scope':'Global physical coastline / selected existing major rivers','data_transformation':'Finite offline LOD, exact source clipping and bounded display shards; no inserted river connections','uncertainty':'Modern shoreline alterations, glacial change, reservoirs and channel migration are not reconstructed','source_assets':assets}}
 def descriptor(p,id,bounds,anchor):return {'id':id,'bounds':bounds,'anchor':anchor,'path':'res://data/strategic/'+p.name,'bytes':p.stat().st_size}
-def pack_physical(out,id,bounds,lod,land,old,coast,coast_source,difference_source):
- if isinstance(old,dict): old=old[lod].intersection(box(bounds[0],bounds[2],bounds[1],bounds[3]))
- west,east,south,north=bounds;tol=TOLERANCES[lod]
- features=[];lines=[]
- for line in parts(coast,'LineString'):
-  raw=list(map(list,line.coords))
-  if len(raw)<2:continue
-  # This boundary already belongs to the globally simplified land surface.
-  # A second independent simplification opens coastline/fill gaps at tile edges.
-  reduced=raw
-  if len(reduced)>=2 and any(p!=reduced[0] for p in reduced[1:]):lines.append(reduced)
- if lines:
-  f={'id':'coast:'+id,'kind':'coast','display_name':'Physical coastline reference','geometry':{'type':'MultiLineString','coordinates':lines},'lod_geometry':{lod:lines},'presentation_lods':[lod],'source_type':'PHYSICAL_REFERENCE','source_geometry_file':'ne_10m_land_v512.geojson','lod_tolerance_m':{lod:tol},'uncertainty':coast_source['access_metadata']['historical_applicability']}
-  features.append(fact(f,id,coast_source,'Boundary of the same globally simplified Natural Earth land surface used for fill correction. Conservative degree-space DP'+str(tol)+'m maximum; no subsequent per-shard simplification. Clip edges are not drawn.','APPROXIMATE'))
- face_count=0
- sx=111195*max(.2,math.cos(math.radians((south+north)*.5)));sy=111195
- # The canonical surface is drawn with spherical chords up to two degrees.
- # Its projected edge is not the planar ring used by the boolean operation.
- # Cover that finite chord sagitta only in physical water, then clip to shard.
- old_mask=transform(lambda a,b:(a/sx,b/sy),transform(lambda a,b:(a*sx,b*sy),old).buffer(COAST_MASK_HALO_M,quad_segs=1,join_style='mitre',mitre_limit=2.0)).intersection(box(west,south,east,north))
- for kind,g in [('land_reference',land.difference(old)),('ocean_reference',old_mask.difference(land))]:
-  if g.is_empty:continue
-  sx=111195*max(.2,math.cos(math.radians((south+north)*.5)));sy=111195
-  metric=set_precision(transform(lambda a,b:(a*sx,b*sy),g),0.001)
-  # Simplify physical land before the boolean operation. Simplifying its thin
-  # difference afterwards moves both shared edges and creates cross-water tips.
-  reduced=set_precision(transform(lambda a,b:(a/sx,b/sy),metric),1e-9)
-  assert reduced.is_valid
-  polygons=[bound_display_coordinates(mapping(p)['coordinates'],bounds) for p in parts(reduced,'Polygon') if p.area>1e-12]
-  if not polygons:continue
-  triangles=[]
-  for polygon in parts(reduced,'Polygon'):
-   if polygon.area<=1e-12: continue
-   try:
-    triangulated=constrained_delaunay_triangles(polygon)
-   except Exception as error:
-    raise RuntimeError(f'{id}/{kind}: area={polygon.area}, valid={polygon.is_valid}, clearance={polygon.minimum_clearance}, bounds={polygon.bounds}') from error
-   triangles.extend([bound_display_coordinates([[list(c) for c in t.exterior.coords]],bounds) for t in parts(triangulated,'Polygon') if t.area>1e-12])
-  face_count+=len(triangles)
-  f={'id':kind+':'+id,'kind':kind,'display_name':'Physical display correction','geometry':{'type':'MultiPolygon','coordinates':polygons},'lod_geometry':{lod:triangles},'lod_geometry_role':'PRECOMPUTED_DISPLAY_TRIANGLES','presentation_lods':[lod],'lod_tolerance_m':{lod:tol},'display_precision_grid_m':0.001,'display_precision_grid_degrees':1e-9,'source_type':'REFERENCE_ONLY','geometry_role':'PRESENTATION_DIFFERENCE_ONLY','uncertainty':'Physical-minus-existing-display only. Explicit submillimetre display precision grids remove affine floating-point topology noise; canonical source polygons and territorial identities unchanged. Simplified display polygons are not territorial units, political ownership or1900 shoreline facts.'}
-  if kind=='ocean_reference':f['display_chord_mask_halo_m']=COAST_MASK_HALO_M
-  if kind=='land_reference':
-   candidates=[(id,transform(lambda x,y:(x*sx,y*sy),geometry)) for id,geometry in zip(STYLE_IDS,STYLE_GEOMETRIES) if geometry.distance(reduced)<DISPLAY_SKIN_MAX_M/min(sx,sy)]
-   coverage=[geometry.buffer(DISPLAY_SKIN_MAX_M) for _,geometry in candidates]
-   references=[''];indices=[]
-   tree=STRtree([geometry for _,geometry in candidates]) if candidates else None
-   for triangle in triangles:
-    point=transform(lambda x,y:(x*sx,y*sy),Polygon(triangle[0]).representative_point())
-    reference=''
-    if tree is not None:
-     nearest=int(tree.nearest(point));distance=candidates[nearest][1].distance(point)
-     matches=tree.query(point.buffer(DISPLAY_SKIN_MAX_M))
-     competing=[int(i) for i in matches if int(i)!=nearest and candidates[int(i)][1].distance(point)<=distance+150.0]
-     if distance<=DISPLAY_SKIN_MAX_M and not competing and coverage[nearest].covers(transform(lambda x,y:(x*sx,y*sy),Polygon(triangle[0]))):reference=candidates[nearest][0]
-    if reference not in references:references.append(reference)
-    indices.append(references.index(reference))
-   f.update({'visual_reference_features':references,'lod_visual_reference_indices':{lod:indices},'visual_reference_role':'BOUNDED_TEXTURE_CONTINUATION_ONLY','visual_reference_max_distance_m':DISPLAY_SKIN_MAX_M,'visual_reference_distance_metric':'SHARD_LOCAL_EQUIRECTANGULAR','visual_reference_ambiguity_margin_m':150.0,'visual_reference_authority':False})
-  features.append(fact(f,id,difference_source,'Globally simplified physical land minus exact canonical political footprint, or inverse; no post-boolean simplification. Constrained triangulation preserves shared edges and holes. Canonical political geometry and picking unchanged.','APPROXIMATE'))
- if not features:return None,None
- doc={'metadata':{'schema_id':'global_strategic_content_r1','shard_id':id,'valid_from':'1900-01-01','valid_to':'1901-01-01','content_level':'strategic','local_support':False,'presentation_lods':[lod],'packing_only':True},'source_registry':{'schema_id':'historical_source_registry_v2','sources':[coast_source,difference_source]},'evidence_catalog':{'schema_id':'historical_fact_evidence_catalog_v2','facts':features}}
- p=out/(id+'.json');write(p,doc)
- d=descriptor(p,id,bounds,[(west+east)*.5,(south+north)*.5]);d['lod']=lod
- return d,{'id':id,'lod':lod,'bytes':p.stat().st_size,'segments':sum(len(line)-1 for line in lines),'faces':face_count}
+
+def independent_foundation(out, with_ink=False):
+ """R27: physical geometry needs only pinned NE. Political ink is optional."""
+ physical_file=ROOT/'local-artifacts/paris-land-pilot-r1/research/ne_10m_land_v512.geojson'
+ lake_file=ROOT/'local-artifacts/global-strategic-r1/source/ne_10m_lakes.geojson'
+ physical=unary_union([shape(f['geometry']) for f in read(physical_file)['features']])
+ # Preserve the already admitted natural-water correction, not a political mask.
+ syvash=next(shape(f['geometry']) for f in read(lake_file)['features'] if f['properties'].get('name')=='Syvash')
+ physical=physical.difference(syvash)
+ lods={lod:set_precision(physical.simplify(tol/111195.0,preserve_topology=True),1e-9) for lod,tol in TOLERANCES.items()}
+ coasts={lod:land.boundary.difference(box(-180,-90,180,90).boundary) for lod,land in lods.items()}
+ src=source('natural_earth_independent_physical_r27','Independent Natural Earth land and water reference',[
+  {'file':physical_file.name,'bytes':physical_file.stat().st_size}, {'file':lake_file.name,'bytes':lake_file.stat().st_size}])
+ src['access_metadata']['data_transformation']='R27 independent globally simplified land; full tile land and its water complement; constrained triangulation; same source boundary for coast. No political input, difference halo, inferred owner or nearest-country association.'
+ src['access_metadata']['scope']='Modern physical reference. Original NE land holes/components and existing Syvash natural-water correction. Inland lake overlays retain their own sources; not a complete global lake survey.'
+ ink_geometries=[];ink_sources=[]
+ if with_ink:
+  # A separate display operation partitions the fixed physical land for a
+  # single draw. It cannot change the physical dataset's shape or provenance.
+  political_files=[ROOT/'data/world_map/historical'/n for n in ['cshapes_1900_snapshot.json','arabia_gulf_geography_1900.json']]
+  display=read(ROOT/'data/presentation/arabia_political_map_regions_1900.json')
+  def cells(rows):return unary_union([Polygon(c['outer'],c.get('holes',[])) for c in rows])
+  regions=[(r['id'],cells(r['mask_cells'])) for r in display['political_map_regions']]
+  partial={key:cells(rows) for key,rows in display.get('partial_scope_masks',{}).items()}
+  scoped=[]
+  for p in political_files:
+   for row in read(p)['features']:
+    g=shape(row['geometry']);key=row['id']
+    if key in display['scope_feature_ids']:
+     inside=g.intersection(partial[key]) if key in partial else g
+     scoped.append(inside)
+     g=g.difference(partial[key]) if key in partial else Polygon()
+    if not g.is_empty:ink_geometries.append((key,g))
+  scope=unary_union(scoped)
+  ink_geometries.extend((key,scope.intersection(g)) for key,g in regions)
+  ink_sources=[{'path':'res://'+p.relative_to(ROOT).as_posix(),'bytes':p.stat().st_size} for p in political_files]
+  ink_sources.append({'path':'res://data/presentation/arabia_political_map_regions_1900.json','bytes':(ROOT/'data/presentation/arabia_political_map_regions_1900.json').stat().st_size})
+ def triangulate(g):
+  return [[[list(c) for c in t.exterior.coords]] for p in parts(set_precision(g,1e-9),'Polygon') for t in parts(constrained_delaunay_triangles(p),'Polygon') if t.area>0]
+ def pack(id,bounds,lod):
+  west,east,south,north=bounds;cell=box(west,south,east,north)
+  land=lods[lod].intersection(cell);water=cell.difference(land)
+  # World-frame closures close planar polygons but are not physical coasts.
+  shore=coasts[lod].intersection(cell)
+  values=[];geometries={}
+  for kind,g,role in [('land_reference',land,'INDEPENDENT_PHYSICAL_LAND'),('ocean_reference',water,'INDEPENDENT_PHYSICAL_WATER_MASK')]:
+   if g.is_empty or g.area<=0:continue
+   key=kind+':'+id
+   geometry={'type':'MultiPolygon','coordinates':[mapping(p)['coordinates'] for p in parts(g,'Polygon') if p.area>0]}
+   triangles=triangulate(g) if kind=='land_reference' else []
+   geometries[key]={'geometry':geometry,'lod_geometry':{lod:triangles}}
+   f={'id':key,'kind':kind,'display_name':'Independent physical land' if kind=='land_reference' else 'Physical water reference',
+    'presentation_lods':[lod],'geometry_role':role,'lod_geometry_role':'PRECOMPUTED_DISPLAY_TRIANGLES' if kind=='land_reference' else 'REFERENCE_MASK_ONLY',
+    'source_type':'PHYSICAL_REFERENCE','bounds_lon_lat':bounds,'lod_tolerance_m':{lod:TOLERANCES[lod]}}
+   values.append(fact(f,id,src,src['access_metadata']['data_transformation'],'APPROXIMATE'))
+  lines=[list(map(list,line.coords)) for line in parts(shore,'LineString') if len(line.coords)>1]
+  if lines:
+   key='coast:'+id;geometries[key]={'geometry':{'type':'MultiLineString','coordinates':lines},'lod_geometry':{lod:lines}}
+   values.append(fact({'id':key,'kind':'coast','display_name':'Physical coastline','presentation_lods':[lod],'source_type':'PHYSICAL_REFERENCE','source_geometry_file':physical_file.name,'lod_tolerance_m':{lod:TOLERANCES[lod]}},id,src,'Boundary of the same globally simplified independent land; tile cut edges are not coast.','APPROXIMATE'))
+  path=out/(id+'.json');side=path.with_suffix('.geom')
+  decoded=json.dumps(geometries,ensure_ascii=False,separators=(',',':')).encode();side.write_bytes(zlib.compress(decoded,9))
+  asset={'path':'res://data/strategic/'+side.name,'encoding':'ZLIB_JSON_UTF8','bytes':side.stat().st_size,'decoded_bytes':len(decoded)}
+  for v in values:v['value']['geometry_asset']=asset
+  write(path,{'metadata':{'schema_id':'global_strategic_content_r1','shard_id':id,'valid_from':'1900-01-01','valid_to':'1901-01-01','content_level':'strategic','physical_foundation':True,'presentation_lods':[lod],'geometry_encoding':'ZLIB_JSON_UTF8'},'source_registry':{'schema_id':'historical_source_registry_v2','sources':[src]},'evidence_catalog':{'schema_id':'historical_fact_evidence_catalog_v2','facts':values}})
+  row=descriptor(path,id,bounds,[(west+east)*.5,(south+north)*.5]);row['lod']=lod
+  if with_ink and not land.is_empty:
+   remaining=land;polygons=[];references=[''];indices=[]
+   # Exact historical intersections; last displayed historical source wins an
+   # overlap. Unknown physical land remains uncoloured, never nearest-owned.
+   for key,g in reversed(ink_geometries):
+    if not g.intersects(remaining):continue
+    overlap=remaining.intersection(g)
+    if overlap.is_empty:continue
+    triangles=triangulate(overlap)
+    if triangles:
+     if key not in references:references.append(key)
+     polygons.extend(triangles);indices.extend([references.index(key)]*len(triangles))
+    remaining=remaining.difference(overlap)
+    if remaining.is_empty:break
+   triangles=triangulate(remaining);polygons.extend(triangles);indices.extend([0]*len(triangles))
+   ink=out/(id+'.ink.geom')
+   payload={'schema_id':'physical_political_ink_partition_r27','physical_shard_id':id,'lod':lod,'references':references,'indices':indices,'triangles':polygons,
+    'source_assets':ink_sources,'license':'CC BY-NC-SA 4.0; physical contribution public domain','role':'DISPLAY_INTERSECTION_ONLY_NOT_SOVEREIGNTY','method':'Complete partition of independent physical land by existing dated display geometry; no nearest-country assignment; unused when political ink is unavailable.'}
+   data=json.dumps(payload,ensure_ascii=False,separators=(',',':')).encode();ink.write_bytes(zlib.compress(data,9))
+   row['ink_asset']={'path':'res://data/strategic/'+ink.name,'encoding':'ZLIB_JSON_UTF8','bytes':ink.stat().st_size,'decoded_bytes':len(data)}
+  return row
+ index=read(out/'index.json') if (out/'index.json').exists() else read(ROOT/'data/strategic/index.json');parents=[]
+ for y in range(6):
+  for x in range(4):
+   west=-180+x*90;south=-90+y*30;id=f'physical_{x}_{y}'
+   parent=pack(id,[west,west+90,south,south+30],'coarse')
+   parent['medium_regions']=[pack(id+f'_mid_{a}_{b}',[west+a*15,west+(a+1)*15,south+b*10,south+(b+1)*10],'medium') for b in range(3) for a in range(6)]
+   parents.append(parent)
+   print(id,flush=True)
+ index.update(coast_regions=parents,physical_foundation='INDEPENDENT_NATURAL_EARTH_R27',coastline_status='INDEPENDENT_PHYSICAL_LAND_AND_MATCHING_COAST')
+ write(out/'index.json',index)
+ print(json.dumps({'physical_shards':sum(1+len(p['medium_regions']) for p in parents),'physical_source':src['source_id'],'political_ink_optional':with_ink,'bytes':sum(p.stat().st_size for p in out.glob('physical_*') if p.is_file())}),flush=True)
 def main():
- global STYLE_IDS,STYLE_GEOMETRIES
- parser=argparse.ArgumentParser();parser.add_argument('--apply',action='store_true');parser.add_argument('--output',type=Path);parser.add_argument('--display-footprint',type=Path);args=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('--apply',action='store_true');parser.add_argument('--output',type=Path);parser.add_argument('--independent',action='store_true',help='Generate only the independent physical foundation');parser.add_argument('--political-ink',action='store_true');parser.add_argument('--compile-display',action='store_true',help='Compile existing physical/ink derivatives with the native Godot encoder, without rebuilding GIS');parser.add_argument('--godot',type=Path);args=parser.parse_args()
  if args.apply and args.output:parser.error('--apply and --output are mutually exclusive')
  out=args.output or (ROOT/'data/strategic' if args.apply else WORK/'candidate');out.mkdir(parents=True,exist_ok=True)
+ if args.compile_display:
+  if not args.godot or not args.godot.is_file():parser.error('--compile-display requires --godot pointing to the Godot 4.6.3 console')
+  subprocess.run([str(args.godot),'--headless','--path',str(ROOT),'--script','res://tools/map/compile_political_display.gd','--',str(out.resolve())],cwd=ROOT,check=True)
+  return
+ if args.independent:
+  independent_foundation(out,args.political_ink);return
  assets=read(WORK/'source-assets.json')
  rivers=read(WORK/'source/ne_10m_rivers_lake_centerlines.geojson')['features']
  river_source=source('natural_earth_rivers_10m_5_1_2','Natural Earth 1:10M rivers; physical layer version5.0.0, pinned repository v5.1.2',[a for a in assets if 'rivers' in a['file']])
@@ -176,86 +215,8 @@ def main():
   p=out/Path(desc['path']).name;write(p,doc)
   desc.update(descriptor(p,desc['id'],desc['bounds'],desc['anchor']))
   desc['feature_count']=len(doc['evidence_catalog']['facts'])
- # Political geometry remains untouched. Only thin display differences are
- # overlaid, with the inherited NC-SA restriction explicitly recorded.
- physical_file=ROOT/'local-artifacts/paris-land-pilot-r1/research/ne_10m_land_v512.geojson'
- physical=unary_union([shape(f['geometry']) for f in read(physical_file)['features']])
- # Natural Earth's land layer includes inland-water interiors. Syvash is
- # independently present in its natural-water source; treating it as land
- # filled the historical polygon's water hole with conspicuous triangles.
- syvash=[shape(f['geometry']) for f in lake_records if f['properties'].get('name')=='Syvash']
- assert len(syvash)==1 and syvash[0].is_valid
- physical=physical.difference(syvash[0])
- assert physical.is_valid
- physical_lods={lod:set_precision(physical.simplify(tolerance/111195.0,preserve_topology=True),1e-9) for lod,tolerance in TOLERANCES.items()}
- assert all(land.is_valid for land in physical_lods.values())
- political_files=[ROOT/'data/world_map/historical'/n for n in ['cshapes_1900_snapshot.json','arabia_gulf_geography_1900.json']]
- original=[shape(f['geometry']) for p in political_files for f in read(p)['features']]
- scoped=set(read(ROOT/'data/presentation/arabia_political_map_regions_1900.json')['scope_feature_ids'])
- style_features=[f for f in read(political_files[0])['features'] if f['id'] not in scoped]
- STYLE_IDS=[f['id'] for f in style_features];STYLE_GEOMETRIES=[shape(f['geometry']) for f in style_features]
- # Texture continuation may inspect the original dated provider footprint;
- # the coarsened canonical ring must not turn a real bay's land into arbitrary
- # triangle-colour patches. This is an offline visual association only.
- sys.path.insert(0,str(ROOT/'tools/historical_data'))
- from build_cshapes_1900_snapshot import active_on,TARGET_DATE
- raw_style_file=ROOT/'local-artifacts/map-correctness-r3/CShapes-2.0.geojson'
- original_style={f"gw_{int(f['properties']['gwcode'])}":shape(f['geometry']) for f in read(raw_style_file)['features'] if active_on(f['properties'],TARGET_DATE)}
- invalid_style=[]
- for i,feature_id in enumerate(STYLE_IDS):
-  geometry=original_style.get(feature_id)
-  if geometry is not None and geometry.is_valid:STYLE_GEOMETRIES[i]=geometry
-  else:invalid_style.append(feature_id)
- # Reject invalid sources rather than quietly inventing a repaired boundary.
- assert all(g.is_valid for g in original)
- political=unary_union(original)
- coast=unary_union([shape(f['geometry']) for f in read(WORK/'source/ne_10m_coastline.geojson')['features']])
- coast_source=source('natural_earth_coast_10m_5_1_2','Natural Earth physical coastline5.0.0-pre9 / land5.1.1, pinned v5.1.2',assets+[{'file':physical_file.name,'bytes':physical_file.stat().st_size}])
- coast_source['access_metadata']['source_assets'].append({'file':lake_file.name,'bytes':lake_file.stat().st_size})
- difference_source=source('physical_display_difference_r1','Presentation difference: Natural Earth physical land versus existing admitted political display footprint',coast_source['access_metadata']['source_assets']+[{'file':p.name,'bytes':p.stat().st_size} for p in political_files],'CC BY-NC-SA 4.0')
- difference_source['publisher']='Natural Earth / NACIS; CShapes2.0 ETH Zurich; existing WWO bounded1900 Arabia tracing'
- difference_source['access_metadata']['source_assets'].append({'file':lake_file.name,'bytes':lake_file.stat().st_size})
- difference_source['access_metadata']['syvash_water_reference']='Existing pinned Natural Earth natural-water polygon removes inland water from the land-only dataset; display correction only, no new lake identity or historical water-level claim'
- difference_source['access_metadata']['source_assets'].append({'file':raw_style_file.name,'bytes':raw_style_file.stat().st_size})
- difference_source['access_metadata']['texture_reference_geometry']='Original same-date CShapes provider footprint, only for bounded texture continuity; no authority or picking changes'
- difference_source['access_metadata']['invalid_texture_reference_fallback_ids']=invalid_style
- difference_source['access_metadata'].update({'source_type':'REFERENCE_ONLY','usage_status':'Derivative of existing CC BY-NC-SA4.0 political footprint, noncommercial share-alike; Natural Earth contribution public domain','political_source':'https://icr.ethz.ch/data/cshapes/','scope':'Display subtraction/addition only. Never territorial classification or picking geometry.'})
- if args.display_footprint:
-  display=read(args.display_footprint)['evidence_catalog']['facts'][0]['value']
-  scopes=set(read(ROOT/'data/presentation/arabia_political_map_regions_1900.json')['scope_feature_ids'])
-  fallback=[shape(f['geometry']) for p in political_files for f in read(p)['features'] if f['id'] in scopes]
-  lod_unions={}
-  for asset in display['assets']:
-   path=ROOT/asset['path'].removeprefix('res://');payload=path.read_bytes()
-   rows=json.loads(zlib.decompress(payload))['features']
-   lod_unions[asset['id']]=unary_union([shape(f['geometry']) for f in rows if f['id'] not in scopes]+fallback)
-   difference_source['access_metadata']['source_assets'].append({'file':path.name,'bytes':path.stat().st_size})
-  difference_source['access_metadata']['scope']='Physical minus independently admitted higher-resolution regional display footprint, or inverse. Canonical territorial geometry and ownership remain unchanged.'
-  political=lod_unions
- descriptors=[];summary=[]
- for y in range(6):
-  for x in range(4):
-   west=-180+x*90;south=-90+y*30;bounds=[west,west+90,south,south+30]
-   window=box(west,south,west+90,south+30)
-   land=physical_lods['coarse'].intersection(window);old=political if isinstance(political,dict) else political.intersection(window);shore=physical_lods['coarse'].boundary.intersection(window)
-   id=f'physical_{x}_{y}'
-   parent,row=pack_physical(out,id,bounds,'coarse',land,old,shore,coast_source,difference_source)
-   assert parent is not None
-   summary.append(row);children=[]
-   # Existing Content shards at two finite LODs, not a general tile manager.
-   # Fine files are small enough that source admission and GPU residency
-   # correspond to the actual regional viewport rather than a quadrant.
-   for b in range(3):
-    for a in range(6):
-     child_bounds=[west+a*15,west+(a+1)*15,south+b*10,south+(b+1)*10]
-     cell=box(child_bounds[0],child_bounds[2],child_bounds[1],child_bounds[3])
-     fine_land=physical_lods['medium']
-     child,child_row=pack_physical(out,id+f'_mid_{a}_{b}',child_bounds,'medium',fine_land.intersection(cell),political if isinstance(political,dict) else political.intersection(cell),fine_land.boundary.intersection(cell),coast_source,difference_source)
-     if child is not None:children.append(child);summary.append(child_row)
-   parent['medium_regions']=children;descriptors.append(parent)
- index['coast_regions']=descriptors;index['coastline_status']='PHYSICAL_REFERENCE_SEPARATE_FROM_POLITICS'
+ # Existing optional river/locator rebuild also ends in the one physical path.
  index['counts']['settlement']+=3
- index['data_gaps']=[g for g in index['data_gaps'] if not g.startswith('Global medium physical coastline')]
  write(out/'index.json',index)
- print(json.dumps({'shards':len(summary),'coarse':len(descriptors),'medium':sum(len(p['medium_regions']) for p in descriptors),'runtime_bytes':sum(p.stat().st_size for p in out.glob('*.json'))}))
+ independent_foundation(out,args.political_ink)
 if __name__=='__main__':main()

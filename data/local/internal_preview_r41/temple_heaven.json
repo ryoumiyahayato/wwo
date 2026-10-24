@@ -1,0 +1,255 @@
+{
+  "metadata": {
+    "schema_id": "local_spatial_content_r1",
+    "shard_id": "r41_temple_heaven",
+    "anchor_place_id": "landmark:temple_heaven_reference",
+    "anchor_lon_lat": [
+      116.406667,
+      39.882167
+    ],
+    "radius_km": 8,
+    "valid_from": "1900-01-01",
+    "valid_to": "1901-01-01",
+    "status": "INTERNAL_LANDMARK_REFERENCE_ONLY",
+    "local_enabled": true,
+    "local_min_mpp": 2,
+    "landmark_visuals": [
+      {
+        "id": "landmark:temple_heaven_reference",
+        "kind": "landmark",
+        "display_name": "天坛祈年殿 · 内部示意",
+        "rank": 0,
+        "anchor_place_id": "landmark:temple_heaven_reference",
+        "anchor_name_zh": "天坛祈年殿",
+        "parent_country_id": "qing_empire",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            116.406667,
+            39.882167
+          ]
+        },
+        "valid_from": "1900-01-01",
+        "valid_to": "1901-01-01",
+        "existence_confirmed_on": "1900-01-01",
+        "existence_note_zh": "祈年殿1896年按原规制重建，早于开局。保留三重檐和坛台，剔除整块演示庭院。殿内陈设、周边用地及1900年后变化未重建。",
+        "reference_year": 1900,
+        "model_reference_year": null,
+        "real_dimensions_note_zh": "按约定参考高度统一换算米制，横向保留原示意比例；不是1900测量或完整遗产区范围。",
+        "model_path": "res://assets/landmarks/internal_preview_r41/temple_heaven.glb",
+        "model_height_m": 38.000003814697266,
+        "model_base_width_m": 62.62049102783203,
+        "model_footprint_m": [
+          62.62049102783203,
+          62.62049102783203
+        ],
+        "model_heading_degrees": 0,
+        "symbol_kind": "monument",
+        "symbol_max_mpp": 1600,
+        "model_max_mpp": 12,
+        "display_height_min_px": 22,
+        "display_height_max_px": 42,
+        "display_width_max_px": 150,
+        "display_scale_max": 3,
+        "source_id": "r41_temple_heaven_display_reference",
+        "source_date": "2026-10-18",
+        "source_type": "HISTORICAL_REFERENCE_AND_INTERNAL_MODEL",
+        "source_name_zh": "历史机构 / 用户二工云盘；位置参考另列",
+        "source_reference": "https://www.visitbeijing.com.cn/article/47QllJ8IU2a",
+        "coordinate_source_reference": "https://whc.unesco.org/en/list/881/",
+        "coordinate_role": "MODERN_APPROXIMATE_MONUMENT_LOCATOR",
+        "coordinate_notice_zh": "固定遗址或遗产区的现代代表位置，不是1900精测坐标；约250米定位限制。",
+        "historical_reference_zh": "仅本机内部预览；模型作者与再分发权待确认，非1900精确复原。 祈年殿1896年按原规制重建，早于开局。保留三重檐和坛台，剔除整块演示庭院。殿内陈设、周边用地及1900年后变化未重建。",
+        "terrain_note_zh": "本站没有LOCAL DEM；使用原无DEM地标相对平面。演示地形、水面、草坪已剔除，不生成当地覆盖。",
+        "rights_status": "UNCONFIRMED_INTERNAL_PREVIEW_ONLY",
+        "model_source_url": "https://drive.google.com/file/d/13GdDMjWRpD2BVh0dTTZgYYrScCoOR7m7/view?usp=drivesdk",
+        "resource_structure": {
+          "key": "temple_heaven",
+          "drive_id": "13GdDMjWRpD2BVh0dTTZgYYrScCoOR7m7",
+          "original_file": "05_Temple_of_Heaven_China.glb",
+          "original_bytes": 45096,
+          "adapted_bytes": 97496,
+          "original_triangles": 1252,
+          "original_vertices": 1372,
+          "original_materials": 6,
+          "kept_source_materials": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "materials": 5,
+          "textures": 0,
+          "footprint_m": [
+            62.62049102783203,
+            62.62049102783203
+          ],
+          "height_m": 38.000003814697266,
+          "uniform_scale": 5.483405418792798,
+          "meshes": [
+            {
+              "name": "temple_heaven_Far",
+              "surfaces": 5,
+              "vertices": 1296,
+              "triangles": 681
+            },
+            {
+              "name": "temple_heaven_Near",
+              "surfaces": 5,
+              "vertices": 1982,
+              "triangles": 1240
+            }
+          ]
+        },
+        "dimensions_type": "SCHEMATIC_METRES",
+        "model_lod_switch_mpp": 4,
+        "model_admission_mpp": 12
+      }
+    ],
+    "license_notice": "仅本机内部预览；版权及再分发许可待确认，不可据此商业发行。",
+    "terrain_note_zh": "本站没有LOCAL DEM；使用原无DEM地标相对平面。演示地形、水面、草坪已剔除，不生成当地覆盖。"
+  },
+  "source_registry": {
+    "schema_id": "historical_source_registry_v2",
+    "sources": [
+      {
+        "source_id": "r41_temple_heaven_display_reference",
+        "title": "天坛祈年殿 historical display reference",
+        "publisher": "Monument institutions and user-supplied Drive; author unconfirmed",
+        "version": "R41_2026-10-18",
+        "license": "USER_AUTHORIZED_LOCAL_INTERNAL_PREVIEW_ONLY_RIGHTS_UNCONFIRMED",
+        "locator": "https://www.visitbeijing.com.cn/article/47QllJ8IU2a",
+        "access_metadata": {
+          "source_type": "DISPLAY_REFERENCE_ONLY",
+          "coordinate_reference": "https://whc.unesco.org/en/list/881/",
+          "model_reference": "https://drive.google.com/file/d/13GdDMjWRpD2BVh0dTTZgYYrScCoOR7m7/view?usp=drivesdk",
+          "rights_notice": "仅本机内部预览；模型作者与再分发权待确认，非1900精确复原。",
+          "historical_applicability": "祈年殿1896年按原规制重建，早于开局。保留三重檐和坛台，剔除整块演示庭院。殿内陈设、周边用地及1900年后变化未重建。",
+          "additional_reference": "https://gygl.beijing.gov.cn/whgy/whgy_wsgc/201912/t20191206_885633.html"
+        }
+      }
+    ]
+  },
+  "evidence_catalog": {
+    "schema_id": "historical_fact_evidence_catalog_v2",
+    "facts": [
+      {
+        "fact_id": "local_spatial:landmark:temple_heaven_reference",
+        "domain": "local_spatial_content",
+        "subject_id": "landmark:temple_heaven_reference",
+        "value": {
+          "id": "landmark:temple_heaven_reference",
+          "kind": "landmark",
+          "display_name": "天坛祈年殿 · 内部示意",
+          "rank": 0,
+          "anchor_place_id": "landmark:temple_heaven_reference",
+          "anchor_name_zh": "天坛祈年殿",
+          "parent_country_id": "qing_empire",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
+              116.406667,
+              39.882167
+            ]
+          },
+          "valid_from": "1900-01-01",
+          "valid_to": "1901-01-01",
+          "existence_confirmed_on": "1900-01-01",
+          "existence_note_zh": "祈年殿1896年按原规制重建，早于开局。保留三重檐和坛台，剔除整块演示庭院。殿内陈设、周边用地及1900年后变化未重建。",
+          "reference_year": 1900,
+          "model_reference_year": null,
+          "real_dimensions_note_zh": "按约定参考高度统一换算米制，横向保留原示意比例；不是1900测量或完整遗产区范围。",
+          "model_path": "res://assets/landmarks/internal_preview_r41/temple_heaven.glb",
+          "model_height_m": 38.000003814697266,
+          "model_base_width_m": 62.62049102783203,
+          "model_footprint_m": [
+            62.62049102783203,
+            62.62049102783203
+          ],
+          "model_heading_degrees": 0,
+          "symbol_kind": "monument",
+          "symbol_max_mpp": 1600,
+          "model_max_mpp": 12,
+          "display_height_min_px": 22,
+          "display_height_max_px": 42,
+          "display_width_max_px": 150,
+          "display_scale_max": 3,
+          "source_id": "r41_temple_heaven_display_reference",
+          "source_date": "2026-10-18",
+          "source_type": "HISTORICAL_REFERENCE_AND_INTERNAL_MODEL",
+          "source_name_zh": "历史机构 / 用户二工云盘；位置参考另列",
+          "source_reference": "https://www.visitbeijing.com.cn/article/47QllJ8IU2a",
+          "coordinate_source_reference": "https://whc.unesco.org/en/list/881/",
+          "coordinate_role": "MODERN_APPROXIMATE_MONUMENT_LOCATOR",
+          "coordinate_notice_zh": "固定遗址或遗产区的现代代表位置，不是1900精测坐标；约250米定位限制。",
+          "historical_reference_zh": "仅本机内部预览；模型作者与再分发权待确认，非1900精确复原。 祈年殿1896年按原规制重建，早于开局。保留三重檐和坛台，剔除整块演示庭院。殿内陈设、周边用地及1900年后变化未重建。",
+          "terrain_note_zh": "本站没有LOCAL DEM；使用原无DEM地标相对平面。演示地形、水面、草坪已剔除，不生成当地覆盖。",
+          "rights_status": "UNCONFIRMED_INTERNAL_PREVIEW_ONLY",
+          "model_source_url": "https://drive.google.com/file/d/13GdDMjWRpD2BVh0dTTZgYYrScCoOR7m7/view?usp=drivesdk",
+          "resource_structure": {
+            "key": "temple_heaven",
+            "drive_id": "13GdDMjWRpD2BVh0dTTZgYYrScCoOR7m7",
+            "original_file": "05_Temple_of_Heaven_China.glb",
+            "original_bytes": 45096,
+            "adapted_bytes": 97496,
+            "original_triangles": 1252,
+            "original_vertices": 1372,
+            "original_materials": 6,
+            "kept_source_materials": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "materials": 5,
+            "textures": 0,
+            "footprint_m": [
+              62.62049102783203,
+              62.62049102783203
+            ],
+            "height_m": 38.000003814697266,
+            "uniform_scale": 5.483405418792798,
+            "meshes": [
+              {
+                "name": "temple_heaven_Far",
+                "surfaces": 5,
+                "vertices": 1296,
+                "triangles": 681
+              },
+              {
+                "name": "temple_heaven_Near",
+                "surfaces": 5,
+                "vertices": 1982,
+                "triangles": 1240
+              }
+            ]
+          },
+          "dimensions_type": "SCHEMATIC_METRES",
+          "model_lod_switch_mpp": 4,
+          "model_admission_mpp": 12
+        },
+        "unit": "display_geography",
+        "source_id": "r41_temple_heaven_display_reference",
+        "source_version": "R41_2026-10-18",
+        "source_locator": "https://www.visitbeijing.com.cn/article/47QllJ8IU2a",
+        "observation_period": {
+          "from": "1900-01-01",
+          "to": "1900-12-31"
+        },
+        "spatial_scope": {
+          "kind": "content_shard",
+          "id": "r41_temple_heaven"
+        },
+        "methodology": "Fixed monument; sourced modern approximate locator; schematic mesh, not a 1900 survey. No sovereignty, control, administrative membership or terrain generated.",
+        "confidence": 0.6,
+        "lower_bound": null,
+        "upper_bound": null,
+        "license": "USER_AUTHORIZED_LOCAL_INTERNAL_PREVIEW_ONLY_RIGHTS_UNCONFIRMED",
+        "review_status": "BOUNDED_ESTIMATE",
+        "generator": "tools/map/install_landmark_expansion_r41.py"
+      }
+    ]
+  }
+}

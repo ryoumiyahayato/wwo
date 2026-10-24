@@ -20,10 +20,10 @@ static func opening_profile(source_id: String) -> Dictionary:
 	if not profile.is_empty(): profile["source_id"] = source_id
 	return profile
 
-func build(organization_state_value: OrganizationState = null, organization_person_reference_ids: Array[String] = [], organization_place_reference_ids: Array[String] = [], livelihood: String = FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, initialize_land_administration: bool = true, native_economy_config: Dictionary = {}, opening_source_id: String = DEFAULT_FORMAL_PERSON_TERRITORY_ID) -> WorldBuildResult:
+func build(organization_state_value: OrganizationState = null, organization_person_reference_ids: Array[String] = [], organization_place_reference_ids: Array[String] = [], livelihood: String = FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, initialize_land_administration: bool = true, native_economy_config: Dictionary = {}, opening_source_id: String = DEFAULT_FORMAL_PERSON_TERRITORY_ID, prepared_provenance: HistoricalProvenanceFoundation = null) -> WorldBuildResult:
 	var r := WorldBuildResult.new()
 	r.world.game_clock = GameClock.new()
-	r.world.provenance = HistoricalProvenanceFoundation.new()
+	r.world.provenance = prepared_provenance if prepared_provenance!=null else HistoricalProvenanceFoundation.new()
 	r.world.historical_evidence = HistoricalPoliticalEvidenceCatalog.new()
 	r.world.political_registry = RuntimePoliticalEntityRegistry.new()
 	r.world.economic_evidence = FormalWorldEconomicEvidenceCatalog.new()
@@ -76,7 +76,7 @@ func build(organization_state_value: OrganizationState = null, organization_pers
 			else "Organization composition is invalid"
 		)
 		return _failure(r)
-	if not r.world.provenance.load_current():
+	if not r.world.provenance.is_loaded() and not r.world.provenance.load_current():
 		r.error = r.world.provenance.initialization_error
 		return _failure(r)
 	if not r.world.historical_evidence.configure(
@@ -99,7 +99,7 @@ func build(organization_state_value: OrganizationState = null, organization_pers
 		return _failure(r)
 	if not _configure_population_composition(r,opening_source_id):
 		return _failure(r)
-	if not _configure_formal_person_composition(r,opening_source_id):
+	if not _configure_formal_person_composition(r,opening_source_id,native_economy_config):
 		return _failure(r)
 	if not _configure_personal_economy_composition(r, livelihood):
 		return _failure(r)
@@ -243,7 +243,7 @@ func _configure_population_composition(r: WorldBuildResult, opening_source_id: S
 		return false
 	return true
 
-func _configure_formal_person_composition(r: WorldBuildResult, source_id: String) -> bool:
+func _configure_formal_person_composition(r: WorldBuildResult, source_id: String, native_request: Dictionary={}) -> bool:
 	if not r.world.population_input_view.is_configured():
 		r.error = "Formal Population input is not configured"
 		return false
@@ -279,23 +279,37 @@ func _configure_formal_person_composition(r: WorldBuildResult, source_id: String
 		person_ids_to_materialize.assign(r.organization_person_reference_ids)
 	else:
 		person_ids_to_materialize.append(str(opening.person_id))
+	var corporate_person: String=""
+	var native_settings: Dictionary=native_request.get("configuration",native_request)
+	var resident_openings: Dictionary = {}
+	if not r.explicit_organization_reference_injection and native_settings.has("opening_residents"):
+		if source_id != DEFAULT_FORMAL_PERSON_TERRITORY_ID or not EconomySliceConfig.valid_opening_residents(native_settings):
+			r.error = "Invalid ordinary resident Opening"
+			return false
+		for resident: Dictionary in native_settings["opening_residents"]:
+			resident_openings[resident["person_id"]] = resident
+			person_ids_to_materialize.append(resident["person_id"])
+	if native_settings.has("corporate_decisions") and not r.explicit_organization_reference_injection:
+		corporate_person="person:formal_generated_country_fra_corporate_manager"
+		person_ids_to_materialize.append(corporate_person)
 	for index: int in person_ids_to_materialize.size():
 		var person_id: String = person_ids_to_materialize[index]
 		var claim_id := (
 			DEFAULT_FORMAL_PERSON_CLAIM_ID
 			if person_id == DEFAULT_FORMAL_PERSON_ID
-			else "formal_population_claim:explicit:%04d" % index if r.explicit_organization_reference_injection else "formal_population_claim:"+population_unit+":0001"
+			else "formal_population_claim:corporate_manager:0001" if person_id==corporate_person else "formal_population_claim:explicit:%04d" % index if r.explicit_organization_reference_injection else "formal_population_claim:"+population_unit+":0001"
 		)
+		var demographic: Dictionary={"birth_year":1870,"sex":"unspecified","basis":"generated_simulation_assumption","joint_distribution_claimed":false}
+		if resident_openings.has(person_id):
+			claim_id = resident_openings[person_id]["claim_id"]
+			demographic["opening_cash_policy"] = "ZERO_CASH_GENERATED_RESIDENT"
+			demographic["opening_configuration_id"] = native_settings["case_id"]
+		if person_id==corporate_person:demographic["opening_cash_policy"]="ZERO_CASH_DEVELOPMENT_CORPORATE_MANAGER"
 		if not r.world.person_overlay.materialize(
 			person_id,
 			claim_id,
 			population_unit,
-			{
-				"birth_year": 1870,
-				"sex": "unspecified",
-				"basis": "generated_simulation_assumption",
-				"joint_distribution_claimed": false,
-			},
+			demographic,
 			str(opening.place_id),
 			{
 				"kind": "generated",
@@ -318,6 +332,13 @@ func _configure_formal_person_composition(r: WorldBuildResult, source_id: String
 	if not r.explicit_organization_reference_injection:
 		r.organization_person_reference_ids = r.world.person_overlay.person_ids()
 		r.organization_place_reference_ids = [str(opening.place_id)]
+		var configuration: Variant=native_request.get("configuration",native_request)
+		if configuration is Dictionary and configuration.get("capital_resale",{}) is Dictionary and configuration.get("capital_resale",{}).has("authority_places"):
+			if not EconomySliceConfig.valid(configuration): r.error="Invalid explicit capital organization place scope";return false
+			for capital_place: String in configuration["capital_resale"]["authority_places"]:
+				if not r.world.spatial_catalog.has_place(capital_place): r.error="Unknown capital organization place";return false
+				if capital_place not in r.organization_place_reference_ids: r.organization_place_reference_ids.append(capital_place)
+			r.organization_place_reference_ids.sort()
 	if not _bind_organization_reference_catalog(r):
 		return false
 	r.world.player_state = VNextPlayerState.new()
@@ -449,11 +470,17 @@ func _failure(r: WorldBuildResult) -> WorldBuildResult:
 	push_error("WORLD BOOTSTRAP ERROR: " + r.error)
 	return r
 
-static func prepare_presentation_content(provenance: HistoricalProvenanceFoundation) -> HistoricalLoader:
+static func prepare_presentation_content(provenance: HistoricalProvenanceFoundation, stage: Callable = Callable(), current: Callable = Callable()) -> HistoricalLoader:
 	# Admission belongs to world installation. Dated display queries run on the
 	# resulting Content object, without re-entering bootstrap during UI refresh.
 	var content := HistoricalLoader.new()
-	content.load_current(provenance.gate())
+	if provenance==null or not provenance.is_loaded():
+		content.errors.append("历史来源目录尚未成功加载")
+		return content
+	if not content.load_current(provenance.gate(),stage,current):
+		if content.errors.is_empty(): content.errors.append("地图资料准备已取消或未完成")
+		return content # Explicit failure object; callers must check loaded/errors.
+	content.provenance = provenance
 	return content
 
 ## Publish ownership only after the slice, its accounts and physical state exist.
@@ -478,6 +505,26 @@ func _prepare_development_business_identities(r: WorldBuildResult, settings: Dic
 			if not candidate.add_member(id,manager) or not candidate.define_position(id,"economic_operator","经营管理者（开发配置）",1) or not candidate.create_appointment(id,"opening_operator",manager,"economic_operator"):
 				r.world.native_economy_error="Development company manager lacks actual host identity: "+manager
 				return false
+			# Explicit player-capital scenarios grant each financial/disposal scope
+			# separately to the actual appointment. A management title alone grants none.
+			if settings.get("case_id") in ["FORMAL_PLAYER_CAPITAL_TRADE_DEVELOPMENT","FORMAL_PLAYER_CAPITAL_SALE_DEVELOPMENT","FORMAL_ECONOMY_FEEDBACK_DEVELOPMENT"]:
+				for permission: Dictionary in settings["capital_resale"]["authorities"]:
+					if permission["firm"]!=firm["id"] or permission["controller"]!=manager or not str(permission["root_authority"]).begins_with("authority:development:player_capital:"): continue
+					var operation: String=permission["operations"][0]
+					var grant:={"authority_id":permission["root_authority"],"holder":{"kind":"position","organization_id":id,"local_id":"economic_operator","person_id":""},"represented_entity":id,"operation":"economy.procure" if operation=="acquire" else "economy.capital."+operation,"target_scope":[firm["id"]],"spatial_scope":[firm["sites"][0]["place_id"]],"subject_scope":["capital_asset"],"amount_or_quantity_limit":float(permission["limit"]),"valid_from":int(permission["start_minute"])/60,"valid_until":int(permission["end_minute"])/60,"basis":{"kind":"generated_simulation_assumption","id":permission["id"]},"revocable":true,"delegable":false,"exclusive_or_concurrent":"concurrent","additional_constraints":{"allowed_stages":["domain_execution"],"required_procedure_id":"","notes":"Exact firm, primary place, capital category and operation. Actual premises and routes remain native-domain checks. No borrowing authority."},"accountability":{"organization_id":id,"relation_id":""},"revoked_at":-1}
+					if not candidate.add_authority_grant(grant):
+						r.world.native_economy_error="Invalid separate player capital grant: "+str(permission["root_authority"])
+						return false
+			var program: Dictionary=settings.get("equity_primary",{})
+			if not program.is_empty() and program["issuer"]==firm["id"] and program["controller"]==manager:
+				var grant: Dictionary={"authority_id":program["authority_id"],"holder":{"kind":"position","organization_id":id,"local_id":"economic_operator","person_id":""},"represented_entity":id,"operation":"economy.equity.issue","target_scope":[firm["id"]],"spatial_scope":[firm["sites"][0]["place_id"]],"subject_scope":[program["asset_id"]],"amount_or_quantity_limit":float(program["max_new_shares"]),"valid_from":int(program["start"])/60,"valid_until":int(program["end"])/60,"basis":{"kind":"generated_simulation_assumption","id":"primary:regional_food:founders_consent"},"revocable":true,"delegable":false,"exclusive_or_concurrent":"concurrent","additional_constraints":{"allowed_stages":["domain_execution"],"required_procedure_id":"","notes":"Bounded founder-consented primary program; fixed denomination/price and project checked by AssetMarket. No automatic governance, borrowing or payout authority."},"accountability":{"organization_id":id,"relation_id":""},"revoked_at":-1}
+				if not candidate.add_authority_grant(grant):
+					r.world.native_economy_error="Invalid separate primary issuance grant";return false
+			var distribution: Dictionary=settings.get("equity_distribution",{})
+			if not distribution.is_empty() and distribution["issuer"]==firm["id"] and distribution["controller"]==manager:
+				var grant: Dictionary={"authority_id":distribution["authority_id"],"holder":{"kind":"position","organization_id":id,"local_id":"economic_operator","person_id":""},"represented_entity":id,"operation":"economy.equity.distribute","target_scope":[firm["id"]],"spatial_scope":[firm["sites"][0]["place_id"]],"subject_scope":[distribution["asset_id"]],"amount_or_quantity_limit":float(distribution["max_total"]),"valid_from":int(distribution["start"])/60,"valid_until":int(distribution["end"])/60,"basis":{"kind":"generated_simulation_assumption","id":"distribution:regional_food:finite_founder_consent"},"revocable":true,"delegable":false,"exclusive_or_concurrent":"concurrent","additional_constraints":{"allowed_stages":["domain_execution"],"required_procedure_id":"","notes":"Bounded cash distribution; not net profit or historical company law. Separate from issuance and management."},"accountability":{"organization_id":id,"relation_id":""},"revoked_at":-1}
+				if not candidate.add_authority_grant(grant):
+					r.world.native_economy_error="Invalid separate cash distribution grant";return false
 	r.world.organization_state=candidate
 	r.world.authorization_check=AuthorizationCheck.new(candidate)
 	return true
@@ -502,7 +549,14 @@ func _configure_native_economy(r: WorldBuildResult, settings: Dictionary) -> voi
 	if not settings.has("residence_permissions") and settings.get("case_id") in ["DEVELOPMENT_MULTI_SITE_LIVING", "FORMAL_REGIONAL_DEVELOPMENT"]:
 		settings["residence_permissions"] = EconomyDevelopmentConfig.formal_residence_permissions(r.world, settings)
 	var organization_before := r.world.organization_state.snapshot()
+	for opening: Dictionary in settings.get("opening_organizations", []):
+		if r.world.game_clock.total_minutes() != 0 or not r.world.organization_state.create_organization(opening.organization_id, "company", opening.place_id):
+			r.world.organization_state.restore(organization_before)
+			r.world.population_state.restore(population_before)
+			r.world.native_economy_error = "Ordinary opening organization could not be installed"
+			return
 	if not _prepare_development_business_identities(r,settings):
+		r.world.organization_state.restore(organization_before)
 		r.world.population_state.restore(population_before)
 		return
 	var native := EconomyR1Slice.new()

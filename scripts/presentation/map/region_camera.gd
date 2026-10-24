@@ -100,15 +100,22 @@ func rotate_at(unit: Vector3, pixel: Vector2, angle: float, viewport_size: Vecto
 	origin = next_origin
 	return true
 
-func zoom_at(pixel: Vector2, factor: float, viewport_size: Vector2) -> void:
+func zoom_at(pixel: Vector2, factor: float, viewport_size: Vector2, picked_unit: Vector3 = Vector3.ZERO, minimum_mpp: float = 2.0) -> void:
 	var old_scale := km_per_pixel
-	var next_scale := maxf(local_min_km_per_pixel if local_active else MIN_KM_PER_PIXEL, km_per_pixel * factor)
+	var floor_scale := maxf(local_min_km_per_pixel if local_active else MIN_KM_PER_PIXEL,minimum_mpp*.001)
+	# Panning into coarse coverage never forcibly zooms the camera backwards.
+	floor_scale = minf(old_scale,floor_scale)
+	if factor<1.0: factor=lerpf(1.0,factor,maxf(.2,smoothstep(floor_scale,floor_scale*2.0,old_scale)))
+	var next_scale := maxf(floor_scale,km_per_pixel*factor)
 	if unit_at(pixel).is_zero_approx(): pixel = valid_anchor(viewport_size).pixel
 	var next_origin := pixel + (origin - pixel) * old_scale / next_scale
+	if not picked_unit.is_zero_approx():
+		next_origin = pixel-RegionProjection.screen_axes(bearing)*(RegionProjection.forward(picked_unit,tangent_frame)/next_scale)
 	km_per_pixel = next_scale
 	origin = next_origin
-	# Translation constraints must not veto a legal scale change.
-	if factor<1.0: constrain(viewport_size)
+	# Both directions must keep the centre inside this chart's finite domain.
+	# The controller performs the WORLD handoff using that same centre.
+	constrain(viewport_size)
 
 func constrain(viewport_size: Vector2) -> void:
 	# Every viewport corner remains in the finite projected disc. Zooming out

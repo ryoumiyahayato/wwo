@@ -1,0 +1,25 @@
+{
+  "generator": "tools/map/build_admin_strokes_r48.py",
+  "source": "TRF-GIS existing 1900 annual references, CC BY 4.0",
+  "ownership": "Higher level, then stable ID; exact common segments only. No snapping or new political clipping.",
+  "counts": {
+    "2": {
+      "units": 362,
+      "input_m": 88248056.6718811,
+      "unique_m": 23621166.10155832,
+      "segments": 17296
+    },
+    "3": {
+      "units": 2936,
+      "input_m": 220324786.68288523,
+      "unique_m": 69621735.17183523,
+      "segments": 53816
+    },
+    "4": {
+      "units": 20,
+      "input_m": 182355.69037143266,
+      "unique_m": 99701.49440540311,
+      "segments": 91
+    }
+  }
+}

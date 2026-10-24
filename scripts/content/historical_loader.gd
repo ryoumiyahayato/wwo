@@ -6,6 +6,8 @@ var geography := GeographyLoader.new()
 var administration := AdministrativeLoader.new()
 var evidence := EvidenceLoader.new()
 var errors: Array[String] = []
+var loaded: bool = false
+var provenance: HistoricalProvenanceFoundation
 const REGIONS_PATH: String = "res://data/presentation/arabia_political_map_regions_1900.json"
 var _display_document: Dictionary = {}
 var _geographic_records: Dictionary = {}
@@ -19,11 +21,28 @@ func remember_geographic_reference(reference: Dictionary) -> void:
 	# A selected display reference is not inserted into SpatialWorld or politics.
 	_selected_display_place = reference.duplicate(true)
 
-func load_current(gate: HistoricalProvenanceGate) -> bool:
-	geography.load_current(gate)
-	administration.load_current(gate)
-	evidence.load_current()
+func load_current(gate: HistoricalProvenanceGate, stage: Callable = Callable(), current: Callable = Callable()) -> bool:
+	loaded = false
+	if stage.is_valid(): stage.call("正在读取历史地图资料")
+	var geography_ok := geography.load_current(gate)
+	errors.append_array(geography.errors)
+	if not geography_ok and geography.errors.is_empty(): errors.append("必需历史地理资料读取失败")
+	if not errors.is_empty(): return false
+	if current.is_valid() and not current.call(): return false
+	if stage.is_valid(): stage.call("正在读取历史行政资料")
+	var administration_ok := administration.load_current(gate)
+	errors.append_array(administration.errors)
+	if not administration_ok and administration.errors.is_empty(): errors.append("必需历史行政资料读取失败")
+	if not errors.is_empty(): return false
+	if current.is_valid() and not current.call(): return false
+	if stage.is_valid(): stage.call("正在读取国家显示资料")
+	var evidence_ok := evidence.load_current()
+	errors.append_array(evidence.errors)
+	if not evidence_ok and evidence.errors.is_empty(): errors.append("必需国家显示资料读取失败")
+	if not errors.is_empty(): return false
 	_display_document = ContentDocument.read(REGIONS_PATH, errors)
+	if not errors.is_empty(): return false
+	if current.is_valid() and not current.call(): return false
 	geometry_content = MapGeometryContent.new(geography.parts_by_feature, geography.presentation)
 	for annotation: Dictionary in geography.presentation.get("geographic_annotations", {}).get("annotations", []) as Array:
 		var record := annotation.duplicate()
@@ -34,10 +53,8 @@ func load_current(gate: HistoricalProvenanceGate) -> bool:
 	for metadata: Variant in [_display_document, geography.presentation, evidence.flag_records, administration.authority_assignments, administration.france_identity, administration.reference_documents]:
 		_collect_display_dates(metadata)
 	_display_change_dates.sort()
-	errors.append_array(geography.errors)
-	errors.append_array(administration.errors)
-	errors.append_array(evidence.errors)
-	return errors.is_empty()
+	loaded = errors.is_empty()
+	return loaded
 
 func _collect_display_dates(metadata: Variant) -> void:
 	if metadata is Dictionary:
@@ -45,7 +62,9 @@ func _collect_display_dates(metadata: Variant) -> void:
 			if str(key) in ["valid_from", "valid_to", "exists_from", "exists_to"]:
 				var date := str(metadata[key])
 				if date.length()==10 and not date in _display_change_dates: _display_change_dates.append(date)
-			elif metadata[key] is Dictionary or metadata[key] is Array:
+			# GeoJSON coordinates contain numbers, never dated display metadata.
+			# Do not visit every boundary vertex to find valid_from/valid_to.
+			elif str(key)!="coordinates" and (metadata[key] is Dictionary or metadata[key] is Array):
 				_collect_display_dates(metadata[key])
 	elif metadata is Array:
 		for entry: Variant in metadata:
@@ -93,7 +112,16 @@ func resolve_map(time: Dictionary, current_units: Array[Dictionary]) -> Resolved
 		var texture := evidence.visual_resolver.texture_for(resolved)
 		if texture != null:
 			textures[owner] = texture
-	return ResolvedMapContent.new(date, units, document, visuals, textures)
+	var place_symbols: Dictionary = {}
+	# Only explicit existing place links. A missing chef-lieu locator is not
+	# manufactured from a name or a department polygon's centroid.
+	var france := administration.france_identity
+	if date>=str(france.get("valid_from","1900-01-01")) and date<str(france.get("valid_to","1901-01-01")):
+		for identity: Dictionary in france.get("units",[]) as Array:
+			var place_id := str(identity.get("capital_place_id",""))
+			if place_id.is_empty(): continue
+			place_symbols[place_id] = {"icon":"admin_primary","administrative_id":identity.id,"source":"france_administrative_identity_1900","level":int(identity.get("level",1))}
+	return ResolvedMapContent.new(date, units, document, visuals, textures,place_symbols)
 
 func resolve_world_page(time: Dictionary, polity: Dictionary, selected_place_id: String = "") -> WorldPageContent:
 	var date := _date_key(time)

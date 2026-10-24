@@ -41,6 +41,19 @@ var _preview_worker: Thread
 var _loading_layer: Control
 var _loading_label: Label
 var _launch_presentation: Dictionary = {}
+var _preview_mutex := Mutex.new()
+var _preview_generation: int = 0
+var _preview_stage: String = ""
+var _displayed_preview_stage: String = ""
+var _preview_stage_since: int = 0
+var _preview_waiting: bool = false
+var _preview_installing: bool = false
+var _preview_display_waiting: bool = false
+var _preview_checking_display: bool = false
+var _pending_preview: Dictionary = {}
+var _pending_launch: WorldBuildResult
+var _loading_back: Button
+var _map_status_generation: int = 0
 
 
 func _ready() -> void:
@@ -64,43 +77,164 @@ func _ready() -> void:
 	_show_page("home")
 
 func _prepare_preview() -> void:
-	if _renderer!=null or _preview_worker!=null: return
-	_set_loading(true,"正在准备地图")
+	if _renderer!=null or _entering or _preview_waiting: return
+	if _preview_worker!=null:
+		_preview_error = "上一地图请求仍在结束，请稍后点击重新准备。"
+		_show_page("selection")
+		return
+	_preview_error = ""
+	_preview_waiting = true
+	_preview_ready = false
+	_preview_mutex.lock()
+	_preview_generation += 1
+	var generation := _preview_generation
+	_preview_mutex.unlock()
+	_report_preview_stage("正在读取地图资料",generation)
+	_displayed_preview_stage = ""
+	_set_loading(true,"正在读取地图资料")
 	_preview_worker = Thread.new()
-	var error := _preview_worker.start(_read_preview)
+	var error := _preview_worker.start(_read_preview.bind(generation))
 	if error!=OK:
 		_preview_worker = null
-		_preview_error = "地图读取失败："+error_string(error)
-		_set_loading(false)
+		_fail_preview("无法启动地图准备线程："+error_string(error))
 	else: set_process(true)
 
-static func _read_preview() -> Dictionary:
+func _preview_current(generation: int) -> bool:
+	_preview_mutex.lock()
+	var active := generation==_preview_generation
+	_preview_mutex.unlock()
+	return active
+
+func _report_preview_stage(stage: String, generation: int) -> void:
+	# Worker writes plain status only. UI and scene-tree operations stay here.
+	_preview_mutex.lock()
+	if generation==_preview_generation: _preview_stage = stage
+	_preview_mutex.unlock()
+
+func _read_preview(generation: int) -> Dictionary:
+	var stage := _report_preview_stage.bind(generation)
+	var current := _preview_current.bind(generation)
 	var provenance := HistoricalProvenanceFoundation.new()
 	if not provenance.load_current(): return {"error":provenance.initialization_error}
-	var prepared := WorldBootstrap.prepare_presentation_content(provenance)
+	if not current.call(): return {"cancelled":true}
+	var prepared := WorldBootstrap.prepare_presentation_content(provenance,stage,current)
+	if not current.call(): return {"cancelled":true}
+	if not prepared.loaded or not prepared.errors.is_empty(): return {"error":"\n".join(prepared.errors)}
+	stage.call("正在准备历史国家")
 	var catalog := HistoricalPoliticalEvidenceCatalog.new()
 	var identities := RuntimePoliticalEntityRegistry.new()
 	if not catalog.configure(HistoricalPoliticalEvidenceCatalog.DEFAULT_PATH,provenance.gate()): return {"error":catalog.initialization_error}
 	if not identities.configure(catalog): return {"error":identities.initialization_error}
-	return {"error":"","content":prepared,"politics":RuntimePoliticalEntityView.new(identities.snapshot()),
-		"evidence":HistoricalPoliticalEvidenceView.new(catalog.read_only_snapshot()),"meshes":GlobeRenderer.prepare_source_geometry(prepared.geometry_content)}
+	if not current.call(): return {"cancelled":true}
+	stage.call("正在准备历史范围与边界")
+	var meshes := GlobeRenderer.prepare_source_geometry(prepared.geometry_content)
+	if not current.call(): return {"cancelled":true}
+	var politics := RuntimePoliticalEntityView.new(identities.snapshot())
+	var evidence := HistoricalPoliticalEvidenceView.new(catalog.read_only_snapshot())
+	var date := GameClock.new().current_date()
+	stage.call("正在读取国家旗帜与显示资料")
+	var display := prepared.resolve_map(date,CurrentWorldPoliticalProjection.map_units(politics,evidence))
+	if not current.call(): return {"cancelled":true}
+	return {"error":"","content":prepared,"politics":politics,"evidence":evidence,"meshes":meshes,"date":date,"display":display}
 
-func _install_preview(prepared: Dictionary, for_launch: bool = false) -> void:
-	if not str(prepared.error).is_empty():
-		_preview_error = "地图读取失败："+str(prepared.error)
-		_set_loading(false)
-		_show_page(_page)
-		return
+static func _preview_result_error(value: Variant) -> String:
+	if not value is Dictionary: return "地图准备线程未返回有效结果，请查看游戏错误日志。"
+	var prepared := value as Dictionary
+	if not prepared.get("error") is String: return "地图准备结果缺少明确的完成状态。"
+	if not str(prepared.error).is_empty(): return str(prepared.error)
+	if not prepared.get("content") is HistoricalLoader: return "地图准备结果缺少历史资料。"
+	var loaded_content := prepared.content as HistoricalLoader
+	if not loaded_content.errors.is_empty(): return "\n".join(loaded_content.errors)
+	if not loaded_content.loaded or loaded_content.geometry_content==null: return "必需历史地图尚未准备成功。"
+	if not prepared.get("politics") is RuntimePoliticalEntityView or not prepared.get("evidence") is HistoricalPoliticalEvidenceView:
+		return "地图准备结果缺少历史国家身份。"
+	if not prepared.get("meshes") is Dictionary: return "地图准备结果缺少历史几何。"
+	if prepared.has("display") and not prepared.display is ResolvedMapContent: return "国家显示资料返回类型无效。"
+	if prepared.has("date"):
+		if not prepared.date is Dictionary: return "地图准备结果的日期格式无效。"
+		for key: String in ["year","month","day"]:
+			if typeof((prepared.date as Dictionary).get(key)) not in [TYPE_INT,TYPE_FLOAT]: return "地图准备结果缺少日期字段："+key
+	var meshes := prepared.meshes as Dictionary
+	var ids := loaded_content.geometry_content.feature_ids()
+	if ids.is_empty(): return "必需历史地图没有有效的地理要素。"
+	for id: String in ids:
+		if not meshes.get(id) is Dictionary: return "历史地图缺少几何："+id
+		var mesh := meshes[id] as Dictionary
+		if not mesh.get("parts") is Array or not mesh.get("borders") is Array or not mesh.get("uv_bounds") is Rect2 or not mesh.get("flag_bounds") is Rect2:
+			return "历史地图几何准备未完成："+id
+		if (mesh.parts as Array).is_empty(): return "历史地图没有可用的查询多边形："+id
+	return ""
+
+func _fail_preview(reason: String) -> void:
+	_preview_ready = false
+	_preview_waiting = false
+	_preview_installing = false
+	_preview_display_waiting = false
+	_preview_checking_display = false
+	_pending_preview = {}
+	_pending_launch = null
+	_launch_presentation = {}
+	_entering = false
+	_preview_error = "地图准备失败："+reason
+	# Release input before renderer cleanup can invoke any of its callbacks.
+	_set_loading(false)
+	if is_instance_valid(_status):
+		_status.text = _preview_error
+		_status.visible = true
+	_countries.clear()
+	_politics = null
+	_evidence = null
+	_content = null
+	if is_instance_valid(_renderer):
+		_renderer.hide()
+		_renderer.queue_free()
+	_renderer = null
+	_show_page(_page)
+	set_process(_preview_worker!=null or _worker!=null)
+
+func _retry_preview() -> void:
+	if _entering: return
+	_prepare_preview()
+
+func _leave_preview_preparation() -> void:
+	if _entering or not _preview_waiting: return
+	_preview_mutex.lock()
+	_preview_generation += 1
+	_preview_mutex.unlock()
+	_preview_waiting = false
+	_preview_display_waiting = false
+	_pending_preview = {}
+	_preview_error = "地图准备已取消，可重新准备；旧线程结束前不会启动新请求。"
+	_set_loading(false)
+	if is_instance_valid(_renderer):
+		_renderer.hide()
+		_renderer.queue_free()
+		_renderer = null
+	_preview_ready = false
+	_show_page("home")
+	# Cooperative cancellation only. Never join/kill a live worker on this path.
+	set_process(_preview_worker!=null)
+
+func _install_preview(prepared: Dictionary) -> bool:
+	var error := _preview_result_error(prepared)
+	if not error.is_empty():
+		_fail_preview(error)
+		return false
 	_content = prepared.content as HistoricalLoader
 	_politics = prepared.politics as RuntimePoliticalEntityView
 	_evidence = prepared.evidence as HistoricalPoliticalEvidenceView
 	_renderer = MAP_SCENE.instantiate() as GlobeRenderer
+	if _renderer==null:
+		_fail_preview("无法创建地图显示节点。")
+		return false
 	_renderer.modulate = Color(0.80,0.83,0.79)
 	add_child(_renderer)
 	move_child(_renderer,1)
-	_renderer.bind_controller(_controller)
 	_renderer.relief.decode_asset = GeographyLoader.decode_relief
 	_renderer.input_blocked = _blocks_map
+	_renderer.map_notice.connect(func(message: String) -> void:
+		if _preview_ready and _page=="selection" and is_instance_valid(_status):
+			_show_map_status(message))
 	_renderer.label_exclusions = _map_occlusions
 	_renderer.configure(_content.geometry_content,_controller)
 	_renderer.install_source_geometry(prepared.meshes)
@@ -108,20 +242,29 @@ func _install_preview(prepared: Dictionary, for_launch: bool = false) -> void:
 	_renderer.strategic_content = _content.strategic_spatial
 	var date := prepared.get("date",GameClock.new().current_date()) as Dictionary
 	var units := CurrentWorldPoliticalProjection.map_units(_politics,_evidence)
-	# CPU source geometry was prepared by the existing menu content worker.
-	# GPU objects stay on the UI thread; the oil painting remains visible.
-	await get_tree().process_frame
-	_renderer.refresh(_politics,_evidence,null,[],date,_content.resolve_map(date,units))
+	# Scene installation is synchronous. The next normal frame will draw it;
+	# menu readiness must not depend on a RenderingServer signal.
+	var display := prepared.display as ResolvedMapContent if prepared.has("display") else _content.resolve_map(date,units)
+	_renderer.refresh(_politics,_evidence,null,[],date,display)
+	_countries.clear()
 	for unit: Dictionary in units:
 		if not str(unit.get("geometry_feature_id","")).is_empty(): _countries.append(unit)
 	_countries.sort_custom(func(a: Dictionary,b: Dictionary) -> bool: return str(a.get("name_zh","")) < str(b.get("name_zh","")))
-	_preview_ready = true
+	# refresh clears this existing flag only after source binding completes.
+	if _countries.is_empty() or _renderer.political.records.is_empty() or _renderer._source_dirty or not _renderer.is_node_ready():
+		_fail_preview("历史国家或显示几何未完整安装，请查看游戏错误日志。")
+		return false
 	_controller.select(_country_id)
-	_focus_country()
-	await RenderingServer.frame_post_draw
-	if not for_launch:
-		_set_loading(false)
-		_show_page(_page)
+	# Establish the actual initial demand before observing installation.
+	# The focus button remains disabled until the same demand is committed.
+	if not _entering:
+		var anchor := _renderer.political.anchors.get(_country_id,Vector3.ZERO) as Vector3
+		if not anchor.is_zero_approx():
+			_controller.focus(anchor)
+			_controller.set_world_zoom(0.86)
+	_preview_display_waiting = true
+	_renderer.queue_redraw()
+	return true
 
 func _set_loading(enabled: bool, text: String = "正在进入世界") -> void:
 	if _loading_layer==null:
@@ -161,8 +304,18 @@ func _set_loading(enabled: bool, text: String = "正在进入世界") -> void:
 		strip.material = material
 		strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_loading_layer.add_child(strip)
+		_loading_back = Button.new()
+		_loading_back.text = "返回主菜单"
+		_loading_back.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		_loading_back.offset_left = -200
+		_loading_back.offset_top = -110
+		_loading_back.offset_right = -48
+		_loading_back.offset_bottom = -76
+		_loading_back.pressed.connect(_leave_preview_preparation)
+		_loading_layer.add_child(_loading_back)
 	_loading_label.text = text
 	_loading_layer.visible = enabled
+	_loading_back.visible = false # Normal preparation has no redundant return button.
 
 func _show_page(page: String) -> void:
 	if _entering: return
@@ -171,7 +324,7 @@ func _show_page(page: String) -> void:
 	_country_name = null
 	_enter_button = null
 	_person_choice = null
-	if page=="selection" and _renderer==null: _prepare_preview.call_deferred()
+	if page=="selection" and _renderer==null and _preview_error.is_empty() and not _preview_waiting: _prepare_preview.call_deferred()
 	($Painting as TextureRect).visible = page!="selection" or not _preview_ready
 	($Shade as ColorRect).visible = page!="selection" or not _preview_ready
 	($Version as Label).visible = page=="home"
@@ -194,7 +347,7 @@ func _show_page(page: String) -> void:
 	add_child(_panel)
 	_panel.minimum_size_changed.connect(_position_panel,CONNECT_DEFERRED)
 	var frame_column := VBoxContainer.new()
-	frame_column.add_theme_constant_override("separation",12)
+	frame_column.add_theme_constant_override("separation",8 if page=="selection" else 12)
 	_panel.add_child(frame_column)
 	_column = VBoxContainer.new()
 	_column.add_theme_constant_override("separation",10)
@@ -212,6 +365,9 @@ func _show_page(page: String) -> void:
 			_button("设置",_show_page.bind("settings"))
 			_button("退出",get_tree().quit)
 		"selection":
+			if not _preview_error.is_empty():
+				_button("重新准备地图",_retry_preview)
+				_button("返回首页",_show_page.bind("home"))
 			var flag_row := HBoxContainer.new()
 			_column.add_child(flag_row)
 			_flag = TextureRect.new()
@@ -239,7 +395,6 @@ func _show_page(page: String) -> void:
 			_person_note = _text("",13)
 			_column = _footer
 			_enter_button = _button("进入世界",_enter_world.bind("new",1),false)
-			_button("返回主菜单",_show_page.bind("home"))
 			_update_country()
 		"load":
 			_text("加载",25)
@@ -249,11 +404,19 @@ func _show_page(page: String) -> void:
 				if not bool(row.empty): any_save = true
 			if not any_save: _text("暂无正式存档。",14)
 			for row: Dictionary in rows:
-				_button(str(row.name),_enter_world.bind("load",int(row.slot)),not bool(row.empty))
+				var actions := HBoxContainer.new()
+				_column.add_child(actions)
+				var load_button := _button(str(row.name),_enter_world.bind("load",int(row.slot)),not bool(row.empty))
+				load_button.reparent(actions)
+				load_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				var info_button := _button("资料",_show_slot_info.bind(row),not bool(row.empty))
+				info_button.reparent(actions)
+				info_button.custom_minimum_size.x = 54
 				var detail := _text(FormalPersistence.summary_text(row),11)
+				detail.custom_minimum_size.y = 28
 				detail.max_lines_visible = 2
-				detail.clip_text = true
-				detail.tooltip_text = FormalPersistence.summary_text(row)
+				detail.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+				detail.tooltip_text = FormalPersistence.details_text(row)
 			_button("返回",_show_page.bind("home"))
 		"themes":
 			_text("主题管理",25)
@@ -295,6 +458,20 @@ func _show_page(page: String) -> void:
 	_controller.suspend_motion()
 	_controller.appearance_changed.emit()
 
+func _show_map_status(message: String) -> void:
+	if _status.text==message and _status.visible: return
+	_map_status_generation += 1
+	_status.text = message
+	_status.tooltip_text = message
+	_status.visible = not message.is_empty()
+	var failed := "失败" in message or "无法" in message or "未安装" in message
+	if failed or "正在" in message or message.is_empty(): return
+	var generation := _map_status_generation
+	var label := _status
+	get_tree().create_timer(3.0,true,false,true).timeout.connect(func() -> void:
+		if generation==_map_status_generation and is_instance_valid(label) and label==_status:
+			label.visible = false)
+
 func _text(value: String,font_size: int) -> Label:
 	var label := Label.new()
 	label.text = value
@@ -302,6 +479,16 @@ func _text(value: String,font_size: int) -> Label:
 	label.add_theme_font_size_override("font_size",font_size)
 	_column.add_child(label)
 	return label
+
+func _show_slot_info(row: Dictionary) -> void:
+	var dialog := AcceptDialog.new()
+	dialog.title = str(row.name)+" · 存档资料"
+	dialog.dialog_text = FormalPersistence.details_text(row)
+	dialog.dialog_autowrap = true
+	add_child(dialog)
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	dialog.popup_centered(Vector2i(mini(620,int(size.x)-40),mini(440,int(size.y)-40)))
 
 func _button(value: String,callback: Callable,enabled: bool = true) -> Button:
 	var button := Button.new()
@@ -360,7 +547,7 @@ func _update_country() -> void:
 		_person_choice.set_item_metadata(0,str(opening.person_id))
 	_person_choice.disabled = not playable
 	_person_choice.visible = playable
-	_person_note.text = "游戏生成的普通人物，居住于"+str(opening.place_name)+"，暂无正式就业。" if playable else "该地区暂无可选人物。"
+	_person_note.text = "游戏生成的普通人物，居住于"+str(opening.place_name)+"，暂无正式就业。"+("进入后可自愿申请本地工坊岗位。" if opening.get("source_id")=="country_fra" else "") if playable else "该地区暂无可选人物。"
 	_enter_button.disabled = not playable or not _preview_ready
 	_position_panel.call_deferred()
 
@@ -369,12 +556,14 @@ func _focus_country() -> void:
 	var anchor := _renderer.political.anchors.get(_country_id,Vector3.ZERO) as Vector3
 	if anchor.is_zero_approx(): return
 	_controller.focus(anchor)
-	_controller.zoom = 0.86
-	_controller.initial_framing_pending = false
-	_controller.view_changed.emit()
+	_controller.set_world_zoom(0.86)
 
 func _enter_world(mode: String,slot: int) -> void:
 	if _entering: return
+	if _preview_worker!=null or _preview_waiting or _preview_installing:
+		_status.visible = true
+		_status.text = "上一地图请求仍在结束，请稍后再进入世界。"
+		return
 	var source_id := _politics.source_historical_id(_country_id) if _politics!=null else ""
 	var opening := WorldBootstrap.opening_profile(source_id)
 	if mode=="new" and (opening.is_empty() or _person_choice==null or _person_choice.item_count==0 or str(_person_choice.get_selected_metadata())!=str(opening.person_id)): return
@@ -388,42 +577,138 @@ func _enter_world(mode: String,slot: int) -> void:
 	_worker = Thread.new()
 	var error := _worker.start(_build_world.bind(mode,slot,_renderer==null,source_id))
 	if error!=OK:
+		_worker = null
 		_entering = false
 		_set_loading(false)
 		_status.text = "无法准备世界："+error_string(error)
 	else: set_process(true)
 
 func _build_world(mode: String,slot: int, prepare_map: bool, source_id: String) -> WorldBuildResult:
-	var built := FormalPersistence.new().load_from_user(slot) if mode=="load" else WorldBootstrap.new().build(null,[],[],FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT,true,{},source_id)
+	var native_settings: Dictionary = EconomyDevelopmentConfig.formal_stratified_request() if mode=="new" and (OS.get_cmdline_user_args().has("--formal-capital-transport") or OS.get_cmdline_user_args().has("--formal-npc-capital-trade") or OS.get_cmdline_user_args().has("--formal-npc-capital-competition") or OS.get_cmdline_user_args().has("--formal-npc-capital-recirculation") or (EconomyDevelopmentConfig.player_capital_requested() or OS.get_cmdline_user_args().has("--formal-economy-feedback"))) else FormalEconomicOpening.for_source(source_id) if mode=="new" else {}
+	var prepared_sources: HistoricalProvenanceFoundation = _content.provenance if _content!=null and _content.loaded else null
+	var built := FormalPersistence.new().load_from_user(slot) if mode=="load" else WorldBootstrap.new().build(null,[],[],FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT,true,native_settings,source_id,prepared_sources)
 	if built.success and prepare_map:
 		var prepared := WorldBootstrap.prepare_presentation_content(built.world.provenance)
+		if not prepared.loaded or not prepared.errors.is_empty():
+			built.success = false
+			built.error = "地图资料准备失败："+"\n".join(prepared.errors)
+			return built
 		_launch_presentation = {"error":"","content":prepared,"date":built.world.game_clock.current_date(),
 			"politics":RuntimePoliticalEntityView.new(built.world.political_registry.snapshot()),
 			"evidence":built.world.historical_evidence_view,"meshes":GlobeRenderer.prepare_source_geometry(prepared.geometry_content)}
 	return built
 
 func _process(_delta: float) -> void:
-	if _preview_worker!=null and not _preview_worker.is_alive():
-		var prepared := _preview_worker.wait_to_finish() as Dictionary
-		_preview_worker = null
-		_install_preview(prepared)
-	if _worker==null:
-		if _preview_worker==null: set_process(false)
+	# Installation contains no await. If a script error interrupted it, this
+	# flag survives to the next normal UI tick, which releases the modal state.
+	if _preview_installing or _preview_checking_display:
+		_preview_checking_display = false
+		_fail_preview("地图安装中断，未完成初始化。请查看游戏错误日志后重试。")
 		return
-	if _worker.is_alive(): return
-	var built := _worker.wait_to_finish() as WorldBuildResult
-	_worker = null
-	set_process(false)
-	if built==null or not built.success:
+	if not _pending_preview.is_empty():
+		var prepared := _pending_preview
+		_pending_preview = {}
+		_preview_installing = true
+		var installed := _install_preview(prepared)
+		_preview_installing = false
+		if not installed:
+			if _preview_error.is_empty(): _fail_preview("地图安装未完成，请查看游戏错误日志后重试。")
+			return
+	if _preview_display_waiting:
+		if not is_instance_valid(_renderer):
+			_fail_preview("地图显示节点已经退出，未完成安装。")
+			return
+		_preview_checking_display = true
+		var status := _renderer.current_view_map_status()
+		_preview_checking_display = false
+		if str(status.state)=="failed":
+			_fail_preview(str(status.message))
+			return
+		_report_preview_stage(str(status.message),_preview_generation)
+		if str(status.state)=="installed":
+			_preview_display_waiting = false
+			_preview_waiting = false
+			_preview_ready = true
+			if _pending_launch!=null:
+				var launching := _pending_launch
+				_pending_launch = null
+				_finish_world_launch(launching)
+				return
+			_set_loading(false)
+			_show_page(_page)
+			if not (status.get("warnings",[]) as Array).is_empty():
+				_show_map_status("物理地图已就绪；可选图层失败："+"; ".join(status.warnings as Array))
+			elif bool(status.get("political_pending",false)):
+				_show_map_status("完整物理地图已就绪，国家着色正在后台准备。")
+	if _preview_worker!=null:
+		if not _preview_worker.is_started():
+			_preview_worker = null
+			_fail_preview("地图准备线程未成功启动。")
+			return
+		if not _preview_worker.is_alive():
+			var preview_result: Variant = _preview_worker.wait_to_finish()
+			_preview_worker = null
+			if _preview_waiting:
+				var error := _preview_result_error(preview_result)
+				if not error.is_empty():
+					_fail_preview(error)
+					return
+				_pending_preview = preview_result as Dictionary
+				_loading_label.text = "正在安装地图"
+				return # Allow the stage label to draw; install on the next UI tick.
+	if _preview_waiting and (not _entering or _preview_display_waiting):
+		_preview_mutex.lock()
+		var stage := _preview_stage
+		_preview_mutex.unlock()
+		if stage!=_displayed_preview_stage:
+			_displayed_preview_stage = stage
+			_preview_stage_since = Time.get_ticks_msec()
+		var prolonged := Time.get_ticks_msec()-_preview_stage_since>=15000
+		_loading_label.text = stage+ ("（仍在处理，可取消准备）" if prolonged else "")
+		_loading_back.text = "取消准备"
+		_loading_back.visible = prolonged and not _entering
+	if _worker==null:
+		set_process(_preview_worker!=null or not _pending_preview.is_empty() or _preview_display_waiting)
+		return
+	if not _worker.is_started():
+		_worker = null
 		_entering = false
 		_set_loading(false)
-		_status.text = "进入失败："+(built.error if built!=null else "未取得世界状态")
+		_status.text = "进入失败：世界准备线程未成功启动。"
+		set_process(false)
+		return
+	if _worker.is_alive(): return
+	var world_result: Variant = _worker.wait_to_finish()
+	_worker = null
+	if not world_result is WorldBuildResult:
+		_entering = false
+		_set_loading(false)
+		_status.text = "进入失败：世界准备线程未返回有效结果。"
+		set_process(false)
+		return
+	var built := world_result as WorldBuildResult
+	if not built.success:
+		_entering = false
+		_set_loading(false)
+		_status.text = "进入失败："+built.error
+		set_process(false)
 		return
 	if not _launch_presentation.is_empty():
-		await _install_preview(_launch_presentation,true)
+		_pending_launch = built
+		_pending_preview = _launch_presentation
 		_launch_presentation = {}
+		_preview_waiting = true
+		_set_loading(true,"正在安装地图")
+		return
+	_finish_world_launch(built)
+
+func _finish_world_launch(built: WorldBuildResult) -> void:
+	set_process(false)
 	var tree := get_tree()
 	tree.set_meta(PREPARED_WORLD_META,built)
+	# The built world now owns its foundation. Drop the menu handoff reference,
+	# including an older preview foundation when this launch restored a save.
+	if _content!=null: _content.provenance = null
 	tree.set_meta(LAUNCH_MODE_META,"prepared_"+_launch_mode)
 	_loading_layer.reparent(tree.root)
 	tree.set_meta(PREPARED_LOADING_META,_loading_layer)
@@ -498,5 +783,8 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _exit_tree() -> void:
+	_preview_mutex.lock()
+	_preview_generation += 1
+	_preview_mutex.unlock()
 	if _worker!=null and _worker.is_started(): _worker.wait_to_finish()
 	if _preview_worker!=null and _preview_worker.is_started(): _preview_worker.wait_to_finish()

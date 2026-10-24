@@ -1,0 +1,1222 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+PASS: Two-employer Opening binds original authority: idle 
+PASS: Opening has two independent employers
+PASS: Opening has two real executable jobs
+PASS: New employer starts with no second batch of bread
+PASS: Choice uses only delivered local notices, ordered by same-currency hourly wage
+PASS: Undelivered vacancy is not available knowledge
+PASS: Resident state restores at minute 0: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: NPC makes a legal application to an available known job
+PASS: Resident state restores at minute 1440: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+MULTI_DAY idle day=1 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 1, "satisfied": 0, "unmet": 1, "used_items": { "beans": 0, "bread": 0, "grain": 0 } } }, "work_hours": 0, "income": 0 } cash=0
+PASS: Resident state restores at minute 2880: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY idle day=2 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 2, "satisfied": 0, "unmet": 2, "used_items": { "beans": 0, "bread": 0, "grain": 0 } } }, "work_hours": 2, "income": 0 } cash=0
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY idle day=3 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 3, "satisfied": 0, "unmet": 3, "used_items": { "beans": 0, "bread": 0, "grain": 0 } } }, "work_hours": 4, "income": 0 } cash=0
+PASS: Resident state restores at minute 5760: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY idle day=4 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 4, "satisfied": 1, "unmet": 3, "used_items": { "beans": 0, "bread": 1, "grain": 0 } } }, "work_hours": 6, "income": 8 } cash=4
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY idle day=5 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 5, "satisfied": 2, "unmet": 3, "used_items": { "beans": 0, "bread": 2, "grain": 0 } } }, "work_hours": 8, "income": 16 } cash=10
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY idle day=6 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 6, "satisfied": 3, "unmet": 3, "used_items": { "beans": 0, "bread": 3, "grain": 0 } } }, "work_hours": 10, "income": 24 } cash=16
+PASS: Resident state restores at minute 10080: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY idle day=7 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 7, "satisfied": 4, "unmet": 3, "used_items": { "beans": 0, "bread": 4, "grain": 0 } } }, "work_hours": 12, "income": 32 } cash=22
+PASS: Autonomous employment produces real income, purchase and food use
+PASS: Public consumer view cannot read NPC private cash or inventory
+PASS: Unchanged known refusal does not cause daily repeated applications
+PASS: Replaying accepted application returns original result
+PASS: Replay does not hire or pay twice
+PASS: Own wage UI includes each existing claim once, including former employers
+PASS: Wage UI cannot disclose an uncontrolled resident's private claims
+PASS: Reading wage UI creates no command, time, money or claim
+PASS: Job selection is an ID, unaffected by list order and refresh
+MULTI_FINAL idle minute=10080 contracts={ "person:formal_generated_country_fra_0002": { "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } } wages={ "work:2:person:formal_generated_country_fra_0002": { "id": "work:2:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 2, "due_day": 4, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:3:person:formal_generated_country_fra_0002": { "id": "work:3:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 3, "due_day": 5, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:4:person:formal_generated_country_fra_0002": { "id": "work:4:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 4, "due_day": 6, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:5:person:formal_generated_country_fra_0002": { "id": "work:5:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 5, "due_day": 7, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:6:person:formal_generated_country_fra_0002": { "id": "work:6:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 8, "work_day": 6, "due_day": 8, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" }, "work:7:person:formal_generated_country_fra_0002": { "id": "work:7:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 8, "work_day": 7, "due_day": 9, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" } } stocks={ "person:formal_generated_country_fra_0001": { "beans": 0, "bread": 0, "grain": 0 }, "person:formal_generated_country_fra_0002": { "beans": 0, "bread": 1, "grain": 0 }, "site:opening_paris_bakery:paris": { "beans": 0, "bread": 7, "grain": 18 }, "site:opening_paris_workshop:paris": { "beans": 0, "bread": 12, "grain": 60 } } physical={ "person:formal_generated_country_fra_0001": { "produced": { "beans": 0, "bread": 0, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 0 } }, "person:formal_generated_country_fra_0002": { "produced": { "beans": 0, "bread": 0, "grain": 0 }, "used": { "beans": 0, "bread": 4, "grain": 0 } }, "site:opening_paris_bakery:paris": { "produced": { "beans": 0, "bread": 12, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 6 } }, "site:opening_paris_workshop:paris": { "produced": { "beans": 0, "bread": 0, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 0 } } }
+PASS: Two-employer Opening binds original authority: occupied 
+PASS: Opening has two independent employers
+PASS: Opening has two real executable jobs
+PASS: New employer starts with no second batch of bread
+PASS: Choice uses only delivered local notices, ordered by same-currency hourly wage
+PASS: Undelivered vacancy is not available knowledge
+PASS: Player chooses the actual selected employer
+PASS: Fixed one-person contracts reject a second job
+PASS: Player books actual work at their chosen firm
+PASS: Resident state restores at minute 0: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: NPC makes a legal application to an available known job
+PASS: Resident state restores at minute 1440: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY occupied day=1 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 1, "satisfied": 0, "unmet": 1, "used_items": { "beans": 0, "bread": 0, "grain": 0 } } }, "work_hours": 0, "income": 0 } cash=0
+PASS: Player second work period uses actual employer
+PASS: Resident state restores at minute 2880: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY occupied day=2 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 2, "satisfied": 0, "unmet": 2, "used_items": { "beans": 0, "bread": 0, "grain": 0 } } }, "work_hours": 2, "income": 0 } cash=0
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY occupied day=3 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 3, "satisfied": 1, "unmet": 2, "used_items": { "beans": 0, "bread": 1, "grain": 0 } } }, "work_hours": 4, "income": 6 } cash=2
+PASS: Resident state restores at minute 5760: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY occupied day=4 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 4, "satisfied": 2, "unmet": 2, "used_items": { "beans": 0, "bread": 2, "grain": 0 } } }, "work_hours": 6, "income": 12 } cash=6
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY occupied day=5 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 5, "satisfied": 3, "unmet": 2, "used_items": { "beans": 0, "bread": 3, "grain": 0 } } }, "work_hours": 8, "income": 18 } cash=10
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY occupied day=6 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 6, "satisfied": 4, "unmet": 2, "used_items": { "beans": 0, "bread": 4, "grain": 0 } } }, "work_hours": 10, "income": 24 } cash=14
+PASS: Resident state restores at minute 10080: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY occupied day=7 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 7, "satisfied": 5, "unmet": 2, "used_items": { "beans": 0, "bread": 5, "grain": 0 } } }, "work_hours": 12, "income": 30 } cash=18
+PASS: Autonomous employment produces real income, purchase and food use
+PASS: Public consumer view cannot read NPC private cash or inventory
+PASS: Unchanged known refusal does not cause daily repeated applications
+PASS: Replaying accepted application returns original result
+PASS: Replay does not hire or pay twice
+PASS: Own wage UI includes each existing claim once, including former employers
+PASS: UI wages retain actual owner, employer, payment and due time
+PASS: UI wages retain actual owner, employer, payment and due time
+PASS: Wage UI cannot disclose an uncontrolled resident's private claims
+PASS: Reading wage UI creates no command, time, money or claim
+PASS: Job selection is an ID, unaffected by list order and refresh
+MULTI_FINAL occupied minute=10080 contracts={ "person:formal_generated_country_fra_0001": { "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" }, "person:formal_generated_country_fra_0002": { "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } } wages={ "work:1:person:formal_generated_country_fra_0001": { "id": "work:1:person:formal_generated_country_fra_0001", "worker": "person:formal_generated_country_fra_0001", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 1, "due_day": 3, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:2:person:formal_generated_country_fra_0002": { "id": "work:2:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 2, "due_day": 3, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:3:person:formal_generated_country_fra_0001": { "id": "work:3:person:formal_generated_country_fra_0001", "worker": "person:formal_generated_country_fra_0001", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 3, "due_day": 5, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:3:person:formal_generated_country_fra_0002": { "id": "work:3:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 3, "due_day": 4, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:4:person:formal_generated_country_fra_0002": { "id": "work:4:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 4, "due_day": 5, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:5:person:formal_generated_country_fra_0002": { "id": "work:5:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 5, "due_day": 6, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:6:person:formal_generated_country_fra_0002": { "id": "work:6:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 6, "due_day": 7, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:7:person:formal_generated_country_fra_0002": { "id": "work:7:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 6, "work_day": 7, "due_day": 8, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" } } stocks={ "person:formal_generated_country_fra_0001": { "beans": 0, "bread": 0, "grain": 0 }, "person:formal_generated_country_fra_0002": { "beans": 0, "bread": 1, "grain": 0 }, "site:opening_paris_bakery:paris": { "beans": 0, "bread": 2, "grain": 22 }, "site:opening_paris_workshop:paris": { "beans": 0, "bread": 18, "grain": 55 } } physical={ "person:formal_generated_country_fra_0001": { "produced": { "beans": 0, "bread": 0, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 0 } }, "person:formal_generated_country_fra_0002": { "produced": { "beans": 0, "bread": 0, "grain": 0 }, "used": { "beans": 0, "bread": 5, "grain": 0 } }, "site:opening_paris_bakery:paris": { "produced": { "beans": 0, "bread": 4, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 2 } }, "site:opening_paris_workshop:paris": { "produced": { "beans": 0, "bread": 10, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 5 } } }
+PASS: Two-employer Opening binds original authority: opportunity 
+PASS: Opening has two independent employers
+PASS: Opening has two real executable jobs
+PASS: New employer starts with no second batch of bread
+PASS: Choice uses only delivered local notices, ordered by same-currency hourly wage
+PASS: Undelivered vacancy is not available knowledge
+PASS: Player chooses the actual selected employer
+PASS: Fixed one-person contracts reject a second job
+PASS: Player books actual work at their chosen firm
+PASS: Resident state restores at minute 0: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Player voluntarily leaves via native contract action
+PASS: Pending exit does not release capacity
+PASS: Pending exit blocks future work
+PASS: Resident state restores at minute 60: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: NPC makes a legal application to an available known job
+PASS: Old player contract actually ended
+PASS: Old employer still owes completed work
+PASS: Player legally switches to the independent second employer
+PASS: New job books its own real work
+PASS: Resident state restores at minute 1440: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY opportunity day=1 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 1, "satisfied": 0, "unmet": 1, "used_items": { "beans": 0, "bread": 0, "grain": 0 } } }, "work_hours": 0, "income": 0 } cash=0
+PASS: Player second work period uses actual employer
+PASS: Only old employer pays the old wage after exit
+PASS: Resident state restores at minute 2880: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY opportunity day=2 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 2, "satisfied": 0, "unmet": 2, "used_items": { "beans": 0, "bread": 0, "grain": 0 } } }, "work_hours": 2, "income": 0 } cash=0
+PASS: Delayed new salary is not paid early
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY opportunity day=3 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 3, "satisfied": 1, "unmet": 2, "used_items": { "beans": 0, "bread": 1, "grain": 0 } } }, "work_hours": 4, "income": 6 } cash=2
+PASS: Later opportunity arrives through the original message boundary
+PASS: Fixed contract policy retains present job despite higher known wage
+PASS: Distinct employers pay 6 plus 8 on their actual delays
+PASS: Player switching employers retains original personal purchase and consumption
+PASS: Player can end the second contract by the same formal rule
+PASS: Resident state restores at minute 5820: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Resident state restores at minute 5820: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY opportunity day=4 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 4, "satisfied": 2, "unmet": 2, "used_items": { "beans": 0, "bread": 2, "grain": 0 } } }, "work_hours": 6, "income": 12 } cash=6
+PASS: Second job really reopens after the player leaves
+PASS: NPC keeps the existing fixed contract after observing a real higher-pay vacancy
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY opportunity day=5 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 5, "satisfied": 3, "unmet": 2, "used_items": { "beans": 0, "bread": 3, "grain": 0 } } }, "work_hours": 8, "income": 18 } cash=10
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY opportunity day=6 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 6, "satisfied": 4, "unmet": 2, "used_items": { "beans": 0, "bread": 4, "grain": 0 } } }, "work_hours": 10, "income": 24 } cash=14
+PASS: Resident state restores at minute 10080: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY opportunity day=7 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 7, "satisfied": 5, "unmet": 2, "used_items": { "beans": 0, "bread": 5, "grain": 0 } } }, "work_hours": 12, "income": 30 } cash=18
+PASS: Autonomous employment produces real income, purchase and food use
+PASS: Public consumer view cannot read NPC private cash or inventory
+PASS: Unchanged known refusal does not cause daily repeated applications
+PASS: Replaying accepted application returns original result
+PASS: Replay does not hire or pay twice
+PASS: Own wage UI includes each existing claim once, including former employers
+PASS: UI wages retain actual owner, employer, payment and due time
+PASS: UI wages retain actual owner, employer, payment and due time
+PASS: UI wages retain actual owner, employer, payment and due time
+PASS: Wage UI cannot disclose an uncontrolled resident's private claims
+PASS: Reading wage UI creates no command, time, money or claim
+PASS: Job selection is an ID, unaffected by list order and refresh
+MULTI_FINAL opportunity minute=10080 contracts={ "person:formal_generated_country_fra_0002": { "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } } wages={ "work:1:person:formal_generated_country_fra_0001": { "id": "work:1:person:formal_generated_country_fra_0001", "worker": "person:formal_generated_country_fra_0001", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 1, "due_day": 2, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:2:person:formal_generated_country_fra_0001": { "id": "work:2:person:formal_generated_country_fra_0001", "worker": "person:formal_generated_country_fra_0001", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 2, "due_day": 4, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:2:person:formal_generated_country_fra_0002": { "id": "work:2:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 2, "due_day": 3, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:3:person:formal_generated_country_fra_0001": { "id": "work:3:person:formal_generated_country_fra_0001", "worker": "person:formal_generated_country_fra_0001", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 3, "due_day": 5, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:3:person:formal_generated_country_fra_0002": { "id": "work:3:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 3, "due_day": 4, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:4:person:formal_generated_country_fra_0002": { "id": "work:4:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 4, "due_day": 5, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:5:person:formal_generated_country_fra_0002": { "id": "work:5:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 5, "due_day": 6, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:6:person:formal_generated_country_fra_0002": { "id": "work:6:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 6, "due_day": 7, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:7:person:formal_generated_country_fra_0002": { "id": "work:7:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 6, "work_day": 7, "due_day": 8, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" } } stocks={ "person:formal_generated_country_fra_0001": { "beans": 0, "bread": 0, "grain": 0 }, "person:formal_generated_country_fra_0002": { "beans": 0, "bread": 1, "grain": 0 }, "site:opening_paris_bakery:paris": { "beans": 0, "bread": 2, "grain": 22 }, "site:opening_paris_workshop:paris": { "beans": 0, "bread": 17, "grain": 55 } } physical={ "person:formal_generated_country_fra_0001": { "produced": { "beans": 0, "bread": 0, "grain": 0 }, "used": { "beans": 0, "bread": 1, "grain": 0 } }, "person:formal_generated_country_fra_0002": { "produced": { "beans": 0, "bread": 0, "grain": 0 }, "used": { "beans": 0, "bread": 5, "grain": 0 } }, "site:opening_paris_bakery:paris": { "produced": { "beans": 0, "bread": 4, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 2 } }, "site:opening_paris_workshop:paris": { "produced": { "beans": 0, "bread": 10, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 5 } } }
+PASS: Two-employer Opening binds original authority: arrears 
+PASS: Opening has two independent employers
+PASS: Opening has two real executable jobs
+PASS: New employer starts with no second batch of bread
+PASS: Choice uses only delivered local notices, ordered by same-currency hourly wage
+PASS: Undelivered vacancy is not available knowledge
+PASS: Resident state restores at minute 0: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: NPC makes a legal application to an available known job
+PASS: Resident state restores at minute 1440: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+MULTI_DAY arrears day=1 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 1, "satisfied": 0, "unmet": 1, "used_items": { "beans": 0, "bread": 0, "grain": 0 } } }, "work_hours": 0, "income": 0 } cash=0
+PASS: Resident state restores at minute 2880: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=2 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 2, "satisfied": 0, "unmet": 2, "used_items": { "beans": 0, "bread": 0, "grain": 0 } } }, "work_hours": 2, "income": 0 } cash=0
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=3 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 3, "satisfied": 0, "unmet": 3, "used_items": { "beans": 0, "bread": 0, "grain": 0 } } }, "work_hours": 4, "income": 0 } cash=0
+PASS: Resident state restores at minute 5760: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=4 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 4, "satisfied": 1, "unmet": 3, "used_items": { "beans": 0, "bread": 1, "grain": 0 } } }, "work_hours": 6, "income": 8 } cash=4
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=5 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 5, "satisfied": 2, "unmet": 3, "used_items": { "beans": 0, "bread": 2, "grain": 0 } } }, "work_hours": 8, "income": 16 } cash=10
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=6 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 6, "satisfied": 3, "unmet": 3, "used_items": { "beans": 0, "bread": 3, "grain": 0 } } }, "work_hours": 10, "income": 22 } cash=14
+PASS: Resident state restores at minute 10080: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=7 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 7, "satisfied": 4, "unmet": 3, "used_items": { "beans": 0, "bread": 4, "grain": 0 } } }, "work_hours": 12, "income": 24 } cash=14
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=8 contract={ "job": "job:opening_paris_bakery", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 8, "satisfied": 5, "unmet": 3, "used_items": { "beans": 0, "bread": 5, "grain": 0 } } }, "work_hours": 14, "income": 26 } cash=14
+PASS: Resident state restores at minute 12960: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=9 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 9, "satisfied": 6, "unmet": 3, "used_items": { "beans": 0, "bread": 6, "grain": 0 } } }, "work_hours": 14, "income": 28 } cash=16
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=10 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 10, "satisfied": 7, "unmet": 3, "used_items": { "beans": 0, "bread": 7, "grain": 0 } } }, "work_hours": 16, "income": 28 } cash=12
+PASS: Resident state restores at minute 15840: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=11 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 11, "satisfied": 8, "unmet": 3, "used_items": { "beans": 0, "bread": 8, "grain": 0 } } }, "work_hours": 18, "income": 34 } cash=16
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=12 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 12, "satisfied": 9, "unmet": 3, "used_items": { "beans": 0, "bread": 9, "grain": 0 } } }, "work_hours": 20, "income": 40 } cash=20
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=13 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 13, "satisfied": 10, "unmet": 3, "used_items": { "beans": 0, "bread": 10, "grain": 0 } } }, "work_hours": 22, "income": 46 } cash=24
+PASS: Resident state restores at minute 20160: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Two employers transfer finite Opening cash without creation
+PASS: Independent firms consume their own finite grain
+PASS: Independent firms consume their own finite grain
+PASS: All bread is original stock or native production, held or used once
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: One person cannot count the same period twice across employers
+PASS: Each real job keeps its independent one-person capacity
+PASS: Each real job keeps its independent one-person capacity
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+PASS: Wage payment preserves the original claim amount
+PASS: Only the actual employer bears each work claim
+MULTI_DAY arrears day=14 contract={ "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } npc={ "categories": { "food": { "required": 14, "satisfied": 11, "unmet": 3, "used_items": { "beans": 0, "bread": 11, "grain": 0 } } }, "work_hours": 24, "income": 52 } cash=28
+PASS: Autonomous employment produces real income, purchase and food use
+PASS: Public consumer view cannot read NPC private cash or inventory
+PASS: Native arrears response legally moves to another payable known employer
+PASS: Old employer debt survives legal switch; new employer does not assume it
+MULTI_ARREARS [{ "id": "work:5:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 4, "work_day": 5, "due_day": 7, "paid": 4, "denomination": "denomination:formal_simulation_minor_v1" }, { "id": "work:6:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 8, "work_day": 6, "due_day": 8, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" }, { "id": "work:7:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 8, "work_day": 7, "due_day": 9, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" }, { "id": "work:8:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 8, "work_day": 8, "due_day": 10, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" }]
+PASS: Unchanged known refusal does not cause daily repeated applications
+PASS: Replaying accepted application returns original result
+PASS: Replay does not hire or pay twice
+PASS: Own wage UI includes each existing claim once, including former employers
+PASS: Wage UI cannot disclose an uncontrolled resident's private claims
+PASS: Reading wage UI creates no command, time, money or claim
+PASS: Job selection is an ID, unaffected by list order and refresh
+MULTI_FINAL arrears minute=20160 contracts={ "person:formal_generated_country_fra_0002": { "job": "job:opening_paris_workshop", "workers": 1, "denomination": "denomination:formal_simulation_minor_v1" } } wages={ "work:2:person:formal_generated_country_fra_0002": { "id": "work:2:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 2, "due_day": 4, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:3:person:formal_generated_country_fra_0002": { "id": "work:3:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 3, "due_day": 5, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:4:person:formal_generated_country_fra_0002": { "id": "work:4:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 0, "work_day": 4, "due_day": 6, "paid": 8, "denomination": "denomination:formal_simulation_minor_v1" }, "work:5:person:formal_generated_country_fra_0002": { "id": "work:5:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 4, "work_day": 5, "due_day": 7, "paid": 4, "denomination": "denomination:formal_simulation_minor_v1" }, "work:6:person:formal_generated_country_fra_0002": { "id": "work:6:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 8, "work_day": 6, "due_day": 8, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" }, "work:7:person:formal_generated_country_fra_0002": { "id": "work:7:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 8, "work_day": 7, "due_day": 9, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" }, "work:8:person:formal_generated_country_fra_0002": { "id": "work:8:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_bakery", "hours": 2, "amount": 8, "remaining": 8, "work_day": 8, "due_day": 10, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" }, "work:10:person:formal_generated_country_fra_0002": { "id": "work:10:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 10, "due_day": 11, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:11:person:formal_generated_country_fra_0002": { "id": "work:11:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 11, "due_day": 12, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:12:person:formal_generated_country_fra_0002": { "id": "work:12:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 12, "due_day": 13, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:13:person:formal_generated_country_fra_0002": { "id": "work:13:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 0, "work_day": 13, "due_day": 14, "paid": 6, "denomination": "denomination:formal_simulation_minor_v1" }, "work:14:person:formal_generated_country_fra_0002": { "id": "work:14:person:formal_generated_country_fra_0002", "worker": "person:formal_generated_country_fra_0002", "employer": "firm:opening_paris_workshop", "hours": 2, "amount": 6, "remaining": 6, "work_day": 14, "due_day": 15, "paid": 0, "denomination": "denomination:formal_simulation_minor_v1" } } stocks={ "person:formal_generated_country_fra_0001": { "beans": 0, "bread": 0, "grain": 0 }, "person:formal_generated_country_fra_0002": { "beans": 0, "bread": 1, "grain": 0 }, "site:opening_paris_bakery:paris": { "beans": 0, "bread": 8, "grain": 17 }, "site:opening_paris_workshop:paris": { "beans": 0, "bread": 16, "grain": 55 } } physical={ "person:formal_generated_country_fra_0001": { "produced": { "beans": 0, "bread": 0, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 0 } }, "person:formal_generated_country_fra_0002": { "produced": { "beans": 0, "bread": 0, "grain": 0 }, "used": { "beans": 0, "bread": 11, "grain": 0 } }, "site:opening_paris_bakery:paris": { "produced": { "beans": 0, "bread": 14, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 7 } }, "site:opening_paris_workshop:paris": { "produced": { "beans": 0, "bread": 10, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 5 } } }
+PASS: Qualification comparison uses a legal initial job requirement
+PASS: Known higher-pay work is skipped when skill is insufficient
+PASS: Known qualification failure creates no repeated impossible application
+PASS: Original domain still rejects an explicit ineligible player application
+PASS: Known qualification failure has a readable disabled application reason
+PASS: Resident state restores at minute 1440: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Read previous generation18 isolated save without writing
+PASS: Generation18 restores without new Opening genesis: 
+PASS: Old single-employer cash, claims, identities and goods remain exact
+PASS: Restoring generation18 does not add a second employer
+PASS: Ordinary C uses the same finite Opening
+PASS: Player occupies the original one-person job
+PASS: First actual work is registered
+PASS: Resident state restores at minute 0: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Resident receives one real capacity refusal
+PASS: Refusal records lawful local capacity information
+PASS: Resident state restores at minute 1440: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Restored unchanged full job does not generate another application
+PASS: Second work booking matches original B
+PASS: Original voluntary exit queues for the next boundary
+PASS: Exit replay is idempotent
+PASS: Exit replay does not make another termination
+PASS: Second distinct exit request is refused
+PASS: Pending exit disables future work UI permission
+PASS: Pending exit cannot book more work
+PASS: Resident state restores at minute 2940: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Unadopted exit cannot release capacity early
+PASS: Capacity stays occupied until the formal boundary
+PASS: Boundary releases the original job and NPC passes original application
+PASS: Only one person occupies the same job after circulation
+PASS: Voluntary termination has an adopted record
+PASS: Adoption time is exact
+PASS: Completed pre-exit work retains unpaid wage claim
+PASS: New contract does not grant immediate income
+PASS: Reemployment does not grant immediate food
+PASS: Actual vacancy wakes one new application at the same boundary
+PASS: New application records on-site known vacancy
+PASS: Accepted NPC application replay returns its original result
+PASS: Replay does not create another employment
+PASS: Former employee cannot force a second contract
+PASS: Resident state restores at minute 4320: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Player and NPC use the same real retail stock
+PASS: Original player consumption survives legal exit
+PASS: Circulation preserves one-person capacity
+PASS: Reemployed resident performs actual later work
+PASS: Old employer pays the former employee after exit
+PASS: First NPC work still observes the wage delay
+PASS: Circulation preserves one-person capacity
+PASS: Reemployed resident performs actual later work
+PASS: Only actual paid income enables NPC acquisition and consumption
+PASS: Resident state restores at minute 7200: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Circulation preserves one-person capacity
+PASS: Reemployed resident performs actual later work
+PASS: Circulation preserves one-person capacity
+PASS: Reemployed resident performs actual later work
+PASS: Resident state restores at minute 10080: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: C completes four resident work periods
+PASS: C pays three matured resident wage claims
+PASS: C resident cash equals 18 wage income minus 8 purchases
+PASS: C resident owns one acquired loaf
+PASS: C uses three actual loaves
+PASS: C retains unemployment food consequences
+PASS: Actual recipes consume only original finite grain
+PASS: Actual bread output follows original material recipe
+PASS: Produced, bought, held and consumed bread balance without forcing production plans
+PASS: Employer pays both workers and receives actual purchase cash
+PASS: Former employee retains earned wages and own consumer spending
+EMPLOYMENT_C minute=10080 npc_hours=8 npc_income=18 npc_cash=10 stock={ "beans": 0, "bread": 17, "grain": 55 } physical={ "produced": { "beans": 0, "bread": 10, "grain": 0 }, "used": { "beans": 0, "bread": 0, "grain": 5 } } food={ "required": 7, "satisfied": 3, "unmet": 4, "used_items": { "beans": 0, "bread": 3, "grain": 0 } }
+PASS: Read generation17 resident slot without modifying it
+PASS: Generation17 retains identities, job capacity and resources: 
+PASS: Old generation17 snapshot restores exactly
+PASS: Same-boundary refusal and reopening use a separate ordinary fixture
+PASS: Early fixture lawfully occupies the single job
+PASS: Early fixture uses original notice boundary
+PASS: Real boundary change can reconsider the same-day refusal
+PASS: Changed opportunity is a distinct decision, not replay of refusal
+PASS: Same-boundary reconsideration cannot double hire
+PASS: Resident state restores at minute 1440: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Same ordinary Opening creates two isolated worlds:  
+PASS: Only two stable Formal people; aggregate population is separate
+PASS: Resident has recorded zero-cash Opening
+PASS: A/B have identical finite money sources
+PASS: A/B have identical configuration and economic Opening
+PASS: Resident state restores at minute 0: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Player may take the one real vacancy at Opening
+PASS: Player books actual work without controlling resident
+PASS: At most one completed resident work period per day
+PASS: Contract hours are adopted once per completed period
+PASS: Only due periods pay actual wages
+PASS: Money conservation on day 1
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0001
+PASS: Satisfied and unmet needs balance
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0002
+PASS: Satisfied and unmet needs balance
+PASS: Bread is produced, held or consumed once
+PASS: Production uses actual grain lots
+PASS: Resident autonomously accepts and books work
+PASS: Replayed automatic work returns its existing result
+PASS: Replayed automatic work does not book or settle twice
+PASS: Zero cash and no completed shop staffing create no purchase
+PASS: Resident state restores at minute 1440: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: At most one completed resident work period per day
+PASS: Contract hours are adopted once per completed period
+PASS: Only due periods pay actual wages
+PASS: Money conservation on day 2
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0001
+PASS: Satisfied and unmet needs balance
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0002
+PASS: Satisfied and unmet needs balance
+PASS: Bread is produced, held or consumed once
+PASS: Production uses actual grain lots
+PASS: One actual resident work period completed
+PASS: Completed work forms unpaid wage responsibility
+PASS: Resident cannot buy before wages become available
+PASS: Resident state restores at minute 2880: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Player's second work period is explicit
+PASS: At most one completed resident work period per day
+PASS: Contract hours are adopted once per completed period
+PASS: Only due periods pay actual wages
+PASS: Money conservation on day 3
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0001
+PASS: Satisfied and unmet needs balance
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0002
+PASS: Satisfied and unmet needs balance
+PASS: Bread is produced, held or consumed once
+PASS: Production uses actual grain lots
+PASS: Paid income, native purchase, handover and consumption occur without player requests
+PASS: Onsite orders have original buyer and real immediate receipts
+PASS: Resident state restores at minute 4320: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Original player purchase and food adoption survive resident competition
+PASS: At most one completed resident work period per day
+PASS: Contract hours are adopted once per completed period
+PASS: Only due periods pay actual wages
+PASS: Money conservation on day 4
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0001
+PASS: Satisfied and unmet needs balance
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0002
+PASS: Satisfied and unmet needs balance
+PASS: Bread is produced, held or consumed once
+PASS: Production uses actual grain lots
+PASS: At most one completed resident work period per day
+PASS: Contract hours are adopted once per completed period
+PASS: Only due periods pay actual wages
+PASS: Money conservation on day 5
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0001
+PASS: Satisfied and unmet needs balance
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0002
+PASS: Satisfied and unmet needs balance
+PASS: Bread is produced, held or consumed once
+PASS: Production uses actual grain lots
+PASS: At most one completed resident work period per day
+PASS: Contract hours are adopted once per completed period
+PASS: Only due periods pay actual wages
+PASS: Money conservation on day 6
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0001
+PASS: Satisfied and unmet needs balance
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0002
+PASS: Satisfied and unmet needs balance
+PASS: Bread is produced, held or consumed once
+PASS: Production uses actual grain lots
+PASS: At most one completed resident work period per day
+PASS: Contract hours are adopted once per completed period
+PASS: Only due periods pay actual wages
+PASS: Money conservation on day 7
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0001
+PASS: Satisfied and unmet needs balance
+PASS: Needs accrue once per actual day for person:formal_generated_country_fra_0002
+PASS: Satisfied and unmet needs balance
+PASS: Bread is produced, held or consumed once
+PASS: Production uses actual grain lots
+PASS: Resident state restores at minute 10080: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Autonomy does not transfer player control
+PASS: Idle player receives no resident wages or charges
+PASS: Autonomous resident has independent labor and income
+PASS: Resident cannot occupy player's full one-person job
+PASS: Resident still seeks work and receives real vacancy refusal
+PASS: Player labor-consumption flow remains 2500+12-2
+PASS: Player sees occupied local vacancy without worker's private state
+PASS: Player-facing query cannot expose automatic resident's private economy
+PASS: Player cannot take the resident's occupied job
+PASS: External player command cannot control automatic resident
+PASS: Rejected control changes no cash
+PASS: Autonomous purchase cannot nominate another person's account
+PASS: Invalid account nomination performs no payment
+RESIDENT_A minute=10080 hours=12 income=30 cash=18 used_bread=5 needs={ "required": 7, "satisfied": 5, "unmet": 2, "used_items": { "beans": 0, "bread": 5, "grain": 0 } }
+PASS: Read existing generation16 test save without writing it
+PASS: Existing generation16 ordinary save remains readable: 
+PASS: Old save does not regenerate the new Opening resident
+PASS: Old wages, purchase and consumption remain exact
+PASS: Delayed supplier knowledge is an explicit initial fact
+PASS: Income cannot reveal an undelivered supplier notice
+PASS: Delivered notice wakes original known-supplier buying
+PASS: Insolvent-employer test uses finite zero-cash Opening
+PASS: No source cash means no invented wage payment
+PASS: Actual unpaid claims are retained
+PASS: Existing arrears response stops further work and preserves debt
+PASS: Resident state restores at minute 10080: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Isolated passenger test reuses existing host Paris-Lyon link: 
+PASS: Player departs through original travel action
+PASS: Player is actually away from resident's workplace
+PASS: Resident work, wages and food persist while player is elsewhere
+PASS: Resident state restores at minute 10080: 
+PASS: Identity, accounts, duties, lots and needs restore exactly
+PASS: Zero time does not repeat autonomous action or settlement
+PASS: Isolated one-loaf Opening: 
+PASS: Visible workshop does not reveal its undisclosed grain offer
+PASS: Only Opening bread notice is known
+PASS: Unstaffed shop cannot sell at Opening
+PASS: Existing job application accepted
+PASS: Existing work funds actual staffing
+PASS: Actual staffed window has bread quote
+PASS: Explicit local carrying limit is enforced without creating travel routes
+PASS: Isolated ledger reservation uses existing available-funds mechanism
+PASS: Reserved money cannot fund purchase
+PASS: Cash refusal performs no payment
+PASS: Old quote cannot survive formal minute change
+PASS: Existing personal purchase obtains actual loaf onsite
+PASS: Delivered loaf belongs to person
+PASS: Seller has no copy of delivered loaf
+PASS: Same action is replayed idempotently
+PASS: Duplicate action creates no order, receipt or batch
+PASS: Duplicate action has no second payment
+PASS: No remaining stock produces no purchasable quotation
+PASS: Customer receives no enterprise permission
+PASS: Consumer cannot bypass enterprise management
+PASS: Original native food adoption consumes actual bread
+PASS: Food portion was removed
+PASS: Actual current food need is met
+PASS: Repeated use without food or unmet need is rejected
+PASS: Rejected repeat consumes no physical portions
+PASS: Consumption does not invent money
+PASS: Native consumed lot and food state restore: 
+PASS: Restored consumed state is exact
+PASS: Isolated original transport configuration builds
+PASS: Original transport accepts known bread order
+PASS: In-transit bread is not usable inventory
+PASS: In-transit bread cannot satisfy food need
+Formal Paris two employers: 1177 checks, 0 failures

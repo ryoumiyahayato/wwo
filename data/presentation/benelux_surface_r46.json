@@ -1,0 +1,491 @@
+{
+  "source_registry": {
+    "schema_id": "historical_source_registry_v2",
+    "sources": [
+      {
+        "source_id": "benelux_modern_surface_r46",
+        "title": "Belgium, Netherlands and Luxembourg modern geographic DSM and cover reference",
+        "publisher": "Copernicus / ESA / Airbus; ESA WorldCover consortium",
+        "version": "GLO90-COG+WorldCover2021-v200:R46",
+        "license": "Copernicus-DEM-GLO90+CC-BY-4.0",
+        "locator": "https://copernicus-dem-90m.s3.amazonaws.com/readme.html",
+        "access_metadata": {
+          "horizontal_crs": "EPSG:4326 WGS84-G1150, actual source affine",
+          "vertical_datum": "EGM2008 EPSG:3855 orthometric metres",
+          "dem_type": "DSM, not bare-earth DTM",
+          "dem_epoch": "TanDEM-X 2011-2015, older gap-fill possible",
+          "cover_epoch": "ESA WorldCover 2021 v200",
+          "sampling": "Native 3-arcsecond latitude GLO90; averaged 6-arcsecond extraction; 1/512-degree display; cover categorical 16x overview.",
+          "historical_applicability": "Modern reference only, not historical coastline, 1900 land cover or political membership.",
+          "shared_detail_ids": [
+            "german_r44_50_+4",
+            "german_r44_50_+6",
+            "german_r44_52_+4",
+            "german_r44_52_+6",
+            "german_r44_54_+4",
+            "german_r44_54_+6"
+          ],
+          "bounds_lon_lat": [
+            2.0,
+            48.0,
+            8.0,
+            56.0
+          ],
+          "licence_url": "https://dataspace.copernicus.eu/sites/default/files/media/files/2025-06/copernicus_contributing_mission_data_access_v2_cop_dem_licenses.pdf",
+          "cover_source": "https://esa-worldcover.org/en/data-access",
+          "cover_doi": "https://doi.org/10.5281/zenodo.7254221"
+        }
+      }
+    ]
+  },
+  "evidence_catalog": {
+    "schema_id": "historical_fact_evidence_catalog_v2",
+    "facts": [
+      {
+        "fact_id": "physical_relief:benelux_r46",
+        "domain": "physical_reference_content",
+        "subject_id": "physical_relief:benelux",
+        "value": {
+          "status": "PHYSICAL_REFERENCE",
+          "assets": [
+            {
+              "id": "physical_relief:benelux_r46_base",
+              "path": "res://assets/maps/relief/benelux_r46_base.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 768,
+              "height": 1024,
+              "decoded_bytes": 4194300,
+              "bytes": 1621294,
+              "bounds_lon_lat": [
+                2.0,
+                48.0,
+                8.0,
+                56.0
+              ],
+              "surface_role": "base",
+              "core_inset_degrees": 0,
+              "channels": "RGB linear observed-cover tones; A fixed DSM hillshade minus .4; independent geographic feather.",
+              "display_spacing_degrees": [
+                0.0078125,
+                0.0078125
+              ],
+              "display_spacing_m_approx": [
+                534.8318574127858,
+                868.7109375
+              ],
+              "surface_group": "benelux_r46",
+              "surface_encoding": 2,
+              "surface_feather_degrees": [
+                0.65,
+                0.7,
+                0.65,
+                1.2
+              ],
+              "shared_detail_ids": [
+                "german_r44_50_+4",
+                "german_r44_50_+6",
+                "german_r44_52_+4",
+                "german_r44_52_+6",
+                "german_r44_54_+4",
+                "german_r44_54_+6"
+              ]
+            },
+            {
+              "id": "physical_relief:benelux_r46_48_+2",
+              "path": "res://assets/maps/relief/benelux_r46_48_+2.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3050885,
+              "bounds_lon_lat": [
+                1.9375,
+                47.9375,
+                4.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                2,
+                48,
+                4,
+                50
+              ],
+              "surface_group": "benelux_r46",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:benelux_r46_48_+4",
+              "path": "res://assets/maps/relief/benelux_r46_48_+4.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3503669,
+              "bounds_lon_lat": [
+                3.9375,
+                47.9375,
+                6.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                4,
+                48,
+                6,
+                50
+              ],
+              "surface_group": "benelux_r46",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:benelux_r46_48_+6",
+              "path": "res://assets/maps/relief/benelux_r46_48_+6.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3890941,
+              "bounds_lon_lat": [
+                5.9375,
+                47.9375,
+                8.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                6,
+                48,
+                8,
+                50
+              ],
+              "surface_group": "benelux_r46",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:benelux_r46_50_+2",
+              "path": "res://assets/maps/relief/benelux_r46_50_+2.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2076474,
+              "bounds_lon_lat": [
+                1.9375,
+                49.9375,
+                4.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                2,
+                50,
+                4,
+                52
+              ],
+              "surface_group": "benelux_r46",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+4",
+              "path": "res://assets/maps/relief/german_r44_50_+4.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3461502,
+              "bounds_lon_lat": [
+                3.9375,
+                49.9375,
+                6.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                4,
+                50,
+                6,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+6",
+              "path": "res://assets/maps/relief/german_r44_50_+6.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3993283,
+              "bounds_lon_lat": [
+                5.9375,
+                49.9375,
+                8.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                6,
+                50,
+                8,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:benelux_r46_52_+2",
+              "path": "res://assets/maps/relief/benelux_r46_52_+2.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 14872,
+              "bounds_lon_lat": [
+                1.9375,
+                51.9375,
+                4.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB observed-cover linear tones and neutral absolute elevation; A fixed DSM hillshade minus .4.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                2,
+                52,
+                4,
+                54
+              ],
+              "surface_group": "benelux_r46",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+4",
+              "path": "res://assets/maps/relief/german_r44_52_+4.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 1001167,
+              "bounds_lon_lat": [
+                3.9375,
+                51.9375,
+                6.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                4,
+                52,
+                6,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+6",
+              "path": "res://assets/maps/relief/german_r44_52_+6.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2367203,
+              "bounds_lon_lat": [
+                5.9375,
+                51.9375,
+                8.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                6,
+                52,
+                8,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+4",
+              "path": "res://assets/maps/relief/german_r44_54_+4.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 10913,
+              "bounds_lon_lat": [
+                3.9375,
+                53.9375,
+                6.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                4,
+                54,
+                6,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+6",
+              "path": "res://assets/maps/relief/german_r44_54_+6.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 7001,
+              "bounds_lon_lat": [
+                5.9375,
+                53.9375,
+                8.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                6,
+                54,
+                8,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            }
+          ]
+        },
+        "unit": "presentation_relief",
+        "source_id": "benelux_modern_surface_r46",
+        "source_version": "GLO90-COG+WorldCover2021-v200:R46",
+        "source_locator": "https://copernicus-dem-90m.s3.amazonaws.com/readme.html",
+        "observation_period": {
+          "from": "2011-01-01",
+          "to": "2021-12-31"
+        },
+        "spatial_scope": {
+          "kind": "geographic_reference",
+          "id": "benelux_with_finite_collars"
+        },
+        "methodology": "Shared R42 DEM, R43 independent cover tones and native mips. Canonical R44 detail reuse. No height-to-landcover or historical water inference.",
+        "confidence": 0.8,
+        "lower_bound": null,
+        "upper_bound": null,
+        "license": "Copernicus-DEM-GLO90+CC-BY-4.0",
+        "review_status": "EVIDENCE_LINKED",
+        "generator": "tools/map/build_benelux_surface_r46.py"
+      }
+    ]
+  }
+}

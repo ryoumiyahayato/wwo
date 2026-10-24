@@ -14,7 +14,7 @@ for descriptor in descriptors:
   feature=fact['value']
   if feature['kind']=='settlement':continue
   if 'geometry_asset' in feature:raise RuntimeError('Pack only newly generated inline source data')
-  fields=['geometry','lod_geometry']+(['lod_visual_reference_indices'] if 'lod_visual_reference_indices' in feature else [])
+  fields=['geometry','lod_geometry']
   geometries[feature['id']]={key:feature.pop(key) for key in fields}
  if geometries:
   raw=json.dumps(geometries,ensure_ascii=False,separators=(',',':')).encode('utf8');packed=zlib.compress(raw,9)

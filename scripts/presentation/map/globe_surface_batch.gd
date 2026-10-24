@@ -4,7 +4,7 @@ extends RefCounted
 
 const DATA_WIDTH: int = 256
 const TEXELS_PER_FACE: int = 6
-const VERTICES_PER_FACE: int = 12
+const VERTICES_PER_FACE: int = 6
 const PICK_CHUNK_SIZE: int = 128
 var cull_axis := Vector3.ZERO
 var cull_angle: float = PI
@@ -12,28 +12,58 @@ var mesh := ArrayMesh.new()
 var data: ImageTexture
 var _pick_chunks: Array[Dictionary] = []
 var _component_caps: Dictionary = {}
-var vertex_count_per_face: int = VERTICES_PER_FACE
-var index_count_per_face: int = 24
 
-func prepare(faces: Array, retain_picking: bool = true, regional_reference: bool = false, zero_expansion: bool = false) -> void:
-	upload(encode(faces, retain_picking, regional_reference, zero_expansion))
+func prepare(faces: Array, retain_picking: bool = true) -> void:
+	upload(encode(faces, retain_picking))
 
-static func encode(faces: Array, retain_picking: bool = true, regional_reference: bool = false, zero_expansion: bool = false) -> Dictionary:
-	# A regional viewport ends before the horizon by more than the maximum
-	# source edge. Its reference faces need only the first triangle fan; the
-	# WORLD and authoritative picking meshes retain both horizon fans.
-	var compact := regional_reference and zero_expansion
-	var vertex_count_per_face: int = 3 if compact else 6 if regional_reference else VERTICES_PER_FACE
-	var index_count_per_face: int = 3 if compact else 12 if regional_reference else 24
+func prepare_picking(faces: Array) -> void:
+	# Historical faces retain identity queries, not a second opaque land mesh.
+	_pick_chunks.clear()
+	_component_caps.clear()
+	var bounds := AABB()
+	var initialized := false
+	var chunk_faces: Array[Dictionary] = []
+	var chunk_bounds := AABB()
+	var components: Dictionary = {}
+	for face: Dictionary in faces:
+		var points := face.points as PackedVector3Array
+		if not GlobeProjection.renderable_triangle(points): continue
+		var box := AABB(points[0],Vector3.ZERO).expand(points[1]).expand(points[2])
+		var component := str(face.get("pick_component_key",face.get("component_index",-1)))
+		components[component] = (components[component] as AABB).merge(box) if components.has(component) else box
+		bounds = bounds.merge(box) if initialized else box
+		initialized = true
+		chunk_bounds = chunk_bounds.merge(box) if not chunk_faces.is_empty() else box
+		chunk_faces.append({"face":face,"bounds":box.grow(GlobeProjection.SOURCE_EPSILON)})
+		if chunk_faces.size()==PICK_CHUNK_SIZE:
+			_pick_chunks.append({"bounds":chunk_bounds,"faces":chunk_faces})
+			chunk_faces = []
+	if not chunk_faces.is_empty(): _pick_chunks.append({"bounds":chunk_bounds,"faces":chunk_faces})
+	for component: String in components: _component_caps[component] = (components[component] as AABB).size.length()*0.5
+	if initialized:
+		cull_axis = bounds.get_center().normalized()
+		cull_angle = acos(clampf(bounds.get_center().length()-bounds.size.length()*0.5,-1.0,1.0))+deg_to_rad(GlobeProjection.SURFACE_EDGE_DEGREES)
+
+static func encode(faces: Array, retain_picking: bool = true) -> Dictionary:
+	for face: Dictionary in faces:
+		var points := face.get("points",PackedVector3Array()) as PackedVector3Array
+		var uvs := face.get("uvs",PackedVector2Array()) as PackedVector2Array
+		if points.size()!=3 or uvs.size()!=3: return {"error":"地理面缺少三个顶点或UV。"}
+		for corner: int in range(3):
+			if not points[corner].is_finite() or absf(points[corner].length_squared()-1.0)>0.00001 or not uvs[corner].is_finite():
+				return {"error":"地理面包含非法球面坐标或UV。"}
+	faces = faces.filter(func(face: Dictionary) -> bool: return GlobeProjection.renderable_triangle(face.points as PackedVector3Array))
+	# Exact edges need three vertices per horizon fan. Keep both fans because
+	# strategic reference meshes are shared by WORLD and REGION as well.
 	if faces.is_empty():
 		return {}
 	var height := maxi(1, ceili(float(faces.size() * TEXELS_PER_FACE) / DATA_WIDTH))
 	var values := PackedFloat32Array()
 	values.resize(DATA_WIDTH * height * 4)
 	var vertices := PackedVector2Array()
-	vertices.resize(faces.size() * vertex_count_per_face)
+	vertices.resize(faces.size() * VERTICES_PER_FACE)
 	var indices := PackedInt32Array()
-	indices.resize(faces.size() * index_count_per_face)
+	indices.resize(faces.size() * VERTICES_PER_FACE)
 	var pick_chunks: Array[Dictionary] = []
 	var bounds := AABB()
 	var initialized := false
@@ -68,26 +98,18 @@ static func encode(faces: Array, retain_picking: bool = true, regional_reference
 		if retain_picking and (chunk_faces.size() == PICK_CHUNK_SIZE or face_index == faces.size() - 1):
 			pick_chunks.append({"bounds": chunk_bounds, "faces": chunk_faces})
 			chunk_faces = []
-		for slot: int in range(vertex_count_per_face):
-			# At zero expansion, paired corners coincide and three of the four
-			# fan triangles have zero area. Keep the original surviving slots.
-			var shader_slot: int = [0,3,4][slot] if compact else slot
-			vertices[face_index * vertex_count_per_face + slot] = Vector2(float(face_index), float(shader_slot))
-		if compact:
-			for corner: int in range(3): indices[face_index*3+corner] = face_index*3+corner
-			continue
-		for fan: int in range(vertex_count_per_face / 6):
-			var base := face_index * vertex_count_per_face + fan * 6
-			for triangle: int in range(4):
-				var offset := face_index * index_count_per_face + fan * 12 + triangle * 3
-				indices[offset] = base
-				indices[offset + 1] = base + triangle + 1
-				indices[offset + 2] = base + triangle + 2
+		for slot: int in range(VERTICES_PER_FACE):
+			var offset := face_index*VERTICES_PER_FACE+slot
+			# VERTEX is a position, never a face/slot transport. The shader uses
+			# the indexed vertex ID; its two fans each have three fixed corners.
+			var point := points[slot%3]
+			vertices[offset] = Vector2(point.x,-point.y)
+			indices[offset] = offset
 	var center := bounds.get_center()
 	var caps: Dictionary = {}
 	for component: String in component_bounds:
 		caps[component] = (component_bounds[component] as AABB).size.length()*0.5
-	return {"height":height,"values":values.to_byte_array(),"vertices":vertices,"indices":indices,"pick_chunks":pick_chunks,"component_caps":caps,"vertex_count_per_face":vertex_count_per_face,"index_count_per_face":index_count_per_face,"cull_axis":center.normalized(),"cull_angle":acos(clampf(center.length()-bounds.size.length()*0.5,-1.0,1.0))+deg_to_rad(GlobeProjection.SURFACE_EDGE_DEGREES)}
+	return {"face_count":faces.size(),"height":height,"values":values.to_byte_array(),"vertices":vertices,"indices":indices,"pick_chunks":pick_chunks,"component_caps":caps,"cull_axis":center.normalized(),"cull_angle":acos(clampf(center.length()-bounds.size.length()*0.5,-1.0,1.0))+deg_to_rad(GlobeProjection.SURFACE_EDGE_DEGREES)}
 
 func upload(payload: Dictionary) -> void:
 	_pick_chunks.clear()
@@ -95,8 +117,13 @@ func upload(payload: Dictionary) -> void:
 	mesh.clear_surfaces()
 	data = null
 	if payload.is_empty(): return
-	vertex_count_per_face = int(payload.vertex_count_per_face)
-	index_count_per_face = int(payload.index_count_per_face)
+	var count := int(payload.get("face_count",0))
+	if count<=0 or not payload.get("vertices") is PackedVector2Array or not payload.get("indices") is PackedInt32Array or not payload.get("values") is PackedByteArray:
+		push_error("地理面绘制包缺少必要字段。")
+		return
+	if (payload.vertices as PackedVector2Array).size()!=count*VERTICES_PER_FACE or (payload.indices as PackedInt32Array).size()!=count*VERTICES_PER_FACE or int(payload.height)!=ceili(float(count*TEXELS_PER_FACE)/DATA_WIDTH) or (payload.values as PackedByteArray).size()!=DATA_WIDTH*int(payload.height)*16:
+		push_error("地理面顶点、索引与面纹理长度不匹配。")
+		return
 	_pick_chunks.assign(payload.pick_chunks as Array)
 	cull_axis = payload.cull_axis as Vector3
 	cull_angle = float(payload.cull_angle)

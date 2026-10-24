@@ -7,13 +7,18 @@ var _units: Array[Dictionary] = []
 var _document: Dictionary = {}
 var _visuals: Dictionary = {}
 var _textures: Dictionary = {}
+var _place_symbol_roles: Dictionary = {}
 
-func _init(date: String = "", units: Array[Dictionary] = [], document: Dictionary = {}, visuals: Dictionary = {}, textures: Dictionary = {}) -> void:
+func _init(date: String = "", units: Array[Dictionary] = [], document: Dictionary = {}, visuals: Dictionary = {}, textures: Dictionary = {}, place_symbol_roles: Dictionary = {}) -> void:
 	_date = date
 	_units.assign(units.duplicate(true))
 	_document = document.duplicate(true)
 	_visuals = visuals.duplicate(true)
 	_textures = textures.duplicate()
+	_place_symbol_roles = place_symbol_roles.duplicate(true)
+
+func place_symbol_roles() -> Dictionary:
+	return _place_symbol_roles.duplicate(true)
 
 func date() -> String:
 	return _date

@@ -185,14 +185,15 @@ func destinations(person: String) -> Array[Dictionary]:
 		if not offer.is_empty(): result.append(offer)
 	return result
 
-## Acquisition into luggage uses explicit passenger carrying terms. A later
-## journey still checks every actual segment, including its stricter limits.
+## Explicit personal limits also permit local acquisition without a passenger
+## route. A journey still checks every actual segment and its stricter limits.
 func can_carry_extra(person: String, good: String, quantity: int) -> bool:
 	var carried := _world.personal_economy_state.native_usable_inventory(person, true)
 	carried[good] = int(carried.get(good, 0)) + quantity
 	if not _carry_limits.is_empty():
 		for item: String in carried:
 			if int(carried[item]) > int(_carry_limits.get("native:" + item, 0)): return false
+		return true
 	for route: Dictionary in _routes.values():
 		if not route["known_to"].has(person): continue
 		var amount: int = 0
@@ -254,6 +255,7 @@ func start(person: String, destination: String, action_id: String, internal: boo
 		var policy := npc_policy(person)
 		if not npc_allowed(person) or int(offer["minutes"]) > int(policy.get("max_minutes", 0)) or int(offer["fare"]) > int(policy.get("max_fee", 0)): return {"accepted": false, "reason": "NO_FINITE_NPC_PASSENGER_AUTHORIZATION"}
 	if _world.military_state.active_actions.has(action_id) or (_world.economy_r1 != null and _world.economy_r1.has_economic_action(action_id)): return {"accepted": false, "reason": "DOMAIN_ACTION_ID_CONFLICT"}
+	if _world.economy_r1 != null and _world.economy_r1.person_has_resident_service_booking(person): return {"accepted":false,"reason":"ON_SITE_RESIDENT_SERVICE_INTERVAL_ALREADY_BOOKED"}
 	if _world.economy_r1 != null and _world.economy_r1.person_has_work_booking(person): return {"accepted": false, "reason": "WORK_INTERVAL_ALREADY_BOOKED"}
 	if int(offer["minutes"]) > FormalLedgerState.MAX_AMOUNT-_world.game_clock.total_minutes() or int(offer["fare"]) > FormalLedgerState.MAX_AMOUNT: return {"accepted": false, "reason": "TRAVEL_AMOUNT_OR_TIME_LIMIT"}
 	if not _world.personal_economy_state.manages_native(person) and not _world.personal_economy_state.employment(person).is_empty(): return {"accepted": false, "reason": "LEGACY_EMPLOYMENT_REQUIRES_HANDOVER"}

@@ -1,0 +1,41 @@
+WWO R56 terrain and coast display derivatives, 2026-10-19.
+
+This package retains R42-R55 notices and original sources. Terrain, land cover
+and coast are physical display references. They do not establish 1900 land
+use, reservoirs, sovereignty, ownership, military control or economic output.
+
+Height: NOAA NCEI ETOPO2022 (CC0/public domain); Copernicus DEM GLO-90.
+Copernicus DEM copyright DLR e.V. (2010-2014), Airbus Defence and Space GmbH
+(2014-2018). COPERNICUS: European Union / ESA.
+The public GLO90 COG's actual affine and vertical datum are retained:
+WGS84 geographic horizontal coordinates, EGM2008 orthometric metres; DSM.
+The regional extracts are averaged to6arcseconds and displayed at1/512degree.
+This is not90m or metre-scale LOCAL terrain throughout the display domain.
+Copernicus license:
+https://dataspace.copernicus.eu/sites/default/files/media/files/2025-06/copernicus_contributing_mission_data_access_v2_cop_dem_licenses.pdf
+
+Cover: ESA WorldCover2021 v200, CC BY4.0.
+Copyright ESA WorldCover project2021 / Contains modified Copernicus Sentinel
+data(2021) processed by ESA WorldCover consortium.
+https://doi.org/10.5281/zenodo.7254221
+https://creativecommons.org/licenses/by/4.0/
+Finite demonstration areas use2250 categorical samples per3degree tile.
+Palette colours are area-reduced. Class IDs are never linearly interpolated.
+Elsewhere the available225/450/2250 samples retain their source limitations.
+
+Physical coast: Natural Earth5.1.2 public domain is retained globally.
+Crete REGION medium additionally uses finite whole GSHHG2.3.7 full-resolution
+island components, compiled2017-06-15, based on heterogeneous legacy WVS.
+Copyright Paul Wessel / Walter H.F.Smith, University of Hawaii / NOAA.
+https://github.com/GenericMappingTools/gshhg-gmt/releases/tag/2.3.7
+GSHHG is LGPL3-or-later. Its LICENSE.TXT, README.TXT, COPYING.LESSERv3.txt
+and COPYINGv3.txt accompany this distribution. Modified Crete physical
+derivatives retain that license; the separate historical CShapes contribution
+retains CC BY-NC-SA4.0 and its existing notices.
+The finite unmodified source components and modification/compilation scripts
+are supplied beside the internal preview in sources/r56. They are not needed
+at runtime and are not embedded in the game. Original global research inputs
+remain in the development workspace. No positional metre accuracy or exact
+1900 shoreline is asserted. Original formal land and political records stay
+unchanged. Newly displayed physical land outside the historical source mask
+is not automatically assigned to a state.

@@ -10,6 +10,7 @@ var cancelled: bool = false
 var errors: Array[String] = []
 var line_chunks: Array[Dictionary] = []
 var surface_reference: Dictionary = {}
+var surface_covers: Array[Dictionary] = []
 var geometry_mutex := Mutex.new()
 
 func landmark_visuals() -> Array[Dictionary]:
@@ -28,6 +29,26 @@ func settlement_visuals(date: String) -> Array[Dictionary]:
 			result.append(feature)
 	return result
 
+func minimum_observation_mpp(ll: Vector2, date: String) -> float:
+	# A shard's 300km query disc is not 300km of detailed urban terrain.
+	if not display_active_on(date): return INF
+	var result := INF
+	var surface := surface_reference
+	if not surface.is_empty():
+		var west := float(surface.west_cell_centre)
+		var north := float(surface.north_cell_centre)
+		var step := float(surface.step_degrees)
+		if ll.x>=west and ll.x<=west+(int(surface.width)-1)*step and ll.y<=north and ll.y>=north-(int(surface.height)-1)*step:
+			result = maxf(float(metadata.get("local_min_mpp",25.0)),step*111195.0*.25)
+	var unit := GlobeProjection.lon_lat_to_unit(ll)
+	for visual: Dictionary in landmark_visuals():
+		if not landmark_visible_on(visual,date) or str(visual.get("model_path","")).is_empty(): continue
+		var p := (visual.geometry as Dictionary).coordinates as Array
+		var distance := unit.angle_to(GlobeProjection.lon_lat_to_unit(Vector2(float(p[0]),float(p[1]))))*6371.0088
+		# The finite model neighbourhood permits observation, not invented blocks.
+		if distance<=2.5: result=minf(result,float(metadata.get("local_min_mpp",25.0)))
+	return result
+
 func active_on(date: String) -> bool:
 	return errors.is_empty() and (has_content or not features.is_empty()) and str(metadata.get("valid_from", "")) <= date and date < str(metadata.get("valid_to", ""))
 
@@ -38,6 +59,8 @@ static func landmark_visible_on(visual: Dictionary, date: String) -> bool:
 
 func display_active_on(date: String) -> bool:
 	if not errors.is_empty(): return false
+	# Modern physical reference is not a one-year political snapshot.
+	if bool(metadata.get("physical_foundation",false)): return true
 	if active_on(date): return true
 	for visual: Dictionary in landmark_visuals():
 		if landmark_visible_on(visual,date): return true

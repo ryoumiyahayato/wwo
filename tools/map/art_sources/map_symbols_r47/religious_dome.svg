@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<title>WWO original map symbol: religious_dome</title>
+<polygon points="29.00,66.00 99.00,66.00 99.00,103.00 29.00,103.00" fill="#D7C7A2" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="29.00,66.00 99.00,66.00 99.00,103.00 29.00,103.00" fill="#D7C7A2" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="28.00,66.00 30.00,66.00 30.74,58.93 32.94,52.17 36.49,46.02 41.25,40.73 47.00,36.56 53.49,33.66 60.45,32.19 67.55,32.19 74.51,33.66 81.00,36.56 86.75,40.73 91.51,46.02 95.06,52.17 97.26,58.93 98.00,66.00 100.00,66.00" fill="#A88A52" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="28.00,66.00 30.00,66.00 30.74,58.93 32.94,52.17 36.49,46.02 41.25,40.73 47.00,36.56 53.49,33.66 60.45,32.19 67.55,32.19 74.51,33.66 81.00,36.56 86.75,40.73 91.51,46.02 95.06,52.17 97.26,58.93 98.00,66.00 100.00,66.00" fill="#A88A52" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="64.00,32.00 64.00,19.00" fill="none" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="64.00,32.00 64.00,19.00" fill="none" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="64.00,103.00 64.00,81.00" fill="none" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="64.00,103.00 64.00,81.00" fill="none" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

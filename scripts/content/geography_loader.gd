@@ -44,8 +44,8 @@ func _load_presentation() -> void:
 	if str(labels.get("schema_id", "")) != "country_label_layout_r3" or not labels.get("layouts") is Dictionary:
 		errors.append("Invalid country label layout format")
 		return
-	var borders := ContentDocument.read("res://data/presentation/political_border_display_r3.json", errors)
-	if str(borders.get("schema_id", "")) != "political_border_display_r3" or str(borders.get("geometry_role", "")) != "PRESENTATION_SHARED_SOURCE_EDGES_ONLY" or not borders.get("boundaries") is Array:
+	var borders := ContentDocument.read("res://data/presentation/political_border_display_r39.json", errors)
+	if str(borders.get("schema_id", "")) != "political_border_display_r39" or str(borders.get("geometry_role", "")) != "DISPLAY_PARTITION_SHARED_EDGES_ONLY_NOT_SOVEREIGNTY" or not borders.get("boundaries") is Array:
 		errors.append("Invalid political display border format")
 		return
 	var annotations := ContentDocument.read("res://data/presentation/geographic_annotations_r3.json", errors)
@@ -120,6 +120,32 @@ func _points_from_raw(raw_value: Variant) -> PackedVector2Array:
 static func decode_relief(level: String, admitted: Dictionary) -> Dictionary:
 	var failures: Array[String] = []
 	var result: Dictionary = {"errors": failures}
+	if level in ["france_catalog","british_catalog","german_catalog","spain_catalog","canary_catalog","benelux_catalog","europe_catalog","siberian_catalog","asian_catalog","northern_catalog","arid_catalog","european_catalog","sampling_catalog"]:
+		# REGION-only metadata admission; WORLD never reads regional images.
+		var pack := {"france_catalog":"france_r42","british_catalog":"british_r43","german_catalog":"german_r44","spain_catalog":"spain_r45","canary_catalog":"canary_r45","benelux_catalog":"benelux_r46","europe_catalog":"europe_r48","siberian_catalog":"siberian_r50","asian_catalog":"asian_r51","northern_catalog":"northern_r52","arid_catalog":"arid_r53","european_catalog":"european_r55","sampling_catalog":"sampling_r57"}[level] as String
+		var document := ContentDocument.read("res://data/presentation/"+pack.replace("_r","_surface_r")+".json",failures)
+		var sources := HistoricalSourceRegistry.new()
+		var facts := HistoricalEvidenceCatalog.new()
+		if not sources.load_document(document.get("source_registry",{}) as Dictionary) or not facts.load_document(document.get("evidence_catalog",{}) as Dictionary):
+			failures.append_array(sources.errors())
+			failures.append_array(facts.errors())
+			return result
+		var fact := facts.fact("physical_relief:"+pack)
+		var gate := HistoricalProvenanceGate.new(sources,facts)
+		if fact==null or not gate.admit_runtime_fact(fact.fact_id,"physical_reference_content",fact.output_material()) or str((fact.value as Dictionary).get("status",""))!="PHYSICAL_REFERENCE":
+			failures.append("Surface requires admitted modern physical reference: "+pack)
+			return result
+		# The shared catalogue retains each upstream provenance assertion and ID.
+		var material_facts: Array = document.evidence_catalog.facts if level in ["europe_catalog","asian_catalog","northern_catalog","arid_catalog","european_catalog","sampling_catalog"] else [document.evidence_catalog.facts[0]]
+		for material: Dictionary in material_facts:
+			var item := facts.fact(str(material.get("fact_id","")))
+			if item==null or not gate.admit_runtime_fact(item.fact_id,"physical_reference_content",item.output_material()):
+				failures.append("Shared surface contains an unadmitted reference")
+				return result
+			for asset: Dictionary in (item.value as Dictionary).assets:
+				admitted[str(asset.id).get_slice(":",1)] = asset
+		result["assets"] = admitted
+		return result
 	if admitted.is_empty():
 		var document := ContentDocument.read(RELIEF_PATH, failures)
 		var sources := HistoricalSourceRegistry.new()
@@ -141,10 +167,21 @@ static func decode_relief(level: String, admitted: Dictionary) -> Dictionary:
 		return result
 	var asset := admitted[level] as Dictionary
 	var buffer := FileAccess.get_file_as_bytes(str(asset.path))
+	if str(asset.format)=="RGBA8_MIP_DEFLATE":
+		# Offline linear-data mips, not a colour image interpreted as height.
+		if buffer.size()<20 or buffer.slice(0,5).get_string_from_ascii()!="FRT42" or buffer.decode_u32(8)!=int(asset.width) or buffer.decode_u32(12)!=int(asset.height) or buffer.decode_u32(16)!=int(asset.decoded_bytes):
+			failures.append("Invalid geographic surface header")
+			return result
+		var pixels := buffer.slice(20).decompress(int(asset.decoded_bytes),FileAccess.COMPRESSION_DEFLATE)
+		if pixels.size()!=int(asset.decoded_bytes):
+			failures.append("Invalid geographic surface data")
+			return result
+		result["image"] = Image.create_from_data(int(asset.width),int(asset.height),true,Image.FORMAT_RGBA8,pixels)
+		return result
 	var image := Image.new()
 	if image.load_png_from_buffer(buffer) != OK or image.get_width() != int(asset.width) or image.get_height() != int(asset.height):
 		failures.append("Invalid relief image")
 		return result
-	image.convert(Image.FORMAT_RG8)
+	image.convert(Image.FORMAT_R8 if str(asset.format)=="R8" else Image.FORMAT_RG8)
 	result["image"] = image
 	return result

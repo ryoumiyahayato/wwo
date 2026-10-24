@@ -11,7 +11,17 @@ const SOURCES: Array[Dictionary] = [
 	{"path":GIZA_PATH,"anchor":GIZA_ANCHOR,"anchor_id":"landmark:giza_pyramids_1900","radius_km":20.0},
 	{"path":"res://data/local/london_westminster_1900.json","anchor":Vector2(-0.1246,51.5007),"anchor_id":"place:london","radius_km":15.0},
 	{"path":"res://data/local/zermatt_west_physical_reference.json","anchor":Vector2(7.703304,46.010743),"anchor_id":"geographic_region:zermatt_west_reference","radius_km":8.0},
-	{"path":"res://data/local/berlin_transport_1900.json","anchor":Vector2(13.388,52.5219),"anchor_id":"place:berlin","radius_km":20.0}]
+	{"path":"res://data/local/berlin_transport_1900.json","anchor":Vector2(13.388,52.5219),"anchor_id":"place:berlin","radius_km":20.0},
+	{"path":"res://data/local/internal_preview_r23/pont_du_gard.json","anchor":Vector2(4.535278,43.947222),"anchor_id":"landmark:pont_du_gard_reference","radius_km":15.0,"internal_preview":true,"display_name":"加尔桥","parent_country_id":"country_fra"},
+	{"path":"res://data/local/internal_preview_r23/stonehenge.json","anchor":Vector2(-1.826277,51.178905),"anchor_id":"landmark:stonehenge_reference","radius_km":15.0,"internal_preview":true,"display_name":"巨石阵","parent_country_id":"british_isles_1900"},
+	{"path":"res://data/local/internal_preview_r23/colosseum.json","anchor":Vector2(12.4922,41.8902),"anchor_id":"landmark:colosseum_reference","radius_km":15.0,"internal_preview":true,"display_name":"罗马斗兽场","parent_country_id":"kingdom_of_italy"},
+	{"path":"res://data/local/internal_preview_r41/orange.json","anchor":Vector2(4.808417,44.135722),"anchor_id":"landmark:orange_reference","radius_km":8.0,"internal_preview":true,"display_name":"奥朗日古剧场","parent_country_id":"country_fra"},
+	{"path":"res://data/local/internal_preview_r41/pisa.json","anchor":Vector2(10.396389,43.723056),"anchor_id":"landmark:pisa_reference","radius_km":8.0,"internal_preview":true,"display_name":"比萨斜塔","parent_country_id":"kingdom_of_italy"},
+	{"path":"res://data/local/internal_preview_r41/parthenon.json","anchor":Vector2(23.72618,37.97087),"anchor_id":"landmark:parthenon_reference","radius_km":8.0,"internal_preview":true,"display_name":"帕特农神庙遗址","parent_country_id":"kingdom_of_greece"},
+	{"path":"res://data/local/internal_preview_r41/petra.json","anchor":Vector2(35.45154,30.32208),"anchor_id":"landmark:petra_reference","radius_km":8.0,"internal_preview":true,"display_name":"佩特拉宝库立面","parent_country_id":"ottoman_empire"},
+	{"path":"res://data/local/internal_preview_r41/taj_mahal.json","anchor":Vector2(78.04222,27.17417),"anchor_id":"landmark:taj_mahal_reference","radius_km":8.0,"internal_preview":true,"display_name":"泰姬陵主体","parent_country_id":"cshapes_gw_750"},
+	{"path":"res://data/local/internal_preview_r41/temple_heaven.json","anchor":Vector2(116.406667,39.882167),"anchor_id":"landmark:temple_heaven_reference","radius_km":8.0,"internal_preview":true,"display_name":"天坛祈年殿","parent_country_id":"qing_empire"},
+	{"path":"res://data/local/internal_preview_r41/hagia_sophia.json","anchor":Vector2(28.98,41.00833),"anchor_id":"landmark:hagia_sophia_reference","radius_km":8.0,"internal_preview":true,"display_name":"圣索菲亚主体","parent_country_id":"ottoman_empire"}]
 const PREWARM_KM_PER_PIXEL: float = 6.0
 var content: LocalSpatialContent
 var _thread: Thread
@@ -28,22 +38,34 @@ static func covers(lon_lat: Vector2) -> bool:
 static func source_at(lon_lat: Vector2) -> Dictionary:
 	var unit := GlobeProjection.lon_lat_to_unit(lon_lat)
 	for source: Dictionary in SOURCES:
+		if not _source_enabled(source): continue
 		if unit.angle_to(GlobeProjection.lon_lat_to_unit(source.anchor as Vector2))*6371.0088<=float(source.radius_km): return source
 	return {}
 
 static func anchors() -> Array[Vector2]:
 	var result: Array[Vector2] = []
-	for source: Dictionary in SOURCES: result.append(source.anchor as Vector2)
+	for source: Dictionary in SOURCES:
+		if _source_enabled(source): result.append(source.anchor as Vector2)
+	return result
+
+static func _source_enabled(source: Dictionary) -> bool:
+	return not bool(source.get("internal_preview",false)) or OS.has_feature("editor") or OS.has_feature("internal_landmark_preview")
+
+static func internal_landmark_sources() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for source: Dictionary in SOURCES:
+		if bool(source.get("internal_preview",false)) and _source_enabled(source): result.append(source)
 	return result
 
 func request(lon_lat: Vector2 = ANCHOR) -> void:
 	var source := source_at(lon_lat)
 	if source.is_empty(): return
+	var changed := not _wanted or _wanted_path!=str(source.path)
 	_wanted = true
 	_wanted_path = str(source.path)
 	_wanted_anchor = source.anchor as Vector2
 	if _thread!=null:
-		if _loading_path!=_wanted_path:
+		if changed and _loading_path!=_wanted_path:
 			_request_mutex.lock()
 			_request_generation += 1
 			_request_mutex.unlock()
@@ -153,15 +175,44 @@ static func _load(path: String, current: Callable) -> LocalSpatialContent:
 		if not ids.has(str(visual.get("anchor_place_id",""))) or not _valid_feature(visual) or str(visual.get("kind",""))!="landmark" or not str(visual.get("model_path","")).begins_with("res://assets/landmarks/") or str(visual.get("source_reference","")).is_empty():
 			result.errors.append("Invalid landmark placement reference")
 			return result
+		# A transport decoration retains its admitted point ID, while LOCAL uses
+		# the shard's existing city anchor. It cannot introduce another locality.
+		if visual.has("local_anchor_id") and str(visual.local_anchor_id)!=expected:
+			result.errors.append("Landmark local anchor differs from its content shard")
+			return result
 	var surface_path := str(result.metadata.get("surface_reference_path",""))
 	if not surface_path.is_empty():
 		var surface_errors: Array[String] = []
 		var surface := ContentDocument.read(surface_path,surface_errors)
 		if surface_errors.is_empty() and _valid_surface(surface):
 			surface["content_path"] = surface_path
+			# Presentation parameters are detached from raw DEM/DSM and cover facts.
+			surface["presentation"] = result.metadata.get("surface_presentation",{})
 			result.surface_reference = surface
 		else:
 			result.metadata["terrain_note_zh"] = "局部高程资料不可用，地表保持平面。"
+	# These acquired open-river panels do not establish a complete channel.
+	# Keep their admitted facts for reading, but use the existing centrelines
+	# consistently in both chart and terrain. Never turn a study cut into a bank.
+	var bounded_river_panel := false
+	var has_river_line := false
+	for feature: Dictionary in result.features:
+		if str(feature.kind)=="river" and str(feature.geometry.type)=="LineString": has_river_line = true
+		if str(feature.kind)=="water_surface" and str(feature.get("geometry_role",""))=="MODERN_WATER_POLYGON_NOT_1900_BANK":
+			bounded_river_panel = true
+	bounded_river_panel = bounded_river_panel and has_river_line
+	if bounded_river_panel:
+		result.metadata["water_display_note_zh"] = "有限现代河面不作完整河道显示；沿用已有中心线，不推定河宽。"
+		if not result.surface_reference.is_empty():
+			var covers: Array = []
+			for cover: Dictionary in result.surface_reference.get("cover_meshes",[]) as Array:
+				if str(cover.kind)!="water_surface": covers.append(cover)
+			result.surface_reference["cover_meshes"] = covers
+			result.surface_reference["river_chart_only"] = true
+	# Legacy source files package cover references beside their DEM. Detach
+	# the inputs here: cover kinds never become DEM values or terrain classes.
+	result.surface_covers.assign(result.surface_reference.get("cover_meshes",[]) as Array)
+	result.surface_reference.erase("cover_meshes")
 	for feature: Dictionary in result.features:
 		if not current.call():
 			result.cancelled = true
@@ -176,12 +227,18 @@ static func _load(path: String, current: Callable) -> LocalSpatialContent:
 		if not current.call():
 			result.cancelled = true
 			return result
+		# Local hydrographic banks are a separate reference, not the exterior
+		# of Natural Earth's physical land. Keep the fact, use the coast that
+		# belongs to the installed physical fill for the actual map outline.
+		if str(feature.kind)=="coast": continue
 		if str(feature.kind) in ["settlement","landmark","geographic_region"]:
 			continue
 		if str(feature.kind)=="water_surface":
+			if bounded_river_panel: continue
 			var geometry := feature.geometry as Dictionary
 			var polygons: Array = [geometry.coordinates] if str(geometry.type)=="Polygon" else geometry.coordinates as Array
-			result.line_chunks.append({"kind":"water_surface","polygons":polygons,"feature_id":str(feature.id),"max_mpp":200.0})
+			var chunk := {"kind":"water_surface","polygons":polygons,"feature_id":str(feature.id),"max_mpp":200.0}
+			result.line_chunks.append(chunk)
 			continue
 		var points := PackedVector3Array()
 		for coordinate: Array in feature.geometry.coordinates as Array:
@@ -230,7 +287,7 @@ static func _valid_surface(surface: Dictionary) -> bool:
 static func _valid_miniature(feature: Dictionary, anchor_id: String) -> bool:
 	var layout: Variant = feature.miniature_layout
 	if not layout is Dictionary or str(feature.kind)!="geographic_region" or str(feature.geometry.type)!="Point": return false
-	if str(layout.get("anchor_place_id",""))!=anchor_id or str(layout.get("model_path",""))!="res://assets/settlements/cabinet_building_modules.glb" or str(layout.get("geometry_role",""))!="ABSTRACT_MINIATURE_COMPOSITION": return false
+	if str(layout.get("anchor_place_id",""))!=anchor_id or str(layout.get("model_path",""))!="res://assets/settlements/urban_landscape_r40.glb" or str(layout.get("geometry_role",""))!="ABSTRACT_MINIATURE_COMPOSITION": return false
 	if str(layout.get("placement_notice_zh","" )).is_empty() or float(layout.get("max_mpp",0))<=0 or float(layout.max_mpp)>24.0 or float(layout.get("scale_max",0))<=0 or float(layout.scale_max)>3.0: return false
 	for field: String in ["max_mpp","scale_max","target_height_px"]:
 		var value: Variant = layout.get(field,null)
@@ -239,7 +296,7 @@ static func _valid_miniature(feature: Dictionary, anchor_id: String) -> bool:
 	var placements: Variant = layout.get("placements",[])
 	if not placements is Array or placements.size()>96: return false
 	for entry: Variant in placements:
-		if not entry is Dictionary or str(entry.get("module","")) not in ["paris_mansard","london_terrace","rural_house","civic_hall","warehouse","quay_platform"]: return false
+		if not entry is Dictionary or str(entry.get("module","")) not in ["paris_mansard","paris_corner","london_terrace","london_gabled","civic_hall","warehouse","sawtooth_workshop","quay_platform"]: return false
 		var offset: Variant = entry.get("offset_m",[])
 		var scale: Variant = entry.get("scale",[])
 		if not offset is Array or offset.size()!=2 or not scale is Array or scale.size()!=3: return false

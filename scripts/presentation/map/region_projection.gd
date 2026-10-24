@@ -33,6 +33,27 @@ static func inverse(km: Vector2, tangent_frame: Basis) -> Vector3:
 static func screen_axes(bearing: float) -> Transform2D:
 	return Transform2D(Vector2(cos(bearing), sin(bearing)), Vector2(sin(bearing), -cos(bearing)), Vector2.ZERO)
 
+static func tangent_axes(unit: Vector3, tangent_frame: Basis) -> Transform2D:
+	# Jacobian of this existing chart. Unlike subtracting two screen points,
+	# it does not inherit a large pan origin's float cancellation.
+	var geographic := frame(lon_lat(unit))
+	var inverse := tangent_frame.transposed()
+	var point := inverse*unit.normalized()
+	var xy := Vector2(point.x,point.y)
+	var sine := xy.length()
+	var axes: Array[Vector2] = []
+	for direction: Vector3 in [geographic.x,geographic.y]:
+		var delta := inverse*direction
+		var dxy := Vector2(delta.x,delta.y)
+		if sine<0.0001:
+			axes.append(dxy)
+			continue
+		var angle := atan2(sine,point.z)
+		var ds := xy.dot(dxy)/sine
+		var da := (point.z*ds-sine*delta.z)/(sine*sine+point.z*point.z)
+		axes.append(dxy*(angle/sine)+xy*(da/sine-angle*ds/(sine*sine)))
+	return Transform2D(axes[0],axes[1],Vector2.ZERO)
+
 static func world_unit(point: Vector2, center: Vector2, radius: float, orientation: Basis) -> Vector3:
 	var xy := (point - center) / radius
 	if xy.length_squared() >= 1.0:
@@ -48,17 +69,3 @@ static func world_scale(unit: Vector3, orientation: Basis, radius: float) -> flo
 static func world_bearing(unit: Vector3, orientation: Basis) -> float:
 	var north := orientation * frame(lon_lat(unit)).y
 	return atan2(north.x, north.y)
-
-static func restore_world(unit: Vector3, pixel: Vector2, center: Vector2, scale: float, bearing: float) -> Dictionary:
-	var offset := pixel - center
-	var distance_squared := offset.length_squared()
-	var metric_radius := EARTH_RADIUS_KM / scale
-	var radius_squared := (distance_squared + sqrt(distance_squared * distance_squared + 4.0 * pow(metric_radius, 4.0))) * 0.5
-	var radius := sqrt(radius_squared)
-	var xy := offset / radius
-	var target := Vector3(xy.x, -xy.y, sqrt(maxf(0.000001, 1.0 - xy.length_squared())))
-	var north_xy := Vector2(sin(bearing), cos(bearing))
-	var north := Vector3(north_xy.x, north_xy.y, -(north_xy.x * target.x + north_xy.y * target.y) / target.z).normalized()
-	var east := north.cross(target).normalized()
-	var attitude := Basis(east, north, target) * frame(lon_lat(unit)).transposed()
-	return {"orientation": attitude, "radius": radius}

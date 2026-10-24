@@ -10,6 +10,8 @@ var _losses_by_order: Dictionary = {} # Derived finite responsibility index.
 var _losses_by_shipment: Dictionary = {}
 var _replacements_by_order: Dictionary = {}
 var _dispositions_by_order: Dictionary = {}
+var _disposition_days: Dictionary = {} # Derived subject / actual decision day.
+var _open_dispositions: Dictionary = {}
 var _ref: WeakRef
 
 func bind(e: RefCounted) -> void:
@@ -23,6 +25,34 @@ func _index_loss(fact: Dictionary) -> void:
 
 func economy() -> RefCounted:
 	return _ref.get_ref()
+
+func _index_disposition(d: Dictionary) -> void:
+	var dates: Array[int] = [int(d["minute"])/1440]
+	for proof: Dictionary in d["confirmed"].values():
+		var date := int(proof["minute"])/1440
+		if not dates.has(date): dates.append(date)
+	if int(d["executed_minute"]) >= 0 and not dates.has(int(d["executed_minute"])/1440): dates.append(int(d["executed_minute"])/1440)
+	for subject: String in d["parties"]:
+		if not _disposition_days.has(subject): _disposition_days[subject] = {}
+		if not _open_dispositions.has(subject): _open_dispositions[subject] = {}
+		for date: int in dates:
+			if not _disposition_days[subject].has(date): _disposition_days[subject][date] = {}
+			_disposition_days[subject][date][d["id"]] = true
+		if d["status"] == "EXECUTED": _open_dispositions[subject].erase(d["id"])
+		else: _open_dispositions[subject][d["id"]] = true
+	if economy()._costs.enabled: economy()._costs._scores_cache.clear()
+
+## Recent decisions and all still-open responsibilities. This is a query index,
+## never a second payable ledger, and is rebuilt from the original contracts.
+func cost_dispositions(subject: String, since_day: int) -> Array[Dictionary]:
+	var ids: Dictionary = _open_dispositions.get(subject, {}).duplicate()
+	for date: int in range(since_day, economy().day+1):
+		for id: String in _disposition_days.get(subject, {}).get(date, {}): ids[id] = true
+	var ordered: Array = ids.keys()
+	ordered.sort()
+	var result: Array[Dictionary] = []
+	for id: String in ordered: result.append(dispositions[id])
+	return result
 
 func controls(actor: String, subject: String, financial: bool = false) -> bool:
 	var e := economy()
@@ -196,7 +226,11 @@ func _notify(actor: String, p: Dictionary, id: String) -> Dictionary:
 	if not FormalLedgerState.exact_fields(p, ["loss_id", "recipient", "delivery_minute", "basis"]) or not losses.has(p["loss_id"]) or not FormalLedgerState.valid_amount(p["delivery_minute"]) or p["delivery_minute"] < economy()._world.game_clock.total_minutes() or not p["basis"] is String or p["basis"].is_empty(): return _result(false, "NOTICE_REQUIRES_EXPLICIT_DELIVERY_TIME_AND_BASIS")
 	var f := losses[p["loss_id"]] as Dictionary
 	var order := economy()._orders.get(f["order_id"], {}) as Dictionary
-	if not f["parties"].any(func(party: String) -> bool: return controls(actor, party)) or order.is_empty() or p["recipient"] not in [order["buyer"], order["seller"]]: return _result(false, "NOT_AUTHORIZED_CONTRACT_LOSS_NOTICE")
+	var service: Dictionary=economy()._service_market.contracts.get(f.get("service_id",""),{})
+	var recipients: Array=[]
+	if not order.is_empty(): recipients=[order["buyer"],order["seller"]]
+	elif not service.is_empty(): recipients=[service["client"],service["provider"]]
+	if not f["parties"].any(func(party: String) -> bool: return controls(actor, party)) or p["recipient"] not in recipients: return _result(false, "NOT_AUTHORIZED_CONTRACT_LOSS_NOTICE")
 	notices[id] = {"id": id, "loss_id": f["id"], "sender": actor, "recipient": p["recipient"], "sent_minute": economy()._world.game_clock.total_minutes(), "delivery_minute": p["delivery_minute"], "basis": p["basis"]}
 	if not _notices_by_loss.has(f["id"]): _notices_by_loss[f["id"]] = []
 	_notices_by_loss[f["id"]].append(id)
@@ -237,9 +271,11 @@ func _report(actor: String, p: Dictionary, id: String) -> Dictionary:
 	if not e._lots.ready(rows): return _result(false, "LOSS_LACKS_ACTUAL_REMAINDER")
 	var first := e._lots.portions[rows[0]["portion_id"]] as Dictionary
 	var location := str(first["location"])
+	var service_id := location.trim_prefix("SERVICE|") if location.begins_with("SERVICE|") else str(first["reserved_for"]) if e._service_market.contracts.has(first["reserved_for"]) else ""
 	var shipment_id := location.trim_prefix("CARGO|") if location.begins_with("CARGO|") else ""
 	var order_id := str(e._shipments[shipment_id]["order_id"]) if not shipment_id.is_empty() and e._shipments.has(shipment_id) else str(first["reserved_for"])
 	if location.contains("|FREIGHT|"): order_id = location.get_slice("|FREIGHT|", 1)
+	if not service_id.is_empty(): order_id=""
 	var quantity := 0
 	for row: Dictionary in rows:
 		var item := e._lots.portions[row["portion_id"]] as Dictionary
@@ -248,6 +284,7 @@ func _report(actor: String, p: Dictionary, id: String) -> Dictionary:
 		if int(row["quantity"]) > FormalLedgerState.MAX_AMOUNT-quantity: return _result(false, "LOSS_QUANTITY_BOUNDS")
 		quantity += int(row["quantity"])
 	if not controls(actor, first["owner"]) and not controls(actor, first["custodian"]): return _result(false, "NOT_LOSS_OWNER_OR_CUSTODIAN")
+	if not service_id.is_empty() and not e._service_market.loss_ready(service_id,quantity): return _result(false,"LOSS_HAS_NO_CURRENT_WAREHOUSE_CUSTODY")
 	if not shipment_id.is_empty() and not e._shipments.has(shipment_id): return _result(false, "MISSING_LOSS_SHIPMENT")
 	var parties: Array[String] = []
 	parties.append(first["owner"])
@@ -256,6 +293,7 @@ func _report(actor: String, p: Dictionary, id: String) -> Dictionary:
 	for party: String in parties:
 		if controls(actor, party): confirmed[party] = {"actor": actor, "minute": e._world.game_clock.total_minutes()}
 	losses[id] = {"id": id, "rows": rows, "quantity": quantity, "good": first["good"], "unit": first["unit"], "owner": first["owner"], "custodian": first["custodian"], "location": location, "place_id": first["place_id"], "shipment_id": shipment_id, "order_id": order_id, "stage": e._shipments.get(shipment_id, {}).get("stage", "STORAGE"), "leg_index": e._shipments.get(shipment_id, {}).get("leg_index", -1), "observed_minute": e._world.game_clock.total_minutes(), "basis": p["basis"], "process": p["process"], "parties": parties, "confirmed": confirmed, "status": "OBSERVED", "adopted_minute": -1, "resolved": 0, "personal_fact": {}}
+	if not service_id.is_empty(): losses[id]["service_id"]=service_id
 	_index_loss(losses[id])
 	return _adopt_loss(losses[id])
 
@@ -290,6 +328,7 @@ func _adopt_loss(fact: Dictionary) -> Dictionary:
 		prepared = e._world.personal_economy_state.prepare_native_loss(personal)
 		if prepared.is_empty(): return _result(false, "LOSS_PERSONAL_PARTITIONS_CHANGED")
 	if not e._lots.record_loss(fact["id"], rows, e._world.game_clock.total_minutes(), fact["basis"], fact["process"]): return _result(false, "LOSS_ADOPTION_FAILED")
+	if fact.has("service_id"): e._service_market.adopted_loss(fact["service_id"],fact["id"],rows,fact["quantity"])
 	if not prepared.is_empty(): e._world.personal_economy_state.adopt_native_change(prepared)
 	fact["personal_fact"] = personal
 	fact["status"] = "ADOPTED"
@@ -333,6 +372,7 @@ func _propose(actor: String, p: Dictionary, id: String) -> Dictionary:
 	p.erase("authorizations")
 	if not EconomySliceConfig._fields(p, ["loss_id", "mode", "quantity", "basis"], ["fees", "payment"]) or not losses.has(p["loss_id"]) or p["mode"] not in ["KEEP", "REPLACE", "RELEASE", "REFUND", "DAMAGES"] or not p["basis"] is String or p["basis"].is_empty() or not FormalLedgerState.valid_amount(p["quantity"]) or int(p["quantity"]) <= 0: return _result(false, "INVALID_DISPOSITION_TERMS")
 	var loss := losses[p["loss_id"]] as Dictionary
+	if loss.has("service_id"): return _result(false,"WAREHOUSE_LOSS_HAS_NO_SELECTED_SERVICE_RESTITUTION_TERMS")
 	if not knows_loss(actor, p["loss_id"]): return _result(false, "NO_RECEIVED_LOSS_INFORMATION")
 	var order := e._orders.get(loss["order_id"], {}) as Dictionary
 	if loss["status"] != "ADOPTED" or order.is_empty(): return _result(false, "NO_ADOPTED_CONTRACT_SHORTFALL")
@@ -364,6 +404,7 @@ func _propose(actor: String, p: Dictionary, id: String) -> Dictionary:
 		if not proof.is_empty(): confirmed[party] = proof
 	if confirmed.is_empty(): return _result(false, "NO_SPECIFIC_CARGO_SETTLEMENT_AUTHORITY")
 	dispositions[id] = {"id": id, "loss_id": loss["id"], "terms": p.duplicate(true), "parties": parties, "confirmed": confirmed, "status": "AGREED" if confirmed.size() == parties.size() else "PROPOSED", "minute": e._world.game_clock.total_minutes(), "executed_minute": -1, "payments": [], "replacement_portions": [], "custody_fact": {}}
+	_index_disposition(dispositions[id])
 	if not _dispositions_by_order.has(order["id"]): _dispositions_by_order[order["id"]] = []
 	_dispositions_by_order[order["id"]].append(id)
 	return {"accepted": true, "reason": "DISPOSITION_PROPOSED", "disposition_id": id}
@@ -377,7 +418,8 @@ func _refund_available(p: Dictionary, order_id: String, own: String = "") -> boo
 	var tx: Dictionary = e._world.ledger_state.transaction(str(p.get("original_transaction_id", "")))
 	if tx.is_empty() or tx["kind"] not in ["goods", "freight"] or tx["reference_id"] != order_id or tx["from_account_id"] != e._account(p["recipient"], p["denomination"]) or tx["to_account_id"] != e._account(p["payer"], p["denomination"]): return false
 	var used := 0
-	for d: Dictionary in dispositions.values():
+	for id: String in _dispositions_by_order.get(order_id, []):
+		var d := dispositions[id] as Dictionary
 		if d["id"] == own or d["terms"]["mode"] != "REFUND": continue
 		if d["terms"]["payment"].get("original_transaction_id") == p.get("original_transaction_id"): used += int(d["terms"]["payment"]["amount"])
 	return int(p["amount"]) <= int(tx["amount"])-used
@@ -393,6 +435,7 @@ func _confirm_disposition(actor: String, p: Dictionary) -> Dictionary:
 			if not d["confirmed"].has(party): d["confirmed"][party] = proof
 	if not allowed: return _result(false, "NO_CARGO_SETTLEMENT_AUTHORITY")
 	if d["status"] == "PROPOSED" and d["confirmed"].size() == d["parties"].size(): d["status"] = "AGREED"
+	_index_disposition(d)
 	return {"accepted": true, "reason": d["status"], "disposition_id": d["id"]}
 
 func _execute(actor: String, p: Dictionary) -> Dictionary:
@@ -445,11 +488,13 @@ func _execute(actor: String, p: Dictionary) -> Dictionary:
 		var legs: Array[Dictionary] = [leg]
 		if not e._world.ledger_state.batch_payment("cargo:"+str(d["id"]), legs, minute):
 			d["status"] = "PAYABLE"
+			_index_disposition(d)
 			return {"accepted": false, "reason": "AGREED_PAYMENT_REMAINS_UNFUNDED", "disposition_id": d["id"], "responsibility_changed": true}
 		d["payments"] = legs
 		d["execution_authorizations"] = [authority["proof"]] if not _host_organization(pay["payer"]).is_empty() else []
 	d["status"] = "EXECUTED"
 	d["executed_minute"] = minute
+	_index_disposition(d)
 	if terms["mode"] == "REPLACE":
 		if not _replacements_by_order.has(order["id"]): _replacements_by_order[order["id"]] = []
 		_replacements_by_order[order["id"]].append(d["id"])
@@ -622,7 +667,10 @@ func restore(raw: Variant, saved: Dictionary) -> bool:
 	var adopted: Dictionary = {}
 	for id: String in raw["losses"]:
 		var f: Variant = raw["losses"][id]
-		if not f is Dictionary or not FormalLedgerState.exact_fields(f, ["id", "rows", "quantity", "good", "unit", "owner", "custodian", "location", "place_id", "shipment_id", "order_id", "stage", "leg_index", "observed_minute", "basis", "process", "parties", "confirmed", "status", "adopted_minute", "resolved", "personal_fact"]) or f["id"] != id or f["status"] not in ["OBSERVED", "ADOPTED"] or not f["rows"] is Array or f["rows"].is_empty() or not FormalLedgerState.valid_amount(f["quantity"]) or f["quantity"] <= 0 or not FormalLedgerState.valid_amount(f["resolved"]) or f["resolved"] > f["quantity"] or not FormalLedgerState.valid_amount(f["observed_minute"]) or not f["confirmed"] is Dictionary or not f["parties"] is Array or not f["personal_fact"] is Dictionary: return false
+		if not f is Dictionary or not EconomySliceConfig._fields(f, ["id", "rows", "quantity", "good", "unit", "owner", "custodian", "location", "place_id", "shipment_id", "order_id", "stage", "leg_index", "observed_minute", "basis", "process", "parties", "confirmed", "status", "adopted_minute", "resolved", "personal_fact"],["service_id"]) or f["id"] != id or f["status"] not in ["OBSERVED", "ADOPTED"] or not f["rows"] is Array or f["rows"].is_empty() or not FormalLedgerState.valid_amount(f["quantity"]) or f["quantity"] <= 0 or not FormalLedgerState.valid_amount(f["resolved"]) or f["resolved"] > f["quantity"] or not FormalLedgerState.valid_amount(f["observed_minute"]) or not f["confirmed"] is Dictionary or not f["parties"] is Array or not f["personal_fact"] is Dictionary: return false
+		if f.has("service_id"):
+			var service: Dictionary=saved.get("service_market",{}).get("contracts",{}).get(f["service_id"],{})
+			if service.get("kind")!="STORAGE" or f["owner"]!=service.get("client") or not f["order_id"].is_empty() or not f["shipment_id"].is_empty() or f["good"]!=service.get("good") or f["resolved"]!=0 or f["location"] not in ["SERVICE|"+str(f["service_id"]),"SITE|"+str(service.get("source_site",""))]: return false
 		for key: String in ["good", "unit", "owner", "custodian", "location", "place_id", "shipment_id", "order_id", "stage", "basis", "process"]:
 			if not f[key] is String: return false
 		if typeof(f["leg_index"]) != TYPE_INT or typeof(f["adopted_minute"]) != TYPE_INT or f["observed_minute"] > e._world.game_clock.total_minutes() or f["basis"].is_empty() or f["process"].is_empty(): return false
@@ -661,6 +709,8 @@ func restore(raw: Variant, saved: Dictionary) -> bool:
 	_losses_by_shipment.clear()
 	_replacements_by_order.clear()
 	_dispositions_by_order.clear()
+	_disposition_days.clear()
+	_open_dispositions.clear()
 	for fact: Dictionary in losses.values(): _index_loss(fact)
 	for id: String in dispositions:
 		var d: Variant = dispositions[id]
@@ -737,14 +787,21 @@ func restore(raw: Variant, saved: Dictionary) -> bool:
 		var n: Variant = raw["notices"][id]
 		if not n is Dictionary or not FormalLedgerState.exact_fields(n, ["id", "loss_id", "sender", "recipient", "sent_minute", "delivery_minute", "basis"]) or n["id"] != id or not losses.has(n["loss_id"]) or not FormalLedgerState.valid_amount(n["sent_minute"]) or n["sent_minute"] > e._world.game_clock.total_minutes() or not FormalLedgerState.valid_amount(n["delivery_minute"]) or n["delivery_minute"] < n["sent_minute"]: return false
 		var order := saved["orders"].get(losses[n["loss_id"]]["order_id"], {}) as Dictionary
+		var service: Dictionary=saved.get("service_market",{}).get("contracts",{}).get(losses[n["loss_id"]].get("service_id",""),{})
 		var cmd: Dictionary = saved["commands"].get(id, {})
-		if order.is_empty() or n["recipient"] not in [order["buyer"], order["seller"]] or cmd.get("envelope", {}).get("actor") != n["sender"] or cmd.get("envelope", {}).get("command", {}).get("kind") != "notify_cargo_loss" or not cmd.get("result", {}).get("accepted", false): return false
+		var recipients: Array=[]
+		if not order.is_empty(): recipients=[order["buyer"],order["seller"]]
+		elif not service.is_empty(): recipients=[service["client"],service["provider"]]
+		if n["recipient"] not in recipients or cmd.get("envelope", {}).get("actor") != n["sender"] or cmd.get("envelope", {}).get("command", {}).get("kind") != "notify_cargo_loss" or not cmd.get("result", {}).get("accepted", false): return false
+		var f:=losses[n["loss_id"]] as Dictionary
+		if not f["parties"].any(func(party: String)->bool:return _valid_confirmations(f["parties"],{party:{"actor":n["sender"],"minute":n["sent_minute"]}},f["observed_minute"],saved)): return false
 	notices = raw.get("notices", {}).duplicate(true)
 	_notices_by_loss.clear()
 	for notice_id: String in notices:
 		var loss_id := str(notices[notice_id]["loss_id"])
 		if not _notices_by_loss.has(loss_id): _notices_by_loss[loss_id] = []
 		_notices_by_loss[loss_id].append(notice_id)
+	for d: Dictionary in dispositions.values(): _index_disposition(d)
 	return true
 
 func keeper_reason(subject: String) -> String:

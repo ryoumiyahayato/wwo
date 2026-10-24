@@ -1,0 +1,2006 @@
+{
+  "source_registry": {
+    "schema_id": "historical_source_registry_v2",
+    "sources": [
+      {
+        "source_id": "german_modern_surface_r44",
+        "title": "German Empire European geographic terrain reference",
+        "publisher": "Copernicus / ESA / Airbus; ESA WorldCover consortium",
+        "version": "GLO90-COG+WorldCover2021-v200:R44",
+        "license": "Copernicus-DEM-GLO90+CC-BY-4.0",
+        "locator": "https://copernicus-dem-90m.s3.amazonaws.com/readme.html",
+        "access_metadata": {
+          "horizontal_crs": "EPSG:4326 WGS84-G1150; actual source affine",
+          "vertical_datum": "EGM2008 EPSG:3855 orthometric metres",
+          "dem_type": "DSM includes surface objects, not bare-earth DTM",
+          "dem_epoch": "TanDEM-X 2011-2015, older gap-fill possible",
+          "cover_epoch": "ESA WorldCover 2021 v200",
+          "sampling": "GLO90 native 3-arcsecond latitude, variable longitude; averaged 6-arcsecond extraction, 1/512-degree display. Cover 16x categorical overview.",
+          "bounds_lon_lat": [
+            4.0,
+            46.0,
+            24.0,
+            58.0
+          ],
+          "historical_applicability": "Modern reference, not 1900 environmental facts. Geographic collars, no ownership mask.",
+          "shared_france": "Same DSM, metric gradients and mip generator; full French cores not duplicated. Existing French material takes precedence where valid.",
+          "licence_url": "https://dataspace.copernicus.eu/sites/default/files/media/files/2025-06/copernicus_contributing_mission_data_access_v2_cop_dem_licenses.pdf",
+          "cover_source": "https://esa-worldcover.org/en/data-access",
+          "cover_doi": "https://doi.org/10.5281/zenodo.7254221"
+        }
+      }
+    ]
+  },
+  "evidence_catalog": {
+    "schema_id": "historical_fact_evidence_catalog_v2",
+    "facts": [
+      {
+        "fact_id": "physical_relief:german_r44",
+        "domain": "physical_reference_content",
+        "subject_id": "physical_relief:german_europe",
+        "value": {
+          "status": "PHYSICAL_REFERENCE",
+          "assets": [
+            {
+              "id": "physical_relief:german_r44_base",
+              "path": "res://assets/maps/relief/german_r44_base.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1280,
+              "height": 768,
+              "decoded_bytes": 5242872,
+              "bytes": 2901833,
+              "bounds_lon_lat": [
+                4.0,
+                46.0,
+                24.0,
+                58.0
+              ],
+              "surface_role": "base",
+              "core_inset_degrees": 0,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.015625,
+                0.015625
+              ],
+              "display_spacing_m_approx": [
+                1069.6637148255716,
+                1737.421875
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2,
+              "surface_feather_degrees": [
+                1.5,
+                1.0,
+                1.0,
+                1.5
+              ]
+            },
+            {
+              "id": "physical_relief:german_r44_46_+8",
+              "path": "res://assets/maps/relief/german_r44_46_+8.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3865740,
+              "bounds_lon_lat": [
+                7.9375,
+                45.9375,
+                10.0625,
+                48.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                148.1148586858389,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                8,
+                46,
+                10,
+                48
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_46_+10",
+              "path": "res://assets/maps/relief/german_r44_46_+10.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3681729,
+              "bounds_lon_lat": [
+                9.9375,
+                45.9375,
+                12.0625,
+                48.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                148.1148586858389,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                10,
+                46,
+                12,
+                48
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_46_+12",
+              "path": "res://assets/maps/relief/german_r44_46_+12.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3744665,
+              "bounds_lon_lat": [
+                11.9375,
+                45.9375,
+                14.0625,
+                48.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                148.1148586858389,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                12,
+                46,
+                14,
+                48
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_46_+14",
+              "path": "res://assets/maps/relief/german_r44_46_+14.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 4072997,
+              "bounds_lon_lat": [
+                13.9375,
+                45.9375,
+                16.0625,
+                48.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                148.1148586858389,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                14,
+                46,
+                16,
+                48
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_46_+16",
+              "path": "res://assets/maps/relief/german_r44_46_+16.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3352101,
+              "bounds_lon_lat": [
+                15.9375,
+                45.9375,
+                18.0625,
+                48.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                148.1148586858389,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                16,
+                46,
+                18,
+                48
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_46_+18",
+              "path": "res://assets/maps/relief/german_r44_46_+18.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3134258,
+              "bounds_lon_lat": [
+                17.9375,
+                45.9375,
+                20.0625,
+                48.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                148.1148586858389,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                18,
+                46,
+                20,
+                48
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_46_+20",
+              "path": "res://assets/maps/relief/german_r44_46_+20.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2188656,
+              "bounds_lon_lat": [
+                19.9375,
+                45.9375,
+                22.0625,
+                48.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                148.1148586858389,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                20,
+                46,
+                22,
+                48
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_46_+22",
+              "path": "res://assets/maps/relief/german_r44_46_+22.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3753180,
+              "bounds_lon_lat": [
+                21.9375,
+                45.9375,
+                24.0625,
+                48.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                148.1148586858389,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                22,
+                46,
+                24,
+                48
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_48_+8",
+              "path": "res://assets/maps/relief/german_r44_48_+8.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 4126801,
+              "bounds_lon_lat": [
+                7.9375,
+                47.9375,
+                10.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                8,
+                48,
+                10,
+                50
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_48_+10",
+              "path": "res://assets/maps/relief/german_r44_48_+10.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3955857,
+              "bounds_lon_lat": [
+                9.9375,
+                47.9375,
+                12.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                10,
+                48,
+                12,
+                50
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_48_+12",
+              "path": "res://assets/maps/relief/german_r44_48_+12.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 4232056,
+              "bounds_lon_lat": [
+                11.9375,
+                47.9375,
+                14.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                12,
+                48,
+                14,
+                50
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_48_+14",
+              "path": "res://assets/maps/relief/german_r44_48_+14.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 4202154,
+              "bounds_lon_lat": [
+                13.9375,
+                47.9375,
+                16.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                14,
+                48,
+                16,
+                50
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_48_+16",
+              "path": "res://assets/maps/relief/german_r44_48_+16.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3729350,
+              "bounds_lon_lat": [
+                15.9375,
+                47.9375,
+                18.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                16,
+                48,
+                18,
+                50
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_48_+18",
+              "path": "res://assets/maps/relief/german_r44_48_+18.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 4115345,
+              "bounds_lon_lat": [
+                17.9375,
+                47.9375,
+                20.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                18,
+                48,
+                20,
+                50
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_48_+20",
+              "path": "res://assets/maps/relief/german_r44_48_+20.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 4066062,
+              "bounds_lon_lat": [
+                19.9375,
+                47.9375,
+                22.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                20,
+                48,
+                22,
+                50
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_48_+22",
+              "path": "res://assets/maps/relief/german_r44_48_+22.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3740318,
+              "bounds_lon_lat": [
+                21.9375,
+                47.9375,
+                24.0625,
+                50.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                142.48141353242082,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                22,
+                48,
+                24,
+                50
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+4",
+              "path": "res://assets/maps/relief/german_r44_50_+4.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3461502,
+              "bounds_lon_lat": [
+                3.9375,
+                49.9375,
+                6.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                4,
+                50,
+                6,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+6",
+              "path": "res://assets/maps/relief/german_r44_50_+6.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3993283,
+              "bounds_lon_lat": [
+                5.9375,
+                49.9375,
+                8.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                6,
+                50,
+                8,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+8",
+              "path": "res://assets/maps/relief/german_r44_50_+8.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 4171047,
+              "bounds_lon_lat": [
+                7.9375,
+                49.9375,
+                10.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                8,
+                50,
+                10,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+10",
+              "path": "res://assets/maps/relief/german_r44_50_+10.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3900381,
+              "bounds_lon_lat": [
+                9.9375,
+                49.9375,
+                12.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                10,
+                50,
+                12,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+12",
+              "path": "res://assets/maps/relief/german_r44_50_+12.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3693692,
+              "bounds_lon_lat": [
+                11.9375,
+                49.9375,
+                14.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                12,
+                50,
+                14,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+14",
+              "path": "res://assets/maps/relief/german_r44_50_+14.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3620590,
+              "bounds_lon_lat": [
+                13.9375,
+                49.9375,
+                16.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                14,
+                50,
+                16,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+16",
+              "path": "res://assets/maps/relief/german_r44_50_+16.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3360561,
+              "bounds_lon_lat": [
+                15.9375,
+                49.9375,
+                18.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                16,
+                50,
+                18,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+18",
+              "path": "res://assets/maps/relief/german_r44_50_+18.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3359198,
+              "bounds_lon_lat": [
+                17.9375,
+                49.9375,
+                20.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                18,
+                50,
+                20,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+20",
+              "path": "res://assets/maps/relief/german_r44_50_+20.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3488848,
+              "bounds_lon_lat": [
+                19.9375,
+                49.9375,
+                22.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                20,
+                50,
+                22,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_50_+22",
+              "path": "res://assets/maps/relief/german_r44_50_+22.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3098873,
+              "bounds_lon_lat": [
+                21.9375,
+                49.9375,
+                24.0625,
+                52.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                136.67437672419274,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                22,
+                50,
+                24,
+                52
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+4",
+              "path": "res://assets/maps/relief/german_r44_52_+4.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 1001167,
+              "bounds_lon_lat": [
+                3.9375,
+                51.9375,
+                6.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                4,
+                52,
+                6,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+6",
+              "path": "res://assets/maps/relief/german_r44_52_+6.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2367203,
+              "bounds_lon_lat": [
+                5.9375,
+                51.9375,
+                8.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                6,
+                52,
+                8,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+8",
+              "path": "res://assets/maps/relief/german_r44_52_+8.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3120748,
+              "bounds_lon_lat": [
+                7.9375,
+                51.9375,
+                10.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                8,
+                52,
+                10,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+10",
+              "path": "res://assets/maps/relief/german_r44_52_+10.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3117826,
+              "bounds_lon_lat": [
+                9.9375,
+                51.9375,
+                12.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                10,
+                52,
+                12,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+12",
+              "path": "res://assets/maps/relief/german_r44_52_+12.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2997918,
+              "bounds_lon_lat": [
+                11.9375,
+                51.9375,
+                14.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                12,
+                52,
+                14,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+14",
+              "path": "res://assets/maps/relief/german_r44_52_+14.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2950858,
+              "bounds_lon_lat": [
+                13.9375,
+                51.9375,
+                16.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                14,
+                52,
+                16,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+16",
+              "path": "res://assets/maps/relief/german_r44_52_+16.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2953742,
+              "bounds_lon_lat": [
+                15.9375,
+                51.9375,
+                18.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                16,
+                52,
+                18,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+18",
+              "path": "res://assets/maps/relief/german_r44_52_+18.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2944327,
+              "bounds_lon_lat": [
+                17.9375,
+                51.9375,
+                20.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                18,
+                52,
+                20,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+20",
+              "path": "res://assets/maps/relief/german_r44_52_+20.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3207961,
+              "bounds_lon_lat": [
+                19.9375,
+                51.9375,
+                22.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                20,
+                52,
+                22,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_52_+22",
+              "path": "res://assets/maps/relief/german_r44_52_+22.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 3094114,
+              "bounds_lon_lat": [
+                21.9375,
+                51.9375,
+                24.0625,
+                54.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                130.70082324100005,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                22,
+                52,
+                24,
+                54
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+4",
+              "path": "res://assets/maps/relief/german_r44_54_+4.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 10913,
+              "bounds_lon_lat": [
+                3.9375,
+                53.9375,
+                6.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                4,
+                54,
+                6,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+6",
+              "path": "res://assets/maps/relief/german_r44_54_+6.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 7001,
+              "bounds_lon_lat": [
+                5.9375,
+                53.9375,
+                8.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                6,
+                54,
+                8,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+8",
+              "path": "res://assets/maps/relief/german_r44_54_+8.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2196300,
+              "bounds_lon_lat": [
+                7.9375,
+                53.9375,
+                10.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                8,
+                54,
+                10,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+10",
+              "path": "res://assets/maps/relief/german_r44_54_+10.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 1739026,
+              "bounds_lon_lat": [
+                9.9375,
+                53.9375,
+                12.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                10,
+                54,
+                12,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+12",
+              "path": "res://assets/maps/relief/german_r44_54_+12.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 1625075,
+              "bounds_lon_lat": [
+                11.9375,
+                53.9375,
+                14.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                12,
+                54,
+                14,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+14",
+              "path": "res://assets/maps/relief/german_r44_54_+14.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 539397,
+              "bounds_lon_lat": [
+                13.9375,
+                53.9375,
+                16.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                14,
+                54,
+                16,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+16",
+              "path": "res://assets/maps/relief/german_r44_54_+16.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 1080898,
+              "bounds_lon_lat": [
+                15.9375,
+                53.9375,
+                18.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                16,
+                54,
+                18,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+18",
+              "path": "res://assets/maps/relief/german_r44_54_+18.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 946093,
+              "bounds_lon_lat": [
+                17.9375,
+                53.9375,
+                20.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                18,
+                54,
+                20,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+20",
+              "path": "res://assets/maps/relief/german_r44_54_+20.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2170930,
+              "bounds_lon_lat": [
+                19.9375,
+                53.9375,
+                22.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                20,
+                54,
+                22,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_54_+22",
+              "path": "res://assets/maps/relief/german_r44_54_+22.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2988534,
+              "bounds_lon_lat": [
+                21.9375,
+                53.9375,
+                24.0625,
+                56.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                124.56803093760658,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                22,
+                54,
+                24,
+                56
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_56_+4",
+              "path": "res://assets/maps/relief/german_r44_56_+4.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 10950,
+              "bounds_lon_lat": [
+                3.9375,
+                55.9375,
+                6.0625,
+                58.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                118.28347167674988,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                4,
+                56,
+                6,
+                58
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_56_+6",
+              "path": "res://assets/maps/relief/german_r44_56_+6.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 14262,
+              "bounds_lon_lat": [
+                5.9375,
+                55.9375,
+                8.0625,
+                58.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                118.28347167674988,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                6,
+                56,
+                8,
+                58
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_56_+8",
+              "path": "res://assets/maps/relief/german_r44_56_+8.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 1676997,
+              "bounds_lon_lat": [
+                7.9375,
+                55.9375,
+                10.0625,
+                58.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                118.28347167674988,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                8,
+                56,
+                10,
+                58
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_56_+10",
+              "path": "res://assets/maps/relief/german_r44_56_+10.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 1005098,
+              "bounds_lon_lat": [
+                9.9375,
+                55.9375,
+                12.0625,
+                58.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                118.28347167674988,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                10,
+                56,
+                12,
+                58
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_56_+12",
+              "path": "res://assets/maps/relief/german_r44_56_+12.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2646756,
+              "bounds_lon_lat": [
+                11.9375,
+                55.9375,
+                14.0625,
+                58.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                118.28347167674988,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                12,
+                56,
+                14,
+                58
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_56_+14",
+              "path": "res://assets/maps/relief/german_r44_56_+14.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 2762834,
+              "bounds_lon_lat": [
+                13.9375,
+                55.9375,
+                16.0625,
+                58.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                118.28347167674988,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                14,
+                56,
+                16,
+                58
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_56_+16",
+              "path": "res://assets/maps/relief/german_r44_56_+16.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 902950,
+              "bounds_lon_lat": [
+                15.9375,
+                55.9375,
+                18.0625,
+                58.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                118.28347167674988,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                16,
+                56,
+                18,
+                58
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_56_+18",
+              "path": "res://assets/maps/relief/german_r44_56_+18.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 407635,
+              "bounds_lon_lat": [
+                17.9375,
+                55.9375,
+                20.0625,
+                58.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                118.28347167674988,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                18,
+                56,
+                20,
+                58
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_56_+20",
+              "path": "res://assets/maps/relief/german_r44_56_+20.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 1062137,
+              "bounds_lon_lat": [
+                19.9375,
+                55.9375,
+                22.0625,
+                58.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                118.28347167674988,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                20,
+                56,
+                22,
+                58
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            },
+            {
+              "id": "physical_relief:german_r44_56_+22",
+              "path": "res://assets/maps/relief/german_r44_56_+22.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 1088,
+              "height": 1088,
+              "decoded_bytes": 6313256,
+              "bytes": 1936121,
+              "bounds_lon_lat": [
+                21.9375,
+                55.9375,
+                24.0625,
+                58.0625
+              ],
+              "surface_role": "detail",
+              "core_inset_degrees": 0.0625,
+              "channels": "RGB linear geographic albedo; A fixed DSM hillshade minus .4. Geographic extent feather supplied separately, no elevation-derived vegetation.",
+              "display_spacing_degrees": [
+                0.001953125,
+                0.001953125
+              ],
+              "display_spacing_m_approx": [
+                118.28347167674988,
+                217.177734375
+              ],
+              "core_bounds_lon_lat": [
+                22,
+                56,
+                24,
+                58
+              ],
+              "surface_group": "german_r44",
+              "surface_encoding": 2
+            }
+          ]
+        },
+        "unit": "presentation_relief",
+        "source_id": "german_modern_surface_r44",
+        "source_version": "GLO90-COG+WorldCover2021-v200:R44",
+        "source_locator": "https://copernicus-dem-90m.s3.amazonaws.com/readme.html",
+        "observation_period": {
+          "from": "2011-01-01",
+          "to": "2021-12-31"
+        },
+        "spatial_scope": {
+          "kind": "geographic_reference",
+          "id": "german_europe_with_finite_collars"
+        },
+        "methodology": "R42 DSM resampling, metric hillshade, R43 observed cover palette, shared mips. No political clipping or world facts.",
+        "confidence": 0.8,
+        "lower_bound": null,
+        "upper_bound": null,
+        "license": "Copernicus-DEM-GLO90+CC-BY-4.0",
+        "review_status": "EVIDENCE_LINKED",
+        "generator": "tools/map/build_german_surface_r44.py"
+      }
+    ]
+  }
+}

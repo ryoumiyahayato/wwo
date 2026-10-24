@@ -1,0 +1,46 @@
+{
+  "bytes": 166400,
+  "materials": 1,
+  "meshes": [
+    {
+      "name": "engine_workshop_far",
+      "surfaces": 1,
+      "triangles": 176
+    },
+    {
+      "name": "engine_workshop_near",
+      "surfaces": 1,
+      "triangles": 560
+    },
+    {
+      "name": "farm_granary_far",
+      "surfaces": 1,
+      "triangles": 68
+    },
+    {
+      "name": "farm_granary_near",
+      "surfaces": 1,
+      "triangles": 352
+    },
+    {
+      "name": "quarry_derrick_far",
+      "surfaces": 1,
+      "triangles": 160
+    },
+    {
+      "name": "quarry_derrick_near",
+      "surfaces": 1,
+      "triangles": 232
+    },
+    {
+      "name": "rail_goods_shed_far",
+      "surfaces": 1,
+      "triangles": 140
+    },
+    {
+      "name": "rail_goods_shed_near",
+      "surfaces": 1,
+      "triangles": 380
+    }
+  ]
+}

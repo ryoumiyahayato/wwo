@@ -13,7 +13,7 @@ grow_vertical = 2
 clip_contents = true
 script = ExtResource("1")
 
-[node name="HemisphereViewportContainer" type="SubViewportContainer" parent="."]
+[node name="HemisphereViewportContainer" type="TextureRect" parent="."]
 show_behind_parent = true
 layout_mode = 1
 anchors_preset = 15
@@ -22,7 +22,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-stretch = true
+expand_mode = 1
+stretch_mode = 0
 
 [node name="HemisphereViewport" type="SubViewport" parent="HemisphereViewportContainer"]
 transparent_bg = true

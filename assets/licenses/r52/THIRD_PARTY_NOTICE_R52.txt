@@ -1,0 +1,18 @@
+WWO R52 geographical display sources
+
+HydroRIVERS © WWF. Lehner B., Grill G. (2013): Global river hydrography and network routing: baseline data and new approaches to study the world's large river systems. Hydrological Processes27(15):2171–2186. https://doi.org/10.1002/hyp.9740 ; https://www.hydrosheds.org/products/hydrorivers
+These are modified geographical display derivatives integrated into WWO, not the original regional database. End users may use this material only as part of WWO. No extraction, reverse engineering, copying or redistribution of the licensed HydroSHEDS material is granted beyond the full HydroSHEDS v1 licence in the accompanying PDF (Appendix A). No standalone database redistribution. All warranty, liability and other protective terms of that licence apply to the HydroSHEDS material. WWF does not endorse WWO.
+
+© Kartverket, N250 Kartdata. CC BY4.0 https://creativecommons.org/licenses/by/4.0/ . Modified modern sea reference, not a1900 coastline. https://kartkatalog.geonorge.no/metadata/n250-kartdata/442cae64-b447-478d-b384-545bc1d9ab48
+
+© Náttúrufræðistofnun / Landmælingar Íslands, IS50V Vatnafar. CC BY4.0. Modified modern lake reference. https://geoportal.gis.is/geonetwork/srv/api/records/83E61CBF-8498-4259-A40C-3B628EA34FB7
+
+NOAA NCEI ETOPO2022 Ice Surface, not subglacial bedrock.
+Copernicus DEM © DLR e.V.2010–2014 / Airbus Defence and Space2014–2018, COPERNICUS European Union/ESA; GLO90 licence applies.
+© ESA WorldCover project2021 / Contains modified Copernicus Sentinel data(2021) processed by ESA WorldCover consortium; CC BY4.0, DOI10.5281/zenodo.7254221.
+Natural Earth public domain.
+
+All modern physical references remain separate from1900 political, land, economic and military facts. Existing internal landmark model restrictions remain.
+
+Required HydroSHEDS attribution (licence Exhibit B):
+This product WWO incorporates data from the HydroSHEDS version 1 database which is © World Wildlife Fund, Inc. (2006-2022) and has been used herein under license. WWF has not evaluated the data as altered and incorporated within WWO, and therefore gives no warranty regarding its accuracy, completeness, currency or suitability for any particular purpose. Portions of the HydroSHEDS v1 database incorporate data which are the intellectual property rights of © USGS (2006-2008), NASA (2000-2005), ESRI (1992-1998), CIAT (2004-2006), UNEP-WCMC (1993), WWF (2004), Commonwealth of Australia (2007), and Her Royal Majesty and the British Crown and are used under license. The HydroSHEDS v1 database and more information are available at https://www.hydrosheds.org.

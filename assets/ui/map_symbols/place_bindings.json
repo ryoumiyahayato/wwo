@@ -1,0 +1,916 @@
+{
+  "schema_id": "wwo_map_symbol_bindings_r47",
+  "valid_from": "1900-01-01",
+  "valid_to": "1901-01-01",
+  "capital_links": [
+    {
+      "place_id": "place:washington",
+      "source_historical_id": "united_states_1900",
+      "capital_name": "Washington",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        -77.011364,
+        38.901495
+      ],
+      "name": "Washington",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#united_states_1900.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n27/mode/1up"
+    },
+    {
+      "place_id": "place:lima",
+      "source_historical_id": "peru_1900",
+      "capital_name": "Lima",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        -77.052008,
+        -12.046067
+      ],
+      "name": "Lima",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#peru_1900.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n108/mode/1up"
+    },
+    {
+      "place_id": "place:rio_de_janeiro",
+      "source_historical_id": "brazil_1900",
+      "capital_name": "Rio de Janeiro",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        -43.212117,
+        -22.907308
+      ],
+      "name": "Rio de Janeiro",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#brazil_1900.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n103/mode/1up"
+    },
+    {
+      "place_id": "place:santiago",
+      "source_historical_id": "chile_1900",
+      "capital_name": "Santiago",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        -70.650504,
+        -33.440205
+      ],
+      "name": "Santiago",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#chile_1900.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n106/mode/1up"
+    },
+    {
+      "place_id": "place:montevideo",
+      "source_historical_id": "uruguay_1900",
+      "capital_name": "Montevideo",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        -56.186823,
+        -34.905376
+      ],
+      "name": "Montevideo",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#uruguay_1900.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n106/mode/1up"
+    },
+    {
+      "place_id": "place:london",
+      "source_historical_id": "british_isles_1900",
+      "capital_name": "London",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        -0.118668,
+        51.501941
+      ],
+      "name": "London",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#british_isles_1900.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n112/mode/1up"
+    },
+    {
+      "place_id": "place:amsterdam",
+      "source_historical_id": "kingdom_of_netherlands",
+      "capital_name": "Amsterdam",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        4.914694,
+        52.351914
+      ],
+      "name": "Amsterdam",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#kingdom_of_netherlands.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n121/mode/1up"
+    },
+    {
+      "place_id": "place:brussels",
+      "source_historical_id": "kingdom_of_belgium",
+      "capital_name": "Brussels",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        4.331371,
+        50.835263
+      ],
+      "name": "Brussels",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#kingdom_of_belgium.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n122/mode/1up"
+    },
+    {
+      "place_id": "place:paris",
+      "source_historical_id": "country_fra",
+      "capital_name": "Paris",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        2.3522,
+        48.8566
+      ],
+      "name": "Paris",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#country_fra.capital",
+      "place_source": "https://archive.org/details/14thedbaedparis00karl/page/n490/mode/1up"
+    },
+    {
+      "place_id": "place:berlin",
+      "source_historical_id": "german_empire",
+      "capital_name": "Berlin",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        13.399603,
+        52.523764
+      ],
+      "name": "Berlin",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#german_empire.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n125/mode/1up"
+    },
+    {
+      "place_id": "place:vienna",
+      "source_historical_id": "austria_hungary",
+      "capital_name": "Vienna",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        16.364693,
+        48.201961
+      ],
+      "name": "Vienna",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#austria_hungary.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n127/mode/1up"
+    },
+    {
+      "place_id": "place:rome",
+      "source_historical_id": "kingdom_of_italy",
+      "capital_name": "Rome",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        12.481313,
+        41.897902
+      ],
+      "name": "Rome",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#kingdom_of_italy.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n129/mode/1up"
+    },
+    {
+      "place_id": "place:stockholm",
+      "source_historical_id": "sweden_norway_union",
+      "capital_name": "Stockholm",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        18.0663,
+        59.324127
+      ],
+      "name": "Stockholm",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#sweden_norway_union.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n139/mode/1up"
+    },
+    {
+      "place_id": "place:cape_town",
+      "source_historical_id": "cshapes_gw_561",
+      "capital_name": "Cape Town",
+      "icon": "admin_primary",
+      "relationship": "controlled_territory",
+      "lon_lat": [
+        18.433042,
+        -33.918065
+      ],
+      "name": "Cape Town",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#cshapes_gw_561.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n158/mode/1up"
+    },
+    {
+      "place_id": "place:pretoria",
+      "source_historical_id": "south_african_republic",
+      "capital_name": "Pretoria",
+      "icon": "capital",
+      "relationship": "belligerent_state",
+      "lon_lat": [
+        28.227483,
+        -25.704975
+      ],
+      "name": "Pretoria",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#south_african_republic.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n158/mode/1up"
+    },
+    {
+      "place_id": "place:bloemfontein",
+      "source_historical_id": "orange_free_state",
+      "capital_name": "Bloemfontein",
+      "icon": "capital",
+      "relationship": "belligerent_state",
+      "lon_lat": [
+        26.229913,
+        -29.119994
+      ],
+      "name": "Bloemfontein",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#orange_free_state.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n158/mode/1up"
+    },
+    {
+      "place_id": "place:algiers",
+      "source_historical_id": "cshapes_gw_615",
+      "capital_name": "Algiers",
+      "icon": "admin_primary",
+      "relationship": "controlled_territory",
+      "lon_lat": [
+        3.048607,
+        36.765011
+      ],
+      "name": "Algiers",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#cshapes_gw_615.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n163/mode/1up"
+    },
+    {
+      "place_id": "place:tunis",
+      "source_historical_id": "beylicate_of_tunis",
+      "capital_name": "Tunis",
+      "icon": "admin_primary",
+      "relationship": "protected_territory",
+      "lon_lat": [
+        10.179678,
+        36.802778
+      ],
+      "name": "Tunis",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#beylicate_of_tunis.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n163/mode/1up"
+    },
+    {
+      "place_id": "place:cairo",
+      "source_historical_id": "khedivate_of_egypt",
+      "capital_name": "Cairo",
+      "icon": "admin_primary",
+      "relationship": "controlled_territory",
+      "lon_lat": [
+        31.248022,
+        30.051906
+      ],
+      "name": "Cairo",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#khedivate_of_egypt.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n161/mode/1up"
+    },
+    {
+      "place_id": "place:tokyo",
+      "source_historical_id": "empire_of_japan",
+      "capital_name": "Tokyo",
+      "icon": "capital",
+      "relationship": "independent_state",
+      "lon_lat": [
+        139.749462,
+        35.686963
+      ],
+      "name": "Tokyo",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#empire_of_japan.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n155/mode/1up"
+    },
+    {
+      "place_id": "place:kolkata",
+      "source_historical_id": "cshapes_gw_750",
+      "capital_name": "Calcutta",
+      "icon": "admin_primary",
+      "relationship": "controlled_territory",
+      "lon_lat": [
+        88.369126,
+        22.569579
+      ],
+      "name": "Calcutta",
+      "valid_from": "1900-01-01",
+      "valid_to": "1901-01-01",
+      "source": "res://data/world_map/historical/political_units_1900.json#cshapes_gw_750.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up"
+    },
+    {
+      "place_id": "place:sydney",
+      "source_historical_id": "cshapes_gw_901",
+      "capital_name": "Sydney",
+      "icon": "admin_primary",
+      "relationship": "controlled_territory",
+      "lon_lat": [
+        151.212548,
+        -33.871373
+      ],
+      "name": "Sydney",
+      "valid_from": "1900-01-01",
+      "valid_to": "1900-12-31",
+      "source": "res://data/world_map/historical/political_units_1900.json#cshapes_gw_901.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n166/mode/1up"
+    },
+    {
+      "place_id": "place:adelaide",
+      "source_historical_id": "cshapes_gw_903",
+      "capital_name": "Adelaide",
+      "icon": "admin_primary",
+      "relationship": "controlled_territory",
+      "lon_lat": [
+        138.598059,
+        -34.933042
+      ],
+      "name": "Adelaide",
+      "valid_from": "1900-01-01",
+      "valid_to": "1900-12-31",
+      "source": "res://data/world_map/historical/political_units_1900.json#cshapes_gw_903.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n166/mode/1up"
+    },
+    {
+      "place_id": "place:melbourne",
+      "source_historical_id": "cshapes_gw_904",
+      "capital_name": "Melbourne",
+      "icon": "admin_primary",
+      "relationship": "controlled_territory",
+      "lon_lat": [
+        144.97307,
+        -37.818086
+      ],
+      "name": "Melbourne",
+      "valid_from": "1900-01-01",
+      "valid_to": "1900-12-31",
+      "source": "res://data/world_map/historical/political_units_1900.json#cshapes_gw_904.capital",
+      "place_source": "https://archive.org/details/philadelphiapubl00rand/page/n166/mode/1up"
+    }
+  ],
+  "city_links": {
+    "place:cairo": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n161/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:alexandria": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n161/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:port_said": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n161/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:algiers": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n163/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:oran": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n163/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:tunis": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n163/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:cape_town": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n158/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:kimberley": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n158/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:johannesburg": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n158/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:pretoria": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n158/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:bloemfontein": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n158/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:durban": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n158/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:beijing": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n151/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:tianjin": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n151/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:shanghai": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n151/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:canton": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n151/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:hong_kong": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n151/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:nanking": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n151/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:singan": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n151/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:moukden": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n151/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:hanoi": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n152/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:saigon": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n152/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:st_petersburg": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n138/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:moscow": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n138/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:warsaw": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n138/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:kiev": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n138/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:odessa": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n138/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:riga": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n138/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:nizhny_novgorod": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n138/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:samara": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n138/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:kazan": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n138/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:omsk": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n145/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:irkutsk": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n146/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:lille": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n119/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:rouen": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n119/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:le_havre": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n119/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:calais": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n119/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:lyon": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n120/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:marseille": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n120/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:bordeaux": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n120/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:nantes": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n120/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:toulouse": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n120/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:brest": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n119/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:london": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n112/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:dover": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n112/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:manchester": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n112/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:liverpool": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n112/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:birmingham": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n112/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:york": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n112/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:newcastle": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n112/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:edinburgh": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n113/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:glasgow": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n113/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:brussels": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n122/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:antwerp": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n122/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:ghent": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n122/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:kortrijk": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n122/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:tournai": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n122/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:amsterdam": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n121/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:berlin": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n125/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:hamburg": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n125/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:cologne": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n125/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:frankfurt": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n125/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:leipzig": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n125/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:munich": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n125/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:vienna": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n127/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:budapest": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n127/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:prague": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n127/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:rome": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n129/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:milan": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n129/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:turin": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n129/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:venice": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n129/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:zurich": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n131/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:istanbul": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n136/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:stockholm": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n139/mode/1up",
+      "basis": "Visually reviewed1899 chief-city panel; Stockholm/Christiania marked Capital, Bergen named chief city. Modern population and administrative relations unused."
+    },
+    "place:oslo": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n140/mode/1up",
+      "basis": "Visually reviewed1899 chief-city panel; Stockholm/Christiania marked Capital, Bergen named chief city. Modern population and administrative relations unused."
+    },
+    "place:bergen": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n140/mode/1up",
+      "basis": "Visually reviewed1899 chief-city panel; Stockholm/Christiania marked Capital, Bergen named chief city. Modern population and administrative relations unused."
+    },
+    "place:kolkata": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:bombay": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:madras": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:delhi": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:lahore": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:allahabad": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:benares": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:lucknow": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:agra": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:poona": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:karachi": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n153/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:tokyo": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n155/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:yokohama": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n155/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:nagoya": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n155/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:kyoto": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n155/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:osaka": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n155/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:kobe": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n155/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:hiroshima": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n155/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:washington": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n27/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:new_york": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n29/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:boston": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n23/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:philadelphia": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n35/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:chicago": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n52/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:st_louis": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n62/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:new_orleans": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n67/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:san_francisco": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n83/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:denver": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n78/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:omaha": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n71/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:salt_lake_city": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n77/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:ogden": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n77/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:oakland": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n82/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:sacramento": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n82/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:toronto": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n88/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:montreal": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n89/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:winnipeg": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n91/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:vancouver": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n92/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:sydney": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n166/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:melbourne": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n166/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:adelaide": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n166/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:buenos_aires": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n106/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:rosario": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n106/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:cordoba": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n106/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:rio_de_janeiro": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n103/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:sao_paulo": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n103/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:santos": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n103/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:lima": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n108/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:santiago": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n106/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:valparaiso": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n106/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    },
+    "place:montevideo": {
+      "source": "https://archive.org/details/philadelphiapubl00rand/page/n106/mode/1up",
+      "basis": "Curated strategic display rank from the contemporary atlas named-map/chief-city evidence; no modern population used"
+    }
+  },
+  "place_icons": {
+    "place:creil": {
+      "icon": "town",
+      "source": "https://archive.org/details/14thedbaedparis00karl/page/n490/mode/1up",
+      "basis": "Existing local source OCR, printed page377 explicitly calls Creil a town; no population classification inferred"
+    },
+    "landmark:hagia_sophia_reference": {
+      "icon": "religious_dome",
+      "source": "res://data/local/internal_preview_r41/hagia_sophia.json",
+      "basis": "Existing Ottoman-period dome/minaret historical reference, not modern museum status"
+    },
+    "landmark:temple_heaven_reference": {
+      "icon": "religious_temple",
+      "source": "res://data/local/internal_preview_r41/temple_heaven.json",
+      "basis": "Existing 1896 Prayer Hall reconstruction reference"
+    },
+    "landmark:pisa_reference": {
+      "icon": "monument",
+      "source": "res://data/local/internal_preview_r41/pisa.json",
+      "basis": "Existing medieval bell tower reference; no inferred religious administration"
+    }
+  },
+  "unknown": "settlement or historic_site; no rank-derived administrative or village identity"
+}

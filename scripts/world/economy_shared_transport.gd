@@ -50,7 +50,8 @@ static func valid_facilities(raw: Variant) -> bool:
 	if not raw is Array or raw.size() > 64: return false
 	var ids: Dictionary = {}
 	for f: Variant in raw:
-		if not f is Dictionary or not EconomySliceConfig._fields(f, ["id","site_id","kind","unit","windows","basis"], ["capital_asset_id"]) or not f["id"] is String or not f["id"].begins_with("facility:") or ids.has(f["id"]) or not f["site_id"] is String or f["kind"] not in ["HANDLING_THROUGHPUT","BERTH_OCCUPANCY","STORAGE_OCCUPANCY"] or not f["unit"] is String or f["unit"].is_empty() or f["basis"] != "EXPLICIT_DEVELOPMENT_TRANSPORT_FACILITY" or not f["windows"] is Array or f["windows"].is_empty() or f["windows"].size() > 256: return false
+		if not f is Dictionary or not EconomySliceConfig._fields(f, ["id","site_id","kind","unit","windows","basis"], ["capital_asset_id", "asset_types"]) or not f["id"] is String or not f["id"].begins_with("facility:") or ids.has(f["id"]) or not f["site_id"] is String or f["kind"] not in ["HANDLING_THROUGHPUT","BERTH_OCCUPANCY","STORAGE_OCCUPANCY"] or not f["unit"] is String or f["unit"].is_empty() or f["basis"] != "EXPLICIT_DEVELOPMENT_TRANSPORT_FACILITY" or not f["windows"] is Array or f["windows"].is_empty() or f["windows"].size() > 256: return false
+		if f.has("asset_types") and (not f["asset_types"] is Array or f["asset_types"].is_empty()): return false
 		if f.has("capital_asset_id") and (not f["capital_asset_id"] is String or not f["capital_asset_id"].begins_with("capital_asset:")): return false
 		var last := -1
 		for w: Variant in f["windows"]:
@@ -69,21 +70,29 @@ func _node_capacity(id: String, now: int) -> float:
 		if now >= int(window["start_minute"]) and now < int(window["end_minute"]): return float(window["capacity"])
 	return 0.0
 
-func _node_available(id: String, now: int) -> float:
+func _node_used(id: String, now: int) -> float:
 	var used := float(_node_throughput.get(id+"|"+str(now/60), 0.0)) if facilities[id]["kind"] == "HANDLING_THROUGHPUT" else 0.0
 	for use_id: String in _active_node_uses.keys():
 		var use := node_uses[use_id] as Dictionary
 		if int(use["end_minute"]) >= 0 and int(use["end_minute"]) <= now: _active_node_uses.erase(use_id); continue
 		if use["facility_id"] == id: used += float(use["amount"])-float(use["released_amount"])
-	return maxf(0.0, _node_capacity(id,now)-used)
+	return used+economy()._service_market.shared_occupancy(id,now)
 
-func _node_amount(id: String, good: String, quantity_value: int) -> float:
+func _node_available(id: String, now: int) -> float:
+	return maxf(0.0, _node_capacity(id,now)-_node_used(id,now))
+
+func service_intake_ready(id: String, now: int) -> bool:
+	return facilities.has(id) and _node_used(id,now)<=_node_capacity(id,now)+VNextInfrastructureLinkState.CAPACITY_EPSILON
+
+func _node_amount(id: String, good: Variant, quantity_value: int) -> float:
 	return float(quantity_value)*weight(good,{"weight_unit":facilities[id]["unit"]})
 
-func _node_use(id: String, shipment_id: String, leg: int, facility: String, good: String, quantity_value: int, minute: int, end: int) -> void:
+func _node_use(id: String, shipment_id: String, leg: int, facility: String, good: Variant, quantity_value: int, minute: int, end: int) -> void:
 	assert(not node_uses.has(id))
 	var amount := _node_amount(facility, good, quantity_value)
 	node_uses[id] = {"id":id,"shipment_id":shipment_id,"leg_index":leg,"facility_id":facility,"good":good,"quantity":quantity_value,"amount":amount,"minute":minute,"end_minute":end,"released_amount":0.0,"releases":{}}
+	if good is Dictionary:
+		node_uses[id].erase("good"); node_uses[id]["asset_id"]=good["asset_id"]
 	if facilities[facility]["kind"] == "HANDLING_THROUGHPUT":
 		var key := facility+"|"+str(minute/60)
 		_node_throughput[key] = float(_node_throughput.get(key,0.0))+amount
@@ -94,7 +103,7 @@ func _storage_use(shipment_id: String) -> String:
 		if node_uses[id]["shipment_id"] == shipment_id and facilities[node_uses[id]["facility_id"]]["kind"] == "STORAGE_OCCUPANCY": return id
 	return ""
 
-func release_storage(shipment_id: String, good: String, quantity_value: int, event_id: String) -> void:
+func release_storage(shipment_id: String, good: Variant, quantity_value: int, event_id: String) -> void:
 	var id := _storage_use(shipment_id)
 	if id.is_empty(): return
 	var use := node_uses[id] as Dictionary
@@ -105,7 +114,7 @@ func release_storage(shipment_id: String, good: String, quantity_value: int, eve
 	use["released_amount"] += amount
 	if is_equal_approx(float(use["released_amount"]),float(use["amount"])): _active_node_uses.erase(id)
 
-func _node_entry_limit(binding: Dictionary, good: String, now: int) -> int:
+func _node_entry_limit(binding: Dictionary, good: Variant, now: int) -> int:
 	if not binding.has("node_resources"): return FormalLedgerState.MAX_AMOUNT
 	var n := binding["node_resources"] as Dictionary
 	var result := FormalLedgerState.MAX_AMOUNT
@@ -126,14 +135,14 @@ func arrive(shipment: Dictionary, order: Dictionary) -> bool:
 	var q := int(shipment["quantity"])
 	var hkey := str(economy().day)+"|"+str(r["edge_id"])+"|arrival"
 	var h := handling.get(hkey,{}) as Dictionary
-	if int(h.get("hours",0))-int(h.get("used",0)) < q*int(n["unloading_hours_per_unit"]): return false
+	if int(h.get("hours",0))-int(h.get("used",0)) < q*handling_units(load_of(order))*int(n["unloading_hours_per_unit"]): return false
 	for key: String in ["destination_handling","destination_berth","destination_storage"]:
-		var amount := _node_amount(n[key],order["good"],q)
+		var amount := _node_amount(n[key],load_of(order),q)
 		if amount <= 0.0 or amount > _node_available(n[key],now)+VNextInfrastructureLinkState.CAPACITY_EPSILON: return false
 	var end := now+int(n["unloading_minutes"])
 	for key: String in ["destination_handling","destination_berth","destination_storage"]:
-		_node_use(prefix+key,shipment["id"],shipment["leg_index"],n[key],order["good"],q,now,-1 if key=="destination_storage" else end)
-	h["used"] += q*int(n["unloading_hours_per_unit"])
+		_node_use(prefix+key,shipment["id"],shipment["leg_index"],n[key],load_of(order),q,now,-1 if key=="destination_storage" else end)
+	h["used"] += q*handling_units(load_of(order))*int(n["unloading_hours_per_unit"])
 	shipment["unloading_end_minute"] = end
 	shipment["stage"] = "UNLOADING"
 	return false
@@ -153,7 +162,7 @@ func labor_needed_arrival(edge_id: String) -> int:
 		if o["route_legs"][0]["edge_id"]!=edge_id: continue
 		var q: int = e._lots.quantity_at("PERSON|"+str(o["buyer"])+"|FREIGHT|"+str(o["id"]),o["good"]) if o["kind"]=="PERSONAL_FREIGHT" else e._lots.reserved_quantity(id)
 		total += mini(int(o["pending"]),q)*int(r["node_resources"]["unloading_hours_per_unit"])
-	return total
+	return total+e._capital_transport.needed(edge_id,true)*int(r["node_resources"]["unloading_hours_per_unit"])
 
 func bind(e: RefCounted) -> bool:
 	_ref = weakref(e)
@@ -205,10 +214,10 @@ func _vehicle_available(binding: Dictionary, now: int) -> float:
 		used = 0.0
 		for id: String in _active_vehicles.keys():
 			var a := entries[id] as Dictionary
-			var cargo: Dictionary = economy()._shipments.get(a["shipment_id"], {})
+			var cargo: Dictionary = cargo(a["shipment_id"])
 			var aboard: bool = bindings[a["edge_id"]].has("node_resources") and cargo.get("leg_index") == a["leg_index"] and cargo.get("stage") in ["LOADING","TRANSIT","WAITING_UNLOAD","UNLOADING"]
 			if maxi(int(a["release_minute"]),node_completion_minute(a["shipment_id"],a["leg_index"])) <= now and not aboard: _active_vehicles.erase(id); continue
-			if a["vehicle_id"] == binding["vehicle_id"]: used += float(a["quantity"])*weight(a["good"], bindings[a["edge_id"]])
+			if a["vehicle_id"] == binding["vehicle_id"]: used += float(a["quantity"])*weight(load_of(a), bindings[a["edge_id"]])
 	return maxf(0.0, float(binding["vehicle_payload"])-used)
 
 func next_boundary(after: int) -> int:
@@ -227,6 +236,10 @@ func next_boundary(after: int) -> int:
 			active_edges[o["route_legs"][cargo["leg_index"]]["edge_id"]] = after+1
 		for field: String in ["loading_end_minute", "arrival_minute", "unloading_end_minute"]:
 			if cargo.has(field) and int(cargo[field]) > after and (next < 0 or int(cargo[field]) < next): next = int(cargo[field])
+	for t: Dictionary in e._capital_transport.tasks.values():
+		if t["stage"]=="WAITING": active_edges[e._capital_transport.offer(t["offer_id"])["legs"][t["leg_index"]]["edge_id"]]=after+1
+		for field: String in ["loading_end_minute","arrival_minute","unloading_end_minute"]:
+			if t[field]>after and (next<0 or t[field]<next): next=t[field]
 	for edge_id: String in active_edges:
 		if not bindings.has(edge_id): continue
 		var r := bindings[edge_id] as Dictionary
@@ -238,7 +251,7 @@ func next_boundary(after: int) -> int:
 	for id: String in _active_vehicles:
 		var end := maxi(int(entries[id]["release_minute"]),node_completion_minute(entries[id]["shipment_id"],entries[id]["leg_index"]))
 		if end > after and (next < 0 or end < next): next = end
-	if not e._moving_shipments.is_empty():
+	if not e._moving_shipments.is_empty() or not e._capital_transport.tasks.is_empty():
 		for f: Dictionary in facilities.values():
 			for w: Dictionary in f["windows"]:
 				if int(w["start_minute"]) > after and (next<0 or int(w["start_minute"])<next): next=int(w["start_minute"])
@@ -268,9 +281,10 @@ func _needed_hours(edge_id: String) -> int:
 		var quantity := int(cargo["quantity"])
 		if quantity > (FormalLedgerState.MAX_AMOUNT-total)/unit: return FormalLedgerState.MAX_AMOUNT
 		total += quantity*unit
-	return total
+	return total+e._capital_transport.needed(edge_id,false)*unit
 
-func weight(good: String, binding: Dictionary) -> float:
+func weight(good: Variant, binding: Dictionary) -> float:
+	if good is Dictionary: return economy()._capital_transport.weight(str(good.get("asset_id","")),str(binding["weight_unit"]))
 	var e := economy()
 	for g: Dictionary in e.config.get("goods", []):
 		if g["id"] != good: continue
@@ -307,6 +321,8 @@ func prepare_labor(capital_used: Dictionary) -> void:
 			hours += amount
 			if hours == wanted: break
 		handling[id] = {"day": e.day, "edge_id": edge_id, "hours": hours, "used": 0, "work": rows}
+		if e._costs.enabled:
+			for row: Dictionary in rows: e._costs.assign_work(row["work_id"], row["hours"], "HANDLING", id)
 		if not _hours.has(r["handling_site"]): _hours[r["handling_site"]] = {}
 		_hours[r["handling_site"]][e.day] = int(_hours[r["handling_site"]].get(e.day, 0))+hours
 		_total_hours[r["handling_site"]] = int(_total_hours.get(r["handling_site"], 0))+hours
@@ -332,12 +348,14 @@ func _prepare_arrival_labor(r: Dictionary, used: Dictionary) -> void:
 		hours+=amount
 		if hours==wanted: break
 	handling[id]={"day":e.day,"edge_id":r["edge_id"],"hours":hours,"used":0,"work":rows,"operation":"ARRIVAL"}
+	if e._costs.enabled:
+		for row: Dictionary in rows: e._costs.assign_work(row["work_id"], row["hours"], "HANDLING", id)
 	if not _hours.has(site): _hours[site]={}
 	_hours[site][e.day]=int(_hours[site].get(e.day,0))+hours
 	_total_hours[site]=int(_total_hours.get(site,0))+hours
 	e._labor[site]=int(e._labor.get(site,0))-hours
 
-func quantity(edge_id: String, good: String, requested: int) -> int:
+func quantity(edge_id: String, good: Variant, requested: int) -> int:
 	if not bindings.has(edge_id): return requested
 	var e := economy()
 	var r := bindings[edge_id] as Dictionary
@@ -346,12 +364,12 @@ func quantity(edge_id: String, good: String, requested: int) -> int:
 	var w := weight(good, r)
 	if w <= 0.0: return 0
 	var h := handling.get(str(e.day)+"|"+edge_id, {}) as Dictionary
-	var labor_limit := maxi(0, int(h.get("hours", 0))-int(h.get("used", 0)))/int(r["handling_hours_per_unit"])
+	var labor_limit := maxi(0, int(h.get("hours", 0))-int(h.get("used", 0)))/(handling_units(good)*int(r["handling_hours_per_unit"]))
 	var payload := _vehicle_available(r, now)
 	var available: float = minf(payload, e._world.spatial_world.remaining_capacity(r["source_link_id"]))
 	return mini(_node_entry_limit(r,good,now), mini(requested, mini(labor_limit, int(floor(minf(float(requested), available/w))))))
 
-func enter(shipment_id: String, leg_index: int, edge_id: String, good: String, quantity_value: int) -> bool:
+func enter(shipment_id: String, leg_index: int, edge_id: String, good: Variant, quantity_value: int) -> bool:
 	if not bindings.has(edge_id): return true
 	var e := economy()
 	var r := bindings[edge_id] as Dictionary
@@ -375,12 +393,14 @@ func enter(shipment_id: String, leg_index: int, edge_id: String, good: String, q
 		for key: String in ["origin_handling","origin_berth"]:
 			_node_use("node:"+shipment_id+":"+str(leg_index)+":"+key,shipment_id,leg_index,r["node_resources"][key],good,quantity_value,now,now+int(r["loading_minutes"]))
 	release_storage(shipment_id,good,quantity_value,id)
-	var hours := quantity_value*int(r["handling_hours_per_unit"])
+	var hours := quantity_value*handling_units(good)*int(r["handling_hours_per_unit"])
 	var h := handling[str(e.day)+"|"+edge_id] as Dictionary
 	h["used"] = int(h["used"])+hours
 	var vehicle_key: String = r["vehicle_id"]+"|"+str(now/60)
 	_vehicle_usage[vehicle_key] = float(_vehicle_usage.get(vehicle_key, 0.0))+q
 	entries[id] = {"adoption_id": id, "shipment_id": shipment_id, "leg_index": leg_index, "edge_id": edge_id, "good": good, "quantity": quantity_value, "minute": now, "handling_hours": hours, "vehicle_id": r["vehicle_id"]}
+	if good is Dictionary:
+		entries[id].erase("good"); entries[id]["asset_id"]=good["asset_id"]
 	if r.has("window_minutes"):
 		entries[id].merge({"loading_end_minute": now+int(r["loading_minutes"]), "arrival_minute": now+int(r["loading_minutes"])+int(r["travel_minutes"]), "release_minute": now+int(r["vehicle_hold_minutes"])})
 		_active_vehicles[id] = true
@@ -406,9 +426,9 @@ func arrival_wait_reason(shipment: Dictionary, order: Dictionary) -> String:
 	if not r.has("node_resources"): return "NO_EXPLICIT_NODE_RESOURCE_BINDING"
 	var n := r["node_resources"] as Dictionary
 	var h := handling.get(str(economy().day)+"|"+str(r["edge_id"])+"|arrival",{}) as Dictionary
-	if int(h.get("hours",0))-int(h.get("used",0)) < int(shipment["quantity"])*int(n["unloading_hours_per_unit"]): return "WAITING_ACTUAL_UNLOADING_LABOR"
+	if int(h.get("hours",0))-int(h.get("used",0)) < int(shipment["quantity"])*handling_units(load_of(order))*int(n["unloading_hours_per_unit"]): return "WAITING_ACTUAL_UNLOADING_LABOR"
 	for key: String in ["destination_handling","destination_berth","destination_storage"]:
-		if _node_amount(n[key],order["good"],shipment["quantity"]) > _node_available(n[key],economy()._world.game_clock.total_minutes()): return "WAITING_NODE_RESOURCE:"+str(n[key])
+		if _node_amount(n[key],load_of(order),shipment["quantity"]) > _node_available(n[key],economy()._world.game_clock.total_minutes()): return "WAITING_NODE_RESOURCE:"+str(n[key])
 	return "NODE_READY_AT_NEXT_EXECUTION_BOUNDARY"
 
 func _restore_nodes(raw: Dictionary, saved: Dictionary) -> bool:
@@ -426,12 +446,12 @@ func _restore_nodes(raw: Dictionary, saved: Dictionary) -> bool:
 			physical[p["location"]]=int(physical.get(p["location"],0))+int(p["remaining"])
 	for id: String in source:
 		var use: Variant = source[id]
-		if not use is Dictionary or not FormalLedgerState.exact_fields(use,["id","shipment_id","leg_index","facility_id","good","quantity","amount","minute","end_minute","released_amount","releases"]) or use["id"]!=id or not facilities.has(use["facility_id"]) or not FormalLedgerState.valid_amount(use["leg_index"]) or not FormalLedgerState.valid_amount(use["quantity"]) or use["quantity"]<=0 or not FormalLedgerState.valid_amount(use["minute"]) or use["minute"]>economy()._world.game_clock.total_minutes() or typeof(use["end_minute"])!=TYPE_INT or not use["releases"] is Dictionary: return false
+		if not use is Dictionary or not EconomySliceConfig._fields(use,["id","shipment_id","leg_index","facility_id","quantity","amount","minute","end_minute","released_amount","releases"],["good","asset_id"]) or not valid_load(use) or use["id"]!=id or not facilities.has(use["facility_id"]) or not FormalLedgerState.valid_amount(use["leg_index"]) or not FormalLedgerState.valid_amount(use["quantity"]) or use["quantity"]<=0 or not FormalLedgerState.valid_amount(use["minute"]) or use["minute"]>economy()._world.game_clock.total_minutes() or typeof(use["end_minute"])!=TYPE_INT or not use["releases"] is Dictionary: return false
 		var entry: Variant = raw["entries"].get("economy_entry:"+str(use["shipment_id"])+":"+str(use["leg_index"]))
-		if not entry is Dictionary or not bindings.has(entry.get("edge_id")) or not bindings[entry["edge_id"]].has("node_resources") or use["good"]!=entry.get("good") or use["quantity"]>entry.get("quantity",0) or use["minute"]<entry.get("minute",0): return false
+		if not entry is Dictionary or not bindings.has(entry.get("edge_id")) or not bindings[entry["edge_id"]].has("node_resources") or load_of(use)!=load_of(entry) or use["quantity"]>entry.get("quantity",0) or use["minute"]<entry.get("minute",0): return false
 		var n := bindings[entry["edge_id"]]["node_resources"] as Dictionary
 		var role := id.trim_prefix("node:"+str(use["shipment_id"])+":"+str(use["leg_index"])+":")
-		if role not in ["origin_handling","origin_berth","destination_handling","destination_berth","destination_storage"] or n[role]!=use["facility_id"] or not is_equal_approx(float(use["amount"]),_node_amount(use["facility_id"],use["good"],use["quantity"])): return false
+		if role not in ["origin_handling","origin_berth","destination_handling","destination_berth","destination_storage"] or n[role]!=use["facility_id"] or not is_equal_approx(float(use["amount"]),_node_amount(use["facility_id"],load_of(use),use["quantity"])): return false
 		if role.begins_with("origin") and (use["minute"]!=entry["minute"] or use["quantity"]!=entry["quantity"] or use["end_minute"]!=entry.get("loading_end_minute")): return false
 		if role.begins_with("destination"):
 			if use["minute"]<entry.get("arrival_minute",FormalLedgerState.MAX_AMOUNT) or use["end_minute"]!=(-1 if role=="destination_storage" else use["minute"]+n["unloading_minutes"]): return false
@@ -440,7 +460,11 @@ func _restore_nodes(raw: Dictionary, saved: Dictionary) -> bool:
 			var event: Variant = use["releases"][event_id]
 			if role!="destination_storage" or not event is Dictionary or not FormalLedgerState.exact_fields(event,["amount","minute"]) or not event["amount"] is float or event["amount"]<=0 or not FormalLedgerState.valid_amount(event["minute"]) or event["minute"]<use["minute"] or event["minute"]>economy()._world.game_clock.total_minutes(): return false
 			var quantity_value := -1
-			if event_id.begins_with("delivery:"):
+			if event_id.begins_with("capital_delivery:"):
+				var trade: Dictionary=saved.get("capital_formation",{}).get("resale",{}).get("trades",{}).get(event_id.trim_prefix("capital_delivery:"),{})
+				if not use.has("asset_id") or trade.get("asset_id")!=use["asset_id"] or trade.get("state")!="DELIVERED" or trade.get("delivered_minute")!=event["minute"]: return false
+				quantity_value=1
+			elif event_id.begins_with("delivery:"):
 				var receipt: Dictionary = saved["delivery_receipts"].get(event_id.trim_prefix("delivery:"),{})
 				if receipt.get("shipment_id",receipt.get("id"))!=use["shipment_id"] or int(receipt.get("delivered_minute",int(receipt.get("delivered_day",-1))*1440))!=event["minute"]: return false
 				quantity_value=int(receipt.get("quantity",-1))
@@ -453,7 +477,7 @@ func _restore_nodes(raw: Dictionary, saved: Dictionary) -> bool:
 				if next.get("shipment_id")!=use["shipment_id"] or next.get("leg_index")!=use["leg_index"]+1 or next.get("minute")!=event["minute"]: return false
 				quantity_value=int(next.get("quantity",-1))
 			if not event_id.begins_with("loss:") and int(event["minute"])<int(use["minute"])+int(n["unloading_minutes"]): return false
-			if quantity_value<=0 or not is_equal_approx(float(event["amount"]),_node_amount(use["facility_id"],use["good"],quantity_value)): return false
+			if quantity_value<=0 or not is_equal_approx(float(event["amount"]),_node_amount(use["facility_id"],load_of(use),quantity_value)): return false
 			released+=float(event["amount"])
 		if not is_equal_approx(released,float(use["released_amount"])) or released>float(use["amount"]): return false
 		var f := facilities[use["facility_id"]] as Dictionary
@@ -462,7 +486,7 @@ func _restore_nodes(raw: Dictionary, saved: Dictionary) -> bool:
 			throughput[key]=float(throughput.get(key,0.0))+float(use["amount"])
 		elif (use["end_minute"]<0 or use["end_minute"]>economy()._world.game_clock.total_minutes()) and released<float(use["amount"]):
 			active[id]=true
-			if role=="destination_storage" and not is_equal_approx(float(use["amount"])-released,_node_amount(use["facility_id"],use["good"],physical.get("CARGO|"+str(use["shipment_id"]),0))): return false
+			if role=="destination_storage" and not is_equal_approx(float(use["amount"])-released,_node_amount(use["facility_id"],load_of(use),(1 if use.has("asset_id") else physical.get("CARGO|"+str(use["shipment_id"]),0)))): return false
 	# Check historical overlap at actual adoption boundaries; no daily history scan.
 	for use: Dictionary in source.values():
 		var f := facilities[use["facility_id"]] as Dictionary
@@ -478,13 +502,37 @@ func _restore_nodes(raw: Dictionary, saved: Dictionary) -> bool:
 				for event: Dictionary in other["releases"].values():
 					if event["minute"]<=use["minute"]: amount-=float(event["amount"])
 				occupied+=amount
+		occupied+=economy()._service_market.shared_occupancy(use["facility_id"],use["minute"])
 		if occupied>capacity_value+VNextInfrastructureLinkState.CAPACITY_EPSILON: return false
+	# A warehouse may be the only user of a mapped facility. Validate its real
+	# reservation/intake boundaries too, even when no cargo entered that node.
+	for facility_id: String in economy()._service_market._facility_history:
+		var mapped: String=economy()._service_market._facilities[facility_id]["shared_storage_id"]
+		if mapped.is_empty(): continue
+		var f:=facilities.get(mapped,{}) as Dictionary
+		if f.is_empty(): return false
+		var dates: Dictionary={}
+		for contract_id: String in economy()._service_market._facility_history[facility_id]:
+			var c:=economy()._service_market.contracts[contract_id] as Dictionary
+			dates[c["accepted_minute"]]=true
+			if c["started_minute"]>=0: dates[c["started_minute"]]=true
+		for minute: int in dates:
+			var capacity_value:=0.0
+			for window: Dictionary in f["windows"]:
+				if minute>=window["start_minute"] and minute<window["end_minute"]: capacity_value=float(window["capacity"])
+			var occupied: float=economy()._service_market.shared_occupancy(mapped,minute)
+			for use: Dictionary in source.values():
+				if use["facility_id"]!=mapped or use["minute"]>minute or (use["end_minute"]>=0 and use["end_minute"]<=minute): continue
+				occupied+=float(use["amount"])
+				for event: Dictionary in use["releases"].values():
+					if event["minute"]<=minute: occupied-=float(event["amount"])
+			if occupied>capacity_value+VNextInfrastructureLinkState.CAPACITY_EPSILON: return false
 	for entry: Dictionary in raw["entries"].values():
 		if not bindings.get(entry.get("edge_id"),{}).has("node_resources"): continue
 		var prefix := "node:"+str(entry["shipment_id"])+":"+str(entry["leg_index"])+":"
 		for key: String in ["origin_handling","origin_berth"]:
 			if not source.has(prefix+key): return false
-		var cargo: Dictionary = saved["shipments"].get(entry["shipment_id"],{})
+		var cargo: Dictionary = saved_cargo(saved,entry["shipment_id"])
 		var progressed: bool = raw["entries"].has("economy_entry:"+str(entry["shipment_id"])+":"+str(int(entry["leg_index"])+1)) or int(cargo.get("leg_index",-1))>int(entry["leg_index"]) or (cargo.get("stage")=="AWAITING_RECIPIENT" and cargo.get("leg_index")==entry["leg_index"])
 		for receipt: Dictionary in saved["delivery_receipts"].values():
 			if receipt.get("shipment_id",receipt["id"])==entry["shipment_id"]: progressed=true
@@ -535,10 +583,10 @@ func restore(raw: Variant, saved: Dictionary) -> bool:
 	var vehicles: Dictionary = {}
 	for id: String in raw["entries"]:
 		var a: Variant = raw["entries"][id]
-		if not a is Dictionary or not EconomySliceConfig._fields(a, ["adoption_id", "shipment_id", "leg_index", "edge_id", "good", "quantity", "minute", "handling_hours", "vehicle_id"], ["loading_end_minute", "arrival_minute", "release_minute"]) or a["adoption_id"] != id or not bindings.has(a["edge_id"]) or not FormalLedgerState.valid_amount(a["quantity"]) or int(a["quantity"]) <= 0 or not FormalLedgerState.valid_amount(a["minute"]) or int(a["minute"]) > e._world.game_clock.total_minutes(): return false
+		if not a is Dictionary or not EconomySliceConfig._fields(a, ["adoption_id", "shipment_id", "leg_index", "edge_id", "quantity", "minute", "handling_hours", "vehicle_id"], ["good", "asset_id", "loading_end_minute", "arrival_minute", "release_minute"]) or not valid_load(a) or a["adoption_id"] != id or not bindings.has(a["edge_id"]) or not FormalLedgerState.valid_amount(a["quantity"]) or int(a["quantity"]) <= 0 or not FormalLedgerState.valid_amount(a["minute"]) or int(a["minute"]) > e._world.game_clock.total_minutes(): return false
 		var r := bindings[a["edge_id"]] as Dictionary
 		var fact: Dictionary = e._world.spatial_world.capacity_adoption(id)
-		if fact.is_empty() or fact["source_id"] != a["shipment_id"] or fact["link_id"] != r["source_link_id"] or fact["window_hour"] != int(a["minute"])/60 or not window_open(r, int(a["minute"])) or not is_equal_approx(float(fact["amount"]), float(a["quantity"])*weight(a["good"], r)) or a["handling_hours"] != int(a["quantity"])*int(r["handling_hours_per_unit"]) or a["vehicle_id"] != r["vehicle_id"]: return false
+		if fact.is_empty() or fact["source_id"] != a["shipment_id"] or fact["link_id"] != r["source_link_id"] or fact["window_hour"] != int(a["minute"])/60 or not window_open(r, int(a["minute"])) or not is_equal_approx(float(fact["amount"]), float(a["quantity"])*weight(load_of(a), r)) or a["handling_hours"] != int(a["quantity"])*handling_units(load_of(a))*int(r["handling_hours_per_unit"]) or a["vehicle_id"] != r["vehicle_id"]: return false
 		var hkey := str(int(a["minute"])/1440)+"|"+str(a["edge_id"])
 		handling_used[hkey] = int(handling_used.get(hkey, 0))+int(a["handling_hours"])
 		var vkey := str(a["vehicle_id"])+"|"+str(int(a["minute"])/60)
@@ -552,7 +600,7 @@ func restore(raw: Variant, saved: Dictionary) -> bool:
 		var use := node_uses[use_id] as Dictionary
 		var entry := raw["entries"]["economy_entry:"+str(use["shipment_id"])+":"+str(use["leg_index"])] as Dictionary
 		var key := str(int(use["minute"])/1440)+"|"+str(entry["edge_id"])+"|arrival"
-		handling_used[key]=int(handling_used.get(key,0))+int(use["quantity"])*int(bindings[entry["edge_id"]]["node_resources"]["unloading_hours_per_unit"])
+		handling_used[key]=int(handling_used.get(key,0))+int(use["quantity"])*handling_units(load_of(use))*int(bindings[entry["edge_id"]]["node_resources"]["unloading_hours_per_unit"])
 	for id: String in handling_used:
 		if not raw["handling"].has(id): return false
 	for id: String in raw["handling"]:
@@ -572,6 +620,9 @@ func restore(raw: Variant, saved: Dictionary) -> bool:
 		batches[shipment_id]["quantity"] += int(cargo["quantity"])
 	for id: String in raw["entries"]:
 		var a := raw["entries"][id] as Dictionary
+		if a.has("asset_id"):
+			if not economy()._capital_transport.valid_entry(a,raw,saved): return false
+			continue
 		if not batches.has(a["shipment_id"]): return false
 		var batch := batches[a["shipment_id"]] as Dictionary
 		var order := saved["orders"][batch["order_id"]] as Dictionary
@@ -595,14 +646,14 @@ func restore(raw: Variant, saved: Dictionary) -> bool:
 		if not a.has("release_minute"): continue
 		var occupied := 0.0
 		for other: Dictionary in entries.values():
-			if other.has("release_minute") and other["vehicle_id"] == a["vehicle_id"] and int(other["minute"]) <= int(a["minute"]) and _restored_vehicle_end(other,saved) > int(a["minute"]): occupied += float(other["quantity"])*weight(other["good"], bindings[other["edge_id"]])
+			if other.has("release_minute") and other["vehicle_id"] == a["vehicle_id"] and int(other["minute"]) <= int(a["minute"]) and _restored_vehicle_end(other,saved) > int(a["minute"]): occupied += float(other["quantity"])*weight(load_of(other), bindings[other["edge_id"]])
 		if occupied > float(bindings[a["edge_id"]]["vehicle_payload"])+VNextInfrastructureLinkState.CAPACITY_EPSILON: return false
 		if _restored_vehicle_end(a,saved) > e._world.game_clock.total_minutes(): _active_vehicles[id] = true
 	return true
 
 func _restored_vehicle_end(entry: Dictionary, saved: Dictionary) -> int:
 	var end := maxi(int(entry["release_minute"]),node_completion_minute(entry["shipment_id"],entry["leg_index"]))
-	var cargo: Dictionary = saved["shipments"].get(entry["shipment_id"],{})
+	var cargo: Dictionary = saved_cargo(saved,entry["shipment_id"])
 	if cargo.get("leg_index")==entry["leg_index"] and cargo.get("stage") in ["LOADING","TRANSIT","WAITING_UNLOAD","UNLOADING"]:
 		end=maxi(end,economy()._world.game_clock.total_minutes()+1)
 	return end
@@ -630,6 +681,12 @@ func site_keeper_reason(site: String) -> String:
 	for id: String in _active_node_uses:
 		var use := node_uses[id] as Dictionary
 		if facilities[use["facility_id"]]["site_id"]==site and (use["end_minute"]<0 or use["end_minute"]>now) and float(use["released_amount"])<float(use["amount"]): return "ACTIVE_TRANSPORT_FACILITY_CUSTODY_OR_OCCUPANCY"
+	for t: Dictionary in e._capital_transport.tasks.values():
+		if t["stage"]=="DELIVERED": continue
+		for leg: Dictionary in e._capital_transport.offer(t["offer_id"])["legs"]:
+			var b: Dictionary=bindings[leg["edge_id"]]
+			for facility: String in b["node_resources"].values().filter(func(v: Variant)->bool: return v is String):
+				if facilities[facility]["site_id"]==site: return "ACCEPTED_EQUIPMENT_CARRIAGE_REQUIRES_FACILITY"
 	for id: String in e._moving_shipments:
 		var cargo := e._shipments[id] as Dictionary
 		var order := e._orders[cargo["order_id"]] as Dictionary
@@ -660,3 +717,21 @@ func passenger_unit_known(link: String, unit: String) -> bool:
 	for r: Dictionary in bindings.values():
 		if r["source_link_id"]==link and r["weight_unit"]==unit: return true
 	return false
+
+
+func load_of(row: Dictionary) -> Variant:
+	return {"asset_id":row["asset_id"]} if row.has("asset_id") else row.get("good","")
+
+func handling_units(load: Variant) -> int:
+	return economy()._capital_transport.handling_units(load.get("asset_id","")) if load is Dictionary else 1
+
+func valid_load(row: Dictionary) -> bool:
+	if row.has("asset_id"):
+		return not row.has("good") and row["asset_id"] is String and not economy()._capital_transport.load_rule(row["asset_id"]).is_empty() and row.get("quantity")==1
+	return row.get("good") is String and economy()._goods.has(row["good"])
+
+func cargo(id: String) -> Dictionary:
+	return economy()._capital_transport.tasks.get(id,economy()._shipments.get(id,{}))
+
+func saved_cargo(saved: Dictionary, id: String) -> Dictionary:
+	return saved.get("capital_transport",{}).get(id,saved["shipments"].get(id,{}))

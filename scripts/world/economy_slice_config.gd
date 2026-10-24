@@ -1,6 +1,16 @@
 class_name EconomySliceConfig
 extends RefCounted
+const LocalQuotations = preload("res://scripts/world/economy_local_quotations.gd")
+const CapitalTransport = preload("res://scripts/world/economy_capital_transport.gd")
 const SharedTransport = preload("res://scripts/world/economy_shared_transport.gd")
+const Liquidity = preload("res://scripts/world/economy_liquidity_rules.gd")
+const CostAllocation = preload("res://scripts/world/economy_cost_allocation.gd")
+const WindDown = preload("res://scripts/world/economy_wind_down.gd")
+const LaborMarket = preload("res://scripts/world/economy_labor_market.gd")
+const Commercial = preload("res://scripts/world/economy_commercial_information.gd")
+const Retail = preload("res://scripts/world/economy_retail_rules.gd")
+const Leases = preload("res://scripts/world/economy_lease_market.gd")
+const Services = preload("res://scripts/world/economy_service_market.gd")
 const Budget = preload("res://scripts/world/economy_procurement_budget.gd")
 const Cohorts = preload("res://scripts/world/economy_cohort_rules.gd")
 
@@ -15,7 +25,7 @@ const FIELDS: Array[String] = ["format", "case_id", "actors", "firms", "jobs", "
 const Credit = preload("res://scripts/world/economy_bilateral_credit.gd")
 const Exchange = preload("res://scripts/world/economy_currency_exchange.gd")
 const Assets = preload("res://scripts/world/economy_asset_market.gd")
-const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations"]
+const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations", "opening_organizations", "opening_residents", "opening_job_choice", "liquidity_policies", "labor_response_policies", "firm_finance_authorities", "cost_accounting", "service_market", "lease_market", "retail_sites", "commercial_information", "labor_market", "wind_down", "capital_resale", "capital_transport", "local_quotation_experiment", "equity_call_market", "equity_primary", "equity_distribution", "corporate_decisions"]
 ## Extra accounts declare finite minor-unit endowments, including zero accounts.
 ## FX offers use target-minor/source-minor rational rates and a fixed source fee.
 ## Routes are directed shared physical edges, with same-currency freight per unit.
@@ -50,9 +60,63 @@ static func valid_development_organizations(settings: Dictionary) -> bool:
 static func is_multi(value: Dictionary) -> bool:
 	return value.get("format") == "R2"
 
+static func valid_opening_organizations(settings: Dictionary) -> bool:
+	var rows: Variant = settings.get("opening_organizations", [])
+	if not rows is Array or rows.size() > 2: return false
+	if rows.is_empty(): return not settings.has("opening_job_choice")
+	var dual: bool = settings.get("case_id") == "FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1"
+	if not settings.get("host_personal_accounts", false) or (not dual and settings.get("case_id") != "FORMAL_PARIS_WORKSHOP_OPENING_R1") or rows.size() != (2 if dual else 1): return false
+	var firms: Variant = settings.get("firms", [])
+	if not firms is Array or firms.size() != rows.size(): return false
+	var names: Array[String] = ["opening_paris_workshop"]
+	if dual: names.append("opening_paris_bakery")
+	var seen: Dictionary = {}
+	for row: Variant in rows:
+		if not row is Dictionary or not _fields(row, ["organization_id", "firm_id", "place_id", "basis", "notice"], ["material_trade"]): return false
+		var name: String = str(row.get("firm_id", "")).trim_prefix("firm:")
+		if name not in names or seen.has(name) or row.get("organization_id") != "organization:"+name or row.get("place_id") != "place:paris" or row.get("basis") != "GENERATED_OPENING_CONFIGURATION" or not row.get("notice") is String or row["notice"].is_empty(): return false
+		var matches: int = 0
+		for firm: Variant in firms:
+			if firm is Dictionary and firm.get("id") == row["firm_id"] and firm.get("host_organization_id") == row["organization_id"] and firm.get("place_id") == row["place_id"] and not firm.has("manager"): matches += 1
+		if matches != 1: return false
+		if row.has("material_trade"):
+			var trade: Variant=row["material_trade"]
+			if not dual or not trade is Dictionary or not FormalLedgerState.exact_fields(trade,["operation","counterparty","good","price","quantity_limit","stock_floor","enabled","basis"]): return false
+			var selling: bool=name=="opening_paris_workshop"
+			if trade["operation"]!=("SELL" if selling else "PROCURE") or trade["counterparty"]!=("firm:opening_paris_bakery" if selling else "firm:opening_paris_workshop") or trade["good"]!="grain" or not trade["enabled"] is bool or trade["basis"]!="GENERATED_OPENING_STAFFED_MATERIAL_TRADE": return false
+			for field: String in ["price","quantity_limit","stock_floor"]:
+				if not FormalLedgerState.valid_amount(trade[field]): return false
+			if trade["price"]<1 or trade["quantity_limit"]<1 or trade["quantity_limit"]>8 or (selling and trade["stock_floor"]<4) or (not selling and trade["stock_floor"]!=0): return false
+			for firm: Dictionary in firms:
+				if selling and firm["id"]==row["firm_id"] and firm["sites"][0]["prices"].get("grain")!=trade["price"]: return false
+		seen[name] = true
+	if settings.has("opening_job_choice"):
+		if not dual or settings["opening_job_choice"] != {"actor":"person:formal_generated_country_fra_0002", "order":"KNOWN_LOCAL_HOURLY_WAGE", "basis":"GENERATED_OPENING_CONFIGURATION"}: return false
+	return true
+
+static func valid_opening_residents(settings: Dictionary) -> bool:
+	var rows: Variant = settings.get("opening_residents", [])
+	if not rows is Array or rows.size() > 1: return false
+	if rows.is_empty(): return true
+	var organizations: Variant = settings.get("opening_organizations", [])
+	if not organizations is Array or organizations.is_empty() or not valid_opening_organizations(settings): return false
+	var row: Variant = rows[0]
+	if not row is Dictionary or not FormalLedgerState.exact_fields(row, ["person_id", "claim_id", "place_id", "opening_cash", "basis"]): return false
+	if row["person_id"] != "person:formal_generated_country_fra_0002" or row["claim_id"] != "formal_population_claim:country_fra:0002" or row["place_id"] != "place:paris" or not FormalLedgerState.valid_amount(row["opening_cash"]) or row["opening_cash"] != 0 or row["basis"] != "GENERATED_OPENING_CONFIGURATION": return false
+	var matches: int = 0
+	for actor: Dictionary in settings.get("actors", []):
+		if actor.get("id") != row["person_id"]: continue
+		if actor.get("kind") != "named" or actor.get("control") != "automatic" or actor.get("account_id") != "account:personal:formal_generated_country_fra_0002" or actor.get("cash") != 0 or actor.get("members") != 1 or actor.get("place_id") != row["place_id"]: return false
+		matches += 1
+	return matches == 1
+
 static func valid(value: Dictionary) -> bool:
+	if not CapitalTransport.valid_configuration(value): return false
 	if not valid_development_organizations(value): return false
+	if not valid_opening_organizations(value): return false
+	if not valid_opening_residents(value): return false
 	if not Budget.valid_rules(value.get("procurement_budgets", [])) or not SharedTransport.valid_configuration(value.get("shared_transport", [])) or not SharedTransport.valid_facilities(value.get("transport_facilities", [])): return false
+	if not Liquidity.valid(value) or not CostAllocation.valid_configuration(value): return false
 	if value.has("place_population_bindings") and (not value.get("host_personal_accounts", false) or not FormalWorldPopulationState.valid_place_population_bindings(value["place_population_bindings"])): return false
 	if value.has("commodity_mappings") and (not value.get("host_personal_accounts", false) or not CommodityMapping.valid_rows(value["commodity_mappings"])): return false
 	if value.has("residence_permissions"):
@@ -89,7 +153,7 @@ static func valid(value: Dictionary) -> bool:
 			expansion_ids[expansion["id"]] = true
 	if value.has("management_scope"):
 		var scope: Variant = value["management_scope"]
-		if not value.get("host_personal_accounts", false) or not scope is Dictionary or not FormalLedgerState.exact_fields(scope, ["id", "identity_basis", "business_basis", "statistics_visibility"]) or not scope["id"] is String or scope["id"].is_empty() or scope["identity_basis"] != "HOST_WORLD" or scope["business_basis"] != "DEVELOPMENT_CONFIGURATION" or scope["statistics_visibility"] not in ["OWNER_ONLY", "PUBLIC_AGGREGATES"]:
+		if not value.get("host_personal_accounts", false) or not scope is Dictionary or not FormalLedgerState.exact_fields(scope, ["id", "identity_basis", "business_basis", "statistics_visibility"]) or not scope["id"] is String or scope["id"].is_empty() or scope["identity_basis"] != "HOST_WORLD" or scope["business_basis"] not in ["DEVELOPMENT_CONFIGURATION", "GENERATED_OPENING_CONFIGURATION"] or scope["statistics_visibility"] not in ["OWNER_ONLY", "PUBLIC_AGGREGATES"]:
 			return false
 	var fields: Array[String] = FIELDS.duplicate()
 	for field: String in OPTIONAL_FIELDS:
@@ -235,7 +299,7 @@ static func valid(value: Dictionary) -> bool:
 	for actor: Dictionary in actors.values():
 		if not Cohorts.valid(actor, value, jobs): return false
 	var route: Variant = value["route"]
-	return route is Dictionary and FormalLedgerState.exact_fields(route, ["id", "place_id", "capacity", "delay", "basis"]) and route["id"] is String and str(route["id"]).begins_with("edge:") and _place(route["place_id"]) and route["basis"] == "SYNTHETIC" and _number(route["capacity"], 1) and _number(route["delay"], 1) and credit_parties_valid(value, actors, firms) and _finance(value, actors, firms, jobs, accounts) and _operations(value, actors, firms) and _lifecycle_configuration(value, actors, firms) and Capital.valid_configuration(value, normalize(value, []))
+	return route is Dictionary and FormalLedgerState.exact_fields(route, ["id", "place_id", "capacity", "delay", "basis"]) and route["id"] is String and str(route["id"]).begins_with("edge:") and _place(route["place_id"]) and route["basis"] == "SYNTHETIC" and _number(route["capacity"], 1) and _number(route["delay"], 1) and credit_parties_valid(value, actors, firms) and _finance(value, actors, firms, jobs, accounts) and _operations(value, actors, firms) and _lifecycle_configuration(value, actors, firms) and Capital.valid_configuration(value, normalize(value, [])) and Services.valid_configuration(value, normalize(value, [])) and Leases.valid_configuration(value, normalize(value, [])) and Retail.valid_configuration(value, normalize(value, [])) and Commercial.valid_configuration(value, normalize(value, [])) and LaborMarket.valid_configuration(value,normalize(value,[])) and WindDown.valid_configuration(value,normalize(value,[])) and LocalQuotations.valid_configuration(value,normalize(value,[])) and Assets.CallMarket.valid_configuration(value,normalize(value,[])) and Assets.Primary.valid_configuration(value,normalize(value,[])) and Assets.Distribution.valid_configuration(value,normalize(value,[])) and Assets.Corporate.valid_configuration(value,normalize(value,[]))
 
 static func _fields(row: Dictionary, required: Array[String], optional: Array[String]) -> bool:
 	var fields := required.duplicate()
@@ -316,26 +380,28 @@ static func _finance(value: Dictionary, actors: Dictionary, firms: Dictionary, j
 			return false
 		var recipients: Dictionary = {}
 		for actor: Variant in row["known_to"]:
-			if not actor is String or not subjects.has(actor) or recipients.has(actor) or actor == row["carrier"] or (actors.has(actor) and actors[actor]["control"] == "dormant"):
+			if not actor is String or not subjects.has(actor) or recipients.has(actor) or (actor == row["carrier"] and not firms.has(actor)) or (actors.has(actor) and actors[actor]["control"] == "dormant"):
 				return false
 			recipients[actor] = true
 		ids[row["id"]] = true
 	if not _transport_and_policy(value, actors, firms, owner_currencies):
 		return false
 	ids.clear()
+	var share_subjects: Dictionary=subjects.duplicate()
+	if value.has("equity_call_market") and value.get("host_personal_accounts",false): share_subjects["HOST_SELECTED_PLAYER"]=true
 	for row: Variant in value.get("assets", []):
 		if not row is Dictionary or not FormalLedgerState.exact_fields(row, Assets.CONFIG_FIELDS) or not row["id"] is String or not str(row["id"]).begins_with("asset:") or ids.has(row["id"]) or not firms.has(row["issuer"]) or (not firms.has(row["manager"]) and not actors.has(row["manager"])) or (actors.has(row["manager"]) and actors[row["manager"]]["control"] == "dormant") or not FormalLedgerState.valid_amount(row["total_shares"]) or int(row["total_shares"]) <= 0 or not row["holders"] is Dictionary or not row["known_to"] is Array:
 			return false
 		var total: int = 0
 		for holder: Variant in row["holders"]:
-			if not holder is String or not subjects.has(holder) or (actors.has(holder) and actors[holder]["control"] == "dormant") or not FormalLedgerState.valid_amount(row["holders"][holder]) or total > int(row["total_shares"]) - int(row["holders"][holder]):
+			if not holder is String or not share_subjects.has(holder) or (actors.has(holder) and actors[holder]["control"] == "dormant") or not FormalLedgerState.valid_amount(row["holders"][holder]) or total > int(row["total_shares"]) - int(row["holders"][holder]):
 				return false
 			total += int(row["holders"][holder])
 		if total != int(row["total_shares"]):
 			return false
 		var recipients: Dictionary = {}
 		for actor: Variant in row["known_to"]:
-			if not actor is String or not subjects.has(actor) or recipients.has(actor) or (actors.has(actor) and actors[actor]["control"] == "dormant"):
+			if not actor is String or not share_subjects.has(actor) or recipients.has(actor) or (actors.has(actor) and actors[actor]["control"] == "dormant"):
 				return false
 			recipients[actor] = true
 		ids[row["id"]] = true
@@ -669,7 +735,7 @@ static func _production_valid(firm: Dictionary, goods: Array[String]) -> bool:
 		return false
 	var ids: Dictionary = {}
 	for activity: Variant in firm["activities"]:
-		if not activity is Dictionary or not FormalLedgerState.exact_fields(activity, ["id", "place_id", "outputs", "materials", "hours", "capacity_units", "enabled", "basis"]) or not activity["id"] is String or not str(activity["id"]).begins_with("activity:") or ids.has(activity["id"]) or activity["place_id"] != firm["place_id"] or not activity["enabled"] is bool or activity["basis"] != "DEVELOPMENT_CONFIGURATION" or not _number(activity["hours"], 1) or not _number(activity["capacity_units"], 1) or not _stock(activity["materials"], goods) or not activity["outputs"] is Dictionary or activity["outputs"].is_empty():
+		if not activity is Dictionary or not FormalLedgerState.exact_fields(activity, ["id", "place_id", "outputs", "materials", "hours", "capacity_units", "enabled", "basis"]) or not activity["id"] is String or not str(activity["id"]).begins_with("activity:") or ids.has(activity["id"]) or activity["place_id"] != firm["place_id"] or not activity["enabled"] is bool or activity["basis"] not in ["DEVELOPMENT_CONFIGURATION", "GENERATED_OPENING_CONFIGURATION"] or not _number(activity["hours"], 1) or not _number(activity["capacity_units"], 1) or not _stock(activity["materials"], goods) or not activity["outputs"] is Dictionary or activity["outputs"].is_empty():
 			return false
 		for good: Variant in activity["outputs"]:
 			if good not in goods or not _number(activity["outputs"][good], 1) or int(activity["materials"][good]) != 0:
@@ -791,7 +857,7 @@ static func _prices_valid(prices: Variant, goods: Array[String]) -> bool:
 	return true
 
 static func _site_valid(site: Dictionary, goods: Array[String]) -> bool:
-	if not _place(site["place_id"]) or not site["roles"] is Array or site["roles"].is_empty() or not _stock(site["stock"], goods) or not _stock(site["targets"], goods) or not _prices_valid(site["prices"], goods) or not _number(site["capacity"]) or not _number(site["coordination_delay"]) or int(site["coordination_delay"]) > 30 or not site["suppliers"] is Array or not site["activities"] is Array or site["basis"] != "DEVELOPMENT_CONFIGURATION":
+	if not _place(site["place_id"]) or not site["roles"] is Array or site["roles"].is_empty() or not _stock(site["stock"], goods) or not _stock(site["targets"], goods) or not _prices_valid(site["prices"], goods) or not _number(site["capacity"]) or not _number(site["coordination_delay"]) or int(site["coordination_delay"]) > 30 or not site["suppliers"] is Array or not site["activities"] is Array or site["basis"] not in ["DEVELOPMENT_CONFIGURATION", "GENERATED_OPENING_CONFIGURATION"]:
 		return false
 	for flag: String in ["enabled", "production_enabled", "accepting_business"]:
 		if not site[flag] is bool:

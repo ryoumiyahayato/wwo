@@ -4,6 +4,7 @@ extends RefCounted
 
 const SOURCE_EPSILON: float = 0.000001
 const SURFACE_EDGE_DEGREES: float = 2.0
+const SURFACE_EDGE_CHORD_SQUARED: float = 2.0-2.0*cos(deg_to_rad(SURFACE_EDGE_DEGREES))
 const SURFACE_LONGITUDE_DEGREES: float = 8.0
 const HIGH_LATITUDE: float = 55.0
 
@@ -17,6 +18,41 @@ static func to_unit_line(points: PackedVector2Array) -> PackedVector3Array:
 	for point: Vector2 in points:
 		output.append(lon_lat_to_unit(point))
 	return output
+
+static func display_line(points: PackedVector2Array) -> PackedVector3Array:
+	# Same dyadic source-edge subdivision as the surface triangulator.
+	# Original ring vertices remain; no cartographic line simplification.
+	var output := PackedVector3Array()
+	if points.is_empty(): return output
+	var previous := points[0]
+	output.append(lon_lat_to_unit(previous))
+	for index: int in range(1,points.size()):
+		var point := points[index]
+		point.x += roundf((previous.x-point.x)/360.0)*360.0
+		_append_display_edge(previous,point,output)
+		previous = point
+	# The same source endpoint can differ by a float32 rounding bit after a
+	# 360-degree unwrap. A closed ring must share its exact encoded endpoint.
+	if points.size()>1 and points[0]==points[-1] and output.size()>1: output[-1] = output[0]
+	return output
+
+static func _append_display_edge(a: Vector2, b: Vector2, output: PackedVector3Array, depth: int = 0) -> void:
+	var unit_a := lon_lat_to_unit(a)
+	var unit_b := lon_lat_to_unit(b)
+	if depth<24 and (unit_a.distance_squared_to(unit_b)>SURFACE_EDGE_CHORD_SQUARED or absf(a.x-b.x)>SURFACE_LONGITUDE_DEGREES):
+		var middle := (a+b)*0.5
+		_append_display_edge(a,middle,output,depth+1)
+		_append_display_edge(middle,b,output,depth+1)
+	else:
+		if output.is_empty() or output[-1]!=unit_b: output.append(unit_b)
+
+static func renderable_triangle(points: PackedVector3Array) -> bool:
+	# A sub-metre boolean sliver can collapse when WGS84 is encoded as unit
+	# float32 vectors. Do not send coincident corners or NaN edge normals.
+	if points.size()!=3: return false
+	var a := points[1]-points[0]
+	var b := points[2]-points[0]
+	return points[0].is_finite() and points[1].is_finite() and points[2].is_finite() and a.length_squared()>0.0 and b.length_squared()>0.0 and (points[2]-points[1]).length_squared()>0.0 and a.cross(b).length_squared()>0.0
 
 static func sphere_screen(point: Vector3, center: Vector2, radius: float) -> Vector2:
 	return center + Vector2(point.x, -point.y) * radius
@@ -195,6 +231,7 @@ static func tessellate_triangle(triangle: PackedVector2Array, depth: int = 0) ->
 	for edge: int in range(3):
 		var a := triangle[edge]
 		var b := triangle[(edge + 1) % 3]
+		if units[edge].distance_squared_to(units[(edge+1)%3])<=SURFACE_EDGE_CHORD_SQUARED and absf(a.x-b.x)<=SURFACE_LONGITUDE_DEGREES: continue
 		var angular_length := rad_to_deg(units[edge].angle_to(units[(edge + 1) % 3]))
 		var ratio := maxf(angular_length / SURFACE_EDGE_DEGREES, absf(a.x - b.x) / SURFACE_LONGITUDE_DEGREES)
 		if ratio > maximum_ratio:
@@ -238,8 +275,9 @@ static func source_mesh(parts: Array, feature_id: String) -> Dictionary:
 		prepared.append({"outer": outer, "holes": holes, "component_index": prepared.size()})
 		outers.append(outer)
 		for ring: PackedVector2Array in [outer] + holes:
-			var line := to_unit_line(ring)
-			line.append(line[0])
+			var closed := ring.duplicate()
+			closed.append(closed[0])
+			var line := display_line(closed)
 			borders.append(line)
 	if outers.is_empty():
 		return {"triangles": triangles, "borders": borders}
@@ -266,6 +304,51 @@ static func source_mesh(parts: Array, feature_id: String) -> Dictionary:
 		if triangles.size() == component_start:
 			push_error("Globe geometry %s component %d: no surface survived source preparation" % [feature_id, part.component_index])
 	return {"triangles": triangles, "borders": borders, "uv_bounds": uv_bounds}
+
+static func source_reference(parts: Array, feature_id: String) -> Dictionary:
+	# Historical identity queries need rings and flag frames, not a second
+	# globally triangulated/sphere-subdivided land surface.
+	var reference := 0.0
+	var largest := 0
+	for part: Dictionary in parts:
+		if (part.outer as PackedVector2Array).size()>largest:
+			largest = (part.outer as PackedVector2Array).size()
+			reference = (part.outer as PackedVector2Array)[0].x
+	var prepared: Array[Dictionary] = []
+	var borders: Array[PackedVector3Array] = []
+	var outers: Array[PackedVector2Array] = []
+	var main_bounds := Rect2()
+	var main_area := -1.0
+	for part: Dictionary in parts:
+		var outer := unwrap_ring(part.outer as PackedVector2Array,reference)
+		if outer.size()<3: continue
+		var holes: Array[PackedVector2Array] = []
+		for ring: PackedVector2Array in part.holes: holes.append(unwrap_ring(ring,reference))
+		var bounds := lon_lat_bounds([outer])
+		var box := AABB(lon_lat_to_unit(outer[0]),Vector3.ZERO)
+		for point: Vector2 in outer: box = box.expand(lon_lat_to_unit(point))
+		var axis := box.get_center()
+		var component := {"outer":outer,"holes":holes,"bounds":bounds,"feature_id":feature_id,"cull_axis":axis.normalized(),"cull_angle":acos(clampf(axis.length()-box.size.length()*0.5,-1.0,1.0)),"borders":[]}
+		prepared.append(component)
+		outers.append(outer)
+		var area := polygon_area(outer)
+		for hole: PackedVector2Array in holes: area -= polygon_area(hole)
+		area *= maxf(0.0,cos(deg_to_rad(bounds.get_center().y)))
+		if area>main_area:
+			main_area = area
+			main_bounds = bounds
+		for ring: PackedVector2Array in [outer]+holes:
+			var closed := ring.duplicate()
+			closed.append(closed[0])
+			var line := display_line(closed)
+			borders.append(line)
+			(component.borders as Array).append(line)
+	var frame := lon_lat_bounds(outers)
+	frame.size = frame.size.max(Vector2.ONE*SOURCE_EPSILON)
+	var flag := Rect2((main_bounds.position-frame.position)/frame.size,main_bounds.size/frame.size)
+	flag.position.y = 1.0-flag.end.y
+	flag.size = flag.size.max(Vector2.ONE*SOURCE_EPSILON)
+	return {"parts":prepared,"borders":borders,"uv_bounds":frame,"flag_bounds":flag}
 
 static func edge_key(a: Vector3, b: Vector3) -> String:
 	var first := str(Vector3i(roundi(a.x * 1000000.0), roundi(a.y * 1000000.0), roundi(a.z * 1000000.0)))

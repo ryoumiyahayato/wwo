@@ -118,6 +118,8 @@ func restore(raw: Variant, orders: Dictionary, transactions: FormalLedgerState, 
 func order_components(o: Dictionary) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var categories: Dictionary = {}
+	if o["kind"] in ["SERVICE","LEASE","CAPITAL_ASSET"]: categories[o["category"]] = int(o["quantity"])
+	if o["kind"]=="CAPITAL_FREIGHT": categories[o["category"]]=int(o["budget_amount"])
 	if o["kind"] == "SALE": categories["goods:"+str(o["good"])] = int(o["price"])*int(o["quantity"])
 	for leg: Dictionary in o["route_legs"]:
 		var category := "freight:"+str(leg["edge_id"])

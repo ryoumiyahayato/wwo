@@ -25,6 +25,7 @@ var _land_admin_document: Dictionary = {}
 var _land_boundary_lods: Dictionary = {}
 var _administrative_coverage: Dictionary = {}
 signal administrative_display_changed
+signal land_politics_changed(land_id: String)
 var _administrative_display_revision: int = 0
 var _opening_admin_members: Dictionary = {}
 var _admin_member_view: Dictionary = {}
@@ -402,8 +403,10 @@ func land_facts(id: String) -> Dictionary:
 func set_land_sovereign(id: String, polity_id: String) -> bool:
 	if not _land_facts.has(id) or not _land_politics.has_entity(polity_id):
 		return false
-	if _land_facts[id].sovereign_polity_id != polity_id: _land_facts[id]["historical_initialization_eligible"] = false
+	var changed: bool = _land_facts[id].sovereign_polity_id != polity_id
+	if changed: _land_facts[id]["historical_initialization_eligible"] = false
 	_land_facts[id]["sovereign_polity_id"] = polity_id
+	if changed: land_politics_changed.emit(id)
 	return true
 
 func split_land(id: String, first_id: String, first: PackedVector2Array, second_id: String, second: PackedVector2Array, control: TerritoryState, historical_initialization: bool = false) -> bool:
@@ -422,6 +425,7 @@ func split_land(id: String, first_id: String, first: PackedVector2Array, second_
 		_land_facts[child]["id"] = child
 		if not historical_initialization: _land_facts[child]["historical_initialization_eligible"] = false
 	_invalidate_administrative_display()
+	land_politics_changed.emit("")
 	return true
 
 func _valid_land_facts(topology: LandTopology, facts: Dictionary, politics: RuntimePoliticalEntityRegistry) -> bool:
@@ -873,6 +877,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 	_land = candidate._land
 	_land_facts = candidate._land_facts
 	_invalidate_administrative_display()
+	land_politics_changed.emit("")
 	return true
 
 

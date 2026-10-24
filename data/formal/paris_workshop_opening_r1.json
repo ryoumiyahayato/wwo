@@ -1,0 +1,94 @@
+{
+  "format": "R2",
+  "case_id": "FORMAL_PARIS_WORKSHOP_OPENING_R1",
+  "host_personal_accounts": true,
+  "management_scope": {
+    "id": "scope:formal_paris_workshop_opening_r1",
+    "identity_basis": "HOST_WORLD",
+    "business_basis": "GENERATED_OPENING_CONFIGURATION",
+    "statistics_visibility": "OWNER_ONLY"
+  },
+  "opening_organizations": [{
+    "organization_id": "organization:opening_paris_workshop",
+    "firm_id": "firm:opening_paris_workshop",
+    "place_id": "place:paris",
+    "basis": "GENERATED_OPENING_CONFIGURATION",
+    "notice": "普通开局的有限模拟工坊；非历史企业。组织持有企业资金及站点存货，授权本站销售现有面包，配置单价2。实际完成工作中最多1小时用于当日现场销售，余下工时用于原生产。个人面包携带上限4，无新增旅行许可。玩家自愿应聘或作为顾客购买，不取得企业经营权。现金与库存仅在世界初始时入账。"
+  }],
+  "stock_horizon": 2,
+  "opening_residents": [{
+    "person_id": "person:formal_generated_country_fra_0002",
+    "claim_id": "formal_population_claim:country_fra:0002", "place_id": "place:paris",
+    "opening_cash": 0, "basis": "GENERATED_OPENING_CONFIGURATION"
+  }],
+  "labor_response_policies": [{"actor": "person:formal_generated_country_fra_0002", "arrears_days": 1, "basis": "GENERATED_OPENING_CONFIGURATION"}],
+  "production_enabled": true,
+  "firm_operations": [{"firm": "firm:opening_paris_workshop", "planning_horizon": 2, "buffer_days": 0, "demand_window": 3, "manage_jobs": false}],
+  "player_choice": "fixed",
+  "person_travel": {"passages": [], "carry_limits": {"native:bread": 4}, "npc_policies": [], "arrival_notices": []},
+  "retail_sites": [{
+    "site_id": "site:opening_paris_workshop:paris", "firm_id": "firm:opening_paris_workshop",
+    "job_ids": ["job:opening_paris_workshop"],
+    "stock_units": {"bread": 1}, "stock_capacity": 16, "stock_unit": "opening_store_stock_unit",
+    "hours_per_day": 1, "units_per_hour": 4, "daily_limit": 4,
+    "open_from": 0, "open_until": 1440, "restock": {}, "window_days": 3,
+    "onsite_first_for": [], "basis": "GENERATED_OPENING_CONFIGURATION",
+    "time_basis": "SETTLED_DAILY_STAFFING_WINDOW"
+  }],
+  "actors": [{
+    "id": "person:formal_generated_country_fra_0001",
+    "kind": "named", "control": "player", "members": 1,
+    "account_id": "account:personal:formal_generated_country_fra_0001",
+    "cash": 0,
+    "stock": {"beans": 0, "bread": 0, "grain": 0},
+    "skill": 1, "daily_need": 1, "population_start": 0,
+    "place_id": "place:paris"
+  }, {
+    "id": "person:formal_generated_country_fra_0002",
+    "kind": "named", "control": "automatic", "members": 1,
+    "account_id": "account:personal:formal_generated_country_fra_0002", "cash": 0,
+    "stock": {"beans": 0, "bread": 0, "grain": 0},
+    "skill": 1, "daily_need": 1, "population_start": 0, "place_id": "place:paris"
+  }],
+  "firms": [{
+    "id": "firm:opening_paris_workshop", "place_id": "place:paris",
+    "account_id": "account:opening_paris_workshop", "cash": 1200,
+    "host_organization_id": "organization:opening_paris_workshop",
+    "sites": [{
+      "id": "site:opening_paris_workshop:paris", "place_id": "place:paris",
+      "roles": ["production", "storage", "sales"],
+      "stock": {"beans": 0, "bread": 12, "grain": 60},
+      "targets": {"beans": 0, "bread": 16, "grain": 0},
+      "prices": {"bread": 2}, "capacity": 2,
+      "suppliers": [], "enabled": true, "production_enabled": true,
+      "accepting_business": true, "coordination_delay": 0,
+      "basis": "GENERATED_OPENING_CONFIGURATION",
+      "activities": [{
+        "id": "activity:opening_paris_bread", "place_id": "place:paris",
+        "outputs": {"bread": 2}, "materials": {"beans": 0, "bread": 0, "grain": 1},
+        "hours": 1, "capacity_units": 1, "enabled": true,
+        "basis": "GENERATED_OPENING_CONFIGURATION"
+      }]
+    }]
+  }],
+  "jobs": [{
+    "id": "job:opening_paris_workshop", "employer": "firm:opening_paris_workshop",
+    "site_id": "site:opening_paris_workshop:paris", "place": "place:paris",
+    "positions": 1, "skill": 1, "hours": 2, "wage_per_hour": 3,
+    "wage_delay": 1, "notice_delay": 1
+  }],
+  "information": [{
+    "actor": "person:formal_generated_country_fra_0002", "kind": "job",
+    "candidate": "job:opening_paris_workshop", "delivery_day": 0
+  }, {
+    "actor": "person:formal_generated_country_fra_0002", "kind": "supplier",
+    "candidate": "firm:opening_paris_workshop|bread|site:opening_paris_workshop:paris", "delivery_day": 0
+  }, {
+    "actor": "person:formal_generated_country_fra_0001", "kind": "job",
+    "candidate": "job:opening_paris_workshop", "delivery_day": 0
+  }, {
+    "actor": "person:formal_generated_country_fra_0001", "kind": "supplier",
+    "candidate": "firm:opening_paris_workshop|bread|site:opening_paris_workshop:paris", "delivery_day": 0
+  }],
+  "route": {"id": "edge:opening_paris_local", "place_id": "place:paris", "capacity": 1, "delay": 1, "basis": "SYNTHETIC"}
+}

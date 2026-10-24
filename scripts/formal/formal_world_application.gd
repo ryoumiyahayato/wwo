@@ -1,5 +1,6 @@
 class_name FormalWorldApplication
 extends Control
+const EconomicText = preload("res://scripts/presentation/ui/formal_economic_text.gd")
 ## Scene assembly and UI action dispatch. Domain facts remain in their owners.
 
 const LAUNCH_MODE_META: StringName = &"formal_world_launch_mode"
@@ -16,7 +17,8 @@ var _map_dirty: bool = false
 var _economy_view_dirty: bool = true
 var _organization_view_dirty: bool = true
 var _economic_map_dirty: bool = false
-var _flag_date: String = ""
+var _flag_reference: Array = []
+var _ui_refresh_pending: bool = false
 var _ui_economy_day: int = -1
 var _ui_economy_revision: int = -1
 var _ui_politics: RuntimePoliticalEntityView
@@ -25,6 +27,15 @@ var _ui_organizations: FormalWorldOrganizationView
 var _ui_responsibilities: FormalWorldOrganizationResponsibilityView
 var _last_personal_transaction_id: String = ""
 var _last_living_record_id: String = ""
+var _economic_brief_key: Array = []
+var _economic_detail_key: Array = []
+var _economic_topic_pending: bool = false
+var _economic_subject: String = ""
+var _economic_order_offset: int = 0
+var _economic_previous_mode: String = ""
+var _economic_return_mode: String = "political"
+var _economic_follow_order: String = ""
+var _economic_locations_stamp: Array = []
 @onready var map_renderer: GlobeRenderer = $GlobeRenderer
 @onready var map_controller: GlobeController = $GlobeController
 @onready var main_shell: MainShell = $MainShell
@@ -40,6 +51,9 @@ func _enter_tree() -> void:
 	get_node("GlobeController").free()
 	controller.reparent(self)
 	prepared.reparent(self)
+	# z_index changes painting, not Godot's GUI hit order. The reused menu
+	# renderer was appended above native archive scrollbars/buttons in the tree.
+	move_child(prepared,get_node("MainShell").get_index())
 	prepared.preserve_on_reparent = false
 	prepared.modulate = Color.WHITE
 	prepared.visible = true
@@ -54,12 +68,29 @@ func _ready() -> void:
 	get_tree().auto_accept_quit = false
 	main_shell.configure([],map_controller,time_control)
 	main_shell.action_requested.connect(_on_action_requested)
-	main_shell.refresh_requested.connect(_refresh_ui)
+	main_shell.refresh_requested.connect(_request_ui_refresh)
 	time_control.advance_requested.connect(_advance_world)
 	time_control.controls_changed.connect(main_shell.refresh_clock)
 	map_controller.appearance_changed.connect(_refresh_economic_map)
+	map_controller.appearance_changed.connect(_economic_mode_changed)
+	map_controller.view_changed.connect(_request_economic_topic_refresh)
+	map_controller.selection_changed.connect(_request_economic_topic_refresh)
+	map_controller.topic_preferences_changed.connect(_request_economic_topic_refresh)
+	map_renderer.topic_selected.connect(_open_economic_topic)
+	map_renderer.place_content_ready.connect(_request_economic_topic_refresh)
+	main_shell.economic_map.query_requested.connect(_query_economic_details)
+	main_shell.economic_map.focus_requested.connect(_focus_economic_place)
+	main_shell.economic_map.selection_requested.connect(_select_economic_place)
+	main_shell.economic_map.links_changed.connect(map_renderer.set_topic_links)
+	main_shell.economic_map.back_requested.connect(_close_economic_details)
+	main_shell.economic_map.expand_requested.connect(func():map_controller.set_map_mode("economic"))
+	main_shell.economic_map.business_requested.connect(_open_economic_business)
+	main_shell.economic_map.statistics_requested.connect(func():
+		var polity:=map_controller.selected_polity_id if not map_controller.selected_polity_id.is_empty() else map_controller.player_polity_id
+		_on_action_requested("economy:polity:"+polity))
 	map_controller.selection_changed.connect(main_shell.map_selection_changed)
 	map_renderer.map_notice.connect(main_shell.show_map_feedback)
+	map_renderer.current_politics_changed.connect(_on_current_map_politics_changed)
 	map_renderer.geographic_reference_selected.connect(func(reference: Dictionary) -> void:
 		if historical_content!=null: historical_content.remember_geographic_reference(reference))
 	map_renderer.place_content_ready.connect(_on_place_content_ready)
@@ -82,9 +113,9 @@ func _assemble_world() -> void:
 	if built == null:
 		var livelihood := str(get_tree().get_meta(FormalWorldMenu.LIVELIHOOD_META,FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT)) if launch_mode=="new" else FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT
 		var native_mode: Variant = get_tree().get_meta(FormalWorldMenu.NATIVE_ECONOMY_META,"")
-		var native_settings: Dictionary = {}
+		var native_settings: Dictionary = FormalEconomicOpening.for_source(WorldBootstrap.DEFAULT_FORMAL_PERSON_TERRITORY_ID) if launch_mode=="new" else {}
 		if launch_mode=="new":
-			if native_mode=="stratified" or OS.get_cmdline_user_args().has("--formal-stratified-economy"):
+			if native_mode=="stratified" or OS.get_cmdline_user_args().has("--formal-stratified-economy") or (OS.get_cmdline_user_args().has("--formal-capital-transport") or OS.get_cmdline_user_args().has("--formal-npc-capital-trade") or OS.get_cmdline_user_args().has("--formal-npc-capital-competition") or OS.get_cmdline_user_args().has("--formal-npc-capital-recirculation") or (EconomyDevelopmentConfig.player_capital_requested() or OS.get_cmdline_user_args().has("--formal-economy-feedback"))):
 				native_settings = EconomyDevelopmentConfig.formal_stratified_request()
 			elif native_mode=="regional" or OS.get_cmdline_user_args().has("--formal-regional-economy"):
 				native_settings = EconomyDevelopmentConfig.formal_regional_request()
@@ -96,7 +127,9 @@ func _assemble_world() -> void:
 	if not built.success:
 		FormalWorldPresenter.show_initialization_error(main_shell,built.error)
 	else:
-		_install_world(built,launch_mode in ["new","prepared_new"])
+		if not _install_world(built,launch_mode in ["new","prepared_new"]):
+			_release_prepared_loading()
+			return
 		if launch_mode=="load": _load_world()
 		elif launch_mode=="prepared_load":
 			_save_dirty = false
@@ -108,15 +141,34 @@ func _assemble_world() -> void:
 				main_shell.show_feedback("经营资料加载失败：" + _world.native_economy_error)
 			elif _world.economy_r1 != null: main_shell.show_feedback("经营资料已就绪。", "person:native")
 	_update_map_visibility()
-	# Keep the carried painting until the installed map has drawn its first frame.
+	_release_prepared_loading()
+
+func _release_prepared_loading() -> void:
+	# Installation is complete (or has an explicit error). A draw signal must
+	# not keep the carried menu overlay alive when the window is not rendering.
 	if get_tree().has_meta(FormalWorldMenu.PREPARED_LOADING_META):
 		var loading := get_tree().get_meta(FormalWorldMenu.PREPARED_LOADING_META) as Control
 		get_tree().remove_meta(FormalWorldMenu.PREPARED_LOADING_META)
-		await RenderingServer.frame_post_draw
 		if is_instance_valid(loading): loading.queue_free()
 
-func _install_world(built: WorldBuildResult, focus_opening: bool = false) -> void:
+func _install_world(built: WorldBuildResult, focus_opening: bool = false) -> bool:
+	var presentation := historical_content
+	if presentation==null: presentation = WorldBootstrap.prepare_presentation_content(built.world.provenance)
+	if not presentation.loaded or not presentation.errors.is_empty():
+		main_shell.configure(presentation.errors,map_controller,time_control)
+		FormalWorldPresenter.show_initialization_error(main_shell,"地图资料准备失败："+"\n".join(presentation.errors))
+		return false
+	historical_content = presentation
 	_world = built.world
+	_economic_brief_key.clear()
+	_economic_detail_key.clear()
+	_economic_subject = ""
+	_economic_follow_order = ""
+	_economic_locations_stamp.clear()
+	map_renderer.set_topic_places([])
+	_economic_order_offset = 0
+	main_shell.economic_map.clear_observation()
+	map_renderer.set_topic_facts([])
 	# Former land selections are presentation history, not a reason to reject
 	# a world whose underlying land identities remain valid in its snapshot.
 	if map_controller.selected_place_id.begins_with("territory_unit:"):
@@ -125,7 +177,7 @@ func _install_world(built: WorldBuildResult, focus_opening: bool = false) -> voi
 	_ui_politics = RuntimePoliticalEntityView.new(_world.political_registry.snapshot())
 	_economy_view_dirty = true
 	_organization_view_dirty = true
-	_flag_date = ""
+	_flag_reference.clear()
 	_ui_economy_day = -1
 	_ui_economy_revision = -1
 	var personal := _world.personal_economy_state.person_economy(_world.player_state.player_id())
@@ -134,7 +186,6 @@ func _install_world(built: WorldBuildResult, focus_opening: bool = false) -> voi
 	_last_living_record_id = str(living[0].record_id) if not living.is_empty() else ""
 	_simulation_step = built.simulation_step
 	_persistence = built.persistence
-	if historical_content == null: historical_content = WorldBootstrap.prepare_presentation_content(_world.provenance)
 	main_shell.configure(historical_content.errors, map_controller, time_control)
 	var opening_person := _world.person_overlay.person(_world.player_state.player_id())
 	var opening_source := str((opening_person.get("provenance",{}) as Dictionary).get("opening_polity_source_id",WorldBootstrap.DEFAULT_FORMAL_PERSON_TERRITORY_ID if str(opening_person.get("claim_id",""))==WorldBootstrap.DEFAULT_FORMAL_PERSON_CLAIM_ID else str(opening_person.get("population_territory_id",""))))
@@ -149,6 +200,8 @@ func _install_world(built: WorldBuildResult, focus_opening: bool = false) -> voi
 	if focus_opening:
 		map_renderer.focus_place(_world.spatial_catalog.get_place(str(opening_person.get("current_place_id",""))))
 	main_shell.refresh()
+	_request_economic_topic_refresh()
+	return true
 
 func _advance_world(minutes: int) -> void:
 	if _simulation_step != null:
@@ -160,6 +213,7 @@ func _on_world_changed(change: Dictionary) -> void:
 		main_shell.queue_redraw()
 		return
 	_save_dirty = true
+	_request_economic_topic_refresh()
 	if _persistence != null and _persistence.queued_save_result != null:
 		var result := _persistence.queued_save_result
 		_persistence.queued_save_result = null
@@ -178,7 +232,7 @@ func _on_world_changed(change: Dictionary) -> void:
 	if date_key!=previous_date:
 		if historical_content.display_changes_between(previous_date,date_key):
 			reference_changed = true
-			_flag_date = ""
+			_flag_reference.clear()
 			_refresh_map()
 		else:
 			map_renderer.political.display_date = date_key
@@ -210,26 +264,45 @@ func _on_world_changed(change: Dictionary) -> void:
 	var personal_changed := bool(change.get("personal_life_changed",false)) or bool(change.get("persons_changed",false)) or bool(change.get("native_changed",false)) or int(change.get("wages_paid",0))>0 or int(change.get("wages_failed",0))>0
 	if reference_changed or (page=="person" and personal_changed) or (page=="economy" and (economic_state_changed or bool(change.get("native_changed",false)))) or (page=="organization" and _organization_view_dirty):
 		main_shell.refresh()
-	elif date_key!=previous_date and not map_controller.selected_place_id.is_empty():
-		main_shell.refresh()
+	elif date_key!=previous_date:
+		# An observation date is not a change to the selected historical dossier.
+		main_shell.world_page.set_observation_date(date_key)
+		if page in ["map","world","administration"]: main_shell.queue_redraw()
 
+func _request_ui_refresh() -> void:
+	# Selection, page and content signals can describe one action. Build only
+	# the final visible page once; domain steps and their order are untouched.
+	if _ui_refresh_pending: return
+	_ui_refresh_pending = true
+	_refresh_ui.call_deferred()
 
 func _refresh_ui() -> void:
-	if _world == null: return
-	_prepare_ui_views(main_shell.current_page in ["person","economy","world","administration"] or not map_controller.selected_polity_id.is_empty(),main_shell.current_page in ["person","organization"])
+	_ui_refresh_pending = false
+	if _world == null or _leaving: return
+	# Static map dossiers only use the existing identity-to-market links.
+	# Fresh economic totals belong to the visible person/economy pages or map theme.
+	_prepare_ui_views(_ui_economy==null or main_shell.current_page in ["person","economy"],main_shell.current_page in ["person","organization"])
 	var polity := CurrentWorldPoliticalProjection.polity_summary(map_controller.selected_polity_id,_ui_politics,_world.historical_evidence_view)
 	if polity.is_empty(): polity = map_renderer.political.records.get(map_controller.selected_polity_id,{}) as Dictionary
 	var dossier_visible := main_shell.current_page in ["world","administration"] or (main_shell.current_page=="map" and (not map_controller.selected_polity_id.is_empty() or not map_controller.selected_place_id.is_empty()))
 	var content := historical_content.resolve_world_page(_world.game_clock.current_date(),polity,map_controller.selected_place_id) if dossier_visible else WorldPageContent.new(HistoricalLoader._date_key(_world.game_clock.current_date()),{},{},{},null,{})
+	if main_shell.current_page=="person" and main_shell.person_page.section=="native" and main_shell.person_page.business_mode and _world.economy_r1!=null:
+		map_renderer.note_topic_query("economic_business_refreshes")
 	FormalWorldPresenter.refresh_ui(_world,main_shell,map_controller,content,_ui_politics,_ui_economy,_ui_organizations,_ui_responsibilities)
-	main_shell.world_page.set_spatial_context(_world.spatial_world)
+	if dossier_visible:
+		main_shell.world_page.set_spatial_context(_world.spatial_world)
+		var current_land := map_renderer.selected_current_land()
+		if current_land.is_empty() and _world.territory_state.has_territory(map_controller.selected_place_id):
+			var raw_controller := _world.territory_state.get_controller(map_controller.selected_place_id)
+			current_land = {"controller_polity_id":raw_controller if _ui_politics.has_entity(raw_controller) else _ui_politics.runtime_id_for_source(raw_controller)}
+		main_shell.world_page.set_current_territory(current_land,_ui_politics,_world.historical_evidence_view)
 	var person := _world.person_overlay.person(_world.player_state.player_id())
 	var place := _world.spatial_world.get_place(str(person.get("current_place_id","")))
 	var local_polity := CurrentWorldPoliticalProjection.polity_summary(map_controller.player_polity_id,_ui_politics,_world.historical_evidence_view)
-	var current_date := HistoricalLoader._date_key(_world.game_clock.current_date())
-	if _flag_date!=current_date:
+	var flag_reference: Array = [map_controller.player_polity_id,str(local_polity.get("flag_id",""))]
+	if _flag_reference!=flag_reference:
 		main_shell.set_view_polity(local_polity,historical_content.flag_texture(_world.game_clock.current_date(),str(local_polity.get("flag_id",""))))
-		_flag_date = current_date
+		_flag_reference = flag_reference
 	if main_shell.current_page=="person":
 		main_shell.person_page.set_location_context(_world.spatial_world,_world.territory_state,CurrentWorldPoliticalProjection.polity_summary(_ui_politics.runtime_id_for_source(str(place.get("parent_country_id",""))),_ui_politics,_world.historical_evidence_view))
 		var market_id := _world.personal_economy_state.accessible_market_id(_world.player_state.player_id())
@@ -238,9 +311,18 @@ func _refresh_ui() -> void:
 	if main_shell.current_page=="world" and main_shell.world_page.index_open:
 		main_shell.world_page.set_index_context(CurrentWorldPoliticalProjection.map_units(_ui_politics,_world.historical_evidence_view))
 	var display_record := map_renderer.political.records.get(map_controller.selected_polity_id,{}) as Dictionary
-	if bool(display_record.get("display_only",false)):
+	if dossier_visible and bool(display_record.get("display_only",false)):
 		var visual := map_renderer.political.resolved_visuals.get(map_controller.selected_polity_id,{}) as Dictionary
 		main_shell.world_page.refresh(display_record,content.place(),WorldPageContent.new(content.date(),content.profile(),content.administration(),content.flag() if not content.flag().is_empty() else visual,map_renderer.political.visual_textures.get(map_controller.selected_polity_id),content.place()))
+	# Page data arrives in this deferred refresh, after the initiating draw.
+	# Publish the completed page instead of leaving its empty first draw visible.
+	main_shell.queue_redraw()
+
+func _on_current_map_politics_changed(state_changed: bool) -> void:
+	if _world==null or _leaving: return
+	if state_changed: _save_dirty = true
+	map_renderer.reconcile_current_selection()
+	if main_shell.current_page in ["map","world","administration"]: _request_ui_refresh()
 
 func _on_place_content_ready() -> void:
 	if historical_content == null: return
@@ -248,7 +330,9 @@ func _on_place_content_ready() -> void:
 	for content: LocalSpatialContent in [historical_content.strategic_spatial.content,historical_content.local_spatial.content]:
 		if content != null: errors.append_array(content.errors)
 	if not errors.is_empty(): main_shell.show_feedback("地图资料读取错误："+"; ".join(errors))
-	if not map_controller.selected_place_id.is_empty(): main_shell.refresh()
+	# A map shard finishing must not rebuild a visible business/person page
+	# just because an unrelated geographic selection still exists behind it.
+	if main_shell.current_page in ["map","world","administration"] and not map_controller.selected_place_id.is_empty(): main_shell.refresh()
 
 func _refresh_map() -> void:
 	_prepare_ui_views(true,false)
@@ -269,10 +353,160 @@ func _prepare_ui_views(need_economy: bool, need_organizations: bool) -> void:
 		_organization_view_dirty = false
 
 func _refresh_economic_map() -> void:
-	if _world==null or not _economic_map_dirty or map_controller.administrative_map_active(): return
+	if _world==null or not _economic_map_dirty or map_controller.map_mode not in ["fulfillment","shortage"]: return
 	_prepare_ui_views(true,false)
 	map_renderer.refresh_economic_observation(_ui_politics,_world.historical_evidence_view,_ui_economy)
 	_economic_map_dirty = false
+	_request_economic_topic_refresh()
+
+func _economic_mode_changed() -> void:
+	var mode := map_controller.map_mode
+	if mode!=_economic_previous_mode:
+		if mode=="economic":
+			_economic_return_mode = _economic_previous_mode if _economic_previous_mode in ["political","geographic"] else "political"
+			main_shell.set("_context_open",false)
+		elif _economic_previous_mode=="economic":
+			main_shell.economic_map.clear_observation()
+			_economic_detail_key.clear()
+		_economic_previous_mode = mode
+	_request_economic_topic_refresh()
+
+func _request_economic_topic_refresh() -> void:
+	if _economic_topic_pending or _world==null or _leaving: return
+	_economic_topic_pending = true
+	_refresh_economic_topic.call_deferred()
+
+func _refresh_economic_topic() -> void:
+	# Coalesce camera/content signals; the renderer keeps the primary layout.
+	await get_tree().process_frame
+	_economic_topic_pending = false
+	if _world==null or _leaving or not is_inside_tree(): return
+	var polity := map_controller.selected_polity_id if not map_controller.selected_polity_id.is_empty() else map_controller.player_polity_id
+	var state_key := FormalEconomicMapObservation.stamp(_world)
+	if _economic_locations_stamp!=state_key:
+		_economic_locations_stamp=state_key
+		map_renderer.set_topic_places(FormalEconomicMapObservation.known_places(_world))
+	if _economic_brief_key.is_empty() or _economic_brief_key[0]!=state_key or _economic_brief_key[2]!=polity:
+		var totals := _world.economy_state.country_summary(polity).get("daily_totals",{}) as Dictionary
+		var available := not totals.is_empty() and float(totals.get("fulfillment_bp",-1))>=0
+		if main_shell.economic_data_available!=available:
+			main_shell.economic_data_available = available
+			main_shell.queue_redraw()
+	if main_shell.current_page!="map":
+		main_shell.economic_map.clear_observation()
+		_economic_detail_key.clear()
+		return
+	var places := map_renderer.topic_place_ids()
+	var key: Array = [state_key,places,polity,map_controller.economic_supplements_enabled,map_controller.map_mode=="economic"]
+	if key!=_economic_brief_key:
+		_economic_brief_key = key
+		var source := _ui_politics.source_historical_id(polity) if _ui_politics!=null else ""
+		var rows: Array[Dictionary] = []
+		if map_controller.economic_supplements_enabled or map_controller.map_mode=="economic":
+			map_renderer.note_topic_query("economic_brief_queries")
+			rows = FormalEconomicMapObservation.brief(_world,places,polity,map_renderer.topic_capital(source))
+		map_renderer.set_topic_facts(rows)
+		var hint := not rows.is_empty()
+		if main_shell.economic_hint_available!=hint:
+			main_shell.economic_hint_available = hint
+			main_shell.queue_redraw()
+	var view := main_shell.economic_map
+	if map_controller.map_mode=="economic" or view.visible:
+		var detail_key: Array = [state_key,polity,_economic_subject,_economic_order_offset]
+		if detail_key!=_economic_detail_key or not view.visible or view.full!=(map_controller.map_mode=="economic"):
+			map_renderer.note_topic_query("economic_detail_queries")
+			var observation := FormalEconomicMapObservation.details(_world,polity,_economic_subject,_economic_order_offset,_economic_follow_order)
+			_economic_follow_order = ""
+			_economic_subject = str(observation.get("subject",""))
+			_economic_order_offset = int(observation.get("offset",0))
+			_economic_detail_key = [state_key,polity,_economic_subject,_economic_order_offset]
+			view.present(observation,_world.spatial_catalog,map_controller.map_mode=="economic",_economic_return_mode)
+
+func _query_economic_details(subject: String, offset: int) -> void:
+	_economic_subject = subject
+	_economic_order_offset = maxi(0,offset)
+	_economic_detail_key.clear()
+	# A compact political detail is opened explicitly, never by a pan.
+	main_shell.economic_map.show()
+	main_shell.set("_context_open",false)
+	_request_economic_topic_refresh()
+
+func _open_economic_topic(place_id: String, subject: String) -> void:
+	main_shell.economic_map.select_place(place_id)
+	_query_economic_details(subject,0)
+
+func _select_economic_place(place_id: String) -> void:
+	if _world==null: return
+	var place := _world.spatial_catalog.get_place(place_id)
+	if place.is_empty(): return
+	var polity := _ui_politics.runtime_id_for_source(str(place.get("parent_country_id","")))
+	map_controller.select(polity,place_id)
+	main_shell.set("_context_open",false)
+
+func _focus_economic_place(place_id: String) -> void:
+	if _world==null: return
+	var place := _world.spatial_catalog.get_place(place_id)
+	if not place.get("lon_lat") is Array: return
+	_select_economic_place(place_id)
+	main_shell.economic_map.select_place(place_id)
+	map_renderer.focus_place(place)
+
+func _close_economic_details() -> void:
+	main_shell.economic_map.clear_observation()
+	_economic_detail_key.clear()
+	if map_controller.map_mode=="economic": map_controller.set_map_mode(_economic_return_mode)
+
+func _open_economic_business(subject: String, site_id: String = "") -> void:
+	if _world==null: return
+	var observer:=_world.player_state.player_id()
+	var personal:=LivelihoodAction.query(_world,observer)
+	if subject==observer and not personal.is_empty():
+		main_shell.remember_page()
+		main_shell.person_page.section="native"
+		main_shell.person_page.native_scope_expanded=false
+		main_shell.person_page.business_mode=false
+		main_shell.person_page.lease_mode=false
+		main_shell.person_page.resident_services_mode=false
+		main_shell.set_page("person",false)
+		return
+	var managers:=personal.get("managed_firms",[]) as Array
+	for index: int in range(managers.size()):
+		if str(managers[index].firm_id)!=subject: continue
+		var target_site:=site_id if not site_id.is_empty() else main_shell.economic_map.selected_site
+		if target_site.is_empty():return
+		var business:=LivelihoodAction.query_business(_world,observer,subject,target_site,main_shell.person_page.quantity_milli)
+		if business.is_empty():return
+		var site_index:=(business.get("sites",[]) as Array).find(target_site)
+		if site_index<0:return
+		main_shell.remember_page()
+		main_shell.person_page.section="native"
+		main_shell.person_page.native_scope_expanded=true
+		main_shell.person_page.business_mode=true
+		main_shell.person_page.business_procurement_mode=true
+		main_shell.person_page.business_finance_mode=false
+		main_shell.person_page.business_services_mode=false
+		main_shell.person_page.business_leases_mode=false
+		main_shell.person_page.business_capital_mode=false
+		main_shell.person_page.lease_mode=false
+		main_shell.person_page.resident_services_mode=false
+		main_shell.person_page.selected_record_id=""
+		main_shell.person_page.selected_commodity_id=""
+		main_shell.person_page.business_firm_index=index
+		main_shell.person_page.business_site_index=site_index
+		main_shell.person_page.business_firm_id=subject
+		main_shell.person_page.business_site_id=target_site
+		main_shell.person_page.business_offer_page=0
+		main_shell.set_page("person",false)
+		return
+
+func _follow_economic_purchase(result: Dictionary, payload: Dictionary) -> void:
+	if not bool(result.get("accepted",false)) or str(result.get("order_id","")).is_empty():return
+	_economic_subject=str(payload.get("firm",""))
+	_economic_follow_order=str(result.order_id)
+	_economic_detail_key.clear()
+	var business:=main_shell.person_page._business
+	main_shell.economic_map.follow_order(_economic_follow_order,str(business.get("site",{}).get("stock_place_id","")),str(payload.get("buyer_site","")))
+	_request_economic_topic_refresh()
 
 func _on_action_requested(action: String) -> void:
 	if _leaving: return
@@ -296,6 +530,17 @@ func _on_action_requested(action: String) -> void:
 	elif action.begins_with("slot:load:"):
 		_load_world(int(action.trim_prefix("slot:load:")))
 		return
+	elif action=="map:internal_load":
+		if _world!=null and OS.has_feature("internal_landmark_preview"):
+			main_shell.world_page.internal_load_active = not main_shell.world_page.internal_load_active
+			map_renderer.set_internal_load_test(main_shell.world_page.internal_load_active)
+			main_shell.queue_redraw()
+		return
+	elif action.begins_with("map:pilot_landmark:"):
+		if _world!=null and map_renderer.focus_internal_landmark(action.trim_prefix("map:pilot_landmark:")):
+			main_shell.world_page.index_open = false
+			main_shell.set_page("map")
+		return
 	elif action.begins_with("encyclopedia:country:"):
 		main_shell.remember_page()
 		map_controller.select(action.trim_prefix("encyclopedia:country:"))
@@ -311,15 +556,55 @@ func _on_action_requested(action: String) -> void:
 		return
 	elif action.begins_with("map_mode:"):
 		map_controller.set_map_mode(action.trim_prefix("map_mode:"))
+		if main_shell.current_page!="map": main_shell.set_page("map",false)
 	elif action.begins_with("time:"):
 		var command := action.trim_prefix("time:")
 		if command == "pause": time_control.toggle_pause()
 		else: time_control.set_speed(int(command))
+	elif action.begins_with("lease_ui:"):
+		if action=="lease_ui:personal_toggle": main_shell.person_page.lease_mode=not main_shell.person_page.lease_mode
+		elif action=="lease_ui:business_toggle": main_shell.person_page.business_leases_mode=not main_shell.person_page.business_leases_mode
+		else: main_shell.person_page.lease_page=maxi(0,main_shell.person_page.lease_page+(-1 if action.ends_with("previous") else 1))
+		main_shell.refresh()
+	elif action.begins_with("resident_service_ui:"):
+		if action=="resident_service_ui:toggle": main_shell.person_page.resident_services_mode=not main_shell.person_page.resident_services_mode
+		else: main_shell.person_page.resident_service_page=maxi(0,main_shell.person_page.resident_service_page+(-1 if action.ends_with("previous") else 1))
+		main_shell.refresh()
+	elif action.begins_with("capital_ui:"):
+		if action=="capital_ui:toggle": main_shell.person_page.business_capital_mode=not main_shell.person_page.business_capital_mode
+		elif action.contains("action_"): main_shell.person_page.business_capital_action_page=maxi(0,main_shell.person_page.business_capital_action_page+(-1 if action.ends_with("previous") else 1))
+		else:
+			main_shell.person_page.business_capital_page=maxi(0,main_shell.person_page.business_capital_page+(-1 if action.ends_with("previous") else 1));main_shell.person_page.business_capital_action_page=0
+		main_shell.refresh()
+	elif action.begins_with("service_ui:"):
+		if action=="service_ui:toggle": main_shell.person_page.business_services_mode=not main_shell.person_page.business_services_mode
+		else: main_shell.person_page.business_service_page=maxi(0,main_shell.person_page.business_service_page+(-1 if action.ends_with("previous") else 1))
+		main_shell.refresh()
 	elif _world != null and action.begins_with("native:"):
 		var result: Dictionary
-		if action.begins_with("native:business_buy:"):
+		if action.begins_with("native:capital_action:"):
+			var row:=main_shell.person_page.capital_request(action.trim_prefix("native:capital_action:"))
+			result=LivelihoodAction.execute_current(_world,row["kind"],row["payload"]) if not row.is_empty() else {"accepted":false,"reason":"KNOWN_CAPITAL_ACTION_NO_LONGER_AVAILABLE"}
+		elif action.begins_with("native:lease_action:"):
+			var parts:=action.trim_prefix("native:lease_action:").split(":")
+			var row:=main_shell.person_page.lease_request(int(parts[1]),parts[0]=="business") if parts.size()==2 else {}
+			result=LivelihoodAction.execute_current(_world,row["kind"],row["payload"]) if not row.is_empty() else {"accepted":false,"reason":"LEASE_CANDIDATE_UNAVAILABLE"}
+		elif action.begins_with("native:labor_action:"):
+			var row:=main_shell.person_page.labor_request(int(action.trim_prefix("native:labor_action:")))
+			result=LivelihoodAction.execute_current(_world,row["kind"],row["payload"]) if not row.is_empty() else {"accepted":false,"reason":"EMPLOYMENT_PROPOSAL_UNAVAILABLE"}
+		elif action.begins_with("native:resident_service_action:"):
+			var row:=main_shell.person_page.resident_service_request(int(action.trim_prefix("native:resident_service_action:")))
+			result=LivelihoodAction.execute_current(_world,row["kind"],row["payload"]) if not row.is_empty() else {"accepted":false,"reason":"RESIDENT_SERVICE_CANDIDATE_UNAVAILABLE"}
+		elif action.begins_with("native:service_action:"):
+			var row:=main_shell.person_page.business_service_request(int(action.trim_prefix("native:service_action:")))
+			result=LivelihoodAction.execute_current(_world,row["kind"],row["payload"]) if not row.is_empty() else {"accepted":false,"reason":"SERVICE_CANDIDATE_UNAVAILABLE"}
+		elif action=="native:business_finance":
+			var payload := main_shell.person_page.business_finance_request()
+			if not payload.is_empty(): result=LivelihoodAction.execute_current(_world,"finance_firm",payload)
+		elif action.begins_with("native:business_buy:"):
 			var payload := main_shell.person_page.business_request(int(action.trim_prefix("native:business_buy:")))
 			result=LivelihoodAction.execute_current(_world,"buy",payload) if not payload.is_empty() else {"accepted":false,"reason":"KNOWN_ENTERPRISE_QUOTE_UNAVAILABLE"}
+			_follow_economic_purchase(result,payload)
 		elif action.begins_with("native:business_activity:"):
 			var parts := action.trim_prefix("native:business_activity:").split("|")
 			result=LivelihoodAction.execute_current(_world,"set_activity_enabled",{"firm":parts[0],"site_id":parts[1],"activity_id":parts[2],"enabled":parts[3]=="1"}) if parts.size()==4 else {"accepted":false,"reason":"INVALID_ACTIVITY_INPUT"}
@@ -351,7 +636,7 @@ func _on_action_requested(action: String) -> void:
 		elif action.begins_with("native:invest:") or action.begins_with("native:maintain:"):
 			var maintenance := action.begins_with("native:maintain:")
 			var id := action.trim_prefix("native:invest:").trim_prefix("native:maintain:")
-			var terms := _world.economy_r1._capital.template(str(_world.economy_r1._capital.assets.get(id, {}).get("template_id", "")) if maintenance else id)
+			var terms := _world.economy_r1._capital.maintenance_template(id,_world.game_clock.total_minutes()) if maintenance else _world.economy_r1._capital.template(id)
 			result = LivelihoodAction.execute_current(_world, "maintain_capital" if maintenance else "invest", {("asset_id" if maintenance else "template_id"): id, "budget": terms.get("budget", 0)})
 		elif action.begins_with("native:project:") or action.begins_with("native:equipment:"):
 			var equipment := action.begins_with("native:equipment:")
@@ -388,7 +673,10 @@ func _on_action_requested(action: String) -> void:
 		elif action.begins_with("native:exit:"):
 			result = LivelihoodAction.execute_current(_world, "request_scope_exit", {"subject_id": action.trim_prefix("native:exit:")})
 		elif action.begins_with("native:apply:"):
-			result = LivelihoodAction.execute_current(_world, "apply", {"job_id": action.trim_prefix("native:apply:")})
+			var parts:=action.trim_prefix("native:apply:").split("|")
+			var payload:={"job_id":parts[0]}
+			if parts.size()==2 and not parts[1].is_empty(): payload["job_quote_id"]=parts[1]
+			result = LivelihoodAction.execute_current(_world, "apply", payload)
 		elif action == "native:work":
 			var employment := _world.personal_economy_state.person_economy(_world.player_state.player_id()).get("employment", {}) as Dictionary
 			result = LivelihoodAction.execute_current(_world, "work", {"hours": int(employment.get("work_hours_available", employment.get("work_hours_limit", 0)))})
@@ -407,10 +695,16 @@ func _on_action_requested(action: String) -> void:
 		else:
 			result = {"accepted": false, "reason": "UNKNOWN_ACTION"}
 		if result.get("responsibility_changed", false): _save_dirty = true
-		var feedback := "行动未接受："+str(result.get("reason", "条件不足。"))
+		var feedback := "行动未接受："+(EconomicText.reason(str(result.get("reason", "条件不足。"))) if action.begins_with("native:apply:") or action in ["native:work","native:leave_job"] else PersonView.capital_reason(str(result.get("reason","条件不足。"))))
 		if result.get("accepted", false):
 			_save_dirty = true
 			feedback = "行动已接受，按正式时间履行。"
+			if action.begins_with("native:apply:"):
+				main_shell.person_page.native_tab="wages"
+				feedback="劳动合同已成立；须另行登记实际工作，完成后才形成工资。"
+			elif action=="native:work": feedback="本期工作已登记，尚未完成。下次日界结算劳动，再按合同到期规则处理工资。"
+			elif action=="native:leave_job": feedback="离职待生效："+PersonView.boundary_text(int(result.get("boundary_minute",0)))+"；此前仍占岗，旧工资责任保留。"
+			if action.begins_with("native:business_buy:"):feedback="采购已受理：%s · %s单位。返回经济地图可跟进本单。"%[str(result.get("order_id","")),str(result.get("quantity",""))]
 			if result.get("reason") == "COLLECTED": feedback = "已领取 %d 单位；原订单付款与持有已记录。" % int(result["quantity"])
 			elif result.get("reason") in ["STORED", "WITHDRAWN", "PERSONAL_FREIGHT_ACCEPTED"]: feedback = "物品行动已接受："+str(result["reason"])+" · 数量 "+str(result["quantity"])
 			elif result.get("reason") == "TRAVEL_STARTED": feedback = "旅行已出发；到达前不能登记劳动。"
@@ -440,7 +734,13 @@ func _on_action_requested(action: String) -> void:
 			var market_id := _ui_economy.market_id_for_economic_aggregate(_ui_economy.economy_entity_for_polity(page.polity_id))
 			if personal.manages_native(person_id): market_id = page.selected_seller_site_id
 			result = personal.purchase(person_id,market_id,page.selected_commodity_id,page.quantity_milli,int(page.quote.get("unit_price",-1)),page.quote)
-			if bool(result.get("success",false)): main_shell.person_page.selected_commodity_id = page.selected_commodity_id
+			if bool(result.get("success",false)):
+				main_shell.person_page.selected_commodity_id = page.selected_commodity_id
+				# One displayed quote is one purchase choice. The next purchase
+				# requires selecting an offer again, including a double click.
+				page.selected_commodity_id = ""
+				page.selected_seller_site_id = ""
+				page.quote = {}
 		elif action == "consume":
 			result = personal.consume(person_id,main_shell.person_page.selected_commodity_id,main_shell.person_page.quantity_milli)
 		elif action == "consumption:autobuy":
@@ -455,7 +755,7 @@ func _on_action_requested(action: String) -> void:
 			var recent := personal.living_records(person_id,1)
 			if not recent.is_empty(): _last_living_record_id = str(recent[0].record_id)
 			var destination := "holding:select:"+main_shell.person_page.selected_commodity_id if action != "consume" else "living:record:"+_last_living_record_id
-			main_shell.show_feedback(str(result.message),destination)
+			main_shell.show_feedback("购买已受理；在个人订单查看交付，物品页查看实际持有。" if action=="purchase" and personal.manages_native(person_id) else "已按原消费规则使用"+EconomicText.good(main_shell.person_page.selected_commodity_id)+"；需要状态已更新。" if action=="consume" and personal.manages_native(person_id) else str(result.message),destination)
 		else: main_shell.show_feedback("操作未完成："+str(result.get("error","条件不可用。")))
 		main_shell.refresh()
 	elif _world != null and action == "person:market":
@@ -568,9 +868,10 @@ func _load_world(slot: int = 1) -> void:
 func _update_map_visibility() -> void:
 	# Pages are bounded workspaces; the uncovered map remains interactive.
 	map_renderer.visible = true
-	($Background as ColorRect).visible = true
+	($Background as CanvasItem).visible = true
 	map_controller.suspend_motion()
 	if _world != null and _map_dirty: _refresh_map()
+	_request_economic_topic_refresh()
 
 func _request_departure(target: String) -> void:
 	if _save_pending: return

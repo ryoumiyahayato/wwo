@@ -1,5 +1,6 @@
 class_name FormalWorldPresenter
 extends RefCounted
+const EconomicText = preload("res://scripts/presentation/ui/formal_economic_text.gd")
 ## Builds detached page/map inputs. Holds no world state and writes no domain owner.
 
 static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeController, content: WorldPageContent, politics: RuntimePoliticalEntityView, economy: FormalWorldEconomyView, organizations: FormalWorldOrganizationView, responsibilities: FormalWorldOrganizationResponsibilityView) -> void:
@@ -20,7 +21,8 @@ static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeCon
 		var member_ids: Dictionary = {}
 		for member: Dictionary in member_records: member_ids[str(member.organization_id)] = true
 		var status_names := {"MONITORING":"正在观察","ATTENTION_REQUIRED":"需要关注","NO_DETAILED_ECONOMY":"无高细节经济资料","ORGANIZATION_INACTIVE":"组织非活跃"}
-		var organization_ids: Array[String] = organizations.organization_ids() if shell.current_page=="organization" else []
+		var organization_ids: Array[String] = []
+		if shell.current_page=="organization": organization_ids.assign(organizations.organization_ids())
 		if shell.current_page=="person":
 			for relation: Dictionary in member_records+appointments:
 				var id := str(relation.organization_id)
@@ -55,41 +57,78 @@ static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeCon
 			organization_rows.append(row)
 		shell.organization_page.refresh(organization_rows,memberships)
 	if shell.current_page=="person":
+		var section := shell.person_page.section
 		var personal := world.personal_economy_state.person_economy(person_id)
-		personal["livelihood_state"] = world.personal_economy_state.livelihood_view(person_id)
-		personal["native_lifecycle"] = world.economy_r1.person_management_view(person_id) if world.economy_r1 != null else {"active": false, "future_authority": "LEGACY_RESIDENT_MACRO_AND_FORMAL_PERSONAL"}
-		personal["residence"] = world.population_state.residence_view(world, person_id)
+		personal["opening_participation"] = world.economy_r1.opening_participation(person_id) if world.economy_r1!=null else {}
 		personal["handover"] = world.economy_r1.responsibility_handover_view(person_id) if world.economy_r1 != null else []
-		personal["travel"] = world.person_travel.view(person_id) if world.person_travel != null else {}
-		personal["travel_destinations"] = world.person_travel.destinations(person_id) if world.person_travel != null else []
-		if shell.current_page == "person" and shell.person_page.section == "native":
+		if section=="situation": personal["livelihood_state"] = world.personal_economy_state.livelihood_view(person_id)
+		if section in ["situation","native"]: personal["residence"] = world.population_state.residence_view(world, person_id)
+		if section=="native":
+			personal["native_lifecycle"] = world.economy_r1.person_management_view(person_id) if world.economy_r1 != null else {"active": false, "future_authority": "LEGACY_RESIDENT_MACRO_AND_FORMAL_PERSONAL"}
+			personal["travel"] = world.person_travel.view(person_id) if world.person_travel != null else {}
+			personal["travel_destinations"] = world.person_travel.destinations(person_id) if world.person_travel != null else []
 			var native_view := LivelihoodAction.query(world, person_id)
+			personal["totals"] = native_view.get("totals",{})
+			personal["income_by_currency"] = native_view.get("income_by_currency",{})
+			personal["minute"] = native_view.get("minute",world.game_clock.total_minutes())
+			personal["wage_rows"] = world.economy_r1.personal_wage_rows(person_id,4,shell.person_page.native_wage_page*3) if world.economy_r1 != null and shell.person_page.native_tab=="wages" else []
+			personal["workplace_handovers"] = world.economy_r1.personal_material_handovers(person_id) if world.economy_r1 != null and shell.person_page.native_tab=="wages" else []
+			personal["wage_outstanding"] = native_view.get("wage_outstanding",0)
 			for key: String in ["known_jobs", "orders", "need_today", "managed_firms", "scope_changes", "management_incoming", "can_reenter"]:
 				personal[key] = native_view.get(key, [] if key != "need_today" else {})
 			personal["cargo_fulfilment"] = native_view.get("cargo_fulfilment", {})
+			personal["resident_services"] = native_view.get("resident_services", {})
+			personal["labor_market"] = native_view.get("labor_market", {})
+			personal["leases"] = native_view.get("leases", {})
+			personal["commercial_information"] = native_view.get("commercial_information", [])
 			personal["scope_options"] = world.economy_r1.scope_options(person_id) if world.economy_r1 != null else []
 			var managers := personal.get("managed_firms",[]) as Array
 			var business: Dictionary={}
 			if shell.person_page.business_mode and not managers.is_empty():
-				shell.person_page.business_firm_index=clampi(shell.person_page.business_firm_index,0,managers.size()-1)
-				var firm_id := str(managers[shell.person_page.business_firm_index]["firm_id"])
-				var sites := world.economy_r1._spec["firms"][firm_id]["sites"] as Array
-				shell.person_page.business_site_index=clampi(shell.person_page.business_site_index,0,sites.size()-1)
-				business=LivelihoodAction.query_business(world,person_id,firm_id,sites[shell.person_page.business_site_index],shell.person_page.quantity_milli,shell.person_page.business_offer_page)
-				if shell.person_page.business_offer_page>0 and business.get("offers",[]).is_empty():
-					shell.person_page.business_offer_page=0
-					business=LivelihoodAction.query_business(world,person_id,firm_id,sites[shell.person_page.business_site_index],shell.person_page.quantity_milli)
+				var firm_ids:Array=managers.map(func(row:Dictionary)->String:return str(row["firm_id"]))
+				if shell.person_page.business_firm_id.is_empty():shell.person_page.business_firm_id=str(firm_ids[clampi(shell.person_page.business_firm_index,0,firm_ids.size()-1)])
+				var index:=firm_ids.find(shell.person_page.business_firm_id)
+				if index>=0:
+					shell.person_page.business_firm_index=index
+					var firm_id:=shell.person_page.business_firm_id
+					var sites := world.economy_r1._spec["firms"][firm_id]["sites"] as Array
+					if shell.person_page.business_site_id.is_empty():shell.person_page.business_site_id=str(sites[clampi(shell.person_page.business_site_index,0,sites.size()-1)])
+					var site_index:=sites.find(shell.person_page.business_site_id)
+					if site_index>=0:
+						shell.person_page.business_site_index=site_index
+						business=LivelihoodAction.query_business(world,person_id,firm_id,shell.person_page.business_site_id,shell.person_page.quantity_milli,shell.person_page.business_offer_page)
+						if shell.person_page.business_offer_page>0 and business.get("offers",[]).is_empty():
+							shell.person_page.business_offer_page=0
+							business=LivelihoodAction.query_business(world,person_id,firm_id,shell.person_page.business_site_id,shell.person_page.quantity_milli)
 			shell.person_page.refresh_business(business)
 		var account := str(personal.get("account_id",""))
 		var receipt_rows := PersonView.receipt_page_size(shell.workspace_rect().size.y)
-		var receipts := world.economy_r1.personal_transaction_rows(person_id, receipt_rows+1, shell.person_page.account_page*receipt_rows) if world.economy_r1 != null and world.economy_r1.personal_accounts().has(person_id) else world.ledger_state.transactions_for_account(account,receipt_rows+1,shell.person_page.account_page*receipt_rows)
+		var receipts: Array[Dictionary] = []
+		if section in ["situation","accounts"]:
+			var count := 3 if section=="situation" else receipt_rows+1
+			var offset := 0 if section=="situation" else shell.person_page.account_page*receipt_rows
+			receipts = world.economy_r1.personal_transaction_rows(person_id,count,offset) if world.economy_r1 != null and world.economy_r1.personal_accounts().has(person_id) else world.ledger_state.transactions_for_account(account,count,offset)
 		var property_view: Dictionary = {}
-		if shell.current_page == "person":
-			var goods := world.personal_economy_state
+		var goods := world.personal_economy_state
+		if section in ["situation","goods"]:
 			var count := EconomyPage.market_page_size(shell.workspace_rect().size.y)
-			property_view = {"rows":goods.holding_rows(person_id,count+1,shell.person_page.inventory_page*count),"selected":goods.holding(person_id,shell.person_page.selected_commodity_id),"records":goods.living_records(person_id,receipt_rows+1,shell.person_page.living_page*receipt_rows),"record":goods.living_record(person_id,shell.person_page.selected_record_id),"capability":goods.commodity_capability(person_id,shell.person_page.selected_commodity_id),"quote":goods.consumption_quote(person_id,shell.person_page.selected_commodity_id,shell.person_page.quantity_milli),"arrangement":goods.arrangement(person_id,shell.person_page.selected_commodity_id)}
+			property_view["rows"] = goods.holding_rows(person_id,count+1,shell.person_page.inventory_page*count if section=="goods" else 0)
+		if section=="records":
+			property_view["records"] = goods.living_records(person_id,receipt_rows+1,shell.person_page.living_page*receipt_rows)
+			property_view["record"] = goods.living_record(person_id,shell.person_page.selected_record_id)
+		if section=="goods" and not shell.person_page.selected_commodity_id.is_empty():
+			property_view["selected"] = goods.holding(person_id,shell.person_page.selected_commodity_id)
+			property_view["capability"] = goods.commodity_capability(person_id,shell.person_page.selected_commodity_id)
+			property_view["quote"] = goods.consumption_quote(person_id,shell.person_page.selected_commodity_id,shell.person_page.quantity_milli)
+			property_view["arrangement"] = goods.arrangement(person_id,shell.person_page.selected_commodity_id)
 			property_view["conversion_quote"] = goods.arrangement_conversion_quote(person_id, shell.person_page.selected_commodity_id) if not goods.manages_native(person_id) else {}
 			if goods.manages_native(person_id): property_view["custody_quote"] = world.economy_r1.personal_custody_quote(person_id, shell.person_page.selected_commodity_id, shell.person_page.quantity_milli)
+		if personal.get("native",false):
+			for row: Dictionary in property_view.get("rows",[])+property_view.get("records",[]):
+				if str(row.get("commodity_id","")).begins_with("native:"): row["name_zh"]=EconomicText.good(row["commodity_id"])
+			for key: String in ["selected","capability","record"]:
+				var row:=property_view.get(key,{}) as Dictionary
+				if str(row.get("commodity_id","")).begins_with("native:"): row["name_zh"]=EconomicText.good(row["commodity_id"])
 		shell.person_page.refresh(person,place,memberships,personal,receipts,property_view)
 	if shell.current_page=="economy":
 		var selected_id := shell.economy_page.polity_id
@@ -99,7 +138,7 @@ static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeCon
 		var market_rows: Array[Dictionary] = []
 		if shell.current_page == "economy":
 			var market_id := economy.market_id_for_economic_aggregate(economy.economy_entity_for_polity(selected_id))
-			var count := EconomyPage.market_page_size(shell.workspace_rect().size.y)
+			var count := EconomyPage.known_market_page_size(shell.workspace_rect().size.y) if native_market else EconomyPage.market_page_size(shell.workspace_rect().size.y)
 			if native_market:
 				market_rows = world.personal_economy_state.market_rows(person_id,market_id,count+1,shell.economy_page.commodity_page*count)
 			else:
@@ -117,7 +156,9 @@ static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeCon
 		var native_observation: Dictionary = {}
 		if shell.current_page == "economy":
 			native_observation = world.economy_state.read_only_native_observation(person_id)
+			native_observation["person_place_name"] = place.get("name_zh",place.get("name","地点名称未记录"))
 			native_observation["cohort_observation"] = world.economy_state.read_only_cohort_observation(person_id, 16, shell.economy_page.cohort_statistics_page*16)
+			native_observation["commercial_information"] = world.economy_r1.commercial_information(person_id) if native_market and world.economy_r1 != null else []
 			native_observation["managed_sites"] = []
 			native_observation["employees"] = []
 			native_observation["enterprise_lifecycles"] = []
@@ -167,6 +208,8 @@ static func refresh_map(world: WorldState, renderer: GlobeRenderer, content: Res
 		if str(place.get("spatial_kind", "")) in ["city", "port"]:
 			places.append(place)
 	renderer.refresh(politics,world.historical_evidence_view,economy,places,world.game_clock.current_date(),content)
+	renderer.bind_current_politics(world.spatial_world,world.territory_state)
+	renderer.refresh_civilian_facilities(preload("res://scripts/presentation/map/civilian_facility_layer.gd").observation(world))
 
 static func show_initialization_error(shell: MainShell, message: String) -> void:
 	shell.show_feedback("正式世界初始化失败：" + message,"","system","error")

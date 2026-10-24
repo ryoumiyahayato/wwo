@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<title>WWO original map symbol: station</title>
+<polygon points="24.00,43.00 104.00,43.00 104.00,86.00 24.00,86.00" fill="#D7C7A2" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="24.00,43.00 104.00,43.00 104.00,86.00 24.00,86.00" fill="#D7C7A2" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="21.00,43.00 64.00,28.00 107.00,43.00" fill="#A88A52" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="21.00,43.00 64.00,28.00 107.00,43.00" fill="#A88A52" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="64.00,86.00 64.00,72.00" fill="none" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="64.00,86.00 64.00,72.00" fill="none" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="33.00,87.00 23.00,111.00" fill="none" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="33.00,87.00 23.00,111.00" fill="none" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="94.00,87.00 104.00,111.00" fill="none" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="94.00,87.00 104.00,111.00" fill="none" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="33.00,98.00 95.00,98.00" fill="none" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="33.00,98.00 95.00,98.00" fill="none" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="29.00,108.00 99.00,108.00" fill="none" stroke="#D9DDE0" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="29.00,108.00 99.00,108.00" fill="none" stroke="#493D2D" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse cx="64.0" cy="56.0" rx="9.0" ry="9.0" fill="#D9DDE0" stroke="#493D2D" stroke-width="6"/>
+</svg>

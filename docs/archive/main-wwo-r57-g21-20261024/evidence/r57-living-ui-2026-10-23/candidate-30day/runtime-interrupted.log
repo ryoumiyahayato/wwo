@@ -1,0 +1,31 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 572.83 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3050 Laptop GPU
+
+R57_CONTINUOUS_DAY 1 minute=1440 cash=4300
+R57_CONTINUOUS_DAY 2 minute=2880 cash=4300
+R57_CONTINUOUS_DAY 3 minute=4320 cash=4300
+R57_CONTINUOUS_DAY 4 minute=5760 cash=4300
+R57_CONTINUOUS_DAY 5 minute=7200 cash=4300
+R57_CONTINUOUS_DAY 6 minute=8640 cash=4300
+R57_CONTINUOUS_DAY 7 minute=10080 cash=4300
+R57_CONTINUOUS_DAY 8 minute=11520 cash=4300
+R57_CONTINUOUS_DAY 9 minute=12960 cash=4300
+R57_CONTINUOUS_DAY 10 minute=14400 cash=4300
+R57_CONTINUOUS_DAY 11 minute=15840 cash=4300
+R57_CONTINUOUS_DAY 12 minute=17280 cash=4300
+R57_CONTINUOUS_DAY 13 minute=18720 cash=4300
+R57_CONTINUOUS_DAY 14 minute=20160 cash=4300
+R57_CONTINUOUS_DAY 15 minute=21600 cash=4300
+R57_CONTINUOUS_DAY 16 minute=23040 cash=4300
+R57_CONTINUOUS_DAY 17 minute=24480 cash=4300
+R57_CONTINUOUS_DAY 18 minute=25920 cash=4300
+R57_CONTINUOUS_DAY 19 minute=27360 cash=4300
+R57_CONTINUOUS_DAY 20 minute=28800 cash=4300
+R57_CONTINUOUS_DAY 21 minute=30240 cash=4300
+R57_CONTINUOUS_DAY 22 minute=31680 cash=4300
+R57_CONTINUOUS_DAY 23 minute=33120 cash=4300
+R57_CONTINUOUS_DAY 24 minute=34560 cash=4300
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 63 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

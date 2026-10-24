@@ -8,8 +8,8 @@ ROOT=Path(__file__).resolve().parents[2]
 SOURCE_ID='noaa_etopo_2022_v1_60s_surface'
 URL='https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO2022/data/60s/60s_surface_elev_gtif/ETOPO_2022_v1_60s_N90W180_surface.tif'
 
-def paris_native_surface(source):
-    """Extract only native cells around Eiffel; decode bounded TIFF tiles."""
+def native_window(source, anchor, width, height):
+    """Decode only intersecting original TIFF tiles; never the full global DEM."""
     with source.open('rb') as fp:
         header=fp.read(8)
         if header[:4]!=b'II*\x00': raise ValueError('Expected source little-endian TIFF')
@@ -17,9 +17,8 @@ def paris_native_surface(source):
         tags=TiffImagePlugin.ImageFileDirectory_v2(header);tags.load(fp)
         if (tags[256],tags[257])!=(21600,10800) or tuple(tags[33550][:2])!=(1/60,1/60): raise ValueError('Unexpected DEM grid')
         if tuple(tags[33922])!=(0.,0.,0.,-180.,90.,0.): raise ValueError('Unexpected DEM origin')
-        width,height=15,13
-        col=math.floor((2.2945+180)*60)-width//2
-        row=math.floor((90-48.858333)*60)-height//2
+        col=math.floor((anchor[0]+180)*60)-width//2
+        row=math.floor((90-anchor[1])*60)-height//2
         tw,th=int(tags[322]),int(tags[323]);tiles_across=math.ceil(tags[256]/tw)
         tiles={};values=[]
         for y in range(row,row+height):
@@ -40,6 +39,13 @@ def paris_native_surface(source):
                 if not math.isfinite(value) or value<=-20000: raise ValueError('DEM contains missing cells')
                 line.append(round(value,2))
             values.append(line)
+    return np.asarray(values,dtype=np.float32),col,row
+
+def paris_native_surface(source):
+    """Preserve the existing Eiffel-area native-cell export."""
+    width,height=15,13
+    grid,col,row=native_window(source,(2.2945,48.858333),width,height)
+    values=grid.tolist()
     document={'schema_id':'local_native_height_reference_r1','source_id':SOURCE_ID,'source_reference':URL,'license':'CC0-1.0',
         'horizontal_crs':'EPSG:4326','vertical_datum':'EGM2008; metres','source_epoch':'ETOPO 2022 composite; not a 1900 survey',
         'anchor_lon_lat':[2.2945,48.858333],'width':width,'height':height,'west_cell_centre':-180+(col+.5)/60,
@@ -51,8 +57,59 @@ def paris_native_surface(source):
     out.write_text(json.dumps(document,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print(json.dumps({'output':str(out),'native_vertices':width*height,'triangles':2*(width-1)*(height-1),'height_range_m':[min(map(min,values)),max(map(max,values))],'bytes':out.stat().st_size}))
 
+def regional_windows(source):
+    """Bounded detail residuals over the unchanged continuous global relief."""
+    def lowpass(values, sigma=3.0):
+        radius=math.ceil(sigma*3)
+        x=np.arange(-radius,radius+1,dtype=np.float32)
+        kernel=np.exp(-.5*(x/sigma)**2);kernel/=kernel.sum()
+        result=values
+        for axis in [0,1]:
+            pads=[(0,0),(0,0)];pads[axis]=(radius,radius)
+            result=np.apply_along_axis(lambda a:np.convolve(a,kernel,mode='valid'),axis,np.pad(result,pads,mode='reflect'))
+        return result
+    target=ROOT/'assets/maps/relief';target.mkdir(parents=True,exist_ok=True)
+    assets=[]
+    for name,anchor in [('paris',(2.2945,48.858333)),('london',(-0.1246,51.5007)),('zermatt',(7.748,46.02)),('giza',(31.1342,29.9792))]:
+        width=height=97
+        # Derivatives and the low-pass footprint both use actual source cells
+        # outside the displayed window, never reflected data at its boundary.
+        collar=12
+        raw,col,row=native_window(source,anchor,width+2*collar,height+2*collar)
+        elevation=np.maximum(raw,0.0)
+        step=2*math.pi*6371008.8/(360*60)
+        lat=np.deg2rad(90-(np.arange(elevation.shape[0])+row+.5)/60)
+        east=(elevation[1:-1,2:]-elevation[1:-1,:-2])/(2*step*np.cos(lat[1:-1,None]))
+        north=-(elevation[2:,1:-1]-elevation[:-2,1:-1])/(2*step)
+        nx,ny=-east,-north
+        norm=np.sqrt(nx*nx+ny*ny+1)
+        shade=(.45*(-.5*nx+.5*ny+math.sqrt(.5))+.55*(.5*nx+.5*ny+math.sqrt(.5)))/norm
+        shade=(shade-math.sqrt(.5))*1.35
+        # Preserve the global mountain/plateau base. Add only the shorter
+        # native-cell band, with fixed global units, not a per-tile stretch.
+        trim=slice(collar-1,-(collar-1))
+        directional=(shade-lowpass(shade))[trim,trim]
+        # R25: the finite window contributes directional form only. Height
+        # and the printing palette remain on the continuous global reference.
+        # Integer 128 decodes to exactly zero, including flat areas.
+        detail=np.rint(128+127*np.clip(directional/.10,-1,1)).astype('uint8')
+        path=target/('native_'+name+'.bin');Image.fromarray(detail).save(path,format='PNG',optimize=True)
+        col+=collar;row+=collar
+        bounds=[-180+col/60,90-(row+height)/60,-180+(col+width)/60,90-row/60]
+        assets.append({'id':'physical_relief:native_'+name,'path':'res://'+path.relative_to(ROOT).as_posix(),'width':width,'height':height,'format':'R8','decoded_bytes':width*height,'bytes':path.stat().st_size,'bounds_lon_lat':bounds,'anchor_lon_lat':list(anchor),'angular_pixel_degrees':1/60,'native_spacing_m_approx':[round(step*math.cos(math.radians(anchor[1]))),round(step)],'display_max_mpp':1600,'release_mpp':2200,'edge_fraction':.22,'source_epoch':'ETOPO 2022 composite; modern physical reference, not 1900 survey','representation':'R25 directional-only short-band residual: (R*255-128)/127*0.10; 3-cell Gaussian low-pass removed; true 1x slope normals; continuous global height and palette unchanged; no new height mesh, coast or land cover'})
+    path=ROOT/'data/presentation/global_physical_relief.json'
+    doc=json.loads(path.read_text(encoding='utf8'))
+    fact=next(f for f in doc['evidence_catalog']['facts'] if f['fact_id']=='physical_relief:etopo_2022')
+    fact['value']['assets']=[a for a in fact['value']['assets'] if not a['id'].startswith('physical_relief:native_')]+assets
+    fact['value']['bounded_derivation']={'generator':'tools/map/build_global_relief.py --regional-windows','method':'R25: four 97x97 native-60s R8 directional-only residuals; 12-source-cell collar supports metric derivatives and Gaussian sigma 3 low-pass; remove the low-frequency band; actual 1x slope normals and fixed directional bound 0.10. Integer 128 is neutral. No finite-window height tint: global height and palette remain continuous. Existing 22% geographic border and scale admission 1600/release 2200 mpp retained. One active window plus at most one pending replacement. No synthetic height or new DEM mesh.','limits':'About 1.15-1.61km east-west and 1.85km north-south. These are cartographic derivatives, not finer elevation, historical land cover or water edges. Original LOCAL grids and their different vertical datums remain unchanged.'}
+    fact['value']['representation']='Two global LODs and at most one bounded native-60s reference texture; no terrain simulation'
+    path.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
+    print(json.dumps({'bounded_reliefs':assets},ensure_ascii=False))
+
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--source',type=Path,required=True);parser.add_argument('--local-paris',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--source',type=Path,required=True);parser.add_argument('--local-paris',action='store_true');parser.add_argument('--regional-windows',action='store_true');args=parser.parse_args()
+    if args.regional_windows:
+        regional_windows(args.source);return
     if args.local_paris:
         paris_native_surface(args.source);return
     from scipy.ndimage import gaussian_filter

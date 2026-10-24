@@ -1,6 +1,7 @@
 class_name WorldPage
 extends RefCounted
 var _polity: Dictionary = {}
+var _current_territory: Dictionary = {}
 var _place: Dictionary = {}
 var _flag: Dictionary = {}
 var _profile: Dictionary = {}
@@ -13,12 +14,24 @@ var _economy_label: String = ""
 var index_open: bool = false
 var index_category: String = "home"
 var index_page: int = 0
+var internal_load_active: bool = false
 var _index_countries: Array[Dictionary] = []
 var admin_page: int = 0
 var selected_admin_id: String = ""
 var admin_member_page: int = 0
 var _land_coverage: Dictionary = {}
 const ADMIN_PAGE_SIZE: int = 12
+
+func set_observation_date(date: String) -> void:
+	_date = date
+
+func set_current_territory(value: Dictionary, politics: RuntimePoliticalEntityView, evidence: HistoricalPoliticalEvidenceView) -> void:
+	_current_territory = {}
+	for field: String in ["sovereign_polity_id","controller_polity_id"]:
+		if not value.has(field): continue
+		var id := str(value[field]) if value[field]!=null else ""
+		var polity := CurrentWorldPoliticalProjection.polity_summary(id,politics,evidence)
+		_current_territory[field] = str(polity.get("name_zh",id)) if not id.is_empty() else "未知"
 
 func refresh(polity: Dictionary, place: Dictionary, content: WorldPageContent, formal_place: bool = false, economy_polity_id: String = "", economy_label: String = "") -> void:
 	var changed := str(_polity.get("id","")) != str(polity.get("id",""))
@@ -60,7 +73,19 @@ func draw_index(shell: MainShell, rect: Rect2) -> void:
 		"help":
 			shell.lines(Vector2(x,y),["滚轮：放大或缩小地图。","左键拖动：浏览地图；点击地理对象：查看资料。","右键拖动：调整地图方向。","Esc：关闭菜单或详情；无详情时呼出系统菜单。","Backspace：返回上一层。","保存与加载：系统菜单内选择存档槽。"],rect.size.x-44)
 		"layers":
-			shell.lines(Vector2(x,y),["行政地图：当前政治显示与历史旗帜。","经济地图：已有国家市场的商品供应满足率或缺口。","历史铁路：尚缺已定位的 1900 年线路资料。","历史行政界：按各条资料的真实年代和层级显示。","当前行政成员、法律主权和实际控制分别保存。"],rect.size.x-44)
+			shell.lines(Vector2(x,y),["政治地图：当前政治、历史旗帜及随尺度显示的行政界。","经济地图：已有国家市场的商品供应满足率或缺口；无资料保留地理底图。","历史铁路：尚缺已定位的 1900 年线路资料。","地理地图：物理地形与自然水文。","当前行政成员、法律主权和实际控制分别保存。"],rect.size.x-44)
+			var pilot := LocalSpatialLoader.internal_landmark_sources()
+			var count := 4
+			index_page = clampi(index_page,0,maxi(0,(pilot.size()-1)/count))
+			var column_width := (rect.size.x-56.0)*0.5
+			for index: int in range(index_page*count,mini(pilot.size(),(index_page+1)*count)):
+				var reference := pilot[index]
+				var slot := index-index_page*count
+				shell.button(Rect2(x+(slot%2)*(column_width+12),y+140+(slot/2)*32,column_width,26),"定位："+str(reference.display_name),"map:pilot_landmark:"+str(reference.anchor_id))
+			if not pilot.is_empty():
+				shell.button(Rect2(x,rect.end.y-35,82,25),"上一页","encyclopedia:previous",index_page>0)
+				shell.button(Rect2(x+92,rect.end.y-35,82,25),"下一页","encyclopedia:next",(index_page+1)*count<pilot.size())
+				shell.button(Rect2(rect.end.x-280,rect.end.y-35,258,25),"高负载："+("开" if internal_load_active else "关")+"（仅内部测试）","map:internal_load")
 		"countries":
 			var count := maxi(1,int((rect.size.y-160)/28))
 			index_page = clampi(index_page,0,maxi(0,(_index_countries.size()-1)/count))
@@ -79,6 +104,21 @@ func draw_index(shell: MainShell, rect: Rect2) -> void:
 
 func has_selection() -> bool:
 	return not _polity.is_empty() or not _place.is_empty()
+
+func clear_selection() -> void:
+	# A cancelled map observation owns no dossier. The player identity and
+	# country flag are separate MainShell inputs and are not changed here.
+	_polity = {}
+	_place = {}
+	_profile = {}
+	_administration = {}
+	_flag = {}
+	_texture = null
+	_formal_place = false
+	_economy_polity_id = ""
+	_economy_label = ""
+	selected_admin_id = ""
+	admin_member_page = 0
 
 func administration_entry(id: String) -> Dictionary:
 	for unit: Dictionary in _administration.get("runtime_units",[]) as Array:
@@ -154,6 +194,8 @@ func draw_card(shell: MainShell, rect: Rect2) -> void:
 		facts.append("范围性质 · 历史显示参考" if bool(_polity.get("display_only",false)) else "权威关系 · "+("已有关系记录" if not (_polity.get("authority_relations",[]) as Array).is_empty() else "未提供额外关联资料"))
 		facts.append("适用起始 · "+str(_polity.get("valid_from","未知")))
 		if _texture == null: facts.append("当日旗帜资料 · 未提供")
+	if _current_territory.has("sovereign_polity_id"): facts.append("当前主权 · "+str(_current_territory.sovereign_polity_id))
+	if _current_territory.has("controller_polity_id"): facts.append("实际控制 · "+str(_current_territory.controller_polity_id))
 	for index: int in range(facts.size()): shell.label(Vector2(x,rect.position.y+103+index*21),facts[index],12,Color(0.86,0.85,0.74),rect.size.x-24)
 	if rect.size.y>174.0+facts.size()*21:
 		shell.wrapped(Vector2(x,rect.position.y+110+facts.size()*21),_scope_text(),rect.size.x-24,11,maxi(1,int((rect.size.y-174-facts.size()*21)/20)))
@@ -183,6 +225,8 @@ func draw_details(shell: MainShell, rect: Rect2) -> void:
 	var facts: Array[String] = ["日期："+_date]
 	if not _place.is_empty():
 		facts.append("资料范围："+("正式世界地点" if _formal_place else "历史展示 / 物理地理参考"))
+		if _current_territory.has("sovereign_polity_id"): facts.append("当前主权："+str(_current_territory.sovereign_polity_id))
+		if _current_territory.has("controller_polity_id"): facts.append("实际控制："+str(_current_territory.controller_polity_id))
 		facts.append("地点类型："+(_place_type() if str(_place.get("spatial_kind",""))=="historical_landmark" else str(_place.get("spatial_kind",_place.get("kind","未记录")))))
 		facts.append("来源："+str(_place.get("source_name_zh",_place.get("source_id","正式空间目录" if _formal_place else "未记录"))))
 		facts.append("历史政治关系："+_place_political_name())
@@ -200,7 +244,10 @@ func draw_details(shell: MainShell, rect: Rect2) -> void:
 			var coordinates := (_place.geometry as Dictionary).coordinates as Array
 			facts.append("所属地点："+str(_place.anchor_name_zh))
 			facts.append("位置参考：%.6f°, %.6f°" % [float(coordinates[0]),float(coordinates[1])])
-			facts.append("建筑尺寸参考：高 %.2f 米；主基座 %.0f 米" % [float(_place.real_height_m),float(_place.real_base_width_m)])
+			if str(_place.get("dimensions_type",""))=="SCHEMATIC_METRES":
+				facts.append("模型包络：高 %.1f 米；宽 %.1f 米" % [float(_place.model_height_m),float(_place.model_base_width_m)])
+			else:
+				facts.append("建筑尺寸参考：高 %.2f 米；主基座 %.0f 米" % [float(_place.real_height_m),float(_place.real_base_width_m)])
 	else:
 		facts.append("历史身份："+str(_polity.get("name_zh","未记录")))
 		facts.append("地位："+str(_polity.get("status","未记录")))
@@ -215,8 +262,8 @@ func draw_details(shell: MainShell, rect: Rect2) -> void:
 		shell.wrapped(right+Vector2(0,151),str(_place.get("real_dimensions_note_zh","")),rect.end.x-right.x-22,11,3)
 		if _place.has("terrain_note_zh"): shell.wrapped(right+Vector2(0,217),str(_place.terrain_note_zh),rect.end.x-right.x-22,10,3)
 	elif _place.has("display_kind"):
-		shell.wrapped(right,str(_place.get("note_zh","")),rect.end.x-right.x-22,11,6)
-		shell.wrapped(right+Vector2(0,145),str(_place.get("source_reference","")),rect.end.x-right.x-22,10,4)
+		shell.wrapped(right,str(_place.get("model_note_zh",_place.get("note_zh",""))),rect.end.x-right.x-22,11,6)
+		shell.wrapped(right+Vector2(0,145),str(_place.get("model_source_reference",_place.get("source_reference",""))),rect.end.x-right.x-22,10,4)
 		shell.wrapped(right+Vector2(0,240),str(_place.get("source_license","")),rect.end.x-right.x-22,10,2)
 		if _place.has("miniature_layout"):
 			var layout := _place.miniature_layout as Dictionary

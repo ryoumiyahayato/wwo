@@ -116,6 +116,26 @@ static func department_geometry(descriptor: Dictionary, lod: String) -> Dictiona
 		if not errors.is_empty() or document.get("id")!=descriptor.get("id") or document.get("source_unit_id")!=descriptor.get("source_unit_id") or document.get("observation_year")!=descriptor.get("observation_year") or document.get("lod")!=lod or not document.get("local_polygons") is Array: return {}
 	else:
 		if not errors.is_empty() or document.get("schema_id") != "trf_gis_1900_reference_geometry_v1" or document.get("id") != descriptor.get("id") or document.get("source_dep_id") != descriptor.get("source_dep_id") or document.get("observation_year") != 1900 or document.get("lod") != lod or not document.get("local_polygons") is Array: return {}
+	# Display strokes are separate derivatives. Picking and coverage continue
+	# to use the admitted original polygons and their original identities.
+	var id := str(descriptor.get("id",""))
+	var lower_display_path := "res://data/presentation/admin_display_r48/"+id.trim_prefix("administrative_region:")+".json"
+	if id.begins_with("administrative_region:france_") and FileAccess.file_exists(lower_display_path):
+		var display_errors: Array[String] = []
+		var display := ContentDocument.read(lower_display_path,display_errors)
+		if display_errors.is_empty() and display.get("schema_id")=="historical_unique_admin_display_r48" and display.get("id")==id and str((display.get("source_geometry_paths",{}) as Dictionary).get(lod,""))==str(descriptor.get(lod+"_path","")):
+			var strokes := (display.get("display_lines",{}) as Dictionary).get(lod,[]) as Array
+			document["display_lines"] = strokes
+			document["display_outline_lines"] = strokes
+			return document
+	if id.begins_with("administrative_region:france_") or id.begins_with("administrative_region:germany_"):
+		var display_path := "res://data/presentation/admin_display_r40/"+id.trim_prefix("administrative_region:")+"_"+lod+".json"
+		if FileAccess.file_exists(display_path):
+			var display_errors: Array[String] = []
+			var display := ContentDocument.read(display_path,display_errors)
+			if display_errors.is_empty() and display.get("schema_id")=="historical_internal_admin_display_r40" and display.get("id")==id and display.get("source_geometry_path")==descriptor.get(lod+"_path") and display.get("lod")==lod and display.get("display_lines") is Array:
+				document["display_lines"] = display.display_lines
+				document["display_outline_lines"] = display.display_lines
 	return document
 
 func _load_authorities(gate: HistoricalProvenanceGate, path: String, subject: String) -> void:

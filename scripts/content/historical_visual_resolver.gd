@@ -111,25 +111,24 @@ func texture_for(resolved: Dictionary) -> Texture2D:
 		return _textures[visual_id] as Texture2D
 	var texture: Texture2D
 	var components := resolved.get("components", []) as Array
-	if not components.is_empty():
+	if components.size()==1:
+		texture = texture_for(_assets.get(str(components[0]),{}) as Dictionary)
+	elif not components.is_empty():
 		var images: Array[Image] = []
 		for component_id: String in components:
 			var component := texture_for(_assets.get(component_id, {}) as Dictionary)
 			if component == null:
 				return null
 			images.append(component.get_image())
-		if images.size() == 1:
-			texture = ImageTexture.create_from_image(images[0])
-		else:
-			var width := images[0].get_width()
-			var height := images[0].get_height()
-			var combined := Image.create(width, height * images.size(), false, Image.FORMAT_RGBA8)
-			for index: int in range(images.size()):
-				var image := images[index].duplicate() as Image
-				image.convert(Image.FORMAT_RGBA8)
-				image.resize(width, height, Image.INTERPOLATE_LANCZOS)
-				combined.blit_rect(image, Rect2i(0, 0, width, height), Vector2i(0, height * index))
-			texture = ImageTexture.create_from_image(combined)
+		var width := images[0].get_width()
+		var height := images[0].get_height()
+		var combined := Image.create(width, height * images.size(), false, Image.FORMAT_RGBA8)
+		for index: int in range(images.size()):
+			var image := images[index].duplicate() as Image
+			image.convert(Image.FORMAT_RGBA8)
+			image.resize(width, height, Image.INTERPOLATE_LANCZOS)
+			combined.blit_rect(image, Rect2i(0, 0, width, height), Vector2i(0, height * index))
+		texture = ImageTexture.create_from_image(combined)
 	else:
 		var path := str(resolved.get("asset_path", ""))
 		if path.is_empty() or not ResourceLoader.exists(path, "Texture2D"):

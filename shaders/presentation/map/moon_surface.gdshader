@@ -5,6 +5,7 @@ uniform vec3 moon_base_color : source_color = vec3(0.54, 0.56, 0.54);
 uniform vec3 moon_light_color : source_color = vec3(0.78, 0.78, 0.70);
 uniform vec3 moon_shadow_color : source_color = vec3(0.10, 0.13, 0.15);
 uniform float surface_contrast : hint_range(0.0, 1.0) = 0.42;
+#include "res://shaders/presentation/map/solar_globe.gdshaderinc"
 
 float hash21(vec2 p) {
 	p = fract(p * vec2(123.34, 456.21));
@@ -36,7 +37,7 @@ float fbm(vec2 p) {
 
 void fragment() {
 	vec3 normal_view = normalize(NORMAL);
-	vec3 light_direction = normalize(vec3(-0.72, 0.38, 0.58));
+	vec3 light_direction = CHART_SUN_VIEW;
 	float direct_light = smoothstep(-0.18, 0.82, dot(normal_view, light_direction));
 	float limb = pow(clamp(1.0 - dot(normal_view, normalize(VIEW)), 0.0, 1.0), 2.4);
 
