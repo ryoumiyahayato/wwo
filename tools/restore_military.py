@@ -59,22 +59,30 @@ def main():
     parser.add_argument('--archive-commit',required=True)
     parser.add_argument('--download',action='store_true')
     parser.add_argument('--include-recovery-evidence',action='store_true')
+    parser.add_argument('--archive-prefix',help='Explicit historical directory prefix; file restoration only, no automatic engine run')
     a=parser.parse_args()
     if a.destination.exists():raise FileExistsError('Destination must be new; no overwrite')
     if not re.fullmatch(r'WWO-FormalPractice-[A-Za-z0-9_-]+',a.user_dir):raise ValueError('Dedicated military test user directory required')
     with gzip.open(a.manifest,'rt',encoding='utf-8') as f:d=json.load(f)
     if d['archive_repository']!=REPO:raise ValueError('Archive repository mismatch')
-    selected=[]
+    selected=[];historical_metadata_changes=[]
+    historical=a.archive_prefix.strip('/')+'/' if a.archive_prefix else None
+    if historical and (P(historical).is_absolute() or '..' in P(historical).parts):raise ValueError('Unsafe historical prefix')
     for row in d['files']:
         p=row['path'];rel=None
-        if p.startswith(CURRENT+'runtime/') and not row['cache']:rel=p[len(CURRENT):]
+        if historical:
+            if p.startswith(historical):rel=p[len(historical):]
+        elif p.startswith(CURRENT+'runtime/') and not row['cache']:rel=p[len(CURRENT):]
         elif p.startswith(CURRENT+'private_state/'):rel=p[len(CURRENT):]
         elif a.include_recovery_evidence and p.startswith('formal-practice-recovery-20261023/private_state/'):
             rel='recovery_evidence/'+p[len('formal-practice-recovery-20261023/'):]
         if rel is None:continue
+        if historical and P(rel).name=='.git':
+            oldrel=rel;rel='.archive_origin/'+rel+'.txt';historical_metadata_changes.append({'original':oldrel,'restored':rel,'reason':'preserve pointer bytes without reconnecting the old shared main Git worktree'})
         if 'object' not in row:raise ValueError('Current required file missing from archive: '+p)
         if P(rel).is_absolute() or '..' in P(rel).parts:raise ValueError('Unsafe restore path')
         selected.append((row,rel))
+    if not selected:raise ValueError('No archived files for the requested prefix')
     chunks=d['chunks'];objects=d['objects'];needed={chunks[sha]['pack'] for row,rel in selected for sha in objects[row['object']]['parts']}
     packages={p['name']:p for p in d['packages']}
     a.packages.mkdir(parents=True,exist_ok=True)
@@ -100,6 +108,11 @@ def main():
             count+=1;bytes_+=size
     finally:
         for z in handles.values():z.close()
+    if historical:
+        receipt={'repository':REPO,'archive_commit':a.archive_commit,'archive_prefix':historical,'materialized_files':count,'materialized_bytes':bytes_,'old_source_reads':False,'resource_hardlinks_created':False,'metadata_path_changes':historical_metadata_changes,'status':'HISTORICAL_FILE_RESTORE_VERIFIED_ENGINE_NOT_RUN','scope':'exact archived file contents; historical launch/dependency limitations remain as originally documented'}
+        rp=a.destination/'ARCHIVE_FILE_RESTORE_RECEIPT.json'
+        if rp.exists():raise FileExistsError('Do not overwrite an original historical receipt')
+        rp.write_text(json.dumps(receipt,ensure_ascii=False,indent=2),encoding='utf-8');print('HISTORICAL_FILE_RESTORE_VERIFIED',historical,count,bytes_,flush=True);return
     project=a.destination/'runtime/project.godot';text=project.read_bytes()
     changed,n=re.subn(rb'config/custom_user_dir_name="[^"]+"',('config/custom_user_dir_name="'+a.user_dir+'"').encode(),text)
     if n!=1:raise ValueError('Expected one dedicated user-directory setting')
