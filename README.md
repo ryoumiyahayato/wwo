@@ -39,7 +39,7 @@ R57区域输入及制作资料已补传，本地实际处置见补记；其他GI
 
 ## 本地取舍
 
-本轮实际回收 **0字节**。当前候选、R56、正式历史发行、运行资产、来源和检查点为KEEP。未完整覆盖的历史实验、缓存与数据为ARCHIVE_THEN_REVIEW/HOLD，不能据目录日期删除。已核实重复截图两份570,690字节、重复成功日志一份100,447字节，共 **671,137字节** 列为DELETE_CANDIDATE，主体已归档并有别名；尚未删除。此前遭拒绝的165份、48,152,351字节继续HOLD，未重试删除。没有清理远端历史、分支或标签。
+前次整理实际回收0字节；本次用户追加清理的结果见下方补记。当前候选、R56、正式历史发行、运行资产、来源和检查点为KEEP。未完整覆盖的历史实验、缓存与数据为ARCHIVE_THEN_REVIEW/HOLD，不能据目录日期删除。已核实重复截图两份570,690字节、重复成功日志一份100,447字节，共 **671,137字节**，主体已归档并有别名；实际处理见本次清理清单。此前遭拒绝的165份、48,152,351字节继续HOLD，未重试删除。没有清理远端历史、分支或标签。
 
 较早代20结论由本入口和代21原料报告界定更新；旧报告保留日期与适用版本。旧分支清理文档中的master表述是历史规则，当前默认分支以本入口核实的 `canonical/current-world` 为准。
 
@@ -49,7 +49,7 @@ R57区域输入及制作资料已补传，本地实际处置见补记；其他GI
 
 ## 后续补传与清理（2026-10-24）
 
-状态：**CLOUD_FILE_RESTORE_VERIFIED_LOCAL_DELETION_PENDING**。私有附件：https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026。全部75包已实际从GitHub回读，逐字节一致，ZIP CRC及成员映射通过。新大包未落磁盘，没有生成新指纹清单。完整路径、对象ID、提供方校验元数据、上传及本地处置仍见[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)。
+状态：**LOCAL_CLEANUP_COMPLETED**。私有附件：https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026。全部75包已实际从GitHub回读，逐字节一致，ZIP CRC及成员映射通过。新大包未落磁盘，没有生成新指纹清单。完整路径、对象ID、提供方校验元数据、上传及本地处置仍见[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)。
 
 [恢复工具](tools/archive/restore_main_resources.py)配合统一清单，支持runtime/rebuild/history/private_test范围和精确only-path。将恢复目标设为新目录或新clone；已存在的目标文件不会覆盖。恢复出来的私有测试用户目录位于_isolated_test_users下，不自动写入真实玩家AppData。
 
@@ -60,5 +60,7 @@ python tools/archive/restore_main_resources.py --inventory docs/archive/main-wwo
 本轮只完成文件层、ZIP读取和少量实际文件恢复；没有启动Godot、模拟、导出、全局地貌重建或完整游戏冷恢复。当前已保存的输入不等于历史全球原始来源已经齐全。
 
 另外补存 49 份Godot导入配置到实际源码路径，保留UID与参数；对应模型本体仍按各自许可处理，不把配置归档当作模型许可。
+
+本轮实际删除 77 个独占目录、3323 个文件目录项。磁盘前后观测：{"C": 113922048, "D": 1401880576}。不要把逻辑文件长度当作物理释放量。具体成功、拒绝和保留路径见统一清单resource_supplement.cleanup。
 
 地貌BIN仍由保留的主工程直接读取，因此上传后继续KEEP。许可未明的模型/图像/BLEND、候选R57、回退R56、受保护正式发行、共享工具链和当前导入缓存继续保留。此前被拒绝的165份以及经济线45项路径不重试、不改回收站绕过。HOLD历史来源目录及其具体原因列在held_evidence_roots。
