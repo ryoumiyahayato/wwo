@@ -5,15 +5,23 @@
 )
 $ErrorActionPreference = 'Stop'
 $OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::new()
+function Read-ArchiveGitHub {
+ param([string[]]$Arguments)
+ $taskGoDebugBefore = $env:GODEBUG
+ try {
+  $env:GODEBUG = if ([string]::IsNullOrEmpty($taskGoDebugBefore)) { 'http2client=0' } else { $taskGoDebugBefore+',http2client=0' }
+  $body = & gh @Arguments
+  if ($LASTEXITCODE -ne 0) { throw 'GitHub读取失败。没有删除。' }
+  return ($body -join "`n")
+ } finally { $env:GODEBUG = $taskGoDebugBefore }
+}
 $root = 'D:\programs\WWO\wwo'
 $archivePath = 'docs/archive/main-wwo-r57-g21-20261024/inventory.json'
-$raw = & gh api "repos/ryoumiyahayato/wwo/contents/${archivePath}?ref=$Commit" -H 'Accept: application/vnd.github.raw+json'
-if ($LASTEXITCODE -ne 0) { throw 'GitHub清单读取失败。没有删除。' }
+$raw = Read-ArchiveGitHub -Arguments @('api',"repos/ryoumiyahayato/wwo/contents/${archivePath}?ref=$Commit",'-H','Accept: application/vnd.github.raw+json')
 $manifest = ($raw -join "`n") | ConvertFrom-Json
 $backup = $manifest.resource_supplement.remaining_originals_backup
 if ($manifest.repository -ne 'ryoumiyahayato/wwo' -or $backup.state -ne 'UPLOADED_VERIFIED') { throw '未找到已回下载核对的本轮归档。' }
-$assetRaw = & gh api "repos/ryoumiyahayato/wwo/releases/$($manifest.resource_supplement.release_id)/assets?per_page=100" --paginate --slurp --jq 'add | map({id,size})'
-if ($LASTEXITCODE -ne 0) { throw '私有附件清单读取失败。没有删除。' }
+$assetRaw = Read-ArchiveGitHub -Arguments @('api',"repos/ryoumiyahayato/wwo/releases/$($manifest.resource_supplement.release_id)/assets?per_page=100",'--paginate','--slurp','--jq','add | map({id,size})')
 $assets = @{}
 foreach ($asset in (($assetRaw -join "`n") | ConvertFrom-Json)) { $assets[[string]$asset.id] = [int64]$asset.size }
 foreach ($package in $manifest.resource_supplement.packages) {
@@ -58,6 +66,7 @@ foreach ($row in $chosen) {
  $mtimeNs = [int64](($item.LastWriteTimeUtc.Ticks - $epoch) * [int64]100)
  if ($item.Length -ne [int64]$row.bytes -or $mtimeNs -ne [int64]$row.mtime_ns) { throw "归档后文件已变化，停止：$path" }
  $approved.Add([pscustomobject]@{Path=$path;Bytes=[int64]$row.bytes})
+ if (($approved.Count % 2000) -eq 0) { Write-Host "已核对$($approved.Count)个文件。尚未删除。" }
 }
 $total = ($approved | Measure-Object -Property Bytes -Sum).Sum
 Write-Host "已核对：$($approved.Count)个本轮已归档文件，逻辑大小$total 字节。"
