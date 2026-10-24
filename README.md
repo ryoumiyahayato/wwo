@@ -47,11 +47,15 @@
 
 - `CLOUD_ARCHIVE_VERIFIED`: true
 - `CLOUD_ONLY_RESTORE_PASSED`: true
-- `OLD_LOCAL_CONTENT_REMOVED`: false
-- `CLEAN_CURRENT_RESTORED`: false
+- `OLD_LOCAL_CONTENT_REMOVED`: true
+- `CLEAN_CURRENT_RESTORED`: true
 
 [实际结果与唯一清理清单](archive-results.json) · [绝对路径删除清单](DELETE_PLAN.json)。全部18包已从GitHub回下载，SHA256、ZIP CRC及对象映射通过；首次新目录恢复不读取旧源码或旧AppData。Godot4.6.3无缓存导入、既有权限/勤务/枪口恢复证据检查、成功和撤权冷读均已实际执行。没有重新强杀、长期模拟或新增作战。
 
-已删除旧根目录 0 个；移除文件目录项 0 个，逻辑字节 0。实际空间变化见清单的磁盘前后观测，硬链接逻辑大小不作为释放量。
+manifest.json.gz是冻结的文件与对象映射快照；实际恢复源码提交以archive-results.json的verified_source_commit为准，最新删除结果以DELETE_PLAN.json和archive-results.json为准。
+
+已删除旧根目录 52 个；移除文件目录项 590561 个，逻辑字节 63137542807。实际空间变化见清单的磁盘前后观测，硬链接逻辑大小不作为释放量。
+
+唯一当前工程位于 `D:/programs/WWO/research/military/current`。再次从GitHub新下载所需6包并独立物化；第二次无缓存导入、原生成功冷读及撤权冷读通过。复现日志见 [验证日志](verification-logs.zip)。默认成功portable；撤权portable仅作对照。`RESTORE_RECEIPT.json`保留实际恢复所用固定源码提交，不改写成后来的收尾说明提交。
 
 5个旧目录因混合经济工作台或仍有共享引用保留，外部403模型来源库和主WWO.git保持原样。经济16包原回下载记录及当前云端元数据已核对，但45项原清理曾遭策略拒绝，未重试。主工归档分支源码与精选证据可读；当前完整运行/重建仍有本地缺项和许可限制，未删除主工程、候选或回退。

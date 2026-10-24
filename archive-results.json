@@ -5,8 +5,8 @@
   "status": {
     "CLOUD_ARCHIVE_VERIFIED": true,
     "CLOUD_ONLY_RESTORE_PASSED": true,
-    "OLD_LOCAL_CONTENT_REMOVED": false,
-    "CLEAN_CURRENT_RESTORED": false
+    "OLD_LOCAL_CONTENT_REMOVED": true,
+    "CLEAN_CURRENT_RESTORED": true
   },
   "source_readback": {
     "repository": "ryoumiyahayato/wwo",
@@ -1206,8 +1206,331 @@
     },
     "critical_restored_inputs_unchanged": true
   },
-  "second_restore": null,
-  "second_verification": null,
+  "second_restore": {
+    "repository": "ryoumiyahayato/wwo",
+    "archive_commit": "5a689ddeed68b3c2f182d271bf990515e6da1ea4",
+    "manifest_sha256": "c7526d78138aedc437eac833286ca699b8b3f1513738ed0d334735b4655089e2",
+    "materialized_files": 24674,
+    "materialized_bytes": 2586287180,
+    "all_restored_bytes_verified_before_allowed_changes": true,
+    "old_source_reads": false,
+    "resource_hardlinks_created": false,
+    "filesystem_policy": "new independent regular files; source READONLY/link flags are not reapplied",
+    "allowed_changes": [
+      {
+        "file": "runtime/project.godot",
+        "field": "config/custom_user_dir_name",
+        "value": "WWO-FormalPractice-MilitaryCurrent-20261024"
+      },
+      {
+        "file": "runtime/authority/recovery_checks.gd",
+        "field": "report output path",
+        "value": "task_root + /recovery_checks.json; prevents writing into original military source"
+      }
+    ],
+    "packages": [
+      {
+        "name": "military-current-0001.zip",
+        "ids": [
+          671734702,
+          671736492,
+          671738714,
+          671741079,
+          671746588,
+          671748348,
+          671752107
+        ],
+        "bytes": 443505922,
+        "sha256": "10903ca247278943bf37a5f189966a7c0b89198044c7460b374a992ae1c52fff"
+      },
+      {
+        "name": "military-current-0002.zip",
+        "ids": [
+          671754185,
+          671756404,
+          671758631,
+          671759937,
+          671761899,
+          671768454,
+          671770683,
+          671773063
+        ],
+        "bytes": 535202949,
+        "sha256": "f8b076b4c5f8d55b558eb3f1af3071b79fe152772c73c934c7641fc58eba2caa"
+      },
+      {
+        "name": "military-current-0003.zip",
+        "ids": [
+          671774664,
+          671776074,
+          671777175,
+          671777630,
+          671778063,
+          671778393,
+          671778782,
+          671779208
+        ],
+        "bytes": 536409970,
+        "sha256": "b3fc19eaf9b89cec2ab07b18cbb6a8c05800b049a102ef42ad2d2f9f26db958f"
+      },
+      {
+        "name": "military-current-0004.zip",
+        "ids": [
+          671779982,
+          671780386,
+          671780837,
+          671781650,
+          671782149,
+          671782543,
+          671783976,
+          671784627
+        ],
+        "bytes": 534537154,
+        "sha256": "169dca49d44ab416994f404fe701bcd7a92f40a6b8db0ae1d4f5adfa06b3d6e1"
+      },
+      {
+        "name": "military-current-0005.zip",
+        "ids": [
+          671785535,
+          671786598,
+          671787391,
+          671787954
+        ],
+        "bytes": 207778442,
+        "sha256": "c4225957334a208950cdf942e2f3b4532869fbd7d352d95a731b045ee8116703"
+      },
+      {
+        "name": "military-private-0018.zip",
+        "ids": [
+          671801512
+        ],
+        "bytes": 59888721,
+        "sha256": "34bcbd81e1b8efd51d134a54919f9cd23cb53bf51aad79c35f28f2aadcfed0bc"
+      }
+    ],
+    "entry": "tools/Run-Military.ps1",
+    "status": "CLOUD_ONLY_RESTORE_PASSED",
+    "critical_input_sha256": {
+      "private_state/authority_revoked_formal.json": "53a37f976aaa7938febf404d815e72699778d04fb47f0fdc04f1a38c7b6db5b7",
+      "private_state/authority_revoked_portable.json": "8610ea2bf5007ccb58eea074110f0b6de675ac2dda2576d52138d74ce2345e2c",
+      "private_state/authority_success_formal.json": "023bb8f48af6b04cf49ee61c89497d50bb17f4ab4bf23c0d7b3ff04022e3a39f",
+      "private_state/authority_success_portable.json": "521be439647d1a568a983861061fcb9632d9ca3680d4e274333d478f81d9830d"
+    },
+    "engine_version": "4.6.3.stable.official.7d41c59c4"
+  },
+  "second_verification": {
+    "root": "D:\\programs\\WWO\\research\\military\\current",
+    "full_checks": false,
+    "stages": [
+      {
+        "name": "fresh_import",
+        "pid": 17324,
+        "exit_code": 0,
+        "wall_seconds": 35.692,
+        "log": "fresh_import.log",
+        "script_errors": false,
+        "engine_error_lines": []
+      },
+      {
+        "name": "revoked_cold",
+        "pid": 13268,
+        "exit_code": 0,
+        "wall_seconds": 7.847,
+        "log": "revoked_cold.log",
+        "script_errors": false,
+        "engine_error_lines": []
+      },
+      {
+        "name": "native_success_cold",
+        "pid": 31948,
+        "exit_code": 0,
+        "wall_seconds": 13.734,
+        "log": "native_success_cold.log",
+        "script_errors": false,
+        "engine_error_lines": []
+      }
+    ],
+    "all_passed": true,
+    "original_delivery_inputs_rewritten": false,
+    "engine_version": "4.6.3.stable.official.7d41c59c4",
+    "revoked_cold": {
+      "current_acceptance": {
+        "authorization": {
+          "reason": "DELEGATION_INVALID",
+          "status": "DENIED"
+        },
+        "ok": false,
+        "reason": "CURRENT_EXECUTION_AUTHORITY_DENIED"
+      },
+      "current_permission": {
+        "authorization": {
+          "reason": "DELEGATION_INVALID",
+          "status": "DENIED"
+        },
+        "ok": false,
+        "reason": "CURRENT_EXECUTION_AUTHORITY_DENIED"
+      },
+      "delegation": {
+        "amount_or_quantity_limit": 1.0,
+        "delegation_id": "delegation.annex.annex_order_001",
+        "delegator_context": {
+          "acting_organization_id": "organization:annex_limited_command",
+          "appointment_id": "commander",
+          "authority_basis": "authority.annex_limited_command.execute",
+          "decision_id": "",
+          "delegation_id": "",
+          "membership_basis": true,
+          "person_id": "person:formal_generated_country_fra_0001",
+          "represented_organization_id": "organization:annex_limited_command"
+        },
+        "exclusive_or_concurrent": "concurrent",
+        "recipient_person_id": "person:formal_generated_country_fra_0002",
+        "redelegable": false,
+        "revocable": true,
+        "revoked_at": 0,
+        "source_id": "authority.annex_limited_command.execute",
+        "source_kind": "authority",
+        "spatial_scope": [
+          "place:paris"
+        ],
+        "subject_scope": [
+          "person:formal_generated_country_fra_0002"
+        ],
+        "target_scope": [
+          "formation:paris_annex_duty_section"
+        ],
+        "valid_from": 0,
+        "valid_until": 1
+      },
+      "history_and_world_exact_after_denial": true,
+      "material": {
+        "available": 18.0,
+        "consumed": 2,
+        "cumulative_issued": 6,
+        "cumulative_returned": 4,
+        "issued": 0,
+        "lost": 0,
+        "lot_id": "material:depot_1900_cartridges_001",
+        "owner_id": "organization:depot_1900_a",
+        "place_id": "place:paris",
+        "registered": 20.0,
+        "reserved": 0,
+        "source_id": "source:depot_1900_initial_v1"
+      },
+      "minute": 2,
+      "mode": "cold",
+      "passed": true,
+      "pending_usec": 12402648,
+      "pid": 9936,
+      "save": "C:/Users/agcrf/AppData/Roaming/WWO-FormalPractice-MilitaryCurrent-20261024/formal_world_1900_manual_3.json"
+    },
+    "native_success_cold": {
+      "engine_static_memory_bytes": 662880102.0,
+      "minute": 2,
+      "nonmilitary_world_exact": true,
+      "organization_id": -9223371869720147968,
+      "pending_usec": 12402648,
+      "persistence_id": -9223371850879333502,
+      "pid": 31948,
+      "portable_error": "",
+      "results": {
+        "accept": {
+          "duplicate": true,
+          "ok": true
+        },
+        "admission": {
+          "blockers": [
+            "NO_FORMAL_BODY_MEDICAL_AUTHORITY",
+            "CONTROLLED_AREA_NOT_COMBAT_REGISTERED",
+            "NO_COMBAT_MATERIAL_ASSIGNMENT",
+            "NO_LOCAL_COMBAT_EXECUTION_CONTRACT"
+          ],
+          "ok": false,
+          "reason": "FORMAL_COMBAT_NOT_READY"
+        },
+        "commission": {
+          "duplicate": true,
+          "ok": true
+        },
+        "decision": {
+          "decision": {
+            "authority": {
+              "authority_id": "authority.annex_limited_command.delegate",
+              "basis_chain": [
+                "authority.annex_limited_command.delegate"
+              ],
+              "status": "ALLOWED"
+            },
+            "blockers": [
+              "NO_FORMAL_BODY_MEDICAL_AUTHORITY",
+              "CONTROLLED_AREA_NOT_COMBAT_REGISTERED",
+              "NO_COMBAT_MATERIAL_ASSIGNMENT",
+              "NO_LOCAL_COMBAT_EXECUTION_CONTRACT"
+            ],
+            "minute": 2,
+            "qualification_source": "scenario:explicit_1900_annex_command_charter_20261024",
+            "request": {
+              "from_minute": 2,
+              "id": "delegation_request:qualified_001",
+              "issuer": "person:formal_generated_country_fra_0001",
+              "objective": "CONTROLLED_LOCAL_DEFENCE",
+              "participants": [
+                "person:formal_generated_country_fra_0001",
+                "person:formal_generated_country_fra_0002"
+              ],
+              "region": "duty_area:paris_fictional_annex:controlled",
+              "settlement_owner": "organization:annex_limited_command",
+              "unit": "formation:paris_annex_duty_section",
+              "until_minute": 3
+            },
+            "status": "FORMAL_COMBAT_NOT_READY"
+          },
+          "duplicate": true,
+          "ok": true
+        },
+        "delegate": {
+          "duplicate": true,
+          "mandate": {
+            "acceptance": {
+              "authorization": {
+                "authority_id": "authority.annex_limited_command.execute",
+                "basis_chain": [
+                  "authority.annex_limited_command.execute",
+                  "delegation.annex.annex_order_001"
+                ],
+                "delegation_id": "delegation.annex.annex_order_001",
+                "status": "ALLOWED"
+              },
+              "minute": 2,
+              "person": "person:formal_generated_country_fra_0002"
+            },
+            "accepted": true,
+            "delegation_id": "delegation.annex.annex_order_001",
+            "from_minute": 2,
+            "id": "annex_order_001",
+            "issued_minute": 2,
+            "until_minute": 3
+          },
+          "ok": true
+        },
+        "saved": true
+      },
+      "save": "C:/Users/agcrf/AppData/Roaming/WWO-FormalPractice-MilitaryCurrent-20261024/formal_world_1900_manual_2.json",
+      "save_costs": {
+        "capture_ms": 27,
+        "mode": "async",
+        "responsive_frames": 103,
+        "total_ms": 1715,
+        "worker_ms": 1674
+      },
+      "schema": "vnext_military_state_v10_authority",
+      "snapshot_exact_on_cold": true,
+      "step_id": -9223371850896111264,
+      "tour": "cold",
+      "world_id": -9223371891211761661
+    },
+    "critical_restored_inputs_unchanged": true
+  },
   "deletion": {
     "stage": "DRY_RUN_PASSED",
     "archive_branch": "archive/military-full-20261024",
@@ -1984,9 +2307,86 @@
       ],
       "files": 590561,
       "source_metadata_matched": true
+    },
+    "execution": {
+      "completed": true,
+      "removed_files": 590561,
+      "removed_logical_bytes": 63137542807,
+      "removed_roots": [
+        "D:\\programs\\WWO\\research\\military\\continuous-map-20261022",
+        "D:\\programs\\WWO\\research\\military\\delivery",
+        "D:\\programs\\WWO\\research\\military\\formal-authority-20261022",
+        "D:\\programs\\WWO\\research\\military\\formal-combat-authority-20261024",
+        "D:\\programs\\WWO\\research\\military\\formal-custody-20261023",
+        "D:\\programs\\WWO\\research\\military\\formal-host-20261022",
+        "D:\\programs\\WWO\\research\\military\\formal-local-delegation-20261023",
+        "D:\\programs\\WWO\\research\\military\\formal-local-duty-20261023",
+        "D:\\programs\\WWO\\research\\military\\formal-practice-mainline-20261023",
+        "D:\\programs\\WWO\\research\\military\\formal-practice-recovery-20261023",
+        "D:\\programs\\WWO\\research\\military\\formal-training-group-20261023",
+        "D:\\programs\\WWO\\research\\military\\global-local-20261022",
+        "D:\\programs\\WWO\\research\\military\\local-military-review-20261013",
+        "D:\\programs\\WWO\\research\\military\\recovery-source",
+        "D:\\programs\\WWO\\research\\military\\runs",
+        "D:\\programs\\WWO\\research\\military\\sources",
+        "D:\\programs\\WWO\\research\\military\\triple-scale-20261021",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261009T223427",
+        "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "D:\\programs\\WWO\\research\\military\\wwo-history-read-20261016",
+        "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "D:\\programs\\WWO\\research\\military\\wwo-longstep-profile-20261016",
+        "D:\\programs\\WWO\\research\\military\\wwo-personal-feedback-20261016",
+        "D:\\programs\\WWO\\research\\military\\wwo-personal-report-20261016",
+        "D:\\programs\\WWO\\research\\military\\wwo-personal-tactics-20261016",
+        "D:\\programs\\WWO\\research\\military\\wwo-personal-task-boundaries-20261017",
+        "D:\\programs\\WWO\\research\\military\\wwo-personal-task-prototype-20261017",
+        "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "D:\\programs\\WWO\\research\\military\\wwo-task-continuity-20261015",
+        "D:\\programs\\WWO\\research\\military\\wwo-time-acceptance-20261016",
+        "D:\\programs\\WWO\\research\\military\\wwo-time-consistency-20261016",
+        "D:\\programs\\WWO\\research\\military\\wwo-v9-sandbox-20261015",
+        "D:\\programs\\WWO\\research\\military\\wwo-war-lab-local",
+        "D:\\programs\\WWO\\research\\military\\wwo-web-runtime-source-20261015",
+        "D:\\programs\\WWO\\research\\military\\_freeze_exports",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-ContinuousMap-20261022",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalAuthority-20261022",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalCustody-20261023",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalLocal-20261022",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalLocalDuty-20261023",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-CombatAuthority-20261024",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-CombatAuthority-SourceRestore-20261024",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-LocalDelegation-20261023",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-LocalDuty-SourceRestore-20261023",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-Mainline-20261023",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-Recovery-20261023",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-Recovery-SourceRestore-20261023",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-SourceRestore-20261023",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-TrainingGroup-SourceRestore-20261023",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalTrainingGroup-20261023",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-GlobeLocal-20261022",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-TripleScale-20261021"
+      ],
+      "free_bytes_before": {
+        "C": 83339497472,
+        "D": 102086205440
+      },
+      "free_bytes_after": {
+        "C": 83607810048,
+        "D": 122982981632
+      },
+      "observed_free_increase": {
+        "C": 268312576,
+        "D": 20896776192
+      },
+      "attributes_acl_and_shared_contents_modified": false
     }
   },
-  "predelete_occupancy": null,
+  "predelete_occupancy": {
+    "one_time_check": true,
+    "process_command_lines_not_persisted": true,
+    "matches": [],
+    "no_process_terminated": true
+  },
   "other_lines": {
     "economy": {
       "repository": "ryoumiyahayato/wwo-economy-lab",
@@ -2101,5 +2501,42 @@
     "native automated recovery, not human GUI or Android acceptance",
     "five mixed/shared old roots and external source library retained",
     "own archive staging not removed until final cloud proof"
-  ]
+  ],
+  "second_download_interruption": {
+    "operation": "second_fresh_cloud_download",
+    "segment": "military-current-0005.zip.part003",
+    "error": "ValueError: Cloud segment differs; previous helper did not retain received length/digest, so cause not established",
+    "time": 1792840410.479915,
+    "restoration_started": false,
+    "first_cloud_download_and_verified_workspace_retained": true,
+    "resume_policy": "same authenticated asset IDs; reuse only receipt-backed second-download bytes; no first-download or upload-package substitution",
+    "resolved_by_same_cloud_object_checksum_verified": true,
+    "all_six_fresh_cloud_packages_verified": true,
+    "first_download_files_substituted": false
+  },
+  "status_scope": "the 52 explicitly approved military old roots and the declared clean current; five shared/mixed old roots remain protected; no economy/main deletion",
+  "old_military_absolute_path_search": {
+    "scope": "current/runtime .gd, .tscn and project.godot",
+    "tool": "rg, case-insensitive, forward/backward slash variants",
+    "matches": 0,
+    "exit_code": 1,
+    "old_military_sources_already_deleted_before_second_runtime_check": true
+  },
+  "accounting": {
+    "successful_attachment_payload_bytes": 7192143243,
+    "first_actual_cloud_download_verified_bytes": 7192143243,
+    "second_actual_cloud_download_verified_bytes": 2317323158,
+    "current_local_observed_files": 25887,
+    "current_local_observed_bytes": 2654515381,
+    "old_cleanup_observed_free_increase": {
+      "C": 268312576,
+      "D": 20896776192
+    },
+    "network_wire_bytes": "unavailable; HTTPS overhead, incomplete first upload and transient retries not measured",
+    "git_push_pack_progress_observed": [
+      "full manifest 39.50 MiB",
+      "verified manifest delta 5.09 MiB"
+    ],
+    "source_archive_file_bytes_are_not_network_wire_bytes": true
+  }
 }
