@@ -49,7 +49,7 @@ R57区域输入及制作资料已补传，本地实际处置见补记；其他GI
 
 ## 后续补传与清理（2026-10-24）
 
-状态：**CLOUD_PACKAGES_VERIFIED_LOCAL_DELETION_PENDING**。私有附件：https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026。全部75包已实际从GitHub回读，逐字节一致，ZIP CRC及成员映射通过。新大包未落磁盘，没有生成新指纹清单。完整路径、对象ID、提供方校验元数据、上传及本地处置仍见[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)。
+状态：**CLOUD_FILE_RESTORE_VERIFIED_LOCAL_DELETION_PENDING**。私有附件：https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026。全部75包已实际从GitHub回读，逐字节一致，ZIP CRC及成员映射通过。新大包未落磁盘，没有生成新指纹清单。完整路径、对象ID、提供方校验元数据、上传及本地处置仍见[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)。
 
 [恢复工具](tools/archive/restore_main_resources.py)配合统一清单，支持runtime/rebuild/history/private_test范围和精确only-path。将恢复目标设为新目录或新clone；已存在的目标文件不会覆盖。恢复出来的私有测试用户目录位于_isolated_test_users下，不自动写入真实玩家AppData。
 
