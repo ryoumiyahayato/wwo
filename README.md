@@ -1,6 +1,6 @@
 # WWO 当前接续入口：R57 代21归档（2026-10-24）
 
-此入口对应私有仓库 `ryoumiyahayato/wwo` 的 `archive/main-wwo-r57-g21-20261024`。默认分支仍为 `canonical/current-world`。本轮只整理和上传；未构建、未运行Godot、未promote、未合并、未删除历史内容。
+此入口对应私有仓库 `ryoumiyahayato/wwo` 的 `archive/main-wwo-r57-g21-20261024`。默认分支仍为 `canonical/current-world`。本入口记录主工归档及用户后续授权的清理；未构建、未运行Godot、未promote、未合并。实际删除见下方补记。
 
 当前为 **R57 代21 CANDIDATE，1,759,546,768字节，accepted=false**。R56继续 **ROLLBACK，1,834,465,568字节**。候选与回退EXE均本地保留，**LOCAL_ONLY**。未把EXE、PCK、Godot缓存或2GB地貌BIN提交普通Git。
 
@@ -27,7 +27,7 @@
 - [生活界面及30日运行](docs/map/R57_ORDINARY_LIVING_UI_2026-10-23.md)、[NPC自主生活](docs/map/R57_ORDINARY_AUTONOMOUS_RESIDENTS_2026-10-23.md)、[岗位流转](docs/map/R57_ORDINARY_EMPLOYMENT_CIRCULATION_2026-10-23.md)、[多雇主](docs/map/R57_ORDINARY_MULTI_EMPLOYER_CHOICE_2026-10-23.md)、[代21原料交易](docs/map/R57_ORDINARY_MATERIAL_TRADE_2026-10-24.md)。报告中的本机证据路径映射到清单的 `destination`；历史报告不改写。
 - [精选证据目录](docs/archive/main-wwo-r57-g21-20261024/evidence/)保存既有压缩记录、实际GUI代表画面、日24中断、首次原料失败及中断日志；保留失败，不只保留PASS。截图数据为游戏模拟，版本和场景见清单。
 - [连续运行主档与冷恢复备份](docs/archive/main-wwo-r57-g21-20261024/checkpoints/)分别是经过30日和24日的独立测试世界；UI日历分别1900-01-31和01-25。[原料采用后检查点](docs/archive/main-wwo-r57-g21-20261024/evidence/r57-living-ui-2026-10-23/material-candidate/material-slot4-adopted.json.gz)为经过44日，另有在途责任检查点。没有读取真实玩家五槽。本轮仅文件读取/解析，不是重新进行游戏恢复。
-- [地图剩余问题](docs/map/R57_MAP_INTERACTION_CLOSEOUT_2026-10-22.md)、[来源与重建调查](docs/map/R57_TERRAIN_SOURCE_RECOVERY_AND_REBUILD_READINESS.md)。旧调查适用于2026-10-20；当前10月21日区域ETOPO缓存已存在，不能把旧“缺源”结论套到所有新缓存。它们仍不等于完整全球原始输入已恢复。
+- [地图剩余问题](docs/map/R57_MAP_INTERACTION_CLOSEOUT_2026-10-22.md)、[来源与重建调查](docs/map/R57_TERRAIN_SOURCE_RECOVERY_AND_REBUILD_READINESS.md)。旧调查适用于2026-10-20；前次盘点已确认10月21日区域ETOPO缓存存在，本次已补传，清理后可从附件恢复，不能把旧“缺源”结论套到所有新缓存。它们仍不等于完整全球原始输入已恢复。
 
 ## 云端可继续开发与完整恢复缺口
 
@@ -35,7 +35,7 @@
 
 再分发权未明确的内部预览模型、云盘适配BLEND、civilian交付模型、orbital_r24图像未新增上传，详见清单。原创R40/R41模型、图标及明确授权海洋材质连同制作源/许可已纳入。地理衍生资料保留原来源和许可，包括CShapes非商业条件、OSM、TRF等，不把不同许可统一改成CC0。
 
-全球GIS/分类/DEM原件、区域缓存和制作依赖仍在清单列出的本地目录。已有制作脚本不等于已经证明可从原始输入完整重建。部分原始GLO/WC/ETOPO输入仍缺完整来源或版本恢复证明。未重新进行无缓存Godot导入、全世界地貌重建或游戏恢复验证。其他工作线仅登记入口，没有移动、上传或删除其内容。
+R57区域输入及制作资料已补传，本地实际处置见补记；其他GIS/分类/DEM输入和工具链按各自范围保留。已有制作脚本不等于已经证明可从原始输入完整重建。部分原始GLO/WC/ETOPO输入仍缺完整来源或版本恢复证明。未重新进行无缓存Godot导入、全世界地貌重建或游戏恢复验证。其他工作线仅登记入口，没有移动、上传或删除其内容。
 
 ## 本地取舍
 
@@ -49,6 +49,16 @@
 
 ## 后续补传与清理（2026-10-24）
 
-阶段：`UPLOADED_VERIFIED`。地貌BIN和R57制作资料使用[私有草稿附件](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026)，不会成为正式游戏Release。已实际上传并回读 75/75 包。文件路径、分段偏移、提供方对象ID、大小及校验元数据仍使用[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)中的resource_supplement。全部大包在内存中串行处理，未新增磁盘ZIP；没有主动计算新哈希。
+状态：**CLOUD_PACKAGES_VERIFIED_LOCAL_DELETION_PENDING**。私有附件：https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026。全部75包已实际从GitHub回读，逐字节一致，ZIP CRC及成员映射通过。新大包未落磁盘，没有生成新指纹清单。完整路径、对象ID、提供方校验元数据、上传及本地处置仍见[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)。
 
-补传已完成，仍须区分云端可读和完整重建。受限模型、原始全球源缺口、候选/回退、本地共享消费者和此前删除拒绝继续单列；不宣称完整游戏重建通过。恢复包不依赖本机旧路径：将各ZIP内的p编号按清单parts偏移拼接回files.path；原许可、来源说明和制作recipe保留在既有源码及补传资料中。
+[恢复工具](tools/archive/restore_main_resources.py)配合统一清单，支持runtime/rebuild/history/private_test范围和精确only-path。将恢复目标设为新目录或新clone；已存在的目标文件不会覆盖。恢复出来的私有测试用户目录位于_isolated_test_users下，不自动写入真实玩家AppData。
+
+```powershell
+python tools/archive/restore_main_resources.py --inventory docs/archive/main-wwo-r57-g21-20261024/inventory.json --destination D:/WWO-Restore --scope runtime
+```
+
+本轮只完成文件层、ZIP读取和少量实际文件恢复；没有启动Godot、模拟、导出、全局地貌重建或完整游戏冷恢复。当前已保存的输入不等于历史全球原始来源已经齐全。
+
+另外补存 49 份Godot导入配置到实际源码路径，保留UID与参数；对应模型本体仍按各自许可处理，不把配置归档当作模型许可。
+
+地貌BIN仍由保留的主工程直接读取，因此上传后继续KEEP。许可未明的模型/图像/BLEND、候选R57、回退R56、受保护正式发行、共享工具链和当前导入缓存继续保留。此前被拒绝的165份以及经济线45项路径不重试、不改回收站绕过。HOLD历史来源目录及其具体原因列在held_evidence_roots。
