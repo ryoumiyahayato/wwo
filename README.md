@@ -64,3 +64,5 @@ python tools/archive/restore_main_resources.py --inventory docs/archive/main-wwo
 本轮实际删除 77 个独占目录、3323 个文件目录项。磁盘前后观测：{"C": 113922048, "D": 1401880576}。不要把逻辑文件长度当作物理释放量。具体成功、拒绝和保留路径见统一清单resource_supplement.cleanup。
 
 地貌BIN仍由保留的主工程直接读取，因此上传后继续KEEP。许可未明的模型/图像/BLEND、候选R57、回退R56、受保护正式发行、共享工具链和当前导入缓存继续保留。此前被拒绝的165份以及经济线45项路径不重试、不改回收站绕过。HOLD历史来源目录及其具体原因列在held_evidence_roots。
+
+本轮自建临时脚本、备用索引、本地完整清单及文件恢复样本已清理；本地归档暂存位置仅保留小恢复索引。实际临时占用与释放见统一清单accounting.latest_temporary_cleanup。
