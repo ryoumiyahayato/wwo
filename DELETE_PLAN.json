@@ -1,0 +1,778 @@
+{
+  "stage": "DRY_RUN_PASSED",
+  "archive_branch": "archive/military-full-20261024",
+  "source_inventory": "inventory.json; each file maps object SHA256 -> chunk -> package -> verified remote parts",
+  "roots": [
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\continuous-map-20261022",
+      "workline": "military",
+      "files": 4437,
+      "logical_bytes": 816190784,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\delivery",
+      "workline": "military",
+      "files": 22,
+      "logical_bytes": 217706,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\formal-authority-20261022",
+      "workline": "military",
+      "files": 50721,
+      "logical_bytes": 5448589533,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\formal-combat-authority-20261024",
+      "workline": "military",
+      "files": 51917,
+      "logical_bytes": 5403646794,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\formal-custody-20261023",
+      "workline": "military",
+      "files": 50697,
+      "logical_bytes": 5281681127,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\formal-host-20261022",
+      "workline": "military",
+      "files": 27224,
+      "logical_bytes": 5137771321,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\formal-local-delegation-20261023",
+      "workline": "military",
+      "files": 25895,
+      "logical_bytes": 2681684678,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\formal-local-duty-20261023",
+      "workline": "military",
+      "files": 100167,
+      "logical_bytes": 10718862070,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\formal-practice-mainline-20261023",
+      "workline": "military",
+      "files": 75685,
+      "logical_bytes": 7732001164,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\formal-practice-recovery-20261023",
+      "workline": "military",
+      "files": 76432,
+      "logical_bytes": 8111389643,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\formal-training-group-20261023",
+      "workline": "military",
+      "files": 75510,
+      "logical_bytes": 8048799634,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\global-local-20261022",
+      "workline": "military",
+      "files": 4645,
+      "logical_bytes": 941471400,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\local-military-review-20261013",
+      "workline": "military",
+      "files": 13,
+      "logical_bytes": 111202,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\recovery-source",
+      "workline": "military",
+      "files": 18,
+      "logical_bytes": 45046618,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\runs",
+      "workline": "military",
+      "files": 279,
+      "logical_bytes": 18138385,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\sources",
+      "workline": "military",
+      "files": 46,
+      "logical_bytes": 280473,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\triple-scale-20261021",
+      "workline": "military",
+      "files": 2019,
+      "logical_bytes": 453931578,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261009T223427",
+      "workline": "military",
+      "files": 1961,
+      "logical_bytes": 115201545,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+      "workline": "military",
+      "files": 1986,
+      "logical_bytes": 115570760,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-history-read-20261016",
+      "workline": "military",
+      "files": 1413,
+      "logical_bytes": 73274849,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+      "workline": "military",
+      "files": 2020,
+      "logical_bytes": 115835966,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-longstep-profile-20261016",
+      "workline": "military",
+      "files": 1416,
+      "logical_bytes": 73314780,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-feedback-20261016",
+      "workline": "military",
+      "files": 2056,
+      "logical_bytes": 89147487,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-report-20261016",
+      "workline": "military",
+      "files": 2055,
+      "logical_bytes": 89146338,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-tactics-20261016",
+      "workline": "military",
+      "files": 2055,
+      "logical_bytes": 89147842,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-task-boundaries-20261017",
+      "workline": "military",
+      "files": 2071,
+      "logical_bytes": 86015457,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-task-prototype-20261017",
+      "workline": "military",
+      "files": 2061,
+      "logical_bytes": 89201819,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+      "workline": "military",
+      "files": 1950,
+      "logical_bytes": 86916650,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-task-continuity-20261015",
+      "workline": "military",
+      "files": 1415,
+      "logical_bytes": 129363720,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-time-acceptance-20261016",
+      "workline": "military",
+      "files": 1415,
+      "logical_bytes": 73313030,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-time-consistency-20261016",
+      "workline": "military",
+      "files": 1422,
+      "logical_bytes": 73684138,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-v9-sandbox-20261015",
+      "workline": "military",
+      "files": 2120,
+      "logical_bytes": 141120413,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-war-lab-local",
+      "workline": "military",
+      "files": 1785,
+      "logical_bytes": 80334461,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-web-runtime-source-20261015",
+      "workline": "military",
+      "files": 2064,
+      "logical_bytes": 86022948,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\_freeze_exports",
+      "workline": "military",
+      "files": 13009,
+      "logical_bytes": 426034878,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "military-only historical candidate, recovery copy or frozen source; every file mapped to archive objects"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-ContinuousMap-20261022",
+      "workline": "military isolated test user",
+      "files": 28,
+      "logical_bytes": 12794279,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalAuthority-20261022",
+      "workline": "military isolated test user",
+      "files": 47,
+      "logical_bytes": 32801396,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalCustody-20261023",
+      "workline": "military isolated test user",
+      "files": 43,
+      "logical_bytes": 26315104,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalLocal-20261022",
+      "workline": "military isolated test user",
+      "files": 40,
+      "logical_bytes": 22105751,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalLocalDuty-20261023",
+      "workline": "military isolated test user",
+      "files": 26,
+      "logical_bytes": 12909518,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-CombatAuthority-20261024",
+      "workline": "military isolated test user",
+      "files": 20,
+      "logical_bytes": 11030569,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-CombatAuthority-SourceRestore-20261024",
+      "workline": "military isolated test user",
+      "files": 15,
+      "logical_bytes": 7998306,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-LocalDelegation-20261023",
+      "workline": "military isolated test user",
+      "files": 16,
+      "logical_bytes": 7034858,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-LocalDuty-SourceRestore-20261023",
+      "workline": "military isolated test user",
+      "files": 15,
+      "logical_bytes": 7060110,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-Mainline-20261023",
+      "workline": "military isolated test user",
+      "files": 73,
+      "logical_bytes": 34783482,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-Recovery-20261023",
+      "workline": "military isolated test user",
+      "files": 87,
+      "logical_bytes": 27354318,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-Recovery-SourceRestore-20261023",
+      "workline": "military isolated test user",
+      "files": 21,
+      "logical_bytes": 8593285,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-SourceRestore-20261023",
+      "workline": "military isolated test user",
+      "files": 17,
+      "logical_bytes": 6670122,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-TrainingGroup-SourceRestore-20261023",
+      "workline": "military isolated test user",
+      "files": 4,
+      "logical_bytes": 3884690,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalTrainingGroup-20261023",
+      "workline": "military isolated test user",
+      "files": 55,
+      "logical_bytes": 22025294,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-GlobeLocal-20261022",
+      "workline": "military isolated test user",
+      "files": 28,
+      "logical_bytes": 12226266,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    },
+    {
+      "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-TripleScale-20261021",
+      "workline": "military isolated test user",
+      "files": 25,
+      "logical_bytes": 9494268,
+      "action": "DELETE_AFTER_CLOUD_ONLY_RESTORE",
+      "status": "PENDING_VERIFICATION",
+      "reason": "exact custom_user_dir_name from military project.godot; real player slots excluded"
+    }
+  ],
+  "protected": [
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-web-workbench-20261015",
+      "reason": "mixed economy/military working tree; preserve whole repository"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-person-attachment-20261011T0010",
+      "reason": "mixed workbench documented original military source; retained dependency"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-web-runtime-taskfix-20261015",
+      "reason": "mixed workbench launcher requires military checkout to exist even in dual-source mode"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-cover-semantics-20261017",
+      "reason": "mixed workbench current personal-cover source profile; dependency not migrated"
+    },
+    {
+      "path": "D:\\programs\\WWO\\research\\military\\upload-staging",
+      "reason": "existing Git checkout and legacy workbench v5 source; not deleting its Git metadata"
+    }
+  ],
+  "additional_protected": [
+    "D:/programs/WWO/wwo",
+    "other worklines",
+    "shared originals and common toolchains",
+    "real player saves",
+    "public FIFO_QUEUE_ZH.md and queue.sqlite3"
+  ],
+  "must_complete": [
+    "all required archive parts uploaded and actually downloaded",
+    "package SHA256 and ZIP CRC",
+    "cloud-only current import/native/success/revocation/duty/recovery checks",
+    "fresh source metadata and process occupancy check"
+  ],
+  "readonly_hardlink_policy": "no SetFileAttributes, no permission/ownership changes, no truncation or shared target edits; remove only approved old directory entries; stop on rejection",
+  "dry_run": {
+    "time": 1792838681.317434,
+    "roots": [
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\continuous-map-20261022",
+        "files": 4437,
+        "logical_bytes": 816190784
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\delivery",
+        "files": 22,
+        "logical_bytes": 217706
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\formal-authority-20261022",
+        "files": 50721,
+        "logical_bytes": 5448589533
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\formal-combat-authority-20261024",
+        "files": 51917,
+        "logical_bytes": 5403646794
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\formal-custody-20261023",
+        "files": 50697,
+        "logical_bytes": 5281681127
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\formal-host-20261022",
+        "files": 27224,
+        "logical_bytes": 5137771321
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\formal-local-delegation-20261023",
+        "files": 25895,
+        "logical_bytes": 2681684678
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\formal-local-duty-20261023",
+        "files": 100167,
+        "logical_bytes": 10718862070
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\formal-practice-mainline-20261023",
+        "files": 75685,
+        "logical_bytes": 7732001164
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\formal-practice-recovery-20261023",
+        "files": 76432,
+        "logical_bytes": 8111389643
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\formal-training-group-20261023",
+        "files": 75510,
+        "logical_bytes": 8048799634
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\global-local-20261022",
+        "files": 4645,
+        "logical_bytes": 941471400
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\local-military-review-20261013",
+        "files": 13,
+        "logical_bytes": 111202
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\recovery-source",
+        "files": 18,
+        "logical_bytes": 45046618
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\runs",
+        "files": 279,
+        "logical_bytes": 18138385
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\sources",
+        "files": 46,
+        "logical_bytes": 280473
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\triple-scale-20261021",
+        "files": 2019,
+        "logical_bytes": 453931578
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261009T223427",
+        "files": 1961,
+        "logical_bytes": 115201545
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-gameplay-20261010T1217",
+        "files": 1986,
+        "logical_bytes": 115570760
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-history-read-20261016",
+        "files": 1413,
+        "logical_bytes": 73274849
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-interactive-observer-20261010T1934",
+        "files": 2020,
+        "logical_bytes": 115835966
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-longstep-profile-20261016",
+        "files": 1416,
+        "logical_bytes": 73314780
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-feedback-20261016",
+        "files": 2056,
+        "logical_bytes": 89147487
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-report-20261016",
+        "files": 2055,
+        "logical_bytes": 89146338
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-tactics-20261016",
+        "files": 2055,
+        "logical_bytes": 89147842
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-task-boundaries-20261017",
+        "files": 2071,
+        "logical_bytes": 86015457
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-personal-task-prototype-20261017",
+        "files": 2061,
+        "logical_bytes": 89201819
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-step-cost-20261009T191132",
+        "files": 1950,
+        "logical_bytes": 86916650
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-task-continuity-20261015",
+        "files": 1415,
+        "logical_bytes": 129363720
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-time-acceptance-20261016",
+        "files": 1415,
+        "logical_bytes": 73313030
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-time-consistency-20261016",
+        "files": 1422,
+        "logical_bytes": 73684138
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-v9-sandbox-20261015",
+        "files": 2120,
+        "logical_bytes": 141120413
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-war-lab-local",
+        "files": 1785,
+        "logical_bytes": 80334461
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\wwo-web-runtime-source-20261015",
+        "files": 2064,
+        "logical_bytes": 86022948
+      },
+      {
+        "path": "D:\\programs\\WWO\\research\\military\\_freeze_exports",
+        "files": 13009,
+        "logical_bytes": 426034878
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-ContinuousMap-20261022",
+        "files": 28,
+        "logical_bytes": 12794279
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalAuthority-20261022",
+        "files": 47,
+        "logical_bytes": 32801396
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalCustody-20261023",
+        "files": 43,
+        "logical_bytes": 26315104
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalLocal-20261022",
+        "files": 40,
+        "logical_bytes": 22105751
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalLocalDuty-20261023",
+        "files": 26,
+        "logical_bytes": 12909518
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-CombatAuthority-20261024",
+        "files": 20,
+        "logical_bytes": 11030569
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-CombatAuthority-SourceRestore-20261024",
+        "files": 15,
+        "logical_bytes": 7998306
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-LocalDelegation-20261023",
+        "files": 16,
+        "logical_bytes": 7034858
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-LocalDuty-SourceRestore-20261023",
+        "files": 15,
+        "logical_bytes": 7060110
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-Mainline-20261023",
+        "files": 73,
+        "logical_bytes": 34783482
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-Recovery-20261023",
+        "files": 87,
+        "logical_bytes": 27354318
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-Recovery-SourceRestore-20261023",
+        "files": 21,
+        "logical_bytes": 8593285
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-SourceRestore-20261023",
+        "files": 17,
+        "logical_bytes": 6670122
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-TrainingGroup-SourceRestore-20261023",
+        "files": 4,
+        "logical_bytes": 3884690
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalTrainingGroup-20261023",
+        "files": 55,
+        "logical_bytes": 22025294
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-GlobeLocal-20261022",
+        "files": 28,
+        "logical_bytes": 12226266
+      },
+      {
+        "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-TripleScale-20261021",
+        "files": 25,
+        "logical_bytes": 9494268
+      }
+    ],
+    "files": 590561,
+    "source_metadata_matched": true
+  }
+}
