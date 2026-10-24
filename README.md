@@ -18,6 +18,8 @@
 
 启动：恢复下列本地依赖后，用Godot4.6.3打开工程并运行项目。构建仍按 [预览管理器说明](tools/build/README.md) 和 `tools/build_preview.ps1` 执行，并遵守既有资源锁；本轮未执行这些命令。归档分支push不匹配现有仅针对默认分支的构建触发器，未修改或停用工作流。
 
+上传状态：**UPLOADED_VERIFIED**。首轮提交6,700项的远端Git对象身份一致；20项关键内容通过GitHub API实际回读，压缩/JSON样本可解析。此结论只覆盖文件层。
+
 ## 唯一清单与精选证据
 
 [统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)记录路径、文件数、字节、工作线、用途、消费者、替代、云端状态与本地处置。`selected_files` 给出原路径和云端实际路径；`groups` 区分既有云端与本轮选入；`exclusions` 列出未上传依赖。上传成功不授予删除权限。
