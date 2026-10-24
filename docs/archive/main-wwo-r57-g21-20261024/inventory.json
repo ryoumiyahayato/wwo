@@ -6186,8 +6186,9 @@
   "consumer": "本轮归档结束后无运行或重建消费者",
   "replacement": "远端归档提交树和根README；辅助过程不属于游戏恢复依赖",
   "disposition": "DELETE_CANDIDATE",
-  "upload": "UPLOADED_VERIFIED",
+  "upload": "LOCAL_ONLY",
   "verification": "README对应远端对象；索引可由提交树重建；临时辅助脚本不需归档",
-  "deletion": "未发现适用的既有获准清理入口，未执行删除；统一清单inventory.json本地KEEP"
+  "deletion": "未发现适用的既有获准清理入口，未执行删除；统一清单inventory.json本地KEEP",
+  "replacement_upload": "UPLOADED_VERIFIED"
  }
 }
