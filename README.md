@@ -31,7 +31,7 @@
 
 ## 云端可继续开发与完整恢复缺口
 
-云端可以查阅并继续编辑主线源码、Opening、工具及精选证据。**单独下载本分支不能完整重建或运行当前候选。** `assets/maps/relief/` 的3182个新BIN（1,992,581,569字节）仍仅本地；旧云端原有资产不因此补齐。当前候选、R56、旧受保护发行、Godot缓存保持本地。没有已配置的LFS对象或获准的新二进制渠道；旧 `prototype-latest` 是受保护历史预发行，本轮未改动、未发布Release。
+云端可以查阅并继续编辑主线源码、Opening、工具及精选证据。**单独下载本分支不能完整重建或运行当前候选。** `assets/maps/relief/` 的3182个新BIN（1,992,581,569字节）已在本轮私有草稿附件补齐并逐包实际回读；具体恢复使用下方resource_supplement映射。当前候选、R56、旧受保护发行、Godot缓存保持本地。没有配置LFS；本轮已核实私有草稿附件渠道，旧 `prototype-latest` 是受保护历史预发行，本轮未改动、未发布Release。
 
 再分发权未明确的内部预览模型、云盘适配BLEND、civilian交付模型、orbital_r24图像未新增上传，详见清单。原创R40/R41模型、图标及明确授权海洋材质连同制作源/许可已纳入。地理衍生资料保留原来源和许可，包括CShapes非商业条件、OSM、TRF等，不把不同许可统一改成CC0。
 
@@ -49,5 +49,6 @@
 
 ## 后续补传与清理（2026-10-24）
 
-阶段：`UPLOAD_IN_PROGRESS`。地貌BIN和R57制作资料使用[私有草稿附件](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026)，不会成为正式游戏Release。已实际上传并回读 60/64 包。文件路径、分段偏移、提供方对象ID、大小及校验元数据仍使用[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)中的resource_supplement。全部大包在内存中串行处理，未新增磁盘ZIP；没有主动计算新哈希。
+阶段：`UPLOADED_VERIFIED`。地貌BIN和R57制作资料使用[私有草稿附件](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026)，不会成为正式游戏Release。已实际上传并回读 64/64 包。文件路径、分段偏移、提供方对象ID、大小及校验元数据仍使用[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)中的resource_supplement。全部大包在内存中串行处理，未新增磁盘ZIP；没有主动计算新哈希。
 
+补传已完成，仍须区分云端可读和完整重建。受限模型、原始全球源缺口、候选/回退、本地共享消费者和此前删除拒绝继续单列；不宣称完整游戏重建通过。恢复包不依赖本机旧路径：将各ZIP内的p编号按清单parts偏移拼接回files.path；原许可、来源说明和制作recipe保留在既有源码及补传资料中。
