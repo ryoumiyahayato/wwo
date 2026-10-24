@@ -1,5 +1,5 @@
 """Restore archived main-WWO resources into missing paths, without old-machine links."""
-import argparse,base64,io,json,pathlib,subprocess,urllib.request,urllib.error,zipfile,time
+import argparse,base64,io,json,pathlib,subprocess,urllib.request,urllib.error,zipfile,time,shutil,os
 P=pathlib.Path
 class NoRedirect(urllib.request.HTTPRedirectHandler):
  def redirect_request(self,*a,**k):return None
@@ -7,22 +7,34 @@ def main():
  a=argparse.ArgumentParser(description=__doc__);a.add_argument('--inventory',type=P,required=True);a.add_argument('--destination',type=P,required=True);a.add_argument('--scope',choices=['runtime','rebuild','history','private_test','all'],default='all');a.add_argument('--only-path',action='append',help='Restore only these exact inventory paths');x=a.parse_args()
  d=json.loads(x.inventory.read_text(encoding='utf-8'));s=d['resource_supplement'];repo='ryoumiyahayato/wwo'
  assert d['repository']==repo and s['state']=='UPLOADED_VERIFIED'
- root=x.destination.resolve();rows=[r for r in s['files']+s.get('reused_git_files',[]) if (x.scope=='all' or r['kind']==x.scope) and (not x.only_path or r['path'] in x.only_path)]
+ root=x.destination.resolve();all_rows=s['files']+s.get('reused_git_files',[])
+ rows=[r for r in all_rows if (x.scope=='all' or r['kind']==x.scope) and (not x.only_path or r['path'] in x.only_path)]
+ aliases=[r for r in s.get('file_aliases',[]) if (x.scope=='all' or r['kind']==x.scope) and (not x.only_path or r['path'] in x.only_path)]
+ by_path={r['path']:r for r in all_rows}
+ for alias in aliases:
+  if alias['source_path'] not in {r['path'] for r in rows}:rows.append(by_path[alias['source_path']])
  if not rows:raise RuntimeError('No files selected')
  root.mkdir(parents=True,exist_ok=True)
- parts={p['name']:p for p in s['parts']};selected={n for r in rows for n in r['parts']}
- for row in rows:
+ token=subprocess.check_output(['gh','auth','token'],text=True).strip();skipped=set()
+ parts={p['name']:p for p in s['parts']}
+ for row in rows+aliases:
   relative=P(row['path'])
   if relative.drive or relative.is_absolute() or '..' in relative.parts:raise RuntimeError('Unsafe archive path')
   target=root/relative
   if not target.resolve().is_relative_to(root):raise RuntimeError('Destination escapes restore root')
-  if target.exists() or target.is_symlink():raise FileExistsError('Existing input retained: '+str(target))
   for ancestor in target.parents:
    if ancestor==root.parent:break
    if ancestor.exists() and ancestor.lstat().st_file_attributes&0x400:raise RuntimeError('Reparse destination retained')
- token=subprocess.check_output(['gh','auth','token'],text=True).strip()
+  if target.exists() or target.is_symlink():
+   if row.get('already_remote') and target.is_file() and not target.is_symlink() and not target.lstat().st_file_attributes&0x400:
+    req=urllib.request.Request('https://api.github.com/repos/'+repo+'/git/blobs/'+row['git_blob'],headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github.raw+json'})
+    with urllib.request.urlopen(req,timeout=60) as response:existing_cloud=response.read()
+    if target.read_bytes()==existing_cloud:skipped.add(row['path']);continue
+   raise FileExistsError('Existing input retained: '+str(target))
+ rows=[r for r in rows if r['path'] not in skipped];selected={n for r in rows for n in r['parts']}
+ if skipped:print('EXISTING_GIT_FILES_REUSED',len(skipped),flush=True)
  for row in rows:
-  if row['bytes']==0 and not row.get('already_remote'):
+  if row['bytes']==0 and not row.get('already_remote') and not row.get('parts'):
    target=root/row['path'];target.parent.mkdir(parents=True,exist_ok=True);target.open('xb').close()
  for package in s['packages']:
   members=[n for n in package['members'] if n in selected]
@@ -57,6 +69,12 @@ def main():
   with target.open('xb') as output:output.write(data)
  for row in rows:
   if (root/row['path']).stat().st_size!=row['bytes']:raise RuntimeError('Incomplete restored file: '+row['path'])
- print('RESOURCE_FILE_RESTORE_COMPLETED',len(rows),sum(r['bytes'] for r in rows),flush=True)
+ for alias in aliases:
+  target=root/alias['path'];target.parent.mkdir(parents=True,exist_ok=True)
+  with (root/alias['source_path']).open('rb') as source,target.open('xb') as output:shutil.copyfileobj(source,output,1024*1024)
+  if target.stat().st_size!=alias['bytes']:raise RuntimeError('Incomplete restored alias: '+alias['path'])
+ for row in rows+aliases:
+  if 'mtime_ns' in row:os.utime(root/row['path'],ns=(row['mtime_ns'],row['mtime_ns']))
+ print('RESOURCE_FILE_RESTORE_COMPLETED',len(rows)+len(aliases),sum(r['bytes'] for r in rows+aliases),flush=True)
  print('File/ZIP checks only. No engine, gameplay or complete world rebuild validation was run.',flush=True)
 if __name__=='__main__':main()
