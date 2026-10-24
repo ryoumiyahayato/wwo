@@ -2571,5 +2571,45 @@
       "C": 7995392,
       "D": 19903447040
     }
+  },
+  "current_local_workspace": {
+    "present": false,
+    "removed_per_later_user_request": {
+      "requested": "remove verified current workspace and its dedicated test user; retain only index and protected shared roots",
+      "verified_cloud_commit_before_cleanup": "31cf7afa0d62f97b065233e9701bd2b24fa148a6",
+      "roots": [
+        {
+          "path": "D:\\programs\\WWO\\research\\military\\current",
+          "files": 25888,
+          "logical_bytes": 2654516479
+        },
+        {
+          "path": "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-MilitaryCurrent-20261024",
+          "files": 15,
+          "logical_bytes": 6015175
+        }
+      ],
+      "no_process_terminated": true,
+      "no_reparse_points": true,
+      "no_changes_after_recovery_except_verified_cleanup_receipt": true,
+      "completed": true,
+      "removed_roots": [
+        "D:\\programs\\WWO\\research\\military\\current",
+        "C:\\Users\\agcrf\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\WWO-FormalPractice-MilitaryCurrent-20261024"
+      ],
+      "fallback_used": false,
+      "free_bytes_before": {
+        "C": 92643401728,
+        "D": 137865990144
+      },
+      "free_bytes_after": {
+        "C": 92649467904,
+        "D": 140572610560
+      },
+      "observed_free_increase": {
+        "C": 6066176,
+        "D": 2706620416
+      }
+    }
   }
 }
