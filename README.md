@@ -46,3 +46,8 @@
 完成整理后停止。后续由用户直接安排，不自动恢复研发、模拟、测试或历史资产删除。
 
 本轮自有归档辅助脚本、备用Git索引及入口副本也列入清单的暂存取舍，归档完成后无运行消费者；未删除。清单中的占用数标注统计时点，首轮网络pack长度未留存，未用原文件长度冒充网络量。
+
+## 后续补传与清理（2026-10-24）
+
+阶段：`UPLOAD_IN_PROGRESS`。地貌BIN和R57制作资料使用[私有草稿附件](https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026)，不会成为正式游戏Release。已实际上传并回读 10/64 包。文件路径、分段偏移、提供方对象ID、大小及校验元数据仍使用[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)中的resource_supplement。全部大包在内存中串行处理，未新增磁盘ZIP；没有主动计算新哈希。
+
