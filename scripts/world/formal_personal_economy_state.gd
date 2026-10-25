@@ -121,7 +121,7 @@ static func _zero_cash_opening(person: Dictionary) -> bool:
 	if demographic.get("opening_cash_policy") == "ZERO_CASH_DEVELOPMENT_CORPORATE_MANAGER": return true
 	if demographic.get("opening_cash_policy") != "ZERO_CASH_GENERATED_RESIDENT": return false
 	var opening: String = str(demographic.get("opening_configuration_id", ""))
-	if opening == FormalEconomicOpening.SECOND_WORKER_CASE:
+	if opening in [FormalEconomicOpening.SECOND_WORKER_CASE, FormalEconomicOpening.MATERIAL_RENEWAL_CASE]:
 		return person.get("person_id") in ["person:formal_generated_country_fra_0002", "person:formal_generated_country_fra_0003"]
 	return person.get("person_id") == "person:formal_generated_country_fra_0002" and opening in ["FORMAL_PARIS_WORKSHOP_OPENING_R1", "FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1"]
 

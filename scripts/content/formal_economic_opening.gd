@@ -3,12 +3,14 @@ extends RefCounted
 ## One bounded ordinary opening. It uses host persons/accounts and the native
 ## execution kernel. Saved worlds bind their saved config without genesis.
 const SINGLE_PATH := "res://data/formal/paris_workshop_opening_r1.json"
+const MATERIAL_RENEWAL_CASE := "FORMAL_PARIS_FINITE_MATERIAL_RENEWAL_R1"
 const SECOND_WORKER_CASE := "FORMAL_PARIS_TWO_WORKERS_OPENING_R1"
 const PATH := "res://data/formal/paris_employment_opening_r1.json"
 
 static func for_source(source_id: String) -> Dictionary:
 	if "--formal-single-employer-opening" in OS.get_cmdline_user_args(): return single_employer(source_id)
 	if source_id != "country_fra": return {}
+	if "--formal-material-renewal-opening" in OS.get_cmdline_user_args(): return material_renewal(source_id)
 	if "--formal-second-worker-opening" in OS.get_cmdline_user_args(): return second_worker(source_id)
 	var result := _load(PATH)
 	# Explicit initial conditions for the finite comparison. Never changes a running world.
@@ -44,6 +46,21 @@ static func second_worker(source_id: String) -> Dictionary:
 	var response: Dictionary = result["labor_response_policies"][0].duplicate(true)
 	response["actor"] = person
 	result["labor_response_policies"].append(response)
+	return result
+
+## Two standing organization resolutions, declared only in this new candidate.
+## Executors may adopt these fixed terms once; ordinary procurement grants no
+## authority to invent terms, repeat a resolution or appoint an employee issuer.
+static func material_renewal(source_id: String) -> Dictionary:
+	var result := second_worker(source_id)
+	if result.is_empty(): return result
+	result["case_id"] = MATERIAL_RENEWAL_CASE
+	result["management_scope"]["id"] = "scope:formal_paris_finite_material_renewal_r1"
+	result["material_renewals"] = []
+	for opening: Dictionary in result["opening_organizations"]:
+		var trade: Dictionary = opening["material_trade"]
+		result["material_renewals"].append({"id": "material_mandate:" + opening["firm_id"].trim_prefix("firm:") + ":renewal_1", "issuer": opening["organization_id"], "firm": opening["firm_id"], "operation": trade["operation"], "counterparty": trade["counterparty"], "good": "grain", "min_price": 1, "max_price": 1, "quantity_limit": 4, "stock_floor": trade["stock_floor"], "valid_from": 32 * 1440, "valid_until": 36 * 1440, "basis": "GENERATED_OPENING_ONE_TIME_ORGANIZATION_RESOLUTION"})
+		opening["notice"] += " 本显式候选另含本组织一次性续期决议：首批8粮耗尽后，由原企业主体执行，第32日生效、第36日截止，限原交易对手及粮食、单价1、第二批累计最多4粮；可撤销后续受理，不抹去已受理责任。雇员无签发权，不能再次续期；不增加粮源。"
 	return result
 
 static func single_employer(source_id: String) -> Dictionary:
