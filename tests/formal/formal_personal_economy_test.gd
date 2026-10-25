@@ -492,6 +492,23 @@ func _grain_bread_boundaries(b: WorldBuildResult) -> void:
 	var buyer := "firm:opening_paris_bakery"
 	var site := "site:opening_paris_workshop:paris"
 	var destination := "site:opening_paris_bakery:paris"
+	for kind: String in ["revoke_material_mandate", "buy"]:
+		var isolated := b.persistence.restore_candidate(saved)
+		test.expect(isolated.success, "Reserved material action control restores an isolated world")
+		if not isolated.success: continue
+		var f := isolated.world.economy_r1
+		var row: Dictionary = f._material_resolutions()[0]
+		var owner_command := {"action_id": f._material_resolution_id(row, true), "minute": isolated.world.game_clock.total_minutes(), "kind": "revoke_material_mandate", "payload": {"mandate_id": row.id}}
+		var foreign_command: Dictionary = owner_command.duplicate(true)
+		foreign_command.kind = kind
+		var denied := LivelihoodAction.execute(isolated.world, PERSON, foreign_command)
+		test.expect(not denied.accepted, "Player cannot execute a command under the organization's reserved action identity")
+		print("MATERIAL_RESERVED_ACTION ", JSON.stringify({"kind": kind, "result": denied, "id_occupied": f._commands.has(owner_command.action_id)}))
+		test.expect(not f._commands.has(owner_command.action_id), "A rejected player request cannot occupy the enterprise's fixed revocation ID")
+		var poisoned := saved.duplicate(true)
+		poisoned.economy_native.commands[owner_command.action_id] = {"envelope": {"actor": PERSON, "command": foreign_command}, "source": "player", "result": denied}
+		test.expect(not b.persistence.restore_candidate(poisoned).success, "Saved rejected foreign commands cannot occupy a fixed organization decision ID")
+		test.expect(f.submit_internal(row.firm, owner_command).accepted, "Enterprise can still execute its legitimate revocation after the foreign refusal")
 	for opening: Dictionary in b.world.economy_r1.config.opening_organizations:
 		var restored := b.persistence.restore_candidate(saved)
 		test.expect(restored.success, "Independent boundary control restores the original world")
