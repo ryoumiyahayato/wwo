@@ -3409,6 +3409,10 @@ func restore(value: Dictionary) -> bool:
 		if not _valid_scope_lifecycle(value.get("commands", {})) or not _valid_property_handovers(value.get("commands", {})): return false
 	if not _upgrade_legacy_contracts(value) or not _upgrade_transport(value) or not _upgrade_site_layout(value) or not _upgrade_operations(value):
 		return false
+	# Components (including Retail) and mandate history traverse orders before
+	# the remaining cross-reference checks. Reject malformed shapes first,
+	# after legacy upgrades have supplied their documented wire fields.
+	if not _validate_saved_order_shapes(value): return false
 	if uses_host_accounts() and value.has("management"):
 		if value["management"] != {"scope_id": _management["scope_id"], "status": "ACTIVE", "activation_minute": 0}:
 			return _fail("Native management lifecycle differs from its saved host responsibility")
@@ -3951,6 +3955,26 @@ func _wage_less(a: String, b: String) -> bool:
 	return str(_work_records[a]["job"]) < str(_work_records[b]["job"])
 
 
+func _validate_saved_order_shapes(value: Dictionary) -> bool:
+	var orders: Variant = value.get("orders")
+	var cursor: Variant = value.get("next_order")
+	if not orders is Dictionary or not FormalLedgerState.valid_amount(cursor) or cursor < 1 or orders.size() != cursor - 1: return _fail("R1 duplicate/missing order IDs")
+	for number: int in range(1, int(cursor)):
+		var id := "order:" + str(number)
+		var order: Variant = orders.get(id)
+		if not order is Dictionary or not EconomySliceConfig._fields(order, ["id", "kind", "buyer", "seller", "buyer_site", "seller_site", "need_category", "good", "quantity", "pending", "transit", "delivered", "cancelled", "price", "action_id", "accepted_day", "accepted_minute", "denomination", "buyer_account", "seller_account", "route_id", "from_place_id", "to_place_id", "route_legs"], ["custody_fact", "source_custody_site", "destination_custody_site", "material_authorizations"]): return _fail("Invalid saved order fields")
+		for field: String in ["id", "kind", "buyer", "seller", "buyer_site", "seller_site", "need_category", "good", "action_id", "denomination", "buyer_account", "seller_account", "route_id", "from_place_id", "to_place_id"]:
+			if not order[field] is String: return _fail("Invalid saved order identity or reference type")
+		if order.id != id or not order.route_legs is Array: return _fail("Invalid saved order ID or route shape")
+		for field: String in ["quantity", "pending", "transit", "delivered", "cancelled", "price", "accepted_day", "accepted_minute"]:
+			if not FormalLedgerState.valid_amount(order[field]): return _fail("Invalid order amount")
+		if order.has("material_authorizations"):
+			var ids: Variant = order.material_authorizations
+			if not ids is Dictionary or not FormalLedgerState.exact_fields(ids, ["SELL", "PROCURE"]): return _fail("Invalid saved material authorization shape")
+			if not ids.SELL is String or not ids.PROCURE is String: return _fail("Invalid saved material authorization ID type")
+	return true
+
+
 func _validate_saved(value: Dictionary) -> bool:
 	if not _host_firm_bindings_valid():
 		return false
@@ -4103,23 +4127,17 @@ func _validate_saved(value: Dictionary) -> bool:
 			var source := "firm" if _spec["firms"].has(actor) else str(actors[actor]["control"])
 			if entry["source"] != source or source == "dormant" or (source != "player" and not str(id).begins_with("auto:" + actor + ":") and not _delegated_firm_credit(value,entry)) or (source == "player" and actor != _world.player_state.player_id()):
 				return _fail("Command authority provenance conflict")
+	if not _validate_saved_order_shapes(value): return false
 	if not _valid_material_history(value): return _fail("Invalid one-time material organization resolution history")
 	for actor: Variant in value["work_queue"]:
 		if not _valid_work_queue(value, actor): return _fail("Invalid pending aggregate or named labor interval")
 	var expected_reservations: Dictionary = {}
 	var orders := value["orders"] as Dictionary
-	if orders.size() != int(value["next_order"]) - 1:
-		return _fail("R1 duplicate/missing order IDs")
 	for number: int in range(1, int(value["next_order"])):
 		var id := "order:" + str(number)
-		if not orders.get(id) is Dictionary:
-			return _fail("Missing R1 order ID")
 		var order := orders[id] as Dictionary
-		if not EconomySliceConfig._fields(order, ["id", "kind", "buyer", "seller", "buyer_site", "seller_site", "need_category", "good", "quantity", "pending", "transit", "delivered", "cancelled", "price", "action_id", "accepted_day", "accepted_minute", "denomination", "buyer_account", "seller_account", "route_id", "from_place_id", "to_place_id", "route_legs"], ["custody_fact", "source_custody_site", "destination_custody_site", "material_authorizations"]) or order["id"] != id or not order["buyer_site"] is String or not order["seller_site"] is String or not stock.has(_destination(order)) or (not _spec["firms"].has(order["seller"]) and order["kind"] != "PERSONAL_FREIGHT") or order["good"] not in _goods:
+		if not stock.has(_destination(order)) or (not _spec["firms"].has(order["seller"]) and order["kind"] != "PERSONAL_FREIGHT") or order["good"] not in _goods:
 			return _fail("Order site or goods references are invalid")
-		for key: String in ["quantity", "pending", "transit", "delivered", "cancelled", "price", "accepted_day", "accepted_minute"]:
-			if not FormalLedgerState.valid_amount(order[key]):
-				return _fail("Invalid order amount")
 		if int(order["quantity"]) <= 0 or int(order["accepted_day"]) > int(value["day"]) or int(order["accepted_minute"]) > _world.game_clock.total_minutes() or int(order["quantity"]) != int(order["pending"]) + int(order["transit"]) + int(order["delivered"]) + int(order["cancelled"]) or not _valid_order_route(order, orders, value["commands"]) or not _valid_order_action(value, order):
 			return _fail("Order responsibility, route or accepted action conflict")
 

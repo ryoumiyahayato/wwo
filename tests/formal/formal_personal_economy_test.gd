@@ -222,6 +222,20 @@ func _test_material_renewal() -> void:
 			# Separate manual authority/revocation checks on detached worlds. These
 			# commands are not evidence for the autonomous continued transaction.
 			var saved := b.persistence.snapshot()
+			for variant: String in ["id", "accepted_minute", "quantity", "material_authorizations"]:
+				var damaged := saved.duplicate(true)
+				# Damage the first grain order: all traversed orders must be safe
+				# before issuance history or cross-order quota arithmetic begins.
+				for order: Dictionary in damaged.economy_native.orders.values():
+					if order.good != "grain": continue
+					if variant == "material_authorizations": order[variant] = []
+					else: order.erase(variant)
+					break
+				print("MATERIAL_RESTORE_SHAPE ", variant)
+				var original_world := b.world
+				var rejected := b.persistence.restore_candidate(damaged)
+				test.expect(not rejected.success, "Damaged saved order is rejected: " + variant)
+				test.expect(b.world == original_world and b.persistence.snapshot() == saved, "Failed order restore leaves current world exact: " + variant)
 			for row: Dictionary in settings.material_renewals:
 				var fork := b.persistence.restore_candidate(saved)
 				test.expect(fork.success, "Detached renewal state restores for manual revocation control")
