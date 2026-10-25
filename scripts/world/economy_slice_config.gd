@@ -25,7 +25,7 @@ const FIELDS: Array[String] = ["format", "case_id", "actors", "firms", "jobs", "
 const Credit = preload("res://scripts/world/economy_bilateral_credit.gd")
 const Exchange = preload("res://scripts/world/economy_currency_exchange.gd")
 const Assets = preload("res://scripts/world/economy_asset_market.gd")
-const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations", "opening_organizations", "opening_residents", "opening_job_choice", "liquidity_policies", "labor_response_policies", "firm_finance_authorities", "cost_accounting", "service_market", "lease_market", "retail_sites", "commercial_information", "labor_market", "wind_down", "capital_resale", "capital_transport", "local_quotation_experiment", "equity_call_market", "equity_primary", "equity_distribution", "corporate_decisions"]
+const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations", "opening_organizations", "opening_residents", "material_renewals", "opening_job_choice", "liquidity_policies", "labor_response_policies", "firm_finance_authorities", "cost_accounting", "service_market", "lease_market", "retail_sites", "commercial_information", "labor_market", "wind_down", "capital_resale", "capital_transport", "local_quotation_experiment", "equity_call_market", "equity_primary", "equity_distribution", "corporate_decisions"]
 ## Extra accounts declare finite minor-unit endowments, including zero accounts.
 ## FX offers use target-minor/source-minor rational rates and a fixed source fee.
 ## Routes are directed shared physical edges, with same-currency freight per unit.
@@ -64,7 +64,7 @@ static func valid_opening_organizations(settings: Dictionary) -> bool:
 	var rows: Variant = settings.get("opening_organizations", [])
 	if not rows is Array or rows.size() > 2: return false
 	if rows.is_empty(): return not settings.has("opening_job_choice")
-	var dual: bool = settings.get("case_id") in ["FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1", FormalEconomicOpening.SECOND_WORKER_CASE]
+	var dual: bool = settings.get("case_id") in ["FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1", FormalEconomicOpening.SECOND_WORKER_CASE, FormalEconomicOpening.MATERIAL_RENEWAL_CASE]
 	if not settings.get("host_personal_accounts", false) or (not dual and settings.get("case_id") != "FORMAL_PARIS_WORKSHOP_OPENING_R1") or rows.size() != (2 if dual else 1): return false
 	var firms: Variant = settings.get("firms", [])
 	if not firms is Array or firms.size() != rows.size(): return false
@@ -95,7 +95,7 @@ static func valid_opening_organizations(settings: Dictionary) -> bool:
 	return true
 
 static func valid_opening_residents(settings: Dictionary) -> bool:
-	var candidate: bool = settings.get("case_id") == FormalEconomicOpening.SECOND_WORKER_CASE
+	var candidate: bool = settings.get("case_id") in [FormalEconomicOpening.SECOND_WORKER_CASE, FormalEconomicOpening.MATERIAL_RENEWAL_CASE]
 	var rows: Variant = settings.get("opening_residents", [])
 	if not rows is Array or rows.size() > (2 if candidate else 1): return false
 	if candidate and rows.size() != 2: return false
@@ -133,11 +133,33 @@ static func valid_opening_residents(settings: Dictionary) -> bool:
 		if players != 1: return false
 	return true
 
+static func valid_material_renewals(settings: Dictionary) -> bool:
+	if settings.get("case_id") != FormalEconomicOpening.MATERIAL_RENEWAL_CASE: return not settings.has("material_renewals")
+	var rows: Variant = settings.get("material_renewals")
+	if not rows is Array or rows.size() != 2: return false
+	var seen: Dictionary = {}
+	for row: Variant in rows:
+		if not row is Dictionary or not FormalLedgerState.exact_fields(row, ["id", "issuer", "firm", "operation", "counterparty", "good", "min_price", "max_price", "quantity_limit", "stock_floor", "valid_from", "valid_until", "basis"]): return false
+		var source: Dictionary = {}
+		for opening: Dictionary in settings.get("opening_organizations", []):
+			if opening["firm_id"] == row["firm"]: source = opening
+		if source.is_empty() or seen.has(row["firm"]) or row["issuer"] != source["organization_id"] or row["id"] != "material_mandate:" + str(row["firm"]).trim_prefix("firm:") + ":renewal_1" or row["basis"] != "GENERATED_OPENING_ONE_TIME_ORGANIZATION_RESOLUTION": return false
+		var trade: Dictionary = source.get("material_trade", {})
+		if trade.is_empty() or not trade["enabled"] or trade["quantity_limit"] != 8: return false
+		for field: String in ["operation", "counterparty", "good", "stock_floor"]:
+			if row[field] != trade[field]: return false
+		for field: String in ["min_price", "max_price", "quantity_limit", "valid_from", "valid_until"]:
+			if not FormalLedgerState.valid_amount(row[field]): return false
+		if row["min_price"] != 1 or row["max_price"] != 1 or row["quantity_limit"] < 1 or row["quantity_limit"] > 4 or row["valid_from"] != 32 * 1440 or row["valid_until"] != 36 * 1440: return false
+		seen[row["firm"]] = true
+	return true
+
 static func valid(value: Dictionary) -> bool:
 	if not CapitalTransport.valid_configuration(value): return false
 	if not valid_development_organizations(value): return false
 	if not valid_opening_organizations(value): return false
 	if not valid_opening_residents(value): return false
+	if not valid_material_renewals(value): return false
 	if not Budget.valid_rules(value.get("procurement_budgets", [])) or not SharedTransport.valid_configuration(value.get("shared_transport", [])) or not SharedTransport.valid_facilities(value.get("transport_facilities", [])): return false
 	if not Liquidity.valid(value) or not CostAllocation.valid_configuration(value): return false
 	if value.has("place_population_bindings") and (not value.get("host_personal_accounts", false) or not FormalWorldPopulationState.valid_place_population_bindings(value["place_population_bindings"])): return false

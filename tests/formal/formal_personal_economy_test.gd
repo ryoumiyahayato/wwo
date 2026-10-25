@@ -11,6 +11,10 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	if "--material-renewal-trade" in OS.get_cmdline_user_args():
+		_test_material_renewal()
+		test.finish(self, "Formal Paris finite material renewal")
+		return
 	if "--second-worker-material-trade" in OS.get_cmdline_user_args():
 		_test_second_worker_material_trade()
 		test.finish(self, "Formal second Paris worker supply")
@@ -20,6 +24,7 @@ func _run() -> void:
 		test.finish(self, "Formal unattended Paris supply")
 		return
 	if "--native-material-trade" in OS.get_cmdline_user_args():
+		_test_material_renewal()
 		_test_second_worker_material_trade()
 		_test_unattended_material_trade()
 		_test_native_material_trade()
@@ -127,6 +132,161 @@ func _test_unattended_material_trade() -> void:
 		if date in [42, 45]: b = _material_disk_restore(b)
 	test.equal(first_need, 42, "Ordinary autonomous bakery first needs grain on day42")
 	test.equal(b.world.game_clock.total_minutes(), 45 * 1440, "Unattended observation continues through day45")
+
+
+func _test_material_renewal() -> void:
+	var settings := FormalEconomicOpening.material_renewal(FRA)
+	var ordinary := FormalEconomicOpening.second_worker(FRA)
+	var seller := "firm:opening_paris_workshop"
+	var buyer := "firm:opening_paris_bakery"
+	var site := "site:opening_paris_workshop:paris"
+	var destination := "site:opening_paris_bakery:paris"
+	if "--formal-material-renewal-opening" in OS.get_cmdline_user_args():
+		test.equal(FormalEconomicOpening.for_source(FRA), settings, "Formal selector explicitly selects finite renewal candidate")
+	test.expect(EconomySliceConfig.valid(settings), "Finite renewal requires the complete candidate and both organization resolutions")
+	for field: String in ["firms", "jobs", "actors", "opening_residents", "labor_response_policies", "information", "retail_sites", "firm_operations"]:
+		test.equal(settings[field], ordinary[field], "Renewal changes no resources or operating parameter: " + field)
+	for i: int in range(2): test.equal(settings.opening_organizations[i].material_trade, ordinary.opening_organizations[i].material_trade, "Original eight-grain genesis grant is unchanged")
+	for variant: String in ["old_case", "issuer", "limit", "expiry", "floor", "duplicate", "missing"]:
+		var bad := settings.duplicate(true)
+		match variant:
+			"old_case": bad.case_id = ordinary.case_id
+			"issuer": bad.material_renewals[0].issuer = bad.opening_organizations[1].organization_id
+			"limit": bad.material_renewals[0].quantity_limit = 5
+			"expiry": bad.material_renewals[0].valid_until = 100 * 1440
+			"floor": bad.material_renewals[0].stock_floor = 0
+			"duplicate": bad.material_renewals[1] = bad.material_renewals[0].duplicate(true)
+			"missing": bad.material_renewals.pop_back()
+		test.expect(not EconomySliceConfig.valid_material_renewals(bad), "Finite organization resolution rejects " + variant)
+	var b := WorldBootstrap.new().build(null, [], [], FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, true, settings)
+	test.expect(b.success and b.world.economy_r1 != null, "Renewal candidate builds through formal bootstrap: " + b.error + (b.world.native_economy_error if b.world != null else ""))
+	if not b.success or b.world.economy_r1 == null: return
+	var last_purchase: Dictionary = {}
+	for date: int in range(1, 37):
+		b.simulation_step.advance_minutes(1440)
+		var e := b.world.economy_r1
+		test.equal(e._commands.values().filter(func(x: Dictionary) -> bool: return x.envelope.actor == PERSON).size(), 0, "Autonomous renewal run has zero player requests")
+		var grain_orders := e._orders.values().filter(func(o: Dictionary) -> bool: return o.good == "grain")
+		var delivered := 0
+		var receipts: Array[String] = []
+		for order: Dictionary in grain_orders:
+			delivered += int(order.delivered)
+			test.equal(e._commands[order.action_id].source, "firm", "Only original enterprise procurement creates renewal purchases")
+			test.equal(order.pending + order.transit, 0, "Renewed onsite order has actual completed handover")
+			test.expect(e._material_order_valid(order, e._orders, e._commands), "Each order retains both original admission authorizations")
+			for receipt: Dictionary in e._delivery_receipts.values():
+				if receipt.order_id == order.id: receipts.append(receipt.id)
+		var adopted := 0
+		for portion: Dictionary in e._lots.portions.values():
+			if portion.owner == buyer and portion.good == "grain" and portion.acquisition_id in receipts: adopted += int(portion.consumed)
+		for row: Dictionary in settings.material_renewals:
+			var issue_id := e._material_resolution_id(row)
+			test.equal(e._commands.has(issue_id), date >= 32, "One predeclared resolution executes only after first quota exhaustion and effective date")
+			var original := e._material_genesis_id(row.firm, row.operation)
+			test.equal(e._material_used(row.firm, row.operation, original), mini(8, delivered), "Old orders remain allocated to the original eight-grain grant")
+			test.equal(e._material_used(row.firm, row.operation, row.id), maxi(0, delivered - 8), "New orders alone debit the independent four-grain grant")
+			if date >= 32:
+				test.equal(e._commands[issue_id].source, "firm", "Organization decision executes through original enterprise command source")
+				test.equal(e._commands[issue_id].envelope.command.minute, 32 * 1440, "Resolution retains its actual issue time")
+		if date == 30 or date == 31: test.equal(delivered, 8, "First exhausted batch is not enlarged by procurement authority")
+		if date == 32: test.expect(delivered > 8, "Effective independent SELL and PROCURE grants permit real continued procurement")
+		if 32 <= date and date <= 34:
+			test.expect(int(e._stocks[site].grain) >= maxi(4, int(e._input_need(site, "grain").target)), "Renewed sales preserve actual stock floor and production protection")
+		if date >= 34: test.equal(delivered, 12, "Both independent second batches stop after exactly four grain")
+		var purchases := e._commands.values().filter(func(x: Dictionary) -> bool: return x.envelope.actor == buyer and x.envelope.command.kind == "buy" and x.envelope.command.minute == date * 1440)
+		if not purchases.is_empty(): last_purchase = purchases.back()
+		if date == 31 or date >= 35:
+			test.expect(not purchases.is_empty(), "Original executor still submits the actual input shortage")
+			for entry: Dictionary in purchases: test.equal(entry.result.reason, "INSUFFICIENT_MATERIAL_SALE_SURPLUS_OR_MANDATE", "Exhaustion or expiry preserves original procurement refusal")
+		if date in [30, 31, 32, 34, 35, 36]:
+			_multi_conservation(b, 4300)
+			print("FINITE_RENEWAL_PARIS ", JSON.stringify({"day": date, "delivered": delivered, "adopted": adopted, "remaining": [e._material_remaining(seller, "SELL"), e._material_remaining(buyer, "PROCURE")], "purchases": purchases, "stocks": e._stocks, "wages": e._open_wages.size(), "cash": [b.world.ledger_state.balance(e._account(seller)), b.world.ledger_state.balance(e._account(buyer))]}))
+		if date in [30, 32, 35, 36]:
+			b = _material_disk_restore(b)
+			e = b.world.economy_r1
+			if not last_purchase.is_empty():
+				var before := b.persistence.snapshot()
+				test.equal(e.submit_internal(buyer, last_purchase.envelope.command), last_purchase.result, "Restored original procurement command replays its receipt or refusal")
+				test.equal(b.persistence.snapshot(), before, "Restored procurement replay duplicates no goods, cash or liability")
+		if date >= 32 and date in [32, 36]:
+			for row: Dictionary in settings.material_renewals:
+				var issued: Dictionary = e._commands[e._material_resolution_id(row)]
+				var before := b.persistence.snapshot()
+				test.equal(e.submit_internal(row.firm, issued.envelope.command), issued.result, "Identical issue replays even after expiry")
+				test.equal(b.persistence.snapshot(), before, "Repeated issue creates no second allowance")
+				var retry: Dictionary = issued.envelope.command.duplicate(true)
+				retry.action_id += ":second_attempt:" + str(date)
+				retry.minute = date * 1440
+				test.equal(e.submit_internal(row.firm, retry).reason, "MATERIAL_RESOLUTION_ALREADY_EXECUTED", "New command identity cannot issue a second grant")
+		if date == 32:
+			# Separate manual authority/revocation checks on detached worlds. These
+			# commands are not evidence for the autonomous continued transaction.
+			var saved := b.persistence.snapshot()
+			for variant: String in ["id", "accepted_minute", "quantity", "material_authorizations"]:
+				var damaged := saved.duplicate(true)
+				# Damage the first grain order: all traversed orders must be safe
+				# before issuance history or cross-order quota arithmetic begins.
+				for order: Dictionary in damaged.economy_native.orders.values():
+					if order.good != "grain": continue
+					if variant == "material_authorizations": order[variant] = []
+					else: order.erase(variant)
+					break
+				print("MATERIAL_RESTORE_SHAPE ", variant)
+				var original_world := b.world
+				var rejected := b.persistence.restore_candidate(damaged)
+				test.expect(not rejected.success, "Damaged saved order is rejected: " + variant)
+				test.expect(b.world == original_world and b.persistence.snapshot() == saved, "Failed order restore leaves current world exact: " + variant)
+			for row: Dictionary in settings.material_renewals:
+				var fork := b.persistence.restore_candidate(saved)
+				test.expect(fork.success, "Detached renewal state restores for manual revocation control")
+				if not fork.success: continue
+				var f := fork.world.economy_r1
+				var facts := _material_facts(fork)
+				var command := {"action_id": f._material_resolution_id(row, true), "minute": 32 * 1440, "kind": "revoke_material_mandate", "payload": {"mandate_id": row.id}}
+				test.expect(f.submit_internal(row.firm, command).accepted, "Original organization executor can revoke its own fixed mandate")
+				test.equal(f._material_remaining(row.firm, row.operation), 0, "Revocation removes the still-unused second-batch capacity")
+				test.equal(_material_facts(fork), facts, "Revocation preserves accepted cash, lots, orders and wages")
+				fork = _material_disk_restore(fork)
+				fork.simulation_step.advance_minutes(1440)
+				f = fork.world.economy_r1
+				test.equal(f._orders.values().filter(func(o: Dictionary) -> bool: return o.good == "grain").reduce(func(total: int, o: Dictionary) -> int: return total + int(o.delivered), 0), 10, "Either side's revocation independently blocks further purchases")
+				var npc := "person:formal_generated_country_fra_0003"
+				command = {"action_id": "auto:" + npc + ":invalid_renewal", "minute": 33 * 1440, "kind": "issue_material_mandate", "payload": {"mandate_id": row.id}}
+				test.equal(f.submit_internal(npc, command).reason, "NO_MATERIAL_ISSUING_AUTHORITY", "Ordinary employee has no organization issuing authority")
+				var other: Dictionary = settings.material_renewals[1] if row.operation == "SELL" else settings.material_renewals[0]
+				test.equal(f._material_remaining(other.firm, other.operation), 2, "Unrevoked counterparty retains its own unused two-grain balance")
+				fork.simulation_step.advance_minutes(3 * 1440)
+				f = fork.world.economy_r1
+				test.equal(f._material_remaining(other.firm, other.operation), 0, "Deadline expires unused capacity without spending it")
+				test.equal(f._material_used(other.firm, other.operation, other.id), 2, "Expiry preserves the actual partial use of the grant")
+				fork = _material_disk_restore(fork)
+			var invalid := saved.duplicate(true)
+			var native: Dictionary = invalid.economy_native
+			native.commands.erase(e._material_resolution_id(settings.material_renewals[0]))
+			test.expect(not b.persistence.restore_candidate(invalid).success, "Saved renewed orders cannot lose their issuing command")
+			invalid = saved.duplicate(true)
+			invalid.economy_native.commands[e._material_resolution_id(settings.material_renewals[0])].envelope.command.kind = "buy"
+			test.expect(not b.persistence.restore_candidate(invalid).success, "Another accepted command cannot impersonate the issuance record")
+			invalid = saved.duplicate(true)
+			for order: Dictionary in invalid.economy_native.orders.values():
+				if order.good == "grain" and order.accepted_minute < 32 * 1440:
+					order.material_authorizations.SELL = settings.material_renewals[0].id
+					break
+			test.expect(not b.persistence.restore_candidate(invalid).success, "Old order cannot be reassigned to a later issuing authority")
+			var excess := e._orders.duplicate(true)
+			for order: Dictionary in excess.values():
+				if order.good == "grain" and order.accepted_minute == 32 * 1440:
+					order.quantity += 4
+					test.expect(not e._material_order_valid(order, excess, e._commands), "Restore quota check counts saved orders against each separate grant")
+					break
+	var e := b.world.economy_r1
+	var paid := 0
+	for tx: Dictionary in b.world.ledger_state.transactions():
+		if tx.kind == "goods" and e._orders[tx.reference_id].good == "grain": paid += int(tx.amount)
+	test.equal(paid, 12, "Twelve actually delivered grain have twelve original cash payments")
+	for wage: Dictionary in e._wages.values():
+		if wage.due_day <= e.day: test.equal(wage.remaining, 0, "Finite renewal interval has no unpaid matured wages")
+	test.equal(b.world.game_clock.total_minutes(), 36 * 1440, "Finite observation stops after second exhaustion and expiry")
 
 
 func _test_second_worker_material_trade() -> void:
