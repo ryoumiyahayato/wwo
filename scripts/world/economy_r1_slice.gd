@@ -755,6 +755,9 @@ func _accept(actor: String, command: Dictionary, internal: bool = false) -> Dict
 	if not FormalLedgerState.exact_fields(command, ["action_id", "minute", "kind", "payload"]) or not command["action_id"] is String or command["action_id"].is_empty() or typeof(command["minute"]) != TYPE_INT or not command["kind"] is String or not command["payload"] is Dictionary:
 		return _result(false, "MALFORMED_COMMAND")
 	var action_id := str(command["action_id"])
+	var material_owner := _material_action_owner(action_id)
+	if not material_owner.is_empty() and actor != material_owner:
+		return _result(false, "NO_MATERIAL_ISSUING_AUTHORITY")
 	if _world.personal_economy_state._livelihood_changes.has(action_id): return _result(false, "DOMAIN_ACTION_ID_CONFLICT")
 	if _world.military_state.active_actions.has(action_id) or (_world.person_overlay.has_travel_action(action_id) and not _commands.has(action_id)):
 		return _result(false, "DOMAIN_ACTION_ID_CONFLICT")
@@ -1181,6 +1184,15 @@ func _material_resolution_id(row: Dictionary, revoke: bool = false) -> String:
 	if revoke and row.has("revocation_id"): return "auto:" + str(row.firm) + ":material_revoke:" + str(row.revocation_id)
 	return "auto:" + str(row.firm) + (":material_revoke:" if revoke else ":material_renewal:") + str(row.id)
 
+## A refused foreign request must not occupy a standing decision's command ID,
+## regardless of its action kind. Internal callers already keep actor prefixes;
+## public player commands and saved rejected entries need this exact-ID check.
+func _material_action_owner(action_id: String) -> String:
+	if not action_id.contains(":material_"): return ""
+	for row: Dictionary in _material_resolutions():
+		if action_id == _material_resolution_id(row) or action_id == _material_resolution_id(row, true): return row.firm
+	return ""
+
 func _material_resolution_record(row: Dictionary, revoke: bool = false, saved_commands: Variant = null) -> Dictionary:
 	var commands: Dictionary = _commands if saved_commands == null else saved_commands
 	var entry: Dictionary = commands.get(_material_resolution_id(row, revoke), {})
@@ -1240,6 +1252,8 @@ func _auto_material_renewals() -> void:
 func _valid_material_history(value: Dictionary) -> bool:
 	for entry: Dictionary in value.commands.values():
 		var command: Dictionary = entry.envelope.command
+		var material_owner := _material_action_owner(command.action_id)
+		if not material_owner.is_empty() and (entry.envelope.actor != material_owner or entry.source != "firm"): return false
 		if command.kind not in ["issue_material_mandate", "revoke_material_mandate"] or not entry.result.accepted: continue
 		var row: Dictionary = {}
 		for candidate: Dictionary in _material_resolutions():
