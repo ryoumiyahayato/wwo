@@ -404,6 +404,8 @@ class TerrainPreparation:
 	var _line_arrays: Array = []
 	var _woodland_positions: Array[Vector3] = []
 	var _current: Callable
+	var _context_image: Image
+	var _context_bounds := Rect2()
 
 	func prepare(surface: Dictionary, frame: Basis, lines: Array[Dictionary], covers: Array[Dictionary], current: Callable) -> Dictionary:
 		_surface_reference = surface
@@ -414,6 +416,13 @@ class TerrainPreparation:
 		_local_surface_anchor = Vector2(float(anchor[0]),float(anchor[1]))
 		_surface_chart_anchor_km = RegionProjection.forward(GlobeProjection.lon_lat_to_unit(_local_surface_anchor),frame)
 		_surface_base_height = _surface_height(_local_surface_anchor)
+		var context := (surface.get("presentation",{}) as Dictionary).get("context_height_asset",{}) as Dictionary
+		if not context.is_empty():
+			var decoded := GeographyLoader.decode_relief("local_context", {"local_context":context})
+			if not decoded.has("image"): return {"error":"外围参考高程无法解码"}
+			_context_image = decoded.image
+			var bounds := context.bounds_lon_lat as Array
+			_context_bounds = Rect2(float(bounds[0]),float(bounds[1]),float(bounds[2])-float(bounds[0]),float(bounds[3])-float(bounds[1]))
 		if not current.call(): return {}
 		_make_water_mask()
 		if not current.call(): return {}
@@ -616,7 +625,7 @@ class TerrainPreparation:
 			var elevation := maxf(0.0,vertices[index].y+_surface_base_height)
 			relief_uv.append(Vector2(log(1.0+elevation/400.0)/log(16.0),0.0))
 			var grid := Vector2(index%int(d.width),index/int(d.width))
-			var edge := _edge_weight(grid)
+			var edge := 1.0 if _context_image!=null else _edge_weight(grid)
 			colors.append(Color(0,0,0,edge))
 		# A data edge is not a descent to the anchor's elevation. Keep every
 		# native height and its actual normal. Only the material's geographic
@@ -676,6 +685,11 @@ class TerrainPreparation:
 				(pick_groups[tile] as Array).append_array(render_indices.slice(first_index,render_indices.size()))
 		# Reorder indices only. The same triangles, native heights and holes
 		# render unchanged; each pick AABB covers an 8x8 source-cell area.
+		if _context_image!=null:
+			var context_arrays := _context_ring(render_vertices,render_normals,render_colors,render_survey_uv,render_relief_uv)
+			render_vertices = context_arrays.vertices; render_normals = context_arrays.normals
+			render_colors = context_arrays.colors; render_survey_uv = context_arrays.uv; render_relief_uv = context_arrays.uv2
+			pick_groups[Vector2i(-1,-1)] = context_arrays.indices
 		render_indices = PackedInt32Array()
 		_surface_pick_chunks.clear()
 		for group: Array in pick_groups.values():
@@ -694,6 +708,62 @@ class TerrainPreparation:
 		_surface_indices = render_indices
 		_terrain_arrays = arrays
 		_surface_water_cells.clear()
+
+	func _context_height(coordinate: Vector2) -> float:
+		# R42's documented log-height channel, before colour composition. It is
+		# quantized Copernicus DSM at ~150x217 m, never swissALTI3D measurement.
+		var uv := Vector2((coordinate.x-_context_bounds.position.x)/_context_bounds.size.x,(_context_bounds.end.y-coordinate.y)/_context_bounds.size.y)
+		var pixel := uv*Vector2(_context_image.get_size())-Vector2.ONE*.5
+		var base := Vector2i(pixel.floor())
+		var fraction := pixel-Vector2(base)
+		var values: Array[float] = []
+		for offset: Vector2i in [Vector2i(0,0),Vector2i(1,0),Vector2i(0,1),Vector2i(1,1)]:
+			var point := (base+offset).clamp(Vector2i.ZERO,_context_image.get_size()-Vector2i.ONE)
+			values.append(200.0*(pow(26.0,_context_image.get_pixelv(point).r)-1.0))
+		return lerpf(lerpf(values[0],values[1],fraction.x),lerpf(values[2],values[3],fraction.x),fraction.y)
+
+	func _context_ring(vertices: PackedVector3Array, normals: PackedVector3Array, colors: PackedColorArray, uv: PackedVector2Array, uv2: PackedVector2Array) -> Dictionary:
+		var d := _surface_reference
+		var extent := Vector2i(int(d.width)-1,int(d.height)-1)
+		var xs: Array[int] = []; var ys: Array[int] = []
+		for axis: int in range(2):
+			var values: Array[int] = xs if axis==0 else ys
+			for cell: int in range(-128,0,8): values.append(cell)
+			for cell: int in range(extent[axis]+1): values.append(cell)
+			for cell: int in range(extent[axis]+8,extent[axis]+129,8): values.append(cell)
+		var lookup := PackedInt32Array(); var indices := PackedInt32Array()
+		for y: int in ys:
+			if not _current.call(): return {"vertices":vertices,"normals":normals,"colors":colors,"uv":uv,"uv2":uv2,"indices":[]}
+			for x: int in xs:
+				if x>=0 and x<=extent.x and y>=0 and y<=extent.y:
+					lookup.append(y*int(d.width)+x);continue
+				var grid := Vector2(x,y)
+				var edge := grid.clamp(Vector2.ZERO,Vector2(extent))
+				var coordinate := Vector2(float(d.west_cell_centre)+x*float(d.step_degrees),float(d.north_cell_centre)-y*float(d.step_degrees))
+				var boundary := Vector2(float(d.west_cell_centre)+edge.x*float(d.step_degrees),float(d.north_cell_centre)-edge.y*float(d.step_degrees))
+				var metric := _surface_metric(GlobeProjection.lon_lat_to_unit(coordinate))
+				var distance := metric.distance_to(_surface_metric(GlobeProjection.lon_lat_to_unit(boundary)))
+				# A labelled display transition reconciles DSM/DTM and vertical datum
+				# differences in a 400m collar; the acquired native samples stay intact.
+				var h := _context_height(coordinate)+(_surface_height(boundary)-_context_height(boundary))*(1.0-smoothstep(0.0,400.0,distance))
+				var rim := minf(minf(x+128.0,extent.x+128.0-x),minf(y+128.0,extent.y+128.0-y))
+				var weight := smoothstep(0.0,24.0,rim)
+				lookup.append(vertices.size())
+				vertices.append(Vector3(metric.x,(h-_surface_base_height)*weight,-metric.y))
+				normals.append(Vector3.ZERO);colors.append(Color(0,0,0,weight))
+				uv.append(grid/Vector2(extent));uv2.append(Vector2(log(1.0+maxf(0.0,h)/400.0)/log(16.0),0.0))
+		for row: int in range(ys.size()-1):
+			for column: int in range(xs.size()-1):
+				if xs[column]>=0 and xs[column+1]<=extent.x and ys[row]>=0 and ys[row+1]<=extent.y: continue
+				var a := row*xs.size()+column;var b := a+1;var c := a+xs.size();var e := c+1
+				indices.append_array([lookup[a],lookup[c],lookup[b],lookup[b],lookup[c],lookup[e]])
+		for offset: int in range(0,indices.size(),3):
+			var a := indices[offset];var b := indices[offset+1];var c := indices[offset+2]
+			var normal := (vertices[b]-vertices[a]).cross(vertices[c]-vertices[a])
+			for id: int in [a,b,c]:
+				if id>=_surface_vertices.size(): normals[id]+=normal
+		for id: int in range(_surface_vertices.size(),normals.size()): normals[id]=normals[id].normalized()
+		return {"vertices":vertices,"normals":normals,"colors":colors,"uv":uv,"uv2":uv2,"indices":Array(indices)}
 
 	func _make_surface_cover() -> void:
 		_cover_arrays = []

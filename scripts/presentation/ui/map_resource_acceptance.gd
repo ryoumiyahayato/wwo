@@ -38,12 +38,21 @@ var _last_state: String = ""
 var _ready_to_capture: bool = false
 var _visual_state: String = "NOT_OPENED"
 var _saved_controller: Dictionary = {}
+var _saved_region: Dictionary = {}
+var _saved_max_fps: int = -1
+var _restored: bool = false
 
 func configure(map: GlobeRenderer, camera_controller: GlobeController) -> void:
 	renderer = map
 	renderer.inspection_preview = true
 	controller = camera_controller
 	_saved_controller = {"orientation": controller._orientation, "zoom": controller.zoom, "mode": controller.map_mode, "polity": controller.selected_polity_id, "place": controller.selected_place_id}
+	for field: String in ["active", "local_active", "local_center_km", "local_place_id", "local_min_km_per_pixel", "tangent_frame", "origin", "km_per_pixel", "bearing", "extent_km"]:
+		_saved_region[field] = controller.region_camera.get(field)
+	_saved_controller["initial_framing_pending"] = controller.initial_framing_pending
+	controller.suspend_motion()
+	_saved_max_fps = Engine.max_fps
+	Engine.max_fps = mini(30, _saved_max_fps) if _saved_max_fps > 0 else 30
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -235,11 +244,14 @@ func _process(_delta: float) -> void:
 
 func _show_selected() -> void:
 	if _open.disabled or _worker != null: return
-	renderer.local_content.clear_inspection_source()
-	renderer.local_content.release()
-	if _row.get("kind") == "candidate" and not renderer.local_content.set_inspection_source(str(_row["path"]), str(_row["map_id"])):
-		_state.text = "候选未安装到原 LOCAL 加载器。"
-		return
+	var content := renderer.local_content.content
+	var same_source := content!=null and content.errors.is_empty() and str(content.metadata.get("content_path", ""))==str(_row["path"])
+	if not same_source:
+		renderer.local_content.clear_inspection_source()
+		renderer.local_content.release()
+		if _row.get("kind") == "candidate" and not renderer.local_content.set_inspection_source(str(_row["path"]), str(_row["map_id"])):
+			_state.text = "候选未安装到原 LOCAL 加载器。"
+			return
 	_active_id = str(_row["id"])
 	_active_generation = _selection_generation
 	_scale.select(1 if Catalog.detail_scale_needed(_row) else 0)
@@ -351,7 +363,13 @@ func _capture_feedback() -> void:
 	_badge.show()
 	_panel.hide()
 	await RenderingServer.frame_post_draw
+	# The completed LOCAL child is published into the cached REGION parent.
+	# Read the root only after that parent and the badge have also drawn.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
 	var image := get_viewport().get_texture().get_image()
+	_refresh_state()
 	var report := _snapshot(unit, version)
 	_panel.show()
 	_badge.hide()
@@ -414,6 +432,14 @@ func _snapshot(unit: Vector3, version: Dictionary) -> Dictionary:
 				"mesh_present": view._local_surface != null,
 				"preparing": view.landmark_preparing(),
 				"visible_models": view._landmark_presented.keys()
+			},
+			"terrain_reference": {
+				"survey_bounds_lon_lat": _v4(view._surface_material.get_shader_parameter("survey_bounds")) if view._surface_material!=null else [],
+				"display_spacing_m": view._surface_reference.get("display_spacing_m_approx",[]),
+				"context_height_asset": (view._surface_reference.get("presentation",{}) as Dictionary).get("context_height_asset",{}),
+				"context_transition_metres": 400 if (view._surface_reference.get("presentation",{}) as Dictionary).has("context_height_asset") else 0,
+				"context_role": "quantized regional DSM and display interpolation; not native DTM measurement or physics",
+				"local_render_pixels": _v2(view._local_render_rect.size)
 			},
 			"map_notices": _notices.duplicate(), "engine_error_log": _error_log()
 		},
@@ -484,20 +510,29 @@ func _choose_manifest() -> void:
 
 func _close() -> void:
 	if _capturing: return
+	_restore_preview()
+	closed.emit()
+	queue_free()
+
+func _restore_preview() -> void:
+	if _restored: return
+	_restored = true
+	if _saved_max_fps >= 0: Engine.max_fps = _saved_max_fps
+	if not is_instance_valid(renderer) or not is_instance_valid(controller): return
+	controller.suspend_motion()
 	renderer.inspection_preview = false
 	renderer.region_view.set_inspection_elevation(-1.0)
 	renderer.local_content.clear_inspection_source()
-	controller.region_camera.leave_local()
-	controller.region_camera.active = false
+	for field: String in _saved_region: controller.region_camera.set(field, _saved_region[field])
+	controller.initial_framing_pending = bool(_saved_controller["initial_framing_pending"])
 	controller._orientation = _saved_controller["orientation"]
 	controller.zoom = float(_saved_controller["zoom"])
 	controller.set_map_mode(str(_saved_controller["mode"]))
 	controller.select(str(_saved_controller["polity"]), str(_saved_controller["place"]))
 	controller.view_changed.emit()
-	closed.emit()
-	queue_free()
 
 func _exit_tree() -> void:
+	_restore_preview()
 	if _worker != null and _worker.is_started(): _worker.wait_to_finish()
 
 static func _v2(value: Vector2) -> Array:
@@ -505,3 +540,6 @@ static func _v2(value: Vector2) -> Array:
 
 static func _v3(value: Vector3) -> Array:
 	return [value.x, value.y, value.z]
+
+static func _v4(value: Vector4) -> Array:
+	return [value.x, value.y, value.z, value.w]

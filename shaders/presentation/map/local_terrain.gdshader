@@ -8,6 +8,7 @@ uniform float cartographic_relief_weight = 0.84;
 uniform mat3 normal_to_geographic = mat3(1.0);
 uniform bool woodland_enabled = false;
 uniform bool local_palette_enabled = false;
+uniform bool native_detail = false;
 uniform vec4 ground_low_tone : source_color = vec4(0.41,0.45,0.37,1.0);
 uniform vec4 ground_high_tone : source_color = vec4(0.60,0.57,0.50,1.0);
 uniform sampler2D woodland_mask : filter_linear, repeat_disable;
@@ -53,22 +54,29 @@ void fragment() {
 		// Modern coverage is a bounded colour input on this same DEM surface.
 		// Linear sampling softens only the mask texel edge; no invented trees,
 		// altitude-based vegetation or extra transparent woodland plane.
-		if (woodland_enabled) {
+		if (woodland_enabled && all(greaterThanEqual(UV,vec2(0.0))) && all(lessThanEqual(UV,vec2(1.0)))) {
 			float coverage = texture(woodland_mask,UV).r;
+			if (native_detail) {
+				vec2 rim = min(UV,vec2(1.0)-UV);
+				coverage *= smoothstep(0.0,0.08,rim.x)*smoothstep(0.0,0.08,rim.y);
+			}
 			ground = mix(ground,vec3(0.34,0.41,0.33),coverage*0.44);
 		}
 		// Same geographic material as REGION; preserve the actual native mesh.
 		vec2 ll = vec2(mix(survey_bounds.x,survey_bounds.z,UV.x),mix(survey_bounds.w,survey_bounds.y,UV.y));
-		float regional_coverage;
-		vec4 regional_surface = surface_sample(ll,regional_coverage);
+		float regional_coverage = 0.0;
+		vec4 regional_surface = vec4(0.0);
+		// Close terrain already has source height, normals and a bounded cover
+		// mask. Avoid six regional texture samples per near-surface fragment.
+		if (!native_detail) { regional_surface = surface_sample(ll,regional_coverage); }
 		float inkshade = hillshade;
 		// Only colour and illumination rejoin the reference chart at the rim.
 		// No source height, normal or water edge is flattened or extended.
 		if (regional_coverage>0.0) {
-			ground = mix(ground,regional_surface.rgb,regional_coverage);
+			ground = mix(ground,regional_surface.rgb,regional_coverage*(native_detail ? 0.35 : 1.0));
 			float regional_form = mix(1.0,regional_surface.a,clamp(cartographic_relief_weight/0.92,0.0,1.0));
 			inkshade = mix(hillshade,mix(regional_form,hillshade,smoothstep(0.0,0.85,edge_weight)),regional_coverage);
-			hillshade = mix(hillshade,mix(1.0,hillshade,smoothstep(0.0,0.85,edge_weight)),regional_coverage);
+			if (!native_detail) { hillshade = mix(hillshade,mix(1.0,hillshade,smoothstep(0.0,0.85,edge_weight)),regional_coverage); }
 		}
 		ALBEDO = mix(ground*hillshade,map_ink_tone.rgb*inkshade,map_ink_weight);
 	}

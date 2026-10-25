@@ -4,6 +4,7 @@ extends RefCounted
 signal landmark_display_changed
 signal landmark_load_failed(message: String)
 signal canvas_update_requested
+signal local_frame_ready
 
 var container: TextureRect
 var viewport: SubViewport
@@ -435,6 +436,9 @@ func _landmark_frame_ready(generation: int) -> void:
 	_landmark_presented = presented
 	_settlement_presented = _settlement_drawn.duplicate()
 	_surface_presented_key = _local_surface_key
+	# The parent REGION canvas may have cached the child's previous texture
+	# earlier in this frame. Publish the completed child even when IDs match.
+	local_frame_ready.emit()
 	if changed: landmark_display_changed.emit()
 
 func _chart_pixel(position: Vector3) -> Vector2:
@@ -917,6 +921,7 @@ func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_
 		_local_surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_surface_material = ShaderMaterial.new()
 		_surface_material.shader = preload("res://shaders/presentation/map/local_terrain.gdshader")
+		_surface_material.set_shader_parameter("native_detail",(surface.get("presentation",{}) as Dictionary).has("context_height_asset"))
 		var native_extent := Vector2(int(surface.width)-1,int(surface.height)-1)*float(surface.step_degrees)
 		_surface_material.set_shader_parameter("survey_bounds",Vector4(float(surface.west_cell_centre),float(surface.north_cell_centre)-native_extent.y,float(surface.west_cell_centre)+native_extent.x,float(surface.north_cell_centre)))
 		_surface_material.set_shader_parameter("woodland_enabled",_surface_woodland_mask!=null)
@@ -1119,7 +1124,7 @@ func surface_unit_at(pixel: Vector2, camera: RegionCamera, viewport_size: Vector
 				hit = intersection as Vector3
 	_surface_pick_pixel = pixel
 	_surface_pick_unit = RegionProjection.inverse(Vector2(hit.x,-hit.z)/1000.0+_surface_chart_anchor_km,_surface_chart_frame) if nearest<INF else Vector3.ZERO
-	if not _surface_pick_unit.is_zero_approx() and _edge_weight(_surface_grid(RegionProjection.lon_lat(_surface_pick_unit)))<0.02: _surface_pick_unit = Vector3.ZERO
+	if not (_surface_reference.get("presentation",{}) as Dictionary).has("context_height_asset") and not _surface_pick_unit.is_zero_approx() and _edge_weight(_surface_grid(RegionProjection.lon_lat(_surface_pick_unit)))<0.02: _surface_pick_unit = Vector3.ZERO
 	return _surface_pick_unit
 
 func surface_screen_point(unit: Vector3, camera: RegionCamera) -> Vector2:

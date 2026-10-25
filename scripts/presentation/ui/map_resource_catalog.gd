@@ -30,7 +30,9 @@ static func discover() -> Array[Dictionary]:
 					var manifest_path := CANDIDATES.path_join(id).path_join(name)
 					var manifest := _read(manifest_path)
 					var base := _base(str(manifest.get("base_map_id", "")))
-					var row := _map_row(base) if not base.is_empty() else {"name": id, "paths": [], "anchor": Vector2.ZERO, "map_id": ""}
+					var candidate_source := base.duplicate()
+					candidate_source["path"] = str(manifest.get("local_content_path", ""))
+					var row := _map_row(candidate_source) if not base.is_empty() else {"name": id, "paths": [], "anchor": Vector2.ZERO, "map_id": ""}
 					row.merge({"id": str(manifest.get("id", id)), "name": str(manifest.get("name", id)), "kind": "candidate", "version": str(manifest.get("version", "未记录")), "path": str(manifest.get("local_content_path", "")), "manifest_path": manifest_path, "manifest": manifest}, true)
 					row["paths"] = _paths_for(str(row["path"]))
 					row["missing"] = _missing(row["paths"])
@@ -58,6 +60,7 @@ static func _paths_for(path: String) -> Array[String]:
 	var paths: Array[String] = []
 	if not path.is_empty(): paths.append(path)
 	var metadata: Dictionary = _read(path).get("metadata", {})
+	_collect_paths(metadata.get("surface_presentation", {}), paths)
 	var surface := str(metadata.get("surface_reference_path", ""))
 	if not surface.is_empty():
 		paths.append(surface)

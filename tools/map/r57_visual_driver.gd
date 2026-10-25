@@ -91,6 +91,9 @@ func tracked_decode(level: String, admitted: Dictionary) -> Dictionary:
 	return result
 
 func _ready() -> void:
+	if acceptance=="resource-review":
+		resource_review.call_deferred()
+		return
 	if acceptance=="toolbar-review":
 		set_process(false)
 		return
@@ -347,6 +350,139 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event.pressed and not event.echo and event.keycode==KEY_F6:
 		get_viewport().set_input_as_handled()
 		if not toolbar_review_running: toolbar_review.call_deferred()
+
+func resource_review() -> void:
+	# Explicit finite menu observation, using this existing observer and feedback.
+	if output.is_empty(): return
+	DirAccess.make_dir_recursive_absolute(output)
+	var menu: Object = get_parent()
+	menu.call("_open_map_acceptance")
+	var deadline := Time.get_ticks_msec()+90000
+	while not is_instance_valid(menu.get("_map_acceptance")) and Time.get_ticks_msec()<deadline: await wait_seconds(.1)
+	if not is_instance_valid(menu.get("_map_acceptance")): return
+	var ui: Object = menu.get("_map_acceptance")
+	renderer = menu.get("_renderer"); controller = menu.get("_controller")
+	perf_relief = renderer.get("relief"); perf_region = renderer.get("_region_layer")
+	perf_world = renderer.get("_world_layer"); perf_local = renderer.get("local_layer")
+	var label := "before"
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--resource-review-label="): label = arg.trim_prefix("--resource-review-label=")
+	var summary: Dictionary = {"label":label,"pid":OS.get_process_id(),"max_fps":Engine.max_fps,"physics_ticks":Engine.physics_ticks_per_second,"time_scale":Engine.time_scale,"device":RenderingServer.get_video_adapter_name(),"cases":[]}
+	if label=="checks":
+		await resource_contract_review(menu,ui)
+		set_process(false)
+		return
+	RenderingServer.frame_pre_draw.connect(performance_pre_draw)
+	RenderingServer.frame_post_draw.connect(performance_post_draw)
+	for point: Array in [["normal", "installed:geographic_region:zermatt_west_reference",7.7063088,46.0079880,40.0,85.0],["terrain", "installed:geographic_region:zermatt_west_reference",7.7063088,46.0079880,2.0,55.0],["ground","installed:geographic_region:zermatt_west_reference",7.7063088,46.0079880,2.0,12.0],["landmark","model:landmark:eiffel_tower_1900",2.2945,48.8584,2.0,55.0]]:
+		var index := -1
+		for i: int in range(ui.get("_rows").size()):
+			if str(ui.get("_rows")[i].id)==str(point[1]): index=i; break
+		if index<0:
+			summary.cases.append({"case":point[0],"error":"row missing","rows":ui.get("_rows").map(func(row:Dictionary)->String:return str(row.id))});continue
+		while ui.get("_worker")!=null: await wait_seconds(.1)
+		ui.get("_choice").select(index);ui.call("_select",index)
+		while ui.get("_worker")!=null: await wait_seconds(.1)
+		if ui.get("_open").disabled:
+			summary.cases.append({"case":point[0],"inspection":ui.get("_inspection")});continue
+		ui.call("_show_selected")
+		await resource_settle()
+		var unit := GlobeProjection.lon_lat_to_unit(Vector2(float(point[2]),float(point[3])))
+		controller.region_camera.leave_local()
+		controller.focus_region(unit,renderer.size*Vector2(.65,.5),float(point[4])*.001,0.0,renderer.size)
+		controller.enter_local(unit,renderer.size*Vector2(.65,.5),renderer.size,str(ui.get("_row").map_id),2.0)
+		renderer.region_view.set_inspection_elevation(float(point[5]));controller.view_changed.emit()
+		await resource_settle()
+		ui.set("_marked",unit)
+		ui.get("_note").text = label+" / "+str(point[0])+"; finite native observation; human visual pending"
+		await ui.call("_capture_feedback")
+		var folder: String=ui.get("_last_output")
+		if not folder.is_empty():
+			DirAccess.copy_absolute(folder.path_join("viewport.png"),output.path_join(label+"-"+str(point[0])+".png"))
+			DirAccess.copy_absolute(folder.path_join("feedback.json"),output.path_join(label+"-"+str(point[0])+"-feedback.json"))
+		await wait_seconds(2)
+		print("RESOURCE_PHASE ",label,"/",point[0],"/idle unix_ms=",Time.get_unix_time_from_system()*1000)
+		performance_begin(str(point[0])+"/idle");await wait_seconds(4);performance_end()
+		if point[0]=="terrain":
+			print("RESOURCE_PHASE ",label,"/terrain/drag unix_ms=",Time.get_unix_time_from_system()*1000)
+			performance_begin("terrain/drag")
+			await performance_drag(Vector2(3,0),60);await performance_drag(Vector2(-3,0),60)
+			performance_end()
+		summary.cases.append({"case":point[0],"feedback":folder,"visual":ui.get("_visual_state"),"surface_generation":renderer.region_view._surface_generation,"surface_mesh":renderer.region_view._local_surface_mesh.get_instance_id() if renderer.region_view._local_surface_mesh!=null else 0,"local_rect":TerrainPixelSource.serial(renderer.region_view._local_render_rect)})
+	RenderingServer.frame_pre_draw.disconnect(performance_pre_draw)
+	RenderingServer.frame_post_draw.disconnect(performance_post_draw)
+	summary["phases"]=perf_phases
+	acceptance_save(label+"-resource",summary)
+	if label=="verified": await resource_contract_review(menu,ui)
+	print("RESOURCE_REVIEW_DONE ",label)
+	set_process(false)
+
+func resource_contract_review(menu: Object, ui: Object) -> void:
+	var catalog = load("res://scripts/presentation/ui/map_resource_catalog.gd")
+	var save_path := "user://formal_world_1900_manual_1.json"
+	var save_before := FileAccess.get_file_as_bytes(save_path)
+	var report: Dictionary = {"cloud_delivery":"NOT_TESTED_LOCAL_FIXTURE_ONLY","save_bytes":save_before.size(),"candidates":[]}
+	var folder := "res://data/local/candidates/resource-review-local"
+	# This exact, bounded directory belongs only to this explicit review.
+	if DirAccess.dir_exists_absolute(folder):
+		push_error("Review fixture directory already exists; preserving it");return
+	DirAccess.make_dir_recursive_absolute(folder)
+	var doc: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/local/zermatt_west_physical_reference.json"))
+	doc.metadata.erase("surface_reference_path");doc.metadata.erase("surface_presentation")
+	doc.metadata["landmark_visuals"]=[]
+	doc.evidence_catalog.facts = (doc.evidence_catalog.facts as Array).filter(func(f:Dictionary)->bool:return str(f.subject_id)=="geographic_region:zermatt_west_reference")
+	var content_path := folder.path_join("local.json")
+	FileAccess.open(content_path,FileAccess.WRITE).store_string(JSON.stringify(doc))
+	var bytes := FileAccess.get_file_as_bytes(content_path).size()
+	var checksum := FileAccess.get_sha256(content_path)
+	for test: String in ["valid","wrong_sha","missing"]:
+		var path := content_path if test!="missing" else folder.path_join("absent.json")
+		var manifest := {"schema_id":"wwo_map_resource_candidate_v1","id":"resource-review-local","name":test,"version":"local-fixture-v1","base_map_id":"geographic_region:zermatt_west_reference","local_content_path":path,"files":[{"path":path,"bytes":bytes,"sha256":checksum if test=="valid" else "0".repeat(64)}]}
+		var manifest_path := folder.path_join(test+".candidate.json")
+		FileAccess.open(manifest_path,FileAccess.WRITE).store_string(JSON.stringify(manifest))
+		var rows: Array[Dictionary] = catalog.discover()
+		var row: Dictionary = rows.filter(func(r:Dictionary)->bool:return str(r.get("manifest_path",""))==manifest_path)[0]
+		while ui.get("_worker")!=null: await wait_seconds(.1)
+		ui.set("_rows",rows)
+		ui.get("_choice").clear()
+		var selected := 0
+		for i: int in range(rows.size()):
+			ui.get("_choice").add_item(str(rows[i].name))
+			if str(rows[i].get("manifest_path",""))==manifest_path: selected=i
+		ui.get("_choice").select(selected);ui.call("_select",selected)
+		while ui.get("_worker")!=null: await wait_seconds(.1)
+		var disabled: bool=ui.get("_open").disabled
+		var item := {"case":test,"open_disabled":disabled,"expected_open_disabled":test!="valid","capture_disabled_after_selection":ui.get("_capture").disabled,"inspection":ui.get("_inspection")}
+		ui.call("_show_selected");await resource_settle()
+		item["loaded_path"]=renderer.local_content.content.metadata.get("content_path","") if renderer.local_content.content!=null else ""
+		item["map_id"]=controller.region_camera.local_place_id
+		report.candidates.append(item)
+		DirAccess.remove_absolute(manifest_path)
+	DirAccess.remove_absolute(content_path);DirAccess.remove_absolute(folder)
+	var saved: Dictionary=ui.get("_saved_controller").duplicate()
+	var saved_region: Dictionary=ui.get("_saved_region").duplicate()
+	var original_fps: int=ui.get("_saved_max_fps")
+	ui.call("_close");await wait_seconds(.3)
+	var region_equal := true
+	for field: String in saved_region: region_equal = region_equal and controller.region_camera.get(field)==saved_region[field]
+	report["close"]={"fps":Engine.max_fps,"expected_fps":original_fps,"region_restored":region_equal,"orientation_restored":controller._orientation==saved.orientation,"zoom_restored":controller.zoom==saved.zoom,"mode_restored":controller.map_mode==saved.mode,"page":menu.get("_page"),"motion_stopped":not controller.camera_motion_active(),"inspection_source_empty":renderer.local_content._inspection_source.is_empty()}
+	menu.call("_open_map_acceptance");await wait_seconds(.4)
+	ui=menu.get("_map_acceptance")
+	report["reopen"]={"exists":is_instance_valid(ui),"fps":Engine.max_fps,"active_id":ui.get("_active_id"),"capture_disabled":ui.get("_capture").disabled}
+	ui.call("_close");await wait_seconds(.3)
+	report["second_close_fps"]=Engine.max_fps
+	report["save_equal"]=FileAccess.get_file_as_bytes(save_path)==save_before
+	report["world_created"]=renderer.spatial_world!=null
+	acceptance_save("resource-contract",report)
+	print("RESOURCE_REVIEW_DONE checks")
+
+func resource_settle() -> void:
+	var deadline := Time.get_ticks_msec()+45000
+	await wait_seconds(.5)
+	while Time.get_ticks_msec()<deadline:
+		await wait_seconds(.1)
+		if not renderer.call("_has_pending_preparation") and not renderer.region_view._landmark_render_pending: break
+	await wait_seconds(1)
 
 func toolbar_review() -> void:
 	# Requested finite GPU/UI observation. The normal menu loaded the existing
@@ -1248,6 +1384,9 @@ func performance_snapshot() -> Dictionary:
 	snapshot["overlay_loading"]=renderer.get("_overlay_thread")!=null
 	snapshot["overlay_uploads"]=(renderer.get("_overlay_uploads") as Array).size()
 	snapshot["overlay_installing"]=(renderer.get("_overlay_installing") as Dictionary).size()
+	if acceptance=="resource-review":
+		var view: RegionView = renderer.get("region_view")
+		snapshot["local_cache"]={"surface_generation":view._surface_generation,"mesh_id":view._local_surface_mesh.get_instance_id() if view._local_surface_mesh!=null else 0,"texture_id":view._surface_height_texture.get_instance_id() if view._surface_height_texture!=null else 0,"render_rect":TerrainPixelSource.serial(view._local_render_rect),"world_update":renderer.get("_viewport").render_target_update_mode,"region_update":view.viewport.render_target_update_mode,"local_update":view._local_viewport.render_target_update_mode if view._local_viewport!=null else -1,"renderer_processing":renderer.is_processing(),"fps":Performance.get_monitor(Performance.TIME_FPS)}
 	return snapshot
 
 func performance_begin(label: String) -> void:
