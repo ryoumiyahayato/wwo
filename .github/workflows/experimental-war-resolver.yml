@@ -1,13 +1,9 @@
 name: Experimental land war resolver
 
 on:
-  pull_request:
-    branches: [canonical/current-world]
-    paths:
-      - "experiments/war_resolver/**"
-      - ".github/workflows/experimental-war-resolver.yml"
   workflow_dispatch:
 
+# Extended/manual validation; automatic main PR checks live in main-validation.yml.
 permissions:
   contents: read
 

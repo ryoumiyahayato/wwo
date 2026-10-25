@@ -1,24 +1,9 @@
 name: Formal Exact Persistence
 
 on:
-  pull_request:
-    branches:
-      - canonical/current-world
-    paths:
-      - ".github/workflows/formal-exact-persistence.yml"
-      - "scripts/formal/**"
-      - "scripts/save/atomic_json_file_store.gd"
-      - "tests/formal/formal_exact_persistence_roundtrip_test.gd"
-  push:
-    branches:
-      - canonical/current-world
-    paths:
-      - ".github/workflows/formal-exact-persistence.yml"
-      - "scripts/formal/**"
-      - "scripts/save/atomic_json_file_store.gd"
-      - "tests/formal/formal_exact_persistence_roundtrip_test.gd"
   workflow_dispatch:
 
+# Extended/manual validation; automatic main PR checks live in main-validation.yml.
 permissions:
   contents: read
 
