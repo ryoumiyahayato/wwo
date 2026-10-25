@@ -31,6 +31,25 @@ var _wanted: bool = false
 var _wanted_path: String = PARIS_PATH
 var _loading_path: String = ""
 var _wanted_anchor := ANCHOR
+var _inspection_source: Dictionary = {}
+
+func set_inspection_source(path: String, anchor_id: String) -> bool:
+	# Only the menu's presentation preview can select an installed candidate.
+	# It retains the original geographic identity and the original parser/gate.
+	if not OS.has_feature("editor") and not OS.has_feature("map_resource_acceptance"): return false
+	for source: Dictionary in SOURCES:
+		if str(source.anchor_id) != anchor_id or not _source_enabled(source): continue
+		if not path.begins_with("res://data/local/candidates/") or not FileAccess.file_exists(path): return false
+		release()
+		_inspection_source = source.duplicate()
+		_inspection_source["path"] = path
+		return true
+	return false
+
+func clear_inspection_source() -> void:
+	if _inspection_source.is_empty(): return
+	release()
+	_inspection_source.clear()
 
 static func covers(lon_lat: Vector2) -> bool:
 	return not source_at(lon_lat).is_empty()
@@ -60,6 +79,8 @@ static func internal_landmark_sources() -> Array[Dictionary]:
 func request(lon_lat: Vector2 = ANCHOR) -> void:
 	var source := source_at(lon_lat)
 	if source.is_empty(): return
+	if not _inspection_source.is_empty() and source.anchor_id == _inspection_source.anchor_id:
+		source = _inspection_source
 	var changed := not _wanted or _wanted_path!=str(source.path)
 	_wanted = true
 	_wanted_path = str(source.path)
@@ -76,7 +97,7 @@ func request(lon_lat: Vector2 = ANCHOR) -> void:
 	_request_mutex.unlock()
 	_thread = Thread.new()
 	_loading_path = _wanted_path
-	_thread.start(_load.bind(_wanted_path,_request_current.bind(_request_generation)))
+	_thread.start(_load.bind(_wanted_path,_request_current.bind(_request_generation),str(source.anchor_id)))
 
 func cancel_pending() -> void:
 	if not _wanted: return
@@ -116,7 +137,7 @@ func release() -> void:
 	cancel_pending()
 	content = null
 
-static func _load(path: String, current: Callable) -> LocalSpatialContent:
+static func _load(path: String, current: Callable, expected_anchor: String = "") -> LocalSpatialContent:
 	var result := LocalSpatialContent.new()
 	result.metadata["content_path"] = path
 	if not current.call():
@@ -135,7 +156,7 @@ static func _load(path: String, current: Callable) -> LocalSpatialContent:
 	var document := parser.data as Dictionary
 	result.metadata = document.get("metadata", {}) as Dictionary
 	result.metadata["content_path"] = path
-	var expected := ""
+	var expected := expected_anchor
 	for source: Dictionary in SOURCES:
 		if str(source.path)==path: expected = str(source.anchor_id); break
 	if str(result.metadata.get("schema_id", "")) != "local_spatial_content_r1" or str(result.metadata.get("anchor_place_id", "")) != expected:

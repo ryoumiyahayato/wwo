@@ -483,3 +483,37 @@ R57仍为代20、1,759,540,224 B、CANDIDATE／accepted=false；没有重新导�
 实际代21 EXE自动GUI在第42日自然缺粮1，原报价仍因无人拒绝；玩家通过原工作按钮登记2h，第43日原劳动分配1h销售、余1h生产，面包坊企业账户支付1并收到原工坊1粮食。order:41→shipment:41→portion:110在第44日按原FIFO投入原生产形成2面包。就业页只补本人实际劳动支持的交接一行，不公开企业账户或采购计划。五次可见正式保存恢复一致，原肥皂实际EXE及局部136/1177项通过，未再跑完整七日或旧30日基线。
 
 面包坊最终现金355，销售回款84、工资形成344，仍不盈利；工坊无持续劳动时不能自主补货。R57代21为1,759,546,768 B，accepted=false；统一入口一次导出，R56保持，未promote。按用户选择先做功能、性能待测，与已核实Codex本地模型GPU服务共用期间的时间数据无可比性能资格，巴黎P1保留。完整判定、来源链、保存文件及预算见docs/map/R57_ORDINARY_MATERIAL_TRADE_2026-10-24.md。
+
+### 2026-10-25｜现有菜单的地图与资源验收
+
+在现有 `formal_world_menu.tscn` 主菜单选择“地图 / 资源验收（开发）”。入口只在编辑器构建或带 `map_resource_acceptance` 特性的构建中显示。复用菜单的 `_prepare_preview`、`GlobeRenderer`、`GlobeController`、`LocalSpatialLoader` 和 `RegionView`；不创建 WorldState、人物、载具或另一份地图工程。
+
+选择器读取当前 `LocalSpatialLoader.SOURCES` 及其实际声明的模型。不存在的文件标为缺失，并禁用打开。选择时在后台读取该对象的文件长度、SHA256、来源及版本。“资源”页显示结果；“打开选中对象”使用原 LOCAL 加载和来源合同。更换选择或重新核对后，须重新打开，才能保存对应反馈。
+
+观察页提供原生视角、85度俯视、55度斜视和12度低角度正交观察；支持原有拖动、滚轮、右键转向，以及 WASD 镜头平移、锚点和东西500米定位。细节比例为2米/像素。它们只移动显示相机，不代表人物地面视角或真实观察权限。
+
+反馈页包含视觉、碰撞、操作、性能、资源缺失五类。填写说明，点选地图坐标，保存实际视口 PNG 和 JSON。输出为 `user://map_resource_feedback/<时间>/viewport.png` 与 `feedback.json`。本机现有 override 对应 `C:/Users/agcrf/AppData/Roaming/WWO_Main_Local_20261025/map_resource_feedback`。JSON记录地图和候选ID、来源版本与资源SHA256、源码基线及工作区标记、经纬度和局部米制坐标、相机、设备、原生地形是否实际呈现，以及有界错误信息。视觉状态只说明是否实际显示，不表示质量通过。镜头移动不会记为角色移动。
+
+如用 `--log-file` 覆盖Godot日志路径，应在 `--` 后另传 `--map-resource-log=<同一路径>`，因为引擎会消费原日志参数。读取日志限制为末尾32KiB，最多记录24条错误或警告。每次保存只产生一张PNG和一份JSON，不逐帧输出世界快照。
+
+云端候选仍通过已有资源交付方式放入独立目录。此入口只读核对，不下载、复制、安装或覆盖资源。先核对清单，再通过同一个Godot工程正常导入模型。候选清单位置为 `res://data/local/candidates/<id>/*.candidate.json`。最小合同如下：
+
+```json
+{
+  "schema_id": "wwo_map_resource_candidate_v1",
+  "id": "cloud-candidate-id",
+  "name": "候选显示名",
+  "version": "云端交付版本",
+  "base_map_id": "当前SOURCES中已有的地图ID",
+  "local_content_path": "res://data/local/candidates/cloud-candidate-id/local.json",
+  "files": [
+    {"path": "res://data/local/candidates/cloud-candidate-id/local.json", "bytes": 123, "sha256": "交付文件的64位SHA256"}
+  ]
+}
+```
+
+所有依赖须列入files，最多512项。文件只允许位于对应ID的 `data/local/candidates/` 或 `assets/landmarks/candidates/`，路径必须规范化，长度和SHA256须匹配。LOCAL内容沿用 `local_spatial_content_r1`、原基础地图身份及原来源解析。已有专项安装脚本位于 `tools/map/install_landscape_r40.py`、`install_landmark_expansion_r41.py`、`install_historical_scenes_r41.py`；本轮未运行这些历史加工脚本。没有收到云端候选包，因此新包导入与候选切换尚未实测。
+
+本机实际验证：Godot 4.6.3 Compatibility、1280×720、i7-13700H、RTX3050 Laptop。通过原菜单进入验收，打开采尔马特西侧原地图，原生高程网格和参考树木实际显示；切换55度斜视及2米/像素，移动观察镜头。保存一份视觉问题反馈，坐标经度7.7063088、纬度46.0079880；实际PNG为69710B。画面显示有限地形窗口边界接缝和近距离底图模糊。高程来源为swissALTI3D2019，显示网格33×63；现代地表不证明1900年土地利用。另实际打开原埃菲尔铁塔模型，桥梁和建筑同时由原渲染器显示；关闭验收后返回原主菜单。
+
+当前恢复树没有可运行的 `varied_maps/`、Cedar、Rivergate、Atlas15，也没有军事5×5公里战场、车辆/步兵控制器及物理碰撞场景。驾驶、步兵移动、桥面物理、分块驾驶连续性、掩体观察和战斗操作均未执行。没有制造替代载具或复制历史地图。经济、人物及正式全球地图权威未变；没有导出EXE或APK。仅做新增组件的局部语法检查与真实窗口操作，未运行全仓库回归。

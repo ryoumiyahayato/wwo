@@ -12,6 +12,9 @@ const PREPARED_CONTENT_META: StringName = &"formal_world_prepared_content"
 const LIVELIHOOD_META: StringName = &"formal_world_livelihood"
 const NATIVE_ECONOMY_META: StringName = &"formal_world_native_economy"
 const SETTINGS = preload("res://scripts/presentation/ui/interface_settings.gd")
+const MAP_ACCEPTANCE = preload("res://scripts/presentation/ui/map_resource_acceptance.gd")
+var _map_acceptance: Control
+var _map_acceptance_requested: bool = false
 @onready var _controller: GlobeController = $GlobeController
 var _renderer: GlobeRenderer
 var _page: String = "home"
@@ -75,6 +78,26 @@ func _ready() -> void:
 	resized.connect(_position_panel)
 	set_process(false)
 	_show_page("home")
+	if "--map-resource-acceptance" in OS.get_cmdline_user_args(): _open_map_acceptance.call_deferred()
+
+func _open_map_acceptance() -> void:
+	if not OS.has_feature("editor") and not OS.has_feature("map_resource_acceptance"): return
+	if _entering or is_instance_valid(_map_acceptance): return
+	_map_acceptance_requested = true
+	_show_page("selection")
+	if _preview_ready: _install_map_acceptance.call_deferred()
+
+func _install_map_acceptance() -> void:
+	if not _map_acceptance_requested or not _preview_ready or not is_instance_valid(_renderer) or is_instance_valid(_map_acceptance): return
+	_map_acceptance = MAP_ACCEPTANCE.new()
+	_map_acceptance.configure(_renderer, _controller)
+	_map_acceptance.closed.connect(func() -> void:
+		_map_acceptance = null
+		_map_acceptance_requested = false
+		_show_page("home"))
+	_panel.hide()
+	add_child(_map_acceptance)
+	_controller.appearance_changed.emit()
 
 func _prepare_preview() -> void:
 	if _renderer!=null or _entering or _preview_waiting: return
@@ -361,6 +384,8 @@ func _show_page(page: String) -> void:
 			_text("1900",int(SETTINGS.theme_parameters().title_size))
 			_button("开始",_show_page.bind("selection"))
 			_button("加载",_show_page.bind("load"))
+			if OS.has_feature("editor") or OS.has_feature("map_resource_acceptance"):
+				_button("地图 / 资源验收（开发）", _open_map_acceptance)
 			_button("主题管理",_show_page.bind("themes"))
 			_button("设置",_show_page.bind("settings"))
 			_button("退出",get_tree().quit)
@@ -509,9 +534,11 @@ func _position_panel() -> void:
 	if _controller != null: _controller.appearance_changed.emit()
 
 func _blocks_map(point: Vector2) -> bool:
+	if is_instance_valid(_map_acceptance): return _map_acceptance.blocks_map(point)
 	return _entering or (_loading_layer!=null and _loading_layer.visible) or _page!="selection" or (_panel != null and _panel.get_global_rect().has_point(point))
 
 func _map_occlusions() -> Array[Rect2]:
+	if is_instance_valid(_map_acceptance): return _map_acceptance.occlusions()
 	var result: Array[Rect2] = []
 	if _panel != null: result.append(Rect2(_panel.position,_panel.size))
 	return result
@@ -559,6 +586,7 @@ func _focus_country() -> void:
 	_controller.set_world_zoom(0.86)
 
 func _enter_world(mode: String,slot: int) -> void:
+	if is_instance_valid(_map_acceptance): return
 	if _entering: return
 	if _preview_worker!=null or _preview_waiting or _preview_installing:
 		_status.visible = true
@@ -636,6 +664,7 @@ func _process(_delta: float) -> void:
 				return
 			_set_loading(false)
 			_show_page(_page)
+			if _map_acceptance_requested: _install_map_acceptance.call_deferred()
 			if not (status.get("warnings",[]) as Array).is_empty():
 				_show_map_status("物理地图已就绪；可选图层失败："+"; ".join(status.warnings as Array))
 			elif bool(status.get("political_pending",false)):
@@ -767,6 +796,7 @@ func _save_preferences() -> void:
 		_status.text = "设置保存失败："+error_string(error)
 
 func _input(event: InputEvent) -> void:
+	if is_instance_valid(_map_acceptance): return
 	if _entering or (_loading_layer!=null and _loading_layer.visible): return
 	if not event is InputEventKey: return
 	var key := event as InputEventKey

@@ -11,6 +11,7 @@ const POLITICAL_UNDER_WIDTH: float = 1.05
 
 var preserve_on_reparent: bool = false
 var show_footer: bool = false
+var inspection_preview: bool = false
 var controller: GlobeController
 var spatial_world: VNextSpatialWorld
 var content: MapGeometryContent
@@ -1654,7 +1655,10 @@ func _sync_landmark_display() -> bool:
 			var geographic_anchor := str(visual.anchor_place_id)==str(visual.id) and local_content!=null and local_content.content!=null and str(local_content.content.metadata.anchor_place_id)==str(visual.id) and not _political_view.runtime_id_for_source(str(visual.get("parent_country_id",""))).is_empty()
 			var anchor := local_layer.place(str(visual.anchor_place_id))
 			var transport_anchor := not anchor.is_empty() and str(anchor.get("display_kind",""))=="transport_node" and str(anchor.id)==id and str(visual.get("local_anchor_id",""))==str(local_content.content.metadata.anchor_place_id)
-			if not geographic_anchor and not transport_anchor and (spatial_world==null or spatial_world.get_place(str(visual.anchor_place_id)).is_empty()):
+			# The menu may inspect a provenance-admitted display anchor without
+			# constructing a formal world place or granting an actor visibility.
+			var inspection_anchor := inspection_preview and spatial_world==null and not anchor.is_empty()
+			if not geographic_anchor and not transport_anchor and not inspection_anchor and (spatial_world==null or spatial_world.get_place(str(visual.anchor_place_id)).is_empty()):
 				_place_points.erase(id)
 				continue
 			_place_points[id] = point

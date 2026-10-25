@@ -60,6 +60,7 @@ var _surface_pick_pixel := Vector2(INF,INF)
 var _surface_pick_unit := Vector3.ZERO
 var _surface_pick_view: Array = []
 var _local_elevation: float = MINIATURE_ELEVATION
+var inspection_elevation_degrees: float = -1.0
 var _surface_chart_frame := Basis()
 var _surface_chart_anchor_km := Vector2.ZERO
 var _surface_presented_key: String = ""
@@ -492,7 +493,15 @@ func _update_local_render_rect(camera: RegionCamera, viewport_size: Vector2) -> 
 	if _local_viewport.size!=Vector2i(next.size): _local_viewport.size = Vector2i(next.size)
 	_update_local_camera(camera,viewport_size)
 
+func set_inspection_elevation(degrees: float) -> void:
+	inspection_elevation_degrees = degrees
+	_local_camera_key.clear()
+	_landmark_view_key.clear()
+
 func elevation_at(camera: RegionCamera) -> float:
+	# Menu-only inspection; no player/formation visibility or physics reads this.
+	if inspection_elevation_degrees >= 0.0:
+		return deg_to_rad(clampf(inspection_elevation_degrees, 8.0, 88.0))
 	var elevation := MINIATURE_ELEVATION
 	if not _surface_reference.is_empty():
 		var d := _surface_reference
