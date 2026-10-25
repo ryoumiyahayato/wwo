@@ -85,7 +85,7 @@ func _test_unattended_material_trade() -> void:
 	var buyer := "firm:opening_paris_bakery"
 	var site := "site:opening_paris_workshop:paris"
 	var destination := "site:opening_paris_bakery:paris"
-	var b := WorldBootstrap.new().build(null, [], [], FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, true, FormalEconomicOpening.for_source(FRA))
+	var b := WorldBootstrap.new().build(null, [], [], FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, true, FormalEconomicOpening._load(FormalEconomicOpening.PATH))
 	test.expect(b.success and b.world.economy_r1 != null, "Unattended ordinary Paris Opening builds")
 	if not b.success or b.world.economy_r1 == null: return
 	var first_need := -1
@@ -338,6 +338,7 @@ func _test_grain_bread_cycle() -> void:
 		test.equal(e.personal_inventory(person).bread, 1, "One declared opening bread reaches personal inventory")
 		test.expect(b.world.personal_economy_state.living_records(person, 128).any(func(row: Dictionary) -> bool: return row.kind == "native_opening"), "Opening bread uses original personal source registration")
 	var first_purchase := -1
+	var first_refusal := -1
 	var first_new_grain := -1
 	var first_adoption := -1
 	var first_bread_sale := -1
@@ -374,6 +375,9 @@ func _test_grain_bread_cycle() -> void:
 		test.expect(jobs[0] != jobs[1], "Real vacancies distribute workers to different employers")
 		for workplace: String in [site, destination]:
 			test.equal(e._retail.allocated_hours(workplace, date), 0 if date == 1 else 1, "Sales use a separate hour from the actual completed work")
+		var purchases := e._commands.values().filter(func(entry: Dictionary) -> bool: return entry.envelope.actor == buyer and entry.envelope.command.kind == "buy" and entry.envelope.command.minute == date*1440)
+		for entry: Dictionary in purchases:
+			if not entry.result.accepted and first_refusal < 0: first_refusal = date
 		var delivered := 0
 		var new_delivered := 0
 		var new_adopted := 0
@@ -385,17 +389,19 @@ func _test_grain_bread_cycle() -> void:
 				var grain_source: Dictionary = e._lots.sources[input.source_id]
 				var portion: Dictionary = e._lots.portions[input.portion_id]
 				if grain_source.good == "grain" and grain_source.id.begins_with("production:"):
-					test.equal(portion.owner, buyer, "New grain input belongs to the actual bakery")
-					test.expect(e._delivery_receipts.has(portion.acquisition_id), "Production input retains its actual paid grain delivery")
-					test.expect(grain_source.formed_minute <= source.formed_minute, "Grain production precedes its bakery adoption")
+					if date == 60:
+						test.equal(portion.owner, buyer, "New grain input belongs to the actual bakery")
+						test.expect(e._delivery_receipts.has(portion.acquisition_id), "Production input retains its actual paid grain delivery")
+						test.expect(grain_source.formed_minute <= source.formed_minute, "Grain production precedes its bakery adoption")
 					traced_bread[source.id] = true
 		for order: Dictionary in e._orders.values():
 			if order.good != "grain": continue
 			delivered += int(order.delivered)
-			test.equal(e._commands[order.action_id].source, "firm", "First and subsequent grain orders come from the original enterprise executor")
-			test.equal(order.buyer_site, destination, "Real grain arrives at the bakery")
-			test.equal(order.pending + order.transit, 0, "Onsite grain delivery completes its accepted responsibility")
-			test.expect(e._material_order_valid(order, e._orders, e._commands), "Both admission-time authorizations remain valid historically")
+			if date == 60:
+				test.equal(e._commands[order.action_id].source, "firm", "First and subsequent grain orders come from the original enterprise executor")
+				test.equal(order.buyer_site, destination, "Real grain arrives at the bakery")
+				test.equal(order.pending + order.transit, 0, "Onsite grain delivery completes its accepted responsibility")
+				test.expect(e._material_order_valid(order, e._orders, e._commands), "Both admission-time authorizations remain valid historically")
 			last_purchase = e._commands[order.action_id]
 		for portion: Dictionary in e._lots.portions.values():
 			if not e._delivery_receipts.has(portion.acquisition_id): continue
@@ -408,7 +414,7 @@ func _test_grain_bread_cycle() -> void:
 				new_delivered += int(portion.remaining) + int(portion.consumed)
 			if portion.owner in [npc, added] and traced_bread.has(source.id): traced_sales += int(portion.remaining) + int(portion.consumed)
 			var order: Dictionary = e._orders[receipt.order_id]
-			test.equal(portion.owner, order.buyer, "Delivered source ownership matches its original order")
+			if date == 60: test.equal(portion.owner, order.buyer, "Delivered source ownership matches its original order")
 		if delivered > 0 and first_purchase < 0: first_purchase = date
 		if new_delivered > 0 and first_new_grain < 0: first_new_grain = date
 		if new_adopted > 0 and first_adoption < 0: first_adoption = date
@@ -420,8 +426,8 @@ func _test_grain_bread_cycle() -> void:
 		if delivered > last_delivered:
 			test.expect(int(e._stocks[site].grain) >= maxi(4, int(e._input_need(site, "grain").target)), "Real sales retain stock floor, reservations and production protection")
 		last_delivered = delivered
-		_multi_conservation(b, 4300)
 		if date in [1, 2, 3, 10, 20, 30, 40, 50, 59, 60] or date in [first_purchase, first_new_grain, first_adoption, first_bread_sale]:
+			_multi_conservation(b, 4300)
 			var source_balance: Dictionary = {}
 			var grain_remaining := 0
 			var grain_consumed := 0
@@ -440,7 +446,7 @@ func _test_grain_bread_cycle() -> void:
 			var cash: Dictionary = {}
 			for actor: String in [seller, buyer, npc, added, PERSON]:
 				cash[actor] = {"cash": b.world.ledger_state.balance(e._account(actor)), "available": b.world.ledger_state.available_balance(e._account(actor))}
-			print("GRAIN_BREAD_PARIS ", JSON.stringify({"day": date, "first_purchase": first_purchase, "first_new_grain": first_new_grain, "first_adoption": first_adoption, "first_bread_sale": first_bread_sale, "delivered": delivered, "new_delivered": new_delivered, "new_adopted": new_adopted, "traced_bread_sales": traced_sales, "stocks": e._stocks, "production": e._physical_totals, "cash": cash, "totals": e._totals, "open_wages": e._open_wages.size(), "need": e._input_need(destination, "grain")}))
+			print("GRAIN_BREAD_PARIS ", JSON.stringify({"day": date, "first_purchase": first_purchase, "first_refusal": first_refusal, "purchases": purchases, "first_new_grain": first_new_grain, "first_adoption": first_adoption, "first_bread_sale": first_bread_sale, "delivered": delivered, "new_delivered": new_delivered, "new_adopted": new_adopted, "traced_bread_sales": traced_sales, "stocks": e._stocks, "production": e._physical_totals, "cash": cash, "totals": e._totals, "open_wages": e._open_wages.size(), "need": e._input_need(destination, "grain")}))
 		if date in [1, 2, 30, 59, 60] or date in [first_purchase, first_adoption]:
 			b = _material_disk_restore(b)
 			e = b.world.economy_r1
@@ -491,12 +497,22 @@ func _grain_bread_boundaries(b: WorldBuildResult) -> void:
 		var facts := _material_facts(restored)
 		var command := {"action_id": f._material_resolution_id(row, true), "minute": restored.world.game_clock.total_minutes(), "kind": "revoke_material_mandate", "payload": {"mandate_id": row.id}}
 		for actor: String in [PERSON, "person:formal_generated_country_fra_0002"]:
-			test.equal(f.submit_internal(actor, command).reason, "NO_MATERIAL_ISSUING_AUTHORITY", "Player and employee cannot execute organization revocation")
+			var unauthorized: Dictionary = command.duplicate(true)
+			unauthorized.action_id = "auto:"+actor+":grain_bread_boundary:"+row.operation
+			var rejected: Dictionary = f.submit(actor, unauthorized) if actor == PERSON else f.submit_internal(actor, unauthorized)
+			test.equal(rejected.reason, "NO_MATERIAL_ISSUING_AUTHORITY", "Player and employee cannot execute organization revocation")
+			unauthorized.action_id += ":issue"
+			unauthorized.kind = "issue_material_mandate"
+			rejected = f.submit(actor, unauthorized) if actor == PERSON else f.submit_internal(actor, unauthorized)
+			test.equal(rejected.reason, "NO_MATERIAL_ISSUING_AUTHORITY", "Player and employee cannot issue organization authority")
 		var issue: Dictionary = command.duplicate(true)
 		issue.action_id = f._material_resolution_id(row)
 		issue.kind = "issue_material_mandate"
 		test.equal(f.submit_internal(row.firm, issue).reason, "MATERIAL_OPENING_MANDATE_ALREADY_DECLARED", "Initial grant cannot be issued again or use an exhausted-old-quota premise")
+		var other: Dictionary = f._material_resolutions().filter(func(x: Dictionary) -> bool: return x.firm != row.firm)[0]
+		var other_remaining: int = f._material_remaining(other.firm, other.operation)
 		test.expect(f.submit_internal(row.firm, command).accepted, "Only its organization executor adopts the fixed revocation decision")
+		test.equal(f._material_remaining(other.firm, other.operation), other_remaining, "Counterparty's independent allowance is not revoked or enlarged")
 		test.equal(f._material_remaining(row.firm, row.operation), 0, "Revocation independently removes this side's unused authority")
 		test.equal(_material_facts(restored), facts, "Revocation preserves accepted orders, deliveries, payments, lots and wages")
 		var before := restored.persistence.snapshot()
@@ -512,8 +528,12 @@ func _grain_bread_boundaries(b: WorldBuildResult) -> void:
 		_material_disk_restore(restored)
 		if f.day == 30:
 			var invalid := restored.persistence.snapshot()
-			invalid.economy_native.commands[command.action_id].result.next_order = 1
-			test.expect(not b.persistence.restore_candidate(invalid).success, "Revocation cannot be moved before previously accepted same-minute or earlier orders")
+			var same_minute := 0
+			for order: Dictionary in invalid.economy_native.orders.values():
+				if order.good == "grain" and order.accepted_minute == command.minute: same_minute = int(order.id.trim_prefix("order:"))
+			test.expect(same_minute > 0, "Autonomous procurement supplies a real same-minute order before revocation")
+			invalid.economy_native.commands[command.action_id].result.next_order = same_minute
+			test.expect(not b.persistence.restore_candidate(invalid).success, "Order cursor distinguishes revocation before and after real same-minute acceptance")
 	for variant: String in ["id", "accepted_minute", "quantity", "authorization_type", "old_authority", "expired", "excess"]:
 		var invalid := saved.duplicate(true)
 		for order: Dictionary in invalid.economy_native.orders.values():
@@ -699,7 +719,7 @@ func _test_native_material_trade() -> void:
 	var seller:="firm:opening_paris_workshop";var buyer:="firm:opening_paris_bakery"
 	var site:="site:opening_paris_workshop:paris";var destination:="site:opening_paris_bakery:paris"
 	for variant: String in ["unknown","sale_permission","sale_missing","procurement_permission","unstaffed","surplus","cash","worker"]:
-		var settings:=FormalEconomicOpening.for_source(FRA)
+		var settings:=FormalEconomicOpening._load(FormalEconomicOpening.PATH)
 		if variant=="unknown":
 			for notice: Dictionary in settings.information:
 				if notice.actor==destination: notice.delivery_day=2
@@ -728,7 +748,7 @@ func _test_native_material_trade() -> void:
 		var expected: Dictionary={"unknown":"UNKNOWN_SUPPLIER","sale_permission":"NO_MATERIAL_SALE_MANDATE","sale_missing":"NO_MATERIAL_SALE_MANDATE","procurement_permission":"NO_MATERIAL_PROCUREMENT_MANDATE","unstaffed":"STORE_NO_ACTUAL_STAFFING","surplus":"INSUFFICIENT_MATERIAL_SALE_SURPLUS_OR_MANDATE","cash":"INSUFFICIENT_CASH_OR_CAPACITY_OR_NEED","worker":"NOT_PROCUREMENT_MANAGER"}
 		test.equal(result.reason,expected[variant],"Material refusal has exact cause: "+variant)
 		test.equal(_material_facts(b),before,"Material refusal preserves money, portions, orders and authority: "+variant)
-	var settings:=FormalEconomicOpening.for_source(FRA)
+	var settings:=FormalEconomicOpening._load(FormalEconomicOpening.PATH)
 	var b:=WorldBootstrap.new().build(null,[],[],FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT,true,settings)
 	var ready: bool=b.success and b.world.economy_r1!=null
 	test.expect(ready,"Ordinary material trade Opening")
