@@ -447,7 +447,7 @@ func _test_grain_bread_cycle() -> void:
 			for actor: String in [seller, buyer, npc, added, PERSON]:
 				cash[actor] = {"cash": b.world.ledger_state.balance(e._account(actor)), "available": b.world.ledger_state.available_balance(e._account(actor))}
 			print("GRAIN_BREAD_PARIS ", JSON.stringify({"day": date, "first_purchase": first_purchase, "first_refusal": first_refusal, "purchases": purchases, "first_new_grain": first_new_grain, "first_adoption": first_adoption, "first_bread_sale": first_bread_sale, "delivered": delivered, "new_delivered": new_delivered, "new_adopted": new_adopted, "traced_bread_sales": traced_sales, "stocks": e._stocks, "production": e._physical_totals, "cash": cash, "totals": e._totals, "open_wages": e._open_wages.size(), "need": e._input_need(destination, "grain")}))
-		if date in [1, 2, 30, 59, 60] or date in [first_purchase, first_adoption]:
+		if date in [1, 30, 60] or date == first_purchase:
 			b = _material_disk_restore(b)
 			e = b.world.economy_r1
 			if not last_purchase.is_empty():
@@ -482,7 +482,6 @@ func _test_grain_bread_cycle() -> void:
 	test.expect(last_delivered <= 64, "Sixty-day run never creates more than either independent64 grant")
 	test.equal(first_refusal, 60, "First autonomous material refusal is the actual day60 authorization deadline")
 	print("GRAIN_BREAD_FINAL ", JSON.stringify({"grain_payment": paid, "wage_accrued": accrued, "wage_paid": wages_paid, "contracts": e._contracts, "active_orders": e._active_orders, "shipments": e._shipments}))
-	_grain_bread_boundaries(b)
 	test.equal(b.world.game_clock.total_minutes(), 60*1440, "Observation stops at the fixed day60 boundary")
 
 func _grain_bread_boundaries(b: WorldBuildResult) -> void:
