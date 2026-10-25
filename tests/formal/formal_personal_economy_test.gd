@@ -458,6 +458,7 @@ func _test_grain_bread_cycle() -> void:
 	var paid := 0
 	var accrued := {seller: 0, buyer: 0}
 	var wages_paid := {seller: 0, buyer: 0}
+	var grain_payments: Dictionary = {}
 	for wage: Dictionary in e._wages.values():
 		accrued[wage.employer] += int(wage.amount)
 		wages_paid[wage.employer] += int(wage.paid)
@@ -467,6 +468,7 @@ func _test_grain_bread_cycle() -> void:
 	for tx: Dictionary in b.world.ledger_state.transactions():
 		if tx.kind == "goods" and e._orders[tx.reference_id].good == "grain":
 			paid += int(tx.amount)
+			grain_payments[tx.reference_id] = int(grain_payments.get(tx.reference_id, 0)) + int(tx.amount)
 			test.equal(tx.from_account_id, e._account(buyer), "Grain payment debits its actual purchaser")
 			test.equal(tx.to_account_id, e._account(seller), "Grain payment credits its actual producer")
 		if tx.kind == "wage":
@@ -474,9 +476,12 @@ func _test_grain_bread_cycle() -> void:
 			test.equal(tx.from_account_id, e._account(wage.employer), "Wage payment belongs to the original employer")
 			test.equal(tx.to_account_id, e._account(wage.worker), "Wage payment reaches the actual worker")
 	test.equal(paid, 2*last_delivered, "All delivered grain has exactly its original price2 Ledger payments")
+	for order: Dictionary in e._orders.values():
+		if order.good == "grain": test.equal(grain_payments.get(order.id, 0), int(order.delivered)*int(order.price), "Every individual grain order has its own exact delivery payment")
 	test.expect(first_purchase > 0 and first_new_grain > 0 and first_adoption > 0 and first_bread_sale > 0, "Actual newly produced grain completes procurement, adoption and bread sale")
 	test.expect(last_delivered <= 64, "Sixty-day run never creates more than either independent64 grant")
-	print("GRAIN_BREAD_FINAL ", JSON.stringify({"grain_payment": paid, "wage_accrued": accrued, "wage_paid": wages_paid, "active_orders": e._active_orders, "shipments": e._shipments}))
+	test.equal(first_refusal, 60, "First autonomous material refusal is the actual day60 authorization deadline")
+	print("GRAIN_BREAD_FINAL ", JSON.stringify({"grain_payment": paid, "wage_accrued": accrued, "wage_paid": wages_paid, "contracts": e._contracts, "active_orders": e._active_orders, "shipments": e._shipments}))
 	_grain_bread_boundaries(b)
 	test.equal(b.world.game_clock.total_minutes(), 60*1440, "Observation stops at the fixed day60 boundary")
 
@@ -543,7 +548,9 @@ func _grain_bread_boundaries(b: WorldBuildResult) -> void:
 				"authorization_type": order.material_authorizations = []
 				"old_authority": order.material_authorizations.SELL = "material_mandate:opening_paris_workshop:opening:SELL"
 				"expired": order.accepted_minute = 60*1440
-				"excess": order.quantity += 64
+				"excess":
+					order.quantity += 64
+					test.expect(not b.world.economy_r1._material_order_valid(order, invalid.economy_native.orders, invalid.economy_native.commands), "Full saved-order quota check rejects over64 independently of fulfilment totals")
 			break
 		test.expect(not b.persistence.restore_candidate(invalid).success, "Malformed or unauthorized saved material order is rejected cleanly: " + variant)
 	test.expect(b.world == original_world and b.persistence.snapshot() == saved, "All detached controls leave the autonomous world unchanged")
