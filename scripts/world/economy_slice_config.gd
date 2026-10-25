@@ -64,7 +64,7 @@ static func valid_opening_organizations(settings: Dictionary) -> bool:
 	var rows: Variant = settings.get("opening_organizations", [])
 	if not rows is Array or rows.size() > 2: return false
 	if rows.is_empty(): return not settings.has("opening_job_choice")
-	var dual: bool = settings.get("case_id") == "FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1"
+	var dual: bool = settings.get("case_id") in ["FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1", FormalEconomicOpening.SECOND_WORKER_CASE]
 	if not settings.get("host_personal_accounts", false) or (not dual and settings.get("case_id") != "FORMAL_PARIS_WORKSHOP_OPENING_R1") or rows.size() != (2 if dual else 1): return false
 	var firms: Variant = settings.get("firms", [])
 	if not firms is Array or firms.size() != rows.size(): return false
@@ -95,20 +95,43 @@ static func valid_opening_organizations(settings: Dictionary) -> bool:
 	return true
 
 static func valid_opening_residents(settings: Dictionary) -> bool:
+	var candidate: bool = settings.get("case_id") == FormalEconomicOpening.SECOND_WORKER_CASE
 	var rows: Variant = settings.get("opening_residents", [])
-	if not rows is Array or rows.size() > 1: return false
+	if not rows is Array or rows.size() > (2 if candidate else 1): return false
+	if candidate and rows.size() != 2: return false
 	if rows.is_empty(): return true
 	var organizations: Variant = settings.get("opening_organizations", [])
 	if not organizations is Array or organizations.is_empty() or not valid_opening_organizations(settings): return false
-	var row: Variant = rows[0]
-	if not row is Dictionary or not FormalLedgerState.exact_fields(row, ["person_id", "claim_id", "place_id", "opening_cash", "basis"]): return false
-	if row["person_id"] != "person:formal_generated_country_fra_0002" or row["claim_id"] != "formal_population_claim:country_fra:0002" or row["place_id"] != "place:paris" or not FormalLedgerState.valid_amount(row["opening_cash"]) or row["opening_cash"] != 0 or row["basis"] != "GENERATED_OPENING_CONFIGURATION": return false
-	var matches: int = 0
-	for actor: Dictionary in settings.get("actors", []):
-		if actor.get("id") != row["person_id"]: continue
-		if actor.get("kind") != "named" or actor.get("control") != "automatic" or actor.get("account_id") != "account:personal:formal_generated_country_fra_0002" or actor.get("cash") != 0 or actor.get("members") != 1 or actor.get("place_id") != row["place_id"]: return false
-		matches += 1
-	return matches == 1
+	var identities: Array[String] = ["0002"]
+	if candidate: identities.append("0003")
+	var seen: Dictionary = {}
+	var actors: Variant = settings.get("actors", [])
+	if not actors is Array: return false
+	for row: Variant in rows:
+		if not row is Dictionary or not FormalLedgerState.exact_fields(row, ["person_id", "claim_id", "place_id", "opening_cash", "basis"]): return false
+		var suffix: String = str(row["person_id"]).trim_prefix("person:formal_generated_country_fra_")
+		if suffix not in identities or seen.has(suffix) or row["person_id"] != "person:formal_generated_country_fra_"+suffix or row["claim_id"] != "formal_population_claim:country_fra:"+suffix or row["place_id"] != "place:paris" or not FormalLedgerState.valid_amount(row["opening_cash"]) or row["opening_cash"] != 0 or row["basis"] != "GENERATED_OPENING_CONFIGURATION": return false
+		seen[suffix] = true
+		var matches: int = 0
+		for actor: Variant in actors:
+			if not actor is Dictionary: return false
+			if actor.get("id") != row["person_id"]: continue
+			if actor.get("kind") != "named" or actor.get("control") != "automatic" or actor.get("account_id") != FormalPersonalEconomyState.personal_account_id(row["person_id"]) or actor.get("cash") != 0 or actor.get("members") != 1 or actor.get("place_id") != row["place_id"]: return false
+			if actor.has("needs") and not actor["needs"] is Dictionary: return false
+			if candidate and (actor.get("stock") != ZERO or actor.get("daily_need") != 1 or actor_needs(actor) != {"food": 1} or actor.get("population_start") != 0): return false
+			matches += 1
+		if matches != 1: return false
+	if candidate:
+		# This bounded candidate admits only the original player and two residents,
+		# never a second representation of their population in a native cohort.
+		if actors.size() != 3: return false
+		var players: int = 0
+		for actor: Dictionary in actors:
+			if actor.get("id") == "person:formal_generated_country_fra_0001":
+				if actor.get("kind") != "named" or actor.get("control") != "player": return false
+				players += 1
+		if players != 1: return false
+	return true
 
 static func valid(value: Dictionary) -> bool:
 	if not CapitalTransport.valid_configuration(value): return false

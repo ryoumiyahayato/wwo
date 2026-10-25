@@ -119,7 +119,11 @@ func configure(policy: Dictionary, ledger: FormalLedgerState, clock: GameClock, 
 static func _zero_cash_opening(person: Dictionary) -> bool:
 	var demographic: Dictionary = person.get("basic_demographic_identity", {})
 	if demographic.get("opening_cash_policy") == "ZERO_CASH_DEVELOPMENT_CORPORATE_MANAGER": return true
-	return person.get("person_id") == "person:formal_generated_country_fra_0002" and demographic.get("opening_cash_policy") == "ZERO_CASH_GENERATED_RESIDENT" and demographic.get("opening_configuration_id") in ["FORMAL_PARIS_WORKSHOP_OPENING_R1", "FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1"]
+	if demographic.get("opening_cash_policy") != "ZERO_CASH_GENERATED_RESIDENT": return false
+	var opening: String = str(demographic.get("opening_configuration_id", ""))
+	if opening == FormalEconomicOpening.SECOND_WORKER_CASE:
+		return person.get("person_id") in ["person:formal_generated_country_fra_0002", "person:formal_generated_country_fra_0003"]
+	return person.get("person_id") == "person:formal_generated_country_fra_0002" and opening in ["FORMAL_PARIS_WORKSHOP_OPENING_R1", "FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1"]
 
 static func personal_account_id(person_id: String) -> String:
 	return "account:personal:" + person_id.trim_prefix("person:")
