@@ -101,11 +101,13 @@ jobs:
               r'Assertion failed|Resource file not found', re.I)
           def run(name, args, env, is_test):
               log = logs / (name + '.log')
-              with log.open('w') as output:
-                  result = subprocess.run(common + args, env=env, stdout=output,
-                                          stderr=subprocess.STDOUT, timeout=240)
-              text = log.read_text()
-              print(text, flush=True)
+              try:
+                  with log.open('w') as output:
+                      result = subprocess.run(common + args, env=env, stdout=output,
+                                              stderr=subprocess.STDOUT, timeout=240)
+              finally:
+                  text = log.read_text()
+                  print(text, flush=True)
               if result.returncode or engine_errors.search(text):
                   raise SystemExit(name + ': process or engine error')
               if not is_test:
@@ -135,10 +137,21 @@ jobs:
               args = ['--script', script] + (['--', option] if option else [])
               run(name, args, env, True)
           PY
-      - uses: actions/upload-artifact@v4
+      - name: Summarize results without artifact storage
         if: always()
-        with:
-          name: main-validation-logs
-          path: work/main-ci-logs/*.log
-          if-no-files-found: warn
-          retention-days: 7
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, re
+          rows = ['## Existing formal regression results', '',
+                  'Full diagnostics remain in this job log; no artifact upload is required.', '',
+                  '| Suite | Checks | Failures |', '|---|---|---|']
+          for name in ['personal', 'two-employers', 'material-trade']:
+              path = pathlib.Path('work/main-ci-logs') / (name + '.log')
+              text = path.read_text() if path.exists() else ''
+              matches = re.findall(r'^.*?:\s*(\d+)\s+checks,\s*(\d+)\s+failures\s*$', text, re.M)
+              cells = matches[-1] if matches else ('NOT COMPLETED', 'See failed execution step')
+              rows.append('| ' + name + ' | ' + ' | '.join(cells) + ' |')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
+              output.write('\n'.join(rows) + '\n')
+          PY
