@@ -1136,18 +1136,35 @@ func _material_terms(firm: String, operation: String) -> Dictionary:
 	return {}
 
 func _material_genesis_id(firm: String, operation: String) -> String:
+	if config.get("case_id") == FormalEconomicOpening.GRAIN_BREAD_CASE:
+		return str(_material_terms(firm, operation).get("id", ""))
 	return "material_mandate:" + firm.trim_prefix("firm:") + ":opening:" + operation
+
+func _material_tracks_authorizations() -> bool:
+	return config.has("material_renewals") or config.get("case_id") == FormalEconomicOpening.GRAIN_BREAD_CASE
 
 func _material_mandate(firm: String, operation: String, id: String) -> Dictionary:
 	if id == _material_genesis_id(firm, operation):
 		var terms := _material_terms(firm, operation)
 		if terms.is_empty() or not terms.enabled: return {}
 		terms = terms.duplicate(true)
+		if config.get("case_id") == FormalEconomicOpening.GRAIN_BREAD_CASE:
+			terms.merge({"firm": firm, "min_price": terms.price, "max_price": terms.price})
+			return terms
 		terms.merge({"id": id, "firm": firm, "min_price": terms.price, "max_price": terms.price, "valid_from": 0, "valid_until": -1})
 		return terms
 	for row: Dictionary in config.get("material_renewals", []):
 		if row.id == id and row.firm == firm and row.operation == operation: return row
 	return {}
+
+func _material_resolutions() -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	rows.assign(config.get("material_renewals", []))
+	if config.get("case_id") == FormalEconomicOpening.GRAIN_BREAD_CASE:
+		for opening: Dictionary in config.opening_organizations:
+			var trade: Dictionary = opening.material_trade
+			rows.append(_material_mandate(opening.firm_id, trade.operation, trade.id))
+	return rows
 
 func _material_used(firm: String, operation: String, id: String, all_orders: Variant = null, before_order: int = -1) -> int:
 	var orders: Dictionary = _orders if all_orders == null else all_orders
@@ -1161,6 +1178,7 @@ func _material_used(firm: String, operation: String, id: String, all_orders: Var
 	return used
 
 func _material_resolution_id(row: Dictionary, revoke: bool = false) -> String:
+	if revoke and row.has("revocation_id"): return "auto:" + str(row.firm) + ":material_revoke:" + str(row.revocation_id)
 	return "auto:" + str(row.firm) + (":material_revoke:" if revoke else ":material_renewal:") + str(row.id)
 
 func _material_resolution_record(row: Dictionary, revoke: bool = false, saved_commands: Variant = null) -> Dictionary:
@@ -1173,8 +1191,10 @@ func _material_resolution_record(row: Dictionary, revoke: bool = false, saved_co
 func _material_active(firm: String, operation: String) -> Dictionary:
 	var id := _material_genesis_id(firm, operation)
 	var terms := _material_mandate(firm, operation, id)
-	if not terms.is_empty() and _material_used(firm, operation, id) < int(terms.quantity_limit): return terms
 	var now := _world.game_clock.total_minutes()
+	if not terms.is_empty() and _material_used(firm, operation, id) < int(terms.quantity_limit):
+		if config.get("case_id") != FormalEconomicOpening.GRAIN_BREAD_CASE: return terms
+		if now >= int(terms.valid_from) and now < int(terms.valid_until) and not _material_resolution_record(terms, true).get("accepted", false): return terms
 	for row: Dictionary in config.get("material_renewals", []):
 		if row.firm != firm or row.operation != operation or now < int(row.valid_from) or now >= int(row.valid_until): continue
 		if not _material_resolution_record(row).get("accepted", false): continue
@@ -1188,16 +1208,18 @@ func _material_remaining(firm: String, operation: String) -> int:
 
 func _material_resolution(actor: String, payload: Dictionary, action: String, kind: String) -> Dictionary:
 	if not FormalLedgerState.exact_fields(payload, ["mandate_id"]): return _result(false, "INVALID_MATERIAL_RESOLUTION")
-	for row: Dictionary in config.get("material_renewals", []):
+	for row: Dictionary in _material_resolutions():
 		if row.id != payload.mandate_id: continue
 		if actor != row.firm or not _world.organization_state.is_organization_active(row.issuer) or _spec.firms[actor].get("host_organization_id") != row.issuer: return _result(false, "NO_MATERIAL_ISSUING_AUTHORITY")
 		var issue := _material_resolution_record(row) as Dictionary
 		var revoke: bool = kind == "revoke_material_mandate"
+		var opening: bool = row.has("revocation_id")
+		if opening and not revoke: return _result(false, "MATERIAL_OPENING_MANDATE_ALREADY_DECLARED")
 		if not revoke and issue.get("accepted", false): return _result(false, "MATERIAL_RESOLUTION_ALREADY_EXECUTED")
 		if action != _material_resolution_id(row, revoke): return _result(false, "INVALID_MATERIAL_RESOLUTION_ACTION")
 		var now := _world.game_clock.total_minutes()
 		if revoke:
-			if not issue.get("accepted", false): return _result(false, "MATERIAL_MANDATE_NOT_ISSUED")
+			if not opening and not issue.get("accepted", false): return _result(false, "MATERIAL_MANDATE_NOT_ISSUED")
 			return {"accepted": true, "reason": "MATERIAL_MANDATE_REVOKED_FOR_FUTURE_ORDERS", "mandate_id": row.id, "minute": now, "next_order": next_order}
 		if now < int(row.valid_from) or now >= int(row.valid_until): return _result(false, "MATERIAL_RESOLUTION_NOT_EFFECTIVE")
 		var original := _material_mandate(actor, row.operation, _material_genesis_id(actor, row.operation))
@@ -1220,7 +1242,7 @@ func _valid_material_history(value: Dictionary) -> bool:
 		var command: Dictionary = entry.envelope.command
 		if command.kind not in ["issue_material_mandate", "revoke_material_mandate"] or not entry.result.accepted: continue
 		var row: Dictionary = {}
-		for candidate: Dictionary in config.get("material_renewals", []):
+		for candidate: Dictionary in _material_resolutions():
 			if candidate.id == command.payload.get("mandate_id"): row = candidate
 		if row.is_empty() or entry.envelope.actor != row.firm or entry.source != "firm" or command.payload != {"mandate_id": row.id}: return false
 		var revoked: bool = command.kind == "revoke_material_mandate"
@@ -1230,8 +1252,12 @@ func _valid_material_history(value: Dictionary) -> bool:
 		var reason := "MATERIAL_MANDATE_REVOKED_FOR_FUTURE_ORDERS" if revoked else "ONE_TIME_ORGANIZATION_MATERIAL_MANDATE_ISSUED"
 		if entry.result != {"accepted": true, "reason": reason, "mandate_id": row.id, "minute": command.minute, "next_order": mark}: return false
 		var issue: Dictionary = _material_resolution_record(row, false, value.commands)
-		if not issue.get("accepted", false): return false
-		if revoked:
+		if row.has("revocation_id"):
+			# This term was declared at genesis. Only its predeclared revocation
+			# may be executed; no issue command or exhausted-old-quota premise.
+			if not revoked or command.minute < row.valid_from: return false
+		elif not issue.get("accepted", false): return false
+		elif revoked:
 			if command.minute < issue.minute or mark < issue.next_order: return false
 		else:
 			if command.minute < row.valid_from or command.minute >= row.valid_until: return false
@@ -1243,7 +1269,7 @@ func _valid_material_history(value: Dictionary) -> bool:
 	return true
 
 func _material_order_valid(order: Dictionary, orders: Dictionary, commands: Dictionary) -> bool:
-	if not config.has("material_renewals"): return not order.has("material_authorizations")
+	if not _material_tracks_authorizations(): return not order.has("material_authorizations")
 	var ids: Variant = order.get("material_authorizations")
 	if not ids is Dictionary or not FormalLedgerState.exact_fields(ids, ["SELL", "PROCURE"]): return false
 	for operation: String in ["SELL", "PROCURE"]:
@@ -1254,8 +1280,8 @@ func _material_order_valid(order: Dictionary, orders: Dictionary, commands: Dict
 		if terms.id != _material_genesis_id(firm, operation):
 			var issue: Dictionary = _material_resolution_record(terms, false, commands)
 			if not issue.get("accepted", false) or order.accepted_minute < issue.minute or int(str(order.id).trim_prefix("order:")) < int(issue.next_order): return false
-			var revoked: Dictionary = _material_resolution_record(terms, true, commands)
-			if revoked.get("accepted", false) and int(str(order.id).trim_prefix("order:")) >= int(revoked.next_order): return false
+		var revoked: Dictionary = _material_resolution_record(terms, true, commands)
+		if revoked.get("accepted", false) and int(str(order.id).trim_prefix("order:")) >= int(revoked.next_order): return false
 		if _material_used(firm, operation, terms.id, orders) > int(terms.quantity_limit): return false
 	return true
 
@@ -1468,10 +1494,10 @@ func _admit(buyer: String, seller: String, good: String, requested: int, action_
 	assert(portions_reserved)
 	next_order += 1
 	var material_ids: Dictionary = {}
-	if onsite and _spec.firms.has(buyer) and config.has("material_renewals"):
+	if onsite and _spec.firms.has(buyer) and _material_tracks_authorizations():
 		material_ids = {"SELL": _material_active(seller, "SELL").id, "PROCURE": _material_active(buyer, "PROCURE").id}
 	_orders[id] = {"id": id, "kind": "SALE", "seller_site": seller_site, "buyer_site": buyer_site, "need_category": category if _actors.has(buyer) else "", "buyer": buyer, "seller": seller, "good": good, "quantity": amount, "pending": amount, "transit": 0, "delivered": 0, "cancelled": 0, "price": price, "action_id": action_id, "accepted_day": day, "accepted_minute": _world.game_clock.total_minutes()}
-	if onsite and _spec.firms.has(buyer) and config.has("material_renewals"):
+	if onsite and _spec.firms.has(buyer) and _material_tracks_authorizations():
 		_orders[id]["material_authorizations"] = material_ids
 	_orders[id].merge({"denomination": denomination, "buyer_account": buyer_account, "seller_account": seller_account, "route_id": route["id"], "from_place_id": route["from_place_id"], "to_place_id": route["to_place_id"], "route_legs": legs})
 	if onsite:
@@ -4417,7 +4443,7 @@ func _valid_order_route(order: Dictionary, saved_orders: Variant = null, saved_c
 			for other: Dictionary in all_orders.values():
 				if other.seller==order.seller and other.buyer==order.buyer and other.good==order.good: used+=int(other.quantity)-int(other.cancelled)
 			buyer_valid = buyer_valid and _material_order_valid(order, all_orders, all_commands)
-			if not config.has("material_renewals"): buyer_valid = buyer_valid and used <= int(sale.get("quantity_limit", 0)) and used <= int(purchase.get("quantity_limit", 0))
+			if not _material_tracks_authorizations(): buyer_valid = buyer_valid and used <= int(sale.get("quantity_limit", 0)) and used <= int(purchase.get("quantity_limit", 0))
 		return _retail.has_site(order["seller_site"]) and order["kind"]=="SALE" and order["route_id"]=="onsite:"+str(order["seller_site"]) and buyer_valid and order["seller"]==_owner(order["seller_site"]) and order["route_legs"]==[] and order["pending"]==0 and order["transit"]==0 and order["cancelled"]==0 and order["delivered"]==order["quantity"] and order["from_place_id"]==_place(order["seller_site"]) and order["to_place_id"]==order["from_place_id"] and order["denomination"]==_sale_currency(order["seller"]) and order["price"]>0 and _valid_locked_price(order) and order["buyer_account"]==_account(order["buyer"],order["denomination"]) and order["seller_account"]==_account(order["seller"],order["denomination"]) and not order.has("custody_fact")
 	if order["kind"] == "PERSONAL_FREIGHT": return _valid_personal_freight_order(order)
 	if order.has("custody_fact") or order.has("source_custody_site") or order.has("destination_custody_site"): return _fail("Sale cannot reinterpret a personal custody contract")

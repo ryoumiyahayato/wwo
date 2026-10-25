@@ -64,7 +64,8 @@ static func valid_opening_organizations(settings: Dictionary) -> bool:
 	var rows: Variant = settings.get("opening_organizations", [])
 	if not rows is Array or rows.size() > 2: return false
 	if rows.is_empty(): return not settings.has("opening_job_choice")
-	var dual: bool = settings.get("case_id") in ["FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1", FormalEconomicOpening.SECOND_WORKER_CASE, FormalEconomicOpening.MATERIAL_RENEWAL_CASE]
+	var cycle: bool = settings.get("case_id") == FormalEconomicOpening.GRAIN_BREAD_CASE
+	var dual: bool = settings.get("case_id") in ["FORMAL_PARIS_TWO_EMPLOYERS_OPENING_R1", FormalEconomicOpening.SECOND_WORKER_CASE, FormalEconomicOpening.MATERIAL_RENEWAL_CASE, FormalEconomicOpening.GRAIN_BREAD_CASE]
 	if not settings.get("host_personal_accounts", false) or (not dual and settings.get("case_id") != "FORMAL_PARIS_WORKSHOP_OPENING_R1") or rows.size() != (2 if dual else 1): return false
 	var firms: Variant = settings.get("firms", [])
 	if not firms is Array or firms.size() != rows.size(): return false
@@ -79,14 +80,21 @@ static func valid_opening_organizations(settings: Dictionary) -> bool:
 		for firm: Variant in firms:
 			if firm is Dictionary and firm.get("id") == row["firm_id"] and firm.get("host_organization_id") == row["organization_id"] and firm.get("place_id") == row["place_id"] and not firm.has("manager"): matches += 1
 		if matches != 1: return false
+		if cycle and not row.has("material_trade"): return false
 		if row.has("material_trade"):
 			var trade: Variant=row["material_trade"]
-			if not dual or not trade is Dictionary or not FormalLedgerState.exact_fields(trade,["operation","counterparty","good","price","quantity_limit","stock_floor","enabled","basis"]): return false
+			var fields: Array[String] = ["operation", "counterparty", "good", "price", "quantity_limit", "stock_floor", "enabled", "basis"]
+			if cycle: fields.append_array(["id", "issuer", "valid_from", "valid_until", "revocation_id"])
+			if not dual or not trade is Dictionary or not FormalLedgerState.exact_fields(trade, fields): return false
 			var selling: bool=name=="opening_paris_workshop"
-			if trade["operation"]!=("SELL" if selling else "PROCURE") or trade["counterparty"]!=("firm:opening_paris_bakery" if selling else "firm:opening_paris_workshop") or trade["good"]!="grain" or not trade["enabled"] is bool or trade["basis"]!="GENERATED_OPENING_STAFFED_MATERIAL_TRADE": return false
+			if trade["operation"]!=("SELL" if selling else "PROCURE") or trade["counterparty"]!=("firm:opening_paris_bakery" if selling else "firm:opening_paris_workshop") or trade["good"]!="grain" or not trade["enabled"] is bool or trade["basis"]!=("GENERATED_OPENING_GRAIN_BREAD_ORGANIZATION_RESOLUTION" if cycle else "GENERATED_OPENING_STAFFED_MATERIAL_TRADE"): return false
 			for field: String in ["price","quantity_limit","stock_floor"]:
 				if not FormalLedgerState.valid_amount(trade[field]): return false
-			if trade["price"]<1 or trade["quantity_limit"]<1 or trade["quantity_limit"]>8 or (selling and trade["stock_floor"]<4) or (not selling and trade["stock_floor"]!=0): return false
+			if cycle:
+				if trade["id"] != "material_mandate:"+name+":grain_bread_1:"+trade["operation"] or trade["issuer"] != row["organization_id"] or trade["revocation_id"] != "material_resolution:"+name+":grain_bread_1:revoke:"+trade["operation"]: return false
+				if not FormalLedgerState.valid_amount(trade["valid_from"]) or not FormalLedgerState.valid_amount(trade["valid_until"]): return false
+				if not trade["enabled"] or trade["price"] != 2 or trade["quantity_limit"] != 64 or trade["stock_floor"] != (4 if selling else 0) or trade["valid_from"] != 0 or trade["valid_until"] != 60*1440: return false
+			elif trade["price"]<1 or trade["quantity_limit"]<1 or trade["quantity_limit"]>8 or (selling and trade["stock_floor"]<4) or (not selling and trade["stock_floor"]!=0): return false
 			for firm: Dictionary in firms:
 				if selling and firm["id"]==row["firm_id"] and firm["sites"][0]["prices"].get("grain")!=trade["price"]: return false
 		seen[name] = true
@@ -95,7 +103,7 @@ static func valid_opening_organizations(settings: Dictionary) -> bool:
 	return true
 
 static func valid_opening_residents(settings: Dictionary) -> bool:
-	var candidate: bool = settings.get("case_id") in [FormalEconomicOpening.SECOND_WORKER_CASE, FormalEconomicOpening.MATERIAL_RENEWAL_CASE]
+	var candidate: bool = settings.get("case_id") in [FormalEconomicOpening.SECOND_WORKER_CASE, FormalEconomicOpening.MATERIAL_RENEWAL_CASE, FormalEconomicOpening.GRAIN_BREAD_CASE]
 	var rows: Variant = settings.get("opening_residents", [])
 	if not rows is Array or rows.size() > (2 if candidate else 1): return false
 	if candidate and rows.size() != 2: return false
@@ -118,7 +126,8 @@ static func valid_opening_residents(settings: Dictionary) -> bool:
 			if actor.get("id") != row["person_id"]: continue
 			if actor.get("kind") != "named" or actor.get("control") != "automatic" or actor.get("account_id") != FormalPersonalEconomyState.personal_account_id(row["person_id"]) or actor.get("cash") != 0 or actor.get("members") != 1 or actor.get("place_id") != row["place_id"]: return false
 			if actor.has("needs") and not actor["needs"] is Dictionary: return false
-			if candidate and (actor.get("stock") != ZERO or actor.get("daily_need") != 1 or actor_needs(actor) != {"food": 1} or actor.get("population_start") != 0): return false
+			var opening_stock: Dictionary = {"beans": 0, "bread": 1, "grain": 0} if settings.get("case_id") == FormalEconomicOpening.GRAIN_BREAD_CASE else ZERO
+			if candidate and (actor.get("stock") != opening_stock or actor.get("daily_need") != 1 or actor_needs(actor) != {"food": 1} or actor.get("population_start") != 0): return false
 			matches += 1
 		if matches != 1: return false
 	if candidate:

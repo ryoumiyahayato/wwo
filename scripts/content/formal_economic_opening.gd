@@ -5,11 +5,13 @@ extends RefCounted
 const SINGLE_PATH := "res://data/formal/paris_workshop_opening_r1.json"
 const MATERIAL_RENEWAL_CASE := "FORMAL_PARIS_FINITE_MATERIAL_RENEWAL_R1"
 const SECOND_WORKER_CASE := "FORMAL_PARIS_TWO_WORKERS_OPENING_R1"
+const GRAIN_BREAD_CASE := "FORMAL_PARIS_GRAIN_BREAD_CYCLE_R1"
 const PATH := "res://data/formal/paris_employment_opening_r1.json"
 
 static func for_source(source_id: String) -> Dictionary:
 	if "--formal-single-employer-opening" in OS.get_cmdline_user_args(): return single_employer(source_id)
 	if source_id != "country_fra": return {}
+	if "--formal-grain-bread-opening" in OS.get_cmdline_user_args(): return grain_bread(source_id)
 	if "--formal-material-renewal-opening" in OS.get_cmdline_user_args(): return material_renewal(source_id)
 	if "--formal-second-worker-opening" in OS.get_cmdline_user_args(): return second_worker(source_id)
 	var result := _load(PATH)
@@ -61,6 +63,36 @@ static func material_renewal(source_id: String) -> Dictionary:
 		var trade: Dictionary = opening["material_trade"]
 		result["material_renewals"].append({"id": "material_mandate:" + opening["firm_id"].trim_prefix("firm:") + ":renewal_1", "issuer": opening["organization_id"], "firm": opening["firm_id"], "operation": trade["operation"], "counterparty": trade["counterparty"], "good": "grain", "min_price": 1, "max_price": 1, "quantity_limit": 4, "stock_floor": trade["stock_floor"], "valid_from": 32 * 1440, "valid_until": 36 * 1440, "basis": "GENERATED_OPENING_ONE_TIME_ORGANIZATION_RESOLUTION"})
 		opening["notice"] += " 本显式候选另含本组织一次性续期决议：首批8粮耗尽后，由原企业主体执行，第32日生效、第36日截止，限原交易对手及粮食、单价1、第二批累计最多4粮；可撤销后续受理，不抹去已受理责任。雇员无签发权，不能再次续期；不增加粮源。"
+	return result
+
+## A separate genesis declaration, not an amendment of existing employment or
+## the old 8+4 mandates. The grain activity is a development production assumption,
+## not a simulation of land, seed, seasons or agricultural resources.
+static func grain_bread(source_id: String) -> Dictionary:
+	var result := second_worker(source_id)
+	if result.is_empty(): return result
+	result["case_id"] = GRAIN_BREAD_CASE
+	result["management_scope"]["id"] = "scope:formal_paris_grain_bread_cycle_r1"
+	for actor: Dictionary in result["actors"]:
+		if actor["control"] == "automatic": actor["stock"]["bread"] = 1
+	for firm: Dictionary in result["firms"]:
+		var upstream: bool = firm["id"] == "firm:opening_paris_workshop"
+		var site: Dictionary = firm["sites"][0]
+		site["stock"] = {"beans": 0, "bread": 0 if upstream else 10, "grain": 4 if upstream else 2}
+		if upstream:
+			site["targets"] = {"beans": 0, "bread": 0, "grain": 8}
+			site["prices"] = {"grain": 2}
+			site["activities"] = [{"id": "activity:opening_paris_development_grain", "place_id": "place:paris", "outputs": {"grain": 2}, "materials": EconomySliceConfig.ZERO.duplicate(), "hours": 1, "capacity_units": 1, "enabled": true, "basis": "DEVELOPMENT_CONFIGURATION"}]
+	for job: Dictionary in result["jobs"]:
+		job["wage_per_hour"] = 1
+		job["wage_delay"] = 0
+	result["retail_sites"][0]["stock_units"] = {"grain": 1}
+	result["information"] = result["information"].filter(func(row: Dictionary) -> bool: return row["candidate"] != "firm:opening_paris_workshop|bread|site:opening_paris_workshop:paris")
+	for opening: Dictionary in result["opening_organizations"]:
+		var trade: Dictionary = opening["material_trade"]
+		var name: String = opening["firm_id"].trim_prefix("firm:")
+		trade.merge({"id": "material_mandate:" + name + ":grain_bread_1:" + trade["operation"], "issuer": opening["organization_id"], "price": 2, "quantity_limit": 64, "valid_from": 0, "valid_until": 60 * 1440, "revocation_id": "material_resolution:" + name + ":grain_bread_1:revoke:" + trade["operation"], "basis": "GENERATED_OPENING_GRAIN_BREAD_ORGANIZATION_RESOLUTION"}, true)
+		opening["notice"] = "本显式新开局的模拟组织，持有原企业账户与本站产出。工坊以实际劳动及基础容量按1生产小时产2粮，无材料输入，仅为简化开发能力，不代表土地、种子或季节系统；面包坊按1粮及1生产小时产2面包。各岗位2小时、时薪1、完成劳动当日到期；各1小时销售，日限4件。组织在开局分别决定SELL/PROCURE，限原对手、粮食单价2、累计64粮、有效区间[0,86400)，卖方保底4。授权和本组织固定撤销决议均在开局声明，原企业只执行既定条款，无自行扩额或续期权；雇员和玩家无签发权。撤销或到期仅阻止后续受理，保留已受理责任。居民各1个开仓面包，全部开仓合计6粮、12面包、4300现金，仅入账一次。"
 	return result
 
 static func single_employer(source_id: String) -> Dictionary:
