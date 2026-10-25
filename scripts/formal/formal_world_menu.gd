@@ -15,6 +15,8 @@ const SETTINGS = preload("res://scripts/presentation/ui/interface_settings.gd")
 const MAP_ACCEPTANCE = preload("res://scripts/presentation/ui/map_resource_acceptance.gd")
 var _map_acceptance: Control
 var _map_acceptance_requested: bool = false
+var _painting_animated: ShaderMaterial
+var _painting_still: ShaderMaterial
 @onready var _controller: GlobeController = $GlobeController
 var _renderer: GlobeRenderer
 var _page: String = "home"
@@ -72,6 +74,12 @@ func _ready() -> void:
 	paint.shader = preload("res://shaders/presentation/ui/menu_painting.gdshader")
 	paint.set_shader_parameter("motion",visual.menu_motion)
 	($Painting as TextureRect).material = paint
+	_painting_animated=paint
+	_painting_still=ShaderMaterial.new()
+	_painting_still.shader=preload("res://shaders/presentation/ui/menu_painting_still.gdshader")
+	_painting_still.set_shader_parameter("motion",visual.menu_motion)
+	var power := SETTINGS.install_power(self,_controller,func() -> bool: return is_instance_valid(_map_acceptance),func() -> bool: return _entering or _preview_waiting or _preview_installing or _preview_worker!=null)
+	power.low_activity_changed.connect(_painting_activity)
 	($Version as Label).text = "v"+str(ProjectSettings.get_setting("application/config/version",""))
 	($Version as Label).theme = theme
 	_controller.selection_changed.connect(_map_country_selected)
@@ -82,6 +90,10 @@ func _ready() -> void:
 	if OS.has_feature("editor") and "--map-resource-review" in OS.get_cmdline_user_args():
 		var observer := load("res://tools/map/r57_visual_driver.gd").new() as Node
 		observer.set("acceptance", "resource-review")
+		add_child(observer)
+	if OS.has_feature("editor") and "--idle-power-review" in OS.get_cmdline_user_args():
+		var observer := load("res://tools/map/r57_visual_driver.gd").new() as Node
+		observer.set("acceptance", "idle-power")
 		add_child(observer)
 
 func _open_map_acceptance() -> void:
@@ -480,6 +492,20 @@ func _show_page(page: String) -> void:
 				toggle.button_pressed = bool(_preferences.get(str(setting.key),true))
 				_column.add_child(toggle)
 				toggle.toggled.connect(_map_preference_changed.bind(str(setting.key)))
+			var refresh := OptionButton.new()
+			refresh.add_item("活动刷新 · 60 FPS");refresh.add_item("活动刷新 · 30 FPS")
+			refresh.select(1 if int(_preferences.active_fps)==30 else 0)
+			_column.add_child(refresh)
+			refresh.item_selected.connect(func(index: int) -> void:
+				_preferences.active_fps=30 if index==1 else 60
+				_save_preferences())
+			var idle := CheckButton.new()
+			idle.text="菜单空闲省电"
+			idle.button_pressed=bool(_preferences.idle_power)
+			_column.add_child(idle)
+			idle.toggled.connect(func(on: bool) -> void:
+				_preferences.idle_power=on
+				_save_preferences())
 			_button("返回",_show_page.bind("home"))
 	_status = _text(_preview_error if page=="selection" else "",12)
 	_status.visible = not _status.text.is_empty()
@@ -775,6 +801,11 @@ func _finish_world_launch(built: WorldBuildResult) -> void:
 func _select_theme() -> void:
 	_preferences.theme = "paris_1877"
 	_save_preferences()
+
+func _painting_activity(low: bool) -> void:
+	if low:
+		_painting_still.set_shader_parameter("presentation_time",fmod(Time.get_ticks_msec()/1000.0,3600.0))
+	($Painting as TextureRect).material=_painting_still if low else _painting_animated
 
 func _volume_changed(value: float) -> void:
 	_preferences.volume = value/100.0

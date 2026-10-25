@@ -63,8 +63,18 @@ var perf_comparison_scene: PackedScene
 var perf_comparison_script: GDScript
 var perf_profile_inventories: Array = []
 var toolbar_review_running: bool = false
+var idle_recording: bool = false
+var idle_previous: int = 0
+var idle_frames: Array = []
+var idle_counts: Dictionary = {}
+var idle_phases: Array = []
+var idle_label: String = ""
 
 func _process(_delta: float) -> void:
+	if idle_recording:
+		var now := Time.get_ticks_usec()
+		if idle_previous>0: idle_frames.append([now-idle_previous,Performance.get_monitor(Performance.TIME_PROCESS)*1000000.0,get_window().has_focus(),get_window().mode,Engine.max_fps])
+		idle_previous = now
 	if perf_recording: performance_tick()
 	if not tracking or renderer==null: return
 	if not get_window().has_focus(): acceptance_unfocused_frames+=1
@@ -91,6 +101,9 @@ func tracked_decode(level: String, admitted: Dictionary) -> Dictionary:
 	return result
 
 func _ready() -> void:
+	if acceptance=="idle-power":
+		idle_power_run.call_deferred()
+		return
 	if acceptance=="resource-review":
 		resource_review.call_deferred()
 		return
@@ -483,6 +496,214 @@ func resource_settle() -> void:
 		await wait_seconds(.1)
 		if not renderer.call("_has_pending_preparation") and not renderer.region_view._landmark_render_pending: break
 	await wait_seconds(1)
+
+func idle_count(key: String) -> void:
+	idle_counts[key] = int(idle_counts.get(key,0))+1
+
+func idle_snapshot() -> Dictionary:
+	var result := {"max_fps":Engine.max_fps,"physics_ticks":Engine.physics_ticks_per_second,"physics_frames":Engine.get_physics_frames(),"time_scale":Engine.time_scale,"fps_monitor":Performance.get_monitor(Performance.TIME_FPS),"texture_bytes":Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),"drawn_frames":Engine.get_frames_drawn(),"counts":idle_counts.duplicate(),"focused":get_window().has_focus(),"window_mode":get_window().mode}
+	if renderer!=null:
+		result["map"] = performance_snapshot()
+		result["renderer_processing"] = renderer.is_processing()
+		result["world_viewport"] = renderer.get("_viewport").render_target_update_mode
+		result["region_viewport"] = renderer.region_view.viewport.render_target_update_mode
+		result["camera"] = economic_camera_state()
+		result["threads"] = {"relief":renderer.relief._thread!=null,"local":renderer.local_content._thread!=null,"strategic":renderer.strategic_content._thread!=null,"surface":renderer.region_view._surface_thread!=null,"overlay":renderer.get("_overlay_thread")!=null}
+	return result
+
+func idle_begin(label: String) -> Dictionary:
+	if label!="minimized" and get_window().mode==Window.MODE_MINIMIZED: get_window().mode=Window.MODE_WINDOWED
+	get_window().grab_focus()
+	idle_previous=0;idle_frames=[]
+	var point := {"phase":label,"unix_ms":Time.get_unix_time_from_system()*1000.0,"begin":idle_snapshot(),"started_us":Time.get_ticks_usec(),"input_cursor":perf_inputs.size()}
+	idle_recording=true
+	print("IDLE_PHASE ",idle_label,"/",label," unix_ms=",point.unix_ms)
+	return point
+
+func idle_end(point: Dictionary) -> void:
+	idle_recording=false
+	point["ended_us"]=Time.get_ticks_usec();point["end"]=idle_snapshot();point["frames"]=idle_frames
+	point["inputs"]=perf_inputs.slice(int(point.input_cursor))
+	point["foreground_valid"]=str(point.phase)=="minimized" or idle_frames.all(func(frame: Array) -> bool: return bool(frame[2]) and int(frame[3])!=Window.MODE_MINIMIZED)
+	idle_phases.append(point)
+	acceptance_save(idle_label,{"pid":OS.get_process_id(),"phases":idle_phases,"label":idle_label,"device":RenderingServer.get_video_adapter_name()})
+
+func idle_image(label: String) -> void:
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
+	get_viewport().get_texture().get_image().save_png(output.path_join(idle_label+"-"+label+".png"))
+	await wait_seconds(2)
+
+func idle_sample(label: String) -> void:
+	if get_window().mode==Window.MODE_MINIMIZED: get_window().mode=Window.MODE_WINDOWED
+	get_window().grab_focus()
+	await wait_seconds(1)
+	var point := idle_begin(label)
+	await wait_seconds(6)
+	idle_end(point)
+
+func idle_drag() -> void:
+	var position: Vector2 = renderer.size*Vector2(.58,.58)
+	var press := InputEventMouseButton.new();press.position=position;press.button_index=MOUSE_BUTTON_LEFT;press.pressed=true
+	performance_input(press)
+	var began := Time.get_ticks_usec()
+	for step: int in range(40):
+		var delta := Vector2(5,0) if step<20 else Vector2(-5,0)
+		var motion := InputEventMouseMotion.new();motion.position=position+delta;motion.relative=delta;motion.button_mask=MOUSE_BUTTON_MASK_LEFT
+		performance_input(motion);position=motion.position
+		await wait_seconds(maxf(.001,(began+(step+1)*100000-Time.get_ticks_usec())/1000000.0))
+	press.position=position;press.pressed=false;performance_input(press)
+	controller.suspend_motion()
+
+func idle_power_run() -> void:
+	if output.is_empty(): return
+	DirAccess.make_dir_recursive_absolute(output)
+	idle_label="baseline"
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--idle-label="): idle_label=arg.trim_prefix("--idle-label=")
+	RenderingServer.frame_post_draw.connect(idle_count.bind("root_post_draw"))
+	var functional := idle_label in ["validation","cold","warm"]
+	await wait_seconds(3)
+	if not functional:
+		await idle_image("menu")
+		await idle_sample("menu")
+	var menu: Object = get_parent()
+	reparent(get_tree().root)
+	menu.call("_enter_world","load",4 if idle_label=="cold" else 1)
+	var deadline := Time.get_ticks_msec()+120000
+	while Time.get_ticks_msec()<deadline:
+		await wait_seconds(.1)
+		if get_tree().current_scene!=null and get_tree().current_scene.get("_world")!=null: break
+	var host: Object=get_tree().current_scene
+	if host==null or host.get("_world")==null: push_error("Idle review: original slot1 load failed");get_tree().quit(4);return
+	renderer=host.get("map_renderer");controller=host.get("map_controller")
+	perf_relief=renderer.relief;perf_region=renderer.get("_region_layer");perf_world=renderer.get("_world_layer");perf_local=renderer.local_layer
+	var shell: Object=host.get("main_shell")
+	var time: Object=host.get("time_control")
+	if not time.paused: push_error("Idle review requires the restored paused world");get_tree().quit(4);return
+	if idle_label in ["validation","cold"]:
+		await resource_settle()
+		await idle_functional(host,idle_label=="cold")
+		return
+	var authority := economic_authority_state(host)
+	renderer.draw.connect(idle_count.bind("map_draw"));renderer.resized.connect(idle_count.bind("map_resize"))
+	shell.draw.connect(idle_count.bind("shell_draw"));shell.get("_clock_values").draw.connect(idle_count.bind("clock_draw"))
+	controller.view_changed.connect(idle_count.bind("view_changed"));controller.appearance_changed.connect(idle_count.bind("appearance_changed"))
+	time.get_node("ClockTimer").timeout.connect(idle_count.bind("clock_timer_ticks"))
+	renderer.region_view.local_frame_ready.connect(idle_count.bind("local_frame"))
+	var unit := GlobeProjection.lon_lat_to_unit(Vector2(2.3522,48.8566))
+	if idle_label=="warm":
+		controller.set_map_mode("political")
+		controller.focus_region(unit,renderer.size*.5,.25,0.0,renderer.size)
+		await resource_settle();await wait_seconds(2)
+		for repeat: int in range(4):
+			var point := idle_begin("political_repeat_"+str(repeat))
+			await idle_drag();idle_end(point)
+			await resource_settle()
+		acceptance_save(idle_label,{"phases":idle_phases,"authority_unchanged":authority==economic_authority_state(host),"world_minute":host.get("_world").game_clock.total_minutes()})
+		print("IDLE_DONE warm");get_tree().quit();return
+	controller.set_map_mode("political");controller.focus(unit);controller.set_world_zoom(.86)
+	await resource_settle();await wait_seconds(2)
+	await idle_image("world");await idle_sample("world_idle")
+	for mode: String in ["political","economic"]:
+		controller.set_map_mode(mode)
+		if mode=="economic":host.call("_focus_economic_place","place:paris")
+		controller.focus_region(unit,renderer.size*.5,.25,0.0,renderer.size)
+		await resource_settle();await wait_seconds(2)
+		await idle_image(mode);await idle_sample(mode+"_idle")
+		var point := idle_begin(mode+"_drag")
+		await idle_drag();idle_end(point)
+		await resource_settle()
+		point=idle_begin(mode+"_zoom")
+		performance_wheel(MOUSE_BUTTON_WHEEL_UP);await wait_seconds(.4)
+		performance_wheel(MOUSE_BUTTON_WHEEL_DOWN);await wait_seconds(2)
+		idle_end(point)
+	var economic: Object=shell.get("economic_map")
+	economic.call("_toggle_details");await wait_seconds(2)
+	await idle_image("folded");await idle_sample("folded_idle")
+	economic.call("_toggle_details")
+	var minimized := idle_begin("minimized")
+	get_window().mode=Window.MODE_MINIMIZED
+	await wait_seconds(6);idle_end(minimized)
+	get_window().mode=Window.MODE_WINDOWED;get_window().grab_focus();await wait_seconds(2)
+	var cycles: Array=[]
+	controller.set_map_mode("political")
+	for cycle: int in range(3):
+		controller.focus_region(unit,renderer.size*.5,.25,0.0,renderer.size)
+		await resource_settle();cycles.append({"cycle":cycle,"state":"region","snapshot":idle_snapshot()})
+		controller.focus(unit);controller.set_world_zoom(.86)
+		await resource_settle();await wait_seconds(2)
+		cycles.append({"cycle":cycle,"state":"world","snapshot":idle_snapshot()})
+	acceptance_save(idle_label,{"pid":OS.get_process_id(),"phases":idle_phases,"label":idle_label,"device":RenderingServer.get_video_adapter_name(),"cycles":cycles,"authority_unchanged":authority==economic_authority_state(host),"world_minute":host.get("_world").get("game_clock").total_minutes()})
+	print("IDLE_DONE ",idle_label)
+	get_tree().quit()
+
+func idle_functional(host: Object, cold: bool) -> void:
+	var shell: Object=host.get("main_shell")
+	var settings = load("res://scripts/presentation/ui/interface_settings.gd")
+	var original_settings: Dictionary=settings.load_preferences()
+	var slot1 := FormalPersistence.existing_slot_path(1)
+	var original_save := FileAccess.get_file_as_bytes(slot1)
+	var state: Dictionary=host.get("_persistence").snapshot()
+	var report := {"loaded_slot":4 if cold else 1,"world_minute":host.get("_world").game_clock.total_minutes(),"paused":host.get("time_control").paused,"ui":{},"settings":{}}
+	report.ui["person"]=await economic_click(shell,"page:person")
+	await idle_image("person")
+	report.ui["native"]=await economic_click(shell,"person:native")
+	report.ui["orders"]=await economic_click(shell,"person:living_tab:orders")
+	await idle_image("orders")
+	report.ui["orders_tab"]=shell.person_page.native_tab
+	shell.set_page("map",false)
+	if cold:
+		shell.set("_settings_open",true);shell.queue_redraw();await wait_seconds(.4)
+		report.settings["fps30_click"]=await economic_click(shell,"settings:fps")
+		report.settings["fps30"]=Engine.max_fps
+		report.settings["fps60_click"]=await economic_click(shell,"settings:fps")
+		report.settings["fps60"]=Engine.max_fps
+		var actual: Dictionary=settings.load_preferences()
+		var same_preferences := true
+		for key: String in ["volume","bgm","fullscreen","theme"]: same_preferences=same_preferences and actual[key]==original_settings[key]
+		report.settings["other_preferences_unchanged"]=same_preferences
+		shell.set("_settings_open",false);shell.queue_redraw()
+		await wait_seconds(3)
+		report.settings["idle_cap"]=Engine.max_fps
+	if not cold:
+		shell.set("_settings_open",true);shell.queue_redraw();await wait_seconds(.4)
+		report.settings["fps30_click"]=await economic_click(shell,"settings:fps")
+		report.settings["fps30"]=Engine.max_fps
+		report.settings["fps60_click"]=await economic_click(shell,"settings:fps")
+		report.settings["fps60"]=Engine.max_fps
+		var actual: Dictionary=settings.load_preferences()
+		var same_preferences := true
+		for key: String in ["volume","bgm","fullscreen","theme"]: same_preferences=same_preferences and actual[key]==original_settings[key]
+		report.settings["other_preferences_unchanged"]=same_preferences
+		shell.set("_settings_open",false);shell.queue_redraw()
+		await wait_seconds(3)
+		report.settings["idle_cap"]=Engine.max_fps
+		var press := InputEventMouseButton.new();press.position=Vector2(800,600);press.button_index=MOUSE_BUTTON_LEFT;press.pressed=true
+		var began := Time.get_ticks_usec()
+		get_viewport().push_input(press,true)
+		report.settings["input_restore_call_us"]=Time.get_ticks_usec()-began
+		report.settings["input_cap"]=Engine.max_fps
+		press.pressed=false;get_viewport().push_input(press,true)
+		report["navigation_state_equal"]=state==host.get("_persistence").snapshot()
+		if not FormalPersistence.existing_slot_path(4).is_empty():
+			report["save_error"]="Slot4 already exists; preserving it"
+		else:
+			shell.open_slots("save");await wait_seconds(.4)
+			report["save_click"]=await economic_click(shell,"slot:choose:4")
+			var deadline := Time.get_ticks_msec()+60000
+			while host.get("_save_pending") and Time.get_ticks_msec()<deadline: await wait_seconds(.1)
+			var saved := FormalPersistence.new()._read_snapshot_file(FormalPersistence.existing_slot_path(4))
+			report["save_success"]=saved.success
+			report["saved_state_equal"]=saved.success and state==saved.snapshot
+	else:
+		var saved := FormalPersistence.new()._read_snapshot_file(FormalPersistence.existing_slot_path(4))
+		report["cold_state_equal"]=saved.success and state==saved.snapshot
+		report["ui_state_equal"]=state==host.get("_persistence").snapshot()
+	report["slot1_unchanged"]=FileAccess.get_file_as_bytes(slot1)==original_save
+	acceptance_save(idle_label,report)
+	print("IDLE_FUNCTIONAL_DONE ",idle_label," ",JSON.stringify(report))
+	host.call("_request_departure","quit")
 
 func toolbar_review() -> void:
 	# Requested finite GPU/UI observation. The normal menu loaded the existing

@@ -793,6 +793,8 @@ func _draw_settings() -> void:
 		button(Rect2(rect.position+Vector2(12,112),Vector2(rect.size.x-24,29)),"BGM · "+("开启" if bool(_preferences.bgm) else "关闭"),"settings:bgm",true,bool(_preferences.bgm))
 	button(Rect2(rect.position+Vector2(12,154),Vector2(rect.size.x-24,29)),"全屏" if bool(_preferences.fullscreen) else "窗口","settings:fullscreen")
 	button(Rect2(rect.position+Vector2(12,196),Vector2(rect.size.x-24,28)),"地图名称 · "+("开启" if _controller.labels_enabled else "关闭"),"settings:labels")
+	button(Rect2(rect.position+Vector2(12,232),Vector2(rect.size.x-24,25)),"活动刷新 · %d FPS" % int(_preferences.get("active_fps",60)),"settings:fps")
+	button(Rect2(rect.position+Vector2(12,261),Vector2(rect.size.x-24,25)),"菜单空闲省电 · "+("开启" if bool(_preferences.get("idle_power",true)) else "关闭"),"settings:idle_power")
 	button(Rect2(rect.position+Vector2(12,290),Vector2(rect.size.x-24,29)),"返回","settings:back")
 
 func open_slots(mode: String) -> void:
@@ -1125,6 +1127,8 @@ func _activate(action: String) -> void:
 		else:
 			if action=="settings:bgm": _preferences.bgm = not bool(_preferences.bgm)
 			elif action=="settings:fullscreen": _preferences.fullscreen = not bool(_preferences.fullscreen)
+			elif action=="settings:fps": _preferences.active_fps=30 if int(_preferences.get("active_fps",60))==60 else 60
+			elif action=="settings:idle_power": _preferences.idle_power=not bool(_preferences.get("idle_power",true))
 			elif action=="settings:labels":
 				_controller.toggle_labels()
 				_preferences.labels = _controller.labels_enabled
