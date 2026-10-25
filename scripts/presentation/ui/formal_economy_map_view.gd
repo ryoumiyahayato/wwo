@@ -39,16 +39,31 @@ var _next: Button
 var _business: Button
 var _return_map: Button
 var _managed_subject: bool = false
+var _detail_toggle: Button
+var _details_collapsed: bool = false
 
 func _ready() -> void:
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme=UIDrawing.shell_theme()
 	_toolbar=HBoxContainer.new();add_child(_toolbar)
-	for p: Array in [["巴黎","place:paris"],["里昂","place:lyon"],["马赛","place:marseille"]]:
-		var id:=str(p[1]);_button(_toolbar,str(p[0]),func():focus_requested.emit(id))
+	# Keep one compact primary row. City shortcuts remain in its native menu.
+	_toolbar.theme=theme.duplicate(true)
+	_toolbar.theme.default_font_size=14
+	for state:String in ["normal","hover","pressed","disabled","focus"]:
+		var box:=_toolbar.theme.get_stylebox(state,"Button") as StyleBoxFlat
+		box.content_margin_top=5;box.content_margin_bottom=5
+		box.content_margin_left=10;box.content_margin_right=10
 	_button(_toolbar,"定位所选",func():focus_requested.emit(selected_place))
+	var locations:=MenuButton.new();locations.text="地点";locations.flat=false
+	locations.tooltip_text="巴黎 / 里昂 / 马赛；只定位镜头。";_toolbar.add_child(locations)
+	var places:Array[String]=[]
+	for p: Array in [["巴黎","place:paris"],["里昂","place:lyon"],["马赛","place:marseille"]]:
+		places.append(str(p[1]));locations.get_popup().add_item(str(p[0]),places.size()-1)
+	locations.get_popup().id_pressed.connect(func(id:int):focus_requested.emit(places[id]))
+	_detail_toggle=_button(_toolbar,"收起详情",_toggle_details)
 	_return_map=_button(_toolbar,"返回政治地图",func():back_requested.emit())
+	_toolbar.minimum_size_changed.connect(_layout)
 	_side=PanelContainer.new();add_child(_side);_side.mouse_filter=Control.MOUSE_FILTER_STOP
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",5);_side.add_child(column)
 	_heading=Label.new();_heading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(_heading)
@@ -89,13 +104,21 @@ func _button(parent:Control,text:String,action:Callable) -> Button:
 
 func _layout() -> void:
 	if _side==null:return
-	_toolbar.position=Vector2(124,92);_toolbar.size=Vector2(minf(size.x-140,600),30)
+	_toolbar.position=Vector2(124,66);_toolbar.size=_toolbar.get_combined_minimum_size()
 	_side.position=Vector2(maxf(12,size.x-348),142);_side.size=Vector2(332,maxf(230,size.y-236))
+
+func _toggle_details() -> void:
+	_details_collapsed=not _details_collapsed
+	_side.visible=not _details_collapsed
+	_detail_toggle.text="展开详情" if _details_collapsed else "收起详情"
+	_layout()
+	# Refresh the existing label exclusions without querying or advancing a world.
+	_publish_links()
 
 func occlusions() -> Array[Rect2]:
 	var rows:Array[Rect2]=[]
 	if visible:
-		rows.append(Rect2(_side.position,_side.size))
+		if _side.visible:rows.append(Rect2(_side.position,_side.size))
 		if full:rows.append(Rect2(_toolbar.position,_toolbar.size))
 	return rows
 
@@ -104,6 +127,7 @@ func present(value:Dictionary, source_catalog:VNextSpatialCatalog, expanded:bool
 	# Already detached and bounded by the host observation adapter.
 	snapshot=value;network=value.get("market_network",{});contacts=value.get("market_contacts",{})
 	_toolbar.visible=full;_expand.visible=not full
+	_side.visible=not full or not _details_collapsed
 	_return_map.text="返回地理地图" if return_mode=="geographic" else "返回政治地图"
 	_subjects.clear()
 	_business.disabled=true
@@ -154,6 +178,8 @@ func present(value:Dictionary, source_catalog:VNextSpatialCatalog, expanded:bool
 
 func clear_observation() -> void:
 	hide();snapshot={};network={};contacts={};catalog=null
+	_details_collapsed=false
+	_detail_toggle.text="收起详情"
 	_managed_subject=false;_business.disabled=true
 	_subjects.clear();_places.clear();_orders.clear();_details.clear()
 	var empty: Array[Dictionary] = []

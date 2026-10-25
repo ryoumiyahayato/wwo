@@ -102,6 +102,11 @@ func _ready() -> void:
 	main_shell.show_feedback("正在准备正式地图。")
 	_update_map_visibility()
 	_assemble_world.call_deferred()
+	if OS.has_feature("editor") and "--economic-toolbar-review" in OS.get_cmdline_user_args():
+		# Reuse the finite native observer on this application. No alternate scene.
+		var observer := load("res://tools/map/r57_visual_driver.gd").new() as Node
+		observer.set("acceptance", "toolbar-review")
+		add_child(observer)
 
 func _assemble_world() -> void:
 	# Let the current scene and its existing globe viewport draw before assembly.

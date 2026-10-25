@@ -517,3 +517,52 @@ R57仍为代20、1,759,540,224 B、CANDIDATE／accepted=false；没有重新导�
 本机实际验证：Godot 4.6.3 Compatibility、1280×720、i7-13700H、RTX3050 Laptop。通过原菜单进入验收，打开采尔马特西侧原地图，原生高程网格和参考树木实际显示；切换55度斜视及2米/像素，移动观察镜头。保存一份视觉问题反馈，坐标经度7.7063088、纬度46.0079880；实际PNG为69710B。画面显示有限地形窗口边界接缝和近距离底图模糊。高程来源为swissALTI3D2019，显示网格33×63；现代地表不证明1900年土地利用。另实际打开原埃菲尔铁塔模型，桥梁和建筑同时由原渲染器显示；关闭验收后返回原主菜单。
 
 当前恢复树没有可运行的 `varied_maps/`、Cedar、Rivergate、Atlas15，也没有军事5×5公里战场、车辆/步兵控制器及物理碰撞场景。驾驶、步兵移动、桥面物理、分块驾驶连续性、掩体观察和战斗操作均未执行。没有制造替代载具或复制历史地图。经济、人物及正式全球地图权威未变；没有导出EXE或APK。仅做新增组件的局部语法检查与真实窗口操作，未运行全仓库回归。
+
+### 2026-10-25｜经济地图顶部工具栏与Economic Lab交接边界
+
+本轮继续使用本地68e74d78及其工作树，不切换或替换正式源码。Economic Lab比较固定为 `ryoumiyahayato/wwo-economy` 的 `sandbox/main` 提交 `d373c1d15ce9e9a21542bd8bd285fb96959ca96e`；截图说明提交为 `f56bc96f5b9d50b20a1573f9ed9ed5c304c829cf`，交接记录为 https://github.com/ryoumiyahayato/wwo-economy/issues/12 。只读取必要源码，没有克隆候选工程或下载地图、缓存、历史存档。
+
+原WWO经济专题已有一排工具，不复制经济线截图中的多排研究控制。现将巴黎、里昂、马赛收进原生“地点”菜单，主要一排保留“定位所选 / 地点 / 收起详情 / 返回政治或地理地图”。工具栏从y92移到y66，只为自身复制紧凑样式。标签避让使用真实工具栏宽度；详情收起后取消原侧栏遮挡区，展开时恢复。法国侧栏内部、曲线、正文和滚动未调整。原经济观察、地图控制器与镜头状态继续使用。
+
+#### 已有观察接口与差异
+
+逐文件文本比较确认两仓固定版本的 `WorldState`、`FormalWorldEconomyView`、`EconomyStockLots` 相同。这不表示世界实例、存档或Economic Lab新增策略可以互换。主WWO以 `FormalEconomicMapObservation.details` 调用当前人物的 `LivelihoodAction.query/query_firm`，再做字段白名单和有界分页；Economic Lab全球层从MerchantRuntime额外读取 `global_market`，主观察接口没有该字段。
+
+| 内容 | 主WWO现有读法 | 本轮边界 |
+|---|---|---|
+| 时间和身份 | world_id、minute/date、world_case、observer/subject；稳定人物、企业、站点、place及market ID | 同一WorldState。ID须在当前目录和权限集合中存在；`market:country_fra`参考节点不能充当地理place |
+| 本人或获准企业 | cash、reserved、inventory、offers、orders、sales_orders、operations、lifecycle，以及本人employment、known_jobs、工资、totals、participation | 仅返回原领域已授权内容。当前普通人物没有企业经营主体，不显示别家私有库存或余额 |
+| 订单与货物 | pending、transit、delivered，原货批责任、交付与付款记录；Network和Contacts只投影这些可见记录 | 在途不算已交付。报价联系、正式订单和近7日到货沿用不同kind与说明，不增加宏观估计线 |
+| 国家统计 | FormalWorldEconomyView及country_summary的daily_totals、满足率、产需和国家统计库存 | 国家库存不冒充城市或企业库存；宏观价格指数不作为成交报价 |
+| 全球参考指数 | 主WWO没有global_commodity_reference及reference_market状态 | Lab的observe_public只给两日延迟指数；observe另含当前供需、缓冲、冲击、估计调配及地区内部样本。均未接入主玩家地图 |
+| 生产组合、采购时点、经营库存、供应合同 | Lab新增ProductionBundle、NewInputContribution、OperatingInventory、SupplyContracts和候选启用策略 | 未整体覆盖EconomyR1Slice。没有收到对应主线兼容补丁、开启合同及局部测试交付，不标记正式接入 |
+| 存档 | 主WWO外层formal_world_exact_variant_v1、快照formal_world_simulation_v15、经济state_v6 | Lab还存在merchant_host_v1封套和state_v7_reference；原v6/R1/R2名称相同也不能替代config/精确字段校验。未打开或迁移经济历史存档 |
+
+Lab地区微观粮食样本明确使用“1 native grain单位=1kg=0.001吨”的开发假设；全球供需为开发标准吨/日，指数初值100。主WWO商品以原unit_id及FormalCommodityMapping的显式分子/分母跨表约束。没有取得逐商品单位、币种和取整合同前，不能把这些吨、指数或估计调配转为原库存、价格、订单和货款。
+
+#### 请求经济线下次交付的只读合同
+
+优先扩展原LivelihoodAction与FormalEconomicMapObservation，不增加Runtime或第二份世界。交付固定源码提交、功能开关与默认关闭条件、直接相关领域检查结果、少量脱敏样本、主WWO目标版本和增量差异。每项数据至少须有：
+
+- `schema_id/source_commit/config_id`，当前`world_minute`、事实发生分钟、获知/发布时间及观察者身份。
+- 企业、站点、人物、地理地点、市场的稳定ID与跨表关系。找不到当前身份时返回缺项，不能临时造世界对象。
+- 商品`good_id/unit_id`、数量精度、显式单位换算和取整规则；币种、整数金额精度、单价与数量的计价关系。
+- 实际生产事件ID、站点、配方/投入货批及数量、已完成产量、实际劳动；库存分别列持有、预占、可用，不能用预计产能填实物。
+- 订单/运输/货批/交付凭证ID，pending/transit/delivered分别列值；付款和退款凭证、实际已付、预留与尚欠、付款责任主体分别列值。
+- 决定ID、发生时间、原理由码、关联正式对象和结果。内部现金窗口、预测需求、缓冲和参数估计放研发段，不进入玩家段。
+- `visibility/basis/observer_id/received_minute`及授权依据。普通查询只含已获知且获准事实；研发完整估计仅在隔离开发世界只读查询。
+- 原存档归属、兼容版本与新增字段恢复策略。观察调用不得推进GameClock、修改Ledger、StockLots、订单、人物或触发保存。
+
+目前没有经过交付的至少20家独立企业数据。主工不补造企业、库存、报价或产能，不重写生产、价格、工资和NPC采购算法。上述合同在本上下文提出，未另建聊天轮询或常驻同步。
+
+本轮复用 `tools/map/r57_visual_driver.gd` 的计时与权威比较函数，增加有限toolbar-review路径，附着在原FormalWorldApplication上。仅编辑器构建带 `--economic-toolbar-review` 时启用；F6触发一次，要求原世界已载入且暂停，不创建/替换世界，不推进或保存。设置 `WWO_VISUAL_OUTPUT` 为明确输出目录，并传 `--toolbar-review-label=before或after`；已有同名结果拒绝覆盖。截图在计时外读取；计时阶段不逐帧截图，只在结束时写有界摘要。日常运行不加载观察器。没有新增场景、测试脚本或全仓回归。
+
+本地结果：同一正式存档只读恢复到minute34620（1900-01-25 01:00）。本人现金2504、预留0；可见order:22为巴黎面包现场交易，quantity1、pending0、transit0、delivered1，shipment:22交付，货款实际已付2、运费0、预留0。此订单来自原存档，本轮没有新采购。实际点击订单列表后，原详情显示“待发0／在途责任0／已到货1”。当前人物只拥有本人经济与国家统计观察项，没有企业管理权限；没有提升权限读取他企库存。
+
+改动前后同为巴黎2.3522,48.8566、250米/像素、1280×720、RTX3050 Laptop、Compatibility。最终工具栏实际矩形为(124,66,316,31)；原工具栏从(124,92)开始，标签避让宽度600。前后图分别为 `local-artifacts/economic-toolbar-20261025/before-paris.png` 和 `final-paris.png`。地点原生菜单实际显示巴黎、里昂、马赛；详情折叠/恢复与政治、地理、经济切换保持镜头。法国侧栏内部仍保留原布局。
+
+有限采样的帧间隔P95：静止17.645→17.624ms，巴黎平移40.239→38.934ms，缩放18.715→18.670ms。最终巴黎平移最大69.821ms，351帧中45帧超过33ms，0帧超过100ms；全球旋转缩放P95为31.497ms、最大63.231ms，272帧中13帧超过33ms。最终各阶段均无失焦帧。首轮全球阶段40帧失焦，该段不做前后比较；字形修正前的中间轮保留为过程记录，不挑选最低数值。上述为一次有界原生窗口观测，不把布局修改归因于地貌性能优化，巴黎P1保留。
+
+计时阶段没有Viewport或窗口截图读回。截图在采样开始前完成，并等待2秒；运行后另做原生鼠标点击。CPU process监视器与帧间隔分别保留在JSON中，均不称为GPU执行时间。最终观测点工作集1,508,761,600B、私有内存1,986,273,280B；Godot巴黎纹理监视器约274—275MB。nvidia-smi当时全GPU已用391MiB，不将该全设备数值当本进程显存。只有本轮一个Godot进程，未并行运行其他高负载Godot。
+
+每轮模式切换、折叠和观察前后的Ledger、原库存/货批、订单、运输、人物及原生经济快照相同，世界分钟保持34620。现有手动槽1为2,543,383B，修改时间仍为2026-10-25T11:09:46.2789494Z；未写入保存或覆盖经济历史档。运行仅保留原地图锚点警告，无SCRIPT ERROR或ERROR。未导出EXE/APK，未运行全仓回归，未改变经济算法或普通Opening。状态为USER_VISUAL_PENDING；用户判断顶部工具栏后再处理法国侧栏。

@@ -62,6 +62,7 @@ var perf_binding_variant: String = "candidate"
 var perf_comparison_scene: PackedScene
 var perf_comparison_script: GDScript
 var perf_profile_inventories: Array = []
+var toolbar_review_running: bool = false
 
 func _process(_delta: float) -> void:
 	if perf_recording: performance_tick()
@@ -90,6 +91,9 @@ func tracked_decode(level: String, admitted: Dictionary) -> Dictionary:
 	return result
 
 func _ready() -> void:
+	if acceptance=="toolbar-review":
+		set_process(false)
+		return
 	if not OS.get_user_data_dir().get_file().begins_with("WWO_R57_Visual_") or output.is_empty():
 		get_tree().quit(2)
 		return
@@ -335,8 +339,101 @@ func acceptance_image(label: String) -> void:
 	if not requested.is_empty() and label not in requested:return
 	RenderingServer.force_draw(false)
 	var image:=get_viewport().get_texture().get_image()
-	if OS.get_environment("WWO_VISUAL_ACCEPTANCE") not in ["economic","economic-action"]:image.resize(800,450,Image.INTERPOLATE_BILINEAR)
+	if acceptance not in ["economic","economic-action","toolbar-review"]:image.resize(800,450,Image.INTERPOLATE_BILINEAR)
 	image.save_png(output+"/"+label+".png")
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if acceptance!="toolbar-review" or not event is InputEventKey: return
+	if event.pressed and not event.echo and event.keycode==KEY_F6:
+		get_viewport().set_input_as_handled()
+		if not toolbar_review_running: toolbar_review.call_deferred()
+
+func toolbar_review() -> void:
+	# Requested finite GPU/UI observation. The normal menu loaded the existing
+	# world. This route never constructs, advances, saves or replaces that world.
+	var host: Object=get_parent()
+	if host.get("_world")==null or not host.get("time_control").paused:
+		print("TOOLBAR_REVIEW_REFUSED: Load the normal world and pause first")
+		return
+	var label: String="review"
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--toolbar-review-label="):label=arg.trim_prefix("--toolbar-review-label=")
+	if label.validate_filename()!=label or not output.is_absolute_path() or output.is_empty():return
+	if FileAccess.file_exists(output+"/"+label+".json"):return
+	if DirAccess.make_dir_recursive_absolute(output)!=OK:return
+	toolbar_review_running=true
+	renderer=host.get("map_renderer");controller=host.get("map_controller")
+	var shell: Object=host.get("main_shell")
+	var view: Object=shell.get("economic_map")
+	var before: Dictionary=economic_authority_state(host)
+	var model: Object=host.get("_world")
+	var native: Object=model.get("economy_r1")
+	var native_before: Dictionary=native.snapshot() if native!=null else {}
+	var personal_before: Dictionary=model.get("personal_economy_state").snapshot()
+	perf_relief=renderer.get("relief");perf_region=renderer.get("_region_layer");perf_world=renderer.get("_world_layer");perf_local=renderer.get("local_layer")
+	RenderingServer.frame_pre_draw.connect(performance_pre_draw)
+	RenderingServer.frame_post_draw.connect(performance_post_draw)
+	set_process(true)
+	controller.set_map_mode("economic")
+	host.call("_focus_economic_place","place:paris")
+	controller.focus_region(GlobeProjection.lon_lat_to_unit(Vector2(2.3522,48.8566)),renderer.get("size")*.5,.25,0.0,renderer.get("size"))
+	await settle();await wait_seconds(3)
+	acceptance_image(label+"-paris")
+	await wait_seconds(2) # The PNG readback is outside all timing phases.
+	perf_phases.clear()
+	performance_begin("paris_economic_idle_no_readback")
+	await wait_seconds(12)
+	performance_end()
+	performance_begin("paris_economic_pan_no_readback")
+	await performance_drag(Vector2(6,0),24)
+	await performance_drag(Vector2(-6,0),24)
+	await wait_seconds(2)
+	performance_end()
+	performance_begin("paris_economic_zoom_no_readback")
+	performance_wheel(MOUSE_BUTTON_WHEEL_UP);await wait_seconds(.4)
+	performance_wheel(MOUSE_BUTTON_WHEEL_DOWN);await wait_seconds(2)
+	performance_end()
+	controller.focus(GlobeProjection.lon_lat_to_unit(Vector2(2.3522,48.8566)))
+	controller.set_world_zoom(.86)
+	await settle();await wait_seconds(2)
+	performance_begin("world_rotate_zoom_no_readback")
+	await performance_drag(Vector2(4,0),16)
+	await performance_drag(Vector2(-4,0),16)
+	performance_wheel(MOUSE_BUTTON_WHEEL_UP);await wait_seconds(.4)
+	performance_wheel(MOUSE_BUTTON_WHEEL_DOWN);await wait_seconds(2)
+	performance_end()
+	controller.focus_region(GlobeProjection.lon_lat_to_unit(Vector2(2.3522,48.8566)),renderer.get("size")*.5,.25,0.0,renderer.get("size"))
+	await settle()
+	var pose: Dictionary=economic_camera_state()
+	var switches: Array=[]
+	for mode: String in ["political","geographic","economic"]:
+		controller.set_map_mode(mode);await wait_seconds(.4)
+		switches.append({"mode":mode,"camera_unchanged":pose==economic_camera_state(),"authority_unchanged":before==economic_authority_state(host)})
+	var folded: Dictionary={"executed":false}
+	if view.has_method("_toggle_details"):
+		view.call("_toggle_details");await wait_seconds(.3)
+		folded={"executed":true,"side_hidden":not view.get("_side").visible,"camera_unchanged":pose==economic_camera_state()}
+		view.call("_toggle_details");await wait_seconds(.3)
+		folded["side_restored"]=view.get("_side").visible
+	var observed: Dictionary=view.get("snapshot")
+	var summary: Dictionary={"source_commit":"68e74d78 + current toolbar worktree","world_minute":model.get("game_clock").total_minutes(),"source_case":observed.get("world_case",""),"observer":observed.get("observer",""),"subject":observed.get("subject",""),"available_fields":observed.get("firm",{}).keys(),"public_country_fields":model.get("economy_state").country_summary(controller.selected_polity_id).keys(),"legal_subjects":observed.get("subjects",[]),"orders_on_page":observed.get("orders_total",0),"mode_switches":switches,"details_fold":folded,"same_authority":before==economic_authority_state(host),"same_native_snapshot":native_before==(native.snapshot() if native!=null else {}),"same_personal_snapshot":personal_before==model.get("personal_economy_state").snapshot(),"gpu":RenderingServer.get_video_adapter_name(),"window":TerrainPixelSource.serial(renderer.get("size")),"phases":[]}
+	for phase: Dictionary in perf_phases:
+		var times: Array=[];var processes: Array=[];var long_frames: Array=[];var unfocused: int=0
+		for frame: Array in phase.frames:
+			times.append(float(frame[2])/1000.0);processes.append(float(frame[3])/1000.0)
+			if not frame[8]:unfocused+=1
+			if float(frame[2])>33000:long_frames.append(float(frame[2])/1000.0)
+		times.sort();processes.sort();long_frames.sort();long_frames.reverse()
+		summary.phases.append({"name":phase.phase,"samples":times.size(),"unfocused":unfocused,"p95_ms":times[int((times.size()-1)*.95)] if not times.is_empty() else 0,"max_ms":times.back() if not times.is_empty() else 0,"process_p95_ms":processes[int((processes.size()-1)*.95)] if not processes.is_empty() else 0,"over33":long_frames.size(),"over100":long_frames.filter(func(ms:float)->bool:return ms>100).size(),"longest_ms":long_frames.slice(0,12),"resources":phase.end})
+	summary["toolbar_rect"]=TerrainPixelSource.serial(Rect2(view.get("_toolbar").position,view.get("_toolbar").size))
+	summary["legal_sample"]={"cash":observed.get("firm",{}).get("cash"),"reserved":observed.get("firm",{}).get("reserved"),"inventory":observed.get("firm",{}).get("inventory",{}),"orders":observed.get("firm",{}).get("orders",[]).slice(0,2)}
+	perf_phases.clear()
+	RenderingServer.frame_pre_draw.disconnect(performance_pre_draw)
+	RenderingServer.frame_post_draw.disconnect(performance_post_draw)
+	set_process(false)
+	acceptance_save(label,summary)
+	print("TOOLBAR_REVIEW_COMPLETE ",output,"/",label,".json unchanged=",summary.same_authority and summary.same_native_snapshot and summary.same_personal_snapshot)
+	toolbar_review_running=false
 
 func acceptance_visual(world: Object) -> void:
 	var places: Array=[
