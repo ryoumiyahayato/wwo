@@ -23,7 +23,7 @@ static func valid(settings: Dictionary) -> bool:
 	seen.clear()
 	for p: Variant in settings.get("labor_response_policies",[]):
 		if not p is Dictionary or not FormalLedgerState.exact_fields(p,["actor","arrears_days","basis"]) or not actors.has(p["actor"]) or seen.has(p["actor"]) or actors[p["actor"]]["control"]!="automatic" or p["basis"] not in ["EXPLICIT_DEVELOPMENT_LABOR_RESPONSE", "GENERATED_OPENING_CONFIGURATION"] or not FormalLedgerState.valid_amount(p["arrears_days"]) or p["arrears_days"]<1 or p["arrears_days"]>90: return false
-		if p["basis"] == "GENERATED_OPENING_CONFIGURATION" and (not EconomySliceConfig.valid_opening_residents(settings) or settings.get("opening_residents", []).is_empty() or p["actor"] != settings["opening_residents"][0]["person_id"]): return false
+		if p["basis"] == "GENERATED_OPENING_CONFIGURATION" and (not EconomySliceConfig.valid_opening_residents(settings) or settings.get("opening_residents", []).is_empty() or not settings["opening_residents"].any(func(resident: Dictionary) -> bool: return resident["person_id"] == p["actor"])): return false
 		seen[p["actor"]]=true
 	seen.clear()
 	for p: Variant in settings.get("firm_finance_authorities",[]):
