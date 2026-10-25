@@ -1,6 +1,18 @@
-# WWO 当前归档入口 · 2026-10-24
+# WWO · GitHub main 开发入口
 
-当前主工仍为 **R57代21 CANDIDATE，accepted=false，1,759,546,768字节**；R56为 **ROLLBACK，1,834,465,568字节**。默认分支仍为 `canonical/current-world`，本归档在 `archive/main-wwo-r57-g21-20261024`。未构建、未运行Godot、未推进世界、未promote、未合并。
+当前主工仍为 **R57代21 CANDIDATE，accepted=false，1,759,546,768字节**；R56为 **ROLLBACK，1,834,465,568字节**。唯一正式开发基线和默认分支为 **`main`**。本轮治理不生成EXE，不改变候选登记，不自动promote。
+
+## 在线开发
+
+一个新任务从最新 `main` 建立一个短期分支，提交一个面向 `main` 的PR。必要自动验证成功并完成审查后才合并；完成后退出短期分支，不建立永久主线副本。不要用 `[skip ci]` 跳过需要的检查。
+
+普通PR运行 [Main validation](.github/workflows/main-validation.yml)：源码差异格式、修改过的Python/JSON语法与Actions配置检查；Godot 4.6.3无界面导入，以及既有个人账务、巴黎双雇主、有限原料交易局部回归。检查无路径过滤，便于设置稳定必需状态 `Source checks` 和 `Formal economy and person`。原料交易使用仓库归档的第30日检查点副本，保存写入隔离目录；不下载全量地貌BIN、不导出候选包。检查失败、资料缺失或超时均不是通过。
+
+原有长跑、完整领域、研究流程保留为手动检查。Windows安装包只接受明确的手动构建确认，发布草稿另有默认关闭的输入；普通PR或合并不创建Release、不覆盖历史附件。正式发布与代码合并分离，仍须资源恢复和真实游戏验收。线上检查不能替代实际游戏验收，R57仍为CANDIDATE，R56继续保留。
+
+军事、经济及独立研究线保持隔离。不能从分支名称推断已合入，不能将研究策略直接接入主WWO；独立PR分别审查，不自动合并或删除。历史候选使用固定归档提交、[构建登记](docs/archive/main-wwo-r57-g21-20261024/build-identity/preview_registry.json)和私有附件管理。
+
+本轮核对、权限阻塞、旧PR处理及旧分支退出条件见 [主线治理记录](docs/maintenance/MAIN_GOVERNANCE_2026-10-25.md)。下一项主体任务只准备独立PR范围：[巴黎两家企业的自主经营约束](docs/maintenance/PARIS_AUTONOMOUS_ENTERPRISE_SCOPE_2026-10-25.md)。
 
 ## 已保存内容
 
@@ -12,7 +24,7 @@
 
 ## 恢复与边界
 
-先clone本分支，再用[恢复工具](tools/archive/restore_main_resources.py)读取统一清单，恢复到唯一的新目录。完整恢复需要 `--scope all`；只恢复运行依赖可用 `--scope runtime`。工具通过现有gh认证取得私有附件；不依赖原D盘资源链接，不覆盖已有文件。`--only-path`可选精确文件。检查点与真实玩家五槽分开，恢复测试用户目录不会自动写回AppData。
+先clone仓库的 `main`；恢复历史代21时检出固定归档提交 [`2be78dee796cda0e70478f6b4435ac9505a5a936`](https://github.com/ryoumiyahayato/wwo/commit/2be78dee796cda0e70478f6b4435ac9505a5a936)，不要依赖待退出的旧主线分支名。再用[恢复工具](tools/archive/restore_main_resources.py)读取统一清单，恢复到唯一的新目录。完整恢复需要 `--scope all`；只恢复运行依赖可用 `--scope runtime`。工具通过现有gh认证取得私有附件；不依赖原D盘资源链接，不覆盖已有文件。`--only-path`可选精确文件。检查点与真实玩家五槽分开，恢复测试用户目录不会自动写回AppData。
 
 当前源码是接续快照；构建输入23,048项曾与代21登记的大小、mtime相符，没有构建时源码提交可证明EXE逐字节对应。驱动和报告有构建后的变化，未重导出。
 

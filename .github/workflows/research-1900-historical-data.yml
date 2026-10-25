@@ -1,26 +1,9 @@
 name: Build 1900 historical evidence
 
 on:
-  pull_request:
-    branches:
-      - canonical/current-world
-    paths:
-      - ".gitattributes"
-      - "tools/historical_data/**"
-      - "tools/provenance/generate_historical_provenance.py"
-      - "tests/tools/test_historical_provenance_eol_contract.py"
-      - "data/provenance/historical_source_registry.json"
-      - "data/provenance/historical_fact_evidence.json"
-      - ".github/workflows/research-1900-historical-data.yml"
-      - "data/world_map/historical/**"
-      - "data/alpha/historical_world_economy_1900/countries_compact.json"
-      - "assets/historical_flags/**"
   workflow_dispatch:
 
-concurrency:
-  group: historical-1900-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
+# Extended/manual validation; automatic main PR checks live in main-validation.yml.
 permissions:
   contents: read
 

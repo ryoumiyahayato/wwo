@@ -1,32 +1,9 @@
 name: Formal time behavior baseline
 
 on:
-  pull_request:
-    branches:
-      - canonical/current-world
-    paths:
-      - ".github/workflows/formal-time-behavior-baseline.yml"
-      - "tests/variable_state/formal_time_stable_contract_test.gd"
-      - "tests/variable_state/formal_time_known_defects_test.gd"
-      - "tests/variable_state/formal_time_test_support.gd"
-      - "docs/refactors/formal_time_behavior_baseline.md"
-      - "scripts/formal/**"
-      - "scripts/core/time/game_calendar.gd"
-      - "scripts/core/data_record_utils.gd"
-      - "scenes/formal/**"
-      - "data/alpha/commodity_market_1900.json"
-      - "data/alpha/historical_world_economy_1900.json"
-      - "data/alpha/historical_world_economy_1900/**"
-      - "data/world_map/historical/**"
-      - "data/world_map/world_coastlines.json"
-      - "data/world_map/regions.json"
-      - "data/world_map/cities.json"
-      - "data/world_map/institutions.json"
-      - "data/world_map/characters.json"
-      - "project.godot"
-      - "tools/run_validation.ps1"
   workflow_dispatch:
 
+# Extended/manual validation; automatic main PR checks live in main-validation.yml.
 permissions:
   contents: read
 

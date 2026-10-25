@@ -1,28 +1,9 @@
 name: Formal 1900 world economy
 
 on:
-  pull_request:
-    branches:
-      - canonical/current-world
-    paths:
-      - "project.godot"
-      - "data/alpha/**"
-      - "data/world_map/historical/**"
-      - "scripts/alpha/**"
-      - "scripts/formal/**"
-      - "scenes/formal/**"
-      - "tests/alpha/**"
-      - "tests/formal/**"
-      - "tools/audit_1900_commodity_economy.py"
-      - "tools/audit_1900_economy_integration.py"
-      - "tools/audit_1900_world_economy_compact.py"
-      - "tools/build_1900_world_economy_estimates.py"
-      - "tools/compact_1900_world_economy_estimates.py"
-      - "tools/run_validation.ps1"
-      - "docs/economy/**"
-      - ".github/workflows/alpha-commodity-economy.yml"
   workflow_dispatch:
 
+# Extended/manual validation; automatic main PR checks live in main-validation.yml.
 permissions:
   contents: read
 

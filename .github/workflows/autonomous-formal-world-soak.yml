@@ -1,24 +1,9 @@
 name: Autonomous Formal World Soak
 
 on:
-  pull_request:
-    branches:
-      - canonical/current-world
-    paths:
-      - ".github/workflows/autonomous-formal-world-soak.yml"
-      - "scripts/formal/**"
-      - "scripts/vnext/**"
-      - "tests/formal/autonomous_formal_world_soak_test.gd"
-  push:
-    branches:
-      - canonical/current-world
-    paths:
-      - ".github/workflows/autonomous-formal-world-soak.yml"
-      - "scripts/formal/**"
-      - "scripts/vnext/**"
-      - "tests/formal/autonomous_formal_world_soak_test.gd"
   workflow_dispatch:
 
+# Extended/manual validation; automatic main PR checks live in main-validation.yml.
 permissions:
   contents: read
 

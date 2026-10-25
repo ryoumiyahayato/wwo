@@ -1,21 +1,9 @@
 name: Formal person overlay validation
 
 on:
-  pull_request:
-    branches:
-      - canonical/current-world
-    paths:
-      - ".github/workflows/formal-person-overlay.yml"
-      - "scripts/formal/**"
-      - "scripts/vnext/player/**"
-      - "scripts/vnext/population/**"
-      - "scripts/vnext/organization/**"
-      - "tests/formal/**"
-      - "tests/vnext/**"
-      - "tools/run_validation.ps1"
-      - "tools/run_vnext_validation.py"
   workflow_dispatch:
 
+# Extended/manual validation; automatic main PR checks live in main-validation.yml.
 permissions:
   contents: read
 
@@ -61,8 +49,8 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          git fetch origin canonical/current-world --no-tags
-          git diff --check origin/canonical/current-world...HEAD
+          git fetch origin main --no-tags
+          git diff --check origin/main...HEAD
           if ($LASTEXITCODE -ne 0) { throw 'Feature diff whitespace check failed' }
 
       - name: Set up Python

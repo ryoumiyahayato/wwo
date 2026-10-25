@@ -2,15 +2,19 @@ name: Windows Prototype Release
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - canonical/current-world
-  push:
-    branches:
-      - canonical/current-world
+    inputs:
+      confirm_build:
+        description: 'Explicitly authorize this resource-dependent Windows build: BUILD_WINDOWS_CANDIDATE'
+        required: true
+        type: string
+      publish_draft:
+        description: 'Create a separate draft prerelease after a successful manual build (never promotes R57)'
+        type: boolean
+        default: false
 
+# Extended/manual validation; automatic main PR checks live in main-validation.yml.
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: windows-prototype-release-${{ github.ref }}
@@ -18,6 +22,7 @@ concurrency:
 
 jobs:
   validate-and-export:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.confirm_build == 'BUILD_WINDOWS_CANDIDATE'
     runs-on: windows-latest
     timeout-minutes: 45
 
@@ -109,6 +114,8 @@ jobs:
           retention-days: 7
 
   build-installer:
+    permissions:
+      contents: write
     needs: validate-and-export
     runs-on: windows-latest
     timeout-minutes: 15
@@ -250,18 +257,19 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Replace prototype-latest prerelease
-        if: github.event_name != 'pull_request'
+      - name: Create explicitly requested draft prerelease
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_draft
         uses: ncipollo/release-action@v1
         with:
-          tag: prototype-latest
-          name: 1900 Prototype Latest
+          tag: manual-candidate-${{ github.run_id }}
+          name: WWO manual candidate ${{ github.run_id }}
+          draft: true
           prerelease: true
-          allowUpdates: true
-          replacesArtifacts: true
-          removeArtifacts: true
+          allowUpdates: false
+          replacesArtifacts: false
+          removeArtifacts: false
           artifacts: builds/installer/1900-Prototype-Setup.exe
           body: |
-            自动覆盖的 Windows 原型安装包。
+            明确手动请求的草稿候选安装包；不覆盖既有Release或附件，不代表实机验收或promote。
             安装标识固定；再次安装会覆盖旧版本，不建立新的存档体系。
             对应提交：${{ github.sha }}

@@ -12,6 +12,8 @@ concurrency:
 
 jobs:
   generate:
+    # Generated data must be reviewed in a PR; never push it directly to main.
+    if: github.ref_type == 'branch' && github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
