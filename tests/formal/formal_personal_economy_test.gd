@@ -11,7 +11,12 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	if "--unattended-material-trade" in OS.get_cmdline_user_args():
+		_test_unattended_material_trade()
+		test.finish(self, "Formal unattended Paris supply")
+		return
 	if "--native-material-trade" in OS.get_cmdline_user_args():
+		_test_unattended_material_trade()
 		_test_native_material_trade()
 		_test_native_consumption()
 		test.finish(self,"Formal Paris finite material trade")
@@ -46,7 +51,7 @@ func _run() -> void:
 	test.finish(self, "Formal personal economy and wages")
 
 func _material_facts(b: WorldBuildResult) -> Dictionary:
-	return {"ledger":b.world.ledger_state.snapshot(),"lots":b.world.economy_r1._lots.snapshot(),"orders":b.world.economy_r1._orders.duplicate(true),"organizations":b.world.organization_state.snapshot()}
+	return {"ledger":b.world.ledger_state.snapshot(),"lots":b.world.economy_r1._lots.snapshot(),"orders":b.world.economy_r1._orders.duplicate(true),"organizations":b.world.organization_state.snapshot(),"wages":b.world.economy_r1._wages.duplicate(true),"deliveries":b.world.economy_r1._delivery_receipts.duplicate(true)}
 
 func _material_disk_restore(b: WorldBuildResult) -> WorldBuildResult:
 	var before:=b.persistence.snapshot()
@@ -61,6 +66,62 @@ func _material_disk_restore(b: WorldBuildResult) -> WorldBuildResult:
 		test.expect(loaded.persistence.snapshot()==before,"Zero-time resume repeats no procurement, payment or production")
 		return loaded
 	return b
+
+func _test_unattended_material_trade() -> void:
+	var npc := "person:formal_generated_country_fra_0002"
+	var seller := "firm:opening_paris_workshop"
+	var buyer := "firm:opening_paris_bakery"
+	var site := "site:opening_paris_workshop:paris"
+	var destination := "site:opening_paris_bakery:paris"
+	var b := WorldBootstrap.new().build(null, [], [], FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, true, FormalEconomicOpening.for_source(FRA))
+	test.expect(b.success and b.world.economy_r1 != null, "Unattended ordinary Paris Opening builds")
+	if not b.success or b.world.economy_r1 == null: return
+	var first_need := -1
+	for date: int in range(1, 46):
+		b.simulation_step.advance_minutes(1440)
+		var e := b.world.economy_r1
+		var need := e._input_need(destination, "grain")
+		var offers := e._input_offers(destination, "grain", int(need.need_by_day), int(need.quantity))
+		var player_requests := e._commands.values().filter(func(x: Dictionary) -> bool: return x.envelope.actor == PERSON)
+		test.equal(player_requests.size(), 0, "Unattended player command count remains zero")
+		test.equal(e._contracts.size(), 1, "One autonomous person has one fixed contract")
+		test.equal(e._contracts[npc].job, "job:opening_paris_bakery", "NPC retains actual bakery job without forced reassignment")
+		test.equal(e._labor_market.occupied("job:opening_paris_workshop"), 0, "Workshop vacancy is not fictional staffing")
+		test.equal(e._retail.allocated_hours(site), 0, "Unstaffed workshop receives no sales labor")
+		test.equal(e._physical_totals[site].produced.bread, 0, "Unstaffed workshop cannot produce")
+		test.equal(e._totals[npc].work_hours, 2 * maxi(0, date - 1), "NPC completed labor is adopted once per actual period")
+		test.equal(e._material_remaining(seller, "SELL"), 8, "Unexecuted sales preserve cumulative mandate")
+		test.equal(e._material_remaining(buyer, "PROCURE"), 8, "Unexecuted procurement preserves separate mandate")
+		test.equal(e._material_sale_available(site, "grain"), 8, "Finite surplus is available but does not substitute for labor")
+		test.equal(e._committed(site, "grain"), 0, "No accepted grain sale means no fictional reservation")
+		test.expect(e._service_market._offers.is_empty() and e._service_market.contracts.is_empty(), "Ordinary Opening has no independent service labor provider")
+		var purchases := e._commands.values().filter(func(x: Dictionary) -> bool: return x.envelope.actor == buyer and x.envelope.command.kind == "buy")
+		test.equal(purchases.size(), maxi(0, date - 41), "Original procurement submits one real request per shortage day")
+		for entry: Dictionary in purchases:
+			test.equal(entry.source, "firm", "Procurement is issued by the original enterprise executor")
+			test.equal(entry.result, {"accepted": false, "reason": "STORE_NO_ACTUAL_STAFFING"}, "Actual enterprise request preserves the staffing refusal")
+		if not purchases.is_empty():
+			var before := b.persistence.snapshot()
+			var entry: Dictionary = purchases.back()
+			test.equal(e.submit_internal(buyer, entry.envelope.command), entry.result, "Failed procurement replay returns the same refusal")
+			test.equal(b.persistence.snapshot(), before, "Failed replay changes no money, lots, wages, orders or responsibilities")
+		test.expect(e._orders.values().all(func(x: Dictionary) -> bool: return x.good != "grain"), "No grain order or delivery is fabricated")
+		if int(need.quantity) > 0:
+			if first_need < 0: first_need = date
+			test.equal(offers.size(), 1, "Delivered supplier knowledge supplies the real grain offer")
+			if not offers.is_empty():
+				test.equal(offers[0].reason, "STORE_NO_ACTUAL_STAFFING", "Real procurement candidate fails actual seller staffing")
+				test.equal(offers[0].quantity, 0, "Unstaffed offer is not executable")
+				test.equal(offers[0].transport_quantity, 0, "No handover capacity without actual labor")
+			if date > first_need:
+				test.equal(e._physical_totals[destination].produced.bread, 48, "Exhausted initial grain cannot produce further bread")
+		if date in [1, 2, 30, 41, 42, 43, 45] or date == first_need:
+			_multi_conservation(b, 4300)
+			print("UNATTENDED_PARIS ", JSON.stringify({"day": date, "first_need": first_need, "contract": e._contracts[npc], "jobs": [e._known_job(npc, "job:opening_paris_workshop"), e._known_job(npc, "job:opening_paris_bakery")], "completed_hours": e._totals[npc].work_hours, "retail_hours": [e._retail.allocated_hours(site), e._retail.allocated_hours(destination)], "production_labor": e._labor, "need": need, "offers": offers, "stocks": e._stocks, "cash": [b.world.ledger_state.balance(e._account(seller)), b.world.ledger_state.balance(e._account(buyer)), b.world.ledger_state.balance(e._account(npc))], "player_requests": player_requests.size(), "buyer_commands": purchases, "wage_claims": e._wages.size()}))
+		if date in [42, 45]: b = _material_disk_restore(b)
+	test.equal(first_need, 42, "Ordinary autonomous bakery first needs grain on day42")
+	test.equal(b.world.game_clock.total_minutes(), 45 * 1440, "Unattended observation continues through day45")
+
 
 func _test_native_material_trade() -> void:
 	var seller:="firm:opening_paris_workshop";var buyer:="firm:opening_paris_bakery"
@@ -140,6 +201,31 @@ func _test_native_material_trade() -> void:
 	if baseline.success:
 		test.equal(baseline.world.game_clock.total_minutes(),43200,"Prior day30 clock remains unchanged")
 		test.expect(baseline.world.economy_r1._material_terms(seller,"SELL").is_empty(),"Loading the old world does not add a new mandate")
+
+
+	# Separate player-staffed control: consume the original mandate through real daily work/orders.
+	var e := b.world.economy_r1
+	for unused_day: int in range(24):
+		if e._material_remaining(seller, "SELL") == 0: break
+		test.expect(LivelihoodAction.execute_current(b.world, "work", {"hours": 2}).accepted, "Quota control registers real player labor")
+		b.simulation_step.advance_minutes(1440)
+	test.equal(e._material_remaining(seller, "SELL"), 0, "Actual deliveries exhaust original sales mandate8")
+	test.equal(e._material_remaining(buyer, "PROCURE"), 0, "Actual purchases exhaust independent procurement mandate8")
+	var grain_orders := e._orders.values().filter(func(x: Dictionary) -> bool: return x.good == "grain")
+	var delivered := 0
+	for order: Dictionary in grain_orders:
+		delivered += int(order.delivered)
+		test.equal(order.pending + order.transit, 0, "Accepted onsite grain orders have no fictional unfinished handover")
+	test.equal(delivered, 8, "Exactly eight real grain units delivered within mandate")
+	test.equal(e._material_sale_available(site, "grain"), 0, "Exhausted mandate removes saleable quantity despite physical surplus")
+	test.expect(int(e._stocks[site].grain) >= maxi(4, int(e._input_need(site, "grain").target)), "Real sales retain stock floor and production protection")
+	var quote: Dictionary = e._offer(buyer, seller, "grain", "onsite:" + site, site, destination)
+	var before := _material_facts(b)
+	var refused := e.submit_internal(buyer, {"action_id": "auto:" + buyer + ":exhausted_control", "minute": b.world.game_clock.total_minutes(), "kind": "buy", "payload": {"quote_id": quote.quote_id, "seller": seller, "seller_site": site, "buyer_site": destination, "good": "grain", "quantity": 1, "denomination": quote.denomination, "max_price": 1, "path_id": quote.route_id}})
+	test.equal(refused.reason, "INSUFFICIENT_MATERIAL_SALE_SURPLUS_OR_MANDATE", "Exhausted mandate rejects another enterprise purchase")
+	test.equal(_material_facts(b), before, "Quota refusal preserves cash, lots, wages and accepted responsibility")
+	print("STAFFED_QUOTA_CONTROL day=", e.day, " delivered=", delivered, " reason=", refused.reason)
+	b = _material_disk_restore(b)
 
 
 func _test_ledger() -> void:
