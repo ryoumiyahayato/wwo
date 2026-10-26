@@ -91,6 +91,10 @@ func tracked_decode(level: String, admitted: Dictionary) -> Dictionary:
 	return result
 
 func _ready() -> void:
+	if acceptance=="native-screenshot":
+		set_process(false)
+		native_screenshot_run.call_deferred()
+		return
 	if acceptance=="resource-review":
 		resource_review.call_deferred()
 		return
@@ -342,8 +346,128 @@ func acceptance_image(label: String) -> void:
 	if not requested.is_empty() and label not in requested:return
 	RenderingServer.force_draw(false)
 	var image:=get_viewport().get_texture().get_image()
-	if acceptance not in ["economic","economic-action","toolbar-review"]:image.resize(800,450,Image.INTERPOLATE_BILINEAR)
 	image.save_png(output+"/"+label+".png")
+
+func native_idle_sample(label: String) -> Dictionary:
+	print("SCREENSHOT_PHASE ",label," unix_ms=",Time.get_unix_time_from_system()*1000.0)
+	var intervals_us: Array[int] = []
+	var began := Time.get_ticks_usec()
+	var previous := began
+	while Time.get_ticks_usec()-began<4000000:
+		await get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		intervals_us.append(now-previous)
+		previous=now
+	intervals_us.sort()
+	return {"label":label,"unix_end_ms":Time.get_unix_time_from_system()*1000.0,"frames":intervals_us.size(),"p95_us":intervals_us[ceili(intervals_us.size()*.95)-1],"static_bytes":Performance.get_monitor(Performance.MEMORY_STATIC),"texture_bytes":Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),"buffer_bytes":Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED),"video_bytes":Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)}
+
+func native_window_state(state: String) -> bool:
+	FileAccess.open(output.path_join("window-request.json"),FileAccess.WRITE).store_string(JSON.stringify({"state":state}))
+	var deadline := Time.get_ticks_msec()+3000
+	while Time.get_ticks_msec()<deadline:
+		await wait_seconds(.05)
+		var path := output.path_join("window-state.json")
+		if FileAccess.file_exists(path):
+			var response: Variant=JSON.parse_string(FileAccess.get_file_as_string(path))
+			if response is Dictionary and response.get("state")==state: return true
+	return false
+
+func native_screenshot_run() -> void:
+	# No grab_focus, mouse injection or new viewport. The existing Python
+	# launcher shows the native HWND without activation and acknowledges states.
+	if output.is_empty(): get_tree().quit(2);return
+	DirAccess.make_dir_recursive_absolute(output)
+	FileAccess.open(output.path_join("window-handle.json"),FileAccess.WRITE).store_string(JSON.stringify({"pid":OS.get_process_id(),"hwnd":DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE,get_window().get_window_id())}))
+	var menu: Object=get_parent()
+	reparent(get_tree().root)
+	var slot_path := FormalPersistence.existing_slot_path(1)
+	print("NATIVE_SCREENSHOT_START user_dir=",OS.get_user_data_dir()," slot=",slot_path)
+	if slot_path.is_empty():
+		acceptance_save("native-screenshot",{"error":"slot1_missing","user_dir":OS.get_user_data_dir()});get_tree().quit(4);return
+	menu.call("_enter_world","load",1)
+	var deadline := Time.get_ticks_msec()+120000
+	var host: Object
+	while Time.get_ticks_msec()<deadline:
+		await wait_seconds(.1)
+		var scene: Node=get_tree().current_scene
+		if scene!=null and scene.get("_world")!=null: host=scene;break
+	if host==null or not bool(host.get("time_control").paused):
+		acceptance_save("native-screenshot",{"error":"paused_slot1_required","host_present":host!=null,"menu_status":str(menu.get("_status").text) if is_instance_valid(menu) else "freed","user_dir":OS.get_user_data_dir()});get_tree().quit(4);return
+	renderer=host.get("map_renderer");controller=host.get("map_controller")
+	host.get("main_shell").call("set_page","map")
+	var authority := economic_authority_state(host)
+	var save_path := FormalPersistence.existing_slot_path(1)
+	var save_before := FileAccess.get_file_as_bytes(save_path)
+	var report: Dictionary={"pid":OS.get_process_id(),"slot":1,"window_unfocusable":get_window().unfocusable,"cases":[],"idle":[]}
+	var paris := GlobeProjection.lon_lat_to_unit(Vector2(2.3522,48.8566))
+	for place: String in ["world","paris","zermatt"]:
+		controller.set_map_mode("geographic" if place=="zermatt" else "political")
+		if place=="world": controller.focus(paris);controller.set_world_zoom(.86)
+		elif place=="paris": controller.focus_region(paris,renderer.size*.5,.25,0.0,renderer.size)
+		else:
+			var unit := GlobeProjection.lon_lat_to_unit(Vector2(7.7063088,46.0079880))
+			controller.focus_region(unit,renderer.size*.5,.002,0.0,renderer.size)
+			controller.enter_local(unit,renderer.size*.5,renderer.size,"geographic_region:zermatt_west_reference",2.0)
+			renderer.region_view.set_inspection_elevation(55.0);controller.view_changed.emit()
+		await resource_settle()
+		await wait_seconds(2)
+		var shot: Node=renderer.screenshot
+		report.idle.append(await native_idle_sample(place+"/idle-before"))
+		var camera_before: Dictionary=shot.call("metadata")
+		acceptance_image(place+"-legacy")
+		print("SCREENSHOT_PHASE ",place,"/capture unix_ms=",Time.get_unix_time_from_system()*1000.0)
+		var captured: Dictionary
+		if place=="world":
+			# Test the actual F12 input handler through Godot, not Windows input.
+			var key := InputEventKey.new();key.keycode=KEY_F12;key.pressed=true
+			get_viewport().push_input(key,true)
+			deadline=Time.get_ticks_msec()+35000
+			while (shot.get("last_result") as Dictionary).is_empty() and Time.get_ticks_msec()<deadline: await get_tree().process_frame
+			captured=shot.get("last_result")
+			key.pressed=false;get_viewport().push_input(key,true)
+		else: captured=await shot.call("capture",place)
+		if bool(captured.get("ok",false)):
+			DirAccess.copy_absolute(captured.png,output.path_join(place+"-native.png"))
+			DirAccess.copy_absolute(captured.json,output.path_join(place+"-native.json"))
+		captured["camera_unchanged"]=camera_before.camera==shot.call("metadata").camera
+		captured["legacy_png"]=output.path_join(place+"-legacy.png")
+		report.cases.append(captured)
+		report.idle.append(await native_idle_sample(place+"/idle-after"))
+		acceptance_save("native-screenshot-progress",report)
+	# Explicitly probe unavailable windows, without silently restoring/showing.
+	# Keep diagnostic raw legacy readbacks separate from valid screenshots.
+	for state: String in ["hidden","minimized"]:
+		var applied := await native_window_state(state)
+		if not applied:
+			report.cases.append({"label":state,"ok":false,"error":"native_window_adapter_required"});continue
+		await wait_seconds(.5)
+		controller.focus(paris);controller.set_world_zoom(.86)
+		var first_draw := Engine.get_frames_drawn()
+		await wait_seconds(.5)
+		acceptance_image(state+"-diagnostic-legacy")
+		# The native HWND state is acknowledged by the launcher, not inferred
+		# from Window.visible (which stays true for a hidden main window).
+		var result: Dictionary=await renderer.screenshot.call("capture",state)
+		result["frames_drawn_delta"]=Engine.get_frames_drawn()-first_draw
+		result["root_visible"]=get_window().visible
+		result["root_can_draw"]=get_window().can_draw()
+		await native_window_state("visible")
+		await resource_settle()
+		await wait_seconds(2)
+		if bool(result.get("ok",false)):
+			acceptance_image(state+"-visible-control")
+			DirAccess.copy_absolute(result.png,output.path_join(state+"-native.png"))
+			DirAccess.copy_absolute(result.json,output.path_join(state+"-native.json"))
+			result["matches_visible_control"]=Image.load_from_file(result.png).get_data()==Image.load_from_file(output.path_join(state+"-visible-control.png")).get_data()
+			if not result.matches_visible_control:
+				result["ok"]=false;result["error"]="hidden_or_minimized_image_differs_from_visible_control"
+		report.cases.append(result)
+	report["authority_unchanged"]=authority==economic_authority_state(host)
+	report["save_bytes_unchanged"]=save_before==FileAccess.get_file_as_bytes(save_path)
+	report["window_focused"]=get_window().has_focus()
+	acceptance_save("native-screenshot",report)
+	print("NATIVE_SCREENSHOT_DONE")
+	get_tree().quit()
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if acceptance!="toolbar-review" or not event is InputEventKey: return

@@ -79,6 +79,10 @@ func _ready() -> void:
 	set_process(false)
 	_show_page("home")
 	if "--map-resource-acceptance" in OS.get_cmdline_user_args(): _open_map_acceptance.call_deferred()
+	if OS.has_feature("editor") and "--native-screenshot-review" in OS.get_cmdline_user_args():
+		var observer := load("res://tools/map/r57_visual_driver.gd").new() as Node
+		observer.set("acceptance", "native-screenshot")
+		add_child(observer)
 	if OS.has_feature("editor") and "--map-resource-review" in OS.get_cmdline_user_args():
 		var observer := load("res://tools/map/r57_visual_driver.gd").new() as Node
 		observer.set("acceptance", "resource-review")

@@ -12,6 +12,7 @@ const POLITICAL_UNDER_WIDTH: float = 1.05
 var preserve_on_reparent: bool = false
 var show_footer: bool = false
 var inspection_preview: bool = false
+var screenshot: Node
 var controller: GlobeController
 var spatial_world: VNextSpatialWorld
 var content: MapGeometryContent
@@ -200,6 +201,10 @@ func _ready() -> void:
 		layer.preparation_failed.connect(func(message: String) -> void: map_notice.emit(message))
 		layer.display_changed.connect(_on_spatial_display_changed.bind(layer))
 	local_layer.display_changed.connect(_on_spatial_display_changed)
+	screenshot = preload("res://scripts/presentation/ui/native_screenshot.gd").new()
+	screenshot.name = "NativeScreenshot"
+	screenshot.set("renderer",self)
+	add_child(screenshot)
 	set_process(false)
 
 func _exit_tree() -> void:

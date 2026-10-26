@@ -176,7 +176,7 @@ static func _read(path: String) -> Dictionary:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 	return parsed if parsed is Dictionary else {}
 
-static func project_version() -> Dictionary:
+static func project_version(include_checksums: bool = true) -> Dictionary:
 	var revision := "未记录"
 	var head_path := "res://.git/HEAD"
 	if FileAccess.file_exists(head_path):
@@ -189,4 +189,8 @@ static func project_version() -> Dictionary:
 				for line: String in FileAccess.get_file_as_string("res://.git/packed-refs").split("\n"):
 					if line.ends_with(" " + reference): revision = line.get_slice(" ", 0)
 		else: revision = head
-	return {"name": ProjectSettings.get_setting("application/config/name", ""), "version": ProjectSettings.get_setting("application/config/version", ""), "build_label": ProjectSettings.get_setting("application/config/build_label", ""), "git_revision": revision, "source_state": "WORKTREE; git revision alone does not certify uncommitted source", "component_version": "map-resource-acceptance-v1", "project_sha256": FileAccess.get_sha256("res://project.godot"), "acceptance_code_sha256": FileAccess.get_sha256("res://scripts/presentation/ui/map_resource_acceptance.gd"), "engine": Engine.get_version_info()}
+	var result := {"name": ProjectSettings.get_setting("application/config/name", ""), "version": ProjectSettings.get_setting("application/config/version", ""), "build_label": ProjectSettings.get_setting("application/config/build_label", ""), "git_revision": revision, "source_state": "WORKTREE; git revision alone does not certify uncommitted source", "component_version": "map-resource-acceptance-v1", "engine": Engine.get_version_info()}
+	if include_checksums:
+		result["project_sha256"] = FileAccess.get_sha256("res://project.godot")
+		result["acceptance_code_sha256"] = FileAccess.get_sha256("res://scripts/presentation/ui/map_resource_acceptance.gd")
+	return result
