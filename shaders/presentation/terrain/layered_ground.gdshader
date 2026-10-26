@@ -51,7 +51,9 @@ void fragment() {
 	float close_weight = 1.0 - smoothstep(0.08, 1.4, metres_per_pixel);
 	float native_distance = 2500.0 - max(abs(terrain_point.x), abs(terrain_point.z));
 	float native_edge = smoothstep(0.0, 128.0, native_distance);
-	float local_weight = (1.0 - smoothstep(1.25, 8.0, metres_per_pixel)) * native_edge;
+	// 100m authored fields remain readable at the 5km projection (~11m/px).
+	// Grain/bump resolution below keeps its separate, much tighter footprint.
+	float local_weight = (1.0 - smoothstep(8.0, 64.0, metres_per_pixel)) * native_edge;
 
 	// One macro base and lighting convention for every LOD and both terrain owners.
 	// The original map already contains weak baked slope structure: do not shade

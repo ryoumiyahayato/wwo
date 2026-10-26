@@ -190,7 +190,22 @@ func _input(event: InputEvent) -> void:
 			_capture()
 			get_viewport().set_input_as_handled()
 			return
-	if event is InputEventMouse and _training_exit.get_rect().has_point((event as InputEventMouse).position):
+	var pointer_position: Vector2 = Vector2.INF
+	var pointer_released: bool = false
+	if event is InputEventMouse:
+		pointer_position = (event as InputEventMouse).position
+		pointer_released = event is InputEventMouseButton and not (event as InputEventMouseButton).pressed
+	elif event is InputEventScreenTouch:
+		pointer_position = (event as InputEventScreenTouch).position
+		pointer_released = not (event as InputEventScreenTouch).pressed or (event as InputEventScreenTouch).canceled
+	elif event is InputEventScreenDrag:
+		pointer_position = (event as InputEventScreenDrag).position
+	if _training_exit.get_rect().has_point(pointer_position):
+		# Always release the native fire/look pointer, even over the host button.
+		# Leave this event unhandled here so the actual pause button also receives it.
+		if pointer_released and not _training_preparing:
+			viewport.push_input(event, true)
+			if is_instance_valid(_training): _training.call("request_frame")
 		return
 	if not _training_preparing:
 		viewport.push_input(event, true)

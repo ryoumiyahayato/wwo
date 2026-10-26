@@ -52,6 +52,8 @@ var _collision_layer: int = 1
 var _collision_tiles: Dictionary[Vector2i, StaticBody3D] = {}
 var _last_mesh_install_usec: int = 0
 var _last_shape_install_usec: int = 0
+var _max_mesh_install_usec: int = 0
+var _max_shape_install_usec: int = 0
 
 
 func begin(config: Dictionary) -> void:
@@ -186,6 +188,8 @@ func get_status() -> Dictionary:
 		"collision_tiles": _collision_tiles.size(), "collision_tile_limit": 9,
 		"last_mesh_install_usec": _last_mesh_install_usec,
 		"last_shape_install_usec": _last_shape_install_usec,
+		"max_mesh_install_usec": _max_mesh_install_usec,
+		"max_shape_install_usec": _max_shape_install_usec,
 		"resource_notes": _resource_notes.duplicate(),
 	}
 
@@ -226,6 +230,8 @@ func close() -> void:
 	_resource_notes = PackedStringArray()
 	_last_mesh_install_usec = 0
 	_last_shape_install_usec = 0
+	_max_mesh_install_usec = 0
+	_max_shape_install_usec = 0
 
 
 func _exit_tree() -> void:
@@ -444,6 +450,7 @@ func _upload_patch(result: Dictionary) -> MeshInstance3D:
 	tile.set_meta("lod", int(result["lod"]))
 	add_child(tile)
 	_last_mesh_install_usec = Time.get_ticks_usec() - start
+	_max_mesh_install_usec = maxi(_max_mesh_install_usec, _last_mesh_install_usec)
 	return tile
 
 
@@ -494,6 +501,7 @@ func _install_collision(result: Dictionary) -> void:
 	add_child(body)
 	_collision_tiles[key] = body
 	_last_shape_install_usec = Time.get_ticks_usec() - start
+	_max_shape_install_usec = maxi(_max_shape_install_usec, _last_shape_install_usec)
 
 
 func _collision_keys(point: Vector2) -> Array[Vector2i]:

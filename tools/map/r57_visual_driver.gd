@@ -2625,6 +2625,82 @@ func terrain_training_key(code: Key, pressed: bool) -> void:
 	# not a direct vehicle-position write or a second driving implementation.
 	Input.parse_input_event(event)
 
+func terrain_training_aim(target: Node3D, native_camera: Camera3D, controls: Control, aim_height: float = 1.0) -> void:
+	for attempt: int in range(4):
+		var direction: Vector3 = (target.global_position + Vector3(0, aim_height, 0) - native_camera.global_position).normalized()
+		var desired_yaw: float = atan2(-direction.x, -direction.z)
+		var desired_pitch: float = asin(clampf(direction.y, -1.0, 1.0))
+		var delta_look: Vector2 = Vector2(wrapf(float(controls.get("camera_yaw")) - desired_yaw, -PI, PI), float(controls.get("camera_pitch")) - desired_pitch) / 0.0048
+		await mouse_button(Vector2(680,340), MOUSE_BUTTON_LEFT, true)
+		var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+		motion.position = Vector2(680,340)
+		motion.relative = delta_look
+		motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+		get_viewport().push_input(motion, true)
+		await mouse_button(Vector2(680,340), MOUSE_BUTTON_LEFT, false)
+		await wait_seconds(0.8)
+	# Observe the original mechanical slew; never snap its desired or actual pose.
+	for frame: int in range(480):
+		await get_tree().physics_frame
+		if not bool(controls.get("main").get("aiming_pending")): break
+
+func terrain_training_crew_roundtrip(session: Node, battle: Node3D, controls: Control) -> Dictionary:
+	var hero: Node3D = battle.get("hero") as Node3D
+	var crew_host: Node = battle.get("crew_host") as Node
+	var pid: String = str(crew_host.call("commander_person_id"))
+	var actor: CharacterBody3D = battle.get("ai_host").get("actors")[pid] as CharacterBody3D
+	var actor_id: int = actor.get_instance_id()
+	var before: Dictionary = session.call("get_status") as Dictionary
+	for frame: int in range(180):
+		if absf(float(hero.get_meta("vehicle_speed", 0.0))) <= 0.5: break
+		await get_tree().physics_frame
+	var board_rect: Rect2 = controls.call("board_exit_rect")
+	await mouse_button(board_rect.get_center(), MOUSE_BUTTON_LEFT, true)
+	await mouse_button(board_rect.get_center(), MOUSE_BUTTON_LEFT, false)
+	await wait_seconds(0.25)
+	var exited: Dictionary = session.call("get_status") as Dictionary
+	var report: Dictionary = {"exited": exited.get("on_foot", false), "after_exit": exited}
+	if not bool(report.exited):
+		report["ok"] = false
+		return report
+	var exit_position: Vector3 = actor.global_position
+	var yaw: float = float(controls.get("camera_yaw"))
+	var forward: Vector3 = Vector3(-sin(yaw),0,-cos(yaw))
+	var right: Vector3 = Vector3(cos(yaw),0,-sin(yaw))
+	var directions: Array[Vector3] = [forward,-forward,right,-right]
+	var codes: Array[Key] = [KEY_W,KEY_S,KEY_D,KEY_A]
+	var away: Vector3 = (actor.global_position - hero.global_position) * Vector3(1,0,1)
+	var chosen: int = 0
+	for index: int in range(1,4):
+		if away.dot(directions[index]) > away.dot(directions[chosen]): chosen=index
+	terrain_training_key(codes[chosen], true)
+	for frame: int in range(360):
+		await get_tree().physics_frame
+		if actor.global_position.distance_to(hero.global_position)>6.2: break
+	terrain_training_key(codes[chosen], false)
+	await wait_seconds(0.15)
+	report["walked_metres"] = actor.global_position.distance_to(exit_position)
+	report["outside_boarding_range_m"] = actor.global_position.distance_to(hero.global_position)
+	await terrain_region_image("15-original-commander-on-foot")
+	terrain_training_key(codes[chosen ^ 1], true)
+	for frame: int in range(300):
+		await get_tree().physics_frame
+		if actor.global_position.distance_to(hero.global_position)<5.4: break
+	terrain_training_key(codes[chosen ^ 1], false)
+	await wait_seconds(0.15)
+	report["boarding_access"] = crew_host.call("boarding_access", pid)
+	board_rect = controls.call("board_exit_rect")
+	await mouse_button(board_rect.get_center(), MOUSE_BUTTON_LEFT, true)
+	await mouse_button(board_rect.get_center(), MOUSE_BUTTON_LEFT, false)
+	await wait_seconds(0.3)
+	var returned: Dictionary = session.call("get_status") as Dictionary
+	report["after_return"] = returned
+	report["same_actor"] = actor_id == (battle.get("ai_host").get("actors")[pid] as Node).get_instance_id()
+	report["injury_and_ammo_preserved"] = before.crew[0].hp == returned.crew[0].hp and before.crew[0].parts == returned.crew[0].parts and before.ammo.spent == returned.ammo.spent and before.ammo.total == returned.ammo.total
+	report["ok"] = not bool(returned.get("on_foot",true)) and report.same_actor and report.injury_and_ammo_preserved and returned.crew_registry.vehicles.player_vehicle.seats["0"].person_id == pid and float(report.walked_metres)>1.0
+	await terrain_region_image("16-original-commander-reboarded")
+	return report
+
 func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
 	var report: Dictionary = {"requested": true, "ok": false}
 	var clicked: bool = await economic_button(observation, "原生坦克训练（隔离）")
@@ -2651,19 +2727,7 @@ func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
 	await terrain_region_image("10-native-training-ready")
 	# Aim by the original manual drag. No snap, forced roll, target assignment,
 	# damage write, stock grant or instant projectile settlement is used.
-	for attempt: int in range(3):
-		var direction: Vector3 = (target.global_position + Vector3(0, 1.0, 0) - native_camera.global_position).normalized()
-		var desired_yaw: float = atan2(-direction.x, -direction.z)
-		var desired_pitch: float = asin(clampf(direction.y, -1.0, 1.0))
-		var delta_look: Vector2 = Vector2(wrapf(float(controls.get("camera_yaw")) - desired_yaw, -PI, PI), float(controls.get("camera_pitch")) - desired_pitch) / 0.0048
-		await mouse_button(Vector2(680,340), MOUSE_BUTTON_LEFT, true)
-		var motion: InputEventMouseMotion = InputEventMouseMotion.new()
-		motion.position = Vector2(680,340)
-		motion.relative = delta_look
-		motion.button_mask = MOUSE_BUTTON_MASK_LEFT
-		get_viewport().push_input(motion, true)
-		await mouse_button(Vector2(680,340), MOUSE_BUTTON_LEFT, false)
-		await wait_seconds(0.8)
+	await terrain_training_aim(target, native_camera, controls)
 	var before_shot: Dictionary = session.call("get_status") as Dictionary
 	terrain_training_key(KEY_SPACE, true)
 	await wait_seconds(0.12)
@@ -2685,6 +2749,18 @@ func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
 	report["driven_metres"] = drive_start.distance_to(hero.position)
 	report["after_drive"] = session.call("get_status")
 	await terrain_region_image("13-native-driving-steering")
+	# Same AP pool, after actual movement to a different incidence. A blocked first
+	# shot is kept as fact; neither penetration nor a crew wound is forced here.
+	report["first_shot"] = after_shot
+	await terrain_training_aim(target, native_camera, controls, 0.65)
+	terrain_training_key(KEY_SPACE, true)
+	await wait_seconds(0.12)
+	terrain_training_key(KEY_SPACE, false)
+	phases.append(await terrain_region_sample("training_second_incidence", 4))
+	after_shot = session.call("get_status") as Dictionary
+	report["after_shot"] = after_shot
+	await terrain_region_image("17-native-second-incidence")
+	report["crew_roundtrip"] = await terrain_training_crew_roundtrip(session, battle, controls)
 	observation.call("_pause_training")
 	var paused_before: Dictionary = session.call("get_status") as Dictionary
 	phases.append(await terrain_region_sample("training_paused_observation", 2))
@@ -2702,7 +2778,7 @@ func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
 	report["legal_cannon_fired"] = shot_rows.any(func(row: Dictionary) -> bool: return row.get("accepted", false) and row.get("weapon", "") == "tank_cannon")
 	report["projectile_contact_recorded"] = shot_rows.any(func(row: Dictionary) -> bool: return row.get("flight_state", "") == "impacted" and float(row.get("flight_seconds", 0)) > 0)
 	report["target_changed"] = before_shot.target != after_shot.target
-	report["ok"] = report.legal_cannon_fired and report.projectile_contact_recorded and report.original_injury_preserved and report.paused_state_preserved and report.same_vehicle_instance and report.same_session and float(report.driven_metres) > 5.0
+	report["ok"] = report.legal_cannon_fired and report.projectile_contact_recorded and report.original_injury_preserved and report.paused_state_preserved and report.same_vehicle_instance and report.same_session and bool(report.crew_roundtrip.get("ok", false)) and float(report.driven_metres) > 5.0
 	return report
 
 func terrain_region_run() -> void:

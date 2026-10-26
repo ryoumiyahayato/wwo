@@ -37,4 +37,18 @@ controller.start({"viewport": observer_viewport, "world_root": optional_identity
 
 17个原资产从既有恢复 staging 复制到相同 native relative 路径；JSON 只变换 res 路径，不改原元数据/既有 source_sha 等字段。8个 GLB 由 .gitignore 排除，raw staging 不动。原 armor_collision 运行时 source 检查完整保留；导出须保持其原始 GLB 可由 FileAccess 读取，不可只留下 imported remap。
 
+## 原模型附件安装
+
+沿用 `tools/map/install_region_slice.py`。旧无参数及 `--from-zip` 用法仍只安装原地形附件；旧地形 README/元数据未改。
+
+```text
+python tools/map/install_region_slice.py --with-training
+python tools/map/install_region_slice.py --training-from-zip PATH/wwo-native-training-models-v1.zip
+python tools/map/install_region_slice.py --from-zip TERRAIN.zip --training-from-zip MODELS.zip
+```
+
+`--with-training` 沿用既有地形安装，并从同一 draft tag `untagged-75a9dbc800223cbf8a18` 获取 `wwo-native-training-models-v1.zip`。单独 `--training-from-zip` 只安装/复用八个原 GLB，不触发地形下载。训练附件及解压总量分别限4MiB，固定八路径白名单；所有目的文件先直接 byteequal 比较，缺失文件只用 xb 创建，不覆盖不同内容。九个 prefixed JSON 留在源码交付，不在 binary 附件中。
+
+`military_runtime/TRAINING_ASSETS.json` 记录沿用的原 source/range provenance，并与附件内同名记录绑定，不新增摘要。上传后的新附件 asset ID 应另作发布说明，不修改这个版本已经打包的来源记录。授权的本地附件安装已执行一次：Installed 0，reused byte-for-byte 8，无覆盖。
+
 本模块实施阶段不运行引擎、不执行测试或 Git。解析、实机驾驶/原伤损/原弹药守恒与嵌入交还由 Lead 统一验证。未运行不表示通过。
