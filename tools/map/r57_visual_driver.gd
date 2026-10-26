@@ -2719,4 +2719,3 @@ func terrain_region_run() -> void:
 	file.store_string(JSON.stringify(result,"\t"))
 	print("REGION_REVIEW_RESULT ",JSON.stringify(result))
 	get_tree().quit(0 if ok and walked and facts_before==facts_after and camera_same else 5)
-
