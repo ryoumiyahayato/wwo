@@ -378,8 +378,10 @@ func resource_review() -> void:
 	perf_relief = renderer.get("relief"); perf_region = renderer.get("_region_layer")
 	perf_world = renderer.get("_world_layer"); perf_local = renderer.get("local_layer")
 	var label := "before"
+	var selected_case := ""
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--resource-review-label="): label = arg.trim_prefix("--resource-review-label=")
+		if arg.begins_with("--resource-review-case="): selected_case=arg.trim_prefix("--resource-review-case=")
 	var summary: Dictionary = {"label":label,"pid":OS.get_process_id(),"max_fps":Engine.max_fps,"physics_ticks":Engine.physics_ticks_per_second,"time_scale":Engine.time_scale,"device":RenderingServer.get_video_adapter_name(),"cases":[]}
 	if label=="checks":
 		await resource_contract_review(menu,ui)
@@ -387,7 +389,15 @@ func resource_review() -> void:
 		return
 	RenderingServer.frame_pre_draw.connect(performance_pre_draw)
 	RenderingServer.frame_post_draw.connect(performance_post_draw)
+	RenderingServer.frame_post_draw.connect(idle_count.bind("root_draw"))
+	renderer.draw.connect(idle_count.bind("map_draw"))
+	controller.view_changed.connect(idle_count.bind("view_changed"))
+	renderer.region_view.canvas_update_requested.connect(idle_count.bind("local_request"))
+	renderer.region_view.local_render_requested.connect(idle_count.bind("local_pose_request"))
+	renderer.region_view.local_frame_ready.connect(idle_count.bind("local_complete"))
+	var power_review := label.begins_with("power-")
 	for point: Array in [["normal", "installed:geographic_region:zermatt_west_reference",7.7063088,46.0079880,40.0,85.0],["terrain", "installed:geographic_region:zermatt_west_reference",7.7063088,46.0079880,2.0,55.0],["ground","installed:geographic_region:zermatt_west_reference",7.7063088,46.0079880,2.0,12.0],["landmark","model:landmark:eiffel_tower_1900",2.2945,48.8584,2.0,55.0]]:
+		if not selected_case.is_empty() and str(point[0])!=selected_case: continue
 		var index := -1
 		for i: int in range(ui.get("_rows").size()):
 			if str(ui.get("_rows")[i].id)==str(point[1]): index=i; break
@@ -415,20 +425,36 @@ func resource_review() -> void:
 			DirAccess.copy_absolute(folder.path_join("feedback.json"),output.path_join(label+"-"+str(point[0])+"-feedback.json"))
 		await wait_seconds(2)
 		print("RESOURCE_PHASE ",label,"/",point[0],"/idle unix_ms=",Time.get_unix_time_from_system()*1000)
-		performance_begin(str(point[0])+"/idle");await wait_seconds(4);performance_end()
-		if point[0]=="terrain":
-			print("RESOURCE_PHASE ",label,"/terrain/drag unix_ms=",Time.get_unix_time_from_system()*1000)
-			performance_begin("terrain/drag")
-			await performance_drag(Vector2(3,0),60);await performance_drag(Vector2(-3,0),60)
+		performance_begin(str(point[0])+"/idle");await wait_seconds(6 if power_review else 4);performance_end()
+		if point[0]=="terrain" or power_review:
+			print("RESOURCE_PHASE ",label,"/",point[0],"/drag unix_ms=",Time.get_unix_time_from_system()*1000)
+			performance_begin(str(point[0])+"/drag")
+			if power_review: await idle_drag()
+			else:
+				await performance_drag(Vector2(3,0),60);await performance_drag(Vector2(-3,0),60)
 			performance_end()
 		summary.cases.append({"case":point[0],"feedback":folder,"visual":ui.get("_visual_state"),"surface_generation":renderer.region_view._surface_generation,"surface_mesh":renderer.region_view._local_surface_mesh.get_instance_id() if renderer.region_view._local_surface_mesh!=null else 0,"local_rect":TerrainPixelSource.serial(renderer.region_view._local_render_rect)})
 	RenderingServer.frame_pre_draw.disconnect(performance_pre_draw)
 	RenderingServer.frame_post_draw.disconnect(performance_post_draw)
+	if power_review:
+		var original_fps: int=ui.get("_saved_max_fps")
+		var saved_region: Dictionary=ui.get("_saved_region").duplicate()
+		var saved: Dictionary=ui.get("_saved_controller").duplicate()
+		ui.call("_close");await wait_seconds(.4)
+		var region_equal := true
+		for field: String in saved_region: region_equal=region_equal and controller.region_camera.get(field)==saved_region[field]
+		summary["closed"]={"fps":Engine.max_fps,"expected_fps":original_fps,"world_created":renderer.spatial_world!=null,"motion_active":controller.camera_motion_active(),"region_restored":region_equal,"orientation_restored":controller._orientation==saved.orientation,"zoom_restored":controller.zoom==saved.zoom,"mode_restored":controller.map_mode==saved.mode}
+		menu.call("_open_map_acceptance");await wait_seconds(.4)
+		ui=menu.get("_map_acceptance")
+		summary["reopened"]={"exists":is_instance_valid(ui),"fps":Engine.max_fps}
+		ui.call("_close");await wait_seconds(.4)
+		summary["second_close_fps"]=Engine.max_fps
 	summary["phases"]=perf_phases
 	acceptance_save(label+"-resource",summary)
 	if label=="verified": await resource_contract_review(menu,ui)
 	print("RESOURCE_REVIEW_DONE ",label)
 	set_process(false)
+	if power_review: get_tree().quit()
 
 func resource_contract_review(menu: Object, ui: Object) -> void:
 	var catalog = load("res://scripts/presentation/ui/map_resource_catalog.gd")
@@ -1607,7 +1633,7 @@ func performance_snapshot() -> Dictionary:
 	snapshot["overlay_installing"]=(renderer.get("_overlay_installing") as Dictionary).size()
 	if acceptance=="resource-review":
 		var view: RegionView = renderer.get("region_view")
-		snapshot["local_cache"]={"surface_generation":view._surface_generation,"mesh_id":view._local_surface_mesh.get_instance_id() if view._local_surface_mesh!=null else 0,"texture_id":view._surface_height_texture.get_instance_id() if view._surface_height_texture!=null else 0,"render_rect":TerrainPixelSource.serial(view._local_render_rect),"world_update":renderer.get("_viewport").render_target_update_mode,"region_update":view.viewport.render_target_update_mode,"local_update":view._local_viewport.render_target_update_mode if view._local_viewport!=null else -1,"renderer_processing":renderer.is_processing(),"fps":Performance.get_monitor(Performance.TIME_FPS)}
+		snapshot["local_cache"]={"surface_generation":view._surface_generation,"mesh_id":view._local_surface_mesh.get_instance_id() if view._local_surface_mesh!=null else 0,"texture_id":view._surface_height_texture.get_instance_id() if view._surface_height_texture!=null else 0,"render_rect":TerrainPixelSource.serial(view._local_render_rect),"world_update":renderer.get("_viewport").render_target_update_mode,"region_update":view.viewport.render_target_update_mode,"local_update":view._local_viewport.render_target_update_mode if view._local_viewport!=null else -1,"renderer_processing":renderer.is_processing(),"fps":Performance.get_monitor(Performance.TIME_FPS),"counts":idle_counts.duplicate(),"physics_frames":Engine.get_physics_frames()}
 	return snapshot
 
 func performance_begin(label: String) -> void:
@@ -1617,7 +1643,7 @@ func performance_begin(label: String) -> void:
 
 func performance_end() -> void:
 	perf_recording=false
-	perf_phases.append({"phase":perf_phase,"started_us":perf_started,"ended_us":Time.get_ticks_usec(),"frames":perf_frames,"events":perf_events,"inputs":perf_inputs,"begin":perf_begin_snapshot,"end":performance_snapshot()})
+	perf_phases.append({"phase":perf_phase,"started_us":perf_started,"ended_us":Time.get_ticks_usec(),"unix_ms":Time.get_unix_time_from_system()*1000.0-(Time.get_ticks_usec()-perf_started)/1000.0,"frames":perf_frames,"events":perf_events,"inputs":perf_inputs,"begin":perf_begin_snapshot,"end":performance_snapshot()})
 
 func performance_input(event: InputEvent) -> void:
 	var began := Time.get_ticks_usec()

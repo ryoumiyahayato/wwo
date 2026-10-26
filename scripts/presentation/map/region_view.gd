@@ -4,6 +4,7 @@ extends RefCounted
 signal landmark_display_changed
 signal landmark_load_failed(message: String)
 signal canvas_update_requested
+signal local_render_requested
 signal local_frame_ready
 
 var container: TextureRect
@@ -371,7 +372,9 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 	_update_local_render_rect(camera,viewport_size)
 	if _local_viewport==null or not _local_container.visible: return
 	_local_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
-	canvas_update_requested.emit()
+	# Poses changed in the current map commit. Request its image without
+	# treating that same camera as a second projection/content revision.
+	local_render_requested.emit()
 	if not _landmark_render_pending:
 		_landmark_render_pending = true
 		RenderingServer.frame_post_draw.connect(_landmark_frame_ready.bind(_local_render_generation),CONNECT_ONE_SHOT)

@@ -174,6 +174,7 @@ func _ready() -> void:
 	region_view.landmark_display_changed.connect(_on_local_frame_ready)
 	region_view.landmark_load_failed.connect(func(message: String) -> void: map_notice.emit(message))
 	region_view.canvas_update_requested.connect(_invalidate_spatial_display)
+	region_view.local_render_requested.connect(_on_local_render_requested)
 	region_view.local_frame_ready.connect(_publish_local_frame)
 	var chinese := preload("res://assets/fonts/map/SourceHanSerifCN-Regular.otf").duplicate() as FontFile
 	_country_font = _country_font.duplicate() as FontFile
@@ -540,14 +541,19 @@ func _invalidate_spatial_display() -> void:
 	_view_dirty = true
 	_map_canvas_dirty = true
 	if visible: set_process(true)
-	queue_redraw()
+	if not inspection_preview: queue_redraw()
+
+func _on_local_render_requested() -> void:
+	if not inspection_preview: _invalidate_spatial_display()
 
 func _publish_local_frame() -> void:
 	# The scene and map batches are already installed. Only the cached parent
 	# must consume the completed child's texture; do not rebuild labels/layers.
 	if not visible or controller==null or not controller.region_camera.active: return
 	_request_map_frame(true)
-	queue_redraw()
+	# Inspection queues its glyphs with the parent request above. Changed
+	# identities still invalidate them through landmark_display_changed.
+	if not inspection_preview: queue_redraw()
 
 func _invalidate_appearance() -> void:
 	_symbol_layout_dirty = true
@@ -2420,8 +2426,12 @@ func _request_map_frame(regional: bool) -> void:
 	var consumer := region_view.container if regional else _container
 	var moving := controller.camera_motion_active() or _transition_elapsed>=0.0
 	if inspection_preview:
+		# The pending child will publish this committed camera after its draw.
+		# Rendering the parent now would cache its previous LOCAL texture.
+		if regional and region_view._landmark_render_pending: return
 		target.render_target_update_mode = SubViewport.UPDATE_ONCE
 		consumer.queue_redraw()
+		queue_redraw()
 		if moving: set_process(visible)
 		return
 	target.render_target_update_mode = SubViewport.UPDATE_ALWAYS if moving else SubViewport.UPDATE_ONCE
