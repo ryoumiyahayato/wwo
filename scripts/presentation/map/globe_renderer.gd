@@ -174,7 +174,6 @@ func _ready() -> void:
 	region_view.landmark_display_changed.connect(_on_local_frame_ready)
 	region_view.landmark_load_failed.connect(func(message: String) -> void: map_notice.emit(message))
 	region_view.canvas_update_requested.connect(_invalidate_spatial_display)
-	region_view.local_render_requested.connect(_on_local_render_requested)
 	region_view.local_frame_ready.connect(_publish_local_frame)
 	var chinese := preload("res://assets/fonts/map/SourceHanSerifCN-Regular.otf").duplicate() as FontFile
 	_country_font = _country_font.duplicate() as FontFile
@@ -543,20 +542,12 @@ func _invalidate_spatial_display() -> void:
 	if visible: set_process(true)
 	queue_redraw()
 
-func _on_local_render_requested() -> void:
-	# Model timing stayed less stable in the bounded comparison. Retain its
-	# original scheduling; only terrain-only inspection reuses the projection.
-	if inspection_preview and region_view._landmark_instances.is_empty(): _request_map_frame(true)
-	else: _invalidate_spatial_display()
-
 func _publish_local_frame() -> void:
 	# The scene and map batches are already installed. Only the cached parent
 	# must consume the completed child's texture; do not rebuild labels/layers.
 	if not visible or controller==null or not controller.region_camera.active: return
 	_request_map_frame(true)
-	# Terrain inspection glyphs already use the committed camera. Changed
-	# identities still invalidate them through landmark_display_changed.
-	if not inspection_preview or not region_view._landmark_instances.is_empty(): queue_redraw()
+	queue_redraw()
 
 func _invalidate_appearance() -> void:
 	_symbol_layout_dirty = true
