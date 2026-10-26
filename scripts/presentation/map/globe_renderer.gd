@@ -541,18 +541,19 @@ func _invalidate_spatial_display() -> void:
 	_view_dirty = true
 	_map_canvas_dirty = true
 	if visible: set_process(true)
-	if not inspection_preview: queue_redraw()
+	queue_redraw()
 
 func _on_local_render_requested() -> void:
-	if not inspection_preview: _invalidate_spatial_display()
+	if inspection_preview: _request_map_frame(true)
+	else: _invalidate_spatial_display()
 
 func _publish_local_frame() -> void:
 	# The scene and map batches are already installed. Only the cached parent
 	# must consume the completed child's texture; do not rebuild labels/layers.
 	if not visible or controller==null or not controller.region_camera.active: return
 	_request_map_frame(true)
-	# Inspection queues its glyphs with the parent request above. Changed
-	# identities still invalidate them through landmark_display_changed.
+	# Inspection glyphs already use the committed camera. Changed identities
+	# still invalidate them through landmark_display_changed.
 	if not inspection_preview: queue_redraw()
 
 func _invalidate_appearance() -> void:
@@ -2426,12 +2427,8 @@ func _request_map_frame(regional: bool) -> void:
 	var consumer := region_view.container if regional else _container
 	var moving := controller.camera_motion_active() or _transition_elapsed>=0.0
 	if inspection_preview:
-		# The pending child will publish this committed camera after its draw.
-		# Rendering the parent now would cache its previous LOCAL texture.
-		if regional and region_view._landmark_render_pending: return
 		target.render_target_update_mode = SubViewport.UPDATE_ONCE
 		consumer.queue_redraw()
-		queue_redraw()
 		if moving: set_process(visible)
 		return
 	target.render_target_update_mode = SubViewport.UPDATE_ALWAYS if moving else SubViewport.UPDATE_ONCE

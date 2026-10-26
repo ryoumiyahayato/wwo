@@ -393,7 +393,8 @@ func resource_review() -> void:
 	renderer.draw.connect(idle_count.bind("map_draw"))
 	controller.view_changed.connect(idle_count.bind("view_changed"))
 	renderer.region_view.canvas_update_requested.connect(idle_count.bind("local_request"))
-	renderer.region_view.local_render_requested.connect(idle_count.bind("local_pose_request"))
+	if renderer.region_view.has_signal("local_render_requested"):
+		renderer.region_view.local_render_requested.connect(idle_count.bind("local_pose_request"))
 	renderer.region_view.local_frame_ready.connect(idle_count.bind("local_complete"))
 	var power_review := label.begins_with("power-")
 	for point: Array in [["normal", "installed:geographic_region:zermatt_west_reference",7.7063088,46.0079880,40.0,85.0],["terrain", "installed:geographic_region:zermatt_west_reference",7.7063088,46.0079880,2.0,55.0],["ground","installed:geographic_region:zermatt_west_reference",7.7063088,46.0079880,2.0,12.0],["landmark","model:landmark:eiffel_tower_1900",2.2945,48.8584,2.0,55.0]]:
