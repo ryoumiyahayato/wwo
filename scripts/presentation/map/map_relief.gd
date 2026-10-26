@@ -175,7 +175,13 @@ func _choose_surface(visible: bool, mpp: float, center: Vector2, radius_km: floa
 	var has_middle := false
 	for row: Dictionary in candidates:
 		if int(row.span)>2 and bool(row.visible): has_middle = true
+	# The padded admission/prewarm frame is not the set of visible pixels.
+	# A bounded proof may admit a complete four-core screen even when that
+	# larger frame has gaps. Uncertain/polar/clipped charts keep the old rule.
+	var screen_view := certified_screen_footprint(footprint,center) if not footprint.is_empty() else Rect2()
+	if explanation.has("groups"): explanation["certified_screen_bounds"] = [screen_view.position.x,screen_view.position.y,screen_view.end.x,screen_view.end.y] if screen_view.has_area() else []
 	var chosen: Array = []
+	var chosen_covers_screen := false
 	var best_step := INF
 	if explanation.has("groups"): explanation["replaced_ids"] = replaced.keys()
 	for span: int in [2,8,16]:
@@ -184,21 +190,25 @@ func _choose_surface(visible: bool, mpp: float, center: Vector2, radius_km: floa
 		var area := 0.0
 		var count := 0
 		var source_total := 0.0
+		var cores: Array[Rect2] = []
 		for row: Dictionary in same:
 			if bool(row.visible) and count<4:
 				area += float(row.overlap)
 				var asset := _assets[str(row.id)] as Dictionary
+				cores.append(_surface_frame(asset.core_bounds_lon_lat as Array))
 				var output_step := float((asset.display_spacing_degrees as Array)[1])*111195.0
 				source_total += float(row.overlap)*(float(row.source_step)+output_step*.05)
 				count += 1
+		var covers_screen := screen_view.has_area() and cores_cover_view(cores,screen_view)
 		if explanation.has("groups"):
-			(explanation.groups as Array).append({"span_degrees":span,"visible_candidates":same.filter(func(row: Dictionary) -> bool: return bool(row.visible)).size(),"first_four_view_coverage":area/maxf(_overlap(view,view),.000001),"source_score_m":source_total/maxf(area,.000001),"ids":same.map(func(row: Dictionary) -> String: return str(row.id))})
-		if area>=_overlap(view,view)*.995 or not has_middle:
+			(explanation.groups as Array).append({"span_degrees":span,"visible_candidates":same.filter(func(row: Dictionary) -> bool: return bool(row.visible)).size(),"first_four_view_coverage":area/maxf(_overlap(view,view),.000001),"screen_coverage_certified":covers_screen,"source_score_m":source_total/maxf(area,.000001),"ids":same.map(func(row: Dictionary) -> String: return str(row.id))})
+		if covers_screen or area>=_overlap(view,view)*.995 or not has_middle:
 			var step := source_total/maxf(area,.000001)
 			# A smaller rectangle is not evidence of a better measurement. For
 			# equal source information prefer the continuous page, not more uploads.
 			if step<=best_step*1.02:
 				chosen = same
+				chosen_covers_screen = covers_screen
 				best_step = step
 	if chosen.is_empty(): return wanted
 	candidates = chosen
@@ -208,7 +218,7 @@ func _choose_surface(visible: bool, mpp: float, center: Vector2, radius_km: floa
 	# A complete geographic overview owns wide views. Do not install four
 	# arbitrary crisp islands where this LOD cannot cover the current screen.
 	_surface_refinement_weight = 1.0
-	if visible_count>4:
+	if visible_count>4 and not chosen_covers_screen:
 		var all_area := 0.0
 		var selected_area := 0.0
 		for index: int in range(visible_count):
@@ -300,6 +310,66 @@ static func projected_footprint(chart: Dictionary, center: Vector2) -> Rect2:
 			output = output.expand(Vector2(center.x-180.0,pole*90.0)).expand(Vector2(center.x+180.0,pole*90.0))
 	# Small conservative collar for sampled curved extrema, not fixed degrees.
 	return output.grow_individual(output.size.x*.02,output.size.y*.02,output.size.x*.02,output.size.y*.02)
+
+static func certified_screen_footprint(chart: Dictionary, center: Vector2) -> Rect2:
+	# Certificate, not a tighter guessed bbox: exp on the sphere is 1-Lipschitz
+	# in chart kilometres. Any boundary point lies within half a sampled edge
+	# segment of a sample. Add one screen pixel and a floating-point collar.
+	# Away from poles, lat/continuous lon have no interior chart extrema.
+	var viewport := chart.size as Vector2
+	var origin := chart.origin as Vector2
+	var step := float(chart.step)
+	if step<=0.0 or not viewport.is_finite() or viewport.x<=0.0 or viewport.y<=0.0: return Rect2()
+	var axes := RegionProjection.screen_axes(float(chart.bearing))
+	var frame := chart.frame as Basis
+	var corners: Array[Vector2] = [Vector2.ZERO,Vector2(viewport.x,0.0),viewport,Vector2(0.0,viewport.y)]
+	for corner: Vector2 in corners:
+		var distance := corner.distance_to(origin)*step
+		if distance>float(chart.extent) or distance>=PI*6371.0088: return Rect2()
+	for pole: float in [-1.0,1.0]:
+		var km := RegionProjection.forward(Vector3(0,pole,0),frame)
+		if km.is_finite() and Rect2(Vector2.ZERO,viewport).grow(1.0).has_point(origin+axes*(km/step)): return Rect2()
+	var output := Rect2()
+	var initialized := false
+	var longest_segment := 0.0
+	for edge: int in range(4):
+		var start := corners[edge]
+		var delta := corners[(edge+1)%4]-start
+		# At most512 inverse projections per changed demand, never pixel scans.
+		var segments := clampi(ceili(delta.length()/8.0),8,128)
+		longest_segment = maxf(longest_segment,delta.length()/segments)
+		for i: int in range(segments):
+			var pixel := start+delta*(float(i)/segments)
+			var km := axes.basis_xform_inv(pixel-origin)*step
+			var ll := RegionProjection.lon_lat(RegionProjection.inverse(km,frame))
+			if not ll.is_finite(): return Rect2()
+			ll.x += 360.0*roundf((center.x-ll.x)/360.0)
+			output = output.expand(ll) if initialized else Rect2(ll,Vector2.ZERO)
+			initialized = true
+	var latitude_error := rad_to_deg((longest_segment*0.5+1.0)*step/6371.0088)+0.0001
+	var absolute_latitude := maxf(absf(output.position.y),absf(output.end.y))+latitude_error
+	# Near poles or ambiguous longitude turns, retain established admission.
+	if absolute_latitude>=80.0 or output.size.x>=180.0: return Rect2()
+	var longitude_error := latitude_error/cos(deg_to_rad(absolute_latitude))
+	return output.grow_individual(longitude_error,latitude_error,longitude_error,latitude_error)
+
+static func cores_cover_view(cores: Array[Rect2], view: Rect2) -> bool:
+	# Exact rectangle-union containment, not summed areas (which can double
+	# count overlaps). The certificate must leave no positive-area gap.
+	if not view.has_area(): return false
+	var remaining: Array[Rect2] = [view]
+	for core: Rect2 in cores:
+		var next: Array[Rect2] = []
+		for gap: Rect2 in remaining:
+			var hit := gap.intersection(core)
+			if not hit.has_area():
+				next.append(gap)
+				continue
+			for part: Rect2 in [Rect2(gap.position,Vector2(hit.position.x-gap.position.x,gap.size.y)),Rect2(Vector2(hit.end.x,gap.position.y),Vector2(gap.end.x-hit.end.x,gap.size.y)),Rect2(Vector2(hit.position.x,gap.position.y),Vector2(hit.size.x,hit.position.y-gap.position.y)),Rect2(Vector2(hit.position.x,hit.end.y),Vector2(hit.size.x,gap.end.y-hit.end.y))]:
+				if part.has_area(): next.append(part)
+		remaining = next
+		if remaining.is_empty(): return true
+	return false
 
 func surface_description(mpp: float) -> Dictionary:
 	var bases: Array[Dictionary] = []
