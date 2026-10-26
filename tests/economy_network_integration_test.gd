@@ -9,8 +9,14 @@ var test := FormalTestCase.new()
 func _initialize() -> void:
 	var arguments := OS.get_cmdline_user_args()
 	var saved_index := arguments.find("--saved-file")
+	var compare_index := arguments.find("--compare-saved")
+	if compare_index >= 0 and (saved_index < 0 or compare_index + 1 >= arguments.size()):
+		test.expect(false, "--compare-saved requires --saved-file and an absolute baseline save path")
+		test.finish(self, "Economic network saved-file cold read")
+		return
 	if saved_index >= 0:
-		_read_saved_file.call_deferred(arguments[saved_index + 1] if saved_index + 1 < arguments.size() else "")
+		var compare_path: String = arguments[compare_index + 1] if compare_index >= 0 else ""
+		_read_saved_file.call_deferred(arguments[saved_index + 1] if saved_index + 1 < arguments.size() else "", compare_path)
 	elif arguments.has("--read-contract-only"):
 		_read_contract_only.call_deferred()
 	else:
@@ -138,7 +144,7 @@ func _read_contract_only() -> void:
 
 ## Cold file inspection uses only the existing exact decoder/restore candidate.
 ## No opening scenario is built here, no file is written and no time is advanced.
-func _read_saved_file(path: String) -> void:
+func _read_saved_file(path: String, compare_path: String = "") -> void:
 	test.expect(not path.is_empty() and path.is_absolute_path(), "Cold-read mode requires the actual absolute GUI save path")
 	if path.is_empty() or not path.is_absolute_path():
 		test.finish(self, "Economic network saved-file cold read")
@@ -163,10 +169,39 @@ func _read_saved_file(path: String) -> void:
 	test.expect(_physical_valid(economy) and _production_totals_valid(economy), "Saved lots and per-good production/input receipts remain physically consistent")
 	_print_saved_summary(restored.world, path)
 	_print_cross_border_trace(economy)
+	if not compare_path.is_empty(): _compare_saved_snapshot(persistence, actual, path, compare_path)
 	# Keep the check separate from the candidate decoder's own validation: these
 	# diagnostic reads must not advance time, settle, allocate cash or write state.
 	test.expect(restored.persistence.snapshot() == actual, "Cold summary and trace leave the entire restored world unchanged")
 	test.finish(self, "Economic network saved-file cold read")
+
+func _compare_saved_snapshot(persistence: FormalPersistence, current: Dictionary, current_path: String, baseline_path: String) -> void:
+	test.expect(baseline_path.is_absolute_path(), "Save comparison requires the explicitly supplied absolute baseline path")
+	if not baseline_path.is_absolute_path(): return
+	var baseline := persistence._read_snapshot_file(baseline_path)
+	test.expect(baseline.success, "Original decoder reads only the requested baseline save: " + baseline.error_code + " " + baseline.message)
+	if not baseline.success: return
+	var same_clock: bool = current.get("total_minutes") == baseline.snapshot.get("total_minutes") and current.get("minute_remainder") == baseline.snapshot.get("minute_remainder")
+	var same_native: bool = current.get("economy_native") == baseline.snapshot.get("economy_native")
+	var same_ledger: bool = current.get("ledger") == baseline.snapshot.get("ledger")
+	test.expect(same_clock, "Current cold-restored and baseline decoded clocks are exactly equal")
+	test.expect(same_native, "Native economy dictionaries are exact: no duplicated orders, lots, wages or production")
+	test.expect(same_ledger, "Ledger dictionaries are exact: no duplicated payment or reservation")
+	print("NETWORK_SAVED_COMPARE ", JSON.stringify({"source": "ORIGINAL_DECODED_SNAPSHOTS_AND_CURRENT_RESTORE_DICTIONARY_EQUALITY_NO_HASHES_NO_WRITES", "current_path": current_path, "baseline_path": baseline_path, "exact": {"clock": same_clock, "economy_native": same_native, "ledger": same_ledger, "all_requested": same_clock and same_native and same_ledger}, "current": _saved_dedup_summary(current), "baseline": _saved_dedup_summary(baseline.snapshot)}))
+
+func _saved_dedup_summary(state: Dictionary) -> Dictionary:
+	var native: Dictionary = state.get("economy_native", {})
+	var sources: Dictionary = native.get("stock_lots", {}).get("sources", {})
+	var unique_transactions: Dictionary = {}
+	var transaction_rows: Array = state.get("ledger", {}).get("transactions", [])
+	for transaction: Dictionary in transaction_rows: unique_transactions[transaction["transaction_id"]] = true
+	var production_sources: Dictionary = {}
+	var produced := Opening.stock()
+	for source: Dictionary in sources.values():
+		if not str(source["id"]).begins_with("production:"): continue
+		production_sources[source["id"]] = true
+		produced[source["good"]] = int(produced[source["good"]]) + int(source["quantity"])
+	return {"clock": {"total_minutes": state.get("total_minutes"), "minute_remainder": state.get("minute_remainder")}, "orders_unique_ids": native.get("orders", {}).size(), "sources_unique_ids": sources.size(), "transactions_rows": transaction_rows.size(), "transactions_unique_ids": unique_transactions.size(), "wages_unique_ids": native.get("wages", {}).size(), "production_sources_unique_ids": production_sources.size(), "produced_by_good_from_unique_source_receipts": produced}
 
 func _print_saved_summary(world: WorldState, source_path: String) -> void:
 	var economy := world.economy_r1
