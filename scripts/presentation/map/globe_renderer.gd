@@ -544,7 +544,9 @@ func _invalidate_spatial_display() -> void:
 	queue_redraw()
 
 func _on_local_render_requested() -> void:
-	if inspection_preview: _request_map_frame(true)
+	# Model timing stayed less stable in the bounded comparison. Retain its
+	# original scheduling; only terrain-only inspection reuses the projection.
+	if inspection_preview and region_view._landmark_instances.is_empty(): _request_map_frame(true)
 	else: _invalidate_spatial_display()
 
 func _publish_local_frame() -> void:
@@ -552,9 +554,9 @@ func _publish_local_frame() -> void:
 	# must consume the completed child's texture; do not rebuild labels/layers.
 	if not visible or controller==null or not controller.region_camera.active: return
 	_request_map_frame(true)
-	# Inspection glyphs already use the committed camera. Changed identities
-	# still invalidate them through landmark_display_changed.
-	if not inspection_preview: queue_redraw()
+	# Terrain inspection glyphs already use the committed camera. Changed
+	# identities still invalidate them through landmark_display_changed.
+	if not inspection_preview or not region_view._landmark_instances.is_empty(): queue_redraw()
 
 func _invalidate_appearance() -> void:
 	_symbol_layout_dirty = true
