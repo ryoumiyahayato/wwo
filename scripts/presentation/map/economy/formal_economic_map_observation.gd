@@ -167,6 +167,14 @@ static func details(world: WorldState, polity_id: String, requested_subject: Str
 	own["sales_orders"] = []
 	var operations := own.get("operations",[]) as Array
 	own["operations"] = operations.slice(0,16)
+	result["production_details"]={}
+	if subject!=world.player_state.player_id(): # query_firm above already authenticated the current manager.
+		for operation:Dictionary in own["operations"]:
+			var site:=str(operation.get("site_id",""))
+			if site.is_empty():continue
+			var production:=world.economy_r1.economy_read_view(world.player_state.player_id(),subject,site)
+			if not production.is_empty():
+				result["production_details"][site]={"site_id":site,"activities":production.get("activities",[]),"units":production.get("units",{}),"inventory_status":production.get("inventory_status",{}),"configuration_source":production.get("configuration_source",{})}
 	var offers := own.get("offers",[]) as Array
 	own["offers"] = offers.slice(0,64)
 	var received: Array[Dictionary] = []

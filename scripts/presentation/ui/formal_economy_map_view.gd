@@ -295,6 +295,33 @@ func _route_status(edge:Dictionary) -> String:
 	if edge.get("closed") is bool:return "已知当前关闭" if bool(edge.closed) else "已知当前开放；不代表有货/有订单"
 	return "已知可达联系；未据此推定当前畅通、余量或成交"
 
+func _production_goods(values:Dictionary,units:Dictionary) -> String:
+	var rows:Array[String]=[]
+	for good:String in values:
+		if int(values[good])==0:continue
+		var unit:=str(units.get(good,"单位未知"))
+		rows.append("%s %s%s"%[GOODS.get(good,good),str(values[good]),{"development_kg":"开发千克","development_m":"开发米","development_piece":"开发件"}.get(unit,unit)])
+	return "、".join(rows) if not rows.is_empty() else "0（已有视图）"
+
+func _production_text(value:Dictionary) -> String:
+	if value.is_empty():return ""
+	var units:Dictionary=value.get("units",{}).get("goods",{})
+	var rows:Array[String]=["获准站点生产 · "+EconomicText.site(str(value.get("site_id",""))),"来源case "+str(value.get("configuration_source",{}).get("case_id","未知"))]
+	for activity:Dictionary in (value.get("activities",[]) as Array).slice(0,8):
+		var recipe:Dictionary=activity.get("recipe",{})
+		var utilization:Variant=activity.get("capacity_utilization")
+		rows.append("配方/批：%s → %s；每批%s人时/%s产能单位（日额度口径）"%[_production_goods(recipe.get("materials",{}),units),_production_goods(recipe.get("outputs",{}),units),str(recipe.get("hours","未知")),str(recipe.get("capacity_units","未知"))])
+		rows.append("计划/实际批次 %s/%s · 累计%s\n实际投入 %s\n净输出 %s · 不可售reject %s"%[str(activity.get("planned_batches","未知")),str(activity.get("actual_batches","未知")),str(activity.get("cumulative_batches","未知")),_production_goods(activity.get("actual_inputs",{}),units),_production_goods(activity.get("actual_outputs",{}),units),_production_goods(activity.get("declared_non_saleable_rejects",{}),units)])
+		rows.append("生产采用劳动 %s人时 · 占用/可用产能 %s/%s · 利用率 %s"%[str(activity.get("allocated_person_hours","未知")),str(activity.get("capacity_used_units","未知")),str(activity.get("capacity_available_units","未知")),"%.1f%%"%(float(utilization)*100.0) if utilization is float or utilization is int else "未知"])
+		rows.append("工艺状态 %s · 观察到约束 %s"%[str(activity.get("process_status","未知")),str(activity.get("observed_constraints",[]))])
+	if (value.get("activities",[]) as Array).is_empty():rows.append("本站没有已声明生产活动；不把贸易站库存当作产出。")
+	for good:String in value.get("inventory_status",{}):
+		if selected_good not in ["all",good]:continue
+		var stock:Dictionary=value["inventory_status"][good]
+		rows.append("%s：在库%s/预留%s · 在途合同责任入%s/出%s（%s）"%[GOODS.get(good,good),str(stock.get("at_site_quantity","未知")),str(stock.get("reserved_at_site_quantity","未知")),str(stock.get("incoming_order_transit_quantity","未知")),str(stock.get("outgoing_order_transit_quantity","未知")),str(units.get(good,"单位未知"))])
+	rows.append("在途为已接受合同责任，不替代未确认的远程实货量；参数/配方按来源case，不是历史产能。")
+	return "\n".join(rows)
+
 func _detail() -> void:
 	if _details==null:return
 	var lines:Array[String]=[]
@@ -316,8 +343,9 @@ func _detail() -> void:
 		lines.append("有向订单是已受理责任；实货另按已知分段状态显示，不是实时货运坐标。")
 	else:
 		lines.append(place_name(selected_place)+" · 城市级锚点，不是厂房地籍坐标。")
+		var production_text:=_production_text(snapshot.get("production_details",{}).get(selected_site,{}))
+		if not production_text.is_empty():lines.append(production_text)
 		lines.append("当前主体已收到报价 %d · 已知岗位 %d · 本页授权订单 %d"%[(contacts.get("contacts",[]) as Array).size(),(snapshot.get("firm",{}).get("known_jobs",[]) as Array).size(),(network.get("edges",{}) as Dictionary).size()])
-		lines.append(_public_place_text())
 		var own:=snapshot.get("firm",{}) as Dictionary
 		var own_sites:Array=network.get("nodes",{}).get(selected_place,{}).get("known_own_sites",[])
 		if own.has("cash") and own.has("reserved") and (selected_node.is_empty() or selected_site in own_sites):lines.append("当前获准观察主体（非任意公共企业）账面现金 %s · 预留 %s（原记账单位）"%[str(own.cash),str(own.reserved)])
@@ -349,6 +377,7 @@ func _detail() -> void:
 			if count>=8:break
 		for edge:Dictionary in network.get("edges",{}).values():
 			if selected_place in [str(edge.from_node),str(edge.to_node)] and selected_good in ["all",str(edge.good)]:lines.append(str(edge.order_id)+" · "+_edge_status(edge))
+		lines.append(_public_place_text())
 	if full:
 		lines.append("图例：圆点=合法地点；方框=企业站点（数字为同地站点数）；菱形=物流节点；统计另标。虚线=已知通路/报价或待发责任；实线箭头=已知实货当前段；浅色=已到货历史。位置不作实时移动。")
 		lines.append("当前有界已知节点 %d%s；节点数随真实数据/活动变化，显示按视野与LOD限额。"%[(public_network.get("nodes",[]) as Array).size(),"（更多节点未在本次预算中列出）" if bool(public_network.get("truncated",false)) else ""])
