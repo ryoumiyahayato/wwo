@@ -40,6 +40,162 @@ var _walk_generation := 0
 var _walk_button: Button
 var _last_center := Vector2(INF,INF)
 var _last_span := -1.0
+const TRAINING_SCRIPT: String = "res://military_runtime/native/modules/isolated_training/controller.gd"
+var _training: Node
+var _training_active: bool = false
+var _training_preparing: bool = false
+var _training_button: Button
+var _training_exit: Button
+var _training_banner: Label
+var _toolbar: Control
+var _training_tick: float = 0.0
+
+func _install_training_controls() -> void:
+	_toolbar = _title.get_parent().get_parent().get_parent().get_parent() as Control
+	_training_button = _button(_walk_button.get_parent(), "原生坦克训练（隔离）", _toggle_training)
+	_training_button.get_parent().move_child(_training_button, _walk_button.get_index() + 1)
+	_training_button.disabled = true
+	_training_exit = Button.new()
+	_training_exit.text = "隔离训练 · 暂停并观察 / Esc"
+	_training_exit.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_training_exit.offset_left = -270
+	_training_exit.offset_right = -16
+	_training_exit.offset_top = 8
+	_training_exit.offset_bottom = 50
+	_training_exit.focus_mode = Control.FOCUS_NONE
+	_training_exit.pressed.connect(_pause_training)
+	_training_exit.hide()
+	add_child(_training_exit)
+	_training_banner = Label.new()
+	_training_banner.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_training_banner.offset_left = 300
+	_training_banner.offset_right = -285
+	_training_banner.offset_top = 8
+	_training_banner.offset_bottom = 48
+	_training_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_training_banner.add_theme_font_size_override("font_size", 13)
+	_training_banner.add_theme_color_override("font_shadow_color", Color.BLACK)
+	_training_banner.add_theme_constant_override("shadow_outline_size", 3)
+	_training_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_training_banner.hide()
+	add_child(_training_banner)
+
+func _toggle_training() -> void:
+	if _training_active:
+		_pause_training()
+		return
+	if is_instance_valid(_training):
+		_set_training_view(true)
+		_training.call("resume")
+		_training_button.text = "恢复原训练（弹药 / 伤损保留）"
+		_request_frame()
+		return
+	var script: GDScript = load(TRAINING_SCRIPT) as GDScript
+	if script == null or not script.can_instantiate():
+		_status.text = "原军事训练模块未就绪；观察与正式世界仍可正常使用。"
+		return
+	_stop_walk()
+	_training_preparing = true
+	_set_training_view(true)
+	_training_banner.text = "准备原生坦克与五车组 · 独立训练身份 · 不写正式世界"
+	_training = script.new() as Node
+	_training.connect("prepared", _on_training_prepared)
+	_training.connect("failed", _on_training_failed)
+	_training.connect("observer_requested", _pause_training)
+	add_child(_training)
+	var exclusions: Array[Rect2] = [_training_exit.get_rect()]
+	_training.call("set_input_exclusions", exclusions)
+	_training.call("start", {"viewport": viewport, "provider": terrain})
+
+func _set_training_view(active: bool) -> void:
+	_training_active = active
+	if active: _stop_walk()
+	_held.clear()
+	_drag = false
+	_orbit = false
+	_toolbar.visible = not active
+	_hint.get_parent().visible = not active
+	_grid.visible = not active
+	_training_exit.visible = active
+	_training_banner.visible = active
+	if is_instance_valid(scenery):
+		# Drop observer-only support before the original military owner is installed.
+		if active: scenery.call("update_view", center, 5000.0)
+		scenery.visible = not active
+	_environment.background_mode = Environment.BG_SKY if active else Environment.BG_COLOR
+	_sun.shadow_enabled = active
+	if not active:
+		camera.make_current()
+		_last_span = -1.0
+		_request_frame()
+
+func _on_training_prepared(_status_data: Dictionary) -> void:
+	_training_preparing = false
+	_training_button.text = "恢复原训练（弹药 / 伤损保留）"
+	_training_banner.text = "隔离训练 · 原车组 / 有限弹药 / 实弹弹着 · Esc暂停观察"
+	_request_frame()
+
+func _on_training_failed(reason: String) -> void:
+	_training_preparing = false
+	if is_instance_valid(_training):
+		_training.call("close")
+		_training.queue_free()
+	_training = null
+	_set_training_view(false)
+	_status.text = "训练未启动：" + reason + "；未修改正式人物、时间或存档。"
+
+func _pause_training() -> void:
+	if not _training_active: return
+	if is_instance_valid(_training):
+		if _training_preparing:
+			_training.call("close")
+			_training.queue_free()
+			_training = null
+		else:
+			_training.call("pause")
+	_training_preparing = false
+	_set_training_view(false)
+	_status.text = "观察模式 · 本次训练已暂停，原车组 / 弹药 / 伤损保留；返回正式世界会结束本次隔离训练。"
+
+func get_training_status() -> Dictionary:
+	if not is_instance_valid(_training): return {"state": "not_started", "isolated": true}
+	var status_data: Dictionary = _training.call("get_status") as Dictionary
+	return status_data
+
+func _process(delta: float) -> void:
+	if _training_active:
+		_training_tick += delta
+		if _training_tick >= 0.5 and not _training_preparing:
+			_training_tick = 0.0
+			var status_data: Dictionary = get_training_status()
+			var driving: Dictionary = status_data.get("driving", {}) as Dictionary
+			_training_banner.text = "隔离训练 · %.1f m/s · 原伤情 / 有限弹药保留 · Esc暂停观察" % float(driving.get("speed_mps", 0.0))
+		return
+	_process_observation(delta)
+
+func _gui_input(event: InputEvent) -> void:
+	if not _training_active: _observation_gui_input(event)
+
+func _input(event: InputEvent) -> void:
+	if not _training_active:
+		_observation_input(event)
+		return
+	if event is InputEventKey:
+		var key: InputEventKey = event as InputEventKey
+		if key.pressed and not key.echo and key.keycode == KEY_ESCAPE:
+			_pause_training()
+			get_viewport().set_input_as_handled()
+			return
+		if key.pressed and not key.echo and key.keycode == KEY_F12:
+			_capture()
+			get_viewport().set_input_as_handled()
+			return
+	if event is InputEventMouse and _training_exit.get_rect().has_point((event as InputEventMouse).position):
+		return
+	if not _training_preparing:
+		viewport.push_input(event, true)
+		if is_instance_valid(_training) and _training.has_method("request_frame"): _training.call("request_frame")
+	get_viewport().set_input_as_handled()
 
 func _ready() -> void:
 	name = "MilitaryTerrainObservation"
@@ -100,6 +256,7 @@ func _ready() -> void:
 	_grid.draw.connect(_draw_grid)
 	add_child(_grid)
 	_build_toolbar()
+	_install_training_controls()
 	resized.connect(_resize)
 	_resize()
 	var script := load("res://scripts/presentation/terrain/layered_terrain.gd") as GDScript
@@ -141,7 +298,7 @@ func _build_toolbar() -> void:
 	_detail = _button(controls,"进入选中 5 km",_enter_selected)
 	_detail.disabled = true
 	_button(controls,"定位原生区块",func() -> void: selected_cell=Vector2i(4,4);center=Vector2.ZERO;_request_frame())
-	_button(controls,"村庄 / 道路",func() -> void: _enter_native();center=Vector2(0,40);span_m=700;elevation=30;_request_frame())
+	_button(controls,"村庄 / 道路",func() -> void: _enter_native();center=Vector2(0,40);span_m=492.1875;elevation=30;_request_frame())
 	_walk_button = _button(controls,"步行观察（隔离）",_toggle_walk)
 	_walk_button.disabled = true
 	_button(controls,"上一级 / Esc",_back)
@@ -161,7 +318,11 @@ func _build_toolbar() -> void:
 func _button(parent: Node, text: String, callback: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.pressed.connect(callback)
+	button.pressed.connect(func() -> void:
+		if _training_active and callback != Callable(self, "_toggle_training"):
+			_pause_training()
+		callback.call()
+	)
 	button.focus_mode = Control.FOCUS_NONE
 	parent.add_child(button)
 	return button
@@ -182,12 +343,16 @@ func _on_prepared() -> void:
 		scenery.call("update_view",center,span_m)
 	_detail.disabled = false
 	_walk_button.disabled = false
+	_training_button.disabled = false
 	_status.text = "50m外围 / 4m原生高度样本 · 仅显示精度逐级提高，不增加测绘精度。"
 	_request_frame()
 
 func _request_frame() -> void:
 	_dirty = true
-	if viewport != null: viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	if _training_active and is_instance_valid(_training) and _training.has_method("request_frame"):
+		_training.call("request_frame")
+	elif viewport != null:
+		viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	if _grid != null: _grid.queue_redraw()
 
 func _set_range(value: float) -> void:
@@ -236,7 +401,7 @@ func _close() -> void:
 	_stop_walk()
 	closed.emit()
 
-func _gui_input(event: InputEvent) -> void:
+func _observation_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse := event as InputEventMouseButton
 		if mouse.button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN] and mouse.pressed:
@@ -267,7 +432,7 @@ func _gui_input(event: InputEvent) -> void:
 			_clamp_center()
 			_request_frame()
 
-func _input(event: InputEvent) -> void:
+func _observation_input(event: InputEvent) -> void:
 	if not event is InputEventKey: return
 	var key := event as InputEventKey
 	if key.echo: return
@@ -296,7 +461,7 @@ func _clamp_center() -> void:
 	center.x = clampf(center.x,-half,half)
 	center.y = clampf(center.y,-half,half)
 
-func _process(delta: float) -> void:
+func _process_observation(delta: float) -> void:
 	var movement := Vector2(float(bool(_held.get(KEY_D,false)))-float(bool(_held.get(KEY_A,false))),float(bool(_held.get(KEY_S,false)))-float(bool(_held.get(KEY_W,false))))
 	if not _walking and movement.length_squared()>0:
 		center += movement.normalized().rotated(bearing)*span_m*0.4*delta
@@ -304,13 +469,12 @@ func _process(delta: float) -> void:
 		_request_frame()
 	if not _dirty or camera==null: return
 	_dirty = false
-	_environment.background_mode=Environment.BG_COLOR if span_m>=8500 and not _walking else Environment.BG_SKY
+	_environment.background_mode=Environment.BG_SKY if _walking else Environment.BG_COLOR
 	_sun.shadow_enabled=_walking
 	if not _walking:
 		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-		# Fit the complete square region in the usable height, not only its width.
-		var full_square := span_m>=8500 or is_equal_approx(span_m,5000)
-		camera.size = span_m*sin(deg_to_rad(elevation))*1.6 if full_square else span_m*size.y/maxf(1,size.x)
+		# One square-framing rule: no size jump at 8500m or exactly 5000m.
+		camera.size = span_m*sin(deg_to_rad(elevation))*1.6
 		var ground := 0.0
 		if terrain != null and bool(terrain.call("is_ready")):
 			ground = float(terrain.call("sample_height",center.x,center.y))
@@ -459,8 +623,11 @@ func _capture() -> void:
 		return
 	var file := FileAccess.open(path+".json",FileAccess.WRITE)
 	if file!=null:
-		file.store_string(JSON.stringify({"region_id":region_config.id,"native_map_id":region_config.native_map_id,"training_only":true,"georegistered":false,"context":context,"center_m":[center.x,center.y],"span_m":span_m,"selected_cell":[selected_cell.x,selected_cell.y],"walking":_walking,"camera":str(camera.transform)},"\t"))
+		var active_camera: Camera3D = viewport.get_camera_3d()
+		file.store_string(JSON.stringify({"region_id":region_config.id,"native_map_id":region_config.native_map_id,"training_only":true,"georegistered":false,"context":context,"center_m":[center.x,center.y],"span_m":span_m,"selected_cell":[selected_cell.x,selected_cell.y],"walking":_walking,"military_training_active":_training_active,"training":get_training_status(),"camera":str(active_camera.global_transform) if active_camera != null else "not_ready"},"\t"))
 	_status.text="已保存真实游戏截图："+ProjectSettings.globalize_path(path+".png")
 
 func _exit_tree() -> void:
+	# End only this explicit isolated scenario; never persist it as a formal unit.
+	if is_instance_valid(_training): _training.call("close")
 	if is_instance_valid(terrain): terrain.call("close")

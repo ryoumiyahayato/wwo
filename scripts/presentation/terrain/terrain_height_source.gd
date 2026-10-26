@@ -101,70 +101,184 @@ static func _sample_grid(heights: PackedFloat32Array, width: int, origin: float,
 
 
 static func build_patch(job: Dictionary) -> Dictionary:
-	var heights: PackedFloat32Array = job["heights"]
-	var width: int = int(job["width"])
-	var source_origin: float = float(job["source_origin"])
-	var source_step: float = float(job["source_step"])
 	var patch_origin: Vector2 = job["origin"]
 	var cells: int = int(job["cells"])
 	var step: float = float(job["step"])
-	var skirt: float = float(job.get("skirt", 0.0))
 	var vertices: PackedVector3Array = PackedVector3Array()
 	var normals: PackedVector3Array = PackedVector3Array()
 	var indices: PackedInt32Array = PackedInt32Array()
 	var row_width: int = cells + 1
 	vertices.resize(row_width * row_width)
 	normals.resize(vertices.size())
-	indices.resize(cells * cells * 6)
 	for row: int in row_width:
 		for column: int in row_width:
-			var x: float = patch_origin.x + float(column) * step
-			var z: float = patch_origin.y + float(row) * step
+			var point: Vector2 = patch_origin + Vector2(column, row) * step
 			var index: int = row * row_width + column
-			var height: float = _sample_grid(heights, width, source_origin, source_step, x, z)
-			var left: float = _sample_grid(heights, width, source_origin, source_step, x - source_step, z)
-			var right: float = _sample_grid(heights, width, source_origin, source_step, x + source_step, z)
-			var back: float = _sample_grid(heights, width, source_origin, source_step, x, z - source_step)
-			var front: float = _sample_grid(heights, width, source_origin, source_step, x, z + source_step)
-			vertices[index] = Vector3(x, height, z)
-			normals[index] = Vector3(left - right, source_step * 2.0, back - front).normalized()
-	var cursor: int = 0
+			vertices[index] = Vector3(point.x, _render_height(job, point), point.y)
+			normals[index] = _source_normal(job, point)
 	for row: int in cells:
 		for column: int in cells:
 			var a: int = row * row_width + column
 			var b: int = a + 1
 			var c: int = a + row_width
 			var d: int = c + 1
-			indices[cursor] = a
-			indices[cursor + 1] = b
-			indices[cursor + 2] = c
-			indices[cursor + 3] = b
-			indices[cursor + 4] = d
-			indices[cursor + 5] = c
-			cursor += 6
-	if skirt > 0.0:
-		var perimeter: PackedInt32Array = PackedInt32Array()
-		for column: int in cells:
-			perimeter.append(column)
-		for row: int in cells:
-			perimeter.append(row * row_width + cells)
-		for column: int in range(cells, 0, -1):
-			perimeter.append(cells * row_width + column)
-		for row: int in range(cells, 0, -1):
-			perimeter.append(row * row_width)
-		var lower_start: int = vertices.size()
-		for original: int in perimeter:
-			vertices.append(vertices[original] - Vector3(0.0, skirt, 0.0))
-			normals.append(normals[original])
-		for index: int in perimeter.size():
-			var next: int = (index + 1) % perimeter.size()
-			indices.append_array(PackedInt32Array([
-				perimeter[index], lower_start + index, perimeter[next],
-				perimeter[next], lower_start + index, lower_start + next,
-			]))
+			if int(job.get("lod", 250)) == 4 or (row > 0 and column > 0 and row < cells - 1 and column < cells - 1):
+				indices.append_array(PackedInt32Array([a, b, c, b, d, c]))
+				continue
+			var corners: PackedInt32Array = PackedInt32Array([a, b, d, c])
+			var polygon: PackedInt32Array = PackedInt32Array()
+			var divided: bool = false
+			for edge: int in 4:
+				var first: int = corners[edge]
+				var last: int = corners[(edge + 1) % 4]
+				polygon.append(first)
+				var start: Vector2 = Vector2(vertices[first].x, vertices[first].z)
+				var end: Vector2 = Vector2(vertices[last].x, vertices[last].z)
+				var edge_step: float = _edge_step(job, start, end)
+				if edge_step <= 0.0:
+					continue
+				var extra: PackedVector2Array = _edge_points(start, end, edge_step)
+				for point: Vector2 in extra:
+					polygon.append(vertices.size())
+					vertices.append(Vector3(point.x, _render_height(job, point), point.y))
+					normals.append(_source_normal(job, point))
+					divided = true
+			if not divided:
+				indices.append_array(PackedInt32Array([a, b, c, b, d, c]))
+				continue
+			# Only a COARSE boundary cell changes topology. Its centre remains on
+			# the old b-c diagonal; the ordered polygon follows the finer contour.
+			var center: int = vertices.size()
+			vertices.append((vertices[b] + vertices[c]) * 0.5)
+			normals.append((normals[b] + normals[c]).normalized())
+			for edge: int in polygon.size():
+				indices.append_array(PackedInt32Array([center, polygon[edge], polygon[(edge + 1) % polygon.size()]]))
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
 	arrays[Mesh.ARRAY_NORMAL] = normals
 	arrays[Mesh.ARRAY_INDEX] = indices
-	return {"ok": true, "kind": str(job["kind"]), "key": job["key"], "arrays": arrays}
+	return {
+		"ok": true, "kind": str(job["kind"]), "key": job["key"],
+		"signature": str(job.get("signature", "")), "lod": int(job.get("lod", 250)),
+		"arrays": arrays,
+	}
+
+
+static func build_transition(jobs: Array[Dictionary], fine: Dictionary) -> Dictionary:
+	var patches: Array[Dictionary] = []
+	for job: Dictionary in jobs:
+		patches.append(build_patch(job))
+	return {"ok": true, "kind": "transition", "patches": patches, "fine": fine}
+
+
+static func build_collision(key: Vector2i, heights: PackedFloat32Array) -> Dictionary:
+	# Original 4m vertices and b-c diagonal. No visual stitch, skirt or GPU readback.
+	const CELLS: int = 25
+	var origin: Vector2 = Vector2(-2500.0, -2500.0) + Vector2(key) * 100.0
+	var grid: PackedVector3Array = PackedVector3Array()
+	grid.resize((CELLS + 1) * (CELLS + 1))
+	for row: int in CELLS + 1:
+		for column: int in CELLS + 1:
+			var point: Vector2 = origin + Vector2(column, row) * 4.0
+			grid[row * (CELLS + 1) + column] = Vector3(point.x, _sample_grid(heights, NATIVE_WIDTH, -2500.0, 4.0, point.x, point.y), point.y)
+	var faces: PackedVector3Array = PackedVector3Array()
+	faces.resize(CELLS * CELLS * 6)
+	var cursor: int = 0
+	for row: int in CELLS:
+		for column: int in CELLS:
+			var a: int = row * (CELLS + 1) + column
+			var b: int = a + 1
+			var c: int = a + CELLS + 1
+			var d: int = c + 1
+			for index: int in PackedInt32Array([a, b, c, b, d, c]):
+				faces[cursor] = grid[index]
+				cursor += 1
+	return {"ok": true, "kind": "collision", "key": key, "faces": faces}
+
+
+static func _source_normal(job: Dictionary, point: Vector2) -> Vector3:
+	var heights: PackedFloat32Array = job["heights"]
+	var width: int = int(job["width"])
+	var origin: float = float(job["source_origin"])
+	var step: float = float(job["source_step"])
+	var left: float = _sample_grid(heights, width, origin, step, point.x - step, point.y)
+	var right: float = _sample_grid(heights, width, origin, step, point.x + step, point.y)
+	var back: float = _sample_grid(heights, width, origin, step, point.x, point.y - step)
+	var front: float = _sample_grid(heights, width, origin, step, point.x, point.y + step)
+	return Vector3(left - right, step * 2.0, back - front).normalized()
+
+
+static func _on_native_border(point: Vector2) -> bool:
+	return (is_equal_approx(absf(point.x), 2500.0) and absf(point.y) <= 2500.0) or (is_equal_approx(absf(point.y), 2500.0) and absf(point.x) <= 2500.0)
+
+
+static func _native_key(point: Vector2) -> Vector2i:
+	return Vector2i(clampi(floori((point.x + 2500.0) / 500.0), 0, 9), clampi(floori((point.y + 2500.0) / 500.0), 0, 9))
+
+
+static func _native_boundary_height(heights: PackedFloat32Array, point: Vector2, lod: float) -> float:
+	# Native boundary is an axis-aligned polyline. Interpolate that actual LOD
+	# contour, including region's 250m corners which need not coincide with 20m.
+	var along_z: bool = is_equal_approx(absf(point.x), 2500.0)
+	var value: float = point.y if along_z else point.x
+	var first: float = -2500.0 + floorf((value + 2500.0) / lod) * lod
+	first = minf(first, 2500.0 - lod)
+	var a: Vector2 = Vector2(point.x, first) if along_z else Vector2(first, point.y)
+	var b: Vector2 = Vector2(point.x, first + lod) if along_z else Vector2(first + lod, point.y)
+	var height_a: float = _sample_grid(heights, NATIVE_WIDTH, -2500.0, 4.0, a.x, a.y)
+	var height_b: float = _sample_grid(heights, NATIVE_WIDTH, -2500.0, 4.0, b.x, b.y)
+	return lerpf(height_a, height_b, (value - first) / lod)
+
+
+static func _render_height(job: Dictionary, point: Vector2) -> float:
+	var heights: PackedFloat32Array = job["heights"]
+	if str(job["kind"]) == "region" and _on_native_border(point):
+		var native: PackedFloat32Array = job.get("native", PackedFloat32Array())
+		if not native.is_empty():
+			var fine: Dictionary = job.get("fine", {})
+			var lod: float = 4.0 if fine.has(_native_key(point)) else 20.0
+			return _native_boundary_height(native, point, lod)
+	return _sample_grid(heights, int(job["width"]), float(job["source_origin"]), float(job["source_step"]), point.x, point.y)
+
+
+static func _edge_step(job: Dictionary, start: Vector2, end: Vector2) -> float:
+	var middle: Vector2 = (start + end) * 0.5
+	var fine: Dictionary = job.get("fine", {})
+	if str(job["kind"]) == "region":
+		var native: PackedFloat32Array = job.get("native", PackedFloat32Array())
+		if not native.is_empty() and _on_native_border(middle):
+			return 4.0 if fine.has(_native_key(middle)) else 20.0
+		return 0.0
+	if int(job["lod"]) != 20:
+		return 0.0
+	var origin: Vector2 = job["origin"]
+	var key: Vector2i = job["key"]
+	var neighbor: Vector2i = Vector2i(-99, -99)
+	if is_equal_approx(start.x, end.x):
+		if is_equal_approx(start.x, origin.x):
+			neighbor = key + Vector2i.LEFT
+		elif is_equal_approx(start.x, origin.x + 500.0):
+			neighbor = key + Vector2i.RIGHT
+	else:
+		if is_equal_approx(start.y, origin.y):
+			neighbor = key + Vector2i.UP
+		elif is_equal_approx(start.y, origin.y + 500.0):
+			neighbor = key + Vector2i.DOWN
+	return 4.0 if fine.has(neighbor) else 0.0
+
+
+static func _edge_points(start: Vector2, end: Vector2, step: float) -> PackedVector2Array:
+	var along_z: bool = is_equal_approx(start.x, end.x)
+	var first: float = start.y if along_z else start.x
+	var last: float = end.y if along_z else end.x
+	var low: float = minf(first, last)
+	var high: float = maxf(first, last)
+	var value: float = -2500.0 + (floorf((low + 2500.0) / step) + 1.0) * step
+	var points: PackedVector2Array = PackedVector2Array()
+	while value < high - 0.00001:
+		points.append(Vector2(start.x, value) if along_z else Vector2(value, start.y))
+		value += step
+	if first > last:
+		points.reverse()
+	return points

@@ -17,21 +17,18 @@ uniform bool has_grass_detail = false;
 uniform bool has_soil_detail = false;
 uniform bool has_stone_detail = false;
 uniform bool native_surface = false;
-uniform bool native_overview = false;
+uniform bool coverage_enabled = false;
+uniform bool far_mesh = false;
+uniform float coverage_cells = 10.0;
+uniform bool use_vertex_damage = false;
 uniform mat4 terrain_to_local;
 uniform mat4 terrain_to_world;
-// Linear-light reflectance, not a replacement map or a new geographic dataset.
 uniform vec3 grass_color = vec3(0.085, 0.160, 0.035);
 uniform vec3 soil_color = vec3(0.160, 0.090, 0.035);
 uniform vec3 rock_color = vec3(0.220, 0.230, 0.215);
-uniform vec3 field_color = vec3(0.190, 0.155, 0.050);
-uniform float macro_contrast : hint_range(0.0, 5.0) = 2.8;
-uniform float normal_relief : hint_range(1.0, 8.0) = 1.6;
-uniform float hillshade_strength : hint_range(0.0, 1.0) = 0.0;
-uniform vec3 relief_light_direction = vec3(-0.45, 0.75, 0.48);
-uniform float detail_scale : hint_range(0.05, 1.0) = 0.32;
-uniform float detail_contrast : hint_range(0.0, 4.0) = 2.2;
-uniform float detail_bump_metres : hint_range(0.0, 0.08) = 0.018;
+uniform float detail_scale = 0.32;
+uniform float detail_contrast = 1.8;
+uniform float detail_bump_metres = 0.014;
 
 varying vec3 terrain_point;
 varying vec3 terrain_normal;
@@ -44,54 +41,44 @@ void vertex() {
 }
 
 void fragment() {
-	vec2 local_uv = (terrain_point.xz + vec2(2500.0)) / 5000.0;
-	vec2 native_grid = clamp(local_uv * 10.0, vec2(0.0), vec2(9.999999));
-	// Explicit cell-centre lookup avoids nearest-filter tie ambiguity on seams.
-	vec2 coverage_uv = (floor(native_grid) + vec2(0.5)) / 10.0;
-	bool covered = native_surface && native_overview && texture(detail_coverage, coverage_uv).r > 0.5;
-	vec2 edge_fraction = min(fract(native_grid), vec2(1.0) - fract(native_grid));
-	float detail_edge_fade = smoothstep(0.0, 2.0, min(edge_fraction.x, edge_fraction.y) * 500.0);
-	vec3 source_normal = normalize(terrain_normal);
-	vec3 base = grass_color;
-	vec3 masks = vec3(0.0);
-	if (!native_surface) {
-		vec2 region_uv = (terrain_point.xz + vec2(22500.0)) / 50000.0;
-		if (has_region_color) {
-			vec3 source = texture(region_color, region_uv).rgb;
-			float luminance = dot(source, vec3(0.2126, 0.7152, 0.0722));
-			// Original regional color still owns forests/fields/river layout.
-			base = max(vec3(0.0), mix(vec3(luminance), source, 1.14));
-			base *= clamp(1.0 + (luminance - 0.10) * macro_contrast, 0.72, 1.35);
-		}
-		if (has_region_normal) {
-			source_normal = normalize(texture(region_normal, region_uv).rgb * 2.0 - 1.0);
-		}
-	} else {
-		if (has_land_control) {
-			// Original Cedar/Ridgevale contract: R soil/roads, G fields, B rock.
-			masks = clamp(texture(land_control, local_uv).rgb, vec3(0.0), vec3(1.0));
-		}
-		float slope = 1.0 - clamp(source_normal.y, 0.0, 1.0);
-		masks.b = max(masks.b, smoothstep(0.12, 0.46, slope) * 0.68);
-		base = mix(grass_color, field_color, masks.g);
-		base = mix(base, soil_color, masks.r);
-		base = mix(base, rock_color, masks.b);
-		if (has_land_color) {
-			vec3 source = texture(land_color, local_uv).rgb;
-			float luminance = dot(source, vec3(0.2126, 0.7152, 0.0722));
-			float structure = clamp(1.0 + (luminance - 0.15) * macro_contrast, 0.68, 1.35);
-			vec3 chroma = clamp(source / max(luminance, 0.035), vec3(0.65), vec3(1.35));
-			// Preserve source low-frequency structure, not its all-over beige cast.
-			base *= structure * mix(vec3(1.0), chroma, 0.12);
-		}
-	}
+	vec2 region_uv = (terrain_point.xz + vec2(22500.0)) / 50000.0;
+	vec2 native_uv = (terrain_point.xz + vec2(2500.0)) / 5000.0;
+	vec2 coverage_grid = clamp(native_uv * coverage_cells, vec2(0.0), vec2(coverage_cells - 0.0001));
+	vec2 coverage_uv = (floor(coverage_grid) + vec2(0.5)) / coverage_cells;
+	bool covered = native_surface && (coverage_enabled || far_mesh) && texture(detail_coverage, coverage_uv).r > 0.5;
+	// Screen footprint also works for a high, narrow orthographic camera.
+	float metres_per_pixel = max(length(dFdx(terrain_point.xz)), length(dFdy(terrain_point.xz)));
+	float close_weight = 1.0 - smoothstep(0.08, 1.4, metres_per_pixel);
+	float native_distance = 2500.0 - max(abs(terrain_point.x), abs(terrain_point.z));
+	float native_edge = smoothstep(0.0, 128.0, native_distance);
+	float local_weight = (1.0 - smoothstep(1.25, 8.0, metres_per_pixel)) * native_edge;
 
-	// Visual relief only: source vertices, support height and collision are untouched.
-	vec3 relief_normal = normalize(vec3(source_normal.x * normal_relief, max(source_normal.y, 0.05), source_normal.z * normal_relief));
-	NORMAL = normalize((VIEW_MATRIX * terrain_to_world * vec4(relief_normal, 0.0)).xyz);
-	vec3 light_direction = normalize(relief_light_direction);
-	float relief = dot(relief_normal, light_direction) - light_direction.y;
-	base *= clamp(1.0 + relief * hillshade_strength * 3.0, 0.65, 1.22);
+	// One macro base and lighting convention for every LOD and both terrain owners.
+	// The original map already contains weak baked slope structure: do not shade
+	// it again with an exaggerated normal or invent an unrelated beige/green map.
+	vec3 base = grass_color;
+	if (has_region_color) { base = texture(region_color, region_uv).rgb; }
+	vec3 source_normal = normalize(terrain_normal);
+	if (has_region_normal) {
+		// Original Y-up object RGB, NOT a tangent/blue-up normal-map import.
+		source_normal = normalize(texture(region_normal, region_uv).rgb * 2.0 - 1.0);
+	}
+	vec3 masks = vec3(0.0);
+	if (native_surface) {
+		if (has_land_control) { masks = clamp(texture(land_control, native_uv).rgb, vec3(0.0), vec3(1.0)); }
+		base = mix(base, base * vec3(1.10, 1.04, 0.82), masks.g * local_weight * 0.55);
+		base = mix(base, soil_color, masks.r * local_weight * 0.75);
+		base = mix(base, rock_color, masks.b * local_weight * 0.70);
+		if (has_land_color) {
+			float source_luma = dot(texture(land_color, native_uv).rgb, vec3(0.2126, 0.7152, 0.0722));
+			float known_local = max(max(masks.r, masks.g), masks.b);
+			base *= mix(1.0, clamp(1.0 + (source_luma - 0.15) * 1.4, 0.85, 1.15), known_local * local_weight);
+		}
+		// True local geometry normals enter continuously near the eye, never at
+		// a 5km rectangular LOD boundary; shared boundary nodes use the same rule.
+		source_normal = normalize(mix(source_normal, normalize(terrain_normal), close_weight * native_edge));
+	}
+	NORMAL = normalize((VIEW_MATRIX * terrain_to_world * vec4(source_normal, 0.0)).xyz);
 
 	vec2 detail_uv = terrain_point.xz * detail_scale;
 	vec3 grass = vec3(0.22);
@@ -100,34 +87,29 @@ void fragment() {
 	if (has_grass_detail) { grass = texture(grass_detail, detail_uv).rgb; }
 	if (has_soil_detail) { soil = texture(soil_detail, detail_uv * 0.86).rgb; }
 	if (has_stone_detail) { stone = texture(stone_detail, detail_uv * 0.68).rgb; }
-	vec3 grain = mix(mix(grass, soil, masks.r), stone, masks.b);
+	vec3 grain = mix(mix(grass, soil, masks.r * local_weight), stone, masks.b * local_weight);
 	float grain_height = dot(grain, vec3(0.2126, 0.7152, 0.0722));
-	float eye_distance = length(CAMERA_POSITION_WORLD - world_point);
-	float close_weight = 1.0 - smoothstep(45.0, 420.0, eye_distance);
-	// Native 512px detail remains mip/anisotropic filtered; unresolved bump fades.
-	float texels_per_pixel = max(length(dFdx(detail_uv)), length(dFdy(detail_uv))) * 512.0;
-	float resolved_detail = 1.0 - smoothstep(1.5, 12.0, texels_per_pixel);
-	float fine_edge = 1.0;
-	if (native_surface && !native_overview) { fine_edge = detail_edge_fade; }
-	base *= mix(1.0, clamp(1.0 + (grain_height - 0.22) * detail_contrast, 0.62, 1.45), close_weight);
-
-	// Screen-space surface-gradient bump. Reuses the three existing detail reads:
-	// no new texture samples, normal-map files, mesh vertices or height sources.
+	float footprint = max(length(dFdx(detail_uv)), length(dFdy(detail_uv))) * 512.0;
+	float resolved = 1.0 - smoothstep(1.5, 12.0, footprint);
+	base *= mix(1.0, clamp(1.0 + (grain_height - 0.22) * detail_contrast, 0.72, 1.32), close_weight);
 	vec3 position_dx = dFdx(VERTEX);
 	vec3 position_dy = dFdy(VERTEX);
 	vec3 cross_x = cross(position_dy, NORMAL);
 	vec3 cross_y = cross(NORMAL, position_dx);
 	float determinant = dot(position_dx, cross_x);
 	vec3 gradient = (dFdx(grain_height) * cross_x + dFdy(grain_height) * cross_y) * sign(determinant) / max(abs(determinant), 0.000001);
-	float bump_weight = close_weight * resolved_detail * fine_edge;
-	vec3 perturbation = gradient * detail_bump_metres * bump_weight;
-	// Bound near-grazing derivatives; no single bright pixel from an extreme normal.
+	vec3 perturbation = gradient * detail_bump_metres * close_weight * resolved;
 	perturbation /= max(1.0, length(perturbation) * 2.5);
 	NORMAL = normalize(NORMAL - perturbation);
+	if (use_vertex_damage) {
+		// The original editable owner supplies actual crater COLOR, not fake edits.
+		float damage = clamp((COLOR.r - COLOR.g) * 4.8, 0.0, 1.0);
+		base = mix(base, vec3(0.047, 0.026, 0.012), damage);
+	}
 	ALBEDO = clamp(base, vec3(0.0), vec3(1.0));
-	float surface_roughness = mix(mix(0.97, 0.92, masks.r), 0.86, masks.b);
-	ROUGHNESS = clamp(surface_roughness + (0.22 - grain_height) * 0.45 * close_weight, 0.80, 1.0);
+	ROUGHNESS = clamp(mix(0.96, 0.87, masks.b * local_weight) + (0.22 - grain_height) * 0.3 * close_weight, 0.82, 1.0);
 	SPECULAR = 0.10;
-	// Derivatives run before per-fragment discard, including seam helper pixels.
+	// Our observer uses actual stitched geometry, not a coverage-mask seam trick.
+	// This optional discard is solely for the original training owner's horizon.
 	if (covered) { discard; }
 }

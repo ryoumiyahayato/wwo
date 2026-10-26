@@ -2616,6 +2616,95 @@ func terrain_region_image(label: String) -> void:
 	get_viewport().get_texture().get_image().save_png(output+"/"+label+".png")
 	print("REGION_IMAGE ",label)
 
+func terrain_training_key(code: Key, pressed: bool) -> void:
+	var event: InputEventKey = InputEventKey.new()
+	event.keycode = code
+	event.physical_keycode = code
+	event.pressed = pressed
+	# The native controller polls physical keys; this is generated ordinary input,
+	# not a direct vehicle-position write or a second driving implementation.
+	Input.parse_input_event(event)
+
+func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
+	var report: Dictionary = {"requested": true, "ok": false}
+	var clicked: bool = await economic_button(observation, "原生坦克训练（隔离）")
+	for attempt: int in range(1800):
+		var status_data: Dictionary = observation.call("get_training_status") as Dictionary
+		if status_data.get("ready", false) or status_data.get("state", "") == "failed": break
+		await get_tree().process_frame
+	var session: Node = observation.get("_training") as Node
+	if not clicked or not is_instance_valid(session):
+		report["error"] = "original_training_did_not_start"
+		return report
+	var first: Dictionary = session.call("get_status") as Dictionary
+	if not bool(first.get("ready", false)):
+		report["error"] = first
+		return report
+	var battle: Node3D = session.call("get_native_battle") as Node3D
+	var controls: Control = battle.get("battle_controls") as Control
+	var hero: Node3D = battle.get("hero") as Node3D
+	var target: Node3D = battle.get("target") as Node3D
+	var native_camera: Camera3D = session.call("get_native_camera") as Camera3D
+	var hero_id: int = hero.get_instance_id()
+	report["initial"] = first
+	phases.append(await terrain_region_sample("training_idle", 3))
+	await terrain_region_image("10-native-training-ready")
+	# Aim by the original manual drag. No snap, forced roll, target assignment,
+	# damage write, stock grant or instant projectile settlement is used.
+	for attempt: int in range(3):
+		var direction: Vector3 = (target.global_position + Vector3(0, 1.0, 0) - native_camera.global_position).normalized()
+		var desired_yaw: float = atan2(-direction.x, -direction.z)
+		var desired_pitch: float = asin(clampf(direction.y, -1.0, 1.0))
+		var delta_look: Vector2 = Vector2(wrapf(float(controls.get("camera_yaw")) - desired_yaw, -PI, PI), float(controls.get("camera_pitch")) - desired_pitch) / 0.0048
+		await mouse_button(Vector2(680,340), MOUSE_BUTTON_LEFT, true)
+		var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+		motion.position = Vector2(680,340)
+		motion.relative = delta_look
+		motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+		get_viewport().push_input(motion, true)
+		await mouse_button(Vector2(680,340), MOUSE_BUTTON_LEFT, false)
+		await wait_seconds(0.8)
+	var before_shot: Dictionary = session.call("get_status") as Dictionary
+	terrain_training_key(KEY_SPACE, true)
+	await wait_seconds(0.12)
+	terrain_training_key(KEY_SPACE, false)
+	await terrain_region_image("11-native-cannon-fired")
+	phases.append(await terrain_region_sample("training_projectile_impact", 4))
+	var after_shot: Dictionary = session.call("get_status") as Dictionary
+	report["before_shot"] = before_shot
+	report["after_shot"] = after_shot
+	await terrain_region_image("12-native-real-impact")
+	var drive_start: Vector3 = hero.position
+	terrain_training_key(KEY_W, true)
+	phases.append(await terrain_region_sample("training_driving", 3))
+	terrain_training_key(KEY_A, true)
+	phases.append(await terrain_region_sample("training_steering", 1.4))
+	terrain_training_key(KEY_W, false)
+	terrain_training_key(KEY_A, false)
+	await wait_seconds(0.8)
+	report["driven_metres"] = drive_start.distance_to(hero.position)
+	report["after_drive"] = session.call("get_status")
+	await terrain_region_image("13-native-driving-steering")
+	observation.call("_pause_training")
+	var paused_before: Dictionary = session.call("get_status") as Dictionary
+	phases.append(await terrain_region_sample("training_paused_observation", 2))
+	var paused_after: Dictionary = session.call("get_status") as Dictionary
+	report["paused_state_preserved"] = paused_before.native_ammo == paused_after.native_ammo and paused_before.crew == paused_after.crew and paused_before.target == paused_after.target and paused_before.elapsed == paused_after.elapsed
+	report["resumed_by_button"] = await economic_button(observation, "恢复原训练（弹药 / 伤损保留）")
+	await wait_seconds(0.5)
+	report["same_vehicle_instance"] = hero_id == (session.call("get_native_battle").get("hero") as Node3D).get_instance_id()
+	report["same_session"] = first.session_id == (session.call("get_status") as Dictionary).session_id
+	observation.call("_pause_training")
+	await terrain_region_image("14-observe-after-preserved-training")
+	var initial_crew: Array = first.get("crew", []) as Array
+	var shot_rows: Array = after_shot.get("shot_audit", []) as Array
+	report["original_injury_preserved"] = initial_crew.size() == 5 and int(initial_crew[0].hp) == 7 and initial_crew[0].parts.left_arm == "injured"
+	report["legal_cannon_fired"] = shot_rows.any(func(row: Dictionary) -> bool: return row.get("accepted", false) and row.get("weapon", "") == "tank_cannon")
+	report["projectile_contact_recorded"] = shot_rows.any(func(row: Dictionary) -> bool: return row.get("flight_state", "") == "impacted" and float(row.get("flight_seconds", 0)) > 0)
+	report["target_changed"] = before_shot.target != after_shot.target
+	report["ok"] = report.legal_cannon_fired and report.projectile_contact_recorded and report.original_injury_preserved and report.paused_state_preserved and report.same_vehicle_instance and report.same_session and float(report.driven_metres) > 5.0
+	return report
+
 func terrain_region_run() -> void:
 	if output.is_empty() or not OS.get_user_data_dir().get_file().begins_with("WWO_R57_Visual_Region_"):
 		push_error("Region review requires its own explicit output and isolated user directory: "+OS.get_user_data_dir())
@@ -2703,7 +2792,12 @@ func terrain_region_run() -> void:
 		walked=start.distance_to(finish)>5 and body.is_on_floor()
 	await terrain_region_image("07-isolated-walking")
 	phases.append(await terrain_region_sample("walking_still",3))
-	ok=await economic_button(observation,"上一级 / Esc") and ok
+	var training_report: Dictionary = {"requested": false}
+	if OS.get_environment("WWO_VISUAL_MILITARY_TRAINING") == "1":
+		training_report = await terrain_training_review(observation, phases)
+		ok = bool(training_report.get("ok", false)) and ok
+	else:
+		ok=await economic_button(observation,"上一级 / Esc") and ok
 	ok=await economic_button(observation,"上一级 / Esc") and ok
 	phases.append(await terrain_region_sample("return_region",2))
 	await terrain_region_image("08-return-selected-region")
@@ -2714,7 +2808,7 @@ func terrain_region_run() -> void:
 	var facts_after: Dictionary=host.get("_persistence").snapshot()
 	ok=ok and host.get("_terrain_observation")==null
 	var camera_same:=pose_before==[controller.orientation(),controller.zoom,controller.region_camera.origin,controller.region_camera.km_per_pixel,controller.selected_place_id,controller.selected_polity_id]
-	var result: Dictionary={"normal_menu_clicks":ok,"world_same_instance":world==host.get("_world"),"world_snapshot_unchanged":facts_before==facts_after,"person_unchanged":person_before==world.person_overlay.person(person_id),"camera_and_selection_unchanged":camera_same,"person_id":person_id,"minute":world.game_clock.total_minutes(),"isolated_walked_on_collision":walked,"walk_start_m":str(start),"walk_end_m":str(finish),"terrain_status_after_return_to_region":ground_status,"phases":phases,"renderer_method":RenderingServer.get_current_rendering_method(),"adapter":RenderingServer.get_video_adapter_name(),"user_dir":OS.get_user_data_dir(),"note":"Native no-focus visible window. Frame/process metrics are not GPU execution time. No saving, deployment or combat actions."}
+	var result: Dictionary={"normal_menu_clicks":ok,"world_same_instance":world==host.get("_world"),"world_snapshot_unchanged":facts_before==facts_after,"person_unchanged":person_before==world.person_overlay.person(person_id),"camera_and_selection_unchanged":camera_same,"person_id":person_id,"minute":world.game_clock.total_minutes(),"isolated_walked_on_collision":walked,"walk_start_m":str(start),"walk_end_m":str(finish),"terrain_status_after_return_to_region":ground_status,"military_training":training_report,"phases":phases,"renderer_method":RenderingServer.get_current_rendering_method(),"adapter":RenderingServer.get_video_adapter_name(),"user_dir":OS.get_user_data_dir(),"note":"Native no-focus visible window. Frame/process metrics are not GPU execution time. No saving or formal deployment; combat, when explicitly requested, belongs only to the isolated native training session."}
 	var file:=FileAccess.open(output+"/region-result.json",FileAccess.WRITE)
 	file.store_string(JSON.stringify(result,"\t"))
 	print("REGION_REVIEW_RESULT ",JSON.stringify(result))

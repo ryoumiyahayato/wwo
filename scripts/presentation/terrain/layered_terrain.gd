@@ -1,8 +1,7 @@
 extends Node3D
-## Read-only fictional training scenery embedded in the existing formal-world host.
-## No WorldState, clock, actors, military/economic commands or persistence live here.
-## Coordinates are local metres, not geographic registration to the selected place.
-## One worker job and at most one mesh installation per frame; caches have fixed caps.
+## Fictional, unregistered training presentation. No actors, WorldState or actions.
+## Native 4m render/support/collision vertices are never moved for LOD stitching.
+## Only coarse-side boundary topology changes. A staged LOD batch commits atomically.
 signal prepared
 signal changed
 signal failed(message: String)
@@ -12,17 +11,13 @@ const GroundShader: Shader = preload("res://shaders/presentation/terrain/layered
 const DEFAULT_BASE_PATH: String = "res://assets/terrain/region_slice/"
 const REGION_MIN: float = -22500.0
 const REGION_MAX: float = 27500.0
-const REGION_TILE_SIZE: float = 5000.0
-const REGION_TILE_COUNT: int = 10
-const REGION_CELLS: int = 20
 const NATIVE_HALF: float = 2500.0
-const NATIVE_TILE_SIZE: float = 500.0
-const NATIVE_TILE_COUNT: int = 10
-const NATIVE_CELLS: int = 125
 const NATIVE_VIEW_LIMIT: float = 8500.0
 const DETAIL_VIEW_LIMIT: float = 1800.0
 const MAX_DETAIL_TILES: int = 9
-const NO_TILE: Vector2i = Vector2i(-999, -999)
+const COLLISION_MARGIN: float = 64.0
+const COLLISION_SIZE: float = 100.0
+const REGION_NATIVE_NEIGHBORS: Array[Vector2i] = [Vector2i(4, 4), Vector2i(3, 4), Vector2i(5, 4), Vector2i(4, 3), Vector2i(4, 5)]
 
 var training_only: bool = true
 var _base_path: String = DEFAULT_BASE_PATH
@@ -32,44 +27,44 @@ var _started: bool = false
 var _prepared: bool = false
 var _data_ready: bool = false
 var _native_requested: bool = false
-var _native_focus: Vector2i = NO_TILE
-var _region_focus: Vector2i = NO_TILE
+var _native_active: bool = false
+var _external_native_owner: bool = false
 var _region_heights: PackedFloat32Array = PackedFloat32Array()
 var _native_heights: PackedFloat32Array = PackedFloat32Array()
 var _region_tiles: Dictionary[Vector2i, MeshInstance3D] = {}
-var _detail_tiles: Dictionary[Vector2i, MeshInstance3D] = {}
-var _detail_targets: Dictionary[Vector2i, bool] = {}
-var _native_overview: MeshInstance3D
+var _native_tiles: Dictionary[Vector2i, MeshInstance3D] = {}
+var _desired_fine: Dictionary = {}
+var _active_fine: Dictionary = {}
 var _region_material: ShaderMaterial
-var _overview_material: ShaderMaterial
-var _detail_material: ShaderMaterial
-var _coverage_image: Image
-var _coverage_texture: ImageTexture
-var _queue: Array[Dictionary] = []
-var _worker: Thread
-var _worker_kind: String = ""
-var _worker_description: Dictionary = {}
+var _native_material: ShaderMaterial
+var _surface_materials: Array[WeakRef] = []
+var _loaded_textures: Dictionary[String, Texture2D] = {}
 var _texture_requests: Dictionary[String, String] = {}
 var _resource_notes: PackedStringArray = PackedStringArray()
+var _worker: Thread
+var _worker_kind: String = ""
+var _stage_results: Array[Dictionary] = []
+var _staged_nodes: Array[MeshInstance3D] = []
+var _stage_fine: Dictionary = {}
+var _stage_index: int = 0
 var _collision_enabled: bool = true
 var _collision_layer: int = 1
-# At most four 500m tiles cover the local +/-64m safety square.
-const COLLISION_MARGIN: float = 64.0
 var _collision_tiles: Dictionary[Vector2i, StaticBody3D] = {}
+var _last_mesh_install_usec: int = 0
+var _last_shape_install_usec: int = 0
 
 
 func begin(config: Dictionary) -> void:
 	close()
 	if config.get("training_only", true) != true:
-		failed.emit("此组件只允许 training_only 观察，不能作为正式地理或军事世界")
+		failed.emit("仅允许 training_only 地形，不是正式地理或军事世界")
 		return
 	_base_path = str(config.get("base_path", DEFAULT_BASE_PATH)).strip_edges()
 	if not _base_path.begins_with("res://"):
-		failed.emit("训练地形 base_path 必须是项目内 res:// 资源路径")
+		failed.emit("地形 base_path 必须是项目内 res:// 路径")
 		return
 	if not _base_path.ends_with("/"):
 		_base_path += "/"
-	training_only = true
 	_center = Vector2.ZERO
 	_span = 50000.0
 	var configured_center: Variant = config.get("center", Vector2.ZERO)
@@ -78,25 +73,20 @@ func begin(config: Dictionary) -> void:
 		if point.is_finite():
 			_center = _clamp_center(point)
 	var configured_span: Variant = config.get("span_m", 50000.0)
-	if configured_span is float or configured_span is int:
+	if configured_span is int or configured_span is float:
 		var value: float = float(configured_span)
 		if is_finite(value):
 			_span = clampf(value, 50.0, 75000.0)
 	_collision_enabled = bool(config.get("collision_enabled", true))
 	_collision_layer = clampi(int(config.get("collision_layer", 1)), 1, 2147483647)
+	training_only = true
 	_started = true
 	set_meta("training_only", true)
 	set_meta("geographically_registered", false)
-	_create_materials()
+	_region_material = create_surface_material({"native_surface": false})
+	_native_material = create_surface_material({"native_surface": true})
 	_request_textures()
-	_worker = Thread.new()
-	_worker_kind = "sources"
-	var error: Error = _worker.start(HeightSource.read_sources.bind(_base_path))
-	if error != OK:
-		_worker = null
-		_started = false
-		failed.emit("无法启动训练高度源读取")
-		return
+	_launch("sources", HeightSource.read_sources.bind(_base_path))
 	set_process(true)
 
 
@@ -109,11 +99,12 @@ func update_view(center: Vector2, span_m: float) -> void:
 		return
 	_center = next_center
 	_span = next_span
-	if _data_ready:
-		_refresh_targets()
+	set_process(true)
+	_refresh_targets()
 
 
 func sample_height(x: float, z: float) -> float:
+	# Passive authoritative support query; external training owner owns its edits.
 	if not _data_ready or not is_finite(x) or not is_finite(z):
 		return NAN
 	if not _native_heights.is_empty() and absf(x) <= NATIVE_HALF and absf(z) <= NATIVE_HALF:
@@ -122,38 +113,79 @@ func sample_height(x: float, z: float) -> float:
 
 
 func is_ready() -> bool:
-	# Ready means a real source-backed patch is installed, not all queued tiles.
 	return _prepared
 
 
 func is_collision_ready(position: Vector3) -> bool:
-	# Local coordinates. The whole safety square must exist, not merely a visual.
-	if not _data_ready or not _native_requested or not _collision_enabled or not position.is_finite():
+	if not _data_ready or not _native_active or _external_native_owner or not _native_requested or not _collision_enabled or not position.is_finite():
 		return false
 	if absf(position.x) > NATIVE_HALF or absf(position.z) > NATIVE_HALF:
 		return false
-	var keys: Array[Vector2i] = _collision_keys(Vector2(position.x, position.z))
-	for key: Vector2i in keys:
-		if not _collision_tiles.has(key) or not is_instance_valid(_collision_tiles[key]):
+	if not _active_fine.has(_native_key(Vector2(position.x, position.z))):
+		return false
+	for key: Vector2i in _collision_keys(Vector2(position.x, position.z)):
+		if not _collision_tiles.has(key):
 			return false
-	return not keys.is_empty()
+	return true
+
+
+func set_external_native_owner(active: bool) -> void:
+	if active == _external_native_owner:
+		return
+	_external_native_owner = active
+	if _started:
+		set_process(true)
+	_discard_stage()
+	_clear_collision()
+	_refresh_targets()
+	_refresh_visibility()
+	changed.emit()
+
+
+func create_surface_material(options: Dictionary = {}) -> ShaderMaterial:
+	# The original military owner may provide its own 100x100 / 50m coverage.
+	# It retains collision, damage commands, support revision and simulation anchors.
+	var material: ShaderMaterial = ShaderMaterial.new()
+	material.shader = GroundShader
+	material.set_shader_parameter("native_surface", bool(options.get("native_surface", true)))
+	material.set_shader_parameter("coverage_enabled", bool(options.get("coverage_enabled", options.get("far_mesh", false))))
+	material.set_shader_parameter("far_mesh", bool(options.get("far_mesh", false)))
+	material.set_shader_parameter("coverage_cells", maxf(1.0, float(options.get("coverage_cells", 10.0))))
+	material.set_shader_parameter("use_vertex_damage", bool(options.get("use_vertex_damage", false)))
+	var coverage: Variant = options.get("detail_coverage")
+	if coverage is Texture2D:
+		material.set_shader_parameter("detail_coverage", coverage)
+	material.set_shader_parameter("terrain_to_local", global_transform.affine_inverse())
+	material.set_shader_parameter("terrain_to_world", global_transform)
+	for parameter: String in _loaded_textures:
+		material.set_shader_parameter(parameter, _loaded_textures[parameter])
+		material.set_shader_parameter("has_" + parameter, true)
+	_surface_materials.append(weakref(material))
+	return material
+
+
+func apply_command(_position: Vector3, _kind: String = "dig", _layer: String = "terrain") -> Dictionary:
+	return {"ok": false, "error": "unsupported", "reason": "read_only_training_presentation"}
+
+
+func apply_explosion(_position: Vector3, _mass: float) -> Dictionary:
+	return {"ok": false, "error": "unsupported", "reason": "read_only_training_presentation"}
 
 
 func get_status() -> Dictionary:
-	# Small local presentation state only; never a world snapshot.
 	return {
-		"training_only": true,
-		"geographically_registered": false,
-		"ready": _prepared,
-		"native_available": not _native_heights.is_empty(),
-		"native_visible": _native_requested and is_instance_valid(_native_overview),
-		"region_tiles": _region_tiles.size(),
-		"detail_tiles": _detail_tiles.size(),
-		"detail_tile_limit": MAX_DETAIL_TILES,
-		"queued_tiles": _queue.size(),
-		"loading": _worker != null,
+		"training_only": true, "geographically_registered": false,
+		"ready": _prepared, "native_available": not _native_heights.is_empty(),
+		"native_visible": _native_requested and _native_active and not _external_native_owner,
+		"external_native_owner": _external_native_owner, "terrain_edit_supported": false,
+		"region_tiles": _region_tiles.size(), "native_tiles": _native_tiles.size(),
+		"detail_tiles": _active_fine.size(), "detail_tile_limit": MAX_DETAIL_TILES,
+		"queued_tiles": maxi(0, _stage_results.size() - _stage_index),
+		"loading": _worker != null or not _stage_results.is_empty(), "loading_kind": _worker_kind,
 		"local_collision_ready": is_collision_ready(Vector3(_center.x, 0.0, _center.y)),
-		"collision_tiles": _collision_tiles.size(),
+		"collision_tiles": _collision_tiles.size(), "collision_tile_limit": 9,
+		"last_mesh_install_usec": _last_mesh_install_usec,
+		"last_shape_install_usec": _last_shape_install_usec,
 		"resource_notes": _resource_notes.duplicate(),
 	}
 
@@ -164,16 +196,13 @@ func close() -> void:
 	_prepared = false
 	_data_ready = false
 	_native_requested = false
-	_native_focus = NO_TILE
-	_region_focus = NO_TILE
-	_queue.clear()
-	# The single bounded data job owns no nodes. Join before releasing its inputs.
+	_native_active = false
+	_external_native_owner = false
 	if _worker != null:
 		_worker.wait_to_finish()
 		_worker = null
 	_worker_kind = ""
-	_worker_description.clear()
-	# Collect requests owned by this component before releasing its texture refs.
+	_discard_stage()
 	for path: String in _texture_requests:
 		var state: ResourceLoader.ThreadLoadStatus = ResourceLoader.load_threaded_get_status(path)
 		if state == ResourceLoader.THREAD_LOAD_LOADED or state == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
@@ -181,22 +210,22 @@ func close() -> void:
 	_texture_requests.clear()
 	for tile: MeshInstance3D in _region_tiles.values():
 		_release_node(tile)
-	for tile: MeshInstance3D in _detail_tiles.values():
+	for tile: MeshInstance3D in _native_tiles.values():
 		_release_node(tile)
 	_region_tiles.clear()
-	_detail_tiles.clear()
-	_detail_targets.clear()
-	_release_node(_native_overview)
-	_native_overview = null
+	_native_tiles.clear()
+	_desired_fine.clear()
+	_active_fine.clear()
 	_clear_collision()
 	_region_heights = PackedFloat32Array()
 	_native_heights = PackedFloat32Array()
 	_region_material = null
-	_overview_material = null
-	_detail_material = null
-	_coverage_image = null
-	_coverage_texture = null
+	_native_material = null
+	_surface_materials.clear()
+	_loaded_textures.clear()
 	_resource_notes = PackedStringArray()
+	_last_mesh_install_usec = 0
+	_last_shape_install_usec = 0
 
 
 func _exit_tree() -> void:
@@ -207,224 +236,323 @@ func _process(_delta: float) -> void:
 	if not _started:
 		return
 	_poll_one_texture()
+	if not _stage_results.is_empty():
+		_stage_one_patch()
+		if _stage_results.is_empty() and _worker == null and _data_ready:
+			_start_next_work()
+		return
 	if _worker != null and not _worker.is_alive():
 		var result: Variant = _worker.wait_to_finish()
-		var kind: String = _worker_kind
 		_worker = null
 		_worker_kind = ""
-		_worker_description.clear()
 		if result is Dictionary:
-			var document: Dictionary = result
-			if kind == "sources":
-				_accept_sources(document)
-			else:
-				_install_patch(document)
+			_accept_result(result)
 		else:
-			failed.emit("训练地形工作线程未返回有效数据")
-	if not _started:
+			failed.emit("训练地形工作线程返回无效数据")
+		# Start computation, not another upload, while this frame's patch is ready.
+		if _started and _worker == null and _stage_results.is_empty() and _data_ready:
+			_start_next_work()
 		return
-	_sync_local_collision()
-	if _worker == null and _data_ready and not _queue.is_empty():
-		_start_next_patch()
+	if _worker == null and _data_ready:
+		_start_next_work()
 
 
-func _accept_sources(result: Dictionary) -> void:
+func _accept_result(result: Dictionary) -> void:
 	if not bool(result.get("ok", false)):
 		_started = false
 		set_process(false)
-		failed.emit(str(result.get("error", "50km 训练高度源无法读取")))
+		failed.emit(str(result.get("error", "训练地形读取失败")))
 		return
-	_region_heights = result["region"]
-	_native_heights = result["native"]
-	_data_ready = true
-	var native_error: String = str(result.get("native_error", ""))
-	if not native_error.is_empty():
-		# Missing native data does not block the independently valid 50km view.
-		_resource_notes.append("5km 细图不可用：" + native_error)
-	_refresh_targets()
+	var kind: String = str(result.get("kind", "sources"))
+	if kind == "sources":
+		_region_heights = result["region"]
+		_native_heights = result["native"]
+		_data_ready = true
+		var note: String = str(result.get("native_error", ""))
+		if not note.is_empty():
+			_resource_notes.append("5km 细图不可用：" + note)
+		_refresh_targets()
+	elif kind == "transition":
+		var fine: Dictionary = result["fine"]
+		if _external_native_owner or fine != _desired_fine:
+			return
+		_stage_fine = fine
+		_stage_results.assign(result["patches"])
+		_stage_index = 0
+		if _stage_results.is_empty():
+			_active_fine = fine
+	elif kind == "collision":
+		if not _external_native_owner and _collision_keys(_center).has(result["key"]) and not _desired_fine.is_empty():
+			_install_collision(result)
+	else:
+		if kind == "native" and _external_native_owner:
+			return
+		if kind == "region":
+			var expected_fine: Dictionary = {} if _external_native_owner else _active_fine
+			if str(result["signature"]) != _region_signature(result["key"], expected_fine):
+				return
+		var tile: MeshInstance3D = _upload_patch(result)
+		_replace_tile(tile)
+		if _native_tiles.size() == 100:
+			_native_active = true
+		_refresh_visibility()
+		_mark_prepared()
 	changed.emit()
 
 
 func _refresh_targets() -> void:
-	var wants_native: bool = not _native_heights.is_empty() and _span < NATIVE_VIEW_LIMIT and absf(_center.x) <= NATIVE_HALF + _span * 0.5 and absf(_center.y) <= NATIVE_HALF + _span * 0.5
-	var wants_detail: bool = wants_native and _span < DETAIL_VIEW_LIMIT
-	var next_native: Vector2i = _native_key(_center) if wants_detail else NO_TILE
-	var next_region: Vector2i = Vector2i(floori((_center.x - REGION_MIN) / REGION_TILE_SIZE), floori((_center.y - REGION_MIN) / REGION_TILE_SIZE))
-	# Walking camera motion inside a tile does not recopy/sort the render cache.
-	# Its small collision safety square is checked independently each frame.
-	if wants_native == _native_requested and next_native == _native_focus and next_region == _region_focus:
-		return
-	_native_requested = wants_native
-	_native_focus = next_native
-	_region_focus = next_region
-	_detail_targets.clear()
-	if wants_detail:
-		for row: int in range(maxi(0, _native_focus.y - 1), mini(NATIVE_TILE_COUNT, _native_focus.y + 2)):
-			for column: int in range(maxi(0, _native_focus.x - 1), mini(NATIVE_TILE_COUNT, _native_focus.x + 2)):
-				_detail_targets[Vector2i(column, row)] = true
+	# Central 20m terrain persists at all observation levels once prepared.
+	_native_requested = not _native_heights.is_empty()
+	var near_native: bool = absf(_center.x) <= NATIVE_HALF + _span * 0.5 and absf(_center.y) <= NATIVE_HALF + _span * 0.5
+	var desired: Dictionary = {}
+	if _native_requested and near_native and _span < DETAIL_VIEW_LIMIT:
+		var focus: Vector2i = _native_key(_center)
+		for row: int in range(maxi(0, focus.y - 1), mini(10, focus.y + 2)):
+			for column: int in range(maxi(0, focus.x - 1), mini(10, focus.x + 2)):
+				desired[Vector2i(column, row)] = true
+	_desired_fine = desired
+	var required: Array[Vector2i] = _collision_keys(_center)
 	for key: Vector2i in _collision_tiles.keys():
-		if not _detail_targets.has(key):
+		if _external_native_owner or desired.is_empty() or not required.has(key):
 			_release_node(_collision_tiles[key])
 			_collision_tiles.erase(key)
-	for key: Vector2i in _detail_tiles.keys():
-		if not _detail_targets.has(key):
-			_release_node(_detail_tiles[key])
-			_detail_tiles.erase(key)
-	_refresh_coverage()
 	_refresh_visibility()
-	_rebuild_queue()
+
+
+func _start_next_work() -> void:
+	var regional_fine: Dictionary = {} if _external_native_owner else _active_fine
+	# Keep a visible real coarse fallback; wide views finish their periphery first.
+	if _region_tiles.is_empty() or (_span >= NATIVE_VIEW_LIMIT and _region_tiles.size() < 100):
+		var first_region: Vector2i = _nearest_missing(_region_tiles, 10, 5000.0, REGION_MIN)
+		_launch("region", HeightSource.build_patch.bind(_patch_job("region", first_region, regional_fine)))
+		return
+	if not _external_native_owner and _native_requested and not _native_active:
+		var missing: Vector2i = _nearest_missing(_native_tiles, 10, 500.0, -2500.0)
+		if missing.x >= 0:
+			_launch("native", HeightSource.build_patch.bind(_patch_job("native", missing, {})))
+			return
+	if not _external_native_owner and _native_active and _active_fine != _desired_fine:
+		var planned: Dictionary = _desired_fine.duplicate()
+		var jobs: Array[Dictionary] = []
+		for key: Vector2i in _native_tiles:
+			var signature: String = _native_signature(key, planned)
+			if str(_native_tiles[key].get_meta("signature", "")) != signature:
+				jobs.append(_patch_job("native", key, planned))
+		for key: Vector2i in REGION_NATIVE_NEIGHBORS:
+			if not _region_tiles.has(key) or str(_region_tiles[key].get_meta("signature", "")) != _region_signature(key, planned):
+				jobs.append(_patch_job("region", key, planned))
+		_launch("transition", HeightSource.build_transition.bind(jobs, planned))
+		return
+	# Region's coarse side follows the actual native boundary, also on owner handoff.
+	for key: Vector2i in REGION_NATIVE_NEIGHBORS:
+		if _region_tiles.has(key) and str(_region_tiles[key].get_meta("signature", "")) != _region_signature(key, regional_fine):
+			_launch("region", HeightSource.build_patch.bind(_patch_job("region", key, regional_fine)))
+			return
+	if not _external_native_owner and _collision_enabled and _native_active and not _desired_fine.is_empty() and absf(_center.x) <= NATIVE_HALF and absf(_center.y) <= NATIVE_HALF:
+		for key: Vector2i in _collision_keys(_center):
+			if not _collision_tiles.has(key):
+				_launch("collision", HeightSource.build_collision.bind(key, _native_heights))
+				return
+	var region_key: Vector2i = _nearest_missing(_region_tiles, 10, 5000.0, REGION_MIN)
+	if region_key.x >= 0:
+		_launch("region", HeightSource.build_patch.bind(_patch_job("region", region_key, regional_fine)))
+	elif _texture_requests.is_empty():
+		# No repeated static-cache scan, upload or viewport wakeup while idle.
+		set_process(false)
+
+
+func _patch_job(kind: String, key: Vector2i, fine: Dictionary) -> Dictionary:
+	if kind == "region":
+		return {
+			"kind": kind, "key": key, "lod": 250, "signature": _region_signature(key, fine),
+			"heights": _region_heights, "width": 1001, "source_origin": REGION_MIN, "source_step": 50.0,
+			"origin": Vector2(REGION_MIN, REGION_MIN) + Vector2(key) * 5000.0,
+			"cells": 20, "step": 250.0, "native": _native_heights, "fine": fine,
+		}
+	var is_fine: bool = fine.has(key)
+	return {
+		"kind": "native", "key": key, "lod": 4 if is_fine else 20, "signature": _native_signature(key, fine),
+		"heights": _native_heights, "width": 1251, "source_origin": -2500.0, "source_step": 4.0,
+		"origin": Vector2(-2500.0, -2500.0) + Vector2(key) * 500.0,
+		"cells": 125 if is_fine else 25, "step": 4.0 if is_fine else 20.0, "fine": fine,
+	}
+
+
+func _native_signature(key: Vector2i, fine: Dictionary) -> String:
+	if fine.has(key):
+		return "4"
+	var bits: int = 0
+	var offsets: Array[Vector2i] = [Vector2i.LEFT, Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN]
+	for index: int in offsets.size():
+		if fine.has(key + offsets[index]):
+			bits |= 1 << index
+	return "20:%d" % bits
+
+
+func _region_signature(key: Vector2i, fine: Dictionary) -> String:
+	var signature: String = "250"
+	if not REGION_NATIVE_NEIGHBORS.has(key):
+		return signature
+	for index: int in 10:
+		if key == Vector2i(4, 4) or key == Vector2i(3, 4):
+			signature += "1" if fine.has(Vector2i(0, index)) else "0"
+		if key == Vector2i(4, 4) or key == Vector2i(5, 4):
+			signature += "1" if fine.has(Vector2i(9, index)) else "0"
+		if key == Vector2i(4, 4) or key == Vector2i(4, 3):
+			signature += "1" if fine.has(Vector2i(index, 0)) else "0"
+		if key == Vector2i(4, 4) or key == Vector2i(4, 5):
+			signature += "1" if fine.has(Vector2i(index, 9)) else "0"
+	return signature
+
+
+func _stage_one_patch() -> void:
+	if _external_native_owner or _stage_fine != _desired_fine:
+		_discard_stage()
+		return
+	var tile: MeshInstance3D = _upload_patch(_stage_results[_stage_index])
+	tile.hide()
+	_staged_nodes.append(tile)
+	_stage_index += 1
+	if _stage_index < _stage_results.size():
+		return
+	# All new boundary partners exist before any old matched surface disappears.
+	for node: MeshInstance3D in _staged_nodes:
+		_replace_tile(node)
+	_active_fine = _stage_fine
+	_staged_nodes = []
+	_stage_results = []
+	_stage_fine = {}
+	_stage_index = 0
+	_refresh_visibility()
 	changed.emit()
 
 
-func _rebuild_queue() -> void:
-	_queue.clear()
-	if _native_requested and not is_instance_valid(_native_overview):
-		_queue.append({"kind": "overview", "key": Vector2i.ZERO})
-	var detail_keys: Array[Vector2i] = []
-	for key: Vector2i in _detail_targets:
-		if not _detail_tiles.has(key):
-			detail_keys.append(key)
-	detail_keys.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
-		return _detail_distance(a) < _detail_distance(b))
-	for key: Vector2i in detail_keys:
-		_queue.append({"kind": "detail", "key": key})
-	var region_keys: Array[Vector2i] = []
-	for row: int in REGION_TILE_COUNT:
-		for column: int in REGION_TILE_COUNT:
-			var key: Vector2i = Vector2i(column, row)
-			if not _region_tiles.has(key):
-				region_keys.append(key)
-	region_keys.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
-		return _region_distance(a) < _region_distance(b))
-	for key: Vector2i in region_keys:
-		_queue.append({"kind": "region", "key": key})
-	if not _worker_description.is_empty():
-		for index: int in range(_queue.size() - 1, -1, -1):
-			if _queue[index] == _worker_description:
-				_queue.remove_at(index)
-
-
-func _start_next_patch() -> void:
-	var description: Dictionary = _queue.pop_front()
-	var kind: String = str(description["kind"])
-	var key: Vector2i = description["key"]
-	var job: Dictionary = {"kind": kind, "key": key}
-	if kind == "region":
-		job.merge({
-			"heights": _region_heights, "width": 1001,
-			"source_origin": REGION_MIN, "source_step": 50.0,
-			"origin": Vector2(REGION_MIN + key.x * REGION_TILE_SIZE, REGION_MIN + key.y * REGION_TILE_SIZE),
-			"cells": REGION_CELLS, "step": 250.0,
-		})
-	else:
-		job.merge({"heights": _native_heights, "width": 1251, "source_origin": -2500.0, "source_step": 4.0})
-		if kind == "overview":
-			job.merge({"origin": Vector2(-NATIVE_HALF, -NATIVE_HALF), "cells": 250, "step": 20.0, "skirt": 30.0})
-		else:
-			job.merge({
-				"origin": Vector2(-NATIVE_HALF + key.x * NATIVE_TILE_SIZE, -NATIVE_HALF + key.y * NATIVE_TILE_SIZE),
-				"cells": NATIVE_CELLS, "step": 4.0, "skirt": 12.0,
-			})
-	_worker = Thread.new()
-	_worker_kind = "mesh"
-	_worker_description = description
-	var error: Error = _worker.start(HeightSource.build_patch.bind(job))
-	if error != OK:
-		_worker = null
-		_worker_description.clear()
-		_started = false
-		set_process(false)
-		failed.emit("无法启动训练地形分块构建")
-
-
-func _install_patch(result: Dictionary) -> bool:
-	if not bool(result.get("ok", false)):
-		failed.emit(str(result.get("error", "训练地形分块构建失败")))
-		return false
+func _upload_patch(result: Dictionary) -> MeshInstance3D:
+	var start: int = Time.get_ticks_usec()
+	var mesh: ArrayMesh = ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, result["arrays"])
+	var tile: MeshInstance3D = MeshInstance3D.new()
 	var kind: String = str(result["kind"])
 	var key: Vector2i = result["key"]
-	if kind == "detail" and (not _detail_targets.has(key) or _detail_tiles.has(key)):
-		return false
-	if kind == "overview" and (not _native_requested or is_instance_valid(_native_overview)):
-		return false
-	if kind == "region" and _region_tiles.has(key):
-		return false
-	var arrays: Array = result["arrays"]
-	var mesh: ArrayMesh = ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	var tile: MeshInstance3D = MeshInstance3D.new()
 	tile.name = "Training_%s_%d_%d" % [kind, key.x, key.y]
 	tile.mesh = mesh
+	tile.material_override = _region_material if kind == "region" else _native_material
 	tile.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	if kind == "region":
-		tile.material_override = _region_material
-		_region_tiles[key] = tile
-	elif kind == "overview":
-		tile.material_override = _overview_material
-		_native_overview = tile
-	else:
-		tile.material_override = _detail_material
-		_detail_tiles[key] = tile
+	tile.set_meta("kind", kind)
+	tile.set_meta("key", key)
+	tile.set_meta("signature", str(result["signature"]))
+	tile.set_meta("lod", int(result["lod"]))
 	add_child(tile)
-	_set_material_transforms()
-	_refresh_coverage()
-	_refresh_visibility()
+	_last_mesh_install_usec = Time.get_ticks_usec() - start
+	return tile
+
+
+func _replace_tile(tile: MeshInstance3D) -> void:
+	var key: Vector2i = tile.get_meta("key")
+	if str(tile.get_meta("kind")) == "region":
+		if _region_tiles.has(key):
+			_release_node(_region_tiles[key])
+		_region_tiles[key] = tile
+	else:
+		if _native_tiles.has(key):
+			_release_node(_native_tiles[key])
+		_native_tiles[key] = tile
+
+
+func _discard_stage() -> void:
+	for tile: MeshInstance3D in _staged_nodes:
+		_release_node(tile)
+	_staged_nodes = []
+	_stage_results = []
+	_stage_fine = {}
+	_stage_index = 0
+
+
+func _refresh_visibility() -> void:
+	var show_native: bool = _native_requested and _native_active and not _external_native_owner
+	for key: Vector2i in _region_tiles:
+		_region_tiles[key].visible = not (key == Vector2i(4, 4) and (show_native or _external_native_owner))
+	for tile: MeshInstance3D in _native_tiles.values():
+		tile.visible = show_native
+
+
+func _install_collision(result: Dictionary) -> void:
+	var key: Vector2i = result["key"]
+	if _collision_tiles.has(key):
+		return
+	var start: int = Time.get_ticks_usec()
+	var shape: ConcavePolygonShape3D = ConcavePolygonShape3D.new()
+	shape.set_faces(result["faces"])
+	var body: StaticBody3D = StaticBody3D.new()
+	body.name = "TrainingLocalGround_%d_%d" % [key.x, key.y]
+	body.collision_layer = _collision_layer
+	body.collision_mask = 0
+	body.set_meta("training_only", true)
+	var collider: CollisionShape3D = CollisionShape3D.new()
+	collider.shape = shape
+	body.add_child(collider)
+	add_child(body)
+	_collision_tiles[key] = body
+	_last_shape_install_usec = Time.get_ticks_usec() - start
+
+
+func _collision_keys(point: Vector2) -> Array[Vector2i]:
+	var first: Vector2i = _collision_key(point - Vector2(COLLISION_MARGIN, COLLISION_MARGIN))
+	var last: Vector2i = _collision_key(point + Vector2(COLLISION_MARGIN, COLLISION_MARGIN))
+	var keys: Array[Vector2i] = []
+	for row: int in range(first.y, last.y + 1):
+		for column: int in range(first.x, last.x + 1):
+			keys.append(Vector2i(column, row))
+	return keys
+
+
+func _collision_key(point: Vector2) -> Vector2i:
+	return Vector2i(clampi(floori((point.x + 2500.0) / COLLISION_SIZE), 0, 49), clampi(floori((point.y + 2500.0) / COLLISION_SIZE), 0, 49))
+
+
+func _clear_collision() -> void:
+	for body: StaticBody3D in _collision_tiles.values():
+		_release_node(body)
+	_collision_tiles.clear()
+
+
+func _launch(kind: String, callable: Callable) -> void:
+	_worker = Thread.new()
+	_worker_kind = kind
+	var error: Error = _worker.start(callable)
+	if error != OK:
+		_worker = null
+		_started = false
+		failed.emit("无法启动训练地形后台任务：" + kind)
+
+
+func _nearest_missing(tiles: Dictionary, count: int, size_m: float, origin: float) -> Vector2i:
+	var best: Vector2i = Vector2i(-1, -1)
+	var distance: float = INF
+	for row: int in count:
+		for column: int in count:
+			var key: Vector2i = Vector2i(column, row)
+			if tiles.has(key):
+				continue
+			var midpoint: Vector2 = Vector2(origin, origin) + (Vector2(key) + Vector2(0.5, 0.5)) * size_m
+			var candidate: float = midpoint.distance_squared_to(_center)
+			if candidate < distance:
+				distance = candidate
+				best = key
+	return best
+
+
+func _mark_prepared() -> void:
 	if not _prepared:
 		_prepared = true
 		prepared.emit()
-	changed.emit()
-	return true
-
-
-func _create_materials() -> void:
-	_coverage_image = Image.create(NATIVE_TILE_COUNT, NATIVE_TILE_COUNT, false, Image.FORMAT_R8)
-	_coverage_image.fill(Color.BLACK)
-	_coverage_texture = ImageTexture.create_from_image(_coverage_image)
-	_region_material = ShaderMaterial.new()
-	_region_material.shader = GroundShader
-	_overview_material = ShaderMaterial.new()
-	_overview_material.shader = GroundShader
-	_overview_material.set_shader_parameter("native_surface", true)
-	_overview_material.set_shader_parameter("native_overview", true)
-	_overview_material.set_shader_parameter("detail_coverage", _coverage_texture)
-	_detail_material = ShaderMaterial.new()
-	_detail_material.shader = GroundShader
-	_detail_material.set_shader_parameter("native_surface", true)
-	for material: ShaderMaterial in [_region_material, _overview_material, _detail_material]:
-		# Linear reflectance palette. Source control/low-frequency layout is retained.
-		material.set_shader_parameter("grass_color", Vector3(0.085, 0.160, 0.035))
-		material.set_shader_parameter("soil_color", Vector3(0.160, 0.090, 0.035))
-		material.set_shader_parameter("rock_color", Vector3(0.220, 0.230, 0.215))
-		material.set_shader_parameter("field_color", Vector3(0.190, 0.155, 0.050))
-		material.set_shader_parameter("macro_contrast", 2.8)
-		material.set_shader_parameter("normal_relief", 1.6)
-		material.set_shader_parameter("detail_scale", 0.32)
-		material.set_shader_parameter("detail_contrast", 2.2)
-		material.set_shader_parameter("detail_bump_metres", 0.018)
-	# Regional slopes are genuinely shallow. Emphasize their SOURCE normal only;
-	# never exaggerate physical vertex height or change grounding/collision.
-	_region_material.set_shader_parameter("normal_relief", 5.0)
-	_region_material.set_shader_parameter("hillshade_strength", 0.38)
-	_region_material.set_shader_parameter("macro_contrast", 3.4)
-	_set_material_transforms()
-
-
-func _set_material_transforms() -> void:
-	for material: ShaderMaterial in [_region_material, _overview_material, _detail_material]:
-		if material != null:
-			material.set_shader_parameter("terrain_to_local", global_transform.affine_inverse())
-			material.set_shader_parameter("terrain_to_world", global_transform)
 
 
 func _request_textures() -> void:
 	var files: Dictionary[String, String] = {
-		"region_color": "continuous/assets/region_color.png",
-		"region_normal": "continuous/assets/region_normal.png",
-		"land_color": "ridgevale/assets/land_color.png",
-		"land_control": "ridgevale/assets/land_control.png",
-		"grass_detail": "cedar/assets/grass_detail.png",
-		"soil_detail": "cedar/assets/soil_detail.png",
-		"stone_detail": "cedar/assets/stone_detail.png",
+		"region_color": "continuous/assets/region_color.png", "region_normal": "continuous/assets/region_normal.png",
+		"land_color": "ridgevale/assets/land_color.png", "land_control": "ridgevale/assets/land_control.png",
+		"grass_detail": "cedar/assets/grass_detail.png", "soil_detail": "cedar/assets/soil_detail.png", "stone_detail": "cedar/assets/stone_detail.png",
 	}
 	for parameter: String in files:
 		var path: String = _base_path + files[parameter]
@@ -448,82 +576,18 @@ func _poll_one_texture() -> void:
 		if state == ResourceLoader.THREAD_LOAD_LOADED:
 			var texture: Texture2D = ResourceLoader.load_threaded_get(path) as Texture2D
 			if texture != null:
-				for material: ShaderMaterial in [_region_material, _overview_material, _detail_material]:
-					material.set_shader_parameter(parameter, texture)
-					material.set_shader_parameter("has_" + parameter, true)
-			else:
-				_resource_notes.append("表层纹理类型无效：" + path)
+				_loaded_textures[parameter] = texture
+				for index: int in range(_surface_materials.size() - 1, -1, -1):
+					var material: ShaderMaterial = _surface_materials[index].get_ref() as ShaderMaterial
+					if material == null:
+						_surface_materials.remove_at(index)
+					else:
+						material.set_shader_parameter(parameter, texture)
+						material.set_shader_parameter("has_" + parameter, true)
 		else:
 			_resource_notes.append("表层纹理读取失败：" + path)
 		changed.emit()
 		break
-
-
-func _refresh_coverage() -> void:
-	if _coverage_image == null:
-		return
-	_coverage_image.fill(Color.BLACK)
-	if _native_requested:
-		for key: Vector2i in _detail_tiles:
-			_coverage_image.set_pixel(key.x, key.y, Color.WHITE)
-	_coverage_texture.update(_coverage_image)
-
-
-func _refresh_visibility() -> void:
-	var native_visible: bool = _native_requested and is_instance_valid(_native_overview)
-	if is_instance_valid(_native_overview):
-		_native_overview.visible = native_visible
-	for key: Vector2i in _region_tiles:
-		_region_tiles[key].visible = not (native_visible and key == Vector2i(4, 4))
-	for tile: MeshInstance3D in _detail_tiles.values():
-		tile.visible = native_visible
-
-
-func _sync_local_collision() -> void:
-	if not _collision_enabled or _detail_targets.is_empty() or not is_instance_valid(_native_overview):
-		_clear_collision()
-		return
-	if absf(_center.x) > NATIVE_HALF or absf(_center.y) > NATIVE_HALF:
-		_clear_collision()
-		return
-	var required: Array[Vector2i] = _collision_keys(_center)
-	for key: Vector2i in _collision_tiles.keys():
-		if not required.has(key):
-			_release_node(_collision_tiles[key])
-			_collision_tiles.erase(key)
-	for key: Vector2i in required:
-		if _collision_tiles.has(key) or not _detail_tiles.has(key):
-			continue
-		var mesh: Mesh = _detail_tiles[key].mesh
-		var body: StaticBody3D = StaticBody3D.new()
-		body.name = "TrainingLocalGround_%d_%d" % [key.x, key.y]
-		body.collision_layer = _collision_layer
-		body.collision_mask = 0
-		body.set_meta("training_only", true)
-		var collider: CollisionShape3D = CollisionShape3D.new()
-		collider.shape = mesh.create_trimesh_shape()
-		body.add_child(collider)
-		add_child(body)
-		_collision_tiles[key] = body
-		changed.emit()
-		# One local collider per frame, never all 5km collision at once.
-		break
-
-
-func _collision_keys(point: Vector2) -> Array[Vector2i]:
-	var first: Vector2i = _native_key(point - Vector2(COLLISION_MARGIN, COLLISION_MARGIN))
-	var last: Vector2i = _native_key(point + Vector2(COLLISION_MARGIN, COLLISION_MARGIN))
-	var keys: Array[Vector2i] = []
-	for row: int in range(first.y, last.y + 1):
-		for column: int in range(first.x, last.x + 1):
-			keys.append(Vector2i(column, row))
-	return keys
-
-
-func _clear_collision() -> void:
-	for body: StaticBody3D in _collision_tiles.values():
-		_release_node(body)
-	_collision_tiles.clear()
 
 
 func _clamp_center(point: Vector2) -> Vector2:
@@ -531,20 +595,7 @@ func _clamp_center(point: Vector2) -> Vector2:
 
 
 func _native_key(point: Vector2) -> Vector2i:
-	return Vector2i(
-		clampi(floori((point.x + NATIVE_HALF) / NATIVE_TILE_SIZE), 0, NATIVE_TILE_COUNT - 1),
-		clampi(floori((point.y + NATIVE_HALF) / NATIVE_TILE_SIZE), 0, NATIVE_TILE_COUNT - 1)
-	)
-
-
-func _detail_distance(key: Vector2i) -> float:
-	var midpoint: Vector2 = Vector2(-NATIVE_HALF, -NATIVE_HALF) + (Vector2(key) + Vector2(0.5, 0.5)) * NATIVE_TILE_SIZE
-	return midpoint.distance_squared_to(_center)
-
-
-func _region_distance(key: Vector2i) -> float:
-	var midpoint: Vector2 = Vector2(REGION_MIN, REGION_MIN) + (Vector2(key) + Vector2(0.5, 0.5)) * REGION_TILE_SIZE
-	return midpoint.distance_squared_to(_center)
+	return Vector2i(clampi(floori((point.x + 2500.0) / 500.0), 0, 9), clampi(floori((point.y + 2500.0) / 500.0), 0, 9))
 
 
 func _release_node(node: Node) -> void:
