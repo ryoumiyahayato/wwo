@@ -81,6 +81,162 @@ def resource_slot():
             publish('RELEASED')
 
 
+def terrain_region_review(args):
+    """Finite source-only route; show the real HWND without activation."""
+    import msvcrt
+    region_review = True
+    if os.name != 'nt' or args.exe:
+        raise ValueError('Terrain review requires the Windows source project')
+    output = (args.output_dir or ROOT/'local-artifacts/native-screenshot').resolve()
+    if not output.is_relative_to(ROOT/'local-artifacts'):
+        raise ValueError('Observer output must stay in local-artifacts')
+    output.mkdir(parents=True, exist_ok=True)
+    (ROOT/'builds').mkdir(exist_ok=True)
+    with (ROOT/'builds/.preview-manager.lock').open('a+b') as lock:
+        for wait_attempt in range(7):
+            lock.seek(0)
+            try:
+                msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+                break
+            except OSError:
+                if os.environ.get('WWO_LOD_CONTROL') != 'after' or wait_attempt == 6:
+                    raise
+                print('LOD waiting five minutes for the existing preview lock; no source change or Godot startup', flush=True)
+                time.sleep(300)
+        try:
+            occupied = subprocess.check_output(['powershell', '-NoProfile', '-Command',
+                "Get-Process -Name 'Godot*','WWO*' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id; exit 0"], text=True).strip()
+            if occupied:
+                raise RuntimeError('Existing game/editor left untouched: ' + occupied)
+            if os.environ.get('WWO_LOD_CANDIDATE_PATCH'):
+                patch = Path(os.environ['WWO_LOD_CANDIDATE_PATCH']).resolve(strict=True)
+                if not patch.is_relative_to(ROOT/'local-artifacts/map-lod-control-20261026'):
+                    raise ValueError('Unexpected candidate patch')
+                subprocess.run(['git','apply','--check',str(patch)],cwd=ROOT,check=True)
+                subprocess.run(['git','apply',str(patch)],cwd=ROOT,check=True)
+            user_name = 'WWO_R57_Visual_Region_' + time.strftime('%Y%m%d_%H%M%S')
+            user_dir = Path(os.environ['APPDATA'])/user_name
+            user_dir.mkdir(exist_ok=False)
+            config = ROOT/'override.cfg'
+            original = config.read_bytes() if config.exists() else None
+            temporary = ('[application]\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="'+user_name+'"\n'
+                '[display]\nwindow/size/no_focus=true\n[debug]\nfile_logging/max_log_files=2\n')
+            temporary_bytes = temporary.encode('utf-8')
+            process = None
+            ownership = []
+            resource_samples = []
+            last_resource = 0.0
+            previous_cpu = None
+            class MemoryCounters(ctypes.Structure):
+                _fields_ = [('cb',ctypes.c_uint32),('faults',ctypes.c_uint32)] + [(name,ctypes.c_size_t) for name in ['peak_working','working','peak_paged','paged','peak_nonpaged','nonpaged','pagefile','peak_pagefile','private']]
+            get_memory = ctypes.windll.psapi.GetProcessMemoryInfo
+            get_memory.argtypes = [ctypes.c_void_p,ctypes.POINTER(MemoryCounters),ctypes.c_uint32]
+            get_times = ctypes.windll.kernel32.GetProcessTimes
+            get_times.argtypes = [ctypes.c_void_p] + [ctypes.POINTER(ctypes.c_uint64)]*4
+            foreground = ctypes.windll.user32.GetForegroundWindow
+            foreground.restype = ctypes.c_void_p
+            foreground_pid = ctypes.windll.user32.GetWindowThreadProcessId
+            foreground_pid.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_ulong)]
+            def owner():
+                pid = ctypes.c_ulong()
+                foreground_pid(foreground(), ctypes.byref(pid))
+                return pid.value
+            initial_owner = owner()
+            user32 = ctypes.windll.user32
+            user32.ShowWindow.argtypes = [ctypes.c_void_p, ctypes.c_int]
+            user32.IsWindowVisible.argtypes = [ctypes.c_void_p]
+            user32.IsIconic.argtypes = [ctypes.c_void_p]
+            user32.SetWindowPos.argtypes = [ctypes.c_void_p,ctypes.c_void_p,ctypes.c_int,ctypes.c_int,ctypes.c_int,ctypes.c_int,ctypes.c_uint]
+            hwnd = None
+            state = None
+            env = os.environ.copy()
+            env['WWO_VISUAL_OUTPUT'] = output.as_posix()
+            # Do not inherit filters/archive settings from unrelated observer runs.
+            for name in ['WWO_VISUAL_NO_IMAGES','WWO_VISUAL_IMAGE_LABELS','WWO_VISUAL_RECORD_ARCHIVE']:
+                env.pop(name, None)
+            try:
+                config.write_bytes(temporary_bytes)
+                with (output/'runtime.log').open('w', encoding='utf-8') as log:
+                    startup = subprocess.STARTUPINFO()
+                    startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                    startup.wShowWindow = 0  # Initial SW_HIDE, then SW_SHOWNOACTIVATE below.
+                    process = subprocess.Popen(['D:/Tools/Godot-4.6.3/Godot_v4.6.3-stable_win64.exe',
+                        '--path',str(ROOT),'--resolution','1280x720','--position','30,30',
+                        '--script','res://tools/map/native_screenshot_boot.gd',
+                        '--','--terrain-region-review'], cwd=ROOT, env=env,
+                        stdout=log, stderr=subprocess.STDOUT, startupinfo=startup)
+                    deadline = time.monotonic()+240
+                    while process.poll() is None:
+                        handle_file = output/'window-handle.json'
+                        if hwnd is None and handle_file.exists():
+                            try: handle = json.loads(handle_file.read_text(encoding='utf-8'))
+                            except ValueError: handle = {}
+                            if handle.get('pid') == process.pid:
+                                hwnd = int(handle['hwnd'])
+                                pid = ctypes.c_ulong()
+                                foreground_pid(hwnd,ctypes.byref(pid))
+                                if pid.value != process.pid:
+                                    raise RuntimeError('Godot root HWND owner differs')
+                                user32.ShowWindow(hwnd,4)
+                                user32.SetWindowPos(hwnd,1,0,0,0,0,0x13)  # Bottom; NOACTIVATE/NOMOVE/NOSIZE.
+                                state = 'visible'
+                        request = output/'window-request.json'
+                        if hwnd and request.exists():
+                            try: requested = json.loads(request.read_text(encoding='utf-8'))['state']
+                            except (ValueError, KeyError): requested = state
+                            if requested != state and requested in ['visible','hidden','minimized']:
+                                user32.ShowWindow(hwnd,{'visible':4,'hidden':0,'minimized':7}[requested])
+                                state = requested
+                                (output/'window-state.json').write_text(json.dumps({'state':state,
+                                    'visible':bool(user32.IsWindowVisible(hwnd)), 'minimized':bool(user32.IsIconic(hwnd))}),encoding='utf-8')
+                        ownership.append([round(time.time()*1000), owner(),state,
+                            bool(user32.IsWindowVisible(hwnd)) if hwnd else None,
+                            bool(user32.IsIconic(hwnd)) if hwnd else None])
+                        now = time.monotonic()
+                        if (region_review or bool(os.environ.get('WWO_LOD_CONTROL'))) and now-last_resource >= 1:
+                            times = [ctypes.c_uint64() for _ in range(4)]
+                            get_times(int(process._handle),*(ctypes.byref(value) for value in times))
+                            cpu = (times[2].value+times[3].value)/10000000
+                            counters = MemoryCounters(); counters.cb=ctypes.sizeof(counters)
+                            get_memory(int(process._handle),ctypes.byref(counters),counters.cb)
+                            phase_file = output/'phase.json'
+                            phase = json.loads(phase_file.read_text(encoding='utf-8')) if phase_file.exists() else {'phase':'preparation'}
+                            sample = {'ms':round(time.time()*1000),**phase,'working_bytes':counters.working,
+                                'private_bytes':counters.private,'cpu_percent_one_core':100*(cpu-previous_cpu)/(now-last_resource) if previous_cpu is not None else None}
+                            # Bounded local GPU sample, not a resident game monitor. Whole-device values include desktop work.
+                            if len(resource_samples)%2 == 0:
+                                gpu = subprocess.run(['nvidia-smi','--query-gpu=utilization.gpu,memory.used,power.draw,temperature.gpu','--format=csv,noheader,nounits'],capture_output=True,text=True)
+                                sample['whole_device_gpu_csv'] = gpu.stdout.strip() if gpu.returncode==0 else 'unavailable'
+                            resource_samples.append(sample)
+                            last_resource=now; previous_cpu=cpu
+                        if time.monotonic()>deadline:
+                            raise TimeoutError('Native screenshot review exceeded 240 seconds')
+                        time.sleep(.1)
+                if process.returncode:
+                    raise RuntimeError('Native screenshot review failed; inspect runtime.log')
+            finally:
+                if process and process.poll() is None:
+                    process.terminate()
+                    try: process.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        process.kill(); process.wait(timeout=5)
+                # Never overwrite an unrelated concurrent edit, even on failure.
+                if config.read_bytes() == temporary_bytes:
+                    if original is None: config.unlink()
+                    else: config.write_bytes(original)
+                else:
+                    raise RuntimeError('Override changed concurrently; preserved it instead of restoring')
+                if region_review or bool(os.environ.get('WWO_LOD_CONTROL')):
+                    (output/'resource-samples.json').write_text(json.dumps(resource_samples,indent=2),encoding='utf-8')
+                (output/'window-ownership.json').write_text(json.dumps({'initial_foreground_pid':initial_owner,
+                    'game_pid':process.pid if process else None,'samples':ownership,
+                    'game_seen_foreground':any(row[1]==process.pid for row in ownership) if process else None,
+                    'test_user_dir':str(user_dir)},indent=2),encoding='utf-8')
+        finally:
+            lock.seek(0)
+            msvcrt.locking(lock.fileno(), msvcrt.LK_UNLCK, 1)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('label', choices=['before', 'after', 'candidate', 'comparison'])
@@ -113,7 +269,11 @@ def main():
     parser.add_argument('--single-employer', action='store_true', help='Retain the original generation18 Opening for compatibility')
     parser.add_argument('--summary-only', action='store_true', help='Keep compact existing run records; skip optional screenshots and memory series')
     parser.add_argument('--compact-record', action='store_true', help='Append existing result records into one compressed JSON file; requires summary-only')
+    parser.add_argument('--terrain-region-review', action='store_true', help='Finite real menu, terrain and physical walking; no save is read or written')
     args = parser.parse_args()
+    if args.terrain_region_review:
+        terrain_region_review(args)
+        return
     if args.compact_record and not args.summary_only:
         raise ValueError('Compact records require summary-only')
     if args.continuous_days and (args.employment_case != 'idle' or not args.compact_record or args.acceptance != 'economic-action'):
@@ -282,5 +442,8 @@ def main():
 
 
 if __name__ == '__main__':
-    with resource_slot():
+    if '--terrain-region-review' in sys.argv:
         main()
+    else:
+        with resource_slot():
+            main()

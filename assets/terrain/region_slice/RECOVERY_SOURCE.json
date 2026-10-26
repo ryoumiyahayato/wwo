@@ -1,0 +1,720 @@
+{
+  "source_repository": "ryoumiyahayato/wwo",
+  "release_id": 422607066,
+  "actual_tag": "untagged-75a9dbc800223cbf8a18",
+  "source_archive_commit": "3c48266b335cfa448953d26b9698abb6dd207a34",
+  "manifest_military_commit": "44c8f3d0639f7b84a0053d7edfa76641cb8a50d7",
+  "manifest_path": "provenance/archive/manifest.json.gz",
+  "destination": "assets/terrain/region_slice",
+  "status": "ARCHIVE_BYTES_RECOVERED_ENGINE_NOT_RUN",
+  "fictional_training_terrain": true,
+  "historical_geodata": false,
+  "digests_computed": false,
+  "zip_crc_computed": false,
+  "verification_scope": "HTTP 206 exact Content-Range, ZIP local/central metadata, successful deflate decode, original manifest byte counts; no engine or regression run",
+  "requested_missing": [
+    {
+      "path": "cedar/assets/rock_detail.png",
+      "reason": "No such file in current runtime manifest; runtime uses stone_detail.png, restored under its real name."
+    }
+  ],
+  "network_bytes": 12123525,
+  "materialized_bytes": 13178169,
+  "file_count": 24,
+  "recovered_glb_metadata": {
+    "file_count": 13,
+    "total_bytes": 211616,
+    "external_buffer_or_image_uris": [],
+    "scope": "Read the original GLB JSON chunks only; all 13 recovered models have one embedded mesh and no external buffer/image URI. No engine import was run."
+  },
+  "temporary_binary_download_bytes": 0,
+  "full_part_downloads": 0,
+  "budget_bytes": 20971520,
+  "package_directory": {
+    "package": "military-current-0001.zip",
+    "package_bytes": 443505922,
+    "central_directory_offset": 443243330,
+    "central_directory_bytes": 262570,
+    "central_directory_entries": 2387,
+    "range_confirmed": true
+  },
+  "files": [
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/barn.glb",
+      "relative_path": "cedar/assets/barn.glb",
+      "bytes": 25476,
+      "entries": [
+        {
+          "entry": "05d2ca151ab45a2a1797073f87eca21858eb5afc1b3829c52639a4622aced45b",
+          "local_offset": 39448682,
+          "compressed_bytes": 7176,
+          "uncompressed_bytes": 25476,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 39448796,
+          "retrieved_range_start": 39448682,
+          "retrieved_range_bytes": 7688
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/chapel.glb",
+      "relative_path": "cedar/assets/chapel.glb",
+      "bytes": 25360,
+      "entries": [
+        {
+          "entry": "5026809b05d2c6018e51b3f58d79cb29a0efc0dcd1d163a6b4c575f6df30f071",
+          "local_offset": 39456575,
+          "compressed_bytes": 7143,
+          "uncompressed_bytes": 25360,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 39456689,
+          "retrieved_range_start": 39456575,
+          "retrieved_range_bytes": 7655
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/grass_detail.png",
+      "relative_path": "cedar/assets/grass_detail.png",
+      "bytes": 406083,
+      "entries": [
+        {
+          "entry": "b3eccfffd03c9b2f8e079e45bcdaf3e7c3ef9f3fbf09359eda39cb4c18030fca",
+          "local_offset": 39464438,
+          "compressed_bytes": 402482,
+          "uncompressed_bytes": 406083,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 39464552,
+          "retrieved_range_start": 39464438,
+          "retrieved_range_bytes": 402994
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/hay_roll.glb",
+      "relative_path": "cedar/assets/hay_roll.glb",
+      "bytes": 5392,
+      "entries": [
+        {
+          "entry": "5384ce2bcc423351e2d8e3cd689e9ace193c34f909e88ecefda2b56113cbc44f",
+          "local_offset": 39867594,
+          "compressed_bytes": 1717,
+          "uncompressed_bytes": 5392,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 39867708,
+          "retrieved_range_start": 39867594,
+          "retrieved_range_bytes": 2229
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/house_0.glb",
+      "relative_path": "cedar/assets/house_0.glb",
+      "bytes": 22936,
+      "entries": [
+        {
+          "entry": "f7ba56ed066817ca8fc275c9f26cce579c6b18ed84865505da726623fb6963db",
+          "local_offset": 45485182,
+          "compressed_bytes": 6462,
+          "uncompressed_bytes": 22936,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 45485296,
+          "retrieved_range_start": 45485182,
+          "retrieved_range_bytes": 6974
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/house_1.glb",
+      "relative_path": "cedar/assets/house_1.glb",
+      "bytes": 22964,
+      "entries": [
+        {
+          "entry": "77b25673cb0868685240d38254b2740ac2aa6631462f0db70bee41d0c27551ad",
+          "local_offset": 45492364,
+          "compressed_bytes": 6484,
+          "uncompressed_bytes": 22964,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 45492478,
+          "retrieved_range_start": 45492364,
+          "retrieved_range_bytes": 6996
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/house_2.glb",
+      "relative_path": "cedar/assets/house_2.glb",
+      "bytes": 22964,
+      "entries": [
+        {
+          "entry": "8d5d7744aa7fb11c13297cbd33c76043511ebb43578b430164c8ac3154f57904",
+          "local_offset": 45499567,
+          "compressed_bytes": 6473,
+          "uncompressed_bytes": 22964,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 45499681,
+          "retrieved_range_start": 45499567,
+          "retrieved_range_bytes": 6985
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/rock_0.glb",
+      "relative_path": "cedar/assets/rock_0.glb",
+      "bytes": 2636,
+      "entries": [
+        {
+          "entry": "2743643779e884c2aa7af7abb537db4b93f9f16d663cd5a04bc480c7b289eacb",
+          "local_offset": 49540724,
+          "compressed_bytes": 1489,
+          "uncompressed_bytes": 2636,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 49540838,
+          "retrieved_range_start": 49540724,
+          "retrieved_range_bytes": 2001
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/rock_1.glb",
+      "relative_path": "cedar/assets/rock_1.glb",
+      "bytes": 2632,
+      "entries": [
+        {
+          "entry": "30a860a0bd23dd05d5e89d3d773296e0c91d6262298a0917d41f0d3d7e501592",
+          "local_offset": 49542932,
+          "compressed_bytes": 1477,
+          "uncompressed_bytes": 2632,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 49543046,
+          "retrieved_range_start": 49542932,
+          "retrieved_range_bytes": 1989
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/rock_2.glb",
+      "relative_path": "cedar/assets/rock_2.glb",
+      "bytes": 2632,
+      "entries": [
+        {
+          "entry": "e38297642c1de56d387eb1a91a70c0c0a0628e43e6967feb00bf79211c9006b2",
+          "local_offset": 49545127,
+          "compressed_bytes": 1489,
+          "uncompressed_bytes": 2632,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 49545241,
+          "retrieved_range_start": 49545127,
+          "retrieved_range_bytes": 2001
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/soil_detail.png",
+      "relative_path": "cedar/assets/soil_detail.png",
+      "bytes": 373041,
+      "entries": [
+        {
+          "entry": "ced7129cc672d0b9dc0db26e8289162398ce0edaae75bbe687d446df82cecb4d",
+          "local_offset": 49547335,
+          "compressed_bytes": 367928,
+          "uncompressed_bytes": 373041,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 49547449,
+          "retrieved_range_start": 49547335,
+          "retrieved_range_bytes": 368440
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/stone_detail.png",
+      "relative_path": "cedar/assets/stone_detail.png",
+      "bytes": 301833,
+      "entries": [
+        {
+          "entry": "2465a31c2f0e6eeed6c91a78d57631ba2f1f75bdde3e7c415512b51a76b6fe2e",
+          "local_offset": 49915936,
+          "compressed_bytes": 299194,
+          "uncompressed_bytes": 301833,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 49916050,
+          "retrieved_range_start": 49915936,
+          "retrieved_range_bytes": 299706
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/tree_0.glb",
+      "relative_path": "cedar/assets/tree_0.glb",
+      "bytes": 23972,
+      "entries": [
+        {
+          "entry": "de845be2d8869753d980f9c90183e1833fdbb4b69889322d48549c15c34b2327",
+          "local_offset": 50483186,
+          "compressed_bytes": 11650,
+          "uncompressed_bytes": 23972,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 50483300,
+          "retrieved_range_start": 50483186,
+          "retrieved_range_bytes": 12162
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/tree_1.glb",
+      "relative_path": "cedar/assets/tree_1.glb",
+      "bytes": 23972,
+      "entries": [
+        {
+          "entry": "ed663e085a8c8616f65a7edf9c361a65861bd9de0dbfd1d586ec3d4673d6ca49",
+          "local_offset": 50495559,
+          "compressed_bytes": 11718,
+          "uncompressed_bytes": 23972,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 50495673,
+          "retrieved_range_start": 50495559,
+          "retrieved_range_bytes": 12230
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/tree_2.glb",
+      "relative_path": "cedar/assets/tree_2.glb",
+      "bytes": 23968,
+      "entries": [
+        {
+          "entry": "11433798bcbac0f408d26ccd32f7735909319b29436ba94ff5e7629148db0ade",
+          "local_offset": 50507997,
+          "compressed_bytes": 11731,
+          "uncompressed_bytes": 23968,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 50508111,
+          "retrieved_range_start": 50507997,
+          "retrieved_range_bytes": 12243
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/wall_4m.glb",
+      "relative_path": "cedar/assets/wall_4m.glb",
+      "bytes": 6712,
+      "entries": [
+        {
+          "entry": "8ddd7ecf2f8a1a24382634f2157b3590f6defc3a94461258a488f7f2d5be96b4",
+          "local_offset": 50520447,
+          "compressed_bytes": 2096,
+          "uncompressed_bytes": 6712,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 50520561,
+          "retrieved_range_start": 50520447,
+          "retrieved_range_bytes": 2608
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/continuous/assets/height_50m.f32",
+      "relative_path": "continuous/assets/height_50m.f32",
+      "bytes": 4008004,
+      "entries": [
+        {
+          "entry": "9013d8a2afe3635788c0b3e6558ec24ce1d7887645af4ab17d16ea8c54b43a96",
+          "local_offset": 50553556,
+          "compressed_bytes": 3544647,
+          "uncompressed_bytes": 4008004,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 50553670,
+          "retrieved_range_start": 50553556,
+          "retrieved_range_bytes": 3545159
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/continuous/assets/region.json",
+      "relative_path": "continuous/assets/region.json",
+      "bytes": 40702,
+      "entries": [
+        {
+          "entry": "638d8d4acaf8c895c6f5d63333f42cab6123541079be2bb56da9be79d48080f7",
+          "local_offset": 54531693,
+          "compressed_bytes": 16176,
+          "uncompressed_bytes": 40702,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 54531807,
+          "retrieved_range_start": 54531693,
+          "retrieved_range_bytes": 16688
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/continuous/assets/region_color.png",
+      "relative_path": "continuous/assets/region_color.png",
+      "bytes": 284891,
+      "entries": [
+        {
+          "entry": "909f9f87d1016e769de78dd5acf587456c199d03ffbc165547dee5d7b48cd0f8",
+          "local_offset": 54547983,
+          "compressed_bytes": 284981,
+          "uncompressed_bytes": 284891,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 54548097,
+          "retrieved_range_start": 54547983,
+          "retrieved_range_bytes": 285493
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/continuous/assets/region_normal.png",
+      "relative_path": "continuous/assets/region_normal.png",
+      "bytes": 104062,
+      "entries": [
+        {
+          "entry": "930915164b053d22a46e524f9ee6e29c4b828fcece7e13916c6c97729aa21dde",
+          "local_offset": 54833640,
+          "compressed_bytes": 104068,
+          "uncompressed_bytes": 104062,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 54833754,
+          "retrieved_range_start": 54833640,
+          "retrieved_range_bytes": 104580
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/ridgevale/assets/height_4m.f32",
+      "relative_path": "ridgevale/assets/height_4m.f32",
+      "bytes": 6260004,
+      "entries": [
+        {
+          "entry": "92ee522fefe91adf878c188f49d84766e97a8ccf7ad3c570008d61a682459712",
+          "local_offset": 65452343,
+          "compressed_bytes": 5538663,
+          "uncompressed_bytes": 6260004,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 65452457,
+          "retrieved_range_start": 65452343,
+          "retrieved_range_bytes": 5539175
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/ridgevale/assets/land_color.png",
+      "relative_path": "ridgevale/assets/land_color.png",
+      "bytes": 1109166,
+      "entries": [
+        {
+          "entry": "aee4e86c28501e4f50f6683c4287a18b2759f5496ecb1362fcb195639ae7bb17",
+          "local_offset": 70991120,
+          "compressed_bytes": 1109501,
+          "uncompressed_bytes": 1109166,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 70991234,
+          "retrieved_range_start": 70991120,
+          "retrieved_range_bytes": 1110013
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/ridgevale/assets/land_control.png",
+      "relative_path": "ridgevale/assets/land_control.png",
+      "bytes": 38273,
+      "entries": [
+        {
+          "entry": "e530e84ed151e91ec563dc0f0c6fb8ca8587722a784f51a0538fed65d6a57f46",
+          "local_offset": 72101298,
+          "compressed_bytes": 26592,
+          "uncompressed_bytes": 38273,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 72101412,
+          "retrieved_range_start": 72101298,
+          "retrieved_range_bytes": 27104
+        }
+      ]
+    },
+    {
+      "archive_path": "formal-combat-authority-20261024/runtime/ridgevale/assets/map.json",
+      "relative_path": "ridgevale/assets/map.json",
+      "bytes": 40494,
+      "entries": [
+        {
+          "entry": "2bddc33a6a34ede904bdde127937b2f3f2e43139e8cdecbe5b83975418f5b623",
+          "local_offset": 72128570,
+          "compressed_bytes": 11773,
+          "uncompressed_bytes": 40494,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 72128684,
+          "retrieved_range_start": 72128570,
+          "retrieved_range_bytes": 12285
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "asset": "military-current-0001.zip.part007",
+      "asset_id": 671752107,
+      "start": 40787181,
+      "end": 40852737,
+      "http_status": 206,
+      "content_range": "bytes 40787181-40852737/40852738",
+      "received_bytes": 65557
+    },
+    {
+      "asset": "military-current-0001.zip.part007",
+      "asset_id": 671752107,
+      "start": 40590146,
+      "end": 40852715,
+      "http_status": 206,
+      "content_range": "bytes 40590146-40852715/40852738",
+      "received_bytes": 262570
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 39448682,
+      "end": 39456369,
+      "http_status": 206,
+      "content_range": "bytes 39448682-39456369/67108864",
+      "received_bytes": 7688
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 39456575,
+      "end": 39464229,
+      "http_status": 206,
+      "content_range": "bytes 39456575-39464229/67108864",
+      "received_bytes": 7655
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 39464438,
+      "end": 39867431,
+      "http_status": 206,
+      "content_range": "bytes 39464438-39867431/67108864",
+      "received_bytes": 402994
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 39867594,
+      "end": 39869822,
+      "http_status": 206,
+      "content_range": "bytes 39867594-39869822/67108864",
+      "received_bytes": 2229
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 45485182,
+      "end": 45492155,
+      "http_status": 206,
+      "content_range": "bytes 45485182-45492155/67108864",
+      "received_bytes": 6974
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 45492364,
+      "end": 45499359,
+      "http_status": 206,
+      "content_range": "bytes 45492364-45499359/67108864",
+      "received_bytes": 6996
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 45499567,
+      "end": 45506551,
+      "http_status": 206,
+      "content_range": "bytes 45499567-45506551/67108864",
+      "received_bytes": 6985
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 49540724,
+      "end": 49542724,
+      "http_status": 206,
+      "content_range": "bytes 49540724-49542724/67108864",
+      "received_bytes": 2001
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 49542932,
+      "end": 49544920,
+      "http_status": 206,
+      "content_range": "bytes 49542932-49544920/67108864",
+      "received_bytes": 1989
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 49545127,
+      "end": 49547127,
+      "http_status": 206,
+      "content_range": "bytes 49545127-49547127/67108864",
+      "received_bytes": 2001
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 49547335,
+      "end": 49915774,
+      "http_status": 206,
+      "content_range": "bytes 49547335-49915774/67108864",
+      "received_bytes": 368440
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 49915936,
+      "end": 50215641,
+      "http_status": 206,
+      "content_range": "bytes 49915936-50215641/67108864",
+      "received_bytes": 299706
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 50483186,
+      "end": 50495347,
+      "http_status": 206,
+      "content_range": "bytes 50483186-50495347/67108864",
+      "received_bytes": 12162
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 50495559,
+      "end": 50507788,
+      "http_status": 206,
+      "content_range": "bytes 50495559-50507788/67108864",
+      "received_bytes": 12230
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 50507997,
+      "end": 50520239,
+      "http_status": 206,
+      "content_range": "bytes 50507997-50520239/67108864",
+      "received_bytes": 12243
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 50520447,
+      "end": 50523054,
+      "http_status": 206,
+      "content_range": "bytes 50520447-50523054/67108864",
+      "received_bytes": 2608
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 50553556,
+      "end": 54098714,
+      "http_status": 206,
+      "content_range": "bytes 50553556-54098714/67108864",
+      "received_bytes": 3545159
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 54531693,
+      "end": 54548380,
+      "http_status": 206,
+      "content_range": "bytes 54531693-54548380/67108864",
+      "received_bytes": 16688
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 54547983,
+      "end": 54833475,
+      "http_status": 206,
+      "content_range": "bytes 54547983-54833475/67108864",
+      "received_bytes": 285493
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 54833640,
+      "end": 54938219,
+      "http_status": 206,
+      "content_range": "bytes 54833640-54938219/67108864",
+      "received_bytes": 104580
+    },
+    {
+      "asset": "military-current-0001.zip.part001",
+      "asset_id": 671734702,
+      "start": 65452343,
+      "end": 67108863,
+      "http_status": 206,
+      "content_range": "bytes 65452343-67108863/67108864",
+      "received_bytes": 1656521
+    },
+    {
+      "asset": "military-current-0001.zip.part002",
+      "asset_id": 671736492,
+      "start": 0,
+      "end": 3882653,
+      "http_status": 206,
+      "content_range": "bytes 0-3882653/67108864",
+      "received_bytes": 3882654
+    },
+    {
+      "asset": "military-current-0001.zip.part002",
+      "asset_id": 671736492,
+      "start": 3882256,
+      "end": 4992268,
+      "http_status": 206,
+      "content_range": "bytes 3882256-4992268/67108864",
+      "received_bytes": 1110013
+    },
+    {
+      "asset": "military-current-0001.zip.part002",
+      "asset_id": 671736492,
+      "start": 4992434,
+      "end": 5019537,
+      "http_status": 206,
+      "content_range": "bytes 4992434-5019537/67108864",
+      "received_bytes": 27104
+    },
+    {
+      "asset": "military-current-0001.zip.part002",
+      "asset_id": 671736492,
+      "start": 5019706,
+      "end": 5031990,
+      "http_status": 206,
+      "content_range": "bytes 5019706-5031990/67108864",
+      "received_bytes": 12285
+    }
+  ]
+}

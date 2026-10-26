@@ -769,7 +769,9 @@ func _draw_map_menus() -> void:
 		y += 104
 	button(Rect2(rect.position.x+12,y,rect.size.x-24,27),"经济补充提示 · "+("开启" if _controller.economic_supplements_enabled else "关闭"),"map:economic_supplements",true,_controller.economic_supplements_enabled)
 	y += 32
-	for text: String in ["人口地图 · 不可用","军事地图 · 不可用","资源与产出地图 · 不可用"]:
+	button(Rect2(rect.position.x+12,y,rect.size.x-24,27),"军事地貌 · 50 / 25 / 5 km","terrain:open")
+	y += 32
+	for text: String in ["人口地图 · 不可用","资源与产出地图 · 不可用"]:
 		button(Rect2(rect.position.x+12,y,rect.size.x-24,23),text,"",false)
 		y += 26
 

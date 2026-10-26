@@ -36,6 +36,9 @@ var _economic_previous_mode: String = ""
 var _economic_return_mode: String = "political"
 var _economic_follow_order: String = ""
 var _economic_locations_stamp: Array = []
+var _terrain_observation: Control
+var _terrain_was_paused: bool = true
+var _terrain_previous_speed: int = 1
 @onready var map_renderer: GlobeRenderer = $GlobeRenderer
 @onready var map_controller: GlobeController = $GlobeController
 @onready var main_shell: MainShell = $MainShell
@@ -61,7 +64,9 @@ func _enter_tree() -> void:
 		tree.remove_meta(key)
 
 func _notification(what: int) -> void:
-	if what==NOTIFICATION_WM_CLOSE_REQUEST and is_node_ready(): _request_departure("quit")
+	if what==NOTIFICATION_WM_CLOSE_REQUEST and is_node_ready():
+		if is_instance_valid(_terrain_observation): _close_terrain_observation()
+		_request_departure("quit")
 
 func _ready() -> void:
 	get_window().min_size = Vector2i(960,640)
@@ -509,7 +514,10 @@ func _follow_economic_purchase(result: Dictionary, payload: Dictionary) -> void:
 	_request_economic_topic_refresh()
 
 func _on_action_requested(action: String) -> void:
-	if _leaving: return
+	if _leaving or is_instance_valid(_terrain_observation): return
+	if action == "terrain:open":
+		_open_terrain_observation()
+		return
 	if action in ["system:main_menu","system:quit"]:
 		_request_departure("menu" if action=="system:main_menu" else "quit")
 		return
@@ -865,7 +873,45 @@ func _load_world(slot: int = 1) -> void:
 			map_controller.select(map_controller.selected_polity_id)
 		_install_world(candidate)
 
+func _open_terrain_observation() -> void:
+	if _world == null or _save_pending or _leaving or is_instance_valid(_terrain_observation): return
+	var script := load("res://scripts/presentation/ui/military_terrain_observation.gd") as GDScript
+	if script == null or not script.can_instantiate():
+		main_shell.show_feedback("军事地貌观察组件不可用。")
+		return
+	_terrain_was_paused = time_control.paused
+	_terrain_previous_speed = time_control.speed
+	time_control.paused = true
+	main_shell.refresh_clock()
+	map_controller.suspend_motion()
+	# Leave the original WorldState, selection and all camera fields untouched.
+	map_renderer.suspend_for_observation(true)
+	map_renderer.process_mode = Node.PROCESS_MODE_DISABLED
+	map_controller.process_mode = Node.PROCESS_MODE_DISABLED
+	main_shell.process_mode = Node.PROCESS_MODE_DISABLED
+	main_shell.hide()
+	_terrain_observation = script.new() as Control
+	_terrain_observation.set("context", {"observer_id":_world.player_state.player_id(),"place_id":_world.person_overlay.current_place(_world.player_state.player_id()),"world_minute":_world.game_clock.total_minutes(),"mode":"READ_ONLY_TRAINING_TERRAIN_NOT_FORMAL_DEPLOYMENT"})
+	_terrain_observation.connect("closed",_close_terrain_observation)
+	add_child(_terrain_observation)
+
+func _close_terrain_observation() -> void:
+	if not is_instance_valid(_terrain_observation): return
+	var previous := _terrain_observation
+	_terrain_observation = null
+	previous.queue_free()
+	main_shell.process_mode = Node.PROCESS_MODE_INHERIT
+	map_controller.process_mode = Node.PROCESS_MODE_INHERIT
+	map_renderer.process_mode = Node.PROCESS_MODE_INHERIT
+	main_shell.show()
+	map_renderer.suspend_for_observation(false)
+	time_control.speed = _terrain_previous_speed
+	time_control.paused = _terrain_was_paused
+	main_shell.refresh_clock()
+	main_shell.show_map_feedback("已返回原正式地图；人物所在地、选择和世界实例保持。")
+
 func _update_map_visibility() -> void:
+	if is_instance_valid(_terrain_observation): return
 	# Pages are bounded workspaces; the uncovered map remains interactive.
 	map_renderer.visible = true
 	($Background as CanvasItem).visible = true

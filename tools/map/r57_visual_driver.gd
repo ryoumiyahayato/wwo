@@ -90,6 +90,10 @@ func tracked_decode(level: String, admitted: Dictionary) -> Dictionary:
 	return result
 
 func _ready() -> void:
+	if acceptance=="terrain-region":
+		set_process(false)
+		terrain_region_run.call_deferred()
+		return
 	if not OS.get_user_data_dir().get_file().begins_with("WWO_R57_Visual_") or output.is_empty():
 		get_tree().quit(2)
 		return
@@ -2576,3 +2580,143 @@ func acceptance_living_ui(host: Object) -> void:
 	r["complete"]=r.final.actors[player].totals.work_hours==6 and r.final.actors[player].totals.income==18 and r.final.actors[player].cash==2516 and r.final.actors[player].totals.categories.food.satisfied==1 and r.final.actors[player].inventory.bread==0
 	ok=ok and r.complete and r.map_return_context and r.two_jobs_visible and r.select_only and r.cancel_no_action and r.empty_order_no_quantity and r.repeat_work_disabled and r.pending_no_work and r.other_job_full and r.other_job_no_click and r.restores.all(func(x:Dictionary)->bool:return x.visible_controls and x.same_world_state and x.selection_same and x.bytes>0)
 	await economic_action_finish(host,r,"LIVING_UI_COMPLETE" if ok else "LIVING_UI_FAILED",0 if ok else 5)
+
+func terrain_region_sample(label: String, seconds: float, target: Control=null) -> Dictionary:
+	FileAccess.open(output+"/phase.json",FileAccess.WRITE).store_string(JSON.stringify({"phase":label}))
+	var values: Array[float]=[]
+	var begin:=Time.get_ticks_usec()
+	var previous:=begin
+	while Time.get_ticks_usec()-begin<int(seconds*1000000):
+		await get_tree().process_frame
+		if target!=null and values.size()%6==0:
+			if label=="zoom":
+				var wheel:=InputEventMouseButton.new()
+				wheel.position=Vector2(640,420)
+				wheel.button_index=MOUSE_BUTTON_WHEEL_UP if values.size()%48<24 else MOUSE_BUTTON_WHEEL_DOWN
+				wheel.pressed=true
+				get_viewport().push_input(wheel,true)
+				var wheel_up:=wheel.duplicate() as InputEventMouseButton
+				wheel_up.pressed=false
+				get_viewport().push_input(wheel_up,true)
+			elif label=="drag":
+				var motion:=InputEventMouseMotion.new()
+				motion.position=Vector2(640+values.size(),420)
+				motion.relative=Vector2(6,0)
+				motion.button_mask=MOUSE_BUTTON_MASK_LEFT
+				get_viewport().push_input(motion,true)
+		var now:=Time.get_ticks_usec()
+		values.append((now-previous)/1000.0)
+		previous=now
+	values.sort()
+	return {"phase":label,"frames":values.size(),"p95_frame_ms":values[mini(values.size()-1,int(values.size()*.95))],"max_frame_ms":values.back(),"process_ms":Performance.get_monitor(Performance.TIME_PROCESS)*1000,"draw_calls":Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),"texture_bytes":Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),"static_bytes":OS.get_static_memory_usage(),"window_focused":get_window().has_focus()}
+
+func terrain_region_image(label: String) -> void:
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
+	get_viewport().get_texture().get_image().save_png(output+"/"+label+".png")
+	print("REGION_IMAGE ",label)
+
+func terrain_region_run() -> void:
+	if output.is_empty() or not OS.get_user_data_dir().get_file().begins_with("WWO_R57_Visual_Region_"):
+		push_error("Region review requires its own explicit output and isolated user directory: "+OS.get_user_data_dir())
+		get_tree().quit(2)
+		return
+	DirAccess.make_dir_recursive_absolute(output)
+	print("REGION_USER_DIR ",OS.get_user_data_dir())
+	FileAccess.open(output.path_join("window-handle.json"),FileAccess.WRITE).store_string(JSON.stringify({"pid":OS.get_process_id(),"hwnd":DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE,get_window().get_window_id())}))
+	get_window().title="WWO · 原正式世界 → 分层军事地貌"
+	await wait_seconds(1)
+	var menu: Node=get_tree().current_scene
+	var ok:=await economic_button(menu,"开始")
+	for attempt: int in range(1800):
+		if menu.get("_preview_ready")==true: break
+		await get_tree().process_frame
+	await wait_seconds(.6)
+	await terrain_region_image("01-legal-person-selection")
+	ok=await economic_button(menu,"进入世界") and ok
+	var host: Node
+	for attempt: int in range(1800):
+		var candidate:=get_tree().current_scene
+		if candidate is FormalWorldApplication and candidate.get("_world")!=null:
+			host=candidate
+			break
+		await get_tree().process_frame
+	if host==null:
+		push_error("Normal menu could not install its formal world")
+		get_tree().quit(3)
+		return
+	renderer=host.get("map_renderer")
+	controller=host.get("map_controller")
+	await wait_seconds(3)
+	var shell: Object=host.get("main_shell")
+	var world: WorldState=host.get("_world")
+	var person_id:=world.player_state.player_id()
+	var person_before:=world.person_overlay.person(person_id).duplicate(true)
+	var facts_before: Dictionary=host.get("_persistence").snapshot()
+	var pose_before: Array=[controller.orientation(),controller.zoom,controller.region_camera.origin,controller.region_camera.km_per_pixel,controller.selected_place_id,controller.selected_polity_id]
+	await terrain_region_image("02-original-formal-world")
+	ok=await economic_click(shell,"map:mode_menu") and ok
+	ok=await economic_click(shell,"terrain:open") and ok
+	var observation: Control=host.get("_terrain_observation")
+	if observation==null:
+		push_error("Military terrain visible menu entry did not open")
+		get_tree().quit(4)
+		return
+	var ground: Node3D=observation.get("terrain")
+	for attempt: int in range(3600):
+		if ground!=null and ground.call("is_ready") and not ground.call("get_status").loading and int(ground.call("get_status").queued_tiles)==0: break
+		await get_tree().process_frame
+	await wait_seconds(1)
+	await terrain_region_image("03-region-50km")
+	var phases: Array=[]
+	phases.append(await terrain_region_sample("50km_idle",3))
+	ok=await economic_button(observation,"25 km") and ok
+	await wait_seconds(1)
+	await terrain_region_image("04-region-25km")
+	ok=await economic_button(observation,"进入选中 5 km") and ok
+	phases.append(await terrain_region_sample("enter_5km",3))
+	await terrain_region_image("05-native-5km")
+	phases.append(await terrain_region_sample("5km_idle",3))
+	ok=await economic_button(observation,"村庄 / 道路") and ok
+	phases.append(await terrain_region_sample("enter_detail",3))
+	await terrain_region_image("06-village-materials")
+	phases.append(await terrain_region_sample("village_idle",3))
+	phases.append(await terrain_region_sample("zoom",3,observation))
+	await mouse_button(Vector2(640,420),MOUSE_BUTTON_LEFT,true)
+	phases.append(await terrain_region_sample("drag",3,observation))
+	await mouse_button(Vector2(820,420),MOUSE_BUTTON_LEFT,false)
+	ok=await economic_button(observation,"步行观察（隔离）") and ok
+	for attempt: int in range(1200):
+		if observation.get("_walking")==true: break
+		await get_tree().process_frame
+	var walked:=false
+	var start:=Vector3.ZERO
+	var finish:=Vector3.ZERO
+	var body:=observation.get("_walker") as CharacterBody3D
+	if body!=null:
+		start=body.position
+		var down:=InputEventKey.new();down.keycode=KEY_W;down.pressed=true;get_viewport().push_input(down,true)
+		phases.append(await terrain_region_sample("walking_motion",4))
+		var up:=InputEventKey.new();up.keycode=KEY_W;up.pressed=false;get_viewport().push_input(up,true)
+		await wait_seconds(.5)
+		finish=body.position
+		walked=start.distance_to(finish)>5 and body.is_on_floor()
+	await terrain_region_image("07-isolated-walking")
+	phases.append(await terrain_region_sample("walking_still",3))
+	ok=await economic_button(observation,"上一级 / Esc") and ok
+	ok=await economic_button(observation,"上一级 / Esc") and ok
+	phases.append(await terrain_region_sample("return_region",2))
+	await terrain_region_image("08-return-selected-region")
+	var ground_status: Dictionary=ground.call("get_status")
+	ok=await economic_button(observation,"返回正式世界") and ok
+	phases.append(await terrain_region_sample("return_formal",2))
+	await terrain_region_image("09-return-original-world")
+	var facts_after: Dictionary=host.get("_persistence").snapshot()
+	ok=ok and host.get("_terrain_observation")==null
+	var camera_same:=pose_before==[controller.orientation(),controller.zoom,controller.region_camera.origin,controller.region_camera.km_per_pixel,controller.selected_place_id,controller.selected_polity_id]
+	var result: Dictionary={"normal_menu_clicks":ok,"world_same_instance":world==host.get("_world"),"world_snapshot_unchanged":facts_before==facts_after,"person_unchanged":person_before==world.person_overlay.person(person_id),"camera_and_selection_unchanged":camera_same,"person_id":person_id,"minute":world.game_clock.total_minutes(),"isolated_walked_on_collision":walked,"walk_start_m":str(start),"walk_end_m":str(finish),"terrain_status_after_return_to_region":ground_status,"phases":phases,"renderer_method":RenderingServer.get_current_rendering_method(),"adapter":RenderingServer.get_video_adapter_name(),"user_dir":OS.get_user_data_dir(),"note":"Native no-focus visible window. Frame/process metrics are not GPU execution time. No saving, deployment or combat actions."}
+	var file:=FileAccess.open(output+"/region-result.json",FileAccess.WRITE)
+	file.store_string(JSON.stringify(result,"\t"))
+	print("REGION_REVIEW_RESULT ",JSON.stringify(result))
+	get_tree().quit(0 if ok and walked and facts_before==facts_after and camera_same else 5)
+

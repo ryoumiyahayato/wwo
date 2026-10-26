@@ -11,6 +11,26 @@ const POLITICAL_UNDER_WIDTH: float = 1.05
 
 var preserve_on_reparent: bool = false
 var show_footer: bool = false
+var observation_suspended: bool = false
+
+func suspend_for_observation(active: bool) -> void:
+	# Keep the one world's display cache, but never render it behind local terrain.
+	if observation_suspended == active: return
+	observation_suspended = active
+	if controller != null: controller.suspend_motion()
+	visible = not active
+	if active:
+		set_process(false)
+		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		region_view.viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		if region_view._local_viewport != null:
+			region_view._local_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	else:
+		_resource_demand_dirty = true
+		_view_dirty = true
+		set_process(true)
+		queue_redraw()
+
 var controller: GlobeController
 var spatial_world: VNextSpatialWorld
 var content: MapGeometryContent
@@ -2545,6 +2565,7 @@ func _on_administrative_display_changed() -> void:
 	place_content_ready.emit()
 
 func _on_visibility_changed() -> void:
+	if observation_suspended: return
 	if controller == null:
 		return
 	if not visible:
