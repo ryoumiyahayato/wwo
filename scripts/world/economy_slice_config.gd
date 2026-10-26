@@ -13,6 +13,7 @@ const Leases = preload("res://scripts/world/economy_lease_market.gd")
 const Services = preload("res://scripts/world/economy_service_market.gd")
 const Budget = preload("res://scripts/world/economy_procurement_budget.gd")
 const Cohorts = preload("res://scripts/world/economy_cohort_rules.gd")
+const Process = preload("res://scripts/world/economy_production_process.gd")
 
 const Capital = preload("res://scripts/world/economy_capital_formation.gd")
 const CommodityMapping = preload("res://scripts/world/formal_commodity_mapping.gd")
@@ -417,10 +418,16 @@ static func _finance(value: Dictionary, actors: Dictionary, firms: Dictionary, j
 		ids[row["id"]] = true
 	ids = {value["route"]["id"]: true}
 	for row: Variant in value.get("routes", []):
-		if not row is Dictionary or not _fields(row, ["id", "from_place_id", "to_place_id", "capacity", "delay", "carrier", "freight_per_unit", "known_to"], ["capacity_manager", "basis", "source_link_id"]) or not row["id"] is String or not str(row["id"]).begins_with("edge:") or ids.has(row["id"]) or not _place(row["from_place_id"]) or not _place(row["to_place_id"]) or not _number(row["capacity"], 1) or not _number(row["delay"], 1) or not _number(row["freight_per_unit"]) or not subjects.has(row["carrier"]) or not row["known_to"] is Array:
+		if not row is Dictionary or not _fields(row, ["id", "from_place_id", "to_place_id", "capacity", "delay", "carrier", "freight_per_unit", "known_to"], ["capacity_manager", "basis", "source_link_id", "source_permission_id"]) or not row["id"] is String or not str(row["id"]).begins_with("edge:") or ids.has(row["id"]) or not _place(row["from_place_id"]) or not _place(row["to_place_id"]) or not _number(row["capacity"], 1) or not _number(row["delay"], 1) or not _number(row["freight_per_unit"]) or not subjects.has(row["carrier"]) or not row["known_to"] is Array:
 			return false
-		if row.get("basis", "SYNTHETIC") not in ["SYNTHETIC", "HOST_LINK"] or (row.get("basis", "SYNTHETIC") == "HOST_LINK" and (not row.get("source_link_id") is String or str(row["source_link_id"]).is_empty())) or (row.get("basis", "SYNTHETIC") == "SYNTHETIC" and row.has("source_link_id")):
-			return false
+		var basis: String = str(row.get("basis", "SYNTHETIC"))
+		if basis not in ["SYNTHETIC", "HOST_LINK", "DEVELOPMENT_PERMISSION"]: return false
+		if basis == "HOST_LINK":
+			if not row.get("source_link_id") is String or str(row["source_link_id"]).is_empty() or row.has("source_permission_id"): return false
+		elif row.has("source_link_id"): return false
+		if basis == "DEVELOPMENT_PERMISSION":
+			if not row.get("source_permission_id") is String or str(row["source_permission_id"]).is_empty(): return false
+		elif row.has("source_permission_id"): return false
 		if row.has("capacity_manager") and (not firms.has(row["capacity_manager"]) and (not actors.has(row["capacity_manager"]) or actors[row["capacity_manager"]]["control"] == "dormant")):
 			return false
 		var recipients: Dictionary = {}
@@ -780,11 +787,12 @@ static func _production_valid(firm: Dictionary, goods: Array[String]) -> bool:
 		return false
 	var ids: Dictionary = {}
 	for activity: Variant in firm["activities"]:
-		if not activity is Dictionary or not FormalLedgerState.exact_fields(activity, ["id", "place_id", "outputs", "materials", "hours", "capacity_units", "enabled", "basis"]) or not activity["id"] is String or not str(activity["id"]).begins_with("activity:") or ids.has(activity["id"]) or activity["place_id"] != firm["place_id"] or not activity["enabled"] is bool or activity["basis"] not in ["DEVELOPMENT_CONFIGURATION", "GENERATED_OPENING_CONFIGURATION"] or not _number(activity["hours"], 1) or not _number(activity["capacity_units"], 1) or not _stock(activity["materials"], goods) or not activity["outputs"] is Dictionary or activity["outputs"].is_empty():
+		if not activity is Dictionary or not _fields(activity, ["id", "place_id", "outputs", "materials", "hours", "capacity_units", "enabled", "basis"], ["process"]) or not activity["id"] is String or not str(activity["id"]).begins_with("activity:") or ids.has(activity["id"]) or activity["place_id"] != firm["place_id"] or not activity["enabled"] is bool or activity["basis"] not in ["DEVELOPMENT_CONFIGURATION", "GENERATED_OPENING_CONFIGURATION"] or not _number(activity["hours"], 1) or not _number(activity["capacity_units"], 1) or not _stock(activity["materials"], goods) or not activity["outputs"] is Dictionary or activity["outputs"].is_empty():
 			return false
 		for good: Variant in activity["outputs"]:
 			if good not in goods or not _number(activity["outputs"][good], 1) or int(activity["materials"][good]) != 0:
 				return false
+		if not Process.valid(activity): return false
 		ids[activity["id"]] = true
 	return activity_order(firm["activities"]).size() == firm["activities"].size()
 

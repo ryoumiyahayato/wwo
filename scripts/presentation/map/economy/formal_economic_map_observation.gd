@@ -5,11 +5,34 @@ extends RefCounted
 const Network = preload("res://scripts/presentation/map/economy/observed_market_network.gd")
 const Contacts = preload("res://scripts/presentation/map/economy/observed_market_contacts.gd")
 const ORDER_PAGE = 32
+const NODE_BUDGET = 128
+const PLACE_BUDGET = 96
+const FACT_BUDGET = 64
+# One detached content projection and one current viewport projection only.
+# Camera signals may query another window; draw calls never scan the economy.
+static var _network_stamp: Array = []
+static var _known_network: Dictionary = {}
+static var _window_places: Array[String] = []
+static var _window_network: Dictionary = {}
+
+static func node_network(world: WorldState, places: Array[String] = []) -> Dictionary:
+	if world==null or world.economy_r1==null: return {}
+	var key := stamp(world)
+	if _network_stamp!=key:
+		_network_stamp=key
+		_known_network=world.economy_r1.network_view(world.player_state.player_id(),[],NODE_BUDGET)
+		_window_places.clear()
+		_window_network.clear()
+	if places.is_empty(): return _known_network
+	if _window_places!=places or _window_network.is_empty():
+		_window_places=places.duplicate()
+		_window_network=world.economy_r1.network_view(world.player_state.player_id(),places,NODE_BUDGET)
+	return _window_network
 
 static func stamp(world: WorldState) -> Array:
 	if world==null: return []
 	var native := world.economy_r1
-	return [world.get_instance_id(),world.player_state.player_id(),world.game_clock.total_minutes(),world.organization_state.revision(),world.economy_state._state_revision,native._commands.size() if native!=null else 0,native.next_order if native!=null else 0,native.next_shipment if native!=null else 0]
+	return [world.get_instance_id(),world.player_state.player_id(),world.game_clock.total_minutes(),world.organization_state.revision(),world.economy_state._state_revision,native._commands.size() if native!=null else 0,native.next_order if native!=null else 0,native.next_shipment if native!=null else 0,native.network_revision() if native!=null else 0]
 
 static func canonical_place(id: String) -> String:
 	return VNextSpatialCatalog.map_id_to_place_id(VNextSpatialCatalog.place_query_to_map_id(id))
@@ -18,28 +41,59 @@ static func known_places(world: WorldState) -> Array[Dictionary]:
 	var rows:Array[Dictionary]=[]
 	if world==null or world.economy_r1==null:return rows
 	var seen:Dictionary={}
-	# Bounded identities only. No enterprise stock, price or other-firm truth
-	# is requested to admit these already known Catalog anchors to the atlas.
-	for source:Dictionary in world.economy_r1.map_site_summaries(world.player_state.player_id(),[],16,true):
-		var id:=str(source.place_id)
-		if seen.has(id):continue
+	# Only identities admitted by the observer boundary. A public establishment
+	# is not permission to read its account, stock, orders or unreceived messages.
+	for source:Dictionary in node_network(world).get("nodes",[]):
+		var id:=str(source.get("place_id",""))
+		if id.is_empty() or seen.has(id):continue
 		var record:=world.spatial_catalog.get_place(id)
-		if _fact(world,source,record).is_empty():continue
+		if not _coordinates(record):continue
 		var point:=record.duplicate()
 		point["id"]=id
 		point["display_name"]=str(record.get("name_zh",record.get("name",id)))
 		rows.append(point);seen[id]=true
+		if rows.size()>=PLACE_BUDGET:break
 	return rows
+
+static func _coordinates(place: Dictionary) -> bool:
+	var coordinates:Variant=place.get("lon_lat")
+	if not coordinates is Array or coordinates.size()!=2:return false
+	if not (coordinates[0] is int or coordinates[0] is float) or not (coordinates[1] is int or coordinates[1] is float):return false
+	var ll:=Vector2(float(coordinates[0]),float(coordinates[1]))
+	return ll.is_finite() and absf(ll.x)<=180 and absf(ll.y)<=90
 
 static func brief(world: WorldState, places: Array[String], polity_id: String, capital: Dictionary) -> Array[Dictionary]:
 	var facts: Array[Dictionary] = []
 	if world==null: return facts
 	var observer := world.player_state.player_id()
 	if world.economy_r1!=null:
-		for row: Dictionary in world.economy_r1.map_site_summaries(observer,places,12):
-			var place := world.spatial_catalog.get_place(str(row.place_id))
-			var fact := _fact(world,row,place)
-			if not fact.is_empty(): facts.append(fact)
+		var groups:Dictionary={}
+		for node:Dictionary in node_network(world,places).get("nodes",[]):
+			var id:=str(node.get("place_id",""))
+			if id not in places:continue
+			if not groups.has(id):groups[id]={"source_id":"nodes:"+id,"subject_id":observer,"place_id":id,"kind":"place","node_ids":[],"node_kinds":[],"site_count":0,"transport_count":0,"identity_bases":[],"known_activity":[],"basis":"OBSERVER_AUTHORIZED_NODE_IDENTITIES","priority":50}
+			var group:Dictionary=groups[id]
+			group.node_ids.append(str(node.get("id","")))
+			var kind:=str(node.get("kind",""))
+			if kind not in group.node_kinds:group.node_kinds.append(kind)
+			var basis:=str(node.get("identity_basis",node.get("basis","")))
+			if not basis.is_empty() and basis not in group.identity_bases:group.identity_bases.append(basis)
+			if kind=="site":
+				group.site_count+=1;group.kind="site";group.priority=80
+				if str(node.get("subject_id",observer))!=observer:group.subject_id=str(node.subject_id)
+			elif kind=="transport_node":
+				group.transport_count+=1
+				if group.kind=="place":group.kind="transport_node"
+		# Retain received labour/supplier activity, not another firm's private plan.
+		for row:Dictionary in world.economy_r1.map_site_summaries(observer,places,16):
+			var id:=str(row.place_id)
+			if groups.has(id):groups[id].known_activity.append(str(row.get("state","")))
+		for id:String in groups:
+			var group:Dictionary=groups[id]
+			group["state"]="合法地点"+(" · %d企业站点"%int(group.site_count) if int(group.site_count)>0 else "")+(" · 物流节点" if int(group.transport_count)>0 else "")
+			var fact:=_fact(world,group,world.spatial_catalog.get_place(id))
+			if not fact.is_empty():facts.append(fact)
+			if facts.size()>=FACT_BUDGET-1:break
 	# A country statistic is labelled as such. Its capital is only a display
 	# anchor; it is never evidence of a business, warehouse or city inventory.
 	if not polity_id.is_empty() and not capital.is_empty():
@@ -58,13 +112,10 @@ static func brief(world: WorldState, places: Array[String], polity_id: String, c
 	return facts
 
 static func _fact(world: WorldState, row: Dictionary, place: Dictionary) -> Dictionary:
-	var coordinates: Variant = place.get("lon_lat")
-	if not coordinates is Array or coordinates.size()!=2: return {}
-	if not (coordinates[0] is float or coordinates[0] is int) or not (coordinates[1] is float or coordinates[1] is int): return {}
-	var ll := Vector2(float(coordinates[0]),float(coordinates[1]))
-	if not ll.is_finite() or absf(ll.x)>180 or absf(ll.y)>90: return {}
+	if not _coordinates(place):return {}
+	var coordinates:Array=place.lon_lat
 	var fact := row.duplicate()
-	fact.merge({"id":"economy:"+str(row.source_id),"domain":"economy","observer":world.player_state.player_id(),"world_id":world.get_instance_id(),"world_minute":world.game_clock.total_minutes(),"lon_lat":[ll.x,ll.y],"position_kind":"CITY_ANCHOR_NOT_PARCEL","knowledge":"CURRENT_OBSERVER_AUTHORIZED_FACT","maps":["political","economic","geographic"]},true)
+	fact.merge({"id":"economy:"+str(row.source_id),"domain":"economy","observer":world.player_state.player_id(),"world_id":world.get_instance_id(),"world_minute":world.game_clock.total_minutes(),"lon_lat":coordinates.duplicate(),"position_kind":"CITY_ANCHOR_NOT_PARCEL","knowledge":"PUBLIC_OR_RECEIVED_IDENTITY_NOT_PRIVATE_BUSINESS_DATA","maps":["political","economic","geographic"]},true)
 	return fact
 
 static func subjects(world: WorldState, polity_id: String) -> Array[Dictionary]:
@@ -81,6 +132,10 @@ static func details(world: WorldState, polity_id: String, requested_subject: Str
 	if subject.begins_with("aggregate:"): subject = "aggregate:"+polity_id
 	if not choices.any(func(row: Dictionary) -> bool: return row.id==subject): subject = str(choices[0].id) if not choices.is_empty() else ""
 	var result := {"world_id":world.get_instance_id(),"minute":world.game_clock.total_minutes(),"date":world.game_clock.current_date(),"world_case":str(world.economy_r1.config.get("case_id","")) if world.economy_r1!=null else "FORMAL_COUNTRY_STATISTICS","observer":world.player_state.player_id(),"subject":subject,"subjects":choices,"source":"当前正式世界 · 只读经济观察","firm":{},"market_network":{},"market_contacts":{},"macro":{},"orders_total":0,"offset":0,"page_size":ORDER_PAGE,"native_enabled":world.economy_r1!=null}
+	result["node_network"]=node_network(world)
+	result["identity_notice"]="显式开发情景；企业、初始禀赋与配方/工资/运力为开发假设，不是历史企业或历史统计。" if str(result.world_case).contains("DEVELOPMENT") else "当前正式世界身份；巴黎开局企业为有限模拟、非历史企业。合法地点不等于人口、库存或厂房地籍。" if str(result.world_case).contains("PARIS") else "合法地点与企业身份按现有来源列示；未提供的历史身份、私有财产和未收到信息不推定。"
+	if result.world_case == "FORMAL_ECONOMIC_NODE_NETWORK_DEVELOPMENT":
+		result["identity_notice"] += " 法英同币种开发贸易；海峡段占用正式共享运力，其他段为开发业务运量。未验收外汇、关税或禁运制度。"
 	if subject.begins_with("aggregate:"):
 		result["macro"] = world.economy_state.country_summary(subject.trim_prefix("aggregate:"))
 		return result

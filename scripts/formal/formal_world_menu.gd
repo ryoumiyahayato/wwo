@@ -37,6 +37,8 @@ var _flag: TextureRect
 var _brief: Label
 var _person_note: Label
 var _person_choice: OptionButton
+var _network_choice: CheckButton
+var _network_opening: bool = false
 var _enter_button: Button
 var _worker: Thread
 var _launch_mode: String = ""
@@ -355,6 +357,7 @@ func _show_page(page: String) -> void:
 	_country_name = null
 	_enter_button = null
 	_person_choice = null
+	_network_choice = null
 	if page=="selection" and _renderer==null and _preview_error.is_empty() and not _preview_waiting: _prepare_preview.call_deferred()
 	($Painting as TextureRect).visible = page!="selection" or not _preview_ready
 	($Shade as ColorRect).visible = page!="selection" or not _preview_ready
@@ -426,6 +429,14 @@ func _show_page(page: String) -> void:
 			_person_choice = OptionButton.new()
 			_column.add_child(_person_choice)
 			_person_note = _text("",13)
+			_network_choice = CheckButton.new()
+			_network_choice.text = "经济网络开发情景（法国）"
+			_network_choice.button_pressed = _network_opening
+			_network_choice.tooltip_text = "同一正式世界、球形地图与时钟。20家开发企业、有限初始资金与原料、开发配方和运输参数；法国—英国同币种贸易。不是1900年历史企业或外汇验收。普通开局不受影响。"
+			_column.add_child(_network_choice)
+			_network_choice.toggled.connect(func(enabled: bool) -> void:
+				_network_opening = enabled
+				_update_country())
 			_column = _footer
 			_enter_button = _button("进入世界",_enter_world.bind("new",1),false)
 			_update_country()
@@ -582,7 +593,12 @@ func _update_country() -> void:
 		_person_choice.set_item_metadata(0,str(opening.person_id))
 	_person_choice.disabled = not playable
 	_person_choice.visible = playable
+	if _network_choice != null:
+		_network_choice.visible = playable and opening.get("source_id", "") == "country_fra"
+		_network_choice.disabled = not _network_choice.visible
 	_person_note.text = "游戏生成的普通人物，居住于"+str(opening.place_name)+"，暂无正式就业。"+("进入后可自愿申请本地工坊岗位。" if opening.get("source_id")=="country_fra" else "") if playable else "该地区暂无可选人物。"
+	if playable and opening.get("source_id", "") == "country_fra" and _network_opening:
+		_person_note.text = "开发情景：20家独立企业，有限开仓原料与资金，法国—英国同币种供应链。企业、配方与运力为开发估计，不是历史事实；使用原正式地图、时钟与存档。"
 	_enter_button.disabled = not playable or not _preview_ready
 	_position_panel.call_deferred()
 
@@ -611,7 +627,9 @@ func _enter_world(mode: String,slot: int) -> void:
 	_controller.suspend_motion()
 	_set_loading(true)
 	_worker = Thread.new()
-	var error := _worker.start(_build_world.bind(mode,slot,_renderer==null,source_id))
+	# Capture the explicit choice before the worker starts; it never reads UI.
+	var network_opening := mode=="new" and source_id=="country_fra" and _network_opening
+	var error := _worker.start(_build_world.bind(mode,slot,_renderer==null,source_id,network_opening))
 	if error!=OK:
 		_worker = null
 		_entering = false
@@ -619,10 +637,15 @@ func _enter_world(mode: String,slot: int) -> void:
 		_status.text = "无法准备世界："+error_string(error)
 	else: set_process(true)
 
-func _build_world(mode: String,slot: int, prepare_map: bool, source_id: String) -> WorldBuildResult:
+func _build_world(mode: String,slot: int, prepare_map: bool, source_id: String, network_opening: bool = false) -> WorldBuildResult:
 	var native_settings: Dictionary = EconomyDevelopmentConfig.formal_stratified_request() if mode=="new" and (OS.get_cmdline_user_args().has("--formal-capital-transport") or OS.get_cmdline_user_args().has("--formal-npc-capital-trade") or OS.get_cmdline_user_args().has("--formal-npc-capital-competition") or OS.get_cmdline_user_args().has("--formal-npc-capital-recirculation") or (EconomyDevelopmentConfig.player_capital_requested() or OS.get_cmdline_user_args().has("--formal-economy-feedback"))) else FormalEconomicOpening.for_source(source_id) if mode=="new" else {}
+	if mode=="new" and network_opening:
+		native_settings = EconomyNetworkDevelopment.request()
 	var prepared_sources: HistoricalProvenanceFoundation = _content.provenance if _content!=null and _content.loaded else null
 	var built := FormalPersistence.new().load_from_user(slot) if mode=="load" else WorldBootstrap.new().build(null,[],[],FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT,true,native_settings,source_id,prepared_sources)
+	if built.success and network_opening and (built.world.economy_r1==null or not built.world.native_economy_error.is_empty()):
+		built.success = false
+		built.error = "经济网络开发情景未能准入："+built.world.native_economy_error
 	if built.success and prepare_map:
 		var prepared := WorldBootstrap.prepare_presentation_content(built.world.provenance)
 		if not prepared.loaded or not prepared.errors.is_empty():

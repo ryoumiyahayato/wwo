@@ -46,7 +46,7 @@ static func project(firm: Dictionary, jurisdictions: Dictionary = {}, centres: D
 		_node(nodes, origin, jurisdictions, centres)
 		_node(nodes, destination, jurisdictions, centres)
 		var good: String = str(order.get("good", ""))
-		var edge: Dictionary = {"order_id": id, "from_node": origin, "to_node": destination, "good": good, "route_id": order.get("route_id", ""), "pending_responsibility": order.get("pending", 0), "transit_responsibility": order.get("transit", 0), "delivered": order.get("delivered", 0), "cargo_ids": []}
+		var edge: Dictionary = {"order_id": id, "from_node": origin, "to_node": destination, "good": good, "route_id": order.get("route_id", ""), "status":order.get("stage","UNKNOWN"), "pending_responsibility": order.get("pending", 0), "transit_responsibility": order.get("transit", 0), "delivered": order.get("delivered", 0), "known_unresolved_loss_quantity":order.get("known_unresolved_loss_quantity"), "cargo_ids": []}
 		for shipment: Dictionary in order.get("shipments", []):
 			var sid: String = str(shipment.get("id", ""))
 			if sid.is_empty(): issues.append("CARGO_IDENTITY_MISSING"); continue
@@ -57,7 +57,13 @@ static func project(firm: Dictionary, jurisdictions: Dictionary = {}, centres: D
 			var actual: Variant = shipment.get("physical_quantity")
 			if not actual is int or actual < 0: issues.append("PHYSICAL_CARGO_UNKNOWN:" + sid); continue
 			_node(nodes, str(shipment.get("place_id", "")), jurisdictions, centres)
-			cargo[sid] = {"cargo_id": sid, "order_id": id, "good": good, "physical_quantity": actual, "place_id": shipment.get("place_id", ""), "from_node": origin, "to_node": destination, "stage": shipment.get("stage", "UNKNOWN"), "earliest_arrival_day": shipment.get("earliest_arrival_day"), "arrival_blocked_reason": shipment.get("arrival_blocked_reason", "")}
+			var leg_from:=str(shipment.get("from_place_id",""))
+			var leg_to:=str(shipment.get("to_place_id",""))
+			_node(nodes,leg_from,jurisdictions,centres)
+			_node(nodes,leg_to,jurisdictions,centres)
+			# Preserve the owner's actual segment cursor. Never replace it with the
+			# order's whole origin/destination or an interpolated live position.
+			cargo[sid] = {"cargo_id": sid, "order_id": id, "good": good, "physical_quantity": actual, "place_id": shipment.get("place_id", ""), "from_node": origin, "to_node": destination, "leg_from_node":leg_from,"leg_to_node":leg_to,"current_edge_id":shipment.get("current_edge_id",""),"next_edge_id":shipment.get("next_edge_id",""),"leg_index":shipment.get("leg_index"),"leg_count":shipment.get("leg_count"),"waiting_reason":shipment.get("waiting_reason",""),"stage": shipment.get("stage", "UNKNOWN"), "earliest_arrival_day": shipment.get("earliest_arrival_day"), "arrival_blocked_reason": shipment.get("arrival_blocked_reason", "")}
 			edge["cargo_ids"].append(sid)
 			in_transit[good] = int(in_transit.get(good, 0)) + int(actual)
 		edges[id] = edge

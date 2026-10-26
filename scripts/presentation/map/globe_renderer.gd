@@ -1037,23 +1037,30 @@ func _draw() -> void:
 func set_topic_facts(rows: Array[Dictionary]) -> void:
 	if _topic_facts==rows: return
 	note_topic_query("topic_publications")
-	_topic_facts = rows.slice(0,16)
+	_topic_facts = rows.slice(0,64)
 	_topic_by_place.clear()
 	for row: Dictionary in _topic_facts:
 		if not row.has_all(["id","source_id","domain","kind","state","place_id","world_id","world_minute","observer","knowledge","maps"]): continue
 		var place := str(row.place_id)
-		if _topic_by_place.has(place): continue
-		_topic_by_place[place] = row
-		_topic_by_place[VNextSpatialCatalog.place_query_to_map_id(place)] = row
+		if _topic_by_place.has(place):
+			if row.kind=="country_statistics":(_topic_by_place[place] as Dictionary)["has_country_statistics"]=true
+			continue
+		var fact:=row.duplicate()
+		_topic_by_place[place] = fact
+		_topic_by_place[VNextSpatialCatalog.place_query_to_map_id(place)] = fact
 	queue_redraw()
 
 func set_topic_links(rows: Array[Dictionary]) -> void:
-	_topic_links = rows.slice(0,12)
+	if _topic_links==rows:return
+	_topic_links = rows.slice(0,48)
+	# Public corridors below responsibilities; physical cargo remains on top.
+	var layers:Dictionary={"transport":0,"offer":1,"receipt":2,"contract":3,"cargo":4}
+	_topic_links.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(layers.get(str(a.get("kind","")),0))<int(layers.get(str(b.get("kind","")),0)))
 	queue_redraw()
 
 func set_topic_places(rows: Array[Dictionary]) -> void:
 	if _topic_places==rows:return
-	_topic_places=rows.slice(0,16)
+	_topic_places=rows.slice(0,96)
 	_symbol_layout_dirty=true
 	queue_redraw()
 
@@ -1074,22 +1081,33 @@ func _draw_topic_information() -> void:
 	var mode := controller.map_mode
 	if mode not in ["political","geographic","economic"]: return
 	if mode!="economic" and not controller.economic_supplements_enabled: return
-	var budget := 12 if controller.region_camera.local_active else 8 if controller.region_camera.active else 2
+	var budget := 24 if mode=="economic" and controller.region_camera.local_active else 16 if mode=="economic" and controller.region_camera.active else 12 if mode=="economic" else 12 if controller.region_camera.local_active else 8 if controller.region_camera.active else 2
 	for row: Dictionary in _symbol_layout:
 		var fact := _topic_by_place.get(str(row.id),{}) as Dictionary
 		if fact.is_empty() or mode not in (fact.maps as Array): continue
-		if not controller.region_camera.active and str(fact.kind)!="country_statistics" and str(row.id)!=controller.selected_place_id:
+		if mode!="economic" and not controller.region_camera.active and str(fact.kind)!="country_statistics" and str(row.id)!=controller.selected_place_id:
 			for candidate: Dictionary in _topic_facts:
 				if candidate.kind=="country_statistics" and candidate.place_id==fact.place_id: fact=candidate;break
 			if fact.kind!="country_statistics": continue
 		var id := str(fact.place_id)
 		if _topic_hits.has(id): continue
-		var color := Color("63c5b5") if fact.kind=="owned_site" else Color("86aeca") if fact.kind=="country_statistics" else Color("dfb56d")
+		var color := Color("63c5b5") if fact.kind in ["owned_site","site"] else Color("86aeca") if fact.kind=="country_statistics" else Color("bda1dc") if fact.kind=="transport_node" else Color("dfb56d")
 		var rect := row.rect as Rect2
 		if bool(row.get("topic_locator_only",false)):
 			draw_line(row.point as Vector2,rect.get_center(),color*Color(1,1,1,.6),1.0,true)
-		draw_circle(rect.end-Vector2(2,2),3.3,Color("14262c"))
-		draw_circle(rect.end-Vector2(2,2),2.4,color)
+		var badge:=rect.end-Vector2(2,2)
+		var kinds:Array=fact.get("node_kinds",[])
+		draw_circle(badge,6.0,Color("14262c"))
+		if fact.kind in ["owned_site","site"]:
+			draw_rect(Rect2(badge-Vector2(4,4),Vector2(8,8)),color,false,1.8)
+			var count:=int(fact.get("site_count",1))
+			if count>1:draw_string(_font,badge+Vector2(7,4),str(count),HORIZONTAL_ALIGNMENT_LEFT,-1,11,color)
+		elif fact.kind=="country_statistics":
+			for index:int in range(3):draw_line(badge+Vector2(-4+index*3,4),badge+Vector2(-4+index*3,-2-index),color,1.8,true)
+		elif fact.kind=="transport_node":
+			draw_polyline(PackedVector2Array([badge+Vector2(0,-5),badge+Vector2(5,0),badge+Vector2(0,5),badge+Vector2(-5,0),badge+Vector2(0,-5)]),color,1.8,true)
+		else:draw_circle(badge,3.0,color)
+		if "transport_node" in kinds and fact.kind!="transport_node":draw_circle(badge+Vector2(-8,0),2.4,Color("bda1dc"))
 		_topic_hits[id] = fact
 		if _topic_hits.size()>=budget: break
 	if mode!="economic" or _topic_links.is_empty() or spatial_world==null: return
@@ -1097,22 +1115,66 @@ func _draw_topic_information() -> void:
 		var a := spatial_world.get_place(str(link.get("from","")))
 		var b := spatial_world.get_place(str(link.get("to","")))
 		if not a.get("lon_lat") is Array or not b.get("lon_lat") is Array: continue
-		if a.lon_lat.size()!=2 or b.lon_lat.size()!=2 or a.lon_lat==b.lon_lat: continue
+		if a.lon_lat.size()!=2 or b.lon_lat.size()!=2: continue
 		var u := GlobeProjection.lon_lat_to_unit(Vector2(float(a.lon_lat[0]),float(a.lon_lat[1])))
 		var v := GlobeProjection.lon_lat_to_unit(Vector2(float(b.lon_lat[0]),float(b.lon_lat[1])))
-		var color := Color("6b9da9") if link.get("kind")=="offer" else Color("70b6ac") if link.get("kind")=="receipt" else Color("caaa73")
-		if link.get("kind")=="offer" and not bool(link.get("available",false)): color=Color("b56868")
-		if link.get("kind")=="contract":
-			if str(link.get("state","")).contains("历史") or str(link.get("state","")).contains("关闭"): color=Color("7a877e")
-			elif str(link.get("state","")).contains("在途"): color=Color("dc986b")
-		for index: int in range(16):
-			if index%2==1 and link.get("kind")!="receipt": continue
-			var from := u.slerp(v,float(index)/16.0)
-			var to := u.slerp(v,float(index+1)/16.0)
-			if not controller.region_camera.active and ((controller.orientation()*from).z<0 or (controller.orientation()*to).z<0): continue
-			var p := screen_point(from)
-			var q := screen_point(to)
-			if p.is_finite() and q.is_finite(): draw_line(p,q,color,1.5,true)
+		_draw_topic_link(link,u,v)
+
+func _draw_topic_link(link:Dictionary,u:Vector3,v:Vector3) -> void:
+	var kind:=str(link.get("kind",""))
+	var status:=str(link.get("status",""))
+	var color:=Color("caaa73")
+	var width:=1.5
+	var dashed:=true
+	if kind=="transport":color=Color("5e8796");width=1.0
+	elif kind=="offer":color=Color("7b9cc0") if bool(link.get("available",false)) else Color("b56868")
+	elif kind=="receipt":color=Color(0.47,0.60,0.53,0.65);dashed=false
+	elif kind=="cargo":
+		color=Color("e5a36d");width=2.6
+		dashed=status in ["WAITING","WAITING_TRANSFER"]
+		if status in ["WAITING_UNLOAD","UNLOADING","AWAITING_RECIPIENT"]:color=Color("c2a0dd")
+		elif status=="LOADING":color=Color("65cfca")
+		elif status=="LOSS_RECORD":color=Color("c97a78")
+	elif kind=="contract":
+		if status in ["DELIVERED","CANCELLED"] or str(link.get("state","")).contains("历史"):color=Color(0.48,0.53,0.49,0.65)
+		elif status=="TRANSIT":color=Color("dc986b")
+	var viewport:=Rect2(Vector2.ZERO,size).grow(12)
+	if u.is_equal_approx(v):
+		# A local handover is a screen-space relation glyph, not a fabricated
+		# out-of-city route or separate establishment coordinate.
+		if kind=="transport" or (not controller.region_camera.active and (controller.orientation()*u).z<0):return
+		var point:=screen_point(u)
+		if not point.is_finite() or not viewport.has_point(point):return
+		var center:=point+Vector2(0,-12)
+		for index:int in range(20):
+			if dashed and index%2==1:continue
+			var p:=center+Vector2.from_angle(0.35+float(index)*TAU/24.0)*9.0
+			var q:=center+Vector2.from_angle(0.35+float(index+1)*TAU/24.0)*9.0
+			draw_line(p,q,color,width,true)
+		if bool(link.get("directed",false)):_draw_topic_arrow(center+Vector2.from_angle(0.35+20.0*TAU/24.0)*9.0,Vector2.from_angle(0.35+20.0*TAU/24.0+PI/2),color,width)
+		return
+	for index:int in range(24):
+		if dashed and index%2==1:continue
+		var from:=u.slerp(v,float(index)/24.0)
+		var to:=u.slerp(v,float(index+1)/24.0)
+		if not controller.region_camera.active and ((controller.orientation()*from).z<0 or (controller.orientation()*to).z<0):continue
+		var p:=screen_point(from);var q:=screen_point(to)
+		if p.is_finite() and q.is_finite():draw_line(p,q,color,width,true)
+	var midpoint:=u.slerp(v,0.56)
+	if bool(link.get("directed",false)) and (controller.region_camera.active or (controller.orientation()*midpoint).z>=0):
+		var tip:=screen_point(midpoint)
+		var tail:=screen_point(u.slerp(v,0.50))
+		if tip.is_finite() and tail.is_finite() and viewport.has_point(tip) and tip.distance_squared_to(tail)>4:_draw_topic_arrow(tip,(tip-tail).normalized(),color,width)
+	if kind=="cargo" and status in ["WAITING","WAITING_TRANSFER","LOADING","WAITING_UNLOAD","UNLOADING","AWAITING_RECIPIENT"]:
+		var anchor:=v if status in ["WAITING_UNLOAD","UNLOADING","AWAITING_RECIPIENT"] else u
+		if controller.region_camera.active or (controller.orientation()*anchor).z>=0:
+			var point:=screen_point(anchor)
+			if point.is_finite() and viewport.has_point(point):draw_arc(point,6,0,TAU,16,color,2.0,true)
+
+func _draw_topic_arrow(tip:Vector2,direction:Vector2,color:Color,width:float) -> void:
+	var normal:=Vector2(-direction.y,direction.x)
+	draw_line(tip,tip-direction*7.0+normal*3.5,color,width,true)
+	draw_line(tip,tip-direction*7.0-normal*3.5,color,width,true)
 
 func _prepare_symbol_layout() -> void:
 	note_topic_query("symbol_prepare_calls")
