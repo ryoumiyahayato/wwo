@@ -58,8 +58,9 @@ func _install_training_controls() -> void:
 	_training_exit = Button.new()
 	_training_exit.text = "隔离训练 · 暂停并观察 / Esc"
 	_training_exit.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	_training_exit.offset_left = -270
-	_training_exit.offset_right = -16
+	# Keep the original native menu centred at viewport_width - 42 accessible.
+	_training_exit.offset_left = -360
+	_training_exit.offset_right = -106
 	_training_exit.offset_top = 8
 	_training_exit.offset_bottom = 50
 	_training_exit.focus_mode = Control.FOCUS_NONE
@@ -169,7 +170,8 @@ func _process(delta: float) -> void:
 			_training_tick = 0.0
 			var status_data: Dictionary = get_training_status()
 			var driving: Dictionary = status_data.get("driving", {}) as Dictionary
-			_training_banner.text = "隔离训练 · %.1f m/s · 原伤情 / 有限弹药保留 · Esc暂停观察" % float(driving.get("speed_mps", 0.0))
+			var motion_text: String = "车长离车" if bool(status_data.get("on_foot", false)) else "%.1f m/s" % float(driving.get("speed_mps", 0.0))
+			_training_banner.text = "隔离训练 · %s · 原伤情 / 有限弹药保留 · Esc暂停观察" % motion_text
 		return
 	_process_observation(delta)
 

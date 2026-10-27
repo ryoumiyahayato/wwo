@@ -51,4 +51,12 @@ python tools/map/install_region_slice.py --from-zip TERRAIN.zip --training-from-
 
 `military_runtime/TRAINING_ASSETS.json` 记录沿用的原 source/range provenance，并与附件内同名记录绑定，不新增摘要。上传后的新附件 asset ID 应另作发布说明，不修改这个版本已经打包的来源记录。授权的本地附件安装已执行一次：Installed 0，reused byte-for-byte 8，无覆盖。
 
-本模块实施阶段不运行引擎、不执行测试或 Git。解析、实机驾驶/原伤损/原弹药守恒与嵌入交还由 Lead 统一验证。未运行不表示通过。
+## 2026-10-26 主宿主窗口有限事实
+
+作者实现阶段未自行运行引擎、测试或 Git。以下来自 Lead 在主线宿主 `battle-main-final` 窗口的既有 driver 报告；没有独立启动军事工程引擎。
+
+- 两发 AP，主炮余弹 31→30→29。第一发 blocked（左侧50未穿透）；第二发命中 rear35 并 penetrated，靶车 rear integrity 100→85，三名靶乘员 HP 10/10/10→7/6/8。
+- 原车长 HP7、左臂 injured 未被治好。经原 UI 下车，实走位移3.446m，离原车达6.310m，再步行返回并占回原 seat0；上下车未补回弹药。
+- sameActor、sameSession、同载具实例、暂停恢复状态保留及正式世界快照不变，均为既有 driver 比较报告，不是此文重新运行或独立重算；不能据此宣称全部军事能力通过或用户已验收。
+
+NOT_RUN：HE、MG、smoke、incoming、拒绝负例、长时运行、正式部署、存读。正式保存、export、合并均未执行。

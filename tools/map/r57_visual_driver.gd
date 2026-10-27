@@ -2761,7 +2761,14 @@ func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
 	report["after_shot"] = after_shot
 	await terrain_region_image("17-native-second-incidence")
 	report["crew_roundtrip"] = await terrain_training_crew_roundtrip(session, battle, controls)
-	observation.call("_pause_training")
+	var native_menu_point: Vector2 = Vector2(controls.size.x - 42.0, 42.0)
+	await mouse_button(native_menu_point, MOUSE_BUTTON_LEFT, true)
+	await mouse_button(native_menu_point, MOUSE_BUTTON_LEFT, false)
+	report["native_menu_accessible"] = bool(controls.get("menu_open"))
+	await terrain_region_image("18-native-original-menu")
+	await mouse_button(native_menu_point, MOUSE_BUTTON_LEFT, true)
+	await mouse_button(native_menu_point, MOUSE_BUTTON_LEFT, false)
+	report["paused_by_host_button"] = await economic_button(observation, "隔离训练 · 暂停并观察 / Esc")
 	var paused_before: Dictionary = session.call("get_status") as Dictionary
 	phases.append(await terrain_region_sample("training_paused_observation", 2))
 	var paused_after: Dictionary = session.call("get_status") as Dictionary
@@ -2770,7 +2777,9 @@ func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
 	await wait_seconds(0.5)
 	report["same_vehicle_instance"] = hero_id == (session.call("get_native_battle").get("hero") as Node3D).get_instance_id()
 	report["same_session"] = first.session_id == (session.call("get_status") as Dictionary).session_id
-	observation.call("_pause_training")
+	await mouse_button(native_menu_point, MOUSE_BUTTON_LEFT, true)
+	await mouse_button(native_menu_point, MOUSE_BUTTON_LEFT, false)
+	report["returned_by_native_menu"] = await economic_button(observation, "返回观察（保留本次训练）")
 	await terrain_region_image("14-observe-after-preserved-training")
 	var initial_crew: Array = first.get("crew", []) as Array
 	var shot_rows: Array = after_shot.get("shot_audit", []) as Array
@@ -2778,7 +2787,7 @@ func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
 	report["legal_cannon_fired"] = shot_rows.any(func(row: Dictionary) -> bool: return row.get("accepted", false) and row.get("weapon", "") == "tank_cannon")
 	report["projectile_contact_recorded"] = shot_rows.any(func(row: Dictionary) -> bool: return row.get("flight_state", "") == "impacted" and float(row.get("flight_seconds", 0)) > 0)
 	report["target_changed"] = before_shot.target != after_shot.target
-	report["ok"] = report.legal_cannon_fired and report.projectile_contact_recorded and report.original_injury_preserved and report.paused_state_preserved and report.same_vehicle_instance and report.same_session and bool(report.crew_roundtrip.get("ok", false)) and float(report.driven_metres) > 5.0
+	report["ok"] = report.legal_cannon_fired and report.projectile_contact_recorded and report.original_injury_preserved and report.paused_state_preserved and report.same_vehicle_instance and report.same_session and report.native_menu_accessible and report.paused_by_host_button and report.returned_by_native_menu and bool(report.crew_roundtrip.get("ok", false)) and float(report.driven_metres) > 5.0
 	return report
 
 func terrain_region_run() -> void:
