@@ -1415,7 +1415,9 @@ func _buy(actor: String, payload: Dictionary, action_id: String, internal: bool 
 	var good := str(payload["good"])
 	var seller_site := _inventory_key(seller, str(payload.get("seller_site", "")))
 	var buyer_site := _inventory_key(actor, str(payload.get("buyer_site", ""))) if _spec["firms"].has(actor) else ""
-	var sale_source_valid: bool = (_spec["sites"].has(seller_site) and _owner(seller_site) == seller and _spec["sites"][seller_site]["prices"].has(good)) or _local_producers.sells(seller, good, seller_site)
+	# Validate the stock-point identity here, not its undisclosed sale goods.
+	# Original supplier knowledge is checked before quotation/capability facts.
+	var sale_source_valid: bool = (_spec["sites"].has(seller_site) and _owner(seller_site) == seller) or (seller_site == seller and _local_producers.has_actor(seller))
 	if good not in _goods or seller == actor or (_actors.has(actor) and not str(payload.get("buyer_site", "")).is_empty()) or not sale_source_valid or (not buyer_site.is_empty() and (not _spec["sites"].has(buyer_site) or _owner(buyer_site) != actor)):
 		return _result(false, "INVALID_ORDER_SITE")
 	var known: Array = _actors[actor]["known_suppliers"] if _actors.has(actor) else _firm_knowledge[buyer_site]
