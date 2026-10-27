@@ -19,6 +19,15 @@ var optimization_enabled := true
 var elapsed := 0.0
 var shots_fired := 0
 var blocked_moves := 0
+# Opt-in CPU timings only; no change to perception, movement or firing schedules.
+const SLOW_TIMING_LIMIT: int = 64
+const SLOW_TIMING_THRESHOLD_USEC: int = 16000
+var _slow_timing_enabled: bool = OS.get_environment("WWO_BATTLE_SLOW_TIMING") == "1"
+var _slow_timing_operations: Dictionary = {}
+var _slow_timing_events: Array[Dictionary] = []
+var _slow_timing_overwritten: int = 0
+var _slow_timing_frame_subsegments: Dictionary = {}
+var _slow_timing_frame_subcalls: Dictionary = {}
 
 func setup(owner_main: Node3D) -> void:
 	main=owner_main
@@ -31,6 +40,11 @@ func on_stage_reset() -> void:
 	elapsed=0.0
 	shots_fired=0
 	blocked_moves=0
+	_slow_timing_operations.clear()
+	_slow_timing_events.clear()
+	_slow_timing_overwritten=0
+	_slow_timing_frame_subsegments.clear()
+	_slow_timing_frame_subcalls.clear()
 
 func spawn(stage: Node3D) -> void:
 	on_stage_reset()
@@ -136,12 +150,22 @@ func _role_alive(u: Dictionary, role: String) -> bool:
 
 func _process(_delta:float) -> void:
 	if not is_instance_valid(main) or main.garage:return
+	var started: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	for u in units.values():
 		if is_instance_valid(u.model):u.model.visible=main.visibility_for_node(u.model)=="visible"
+	if _slow_timing_enabled:
+		_record_slow_timing("visibility", started, {"visibility": Time.get_ticks_usec()-started})
 
 func _physics_process(delta: float) -> void:
 	if not is_instance_valid(main) or main.garage or main.game_mode!="skirmish": return
 	if main.has_method("is_battle_active") and not main.is_battle_active(): return
+	var started: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
+	var think_usec: int = 0
+	var move_usec: int = 0
+	var aim_usec: int = 0
+	if _slow_timing_enabled:
+		_slow_timing_frame_subsegments.clear()
+		_slow_timing_frame_subcalls.clear()
 	elapsed+=delta
 	for u in units.values():
 		if not is_instance_valid(u.model): continue
@@ -154,12 +178,66 @@ func _physics_process(delta: float) -> void:
 		u.reload=maxf(0,u.reload-delta)
 		u.mg_reload=maxf(0,u.mg_reload-delta)
 		u.think-=delta
+		var phase_started: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 		if u.think<=0 or not optimization_enabled:
 			u.think=.65
 			damage_feedback.sync(u)
 			_think(u)
+		if _slow_timing_enabled:
+			think_usec += Time.get_ticks_usec()-phase_started
+			phase_started = Time.get_ticks_usec()
 		_move(u,delta)
+		if _slow_timing_enabled:
+			move_usec += Time.get_ticks_usec()-phase_started
+			phase_started = Time.get_ticks_usec()
 		_aim(u,delta)
+		if _slow_timing_enabled:
+			aim_usec += Time.get_ticks_usec()-phase_started
+	if _slow_timing_enabled:
+		_record_slow_timing("physics", started, {"think": think_usec, "move": move_usec, "aim": aim_usec})
+
+func _record_physics_subsegment(key: String, started: int) -> void:
+	var duration: int = Time.get_ticks_usec()-started
+	_slow_timing_frame_subsegments[key] = int(_slow_timing_frame_subsegments.get(key,0))+duration
+	_slow_timing_frame_subcalls[key] = int(_slow_timing_frame_subcalls.get(key,0))+1
+
+func _record_slow_timing(operation: String, started: int, segments: Dictionary) -> void:
+	var total: int = Time.get_ticks_usec()-started
+	var aggregate: Dictionary = _slow_timing_operations.get(operation, {"calls": 0, "total_usec": 0, "max_usec": 0, "segments_total_usec": {}, "segments_max_usec": {}})
+	aggregate.calls += 1
+	aggregate.total_usec += total
+	aggregate.max_usec = maxi(int(aggregate.max_usec), total)
+	for key: String in segments:
+		aggregate.segments_total_usec[key] = int(aggregate.segments_total_usec.get(key, 0)) + int(segments[key])
+		aggregate.segments_max_usec[key] = maxi(int(aggregate.segments_max_usec.get(key, 0)), int(segments[key]))
+	if operation == "physics":
+		# Child times are included in move/aim above, never additional CPU time.
+		var child_totals: Dictionary = aggregate.get("subsegments_total_usec",{})
+		var child_max: Dictionary = aggregate.get("subsegments_max_frame_usec",{})
+		var child_calls: Dictionary = aggregate.get("subsegment_calls",{})
+		for key: String in _slow_timing_frame_subsegments:
+			child_totals[key] = int(child_totals.get(key,0))+int(_slow_timing_frame_subsegments[key])
+			child_max[key] = maxi(int(child_max.get(key,0)),int(_slow_timing_frame_subsegments[key]))
+			child_calls[key] = int(child_calls.get(key,0))+int(_slow_timing_frame_subcalls[key])
+		aggregate["subsegments_total_usec"] = child_totals
+		aggregate["subsegments_max_frame_usec"] = child_max
+		aggregate["subsegment_calls"] = child_calls
+	_slow_timing_operations[operation] = aggregate
+	if total < SLOW_TIMING_THRESHOLD_USEC:
+		return
+	_slow_timing_events.append({"operation": operation, "frame": Engine.get_process_frames(), "physics_frame": Engine.get_physics_frames(), "units": units.size(), "elapsed": elapsed, "total_usec": total, "segments_usec": segments})
+	if operation == "physics":
+		_slow_timing_events.back()["subsegments_usec"] = _slow_timing_frame_subsegments.duplicate()
+		_slow_timing_events.back()["subsegment_calls"] = _slow_timing_frame_subcalls.duplicate()
+	if _slow_timing_events.size() > SLOW_TIMING_LIMIT:
+		_slow_timing_events.pop_front()
+		_slow_timing_overwritten += 1
+
+func _slow_timing_snapshot() -> Dictionary:
+	var result: Dictionary = {"enabled": _slow_timing_enabled, "source": "ai_armor", "clock": "cpu_call_usec_not_gpu", "event_limit": SLOW_TIMING_LIMIT, "threshold_usec": SLOW_TIMING_THRESHOLD_USEC, "operations": _slow_timing_operations.duplicate(true), "events": _slow_timing_events.duplicate(true), "overwritten": _slow_timing_overwritten, "subsegments_included_in_parents": true}
+	if is_instance_valid(main) and is_instance_valid(main.get("vehicle_contacts")) and main.vehicle_contacts.has_method("slow_timing_snapshot"):
+		result["vehicle_contact_resolver"] = main.vehicle_contacts.slow_timing_snapshot()
+	return result
 
 func _advance_unit_combat(u: Dictionary, delta: float) -> void:
 	# Default per-unit owner. An adopting host may already own this exact Combat.
@@ -270,7 +348,9 @@ func _visible(u: Dictionary, candidate: Dictionary) -> bool:
 func _move(u: Dictionary, delta: float) -> void:
 	var model: Node3D=u.model
 	var unfit_pose: Transform3D=model.global_transform
+	var sub_started: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var baseline: Dictionary=main.align_vehicle_ground(model,true)
+	if _slow_timing_enabled: _record_physics_subsegment("move_ground_support",sub_started)
 	if not bool(baseline.get("loaded",false)):
 		model.global_transform=unfit_pose
 		u.speed=0.0
@@ -279,7 +359,9 @@ func _move(u: Dictionary, delta: float) -> void:
 		model.set_meta("vehicle_speed",0.0)
 		return
 	var before: Transform3D=model.global_transform
+	sub_started = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var contact_before: Dictionary=main.vehicle_contacts.capture_pose(model)
+	if _slow_timing_enabled: _record_physics_subsegment("move_capture_pose",sub_started)
 	var old_yaw := model.rotation.y
 	var desired_speed := 0.0
 	if _role_alive(u,"驾驶员"):
@@ -300,7 +382,9 @@ func _move(u: Dictionary, delta: float) -> void:
 	u.speed=move_toward(u.speed,desired_speed,3.0*delta)
 	model.position+=Vector3(-sin(model.rotation.y),0,-cos(model.rotation.y))*u.speed*delta
 	var attempted_yaw := model.rotation.y
+	sub_started = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var ground: Dictionary=main.align_vehicle_ground(model,true)
+	if _slow_timing_enabled: _record_physics_subsegment("move_ground_support",sub_started)
 	var horizontal := Vector2(model.position.x-before.origin.x,model.position.z-before.origin.z).length()
 	var turn_distance := absf(wrapf(attempted_yaw-old_yaw,-PI,PI))
 	var valid := GroundSupport.transition_allowed(baseline,ground,horizontal,turn_distance)
@@ -308,11 +392,15 @@ func _move(u: Dictionary, delta: float) -> void:
 		# A terrain-blocked drive may still make a physically safe pivot, never teleport.
 		model.global_transform=before
 		model.rotation.y=attempted_yaw
+		sub_started = Time.get_ticks_usec() if _slow_timing_enabled else 0
 		ground=main.align_vehicle_ground(model,true)
+		if _slow_timing_enabled: _record_physics_subsegment("move_ground_support",sub_started)
 		valid=GroundSupport.transition_allowed(baseline,ground,0.0,turn_distance)
 		u.speed=0.0
 	if valid:
+		sub_started = Time.get_ticks_usec() if _slow_timing_enabled else 0
 		var contact: Dictionary=main.vehicle_contacts.resolve_pose(model,contact_before,u.speed,delta)
+		if _slow_timing_enabled: _record_physics_subsegment("move_resolve_pose",sub_started)
 		if bool(contact.get("blocked",false)):
 			u.speed=0.0
 			u.avoid=1.0
@@ -355,7 +443,9 @@ func _aim(u: Dictionary, delta: float) -> void:
 		u.stable_aim=0.0
 		return
 	u["visible_checked_at"]=u.target.observed_at
+	var sub_started: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var contact_before: Dictionary=main.vehicle_contacts.capture_pose(u.model)
+	if _slow_timing_enabled: _record_physics_subsegment("aim_capture_pose",sub_started)
 	var point: Vector3=_aim_point(u)
 	var local: Vector3=u.model.to_local(point)-u.turret.position
 	var yaw := atan2(-local.x,-local.z)
@@ -363,7 +453,9 @@ func _aim(u: Dictionary, delta: float) -> void:
 	var barrel_local: Vector3=u.turret.to_local(point)-u.barrel.position
 	var pitch := clampf(atan2(barrel_local.y,Vector2(barrel_local.x,barrel_local.z).length()),-.15,.32)
 	u.barrel.rotation.x=move_toward(u.barrel.rotation.x,pitch,.5*delta)
+	sub_started = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	main.vehicle_contacts.resolve_pose(u.model,contact_before,0.0,delta)
+	if _slow_timing_enabled: _record_physics_subsegment("aim_resolve_pose",sub_started)
 	var direction: Vector3=-u.muzzle.global_basis.z.normalized()
 	var to_target: Vector3=(point-u.muzzle.global_position).normalized()
 	var shot_range: float=Visibility.weapon_range("mg" if str(u.target.get("actor_kind","vehicle"))=="infantry" else "cannon")
@@ -381,9 +473,13 @@ func _aim_point(u: Dictionary) -> Vector3:
 
 func _search_sector(u: Dictionary, delta: float) -> void:
 	if not _role_alive(u,"炮手") or not is_instance_valid(u.turret): return
+	var sub_started: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var before: Dictionary=main.vehicle_contacts.capture_pose(u.model)
+	if _slow_timing_enabled: _record_physics_subsegment("aim_capture_pose",sub_started)
 	u.turret.rotation.y=rotate_toward(u.turret.rotation.y,Gunnery.search_yaw(elapsed,int(u.get("index",0))),.35*delta)
+	sub_started = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	main.vehicle_contacts.resolve_pose(u.model,before,0.0,delta)
+	if _slow_timing_enabled: _record_physics_subsegment("aim_resolve_pose",sub_started)
 
 func _fire(u: Dictionary, direction: Vector3, machinegun := false) -> void:
 	if not _alive(u) or not _role_alive(u,"炮手") or elapsed<float(u.get("safety_retry_until",0.0)) or not VisualContact.fresh(u.target,elapsed):return
@@ -528,4 +624,6 @@ func snapshot() -> Dictionary:
 	for u in units.values():
 		result["blue_ai" if u.team=="blue" else "red_ai"]+=1
 		result.units[u.id]={"team":u.team,"position":u.model.global_position,"travel":u.travel,"shots":u.shots,"blocked":u.blocked,"alive":_alive(u),"damage_status":DamageFeedback.status(u),"driver":_role_alive(u,"驾驶员"),"gunner":_role_alive(u,"炮手"),"modules":u.combat.modules.duplicate(true),"crew":u.combat.crew.duplicate(true)}
+	if _slow_timing_enabled:
+		result["slow_timing"] = _slow_timing_snapshot()
 	return result

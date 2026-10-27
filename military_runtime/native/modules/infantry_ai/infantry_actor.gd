@@ -72,14 +72,87 @@ var _stalled := 0.0
 var mg_suppression := 0.0
 var blast_suppression := 0.0
 var suppression_level := 0.0
+var _battle_timing_enabled: bool = false
+var _timing_perception_refreshes: int = 0
+var _timing_perception_granted: int = 0
+var _timing_perception_denied: int = 0
+var _timing_skipped: Dictionary = {}
+var _timing_sense_candidates: int = 0
+var _timing_sense_visibility: int = 0
+var _timing_sense_ray: int = 0
+var _timing_sense_shared: int = 0
+var _timing_other_brain: int = 0
+var _timing_other_risk: int = 0
+var _timing_other_sync: int = 0
+var _timing_other_aim_fire: int = 0
+
+func performance_snapshot() -> Dictionary:
+ var result: Dictionary = {"enabled":_battle_timing_enabled,"shot_sequence":shot_sequence}
+ if _battle_timing_enabled:
+  var own_packets: Array[Dictionary] = []
+  var clock: float = _observation_clock()
+  for packet: Dictionary in _cached_direct_observations:
+   if not bool(packet.get("visible",false)) or not bool(packet.get("alive",false)) or str(packet.get("observer_id",""))!=brain.actor_id: continue
+   var point: Vector3 = packet.position
+   var origin: Vector3 = packet.get("observation_origin",Vector3.ZERO)
+   var observed: float = float(packet.get("observed_sim",-1.0))
+   own_packets.append({"actor_id":str(packet.actor_id),"team_id":str(packet.get("team_id","")),"actor_kind":str(packet.get("actor_kind","")),"alive_at_packet":bool(packet.get("alive",false)),"observer_id":brain.actor_id,"origin":[origin.x,origin.y,origin.z],"point":[point.x,point.y,point.z],"observed_sim":observed,"age_sim":maxf(0.0,clock-observed),"fresh":observed>=0.0 and clock<=observed+0.200001,"self_to_seen_point_planar_m":Vector2(point.x-global_position.x,point.z-global_position.z).length()})
+  result.merge({"counter_scope":"actor_lifetime","perception_refreshes":_timing_perception_refreshes,"perception_granted":_timing_perception_granted,"perception_denied":_timing_perception_denied,"skipped_callbacks":_timing_skipped.duplicate(),"own_visible_packets":own_packets,"own_packet_clock_sim":clock})
+  result["locomotion"]={"enabled":locomotion_lod_enabled,"target_hz":locomotion_hz,"callbacks":_timing_locomotion_callbacks,"solves":_timing_locomotion_solves,"lowrisk_solves":_timing_locomotion_lowrisk,"highrisk_solves":_timing_locomotion_highrisk,"deferred":_timing_locomotion_deferred,"integrated_sim_seconds":_timing_locomotion_sim,"maximum_step_sim_seconds":_timing_locomotion_max_delta,"pending_sim_seconds":_locomotion_pending,"effective_solve_hz":float(_timing_locomotion_solves)/_timing_locomotion_sim if _timing_locomotion_sim>0.0 else 0.0,"current_risk":_locomotion_risk,"risk_counts":_timing_locomotion_risks.duplicate(),"actual_velocity":[_locomotion_actual_velocity.x,_locomotion_actual_velocity.y,_locomotion_actual_velocity.z],"public_velocity":[velocity.x,velocity.y,velocity.z],"support_probe_calls":_timing_support_probe_calls,"support_probe_hits":_timing_support_probe_hits,"support_probe_terrain":_timing_support_probe_terrain,"support_probe_usec":_timing_support_probe_usec,"support_layer":int(_locomotion_floor.collision_layer) if is_instance_valid(_locomotion_floor) else 0}
+ return result
+
+func _record_battle_timing(operation: String, start_usec: int, sense_usec: int = 0, nav_usec: int = 0, motor_usec: int = 0, skipped: String = "", motor_solve_usec: int = 0, motor_heading_usec: int = 0) -> void:
+ var end_usec: int = Time.get_ticks_usec()
+ if not skipped.is_empty(): _timing_skipped[skipped] = int(_timing_skipped.get(skipped,0))+1
+ if is_instance_valid(host): host.record_actor_timing(brain.actor_id,operation,start_usec,end_usec,sense_usec,nav_usec,motor_usec,skipped,motor_solve_usec,motor_heading_usec,_timing_sense_candidates if operation=="actor" else 0,_timing_sense_visibility if operation=="actor" else 0,_timing_sense_ray if operation=="actor" else 0,_timing_sense_shared if operation=="actor" else 0,_timing_motor_support if operation=="actor" else 0,_timing_other_brain if operation=="actor" else 0,_timing_other_risk if operation=="actor" else 0,_timing_other_sync if operation=="actor" else 0,_timing_other_aim_fire if operation=="actor" else 0)
+
+var _observation_generation: int = 0
+var _observation_sample_clock: float = -1.0
+var _observation_memory_only: bool = false
+var _cached_direct_observations: Array = []
+
+func _observation_clock() -> float:
+ var value: Variant = host.get("_loot_clock") if is_instance_valid(host) else null
+ return float(value) if value!=null else 0.0
+
+func _shared_contact_packets() -> Array:
+ if not is_instance_valid(host) or not host.has_method("shared_contacts"): return []
+ var clock: Variant = host.get("_loot_clock")
+ if (clock is float or clock is int) and float(clock)>=0.0:
+  return host.shared_contacts(brain.team_id,true)
+ return host.shared_contacts(brain.team_id)
+
+func perception_request_eligible() -> bool:
+ if not _configured or embarked or brain.hp<=0.0 or not is_physics_processing() or not can_process(): return false
+ if weapon=="" or engagement_delay>0.0 or bool(get_meta("player_controlled",false)) or bool(get_meta("construction_order",false)): return false
+ var returning: Dictionary = get_meta("crew_return_order",{})
+ return returning.is_empty() or not brain.order.is_empty()
 
 func _scheduled_observations() -> Array:
  if brain.hp<=0.0:
+  if not _cached_observations.is_empty(): _observation_generation += 1
   _cached_observations.clear()
   return []
  if not is_instance_valid(host) or not host.has_method("perception_due") or host.perception_due(perception_slot):
   _cached_observations = _observations()
+  _observation_sample_clock = _observation_clock() if is_instance_valid(host) else 0.0
+  _observation_memory_only = false
+  _observation_generation += 1
+  if _battle_timing_enabled: _timing_perception_refreshes += 1
   if is_instance_valid(host) and host.has_method("performance_snapshot"): host._perception_updates += 1
+ elif not _observation_memory_only and _observation_clock()>_observation_sample_clock+0.200001:
+  # A deferred budget cannot keep an old visible packet alive as a new sighting.
+  _cached_observations = _shared_contact_packets()
+  _observation_memory_only = true
+  _cached_direct_observations.clear()
+  _observation_generation += 1
+ # Death/embark invalidates own positive facts without scanning all team reports.
+ for packet: Dictionary in _cached_direct_observations:
+  if not bool(packet.get("alive",false)) or not packet.has("node") or str(packet.get("actor_kind",""))!="infantry": continue
+  var subject = host.actors.get(str(packet.actor_id)) if is_instance_valid(host) else null
+  if is_instance_valid(subject) and (subject.embarked or subject.brain.hp<=0.0):
+   packet.alive=false
+   _observation_generation += 1
  return _cached_observations
 
 
@@ -95,6 +168,7 @@ func _process(delta: float) -> void:
 func configure(id: String, team: String, owner_host: Node) -> void:
  brain.setup(id,team)
  host = owner_host
+ _battle_timing_enabled = bool(owner_host.get("_battle_timing_enabled")) if is_instance_valid(owner_host) else false
  set_meta("actor_id",id)
  set_meta("actor_kind","infantry")
  set_meta("kind","ai_person")
@@ -118,12 +192,32 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
  if not _configured or embarked: return
+ var timing_start: int = Time.get_ticks_usec() if _battle_timing_enabled else 0
+ if _battle_timing_enabled:
+  _timing_sense_candidates=0
+  _timing_sense_visibility=0
+  _timing_sense_ray=0
+  _timing_sense_shared=0
+  _timing_motor_support=0
+  _timing_other_brain=0
+  _timing_other_risk=0
+  _timing_other_sync=0
+  _timing_other_aim_fire=0
+ var timing_sense: int = 0
+ var timing_nav: int = 0
+ var timing_motor: int = 0
+ var timing_motor_solve: int = 0
+ var timing_motor_heading: int = 0
+ var phase_start: int = 0
  var owner_main = host.get("main") if is_instance_valid(host) else null
  if is_instance_valid(owner_main):
-  if owner_main.has_method("is_battle_active") and not owner_main.is_battle_active(): return
+  if owner_main.has_method("is_battle_active") and not owner_main.is_battle_active():
+   if _battle_timing_enabled: _record_battle_timing("actor",timing_start,0,0,0,"battle_inactive")
+   return
   var terrain = owner_main.get("terrain_damage")
   if is_instance_valid(terrain) and terrain.has_method("is_position_loaded") and not terrain.is_position_loaded(global_position):
    velocity = Vector3.ZERO
+   if _battle_timing_enabled: _record_battle_timing("actor",timing_start,0,0,0,"terrain_unloaded")
    return
  _advance_stance(delta)
  _advance_suppression(delta)
@@ -143,7 +237,12 @@ func _physics_process(delta: float) -> void:
   host.infantry_weapon_tick(self,delta)
  if bool(get_meta("player_controlled",false)):
   var controller = get_meta("player_controller",null)
-  if is_instance_valid(controller): controller.physics_tick(self,delta)
+  if is_instance_valid(controller):
+   phase_start = Time.get_ticks_usec() if _battle_timing_enabled else 0
+   controller.physics_tick(self,delta)
+   if _battle_timing_enabled: timing_motor = Time.get_ticks_usec()-phase_start
+  if is_instance_valid(host) and host.has_method("note_actor_moved"): host.note_actor_moved(self)
+  if _battle_timing_enabled: _record_battle_timing("actor",timing_start,0,0,timing_motor)
   return
  if suppression_level>=0.6: brain.cooldown += delta*0.65
  # Crew host owns this temporary movement request; never replace construction orders.
@@ -154,114 +253,317 @@ func _physics_process(delta: float) -> void:
   brain._set_state("return_to_vehicle")
   command = {"move":global_position.distance_to(destination)>float(returning.get("stop_distance",5.6)), "destination":destination, "fire":false, "target_id":"", "build":false}
  else:
+  phase_start = Time.get_ticks_usec() if _battle_timing_enabled else 0
   var observations := _scheduled_observations() if engagement_delay<=0.0 and weapon!="" and not bool(get_meta("construction_order",false)) else []
+  if _battle_timing_enabled: timing_sense = Time.get_ticks_usec()-phase_start
   var loot_command: Dictionary = {}
   if brain.hp>0.0 and not bool(get_meta("construction_order",false)) and brain.order.is_empty() and brain.tactical_order.is_empty() and is_instance_valid(host) and host.has_method("infantry_loot_command"):
    loot_command = host.infantry_loot_command(self,delta)
-  command = brain.tick(delta,global_position,observations,false) if loot_command.is_empty() else loot_command
- var direction: Vector3 = command.destination - global_position
- direction.y = 0.0
- direction = direction.normalized() if bool(command.move) and direction.length() > 0.1 else Vector3.ZERO
- _route_retry = maxf(0.0,_route_retry-delta)
- _ground_probe_clock -= delta
- if direction.length_squared()>0.01 and _ground_probe_clock<=0.0:
-  _ground_probe_clock = 0.12
-  var ahead := global_position+direction*0.8
-  var query := PhysicsRayQueryParameters3D.create(ahead+Vector3.UP*0.8,ahead-Vector3.UP*0.8,8,[get_rid()])
-  var ground_hit := get_world_3d().direct_space_state.intersect_ray(query)
-  _ground_safe = not ground_hit.is_empty() and ground_hit.normal.dot(Vector3.UP)>=cos(floor_max_angle)
- if direction.length_squared()>0.01:
-  _stalled = _stalled+delta if global_position.distance_to(_last_progress)<0.015 else 0.0
- else: _stalled = 0.0
- _last_progress = global_position
- if _stalled>0.8:
-  _route.clear()
-  _stalled = 0.0
-  _route_retry = 0.0
- var requested: Vector3 = command.destination
- if not bool(command.move):
-  _route.clear()
- elif Vector2(requested.x-_route_goal.x,requested.z-_route_goal.z).length()>1.0:
-  _route.clear()
-  _route_retry = 0.0
-  _route_goal = requested
- while not _route.is_empty() and Vector2(_route[0].x-global_position.x,_route[0].z-global_position.z).length()<0.26:
-  _route.pop_front()
- _update_vehicle_yield(direction,delta)
- if _vehicle_yield_active:
-  direction=_vehicle_yield_direction
-  _stalled=0.0
- if direction.length_squared()>0.01 and not _vehicle_yield_active:
-  # This local result lives only until planning/movement, never across actors or ticks.
-  # The empty-route branch used to perform the same two capsule sweeps twice.
-  var path_blocked_now: bool = _path_blocked(direction) if _route.is_empty() else false
-  if _route.is_empty() and (path_blocked_now or not _ground_safe) and _route_retry<=0.0 and (not is_instance_valid(host) or not host.has_method("request_path_plan") or host.request_path_plan()):
-   _route = _route_planner.plan(self,requested)
-   # Re-probe after planner callbacks, which may change scene state.
-   if _route.is_empty(): path_blocked_now = _path_blocked(direction)
-   _route_goal = requested
-   _route_retry = 1.0
-  if not _route.is_empty():
-   var next: Vector3 = _route[0]-global_position
-   next.y = 0.0
-   direction = next.normalized()
-   # Dynamic people/obstacles may invalidate a previously clear route.
-   if _path_blocked(direction,minf(0.65,next.length())):
-    if _route_retry<=0.0:
-     _route.clear()
-     _route_retry = 0.25
-    direction = Vector3.ZERO
-  elif path_blocked_now or not _ground_safe: direction = Vector3.ZERO
- var effective_speed := locomotion_speed()*(0.6 if suppression_level>=0.6 else 1.0)
- if not person_state.is_empty():
-  var parts: Dictionary = person_state.get("parts",{})
-  for leg in ["left_leg","right_leg"]:
-   if str(parts.get(leg,"healthy")) != "healthy": effective_speed *= 0.6
- direction = guard_stance_motion(direction,effective_speed,delta)
- velocity.x = direction.x * effective_speed
- velocity.z = direction.z * effective_speed
- if not is_on_floor(): velocity.y -= gravity * delta
- else: velocity.y = -0.1
- move_and_slide()
- if direction.length_squared() > 0.01: _set_body_heading(lerp_angle(rotation.y,atan2(-direction.x,-direction.z),minf(1.0,delta*9.0)))
+  phase_start = Time.get_ticks_usec() if _battle_timing_enabled else 0
+  var source_generation: int = _observation_generation if engagement_delay<=0.0 and weapon!="" and not bool(get_meta("construction_order",false)) else -1
+  command = brain.tick(delta,global_position,observations,false,source_generation,_observation_clock() if is_instance_valid(host) else -1.0,weapon) if loot_command.is_empty() else loot_command
+  if _battle_timing_enabled: _timing_other_brain=Time.get_ticks_usec()-phase_start
+ phase_start = Time.get_ticks_usec() if _battle_timing_enabled else 0
+ var motion_delta: float = _locomotion_step_delta(delta,command)
+ if _battle_timing_enabled: _timing_other_risk=Time.get_ticks_usec()-phase_start
+ if motion_delta>0.0:
+  _advance_locomotion(command,motion_delta,delta)
+  if _battle_timing_enabled:
+   timing_nav=_locomotion_nav_usec
+   timing_motor=_locomotion_motor_usec
+   timing_motor_solve=_locomotion_solve_usec
+   timing_motor_heading=_locomotion_heading_usec
+ phase_start = Time.get_ticks_usec() if _battle_timing_enabled else 0
  if brain.state in ["see_target","fire"] and not brain.target_id.is_empty():
   _aim_autonomous_weapon(_shot_aim_point(brain.last_known),delta)
  if command.fire:
   if not _shoot(str(command.target_id),command.destination,true):
    # Rejected intents do not consume ammunition. Bound retries while obstructed.
    brain.cooldown = maxf(brain.cooldown,0.15)
+ if _battle_timing_enabled: _timing_other_aim_fire=Time.get_ticks_usec()-phase_start
+ phase_start = Time.get_ticks_usec() if _battle_timing_enabled else 0
  _sync_person_state()
+ if _battle_timing_enabled: _timing_other_sync=Time.get_ticks_usec()-phase_start
  if command.build:
   _emit({"kind":"build_requested","actor_id":brain.actor_id,"preset":command.preset,"position":global_position})
+ if _battle_timing_enabled: _record_battle_timing("actor",timing_start,timing_sense,timing_nav,timing_motor,"",timing_motor_solve,timing_motor_heading)
+
+# Explicitly enabled only for battlefield roster ids, never inherited by crew.
+var locomotion_lod_enabled: bool = false
+var locomotion_hz: float = 60.0
+var _locomotion_pending: float = 0.0
+var _locomotion_actual_velocity: Vector3 = Vector3.ZERO
+var _locomotion_last_position: Vector3 = Vector3.ZERO
+var _locomotion_last_direction: Vector3 = Vector3.ZERO
+var _locomotion_last_move: bool = false
+var _locomotion_last_speed: float = 0.0
+var _locomotion_last_hp: float = -1.0
+var _locomotion_last_shape: Vector3 = Vector3.ZERO
+var _locomotion_floor: CollisionObject3D
+var _locomotion_floor_terrain: bool = false
+var _locomotion_support_contact: KinematicCollision3D = KinematicCollision3D.new()
+var _timing_support_probe_calls: int = 0
+var _timing_support_probe_hits: int = 0
+var _timing_support_probe_terrain: int = 0
+var _timing_support_probe_usec: int = 0
+var _timing_motor_support: int = 0
+var _locomotion_epoch: int = -1
+var _locomotion_risk: String = "initial"
+var _locomotion_nav_usec: int = 0
+var _locomotion_motor_usec: int = 0
+var _locomotion_solve_usec: int = 0
+var _locomotion_heading_usec: int = 0
+var _timing_locomotion_callbacks: int = 0
+var _timing_locomotion_solves: int = 0
+var _timing_locomotion_lowrisk: int = 0
+var _timing_locomotion_highrisk: int = 0
+var _timing_locomotion_deferred: int = 0
+var _timing_locomotion_sim: float = 0.0
+var _timing_locomotion_max_delta: float = 0.0
+var _timing_locomotion_risks: Dictionary = {}
+
+func locomotion_actual_velocity() -> Vector3:
+ return _locomotion_actual_velocity if locomotion_lod_enabled and not bool(get_meta("player_controlled",false)) else get_real_velocity()
+
+func locomotion_footprint_radius() -> float:
+ var body: CollisionShape3D = get_node_or_null("BodyCollision") as CollisionShape3D
+ if not is_instance_valid(body): return -1.0
+ var shape_basis: Basis = body.global_basis
+ var scale_bound: float = maxf(shape_basis.x.length(),maxf(shape_basis.y.length(),shape_basis.z.length()))
+ var y_planar: float = Vector2(shape_basis.y.x,shape_basis.y.z).length()
+ if body.shape is CapsuleShape3D:
+  return float(body.shape.radius)*scale_bound+maxf(0.0,float(body.shape.height)*0.5-float(body.shape.radius))*y_planar
+ if body.shape is BoxShape3D:
+  var size: Vector3 = body.shape.size
+  return Vector2(size.x,size.z).length()*0.5*maxf(shape_basis.x.length(),shape_basis.z.length())+size.y*0.5*y_planar
+ return -1.0
+
+func _locomotion_shape_signature() -> Vector3:
+ var body: CollisionShape3D = get_node_or_null("BodyCollision") as CollisionShape3D
+ if not is_instance_valid(body): return Vector3.ZERO
+ if body.shape is CapsuleShape3D: return Vector3(float(body.shape.radius),float(body.shape.height),0.0)
+ if body.shape is BoxShape3D: return body.shape.size
+ return Vector3.ZERO
+
+func _locomotion_speed() -> float:
+ var speed: float = locomotion_speed()*(0.6 if suppression_level>=0.6 else 1.0)
+ if not person_state.is_empty():
+  var parts: Dictionary = person_state.get("parts",{})
+  for leg: String in ["left_leg","right_leg"]:
+   if str(parts.get(leg,"healthy"))!="healthy": speed*=0.6
+ return speed
+
+func _locomotion_step_delta(delta: float, command: Dictionary) -> float:
+ if delta<=0.0: return 0.0
+ if _battle_timing_enabled: _timing_locomotion_callbacks+=1
+ _locomotion_pending+=delta
+ _locomotion_risk="original_60"
+ if locomotion_lod_enabled and locomotion_hz<Engine.physics_ticks_per_second and not bool(get_meta("player_controlled",false)):
+  var direction: Vector3 = command.destination-global_position
+  direction.y=0.0
+  direction=direction.normalized() if bool(command.move) and direction.length()>0.1 else Vector3.ZERO
+  _locomotion_risk=""
+  if not is_on_floor(): _locomotion_risk="airborne"
+  elif is_on_wall() or is_on_ceiling(): _locomotion_risk="wall_contact"
+  elif get_floor_normal().dot(Vector3.UP)<cos(maxf(0.0,floor_max_angle-deg_to_rad(12.0))): _locomotion_risk="slope"
+  elif _stance_enabled and _stance_elapsed<Stance.TRANSITION_SECONDS: _locomotion_risk="stance_blend"
+  elif not _stance_support_ok: _locomotion_risk="stance_support"
+  elif brain.hp<=0.0 or not is_equal_approx(brain.hp,_locomotion_last_hp): _locomotion_risk="health_change"
+  elif _locomotion_shape_signature()!=_locomotion_last_shape: _locomotion_risk="shape_change"
+  elif not is_equal_approx(_locomotion_speed(),_locomotion_last_speed): _locomotion_risk="speed_change"
+  elif not global_position.is_equal_approx(_locomotion_last_position): _locomotion_risk="external_move"
+  elif bool(command.move)!=_locomotion_last_move: _locomotion_risk="move_intent"
+  elif direction.length_squared()>0.01 and _locomotion_last_direction.length_squared()>0.01 and direction.dot(_locomotion_last_direction)<cos(deg_to_rad(10.0)): _locomotion_risk="turn_intent"
+  elif not _route.is_empty() and global_position.distance_to(_route[0])<0.26+_locomotion_speed()*0.05: _locomotion_risk="route_corner"
+  elif not _locomotion_floor_terrain or not is_instance_valid(_locomotion_floor) or (_locomotion_floor.collision_layer&8)==0 or not get_platform_velocity().is_zero_approx(): _locomotion_risk="platform_or_unknown_support"
+  elif not is_instance_valid(host) or not host.has_method("locomotion_contact_risk"): _locomotion_risk="risk_unavailable"
+  else: _locomotion_risk=host.locomotion_contact_risk(self,_locomotion_epoch)
+  var period: int = maxi(1,floori(float(Engine.physics_ticks_per_second)/maxf(20.0,locomotion_hz)))
+  if _locomotion_risk.is_empty() and _locomotion_pending+0.000001<0.05 and (Engine.get_physics_frames()+perception_slot)%period!=0:
+   if _battle_timing_enabled: _timing_locomotion_deferred+=1
+   return 0.0
+ var integrated: float = _locomotion_pending
+ _locomotion_pending=0.0
+ if _battle_timing_enabled:
+  _timing_locomotion_solves+=1
+  _timing_locomotion_sim+=integrated
+  _timing_locomotion_max_delta=maxf(_timing_locomotion_max_delta,integrated)
+  if _locomotion_risk.is_empty(): _timing_locomotion_lowrisk+=1
+  else:
+   _timing_locomotion_highrisk+=1
+   _timing_locomotion_risks[_locomotion_risk]=int(_timing_locomotion_risks.get(_locomotion_risk,0))+1
+ return integrated
+
+func _advance_locomotion(command: Dictionary, delta: float, physics_delta: float) -> void:
+ var direction: Vector3 = command.destination-global_position
+ direction.y=0.0
+ direction=direction.normalized() if bool(command.move) and direction.length()>0.1 else Vector3.ZERO
+ _locomotion_last_direction=direction
+ _locomotion_last_move=bool(command.move)
+ var phase_start: int = Time.get_ticks_usec() if _battle_timing_enabled else 0
+ _route_retry=maxf(0.0,_route_retry-delta)
+ _ground_probe_clock-=delta
+ if direction.length_squared()>0.01 and _ground_probe_clock<=0.0:
+  _ground_probe_clock=0.12
+  var ahead: Vector3 = global_position+direction*0.8
+  var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(ahead+Vector3.UP*0.8,ahead-Vector3.UP*0.8,8,[get_rid()])
+  var ground_hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
+  _ground_safe=not ground_hit.is_empty() and ground_hit.normal.dot(Vector3.UP)>=cos(floor_max_angle)
+ if direction.length_squared()>0.01: _stalled=_stalled+delta if global_position.distance_to(_last_progress)<0.015 else 0.0
+ else: _stalled=0.0
+ _last_progress=global_position
+ if _stalled>0.8:
+  _route.clear()
+  _stalled=0.0
+  _route_retry=0.0
+ var requested: Vector3 = command.destination
+ if not bool(command.move): _route.clear()
+ elif Vector2(requested.x-_route_goal.x,requested.z-_route_goal.z).length()>1.0:
+  _route.clear()
+  _route_retry=0.0
+  _route_goal=requested
+ while not _route.is_empty() and Vector2(_route[0].x-global_position.x,_route[0].z-global_position.z).length()<0.26: _route.pop_front()
+ _update_vehicle_yield(direction,delta)
+ if _vehicle_yield_active:
+  direction=_vehicle_yield_direction
+  _stalled=0.0
+ if direction.length_squared()>0.01 and not _vehicle_yield_active:
+  var path_blocked_now: bool = _path_blocked(direction) if _route.is_empty() else false
+  if _route.is_empty() and (path_blocked_now or not _ground_safe) and _route_retry<=0.0 and (not is_instance_valid(host) or not host.has_method("request_path_plan") or host.request_path_plan()):
+   _route=_route_planner.plan(self,requested)
+   if _route.is_empty(): path_blocked_now=_path_blocked(direction)
+   _route_goal=requested
+   _route_retry=1.0
+  if not _route.is_empty():
+   var next: Vector3 = _route[0]-global_position
+   next.y=0.0
+   direction=next.normalized()
+   if _path_blocked(direction,minf(0.65,next.length())):
+    if _route_retry<=0.0:
+     _route.clear()
+     _route_retry=0.25
+    direction=Vector3.ZERO
+  elif path_blocked_now or not _ground_safe: direction=Vector3.ZERO
+ if _battle_timing_enabled: _locomotion_nav_usec=Time.get_ticks_usec()-phase_start
+ phase_start=Time.get_ticks_usec() if _battle_timing_enabled else 0
+ var effective_speed: float = _locomotion_speed()
+ direction=guard_stance_motion(direction,effective_speed,delta)
+ velocity.x=direction.x*effective_speed
+ velocity.z=direction.z*effective_speed
+ if not is_on_floor(): velocity.y-=gravity*delta
+ else: velocity.y=-0.1
+ var before: Vector3 = global_position
+ # Native move_and_slide has no dt argument. Scale displacement only inside this call.
+ var ratio: float = delta/physics_delta if locomotion_lod_enabled else 1.0
+ velocity*=ratio
+ var sub_start: int = Time.get_ticks_usec() if _battle_timing_enabled else 0
+ move_and_slide()
+ velocity/=ratio
+ if _battle_timing_enabled: _locomotion_solve_usec=Time.get_ticks_usec()-sub_start
+ _locomotion_actual_velocity=(global_position-before)/delta
+ _locomotion_last_position=global_position
+ _locomotion_last_hp=brain.hp
+ _locomotion_last_speed=effective_speed
+ _locomotion_last_shape=_locomotion_shape_signature()
+ # Only this solve's actual native floor contact can certify static terrain support.
+ _locomotion_floor=null
+ _locomotion_floor_terrain=false
+ var owner_main = host.get("main") if is_instance_valid(host) else null
+ var support_terrain = owner_main.get("terrain_damage") if is_instance_valid(owner_main) else null
+ for index: int in get_slide_collision_count():
+  var collision: KinematicCollision3D = get_slide_collision(index)
+  if collision.get_normal().dot(Vector3.UP)>=cos(floor_max_angle):
+   _locomotion_floor=collision.get_collider() as CollisionObject3D
+   _locomotion_floor_terrain=_locomotion_floor is StaticBody3D and is_instance_valid(support_terrain) and support_terrain.is_ancestor_of(_locomotion_floor)
+ # Floor snap may set is_on_floor without adding a slide collision. Supplement only
+ # that missing evidence, using the same complete native body; never move/snap it here.
+ if locomotion_lod_enabled and brain.hp>0.0 and _locomotion_floor==null and is_on_floor():
+  var support_started: int = Time.get_ticks_usec() if _battle_timing_enabled else 0
+  if _battle_timing_enabled: _timing_support_probe_calls+=1
+  if test_move(global_transform,Vector3.DOWN*floor_snap_length,_locomotion_support_contact,safe_margin,true,8):
+   if _battle_timing_enabled: _timing_support_probe_hits+=1
+   var floor_candidate: CollisionObject3D = null
+   var all_terrain: bool = true
+   for index: int in _locomotion_support_contact.get_collision_count():
+    if _locomotion_support_contact.get_normal(index).dot(Vector3.UP)<cos(floor_max_angle): continue
+    var support: CollisionObject3D = _locomotion_support_contact.get_collider(index) as CollisionObject3D
+    if floor_candidate==null: floor_candidate=support
+    if not (support is StaticBody3D and is_instance_valid(support_terrain) and support_terrain.is_ancestor_of(support)): all_terrain=false
+   _locomotion_floor=floor_candidate
+   _locomotion_floor_terrain=is_instance_valid(floor_candidate) and all_terrain
+   if _battle_timing_enabled and _locomotion_floor_terrain: _timing_support_probe_terrain+=1
+  if _battle_timing_enabled:
+   var support_usec: int = Time.get_ticks_usec()-support_started
+   _timing_motor_support+=support_usec
+   _timing_support_probe_usec+=support_usec
+ if is_instance_valid(host):
+  if host.has_method("note_actor_moved"): host.note_actor_moved(self)
+  if host.has_method("locomotion_geometry_epoch"): _locomotion_epoch=host.locomotion_geometry_epoch()
+ sub_start=Time.get_ticks_usec() if _battle_timing_enabled else 0
+ if direction.length_squared()>0.01: _set_body_heading(lerp_angle(rotation.y,atan2(-direction.x,-direction.z),minf(1.0,delta*9.0)))
+ if _battle_timing_enabled:
+  _locomotion_heading_usec=Time.get_ticks_usec()-sub_start
+  _locomotion_motor_usec=Time.get_ticks_usec()-phase_start
 
 func _observations() -> Array:
  var result: Array = []
+ _cached_direct_observations.clear()
  if bool(get_meta("construction_order",false)): return result
  if not is_instance_valid(host) or not host.has_method("infantry_candidates"): return result
+ var sense_started: int = Time.get_ticks_usec() if _battle_timing_enabled else 0
  var candidates: Array = host.infantry_candidates(brain.actor_id)
- for offset in candidates.size():
-  var candidate: Dictionary = candidates[(_candidate_cursor+offset)%candidates.size()]
+ var context: Dictionary = host.infantry_visibility_context(brain.actor_id) if host.has_method("infantry_visibility_context") else {}
+ if _battle_timing_enabled: _timing_sense_candidates += Time.get_ticks_usec()-sense_started
+ var current_index: int = -1
+ for index: int in candidates.size():
+  if str(candidates[index].actor_id)==brain.target_id:
+   current_index=index
+   break
+ var cyclic_offset: int = 0
+ for iteration: int in candidates.size():
+  var index: int
+  if current_index>=0 and iteration==0: index=current_index
+  else:
+   index=(_candidate_cursor+cyclic_offset)%candidates.size()
+   cyclic_offset+=1
+   if index==current_index:
+    index=(_candidate_cursor+cyclic_offset)%candidates.size()
+    cyclic_offset+=1
+  var candidate: Dictionary = candidates[index]
   if str(candidate.get("actor_id","")) == brain.actor_id: continue
   if str(candidate.get("team_id",brain.team_id)) == brain.team_id: continue
   if not bool(candidate.get("alive",false)): continue
   if str(candidate.get("actor_kind","infantry")) in ["vehicle","fortification"] and weapon not in ["at","rocket","grenade","grenade_launcher","heavy_grenade"]: continue
   var point: Vector3 = candidate.position
-  var visible := false
-  # Missing visibility integration fails closed; never grants omniscience.
-  if host.has_method("infantry_visibility"):
-   visible = float(host.infantry_visibility(brain.actor_id,str(candidate.actor_id))) > 0.0
+  var visible: bool = false
+  sense_started = Time.get_ticks_usec() if _battle_timing_enabled else 0
+  if not context.is_empty() and host.has_method("infantry_candidate_visible"):
+   visible=host.infantry_candidate_visible(candidate,context)
+  elif host.has_method("infantry_visibility"):
+   visible=float(host.infantry_visibility(brain.actor_id,str(candidate.actor_id)))>0.0
+  if _battle_timing_enabled: _timing_sense_visibility += Time.get_ticks_usec()-sense_started
   if visible:
-   if host.has_method("consume_perception_ray") and not host.consume_perception_ray():
-    _candidate_cursor = (_candidate_cursor+offset)%maxi(1,candidates.size())
+   if host.has_method("consume_perception_ray") and not host.consume_perception_ray(brain.actor_id):
+    if _battle_timing_enabled: _timing_perception_denied += 1
+    _candidate_cursor=index
     break
+   if _battle_timing_enabled: _timing_perception_granted += 1
+   sense_started = Time.get_ticks_usec() if _battle_timing_enabled else 0
    var hit := _ray(point)
-   visible = not hit.is_empty() and _collision_actor_id(hit.collider) == str(candidate.actor_id)
+   if _battle_timing_enabled: _timing_sense_ray += Time.get_ticks_usec()-sense_started
+   visible=not hit.is_empty() and _collision_actor_id(hit.collider)==str(candidate.actor_id)
   if visible:
    var observation: Dictionary = candidate.duplicate()
-   observation.visible = true
+   observation.visible=true
+   observation.observer_id=brain.actor_id
+   observation.observed_sim=_observation_clock()
+   observation.observation_origin=global_position+Vector3.UP*aim_height
+   _cached_direct_observations.append(observation)
    result.append(observation)
    if host.has_method("report_contact"): host.report_contact(brain.team_id,observation)
- if host.has_method("shared_contacts"): result.append_array(host.shared_contacts(brain.team_id))
+ sense_started = Time.get_ticks_usec() if _battle_timing_enabled else 0
+ if host.has_method("shared_contacts"): result.append_array(_shared_contact_packets())
+ if _battle_timing_enabled: _timing_sense_shared += Time.get_ticks_usec()-sense_started
  return result
 
 func _ray(point: Vector3) -> Dictionary:
@@ -475,17 +777,21 @@ func set_embarked(value: bool) -> void:
  _sync_person_state()
 
 func update_visual_pose(delta: float) -> void:
+ var timing_start: int = Time.get_ticks_usec() if _battle_timing_enabled else 0
  # Already-prone casualties retain their supported last articulated pose.
  # Applying the standing fall tilt on top of prone would twist limbs into ground.
  if brain.hp<=0.0 and _stance_enabled and float(_stance_pose.prone)>0.5:
   if is_instance_valid(weapon_pivot): weapon_pivot.visible = false
+  if _battle_timing_enabled: _record_battle_timing("pose",timing_start)
   return
  var body_shape := get_node_or_null("BodyCollision") as CollisionShape3D
  if is_instance_valid(body_shape) and body_shape.shape is CapsuleShape3D and not _stance_enabled:
   body_shape.shape.height = 0.56 if brain.hp<=0.0 else 1.65
   body_shape.position.y = 0.28 if brain.hp<=0.0 else 0.825
  var visual := get_node_or_null("InfantryVisual") as Node3D
- if not is_instance_valid(visual): return
+ if not is_instance_valid(visual):
+  if _battle_timing_enabled: _record_battle_timing("pose",timing_start)
+  return
  if _limbs.is_empty():
   for part in ["Thigh_L","Thigh_R","Shin_L","Shin_R","Foot_L","Foot_R","UpperArm_L","UpperArm_R","Forearm_L","Forearm_R"]:
    var limb := visual.find_child("*"+part,true,false) as Node3D
@@ -494,7 +800,7 @@ func update_visual_pose(delta: float) -> void:
     _limb_rest[part] = limb.rotation
  var dead: bool = brain.hp<=0.0
  # Animate real displacement, never requested velocity against a wall.
- var speed := Vector2(get_real_velocity().x,get_real_velocity().z).length()
+ var speed := Vector2(locomotion_actual_velocity().x,locomotion_actual_velocity().z).length()
  _walk_blend = move_toward(_walk_blend,clampf(speed/maxf(move_speed,0.01),0.0,1.0) if not dead else 0.0,delta*5.0)
  _walk_phase += speed*delta*5.5
  _recoil = move_toward(_recoil,0.0,delta*8.0)
@@ -524,6 +830,7 @@ func update_visual_pose(delta: float) -> void:
  visual.position.y = move_toward(visual.position.y,0.24 if dead else 0.0,delta*1.5)
  visual.scale.y = move_toward(visual.scale.y,0.58 if dead else 1.0,delta*1.2)
  if is_instance_valid(weapon_pivot): weapon_pivot.visible = not dead and not weapon.is_empty()
+ if _battle_timing_enabled: _record_battle_timing("pose",timing_start)
 
 func _path_blocked(direction: Vector3, probe_distance := 0.65) -> bool:
  # A grounded capsule's horizontal probe commonly touches its walkable floor.
@@ -590,6 +897,7 @@ func receive_vehicle_contact(direction: Vector3, speed: float, crush: bool) -> b
  var planar := Vector3(direction.x,0,direction.z)
  if planar.length_squared()<0.0001: return false
  var collision := move_and_collide(planar.normalized()*clampf(maxf(0.15,absf(speed)/60.0),0.15,0.6))
+ if is_instance_valid(host) and host.has_method("note_actor_moved"): host.note_actor_moved(self)
  return collision==null
 
 func _update_vehicle_yield(intended:Vector3,delta:float)->void:
@@ -598,7 +906,7 @@ func _update_vehicle_yield(intended:Vector3,delta:float)->void:
  _vehicle_yield_clock=.15
  _vehicle_yield_active=false
  _vehicle_yield_direction=Vector3.ZERO
- var neighbors:Array[Node3D]=FriendlySafety.nearby_friendly_vehicles(self,host,brain.team_id)
+ var neighbors:Array[Node3D]=host.nearby_friendly_vehicles(self,brain.team_id) if is_instance_valid(host) and host.has_method("nearby_friendly_vehicles") else FriendlySafety.nearby_friendly_vehicles(self,host,brain.team_id)
  for vehicle in neighbors:
   # A stopped vehicle remains a real navigation/collision obstacle, not an endless moving-track wait.
   # Approximate zero is the engine epsilon, not a gameplay low-speed threshold.
@@ -778,7 +1086,7 @@ func _solve_leg_plants() -> void:
  var prone := float(_stance_pose.prone)
  var crouch := float(_stance_pose.crouch)
  var normal := get_floor_normal() if is_on_floor() else Vector3.UP
- var run_blend := clampf((Vector2(get_real_velocity().x,get_real_velocity().z).length()/maxf(move_speed,0.01)-1.0)/0.65,0.0,1.0)
+ var run_blend := clampf((Vector2(locomotion_actual_velocity().x,locomotion_actual_velocity().z).length()/maxf(move_speed,0.01)-1.0)/0.65,0.0,1.0)
  for side in ["L","R"]:
   if not _limbs.has("Thigh_"+side) or not _limbs.has("Shin_"+side) or not _limbs.has("Foot_"+side): continue
   var upper: Node3D = _limbs["Thigh_"+side]

@@ -1,7 +1,7 @@
 {
   "schema": "wwo-military-source-v1",
   "military_repository": "https://github.com/ryoumiyahayato/wwo-military",
-  "military_commit": "01caf7907a8fe063e89ad16baf2e96f27f56abef",
+  "military_commit": "926cc747b66a0f0290da96a7324900dd4624c707",
   "source_root": "military-godot",
   "source_paths": [
     "assets/armor_geometry/kestrel_scout.json",
@@ -49,6 +49,9 @@
     "modules/infantry_ai/skirmish_host.gd",
     "modules/infantry_ai/weapon_drops.gd",
     "modules/isolated_training/battle.gd",
+    "modules/isolated_training/battlefield_armor.gd",
+    "modules/isolated_training/battlefield_deployment.gd",
+    "modules/isolated_training/battlefield_infantry.gd",
     "modules/isolated_training/controller.gd",
     "modules/isolated_training/controls.gd",
     "modules/isolated_training/opponent.gd",

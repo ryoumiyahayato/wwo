@@ -1293,7 +1293,11 @@ func observation_context() -> Dictionary:
 
 func _collect_observation_rids(node:Node,output:Array[RID]) -> void:
 	if node is CollisionObject3D:output.append(node.get_rid())
-	for child in node.get_children():_collect_observation_rids(child,output)
+	# Native tree traversal returns the same live collision descendants, without
+	# recursively crossing every render/equipment node in GDScript per LOS call.
+	# No across-call topology/RID cache: boarding, drops and replacement stay live.
+	for body: CollisionObject3D in node.find_children("*", "CollisionObject3D", true, false):
+		output.append(body.get_rid())
 
 func observation_reason(point:Vector3,subject:Node3D=null,endpoint_margin:float=0.0) -> String:
 	var observer:Dictionary=observation_context()

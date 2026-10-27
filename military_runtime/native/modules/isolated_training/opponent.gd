@@ -13,14 +13,18 @@ const ENEMY_ID: String = "training_red_0"
 # This is setup, never a live target-derived relocation or a respawn.
 const START_XZ: Vector2 = Vector2(0.0, 110.0)
 var _bound: bool = false
+var _bound_unit_id: String = ENEMY_ID
 var _visual_changed: bool = false
 var _previous_visual_state: Array = []
 
 func bind_existing(model: Node3D, state: Combat) -> Dictionary:
+	var position: Vector3 = Vector3(START_XZ.x, main.terrain_damage.sample_height(START_XZ.x, START_XZ.y), START_XZ.y)
+	return _bind_existing_unit(model, state, ENEMY_ID, position)
+
+func _bind_existing_unit(model: Node3D, state: Combat, unit_id: String, position: Vector3) -> Dictionary:
 	if _bound or not units.is_empty():
 		return {"ok": false, "reason": "encounter_already_bound"}
-	var position: Vector3 = Vector3(START_XZ.x, main.terrain_damage.sample_height(START_XZ.x, START_XZ.y), START_XZ.y)
-	if not position.is_finite() or state.crew.size() != 3:
+	if not is_instance_valid(model) or unit_id.is_empty() or not position.is_finite() or state.crew.size() != 3:
 		return {"ok": false, "reason": "original_opponent_unavailable"}
 	var turret: Node3D = model.find_child("Turret", true, false) as Node3D
 	var barrel: Node3D = model.find_child("Barrel", true, false) as Node3D
@@ -30,18 +34,18 @@ func bind_existing(model: Node3D, state: Combat) -> Dictionary:
 	model.hide()
 	model.global_position = position
 	model.rotation = Vector3.ZERO
-	model.set_meta("actor_id", ENEMY_ID)
+	model.set_meta("actor_id", unit_id)
 	model.set_meta("team_id", "red")
 	model.set_meta("actor_kind", "vehicle")
 	var exclusions: Array[RID] = []
 	for body: CollisionObject3D in model.find_children("*", "CollisionObject3D", true, false):
-		body.set_meta("actor_id", ENEMY_ID)
+		body.set_meta("actor_id", unit_id)
 		body.set_meta("team_id", "red")
 		exclusions.append(body.get_rid())
 	var envelope: BoxShape3D = BoxShape3D.new()
 	envelope.size = Vector3(3.4, 1.4, 5.4)
 	var unit: Dictionary = {
-		"id": ENEMY_ID, "team": "red", "model": model, "combat": state,
+		"id": unit_id, "team": "red", "model": model, "combat": state,
 		"turret": turret, "barrel": barrel, "muzzle": muzzle,
 		"mg_muzzle": model.find_child("MG_Muzzle", true, false), "mg_reload": 0.0,
 		"exclude": exclusions, "shape": envelope, "home": position,
@@ -54,9 +58,10 @@ func bind_existing(model: Node3D, state: Combat) -> Dictionary:
 		"visual_weapons": {"primary": {"weapon_id": "game_tank_cannon"}, "mg": {"weapon_id": "game_vehicle_mg"}},
 		"ballistics": Ballistics.configuration({})
 	}
-	if not main.vehicle_ammo.register_vehicle(ENEMY_ID, AmmoConfig.loadout("cannon", true)):
+	if not main.vehicle_ammo.register_vehicle(unit_id, AmmoConfig.loadout("cannon", true)):
 		return {"ok": false, "reason": "opponent_ammo_already_registered"}
-	units[ENEMY_ID] = unit
+	units[unit_id] = unit
+	_bound_unit_id = unit_id
 	_add_team_panels(model, "red", Vector3(0.0, 0.95, 0.0), Vector3(2.7, 1.05, 4.6))
 	damage_feedback.setup(unit)
 	main.terrain_damage.set_simulation_anchors([main.hero.global_position, position])
@@ -65,9 +70,11 @@ func bind_existing(model: Node3D, state: Combat) -> Dictionary:
 	return {"ok": true}
 
 func deployment_ready() -> bool:
-	if not _bound:
+	return _bound and units.has(_bound_unit_id) and _unit_deployment_ready(units[_bound_unit_id])
+
+func _unit_deployment_ready(unit: Dictionary) -> bool:
+	if not is_instance_valid(unit.get("model")):
 		return false
-	var unit: Dictionary = units[ENEMY_ID]
 	var support: Dictionary = main.align_vehicle_ground(unit.model, true)
 	if not bool(support.get("driveable", false)):
 		return false
@@ -168,7 +175,7 @@ func _fire(unit: Dictionary, direction: Vector3, machinegun: bool = false) -> vo
 	unit["shot_cone_radians"] = Gunnery.cone_radians(float(unit.speed), false)
 	var audit_id: int = _audit_shot(unit, origin, direction, origin + direction * float(config.range), {}, false)
 	var visual_weapon: Dictionary = WeaponVFX.describe(unit, "cannon", "primary")
-	var row: Dictionary = {"id": audit_id, "actor_id": str(unit.id), "vehicle_id": str(unit.id),
+	var row: Dictionary = {"id": audit_id, "actor_id": str(unit.id), "vehicle_id": str(unit.id), "team_id": str(unit.team),
 		"accepted": true, "weapon": "tank_cannon", "round": str(committed.round), "ammo_commit": int(committed.commit),
 		"origin": origin, "direction": direction, "speed": config.speed, "gravity": config.gravity,
 		"horizontal_limit": config.range, "flight_state": "flying"}
@@ -206,7 +213,8 @@ func _launch_feedback(unit: Dictionary, visual_weapon: Dictionary) -> void:
 
 func _flight_row(audit_id: int) -> Dictionary:
 	for row: Dictionary in main.incoming_audit:
-		if int(row.get("id", -1)) == audit_id and str(row.get("actor_id", "")) == ENEMY_ID:
+		# This host's CombatAudit sequence is shared by every unit and never reused.
+		if int(row.get("id", -1)) == audit_id:
 			return row
 	return {}
 
@@ -251,15 +259,20 @@ func _shell_impact(event: Dictionary, generation: int, audit_id: int, commit: in
 	var actual_hit: Dictionary = event.duplicate()
 	event["hit"] = actual_hit
 	event["hit_actor_id"] = hit_actor
-	event["actor_id"] = ENEMY_ID
-	event["team_id"] = "red"
+	# Immutable launch ownership, not the current target or a surviving model.
+	event["actor_id"] = str(row.actor_id)
+	event["team_id"] = str(row.team_id)
 	event["weapon"] = "cannon"
-	event["round"] = "ap"
+	event["round"] = str(row.round)
 	event["penetration"] = 110
 	event["ammo_commit"] = commit
 	event["audit_id"] = audit_id
 	if hit_actor == "player":
-		main.apply_ai_hit(event)
+		# The existing bridge owns the same-team gate, then calls apply_ai_hit once.
+		if is_instance_valid(main.ai_host):
+			main.ai_host.infantry_apply_hit(event)
+		elif str(event.team_id) != "blue":
+			main.apply_ai_hit(event)
 	elif units.has(hit_actor):
 		receive_hit(event)
 	elif not hit_actor.is_empty() and is_instance_valid(main.ai_host):

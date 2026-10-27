@@ -6,6 +6,8 @@ var material_provider: Object
 var session_ready: bool = false
 var session_locked: bool = false
 var preparation_error: String = ""
+var battlefield_profile: String = "single_opponent"
+const BattlefieldDeployment = preload("res://military_runtime/native/modules/isolated_training/battlefield_deployment.gd")
 
 func request_training_frame() -> void:
 	frame_requested.emit()
@@ -33,7 +35,7 @@ func _ready() -> void:
 	build_hud()
 	hud.custom_viewport = get_viewport()
 	load_display()
-	ai_host = preload("res://military_runtime/native/triple/local_host.gd").new()
+	ai_host = preload("res://military_runtime/native/modules/isolated_training/battlefield_infantry.gd").new() if battlefield_profile == BattlefieldDeployment.PROFILE else preload("res://military_runtime/native/triple/local_host.gd").new()
 	add_child(ai_host)
 	ai_host.setup(self)
 	crew_host = preload("res://military_runtime/native/modules/vehicle_crew/vehicle_crew_host.gd").new()
@@ -50,13 +52,30 @@ func _ready() -> void:
 func prepare_encounter() -> Dictionary:
 	if is_instance_valid(armor_host):
 		return {"ok": false, "reason": "encounter_already_installed"}
+	if battlefield_profile == BattlefieldDeployment.PROFILE:
+		armor_host = preload("res://military_runtime/native/modules/isolated_training/battlefield_armor.gd").new()
+		add_child(armor_host)
+		armor_host.setup(self)
+		var armor_result: Dictionary = await armor_host.prepare_battlefield(BattlefieldDeployment.vehicle_rows(terrain_damage), crew_host.registry)
+		if not bool(armor_result.get("ok", false)):
+			return armor_result
+		return await ai_host.deploy_infantry(BattlefieldDeployment.infantry_rows(terrain_damage))
 	armor_host = preload("res://military_runtime/native/modules/isolated_training/opponent.gd").new()
 	add_child(armor_host)
 	armor_host.setup(self)
 	return armor_host.bind_existing(target, combat)
 
 func encounter_ready() -> bool:
-	return is_instance_valid(armor_host) and armor_host.deployment_ready()
+	if not is_instance_valid(armor_host) or not armor_host.deployment_ready():
+		return false
+	if battlefield_profile == BattlefieldDeployment.PROFILE:
+		if not terrain_damage.stream_queue.is_empty():
+			return false
+		for id: String in ai_host.field_roster:
+			var actor: CharacterBody3D = ai_host.actors[id]
+			if not terrain_damage.is_position_loaded(actor.global_position):
+				return false
+	return true
 
 func _on_control_changed(_on_foot: bool) -> void:
 	fire_control.cancel("车长上下车，指示已撤销")

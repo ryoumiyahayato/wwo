@@ -45,6 +45,8 @@ var _training: Node
 var _training_active: bool = false
 var _training_preparing: bool = false
 var _training_button: Button
+var _battlefield_button: Button
+var _training_profile: String = "single_opponent"
 var _training_exit: Button
 var _training_banner: Label
 var _toolbar: Control
@@ -55,6 +57,10 @@ func _install_training_controls() -> void:
 	_training_button = _button(_walk_button.get_parent(), "原生坦克训练（隔离）", _toggle_training)
 	_training_button.get_parent().move_child(_training_button, _walk_button.get_index() + 1)
 	_training_button.disabled = true
+	_battlefield_button = _button(_walk_button.get_parent(), "20车 / 150步兵战场（隔离）", _toggle_battlefield)
+	_battlefield_button.tooltip_text = "20车与150名独立步兵，62名车组另计。满规模持续接战与30FPS仍在验证，尚未达标。暂停/重入保留伤损与有限弹药，不写正式世界。"
+	_battlefield_button.get_parent().move_child(_battlefield_button, _training_button.get_index() + 1)
+	_battlefield_button.disabled = true
 	_training_exit = Button.new()
 	_training_exit.text = "隔离训练 · 暂停并观察 / Esc"
 	_training_exit.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
@@ -84,7 +90,13 @@ func _install_training_controls() -> void:
 	_training_banner.hide()
 	add_child(_training_banner)
 
-func _toggle_training() -> void:
+func _toggle_battlefield() -> void:
+	_toggle_training("field_170")
+
+func _toggle_training(profile: String = "") -> void:
+	if is_instance_valid(_training) and not profile.is_empty() and profile != _training_profile:
+		_status.text = "本次会话保留原车组与伤弹。返回正式世界明确结束后，再选择另一训练场景。"
+		return
 	if _training_active:
 		_pause_training()
 		return
@@ -99,9 +111,10 @@ func _toggle_training() -> void:
 		_status.text = "原军事训练模块未就绪；观察与正式世界仍可正常使用。"
 		return
 	_stop_walk()
+	_training_profile = "single_opponent" if profile.is_empty() else profile
 	_training_preparing = true
 	_set_training_view(true)
-	_training_banner.text = "准备原生坦克与五车组 · 独立训练身份 · 不写正式世界"
+	_training_banner.text = "准备20辆可战车辆 / 150独立步兵；62车组另计\n原规则分批部署，地面就绪后共同激活" if _training_profile == "field_170" else "准备原生坦克与五车组 · 独立训练身份 · 不写正式世界"
 	_training = script.new() as Node
 	_training.connect("prepared", _on_training_prepared)
 	_training.connect("failed", _on_training_failed)
@@ -109,7 +122,7 @@ func _toggle_training() -> void:
 	add_child(_training)
 	var exclusions: Array[Rect2] = [_training_exit.get_rect()]
 	_training.call("set_input_exclusions", exclusions)
-	_training.call("start", {"viewport": viewport, "provider": terrain})
+	_training.call("start", {"viewport": viewport, "provider": terrain, "profile": _training_profile})
 
 func _set_training_view(active: bool) -> void:
 	_training_active = active
@@ -181,7 +194,8 @@ func _process(delta: float) -> void:
 			var chamber_text: String = "弹仓空"
 			if not str(ammo.get("loaded", "")).is_empty(): chamber_text = "已装弹"
 			elif not str(ammo.get("loading", "")).is_empty(): chamber_text = "装填 %.1fs" % float(ammo.get("remaining", 0.0))
-			_training_banner.text = "隔离装甲交战 · %s\n%s · %s · 总余弹%d · Esc暂停" % [motion_text, round_name.to_upper(), chamber_text, int(ammo.get("total", 0))]
+			var scenario_label: String = "部署20车 / 150步兵" if _training_profile == "field_170" else "隔离装甲交战"
+			_training_banner.text = "%s · %s\n%s · %s · 总余弹%d · Esc暂停" % [scenario_label, motion_text, round_name.to_upper(), chamber_text, int(ammo.get("total", 0))]
 		return
 	_process_observation(delta)
 
@@ -371,6 +385,7 @@ func _on_prepared() -> void:
 	_detail.disabled = false
 	_walk_button.disabled = false
 	_training_button.disabled = false
+	_battlefield_button.disabled = false
 	_status.text = "50m外围 / 4m原生高度样本 · 仅显示精度逐级提高，不增加测绘精度。"
 	_request_frame()
 

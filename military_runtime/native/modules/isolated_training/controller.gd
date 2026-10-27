@@ -46,6 +46,9 @@ func request_frame() -> void:
 	_render_hold = 0.25
 
 func _process(delta: float) -> void:
+	if _state == "preparing":
+		request_frame()
+		return
 	if _state != "running" or not is_instance_valid(_battle):
 		return
 	_render_hold = maxf(0.0, _render_hold - delta)
@@ -126,6 +129,11 @@ func start(options: Dictionary) -> void:
 		if not ResourceLoader.exists(path):
 			_fail("missing_original_training_resource: " + path)
 			return
+	var battle_script: Script = NativeBattle
+	var port_script: Script = NativePort
+	if not battle_script.can_instantiate() or not port_script.can_instantiate():
+		_fail("original_runtime_source_not_instantiable")
+		return
 	_port = NativePort.new()
 	if not _port.read_request(REQUEST_PATH):
 		_fail(_port.error)
@@ -137,6 +145,12 @@ func start(options: Dictionary) -> void:
 	_capture_global_settings()
 	_battle = NativeBattle.new()
 	_battle.name = "IsolatedNativeTankSession"
+	_battle.battlefield_profile = str(options.get("profile", "single_opponent"))
+	if _battle.battlefield_profile not in ["single_opponent", "field_170"]:
+		_battle.free()
+		_battle = null
+		_fail("unknown_training_profile")
+		return
 	_battle.material_provider = _provider
 	_battle.process_mode = Node.PROCESS_MODE_ALWAYS
 	_battle.map_requested.connect(_request_observer)
@@ -166,12 +180,15 @@ func start(options: Dictionary) -> void:
 		return
 	# Install only once: preserves injured commander and already-spent 9 rounds.
 	_battle.session_locked = true
-	var encounter: Dictionary = _battle.prepare_encounter()
+	var encounter: Dictionary = await _battle.prepare_encounter()
+	if generation != _generation or not is_instance_valid(_battle):
+		return
 	if not bool(encounter.get("ok", false)):
 		_fail(str(encounter.get("reason", "encounter_install_failed")))
 		return
 	var opponent_ready: bool = false
-	for deployment_frame: int in range(120):
+	var deployment_limit: int = 1200 if _battle.battlefield_profile == "field_170" else 120
+	for deployment_frame: int in range(deployment_limit):
 		await get_tree().physics_frame
 		if generation != _generation or not is_instance_valid(_battle):
 			return
@@ -181,6 +198,17 @@ func start(options: Dictionary) -> void:
 	if not opponent_ready:
 		_fail("original_opponent_deployment_not_ready")
 		return
+	if _battle.battlefield_profile == "field_170":
+		# Registration precedes activation. Give newly installed shapes two physics
+		# boundaries; no live member is allowed to fall through pending terrain.
+		for registration_frame: int in range(2):
+			await get_tree().physics_frame
+			if generation != _generation or not is_instance_valid(_battle):
+				return
+		var activated: Dictionary = _battle.ai_host.activate_battlefield()
+		if not bool(activated.get("ok", false)) or int(activated.get("activated", 0)) != 150:
+			_fail("independent_infantry_activation_incomplete")
+			return
 	_battle.session_ready = true
 	for child: Node in _battle.find_children("*", "", true, false):
 		if child.process_mode == Node.PROCESS_MODE_ALWAYS:
@@ -268,6 +296,7 @@ func get_player_status() -> Dictionary:
 	var status: Dictionary = {"state": _state, "ready": _state in ["running", "paused"]}
 	if not bool(status.ready) or not is_instance_valid(_battle) or not is_instance_valid(_battle.hero):
 		return status
+	status["profile"] = _battle.battlefield_profile
 	var primary: Dictionary = _battle.vehicle_ammo.status("player_vehicle", "primary")
 	status.merge({"on_foot": _battle.player_infantry_controller.active(),
 		"driving": {"speed_mps": float(_battle.hero.get_meta("vehicle_speed", 0.0))},
@@ -305,8 +334,11 @@ func get_status() -> Dictionary:
 		"battle_finished": _battle.battle_finished, "battle_result": _battle.battle_result,
 		"message": _battle.message, "native_actor_count": _battle.ai_host.actors.size(),
 		"terrain": _battle.terrain_damage.simulation_stream_snapshot()}, true)
+	status["profile"] = _battle.battlefield_profile
 	if is_instance_valid(_battle.armor_host):
 		status["encounter"] = _battle.armor_host.encounter_snapshot()
+	if _battle.battlefield_profile == "field_170":
+		status["battlefield_infantry"] = _battle.ai_host.battlefield_snapshot()
 	return status.duplicate(true)
 
 func _request_observer() -> void:

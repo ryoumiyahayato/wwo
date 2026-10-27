@@ -57,7 +57,30 @@ func order_build(site: Vector3, preset: String, approved: bool) -> bool:
  _set_state("move_to_build")
  return true
 
-func tick(delta: float, position: Vector3, observations: Array, commit_immediately := true) -> Dictionary:
+var _observation_key: Array = []
+var _seen_packets: Array = []
+var _best_report: Dictionary = {}
+var _best_report_expiry: float = -INF
+
+func _prepare_observations(observations: Array, generation: int, clock: float, weapon_kind: String) -> void:
+ var key: Array = [generation,team_id,prefer_vehicles,nearby_vehicle_radius,preferred_target_id,str(tactical_order.get("target_id","")),weapon_kind]
+ if generation>=0 and key==_observation_key: return
+ _observation_key=key
+ _seen_packets=[]
+ _best_report={}
+ _best_report_expiry=-INF
+ for item: Dictionary in observations:
+  if str(item.get("team_id",team_id))==team_id: continue
+  if bool(item.get("alive",false)) and bool(item.get("visible",false)):
+   _seen_packets.append(item)
+  elif bool(item.get("reported",false)) and (prefer_vehicles or str(item.get("actor_kind","infantry"))=="infantry"):
+   var expiry: float = float(item.get("expires",clock+float(item.get("remaining",0.0)))) if clock>=0.0 else float(item.get("remaining",0.0))
+   if expiry>_best_report_expiry:
+    _best_report=item
+    _best_report_expiry=expiry
+ _seen_packets.sort_custom(func(a,b): return str(a.actor_id)<str(b.actor_id))
+
+func tick(delta: float, position: Vector3, observations: Array, commit_immediately := true, observation_generation: int = -1, observation_clock: float = -1.0, weapon_kind: String = "") -> Dictionary:
  var dt := clampf(delta, 0.0, 0.25)
  if not tactical_order.is_empty():
   tactical_order.remaining=maxf(0.0,float(tactical_order.remaining)-dt)
@@ -77,32 +100,47 @@ func tick(delta: float, position: Vector3, observations: Array, commit_immediate
   ammo += transferred
   reserve_ammo -= transferred
   _set_state("idle")
+ _prepare_observations(observations,observation_generation,observation_clock,weapon_kind)
  var seen: Array = []
- for item in observations:
-  if str(item.get("team_id",team_id)) != team_id and bool(item.get("alive",false)) and bool(item.get("visible",false)):
-   # A remote vehicle cannot suppress fallback to genuinely visible local targets.
-   if prefer_vehicles and str(item.get("actor_kind","infantry"))=="vehicle" and _planar_distance(position,item.position)>nearby_vehicle_radius: continue
-   seen.append(item)
- # IDs, not distance/weak-point optimization, define fixed target priority.
- seen.sort_custom(func(a,b): return str(a.actor_id) < str(b.actor_id))
+ for item: Dictionary in _seen_packets:
+  # Freshness is simulation time, not wall time and not a cache-read refresh.
+  if observation_clock>=0.0 and item.has("observed_sim") and observation_clock>float(item.observed_sim)+0.200001: continue
+  if prefer_vehicles and str(item.get("actor_kind","infantry"))=="vehicle" and _planar_distance(position,item.position)>nearby_vehicle_radius: continue
+  seen.append(item)
  if not seen.is_empty():
-  var target: Dictionary = seen[0]
-  # Optional fixed scenario pairing applies only among genuinely visible actors.
-  for candidate in seen:
-   if str(candidate.actor_id)==str(tactical_order.get("target_id",preferred_target_id)):
-    target = candidate
+  # Do not keep approaching a distant sighting while an actually observed
+  # opponent is already inside this weapon's unchanged engagement threshold.
+  # This pool contains only filtered, fresh self-observations, never world truth.
+  var engaging: Array = []
+  for candidate: Dictionary in seen:
+   if _planar_distance(position,candidate.position)<=engagement_range*0.88:
+    engaging.append(candidate)
+  var selectable: Array = seen if engaging.is_empty() else engaging
+  var target: Dictionary = selectable[0]
+  # Only this observer's actual LOS packet may stabilize an acquired target.
+  for candidate: Dictionary in selectable:
+   if str(candidate.actor_id)==target_id and str(candidate.get("observer_id",""))==actor_id:
+    target=candidate
     break
-  if prefer_vehicles and tactical_order.is_empty():
-   for candidate in seen:
-    if str(candidate.get("actor_kind","infantry"))=="vehicle":
-     target = candidate
-     break
+  var explicit_id: String = str(tactical_order.get("target_id",preferred_target_id))
+  var explicit_visible: bool = false
+  for candidate: Dictionary in seen:
+   if str(candidate.actor_id)==explicit_id:
+    target=candidate
+    explicit_visible=true
+    break
+  if prefer_vehicles and not explicit_visible and tactical_order.is_empty():
+   if str(target.get("actor_kind","infantry"))!="vehicle":
+    for candidate: Dictionary in seen:
+     if str(candidate.get("actor_kind","infantry"))=="vehicle":
+      target=candidate
+      break
   if target_id != str(target.actor_id):
    _set_state("see_target")
    state_time = 0.0
   target_id = str(target.actor_id)
   last_known = target.position
-  memory_remaining = memory_ttl
+  memory_remaining = maxf(0.0,memory_ttl-maxf(0.0,observation_clock-float(target.observed_sim))) if observation_clock>=0.0 and target.has("observed_sim") else memory_ttl
   if _planar_distance(position,last_known)>engagement_range*0.88:
    _set_state("approach")
    out.move = true
@@ -140,12 +178,12 @@ func tick(delta: float, position: Vector3, observations: Array, commit_immediate
   out.move=_planar_distance(position,out.destination)>1.0
   return out
  # Immutable team reports allow search only, never blind firing.
- if seen.is_empty():
-  for report in observations:
-   if bool(report.get("reported",false)) and str(report.get("team_id",team_id))!=team_id and (prefer_vehicles or str(report.get("actor_kind","infantry"))=="infantry") and float(report.get("remaining",0.0))>memory_remaining:
-    target_id = str(report.actor_id)
-    last_known = report.position
-    memory_remaining = minf(memory_ttl,float(report.remaining))
+ if seen.is_empty() and not _best_report.is_empty():
+  var remaining: float = maxf(0.0,_best_report_expiry-observation_clock) if observation_clock>=0.0 else float(_best_report.get("remaining",0.0))
+  if remaining>memory_remaining:
+   target_id=str(_best_report.actor_id)
+   last_known=_best_report.position
+   memory_remaining=minf(memory_ttl,remaining)
  # No hidden current positions are used: search only the last observed location.
  if memory_remaining > 0.0 and not target_id.is_empty():
   _set_state("search")
@@ -201,6 +239,11 @@ func restore(data: Dictionary) -> bool:
  cover_used = bool(data.get("cover_used",false))
  sequence = maxi(0,int(data.get("sequence",0)))
  state = "disabled" if hp <= 0.0 else str(data.get("state","idle"))
+ # Observation classification is ephemeral, never restored military knowledge.
+ _observation_key.clear()
+ _seen_packets.clear()
+ _best_report.clear()
+ _best_report_expiry=-INF
  return true
 
 func _planar_distance(a: Vector3, b: Vector3) -> float:

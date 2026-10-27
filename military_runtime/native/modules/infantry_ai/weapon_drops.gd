@@ -49,10 +49,12 @@ func choose(point: Vector3, current_kind: String, now: float, usable: Callable, 
  var current_rank := rank(current_kind)
  for id in records:
   var record: Dictionary = records[id]
-  var grade := rank(str(record.category))
-  var distance := point.distance_to(record.position)
   if not str(record.owner).is_empty() or now<float(record.blocked_until): continue
-  if int(record.ammo)+int(record.reserve)<=0 or distance>radius or grade<=current_rank: continue
+  if int(record.ammo)+int(record.reserve)<=0: continue
+  var grade := rank(str(record.category))
+  if grade<=current_rank: continue
+  var distance := point.distance_to(record.position)
+  if distance>radius: continue
   if not usable.call(record): continue
   if current_rank==0:
    if distance>best_distance: continue
