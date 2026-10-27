@@ -396,32 +396,39 @@ func _ensure_locomotion_grid() -> void:
   if not _locomotion_vehicles.has(cell): _locomotion_vehicles[cell]=[]
   _locomotion_vehicles[cell].append(vehicle)
 
-func locomotion_contact_risk(actor: Node3D, seen_epoch: int) -> String:
+func locomotion_contact_risk(actor: Node3D, seen_epoch: int, known_own_radius: float = -2.0) -> String:
  _ensure_locomotion_grid()
  if seen_epoch!=_locomotion_geometry_revision: return "terrain_dirty"
  if not is_instance_valid(_locomotion_terrain) or not _locomotion_terrain.has_signal("terrain_changed"): return "terrain_dirty_unavailable"
- var own_radius: float = actor.locomotion_footprint_radius()
+ # -2 requests a fresh read; -1 remains the original unknown-shape result.
+ var own_radius: float = known_own_radius if known_own_radius>=-1.0 else actor.locomotion_footprint_radius()
  if own_radius<0.0: return "shape_unknown"
  var origin: Vector3 = actor.global_position
+ var own_speed: float = maxf(float(actor.move_speed)*1.65,actor.velocity.length())
  var cell: Vector2i = _locomotion_cell(origin,4.0)
  # Radius plus one conservative cell; memberships update after actual solves.
  for x: int in range(-2,3):
   for z: int in range(-2,3):
-   for id in _locomotion_people.get(cell+Vector2i(x,z),[]):
+   var neighbors: Variant = _locomotion_people.get(cell+Vector2i(x,z))
+   if neighbors==null: continue
+   for id in neighbors:
     var other = actors.get(id)
     if not is_instance_valid(other) or other==actor or other.embarked or other.collision_layer==0: continue
     var point: Vector3 = other.global_position
-    if absf(point.y-origin.y)>3.0+absf(other.velocity.y)*0.05: continue
+    var other_velocity: Vector3 = other.velocity
+    if absf(point.y-origin.y)>3.0+absf(other_velocity.y)*0.05: continue
     var radius: float = other.locomotion_footprint_radius()
     if radius<0.0: return "neighbor_shape_unknown"
-    var speed: float = maxf(float(actor.move_speed)*1.65,actor.velocity.length())+maxf(float(other.move_speed)*1.65,other.velocity.length())
+    var speed: float = own_speed+maxf(float(other.move_speed)*1.65,other_velocity.length())
     var clearance: float = own_radius+radius+speed*0.05+0.3
     if clearance>4.0: return "fast_or_large_neighbor"
     if Vector2(point.x-origin.x,point.z-origin.z).length_squared()<clearance*clearance: return "near_person"
  cell=_locomotion_cell(origin,16.0)
  for x: int in range(-2,3):
   for z: int in range(-2,3):
-   for vehicle in _locomotion_vehicles.get(cell+Vector2i(x,z),[]):
+   var vehicles: Variant = _locomotion_vehicles.get(cell+Vector2i(x,z))
+   if vehicles==null: continue
+   for vehicle in vehicles:
     if is_instance_valid(vehicle) and origin.distance_squared_to(vehicle.global_position)<144.0: return "near_vehicle"
  return ""
 

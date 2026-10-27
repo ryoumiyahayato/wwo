@@ -328,21 +328,31 @@ func locomotion_actual_velocity() -> Vector3:
 func locomotion_footprint_radius() -> float:
  var body: CollisionShape3D = get_node_or_null("BodyCollision") as CollisionShape3D
  if not is_instance_valid(body): return -1.0
+ var shape: Shape3D = body.shape
+ return _locomotion_footprint_from(body,shape,_locomotion_shape_signature(shape))
+
+func _locomotion_footprint_from(body: CollisionShape3D, shape: Shape3D, dimensions: Vector3) -> float:
+ # These inputs are sampled within this call, never retained across callbacks.
+ if not is_instance_valid(body): return -1.0
  var shape_basis: Basis = body.global_basis
- var scale_bound: float = maxf(shape_basis.x.length(),maxf(shape_basis.y.length(),shape_basis.z.length()))
+ var x_length: float = shape_basis.x.length()
+ var y_length: float = shape_basis.y.length()
+ var z_length: float = shape_basis.z.length()
+ var scale_bound: float = maxf(x_length,maxf(y_length,z_length))
  var y_planar: float = Vector2(shape_basis.y.x,shape_basis.y.z).length()
- if body.shape is CapsuleShape3D:
-  return float(body.shape.radius)*scale_bound+maxf(0.0,float(body.shape.height)*0.5-float(body.shape.radius))*y_planar
- if body.shape is BoxShape3D:
-  var size: Vector3 = body.shape.size
-  return Vector2(size.x,size.z).length()*0.5*maxf(shape_basis.x.length(),shape_basis.z.length())+size.y*0.5*y_planar
+ if shape is CapsuleShape3D:
+  return dimensions.x*scale_bound+maxf(0.0,dimensions.y*0.5-dimensions.x)*y_planar
+ if shape is BoxShape3D:
+  return Vector2(dimensions.x,dimensions.z).length()*0.5*maxf(x_length,z_length)+dimensions.y*0.5*y_planar
  return -1.0
 
-func _locomotion_shape_signature() -> Vector3:
- var body: CollisionShape3D = get_node_or_null("BodyCollision") as CollisionShape3D
- if not is_instance_valid(body): return Vector3.ZERO
- if body.shape is CapsuleShape3D: return Vector3(float(body.shape.radius),float(body.shape.height),0.0)
- if body.shape is BoxShape3D: return body.shape.size
+func _locomotion_shape_signature(shape: Shape3D = null) -> Vector3:
+ if shape==null:
+  var body: CollisionShape3D = get_node_or_null("BodyCollision") as CollisionShape3D
+  if not is_instance_valid(body): return Vector3.ZERO
+  shape=body.shape
+ if shape is CapsuleShape3D: return Vector3(float(shape.radius),float(shape.height),0.0)
+ if shape is BoxShape3D: return shape.size
  return Vector3.ZERO
 
 func _locomotion_speed() -> float:
@@ -359,7 +369,8 @@ func _locomotion_step_delta(delta: float, command: Dictionary) -> float:
  _locomotion_pending+=delta
  _locomotion_risk="original_60"
  if locomotion_lod_enabled and locomotion_hz<Engine.physics_ticks_per_second and not bool(get_meta("player_controlled",false)):
-  var direction: Vector3 = command.destination-global_position
+  var current_position: Vector3 = global_position
+  var direction: Vector3 = command.destination-current_position
   direction.y=0.0
   direction=direction.normalized() if bool(command.move) and direction.length()>0.1 else Vector3.ZERO
   _locomotion_risk=""
@@ -369,15 +380,23 @@ func _locomotion_step_delta(delta: float, command: Dictionary) -> float:
   elif _stance_enabled and _stance_elapsed<Stance.TRANSITION_SECONDS: _locomotion_risk="stance_blend"
   elif not _stance_support_ok: _locomotion_risk="stance_support"
   elif brain.hp<=0.0 or not is_equal_approx(brain.hp,_locomotion_last_hp): _locomotion_risk="health_change"
-  elif _locomotion_shape_signature()!=_locomotion_last_shape: _locomotion_risk="shape_change"
-  elif not is_equal_approx(_locomotion_speed(),_locomotion_last_speed): _locomotion_risk="speed_change"
-  elif not global_position.is_equal_approx(_locomotion_last_position): _locomotion_risk="external_move"
-  elif bool(command.move)!=_locomotion_last_move: _locomotion_risk="move_intent"
-  elif direction.length_squared()>0.01 and _locomotion_last_direction.length_squared()>0.01 and direction.dot(_locomotion_last_direction)<cos(deg_to_rad(10.0)): _locomotion_risk="turn_intent"
-  elif not _route.is_empty() and global_position.distance_to(_route[0])<0.26+_locomotion_speed()*0.05: _locomotion_risk="route_corner"
-  elif not _locomotion_floor_terrain or not is_instance_valid(_locomotion_floor) or (_locomotion_floor.collision_layer&8)==0 or not get_platform_velocity().is_zero_approx(): _locomotion_risk="platform_or_unknown_support"
-  elif not is_instance_valid(host) or not host.has_method("locomotion_contact_risk"): _locomotion_risk="risk_unavailable"
-  else: _locomotion_risk=host.locomotion_contact_risk(self,_locomotion_epoch)
+  else:
+   var current_body: CollisionShape3D = get_node_or_null("BodyCollision") as CollisionShape3D
+   var current_shape: Shape3D = current_body.shape if is_instance_valid(current_body) else null
+   var dimensions: Vector3 = _locomotion_shape_signature(current_shape)
+   if dimensions!=_locomotion_last_shape: _locomotion_risk="shape_change"
+   else:
+    var current_speed: float = _locomotion_speed()
+    if not is_equal_approx(current_speed,_locomotion_last_speed): _locomotion_risk="speed_change"
+    elif not current_position.is_equal_approx(_locomotion_last_position): _locomotion_risk="external_move"
+    elif bool(command.move)!=_locomotion_last_move: _locomotion_risk="move_intent"
+    elif direction.length_squared()>0.01 and _locomotion_last_direction.length_squared()>0.01 and direction.dot(_locomotion_last_direction)<cos(deg_to_rad(10.0)): _locomotion_risk="turn_intent"
+    elif not _route.is_empty() and current_position.distance_to(_route[0])<0.26+current_speed*0.05: _locomotion_risk="route_corner"
+    elif not _locomotion_floor_terrain or not is_instance_valid(_locomotion_floor) or (_locomotion_floor.collision_layer&8)==0 or not get_platform_velocity().is_zero_approx(): _locomotion_risk="platform_or_unknown_support"
+    elif not is_instance_valid(host) or not host.has_method("locomotion_contact_risk"): _locomotion_risk="risk_unavailable"
+    else:
+     var own_radius: float = _locomotion_footprint_from(current_body,current_shape,dimensions)
+     _locomotion_risk=host.locomotion_contact_risk(self,_locomotion_epoch,own_radius)
   var period: int = maxi(1,floori(float(Engine.physics_ticks_per_second)/maxf(20.0,locomotion_hz)))
   if _locomotion_risk.is_empty() and _locomotion_pending+0.000001<0.05 and (Engine.get_physics_frames()+perception_slot)%period!=0:
    if _battle_timing_enabled: _timing_locomotion_deferred+=1

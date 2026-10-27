@@ -88,3 +88,11 @@ python tools/map/install_region_slice.py --from-zip TERRAIN.zip --training-from-
 - `d447d8d` 在本人fresh自见目标内优先接战范围，使39名射手74次实际射击、蓝红均开火；不拿最近敌真相代替LOS。结构命中约54k次，ownRID局部降低但capture/layout未提速，活动1.501–1.873FPS。
 - `3ccfdbe` field-only原运动/nav20/60Hz，仍逐tick运行Brain/感知/fire/伤弹；原五人/玩家保留原路径。147人有低风险服务，但未知floor-snap支撑保守回60，实际平均45.49Hz；累计delta最大.05sim，未丢时或加速。开场2.079FPS/P95 509.004ms、持续2.261/P95 474.306，phase模拟/墙时仅.252–.314，明确未达30。49射手106枪、双方各53；150ID/实例不变，末50蓝/42红存活，不把自然减载当满载通过。玩家AP1/HE1、SMK0、驾驶2.972m，玩法整体仍失败；原车长伤弹/返同座、同会话/正式世界比较保留。
 - `f1f5a09` 精确活读后的immutable snapshot试验：同开场capture99.47→112.58µs、layout61.39→70.76µs，没有净收益证据，`2baf779` 已回退。不继续叠缓存。后续`a48bc75`补真实native本体支撑：32255次实际命中原静态地形，实际平均28.17Hz；诊断轮1.304–1.526FPS、关闭诊断1.129–1.426FPS仍失败。两轮与外部3-worker地形采样重叠，OS亦见第二Godot与约237%单核等量Python负载，不作干净AB、不停止他线，也不拿此掩盖早先约2FPS失败。新risk段77.997ms/8tick，说明索引本身须优化；不降视觉预算、射击条件或接触精度。
+
+## 本轮成本收敛与延长窗口：未达30FPS
+
+- 核对宿主/军事计算/隔离运行/历史研究，没有可删的第二套crew/ammo/health owner。Armor think已有0.65s，导航为逐Actor局部scratch与原全Host最多一次plan/physics预算；共享小队全图不是这轮小改。原视觉LOD换共享Mesh/pose interval，不冻结physics/fire。不按入口未加载删研究码。
+- 军事提交`a20df84`只作Actor/Host风险同call getter/几何去重；`0490c8e`只作Resolver每capture紧凑fresh Transform/整数路径，不跨capture比较/COW，不减形状/.045步长/query/callback，不改原插值或军规。主仓仅固定commit的确定性集成，无独立规则修改。
+- 既有driver延长30s运动/30s玩家静止AI活动/30s接战/60sHE/30s烟/60s持续，补P99/每phase实际人数与弹药。默认关闭诊断约247.65s活动采样，仍20车/150独立兵/62双向座/212人；150全移动、19AI车全移动/16实射，双方69射手154枪。末57活兵不能当满载通过。原车长同Actor实走返原座，后来真实受伤HP7→3未治好，AP1/HE3/SMK1实耗；驾驶1.322m仍失败。
+- 默认开场1.165FPS/P95 1034.489/P99 1073.738ms，静止玩家1.105/1061.497/1125.734，接战1.295/912.870/954.539，HE1.232/962.184/1035.569，持续1.421/845.245/896.630。CPU约满一核，整卡GPU1–4%非进程GPU时间，工作集1323–1351MiB。没有30FPS或完整操作验收。
+- 风险µs/callback原始81.985→39.481→69.282，未改车辆控制组也约减半；不能归因或声明稳定净收益。风险轮44–60FPS时是原车长真实阵亡、battle_finished/physics-active=0，已判无效，不拿结束/自然减员/空弹过线。当前native terrain49.481ms主线程区间不等于旧观察51.777ms；旧167.555ms仍未关闭。日志无SCRIPT ERROR/ERROR，原warning保留。分阶段资源及四轮结果见[既有说明](../../../../docs/maps/layered_military_region.md)。未合并、导出、发布。

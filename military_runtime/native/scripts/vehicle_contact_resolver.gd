@@ -182,29 +182,47 @@ func _path_nodes_from(vehicle: Node3D, node: Node, observe: bool) -> Array:
 		cursor=parent
 	return path
 
+func _indexed_path_from(vehicle: Node3D, node: Node, observe: bool, topology: Dictionary) -> PackedInt32Array:
+	var path: PackedInt32Array=PackedInt32Array()
+	var nodes: Array[Node3D]=topology.nodes
+	var ids: Array[int]=topology.ids
+	var indices: Dictionary=topology.indices
+	for entry: Dictionary in _path_nodes_from(vehicle,node,observe):
+		var id: int=int(entry.id)
+		if not indices.has(id):
+			indices[id]=nodes.size()
+			nodes.append(entry.node as Node3D)
+			ids.append(id)
+		path.append(int(indices[id]))
+	return path
+
 func _build_vehicle_metadata(vehicle: Node3D, observe: bool) -> Dictionary:
+	# Published once, then never edited. Old poses retain this table on invalidation.
+	var nodes: Array[Node3D]=[]
+	var ids: Array[int]=[]
+	var topology: Dictionary={"nodes":nodes,"ids":ids,"indices":{}}
 	var named: Dictionary={}
 	for key: String in ["Turret","Barrel","Muzzle"]:
 		var found: Node=vehicle.find_child(key,true,false)
 		named[key]=found as Node3D
 		# Watch even a non-Node3D first match: reordering can change that match.
-		if found!=null:_path_nodes_from(vehicle,found,observe)
+		if found!=null:_indexed_path_from(vehicle,found,observe,topology)
 	var shapes: Array[Dictionary]=[]
 	for shape_child: Node in vehicle.find_children("*","CollisionShape3D",true,false):
 		var shape_node: CollisionShape3D=shape_child as CollisionShape3D
 		var body: CollisionObject3D=shape_node.get_parent() as CollisionObject3D
 		if body!=null:
-			shapes.append({"node":shape_node,"body":body,"path":_path_nodes_from(vehicle,shape_node,observe)})
+			shapes.append({"node":shape_node,"body":body,"path":_indexed_path_from(vehicle,shape_node,observe,topology)})
 	var own: Array[RID]=[]
 	for body_child: Node in vehicle.find_children("*","CollisionObject3D",true,false):
 		var body: CollisionObject3D=body_child as CollisionObject3D
 		own.append(body.get_rid())
 		if observe:_path_nodes_from(vehicle,body,true)
-	var barrel_path: Array=[]
-	var muzzle_path: Array=[]
-	if named.Barrel!=null:barrel_path=_path_nodes_from(vehicle,named.Barrel,observe)
-	if named.Muzzle!=null:muzzle_path=_path_nodes_from(vehicle,named.Muzzle,observe)
-	return {"vehicle":vehicle,"named":named,"shapes":shapes,"own":own,"barrel_path":barrel_path,"muzzle_path":muzzle_path}
+	var barrel_path: PackedInt32Array=PackedInt32Array()
+	var muzzle_path: PackedInt32Array=PackedInt32Array()
+	if named.Barrel!=null:barrel_path=_indexed_path_from(vehicle,named.Barrel,observe,topology)
+	if named.Muzzle!=null:muzzle_path=_indexed_path_from(vehicle,named.Muzzle,observe,topology)
+	return {"vehicle":vehicle,"named":named,"topology":topology,"shapes":shapes,"own":own,"barrel_path":barrel_path,"muzzle_path":muzzle_path}
 
 func _metadata_for_vehicle(vehicle: Node3D, capture_lookup: bool=false) -> Dictionary:
 	var observed: bool=_metadata_observation_ready(vehicle)
@@ -243,11 +261,18 @@ func capture_pose(vehicle: Node3D) -> Dictionary:
 	var timing_started: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var metadata: Dictionary=_metadata_for_vehicle(vehicle,true)
 	var pose: Dictionary={"root":vehicle.global_transform,"nodes":{},"shapes":[]}
+	var local_transforms: Array[Transform3D]=[]
+	# Zero means not captured; otherwise the compact snapshot index plus one.
+	var local_indices: PackedInt32Array=PackedInt32Array()
+	local_indices.resize(metadata.topology.nodes.size())
+	pose["local_transforms"]=local_transforms
+	pose["local_indices"]=local_indices
+	pose["topology"]=metadata.topology
 	for key: String in ["Turret","Barrel"]:
 		var node: Node3D=metadata.named[key]
 		if node!=null:pose.nodes[key]={"node":node,"id":node.get_instance_id(),"transform":node.transform}
 	var barrel: Node3D=metadata.named.Barrel
-	pose.layout=_capture_layout(vehicle,barrel,metadata,pose.nodes)
+	pose.layout=_capture_layout(vehicle,barrel,metadata,pose.nodes,local_transforms,local_indices)
 	# Used by travel/substep and old-pose collision tests; not dead data.
 	pose.shapes=_shape_pose(pose,pose,1.0)
 	if _slow_timing_enabled: _timing_sample("capture_pose",Time.get_ticks_usec()-timing_started)
@@ -265,21 +290,34 @@ func _apply(vehicle: Node3D,a: Dictionary,b: Dictionary,weight: float) -> void:
 func _path_from(vehicle:Node3D,node:Node3D)->Array:
 	return _snapshot_path(_path_nodes_from(vehicle,node,false),{})
 
-func _capture_layout(vehicle:Node3D,barrel:Node3D,metadata:Dictionary={},articulated:Dictionary={})->Array:
+func _capture_local_path(path: PackedInt32Array, nodes: Array[Node3D], snapshot: Array[Transform3D], captured: PackedInt32Array) -> void:
+	for index: int in path:
+		if captured[index]==0:
+			snapshot.append(nodes[index].transform)
+			captured[index]=snapshot.size()
+
+func _capture_layout(_vehicle:Node3D,barrel:Node3D,metadata:Dictionary,articulated:Dictionary,snapshot:Array[Transform3D],captured:PackedInt32Array)->Array:
 	var timing_started: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
-	if metadata.is_empty():metadata=_metadata_for_vehicle(vehicle)
 	var layout:Array=[]
-	var captured:Dictionary={}
-	for record:Dictionary in articulated.values():captured[int(record.id)]=record
+	var nodes: Array[Node3D]=metadata.topology.nodes
+	var indices: Dictionary=metadata.topology.indices
+	for record:Dictionary in articulated.values():
+		var index: int=int(indices[int(record.id)])
+		snapshot.append(record.transform)
+		captured[index]=snapshot.size()
 	for entry:Dictionary in metadata.shapes:
 		var node:CollisionShape3D=entry.node
 		var body:CollisionObject3D=entry.body
 		if node.disabled or node.shape==null:continue
 		if str(body.get_meta("kind","")) not in ["armor","armor_group"]:continue
-		layout.append({"shape":node.shape,"path":_snapshot_path(entry.path,captured),"barrel":false})
+		_capture_local_path(entry.path,nodes,snapshot,captured)
+		layout.append({"shape":node.shape,"path":entry.path,"barrel":false})
 	var muzzle:Node3D=metadata.named.Muzzle
 	if barrel!=null and muzzle!=null and barrel.global_position.distance_to(muzzle.global_position)>0.05:
-		layout.append({"shape":CapsuleShape3D.new(),"path":_snapshot_path(metadata.barrel_path,captured),"muzzle_path":_snapshot_path(metadata.muzzle_path,captured),"radius":float(barrel.get_meta("contact_radius",0.075)),"barrel":true})
+		var capsule: CapsuleShape3D=CapsuleShape3D.new()
+		_capture_local_path(metadata.barrel_path,nodes,snapshot,captured)
+		_capture_local_path(metadata.muzzle_path,nodes,snapshot,captured)
+		layout.append({"shape":capsule,"path":metadata.barrel_path,"muzzle_path":metadata.muzzle_path,"radius":float(barrel.get_meta("contact_radius",0.075)),"barrel":true})
 	if _slow_timing_enabled: _timing_sample("layout_including_path_capture",Time.get_ticks_usec()-timing_started)
 	return layout
 
@@ -297,10 +335,24 @@ func _path_pose(path:Array,root_pose:Transform3D,locals:Dictionary,resolved:Dict
 			resolved[id]=transform
 	return transform
 
+func _indexed_path_pose(path:PackedInt32Array,root_pose:Transform3D,locals:Dictionary,resolved:Dictionary,snapshot:Array[Transform3D],captured:PackedInt32Array,ids:Array[int])->Transform3D:
+	var transform: Transform3D=root_pose
+	for index: int in path:
+		var id: int=ids[index]
+		if resolved.has(id):
+			transform=resolved[id]
+		else:
+			transform=transform*(locals[id] if locals.has(id) else snapshot[captured[index]-1])
+			resolved[id]=transform
+	return transform
+
 func _shape_pose(a:Dictionary,b:Dictionary,weight:float)->Array:
 	var timing_started: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var result:Array=[]
 	var root_pose:Transform3D=(a.root as Transform3D).interpolate_with(b.root,weight)
+	var snapshot: Array[Transform3D]=a.local_transforms
+	var captured: PackedInt32Array=a.local_indices
+	var ids: Array[int]=a.topology.ids
 	var locals:Dictionary={}
 	var resolved:Dictionary={}
 	for key in a.nodes:
@@ -309,9 +361,9 @@ func _shape_pose(a:Dictionary,b:Dictionary,weight:float)->Array:
 			if id==0:id=a.nodes[key].node.get_instance_id()
 			locals[id]=(a.nodes[key].transform as Transform3D).interpolate_with(b.nodes[key].transform,weight)
 	for entry in a.layout:
-		var transform:=_path_pose(entry.path,root_pose,locals,resolved)
+		var transform: Transform3D=_indexed_path_pose(entry.path,root_pose,locals,resolved,snapshot,captured,ids)
 		if entry.barrel:
-			var end:=_path_pose(entry.muzzle_path,root_pose,locals,resolved).origin
+			var end: Vector3=_indexed_path_pose(entry.muzzle_path,root_pose,locals,resolved,snapshot,captured,ids).origin
 			var start:=transform.origin
 			var axis:Vector3=(end-start).normalized()
 			var right:Vector3=axis.cross(Vector3.RIGHT if absf(axis.dot(Vector3.UP))>0.95 else Vector3.UP).normalized()
@@ -349,7 +401,7 @@ func resolve_pose(vehicle:Node3D,previous:Dictionary,speed:float,_delta:float) -
 	var timing_started: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	# The caller changes only transforms between capture and resolve. Reuse the
 	# captured topology within this synchronous sweep, never across frames.
-	var desired:Dictionary={"root":vehicle.global_transform,"nodes":{},"layout":previous.layout}
+	var desired:Dictionary={"root":vehicle.global_transform,"nodes":{},"layout":previous.layout,"local_transforms":previous.local_transforms,"local_indices":previous.local_indices,"topology":previous.topology}
 	for key in previous.nodes:
 		var node:Node3D=previous.nodes[key].node
 		if not is_instance_valid(node):

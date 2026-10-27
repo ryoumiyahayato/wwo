@@ -2614,6 +2614,15 @@ func terrain_region_sample(label: String, seconds: float, target: Control=null) 
 			if slow_frames.size()>8: slow_frames.resize(8)
 		previous=now
 	var wall_seconds: float = float(Time.get_ticks_usec() - begin) / 1000000.0
+	var result: Dictionary = terrain_region_frame_summary(label, wall_seconds, values)
+	if timing_enabled: result["slow_frames"] = slow_frames
+	# Resource samples must not silently label subsequent input/snapshots/foot
+	# round trips as belonging to the preceding frame-measurement interval.
+	FileAccess.open(output+"/phase.json",FileAccess.WRITE).store_string(JSON.stringify({"phase":"between_samples"}))
+	return result
+
+func terrain_region_frame_summary(label: String, wall_seconds: float, values: Array[float]) -> Dictionary:
+	var result: Dictionary = {"phase":label,"frames":values.size(),"wall_seconds":wall_seconds,"average_fps":float(values.size()) / maxf(0.000001, wall_seconds),"p50_frame_ms":null,"p95_frame_ms":null,"p99_frame_ms":null,"max_frame_ms":null,"process_ms":Performance.get_monitor(Performance.TIME_PROCESS)*1000,"draw_calls":Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),"texture_bytes":Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),"static_bytes":OS.get_static_memory_usage(),"window_focused":get_window().has_focus()}
 	var over_33: int = 0
 	var over_50: int = 0
 	var over_100: int = 0
@@ -2621,12 +2630,15 @@ func terrain_region_sample(label: String, seconds: float, target: Control=null) 
 		if value > 1000.0 / 30.0: over_33 += 1
 		if value > 50.0: over_50 += 1
 		if value > 100.0: over_100 += 1
-	values.sort()
-	var result: Dictionary = {"phase":label,"frames":values.size(),"wall_seconds":wall_seconds,"average_fps":float(values.size()) / maxf(0.000001, wall_seconds),"p50_frame_ms":values[mini(values.size()-1,int(values.size()*.50))],"p95_frame_ms":values[mini(values.size()-1,int(values.size()*.95))],"p99_frame_ms":values[mini(values.size()-1,int(values.size()*.99))],"max_frame_ms":values.back(),"over_33_333ms":over_33,"over_50ms":over_50,"over_100ms":over_100,"process_ms":Performance.get_monitor(Performance.TIME_PROCESS)*1000,"draw_calls":Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),"texture_bytes":Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),"static_bytes":OS.get_static_memory_usage(),"window_focused":get_window().has_focus()}
-	if timing_enabled: result["slow_frames"] = slow_frames
-	# Resource samples must not silently label subsequent input/snapshots/foot
-	# round trips as belonging to the preceding frame-measurement interval.
-	FileAccess.open(output+"/phase.json",FileAccess.WRITE).store_string(JSON.stringify({"phase":"between_samples"}))
+	if not values.is_empty():
+		values.sort()
+		result.p50_frame_ms = values[mini(values.size()-1,int(values.size()*.50))]
+		result.p95_frame_ms = values[mini(values.size()-1,int(values.size()*.95))]
+		result.p99_frame_ms = values[mini(values.size()-1,int(values.size()*.99))]
+		result.max_frame_ms = values.back()
+	result["over_33_333ms"] = over_33
+	result["over_50ms"] = over_50
+	result["over_100ms"] = over_100
 	return result
 
 func terrain_region_image(label: String) -> void:
@@ -2936,11 +2948,60 @@ func terrain_training_encounter_review(observation: Control, phases: Array) -> D
 	report["ok"] = report.legal_cannon_fired and report.projectile_contact_recorded and report.enemy_cannon_fired and report.enemy_visible_shot_recorded and report.combat_damage_observed and float(report.driven_metres) > 5.0 and float(report.enemy_moved_metres) > 1.0 and report.same_vehicle_instance and report.same_session and report.paused_state_preserved and report.paused_by_host_button and report.resumed_by_button and report.returned_by_native_menu and report.native_menu_accessible and bool((report.crew_roundtrip as Dictionary).get("ok", false))
 	return report
 
+func terrain_battlefield_activity(battle: Node3D) -> Dictionary:
+	# Boundary-only counts. No per-frame full snapshots or live-truth AI input.
+	var host: Node = battle.get("ai_host") as Node
+	var actors: Dictionary = host.get("actors") as Dictionary
+	var roster: Array = host.get("field_roster") as Array
+	var positions: Dictionary = {}
+	var alive_by_team: Dictionary = {"blue":0,"red":0}
+	var active: int = 0
+	var alive_active: int = 0
+	var armed_alive: int = 0
+	var rounds_alive: int = 0
+	var shots: int = 0
+	for id: String in roster:
+		var actor: CharacterBody3D = actors.get(id) as CharacterBody3D
+		if not is_instance_valid(actor): continue
+		positions[id] = actor.global_position
+		shots += int(actor.get("shot_sequence"))
+		var brain: RefCounted = actor.get("brain") as RefCounted
+		var processing: bool = actor.is_physics_processing() and actor.can_process()
+		if processing: active += 1
+		if float(brain.get("hp")) <= 0.0: continue
+		var team: String = str(brain.get("team_id"))
+		alive_by_team[team] = int(alive_by_team.get(team,0)) + 1
+		if processing: alive_active += 1
+		var rounds: int = int(brain.get("ammo")) + int(brain.get("reserve_ammo"))
+		rounds_alive += rounds
+		if not str(actor.get("weapon")).is_empty() and rounds > 0: armed_alive += 1
+	var armor: Node = battle.get("armor_host") as Node
+	var units: Dictionary = armor.get("units") as Dictionary
+	var vehicle_nodes: int = 1 if is_instance_valid(battle.get("hero")) else 0
+	var ai_vehicles_alive: int = 0
+	for unit: Dictionary in units.values():
+		if is_instance_valid(unit.get("model")): vehicle_nodes += 1
+		if bool(armor.call("_alive",unit)): ai_vehicles_alive += 1
+	return {"vehicle_nodes":vehicle_nodes,"ai_vehicles_alive":ai_vehicles_alive,"infantry_nodes":positions.size(),"alive_by_team":alive_by_team,"physics_active":active,"living_physics_active":alive_active,"living_armed_with_rounds":armed_alive,"living_infantry_rounds":rounds_alive,"infantry_shots":shots,"simulation_seconds":battle.get("elapsed"),"battle_finished":battle.get("battle_finished"),"_positions":positions}
+
 func terrain_battlefield_sample(label: String, seconds: float, battle: Node3D) -> Dictionary:
+	var before: Dictionary = terrain_battlefield_activity(battle)
 	var simulation_before: float = float(battle.get("elapsed"))
 	var result: Dictionary = await terrain_region_sample(label, seconds)
 	result["native_simulation_seconds"] = float(battle.get("elapsed")) - simulation_before
 	result["simulation_wall_ratio"] = float(result.native_simulation_seconds) / maxf(0.000001, float(result.wall_seconds))
+	var after: Dictionary = terrain_battlefield_activity(battle)
+	var moved: int = 0
+	for id: String in before._positions:
+		if after._positions.has(id):
+			var a: Vector3 = before._positions[id]
+			var b: Vector3 = after._positions[id]
+			if Vector2(a.x,a.z).distance_to(Vector2(b.x,b.z)) > 0.1: moved += 1
+	before.erase("_positions")
+	after.erase("_positions")
+	result["activity_before"] = before
+	result["activity_after"] = after
+	result["infantry_moved_over_0_1m"] = moved
 	return result
 
 func terrain_battlefield_census(state: Dictionary) -> Dictionary:
@@ -2976,6 +3037,13 @@ func terrain_training_battlefield_review(observation: Control, phases: Array) ->
 	var report: Dictionary = {"requested": true, "profile": "field_170", "ok": false, "samples": []}
 	FileAccess.open(output+"/phase.json",FileAccess.WRITE).store_string(JSON.stringify({"phase":"field_deployment"}))
 	var prepare_start: int = Time.get_ticks_usec()
+	var prepare_clock: Array[int] = [prepare_start]
+	var prepare_intervals: Array[float] = []
+	var prepare_frame: Callable = func() -> void:
+		var now: int = Time.get_ticks_usec()
+		prepare_intervals.append(float(now-prepare_clock[0])/1000.0)
+		prepare_clock[0] = now
+	get_tree().process_frame.connect(prepare_frame)
 	var clicked: bool = await economic_button(observation, "20车 / 150步兵战场（隔离）")
 	for attempt: int in range(2400):
 		var preparing_session: Node = observation.get("_training") as Node
@@ -2985,9 +3053,13 @@ func terrain_training_battlefield_review(observation: Control, phases: Array) ->
 		elif attempt > 10:
 			break
 		await get_tree().process_frame
+	get_tree().process_frame.disconnect(prepare_frame)
 	var session: Node = observation.get("_training") as Node
 	report["clicked_original_entry"] = clicked
 	report["prepare_wall_usec"] = Time.get_ticks_usec() - prepare_start
+	var deployment: Dictionary = terrain_region_frame_summary("field_deployment",float(report.prepare_wall_usec)/1000000.0,prepare_intervals)
+	deployment["measurement"] = "initialization_not_sustained_fps"
+	report["deployment_frames"] = deployment
 	if not clicked or not is_instance_valid(session):
 		report["error"] = "field_profile_did_not_start"
 		return report
@@ -3004,9 +3076,15 @@ func terrain_training_battlefield_review(observation: Control, phases: Array) ->
 	var hero: Node3D = battle.get("hero") as Node3D
 	var camera: Camera3D = session.call("get_native_camera") as Camera3D
 	var hero_instance: int = hero.get_instance_id()
+	deployment["activity_after"] = terrain_battlefield_activity(battle)
+	(deployment.activity_after as Dictionary).erase("_positions")
+	phases.append(deployment)
 	await terrain_region_image("20-field-deployment-ready")
-	phases.append(await terrain_battlefield_sample("field_all_active_motion", 6.0, battle))
+	phases.append(await terrain_battlefield_sample("field_all_active_motion", 30.0, battle))
 	report.samples.append({"phase":"field_all_active_motion", "state":session.call("get_status")})
+	# Player/view stays still; all native AI, ammunition and damage remain active.
+	phases.append(await terrain_battlefield_sample("field_player_idle_ai_active", 30.0, battle))
+	report.samples.append({"phase":"field_player_idle_ai_active", "state":session.call("get_status")})
 	if not bool(battle.get("battle_finished")):
 		report["crew_roundtrip"] = await terrain_training_crew_roundtrip(session, battle, controls)
 	terrain_training_key(KEY_W, true)
@@ -3036,19 +3114,38 @@ func terrain_training_battlefield_review(observation: Control, phases: Array) ->
 		# Original finite-ammo selection does not magically replace a loaded AP.
 		var vehicle_hud: Control = controls.get("vehicle_hud") as Control
 		for button: Dictionary in vehicle_hud.call("ammo_buttons"):
-			if int(button.index) == mini(shot + 1, 2):
+			if int(button.index) == (1 if shot < 2 else 2):
 				await mouse_button((button.rect as Rect2).get_center(), MOUSE_BUTTON_LEFT, true)
 				await mouse_button((button.rect as Rect2).get_center(), MOUSE_BUTTON_LEFT, false)
+		var he_before: int = 0
+		if shot == 1:
+			# The intentionally thin HUD status has no spent-ammo history.
+			var he_state: Dictionary = session.call("get_status") as Dictionary
+			he_before = int(((he_state.get("ammo",{}) as Dictionary).get("spent_rounds",{}) as Dictionary).get("he",0))
+		var held_fire: bool = false
+		var fire_point: Vector2 = controls.call("center_fire")
+		fire_point = controls.get_global_transform_with_canvas() * fire_point
 		if is_instance_valid(target):
 			await terrain_training_aim(target, camera, controls, 0.8, 2, 0.2)
-			terrain_training_key(KEY_SPACE, true)
-			await wait_seconds(0.12)
-			terrain_training_key(KEY_SPACE, false)
+			if shot == 0:
+				terrain_training_key(KEY_SPACE, true)
+				await wait_seconds(0.12)
+				terrain_training_key(KEY_SPACE, false)
+			else:
+				# Hold the original fire button: its original reload/role/muzzle/ammo
+				# gates alone decide repeated shots. Never spawn an explosion directly.
+				await mouse_button(fire_point, MOUSE_BUTTON_LEFT, true)
+				held_fire = true
 		var label: String = ["field_near_far_exchange", "field_he_and_impacts", "field_smoke_and_exchange"][shot]
-		phases.append(await terrain_battlefield_sample(label, 12.0, battle))
-		report.samples.append({"phase":label, "state":session.call("get_status")})
+		phases.append(await terrain_battlefield_sample(label, 60.0 if shot == 1 else 30.0, battle))
+		if held_fire: await mouse_button(fire_point, MOUSE_BUTTON_LEFT, false)
+		var phase_state: Dictionary = session.call("get_status") as Dictionary
+		if shot == 1:
+			report["he_burst_actual_rounds"] = int(((phase_state.get("ammo",{}) as Dictionary).get("spent_rounds",{}) as Dictionary).get("he",0))-he_before
+			report["dense_he_load_reached"] = int(report.he_burst_actual_rounds) >= 3
+		report.samples.append({"phase":label, "state":phase_state})
 		await terrain_region_image("21-field-exchange-%d" % shot)
-	phases.append(await terrain_battlefield_sample("field_sustained_all_fronts", 12.0, battle))
+	phases.append(await terrain_battlefield_sample("field_sustained_all_fronts", 60.0, battle))
 	var final: Dictionary = session.call("get_status") as Dictionary
 	report["after_combat"] = final
 	report["final_census"] = terrain_battlefield_census(final)
@@ -3111,11 +3208,14 @@ func terrain_training_battlefield_review(observation: Control, phases: Array) ->
 	report["gameplay_ok"] = report.real_scale_deployed and not bool(final.battle_finished) and changed_or_missing_identity.is_empty() and int(shooters_by_team.blue) > 0 and int(shooters_by_team.red) > 0 and int(report.final_census.injured_or_dead_infantry) > 0 and int(player_rounds_delta.ap) > 0 and int(player_rounds_delta.he) > 0 and int(player_rounds_delta.smoke) > 0 and float(report.driven_metres) > 5.0 and bool((report.get("crew_roundtrip", {}) as Dictionary).get("ok", false)) and report.same_vehicle_instance and report.same_session_after_resume and report.explicit_pause_preserved and report.resumed_by_button and report.returned_by_host_button and report.returned_to_upper_map and float(report.upper_map_span) > 8500 and report.reentered_selected_5km
 	var fps_ok: bool = true
 	for phase: Dictionary in phases:
-		if str(phase.phase).begins_with("field_") and not str(phase.phase).contains("paused"):
+		if str(phase.phase).begins_with("field_") and not str(phase.phase).contains("paused") and phase.get("measurement","") != "initialization_not_sustained_fps":
 			if float(phase.get("average_fps", 0.0)) < 30.0 or float(phase.p95_frame_ms) > 1000.0 / 30.0: fps_ok = false
 	report["all_measured_active_phases_30fps"] = fps_ok
 	report["ok"] = report.gameplay_ok and fps_ok
 	report["note"] = "Counts are live original entities, crew excluded from 150. Natural casualties/ammo exhaustion stay in each phase census; later lighter frames cannot establish intact-force performance. Explicit whole-session pause is not distance/camera simulation LOD. No HP/ammo/pose writes."
+	var native_terrain: Object = battle.get("terrain_damage") as Object
+	if OS.get_environment("WWO_TERRAIN_SLOW_TIMING") == "1" and native_terrain.has_method("get_slow_timing"):
+		report["terrain_timing"] = native_terrain.call("get_slow_timing")
 	return report
 
 func terrain_region_run() -> void:

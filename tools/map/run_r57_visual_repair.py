@@ -165,7 +165,8 @@ def terrain_region_review(args):
                         '--script','res://tools/map/native_screenshot_boot.gd',
                         '--','--terrain-region-review'], cwd=ROOT, env=env,
                         stdout=log, stderr=subprocess.STDOUT, startupinfo=startup)
-                    deadline = time.monotonic()+240
+                    review_seconds = 600 if env.get('WWO_VISUAL_SCALE_BATTLEFIELD') == '1' else 240
+                    deadline = time.monotonic()+review_seconds
                     while process.poll() is None:
                         handle_file = output/'window-handle.json'
                         if hwnd is None and handle_file.exists():
@@ -210,7 +211,7 @@ def terrain_region_review(args):
                             resource_samples.append(sample)
                             last_resource=now; previous_cpu=cpu
                         if time.monotonic()>deadline:
-                            raise TimeoutError('Native screenshot review exceeded 240 seconds')
+                            raise TimeoutError(f'Native screenshot review exceeded {review_seconds} seconds')
                         time.sleep(.1)
                 if process.returncode:
                     raise RuntimeError('Native screenshot review failed; inspect runtime.log')
