@@ -77,7 +77,51 @@ func _run() -> void:
 		"save pins the exact production Organization evidence fingerprint"
 	)
 
+	_test_evidence_view_detached_index()
 	_finish()
+
+
+func _test_evidence_view_detached_index() -> void:
+	var source: Dictionary = {
+		"organizations": [null, 3, [], {}, {"organization_id": ""},
+			{"organization_id": " "}, {"organization_id": 17},
+			{"organization_id": "z", "basis_class": "first"},
+			{"organization_id": "z", "basis_class": "last", "nested": {"values": [2]}}],
+		"coverage": {"nested": {"count": 2}},
+	}
+	var expected := source.duplicate(true)
+	var view := FormalWorldOrganizationEvidenceView.new(source)
+	_equal(source, expected, "evidence construction does not mutate its input")
+	_equal(view.organization_ids(), [" ", "17", "z"], "index preserves string conversion, sorting and non-empty whitespace ID")
+	_equal(view.organization_count(), 3, "index skips invalid rows and empty IDs, coalescing duplicate IDs")
+	_equal(view.basis_class("z"), "last", "last duplicate ID remains the indexed record")
+	_equal(view.organization_basis("missing"), {}, "unknown evidence ID remains empty")
+	_equal(view.snapshot(), expected, "snapshot retains original rows, including rows omitted from the index")
+	var expected_basis: Dictionary = expected["organizations"][-1]
+	source["organizations"][-1]["nested"]["values"][0] = 50
+	source["coverage"]["nested"]["count"] = 50
+	_equal(view.organization_basis("z"), expected_basis, "nested input changes cannot reach indexed evidence")
+	_equal(view.snapshot(), expected, "nested input changes cannot reach the owned snapshot")
+	var basis := view.organization_basis("z")
+	basis["nested"]["values"].append(60)
+	_equal(view.organization_basis("z"), expected_basis, "nested basis result remains detached")
+	var output := view.snapshot()
+	output["organizations"][-1]["nested"]["values"].append(70)
+	_equal(view.organization_basis("z"), expected_basis, "snapshot result cannot mutate the index")
+	_equal(view.snapshot(), expected, "snapshot result remains detached")
+	var coverage := view.coverage_summary()
+	coverage["nested"]["count"] = 80
+	_equal(view.coverage_summary(), expected["coverage"], "coverage result remains detached")
+	var restored := FormalWorldOrganizationEvidenceView.new(view.snapshot())
+	_equal(restored.snapshot(), expected, "view snapshot reconstructs without format changes")
+	_equal(restored.organization_basis("z"), expected_basis, "reconstructed index retains the duplicate-ID rule")
+	_equal(restored.organization_ids(), view.organization_ids(), "reconstructed index retains all IDs")
+	_equal(FormalWorldOrganizationEvidenceView.new().organization_count(), 0, "missing organizations has an empty index")
+	for raw: Variant in [null, 4, "not an array", {}]:
+		var invalid_source: Dictionary = {"organizations": raw}
+		var invalid_view := FormalWorldOrganizationEvidenceView.new(invalid_source)
+		_equal(invalid_view.organization_count(), 0, "non-array organizations has an empty index")
+		_equal(invalid_view.snapshot(), invalid_source, "non-array organizations remains unchanged in the snapshot")
 
 
 func _finish() -> void:

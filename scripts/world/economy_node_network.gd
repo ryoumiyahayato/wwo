@@ -308,6 +308,35 @@ func view(e: RefCounted, observer: String, places: Array[String], limit: int) ->
 		_add_edge(result, selected, _relation("located_at:" + id, "located_at", id, row["place_id"], row["place_id"], row["place_id"], row["source_id"], row["basis"]), budget)
 	return result
 
+## Published sellers share a real place, not a pooled owner or stock. Search a
+## goods corridor once per city, then retain each announcement's own audience.
+## Only the original delayed inbox may turn these candidates into knowledge.
+func market_directory_candidates(e: RefCounted, buyer_site: String, good: String, scope: String, at_day: int, policy: Dictionary, known: Array, pending: Dictionary) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	if policy.is_empty() or scope not in ["LOCAL", "REGIONAL", "WIDE"] or (scope == "WIDE" and not policy["allow_wide"]): return result
+	e._ensure_configuration_queries()
+	var groups: Dictionary = e._directory_by_good.get(good, {})
+	var destination: String = e._place(buyer_site)
+	var network_scope: bool = policy.get("scope_basis") == "NETWORK_ACCESS"
+	for place: String in groups:
+		if network_scope and scope == "LOCAL" and place != destination: continue
+		var announced: Array[String] = []
+		for entry: Dictionary in groups[place]:
+			var candidate: String = e._directory_candidate(entry)
+			if e._supplier_known(known, candidate) or pending.has(candidate) or not e._directory_entry_announced(buyer_site, entry, at_day): continue
+			if not network_scope and not e._directory_entry_visible(buyer_site, entry, scope, at_day, policy): continue
+			announced.append(candidate)
+		if announced.is_empty(): continue
+		var lead: int = -1
+		for path: Dictionary in e._paths_for(e._owner(buyer_site), place, destination, at_day, good):
+			var value: int = e._path_travel_days(path)
+			lead = value if lead < 0 else mini(lead, value)
+		if lead < 0 or (network_scope and scope == "REGIONAL" and lead > int(policy["regional_max_days"])): continue
+		for candidate: String in announced:
+			result.append({"candidate": candidate, "lead": lead, "market_place_id": place})
+	return result
+
+
 func hub_view(e: RefCounted, observer: String, places: Array[String], limit: int) -> Dictionary:
 	var budget: int=clampi(limit,1,96)
 	var stamp: String=JSON.stringify([observer,revision,e._world.organization_state.revision(),e._receipts.size(),e._commands.size(),e._enterprise_changes.size(),places,budget])

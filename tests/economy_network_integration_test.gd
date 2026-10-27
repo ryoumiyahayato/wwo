@@ -127,6 +127,20 @@ func _remote_read_sample(economy: EconomyR1Slice) -> Dictionary:
 	result["remote_by_projection"] = counts
 	return result
 
+func _planning_delay_projection_exact(economy: EconomyR1Slice) -> bool:
+	var paths: Array[Dictionary] = [{"edge_ids": []}]
+	for id: String in economy._all_routes(): paths.append({"edge_ids": [id]})
+	for path: Dictionary in economy.config.get("transport_paths", []): paths.append(path)
+	for order: Dictionary in economy._orders.values():
+		var path: Dictionary = {"edge_ids": []}
+		for leg: Dictionary in order["route_legs"]: path["edge_ids"].append(leg["edge_id"])
+		paths.append(path)
+	for path: Dictionary in paths:
+		var expected: int = economy._travel_days(economy._locked_legs(path, FormalLedgerState.DENOMINATION))
+		if economy._path_travel_days(path) != expected: return false
+	return true
+
+
 ## Short functional branch: one normal fixture, at most three days, then reads
 ## only. It does not save and does not repeat the 24-day two-case integration.
 func _read_contract_only() -> void:
@@ -143,6 +157,7 @@ func _read_contract_only() -> void:
 		var sample := _remote_read_sample(built.world.economy_r1)
 		if index == 0:
 			var economy := built.world.economy_r1
+			test.expect(_planning_delay_projection_exact(economy), "Planning delay matches original locked legs for empty, single-edge, configured and accepted paths")
 			var places: Array[String] = ["place:paris"]
 			var hubs := economy.market_hub_view(Opening.PLAYER, places)
 			test.expect(not hubs.is_empty() and not hubs.get("hubs", []).is_empty() and hubs.get("inventory_authority_created", true) == false, "The real player's typed-place hub view is nonempty and creates no inventory authority")
@@ -321,6 +336,37 @@ func _source_has_mined_input(economy: EconomyR1Slice, source_id: String, site: S
 		if str(source.get("id", "")).begins_with("production:") and str(source["id"]).contains(":" + site + ":"): return true
 		for input: Dictionary in source.get("inputs", []): pending.append(input["source_id"])
 	return false
+
+func _regional_market_feedback(economy: EconomyR1Slice) -> Dictionary:
+	var candidate: String = Opening.REGIONAL_FAMILY + "|flour|" + Opening.REGIONAL_FAMILY
+	var received: Dictionary = {}
+	for receipt: Dictionary in economy._receipts.values():
+		if receipt.get("source") == "directory" and receipt.get("candidate") == candidate:
+			received[receipt["actor"]] = {"observed_day":receipt["observed_day"], "delivery_day":receipt["delivery_day"], "scope":receipt["scope"]}
+	var orders: Array[Dictionary] = []
+	var after_knowledge: bool = true
+	for order: Dictionary in economy._orders.values():
+		if order["seller"] != Opening.REGIONAL_FAMILY or order["buyer_site"] not in ["site:network:bakery1", "site:regional:station:paris"]: continue
+		var receipt: Dictionary = received.get(order["buyer_site"], {})
+		after_knowledge = after_knowledge and not receipt.is_empty() and int(order["accepted_day"]) >= int(receipt.get("delivery_day", FormalLedgerState.MAX_AMOUNT))
+		orders.append({"id":order["id"], "buyer_site":order["buyer_site"], "accepted_day":order["accepted_day"], "quantity":order["quantity"], "delivered":order["delivered"], "price":order["price"]})
+	var bread: int = 0
+	for source: Dictionary in economy._lots.sources.values():
+		if source["good"] != "bread" or not str(source["id"]).contains(":site:network:bakery1:"): continue
+		var pending: Array[String] = [source["id"]]
+		var seen: Dictionary = {}
+		var family_input: bool = false
+		while not pending.is_empty():
+			var id: String = pending.pop_back()
+			if seen.has(id): continue
+			seen[id] = true
+			if id.begins_with("local_production:") and id.ends_with(":" + Opening.REGIONAL_FAMILY + ":flour"):
+				family_input = true
+				break
+			for input: Dictionary in economy._lots.sources.get(id, {}).get("inputs", []): pending.append(input["source_id"])
+		if family_input: bread += int(source["quantity"])
+	return {"market_place_id":economy._place(Opening.REGIONAL_FAMILY), "received_announcements":received, "orders":orders, "all_orders_after_knowledge":after_knowledge, "bread_with_household_flour_input":bread, "remaining_family_flour":economy._stocks[Opening.REGIONAL_FAMILY]["flour"], "scope":"ORIGINAL_DELAYED_DIRECTORY_ORDER_LEDGER_AND_SOURCE_LINEAGE_NOT_HUB_STOCK"}
+
 
 func _regional_metrics(economy: EconomyR1Slice) -> Dictionary:
 	var family_output: int = 0
@@ -617,6 +663,9 @@ func _run_regional() -> void:
 	var economy := normal.world.economy_r1
 	var shortage := tools.world.economy_r1
 	var interrupted := rail.world.economy_r1
+	var family_candidate: String = Opening.REGIONAL_FAMILY + "|flour|" + Opening.REGIONAL_FAMILY
+	test.expect(not economy._supplier_known(economy._known_suppliers("site:network:bakery1"), family_candidate) and not economy._supplier_known(economy._known_suppliers("site:regional:station:paris"), family_candidate), "City buyers start without a secretly prefilled household supplier")
+	test.expect(economy._directory_entry("site:network:bakery1", family_candidate, "REGIONAL", 0).is_empty() and economy._directory_entry("site:network:mill1", family_candidate, "WIDE", 1).is_empty(), "Unpublished or unaddressed city announcements do not grant supplier knowledge")
 	test.expect(not economy._spec["firms"].has(Opening.REGIONAL_FAMILY) and economy._spec["actors"][Opening.REGIONAL_FAMILY]["members"] == 2, "Rouen processing belongs to two real anonymous residents, not a renamed corporation")
 	test.equal(normal.world.population_state.unit_for_place("place:rouen"), "country_fra", "Rouen is an admitted host place in the existing French population authority")
 	test.equal(normal.world.ledger_state.account(economy._account(Opening.REGIONAL_FAMILY))["owner_id"], Opening.REGIONAL_FAMILY, "The household retains its own canonical account")
@@ -732,6 +781,12 @@ func _run_regional() -> void:
 	test.expect(not rail_control["failed"] and rail.world.game_clock.total_minutes() == REGIONAL_DAYS * 1440, "The rail branch finishes 36 days only with an actual successful intervention, not an unchanged or abandoned control")
 	test.expect(physical_ok and cash_ok, "Every daily boundary conserves per-good source/portions and formal cash in all branches")
 	for world: WorldBuildResult in worlds: test.expect(_production_totals_valid(world.world.economy_r1), "Production plus actual installation/maintenance input receipts match per-good site totals")
+	for world: WorldBuildResult in worlds:
+		test.expect(_planning_delay_projection_exact(world.world.economy_r1), "Planning delay remains exact after 36 days, including original closed-link and shortage paths")
+	var market_feedback := _regional_market_feedback(economy)
+	test.expect(not market_feedback["received_announcements"].is_empty() and not market_feedback["orders"].is_empty() and market_feedback["all_orders_after_knowledge"], "City market discovery actually precedes household sale contracts through the delayed original inbox")
+	test.expect(int(market_feedback["bread_with_household_flour_input"]) > 0, "A city bakery actually consumes the discovered household flour in later bread production")
+	print("REGIONAL_CITY_MARKET ", JSON.stringify(market_feedback))
 	var actual := _regional_metrics(economy)
 	var lacking := _regional_metrics(shortage)
 	var delayed := _regional_metrics(interrupted)

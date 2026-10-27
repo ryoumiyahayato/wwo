@@ -477,8 +477,10 @@ func _ensure_configuration_queries() -> void:
 		var candidate := _directory_candidate(entry)
 		if not _directory_by_candidate.has(candidate): _directory_by_candidate[candidate] = []
 		_directory_by_candidate[candidate].append(entry)
-		if not _directory_by_good.has(entry["good"]): _directory_by_good[entry["good"]] = []
-		_directory_by_good[entry["good"]].append(entry)
+		var place := _place(str(entry.get("site_id", _primary_site(entry["seller"]))))
+		if not _directory_by_good.has(entry["good"]): _directory_by_good[entry["good"]] = {}
+		if not _directory_by_good[entry["good"]].has(place): _directory_by_good[entry["good"]][place] = []
+		_directory_by_good[entry["good"]][place].append(entry)
 	for node: Dictionary in config.get("transport_nodes", []): _node_capacities[node["place_id"]] = node["capacity"]
 	_node_network.rebuild(_spec, _route_rows, config)
 	_configuration_queries_ready = true
@@ -562,6 +564,14 @@ func _travel_days(legs: Array) -> int:
 	var total: int = 0
 	for leg: Dictionary in legs:
 		total += int(leg["delay"])
+	return total
+
+# Planning/discovery only: contracts still lock their complete payment legs.
+func _path_travel_days(path: Dictionary) -> int:
+	var edges := _all_routes()
+	var total: int = 0
+	for id: String in path["edge_ids"]:
+		total += int(edges[id]["delay"])
 	return total
 
 func _node_capacity(place: String) -> int:
@@ -696,15 +706,18 @@ func _candidate_key(value: String) -> String:
 	var fields := _candidate(value)
 	return str(fields["seller"]) + "|" + str(fields["good"]) + "|" + str(fields["site"])
 
+func _directory_entry_announced(firm: String, entry: Dictionary, at_day: int) -> bool:
+	return (entry["known_to"].has(firm) or entry["known_to"].has(_owner(firm))) and int(entry["available_day"]) <= at_day
+
 func _directory_entry_visible(firm: String, entry: Dictionary, scope: String, at_day: int, policy: Dictionary) -> bool:
 	if policy.is_empty() or scope not in ["LOCAL", "REGIONAL", "WIDE"] or (scope == "WIDE" and not policy["allow_wide"]): return false
-	if not entry["known_to"].has(firm) and not entry["known_to"].has(_owner(firm)) or int(entry["available_day"]) > at_day: return false
+	if not _directory_entry_announced(firm, entry, at_day): return false
 	if policy.get("scope_basis")=="NETWORK_ACCESS":
 		var own: String=_place(firm)
 		var source: String=_place(str(entry.get("site_id",_primary_site(entry["seller"]))))
 		if scope=="LOCAL":return source==own
 		for path: Dictionary in _paths_for(_owner(firm),source,own,at_day,str(entry["good"])):
-			if scope=="WIDE" or _travel_days(_locked_legs(path,_sale_currency(entry["seller"])))<=int(policy["regional_max_days"]):return true
+			if scope=="WIDE" or _path_travel_days(path)<=int(policy["regional_max_days"]):return true
 		return false
 	if policy.get("scope_basis", "CONFIGURED") == "HOST_SPACE":
 		var own_place := _place(firm)
@@ -751,23 +764,11 @@ func _deliver_directory(message: Dictionary) -> void:
 		if candidate.split("|")[1] == good:
 			count += 1
 	var limit := mini(int(policy["result_limit"]), maxi(0, int(policy["max_known"]) - count))
-	var candidates: Array[Dictionary] = []
 	var pending: Dictionary = {}
 	for notice: Dictionary in _messages:
 		if _inventory_key(notice["actor"]) == firm and notice["kind"] == "supplier": pending[_candidate_key(notice["candidate"])] = true
 	_ensure_configuration_queries()
-	for entry: Dictionary in _directory_by_good.get(good, []):
-		var candidate := _directory_candidate(entry)
-		if _supplier_known(known, candidate) or not _directory_entry_visible(firm, entry, message["scope"], day, policy):
-			continue
-		if pending.has(candidate): continue
-		var paths := _paths_for(_owner(firm), _place(str(entry.get("site_id", _primary_site(entry["seller"])))), _place(firm), day,str(entry["good"]))
-		var lead: int = -1
-		for path: Dictionary in paths:
-			var value := _travel_days(_locked_legs(path, _sale_currency(entry["seller"])))
-			lead = value if lead < 0 else mini(lead, value)
-		if lead >= 0:
-			candidates.append({"candidate": candidate, "lead": lead})
+	var candidates := _node_network.market_directory_candidates(self, firm, good, message["scope"], day, policy, known, pending)
 	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["lead"]) < int(b["lead"]) if a["lead"] != b["lead"] else str(a["candidate"]) < str(b["candidate"]))
 	for index: int in mini(limit, candidates.size()):
 		var candidate := str(candidates[index]["candidate"])
@@ -2572,7 +2573,7 @@ func _known_lead(firm: String, good: String) -> int:
 			shortest=0
 			continue
 		for path: Dictionary in _paths_for(_owner(firm), _place(parts["site"]), _place(firm), day, good):
-			var lead := _travel_days(_locked_legs(path, _sale_currency(parts["seller"])))
+			var lead := _path_travel_days(path)
 			shortest = lead if shortest < 0 else mini(shortest, lead)
 	return shortest
 
@@ -2914,7 +2915,12 @@ func _procure_inputs() -> void:
 			var need := _input_need(site, good)
 			_coordinate_transfer(site, good, need)
 			need = _input_need(site, good)
-			for offer: Dictionary in _input_offers(site, good, int(need["need_by_day"]), int(need["quantity"])):
+			# Covered stock/incoming needs no complete quote list. A zero quantity
+			# can still hide a dated shortfall: keep the fresh discovery below.
+			var purchase_offers: Array[Dictionary] = []
+			if int(need["quantity"]) > 0:
+				purchase_offers = _input_offers(site, good, int(need["need_by_day"]), int(need["quantity"]))
+			for offer: Dictionary in purchase_offers:
 				need = _input_need(site, good)
 				var wanted := mini(1000000, int(need["quantity"]))
 				if wanted <= 0:

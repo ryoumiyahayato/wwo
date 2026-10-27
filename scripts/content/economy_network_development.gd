@@ -285,6 +285,9 @@ static func _install_regional_search(result: Dictionary) -> void:
 				# Explicit published commercial notices. NETWORK_ACCESS uses the
 				# receiving site's known goods paths, not this required legacy tag.
 				result["supplier_directory"].append({"seller": firm["id"], "site_id": site["id"], "good": good, "zone": "published_admitted_network", "known_to": receivers.duplicate(), "available_day": 1})
+	# A real Rouen household publishes to two admitted city stock points. The
+	# original search delay and known goods corridors govern when they learn it.
+	result["supplier_directory"].append({"seller": REGIONAL_FAMILY, "site_id": REGIONAL_FAMILY, "good": "flour", "zone": "published_admitted_network", "known_to": ["site:network:bakery1", "site:regional:station:paris"], "available_day": 1})
 
 static func _regional_worker(result: Dictionary, name: String, firm: String, site: String, place: String, population_start: int) -> void:
 	var actor := "cohort:regional:" + name
@@ -326,12 +329,6 @@ static func _install_regional_mine(result: Dictionary, mine: Dictionary, populat
 static func _install_regional_family(result: Dictionary, population_start: int) -> void:
 	result["actors"].append({"id": REGIONAL_FAMILY, "kind": "cohort", "control": "automatic", "members": 2, "account_id": "account:regional:rouen_miller", "cash": 24, "stock": stock({"grain": 24}), "skill": 1, "daily_need": 1, "needs": {"food": 1, "clothing": 1, "household": 1}, "population_start": population_start, "place_id": "place:rouen", "population_unit_id": "country_fra"})
 	result["local_producers"] = [{"actor": REGIONAL_FAMILY, "input_good": "grain", "input_per_batch": 3, "output_good": "flour", "output_per_batch": 2, "hours_per_batch": 2, "max_batches_per_day": 1, "lifetime_batch_limit": 8, "price": 3, "basis": "EXPLICIT_DEVELOPMENT_FINITE_HOUSEHOLD_PROCESSING"}]
-	var supplier := REGIONAL_FAMILY + "|flour|" + REGIONAL_FAMILY
-	for firm: Dictionary in result["firms"]:
-		for site: Dictionary in firm["sites"]:
-			if site["id"] not in ["site:network:bakery1", "site:regional:station:paris"]: continue
-			site["suppliers"].append(supplier)
-			result["information"].append({"actor": site["id"], "kind": "supplier", "candidate": supplier, "delivery_day": 0})
 
 static func _install_regional_rail(result: Dictionary, population_start: int) -> void:
 	var owner := "firm:network:wholesale1"

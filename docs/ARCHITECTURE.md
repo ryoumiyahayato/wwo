@@ -2,6 +2,8 @@
 
 本文记录当前 Formal 产品已经存在的运行结构。旧 prototype / alpha 产品路径不属于本文的当前实现；文件仍存在不代表正式运行使用它。UI / HUD 固定布局原则是保留的产品约束，待调整项不表示已经实现。
 
+节点经济的现行解释、有限样本与施工入口集中在本文[节点经济章节](<#节点经济的实际运行结构>)。原市场构想及差异见[市场设计](<WORLD_MARKET_WAR_TECH.md#节点经济与原市场设计的关系>)；[决定文档](<DECISIONS.md>)区分现行约束和已被取代的旧产品实现。以下日期化开发记录不是同时生效的开局清单；是否启用某项能力，以当前菜单、开局配置和存档内配置为准。
+
 ## 正式入口与依赖方向
 
 Godot 4.6.3、Compatibility。项目入口为 `scenes/formal/formal_world_menu.tscn`；`FormalWorldMenu` 进入 `scenes/formal/formal_world_main.tscn`，以 new / load 标记选择新世界或继续存档。菜单只检查存档是否存在，恢复由主场景中的 `FormalWorldApplication` 协调。
@@ -29,7 +31,7 @@ World、Simulation、Content 和 Persistence 不依赖正式 UI；Application �
 |`GameClock`|保存正式世界唯一累计时间 `_total_minutes`，提供小时、日期与分钟余量；日历从 1900-01-01 00:00 换算。|
 |`FormalWorldEconomyState`|保存市场运行结果、shipments、routes、history、revision；准备只读输入查找、生成 detached 经济视图并保存/恢复经济 payload，不执行结算。|
 |`FormalWorldEconomySimulation`|持有经济状态引用和路线算法索引；初始化开局库存/价格/路线，并按日计算生产、需求、消费、短缺、运输和贸易结果。|
-|`SimulationStep`|按当前 GameClock → Spatial → Economy → Organization responsibility review → 已到期工资结算 顺序推进；领域算法仍在各领域组件中。|
+|`SimulationStep`|按日界、消费、生计、货运和旅行的到期分钟分段；连接实际位置、Native、个人安排、宏观日结和责任交接，具体顺序见下文 TIME。领域算法仍在各领域组件中。|
 |`FormalPersistence`|snapshot、精确编码/解码、save/load、schema 检查、隔离 candidate restore/validation 和文件存储协调。|
 |`FormalWorldApplication`|主场景启动、安装世界、signal 连接、接收 UI 请求、调用 Step/Persistence/Presenter、成功 load 后替换世界和刷新显示、协调地图显示生命周期。|
 |`FormalWorldPresenter`|无成员状态的显示输入组装；调用期间从当前世界与已解析 Content 产生 copied records 和 detached views，不长期保存 WorldState、不修改世界、不读取历史原始文件。|
@@ -53,7 +55,9 @@ Application 保存当前 `WorldState`、`SimulationStep`、`FormalPersistence` �
 |经济证据与人口输入|`economic_evidence: FormalWorldEconomicEvidenceCatalog`；`economic_static_view: FormalWorldEconomicStaticView`；`population_input_view: FormalWorldPopulationInputView`|
 |正式可变人口|`population_state: FormalWorldPopulationState`|
 |市场|`market_registry: FormalWorldMarketRegistry`；`market_registry_view: FormalWorldMarketView`|
-|经济运行|`economy_state: FormalWorldEconomyState`|
+|宏观经济运行|`economy_state: FormalWorldEconomyState`|
+|原生经济作用域|`economy_r1: EconomyR1Slice`（启用并准入成功时）；企业、站点、订单、货运、劳动、消息及所属子组件的运行状态|
+|人物旅行|`person_travel: FormalPersonTravel`；仍使用同一人物位置与 GameClock|
 |空间 / place|`spatial_catalog: VNextSpatialCatalog`；`spatial_world: VNextSpatialWorld`|
 |领土控制|`territory_state: TerritoryState`|
 |人物|`person_overlay: VNextNamedPersonOverlay`|
@@ -77,23 +81,28 @@ Formal menu → Formal main / Application
 → prepare_presentation_content → map / pages refresh
 ```
 
-经济构建路径为 WorldBootstrap → EconomyState.configure（绑定只读政治/市场/经济证据/人口输入及正式人口状态）→ EconomySimulation.initialize_state → SimulationStep。计算组件由构建结果连接给 Step，WorldState 不保存它；MarketRegistry 是市场身份的唯一所有者。市场由实际经济输入集合建立，状态和恢复引用必须覆盖对应市场身份，不要求恰好 50 个。
+宏观经济构建路径为 WorldBootstrap → EconomyState.configure（绑定只读政治/市场/经济证据/人口输入及正式人口状态）→ EconomySimulation.initialize_state → SimulationStep。宏观计算组件由构建结果连接给 Step，WorldState 不保存它；MarketRegistry 是统计市场身份的唯一所有者，不是企业钱货的集中池。市场由实际经济输入集合建立，状态和恢复引用必须覆盖对应市场身份，不要求恰好 50 个。
+
+Bootstrap随后按开局settings组合Native；只有账户、实物、组织和人口责任均准备成功后，才发布world.economy_r1并绑定PersonalEconomy和宏观排除范围。未启用或准入失败不能凭地图创建Native经济。当前菜单的城市与产业开发选项使用regional_request，详见[节点经济章节](<#节点经济的实际运行结构>)。
 
 主场景先建立一个新世界；load 模式随后调用存档恢复。安装保存的是构建结果中的运行组件引用，不把 WorldBuildResult 当成永久世界。地图 geometry 在安装时配置，日期相关显示由 Content 的解析方法取得。
 
 ### TIME：世界时间推进
 
 ```text
-TimeControl.advance_requested
-→ Application._advance_world
+TimeControl.advance_requested → Application._advance_world
 → SimulationStep.advance_minutes
-→ GameClock → Spatial → Economy → Organization responsibility review → 已到期工资结算
-→ Application → Content 日期解析 → Presenter → UI / Map
+→ 最早的日界 / 消费安排 / 生计转换 / Native货运 / 人物旅行到期点
+→ GameClock → Spatial（跨完整小时）→ 人物实际抵达 → legacy到期工资
+→ Native.advance_time → 日界时Native.settle_day(false) → 到期Shared窗口
+→ 旅行抵达通知 → 个人到期消费安排 → Formal.settle_hour_range → 生计转换
+→ 日界时：迁居提交 → Native作用域交接 → Organization责任复核
+→ Application → Content日期解析 → Presenter → UI / Map
 ```
 
-SimulationStep 将跨日推进分段处理：先把 Clock 推到日边界，再同步 Spatial、调用 FormalWorldEconomySimulation.settle_hour_range 修改同一 EconomyState，再以结算后只读经济观察进行 Organization responsibility review，并处理到期工资。最后不足一日的完整小时按 Clock → Spatial → Economy 处理，随后处理到期工资；不足一小时的分钟余量不触发经济小时结算。页面日期从 Clock 重新取得，地图在跨完整小时的刷新中重新解析日期相关内容。
+以上是事件点顺序，依据[scripts/simulation/simulation_step.gd](<../scripts/simulation/simulation_step.gd>)。最终不足下一个事件的尾段按Clock → 跨小时则Spatial与Formal → Native日内推进 → legacy工资处理，不能将事件点顺序无条件抄到尾段。Formal的settle_hour_range只在跨24小时整数日界时运行宏观日结，不是每小时重新生产消费。日内货运可以按分钟到期；普通生产仍按已结区间和日界处理。页面日期重新取自Clock。
 
-当前未自动推进 Military，也没有在这条链中自动推进 NPC AI、Relationship 或独立 Politics simulation。
+当前没有在此链自动推进独立通用NPC模拟、Relationship或独立Politics simulation；Native内部已有有限雇佣、生产、采购、消费等自动经济决策。这不等于通用人物AI完成，也不等于Military已加入上述经济时间链。
 
 ### SAVE：精确保存
 
@@ -105,7 +114,7 @@ Application → FormalPersistence.save_to_user
 → 替换正式文件，保留上一份 .bak
 ```
 
-经济保存直接调用 EconomyState.get_persistent_state；嵌套 payload 仍为 `formal_world_economy_state_v6`，字段与数值类型不变（权威小时、静态/人口引用、market_states、shipments、shipment sequence、last_day_index）。计算对象和缓存不序列化；history 与 routes 的既有持久化处理不变。
+宏观经济保存调用 EconomyState.get_persistent_state；嵌套 payload 为 `formal_world_economy_state_v6`（结算小时进度及对GameClock的时间一致性引用、静态/人口引用、market_states、shipments、shipment sequence、last_day_index）。领域小时游标不是第二个世界时钟。Native通过既有economy_native字段保存自身及所属领域状态；节点图、查询索引和LRU不保存。计算对象和缓存不序列化；history与routes的既有持久化处理不变。
 
 存档路径为 `user://formal_world_1900.json`，snapshot schema 为 `formal_world_simulation_v15`。外层 JSON 使用 `formal_world_exact_variant_v1` 容器；snapshot 用 Godot Variant bytes + base64 保存，保留整数/浮点类型与精确浮点位，不经 JSON 数字解析重建运行数值。临时文件校验失败时不替换正式文件。
 
@@ -634,3 +643,132 @@ AssetMarket内的 `EconomyCorporateFinancePolicy` 只形成观察和意图。每
 实际自主发行在第3日成立，第4日送达，第6日NPC认购5份，第8日原子配售并向公司支付50；总股份105。另一世界第36日自主登记100，第38日向原登记股东支付54/36/10。两对从稳定第2日候选建立的第60日对照，仅现金及投资者后续选择不同：公司可用现金795/745（融资/关闭策略）、645/745（分配/留存）；四条路径产能7、面包生产236、交付238、实付工资1044。融资项目仍因机器材料未到站等待，原机器生产计划排产0；未证明融资带来新增产出。
 
 查询仅使用原命令派生的最近评估索引及有限记录窗口；索引不保存。普通股东不返回公司内部观察；沙盒显式研究视图另作标记。已接受责任在授权撤销后仍按原条款履行；新增决定仍检查有效控制及授权。不实现经理继任治理、多轮发行或周期分配。原30360分钟Godot界面交接、重装及经营页面验收继续待验。
+
+## 节点经济的实际运行结构
+
+本节记录2026-10-27已施工及验证的有限实现，对应[经济PR125](<https://github.com/ryoumiyahayato/wwo/pull/125>)，不是已合并main或全球经济完成声明。本次发布可独立复现的经济领域及其测试；第5节新地图适配/侧栏仍是本地候选，依赖尚未整体提交的并行Application/GlobeRenderer接线，不把本地完整工作区等同GitHub现有组合。原设计目标与可选方案放在[市场设计差异章节](<WORLD_MARKET_WAR_TECH.md#节点经济与原市场设计的关系>)，不把本节的实现选择提升为不可更改的产品决定。
+
+### 1. 定义与当前范围
+
+节点制目前是**主体保有财产和决策、地点与交通网络约束可达性、市场按地点组织信息发现**的Formal/Native经济。不是把世界切成自动生产和相互传送资源的城市库存池，也不是另起一套模拟器。
+
+当前菜单显式选择“城市与产业开发情景（法国）”时，[FormalWorldMenu._build_world](<../scripts/formal/formal_world_menu.gd>)调用[EconomyNetworkDevelopment.regional_request](<../scripts/content/economy_network_development.gd>)。它在正式地图、人物、人口、组织、账户与存档中准入开发配置。旧request/template是较早网络样本，不应与regional_template混称。普通开局和旧存档不因此自动升级成该情景；读档恢复保存的配置，不按最新模板补钱货。
+
+区域模板有20家独立公司、23个公司经营站点、1个非公司家庭生产者、10种商品和8个place：巴黎、里昂、马赛、鲁昂、勒阿弗尔、勒阿弗尔港、伦敦港、伦敦。港口与城市是独立place，不能说成8座城市或法国、英国的完整经济。家庭使用宿主人口中的2人，不再生成一家公司或一份人口。**尚无独立村镇名录、农业腹地生产循环或强制三级市场结构。** 现金、库存、设备、矿藏、配方、载重和班次均为有限开发估计，不是1900年历史校准。
+
+|节点/对象|实际作用|运算与权威边界|
+|---|---|---|
+|place，含城市与港口|宿主Spatial稳定地点、站点归属、线路端点|参与位置与可达性判断；城市身份本身不持有钱货、不替企业决定|
+|firm|独立商业组织、账户、管理和经营规则|真实采购、预算与合同主体；一家企业可以有多个site|
+|site|生产/储存/销售/装卸等实际经营地点|按自身活动、工时、原料、承诺和资本执行；不是每个site都有生产|
+|local_producer|当前为鲁昂2人家庭加工群体|原Actor账户、劳动和StockLots批次；有限3粮→2面粉、最多8批，不伪装公司|
+|transport_node|按place派生的转运身份与配置日数量入口|节点图身份不是仓库产权；真实Shared设施、载具和工时由原运输领域处理|
+|城市hub/市场聚合|按地点汇总可知身份、商品和活动；按商品、来源place组织公告候选|是派生查询/显示对象，也参与供应发现分组；无统一城市钱包、库存或市场清算器|
+|村镇/腹地|保留设计方向|当前无独立实现；不能把鲁昂城市家庭加工称为已经完成农村经济|
+
+居民与劳动cohort也实际产生需要、工作、工资和消费，但不为每个居民建立一个可见图节点。图的身份表不是全部经济状态的清单。
+
+### 2. 数据归属与连接
+
+|事实|持有模块|
+|---|---|
+|唯一累计世界分钟|GameClock；领域day/hour只是处理进度|
+|正式组织、任命与权限|OrganizationState及AuthorizationCheck；知情、持股、地图选中不授予管理权|
+|现金、预留、原子付款|[FormalLedgerState](<../scripts/world/formal_ledger_state.gd>)|
+|实物来源、份额、预留、物主与保管位置|[EconomyStockLots](<../scripts/world/economy_stock_lots.gd>)；Slice的库存合计与批次严格对账|
+|计划、工作/工资、订单、shipment、消息/收据及领域子组件|[EconomyR1Slice](<../scripts/world/economy_r1_slice.gd>)，经economy_native保存|
+|真实空间连接与容量采用|原SpatialWorld；[EconomySharedTransport](<../scripts/world/economy_shared_transport.gd>)另核载具、装卸劳动、设施和占用|
+|身份图、邻接、路径候选、目录分组、hub视图|[economy_node_network](<../scripts/world/economy_node_network.gd>)及Slice派生索引；可重建，不是钱货运力权威、不保存|
+|未被Native接管人口的统计市场|FormalWorldEconomyState/Simulation；单位和责任与Native分开|
+
+图使用稳定ID的Dictionary，邻接表为place→有向route ID数组；另有place→sites、place→edges等窄索引，不建立企业两两相连的全矩阵。身份关系有firm operates site、site located_at place；交通边来自HOST_LINK、显式DEVELOPMENT_PERMISSION或标明SYNTHETIC的本地边。它们不是成交记录。当前连接骨架由配置准入，不按价格自动修建铁路或生成道路。
+
+买卖、计划数量、库存、已知供应商和实际物流采用在运行中变化。路径候选保留显式transport_paths，并补两次有界词典序Dijkstra结果：先运费后延时、先延时后运费，稳定ID打破平局。上限8腿、4096访问、8192松弛，LRU最多512项；不是枚举全部路径或完整多目标最优前沿。查询只走买方已知、商品可准入的连接；缓存不承诺有货、有钱或当下空闲运力，实际签约和入段仍重新检查。已受理订单保存原route_legs，不因后来发现更短路径或停线而重写历史。
+
+区域目录索引为good→真实来源place→公告数组。同一买方/商品对一个来源城市复用一次可达查询；每条公告仍独立检查受众、available_day、已知与待送候选。LOCAL同地；REGIONAL为已知货物路径规划时长不超过4日；WIDE仍须可达并获配置允许。三者是**发现范围**，不是村镇/国内/国际三个库存与清算层。候选按lead、稳定candidate排序，沿原limit和冷却期送达。
+
+城市与未来聚落不需要强制树形从属才能交易；但目前没有自动计算腹地。将来加入聚落，仍须提供合法place、人口/经营者、有限资源、公告受众和真实连接，不能只加地图点就获得产出。
+
+### 3. 时间推进、生产与交易决定
+
+正式组合由[WorldBootstrap](<../scripts/content/world_bootstrap.gd>)准入Native；[SimulationStep](<../scripts/simulation/simulation_step.gd>)的宿主事件顺序见前文TIME。Native日内只处理到期的小时/分钟货运等，不每帧遍历全网重算日经济。日界settle_day(false)主要顺序为：
+
+```text
+day递增、报价生效、清日经营计数
+→ 消息送达、既有货运到达/卸货、旧到期工资
+→ 企业计划和岗位更新
+→ 兑现已排工作、记录实际工时、形成工资请求、再付到期工资
+→ 建设/服务/零售/运输从同批实际工时分配
+→ 家庭加工与站点生产
+→ 居民采购、原料/补货和资本采购
+→ 派发货运、消费现有可用物、关闭价格窗口
+→ 发布观察、未来维护/经营决定及下一期劳动
+```
+
+计划读取本企业库存、已承诺量、收到的请求和已观察订单；只在同一物主内部传播配方需求，不预知全世界消费者。生产真实消耗StockLots原料、工时及有效设备能力后才生成带投入来源的产出批次。生产上下文为本日界之前的已结区间；午夜新安装设备不倒灌提高昨天产出。有限矿藏与维护沿原CapitalFormation，不由图生成资源。
+
+居民从自身需要、可用持有、已知报价、资金和旅行/所在地条件作采购；企业_input_need区分free_stock、incoming和已知日期的到货。先尝试内部调拨，再按已知报价的运输可执行性、是否迟于需要、预计到达、可比较成本等排序，逐次重新核需求、报价、预算和现金后提交原buy。当前模板标价是显式输入；该样本不证明全球市场清算价或长期均衡。
+
+本次仅移除面包坊和巴黎站两个NPC买方开局硬送的家庭supplier知识；其他明确初始供应商、岗位和走廊知识仍在，玩家原家庭notice也保留。不是所有主体都从零探索，也不是每笔交易都由新目录发现。
+
+没有足量供应时，_discover_suppliers把请求放入原_messages。区域策略有LOCAL/REGIONAL/WIDE分别1/2/3日延迟、3日冷却、每次最多2候选、每商品最多8个已知候选。到_delivery_day才由_deliver_directory写_firm_knowledge与_receipts；打开地图或读目录不让所有主体立刻知情。零量采购门控只省略当前不需购买的完整offers构造；末尾仍用fresh need执行发现，因为quantity为0也可能存在日期短缺。
+
+迁居和scope交接在旧日Native、个人安排及宏观责任都结清后才影响未来。Native实际接管的人物/cohort从宏观需求人口中排除；统计库存不能无产权依据变成企业私产。当前没有企业/cohort责任任意双向升降精度的完整闭环。
+
+### 4. 商品、资金、信息与运输状态
+
+普通运输销售依次为：已知报价→订单受理→卖方批次与买方货款/全程运费预留→候发→装载/入段→运输→到站等待或卸货→下一腿/交付→可用库存→后续生产或消费。
+
+- **受理不是付款。** 原_buy/_admit核知情、报价、币种、限价、资格和权限，锁定价格与route_legs。Ledger.reserve降低可用余额；StockLots.reserve占住卖家原批次，不复制商品。
+- **发运不是产权取得。** 批次移至CARGO并更换保管方，普通SALE途中仍归卖方。在途不算买方可生产原料。相同所有者的内部TRANSFER不产生一笔卖方营业收入。
+- **到站不必等于交付。** Shared可处于LOADING、TRANSIT、WAITING_UNLOAD、UNLOADING；缺工时/设施会等待。个人待领还检查本人在场与携带条件。最终_deliver_shipment完成可失败准备后，以Ledger.batch_payment支付货款和各段承运费、释放相应预留，再采用买方批次、转物主并记成功receipt。部分交付按累计差额精确结算，不另造小数钱。
+- **现场是例外，不是假物流。** onsite用同一交付函数同步付款和交货，无运输腿。timed Shared及日界受理的自动订单可当日派发，不能笼统说所有新单次日发；legacy每段仍按配置day delay到达。
+- **信息独立于实物流。** directory收据证明收到公告，不证明有空闲运力、可售存货或已经成交。成交和货损另保留原合同/批次/回执事实。
+
+当前区域情景的巴黎↔鲁昂铁路与勒阿弗尔港↔伦敦港海峡使用Shared：沿同一Spatial容量请求→分配结果→实际采用，还竞争双向共用载具、真实装卸工时、站台/泊位和保管设施。其他目录铁路边仍有legacy日级BUSINESS数量上限；城市↔港口接入为开发许可，本地边为合成日量。不能把“有历史目录线路”写成“已统一真实铁路吞吐”。开发进入窗仅配置day0–60，不是无限持续班表。
+
+统一的是原账户和货批产权，不是已经完成“所有仓库共用一套空间容量”。库存site、个人寄存、零售空间和Shared保管设施仍有各自现存资格/容量语义；转运节点不自动成为收货物主，不凭地图hub归集库存。
+
+### 5. 地图读取不是第二次结算
+
+**交接状态：**领域已有有界/授权读取接口。以下新按需适配、默认收起及货流摘要是本地候选实现及headless叶组件验证结果；它们与并行Application/GlobeRenderer修改尚未作为完整组合提交本次PR。源码链接指向现有组件位置，不表示GitHub该组件已含全部候选改动。另一台电脑不可只checkout当前PR就宣称新球面UI可用；继续该工作须先整理这组接线与叶组件的独立提交边界，不覆盖并行地图工作。
+
+原Application调用[FormalEconomicMapObservation](<../scripts/presentation/map/economy/formal_economic_map_observation.gd>)读取当前world/observer和所选place/site；[FormalEconomyMapView](<../scripts/presentation/ui/formal_economy_map_view.gd>)显示并发出原请求，GlobeRenderer投影同一place。关闭详情只读城市身份；选中再读本人或实际受任管理的站点，不全图预载私账。
+
+页最多32订单、最多扫描256个订单ID；侧栏分开显示合同责任、去重shipment阶段、可核本地实物及近7日各商品交付。远程/TRANSIT数量与精确位置仍null/未知。联系预算48、收据窗口256，明确截断；仅真实receipt作按世界分钟的历史方向脉冲，已知走廊线和合同不是移动货物。页内订单反查O(1)、一次present只发布一次，切world/observer清空旧公私数据和正文。headless检查证明读取不改完整world及Clock，但**没有证明实际球面画面、动画布局或帧率已验收**。
+
+### 6. 已验证样本与性能边界
+
+以下是2026-10-27实际运行结果，不是本次文档整理重新运行，也不是全国长期结论。测试入口复用[原集成测试](<../tests/economy_network_integration_test.gd>)。
+
+|实际样本|观察与边界|
+|---|---|
+|新区域正常/工具停产/铁路中断，各36日，合计60/0|正常煤48、矿72、维护2且耗工具2；工具停产煤28、矿42、维护0。正常/断铁路多段grain交付34/4；实际捕获入段后干预，断后无新采用，旧采用保留。含守恒、恢复和继续运行|
+|家庭公告→面包坊|家庭初始现金24、grain24，3→2、2工时/批、最多8批；面包坊不再预知它。day5请求、day7收到REGIONAL，day7/8/9各接受2flour，实际交付6，原账户收到18；来源追溯确认12bread含家庭flour。家庭总产16、余10。不能据初始现金不为零的家庭证明“收入才使生活消费首次可能”|
+|独立gate-only对照13/0|只启用零量offers门控，从旧三分支day35候选推进相同day36，三个完整正式snapshot逐字段精确相同；不是拿经济决策已改变的新市场case当性能对照|
+|本地候选读取/展示27/0（未整体入仓）|原权限、未知值、7日边界、去重、32/256/48预算、单次发布、切源清理和完整snapshot不变；展示边界用明确UI-only detached fixture，不充作真实成交证据。新增地图fixture与叶组件随本地候选保留，不将27项作为当前GitHub组合的通过数|
+|真实旧R59 slot3冷恢复16/0|实际文件经原decoder/restore，完整源snapshot一致；没有把新模板灌进旧存档。该私有文件不属于可跨机器分发的测试输入，另一台电脑须选实际已有save|
+|保护中的组织证据优化677/0|[原组织测试](<../tests/formal/formal_world_organization_production_composition_test.gd>)验证拥有一份detached snapshot并索引其记录，公共getter仍深复制；不是取消边界复制|
+|旧网络24日89/0|未变旧场景的既有结果复用，本次不重复跑；不能与新区域计数混用|
+
+家庭案例的配置路径是鲁昂→巴黎的rail_paris_rouen；装卸使用鲁昂站和巴黎站原工时/设施，卖方与收货方仍分别是家庭和面包坊，不把两站变成货物买家。这里没有另模拟家庭到车站的逐街搬运。已核验货款18进入家庭原账户；运费另按订单原条款付承运方，期末家庭现金还受自身消费影响，不能写成“初始24加收入18就是期末42”或据此称净利18。
+
+原三分支各36日测到7,307次零量报价构造、2,702条候选、748.6ms该段CPU；376次quantity为0仍有条件短缺。独立gate-only末日该段合计31,213→205µs，仍保留fresh发现。规划时长只求标量延时，不再为了读delay构造完整收费腿；真实签约/运输仍锁全腿。临时计数、环境比较分支和自有Variant对照文件均已移除。
+
+这些是在外部Blender并行条件下的局部样本。正需求报价耗时有噪声，未证明整日结算、整机内存或FPS收益；城市分组本身没有单独干净计时。日结仍扫描已准入站点/商品，已知报价、需求日期和历史索引仍有代价，不是全系统常数复杂度。
+
+复现使用既有测试参数：--regional-case（默认网络另为原24日）、--read-contract-only、--saved-file <实际旧档绝对路径>。引擎为Godot4.6.3 Standard/Compatibility；从项目根使用原构建管理器锁序行CPU进程，不绕过图形/导出busy检查。可执行文件和用户save路径按电脑配置，不把本机盘符、临时日志或聊天历史当依赖。未验证Linux构建或跨平台GUI；可移交技术事实不等于所有平台已跑通。
+
+原Manager.busy返回外部Blender9892，本里程碑未运行GUI、static after/live或导出新候选，未promote；R59及回退不变。正式Application与既有可视driver最终仅解析通过，不称实机验收。
+
+### 7. 下一轮施工入口与扩展边界
+
+**首要已知缺口：历史目录恢复的as-of校验。** 当前_valid_message→_directory_entry会以receipt的delivery_day查公告，但后续_paths_for→Shared.path_conditions仍读取当前GameClock之后的配置窗。开发末窗耗尽后可能拒绝真实历史REGIONAL/WIDE知识。36日和R59不覆盖这个边界，问题本轮未修；不能删除校验、用空商品、放松恢复或把当前缓存当历史来解决。下一步应在原路径/Shared机制中分开“历史时点的知情与合法通路”与“现在能否承诺新运输”，保留受众、发布日期、当时已知边、商品口径和订单事实；如何实现仍需针对边界样本验证，不新增第二套历史世界。
+
+其次，逐条将剩余开发运输边接入现有Shared前，必须有同口径载重、载具/装卸劳动、服务窗及真实设施资源；不把legacy限额改名成物理容量。现存仓储能力能否合并，应以产权、空间单位、时间占用和责任交接的实际冲突为依据，不为“统一”字样全盘重写。
+
+扩展地区/国家可复用稳定place与主体ID、配置准入/人口排除、StockLots/Ledger、原消息、稀疏邻接、Shared与只读地图。不需要先把全国每个地点都升格成可见企业或单独市场。仍须补真实地理与连接、资源和产能数据、公告覆盖、货币/国境/制度规则、持续服务窗及长期资源再生产。现有跨海拓扑不是完整国际市场制度。
+
+算法上需警惕：路径上限可能截掉大图合法长路，双候选会遗漏其他折中路径；LRU会在多主体/商品时抖动；日界采购/规划和增长历史仍可能放大成本；缺少宏观合同/资产接收方阻止任意升降精度。层级路由、活跃地区、多精度调度、按可达性形成腹地等是待讨论方案，不是已实现能力或本轮正式决定。应先用实际目标规模和瓶颈选方案，不先承诺全球百万节点性能。
+
+旧FormalWorldSimulation、EconomyService、Prototype/Alpha旧读取宿主、V2旧UI和隔离VNextWorldRuntime不得因名称相似恢复为正式根；独立经济研究工作树也不是当前财产权威。部分data/alpha仍被正式证据Catalog读取，不能据“旧实现退役”删除来源资料。后续实现变化应更新本节对应机制和样本边界，不再叠加一份并列“最新架构”。

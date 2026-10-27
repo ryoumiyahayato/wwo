@@ -15,10 +15,10 @@ func _init(snapshot_value: Dictionary = {}) -> void:
 	for raw_record: Variant in raw_records as Array:
 		if not raw_record is Dictionary:
 			continue
-		var record := (raw_record as Dictionary).duplicate(true)
-		var organization_id := str(record.get("organization_id", ""))
+		# Index the owned snapshot; public queries still return detached copies.
+		var organization_id := str((raw_record as Dictionary).get("organization_id", ""))
 		if not organization_id.is_empty():
-			_records[organization_id] = record
+			_records[organization_id] = raw_record
 
 
 func fingerprint() -> String:
