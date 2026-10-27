@@ -70,6 +70,10 @@ func _needs_animation_frame() -> bool:
 		return true
 	if is_instance_valid(_barrel) and not _barrel.transform.is_equal_approx(_last_barrel_pose):
 		return true
+	# Native end_battle freezes stage projectiles/effects. Their retained flying
+	# facts must not request frames forever after the final outcome frame.
+	if _battle.battle_finished:
+		return false
 	if _battle.reload_remaining > 0.0 or _battle.mg_remaining > 0.0 or _battle.weather_index == 1:
 		return true
 	if is_instance_valid(_battle.smoke_root) or not _battle.effect_nodes.is_empty():
@@ -83,6 +87,11 @@ func _needs_animation_frame() -> bool:
 	for shot: Dictionary in _battle.shot_audit:
 		if str(shot.get("flight_state", "")) == "flying":
 			return true
+	for shot: Dictionary in _battle.incoming_audit:
+		if str(shot.get("flight_state", "")) == "flying":
+			return true
+	if is_instance_valid(_battle.armor_host) and _battle.armor_host.has_animation_activity():
+		return true
 	for actor: CharacterBody3D in _battle.ai_host.actors.values():
 		if is_instance_valid(actor) and not bool(actor.get("embarked")) and actor.velocity.length_squared() > 0.0001:
 			return true
@@ -157,6 +166,21 @@ func start(options: Dictionary) -> void:
 		return
 	# Install only once: preserves injured commander and already-spent 9 rounds.
 	_battle.session_locked = true
+	var encounter: Dictionary = _battle.prepare_encounter()
+	if not bool(encounter.get("ok", false)):
+		_fail(str(encounter.get("reason", "encounter_install_failed")))
+		return
+	var opponent_ready: bool = false
+	for deployment_frame: int in range(120):
+		await get_tree().physics_frame
+		if generation != _generation or not is_instance_valid(_battle):
+			return
+		if _battle.encounter_ready():
+			opponent_ready = true
+			break
+	if not opponent_ready:
+		_fail("original_opponent_deployment_not_ready")
+		return
 	_battle.session_ready = true
 	for child: Node in _battle.find_children("*", "", true, false):
 		if child.process_mode == Node.PROCESS_MODE_ALWAYS:
@@ -239,6 +263,20 @@ func set_input_exclusions(rectangles: Array[Rect2]) -> void:
 	if is_instance_valid(_battle) and is_instance_valid(_battle.battle_controls):
 		_battle.battle_controls.presentation_exclusions = _input_exclusions.duplicate()
 
+func get_player_status() -> Dictionary:
+	# Cheap host banner projection. Never construct the full driver/encounter facts.
+	var status: Dictionary = {"state": _state, "ready": _state in ["running", "paused"]}
+	if not bool(status.ready) or not is_instance_valid(_battle) or not is_instance_valid(_battle.hero):
+		return status
+	var primary: Dictionary = _battle.vehicle_ammo.status("player_vehicle", "primary")
+	status.merge({"on_foot": _battle.player_infantry_controller.active(),
+		"driving": {"speed_mps": float(_battle.hero.get_meta("vehicle_speed", 0.0))},
+		"ammo": {"loaded": str(primary.get("loaded", "")), "loading": str(primary.get("loading", "")),
+			"next": str(primary.get("next", "")), "total": int(primary.get("total", 0)),
+			"remaining": float(primary.get("remaining", 0.0))},
+		"reload_remaining": float(primary.get("remaining", 0.0))})
+	return status
+
 func get_status() -> Dictionary:
 	var status: Dictionary = {"state": _state, "ready": _state in ["running", "paused"],
 		"paused": _state == "paused", "error": _error, "isolated": true,
@@ -267,6 +305,8 @@ func get_status() -> Dictionary:
 		"battle_finished": _battle.battle_finished, "battle_result": _battle.battle_result,
 		"message": _battle.message, "native_actor_count": _battle.ai_host.actors.size(),
 		"terrain": _battle.terrain_damage.simulation_stream_snapshot()}, true)
+	if is_instance_valid(_battle.armor_host):
+		status["encounter"] = _battle.armor_host.encounter_snapshot()
 	return status.duplicate(true)
 
 func _request_observer() -> void:

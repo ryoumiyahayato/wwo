@@ -2586,6 +2586,8 @@ func terrain_region_sample(label: String, seconds: float, target: Control=null) 
 	var values: Array[float]=[]
 	var begin:=Time.get_ticks_usec()
 	var previous:=begin
+	var timing_enabled: bool = OS.get_environment("WWO_TERRAIN_SLOW_TIMING") == "1"
+	var slow_frames: Array[Dictionary] = []
 	while Time.get_ticks_usec()-begin<int(seconds*1000000):
 		await get_tree().process_frame
 		if target!=null and values.size()%6==0:
@@ -2606,9 +2608,15 @@ func terrain_region_sample(label: String, seconds: float, target: Control=null) 
 				get_viewport().push_input(motion,true)
 		var now:=Time.get_ticks_usec()
 		values.append((now-previous)/1000.0)
+		if timing_enabled and now - previous > 24000:
+			slow_frames.append({"begin_usec": previous, "end_usec": now, "wall_usec": now-previous, "completed_process_frame": Engine.get_process_frames()-1, "observed_process_frame": Engine.get_process_frames(), "physics_frame": Engine.get_physics_frames(), "process_monitor_usec": int(Performance.get_monitor(Performance.TIME_PROCESS)*1000000.0), "physics_monitor_usec": int(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)*1000000.0)})
+			slow_frames.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.wall_usec)>int(b.wall_usec))
+			if slow_frames.size()>8: slow_frames.resize(8)
 		previous=now
 	values.sort()
-	return {"phase":label,"frames":values.size(),"p95_frame_ms":values[mini(values.size()-1,int(values.size()*.95))],"max_frame_ms":values.back(),"process_ms":Performance.get_monitor(Performance.TIME_PROCESS)*1000,"draw_calls":Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),"texture_bytes":Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),"static_bytes":OS.get_static_memory_usage(),"window_focused":get_window().has_focus()}
+	var result: Dictionary = {"phase":label,"frames":values.size(),"p95_frame_ms":values[mini(values.size()-1,int(values.size()*.95))],"max_frame_ms":values.back(),"process_ms":Performance.get_monitor(Performance.TIME_PROCESS)*1000,"draw_calls":Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),"texture_bytes":Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),"static_bytes":OS.get_static_memory_usage(),"window_focused":get_window().has_focus()}
+	if timing_enabled: result["slow_frames"] = slow_frames
+	return result
 
 func terrain_region_image(label: String) -> void:
 	await get_tree().process_frame
@@ -2625,8 +2633,8 @@ func terrain_training_key(code: Key, pressed: bool) -> void:
 	# not a direct vehicle-position write or a second driving implementation.
 	Input.parse_input_event(event)
 
-func terrain_training_aim(target: Node3D, native_camera: Camera3D, controls: Control, aim_height: float = 1.0) -> void:
-	for attempt: int in range(4):
+func terrain_training_aim(target: Node3D, native_camera: Camera3D, controls: Control, aim_height: float = 1.0, attempts: int = 4, settle_seconds: float = 0.8) -> void:
+	for attempt: int in range(attempts):
 		var direction: Vector3 = (target.global_position + Vector3(0, aim_height, 0) - native_camera.global_position).normalized()
 		var desired_yaw: float = atan2(-direction.x, -direction.z)
 		var desired_pitch: float = asin(clampf(direction.y, -1.0, 1.0))
@@ -2638,7 +2646,7 @@ func terrain_training_aim(target: Node3D, native_camera: Camera3D, controls: Con
 		motion.button_mask = MOUSE_BUTTON_MASK_LEFT
 		get_viewport().push_input(motion, true)
 		await mouse_button(Vector2(680,340), MOUSE_BUTTON_LEFT, false)
-		await wait_seconds(0.8)
+		await wait_seconds(settle_seconds)
 	# Observe the original mechanical slew; never snap its desired or actual pose.
 	for frame: int in range(480):
 		await get_tree().physics_frame
@@ -2697,12 +2705,21 @@ func terrain_training_crew_roundtrip(session: Node, battle: Node3D, controls: Co
 	report["after_return"] = returned
 	report["same_actor"] = actor_id == (battle.get("ai_host").get("actors")[pid] as Node).get_instance_id()
 	report["injury_and_ammo_preserved"] = before.crew[0].hp == returned.crew[0].hp and before.crew[0].parts == returned.crew[0].parts and before.ammo.spent == returned.ammo.spent and before.ammo.total == returned.ammo.total
+	if before.has("encounter"):
+		# Incoming fire may worsen a real injury during the walk, never heal it.
+		var no_healing: bool = float(returned.crew[0].hp) <= float(before.crew[0].hp)
+		for part: String in before.crew[0].parts:
+			if str(before.crew[0].parts[part]) != "healthy" and str(returned.crew[0].parts[part]) == "healthy": no_healing = false
+		report["injury_and_ammo_preserved"] = no_healing and int(returned.ammo.spent) >= int(before.ammo.spent) and int(returned.ammo.total) <= int(before.ammo.total)
 	report["ok"] = not bool(returned.get("on_foot",true)) and report.same_actor and report.injury_and_ammo_preserved and returned.crew_registry.vehicles.player_vehicle.seats["0"].person_id == pid and float(report.walked_metres)>1.0
 	await terrain_region_image("16-original-commander-reboarded")
 	return report
 
 func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
+	if OS.get_environment("WWO_VISUAL_ARMORED_ENCOUNTER") == "1":
+		return await terrain_training_encounter_review(observation, phases)
 	var report: Dictionary = {"requested": true, "ok": false}
+	var prepare_started_usec: int = Time.get_ticks_usec()
 	var clicked: bool = await economic_button(observation, "原生坦克训练（隔离）")
 	for attempt: int in range(1800):
 		var status_data: Dictionary = observation.call("get_training_status") as Dictionary
@@ -2723,6 +2740,8 @@ func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
 	var native_camera: Camera3D = session.call("get_native_camera") as Camera3D
 	var hero_id: int = hero.get_instance_id()
 	report["initial"] = first
+	if OS.get_environment("WWO_TERRAIN_SLOW_TIMING") == "1":
+		report["prepare_wall_usec"] = Time.get_ticks_usec() - prepare_started_usec
 	phases.append(await terrain_region_sample("training_idle", 3))
 	await terrain_region_image("10-native-training-ready")
 	# Aim by the original manual drag. No snap, forced roll, target assignment,
@@ -2787,7 +2806,121 @@ func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
 	report["legal_cannon_fired"] = shot_rows.any(func(row: Dictionary) -> bool: return row.get("accepted", false) and row.get("weapon", "") == "tank_cannon")
 	report["projectile_contact_recorded"] = shot_rows.any(func(row: Dictionary) -> bool: return row.get("flight_state", "") == "impacted" and float(row.get("flight_seconds", 0)) > 0)
 	report["target_changed"] = before_shot.target != after_shot.target
+	if OS.get_environment("WWO_TERRAIN_SLOW_TIMING") == "1":
+		var native_terrain: Object = battle.get("terrain_damage") as Object
+		if native_terrain.has_method("get_slow_timing"):
+			report["terrain_timing"] = native_terrain.call("get_slow_timing")
 	report["ok"] = report.legal_cannon_fired and report.projectile_contact_recorded and report.original_injury_preserved and report.paused_state_preserved and report.same_vehicle_instance and report.same_session and report.native_menu_accessible and report.paused_by_host_button and report.returned_by_native_menu and bool(report.crew_roundtrip.get("ok", false)) and float(report.driven_metres) > 5.0
+	return report
+
+func terrain_training_encounter_review(observation: Control, phases: Array) -> Dictionary:
+	var report: Dictionary = {"requested": true, "encounter_requested": true, "ok": false}
+	var clicked: bool = await economic_button(observation, "原生坦克训练（隔离）")
+	for attempt: int in range(1800):
+		var preparing: Dictionary = observation.call("get_training_status") as Dictionary
+		if preparing.get("ready", false) or preparing.get("state", "") == "failed": break
+		await get_tree().process_frame
+	var session: Node = observation.get("_training") as Node
+	if not clicked or not is_instance_valid(session):
+		report["error"] = "original_training_did_not_start"
+		return report
+	var first: Dictionary = session.call("get_status") as Dictionary
+	report["initial"] = first
+	if not bool(first.get("ready", false)):
+		report["error"] = first
+		return report
+	var battle: Node3D = session.call("get_native_battle") as Node3D
+	var controls: Control = battle.get("battle_controls") as Control
+	var hero: Node3D = battle.get("hero") as Node3D
+	var target: Node3D = battle.get("target") as Node3D
+	var native_camera: Camera3D = session.call("get_native_camera") as Camera3D
+	var hero_id: int = hero.get_instance_id()
+	var target_id: int = target.get_instance_id()
+	phases.append(await terrain_region_sample("encounter_initial_contact", 0.4))
+	await terrain_region_image("10-armored-contact")
+	# Set the original visible sight by real menu clicks: 0 -> 50 -> 100m.
+	# The 117m encounter is not the old 13m range; gravity is not disabled.
+	var range_menu_point: Vector2 = Vector2(controls.size.x - 42.0, 42.0)
+	await mouse_button(range_menu_point, MOUSE_BUTTON_LEFT, true)
+	await mouse_button(range_menu_point, MOUSE_BUTTON_LEFT, false)
+	var sight_button: Button = controls.get("sight_button") as Button
+	for range_click: int in range(2):
+		await mouse_button(sight_button.get_global_rect().get_center(), MOUSE_BUTTON_LEFT, true)
+		await mouse_button(sight_button.get_global_rect().get_center(), MOUSE_BUTTON_LEFT, false)
+	report["sight_label_after_clicks"] = sight_button.text
+	await mouse_button(range_menu_point, MOUSE_BUTTON_LEFT, true)
+	await mouse_button(range_menu_point, MOUSE_BUTTON_LEFT, false)
+	var shots: Array[Dictionary] = []
+	for round_index: int in range(2):
+		if bool(battle.get("battle_finished")): break
+		# Driver facts may inspect results, but manual aim only uses a currently
+		# rendered, source-LOS-visible target. Hidden transforms never aim a shot.
+		if target.visible:
+			await terrain_training_aim(target, native_camera, controls, 1.3 if round_index == 0 else 0.2, 2, 0.2)
+			var before_shot: Dictionary = session.call("get_status") as Dictionary
+			terrain_training_key(KEY_SPACE, true)
+			await wait_seconds(0.12)
+			terrain_training_key(KEY_SPACE, false)
+			phases.append(await terrain_region_sample("encounter_exchange_%d" % round_index, 4.8))
+			shots.append({"before": before_shot, "after": session.call("get_status")})
+		else:
+			phases.append(await terrain_region_sample("encounter_no_visible_shot", 2))
+		if round_index == 0 and not bool(battle.get("battle_finished")):
+			terrain_training_key(KEY_W, true)
+			phases.append(await terrain_region_sample("encounter_short_approach", 3))
+			terrain_training_key(KEY_W, false)
+			await wait_seconds(0.5)
+			await terrain_region_image("13-armored-approach")
+	var after_combat: Dictionary = session.call("get_status") as Dictionary
+	report["exchanges"] = shots
+	report["after_combat"] = after_combat
+	report["driven_metres"] = (after_combat.world_position as Vector3).distance_to(first.world_position as Vector3)
+	report["enemy_moved_metres"] = (after_combat.target.position_local as Vector3).distance_to(first.target.position_local as Vector3)
+	report["same_vehicle_instance"] = hero_id == hero.get_instance_id() and target_id == target.get_instance_id()
+	report["same_session"] = first.session_id == after_combat.session_id
+	report["legal_cannon_fired"] = (after_combat.shot_audit as Array).any(func(row: Dictionary) -> bool: return bool(row.get("accepted", false)))
+	report["projectile_contact_recorded"] = (after_combat.shot_audit as Array).any(func(row: Dictionary) -> bool: return row.get("flight_state", "") == "impacted" and float(row.get("flight_seconds", 0)) > 0.0)
+	report["enemy_cannon_fired"] = (after_combat.incoming_audit as Array).any(func(row: Dictionary) -> bool: return bool(row.get("accepted", false)) and row.get("weapon", "") == "tank_cannon")
+	var enemy_audit: Array = (after_combat.get("encounter", {}) as Dictionary).get("shot_audit", []) as Array
+	report["enemy_visible_shot_recorded"] = enemy_audit.any(func(row: Dictionary) -> bool: return row.get("source", "") == "training_red_0" and bool(row.get("visible_confirmed", false)) and float(row.get("observation_age", 99.0)) <= 0.85)
+	var damage_observed: bool = false
+	for bodies: Array in [[first.crew, after_combat.crew], [first.target.crew, after_combat.target.crew]]:
+		for index: int in range(bodies[0].size()):
+			if float(bodies[1][index].hp) < float(bodies[0][index].hp): damage_observed = true
+	for modules: Array in [[first.vehicle_modules, after_combat.vehicle_modules], [first.target.modules, after_combat.target.modules]]:
+		for key: String in modules[0]:
+			if float(modules[1][key].get("integrity", INF)) < float(modules[0][key].get("integrity", INF)): damage_observed = true
+	report["combat_damage_observed"] = damage_observed
+	await terrain_region_image("17-armored-exchange-result")
+	if not bool(after_combat.battle_finished):
+		report["crew_roundtrip"] = await terrain_training_crew_roundtrip(session, battle, controls)
+	else:
+		report["crew_roundtrip"] = {"ok": false, "reason": "original_commander_death_or_battle_end"}
+	# Open the actual military menu, then pause with the host's real button.
+	var menu_point: Vector2 = Vector2(controls.size.x - 42.0, 42.0)
+	await mouse_button(menu_point, MOUSE_BUTTON_LEFT, true)
+	await mouse_button(menu_point, MOUSE_BUTTON_LEFT, false)
+	report["native_menu_accessible"] = bool(controls.get("menu_open"))
+	await terrain_region_image("18-native-original-menu")
+	await mouse_button(menu_point, MOUSE_BUTTON_LEFT, true)
+	await mouse_button(menu_point, MOUSE_BUTTON_LEFT, false)
+	report["paused_by_host_button"] = await economic_button(observation, "隔离训练 · 暂停并观察 / Esc")
+	var paused: Dictionary = session.call("get_status") as Dictionary
+	phases.append(await terrain_region_sample("encounter_paused_observation", 2))
+	var paused_later: Dictionary = session.call("get_status") as Dictionary
+	report["paused_state_preserved"] = paused.paused and paused.vehicle_modules == paused_later.vehicle_modules and paused.crew == paused_later.crew and paused.native_ammo == paused_later.native_ammo and paused.target == paused_later.target and paused.encounter == paused_later.encounter
+	report["paused"] = paused_later
+	report["resumed_by_button"] = await economic_button(observation, "恢复原训练（弹药 / 伤损保留）")
+	await wait_seconds(0.3)
+	report["after_resume"] = session.call("get_status")
+	await mouse_button(menu_point, MOUSE_BUTTON_LEFT, true)
+	await mouse_button(menu_point, MOUSE_BUTTON_LEFT, false)
+	report["returned_by_native_menu"] = await economic_button(observation, "返回观察（保留本次训练）")
+	await terrain_region_image("14-observe-after-preserved-training")
+	var native_terrain: Object = battle.get("terrain_damage") as Object
+	if OS.get_environment("WWO_TERRAIN_SLOW_TIMING") == "1" and native_terrain.has_method("get_slow_timing"):
+		report["terrain_timing"] = native_terrain.call("get_slow_timing")
+	report["ok"] = report.legal_cannon_fired and report.projectile_contact_recorded and report.enemy_cannon_fired and report.enemy_visible_shot_recorded and report.combat_damage_observed and float(report.driven_metres) > 5.0 and float(report.enemy_moved_metres) > 1.0 and report.same_vehicle_instance and report.same_session and report.paused_state_preserved and report.paused_by_host_button and report.resumed_by_button and report.returned_by_native_menu and report.native_menu_accessible and bool((report.crew_roundtrip as Dictionary).get("ok", false))
 	return report
 
 func terrain_region_run() -> void:

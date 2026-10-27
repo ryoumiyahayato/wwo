@@ -54,10 +54,64 @@ var _last_mesh_install_usec: int = 0
 var _last_shape_install_usec: int = 0
 var _max_mesh_install_usec: int = 0
 var _max_shape_install_usec: int = 0
+# Explicit opt-in timing, bounded in memory/logs; original update policy is unchanged.
+var _slow_timing_enabled: bool = OS.get_environment("WWO_TERRAIN_SLOW_TIMING") == "1"
+var _slow_timing_threshold_usec: int = 16000
+var _slow_timing_limit: int = 64
+var _slow_timing_print: bool = true
+var _slow_timing_events: Array[Dictionary] = []
+var _slow_timing_overwritten: int = 0
+var _slow_timing_printed: int = 0
+var _slow_job_id: int = 0
+var _slow_process_install_usec: int = 0
+
+
+func set_slow_timing(enabled: bool, slow_usec: int = 16000, event_limit: int = 64, print_events: bool = true) -> void:
+	_slow_timing_enabled = enabled
+	_slow_timing_threshold_usec = maxi(1, slow_usec)
+	_slow_timing_limit = clampi(event_limit, 1, 64)
+	_slow_timing_print = print_events
+	_slow_timing_events.clear()
+	_slow_timing_overwritten = 0
+	_slow_timing_printed = 0
+
+
+func get_slow_timing() -> Dictionary:
+	return {"enabled": _slow_timing_enabled, "threshold_usec": _slow_timing_threshold_usec,
+		"event_limit": _slow_timing_limit, "overwritten": _slow_timing_overwritten,
+		"printed": _slow_timing_printed, "events": _slow_timing_events.duplicate(true)}
+
+
+func _record_slow_timing(operation: String, started_usec: int, ended_usec: int, segments: Dictionary, context: Dictionary = {}) -> void:
+	if not _slow_timing_enabled or ended_usec - started_usec < _slow_timing_threshold_usec:
+		return
+	var event: Dictionary = {"source": "region_observation", "operation": operation,
+		"thread": "main", "frame": Engine.get_process_frames(), "physics_frame": Engine.get_physics_frames(),
+		"start_usec": started_usec, "end_usec": ended_usec, "total_usec": ended_usec - started_usec,
+		"segments_usec": segments}
+	event.merge(context, true)
+	if _slow_timing_events.size() >= _slow_timing_limit:
+		_slow_timing_events.pop_front()
+		_slow_timing_overwritten += 1
+	_slow_timing_events.append(event)
+	if _slow_timing_print and _slow_timing_printed < _slow_timing_limit:
+		_slow_timing_printed += 1
+		print("TERRAIN_SLOW ", JSON.stringify(event))
+
+
+func _finish_slow_main_update(started_usec: int) -> void:
+	if not _slow_timing_enabled:
+		return
+	var ended_usec: int = Time.get_ticks_usec()
+	_record_slow_timing("main_update", started_usec, ended_usec,
+		{"mesh_and_shape_install": _slow_process_install_usec,
+		"other_main_update": maxi(0, ended_usec - started_usec - _slow_process_install_usec)})
 
 
 func begin(config: Dictionary) -> void:
 	close()
+	if OS.get_environment("WWO_TERRAIN_SLOW_TIMING") == "1":
+		_slow_timing_enabled = true
 	if config.get("training_only", true) != true:
 		failed.emit("仅允许 training_only 地形，不是正式地理或军事世界")
 		return
@@ -175,7 +229,7 @@ func apply_explosion(_position: Vector3, _mass: float) -> Dictionary:
 
 
 func get_status() -> Dictionary:
-	return {
+	var status: Dictionary = {
 		"training_only": true, "geographically_registered": false,
 		"ready": _prepared, "native_available": not _native_heights.is_empty(),
 		"native_visible": _native_requested and _native_active and not _external_native_owner,
@@ -192,6 +246,9 @@ func get_status() -> Dictionary:
 		"max_shape_install_usec": _max_shape_install_usec,
 		"resource_notes": _resource_notes.duplicate(),
 	}
+	if _slow_timing_enabled:
+		status["slow_timing"] = get_slow_timing()
+	return status
 
 
 func close() -> void:
@@ -232,6 +289,11 @@ func close() -> void:
 	_last_shape_install_usec = 0
 	_max_mesh_install_usec = 0
 	_max_shape_install_usec = 0
+	_slow_timing_events.clear()
+	_slow_timing_overwritten = 0
+	_slow_timing_printed = 0
+	_slow_job_id = 0
+	_slow_process_install_usec = 0
 
 
 func _exit_tree() -> void:
@@ -241,11 +303,16 @@ func _exit_tree() -> void:
 func _process(_delta: float) -> void:
 	if not _started:
 		return
+	var slow_started_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
+	if _slow_timing_enabled:
+		_slow_process_install_usec = 0
 	_poll_one_texture()
 	if not _stage_results.is_empty():
 		_stage_one_patch()
 		if _stage_results.is_empty() and _worker == null and _data_ready:
 			_start_next_work()
+		if _slow_timing_enabled:
+			_finish_slow_main_update(slow_started_usec)
 		return
 	if _worker != null and not _worker.is_alive():
 		var result: Variant = _worker.wait_to_finish()
@@ -258,12 +325,26 @@ func _process(_delta: float) -> void:
 		# Start computation, not another upload, while this frame's patch is ready.
 		if _started and _worker == null and _stage_results.is_empty() and _data_ready:
 			_start_next_work()
+		if _slow_timing_enabled:
+			_finish_slow_main_update(slow_started_usec)
 		return
 	if _worker == null and _data_ready:
 		_start_next_work()
+	if _slow_timing_enabled:
+		_finish_slow_main_update(slow_started_usec)
 
 
 func _accept_result(result: Dictionary) -> void:
+	if _slow_timing_enabled and result.has("_slow_worker"):
+		var timing: Dictionary = result["_slow_worker"]
+		var worker_start: int = int(timing["start_usec"])
+		var worker_end: int = int(timing["end_usec"])
+		_record_slow_timing("worker_data", worker_start, worker_end,
+			{"worker_data": worker_end - worker_start}, {
+			"thread": "worker", "frame": timing["dispatch_frame"],
+			"physics_frame": timing["dispatch_physics_frame"], "frame_role": "dispatch",
+			"received_frame": Engine.get_process_frames(), "job_id": timing["job_id"],
+			"job_kind": timing["job_kind"], "dispatch_usec": timing["dispatch_usec"]})
 	if not bool(result.get("ok", false)):
 		_started = false
 		set_process(false)
@@ -284,6 +365,9 @@ func _accept_result(result: Dictionary) -> void:
 			return
 		_stage_fine = fine
 		_stage_results.assign(result["patches"])
+		if _slow_timing_enabled and result.has("_slow_worker"):
+			for patch: Dictionary in _stage_results:
+				patch["_slow_worker"] = result["_slow_worker"]
 		_stage_index = 0
 		if _stage_results.is_empty():
 			_active_fine = fine
@@ -433,10 +517,23 @@ func _stage_one_patch() -> void:
 	changed.emit()
 
 
+func _slow_result_context(result: Dictionary) -> Dictionary:
+	var key: Vector2i = result["key"]
+	var context: Dictionary = {"key": [key.x, key.y], "kind": str(result["kind"])}
+	if result.has("_slow_worker"):
+		var timing: Dictionary = result["_slow_worker"]
+		context["job_id"] = timing["job_id"]
+		context["dispatch_frame"] = timing["dispatch_frame"]
+		context["worker_start_usec"] = timing["start_usec"]
+		context["worker_end_usec"] = timing["end_usec"]
+	return context
+
+
 func _upload_patch(result: Dictionary) -> MeshInstance3D:
 	var start: int = Time.get_ticks_usec()
 	var mesh: ArrayMesh = ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, result["arrays"])
+	var uploaded_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var tile: MeshInstance3D = MeshInstance3D.new()
 	var kind: String = str(result["kind"])
 	var key: Vector2i = result["key"]
@@ -448,9 +545,15 @@ func _upload_patch(result: Dictionary) -> MeshInstance3D:
 	tile.set_meta("key", key)
 	tile.set_meta("signature", str(result["signature"]))
 	tile.set_meta("lod", int(result["lod"]))
+	var before_tree_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	add_child(tile)
 	_last_mesh_install_usec = Time.get_ticks_usec() - start
 	_max_mesh_install_usec = maxi(_max_mesh_install_usec, _last_mesh_install_usec)
+	if _slow_timing_enabled:
+		_slow_process_install_usec += _last_mesh_install_usec
+		_record_slow_timing("mesh_install", start, start + _last_mesh_install_usec,
+			{"mesh_upload": uploaded_usec - start, "node_setup": before_tree_usec - uploaded_usec,
+			"tree_registration": start + _last_mesh_install_usec - before_tree_usec}, _slow_result_context(result))
 	return tile
 
 
@@ -489,19 +592,31 @@ func _install_collision(result: Dictionary) -> void:
 		return
 	var start: int = Time.get_ticks_usec()
 	var shape: ConcavePolygonShape3D = ConcavePolygonShape3D.new()
+	var created_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	shape.set_faces(result["faces"])
+	var faces_done_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var body: StaticBody3D = StaticBody3D.new()
 	body.name = "TrainingLocalGround_%d_%d" % [key.x, key.y]
 	body.collision_layer = _collision_layer
 	body.collision_mask = 0
 	body.set_meta("training_only", true)
 	var collider: CollisionShape3D = CollisionShape3D.new()
+	var before_bind_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	collider.shape = shape
 	body.add_child(collider)
+	var before_space_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	add_child(body)
+	var after_space_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	_collision_tiles[key] = body
 	_last_shape_install_usec = Time.get_ticks_usec() - start
 	_max_shape_install_usec = maxi(_max_shape_install_usec, _last_shape_install_usec)
+	if _slow_timing_enabled:
+		_slow_process_install_usec += _last_shape_install_usec
+		_record_slow_timing("shape_install", start, start + _last_shape_install_usec, {
+			"shape_create": created_usec - start, "shape_set_faces": faces_done_usec - created_usec,
+			"node_create": before_bind_usec - faces_done_usec, "shape_bind": before_space_usec - before_bind_usec,
+			"space_registration": after_space_usec - before_space_usec,
+			"other_main_update": start + _last_shape_install_usec - after_space_usec}, _slow_result_context(result))
 
 
 func _collision_keys(point: Vector2) -> Array[Vector2i]:
@@ -527,7 +642,14 @@ func _clear_collision() -> void:
 func _launch(kind: String, callable: Callable) -> void:
 	_worker = Thread.new()
 	_worker_kind = kind
-	var error: Error = _worker.start(callable)
+	var task: Callable = callable
+	if _slow_timing_enabled:
+		_slow_job_id += 1
+		var context: Dictionary = {"job_id": _slow_job_id, "job_kind": kind,
+			"dispatch_frame": Engine.get_process_frames(), "dispatch_physics_frame": Engine.get_physics_frames(),
+			"dispatch_usec": Time.get_ticks_usec()}
+		task = HeightSource.run_timed_job.bind(callable, context)
+	var error: Error = _worker.start(task)
 	if error != OK:
 		_worker = null
 		_started = false

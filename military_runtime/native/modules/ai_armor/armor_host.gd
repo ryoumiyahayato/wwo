@@ -148,7 +148,7 @@ func _physics_process(delta: float) -> void:
 		if not u.get("tactical_order",{}).is_empty():
 			u.tactical_order.remaining=maxf(0.0,float(u.tactical_order.remaining)-delta)
 			if float(u.tactical_order.remaining)<=0:u.tactical_order={}
-		u.combat.advance_time(delta)
+		_advance_unit_combat(u,delta)
 		u["reload_overshoot"]=maxf(0.0,delta-float(u.reload)) if u.reload>0.0 else 0.0
 		u["mg_overshoot"]=maxf(0.0,delta-float(u.mg_reload)) if u.mg_reload>0.0 else 0.0
 		u.reload=maxf(0,u.reload-delta)
@@ -160,6 +160,10 @@ func _physics_process(delta: float) -> void:
 			_think(u)
 		_move(u,delta)
 		_aim(u,delta)
+
+func _advance_unit_combat(u: Dictionary, delta: float) -> void:
+	# Default per-unit owner. An adopting host may already own this exact Combat.
+	u.combat.advance_time(delta)
 
 func _think(u: Dictionary) -> void:
 	var previous_id: String=u.target.get("actor_id","")
@@ -352,7 +356,7 @@ func _aim(u: Dictionary, delta: float) -> void:
 		return
 	u["visible_checked_at"]=u.target.observed_at
 	var contact_before: Dictionary=main.vehicle_contacts.capture_pose(u.model)
-	var point: Vector3=u.target.position
+	var point: Vector3=_aim_point(u)
 	var local: Vector3=u.model.to_local(point)-u.turret.position
 	var yaw := atan2(-local.x,-local.z)
 	u.turret.rotation.y=rotate_toward(u.turret.rotation.y,yaw,.7*delta)
@@ -369,6 +373,11 @@ func _aim(u: Dictionary, delta: float) -> void:
 		if str(u.target.get("actor_kind","vehicle"))=="infantry" and is_instance_valid(u.mg_muzzle):
 			if u.mg_reload<=0: _fire(u,-u.mg_muzzle.global_basis.z.normalized(),true)
 		elif u.reload<=0: _fire(u,direction)
+
+func _aim_point(u: Dictionary) -> Vector3:
+	# Hosts with elapsed-flight shells may compensate only this observed packet.
+	# Default reconstructed combined-battle behavior remains unchanged.
+	return u.target.position
 
 func _search_sector(u: Dictionary, delta: float) -> void:
 	if not _role_alive(u,"炮手") or not is_instance_valid(u.turret): return

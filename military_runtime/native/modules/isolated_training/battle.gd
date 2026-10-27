@@ -47,6 +47,17 @@ func _ready() -> void:
 	battle_controls.setup(self)
 	refresh_hud()
 
+func prepare_encounter() -> Dictionary:
+	if is_instance_valid(armor_host):
+		return {"ok": false, "reason": "encounter_already_installed"}
+	armor_host = preload("res://military_runtime/native/modules/isolated_training/opponent.gd").new()
+	add_child(armor_host)
+	armor_host.setup(self)
+	return armor_host.bind_existing(target, combat)
+
+func encounter_ready() -> bool:
+	return is_instance_valid(armor_host) and armor_host.deployment_ready()
+
 func _on_control_changed(_on_foot: bool) -> void:
 	fire_control.cancel("车长上下车，指示已撤销")
 	clear_vehicle_fire_input()
@@ -71,7 +82,7 @@ func load_terrain() -> void:
 		return
 	var scenery: Node3D = preload("res://military_runtime/native/ridgevale/world.gd").new()
 	stage.add_child(scenery)
-	scenery.build(terrain_damage)
+	scenery.build(terrain_damage, {"route_dressing": true})
 
 func build_range() -> void:
 	if session_locked:

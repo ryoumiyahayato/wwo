@@ -1,6 +1,6 @@
 # 原生隔离训练嵌入
 
-本模块只适配初始化、显示、会话生命周期与地形所有权。坦克/炮塔驾驶、GroundSupport、VehicleContacts、车组上下车、唯一有限弹药池、原炮口/炮手/装填、实体炮弹飞行碰撞与 Combat 伤损仍由原军事源码执行。不安装独立军队、工程支援、诊断宿主、性能采集器或全局渲染/模拟速率 helper。
+本模块只适配初始化、显示、会话生命周期、单敌车部署/实体炮弹接线与地形所有权。坦克/炮塔驾驶、GroundSupport、VehicleContacts、车组上下车、唯一有限弹药池、原炮口/炮手/装填、实体炮弹飞行碰撞与 Combat 伤损仍由原军事源码执行。不安装独立军队、工程支援、诊断宿主、性能采集器或全局渲染/模拟速率 helper。
 
 ## 嵌入 API
 
@@ -27,7 +27,7 @@ controller.start({"viewport": observer_viewport, "world_root": optional_identity
 
 原 default_request 安装一次。五个稳定 person_id，车长 HP7/左臂 injured，AP6/HE2/smoke1 已消耗，原40主炮弹剩31。所有 garage/reset/select_unit/select_catalog/cycle_target/cycle_terrain/load_display/clear_stage 与弹药恢复入口被锁；不写正式存档或外部租约返回文件。
 
-保留原 Kestrel 固定靶的外装 layer1、内部乘员 layer2。仅撤销 skirmish 的 blanket hide，继续使用原 LOS/天气/烟幕。没有强制命中，不改 forced_roll。
+同一原Kestrel/Combat/三乘员在准备阶段一次放置于中央道路(0,110)m，接入原ai_armor观察、驾驶、炮塔及伤损。主炮采用原Shell实际飞行接触，MG保留hitscan；原大军部署不删减。外装layer1、内部乘员layer2、原LOS/天气/烟幕保留，没有强制命中或修改forced_roll。
 
 近景唯一 owner 为原 Ridgevale + streamed_battle_terrain，包含 actor/固定靶流式 anchor、collision、support、形变及原事务。4m 原场双线性生成1m顶点，sample_height 与同1m碰撞三角使用相同对角重心插值；不抬平或改原高程。
 
@@ -59,4 +59,12 @@ python tools/map/install_region_slice.py --from-zip TERRAIN.zip --training-from-
 - 原车长 HP7、左臂 injured 未被治好。经原 UI 下车，实走位移3.446m，离原车达6.310m，再步行返回并占回原 seat0；上下车未补回弹药。
 - sameActor、sameSession、同载具实例、暂停恢复状态保留及正式世界快照不变，均为既有 driver 比较报告，不是此文重新运行或独立重算；不能据此宣称全部军事能力通过或用户已验收。
 
-NOT_RUN：HE、MG、smoke、incoming、拒绝负例、长时运行、正式部署、存读。正式保存、export、合并均未执行。
+## 2026-10-27 主宿主原规则对抗
+
+运行源码固定在[NATIVE_SOURCE](../../../NATIVE_SOURCE.json)所记军事commit `01caf7907a8fe063e89ad16baf2e96f27f56abef`；规则在军事仓修改后用[同步命令](../../../../tools/map/sync_military_runtime.py)确定性更新，不手改两份规则。`get_player_status()`仅给本车横幅state/ready/on_foot/driving/ammo；完整`get_status().encounter`为driver-only，不作为隐藏敌情HUD。
+
+主宿主完整实窗退出0：玩家驾驶20.263m、敌55.691m；原菜单标尺100m后两发AP实飞105.076m/0.657463s、51.731m/0.323464s，余弹31→29。敌front完整度100→78、三crew10/10/10→0/6/7；敌炮手/驾驶员仍活，不宣称全敌失能或胜利。敌两发真实来袭被我方装甲挡住。同车长实走3.286m、离车6.283m，原UI返同seat0/同Actor，HP7伤臂保留；暂停冻结、恢复、原菜单返回及正式世界比较均通过。首个独立会话冲近暴露侧面导致玩家车长阵亡，失败记录保留，未降低AI伤害或重生该会话。详见[主宿主说明](../../../../docs/maps/layered_military_region.md)。
+
+这不是军事工程独立启动、全量回归或用户接受。原167.555ms尖峰仍未关闭；局部建块优化不能外推整体稳定。
+
+NOT_RUN：HE、MG、smoke、拒绝负例、长时运行、正式部署、存读。正式保存、export、合并均未执行。

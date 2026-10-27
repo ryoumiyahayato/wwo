@@ -2,6 +2,7 @@ extends Node3D
 ## Read-only military art, adapted from ridgevale/world.gd and continuous/region_world.gd.
 ## No combatants, inventory, town identities or official ownership are created.
 signal changed
+const Placement: GDScript = preload("res://military_runtime/native/modules/region_observation/scenery_placement.gd")
 var terrain: Node3D
 var base_path := "res://assets/terrain/region_slice/"
 var _native_document: Dictionary = {}
@@ -86,7 +87,7 @@ func _install_group(kind: String, packed: PackedScene) -> void:
 			if not is_finite(position.y): continue
 			var key:=Vector2i(floori(position.x/250),floori(position.z/250))
 			if not batches.has(key): batches[key]=[]
-			var pose:=Transform3D(Basis(Vector3.UP,float(row.yaw)).scaled(Vector3.ONE*float(row.scale)),position)
+			var pose: Transform3D = Placement.pose(row, terrain)
 			(batches[key] as Array).append(pose*transform_in_asset)
 		for key: Vector2i in batches:
 			var multi:=MultiMesh.new()
@@ -174,8 +175,7 @@ func _sync_collisions() -> void:
 			var body:=StaticBody3D.new()
 			body.collision_layer=1
 			body.collision_mask=0
-			body.position=Vector3(float(p[0]),float(terrain.call("sample_height",float(p[0]),float(p[2]))),float(p[2]))
-			body.rotation.y=float(row.yaw)
+			body.transform = Placement.pose(row, terrain)
 			_native.add_child(body)
 			for box: Dictionary in spec.get("boxes",[]): _box(body,box)
 			if spec.get("shape","")=="box": _box(body,spec)

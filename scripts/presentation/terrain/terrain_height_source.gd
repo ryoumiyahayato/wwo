@@ -10,6 +10,19 @@ const NATIVE_STEP: float = 4.0
 const NATIVE_ORIGIN: float = -2500.0
 
 
+static func run_timed_job(task: Callable, context: Dictionary) -> Variant:
+	# Opt-in wrapper only. No scene-tree/Engine queries on the worker thread.
+	var started_usec: int = Time.get_ticks_usec()
+	var result: Variant = task.call()
+	var ended_usec: int = Time.get_ticks_usec()
+	if result is Dictionary:
+		var timing: Dictionary = context.duplicate()
+		timing["start_usec"] = started_usec
+		timing["end_usec"] = ended_usec
+		result["_slow_worker"] = timing
+	return result
+
+
 static func read_sources(base_path: String) -> Dictionary:
 	var metadata_path: String = base_path + "continuous/assets/region.json"
 	var file: FileAccess = FileAccess.open(metadata_path, FileAccess.READ)

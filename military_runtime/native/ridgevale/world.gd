@@ -10,8 +10,9 @@ var placement_count := 0
 var field: RefCounted
 var material: StandardMaterial3D
 var tree_material: StandardMaterial3D
+const Placement: GDScript = preload("res://military_runtime/native/modules/region_observation/scenery_placement.gd")
 
-func build(terrain: Node3D) -> void:
+func build(terrain: Node3D, options: Dictionary = {}) -> void:
 	name = "RidgevaleScenery"
 	if not terrain.ready_surface:
 		push_error("Ridgevale scenery requires configured terrain")
@@ -31,12 +32,13 @@ func build(terrain: Node3D) -> void:
 	tree_material = material.duplicate() as StandardMaterial3D
 	tree_material.disable_receive_shadows = true
 	var batches: Dictionary = {}
-	for row in manifest.placements:
-		var p: Array = row.position
-		var point := Vector3(p[0], terrain.sample_height(p[0], p[2]) + float(row.get("ground_offset_m", 0.0)), p[2])
+	var placements: Array = manifest.placements.duplicate()
+	if bool(options.get("route_dressing", false)):
+		placements.append_array(Placement.route_rows())
+	for row: Dictionary in placements:
+		var transform: Transform3D = Placement.pose(row, terrain)
+		var point: Vector3 = transform.origin
 		if not point.is_finite(): continue
-		var basis := Basis(Vector3.UP, float(row.yaw)).scaled(Vector3.ONE * float(row.scale))
-		var transform := Transform3D(basis, point)
 		var key := "%s_%d_%d" % [row.kind, floori(point.x / 100.0), floori(point.z / 100.0)]
 		if not batches.has(key): batches[key] = {"kind": row.kind, "transforms": []}
 		batches[key].transforms.append(transform)

@@ -69,12 +69,15 @@ func _install_training_controls() -> void:
 	add_child(_training_exit)
 	_training_banner = Label.new()
 	_training_banner.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	_training_banner.offset_left = 300
-	_training_banner.offset_right = -285
-	_training_banner.offset_top = 8
-	_training_banner.offset_bottom = 48
+	_training_banner.offset_left = 240
+	_training_banner.offset_right = -390
+	_training_banner.offset_top = 6
+	_training_banner.offset_bottom = 60
 	_training_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_training_banner.add_theme_font_size_override("font_size", 13)
+	_training_banner.add_theme_font_size_override("font_size", 16)
+	_training_banner.add_theme_color_override("font_color", Color(0.98, 0.96, 0.88))
+	_training_banner.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+	_training_banner.add_theme_constant_override("outline_size", 3)
 	_training_banner.add_theme_color_override("font_shadow_color", Color.BLACK)
 	_training_banner.add_theme_constant_override("shadow_outline_size", 3)
 	_training_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -168,10 +171,17 @@ func _process(delta: float) -> void:
 		_training_tick += delta
 		if _training_tick >= 0.5 and not _training_preparing:
 			_training_tick = 0.0
-			var status_data: Dictionary = get_training_status()
+			var status_data: Dictionary = _training.call("get_player_status") as Dictionary if _training.has_method("get_player_status") else get_training_status()
 			var driving: Dictionary = status_data.get("driving", {}) as Dictionary
-			var motion_text: String = "车长离车" if bool(status_data.get("on_foot", false)) else "%.1f m/s" % float(driving.get("speed_mps", 0.0))
-			_training_banner.text = "隔离训练 · %s · 原伤情 / 有限弹药保留 · Esc暂停观察" % motion_text
+			var motion_text: String = "车长离车" if bool(status_data.get("on_foot", false)) else "车内 · %.1f m/s" % float(driving.get("speed_mps", 0.0))
+			var ammo: Dictionary = status_data.get("ammo", {}) as Dictionary
+			var round_name: String = str(ammo.get("loaded", ""))
+			if round_name.is_empty(): round_name = str(ammo.get("loading", ""))
+			if round_name.is_empty(): round_name = str(ammo.get("next", ""))
+			var chamber_text: String = "弹仓空"
+			if not str(ammo.get("loaded", "")).is_empty(): chamber_text = "已装弹"
+			elif not str(ammo.get("loading", "")).is_empty(): chamber_text = "装填 %.1fs" % float(ammo.get("remaining", 0.0))
+			_training_banner.text = "隔离装甲交战 · %s\n%s · %s · 总余弹%d · Esc暂停" % [motion_text, round_name.to_upper(), chamber_text, int(ammo.get("total", 0))]
 		return
 	_process_observation(delta)
 

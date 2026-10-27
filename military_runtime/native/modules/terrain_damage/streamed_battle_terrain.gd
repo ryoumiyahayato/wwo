@@ -47,6 +47,58 @@ var _mesh_index_cache: Dictionary = {}
 var support_revision := 0
 var height_cache_hits := 0
 var height_cache_misses := 0
+# Explicit, temporary timing only. No geometry, collision or scheduling policy changes.
+var _slow_timing_enabled: bool = OS.get_environment("WWO_TERRAIN_SLOW_TIMING") == "1"
+var _slow_timing_threshold_usec: int = 16000
+var _slow_timing_limit: int = 64
+var _slow_timing_print: bool = true
+var _slow_timing_events: Array[Dictionary] = []
+var _slow_timing_overwritten: int = 0
+var _slow_timing_printed: int = 0
+var _slow_process_build_usec: int = 0
+var _slow_mesh_data_usec: int = 0
+var _slow_mesh_upload_usec: int = 0
+# One synchronous build's original CPU arrays, never a second terrain cache.
+# Keep the same single-sided Concave/b-c faces without GPU mesh readback.
+var _capture_collision_data: bool = false
+var _collision_build_mesh: ArrayMesh
+var _collision_build_vertices: PackedVector3Array = PackedVector3Array()
+var _collision_build_indices: PackedInt32Array = PackedInt32Array()
+
+func _ready() -> void:
+	if OS.get_environment("WWO_TERRAIN_SLOW_TIMING") == "1":
+		_slow_timing_enabled = true
+
+func set_slow_timing(enabled: bool, slow_usec: int = 16000, event_limit: int = 64, print_events: bool = true) -> void:
+	_slow_timing_enabled = enabled
+	_slow_timing_threshold_usec = maxi(1, slow_usec)
+	_slow_timing_limit = clampi(event_limit, 1, 64)
+	_slow_timing_print = print_events
+	_slow_timing_events.clear()
+	_slow_timing_overwritten = 0
+	_slow_timing_printed = 0
+
+func get_slow_timing() -> Dictionary:
+	return {"enabled": _slow_timing_enabled, "threshold_usec": _slow_timing_threshold_usec,
+		"event_limit": _slow_timing_limit, "overwritten": _slow_timing_overwritten,
+		"printed": _slow_timing_printed, "events": _slow_timing_events.duplicate(true)}
+
+func _record_slow_timing(operation: String, started_usec: int, ended_usec: int, segments: Dictionary, context: Dictionary = {}) -> void:
+	if not _slow_timing_enabled or ended_usec - started_usec < _slow_timing_threshold_usec:
+		return
+	var event: Dictionary = {"source": "streamed_battle_terrain", "operation": operation,
+		"thread": "main", "frame": Engine.get_process_frames(), "physics_frame": Engine.get_physics_frames(),
+		"start_usec": started_usec, "end_usec": ended_usec, "total_usec": ended_usec - started_usec,
+		"segments_usec": segments}
+	event.merge(context)
+	if _slow_timing_events.size() >= _slow_timing_limit:
+		_slow_timing_events.pop_front()
+		_slow_timing_overwritten += 1
+	_slow_timing_events.append(event)
+	if _slow_timing_print and _slow_timing_printed < _slow_timing_limit:
+		_slow_timing_printed += 1
+		print("TERRAIN_SLOW ", JSON.stringify(event))
+
 func ground_support_revision() -> int: return support_revision
 func _invalidate_height_cache() -> void:
 	_height_cells.clear()
@@ -130,7 +182,10 @@ func _refresh_stream_targets() -> void:
 			chunks.erase(key)
 			support_revision += 1
 func simulation_stream_snapshot() -> Dictionary:
-	return {"simulation_chunks":simulation_chunks.size(),"loaded_chunks":chunks.size(),"peak_loaded_chunks":peak_loaded_chunks,"queued_chunks":stream_queue.size(),"simulation_chunk_budget":SIMULATION_CHUNK_BUDGET,"budget_exceeded":simulation_budget_exceeded,"chunks_built_per_frame_limit":1}
+	var status: Dictionary = {"simulation_chunks":simulation_chunks.size(),"loaded_chunks":chunks.size(),"peak_loaded_chunks":peak_loaded_chunks,"queued_chunks":stream_queue.size(),"simulation_chunk_budget":SIMULATION_CHUNK_BUDGET,"budget_exceeded":simulation_budget_exceeded,"chunks_built_per_frame_limit":1}
+	if _slow_timing_enabled:
+		status["slow_timing"] = get_slow_timing()
+	return status
 
 func update_focus(position: Vector3) -> void: set_focus(position)
 func is_position_loaded(position: Vector3) -> bool:
@@ -139,12 +194,18 @@ func is_position_loaded(position: Vector3) -> bool:
 func _process(delta: float) -> void:
 	if not ready_surface: return
 	var start := Time.get_ticks_usec()
+	if _slow_timing_enabled:
+		_slow_process_build_usec = 0
 	_tick_jobs(delta)
 	flush_updates()
 	if not stream_queue.is_empty(): _build_chunk(stream_queue.pop_front())
 	peak_loaded_chunks=maxi(peak_loaded_chunks,chunks.size())
 	last_update_usec = Time.get_ticks_usec()-start
 	maximum_update_usec = maxi(maximum_update_usec,last_update_usec)
+	if _slow_timing_enabled:
+		_record_slow_timing("main_update", start, start + last_update_usec,
+			{"build_chunk_total": _slow_process_build_usec,
+			"other_main_update": maxi(0, last_update_usec - _slow_process_build_usec)})
 
 func _procedural_base(x: float, z: float) -> float:
 	# Smooth driveable land, with broad hills rather than impassable noise.
@@ -188,21 +249,86 @@ func sample_normal(x: float, z: float) -> Vector3:
 	return Vector3(left-right,1.0,back-front).normalized()
 
 func _build_chunk(key: Vector2i) -> void:
+	var started_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
+	if _slow_timing_enabled:
+		_slow_mesh_data_usec = 0
+		_slow_mesh_upload_usec = 0
+	_capture_collision_data = true
 	var mesh := _make_mesh(key.x*CHUNK_SIZE,key.y*CHUNK_SIZE,CELLS,1.0,true)
+	_capture_collision_data = false
+	var mesh_done_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
+	var tree_usec: int = 0
+	var space_usec: int = 0
+	var mark_usec: int = 0
+	var is_new_chunk: bool = not chunks.has(key) if _slow_timing_enabled else false
 	var tile: Node3D
 	if chunks.has(key): tile = chunks[key]
 	else:
-		tile = Node3D.new(); tile.name = "Land_%d_%d" % [key.x,key.y]; add_child(tile)
-		var visual := MeshInstance3D.new(); visual.name="Surface"; tile.add_child(visual)
+		tile = Node3D.new(); tile.name = "Land_%d_%d" % [key.x,key.y]
+		if _slow_timing_enabled: mark_usec = Time.get_ticks_usec()
+		add_child(tile)
+		if _slow_timing_enabled: tree_usec += Time.get_ticks_usec() - mark_usec
+		var visual := MeshInstance3D.new(); visual.name="Surface"
+		if _slow_timing_enabled: mark_usec = Time.get_ticks_usec()
+		tile.add_child(visual)
+		if _slow_timing_enabled: tree_usec += Time.get_ticks_usec() - mark_usec
 		var ground := StaticBody3D.new(); ground.name="Ground"; ground.collision_layer=8; ground.collision_mask=0
-		ground.add_to_group("drivable_ground"); tile.add_child(ground)
-		var shape := CollisionShape3D.new(); shape.name="Shape"; ground.add_child(shape)
+		ground.add_to_group("drivable_ground")
+		if _slow_timing_enabled: mark_usec = Time.get_ticks_usec()
+		tile.add_child(ground)
+		if _slow_timing_enabled: space_usec += Time.get_ticks_usec() - mark_usec
+		var shape := CollisionShape3D.new(); shape.name="Shape"
+		if _slow_timing_enabled: mark_usec = Time.get_ticks_usec()
+		ground.add_child(shape)
+		if _slow_timing_enabled: space_usec += Time.get_ticks_usec() - mark_usec
 		chunks[key]=tile
+	var nodes_done_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	tile.get_node("Surface").mesh=mesh
-	tile.get_node("Ground/Shape").shape=mesh.create_trimesh_shape()
+	var visual_done_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
+	# Avoid ArrayMesh readback/intermediate TriangleMesh, but retain its legacy
+	# 0.0001 collision-only snap. Render/source data, winding, Concave/BVH type
+	# and backface=false are unchanged. Other overrides keep their old fallback.
+	var collision: Shape3D
+	var collision_data_done_usec: int = visual_done_usec
+	var direct_cpu_faces: bool = _collision_build_mesh == mesh and not _collision_build_indices.is_empty()
+	if direct_cpu_faces:
+		var collision_vertices: PackedVector3Array = _collision_build_vertices.duplicate()
+		for vertex_index: int in collision_vertices.size():
+			collision_vertices[vertex_index] = collision_vertices[vertex_index].snappedf(0.0001)
+		var faces: PackedVector3Array = PackedVector3Array()
+		faces.resize(_collision_build_indices.size())
+		for index: int in _collision_build_indices.size():
+			faces[index] = collision_vertices[_collision_build_indices[index]]
+		if _slow_timing_enabled: collision_data_done_usec = Time.get_ticks_usec()
+		var concave: ConcavePolygonShape3D = ConcavePolygonShape3D.new()
+		concave.set_faces(faces)
+		collision = concave
+	else:
+		collision = mesh.create_trimesh_shape()
+	var shape_done_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
+	tile.get_node("Ground/Shape").shape=collision
+	var registered_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
+	_collision_build_mesh = null
+	_collision_build_vertices = PackedVector3Array()
+	_collision_build_indices = PackedInt32Array()
 	rebuild_count+=1
 	# Explicit rebuild also supports editor/test base-grid changes.
 	_invalidate_height_cache()
+	if _slow_timing_enabled:
+		var ended_usec: int = Time.get_ticks_usec()
+		_slow_process_build_usec += ended_usec - started_usec
+		_record_slow_timing("build_chunk", started_usec, ended_usec, {
+			"mesh_data": _slow_mesh_data_usec, "mesh_upload": _slow_mesh_upload_usec,
+			"mesh_override_other": maxi(0, mesh_done_usec - started_usec - _slow_mesh_data_usec - _slow_mesh_upload_usec),
+			"node_create": maxi(0, nodes_done_usec - mesh_done_usec - tree_usec - space_usec),
+			"tree_registration": tree_usec, "mesh_bind": visual_done_usec - nodes_done_usec,
+			"collision_data": collision_data_done_usec - visual_done_usec,
+			"shape_create_trimesh": 0 if direct_cpu_faces else shape_done_usec - visual_done_usec,
+			"shape_set_faces": shape_done_usec - collision_data_done_usec if direct_cpu_faces else 0,
+			"space_registration": space_usec + registered_usec - shape_done_usec,
+			"other_main_update": ended_usec - registered_usec},
+			{"key": [key.x, key.y], "new_chunk": is_new_chunk,
+			"collision_path": "cpu_faces" if direct_cpu_faces else "mesh_fallback"})
 
 func _mesh_indices(cells: int) -> PackedInt32Array:
 	if _mesh_index_cache.has(cells): return _mesh_index_cache[cells]
@@ -219,10 +345,20 @@ func _mesh_indices(cells: int) -> PackedInt32Array:
 	return indices
 
 func _make_mesh(ox: float, oz: float, cells: int, step: float, detailed: bool) -> ArrayMesh:
+	var data_started_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var vertices := PackedVector3Array(); var normals := PackedVector3Array()
 	var colors := PackedColorArray(); var indices := _mesh_indices(cells)
 	var vertex_count := (cells+1)*(cells+1)
 	vertices.resize(vertex_count); normals.resize(vertex_count); colors.resize(vertex_count)
+	# The same double-precision tint factors repeat along every row/column.
+	# 51+51 trig evaluations instead of 2601+2601; keep the original expression.
+	var tint_sin_x: PackedFloat64Array = PackedFloat64Array()
+	var tint_cos_z: PackedFloat64Array = PackedFloat64Array()
+	tint_sin_x.resize(cells + 1)
+	tint_cos_z.resize(cells + 1)
+	for axis_index: int in cells + 1:
+		tint_sin_x[axis_index] = sin((ox + axis_index * step) * 0.13)
+		tint_cos_z[axis_index] = cos((oz + axis_index * step) * 0.11)
 	# Cache the padded grid once: normals share samples with neighboring chunks.
 	var height_grid := PackedFloat32Array()
 	if detailed:
@@ -237,7 +373,7 @@ func _make_mesh(ox: float, oz: float, cells: int, step: float, detailed: bool) -
 			var vi := z*(cells+1)+x
 			vertices[vi]=Vector3(wx,h,wz)
 			normals[vi]=Vector3(height_grid[gi-1]-height_grid[gi+1],2.0,height_grid[gi-cells-3]-height_grid[gi+cells+3]).normalized() if detailed else Vector3.UP
-			var tint := 0.90+0.06*sin(wx*0.13)*cos(wz*0.11)
+			var tint := 0.90+0.06*tint_sin_x[x]*tint_cos_z[z]
 			var surface_color := Color(tint,tint,tint)
 			if detailed:
 				# Color-only exposed soil; filling back to the local base restores grass.
@@ -248,8 +384,16 @@ func _make_mesh(ox: float, oz: float, cells: int, step: float, detailed: bool) -
 	var arrays: Array=[]; arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX]=vertices; arrays[Mesh.ARRAY_NORMAL]=normals
 	arrays[Mesh.ARRAY_COLOR]=colors; arrays[Mesh.ARRAY_INDEX]=indices
+	var upload_started_usec: int = Time.get_ticks_usec() if _slow_timing_enabled else 0
 	var mesh := ArrayMesh.new(); mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 	mesh.surface_set_material(0,material)
+	if _capture_collision_data:
+		_collision_build_mesh = mesh
+		_collision_build_vertices = vertices
+		_collision_build_indices = indices
+	if _slow_timing_enabled:
+		_slow_mesh_data_usec = upload_started_usec - data_started_usec
+		_slow_mesh_upload_usec = Time.get_ticks_usec() - upload_started_usec
 	return mesh
 
 func _build_horizon() -> void:

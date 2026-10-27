@@ -24,7 +24,7 @@ uniform bool use_vertex_damage = false;
 uniform mat4 terrain_to_local;
 uniform mat4 terrain_to_world;
 uniform vec3 grass_color = vec3(0.085, 0.160, 0.035);
-uniform vec3 soil_color = vec3(0.160, 0.090, 0.035);
+uniform vec3 soil_color = vec3(0.180, 0.130, 0.075);
 uniform vec3 rock_color = vec3(0.220, 0.230, 0.215);
 uniform float detail_scale = 0.32;
 uniform float detail_contrast = 1.8;
@@ -68,6 +68,15 @@ void fragment() {
 	vec3 masks = vec3(0.0);
 	if (native_surface) {
 		if (has_land_control) { masks = clamp(texture(land_control, native_uv).rgb, vec3(0.0), vec3(1.0)); }
+		// The authored road is only ~4 texels wide (2.44m/texel). Linear R made
+		// its entire verge look like smeared mud. Resolve a core + gravel shoulder
+		// near the eye, with derivative AA; distant semantic masks are unchanged.
+		float road_raw = masks.r;
+		float road_aa = max(0.025, fwidth(road_raw) * 0.5);
+		float road_core = smoothstep(0.18 - road_aa, 0.82 + road_aa, road_raw);
+		float shoulder = max(0.0, smoothstep(0.04, 0.32, road_raw) - road_core);
+		masks.r = mix(road_raw, road_core, close_weight);
+		masks.b = max(masks.b, shoulder * close_weight * 0.40);
 		base = mix(base, base * vec3(1.10, 1.04, 0.82), masks.g * local_weight * 0.55);
 		base = mix(base, soil_color, masks.r * local_weight * 0.75);
 		base = mix(base, rock_color, masks.b * local_weight * 0.70);
