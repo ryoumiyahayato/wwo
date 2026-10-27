@@ -107,6 +107,9 @@ func release_storage(shipment_id: String, good: Variant, quantity_value: int, ev
 	var id := _storage_use(shipment_id)
 	if id.is_empty(): return
 	var use := node_uses[id] as Dictionary
+	# Old saves may retain an already-passed node until final receipt. Do not
+	# relabel a later departure as that node's adjacent historical exit.
+	if event_id.begins_with("transfer:") and event_id!="transfer:"+shipment_id+":"+str(int(use["leg_index"])+1):return
 	if use["releases"].has(event_id): return
 	var amount := _node_amount(use["facility_id"],good,quantity_value)
 	assert(amount <= float(use["amount"])-float(use["released_amount"])+VNextInfrastructureLinkState.CAPACITY_EPSILON)
@@ -147,7 +150,7 @@ func arrive(shipment: Dictionary, order: Dictionary) -> bool:
 	shipment["stage"] = "UNLOADING"
 	return false
 
-func labor_needed_arrival(edge_id: String) -> int:
+func labor_needed_arrival(edge_id: String, entered_only: bool = false) -> int:
 	var e := economy()
 	var r := bindings[edge_id] as Dictionary
 	if not r.has("node_resources"): return 0
@@ -157,11 +160,12 @@ func labor_needed_arrival(edge_id: String) -> int:
 		var o := e._orders[c["order_id"]] as Dictionary
 		if o["route_legs"][c["leg_index"]]["edge_id"] == edge_id and c["stage"] in ["TRANSIT","LOADING","WAITING_UNLOAD"]:
 			total += int(c["quantity"])*int(r["node_resources"]["unloading_hours_per_unit"])
-	for id: String in e._pending_orders:
-		var o := e._orders[id] as Dictionary
-		if o["route_legs"][0]["edge_id"]!=edge_id: continue
-		var q: int = e._lots.quantity_at("PERSON|"+str(o["buyer"])+"|FREIGHT|"+str(o["id"]),o["good"]) if o["kind"]=="PERSONAL_FREIGHT" else e._lots.reserved_quantity(id)
-		total += mini(int(o["pending"]),q)*int(r["node_resources"]["unloading_hours_per_unit"])
+	if not entered_only:
+		for id: String in e._pending_orders:
+			var o := e._orders[id] as Dictionary
+			if o["route_legs"][0]["edge_id"]!=edge_id: continue
+			var q: int = e._lots.quantity_at("PERSON|"+str(o["buyer"])+"|FREIGHT|"+str(o["id"]),o["good"]) if o["kind"]=="PERSONAL_FREIGHT" else e._lots.reserved_quantity(id)
+			total += mini(int(o["pending"]),q)*int(r["node_resources"]["unloading_hours_per_unit"])
 	return total+e._capital_transport.needed(edge_id,true)*int(r["node_resources"]["unloading_hours_per_unit"])
 
 func bind(e: RefCounted) -> bool:
@@ -299,6 +303,12 @@ func allocated_hours(site: String, day: int = -1) -> int:
 func prepare_labor(capital_used: Dictionary) -> void:
 	var e := economy()
 	var used := capital_used.duplicate(true)
+	# Existing on-board cargo must be able to free the SAME finite vehicle.
+	# Otherwise an impossible outbound backlog can consume all destination work
+	# every day while the loaded train can never unload. Reuse original earned
+	# work and costs; pending, not-yet-entered promises get no such precedence.
+	for r: Dictionary in bindings.values():
+		if r.has("node_resources"): _prepare_arrival_labor(r, used, true)
 	for edge_id: String in bindings:
 		var r := bindings[edge_id] as Dictionary
 		if not _has_window(r, e._world.game_clock.total_minutes()):
@@ -329,12 +339,12 @@ func prepare_labor(capital_used: Dictionary) -> void:
 		e._labor[r["handling_site"]] = int(e._labor.get(r["handling_site"], 0))-hours
 		if r.has("node_resources"): _prepare_arrival_labor(r,used)
 
-func _prepare_arrival_labor(r: Dictionary, used: Dictionary) -> void:
+func _prepare_arrival_labor(r: Dictionary, used: Dictionary, entered_only: bool = false) -> void:
 	var e := economy()
 	var site := str(facilities[r["node_resources"]["destination_handling"]]["site_id"])
 	var id := str(e.day)+"|"+str(r["edge_id"])+"|arrival"
 	if handling.has(id): return
-	var wanted := mini(labor_needed_arrival(r["edge_id"]),int(e._labor.get(site,0)))
+	var wanted := mini(labor_needed_arrival(r["edge_id"], entered_only),int(e._labor.get(site,0)))
 	if wanted<=0: return
 	var rows: Array[Dictionary] = []
 	var hours := 0
@@ -476,6 +486,22 @@ func _restore_nodes(raw: Dictionary, saved: Dictionary) -> bool:
 				var next: Dictionary = raw["entries"][event_id]
 				if next.get("shipment_id")!=use["shipment_id"] or next.get("leg_index")!=use["leg_index"]+1 or next.get("minute")!=event["minute"]: return false
 				quantity_value=int(next.get("quantity",-1))
+			elif event_id.begins_with("transfer:"+str(use["shipment_id"])+":"):
+				# A legacy next leg is a real departure too: do not keep warehouse
+				# capacity occupied until some later, non-adjacent Shared leg.
+				var suffix: String=event_id.trim_prefix("transfer:"+str(use["shipment_id"])+":")
+				if not suffix.is_valid_int():return false
+				var leg: int=int(suffix)
+				if leg!=int(use["leg_index"])+1:return false
+				var proof: Dictionary=saved["shipments"].get(use["shipment_id"],{})
+				if proof.is_empty():
+					for receipt: Dictionary in saved["delivery_receipts"].values():
+						if receipt.get("shipment_id",receipt["id"])==use["shipment_id"]:proof=receipt;break
+				if proof.is_empty() or not proof.get("departures") is Array or not proof.get("departure_quantities") is Array or leg>=proof["departures"].size() or leg>=proof["departure_quantities"].size():return false
+				var order: Dictionary=saved["orders"].get(proof.get("order_id"),{})
+				if not order.get("route_legs") is Array or leg>=order["route_legs"].size() or bindings.has(order["route_legs"][leg]["edge_id"]):return false
+				if event["minute"]!=int(proof["departures"][leg])*1440:return false
+				quantity_value=int(proof["departure_quantities"][leg])
 			if not event_id.begins_with("loss:") and int(event["minute"])<int(use["minute"])+int(n["unloading_minutes"]): return false
 			if quantity_value<=0 or not is_equal_approx(float(event["amount"]),_node_amount(use["facility_id"],load_of(use),quantity_value)): return false
 			released+=float(event["amount"])
@@ -537,7 +563,9 @@ func _restore_nodes(raw: Dictionary, saved: Dictionary) -> bool:
 		for receipt: Dictionary in saved["delivery_receipts"].values():
 			if receipt.get("shipment_id",receipt["id"])==entry["shipment_id"]: progressed=true
 		if progressed and not source.has(prefix+"destination_handling"): return false
-		if cargo.get("stage")=="UNLOADING":
+		# The live unloading cursor belongs only to its current leg. Historical
+		# nodes keep their own independently validated duration/release facts.
+		if cargo.get("stage")=="UNLOADING" and cargo.get("leg_index")==entry["leg_index"]:
 			if not source.has(prefix+"destination_berth") or cargo.get("unloading_end_minute")!=source[prefix+"destination_berth"]["end_minute"]: return false
 		if source.has(prefix+"destination_handling"):
 			for key: String in ["destination_berth","destination_storage"]:

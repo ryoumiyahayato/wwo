@@ -12,12 +12,50 @@ var nodes: Dictionary = {}
 var adjacency: Dictionary = {}
 var _routes: Dictionary = {}
 var _local_id: String = ""
+var cache_enabled: bool = true # Derived query policy; never saved or an admission authority.
+const CACHE_LIMIT: int = 512
+var _path_cache: Dictionary = {}
+var _cache_until: int = 0
+var _site_ids: Array[String] = []
+var _sites_by_place: Dictionary = {}
+var _edge_ids: Array[String] = []
+var _edges_by_place: Dictionary = {}
+var _transport_ids: Array[String] = []
+var _hub_cache: Dictionary = {}
+var _stats: Dictionary = {"queries":0,"hits":0,"searches":0,"visited":0,"relaxations":0,"max_visits":0,"invalidations":0}
+
+func metrics() -> Dictionary:
+	var result: Dictionary = _stats.duplicate()
+	result["cache_entries"] = _path_cache.size()
+	result["node_count"] = nodes.size()
+	result["edge_count"] = _routes.size()
+	return result
+
+func invalidate_paths() -> void:
+	_path_cache.clear()
+	_cache_until = 0
+	_stats["invalidations"] = int(_stats["invalidations"]) + 1
+
+func _query_epoch(e: RefCounted) -> void:
+	var now: int = e._world.game_clock.total_minutes()
+	if _cache_until > now: return
+	_path_cache.clear()
+	_cache_until = FormalLedgerState.MAX_AMOUNT
+	# Availability of a future departure changes only when its final configured
+	# window ends. Daily use/cash/stock are deliberately NOT cached promises.
+	for binding: Dictionary in e._shared.bindings.values():
+		var starts: Array = binding["entry_minutes"]
+		if starts.is_empty(): continue
+		var end: int = int(starts.back()) + int(binding.get("window_minutes",1))
+		if end > now: _cache_until = mini(_cache_until,end)
 
 func rebuild(spec: Dictionary, routes: Dictionary, settings: Dictionary) -> void:
 	revision += 1
 	nodes.clear()
 	adjacency.clear()
 	_routes = routes
+	_site_ids.clear();_sites_by_place.clear();_edge_ids.clear();_edges_by_place.clear();_transport_ids.clear();_hub_cache.clear()
+	invalidate_paths()
 	_local_id = str(spec["route"]["id"])
 	var ids: Array = routes.keys()
 	ids.sort()
@@ -29,6 +67,10 @@ func rebuild(spec: Dictionary, routes: Dictionary, settings: Dictionary) -> void
 		_place_identity(destination)
 		if not adjacency.has(origin): adjacency[origin] = []
 		adjacency[origin].append(id)
+		_edge_ids.append(id)
+		for place: String in [origin,destination]:
+			if not _edges_by_place.has(place): _edges_by_place[place]=[]
+			if not _edges_by_place[place].has(id): _edges_by_place[place].append(id)
 	for firm: String in spec["firms"]:
 		var row: Dictionary = spec["firms"][firm]
 		nodes[firm] = _identity(firm, "firm", row["place_id"], "", firm, firm, "ADMITTED_ENTERPRISE_IDENTITY")
@@ -36,11 +78,21 @@ func rebuild(spec: Dictionary, routes: Dictionary, settings: Dictionary) -> void
 			var location: String = spec["sites"][site]["place_id"]
 			_place_identity(location)
 			nodes[site] = _identity(site, "site", location, site, firm, site, spec["sites"][site]["basis"])
+			_site_ids.append(site)
+			if not _sites_by_place.has(location):_sites_by_place[location]=[]
+			_sites_by_place[location].append(site)
+	_site_ids.sort()
+	for producer: Dictionary in settings.get("local_producers",[]):
+		var actor: String=str(producer["actor"])
+		var place: String=str(spec["actors"][actor]["place_id"])
+		_place_identity(place)
+		nodes[actor]=_identity(actor,"local_producer",place,actor,"",actor,producer["basis"])
 	for row: Dictionary in settings.get("transport_nodes", []):
 		var place: String = row["place_id"]
 		_place_identity(place)
 		var id: String = "transport_node:" + place
 		nodes[id] = _identity(id, "transport_node", place, "", "", place, "CONFIGURED_TRANSFER_THROUGHPUT_NOT_STOCK")
+		_transport_ids.append(id)
 
 func _identity(id: String, kind: String, place: String, site: String, firm: String, source: String, basis: String) -> Dictionary:
 	return {"id": id, "kind": kind, "type": kind, "place_id": place, "site_id": site, "firm_id": firm, "source_id": source, "basis": basis}
@@ -76,17 +128,34 @@ static func path_id(ids: Array) -> String:
 ## Layering by hop count preserves the eight-leg bound without a dense all-pairs
 ## table. Non-negative costs and positive travel times never reward a cycle.
 func paths(e: RefCounted, buyer: String, origin: String, destination: String, good: String = "") -> Array[Dictionary]:
+	_stats["queries"]=int(_stats["queries"])+1
 	var result: Array[Dictionary] = []
 	if origin == destination: return result
+	_query_epoch(e)
+	var key: String=JSON.stringify([buyer,origin,destination,good])
+	if cache_enabled and _path_cache.has(key):
+		var cached: Array[Dictionary]=_path_cache[key]
+		var valid: bool=true
+		for path: Dictionary in cached:
+			for edge: String in path["edge_ids"]:
+				if not edge_known(e,edge,buyer) or (not good.is_empty() and not e._shared.path_conditions([{"edge_id":edge}],good)):valid=false;break
+		if valid:
+			_stats["hits"]=int(_stats["hits"])+1
+			_path_cache.erase(key);_path_cache[key]=cached
+			return cached.duplicate(true)
 	var seen: Dictionary = {}
 	for by_delay: bool in [false, true]:
 		var path: Dictionary = _shortest(e, buyer, origin, destination, by_delay, good)
 		if path.is_empty() or seen.has(path["id"]): continue
 		seen[path["id"]] = true
 		result.append(path)
+	if cache_enabled:
+		if _path_cache.size()>=CACHE_LIMIT:_path_cache.erase(_path_cache.keys()[0])
+		_path_cache[key]=result.duplicate(true)
 	return result
 
 func _shortest(e: RefCounted, buyer: String, origin: String, destination: String, by_delay: bool, good: String) -> Dictionary:
+	_stats["searches"]=int(_stats["searches"])+1
 	var queue: Array[Dictionary] = []
 	var initial: Dictionary = {"place": origin, "edge_ids": [], "cost": 0, "delay": 0, "primary": 0, "secondary": 0, "token": ""}
 	_push(queue, initial)
@@ -98,11 +167,14 @@ func _shortest(e: RefCounted, buyer: String, origin: String, destination: String
 		var key: String = str(current["place"]) + "|" + str(current["edge_ids"].size())
 		if best.get(key, {}).get("token", "") != current["token"]: continue
 		visits += 1
+		_stats["visited"]=int(_stats["visited"])+1
+		_stats["max_visits"]=maxi(int(_stats["max_visits"]),visits)
 		if current["place"] == destination:
 			return {"id": path_id(current["edge_ids"]), "from_place_id": origin, "to_place_id": destination, "edge_ids": current["edge_ids"].duplicate()}
 		if current["edge_ids"].size() >= MAX_LEGS: continue
 		for id: String in adjacency.get(current["place"], []):
 			relaxations += 1
+			_stats["relaxations"]=int(_stats["relaxations"])+1
 			if relaxations >= MAX_RELAXATIONS: break
 			if not edge_known(e, id, buyer) or current["edge_ids"].has(id): continue
 			if not good.is_empty() and not e._shared.path_conditions([{"edge_id": id}], good): continue
@@ -112,7 +184,10 @@ func _shortest(e: RefCounted, buyer: String, origin: String, destination: String
 			if not e._shared.bindings.has(id) and int(e._transport.get("edges", {}).get(id, {}).get("capacity", row["capacity"])) <= 0: continue
 			var ids: Array = current["edge_ids"].duplicate()
 			ids.append(id)
-			var cost: int = int(current["cost"]) + int(row["freight_per_unit"])
+			# A carrier owning the cargo still uses its real paid handling/vehicle
+			# resources; it does not make a separate cash transfer to itself.
+			var cash_freight: int=0 if str(row["carrier"])==buyer else int(row["freight_per_unit"])
+			var cost: int = int(current["cost"]) + cash_freight
 			var delay: int = int(current["delay"]) + int(row["delay"])
 			if cost > FormalLedgerState.MAX_AMOUNT or delay > FormalLedgerState.MAX_AMOUNT: continue
 			var next: Dictionary = {"place": row["to_place_id"], "edge_ids": ids, "cost": cost, "delay": delay, "primary": delay if by_delay else cost, "secondary": cost if by_delay else delay, "token": path_id(ids)}
@@ -172,11 +247,14 @@ func view(e: RefCounted, observer: String, places: Array[String], limit: int) ->
 	for job: String in e._actors[observer].get("known_jobs", []):
 		var row: Dictionary = e._known_job(observer, job)
 		if not str(row.get("site_id", "")).is_empty(): known_sites[row["site_id"]] = true
+	result["subjects"]=subjects
 	var selected: Dictionary = {}
 	for place: String in places:
 		if e._world.spatial_catalog.has_place(place): _add_place(e, result, selected, place, budget)
-	var ids: Array = nodes.keys()
-	ids.sort()
+	var ids: Array[String] = _site_ids
+	if not places.is_empty():
+		ids=[]
+		for place: String in places: ids.append_array(_sites_by_place.get(place,[]))
 	for id: String in ids:
 		var row: Dictionary = nodes[id]
 		if row["kind"] != "site" or (not places.is_empty() and row["place_id"] not in places): continue
@@ -196,8 +274,21 @@ func view(e: RefCounted, observer: String, places: Array[String], limit: int) ->
 		_add_node(result, selected, site_row, budget)
 		_add_edge(result, selected, _relation("operates:" + id, "operates", firm, id, row["place_id"], row["place_id"], id, site_row["visibility"]), budget)
 		_add_edge(result, selected, _relation("located_at:" + id, "located_at", id, row["place_id"], row["place_id"], row["place_id"], id, "ADMITTED_SITE_PLACE"), budget)
-	ids = _routes.keys()
-	ids.sort()
+	for producer: Dictionary in e.config.get("local_producers",[]):
+		var actor: String=str(producer["actor"])
+		if not known_sites.has(actor) and observer!=actor:continue
+		var row: Dictionary=nodes[actor].duplicate()
+		if not places.is_empty() and row["place_id"] not in places:continue
+		row["identity_basis"]="RECEIVED_LOCAL_PRODUCER_ANNOUNCEMENT"
+		_add_place(e,result,selected,row["place_id"],budget)
+		_add_node(result,selected,row,budget)
+	ids = _edge_ids
+	if not places.is_empty():
+		ids=[]
+		var seen_edges: Dictionary={}
+		for place: String in places:
+			for id: String in _edges_by_place.get(place,[]):
+				if not seen_edges.has(id):ids.append(id);seen_edges[id]=true
 	for id: String in ids:
 		var row: Dictionary = _routes[id]
 		if not places.is_empty() and row["from_place_id"] not in places and row["to_place_id"] not in places: continue
@@ -210,11 +301,55 @@ func view(e: RefCounted, observer: String, places: Array[String], limit: int) ->
 		var edge: Dictionary = _relation(id, "transport", row["from_place_id"], row["to_place_id"], row["from_place_id"], row["to_place_id"], str(row.get("source_link_id", row.get("source_permission_id", id))), row.get("basis", "SYNTHETIC"))
 		edge.merge({"capacity": row["capacity"], "delay": row["delay"], "freight_per_unit": row["freight_per_unit"], "carrier_id": row["carrier"], "source_link_id": row.get("source_link_id", ""), "source_permission_id": row.get("source_permission_id", ""), "status": "KNOWN_CORRIDOR_NOT_A_TRADE", "capacity_basis": "CONFIGURED_CEILING_NOT_FREE_LIVE_CAPACITY"})
 		_add_edge(result, selected, edge, budget)
-	for id: String in nodes:
+	for id: String in _transport_ids:
 		var row: Dictionary = nodes[id]
-		if row["kind"] != "transport_node" or not selected.has(row["place_id"]): continue
+		if not selected.has(row["place_id"]): continue
 		_add_node(result, selected, row.duplicate(true), budget)
 		_add_edge(result, selected, _relation("located_at:" + id, "located_at", id, row["place_id"], row["place_id"], row["place_id"], row["source_id"], row["basis"]), budget)
+	return result
+
+func hub_view(e: RefCounted, observer: String, places: Array[String], limit: int) -> Dictionary:
+	var budget: int=clampi(limit,1,96)
+	var stamp: String=JSON.stringify([observer,revision,e._world.organization_state.revision(),e._receipts.size(),e._commands.size(),e._enterprise_changes.size(),places,budget])
+	if _hub_cache.has(stamp):
+		var cached: Dictionary=_hub_cache[stamp].duplicate(true)
+		cached["minute"]=e._world.game_clock.total_minutes()
+		return cached
+	var projection: Dictionary=view(e,observer,places,256)
+	var groups: Dictionary={}
+	for node: Dictionary in projection.get("nodes",[]):
+		var place: String=str(node["place_id"])
+		if not groups.has(place):
+			var source: Dictionary=e._world.spatial_catalog.get_place(place)
+			groups[place]={"place_id":place,"label":str(source.get("name_zh",source.get("name",place))),"known_subject_count":0,"known_site_count":0,"known_goods":[],"activity_tags":[],"visibility":"PUBLIC_IDENTITIES_AND_RECEIVED_INFORMATION_ONLY","_subjects":{}}
+		var hub: Dictionary=groups[place]
+		if node["kind"]=="site":
+			hub["known_site_count"]=int(hub["known_site_count"])+1
+			hub["_subjects"][node["firm_id"]]=true
+		elif node["kind"]=="local_producer":hub["_subjects"][node["id"]]=true
+		elif node["kind"]=="transport_node" and not hub["activity_tags"].has("transport"):hub["activity_tags"].append("transport")
+	for subject: String in projection.get("subjects",[]):
+		for known: String in e._known_suppliers(subject):
+			var candidate: Dictionary=e._candidate(known)
+			var place: String=e._place(candidate["site"])
+			if not groups.has(place):continue
+			var goods: Array=groups[place]["known_goods"]
+			if not goods.has(candidate["good"]):goods.append(candidate["good"])
+	for place: String in groups:
+		var hub: Dictionary=groups[place]
+		hub["known_subject_count"]=hub["_subjects"].size();hub.erase("_subjects")
+		for good: String in hub["known_goods"]:
+			var tag: String="mining" if good in ["coal","iron_ore"] else "industry" if good in ["steel","tools"] else "food" if good in ["grain","flour","bread"] else "textile" if good in ["fiber","cloth","clothes"] else "market"
+			if not hub["activity_tags"].has(tag):hub["activity_tags"].append(tag)
+		if hub["activity_tags"].is_empty():hub["activity_tags"].append("market")
+	var ordered: Array=groups.keys();ordered.sort()
+	var rows: Array[Dictionary]=[]
+	for place: String in ordered:
+		if rows.size()>=budget:break
+		rows.append(groups[place])
+	var result: Dictionary={"format":"economic_market_hubs_v1","revision":revision,"minute":e._world.game_clock.total_minutes(),"hubs":rows,"truncated":bool(projection.get("truncated",false)) or groups.size()>budget,"inventory_authority_created":false}
+	if _hub_cache.size()>=8:_hub_cache.erase(_hub_cache.keys()[0])
+	_hub_cache[stamp]=result.duplicate(true)
 	return result
 
 static func _relation(id: String, kind: String, origin: String, destination: String, from_place: String, to_place: String, source: String, basis: String) -> Dictionary:

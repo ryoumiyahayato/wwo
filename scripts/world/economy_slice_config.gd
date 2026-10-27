@@ -14,6 +14,7 @@ const Services = preload("res://scripts/world/economy_service_market.gd")
 const Budget = preload("res://scripts/world/economy_procurement_budget.gd")
 const Cohorts = preload("res://scripts/world/economy_cohort_rules.gd")
 const Process = preload("res://scripts/world/economy_production_process.gd")
+const LocalProducers = preload("res://scripts/world/economy_local_producers.gd")
 
 const Capital = preload("res://scripts/world/economy_capital_formation.gd")
 const CommodityMapping = preload("res://scripts/world/formal_commodity_mapping.gd")
@@ -26,7 +27,7 @@ const FIELDS: Array[String] = ["format", "case_id", "actors", "firms", "jobs", "
 const Credit = preload("res://scripts/world/economy_bilateral_credit.gd")
 const Exchange = preload("res://scripts/world/economy_currency_exchange.gd")
 const Assets = preload("res://scripts/world/economy_asset_market.gd")
-const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations", "opening_organizations", "opening_residents", "material_renewals", "opening_job_choice", "liquidity_policies", "labor_response_policies", "firm_finance_authorities", "cost_accounting", "service_market", "lease_market", "retail_sites", "commercial_information", "labor_market", "wind_down", "capital_resale", "capital_transport", "local_quotation_experiment", "equity_call_market", "equity_primary", "equity_distribution", "corporate_decisions"]
+const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations", "opening_organizations", "opening_residents", "material_renewals", "opening_job_choice", "liquidity_policies", "labor_response_policies", "firm_finance_authorities", "cost_accounting", "service_market", "lease_market", "retail_sites", "commercial_information", "labor_market", "wind_down", "capital_resale", "capital_transport", "local_quotation_experiment", "equity_call_market", "equity_primary", "equity_distribution", "corporate_decisions", "local_producers"]
 ## Extra accounts declare finite minor-unit endowments, including zero accounts.
 ## FX offers use target-minor/source-minor rational rates and a fixed source fee.
 ## Routes are directed shared physical edges, with same-currency freight per unit.
@@ -311,10 +312,11 @@ static func valid(value: Dictionary) -> bool:
 				return false
 		else:
 			var parts := str(row["candidate"]).split("|")
-			if parts.size() not in [2, 3] or not firms.has(parts[0]):
+			if parts.size() not in [2, 3] or (parts.size()==2 and not firms.has(parts[0])):
 				return false
 			var seller_site := str(parts[2]) if parts.size() == 3 else configured_primary(firms, parts[0])
-			if not sites.has(seller_site) or sites[seller_site]["firm_id"] != parts[0] or not sites[seller_site]["prices"].has(parts[1]) or parts[0] == row["actor"] or (sites.has(row["actor"]) and sites[row["actor"]]["firm_id"] == parts[0]):
+			var local: bool=LocalProducers.sale_valid(value,parts[0],parts[1],seller_site)
+			if (not local and (not firms.has(parts[0]) or not sites.has(seller_site) or sites[seller_site]["firm_id"] != parts[0] or not sites[seller_site]["prices"].has(parts[1]))) or parts[0] == row["actor"] or (sites.has(row["actor"]) and sites[row["actor"]]["firm_id"] == parts[0]):
 				return false
 			good = parts[1]
 			if firms.has(row["actor"]) and not sites[configured_primary(firms, row["actor"])]["suppliers"].has(row["candidate"]):
@@ -345,7 +347,7 @@ static func valid(value: Dictionary) -> bool:
 	for actor: Dictionary in actors.values():
 		if not Cohorts.valid(actor, value, jobs): return false
 	var route: Variant = value["route"]
-	return route is Dictionary and FormalLedgerState.exact_fields(route, ["id", "place_id", "capacity", "delay", "basis"]) and route["id"] is String and str(route["id"]).begins_with("edge:") and _place(route["place_id"]) and route["basis"] == "SYNTHETIC" and _number(route["capacity"], 1) and _number(route["delay"], 1) and credit_parties_valid(value, actors, firms) and _finance(value, actors, firms, jobs, accounts) and _operations(value, actors, firms) and _lifecycle_configuration(value, actors, firms) and Capital.valid_configuration(value, normalize(value, [])) and Services.valid_configuration(value, normalize(value, [])) and Leases.valid_configuration(value, normalize(value, [])) and Retail.valid_configuration(value, normalize(value, [])) and Commercial.valid_configuration(value, normalize(value, [])) and LaborMarket.valid_configuration(value,normalize(value,[])) and WindDown.valid_configuration(value,normalize(value,[])) and LocalQuotations.valid_configuration(value,normalize(value,[])) and Assets.CallMarket.valid_configuration(value,normalize(value,[])) and Assets.Primary.valid_configuration(value,normalize(value,[])) and Assets.Distribution.valid_configuration(value,normalize(value,[])) and Assets.Corporate.valid_configuration(value,normalize(value,[]))
+	return route is Dictionary and FormalLedgerState.exact_fields(route, ["id", "place_id", "capacity", "delay", "basis"]) and route["id"] is String and str(route["id"]).begins_with("edge:") and _place(route["place_id"]) and route["basis"] == "SYNTHETIC" and _number(route["capacity"], 1) and _number(route["delay"], 1) and credit_parties_valid(value, actors, firms) and _finance(value, actors, firms, jobs, accounts) and _operations(value, actors, firms) and _lifecycle_configuration(value, actors, firms) and Capital.valid_configuration(value, normalize(value, [])) and Services.valid_configuration(value, normalize(value, [])) and Leases.valid_configuration(value, normalize(value, [])) and Retail.valid_configuration(value, normalize(value, [])) and Commercial.valid_configuration(value, normalize(value, [])) and LaborMarket.valid_configuration(value,normalize(value,[])) and WindDown.valid_configuration(value,normalize(value,[])) and LocalQuotations.valid_configuration(value,normalize(value,[])) and Assets.CallMarket.valid_configuration(value,normalize(value,[])) and Assets.Primary.valid_configuration(value,normalize(value,[])) and Assets.Distribution.valid_configuration(value,normalize(value,[])) and Assets.Corporate.valid_configuration(value,normalize(value,[])) and Process.valid_configuration(value,normalize(value,[])) and LocalProducers.valid(value,normalize(value,[]))
 
 static func _fields(row: Dictionary, required: Array[String], optional: Array[String]) -> bool:
 	var fields := required.duplicate()
@@ -563,9 +565,11 @@ static func _operations(value: Dictionary, actors: Dictionary, firms: Dictionary
 		seen[key] = true
 	seen.clear()
 	for row: Variant in value.get("supplier_directory", []):
-		if not row is Dictionary or not _fields(row, ["seller", "good", "zone", "known_to", "available_day"], ["site_id"]) or not firms.has(row["seller"]) or not sites.has(row.get("site_id", configured_primary(firms, row["seller"]))) or sites[row.get("site_id", configured_primary(firms, row["seller"]))]["firm_id"] != row["seller"] or not sites[row.get("site_id", configured_primary(firms, row["seller"]))]["prices"].has(row["good"]) or not row["zone"] is String or row["zone"].is_empty() or not row["known_to"] is Array or not _number(row["available_day"]):
+		if not row is Dictionary or not _fields(row, ["seller", "good", "zone", "known_to", "available_day"], ["site_id"]) or not row["seller"] is String or not row["good"] is String or not row["zone"] is String or row["zone"].is_empty() or not row["known_to"] is Array or not _number(row["available_day"]):
 			return false
-		var key := str(row.get("site_id", configured_primary(firms, row["seller"]))) + "|" + str(row["good"])
+		var point: String=str(row.get("site_id",configured_primary(firms,row["seller"]) if firms.has(row["seller"]) else ""))
+		if not LocalProducers.sale_valid(value,row["seller"],row["good"],point) and (not firms.has(row["seller"]) or not sites.has(point) or sites[point]["firm_id"]!=row["seller"] or not sites[point]["prices"].has(row["good"])):return false
+		var key := point + "|" + str(row["good"])
 		if seen.has(key):
 			return false
 		var recipients: Dictionary = {}
@@ -576,8 +580,9 @@ static func _operations(value: Dictionary, actors: Dictionary, firms: Dictionary
 		seen[key] = true
 	seen.clear()
 	for row: Variant in value.get("supplier_search", []):
-		if not row is Dictionary or not _fields(row, ["firm", "local_zones", "regional_zones", "allow_wide", "delay_days", "result_limit", "max_known", "cooldown_days"], ["scope_basis", "site_id"]) or not firms.has(row["firm"]) or seen.has(str(row.get("site_id", row["firm"]))) or not row["allow_wide"] is bool or row.get("scope_basis", "CONFIGURED") not in ["CONFIGURED", "HOST_SPACE"] or not row["delay_days"] is Dictionary or not FormalLedgerState.exact_fields(row["delay_days"], ["LOCAL", "REGIONAL", "WIDE"]):
+		if not row is Dictionary or not _fields(row, ["firm", "local_zones", "regional_zones", "allow_wide", "delay_days", "result_limit", "max_known", "cooldown_days"], ["scope_basis", "site_id", "regional_max_days"]) or not firms.has(row["firm"]) or seen.has(str(row.get("site_id", row["firm"]))) or not row["allow_wide"] is bool or row.get("scope_basis", "CONFIGURED") not in ["CONFIGURED", "HOST_SPACE", "NETWORK_ACCESS"] or not row["delay_days"] is Dictionary or not FormalLedgerState.exact_fields(row["delay_days"], ["LOCAL", "REGIONAL", "WIDE"]):
 			return false
+		if row.get("scope_basis")=="NETWORK_ACCESS" and (not _number(row.get("regional_max_days"),1) or int(row["regional_max_days"])>30):return false
 		for key: String in ["local_zones", "regional_zones"]:
 			if not row[key] is Array or row[key].size() > 16:
 				return false

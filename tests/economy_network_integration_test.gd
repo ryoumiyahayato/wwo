@@ -4,6 +4,7 @@ extends SceneTree
 
 const Opening = preload("res://scripts/content/economy_network_development.gd")
 const DAYS: int = 24
+const REGIONAL_DAYS: int = 36
 var test := FormalTestCase.new()
 
 func _initialize() -> void:
@@ -17,6 +18,8 @@ func _initialize() -> void:
 	if saved_index >= 0:
 		var compare_path: String = arguments[compare_index + 1] if compare_index >= 0 else ""
 		_read_saved_file.call_deferred(arguments[saved_index + 1] if saved_index + 1 < arguments.size() else "", compare_path)
+	elif arguments.has("--regional-case"):
+		_run_regional.call_deferred()
 	elif arguments.has("--read-contract-only"):
 		_read_contract_only.call_deferred()
 	else:
@@ -33,9 +36,9 @@ func _physical_valid(economy: EconomyR1Slice) -> bool:
 	for source: Dictionary in economy._lots.sources.values(): formed[source["good"]] = int(formed[source["good"]]) + int(source["quantity"])
 	for portion: Dictionary in economy._lots.portions.values(): accounted[portion["good"]] = int(accounted[portion["good"]]) + int(portion["remaining"]) + int(portion["consumed"]) + int(portion["lost"])
 	if formed != accounted: return false
-	for site: String in economy._site_ids():
+	for owner: String in economy._stocks:
 		for good: String in economy._goods:
-			if int(economy._stocks[site][good]) < 0: return false
+			if int(economy._stocks[owner][good]) < 0: return false
 	return true
 
 func _production_totals_valid(economy: EconomyR1Slice) -> bool:
@@ -48,6 +51,13 @@ func _production_totals_valid(economy: EconomyR1Slice) -> bool:
 			# This scenario has one saleable output per activity, so each consumed
 			# input receipt is counted exactly once, never across unlike units.
 			for input: Dictionary in source["inputs"]:
+				var good: String = economy._lots.sources[input["source_id"]]["good"]
+				used[good] = int(used[good]) + int(input["quantity"])
+		# Installation/maintenance consume real goods at their material stage,
+		# including projects later cancelled or still waiting for paid work.
+		for project: Dictionary in economy._capital.projects.values():
+			if project["site_id"] != site: continue
+			for input: Dictionary in project.get("material_sources", []):
 				var good: String = economy._lots.sources[input["source_id"]]["good"]
 				used[good] = int(used[good]) + int(input["quantity"])
 		if made != economy._physical_totals[site]["produced"] or used != economy._physical_totals[site]["used"]: return false
@@ -131,7 +141,30 @@ func _read_contract_only() -> void:
 		test.expect(step.get("success", true), "Read fixture advances one bounded day")
 		var before := built.persistence.snapshot()
 		var sample := _remote_read_sample(built.world.economy_r1)
-		test.expect(built.persistence.snapshot() == before, "Read-contract, managed_firm and query_firm do not write any world state")
+		if index == 0:
+			var economy := built.world.economy_r1
+			var places: Array[String] = ["place:paris"]
+			var hubs := economy.market_hub_view(Opening.PLAYER, places)
+			test.expect(not hubs.is_empty() and not hubs.get("hubs", []).is_empty() and hubs.get("inventory_authority_created", true) == false, "The real player's typed-place hub view is nonempty and creates no inventory authority")
+			var identity_only: bool = true
+			for hub: Dictionary in hubs.get("hubs", []): identity_only = identity_only and not hub.has("cash") and not hub.has("inventory")
+			test.expect(identity_only, "Every public city hub omits private cash and inventory")
+			test.expect(economy.market_hub_view("firm:network:mill1", places).is_empty(), "A firm ID cannot impersonate the player to read city hubs")
+			var mapped := economy.economy_map_view(Opening.PLAYER, "firm:network:mill1", "site:network:mill1", 0, 999)
+			test.expect(not mapped.is_empty() and mapped.get("page_size") == 32 and int(mapped.get("scanned", 257)) <= 256 and int(mapped.get("scanned", -1)) >= 0, "Authorized map reads clamp an oversized request to 32 rows and examine at most 256 IDs")
+			var selected: Dictionary = mapped.get("firm", {})
+			var operations: Array = selected.get("operations", [])
+			test.expect(selected.get("inventory_basis") == "SELECTED_OWN_SITE" and selected.get("site_id") == "site:network:mill1" and operations.size() == 1 and operations[0].get("site_id") == "site:network:mill1", "Map inventory and the sole operation refer only to the selected authorized site")
+			test.expect(economy.economy_map_view(Opening.PLAYER, "firm:network:mill2", "site:network:mill2").is_empty(), "An unappointed company has no map business read")
+			test.expect(economy.economy_map_view(Opening.PLAYER, "firm:network:mill1", "site:network:mill2").is_empty(), "A map read cannot attach another company's site to an authorized company")
+			test.expect(economy.economy_map_view("firm:network:mill1", "firm:network:mill1", "site:network:mill1").is_empty(), "A forged observer cannot read the player's managed company through the map API")
+			var production := economy.economy_production_view(Opening.PLAYER, "firm:network:mill1", "site:network:mill1")
+			test.expect(not production.is_empty() and production.get("firm_id") == "firm:network:mill1" and production.get("site_id") == "site:network:mill1", "Opt-in production detail returns the selected authorized business")
+			var unappointed_production := economy.economy_production_view(Opening.PLAYER, "firm:network:mill2", "site:network:mill2")
+			var wrong_site_production := economy.economy_production_view(Opening.PLAYER, "firm:network:mill1", "site:network:mill2")
+			var forged_production := economy.economy_production_view("firm:network:mill1", "firm:network:mill1", "site:network:mill1")
+			test.expect(unappointed_production.is_empty() and wrong_site_production.is_empty() and forged_production.is_empty(), "Production detail rejects an unappointed company, a wrong site and a forged observer")
+		test.expect(built.persistence.snapshot() == before, "Legacy cargo/business reads and new hub, paged-map and production reads leave the complete authoritative world snapshot unchanged")
 		if int(sample["remote"]) == 0: continue
 		exercised = true
 		test.expect(sample["complete"], "Real remote buyer and seller orders are covered by both managed_firm and query_firm")
@@ -165,7 +198,7 @@ func _read_saved_file(path: String, compare_path: String = "") -> void:
 		test.expect(actual.get(field) == loaded.snapshot.get(field), "Cold restore preserves the saved authoritative field: " + field)
 	test.expect(actual == loaded.snapshot, "Cold restore matches the exact source snapshot without fingerprint calculation")
 	var economy := restored.world.economy_r1
-	test.equal(economy.config["case_id"], Opening.CASE_ID, "The supplied GUI save is the explicit economic network scenario")
+	test.expect(economy.config["case_id"] in [Opening.CASE_ID, Opening.REGIONAL_CASE_ID], "The supplied GUI save is an explicit original or regional economic scenario")
 	test.expect(_physical_valid(economy) and _production_totals_valid(economy), "Saved lots and per-good production/input receipts remain physically consistent")
 	_print_saved_summary(restored.world, path)
 	_print_cross_border_trace(economy)
@@ -198,7 +231,7 @@ func _saved_dedup_summary(state: Dictionary) -> Dictionary:
 	var production_sources: Dictionary = {}
 	var produced := Opening.stock()
 	for source: Dictionary in sources.values():
-		if not str(source["id"]).begins_with("production:"): continue
+		if not str(source["id"]).begins_with("production:") and not str(source["id"]).begins_with("local_production:"): continue
 		production_sources[source["id"]] = true
 		produced[source["good"]] = int(produced[source["good"]]) + int(source["quantity"])
 	return {"clock": {"total_minutes": state.get("total_minutes"), "minute_remainder": state.get("minute_remainder")}, "orders_unique_ids": native.get("orders", {}).size(), "sources_unique_ids": sources.size(), "transactions_rows": transaction_rows.size(), "transactions_unique_ids": unique_transactions.size(), "wages_unique_ids": native.get("wages", {}).size(), "production_sources_unique_ids": production_sources.size(), "produced_by_good_from_unique_source_receipts": produced}
@@ -273,6 +306,466 @@ func _print_cross_border_trace(economy: EconomyR1Slice) -> bool:
 		if transaction["reference_id"] == selected["id"]: payments.append(transaction)
 	print("NETWORK_ORDER_TRACE ", JSON.stringify({"source": "ACTUAL_FORMAL_ORDER_LOT_LINEAGE_DELIVERY_SPATIAL_ADOPTION_AND_LEDGER_NOT_A_MACRO_FLOW", "observed_minute": economy._world.game_clock.total_minutes(), "order_id": selected["id"], "buyer": selected["buyer"], "buyer_site": selected["buyer_site"], "seller": selected["seller"], "seller_site": selected["seller_site"], "good": selected["good"], "unit": economy._good_units()[selected["good"]], "contract_quantity": selected["quantity"], "delivered_quantity": selected["delivered"], "pending_quantity": selected["pending"], "transit_quantity": selected["transit"], "price_minor_per_unit": selected["price"], "denomination": selected["denomination"], "sources": sources, "portion_lineage_history_not_additive_stock": portions, "route_id": selected["route_id"], "route_legs": legs, "shipment_ids": shipment_ids.keys(), "delivery_receipts": receipts, "shared_adoptions": adoptions, "node_uses": node_uses, "ledger_transactions_with_order_reference": payments}))
 	return true
+
+func _regional_history(economy: EconomyR1Slice) -> Dictionary:
+	return {"minute": economy._world.game_clock.total_minutes(), "orders": economy._orders.size(), "sources": economy._lots.sources.size(), "portions": economy._lots.portions.size(), "wages": economy._wages.size(), "delivery_receipts": economy._delivery_receipts.size(), "shared_entries": economy._shared.entries.size(), "transactions": economy._world.ledger_state.transactions().size(), "route_queries": economy.query_metrics(), "rail_infrastructure": _regional_rail_state(economy), "scope": "ACTUAL_RUNTIME_RECORD_COUNTS_AND_DERIVED_QUERY_METRICS_NOT_ENCODED_SAVE_BYTES"}
+
+func _source_has_mined_input(economy: EconomyR1Slice, source_id: String, site: String) -> bool:
+	var pending: Array[String] = [source_id]
+	var seen: Dictionary = {}
+	while not pending.is_empty():
+		var id: String = pending.pop_back()
+		if seen.has(id): continue
+		seen[id] = true
+		var source: Dictionary = economy._lots.sources.get(id, {})
+		if str(source.get("id", "")).begins_with("production:") and str(source["id"]).contains(":" + site + ":"): return true
+		for input: Dictionary in source.get("inputs", []): pending.append(input["source_id"])
+	return false
+
+func _regional_metrics(economy: EconomyR1Slice) -> Dictionary:
+	var family_output: int = 0
+	var family_input: int = 0
+	var family_sources: int = 0
+	for source: Dictionary in economy._lots.sources.values():
+		if not str(source["id"]).begins_with("local_production:") or not str(source["id"]).ends_with(":" + Opening.REGIONAL_FAMILY + ":flour"): continue
+		family_sources += 1
+		family_output += int(source["quantity"])
+		for input: Dictionary in source["inputs"]: family_input += int(input["quantity"])
+	var family_delivered: int = 0
+	var family_payments: int = 0
+	for order: Dictionary in economy._orders.values():
+		if order["seller"] != Opening.REGIONAL_FAMILY: continue
+		family_delivered += int(order["delivered"])
+		for payment: Dictionary in economy._world.ledger_state.own_transactions(Opening.REGIONAL_FAMILY):
+			if payment["reference_id"] == order["id"] and payment["kind"] == "goods": family_payments += int(payment["amount"])
+	var installations: int = 0
+	var repairs: int = 0
+	var repair_tools: int = 0
+	var complete_chain: bool = false
+	var pending_repairs: Array[Dictionary] = []
+	for project: Dictionary in economy._capital.projects.values():
+		if project["kind"] == "INSTALL" and project["status"] == "COMPLETED": installations += 1
+		if project["kind"] != "MAINTENANCE": continue
+		if project["status"] == "COMPLETED": repairs += 1
+		else: pending_repairs.append({"id": project["id"], "status": project["status"], "reason": project["reason"]})
+		for input: Dictionary in project.get("material_sources", []):
+			var source: Dictionary = economy._lots.sources[input["source_id"]]
+			if source["good"] != "tools": continue
+			repair_tools += int(input["quantity"])
+			if _source_has_mined_input(economy, source["id"], "site:network:coal") and _source_has_mined_input(economy, source["id"], "site:network:ore"): complete_chain = true
+	var funded_residents: int = 0
+	var paid: int = 0
+	for claim: Dictionary in economy._wages.values(): paid += int(claim["amount"]) - int(claim["remaining"])
+	for actor: String in economy._actor_ids():
+		if actor == Opening.REGIONAL_FAMILY or economy._spec["actors"][actor]["kind"] != "cohort": continue
+		var account: String = economy._account(actor)
+		var wage_in: int = 0
+		var other_in: int = 0
+		var food_out: int = 0
+		for payment: Dictionary in economy._world.ledger_state.own_transactions(actor):
+			if payment["to_account_id"] == account:
+				if payment["kind"] == "wage": wage_in += int(payment["amount"])
+				else: other_in += int(payment["amount"])
+			var order: Dictionary = economy._orders.get(payment["reference_id"], {})
+			if payment["from_account_id"] == account and payment["kind"] == "goods" and order.get("good") == "bread": food_out += int(payment["amount"])
+		if wage_in > 0 and other_in == 0 and food_out > 0 and int(economy._physical_totals[actor]["used"]["bread"]) > 0: funded_residents += 1
+	return {"family_sources": family_sources, "family_grain_used": family_input, "family_flour_produced": family_output, "family_flour_delivered": family_delivered, "family_goods_payments": family_payments, "installations_completed": installations, "maintenance_completed": repairs, "tools_consumed_in_maintenance": repair_tools, "mined_coal_ore_to_steel_to_tools_to_maintenance": complete_chain, "pending_maintenance": pending_repairs, "coal_extracted_kg": _produced(economy, "site:network:coal", "coal"), "ore_extracted_kg": _produced(economy, "site:network:ore", "iron_ore"), "wages_paid_minor": paid, "zero_opening_cash_wage_funded_food_consumers": funded_residents, "unmet_need_units": _unmet(economy), "delivered_by_good": _delivered(economy), "multileg_delivered_by_good": _delivered(economy, true), "history": _regional_history(economy)}
+
+func _print_public_control_leaves(expected: Dictionary, actual: Dictionary, label: String) -> void:
+	# Selected original public control/topology leaves only. Never normalize or
+	# rewrite either saved world, and never print provenance fingerprints.
+	var leaves: Array[Dictionary] = []
+	var before: Dictionary = expected["territory"]["controllers"]
+	var after: Dictionary = actual["territory"]["controllers"]
+	var ids: Array = before.keys()
+	for id: Variant in after:
+		if not ids.has(id): ids.append(id)
+	for id: Variant in ids:
+		if before.has(id) == after.has(id) and before.get(id) == after.get(id): continue
+		leaves.append({"path": "territory.controllers." + str(id), "before_present": before.has(id), "after_present": after.has(id), "before": before.get(id), "after": after.get(id), "before_type": typeof(before.get(id)), "after_type": typeof(after.get(id))})
+		if leaves.size() >= 4: break
+	var old_land: Dictionary = expected["spatial"]["land"]
+	var new_land: Dictionary = actual["spatial"]["land"]
+	if old_land["revision"] != new_land["revision"]: leaves.append({"path": "spatial.land.revision", "before": old_land["revision"], "after": new_land["revision"]})
+	if old_land["active"].size() != new_land["active"].size(): leaves.append({"path": "spatial.land.active.size", "before": old_land["active"].size(), "after": new_land["active"].size()})
+	var old_parents: Dictionary = {}
+	var new_parents: Dictionary = {}
+	for row: Dictionary in old_land["active"]: old_parents[row["territory_unit_id"]] = row["parent_id"]
+	for row: Dictionary in new_land["active"]: new_parents[row["territory_unit_id"]] = row["parent_id"]
+	ids = old_parents.keys()
+	for id: Variant in new_parents:
+		if not ids.has(id): ids.append(id)
+	for id: Variant in ids:
+		if leaves.size() >= 8: break
+		if old_parents.has(id) == new_parents.has(id) and old_parents.get(id) == new_parents.get(id): continue
+		leaves.append({"path": "spatial.land.active[" + str(id) + "].parent_id", "before_present": old_parents.has(id), "after_present": new_parents.has(id), "before": old_parents.get(id), "after": new_parents.get(id), "before_type": typeof(old_parents.get(id)), "after_type": typeof(new_parents.get(id))})
+	if not leaves.is_empty(): print("REGIONAL_PUBLIC_CONTROL_LEAVES ", label, " ", JSON.stringify(leaves))
+
+func _regional_rail_state(economy: EconomyR1Slice) -> Dictionary:
+	var row := economy._world.spatial_world.infrastructure_state(Opening.REGIONAL_RAIL_LINK)
+	return {"status": row.get("status"), "nominal_capacity": row.get("nominal_capacity"), "condition": row.get("condition"), "effective_capacity": row.get("effective_capacity"), "remaining_capacity": row.get("remaining_capacity")}
+
+func _regional_rail_waiting(economy: EconomyR1Slice) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for id: String in economy._moving_shipments:
+		var cargo: Dictionary = economy._shipments[id]
+		if cargo["stage"] != "WAITING": continue
+		var order: Dictionary = economy._orders[cargo["order_id"]]
+		var leg: Dictionary = order["route_legs"][cargo["leg_index"]]
+		if leg["edge_id"] not in Opening.REGIONAL_RAIL_EDGES: continue
+		result.append({"shipment": id, "good": order["good"], "quantity": cargo["quantity"], "leg_index": cargo["leg_index"], "reason": economy._waiting_reason(leg, cargo["quantity"], cargo["ready_day"], order["good"])})
+		if result.size() >= 4: break
+	for id: String in economy._pending_orders:
+		if result.size() >= 4: break
+		var order: Dictionary = economy._orders[id]
+		var leg: Dictionary = order["route_legs"][0]
+		if leg["edge_id"] not in Opening.REGIONAL_RAIL_EDGES: continue
+		result.append({"order": id, "good": order["good"], "pending": order["pending"], "reason": economy._waiting_reason(leg, 1, economy._earliest_dispatch(order), order["good"])})
+	return result
+
+func _print_initial_authority_difference(expected: Dictionary, actual: Dictionary, label: String) -> void:
+	for field: String in ["total_minutes", "minute_remainder", "economy_native", "ledger", "population"]:
+		test.expect(actual.get(field) == expected.get(field), label + " initial authority remains exact: " + field)
+	var differences: Array[Dictionary] = []
+	for field: String in expected:
+		if expected[field] == actual.get(field): continue
+		var row: Dictionary = {"field": field, "expected_type": typeof(expected[field]), "actual_type": typeof(actual.get(field))}
+		if expected[field] is Dictionary and actual.get(field) is Dictionary:
+			var children: Array[Dictionary] = []
+			for key: Variant in expected[field]:
+				if expected[field][key] == actual[field].get(key): continue
+				var child: Dictionary = {"field": key}
+				if typeof(expected[field][key]) in [TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_FLOAT]:
+					child["expected"] = expected[field][key]
+					child["actual"] = actual[field].get(key)
+				children.append(child)
+				if children.size() >= 8: break
+			row["different_children_first_8"] = children
+		else:
+			row["expected"] = expected[field]
+			row["actual"] = actual.get(field)
+		differences.append(row)
+	if not differences.is_empty():
+		print("REGIONAL_INITIAL_RESTORE_DIFFERENCES ", label, " ", JSON.stringify(differences))
+		if label == "tools_shortage": _print_public_control_leaves(expected, actual, label)
+
+func _advance_regional_rail(world: WorldBuildResult, minutes: int, control: Dictionary) -> Dictionary:
+	var economy := world.world.economy_r1
+	var target: int = world.world.game_clock.total_minutes() + minutes
+	while world.world.game_clock.total_minutes() < target:
+		if control["closed"]: return world.simulation_step.advance_minutes(target - world.world.game_clock.total_minutes())
+		if control["failed"]: return {"success": true, "intervention_failed": true}
+		var now: int = world.world.game_clock.total_minutes()
+		var boundary: int = mini(target, (world.world.game_clock.current_day() + 1) * 1440)
+		var next_event: int = economy.next_transport_boundary()
+		if next_event > now: boundary = mini(boundary, next_event)
+		var step: Dictionary = world.simulation_step.advance_minutes(boundary - now)
+		if not step.get("success", true): return step
+		for entry: Dictionary in economy._shared.entries.values():
+			if entry["edge_id"] not in Opening.REGIONAL_RAIL_EDGES: continue
+			var cargo: Dictionary = economy._shipments.get(entry["shipment_id"], {})
+			if cargo.is_empty() or economy._orders[cargo["order_id"]]["route_legs"].size() < 2: continue
+			if cargo["leg_index"] == entry["leg_index"] and cargo["stage"] == "TRANSIT":
+				control["adopted"] = entry.duplicate(true)
+				control["fact"] = world.world.spatial_world.capacity_adoption(entry["adoption_id"])
+				for prior: Dictionary in economy._shared.entries.values():
+					if prior["edge_id"] in Opening.REGIONAL_RAIL_EDGES: control["entry_ids"][prior["adoption_id"]] = true
+				control["closed"] = world.world.spatial_world.set_infrastructure_status(Opening.REGIONAL_RAIL_LINK, VNextInfrastructureLinkState.STATUS_INTERRUPTED)
+				control["failed"] = not control["closed"]
+				test.expect(control["closed"], "Spatial interrupts the real rail immediately after actual loading ends and the admitted multileg cargo enters TRANSIT")
+				print("REGIONAL_RAIL_INTERRUPTION ", JSON.stringify({"minute": world.world.game_clock.total_minutes(), "cargo_stage": cargo["stage"], "already_adopted_entry": control["adopted"], "spatial_fact": control["fact"], "entry_count_at_closure": control["entry_ids"].size(), "infrastructure_after": _regional_rail_state(economy)}))
+				break
+			if cargo["leg_index"] > entry["leg_index"] or (cargo["leg_index"] == entry["leg_index"] and cargo["stage"] in ["WAITING_UNLOAD", "UNLOADING", "AWAITING_RECIPIENT"]):
+				control["failed"] = true
+				test.expect(false, "Rail control missed an already-progressed real multileg adoption; stop this branch immediately rather than claim an intervention")
+				return {"success": true, "intervention_failed": true}
+		if not control["closed"] and world.world.game_clock.total_minutes() >= 7 * 1440:
+			control["failed"] = true
+			test.expect(false, "No actual multileg rail TRANSIT was intercepted in the bounded opening week; do not silently run an unchanged 36-day control")
+			return {"success": true, "intervention_failed": true}
+	return {"success": true}
+
+func _print_regional_family_market(economy: EconomyR1Slice) -> void:
+	var buyers: Array[Dictionary] = []
+	var family_key := Opening.REGIONAL_FAMILY + "|flour|" + Opening.REGIONAL_FAMILY
+	for site: String in ["site:network:bakery1", "site:regional:station:paris"]:
+		var need := economy._input_need(site, "flour")
+		var offers: Array[Dictionary] = []
+		var rank: int = 0
+		for offer: Dictionary in economy._input_offers(site, "flour", need["need_by_day"], maxi(1, int(need["quantity"]))):
+			rank += 1
+			if rank > 2 and offer["seller"] != Opening.REGIONAL_FAMILY: continue
+			offers.append({"rank": rank, "seller": offer["seller"], "quantity": offer["quantity"], "transport_quantity": offer["transport_quantity"], "reason": offer["reason"], "price": offer["price"], "freight_per_unit": offer["freight_per_unit"], "route_legs": offer["route_legs"], "arrival_day": offer["earliest_arrival_day"]})
+		buyers.append({"site": site, "family_known": economy._firm_knowledge[site].has(family_key), "buyer_account": economy._account(economy._owner(site)), "available_cash": economy._world.ledger_state.available_balance(economy._account(economy._owner(site))), "input_need": need, "ranked_legal_offers_first_2_and_family": offers})
+	var orders: Array[Dictionary] = []
+	for order: Dictionary in economy._orders.values():
+		if order["seller"] == Opening.REGIONAL_FAMILY and orders.size() < 8: orders.append({"id": order["id"], "buyer_site": order["buyer_site"], "quantity": order["quantity"], "pending": order["pending"], "transit": order["transit"], "delivered": order["delivered"]})
+	var commands: Array[Dictionary] = []
+	for row: Dictionary in economy._commands.values():
+		var command: Dictionary = row["envelope"]["command"]
+		if command["kind"] == "buy" and command["payload"].get("seller") == Opening.REGIONAL_FAMILY and commands.size() < 8: commands.append({"id": command["action_id"], "minute": command["minute"], "actor": row["envelope"]["actor"], "payload": command["payload"], "result": row["result"]})
+	var shipments: Array[Dictionary] = []
+	for cargo: Dictionary in economy._shipments.values():
+		var order: Dictionary = economy._orders[cargo["order_id"]]
+		if order["seller"] != Opening.REGIONAL_FAMILY: continue
+		var view := economy._shipment_view(cargo, order)
+		shipments.append({"id": cargo["id"], "order_id": order["id"], "stage": view["stage"], "leg_index": view["leg_index"], "quantity": view["quantity"], "physical_quantity": view["physical_quantity"], "place_id": view["place_id"], "arrival_minute": view.get("arrival_minute"), "unloading_end_minute": view.get("unloading_end_minute"), "waiting_reason": view.get("waiting_reason"), "arrival_blocked_reason": view.get("arrival_blocked_reason")})
+		if shipments.size() >= 8: break
+	var handling_rows: Array[Dictionary] = []
+	var resources: Array[Dictionary] = []
+	var now: int = economy._world.game_clock.total_minutes()
+	for edge_id: String in Opening.REGIONAL_RAIL_EDGES:
+		var binding: Dictionary = economy._shared.bindings[edge_id]
+		for operation: String in ["ORIGIN", "ARRIVAL"]:
+			var key := str(economy.day) + "|" + edge_id
+			var site: String = binding["handling_site"]
+			if operation == "ARRIVAL":
+				key += "|arrival"
+				site = economy._shared.facilities[binding["node_resources"]["destination_handling"]]["site_id"]
+			var handling: Dictionary = economy._shared.handling.get(key, {})
+			var work_sources: Array[Dictionary] = []
+			for work_id: String in economy._capital_work_ids:
+				var work: Dictionary = economy._work_records[work_id]
+				if economy._spec["jobs"][work["job"]]["site_id"] != site: continue
+				var claim: Dictionary = economy._wages.get(work_id, {})
+				var payments: Array[Dictionary] = []
+				for payment: Dictionary in economy._world.ledger_state.own_transactions(work["actor"]):
+					if payment["kind"] == "wage" and payment["reference_id"] == work_id and payments.size() < 4: payments.append({"transaction_id": payment["transaction_id"], "minute": payment["effective_minute"], "amount": payment["amount"]})
+				work_sources.append({"work_id": work_id, "actor": work["actor"], "job": work["job"], "work_day": work["day"], "recorded_hours": work["hours"], "wage_amount": claim.get("amount"), "wage_paid": claim.get("paid"), "wage_remaining": claim.get("remaining"), "wage_due_day": claim.get("due_day"), "actual_wage_transactions_first_4": payments})
+				if work_sources.size() >= 4: break
+			var needed: int = economy._shared.labor_needed_arrival(edge_id) if operation == "ARRIVAL" else economy._shared._needed_hours(edge_id)
+			handling_rows.append({"day": economy.day, "edge_id": edge_id, "operation": operation, "site": site, "record_present": economy._shared.handling.has(key), "hours": handling.get("hours"), "used": handling.get("used"), "work": handling.get("work"), "needed_hours_now": needed, "native_remaining_site_labor": economy._labor.get(site), "actual_site_work_and_wage_sources_first_4": work_sources})
+		var nodes: Dictionary = {}
+		for role: String in ["origin_handling", "origin_berth", "destination_handling", "destination_berth", "destination_storage"]:
+			var facility: String = binding["node_resources"][role]
+			nodes[role] = {"facility_id": facility, "capacity": economy._shared._node_capacity(facility, now), "used": economy._shared._node_used(facility, now), "available": economy._shared._node_available(facility, now)}
+		resources.append({"edge_id": edge_id, "window_open": economy._shared.window_open(binding, now), "weight_unit": binding["weight_unit"], "vehicle_id": binding["vehicle_id"], "vehicle_payload": binding["vehicle_payload"], "vehicle_available": economy._shared._vehicle_available(binding, now), "actual_link_remaining_capacity": economy._world.spatial_world.remaining_capacity(binding["source_link_id"]), "flour_quantity_limit_for_one_unit_now": economy._shared.quantity(edge_id, "flour", 1), "node_resources": nodes})
+	print("REGIONAL_FAMILY_MARKET ", JSON.stringify({"minute": now, "buyers": buyers, "family_orders_first_8": orders, "family_buy_commands_first_8": commands, "no_submitted_family_buy_commands": commands.is_empty(), "printed_family_shipment_rows": shipments.size()}))
+	for row: Dictionary in shipments: print("REGIONAL_FAMILY_SHIPMENT ", JSON.stringify({"minute": now, "shipment": row}))
+	for row: Dictionary in handling_rows: print("REGIONAL_RAIL_HANDLING ", JSON.stringify({"minute": now, "handling": row}))
+	for row: Dictionary in resources: print("REGIONAL_RAIL_RESOURCES ", JSON.stringify({"minute": now, "resources": row}))
+
+func _print_regional_pending_maintenance(economy: EconomyR1Slice) -> void:
+	var pending: Array[Dictionary] = []
+	for project: Dictionary in economy._capital.projects.values():
+		if project["kind"] != "MAINTENANCE" or project["status"] == "COMPLETED": continue
+		var resources: Dictionary = {}
+		var terms := economy._capital.terms_for(project)
+		for good: String in terms["materials"]:
+			resources[good] = {"required": terms["materials"][good], "on_hand": economy._stocks[project["site_id"]][good], "free": economy.capital_free_goods(project["site_id"], good), "exposure": economy._exposure(project["site_id"], good), "offers": economy._input_offers(project["site_id"], good, economy.day + 1, 1).slice(0, 2)}
+		var commands: Array[Dictionary] = []
+		for row: Dictionary in economy._commands.values():
+			var command: Dictionary = row["envelope"]["command"]
+			if command["kind"] == "buy" and command["payload"].get("buyer_site") == project["site_id"] and command["payload"].get("good") in ["steel", "tools"]: commands.append({"minute": command["minute"], "payload": command["payload"], "result": row["result"]})
+		pending.append({"id": project["id"], "site": project["site_id"], "status": project["status"], "reason": project["reason"], "budget": project["budget"], "orders": project["orders"], "material_sources": project.get("material_sources", []), "resources": resources, "recent_material_buy_commands_last_4": commands.slice(maxi(0, commands.size() - 4))})
+	print("REGIONAL_PENDING_MAINTENANCE ", JSON.stringify({"minute": economy._world.game_clock.total_minutes(), "projects": pending}))
+
+func _regional_config_failure_names(configuration: Dictionary) -> void:
+	# Only on a failed existing validation. Reuse its original subvalidators;
+	# do not start a world, add a validation platform or relax admission rules.
+	var actors: Dictionary = {}
+	var firms: Dictionary = {}
+	var accounts: Dictionary = {FormalLedgerState.SOURCE_ACCOUNT: true}
+	for actor: Dictionary in configuration["actors"]:
+		actors[actor["id"]] = actor
+		accounts[actor["account_id"]] = true
+	for firm: Dictionary in configuration["firms"]:
+		firms[firm["id"]] = firm
+		accounts[firm["account_id"]] = true
+	var jobs: Dictionary = {}
+	for job: Dictionary in configuration["jobs"]: jobs[job["id"]] = job
+	var spec := EconomySliceConfig.normalize(configuration, [])
+	var checks: Dictionary = {"finance_routes": EconomySliceConfig._finance(configuration, actors, firms, jobs, accounts), "operations_supplier_search": EconomySliceConfig._operations(configuration, actors, firms), "capital_investment": EconomySliceConfig.Capital.valid_configuration(configuration, spec), "production_process": EconomySliceConfig.Process.valid_configuration(configuration, spec), "local_producers": EconomySliceConfig.LocalProducers.valid(configuration, spec), "shared_transport": EconomySliceConfig.SharedTransport.valid_configuration(configuration.get("shared_transport", [])), "transport_facilities": EconomySliceConfig.SharedTransport.valid_facilities(configuration.get("transport_facilities", []))}
+	var failures: Array[String] = []
+	for name: String in checks:
+		if not checks[name]: failures.append(name)
+	if failures.is_empty(): failures.append("BASE_R2_IDENTITIES_SITES_JOBS_INFORMATION_OR_OTHER_ORIGINAL_OPTIONAL_CONTRACT")
+	print("REGIONAL_CONFIGURATION_FAILED ", JSON.stringify(failures))
+
+func _run_regional() -> void:
+	var configuration := Opening.regional_template()
+	var valid: bool = EconomySliceConfig.valid(configuration)
+	test.expect(valid, "Regional case uses native producers, capital permissions and existing Shared transport schema")
+	if not valid:
+		_regional_config_failure_names(configuration)
+		test.finish(self, "Regional economic industry integration")
+		return
+	test.equal(configuration["firms"].size(), 20, "The actual household is not a twenty-first company")
+	test.equal(Opening.template()["case_id"], Opening.CASE_ID, "The old case entry is unchanged")
+	# Use the actual formal opening's historical land initialization. Skipping it
+	# made restore legitimately add land splits/controllers absent from the seed.
+	var normal := WorldBootstrap.new().build(null, [], [], FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, true, Opening.regional_request())
+	test.expect(normal.success and normal.world.economy_r1 != null, "Host opening builds the opt-in regional case: " + normal.error)
+	if not normal.success or normal.world.economy_r1 == null:
+		test.finish(self, "Regional economic industry integration")
+		return
+	var initial := normal.persistence.snapshot()
+	var initial_sample_minute: int = int(initial["total_minutes"])
+	var initial_document_bytes: int = JSON.stringify(FormalWorldPersistenceDocument.encode(initial)).to_utf8_buffer().size()
+	var initial_native_bytes: int = var_to_bytes(initial["economy_native"]).size()
+	var tools := FormalPersistence.new().restore_candidate(initial)
+	var rail := FormalPersistence.new().restore_candidate(initial)
+	test.expect(tools.success and rail.success, "Normal, upstream-tools shortage and rail interruption use the identical original formal snapshot")
+	if not tools.success or not rail.success:
+		test.finish(self, "Regional economic industry integration")
+		return
+	var tools_initial := tools.persistence.snapshot()
+	var rail_initial := rail.persistence.snapshot()
+	test.expect(tools_initial == initial and rail_initial == initial, "Initial cash, lots, population, responsibilities and clock are exact before the single intervention")
+	_print_initial_authority_difference(initial, tools_initial, "tools_shortage")
+	_print_initial_authority_difference(initial, rail_initial, "rail_interrupted")
+	var economy := normal.world.economy_r1
+	var shortage := tools.world.economy_r1
+	var interrupted := rail.world.economy_r1
+	test.expect(not economy._spec["firms"].has(Opening.REGIONAL_FAMILY) and economy._spec["actors"][Opening.REGIONAL_FAMILY]["members"] == 2, "Rouen processing belongs to two real anonymous residents, not a renamed corporation")
+	test.equal(normal.world.population_state.unit_for_place("place:rouen"), "country_fra", "Rouen is an admitted host place in the existing French population authority")
+	test.equal(normal.world.ledger_state.account(economy._account(Opening.REGIONAL_FAMILY))["owner_id"], Opening.REGIONAL_FAMILY, "The household retains its own canonical account")
+	test.expect(LivelihoodAction.query(normal.world, Opening.PLAYER).get("known_suppliers", []).has(Opening.REGIONAL_FAMILY + "|flour|" + Opening.REGIONAL_FAMILY), "The Paris person actually received the household sale identity through original supplier information")
+	test.expect(LivelihoodAction.query_firm(normal.world, Opening.PLAYER, Opening.REGIONAL_FAMILY).is_empty(), "A received sale notice grants no household management, cash or stock access")
+	# A tools-supply shock, not an assumption that NPCs cannot discover the
+	# other tool producer over the real network. Both original plants use their
+	# own legal operating action; no existing tool lot or reservation is removed.
+	for suffix: String in ["1", "2"]:
+		var owner := "firm:network:tools" + suffix
+		var close: Dictionary = shortage.submit_internal(owner, shortage._auto_command(owner, "set_site_status", {"firm": owner, "site_id": "site:network:tools" + suffix, "enabled": true, "production_enabled": false, "accepting_business": false}, "regional_upstream_tools_shortage"))
+		test.expect(close.get("accepted", false), "Existing self-manager action stops new upstream tools at plant " + suffix + "; no inventory is edited")
+	var cash := _cash_total(normal.world)
+	var steps_ok: bool = true
+	var physical_ok: bool = true
+	var cash_ok: bool = true
+	var rail_control: Dictionary = {"closed": false, "failed": false, "adopted": {}, "fact": {}, "entry_ids": {}}
+	var closed_rail: bool = false
+	var adopted: Dictionary = {}
+	var adopted_fact: Dictionary = {}
+	var entry_ids_at_closure: Dictionary = {}
+	var entered_cargo_progressed: bool = false
+	var retained_adoption: bool = true
+	var closure_maintained: bool = true
+	var day_times: Dictionary = {"normal": [], "tools_shortage": [], "rail_interrupted": []}
+	var worlds: Array[WorldBuildResult] = [normal, tools, rail]
+	var labels: Array[String] = ["normal", "tools_shortage", "rail_interrupted"]
+	var resumed: WorldBuildResult
+	# One extra day only, from the same minute-zero snapshot. Cache policy and
+	# counters belong to the derived helper, never to persistent economic state.
+	var uncached := FormalPersistence.new().restore_candidate(initial)
+	test.expect(uncached.success, "A single cache-off control restores the identical minute-zero formal snapshot: " + uncached.error)
+	if not uncached.success:
+		test.finish(self, "Regional economic industry integration")
+		return
+	var uncached_authority := uncached.persistence.snapshot()
+	test.expect(uncached_authority == initial, "The cache control also preserves the entire original minute-zero snapshot before its policy switch")
+	uncached.world.economy_r1._node_network.cache_enabled = false
+	test.expect(uncached.persistence.snapshot() == uncached_authority, "The sole derived cache switch changes no field of its exact pre-switch saved authority")
+	var cached_before := economy.query_metrics()
+	var uncached_before := uncached.world.economy_r1.query_metrics()
+	# All opening equality/restore checks are complete. Retain only scalar byte
+	# counts, not minute-zero snapshot copies, throughout the multi-day loop.
+	initial = {}
+	tools_initial = {}
+	rail_initial = {}
+	uncached_authority = {}
+	for index: int in REGIONAL_DAYS:
+		var timings: Dictionary = {}
+		for branch: int in worlds.size():
+			if branch == 2 and rail_control["failed"]:
+				timings[labels[branch]] = null
+				day_times[labels[branch]].append(null)
+				continue
+			var start: int = Time.get_ticks_usec()
+			var step: Dictionary
+			if branch == 2: step = _advance_regional_rail(worlds[branch], 1440, rail_control)
+			else: step = worlds[branch].simulation_step.advance_minutes(1440)
+			var elapsed: int = Time.get_ticks_usec() - start
+			timings[labels[branch]] = elapsed
+			day_times[labels[branch]].append(elapsed)
+			steps_ok = steps_ok and bool(step.get("success", true))
+			physical_ok = physical_ok and _physical_valid(worlds[branch].world.economy_r1)
+			cash_ok = cash_ok and _cash_total(worlds[branch].world) == cash
+		if index == 0:
+			var uncached_start: int = Time.get_ticks_usec()
+			var uncached_step: Dictionary = uncached.simulation_step.advance_minutes(1440)
+			var uncached_elapsed: int = Time.get_ticks_usec() - uncached_start
+			test.expect(uncached_step.get("success", true), "The cache-off control executes only the same first 1440 minutes")
+			var clock_exact: bool = uncached.world.game_clock.snapshot() == normal.world.game_clock.snapshot()
+			var native_exact: bool = uncached.world.economy_r1.snapshot() == economy.snapshot()
+			var ledger_exact: bool = uncached.world.ledger_state.snapshot() == normal.world.ledger_state.snapshot()
+			test.expect(clock_exact and native_exact and ledger_exact, "Cache on/off has exactly the same first-day clock, native orders/transport/production and Ledger money")
+			var cached_after := economy.query_metrics()
+			var uncached_after := uncached.world.economy_r1.query_metrics()
+			var cached_counts: Dictionary = {}
+			var uncached_counts: Dictionary = {}
+			for counter: String in ["queries", "searches", "hits"]:
+				cached_counts[counter] = int(cached_after[counter]) - int(cached_before[counter])
+				uncached_counts[counter] = int(uncached_after[counter]) - int(uncached_before[counter])
+			print("REGIONAL_CACHE_CONTROL ", JSON.stringify({"minutes": 1440, "extra_control_days": 1, "exact": {"clock": clock_exact, "economy_native": native_exact, "ledger": ledger_exact}, "cache_on_day1_counts": cached_counts, "cache_off_day1_counts": uncached_counts, "cache_on_advance_us": timings["normal"], "cache_off_advance_us": uncached_elapsed, "scope": "ONE_FIRST_DAY_ONLY_DERIVED_CACHE_POLICY_NOT_EXCLUSIVE_PERFORMANCE"}))
+			uncached = null
+		closed_rail = rail_control["closed"]
+		if closed_rail:
+			var link_state := _regional_rail_state(interrupted)
+			var still_closed: bool = link_state["status"] == VNextInfrastructureLinkState.STATUS_INTERRUPTED and link_state["effective_capacity"] == 0.0
+			if closure_maintained and not still_closed:
+				test.expect(false, "Spatial rail interruption must persist with zero effective capacity after every subsequent native advance")
+				print("REGIONAL_RAIL_UNEXPECTED_STATE ", JSON.stringify({"minute": rail.world.game_clock.total_minutes(), "link": link_state}))
+			closure_maintained = closure_maintained and still_closed
+			adopted = rail_control["adopted"]
+			adopted_fact = rail_control["fact"]
+			entry_ids_at_closure = rail_control["entry_ids"]
+			retained_adoption = retained_adoption and interrupted._shared.entries.get(adopted["adoption_id"]) == adopted and rail.world.spatial_world.capacity_adoption(adopted["adoption_id"]) == adopted_fact
+			var cargo: Dictionary = interrupted._shipments.get(adopted["shipment_id"], {})
+			if not cargo.is_empty() and int(cargo["leg_index"]) > int(adopted["leg_index"]): entered_cargo_progressed = true
+			for receipt: Dictionary in interrupted._delivery_receipts.values():
+				if receipt.get("shipment_id", receipt["id"]) == adopted["shipment_id"]: entered_cargo_progressed = true
+		print("REGIONAL_DAY ", JSON.stringify({"day": index + 1, "advance_minutes_1440_us": timings, "normal_records": _regional_history(economy), "tools_shortage_records": _regional_history(shortage), "rail_interrupted_records": _regional_history(interrupted)}))
+		if index < 4 or index == REGIONAL_DAYS - 1: _print_regional_family_market(economy)
+		if index + 1 in [9, 10, 12, REGIONAL_DAYS]: _print_regional_pending_maintenance(economy)
+		if index == REGIONAL_DAYS - 2:
+			var checkpoint := normal.persistence.snapshot()
+			resumed = FormalPersistence.new().restore_candidate(checkpoint)
+			test.expect(resumed.success, "Day-35 cold restore retains finite deposits, household lots, capital maintenance and responsibilities: " + resumed.error)
+			if resumed.success: test.expect(resumed.persistence.snapshot() == checkpoint, "Day-35 formal restore is exact without duplicating history")
+		elif index == REGIONAL_DAYS - 1 and resumed != null and resumed.success:
+			var next: Dictionary = resumed.simulation_step.advance_minutes(1440)
+			test.expect(next.get("success", true), "Cold-restored world advances the same final day, never an extra hidden day")
+			test.expect(resumed.world.economy_r1.snapshot() == economy.snapshot() and resumed.world.ledger_state.snapshot() == normal.world.ledger_state.snapshot(), "Repeated final-day execution in the restored world is deterministic with no duplicate extraction, goods, wages or payments")
+		if not steps_ok: break
+	test.expect(steps_ok and normal.world.game_clock.total_minutes() == REGIONAL_DAYS * 1440 and tools.world.game_clock.total_minutes() == REGIONAL_DAYS * 1440, "Normal and tools-shortage branches finish all 36 days through successful original simulation steps")
+	test.expect(not rail_control["failed"] and rail.world.game_clock.total_minutes() == REGIONAL_DAYS * 1440, "The rail branch finishes 36 days only with an actual successful intervention, not an unchanged or abandoned control")
+	test.expect(physical_ok and cash_ok, "Every daily boundary conserves per-good source/portions and formal cash in all branches")
+	for world: WorldBuildResult in worlds: test.expect(_production_totals_valid(world.world.economy_r1), "Production plus actual installation/maintenance input receipts match per-good site totals")
+	var actual := _regional_metrics(economy)
+	var lacking := _regional_metrics(shortage)
+	var delayed := _regional_metrics(interrupted)
+	test.expect(int(actual["family_sources"]) > 0 and int(actual["family_sources"]) <= 8 and actual["family_grain_used"] == int(actual["family_sources"]) * 3 and actual["family_flour_produced"] == int(actual["family_sources"]) * 2, "Finite household flour is backed by its original grain portions and bounded self-work, not regeneration")
+	test.expect(int(actual["family_flour_delivered"]) > 0 and actual["family_goods_payments"] == int(actual["family_flour_delivered"]) * 3, "A city buyer actually receives household flour and pays the household's original account")
+	test.expect(int(actual["installations_completed"]) >= 2 and int(actual["maintenance_completed"]) > 0 and actual["mined_coal_ore_to_steel_to_tools_to_maintenance"], "Actual finite coal/ore inputs reach steel, tools and later equipment maintenance through original source lineage")
+	test.expect(int(actual["coal_extracted_kg"]) <= 48 and int(actual["ore_extracted_kg"]) <= 72, "In-ground finite estimates cannot become unlimited saleable stock")
+	test.expect(int(actual["coal_extracted_kg"]) > int(lacking["coal_extracted_kg"]) and int(actual["ore_extracted_kg"]) > int(lacking["ore_extracted_kg"]) and int(lacking["maintenance_completed"]) == 0, "Stopping upstream new tools causes real maintenance failure and lower subsequent mine capacity/output")
+	test.expect(int(actual["zero_opening_cash_wage_funded_food_consumers"]) > 0, "Residents with no opening cash actually buy and consume bread using paid wages rather than UI allocations")
+	test.expect(closed_rail and retained_adoption and entered_cargo_progressed, "An adopted multileg cargo keeps its original capacity fact and progresses beyond the interrupted rail leg")
+	var no_new_entries: bool = closed_rail
+	var unexpected_entries: Array[Dictionary] = []
+	for entry: Dictionary in interrupted._shared.entries.values():
+		if entry["edge_id"] in Opening.REGIONAL_RAIL_EDGES and not entry_ids_at_closure.has(entry["adoption_id"]):
+			no_new_entries = false
+			if unexpected_entries.size() < 8: unexpected_entries.append(entry)
+	var delivery_changed: bool = actual["multileg_delivered_by_good"] != delayed["multileg_delivered_by_good"]
+	test.expect(closed_rail and closure_maintained, "Real Spatial rail status remains interrupted with zero effective capacity after native advances")
+	test.expect(no_new_entries, "Closed real rail admits no later Shared cargo adoption")
+	test.expect(delivery_changed, "The actual multileg delivery outcome changes without a synthetic bypass")
+	print("REGIONAL_RAIL_OUTCOME ", JSON.stringify({"closure_maintained": closure_maintained, "no_new_adoptions": no_new_entries, "unexpected_adoptions_first_8": unexpected_entries, "normal_infrastructure": _regional_rail_state(economy), "interrupted_infrastructure": _regional_rail_state(interrupted), "normal_multileg_delivered_by_good": actual["multileg_delivered_by_good"], "interrupted_multileg_delivered_by_good": delayed["multileg_delivered_by_good"], "normal_waiting_on_rail_first_4": _regional_rail_waiting(economy), "interrupted_waiting_on_rail_first_4": _regional_rail_waiting(interrupted)}))
+	for world: WorldBuildResult in [tools, rail]:
+		var snapshot := world.persistence.snapshot()
+		var restored := FormalPersistence.new().restore_candidate(snapshot)
+		test.expect(restored.success, "The actual shortage/interrupted branch cold-restores with its original obligations: " + restored.error)
+		if restored.success: test.expect(restored.persistence.snapshot() == snapshot, "Cold restore does not duplicate failed requests, capital stages, shipments or payments")
+	print("REGIONAL_SUMMARY ", JSON.stringify({"days": REGIONAL_DAYS, "normal": actual, "tools_shortage": lacking, "rail_interrupted": delayed, "advance_us_by_day": day_times, "timing_scope": "ADVANCE_MINUTES_ONLY_NOT_EXCLUSIVE_GUI_OR_RENDER_PERFORMANCE", "actual_adopted_rail_fact_retained": closed_rail and retained_adoption, "rail_intervention_failed": rail_control["failed"]}))
+	var final_save := normal.persistence.snapshot()
+	var final_document_bytes: int = JSON.stringify(FormalWorldPersistenceDocument.encode(final_save)).to_utf8_buffer().size()
+	var final_native_bytes: int = var_to_bytes(final_save["economy_native"]).size()
+	print("REGIONAL_SAVE_GROWTH ", JSON.stringify({"start_minute": initial_sample_minute, "end_minute": final_save["total_minutes"], "exact_document_json_utf8_bytes": {"start": initial_document_bytes, "end": final_document_bytes, "growth": final_document_bytes - initial_document_bytes}, "economy_native_variant_bytes": {"start": initial_native_bytes, "end": final_native_bytes, "growth": final_native_bytes - initial_native_bytes}, "encoding": FormalWorldPersistenceDocument.FORMAT_ID, "scope": "TWO_IN_MEMORY_ORIGINAL_CODEC_SAMPLES_NOT_ACTUAL_DISK_FILE_SIZE", "exact_document_metadata_included": true, "excluded": ["SAVE_TO_USER_UI_SUMMARY", "ATOMIC_TEMPORARY_FILE"]}))
+	final_save = {}
+	_print_cross_border_trace(economy)
+	test.finish(self, "Regional economic industry integration")
 
 func _run() -> void:
 	var configuration := Opening.template()

@@ -13,6 +13,11 @@ const CHANNEL_EDGE: String = "edge:network:port_le_havre:port_london"
 const CLOSURE_EDGE: String = "edge:network:le_havre:port_le_havre"
 const NETWORK_OPERATOR: String = "firm:network:mill1"
 const PLACES: Array[String] = ["paris", "lyon", "marseille", "rouen", "le_havre", "port_le_havre", "port_london", "london"]
+const REGIONAL_CASE_ID: String = "FORMAL_ECONOMIC_REGIONAL_INDUSTRY_DEVELOPMENT"
+const REGIONAL_FAMILY: String = "cohort:regional:rouen_miller"
+const REGIONAL_RAIL_LINK: String = "rail_paris_rouen"
+const REGIONAL_PAYLOAD_UNIT: String = "development_transport_payload_unit"
+const REGIONAL_RAIL_EDGES: Array[String] = ["edge:network:paris:rouen", "edge:network:rouen:paris"]
 
 static func request(person_ids: Array[String] = []) -> Dictionary:
 	return {"format": "HOST_REGION_SELECTION", "person_ids": person_ids.duplicate(), "select_people_at_sites": person_ids.is_empty(), "configuration": template()}
@@ -204,6 +209,170 @@ static func _install_channel_transport(result: Dictionary, population_starts: Di
 				for start: int in starts: windows.append({"start_minute": start, "end_minute": start + 60, "capacity": 8})
 			else: windows.append({"start_minute": 0, "end_minute": 90 * 1440, "capacity": 16 if kind == "STORAGE_OCCUPANCY" else 8})
 			result["transport_facilities"].append({"id": "facility:network:" + site + ":" + kind, "site_id": site, "kind": kind, "unit": unit, "windows": windows, "basis": "EXPLICIT_DEVELOPMENT_TRANSPORT_FACILITY"})
+
+## Separate opt-in regional case. The original template/request and saved native
+## configurations above are never rewritten or upgraded by selecting this case.
+static func regional_request(person_ids: Array[String] = []) -> Dictionary:
+	return {"format": "HOST_REGION_SELECTION", "person_ids": person_ids.duplicate(), "select_people_at_sites": person_ids.is_empty(), "configuration": regional_template()}
+
+static func regional_template() -> Dictionary:
+	var result := template()
+	result["case_id"] = REGIONAL_CASE_ID
+	result["management_scope"]["id"] = "scope:economic_regional_industry_development"
+	# One declared payload estimate works on both admitted rail and sea bindings.
+	# It is not historical tonnage, nor a conversion of the unlike goods units.
+	for good: Dictionary in result["goods"]:
+		good["unit_weight"]["unit"] = REGIONAL_PAYLOAD_UNIT
+		if good["id"] == "tools": good["capital_uses"] = ["INSTALLABLE_EQUIPMENT", "MAINTENANCE_INPUT"]
+		if good["id"] == "steel": good["capital_uses"] = ["INSTALLATION_INPUT", "MAINTENANCE_INPUT"]
+	for binding: Dictionary in result["shared_transport"]: binding["weight_unit"] = REGIONAL_PAYLOAD_UNIT
+	for facility: Dictionary in result["transport_facilities"]: facility["unit"] = REGIONAL_PAYLOAD_UNIT
+	var population_start: int = 0
+	for actor: Dictionary in result["actors"]:
+		if actor["kind"] != "cohort": continue
+		# Resident wage/spending causality is visible without opening cash gifts.
+		actor["cash"] = 0
+		if actor.get("population_unit_id") == "country_fra": population_start = maxi(population_start, int(actor["population_start"]) + int(actor["members"]))
+	result["capital_investment"] = {"templates": [], "npc_policies": [], "maintenance_policies": []}
+	for mine: Dictionary in [{"name": "coal", "good": "coal", "opening": 8, "batch": 4, "reserve": 48}, {"name": "ore", "good": "iron_ore", "opening": 12, "batch": 6, "reserve": 72}]:
+		_install_regional_mine(result, mine, population_start)
+		population_start += 1
+	# Existing French metal/tool production has spare paid labor. Installed mine
+	# capacity, real inputs and process quotas remain independent limitations.
+	for job: Dictionary in result["jobs"]:
+		if job["id"] in ["job:network:steel1", "job:network:tools1"]: job["hours"] = 8
+	for firm: Dictionary in result["firms"]:
+		if firm["id"] not in ["firm:network:steel1", "firm:network:tools1"]: continue
+		for site: Dictionary in firm["sites"]:
+			for activity: Dictionary in site["activities"]: activity["process"]["max_batches_per_cycle"] = 4
+	_install_regional_rail(result, population_start)
+	population_start += 2
+	_install_regional_family(result, population_start)
+	_install_regional_search(result)
+	# Explicit finite information, not knowledge of other firms' private books.
+	for actor: Dictionary in result["actors"]:
+		if actor["kind"] == "named" and actor["place_id"] == "place:paris":
+			# The local household announced a sale to this person. Identity and
+			# quotation knowledge confer no control over household cash or stock.
+			result["information"].append({"actor": actor["id"], "kind": "supplier", "candidate": REGIONAL_FAMILY + "|flour|" + REGIONAL_FAMILY, "delivery_day": 0})
+		var is_new: bool = str(actor["id"]).begins_with("cohort:regional:")
+		if not is_new and actor["place_id"] != "place:paris": continue
+		for supplier: String in ["firm:network:bakery1|bread|site:network:bakery1", "firm:network:wholesale1|bread|site:regional:station:paris", "firm:network:tailor1|clothes|site:network:tailor1", "firm:network:tools1|tools|site:network:tools1"]:
+			var already: bool = false
+			for notice: Dictionary in result["information"]:
+				if notice["actor"] == actor["id"] and notice["kind"] == "supplier" and notice["candidate"] == supplier: already = true
+			if not already: result["information"].append({"actor": actor["id"], "kind": "supplier", "candidate": supplier, "delivery_day": 0})
+		if not is_new: continue
+		for edge: Dictionary in result["routes"]:
+			var local: bool = edge["from_place_id"] == actor["place_id"] and edge["to_place_id"] == actor["place_id"]
+			var supply: bool = actor["place_id"] == "place:lyon" and edge.get("source_link_id") == "rail_paris_lyon"
+			supply = supply or (actor["place_id"] == "place:rouen" and edge.get("source_link_id") == REGIONAL_RAIL_LINK)
+			if (local or supply) and not actor["id"] in edge["known_to"]: edge["known_to"].append(actor["id"])
+	return result
+
+static func _install_regional_search(result: Dictionary) -> void:
+	result["supplier_search"] = []
+	result["supplier_directory"] = []
+	var recipients: Array[String] = []
+	for firm: Dictionary in result["firms"]: recipients.append(firm["id"])
+	for firm: Dictionary in result["firms"]:
+		var receivers := recipients.duplicate()
+		receivers.erase(firm["id"])
+		for site: Dictionary in firm["sites"]:
+			if not site["suppliers"].is_empty():
+				result["supplier_search"].append({"firm": firm["id"], "site_id": site["id"], "local_zones": [], "regional_zones": [], "scope_basis": "NETWORK_ACCESS", "regional_max_days": 4, "allow_wide": true, "delay_days": {"LOCAL": 1, "REGIONAL": 2, "WIDE": 3}, "result_limit": 2, "max_known": 8, "cooldown_days": 3})
+			for good: String in site["prices"]:
+				# Explicit published commercial notices. NETWORK_ACCESS uses the
+				# receiving site's known goods paths, not this required legacy tag.
+				result["supplier_directory"].append({"seller": firm["id"], "site_id": site["id"], "good": good, "zone": "published_admitted_network", "known_to": receivers.duplicate(), "available_day": 1})
+
+static func _regional_worker(result: Dictionary, name: String, firm: String, site: String, place: String, population_start: int) -> void:
+	var actor := "cohort:regional:" + name
+	var job := "job:regional:" + name
+	result["actors"].append({"id": actor, "kind": "cohort", "control": "automatic", "members": 1, "account_id": "account:regional:" + name, "cash": 0, "stock": stock(), "skill": 1, "daily_need": 1, "needs": {"food": 1, "clothing": 1, "household": 1}, "population_start": population_start, "place_id": place, "population_unit_id": "country_fra"})
+	result["jobs"].append({"id": job, "employer": firm, "site_id": site, "positions": 1, "skill": 1, "hours": 8, "place": place, "wage_per_hour": 1, "wage_delay": 1})
+	result["information"].append({"actor": actor, "kind": "job", "candidate": job, "delivery_day": 0})
+
+static func _install_regional_mine(result: Dictionary, mine: Dictionary, population_start: int) -> void:
+	var name: String = mine["name"]
+	var owner := "firm:network:" + name
+	var site_id := "site:network:" + name
+	var activity_id := "activity:network:" + name
+	var template_id := "capital_template:regional:" + name
+	for firm: Dictionary in result["firms"]:
+		if firm["id"] != owner: continue
+		firm["manager"] = owner
+		var site: Dictionary = firm["sites"][0]
+		# Small explicit opening lots break the coal/steel/tool startup cycle.
+		# They are not extraction receipts and are never silently replenished.
+		site["stock"] = stock({str(mine["good"]): mine["opening"], "tools": 1, "steel": 1})
+		site["capacity"] = 0
+		site["targets"] = stock({str(mine["good"]): int(mine["batch"]) * 2})
+		var activity: Dictionary = site["activities"][0]
+		activity["outputs"] = {str(mine["good"]): mine["batch"]}
+		activity["materials"] = stock()
+		activity["process"] = _process(activity["outputs"], {}, "")
+		activity["process"]["max_batches_per_cycle"] = 4
+		activity["process"]["lifetime_batch_limit"] = 12
+		activity["process"]["finite_extraction"] = {"format": "finite_mineral_extraction_v1", "id": "deposit:regional:" + name, "good": mine["good"], "place_id": site["place_id"], "unit": "development_kg", "reserve_quantity": mine["reserve"], "quantity_per_batch": mine["batch"], "capital_template_id": template_id, "basis": "EXPLICIT_DEVELOPMENT_FINITE_MINERAL_RESERVE", "source": "Explicit finite in-ground development estimate; no historical mine, title or measured geological reserve is inferred"}
+		for supplier: String in ["firm:network:tools1|tools|site:network:tools1", "firm:network:steel1|steel|site:network:steel1"]:
+			site["suppliers"].append(supplier)
+			result["information"].append({"actor": site_id, "kind": "supplier", "candidate": supplier, "delivery_day": 0})
+	result["capital_investment"]["templates"].append({"id": template_id, "firm": owner, "site_id": site_id, "kind": "INSTALL", "asset_type": "development_mine_equipment", "capacity": 2, "activities": [activity_id], "materials": {"tools": 1, "steel": 1}, "hours": 2, "hours_per_day": 2, "duration_minutes": 1440, "max_projects": 1, "budget": 40, "cash_floor": 20, "denomination": FormalLedgerState.DENOMINATION, "basis": "DEVELOPMENT_CAPITAL_PERMISSION", "service_days": 5, "maintenance": {"materials": {"tools": 1, "steel": 1}, "hours": 2, "hours_per_day": 2, "duration_minutes": 1440}})
+	result["capital_investment"]["npc_policies"].append({"template_id": template_id, "window_days": 1, "minimum_pressure": 1, "minimum_utilization_percent": 0, "cooldown_days": 365})
+	result["capital_investment"]["maintenance_policies"].append({"template_id": template_id, "basis": "EXPLICIT_DEVELOPMENT_SCHEDULED_MAINTENANCE"})
+	_regional_worker(result, "mine:" + name, owner, site_id, "place:lyon", population_start)
+
+static func _install_regional_family(result: Dictionary, population_start: int) -> void:
+	result["actors"].append({"id": REGIONAL_FAMILY, "kind": "cohort", "control": "automatic", "members": 2, "account_id": "account:regional:rouen_miller", "cash": 24, "stock": stock({"grain": 24}), "skill": 1, "daily_need": 1, "needs": {"food": 1, "clothing": 1, "household": 1}, "population_start": population_start, "place_id": "place:rouen", "population_unit_id": "country_fra"})
+	result["local_producers"] = [{"actor": REGIONAL_FAMILY, "input_good": "grain", "input_per_batch": 3, "output_good": "flour", "output_per_batch": 2, "hours_per_batch": 2, "max_batches_per_day": 1, "lifetime_batch_limit": 8, "price": 3, "basis": "EXPLICIT_DEVELOPMENT_FINITE_HOUSEHOLD_PROCESSING"}]
+	var supplier := REGIONAL_FAMILY + "|flour|" + REGIONAL_FAMILY
+	for firm: Dictionary in result["firms"]:
+		for site: Dictionary in firm["sites"]:
+			if site["id"] not in ["site:network:bakery1", "site:regional:station:paris"]: continue
+			site["suppliers"].append(supplier)
+			result["information"].append({"actor": site["id"], "kind": "supplier", "candidate": supplier, "delivery_day": 0})
+
+static func _install_regional_rail(result: Dictionary, population_start: int) -> void:
+	var owner := "firm:network:wholesale1"
+	var paris := "site:regional:station:paris"
+	var rouen := "site:regional:station:rouen"
+	for firm: Dictionary in result["firms"]:
+		if firm["id"] != owner: continue
+		for pair: Array in [[paris, "place:paris"], [rouen, "place:rouen"]]:
+			var shop: bool = pair[0] == paris
+			var suppliers: Array[String] = []
+			if shop: suppliers.append("firm:network:bakery1|bread|site:network:bakery1")
+			firm["sites"].append({"id": pair[0], "place_id": pair[1], "roles": ["storage", "sales"] if shop else ["storage"], "stock": stock(), "capacity": 0, "targets": stock({"flour": 4, "bread": 4}) if shop else stock(), "prices": {"flour": 5, "bread": 5} if shop else {}, "activities": [], "suppliers": suppliers, "enabled": true, "production_enabled": false, "accepting_business": true, "basis": "DEVELOPMENT_CONFIGURATION", "coordination_delay": 0})
+			for supplier: String in suppliers: result["information"].append({"actor": pair[0], "kind": "supplier", "candidate": supplier, "delivery_day": 0})
+	_regional_worker(result, "station:paris", owner, paris, "place:paris", population_start)
+	_regional_worker(result, "station:rouen", owner, rouen, "place:rouen", population_start + 1)
+	var handling_starts: Array[int] = []
+	for day: int in range(0, 61):
+		for hour: int in [0, 4, 12, 16]: handling_starts.append(day * 1440 + hour * 60)
+	for site: String in [paris, rouen]:
+		for kind: String in ["HANDLING_THROUGHPUT", "BERTH_OCCUPANCY", "STORAGE_OCCUPANCY"]:
+			var windows: Array[Dictionary] = []
+			if kind == "HANDLING_THROUGHPUT":
+				for start: int in handling_starts: windows.append({"start_minute": start, "end_minute": start + 60, "capacity": 4})
+			else: windows.append({"start_minute": 0, "end_minute": 90 * 1440, "capacity": 8 if kind == "STORAGE_OCCUPANCY" else 4})
+			# BERTH is the original finite standing/working-space mechanism here,
+			# explicitly a station platform; it does not turn this rail into a port.
+			result["transport_facilities"].append({"id": "facility:regional:" + site + ":" + kind, "site_id": site, "kind": kind, "unit": REGIONAL_PAYLOAD_UNIT, "windows": windows, "basis": "EXPLICIT_DEVELOPMENT_TRANSPORT_FACILITY"})
+	for edge: Dictionary in result["routes"]:
+		if edge.get("source_link_id") != REGIONAL_RAIL_LINK: continue
+		edge["carrier"] = owner
+		var forward: bool = edge["from_place_id"] == "place:paris"
+		var origin := paris if forward else rouen
+		var destination := rouen if forward else paris
+		var entries: Array[int] = []
+		for day: int in range(0, 61): entries.append(day * 1440 + (0 if forward else 720))
+		var resources: Dictionary = {"unloading_minutes": 60, "unloading_hours_per_unit": 1}
+		for key: String in ["origin_handling", "origin_berth", "destination_handling", "destination_berth", "destination_storage"]:
+			var site := origin if key.begins_with("origin") else destination
+			var kind := "HANDLING_THROUGHPUT" if key.ends_with("handling") else "BERTH_OCCUPANCY" if key.ends_with("berth") else "STORAGE_OCCUPANCY"
+			resources[key] = "facility:regional:" + site + ":" + kind
+		result["shared_transport"].append({"edge_id": edge["id"], "source_link_id": REGIONAL_RAIL_LINK, "entry_minutes": entries, "weight_unit": REGIONAL_PAYLOAD_UNIT, "vehicle_id": "vehicle:regional:finite_train", "vehicle_payload": 4, "handling_site": origin, "handling_hours_per_unit": 1, "basis": "EXPLICIT_DEVELOPMENT_SHARED_RAIL_CAPACITY", "window_minutes": 60, "loading_minutes": 60, "travel_minutes": 180, "vehicle_hold_minutes": 300, "node_resources": resources, "legacy_node_limit_basis": "EXPLICIT_DAILY_BUSINESS_QUANTITY_LIMIT"})
 
 static func _bind_channel_edges(result: Dictionary) -> void:
 	var starts: Array[int] = []

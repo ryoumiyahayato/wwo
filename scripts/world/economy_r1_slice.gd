@@ -7,6 +7,7 @@ const SharedTransport = preload("res://scripts/world/economy_shared_transport.gd
 const StockLots = preload("res://scripts/world/economy_stock_lots.gd")
 const Budget = preload("res://scripts/world/economy_procurement_budget.gd")
 const Cohorts = preload("res://scripts/world/economy_cohort_rules.gd")
+const LocalProducers = preload("res://scripts/world/economy_local_producers.gd")
 const Process = preload("res://scripts/world/economy_production_process.gd")
 const ReadContract = preload("res://scripts/world/economy_read_contract.gd")
 const NodeNetwork = preload("res://scripts/world/economy_node_network.gd")
@@ -113,6 +114,7 @@ var _spec: Dictionary = {}
 var _firm_knowledge: Dictionary = {}
 var _transport: Dictionary = {}
 var _orders_by_buyer: Dictionary = {}
+var _orders_by_subject: Dictionary = {} # Derived buyer/seller index; rebuilt from original orders.
 var _active_by_buyer: Dictionary = {}
 var _pending_by_key: Dictionary = {}
 var _wages_by_worker: Dictionary = {}
@@ -158,6 +160,7 @@ var _retail: Retail = Retail.new()
 var _commercial: Commercial = Commercial.new()
 var _labor_market: LaborMarket = LaborMarket.new()
 var _wind_down: WindDown = WindDown.new()
+var _local_producers: LocalProducers = LocalProducers.new()
 
 
 func bind(world: WorldState, settings: Dictionary, admission_minutes: Dictionary = {}) -> bool:
@@ -177,6 +180,7 @@ func bind(world: WorldState, settings: Dictionary, admission_minutes: Dictionary
 	_labor_market.bind(self)
 	_wind_down.bind(self)
 	_leases.bind(self)
+	_local_producers.bind(self)
 	_invalidate_configuration_queries()
 	_subject_activation = admission_minutes.duplicate(true)
 	_spec = EconomySliceConfig.normalize(config, world.person_overlay.person_ids())
@@ -435,6 +439,8 @@ func _delivery_delay() -> int:
 
 func _price(seller: String, good: String) -> int:
 	seller = _inventory_key(seller)
+	if _local_producers.has_actor(seller):
+		return int(_local_producers.rule(seller)["price"]) if _local_producers.sells(seller, good, seller) else 0
 	if not _local_quotes.rule(seller,good).is_empty():
 		var published := _local_quotes.current(seller,good)
 		if not published.is_empty(): return int(published["price"])
@@ -528,12 +534,22 @@ func _initialize_transport() -> void:
 	for row: Dictionary in config.get("transport_nodes", []):
 		_transport["nodes"][row["place_id"]] = {"dispatched": 0}
 
-func _locked_legs(path: Dictionary, denomination: String) -> Array[Dictionary]:
+func _locked_legs(path: Dictionary, denomination: String, buyer: String = "") -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var edges := _all_routes()
+	var payer := _owner(buyer) if not buyer.is_empty() else ""
+	var payer_account := _account(payer, denomination) if not payer.is_empty() else ""
 	for id: String in path["edge_ids"]:
 		var edge := edges[id] as Dictionary
-		result.append({"edge_id": id, "delay": edge["delay"], "freight_per_unit": edge["freight_per_unit"], "carrier_account": _account(str(edge["carrier"]), denomination) if int(edge["freight_per_unit"]) > 0 else ""})
+		var fee := int(edge["freight_per_unit"])
+		var carrier := str(edge["carrier"])
+		var account := _account(carrier, denomination) if fee > 0 else ""
+		# Own carriage still uses the original paid work, vehicle and facilities.
+		# Only a cash transfer to this very same owner/account is omitted.
+		if not payer.is_empty() and carrier == payer and not account.is_empty() and account == payer_account:
+			var ledger_account := _world.ledger_state.account(account)
+			if ledger_account.get("owner_id") == payer and ledger_account.get("denomination") == denomination: fee = 0
+		result.append({"edge_id": id, "delay": edge["delay"], "freight_per_unit": fee, "carrier_account": account})
 	return result
 
 func _freight(legs: Array) -> int:
@@ -555,13 +571,21 @@ func _node_capacity(place: String) -> int:
 func _node_available(place: String) -> int:
 	return maxi(0, _node_capacity(place) - int(_transport["nodes"].get(place, {}).get("dispatched", 0)))
 
-func _batch_limit(legs: Array) -> int:
+func _batch_limit(legs: Array, good: String = "") -> int:
 	var amount := FormalLedgerState.MAX_AMOUNT
 	var edges := _all_routes()
 	for leg: Dictionary in legs:
 		var edge := edges[leg["edge_id"]] as Dictionary
 		if not _cargo_edge_valid(edge): return 0
 		amount = mini(amount, mini(FormalLedgerState.MAX_AMOUNT if _shared.bindings.has(leg["edge_id"]) else int(edge["capacity"]), _node_capacity(edge["from_place_id"])))
+		# Size a NEW physical batch for every locked leg, including later trains.
+		# The default retains historical validation; old entered batches and their
+		# original capacity/adoption facts are never rewritten by this bound.
+		var binding: Dictionary = _shared.bindings.get(leg["edge_id"], {})
+		if not good.is_empty() and not binding.is_empty():
+			var unit_weight: float = _shared.weight(good, binding)
+			if unit_weight <= 0.0: return 0
+			amount = mini(amount, int(minf(float(FormalLedgerState.MAX_AMOUNT), floor(float(binding["vehicle_payload"]) / unit_weight))))
 	return amount
 
 func _set_edge_capacity(actor: String, payload: Dictionary, action_id: String) -> Dictionary:
@@ -577,6 +601,7 @@ func _set_edge_capacity(actor: String, payload: Dictionary, action_id: String) -
 	# travel time; it is never returned, repriced, or teleported to another edge.
 	_edge(payload["edge_id"])["capacity"] = payload["capacity"]
 	_edge(payload["edge_id"])["capacity_action"] = action_id
+	_node_network.invalidate_paths()
 	return {"accepted": true, "reason": "ACCEPTED", "edge_id": payload["edge_id"], "capacity": payload["capacity"]}
 
 
@@ -597,6 +622,7 @@ func _route_available(path: Dictionary) -> int:
 
 
 func _sale_currency(seller: String) -> String:
+	if _local_producers.has_actor(seller): return FormalLedgerState.DENOMINATION
 	return str(_spec["firms"][_owner(seller)].get("denomination", FormalLedgerState.DENOMINATION))
 
 func advance_time() -> bool:
@@ -673,6 +699,13 @@ func _candidate_key(value: String) -> String:
 func _directory_entry_visible(firm: String, entry: Dictionary, scope: String, at_day: int, policy: Dictionary) -> bool:
 	if policy.is_empty() or scope not in ["LOCAL", "REGIONAL", "WIDE"] or (scope == "WIDE" and not policy["allow_wide"]): return false
 	if not entry["known_to"].has(firm) and not entry["known_to"].has(_owner(firm)) or int(entry["available_day"]) > at_day: return false
+	if policy.get("scope_basis")=="NETWORK_ACCESS":
+		var own: String=_place(firm)
+		var source: String=_place(str(entry.get("site_id",_primary_site(entry["seller"]))))
+		if scope=="LOCAL":return source==own
+		for path: Dictionary in _paths_for(_owner(firm),source,own,at_day,str(entry["good"])):
+			if scope=="WIDE" or _travel_days(_locked_legs(path,_sale_currency(entry["seller"])))<=int(policy["regional_max_days"]):return true
+		return false
 	if policy.get("scope_basis", "CONFIGURED") == "HOST_SPACE":
 		var own_place := _place(firm)
 		var seller_place := _place(str(entry.get("site_id", _primary_site(entry["seller"]))))
@@ -728,7 +761,7 @@ func _deliver_directory(message: Dictionary) -> void:
 		if _supplier_known(known, candidate) or not _directory_entry_visible(firm, entry, message["scope"], day, policy):
 			continue
 		if pending.has(candidate): continue
-		var paths := _paths_for(_owner(firm), _place(str(entry.get("site_id", _primary_site(entry["seller"])))), _place(firm), day)
+		var paths := _paths_for(_owner(firm), _place(str(entry.get("site_id", _primary_site(entry["seller"])))), _place(firm), day,str(entry["good"]))
 		var lead: int = -1
 		for path: Dictionary in paths:
 			var value := _travel_days(_locked_legs(path, _sale_currency(entry["seller"])))
@@ -1133,7 +1166,7 @@ func _queue_work(actor: String, payload: Dictionary, action_id: String) -> Dicti
 
 func _committed(seller: String, good: String) -> int:
 	var quantity := 0
-	for id: String in _lots._by_location.get("SITE|"+_inventory_key(seller)+"#"+good, {}):
+	for id: String in _lots._by_location.get(_local_producers.location(_inventory_key(seller))+"#"+good, {}):
 		var p := _lots.portions[id] as Dictionary
 		if p["good"] == good and not str(p["reserved_for"]).is_empty(): quantity += int(p["remaining"])
 	return quantity
@@ -1305,24 +1338,27 @@ func _offer(actor: String, seller: String, good: String, path_id: String = "", s
 	var price := _price(seller_site, good)
 	var denomination := _sale_currency(seller)
 	var path := _route_for(actor, seller, path_id, buyer_site, seller_site) if known_path.is_empty() else known_path
-	var stock := maxi(0, int(_stocks[seller_site][good]) - _committed(seller_site, good))
+	var stock := maxi(0, _lots.quantity_at(_local_producers.location(seller_site), good) - _committed(seller_site, good))
 	var legs: Array[Dictionary] = []
-	if not path.is_empty(): legs.assign(_locked_legs(path, denomination))
+	if not path.is_empty(): legs.assign(_locked_legs(path, denomination, actor))
 	var freight := _freight(legs)
 	var transport_ready: bool = _shared.path_conditions(legs, good)
 	var limit := mini(stock, _route_available(path)) if not path.is_empty() and _site_selling(seller_site) and transport_ready else 0
+	var freight_basis := "POSTED_CARRIER_CASH_CHARGES"
 	for leg: Dictionary in legs:
+		if int(leg["freight_per_unit"]) == 0 and not str(leg["carrier_account"]).is_empty() and leg["carrier_account"] == _account(actor, denomination):
+			freight_basis = "INTERNAL_CARRIER_NO_SEPARATE_CASH_TRANSFER_ACTUAL_RESOURCE_COSTS_REMAIN"
 		if int(leg["freight_per_unit"]) > 0 and (str(leg["carrier_account"]).is_empty() or leg["carrier_account"] == _account(actor, denomination)):
 			limit = 0
 	var available := maxi(0, _world.ledger_state.available_balance(_account(actor, denomination)))
 	var quantity := mini(limit, available / (price + freight))
-	return _local_quotes.offer(_inventory_key(actor,buyer_site), {"quote_id": _quote_id(_world.game_clock.total_minutes(), actor, seller, good, str(path.get("id", "")), seller_site, buyer_site), "minute": _world.game_clock.total_minutes(), "seller": seller, "seller_site": seller_site, "buyer_site": buyer_site, "good": good, "price": price, "denomination": denomination, "quantity": quantity, "transport_quantity": limit, "freight_per_unit": freight, "route_id": path.get("id", ""), "route_legs": legs, "from_place_id": _place(seller_site), "to_place_id": _place(buyer_site if not buyer_site.is_empty() else actor), "earliest_arrival_day": day + 1 + _travel_days(legs), "eta_guaranteed": false, "reason": "FIRM_STOPPED_NEW_BUSINESS" if not _site_selling(seller_site) else "NO_KNOWN_PATH" if path.is_empty() else "NO_UNCOMMITTED_STOCK" if stock==0 else "UNCONFIGURED_SHARED_WEIGHT_OR_SERVICE_WINDOW" if not transport_ready else "TRANSPORT_LIMIT_OR_CLOSED" if limit==0 else "INSUFFICIENT_AVAILABLE_CASH" if quantity==0 else "OFFER", "transport_basis": _path_basis(path)})
+	return _local_quotes.offer(_inventory_key(actor,buyer_site), {"quote_id": _quote_id(_world.game_clock.total_minutes(), actor, seller, good, str(path.get("id", "")), seller_site, buyer_site), "minute": _world.game_clock.total_minutes(), "seller": seller, "seller_site": seller_site, "buyer_site": buyer_site, "good": good, "price": price, "denomination": denomination, "quantity": quantity, "transport_quantity": limit, "freight_per_unit": freight, "route_id": path.get("id", ""), "route_legs": legs, "from_place_id": _place(seller_site), "to_place_id": _place(buyer_site if not buyer_site.is_empty() else actor), "earliest_arrival_day": day + 1 + _travel_days(legs), "eta_guaranteed": false, "reason": "FIRM_STOPPED_NEW_BUSINESS" if not _site_selling(seller_site) else "NO_KNOWN_PATH" if path.is_empty() else "NO_UNCOMMITTED_STOCK" if stock==0 else "UNCONFIGURED_SHARED_WEIGHT_OR_SERVICE_WINDOW" if not transport_ready else "TRANSPORT_LIMIT_OR_CLOSED" if limit==0 else "INSUFFICIENT_AVAILABLE_CASH" if quantity==0 else "OFFER", "transport_basis": _path_basis(path), "freight_basis": freight_basis})
 
 
 func _onsite_offer(actor: String, seller: String, site: String, good: String, buyer_site: String="") -> Dictionary:
 	var why:=_retail.reason(actor,site,good)
 	var price:=_price(site,good);var currency:=_sale_currency(seller)
-	var stock:=maxi(0,int(_stocks[site][good])-_committed(site,good))
+	var stock:=maxi(0,_lots.quantity_at(_local_producers.location(site),good)-_committed(site,good))
 	if _spec.firms.has(actor):
 		buyer_site=_inventory_key(actor,buyer_site)
 		stock=mini(_material_sale_available(site,good),_material_remaining(actor,"PROCURE"))
@@ -1379,7 +1415,8 @@ func _buy(actor: String, payload: Dictionary, action_id: String, internal: bool 
 	var good := str(payload["good"])
 	var seller_site := _inventory_key(seller, str(payload.get("seller_site", "")))
 	var buyer_site := _inventory_key(actor, str(payload.get("buyer_site", ""))) if _spec["firms"].has(actor) else ""
-	if seller == actor or (_actors.has(actor) and not str(payload.get("buyer_site", "")).is_empty()) or not _spec["sites"].has(seller_site) or _owner(seller_site) != seller or (not buyer_site.is_empty() and (not _spec["sites"].has(buyer_site) or _owner(buyer_site) != actor)):
+	var sale_source_valid: bool = (_spec["sites"].has(seller_site) and _owner(seller_site) == seller and _spec["sites"][seller_site]["prices"].has(good)) or _local_producers.sells(seller, good, seller_site)
+	if good not in _goods or seller == actor or (_actors.has(actor) and not str(payload.get("buyer_site", "")).is_empty()) or not sale_source_valid or (not buyer_site.is_empty() and (not _spec["sites"].has(buyer_site) or _owner(buyer_site) != actor)):
 		return _result(false, "INVALID_ORDER_SITE")
 	var known: Array = _actors[actor]["known_suppliers"] if _actors.has(actor) else _firm_knowledge[buyer_site]
 	if not known.has(seller + "|" + good + "|" + seller_site) and not (seller_site == _primary_site(seller) and known.has(seller + "|" + good)):
@@ -1432,7 +1469,7 @@ func _admit(buyer: String, seller: String, good: String, requested: int, action_
 	var route := {"id":path_id,"from_place_id":_place(seller_site),"to_place_id":_place(buyer),"edge_ids":[]} if onsite else _route_for(buyer, seller, path_id, buyer_site, seller_site)
 	if route.is_empty():
 		return _result(false, "NO_KNOWN_ROUTE")
-	var legs := _locked_legs(route, denomination)
+	var legs := _locked_legs(route, denomination, buyer)
 	if not _shared.path_conditions(legs, good): return _result(false, "UNCONFIGURED_SHARED_WEIGHT_OR_SERVICE_WINDOW")
 	var freight := _freight(legs)
 	var unit_cost := price + freight
@@ -1445,7 +1482,7 @@ func _admit(buyer: String, seller: String, good: String, requested: int, action_
 			return _result(false, "FREIGHT_CURRENCY_ACCOUNT")
 	if requested <= 0 or requested > 1000000 or requested > FormalLedgerState.MAX_AMOUNT / unit_cost or next_order >= FormalLedgerState.MAX_AMOUNT:
 		return _result(false, "QUANTITY_BOUNDS")
-	var limit := maxi(0, int(_stocks[seller_site][good]) - _committed(seller_site, good))
+	var limit := maxi(0, _lots.quantity_at(_local_producers.location(seller_site), good) - _committed(seller_site, good))
 	var eligible := requested
 	if _actors.has(buyer) and not category.is_empty():
 		var needed := int(_household_position(buyer, true).get(category, {}).get("uncovered", 0))
@@ -1467,7 +1504,7 @@ func _admit(buyer: String, seller: String, good: String, requested: int, action_
 	var id := "order:" + str(next_order)
 	var components := _budget_plan(buyer, denomination, good, legs, amount, true, price)
 	if not _budget_ready(components): return _result(false, "CUMULATIVE_BUDGET_OR_WINDOW")
-	if _lots.selection("SITE|"+seller_site, good, amount).is_empty(): return _result(false, "UNCOMMITTED_SOURCE_PORTIONS_UNAVAILABLE")
+	if _lots.selection(_local_producers.location(seller_site), good, amount).is_empty(): return _result(false, "UNCOMMITTED_SOURCE_PORTIONS_UNAVAILABLE")
 	# Prepare all fallible adoption/payment checks before reserving an onsite sale.
 	if onsite:
 		var preview:={"id":id,"kind":"SALE","buyer":buyer,"seller":seller,"good":good,"quantity":amount,"price":price,"denomination":denomination,"buyer_account":buyer_account,"seller_account":seller_account,"seller_site":seller_site,"buyer_site":buyer_site,"route_id":path_id,"route_legs":[],"from_place_id":_place(seller_site),"to_place_id":_place(buyer),"accepted_minute":_world.game_clock.total_minutes(),"accepted_day":day,"delivered":0,"pending":0,"transit":amount,"cancelled":0,"need_category":category,"action_id":action_id}
@@ -1481,7 +1518,7 @@ func _admit(buyer: String, seller: String, good: String, requested: int, action_
 		return _result(false, "INSUFFICIENT_CASH")
 	var budget_committed := _budgets.commit(id, components)
 	assert(budget_committed)
-	var portions_reserved := _lots.reserve(id, "SITE|"+seller_site, good, amount, _world.game_clock.total_minutes())
+	var portions_reserved := _lots.reserve(id, _local_producers.location(seller_site), good, amount, _world.game_clock.total_minutes())
 	assert(portions_reserved)
 	next_order += 1
 	var material_ids: Dictionary = {}
@@ -1674,6 +1711,7 @@ func settle_day(settle_personal_arrangements: bool = true) -> bool:
 	_publish_site_reports()
 	_npc_invest()
 	_capital.npc_build()
+	_capital.npc_maintenance()
 	_capital.npc_resale()
 	_local_quotes.npc_decisions()
 	_service_market.npc_decisions()
@@ -1905,7 +1943,7 @@ func _dispatch_transport(shared_only: bool = false) -> bool:
 		if int(order["pending"]) > 0:
 			var free := mini(_shared.quantity(leg["edge_id"], order["good"], FormalLedgerState.MAX_AMOUNT) if _shared.bindings.has(leg["edge_id"]) else maxi(0, int(edge["capacity"])-int(edge["dispatched"])), _node_available(place))
 			var physical_pending: int = _lots.quantity_at("PERSON|"+str(order["buyer"])+"|FREIGHT|"+str(order["id"]), order["good"]) if order["kind"] == "PERSONAL_FREIGHT" else _lots.reserved_quantity(order["id"])
-			var quantity := mini(mini(int(order["pending"]), physical_pending), mini(free, _batch_limit(order["route_legs"])))
+			var quantity := mini(mini(int(order["pending"]), physical_pending), mini(free, _batch_limit(order["route_legs"], order["good"])))
 			if quantity <= 0:
 				continue
 			if next_shipment >= FormalLedgerState.MAX_AMOUNT:
@@ -1958,6 +1996,8 @@ func _enter_transport_leg(shipment: Dictionary, order: Dictionary) -> void:
 		for prior: int in shipment["departures"]: shipment["departure_quantities"].append(int(shipment["quantity"])+int(_collected_by_shipment.get(shipment["id"], 0)))
 	shipment["departures"].append(day)
 	shipment["departure_quantities"].append(shipment["quantity"])
+	if not _shared.bindings.has(leg["edge_id"]):
+		_shared.release_storage(shipment["id"],order["good"],shipment["quantity"],"transfer:"+str(shipment["id"])+":"+str(shipment["leg_index"]))
 	shipment["leg_arrival_day"] = day + int(leg["delay"])
 	var entry := _shared.entries.get("economy_entry:"+str(shipment["id"])+":"+str(shipment["leg_index"]), {}) as Dictionary
 	if entry.has("arrival_minute"):
@@ -2238,7 +2278,7 @@ func _operations_policy(site: String) -> Dictionary:
 			fallback = row
 	if not fallback.is_empty():
 		return fallback
-	return {"firm": owner, "planning_horizon": mini(30, int(config["stock_horizon"])), "buffer_days": 2, "demand_window": 3, "manage_jobs": _spec["firms"][owner].has("manager") or not _configured_legacy_recipe(owner)}
+	return {"firm": owner, "planning_horizon": mini(30, int(config["stock_horizon"])), "buffer_days": 2, "demand_window": 3, "manage_jobs": false if _local_producers.has_actor(owner) else _spec["firms"][owner].has("manager") or not _configured_legacy_recipe(owner)}
 
 
 func _update_job_postings() -> void:
@@ -2510,6 +2550,7 @@ func _production_order(site: String) -> Array[String]:
 
 
 func _input_good(firm: String, good: String) -> bool:
+	if _capital.maintenance_stock_target(firm,good)>0:return true
 	if _service_market.materials_needed(firm,good)>0: return true
 	if _spec["sites"][firm]["activities"].is_empty():
 		return true
@@ -2565,6 +2606,9 @@ func _input_need(firm: String, good: String) -> Dictionary:
 		target = 0
 	target=maxi(target,_service_market.materials_needed(firm,good))
 	if _retail.has_site(firm) and _retail.target(firm,good)>=0: target=_retail.target(firm,good)
+	# A finite, explicitly scheduled maintenance need joins the same ordinary
+	# procurement/competition; no material, money or early service is created.
+	target=maxi(target,_capital.maintenance_stock_target(firm,good))
 	var free_stock := maxi(0, int(_stocks[firm][good]) - _committed(firm, good))
 	var incoming := maxi(0, _exposure(firm, good) - int(_stocks[firm][good]))
 	var dated: Dictionary = {}
@@ -2639,6 +2683,7 @@ func _close_price_windows() -> void:
 		state["last_reason"] = reason
 
 func _produce() -> void:
+	_local_producers.produce()
 	for firm: String in _site_ids():
 		if not _plans.has(firm):
 			continue
@@ -3405,6 +3450,7 @@ func snapshot() -> Dictionary:
 
 func restore(value: Dictionary) -> bool:
 	value = value.duplicate(true)
+	if not config.get("local_producers", []).is_empty() and not value.get("stock_lots") is Dictionary: return _fail("Household processing requires its original native batch sources")
 	_labor_market.ready=false
 	if not _local_quotes.restore(value.get("local_quotations"),value): return _fail(_local_quotes.error)
 	if not _restore_business_lifecycles(value): return false
@@ -3519,6 +3565,7 @@ func restore(value: Dictionary) -> bool:
 			_firm_knowledge[_primary_site(firm)] = _spec["sites"][_primary_site(firm)]["suppliers"].duplicate()
 	_open_wages.clear()
 	_orders_by_buyer.clear()
+	_orders_by_subject.clear()
 	_active_by_buyer.clear()
 	_pending_by_key.clear()
 	_wages_by_worker.clear()
@@ -3650,6 +3697,7 @@ func _delivery_relations(receipts: Dictionary, orders: Dictionary, dates: Dictio
 	return result
 
 func _valid_locked_price(order: Dictionary) -> bool:
+	if _local_producers.sells(order["seller"], order["good"], order["seller_site"]): return int(order["price"]) == int(_local_producers.rule(order["seller"])["price"])
 	if not _local_quotes.rule(order["seller_site"],order["good"]).is_empty(): return _local_quotes.valid_locked_price(order)
 	var policy := _price_policy(order["seller_site"], order["good"])
 	if policy.is_empty() or policy["mode"] == "N2":
@@ -3803,6 +3851,9 @@ func _index_order(id: String) -> void:
 	var order := _orders[id] as Dictionary
 	_observe_order_acceptance(order)
 	var buyer := str(order["buyer"])
+	for subject: String in [buyer,str(order["seller"])]:
+		if not _orders_by_subject.has(subject):_orders_by_subject[subject]=[]
+		if _orders_by_subject[subject].is_empty() or _orders_by_subject[subject].back()!=id:_orders_by_subject[subject].append(id)
 	if not _orders_by_buyer.has(buyer):
 		_orders_by_buyer[buyer] = []
 		_active_by_buyer[buyer] = []
@@ -4150,7 +4201,7 @@ func _validate_saved(value: Dictionary) -> bool:
 	for number: int in range(1, int(value["next_order"])):
 		var id := "order:" + str(number)
 		var order := orders[id] as Dictionary
-		if not stock.has(_destination(order)) or (not _spec["firms"].has(order["seller"]) and order["kind"] != "PERSONAL_FREIGHT") or order["good"] not in _goods:
+		if not stock.has(_destination(order)) or (not _spec["firms"].has(order["seller"]) and order["kind"] != "PERSONAL_FREIGHT" and not (order["kind"] == "SALE" and _local_producers.sells(order["seller"], order["good"], order["seller_site"]))) or order["good"] not in _goods:
 			return _fail("Order site or goods references are invalid")
 		if int(order["quantity"]) <= 0 or int(order["accepted_day"]) > int(value["day"]) or int(order["accepted_minute"]) > _world.game_clock.total_minutes() or int(order["quantity"]) != int(order["pending"]) + int(order["transit"]) + int(order["delivered"]) + int(order["cancelled"]) or not _valid_order_route(order, orders, value["commands"]) or not _valid_order_action(value, order):
 			return _fail("Order responsibility, route or accepted action conflict")
@@ -4275,7 +4326,7 @@ func _validate_continuation(value: Dictionary, actors: Dictionary, stock: Dictio
 			var expected := opening + int(flows["produced"][good]) - int(flows["used"][good])
 			expected += _service_market.stock_delta(actor,good)
 			for p: Dictionary in value.get("stock_lots", {}).get("portions", {}).values():
-				if p["good"] == good and (p["location"] == "SITE|"+actor or p["location"] == "ACTOR|"+actor or (_declared_named(actor) and p["owner"] == actor)): expected -= int(p["lost"])
+				if p["good"] == good and (p["location"] == "SITE|"+actor or p["location"] == "ACTOR|"+actor or (actors.has(actor) and p["owner"] == actor)): expected -= int(p["lost"])
 
 			for fact: Dictionary in _property_handovers.values():
 				if fact["person_id"] == actor and fact["good"] == good: expected += int(fact["quantity"])
@@ -4285,11 +4336,15 @@ func _validate_continuation(value: Dictionary, actors: Dictionary, stock: Dictio
 				if _destination(order) == actor:
 					expected += int(order["delivered"])
 				if order["seller_site"] == actor:
-					expected -= int(order["transit"]) + int(order["delivered"])
-					for loss: Dictionary in _cargo_fulfilment.losses.values():
-						if loss["status"] == "ADOPTED" and loss["order_id"] == order["id"] and not str(loss["shipment_id"]).is_empty(): expected -= int(loss["quantity"])
+					expected -= int(order["delivered"])
+					# StockLots projects actors by owner, including their outbound
+					# cargo; firm stock points project only goods still at that site.
+					if not actors.has(actor):
+						expected -= int(order["transit"])
+						for loss: Dictionary in _cargo_fulfilment.losses.values():
+							if loss["status"] == "ADOPTED" and loss["order_id"] == order["id"] and not str(loss["shipment_id"]).is_empty(): expected -= int(loss["quantity"])
 			if expected != int(stock[actor][good]):
-				return _fail("R1 inventory does not match actual physical flows")
+				return _fail("R1 inventory does not match actual physical flows: " + actor + "/" + good + " expected=" + str(expected) + " actual=" + str(stock[actor][good]))
 		if actors.has(actor):
 			if not _valid_household_flows(value, actor, flows):
 				return false
@@ -4312,7 +4367,7 @@ func _validate_continuation(value: Dictionary, actors: Dictionary, stock: Dictio
 				return _fail("Activities exceed shared actual labor or equipment")
 	for key: Variant in value["request_window"]:
 		var parts := str(key).split("|")
-		if not key is String or parts.size() != 2 or not _spec["sites"].has(parts[0]) or not _spec["sites"][parts[0]]["prices"].has(parts[1]) or not value["request_window"][key] is Array:
+		if not key is String or parts.size() != 2 or not ((_spec["sites"].has(parts[0]) and _spec["sites"][parts[0]]["prices"].has(parts[1])) or _local_producers.sells(parts[0], parts[1], parts[0])) or not value["request_window"][key] is Array:
 			return _fail("Invalid received customer request container")
 		var window := _request_retention_window(parts[0])
 		var policy := _price_policy(parts[0], parts[1])
@@ -4436,7 +4491,8 @@ func _valid_order_route(order: Dictionary, saved_orders: Variant = null, saved_c
 	if order["kind"] == "PERSONAL_FREIGHT": return _valid_personal_freight_order(order)
 	if order.has("custody_fact") or order.has("source_custody_site") or order.has("destination_custody_site"): return _fail("Sale cannot reinterpret a personal custody contract")
 	var transfer: bool = order["kind"] == "TRANSFER"
-	if order["kind"] not in ["SALE", "TRANSFER"] or not _spec["sites"].has(order["seller_site"]) or _owner(order["seller_site"]) != order["seller"] or not FormalLedgerState.currency_id(order["denomination"]) or not order["route_id"] is String or not order["route_legs"] is Array or order["route_legs"].is_empty():
+	var sale_source_valid: bool = (_spec["sites"].has(order["seller_site"]) and _owner(order["seller_site"]) == order["seller"]) or (not transfer and order["kind"] == "SALE" and _local_producers.sells(order["seller"], order["good"], order["seller_site"]))
+	if order["kind"] not in ["SALE", "TRANSFER"] or not sale_source_valid or not FormalLedgerState.currency_id(order["denomination"]) or not order["route_id"] is String or not order["route_legs"] is Array or order["route_legs"].is_empty():
 		return _fail("Unknown order kind, stock point, currency or path")
 	if _spec["firms"].has(order["buyer"]):
 		if not _spec["sites"].has(order["buyer_site"]) or _owner(order["buyer_site"]) != order["buyer"] or order["need_category"] != "":
@@ -4451,7 +4507,7 @@ func _valid_order_route(order: Dictionary, saved_orders: Variant = null, saved_c
 	var chosen: Dictionary = _path_for(order["buyer"], str(order["from_place_id"]), str(order["to_place_id"]), int(order["accepted_day"]), order["route_id"])
 	# A named buyer can later move. Its original host destination stays locked.
 	var destination_valid: bool = _world.spatial_catalog.has_place(str(order["to_place_id"])) if order["buyer_site"] == "" else order["to_place_id"] == _place(order["buyer_site"])
-	if chosen.is_empty() or order["from_place_id"] != _place(order["seller_site"]) or not destination_valid or order["route_legs"] != _locked_legs(chosen, order["denomination"]):
+	if chosen.is_empty() or order["from_place_id"] != _place(order["seller_site"]) or not destination_valid or order["route_legs"] != _locked_legs(chosen, order["denomination"], order["buyer"]):
 		return _fail("Order differs from its known locked site path and freight")
 	if order["buyer_account"] != _account(order["buyer"], order["denomination"]) or order["seller_account"] != _account(order["seller"], order["denomination"]) or str(order["buyer_account"]).is_empty() or str(order["seller_account"]).is_empty() or (order["buyer_account"] == order["seller_account"]) != transfer:
 		return _fail("Order currency account ownership conflict")
@@ -5081,9 +5137,30 @@ func personal_material_handovers(person: String) -> Array[Dictionary]:
 ## A bounded read boundary for the host map. Received supplier identities do
 ## not grant access to another firm's stock, accounts or internal orders.
 func network_view(observer: String, places: Array[String] = [], limit: int = 128) -> Dictionary:
-	if map_subjects(observer).is_empty(): return {}
+	if not _map_observer_allowed(observer): return {}
 	_ensure_configuration_queries()
 	return _node_network.view(self, observer, places, limit)
+
+func _map_observer_allowed(observer: String) -> bool:
+	return _world!=null and observer==_world.player_state.player_id() and _world.person_overlay.is_alive(observer) and manages_person(observer)
+
+func market_hub_view(observer: String, places: Array[String] = [], limit: int = 96) -> Dictionary:
+	if not _map_observer_allowed(observer):return {}
+	_ensure_configuration_queries()
+	return _node_network.hub_view(self,observer,places,limit)
+
+func economy_map_view(observer: String, subject: String, site: String = "", offset: int = 0, limit: int = 32) -> Dictionary:
+	return ReadContract.map_subject(self,observer,subject,site,offset,limit)
+
+func economy_map_subject_view(observer: String, subject: String, site: String = "", offset: int = 0, limit: int = 32) -> Dictionary:
+	return economy_map_view(observer,subject,site,offset,limit)
+
+func economy_production_view(observer: String, firm: String, site: String) -> Dictionary:
+	return ReadContract.production(self,observer,firm,site)
+
+func query_metrics() -> Dictionary:
+	_ensure_configuration_queries()
+	return _node_network.metrics()
 
 func node_network_view(observer: String, places: Array[String] = [], limit: int = 128) -> Dictionary:
 	return network_view(observer, places, limit)
@@ -5386,6 +5463,7 @@ func _site_accepting(site: String) -> bool:
 	return _site_operating(site) and bool(_site_state[site]["accepting_business"])
 
 func _site_selling(site: String) -> bool:
+	if _local_producers.has_actor(site): return _actors.has(site) and subject_active_at(site, _world.game_clock.total_minutes())
 	return _site_accepting(site) and _wind_down.selling(site)
 
 func _site_producing(site: String, at_minute: int = -1) -> bool:
@@ -5422,7 +5500,7 @@ func _publish_site_reports() -> void:
 		for good: String in _goods: local_needs[good] = _input_need(site, good)
 		var surplus := _zero_goods()
 		for good: String in _goods:
-			var retained := maxi(int(_spec["sites"][site]["targets"][good]), int(local_needs[good]["target"]))
+			var retained := maxi(maxi(int(_spec["sites"][site]["targets"][good]),int(local_needs[good]["target"])),_capital.goods_needed(site,good))
 			surplus[good] = maxi(0, int(inventory[good]) - retained)
 		var needs: Dictionary = {}
 		for good: String in _goods:
@@ -5494,7 +5572,7 @@ func _transfer_goods(actor: String, payload: Dictionary, action_id: String, inte
 	var path := _route_for(firm, firm, payload["path_id"], payload["to_site"], payload["from_site"])
 	if path.is_empty():
 		return _result(false, "NO_KNOWN_ROUTE")
-	var legs := _locked_legs(path, payload["denomination"])
+	var legs := _locked_legs(path, payload["denomination"], firm)
 	if not _shared.path_conditions(legs, payload["good"]): return _result(false, "UNCONFIGURED_SHARED_WEIGHT_OR_SERVICE_WINDOW")
 	var freight := _freight(legs)
 	var account := _account(firm, payload["denomination"])
@@ -5548,7 +5626,7 @@ func _coordinate_transfer(destination: String, good: String, need: Dictionary, c
 		if surplus <= 0:
 			continue
 		for path: Dictionary in _paths_for(firm, _place(source), _place(destination), day):
-			var legs := _locked_legs(path, currency)
+			var legs := _locked_legs(path, currency, firm)
 			var arrival := day + 1 + _travel_days(legs)
 			var freight := _freight(legs)
 			var preferable: bool = true
@@ -5791,7 +5869,10 @@ func _valid_household_flows(value: Dictionary, actor: String, flows: Dictionary)
 		if resident!=(_service_market._resident.food_total(actor,int(value["day"])) if category=="food" else 0): return _fail("Resident food satisfaction lacks actual service receipt")
 		if int(row["satisfied"])-resident > service or service - (int(row["satisfied"])-resident) > int(value["day"]) * (largest - 1):
 			return _fail("Flow need lacks actual usable item consumption")
-	return flows["produced"] == _zero_goods() and used == flows["used"]
+	var household_production: Dictionary = _local_producers.flow_totals(actor, value.get("stock_lots", {}))
+	if household_production.is_empty(): return _fail("Invalid household production source quantities")
+	for good: String in _goods: used[good] = int(used[good]) + int(household_production["used"][good])
+	return flows["produced"] == household_production["produced"] and used == flows["used"]
 
 func _valid_current_need(value: Dictionary, actor: String) -> bool:
 	var need: Variant = value["needs"][actor]
@@ -5874,7 +5955,7 @@ func _internal_request_pressure(source: String, good: String) -> int:
 			if (not produces or not _site_reports[site]["producing"]) and _reported_surplus(site, good) <= 0:
 				continue
 			for path: Dictionary in _paths_for(firm, _place(site), _place(destination), day):
-				var legs := _locked_legs(path, _sale_currency(firm))
+				var legs := _locked_legs(path, _sale_currency(firm), firm)
 				candidates.append({"site": site, "surplus": _reported_surplus(site, good), "feasible": feasible, "lead": _travel_days(legs), "freight": _freight(legs)})
 		candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 			if (int(a["surplus"]) > 0) != (int(b["surplus"]) > 0):
@@ -6316,7 +6397,7 @@ func personal_freight_options(person: String, good: String) -> Array[Dictionary]
 		destinations[destination] = true
 		for path: Dictionary in _paths_for(person, origin, destination, day):
 			var currency := str(_world.ledger_state.account(_account(person)).get("denomination", FormalLedgerState.DENOMINATION))
-			var legs := _locked_legs(path, currency)
+			var legs := _locked_legs(path, currency, person)
 			var valid: bool = true
 			for leg: Dictionary in legs:
 				if int(leg["freight_per_unit"]) > 0 and (str(leg["carrier_account"]).is_empty() or leg["carrier_account"] == _account(person, currency)): valid = false
@@ -6335,7 +6416,7 @@ func _personal_freight_action(actor: String, payload: Dictionary, action_id: Str
 	for candidate: Dictionary in _paths_for(actor, payload["from_place_id"], payload["to_place_id"], day):
 		if candidate["id"] == payload["path_id"]: path = candidate
 	if path.is_empty(): return _result(false, "NO_KNOWN_ROUTE")
-	var legs := _locked_legs(path, payload["denomination"])
+	var legs := _locked_legs(path, payload["denomination"], actor)
 	if not _shared.path_conditions(legs, payload["good"]): return _result(false, "UNCONFIGURED_SHARED_WEIGHT_OR_SERVICE_WINDOW")
 	var freight := _freight(legs)
 	var account := _account(actor, payload["denomination"])
@@ -6379,7 +6460,7 @@ func _valid_personal_freight_order(order: Dictionary) -> bool:
 	if not _declared_named(person) or order["seller"] != person or order["seller_site"] != person or order["buyer_site"] != "" or order["price"] != 0 or order["need_category"] != "" or order["from_place_id"] == order["to_place_id"] or not FormalLedgerState.currency_id(order["denomination"]) or not order["route_legs"] is Array or order["route_legs"].is_empty(): return _fail("Invalid personal freight ownership")
 	if order.get("source_custody_site", "").is_empty() or order.get("destination_custody_site", "").is_empty() or order["source_custody_site"] != _personal_storage_site(order["from_place_id"], order["good"]) or order["destination_custody_site"] != _personal_storage_site(order["to_place_id"], order["good"]): return _fail("Personal freight lacks explicit custody permissions")
 	var path: Dictionary = _path_for(person, order["from_place_id"], order["to_place_id"], int(order["accepted_day"]), order["route_id"])
-	if path.is_empty() or order["route_legs"] != _locked_legs(path, order["denomination"]) or order["buyer_account"] != _account(person, order["denomination"]) or order["buyer_account"] != order["seller_account"] or str(order["buyer_account"]).is_empty(): return _fail("Personal freight changes its known path or account")
+	if path.is_empty() or order["route_legs"] != _locked_legs(path, order["denomination"], person) or order["buyer_account"] != _account(person, order["denomination"]) or order["buyer_account"] != order["seller_account"] or str(order["buyer_account"]).is_empty(): return _fail("Personal freight changes its known path or account")
 	for leg: Dictionary in order["route_legs"]:
 		if int(leg["freight_per_unit"]) > 0 and (str(leg["carrier_account"]).is_empty() or leg["carrier_account"] == order["buyer_account"]): return _fail("Personal freight lacks its carrier account")
 	var unit := _freight(order["route_legs"])
@@ -8078,6 +8159,7 @@ func finalize_physical_restore() -> bool:
 		if _stocks != _legacy_stock_boundary: return _fail("Restored physical partitions differ from old quantity balance")
 		_legacy_stock_boundary.clear()
 	if not Process.history_valid(self): return _fail("Production process history violates original source receipts, cycle or quota")
+	if not _local_producers.history_valid(): return _fail("Household production violates original finite inputs, local labor or batch receipts")
 	return _validate_physical_references() and _validate_personal_physical_partitions()
 
 func _validate_physical_references() -> bool:
@@ -8086,12 +8168,12 @@ func _validate_physical_references() -> bool:
 	for o: Dictionary in _orders.values():
 		if o["kind"] != "PERSONAL_FREIGHT" and int(o["pending"]) > 0:
 			var live := _lots.reserved_quantity(o["id"])
-			var lost := _lots.lost_at("SITE|"+str(o["seller_site"]), o["good"], o["id"])
+			var lost := _lots.lost_at(_local_producers.location(str(o["seller_site"])), o["good"], o["id"])
 			if live+lost+_cargo_fulfilment.unresolved(o["id"])-_cargo_fulfilment.site_loss(o["id"]) != int(o["pending"]): return _fail("Order lacks physical reserved portions or recorded outstanding loss")
 			var rows := _lots.reserved_selection(o["id"], live)
 			for r: Dictionary in rows:
 				var p := _lots.portions[r["portion_id"]] as Dictionary
-				if p["good"] != o["good"] or p["owner"] != o["seller"] or p["location"] != "SITE|"+str(o["seller_site"]): return _fail("Reserved portion owner/location mismatch")
+				if p["good"] != o["good"] or p["owner"] != o["seller"] or p["location"] != _local_producers.location(str(o["seller_site"])): return _fail("Reserved portion owner/location mismatch")
 	for p: Dictionary in _lots.portions.values():
 		if not _actors.has(p["custodian"]) and not _spec["firms"].has(p["custodian"]) and not _spec["sites"].has(p["custodian"]) and not custodians.has(p["custodian"]): return _fail("Physical portion has an unknown custodian")
 		if int(p["remaining"]) <= 0: continue
@@ -8102,7 +8184,7 @@ func _validate_physical_references() -> bool:
 				if c["kind"]!="STORAGE" or c["started_minute"]>=0 or c["status"]=="CANCELLED" or loc!="SITE|"+str(c["source_site"]) or p["owner"]!=c["client"] or p["good"]!=c["good"]: return _fail("Service reservation lost actual client stock")
 				continue
 			var order := _orders.get(p["reserved_for"], {}) as Dictionary
-			if order.is_empty() or order["kind"] == "PERSONAL_FREIGHT" or int(order["pending"]) <= 0 or loc != "SITE|"+str(order["seller_site"]) or p["owner"] != order["seller"] or p["good"] != order["good"]: return _fail("Physical reservation has no corresponding unfulfilled order")
+			if order.is_empty() or order["kind"] == "PERSONAL_FREIGHT" or int(order["pending"]) <= 0 or loc != _local_producers.location(str(order["seller_site"])) or p["owner"] != order["seller"] or p["good"] != order["good"]: return _fail("Physical reservation has no corresponding unfulfilled order")
 		if loc.begins_with("CARGO|"):
 			var id := loc.trim_prefix("CARGO|")
 			if not _shipments.has(id) or p["good"] != _orders[_shipments[id]["order_id"]]["good"] or p["place_id"] != _shipments[id]["place_id"]: return _fail("Physical cargo has an invalid shipment reference")
@@ -8120,6 +8202,7 @@ func _validate_physical_references() -> bool:
 			var custody := loc.trim_prefix("PERSON|"+str(p["owner"])+"|")
 			if custody.begins_with("STORED|") and p["place_id"] != custody.trim_prefix("STORED|"): return _fail("Personal storage place differs from physical custody")
 		elif loc != "ACTOR|"+str(p["owner"]) or not _actors.has(p["owner"]): return _fail("Unknown physical custody")
+		elif _local_producers.has_actor(p["owner"]) and p["place_id"] != _place(p["owner"]): return _fail("Household producer custody differs from its admitted place")
 	for cargo: Dictionary in _shipments.values():
 		var good := str(_orders[cargo["order_id"]]["good"])
 		if _lots.quantity_at("CARGO|"+str(cargo["id"]), good)+_lots.lost_at("CARGO|"+str(cargo["id"]), good)-_cargo_fulfilment.cargo_loss(cargo["id"]) != int(cargo["quantity"]): return _fail("Shipment physical quantities and unresolved losses are not conserved")

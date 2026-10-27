@@ -44,7 +44,7 @@ static func valid_configuration(settings: Dictionary, spec: Dictionary) -> bool:
 	if not resale_configuration_valid(settings, spec): return false
 	if not settings.has("capital_investment"): return true
 	var value: Variant = settings["capital_investment"]
-	if not value is Dictionary or not EconomySliceConfig._fields(value, ["templates", "npc_policies"], ["building_policies"]) or not value["templates"] is Array or value["templates"].size() > 128 or not value["npc_policies"] is Array: return false
+	if not value is Dictionary or not EconomySliceConfig._fields(value, ["templates", "npc_policies"], ["building_policies", "maintenance_policies"]) or not value["templates"] is Array or value["templates"].size() > 128 or not value["npc_policies"] is Array: return false
 	var sites := spec["sites"].duplicate(true) as Dictionary
 	var firms := spec["firms"].duplicate(true) as Dictionary
 	for option: Dictionary in settings.get("runtime_expansions", []):
@@ -67,7 +67,7 @@ static func valid_configuration(settings: Dictionary, spec: Dictionary) -> bool:
 	for good: Dictionary in settings.get("goods", []): uses[good["id"]] = good.get("capital_uses", [])
 	var seen: Dictionary = {}
 	for row: Variant in value["templates"]:
-		if not row is Dictionary or not EconomySliceConfig._fields(row, ["id", "firm", "site_id", "kind", "asset_type", "capacity", "activities", "materials", "hours", "hours_per_day", "duration_minutes", "max_projects", "budget", "cash_floor", "denomination", "basis"], ["maintenance", "building"]): return false
+		if not row is Dictionary or not EconomySliceConfig._fields(row, ["id", "firm", "site_id", "kind", "asset_type", "capacity", "activities", "materials", "hours", "hours_per_day", "duration_minutes", "max_projects", "budget", "cash_floor", "denomination", "basis"], ["maintenance", "building", "service_days"]): return false
 		for key: String in ["id", "firm", "site_id", "asset_type", "denomination"]:
 			if not row[key] is String or row[key].is_empty(): return false
 		if seen.has(row["id"]) or not firms.has(row["firm"]) or not sites.has(row["site_id"]) or sites[row["site_id"]]["firm_id"] != row["firm"] or row["kind"] not in ["EXPAND", "INSTALL", "NEW_SITE"]+BUILD_KINDS or row["basis"] != "DEVELOPMENT_CAPITAL_PERMISSION": return false
@@ -97,6 +97,8 @@ static func valid_configuration(settings: Dictionary, spec: Dictionary) -> bool:
 				if not (uses.get(good, []) as Array).has("MAINTENANCE_INPUT"): return false
 			for key: String in ["hours", "hours_per_day", "duration_minutes"]:
 				if not FormalLedgerState.valid_amount(maintenance[key]) or int(maintenance[key]) < 1 or int(maintenance[key]) > 1000000: return false
+		if row.has("service_days"):
+			if not row.has("maintenance") or row["kind"] in BUILD_KINDS or not FormalLedgerState.valid_amount(row["service_days"]) or int(row["service_days"]) < 1 or int(row["service_days"]) > 365: return false
 		seen[row["id"]] = row
 	var policies: Dictionary = {}
 	for row: Variant in value["npc_policies"]:
@@ -107,6 +109,12 @@ static func valid_configuration(settings: Dictionary, spec: Dictionary) -> bool:
 		if not FormalLedgerState.valid_amount(row["minimum_utilization_percent"]) or int(row["minimum_utilization_percent"]) > 100: return false
 		if int(row["window_days"]) > 30: return false
 		policies[row["template_id"]] = true
+	var maintenance_policies: Variant = value.get("maintenance_policies", [])
+	if not maintenance_policies is Array or maintenance_policies.size() > 32: return false
+	var maintained: Dictionary = {}
+	for policy: Variant in maintenance_policies:
+		if not policy is Dictionary or not FormalLedgerState.exact_fields(policy, ["template_id", "basis"]) or not policy["template_id"] is String or not seen.has(policy["template_id"]) or maintained.has(policy["template_id"]) or policy["basis"] != "EXPLICIT_DEVELOPMENT_SCHEDULED_MAINTENANCE" or not seen[policy["template_id"]].has("service_days"): return false
+		maintained[policy["template_id"]] = true
 	var rights: Dictionary={};var objects: Dictionary={};var spaces:Dictionary={}
 	for row: Dictionary in value["templates"]:
 		if row["kind"] not in BUILD_KINDS:continue
@@ -244,7 +252,7 @@ func goods_needed(site: String, good: String) -> int:
 	for id: String in _active_by_site.get(site, []):
 		var p := projects[id] as Dictionary
 		if p["status"] not in TERMINAL and p["status"] != "PAUSED" and p["materials"].is_empty(): amount += int(terms_for(p)["materials"].get(good, 0))
-	return amount
+	return amount + maintenance_stock_target(site, good)
 
 func labor_needed(site: String) -> int:
 	var amount := 0
@@ -454,6 +462,117 @@ func complete_external_maintenance(c: Dictionary) -> bool:
 	_asset_event(a,"ACTIVE",now,c["action_id"])
 	return true
 
+## Only original installation or actual completed repair renews a declared service
+## window. Ordinary ACTIVE controls and reinstallation cannot turn it into a buff.
+func _service_completions(id: String) -> Array[int]:
+	var asset: Dictionary = assets.get(id, {})
+	var result: Array[int] = []
+	if asset.is_empty(): return result
+	result.append(int(asset["in_service_minute"]))
+	for event: Dictionary in asset["events"]:
+		if event["status"] != "ACTIVE": continue
+		var project: Dictionary = projects.get("capital_project:" + str(event["source"]), {})
+		var repaired: bool = project.get("kind") == "MAINTENANCE" and project.get("asset_id") == id and project.get("status") == "COMPLETED" and project.get("completed_minute") == event["minute"]
+		var external: Dictionary = _economy()._service_market.contracts.get("service:" + str(event["source"]), {})
+		repaired = repaired or (external.get("kind") == "REPAIR" and external.get("asset_id") == id and external.get("repair_result_minute") == event["minute"])
+		if repaired and int(event["minute"]) not in result: result.append(int(event["minute"]))
+	result.sort()
+	return result
+
+func service_status(id: String, minute: int = -1) -> Dictionary:
+	var asset: Dictionary = assets.get(id, {})
+	if asset.is_empty(): return {}
+	var terms: Dictionary = template(asset["template_id"])
+	if not terms.has("service_days"): return {}
+	if minute < 0: minute = _economy()._world.game_clock.total_minutes()
+	var start: int = -1
+	for completed: int in _service_completions(id):
+		if completed <= minute: start = completed
+	var until: int = start + int(terms["service_days"]) * 1440 if start >= 0 else -1
+	return {"service_days": terms["service_days"], "last_service_minute": start, "service_until_minute": until, "serviceable": start >= 0 and minute < until, "reason": "NOT_INSTALLED_YET" if start < 0 else "SERVICE_CURRENT" if minute < until else "MAINTENANCE_DUE", "basis": "EXPLICIT_DEVELOPMENT_CALENDAR_SERVICE_WINDOW"}
+
+func service_available(id: String, minute: int) -> bool:
+	var service: Dictionary = service_status(id, minute)
+	return service.is_empty() or bool(service["serviceable"])
+
+func _maintenance_useful(terms: Dictionary) -> bool:
+	var e := _economy()
+	var site: String = terms["site_id"]
+	for activity_id: String in terms["activities"]:
+		var activity: Dictionary = e._activity(site, activity_id)
+		var state: Dictionary = e._site_state[site]["activities"][activity_id]
+		if not state["enabled"]: continue
+		var process: Dictionary = activity.get("process", {})
+		if not process.is_empty() and (not process["constraints"].is_empty() or int(state["batches"]) >= int(process["lifetime_batch_limit"])): continue
+		var resource: Dictionary = process.get("finite_extraction", {})
+		if not resource.is_empty() and int(state["batches"]) >= int(resource["reserve_quantity"]) / int(resource["quantity_per_batch"]): continue
+		return true
+	return false
+
+## Finite future operating stock, not a maintenance project or free supply. One
+## declared repair recipe is anticipated only within its real known lead window.
+## Consumers still compete through the native purchase and reservation authorities.
+func maintenance_stock_targets(selected_site: String = "", selected_good: String = "") -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	if assets.is_empty(): return result
+	var e := _economy()
+	var now: int = e._world.game_clock.total_minutes()
+	for policy: Dictionary in e.config.get("capital_investment", {}).get("maintenance_policies", []):
+		var terms: Dictionary = template(policy["template_id"])
+		var site: String = terms["site_id"]
+		var firm: String = terms["firm"]
+		if not selected_good.is_empty() and not terms["maintenance"]["materials"].has(selected_good): continue
+		if (not selected_site.is_empty() and site != selected_site) or not e._spec["sites"].has(site) or not e._site_producing(site): continue
+		if (e.firm_manager_at(firm, now) != firm and not e._assets.corporate.can_plan(firm)) or not _maintenance_useful(terms): continue
+		var lead: int = -1
+		for good: String in terms["maintenance"]["materials"]:
+			lead = maxi(lead, e._known_lead(site, good))
+		if lead < 0: continue # Unknown routes do not become invented instant supply.
+		for id: String in assets:
+			if assets[id]["template_id"] != terms["id"]: continue
+			var current: Dictionary = asset_state(id, now)
+			if current["owner"] != firm or current["installed_site"] != site or current["status"] != "ACTIVE" or move_busy(id) or live_asset_offer(id) or e._service_market.asset_busy(id): continue
+			var service: Dictionary = service_status(id, now)
+			# +2 accounts for the next procurement decision and earliest dispatch;
+			# neither known travel time nor congestion becomes guaranteed arrival.
+			if service.is_empty() or now + (lead + 2) * 1440 < int(service["service_until_minute"]): continue
+			var pending: bool = false
+			for project_id: String in _active_by_site.get(site, []):
+				if projects[project_id]["asset_id"] == id: pending = true
+			if pending: continue # The actual project's recipe is already counted.
+			result.append({"asset_id": id, "template_id": terms["id"], "firm": firm, "site_id": site, "materials": (terms["maintenance"]["materials"] as Dictionary).duplicate(true), "budget": terms["budget"], "cash_floor": terms["cash_floor"], "denomination": terms["denomination"], "service_until_minute": service["service_until_minute"], "known_slowest_material_lead_days": lead, "basis": "ONE_DECLARED_MAINTENANCE_RECIPE_AHEAD_OF_ACTUAL_SERVICE_DEADLINE"})
+	return result
+
+func maintenance_stock_target(site: String, good: String) -> int:
+	var amount: int = 0
+	for target: Dictionary in maintenance_stock_targets(site, good): amount += int(target["materials"].get(good, 0))
+	return amount
+
+## Called at the existing native capital decision boundary. No timer, replacement
+## project queue, invented work or direct status write belongs to this policy.
+func npc_maintenance() -> void:
+	var e := _economy()
+	var now: int = e._world.game_clock.total_minutes()
+	for policy: Dictionary in e.config.get("capital_investment", {}).get("maintenance_policies", []):
+		var terms: Dictionary = template(policy["template_id"])
+		var firm: String = terms["firm"]
+		var site: String = terms["site_id"]
+		if not e._spec["sites"].has(site) or (e.firm_manager_at(firm, now) != firm and not e._assets.corporate.can_plan(firm)) or not e._site_producing(site): continue
+		if not _maintenance_useful(terms): continue
+		var ids: Array[String] = []
+		for id: String in assets:
+			if assets[id]["template_id"] == terms["id"]: ids.append(id)
+		ids.sort()
+		for id: String in ids:
+			var current: Dictionary = asset_state(id, now)
+			if current["owner"] != firm or current["installed_site"] != site or current["status"] != "ACTIVE" or service_available(id, now): continue
+			if active_count(firm) >= int(terms["max_projects"]) or move_busy(id) or live_asset_offer(id) or e._service_market.asset_busy(id): continue
+			var pending: bool = false
+			for project_id: String in _active:
+				if projects[project_id]["asset_id"] == id: pending = true
+			if pending: continue
+			e._accept(firm, e._auto_command(firm, "maintain_capital", {"asset_id": id, "budget": terms["budget"]}, id), true)
+
 func pools(site: String, minute: int) -> Array[Dictionary]:
 	var base := int(_economy()._spec["sites"][site]["capacity"])
 	var cached := _pool_cache.get(site, {}) as Dictionary
@@ -462,7 +581,7 @@ func pools(site: String, minute: int) -> Array[Dictionary]:
 	for id: String in assets:
 		var asset := assets[id] as Dictionary
 		var current := asset_state(id, minute)
-		if current["status"] == "ACTIVE" and current["installed_site"] == site and template(asset["template_id"])["kind"] not in BUILD_KINDS: result.append({"id": id, "capacity": asset["capacity"], "activities": current["activities"].duplicate()})
+		if current["status"] == "ACTIVE" and current["installed_site"] == site and template(asset["template_id"])["kind"] not in BUILD_KINDS and service_available(id, minute): result.append({"id": id, "capacity": asset["capacity"], "activities": current["activities"].duplicate()})
 	# Preserve restrictive machines before the universal base pool.
 	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["activities"].size() < b["activities"].size() if a["activities"].size() != b["activities"].size() else a["id"] < b["id"])
 	if base > 0: result.append({"id": "base:"+site, "capacity": base, "activities": []})
@@ -497,10 +616,15 @@ func cumulative_capacity(site: String, through_day: int) -> int:
 			if event["minute"] <= through_day*1440: edges.append(event["minute"])
 		for trade: Dictionary in resale_trades.values():
 			if trade["asset_id"]==id and trade["delivered_minute"]>=0 and trade["delivered_minute"]<=through_day*1440: edges.append(trade["delivered_minute"])
+		var terms: Dictionary = template(asset["template_id"])
+		if terms.has("service_days"):
+			for completed: int in _service_completions(id):
+				var deadline: int = completed + int(terms["service_days"]) * 1440
+				if deadline <= through_day * 1440: edges.append(deadline)
 		edges.sort()
 		for index: int in range(edges.size()-1):
 			var state := asset_state(id,edges[index])
-			if state["status"]=="ACTIVE" and state["installed_site"]==site: total += maxi(0,edges[index+1]/1440-edges[index]/1440)*int(asset["capacity"])
+			if state["status"]=="ACTIVE" and state["installed_site"]==site and service_available(id, edges[index]): total += maxi(0,edges[index+1]/1440-edges[index]/1440)*int(asset["capacity"])
 	return total
 
 func invested_goods(site: String, good: String) -> int:
@@ -558,6 +682,8 @@ func view(firm: String) -> Dictionary:
 	for asset_id: String in asset_ids:
 		var asset := (assets[asset_id] as Dictionary).duplicate(true)
 		asset["current_use"] = asset_state(asset_id)
+		var service: Dictionary = service_status(asset_id)
+		if not service.is_empty(): asset["service_window"] = service
 		asset["internal_maintenance_ready"]=not maintenance_template(asset_id,e._world.game_clock.total_minutes()).is_empty() and asset["current_use"]["status"] in ["ACTIVE","PAUSED"] and not move_busy(asset_id)
 		asset["maintenance_recipe"]=maintenance_template(asset_id,e._world.game_clock.total_minutes()).get("id","")
 		asset["mobility"] = mobility_costs(asset_id)

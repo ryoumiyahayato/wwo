@@ -30,9 +30,7 @@ static func order_view(e: RefCounted, actor: String, order: Dictionary) -> Dicti
 			cargo["physical_tracking"] = "AWAITING_LOCAL_OBSERVATION_OR_SPECIFIC_NOTICE"
 	return row
 
-static func own(e: RefCounted, actor: String, firm: String, site: String) -> Dictionary:
-	if not e._spec.firms.has(firm) or not e._manager(actor, firm) or not e._spec.sites.has(site) or e._owner(site) != firm: return {}
-	var now: int = e._world.game_clock.total_minutes()
+static func _activities(e: RefCounted, site: String) -> Array[Dictionary]:
 	var activities: Array[Dictionary] = []
 	for activity: Dictionary in e._spec.sites[site].activities:
 		var state: Dictionary = e._site_state[site].activities[activity.id]
@@ -57,6 +55,87 @@ static func own(e: RefCounted, actor: String, firm: String, site: String) -> Dic
 			for good: String in activity.materials:
 				if int(activity.materials[good]) > 0 and int(e._stocks[site][good]) < int(activity.materials[good]): constraints.append("CURRENT_MATERIAL_SHORTAGE:" + good)
 		activities.append({"id": activity.id, "recipe": activity.duplicate(true), "process_status": reason, "planned_batches": planned, "actual_batches": actual, "cumulative_batches": state.batches, "actual_inputs": inputs, "actual_outputs": outputs, "declared_non_saleable_rejects": rejects, "allocated_person_hours": actual * int(activity.hours), "capacity_available_units": capacity, "capacity_used_units": actual * int(activity.capacity_units), "capacity_utilization": float(actual * int(activity.capacity_units)) / capacity if capacity > 0 else null, "observed_constraints": constraints})
+	return activities
+
+static func _observer_allowed(e: RefCounted, observer: String) -> bool:
+	return e._world != null and observer == e._world.player_state.player_id() and e._world.person_overlay.is_alive(observer) and e.manages_person(observer)
+
+static func _units(e: RefCounted) -> Dictionary:
+	return {"goods": e._good_units().duplicate(true), "labor": "person_hour", "time": "host_game_minute", "currency": "denomination-tagged integer minor units", "capacity": "capacity_unit_per_eligible_day"}
+
+static func _configuration_source(e: RefCounted, firm: String) -> Dictionary:
+	return {"case_id": e.config.get("case_id", "LEGACY_UNSPECIFIED"), "identity_basis": e._business_identity_basis(firm), "recipe_source": "EconomySliceConfig normalized activities; process.source or LEGACY_UNSPECIFIED"}
+
+## Current inventory and accepted contractual incoming only. No all-order scan or
+## unconfirmed remote transit/loss quantity is needed to describe this stock point.
+static func _inventory_status(e: RefCounted, key: String, stock: Dictionary) -> Dictionary:
+	var result: Dictionary = {}
+	if stock.is_empty(): return result
+	for good: String in e._goods:
+		var quantity: int = int(stock.get(good, 0))
+		var reserved: int = e._committed(key, good)
+		result[good] = {"at_site_quantity": quantity, "reserved_at_site_quantity": reserved, "unreserved_at_site_quantity": maxi(0, quantity - reserved), "incoming_accepted_quantity": e._incoming_by_key.get(key + "|" + good, 0), "basis": "CURRENT_AUTHORIZED_STOCK_RESERVATIONS_AND_ACCEPTED_INCOMING_NOT_REMOTE_CARGO_PHYSICS"}
+	return result
+
+## Research details are opt-in. Activities share the existing own() construction,
+## but this path never asks Ledger, histories, finance, offers or all orders.
+static func production(e: RefCounted, observer: String, firm: String, site: String) -> Dictionary:
+	if not _observer_allowed(e, observer) or not e._spec.firms.has(firm) or not e._manager(observer, firm) or not e._spec.sites.has(site) or e._owner(site) != firm or not e._stocks.has(site): return {}
+	return {"format": "economy_production_read_v1", "minute": e._world.game_clock.total_minutes(), "day": e.day, "observer": observer, "visibility": "AUTHORIZED_CURRENT_MANAGER_OWN_BUSINESS", "firm_id": firm, "site_id": site, "place_id": e._place(site), "configuration_source": _configuration_source(e, firm), "units": _units(e), "activities": _activities(e, site), "inventory_status": _inventory_status(e, site, e._stocks[site])}
+
+## Offset is a reverse offset into the original subject index, not a count of
+## site-matching rows. Each page examines at most 256 IDs and returns at most 32.
+## The index is borrowed; do not duplicate or sort an entire subject's history.
+static func map_subject(e: RefCounted, observer: String, subject: String, site: String = "", offset: int = 0, limit: int = 32) -> Dictionary:
+	if subject.is_empty() or not _observer_allowed(e, observer): return {}
+	var managed: bool = e._spec.firms.has(subject) and e._manager(observer, subject)
+	if not managed and (subject != observer or not e._actors.has(subject)): return {}
+	if not site.is_empty() and (not managed or not e._spec.sites.has(site) or e._owner(site) != subject): return {}
+	var account_id: String = e._account(subject)
+	var account: Dictionary = e._world.ledger_state.account(account_id)
+	if account.is_empty(): return {}
+	var stock: Dictionary = {}
+	var stock_key: String = ""
+	if not site.is_empty():
+		stock_key = site
+		stock = (e._stocks.get(site, {}) as Dictionary).duplicate(true)
+	elif not managed:
+		# Personal ownership aggregates include remote stored and freight cargo.
+		# Only carried/current-place accessible goods are locally observable here.
+		stock_key = subject
+		stock = e.personal_inventory(subject)
+	var inventory_status: Dictionary = _inventory_status(e, stock_key, stock) if not stock_key.is_empty() else {}
+	var free_inventory: Dictionary = {}
+	var committed_inventory: Dictionary = {}
+	for good: String in inventory_status:
+		free_inventory[good] = inventory_status[good]["unreserved_at_site_quantity"]
+		committed_inventory[good] = inventory_status[good]["reserved_at_site_quantity"]
+	var operations: Array[Dictionary] = []
+	if not site.is_empty():
+		var state: Dictionary = e._site_state[site]
+		operations.append({"firm_id": subject, "site_id": site, "place_id": e._place(site), "stock_place_id": e._place(site), "free_inventory": free_inventory.duplicate(true), "committed_inventory": committed_inventory.duplicate(true), "enabled": state["enabled"], "production_enabled": state["production_enabled"], "accepting_business": state["accepting_business"], "operating": e._site_operating(site), "base_capacity": e._spec.sites[site]["capacity"], "shared_capacity": e.site_capacity(site), "capacity_basis": "CONFIGURED_BASE_PLUS_ACTUAL_SERVICEABLE_INSTALLED_CAPITAL", "inventory": stock.duplicate(true), "inventory_status": inventory_status.duplicate(true)})
+	var ids: Array = e._orders_by_subject.get(subject, [])
+	var start: int = clampi(offset, 0, ids.size())
+	var page_size: int = clampi(limit, 0, 32)
+	var position: int = ids.size() - 1 - start
+	var scanned: int = 0
+	var orders: Array[Dictionary] = []
+	while position >= 0 and orders.size() < page_size and scanned < 256:
+		var id: String = str(ids[position])
+		position -= 1
+		scanned += 1
+		var order: Dictionary = e._orders.get(id, {})
+		if order.is_empty() or (order["buyer"] != subject and order["seller"] != subject): continue
+		if not site.is_empty() and not ((order["buyer"] == subject and order.get("buyer_site", "") == site) or (order["seller"] == subject and order.get("seller_site", "") == site)): continue
+		orders.append(order_view(e, observer, order))
+	var more: bool = position >= 0
+	var firm: Dictionary = {"subject_id": subject, "firm_id": subject if managed else "", "site_id": site, "current_place_id": e._place(site if not site.is_empty() else subject), "account_id": account_id, "denomination": account["denomination"], "cash": e._world.ledger_state.balance(account_id), "reserved": e._world.ledger_state.reserved_balance(account_id), "available": e._world.ledger_state.available_balance(account_id), "inventory": stock, "free_inventory": free_inventory, "committed_inventory": committed_inventory, "inventory_status": inventory_status, "inventory_basis": "SELECTED_OWN_SITE" if not site.is_empty() else "CURRENT_PLACE_ACCESSIBLE_PERSONAL_STOCK" if not managed else "SELECT_A_SITE_NO_FIRM_WIDE_STOCK_AGGREGATE", "operations": operations, "orders": orders, "sales_orders": []}
+	return {"format": "economy_map_subject_v1", "minute": e._world.game_clock.total_minutes(), "day": e.day, "observer": observer, "subject_id": subject, "site_id": site, "visibility": "AUTHORIZED_CURRENT_MANAGER_OWN_BUSINESS" if managed else "OBSERVER_PERSONAL_LOCAL_STOCK_AND_OWN_CONTRACTS", "firm": firm, "orders_total": ids.size(), "offset": start, "page_size": page_size, "next_offset": start + scanned, "truncated": more, "scanned": scanned, "scan_limit": 256, "pagination_basis": "LATEST_SUBJECT_INDEX_REVERSE_OFFSET_SITE_FILTER_IS_BOUNDED_NOT_A_FILTERED_TOTAL", "physical_tracking": "LOCAL_OBSERVATION_AND_RECEIVED_LOSS_RECORDS_ONLY"}
+
+static func own(e: RefCounted, actor: String, firm: String, site: String) -> Dictionary:
+	if not e._spec.firms.has(firm) or not e._manager(actor, firm) or not e._spec.sites.has(site) or e._owner(site) != firm: return {}
+	var now: int = e._world.game_clock.total_minutes()
+	var activities: Array[Dictionary] = _activities(e, site)
 	var orders: Array[Dictionary] = []
 	var prices: Array[Dictionary] = []
 	var decisions: Array[Dictionary] = []
@@ -100,4 +179,4 @@ static func own(e: RefCounted, actor: String, firm: String, site: String) -> Dic
 		inventory_status[good] = {"at_site_quantity": e._stocks[site][good], "reserved_at_site_quantity": reserved, "unreserved_at_site_quantity": maxi(0, int(e._stocks[site][good]) - reserved), "incoming_accepted_quantity": e._incoming_by_key.get(site + "|" + good, 0), "incoming_order_transit_quantity": incoming_transit, "outgoing_order_transit_quantity": outgoing_transit, "cumulative_delivered_in": delivered_in, "cumulative_delivered_out": delivered_out, "basis": "FORMAL_LOTS_RESERVATIONS_AND_CONTRACT_STATUS_NOT_UNCONFIRMED_REMOTE_CARGO_PHYSICS"}
 	var payments: Array = e._world.ledger_state.own_transactions(firm)
 	if payments.size() > 8: payments = payments.slice(payments.size() - 8)
-	return {"format": FORMAT, "minute": now, "day": e.day, "observer": actor, "visibility": "AUTHORIZED_CURRENT_MANAGER_OWN_BUSINESS", "firm_id": firm, "site_id": site, "place_id": e._place(site), "configuration_source": {"case_id": e.config.case_id, "identity_basis": e._business_identity_basis(firm), "recipe_source": "EconomySliceConfig normalized activities; process.source or LEGACY_UNSPECIFIED"}, "units": {"goods": e._good_units().duplicate(true), "labor": "person_hour", "time": "host_game_minute", "currency": "denomination-tagged integer minor units", "capacity": "capacity_unit_per_eligible_day"}, "activities": activities, "physical_totals": e._physical_totals[site].duplicate(true), "inventory": e._inventory_view(site).duplicate(true), "inventory_status": inventory_status, "finance": e._firm_finance_view(firm).duplicate(true), "wage_claims_latest8": wages, "seller_quotes": quotes, "actual_trade_prices_latest8": prices, "orders_latest8": orders, "payments_latest8": payments, "npc_results_latest8": decisions, "truncation": "Latest 8 records per history; aggregates retain source windows", "excluded_internal_state": ["OTHER_FIRMS_PRIVATE_STOCK_CASH_PLANS", "UNRECEIVED_SUPPLIER_INFORMATION", "MACRO_ESTIMATED_FLOW_AND_PRICE", "UNCONFIRMED_CARGO_OUTCOME"]}
+	return {"format": FORMAT, "minute": now, "day": e.day, "observer": actor, "visibility": "AUTHORIZED_CURRENT_MANAGER_OWN_BUSINESS", "firm_id": firm, "site_id": site, "place_id": e._place(site), "configuration_source": _configuration_source(e, firm), "units": _units(e), "activities": activities, "physical_totals": e._physical_totals[site].duplicate(true), "inventory": e._inventory_view(site).duplicate(true), "inventory_status": inventory_status, "finance": e._firm_finance_view(firm).duplicate(true), "wage_claims_latest8": wages, "seller_quotes": quotes, "actual_trade_prices_latest8": prices, "orders_latest8": orders, "payments_latest8": payments, "npc_results_latest8": decisions, "truncation": "Latest 8 records per history; aggregates retain source windows", "excluded_internal_state": ["OTHER_FIRMS_PRIVATE_STOCK_CASH_PLANS", "UNRECEIVED_SUPPLIER_INFORMATION", "MACRO_ESTIMATED_FLOW_AND_PRICE", "UNCONFIRMED_CARGO_OUTCOME"]}
