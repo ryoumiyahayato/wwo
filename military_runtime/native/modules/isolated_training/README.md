@@ -109,3 +109,7 @@ python tools/map/install_region_slice.py --from-zip TERRAIN.zip --training-from-
 ## 隐藏旧按钮主题（`8613038`）
 
 仅当旧20按钮在skirmish尾段最终必隐藏时省掉60个StyleBoxFlat/refresh，不跳其余HUD/disabled/reticle/显隐/军令/合法观察，车库/练习主题照常；无cache/池/新flag。RTX默认单变量前段运动1.888FPS/P99 589.587ms、静止1.907/574.050、HE1.961/658.239，未证实净帧收益。82步兵射手166枪、19AI车全移动/实射；HE段4发、驾驶2.972m仍失败。后段原车长真实阵亡，全场结束、physics-active=0；26.411/60.100FPS无效，不拿244.638s混合区间称全程活动。这里只去确定隐藏重建，主要瓶颈、有效持续30FPS与完整操控仍未解决，详见既有说明。
+
+## 第二组RTX诊断窗：候选撤回
+
+abcf原码与772f Nav局部精确f缓存约244s累计测量均失败，运动2.264→2.040FPS/P99 488.870→571.180、HE2.961→2.924/414.042→431.287。Nav4.671→5.136ms/150callback，未改车辆亦约慢11%，不归因算法；开场累计plan11/6，不能把Nav全区间当A*容器。已9d3902c回退，runtime净回abcf。两窗150兵全移动、真实射击，车长原规则阵亡后physics=0，60/43.957等无效；正常操控/持续30FPS未达。类型两声明4eba回退（无script slot/direct-call快路证据）；query桶候选低上界且未测，已原样还原。正式隔离/身份比较true，无SCRIPT ERROR，详细CPU/整卡GPU与缺口/内存/模拟墙时见既有主说明。
