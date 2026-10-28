@@ -230,6 +230,18 @@ python tools/map/install_region_slice.py --training-from-zip MODELS.zip
 
 主要活动段模拟/墙时.256–.367；整卡显存约374–376MiB含桌面，并非进程GPU帧时间，进程GPU缺口仍保留。每条样本新scope正确标明同游戏PID19664、game_process与NVIDIA整卡、实际RTX adapter；这只是旧数据来源标签，没有增加测量或改变负载。AP1/HE5/SMK2，HE阶段4发满足原driver密集门，但FPS仍失败，不扩称稳定爆炸承载；驾驶2.973m仍低于原>5m。原车长同Actor实走3.400m返原座，原伤弹保留、自然HP7→3；观察步行collision检查、同会话重入、正式世界/人物/相机比较通过。无SCRIPT ERROR/ERROR、保留既有warning。默认没有感知counter，不据此记0ray；诊断轮另有实际本人ray数据。相对早先RTX基线没有足够稳定净收益，30FPS与完整操控仍未达标。原始报告保留于validation的`field170-mandatory-default-20261028`。
 
+### 第三条窄路径：最终隐藏的旧按钮主题（`8613038`）
+
+真实入口虽跳过原Main._ready，仍build_hud并继承原refresh_hud。该函数每≥.1s且每render最多一次，为20个旧按钮各new三种StyleBoxFlat并theme override；随后skirmish尾段又统一hide这些旧按钮。只用尾段显隐条件的补集`garage || game_mode!="skirmish"`包住纯主题循环，省去该模式每refresh确定无最终显示的60次new/override。没有跳整次HUD刷新，也没有style池/cache、新flag、降低刷新频率或隐藏军事实体；原文本/disabled/reticle/消息/权限、显隐通知、薄HUD/底车3D视图照常，回车库/练习仍原样重建。
+
+原Main._process还推进结束/地形事件/anchors/focus/camera/weather/VFX，Minimap还维护真实军令，不能整段当作表现停用。也没有找到每render重建全场170个mesh/material或深复制全世界的事实。60个UI样式是确定重复工作，不等于数百毫秒根因或30FPS净收益。
+
+补正监控解读：[Godot4.6.3主循环](https://github.com/godotengine/godot/blob/4.6.3-stable/main/main.cpp#L4960-L5001)的TIME_PROCESS/TIME_PHYSICS_PROCESS是约1秒发布窗中的各自最大值，可来自不同frame且滞后。process含idle/flush/nav与RenderingServer sync/draw调用墙时、不含前面的physics循环，也不是GPU完成时间；physics取最大单tick，不累加同render的8tick。不能将physics monitor×8与process相加重建某帧，也不能把process的66–444ms直接归罪HUD。既有Actor/Armor同render事件可定位其本身累计成本，剩余draw/同步缺口仍未完全分离。
+
+`8613038`与`c5cab17`同RTX/Compatibility/1280×720、默认timing关闭作单变量复核：运动1.923→1.888FPS（P99 562.804→589.587ms）、玩家静止1.944→1.907（588.301→574.050）、HE2.393→1.961（503.101→658.239）。未支持稳定净帧收益，不能将静态少60个style与数百毫秒缺口画等号。候选启动时另见CompatTelRunner约90%单核等量及Chrome等桌面活动，没改/停它们，亦没有全时外部负载记录，不以此掩盖前段约1.9FPS失败。
+
+候选测量区间累计244.638s墙时**不全是活动时间**：初20车/150活兵且150physics/62座/212人，150人全移动，19AI车全移动/19实射，82步兵射手（蓝43/红39）166枪、AP1/HE5/SMK1、HE段4发；驾驶2.972m仍失败。原车长同Actor实走3.400m返原座/伤弹保留，后来HP7→0真实阵亡，末battle_finished=true、41兵尚存但physics-active=0。持续段混合26.411FPS和重入60.100FPS均无效，不能作为完整负载收益或把累计244s称全程活战斗。身份、正式世界/人物/相机比较及观察步行通过，无SCRIPT ERROR/ERROR；控件截图布局保留只证明本窗口表现未见缺损，不是帧率验收。保留两行条件门仅代表确定的隐藏重建已去掉，当前源码仍未完成有效持续30FPS/正常操控验收。原始候选保留于`field170-hidden-style-default-20261028`，完整未结束战斗的RTX默认参考仍是前述`c5cab17`窗口。
+
 ## 明确未完成
 
 - 步行167.555ms及其它未知峰的根因仍未关闭；已对齐的native建块成本仅作局部修复，实机功能通过不等于性能验收或用户接受。

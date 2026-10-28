@@ -476,13 +476,15 @@ func refresh_hud():
 	for label in labels.values():label.show()
 	buttons.mg_type.position.x=486;buttons.he.position.x=178;buttons.he.text="高爆弹 HE";labels.shells.text="武器弹种"
 	if hud==null:return
-	for key in buttons:
-		var b: Button=buttons[key]
-		var active: bool=(key==["heavy","light","infantry"][unit] or (mounted_kind()!="mg" and key==["ap","he","smoke"][1 if mounted_kind()=="mortar" else ammo]))
-		b.add_theme_stylebox_override("normal",ui_style(Color(.13,.17,.18,.88),Color("c8a66e") if active else Color("45545b")))
-		b.add_theme_stylebox_override("hover",ui_style(Color("3b4848"),Color("c8a66e")))
-		b.add_theme_stylebox_override("pressed",ui_style(Color("5a6152"),Color("e5bf77")))
-		b.add_theme_color_override("font_color",Color("e7cb95") if active else Color("ced8d8"))
+	# Skirmish hides these legacy buttons at the end of this refresh.
+	if garage or game_mode!="skirmish":
+		for key in buttons:
+			var b: Button=buttons[key]
+			var active: bool=(key==["heavy","light","infantry"][unit] or (mounted_kind()!="mg" and key==["ap","he","smoke"][1 if mounted_kind()=="mortar" else ammo]))
+			b.add_theme_stylebox_override("normal",ui_style(Color(.13,.17,.18,.88),Color("c8a66e") if active else Color("45545b")))
+			b.add_theme_stylebox_override("hover",ui_style(Color("3b4848"),Color("c8a66e")))
+			b.add_theme_stylebox_override("pressed",ui_style(Color("5a6152"),Color("e5bf77")))
+			b.add_theme_color_override("font_color",Color("e7cb95") if active else Color("ced8d8"))
 	labels.name.text=(str(catalog_entry().get("display_name","战车")) if unit<2 else "野战步枪兵") if garage else ("步兵靶位" if target_infantry else ["目标 · 堡垒 5人","目标 · 红隼 3人"][target_tank])
 	labels.spec.text=("重型战车 · 固定穿深 110" if unit==0 else "轻型战车 · 固定穿深 90") if unit<2 else "步兵试验单位 · 无数字生命条"
 	if not garage: labels.spec.text="点选转炮 · 拖靶检视 · 开镜微调后射击"
