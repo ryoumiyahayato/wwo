@@ -1,59 +1,46 @@
 class_name FormalEconomicMapObservation
 extends RefCounted
-## Adapts the existing formal owners to the frozen merchant display contracts.
-## No Runtime, clock, stock, order, account or mutable cross-domain database.
+## Detached observer projections. No clock, stock, account or routing authority.
 const Network = preload("res://scripts/presentation/map/economy/observed_market_network.gd")
 const Contacts = preload("res://scripts/presentation/map/economy/observed_market_contacts.gd")
 const ORDER_PAGE = 32
 const NODE_BUDGET = 128
 const PLACE_BUDGET = 96
 const FACT_BUDGET = 64
-# One detached content projection and one current viewport projection only.
-# Camera signals may query another window; draw calls never scan the economy.
-static var _network_stamp: Array = []
-static var _known_network: Dictionary = {}
-static var _window_places: Array[String] = []
-static var _window_network: Dictionary = {}
-
-static func node_network(world: WorldState, places: Array[String] = []) -> Dictionary:
-	if world==null or world.economy_r1==null: return {}
-	var key := stamp(world)
-	if _network_stamp!=key:
-		_network_stamp=key
-		_known_network=world.economy_r1.network_view(world.player_state.player_id(),[],NODE_BUDGET)
-		_window_places.clear()
-		_window_network.clear()
-	if places.is_empty(): return _known_network
-	if _window_places!=places or _window_network.is_empty():
-		_window_places=places.duplicate()
-		_window_network=world.economy_r1.network_view(world.player_state.player_id(),places,NODE_BUDGET)
-	return _window_network
+static var _hub_stamp: Array = []
+static var _hub_data: Dictionary = {}
+static var _city_stamp: Array = []
+static var _city_data: Dictionary = {}
 
 static func stamp(world: WorldState) -> Array:
-	if world==null: return []
-	var native := world.economy_r1
+	if world==null:return []
+	var native:=world.economy_r1
 	return [world.get_instance_id(),world.player_state.player_id(),world.game_clock.total_minutes(),world.organization_state.revision(),world.economy_state._state_revision,native._commands.size() if native!=null else 0,native.next_order if native!=null else 0,native.next_shipment if native!=null else 0,native.network_revision() if native!=null else 0]
+
+static func identity_stamp(world: WorldState) -> Array:
+	if world==null:return []
+	var native:=world.economy_r1
+	return [world.get_instance_id(),world.player_state.player_id(),world.organization_state.revision(),native.network_revision() if native!=null else 0,native._commands.size() if native!=null else 0,native._receipts.size() if native!=null else 0,native._enterprise_changes.size() if native!=null else 0,native.day if native!=null else 0]
+
+static func hubs(world: WorldState) -> Dictionary:
+	if world==null or world.economy_r1==null:return {}
+	var key:=identity_stamp(world)
+	if key!=_hub_stamp:
+		_hub_stamp=key
+		_hub_data=world.economy_r1.market_hub_view(world.player_state.player_id(),[],PLACE_BUDGET)
+	return _hub_data
+
+static func node_network(world: WorldState, places: Array[String] = []) -> Dictionary:
+	# Establishment identities are requested only for the inspected city.
+	if world==null or world.economy_r1==null or places.is_empty():return {}
+	var key:Array=[identity_stamp(world),places]
+	if key!=_city_stamp:
+		_city_stamp=key
+		_city_data=world.economy_r1.network_view(world.player_state.player_id(),places,NODE_BUDGET)
+	return _city_data
 
 static func canonical_place(id: String) -> String:
 	return VNextSpatialCatalog.map_id_to_place_id(VNextSpatialCatalog.place_query_to_map_id(id))
-
-static func known_places(world: WorldState) -> Array[Dictionary]:
-	var rows:Array[Dictionary]=[]
-	if world==null or world.economy_r1==null:return rows
-	var seen:Dictionary={}
-	# Only identities admitted by the observer boundary. A public establishment
-	# is not permission to read its account, stock, orders or unreceived messages.
-	for source:Dictionary in node_network(world).get("nodes",[]):
-		var id:=str(source.get("place_id",""))
-		if id.is_empty() or seen.has(id):continue
-		var record:=world.spatial_catalog.get_place(id)
-		if not _coordinates(record):continue
-		var point:=record.duplicate()
-		point["id"]=id
-		point["display_name"]=str(record.get("name_zh",record.get("name",id)))
-		rows.append(point);seen[id]=true
-		if rows.size()>=PLACE_BUDGET:break
-	return rows
 
 static func _coordinates(place: Dictionary) -> bool:
 	var coordinates:Variant=place.get("lon_lat")
@@ -62,131 +49,105 @@ static func _coordinates(place: Dictionary) -> bool:
 	var ll:=Vector2(float(coordinates[0]),float(coordinates[1]))
 	return ll.is_finite() and absf(ll.x)<=180 and absf(ll.y)<=90
 
+static func known_places(world: WorldState) -> Array[Dictionary]:
+	var rows:Array[Dictionary]=[]
+	if world==null:return rows
+	for hub:Dictionary in hubs(world).get("hubs",[]):
+		var id:=str(hub.get("place_id",""))
+		var record:=world.spatial_catalog.get_place(id)
+		if not _coordinates(record):continue
+		var point:=record.duplicate()
+		point["id"]=id;point["display_name"]=str(hub.get("label",record.get("name_zh",id)))
+		rows.append(point)
+	return rows
+
 static func brief(world: WorldState, places: Array[String], polity_id: String, capital: Dictionary) -> Array[Dictionary]:
-	var facts: Array[Dictionary] = []
-	if world==null: return facts
-	var observer := world.player_state.player_id()
-	if world.economy_r1!=null:
-		var groups:Dictionary={}
-		for node:Dictionary in node_network(world,places).get("nodes",[]):
-			var id:=str(node.get("place_id",""))
-			if id not in places:continue
-			if not groups.has(id):groups[id]={"source_id":"nodes:"+id,"subject_id":observer,"place_id":id,"kind":"place","node_ids":[],"node_kinds":[],"site_count":0,"transport_count":0,"identity_bases":[],"known_activity":[],"basis":"OBSERVER_AUTHORIZED_NODE_IDENTITIES","priority":50}
-			var group:Dictionary=groups[id]
-			group.node_ids.append(str(node.get("id","")))
-			var kind:=str(node.get("kind",""))
-			if kind not in group.node_kinds:group.node_kinds.append(kind)
-			var basis:=str(node.get("identity_basis",node.get("basis","")))
-			if not basis.is_empty() and basis not in group.identity_bases:group.identity_bases.append(basis)
-			if kind=="site":
-				group.site_count+=1;group.kind="site";group.priority=80
-				if str(node.get("subject_id",observer))!=observer:group.subject_id=str(node.subject_id)
-			elif kind=="transport_node":
-				group.transport_count+=1
-				if group.kind=="place":group.kind="transport_node"
-		# Retain received labour/supplier activity, not another firm's private plan.
-		for row:Dictionary in world.economy_r1.map_site_summaries(observer,places,16):
-			var id:=str(row.place_id)
-			if groups.has(id):groups[id].known_activity.append(str(row.get("state","")))
-		for id:String in groups:
-			var group:Dictionary=groups[id]
-			group["state"]="合法地点"+(" · %d企业站点"%int(group.site_count) if int(group.site_count)>0 else "")+(" · 物流节点" if int(group.transport_count)>0 else "")
-			var fact:=_fact(world,group,world.spatial_catalog.get_place(id))
-			if not fact.is_empty():facts.append(fact)
-			if facts.size()>=FACT_BUDGET-1:break
-	# A country statistic is labelled as such. Its capital is only a display
-	# anchor; it is never evidence of a business, warehouse or city inventory.
+	var facts:Array[Dictionary]=[]
+	if world==null:return facts
+	for hub:Dictionary in hubs(world).get("hubs",[]):
+		var id:=str(hub.get("place_id",""))
+		if id not in places:continue
+		var row:Dictionary=hub.duplicate()
+		row.merge({"source_id":id,"subject_id":"","kind":"economic_hub","state":"已知经济主体 %s · 站点 %s"%[str(hub.get("known_subject_count","未知")),str(hub.get("known_site_count","未知"))],"basis":"PUBLIC_OR_RECEIVED_CITY_IDENTITIES","priority":70})
+		var fact:=_fact(world,row,world.spatial_catalog.get_place(id))
+		if not fact.is_empty():facts.append(fact)
+		if facts.size()>=FACT_BUDGET-1:break
 	if not polity_id.is_empty() and not capital.is_empty():
-		var summary := world.economy_state.country_summary(polity_id)
-		var totals := summary.get("daily_totals",{}) as Dictionary
-		var fulfillment: Variant = totals.get("fulfillment_bp")
-		var place_id := canonical_place(str(capital.get("id","")))
-		if fulfillment is float or fulfillment is int:
-			if float(fulfillment)>=0 and place_id in places:
-				var row := {"source_id":str(summary.get("market_id","")),"subject_id":"aggregate:"+polity_id,"place_id":place_id,"kind":"country_statistics","state":"国家统计 · 满足率 %.1f%%" % (float(fulfillment)/100.0),"basis":"FORMAL_SETTLED_COUNTRY_STATISTICS","priority":40}
-				var fact := _fact(world,row,capital)
-				if not fact.is_empty():
-					fact["position_kind"] = "COUNTRY_STATISTIC_AT_CAPITAL_ANCHOR"
-					fact["knowledge"] = "PUBLIC_COUNTRY_STATISTICS"
-					facts.append(fact)
+		var summary:=world.economy_state.country_summary(polity_id)
+		var fulfillment:Variant=summary.get("daily_totals",{}).get("fulfillment_bp")
+		var place_id:=canonical_place(str(capital.get("id","")))
+		if (fulfillment is float or fulfillment is int) and float(fulfillment)>=0 and place_id in places:
+			var row:Dictionary={"source_id":str(summary.get("market_id","")),"subject_id":"aggregate:"+polity_id,"place_id":place_id,"kind":"country_statistics","state":"国家统计 · 满足率 %.1f%%"%(float(fulfillment)/100.0),"basis":"FORMAL_SETTLED_COUNTRY_STATISTICS","priority":40}
+			var fact:=_fact(world,row,capital)
+			if not fact.is_empty():
+				fact["position_kind"]="COUNTRY_STATISTIC_AT_CAPITAL_ANCHOR";fact["knowledge"]="PUBLIC_COUNTRY_STATISTICS";facts.append(fact)
 	return facts
 
 static func _fact(world: WorldState, row: Dictionary, place: Dictionary) -> Dictionary:
 	if not _coordinates(place):return {}
-	var coordinates:Array=place.lon_lat
-	var fact := row.duplicate()
-	fact.merge({"id":"economy:"+str(row.source_id),"domain":"economy","observer":world.player_state.player_id(),"world_id":world.get_instance_id(),"world_minute":world.game_clock.total_minutes(),"lon_lat":coordinates.duplicate(),"position_kind":"CITY_ANCHOR_NOT_PARCEL","knowledge":"PUBLIC_OR_RECEIVED_IDENTITY_NOT_PRIVATE_BUSINESS_DATA","maps":["political","economic","geographic"]},true)
+	var fact:=row.duplicate()
+	fact.merge({"id":"economy:"+str(row.source_id),"domain":"economy","observer":world.player_state.player_id(),"world_id":world.get_instance_id(),"world_minute":world.game_clock.total_minutes(),"lon_lat":(place.lon_lat as Array).duplicate(),"position_kind":"CITY_ANCHOR_NOT_PARCEL","knowledge":"PUBLIC_OR_RECEIVED_IDENTITY_NOT_PRIVATE_BUSINESS_DATA","maps":["political","economic","geographic"]},true)
 	return fact
 
 static func subjects(world: WorldState, polity_id: String) -> Array[Dictionary]:
-	var rows: Array[Dictionary] = []
-	if world==null: return rows
-	if world.economy_r1!=null: rows.append_array(world.economy_r1.map_subjects(world.player_state.player_id()))
-	if not polity_id.is_empty(): rows.append({"id":"aggregate:"+polity_id,"name":"所选国家 · 统计范围","kind":"aggregate"})
+	var rows:Array[Dictionary]=[]
+	if world==null:return rows
+	if world.economy_r1!=null:rows.append_array(world.economy_r1.map_subjects(world.player_state.player_id()))
+	if not polity_id.is_empty():rows.append({"id":"aggregate:"+polity_id,"name":"国家统计（非城市库存）","kind":"aggregate"})
 	return rows
 
-static func details(world: WorldState, polity_id: String, requested_subject: String, offset: int = 0, requested_order: String = "") -> Dictionary:
-	if world==null: return {}
-	var choices := subjects(world,polity_id)
-	var subject := requested_subject
-	if subject.begins_with("aggregate:"): subject = "aggregate:"+polity_id
-	if not choices.any(func(row: Dictionary) -> bool: return row.id==subject): subject = str(choices[0].id) if not choices.is_empty() else ""
-	var result := {"world_id":world.get_instance_id(),"minute":world.game_clock.total_minutes(),"date":world.game_clock.current_date(),"world_case":str(world.economy_r1.config.get("case_id","")) if world.economy_r1!=null else "FORMAL_COUNTRY_STATISTICS","observer":world.player_state.player_id(),"subject":subject,"subjects":choices,"source":"当前正式世界 · 只读经济观察","firm":{},"market_network":{},"market_contacts":{},"macro":{},"orders_total":0,"offset":0,"page_size":ORDER_PAGE,"native_enabled":world.economy_r1!=null}
-	result["node_network"]=node_network(world)
-	result["identity_notice"]="显式开发情景；企业、初始禀赋与配方/工资/运力为开发假设，不是历史企业或历史统计。" if str(result.world_case).contains("DEVELOPMENT") else "当前正式世界身份；巴黎开局企业为有限模拟、非历史企业。合法地点不等于人口、库存或厂房地籍。" if str(result.world_case).contains("PARIS") else "合法地点与企业身份按现有来源列示；未提供的历史身份、私有财产和未收到信息不推定。"
-	if result.world_case == "FORMAL_ECONOMIC_NODE_NETWORK_DEVELOPMENT":
-		result["identity_notice"] += " 法英同币种开发贸易；海峡段占用正式共享运力，其他段为开发业务运量。未验收外汇、关税或禁运制度。"
+static func overview(world: WorldState, polity_id: String, place_id: String = "", subject: String = "") -> Dictionary:
+	if world==null:return {}
+	var world_case:=str(world.economy_r1.config.get("case_id","")) if world.economy_r1!=null else "FORMAL_COUNTRY_STATISTICS"
+	var notice:="开发情景：非历史企业；禀赋、配方、工资与运力为开发假设。" if world_case.contains("DEVELOPMENT") else "巴黎普通开局企业为有限模拟、非历史企业。" if world_case.contains("PARIS") else "身份按现有公开或已收到资料列示。"
+	var known_hubs:=hubs(world)
+	return {"world_id":world.get_instance_id(),"minute":world.game_clock.total_minutes(),"date":world.game_clock.current_date(),"world_case":world_case,"observer":world.player_state.player_id(),"subject":subject,"selected_place":place_id,"authorized_subjects":subjects(world,polity_id),"subjects":[],"hubs":known_hubs,"node_network":{},"firm":{},"market_network":{},"market_contacts":{},"production_details":{},"macro":{},"orders_total":0,"offset":0,"next_offset":0,"page_size":ORDER_PAGE,"native_enabled":world.economy_r1!=null,"details_loaded":false,"identity_notice":notice,"read_scope":{"kind":"HUB_IDENTITIES_ONLY","identity_limit":PLACE_BUDGET,"identity_truncated":known_hubs.get("truncated")}}
+
+static func details(world: WorldState, polity_id: String, requested_subject: String, offset: int = 0, requested_order: String = "", place_id: String = "", site_id: String = "", research: bool = false) -> Dictionary:
+	var result:=overview(world,polity_id,place_id,requested_subject)
+	if result.is_empty():return result
+	result["details_loaded"]=true;result["research"]=research
+	var city:=node_network(world,[place_id]) if not place_id.is_empty() else {}
+	result["node_network"]=city
+	result["read_scope"]={"kind":"CITY_IDENTITIES_ONLY","identity_limit":NODE_BUDGET,"identity_truncated":city.get("truncated")}
+	var choices:Array[Dictionary]=[{"id":"","name":"城市总览","kind":"hub"}]
+	var authorized:Dictionary={}
+	for row:Dictionary in result.authorized_subjects:authorized[str(row.id)]=row
+	var seen:Dictionary={}
+	for node:Dictionary in city.get("nodes",[]):
+		var firm:=str(node.get("firm_id",""))
+		var producer:bool=str(node.get("kind",""))=="local_producer"
+		if producer:firm=str(node.get("id",""))
+		if str(node.get("place_id",""))!=place_id or firm.is_empty() or seen.has(firm):continue
+		seen[firm]=true
+		choices.append({"id":firm,"name":"本地生产者（公开身份）" if producer else FormalEconomicText.firm(firm),"kind":"firm" if authorized.has(firm) else "public_firm"})
+	for row:Dictionary in result.authorized_subjects:
+		if row.kind in ["person","aggregate"]:choices.append(row)
+	var subject:=requested_subject
+	if not choices.any(func(row:Dictionary)->bool:return str(row.id)==subject):subject=""
+	result["subject"]=subject;result["subjects"]=choices
 	if subject.begins_with("aggregate:"):
-		result["macro"] = world.economy_state.country_summary(subject.trim_prefix("aggregate:"))
-		return result
-	if world.economy_r1==null or subject.is_empty(): return result
-	var observed := LivelihoodAction.query(world,world.player_state.player_id()) if subject==world.player_state.player_id() else LivelihoodAction.query_firm(world,world.player_state.player_id(),subject)
-	if observed.is_empty(): return result
-	var own: Dictionary = {}
-	for key: String in ["day","cash","reserved","inventory","offers","orders","sales_orders","operations","lifecycle","employment","known_jobs","totals","wage_outstanding","wage_matured_unpaid"]:
-		if observed.has(key): own[key] = observed[key]
-	if subject==world.player_state.player_id():
-		own["participation"] = world.personal_economy_state.person_economy(subject)
-	# Retain one bounded detail page. Historical records remain in their owner.
-	var orders: Array[Dictionary] = []
-	var seen: Dictionary = {}
-	for key: String in ["orders","sales_orders"]:
-		for order: Dictionary in own.get(key,[]):
-			if seen.has(str(order.id)): continue
-			seen[str(order.id)] = true
-			orders.append(order)
-	orders.reverse()
-	if not requested_order.is_empty():
-		for index:int in range(orders.size()):
-			if str(orders[index].id)==requested_order:offset=(index/ORDER_PAGE)*ORDER_PAGE;break
-	var last_page := (maxi(0,orders.size()-1)/ORDER_PAGE)*ORDER_PAGE
-	var start := clampi(offset,0,last_page)
-	result["orders_total"] = orders.size()
-	result["offset"] = start
-	own["orders"] = orders.slice(start,start+ORDER_PAGE)
-	own["sales_orders"] = []
-	var operations := own.get("operations",[]) as Array
-	own["operations"] = operations.slice(0,16)
-	result["production_details"]={}
-	if subject!=world.player_state.player_id(): # query_firm above already authenticated the current manager.
-		for operation:Dictionary in own["operations"]:
-			var site:=str(operation.get("site_id",""))
-			if site.is_empty():continue
-			var production:=world.economy_r1.economy_read_view(world.player_state.player_id(),subject,site)
-			if not production.is_empty():
-				result["production_details"][site]={"site_id":site,"activities":production.get("activities",[]),"units":production.get("units",{}),"inventory_status":production.get("inventory_status",{}),"configuration_source":production.get("configuration_source",{})}
-	var offers := own.get("offers",[]) as Array
-	own["offers"] = offers.slice(0,64)
-	var received: Array[Dictionary] = []
-	for offer: Dictionary in own["offers"]:
-		if str(offer.get("from_place_id","")).is_empty() or str(offer.get("to_place_id","")).is_empty(): continue
-		var row := offer.duplicate()
-		# A quoted quantity is not a procurement permission. The existing
-		# business page performs that check when the player requests it.
-		row["can_order_one"] = null
-		row["quoted_quantity_positive"] = int(row.get("quantity",0))>0
-		received.append(row)
-	result["firm"] = own
-	result["market_network"] = Network.project(own)
-	result["market_contacts"] = Contacts.project(own,received,world.game_clock.total_minutes())
+		result["macro"]=world.economy_state.country_summary(subject.trim_prefix("aggregate:"));return result
+	if world.economy_r1==null or subject.is_empty() or not authorized.has(subject):return result
+	var requested_site:=site_id
+	if requested_site.is_empty() and subject!=world.player_state.player_id():
+		for node:Dictionary in city.get("nodes",[]):
+			if str(node.get("firm_id",""))==subject and str(node.get("kind",""))=="site" and str(node.get("place_id",""))==place_id:
+				requested_site=str(node.get("site_id",""));break
+	var page:=world.economy_r1.economy_map_view(world.player_state.player_id(),subject,requested_site,maxi(0,offset),ORDER_PAGE)
+	if page.is_empty():return result
+	var own:Dictionary=page.get("firm",{})
+	result["orders_total"]=int(page.get("orders_total",0));result["offset"]=int(page.get("offset",0));result["next_offset"]=int(page.get("next_offset",0));result["truncated"]=bool(page.get("truncated",false))
+	var selected_site:=site_id
+	if selected_site.is_empty() and not (own.get("operations",[]) as Array).is_empty():selected_site=str(own["operations"][0].get("site_id",""))
+	result["selected_site"]=selected_site
+	if subject!=world.player_state.player_id() and not selected_site.is_empty():
+		var production:=world.economy_r1.economy_production_view(world.player_state.player_id(),subject,selected_site)
+		if not production.is_empty():result["production_details"][selected_site]=production
+	# map_subject deliberately does not recompute global offers or wage history.
+	result["firm"]=own
+	result["market_network"]=Network.project(own)
+	result["read_scope"]={"kind":"AUTHORIZED_ORDER_PAGE","observed_minute":world.game_clock.total_minutes(),"place_id":place_id,"site_id":selected_site,"page_limit":ORDER_PAGE,"orders_returned":(result["market_network"].get("edges",{}) as Dictionary).size(),"orders_truncated":page.get("truncated"),"indexed_orders_total":page.get("orders_total"),"identity_limit":NODE_BUDGET,"identity_truncated":city.get("truncated")}
+	var received:Array[Dictionary]=[]
+	result["market_contacts"]=Contacts.project(own,received,world.game_clock.total_minutes())
 	return result

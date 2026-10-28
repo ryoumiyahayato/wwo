@@ -18,6 +18,8 @@ const REGIONAL_FAMILY: String = "cohort:regional:rouen_miller"
 const REGIONAL_RAIL_LINK: String = "rail_paris_rouen"
 const REGIONAL_PAYLOAD_UNIT: String = "development_transport_payload_unit"
 const REGIONAL_RAIL_EDGES: Array[String] = ["edge:network:paris:rouen", "edge:network:rouen:paris"]
+const REGIONAL_LYON_RAIL_LINK: String = "rail_paris_lyon"
+const REGIONAL_LYON_RAIL_EDGES: Array[String] = ["edge:network:paris:lyon", "edge:network:lyon:paris"]
 
 static func request(person_ids: Array[String] = []) -> Dictionary:
 	return {"format": "HOST_REGION_SELECTION", "person_ids": person_ids.duplicate(), "select_people_at_sites": person_ids.is_empty(), "configuration": template()}
@@ -212,10 +214,10 @@ static func _install_channel_transport(result: Dictionary, population_starts: Di
 
 ## Separate opt-in regional case. The original template/request and saved native
 ## configurations above are never rewritten or upgraded by selecting this case.
-static func regional_request(person_ids: Array[String] = []) -> Dictionary:
-	return {"format": "HOST_REGION_SELECTION", "person_ids": person_ids.duplicate(), "select_people_at_sites": person_ids.is_empty(), "configuration": regional_template()}
+static func regional_request(person_ids: Array[String] = [], lyon_shared: bool = true) -> Dictionary:
+	return {"format": "HOST_REGION_SELECTION", "person_ids": person_ids.duplicate(), "select_people_at_sites": person_ids.is_empty(), "configuration": regional_template(lyon_shared)}
 
-static func regional_template() -> Dictionary:
+static func regional_template(lyon_shared: bool = true) -> Dictionary:
 	var result := template()
 	result["case_id"] = REGIONAL_CASE_ID
 	result["management_scope"]["id"] = "scope:economic_regional_industry_development"
@@ -245,8 +247,8 @@ static func regional_template() -> Dictionary:
 		if firm["id"] not in ["firm:network:steel1", "firm:network:tools1"]: continue
 		for site: Dictionary in firm["sites"]:
 			for activity: Dictionary in site["activities"]: activity["process"]["max_batches_per_cycle"] = 4
-	_install_regional_rail(result, population_start)
-	population_start += 2
+	_install_regional_rail(result, population_start, lyon_shared)
+	population_start += 3 if lyon_shared else 2
 	_install_regional_family(result, population_start)
 	_install_regional_search(result)
 	# Explicit finite information, not knowledge of other firms' private books.
@@ -330,13 +332,18 @@ static func _install_regional_family(result: Dictionary, population_start: int) 
 	result["actors"].append({"id": REGIONAL_FAMILY, "kind": "cohort", "control": "automatic", "members": 2, "account_id": "account:regional:rouen_miller", "cash": 24, "stock": stock({"grain": 24}), "skill": 1, "daily_need": 1, "needs": {"food": 1, "clothing": 1, "household": 1}, "population_start": population_start, "place_id": "place:rouen", "population_unit_id": "country_fra"})
 	result["local_producers"] = [{"actor": REGIONAL_FAMILY, "input_good": "grain", "input_per_batch": 3, "output_good": "flour", "output_per_batch": 2, "hours_per_batch": 2, "max_batches_per_day": 1, "lifetime_batch_limit": 8, "price": 3, "basis": "EXPLICIT_DEVELOPMENT_FINITE_HOUSEHOLD_PROCESSING"}]
 
-static func _install_regional_rail(result: Dictionary, population_start: int) -> void:
+static func _install_regional_rail(result: Dictionary, population_start: int, lyon_shared: bool) -> void:
 	var owner := "firm:network:wholesale1"
 	var paris := "site:regional:station:paris"
 	var rouen := "site:regional:station:rouen"
+	var lyon := "site:regional:station:lyon"
+	# false preserves the original regional input for its existing regression;
+	# normal gameplay uses true. Neither option upgrades a saved configuration.
+	var stations: Array = [[paris, "place:paris"], [rouen, "place:rouen"]]
+	if lyon_shared: stations.append([lyon, "place:lyon"])
 	for firm: Dictionary in result["firms"]:
 		if firm["id"] != owner: continue
-		for pair: Array in [[paris, "place:paris"], [rouen, "place:rouen"]]:
+		for pair: Array in stations:
 			var shop: bool = pair[0] == paris
 			var suppliers: Array[String] = []
 			if shop: suppliers.append("firm:network:bakery1|bread|site:network:bakery1")
@@ -344,10 +351,15 @@ static func _install_regional_rail(result: Dictionary, population_start: int) ->
 			for supplier: String in suppliers: result["information"].append({"actor": pair[0], "kind": "supplier", "candidate": supplier, "delivery_day": 0})
 	_regional_worker(result, "station:paris", owner, paris, "place:paris", population_start)
 	_regional_worker(result, "station:rouen", owner, rouen, "place:rouen", population_start + 1)
+	if lyon_shared: _regional_worker(result, "station:lyon", owner, lyon, "place:lyon", population_start + 2)
 	var handling_starts: Array[int] = []
 	for day: int in range(0, 61):
 		for hour: int in [0, 4, 12, 16]: handling_starts.append(day * 1440 + hour * 60)
-	for site: String in [paris, rouen]:
+	# Both rail services use this ONE Paris facility and the same earned work.
+	# The Lyon site has no opening goods, money or production. Its worker is an
+	# admitted host population member paid from the existing carrier account.
+	for pair: Array in stations:
+		var site: String = pair[0]
 		for kind: String in ["HANDLING_THROUGHPUT", "BERTH_OCCUPANCY", "STORAGE_OCCUPANCY"]:
 			var windows: Array[Dictionary] = []
 			if kind == "HANDLING_THROUGHPUT":
@@ -357,11 +369,14 @@ static func _install_regional_rail(result: Dictionary, population_start: int) ->
 			# explicitly a station platform; it does not turn this rail into a port.
 			result["transport_facilities"].append({"id": "facility:regional:" + site + ":" + kind, "site_id": site, "kind": kind, "unit": REGIONAL_PAYLOAD_UNIT, "windows": windows, "basis": "EXPLICIT_DEVELOPMENT_TRANSPORT_FACILITY"})
 	for edge: Dictionary in result["routes"]:
-		if edge.get("source_link_id") != REGIONAL_RAIL_LINK: continue
+		var link: String = str(edge.get("source_link_id", ""))
+		if link != REGIONAL_RAIL_LINK and (not lyon_shared or link != REGIONAL_LYON_RAIL_LINK): continue
 		edge["carrier"] = owner
+		var mainline: bool = link == REGIONAL_LYON_RAIL_LINK
+		var other := lyon if mainline else rouen
 		var forward: bool = edge["from_place_id"] == "place:paris"
-		var origin := paris if forward else rouen
-		var destination := rouen if forward else paris
+		var origin := paris if forward else other
+		var destination := other if forward else paris
 		var entries: Array[int] = []
 		for day: int in range(0, 61): entries.append(day * 1440 + (0 if forward else 720))
 		var resources: Dictionary = {"unloading_minutes": 60, "unloading_hours_per_unit": 1}
@@ -369,7 +384,8 @@ static func _install_regional_rail(result: Dictionary, population_start: int) ->
 			var site := origin if key.begins_with("origin") else destination
 			var kind := "HANDLING_THROUGHPUT" if key.ends_with("handling") else "BERTH_OCCUPANCY" if key.ends_with("berth") else "STORAGE_OCCUPANCY"
 			resources[key] = "facility:regional:" + site + ":" + kind
-		result["shared_transport"].append({"edge_id": edge["id"], "source_link_id": REGIONAL_RAIL_LINK, "entry_minutes": entries, "weight_unit": REGIONAL_PAYLOAD_UNIT, "vehicle_id": "vehicle:regional:finite_train", "vehicle_payload": 4, "handling_site": origin, "handling_hours_per_unit": 1, "basis": "EXPLICIT_DEVELOPMENT_SHARED_RAIL_CAPACITY", "window_minutes": 60, "loading_minutes": 60, "travel_minutes": 180, "vehicle_hold_minutes": 300, "node_resources": resources, "legacy_node_limit_basis": "EXPLICIT_DAILY_BUSINESS_QUANTITY_LIMIT"})
+		var vehicle: String = "vehicle:regional:finite_lyon_train" if mainline else "vehicle:regional:finite_train"
+		result["shared_transport"].append({"edge_id": edge["id"], "source_link_id": link, "entry_minutes": entries, "weight_unit": REGIONAL_PAYLOAD_UNIT, "vehicle_id": vehicle, "vehicle_payload": 4, "handling_site": origin, "handling_hours_per_unit": 1, "basis": "EXPLICIT_DEVELOPMENT_SHARED_RAIL_CAPACITY", "window_minutes": 60, "loading_minutes": 60, "travel_minutes": 180, "vehicle_hold_minutes": 300, "node_resources": resources, "legacy_node_limit_basis": "EXPLICIT_DAILY_BUSINESS_QUANTITY_LIMIT"})
 
 static func _bind_channel_edges(result: Dictionary) -> void:
 	var starts: Array[int] = []

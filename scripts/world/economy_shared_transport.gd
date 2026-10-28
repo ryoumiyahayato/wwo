@@ -117,6 +117,33 @@ func release_storage(shipment_id: String, good: Variant, quantity_value: int, ev
 	use["released_amount"] += amount
 	if is_equal_approx(float(use["released_amount"]),float(use["amount"])): _active_node_uses.erase(id)
 
+# Inbound pressure is derived from current adopted cargo, not a reservation ledger.
+func _incoming_storage_amount(storage: String, c: Dictionary) -> float:
+	if c["stage"] not in ["LOADING", "TRANSIT", "WAITING_UNLOAD"] or int(c["quantity"]) <= 0: return 0.0
+	var shipment_id: String = str(c["id"])
+	var leg: int = int(c["leg_index"])
+	var adopted: Dictionary = entries.get("economy_entry:" + shipment_id + ":" + str(leg), {})
+	if adopted.is_empty() or adopted["shipment_id"] != shipment_id or int(adopted["leg_index"]) != leg: return 0.0
+	var r: Dictionary = bindings.get(adopted["edge_id"], {})
+	if not r.has("node_resources") or r["node_resources"]["destination_storage"] != storage: return 0.0
+	if node_uses.has("node:" + shipment_id + ":" + str(leg) + ":destination_storage"): return 0.0
+	var amount: float = _node_amount(storage, load_of(adopted), int(c["quantity"]))
+	return amount if amount > 0.0 else -1.0
+
+func _incoming_storage_total(storage: String) -> float:
+	var e := economy()
+	var total: float = 0.0
+	# Use existing cargo indices; no hold/window requirement and no historical scan.
+	for id: String in e._moving_shipments:
+		var amount: float = _incoming_storage_amount(storage, e._shipments[id])
+		if amount < 0.0: return -1.0
+		total += amount
+	for task: Dictionary in e._capital_transport.tasks.values():
+		var amount: float = _incoming_storage_amount(storage, task)
+		if amount < 0.0: return -1.0
+		total += amount
+	return total
+
 func _node_entry_limit(binding: Dictionary, good: Variant, now: int) -> int:
 	if not binding.has("node_resources"): return FormalLedgerState.MAX_AMOUNT
 	var n := binding["node_resources"] as Dictionary
@@ -125,7 +152,13 @@ func _node_entry_limit(binding: Dictionary, good: Variant, now: int) -> int:
 		var weight_value := _node_amount(n[key],good,1)
 		if weight_value <= 0.0: return 0
 		result = mini(result,int(floor(_node_available(n[key],now)/weight_value)))
-	return result
+	var storage: String = str(n["destination_storage"])
+	var storage_weight: float = _node_amount(storage, good, 1)
+	if storage_weight <= 0.0: return 0
+	var incoming: float = _incoming_storage_total(storage)
+	if incoming < 0.0: return 0 # An unconvertible adopted load is never zero-weight.
+	var available: float = maxf(0.0, _node_available(storage, now) - incoming)
+	return mini(result, int(floor(available / storage_weight)))
 
 ## Arrival is at the actual vehicle/node, never an unbounded warehouse.
 func arrive(shipment: Dictionary, order: Dictionary) -> bool:
@@ -339,12 +372,48 @@ func prepare_labor(capital_used: Dictionary) -> void:
 		e._labor[r["handling_site"]] = int(e._labor.get(r["handling_site"], 0))-hours
 		if r.has("node_resources"): _prepare_arrival_labor(r,used)
 
-func _prepare_arrival_labor(r: Dictionary, used: Dictionary, entered_only: bool = false) -> void:
+# Hard unloading reservations are for entered batches that can fit today.
+# Gross hiring forecasts remain in labor_needed_arrival, including pending orders.
+func _arrival_batch_hours_today(r: Dictionary, c: Dictionary, load: Variant) -> int:
+	if c["stage"] not in ["LOADING", "TRANSIT", "WAITING_UNLOAD"]: return 0
+	var e := economy()
+	var arrival: int = int(c.get("arrival_minute", -1))
+	if arrival >= 0:
+		# Staff are assigned once per day, including actual arrivals later today.
+		if arrival >= (int(e.day) + 1) * 1440: return 0
+	else:
+		var arrival_day: int = int(c.get("leg_arrival_day", -1))
+		if arrival_day < 0 or arrival_day > int(e.day): return 0
+	var quantity_value: int = int(c["quantity"])
+	if quantity_value <= 0: return 0
+	var storage: String = str(r["node_resources"]["destination_storage"])
+	var amount: float = _node_amount(storage, load, quantity_value)
+	var now: int = e._world.game_clock.total_minutes()
+	if amount <= 0.0 or amount > _node_available(storage, now) + VNextInfrastructureLinkState.CAPACITY_EPSILON: return 0
+	return quantity_value * handling_units(load) * int(r["node_resources"]["unloading_hours_per_unit"])
+
+func _arrival_labor_hours_today(r: Dictionary) -> int:
+	if not r.has("node_resources"): return 0
+	var e := economy()
+	var edge_id: String = str(r["edge_id"])
+	var total: int = 0
+	for id: String in e._moving_shipments:
+		var c: Dictionary = e._shipments[id]
+		var o: Dictionary = e._orders[c["order_id"]]
+		if o["route_legs"][c["leg_index"]]["edge_id"] != edge_id: continue
+		total += mini(FormalLedgerState.MAX_AMOUNT - total, _arrival_batch_hours_today(r, c, load_of(o)))
+	for task: Dictionary in e._capital_transport.tasks.values():
+		var capital_offer: Dictionary = e._capital_transport.offer(task["offer_id"])
+		if int(task["leg_index"]) >= capital_offer["legs"].size() or capital_offer["legs"][task["leg_index"]]["edge_id"] != edge_id: continue
+		total += mini(FormalLedgerState.MAX_AMOUNT - total, _arrival_batch_hours_today(r, task, load_of(task)))
+	return total
+
+func _prepare_arrival_labor(r: Dictionary, used: Dictionary, _entered_only: bool = false) -> void:
 	var e := economy()
 	var site := str(facilities[r["node_resources"]["destination_handling"]]["site_id"])
 	var id := str(e.day)+"|"+str(r["edge_id"])+"|arrival"
 	if handling.has(id): return
-	var wanted := mini(labor_needed_arrival(r["edge_id"], entered_only),int(e._labor.get(site,0)))
+	var wanted := mini(_arrival_labor_hours_today(r),int(e._labor.get(site,0)))
 	if wanted<=0: return
 	var rows: Array[Dictionary] = []
 	var hours := 0
@@ -697,9 +766,9 @@ func labor_needed(site: String) -> int:
 			total += mini(FormalLedgerState.MAX_AMOUNT-total,labor_needed_arrival(edge_id))
 	return total
 
-func path_conditions(legs: Array, good: String) -> bool:
+func path_conditions(legs: Array, good: String, at_minute: int = -1) -> bool:
 	for leg: Dictionary in legs:
-		if bindings.has(leg["edge_id"]) and (weight(good, bindings[leg["edge_id"]]) <= 0.0 or not _has_window(bindings[leg["edge_id"]], economy()._world.game_clock.total_minutes())): return false
+		if bindings.has(leg["edge_id"]) and (weight(good, bindings[leg["edge_id"]]) <= 0.0 or not _has_window(bindings[leg["edge_id"]], economy()._world.game_clock.total_minutes() if at_minute < 0 else at_minute)): return false
 	return true
 
 

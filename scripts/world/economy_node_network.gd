@@ -127,13 +127,15 @@ static func path_id(ids: Array) -> String:
 ## Two finite lexicographic Dijkstra searches (freight/delay and delay/freight).
 ## Layering by hop count preserves the eight-leg bound without a dense all-pairs
 ## table. Non-negative costs and positive travel times never reward a cycle.
-func paths(e: RefCounted, buyer: String, origin: String, destination: String, good: String = "") -> Array[Dictionary]:
+func paths(e: RefCounted, buyer: String, origin: String, destination: String, good: String = "", at_minute: int = -1) -> Array[Dictionary]:
 	_stats["queries"]=int(_stats["queries"])+1
 	var result: Array[Dictionary] = []
 	if origin == destination: return result
-	_query_epoch(e)
+	# Historical knowledge must not read, replace or expire today's path cache.
+	var current_query: bool = at_minute < 0
+	if current_query: _query_epoch(e)
 	var key: String=JSON.stringify([buyer,origin,destination,good])
-	if cache_enabled and _path_cache.has(key):
+	if current_query and cache_enabled and _path_cache.has(key):
 		var cached: Array[Dictionary]=_path_cache[key]
 		var valid: bool=true
 		for path: Dictionary in cached:
@@ -145,16 +147,16 @@ func paths(e: RefCounted, buyer: String, origin: String, destination: String, go
 			return cached.duplicate(true)
 	var seen: Dictionary = {}
 	for by_delay: bool in [false, true]:
-		var path: Dictionary = _shortest(e, buyer, origin, destination, by_delay, good)
+		var path: Dictionary = _shortest(e, buyer, origin, destination, by_delay, good, at_minute)
 		if path.is_empty() or seen.has(path["id"]): continue
 		seen[path["id"]] = true
 		result.append(path)
-	if cache_enabled:
+	if current_query and cache_enabled:
 		if _path_cache.size()>=CACHE_LIMIT:_path_cache.erase(_path_cache.keys()[0])
 		_path_cache[key]=result.duplicate(true)
 	return result
 
-func _shortest(e: RefCounted, buyer: String, origin: String, destination: String, by_delay: bool, good: String) -> Dictionary:
+func _shortest(e: RefCounted, buyer: String, origin: String, destination: String, by_delay: bool, good: String, at_minute: int = -1) -> Dictionary:
 	_stats["searches"]=int(_stats["searches"])+1
 	var queue: Array[Dictionary] = []
 	var initial: Dictionary = {"place": origin, "edge_ids": [], "cost": 0, "delay": 0, "primary": 0, "secondary": 0, "token": ""}
@@ -177,7 +179,7 @@ func _shortest(e: RefCounted, buyer: String, origin: String, destination: String
 			_stats["relaxations"]=int(_stats["relaxations"])+1
 			if relaxations >= MAX_RELAXATIONS: break
 			if not edge_known(e, id, buyer) or current["edge_ids"].has(id): continue
-			if not good.is_empty() and not e._shared.path_conditions([{"edge_id": id}], good): continue
+			if not good.is_empty() and not e._shared.path_conditions([{"edge_id": id}], good, at_minute): continue
 			var row: Dictionary = _routes[id]
 			if row["from_place_id"] == row["to_place_id"]: continue
 			if e._shared.alias_requires_binding(id): continue

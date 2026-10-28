@@ -82,6 +82,8 @@ func _ready() -> void:
 	main_shell.economic_map.focus_requested.connect(_focus_economic_place)
 	main_shell.economic_map.selection_requested.connect(_select_economic_place)
 	main_shell.economic_map.links_changed.connect(map_renderer.set_topic_links)
+	main_shell.economic_map.demand_changed.connect(_request_economic_topic_refresh)
+	main_shell.economic_map.flow_animation_changed.connect(map_renderer.set_topic_flow_animation)
 	main_shell.economic_map.back_requested.connect(_close_economic_details)
 	main_shell.economic_map.expand_requested.connect(func():map_controller.set_map_mode("economic"))
 	main_shell.economic_map.business_requested.connect(_open_economic_business)
@@ -382,52 +384,60 @@ func _request_economic_topic_refresh() -> void:
 	_refresh_economic_topic.call_deferred()
 
 func _refresh_economic_topic() -> void:
-	# Coalesce camera/content signals; the renderer keeps the primary layout.
+	# Coalesce camera/content demands before any observer read. Closed/non-map
+	# pages never fetch establishment, firm or production histories.
 	await get_tree().process_frame
-	_economic_topic_pending = false
-	if _world==null or _leaving or not is_inside_tree(): return
-	var polity := map_controller.selected_polity_id if not map_controller.selected_polity_id.is_empty() else map_controller.player_polity_id
-	var state_key := FormalEconomicMapObservation.stamp(_world)
-	if _economic_locations_stamp!=state_key:
-		_economic_locations_stamp=state_key
-		map_renderer.set_topic_places(FormalEconomicMapObservation.known_places(_world))
-	if _economic_brief_key.is_empty() or _economic_brief_key[0]!=state_key or _economic_brief_key[2]!=polity:
-		var totals := _world.economy_state.country_summary(polity).get("daily_totals",{}) as Dictionary
-		var available := not totals.is_empty() and float(totals.get("fulfillment_bp",-1))>=0
-		if main_shell.economic_data_available!=available:
-			main_shell.economic_data_available = available
-			main_shell.queue_redraw()
+	_economic_topic_pending=false
+	if _world==null or _leaving or not is_inside_tree():return
+	var view:=main_shell.economic_map
+	var full:bool=map_controller.map_mode=="economic"
 	if main_shell.current_page!="map":
-		main_shell.economic_map.clear_observation()
-		_economic_detail_key.clear()
+		if view.visible:view.clear_observation()
+		_economic_detail_key.clear();map_renderer.set_topic_flow_animation(false)
 		return
-	var places := map_renderer.topic_place_ids()
-	var key: Array = [state_key,places,polity,map_controller.economic_supplements_enabled,map_controller.map_mode=="economic"]
+	var polity:=map_controller.selected_polity_id if not map_controller.selected_polity_id.is_empty() else map_controller.player_polity_id
+	var totals:Dictionary=_world.economy_state.country_summary(polity).get("daily_totals",{})
+	var available:bool=not totals.is_empty() and float(totals.get("fulfillment_bp",-1))>=0
+	if main_shell.economic_data_available!=available:main_shell.economic_data_available=available;main_shell.queue_redraw()
+	if not full and not map_controller.economic_supplements_enabled and not view.visible:
+		map_renderer.set_topic_facts([]);map_renderer.set_topic_places([]);map_renderer.set_topic_flow_animation(false)
+		_economic_locations_stamp.clear();_economic_brief_key.clear()
+		return
+	var identity_key:=FormalEconomicMapObservation.identity_stamp(_world)
+	if _economic_locations_stamp!=identity_key:
+		_economic_locations_stamp=identity_key
+		map_renderer.set_topic_places(FormalEconomicMapObservation.known_places(_world))
+	var places:=map_renderer.topic_place_ids()
+	var key:Array=[identity_key,places,polity,map_controller.economic_supplements_enabled,full,_world.economy_state._state_revision]
 	if key!=_economic_brief_key:
-		_economic_brief_key = key
-		var source := _ui_politics.source_historical_id(polity) if _ui_politics!=null else ""
-		var rows: Array[Dictionary] = []
-		if map_controller.economic_supplements_enabled or map_controller.map_mode=="economic":
-			map_renderer.note_topic_query("economic_brief_queries")
-			rows = FormalEconomicMapObservation.brief(_world,places,polity,map_renderer.topic_capital(source))
+		_economic_brief_key=key
+		var source:=_ui_politics.source_historical_id(polity) if _ui_politics!=null else ""
+		var rows:Array[Dictionary]=[]
+		if map_controller.economic_supplements_enabled or full:rows=FormalEconomicMapObservation.brief(_world,places,polity,map_renderer.topic_capital(source))
 		map_renderer.set_topic_facts(rows)
-		var hint := not rows.is_empty()
-		if main_shell.economic_hint_available!=hint:
-			main_shell.economic_hint_available = hint
-			main_shell.queue_redraw()
-	var view := main_shell.economic_map
-	if map_controller.map_mode=="economic" or view.visible:
-		var detail_key: Array = [state_key,polity,_economic_subject,_economic_order_offset]
-		if detail_key!=_economic_detail_key or not view.visible or view.full!=(map_controller.map_mode=="economic"):
-			map_renderer.note_topic_query("economic_detail_queries")
-			var observation := FormalEconomicMapObservation.details(_world,polity,_economic_subject,_economic_order_offset,_economic_follow_order)
-			_economic_follow_order = ""
-			_economic_subject = str(observation.get("subject",""))
-			_economic_order_offset = int(observation.get("offset",0))
-			_economic_detail_key = [state_key,polity,_economic_subject,_economic_order_offset]
-			view.present(observation,_world.spatial_catalog,map_controller.map_mode=="economic",_economic_return_mode)
+		var hint:bool=not rows.is_empty()
+		if main_shell.economic_hint_available!=hint:main_shell.economic_hint_available=hint;main_shell.queue_redraw()
+	map_renderer.set_topic_flow_animation(full and view.flow_animation_enabled)
+	if full:map_renderer.set_topic_world_minute(_world.game_clock.total_minutes())
+	if not full and not view.visible:return
+	var state_key:=FormalEconomicMapObservation.stamp(_world)
+	var demand:bool=view.details_requested()
+	var detail_key:Array=[state_key,polity,_economic_subject,_economic_order_offset,view.selected_place,view.selected_site,demand,view.research_expanded]
+	if detail_key==_economic_detail_key and view.visible and view.full==full:return
+	var observation:Dictionary
+	if demand:
+		observation=FormalEconomicMapObservation.details(_world,polity,_economic_subject,_economic_order_offset,_economic_follow_order,view.selected_place,view.selected_site,view.research_expanded)
+	else:
+		observation=FormalEconomicMapObservation.overview(_world,polity,view.selected_place,_economic_subject)
+		observation["offset"]=_economic_order_offset
+	_economic_follow_order="";_economic_subject=str(observation.get("subject",""));_economic_order_offset=int(observation.get("offset",0))
+	view.present(observation,_world.spatial_catalog,full,_economic_return_mode)
+	_economic_detail_key=[state_key,polity,_economic_subject,_economic_order_offset,view.selected_place,view.selected_site,demand,view.research_expanded]
 
 func _query_economic_details(subject: String, offset: int) -> void:
+	if _economic_subject!=subject:
+		main_shell.economic_map.selected_site="";main_shell.economic_map.selected_node="";main_shell.economic_map.selected_order=""
+	main_shell.economic_map.set_details_open(true)
 	_economic_subject = subject
 	_economic_order_offset = maxi(0,offset)
 	_economic_detail_key.clear()
@@ -437,6 +447,7 @@ func _query_economic_details(subject: String, offset: int) -> void:
 	_request_economic_topic_refresh()
 
 func _open_economic_topic(place_id: String, subject: String) -> void:
+	main_shell.economic_map.selected_site="";main_shell.economic_map.selected_node=""
 	main_shell.economic_map.select_place(place_id)
 	_query_economic_details(subject,0)
 

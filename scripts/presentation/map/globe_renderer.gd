@@ -61,6 +61,12 @@ var _topic_facts: Array[Dictionary] = []
 var _topic_by_place: Dictionary = {}
 var _topic_hits: Dictionary = {}
 var _topic_links: Array[Dictionary] = []
+var _topic_paths: Dictionary = {}
+var _topic_projected: Dictionary = {}
+var _topic_projection_key: Array = []
+var _topic_flow: Node2D
+var _topic_flow_enabled: bool = true
+const EconomicFlowOverlay = preload("res://scripts/presentation/map/economy/formal_economic_flow_overlay.gd")
 var _topic_places: Array[Dictionary] = []
 var _unassigned_pick: bool = false
 var _center := Vector2.ZERO
@@ -1051,12 +1057,55 @@ func set_topic_facts(rows: Array[Dictionary]) -> void:
 	queue_redraw()
 
 func set_topic_links(rows: Array[Dictionary]) -> void:
-	if _topic_links==rows:return
-	_topic_links = rows.slice(0,48)
-	# Public corridors below responsibilities; physical cargo remains on top.
+	var normalized:Array[Dictionary]=rows.slice(0,48)
 	var layers:Dictionary={"transport":0,"offer":1,"receipt":2,"contract":3,"cargo":4}
-	_topic_links.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(layers.get(str(a.get("kind","")),0))<int(layers.get(str(b.get("kind","")),0)))
+	normalized.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var first:=int(layers.get(str(a.get("kind","")),0));var second:=int(layers.get(str(b.get("kind","")),0))
+		return first<second if first!=second else str(a.get("id",""))<str(b.get("id","")))
+	if _topic_links==normalized:return
+	_topic_links=normalized;_topic_paths.clear();_topic_projected.clear();_topic_projection_key.clear()
+	if spatial_world!=null:
+		for link:Dictionary in _topic_links:
+			var a:=spatial_world.get_place(str(link.get("from","")));var b:=spatial_world.get_place(str(link.get("to","")))
+			if not a.get("lon_lat") is Array or not b.get("lon_lat") is Array:continue
+			if a.lon_lat.size()!=2 or b.lon_lat.size()!=2:continue
+			var u:=GlobeProjection.lon_lat_to_unit(Vector2(float(a.lon_lat[0]),float(a.lon_lat[1])))
+			var v:=GlobeProjection.lon_lat_to_unit(Vector2(float(b.lon_lat[0]),float(b.lon_lat[1])))
+			var units:=PackedVector3Array()
+			for index:int in range(25):units.append(u.slerp(v,float(index)/24.0))
+			_topic_paths[str(link.id)]={"units":units,"local":u.is_equal_approx(v)}
+	_ensure_topic_flow()
+	if _topic_links.is_empty():_topic_flow.call("update_paths",_topic_links)
 	queue_redraw()
+
+func _ensure_topic_flow() -> void:
+	if is_instance_valid(_topic_flow):return
+	_topic_flow=EconomicFlowOverlay.new();add_child(_topic_flow)
+	_topic_flow.call("set_enabled",_topic_flow_enabled)
+
+func set_topic_world_minute(minute: int) -> void:
+	_ensure_topic_flow();_topic_flow.call("set_world_minute",minute)
+
+func set_topic_flow_animation(enabled: bool) -> void:
+	_topic_flow_enabled=enabled
+	_ensure_topic_flow();_topic_flow.call("set_enabled",enabled)
+
+func _topic_points(link:Dictionary) -> PackedVector2Array:
+	var id:=str(link.get("id",""))
+	if _topic_projected.has(id):return _topic_projected[id]
+	var points:=PackedVector2Array();var source:Dictionary=_topic_paths.get(id,{})
+	var units:PackedVector3Array=source.get("units",PackedVector3Array())
+	if units.is_empty():return points
+	if bool(source.get("local",false)):
+		if str(link.get("kind",""))=="transport" or (not controller.region_camera.active and (controller.orientation()*units[0]).z<0):return points
+		var point:=screen_point(units[0])
+		if not point.is_finite():return points
+		for index:int in range(25):points.append(point+Vector2(0,-12)+Vector2.from_angle(.35+float(index)*TAU/24.0)*9.0)
+	else:
+		for unit:Vector3 in units:
+			points.append(screen_point(unit) if controller.region_camera.active or (controller.orientation()*unit).z>=0 else Vector2(INF,INF))
+	_topic_projected[id]=points
+	return points
 
 func set_topic_places(rows: Array[Dictionary]) -> void:
 	if _topic_places==rows:return
@@ -1079,6 +1128,7 @@ func topic_capital(source_id: String) -> Dictionary:
 func _draw_topic_information() -> void:
 	_topic_hits.clear()
 	var mode := controller.map_mode
+	if is_instance_valid(_topic_flow):_topic_flow.visible=mode=="economic"
 	if mode not in ["political","geographic","economic"]: return
 	if mode!="economic" and not controller.economic_supplements_enabled: return
 	var budget := 24 if mode=="economic" and controller.region_camera.local_active else 16 if mode=="economic" and controller.region_camera.active else 12 if mode=="economic" else 12 if controller.region_camera.local_active else 8 if controller.region_camera.active else 2
@@ -1110,17 +1160,29 @@ func _draw_topic_information() -> void:
 		if "transport_node" in kinds and fact.kind!="transport_node":draw_circle(badge+Vector2(-8,0),2.4,Color("bda1dc"))
 		_topic_hits[id] = fact
 		if _topic_hits.size()>=budget: break
-	if mode!="economic" or _topic_links.is_empty() or spatial_world==null: return
-	for link: Dictionary in _topic_links:
-		var a := spatial_world.get_place(str(link.get("from","")))
-		var b := spatial_world.get_place(str(link.get("to","")))
-		if not a.get("lon_lat") is Array or not b.get("lon_lat") is Array: continue
-		if a.lon_lat.size()!=2 or b.lon_lat.size()!=2: continue
-		var u := GlobeProjection.lon_lat_to_unit(Vector2(float(a.lon_lat[0]),float(a.lon_lat[1])))
-		var v := GlobeProjection.lon_lat_to_unit(Vector2(float(b.lon_lat[0]),float(b.lon_lat[1])))
-		_draw_topic_link(link,u,v)
+	if is_instance_valid(_topic_flow):_topic_flow.visible=mode=="economic"
+	if mode!="economic" or _topic_links.is_empty() or spatial_world==null:return
+	var rc:=controller.region_camera
+	var projection_key:Array=[controller.orientation(),controller.zoom,size,rc.active,rc.local_active,rc.tangent_frame,rc.origin,rc.km_per_pixel,rc.bearing]
+	var changed:bool=projection_key!=_topic_projection_key
+	if changed:_topic_projection_key=projection_key;_topic_projected.clear()
+	var flows:Array[Dictionary]=[]
+	for link:Dictionary in _topic_links:
+		_draw_topic_link(link)
+		if changed and bool(link.get("animate",false)) and flows.size()<16:
+			var points:=_topic_points(link);var contiguous:=PackedVector2Array();var best:=PackedVector2Array()
+			for point:Vector2 in points:
+				if point.is_finite():contiguous.append(point)
+				else:
+					if contiguous.size()>best.size():best=contiguous
+					contiguous=PackedVector2Array()
+			if contiguous.size()>best.size():best=contiguous
+			var length:float=0.0
+			for index:int in range(1,best.size()):length+=best[index-1].distance_to(best[index])
+			if length>0:flows.append({"points":best,"length":length,"observed_minute":int(link.get("observed_minute",0))})
+	if changed:_ensure_topic_flow();_topic_flow.call("update_paths",flows)
 
-func _draw_topic_link(link:Dictionary,u:Vector3,v:Vector3) -> void:
+func _draw_topic_link(link:Dictionary) -> void:
 	var kind:=str(link.get("kind",""))
 	var status:=str(link.get("status",""))
 	var color:=Color("caaa73")
@@ -1139,37 +1201,25 @@ func _draw_topic_link(link:Dictionary,u:Vector3,v:Vector3) -> void:
 		if status in ["DELIVERED","CANCELLED"] or str(link.get("state","")).contains("历史"):color=Color(0.48,0.53,0.49,0.65)
 		elif status=="TRANSIT":color=Color("dc986b")
 	var viewport:=Rect2(Vector2.ZERO,size).grow(12)
-	if u.is_equal_approx(v):
-		# A local handover is a screen-space relation glyph, not a fabricated
-		# out-of-city route or separate establishment coordinate.
-		if kind=="transport" or (not controller.region_camera.active and (controller.orientation()*u).z<0):return
-		var point:=screen_point(u)
-		if not point.is_finite() or not viewport.has_point(point):return
-		var center:=point+Vector2(0,-12)
-		for index:int in range(20):
-			if dashed and index%2==1:continue
-			var p:=center+Vector2.from_angle(0.35+float(index)*TAU/24.0)*9.0
-			var q:=center+Vector2.from_angle(0.35+float(index+1)*TAU/24.0)*9.0
-			draw_line(p,q,color,width,true)
-		if bool(link.get("directed",false)):_draw_topic_arrow(center+Vector2.from_angle(0.35+20.0*TAU/24.0)*9.0,Vector2.from_angle(0.35+20.0*TAU/24.0+PI/2),color,width)
-		return
-	for index:int in range(24):
-		if dashed and index%2==1:continue
-		var from:=u.slerp(v,float(index)/24.0)
-		var to:=u.slerp(v,float(index+1)/24.0)
-		if not controller.region_camera.active and ((controller.orientation()*from).z<0 or (controller.orientation()*to).z<0):continue
-		var p:=screen_point(from);var q:=screen_point(to)
-		if p.is_finite() and q.is_finite():draw_line(p,q,color,width,true)
-	var midpoint:=u.slerp(v,0.56)
-	if bool(link.get("directed",false)) and (controller.region_camera.active or (controller.orientation()*midpoint).z>=0):
-		var tip:=screen_point(midpoint)
-		var tail:=screen_point(u.slerp(v,0.50))
-		if tip.is_finite() and tail.is_finite() and viewport.has_point(tip) and tip.distance_squared_to(tail)>4:_draw_topic_arrow(tip,(tip-tail).normalized(),color,width)
+	var points:=_topic_points(link)
+	if points.size()<2:return
+	if not dashed:
+		var contiguous:=PackedVector2Array()
+		for point:Vector2 in points:
+			if point.is_finite():contiguous.append(point)
+			else:
+				if contiguous.size()>1:draw_polyline(contiguous,color,width,true)
+				contiguous=PackedVector2Array()
+		if contiguous.size()>1:draw_polyline(contiguous,color,width,true)
+	else:
+		for index:int in range(1,points.size(),2):
+			if points[index-1].is_finite() and points[index].is_finite():draw_line(points[index-1],points[index],color,width,true)
+	var index:=mini(14,points.size()-1)
+	var tip:=points[index];var tail:=points[index-1]
+	if bool(link.get("directed",false)) and tip.is_finite() and tail.is_finite() and viewport.has_point(tip) and tip.distance_squared_to(tail)>1:_draw_topic_arrow(tip,(tip-tail).normalized(),color,width)
 	if kind=="cargo" and status in ["WAITING","WAITING_TRANSFER","LOADING","WAITING_UNLOAD","UNLOADING","AWAITING_RECIPIENT"]:
-		var anchor:=v if status in ["WAITING_UNLOAD","UNLOADING","AWAITING_RECIPIENT"] else u
-		if controller.region_camera.active or (controller.orientation()*anchor).z>=0:
-			var point:=screen_point(anchor)
-			if point.is_finite() and viewport.has_point(point):draw_arc(point,6,0,TAU,16,color,2.0,true)
+		var point:=points[points.size()-1] if status in ["WAITING_UNLOAD","UNLOADING","AWAITING_RECIPIENT"] else points[0]
+		if point.is_finite() and viewport.has_point(point):draw_arc(point,6,0,TAU,16,color,2.0,true)
 
 func _draw_topic_arrow(tip:Vector2,direction:Vector2,color:Color,width:float) -> void:
 	var normal:=Vector2(-direction.y,direction.x)

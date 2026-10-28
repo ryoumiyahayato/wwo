@@ -6,6 +6,9 @@ const Opening = preload("res://scripts/content/economy_network_development.gd")
 const DAYS: int = 24
 const REGIONAL_DAYS: int = 36
 var test := FormalTestCase.new()
+var _lyon_shared_case: bool = false
+var _rail_link: String = Opening.REGIONAL_RAIL_LINK
+var _rail_edges: Array[String] = Opening.REGIONAL_RAIL_EDGES.duplicate()
 
 func _initialize() -> void:
 	var arguments := OS.get_cmdline_user_args()
@@ -19,7 +22,13 @@ func _initialize() -> void:
 		var compare_path: String = arguments[compare_index + 1] if compare_index >= 0 else ""
 		_read_saved_file.call_deferred(arguments[saved_index + 1] if saved_index + 1 < arguments.size() else "", compare_path)
 	elif arguments.has("--regional-case"):
+		if arguments.has("--lyon-shared"):
+			_lyon_shared_case = true
+			_rail_link = Opening.REGIONAL_LYON_RAIL_LINK
+			_rail_edges = Opening.REGIONAL_LYON_RAIL_EDGES.duplicate()
 		_run_regional.call_deferred()
+	elif arguments.has("--directory-history-only"):
+		_directory_history_only.call_deferred()
 	elif arguments.has("--read-contract-only"):
 		_read_contract_only.call_deferred()
 	else:
@@ -143,6 +152,206 @@ func _planning_delay_projection_exact(economy: EconomyR1Slice) -> bool:
 
 ## Short functional branch: one normal fixture, at most three days, then reads
 ## only. It does not save and does not repeat the 24-day two-case integration.
+func _map_presentation_boundary(built: WorldBuildResult) -> void:
+	var before := built.persistence.snapshot()
+	var economy := built.world.economy_r1
+	var subject: String = ""
+	for row: Dictionary in economy.map_subjects(built.world.player_state.player_id()):
+		if economy._spec["firms"].has(row["id"]):
+			subject = row["id"]
+			break
+	test.expect(not subject.is_empty(), "Presentation read uses a real currently authorized company")
+	if subject.is_empty(): return
+	var site := economy._primary_site(subject)
+	var place := economy._place(site)
+	var overview := FormalEconomicMapObservation.overview(built.world, "", place, subject)
+	test.expect(overview["read_scope"]["kind"] == "HUB_IDENTITIES_ONLY" and overview["node_network"].is_empty() and overview["firm"].is_empty() and overview["production_details"].is_empty(), "Closed map reads hub identities, not private business or production")
+	var page := FormalEconomicMapObservation.details(built.world, "", subject, 0, "", place, site)
+	test.expect(page["read_scope"]["kind"] == "AUTHORIZED_ORDER_PAGE" and page["read_scope"]["site_id"] == site and page["read_scope"]["page_limit"] == 32, "Open map describes its original authorized site and bounded page")
+	# UI-only detached DTO fixtures test aggregation/unknowns, not economic facts.
+	var now: int = 8 * 1440
+	var delivery := {"id":"ui:receipt", "delivered_minute":now - 7 * 1440, "quantity":2}
+	var cargo := {"id":"ui:shipment", "stage":"TRANSIT", "physical_quantity":null}
+	var order := {"id":"ui:order", "good":"grain", "from_place_id":"place:paris", "to_place_id":"place:rouen", "pending":1, "transit":1, "shipments":[cargo, cargo.duplicate(true)], "deliveries":[delivery, delivery.duplicate(true), {"id":"ui:future", "delivered_minute":now + 1, "quantity":9}, {"id":"ui:old", "delivered_minute":now - 7 * 1440 - 1, "quantity":9}]}
+	page["minute"] = now; page["date"] = {}; page["read_scope"]["observed_minute"] = now
+	page["firm"]["orders"] = [order, order]; page["firm"]["sales_orders"] = [order.duplicate(true)]
+	page["market_network"] = {"nodes":{}, "edges":{"ui:order":{"order_id":"ui:order", "good":"grain", "from_node":"place:paris", "to_node":"place:rouen", "status":"TRANSIT", "pending_responsibility":1, "transit_responsibility":1}}, "cargo":{"ui:shipment":{"cargo_id":"ui:shipment", "order_id":"ui:order", "good":"grain", "stage":"TRANSIT", "physical_quantity":null}}}
+	var view := FormalEconomyMapView.new()
+	root.add_child(view)
+	view.set_details_open(true)
+	var emissions: Array = []
+	view.links_changed.connect(func(rows: Array[Dictionary]) -> void: emissions.append(rows.duplicate(true)))
+	view.present(page, built.world.spatial_catalog, true)
+	test.expect(emissions.size() == 1, "One presentation update publishes links only once")
+	test.expect(view._order_index.size() == 1 and view._receipt_facts.size() == 1 and view._receipt_facts[0]["quantity"] == 2, "Repeated buyer/seller orders and receipt IDs count once; exact seven-day boundary stays and future/old rows do not")
+	var links_valid: bool = true
+	for link: Dictionary in emissions[0]:
+		links_valid = links_valid and (not link.get("animate", false) or link["kind"] == "receipt") and link["kind"] != "cargo"
+		if link["kind"] == "contract": links_valid = links_valid and not link.has("quantity")
+	test.expect(links_valid and emissions[0].size() <= 48 and view._freight_summary().contains("另1条分段记录的实物量/当前位置未知"), "Unknown TRANSIT stays unknown and unlocated; only actual receipt facts animate, contracts have no fake zero quantity")
+	# Detached UI-only control: no seven-day expiry or future receipt crosses
+	# this one-minute step. Exercise the original renderer setter off-tree,
+	# without _ready, viewports, drawing, a second scene or world advancement.
+	var stable_page: Dictionary = page.duplicate(true)
+	for bucket: String in ["orders", "sales_orders"]:
+		for row: Dictionary in stable_page["firm"][bucket]:
+			row["deliveries"] = [{"id":"ui:stable", "delivered_minute":now - 1440, "quantity":2}]
+	view.present(stable_page, built.world.spatial_catalog, true)
+	var stable_links: Array[Dictionary] = emissions.back().duplicate(true)
+	var renderer := GlobeRenderer.new()
+	renderer.spatial_world = built.world.spatial_world
+	renderer.set_topic_links(stable_links)
+	test.expect(not renderer._topic_paths.is_empty(), "The real renderer builds spherical paths for the detached authorized-page fixture")
+	if not renderer._topic_paths.is_empty():
+		var path_id: String = str(renderer._topic_paths.keys()[0])
+		var geometry: Dictionary = renderer._topic_paths[path_id]
+		stable_page["minute"] = now + 1; stable_page["read_scope"]["observed_minute"] = now + 1
+		view.present(stable_page, built.world.spatial_catalog, true)
+		var next_links: Array[Dictionary] = emissions.back().duplicate(true)
+		renderer.set_topic_links(next_links)
+		renderer.set_topic_world_minute(now + 1)
+		test.expect(stable_links == next_links and is_same(geometry, renderer._topic_paths[path_id]) and renderer._topic_flow.get("world_minute") == now + 1, "A pure observation-minute refresh reuses the same geometry objects while the real receipt animation minute still advances")
+		var legacy_links: Array[Dictionary] = stable_links.duplicate(true)
+		for row: Dictionary in legacy_links:
+			if not row.get("animate", false): row["observed_minute"] = now
+		renderer.set_topic_links(legacy_links)
+		var old_geometry: Dictionary = renderer._topic_paths[path_id]
+		var samples: int = 0
+		for path: Dictionary in renderer._topic_paths.values(): samples += path["units"].size()
+		var next_legacy_links: Array[Dictionary] = legacy_links.duplicate(true)
+		for row: Dictionary in next_legacy_links:
+			if not row.get("animate", false): row["observed_minute"] = now + 1
+		renderer.set_topic_links(next_legacy_links)
+		test.expect(not is_same(old_geometry, renderer._topic_paths[path_id]), "The previous timestamp-only link shape actually rebuilds geometry in the same unchanged renderer")
+		print("MAP_GEOMETRY_MINUTE_CONTROL ", JSON.stringify({"paths":renderer._topic_paths.size(), "old_timestamp_refresh_spherical_samples":samples, "new_minute_only_spherical_samples":0, "scope":"DETACHED_UI_DATA_REAL_RENDERER_SETTER_NO_WINDOW_OR_FPS_MEASUREMENT"}))
+	renderer.free()
+	for index: int in 257:
+		order["deliveries"].append({"id":"ui:cap:" + str(index), "delivered_minute":now - 10, "quantity":1})
+	view.present(page, built.world.spatial_catalog, true)
+	test.expect(view._receipt_truncated and view._receipt_source_count == 258 and view._receipt_facts.size() == 256 and view._freight_summary().contains("收据已截断"), "Receipt budget retains the latest 256 unique facts and states its actual truncation")
+	view.set_details_open(false)
+	overview["world_id"] = int(page["world_id"]) + 1; overview["observer"] = "ui:other-observer"
+	view.present(overview, built.world.spatial_catalog, true)
+	test.expect(view.public_network.is_empty() and view.network.is_empty() and view._order_index.is_empty() and view._receipt_facts.is_empty() and view._details.text.is_empty(), "Changing source world or observer clears both public/private old page data and text: " + JSON.stringify({"public_empty":view.public_network.is_empty(), "private_empty":view.network.is_empty(), "orders_empty":view._order_index.is_empty(), "receipts_empty":view._receipt_facts.is_empty(), "text_length":view._details.text.length()}))
+	view.free()
+	test.expect(built.persistence.snapshot() == before, "Map observations and all presentation fixture operations leave the complete real world and clock unchanged")
+
+
+## One original regional opening, twelve real days and one continuation day.
+## Only the declared Shared entry schedule is shortened; no clock or receipt is
+## manufactured to make the household discoverable before its original delay.
+func _directory_history_only() -> void:
+	var request := Opening.regional_request()
+	for binding: Dictionary in request["configuration"]["shared_transport"]:
+		var entries: Array[int] = []
+		for minute: int in binding["entry_minutes"]:
+			if minute < 9 * 1440: entries.append(minute)
+		binding["entry_minutes"] = entries
+	test.expect(EconomySliceConfig.valid(request["configuration"]), "Shortened original entry windows retain the real regional configuration contract")
+	var built := WorldBootstrap.new().build(null, [], [], FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, true, request)
+	test.expect(built.success and built.world.economy_r1 != null, "Historical directory fixture uses the original formal regional opening: " + built.error)
+	if not built.success or built.world.economy_r1 == null:
+		test.finish(self, "Economic network historical directory")
+		return
+	var economy := built.world.economy_r1
+	var buyer_site: String = "site:network:bakery1"
+	var buyer: String = economy._owner(buyer_site)
+	var family: String = Opening.REGIONAL_FAMILY
+	var candidate: String = family + "|flour|" + family
+	var receipt_id: String = "message:" + buyer_site + ":supplier:" + candidate
+	var receipt: Dictionary = {}
+	var past_path: String = ""
+	var steps_ok: bool = true
+	var conserved: bool = true
+	var cash: int = _cash_total(built.world)
+	for index: int in 12:
+		var step: Dictionary = built.simulation_step.advance_minutes(1440)
+		steps_ok = steps_ok and bool(step.get("success", true))
+		conserved = conserved and _physical_valid(economy) and _cash_total(built.world) == cash
+		if not steps_ok: break
+		if index == 7:
+			receipt = economy._receipts.get(receipt_id, {}).duplicate(true)
+			test.expect(receipt.get("source") == "directory" and receipt.get("scope") == "REGIONAL" and int(receipt.get("delivery_day", -1)) > 0 and int(receipt.get("delivery_day", 9)) < 9, "The household is genuinely learned through its original delayed REGIONAL inbox before the last window")
+			for known_offer: Dictionary in economy._offers(buyer, buyer_site, "flour"):
+				if known_offer["seller"] == family and not str(known_offer["route_id"]).is_empty():
+					past_path = str(known_offer["route_id"])
+					break
+			test.expect(not past_path.is_empty(), "The received household has a real known goods corridor while entry windows remain")
+			var before_expiry := built.persistence.snapshot()
+			var early_restore := FormalPersistence.new().restore_candidate(before_expiry)
+			test.expect(early_restore.success, "The actual day-eight world cold-restores before window expiry: " + early_restore.error)
+			if early_restore.success: test.expect(early_restore.persistence.snapshot() == before_expiry, "The pre-expiry complete formal snapshot is exact")
+	test.expect(steps_ok and built.world.game_clock.total_minutes() == 12 * 1440, "The original SimulationStep reaches day twelve without editing GameClock")
+	test.expect(conserved, "Each of twelve actual daily boundaries conserves original goods and formal cash")
+	if not steps_ok or receipt.get("source") != "directory" or receipt.get("scope") != "REGIONAL" or past_path.is_empty():
+		test.finish(self, "Economic network historical directory")
+		return
+	var origin: String = economy._place(family)
+	var destination: String = economy._place(buyer_site)
+	test.expect(economy._supplier_known(economy._known_suppliers(buyer_site), candidate), "Expiry does not erase the household identity already received by the city")
+	test.expect(economy._paths_for(buyer, origin, destination, economy.day, "flour").is_empty(), "A current flour path has no remaining configured Shared entry window")
+	var offer := economy._offer(buyer, family, "flour", past_path, family, buyer_site)
+	test.expect(int(offer["quantity"]) == 0 and int(offer["transport_quantity"]) == 0, "An old corridor identity cannot become a fresh executable offer after expiry")
+	var payload := {"quote_id": offer["quote_id"], "seller": family, "seller_site": family, "buyer_site": buyer_site, "good": "flour", "quantity": 1, "denomination": offer["denomination"], "max_price": offer["price"], "path_id": past_path, "need_by_day": economy.day + 1}
+	var refused := economy.submit_internal(buyer, economy._auto_command(buyer, "buy", payload, "historical_directory_expired_window"))
+	test.expect(not refused.get("accepted", false) and refused.get("reason") in ["NO_KNOWN_ROUTE", "UNCONFIGURED_SHARED_WEIGHT_OR_SERVICE_WINDOW"], "The ordinary current buy rejects the expired corridor, not merely an unaffordable or unknown supplier: " + str(refused))
+	var checkpoint := built.persistence.snapshot()
+	# Warm the current negative result first. A historical lookup must neither
+	# reuse it nor replace it with a formerly usable path under the same key.
+	economy._paths_for(buyer, origin, destination, economy.day, "flour")
+	var current_cache: Dictionary = economy._node_network._path_cache.duplicate(true)
+	var current_epoch: int = economy._node_network._cache_until
+	test.expect(economy._valid_message(receipt, economy._actors), "A real directory receipt remains valid at its own delivery day after the final Shared window")
+	test.expect(economy._node_network._path_cache == current_cache and economy._node_network._cache_until == current_epoch, "Historical validation does not read through, replace or reset the current path cache epoch")
+	test.expect(economy._paths_for(buyer, origin, destination, economy.day, "flour").is_empty(), "Current paths remain unavailable after validating historical knowledge")
+	# Exercise Node search itself, not only the direct legacy Rouen/Paris row.
+	var derived_destination: String = "place:lyon"
+	test.expect(economy._node_network.paths(economy, buyer, origin, derived_destination, "flour").is_empty(), "Current derived Rouen/Lyon flour search warms a negative result after entry expiry")
+	var derived_cache: Dictionary = economy._node_network._path_cache.duplicate(true)
+	var derived_epoch: int = economy._node_network._cache_until
+	var historical_paths: Array[Dictionary] = economy._node_network.paths(economy, buyer, origin, derived_destination, "flour", 7 * 1440)
+	var multileg_via_paris: bool = false
+	var route_rows: Dictionary = economy._all_routes()
+	for historical_path: Dictionary in historical_paths:
+		if historical_path["edge_ids"].size() < 2: continue
+		for edge: String in historical_path["edge_ids"]:
+			if route_rows[edge]["to_place_id"] == "place:paris": multileg_via_paris = true
+	test.expect(multileg_via_paris, "An explicit day-seven Node query recovers a real multileg Rouen/Paris/Lyon goods corridor despite today's cached negative result")
+	test.expect(economy._node_network.paths(economy, buyer, origin, derived_destination, "flour", 10 * 1440).is_empty(), "An as-of query after the last entry cannot reuse a path that existed on day seven")
+	test.expect(economy._node_network._path_cache == derived_cache and economy._node_network._cache_until == derived_epoch, "Positive and negative historical multileg searches leave the current path cache and epoch unchanged")
+	test.expect(economy._node_network.paths(economy, buyer, origin, derived_destination, "flour").is_empty(), "The current derived multileg query stays unavailable after historical searches")
+	test.expect(built.persistence.snapshot() == checkpoint, "Historical validation and current path reads change no field of the complete formal world")
+	for change: String in ["date", "audience"]:
+		var altered := checkpoint.duplicate(true)
+		var forged: Dictionary = receipt.duplicate(true)
+		if change == "date":
+			forged["delivery_day"] = 10
+			forged["observed_day"] = 10 - int(economy._search_policy(buyer_site)["delay_days"][receipt["scope"]])
+		else:
+			forged["actor"] = "site:network:mill1"
+			forged["id"] = "message:" + str(forged["actor"]) + ":supplier:" + candidate
+		test.expect(not economy._valid_message(forged, economy._actors), "Original directory legality rejects a forged " + change + " despite a well-formed identity and delay")
+		altered["economy_native"]["receipts"].erase(receipt_id)
+		altered["economy_native"]["receipts"][forged["id"]] = forged
+		var invalid := FormalPersistence.new().restore_candidate(altered)
+		test.expect(not invalid.success, "Strict cold restore rejects the forged directory " + change)
+	var wrong_good: Dictionary = receipt.duplicate(true)
+	wrong_good["candidate"] = family + "|steel|" + family
+	wrong_good["id"] = "message:" + buyer_site + ":supplier:" + str(wrong_good["candidate"])
+	test.expect(not economy._valid_message(wrong_good, economy._actors), "Historical knowledge retains the actually announced commodity instead of bypassing good validation")
+	var restored := FormalPersistence.new().restore_candidate(checkpoint)
+	test.expect(restored.success, "The actual post-window world cold-restores its legal old directory receipt: " + restored.error)
+	if not restored.success:
+		test.finish(self, "Economic network historical directory")
+		return
+	test.expect(restored.persistence.snapshot() == checkpoint, "Cold restore after expiry preserves every formal snapshot field without a new schema")
+	var original_next: Dictionary = built.simulation_step.advance_minutes(1440)
+	var restored_next: Dictionary = restored.simulation_step.advance_minutes(1440)
+	test.expect(original_next.get("success", true) and restored_next.get("success", true), "Both original and cold-restored worlds advance the same thirteenth day")
+	test.expect(restored.persistence.snapshot() == built.persistence.snapshot(), "The complete continued world is exact with no duplicate knowledge, cargo, goods or payments")
+	test.finish(self, "Economic network historical directory")
+
+
 func _read_contract_only() -> void:
 	var built := WorldBootstrap.new().build(null, [], [], FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, false, Opening.request())
 	test.expect(built.success and built.world.economy_r1 != null, "Bounded read fixture uses the actual host opening: " + built.error)
@@ -188,6 +397,7 @@ func _read_contract_only() -> void:
 		print("NETWORK_READ_SAMPLE ", JSON.stringify({"minute": built.world.game_clock.total_minutes(), "sample": sample}))
 		break
 	test.expect(exercised, "At most three days exercised actual nonempty remote cargo")
+	_map_presentation_boundary(built)
 	test.finish(self, "Economic network read contract")
 
 ## Cold file inspection uses only the existing exact decoder/restore candidate.
@@ -447,8 +657,44 @@ func _print_public_control_leaves(expected: Dictionary, actual: Dictionary, labe
 		leaves.append({"path": "spatial.land.active[" + str(id) + "].parent_id", "before_present": old_parents.has(id), "after_present": new_parents.has(id), "before": old_parents.get(id), "after": new_parents.get(id), "before_type": typeof(old_parents.get(id)), "after_type": typeof(new_parents.get(id))})
 	if not leaves.is_empty(): print("REGIONAL_PUBLIC_CONTROL_LEAVES ", label, " ", JSON.stringify(leaves))
 
+func _lyon_shared_metrics(economy: EconomyR1Slice) -> Dictionary:
+	var entered := Opening.stock()
+	var delivered := Opening.stock()
+	var entries: int = 0
+	var spatial_facts_match: bool = true
+	var shipment_orders: Dictionary = {}
+	for cargo: Dictionary in economy._shipments.values(): shipment_orders[cargo["id"]] = cargo["order_id"]
+	for receipt: Dictionary in economy._delivery_receipts.values(): shipment_orders[receipt.get("shipment_id", receipt["id"])] = receipt["order_id"]
+	for entry: Dictionary in economy._shared.entries.values():
+		if entry["edge_id"] not in Opening.REGIONAL_LYON_RAIL_EDGES: continue
+		entries += 1
+		var order: Dictionary = economy._orders.get(shipment_orders.get(entry["shipment_id"], ""), {})
+		if not order.is_empty(): entered[order["good"]] = int(entered[order["good"]]) + int(entry["quantity"])
+		var fact := economy._world.spatial_world.capacity_adoption(entry["adoption_id"])
+		spatial_facts_match = spatial_facts_match and not fact.is_empty() and fact["link_id"] == Opening.REGIONAL_LYON_RAIL_LINK and fact["source_id"] == entry["shipment_id"]
+	var grain_order: Dictionary = {}
+	for order: Dictionary in economy._orders.values():
+		var uses_link: bool = false
+		for leg: Dictionary in order["route_legs"]:
+			if leg["edge_id"] in Opening.REGIONAL_LYON_RAIL_EDGES: uses_link = true
+		if not uses_link: continue
+		delivered[order["good"]] = int(delivered[order["good"]]) + int(order["delivered"])
+		if grain_order.is_empty() and order["good"] == "grain" and order["buyer"] == "firm:network:mill1" and int(order["delivered"]) > 0: grain_order = order
+	var goods_paid: int = 0
+	var freight_paid: int = 0
+	if not grain_order.is_empty():
+		for payment: Dictionary in economy._world.ledger_state.own_transactions(grain_order["buyer"]):
+			if payment["reference_id"] != grain_order["id"]: continue
+			if payment["kind"] == "goods": goods_paid += int(payment["amount"])
+			if payment["kind"] == "freight": freight_paid += int(payment["amount"])
+	var worker: String = "cohort:regional:station:lyon"
+	var wages_paid: int = 0
+	for payment: Dictionary in economy._world.ledger_state.own_transactions(worker):
+		if payment["kind"] == "wage" and payment["to_account_id"] == economy._account(worker): wages_paid += int(payment["amount"])
+	return {"entries": entries, "entered_by_good": entered, "delivered_using_link_by_good": delivered, "spatial_facts_match": spatial_facts_match, "lyon_handling_hours_allocated": economy._shared.allocated_hours("site:regional:station:lyon"), "lyon_zero_cash_worker_wages_paid": wages_paid, "lyon_worker_bread_consumed": economy._physical_totals[worker]["used"]["bread"], "lyon_seller_grain_remaining": economy._stocks["site:network:grain"]["grain"], "paris_mill_grain_consumed": economy._physical_totals["site:network:mill1"]["used"]["grain"], "example_order": {"id": grain_order.get("id", ""), "buyer": grain_order.get("buyer", ""), "seller": grain_order.get("seller", ""), "accepted_day": grain_order.get("accepted_day", -1), "quantity": grain_order.get("quantity", 0), "delivered": grain_order.get("delivered", 0), "goods_paid": goods_paid, "freight_paid": freight_paid}}
+
 func _regional_rail_state(economy: EconomyR1Slice) -> Dictionary:
-	var row := economy._world.spatial_world.infrastructure_state(Opening.REGIONAL_RAIL_LINK)
+	var row := economy._world.spatial_world.infrastructure_state(_rail_link)
 	return {"status": row.get("status"), "nominal_capacity": row.get("nominal_capacity"), "condition": row.get("condition"), "effective_capacity": row.get("effective_capacity"), "remaining_capacity": row.get("remaining_capacity")}
 
 func _regional_rail_waiting(economy: EconomyR1Slice) -> Array[Dictionary]:
@@ -458,14 +704,14 @@ func _regional_rail_waiting(economy: EconomyR1Slice) -> Array[Dictionary]:
 		if cargo["stage"] != "WAITING": continue
 		var order: Dictionary = economy._orders[cargo["order_id"]]
 		var leg: Dictionary = order["route_legs"][cargo["leg_index"]]
-		if leg["edge_id"] not in Opening.REGIONAL_RAIL_EDGES: continue
+		if leg["edge_id"] not in _rail_edges: continue
 		result.append({"shipment": id, "good": order["good"], "quantity": cargo["quantity"], "leg_index": cargo["leg_index"], "reason": economy._waiting_reason(leg, cargo["quantity"], cargo["ready_day"], order["good"])})
 		if result.size() >= 4: break
 	for id: String in economy._pending_orders:
 		if result.size() >= 4: break
 		var order: Dictionary = economy._orders[id]
 		var leg: Dictionary = order["route_legs"][0]
-		if leg["edge_id"] not in Opening.REGIONAL_RAIL_EDGES: continue
+		if leg["edge_id"] not in _rail_edges: continue
 		result.append({"order": id, "good": order["good"], "pending": order["pending"], "reason": economy._waiting_reason(leg, 1, economy._earliest_dispatch(order), order["good"])})
 	return result
 
@@ -508,15 +754,15 @@ func _advance_regional_rail(world: WorldBuildResult, minutes: int, control: Dict
 		var step: Dictionary = world.simulation_step.advance_minutes(boundary - now)
 		if not step.get("success", true): return step
 		for entry: Dictionary in economy._shared.entries.values():
-			if entry["edge_id"] not in Opening.REGIONAL_RAIL_EDGES: continue
+			if entry["edge_id"] not in _rail_edges: continue
 			var cargo: Dictionary = economy._shipments.get(entry["shipment_id"], {})
 			if cargo.is_empty() or economy._orders[cargo["order_id"]]["route_legs"].size() < 2: continue
 			if cargo["leg_index"] == entry["leg_index"] and cargo["stage"] == "TRANSIT":
 				control["adopted"] = entry.duplicate(true)
 				control["fact"] = world.world.spatial_world.capacity_adoption(entry["adoption_id"])
 				for prior: Dictionary in economy._shared.entries.values():
-					if prior["edge_id"] in Opening.REGIONAL_RAIL_EDGES: control["entry_ids"][prior["adoption_id"]] = true
-				control["closed"] = world.world.spatial_world.set_infrastructure_status(Opening.REGIONAL_RAIL_LINK, VNextInfrastructureLinkState.STATUS_INTERRUPTED)
+					if prior["edge_id"] in _rail_edges: control["entry_ids"][prior["adoption_id"]] = true
+				control["closed"] = world.world.spatial_world.set_infrastructure_status(_rail_link, VNextInfrastructureLinkState.STATUS_INTERRUPTED)
 				control["failed"] = not control["closed"]
 				test.expect(control["closed"], "Spatial interrupts the real rail immediately after actual loading ends and the admitted multileg cargo enters TRANSIT")
 				print("REGIONAL_RAIL_INTERRUPTION ", JSON.stringify({"minute": world.world.game_clock.total_minutes(), "cargo_stage": cargo["stage"], "already_adopted_entry": control["adopted"], "spatial_fact": control["fact"], "entry_count_at_closure": control["entry_ids"].size(), "infrastructure_after": _regional_rail_state(economy)}))
@@ -594,7 +840,7 @@ func _print_regional_family_market(economy: EconomyR1Slice) -> void:
 func _print_regional_pending_maintenance(economy: EconomyR1Slice) -> void:
 	var pending: Array[Dictionary] = []
 	for project: Dictionary in economy._capital.projects.values():
-		if project["kind"] != "MAINTENANCE" or project["status"] == "COMPLETED": continue
+		if project["status"] == "COMPLETED": continue
 		var resources: Dictionary = {}
 		var terms := economy._capital.terms_for(project)
 		for good: String in terms["materials"]:
@@ -603,8 +849,8 @@ func _print_regional_pending_maintenance(economy: EconomyR1Slice) -> void:
 		for row: Dictionary in economy._commands.values():
 			var command: Dictionary = row["envelope"]["command"]
 			if command["kind"] == "buy" and command["payload"].get("buyer_site") == project["site_id"] and command["payload"].get("good") in ["steel", "tools"]: commands.append({"minute": command["minute"], "payload": command["payload"], "result": row["result"]})
-		pending.append({"id": project["id"], "site": project["site_id"], "status": project["status"], "reason": project["reason"], "budget": project["budget"], "orders": project["orders"], "material_sources": project.get("material_sources", []), "resources": resources, "recent_material_buy_commands_last_4": commands.slice(maxi(0, commands.size() - 4))})
-	print("REGIONAL_PENDING_MAINTENANCE ", JSON.stringify({"minute": economy._world.game_clock.total_minutes(), "projects": pending}))
+		pending.append({"id": project["id"], "kind": project["kind"], "site": project["site_id"], "status": project["status"], "reason": project["reason"], "budget": project["budget"], "orders": project["orders"], "material_sources": project.get("material_sources", []), "resources": resources, "recent_material_buy_commands_last_4": commands.slice(maxi(0, commands.size() - 4))})
+	print("REGIONAL_PENDING_CAPITAL ", JSON.stringify({"minute": economy._world.game_clock.total_minutes(), "projects": pending}))
 
 func _regional_config_failure_names(configuration: Dictionary) -> void:
 	# Only on a failed existing validation. Reuse its original subvalidators;
@@ -629,7 +875,7 @@ func _regional_config_failure_names(configuration: Dictionary) -> void:
 	print("REGIONAL_CONFIGURATION_FAILED ", JSON.stringify(failures))
 
 func _run_regional() -> void:
-	var configuration := Opening.regional_template()
+	var configuration := Opening.regional_template(_lyon_shared_case)
 	var valid: bool = EconomySliceConfig.valid(configuration)
 	test.expect(valid, "Regional case uses native producers, capital permissions and existing Shared transport schema")
 	if not valid:
@@ -640,7 +886,7 @@ func _run_regional() -> void:
 	test.equal(Opening.template()["case_id"], Opening.CASE_ID, "The old case entry is unchanged")
 	# Use the actual formal opening's historical land initialization. Skipping it
 	# made restore legitimately add land splits/controllers absent from the seed.
-	var normal := WorldBootstrap.new().build(null, [], [], FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, true, Opening.regional_request())
+	var normal := WorldBootstrap.new().build(null, [], [], FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, true, Opening.regional_request([], _lyon_shared_case))
 	test.expect(normal.success and normal.world.economy_r1 != null, "Host opening builds the opt-in regional case: " + normal.error)
 	if not normal.success or normal.world.economy_r1 == null:
 		test.finish(self, "Regional economic industry integration")
@@ -663,6 +909,11 @@ func _run_regional() -> void:
 	var economy := normal.world.economy_r1
 	var shortage := tools.world.economy_r1
 	var interrupted := rail.world.economy_r1
+	if _lyon_shared_case:
+		var lyon_binding: Dictionary = economy._shared.bindings[Opening.REGIONAL_LYON_RAIL_EDGES[0]]
+		var rouen_binding: Dictionary = economy._shared.bindings[Opening.REGIONAL_RAIL_EDGES[0]]
+		test.expect(lyon_binding["node_resources"]["origin_handling"] == rouen_binding["node_resources"]["origin_handling"] and lyon_binding["vehicle_id"] != rouen_binding["vehicle_id"] and lyon_binding["vehicle_id"] == economy._shared.bindings[Opening.REGIONAL_LYON_RAIL_EDGES[1]]["vehicle_id"], "Two finite bidirectional trains share one actual Paris handling facility, not per-service cloned station capacity")
+		test.expect(economy._spec["actors"]["cohort:regional:station:lyon"]["cash"] == 0 and economy._spec["sites"]["site:regional:station:lyon"]["stock"] == Opening.stock(), "The added Lyon handling site and host worker introduce no money, sale goods or phantom production")
 	var family_candidate: String = Opening.REGIONAL_FAMILY + "|flour|" + Opening.REGIONAL_FAMILY
 	test.expect(not economy._supplier_known(economy._known_suppliers("site:network:bakery1"), family_candidate) and not economy._supplier_known(economy._known_suppliers("site:regional:station:paris"), family_candidate), "City buyers start without a secretly prefilled household supplier")
 	test.expect(economy._directory_entry("site:network:bakery1", family_candidate, "REGIONAL", 0).is_empty() and economy._directory_entry("site:network:mill1", family_candidate, "WIDE", 1).is_empty(), "Unpublished or unaddressed city announcements do not grant supplier knowledge")
@@ -766,6 +1017,23 @@ func _run_regional() -> void:
 				if receipt.get("shipment_id", receipt["id"]) == adopted["shipment_id"]: entered_cargo_progressed = true
 		print("REGIONAL_DAY ", JSON.stringify({"day": index + 1, "advance_minutes_1440_us": timings, "normal_records": _regional_history(economy), "tools_shortage_records": _regional_history(shortage), "rail_interrupted_records": _regional_history(interrupted)}))
 		if index < 4 or index == REGIONAL_DAYS - 1: _print_regional_family_market(economy)
+		if index == 1 and _lyon_shared_case:
+			var witnessed: bool = true
+			var investment_responded: bool = true
+			for pair: Array in [["site:network:coal", "coal"], ["site:network:ore", "iron_ore"]]:
+				var fresh_unlinked: bool = false
+				var committed: int = 0
+				var installed_project: bool = false
+				for row: Dictionary in economy._request_window.get(str(pair[0]) + "|" + str(pair[1]), []):
+					if row["buyer"] == "site:network:steel2" and int(row["day"]) == 2 and str(row["order_id"]).is_empty(): fresh_unlinked = true
+				for order: Dictionary in economy._orders.values():
+					if order["kind"] == "SALE" and order["seller_site"] == pair[0] and order["buyer_site"] == "site:network:steel2" and order["good"] == pair[1]: committed += int(order["pending"]) + int(order["transit"])
+				for project: Dictionary in economy._capital.projects.values():
+					if project["site_id"] == pair[0] and project["kind"] == "INSTALL": installed_project = true
+				witnessed = witnessed and fresh_unlinked and committed > 0
+				investment_responded = investment_responded and installed_project
+			test.expect(witnessed, "The original day-two world has newer unlinked enquiries and older genuinely funded coal/ore obligations, not synthetic demand")
+			test.expect(investment_responded, "A newer enquiry cannot erase an eligible self-manager's actual unfulfilled SALE evidence for original capital investment")
 		if index + 1 in [9, 10, 12, REGIONAL_DAYS]: _print_regional_pending_maintenance(economy)
 		if index == REGIONAL_DAYS - 2:
 			var checkpoint := normal.persistence.snapshot()
@@ -790,17 +1058,42 @@ func _run_regional() -> void:
 	var actual := _regional_metrics(economy)
 	var lacking := _regional_metrics(shortage)
 	var delayed := _regional_metrics(interrupted)
+	var lyon_normal: Dictionary = {}
+	if _lyon_shared_case:
+		lyon_normal = _lyon_shared_metrics(economy)
+		var lyon_blocked := _lyon_shared_metrics(interrupted)
+		test.expect(int(lyon_normal["entries"]) > 0 and lyon_normal["spatial_facts_match"] and int(lyon_normal["lyon_handling_hours_allocated"]) > 0, "The formerly daily-business Lyon rail really adopts original Spatial capacity and earned station work")
+		var grain: Dictionary = lyon_normal["example_order"]
+		test.expect(int(grain["delivered"]) > 0 and int(grain["goods_paid"]) == int(grain["delivered"]) and int(grain["freight_paid"]) > 0 and int(lyon_normal["lyon_seller_grain_remaining"]) < 160 and int(lyon_normal["paris_mill_grain_consumed"]) > 0, "Actual Lyon grain reaches the Paris mill, reduces the original seller stock, pays goods plus freight and is later consumed")
+		test.expect(int(lyon_normal["lyon_zero_cash_worker_wages_paid"]) > 0, "The added handling member starts with no cash and receives the existing carrier's real wages")
+		print("REGIONAL_LYON_SHARED_OUTCOME ", JSON.stringify({"interrupted_link": _rail_link, "normal": lyon_normal, "interrupted": lyon_blocked}))
 	test.expect(int(actual["family_sources"]) > 0 and int(actual["family_sources"]) <= 8 and actual["family_grain_used"] == int(actual["family_sources"]) * 3 and actual["family_flour_produced"] == int(actual["family_sources"]) * 2, "Finite household flour is backed by its original grain portions and bounded self-work, not regeneration")
 	test.expect(int(actual["family_flour_delivered"]) > 0 and actual["family_goods_payments"] == int(actual["family_flour_delivered"]) * 3, "A city buyer actually receives household flour and pays the household's original account")
-	test.expect(int(actual["installations_completed"]) >= 2 and int(actual["maintenance_completed"]) > 0 and actual["mined_coal_ore_to_steel_to_tools_to_maintenance"], "Actual finite coal/ore inputs reach steel, tools and later equipment maintenance through original source lineage")
+	if _lyon_shared_case:
+		# This is a different declared-capacity input, not the old positive-throughput
+		# baseline. A physically missing maintenance tool must not become a repair.
+		var mined_steel: bool = false
+		for source: Dictionary in economy._lots.sources.values():
+			if source["good"] == "steel" and _source_has_mined_input(economy, source["id"], "site:network:coal") and _source_has_mined_input(economy, source["id"], "site:network:ore"): mined_steel = true
+		test.expect(int(actual["installations_completed"]) >= 2 and mined_steel and _produced(economy, "site:network:tools1", "tools") > 0 and int(lyon_normal["delivered_using_link_by_good"]["steel"]) > 0 and int(lyon_normal["delivered_using_link_by_good"]["tools"]) > 0, "The new finite mainline has actual installation, mined inputs in steel, manufactured tools and real steel/tool deliveries")
+		var waiting_sites: Dictionary = {}
+		for project: Dictionary in economy._capital.projects.values():
+			var site: String = project["site_id"]
+			if project["kind"] == "MAINTENANCE" and project["status"] == "WAITING_RESOURCES" and project["reason"] == "CAPITAL_GOODS_NOT_AT_SITE" and site in ["site:network:coal", "site:network:ore"] and int(economy._stocks[site]["tools"]) == 0 and economy._exposure(site, "tools") == 0: waiting_sites[site] = true
+		test.expect(waiting_sites.size() == 2 and int(actual["maintenance_completed"]) == 0 and int(actual["tools_consumed_in_maintenance"]) == 0, "Under the declared shared-capacity shortage both mine repairs really wait for absent tools, with no invented material consumption or completed maintenance")
+	else:
+		test.expect(int(actual["installations_completed"]) >= 2 and int(actual["maintenance_completed"]) > 0 and actual["mined_coal_ore_to_steel_to_tools_to_maintenance"], "Actual finite coal/ore inputs reach steel, tools and later equipment maintenance through original source lineage")
 	test.expect(int(actual["coal_extracted_kg"]) <= 48 and int(actual["ore_extracted_kg"]) <= 72, "In-ground finite estimates cannot become unlimited saleable stock")
-	test.expect(int(actual["coal_extracted_kg"]) > int(lacking["coal_extracted_kg"]) and int(actual["ore_extracted_kg"]) > int(lacking["ore_extracted_kg"]) and int(lacking["maintenance_completed"]) == 0, "Stopping upstream new tools causes real maintenance failure and lower subsequent mine capacity/output")
+	if _lyon_shared_case:
+		test.expect(_produced(economy, "site:network:tools1", "tools") > _produced(shortage, "site:network:tools1", "tools") and int(actual["coal_extracted_kg"]) > int(lacking["coal_extracted_kg"]) and int(actual["ore_extracted_kg"]) > int(lacking["ore_extracted_kg"]), "The sole upstream-tools intervention changes actual manufacture and extraction under the same constrained transport, not an asserted successful repair")
+	else:
+		test.expect(int(actual["coal_extracted_kg"]) > int(lacking["coal_extracted_kg"]) and int(actual["ore_extracted_kg"]) > int(lacking["ore_extracted_kg"]) and int(lacking["maintenance_completed"]) == 0, "Stopping upstream new tools causes real maintenance failure and lower subsequent mine capacity/output")
 	test.expect(int(actual["zero_opening_cash_wage_funded_food_consumers"]) > 0, "Residents with no opening cash actually buy and consume bread using paid wages rather than UI allocations")
 	test.expect(closed_rail and retained_adoption and entered_cargo_progressed, "An adopted multileg cargo keeps its original capacity fact and progresses beyond the interrupted rail leg")
 	var no_new_entries: bool = closed_rail
 	var unexpected_entries: Array[Dictionary] = []
 	for entry: Dictionary in interrupted._shared.entries.values():
-		if entry["edge_id"] in Opening.REGIONAL_RAIL_EDGES and not entry_ids_at_closure.has(entry["adoption_id"]):
+		if entry["edge_id"] in _rail_edges and not entry_ids_at_closure.has(entry["adoption_id"]):
 			no_new_entries = false
 			if unexpected_entries.size() < 8: unexpected_entries.append(entry)
 	var delivery_changed: bool = actual["multileg_delivered_by_good"] != delayed["multileg_delivered_by_good"]
@@ -813,7 +1106,7 @@ func _run_regional() -> void:
 		var restored := FormalPersistence.new().restore_candidate(snapshot)
 		test.expect(restored.success, "The actual shortage/interrupted branch cold-restores with its original obligations: " + restored.error)
 		if restored.success: test.expect(restored.persistence.snapshot() == snapshot, "Cold restore does not duplicate failed requests, capital stages, shipments or payments")
-	print("REGIONAL_SUMMARY ", JSON.stringify({"days": REGIONAL_DAYS, "normal": actual, "tools_shortage": lacking, "rail_interrupted": delayed, "advance_us_by_day": day_times, "timing_scope": "ADVANCE_MINUTES_ONLY_NOT_EXCLUSIVE_GUI_OR_RENDER_PERFORMANCE", "actual_adopted_rail_fact_retained": closed_rail and retained_adoption, "rail_intervention_failed": rail_control["failed"]}))
+	print("REGIONAL_SUMMARY ", JSON.stringify({"configuration_variant": "LYON_SHARED_FINITE_CAPACITY" if _lyon_shared_case else "ORIGINAL_LYON_LEGACY_CAPACITY", "days": REGIONAL_DAYS, "normal": actual, "tools_shortage": lacking, "rail_interrupted": delayed, "advance_us_by_day": day_times, "timing_scope": "ADVANCE_MINUTES_ONLY_NOT_EXCLUSIVE_GUI_OR_RENDER_PERFORMANCE", "actual_adopted_rail_fact_retained": closed_rail and retained_adoption, "rail_intervention_failed": rail_control["failed"]}))
 	var final_save := normal.persistence.snapshot()
 	var final_document_bytes: int = JSON.stringify(FormalWorldPersistenceDocument.encode(final_save)).to_utf8_buffer().size()
 	var final_native_bytes: int = var_to_bytes(final_save["economy_native"]).size()

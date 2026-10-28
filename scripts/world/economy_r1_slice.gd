@@ -514,18 +514,18 @@ func _path_for(buyer: String, origin: String, destination: String, known_day: in
 	return {}
 
 
-func _paths_for(buyer: String, origin: String, destination: String, known_day: int, good: String = "") -> Array[Dictionary]:
+func _paths_for(buyer: String, origin: String, destination: String, known_day: int, good: String = "", at_minute: int = -1) -> Array[Dictionary]:
 	_ensure_configuration_queries()
 	var result: Array[Dictionary] = []
 	for row: Dictionary in _paths_by_endpoints.get(origin + "|" + destination, []):
 		if row["id"] != _spec["route"]["id"] and (not row["known_to"].has(buyer) or known_day < int(row["known_day"])): continue
 		var valid: bool = true
 		for edge_id: String in row["edge_ids"]:
-			if not _cargo_edge_valid(_route_rows[edge_id]) or (not good.is_empty() and not _shared.path_conditions([{"edge_id": edge_id}], good)): valid = false; break
+			if not _cargo_edge_valid(_route_rows[edge_id]) or (not good.is_empty() and not _shared.path_conditions([{"edge_id": edge_id}], good, at_minute)): valid = false; break
 		if valid: result.append({"id": row["id"], "from_place_id": origin, "to_place_id": destination, "edge_ids": row["edge_ids"].duplicate()})
 	var seen_edges: Dictionary = {}
 	for path: Dictionary in result: seen_edges[JSON.stringify(path["edge_ids"])] = true
-	for path: Dictionary in _node_network.paths(self, buyer, origin, destination, good):
+	for path: Dictionary in _node_network.paths(self, buyer, origin, destination, good, at_minute):
 		if not seen_edges.has(JSON.stringify(path["edge_ids"])): result.append(path)
 	return result
 
@@ -709,14 +709,14 @@ func _candidate_key(value: String) -> String:
 func _directory_entry_announced(firm: String, entry: Dictionary, at_day: int) -> bool:
 	return (entry["known_to"].has(firm) or entry["known_to"].has(_owner(firm))) and int(entry["available_day"]) <= at_day
 
-func _directory_entry_visible(firm: String, entry: Dictionary, scope: String, at_day: int, policy: Dictionary) -> bool:
+func _directory_entry_visible(firm: String, entry: Dictionary, scope: String, at_day: int, policy: Dictionary, at_minute: int = -1) -> bool:
 	if policy.is_empty() or scope not in ["LOCAL", "REGIONAL", "WIDE"] or (scope == "WIDE" and not policy["allow_wide"]): return false
 	if not _directory_entry_announced(firm, entry, at_day): return false
 	if policy.get("scope_basis")=="NETWORK_ACCESS":
 		var own: String=_place(firm)
 		var source: String=_place(str(entry.get("site_id",_primary_site(entry["seller"]))))
 		if scope=="LOCAL":return source==own
-		for path: Dictionary in _paths_for(_owner(firm),source,own,at_day,str(entry["good"])):
+		for path: Dictionary in _paths_for(_owner(firm),source,own,at_day,str(entry["good"]),at_minute):
 			if scope=="WIDE" or _path_travel_days(path)<=int(policy["regional_max_days"]):return true
 		return false
 	if policy.get("scope_basis", "CONFIGURED") == "HOST_SPACE":
@@ -728,12 +728,12 @@ func _directory_entry_visible(firm: String, entry: Dictionary, scope: String, at
 	var zones: Array = policy["local_zones"] if scope == "LOCAL" else policy["regional_zones"]
 	return scope == "WIDE" or zones.has(entry["zone"])
 
-func _directory_entry(firm: String, candidate: String, scope: String, at_day: int) -> Dictionary:
+func _directory_entry(firm: String, candidate: String, scope: String, at_day: int, at_minute: int = -1) -> Dictionary:
 	_ensure_configuration_queries()
 	firm = _inventory_key(firm)
 	var policy := _search_policy(firm)
 	for entry: Dictionary in _directory_by_candidate.get(candidate, []):
-		if _directory_entry_visible(firm, entry, scope, at_day, policy): return entry
+		if _directory_entry_visible(firm, entry, scope, at_day, policy, at_minute): return entry
 	return {}
 
 func _discover_suppliers(firm: String, good: String, need: Dictionary) -> void:
@@ -4734,7 +4734,7 @@ func _valid_message(message: Dictionary, actors: Dictionary) -> bool:
 	if message.get("source") == "directory":
 		fields.append_array(["source", "scope"])
 		var policy := _search_policy(actor)
-		return FormalLedgerState.exact_fields(message, fields) and message["kind"] == "supplier" and not policy.is_empty() and message["scope"] in ["LOCAL", "REGIONAL", "WIDE"] and not _directory_entry(actor, candidate, message["scope"], int(message["delivery_day"])).is_empty() and message["id"] == "message:" + actor + ":supplier:" + candidate and int(message["delivery_day"]) == int(message["observed_day"]) + int(policy["delay_days"][message["scope"]])
+		return FormalLedgerState.exact_fields(message, fields) and message["kind"] == "supplier" and not policy.is_empty() and message["scope"] in ["LOCAL", "REGIONAL", "WIDE"] and not _directory_entry(actor, candidate, message["scope"], int(message["delivery_day"]), int(message["delivery_day"]) * 1440).is_empty() and message["id"] == "message:" + actor + ":supplier:" + candidate and int(message["delivery_day"]) == int(message["observed_day"]) + int(policy["delay_days"][message["scope"]])
 	if message.get("kind") == "job_posting":
 		fields.append_array(["version", "positions"])
 		var local: bool = message.get("source") == "local_notice"
@@ -7996,14 +7996,27 @@ func _npc_invest() -> void:
 		var latest := int(_capital._firm_last_project.get(firm, -int(policy["cooldown_days"])*1440))
 		if day*1440-latest < int(policy["cooldown_days"])*1440: continue
 		var observed_days: Dictionary = {}
+		var counted_orders: Dictionary = {}
 		var pressure := 0
 		for good: String in _spec["sites"][site]["prices"]:
 			for row: Dictionary in _request_window.get(site+"|"+good, []):
 				if int(row["day"]) <= day-int(policy["window_days"]): continue
-				var accepted_order := _orders.get(str(row.get("order_id", "")), {}) as Dictionary
-				var amount := int(accepted_order.get("pending", 0))+int(accepted_order.get("transit", 0))
-				# Unfunded requests remain visible as enquiries, not committed revenue.
-				if not accepted_order.is_empty(): amount += _delivered_order_quantity(accepted_order["id"], maxi(0, day-int(policy["window_days"])+1))
+				var buyer_key: String = str(row.get("buyer", ""))
+				if buyer_key.is_empty(): continue
+				var linked_id: String = str(row.get("order_id", ""))
+				# A fresh enquiry may locate old real commitments, never create their quantity.
+				var related_ids: Array = [linked_id] if not linked_id.is_empty() else _active_by_buyer.get(_owner(buyer_key), [])
+				var amount: int = 0
+				for related_id: String in related_ids:
+					if counted_orders.has(related_id): continue
+					var accepted_order: Dictionary = _orders.get(related_id, {})
+					if accepted_order.is_empty() or accepted_order["kind"] != "SALE" or accepted_order["seller_site"] != site or accepted_order["good"] != good: continue
+					if _inventory_key(str(accepted_order["buyer"]), str(accepted_order.get("buyer_site", ""))) != buyer_key: continue
+					var remaining: int = int(accepted_order["pending"]) + int(accepted_order["transit"])
+					if not linked_id.is_empty(): remaining += _delivered_order_quantity(related_id, maxi(0, day-int(policy["window_days"])+1))
+					if remaining <= 0: continue
+					counted_orders[related_id] = true
+					amount += remaining
 				if amount > 0:
 					observed_days[row["day"]] = true
 					pressure += amount
