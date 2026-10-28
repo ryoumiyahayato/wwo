@@ -96,3 +96,12 @@ python tools/map/install_region_slice.py --from-zip TERRAIN.zip --training-from-
 - 既有driver延长30s运动/30s玩家静止AI活动/30s接战/60sHE/30s烟/60s持续，补P99/每phase实际人数与弹药。默认关闭诊断约247.65s活动采样，仍20车/150独立兵/62双向座/212人；150全移动、19AI车全移动/16实射，双方69射手154枪。末57活兵不能当满载通过。原车长同Actor实走返原座，后来真实受伤HP7→3未治好，AP1/HE3/SMK1实耗；驾驶1.322m仍失败。
 - 默认开场1.165FPS/P95 1034.489/P99 1073.738ms，静止玩家1.105/1061.497/1125.734，接战1.295/912.870/954.539，HE1.232/962.184/1035.569，持续1.421/845.245/896.630。CPU约满一核，整卡GPU1–4%非进程GPU时间，工作集1323–1351MiB。没有30FPS或完整操作验收。
 - 风险µs/callback原始81.985→39.481→69.282，未改车辆控制组也约减半；不能归因或声明稳定净收益。风险轮44–60FPS时是原车长真实阵亡、battle_finished/physics-active=0，已判无效，不拿结束/自然减员/空弹过线。当前native terrain49.481ms主线程区间不等于旧观察51.777ms；旧167.555ms仍未关闭。日志无SCRIPT ERROR/ERROR，原warning保留。分阶段资源及四轮结果见[既有说明](../../../../docs/maps/layered_military_region.md)。未合并、导出、发布。
+
+## 原热路径第二轮
+
+- `f0ab400`单weight active world表只让shape段20.070→17.680µs，capture＋resolve父段却276.199→283.285µs、全军运动1.980→1.899FPS；未证实净收益，`e3b2bcc`已回退，不保留额外表。
+- `a6b279c`仅在原时钟已保证本tick服务时省邻格分类，保留原入口、ensure/terrain/epoch、自身shape门及所有运动/支撑/Brain/感知/fire/伤弹。非mandatory仍完整live风险；`scheduled_unclassified_solves`单列，不当低风险/风险下降。不是降服务Hz，不改部署或用睡眠减载。详见[既有说明](../../../../docs/maps/layered_military_region.md)。
+- RTX诊断首样本54450callbacks=22926solves+31524deferred，solves=0 classified-low+4973 classified-high+17953 scheduled；max.05sim/pending max.0333不变。仍1.446FPS开场/1.515持续，稳定净增益未证实。
+- 同源码默认长窗实际切到Intel Iris Xe，不是RTX；NVIDIA0%/0MiB不是游戏GPU负载，不用于RTX对照/验收。245.827s活动采样1.091–1.405FPS，150人全移动、19AI车全移动/实射，63步兵射手159枪；驾驶1.321m、HE段2发及观察步行collision检查失败。身份、原车长同Actor伤弹和正式世界隔离比较保留；设备漂移/Intel与进程GPU缺口见既有说明。
+- 10月28日固定`c5cab17`默认复核已由日志确认实际RTX/Compatibility；244.470s活动采样开场1.923FPS/P95 558.533/P99 562.804ms、静止1.944/555.633/588.301、HE2.393/475.742/503.101、持续2.752/417.446/445.165，模拟/墙时.256–.367。CPU约满一核，工作集1317–1347MiB；整卡GPU2.2–4.7%不是进程GPU时间。新标签只标明游戏PID/实际adapter/采样scope，不增测量。
+- 150人全移动，19AI车全移动/18实射，75步兵射手159枪。AP1/HE5/SMK2、HE段4发过原密集门但FPS失败；驾驶2.973m仍失败。原车长同Actor伤弹/返原座保留、自然HP7→3；步行/同会话/正式世界比较通过。末31活兵不能验收满载，稳定净收益未证实。

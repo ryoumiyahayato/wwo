@@ -396,7 +396,7 @@ func _ensure_locomotion_grid() -> void:
   if not _locomotion_vehicles.has(cell): _locomotion_vehicles[cell]=[]
   _locomotion_vehicles[cell].append(vehicle)
 
-func locomotion_contact_risk(actor: Node3D, seen_epoch: int, known_own_radius: float = -2.0) -> String:
+func locomotion_contact_risk(actor: Node3D, seen_epoch: int, known_own_radius: float = -2.0, evaluate_neighbors: bool = true) -> String:
  _ensure_locomotion_grid()
  if seen_epoch!=_locomotion_geometry_revision: return "terrain_dirty"
  if not is_instance_valid(_locomotion_terrain) or not _locomotion_terrain.has_signal("terrain_changed"): return "terrain_dirty_unavailable"
@@ -406,6 +406,8 @@ func locomotion_contact_risk(actor: Node3D, seen_epoch: int, known_own_radius: f
  var origin: Vector3 = actor.global_position
  var own_speed: float = maxf(float(actor.move_speed)*1.65,actor.velocity.length())
  var cell: Vector2i = _locomotion_cell(origin,4.0)
+ # False is only valid when the original schedule already guarantees a full solve.
+ if not evaluate_neighbors: return "scheduled_unclassified"
  # Radius plus one conservative cell; memberships update after actual solves.
  for x: int in range(-2,3):
   for z: int in range(-2,3):

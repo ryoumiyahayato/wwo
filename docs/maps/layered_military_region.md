@@ -174,9 +174,65 @@ python tools/map/install_region_slice.py --training-from-zip MODELS.zip
 
 诊断轮native terrain保留的64条阈值事件（另11条覆盖）中，main_update最大49.481ms，含同次两块build42.479ms/其它7.002ms；单块最大35.003ms中mesh_data16.888、shape_set_faces8.673、space_registration7.761ms。这是本轮原军事地形，不是旧观察碰撞51.777ms的同帧追溯。初始化2.3s级尾帧仍无完整归因。旧167.555ms/51.777ms未关闭。四轮原始报告在validation的`field170-long-baseline-20261027`、`field170-long-risk-reuse-20261027`、`field170-long-flat-poses-20261027`、`field170-long-default-20261027`本地目录保留；不覆盖失败，不拿后期减员或全局结束帧过线。
 
+## 原热路径追加候选的有限对照（2026-10-27）
+
+未扩展部署密度、角色数量或架构。追加的 `e64af98`→`f0ab400` 两个串行长窗都使用原20车/150活兵/62座入口、既有30/60s分段及有限弹药；只有后者把单weight的父链查表改为parent-first active world数组。原矩阵乘法本已memo，此候选只试图减少父链循环/ID/字典查询，不是省掉重复矩阵乘法。
+
+首次活动采样的capture/layout/shape-pose/resolve均值（µs）分别为97.637/56.818/20.070/178.562→102.579/61.361/17.680/180.706；capture＋resolve父段276.199→283.285µs。未改的Actor风险对照也37.909→39.261µs/callback，不能将时钟缩放后的约1%差异冒称净收益。全军运动1.980→1.899FPS，P99 564.250→665.258ms；持续段3.116→2.606FPS，末只21/26活兵，且两轮战斗均未结束。shape局部下降没有形成父段/整帧可靠收益，已用`e3b2bcc`完整回退此候选；最终不保留active-world表。两轮150人均移动>1m，分别85/80射手、178/184枪，驾驶2.973/2.972m仍失败，不用自然伤亡减载验收。
+
+没有实施零角度/零输入的接触快门：ground fit/coast/search仍可能改变真实姿态，原Quaternion角距离数值也不能由局部Euler相同推出原travel门必为0。也没有换HeightMap碰撞后端；[Godot4.6源码](https://raw.githubusercontent.com/godotengine/godot/4.6-stable/modules/godot_physics_3d/godot_shape_3d.cpp)的HeightMap cull默认双面，而当前Concave为单面，不用它换取不等价的碰撞结果。风险格已每physics统一建立，不是每Actor全量重建；空plan重复扫掠虽可消重，但受全Host每tick一个plan预算压住，本轮未以此堆微改。两个原始长窗位于validation的`field170-worldtable-before-20261027`和`field170-worldtable-after-20261027`，保留失败与回退历史。
+
+`a6b279c`只细化原风险路径：在原LOD分支，以原精确时钟谓词`pending+.000001<.05 && phaseNotDue`决定邻格分类是否可能影响defer。原Actor全部标量检查、Host原调用点、ensure/terrain/epoch/自身shape前门与pre-loop读取均保留；仅当时钟项已经决定本tick必solve时，不再扫邻格，返回`scheduled_unclassified`。非mandatory仍完整读取live邻居、未知/大/快/车辆风险。没有减少一个服务相位、碰撞、Brain/感知/fire/伤弹回调，也不跨callback缓存。默认旧caller参数仍true，原五人/玩家60Hz分支不变。
+
+诊断单列`scheduled_unclassified_solves`，不进low/high或risk_counts；同scope满足`solves=lowrisk+highrisk+scheduled_unclassified`。该marker不是低风险证据，分类减少不能说世界危险变少。原solves/deferred/累计sim/pending/maxDelta继续记录；只可能省无决策价值的邻格遍历，不省Actor标量、建格、原native运动或车辆控制。
+
+`a6b279c`诊断轮首次活动采样累计54450callbacks=22926solves+31524deferred；22926solves=0个classified-low+4973个classified-high+17953个scheduled-unclassified，150人该计数恒等式均成立。结算max.05sim、pending max.0333；不把low=0解释为没有低风险服务。150人全位移>1m、所有本人ray非零，77名射手（蓝41/红36）180枪；末49活兵、146physics、20车注册/62座/212人、战斗未结束。驾驶1.322m、AP1/HE3/SMK1、HE段2发，玩法和密集HE仍失败。
+
+该轮风险43.741µs/callback，但未改Armor控制组也从15.579→21.326ms/physics；开场1.446FPS/P99 1080.156ms、玩家静止1.274/1181.663、持续1.515/1138.110，不能宣称原始提速或稳定净收益。启动前未见其它Godot/已知地形采样，但OS快照有DWM约99%单核等量等桌面负载，未为数字调整他线、进程优先级或功耗/焦点策略，也没有全时外部负载跟踪。保留这种不确定性，不用它掩盖早先约2FPS的失败。解析通过、无SCRIPT ERROR/ERROR不等于30FPS验收。
+
+### 同`a6b279c`关闭诊断的补充轮：实际为Intel，不作RTX对照
+
+2026-10-27 23:09启动的`field170-mandatory-default-20261027`实际Godot日志/adapter均为**Intel Iris Xe**、Compatibility，并非此前RTX3050；没有切换引擎/修改OS策略来制造此变化，选择变化原因未确定。NVIDIA采样器此时记录0%/0MiB，不能据此说游戏GPU空闲；Intel利用率、共享显存和进程GPU帧时间未取得。本轮不可作为所要求RTX3050的关闭诊断验收，也不可与RTX轮作因果提速AB。
+
+约245.827s实际活动采样，初始化另计。初20车/150活兵且150physics/62座/212人；150人全移动>1m，19AI车全移动>1m且19辆均实射，63名步兵射手（蓝35/红28）159枪。末同150ID/实例、50蓝/9红存活、144physics、15AI活车、战斗未结束。AP1/HE3/SMK1、HE段2发、驾驶1.321m；原HP7伤臂车长同Actor实走3.400m返原座，伤弹保留。正式世界/人物/相机比较未变；但既有观察步行collision检查也为false，连同驾驶/FPS一起保留为失败，不把菜单/身份通过混为完整可操作。默认无感知counter不记为0ray。
+
+| Intel补充轮阶段（墙秒） | FPS | P95 / P99 ms | 末活兵 / AI活车 | CPU单核等量% | 工作集 / private峰MiB |
+|---|---:|---:|---:|---:|---:|
+| 部署18.095 | 2.597 | 1194.021 / 10913.086 | 150 / 19 | 73.91 | 1868.46 / 1903.21 |
+| 全军运动30.259 | 1.190 | 1107.332 / 1141.162 | 149 / 19 | 86.61 | 1869.12 / 1895.29 |
+| 玩家静止、AI活动30.249 | 1.091 | 1347.431 / 2067.863 | 142 / 19 | 85.62 | 1861.90 / 1879.66 |
+| 近远接战30.581 | 1.112 | 1460.167 / 1647.081 | 111 / 19 | 83.11 | 1891.62 / 1901.55 |
+| HE尝试60.629 | 1.122 | 1641.410 / 1762.969 | 86 / 19 | 77.29 | 1921.51 / 1918.76 |
+| 烟弹接战30.579 | 1.275 | 1491.529 / 1655.493 | 75 / 16 | 80.74 | 1930.36 / 1923.58 |
+| 持续交战60.491 | 1.405 | 1146.227 / 1628.994 | 59 / 15 | 77.38 | 1931.11 / 1923.05 |
+
+各主要活动段模拟/墙时仅.145–.187。无SCRIPT ERROR/ERROR、只有既有warning，仍不等于性能或玩法通过。`field170-mandatory-risk-20261027`日志确认是RTX，诊断结果与此Intel默认轮分别保留，不合并GPU统计。
+
+### GPU来源标签与资源候选边界（2026-10-28）
+
+既有Runner只在结果落盘前补每条样本的`game_pid`、`cpu_memory_scope=game_process`、`gpu_csv_scope=nvidia_smi_whole_device_not_pid`及实际`rendering_adapter/method`；不增加任何采样、频率、进程或运行时counter。只信同run报告的绝对user_dir与本次目录一致，缺失/不匹配记unknown，旧原始文件不追改。Windows Compatibility/OpenGL不靠`--gpu-index`选卡；官方[修订说明](https://patch-diff.githubusercontent.com/raw/godotengine/godot/pull/119289.patch)明确该逻辑只用于RenderingDevice后端。4.6.3不警告不等于参数生效，本工作线不改OS/驱动或改ANGLE/Vulkan来伪造同条件。
+
+没有新增barrel Capsule资源池。旧pose/query/last_debug会长期强持有，按帧回收不安全；即使独占，原is_equal_approx更新相对于fresh构造初态，沿用旧尺寸会吞掉原本该写的小变化。恢复初态又有Shape setter成本，现有父段未归因ctor/RID收益；因此不为未经证实的分配猜测叠缓存或改变碰撞精度。
+
+### 实际RTX、默认关闭诊断的复核（2026-10-28）
+
+固定源码`c5cab17`（规则与`a6b279c`相同，仅说明提交）、Godot4.6.3/Compatibility/1280×720，启动头与报告均确认NVIDIA RTX3050Laptop；未使用选卡flag或系统改动。约244.470s活动采样，初始化另计。初20车/150活兵且150physics/62座/212独立人；150步兵全移动>1m，19AI车全移动、18辆实际射击，75步兵射手（蓝39/红36）159枪。同150ID/实例，末31活兵/139physics/13AI活车，battle_finished=false；后段自然减载不能验收初始规模。
+
+| RTX默认轮阶段（墙秒） | FPS | P95 / P99 ms | 末活兵 / AI活车 | CPU单核等量% | 工作集 / private峰MiB | NVIDIA整卡均值% |
+|---|---:|---:|---:|---:|---:|---:|
+| 部署3.565 | 13.462 | 115.668 / 1569.250 | 150 / 19 | 96.33 | 1311.82 / 1759.84 | 18.00 |
+| 全军运动30.159 | 1.923 | 558.533 / 562.804 | 145 / 19 | 99.53 | 1316.68 / 1752.26 | 3.67 |
+| 玩家静止、AI活动30.352 | 1.944 | 555.633 / 588.301 | 130 / 19 | 99.92 | 1316.64 / 1734.55 | 4.00 |
+| 近远接战30.191 | 2.087 | 542.419 / 594.554 | 82 / 19 | 101.43 | 1331.33 / 1751.33 | 2.20 |
+| HE尝试60.170 | 2.393 | 475.742 / 503.101 | 62 / 16 | 99.91 | 1340.41 / 1760.48 | 2.83 |
+| 烟弹接战30.003 | 2.700 | 403.769 / 429.914 | 53 / 14 | 100.64 | 1343.03 / 1763.24 | 4.50 |
+| 持续交战60.330 | 2.752 | 417.446 / 445.165 | 31 / 13 | 99.46 | 1347.24 / 1767.14 | 4.72 |
+
+主要活动段模拟/墙时.256–.367；整卡显存约374–376MiB含桌面，并非进程GPU帧时间，进程GPU缺口仍保留。每条样本新scope正确标明同游戏PID19664、game_process与NVIDIA整卡、实际RTX adapter；这只是旧数据来源标签，没有增加测量或改变负载。AP1/HE5/SMK2，HE阶段4发满足原driver密集门，但FPS仍失败，不扩称稳定爆炸承载；驾驶2.973m仍低于原>5m。原车长同Actor实走3.400m返原座，原伤弹保留、自然HP7→3；观察步行collision检查、同会话重入、正式世界/人物/相机比较通过。无SCRIPT ERROR/ERROR、保留既有warning。默认没有感知counter，不据此记0ray；诊断轮另有实际本人ray数据。相对早先RTX基线没有足够稳定净收益，30FPS与完整操控仍未达标。原始报告保留于validation的`field170-mandatory-default-20261028`。
+
 ## 明确未完成
 
 - 步行167.555ms及其它未知峰的根因仍未关闭；已对齐的native建块成本仅作局部修复，实机功能通过不等于性能验收或用户接受。
-- 本轮满规模已实发AP/HE/SMK，但默认轮连续HE仅2发，爆炸密集目标未达；MG、受阻/移动车上下车拒绝、其它座位多人转移、长距离坡障、移动端/多分辨率、长时功耗、保存重载或正式部署未验。来袭主炮已有实测，不扩称所有武器/伤损分支通过。
+- 10月27日旧默认轮HE阶段仅2发；10月28日RTX默认轮4发满足原密集门，但FPS/驾驶仍失败，不能称稳定爆炸承载。MG、受阻/移动车上下车拒绝、其它座位多人转移、长距离坡障、移动端/多分辨率、长时功耗、保存重载或正式部署未验。来袭主炮已有实测，不扩称所有武器/伤损分支通过。
 - 没有历史地理配准、正式军事实体/控制权绑定、完整Cedar/Rivergate/Atlas15、全局军事或经济AI扩建。原程序化低面数art仍未达商业战争游戏美术质量。
 - 没有全仓回归、Windows导出、游戏Release发布/promote、PR合并或原资料清理。素材权利按原来源保留，不据此宣称全部开源。

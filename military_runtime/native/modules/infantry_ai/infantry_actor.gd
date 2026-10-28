@@ -98,7 +98,7 @@ func performance_snapshot() -> Dictionary:
    var observed: float = float(packet.get("observed_sim",-1.0))
    own_packets.append({"actor_id":str(packet.actor_id),"team_id":str(packet.get("team_id","")),"actor_kind":str(packet.get("actor_kind","")),"alive_at_packet":bool(packet.get("alive",false)),"observer_id":brain.actor_id,"origin":[origin.x,origin.y,origin.z],"point":[point.x,point.y,point.z],"observed_sim":observed,"age_sim":maxf(0.0,clock-observed),"fresh":observed>=0.0 and clock<=observed+0.200001,"self_to_seen_point_planar_m":Vector2(point.x-global_position.x,point.z-global_position.z).length()})
   result.merge({"counter_scope":"actor_lifetime","perception_refreshes":_timing_perception_refreshes,"perception_granted":_timing_perception_granted,"perception_denied":_timing_perception_denied,"skipped_callbacks":_timing_skipped.duplicate(),"own_visible_packets":own_packets,"own_packet_clock_sim":clock})
-  result["locomotion"]={"enabled":locomotion_lod_enabled,"target_hz":locomotion_hz,"callbacks":_timing_locomotion_callbacks,"solves":_timing_locomotion_solves,"lowrisk_solves":_timing_locomotion_lowrisk,"highrisk_solves":_timing_locomotion_highrisk,"deferred":_timing_locomotion_deferred,"integrated_sim_seconds":_timing_locomotion_sim,"maximum_step_sim_seconds":_timing_locomotion_max_delta,"pending_sim_seconds":_locomotion_pending,"effective_solve_hz":float(_timing_locomotion_solves)/_timing_locomotion_sim if _timing_locomotion_sim>0.0 else 0.0,"current_risk":_locomotion_risk,"risk_counts":_timing_locomotion_risks.duplicate(),"actual_velocity":[_locomotion_actual_velocity.x,_locomotion_actual_velocity.y,_locomotion_actual_velocity.z],"public_velocity":[velocity.x,velocity.y,velocity.z],"support_probe_calls":_timing_support_probe_calls,"support_probe_hits":_timing_support_probe_hits,"support_probe_terrain":_timing_support_probe_terrain,"support_probe_usec":_timing_support_probe_usec,"support_layer":int(_locomotion_floor.collision_layer) if is_instance_valid(_locomotion_floor) else 0}
+  result["locomotion"]={"enabled":locomotion_lod_enabled,"target_hz":locomotion_hz,"callbacks":_timing_locomotion_callbacks,"solves":_timing_locomotion_solves,"lowrisk_solves":_timing_locomotion_lowrisk,"highrisk_solves":_timing_locomotion_highrisk,"scheduled_unclassified_solves":_timing_locomotion_scheduled_unclassified,"deferred":_timing_locomotion_deferred,"integrated_sim_seconds":_timing_locomotion_sim,"maximum_step_sim_seconds":_timing_locomotion_max_delta,"pending_sim_seconds":_locomotion_pending,"effective_solve_hz":float(_timing_locomotion_solves)/_timing_locomotion_sim if _timing_locomotion_sim>0.0 else 0.0,"current_risk":_locomotion_risk,"risk_counts":_timing_locomotion_risks.duplicate(),"actual_velocity":[_locomotion_actual_velocity.x,_locomotion_actual_velocity.y,_locomotion_actual_velocity.z],"public_velocity":[velocity.x,velocity.y,velocity.z],"support_probe_calls":_timing_support_probe_calls,"support_probe_hits":_timing_support_probe_hits,"support_probe_terrain":_timing_support_probe_terrain,"support_probe_usec":_timing_support_probe_usec,"support_layer":int(_locomotion_floor.collision_layer) if is_instance_valid(_locomotion_floor) else 0}
  return result
 
 func _record_battle_timing(operation: String, start_usec: int, sense_usec: int = 0, nav_usec: int = 0, motor_usec: int = 0, skipped: String = "", motor_solve_usec: int = 0, motor_heading_usec: int = 0) -> void:
@@ -317,6 +317,7 @@ var _timing_locomotion_callbacks: int = 0
 var _timing_locomotion_solves: int = 0
 var _timing_locomotion_lowrisk: int = 0
 var _timing_locomotion_highrisk: int = 0
+var _timing_locomotion_scheduled_unclassified: int = 0
 var _timing_locomotion_deferred: int = 0
 var _timing_locomotion_sim: float = 0.0
 var _timing_locomotion_max_delta: float = 0.0
@@ -369,6 +370,8 @@ func _locomotion_step_delta(delta: float, command: Dictionary) -> float:
  _locomotion_pending+=delta
  _locomotion_risk="original_60"
  if locomotion_lod_enabled and locomotion_hz<Engine.physics_ticks_per_second and not bool(get_meta("player_controlled",false)):
+  var period: int = maxi(1,floori(float(Engine.physics_ticks_per_second)/maxf(20.0,locomotion_hz)))
+  var may_defer_clock: bool = _locomotion_pending+0.000001<0.05 and (Engine.get_physics_frames()+perception_slot)%period!=0
   var current_position: Vector3 = global_position
   var direction: Vector3 = command.destination-current_position
   direction.y=0.0
@@ -396,9 +399,8 @@ func _locomotion_step_delta(delta: float, command: Dictionary) -> float:
     elif not is_instance_valid(host) or not host.has_method("locomotion_contact_risk"): _locomotion_risk="risk_unavailable"
     else:
      var own_radius: float = _locomotion_footprint_from(current_body,current_shape,dimensions)
-     _locomotion_risk=host.locomotion_contact_risk(self,_locomotion_epoch,own_radius)
-  var period: int = maxi(1,floori(float(Engine.physics_ticks_per_second)/maxf(20.0,locomotion_hz)))
-  if _locomotion_risk.is_empty() and _locomotion_pending+0.000001<0.05 and (Engine.get_physics_frames()+perception_slot)%period!=0:
+     _locomotion_risk=host.locomotion_contact_risk(self,_locomotion_epoch,own_radius,may_defer_clock)
+  if _locomotion_risk.is_empty() and may_defer_clock:
    if _battle_timing_enabled: _timing_locomotion_deferred+=1
    return 0.0
  var integrated: float = _locomotion_pending
@@ -408,6 +410,7 @@ func _locomotion_step_delta(delta: float, command: Dictionary) -> float:
   _timing_locomotion_sim+=integrated
   _timing_locomotion_max_delta=maxf(_timing_locomotion_max_delta,integrated)
   if _locomotion_risk.is_empty(): _timing_locomotion_lowrisk+=1
+  elif _locomotion_risk=="scheduled_unclassified": _timing_locomotion_scheduled_unclassified+=1
   else:
    _timing_locomotion_highrisk+=1
    _timing_locomotion_risks[_locomotion_risk]=int(_timing_locomotion_risks.get(_locomotion_risk,0))+1

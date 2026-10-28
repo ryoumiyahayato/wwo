@@ -228,6 +228,23 @@ def terrain_region_review(args):
                 else:
                     raise RuntimeError('Override changed concurrently; preserved it instead of restoring')
                 if region_review or bool(os.environ.get('WWO_LOD_CONTROL')):
+                    # Label existing samples only; do not infer renderer load from NVIDIA device counters.
+                    rendering_adapter = rendering_method = 'unknown'
+                    if region_review:
+                        try:
+                            report = json.loads((output/'region-result.json').read_text(encoding='utf-8'))
+                            if isinstance(report, dict) and isinstance(report.get('user_dir'), str):
+                                report_user_dir = Path(report['user_dir'])
+                                if report_user_dir.is_absolute() and report_user_dir.resolve() == user_dir.resolve():
+                                    adapter = report.get('adapter')
+                                    method = report.get('renderer_method')
+                                    if isinstance(adapter, str) and adapter.strip(): rendering_adapter = adapter
+                                    if isinstance(method, str) and method.strip(): rendering_method = method
+                        except Exception:
+                            rendering_adapter = rendering_method = 'unknown'
+                    for sample in resource_samples:
+                        sample.update({'game_pid':process.pid if process else None,'cpu_memory_scope':'game_process',
+                            'gpu_csv_scope':'nvidia_smi_whole_device_not_pid','rendering_adapter':rendering_adapter,'rendering_method':rendering_method})
                     (output/'resource-samples.json').write_text(json.dumps(resource_samples,indent=2),encoding='utf-8')
                 (output/'window-ownership.json').write_text(json.dumps({'initial_foreground_pid':initial_owner,
                     'game_pid':process.pid if process else None,'samples':ownership,
