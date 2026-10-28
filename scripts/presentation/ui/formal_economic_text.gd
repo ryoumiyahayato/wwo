@@ -25,7 +25,19 @@ static func site(id: String) -> String:
 	return "已知站点（名称未记录）"
 
 static func job(id: String) -> String:
+	if id.begins_with("job:network:"):return _network_alias(id.trim_prefix("job:network:"))+"工作"
+	if id.begins_with("job:regional:station:"):return site(id.replace("job:","site:"))+"装卸工作"
 	return "面包制作与门市工作" if id in ["job:opening_paris_workshop","job:opening_paris_bakery"] else "已知岗位（名称未记录）"
+
+static func activity(row: Dictionary) -> String:
+	var outputs: Dictionary=row.get("outputs",{})
+	if outputs.has("flour"):return "研磨面粉"
+	if outputs.has("bread"):return "烘焙面包"
+	if outputs.has("coal"):return "开采煤炭"
+	if outputs.has("iron_ore"):return "开采铁矿"
+	var names: PackedStringArray=[]
+	for id: String in outputs:names.append(good(id))
+	return "生产"+"、".join(names) if not names.is_empty() else "生产活动"
 
 static func good(id: String) -> String:
 	return str(GOODS.get(id.trim_prefix("native:"),"商品（名称未记录）"))
@@ -51,7 +63,13 @@ static func cargo_stage(id: String) -> String:
 
 static func constraint(id: String) -> String:
 	if id.begins_with("CURRENT_MATERIAL_SHORTAGE:"):return "当前原料不足："+good(id.trim_prefix("CURRENT_MATERIAL_SHORTAGE:"))
+	if id.begins_with("MATERIAL_SHORTAGE:"):return "下一批缺少"+good(id.trim_prefix("MATERIAL_SHORTAGE:"))
+	var operating: Dictionary={"SITE_NOT_OPERATING":"站点已暂停经营","NO_CURRENT_LEASE_USE_RIGHT":"当前没有有效场地使用权","PRODUCTION_PAUSED":"本站生产已暂停","ACTIVITY_DISABLED":"此项生产活动已暂停","NO_COMPATIBLE_EQUIPMENT":"缺少当前可用的兼容设备"}
+	if operating.has(id):return str(operating[id])
 	return str({"LABOR_HOURS_BOUND":"劳动工时不足","CAPACITY_BOUND":"可用产能不足","MINERAL_RESERVE_EXHAUSTED":"有限矿藏已耗尽","OUTSIDE_SEASON":"不在生产季节","SEASON_CLOSED":"不在生产季节","CYCLE_NOT_READY":"生产周期尚未完成","ELIGIBLE":"本期可采用","LEGACY_UNSPECIFIED":"未声明工艺限制"}.get(id,"存在已报告的工艺限制（研发细节可查原码）"))
 
 static func reason(id: String) -> String:
-	return str({"NO_VACANCY":"本人已知该岗位没有空额。", "ALREADY_EMPLOYED":"已有劳动合同；须先正式离职生效。", "EMPLOYMENT_END_PENDING":"离职尚未生效，当前岗位仍占用。", "UNQUALIFIED":"本人技能不满足岗位要求。", "UNKNOWN_JOB":"本人尚未收到此岗位消息。", "STALE_JOB_NOTICE":"岗位通知已更新，原通知不能继续使用。", "WORK_PERIOD_ALREADY_CLAIMED":"本期工作已经登记，不能重复登记。", "OUTSIDE_JOB_PLACE_OR_TRAVELLING":"人物不在工作地点或正在旅行。", "WORK_SITE_STOPPED":"当前工作站点不能采用劳动。", "EMPLOYMENT_REQUIRED":"尚未取得劳动合同。", "STORE_PREMISES_OR_BUSINESS_UNAVAILABLE":"该站点当前不能开展销售。", "OFFER":"当前报价可提交；仍需正式裁决。", "ONSITE_REAL_STOCK_HANDOVER":"现场实际交付。", "STORE_NO_ACTUAL_STAFFING":"该店当日尚无已完成的销售工作，暂不能现场交付。", "STORE_DAILY_SALES_CAPACITY_EXHAUSTED":"该店当日交付能力已用完。", "STORE_CLOSED_AT_CURRENT_TIME":"当前不在营业时间。", "ONSITE_CUSTOMER_NOT_AT_STORE":"人物不在门市所在地，不能现场取货。", "ONSITE_CUSTOMER_ACTIVITY_CONFLICT":"本人已有工作预约，当前不能办理现场购买。", "NO_UNCOMMITTED_STOCK":"卖方没有未被预占的可售商品。", "INSUFFICIENT_AVAILABLE_CASH":"本人可用资金不足。"}.get(id,"当前条件不允许；未提供更具体的可知原因。" if id==id.to_upper() and "_" in id else id))
+	var trade: Dictionary={"UNCONFIGURED_SHARED_WEIGHT_OR_SERVICE_WINDOW":"已知供货联系，但当前没有匹配的Shared重量口径或剩余服务窗口。","NO_ROUTE":"当前没有本人已知且可执行的运输路线。","NO_STOCK":"卖方未锁定现货不足以满足本次数量；旧报价不保证还能买到。","FIRM_STOPPED_NEW_PROCUREMENT":"本站或企业已停止接受新采购；旧合同不因此消失。","CUMULATIVE_BUDGET_OR_WINDOW":"采购授权的累计额度或有效期不足。","QUANTITY_EXCEEDS_CURRENT_OFFER":"所选数量超过当前可执行报价，请少买或重新询价。","KNOWN_ENTERPRISE_QUOTE_UNAVAILABLE":"数量或报价已改变，请刷新后重新确认。","NOT_PROCUREMENT_MANAGER":"当前人物没有本企业的采购权限。","NOT_ORDER_OWNER":"这不是本人或当前获权企业的采购单，不能取消。","NO_PENDING_QUANTITY":"没有尚未发运的数量可取消；已采用的运输不能借此撤回。","LOSS_REQUIRES_CONFIRMED_DISPOSITION":"订单有待确认的损失责任，须先按原规则处置。","STALE_QUOTE":"原报价已变化，请重新取得当前报价。","RESERVATION_ERROR":"资金预留无法按原合同处理，本次未受理。","CAPITAL_GOODS_NOT_AT_SITE":"维修材料尚未实际到达本站，不能完成维修。"}
+	trade.merge({"NO_KNOWN_PATH":"供货主体已知，但没有当前可执行的已知运输通路。","TRANSPORT_LIMIT_OR_CLOSED":"原运输额度不足或连接已关闭；名义到货日不能替代实际采用。","FIRM_STOPPED_NEW_BUSINESS":"卖方当前不再接受新交易，旧合同仍须按原责任处理。","CANCEL_PENDING_AVAILABLE":"可申请取消未发运部分；执行时仍复核预留、实物和责任。","CANCELLATION_AMOUNT_BOUNDS":"原合同待释放金额无法合法表示，不能确认本次取消。"})
+	if trade.has(id):return str(trade[id])
+	return str({"NO_VACANCY":"本人已知该岗位没有空额。", "ALREADY_EMPLOYED":"已有劳动合同；须先正式离职生效。", "EMPLOYMENT_END_PENDING":"离职尚未生效，当前岗位仍占用。", "UNQUALIFIED":"本人技能不满足岗位要求。", "UNKNOWN_JOB":"本人尚未收到此岗位消息。", "STALE_JOB_NOTICE":"岗位通知已更新，原通知不能继续使用。", "WORK_PERIOD_ALREADY_CLAIMED":"本期工作已经登记，不能重复登记。", "OUTSIDE_JOB_PLACE_OR_TRAVELLING":"人物不在工作地点或正在旅行。", "WORK_SITE_STOPPED":"当前工作站点不能采用劳动。", "EMPLOYMENT_REQUIRED":"尚未取得劳动合同。", "STORE_PREMISES_OR_BUSINESS_UNAVAILABLE":"该站点当前不能开展销售。", "OFFER":"当前报价可提交；仍需正式裁决。", "ONSITE_REAL_STOCK_HANDOVER":"现场实际交付。", "STORE_NO_ACTUAL_STAFFING":"该店当日尚无已完成的销售工作，暂不能现场交付。", "STORE_DAILY_SALES_CAPACITY_EXHAUSTED":"该店当日交付能力已用完。", "STORE_CLOSED_AT_CURRENT_TIME":"当前不在营业时间。", "ONSITE_CUSTOMER_NOT_AT_STORE":"人物不在门市所在地，不能现场取货。", "ONSITE_CUSTOMER_ACTIVITY_CONFLICT":"本人已有工作预约，当前不能办理现场购买。", "NO_UNCOMMITTED_STOCK":"卖方没有未被预占的可售商品。", "INSUFFICIENT_AVAILABLE_CASH":"本次付款账户的可用资金不足。"}.get(id,"当前条件不允许；未提供更具体的可知原因。" if id==id.to_upper() and "_" in id else id))

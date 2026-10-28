@@ -3259,7 +3259,7 @@ func _firm_finance_view(firm: String) -> Dictionary:
 	result["lease_obligations"] = _leases.finance_view(firm,window)
 	return result
 
-func _site_operating_view(firm: String) -> Dictionary:
+func _site_operating_view(firm: String, known_offers: Variant = null, known_finance: Variant = null) -> Dictionary:
 	var plan := (_plans.get(firm, {}) as Dictionary).duplicate(true)
 	var activities: Array[Dictionary] = []
 	var scheduled_hours: int = 0
@@ -3349,7 +3349,7 @@ func _site_operating_view(firm: String) -> Dictionary:
 		committed[good] = _committed(firm, good)
 		free[good] = maxi(0, int(_stocks[firm][good]) - int(committed[good]))
 		incoming[good] = _exposure(firm, good) - int(_stocks[firm][good])
-	return {"firm_id": _owner(firm), "site_id": firm, "roles": _spec["sites"][firm]["roles"].duplicate(), "inventory": _stocks[firm].duplicate(true), "free_inventory": free, "committed_inventory": committed, "incoming": incoming, "known_suppliers": _firm_knowledge[firm].duplicate(), "offers": _offers(_owner(firm), firm), "delivered_report": (_site_reports.get(firm, {}) as Dictionary).duplicate(true), "host_organization_id": _spec["firms"][_owner(firm)].get("host_organization_id", ""), "manager": firm_manager_at(_owner(firm), _world.game_clock.total_minutes()), "management_basis": _firm_management_basis(_owner(firm)), "operating": _site_operating(firm), "lease_use_allowed": _leases.site_allowed(firm), "site_status": _site_state[firm].duplicate(true), "stock_place_id": _place(firm), "population_unit_id": _world.population_state.unit_for_place(_place(firm)), "shared_capacity": site_capacity(firm), "base_capacity": _spec["sites"][firm]["capacity"], "capacity_pools": _capital.pools(firm, _world.game_clock.total_minutes()), "capacity_basis": "CONFIGURED_BASE_PLUS_ACTUAL_INSTALLED_CAPITAL", "activities": activities, "product_needs": product_needs, "plan": plan, "input_needs": needs, "job_postings": jobs, "quotations": prices, "cooperation": cooperation, "received_requests": received, "finances": _firm_finance_view(_owner(firm)), "supplier_search": searches, "pending_directory_results": pending}
+	return {"firm_id": _owner(firm), "site_id": firm, "roles": _spec["sites"][firm]["roles"].duplicate(), "inventory": _stocks[firm].duplicate(true), "free_inventory": free, "committed_inventory": committed, "incoming": incoming, "known_suppliers": _firm_knowledge[firm].duplicate(), "offers": (known_offers as Array).duplicate(true) if known_offers is Array else _offers(_owner(firm), firm), "delivered_report": (_site_reports.get(firm, {}) as Dictionary).duplicate(true), "host_organization_id": _spec["firms"][_owner(firm)].get("host_organization_id", ""), "manager": firm_manager_at(_owner(firm), _world.game_clock.total_minutes()), "management_basis": _firm_management_basis(_owner(firm)), "operating": _site_operating(firm), "lease_use_allowed": _leases.site_allowed(firm), "site_status": _site_state[firm].duplicate(true), "stock_place_id": _place(firm), "population_unit_id": _world.population_state.unit_for_place(_place(firm)), "shared_capacity": site_capacity(firm), "base_capacity": _spec["sites"][firm]["capacity"], "capacity_pools": _capital.pools(firm, _world.game_clock.total_minutes()), "capacity_basis": "CONFIGURED_BASE_PLUS_ACTUAL_INSTALLED_CAPITAL", "activities": activities, "product_needs": product_needs, "plan": plan, "input_needs": needs, "job_postings": jobs, "quotations": prices, "cooperation": cooperation, "received_requests": received, "finances": (known_finance as Dictionary).duplicate(true) if known_finance is Dictionary else _firm_finance_view(_owner(firm)), "supplier_search": searches, "pending_directory_results": pending}
 
 func _visible_subject(actor: String, observer: String = "") -> Dictionary:
 	if observer.is_empty(): observer = actor
@@ -5086,11 +5086,84 @@ func _firm_business_action(actor: String, kind: String, payload: Dictionary) -> 
 	return result
 
 
+## Current own-business facts only; no quotes, finance history or forecasting.
+func business_situation(actor: String, firm: String, site: String) -> Dictionary:
+	if not _map_observer_allowed(actor): return {}
+	if not _spec["firms"].has(firm) or not _manager(actor, firm): return {}
+	if not _spec["sites"].has(site) or _owner(site) != firm: return {}
+	var state: Dictionary = _site_state[site]
+	var plan: Dictionary = _plans.get(site, {})
+	var operating: bool = _site_operating(site)
+	var activities: Array[Dictionary] = []
+	for id: String in _spec["sites"][site]["activity_order"]:
+		var activity: Dictionary = _activity(site, id)
+		var materials: Array[Dictionary] = []
+		var material_batches: Variant = null
+		var constraints: Array[String] = []
+		if not operating: constraints.append("SITE_NOT_OPERATING")
+		if not _leases.site_allowed(site): constraints.append("NO_CURRENT_LEASE_USE_RIGHT")
+		elif not config["production_enabled"] or not _site_producing(site): constraints.append("PRODUCTION_PAUSED")
+		if not state["activities"][id]["enabled"]: constraints.append("ACTIVITY_DISABLED")
+		if _capital.capacity(site, _world.game_clock.total_minutes(), id) < int(activity["capacity_units"]): constraints.append("NO_COMPATIBLE_EQUIPMENT")
+		var process_reason: String = Process.reason(activity, day, int(state["activities"][id]["batches"]))
+		if process_reason not in ["ELIGIBLE", "LEGACY_UNSPECIFIED"]: constraints.append(process_reason)
+		for good: String in activity["materials"]:
+			var per_batch: int = int(activity["materials"][good])
+			if per_batch <= 0: continue
+			var on_hand: int = int(_stocks[site][good])
+			var free_goods: int = capital_free_goods(site, good)
+			var incoming: int = maxi(0, _exposure(site, good) - on_hand)
+			var batches: int = free_goods / per_batch
+			material_batches = batches if material_batches == null else mini(int(material_batches), batches)
+			materials.append({"good": good, "per_batch": per_batch, "on_hand": on_hand, "free": free_goods, "incoming": incoming})
+			if free_goods < per_batch: constraints.append("MATERIAL_SHORTAGE:" + good)
+		var actual: Variant = null
+		var settled: Dictionary = plan.get("activities", {}).get(id, {})
+		if not processing and day > 0 and plan.get("day") == day and settled.has("actual"): actual = int(settled["actual"])
+		activities.append({"id": id, "enabled": state["activities"][id]["enabled"], "hours": activity["hours"], "materials": materials, "outputs": activity["outputs"].duplicate(true), "material_batches_available": material_batches, "actual_batches": actual, "next_batch_constraints": constraints})
+	var cash: Dictionary = {}
+	for account: Dictionary in _world.ledger_state.own_accounts(firm):
+		cash[account["denomination"]] = {"balance": account["balance"], "reserved": _world.ledger_state.reserved_balance(account["account_id"]), "available": _world.ledger_state.available_balance(account["account_id"])}
+	var automation: Dictionary = {"mode": "STOCK_TARGET_INPUTS" if activities.is_empty() else "ACTIVITY_DRIVEN_INPUTS", "independent_auto_buy_switch": false, "existing_orders_continue": true, "wage_obligations_continue": true, "maintenance_and_service_inputs_separate": true}
+	return {"firm_id": firm, "site_id": site, "minute": _world.game_clock.total_minutes(), "operating": operating, "production_enabled": state["production_enabled"], "accepting_business": state["accepting_business"], "automation": automation, "activities": activities, "cash": cash, "basis": "CURRENT_OWN_STOCK_CONTRACTS_AND_SETTLED_PLAN_NOT_A_FORECAST"}
+
+func _business_supplier_knowledge(site: String, offer: Dictionary) -> Dictionary:
+	var seller: String = str(offer["seller"])
+	var candidate: String = seller + "|" + str(offer["good"]) + "|" + str(offer["seller_site"])
+	var candidates: Array[String] = [candidate]
+	if offer["seller_site"] == _primary_site(seller): candidates.append(seller + "|" + str(offer["good"]))
+	var receivers: Array[String] = [site]
+	if site == _primary_site(_owner(site)): receivers.append(_owner(site))
+	for receiver: String in receivers:
+		for key: String in candidates:
+			var receipt: Dictionary = _receipts.get("message:" + receiver + ":supplier:" + key, {})
+			if receipt.is_empty() or receipt.get("actor") != receiver or receipt.get("kind") != "supplier" or receipt.get("candidate") != key: continue
+			return {"received_day": receipt.get("delivery_day"), "observed_day": receipt.get("observed_day"), "basis": str(receipt.get("source", "RECEIVED_SUPPLIER_NOTICE"))}
+	for key: String in candidates:
+		if _spec["sites"][site]["suppliers"].has(key): return {"received_day": null, "observed_day": null, "basis": "EXPLICIT_CONFIGURED_SUPPLIER"}
+	return {"received_day": null, "observed_day": null, "basis": "UNKNOWN"}
+
+## Eligibility preview, not a release or a promise of remote physical condition.
+func cancel_pending_view(actor: String, order_id: String) -> Dictionary:
+	if not _map_observer_allowed(actor): return {}
+	var order: Dictionary = _orders.get(order_id, {})
+	if order.is_empty(): return {}
+	if order["buyer"] != actor and not (_spec["firms"].has(order["buyer"]) and _manager(actor, order["buyer"])): return {}
+	var quantity: int = int(order["pending"])
+	var amount: Dictionary = FormalLedgerState.ratio(int(order["price"]) + _freight(order["route_legs"]), quantity, 1)
+	var reason: String = "CANCEL_PENDING_AVAILABLE"
+	if _cargo_fulfilment.unresolved(order_id) > 0: reason = "LOSS_REQUIRES_CONFIRMED_DISPOSITION"
+	elif quantity <= 0: reason = "NO_PENDING_QUANTITY"
+	elif amount.is_empty(): reason = "CANCELLATION_AMOUNT_BOUNDS"
+	return {"order_id": order_id, "minute": _world.game_clock.total_minutes(), "can_cancel_pending": reason == "CANCEL_PENDING_AVAILABLE", "quantity_pending": quantity, "releasable_amount": amount.get("quotient"), "denomination": order["denomination"], "reason": reason, "basis": "PENDING_CONTRACT_ONLY_EXECUTION_RECHECKS"}
+
 func business_view(actor: String, firm: String, site: String, quantity_value: int=1, offset: int=0, limit: int=1) -> Dictionary:
 	if not _spec["firms"].has(firm) or not _manager(actor,firm): return {}
 	if site.is_empty(): site=_primary_site(firm)
 	if not _spec["sites"].has(site) or _owner(site)!=firm or quantity_value<1 or quantity_value>1000000 or offset<0 or limit<1 or limit>16: return {}
 	var candidates := _offers(firm,site)
+	var finance: Dictionary = _firm_finance_view(firm)
+	var site_view: Dictionary = _site_operating_view(site, candidates, finance)
 	var rows: Array[Dictionary]=[]
 	for i: int in range(offset,mini(offset+limit,candidates.size())):
 		var offer := candidates[i].duplicate(true) as Dictionary
@@ -5108,9 +5181,21 @@ func business_view(actor: String, firm: String, site: String, quantity_value: in
 		var permission := _procurement_permission(actor,firm,payload,false,components,offer["seller"],_place(site),"goods:"+str(offer["good"]),cost.get("quotient",-1))
 		offer["can_order"]=offer["reason"]=="OFFER" and offer["quantity"]>=quantity_value and _site_accepting(site) and not _firm_winding_down(firm) and _budget_ready(components) and permission["ok"]
 		offer["order_reason"]="FIRM_STOPPED_NEW_PROCUREMENT" if not _site_accepting(site) or _firm_winding_down(firm) else "CUMULATIVE_BUDGET_OR_WINDOW" if not _budget_ready(components) else permission.get("reason","") if not permission["ok"] else offer["reason"] if offer["reason"]!="OFFER" else "QUANTITY_EXCEEDS_CURRENT_OFFER" if offer["quantity"]<quantity_value else offer["reason"]
+		offer["quantity_requested"] = quantity_value
+		offer["goods_total"] = FormalLedgerState.ratio(int(offer["price"]), quantity_value, 1).get("quotient")
+		offer["freight_total"] = FormalLedgerState.ratio(int(offer["freight_per_unit"]), quantity_value, 1).get("quotient")
+		offer["reservation_total"] = cost.get("quotient")
+		var available_after: Variant = null
+		var account_id: String = _account(firm, str(offer["denomination"]))
+		if not cost.is_empty() and not _world.ledger_state.account(account_id).is_empty():
+			var available: int = _world.ledger_state.available_balance(account_id)
+			if available >= int(cost["quotient"]): available_after = available - int(cost["quotient"])
+		offer["available_after_order"] = available_after
+		offer["quotation_minute"] = offer.get("minute")
+		offer["knowledge"] = _business_supplier_knowledge(site, offer)
 		offer["request"]=payload
 		rows.append(offer)
-	return {"firm_id":firm,"site_id":site,"minute":_world.game_clock.total_minutes(),"finance":_firm_finance_view(firm),"financial_actions":_business_credit_actions(actor,firm,quantity_value),"retail":_retail.view(site),"commercial_information":_commercial.business_view(actor,firm,site),"labor_market":_labor_market.business_view(actor,firm,site),"wind_down":_wind_down.view(actor,firm,quantity_value),"capital_resale":_capital.resale_business(actor,firm),"services":_service_market.business_view(actor,firm,site,quantity_value),"leases":_leases.view(actor,firm,site),"site":_site_operating_view(site),"offers":rows,"offer_total":candidates.size(),"offer_offset":offset,"sites":_spec["firms"][firm]["sites"].duplicate(),"orders":_active_by_buyer.get(firm,{}).size(),"identity_basis":_business_identity_basis(firm)}
+	return {"firm_id":firm,"site_id":site,"minute":_world.game_clock.total_minutes(),"finance":finance,"situation":business_situation(actor,firm,site),"financial_actions":_business_credit_actions(actor,firm,quantity_value),"retail":_retail.view(site),"commercial_information":_commercial.business_view(actor,firm,site),"labor_market":_labor_market.business_view(actor,firm,site),"wind_down":_wind_down.view(actor,firm,quantity_value),"capital_resale":_capital.resale_business(actor,firm),"services":_service_market.business_view(actor,firm,site,quantity_value),"leases":_leases.view(actor,firm,site),"site":site_view,"offers":rows,"offer_total":candidates.size(),"offer_offset":offset,"sites":_spec["firms"][firm]["sites"].duplicate(),"orders":_active_by_buyer.get(firm,{}).size(),"identity_basis":_business_identity_basis(firm)}
 
 func _business_identity_basis(firm: String) -> String:
 	for row: Dictionary in config.get("opening_organizations",[]):

@@ -13,6 +13,8 @@ signal business_requested(subject_id: String, site_id: String)
 signal statistics_requested
 signal demand_changed
 signal flow_animation_changed(enabled: bool)
+signal personal_market_requested
+signal pending_cancellation_requested(order_id: String)
 const GOODS = EconomicText.GOODS
 var snapshot: Dictionary = {}
 var network: Dictionary = {}
@@ -63,6 +65,10 @@ var _order_index: Dictionary = {}
 var _receipt_source_count: int = 0
 var _receipt_truncated: bool = false
 var _page_offsets: Array[int] = []
+var _jobs: Button
+var _personal_market: Button
+var _cancel_pending: Button
+var _navigation_pending: Dictionary = {}
 
 func _ready() -> void:
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -102,7 +108,11 @@ func _ready() -> void:
 	_button(actions,"关闭详情",func():back_requested.emit())
 	var navigation:=HBoxContainer.new();column.add_child(navigation)
 	_business=_button(navigation,"经营所选站点",func():business_requested.emit(str(snapshot.get("subject","")),selected_site))
-	_button(navigation,"正式市场页",func():statistics_requested.emit())
+	_button(navigation,"国家统计",func():statistics_requested.emit())
+	_jobs=_button(navigation,"本人岗位",func():business_requested.emit(str(snapshot.get("observer","")),""))
+	_personal_market=_button(navigation,"已知报价",func():personal_market_requested.emit())
+	_jobs.tooltip_text="原人物岗位与订单页；不因浏览城市而移动人物或获得经营权。"
+	_personal_market.tooltip_text="本人已知报价；按真实所在地和原规则复核，不是所看城市的全市场。"
 	_subjects=OptionButton.new();_subjects.fit_to_longest_item=false;column.add_child(_subjects)
 	_subjects.item_selected.connect(func(index:int):
 		if not _updating:
@@ -114,10 +124,14 @@ func _ready() -> void:
 			var row:Dictionary=_places.get_item_metadata(index)
 			selected_node=str(row.get("node_id",""));selected_site=str(row.get("site_id",""))
 			selected_place=str(row.place_id);selected_order=""
-			_sync_site_selection();demand_changed.emit())
+			_sync_site_selection()
+			var subject:=str(row.get("subject_id",snapshot.get("subject","")))
+			if subject!=str(snapshot.get("subject","")):query_requested.emit(subject,0)
+			else:demand_changed.emit())
 	_orders=OptionButton.new();_orders.fit_to_longest_item=false;column.add_child(_orders)
 	_orders.item_selected.connect(func(index:int):
-		if not _updating:selected_order=str(_orders.get_item_metadata(index));_detail())
+		if not _updating:
+			selected_order=str(_orders.get_item_metadata(index));_detail();demand_changed.emit())
 	_goods_select=OptionButton.new();_goods_select.add_item("全部商品");_goods_select.set_item_metadata(0,"all");column.add_child(_goods_select)
 	_goods_select.item_selected.connect(func(index:int):selected_good=str(_goods_select.get_item_metadata(index));_detail())
 	var options:=HBoxContainer.new();column.add_child(options)
@@ -128,7 +142,9 @@ func _ready() -> void:
 	_flow_toggle.toggled.connect(set_flow_animation)
 	var receipts:=CheckButton.new();receipts.text="到货7日";receipts.tooltip_text="本页授权订单近7日实际到货收据；不是当前在途。";receipts.button_pressed=true;options.add_child(receipts)
 	receipts.toggled.connect(func(on:bool):show_receipts=on;_publish_links())
-	_details=RichTextLabel.new();_details.custom_minimum_size=Vector2(0,180);_details.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_details.size_flags_vertical=Control.SIZE_EXPAND_FILL;_details.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_details.scroll_active=true;column.add_child(_details)
+	_details=RichTextLabel.new();_details.custom_minimum_size=Vector2(0,140);_details.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_details.size_flags_vertical=Control.SIZE_EXPAND_FILL;_details.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_details.scroll_active=true;column.add_child(_details)
+	_cancel_pending=_button(column,"取消本单未发部分",_request_pending_cancellation)
+	_cancel_pending.visible=false;_cancel_pending.disabled=true
 	for selector:OptionButton in [_subjects,_places,_orders,_goods_select]:
 		selector.clip_text=true;selector.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	var pages:=HBoxContainer.new();column.add_child(pages)
@@ -184,6 +200,26 @@ func occlusions() -> Array[Rect2]:
 		if full:rows.append(Rect2(_toolbar.position,_toolbar.size))
 	return rows
 
+func navigation_state() -> Dictionary:
+	# Identifiers/preferences only. Never retain the old observation in history.
+	var source:Dictionary=_navigation_pending if not _navigation_pending.is_empty() else snapshot
+	return {"world_id":int(source.get("world_id",_flow_world_id)),"observer":str(source.get("observer",_flow_observer)),"subject":str(source.get("subject","")),"place":selected_place,"site":selected_site,"order":selected_order,"offset":int(source.get("offset",0)),"details":not _details_collapsed,"research":research_expanded,"expanded":full}
+
+func restore_navigation(state:Dictionary) -> void:
+	_navigation_pending={"world_id":int(state.get("world_id",0)),"observer":str(state.get("observer","")),"subject":str(state.get("subject","")),"offset":maxi(0,int(state.get("offset",0)))}
+	selected_place=FormalEconomicMapObservation.canonical_place(str(state.get("place","place:paris")))
+	selected_site=str(state.get("site",""));selected_order=str(state.get("order",""));selected_node=""
+	_details_collapsed=not bool(state.get("details",false));research_expanded=bool(state.get("research",false));full=bool(state.get("expanded",false))
+	_page_offsets.clear();_menu_key.clear()
+	if not is_node_ready():return
+	_subjects.clear();_places.clear();_orders.clear();_goods_select.clear();_details.text=""
+	_business.disabled=true;_jobs.disabled=true;_personal_market.disabled=true
+	_cancel_pending.visible=false;_cancel_pending.disabled=true
+	_detail_toggle.text="展开详情" if _details_collapsed else "收起详情"
+	_research_toggle.text="收起研发细节" if research_expanded else "展开研发细节"
+	_side.visible=not _details_collapsed;_toolbar.visible=full
+	# No show(), signals, observer reads, focus or world mutation here.
+
 func present(value:Dictionary, source_catalog:VNextSpatialCatalog, expanded:bool, return_mode:String="political") -> void:
 	catalog=source_catalog;full=expanded;_updating=true
 	var subject:=str(value.get("subject",""));var observer:=str(value.get("observer",""))
@@ -191,6 +227,12 @@ func present(value:Dictionary, source_catalog:VNextSpatialCatalog, expanded:bool
 	for row:Dictionary in value.get("authorized_subjects",[]):
 		if str(row.id)==subject:authorized=true;break
 	var world_id:=int(value.get("world_id",0))
+	if not _navigation_pending.is_empty():
+		if world_id!=int(_navigation_pending.get("world_id",0)) or observer!=str(_navigation_pending.get("observer","")):
+			selected_site="";selected_order="";selected_node="";research_expanded=false;_details_collapsed=true
+		_navigation_pending.clear()
+	_jobs.disabled=observer.is_empty();_personal_market.disabled=observer.is_empty()
+	_cancel_pending.visible=false;_cancel_pending.disabled=true
 	var source_changed:bool=world_id==0 or world_id!=_flow_world_id or observer!=_flow_observer
 	if source_changed:
 		public_network={};_menu_key.clear();_page_offsets.clear()
@@ -208,6 +250,10 @@ func present(value:Dictionary, source_catalog:VNextSpatialCatalog, expanded:bool
 		_flow_scope=(value.get("read_scope",{}) as Dictionary).duplicate(true)
 		_flow_scope["date"]=(value.get("date",{}) as Dictionary).duplicate()
 		_rebuild_order_index();_collect_receipts()
+		var follow:=str(value.get("follow_order_id",""))
+		if not follow.is_empty() and _order_index.has(follow):selected_order=follow
+	_detail_toggle.text="展开详情" if _details_collapsed else "收起详情"
+	_research_toggle.text="收起研发细节" if research_expanded else "展开研发细节"
 	_toolbar.visible=full;_expand.visible=not full;_side.visible=not _details_collapsed
 	_return_map.text="返回地理地图" if return_mode=="geographic" else "返回政治地图"
 	if not _details_collapsed:
@@ -229,19 +275,25 @@ func _update_menus(value:Dictionary) -> void:
 	for id:String in network.get("edges",{}):
 		var edge:Dictionary=network.edges[id]
 		order_rows.append([id,str(edge.good),_edge_status(edge)])
-	var key:Array=[value.get("subjects",[]),public_network.get("nodes",[]),subject,selected_site,order_rows,_hub().get("known_goods",[]),research_expanded]
+	var key:Array=[value.get("subjects",[]),public_network.get("nodes",[]),subject,selected_site,selected_order,order_rows,_hub().get("known_goods",[]),research_expanded]
 	if key==_menu_key:return
 	_menu_key=key
 	_subjects.clear();_managed_subject=false
 	for row:Dictionary in value.get("subjects",[]):
 		_subjects.add_item(str(row.name));_subjects.set_item_metadata(_subjects.item_count-1,str(row.id))
 		if str(row.id)==subject:_subjects.select(_subjects.item_count-1);_managed_subject=str(row.kind)=="firm"
-	_places.clear();_places.add_item("本站点／公开身份");_places.set_item_metadata(0,{"place_id":selected_place,"site_id":"","node_id":""})
+	var authorized:Dictionary={}
+	for row:Dictionary in value.get("authorized_subjects",[]):
+		if str(row.get("kind",""))=="firm":authorized[str(row.get("id",""))]=true
+	_places.clear();_places.add_item("选择本城有权站点" if subject.is_empty() else "本站点／公开身份")
+	_places.set_item_metadata(0,{"place_id":selected_place,"site_id":"","node_id":"","subject_id":subject})
 	for node:Dictionary in public_network.get("nodes",[]):
-		if str(node.get("kind",""))!="site" or str(node.get("place_id",""))!=selected_place or str(node.get("firm_id",""))!=subject:continue
+		if str(node.get("kind",""))!="site" or str(node.get("place_id",""))!=selected_place:continue
+		var firm:=str(node.get("firm_id",""))
+		if (subject.is_empty() and not authorized.has(firm)) or (not subject.is_empty() and firm!=subject):continue
 		if _places.item_count>=PLACE_MENU_BUDGET:break
 		_places.add_item(EconomicText.site(str(node.get("site_id",""))))
-		_places.set_item_metadata(_places.item_count-1,{"place_id":selected_place,"site_id":str(node.get("site_id","")),"node_id":str(node.get("id",""))})
+		_places.set_item_metadata(_places.item_count-1,{"place_id":selected_place,"site_id":str(node.get("site_id","")),"node_id":str(node.get("id","")),"subject_id":firm})
 	_sync_site_selection()
 	_orders.clear();_orders.add_item("经营概要／选择订单");_orders.set_item_metadata(0,"")
 	for row:Array in order_rows:
@@ -264,10 +316,12 @@ func clear_observation() -> void:
 	_details_collapsed=true;research_expanded=false
 	_detail_toggle.text="展开详情";_research_toggle.text="展开研发细节"
 	_menu_key.clear();_receipt_facts.clear();_page_offsets.clear();_flow_subject="";_flow_observer="";_flow_world_id=0
-	_order_index.clear();_flow_scope.clear();_receipt_source_count=0;_receipt_truncated=false
+	_order_index.clear();_flow_scope.clear();_receipt_source_count=0;_receipt_truncated=false;_navigation_pending.clear()
+	_cancel_pending.visible=false;_cancel_pending.disabled=true;_jobs.disabled=true;_personal_market.disabled=true
 	selected_place="place:paris";selected_site="";selected_order="";selected_good="all"
 	_managed_subject=false;_business.disabled=true
-	_subjects.clear();_places.clear();_orders.clear();_details.text=""
+	_subjects.clear();_places.clear();_orders.clear();_goods_select.clear();_details.text=""
+	_heading.text="";_page.text="";_business.tooltip_text=""
 	var empty: Array[Dictionary] = []
 	links_changed.emit(empty)
 
@@ -458,10 +512,132 @@ func _production_text(value:Dictionary) -> String:
 	rows.append("在途为已接受合同责任，不替代未确认的远程实货量；参数/配方按来源case，不是历史产能。")
 	return "\n".join(rows)
 
+func _player_situation_text() -> String:
+	var person:Dictionary=snapshot.get("player_context",{})
+	var current_place:=str(person.get("current_place_id",""))
+	var location:=place_name(current_place) if not current_place.is_empty() else "未知"
+	if person.get("present_at_recorded_place")==false:location="原人物记录为"+location+"，但按旅行规则当前不可确认为在场；不推定途中坐标。"
+	var rows:Array[String]=["正在查看："+place_name(selected_place)+"；本人所在地："+location]
+	if person.has("managed_firms_listed"):
+		rows.append("本页已列示微观经营授权 %d 家；受雇/工资看原岗位页，浏览城市不会移动本人。"%int(person.managed_firms_listed))
+	if person.has("available"):
+		rows.append("本人可用 %s · 预留 %s %s"%[str(person.available),str(person.get("reserved","未知")),EconomicText.currency(str(person.get("denomination","")))])
+	if person.has("inventory"):rows.append("本人当前可见本地持有："+_goods(person.get("inventory",{}))+"（不含未知远程实物）。")
+	rows.append("可用上方‘本人岗位’或‘已知报价’行动；按本人原所在地与权限复核。")
+	return "\n".join(rows)
+
+func _business_situations_text() -> String:
+	var rows:Array[String]=[]
+	var subject:=str(snapshot.get("subject",""));var shown:int=0;var matched:int=0
+	for situation:Dictionary in snapshot.get("city_business_situations",[]):
+		if not subject.is_empty() and (str(situation.get("firm_id",""))!=subject or str(situation.get("site_id",""))!=selected_site):continue
+		matched+=1
+		if shown>=3:continue
+		shown+=1
+		rows.append(EconomicText.site(str(situation.get("site_id","")))+" · "+("经营中" if situation.get("operating")==true else "经营已停")+" / "+("生产开" if situation.get("production_enabled")==true else "生产停")+" / "+("接新业务" if situation.get("accepting_business")==true else "不接新业务"))
+		var cash:Dictionary=situation.get("cash",{})
+		for currency:String in cash:
+			var account:Dictionary=cash[currency]
+			rows.append("企业可用 %s · 预留 %s %s"%[str(account.get("available","未知")),str(account.get("reserved","未知")),EconomicText.currency(currency)])
+		var activities:Array=situation.get("activities",[])
+		var count:int=0
+		for activity:Dictionary in activities:
+			if count>=2:break
+			count+=1
+			var actual:Variant=activity.get("actual_batches")
+			var batches:Variant=activity.get("material_batches_available")
+			rows.append(EconomicText.activity(activity)+" · "+("活动开" if activity.get("enabled")==true else "活动停")+"；最近已结算 "+(str(actual)+" 批" if actual is int else "批次尚未知"))
+			rows.append("当前原料支持 "+(str(batches)+" 批（不是保证产量）" if batches is int else "无原料投入项" if activity.has("material_batches_available") else "批次未知"))
+			var material_count:int=0
+			var materials:Array=activity.get("materials",[])
+			for material:Dictionary in materials:
+				if material_count>=4:break
+				material_count+=1
+				rows.append("  %s：每批%s · 本站可用%s · 合同供给%s"%[EconomicText.good(str(material.get("good",""))),str(material.get("per_batch","未知")),str(material.get("free","未知")),str(material.get("incoming","未知"))])
+			if materials.size()>material_count:rows.append("  另 %d 项投入，原经营页可查；上方支持批次仍按原领域全部投入计算。"%(materials.size()-material_count))
+			var constraints:Array[String]=[]
+			for code:String in activity.get("next_batch_constraints",[]):constraints.append(EconomicText.constraint(code))
+			rows.append("下一批限制："+("、".join(constraints) if not constraints.is_empty() else "当前未报告；劳动、时序等仍由原日结裁决。"))
+		if activities.size()>2:rows.append("另有 %d 项生产活动，进入原经营页查看。"%(activities.size()-2))
+		var automation:Dictionary=situation.get("automation",{})
+		rows.append("按活动原料规则自动补货；没有独立自动采购开关。" if str(automation.get("mode",""))=="ACTIVITY_DRIVEN_INPUTS" else "本站按既有库存目标补货，不把贸易库存当产出。")
+		rows.append("停产不取消原订单/工资；维护、服务投入仍按各自规则。合同供给不等于到货实物。")
+	if matched>shown:rows.append("另有 %d 个本城获权站点，请在站点下拉选择查看。"%(matched-shown))
+	if bool(snapshot.get("city_situations_truncated",false)) and (matched>0 or subject.is_empty()):rows.append("处境最多读本城 %d 个获权站点，身份页或处境已截断；未见不等于没有。"%int(snapshot.get("city_situation_limit",8)))
+	return "\n".join(rows)
+
+func _identity_notice_text() -> String:
+	var producers:int=0
+	for node:Dictionary in public_network.get("nodes",[]):
+		if str(node.get("kind",""))=="local_producer" and str(node.get("place_id",""))==selected_place:producers+=1
+	if producers==0:return ""
+	return "本次已知身份页列示地方生产者 %d 个（公开/已知身份不是经营授权）。未提供原消息日期或家庭成交记录；页头是观察时刻，不能当成交新闻。私账与私有买卖仍不可见。"%producers
+
+func _pending_preview() -> Dictionary:
+	var preview:Dictionary=snapshot.get("pending_cancellation",{})
+	if selected_order.is_empty() or str(preview.get("order_id",""))!=selected_order or not _order_index.has(selected_order):return {}
+	if not preview.get("minute") is int or preview.get("minute")!=snapshot.get("minute"):return {}
+	return preview
+
+func _request_pending_cancellation() -> void:
+	var preview:=_pending_preview()
+	if preview.get("can_cancel_pending")==true:pending_cancellation_requested.emit(selected_order)
+
+func _cancellation_text() -> String:
+	var preview:=_pending_preview()
+	_cancel_pending.visible=not selected_order.is_empty()
+	_cancel_pending.disabled=preview.get("can_cancel_pending")!=true
+	_cancel_pending.tooltip_text="仅提交取消本单未发部分；原领域执行时再次复核，已采用运输不能撤回。"
+	if preview.is_empty():return "尚未取得当前订单的取消预览；未推算可释放金额。"
+	var amount:Variant=preview.get("releasable_amount")
+	var text:="合同未发 %s；取消预览释放 %s %s。"%[str(preview.get("quantity_pending","未知")),str(amount) if amount is int else "金额未知",EconomicText.currency(str(preview.get("denomination","")))]
+	if preview.get("can_cancel_pending")!=true:text+="\n当前不可取消："+EconomicText.reason(str(preview.get("reason","")))
+	return text+"\n只处理未发责任；在途、装卸和已交付不撤回。执行仍由原规则复核。"
+
+func _order_waiting_text(order:Dictionary) -> String:
+	var reasons:Dictionary={}
+	var pending:=str(order.get("pending_waiting_reason",""))
+	if not pending.is_empty():reasons[pending]=true
+	for cargo:Dictionary in order.get("shipments",[]):
+		for key:String in ["waiting_reason","arrival_blocked_reason"]:
+			var code:=str(cargo.get(key,""))
+			if not code.is_empty():reasons[code]=true
+	var labels:Dictionary={"SHARED_RESOURCE_REQUIRES_EXPLICIT_BINDING":"尚无Shared资源的明确绑定","HOST_CONNECTION_UNAVAILABLE":"原订单所需宿主连接当前不可用","NOT_READY":"最早可发运时点尚未到","WAITING_EXPLICIT_HOST_ENTRY_WINDOW":"等待正式Shared入场窗口","SHARED_LINK_VEHICLE_OR_HANDLING_LIMIT":"当前车辆/装卸服务量不足","EDGE_CLOSED":"原订单报告路段当前关闭；重开时点未知","EDGE_CAPACITY":"本期路段剩余运力不足","NODE_CAPACITY":"本期节点承接量不足","QUEUED_NEXT_DISPATCH":"等待下一次正式调度","EXPLICIT_OWNER_COLLECTION_REQUIRED":"须本人按原规则到收货地正式领取","FUTURE_HOST_ENTRY_ALLOCATION_REQUIRED":"后续Shared服务尚待正式分配，不保证到达时点","BATCH_EXCEEDS_ACTIVE_CAPACITY":"现批次超过当前后续路段能力"}
+	var rows:Array[String]=[]
+	for code:String in reasons:
+		var label:=str(labels[code]) if labels.has(code) else EconomicText.reason(code)
+		rows.append(label if label!=code else "存在原订单已报告的等待条件，原运输页可查。")
+	return "原订单报告的等待/后续条件："+"、".join(rows)+"（不据此推断货物精确位置）。" if not rows.is_empty() else ""
+
+func _sales_text() -> String:
+	var subject:=str(snapshot.get("subject",""));var observer:=str(snapshot.get("observer",""))
+	if subject.is_empty() or subject==observer:return ""
+	var delivered:Dictionary={}
+	for receipt:Dictionary in _receipt_facts:
+		var id:=str(receipt.get("order_id",""));var order:=_raw_order(id)
+		if str(order.get("kind",""))!="SALE" or str(order.get("seller",""))!=subject or str(order.get("buyer","")) in [subject,observer]:continue
+		if not selected_order.is_empty() and selected_order!=id:continue
+		if selected_good not in ["all",str(receipt.get("good",""))]:continue
+		delivered[id]=int(delivered.get(id,0))+int(receipt.get("quantity",0))
+	var rows:Array[String]=[];var shown:int=0
+	for id:String in delivered:
+		if shown>=3:break
+		shown+=1
+		var order:=_raw_order(id);var buyer:=EconomicText.firm(str(order.get("buyer","")))
+		if buyer=="企业（名称未记录）":buyer="其他已知买方"
+		rows.append("%s购入 %s %s；实际交付 %s → %s。"%[buyer,str(delivered[id]),EconomicText.good(str(order.get("good",""))),place_name(str(order.get("from_place_id",""))),place_name(str(order.get("to_place_id","")))])
+		if order.get("paid_goods_amount") is int:rows.append("该单累计已结货款 %s %s（非利润，非仅7日合计）。"%[str(order.paid_goods_amount),EconomicText.currency(str(order.get("denomination","")))])
+	if rows.is_empty():return ""
+	if delivered.size()>shown:rows.append("另 %d 单有交付，选择订单查看。"%(delivered.size()-shown))
+	return "近7日本页对外销售的真实交付（非全城；不猜买方内部策略）\n"+"\n".join(rows)
+
 func _detail() -> void:
 	if _details==null or _details_collapsed:return
-	var lines:Array[String]=[]
+	_cancel_pending.visible=false;_cancel_pending.disabled=true
+	var lines:Array[String]=[_player_situation_text()]
 	var subject:=str(snapshot.get("subject",""));var hub:=_hub()
+	var follow_notice:=str(snapshot.get("follow_notice",""))
+	if not follow_notice.is_empty():lines.append(follow_notice)
 	if subject.begins_with("aggregate:"):
 		var totals:Dictionary=snapshot.get("macro",{}).get("daily_totals",{})
 		lines.append("国家统计（非城市或企业库存）")
@@ -471,31 +647,48 @@ func _detail() -> void:
 		var order:=_raw_order(selected_order)
 		lines.append(EconomicText.good(str(order.get("good","")))+" · "+_edge_status(network.get("edges",{}).get(selected_order,{})))
 		lines.append("%s → %s\n待发%s · 在途责任%s · 确认交付%s"%[place_name(str(order.get("from_place_id",""))),place_name(str(order.get("to_place_id",""))),str(order.get("pending","未知")),str(order.get("transit","未知")),str(order.get("delivered","未知"))])
+		lines.append(_cancellation_text())
+		var waiting:=_order_waiting_text(order)
+		if not waiting.is_empty():lines.append(waiting)
 		lines.append("合同在途责任不等于已核实远程实货。精确位置未知。")
-		lines.append(_flow_scope_text());lines.append(_freight_summary())
-		if research_expanded:lines.append(str(order.get("id",""))+"\n"+_cargo_text(selected_order))
+		var sales:=_sales_text()
+		if not sales.is_empty():lines.append(sales)
+		lines.append(_freight_summary())
+		if research_expanded:lines.append(_flow_scope_text()+"\n"+str(order.get("id",""))+"\n"+_cargo_text(selected_order))
 	elif subject.is_empty():
-		lines.append("已知主体 %s · 已知站点 %s"%[str(hub.get("known_subject_count","未知")),str(hub.get("known_site_count","未知"))])
+		var situations:=_business_situations_text()
+		if not situations.is_empty():lines.append("本城获权站点处境\n"+situations)
+		lines.append("在站点下拉选择本城有权设施，再用‘经营所选站点’进入原采购/生产页。未列示处境不表示不存在企业或库存为零。")
+		lines.append("公开身份范围：已知主体 %s · 已知站点 %s"%[str(hub.get("known_subject_count","未知")),str(hub.get("known_site_count","未知"))])
 		var goods:Array[String]=[]
 		for good:String in hub.get("known_goods",[]):goods.append(EconomicText.good(good))
-		if not goods.is_empty():lines.append("已知经营商品："+"、".join(goods))
-		lines.append("选择本城企业再查看。公开身份不是经营授权；未知的库存、利润与产能不推定为零。")
+		if not goods.is_empty():lines.append("已知经营商品（不是当前成交/产量）："+"、".join(goods))
+		lines.append("公开身份不是经营授权；未知的库存、利润与产能不推定为零。")
 	else:
 		var subject_name: String="已知主体"
 		for choice:Dictionary in snapshot.get("subjects",[]):
 			if str(choice.id)==subject:subject_name=str(choice.name);break
-		lines.append(subject_name if subject!=snapshot.get("observer","") else "当前人物 · 本地财产")
+		lines.append(subject_name if subject!=snapshot.get("observer","") else "当前人物 · 本地财产与本人订单")
 		var own:Dictionary=snapshot.get("firm",{})
 		if own.is_empty():lines.append("仅收到公开身份；没有本站经营授权，私账/库存/内部订单不可见。")
 		else:
-			lines.append(_flow_scope_text());lines.append(_freight_summary())
-			if own.has("cash"):lines.append("获准账面现金 %s · 预留 %s（原记账单位）"%[str(own.cash),str(own.get("reserved","未知"))])
+			var situation:=_business_situations_text()
+			if not situation.is_empty():lines.append(situation)
+			elif own.has("cash") and subject!=snapshot.get("observer",""):lines.append("企业可用 %s · 预留 %s（原记账单位）"%[str(own.get("available","未知")),str(own.get("reserved","未知"))])
+			var sales:=_sales_text()
+			if not sales.is_empty():lines.append(sales)
 			var production:Dictionary=snapshot.get("production_details",{}).get(selected_site,{})
-			if not production.is_empty():lines.append(_production_text(production) if research_expanded else _production_summary(production))
+			if not production.is_empty():
+				if research_expanded:lines.append(_production_text(production))
+				elif situation.is_empty():lines.append(_production_summary(production))
 			for operation:Dictionary in own.get("operations",[]):
 				if str(operation.get("site_id",""))!=selected_site:continue
 				lines.append("本站在库："+_goods(operation.get("inventory",{}))+"\n可用："+_goods(operation.get("free_inventory",{}))+" · 已承诺："+_goods(operation.get("committed_inventory",{})))
-			lines.append("本页授权订单 %d；报价、就业与工资详情未请求，见原人物/经营页。"%(network.get("edges",{}) as Dictionary).size())
+			lines.append(_freight_summary())
+			lines.append("本页授权订单 %d；报价/岗位/工资见原人物或经营页，不能推定别家私账。"%(network.get("edges",{}) as Dictionary).size())
+			if research_expanded:lines.append(_flow_scope_text())
+	var identity_notice:=_identity_notice_text()
+	if not identity_notice.is_empty():lines.append(identity_notice)
 	if research_expanded:lines.append(_public_place_text())
 	lines.append("地图仅城市锚点。虚线为已知通路/合同责任；流动脉冲仅表示本页近7日已确认交付方向，不是实时货物坐标。")
 	lines.append(str(snapshot.get("identity_notice","")))

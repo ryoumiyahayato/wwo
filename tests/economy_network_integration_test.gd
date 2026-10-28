@@ -27,6 +27,8 @@ func _initialize() -> void:
 			_rail_link = Opening.REGIONAL_LYON_RAIL_LINK
 			_rail_edges = Opening.REGIONAL_LYON_RAIL_EDGES.duplicate()
 		_run_regional.call_deferred()
+	elif arguments.has("--player-choices-only"):
+		_player_choices_only.call_deferred()
 	elif arguments.has("--directory-history-only"):
 		_directory_history_only.call_deferred()
 	elif arguments.has("--read-contract-only"):
@@ -236,6 +238,276 @@ func _map_presentation_boundary(built: WorldBuildResult) -> void:
 	view.free()
 	test.expect(built.persistence.snapshot() == before, "Map observations and all presentation fixture operations leave the complete real world and clock unchanged")
 
+
+## This flag exercises real choices through the original action/step boundary.
+## A alone continues to day 36; B stops after the bounded production comparison,
+## and the interruption clone runs only two further daily boundaries. No GUI run.
+func _player_choice_advance(built: WorldBuildResult, minutes: int, cash: int) -> bool:
+	var economy := built.world.economy_r1
+	# The actual player never receives NPC automatic work. Keep the chosen bakery
+	# job staffed by explicitly booking each original four-hour work period.
+	if not economy._work_queue.has(Opening.PLAYER):
+		var work := LivelihoodAction.execute_current(built.world, "work", {"hours": 4})
+		if not work.get("accepted", false):
+			print("PLAYER_CHOICE_WORK_REFUSAL ", JSON.stringify(work))
+			return false
+	var step: Dictionary = built.simulation_step.advance_minutes(minutes)
+	if not step.get("success", true): print("PLAYER_CHOICE_STEP_FAILURE ", JSON.stringify(step))
+	return step.get("success", true) and _cash_total(built.world) == cash and _physical_valid(economy) and _production_totals_valid(economy)
+
+func _player_choice_costs(economy: EconomyR1Slice) -> Dictionary:
+	var account := economy._account("firm:network:mill1")
+	var result: Dictionary = {"cash": economy._world.ledger_state.balance(account), "reserved": economy._world.ledger_state.reserved_balance(account), "available": economy._world.ledger_state.available_balance(account), "goods_paid": 0, "freight_paid": 0, "wages_paid": 0, "flour_produced": _produced(economy, "site:network:mill1", "flour"), "grain_at_site": economy._stocks["site:network:mill1"]["grain"], "basis": "ACTUAL_LEDGER_CASH_FLOWS_AND_SOURCE_BACKED_SITE_OUTPUT_NOT_NET_PROFIT"}
+	for payment: Dictionary in economy._world.ledger_state.own_transactions("firm:network:mill1"):
+		if payment["from_account_id"] != account: continue
+		var field: String = "goods_paid" if payment["kind"] == "goods" else "freight_paid" if payment["kind"] == "freight" else "wages_paid" if payment["kind"] == "wage" else ""
+		if not field.is_empty(): result[field] = int(result[field]) + int(payment["amount"])
+	return result
+
+func _player_choice_interruption(normal: WorldBuildResult, order_id: String, entry: Dictionary) -> Dictionary:
+	var checkpoint := normal.persistence.snapshot()
+	var interrupted := FormalPersistence.new().restore_candidate(checkpoint)
+	test.expect(interrupted.success, "Player response restores the actual partial-dispatch snapshot: " + interrupted.error)
+	if not interrupted.success: return {}
+	test.expect(interrupted.persistence.snapshot() == checkpoint, "The normal and interrupted response begin at exactly the same real transit snapshot")
+	checkpoint = {}
+	var economy := interrupted.world.economy_r1
+	var cash: int = _cash_total(interrupted.world)
+	var fact := interrupted.world.spatial_world.capacity_adoption(entry["adoption_id"])
+	var adopted_ids: Dictionary = {}
+	for prior: Dictionary in economy._shared.entries.values():
+		if prior["edge_id"] in Opening.REGIONAL_LYON_RAIL_EDGES: adopted_ids[prior["adoption_id"]] = true
+	var order: Dictionary = economy._orders[order_id]
+	var pending: int = int(order["pending"])
+	var transit: int = int(order["transit"])
+	var cargo_before: Dictionary = economy._shipments[entry["shipment_id"]].duplicate(true)
+	var delivered_before: int = int(order["delivered"])
+	test.expect(pending > 0 and transit > 0 and cargo_before["stage"] == "TRANSIT", "The response has actual pending goods and separately adopted cargo, not a fabricated cancellation fixture")
+	var closed: bool = interrupted.world.spatial_world.set_infrastructure_status(Opening.REGIONAL_LYON_RAIL_LINK, VNextInfrastructureLinkState.STATUS_INTERRUPTED)
+	test.expect(closed, "The real Spatial Lyon rail is interrupted without changing a native synthetic capacity")
+	var read_before := interrupted.persistence.snapshot()
+	var preview := economy.cancel_pending_view(Opening.PLAYER, order_id)
+	var private_order: String = ""
+	for candidate: Dictionary in economy._orders.values():
+		if candidate["buyer"] != Opening.PLAYER and not economy._manager(Opening.PLAYER, candidate["buyer"]):
+			private_order = candidate["id"]
+			break
+	test.expect(not private_order.is_empty() and economy.cancel_pending_view(Opening.PLAYER, private_order).is_empty(), "Cancel preview discloses nothing about a real unappointed buyer's order")
+	test.expect(economy.cancel_pending_view("firm:network:mill1", order_id).is_empty() and economy.cancel_pending_view(Opening.PLAYER, "unknown:player-choice-order").is_empty(), "Forged observers and unknown order IDs have no cancel preview")
+	test.expect(preview.get("can_cancel_pending", false) and preview.get("quantity_pending") == pending, "The legitimate cancellation preview describes only the remaining original pending quantity")
+	test.expect(interrupted.persistence.snapshot() == read_before, "Cancellation previews do not release money, lots or any other authoritative field")
+	read_before = {}
+	var account := economy._account("firm:network:mill1")
+	var available: int = interrupted.world.ledger_state.available_balance(account)
+	var reserved: int = interrupted.world.ledger_state.reserved_balance(account)
+	var balance: int = interrupted.world.ledger_state.balance(account)
+	var cancelled := LivelihoodAction.execute_current(interrupted.world, "cancel", {"order_id": order_id})
+	test.expect(cancelled.get("accepted", false), "The actual player cancels only their managed company's outstanding pending part")
+	var release: int = int(preview.get("releasable_amount", -1))
+	test.expect(release > 0 and interrupted.world.ledger_state.available_balance(account) == available + release and interrupted.world.ledger_state.reserved_balance(account) == reserved - release and interrupted.world.ledger_state.balance(account) == balance, "Cancellation releases exactly the original pending reservation, without a cash refund or money creation")
+	test.expect(order["pending"] == 0 and order["cancelled"] == pending and order["transit"] == transit and order["delivered"] == delivered_before and economy._shipments[entry["shipment_id"]] == cargo_before, "Pending cancellation neither recalls the adopted cargo nor rewrites completed delivery history")
+	var target: int = (economy.day + 2) * 1440
+	var steps_ok: bool = true
+	while interrupted.world.game_clock.total_minutes() < target:
+		var now: int = interrupted.world.game_clock.total_minutes()
+		var boundary: int = mini(target, (economy.day + 1) * 1440)
+		var event: int = economy.next_transport_boundary()
+		if event > now: boundary = mini(boundary, event)
+		steps_ok = _player_choice_advance(interrupted, boundary - now, cash) and steps_ok
+		if not steps_ok: break
+	var no_new: bool = true
+	for adopted: Dictionary in economy._shared.entries.values():
+		if adopted["edge_id"] in Opening.REGIONAL_LYON_RAIL_EDGES and not adopted_ids.has(adopted["adoption_id"]): no_new = false
+	var infrastructure := interrupted.world.spatial_world.infrastructure_state(Opening.REGIONAL_LYON_RAIL_LINK)
+	test.expect(steps_ok and infrastructure.get("status") == VNextInfrastructureLinkState.STATUS_INTERRUPTED and infrastructure.get("effective_capacity") == 0.0 and no_new, "The response keeps the physical rail closed, conserves goods/cash and admits no new rail cargo")
+	test.expect(economy._shared.entries.get(entry["adoption_id"]) == entry and interrupted.world.spatial_world.capacity_adoption(entry["adoption_id"]) == fact, "The exact previously adopted Shared and Spatial capacity facts survive the interruption")
+	test.expect(order["delivered"] == delivered_before + transit and order["cancelled"] == pending and order["pending"] == 0 and order["transit"] == 0, "Already adopted goods really arrive while the cancelled unshipped remainder stays cancelled")
+	return {"minute": interrupted.world.game_clock.total_minutes(), "pending_cancelled": pending, "adopted_delivered": int(order["delivered"]) - delivered_before, "released_reservation": release, "rail_status": infrastructure.get("status"), "no_new_adoptions": no_new}
+
+func _player_choices_only() -> void:
+	var base := WorldBootstrap.new().build(null, [], [], FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT, true, Opening.regional_request())
+	test.expect(base.success and base.world.economy_r1 != null, "Player choices use the actual default regional formal opening: " + base.error)
+	if not base.success or base.world.economy_r1 == null:
+		test.finish(self, "Economic network player choices")
+		return
+	var economy := base.world.economy_r1
+	var read_before := base.persistence.snapshot()
+	var person := LivelihoodAction.query(base.world, Opening.PLAYER)
+	var job: Dictionary = {}
+	var tools_notice: bool = false
+	for notice: Dictionary in person.get("known_jobs", []):
+		if notice["id"] == "job:network:bakery1": job = notice
+		if notice["id"] == "job:network:tools1": tools_notice = true
+	test.expect(not job.is_empty() and tools_notice and job.get("at_workplace", false) and int(job.get("vacancies", 0)) > 0, "The actual day-zero local bakery vacancy and tools job notice were received, not manufactured")
+	test.expect(economy.business_situation(Opening.PLAYER, "firm:network:bakery1", "site:network:bakery1").is_empty() and LivelihoodAction.query_business(base.world, Opening.PLAYER, "firm:network:bakery1", "site:network:bakery1").is_empty(), "Receiving a bakery job notice grants no bakery business authority")
+	test.expect(base.persistence.snapshot() == read_before, "Initial job and authority reads leave the complete authoritative snapshot unchanged")
+	read_before = {}
+	if job.is_empty() or int(job.get("vacancies", 0)) <= 0:
+		print("PLAYER_CHOICES_JOB_UNAVAILABLE ", JSON.stringify(person.get("known_jobs", [])))
+		test.finish(self, "Economic network player choices")
+		return
+	var unknown := LivelihoodAction.execute_current(base.world, "apply", {"job_id": "unknown:player-choice-job"})
+	test.expect(not unknown.get("accepted", true) and unknown.get("reason") == "UNKNOWN_JOB", "An unknown job cannot become employment")
+	var applied := LivelihoodAction.execute_current(base.world, "apply", {"job_id": "job:network:bakery1"})
+	test.expect(applied.get("accepted", false), "The ordinary player accepts the one actual bakery vacancy through the original action")
+	if not applied.get("accepted", false):
+		print("PLAYER_CHOICES_APPLY_REFUSAL ", JSON.stringify(applied))
+		test.finish(self, "Economic network player choices")
+		return
+	var excessive := LivelihoodAction.execute_current(base.world, "work", {"hours": 5})
+	test.expect(not excessive.get("accepted", true) and excessive.get("reason") == "LABOR_LIMIT", "The existing four-hour contract does not admit extra invented work")
+	var work := LivelihoodAction.execute_current(base.world, "work", {"hours": 4})
+	test.expect(work.get("accepted", false), "The player explicitly registers real hours rather than relying on NPC automatic work")
+	var seed := base.persistence.snapshot()
+	var a := FormalPersistence.new().restore_candidate(seed)
+	var b := FormalPersistence.new().restore_candidate(seed)
+	test.expect(a.success and b.success, "Both lawful choices restore the same complete employment/clock/money/lots snapshot")
+	if not a.success or not b.success:
+		test.finish(self, "Economic network player choices")
+		return
+	test.expect(a.persistence.snapshot() == seed and b.persistence.snapshot() == seed, "The two choice worlds are exactly equal before their sole procurement difference")
+	seed = {}
+	base = null
+	var ea := a.world.economy_r1
+	var eb := b.world.economy_r1
+	var cash: int = _cash_total(a.world)
+	for branch: WorldBuildResult in [a, b]:
+		var pause := LivelihoodAction.execute_current(branch.world, "set_activity_enabled", {"firm": "firm:network:mill1", "site_id": "site:network:mill1", "activity_id": "activity:network:mill1", "enabled": false})
+		test.expect(pause.get("accepted", false), "A real manager pauses milling so not clicking buy cannot be confused with automatic replenishment")
+	var before_reads := a.persistence.snapshot()
+	var situation := ea.business_situation(Opening.PLAYER, "firm:network:mill1", "site:network:mill1")
+	test.expect(not situation.is_empty() and situation["automation"]["independent_auto_buy_switch"] == false and situation["automation"]["existing_orders_continue"] and not ea._input_good("site:network:mill1", "grain"), "The read states the actual activity-driven automation and unchanged existing obligations")
+	var quoted := LivelihoodAction.query_business(a.world, Opening.PLAYER, "firm:network:mill1", "site:network:mill1", 6)
+	var chosen: Dictionary = {}
+	for offset: int in mini(16, int(quoted.get("offer_total", 0))):
+		var page: Dictionary = quoted if offset == 0 else LivelihoodAction.query_business(a.world, Opening.PLAYER, "firm:network:mill1", "site:network:mill1", 6, offset)
+		for offer: Dictionary in page.get("offers", []):
+			var actual_rail: bool = false
+			for leg: Dictionary in offer["route_legs"]:
+				if leg["edge_id"] in Opening.REGIONAL_LYON_RAIL_EDGES: actual_rail = true
+			if offer["good"] == "grain" and offer.get("can_order", false) and actual_rail: chosen = offer
+		if not chosen.is_empty(): break
+	test.expect(not chosen.is_empty(), "A six-unit order uses a current, actually orderable known supplier quote over the real finite Lyon train")
+	test.expect(ea.business_situation(Opening.PLAYER, "firm:network:mill2", "site:network:mill2").is_empty() and ea.business_situation(Opening.PLAYER, "firm:network:mill1", "site:network:mill2").is_empty() and ea.business_situation("firm:network:mill1", "firm:network:mill1", "site:network:mill1").is_empty(), "Business situations reject an unappointed company, a wrong site and a forged observer")
+	test.expect(LivelihoodAction.query_business(a.world, "firm:network:mill1", "firm:network:mill1", "site:network:mill1").is_empty(), "The host business wrapper rejects firm-ID observer impersonation")
+	var places: Array[String] = ["place:paris"]
+	var hubs := ea.market_hub_view(Opening.PLAYER, places)
+	var city := FormalEconomicMapObservation.details(a.world, "", "firm:network:mill1", 0, "", "place:paris", "site:network:mill1")
+	test.expect(not hubs.get("hubs", []).is_empty() and hubs.get("inventory_authority_created", true) == false and city.get("subject") == "firm:network:mill1", "Actual city observation remains an authorized read, never a hub inventory authority")
+	var map_view := FormalEconomyMapView.new()
+	map_view._ready()
+	map_view.set_details_open(true)
+	map_view.present(city, a.world.spatial_catalog, false)
+	var navigation := map_view.navigation_state()
+	var navigation_only: bool = navigation.size() == 10
+	for key: String in navigation:
+		navigation_only = navigation_only and key in ["world_id", "observer", "subject", "place", "site", "order", "offset", "details", "research", "expanded"]
+	test.expect(navigation_only and navigation.get("site") == "site:network:mill1", "Off-tree navigation contains only ten identifiers/options, not a cached business DTO")
+	map_view.clear_observation()
+	map_view.restore_navigation(navigation)
+	test.expect(map_view.navigation_state() == navigation and map_view.snapshot.is_empty() and map_view.network.is_empty() and map_view.contacts.is_empty() and map_view.public_network.is_empty() and map_view._order_index.is_empty() and map_view._receipt_facts.is_empty() and map_view._details.text.is_empty(), "Off-tree restore recovers only navigation; private observations stay cleared until a fresh read, not a GUI acceptance")
+	map_view.free()
+	test.expect(a.persistence.snapshot() == before_reads, "Situation, quotation, city and off-tree navigation reads change no authoritative field or time")
+	before_reads = {}
+	if chosen.is_empty():
+		print("PLAYER_CHOICES_NO_QUOTE ", JSON.stringify(quoted))
+		test.finish(self, "Economic network player choices")
+		return
+	var account := ea._account("firm:network:mill1")
+	var available: int = a.world.ledger_state.available_balance(account)
+	var reserved: int = a.world.ledger_state.reserved_balance(account)
+	var balance: int = a.world.ledger_state.balance(account)
+	test.expect(chosen.get("quantity_requested") == 6 and chosen.get("reservation_total") == int(chosen["goods_total"]) + int(chosen["freight_total"]) and chosen.get("available_after_order") == available - int(chosen["reservation_total"]) and chosen.get("quotation_minute") == a.world.game_clock.total_minutes() and chosen.get("knowledge", {}).has("received_day") and chosen.get("knowledge", {}).has("basis"), "The quote exposes this quantity's actual goods/freight lock, remaining cash and received-knowledge timing")
+	var bought := LivelihoodAction.execute_current(a.world, "buy", chosen["request"])
+	test.expect(bought.get("accepted", false) and bought.get("quantity") == 6, "Choice A submits the original quote request and really reserves six grain units")
+	if not bought.get("accepted", false):
+		print("PLAYER_CHOICES_BUY_REFUSAL ", JSON.stringify(bought))
+		test.finish(self, "Economic network player choices")
+		return
+	var order_id: String = bought["order_id"]
+	test.expect(a.world.ledger_state.reserved_balance(account) == reserved + int(chosen["reservation_total"]) and a.world.ledger_state.available_balance(account) == available - int(chosen["reservation_total"]) and a.world.ledger_state.balance(account) == balance, "Choice A locks the quoted funds without prematurely paying for undelivered grain")
+	test.expect(b.world.ledger_state.available_balance(account) == available and b.world.ledger_state.reserved_balance(account) == reserved and not eb._input_good("site:network:mill1", "grain"), "Choice B keeps the actual cash and disabled replenishment instead of silently placing the same order")
+	var steps_ok: bool = true
+	var response: Dictionary = {}
+	var response_attempted: bool = false
+	while int(ea._orders[order_id]["delivered"]) < 3 and a.world.game_clock.total_minutes() < 12 * 1440:
+		var now: int = a.world.game_clock.total_minutes()
+		var boundary: int = mini(12 * 1440, (ea.day + 1) * 1440)
+		var event: int = ea.next_transport_boundary()
+		if event > now: boundary = mini(boundary, event)
+		steps_ok = _player_choice_advance(a, boundary - now, cash) and steps_ok
+		steps_ok = _player_choice_advance(b, boundary - now, cash) and steps_ok
+		if not steps_ok: break
+		if not response_attempted:
+			for entry: Dictionary in ea._shared.entries.values():
+				if entry["edge_id"] not in Opening.REGIONAL_LYON_RAIL_EDGES: continue
+				var cargo: Dictionary = ea._shipments.get(entry["shipment_id"], {})
+				if cargo.get("order_id") == order_id and cargo.get("stage") == "TRANSIT" and cargo.get("leg_index") == entry["leg_index"]:
+					response_attempted = true
+					response = _player_choice_interruption(a, order_id, entry.duplicate(true))
+					break
+	var at_delivery_a := _player_choice_costs(ea)
+	var at_delivery_b := _player_choice_costs(eb)
+	test.expect(steps_ok and int(ea._orders[order_id]["delivered"]) >= 3 and int(ea._stocks["site:network:mill1"]["grain"]) >= 3, "Choice A actually receives source-backed grain before the bounded twelve-day wait ends")
+	test.expect(a.world.game_clock.total_minutes() == b.world.game_clock.total_minutes() and int(eb._stocks["site:network:mill1"]["grain"]) == 0 and at_delivery_b["goods_paid"] == 0 and at_delivery_a["goods_paid"] > 0, "At the identical arrival time A has paid stock while paused B has neither hidden purchases nor grain")
+	test.expect(not response.is_empty(), "A real partial-dispatch transit allowed the bounded interruption/cancellation response")
+	if not steps_ok or int(ea._orders[order_id]["delivered"]) < 3:
+		print("PLAYER_CHOICES_ARRIVAL_FAILURE ", JSON.stringify({"a": at_delivery_a, "b": at_delivery_b, "order": ea._orders[order_id]}))
+		test.finish(self, "Economic network player choices")
+		return
+	var resume_minute: int = a.world.game_clock.total_minutes()
+	for branch: WorldBuildResult in [a, b]:
+		var resume := LivelihoodAction.execute_current(branch.world, "set_activity_enabled", {"firm": "firm:network:mill1", "site_id": "site:network:mill1", "activity_id": "activity:network:mill1", "enabled": true})
+		test.expect(resume.get("accepted", false), "Both managers restore the same admitted recipe without creating equipment or labor")
+	var production_window: Array[Dictionary] = []
+	for boundary: int in 4:
+		var minutes: int = (ea.day + 1) * 1440 - a.world.game_clock.total_minutes()
+		steps_ok = _player_choice_advance(a, minutes, cash) and steps_ok
+		steps_ok = _player_choice_advance(b, minutes, cash) and steps_ok
+		production_window.append({"minute": a.world.game_clock.total_minutes(), "a": _player_choice_costs(ea), "b": _player_choice_costs(eb), "a_situation": ea.business_situation(Opening.PLAYER, "firm:network:mill1", "site:network:mill1"), "b_situation": eb.business_situation(Opening.PLAYER, "firm:network:mill1", "site:network:mill1")})
+		if not steps_ok or _produced(ea, "site:network:mill1", "flour") > 0: break
+	test.expect(steps_ok and _produced(ea, "site:network:mill1", "flour") > 0, "Within four actual daily settlements the pre-bought stock reaches real milling work and output, not a forecast")
+	test.expect(_produced(ea, "site:network:mill1", "flour") > _produced(eb, "site:network:mill1", "flour"), "Earlier lawful procurement yields a real output difference at the first productive A boundary before B catches up")
+	var comparison_minute: int = a.world.game_clock.total_minutes()
+	b = null
+	while a.world.game_clock.total_minutes() < REGIONAL_DAYS * 1440:
+		var minutes: int = mini(REGIONAL_DAYS * 1440, (ea.day + 1) * 1440) - a.world.game_clock.total_minutes()
+		steps_ok = _player_choice_advance(a, minutes, cash) and steps_ok
+		if not steps_ok: break
+	var actual := _regional_metrics(ea)
+	var market := _regional_market_feedback(ea)
+	test.expect(steps_ok and a.world.game_clock.total_minutes() == REGIONAL_DAYS * 1440, "Only the A world continues naturally to day 36 with successful conserving original steps")
+	test.expect(not market["received_announcements"].is_empty() and not market["orders"].is_empty() and market["all_orders_after_knowledge"], "NPC city buyers discover the finite household through real delayed messages before placing their own orders")
+	test.expect(int(actual["family_flour_delivered"]) > 0 and actual["family_goods_payments"] == int(actual["family_flour_delivered"]) * 3 and int(market["bread_with_household_flour_input"]) > 0, "NPC household flour really arrives, is paid for and supplies actual bakery bread source lineage")
+	var no_npc_proxy: bool = true
+	var player_buys: int = 0
+	var capacity_refusal: bool = false
+	for row: Dictionary in ea._commands.values():
+		var command: Dictionary = row["envelope"]["command"]
+		if row["envelope"]["actor"] == Opening.PLAYER and command["kind"] == "buy":
+			player_buys += 1
+			no_npc_proxy = no_npc_proxy and command["payload"].get("firm") == "firm:network:mill1" and command["payload"].get("good") == "grain" and command["payload"].get("quantity") == 6
+		if row["envelope"]["actor"] == "cohort:network:bakery1" and command["kind"] == "apply" and row["result"].get("reason") == "NO_VACANCY": capacity_refusal = true
+	test.expect(no_npc_proxy and player_buys == 1, "No player command buys or delivers on behalf of NPC bakers, station merchants or the household")
+	test.expect(capacity_refusal, "The original bakery cohort receives a real no-vacancy refusal rather than sharing the player's one occupied job")
+	var wages: int = 0
+	var work_hours: int = 0
+	for record: Dictionary in ea._work_records.values():
+		if record["actor"] == Opening.PLAYER and record["job"] == "job:network:bakery1": work_hours += int(record["hours"])
+	for payment: Dictionary in a.world.ledger_state.own_transactions(Opening.PLAYER):
+		if payment["kind"] != "wage": continue
+		var claim: Dictionary = ea._wages.get(payment["reference_id"], {})
+		if claim.get("employer") == "firm:network:bakery1" and payment["from_account_id"] == ea._account("firm:network:bakery1") and ea._work_records.has(payment["reference_id"]): wages += int(payment["amount"])
+	test.expect(work_hours > 0 and wages > 0, "Explicit ordinary-person work produces wages from the employer's original account after the actual delay")
+	var final_reads := a.persistence.snapshot()
+	test.expect(LivelihoodAction.query(a.world, Opening.PLAYER).get("employment", {}).get("job") == "job:network:bakery1" and LivelihoodAction.query_firm(a.world, Opening.PLAYER, "firm:network:bakery1").is_empty() and ea.business_situation(Opening.PLAYER, "firm:network:bakery1", "site:network:bakery1").is_empty() and LivelihoodAction.query_business(a.world, Opening.PLAYER, "firm:network:bakery1", "site:network:bakery1").is_empty(), "Employment stays real employment and never grants bakery management or private business access")
+	test.expect(a.persistence.snapshot() == final_reads, "Post-employment reads remain completely side-effect-free")
+	var restored := FormalPersistence.new().restore_candidate(final_reads)
+	test.expect(restored.success, "The actual player decisions, work, NPC trade and original responsibilities cold-restore: " + restored.error)
+	if restored.success: test.expect(restored.persistence.snapshot() == final_reads, "Cold restore keeps the complete actual decision world exact without duplicated wages, goods or orders")
+	final_reads = {}
+	print("PLAYER_CHOICES_RESULT ", JSON.stringify({"scope": "HEADLESS_DOMAIN_AND_OFF_TREE_NAVIGATION_NOT_GUI_ACCEPTANCE", "resume_minute": resume_minute, "comparison_minute": comparison_minute, "a_at_arrival": at_delivery_a, "b_at_arrival": at_delivery_b, "productive_boundaries_max_4": production_window, "interruption_response": response, "end_minute": a.world.game_clock.total_minutes(), "player_work_hours": work_hours, "actual_employer_wages_paid": wages, "family_flour_delivered": actual["family_flour_delivered"], "family_goods_paid": actual["family_goods_payments"], "bread_from_family_flour": market["bread_with_household_flour_input"]}))
+	test.finish(self, "Economic network player choices")
 
 ## One original regional opening, twelve real days and one continuation day.
 ## Only the declared Shared entry schedule is shortened; no clock or receipt is

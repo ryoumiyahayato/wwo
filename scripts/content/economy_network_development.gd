@@ -131,6 +131,10 @@ static func template() -> Dictionary:
 		result["jobs"].append({"id": job, "employer": firm, "site_id": site, "positions": 1, "skill": 1, "hours": 4, "place": place, "wage_per_hour": 1, "wage_delay": 1})
 		result["information"].append({"actor": worker, "kind": "job", "candidate": job, "delivery_day": 0})
 	_install_channel_transport(result, population_starts)
+	# Two actual local vacancies are public knowledge, not a job or management grant.
+	for job: Dictionary in result["jobs"]:
+		if job["place"] == "place:paris" and job["id"] in ["job:network:bakery1", "job:network:tools1"]:
+			result["information"].append({"actor": PLAYER, "kind": "job", "candidate": job["id"], "delivery_day": 0})
 	# Consumers know actual posted local shops, or an explicit domestic regional
 	# supplier where no local retailer exists. No consumer scans the whole world.
 	for actor: Dictionary in result["actors"]:

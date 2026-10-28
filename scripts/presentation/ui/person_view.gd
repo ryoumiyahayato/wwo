@@ -12,6 +12,7 @@ var native_scope_expanded: bool = false
 var capital_mode: bool = false
 var business_mode: bool = false
 var business_procurement_mode: bool = true
+var business_situation_mode: bool = true
 var business_finance_mode: bool = false
 var business_finance_page: int = 0
 var lease_mode: bool = false
@@ -800,6 +801,9 @@ func _draw_capital(shell: MainShell, rect: Rect2, y: float) -> void:
 	shell.label(Vector2(rect.position.x+206,rect.end.y-36), str(capital_page+1)+" / "+str(rows.size()), 10)
 
 func refresh_business(view: Dictionary) -> void:
+	if _business.get("firm_id","")!=view.get("firm_id","") or _business.get("site_id","")!=view.get("site_id",""):
+		business_situation_mode=true
+		business_activity_page=0
 	_business=view
 
 func business_request(index: int) -> Dictionary:
@@ -920,23 +924,27 @@ func _draw_business(shell: MainShell, rect: Rect2, start: float) -> void:
 		return
 	var sites := _business["sites"] as Array
 	var firms := _personal.get("managed_firms",[]) as Array
-	shell.label(Vector2(rect.position.x+14,y),str(_business["firm_id"])+" · "+str(_business["identity_basis"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
-	y+=20
-	shell.button(Rect2(rect.position.x+12,y,100,23),"上一企业","person:business_firm_previous",business_firm_index>0)
-	shell.button(Rect2(rect.position.x+122,y,100,23),"下一企业","person:business_firm_next",business_firm_index+1<firms.size())
-	y+=34
-	shell.label(Vector2(rect.position.x+14,y),str(_business["site_id"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
-	y+=20
-	shell.button(Rect2(rect.position.x+12,y,100,23),"上一地点","person:business_site_previous",business_site_index>0)
-	shell.button(Rect2(rect.position.x+122,y,100,23),"下一地点","person:business_site_next",business_site_index+1<sites.size())
-	y+=34
+	shell.label(Vector2(rect.position.x+14,y),EconomicText.firm(str(_business["firm_id"]))+" · "+place_label(str(_business["site"].get("stock_place_id",""))),13,Color(0.96,0.88,0.67),rect.size.x-28)
+	y+=22
+	var nav_width: float=minf(128.0,(rect.size.x-48.0)/4.0)
+	shell.button(Rect2(rect.position.x+12,y,nav_width,23),"上一企业","person:business_firm_previous",business_firm_index>0)
+	shell.button(Rect2(rect.position.x+20+nav_width,y,nav_width,23),"下一企业","person:business_firm_next",business_firm_index+1<firms.size())
+	shell.button(Rect2(rect.position.x+28+nav_width*2,y,nav_width,23),"上一站点","person:business_site_previous",business_site_index>0)
+	shell.button(Rect2(rect.position.x+36+nav_width*3,y,nav_width,23),"下一站点","person:business_site_next",business_site_index+1<sites.size())
+	y+=30
 	for currency: String in _business["finance"]["account_cash"]:
 		var cash := _business["finance"]["account_cash"][currency] as Dictionary
-		shell.label(Vector2(rect.position.x+14,y),"可用 %d · 预留 %d · %s" % [int(cash["available"]),int(cash["reserved"]),currency],10,Color(0.82,0.86,0.79),rect.size.x-28)
-		y+=18
-	shell.button(Rect2(rect.position.x+12,y,100,23),"采购报价","person:business_procurement",not business_procurement_mode)
-	shell.button(Rect2(rect.position.x+122,y,100,23),"生产及其他经营","person:business_operations",business_procurement_mode)
-	y+=28
+		var unpaid: Variant=_business["finance"].get("wages_unpaid",{}).get(currency,0)
+		shell.label(Vector2(rect.position.x+14,y),"企业可用 %d · 已预留 %d · 未付工资 %s · %s" % [int(cash["available"]),int(cash["reserved"]),str(unpaid),EconomicText.currency(currency)],12,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=20
+	var tab_width: float=minf(180.0,(rect.size.x-40.0)/3.0)
+	shell.button(Rect2(rect.position.x+12,y,tab_width,25),"处境与决定","business_ui:situation",true,business_situation_mode)
+	shell.button(Rect2(rect.position.x+20+tab_width,y,tab_width,25),"采购报价","business_ui:offers",true,not business_situation_mode and business_procurement_mode)
+	shell.button(Rect2(rect.position.x+28+tab_width*2,y,tab_width,25),"生产及经营详情","business_ui:operations",true,not business_situation_mode and not business_procurement_mode)
+	y+=34
+	if business_situation_mode:
+		_draw_business_situation(shell,rect,y)
+		return
 	if business_procurement_mode:
 		_draw_business_procurement(shell,rect,y)
 		return
@@ -995,22 +1003,108 @@ func _draw_business(shell: MainShell, rect: Rect2, start: float) -> void:
 		y+=26
 	_draw_business_procurement(shell,rect,y)
 
+func _draw_business_situation(shell: MainShell, rect: Rect2, start: float) -> void:
+	var situation: Dictionary=_business.get("situation",{})
+	var activities: Array=situation.get("activities",[])
+	var y: float=start
+	if situation.is_empty():
+		shell.label(Vector2(rect.position.x+14,y),"尚无当前获准经营摘要；报价与权限仍以原领域复核为准。",12,Color(0.82,0.86,0.79),rect.size.x-28)
+	elif activities.is_empty():
+		shell.label(Vector2(rect.position.x+14,y),"本站没有生产配方；可查看原商品报价、合同及经营责任。",12,Color(0.82,0.86,0.79),rect.size.x-28)
+	else:
+		business_activity_page=clampi(business_activity_page,0,activities.size()-1)
+		var activity: Dictionary=activities[business_activity_page]
+		var actual: Variant=activity.get("actual_batches")
+		shell.label(Vector2(rect.position.x+14,y),EconomicText.activity(activity)+(" · 已启用" if activity.get("enabled",false) else " · 已暂停")+(" · 尚无已结算产出" if actual==null else " · 最近结算 %s批" % str(actual)),14,Color(0.96,0.88,0.67),rect.size.x-28)
+		y+=24
+		for material: Dictionary in (activity.get("materials",[]) as Array).slice(0,3):
+			shell.label(Vector2(rect.position.x+14,y),"%s：本站 %s · 可供生产 %s · 已订未交 %s · 每批需 %s" % [EconomicText.good(str(material["good"])),str(material["on_hand"]),str(material["free"]),str(material["incoming"]),str(material["per_batch"])],12,Color(0.86,0.89,0.81),rect.size.x-28)
+			y+=20
+		var site_activities: Array=_business.get("site",{}).get("activities",[])
+		if actual!=null and business_activity_page<site_activities.size():
+			var produced: Dictionary=site_activities[business_activity_page].get("plan",{}).get("actual_outputs_today",{})
+			var output_text: PackedStringArray=[]
+			for good: String in produced:output_text.append(EconomicText.good(good)+" "+str(produced[good]))
+			if not output_text.is_empty():
+				shell.label(Vector2(rect.position.x+14,y),"最近结算实际产出："+"、".join(output_text),12,Color(0.86,0.89,0.81),rect.size.x-28)
+				y+=20
+		var settled_plan: Dictionary=_business.get("site",{}).get("plan",{})
+		if settled_plan.has("labor_hours"):
+			shell.label(Vector2(rect.position.x+14,y),"已采用劳动 %s人时 · 本期生产用 %s人时 · 本站有效产能 %s" % [str(settled_plan["labor_hours"]),str(settled_plan.get("used_hours","未知")),str(_business.get("site",{}).get("shared_capacity","未知"))],12,Color(0.86,0.89,0.81),rect.size.x-28)
+			y+=20
+		var supported: Variant=activity.get("material_batches_available")
+		if supported!=null:
+			shell.label(Vector2(rect.position.x+14,y),"仅按现有原料最多可供 %s批；仍需实际工时与可用产能。" % str(supported),12,Color(0.86,0.89,0.81),rect.size.x-28)
+			y+=22
+		var constraints: PackedStringArray=[]
+		for code: String in activity.get("next_batch_constraints",[]):constraints.append(EconomicText.constraint(code))
+		shell.label(Vector2(rect.position.x+14,y),"当前限制："+("尚无已报告的下一批限制；不保证未来到货。" if constraints.is_empty() else " / ".join(constraints)),12,Color(0.90,0.82,0.65),rect.size.x-28)
+		y+=26
+		var enabled: bool=bool(activity.get("enabled",false))
+		shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,28),("暂缓" if enabled else "恢复")+EconomicText.activity(activity)+("（暂停该项原料自动补料）" if enabled else "（恢复该项自动补料）"),"native:business_activity:"+str(_business["firm_id"])+"|"+str(_business["site_id"])+"|"+str(activity["id"])+"|"+("0" if enabled else "1"))
+		y+=36
+		if activities.size()>1 and y+28<rect.end.y-76:
+			shell.button(Rect2(rect.position.x+12,y,110,24),"上一生产活动","person:business_activity_previous",business_activity_page>0)
+			shell.button(Rect2(rect.position.x+132,y,110,24),"下一生产活动","person:business_activity_next",business_activity_page+1<activities.size())
+			y+=30
+	if y+34<rect.end.y-70:
+		shell.wrapped(Vector2(rect.position.x+14,y),"启用的生产活动会按原规则自动补料。暂缓会延后产出，不撤销旧订单、已承担工资或其他付款责任；维修与服务用料另按原规则处理。",rect.size.x-28,11,2)
+	shell.button(Rect2(rect.position.x+12,rect.end.y-60,190,26),"比较原料报价与锁款","business_ui:offers")
+	shell.button(Rect2(rect.end.x-202,rect.end.y-60,190,26),"返回经济地图看变化","business_ui:return_map")
+	shell.label(Vector2(rect.position.x+14,rect.end.y-15),"可用现金不是利润；未到期工资、租约及其他责任不一定已计入预留。",10,Color(0.82,0.86,0.79),rect.size.x-28)
+
+func business_batch_quantity(multiplier: int) -> int:
+	var offers: Array=_business.get("offers",[])
+	if offers.is_empty() or multiplier<1 or multiplier>2:return 0
+	var good: String=str(offers[0].get("good",""))
+	var activities: Array=_business.get("site",{}).get("activities",[])
+	if business_activity_page<0 or business_activity_page>=activities.size():return 0
+	var activity: Dictionary=activities[business_activity_page]
+	var amount: int=int(activity.get("materials",{}).get(good,0))
+	return amount*multiplier if amount>0 and amount<=1000000/multiplier else 0
+
+static func _business_amount(value: Variant) -> String:
+	return "未知" if value==null else str(value)
+
 func _draw_business_procurement(shell:MainShell, rect:Rect2, start:float) -> void:
-	var y:=start
-	shell.quantity_input(Rect2(rect.end.x-168,start-26,144,26),quantity_milli,"person:collection",1)
-	shell.label(Vector2(rect.position.x+14,y),"企业采购数量 %d（右侧输入）" % quantity_milli,10)
-	y+=20
-	var offers := _business["offers"] as Array
-	for i: int in offers.size():
-		if y+62>rect.end.y-34: break
-		var offer := offers[i] as Dictionary
-		shell.button(Rect2(rect.position.x+12,y,rect.size.x-24,23),"采购 %s · %d + 运费 %d %s" % [offer["good"],int(offer["price"]),int(offer["freight_per_unit"]),offer["denomination"]],"native:business_buy:"+str(i),offer["can_order"])
-		y+=40
-		shell.label(Vector2(rect.position.x+14,y),str(offer["seller_site"])+" · "+str(offer["order_reason"]),10,Color(0.82,0.86,0.79),rect.size.x-28)
-		y+=10
-	if offers.is_empty() and y+20<rect.end.y-34: shell.label(Vector2(rect.position.x+14,y),"尚无已知供应商报价。",11)
+	var y: float=start
+	shell.label(Vector2(rect.position.x+14,y+18),"本次采购数量 %d（右侧输入后重新报价）" % quantity_milli,12,Color(0.86,0.89,0.81),rect.size.x-210)
+	shell.quantity_input(Rect2(rect.end.x-180,y,164,26),quantity_milli,"person:collection",1)
+	y+=34
+	var offers: Array=_business.get("offers",[])
+	if offers.is_empty():
+		shell.label(Vector2(rect.position.x+14,y),"尚无本人企业已知的供货报价；城市身份不等于取得供货知识。",12,Color(0.82,0.86,0.79),rect.size.x-28)
+	else:
+		# Original business_view supplies one bounded quotation page; no extra world query.
+		var offer: Dictionary=offers[0]
+		var current: bool=int(offer.get("quantity_requested",-1))==quantity_milli
+		var total: Variant=offer.get("reservation_total") if current else null
+		shell.label(Vector2(rect.position.x+14,y),EconomicText.good(str(offer["good"]))+" · "+EconomicText.site(str(offer["seller_site"]))+" · "+place_label(str(offer.get("from_place_id","")))+" → "+place_label(str(offer.get("to_place_id",""))),13,Color(0.96,0.88,0.67),rect.size.x-28)
+		y+=22
+		shell.label(Vector2(rect.position.x+14,y),"货款 %s ＋ 运费 %s ＝ 本次总预留 %s %s" % [_business_amount(offer.get("goods_total") if current else null),_business_amount(offer.get("freight_total") if current else null),_business_amount(total),EconomicText.currency(str(offer["denomination"]))],12,Color(0.86,0.89,0.81),rect.size.x-28)
+		y+=20
+		shell.label(Vector2(rect.position.x+14,y),"预留后可用 %s；当前最多可订 %s。仍须承担其他工资和付款责任。" % [_business_amount(offer.get("available_after_order") if current else null),str(offer.get("quantity","未知"))],11,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=19
+		var knowledge: Dictionary=offer.get("knowledge",{})
+		var received: Variant=knowledge.get("received_day")
+		var message: String="供货消息获知日期未记录" if received==null else "供货消息第%s日收到" % str(received)
+		shell.label(Vector2(rect.position.x+14,y),"本次报价："+boundary_text(int(offer.get("quotation_minute",offer.get("minute",0))))+" · "+message,11,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=19
+		var eta: String="名义最早第%s日抵达" % str(offer.get("earliest_arrival_day","未知"))
+		var legs: Array=offer.get("route_legs",[])
+		shell.label(Vector2(rect.position.x+14,y),"路线 %s段 · %s；%s" % [str(legs.size()),eta,"现场条件仍在确认时复核" if offer.get("eta_guaranteed",false) else "不保证准时，仍需实际车次、装卸与空间"],11,Color(0.82,0.86,0.79),rect.size.x-28)
+		y+=20
+		shell.label(Vector2(rect.position.x+14,y),EconomicText.reason(str(offer.get("order_reason",offer.get("reason","")))) if current else "数量已更改，等待重新取得当前报价；暂不能确认。",11,Color(0.90,0.82,0.65),rect.size.x-28)
+		var one: int=business_batch_quantity(1)
+		var two: int=business_batch_quantity(2)
+		var confirm_y: float=rect.end.y-88
+		if y+24<confirm_y:
+			shell.button(Rect2(rect.position.x+12,confirm_y-30,160,24),"所选活动一批 %s" % str(one) if one>0 else "此报价非当前活动用料","business_ui:batch:1",one>0)
+			shell.button(Rect2(rect.position.x+184,confirm_y-30,160,24),"所选活动两批 %s" % str(two) if two>0 else "暂无批次预设","business_ui:batch:2",two>0)
+		shell.button(Rect2(rect.position.x+12,confirm_y,rect.size.x-24,28),"确认采购 %d %s · 预留 %s" % [quantity_milli,EconomicText.good(str(offer["good"])),_business_amount(total)],"native:business_buy:0",current and bool(offer.get("can_order",false)))
 	shell.button(Rect2(rect.position.x+12,rect.end.y-28,100,23),"报价上一页","person:business_offer_previous",business_offer_page>0)
-	shell.button(Rect2(rect.position.x+122,rect.end.y-28,100,23),"报价下一页","person:business_offer_next",business_offer_page+1<int(_business["offer_total"]))
+	shell.button(Rect2(rect.position.x+122,rect.end.y-28,100,23),"报价下一页","person:business_offer_next",business_offer_page+1<int(_business.get("offer_total",0)))
+	shell.button(Rect2(rect.end.x-202,rect.end.y-28,190,23),"返回经济地图看订单","business_ui:return_map")
 
 func _draw_business_finance(shell: MainShell, rect: Rect2, start: float) -> void:
 	var y := start

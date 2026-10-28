@@ -35,6 +35,7 @@ var _economic_order_offset: int = 0
 var _economic_previous_mode: String = ""
 var _economic_return_mode: String = "political"
 var _economic_follow_order: String = ""
+var _economic_navigation: Dictionary = {}
 var _economic_locations_stamp: Array = []
 @onready var map_renderer: GlobeRenderer = $GlobeRenderer
 @onready var map_controller: GlobeController = $GlobeController
@@ -87,6 +88,10 @@ func _ready() -> void:
 	main_shell.economic_map.back_requested.connect(_close_economic_details)
 	main_shell.economic_map.expand_requested.connect(func():map_controller.set_map_mode("economic"))
 	main_shell.economic_map.business_requested.connect(_open_economic_business)
+	main_shell.economic_map.personal_market_requested.connect(func():
+		_remember_economic_navigation()
+		_on_action_requested("person:market"))
+	main_shell.economic_map.pending_cancellation_requested.connect(func(order_id: String):_on_action_requested("native:cancel:"+order_id))
 	main_shell.economic_map.statistics_requested.connect(func():
 		var polity:=map_controller.selected_polity_id if not map_controller.selected_polity_id.is_empty() else map_controller.player_polity_id
 		_on_action_requested("economy:polity:"+polity))
@@ -171,6 +176,7 @@ func _install_world(built: WorldBuildResult, focus_opening: bool = false) -> boo
 	_economic_detail_key.clear()
 	_economic_subject = ""
 	_economic_follow_order = ""
+	_economic_navigation.clear()
 	_economic_locations_stamp.clear()
 	map_renderer.set_topic_places([])
 	_economic_order_offset = 0
@@ -392,9 +398,20 @@ func _refresh_economic_topic() -> void:
 	var view:=main_shell.economic_map
 	var full:bool=map_controller.map_mode=="economic"
 	if main_shell.current_page!="map":
-		if view.visible:view.clear_observation()
+		if _economic_follow_order.is_empty():_remember_economic_navigation()
+		view.clear_observation() # Private DTOs never survive behind another page.
 		_economic_detail_key.clear();map_renderer.set_topic_flow_animation(false)
 		return
+	if not _economic_navigation.is_empty():
+		if int(_economic_navigation.get("world_id",0))==_world.get_instance_id() and str(_economic_navigation.get("observer",""))==_world.player_state.player_id():
+			_economic_subject=str(_economic_navigation.get("subject",""))
+			_economic_order_offset=maxi(0,int(_economic_navigation.get("offset",0)))
+			view.restore_navigation(_economic_navigation)
+			if bool(_economic_navigation.get("details",false)):view.show()
+		else:
+			_economic_subject="";_economic_order_offset=0;_economic_follow_order=""
+			view.clear_observation()
+		_economic_navigation.clear();_economic_detail_key.clear()
 	var polity:=map_controller.selected_polity_id if not map_controller.selected_polity_id.is_empty() else map_controller.player_polity_id
 	var totals:Dictionary=_world.economy_state.country_summary(polity).get("daily_totals",{})
 	var available:bool=not totals.is_empty() and float(totals.get("fulfillment_bp",-1))>=0
@@ -422,21 +439,24 @@ func _refresh_economic_topic() -> void:
 	if not full and not view.visible:return
 	var state_key:=FormalEconomicMapObservation.stamp(_world)
 	var demand:bool=view.details_requested()
-	var detail_key:Array=[state_key,polity,_economic_subject,_economic_order_offset,view.selected_place,view.selected_site,demand,view.research_expanded]
+	var detail_key:Array=[state_key,polity,_economic_subject,_economic_order_offset,view.selected_place,view.selected_site,view.selected_order,_economic_follow_order,demand,view.research_expanded]
 	if detail_key==_economic_detail_key and view.visible and view.full==full:return
 	var observation:Dictionary
 	if demand:
-		observation=FormalEconomicMapObservation.details(_world,polity,_economic_subject,_economic_order_offset,_economic_follow_order,view.selected_place,view.selected_site,view.research_expanded)
+		var requested_order: String=_economic_follow_order if not _economic_follow_order.is_empty() else view.selected_order
+		observation=FormalEconomicMapObservation.details(_world,polity,_economic_subject,_economic_order_offset,requested_order,view.selected_place,view.selected_site,view.research_expanded)
+		_economic_follow_order="" # Consume only after a fresh authorized detail read.
 	else:
 		observation=FormalEconomicMapObservation.overview(_world,polity,view.selected_place,_economic_subject)
 		observation["offset"]=_economic_order_offset
-	_economic_follow_order="";_economic_subject=str(observation.get("subject",""));_economic_order_offset=int(observation.get("offset",0))
+	_economic_subject=str(observation.get("subject",""));_economic_order_offset=int(observation.get("offset",0))
 	view.present(observation,_world.spatial_catalog,full,_economic_return_mode)
-	_economic_detail_key=[state_key,polity,_economic_subject,_economic_order_offset,view.selected_place,view.selected_site,demand,view.research_expanded]
+	_economic_detail_key=[state_key,polity,_economic_subject,_economic_order_offset,view.selected_place,view.selected_site,view.selected_order,_economic_follow_order,demand,view.research_expanded]
 
 func _query_economic_details(subject: String, offset: int) -> void:
 	if _economic_subject!=subject:
-		main_shell.economic_map.selected_site="";main_shell.economic_map.selected_node="";main_shell.economic_map.selected_order=""
+		# The city selector may already name an explicit authorized site.
+		main_shell.economic_map.selected_order=""
 	main_shell.economic_map.set_details_open(true)
 	_economic_subject = subject
 	_economic_order_offset = maxi(0,offset)
@@ -468,6 +488,7 @@ func _focus_economic_place(place_id: String) -> void:
 	map_renderer.focus_place(place)
 
 func _close_economic_details() -> void:
+	_economic_navigation.clear();_economic_follow_order=""
 	main_shell.economic_map.clear_observation()
 	_economic_detail_key.clear()
 	if map_controller.map_mode=="economic": map_controller.set_map_mode(_economic_return_mode)
@@ -477,6 +498,7 @@ func _open_economic_business(subject: String, site_id: String = "") -> void:
 	var observer:=_world.player_state.player_id()
 	var personal:=LivelihoodAction.query(_world,observer)
 	if subject==observer and not personal.is_empty():
+		_remember_economic_navigation()
 		main_shell.remember_page()
 		main_shell.person_page.section="native"
 		main_shell.person_page.native_scope_expanded=false
@@ -494,10 +516,12 @@ func _open_economic_business(subject: String, site_id: String = "") -> void:
 		if business.is_empty():return
 		var site_index:=(business.get("sites",[]) as Array).find(target_site)
 		if site_index<0:return
+		_remember_economic_navigation()
 		main_shell.remember_page()
 		main_shell.person_page.section="native"
 		main_shell.person_page.native_scope_expanded=true
 		main_shell.person_page.business_mode=true
+		main_shell.person_page.business_situation_mode=true
 		main_shell.person_page.business_procurement_mode=true
 		main_shell.person_page.business_finance_mode=false
 		main_shell.person_page.business_services_mode=false
@@ -515,13 +539,28 @@ func _open_economic_business(subject: String, site_id: String = "") -> void:
 		main_shell.set_page("person",false)
 		return
 
+func _remember_economic_navigation() -> void:
+	if _world==null:return
+	var state: Dictionary=main_shell.economic_map.navigation_state()
+	if int(state.get("world_id",0))!=_world.get_instance_id() or str(state.get("observer",""))!=_world.player_state.player_id():return
+	state["subject"]=_economic_subject;state["offset"]=_economic_order_offset
+	_economic_navigation=state # Only validated UI identifiers and preferences.
+
 func _follow_economic_purchase(result: Dictionary, payload: Dictionary) -> void:
-	if not bool(result.get("accepted",false)) or str(result.get("order_id","")).is_empty():return
-	_economic_subject=str(payload.get("firm",""))
-	_economic_follow_order=str(result.order_id)
-	_economic_detail_key.clear()
-	var business:=main_shell.person_page._business
-	main_shell.economic_map.follow_order(_economic_follow_order,str(business.get("site",{}).get("stock_place_id","")),str(payload.get("buyer_site","")))
+	if _world==null or not bool(result.get("accepted",false)) or str(result.get("order_id","")).is_empty():return
+	var observer: String=_world.player_state.player_id()
+	var firm: String=str(payload.get("firm",""))
+	_economic_subject=firm if not firm.is_empty() else observer
+	_economic_follow_order=str(result["order_id"])
+	_economic_order_offset=0;_economic_detail_key.clear()
+	var site: String=str(result.get("buyer_site",payload.get("buyer_site",observer)))
+	var place: String=_world.person_overlay.current_place(observer) if firm.is_empty() else ""
+	var business: Dictionary=main_shell.person_page._business
+	if not firm.is_empty() and str(business.get("site_id",""))==site:place=str(business.get("site",{}).get("stock_place_id",""))
+	if place.is_empty():place=str(_economic_navigation.get("place",main_shell.economic_map.selected_place))
+	_economic_navigation={"world_id":_world.get_instance_id(),"observer":observer,"subject":_economic_subject,"place":place,"site":site,"order":_economic_follow_order,"offset":0,"details":true,"research":false,"expanded":map_controller.map_mode=="economic"}
+	# The off-map refresh still clears every private DTO. Re-entry resolves this
+	# original ID through the current authorized index, never through old data.
 	_request_economic_topic_refresh()
 
 func _on_action_requested(action: String) -> void:
@@ -577,6 +616,20 @@ func _on_action_requested(action: String) -> void:
 		var command := action.trim_prefix("time:")
 		if command == "pause": time_control.toggle_pause()
 		else: time_control.set_speed(int(command))
+	elif action.begins_with("business_ui:"):
+		if _world==null:return
+		var page: PersonView=main_shell.person_page
+		if action=="business_ui:return_map":
+			main_shell.set_page("map",false)
+			_request_economic_topic_refresh()
+		elif action=="business_ui:situation":page.business_situation_mode=true
+		elif action in ["business_ui:offers","business_ui:operations"]:
+			page.business_situation_mode=false
+			page.business_procurement_mode=action=="business_ui:offers"
+		elif action in ["business_ui:batch:1","business_ui:batch:2"]:
+			var quantity: int=page.business_batch_quantity(int(action.right(1)))
+			if quantity>0:page.quantity_milli=quantity # A UI choice; refresh requotes before buy.
+		main_shell.refresh()
 	elif action.begins_with("lease_ui:"):
 		if action=="lease_ui:personal_toggle": main_shell.person_page.lease_mode=not main_shell.person_page.lease_mode
 		elif action=="lease_ui:business_toggle": main_shell.person_page.business_leases_mode=not main_shell.person_page.business_leases_mode
@@ -598,6 +651,7 @@ func _on_action_requested(action: String) -> void:
 		main_shell.refresh()
 	elif _world != null and action.begins_with("native:"):
 		var result: Dictionary
+		var cancellation_before: Dictionary={}
 		if action.begins_with("native:capital_action:"):
 			var row:=main_shell.person_page.capital_request(action.trim_prefix("native:capital_action:"))
 			result=LivelihoodAction.execute_current(_world,row["kind"],row["payload"]) if not row.is_empty() else {"accepted":false,"reason":"KNOWN_CAPITAL_ACTION_NO_LONGER_AVAILABLE"}
@@ -707,11 +761,13 @@ func _on_action_requested(action: String) -> void:
 		elif action.begins_with("native:disposition_execute:"):
 			result = LivelihoodAction.execute_current(_world, "execute_cargo_disposition", {"disposition_id": action.trim_prefix("native:disposition_execute:"), "authorizations":_world.economy_r1._cargo_fulfilment.action_authorizations(_world.player_state.player_id(),"","",0,action.trim_prefix("native:disposition_execute:"),true)})
 		elif action.begins_with("native:cancel:"):
-			result = LivelihoodAction.execute_current(_world, "cancel", {"order_id": action.trim_prefix("native:cancel:")})
+			var order_id: String=action.trim_prefix("native:cancel:")
+			cancellation_before=_world.economy_r1.cancel_pending_view(_world.player_state.player_id(),order_id) if _world.economy_r1!=null else {}
+			result = LivelihoodAction.execute_current(_world, "cancel", {"order_id": order_id})
 		else:
 			result = {"accepted": false, "reason": "UNKNOWN_ACTION"}
 		if result.get("responsibility_changed", false): _save_dirty = true
-		var feedback := "行动未接受："+(EconomicText.reason(str(result.get("reason", "条件不足。"))) if action.begins_with("native:apply:") or action in ["native:work","native:leave_job"] else PersonView.capital_reason(str(result.get("reason","条件不足。"))))
+		var feedback := "行动未接受："+(EconomicText.reason(str(result.get("reason", "条件不足。"))) if action.begins_with("native:apply:") or action.begins_with("native:business_buy:") or action.begins_with("native:cancel:") or action in ["native:work","native:leave_job"] else PersonView.capital_reason(str(result.get("reason","条件不足。"))))
 		if result.get("accepted", false):
 			_save_dirty = true
 			feedback = "行动已接受，按正式时间履行。"
@@ -720,7 +776,12 @@ func _on_action_requested(action: String) -> void:
 				feedback="劳动合同已成立；须另行登记实际工作，完成后才形成工资。"
 			elif action=="native:work": feedback="本期工作已登记，尚未完成。下次日界结算劳动，再按合同到期规则处理工资。"
 			elif action=="native:leave_job": feedback="离职待生效："+PersonView.boundary_text(int(result.get("boundary_minute",0)))+"；此前仍占岗，旧工资责任保留。"
-			if action.begins_with("native:business_buy:"):feedback="采购已受理：%s · %s单位。返回经济地图可跟进本单。"%[str(result.get("order_id","")),str(result.get("quantity",""))]
+			if action.begins_with("native:business_buy:"):
+				var preview: Dictionary=_world.economy_r1.cancel_pending_view(_world.player_state.player_id(),str(result.get("order_id","")))
+				feedback="已现场交付 %s单位，原付款与本站库存已更新。" % str(result.get("quantity","")) if result.get("reason")=="ONSITE_DELIVERED" else "采购已受理 %s单位；当前未发部分对应预留 %s %s（不是整单在途锁款）。受理不等于到货，返回经济地图看原合同。" % [str(result.get("quantity","")),str(preview.get("releasable_amount","未知")),EconomicText.currency(str(preview.get("denomination","")))]
+			elif action.begins_with("native:business_activity:"):feedback="生产活动设置已更新；补料按当前启用活动的原需求执行。旧订单与工资责任仍保留，推进时间后再看实际产出。"
+			elif action.begins_with("native:cancel:"):
+				feedback="已取消尚未发运的 %s单位，释放相应预留 %s %s；已采用或在途运输不撤回。" % [str(cancellation_before.get("quantity_pending","未知")),str(cancellation_before.get("releasable_amount","未知")),EconomicText.currency(str(cancellation_before.get("denomination","")))]
 			if result.get("reason") == "COLLECTED": feedback = "已领取 %d 单位；原订单付款与持有已记录。" % int(result["quantity"])
 			elif result.get("reason") in ["STORED", "WITHDRAWN", "PERSONAL_FREIGHT_ACCEPTED"]: feedback = "物品行动已接受："+str(result["reason"])+" · 数量 "+str(result["quantity"])
 			elif result.get("reason") == "TRAVEL_STARTED": feedback = "旅行已出发；到达前不能登记劳动。"
@@ -728,7 +789,7 @@ func _on_action_requested(action: String) -> void:
 			elif result.get("reason") == "RESIDENCE_QUEUED": feedback = "常住迁居已申请："+PersonView.boundary_text(int(result["boundary_minute"]))+"；生效前保留原统计归属。"
 			elif result.get("reason") == "EXIT_QUEUED": feedback = "退出已排队；边界确认无未结责任后，由旧宏观承担未来常住消费。"
 			elif result.get("reason") == "EXIT_DEFERRED": feedback = "退出延后，保留原归属："+str(result["responsibility_reason"])
-		main_shell.show_feedback(feedback, "person:goods" if action in ["native:store", "native:withdraw"] or action.begins_with("native:freight:") else "person:native")
+		main_shell.show_feedback(feedback, "business_ui:return_map" if action.begins_with("native:business_buy:") or action.begins_with("native:cancel:") else "person:goods" if action in ["native:store", "native:withdraw"] or action.begins_with("native:freight:") else "person:native")
 		main_shell.refresh()
 	elif _world != null and action in ["livelihood:terminate_wage", "livelihood:cancel_plan", "livelihood:convert_plan"]:
 		var payload: Dictionary = {}
@@ -751,6 +812,9 @@ func _on_action_requested(action: String) -> void:
 			if personal.manages_native(person_id): market_id = page.selected_seller_site_id
 			result = personal.purchase(person_id,market_id,page.selected_commodity_id,page.quantity_milli,int(page.quote.get("unit_price",-1)),page.quote)
 			if bool(result.get("success",false)):
+				if personal.manages_native(person_id):
+					var source: Dictionary=result.get("source",{})
+					_follow_economic_purchase({"accepted":true,"order_id":source.get("order_id","")},{"buyer_site":person_id})
 				main_shell.person_page.selected_commodity_id = page.selected_commodity_id
 				# One displayed quote is one purchase choice. The next purchase
 				# requires selecting an offer again, including a double click.
