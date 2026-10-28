@@ -274,6 +274,29 @@ Nav不加堆/索引/序号/helper：只在单plan内与原open平行保存精确
 
 query排除桶候选只短暂改canonical未提交/运行，已按原差异全部还原：官方setter确会clear/逐RID insert，但本轮原码累计query_setup仅363829us/191191item，占resolve约10%且连其全去掉也只是约30s开场窗的1.2%上界，实际shape/transform/motion还要设且有桶判断，不能当主要帧缺口。没有堆第三个微候选、更不移动子计时范围来伪称收益。原native运动/几何查询仍大项，未找到同参同语义可安全消除的一次原生服务；支撑、前探、水平/抬高阻挡与实际move不能互代。旧167.555/51.777ms和30FPS、有效持续满规模/正常操控仍未解决。
 
+### 原生运动结果暂存对照：仍无父段净收益（2026-10-28下午）
+
+`field170-motion-result-before-20261028`为`c3ba797`，`field170-motion-result-after-20261028`为`61565bc`；均实际RTX/4.6.3 Compatibility/1280×720、battle timing=1/terrain timing=0。候选仅把`_path_blocked`每probe新建KinematicCollision3D换成Actor已有私有support输出暂存，最多省两次分配（首probe早退可仅一次），不是省/缓存任何native查询。四个调用site含yield均原样；两transform、motion、.001、recovery=false、max8和法线遍历顺序不变。[原生test_move](https://raw.githubusercontent.com/godotengine/godot/4.6.3-stable/scene/3d/physics/physics_body_3d.cpp)同步传输出指针；stock [GodotSpace](https://raw.githubusercontent.com/godotengine/godot/4.6.3-stable/modules/godot_physics_3d/godot_space_3d.cpp)在查询前清MotionResult、成功前写全部有效count/normal等，false不读旧值，无脚本回调/await；原support只即时消费，故没有未消费别名。此限定不是未知插件担保，也不减少原native运动/感知/火力服务。
+
+两窗开场ring均64事件/512份150callbacks，4/5 overwritten；按150callback归一Actor34.306→34.297ms、Nav4.669→4.739、nativeSolve9.393→9.414、risk4.439→4.388；未改车14.472→14.140ms/physics。覆盖/接战轨迹不同；Nav没有改善，整帧变化混合，不据此称分配占比为零或算法致慢。已`5dbc8ae`正常回退，当前运行代码仍净同`abcf9a6`，原始报告和尝试提交保留，无新增池/cache/字段/平台。
+
+| 阶段 | 原码FPS/P95/P99 ms | 暂存候选FPS/P95/P99 ms | 候选末活兵/physics-active |
+|---|---:|---:|---:|
+| 初始化/部署 | 16.554/62.638/1284.750 | 17.361/76.224/1232.222 | 150/150 |
+| 全军运动30s | 2.217/480.669/524.968 | 2.238/479.678/491.375 | 147/150 |
+| 玩家静止AI活动30s | 2.285/473.878/491.954 | 2.272/484.244/509.821 | 117/149 |
+| 驾驶约3s | 2.339/436.988/436.988 | 2.338/446.928/446.928 | 107/149 |
+| AP接战30s | 2.453/444.497/455.436 | 2.376/480.861/493.740 | 74/145 |
+| HE/impact60s | 原码中途结束，4.750无效 | 3.021/395.707/418.769 | 41/143 |
+| 烟幕交火30s | 原码已结束未执行 | 3.721/290.170/306.555 | 31/142 |
+| 持续60s/重入 | 60.031/60.114均无效 | 46.758/60.079均无效 | 21/0，已结束 |
+
+候选运动/静止/AP/HE/烟幕的模拟墙时比分别.298/.303/.317/.403/.496，CPU约99.1–100.15%单核等量；工作集1325.66–1371.10、private1745.83–1792.57MiB，NVIDIA整卡均值1.86–6.53%，仍无PID GPU时间/独立render-synctime。原码活动前段比.296/.305/.327、CPU99.58–100.11%，工作集1323.34–1359.07、private1747.98–1779.28MiB，整卡3.00–3.53%。启动外部主要DSH约49–75%单核等量，WMI约19–23%；未改/停、缺全时其它进程轨迹，不消除为无干扰结论。
+
+原码/候选初20车150活兵150physics、62座212人，150兵均移动>1m，19AI车均移动；19→18车实射，74射手168枪→90射手196枪。AP1/HE5/SMK0→AP1/HE6/SMK3，HE段5发；驾驶5.137→5.141m通过距离但2.3FPS仍非正常操控。累计测量214.010/244.836s墙时不称全程活动：原车长同Actor走返座且原伤弹保留，随后两窗HP0真实阵亡按原规则停场；后段高FPS全部剔除，不补烟幕/治疗/减部署。正式世界/人物/相机/步行比较true，身份无丢换，无SCRIPT ERROR/ERROR。
+
+另一假设也未成立为根因：field生成不是两套19AI，Hull Convex替代fallback Box，不叠建。已知62crew×6=372部位body是layer2，CONTACT_MASK不含2且布局实时筛掉crew，不能当372个sweep或删并伤害身份。原生Node3D重复setter会再walk子树，但pending变换通知合并；不能把多setter直接当多次物理同步，更没有据此批改Euler/Transform或暂停通知。已读实际远步兵GLB JSON（28node/20mesh，无extensions、碰撞后缀或脚本覆盖），未运行时全树计数，不以未证自子Body互撞为由改mask/层。原生运动与常规几何查询仍大项，旧167.555/51.777与有效持续30FPS未解决。
+
 ## 明确未完成
 
 - 步行167.555ms及其它未知峰的根因仍未关闭；已对齐的native建块成本仅作局部修复，实机功能通过不等于性能验收或用户接受。

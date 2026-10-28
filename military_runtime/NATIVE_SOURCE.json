@@ -1,7 +1,7 @@
 {
   "schema": "wwo-military-source-v1",
   "military_repository": "https://github.com/ryoumiyahayato/wwo-military",
-  "military_commit": "c3ba7971d08fa8ea9b01ceaa565e90f79456af1c",
+  "military_commit": "1be636748535feaeae694cbd12584e3346d5da9e",
   "source_root": "military-godot",
   "source_paths": [
     "assets/armor_geometry/kestrel_scout.json",
