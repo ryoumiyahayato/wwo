@@ -39,15 +39,17 @@ static func read_relief_page(path: String, source: String, width: int, height: i
 	if not header is Dictionary or not header.get("meta") is Dictionary or not header.get("blocks") is Dictionary: return {}
 	var meta: Dictionary = header.meta
 	if meta.get("kind") != "relief-page" or meta.get("source") != source.trim_prefix("res://") or meta.get("width") != width or meta.get("height") != height or meta.get("decoded_bytes") != bytes: return {}
-	var block: Variant = (header.blocks as Dictionary).get("mips")
+	var blocks: Dictionary = header.blocks
 	var length := file.get_length()-file.get_position()
-	if not block is Array or block.size() != 3 or block[0] != 0 or block[1] != length or block[2] != "webp-rgba8-mips": return {}
 	if current.is_valid() and not current.call(): return {}
+	var block: Variant = blocks.get("mips")
+	var predicted := blocks.has("base")
+	if not predicted and (not block is Array or block.size() != 3 or block[0] != 0 or block[1] != length or block[2] != "webp-rgba8-mips"): return {}
 	var payload := file.get_buffer(length)
 	if payload.size() != length: return {}
 	file.close()
 	var read_done := Time.get_ticks_usec() if measured else 0
-	var image := decode_webp_mips(payload,width,height,bytes)
+	var image := _decode_predicted_mips(payload,blocks,width,height,bytes,current) if predicted else decode_webp_mips(payload,width,height,bytes)
 	if image == null or (current.is_valid() and not current.call()): return {}
 	var errors: Array[String] = []
 	var result := {"image":image,"errors":errors,"storage":"wwocm2-page"}
@@ -55,6 +57,50 @@ static func read_relief_page(path: String, source: String, width: int, height: i
 		result["read_us"] = read_done-started
 		result["decode_us"] = Time.get_ticks_usec()-read_done
 	return result
+
+static func _decode_predicted_mips(payload: PackedByteArray, blocks: Dictionary, width: int, height: int, expected: int, current: Callable) -> Image:
+	var base: Variant = blocks.get("base")
+	var corrections: Variant = blocks.get("mip_corrections")
+	if blocks.size()!=2 or not base is Array or base.size()!=3 or not corrections is Array or corrections.size()!=4: return null
+	if base[0]!=0 or not _is_integer(base[1],25,payload.size()-1) or base[2]!="webp-rgba8-base": return null
+	var split := int(base[1])
+	if corrections[0]!=split or corrections[1]!=payload.size()-split or corrections[2]!="zlib-sparse-box-rgba8": return null
+	if not _is_integer(corrections[3],4,mini(MAX_DECODE_BYTES,(expected-width*height*4)*4+64)) or int(corrections[3])%4!=0: return null
+	if payload.slice(0,4).get_string_from_ascii()!="RIFF" or payload.slice(8,16).get_string_from_ascii()!="WEBPVP8L" or payload[20]!=47: return null
+	var dimensions := payload.decode_u32(21)
+	if (dimensions&16383)+1!=width or ((dimensions>>14)&16383)+1!=height or dimensions>>29: return null
+	var image := Image.new()
+	if image.load_webp_from_buffer(payload.slice(0,split))!=OK or image.get_width()!=width or image.get_height()!=height: return null
+	image.convert(Image.FORMAT_RGBA8)
+	var original := Vector2i(width,height)
+	var raw := image.get_data()
+	var delta := payload.slice(split).decompress(int(corrections[3]),FileAccess.COMPRESSION_DEFLATE).to_int32_array()
+	if delta.size()*4!=int(corrections[3]): return null
+	var offset := 0
+	while width!=1 or height!=1:
+		if offset>=delta.size() or (current.is_valid() and not current.call()): return null
+		var prior_bytes := width*height*4
+		width = maxi(1,width/2)
+		height = maxi(1,height/2)
+		var level_bytes := width*height*4
+		if image.generate_mipmaps()!=OK: return null
+		var pixels := image.get_data().slice(prior_bytes,prior_bytes+level_bytes)
+		var count := delta[offset]
+		offset += 1
+		if count<0 or count>level_bytes or offset+count>delta.size(): return null
+		var at := -1
+		for index in range(offset,offset+count):
+			var word := delta[index]
+			var gap := (word>>8)&0xffffff
+			if gap==0: return null
+			at += gap
+			if at>=level_bytes: return null
+			pixels[at] = (int(pixels[at])+(word&255))&255
+		offset += count
+		raw.append_array(pixels)
+		image = Image.create_from_data(width,height,false,Image.FORMAT_RGBA8,pixels)
+	if offset!=delta.size() or raw.size()!=expected: return null
+	return Image.create_from_data(original.x,original.y,true,Image.FORMAT_RGBA8,raw)
 
 static func decode_webp_mips(payload: PackedByteArray, width: int, height: int, bytes: int) -> Image:
 	# The lossless stream contains all original mip bytes, including RGB under zero alpha.

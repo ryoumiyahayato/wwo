@@ -177,9 +177,9 @@ func is_ready() -> bool:
 	return _prepared
 
 
-func compact_native_samples() -> PackedFloat32Array:
-	# The worker validates this grid before the native owner borrows it.
-	return _native_heights if _compact_native else PackedFloat32Array()
+func validated_ridgevale_samples() -> PackedFloat32Array:
+	# Both raw and compact input pass the same worker validation.
+	return _native_heights
 
 
 func is_collision_ready(position: Vector3) -> bool:
@@ -241,7 +241,7 @@ func apply_explosion(_position: Vector3, _mass: float) -> Dictionary:
 func get_status() -> Dictionary:
 	var status: Dictionary = {
 		"training_only": true, "geographically_registered": false,
-		"ready": _prepared, "native_available": not _native_heights.is_empty(),
+		"ready": _prepared, "native_available": not _native_heights.is_empty(), "compact_native": _compact_native,
 		"native_visible": _native_requested and _native_active and not _external_native_owner,
 		"external_native_owner": _external_native_owner, "terrain_edit_supported": false,
 		"region_tiles": _region_tiles.size(), "native_tiles": _native_tiles.size(),

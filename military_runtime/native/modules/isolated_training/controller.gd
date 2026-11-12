@@ -152,8 +152,8 @@ func start(options: Dictionary) -> void:
 		_provider.connect("changed", request_frame)
 	_capture_global_settings()
 	var samples := PackedFloat32Array()
-	if _provider.has_method("compact_native_samples"):
-		samples = _provider.call("compact_native_samples") as PackedFloat32Array
+	if _provider.has_method("validated_ridgevale_samples"):
+		samples = _provider.call("validated_ridgevale_samples") as PackedFloat32Array
 	while _horizon_job==null:
 		_horizon_job = MapJobs.submit(NativeTerrain.prepare_horizon.bind(samples),"Ridgevale horizon",MapJobs.VISIBLE)
 		if _horizon_job!=null: break
