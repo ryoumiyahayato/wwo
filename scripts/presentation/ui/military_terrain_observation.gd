@@ -46,6 +46,11 @@ var _walk_button: Button
 var _last_center := Vector2(INF,INF)
 var _last_span := -1.0
 const TRAINING_SCRIPT: String = "res://military_runtime/native/modules/isolated_training/controller.gd"
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+var training_script_usec: int
+var _training_script_requested := false
+var _training_script_started: int
+var _training_script: GDScript
 var _training: Node
 var _training_active: bool = false
 var _training_preparing: bool = false
@@ -111,23 +116,38 @@ func _toggle_training(profile: String = "") -> void:
 		_training_button.text = "恢复原训练（弹药 / 伤损保留）"
 		_request_frame()
 		return
-	var script: GDScript = load(TRAINING_SCRIPT) as GDScript
-	if script == null or not script.can_instantiate():
-		_status.text = "原军事训练模块未就绪；观察与正式世界仍可正常使用。"
-		if _direct_training: map_requested.emit("原军事训练模块未就绪")
-		return
 	_stop_walk()
 	_training_profile = "single_opponent" if profile.is_empty() else profile
 	_training_preparing = true
 	_set_training_view(true)
 	_training_banner.text = "准备20辆可战车辆 / 150独立步兵；62车组另计\n原规则分批部署，地面就绪后共同激活" if _training_profile == "field_170" else "准备原生坦克与五车组 · 独立训练身份 · 不写正式世界"
-	_training = script.new() as Node
+
+func _poll_training_script() -> void:
+	if not _training_script_requested and _training_script==null:
+		var error := MapJobs.request_resource(TRAINING_SCRIPT,"GDScript")
+		if error==ERR_BUSY: return
+		if error!=OK:
+			_on_training_failed(error_string(error))
+			return
+		_training_script_requested = true
+		_training_script_started = Time.get_ticks_usec() if MapJobs.measuring else 0
+	if _training_script_requested:
+		if ResourceLoader.load_threaded_get_status(TRAINING_SCRIPT)==ResourceLoader.THREAD_LOAD_IN_PROGRESS: return
+		_training_script = MapJobs.take_resource(TRAINING_SCRIPT) as GDScript
+		_training_script_requested = false
+		if _training_script_started>0: training_script_usec = Time.get_ticks_usec()-_training_script_started
+		if _training_script==null or not _training_script.can_instantiate():
+			_on_training_failed("原军事训练模块未就绪")
+			return
+	if not _training_preparing: return
+	_training = _training_script.new() as Node
+	_training_script = null
 	_training.connect("prepared", _on_training_prepared)
 	_training.connect("failed", _on_training_failed)
 	_training.connect("observer_requested", _pause_training)
 	add_child(_training)
 	_training.call("set_input_exclusions", _host_input_exclusions())
-	_training.call("start", {"viewport": viewport, "provider": terrain, "profile": _training_profile})
+	_training.call("start", {"viewport": viewport, "provider": terrain, "profile": _training_profile, "measure_startup":MapJobs.measuring})
 
 func _set_training_view(active: bool) -> void:
 	_training_active = active
@@ -158,6 +178,8 @@ func _on_training_prepared(_status_data: Dictionary) -> void:
 	_request_frame()
 
 func _on_training_failed(reason: String) -> void:
+	_direct_training_requested = false
+	_cancel_training_script()
 	_training_preparing = false
 	if is_instance_valid(_training):
 		_training.call("close")
@@ -169,6 +191,7 @@ func _on_training_failed(reason: String) -> void:
 
 func _pause_training(return_to_map: bool = true) -> void:
 	_direct_training_requested=false
+	_cancel_training_script()
 	if not _training_active:
 		if _direct_training and return_to_map: map_requested.emit("")
 		return
@@ -186,7 +209,7 @@ func _pause_training(return_to_map: bool = true) -> void:
 
 func resume_training() -> void:
 	_direct_training_requested=true
-	if _terrain_ready: _toggle_training(initial_training_profile)
+	if _terrain_ready: _toggle_training(_training_profile if initial_training_profile.is_empty() else initial_training_profile)
 
 func get_training_status() -> Dictionary:
 	if not is_instance_valid(_training): return {"state": "not_started", "isolated": true}
@@ -194,6 +217,8 @@ func get_training_status() -> Dictionary:
 	return status_data
 
 func _process(delta: float) -> void:
+	if not is_instance_valid(_training) and (_training_preparing or _direct_training_requested):
+		_poll_training_script()
 	if _training_active:
 		_training_tick += delta
 		if _training_tick >= 0.5 and not _training_preparing:
@@ -724,4 +749,10 @@ func _capture() -> void:
 func _exit_tree() -> void:
 	# End only this explicit isolated scenario; never persist it as a formal unit.
 	if is_instance_valid(_training): _training.call("close")
+	_cancel_training_script()
 	if is_instance_valid(terrain): terrain.call("close")
+
+func _cancel_training_script() -> void:
+	if _training_script_requested: MapJobs.abandon_resource(TRAINING_SCRIPT)
+	_training_script_requested = false
+	_training_script = null

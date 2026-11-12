@@ -1,7 +1,12 @@
 extends SceneTree
 ## Offline ArrayMesh conversion. Not installed in a world or player scene.
+const CityStorage = preload("res://scripts/presentation/map/city_surface_storage.gd")
+
 func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
+	if args.size()==3 and args[0]=="--pack-ground":
+		pack_ground(args[1],args[2])
+		return
 	if args.size()<2 or args.size()>3: quit(2); return
 	var source := args[0]
 	var output := args[1]
@@ -78,4 +83,45 @@ func _initialize() -> void:
 		var destination := output.path_join(name.get_basename()+".res")
 		if ResourceSaver.save(mesh,destination,ResourceSaver.FLAG_COMPRESS)!=OK: quit(4);return
 	print("City numeric meshes saved to ",output)
+	quit()
+
+func pack_ground(source: String, output: String) -> void:
+	if DirAccess.make_dir_recursive_absolute(output)!=OK: quit(6);return
+	var paths: Array[String] = []
+	var before := 0
+	var after := 0
+	var all := 0
+	var times: Array[int] = []
+	for name in DirAccess.get_files_at(source):
+		if not name.begins_with("context_") or not name.ends_with(".res"): continue
+		var path := source.path_join(name)
+		var file := FileAccess.open(path,FileAccess.READ)
+		if file==null: quit(7);return
+		var source_bytes := file.get_length()
+		all+=source_bytes
+		var mesh := ResourceLoader.load(path,"ArrayMesh",ResourceLoader.CACHE_MODE_IGNORE) as ArrayMesh
+		if mesh==null or mesh.get_surface_count()!=1 or mesh.surface_get_primitive_type(0)!=Mesh.PRIMITIVE_TRIANGLES: continue
+		if mesh.surface_get_material(0)!=null or not mesh.get_meta_list().is_empty() or mesh.get_blend_shape_count()!=0: continue
+		if RenderingServer.mesh_get_surface(mesh.get_rid(),0).has("lods"): continue
+		var arrays := mesh.surface_get_arrays(0)
+		if not arrays[Mesh.ARRAY_VERTEX] is PackedVector2Array or not arrays[Mesh.ARRAY_COLOR] is PackedColorArray or not arrays[Mesh.ARRAY_INDEX] is PackedInt32Array: continue
+		var encoded := CityStorage.encode(arrays)
+		if encoded.is_empty() or encoded.size()>=source_bytes: continue
+		var start := Time.get_ticks_usec()
+		var decoded := CityStorage.decode(encoded)
+		times.append(Time.get_ticks_usec()-start)
+		if decoded!=arrays:
+			printerr("Ground mesh differs after conversion: ",path)
+			quit(8);return
+		var dest := FileAccess.open(output.path_join(name.get_basename()+".ctm"),FileAccess.WRITE)
+		if dest==null: quit(9);return
+		dest.store_buffer(encoded)
+		paths.append(name)
+		before+=source_bytes
+		after+=encoded.size()
+	var manifest := FileAccess.open(output.path_join("ground.json"),FileAccess.WRITE)
+	if manifest==null or paths.is_empty(): quit(10);return
+	manifest.store_string(JSON.stringify({"schema":1,"tiles":paths},"\t")+"\n")
+	times.sort()
+	print("Ground tiles ",paths.size()," before ",before," after ",after," full ground ",all," median decode us ",times[times.size()/2]," p95 decode us ",times[floori(times.size()*.95)])
 	quit()

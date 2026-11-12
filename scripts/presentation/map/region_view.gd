@@ -1,6 +1,10 @@
 class_name RegionView
 extends RefCounted
 const CityOverview = preload("res://scripts/presentation/map/city_miniature.gd")
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
+var frame_budget: FrameBudget
+var _city_load_slots: Dictionary = {}
 ## Cached regional canvas; political ink records share CPU identity geometry.
 signal landmark_display_changed
 signal landmark_load_failed(message: String)
@@ -29,6 +33,7 @@ var _labels: Array[Dictionary] = []
 var country_label_rects: Array[Rect2] = []
 const MINIATURE_ELEVATION: float = 0.9599310886 # 55 degrees; shared chart ground.
 const MAX_CACHED_LANDMARK_SCENES: int = 2
+const MAX_PENDING_LANDMARK_SCENES: int = 2
 const SETTLEMENT_MODULE_PATH: String = "res://assets/settlements/urban_landscape_r40.glb"
 var landmark_screen_bounds: Dictionary = {}
 var _landmark_scenes: Dictionary = {}
@@ -51,7 +56,8 @@ var _local_surface_mesh: ArrayMesh
 var _local_surface_key: String = ""
 var _local_surface_anchor := Vector2.ZERO
 var _surface_reference: Dictionary = {}
-var _surface_thread: Thread
+var _surface_thread: MapJobs.Job
+var _landmark_waiting_for_slot: bool
 var _surface_build_key: Array = []
 var _surface_wanted_key: Array = []
 var _surface_cpu_ready: Dictionary = {}
@@ -122,7 +128,7 @@ func city_pending_count() -> int:
 	var count := 0
 	for layer: CityMiniature in city_layers.values(): count+=layer._pending_meshes.size()
 	for layer: CityMiniature in city_layers.values():
-		if layer._context_install_pending: count+=1
+		if layer._presentation_job!=null or layer._context_install_pending or layer._waiting_for_slot or not layer._retiring_context.is_empty(): count+=1
 	return count
 
 func city_cache_count() -> int:
@@ -151,6 +157,9 @@ func _sync_city_layers() -> void:
 		var id := str(data.id)
 		wanted[id]=true
 		if not city_layers.has(id): city_layers[id]=CityOverview.new()
+		var layer := city_layers[id] as CityMiniature
+		layer.load_slots = _city_load_slots
+		layer.frame_budget = frame_budget
 		var context: bool=data.get("role","")=="NATIONAL_CARTOGRAPHIC_CONTEXT"
 		(city_layers[id] as CityMiniature).cache_budget_bytes=int(8*1024*1024/maxi(1,context_count)) if context else int((40 if has_context else 48)*1024*1024/maxi(1,detailed_count))
 	for id: String in city_layers.keys():
@@ -326,11 +335,13 @@ func update_labels(canvas: CanvasItem, camera: RegionCamera, controller: GlobeCo
 
 func dispose() -> void:
 	clear()
-	if _surface_thread!=null:
-		_surface_thread.wait_to_finish()
-		_surface_thread = null
+	for layer: CityMiniature in city_layers.values(): layer.dispose()
+	city_layers.clear()
+	MapJobs.abandon(_surface_thread)
+	_surface_thread = null
 	_landmark_scenes.clear()
 	_landmark_scene_order.clear()
+	for path: String in _landmark_pending: MapJobs.abandon_resource(path)
 	_landmark_pending.clear()
 	_local_surface_mesh = null
 	_surface_reference.clear()
@@ -338,7 +349,7 @@ func dispose() -> void:
 		RenderingServer.free_rid(_background)
 
 func landmark_preparing() -> bool:
-	return city_pending_count()>0 or _surface_thread!=null or not _landmark_pending.is_empty() or (_internal_scene_load!=null and bool(_internal_scene_load.call("preparing")))
+	return city_pending_count()>0 or _surface_thread!=null or not _surface_cpu_ready.is_empty() or _landmark_waiting_for_slot or not _landmark_pending.is_empty() or (_internal_scene_load!=null and bool(_internal_scene_load.call("preparing")))
 
 func landmark_visible(id: String) -> bool:
 	return _local_container!=null and _local_container.visible and _landmark_presented.has(id) and _landmark_instances.has(id) and (_landmark_instances[id] as Node3D).visible and landmark_screen_bounds.has(id)
@@ -353,12 +364,19 @@ func settlement_at(pixel: Vector2) -> String:
 			if rectangle.has_point(pixel): return id
 	return ""
 
+func _request_landmark(path: String) -> void:
+	var error := MapJobs.request_resource(path,"PackedScene")
+	if error==OK: _landmark_pending[path] = true
+	elif error==ERR_BUSY: _landmark_waiting_for_slot = true
+	else: _landmark_failed_load(path)
+
 func _landmark_failed_load(path: String) -> void:
 	_landmark_failed[path] = true
 	landmark_load_failed.emit("地标模型读取失败，暂保留地图剪影。")
 
 func prepare_landmarks() -> bool:
-	var completed := _poll_surface_preparation()
+	var completed := _poll_surface_preparation() or _landmark_waiting_for_slot
+	_landmark_waiting_for_slot = false
 	var city_began := Time.get_ticks_usec()
 	for id: String in city_layers.keys():
 		var layer := city_layers[id] as CityMiniature
@@ -369,17 +387,21 @@ func prepare_landmarks() -> bool:
 	for path: String in _landmark_pending.keys():
 		var status := ResourceLoader.load_threaded_get_status(path)
 		if status==ResourceLoader.THREAD_LOAD_IN_PROGRESS: continue
-		if status==ResourceLoader.THREAD_LOAD_LOADED:
-			var scene := ResourceLoader.load_threaded_get(path) as PackedScene
+		var wanted := _settlement_demanded if path==SETTLEMENT_MODULE_PATH else _landmark_wanted_paths.has(path)
+		if wanted and frame_budget!=null and not frame_budget.claim_upload(0): break
+		var started := Time.get_ticks_usec()
+		var scene := MapJobs.take_resource(path) as PackedScene
+		if frame_budget!=null: frame_budget.observe("native_get_us",started)
+		if wanted:
 			if scene!=null:
-				# A retired LOCAL composition does not retain a late bundle result.
-				if (_settlement_demanded if path==SETTLEMENT_MODULE_PATH else _landmark_wanted_paths.has(path)):
-					_landmark_scenes[path] = scene
-					_touch_landmark_scene(path)
+				_landmark_scenes[path] = scene
+				_touch_landmark_scene(path)
 			else: _landmark_failed_load(path)
-		else: _landmark_failed_load(path)
 		_landmark_pending.erase(path)
 		completed = true
+		if wanted and frame_budget!=null:
+			frame_budget.finish_upload(started,"landmark load")
+			break
 	_trim_landmark_scenes()
 	if completed: _landmark_view_key.clear()
 	return completed
@@ -411,10 +433,8 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 			if _landmark_scenes.has(path): _touch_landmark_scene(path)
 			continue
 		if not _landmark_scenes.has(path):
-			if not _landmark_pending.has(path) and not _landmark_failed.has(path):
-				if ResourceLoader.load_threaded_request(path,"PackedScene")==OK:
-					_landmark_pending[path] = true
-				else: _landmark_failed_load(path)
+			if _landmark_pending.size()<MAX_PENDING_LANDMARK_SCENES and not _landmark_pending.has(path) and not _landmark_failed.has(path):
+				_request_landmark(path)
 			continue
 		_touch_landmark_scene(path)
 		var node := (_landmark_scenes[path] as PackedScene).instantiate()
@@ -747,9 +767,8 @@ func _settlement_demand(features: Array[Dictionary], camera: RegionCamera, viewp
 	if not _settlement_meshes.is_empty(): return wanted
 	if _landmark_failed.has(SETTLEMENT_MODULE_PATH): return wanted
 	if not _landmark_scenes.has(SETTLEMENT_MODULE_PATH):
-		if not _landmark_pending.has(SETTLEMENT_MODULE_PATH):
-			if ResourceLoader.load_threaded_request(SETTLEMENT_MODULE_PATH,"PackedScene")==OK: _landmark_pending[SETTLEMENT_MODULE_PATH] = true
-			else: _landmark_failed_load(SETTLEMENT_MODULE_PATH)
+		if _landmark_pending.size()<MAX_PENDING_LANDMARK_SCENES and not _landmark_pending.has(SETTLEMENT_MODULE_PATH):
+			_request_landmark(SETTLEMENT_MODULE_PATH)
 		return wanted
 	var source := (_landmark_scenes[SETTLEMENT_MODULE_PATH] as PackedScene).instantiate()
 	var nodes: Array[Node] = [source]
@@ -1050,9 +1069,12 @@ func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_
 	if _surface_cpu_ready.is_empty():
 		if _surface_thread==null:
 			_surface_build_key = demand_key+[_surface_generation]
-			_surface_thread = Thread.new()
-			_surface_thread.start(LocalSpatialLod.prepare_terrain.bind(surface,camera.tangent_frame,reference_lines,covers,_surface_preparation_current.bind(_surface_generation)))
+			var work := LocalSpatialLod.prepare_terrain.bind(surface,camera.tangent_frame,reference_lines,covers,_surface_preparation_current.bind(_surface_generation))
+			_surface_thread = MapJobs.submit(work,"local surface geometry",MapJobs.VISIBLE,self)
 		return
+	var upload_bytes := int(_surface_cpu_ready.get("upload_bytes",0))
+	if frame_budget!=null and not frame_budget.claim_upload(upload_bytes): return
+	var upload_started := Time.get_ticks_usec()
 	if _local_surface!=null:
 		for node: MeshInstance3D in [_local_surface,_surface_cover,_surface_lines]:
 			if node!=null:
@@ -1066,6 +1088,7 @@ func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_
 	_local_surface_key = source_key
 	_surface_chart_frame = camera.tangent_frame
 	_install_surface_geometry(_surface_cpu_ready)
+	if frame_budget!=null: frame_budget.finish_upload(upload_started,"local terrain")
 	_surface_cpu_ready = {}
 	_surface_presented_key = ""
 	_enable_landmark_3d()
@@ -1346,7 +1369,7 @@ func surface_screen_point(unit: Vector3, camera: RegionCamera) -> Vector2:
 	if _local_surface==null or not _local_surface.visible or _landmark_camera==null or not _surface_contains(coordinate): return Vector2(INF,INF)
 	return chart_screen_point(unit,camera)
 
-func release_landmarks(keep_context: bool = false) -> void:
+func release_landmarks(keep_context: bool = false, drop_scene_cache: bool = false) -> void:
 	for id: String in city_layers.keys():
 		var layer := city_layers[id] as CityMiniature
 		if keep_context and layer.profile.get("role","")=="NATIONAL_CARTOGRAPHIC_CONTEXT": continue
@@ -1357,6 +1380,10 @@ func release_landmarks(keep_context: bool = false) -> void:
 	_cancel_surface_preparation()
 	_release_settlements()
 	_landmark_wanted_paths.clear()
+	_landmark_waiting_for_slot = false
+	if drop_scene_cache:
+		_landmark_scenes.clear()
+		_landmark_scene_order.clear()
 	landmark_screen_bounds.clear()
 	_landmark_presented.clear()
 	_landmark_instances.clear()
@@ -1438,6 +1465,7 @@ func _cancel_surface_preparation() -> void:
 	_surface_mutex.lock()
 	_surface_generation += 1
 	_surface_mutex.unlock()
+	MapJobs.cancel_queued(_surface_thread)
 	_surface_wanted_key.clear()
 	_surface_cpu_ready = {}
 
@@ -1448,8 +1476,8 @@ func _surface_preparation_current(generation: int) -> bool:
 	return current
 
 func _poll_surface_preparation() -> bool:
-	if _surface_thread==null or _surface_thread.is_alive(): return false
-	var returned: Variant = _surface_thread.wait_to_finish()
+	if _surface_thread==null or not _surface_thread.completed: return false
+	var returned: Variant = _surface_thread.take()
 	_surface_thread = null
 	if not _surface_wanted_key.is_empty() and _surface_build_key==_surface_wanted_key+[_surface_generation]:
 		var valid := returned is Dictionary
@@ -1463,7 +1491,17 @@ func _poll_surface_preparation() -> bool:
 			_surface_wanted_key.clear()
 			_surface_cpu_ready = {}
 			landmark_load_failed.emit("LOCAL地形准备未返回完整结果，暂保留区域地貌和地点标识。")
-		else: _surface_cpu_ready = returned as Dictionary
+		else:
+			_surface_cpu_ready = returned as Dictionary
+			var bytes := 0
+			for field: String in ["terrain_arrays","cover_arrays","line_arrays","height_bytes","water_bytes","woodland_bytes","context_water_bytes"]:
+				bytes += FrameBudget.packed_bytes(_surface_cpu_ready.get(field))
+			if bytes>FrameBudget.UPLOAD_BYTES:
+				_landmark_failed[str(_surface_wanted_key[0])] = true
+				_surface_wanted_key.clear()
+				_surface_cpu_ready = {}
+				landmark_load_failed.emit("LOCAL地形超过当前绘制预算，暂保留区域地貌。")
+			else: _surface_cpu_ready["upload_bytes"] = bytes
 	return true
 
 func _install_surface_geometry(data: Dictionary) -> void:

@@ -1,0 +1,49 @@
+{
+  "protected_paths": [
+    "builds/preview_R63",
+    "builds/preview_R64",
+    "builds/preview_R65/WWO_R65_Debug.exe",
+    "builds/preview_R67",
+    "builds/windows",
+    "builds/preview_2026-10-19_raster_r57",
+    "builds/preview_2026-10-19_sampling_r56",
+    "local-artifacts",
+    "builds/preview_2026-10-15_coast_local_performance_r19",
+    "builds/preview_2026-10-16_surface_environment_landmarks_r30",
+    "local-artifacts/revoked-r30",
+    "builds/preview_R58/override.cfg",
+    "builds/preview_R59/override.cfg"
+  ],
+  "seed_builds": {
+    "R57": {
+      "state": "CANDIDATE",
+      "path": "builds/preview_2026-10-19_raster_r57/WWO_1900_Terrain_Raster_LOD_Integrity_R57_Preview.exe",
+      "evidence": "docs/map/R57_TERRAIN_PIXEL_SOURCE_AND_GRID_ARTIFACT_REPAIR.md; user2026-10-20 confirms player acceptance pending"
+    },
+    "R56": {
+      "state": "ROLLBACK",
+      "path": "builds/preview_2026-10-19_sampling_r56/WWO_1900_Terrain_Sampling_LOD_Coastline_R56_Preview.exe",
+      "evidence": "User2026-10-20 explicitly retains R56 until R57 player acceptance"
+    }
+  },
+  "retired_files": {
+    "R50": [
+      "builds/preview_2026-10-18_siberian_r50/README.txt"
+    ],
+    "R51": [
+      "builds/preview_2026-10-19_asian_r51/README_R51.txt"
+    ],
+    "R52": [
+      "builds/preview_2026-10-19_caucasus_nordic_r52/README_R52.txt"
+    ],
+    "R53": [
+      "builds/preview_2026-10-19_arid_r53/README_R53.txt"
+    ],
+    "R54": [
+      "builds/preview_2026-10-19_performance_r54/README_R54.txt"
+    ],
+    "R55": [
+      "builds/preview_2026-10-19_coverage_r55/README_R55.txt"
+    ]
+  }
+}

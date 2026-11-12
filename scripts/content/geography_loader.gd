@@ -2,6 +2,7 @@ class_name GeographyLoader
 extends RefCounted
 
 const RELIEF_PATH: String = "res://data/presentation/global_physical_relief.json"
+const CompactMap = preload("res://scripts/content/compact_map_raster.gd")
 const GEOMETRY_PATH: String = "res://data/world_map/historical/cshapes_1900_snapshot.json"
 const SUPPLEMENT_PATH: String = "res://data/world_map/historical/arabia_gulf_geography_1900.json"
 const WESTERN_FRONTIER_DETAILS: Array[String] = [
@@ -133,9 +134,10 @@ func _points_from_raw(raw_value: Variant) -> PackedVector2Array:
 		output.append(Vector2(lon, lat))
 	return output
 
-static func decode_relief(level: String, admitted: Dictionary) -> Dictionary:
+static func decode_relief(level: String, admitted: Dictionary, current: Callable = Callable(), measured: bool = false) -> Dictionary:
 	var failures: Array[String] = []
 	var result: Dictionary = {"errors": failures}
+	if current.is_valid() and not current.call(): return result
 	if level in ["france_catalog","british_catalog","german_catalog","spain_catalog","canary_catalog","benelux_catalog","europe_catalog","siberian_catalog","asian_catalog","northern_catalog","arid_catalog","european_catalog","sampling_catalog"]:
 		# REGION-only metadata admission; WORLD never reads regional images.
 		var pack := {"france_catalog":"france_r42","british_catalog":"british_r43","german_catalog":"german_r44","spain_catalog":"spain_r45","canary_catalog":"canary_r45","benelux_catalog":"benelux_r46","europe_catalog":"europe_r48","siberian_catalog":"siberian_r50","asian_catalog":"asian_r51","northern_catalog":"northern_r52","arid_catalog":"arid_r53","european_catalog":"european_r55","sampling_catalog":"sampling_r57"}[level] as String
@@ -182,7 +184,45 @@ static func decode_relief(level: String, admitted: Dictionary) -> Dictionary:
 		failures.append("Missing relief level")
 		return result
 	var asset := admitted[level] as Dictionary
-	var decoded := decode_relief_buffer(FileAccess.get_file_as_bytes(str(asset.path)),asset)
+	if current.is_valid() and not current.call(): return result
+	var path := str(asset.path)
+	var decoded_size := int(asset.get("decoded_bytes",int(asset.width)*int(asset.height)*4))
+	if str(asset.format) == "RGBA8_MIP_WWOCM2":
+		var packed := CompactMap.read_relief_page(path,path,int(asset.width),int(asset.height),decoded_size,current,measured)
+		if not packed.is_empty():
+			if result.has("assets"): packed["assets"] = result.assets
+			return packed
+		if not current.is_valid() or current.call(): failures.append("Invalid WWOCM2 relief page: "+path)
+		return result
+	if str(asset.format)=="RGBA8_MIP_DEFLATE":
+		if CompactMap.has_builtin_relief_pages() and path.begins_with("res://assets/maps/relief/"):
+			var page_path := CompactMap.RELIEF_PAGES.path_join(path.get_file().get_basename()+".wcm")
+			var page := CompactMap.read_relief_page(page_path,path,int(asset.width),int(asset.height),decoded_size,current,measured)
+			if current.is_valid() and not current.call(): return result
+			if not page.is_empty(): return page
+		var compact := CompactMap.read_relief(path,int(asset.width),int(asset.height),decoded_size,current)
+		if current.is_valid() and not current.call(): return result
+		if compact != null:
+			result["image"] = compact
+			result["storage"] = "compact"
+			return result
+	var read_started := Time.get_ticks_usec() if measured else 0
+	var input := FileAccess.open(path,FileAccess.READ)
+	if input==null:
+		failures.append("Cannot open relief asset: "+str(asset.path))
+		return result
+	var length := input.get_length()
+	if length>32*1024*1024 or decoded_size>64*1024*1024:
+		failures.append("Relief asset exceeds the map read or decoded byte budget: "+str(asset.path))
+		return result
+	var buffer := input.get_buffer(length)
+	input.close()
+	if current.is_valid() and not current.call(): return result
+	var read_done := Time.get_ticks_usec() if measured else 0
+	var decoded := decode_relief_buffer(buffer,asset)
+	if measured:
+		decoded["read_us"] = read_done-read_started
+		decoded["decode_us"] = Time.get_ticks_usec()-read_done
 	if result.has("assets"): decoded["assets"] = result.assets
 	return decoded
 
@@ -234,17 +274,8 @@ static func _decode_lossless_surface(buffer: PackedByteArray, asset: Dictionary)
 	if codec==1:
 		raw=payload.decompress(length,FileAccess.COMPRESSION_ZSTD)
 	elif codec==5:
-		# A lossless VP8L image carries the linear Mip byte stream, without
-		# regeneration. Only the final row is padded; native decoding also
-		# performs the reversible colour/prediction transforms.
-		if payload.size()<25 or payload.slice(0,4).get_string_from_ascii()!="RIFF" or payload.slice(8,16).get_string_from_ascii()!="WEBPVP8L" or payload[20]!=47: return bad
-		var bits := int(payload.decode_u32(21))
-		if (bits&16383)+1!=w or ((bits>>14)&16383)+1!=ceili(float(length/4)/w) or bits>>29: return bad
-		var packed_image := Image.new()
-		if packed_image.load_webp_from_buffer(payload)!=OK: return bad
-		packed_image.convert(Image.FORMAT_RGBA8)
-		raw=packed_image.get_data();packed_image=null
-		raw.resize(length) # Release image first: no second full-size COW copy.
+		var decoded := CompactMap.decode_webp_mips(payload,w,h,length)
+		return {"errors":failures,"image":decoded} if decoded!=null else bad
 	else: return bad
 	if raw.size()!=length: return bad
 	var image := Image.create_from_data(w,h,true,Image.FORMAT_RGBA8,raw)

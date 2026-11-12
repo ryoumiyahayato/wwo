@@ -6,6 +6,8 @@ extends RefCounted
 
 const SNAPSHOT_SCHEMA_ID: String = "vnext_spatial_world_v2"
 const ADMINISTRATIVE_REFERENCE_CELL_M: float = 200000.0
+const ADMINISTRATIVE_LOCAL_CELL_M: float = 25000.0
+const ADMINISTRATIVE_LOCAL_MAX_MPP: float = 300.0
 const DEFAULT_NOMINAL_CAPACITY_BY_TYPE: Dictionary = {
 	VNextSpatialCatalog.LINK_TYPE_ROAD: 100.0,
 	VNextSpatialCatalog.LINK_TYPE_RAIL: 1000.0,
@@ -35,6 +37,8 @@ var _admin_member_view_revision: int = -1
 var _admin_reference_choice: Dictionary = {}
 var _admin_reference_choice_date: String = ""
 var _administrative_reference_grid: Dictionary = {} # Derived display bounds only.
+var _administrative_local_grid: Dictionary = {}
+var _administrative_reference_rects: Dictionary[String,Rect2] = {}
 var _administrative_children: Dictionary = {}
 var _loaded_child_rosters: Dictionary = {}
 
@@ -96,18 +100,32 @@ func loaded_administrative_boundary_ids(date: String) -> Array[String]:
 	return ids
 
 func administrative_reference_bounds(id: String) -> Rect2:
-	var descriptor := (_land_administrations.get(id,{}) as Dictionary).get("reference_descriptor",{}) as Dictionary
-	var values := descriptor.get("local_bounds",[]) as Array
-	return Rect2(float(values[0]),float(values[1]),float(values[2]),float(values[3])) if values.size()==4 else Rect2()
+	return _administrative_reference_rects.get(id,Rect2())
+
+static func _administrative_max_mpp(identity: Dictionary, level: int) -> float:
+	return float(identity.get("display_max_mpp",6500.0 if level<=1 else 1400.0 if level==2 else 300.0 if level==3 else 80.0))
 
 func _index_administrative_reference(id: String) -> void:
-	var bounds := administrative_reference_bounds(id)
+	var identity := _land_administrations[id] as Dictionary
+	var descriptor := identity.get("reference_descriptor",{}) as Dictionary
+	var values := descriptor.get("local_bounds",[]) as Array
+	if values.size()!=4: return
+	var bounds := Rect2(float(values[0]),float(values[1]),float(values[2]),float(values[3]))
+	_administrative_reference_rects[id] = bounds
 	if not bounds.has_area(): return
-	for y: int in range(floori(bounds.position.y/ADMINISTRATIVE_REFERENCE_CELL_M),floori(bounds.end.y/ADMINISTRATIVE_REFERENCE_CELL_M)+1):
-		for x: int in range(floori(bounds.position.x/ADMINISTRATIVE_REFERENCE_CELL_M),floori(bounds.end.x/ADMINISTRATIVE_REFERENCE_CELL_M)+1):
+	var local := _administrative_max_mpp(identity,int(identity.get("level",1)))<=ADMINISTRATIVE_LOCAL_MAX_MPP and bounds.size.x<=50000.0 and bounds.size.y<=50000.0
+	var grid := _administrative_local_grid if local else _administrative_reference_grid
+	var step := ADMINISTRATIVE_LOCAL_CELL_M if local else ADMINISTRATIVE_REFERENCE_CELL_M
+	for y: int in range(floori(bounds.position.y/step),floori(bounds.end.y/step)+1):
+		for x: int in range(floori(bounds.position.x/step),floori(bounds.end.x/step)+1):
 			var cell := Vector2i(x,y)
-			if not _administrative_reference_grid.has(cell): _administrative_reference_grid[cell] = []
-			(_administrative_reference_grid[cell] as Array).append(id)
+			if not grid.has(cell): grid[cell] = []
+			(grid[cell] as Array).append(id)
+
+static func _collect_administrative_references(grid: Dictionary, step: float, view: Rect2, candidates: Dictionary) -> void:
+	for y: int in range(floori(view.position.y/step),floori(view.end.y/step)+1):
+		for x: int in range(floori(view.position.x/step),floori(view.end.x/step)+1):
+			for id: String in grid.get(Vector2i(x,y),[]): candidates[id] = true
 
 func administrative_display_revision() -> int:
 	return _administrative_display_revision
@@ -152,22 +170,25 @@ func request_administrative_boundaries(view: Rect2, date: String, mpp: float, en
 	if not enabled or _land == null or mpp>6500.0 or not view.has_area() or home_polity_id.is_empty(): return result
 	var members := _current_administrative_members()
 	var candidates: Dictionary = {}
-	for y: int in range(floori(view.position.y/ADMINISTRATIVE_REFERENCE_CELL_M),floori(view.end.y/ADMINISTRATIVE_REFERENCE_CELL_M)+1):
-		for x: int in range(floori(view.position.x/ADMINISTRATIVE_REFERENCE_CELL_M),floori(view.end.x/ADMINISTRATIVE_REFERENCE_CELL_M)+1):
-			for id: String in _administrative_reference_grid.get(Vector2i(x,y),[]): candidates[id] = true
+	_collect_administrative_references(_administrative_reference_grid,ADMINISTRATIVE_REFERENCE_CELL_M,view,candidates)
+	if mpp<=ADMINISTRATIVE_LOCAL_MAX_MPP:
+		_collect_administrative_references(_administrative_local_grid,ADMINISTRATIVE_LOCAL_CELL_M,view,candidates)
 	# Changed actual membership can lie outside its historical reference bounds.
 	for id: String in members: candidates[id] = true
 	if _land_administrations.has(selected_id): candidates[selected_id] = true
+	var member_view := view.grow(mpp*60.0)
 	for id: String in candidates:
 		var identity := _land_administrations[id] as Dictionary
 		if str(identity.get("polity_id","")) != home_polity_id and id!=selected_id: continue
 		# Lower units only enter the existing view demand at close range.
 		var level := int(identity.get("level",1))
-		var max_mpp := float(identity.get("display_max_mpp",6500.0 if level<=1 else 1400.0 if level==2 else 300.0 if level==3 else 80.0))
+		var max_mpp := _administrative_max_mpp(identity,level)
 		if mpp>max_mpp and id!=selected_id: continue
 		if mpp<float(identity.get("display_min_mpp",0.0)) and id!=selected_id: continue
+		var reference := administrative_reference_bounds(id)
+		if not members.has(id) and not view.intersects(reference,true): continue
 		var current := administrative_display_uses_members(id,date)
-		var bounds := administrative_display_bounds(id,date)
+		var bounds: Rect2 = (members.get(id,{}) as Dictionary).get("bounds",Rect2()) if current else reference
 		if not view.intersects(bounds,true): continue
 		if id!=selected_id and minf(bounds.size.x,bounds.size.y)/mpp<12.0: continue
 		if current:
@@ -175,7 +196,7 @@ func request_administrative_boundaries(view: Rect2, date: String, mpp: float, en
 			var neighbors: Dictionary = {}
 			var ids := (members.get(id,{"ids":[]}) as Dictionary).ids as Array
 			for land_id: String in ids:
-				if not _land.land_bounds(land_id).intersects(view.grow(mpp*60.0),true): continue
+				if not _land.land_bounds(land_id).intersects(member_view,true): continue
 				polygons[land_id] = _land.polygon(land_id)
 				neighbors[land_id] = []
 				for neighbor: String in _land.neighbors(land_id):
@@ -276,6 +297,15 @@ func administrative_land_members(region_id: String) -> Array[String]:
 
 func administrative_identity(region_id: String) -> Dictionary:
 	return (_land_administrations.get(region_id,{}) as Dictionary).duplicate(true)
+
+func administrative_capital_symbol(region_id: String, date: String) -> Dictionary:
+	var identity := _land_administrations.get(region_id,{}) as Dictionary
+	if (identity.get("capital_lon_lat",[]) as Array).size()!=2 or date<str(identity.get("valid_from","1900-01-01")) or date>=str(identity.get("valid_to","1901-01-01")):
+		return {}
+	var capital := str(identity.get("capital_place_id",""))
+	return identity.merged({"id":region_id if capital.is_empty() else capital,"kind":"settlement",
+		"display_name":str(identity.get("capital_name",identity.get("historical_name",""))),
+		"map_symbol":"admin_primary" if int(identity.get("level",1))<=1 else "admin_secondary"},true)
 
 func administrative_children(region_id: String) -> Array[Dictionary]:
 	var parent := _land_administrations.get(region_id,{}) as Dictionary

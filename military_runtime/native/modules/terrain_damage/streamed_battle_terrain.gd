@@ -38,6 +38,7 @@ var last_transaction_usec := 0
 var maximum_transaction_usec := 0
 var source_id := "battle_land_5km_v1"
 var horizon: MeshInstance3D
+var stream_initial_chunks := false
 # Exact double-precision cell corners, bounded independently of streamed mesh memory.
 # Edits invalidate before rebuilding collision; stream changes invalidate support poses.
 const HEIGHT_CELL_CACHE_LIMIT := 8192
@@ -116,9 +117,10 @@ func configure(focus: Vector3 = Vector3.ZERO, original_mesh: MeshInstance3D = nu
 	ready_surface = true
 	set_focus(focus)
 	# Spawn safety: the central 3x3 is ready before a vehicle can be placed.
-	for key in stream_queue.duplicate():
-		if absi(key.x-focus_chunk.x)<=1 and absi(key.y-focus_chunk.y)<=1:
-			_build_chunk(key); stream_queue.erase(key)
+	if not stream_initial_chunks:
+		for key in stream_queue.duplicate():
+			if absi(key.x-focus_chunk.x)<=1 and absi(key.y-focus_chunk.y)<=1:
+				_build_chunk(key); stream_queue.erase(key)
 	return {"ok": true, "bounds": bounds, "world_size_metres": Vector2(5000,5000), "loaded_chunks": chunks.size()}
 
 func setup(host: Node3D, original: Node = null) -> Dictionary:
@@ -332,6 +334,11 @@ func _build_chunk(key: Vector2i) -> void:
 
 func _mesh_indices(cells: int) -> PackedInt32Array:
 	if _mesh_index_cache.has(cells): return _mesh_index_cache[cells]
+	var indices := _grid_indices(cells)
+	if cells==CELLS or cells==100: _mesh_index_cache[cells]=indices
+	return indices
+
+static func _grid_indices(cells: int) -> PackedInt32Array:
 	var indices := PackedInt32Array()
 	indices.resize(cells*cells*6)
 	var cursor := 0
@@ -341,7 +348,6 @@ func _mesh_indices(cells: int) -> PackedInt32Array:
 			indices[cursor]=a; indices[cursor+1]=b; indices[cursor+2]=c
 			indices[cursor+3]=b; indices[cursor+4]=d; indices[cursor+5]=c
 			cursor+=6
-	if cells==CELLS or cells==100: _mesh_index_cache[cells]=indices
 	return indices
 
 func _make_mesh(ox: float, oz: float, cells: int, step: float, detailed: bool) -> ArrayMesh:

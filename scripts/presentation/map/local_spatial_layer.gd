@@ -5,6 +5,13 @@ signal preparation_failed(message: String)
 ## Prepared line meshes and glyphs on the existing regional canvas.
 
 const PREPARE_BUDGET_USEC: int = 2000
+const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+const MAX_STAGED_BYTES: int = 224 * 1024 * 1024
+const MAX_GEOMETRY_BYTES: int = 256 * 1024 * 1024
+const MAX_RETIRED_BATCHES: int = 2048
+var _retiring: Array[Dictionary] = []
+var _geometry_bytes: int = 0
 const DRAW_ORDER: int = 100000
 var rail_style: int = 2
 var ready: bool = false
@@ -17,7 +24,7 @@ var label_rects: Array[Rect2] = []
 var available_lods: Dictionary = {}
 var active_lod: String = ""
 var _chunks: Array[Dictionary] = []
-var _lod_thread: Thread
+var _lod_thread: MapJobs.Job
 var _lod_generation: int = 0
 var _generation: int = 0
 var _generation_mutex := Mutex.new()
@@ -244,7 +251,7 @@ func _finish_political_patch() -> void:
 			batch.complete = true
 			batch.political_patch = false
 		elif (_replace_noncoast and str(batch.kind) not in ["coast","ocean_reference","land_reference"]) or (str(batch.kind)=="land_reference" and str(batch.get("source_feature_id","")) in _upload_political_features):
-			RenderingServer.free_rid(batch.item as RID)
+			_retire_batch(batch)
 			_batches.remove_at(index)
 	_installed_political_cells = _job_cells
 	if _replace_noncoast: _physical_reference["ink_enabled"] = true
@@ -290,15 +297,14 @@ func _queue_preparation() -> void:
 	for lod_name: String in _wanted:
 		if not _cpu_ready.has(lod_name) and not available_lods.has(lod_name): missing.append(lod_name)
 	if not missing.is_empty():
-		_lod_thread = Thread.new()
 		_lod_generation = _generation
 		_job_cells = _political_cells if not strategic or bool(_content.metadata.get("ink_enabled",false)) else {}
 		_job_political_features = []
 		_pending_political_features.clear()
-		var error := _lod_thread.start(_prepare_job.bind(_content,missing,_generation,_ink_frames,_job_cells,[]))
-		if error!=OK:
-			_lod_thread = null
-			_fail_preparation("无法启动地图几何线程："+error_string(error))
+		var priority := MapJobs.FOUNDATION if strategic and _target=="coarse" else MapJobs.VISIBLE
+		_lod_thread = MapJobs.submit(_prepare_job.bind(_content,missing,_generation,_ink_frames,_job_cells,[]),"map geometry",priority,self)
+		if _lod_thread==null:
+			_fail_preparation("地图几何任务队列已满。")
 			return
 		preparing = true
 		return
@@ -306,13 +312,11 @@ func _queue_preparation() -> void:
 		_job_political_features = _pending_political_features.duplicate()
 		_pending_political_features.clear()
 		_job_cells = _political_cells
-		_lod_thread = Thread.new()
 		_lod_generation = _generation
 		var patch_lods: Array[String] = [_target]
-		var error := _lod_thread.start(_prepare_job.bind(_content,patch_lods,_generation,_ink_frames,_job_cells,_job_political_features))
-		if error!=OK:
-			_lod_thread = null
-			_fail_preparation("无法启动政治显示线程："+error_string(error))
+		_lod_thread = MapJobs.submit(_prepare_job.bind(_content,patch_lods,_generation,_ink_frames,_job_cells,_job_political_features),"map ink geometry",MapJobs.VISIBLE,self)
+		if _lod_thread==null:
+			_fail_preparation("政治显示任务队列已满。")
 			return
 		preparing = true
 		return
@@ -334,7 +338,7 @@ func _queue_preparation() -> void:
 func _prepare_job(source: LocalSpatialContent, lods: Array[String], generation: int, frames: Dictionary, cells: Dictionary, only: Array) -> Dictionary:
 	var features: Array[String] = []
 	features.assign(only)
-	var result := LocalSpatialLod.prepare(source,lods,_preparation_current.bind(generation),frames,cells,features)
+	var result := LocalSpatialLod.prepare(source,lods,_preparation_current.bind(generation),frames,cells,features,MAX_STAGED_BYTES)
 	result["request"] = {"generation":generation,"lods":lods.duplicate(),"regions":source.metadata.get("regions",[]),"source_groups":source.line_chunks.size(),"features":features}
 	return result
 
@@ -376,7 +380,7 @@ func _trim_gpu() -> void:
 		var batch := _batches[index]
 		var protected := not available_lods.has(_target) and str(batch.lod)==fallback
 		if str(batch.lod) not in _wanted and str(batch.lod)!=pending and not protected:
-			RenderingServer.free_rid(batch.item as RID)
+			_retire_batch(batch)
 			available_lods.erase(str(batch.lod))
 			_batches.remove_at(index)
 
@@ -387,7 +391,7 @@ func release_gpu() -> void:
 	_resident = false
 	_physical_reference = {}
 	_clear_fallback()
-	for batch: Dictionary in _batches: RenderingServer.free_rid(batch.item as RID)
+	for batch: Dictionary in _batches: _retire_batch(batch)
 	_batches.clear()
 	_upload_chunks.clear()
 	_cursor = 0
@@ -401,23 +405,23 @@ func release_gpu() -> void:
 	ready = false
 	preparing = _lod_thread != null
 
-func prepare_step(font: Font) -> bool:
+func prepare_step(font: Font, budget: FrameBudget = null) -> bool:
 	if _step_active:
 		_step_active = false
 		_fail_preparation("地图几何或绘制资源安装中断，请查看游戏错误日志。")
 		return false
 	_step_active = true
-	var changed := _prepare_step(font)
+	var changed := _prepare_step(font,budget)
 	_step_active = false
 	return changed
 
-func _prepare_step(font: Font) -> bool:
+func _prepare_step(font: Font, budget: FrameBudget) -> bool:
 	if not preparing and _lod_thread==null: return false
 	var step_started := Time.get_ticks_usec()
 	if _lod_thread != null:
-		if _lod_thread.is_alive():
+		if not _lod_thread.completed:
 			return false
-		var returned: Variant = _lod_thread.wait_to_finish()
+		var returned: Variant = _lod_thread.take()
 		_lod_thread = null
 		if returned is Dictionary:
 			var r := returned as Dictionary
@@ -463,6 +467,20 @@ func _prepare_step(font: Font) -> bool:
 		return false
 	while _cursor < _upload_chunks.size():
 		var line := _upload_chunks[_cursor]
+		var bytes := int(line.get("upload_bytes",0))
+		if _geometry_bytes + bytes > MAX_GEOMETRY_BYTES:
+			if strategic and _target=="medium" and not _fallback_batches.is_empty():
+				# The separate WORLD slot is already complete. Use it while the
+				# two medium versions cannot coexist within the same budget.
+				_clear_fallback()
+				_physical_reference = {}
+				display_changed.emit()
+				return false
+			if not _retiring.is_empty(): return false
+			_fail_preparation("地图几何超过当前绘制驻留预算（%d 字节已驻留，%d 字节待提交）。"%[_geometry_bytes,bytes])
+			return false
+		if budget!=null and not budget.claim_upload(bytes): return false
+		var upload_started := Time.get_ticks_usec()
 		var geometry: RefCounted
 		var surface := line.has("face_count")
 		var mesh: ArrayMesh
@@ -471,13 +489,13 @@ func _prepare_step(font: Font) -> bool:
 			var surfaces := GlobeSurfaceBatch.new()
 			# Surface geometry includes physical land and water. Its kind, not
 			# this mesh representation, determines geographic meaning.
-			surfaces.upload(line.payload as Dictionary)
+			surfaces.upload(line.payload as Dictionary,budget)
 			geometry = surfaces
 			mesh = surfaces.mesh
 			texture = surfaces.data
 		else:
 			var strokes := GlobeBoundaryBatch.new()
-			strokes.upload(line.payload as Dictionary)
+			strokes.upload(line.payload as Dictionary,budget)
 			geometry = strokes
 			mesh = strokes.mesh
 			texture = strokes.data
@@ -517,6 +535,9 @@ func _prepare_step(font: Font) -> bool:
 		RenderingServer.canvas_item_add_mesh(item, mesh.get_rid())
 		RenderingServer.canvas_item_set_visible(item, false)
 		_batches.append({"item": item, "material": material, "geometry": geometry, "lod":line.lod, "kind":line.kind, "visible":false, "complete":false, "surface": surface, "ink_reference":line.get("ink_reference",""),"source_feature_id":line.get("source_feature_id",""),"original_ink_reference":line.get("original_ink_reference",""),"component_uv":line.get("component_uv",false),"political_patch":not _upload_political_features.is_empty(),"texture":RID(),"water_class": line.get("water_class", "lake"), "replacement_key":line.get("replacement_key",""),"water_line_style":line.get("water_line_style",""), "faces": int(line.get("face_count",0)), "cull_axis":line.get("cull_axis",Vector3.ZERO),"cull_angle":line.get("cull_angle",PI)})
+		_batches.back()["upload_bytes"] = bytes
+		_geometry_bytes += bytes
+		if budget!=null: budget.finish_upload(upload_started,str(line.kind))
 		# The installed geometry owns its mesh, texture and required picking data.
 		# Encoded staging arrays are no longer needed by either content level.
 		line.erase("payload")
@@ -561,7 +582,7 @@ func _fail_preparation(message: String) -> void:
 func _discard_unpublished() -> void:
 	for index: int in range(_batches.size()-1,-1,-1):
 		if not bool(_batches[index].get("complete",false)) or bool(_batches[index].get("political_patch",false)):
-			RenderingServer.free_rid(_batches[index].item as RID)
+			_retire_batch(_batches[index])
 			_batches.remove_at(index)
 	for lod_name: String in _cpu_ready: available_lods.erase(lod_name)
 	_cpu_ready.clear()
@@ -615,6 +636,7 @@ func _cancel_preparation() -> void:
 	_generation_mutex.lock()
 	_generation += 1
 	_generation_mutex.unlock()
+	MapJobs.cancel_queued(_lod_thread)
 
 func _preparation_current(generation: int) -> bool:
 	_generation_mutex.lock()
@@ -907,7 +929,7 @@ func clear() -> void:
 	_cancel_preparation()
 	_clear_fallback()
 	for batch: Dictionary in _batches:
-		RenderingServer.free_rid(batch.item as RID)
+		_retire_batch(batch)
 	_batches.clear()
 	_chunks.clear()
 	_upload_chunks.clear()
@@ -927,10 +949,9 @@ func clear() -> void:
 	if not retired.is_empty() and _lod_thread == null:
 		# Reuse the cancelled geometry slot. Only detached CPU containers move
 		# here; meshes, materials and CanvasItems have already been released.
-		_lod_thread = Thread.new()
 		_lod_generation = _generation-1
-		if _lod_thread.start(LocalSpatialLayer._release_content_data.bind(retired)) != OK:
-			_lod_thread = null
+		_lod_thread = MapJobs.submit(LocalSpatialLayer._release_content_data.bind(retired),"retire map source",MapJobs.OPTIONAL)
+		if _lod_thread==null:
 			retired.clear()
 	preparing = _lod_thread != null
 	reference_relief = {}
@@ -969,12 +990,29 @@ func hide_display() -> void:
 
 func dispose() -> void:
 	clear()
-	if _lod_thread != null:
-		_lod_thread.wait_to_finish()
-		_lod_thread = null
+	drain_retirement()
+	MapJobs.abandon(_lod_thread)
+	_lod_thread = null
 
 func _clear_fallback() -> void:
 	for batch: Dictionary in _fallback_batches:
-		RenderingServer.free_rid(batch.item as RID)
+		_retire_batch(batch)
 	_fallback_batches.clear()
 	_fallback_lod = ""
+
+func _retire_batch(batch: Dictionary) -> void:
+	RenderingServer.canvas_item_set_visible(batch.item as RID,false)
+	if _retiring.size() >= MAX_RETIRED_BATCHES:
+		_free_batch(_retiring.pop_back())
+	_retiring.append(batch)
+
+func _free_batch(batch: Dictionary) -> void:
+	RenderingServer.free_rid(batch.item as RID)
+	_geometry_bytes -= int(batch.get("upload_bytes",0))
+
+func retirement_pending() -> bool:
+	return not _retiring.is_empty()
+
+func drain_retirement(budget: FrameBudget = null) -> void:
+	while not _retiring.is_empty() and (budget==null or budget.claim_retirement()):
+		_free_batch(_retiring.pop_back())

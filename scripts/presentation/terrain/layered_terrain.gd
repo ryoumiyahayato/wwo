@@ -6,6 +6,7 @@ signal prepared
 signal changed
 signal failed(message: String)
 
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
 const HeightSource: GDScript = preload("res://scripts/presentation/terrain/terrain_height_source.gd")
 const GroundShader: Shader = preload("res://shaders/presentation/terrain/layered_ground.gdshader")
 const DEFAULT_BASE_PATH: String = "res://assets/terrain/region_slice/"
@@ -31,6 +32,7 @@ var _native_active: bool = false
 var _external_native_owner: bool = false
 var _region_heights: PackedFloat32Array = PackedFloat32Array()
 var _native_heights: PackedFloat32Array = PackedFloat32Array()
+var _compact_native: bool = false
 var _region_tiles: Dictionary[Vector2i, MeshInstance3D] = {}
 var _native_tiles: Dictionary[Vector2i, MeshInstance3D] = {}
 var _desired_fine: Dictionary = {}
@@ -40,8 +42,11 @@ var _native_material: ShaderMaterial
 var _surface_materials: Array[WeakRef] = []
 var _loaded_textures: Dictionary[String, Texture2D] = {}
 var _texture_requests: Dictionary[String, String] = {}
+var texture_prepare_usec: int
+var _texture_prepare_started: int
 var _resource_notes: PackedStringArray = PackedStringArray()
-var _worker: Thread
+var _worker: MapJobs.Job
+var _texture_wanted: Dictionary[String,String] = {}
 var _worker_kind: String = ""
 var _stage_results: Array[Dictionary] = []
 var _staged_nodes: Array[MeshInstance3D] = []
@@ -172,6 +177,11 @@ func is_ready() -> bool:
 	return _prepared
 
 
+func compact_native_samples() -> PackedFloat32Array:
+	# The worker validates this grid before the native owner borrows it.
+	return _native_heights if _compact_native else PackedFloat32Array()
+
+
 func is_collision_ready(position: Vector3) -> bool:
 	if not _data_ready or not _native_active or _external_native_owner or not _native_requested or not _collision_enabled or not position.is_finite():
 		return false
@@ -253,22 +263,20 @@ func get_status() -> Dictionary:
 
 func close() -> void:
 	set_process(false)
+	_compact_native = false
 	_started = false
 	_prepared = false
 	_data_ready = false
 	_native_requested = false
 	_native_active = false
 	_external_native_owner = false
-	if _worker != null:
-		_worker.wait_to_finish()
-		_worker = null
+	MapJobs.abandon(_worker)
+	_worker = null
 	_worker_kind = ""
 	_discard_stage()
-	for path: String in _texture_requests:
-		var state: ResourceLoader.ThreadLoadStatus = ResourceLoader.load_threaded_get_status(path)
-		if state == ResourceLoader.THREAD_LOAD_LOADED or state == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-			ResourceLoader.load_threaded_get(path)
+	for path: String in _texture_requests: MapJobs.abandon_resource(path)
 	_texture_requests.clear()
+	_texture_wanted.clear()
 	for tile: MeshInstance3D in _region_tiles.values():
 		_release_node(tile)
 	for tile: MeshInstance3D in _native_tiles.values():
@@ -314,8 +322,8 @@ func _process(_delta: float) -> void:
 		if _slow_timing_enabled:
 			_finish_slow_main_update(slow_started_usec)
 		return
-	if _worker != null and not _worker.is_alive():
-		var result: Variant = _worker.wait_to_finish()
+	if _worker != null and _worker.completed:
+		var result: Variant = _worker.take()
 		_worker = null
 		_worker_kind = ""
 		if result is Dictionary:
@@ -354,6 +362,7 @@ func _accept_result(result: Dictionary) -> void:
 	if kind == "sources":
 		_region_heights = result["region"]
 		_native_heights = result["native"]
+		_compact_native = bool(result["compact_native"])
 		_data_ready = true
 		var note: String = str(result.get("native_error", ""))
 		if not note.is_empty():
@@ -446,7 +455,7 @@ func _start_next_work() -> void:
 	var region_key: Vector2i = _nearest_missing(_region_tiles, 10, 5000.0, REGION_MIN)
 	if region_key.x >= 0:
 		_launch("region", HeightSource.build_patch.bind(_patch_job("region", region_key, regional_fine)))
-	elif _texture_requests.is_empty():
+	elif _texture_requests.is_empty() and _texture_wanted.is_empty():
 		# No repeated static-cache scan, upload or viewport wakeup while idle.
 		set_process(false)
 
@@ -640,7 +649,6 @@ func _clear_collision() -> void:
 
 
 func _launch(kind: String, callable: Callable) -> void:
-	_worker = Thread.new()
 	_worker_kind = kind
 	var task: Callable = callable
 	if _slow_timing_enabled:
@@ -649,9 +657,8 @@ func _launch(kind: String, callable: Callable) -> void:
 			"dispatch_frame": Engine.get_process_frames(), "dispatch_physics_frame": Engine.get_physics_frames(),
 			"dispatch_usec": Time.get_ticks_usec()}
 		task = HeightSource.run_timed_job.bind(callable, context)
-	var error: Error = _worker.start(task)
-	if error != OK:
-		_worker = null
+	_worker = MapJobs.submit(task,"training terrain "+kind,MapJobs.VISIBLE)
+	if _worker==null:
 		_started = false
 		failed.emit("无法启动训练地形后台任务：" + kind)
 
@@ -679,6 +686,8 @@ func _mark_prepared() -> void:
 
 
 func _request_textures() -> void:
+	_texture_prepare_started = Time.get_ticks_usec() if MapJobs.measuring else 0
+	texture_prepare_usec = 0
 	var files: Dictionary[String, String] = {
 		"region_color": "continuous/assets/region_color.png", "region_normal": "continuous/assets/region_normal.png",
 		"land_color": "ridgevale/assets/land_color.png", "land_control": "ridgevale/assets/land_control.png",
@@ -689,35 +698,44 @@ func _request_textures() -> void:
 		if not ResourceLoader.exists(path, "Texture2D"):
 			_resource_notes.append("缺少可选表层纹理：" + files[parameter])
 			continue
-		var error: Error = ResourceLoader.load_threaded_request(path, "Texture2D")
-		if error == OK:
-			_texture_requests[path] = parameter
-		else:
-			_resource_notes.append("无法请求表层纹理：" + files[parameter])
+		_texture_wanted[path] = parameter
+
+
+func _start_one_texture() -> void:
+	if not _texture_requests.is_empty() or _texture_wanted.is_empty(): return
+	var path: String = _texture_wanted.keys().front()
+	var error := MapJobs.request_resource(path,"Texture2D")
+	if error==ERR_BUSY: return
+	if error==OK: _texture_requests[path] = _texture_wanted[path]
+	else: _resource_notes.append("无法请求表层纹理：" + path)
+	_texture_wanted.erase(path)
 
 
 func _poll_one_texture() -> void:
+	_start_one_texture()
 	for path: String in _texture_requests.keys():
 		var state: ResourceLoader.ThreadLoadStatus = ResourceLoader.load_threaded_get_status(path)
 		if state == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
 			continue
 		var parameter: String = _texture_requests[path]
 		_texture_requests.erase(path)
-		if state == ResourceLoader.THREAD_LOAD_LOADED:
-			var texture: Texture2D = ResourceLoader.load_threaded_get(path) as Texture2D
-			if texture != null:
-				_loaded_textures[parameter] = texture
-				for index: int in range(_surface_materials.size() - 1, -1, -1):
-					var material: ShaderMaterial = _surface_materials[index].get_ref() as ShaderMaterial
-					if material == null:
-						_surface_materials.remove_at(index)
-					else:
-						material.set_shader_parameter(parameter, texture)
-						material.set_shader_parameter("has_" + parameter, true)
+		var texture := MapJobs.take_resource(path) as Texture2D
+		if texture != null:
+			_loaded_textures[parameter] = texture
+			for index: int in range(_surface_materials.size() - 1, -1, -1):
+				var material: ShaderMaterial = _surface_materials[index].get_ref() as ShaderMaterial
+				if material == null:
+					_surface_materials.remove_at(index)
+				else:
+					material.set_shader_parameter(parameter, texture)
+					material.set_shader_parameter("has_" + parameter, true)
 		else:
 			_resource_notes.append("表层纹理读取失败：" + path)
 		changed.emit()
 		break
+	if _texture_prepare_started>0 and _texture_requests.is_empty() and _texture_wanted.is_empty():
+		texture_prepare_usec = Time.get_ticks_usec()-_texture_prepare_started
+		_texture_prepare_started = 0
 
 
 func _clamp_center(point: Vector2) -> Vector2:

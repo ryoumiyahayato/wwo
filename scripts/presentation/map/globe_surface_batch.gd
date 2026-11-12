@@ -111,7 +111,7 @@ static func encode(faces: Array, retain_picking: bool = true) -> Dictionary:
 		caps[component] = (component_bounds[component] as AABB).size.length()*0.5
 	return {"face_count":faces.size(),"height":height,"values":values.to_byte_array(),"vertices":vertices,"indices":indices,"pick_chunks":pick_chunks,"component_caps":caps,"cull_axis":center.normalized(),"cull_angle":acos(clampf(center.length()-bounds.size.length()*0.5,-1.0,1.0))+deg_to_rad(GlobeProjection.SURFACE_EDGE_DEGREES)}
 
-func upload(payload: Dictionary) -> void:
+func upload(payload: Dictionary, budget: RefCounted = null) -> void:
 	_pick_chunks.clear()
 	_component_caps = payload.get("component_caps",{}) as Dictionary
 	mesh.clear_surfaces()
@@ -127,12 +127,16 @@ func upload(payload: Dictionary) -> void:
 	_pick_chunks.assign(payload.pick_chunks as Array)
 	cull_axis = payload.cull_axis as Vector3
 	cull_angle = float(payload.cull_angle)
+	var began := Time.get_ticks_usec() if budget!=null and not budget.observations.is_empty() else 0
 	data = ImageTexture.create_from_image(Image.create_from_data(DATA_WIDTH, int(payload.height), false, Image.FORMAT_RGBAF, payload.values as PackedByteArray))
+	if began>0: budget.observe("texture_api_us",began)
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = payload.vertices
 	arrays[Mesh.ARRAY_INDEX] = payload.indices
+	if began>0: began = Time.get_ticks_usec()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	if began>0: budget.observe("mesh_api_us",began)
 
 func distance_screen_point(origin: Vector3, direction: Vector3, basis: Basis, point: Vector2, center: Vector2, radius: float, tolerance: float = 4.0) -> float:
 	var best := INF

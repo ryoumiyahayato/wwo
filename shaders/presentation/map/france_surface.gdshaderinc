@@ -1,11 +1,15 @@
 // Linear-data material on the existing physical triangles / native DEM.
 // It never defines coastline, political membership or historical land use.
 uniform sampler2D surface_base : filter_linear_mipmap, repeat_disable;
+uniform sampler2D surface_base_ba : filter_linear_mipmap, repeat_disable;
+uniform bool surface_base_split = false;
 uniform vec4 surface_base_bounds = vec4(0.0);
 uniform int surface_base_encoding = 0;
 uniform vec4 surface_base_feather = vec4(0.0);
 uniform float surface_base_opacity = 1.0;
 uniform sampler2D surface_secondary : filter_linear_mipmap, repeat_disable;
+uniform sampler2D surface_secondary_ba : filter_linear_mipmap, repeat_disable;
+uniform bool surface_secondary_split = false;
 uniform vec4 surface_secondary_bounds = vec4(0.0);
 uniform int surface_secondary_encoding = 0;
 uniform vec4 surface_secondary_feather = vec4(0.0);
@@ -178,12 +182,18 @@ vec4 surface_sample(vec2 ll, out float coverage) {
 	vec4 value = vec4(0.0,0.0,0.0,1.0);
 	if (surface_weight<=0.0) { return value; }
 	if (surface_contains(ll,surface_base_bounds)) {
-		value = surface_decode(texture(surface_base,surface_uv(ll,surface_base_bounds)),surface_base_encoding,surface_cover_base,coverage);
+		vec2 uv = surface_uv(ll,surface_base_bounds);
+		vec4 source = texture(surface_base,uv);
+		if (surface_base_split) { source.ba = texture(surface_base_ba,uv).rg; }
+		value = surface_decode(source,surface_base_encoding,surface_cover_base,coverage);
 		coverage *= surface_extent_weight(ll,surface_base_bounds,surface_base_feather)*surface_base_opacity;
 	}
 	if (surface_contains(ll,surface_secondary_bounds)) {
 		float second_coverage;
-		vec4 second = surface_decode(texture(surface_secondary,surface_uv(ll,surface_secondary_bounds)),surface_secondary_encoding,surface_cover_secondary,second_coverage);
+		vec2 uv = surface_uv(ll,surface_secondary_bounds);
+		vec4 source = texture(surface_secondary,uv);
+		if (surface_secondary_split) { source.ba = texture(surface_secondary_ba,uv).rg; }
+		vec4 second = surface_decode(source,surface_secondary_encoding,surface_cover_secondary,second_coverage);
 		second_coverage *= surface_extent_weight(ll,surface_secondary_bounds,surface_secondary_feather)*surface_secondary_opacity;
 		float combined = coverage+second_coverage*(1.0-coverage);
 		value = mix(value,second,second_coverage/max(combined,0.000001));

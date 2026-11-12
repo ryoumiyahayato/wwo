@@ -6,13 +6,27 @@ const RELEASE_MPP: float = MapScaleStyle.GLOBAL_RELIEF_RELEASE_MPP
 # Six visible pages cover the common 3-by-2 seam crossing without replacing
 # their observed material with a much coarser eight-degree page.
 const SURFACE_SLOTS: int = 6
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
+const RESIDENT_BYTES: int = 320 * 1024 * 1024
+const STAGED_BASE_BYTES: int = 24 * 1024 * 1024
 var textures: Dictionary = {}
 var errors: Array[String] = []
 var decode_asset: Callable
 var _assets: Dictionary = {}
 var _wanted: Array[String] = []
 var _attempted: Dictionary = {}
-var _thread: Thread
+var _thread: MapJobs.Job
+var _decode_mutex := Mutex.new()
+var _generation: int = 0
+var _worker_generation: int = 0
+var _ready_image: Image
+var _ready_base_ba: Image
+var _staged_base_rg: ImageTexture
+var _base_ba: Dictionary[String,ImageTexture] = {}
+var _ready_storage: String
+var _texture_storage: Dictionary[String,String] = {}
+var _texture_bytes: Dictionary = {}
 var _level: String = ""
 var _demand_key: Array = []
 var _window: String = ""
@@ -80,8 +94,8 @@ func _surface_candidates(view: Rect2) -> Array:
 				pages[page.id] = page
 	return pages.values()
 
-func request(visible: bool, mpp: float, center: Vector2 = Vector2(INF,INF), radius_km: float = 0.0, regional: bool = true, footprint: Dictionary = {}) -> bool:
-	var key: Array = [visible,mpp,center,radius_km,regional,footprint,_assets.size()]
+func request(visible: bool, mpp: float, center: Vector2 = Vector2(INF,INF), radius_km: float = 0.0, regional: bool = true, footprint: Dictionary = {}, foundation_only: bool = false) -> bool:
+	var key: Array = [visible,mpp,center,radius_km,regional,footprint,_assets.size(),foundation_only]
 	var previous_mpp := float(_demand_key[1]) if not _demand_key.is_empty() else mpp
 	var previous_refinement := _surface_refinement_weight
 	var previous_longitude := _surface_view.get_center().x
@@ -89,17 +103,18 @@ func request(visible: bool, mpp: float, center: Vector2 = Vector2(INF,INF), radi
 	if _demand_key!=key:
 		_demand_key = key
 		_wanted.assign(["world"] if visible else [])
-		if visible and (mpp <= PREWARM_MPP or (textures.has("region") and mpp < RELEASE_MPP)):
+		if visible and not foundation_only and (mpp <= PREWARM_MPP or (textures.has("region") and mpp < RELEASE_MPP)):
 			_wanted.append("region")
-		_desired_window = _choose_window(center,radius_km,mpp) if visible and regional and center.is_finite() else ""
+		_desired_window = _choose_window(center,radius_km,mpp) if visible and not foundation_only and regional and center.is_finite() else ""
 		if not _desired_window.is_empty(): _wanted.append(_desired_window)
 		var active := _window
 		if textures.has(_desired_window): _window = _desired_window
-		elif not visible or not regional or not center.is_finite() or not _window_intersects(_window,center,radius_km,mpp): _window = ""
+		elif not visible or foundation_only or not regional or not center.is_finite() or not _window_intersects(_window,center,radius_km,mpp): _window = ""
 		if not _window.is_empty() and _window not in _wanted: _wanted.append(_window)
 		changed = active!=_window
-		_surface_wanted = _choose_surface(visible,mpp,center,radius_km,regional,footprint)
+		_surface_wanted = _choose_surface(visible and not foundation_only,mpp,center,radius_km,regional,footprint)
 		_wanted.append_array(_surface_wanted)
+		_cancel_obsolete()
 	var previous_surface := _surface_active.duplicate()
 	_refresh_surface_active()
 	changed = changed or previous_surface!=_surface_active
@@ -116,28 +131,103 @@ func request(visible: bool, mpp: float, center: Vector2 = Vector2(INF,INF), radi
 	return changed
 
 func _start_decode() -> void:
-	if _thread == null and decode_asset.is_valid():
+	if _thread == null and _ready_image == null and decode_asset.is_valid():
 		for level: String in _wanted:
 			if not textures.has(level) and not _attempted.has(level):
 				_level = level
 				_attempted[level] = true
 				# Asset records are immutable; only the worker catalogue dictionary changes.
 				# Copying every nested record blocks wheel input as the library grows.
-				_thread = Thread.new()
-				var error := _thread.start(decode_asset.bind(level, _assets.duplicate()))
-				if error!=OK:
-					errors.append("无法启动地貌读取："+error_string(error))
-					_thread = null
+				_worker_generation = _generation
+				_thread = MapJobs.submit(_decode.bind(decode_asset,level,_assets.duplicate(),_worker_generation,MapJobs.measuring),"relief read",MapJobs.FOUNDATION if level=="world" else MapJobs.VISIBLE,self)
+				if _thread==null: _attempted.erase(level)
 				break
 
 func _retire_textures() -> bool:
 	var changed := false
 	for level: String in textures.keys():
 		if level not in _wanted and level not in _surface_active:
-			textures.erase(level)
-			_attempted.erase(level)
+			_drop_texture(level)
 			changed = true
 	return changed
+
+func _decode(reader: Callable, level: String, assets: Dictionary, generation: int, measured: bool) -> Dictionary:
+	var current := _decode_current.bind(generation)
+	if reader == GeographyLoader.decode_relief:
+		var result := GeographyLoader.decode_relief(level,assets,current,measured)
+		var image := result.get("image") as Image
+		var asset := assets.get(level,{}) as Dictionary
+		if image!=null and asset.get("surface_role")=="base" and image.get_data_size()>STAGED_BASE_BYTES and image.get_format()==Image.FORMAT_RGBA8 and image.get_width()<=8192:
+			var started := Time.get_ticks_usec() if measured else 0
+			var ba := _base_ba_image(image,current)
+			if ba!=null and current.call():
+				image.convert(Image.FORMAT_RG8)
+				result["base_ba"] = ba
+			if measured: result["decode_us"] = int(result.get("decode_us",0))+Time.get_ticks_usec()-started
+		return result
+	return reader.call(level,assets)
+
+static func _base_ba_image(image: Image, current: Callable) -> Image:
+	# Interpret RGBA as adjacent RG/BA pairs. Godot's centre-sampled 2:1
+	# nearest resize selects the odd pair, without changing any channel byte.
+	var output := PackedByteArray()
+	var raw := image.get_data()
+	var width := image.get_width()
+	var height := image.get_height()
+	var offset := 0
+	for level: int in image.get_mipmap_count()+1:
+		if not current.call(): return null
+		var next := offset+width*height*4
+		var pairs := Image.create_from_data(width*2,height,false,Image.FORMAT_RG8,raw.slice(offset,next))
+		pairs.resize(width,height,Image.INTERPOLATE_NEAREST)
+		output.append_array(pairs.get_data())
+		width = maxi(1,width/2)
+		height = maxi(1,height/2)
+		offset = next
+	return Image.create_from_data(image.get_width(),image.get_height(),image.has_mipmaps(),Image.FORMAT_RG8,output)
+
+func _decode_current(generation: int) -> bool:
+	_decode_mutex.lock()
+	var current := _generation == generation
+	_decode_mutex.unlock()
+	return current
+
+func _cancel_obsolete() -> void:
+	if _level in _wanted: return
+	_decode_mutex.lock()
+	_generation += 1
+	_decode_mutex.unlock()
+	MapJobs.cancel_queued(_thread)
+	if _ready_image != null:
+		_ready_image = null
+		_ready_base_ba = null
+		_staged_base_rg = null
+		_attempted.erase(_level)
+
+func _drop_texture(level: String) -> void:
+	textures.erase(level)
+	_base_ba.erase(level)
+	_texture_bytes.erase(level)
+	_texture_storage.erase(level)
+	_attempted.erase(level)
+
+func storage_for(level: String) -> String:
+	return _texture_storage.get(level,"")
+
+func resident_bytes() -> int:
+	var result := 0
+	for bytes: int in _texture_bytes.values(): result += bytes
+	return result
+
+func retain_world() -> void:
+	_wanted.assign(["world"] if textures.has("world") else [])
+	_surface_wanted.clear()
+	_surface_active.clear()
+	_window = ""
+	_desired_window = ""
+	_demand_key.clear()
+	_cancel_obsolete()
+	_retire_textures()
 
 func _choose_surface(visible: bool, mpp: float, center: Vector2, radius_km: float, regional: bool, footprint: Dictionary = {}, explanation: Dictionary = {}) -> Array[String]:
 	var wanted: Array[String] = []
@@ -603,7 +693,7 @@ func _surface_asset(level: String) -> Dictionary:
 	# Both production resampling and original classification limit its detail.
 	var mpp := float(_demand_key[1]) if _demand_key.size()>1 else 1000.0
 	var cover_weight := smoothstep(cover_step/6.0,cover_step/2.0,mpp) if cover_step>0 else 1.0
-	return {"id":level,"texture":textures[level],"bounds":Vector4(frame.position.x,frame.position.y,frame.end.x,frame.end.y),"inset":float(asset.core_inset_degrees),"encoding":int(asset.get("surface_encoding",0)),"cover_weight":cover_weight,"feather":Vector4(float(feather[0]),float(feather[1]),float(feather[2]),float(feather[3])),"max_mpp":float(asset.get("surface_display_max_mpp",4500.0)),"fade_mpp":float(asset.get("surface_fade_mpp",2500.0))}
+	return {"id":level,"texture":textures[level],"ba":_base_ba.get(level),"bounds":Vector4(frame.position.x,frame.position.y,frame.end.x,frame.end.y),"inset":float(asset.core_inset_degrees),"encoding":int(asset.get("surface_encoding",0)),"cover_weight":cover_weight,"feather":Vector4(float(feather[0]),float(feather[1]),float(feather[2]),float(feather[3])),"max_mpp":float(asset.get("surface_display_max_mpp",4500.0)),"fade_mpp":float(asset.get("surface_fade_mpp",2500.0))}
 
 func _surface_frame(bounds: Array) -> Rect2:
 	# The four neighbouring cores share the same longitude turn. Merging
@@ -652,13 +742,24 @@ func window_description(mpp: float) -> Dictionary:
 	return {"texture":textures[_window],"bounds":Vector4(float(b[0]),float(b[1]),float(b[2]),float(b[3])),"weight":weight,"edge":float(asset.edge_fraction)}
 
 func preparing() -> bool:
-	return _thread != null
+	return _thread != null or _ready_image != null
 
-func poll() -> bool:
-	if _thread == null or _thread.is_alive():
-		return false
-	var result := _thread.wait_to_finish() as Dictionary
+func poll(budget: FrameBudget = null) -> bool:
+	if _ready_image != null: return _upload_ready(budget)
+	if _thread == null or not _thread.completed: return false
+	var result: Variant = _thread.take()
 	_thread = null
+	if _worker_generation != _generation or _level not in _wanted:
+		_attempted.erase(_level)
+		_start_decode()
+		return false
+	if not result is Dictionary:
+		errors.append("地貌读取未返回结果")
+		_start_decode()
+		return false
+	if budget!=null and not budget.observations.is_empty() and result.has("read_us"):
+		budget.observations["relief_read_us"] = result.read_us
+		budget.observations["relief_decode_us"] = result.decode_us
 	errors.append_array(result.errors as Array[String])
 	if result.has("assets"):
 		_assets.merge(result.assets as Dictionary)
@@ -673,18 +774,50 @@ func poll() -> bool:
 	if not result.errors.is_empty():
 		_start_decode()
 		return false
-	if _level not in _wanted:
-		_attempted.erase(_level)
-		# A cancelled image produces no appearance invalidation. Drain the
-		# current bounded demand here; otherwise the last stale result leaves
-		# wanted images idle until another mouse/geometry event happens.
-		_start_decode()
-		return false
 	if not result.has("image"):
 		_start_decode()
 		return true # Catalogue changes demand, not pixels.
-	var texture := ImageTexture.create_from_image(result.image as Image)
-	textures[_level] = texture
+	_ready_image = result.image as Image
+	_ready_base_ba = result.get("base_ba") as Image
+	_ready_storage = str(result.get("storage","legacy"))
+	return _upload_ready(budget)
+
+func _upload_ready(budget: FrameBudget) -> bool:
+	var bytes := _ready_image.get_data_size()+(_ready_base_ba.get_data_size() if _ready_base_ba!=null else 0)
+	if bytes > FrameBudget.UPLOAD_BYTES or resident_bytes()+bytes > RESIDENT_BYTES:
+		# Drop obsolete refinements as a group. The world texture still covers
+		# every pixel until a complete replacement can be published.
+		var changed := false
+		for level: String in textures.keys():
+			if level=="world" or level in _wanted: continue
+			_surface_active.erase(level)
+			_drop_texture(level)
+			changed = true
+		if bytes > FrameBudget.UPLOAD_BYTES or resident_bytes()+bytes > RESIDENT_BYTES:
+			_ready_image = null
+			_ready_base_ba = null
+			_staged_base_rg = null
+			_start_decode()
+			return changed
+		if changed: return true
+	var upload := _ready_image if _staged_base_rg==null else _ready_base_ba
+	if budget!=null and (budget.operations>0 or not budget.claim_upload(upload.get_data_size())): return false
+	var started := Time.get_ticks_usec()
+	var texture := ImageTexture.create_from_image(upload)
+	if budget!=null:
+		budget.observe("texture_api_us",started)
+		budget.finish_upload(started,"relief page "+_level)
+	if _ready_base_ba!=null and _staged_base_rg==null:
+		_staged_base_rg = texture
+		return false
+	if _staged_base_rg!=null:
+		_base_ba[_level] = texture
+	textures[_level] = texture if _staged_base_rg==null else _staged_base_rg
+	_texture_bytes[_level] = bytes
+	_texture_storage[_level] = _ready_storage
+	_ready_image = null
+	_ready_base_ba = null
+	_staged_base_rg = null
 	_refresh_surface_active()
 	_retire_textures()
 	if _level==_desired_window: _window = _level
@@ -694,16 +827,23 @@ func poll() -> bool:
 	# previous texture only after the replacement is actually available.
 	for level: String in textures.keys():
 		if level.begins_with("native_") and level!=_window and level!=_desired_window:
-			textures.erase(level)
-			_attempted.erase(level)
+			_drop_texture(level)
 	_start_decode()
 	return true
 
 func dispose() -> void:
-	if _thread != null:
-		_thread.wait_to_finish()
-		_thread = null
+	_decode_mutex.lock()
+	_generation += 1
+	_decode_mutex.unlock()
+	MapJobs.abandon(_thread)
+	_thread = null
 	textures.clear()
+	_base_ba.clear()
+	_texture_bytes.clear()
+	_texture_storage.clear()
+	_ready_image = null
+	_ready_base_ba = null
+	_staged_base_rg = null
 	_assets.clear()
 	_surface_grid.clear()
 	_surface_foundations.clear()

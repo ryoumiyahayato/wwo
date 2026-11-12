@@ -1,0 +1,7 @@
+{
+  "format": "wwo-compact-map-base-v1",
+  "sources": {
+    "res://assets/maps/relief/canonical_r56_france_r42_46_+6.bin": "alps.wcm",
+    "res://assets/terrain/region_slice/ridgevale/assets/height_4m.f32": "ridgevale-height.wcm"
+  }
+}
