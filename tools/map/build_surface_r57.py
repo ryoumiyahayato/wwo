@@ -165,27 +165,47 @@ def choices(kind,x,y):
                     out.append((abs(src.transform.e),p,list(src.bounds),src.width,src.height))
     return sorted(out,key=lambda v:v[0])
 
-def field(bounds,size,fine=True,read_cover=True,inputs=None):
+def sample_facts(bounds,size,fine=True,read_cover=True,inputs=None,*,parent_grid=None):
+    """Sample source facts. parent_grid is (bounds, size, window offset in pixels)."""
     w,s,e,n=bounds;nx,ny=size
+    transform=from_bounds(*bounds,nx,ny)
+    if parent_grid is not None:
+        if inputs is not None:
+            raise ValueError('Parent-grid window requires catalogue source cells')
+        parent_bounds,(pw,ph),(crop_x,crop_y)=parent_grid
+        parent_transform=from_bounds(*parent_bounds,pw,ph)
+        if (crop_x<0 or crop_y<0 or crop_x+nx>pw or crop_y+ny>ph or
+            not (parent_transform*rasterio.Affine.translation(crop_x,crop_y)).almost_equals(transform,precision=1e-10)):
+            raise ValueError('Fact window is not aligned to its parent grid')
+
+    def warp(source,output,src,method):
+        target=output if parent_grid is None else np.full((ph,pw),np.nan,dtype=output.dtype)
+        reproject(source,target,src_transform=src.transform,src_crs=src.crs,
+                  dst_transform=transform if parent_grid is None else parent_transform,
+                  dst_crs='EPSG:4326',dst_nodata=np.nan,resampling=method)
+        if parent_grid is not None: output[:]=target[crop_y:crop_y+ny,crop_x:crop_x+nx]
+
+    def read_height(path):
+        if parent_grid is None: return sib.sample(path,bounds,size)
+        with rasterio.open(path) as src:
+            output=np.full((ny,nx),np.nan,dtype='float32')
+            warp(rasterio.band(src,1),output,src,Resampling.bilinear)
+            return output
+
     if inputs is not None:
         inputs.validate(bounds,size,read_cover)
         h,dem=inputs.height(bounds,size,fine)
-    else:h=sib.sample(sib.ETOPO,bounds,size);dem=[]
+    else:h=read_height(sib.ETOPO);dem=[]
     cover=[]
-    xx,yy=np.meshgrid(w+(np.arange(nx)+.5)*(e-w)/nx,n-(np.arange(ny)+.5)*(n-s)/ny)
     # DEM source spacing is retained by actual geocell. No global GLO fetch.
     for y in ([] if inputs is not None else range(math.floor(s),math.ceil(n))):
         for x in range(math.floor(w),math.ceil(e)):
             cc=choices('dem',x,y) if fine else []
             if not cc:continue
             step,p,b,sw,sh=cc[0]
-            data=sib.sample(p,bounds,size);valid=np.isfinite(data);h[valid]=data[valid]
+            data=read_height(p);valid=np.isfinite(data);h[valid]=data[valid]
             dem.append(dict(path=str(p.relative_to(ROOT)),bounds=b,spacing_m_ns=step*111195))
     if not np.isfinite(h).all():raise ValueError('DEM has missing output support; no BIN may be written')
-    lat=n-(np.arange(ny)+.5)*(n-s)/ny
-    sm=gaussian_filter(h,.65);gy,gx=np.gradient(sm)
-    gx/=111195*(e-w)/nx*np.cos(np.deg2rad(lat))[:,None];gy/=-111195*(n-s)/ny
-    shade=np.clip(1+(((.45*(1.5*gx-1.5*gy+.70710678)+.55*(-1.5*gx-1.5*gy+.70710678))/np.sqrt(1+9*(gx*gx+gy*gy)))-.70710678)*1.7,.48,1.32)
     observed=np.broadcast_to(sib.PALETTE[0],(ny,nx,3)).copy()
     if inputs is not None and read_cover:observed,cover=inputs.colour(bounds,size)
     for y in (range(math.floor(s/3)*3,math.ceil(n/3)*3,3) if read_cover and inputs is None else []):
@@ -202,14 +222,30 @@ def field(bounds,size,fine=True,read_cover=True,inputs=None):
                 palette=sib.PALETTE[classes]
                 rgb=np.full((ny,nx,3),np.nan,dtype='float32')
                 for i in range(3):
-                    reproject(palette[:,:,i],rgb[:,:,i],src_transform=src.transform,src_crs=src.crs,dst_transform=from_bounds(*bounds,nx,ny),dst_crs='EPSG:4326',dst_nodata=np.nan,resampling=Resampling.average)
+                    warp(palette[:,:,i],rgb[:,:,i],src,Resampling.average)
                 valid=np.isfinite(rgb[:,:,0]);observed[valid]=rgb[valid]
                 cover.append(dict(path=str(p.relative_to(ROOT)),bounds=b,shape=[sw,sh],spacing_m_ns=step*111195,method='class10-only presence; other classes unknown' if tree_only else 'categorical palette first, area resampling of colours'))
+    return h,observed,dem,cover
+
+
+def material_from_facts(bounds,h,observed):
+    """Derive the published RGBA material without retaining a shade raster."""
+    w,s,e,n=bounds;ny,nx=h.shape
+    lat=n-(np.arange(ny)+.5)*(n-s)/ny
+    sm=gaussian_filter(h,.65);gy,gx=np.gradient(sm)
+    gx/=111195*(e-w)/nx*np.cos(np.deg2rad(lat))[:,None];gy/=-111195*(n-s)/ny
+    shade=np.clip(1+(((.45*(1.5*gx-1.5*gy+.70710678)+.55*(-1.5*gx-1.5*gy+.70710678))/np.sqrt(1+9*(gx*gx+gy*gy)))-.70710678)*1.7,.48,1.32)
     level=np.log1p(np.maximum(h,0)/200)/np.log(26);upland=prev.common.smooth(.2,.95,level)
     rgb=(observed*(1-upland[:,:,None]*.4)+np.array([.70,.68,.62])*upland[:,:,None]*.4)*shade[:,:,None]
     # Height and metric slope determine this independent achromatic print.
     neutral=(.57*(1-upland)+.69*upland)*shade
-    return np.concatenate([np.clip(rgb,0,1),np.clip(neutral[:,:,None],.1,1)],axis=-1),h,shade,dem,cover
+    return np.concatenate([np.clip(rgb,0,1),np.clip(neutral[:,:,None],.1,1)],axis=-1),shade
+
+
+def field(bounds,size,fine=True,read_cover=True,inputs=None):
+    h,observed,dem,cover=sample_facts(bounds,size,fine,read_cover,inputs)
+    pixels,shade=material_from_facts(bounds,h,observed)
+    return pixels,h,shade,dem,cover
 
 def write(name,p,bounds,out=None):
     if not np.isfinite(p).all() or p.ndim!=3 or p.shape[2]!=4:raise ValueError('Invalid material before BIN write')
