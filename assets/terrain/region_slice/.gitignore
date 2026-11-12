@@ -1,0 +1,5 @@
+# Versioned binary payload lives in the existing WWO draft resource archive.
+# Install using tools/map/install_region_slice.py; retain metadata/import settings.
+*.f32
+*.png
+*.glb

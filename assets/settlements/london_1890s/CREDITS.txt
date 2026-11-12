@@ -1,0 +1,44 @@
+London historical miniature presentation
+
+BUILDING FOOTPRINTS
+A Layer of Late Victorian London: The Building Footprints from the 1:1,056
+Ordnance Survey Map (1891-1896), corrected version corr_v1.
+Remi Petitpierre, Isabella di Lenardo, Polly Hudson, Hendrik Herold,
+Katherine McDonough, Beatrice Vaienti, Robert Hecht and Christopher Fleet.
+https://zenodo.org/records/21282700
+https://doi.org/10.5334/johd.602
+Creative Commons Attribution 4.0 International:
+https://creativecommons.org/licenses/by/4.0/
+
+Changes: read EPSG:3857, convert to a local geographic map chart; discard very
+small fragments; raster generalisation and bounded closing; preserve source
+voids, polygon holes and selected spatial corridors; triangulate and partition
+into 3 km tiles. Runtime meshes are display derivatives, not source buildings.
+Actual corrected layer read: 1,299,040 features. The source description also
+contains an older total of 1,299,029. Survey 1891-1895, publication 1893-1896.
+The source reports six missing sheets and extraction/sheet-edge limitations.
+No building use, historical height, ownership or road capacity is inferred.
+The 8 m block height and map colours are presentation assumptions.
+
+HISTORICAL MAP REFERENCE / SELECTED PRIMARY STRUCTURE
+Ordnance Survey London town plans, National Library of Scotland.
+https://maps.nls.uk/os/townplans-england/london-1056-1890s.html
+https://maps.nls.uk/view/101202420
+CC-BY (NLS). Selected corridors, bridges and open spaces are cartographically
+generalised reference inputs. Their display widths are not surveyed property
+boundaries. Other gaps in the building layer are not automatically roads.
+
+MODERN WATER
+Copyright OpenStreetMap contributors, Open Database Licence 1.0.
+https://www.openstreetmap.org/copyright
+https://opendatacommons.org/licenses/odbl/1-0/
+Selected Thames water polygons, park lakes and surviving dock basins from the
+OSM API, acquired 2026-10-30. Individual object IDs, versions and timestamps
+are retained in index.json. Modern water is not an 1890s bank survey.
+Changes: union only supplied neighbouring polygons; preserve islands and
+holes; simplify at 1.5 m; triangulate; add map-colour inset and a 3 m bank band.
+Colour variation is not measured water depth. Historic infilled dock basins
+are not reconstructed. Small tributaries and all minor lakes are incomplete.
+
+The raw corrected GeoPackage and GIS preparation inputs are not shipped.
+The miniature creates no economic, demographic, land or transport authority.

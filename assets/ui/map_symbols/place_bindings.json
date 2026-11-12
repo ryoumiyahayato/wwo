@@ -2,6 +2,52 @@
   "schema_id": "wwo_map_symbol_bindings_r47",
   "valid_from": "1900-01-01",
   "valid_to": "1901-01-01",
+  "reference_places": [
+    {
+      "id": "map_reference:barbizon",
+      "kind": "settlement",
+      "spatial_kind": "historical settlement",
+      "map_symbol": "village",
+      "name_zh": "巴比松",
+      "name_en": "Barbizon",
+      "lon_lat": [2.607752, 48.445751],
+      "max_mpp": 400,
+      "source_name_zh": "巴比松市镇历史",
+      "source_reference": "https://www.barbizon.fr/histoire/",
+      "coordinate_source_reference": "https://data.geopf.fr/geocodage/",
+      "note_zh": "1900年为沙伊昂比耶尔所属聚落，1903年独立设镇。锚点为现址参考。"
+    },
+    {
+      "id": "map_reference:ganne_inn",
+      "kind": "landmark",
+      "spatial_kind": "historic_site",
+      "display_kind": "landmark_reference",
+      "map_symbol": "historic_site",
+      "name_zh": "加讷旅馆",
+      "name_en": "Ganne Inn",
+      "lon_lat": [2.602464, 48.446181],
+      "max_mpp": 16,
+      "source_name_zh": "法国文化部 Mérimée",
+      "source_reference": "https://pop.culture.gouv.fr/notice/merimee/PA00086807",
+      "coordinate_source_reference": "https://data.geopf.fr/geocodage/",
+      "note_zh": "大街92号，19世纪巴比松画派的聚会地。锚点为现址参考。"
+    },
+    {
+      "id": "map_reference:fontainebleau_palace",
+      "kind": "landmark",
+      "spatial_kind": "historic_site",
+      "display_kind": "landmark_reference",
+      "map_symbol": "castle",
+      "name_zh": "枫丹白露宫",
+      "name_en": "Palace of Fontainebleau",
+      "lon_lat": [2.700856, 48.401680],
+      "max_mpp": 210,
+      "source_name_zh": "枫丹白露宫官方历史",
+      "source_reference": "https://www.chateaudefontainebleau.fr/le-chateau-et-les-jardins-de-fontainebleau/histoire-chateau-fontainebleau/chateau-fontainebleau-moyen-age/",
+      "coordinate_source_reference": "https://data.geopf.fr/geocodage/",
+      "note_zh": "历史宫殿。符号使用现址锚点，形态随底图楼廓显示。"
+    }
+  ],
   "capital_links": [
     {
       "place_id": "place:washington",

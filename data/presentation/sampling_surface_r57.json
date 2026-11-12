@@ -1192,6 +1192,54 @@
           "method": "Real225/3degree WorldCover palette-before-area colours across missing-source18N edge down to existing10N overview edge; same ETOPO metric shade. Preserve original Mip0 outside local support and independent A in Mip0. Rebuild all area Mips.",
           "historical_applicability": "Modern natural-reference display only"
         }
+      },
+      {
+        "source_id": "terrain_overview_grid_r65",
+        "title": "Finite European overview RGB repair from existing R57 cores",
+        "publisher": "WWO derived display / admitted R57 upstream sources",
+        "version": "R65",
+        "license": "CC0-1.0+CC-BY-4.0",
+        "locator": "res://data/presentation/sampling_surface_r57.json",
+        "access_metadata": {
+          "inputs": [
+            "physical_relief:euro_afro_russia_r57_continuity_base",
+            "physical_relief:repair_r57_mid8_r56_32_-16",
+            "physical_relief:repair_r57_mid8_r56_32_-8",
+            "physical_relief:repair_r57_mid8_r56_32_+0",
+            "physical_relief:repair_r57_mid8_r56_32_+8",
+            "physical_relief:repair_r57_mid8_r56_32_+16",
+            "physical_relief:repair_r57_mid8_r56_32_+24",
+            "physical_relief:repair_r57_mid8_r56_40_-16",
+            "physical_relief:repair_r57_mid8_r56_40_-8",
+            "physical_relief:repair_r57_mid8_r56_40_+0",
+            "physical_relief:repair_r57_mid8_r56_40_+8",
+            "physical_relief:repair_r57_mid8_r56_40_+16",
+            "physical_relief:repair_r57_mid8_r56_40_+24",
+            "physical_relief:repair_r57_mid8_r56_48_-16",
+            "physical_relief:repair_r57_mid8_r56_48_-8",
+            "physical_relief:repair_r57_mid8_r56_48_+0",
+            "physical_relief:repair_r57_mid8_r56_48_+8",
+            "physical_relief:repair_r57_mid8_r56_48_+16",
+            "physical_relief:repair_r57_mid8_r56_48_+24",
+            "physical_relief:repair_r57_mid8_r56_56_-16",
+            "physical_relief:repair_r57_mid8_r56_56_-8",
+            "physical_relief:repair_r57_mid8_r56_56_+0",
+            "physical_relief:repair_r57_mid8_r56_56_+8",
+            "physical_relief:repair_r57_mid8_r56_56_+16",
+            "physical_relief:repair_r57_mid8_r56_56_+24"
+          ],
+          "new_acquisition": false,
+          "method": {
+            "bounds": [
+              -16,
+              32,
+              32,
+              64
+            ],
+            "method": "Area-reduced admitted R57 eight-degree core RGB; preserve original DEM alpha in every mip and unmodified RGB outside support.",
+            "historical_applicability": "Modern physical reference, not 1900 land use or historical water boundaries"
+          }
+        }
       }
     ]
   },
@@ -15631,12 +15679,16 @@
                 "physical_relief:france_r42_40_-6"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_40_-6",
+                  "physical_relief:france_r42_40_-6"
+                ]
               }
             },
             {
@@ -15677,12 +15729,16 @@
                 "physical_relief:france_r42_42_-6"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_42_-6",
+                  "physical_relief:france_r42_42_-6"
+                ]
               }
             },
             {
@@ -15723,12 +15779,16 @@
                 "physical_relief:british_r43_48_-6"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:france_r42_48_-6",
+                  "physical_relief:british_r43_48_-6"
+                ]
               }
             },
             {
@@ -15769,12 +15829,16 @@
                 "physical_relief:british_r43_50_-6"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:france_r42_50_-6",
+                  "physical_relief:british_r43_50_-6"
+                ]
               }
             },
             {
@@ -15815,12 +15879,16 @@
                 "physical_relief:france_r42_40_-4"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_40_-4",
+                  "physical_relief:france_r42_40_-4"
+                ]
               }
             },
             {
@@ -15861,12 +15929,16 @@
                 "physical_relief:france_r42_42_-4"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_42_-4",
+                  "physical_relief:france_r42_42_-4"
+                ]
               }
             },
             {
@@ -15907,12 +15979,16 @@
                 "physical_relief:british_r43_48_-4"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:france_r42_48_-4",
+                  "physical_relief:british_r43_48_-4"
+                ]
               }
             },
             {
@@ -15953,12 +16029,16 @@
                 "physical_relief:british_r43_50_-4"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:france_r42_50_-4",
+                  "physical_relief:british_r43_50_-4"
+                ]
               }
             },
             {
@@ -15999,12 +16079,16 @@
                 "physical_relief:france_r42_40_-2"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_40_-2",
+                  "physical_relief:france_r42_40_-2"
+                ]
               }
             },
             {
@@ -16045,12 +16129,16 @@
                 "physical_relief:france_r42_42_-2"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_42_-2",
+                  "physical_relief:france_r42_42_-2"
+                ]
               }
             },
             {
@@ -16091,12 +16179,16 @@
                 "physical_relief:british_r43_50_-2"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:france_r42_50_-2",
+                  "physical_relief:british_r43_50_-2"
+                ]
               }
             },
             {
@@ -16137,12 +16229,16 @@
                 "physical_relief:france_r42_40_+0"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_40_+0",
+                  "physical_relief:france_r42_40_+0"
+                ]
               }
             },
             {
@@ -16183,12 +16279,16 @@
                 "physical_relief:france_r42_42_+0"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_42_+0",
+                  "physical_relief:france_r42_42_+0"
+                ]
               }
             },
             {
@@ -16229,12 +16329,16 @@
                 "physical_relief:british_r43_50_+0"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:france_r42_50_+0",
+                  "physical_relief:british_r43_50_+0"
+                ]
               }
             },
             {
@@ -16275,12 +16379,16 @@
                 "physical_relief:france_r42_40_+2"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_40_+2",
+                  "physical_relief:france_r42_40_+2"
+                ]
               }
             },
             {
@@ -16321,12 +16429,16 @@
                 "physical_relief:france_r42_42_+2"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_42_+2",
+                  "physical_relief:france_r42_42_+2"
+                ]
               }
             },
             {
@@ -16367,12 +16479,16 @@
                 "physical_relief:benelux_r46_48_+2"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:france_r42_48_+2",
+                  "physical_relief:benelux_r46_48_+2"
+                ]
               }
             },
             {
@@ -16413,12 +16529,16 @@
                 "physical_relief:benelux_r46_50_+2"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:france_r42_50_+2",
+                  "physical_relief:benelux_r46_50_+2"
+                ]
               }
             },
             {
@@ -16459,12 +16579,16 @@
                 "physical_relief:france_r42_40_+4"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:spain_r45_40_+4",
+                  "physical_relief:france_r42_40_+4"
+                ]
               }
             },
             {
@@ -16505,12 +16629,16 @@
                 "physical_relief:benelux_r46_48_+4"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:france_r42_48_+4",
+                  "physical_relief:benelux_r46_48_+4"
+                ]
               }
             },
             {
@@ -16551,12 +16679,16 @@
                 "physical_relief:france_r42_50_+4"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:german_r44_50_+4",
+                  "physical_relief:france_r42_50_+4"
+                ]
               }
             },
             {
@@ -16597,12 +16729,16 @@
                 "physical_relief:benelux_r46_48_+6"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:france_r42_48_+6",
+                  "physical_relief:benelux_r46_48_+6"
+                ]
               }
             },
             {
@@ -16643,12 +16779,16 @@
                 "physical_relief:france_r42_50_+6"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:german_r44_50_+6",
+                  "physical_relief:france_r42_50_+6"
+                ]
               }
             },
             {
@@ -16689,12 +16829,16 @@
                 "physical_relief:france_r42_46_+8"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:german_r44_46_+8",
+                  "physical_relief:france_r42_46_+8"
+                ]
               }
             },
             {
@@ -16735,12 +16879,16 @@
                 "physical_relief:france_r42_48_+8"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:german_r44_48_+8",
+                  "physical_relief:france_r42_48_+8"
+                ]
               }
             },
             {
@@ -16781,12 +16929,16 @@
                 "physical_relief:france_r42_50_+8"
               ],
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:german_r44_50_+8",
+                  "physical_relief:france_r42_50_+8"
+                ]
               }
             }
           ]
@@ -73086,12 +73238,15 @@
               "source_asset": "physical_relief:shared_r48_40_-6",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_40_-6"
+                ]
               }
             },
             {
@@ -73134,12 +73289,15 @@
               "source_asset": "physical_relief:shared_r48_42_-6",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_42_-6"
+                ]
               }
             },
             {
@@ -73182,12 +73340,15 @@
               "source_asset": "physical_relief:shared_r48_48_-6",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_48_-6"
+                ]
               }
             },
             {
@@ -73230,12 +73391,15 @@
               "source_asset": "physical_relief:shared_r48_50_-6",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_50_-6"
+                ]
               }
             },
             {
@@ -73278,12 +73442,15 @@
               "source_asset": "physical_relief:shared_r48_40_-4",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_40_-4"
+                ]
               }
             },
             {
@@ -73326,12 +73493,15 @@
               "source_asset": "physical_relief:shared_r48_42_-4",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_42_-4"
+                ]
               }
             },
             {
@@ -73374,12 +73544,15 @@
               "source_asset": "physical_relief:shared_r48_48_-4",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_48_-4"
+                ]
               }
             },
             {
@@ -73422,12 +73595,15 @@
               "source_asset": "physical_relief:shared_r48_50_-4",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_50_-4"
+                ]
               }
             },
             {
@@ -73470,12 +73646,15 @@
               "source_asset": "physical_relief:shared_r48_40_-2",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_40_-2"
+                ]
               }
             },
             {
@@ -73518,12 +73697,15 @@
               "source_asset": "physical_relief:shared_r48_42_-2",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_42_-2"
+                ]
               }
             },
             {
@@ -73566,12 +73748,15 @@
               "source_asset": "physical_relief:shared_r48_50_-2",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_50_-2"
+                ]
               }
             },
             {
@@ -73614,12 +73799,15 @@
               "source_asset": "physical_relief:shared_r48_40_+0",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_40_+0"
+                ]
               }
             },
             {
@@ -73662,12 +73850,15 @@
               "source_asset": "physical_relief:shared_r48_42_+0",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_42_+0"
+                ]
               }
             },
             {
@@ -73710,12 +73901,15 @@
               "source_asset": "physical_relief:shared_r48_50_+0",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_50_+0"
+                ]
               }
             },
             {
@@ -73758,12 +73952,15 @@
               "source_asset": "physical_relief:shared_r48_40_+2",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_40_+2"
+                ]
               }
             },
             {
@@ -73806,12 +74003,15 @@
               "source_asset": "physical_relief:shared_r48_42_+2",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_42_+2"
+                ]
               }
             },
             {
@@ -73854,12 +74054,15 @@
               "source_asset": "physical_relief:shared_r48_48_+2",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_48_+2"
+                ]
               }
             },
             {
@@ -73902,12 +74105,15 @@
               "source_asset": "physical_relief:shared_r48_50_+2",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_50_+2"
+                ]
               }
             },
             {
@@ -73950,12 +74156,15 @@
               "source_asset": "physical_relief:shared_r48_40_+4",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_40_+4"
+                ]
               }
             },
             {
@@ -73998,12 +74207,15 @@
               "source_asset": "physical_relief:shared_r48_48_+4",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_48_+4"
+                ]
               }
             },
             {
@@ -74046,12 +74258,15 @@
               "source_asset": "physical_relief:shared_r48_50_+4",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_50_+4"
+                ]
               }
             },
             {
@@ -74094,12 +74309,15 @@
               "source_asset": "physical_relief:shared_r48_48_+6",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_48_+6"
+                ]
               }
             },
             {
@@ -74142,12 +74360,15 @@
               "source_asset": "physical_relief:shared_r48_50_+6",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_50_+6"
+                ]
               }
             },
             {
@@ -74190,12 +74411,15 @@
               "source_asset": "physical_relief:shared_r48_48_+8",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_48_+8"
+                ]
               }
             },
             {
@@ -74238,12 +74462,15 @@
               "source_asset": "physical_relief:shared_r48_50_+8",
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_50_+8"
+                ]
               }
             },
             {
@@ -137377,12 +137604,15 @@
               ],
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_48_+2"
+                ]
               },
               "surface_replaces": [
                 "canonical_r56_shared_r48_48_+2"
@@ -137432,12 +137662,15 @@
               ],
               "surface_lod_degrees": 2,
               "precision": {
-                "dem_extract_m_ns": 0,
+                "dem_extract_m_ns": 185.325,
                 "dem_fallback_m_ns": 1853.25,
                 "cover_m_ns_max": 0,
                 "output_m_ns": 217.177734375,
                 "neutral_channel": false,
-                "source_note": "Known producer DEM spacing; original per-cell cover precision not retained in this legacy record. Query original research extraction, not output dimensions."
+                "source_note": "DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.",
+                "dem_precision_sources": [
+                  "physical_relief:shared_r48_48_+4"
+                ]
               },
               "surface_replaces": [
                 "canonical_r56_shared_r48_48_+4"
@@ -258066,6 +258299,140 @@
         "license": "CC0-1.0+CC-BY-4.0",
         "review_status": "EVIDENCE_LINKED",
         "generator": "tools/map/build_surface_r57.py"
+      },
+      {
+        "fact_id": "physical_relief:overview_grid_r65",
+        "domain": "physical_reference_content",
+        "subject_id": "physical_relief:europe_overview_rgb",
+        "value": {
+          "status": "PHYSICAL_REFERENCE",
+          "assets": [
+            {
+              "id": "physical_relief:euro_afro_russia_r65_gridfree_base",
+              "path": "res://assets/maps/relief/euro_afro_russia_r65_gridfree_base.bin",
+              "format": "RGBA8_MIP_DEFLATE",
+              "width": 3120,
+              "height": 2280,
+              "decoded_bytes": 37938168,
+              "bytes": 12620698,
+              "bounds_lon_lat": [
+                -28,
+                10,
+                76,
+                86
+              ],
+              "surface_role": "base",
+              "core_inset_degrees": 0,
+              "display_spacing_degrees": [
+                0.03333333333333333,
+                0.03333333333333333
+              ],
+              "surface_encoding": 6,
+              "surface_support_fraction": 1.0,
+              "channels": "RGB observed WC2021 + fixed DEM hillshade; A independent neutral DEM print luminance, NOT geographic or WC alpha. Linear per-channel area Mips.",
+              "surface_group": "sampling_r57",
+              "surface_feather_degrees": [
+                0,
+                0,
+                4,
+                0
+              ],
+              "precision": {
+                "dem_native_m_ns": 1853.25,
+                "dem_extract_m_ns": 1853.25,
+                "dem_fallback_m_ns": 1853.25,
+                "dem_cells": [],
+                "cover_cells": [],
+                "cover_m_ns_max": 1483.0,
+                "cover_m_ns_min": 148.0,
+                "cover_epoch": "2021 v200 modern reference",
+                "cover_method": "Existing R57 observed European core RGB reduced to the original overview grid inside declared correction; original source bounds elsewhere.",
+                "output_m_ns": 3706.5,
+                "neutral_channel": true,
+                "horizontal_crs": "EPSG:4326",
+                "vertical_datum": "EGM2008 orthometric metres",
+                "dem_type": "DSM where cached GLO90; ETOPO surface elsewhere"
+              },
+              "surface_replaces": [
+                "euro_afro_russia_r57_continuity_base"
+              ],
+              "source_assets": [
+                "physical_relief:euro_afro_russia_r57_continuity_base",
+                "physical_relief:repair_r57_mid8_r56_32_-16",
+                "physical_relief:repair_r57_mid8_r56_32_-8",
+                "physical_relief:repair_r57_mid8_r56_32_+0",
+                "physical_relief:repair_r57_mid8_r56_32_+8",
+                "physical_relief:repair_r57_mid8_r56_32_+16",
+                "physical_relief:repair_r57_mid8_r56_32_+24",
+                "physical_relief:repair_r57_mid8_r56_40_-16",
+                "physical_relief:repair_r57_mid8_r56_40_-8",
+                "physical_relief:repair_r57_mid8_r56_40_+0",
+                "physical_relief:repair_r57_mid8_r56_40_+8",
+                "physical_relief:repair_r57_mid8_r56_40_+16",
+                "physical_relief:repair_r57_mid8_r56_40_+24",
+                "physical_relief:repair_r57_mid8_r56_48_-16",
+                "physical_relief:repair_r57_mid8_r56_48_-8",
+                "physical_relief:repair_r57_mid8_r56_48_+0",
+                "physical_relief:repair_r57_mid8_r56_48_+8",
+                "physical_relief:repair_r57_mid8_r56_48_+16",
+                "physical_relief:repair_r57_mid8_r56_48_+24",
+                "physical_relief:repair_r57_mid8_r56_56_-16",
+                "physical_relief:repair_r57_mid8_r56_56_-8",
+                "physical_relief:repair_r57_mid8_r56_56_+0",
+                "physical_relief:repair_r57_mid8_r56_56_+8",
+                "physical_relief:repair_r57_mid8_r56_56_+16",
+                "physical_relief:repair_r57_mid8_r56_56_+24"
+              ],
+              "dem_source": "Retained R57 ETOPO overview; real native60s ETOPO only inside declared local correction",
+              "cover_source": "Retained material elsewhere; WorldCover2021-v200 nearest225/3degree in declared10-21N20W-40E correction",
+              "local_correction": {
+                "bounds": [
+                  -20,
+                  10,
+                  40,
+                  21
+                ],
+                "source_record": "local-artifacts/terrain-r57/continuity-repair-2026-10-21/africa_target.json",
+                "method": "Real225/3degree WorldCover palette-before-area colours across missing-source18N edge down to existing10N overview edge; same ETOPO metric shade. Preserve original Mip0 outside local support and independent A in Mip0. Rebuild all area Mips."
+              },
+              "grid_correction": {
+                "bounds": [
+                  -16,
+                  32,
+                  32,
+                  64
+                ],
+                "method": "Area-reduced admitted R57 eight-degree core RGB; preserve original DEM alpha in every mip and unmodified RGB outside support.",
+                "historical_applicability": "Modern physical reference, not 1900 land use or historical water boundaries"
+              }
+            }
+          ]
+        },
+        "unit": "presentation_relief",
+        "source_id": "terrain_overview_grid_r65",
+        "source_version": "R65",
+        "source_locator": "res://data/presentation/sampling_surface_r57.json",
+        "observation_period": {
+          "from": "2021-01-01",
+          "to": "2022-12-31"
+        },
+        "spatial_scope": {
+          "kind": "geographic_reference",
+          "id": "europe_overview_rgb_correction",
+          "bounds_lon_lat": [
+            -16,
+            32,
+            32,
+            64
+          ]
+        },
+        "methodology": "Area-reduced admitted R57 eight-degree core RGB; preserve original DEM alpha in every mip and unmodified RGB outside support.",
+        "confidence": 0.8,
+        "lower_bound": null,
+        "upper_bound": null,
+        "license": "CC0-1.0+CC-BY-4.0",
+        "review_status": "EVIDENCE_LINKED",
+        "generator": "tools/map/build_surface_r57.py --repair-overview-grid"
       }
     ]
   }
