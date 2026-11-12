@@ -1231,8 +1231,6 @@ func _open_terrain_observation(training_profile: String = "single_opponent") -> 
 	)
 	var observation := _terrain_observation
 	await get_tree().process_frame
-	while generation==_terrain_open_generation and _terrain_observation==observation and map_renderer.observation_retirement_step>0:
-		await get_tree().process_frame
 	if generation!=_terrain_open_generation or _terrain_observation!=observation: return
 	var scene_started := Time.get_ticks_usec() if started>0 else 0
 	add_child(observation)

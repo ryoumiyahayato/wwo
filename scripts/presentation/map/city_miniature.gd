@@ -124,7 +124,8 @@ func _request_mesh(path: String) -> void:
 	if _mesh_cache.has(path) or _pending_meshes.has(path): _mesh_age[path]=_age
 	if _budget_rejected.has(path): return
 	if not _mesh_cache.has(path) and not _pending_meshes.has(path):
-		if _pending_meshes.size()>=2 or int(load_slots.get("count",0))>=MAX_READS:
+		var frame := Engine.get_process_frames()
+		if _pending_meshes.size()>=2 or int(load_slots.get("count",0))>=MAX_READS or (frame_budget!=null and int(load_slots.get("frame",-1))==frame):
 			_waiting_for_slot=true
 			return
 		var file := FileAccess.open(path,FileAccess.READ)
@@ -135,11 +136,6 @@ func _request_mesh(path: String) -> void:
 		bytes=maxi(bytes,decoded_bytes)
 		if bytes>READ_BYTES: return
 		if int(load_slots.get("bytes",0))+bytes>READ_BYTES:
-			_waiting_for_slot=true
-			return
-		# ResourceLoader may create native resources on its worker. Issue only
-		# one new city request per renderer frame, including across profiles.
-		if frame_budget!=null and int(load_slots.get("frame",-1))==Engine.get_process_frames():
 			_waiting_for_slot=true
 			return
 		var error := OK
@@ -154,7 +150,7 @@ func _request_mesh(path: String) -> void:
 			_pending_meshes[path]=bytes
 			load_slots["count"] = int(load_slots.get("count",0))+1
 			load_slots["bytes"] = int(load_slots.get("bytes",0))+bytes
-			load_slots["frame"] = Engine.get_process_frames()
+			load_slots["frame"] = frame
 
 func _trim_meshes(reserve: int = 0) -> bool:
 	var total := 0
@@ -607,6 +603,13 @@ func _update_context(view: RefCounted, data: Dictionary, camera: RegionCamera, v
 					material.set_shader_parameter("coverage_mask",not roof_print)
 					material.set_shader_parameter("woodland_mask",bool(tile.get("woodland_mask",false)))
 					material.set_shader_parameter("building_mask",mesh.get_meta("building_print"))
+				if roof_print and not bool(tile.get("window_baked",false)):
+					var windows: Array[Vector4]=[]
+					for city: Dictionary in _presentation.get("building_print",{}).get("cities",[]):
+						if not city.id in tile.get("cities",[]): continue
+						var radius := float(city.radius_km)
+						windows.append(Vector4(city.anchor[0],city.anchor[1],radius,clampf(radius*.3,1.0,3.0)))
+					for index: int in range(3): material.set_shader_parameter("print_coverage%d"%index,windows[index] if index<windows.size() else Vector4.ZERO)
 				RenderingServer.canvas_item_set_material(item,material.get_rid())
 				RenderingServer.canvas_item_add_mesh(item,(_mesh_cache[path] as ArrayMesh).get_rid())
 				_context_items[path]={"item":item,"material":material,"tile":tile,"staged":changing};installed+=1
@@ -647,13 +650,6 @@ func _update_context(view: RefCounted, data: Dictionary, camera: RegionCamera, v
 			material.set_shader_parameter("strength",strength)
 		material.set_shader_parameter("detail_weights",detail_weights)
 		for index: int in range(3): material.set_shader_parameter("detail_bounds%d"%index,detail_boxes[index] if index<detail_boxes.size() else Vector4.ZERO)
-		if roof_print and not bool(tile.get("window_baked",false)):
-			var windows: Array[Vector4]=[]
-			for city: Dictionary in _presentation.get("building_print",{}).get("cities",[]):
-				if not city.id in tile.get("cities",[]): continue
-				var radius := float(city.radius_km)
-				windows.append(Vector4(city.anchor[0],city.anchor[1],radius,clampf(radius*.3,1.0,3.0)))
-			for index: int in range(3): material.set_shader_parameter("print_coverage%d"%index,windows[index] if index<windows.size() else Vector4.ZERO)
 		instances+=int(tile.get("source_features",{}).get("urban",0))
 	bounds=Rect2(Vector2.ZERO,viewport_size);render_bounds=Rect2()
 	_trim_meshes()

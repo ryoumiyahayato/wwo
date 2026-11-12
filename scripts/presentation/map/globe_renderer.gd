@@ -151,7 +151,6 @@ var preserve_on_reparent: bool = false
 var show_footer: bool = false
 var inspection_preview: bool = false
 var observation_suspended: bool = false
-var observation_retirement_step: int = 0
 const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
 var _map_budget := FrameBudget.new()
 
@@ -162,37 +161,25 @@ func suspend_for_observation(active: bool) -> void:
 	if controller != null: controller.suspend_motion()
 	visible = not active
 	if active:
-		observation_retirement_step = 1
+		relief.retain_world()
+		if not _world_layer.display_installed(): _world_layer.clear()
+		_region_layer.clear()
+		local_layer.clear()
+		if strategic_content!=null: strategic_content.release()
+		if local_content!=null: local_content.release()
+		region_view.release_landmarks(false,true)
+		_cancel_overlay_display()
 		strategic_layer = _world_layer
+		_bind_relief()
 		_transition_elapsed = -1.0
 		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		region_view.viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-		set_process(true)
+		set_process(_has_pending_preparation())
 	else:
-		observation_retirement_step = 0
 		_resource_demand_dirty = true
 		_view_dirty = true
 		set_process(true)
 		queue_redraw()
-
-func _retire_observation_map_step() -> void:
-	match observation_retirement_step:
-		1:
-			relief.retain_world()
-			_bind_relief()
-		2:
-			if not _world_layer.display_installed(): _world_layer.clear()
-			_region_layer.clear()
-			local_layer.clear()
-		3:
-			if strategic_content!=null: strategic_content.release()
-			if local_content!=null: local_content.release()
-		4:
-			region_view.release_landmarks(false,true)
-			_cancel_overlay_display()
-			observation_retirement_step = 0
-			return
-	observation_retirement_step += 1
 
 var screenshot: Node
 var controller: GlobeController
@@ -3120,9 +3107,6 @@ func _process(_delta: float) -> void:
 	if observation_profile: observation_costs={"frame":Engine.get_process_frames()}
 	_map_budget.reset(observation_costs if observation_profile else {})
 	for layer: LocalSpatialLayer in [_world_layer,_region_layer,local_layer]: layer.drain_retirement(_map_budget)
-	if observation_suspended and observation_retirement_step>0:
-		_retire_observation_map_step()
-		return
 	if not visible:
 		# Join cancelled workers and discard their results even while hidden.
 		# This processing stops as soon as the existing requests have drained.
