@@ -8,6 +8,7 @@ const REGION_ORIGIN: float = -22500.0
 const NATIVE_WIDTH: int = 1251
 const NATIVE_STEP: float = 4.0
 const NATIVE_ORIGIN: float = -2500.0
+const CompactMap = preload("res://scripts/content/compact_map_raster.gd")
 
 
 static func run_timed_job(task: Callable, context: Dictionary) -> Variant:
@@ -42,12 +43,16 @@ static func read_sources(base_path: String) -> Dictionary:
 	var region: Dictionary = _read_floats(base_path + "continuous/assets/height_50m.f32", REGION_WIDTH)
 	if not bool(region.get("ok", false)):
 		return region
-	var native: Dictionary = _read_floats(base_path + "ridgevale/assets/height_4m.f32", NATIVE_WIDTH)
+	var native_path := base_path + "ridgevale/assets/height_4m.f32"
+	var native := _decode_floats(CompactMap.read_height(native_path,NATIVE_WIDTH),NATIVE_WIDTH,native_path)
+	var compact_native := bool(native.ok)
+	if not compact_native: native = _read_floats(native_path,NATIVE_WIDTH)
 	return {
 		"ok": true,
 		"region": region["heights"],
 		"native": native.get("heights", PackedFloat32Array()),
 		"native_error": str(native.get("error", "")),
+		"compact_native": compact_native,
 		"training_only": true,
 	}
 
@@ -77,6 +82,10 @@ static func _read_floats(path: String, width: int) -> Dictionary:
 		return {"ok": false, "error": "高度源字节数不匹配：" + path}
 	var bytes: PackedByteArray = file.get_buffer(expected_bytes)
 	file.close()
+	return _decode_floats(bytes,width,path)
+
+
+static func _decode_floats(bytes: PackedByteArray, width: int, path: String) -> Dictionary:
 	var heights: PackedFloat32Array = bytes.to_float32_array()
 	if heights.size() != width * width:
 		return {"ok": false, "error": "高度源未完整读取：" + path}
