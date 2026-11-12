@@ -74,3 +74,19 @@ python tools/map/build_benelux_hydro_r46.py
 MapRelief一个线程、最多两份地理概览和四张细片；共享德国文件维持原运行键，不反复创建别名。目录和图像只在REGION地理需求内读取，4500至2500米/像素渐入，750至300细化。WORLD及国家选择不请求三国高精度纹理、历史原图或LOCAL内容。
 
 新增概览完整Mip为4,194,300字节；法国＋比荷卢概览及四张常规细片上限34,952,324字节，低于R44既有全库最大上限。不是显存、工作集或性能实测。离开需求后沿MapRelief、现有材质及R39区域批次解绑释放，没有无限地貌缓存或新RID池。没有新增全国LOCAL DEM、建筑、碰撞体或模型。
+
+## 2026-11-08 城镇与有限海岸补充
+
+后续城镇显示使用[OpenFreeMap](https://openfreemap.org/quick_start/)提供的[OpenMapTiles模式](https://openmaptiles.org/docs/schema/)及© OpenStreetMap contributors数据，ODbL-1.0；不改变上述R46高程、自然覆盖或须德海的来源。TileJSON为https://tiles.openfreemap.org/planet，固定实际取得快照20261101_080013_pt。离线缓存545个使用源片，累计36,796,703字节（预算计入缓存内其他已取得源片）；两路请求，上限3,000片/50,000,000字节。原始PBF和数值中间件位于项目外offline-map-sources/benelux_settlement_reference，不进入运行资源。
+
+z9 landuse/landcover用于三国建成区、工业和林地概化；排除neighbourhood、suburb、quarter等地点区划面。13个城市窗口的z13同类覆盖替换粗面，building轮廓栅格化为两档带Mip的R8覆盖率。名义LOD14并不增加z13源精度；它不是原始建筑数量或逐栋实体。源片坐标为Web Mercator瓦片，经源extent解码为经纬度，再沿原RegionProjection投影。没有屏幕偏移对齐。
+
+z12有限沿海完整片的water/ocean并集用于原物理海岸的闭合修正。只在差异不触及实际覆盖边缘时替换原陆地、海面及岸线，其他部分保留。现代常年river面用于城市及邻接河流显示；lake、reservoir、pond及间歇水面不作为河道补入。现代河口工程、潮位基准、1900港池和河道年代尚未核定，不据现代图形设定运输能力。原R46近1900须德海范围继续覆盖后来圩田；新城镇和河面从该范围扣除。
+
+城市选择见data/local/benelux_city_reference_selection.json：布鲁塞尔、安特卫普、根特、列日、沙勒罗瓦、布鲁日；阿姆斯特丹、鹿特丹、海牙、乌得勒支、格罗宁根、马斯特里赫特；卢森堡市。半径2.5—4.5km只表示有限显示窗口，不是1900市界或人口门槛。其他聚落按来源概化；未获得历史范围的地点不补人口。R46记录的欧本/马尔梅迪政治来源问题未在本次改动中处理。
+
+制作入口为tools/map/build_benelux_city_context.py，沿原save_city_meshes.gd生成原生资源；现有输出默认复用，--rebuild明确重制数值衍生。海岸沿原build_seine_coast_reference.py --area benelux，随后只编译受影响的物理分片。原件、许可证及恢复基线保留。
+
+来源选择与海岸裁切分离：三国参考轮廓外加0.08°邻带，并限于实际取得的完整z9片。这个范围允许近岸城区延续，不能用于主权、土地或岸线认定。真正的海陆由现有物理岸线决定；原1905须德海继续扣除。coverage.geometry供法国概化离线生产器移除与新源的重复显示，不新增运行时GIS。法国IGN在布鲁塞尔也含FXX建成区，已按这个范围接管，避免粗底色覆盖新楼廓。
+
+选择范围派生自既有cshapes_1900_snapshot.json，保留其CC BY-NC-SA 4.0来源声明；现代OSM地物保留ODbL-1.0。物理陆地继承原Natural Earth及已声明局部岸线，须德海仍是RWS CC0资料。不能把混合来源统一写成公共领域。
