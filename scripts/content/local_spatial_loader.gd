@@ -24,7 +24,8 @@ const SOURCES: Array[Dictionary] = [
 	{"path":"res://data/local/internal_preview_r41/hagia_sophia.json","anchor":Vector2(28.98,41.00833),"anchor_id":"landmark:hagia_sophia_reference","radius_km":8.0,"internal_preview":true,"display_name":"圣索菲亚主体","parent_country_id":"ottoman_empire"}]
 const PREWARM_KM_PER_PIXEL: float = 0.35
 var content: LocalSpatialContent
-var _thread: Thread
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+var _thread: MapJobs.Job
 var _request_mutex := Mutex.new()
 var _request_generation: int = 0
 var _wanted: bool = false
@@ -90,14 +91,14 @@ func request(lon_lat: Vector2 = ANCHOR) -> void:
 			_request_mutex.lock()
 			_request_generation += 1
 			_request_mutex.unlock()
+			MapJobs.cancel_queued(_thread)
 		return
 	if content!=null and str(content.metadata.get("content_path",""))==_wanted_path: return
 	_request_mutex.lock()
 	_request_generation += 1
 	_request_mutex.unlock()
-	_thread = Thread.new()
 	_loading_path = _wanted_path
-	_thread.start(_load.bind(_wanted_path,_request_current.bind(_request_generation),str(source.anchor_id)))
+	_thread = MapJobs.submit(_load.bind(_wanted_path,_request_current.bind(_request_generation),str(source.anchor_id)), "local map read",MapJobs.VISIBLE,self)
 
 func cancel_pending() -> void:
 	if not _wanted: return
@@ -106,6 +107,7 @@ func cancel_pending() -> void:
 	_request_mutex.lock()
 	_request_generation += 1
 	_request_mutex.unlock()
+	MapJobs.cancel_queued(_thread)
 
 func _request_current(generation: int) -> bool:
 	_request_mutex.lock()
@@ -117,11 +119,11 @@ func preparing() -> bool:
 	return _thread != null
 
 func poll() -> bool:
-	if _thread == null or _thread.is_alive():
+	if _thread == null or not _thread.completed:
 		return false
-	var result := _thread.wait_to_finish() as LocalSpatialContent
+	var result := _thread.take() as LocalSpatialContent
 	_thread = null
-	if result.cancelled or not _wanted or _loading_path!=_wanted_path:
+	if result==null or result.cancelled or not _wanted or _loading_path!=_wanted_path:
 		if _wanted: request(_wanted_anchor)
 		return false
 	content = result
@@ -129,9 +131,8 @@ func poll() -> bool:
 
 func dispose() -> void:
 	release()
-	if _thread != null:
-		_thread.wait_to_finish()
-		_thread = null
+	MapJobs.abandon(_thread)
+	_thread = null
 
 func release() -> void:
 	cancel_pending()
@@ -148,7 +149,13 @@ static func _load(path: String, current: Callable, expected_anchor: String = "")
 		result.metadata["content_path"] = path
 		result.errors.append("Local shard unavailable: "+path)
 		return result
+	if file.get_length()>16*1024*1024:
+		result.errors.append("Local shard exceeds the read budget: "+path)
+		return result
 	var text := file.get_as_text()
+	if not current.call():
+		result.cancelled = true
+		return result
 	var parser := JSON.new()
 	if parser.parse(text) != OK or not parser.data is Dictionary:
 		result.errors.append("Invalid Local shard JSON")

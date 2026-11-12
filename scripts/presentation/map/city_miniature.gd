@@ -1,6 +1,8 @@
 class_name CityMiniature
 extends RefCounted
 ## Presentation only: source-derived city meshes and isolated settlement diagrams.
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+const CityStorage = preload("res://scripts/presentation/map/city_surface_storage.gd")
 const GRADE_NAMES: Array[String] = ["未知", "村庄", "城镇", "中小城市", "中等城市", "中大型城市", "大型城市", "核心都市"]
 const COUNTS: Array[int] = [0, 6, 18, 40, 85, 150, 240, 380]
 static var _profiles: Dictionary = {}
@@ -11,7 +13,15 @@ const OVERVIEW_FULL_MPP: float = 160.0
 const OVERVIEW_END_MPP: float = 240.0
 const RASTER_DISTRICT_BUDGET_BYTES: int = 4*1024*1024
 const CONTEXT_PRINT_BUDGET_BYTES: int = 6*1024*1024
+const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
+const MAX_READS: int = 4
+const READ_BYTES: int = 12 * 1024 * 1024
 var cache_budget_bytes: int = -1
+var load_slots: Dictionary = {}
+var frame_budget: FrameBudget
+var _waiting_for_slot: bool = false
+var _budget_rejected: Dictionary = {}
+var _retiring_context: Array[Dictionary] = []
 var nodes: Array[GeometryInstance3D] = []
 var layout: Array[Dictionary] = []
 var cached: Dictionary = {}
@@ -27,11 +37,15 @@ var _water_polygons: Array[PackedVector2Array] = []
 var _water_banks: Array[PackedVector2Array] = []
 var _mesh_cache: Dictionary = {}
 var _pending_meshes: Dictionary = {}
+var _packed_mesh_jobs: Dictionary[String,MapJobs.Job] = {}
 var _mesh_age: Dictionary = {}
 var _mesh_bytes: Dictionary = {}
 var _parts: Dictionary = {}
 var _wanted_meshes: Dictionary = {}
 var _presentation: Dictionary = {}
+var _presentation_job: MapJobs.Job
+var _presentation_ready: bool
+var _context_tones_ready: bool
 var _age: int = 0
 var _water_mesh_paths: Dictionary = {} # Derived paths in the current presentation index.
 var _water_active_path: String = ""
@@ -44,28 +58,60 @@ var _metropolitan_tones: Array[Vector4] = [] # Display windows, not settlement e
 var _building_opacity: float = 0.0
 
 func preparing() -> bool:
-	return not _pending_meshes.is_empty() or _context_install_pending
+	return _presentation_job!=null or not _pending_meshes.is_empty() or _context_install_pending or _waiting_for_slot or not _retiring_context.is_empty()
 
 func poll(budget_usec: int = 2000) -> bool:
-	var changed := false
+	_drain_context(frame_budget)
+	var changed := _waiting_for_slot
+	_waiting_for_slot = false
+	if _presentation_job!=null and _presentation_job.completed:
+		var result := _presentation_job.take() as Dictionary
+		_presentation = result.index
+		if frame_budget!=null and not frame_budget.observations.is_empty() and result.has("read_us"):
+			frame_budget.observations["city_index_read_us"] = int(frame_budget.observations.get("city_index_read_us",0)) + int(result.read_us)
+			frame_budget.observations["city_index_decode_us"] = int(frame_budget.observations.get("city_index_decode_us",0)) + int(result.decode_us)
+		_presentation_job = null
+		_presentation_ready = true
+		changed = true
 	var began := Time.get_ticks_usec()
 	for path: String in _pending_meshes.keys():
-		var status := ResourceLoader.load_threaded_get_status(path)
-		if status==ResourceLoader.THREAD_LOAD_IN_PROGRESS: continue
-		if status==ResourceLoader.THREAD_LOAD_LOADED:
-			var mesh := ResourceLoader.load_threaded_get(path) as ArrayMesh
-			if mesh!=null and not (_water_mesh_paths.has(path) and profile.is_empty()):
+		var job: MapJobs.Job = _packed_mesh_jobs.get(path)
+		if job!=null:
+			if not job.completed: continue
+		elif ResourceLoader.load_threaded_get_status(path)==ResourceLoader.THREAD_LOAD_IN_PROGRESS: continue
+		var wanted := _wanted_meshes.has(path)
+		if wanted and frame_budget!=null and not frame_budget.claim_upload(int(_pending_meshes[path])): break
+		var started := Time.get_ticks_usec()
+		var mesh: ArrayMesh
+		if job!=null:
+			var arrays := job.take() as Array
+			_packed_mesh_jobs.erase(path)
+			if wanted and not arrays.is_empty():
+				mesh = ArrayMesh.new()
+				mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+			elif wanted: _budget_rejected[path] = true
+	else:
+			mesh = MapJobs.take_resource(path) as ArrayMesh
+		if frame_budget!=null: frame_budget.observe("city_ground_upload_us" if job!=null else "native_get_us",started)
+		if mesh!=null and wanted:
+			var bytes := 0
+			for surface: int in mesh.get_surface_count():
+				bytes+=mesh.surface_get_array_len(surface)*16+mesh.surface_get_array_index_len(surface)*4
+				if mesh.surface_get_format(surface)&Mesh.ARRAY_FORMAT_COLOR: bytes+=mesh.surface_get_array_len(surface)*4
+				if mesh.surface_get_format(surface)&Mesh.ARRAY_FORMAT_TEX_UV: bytes+=mesh.surface_get_array_len(surface)*8
+			if mesh.has_meta("resident_bytes"): bytes = int(mesh.get_meta("resident_bytes"))
+			if _trim_meshes(bytes):
 				_mesh_cache[path]=mesh
-				var bytes := 0
-				for surface: int in mesh.get_surface_count():
-					bytes+=mesh.surface_get_array_len(surface)*16+mesh.surface_get_array_index_len(surface)*4
-					if mesh.surface_get_format(surface)&Mesh.ARRAY_FORMAT_COLOR: bytes+=mesh.surface_get_array_len(surface)*4
-					if mesh.surface_get_format(surface)&Mesh.ARRAY_FORMAT_TEX_UV: bytes+=mesh.surface_get_array_len(surface)*8
 				_mesh_bytes[path]=bytes
-				if mesh.has_meta("resident_bytes"): _mesh_bytes[path]=int(mesh.get_meta("resident_bytes"))
+			else: _budget_rejected[path] = true
+		load_slots["count"] = int(load_slots.get("count",0))-1
+		load_slots["bytes"] = int(load_slots.get("bytes",0))-int(_pending_meshes[path])
 		_pending_meshes.erase(path)
-		changed=true
+		if not wanted: _mesh_age.erase(path)
+		elif frame_budget!=null: frame_budget.finish_upload(started,"city loaded mesh")
+		changed = changed or wanted
 		if Time.get_ticks_usec()-began>budget_usec: break
+		if wanted: break
 	_trim_meshes()
 	if changed or _context_install_pending: _context_view_key.clear()
 	return changed or _context_install_pending
@@ -74,23 +120,64 @@ func _request_mesh(path: String) -> void:
 	# poll() trims before scene installation. Keep every requested current
 	# layer, including the blended overview and foundations, until then.
 	_wanted_meshes[path]=true
-	_age+=1;_mesh_age[path]=_age
+	_age+=1
+	if _mesh_cache.has(path) or _pending_meshes.has(path): _mesh_age[path]=_age
+	if _budget_rejected.has(path): return
 	if not _mesh_cache.has(path) and not _pending_meshes.has(path):
-		if ResourceLoader.load_threaded_request(path,"ArrayMesh")==OK: _pending_meshes[path]=true
+		if _pending_meshes.size()>=2 or int(load_slots.get("count",0))>=MAX_READS:
+			_waiting_for_slot=true
+			return
+		var file := FileAccess.open(path,FileAccess.READ)
+		if file==null: return
+		var bytes := file.get_length()
+		var decoded_bytes := CityStorage.read_budget(file) if path.begins_with("res://assets/settlements/europe_context/context_") else 0
+		file.close()
+		bytes=maxi(bytes,decoded_bytes)
+		if bytes>READ_BYTES: return
+		if int(load_slots.get("bytes",0))+bytes>READ_BYTES:
+			_waiting_for_slot=true
+			return
+		# ResourceLoader may create native resources on its worker. Issue only
+		# one new city request per renderer frame, including across profiles.
+		if frame_budget!=null and int(load_slots.get("frame",-1))==Engine.get_process_frames():
+			_waiting_for_slot=true
+			return
+		var error := OK
+		if decoded_bytes>0:
+			var job := MapJobs.submit(CityStorage.read.bind(path),"city ground decode",MapJobs.VISIBLE)
+			if job==null: error=ERR_BUSY
+			else: _packed_mesh_jobs[path]=job
+		else: error=MapJobs.request_resource(path,"ArrayMesh",ResourceLoader.CACHE_MODE_IGNORE)
+		if error==ERR_BUSY: _waiting_for_slot=true
+		if error==OK:
+			_mesh_age[path]=_age
+			_pending_meshes[path]=bytes
+			load_slots["count"] = int(load_slots.get("count",0))+1
+			load_slots["bytes"] = int(load_slots.get("bytes",0))+bytes
+			load_slots["frame"] = Engine.get_process_frames()
 
-func _trim_meshes() -> void:
+func _trim_meshes(reserve: int = 0) -> bool:
 	var total := 0
 	for bytes: int in _mesh_bytes.values(): total+=bytes
 	var budget: int=(48 if not profile.is_empty() else 24)*1024*1024
-	if cache_budget_bytes>=0: budget=cache_budget_bytes
-	while total>budget:
+	# Keep the visible old and new context prints during the existing handoff.
+	if cache_budget_bytes>=0: budget=maxi(cache_budget_bytes,24*1024*1024)
+	for path: String in _budget_rejected.keys():
+		if not _wanted_meshes.has(path): _budget_rejected.erase(path)
+	while total+reserve>budget:
 		var oldest: String=""
 		for path: String in _mesh_cache:
 			if _parts.has(path) or _context_items.has(path) or _wanted_meshes.has(path): continue
 			if oldest.is_empty() or int(_mesh_age.get(path,0))<int(_mesh_age.get(oldest,0)): oldest=path
 		if oldest.is_empty(): break
 		total-=int(_mesh_bytes.get(oldest,0))
-		_mesh_cache.erase(oldest);_mesh_age.erase(oldest);_mesh_bytes.erase(oldest)
+		_erase_mesh(oldest)
+	return total+reserve<=budget
+
+func _erase_mesh(path: String) -> void:
+	_mesh_cache.erase(path)
+	_mesh_age.erase(path)
+	_mesh_bytes.erase(path)
 
 static func for_content(content: LocalSpatialContent) -> Dictionary:
 	if content == null: return {}
@@ -178,9 +265,32 @@ static func visible_profiles(camera: RegionCamera, viewport: Vector2) -> Array[D
 static func _profile(path: String) -> Dictionary:
 	if path.is_empty(): return {}
 	if not _profiles.has(path):
-		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-		_profiles[path] = data if data is Dictionary else {}
+		_profiles[path] = _read_profile(path)
 	return _profiles[path]
+
+static func _read_profile(path: String, timing: Dictionary = {}) -> Dictionary:
+	if path.is_empty(): return {}
+	var started := Time.get_ticks_usec() if not timing.is_empty() else 0
+	var text := FileAccess.get_file_as_string(path)
+	var read_done := Time.get_ticks_usec() if started>0 else 0
+	var data: Variant = JSON.parse_string(text)
+	if started>0:
+		timing["read_us"] = read_done-started
+		timing["decode_us"] = Time.get_ticks_usec()-read_done
+	return data if data is Dictionary else {}
+
+func _ensure_presentation(path: String) -> bool:
+	if _presentation_ready: return true
+	if _presentation_job==null:
+		_presentation_job = MapJobs.submit(CityMiniature._read_presentation.bind(path,MapJobs.measuring),"city presentation index",MapJobs.VISIBLE)
+		if _presentation_job==null: _waiting_for_slot = true
+	return false
+
+static func _read_presentation(path: String, measured: bool) -> Dictionary:
+	var timing: Dictionary = {"read_us":0,"decode_us":0} if measured else {}
+	var data := _read_profile(path,timing)
+	timing["index"] = data
+	return timing
 
 static func sample(source: Dictionary, grade: int) -> Dictionary:
 	var result: Dictionary = source.duplicate(true)
@@ -240,7 +350,13 @@ static func display_strength(mpp: float) -> float:
 
 func clear() -> void:
 	_context_install_pending=false;_context_view_key.clear()
-	for item: Dictionary in _context_items.values(): RenderingServer.free_rid(item.item as RID)
+	_waiting_for_slot=false
+	MapJobs.abandon(_presentation_job)
+	_presentation_job = null
+	_presentation_ready = false
+	_context_tones_ready = false
+	_budget_rejected.clear()
+	for item: Dictionary in _context_items.values(): _retire_context_item(item)
 	_context_items.clear()
 	for node: GeometryInstance3D in nodes:
 		node.visible = false
@@ -253,9 +369,33 @@ func clear() -> void:
 	_building_opacity=0.0
 	_metropolitan_tones.clear()
 	_water_active_path=""
-	for path: String in _water_mesh_paths:
-		_mesh_cache.erase(path);_mesh_age.erase(path);_mesh_bytes.erase(path)
-	_trim_meshes()
+	_mesh_cache.clear()
+	_mesh_age.clear()
+	_mesh_bytes.clear()
+
+func _retire_context_item(item: Dictionary) -> void:
+	if frame_budget==null:
+		RenderingServer.free_rid(item.item as RID)
+		return
+	RenderingServer.canvas_item_set_visible(item.item as RID,false)
+	if _retiring_context.size()>=512:
+		RenderingServer.free_rid((_retiring_context.pop_back() as Dictionary).item as RID)
+	_retiring_context.append(item)
+
+func _drain_context(budget: FrameBudget) -> void:
+	while not _retiring_context.is_empty() and (budget==null or budget.claim_retirement()):
+		RenderingServer.free_rid((_retiring_context.pop_back() as Dictionary).item as RID)
+
+func dispose() -> void:
+	clear()
+	_drain_context(null)
+	for path: String in _pending_meshes:
+		if _packed_mesh_jobs.has(path): MapJobs.abandon(_packed_mesh_jobs[path])
+		else: MapJobs.abandon_resource(path)
+		load_slots["count"] = int(load_slots.get("count",0))-1
+		load_slots["bytes"] = int(load_slots.get("bytes",0))-int(_pending_meshes[path])
+	_pending_meshes.clear()
+	_packed_mesh_jobs.clear()
 
 func _context_tile_rect(tile: Dictionary, view: RefCounted, camera: RegionCamera) -> Rect2:
 	var b: Array=tile.bounds
@@ -321,8 +461,10 @@ static func _ground_bytes(tiles: Dictionary) -> int:
 func _update_context(view: RefCounted, data: Dictionary, camera: RegionCamera, viewport_size: Vector2) -> bool:
 	if key!=str(data.id):
 		clear();key=str(data.id);build_count+=1
-		_presentation=_profile(str(data.presentation_index))
-		_metropolitan_tones.clear()
+	profile=data
+	if not _ensure_presentation(str(data.presentation_index)): return false
+	if not _context_tones_ready:
+		_context_tones_ready = true
 		for city: Dictionary in _presentation.get("building_print",{}).get("cities",[]):
 			# Coarse ink hands over only where roof detail is actually present.
 			# A larger, independent radius leaves an empty annulus around town.
@@ -338,7 +480,6 @@ func _update_context(view: RefCounted, data: Dictionary, camera: RegionCamera, v
 				if b.size()!=4: continue
 				var radius: float=maxf((float(b[2])-float(b[0]))*111.195*cos(deg_to_rad(a[1])),(float(b[3])-float(b[1]))*111.195)*.5
 				_metropolitan_tones.append(Vector4(a[0],a[1],radius,radius*1.6))
-	profile=data
 	var detail_ready: Array=[]
 	for layer: CityMiniature in view.city_views():
 		if layer==self or layer.profile.is_empty() or layer.profile.get("role","")=="NATIONAL_CARTOGRAPHIC_CONTEXT": continue
@@ -443,7 +584,10 @@ func _update_context(view: RefCounted, data: Dictionary, camera: RegionCamera, v
 			var tile: Dictionary=wanted[path]
 			var roof_print := int(tile.z)>=12
 			if not _context_items.has(path):
-				if installed>=8: _context_install_pending=true;continue
+				if installed>=8 or frame_budget!=null and not frame_budget.claim_upload(0):
+					_context_install_pending=true
+					continue
+				var started := Time.get_ticks_usec()
 				var item := RenderingServer.canvas_item_create()
 				RenderingServer.canvas_item_set_parent(item,view.map_canvas)
 				RenderingServer.canvas_item_set_draw_index(item,-9 if roof_print else -10)
@@ -466,6 +610,7 @@ func _update_context(view: RefCounted, data: Dictionary, camera: RegionCamera, v
 				RenderingServer.canvas_item_set_material(item,material.get_rid())
 				RenderingServer.canvas_item_add_mesh(item,(_mesh_cache[path] as ArrayMesh).get_rid())
 				_context_items[path]={"item":item,"material":material,"tile":tile,"staged":changing};installed+=1
+				if frame_budget!=null: frame_budget.finish_upload(started,"city context item")
 			keep[path]=true
 	var switch_ready := all_ready and not _context_install_pending
 	var continuity := 1.0-smoothstep(55.0,130.0,mpp) if data.get("building_ground_handoff",false) else 0.0
@@ -476,7 +621,10 @@ func _update_context(view: RefCounted, data: Dictionary, camera: RegionCamera, v
 	for path: String in _context_items.keys():
 		var item: Dictionary=_context_items[path]
 		if not keep.has(path):
-			RenderingServer.free_rid(item.item as RID);_context_items.erase(path);continue
+			_retire_context_item(item)
+			_context_items.erase(path)
+			if int(item.tile.z)>=12 and not _wanted_meshes.has(path): _erase_mesh(path)
+			continue
 		var tile: Dictionary=item.tile
 		var roof_print := int(tile.z)>=12
 		RenderingServer.canvas_item_set_custom_rect(item.item as RID,true,Rect2(Vector2.ZERO,viewport_size))
@@ -515,6 +663,10 @@ func _historical_part(view: RefCounted, path: String, tone: Color, water: bool =
 	_request_mesh(path)
 	if not _mesh_cache.has(path): return null
 	if not _parts.has(path):
+		if frame_budget!=null and not frame_budget.claim_upload(0):
+			_waiting_for_slot = true
+			return null
+		var started := Time.get_ticks_usec()
 		var node := MeshInstance3D.new()
 		node.mesh=_mesh_cache[path] as ArrayMesh
 		node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -544,6 +696,7 @@ func _historical_part(view: RefCounted, path: String, tone: Color, water: bool =
 					material.depth_draw_mode=BaseMaterial3D.DEPTH_DRAW_DISABLED
 			node.set_surface_override_material(surface,material)
 		view._landmark_root.add_child(node);nodes.append(node);_parts[path]=node
+		if frame_budget!=null: frame_budget.finish_upload(started,"city scene item")
 	return _parts[path] as MeshInstance3D
 
 func _opacity(node: MeshInstance3D, value: float) -> void:
@@ -600,9 +753,9 @@ func _historical_water(view: RefCounted, camera: RegionCamera, desired: Dictiona
 func _update_historical(view: RefCounted, data: Dictionary, camera: RegionCamera, viewport_size: Vector2) -> void:
 	if key!=str(data.id):
 		clear();key=str(data.id);build_count+=1
-		_presentation=_profile(str(data.presentation_index))
 		_water_data={"bounds":data.background_bounds}
 	profile=data
+	if not _ensure_presentation(str(data.presentation_index)): return
 	var unit := GlobeProjection.lon_lat_to_unit(Vector2(float(data.anchor[0]),float(data.anchor[1])))
 	var placement: Transform3D=view._chart_transform(unit,camera,viewport_size)
 	placement.basis*=view._geographic_basis(unit,camera,0.0)
@@ -643,15 +796,21 @@ func _update_historical(view: RefCounted, data: Dictionary, camera: RegionCamera
 			_wanted_meshes[str(row.path)]=true
 			detailed.append(row);_request_mesh(str(row.path))
 			if not _mesh_cache.has(str(row.path)): all_ready=false
-	var use_detail := near and all_ready and not detailed.is_empty()
+	var district_nodes: Array[MeshInstance3D] = []
+	if near and all_ready:
+		for row: Dictionary in detailed:
+			var path := str(row.path)
+			desired[path]=true
+			var tone := Color(.40,.39,.34) if inspection_mesh else Color(.49,.47,.41)
+			var node := _historical_part(view,path,tone,false,true)
+			if node!=null: district_nodes.append(node)
+	var use_detail := near and not detailed.is_empty() and district_nodes.size()==detailed.size()
 	var detail_weight := 1.0-smoothstep(16.0,24.0,mpp) if use_detail else 0.0
 	if use_detail:
 		instances=0
 		_building_opacity=building_strength*detail_weight
-		for row: Dictionary in detailed:
-			desired[str(row.path)]=true;instances+=int(row.blocks)
-			var tone := Color(.40,.39,.34) if inspection_mesh else Color(.49,.47,.41)
-			_opacity(_historical_part(view,str(row.path),tone,false,true),_building_opacity)
+		for row: Dictionary in detailed: instances+=int(row.blocks)
+	for node: MeshInstance3D in district_nodes: _opacity(node,_building_opacity)
 	if building_strength>0.0 and detail_weight<1.0:
 		var overview: Dictionary=_presentation.get("overview",{})
 		if overview.has("path"):
@@ -670,8 +829,7 @@ func _update_historical(view: RefCounted, data: Dictionary, camera: RegionCamera
 		var node := _parts[path] as MeshInstance3D
 		if not desired.has(path):
 			nodes.erase(node);_parts.erase(path);node.visible=false;node.mesh=null;node.queue_free()
-			if _water_mesh_paths.has(path):
-				_mesh_cache.erase(path);_mesh_age.erase(path);_mesh_bytes.erase(path)
+			if _water_mesh_paths.has(path) or path.get_file().begins_with("district_"): _erase_mesh(path)
 		else: node.transform=placement
 	profile=data
 	var area := extent(data);bounds=Rect2();var first := true

@@ -3,11 +3,13 @@ extends Node3D
 ## No combatants, inventory, town identities or official ownership are created.
 signal changed
 const Placement: GDScript = preload("res://military_runtime/native/modules/region_observation/scenery_placement.gd")
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
 var terrain: Node3D
 var base_path := "res://assets/terrain/region_slice/"
 var _native_document: Dictionary = {}
 var _region_document: Dictionary = {}
 var _pending: Dictionary = {}
+var _wanted: Dictionary = {}
 var _native := Node3D.new()
 var _native_ready := false
 var _native_wanted := false
@@ -44,26 +46,33 @@ func update_view(center: Vector2, span: float) -> void:
 			(_groups[kind] as Array).append(row)
 		for kind: String in _groups:
 			var path:=base_path+"cedar/assets/"+kind+".glb"
-			if ResourceLoader.exists(path) and ResourceLoader.load_threaded_request(path)==OK:
-				_pending[kind]=path
-	set_process(not _pending.is_empty())
+			if ResourceLoader.exists(path): _wanted[kind]=path
+	set_process(_native_wanted and (not _pending.is_empty() or not _wanted.is_empty()))
 	_sync_collisions()
 
 func _process(_delta: float) -> void:
+	if _pending.is_empty() and not _wanted.is_empty():
+		var kind: String = _wanted.keys().front()
+		var path := str(_wanted[kind])
+		var error := MapJobs.request_resource(path,"PackedScene")
+		if error==ERR_BUSY: return
+		_wanted.erase(kind)
+		if error==OK: _pending[kind]=path
 	# Install one small original asset group per frame, not a world of objects on click.
 	for kind: String in _pending.keys():
 		var path:=str(_pending[kind])
 		var status:=ResourceLoader.load_threaded_get_status(path)
-		if status==ResourceLoader.THREAD_LOAD_FAILED or status==ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-			_pending.erase(kind)
-			continue
-		if status!=ResourceLoader.THREAD_LOAD_LOADED: continue
-		var packed:=ResourceLoader.load_threaded_get(path) as PackedScene
+		if status==ResourceLoader.THREAD_LOAD_IN_PROGRESS: continue
+		var packed:=MapJobs.take_resource(path) as PackedScene
 		_pending.erase(kind)
 		if packed!=null: _install_group(kind,packed)
 		changed.emit()
 		break
-	if _pending.is_empty(): set_process(false)
+	if _pending.is_empty() and _wanted.is_empty(): set_process(false)
+
+func _exit_tree() -> void:
+	for path: String in _pending.values(): MapJobs.abandon_resource(path)
+	_pending.clear()
 
 func _install_group(kind: String, packed: PackedScene) -> void:
 	var prototype:=packed.instantiate() as Node3D

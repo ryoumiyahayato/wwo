@@ -12,11 +12,11 @@ config_version=5
 
 config/name="1900"
 config/version="0.001a"
-config/build_label="WWO R66 — Continental Town Map"
-config/build_id="wwo-r66-continental-town-map"
-config/build_sequence=67
+config/build_label="WWO R68 — Map Integration Candidate"
+config/build_id="wwo-r68-map-integration-candidate"
+config/build_sequence=68
 config/use_custom_user_dir.debug=true
-config/custom_user_dir_name.debug="WWO_Unified_Debug"
+config/custom_user_dir_name.debug="WWO_R68_Candidate"
 run/main_scene="res://scenes/formal/formal_world_menu.tscn"
 run/max_fps=60
 run/low_processor_mode=true

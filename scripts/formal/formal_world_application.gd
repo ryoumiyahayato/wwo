@@ -2,6 +2,8 @@ class_name FormalWorldApplication
 extends Control
 const UILocale = preload("res://scripts/presentation/ui/ui_locale.gd")
 const EconomicText = preload("res://scripts/presentation/ui/formal_economic_text.gd")
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+const TERRAIN_OBSERVATION_SCRIPT := "res://scripts/presentation/ui/military_terrain_observation.gd"
 ## Scene assembly and UI action dispatch. Domain facts remain in their owners.
 
 const LAUNCH_MODE_META: StringName = &"formal_world_launch_mode"
@@ -41,6 +43,9 @@ var _economic_follow_order: String = ""
 var _economic_navigation: Dictionary = {}
 var _economic_locations_stamp: Array = []
 var _terrain_observation: Control
+var _terrain_open_generation: int
+var _terrain_open_pending := false
+var _terrain_script_requested := false
 var _terrain_was_paused: bool = true
 var _terrain_previous_speed: int = 1
 var _debug_terrain_parked: bool = false
@@ -70,8 +75,13 @@ func _enter_tree() -> void:
 
 func _notification(what: int) -> void:
 	if what==NOTIFICATION_WM_CLOSE_REQUEST and is_node_ready():
-		if is_instance_valid(_terrain_observation): _close_terrain_observation()
+		_close_terrain_observation()
 		_request_departure("quit")
+
+func _exit_tree() -> void:
+	_cancel_terrain_open()
+	if is_instance_valid(_terrain_observation) and _terrain_observation.get_parent()==null:
+		_terrain_observation.queue_free()
 
 func _ready() -> void:
 	get_window().min_size = Vector2i(960,640)
@@ -1175,8 +1185,28 @@ func _load_world(slot: int = 1) -> void:
 		_install_world(candidate)
 
 func _open_terrain_observation(training_profile: String = "single_opponent") -> void:
-	if _world == null or _save_pending or _leaving or is_instance_valid(_terrain_observation): return
-	var script := load("res://scripts/presentation/ui/military_terrain_observation.gd") as GDScript
+	if _world == null or _save_pending or _leaving or _terrain_open_pending or is_instance_valid(_terrain_observation): return
+	var started := Time.get_ticks_usec() if map_renderer.observation_profile else 0
+	var world := _world
+	_terrain_open_pending = true
+	_terrain_open_generation += 1
+	var generation := _terrain_open_generation
+	var error := MapJobs.request_resource(TERRAIN_OBSERVATION_SCRIPT,"GDScript")
+	while error==ERR_BUSY:
+		await get_tree().process_frame
+		if generation!=_terrain_open_generation: return
+		error = MapJobs.request_resource(TERRAIN_OBSERVATION_SCRIPT,"GDScript")
+	var script: GDScript
+	if error==OK:
+		_terrain_script_requested = true
+		while ResourceLoader.load_threaded_get_status(TERRAIN_OBSERVATION_SCRIPT)==ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			await get_tree().process_frame
+			if generation!=_terrain_open_generation: return
+		script = MapJobs.take_resource(TERRAIN_OBSERVATION_SCRIPT) as GDScript
+		_terrain_script_requested = false
+	_terrain_open_pending = false
+	var loaded := Time.get_ticks_usec() if started>0 else 0
+	if _world!=world or _leaving or _save_pending: return
 	if script == null or not script.can_instantiate():
 		main_shell.show_feedback("军事地貌观察组件不可用。")
 		return
@@ -1187,7 +1217,7 @@ func _open_terrain_observation(training_profile: String = "single_opponent") -> 
 	map_controller.suspend_motion()
 	# Leave the original WorldState, selection and all camera fields untouched.
 	map_renderer.suspend_for_observation(true)
-	map_renderer.process_mode = Node.PROCESS_MODE_DISABLED
+	var map_suspended := Time.get_ticks_usec() if started>0 else 0
 	map_controller.process_mode = Node.PROCESS_MODE_DISABLED
 	main_shell.process_mode = Node.PROCESS_MODE_DISABLED
 	main_shell.hide()
@@ -1199,7 +1229,14 @@ func _open_terrain_observation(training_profile: String = "single_opponent") -> 
 		debug_select_workspace("map")
 		if not message.is_empty(): main_shell.show_map_feedback(message)
 	)
-	add_child(_terrain_observation)
+	var observation := _terrain_observation
+	await get_tree().process_frame
+	if generation!=_terrain_open_generation or _terrain_observation!=observation: return
+	var scene_started := Time.get_ticks_usec() if started>0 else 0
+	add_child(observation)
+	if started>0:
+		observation.set_meta("startup_open_usec",{"observation_script_wait":loaded-started,
+			"map_suspend":map_suspended-loaded,"observation_scene":Time.get_ticks_usec()-scene_started})
 
 func debug_select_workspace(workspace: String) -> void:
 	if not (OS.has_feature("debug") or "--dev-preview" in OS.get_cmdline_user_args()): return
@@ -1212,7 +1249,6 @@ func debug_select_workspace(workspace: String) -> void:
 		elif _debug_terrain_parked:
 			time_control.paused=true;main_shell.refresh_clock()
 			map_renderer.suspend_for_observation(true)
-			map_renderer.process_mode=Node.PROCESS_MODE_DISABLED
 			map_controller.process_mode=Node.PROCESS_MODE_DISABLED
 			main_shell.process_mode=Node.PROCESS_MODE_DISABLED;main_shell.hide()
 			_terrain_observation.process_mode=Node.PROCESS_MODE_INHERIT
@@ -1220,6 +1256,7 @@ func debug_select_workspace(workspace: String) -> void:
 			_terrain_observation.call("resume_training")
 		return
 	if workspace not in ["map","economy","military"]:return
+	if _terrain_open_pending: _cancel_terrain_open()
 	if is_instance_valid(_terrain_observation) and not _debug_terrain_parked:
 		_terrain_observation.call("_pause_training",false)
 		_terrain_observation.process_mode=Node.PROCESS_MODE_DISABLED
@@ -1234,6 +1271,7 @@ func debug_select_workspace(workspace: String) -> void:
 		map_controller.set_map_mode("economic" if workspace=="economy" else "military")
 
 func _close_terrain_observation() -> void:
+	_cancel_terrain_open()
 	if not is_instance_valid(_terrain_observation): return
 	var previous := _terrain_observation
 	_terrain_observation = null
@@ -1248,6 +1286,12 @@ func _close_terrain_observation() -> void:
 	time_control.paused = _terrain_was_paused
 	main_shell.refresh_clock()
 	main_shell.show_map_feedback("已返回原正式地图；人物所在地、选择和世界实例保持。")
+
+func _cancel_terrain_open() -> void:
+	_terrain_open_generation += 1
+	_terrain_open_pending = false
+	if _terrain_script_requested: MapJobs.abandon_resource(TERRAIN_OBSERVATION_SCRIPT)
+	_terrain_script_requested = false
 
 func _update_map_visibility() -> void:
 	# Pages are bounded workspaces; the uncovered map remains interactive.

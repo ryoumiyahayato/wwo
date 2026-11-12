@@ -7,12 +7,17 @@ var session_ready: bool = false
 var session_locked: bool = false
 var preparation_error: String = ""
 var battlefield_profile: String = "single_opponent"
+var measure_startup := false
+var startup_usec: Dictionary = {}
+var prepared_terrain: Node3D
+var prepared_scenery: Node3D
 const BattlefieldDeployment = preload("res://military_runtime/native/modules/isolated_training/battlefield_deployment.gd")
 
 func request_training_frame() -> void:
 	frame_requested.emit()
 
 func _ready() -> void:
+	var started := Time.get_ticks_usec() if measure_startup else 0
 	# Deliberately do not call main._ready(): its standalone helpers alter root MSAA,
 	# SceneTree interpolation/physics rate and install diagnostic/command-line hosts.
 	# This is only its initialization glue; no vehicle or weapon rule is replaced.
@@ -30,14 +35,14 @@ func _ready() -> void:
 	camera.near = 0.08
 	camera.far = 3200.0
 	add_child(camera)
-	camera.current = true
 	# The observer viewport already has its own World3D, lighting and environment.
 	build_hud()
 	if is_instance_valid(damage_overlay):
 		damage_overlay.queue_free()
 		damage_overlay = null
 	hud.custom_viewport = get_viewport()
-	load_display()
+	# Preserve the opening stage reset before the native range transition.
+	clear_stage()
 	ai_host = preload("res://military_runtime/native/modules/isolated_training/battlefield_infantry.gd").new() if battlefield_profile == BattlefieldDeployment.PROFILE else preload("res://military_runtime/native/triple/local_host.gd").new()
 	add_child(ai_host)
 	ai_host.setup(self)
@@ -51,6 +56,13 @@ func _ready() -> void:
 	battle_controls = preload("res://military_runtime/native/modules/isolated_training/controls.gd").new()
 	battle_controls.setup(self)
 	refresh_hud()
+	if measure_startup: startup_usec["scene_ready"] = Time.get_ticks_usec()-started
+
+func load_model(index: int, player_model: bool = false) -> Node3D:
+	var started := Time.get_ticks_usec() if measure_startup else 0
+	var model := super.load_model(index,player_model)
+	if measure_startup: startup_usec["model_load_and_instantiate"] = int(startup_usec.get("model_load_and_instantiate",0))+Time.get_ticks_usec()-started
+	return model
 
 func prepare_encounter() -> Dictionary:
 	if is_instance_valid(armor_host):
@@ -92,19 +104,16 @@ func load_terrain() -> void:
 	if session_locked:
 		_deny_rebuild()
 		return
-	var native_terrain: Node3D = preload("res://military_runtime/native/modules/isolated_training/terrain.gd").new()
-	native_terrain.material_provider = material_provider
-	terrain_damage = native_terrain
-	stage.add_child(terrain_damage)
-	terrain_root = terrain_damage
-	var result: Dictionary = terrain_damage.configure(Vector3.ZERO, null)
-	if not bool(result.get("ok", false)):
-		preparation_error = str(result.get("error", "native_terrain_failed"))
+	if not is_instance_valid(prepared_terrain) or not is_instance_valid(prepared_scenery):
+		preparation_error = "native_terrain_not_prepared"
 		preparation_failed.emit(preparation_error)
 		return
-	var scenery: Node3D = preload("res://military_runtime/native/ridgevale/world.gd").new()
-	stage.add_child(scenery)
-	scenery.build(terrain_damage, {"route_dressing": true})
+	terrain_damage = prepared_terrain
+	terrain_root = terrain_damage
+	prepared_terrain.reparent(stage,false)
+	prepared_scenery.reparent(stage,false)
+	prepared_terrain = null
+	prepared_scenery = null
 
 func build_range() -> void:
 	if session_locked:

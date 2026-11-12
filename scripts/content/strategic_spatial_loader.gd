@@ -6,12 +6,16 @@ const INDEX_PATH: String = "res://data/strategic/index.json"
 const MAX_ACTIVE_REGIONS: int = 2
 const MEDIUM_LOD_MPP: float = 1500.0
 const MAX_PAN_MARGIN_KM: float = 35.0
+const MAX_PACKED_REQUEST_BYTES: int = 96 * 1024 * 1024
+const MAX_DECODED_REQUEST_BYTES: int = 192 * 1024 * 1024
+const MAX_DRAW_SHARD_BYTES: int = 96 * 1024 * 1024
 var content: LocalSpatialContent
 var errors: Array[String] = []
 var failure: String = ""
 var _index: Dictionary = {}
 var _descriptors: Array[Dictionary] = []
-var _thread: Thread
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+var _thread: MapJobs.Job
 var _wanted: Array[String] = []
 var _required_physical: Array[String] = []
 var _physical_view: Array = []
@@ -115,6 +119,7 @@ func request(center: Vector2, radius_km: float, date: String, mpp: float = 4500.
 	_request_mutex.lock()
 	_request_generation += 1
 	_request_mutex.unlock()
+	MapJobs.cancel_queued(_thread)
 	_start()
 	return true
 
@@ -144,7 +149,6 @@ func _start(retired: LocalSpatialContent = null) -> void:
 	_loading_with_ink = _with_ink
 	if retired == null: retired = content
 	content = null
-	_thread = Thread.new()
 	var descriptors: Array[Dictionary] = []
 	var lake_only := not _with_ink or not _loading.any(func(id: String) -> bool: return id.begins_with("physical_") and "_mid_" in id)
 	for descriptor: Dictionary in _descriptors:
@@ -152,10 +156,10 @@ func _start(retired: LocalSpatialContent = null) -> void:
 			var selected := descriptor.duplicate()
 			if lake_only and str(descriptor.id) in (_index.regions as Array).map(func(row: Dictionary) -> String: return str(row.id)): selected["natural_lakes_only"] = true
 			descriptors.append(selected)
-	var error := _thread.start(_load.bind(_index, descriptors, _request_current.bind(_request_generation), retired,_with_ink))
-	if error!=OK:
-		_thread = null
-		failure = "无法启动物理地图读取线程："+error_string(error)
+	var priority := MapJobs.FOUNDATION if lake_only else MapJobs.VISIBLE
+	_thread = MapJobs.submit(_load.bind(_index,descriptors,_request_current.bind(_request_generation),retired,_with_ink),"strategic map read",priority,self)
+	if _thread==null:
+		failure = "物理地图读取任务队列已满。"
 		errors.append(failure)
 		content_changed.emit()
 
@@ -169,9 +173,9 @@ func preparing() -> bool:
 	return _thread != null
 
 func poll() -> bool:
-	if _thread == null or _thread.is_alive():
+	if _thread == null or not _thread.completed:
 		return false
-	var returned: Variant = _thread.wait_to_finish()
+	var returned: Variant = _thread.take()
 	_thread = null
 	var stale := _loading != _wanted or _loading_generation != _request_generation or _loading_with_ink!=_with_ink
 	if stale:
@@ -198,6 +202,7 @@ func release() -> void:
 	_request_mutex.lock()
 	_request_generation += 1
 	_request_mutex.unlock()
+	MapJobs.cancel_queued(_thread)
 	_wanted.clear()
 	_required_physical.clear()
 	_physical_view.clear()
@@ -207,11 +212,11 @@ func release() -> void:
 
 func dispose() -> void:
 	release()
-	if _thread != null:
-		_thread.wait_to_finish()
-		_thread = null
+	MapJobs.abandon(_thread)
+	_thread = null
 
-static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Callable = Callable(), retired: LocalSpatialContent = null, with_ink: bool = false, features_only: bool = false) -> LocalSpatialContent:
+static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Callable = Callable(), retired: LocalSpatialContent = null, with_ink: bool = false, features_only: bool = false, budget: Dictionary = {}) -> LocalSpatialContent:
+	if budget.is_empty(): budget = {"read":0,"decoded":0}
 	var result := LocalSpatialContent.new()
 	# The installed layer may still read this content or prepare another LOD.
 	# Borrow immutable shard references; its owner retires the old input.
@@ -244,7 +249,7 @@ static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Ca
 					copy["lod_geometry"] = {}
 					return copy)
 			elif with_ink and not previous_ink and descriptor.has("ink_asset"):
-				var partition := _read_ink(descriptor)
+				var partition := _read_ink(descriptor,budget,current)
 				if partition.has("error"):
 					_note_optional_error(result,str(partition.error))
 				else:
@@ -264,7 +269,7 @@ static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Ca
 		# railway and river supplements are optional; a broken supplement must
 		# not be published partially or prevent the physical map from opening.
 		if not features_only and not shard_id.begins_with("physical_"):
-			var supplemental := _load(index,[descriptor],current,null,with_ink,true)
+			var supplemental := _load(index,[descriptor],current,null,with_ink,true,budget)
 			if supplemental.cancelled:
 				result.cancelled = true
 				return result
@@ -284,7 +289,13 @@ static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Ca
 			result.shards[shard_id] = supplemental.features
 			continue
 		var shard_features: Array[Dictionary] = []
-		var bytes := FileAccess.get_file_as_bytes(str(descriptor.path))
+		var bytes := _read_bounded(str(descriptor.path),budget)
+		if current.is_valid() and not current.call():
+			result.cancelled = true
+			return result
+		if bytes.is_empty() or not _admit_decoded(budget,bytes.size()):
+			result.errors.append("Strategic shard exceeds the read budget or is unavailable: "+str(descriptor.path))
+			return result
 		var parser := JSON.new()
 		if parser.parse(bytes.get_string_from_utf8()) != OK or not parser.data is Dictionary:
 			result.errors.append("Invalid strategic JSON: " + str(descriptor.id))
@@ -302,7 +313,7 @@ static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Ca
 		var gate := HistoricalProvenanceGate.new(sources, facts)
 		var ink: Dictionary = {}
 		if with_ink and descriptor.has("ink_asset") and not descriptor.has("compiled_asset"):
-			ink = _read_ink(descriptor)
+			ink = _read_ink(descriptor,budget,current)
 			if ink.has("error"):
 				_note_optional_error(result,str(ink.error))
 				ink = {}
@@ -328,10 +339,16 @@ static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Ca
 					result.errors.append("Invalid strategic geometry descriptor: " + fact_id)
 					return result
 				if not geometry_assets.has(path):
-					var packed := FileAccess.get_file_as_bytes(path)
+					var packed := _read_bounded(path,budget)
+					if current.is_valid() and not current.call():
+						result.cancelled = true
+						return result
 					var decoded := packed.decompress_dynamic(33554432, FileAccess.COMPRESSION_DEFLATE)
+					if current.is_valid() and not current.call():
+						result.cancelled = true
+						return result
 					var geometry_parser := JSON.new()
-					if decoded.is_empty() or geometry_parser.parse(decoded.get_string_from_utf8()) != OK or not geometry_parser.data is Dictionary:
+					if decoded.is_empty() or not _admit_decoded(budget,decoded.size()) or geometry_parser.parse(decoded.get_string_from_utf8()) != OK or not geometry_parser.data is Dictionary:
 						result.errors.append("Invalid strategic geometry payload: " + path)
 						return result
 					geometry_assets[path] = geometry_parser.data
@@ -344,7 +361,12 @@ static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Ca
 					result.errors.append("Invalid strategic geometry fields: " + fact_id)
 					return result
 				feature["geometry"] = geometry_value.geometry
-				feature["lod_geometry"] = geometry_value.lod_geometry
+				var lod_geometry := geometry_value.lod_geometry as Dictionary
+				for lod: String in lod_geometry:
+					var reference: Variant = lod_geometry[lod]
+					if reference is String and reference == "@geometry.coordinates":
+						lod_geometry[lod] = (geometry_value.geometry as Dictionary).get("coordinates")
+				feature["lod_geometry"] = lod_geometry
 				# Optional cross-source draw replacements are prepared offline in
 				# this same bounded native pack. They never replace query geometry,
 				# land, political ink, or an immutable cached source shard.
@@ -474,9 +496,26 @@ static func _land_query(geometry: Dictionary) -> Array[Dictionary]:
 		result.append({"rings":rings,"bounds":GlobeProjection.lon_lat_bounds([rings[0]])})
 	return result
 
-static func _read_ink(descriptor: Dictionary) -> Dictionary:
+static func _read_bounded(path: String, budget: Dictionary) -> PackedByteArray:
+	var file := FileAccess.open(path,FileAccess.READ)
+	if file==null: return PackedByteArray()
+	var size := file.get_length()
+	if size>32*1024*1024 or int(budget.get("read",0))+size>MAX_PACKED_REQUEST_BYTES: return PackedByteArray()
+	budget["read"] = int(budget.get("read",0))+size
+	return file.get_buffer(size)
+
+static func _admit_decoded(budget: Dictionary, bytes: int) -> bool:
+	var total := int(budget.get("decoded",0))+bytes
+	if total>MAX_DECODED_REQUEST_BYTES: return false
+	budget["decoded"] = total
+	return true
+
+static func _read_ink(descriptor: Dictionary, budget: Dictionary = {}, current: Callable = Callable()) -> Dictionary:
 	var id := str(descriptor.id)
-	var bytes := FileAccess.get_file_as_bytes(str(descriptor.ink_asset.path)).decompress_dynamic(33554432,FileAccess.COMPRESSION_DEFLATE)
+	var packed := _read_bounded(str(descriptor.ink_asset.path),budget)
+	if packed.is_empty() or current.is_valid() and not current.call(): return {"error":"Political ink read skipped: "+id}
+	var bytes := packed.decompress_dynamic(33554432,FileAccess.COMPRESSION_DEFLATE)
+	if bytes.is_empty() or not _admit_decoded(budget,bytes.size()) or current.is_valid() and not current.call(): return {"error":"Political ink decode skipped: "+id}
 	var parser := JSON.new()
 	if parser.parse(bytes.get_string_from_utf8())!=OK or not parser.data is Dictionary:
 		return {"error":"Invalid political ink partition: "+id}
@@ -494,6 +533,7 @@ static func read_display(asset: Dictionary, id: String, lod: String) -> Dictiona
 	if not path.begins_with("res://data/strategic/") or path.simplify_path()!=path or asset.get("encoding")!="GODOT_COMPRESSED_VARIANT_R37": return {"error":"政治显示资源描述无效："+id}
 	var file := FileAccess.open_compressed(path,FileAccess.READ,FileAccess.COMPRESSION_DEFLATE)
 	if file==null: return {"error":"无法读取预制政治显示："+id+" / "+error_string(FileAccess.get_open_error())}
+	if file.get_length()>MAX_DRAW_SHARD_BYTES: return {"error":"预制政治显示超过单片解码预算："+id}
 	var value: Variant = file.get_var(false)
 	if not value is Dictionary: return {"error":"预制政治显示内容无效："+id}
 	var display := value as Dictionary

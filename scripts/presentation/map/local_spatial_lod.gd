@@ -3,8 +3,9 @@ extends RefCounted
 ## Finite load-time caches derived from admitted facts, never new source facts.
 const TOLERANCE_M: Dictionary = {"coarse": 600.0, "medium": 120.0, "local": 0.0}
 const EARTH_RADIUS_M: float = 6371008.8
+const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
 
-static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse", "medium", "local"], current: Callable = Callable(), ink_frames: Dictionary = {}, political_cells: Dictionary = {}, only_features: Array[String] = []) -> Dictionary:
+static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse", "medium", "local"], current: Callable = Callable(), ink_frames: Dictionary = {}, political_cells: Dictionary = {}, only_features: Array[String] = [], max_staged_bytes: int = 0) -> Dictionary:
 	# Hold immutable source references inside this worker. The installed layer
 	# may keep the old Content alive until its complete successor is displayed.
 	content.geometry_mutex.lock()
@@ -12,6 +13,7 @@ static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse
 	var source_features := content.features
 	content.geometry_mutex.unlock()
 	var chunks: Array[Dictionary] = []
+	var staged_bytes := 0
 	# Only actual legal-sovereign changes alter the initial display partition.
 	var changed_cells: Dictionary = {}
 	for id: String in political_cells:
@@ -37,6 +39,10 @@ static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse
 				if not only_features.is_empty() and str(chunk.land_feature_id) not in only_features: continue
 				var compiled := _prepared_display(chunk,changed_cells,only_features,ink_frames,current)
 				if compiled.has("error"): return compiled
+				for batch: Dictionary in compiled.chunks as Array:
+					staged_bytes += _measure_payload(batch)
+					if max_staged_bytes>0 and staged_bytes>max_staged_bytes:
+						return {"error":"地图绘制包超过预备预算（%d 字节）。"%staged_bytes}
 				chunks.append_array(compiled.chunks as Array)
 				continue
 			var kind := str(chunk.kind)
@@ -212,11 +218,20 @@ static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse
 			boundaries.assign(chunk.boundaries as Array)
 			chunk["payload"] = GlobeBoundaryBatch.encode(boundaries,str(chunk.kind),str(chunk.kind) in ["coast","river"])
 			chunk.erase("boundaries")
+		staged_bytes += _measure_payload(chunk)
+		if max_staged_bytes>0 and staged_bytes>max_staged_bytes:
+			return {"error":"地图绘制包超过预备预算（%d 字节）。"%staged_bytes}
 	# All float32-degenerate faces may legitimately encode to no draw. Omit
 	# those empty batches here; an actual upload failure must not be ignored.
 	for index: int in range(chunks.size()-1,-1,-1):
 		if (chunks[index].payload as Dictionary).is_empty(): chunks.remove_at(index)
 	return {"chunks":chunks, "lods":lods}
+
+static func _measure_payload(chunk: Dictionary) -> int:
+	var payload := chunk.get("payload",{}) as Dictionary
+	var bytes := FrameBudget.packed_bytes(payload)
+	chunk["upload_bytes"] = bytes - FrameBudget.packed_bytes(payload.get("pick_chunks",[]))
+	return bytes
 
 static func _component_frame(description: Variant, triangle: PackedVector2Array) -> Rect2:
 	if description is Rect2: return description

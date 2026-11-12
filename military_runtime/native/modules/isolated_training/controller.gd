@@ -7,6 +7,9 @@ signal observer_requested
 
 const NativeBattle = preload("res://military_runtime/native/modules/isolated_training/battle.gd")
 const NativePort = preload("res://military_runtime/native/triple/port.gd")
+const NativeTerrain = preload("res://military_runtime/native/modules/isolated_training/terrain.gd")
+const NativeScenery = preload("res://military_runtime/native/ridgevale/world.gd")
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
 const REQUEST_PATH: String = "res://military_runtime/native/triple/default_request.json"
 const REQUIRED_MODELS: Array[String] = [
 	"res://military_runtime/native/assets/user_derived/models/user_heavy_mbt_aimable.glb",
@@ -17,6 +20,8 @@ var _battle: NativeBattle
 var _port: NativePort
 var _viewport: SubViewport
 var _world_root: Node3D
+var _terrain_preparation: Node3D
+var _horizon_job: MapJobs.Job
 var _provider: Object
 var _observer_camera: Camera3D
 var _state: String = "idle"
@@ -34,6 +39,7 @@ var _turret: Node3D
 var _barrel: Node3D
 var _last_turret_pose: Transform3D = Transform3D.IDENTITY
 var _last_barrel_pose: Transform3D = Transform3D.IDENTITY
+var startup_usec: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -101,6 +107,8 @@ func _needs_animation_frame() -> bool:
 	return false
 
 func start(options: Dictionary) -> void:
+	var measured := bool(options.get("measure_startup",false))
+	var started := Time.get_ticks_usec() if measured else 0
 	if _state != "idle" and _state != "closed" and _state != "failed":
 		failed.emit("existing_session_use_pause_or_resume")
 		return
@@ -143,7 +151,56 @@ func start(options: Dictionary) -> void:
 	if _provider.has_signal("changed") and not _provider.is_connected("changed", request_frame):
 		_provider.connect("changed", request_frame)
 	_capture_global_settings()
+	var samples := PackedFloat32Array()
+	if _provider.has_method("compact_native_samples"):
+		samples = _provider.call("compact_native_samples") as PackedFloat32Array
+	while _horizon_job==null:
+		_horizon_job = MapJobs.submit(NativeTerrain.prepare_horizon.bind(samples),"Ridgevale horizon",MapJobs.VISIBLE)
+		if _horizon_job!=null: break
+		await get_tree().process_frame
+		if generation!=_generation: return
+	while not _horizon_job.completed:
+		await get_tree().process_frame
+		if generation!=_generation: return
+	var prepared_ground := _horizon_job.take() as Dictionary
+	_horizon_job = null
+	if prepared_ground.is_empty():
+		_fail("ridgevale_heightfield_invalid")
+		return
+	if measured: startup_usec["horizon_worker_wait"] = Time.get_ticks_usec()-started
+	var terrain_started := Time.get_ticks_usec() if measured else 0
+	_terrain_preparation = Node3D.new()
+	_terrain_preparation.hide()
+	var parent: Node = _world_root if is_instance_valid(_world_root) else _viewport
+	parent.add_child(_terrain_preparation)
+	var terrain := NativeTerrain.new(PackedFloat32Array(),prepared_ground.field)
+	terrain.prepared_horizon = prepared_ground.arrays
+	prepared_ground.clear()
+	terrain.stream_initial_chunks = true
+	terrain.material_provider = _provider
+	if measured: terrain.set_slow_timing(true,1,64,false)
+	_terrain_preparation.add_child(terrain)
+	var configured := terrain.configure(Vector3.ZERO,null)
+	if not configured.get("ok",false):
+		_fail(str(configured.get("error","native_terrain_failed")))
+		return
+	if measured: startup_usec["terrain_configure"] = Time.get_ticks_usec()-terrain_started
+	# The original stream installs one chunk per frame. Vehicles and their
+	# physics enter only after all nine original spawn colliders are present.
+	while terrain.chunks.size()<9:
+		await get_tree().process_frame
+		if generation!=_generation: return
+	if measured: startup_usec["terrain_spawn_ready"] = Time.get_ticks_usec()-terrain_started
+	var scenery_started := Time.get_ticks_usec() if measured else 0
+	var scenery := NativeScenery.new()
+	_terrain_preparation.add_child(scenery)
+	scenery.build(terrain,{"route_dressing":true})
+	if measured: startup_usec["scenery_models_and_colliders"] = Time.get_ticks_usec()-scenery_started
+	await get_tree().process_frame
+	if generation!=_generation: return
+	var scene_started := Time.get_ticks_usec() if measured else 0
 	_battle = NativeBattle.new()
+	_battle.measure_startup = measured
 	_battle.name = "IsolatedNativeTankSession"
 	_battle.battlefield_profile = str(options.get("profile", "single_opponent"))
 	if _battle.battlefield_profile not in ["single_opponent", "field_170"]:
@@ -152,20 +209,43 @@ func start(options: Dictionary) -> void:
 		_fail("unknown_training_profile")
 		return
 	_battle.material_provider = _provider
+	_battle.prepared_terrain = terrain
+	_battle.prepared_scenery = scenery
 	_battle.process_mode = Node.PROCESS_MODE_ALWAYS
+	_battle.hide()
 	_battle.map_requested.connect(_request_observer)
 	_battle.frame_requested.connect(request_frame)
 	if is_instance_valid(_world_root):
 		_world_root.add_child(_battle)
 	else:
 		_viewport.add_child(_battle)
+	_battle.hud.hide()
+	_battle.set_process(false)
+	_battle.set_physics_process(false)
+	_restore_global_settings()
+	var scene_usec := Time.get_ticks_usec()-scene_started if measured else 0
+	await get_tree().process_frame
+	if generation!=_generation: return
+	var mode_started := Time.get_ticks_usec() if measured else 0
 	_battle.choose_game_mode("skirmish")
+	_terrain_preparation.queue_free()
+	_terrain_preparation = null
+	if measured:
+		startup_usec["build_range_sync"] = Time.get_ticks_usec()-mode_started
+		startup_usec["scene_and_module_sync"] = scene_usec+int(startup_usec.build_range_sync)
 	# Initialization must not change formal-tree or root-viewport settings. No
 	# helper that continuously writes these globals is installed in NativeBattle.
 	_restore_global_settings()
 	if not _battle.preparation_error.is_empty():
 		_fail(_battle.preparation_error)
 		return
+	_battle.set_process(true)
+	_battle.set_physics_process(true)
+	await get_tree().process_frame
+	if generation!=_generation: return
+	_battle.show()
+	_battle.hud.show()
+	_battle.camera.make_current()
 	for frame: int in range(30):
 		await get_tree().physics_frame
 		if generation != _generation or not is_instance_valid(_battle):
@@ -210,6 +290,12 @@ func start(options: Dictionary) -> void:
 			_fail("independent_infantry_activation_incomplete")
 			return
 	_battle.session_ready = true
+	if measured:
+		startup_usec["scene_and_module_ready"] = Time.get_ticks_usec()-started
+		startup_usec["battle"] = _battle.startup_usec
+		startup_usec["terrain"] = _battle.terrain_damage.startup_usec
+		startup_usec["terrain_slow"] = _battle.terrain_damage.get_slow_timing()
+		_battle.terrain_damage.set_slow_timing(false)
 	for child: Node in _battle.find_children("*", "", true, false):
 		if child.process_mode == Node.PROCESS_MODE_ALWAYS:
 			child.process_mode = Node.PROCESS_MODE_INHERIT
@@ -353,6 +439,13 @@ func _fail(reason: String) -> void:
 	failed.emit(reason)
 
 func _release_session() -> void:
+	MapJobs.abandon(_horizon_job)
+	_horizon_job = null
+	if is_instance_valid(_terrain_preparation):
+		var parent := _terrain_preparation.get_parent()
+		if parent!=null: parent.remove_child(_terrain_preparation)
+		_terrain_preparation.queue_free()
+	_terrain_preparation = null
 	_restore_global_settings()
 	if is_instance_valid(_battle):
 		_battle.session_ready = false
