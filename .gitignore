@@ -25,7 +25,8 @@ logs/
 
 # Local review and profiling output
 artifacts/
-local-artifacts/
+local-artifacts/*
+!local-artifacts/.gdignore
 *.png.import
 *.jpg.import
 *.jpeg.import

@@ -6,10 +6,131 @@ collars, not an overloaded land-cover mask. Mips average material channels.
 """
 import copy,json,math,struct,sys,zlib,time
 from functools import lru_cache
+
+def repair_shared_precision(root):
+    """Recover declared DEM spacing through existing shared-source records.
+
+    This changes selection metadata only. It does not infer source pixels,
+    recover unknown cover precision or expand geographic support.
+    """
+    from pathlib import Path
+    path=Path(root)/'data/presentation/sampling_surface_r57.json'
+    doc=json.loads(path.read_text(encoding='utf-8'))
+    assets=[a for f in doc['evidence_catalog']['facts'] for a in f.get('value',{}).get('assets',[])]
+    byid={a['id']:a for a in assets}
+    changed=[]
+    for _ in range(3):
+        for a in assets:
+            p=a.get('precision',{})
+            b=a.get('bounds_lon_lat',[])
+            if len(b)!=4 or b[0]>=8.5 or b[2]<=-5.5 or b[1]>=51.5 or b[3]<=42:continue
+            if p.get('dem_extract_m_ns',0)>0:continue
+            ids=a.get('upstream_asset_ids',[]) or ([a['source_asset']] if a.get('source_asset') else [])
+            sources=[byid.get(i,{}) for i in ids]
+            values=[s.get('precision',{}).get('dem_extract_m_ns',0) for s in sources]
+            if not values or min(values)<=0:continue
+            p['dem_extract_m_ns']=max(values)
+            p['dem_precision_sources']=ids
+            p['source_note']='DEM spacing inherited from the existing declared upstream assets. Geographic NoData/support and unknown cover precision remain unchanged; no new source measurement.'
+            a['precision']=p;changed.append(a['id'])
+    path.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    print(json.dumps({'metadata_records':len(changed),'pixel_changes':0,'new_acquisition':False}))
+
+def repair_overview_grid(root):
+    """Finite Europe RGB repair from admitted R57 pages; retain all DEM alpha."""
+    from PIL import Image
+    from pathlib import Path
+    import numpy as np
+    catalog = root/'data/presentation/sampling_surface_r57.json'
+    doc = json.loads(catalog.read_text(encoding='utf-8'))
+    assets = [a for f in doc['evidence_catalog']['facts'] for a in f.get('value',{}).get('assets',[])]
+    base = next(a for a in assets if a['id']=='physical_relief:euro_afro_russia_r57_continuity_base')
+    pages = [a for a in assets if a['id'].startswith('physical_relief:repair_r57_mid8_r56_')
+             and a['core_bounds_lon_lat'][0]>=-16 and a['core_bounds_lon_lat'][2]<=32]
+    if len(pages)!=24:
+        raise ValueError('Expected the existing 24 eight-degree Europe cores, without source substitution')
+    def decode(asset):
+        payload = (root/asset['path'].removeprefix('res://')).read_bytes()
+        if payload[:8]!=b'FRT42\0\0\0': raise ValueError('Expected original FRT42 format')
+        width,height,size = struct.unpack_from('<III',payload,8)
+        raw = zlib.decompress(payload[20:])
+        if len(raw)!=size or [width,height]!=[asset['width'],asset['height']]:
+            raise ValueError('Source dimensions or decoded size changed')
+        return width,height,raw
+    width,height,original = decode(base)
+    edited = np.frombuffer(original[:width*height*4],np.uint8).reshape(height,width,4).copy()
+    for page in pages:
+        pw,ph,raw = decode(page)
+        bounds = page['bounds_lon_lat']; w,s,e,n = page['core_bounds_lon_lat']
+        crop = (round((w-bounds[0])*pw/(bounds[2]-bounds[0])),
+                round((bounds[3]-n)*ph/(bounds[3]-bounds[1])),
+                round((e-bounds[0])*pw/(bounds[2]-bounds[0])),
+                round((bounds[3]-s)*ph/(bounds[3]-bounds[1])))
+        source = np.frombuffer(raw[:pw*ph*4],np.uint8).reshape(ph,pw,4)
+        x,y = round((w+28)*30),round((86-n)*30)
+        # Float area reduction preserves the actual source colours, without
+        # guessing material classes, blurring coastlines or altering geometry.
+        for channel in range(3):
+            core = Image.fromarray(source[:,:,channel].astype(np.float32)).crop(crop)
+            reduced = np.asarray(core.resize((240,240),Image.Resampling.BOX))
+            edited[y:y+240,x:x+240,channel]=np.clip(np.rint(reduced),0,255).astype(np.uint8)
+    result = bytearray(original)
+    result[:width*height*4]=edited.tobytes()
+    rgb = edited[:,:,:3].copy()
+    mask = Image.new('L',(width,height),0)
+    mask.paste(255,(360,660,1800,1620)) # [-16,32,32,64] in the original overview.
+    offset = width*height*4; mw,mh = width,height
+    while mw>1 or mh>1:
+        mw,mh=max(1,mw//2),max(1,mh//2)
+        next_rgb=np.empty((mh,mw,3),np.uint8)
+        for channel in range(3):
+            reduced=np.asarray(Image.fromarray(rgb[:,:,channel].astype(np.float32)).resize((mw,mh),Image.Resampling.BOX))
+            next_rgb[:,:,channel]=np.clip(np.rint(reduced),0,255).astype(np.uint8)
+        mask=mask.resize((mw,mh),Image.Resampling.BOX)
+        level=np.frombuffer(original[offset:offset+mw*mh*4],np.uint8).reshape(mh,mw,4).copy()
+        selected=np.asarray(mask)>0
+        level[:,:,:3][selected]=next_rgb[selected]
+        result[offset:offset+mw*mh*4]=level.tobytes()
+        rgb=next_rgb; offset+=mw*mh*4
+    if offset!=len(original): raise ValueError('Unexpected original mip chain')
+    name='euro_afro_russia_r65_gridfree_base'
+    output=root/'assets/maps/relief'/f'{name}.bin'
+    encoded=b'FRT42\0\0\0'+struct.pack('<III',width,height,len(result))+zlib.compress(result,9)
+    output.write_bytes(encoded)
+    asset=copy.deepcopy(base)
+    asset.update(id='physical_relief:'+name,path='res://assets/maps/relief/'+name+'.bin',bytes=len(encoded),
+                 surface_replaces=['euro_afro_russia_r57_continuity_base'],
+                 source_assets=[base['id']]+[a['id'] for a in pages])
+    asset['grid_correction']={'bounds':[-16,32,32,64],
+        'method':'Area-reduced admitted R57 eight-degree core RGB; preserve original DEM alpha in every mip and unmodified RGB outside support.',
+        'historical_applicability':'Modern physical reference, not 1900 land use or historical water boundaries'}
+    asset['precision']['cover_method']='Existing R57 observed European core RGB reduced to the original overview grid inside declared correction; original source bounds elsewhere.'
+    src=copy.deepcopy(doc['source_registry']['sources'][-1])
+    src.update(source_id='terrain_overview_grid_r65',title='Finite European overview RGB repair from existing R57 cores',version='R65',
+               publisher='WWO derived display / admitted R57 upstream sources',locator='res://data/presentation/sampling_surface_r57.json')
+    src['access_metadata']={'inputs':asset['source_assets'],'new_acquisition':False,'method':asset['grid_correction']}
+    fact=copy.deepcopy(doc['evidence_catalog']['facts'][-1])
+    fact.update(fact_id='physical_relief:overview_grid_r65',source_id=src['source_id'],source_version='R65',
+                subject_id='physical_relief:europe_overview_rgb',source_locator=src['locator'],
+                spatial_scope={'kind':'geographic_reference','id':'europe_overview_rgb_correction','bounds_lon_lat':[-16,32,32,64]},
+                methodology=asset['grid_correction']['method'],generator='tools/map/build_surface_r57.py --repair-overview-grid')
+    fact['value']['assets']=[asset]
+    doc['source_registry']['sources']=[s for s in doc['source_registry']['sources'] if s['source_id']!=src['source_id']]+[src]
+    doc['evidence_catalog']['facts']=[f for f in doc['evidence_catalog']['facts'] if f['fact_id']!=fact['fact_id']]+[fact]
+    catalog.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    print(json.dumps({'output':str(output),'pages':len(pages),'bytes':len(encoded),'decoded_bytes':len(result),'new_acquisition':False}))
+
 if __name__ == '__main__':
+    if '--repair-shared-precision' in sys.argv:
+        from pathlib import Path as GenerationPath
+        repair_shared_precision(GenerationPath(__file__).resolve().parents[2])
+        raise SystemExit(0)
     from generation_policy import enter
     from pathlib import Path as GenerationPath
     enter(GenerationPath(__file__).resolve().parents[2], 'sampling_surface_r57.json')
+    if '--repair-overview-grid' in sys.argv:
+        repair_overview_grid(GenerationPath(__file__).resolve().parents[2])
+        raise SystemExit(0)
 
 from pathlib import Path
 import numpy as np

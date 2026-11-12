@@ -30,7 +30,12 @@ func _load() -> void:
 	if ResourceLoader.exists(atlas_path,"Texture2D"): texture = load(atlas_path) as Texture2D
 	if FileAccess.file_exists(BINDINGS):
 		var bindings: Variant = JSON.parse_string(FileAccess.get_file_as_string(BINDINGS))
-		if bindings is Dictionary and bindings.get("schema_id")=="wwo_map_symbol_bindings_r47": _bindings = bindings
+		if bindings is Dictionary and bindings.get("schema_id")=="wwo_map_symbol_bindings_r47":
+			_bindings = bindings
+			for reference: Dictionary in _bindings.get("reference_places",[]) as Array:
+				reference["valid_from"]=_bindings.valid_from
+				reference["valid_to"]=_bindings.valid_to
+				reference["display_until"]=_bindings.valid_to
 
 func capital_places() -> Dictionary:
 	_load()
@@ -74,6 +79,11 @@ func limit_for(record: Dictionary, id: String) -> float:
 	var kind := symbol_id(record,id)
 	return float((icons.get(kind,{}) as Dictionary).get("region_max_mpp",3000.0))*(1.12 if _retained_ids.has(id) else 1.0)
 
+func reference_places() -> Array:
+	_load()
+	if _date<str(_bindings.get("valid_from","1900-01-01")) or _date>=str(_bindings.get("valid_to","1901-01-01")): return []
+	return _bindings.get("reference_places",[]) as Array
+
 static func _cells(rect: Rect2) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
 	for y: int in range(floori(rect.position.y/32.0),floori(rect.end.y/32.0)+1):
@@ -103,6 +113,10 @@ func layout(candidates: Array[Dictionary], regional: bool, mpp: float, selected:
 		if not regional and not bool(spec.get("world",false)) and not chosen: continue
 		var limit := float(spec.get("region_max_mpp",3000.0) if regional else spec.get("world_max_mpp",18000.0))
 		if mpp>limit*(1.12 if previous.has(id) else 1.0) and not chosen: continue
+		# A known but unclassified settlement gets a pair of roofs at close
+		# scale. Keep its ordinary settlement identity and distant locator.
+		if regional and mpp<=300.0 and kind=="settlement" and str(candidate.record.get("kind",""))=="settlement":
+			spec=icons.get("town",spec) as Dictionary
 		var pixels := float(spec.get("screen_px",18.0))
 		if not regional: pixels *= 0.78
 		var model := bool(candidate.get("model",false))
@@ -137,19 +151,10 @@ func layout(candidates: Array[Dictionary], regional: bool, mpp: float, selected:
 		# traversal, allocation or label preparation.
 		if admitted.size()>=(160 if regional else 24): break
 		var rect := (row.rect as Rect2).grow(2.0)
-		# Hidden model locators do not reserve a full icon; model picking stays
-		# with RegionView. Selection uses only its small existing ground anchor.
-		if bool(row.model) and str(row.id)!=selected and not bool(row.get("topic_locator",false)): continue
+		# A model keeps a small geographic locator; it never gains icon-sized
+		# geometry or a larger physical footprint.
 		if not free_rect(rect,grid) and str(row.id)!=selected:
-			if not bool(row.get("topic_locator",false)):continue
-			# Keep the existing symbol at a shared city anchor. A free adjacent
-			# status point remains linked to that same ground position.
-			var located:=false
-			for offset:Vector2 in [Vector2.ZERO,Vector2(18,0),Vector2(-18,0),Vector2(0,18),Vector2(0,-18),Vector2(28,0),Vector2(-28,0),Vector2(0,28),Vector2(0,-28)]:
-				var anchor:=Rect2((row.point as Vector2)+offset-Vector2.ONE*4.0,Vector2.ONE*8.0)
-				if not Rect2(Vector2.ZERO,viewport_size).encloses(anchor) or not free_rect(anchor.grow(2.0),grid):continue
-				row["rect"]=anchor;row["topic_locator_only"]=true;rect=anchor.grow(2.0);located=true;break
-			if not located:continue
+			continue
 		occupy(rect,grid)
 		admitted.append(row)
 	_retained_ids.clear()
@@ -160,12 +165,17 @@ func draw(canvas: CanvasItem, rows: Array[Dictionary], selected: String, hovered
 	for row: Dictionary in rows:
 		var rect := row.rect as Rect2
 		var chosen := str(row.id)==selected
+		if bool(row.model) and not bool(row.get("topic_locator",false)):
+			canvas.draw_circle(rect.get_center(),3.5,Color(0.10,0.15,0.14,0.9),false,2.5,true)
+			canvas.draw_circle(rect.get_center(),3.5,Color(0.86,0.77,0.55),false,1.0,true)
 		if not bool(row.model) and not bool(row.get("topic_locator_only",false)):
 			var color := Color(1.15,1.12,1.04) if str(row.id)==hovered else Color.WHITE
 			if not bool((row.record as Dictionary).get("symbol_selectable",true)): color = Color(0.72,0.72,0.72,0.6)
 			var coords := (row.spec as Dictionary).get("rect",[]) as Array
 			if texture!=null and coords.size()==4:
-				canvas.draw_texture_rect_region(texture,rect,Rect2(float(coords[0]),float(coords[1]),float(coords[2]),float(coords[3])),color)
+				var source := Rect2(float(coords[0]),float(coords[1]),float(coords[2]),float(coords[3]))
+				canvas.draw_texture_rect_region(texture,rect.grow(1.25),source,Color(0.10,0.15,0.14,0.85*color.a))
+				canvas.draw_texture_rect_region(texture,rect,source,color)
 			else: canvas.draw_circle(rect.get_center(),3.0,Color(0.84,0.78,0.64))
 		if chosen:
 			var point := Vector2(rect.get_center().x,rect.end.y+2.0)

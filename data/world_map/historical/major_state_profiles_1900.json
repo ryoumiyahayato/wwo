@@ -13,7 +13,14 @@
       "opening_brief_zh": "美国是联邦共和国。1898 年美西战争与《巴黎条约》使其获得波多黎各、关岛和菲律宾等海外领地，对外影响随之扩大。",
       "opening_source_title": "美国国会图书馆：美西战争资料指南",
       "opening_source_url": "https://guides.loc.gov/spanish-american-war",
-      "opening_reference_year": 1900
+      "opening_reference_year": 1900,
+      "government_summary": {
+        "form_zh": "联邦共和制",
+        "reference_year": 1900,
+        "basis": "HISTORICAL_DISPLAY_REFERENCE_NOT_RUNTIME_APPOINTMENT",
+        "source_title": "美国国会图书馆：美西战争资料指南",
+        "source_url": "https://guides.loc.gov/spanish-american-war"
+      }
     },
     {
       "rank": 2,
@@ -25,7 +32,14 @@
       "opening_brief_zh": "英国是拥有海外殖民地的君主国。1899 年爆发的南非战争正在进行，帝国在南部非洲的政策成为重要公共议题。",
       "opening_source_title": "英国国家档案馆：1899—1902 年南非战争档案指南",
       "opening_source_url": "https://www.nationalarchives.gov.uk/help-with-your-research/research-guides/the-south-african-war-1899-1902-overview/",
-      "opening_reference_year": 1900
+      "opening_reference_year": 1900,
+      "government_summary": {
+        "form_zh": "君主制",
+        "reference_year": 1900,
+        "basis": "HISTORICAL_DISPLAY_REFERENCE_NOT_RUNTIME_APPOINTMENT",
+        "source_title": "英国国家档案馆：1899—1902 年南非战争档案指南",
+        "source_url": "https://www.nationalarchives.gov.uk/help-with-your-research/research-guides/the-south-african-war-1899-1902-overview/"
+      }
     },
     {
       "rank": 3,
@@ -37,7 +51,14 @@
       "opening_brief_zh": "德意志帝国在 1871 年建立，君主权力与帝国议会并存。帝国议会参与立法和预算，而皇帝与帝国政府保有重要政治权力。",
       "opening_source_title": "德国联邦议院：德意志帝国 1871—1918",
       "opening_source_url": "https://www.bundestag.de/en/parliament/history/parliamentarism/empire",
-      "opening_reference_year": 1900
+      "opening_reference_year": 1900,
+      "government_summary": {
+        "form_zh": "君主制（帝国）",
+        "reference_year": 1900,
+        "basis": "HISTORICAL_DISPLAY_REFERENCE_NOT_RUNTIME_APPOINTMENT",
+        "source_title": "德国联邦议院：德意志帝国 1871—1918",
+        "source_url": "https://www.bundestag.de/en/parliament/history/parliamentarism/empire"
+      }
     },
     {
       "rank": 4,
@@ -49,7 +70,22 @@
       "opening_brief_zh": "俄罗斯帝国由沙皇统治，疆域横跨欧亚。19 世纪末铁路和工业持续扩展，广大农业地区与新兴工业中心并存。",
       "opening_source_title": "美国国会图书馆：Russia, a country study，帝国与工业化章节",
       "opening_source_url": "https://tile.loc.gov/storage-services/master/frd/frdcstdy/ru/russiacountrystu00curt/russiacountrystu00curt.pdf",
-      "opening_reference_year": 1900
+      "opening_reference_year": 1900,
+      "government_summary": {
+        "form_zh": "沙皇君主制",
+        "reference_year": 1900,
+        "basis": "HISTORICAL_DISPLAY_REFERENCE_NOT_RUNTIME_APPOINTMENT",
+        "source_title": "美国国会图书馆：Russia, a country study，帝国与工业化章节",
+        "source_url": "https://tile.loc.gov/storage-services/master/frd/frdcstdy/ru/russiacountrystu00curt/russiacountrystu00curt.pdf",
+        "institutions": [
+          {
+            "label_zh": "君主",
+            "value_zh": "沙皇"
+          }
+        ],
+        "parliament_basis_url": "https://www.prlib.ru/collections/1313035",
+        "parliament_note_zh": "1900年尚无国家杜马；1906年第一届杜马开会。"
+      }
     },
     {
       "rank": 5,
@@ -61,7 +97,24 @@
       "opening_brief_zh": "清帝国在列强竞争中承受外交压力。1899 年，美国向有关列强提出在华贸易的门户开放照会，中国的贸易与势力范围问题受到国际关注。",
       "opening_source_title": "美国国务院历史办公室：1899—1900 年海约翰与中国",
       "opening_source_url": "https://history.state.gov/milestones/1899-1913/hay-and-china",
-      "opening_reference_year": 1900
+      "opening_reference_year": 1900,
+      "government_summary": {
+        "form_zh": "君主专制",
+        "reference_year": 1900,
+        "basis": "HISTORICAL_DISPLAY_REFERENCE_NOT_RUNTIME_APPOINTMENT",
+        "source_title": "故宫博物院：清代军机处史料展",
+        "source_url": "https://www.dpm.org.cn/show/225948.html",
+        "institutions": [
+          {
+            "label_zh": "君主",
+            "value_zh": "皇帝"
+          },
+          {
+            "label_zh": "中枢",
+            "value_zh": "军机处"
+          }
+        ]
+      }
     },
     {
       "rank": 6,
@@ -73,7 +126,30 @@
       "opening_brief_zh": "法国处于第三共和国时期，总统与两院议会构成国家政治生活的中心。1875 年确立的共和国制度已延续至世纪之交。",
       "opening_source_title": "法国参议院：1875—1940 年共和国参议院",
       "opening_source_url": "https://www.senat.fr/connaitre-le-senat/lhistoire-du-senat/1875-1940-le-senat-republicain.html",
-      "opening_reference_year": 1900
+      "opening_reference_year": 1900,
+      "government_summary": {
+        "form_zh": "议会共和制",
+        "reference_year": 1900,
+        "basis": "HISTORICAL_DISPLAY_REFERENCE_NOT_RUNTIME_APPOINTMENT",
+        "source_title": "法国参议院：1875—1940 年共和国参议院",
+        "source_url": "https://www.senat.fr/connaitre-le-senat/lhistoire-du-senat/1875-1940-le-senat-republicain.html",
+        "executive_zh": "总统、内阁",
+        "legislature_zh": "参议院、众议院",
+        "institutions": [
+          {
+            "label_zh": "国家元首",
+            "value_zh": "总统"
+          },
+          {
+            "label_zh": "政府",
+            "value_zh": "内阁"
+          },
+          {
+            "label_zh": "议会",
+            "value_zh": "参议院、众议院"
+          }
+        ]
+      }
     },
     {
       "rank": 7,
@@ -122,7 +198,14 @@
       "opening_brief_zh": "西班牙仍为君主国。1898 年战争后的《巴黎条约》结束了其对古巴的主权要求，并将波多黎各、关岛和菲律宾转让给美国。",
       "opening_source_title": "美国国会图书馆：1898 年《巴黎条约》及美西战争资料",
       "opening_source_url": "https://guides.loc.gov/spanish-american-war",
-      "opening_reference_year": 1900
+      "opening_reference_year": 1900,
+      "government_summary": {
+        "form_zh": "君主制",
+        "reference_year": 1900,
+        "basis": "HISTORICAL_DISPLAY_REFERENCE_NOT_RUNTIME_APPOINTMENT",
+        "source_title": "美国国会图书馆：1898 年《巴黎条约》及美西战争资料",
+        "source_url": "https://guides.loc.gov/spanish-american-war"
+      }
     },
     {
       "rank": 12,
@@ -134,7 +217,14 @@
       "opening_brief_zh": "加拿大是英帝国内的联邦自治领，1867 年邦联奠定了其政治结构。各省与联邦政府分担权力，对英国仍保有宪制联系。",
       "opening_source_title": "加拿大政府：加拿大联邦制",
       "opening_source_url": "https://www.canada.ca/en/intergovernmental-affairs/services/federation/federalism-canada.html",
-      "opening_reference_year": 1900
+      "opening_reference_year": 1900,
+      "government_summary": {
+        "form_zh": "联邦自治领",
+        "reference_year": 1900,
+        "basis": "HISTORICAL_DISPLAY_REFERENCE_NOT_RUNTIME_APPOINTMENT",
+        "source_title": "加拿大政府：加拿大联邦制",
+        "source_url": "https://www.canada.ca/en/intergovernmental-affairs/services/federation/federalism-canada.html"
+      }
     },
     {
       "rank": 13,
@@ -303,7 +393,14 @@
       "opening_brief_zh": "南非共和国是布尔人共和国。1899 年与英国爆发的战争已打破日常政治秩序，国家处于战争之中。",
       "opening_source_title": "英国国家档案馆：南非战争档案",
       "opening_source_url": "https://www.nationalarchives.gov.uk/education/resources/the-south-african-war-how-did-the-british-conduct-war-in-1899-1902/",
-      "opening_reference_year": 1900
+      "opening_reference_year": 1900,
+      "government_summary": {
+        "form_zh": "共和制",
+        "reference_year": 1900,
+        "basis": "HISTORICAL_DISPLAY_REFERENCE_NOT_RUNTIME_APPOINTMENT",
+        "source_title": "英国国家档案馆：南非战争档案",
+        "source_url": "https://www.nationalarchives.gov.uk/education/resources/the-south-african-war-how-did-the-british-conduct-war-in-1899-1902/"
+      }
     },
     {
       "rank": 33,
@@ -315,7 +412,14 @@
       "opening_brief_zh": "奥兰治自由邦是布尔人共和国。1899 年开始的南非战争将它与南非共和国一同卷入对英国的战争。",
       "opening_source_title": "英国国家档案馆：南非战争档案",
       "opening_source_url": "https://www.nationalarchives.gov.uk/education/resources/the-south-african-war-how-did-the-british-conduct-war-in-1899-1902/",
-      "opening_reference_year": 1900
+      "opening_reference_year": 1900,
+      "government_summary": {
+        "form_zh": "共和制",
+        "reference_year": 1900,
+        "basis": "HISTORICAL_DISPLAY_REFERENCE_NOT_RUNTIME_APPOINTMENT",
+        "source_title": "英国国家档案馆：南非战争档案",
+        "source_url": "https://www.nationalarchives.gov.uk/education/resources/the-south-african-war-how-did-the-british-conduct-war-in-1899-1902/"
+      }
     },
     {
       "rank": 34,

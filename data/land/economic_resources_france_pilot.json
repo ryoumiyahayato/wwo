@@ -1,0 +1,81 @@
+{
+  "scope": "Finite opt-in formal-world pilot. Resource presence has geographic support. ALL operative quantities below are development assumptions, not measured 1900 land, yields or French reserves.",
+  "quantity_units": {
+    "grain_coal_flour": "development_kg: one Native unit denotes one developer kilogram. Divide by 1000 only for mass reporting; this grants no national statistical coverage or macro inventory conversion.",
+    "bread": "development_piece, with no admitted piece-to-kg or calorie conversion",
+    "land": "land_units * land_unit_m2; original 10 * 100m2 = 0.1ha",
+    "money": "Original Ledger denomination:formal_simulation_minor_v1, not historical francs or macro centimes",
+    "logistics_storage": "Pilot legacy edge/node capacities are Native business quantities/day, not railway tonnes. StockLots records quantity and title; this pilot has no bound physical warehouse facility. Regional Shared payload/storage units require their separate declared conversions."
+  },
+  "scale_comparisons": {
+    "entry": "EconomyNetworkDevelopment.resource_scale_request; opt-in WorldBootstrap configuration, never applied to an existing world",
+    "factors": [100, 1000],
+    "balanced": "Scale land, finite seeds/opening stocks/capital, aggregate members/labor, processing capacity and quotas, mineral quantities and legacy daily route/node allowances together. Keep per-unit inputs, work, prices and calendar rules unchanged. Merchant receives a four-times-factor grain restocking target, paid from its own funds.",
+    "surplus": "Double land and provide the extra finite opening seed allocation; labor and buyers unchanged. Sowing is still limited by the one-day labor budget.",
+    "shortage": "Ten times buyer members and their declared opening cash; farmer members, land, seeds, labor and production remain at balanced quantities. Additional members do not grant additional jobs or wages.",
+    "bottleneck": "Keep balanced goods, actors and money; retain only one hundredth of the balanced route/node allowance.",
+    "basis": "Development scale comparisons, not measured 1900 France. No in-run cash, stock, land or deposit top-ups. Original resource_request remains unchanged. Food rates, farm population/land ratios and throughput are uncalibrated."
+  },
+  "calculation_rules": {
+    "capacity": "One capacity per resource id. Multiple admitted actors share it; actor creation or succession never resets land or geological remaining quantity.",
+    "permission": "Producer land_use_units and optional from_day/until_day are explicit development use permissions, not historical property titles. Resource presence alone grants no use right.",
+    "weather": "Unspecified years use development weather factor 1000, not observed historical weather. A bounded 1901 factor-500 comparison changes harvest through the production formula.",
+    "mineral_remaining": "Derived from original extraction source receipts across all operators. Discovery changes knowledge only. The opportunity-cost gate uses the exact milli quotation, not its rounded integer unit ceiling."
+  },
+  "sources": {
+    "agriculture": "https://www.fao.org/gaez/en",
+    "modern_agriculture_presence": "https://www.insee.fr/fr/statistiques/7728859",
+    "coal_presence": "https://www.loire.gouv.fr/Actions-de-l-Etat/Risques-naturels.-miniers-et-technologiques/Risques-miniers"
+  },
+  "unknown": ["1900 cultivated area near Rouen", "1900 soil/fertility and weather series", "Historical farm tenure and yield", "Measured coal resources/discoveries and mine titles", "Within-region mine-to-market transport"],
+  "resources": [
+    {
+      "id": "resource:rouen:grain_pilot", "kind": "crop",
+      "geographic_unit_id": "country_fra", "place_id": "place:rouen",
+      "geographic_basis": "Rouen market catchment in France; not a cadastral parcel or a claim that the city centre is farmland",
+      "source_url": "https://www.insee.fr/fr/statistiques/7728859",
+      "quantity_basis": "EXPLICIT_DEVELOPMENT_ASSUMPTION",
+      "land_units": 10, "land_unit_m2": 100, "seed_per_unit": 2,
+      "yield_per_unit": 15, "sow_hours": 1, "harvest_hours": 1,
+      "sow_month": 3, "sow_date": 15, "grow_days": 180,
+      "suitability_permille": 900, "fertility_permille": 900,
+      "climate_permille": 1000, "technology_permille": 1000, "food_reserve": 10,
+      "weather_by_year_permille": {"1900": 1000}
+    },
+    {
+      "id": "resource:france:coal_pilot", "kind": "mineral",
+      "geographic_unit_id": "country_fra", "place_id": "place:lyon",
+      "geographic_basis": "Country-level French coal occurrence; Lyon is the pilot market collection point, NOT an asserted mine coordinate. Loire coal occurrence does not prove a Lyon deposit.",
+      "source_url": "https://www.loire.gouv.fr/Actions-de-l-Etat/Risques-naturels.-miniers-et-technologiques/Risques-miniers",
+      "quantity_basis": "EXPLICIT_DEVELOPMENT_ASSUMPTION",
+      "geological_quantity": 120, "discovered_quantity": 40,
+      "discovery": [{"day": 120, "quantity": 40}],
+      "units_per_day": 4, "hours_per_unit": 2, "equipment_period": 7,
+      "maintenance_hours": 2, "economic_cost": 3,
+      "cost_basis": "Reservation/opportunity cost in pilot money; not a paid invoice or guaranteed profit. Remaining 40 units stay undiscovered."
+    }
+  ],
+  "cycle_comparisons": {
+    "entry": "EconomyNetworkDevelopment.resource_cycle_request(100, scenario); old resource_request/resource_scale_request remain separate controls",
+    "sources": {
+      "basket": "https://web.mit.edu/14.731/papers/greatdivergence.pdf",
+      "fuel_energy": "https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/2_Volume2/V2_1_Ch1_Introduction.pdf",
+      "energy_requirements": "https://www.fao.org/4/Y5686e/y5686e07.htm"
+    },
+    "source_scope": "Allen 2001 Table 3 is a comparative premodern European basket (182kg bread/year, 5 million BTU fuel/year), not measured Rouen/Lyon 1900 consumption. Food mass range is a developer extrapolation; fuel heat values are modern physical reference, not stove efficiency.",
+    "food_service": "One food unit denotes one gram of dry-staple approximation: grain/flour kg=1000, bread piece=500 (0.5kg flour input). Not exact calories, complete diet or protein adequacy. Developer range 400-650g/adult/day; selected farmers/wage workers 500, miners 600.",
+    "fuel_service": "One fuel unit=1MJ fuel input; coal kg=25MJ (IPCC other bituminous coal reference 25.8, interval 19.9-30.5). Household range 8-16MJ/person/day, selected 10; wood and other fuels are not admitted sources in this pilot. No useful-heat/stove conversion.",
+    "population_and_land": "100-scale case uses 20 farmer +10 miner +5 mill worker +5 bakery worker adults from existing host population, the same 10ha and annual potential 12150kg. Capacity units regrouped from 100m2 to1000m2, 20kg seed and150kg base yield per unit; selected sow/harvest 1 person-hour/unit are developer work rates, not historical labor measurements. Growing/cooking/threshing labor is incomplete.",
+    "ownership": "Self-employed output belongs to its cohort; self-use consumes its original lots. Enterprises own processing output and owe real wages. Crop seed and forthcoming household use are retained before sale; no goods or cash are granted after opening.",
+    "opening_cash": "Declared before simulation, not replenished: resource cohorts30/person, workers60/person; enterprise working capital is old100-scale/20. Crop and merchant opening grain remain3200/2400kg. Carryover food, financial endowments and nominal wage8/hour are assumptions, not francs or measured wealth.",
+    "processing": "Mill5kg grain->4kg flour+1kg reject,1kg coal,1person-hour; bakery5kg flour+1kg coal->10bread portions,2person-hours. Flour extraction80% uses Allen83% as an order-of-magnitude reference. Equipment, throughput, fuel and labor are developer assumptions; water and wet bread mass are unmodeled.",
+    "decision_policy": "Actual delivered sales over30days set inventory coverage (14days normal,7adjusted) with bounded probe and target ceiling. Merchant rejects landed cost above its own current ask (adjusted requires10% quote spread), without guaranteed profit. Mine production is constrained by inventory, labor, price and discovered remaining. Adjusted processing queues only currently useful shifts; old fixed-hours rules remain available.",
+    "shocks": "1901 weather factor500 reduces actual harvest; day30 original action disables downstream bakery activity, or lowers existing route daily capacity to1/100. No final outputs/prices are prescribed.",
+    "unmapped_needs": {
+      "beans_peas": "Allen52litres/year comparative reference; no admitted producer here",
+      "meat_dairy_eggs": "Allen26kg meat,5.2kg butter,5.2kg cheese,52eggs/year; no mappings here",
+      "clothing_hygiene_light": "Allen5m linen,2.6kg soap,2.6kg candles,2.6litres oil/year; goods exist in broader catalog but no configured supply in this slice",
+      "housing_water_health": "No quantity/service mapping in this slice; unmet scope remains unknown, not zero"
+    }
+  }
+}

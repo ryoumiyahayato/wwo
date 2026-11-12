@@ -1,0 +1,339 @@
+{
+  "schema": "settlement_display_selection_v1",
+  "year": 1901,
+  "threshold": 100000,
+  "population_scope": "Total commune population; 1901 metropolitan France, continental cities. Supplemental cartographic windows are identified separately.",
+  "population_source": "https://www.numdam.org/item/JSFS_1907__48__20_0.pdf",
+  "population_source_page": 24,
+  "geometry_basis": "Modern IGN Plan building footprints. Acquisition radii are bounded display windows, not reconstructed 1901 city limits.",
+  "other_geographies": [{"id":"sete","name":"塞特","tier":"C","geography":"lagoon_coast"}],
+  "cities": [
+    {
+      "id": "la_bouille",
+      "name": "拉布耶",
+      "name_en": "La Bouille",
+      "selection_reason": "Seine riverbank village southwest of Rouen; modern IGN roofs and streets are display references",
+      "anchor": [0.9342,49.3513],
+      "radius_km": 1.15,
+      "street_print": true
+    },
+    {
+      "id": "barbizon",
+      "name": "巴比松",
+      "name_en": "Barbizon",
+      "selection_reason": "Historic hamlet at the forest edge; present-day footprints and streets used for display",
+      "anchor": [2.607752,48.445751],
+      "radius_km": 1.15,
+      "street_print": true
+    },
+    {
+      "id": "chailly_en_biere",
+      "name": "沙伊昂比耶尔",
+      "name_en": "Chailly-en-Bière",
+      "selection_reason": "Rural settlement context for the Barbizon window",
+      "anchor": [2.60924,48.467167],
+      "radius_km": 1.2,
+      "street_print": true
+    },
+    {
+      "id": "fontainebleau",
+      "name": "枫丹白露",
+      "name_en": "Fontainebleau",
+      "selection_reason": "Forest town and palace setting",
+      "anchor": [2.70177,48.40908],
+      "radius_km": 2.65,
+      "street_print": true
+    },
+    {
+      "id": "brest",
+      "name": "布雷斯特",
+      "name_en": "Brest",
+      "selection_reason": "Supplemental Brittany harbour display window",
+      "anchor": [-4.486,48.392],
+      "radius_km": 5,
+      "tier": "B",
+      "street_print": true
+    },
+    {
+      "id": "paris",
+      "name": "巴黎",
+      "population": 2714068,
+      "anchor": [
+        2.3522,
+        48.8566
+      ],
+      "radius_km": 16,
+      "name_en": "Paris"
+    },
+    {
+      "id": "marseille",
+      "name": "马赛",
+      "population": 491161,
+      "anchor": [
+        5.3698,
+        43.2965
+      ],
+      "radius_km": 6,
+      "name_en": "Marseille",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "lyon",
+      "name": "里昂",
+      "population": 459099,
+      "anchor": [
+        4.8357,
+        45.764
+      ],
+      "radius_km": 10,
+      "name_en": "Lyon",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "bordeaux",
+      "name": "波尔多",
+      "population": 256638,
+      "anchor": [
+        -0.5792,
+        44.8378
+      ],
+      "radius_km": 5,
+      "name_en": "Bordeaux",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "lille",
+      "name": "里尔",
+      "population": 210696,
+      "anchor": [
+        3.063,
+        50.6292
+      ],
+      "radius_km": 11.5,
+      "name_en": "Lille",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "toulouse",
+      "name": "图卢兹",
+      "population": 149841,
+      "anchor": [
+        1.4442,
+        43.6047
+      ],
+      "radius_km": 4,
+      "name_en": "Toulouse",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "saint_etienne",
+      "name": "圣艾蒂安",
+      "population": 146559,
+      "anchor": [
+        4.3872,
+        45.4397
+      ],
+      "radius_km": 4,
+      "name_en": "Saint-Étienne",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "nantes",
+      "name": "南特",
+      "population": 132990,
+      "anchor": [
+        -1.5536,
+        47.2184
+      ],
+      "radius_km": 4,
+      "name_en": "Nantes",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "le_havre",
+      "name": "勒阿弗尔",
+      "population": 130196,
+      "anchor": [
+        0.1079,
+        49.4944
+      ],
+      "radius_km": 4,
+      "name_en": "Le Havre",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "roubaix",
+      "name": "鲁贝",
+      "population": 124365,
+      "anchor": [
+        3.1746,
+        50.6927
+      ],
+      "radius_km": 3.5,
+      "name_en": "Roubaix",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "rouen",
+      "name": "鲁昂",
+      "population": 116316,
+      "anchor": [
+        1.0993,
+        49.4431
+      ],
+      "radius_km": 5.2,
+      "name_en": "Rouen",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "reims",
+      "name": "兰斯",
+      "population": 108385,
+      "anchor": [
+        4.0317,
+        49.2583
+      ],
+      "radius_km": 4.4,
+      "name_en": "Reims",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "nice",
+      "name": "尼斯",
+      "population": 105109,
+      "anchor": [
+        7.262,
+        43.7102
+      ],
+      "radius_km": 5,
+      "name_en": "Nice",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "nancy",
+      "name": "南锡",
+      "population": 102559,
+      "anchor": [
+        6.1844,
+        48.6921
+      ],
+      "radius_km": 4.5,
+      "name_en": "Nancy",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "toulon",
+      "name": "土伦",
+      "population": 101602,
+      "anchor": [
+        5.928,
+        43.1242
+      ],
+      "radius_km": 5.1,
+      "name_en": "Toulon",
+      "tier": "A",
+      "street_print": true
+    },
+    {
+      "id": "neuilly_sur_seine",
+      "name": "塞纳河畔讷伊",
+      "name_en": "Neuilly-sur-Seine",
+      "anchor": [2.26965, 48.8846],
+      "radius_km": 2.2,
+      "tier": "B",
+      "street_print": true
+    },
+    {
+      "id": "saint_denis",
+      "name": "圣但尼",
+      "name_en": "Saint-Denis",
+      "anchor": [2.35387, 48.93564],
+      "radius_km": 3.6,
+      "tier": "B",
+      "street_print": true
+    },
+    {
+      "id": "versailles",
+      "name": "凡尔赛",
+      "name_en": "Versailles",
+      "anchor": [2.13424, 48.80359],
+      "radius_km": 3.5,
+      "tier": "B",
+      "street_print": true
+    },
+    {
+      "id": "tourcoing",
+      "name": "图尔宽",
+      "name_en": "Tourcoing",
+      "anchor": [3.16117, 50.72391],
+      "radius_km": 3.2,
+      "tier": "B",
+      "street_print": true
+    },
+    {"id":"amiens","name":"亚眠","name_en":"Amiens","anchor":[2.29778,49.89194],"radius_km":4.6,"tier":"B","street_print":true},
+    {"id":"limoges","name":"利摩日","name_en":"Limoges","anchor":[1.2626,45.8343],"radius_km":4.9,"tier":"B","street_print":true},
+    {"id":"angers","name":"昂热","name_en":"Angers","anchor":[-0.55556,47.47278],"radius_km":4.7,"tier":"B","street_print":true},
+    {"id":"nimes","name":"尼姆","name_en":"Nîmes","anchor":[4.36,43.83694],"radius_km":4.6,"tier":"B","street_print":true},
+    {"id":"montpellier","name":"蒙彼利埃","name_en":"Montpellier","anchor":[3.87635,43.61093],"radius_km":5.2,"tier":"B","street_print":true},
+    {"id":"rennes","name":"雷恩","name_en":"Rennes","anchor":[-1.68083,48.11417],"radius_km":5.2,"tier":"B","street_print":true},
+    {"id":"dijon","name":"第戎","name_en":"Dijon","anchor":[5.04194,47.32306],"radius_km":4.8,"tier":"B","street_print":true},
+    {"id":"grenoble","name":"格勒诺布尔","name_en":"Grenoble","anchor":[5.7266,45.1872],"radius_km":5.6,"tier":"B","street_print":true},
+    {"id":"orleans","name":"奥尔良","name_en":"Orléans","anchor":[1.90407,47.90248],"radius_km":5.3,"tier":"B","street_print":true},
+    {"id":"besancon","name":"贝桑松","name_en":"Besançon","anchor":[6.02139,47.24222],"radius_km":4.7,"tier":"B","street_print":true},
+    {"id":"tours","name":"图尔","name_en":"Tours","anchor":[0.68833,47.39278],"radius_km":5.1,"tier":"B","street_print":true},
+    {"id":"le_mans","name":"勒芒","name_en":"Le Mans","anchor":[0.19694,48.00417],"radius_km":4.7,"tier":"B","street_print":true},
+    {"id":"beziers","name":"贝济耶","name_en":"Béziers","anchor":[3.21611,43.34333],"radius_km":4.3,"tier":"B","street_print":true},
+    {"id":"calais","name":"加来","name_en":"Calais","anchor":[1.8566,50.9472],"radius_km":4.6,"tier":"B","street_print":true},
+    {"id":"troyes","name":"特鲁瓦","name_en":"Troyes","anchor":[4.07806,48.29889],"radius_km":4.3,"tier":"B","street_print":true},
+    {"id":"clermont_ferrand","name":"克莱蒙费朗","name_en":"Clermont-Ferrand","anchor":[3.08694,45.77972],"radius_km":5,"tier":"B","street_print":true},
+    {"id":"saint_quentin","name":"圣康坦","name_en":"Saint-Quentin","anchor":[3.28556,49.84778],"radius_km":4.2,"tier":"B","street_print":true},
+    {"id":"clichy","name":"克利希","name_en":"Clichy","anchor":[2.30556,48.90361],"radius_km":2.3,"tier":"C","street_print":true},
+    {"id":"saint_ouen","name":"圣旺","name_en":"Saint-Ouen","anchor":[2.33306,48.90694],"radius_km":2.3,"tier":"C","street_print":true},
+    {"id":"montreuil","name":"蒙特勒伊","name_en":"Montreuil","anchor":[2.44306,48.86028],"radius_km":2.5,"tier":"C","street_print":true},
+    {"id":"vincennes","name":"万塞讷","name_en":"Vincennes","anchor":[2.43917,48.84778],"radius_km":2.1,"tier":"C","street_print":true},
+    {"id":"asnieres_sur_seine","name":"塞纳河畔阿涅尔","name_en":"Asnières-sur-Seine","anchor":[2.28556,48.91111],"radius_km":2.3,"tier":"C","street_print":true},
+    {"id":"aubervilliers","name":"欧贝维利耶","name_en":"Aubervilliers","anchor":[2.3825,48.91111],"radius_km":2.4,"tier":"C","street_print":true},
+    {"id":"ivry_sur_seine","name":"塞纳河畔伊夫里","name_en":"Ivry-sur-Seine","anchor":[2.38778,48.81389],"radius_km":2.4,"tier":"C","street_print":true},
+    {"id":"boulogne_sur_mer","name":"滨海布洛涅","name_en":"Boulogne-sur-Mer","anchor":[1.61389,50.72556],"radius_km":2.9,"tier":"C","street_print":true},
+    {"id":"avignon","name":"阿维尼翁","name_en":"Avignon","anchor":[4.80833,43.94861],"radius_km":3,"tier":"C","street_print":true},
+    {"id":"bourges","name":"布尔日","name_en":"Bourges","anchor":[2.39556,47.08361],"radius_km":3,"tier":"C","street_print":true},
+    {"id":"caen","name":"卡昂","name_en":"Caen","anchor":[-0.37056,49.18222],"radius_km":3.2,"tier":"C","street_print":true},
+    {"id":"cherbourg","name":"瑟堡","name_en":"Cherbourg","anchor":[-1.61636,49.63984],"radius_km":2.9,"tier":"C","street_print":true},
+    {"id":"poitiers","name":"普瓦捷","name_en":"Poitiers","anchor":[0.33528,46.58111],"radius_km":2.9,"tier":"C","street_print":true},
+    {"id":"dunkerque","name":"敦刻尔克","name_en":"Dunkerque","anchor":[2.3768,51.0381],"radius_km":3.1,"tier":"C","street_print":true},
+    {"id":"angouleme","name":"昂古莱姆","name_en":"Angoulême","anchor":[0.15944,45.64944],"radius_km":2.8,"tier":"C","street_print":true},
+    {"id":"colmar","name":"科尔马","name_en":"Colmar","anchor":[7.355,48.08111],"radius_km":2.7,"tier":"C","street_print":true},
+    {"id":"rochefort","name":"罗什福尔","name_en":"Rochefort","anchor":[-0.96694,45.94194],"radius_km":2.7,"tier":"C","street_print":true},
+    {"id":"perpignan","name":"佩皮尼昂","name_en":"Perpignan","anchor":[2.89541,42.69764],"radius_km":2.9,"tier":"C","street_print":true},
+    {"id":"saint_nazaire","name":"圣纳泽尔","name_en":"Saint-Nazaire","anchor":[-2.2179,47.27506],"radius_km":2.9,"tier":"C","street_print":true},
+    {"id":"montlucon","name":"蒙吕松","name_en":"Montluçon","anchor":[2.6025,46.34],"radius_km":2.8,"tier":"C","street_print":true},
+    {"id":"roanne","name":"罗阿讷","name_en":"Roanne","anchor":[4.06806,46.03611],"radius_km":2.8,"tier":"C","street_print":true},
+    {"id":"douai","name":"杜埃","name_en":"Douai","anchor":[3.07917,50.37083],"radius_km":2.8,"tier":"C","street_print":true},
+    {"id":"belfort","name":"贝尔福","name_en":"Belfort","anchor":[6.84944,47.64111],"radius_km":2.8,"tier":"C","street_print":true},
+    {"id":"perigueux","name":"佩里格","name_en":"Périgueux","anchor":[0.71806,45.18417],"radius_km":2.7,"tier":"C","street_print":true},
+    {"id":"valenciennes","name":"瓦朗谢讷","name_en":"Valenciennes","anchor":[3.525,50.35917],"radius_km":2.9,"tier":"C","street_print":true},
+    {"id":"carcassonne","name":"卡尔卡松","name_en":"Carcassonne","anchor":[2.35139,43.21583],"radius_km":2.8,"tier":"C","street_print":true},
+    {"id":"cannes","name":"戛纳","name_en":"Cannes","anchor":[7.01275,43.55135],"radius_km":3,"tier":"C","street_print":true},
+    {"id":"arles","name":"阿尔勒","name_en":"Arles","anchor":[4.62861,43.67694],"radius_km":2.8,"tier":"C","street_print":true},
+    {"id":"armentieres","name":"阿尔芒蒂耶尔","name_en":"Armentières","anchor":[2.88028,50.68722],"radius_km":2.6,"tier":"C","street_print":true},
+    {"id":"valence","name":"瓦朗斯","name_en":"Valence","anchor":[4.89083,44.9325],"radius_km":2.9,"tier":"C","street_print":true},
+    {"id":"chalon_sur_saone","name":"索恩河畔沙隆","name_en":"Chalon-sur-Saône","anchor":[4.85372,46.78112],"radius_km":2.8,"tier":"C","street_print":true},
+    {"id":"bayonne","name":"巴约讷","name_en":"Bayonne","anchor":[-1.47639,43.4925],"radius_km":2.9,"tier":"C","street_print":true},
+    {"id":"aix_en_provence","name":"普罗旺斯地区艾克斯","name_en":"Aix-en-Provence","anchor":[5.44556,43.52778],"radius_km":3,"tier":"C","street_print":true},
+    {"id":"lens","name":"朗斯","name_en":"Lens","anchor":[2.8331,50.4315],"radius_km":2.8,"tier":"C","street_print":true},
+    {"id":"courbevoie","name":"库尔布瓦","name_en":"Courbevoie","anchor":[2.25222,48.89722],"radius_km":2.3,"tier":"C","street_print":true}
+  ]
+}

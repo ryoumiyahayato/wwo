@@ -1,14 +1,23 @@
 class_name InterfaceSettings
 extends RefCounted
-## Audio/display preferences only. No world or save-state ownership.
+const UILocale = preload("res://scripts/presentation/ui/ui_locale.gd")
+## Shared interface preferences and theme presets.
 const PATH: String = "user://interface_settings.cfg"
-const PARIS_PAINTING = preload("res://assets/menu/paris_street_rainy_day_1877.jpg")
-
-static func theme_parameters() -> Dictionary:
-	# One actual theme: shared controls plus the Cabinet instrument palette.
-	# The globe's brass and historical map strokes retain their existing values.
-	return {"id":"paris_1877","name":"1900 · 巴黎","background":PARIS_PAINTING,
-		"design_name":"Le Cabinet du Monde — 世界仪器室",
+const DEFAULT_THEME := "paris_1877"
+const THEMES := {
+	DEFAULT_THEME: {"name":"1900",
+		"background":preload("res://assets/menu/paris_street_rainy_day_1877.jpg"),
+		"art":{
+			"folio":preload("res://assets/ui/instrument_reference/folio.png"),
+			"market":preload("res://assets/ui/instrument_reference/market.png"),
+			"politics":preload("res://assets/ui/instrument_reference/politics.png"),
+			"portrait":preload("res://assets/ui/instrument_reference/portrait.png"),
+			"accounts":preload("res://assets/ui/instrument_reference/accounts.png"),
+			"belongings":preload("res://assets/ui/instrument_reference/belongings.png"),
+			"relations":preload("res://assets/ui/instrument_reference/relations.png"),
+			"dial_compact":preload("res://assets/ui/instrument_reference/dial_compact.png"),
+			"dial_large":preload("res://assets/ui/instrument_reference/dial_large.png"),
+			"message_handle":preload("res://assets/ui/instrument_reference/message_handle.png")},
 		"panel":Color(0.018,0.030,0.047,0.94),"ink":Color(0.91,0.86,0.73),
 		"brass":Color(0.64,0.54,0.32,0.65),"button":Color(0.025,0.042,0.056,0.95),
 		"button_hover":Color(0.08,0.12,0.14,0.97),
@@ -23,15 +32,26 @@ static func theme_parameters() -> Dictionary:
 			"muted":Color(0.65,0.73,0.72,1.0),
 			"teal":Color(0.39,0.57,0.56,0.72),
 			"status":Color(0.53,0.23,0.22,0.90),
-			"clock_radius":144.0,"title_size":16,"caption_size":11}}
+			"clock_radius":116.0,"title_size":16,"caption_size":11}}
+}
+
+static var _theme_id: String = DEFAULT_THEME
+
+static func theme_parameters() -> Dictionary:
+	return THEMES[_theme_id]
+
+static func _known_theme(id: String) -> String:
+	return id if THEMES.has(id) else DEFAULT_THEME
 
 
 static func load_preferences() -> Dictionary:
 	var config := ConfigFile.new()
 	config.load(PATH)
-	return {"volume":clampf(float(config.get_value("audio","volume",0.8)),0.0,1.0),"bgm":bool(config.get_value("audio","bgm",true)),"fullscreen":bool(config.get_value("display","fullscreen",false)),"theme":str(config.get_value("display","theme","paris_1877")),"labels":false}
+	return {"volume":clampf(float(config.get_value("audio","volume",0.8)),0.0,1.0),"bgm":bool(config.get_value("audio","bgm",true)),"fullscreen":bool(config.get_value("display","fullscreen",false)),"theme":_known_theme(str(config.get_value("display","theme",DEFAULT_THEME))),"locale":str(config.get_value("display","locale","zh_CN")),"labels":false}
 
 static func apply(value: Dictionary) -> void:
+	_theme_id = _known_theme(str(value.get("theme",DEFAULT_THEME)))
+	UILocale.apply(str(value.get("locale","zh_CN")))
 	AudioServer.set_bus_volume_db(0,linear_to_db(maxf(0.0001,float(value.volume))))
 	AudioServer.set_bus_mute(0,float(value.volume)<=0.0)
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if bool(value.get("fullscreen",false)) else DisplayServer.WINDOW_MODE_WINDOWED)
@@ -44,6 +64,7 @@ static func save(value: Dictionary) -> Error:
 	config.set_value("audio","volume",value.volume)
 	config.set_value("audio","bgm",value.bgm)
 	config.set_value("display","fullscreen",value.get("fullscreen",false))
-	config.set_value("display","theme",value.get("theme","paris_1877"))
+	config.set_value("display","theme",_theme_id)
+	config.set_value("display","locale",value.get("locale","zh_CN"))
 	return config.save(PATH)
 

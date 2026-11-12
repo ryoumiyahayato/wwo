@@ -5,6 +5,7 @@ extends RefCounted
 ## dynamic facts and accepts explicit hours instead of owning a global clock.
 
 const SNAPSHOT_SCHEMA_ID: String = "vnext_spatial_world_v2"
+const ADMINISTRATIVE_REFERENCE_CELL_M: float = 200000.0
 const DEFAULT_NOMINAL_CAPACITY_BY_TYPE: Dictionary = {
 	VNextSpatialCatalog.LINK_TYPE_ROAD: 100.0,
 	VNextSpatialCatalog.LINK_TYPE_RAIL: 1000.0,
@@ -14,6 +15,7 @@ const DEFAULT_NOMINAL_CAPACITY_BY_TYPE: Dictionary = {
 var _catalog: VNextSpatialCatalog = null
 var _current_hour: int = 0
 var _infrastructure: Dictionary = {}
+var infrastructure_revision: int = 0 # Derived route-cache invalidation, not saved.
 var _territories: Dictionary = {}
 var _capacity: VNextSpatialCapacityWindow = null
 var _land: LandTopology
@@ -30,6 +32,9 @@ var _administrative_display_revision: int = 0
 var _opening_admin_members: Dictionary = {}
 var _admin_member_view: Dictionary = {}
 var _admin_member_view_revision: int = -1
+var _admin_reference_choice: Dictionary = {}
+var _admin_reference_choice_date: String = ""
+var _administrative_reference_grid: Dictionary = {} # Derived display bounds only.
 var _administrative_children: Dictionary = {}
 var _loaded_child_rosters: Dictionary = {}
 
@@ -52,7 +57,9 @@ func configure_land_administrations(document: Dictionary, boundaries: Dictionary
 		candidate[id]["boundary_area_km2"] = feature.source_area_km2
 		candidate[id]["reference_descriptor"] = feature.duplicate(true)
 	_land_administrations.merge(candidate)
+	_admin_reference_choice.clear()
 	for id: String in candidate:
+		_index_administrative_reference(id)
 		var parent := str(candidate[id].get("parent_region_id",""))
 		if parent.is_empty() or parent=="<null>": continue
 		if not _administrative_children.has(parent): _administrative_children[parent] = []
@@ -93,11 +100,21 @@ func administrative_reference_bounds(id: String) -> Rect2:
 	var values := descriptor.get("local_bounds",[]) as Array
 	return Rect2(float(values[0]),float(values[1]),float(values[2]),float(values[3])) if values.size()==4 else Rect2()
 
+func _index_administrative_reference(id: String) -> void:
+	var bounds := administrative_reference_bounds(id)
+	if not bounds.has_area(): return
+	for y: int in range(floori(bounds.position.y/ADMINISTRATIVE_REFERENCE_CELL_M),floori(bounds.end.y/ADMINISTRATIVE_REFERENCE_CELL_M)+1):
+		for x: int in range(floori(bounds.position.x/ADMINISTRATIVE_REFERENCE_CELL_M),floori(bounds.end.x/ADMINISTRATIVE_REFERENCE_CELL_M)+1):
+			var cell := Vector2i(x,y)
+			if not _administrative_reference_grid.has(cell): _administrative_reference_grid[cell] = []
+			(_administrative_reference_grid[cell] as Array).append(id)
+
 func administrative_display_revision() -> int:
 	return _administrative_display_revision
 
 func _invalidate_administrative_display() -> void:
 	_administrative_display_revision += 1
+	_admin_reference_choice.clear()
 	administrative_display_changed.emit()
 
 func _current_administrative_members() -> Dictionary:
@@ -114,9 +131,15 @@ func _current_administrative_members() -> Dictionary:
 	return _admin_member_view
 
 func administrative_display_uses_members(id: String, date: String) -> bool:
+	if _admin_reference_choice_date!=date:
+		_admin_reference_choice_date=date
+		_admin_reference_choice.clear()
+	if _admin_reference_choice.has(id): return bool(_admin_reference_choice[id])
 	var current := _current_administrative_members().get(id,{"ids":[]}) as Dictionary
 	var reference_active := _administrative_reference_visible(id,date)
-	return not reference_active or current.ids != _opening_admin_members.get(id,[])
+	var use_members: bool=not reference_active or current.ids != _opening_admin_members.get(id,[])
+	_admin_reference_choice[id]=use_members
+	return use_members
 
 func administrative_display_bounds(id: String, date: String) -> Rect2:
 	if administrative_display_uses_members(id,date):
@@ -128,7 +151,14 @@ func request_administrative_boundaries(view: Rect2, date: String, mpp: float, en
 	var result: Array[Dictionary] = []
 	if not enabled or _land == null or mpp>6500.0 or not view.has_area() or home_polity_id.is_empty(): return result
 	var members := _current_administrative_members()
-	for id: String in _land_administrations:
+	var candidates: Dictionary = {}
+	for y: int in range(floori(view.position.y/ADMINISTRATIVE_REFERENCE_CELL_M),floori(view.end.y/ADMINISTRATIVE_REFERENCE_CELL_M)+1):
+		for x: int in range(floori(view.position.x/ADMINISTRATIVE_REFERENCE_CELL_M),floori(view.end.x/ADMINISTRATIVE_REFERENCE_CELL_M)+1):
+			for id: String in _administrative_reference_grid.get(Vector2i(x,y),[]): candidates[id] = true
+	# Changed actual membership can lie outside its historical reference bounds.
+	for id: String in members: candidates[id] = true
+	if _land_administrations.has(selected_id): candidates[selected_id] = true
+	for id: String in candidates:
 		var identity := _land_administrations[id] as Dictionary
 		if str(identity.get("polity_id","")) != home_polity_id and id!=selected_id: continue
 		# Lower units only enter the existing view demand at close range.
@@ -263,6 +293,7 @@ func administrative_children(region_id: String) -> Array[Dictionary]:
 				row["source_name_zh"] = source.get("publisher","")
 				row["boundary_reference"] = (source.get("supporting_locators",[]) as Array).back() if not (source.get("supporting_locators",[]) as Array).is_empty() else source.get("locator","")
 				_land_administrations[str(row.id)] = row
+				_index_administrative_reference(str(row.id))
 				if not _administrative_children.has(region_id): _administrative_children[region_id] = []
 				_administrative_children[region_id].append(str(row.id))
 			_loaded_child_rosters[region_id] = true
@@ -504,6 +535,7 @@ func initialize(catalog_value: VNextSpatialCatalog) -> bool:
 	_catalog = catalog_value
 	_current_hour = 0
 	_infrastructure = candidate_infrastructure
+	infrastructure_revision += 1
 	_territories = candidate_territories
 	_capacity = candidate_capacity
 	return _is_internal_state_valid()
@@ -872,6 +904,7 @@ func restore(snapshot_value: Dictionary) -> bool:
 
 	_current_hour = candidate._current_hour
 	_infrastructure = candidate._infrastructure
+	infrastructure_revision += 1
 	_territories = candidate._territories
 	_capacity = candidate._capacity
 	_land = candidate._land
@@ -961,6 +994,7 @@ func _mutate_infrastructure(link_id: String, mutation: Callable) -> bool:
 		return false
 	_capacity._recompute_allocations()
 	if _is_internal_state_valid():
+		infrastructure_revision += 1
 		return true
 	state.restore(before)
 	_capacity._recompute_allocations()

@@ -1,7 +1,6 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/formal/formal_world_menu.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/menu/paris_street_rainy_day_1877.jpg" id="2"]
 [ext_resource type="Script" path="res://scripts/presentation/map/globe_controller.gd" id="3"]
 [ext_resource type="Shader" path="res://shaders/presentation/ui/menu_shade.gdshader" id="4"]
 
@@ -25,7 +24,6 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-texture = ExtResource("2")
 expand_mode = 1
 stretch_mode = 6
 

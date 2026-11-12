@@ -1,33 +1,43 @@
 class_name FormalWorldPresenter
 extends RefCounted
 const EconomicText = preload("res://scripts/presentation/ui/formal_economic_text.gd")
+
+static func refresh_player_marker(world: WorldState, renderer: GlobeRenderer) -> void:
+	var place := world.spatial_world.get_place(world.person_overlay.current_place(world.player_state.player_id()))
+	renderer.set_player_place(place)
 ## Builds detached page/map inputs. Holds no world state and writes no domain owner.
 
-static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeController, content: WorldPageContent, politics: RuntimePoliticalEntityView, economy: FormalWorldEconomyView, organizations: FormalWorldOrganizationView, responsibilities: FormalWorldOrganizationResponsibilityView) -> void:
+static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeController, politics: RuntimePoliticalEntityView, economy: FormalWorldEconomyView, organizations: FormalWorldOrganizationView, responsibilities: FormalWorldOrganizationResponsibilityView) -> Dictionary:
 	shell.set_date(world.game_clock.current_date())
 	var person_id := world.player_state.player_id()
-	var person := world.person_overlay.person(person_id)
-	var place := world.spatial_world.get_place(str(person.get("current_place_id","")))
-	var source_id := str(place.get("parent_country_id",person.get("population_territory_id","")))
-	if politics.runtime_id_for_source(source_id).is_empty():
-		var mapped_source := world.population_state.unit_for_place(str(person.get("current_place_id","")))
-		if not politics.runtime_id_for_source(mapped_source).is_empty(): source_id = mapped_source
-	var local_id := politics.runtime_id_for_source(source_id)
+	var person: Dictionary = {}
+	var place: Dictionary = {}
+	var local_id := ""
+	var work_drawer := shell.current_page=="organization" and shell.organization_page.work_open()
+	if shell.current_page in ["person","economy"] or work_drawer:
+		person = world.person_overlay.person(person_id)
+		place = world.spatial_world.get_place(str(person.get("current_place_id","")))
+		var source_id := str(place.get("parent_country_id",person.get("population_territory_id","")))
+		if politics.runtime_id_for_source(source_id).is_empty():
+			var mapped_source := world.population_state.unit_for_place(str(person.get("current_place_id","")))
+			if not politics.runtime_id_for_source(mapped_source).is_empty(): source_id = mapped_source
+		local_id = politics.runtime_id_for_source(source_id)
 	var memberships: Array[Dictionary] = []
 	var organization_rows: Array[Dictionary] = []
-	if shell.current_page in ["person","organization"]:
+	if shell.current_page in ["person","organization","world"]:
 		var appointments := organizations.appointments_for_person(person_id)
 		var member_records := organizations.memberships_for_person(person_id)
 		var member_ids: Dictionary = {}
 		for member: Dictionary in member_records: member_ids[str(member.organization_id)] = true
 		var status_names := {"MONITORING":"正在观察","ATTENTION_REQUIRED":"需要关注","NO_DETAILED_ECONOMY":"无高细节经济资料","ORGANIZATION_INACTIVE":"组织非活跃"}
 		var organization_ids: Array[String] = []
-		if shell.current_page=="organization": organization_ids.assign(organizations.organization_ids())
+		if shell.current_page in ["organization","world"]: organization_ids.assign(organizations.organization_ids())
 		if shell.current_page=="person":
 			for relation: Dictionary in member_records+appointments:
 				var id := str(relation.organization_id)
 				if not id in organization_ids: organization_ids.append(id)
 		for organization_id: String in organization_ids:
+			if shell.current_page=="world" and organizations.organization_kind(organization_id)!="government_body": continue
 			var row := organizations.organization(organization_id)
 			var basis := world.organization_evidence_view.organization_basis(organization_id)
 			var represented := politics.runtime_id_for_source(str(basis.get("represented_polity_id","")))
@@ -54,10 +64,14 @@ static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeCon
 				var role_text := "、".join(roles) if not roles.is_empty() else "成员记录；未记录职务"
 				row["player_roles"] = role_text
 				memberships.append({"organization_id":organization_id,"label":name,"roles_text":role_text})
+			row["player_positions"]=roles
 			organization_rows.append(row)
 		shell.organization_page.refresh(organization_rows,memberships)
-	if shell.current_page=="person":
-		var section := shell.person_page.section
+		if shell.current_page=="organization":
+			var work_view := world.personal_economy_state.person_economy(person_id)
+			shell.organization_page.has_personal_work=bool(work_view.get("native",false)) or not (work_view.get("handover",[]) as Array).is_empty()
+	if shell.current_page=="person" or work_drawer:
+		var section := "native" if work_drawer else shell.person_page.section
 		var personal := world.personal_economy_state.person_economy(person_id)
 		personal["opening_participation"] = world.economy_r1.opening_participation(person_id) if world.economy_r1!=null else {}
 		personal["handover"] = world.economy_r1.responsibility_handover_view(person_id) if world.economy_r1 != null else []
@@ -84,7 +98,7 @@ static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeCon
 			personal["scope_options"] = world.economy_r1.scope_options(person_id) if world.economy_r1 != null else []
 			var managers := personal.get("managed_firms",[]) as Array
 			var business: Dictionary={}
-			if shell.person_page.business_mode and not managers.is_empty():
+			if not work_drawer and shell.person_page.business_mode and not managers.is_empty():
 				var firm_ids:Array=managers.map(func(row:Dictionary)->String:return str(row["firm_id"]))
 				if shell.person_page.business_firm_id.is_empty():shell.person_page.business_firm_id=str(firm_ids[clampi(shell.person_page.business_firm_index,0,firm_ids.size()-1)])
 				var index:=firm_ids.find(shell.person_page.business_firm_id)
@@ -111,7 +125,7 @@ static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeCon
 		var property_view: Dictionary = {}
 		var goods := world.personal_economy_state
 		if section in ["situation","goods"]:
-			var count := EconomyPage.market_page_size(shell.workspace_rect().size.y)
+			var count := PersonView.inventory_page_size(shell.person_inventory_height())
 			property_view["rows"] = goods.holding_rows(person_id,count+1,shell.person_page.inventory_page*count if section=="goods" else 0)
 		if section=="records":
 			property_view["records"] = goods.living_records(person_id,receipt_rows+1,shell.person_page.living_page*receipt_rows)
@@ -131,72 +145,49 @@ static func refresh_ui(world: WorldState, shell: MainShell, controller: GlobeCon
 				if str(row.get("commodity_id","")).begins_with("native:"): row["name_zh"]=EconomicText.good(row["commodity_id"])
 		shell.person_page.refresh(person,place,memberships,personal,receipts,property_view)
 	if shell.current_page=="economy":
-		var selected_id := shell.economy_page.polity_id
-		if not politics.has_entity(selected_id):
-			selected_id = controller.selected_polity_id if politics.has_entity(controller.selected_polity_id) else local_id
-		var native_market := shell.economy_page.personal_market and world.personal_economy_state.manages_native(person_id)
-		var market_rows: Array[Dictionary] = []
-		if shell.current_page == "economy":
-			var market_id := economy.market_id_for_economic_aggregate(economy.economy_entity_for_polity(selected_id))
-			var count := EconomyPage.known_market_page_size(shell.workspace_rect().size.y) if native_market else EconomyPage.market_page_size(shell.workspace_rect().size.y)
-			if native_market:
-				market_rows = world.personal_economy_state.market_rows(person_id,market_id,count+1,shell.economy_page.commodity_page*count)
-			else:
-				market_rows = world.economy_state.read_only_market_rows(market_id,count+1,shell.economy_page.commodity_page*count)
-		var selected_market := shell.economy_page.selected_seller_site_id if native_market else economy.market_id_for_economic_aggregate(economy.economy_entity_for_polity(selected_id))
-		var offer: Dictionary = {}
-		var selected_item: Dictionary = {}
-		if shell.current_page == "economy" and not shell.economy_page.selected_commodity_id.is_empty():
-			selected_item = world.personal_economy_state.commodity_capability(person_id,shell.economy_page.selected_commodity_id,selected_market)
-			offer = world.personal_economy_state.purchase_quote(person_id,selected_market,shell.economy_page.selected_commodity_id,shell.economy_page.quantity_milli)
-			if offer.get("quantity_scale") == 1 and offer.get("success",false):
-				selected_item["price"] = offer["unit_price"]
-				selected_item["denomination"] = offer["denomination"]
-				selected_item["seller_site"] = offer["seller_site"]
-		var native_observation: Dictionary = {}
-		if shell.current_page == "economy":
-			native_observation = world.economy_state.read_only_native_observation(person_id)
-			native_observation["person_place_name"] = place.get("name_zh",place.get("name","地点名称未记录"))
-			native_observation["cohort_observation"] = world.economy_state.read_only_cohort_observation(person_id, 16, shell.economy_page.cohort_statistics_page*16)
-			native_observation["commercial_information"] = world.economy_r1.commercial_information(person_id) if native_market and world.economy_r1 != null else []
-			native_observation["managed_sites"] = []
-			native_observation["employees"] = []
-			native_observation["enterprise_lifecycles"] = []
-			native_observation["scope_requests"] = world.economy_r1.scope_change_view(person_id) if world.economy_r1 != null else []
-			native_observation["residence_statistics"] = world.population_state.residence_statistics()
-			native_observation["commodity_crosswalk"] = world.economy_state.commodity_mapping_observation()
-			native_observation["property_handovers"] = world.economy_r1.property_handover_view(person_id) if world.economy_r1 != null else []
-			native_observation["handover"] = world.economy_r1.responsibility_handover_view(person_id) if world.economy_r1 != null else []
-			var population_unit := economy.economy_entity_for_polity(selected_id)
-			native_observation["population_responsibility"] = world.economy_state.read_only_population_responsibility(population_unit)
-			native_observation["population_responsibility"]["present_named_people"] = world.population_state.present_named_count(population_unit, world.person_overlay)
-			if world.economy_r1 != null:
-				for firm: Dictionary in LivelihoodAction.query(world, person_id).get("managed_firms", []):
-					var view := LivelihoodAction.query_firm(world, person_id, str(firm["firm_id"]))
-					native_observation["employees"].append_array(view.get("employees", []))
-					native_observation["enterprise_lifecycles"].append(view.get("lifecycle", {}))
-					for site: Dictionary in view.get("operations", []):
-						native_observation["managed_sites"].append({"site_id": site["site_id"], "place_id": site["stock_place_id"], "operating": site["operating"], "inventory": site["inventory"], "free_inventory": site["free_inventory"], "committed_inventory": site["committed_inventory"], "job_postings": site["job_postings"], "input_needs": site["input_needs"], "incoming": site["incoming"], "activities": site["activities"], "effective_capacity": site["shared_capacity"], "base_capacity": site["base_capacity"], "plan_day": site.get("plan", {}).get("day", -1)})
-		shell.economy_page.refresh(CurrentWorldPoliticalProjection.polity_summary(selected_id,politics,world.historical_evidence_view,economy),economy,selected_id,market_rows,offer,selected_item,native_market,native_observation)
-	if shell.current_page in ["world","administration"] or (shell.current_page=="map" and (not controller.selected_polity_id.is_empty() or not controller.selected_place_id.is_empty())):
-		var selected_place := world.spatial_world.get_place(controller.selected_place_id)
-		var formal_place := not selected_place.is_empty()
-		if selected_place.is_empty() and controller.selected_place_id.begins_with("administrative_region:"):
-			selected_place = world.spatial_world.administrative_land_summary(controller.selected_place_id,content.date())
-		if selected_place.is_empty():
-			for unit: Dictionary in content.administration().get("runtime_units",[]) as Array:
-				if str(unit.id) == controller.selected_place_id:
-					selected_place = unit.duplicate(true)
-					selected_place.merge({"place_id":str(unit.id),"spatial_kind":"historical_administration"})
-					break
-		if selected_place.is_empty(): selected_place = content.place()
-		var selected_polity := CurrentWorldPoliticalProjection.polity_summary(controller.selected_polity_id,politics,world.historical_evidence_view,economy)
-		var economy_id := controller.selected_polity_id
-		if not selected_place.is_empty():
-			economy_id = politics.runtime_id_for_source(str(selected_place.get("parent_country_id","")))
-		if economy.economy_entity_for_polity(economy_id).is_empty(): economy_id = ""
-		var mapped := CurrentWorldPoliticalProjection.polity_summary(economy_id,politics,world.historical_evidence_view)
-		shell.world_page.refresh(selected_polity,selected_place,content,formal_place,economy_id,str(mapped.get("name_zh","")))
+		var selected_id: String=shell.economy_page.polity_id
+		if not politics.has_entity(selected_id): selected_id=controller.player_polity_id if politics.has_entity(controller.player_polity_id) else local_id
+		var managed: bool=world.personal_economy_state.manages_native(person_id)
+		var polity: Dictionary=CurrentWorldPoliticalProjection.polity_summary(selected_id,politics,world.historical_evidence_view)
+		var market: Dictionary=world.economy_r1.market_display_view(person_id,shell.economy_page.content in ["quotes","activity"]) if managed and world.economy_r1!=null else {}
+		if managed and world.economy_r1!=null and shell.economy_page.content=="transport":
+			var places: Array[String]=[]
+			for hub: Dictionary in world.economy_r1.market_hub_view(person_id,[],96).get("hubs",[]):
+				var id := str(hub.get("place_id",""))
+				if shell.economy_page._in_scope(id): places.append(id)
+			market["logistics"]=world.economy_r1.logistics_map_view(person_id,places,true)
+		var countries: Array[Dictionary]=[]
+		var seen: Dictionary={}
+		for region: Dictionary in market.get("places",[]):
+			var id: String=politics.runtime_id_for_source(str(region.parent_country_id))
+			if id.is_empty() or seen.has(id): continue
+			seen[id]=true
+			var country: Dictionary=CurrentWorldPoliticalProjection.polity_summary(id,politics,world.historical_evidence_view)
+			countries.append({"id":id,"name_zh":country.get("name_zh",id)})
+		market["countries"]=countries
+		if shell.economy_page.market_scope!="regional":
+			var region_valid: bool=false
+			var candidate: String=""
+			for region: Dictionary in shell.economy_page.region_choices():
+				if region.has("polity_id") and str(region.polity_id)!=selected_id: continue
+				if str(region.place_id)==shell.economy_page.region_id: region_valid=true
+				if candidate.is_empty() or str(region.place_id)==str(person.get("current_place_id","")): candidate=str(region.place_id)
+			if not region_valid: shell.economy_page.region_id=candidate
+		var offer: Dictionary={}
+		var selected_item: Dictionary={}
+		if managed and not shell.economy_page.selected_commodity_id.is_empty():
+			var good: String=shell.economy_page.selected_commodity_id
+			var site: String=shell.economy_page.selected_seller_site_id
+			selected_item=world.personal_economy_state.commodity_capability(person_id,good,site)
+			for row: Dictionary in market.get("offers",[]):
+				if row.commodity_id==good and row.seller_site==site: selected_item.merge(row,true);break
+			offer=world.personal_economy_state.purchase_quote(person_id,site,good,shell.economy_page.quantity_milli)
+			if offer.get("success",false):
+				selected_item["price"]=offer["unit_price"];selected_item["denomination"]=offer["denomination"]
+		shell.economy_page.refresh(polity,economy,selected_id,[],offer,selected_item,managed,{"market":market})
+	# The application also needs this already-prepared personal location; it
+	# must not query the person and place again after consuming the page.
+	return place
 
 static func map_units(world: WorldState, politics: RuntimePoliticalEntityView) -> Array[Dictionary]:
 	return CurrentWorldPoliticalProjection.map_units(politics,world.historical_evidence_view)

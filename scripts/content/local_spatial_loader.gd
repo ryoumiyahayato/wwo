@@ -7,10 +7,10 @@ const ANCHOR: Vector2 = Vector2(2.3522, 48.8566)
 const GIZA_ANCHOR: Vector2 = Vector2(31.131557,29.976122)
 const GIZA_PATH: String = "res://data/local/giza_pyramids_1900.json"
 const SOURCES: Array[Dictionary] = [
-	{"path":PARIS_PATH,"anchor":ANCHOR,"anchor_id":"place:paris","radius_km":300.0},
+	{"path":PARIS_PATH,"anchor":ANCHOR,"anchor_id":"place:paris","radius_km":300.0,"city_overview_path":"res://data/local/paris_city_reference.json","city_overview_profiles":[{"place_id":"place:rouen","path":"res://data/local/rouen_city_reference.json"},{"place_id":"place:lyon","path":"res://data/local/lyon_city_reference.json"},{"place_id":"place:le_havre","path":"res://data/local/le_havre_city_reference.json"},{"place_id":"","path":"res://data/local/france_settlement_context.json"},{"place_id":"","path":"res://data/local/benelux_settlement_context.json"}]},
 	{"path":GIZA_PATH,"anchor":GIZA_ANCHOR,"anchor_id":"landmark:giza_pyramids_1900","radius_km":20.0},
-	{"path":"res://data/local/london_westminster_1900.json","anchor":Vector2(-0.1246,51.5007),"anchor_id":"place:london","radius_km":15.0},
-	{"path":"res://data/local/zermatt_west_physical_reference.json","anchor":Vector2(7.703304,46.010743),"anchor_id":"geographic_region:zermatt_west_reference","radius_km":8.0},
+	{"path":"res://data/local/london_westminster_1900.json","anchor":Vector2(-0.1246,51.5007),"anchor_id":"place:london","radius_km":15.0,"city_overview_path":"res://data/local/london_city_overview.json","city_overview_profiles":[{"place_id":"","path":"res://data/local/british_settlement_context.json"}]},
+	{"path":"res://data/local/zermatt_west_physical_reference.json","anchor":Vector2(7.703304,46.010743),"anchor_id":"geographic_region:zermatt_west_reference","radius_km":14.0},
 	{"path":"res://data/local/berlin_transport_1900.json","anchor":Vector2(13.388,52.5219),"anchor_id":"place:berlin","radius_km":20.0},
 	{"path":"res://data/local/internal_preview_r23/pont_du_gard.json","anchor":Vector2(4.535278,43.947222),"anchor_id":"landmark:pont_du_gard_reference","radius_km":15.0,"internal_preview":true,"display_name":"加尔桥","parent_country_id":"country_fra"},
 	{"path":"res://data/local/internal_preview_r23/stonehenge.json","anchor":Vector2(-1.826277,51.178905),"anchor_id":"landmark:stonehenge_reference","radius_km":15.0,"internal_preview":true,"display_name":"巨石阵","parent_country_id":"british_isles_1900"},
@@ -22,7 +22,7 @@ const SOURCES: Array[Dictionary] = [
 	{"path":"res://data/local/internal_preview_r41/taj_mahal.json","anchor":Vector2(78.04222,27.17417),"anchor_id":"landmark:taj_mahal_reference","radius_km":8.0,"internal_preview":true,"display_name":"泰姬陵主体","parent_country_id":"cshapes_gw_750"},
 	{"path":"res://data/local/internal_preview_r41/temple_heaven.json","anchor":Vector2(116.406667,39.882167),"anchor_id":"landmark:temple_heaven_reference","radius_km":8.0,"internal_preview":true,"display_name":"天坛祈年殿","parent_country_id":"qing_empire"},
 	{"path":"res://data/local/internal_preview_r41/hagia_sophia.json","anchor":Vector2(28.98,41.00833),"anchor_id":"landmark:hagia_sophia_reference","radius_km":8.0,"internal_preview":true,"display_name":"圣索菲亚主体","parent_country_id":"ottoman_empire"}]
-const PREWARM_KM_PER_PIXEL: float = 6.0
+const PREWARM_KM_PER_PIXEL: float = 0.35
 var content: LocalSpatialContent
 var _thread: Thread
 var _request_mutex := Mutex.new()
@@ -192,6 +192,19 @@ static func _load(path: String, current: Callable, expected_anchor: String = "")
 		ids[id] = true
 		if not LocalSpatialContent.historical_rail_alignment(feature): continue
 		result.features.append(feature)
+	# Concept placements may reuse an admitted point in this same shard. The
+	# offset remains bounded around that point; no new place identity is made.
+	var composition_points: Dictionary={}
+	for feature: Dictionary in result.features:
+		if str(feature.geometry.type)=="Point":composition_points[str(feature.id)]=feature.geometry.coordinates
+	for feature: Dictionary in result.features:
+		for placement: Dictionary in (feature.get("miniature_layout",{}) as Dictionary).get("placements",[]):
+			if not placement.has("reference_anchor_id"):continue
+			var reference:=str(placement.reference_anchor_id)
+			if not composition_points.has(reference):
+				result.errors.append("Concept composition requires an admitted point: "+reference)
+				return result
+			placement["reference_anchor_lon_lat"]=(composition_points[reference] as Array).duplicate()
 	for visual: Dictionary in result.landmark_visuals():
 		if not ids.has(str(visual.get("anchor_place_id",""))) or not _valid_feature(visual) or str(visual.get("kind",""))!="landmark" or not str(visual.get("model_path","")).begins_with("res://assets/landmarks/") or str(visual.get("source_reference","")).is_empty():
 			result.errors.append("Invalid landmark placement reference")
@@ -261,23 +274,39 @@ static func _load(path: String, current: Callable, expected_anchor: String = "")
 			var chunk := {"kind":"water_surface","polygons":polygons,"feature_id":str(feature.id),"max_mpp":200.0}
 			result.line_chunks.append(chunk)
 			continue
-		var points := PackedVector3Array()
-		for coordinate: Array in feature.geometry.coordinates as Array:
-			var lon := deg_to_rad(float(coordinate[0]))
-			var lat := deg_to_rad(float(coordinate[1]))
-			points.append(Vector3(cos(lat) * sin(lon), sin(lat), cos(lat) * cos(lon)))
+		var lines: Array=[feature.geometry.coordinates]
+		if feature.has("display_geometry"):
+			if not feature.display_geometry is Dictionary:
+				result.errors.append("Invalid local display geometry: "+str(feature.id));return result
+			var display: Dictionary=feature.display_geometry
+			if str(feature.get("display_geometry_role",""))!="RIVER_STROKE_CLIPPED_AT_INSTALLED_MODERN_SEA" or str(feature.kind)!="river" or display.get("type")!="MultiLineString" or not display.get("coordinates") is Array or (display.coordinates as Array).size()>32:
+				result.errors.append("Invalid local display clipping: "+str(feature.id));return result
+			lines=display.coordinates
+			for raw: Variant in lines:
+				if not raw is Array:
+					result.errors.append("Invalid local display coordinates: "+str(feature.id));return result
+				var copy := feature.duplicate()
+				copy["geometry"]={"type":"LineString","coordinates":raw}
+				if not _valid_feature(copy):
+					result.errors.append("Invalid local display line: "+str(feature.id));return result
 		var kind := str(feature.kind)
 		if not groups.has(kind):
 			groups[kind] = []
 			segment_counts[kind] = 0
-		for offset: int in range(0, points.size() - 1, 128):
-			var part := points.slice(offset, mini(offset + 129, points.size()))
-			(groups[kind] as Array).append({"kind": kind, "points": part, "feature_id":str(feature.id)})
-			segment_counts[kind] += part.size() - 1
-			if int(segment_counts[kind]) >= 256:
-				result.line_chunks.append({"kind": kind, "boundaries": groups[kind], "max_mpp": 200.0})
-				groups[kind] = []
-				segment_counts[kind] = 0
+		for line: Array in lines:
+			var points := PackedVector3Array()
+			for coordinate: Array in line:
+				var lon := deg_to_rad(float(coordinate[0]))
+				var lat := deg_to_rad(float(coordinate[1]))
+				points.append(Vector3(cos(lat) * sin(lon), sin(lat), cos(lat) * cos(lon)))
+			for offset: int in range(0, points.size() - 1, 128):
+				var part := points.slice(offset, mini(offset + 129, points.size()))
+				(groups[kind] as Array).append({"kind": kind, "points": part, "feature_id":str(feature.id)})
+				segment_counts[kind] += part.size() - 1
+				if int(segment_counts[kind]) >= 256:
+					result.line_chunks.append({"kind": kind, "boundaries": groups[kind], "max_mpp": 200.0})
+					groups[kind] = []
+					segment_counts[kind] = 0
 	for kind: String in groups:
 		if not (groups[kind] as Array).is_empty():
 			result.line_chunks.append({"kind": kind, "boundaries": groups[kind], "max_mpp": 200.0})
@@ -318,6 +347,7 @@ static func _valid_miniature(feature: Dictionary, anchor_id: String) -> bool:
 	if not placements is Array or placements.size()>96: return false
 	for entry: Variant in placements:
 		if not entry is Dictionary or str(entry.get("module","")) not in ["paris_mansard","paris_corner","london_terrace","london_gabled","civic_hall","warehouse","sawtooth_workshop","quay_platform"]: return false
+		if entry.has("reference_anchor_id") and (not entry.reference_anchor_id is String or str(entry.reference_anchor_id).is_empty()):return false
 		var offset: Variant = entry.get("offset_m",[])
 		var scale: Variant = entry.get("scale",[])
 		if not offset is Array or offset.size()!=2 or not scale is Array or scale.size()!=3: return false

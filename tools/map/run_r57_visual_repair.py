@@ -28,7 +28,7 @@ def resource_slot():
     import msvcrt
     status_path = ROOT / 'local-artifacts/r57-living-ui-2026-10-23/resource-state.json'
     status_path.parent.mkdir(parents=True, exist_ok=True)
-    check = "Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^(Godot|WWO|candidate|blender|ffmpeg).*\\.exe$' } | Select-Object ProcessId,CreationDate,CommandLine | ConvertTo-Json -Compress"
+    check = "Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^(Godot|WWO|candidate).*\\.exe$' } | Select-Object ProcessId,CreationDate,CommandLine | ConvertTo-Json -Compress"
     started = subprocess.check_output(['powershell', '-NoProfile', '-Command',
         f'(Get-Process -Id {os.getpid()}).StartTime.ToUniversalTime().ToString("o")'], text=True).strip()
     state = {'pid': os.getpid(), 'process_start_utc': started, 'request': sys.argv[1:],
@@ -48,13 +48,14 @@ def resource_slot():
                 except OSError:
                     publish('WAITING')
                     print('WAITING: preview resource lock', flush=True)
-                    time.sleep(120)
+                    time.sleep(2)
             while True:
                 raw = subprocess.check_output(['powershell', '-NoProfile', '-Command', check], text=True).strip()
                 occupants = json.loads(raw) if raw else []
                 if isinstance(occupants, dict): occupants = [occupants]
                 gpu = subprocess.check_output(['nvidia-smi', '--query-compute-apps=pid,process_name', '--format=csv,noheader,nounits'], text=True).strip()
                 shared_host = []
+                external_gpu = []
                 for row in gpu.splitlines():
                     if not row.strip(): continue
                     sharing = '--functional-gpu-sharing' in sys.argv and 'performance' not in sys.argv
@@ -65,13 +66,16 @@ def resource_slot():
                         if '--utility-sub-type=on_device_model.mojom.OnDeviceModelService' in command:
                             shared_host.append(row)
                             continue
-                    occupants.append({'gpu_process': row})
+                    external_gpu.append(row)
                 state['shared_host_gpu_contexts'] = shared_host
+                state['external_gpu_contexts'] = external_gpu
+                # External GPU work affects timing comparability, not ownership
+                # of this project's override or ability to check gameplay.
                 if not occupants:
                     break
                 publish('WAITING', occupants)
                 print('WAITING: existing Godot/WWO process; no message or termination', flush=True)
-                time.sleep(120)
+                time.sleep(2)
             publish('RUNNING')
             yield
         finally:
@@ -85,33 +89,127 @@ def native_screenshot_review(args):
     """Finite source-only route; show the real HWND without activation."""
     import msvcrt
     import shutil
-    if os.name != 'nt' or args.exe or not args.screenshot_save:
-        raise ValueError('Native screenshot review requires Windows source and --screenshot-save')
-    source = args.screenshot_save.resolve(strict=True)
+    region_review = args.terrain_region_review
+    if args.local_continuity_review and (not args.terrain_a0_review or not args.terrain_a0_new_world):
+        raise ValueError('Local continuity review requires the existing A0 new paused world route')
+    a0_mode = args.terrain_a0_review
+    current_pack = args.terrain_current_pack.resolve(strict=True) if args.terrain_current_pack else None
+    if current_pack and (not a0_mode or not current_pack.is_relative_to(ROOT/'local-artifacts') or current_pack.suffix!='.pck'):
+        raise ValueError('Current-pack review requires an explicit local PCK and existing A0 route')
+    if region_review and a0_mode:
+        raise ValueError('A0 texture paging and military terrain are separate routes')
+    new_paused = bool(a0_mode and args.terrain_a0_new_world)
+    if os.name != 'nt' or args.exe or (not region_review and not new_paused and not args.screenshot_save):
+        raise ValueError('Native review requires Windows source and a paused save, or explicit A0 new-world route')
+    source = args.screenshot_save.resolve(strict=True) if not region_review and not new_paused else None
+    manifest = args.terrain_a0_manifest.resolve(strict=True) if a0_mode else None
+    if manifest and not manifest.is_relative_to(ROOT):
+        raise ValueError('A0 manifest must stay in the project')
+    record_resources = region_review or bool(a0_mode)
     output = (args.output_dir or ROOT/'local-artifacts/native-screenshot').resolve()
     if not output.is_relative_to(ROOT/'local-artifacts'):
         raise ValueError('Observer output must stay in local-artifacts')
     output.mkdir(parents=True, exist_ok=True)
     (ROOT/'builds').mkdir(exist_ok=True)
+    continuity_originals = {}
     with (ROOT/'builds/.preview-manager.lock').open('a+b') as lock:
         lock.seek(0)
         msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
         try:
+            if args.local_continuity_review:
+                sys.path.insert(0, str(ROOT))
+                from tools.build.preview import Manager
+                busy = Manager(track=False).busy()
+                if busy:
+                    raise RuntimeError('Graphics resource guard remains occupied: ' + str(busy))
             occupied = subprocess.check_output(['powershell', '-NoProfile', '-Command',
                 "Get-Process -Name 'Godot*','WWO*' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id; exit 0"], text=True).strip()
             if occupied:
                 raise RuntimeError('Existing game/editor left untouched: ' + occupied)
-            user_name = 'WWO_Native_Screenshot_' + time.strftime('%Y%m%d_%H%M%S')
+            if args.continuity_before_source:
+                if not args.local_continuity_review:
+                    raise ValueError('Frozen source applies only to the requested continuity comparison')
+                frozen = args.continuity_before_source.resolve(strict=True)
+                if not frozen.is_relative_to(ROOT/'local-artifacts'):
+                    raise ValueError('Frozen source must stay under local-artifacts')
+                files = ['scripts/presentation/map/local_spatial_lod.gd','scripts/presentation/map/region_view.gd',
+                    'scripts/presentation/map/globe_renderer.gd','scripts/content/local_spatial_content.gd',
+                    'scripts/content/local_spatial_loader.gd','shaders/presentation/map/local_terrain.gdshader',
+                    'shaders/presentation/map/local_chart.gdshaderinc','data/local/zermatt_west_physical_reference.json',
+                    'data/local/london_westminster_1900.json']
+                for rel in files:
+                    path = ROOT/rel
+                    continuity_originals[path] = (path.read_bytes(), (frozen/rel).read_bytes())
+                    recovery = output/'current-source'/rel
+                    recovery.parent.mkdir(parents=True, exist_ok=True)
+                    recovery.write_bytes(continuity_originals[path][0])
+                for path, (current, before) in continuity_originals.items():
+                    if path.read_bytes() != current:
+                        raise RuntimeError('Source changed while preparing comparison: '+str(path))
+                    path.write_bytes(before)
+            user_name = ('WWO_Terrain_A0_' if a0_mode else 'WWO_R57_Visual_Region_' if region_review else 'WWO_Native_Screenshot_') + time.strftime('%Y%m%d_%H%M%S')
             user_dir = Path(os.environ['APPDATA'])/user_name
             user_dir.mkdir(exist_ok=False)
-            shutil.copyfile(source, user_dir/'formal_world_1900_manual_1.json')
-            config = ROOT/'override.cfg'
+            if source is not None:
+                shutil.copyfile(source, user_dir/'formal_world_1900_manual_1.json')
+            # Godot --main-pack loads override.cfg beside that pack, not --path.
+            config = (current_pack.parent if current_pack else ROOT)/'override.cfg'
             original = config.read_bytes() if config.exists() else None
             temporary = ('[application]\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="'+user_name+'"\n'
                 '[display]\nwindow/size/no_focus=true\n[debug]\nfile_logging/max_log_files=2\n')
             temporary_bytes = temporary.encode('utf-8')
             process = None
             ownership = []
+            resource_samples = []
+            last_resource = 0.0
+            previous_cpu = None
+            previous_system = None
+            gpu_sampling_available = None
+            class PowerStatus(ctypes.Structure):
+                _fields_ = [('ac',ctypes.c_ubyte),('flags',ctypes.c_ubyte),('percent',ctypes.c_ubyte),('saver',ctypes.c_ubyte),('life',ctypes.c_uint32),('full_life',ctypes.c_uint32)]
+            def environment_sample(game_pid=None, game_cpu=None):
+                nonlocal previous_system, gpu_sampling_available
+                sample_began = time.monotonic()
+                power = PowerStatus()
+                ctypes.windll.kernel32.GetSystemPowerStatus(ctypes.byref(power))
+                clocks = [ctypes.c_uint64() for _ in range(3)]
+                ctypes.windll.kernel32.GetSystemTimes(*(ctypes.byref(value) for value in clocks))
+                idle, kernel_time, user_time = [value.value/10000000 for value in clocks]
+                total, busy = kernel_time+user_time, kernel_time+user_time-idle
+                row = {'ms':round(time.time()*1000),'ac':power.ac,'battery_percent':power.percent,'battery_saver':power.saver}
+                if previous_system is not None:
+                    elapsed_total = total-previous_system[0]
+                    row['whole_machine_cpu_percent'] = 100*(busy-previous_system[1])/elapsed_total if elapsed_total>0 else None
+                    if game_cpu is not None and previous_system[2] is not None and elapsed_total>0:
+                        row['external_machine_cpu_percent'] = max(0,100*((busy-previous_system[1])-(game_cpu-previous_system[2]))/elapsed_total)
+                previous_system = (total,busy,game_cpu)
+                # Read actual activity, not a blanket Blender-name exclusion.
+                gpu_query = "$ErrorActionPreference='Stop'; Get-CimInstance Win32_PerfFormattedData_GPUPerformanceCounters_GPUEngine | Where-Object { $_.UtilizationPercentage -gt 0 } | Select-Object Name,UtilizationPercentage | ConvertTo-Json -Compress"
+                row['gpu_engine_sample_available'] = False
+                if gpu_sampling_available is not False:
+                    try:
+                        active = subprocess.run(['powershell','-NoProfile','-Command',gpu_query],capture_output=True,text=True,timeout=3)
+                        engines = json.loads(active.stdout) if active.returncode==0 and active.stdout.strip() else []
+                        if isinstance(engines,dict): engines=[engines]
+                        row['gpu_engines'] = engines
+                        row['external_gpu_engines'] = [value for value in engines if game_pid is None or not value.get('Name','').startswith(f'pid_{game_pid}_')]
+                        row['gpu_engine_sample_available'] = active.returncode==0
+                    except (subprocess.TimeoutExpired,ValueError):
+                        pass
+                    gpu_sampling_available = row['gpu_engine_sample_available']
+                try:
+                    gpu = subprocess.run(['nvidia-smi','--query-gpu=utilization.gpu,memory.used,power.draw,temperature.gpu','--format=csv,noheader,nounits'],capture_output=True,text=True,timeout=3)
+                    row['whole_device_gpu_csv'] = gpu.stdout.strip() if gpu.returncode==0 else 'unavailable'
+                except subprocess.TimeoutExpired:
+                    row['whole_device_gpu_csv'] = 'unavailable'
+                row['sample_wall_ms'] = round((time.monotonic()-sample_began)*1000,3)
+                return row
+            class MemoryCounters(ctypes.Structure):
+                _fields_ = [('cb',ctypes.c_uint32),('faults',ctypes.c_uint32)] + [(name,ctypes.c_size_t) for name in ['peak_working','working','peak_paged','paged','peak_nonpaged','nonpaged','pagefile','peak_pagefile','private']]
+            get_memory = ctypes.windll.psapi.GetProcessMemoryInfo
+            get_memory.argtypes = [ctypes.c_void_p,ctypes.POINTER(MemoryCounters),ctypes.c_uint32]
+            get_times = ctypes.windll.kernel32.GetProcessTimes
+            get_times.argtypes = [ctypes.c_void_p] + [ctypes.POINTER(ctypes.c_uint64)]*4
             foreground = ctypes.windll.user32.GetForegroundWindow
             foreground.restype = ctypes.c_void_p
             foreground_pid = ctypes.windll.user32.GetWindowThreadProcessId
@@ -130,21 +228,39 @@ def native_screenshot_review(args):
             state = None
             env = os.environ.copy()
             env['WWO_VISUAL_OUTPUT'] = output.as_posix()
+            env['WWO_LOCAL_CONTINUITY_REVIEW'] = '1' if args.local_continuity_review else '0'
+            env['WWO_LOCAL_CONTINUITY_CASES'] = args.places if args.local_continuity_review else ''
+            env['WWO_VISUAL_USER_DIR'] = user_dir.as_posix()
+            env['WWO_TERRAIN_A0_SOURCE_ROOT'] = ROOT.as_posix()
+            env['WWO_VISUAL_MAIN_PACK'] = current_pack.as_posix() if current_pack else ''
             # Do not inherit filters/archive settings from unrelated observer runs.
-            for name in ['WWO_VISUAL_NO_IMAGES','WWO_VISUAL_IMAGE_LABELS','WWO_VISUAL_RECORD_ARCHIVE']:
+            for name in ['WWO_VISUAL_NO_IMAGES','WWO_VISUAL_IMAGE_LABELS','WWO_VISUAL_RECORD_ARCHIVE','WWO_TERRAIN_AB','WWO_TERRAIN_A0','WWO_TERRAIN_A0_MANIFEST','WWO_TERRAIN_A0_NEW']:
                 env.pop(name, None)
+            if a0_mode:
+                env['WWO_TERRAIN_A0'] = a0_mode
+                env['WWO_TERRAIN_A0_MANIFEST'] = manifest.as_posix()
+                env['WWO_TERRAIN_A0_NEW'] = '1' if new_paused else '0'
+            environment_before = []
+            if record_resources:
+                environment_before.append(environment_sample())
+                time.sleep(1)
+                environment_before.append(environment_sample())
             try:
                 config.write_bytes(temporary_bytes)
                 with (output/'runtime.log').open('w', encoding='utf-8') as log:
                     startup = subprocess.STARTUPINFO()
                     startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                     startup.wShowWindow = 0  # Initial SW_HIDE, then SW_SHOWNOACTIVATE below.
-                    process = subprocess.Popen(['D:/Tools/Godot-4.6.3/Godot_v4.6.3-stable_win64.exe',
+                    command = ['D:/Tools/Godot-4.6.3/Godot_v4.6.3-stable_win64.exe',
                         '--path',str(ROOT),'--resolution','1280x720','--position','30,30',
+                        '--rendering-method','gl_compatibility','--audio-driver','Dummy',
+                        '--log-file',str(output/'engine.log'),
                         '--script','res://tools/map/native_screenshot_boot.gd',
-                        '--','--native-screenshot-review'], cwd=ROOT, env=env,
-                        stdout=log, stderr=subprocess.STDOUT, startupinfo=startup)
-                    deadline = time.monotonic()+240
+                        '--','--terrain-region-review' if region_review else '--native-screenshot-review']
+                    if current_pack: command[1:1] = ['--main-pack',str(current_pack)]
+                    if a0_mode: command.append('--terrain-a0-review')
+                    process = subprocess.Popen(command,cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT,startupinfo=startup)
+                    deadline = time.monotonic()+(420 if a0_mode else 240)
                     while process.poll() is None:
                         handle_file = output/'window-handle.json'
                         if hwnd is None and handle_file.exists():
@@ -171,11 +287,30 @@ def native_screenshot_review(args):
                         ownership.append([round(time.time()*1000), owner(),state,
                             bool(user32.IsWindowVisible(hwnd)) if hwnd else None,
                             bool(user32.IsIconic(hwnd)) if hwnd else None])
+                        now = time.monotonic()
+                        if record_resources and now-last_resource >= 1:
+                            times = [ctypes.c_uint64() for _ in range(4)]
+                            get_times(int(process._handle),*(ctypes.byref(value) for value in times))
+                            cpu = (times[2].value+times[3].value)/10000000
+                            counters = MemoryCounters(); counters.cb=ctypes.sizeof(counters)
+                            get_memory(int(process._handle),ctypes.byref(counters),counters.cb)
+                            phase_file = output/'phase.json'
+                            try: phase = json.loads(phase_file.read_text(encoding='utf-8')) if phase_file.exists() else {'phase':'preparation'}
+                            except ValueError: phase = {'phase':'phase_write_in_progress'}
+                            sample = {'ms':round(time.time()*1000),**phase,'working_bytes':counters.working,'peak_working_bytes':counters.peak_working,
+                                'private_bytes':counters.private,'cpu_percent_one_core':100*(cpu-previous_cpu)/(now-last_resource) if previous_cpu is not None else None}
+                            # The requested compact route keeps the cheap process
+                            # CPU/working-set reads, but leaves external GPU/CIM
+                            # queries outside the timed native interaction.
+                            if len(resource_samples)%5 == 0 and not args.summary_only:
+                                sample['environment'] = environment_sample(process.pid,cpu)
+                            resource_samples.append(sample)
+                            last_resource=now; previous_cpu=cpu
                         if time.monotonic()>deadline:
-                            raise TimeoutError('Native screenshot review exceeded 240 seconds')
+                            raise TimeoutError('Native review exceeded its finite deadline')
                         time.sleep(.1)
-                if process.returncode:
-                    raise RuntimeError('Native screenshot review failed; inspect runtime.log')
+                if process.returncode or 'SCRIPT ERROR:' in (output/'runtime.log').read_text(encoding='utf-8'):
+                    raise RuntimeError('Native review failed; inspect runtime.log')
             finally:
                 if process and process.poll() is None:
                     process.terminate()
@@ -188,13 +323,37 @@ def native_screenshot_review(args):
                     else: config.write_bytes(original)
                 else:
                     raise RuntimeError('Override changed concurrently; preserved it instead of restoring')
+                if record_resources:
+                    (output/'resource-samples.json').write_text(json.dumps(resource_samples,indent=2),encoding='utf-8')
+                    environments = [row['environment'] for row in resource_samples if 'environment' in row]
+                    gpu_busy = [any(float(item.get('UtilizationPercentage',0))>5 for item in row.get('external_gpu_engines',[])) for row in environments]
+                    cpu_busy = [float(row.get('external_machine_cpu_percent',0))*(os.cpu_count() or 1)>50 for row in environments]
+                    competing = any(a and b for a,b in zip(gpu_busy,gpu_busy[1:])) or any(a and b for a,b in zip(cpu_busy,cpu_busy[1:]))
+                    known = bool(environments) and all(row.get('gpu_engine_sample_available',False) and row.get('ac')==1 and row.get('battery_saver')==0 for row in environment_before+environments)
+                    (output/'process-summary.json').write_text(json.dumps({'mode':a0_mode,'new_world_paused_route':new_paused,
+                        'peak_working_bytes':max((row['peak_working_bytes'] for row in resource_samples),default=None),
+                        'peak_sampled_private_bytes':max((row['private_bytes'] for row in resource_samples),default=None),
+                        'environment_before':environment_before,'external_gpu_queries_during_timing':not args.summary_only,'sustained_external_competition_observed':competing,
+                        'timing_environment_status':'UNVERIFIED_COMPETING_OR_UNKNOWN' if competing or not known else 'NO_SUSTAINED_COMPETITION_OBSERVED_REVIEW_REQUIRED',
+                        'notes':['No Blender-name busy inference, no other process terminated, no indefinite resource wait.',
+                            'External CPU is whole-machine busy time minus this Godot process; includes OS and launcher.',
+                            'GPU engine counters identify external PIDs; whole-device nvidia values include this game.',
+                            'Fresh process is not a physical cold disk read; OS file cache was not flushed.']},indent=2),encoding='utf-8')
                 (output/'window-ownership.json').write_text(json.dumps({'initial_foreground_pid':initial_owner,
                     'game_pid':process.pid if process else None,'samples':ownership,
                     'game_seen_foreground':any(row[1]==process.pid for row in ownership) if process else None,
                     'test_user_dir':str(user_dir)},indent=2),encoding='utf-8')
         finally:
+            changed_sources = []
+            for path, (current, before) in continuity_originals.items():
+                if path.read_bytes() == before:
+                    path.write_bytes(current)
+                elif path.read_bytes() != current:
+                    changed_sources.append(str(path))
             lock.seek(0)
             msvcrt.locking(lock.fileno(), msvcrt.LK_UNLCK, 1)
+            if changed_sources:
+                raise RuntimeError('Concurrent source edits preserved; candidate copy is in current-source: '+str(changed_sources))
 
 
 def main():
@@ -202,6 +361,13 @@ def main():
     parser.add_argument('label', choices=['before', 'after', 'candidate', 'comparison'])
     parser.add_argument('--exe', type=Path)
     parser.add_argument('--native-screenshot-review', action='store_true', help='Finite no-focus source screenshots; preserves override.cfg and the supplied save')
+    parser.add_argument('--terrain-region-review', action='store_true', help='Finite real menu to terrain and collision walking; no save is read or written')
+    parser.add_argument('--terrain-a0-review', choices=['original','flat_webp'], help='Existing no-focus WORLD/REGION/LOCAL route using the same cold-start A0 hook')
+    parser.add_argument('--terrain-current-pack', type=Path, help='Run the existing finite A0 route against this normal-export PCK as main pack, not an overlay')
+    parser.add_argument('--terrain-a0-manifest', type=Path, default=ROOT/'local-artifacts/terrain-lossless-20261027/manifest.json', help='Existing schema1 batch manifest; only mapped files change codec')
+    parser.add_argument('--terrain-a0-new-world', action='store_true', help='Explicit formal menu new-world route; require default paused clock, never save')
+    parser.add_argument('--local-continuity-review', action='store_true', help='Requested seven fixed WORLD/REGION/LOCAL cameras through the existing paused-world route')
+    parser.add_argument('--continuity-before-source', type=Path, help='Frozen pre-edit map sources for the same cameras; restored under the existing resource lock')
     parser.add_argument('--screenshot-save', type=Path, help='Existing paused save to copy read-only into a unique screenshot test directory')
     parser.add_argument('--ui-only', action='store_true')
     parser.add_argument('--water-only', action='store_true', help='Reuse the finite Benelux installation check without another image set')
@@ -232,7 +398,9 @@ def main():
     parser.add_argument('--summary-only', action='store_true', help='Keep compact existing run records; skip optional screenshots and memory series')
     parser.add_argument('--compact-record', action='store_true', help='Append existing result records into one compressed JSON file; requires summary-only')
     args = parser.parse_args()
-    if args.native_screenshot_review:
+    if args.terrain_a0_new_world and not args.terrain_a0_review:
+        raise ValueError('--terrain-a0-new-world requires --terrain-a0-review')
+    if args.native_screenshot_review or args.terrain_region_review or args.terrain_a0_review:
         native_screenshot_review(args)
         return
     if args.screenshot_save:
@@ -255,7 +423,8 @@ def main():
     executable = args.exe.resolve() if args.exe else Path('D:/Tools/Godot-4.6.3/Godot_v4.6.3-stable_win64.exe')
     folder = executable.parent if args.exe else ROOT
     config = folder / 'override.cfg'
-    if config.exists() and not args.recover_material_override:
+    original_visual_config = config.read_bytes() if config.exists() and args.acceptance == 'visual' and not args.exe else None
+    if config.exists() and original_visual_config is None and not args.recover_material_override:
         raise RuntimeError('Existing override left untouched: ' + str(config))
     scene = (output.parent if args.summary_only else output) / 'visual.tscn'
     scene.write_text('[gd_scene load_steps=2 format=3]\n[ext_resource type="Script" path="' +
@@ -285,7 +454,9 @@ def main():
     override_text = '[application]\nconfig/use_custom_user_dir=true\nconfig/custom_user_dir_name="' + user_dir_name + '"\n' + \
                       'run/main_scene="' + scene.as_posix() + '"\n[display]\nwindow/size/viewport_width=1280\n' + \
                       'window/size/viewport_height=720\nwindow/size/window_width_override=1280\nwindow/size/window_height_override=720\n'
-    if config.exists():
+    if args.acceptance == 'startup':
+        override_text += 'window/size/no_focus=true\n'
+    if config.exists() and original_visual_config is None:
         records = json.loads(gzip.decompress((output.parent/'material-trade-runs.json.gz').read_bytes()))
         owner = records.get('material-interruption', {}).get('owner', {})
         if config.read_text(encoding='utf-8') != override_text or '--material-trade' not in owner.get('request', []):
@@ -387,7 +558,12 @@ def main():
         if process and process.poll() is None:
             process.terminate()
             process.wait(timeout=10)
-        config.unlink(missing_ok=True)
+        if config.exists() and config.read_text(encoding='utf-8') != override_text:
+            raise RuntimeError('Observer configuration changed by another writer; retained')
+        if original_visual_config is not None:
+            config.write_bytes(original_visual_config)
+        else:
+            config.unlink(missing_ok=True)
         if memory and args.summary_only:
             record = output / ('economic-action.json' if args.acceptance == 'economic-action' else args.acceptance + '.json')
             record_key = output.name + '/' + record.stem
@@ -405,7 +581,7 @@ def main():
 
 
 if __name__ == '__main__':
-    if '--native-screenshot-review' in sys.argv:
+    if '--native-screenshot-review' in sys.argv or '--terrain-region-review' in sys.argv or '--terrain-a0-review' in sys.argv:
         main()
     else:
         with resource_slot():

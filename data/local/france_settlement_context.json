@@ -1,0 +1,17 @@
+{
+  "id":"france_mainland_settlement_context",
+  "role":"NATIONAL_CARTOGRAPHIC_CONTEXT",
+  "name":"法国大陆 · 建成区与村镇参考",
+  "map_name":"法国大陆建成区",
+  "precision":"MODERN_GENERALISED_REFERENCE_NOT_1900_OR_INDIVIDUAL_BUILDINGS",
+  "anchor":[2.5,46.5],
+  "content_bounds":[-5.2,42.25,8.3,51.15],
+  "overview_bounds":[-5.2,42.25,8.3,51.15],
+  "ground_mode":"cartographic_context",
+  "presentation_index":"res://assets/settlements/france_context/index.json",
+  "maximum_mpp":2600.0,
+  "cache_budget_bytes":8388608,
+  "building_ground_handoff":true,
+  "attribution":"© IGN · Plan IGN · Licence Ouverte 2.0",
+  "source":{"url":"https://www.data.gouv.fr/datasets/plan-ign","publisher":"IGN","license":"Etalab-Open-Licence-2.0","basis":"MODERN_GENERALISED_REFERENCE_NOT_1900"}
+}

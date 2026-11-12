@@ -1,0 +1,17 @@
+{
+  "schema_id": "wwo_observation_region_v1",
+  "id": "training:continuous_ridgevale_50km_v1",
+  "name": "Ridgevale 连续训练地区",
+  "training_only": true,
+  "georegistered": false,
+  "bounds_m": [-22500, -22500, 27500, 27500],
+  "cell_size_m": 5000,
+  "native_cell": [4, 4],
+  "native_map_id": "ridgevale_5km_c1_20261020",
+  "native_bounds_m": [-2500, -2500, 2500, 2500],
+  "base_path": "res://assets/terrain/region_slice/",
+  "source_repository": "https://github.com/ryoumiyahayato/wwo-military",
+  "source_commit": "44c8f3d0639f7b84a0053d7edfa76641cb8a50d7",
+  "source_note": "原军事制作的虚构训练地形；50m外围 / 4m原生高度采样，不是测绘精度或1900年历史地表。其他区块仅观察，未绑定正式军事实体。",
+  "detail_note": "5 km区块保留原生山脊、道路和村庄；建筑与环境集中在原800m制作范围，外围不伪造聚落。"
+}

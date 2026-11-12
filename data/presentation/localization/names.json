@@ -1,0 +1,4296 @@
+{
+  "administrative_region:france_seine": {
+    "zh": {
+      "name": "塞纳省",
+      "capital": "巴黎"
+    },
+    "en": {
+      "name": "Seine",
+      "capital": "Paris"
+    },
+    "fr": {
+      "name": "Seine",
+      "capital": "Paris"
+    }
+  },
+  "place:paris": {
+    "zh": {
+      "name": "巴黎"
+    },
+    "en": {
+      "name": "Paris"
+    },
+    "fr": {
+      "name": "Paris"
+    }
+  },
+  "administrative_region:france_seine_et_oise": {
+    "zh": {
+      "name": "塞纳-瓦兹省",
+      "capital": "凡尔赛"
+    },
+    "en": {
+      "name": "Seine-et-Oise",
+      "capital": "Versailles"
+    },
+    "fr": {
+      "name": "Seine-et-Oise",
+      "capital": "Versailles"
+    }
+  },
+  "place:versailles": {
+    "zh": {
+      "name": "凡尔赛"
+    },
+    "en": {
+      "name": "Versailles"
+    },
+    "fr": {
+      "name": "Versailles"
+    }
+  },
+  "administrative_region:france_eure": {
+    "zh": {
+      "name": "厄尔省",
+      "capital": "埃夫勒"
+    },
+    "en": {
+      "name": "Eure",
+      "capital": "Évreux"
+    },
+    "fr": {
+      "name": "Eure",
+      "capital": "Évreux"
+    }
+  },
+  "administrative_region:france_eure_et_loir": {
+    "zh": {
+      "name": "厄尔-卢瓦尔省",
+      "capital": "沙特尔"
+    },
+    "en": {
+      "name": "Eure-et-Loir",
+      "capital": "Chartres"
+    },
+    "fr": {
+      "name": "Eure-et-Loir",
+      "capital": "Chartres"
+    }
+  },
+  "administrative_region:france_oise": {
+    "zh": {
+      "name": "瓦兹省",
+      "capital": "博韦"
+    },
+    "en": {
+      "name": "Oise",
+      "capital": "Beauvais"
+    },
+    "fr": {
+      "name": "Oise",
+      "capital": "Beauvais"
+    }
+  },
+  "administrative_region:france_seine_et_marne": {
+    "zh": {
+      "name": "塞纳-马恩省",
+      "capital": "默伦"
+    },
+    "en": {
+      "name": "Seine-et-Marne",
+      "capital": "Melun"
+    },
+    "fr": {
+      "name": "Seine-et-Marne",
+      "capital": "Melun"
+    }
+  },
+  "administrative_region:france_ain": {
+    "zh": {
+      "name": "安省",
+      "capital": "布尔格"
+    },
+    "en": {
+      "name": "Ain",
+      "capital": "Bourg"
+    },
+    "fr": {
+      "name": "Ain",
+      "capital": "Bourg"
+    }
+  },
+  "administrative_region:france_aisne": {
+    "zh": {
+      "name": "埃纳省",
+      "capital": "拉昂"
+    },
+    "en": {
+      "name": "Aisne",
+      "capital": "Laon"
+    },
+    "fr": {
+      "name": "Aisne",
+      "capital": "Laon"
+    }
+  },
+  "administrative_region:france_allier": {
+    "zh": {
+      "name": "阿列省",
+      "capital": "穆兰"
+    },
+    "en": {
+      "name": "Allier",
+      "capital": "Moulins"
+    },
+    "fr": {
+      "name": "Allier",
+      "capital": "Moulins"
+    }
+  },
+  "administrative_region:france_alpes_maritimes": {
+    "zh": {
+      "name": "滨海阿尔卑斯省",
+      "capital": "尼斯"
+    },
+    "en": {
+      "name": "Alpes-Maritimes",
+      "capital": "Nice"
+    },
+    "fr": {
+      "name": "Alpes-Maritimes",
+      "capital": "Nice"
+    }
+  },
+  "administrative_region:france_ardeche": {
+    "zh": {
+      "name": "阿尔代什省",
+      "capital": "普里瓦"
+    },
+    "en": {
+      "name": "Ardèche",
+      "capital": "Privas"
+    },
+    "fr": {
+      "name": "Ardèche",
+      "capital": "Privas"
+    }
+  },
+  "administrative_region:france_ardennes": {
+    "zh": {
+      "name": "阿登省",
+      "capital": "梅济耶尔"
+    },
+    "en": {
+      "name": "Ardennes",
+      "capital": "Mézières"
+    },
+    "fr": {
+      "name": "Ardennes",
+      "capital": "Mézières"
+    }
+  },
+  "administrative_region:france_ariege": {
+    "zh": {
+      "name": "阿列日省",
+      "capital": "富瓦"
+    },
+    "en": {
+      "name": "Ariège",
+      "capital": "Foix"
+    },
+    "fr": {
+      "name": "Ariège",
+      "capital": "Foix"
+    }
+  },
+  "administrative_region:france_aube": {
+    "zh": {
+      "name": "奥布省",
+      "capital": "特鲁瓦"
+    },
+    "en": {
+      "name": "Aube",
+      "capital": "Troyes"
+    },
+    "fr": {
+      "name": "Aube",
+      "capital": "Troyes"
+    }
+  },
+  "administrative_region:france_aude": {
+    "zh": {
+      "name": "奥德省",
+      "capital": "卡尔卡松"
+    },
+    "en": {
+      "name": "Aude",
+      "capital": "Carcassonne"
+    },
+    "fr": {
+      "name": "Aude",
+      "capital": "Carcassonne"
+    }
+  },
+  "administrative_region:france_aveyron": {
+    "zh": {
+      "name": "阿韦龙省",
+      "capital": "罗德兹"
+    },
+    "en": {
+      "name": "Aveyron",
+      "capital": "Rodez"
+    },
+    "fr": {
+      "name": "Aveyron",
+      "capital": "Rodez"
+    }
+  },
+  "administrative_region:france_basses_alpes": {
+    "zh": {
+      "name": "下阿尔卑斯省",
+      "capital": "迪涅"
+    },
+    "en": {
+      "name": "Basses-Alpes",
+      "capital": "Digne"
+    },
+    "fr": {
+      "name": "Basses-Alpes",
+      "capital": "Digne"
+    }
+  },
+  "administrative_region:france_basses_pyrenees": {
+    "zh": {
+      "name": "下比利牛斯省",
+      "capital": "波城"
+    },
+    "en": {
+      "name": "Basses-Pyrénées",
+      "capital": "Pau"
+    },
+    "fr": {
+      "name": "Basses-Pyrénées",
+      "capital": "Pau"
+    }
+  },
+  "administrative_region:france_bouches_du_rhone": {
+    "zh": {
+      "name": "罗讷河口省",
+      "capital": "马赛"
+    },
+    "en": {
+      "name": "Bouches-du-Rhône",
+      "capital": "Marseille"
+    },
+    "fr": {
+      "name": "Bouches-du-Rhône",
+      "capital": "Marseille"
+    }
+  },
+  "administrative_region:france_calvados": {
+    "zh": {
+      "name": "卡尔瓦多斯省",
+      "capital": "卡昂"
+    },
+    "en": {
+      "name": "Calvados",
+      "capital": "Caen"
+    },
+    "fr": {
+      "name": "Calvados",
+      "capital": "Caen"
+    }
+  },
+  "administrative_region:france_cantal": {
+    "zh": {
+      "name": "康塔尔省",
+      "capital": "欧里亚克"
+    },
+    "en": {
+      "name": "Cantal",
+      "capital": "Aurillac"
+    },
+    "fr": {
+      "name": "Cantal",
+      "capital": "Aurillac"
+    }
+  },
+  "administrative_region:france_charente": {
+    "zh": {
+      "name": "夏朗德省",
+      "capital": "昂古莱姆"
+    },
+    "en": {
+      "name": "Charente",
+      "capital": "Angoulême"
+    },
+    "fr": {
+      "name": "Charente",
+      "capital": "Angoulême"
+    }
+  },
+  "administrative_region:france_charente_inferieure": {
+    "zh": {
+      "name": "下夏朗德省",
+      "capital": "拉罗谢尔"
+    },
+    "en": {
+      "name": "Charente-Inférieure",
+      "capital": "La Rochelle"
+    },
+    "fr": {
+      "name": "Charente-Inférieure",
+      "capital": "La Rochelle"
+    }
+  },
+  "administrative_region:france_cher": {
+    "zh": {
+      "name": "谢尔省",
+      "capital": "布尔日"
+    },
+    "en": {
+      "name": "Cher",
+      "capital": "Bourges"
+    },
+    "fr": {
+      "name": "Cher",
+      "capital": "Bourges"
+    }
+  },
+  "administrative_region:france_correze": {
+    "zh": {
+      "name": "科雷兹省",
+      "capital": "蒂勒"
+    },
+    "en": {
+      "name": "Corrèze",
+      "capital": "Tulle"
+    },
+    "fr": {
+      "name": "Corrèze",
+      "capital": "Tulle"
+    }
+  },
+  "administrative_region:france_corse": {
+    "zh": {
+      "name": "科西嘉省",
+      "capital": "阿雅克肖"
+    },
+    "en": {
+      "name": "Corse",
+      "capital": "Ajaccio"
+    },
+    "fr": {
+      "name": "Corse",
+      "capital": "Ajaccio"
+    }
+  },
+  "administrative_region:france_cote_d_or": {
+    "zh": {
+      "name": "科多尔省",
+      "capital": "第戎"
+    },
+    "en": {
+      "name": "Côte-d'Or",
+      "capital": "Dijon"
+    },
+    "fr": {
+      "name": "Côte-d'Or",
+      "capital": "Dijon"
+    }
+  },
+  "administrative_region:france_cotes_du_nord": {
+    "zh": {
+      "name": "北滨海省",
+      "capital": "圣布里厄"
+    },
+    "en": {
+      "name": "Côtes-du-Nord",
+      "capital": "Saint-Brieuc"
+    },
+    "fr": {
+      "name": "Côtes-du-Nord",
+      "capital": "Saint-Brieuc"
+    }
+  },
+  "administrative_region:france_creuse": {
+    "zh": {
+      "name": "克勒兹省",
+      "capital": "盖雷"
+    },
+    "en": {
+      "name": "Creuse",
+      "capital": "Guéret"
+    },
+    "fr": {
+      "name": "Creuse",
+      "capital": "Guéret"
+    }
+  },
+  "administrative_region:france_deux_sevres": {
+    "zh": {
+      "name": "德塞夫勒省",
+      "capital": "尼奥尔"
+    },
+    "en": {
+      "name": "Deux-Sèvres",
+      "capital": "Niort"
+    },
+    "fr": {
+      "name": "Deux-Sèvres",
+      "capital": "Niort"
+    }
+  },
+  "administrative_region:france_dordogne": {
+    "zh": {
+      "name": "多尔多涅省",
+      "capital": "佩里格"
+    },
+    "en": {
+      "name": "Dordogne",
+      "capital": "Périgueux"
+    },
+    "fr": {
+      "name": "Dordogne",
+      "capital": "Périgueux"
+    }
+  },
+  "administrative_region:france_doubs": {
+    "zh": {
+      "name": "杜省",
+      "capital": "贝桑松"
+    },
+    "en": {
+      "name": "Doubs",
+      "capital": "Besançon"
+    },
+    "fr": {
+      "name": "Doubs",
+      "capital": "Besançon"
+    }
+  },
+  "administrative_region:france_drome": {
+    "zh": {
+      "name": "德龙省",
+      "capital": "瓦朗斯"
+    },
+    "en": {
+      "name": "Drôme",
+      "capital": "Valence"
+    },
+    "fr": {
+      "name": "Drôme",
+      "capital": "Valence"
+    }
+  },
+  "administrative_region:france_finistere": {
+    "zh": {
+      "name": "菲尼斯泰尔省",
+      "capital": "坎佩尔"
+    },
+    "en": {
+      "name": "Finistère",
+      "capital": "Quimper"
+    },
+    "fr": {
+      "name": "Finistère",
+      "capital": "Quimper"
+    }
+  },
+  "administrative_region:france_gard": {
+    "zh": {
+      "name": "加尔省",
+      "capital": "尼姆"
+    },
+    "en": {
+      "name": "Gard",
+      "capital": "Nîmes"
+    },
+    "fr": {
+      "name": "Gard",
+      "capital": "Nîmes"
+    }
+  },
+  "administrative_region:france_gers": {
+    "zh": {
+      "name": "热尔省",
+      "capital": "欧什"
+    },
+    "en": {
+      "name": "Gers",
+      "capital": "Auch"
+    },
+    "fr": {
+      "name": "Gers",
+      "capital": "Auch"
+    }
+  },
+  "administrative_region:france_gironde": {
+    "zh": {
+      "name": "吉伦特省",
+      "capital": "波尔多"
+    },
+    "en": {
+      "name": "Gironde",
+      "capital": "Bordeaux"
+    },
+    "fr": {
+      "name": "Gironde",
+      "capital": "Bordeaux"
+    }
+  },
+  "administrative_region:france_haute_garonne": {
+    "zh": {
+      "name": "上加龙省",
+      "capital": "图卢兹"
+    },
+    "en": {
+      "name": "Haute-Garonne",
+      "capital": "Toulouse"
+    },
+    "fr": {
+      "name": "Haute-Garonne",
+      "capital": "Toulouse"
+    }
+  },
+  "administrative_region:france_haute_loire": {
+    "zh": {
+      "name": "上卢瓦尔省",
+      "capital": "勒皮"
+    },
+    "en": {
+      "name": "Haute-Loire",
+      "capital": "Le Puy"
+    },
+    "fr": {
+      "name": "Haute-Loire",
+      "capital": "Le Puy"
+    }
+  },
+  "administrative_region:france_haute_marne": {
+    "zh": {
+      "name": "上马恩省",
+      "capital": "肖蒙"
+    },
+    "en": {
+      "name": "Haute-Marne",
+      "capital": "Chaumont"
+    },
+    "fr": {
+      "name": "Haute-Marne",
+      "capital": "Chaumont"
+    }
+  },
+  "administrative_region:france_haute_saone": {
+    "zh": {
+      "name": "上索恩省",
+      "capital": "沃苏勒"
+    },
+    "en": {
+      "name": "Haute-Saône",
+      "capital": "Vesoul"
+    },
+    "fr": {
+      "name": "Haute-Saône",
+      "capital": "Vesoul"
+    }
+  },
+  "administrative_region:france_haute_savoie": {
+    "zh": {
+      "name": "上萨瓦省",
+      "capital": "阿讷西"
+    },
+    "en": {
+      "name": "Haute-Savoie",
+      "capital": "Annecy"
+    },
+    "fr": {
+      "name": "Haute-Savoie",
+      "capital": "Annecy"
+    }
+  },
+  "administrative_region:france_haute_vienne": {
+    "zh": {
+      "name": "上维埃纳省",
+      "capital": "利摩日"
+    },
+    "en": {
+      "name": "Haute-Vienne",
+      "capital": "Limoges"
+    },
+    "fr": {
+      "name": "Haute-Vienne",
+      "capital": "Limoges"
+    }
+  },
+  "administrative_region:france_hautes_alpes": {
+    "zh": {
+      "name": "上阿尔卑斯省",
+      "capital": "加普"
+    },
+    "en": {
+      "name": "Hautes-Alpes",
+      "capital": "Gap"
+    },
+    "fr": {
+      "name": "Hautes-Alpes",
+      "capital": "Gap"
+    }
+  },
+  "administrative_region:france_hautes_pyrenees": {
+    "zh": {
+      "name": "上比利牛斯省",
+      "capital": "塔布"
+    },
+    "en": {
+      "name": "Hautes-Pyrénées",
+      "capital": "Tarbes"
+    },
+    "fr": {
+      "name": "Hautes-Pyrénées",
+      "capital": "Tarbes"
+    }
+  },
+  "administrative_region:france_herault": {
+    "zh": {
+      "name": "埃罗省",
+      "capital": "蒙彼利埃"
+    },
+    "en": {
+      "name": "Hérault",
+      "capital": "Montpellier"
+    },
+    "fr": {
+      "name": "Hérault",
+      "capital": "Montpellier"
+    }
+  },
+  "administrative_region:france_ille_et_vilaine": {
+    "zh": {
+      "name": "伊勒-维莱讷省",
+      "capital": "雷恩"
+    },
+    "en": {
+      "name": "Ille-et-Vilaine",
+      "capital": "Rennes"
+    },
+    "fr": {
+      "name": "Ille-et-Vilaine",
+      "capital": "Rennes"
+    }
+  },
+  "administrative_region:france_indre": {
+    "zh": {
+      "name": "安德尔省",
+      "capital": "沙托鲁"
+    },
+    "en": {
+      "name": "Indre",
+      "capital": "Châteauroux"
+    },
+    "fr": {
+      "name": "Indre",
+      "capital": "Châteauroux"
+    }
+  },
+  "administrative_region:france_indre_et_loire": {
+    "zh": {
+      "name": "安德尔-卢瓦尔省",
+      "capital": "图尔"
+    },
+    "en": {
+      "name": "Indre-et-Loire",
+      "capital": "Tours"
+    },
+    "fr": {
+      "name": "Indre-et-Loire",
+      "capital": "Tours"
+    }
+  },
+  "administrative_region:france_isere": {
+    "zh": {
+      "name": "伊泽尔省",
+      "capital": "格勒诺布尔"
+    },
+    "en": {
+      "name": "Isère",
+      "capital": "Grenoble"
+    },
+    "fr": {
+      "name": "Isère",
+      "capital": "Grenoble"
+    }
+  },
+  "administrative_region:france_jura": {
+    "zh": {
+      "name": "汝拉省",
+      "capital": "隆勒索涅"
+    },
+    "en": {
+      "name": "Jura",
+      "capital": "Lons-le-Saunier"
+    },
+    "fr": {
+      "name": "Jura",
+      "capital": "Lons-le-Saunier"
+    }
+  },
+  "administrative_region:france_landes": {
+    "zh": {
+      "name": "朗德省",
+      "capital": "蒙德马桑"
+    },
+    "en": {
+      "name": "Landes",
+      "capital": "Mont-de-Marsan"
+    },
+    "fr": {
+      "name": "Landes",
+      "capital": "Mont-de-Marsan"
+    }
+  },
+  "administrative_region:france_loir_et_cher": {
+    "zh": {
+      "name": "卢瓦-谢尔省",
+      "capital": "布卢瓦"
+    },
+    "en": {
+      "name": "Loir-et-Cher",
+      "capital": "Blois"
+    },
+    "fr": {
+      "name": "Loir-et-Cher",
+      "capital": "Blois"
+    }
+  },
+  "administrative_region:france_loire": {
+    "zh": {
+      "name": "卢瓦尔省",
+      "capital": "圣艾蒂安"
+    },
+    "en": {
+      "name": "Loire",
+      "capital": "Saint-Étienne"
+    },
+    "fr": {
+      "name": "Loire",
+      "capital": "Saint-Étienne"
+    }
+  },
+  "administrative_region:france_loire_inferieure": {
+    "zh": {
+      "name": "下卢瓦尔省",
+      "capital": "南特"
+    },
+    "en": {
+      "name": "Loire-Inférieure",
+      "capital": "Nantes"
+    },
+    "fr": {
+      "name": "Loire-Inférieure",
+      "capital": "Nantes"
+    }
+  },
+  "administrative_region:france_loiret": {
+    "zh": {
+      "name": "卢瓦雷省",
+      "capital": "奥尔良"
+    },
+    "en": {
+      "name": "Loiret",
+      "capital": "Orléans"
+    },
+    "fr": {
+      "name": "Loiret",
+      "capital": "Orléans"
+    }
+  },
+  "administrative_region:france_lot": {
+    "zh": {
+      "name": "洛特省",
+      "capital": "卡奥尔"
+    },
+    "en": {
+      "name": "Lot",
+      "capital": "Cahors"
+    },
+    "fr": {
+      "name": "Lot",
+      "capital": "Cahors"
+    }
+  },
+  "administrative_region:france_lot_et_garonne": {
+    "zh": {
+      "name": "洛特-加龙省",
+      "capital": "阿让"
+    },
+    "en": {
+      "name": "Lot-et-Garonne",
+      "capital": "Agen"
+    },
+    "fr": {
+      "name": "Lot-et-Garonne",
+      "capital": "Agen"
+    }
+  },
+  "administrative_region:france_lozere": {
+    "zh": {
+      "name": "洛泽尔省",
+      "capital": "芒德"
+    },
+    "en": {
+      "name": "Lozère",
+      "capital": "Mende"
+    },
+    "fr": {
+      "name": "Lozère",
+      "capital": "Mende"
+    }
+  },
+  "administrative_region:france_maine_et_loire": {
+    "zh": {
+      "name": "曼恩-卢瓦尔省",
+      "capital": "昂热"
+    },
+    "en": {
+      "name": "Maine-et-Loire",
+      "capital": "Angers"
+    },
+    "fr": {
+      "name": "Maine-et-Loire",
+      "capital": "Angers"
+    }
+  },
+  "administrative_region:france_manche": {
+    "zh": {
+      "name": "芒什省",
+      "capital": "圣洛"
+    },
+    "en": {
+      "name": "Manche",
+      "capital": "Saint-Lô"
+    },
+    "fr": {
+      "name": "Manche",
+      "capital": "Saint-Lô"
+    }
+  },
+  "administrative_region:france_marne": {
+    "zh": {
+      "name": "马恩省",
+      "capital": "马恩河畔沙隆"
+    },
+    "en": {
+      "name": "Marne",
+      "capital": "Châlons-sur-Marne"
+    },
+    "fr": {
+      "name": "Marne",
+      "capital": "Châlons-sur-Marne"
+    }
+  },
+  "administrative_region:france_mayenne": {
+    "zh": {
+      "name": "马耶讷省",
+      "capital": "拉瓦勒"
+    },
+    "en": {
+      "name": "Mayenne",
+      "capital": "Laval"
+    },
+    "fr": {
+      "name": "Mayenne",
+      "capital": "Laval"
+    }
+  },
+  "administrative_region:france_meurthe_et_moselle": {
+    "zh": {
+      "name": "默尔特-摩泽尔省",
+      "capital": "南锡"
+    },
+    "en": {
+      "name": "Meurthe-et-Moselle",
+      "capital": "Nancy"
+    },
+    "fr": {
+      "name": "Meurthe-et-Moselle",
+      "capital": "Nancy"
+    }
+  },
+  "administrative_region:france_meuse": {
+    "zh": {
+      "name": "默兹省",
+      "capital": "巴勒迪克"
+    },
+    "en": {
+      "name": "Meuse",
+      "capital": "Bar-le-Duc"
+    },
+    "fr": {
+      "name": "Meuse",
+      "capital": "Bar-le-Duc"
+    }
+  },
+  "administrative_region:france_morbihan": {
+    "zh": {
+      "name": "莫尔比昂省",
+      "capital": "瓦讷"
+    },
+    "en": {
+      "name": "Morbihan",
+      "capital": "Vannes"
+    },
+    "fr": {
+      "name": "Morbihan",
+      "capital": "Vannes"
+    }
+  },
+  "administrative_region:france_nievre": {
+    "zh": {
+      "name": "涅夫勒省",
+      "capital": "讷韦尔"
+    },
+    "en": {
+      "name": "Nièvre",
+      "capital": "Nevers"
+    },
+    "fr": {
+      "name": "Nièvre",
+      "capital": "Nevers"
+    }
+  },
+  "administrative_region:france_nord": {
+    "zh": {
+      "name": "北部省",
+      "capital": "里尔"
+    },
+    "en": {
+      "name": "Nord",
+      "capital": "Lille"
+    },
+    "fr": {
+      "name": "Nord",
+      "capital": "Lille"
+    }
+  },
+  "administrative_region:france_orne": {
+    "zh": {
+      "name": "奥恩省",
+      "capital": "阿朗松"
+    },
+    "en": {
+      "name": "Orne",
+      "capital": "Alençon"
+    },
+    "fr": {
+      "name": "Orne",
+      "capital": "Alençon"
+    }
+  },
+  "administrative_region:france_pas_de_calais": {
+    "zh": {
+      "name": "加来海峡省",
+      "capital": "阿拉斯"
+    },
+    "en": {
+      "name": "Pas-de-Calais",
+      "capital": "Arras"
+    },
+    "fr": {
+      "name": "Pas-de-Calais",
+      "capital": "Arras"
+    }
+  },
+  "administrative_region:france_puy_de_dome": {
+    "zh": {
+      "name": "多姆山省",
+      "capital": "克莱蒙费朗"
+    },
+    "en": {
+      "name": "Puy-de-Dôme",
+      "capital": "Clermont-Ferrand"
+    },
+    "fr": {
+      "name": "Puy-de-Dôme",
+      "capital": "Clermont-Ferrand"
+    }
+  },
+  "administrative_region:france_pyrenees_orientales": {
+    "zh": {
+      "name": "东比利牛斯省",
+      "capital": "佩皮尼昂"
+    },
+    "en": {
+      "name": "Pyrénées-Orientales",
+      "capital": "Perpignan"
+    },
+    "fr": {
+      "name": "Pyrénées-Orientales",
+      "capital": "Perpignan"
+    }
+  },
+  "administrative_region:france_rhone": {
+    "zh": {
+      "name": "罗讷省",
+      "capital": "里昂"
+    },
+    "en": {
+      "name": "Rhône",
+      "capital": "Lyon"
+    },
+    "fr": {
+      "name": "Rhône",
+      "capital": "Lyon"
+    }
+  },
+  "administrative_region:france_saone_et_loire": {
+    "zh": {
+      "name": "索恩-卢瓦尔省",
+      "capital": "马孔"
+    },
+    "en": {
+      "name": "Saône-et-Loire",
+      "capital": "Mâcon"
+    },
+    "fr": {
+      "name": "Saône-et-Loire",
+      "capital": "Mâcon"
+    }
+  },
+  "administrative_region:france_sarthe": {
+    "zh": {
+      "name": "萨尔特省",
+      "capital": "勒芒"
+    },
+    "en": {
+      "name": "Sarthe",
+      "capital": "Le Mans"
+    },
+    "fr": {
+      "name": "Sarthe",
+      "capital": "Le Mans"
+    }
+  },
+  "administrative_region:france_savoie": {
+    "zh": {
+      "name": "萨瓦省",
+      "capital": "尚贝里"
+    },
+    "en": {
+      "name": "Savoie",
+      "capital": "Chambéry"
+    },
+    "fr": {
+      "name": "Savoie",
+      "capital": "Chambéry"
+    }
+  },
+  "administrative_region:france_seine_inferieure": {
+    "zh": {
+      "name": "下塞纳省",
+      "capital": "鲁昂"
+    },
+    "en": {
+      "name": "Seine-Inférieure",
+      "capital": "Rouen"
+    },
+    "fr": {
+      "name": "Seine-Inférieure",
+      "capital": "Rouen"
+    }
+  },
+  "administrative_region:france_somme": {
+    "zh": {
+      "name": "索姆省",
+      "capital": "亚眠"
+    },
+    "en": {
+      "name": "Somme",
+      "capital": "Amiens"
+    },
+    "fr": {
+      "name": "Somme",
+      "capital": "Amiens"
+    }
+  },
+  "administrative_region:france_tarn": {
+    "zh": {
+      "name": "塔恩省",
+      "capital": "阿尔比"
+    },
+    "en": {
+      "name": "Tarn",
+      "capital": "Albi"
+    },
+    "fr": {
+      "name": "Tarn",
+      "capital": "Albi"
+    }
+  },
+  "administrative_region:france_tarn_et_garonne": {
+    "zh": {
+      "name": "塔恩-加龙省",
+      "capital": "蒙托邦"
+    },
+    "en": {
+      "name": "Tarn-et-Garonne",
+      "capital": "Montauban"
+    },
+    "fr": {
+      "name": "Tarn-et-Garonne",
+      "capital": "Montauban"
+    }
+  },
+  "administrative_region:france_territoire_de_belfort": {
+    "zh": {
+      "name": "贝尔福地区",
+      "capital": "贝尔福"
+    },
+    "en": {
+      "name": "Territoire-de-Belfort",
+      "capital": "Belfort"
+    },
+    "fr": {
+      "name": "Territoire-de-Belfort",
+      "capital": "Belfort"
+    }
+  },
+  "administrative_region:france_var": {
+    "zh": {
+      "name": "瓦尔省",
+      "capital": "德拉吉尼昂"
+    },
+    "en": {
+      "name": "Var",
+      "capital": "Draguignan"
+    },
+    "fr": {
+      "name": "Var",
+      "capital": "Draguignan"
+    }
+  },
+  "administrative_region:france_vaucluse": {
+    "zh": {
+      "name": "沃克吕兹省",
+      "capital": "阿维尼翁"
+    },
+    "en": {
+      "name": "Vaucluse",
+      "capital": "Avignon"
+    },
+    "fr": {
+      "name": "Vaucluse",
+      "capital": "Avignon"
+    }
+  },
+  "administrative_region:france_vendee": {
+    "zh": {
+      "name": "旺代省",
+      "capital": "永河畔拉罗什"
+    },
+    "en": {
+      "name": "Vendée",
+      "capital": "La Roche-sur-Yon"
+    },
+    "fr": {
+      "name": "Vendée",
+      "capital": "La Roche-sur-Yon"
+    }
+  },
+  "administrative_region:france_vienne": {
+    "zh": {
+      "name": "维埃纳省",
+      "capital": "普瓦捷"
+    },
+    "en": {
+      "name": "Vienne",
+      "capital": "Poitiers"
+    },
+    "fr": {
+      "name": "Vienne",
+      "capital": "Poitiers"
+    }
+  },
+  "administrative_region:france_vosges": {
+    "zh": {
+      "name": "孚日省",
+      "capital": "埃皮纳勒"
+    },
+    "en": {
+      "name": "Vosges",
+      "capital": "Épinal"
+    },
+    "fr": {
+      "name": "Vosges",
+      "capital": "Épinal"
+    }
+  },
+  "administrative_region:france_yonne": {
+    "zh": {
+      "name": "约讷省",
+      "capital": "欧塞尔"
+    },
+    "en": {
+      "name": "Yonne",
+      "capital": "Auxerre"
+    },
+    "fr": {
+      "name": "Yonne",
+      "capital": "Auxerre"
+    }
+  },
+  "name:London": {
+    "zh": {
+      "name": "伦敦"
+    },
+    "en": {
+      "name": "London"
+    }
+  },
+  "name:Westminster": {
+    "zh": {
+      "name": "威斯敏斯特"
+    },
+    "en": {
+      "name": "Westminster"
+    }
+  },
+  "name:Greenwich": {
+    "zh": {
+      "name": "格林尼治"
+    },
+    "en": {
+      "name": "Greenwich"
+    }
+  },
+  "name:Dorset": {
+    "zh": {
+      "name": "多塞特郡"
+    },
+    "en": {
+      "name": "Dorset"
+    }
+  },
+  "name:England": {
+    "zh": {
+      "name": "英格兰"
+    },
+    "en": {
+      "name": "England"
+    }
+  },
+  "name:Scotland": {
+    "zh": {
+      "name": "苏格兰"
+    },
+    "en": {
+      "name": "Scotland"
+    }
+  },
+  "name:Wales": {
+    "zh": {
+      "name": "威尔士"
+    },
+    "en": {
+      "name": "Wales"
+    }
+  },
+  "name:Ireland": {
+    "zh": {
+      "name": "爱尔兰"
+    },
+    "en": {
+      "name": "Ireland"
+    }
+  },
+  "name:Berlin": {
+    "zh": {
+      "name": "柏林"
+    },
+    "en": {
+      "name": "Berlin"
+    }
+  },
+  "name:Sakhalin island": {
+    "zh": {
+      "name": "萨哈林岛"
+    },
+    "en": {
+      "name": "Sakhalin island"
+    }
+  },
+  "country_fra": {
+    "zh": {
+      "name": "法兰西第三共和国"
+    },
+    "en": {
+      "name": "French Third Republic"
+    }
+  },
+  "state:country_fra": {
+    "zh": {
+      "name": "法兰西第三共和国"
+    },
+    "en": {
+      "name": "French Third Republic"
+    }
+  },
+  "french_colonial_empire": {
+    "zh": {
+      "name": "法兰西殖民帝国"
+    },
+    "en": {
+      "name": "French Colonial Empire"
+    }
+  },
+  "state:french_colonial_empire": {
+    "zh": {
+      "name": "法兰西殖民帝国"
+    },
+    "en": {
+      "name": "French Colonial Empire"
+    }
+  },
+  "british_isles_1900": {
+    "zh": {
+      "name": "大不列颠及爱尔兰联合王国"
+    },
+    "en": {
+      "name": "United Kingdom of Great Britain and Ireland"
+    }
+  },
+  "state:british_isles_1900": {
+    "zh": {
+      "name": "大不列颠及爱尔兰联合王国"
+    },
+    "en": {
+      "name": "United Kingdom of Great Britain and Ireland"
+    }
+  },
+  "british_empire_overseas": {
+    "zh": {
+      "name": "大英帝国海外领地"
+    },
+    "en": {
+      "name": "British Overseas Territories"
+    }
+  },
+  "state:british_empire_overseas": {
+    "zh": {
+      "name": "大英帝国海外领地"
+    },
+    "en": {
+      "name": "British Overseas Territories"
+    }
+  },
+  "german_empire": {
+    "zh": {
+      "name": "德意志帝国"
+    },
+    "en": {
+      "name": "German Empire"
+    }
+  },
+  "state:german_empire": {
+    "zh": {
+      "name": "德意志帝国"
+    },
+    "en": {
+      "name": "German Empire"
+    }
+  },
+  "german_colonial_empire": {
+    "zh": {
+      "name": "德属殖民地"
+    },
+    "en": {
+      "name": "German Colonies"
+    }
+  },
+  "state:german_colonial_empire": {
+    "zh": {
+      "name": "德属殖民地"
+    },
+    "en": {
+      "name": "German Colonies"
+    }
+  },
+  "austria_hungary": {
+    "zh": {
+      "name": "奥匈帝国"
+    },
+    "en": {
+      "name": "Austria-Hungary"
+    }
+  },
+  "state:austria_hungary": {
+    "zh": {
+      "name": "奥匈帝国"
+    },
+    "en": {
+      "name": "Austria-Hungary"
+    }
+  },
+  "russian_empire": {
+    "zh": {
+      "name": "俄罗斯帝国"
+    },
+    "en": {
+      "name": "Russian Empire"
+    }
+  },
+  "state:russian_empire": {
+    "zh": {
+      "name": "俄罗斯帝国"
+    },
+    "en": {
+      "name": "Russian Empire"
+    }
+  },
+  "ottoman_empire": {
+    "zh": {
+      "name": "奥斯曼帝国"
+    },
+    "en": {
+      "name": "Ottoman Empire"
+    }
+  },
+  "state:ottoman_empire": {
+    "zh": {
+      "name": "奥斯曼帝国"
+    },
+    "en": {
+      "name": "Ottoman Empire"
+    }
+  },
+  "qing_empire": {
+    "zh": {
+      "name": "大清帝国"
+    },
+    "en": {
+      "name": "Qing Empire"
+    }
+  },
+  "state:qing_empire": {
+    "zh": {
+      "name": "大清帝国"
+    },
+    "en": {
+      "name": "Qing Empire"
+    }
+  },
+  "empire_of_japan": {
+    "zh": {
+      "name": "大日本帝国"
+    },
+    "en": {
+      "name": "Empire of Japan"
+    }
+  },
+  "state:empire_of_japan": {
+    "zh": {
+      "name": "大日本帝国"
+    },
+    "en": {
+      "name": "Empire of Japan"
+    }
+  },
+  "korean_empire": {
+    "zh": {
+      "name": "大韩帝国"
+    },
+    "en": {
+      "name": "Korean Empire"
+    }
+  },
+  "state:korean_empire": {
+    "zh": {
+      "name": "大韩帝国"
+    },
+    "en": {
+      "name": "Korean Empire"
+    }
+  },
+  "united_states_1900": {
+    "zh": {
+      "name": "美利坚合众国"
+    },
+    "en": {
+      "name": "United States of America"
+    }
+  },
+  "state:united_states_1900": {
+    "zh": {
+      "name": "美利坚合众国"
+    },
+    "en": {
+      "name": "United States of America"
+    }
+  },
+  "united_states_overseas": {
+    "zh": {
+      "name": "美国海外控制区"
+    },
+    "en": {
+      "name": "United States Overseas Controlled Territories"
+    }
+  },
+  "state:united_states_overseas": {
+    "zh": {
+      "name": "美国海外控制区"
+    },
+    "en": {
+      "name": "United States Overseas Controlled Territories"
+    }
+  },
+  "kingdom_of_italy": {
+    "zh": {
+      "name": "意大利王国"
+    },
+    "en": {
+      "name": "Kingdom of Italy"
+    }
+  },
+  "state:kingdom_of_italy": {
+    "zh": {
+      "name": "意大利王国"
+    },
+    "en": {
+      "name": "Kingdom of Italy"
+    }
+  },
+  "kingdom_of_spain": {
+    "zh": {
+      "name": "西班牙王国"
+    },
+    "en": {
+      "name": "Kingdom of Spain"
+    }
+  },
+  "state:kingdom_of_spain": {
+    "zh": {
+      "name": "西班牙王国"
+    },
+    "en": {
+      "name": "Kingdom of Spain"
+    }
+  },
+  "spanish_possessions": {
+    "zh": {
+      "name": "西班牙海外领地"
+    },
+    "en": {
+      "name": "Spanish Overseas Territories"
+    }
+  },
+  "state:spanish_possessions": {
+    "zh": {
+      "name": "西班牙海外领地"
+    },
+    "en": {
+      "name": "Spanish Overseas Territories"
+    }
+  },
+  "kingdom_of_portugal": {
+    "zh": {
+      "name": "葡萄牙王国"
+    },
+    "en": {
+      "name": "Kingdom of Portugal"
+    }
+  },
+  "state:kingdom_of_portugal": {
+    "zh": {
+      "name": "葡萄牙王国"
+    },
+    "en": {
+      "name": "Kingdom of Portugal"
+    }
+  },
+  "portuguese_empire": {
+    "zh": {
+      "name": "葡萄牙殖民帝国"
+    },
+    "en": {
+      "name": "Portuguese Colonial Empire"
+    }
+  },
+  "state:portuguese_empire": {
+    "zh": {
+      "name": "葡萄牙殖民帝国"
+    },
+    "en": {
+      "name": "Portuguese Colonial Empire"
+    }
+  },
+  "kingdom_of_belgium": {
+    "zh": {
+      "name": "比利时王国"
+    },
+    "en": {
+      "name": "Kingdom of Belgium"
+    }
+  },
+  "state:kingdom_of_belgium": {
+    "zh": {
+      "name": "比利时王国"
+    },
+    "en": {
+      "name": "Kingdom of Belgium"
+    }
+  },
+  "congo_free_state": {
+    "zh": {
+      "name": "刚果自由邦"
+    },
+    "en": {
+      "name": "Congo Free State"
+    }
+  },
+  "state:congo_free_state": {
+    "zh": {
+      "name": "刚果自由邦"
+    },
+    "en": {
+      "name": "Congo Free State"
+    }
+  },
+  "kingdom_of_netherlands": {
+    "zh": {
+      "name": "尼德兰王国"
+    },
+    "en": {
+      "name": "Kingdom of the Netherlands"
+    }
+  },
+  "state:kingdom_of_netherlands": {
+    "zh": {
+      "name": "尼德兰王国"
+    },
+    "en": {
+      "name": "Kingdom of the Netherlands"
+    }
+  },
+  "dutch_colonial_empire": {
+    "zh": {
+      "name": "荷兰殖民帝国"
+    },
+    "en": {
+      "name": "Dutch Colonial Empire"
+    }
+  },
+  "state:dutch_colonial_empire": {
+    "zh": {
+      "name": "荷兰殖民帝国"
+    },
+    "en": {
+      "name": "Dutch Colonial Empire"
+    }
+  },
+  "sweden_norway_union": {
+    "zh": {
+      "name": "瑞典—挪威联合王国"
+    },
+    "en": {
+      "name": "United Kingdoms of Sweden and Norway"
+    }
+  },
+  "state:sweden_norway_union": {
+    "zh": {
+      "name": "瑞典—挪威联合王国"
+    },
+    "en": {
+      "name": "United Kingdoms of Sweden and Norway"
+    }
+  },
+  "kingdom_of_denmark": {
+    "zh": {
+      "name": "丹麦王国"
+    },
+    "en": {
+      "name": "Kingdom of Denmark"
+    }
+  },
+  "state:kingdom_of_denmark": {
+    "zh": {
+      "name": "丹麦王国"
+    },
+    "en": {
+      "name": "Kingdom of Denmark"
+    }
+  },
+  "swiss_confederation": {
+    "zh": {
+      "name": "瑞士联邦"
+    },
+    "en": {
+      "name": "Swiss Confederation"
+    }
+  },
+  "state:swiss_confederation": {
+    "zh": {
+      "name": "瑞士联邦"
+    },
+    "en": {
+      "name": "Swiss Confederation"
+    }
+  },
+  "kingdom_of_romania": {
+    "zh": {
+      "name": "罗马尼亚王国"
+    },
+    "en": {
+      "name": "Kingdom of Romania"
+    }
+  },
+  "state:kingdom_of_romania": {
+    "zh": {
+      "name": "罗马尼亚王国"
+    },
+    "en": {
+      "name": "Kingdom of Romania"
+    }
+  },
+  "kingdom_of_serbia": {
+    "zh": {
+      "name": "塞尔维亚王国"
+    },
+    "en": {
+      "name": "Kingdom of Serbia"
+    }
+  },
+  "state:kingdom_of_serbia": {
+    "zh": {
+      "name": "塞尔维亚王国"
+    },
+    "en": {
+      "name": "Kingdom of Serbia"
+    }
+  },
+  "principality_of_montenegro": {
+    "zh": {
+      "name": "黑山公国"
+    },
+    "en": {
+      "name": "Principality of Montenegro"
+    }
+  },
+  "state:principality_of_montenegro": {
+    "zh": {
+      "name": "黑山公国"
+    },
+    "en": {
+      "name": "Principality of Montenegro"
+    }
+  },
+  "principality_of_bulgaria": {
+    "zh": {
+      "name": "保加利亚公国"
+    },
+    "en": {
+      "name": "Principality of Bulgaria"
+    }
+  },
+  "state:principality_of_bulgaria": {
+    "zh": {
+      "name": "保加利亚公国"
+    },
+    "en": {
+      "name": "Principality of Bulgaria"
+    }
+  },
+  "kingdom_of_greece": {
+    "zh": {
+      "name": "希腊王国"
+    },
+    "en": {
+      "name": "Kingdom of Greece"
+    }
+  },
+  "state:kingdom_of_greece": {
+    "zh": {
+      "name": "希腊王国"
+    },
+    "en": {
+      "name": "Kingdom of Greece"
+    }
+  },
+  "persia_qajar": {
+    "zh": {
+      "name": "卡扎尔波斯"
+    },
+    "en": {
+      "name": "Qajar Persia"
+    }
+  },
+  "state:persia_qajar": {
+    "zh": {
+      "name": "卡扎尔波斯"
+    },
+    "en": {
+      "name": "Qajar Persia"
+    }
+  },
+  "emirate_of_afghanistan": {
+    "zh": {
+      "name": "阿富汗酋长国"
+    },
+    "en": {
+      "name": "Emirate of Afghanistan"
+    }
+  },
+  "state:emirate_of_afghanistan": {
+    "zh": {
+      "name": "阿富汗酋长国"
+    },
+    "en": {
+      "name": "Emirate of Afghanistan"
+    }
+  },
+  "kingdom_of_siam": {
+    "zh": {
+      "name": "暹罗王国"
+    },
+    "en": {
+      "name": "Kingdom of Siam"
+    }
+  },
+  "state:kingdom_of_siam": {
+    "zh": {
+      "name": "暹罗王国"
+    },
+    "en": {
+      "name": "Kingdom of Siam"
+    }
+  },
+  "kingdom_of_nepal": {
+    "zh": {
+      "name": "尼泊尔王国"
+    },
+    "en": {
+      "name": "Kingdom of Nepal"
+    }
+  },
+  "state:kingdom_of_nepal": {
+    "zh": {
+      "name": "尼泊尔王国"
+    },
+    "en": {
+      "name": "Kingdom of Nepal"
+    }
+  },
+  "kingdom_of_bhutan": {
+    "zh": {
+      "name": "不丹王国"
+    },
+    "en": {
+      "name": "Kingdom of Bhutan"
+    }
+  },
+  "state:kingdom_of_bhutan": {
+    "zh": {
+      "name": "不丹王国"
+    },
+    "en": {
+      "name": "Kingdom of Bhutan"
+    }
+  },
+  "ethiopian_empire": {
+    "zh": {
+      "name": "埃塞俄比亚帝国"
+    },
+    "en": {
+      "name": "Ethiopian Empire"
+    }
+  },
+  "state:ethiopian_empire": {
+    "zh": {
+      "name": "埃塞俄比亚帝国"
+    },
+    "en": {
+      "name": "Ethiopian Empire"
+    }
+  },
+  "republic_of_liberia": {
+    "zh": {
+      "name": "利比里亚共和国"
+    },
+    "en": {
+      "name": "Republic of Liberia"
+    }
+  },
+  "state:republic_of_liberia": {
+    "zh": {
+      "name": "利比里亚共和国"
+    },
+    "en": {
+      "name": "Republic of Liberia"
+    }
+  },
+  "moroccan_sultanate": {
+    "zh": {
+      "name": "摩洛哥苏丹国"
+    },
+    "en": {
+      "name": "Sultanate of Morocco"
+    }
+  },
+  "state:moroccan_sultanate": {
+    "zh": {
+      "name": "摩洛哥苏丹国"
+    },
+    "en": {
+      "name": "Sultanate of Morocco"
+    }
+  },
+  "arabian_polities": {
+    "zh": {
+      "name": "阿拉伯半岛诸政权"
+    },
+    "en": {
+      "name": "Arabian Polities"
+    }
+  },
+  "state:arabian_polities": {
+    "zh": {
+      "name": "阿拉伯半岛诸政权"
+    },
+    "en": {
+      "name": "Arabian Polities"
+    }
+  },
+  "sultanate_of_muscat_oman": {
+    "zh": {
+      "name": "马斯喀特和阿曼苏丹国"
+    },
+    "en": {
+      "name": "Sultanate of Muscat and Oman"
+    }
+  },
+  "state:sultanate_of_muscat_oman": {
+    "zh": {
+      "name": "马斯喀特和阿曼苏丹国"
+    },
+    "en": {
+      "name": "Sultanate of Muscat and Oman"
+    }
+  },
+  "somali_territories_1900": {
+    "zh": {
+      "name": "索马里诸领地"
+    },
+    "en": {
+      "name": "Somali Territories"
+    }
+  },
+  "state:somali_territories_1900": {
+    "zh": {
+      "name": "索马里诸领地"
+    },
+    "en": {
+      "name": "Somali Territories"
+    }
+  },
+  "south_africa_war_zone": {
+    "zh": {
+      "name": "南部非洲交战区"
+    },
+    "en": {
+      "name": "Southern African War Zone"
+    }
+  },
+  "state:south_africa_war_zone": {
+    "zh": {
+      "name": "南部非洲交战区"
+    },
+    "en": {
+      "name": "Southern African War Zone"
+    }
+  },
+  "mexican_republic": {
+    "zh": {
+      "name": "墨西哥合众国"
+    },
+    "en": {
+      "name": "United Mexican States"
+    }
+  },
+  "state:mexican_republic": {
+    "zh": {
+      "name": "墨西哥合众国"
+    },
+    "en": {
+      "name": "United Mexican States"
+    }
+  },
+  "guatemala_1900": {
+    "zh": {
+      "name": "危地马拉共和国"
+    },
+    "en": {
+      "name": "Republic of Guatemala"
+    }
+  },
+  "state:guatemala_1900": {
+    "zh": {
+      "name": "危地马拉共和国"
+    },
+    "en": {
+      "name": "Republic of Guatemala"
+    }
+  },
+  "honduras_1900": {
+    "zh": {
+      "name": "洪都拉斯共和国"
+    },
+    "en": {
+      "name": "Republic of Honduras"
+    }
+  },
+  "state:honduras_1900": {
+    "zh": {
+      "name": "洪都拉斯共和国"
+    },
+    "en": {
+      "name": "Republic of Honduras"
+    }
+  },
+  "el_salvador_1900": {
+    "zh": {
+      "name": "萨尔瓦多共和国"
+    },
+    "en": {
+      "name": "Republic of El Salvador"
+    }
+  },
+  "state:el_salvador_1900": {
+    "zh": {
+      "name": "萨尔瓦多共和国"
+    },
+    "en": {
+      "name": "Republic of El Salvador"
+    }
+  },
+  "nicaragua_1900": {
+    "zh": {
+      "name": "尼加拉瓜共和国"
+    },
+    "en": {
+      "name": "Republic of Nicaragua"
+    }
+  },
+  "state:nicaragua_1900": {
+    "zh": {
+      "name": "尼加拉瓜共和国"
+    },
+    "en": {
+      "name": "Republic of Nicaragua"
+    }
+  },
+  "costa_rica_1900": {
+    "zh": {
+      "name": "哥斯达黎加共和国"
+    },
+    "en": {
+      "name": "Republic of Costa Rica"
+    }
+  },
+  "state:costa_rica_1900": {
+    "zh": {
+      "name": "哥斯达黎加共和国"
+    },
+    "en": {
+      "name": "Republic of Costa Rica"
+    }
+  },
+  "republic_of_colombia_1900": {
+    "zh": {
+      "name": "哥伦比亚共和国"
+    },
+    "en": {
+      "name": "Republic of Colombia"
+    }
+  },
+  "state:republic_of_colombia_1900": {
+    "zh": {
+      "name": "哥伦比亚共和国"
+    },
+    "en": {
+      "name": "Republic of Colombia"
+    }
+  },
+  "venezuela_1900": {
+    "zh": {
+      "name": "委内瑞拉合众国"
+    },
+    "en": {
+      "name": "United States of Venezuela"
+    }
+  },
+  "state:venezuela_1900": {
+    "zh": {
+      "name": "委内瑞拉合众国"
+    },
+    "en": {
+      "name": "United States of Venezuela"
+    }
+  },
+  "ecuador_1900": {
+    "zh": {
+      "name": "厄瓜多尔共和国"
+    },
+    "en": {
+      "name": "Republic of Ecuador"
+    }
+  },
+  "state:ecuador_1900": {
+    "zh": {
+      "name": "厄瓜多尔共和国"
+    },
+    "en": {
+      "name": "Republic of Ecuador"
+    }
+  },
+  "peru_1900": {
+    "zh": {
+      "name": "秘鲁共和国"
+    },
+    "en": {
+      "name": "Republic of Peru"
+    }
+  },
+  "state:peru_1900": {
+    "zh": {
+      "name": "秘鲁共和国"
+    },
+    "en": {
+      "name": "Republic of Peru"
+    }
+  },
+  "bolivia_1900": {
+    "zh": {
+      "name": "玻利维亚共和国"
+    },
+    "en": {
+      "name": "Republic of Bolivia"
+    }
+  },
+  "state:bolivia_1900": {
+    "zh": {
+      "name": "玻利维亚共和国"
+    },
+    "en": {
+      "name": "Republic of Bolivia"
+    }
+  },
+  "chile_1900": {
+    "zh": {
+      "name": "智利共和国"
+    },
+    "en": {
+      "name": "Republic of Chile"
+    }
+  },
+  "state:chile_1900": {
+    "zh": {
+      "name": "智利共和国"
+    },
+    "en": {
+      "name": "Republic of Chile"
+    }
+  },
+  "argentina_1900": {
+    "zh": {
+      "name": "阿根廷共和国"
+    },
+    "en": {
+      "name": "Argentine Republic"
+    }
+  },
+  "state:argentina_1900": {
+    "zh": {
+      "name": "阿根廷共和国"
+    },
+    "en": {
+      "name": "Argentine Republic"
+    }
+  },
+  "paraguay_1900": {
+    "zh": {
+      "name": "巴拉圭共和国"
+    },
+    "en": {
+      "name": "Republic of Paraguay"
+    }
+  },
+  "state:paraguay_1900": {
+    "zh": {
+      "name": "巴拉圭共和国"
+    },
+    "en": {
+      "name": "Republic of Paraguay"
+    }
+  },
+  "uruguay_1900": {
+    "zh": {
+      "name": "乌拉圭东岸共和国"
+    },
+    "en": {
+      "name": "Oriental Republic of Uruguay"
+    }
+  },
+  "state:uruguay_1900": {
+    "zh": {
+      "name": "乌拉圭东岸共和国"
+    },
+    "en": {
+      "name": "Oriental Republic of Uruguay"
+    }
+  },
+  "brazil_1900": {
+    "zh": {
+      "name": "巴西合众国"
+    },
+    "en": {
+      "name": "United States of Brazil"
+    }
+  },
+  "state:brazil_1900": {
+    "zh": {
+      "name": "巴西合众国"
+    },
+    "en": {
+      "name": "United States of Brazil"
+    }
+  },
+  "haiti_1900": {
+    "zh": {
+      "name": "海地共和国"
+    },
+    "en": {
+      "name": "Republic of Haiti"
+    }
+  },
+  "state:haiti_1900": {
+    "zh": {
+      "name": "海地共和国"
+    },
+    "en": {
+      "name": "Republic of Haiti"
+    }
+  },
+  "dominican_republic_1900": {
+    "zh": {
+      "name": "多米尼加共和国"
+    },
+    "en": {
+      "name": "Dominican Republic"
+    }
+  },
+  "state:dominican_republic_1900": {
+    "zh": {
+      "name": "多米尼加共和国"
+    },
+    "en": {
+      "name": "Dominican Republic"
+    }
+  },
+  "cshapes_gw_2": {
+    "en": {
+      "name": "United States of America"
+    }
+  },
+  "state:cshapes_gw_2": {
+    "en": {
+      "name": "United States of America"
+    }
+  },
+  "cshapes_gw_3": {
+    "en": {
+      "name": "Alaska"
+    }
+  },
+  "state:cshapes_gw_3": {
+    "en": {
+      "name": "Alaska"
+    }
+  },
+  "cshapes_gw_4": {
+    "en": {
+      "name": "Hawaii"
+    }
+  },
+  "state:cshapes_gw_4": {
+    "en": {
+      "name": "Hawaii"
+    }
+  },
+  "cshapes_gw_6": {
+    "en": {
+      "name": "Puerto Rico"
+    }
+  },
+  "state:cshapes_gw_6": {
+    "en": {
+      "name": "Puerto Rico"
+    }
+  },
+  "cshapes_gw_20": {
+    "en": {
+      "name": "Canada"
+    }
+  },
+  "state:cshapes_gw_20": {
+    "en": {
+      "name": "Canada"
+    }
+  },
+  "cshapes_gw_21": {
+    "en": {
+      "name": "Newfoundland"
+    }
+  },
+  "state:cshapes_gw_21": {
+    "en": {
+      "name": "Newfoundland"
+    }
+  },
+  "cshapes_gw_31": {
+    "en": {
+      "name": "Bahamas"
+    }
+  },
+  "state:cshapes_gw_31": {
+    "en": {
+      "name": "Bahamas"
+    }
+  },
+  "cshapes_gw_40": {
+    "en": {
+      "name": "Cuba"
+    }
+  },
+  "state:cshapes_gw_40": {
+    "en": {
+      "name": "Cuba"
+    }
+  },
+  "cshapes_gw_41": {
+    "en": {
+      "name": "Haiti"
+    }
+  },
+  "state:cshapes_gw_41": {
+    "en": {
+      "name": "Haiti"
+    }
+  },
+  "cshapes_gw_42": {
+    "en": {
+      "name": "Dominican Republic"
+    }
+  },
+  "state:cshapes_gw_42": {
+    "en": {
+      "name": "Dominican Republic"
+    }
+  },
+  "cshapes_gw_51": {
+    "en": {
+      "name": "Jamaica"
+    }
+  },
+  "state:cshapes_gw_51": {
+    "en": {
+      "name": "Jamaica"
+    }
+  },
+  "cshapes_gw_52": {
+    "en": {
+      "name": "Trinidad and Tobago"
+    }
+  },
+  "state:cshapes_gw_52": {
+    "en": {
+      "name": "Trinidad and Tobago"
+    }
+  },
+  "cshapes_gw_53": {
+    "en": {
+      "name": "Barbados"
+    }
+  },
+  "state:cshapes_gw_53": {
+    "en": {
+      "name": "Barbados"
+    }
+  },
+  "cshapes_gw_65": {
+    "en": {
+      "name": "Guadeloupe"
+    }
+  },
+  "state:cshapes_gw_65": {
+    "en": {
+      "name": "Guadeloupe"
+    }
+  },
+  "cshapes_gw_66": {
+    "en": {
+      "name": "Martinique"
+    }
+  },
+  "state:cshapes_gw_66": {
+    "en": {
+      "name": "Martinique"
+    }
+  },
+  "cshapes_gw_70": {
+    "en": {
+      "name": "Mexico"
+    }
+  },
+  "state:cshapes_gw_70": {
+    "en": {
+      "name": "Mexico"
+    }
+  },
+  "cshapes_gw_80": {
+    "en": {
+      "name": "Belize"
+    }
+  },
+  "state:cshapes_gw_80": {
+    "en": {
+      "name": "Belize"
+    }
+  },
+  "cshapes_gw_90": {
+    "en": {
+      "name": "Guatemala"
+    }
+  },
+  "state:cshapes_gw_90": {
+    "en": {
+      "name": "Guatemala"
+    }
+  },
+  "cshapes_gw_91": {
+    "en": {
+      "name": "Honduras"
+    }
+  },
+  "state:cshapes_gw_91": {
+    "en": {
+      "name": "Honduras"
+    }
+  },
+  "cshapes_gw_92": {
+    "en": {
+      "name": "El Salvador"
+    }
+  },
+  "state:cshapes_gw_92": {
+    "en": {
+      "name": "El Salvador"
+    }
+  },
+  "cshapes_gw_93": {
+    "en": {
+      "name": "Nicaragua"
+    }
+  },
+  "state:cshapes_gw_93": {
+    "en": {
+      "name": "Nicaragua"
+    }
+  },
+  "cshapes_gw_94": {
+    "en": {
+      "name": "Costa Rica"
+    }
+  },
+  "state:cshapes_gw_94": {
+    "en": {
+      "name": "Costa Rica"
+    }
+  },
+  "cshapes_gw_100": {
+    "en": {
+      "name": "Colombia"
+    }
+  },
+  "state:cshapes_gw_100": {
+    "en": {
+      "name": "Colombia"
+    }
+  },
+  "cshapes_gw_101": {
+    "en": {
+      "name": "Venezuela"
+    }
+  },
+  "state:cshapes_gw_101": {
+    "en": {
+      "name": "Venezuela"
+    }
+  },
+  "cshapes_gw_110": {
+    "en": {
+      "name": "Guyana"
+    }
+  },
+  "state:cshapes_gw_110": {
+    "en": {
+      "name": "Guyana"
+    }
+  },
+  "cshapes_gw_115": {
+    "en": {
+      "name": "Surinam"
+    }
+  },
+  "state:cshapes_gw_115": {
+    "en": {
+      "name": "Surinam"
+    }
+  },
+  "cshapes_gw_120": {
+    "en": {
+      "name": "French Guyana"
+    }
+  },
+  "state:cshapes_gw_120": {
+    "en": {
+      "name": "French Guyana"
+    }
+  },
+  "cshapes_gw_130": {
+    "en": {
+      "name": "Ecuador"
+    }
+  },
+  "state:cshapes_gw_130": {
+    "en": {
+      "name": "Ecuador"
+    }
+  },
+  "cshapes_gw_135": {
+    "en": {
+      "name": "Peru"
+    }
+  },
+  "state:cshapes_gw_135": {
+    "en": {
+      "name": "Peru"
+    }
+  },
+  "cshapes_gw_140": {
+    "en": {
+      "name": "Brazil"
+    }
+  },
+  "state:cshapes_gw_140": {
+    "en": {
+      "name": "Brazil"
+    }
+  },
+  "cshapes_gw_145": {
+    "en": {
+      "name": "Bolivia"
+    }
+  },
+  "state:cshapes_gw_145": {
+    "en": {
+      "name": "Bolivia"
+    }
+  },
+  "cshapes_gw_150": {
+    "en": {
+      "name": "Paraguay"
+    }
+  },
+  "state:cshapes_gw_150": {
+    "en": {
+      "name": "Paraguay"
+    }
+  },
+  "cshapes_gw_155": {
+    "en": {
+      "name": "Chile"
+    }
+  },
+  "state:cshapes_gw_155": {
+    "en": {
+      "name": "Chile"
+    }
+  },
+  "cshapes_gw_160": {
+    "en": {
+      "name": "Argentina"
+    }
+  },
+  "state:cshapes_gw_160": {
+    "en": {
+      "name": "Argentina"
+    }
+  },
+  "cshapes_gw_165": {
+    "en": {
+      "name": "Uruguay"
+    }
+  },
+  "state:cshapes_gw_165": {
+    "en": {
+      "name": "Uruguay"
+    }
+  },
+  "cshapes_gw_200": {
+    "en": {
+      "name": "United Kingdom"
+    }
+  },
+  "state:cshapes_gw_200": {
+    "en": {
+      "name": "United Kingdom"
+    }
+  },
+  "cshapes_gw_210": {
+    "en": {
+      "name": "Netherlands"
+    }
+  },
+  "state:cshapes_gw_210": {
+    "en": {
+      "name": "Netherlands"
+    }
+  },
+  "cshapes_gw_211": {
+    "en": {
+      "name": "Belgium"
+    }
+  },
+  "state:cshapes_gw_211": {
+    "en": {
+      "name": "Belgium"
+    }
+  },
+  "cshapes_gw_212": {
+    "en": {
+      "name": "Luxembourg"
+    }
+  },
+  "state:cshapes_gw_212": {
+    "en": {
+      "name": "Luxembourg"
+    }
+  },
+  "cshapes_gw_220": {
+    "en": {
+      "name": "France"
+    }
+  },
+  "state:cshapes_gw_220": {
+    "en": {
+      "name": "France"
+    }
+  },
+  "cshapes_gw_225": {
+    "en": {
+      "name": "Switzerland"
+    }
+  },
+  "state:cshapes_gw_225": {
+    "en": {
+      "name": "Switzerland"
+    }
+  },
+  "cshapes_gw_230": {
+    "en": {
+      "name": "Spain"
+    }
+  },
+  "state:cshapes_gw_230": {
+    "en": {
+      "name": "Spain"
+    }
+  },
+  "cshapes_gw_235": {
+    "en": {
+      "name": "Portugal"
+    }
+  },
+  "state:cshapes_gw_235": {
+    "en": {
+      "name": "Portugal"
+    }
+  },
+  "cshapes_gw_255": {
+    "en": {
+      "name": "Germany (Prussia)"
+    }
+  },
+  "state:cshapes_gw_255": {
+    "en": {
+      "name": "Germany (Prussia)"
+    }
+  },
+  "cshapes_gw_300": {
+    "en": {
+      "name": "Austria-Hungary"
+    }
+  },
+  "state:cshapes_gw_300": {
+    "en": {
+      "name": "Austria-Hungary"
+    }
+  },
+  "cshapes_gw_325": {
+    "en": {
+      "name": "Italy/Sardinia"
+    }
+  },
+  "state:cshapes_gw_325": {
+    "en": {
+      "name": "Italy/Sardinia"
+    }
+  },
+  "cshapes_gw_338": {
+    "en": {
+      "name": "Malta"
+    }
+  },
+  "state:cshapes_gw_338": {
+    "en": {
+      "name": "Malta"
+    }
+  },
+  "cshapes_gw_340": {
+    "en": {
+      "name": "Serbia"
+    }
+  },
+  "state:cshapes_gw_340": {
+    "en": {
+      "name": "Serbia"
+    }
+  },
+  "cshapes_gw_341": {
+    "en": {
+      "name": "Montenegro"
+    }
+  },
+  "state:cshapes_gw_341": {
+    "en": {
+      "name": "Montenegro"
+    }
+  },
+  "cshapes_gw_350": {
+    "en": {
+      "name": "Greece"
+    }
+  },
+  "state:cshapes_gw_350": {
+    "en": {
+      "name": "Greece"
+    }
+  },
+  "cshapes_gw_355": {
+    "en": {
+      "name": "Bulgaria"
+    }
+  },
+  "state:cshapes_gw_355": {
+    "en": {
+      "name": "Bulgaria"
+    }
+  },
+  "cshapes_gw_360": {
+    "en": {
+      "name": "Rumania"
+    }
+  },
+  "state:cshapes_gw_360": {
+    "en": {
+      "name": "Rumania"
+    }
+  },
+  "cshapes_gw_365": {
+    "en": {
+      "name": "Russia (Soviet Union)"
+    }
+  },
+  "state:cshapes_gw_365": {
+    "en": {
+      "name": "Russia (Soviet Union)"
+    }
+  },
+  "cshapes_gw_380": {
+    "en": {
+      "name": "Sweden"
+    }
+  },
+  "state:cshapes_gw_380": {
+    "en": {
+      "name": "Sweden"
+    }
+  },
+  "cshapes_gw_390": {
+    "en": {
+      "name": "Denmark"
+    }
+  },
+  "state:cshapes_gw_390": {
+    "en": {
+      "name": "Denmark"
+    }
+  },
+  "cshapes_gw_395": {
+    "en": {
+      "name": "Iceland"
+    }
+  },
+  "state:cshapes_gw_395": {
+    "en": {
+      "name": "Iceland"
+    }
+  },
+  "cshapes_gw_402": {
+    "en": {
+      "name": "Cape Verde"
+    }
+  },
+  "state:cshapes_gw_402": {
+    "en": {
+      "name": "Cape Verde"
+    }
+  },
+  "cshapes_gw_404": {
+    "en": {
+      "name": "Guinea-Bissau"
+    }
+  },
+  "state:cshapes_gw_404": {
+    "en": {
+      "name": "Guinea-Bissau"
+    }
+  },
+  "cshapes_gw_411": {
+    "en": {
+      "name": "Equatorial Guinea"
+    }
+  },
+  "state:cshapes_gw_411": {
+    "en": {
+      "name": "Equatorial Guinea"
+    }
+  },
+  "cshapes_gw_420": {
+    "en": {
+      "name": "Gambia"
+    }
+  },
+  "state:cshapes_gw_420": {
+    "en": {
+      "name": "Gambia"
+    }
+  },
+  "cshapes_gw_430": {
+    "en": {
+      "name": "French West Africa"
+    }
+  },
+  "state:cshapes_gw_430": {
+    "en": {
+      "name": "French West Africa"
+    }
+  },
+  "cshapes_gw_433": {
+    "en": {
+      "name": "Senegal"
+    }
+  },
+  "state:cshapes_gw_433": {
+    "en": {
+      "name": "Senegal"
+    }
+  },
+  "cshapes_gw_434": {
+    "en": {
+      "name": "Benin"
+    }
+  },
+  "state:cshapes_gw_434": {
+    "en": {
+      "name": "Benin"
+    }
+  },
+  "cshapes_gw_437": {
+    "en": {
+      "name": "Cote D'Ivoire"
+    }
+  },
+  "state:cshapes_gw_437": {
+    "en": {
+      "name": "Cote D'Ivoire"
+    }
+  },
+  "cshapes_gw_438": {
+    "en": {
+      "name": "Guinea"
+    }
+  },
+  "state:cshapes_gw_438": {
+    "en": {
+      "name": "Guinea"
+    }
+  },
+  "cshapes_gw_450": {
+    "en": {
+      "name": "Liberia"
+    }
+  },
+  "state:cshapes_gw_450": {
+    "en": {
+      "name": "Liberia"
+    }
+  },
+  "cshapes_gw_451": {
+    "en": {
+      "name": "Sierra Leone"
+    }
+  },
+  "state:cshapes_gw_451": {
+    "en": {
+      "name": "Sierra Leone"
+    }
+  },
+  "cshapes_gw_452": {
+    "en": {
+      "name": "Ghana"
+    }
+  },
+  "state:cshapes_gw_452": {
+    "en": {
+      "name": "Ghana"
+    }
+  },
+  "cshapes_gw_460": {
+    "en": {
+      "name": "German Togoland"
+    }
+  },
+  "state:cshapes_gw_460": {
+    "en": {
+      "name": "German Togoland"
+    }
+  },
+  "cshapes_gw_470": {
+    "en": {
+      "name": "Kamerun"
+    }
+  },
+  "state:cshapes_gw_470": {
+    "en": {
+      "name": "Kamerun"
+    }
+  },
+  "cshapes_gw_481": {
+    "en": {
+      "name": "Gabon"
+    }
+  },
+  "state:cshapes_gw_481": {
+    "en": {
+      "name": "Gabon"
+    }
+  },
+  "cshapes_gw_484": {
+    "en": {
+      "name": "Congo"
+    }
+  },
+  "state:cshapes_gw_484": {
+    "en": {
+      "name": "Congo"
+    }
+  },
+  "cshapes_gw_490": {
+    "en": {
+      "name": "Congo, Democratic Republic of (Zaire)"
+    }
+  },
+  "state:cshapes_gw_490": {
+    "en": {
+      "name": "Congo, Democratic Republic of (Zaire)"
+    }
+  },
+  "cshapes_gw_500": {
+    "en": {
+      "name": "Uganda"
+    }
+  },
+  "state:cshapes_gw_500": {
+    "en": {
+      "name": "Uganda"
+    }
+  },
+  "cshapes_gw_501": {
+    "en": {
+      "name": "Kenya"
+    }
+  },
+  "state:cshapes_gw_501": {
+    "en": {
+      "name": "Kenya"
+    }
+  },
+  "cshapes_gw_510": {
+    "en": {
+      "name": "Tanzania (Tanganyika)"
+    }
+  },
+  "state:cshapes_gw_510": {
+    "en": {
+      "name": "Tanzania (Tanganyika)"
+    }
+  },
+  "cshapes_gw_511": {
+    "en": {
+      "name": "Zanzibar"
+    }
+  },
+  "state:cshapes_gw_511": {
+    "en": {
+      "name": "Zanzibar"
+    }
+  },
+  "cshapes_gw_521": {
+    "en": {
+      "name": "British Somaliland (Somaliland Republic)"
+    }
+  },
+  "state:cshapes_gw_521": {
+    "en": {
+      "name": "British Somaliland (Somaliland Republic)"
+    }
+  },
+  "cshapes_gw_522": {
+    "en": {
+      "name": "Djibouti"
+    }
+  },
+  "state:cshapes_gw_522": {
+    "en": {
+      "name": "Djibouti"
+    }
+  },
+  "cshapes_gw_530": {
+    "en": {
+      "name": "Ethiopia"
+    }
+  },
+  "state:cshapes_gw_530": {
+    "en": {
+      "name": "Ethiopia"
+    }
+  },
+  "cshapes_gw_531": {
+    "en": {
+      "name": "Eritrea"
+    }
+  },
+  "state:cshapes_gw_531": {
+    "en": {
+      "name": "Eritrea"
+    }
+  },
+  "cshapes_gw_540": {
+    "en": {
+      "name": "Angola"
+    }
+  },
+  "state:cshapes_gw_540": {
+    "en": {
+      "name": "Angola"
+    }
+  },
+  "cshapes_gw_541": {
+    "en": {
+      "name": "Mozambique"
+    }
+  },
+  "state:cshapes_gw_541": {
+    "en": {
+      "name": "Mozambique"
+    }
+  },
+  "cshapes_gw_552": {
+    "en": {
+      "name": "Zimbabwe (Rhodesia)"
+    }
+  },
+  "state:cshapes_gw_552": {
+    "en": {
+      "name": "Zimbabwe (Rhodesia)"
+    }
+  },
+  "cshapes_gw_553": {
+    "en": {
+      "name": "Malawi"
+    }
+  },
+  "state:cshapes_gw_553": {
+    "en": {
+      "name": "Malawi"
+    }
+  },
+  "cshapes_gw_561": {
+    "en": {
+      "name": "Cape Colony"
+    }
+  },
+  "state:cshapes_gw_561": {
+    "en": {
+      "name": "Cape Colony"
+    }
+  },
+  "cshapes_gw_562": {
+    "en": {
+      "name": "Natal"
+    }
+  },
+  "state:cshapes_gw_562": {
+    "en": {
+      "name": "Natal"
+    }
+  },
+  "cshapes_gw_563": {
+    "en": {
+      "name": "Transvaal"
+    }
+  },
+  "state:cshapes_gw_563": {
+    "en": {
+      "name": "Transvaal"
+    }
+  },
+  "cshapes_gw_564": {
+    "en": {
+      "name": "Orange Free State"
+    }
+  },
+  "state:cshapes_gw_564": {
+    "en": {
+      "name": "Orange Free State"
+    }
+  },
+  "cshapes_gw_565": {
+    "en": {
+      "name": "Namibia"
+    }
+  },
+  "state:cshapes_gw_565": {
+    "en": {
+      "name": "Namibia"
+    }
+  },
+  "cshapes_gw_570": {
+    "en": {
+      "name": "Lesotho"
+    }
+  },
+  "state:cshapes_gw_570": {
+    "en": {
+      "name": "Lesotho"
+    }
+  },
+  "cshapes_gw_571": {
+    "en": {
+      "name": "Botswana"
+    }
+  },
+  "state:cshapes_gw_571": {
+    "en": {
+      "name": "Botswana"
+    }
+  },
+  "cshapes_gw_572": {
+    "en": {
+      "name": "Swaziland (Eswatini)"
+    }
+  },
+  "state:cshapes_gw_572": {
+    "en": {
+      "name": "Swaziland (Eswatini)"
+    }
+  },
+  "cshapes_gw_580": {
+    "en": {
+      "name": "Madagascar (Malagasy)"
+    }
+  },
+  "state:cshapes_gw_580": {
+    "en": {
+      "name": "Madagascar (Malagasy)"
+    }
+  },
+  "cshapes_gw_585": {
+    "en": {
+      "name": "Reunion"
+    }
+  },
+  "state:cshapes_gw_585": {
+    "en": {
+      "name": "Reunion"
+    }
+  },
+  "cshapes_gw_590": {
+    "en": {
+      "name": "Mauritius"
+    }
+  },
+  "state:cshapes_gw_590": {
+    "en": {
+      "name": "Mauritius"
+    }
+  },
+  "cshapes_gw_600": {
+    "en": {
+      "name": "Morocco"
+    }
+  },
+  "state:cshapes_gw_600": {
+    "en": {
+      "name": "Morocco"
+    }
+  },
+  "cshapes_gw_610": {
+    "en": {
+      "name": "Spanish West Africa"
+    }
+  },
+  "state:cshapes_gw_610": {
+    "en": {
+      "name": "Spanish West Africa"
+    }
+  },
+  "cshapes_gw_615": {
+    "en": {
+      "name": "Algeria"
+    }
+  },
+  "state:cshapes_gw_615": {
+    "en": {
+      "name": "Algeria"
+    }
+  },
+  "cshapes_gw_616": {
+    "en": {
+      "name": "Tunisia"
+    }
+  },
+  "state:cshapes_gw_616": {
+    "en": {
+      "name": "Tunisia"
+    }
+  },
+  "cshapes_gw_625": {
+    "en": {
+      "name": "Sudan"
+    }
+  },
+  "state:cshapes_gw_625": {
+    "en": {
+      "name": "Sudan"
+    }
+  },
+  "cshapes_gw_630": {
+    "en": {
+      "name": "Iran (Persia)"
+    }
+  },
+  "state:cshapes_gw_630": {
+    "en": {
+      "name": "Iran (Persia)"
+    }
+  },
+  "cshapes_gw_640": {
+    "en": {
+      "name": "Turkey (Ottoman Empire)"
+    }
+  },
+  "state:cshapes_gw_640": {
+    "en": {
+      "name": "Turkey (Ottoman Empire)"
+    }
+  },
+  "cshapes_gw_651": {
+    "en": {
+      "name": "Egypt"
+    }
+  },
+  "state:cshapes_gw_651": {
+    "en": {
+      "name": "Egypt"
+    }
+  },
+  "cshapes_gw_696": {
+    "en": {
+      "name": "United Arab Emirates"
+    }
+  },
+  "state:cshapes_gw_696": {
+    "en": {
+      "name": "United Arab Emirates"
+    }
+  },
+  "cshapes_gw_698": {
+    "en": {
+      "name": "Oman"
+    }
+  },
+  "state:cshapes_gw_698": {
+    "en": {
+      "name": "Oman"
+    }
+  },
+  "cshapes_gw_700": {
+    "en": {
+      "name": "Afghanistan"
+    }
+  },
+  "state:cshapes_gw_700": {
+    "en": {
+      "name": "Afghanistan"
+    }
+  },
+  "cshapes_gw_710": {
+    "en": {
+      "name": "China"
+    }
+  },
+  "state:cshapes_gw_710": {
+    "en": {
+      "name": "China"
+    }
+  },
+  "cshapes_gw_713": {
+    "en": {
+      "name": "Taiwan"
+    }
+  },
+  "state:cshapes_gw_713": {
+    "en": {
+      "name": "Taiwan"
+    }
+  },
+  "cshapes_gw_730": {
+    "en": {
+      "name": "Korea"
+    }
+  },
+  "state:cshapes_gw_730": {
+    "en": {
+      "name": "Korea"
+    }
+  },
+  "cshapes_gw_740": {
+    "en": {
+      "name": "Japan"
+    }
+  },
+  "state:cshapes_gw_740": {
+    "en": {
+      "name": "Japan"
+    }
+  },
+  "cshapes_gw_750": {
+    "en": {
+      "name": "India"
+    }
+  },
+  "state:cshapes_gw_750": {
+    "en": {
+      "name": "India"
+    }
+  },
+  "cshapes_gw_760": {
+    "en": {
+      "name": "Bhutan"
+    }
+  },
+  "state:cshapes_gw_760": {
+    "en": {
+      "name": "Bhutan"
+    }
+  },
+  "cshapes_gw_780": {
+    "en": {
+      "name": "Sri Lanka (Ceylon)"
+    }
+  },
+  "state:cshapes_gw_780": {
+    "en": {
+      "name": "Sri Lanka (Ceylon)"
+    }
+  },
+  "cshapes_gw_781": {
+    "en": {
+      "name": "Maldives"
+    }
+  },
+  "state:cshapes_gw_781": {
+    "en": {
+      "name": "Maldives"
+    }
+  },
+  "cshapes_gw_790": {
+    "en": {
+      "name": "Nepal"
+    }
+  },
+  "state:cshapes_gw_790": {
+    "en": {
+      "name": "Nepal"
+    }
+  },
+  "cshapes_gw_800": {
+    "en": {
+      "name": "Thailand"
+    }
+  },
+  "state:cshapes_gw_800": {
+    "en": {
+      "name": "Thailand"
+    }
+  },
+  "cshapes_gw_811": {
+    "en": {
+      "name": "Cambodia (Kampuchea)"
+    }
+  },
+  "state:cshapes_gw_811": {
+    "en": {
+      "name": "Cambodia (Kampuchea)"
+    }
+  },
+  "cshapes_gw_812": {
+    "en": {
+      "name": "Laos"
+    }
+  },
+  "state:cshapes_gw_812": {
+    "en": {
+      "name": "Laos"
+    }
+  },
+  "cshapes_gw_815": {
+    "en": {
+      "name": "Vietnam (Annam/Cochin China/Tonkin)"
+    }
+  },
+  "state:cshapes_gw_815": {
+    "en": {
+      "name": "Vietnam (Annam/Cochin China/Tonkin)"
+    }
+  },
+  "cshapes_gw_821": {
+    "en": {
+      "name": "Federated Malay States"
+    }
+  },
+  "state:cshapes_gw_821": {
+    "en": {
+      "name": "Federated Malay States"
+    }
+  },
+  "cshapes_gw_822": {
+    "en": {
+      "name": "Unfederated Malay States"
+    }
+  },
+  "state:cshapes_gw_822": {
+    "en": {
+      "name": "Unfederated Malay States"
+    }
+  },
+  "cshapes_gw_823": {
+    "en": {
+      "name": "Sabah (North Borneo)"
+    }
+  },
+  "state:cshapes_gw_823": {
+    "en": {
+      "name": "Sabah (North Borneo)"
+    }
+  },
+  "cshapes_gw_824": {
+    "en": {
+      "name": "Sarawak"
+    }
+  },
+  "state:cshapes_gw_824": {
+    "en": {
+      "name": "Sarawak"
+    }
+  },
+  "cshapes_gw_827": {
+    "en": {
+      "name": "Straits Settlements"
+    }
+  },
+  "state:cshapes_gw_827": {
+    "en": {
+      "name": "Straits Settlements"
+    }
+  },
+  "cshapes_gw_835": {
+    "en": {
+      "name": "Brunei"
+    }
+  },
+  "state:cshapes_gw_835": {
+    "en": {
+      "name": "Brunei"
+    }
+  },
+  "cshapes_gw_840": {
+    "en": {
+      "name": "Philippines"
+    }
+  },
+  "state:cshapes_gw_840": {
+    "en": {
+      "name": "Philippines"
+    }
+  },
+  "cshapes_gw_850": {
+    "en": {
+      "name": "Indonesia"
+    }
+  },
+  "state:cshapes_gw_850": {
+    "en": {
+      "name": "Indonesia"
+    }
+  },
+  "cshapes_gw_860": {
+    "en": {
+      "name": "East Timor"
+    }
+  },
+  "state:cshapes_gw_860": {
+    "en": {
+      "name": "East Timor"
+    }
+  },
+  "cshapes_gw_901": {
+    "en": {
+      "name": "New South Wales"
+    }
+  },
+  "state:cshapes_gw_901": {
+    "en": {
+      "name": "New South Wales"
+    }
+  },
+  "cshapes_gw_902": {
+    "en": {
+      "name": "Western Australia"
+    }
+  },
+  "state:cshapes_gw_902": {
+    "en": {
+      "name": "Western Australia"
+    }
+  },
+  "cshapes_gw_903": {
+    "en": {
+      "name": "South Australia"
+    }
+  },
+  "state:cshapes_gw_903": {
+    "en": {
+      "name": "South Australia"
+    }
+  },
+  "cshapes_gw_904": {
+    "en": {
+      "name": "Victoria"
+    }
+  },
+  "state:cshapes_gw_904": {
+    "en": {
+      "name": "Victoria"
+    }
+  },
+  "cshapes_gw_905": {
+    "en": {
+      "name": "Queensland"
+    }
+  },
+  "state:cshapes_gw_905": {
+    "en": {
+      "name": "Queensland"
+    }
+  },
+  "cshapes_gw_906": {
+    "en": {
+      "name": "Tasmania"
+    }
+  },
+  "state:cshapes_gw_906": {
+    "en": {
+      "name": "Tasmania"
+    }
+  },
+  "cshapes_gw_911": {
+    "en": {
+      "name": "Papua"
+    }
+  },
+  "state:cshapes_gw_911": {
+    "en": {
+      "name": "Papua"
+    }
+  },
+  "cshapes_gw_912": {
+    "en": {
+      "name": "New Guinea (German New Guinea) (Kaiser Wilhelmsland)"
+    }
+  },
+  "state:cshapes_gw_912": {
+    "en": {
+      "name": "New Guinea (German New Guinea) (Kaiser Wilhelmsland)"
+    }
+  },
+  "cshapes_gw_920": {
+    "en": {
+      "name": "New Zealand"
+    }
+  },
+  "state:cshapes_gw_920": {
+    "en": {
+      "name": "New Zealand"
+    }
+  },
+  "cshapes_gw_930": {
+    "en": {
+      "name": "New Caledonia and Dependencies"
+    }
+  },
+  "state:cshapes_gw_930": {
+    "en": {
+      "name": "New Caledonia and Dependencies"
+    }
+  },
+  "cshapes_gw_940": {
+    "en": {
+      "name": "Solomon Islands"
+    }
+  },
+  "state:cshapes_gw_940": {
+    "en": {
+      "name": "Solomon Islands"
+    }
+  },
+  "cshapes_gw_950": {
+    "en": {
+      "name": "Fiji"
+    }
+  },
+  "state:cshapes_gw_950": {
+    "en": {
+      "name": "Fiji"
+    }
+  },
+  "cshapes_gw_3461": {
+    "en": {
+      "name": "Bosnia"
+    }
+  },
+  "state:cshapes_gw_3461": {
+    "en": {
+      "name": "Bosnia"
+    }
+  },
+  "cshapes_gw_3462": {
+    "en": {
+      "name": "Herzegovina"
+    }
+  },
+  "state:cshapes_gw_3462": {
+    "en": {
+      "name": "Herzegovina"
+    }
+  },
+  "cshapes_gw_4781": {
+    "en": {
+      "name": "Lagos"
+    }
+  },
+  "state:cshapes_gw_4781": {
+    "en": {
+      "name": "Lagos"
+    }
+  },
+  "cshapes_gw_4783": {
+    "en": {
+      "name": "Southern Nigeria"
+    }
+  },
+  "state:cshapes_gw_4783": {
+    "en": {
+      "name": "Southern Nigeria"
+    }
+  },
+  "cshapes_gw_4784": {
+    "en": {
+      "name": "Northern Nigeria"
+    }
+  },
+  "state:cshapes_gw_4784": {
+    "en": {
+      "name": "Northern Nigeria"
+    }
+  },
+  "cshapes_gw_5200": {
+    "en": {
+      "name": "Italian Somaliland"
+    }
+  },
+  "state:cshapes_gw_5200": {
+    "en": {
+      "name": "Italian Somaliland"
+    }
+  },
+  "cshapes_gw_5518": {
+    "en": {
+      "name": "Northeastern Rhodesia"
+    }
+  },
+  "state:cshapes_gw_5518": {
+    "en": {
+      "name": "Northeastern Rhodesia"
+    }
+  },
+  "cshapes_gw_5519": {
+    "en": {
+      "name": "Northwestern Rhodesia"
+    }
+  },
+  "state:cshapes_gw_5519": {
+    "en": {
+      "name": "Northwestern Rhodesia"
+    }
+  },
+  "cshapes_gw_7020": {
+    "en": {
+      "name": "Bokhara"
+    }
+  },
+  "state:cshapes_gw_7020": {
+    "en": {
+      "name": "Bokhara"
+    }
+  },
+  "cshapes_gw_7030": {
+    "en": {
+      "name": "Khiva"
+    }
+  },
+  "state:cshapes_gw_7030": {
+    "en": {
+      "name": "Khiva"
+    }
+  },
+  "name:France": {
+    "zh": {
+      "name": "法国"
+    },
+    "en": {
+      "name": "France"
+    }
+  },
+  "name:French territories": {
+    "zh": {
+      "name": "法属领地"
+    },
+    "en": {
+      "name": "French territories"
+    }
+  },
+  "name:United Kingdom": {
+    "zh": {
+      "name": "英国"
+    },
+    "en": {
+      "name": "United Kingdom"
+    }
+  },
+  "name:British territories": {
+    "zh": {
+      "name": "英属领地"
+    },
+    "en": {
+      "name": "British territories"
+    }
+  },
+  "name:Germany": {
+    "zh": {
+      "name": "德国"
+    },
+    "en": {
+      "name": "Germany"
+    }
+  },
+  "name:German territories": {
+    "zh": {
+      "name": "德属领地"
+    },
+    "en": {
+      "name": "German territories"
+    }
+  },
+  "name:Austria-Hungary": {
+    "zh": {
+      "name": "奥匈帝国"
+    },
+    "en": {
+      "name": "Austria-Hungary"
+    }
+  },
+  "name:Russian Empire": {
+    "zh": {
+      "name": "俄罗斯帝国"
+    },
+    "en": {
+      "name": "Russian Empire"
+    }
+  },
+  "name:Ottoman Empire": {
+    "zh": {
+      "name": "奥斯曼帝国"
+    },
+    "en": {
+      "name": "Ottoman Empire"
+    }
+  },
+  "name:Qing Empire": {
+    "zh": {
+      "name": "清帝国"
+    },
+    "en": {
+      "name": "Qing Empire"
+    }
+  },
+  "name:Japan": {
+    "zh": {
+      "name": "日本帝国"
+    },
+    "en": {
+      "name": "Japan"
+    }
+  },
+  "name:Korea": {
+    "zh": {
+      "name": "韩国"
+    },
+    "en": {
+      "name": "Korea"
+    }
+  },
+  "name:United States": {
+    "zh": {
+      "name": "美国"
+    },
+    "en": {
+      "name": "United States"
+    }
+  },
+  "name:US-controlled territories": {
+    "zh": {
+      "name": "美国控制区"
+    },
+    "en": {
+      "name": "US-controlled territories"
+    }
+  },
+  "name:Italy": {
+    "zh": {
+      "name": "意大利"
+    },
+    "en": {
+      "name": "Italy"
+    }
+  },
+  "name:Spain": {
+    "zh": {
+      "name": "西班牙"
+    },
+    "en": {
+      "name": "Spain"
+    }
+  },
+  "name:Spanish territories": {
+    "zh": {
+      "name": "西属领地"
+    },
+    "en": {
+      "name": "Spanish territories"
+    }
+  },
+  "name:Portugal": {
+    "zh": {
+      "name": "葡萄牙"
+    },
+    "en": {
+      "name": "Portugal"
+    }
+  },
+  "name:Portuguese territories": {
+    "zh": {
+      "name": "葡属领地"
+    },
+    "en": {
+      "name": "Portuguese territories"
+    }
+  },
+  "name:Belgium": {
+    "zh": {
+      "name": "比利时"
+    },
+    "en": {
+      "name": "Belgium"
+    }
+  },
+  "name:Congo Free State": {
+    "zh": {
+      "name": "刚果自由邦"
+    },
+    "en": {
+      "name": "Congo Free State"
+    }
+  },
+  "name:Netherlands": {
+    "zh": {
+      "name": "荷兰"
+    },
+    "en": {
+      "name": "Netherlands"
+    }
+  },
+  "name:Dutch territories": {
+    "zh": {
+      "name": "荷属领地"
+    },
+    "en": {
+      "name": "Dutch territories"
+    }
+  },
+  "name:Sweden-Norway": {
+    "zh": {
+      "name": "瑞典—挪威"
+    },
+    "en": {
+      "name": "Sweden-Norway"
+    }
+  },
+  "name:Denmark": {
+    "zh": {
+      "name": "丹麦"
+    },
+    "en": {
+      "name": "Denmark"
+    }
+  },
+  "name:Switzerland": {
+    "zh": {
+      "name": "瑞士"
+    },
+    "en": {
+      "name": "Switzerland"
+    }
+  },
+  "name:Romania": {
+    "zh": {
+      "name": "罗马尼亚"
+    },
+    "en": {
+      "name": "Romania"
+    }
+  },
+  "name:Serbia": {
+    "zh": {
+      "name": "塞尔维亚"
+    },
+    "en": {
+      "name": "Serbia"
+    }
+  },
+  "name:Montenegro": {
+    "zh": {
+      "name": "黑山"
+    },
+    "en": {
+      "name": "Montenegro"
+    }
+  },
+  "name:Bulgaria": {
+    "zh": {
+      "name": "保加利亚"
+    },
+    "en": {
+      "name": "Bulgaria"
+    }
+  },
+  "name:Greece": {
+    "zh": {
+      "name": "希腊"
+    },
+    "en": {
+      "name": "Greece"
+    }
+  },
+  "name:Persia": {
+    "zh": {
+      "name": "波斯"
+    },
+    "en": {
+      "name": "Persia"
+    }
+  },
+  "name:Afghanistan": {
+    "zh": {
+      "name": "阿富汗"
+    },
+    "en": {
+      "name": "Afghanistan"
+    }
+  },
+  "name:Siam": {
+    "zh": {
+      "name": "暹罗"
+    },
+    "en": {
+      "name": "Siam"
+    }
+  },
+  "name:Nepal": {
+    "zh": {
+      "name": "尼泊尔"
+    },
+    "en": {
+      "name": "Nepal"
+    }
+  },
+  "name:Bhutan": {
+    "zh": {
+      "name": "不丹"
+    },
+    "en": {
+      "name": "Bhutan"
+    }
+  },
+  "name:Ethiopia": {
+    "zh": {
+      "name": "埃塞俄比亚"
+    },
+    "en": {
+      "name": "Ethiopia"
+    }
+  },
+  "name:Liberia": {
+    "zh": {
+      "name": "利比里亚"
+    },
+    "en": {
+      "name": "Liberia"
+    }
+  },
+  "name:Morocco": {
+    "zh": {
+      "name": "摩洛哥"
+    },
+    "en": {
+      "name": "Morocco"
+    }
+  },
+  "name:Arabian polities": {
+    "zh": {
+      "name": "阿拉伯诸政权"
+    },
+    "en": {
+      "name": "Arabian polities"
+    }
+  },
+  "name:Oman": {
+    "zh": {
+      "name": "阿曼"
+    },
+    "en": {
+      "name": "Oman"
+    }
+  },
+  "name:Somali territories": {
+    "zh": {
+      "name": "索马里诸领地"
+    },
+    "en": {
+      "name": "Somali territories"
+    }
+  },
+  "name:Boer War zone": {
+    "zh": {
+      "name": "布尔战争区"
+    },
+    "en": {
+      "name": "Boer War zone"
+    }
+  },
+  "name:Mexico": {
+    "zh": {
+      "name": "墨西哥"
+    },
+    "en": {
+      "name": "Mexico"
+    }
+  },
+  "name:Guatemala": {
+    "zh": {
+      "name": "危地马拉"
+    },
+    "en": {
+      "name": "Guatemala"
+    }
+  },
+  "name:Honduras": {
+    "zh": {
+      "name": "洪都拉斯"
+    },
+    "en": {
+      "name": "Honduras"
+    }
+  },
+  "name:El Salvador": {
+    "zh": {
+      "name": "萨尔瓦多"
+    },
+    "en": {
+      "name": "El Salvador"
+    }
+  },
+  "name:Nicaragua": {
+    "zh": {
+      "name": "尼加拉瓜"
+    },
+    "en": {
+      "name": "Nicaragua"
+    }
+  },
+  "name:Costa Rica": {
+    "zh": {
+      "name": "哥斯达黎加"
+    },
+    "en": {
+      "name": "Costa Rica"
+    }
+  },
+  "name:Colombia": {
+    "zh": {
+      "name": "哥伦比亚"
+    },
+    "en": {
+      "name": "Colombia"
+    }
+  },
+  "name:Venezuela": {
+    "zh": {
+      "name": "委内瑞拉"
+    },
+    "en": {
+      "name": "Venezuela"
+    }
+  },
+  "name:Ecuador": {
+    "zh": {
+      "name": "厄瓜多尔"
+    },
+    "en": {
+      "name": "Ecuador"
+    }
+  },
+  "name:Peru": {
+    "zh": {
+      "name": "秘鲁"
+    },
+    "en": {
+      "name": "Peru"
+    }
+  },
+  "name:Bolivia": {
+    "zh": {
+      "name": "玻利维亚"
+    },
+    "en": {
+      "name": "Bolivia"
+    }
+  },
+  "name:Chile": {
+    "zh": {
+      "name": "智利"
+    },
+    "en": {
+      "name": "Chile"
+    }
+  },
+  "name:Argentina": {
+    "zh": {
+      "name": "阿根廷"
+    },
+    "en": {
+      "name": "Argentina"
+    }
+  },
+  "name:Paraguay": {
+    "zh": {
+      "name": "巴拉圭"
+    },
+    "en": {
+      "name": "Paraguay"
+    }
+  },
+  "name:Uruguay": {
+    "zh": {
+      "name": "乌拉圭"
+    },
+    "en": {
+      "name": "Uruguay"
+    }
+  },
+  "name:Brazil": {
+    "zh": {
+      "name": "巴西"
+    },
+    "en": {
+      "name": "Brazil"
+    }
+  },
+  "name:Haiti": {
+    "zh": {
+      "name": "海地"
+    },
+    "en": {
+      "name": "Haiti"
+    }
+  },
+  "name:Dominican Republic": {
+    "zh": {
+      "name": "多米尼加"
+    },
+    "en": {
+      "name": "Dominican Republic"
+    }
+  }
+}

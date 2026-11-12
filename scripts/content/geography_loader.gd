@@ -4,6 +4,9 @@ extends RefCounted
 const RELIEF_PATH: String = "res://data/presentation/global_physical_relief.json"
 const GEOMETRY_PATH: String = "res://data/world_map/historical/cshapes_1900_snapshot.json"
 const SUPPLEMENT_PATH: String = "res://data/world_map/historical/arabia_gulf_geography_1900.json"
+const WESTERN_FRONTIER_DETAILS: Array[String] = [
+	"border_046", "border_049",
+]
 var errors: Array[String] = []
 var metadata: Dictionary = {}
 var parts_by_feature: Dictionary = {}
@@ -48,6 +51,19 @@ func _load_presentation() -> void:
 	if str(borders.get("schema_id", "")) != "political_border_display_r39" or str(borders.get("geometry_role", "")) != "DISPLAY_PARTITION_SHARED_EDGES_ONLY_NOT_SOVEREIGNTY" or not borders.get("boundaries") is Array:
 		errors.append("Invalid political display border format")
 		return
+	var regional_frontiers: Array[Dictionary] = []
+	for filename: String in WESTERN_FRONTIER_DETAILS:
+		var detail := ContentDocument.read("res://data/presentation/political_border_detail/%s.json"%filename, errors)
+		var lines: Variant = detail.get("lines", [detail.get("points", [])])
+		if detail.get("source_features") is Array and lines is Array and not lines.is_empty() and lines.all(func(line: Variant) -> bool: return line is Array and line.size()>1):
+			detail["lines"] = lines
+			regional_frontiers.append(detail)
+	borders["regional_frontiers"] = regional_frontiers
+	var overrides := ContentDocument.read("res://data/presentation/political_border_detail/frontier_france_neighbors_1900.json",errors)
+	if overrides.get("schema_id")!="historical_frontier_overrides_1900" or not overrides.get("frontiers") is Array:
+		errors.append("Invalid French frontier display data")
+		return
+	borders["frontier_overrides"] = overrides.frontiers
 	var annotations := ContentDocument.read("res://data/presentation/geographic_annotations_r3.json", errors)
 	var islands := ContentDocument.read("res://data/world_map/historical/island_political_references_1900.json",errors)
 	if islands.get("schema_id")!="island_political_references_1900_v1" or not islands.get("annotations") is Array:
@@ -166,7 +182,16 @@ static func decode_relief(level: String, admitted: Dictionary) -> Dictionary:
 		failures.append("Missing relief level")
 		return result
 	var asset := admitted[level] as Dictionary
-	var buffer := FileAccess.get_file_as_bytes(str(asset.path))
+	var decoded := decode_relief_buffer(FileAccess.get_file_as_bytes(str(asset.path)),asset)
+	if result.has("assets"): decoded["assets"] = result.assets
+	return decoded
+
+static func decode_relief_buffer(buffer: PackedByteArray, asset: Dictionary) -> Dictionary:
+	# Same validation/codec for production and finite native read-vs-decode timing.
+	var failures: Array[String] = []
+	var result: Dictionary = {"errors":failures}
+	if str(asset.format)=="RGBA8_MIP_FRA0":
+		return _decode_lossless_surface(buffer,asset)
 	if str(asset.format)=="RGBA8_MIP_DEFLATE":
 		# Offline linear-data mips, not a colour image interpreted as height.
 		if buffer.size()<20 or buffer.slice(0,5).get_string_from_ascii()!="FRT42" or buffer.decode_u32(8)!=int(asset.width) or buffer.decode_u32(12)!=int(asset.height) or buffer.decode_u32(16)!=int(asset.decoded_bytes):
@@ -185,3 +210,43 @@ static func decode_relief(level: String, admitted: Dictionary) -> Dictionary:
 	image.convert(Image.FORMAT_R8 if str(asset.format)=="R8" else Image.FORMAT_RG8)
 	result["image"] = image
 	return result
+
+static func _decode_lossless_surface(buffer: PackedByteArray, asset: Dictionary) -> Dictionary:
+	# FRA0 v1 is an opt-in storage codec, not a new surface encoding. Restore
+	# original RGBA8 + all offline Mips before the unchanged texture upload.
+	var failures: Array[String] = []
+	var bad_errors: Array[String] = ["Invalid lossless geographic surface"]
+	var bad := {"errors":bad_errors}
+	if buffer.size()<28 or buffer.slice(0,8)!=PackedByteArray([70,82,65,48,0,0,0,0]) or buffer[8]!=1 or buffer.decode_u16(10)!=1025: return bad
+	var codec := int(buffer[9])
+	var w := int(buffer.decode_u32(12));var h := int(buffer.decode_u32(16))
+	var length := int(buffer.decode_u32(20))
+	if w<1 or h<1 or w>16384 or h>16384 or length>268435456: return bad
+	if w!=int(asset.width) or h!=int(asset.height) or length!=int(asset.decoded_bytes) or int(buffer.decode_u32(24))!=buffer.size()-28: return bad
+	var ww := w;var hh := h;var expected := 0
+	while true:
+		expected+=ww*hh*4
+		if ww==1 and hh==1: break
+		ww=maxi(1,ww/2);hh=maxi(1,hh/2)
+	if length!=expected: return bad
+	var payload := buffer.slice(28)
+	var raw: PackedByteArray
+	if codec==1:
+		raw=payload.decompress(length,FileAccess.COMPRESSION_ZSTD)
+	elif codec==5:
+		# A lossless VP8L image carries the linear Mip byte stream, without
+		# regeneration. Only the final row is padded; native decoding also
+		# performs the reversible colour/prediction transforms.
+		if payload.size()<25 or payload.slice(0,4).get_string_from_ascii()!="RIFF" or payload.slice(8,16).get_string_from_ascii()!="WEBPVP8L" or payload[20]!=47: return bad
+		var bits := int(payload.decode_u32(21))
+		if (bits&16383)+1!=w or ((bits>>14)&16383)+1!=ceili(float(length/4)/w) or bits>>29: return bad
+		var packed_image := Image.new()
+		if packed_image.load_webp_from_buffer(payload)!=OK: return bad
+		packed_image.convert(Image.FORMAT_RGBA8)
+		raw=packed_image.get_data();packed_image=null
+		raw.resize(length) # Release image first: no second full-size COW copy.
+	else: return bad
+	if raw.size()!=length: return bad
+	var image := Image.create_from_data(w,h,true,Image.FORMAT_RGBA8,raw)
+	if image==null: return bad
+	return {"errors":failures,"image":image}

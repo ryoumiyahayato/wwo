@@ -1,5 +1,6 @@
 class_name FormalWorldMenu
 extends Control
+const UILocale = preload("res://scripts/presentation/ui/ui_locale.gd")
 
 const WORLD_SCENE: String = "res://scenes/formal/formal_world_main.tscn"
 const MAP_SCENE = preload("res://scenes/presentation/map/globe_renderer.tscn")
@@ -11,6 +12,7 @@ const PREPARED_LOADING_META: StringName = &"formal_world_prepared_loading"
 const PREPARED_CONTENT_META: StringName = &"formal_world_prepared_content"
 const LIVELIHOOD_META: StringName = &"formal_world_livelihood"
 const NATIVE_ECONOMY_META: StringName = &"formal_world_native_economy"
+const SELECTION_ZOOM := 0.76
 const SETTINGS = preload("res://scripts/presentation/ui/interface_settings.gd")
 const MAP_ACCEPTANCE = preload("res://scripts/presentation/ui/map_resource_acceptance.gd")
 var _map_acceptance: Control
@@ -36,7 +38,8 @@ var _country_name: Label
 var _flag: TextureRect
 var _brief: Label
 var _person_note: Label
-var _person_choice: OptionButton
+var _government: Label
+var _atlas_title: VBoxContainer
 var _network_choice: CheckButton
 var _network_opening: bool = false
 var _enter_button: Button
@@ -44,6 +47,7 @@ var _worker: Thread
 var _launch_mode: String = ""
 var _preview_worker: Thread
 var _loading_layer: Control
+var _loading_painting: TextureRect
 var _loading_label: Label
 var _launch_presentation: Dictionary = {}
 var _preview_mutex := Mutex.new()
@@ -62,20 +66,51 @@ var _map_status_generation: int = 0
 
 
 func _ready() -> void:
+	var debug_spaces=preload("res://scripts/presentation/ui/debug_workspaces.gd")
+	if debug_spaces.enabled() and not get_tree().root.has_node("DebugWorkspaces"):
+		var dock := debug_spaces.new();dock.name="DebugWorkspaces"
+		get_tree().root.add_child.call_deferred(dock)
+	# Optional in-process observation. It never activates a native window or
+	# moves the desktop cursor. Normal startup installs no polling timer.
+	var native_capture=preload("res://scripts/presentation/ui/native_screenshot.gd")
+	if native_capture.observation_requested() and not get_tree().root.has_node("NativeObservation"):
+		var observation := native_capture.new()
+		observation.name="NativeObservation"
+		get_tree().root.add_child.call_deferred(observation)
 	get_window().min_size = Vector2i(960,640)
 	get_tree().auto_accept_quit = true
-	theme = UIDrawing.shell_theme()
 	_preferences = SETTINGS.load_preferences()
 	SETTINGS.apply(_preferences)
 	_controller.labels_enabled = bool(_preferences.get("labels",false))
-	var visual := SETTINGS.theme_parameters()
-	($Painting as TextureRect).texture = visual.background as Texture2D
 	var paint := ShaderMaterial.new()
 	paint.shader = preload("res://shaders/presentation/ui/menu_painting.gdshader")
-	paint.set_shader_parameter("motion",visual.menu_motion)
 	($Painting as TextureRect).material = paint
+	_apply_theme()
 	($Version as Label).text = "v"+str(ProjectSettings.get_setting("application/config/version",""))
-	($Version as Label).theme = theme
+	_atlas_title = VBoxContainer.new()
+	_atlas_title.position = Vector2(48,54)
+	_atlas_title.z_index = 18
+	_atlas_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_atlas_title)
+	var year := Label.new()
+	year.text = "1900"
+	year.add_theme_font_override("font",preload("res://assets/fonts/map/EBGaramond-Medium.ttf"))
+	year.add_theme_font_size_override("font_size",66)
+	year.add_theme_color_override("font_color",UIDrawing.FOLIO_PAPER)
+	year.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_atlas_title.add_child(year)
+	var rule := ColorRect.new()
+	rule.color = UIDrawing.FOLIO_BRASS
+	rule.custom_minimum_size = Vector2(96,2)
+	rule.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_atlas_title.add_child(rule)
+	var caption := Label.new()
+	caption.text = UILocale.text("世界图册")
+	caption.add_theme_font_size_override("font_size",17)
+	caption.add_theme_color_override("font_color",UIDrawing.FOLIO_BRASS)
+	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_atlas_title.add_child(caption)
 	_controller.selection_changed.connect(_map_country_selected)
 	resized.connect(_position_panel)
 	set_process(false)
@@ -212,7 +247,7 @@ func _fail_preview(reason: String) -> void:
 	# Release input before renderer cleanup can invoke any of its callbacks.
 	_set_loading(false)
 	if is_instance_valid(_status):
-		_status.text = _preview_error
+		_status.text = UILocale.text(_preview_error)
 		_status.visible = true
 	_countries.clear()
 	_politics = null
@@ -260,7 +295,6 @@ func _install_preview(prepared: Dictionary) -> bool:
 	if _renderer==null:
 		_fail_preview("无法创建地图显示节点。")
 		return false
-	_renderer.modulate = Color(0.80,0.83,0.79)
 	add_child(_renderer)
 	move_child(_renderer,1)
 	_renderer.relief.decode_asset = GeographyLoader.decode_relief
@@ -294,7 +328,7 @@ func _install_preview(prepared: Dictionary) -> bool:
 		var anchor := _renderer.political.anchors.get(_country_id,Vector3.ZERO) as Vector3
 		if not anchor.is_zero_approx():
 			_controller.focus(anchor)
-			_controller.set_world_zoom(0.86)
+			_controller.set_world_zoom(SELECTION_ZOOM)
 	_preview_display_waiting = true
 	_renderer.queue_redraw()
 	return true
@@ -308,6 +342,7 @@ func _set_loading(enabled: bool, text: String = "正在进入世界") -> void:
 		_loading_layer.theme = UIDrawing.shell_theme()
 		add_child(_loading_layer)
 		var painting := TextureRect.new()
+		_loading_painting = painting
 		painting.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		painting.texture = SETTINGS.theme_parameters().background as Texture2D
 		painting.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -346,7 +381,7 @@ func _set_loading(enabled: bool, text: String = "正在进入世界") -> void:
 		_loading_back.offset_bottom = -76
 		_loading_back.pressed.connect(_leave_preview_preparation)
 		_loading_layer.add_child(_loading_back)
-	_loading_label.text = text
+	_loading_label.text = UILocale.text(text)
 	_loading_layer.visible = enabled
 	_loading_back.visible = false # Normal preparation has no redundant return button.
 
@@ -356,8 +391,8 @@ func _show_page(page: String) -> void:
 	_country_choice = null
 	_country_name = null
 	_enter_button = null
-	_person_choice = null
 	_network_choice = null
+	_atlas_title.visible = page=="selection"
 	if page=="selection" and _renderer==null and _preview_error.is_empty() and not _preview_waiting: _prepare_preview.call_deferred()
 	($Painting as TextureRect).visible = page!="selection" or not _preview_ready
 	($Shade as ColorRect).visible = page!="selection" or not _preview_ready
@@ -368,15 +403,22 @@ func _show_page(page: String) -> void:
 		_panel.queue_free()
 	_panel = PanelContainer.new()
 	_panel.z_index = 20
+	_panel.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	var frame := StyleBoxFlat.new()
-	frame.bg_color = SETTINGS.theme_parameters().panel as Color
-	frame.bg_color.a = 0.94 if page=="selection" else 0.87
-	frame.border_color = Color(0.60,0.51,0.31,0.45)
-	frame.set_border_width_all(1 if page!="home" else 0)
-	frame.content_margin_left = 22
-	frame.content_margin_right = 22
-	frame.content_margin_top = 22
-	frame.content_margin_bottom = 22
+	frame.draw_center = false
+	var menu_panel := _panel
+	if page=="selection":
+		menu_panel.draw.connect(func() -> void:
+			var bounds := Rect2(Vector2.ZERO,menu_panel.size)
+			UIDrawing.folio(menu_panel,bounds,UIDrawing.FOLIO_HEADER_HEIGHT)
+			UIDrawing.folio_title(menu_panel,get_theme_default_font(),bounds,UILocale.text("国家档案  /  1900"),15))
+	else:
+		menu_panel.draw.connect(func() -> void:
+			UIDrawing.folio_frame(menu_panel,Rect2(Vector2.ZERO,menu_panel.size),SETTINGS.theme_parameters().panel as Color))
+	frame.content_margin_left = 29 if page=="selection" else 24
+	frame.content_margin_right = frame.content_margin_left
+	frame.content_margin_top = UIDrawing.FOLIO_HEADER_HEIGHT+13 if page=="selection" else 24
+	frame.content_margin_bottom = 38 if page=="selection" else 22
 	_panel.add_theme_stylebox_override("panel",frame)
 	add_child(_panel)
 	_panel.minimum_size_changed.connect(_position_panel,CONNECT_DEFERRED)
@@ -403,45 +445,69 @@ func _show_page(page: String) -> void:
 		"selection":
 			if not _preview_error.is_empty():
 				_button("重新准备地图",_retry_preview)
-				_button("返回首页",_show_page.bind("home"))
 			var flag_row := HBoxContainer.new()
+			flag_row.add_theme_constant_override("separation",14)
 			_column.add_child(flag_row)
 			_flag = TextureRect.new()
-			_flag.custom_minimum_size = Vector2(62,42)
+			_flag.custom_minimum_size = Vector2(78,52)
 			_flag.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			_flag.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			flag_row.add_child(_flag)
 			_country_name = Label.new()
 			_country_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			_country_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			_country_name.add_theme_font_size_override("font_size",21)
+			_country_name.add_theme_font_size_override("font_size",26)
+			_country_name.add_theme_color_override("font_color",UIDrawing.FOLIO_INK)
 			flag_row.add_child(_country_name)
+			_government = _text("",12)
+			_government.add_theme_color_override("font_color",UIDrawing.FOLIO_MUTED)
+			_brief = _text("",14)
+			_brief.max_lines_visible = 4
+			_brief.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			_brief.add_theme_color_override("font_color",UIDrawing.FOLIO_INK)
+			var character_area := VBoxContainer.new()
+			character_area.custom_minimum_size.y = 82
+			character_area.add_theme_constant_override("separation",4)
+			_column.add_child(character_area)
+			var identity := _text("开局身份",12)
+			identity.add_theme_color_override("font_color",UIDrawing.FOLIO_MUTED)
+			identity.reparent(character_area)
+			_person_note = _text("",17)
+			_person_note.add_theme_color_override("font_color",UIDrawing.FOLIO_INK)
+			_person_note.reparent(character_area)
+			if OS.is_debug_build() and "--opening-scenarios" in OS.get_cmdline_user_args():
+				_network_choice = CheckButton.new()
+				_network_choice.text = UILocale.text("产业开发情景")
+				_network_choice.add_theme_color_override("font_color",UIDrawing.FOLIO_INK)
+				_network_choice.button_pressed = _network_opening
+				_column.add_child(_network_choice)
+				_network_choice.toggled.connect(func(enabled: bool) -> void:
+					_network_opening = enabled
+					_update_country())
+			_column = _footer
+			_enter_button = _button("进入世界",_enter_world.bind("new",1),false)
+			_enter_button.custom_minimum_size = Vector2(154,36)
+			_enter_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			_style_folio_control(_enter_button,true)
+			var navigation := HBoxContainer.new()
+			navigation.add_theme_constant_override("separation",8)
+			_footer.add_child(navigation)
 			_country_choice = OptionButton.new()
 			_country_choice.fit_to_longest_item = false
 			_country_choice.clip_text = true
-			_column.add_child(_country_choice)
+			_country_choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			navigation.add_child(_country_choice)
+			_style_folio_control(_country_choice)
 			for country: Dictionary in _countries:
-				_country_choice.add_item(str(country.get("name_zh","名称未记录")))
+				_country_choice.add_item(UILocale.name(country))
 				_country_choice.set_item_metadata(_country_choice.item_count-1,str(country.id))
 			_country_choice.item_selected.connect(_country_chosen)
-			_brief = _text("",14)
-			_text("身份",16)
-			_person_choice = OptionButton.new()
-			_column.add_child(_person_choice)
-			_person_note = _text("",13)
-			_network_choice = CheckButton.new()
-			_network_choice.text = "经济网络开发情景（法国）"
-			_network_choice.button_pressed = _network_opening
-			_network_choice.tooltip_text = "同一正式世界、球形地图与时钟。20家开发企业、有限初始资金与原料、开发配方和运输参数；法国—英国同币种贸易。不是1900年历史企业或外汇验收。普通开局不受影响。"
-			_column.add_child(_network_choice)
-			_network_choice.toggled.connect(func(enabled: bool) -> void:
-				_network_opening = enabled
-				_update_country())
-			_column = _footer
-			_enter_button = _button("进入世界",_enter_world.bind("new",1),false)
+			var back := _button("返回主菜单",_show_page.bind("home"))
+			back.reparent(navigation)
+			_style_folio_control(back)
 			_update_country()
 		"load":
-			_text("加载",25)
+			_system_heading("加载")
 			var rows := FormalPersistence.slot_summaries()
 			var any_save := false
 			for row: Dictionary in rows:
@@ -463,21 +529,29 @@ func _show_page(page: String) -> void:
 				detail.tooltip_text = FormalPersistence.details_text(row)
 			_button("返回",_show_page.bind("home"))
 		"themes":
-			_text("主题管理",25)
-			_button("● "+str(SETTINGS.theme_parameters().name),_select_theme)
-			_text(str(SETTINGS.theme_parameters().design_name),13)
-			_text("古斯塔夫·卡耶博特\n《雨天的巴黎街道》· 1877",14)
-			_text("芝加哥艺术博物馆 · CC0",12)
+			_system_heading("主题管理")
+			for id: String in SETTINGS.THEMES:
+				var preset: Dictionary = SETTINGS.THEMES[id]
+				var selected: bool = id==_preferences.theme
+				var caption := UILocale.text(str(preset.name))
+				if selected: caption = "● "+caption
+				var choice := _button(caption,_select_theme.bind(id),not selected)
+				if selected:
+					choice.add_theme_stylebox_override("disabled",theme.get_stylebox("normal","Button"))
+					choice.add_theme_color_override("font_disabled_color",theme.get_color("font_color","Button"))
 			_button("返回",_show_page.bind("home"))
 		"settings":
-			_text("设置",25)
-			_text("主音量",16)
+			_system_heading("设置")
+			var volume_caption := UILocale.text("主音量 · %d%%")
 			var volume := HSlider.new()
 			volume.min_value = 0
 			volume.max_value = 100
 			volume.value = float(_preferences.volume)*100
+			var volume_label := _text(volume_caption % roundi(volume.value),14)
 			_column.add_child(volume)
-			volume.value_changed.connect(_volume_changed)
+			volume.value_changed.connect(func(value: float) -> void:
+				volume_label.text = volume_caption % roundi(value)
+				_volume_changed(value))
 			if AudioServer.get_bus_index("BGM")>=0:
 				var bgm := CheckButton.new()
 				bgm.text = "BGM"
@@ -485,27 +559,34 @@ func _show_page(page: String) -> void:
 				_column.add_child(bgm)
 				bgm.toggled.connect(_bgm_changed)
 			var fullscreen := CheckButton.new()
-			fullscreen.text = "全屏"
+			fullscreen.text = UILocale.text("全屏")
 			fullscreen.button_pressed = bool(_preferences.fullscreen)
 			_column.add_child(fullscreen)
 			fullscreen.toggled.connect(_fullscreen_changed)
-			for setting: Dictionary in [{"key":"labels","name":"地图名称"}]:
-				var toggle := CheckButton.new()
-				toggle.text = str(setting.name)
-				toggle.button_pressed = bool(_preferences.get(str(setting.key),true))
-				_column.add_child(toggle)
-				toggle.toggled.connect(_map_preference_changed.bind(str(setting.key)))
+			var labels := CheckButton.new()
+			labels.text = UILocale.text("地图名称")
+			labels.button_pressed = bool(_preferences.get("labels",true))
+			_column.add_child(labels)
+			labels.toggled.connect(_map_preference_changed.bind("labels"))
+			_text("语言",14)
+			var language := OptionButton.new()
+			language.add_item("简体中文")
+			language.add_item("English")
+			language.select(1 if UILocale.english() else 0)
+			_column.add_child(language)
+			language.item_selected.connect(_language_changed)
 			_button("返回",_show_page.bind("home"))
 	_status = _text(_preview_error if page=="selection" else "",12)
+	if page=="selection": _status.add_theme_color_override("font_color",UIDrawing.FOLIO_INK)
 	_status.visible = not _status.text.is_empty()
 	_position_panel()
 	_controller.suspend_motion()
 	_controller.appearance_changed.emit()
 
 func _show_map_status(message: String) -> void:
-	if _status.text==message and _status.visible: return
+	if _status.text==UILocale.text(message) and _status.visible: return
 	_map_status_generation += 1
-	_status.text = message
+	_status.text = UILocale.text(message)
 	_status.tooltip_text = message
 	_status.visible = not message.is_empty()
 	var failed := "失败" in message or "无法" in message or "未安装" in message
@@ -516,7 +597,12 @@ func _show_map_status(message: String) -> void:
 		if generation==_map_status_generation and is_instance_valid(label) and label==_status:
 			label.visible = false)
 
+func _system_heading(title: String) -> void:
+	_text(title,20)
+	_column.add_child(HSeparator.new())
+
 func _text(value: String,font_size: int) -> Label:
+	value=UILocale.text(value)
 	var label := Label.new()
 	label.text = value
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -528,13 +614,10 @@ func _show_slot_info(row: Dictionary) -> void:
 	var dialog := AcceptDialog.new()
 	dialog.title = str(row.name)+" · 存档资料"
 	dialog.dialog_text = FormalPersistence.details_text(row)
-	dialog.dialog_autowrap = true
-	add_child(dialog)
-	dialog.confirmed.connect(dialog.queue_free)
-	dialog.canceled.connect(dialog.queue_free)
-	dialog.popup_centered(Vector2i(mini(620,int(size.x)-40),mini(440,int(size.y)-40)))
+	UIDrawing.present_information_dialog(self,dialog)
 
 func _button(value: String,callback: Callable,enabled: bool = true) -> Button:
+	value=UILocale.text(value)
 	var button := Button.new()
 	button.text = value
 	button.disabled = not enabled
@@ -543,12 +626,23 @@ func _button(value: String,callback: Callable,enabled: bool = true) -> Button:
 	_column.add_child(button)
 	return button
 
+func _style_folio_control(control: Control, primary: bool = false) -> void:
+	var entry_fill := {"normal":Color("554432"),"hover":Color("6a543b"),"pressed":Color("463727"),"disabled":Color("312d28")}
+	for state: String in ["normal","hover","pressed","disabled"]:
+		var fill := UIDrawing.FOLIO_SHADE if state=="hover" else UIDrawing.FOLIO_BINDING
+		if primary: fill = entry_fill[state]
+		control.add_theme_stylebox_override(state,UIDrawing.folio_button_style(fill,UIDrawing.FOLIO_RULE))
+	for state: String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
+		control.add_theme_color_override(state,UIDrawing.FOLIO_INK)
+	control.add_theme_color_override("font_disabled_color",UIDrawing.FOLIO_MUTED)
+
 func _position_panel() -> void:
 	if _panel == null: return
-	var width := minf(350,size.x*0.36) if _page=="selection" else 360.0
+	var width := minf(430,size.x*0.43) if _page=="selection" else 500.0 if _page=="load" else 360.0
 	_panel.size = Vector2(width,0)
 	var height := minf(_panel.get_combined_minimum_size().y,size.y-64)
-	_panel.position = Vector2(size.x-width-32 if _page=="selection" else 48,maxf(32,(size.y-height)*0.5))
+	var left := size.x-width-32 if _page=="selection" else 48.0 if _page=="home" else (size.x-width)*0.5
+	_panel.position = Vector2(left,maxf(32,(size.y-height)*0.5))
 	_panel.size = Vector2(width,height)
 	if _controller != null: _controller.appearance_changed.emit()
 
@@ -576,29 +670,25 @@ func _update_country() -> void:
 	if _country_name == null or _politics == null: return
 	var polity := CurrentWorldPoliticalProjection.polity_summary(_country_id,_politics,_evidence)
 	var content := _content.resolve_world_page(GameClock.new().current_date(),polity)
-	_country_name.text = str(polity.get("name_zh","名称未记录"))
+	_country_name.text = UILocale.name(polity)
 	_flag.texture = content.texture()
-	_brief.text = str(content.profile().get("opening_brief_zh",""))
-	if _brief.text.is_empty(): _brief.text = AdministrativeLoader.identity_introduction(polity)
-	_brief.tooltip_text = str(content.profile().get("opening_source_title","1900 年历史政治身份资料"))+"\n"+str(content.profile().get("opening_source_url","https://icr.ethz.ch/data/cshapes/"))
+	var profile := content.profile()
+	_brief.text = UILocale.text(str(profile.get("opening_brief_zh","")))
+	if _brief.text.is_empty(): _brief.text = UILocale.text(AdministrativeLoader.identity_introduction(polity))
+	_brief.tooltip_text = str(profile.get("opening_source_title","1900 年历史政治身份资料"))+"\n"+str(profile.get("opening_source_url","https://icr.ethz.ch/data/cshapes/"))
 	_brief.visible = not _brief.text.is_empty()
+	_government.text = UILocale.text(str(profile.get("government_summary",{}).get("form_zh","")))
+	_government.visible = not _government.text.is_empty()
 	for index: int in range(_country_choice.item_count):
 		if str(_country_choice.get_item_metadata(index))==_country_id: _country_choice.select(index); break
-	_country_choice.text = "选择国家"
-	var opening := WorldBootstrap.opening_profile(_politics.source_historical_id(_country_id))
+	_country_choice.text = UILocale.text("选择国家")
+	var source_id := _politics.source_historical_id(_country_id)
+	var opening := WorldBootstrap.opening_profile(source_id)
 	var playable := not opening.is_empty()
-	_person_choice.clear()
-	if playable:
-		_person_choice.add_item(str(opening.place_name)+" · 普通开局人物")
-		_person_choice.set_item_metadata(0,str(opening.person_id))
-	_person_choice.disabled = not playable
-	_person_choice.visible = playable
 	if _network_choice != null:
 		_network_choice.visible = playable and opening.get("source_id", "") == "country_fra"
 		_network_choice.disabled = not _network_choice.visible
-	_person_note.text = "游戏生成的普通人物，居住于"+str(opening.place_name)+"，暂无正式就业。"+("进入后可自愿申请本地工坊岗位。" if opening.get("source_id")=="country_fra" else "") if playable else "该地区暂无可选人物。"
-	if playable and opening.get("source_id", "") == "country_fra" and _network_opening:
-		_person_note.text = "开发情景：20家独立企业，有限开仓原料与资金，法国—英国同币种供应链。企业、配方与运力为开发估计，不是历史事实；使用原正式地图、时钟与存档。"
+	_person_note.text = UILocale.text(str(opening.place_name)+" · 居民 · 未就业" if playable else "该地区暂无可选人物。")
 	_enter_button.disabled = not playable or not _preview_ready
 	_position_panel.call_deferred()
 
@@ -607,23 +697,23 @@ func _focus_country() -> void:
 	var anchor := _renderer.political.anchors.get(_country_id,Vector3.ZERO) as Vector3
 	if anchor.is_zero_approx(): return
 	_controller.focus(anchor)
-	_controller.set_world_zoom(0.86)
+	_controller.set_world_zoom(SELECTION_ZOOM)
 
 func _enter_world(mode: String,slot: int) -> void:
 	if is_instance_valid(_map_acceptance): return
 	if _entering: return
 	if _preview_worker!=null or _preview_waiting or _preview_installing:
 		_status.visible = true
-		_status.text = "上一地图请求仍在结束，请稍后再进入世界。"
+		_status.text = UILocale.text("上一地图请求仍在结束，请稍后再进入世界。")
 		return
 	var source_id := _politics.source_historical_id(_country_id) if _politics!=null else ""
 	var opening := WorldBootstrap.opening_profile(source_id)
-	if mode=="new" and (opening.is_empty() or _person_choice==null or _person_choice.item_count==0 or str(_person_choice.get_selected_metadata())!=str(opening.person_id)): return
+	if mode=="new" and (opening.is_empty() or _page!="selection"): return
 	if mode=="load" and FormalPersistence.existing_slot_path(slot).is_empty(): return
 	_entering = true
 	_launch_mode = mode
 	_status.visible = true
-	_status.text = "正在进入世界。"
+	_status.text = UILocale.text("正在进入世界。")
 	_controller.suspend_motion()
 	_set_loading(true)
 	_worker = Thread.new()
@@ -634,18 +724,27 @@ func _enter_world(mode: String,slot: int) -> void:
 		_worker = null
 		_entering = false
 		_set_loading(false)
-		_status.text = "无法准备世界："+error_string(error)
+		_status.text = UILocale.text("无法准备世界："+error_string(error))
 	else: set_process(true)
 
 func _build_world(mode: String,slot: int, prepare_map: bool, source_id: String, network_opening: bool = false) -> WorldBuildResult:
 	var native_settings: Dictionary = EconomyDevelopmentConfig.formal_stratified_request() if mode=="new" and (OS.get_cmdline_user_args().has("--formal-capital-transport") or OS.get_cmdline_user_args().has("--formal-npc-capital-trade") or OS.get_cmdline_user_args().has("--formal-npc-capital-competition") or OS.get_cmdline_user_args().has("--formal-npc-capital-recirculation") or (EconomyDevelopmentConfig.player_capital_requested() or OS.get_cmdline_user_args().has("--formal-economy-feedback"))) else FormalEconomicOpening.for_source(source_id) if mode=="new" else {}
 	if mode=="new" and network_opening:
-		native_settings = EconomyNetworkDevelopment.request()
+		native_settings = EconomyNetworkDevelopment.regional_request()
+		preload("res://scripts/content/technology_pilot.gd").admit(native_settings["configuration"],source_id)
+	if mode=="new" and source_id=="country_fra" and OS.is_debug_build() and "--formal-warehouse-pilot" in OS.get_cmdline_user_args():
+		if not network_opening:
+			native_settings = EconomyNetworkDevelopment.regional_request()
+			preload("res://scripts/content/technology_pilot.gd").admit(native_settings["configuration"],source_id)
+		EconomyNetworkDevelopment.add_warehouse_pilot(native_settings["configuration"])
+	var resource_opening: bool = mode=="new" and source_id=="country_fra" and OS.get_cmdline_user_args().has("--formal-resource-economy")
+	if resource_opening:
+		native_settings = EconomyNetworkDevelopment.resource_request(OS.get_cmdline_user_args().has("--formal-resource-households"))
 	var prepared_sources: HistoricalProvenanceFoundation = _content.provenance if _content!=null and _content.loaded else null
 	var built := FormalPersistence.new().load_from_user(slot) if mode=="load" else WorldBootstrap.new().build(null,[],[],FormalPersonalEconomyState.NO_FORMAL_EMPLOYMENT,true,native_settings,source_id,prepared_sources)
-	if built.success and network_opening and (built.world.economy_r1==null or not built.world.native_economy_error.is_empty()):
+	if built.success and mode=="new" and not native_settings.is_empty() and (built.world.economy_r1==null or not built.world.native_economy_error.is_empty()):
 		built.success = false
-		built.error = "经济网络开发情景未能准入："+built.world.native_economy_error
+		built.error = "开局经济未能准入："+built.world.native_economy_error
 	if built.success and prepare_map:
 		var prepared := WorldBootstrap.prepare_presentation_content(built.world.provenance)
 		if not prepared.loaded or not prepared.errors.is_empty():
@@ -714,7 +813,7 @@ func _process(_delta: float) -> void:
 					_fail_preview(error)
 					return
 				_pending_preview = preview_result as Dictionary
-				_loading_label.text = "正在安装地图"
+				_loading_label.text = UILocale.text("正在安装地图")
 				return # Allow the stage label to draw; install on the next UI tick.
 	if _preview_waiting and (not _entering or _preview_display_waiting):
 		_preview_mutex.lock()
@@ -724,7 +823,7 @@ func _process(_delta: float) -> void:
 			_displayed_preview_stage = stage
 			_preview_stage_since = Time.get_ticks_msec()
 		var prolonged := Time.get_ticks_msec()-_preview_stage_since>=15000
-		_loading_label.text = stage+ ("（仍在处理，可取消准备）" if prolonged else "")
+		_loading_label.text = UILocale.text(stage+ ("（仍在处理，可取消准备）" if prolonged else ""))
 		_loading_back.text = "取消准备"
 		_loading_back.visible = prolonged and not _entering
 	if _worker==null:
@@ -734,7 +833,7 @@ func _process(_delta: float) -> void:
 		_worker = null
 		_entering = false
 		_set_loading(false)
-		_status.text = "进入失败：世界准备线程未成功启动。"
+		_status.text = UILocale.text("进入失败：世界准备线程未成功启动。")
 		set_process(false)
 		return
 	if _worker.is_alive(): return
@@ -743,14 +842,14 @@ func _process(_delta: float) -> void:
 	if not world_result is WorldBuildResult:
 		_entering = false
 		_set_loading(false)
-		_status.text = "进入失败：世界准备线程未返回有效结果。"
+		_status.text = UILocale.text("进入失败：世界准备线程未返回有效结果。")
 		set_process(false)
 		return
 	var built := world_result as WorldBuildResult
 	if not built.success:
 		_entering = false
 		_set_loading(false)
-		_status.text = "进入失败："+built.error
+		_status.text = UILocale.text("进入失败："+built.error)
 		set_process(false)
 		return
 	if not _launch_presentation.is_empty():
@@ -797,11 +896,36 @@ func _finish_world_launch(built: WorldBuildResult) -> void:
 		_loading_layer.reparent(self)
 		_set_loading(false)
 		_entering = false
-		_status.text = "无法打开世界："+error_string(error)
+		_status.text = UILocale.text("无法打开世界："+error_string(error))
 
-func _select_theme() -> void:
-	_preferences.theme = "paris_1877"
-	_save_preferences()
+func _apply_theme() -> void:
+	theme = UIDrawing.system_theme()
+	($Version as Label).theme = theme
+	var visual := SETTINGS.theme_parameters()
+	var painting := $Painting as TextureRect
+	painting.texture = visual.background as Texture2D
+	(painting.material as ShaderMaterial).set_shader_parameter("motion",visual.menu_motion)
+	if is_instance_valid(_loading_painting):
+		_loading_painting.texture = painting.texture
+		_loading_layer.theme = UIDrawing.shell_theme()
+
+func _select_theme(id: String) -> void:
+	if id==_preferences.theme or not SETTINGS.THEMES.has(id): return
+	var preferences := _preferences.duplicate()
+	preferences.theme = id
+	var error := SETTINGS.save(preferences)
+	if error!=OK:
+		SETTINGS.apply(_preferences)
+		_status.visible = true
+		_status.text = UILocale.text("设置保存失败："+error_string(error))
+		return
+	_preferences = preferences
+	_apply_theme()
+	_show_page("themes")
+
+func _language_changed(index: int) -> void:
+	_preferences.locale="en" if index==1 else "zh_CN"
+	_save_preferences(true)
 
 func _volume_changed(value: float) -> void:
 	_preferences.volume = value/100.0
@@ -820,11 +944,14 @@ func _map_preference_changed(value: bool, key: String) -> void:
 	_controller.labels_enabled = bool(_preferences.labels)
 	_save_preferences()
 
-func _save_preferences() -> void:
+func _save_preferences(rebuild_settings: bool = false) -> void:
 	var error := SETTINGS.save(_preferences)
+	if rebuild_settings: _show_page("settings")
 	if error != OK and _status!=null:
 		_status.visible = true
-		_status.text = "设置保存失败："+error_string(error)
+		_status.text = UILocale.text("设置保存失败："+error_string(error))
+	elif _status!=null and _page=="settings":
+		_status.hide()
 
 func _input(event: InputEvent) -> void:
 	if is_instance_valid(_map_acceptance): return
@@ -834,11 +961,10 @@ func _input(event: InputEvent) -> void:
 	if not key.pressed or key.echo or key.keycode not in [KEY_ESCAPE,KEY_BACKSPACE]: return
 	var focus := get_viewport().gui_get_focus_owner()
 	if key.keycode==KEY_BACKSPACE and (focus is LineEdit or focus is TextEdit): return
-	for choice: OptionButton in [_country_choice,_person_choice]:
-		if choice != null and choice.get_popup().visible:
-			choice.get_popup().hide()
-			get_viewport().set_input_as_handled()
-			return
+	if _country_choice!=null and _country_choice.get_popup().visible:
+		_country_choice.get_popup().hide()
+		get_viewport().set_input_as_handled()
+		return
 	if _page!="home":
 		_show_page("home")
 		get_viewport().set_input_as_handled()

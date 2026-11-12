@@ -1,0 +1,382 @@
+{
+  "schema_version": 1,
+  "scope": {
+    "source_tanks": 8,
+    "import_ready_source_tanks": 7,
+    "additional_assault_gun": 1,
+    "existing_original_scout": 1,
+    "runtime_integration": "Pending integration owner verification",
+    "source_roots_scanned": {
+      "二工": 220,
+      "主工": 196
+    },
+    "scope_limit": "Both root listings, relevant tactical model folder and all three tank ZIPs. Not a recursive claim about unrelated folders."
+  },
+  "axes": {
+    "up": "+Y",
+    "forward": "-Z",
+    "aim_hierarchy": "Turret/Barrel/Muzzle"
+  },
+  "stats_notice": "Fixed fictional heavy/light gameplay profiles. No real weapon performance values researched or inferred.",
+  "vehicles": [
+    {
+      "id": "user_heavy_mbt",
+      "display_name": "重型 MBT 素材型",
+      "model_path": "res://military_runtime/native/assets/user_derived/models/user_heavy_mbt_aimable.glb",
+      "role": "heavy",
+      "aim_mode": "turret",
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -5,
+        15
+      ],
+      "triangles": 10116,
+      "source_drive_id": "19Hdb_peI1pqSl8KGIB8GBtaYutsTt5eY",
+      "source_sha256": "e5c9b3825d03c2b5f464dc4e79883469cc9792124db3d8c0d6062f04e6e76e4c",
+      "fictional_stats": "heavy",
+      "status": "existing_runtime_asset",
+      "limitations": [
+        "Existing derivation reused without duplicate generation."
+      ],
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_tank_cannon"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    },
+    {
+      "id": "kestrel_scout",
+      "display_name": "Kestrel 原创侦察车",
+      "model_path": "res://military_runtime/native/assets/models/kestrel_scout.glb",
+      "role": "light",
+      "aim_mode": "turret",
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -5,
+        15
+      ],
+      "fictional_stats": "light",
+      "status": "existing_runtime_asset",
+      "limitations": [
+        "Original fictional project vehicle; excluded from user-library tank denominator."
+      ],
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_tank_cannon"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    },
+    {
+      "id": "t90m",
+      "display_name": "T-90M 素材型",
+      "model_path": "res://military_runtime/native/assets/catalog_tanks/models/t90m.glb",
+      "role": "heavy",
+      "aim_mode": "turret",
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -5,
+        15
+      ],
+      "triangles": 18184,
+      "source_sha256": "ffd94d92e818fa7830f82ffd6b6ff187affb705f2dee5dea158b0f2a797dd7b2",
+      "limitations": [
+        "Source names retained as identification only; no historical dimensional accuracy claimed."
+      ],
+      "source_drive_id": "1zhAih1HXkY1tVEx2_Sz7CjnHVOujW3T6",
+      "source_drive_url": "https://drive.google.com/file/d/1zhAih1HXkY1tVEx2_Sz7CjnHVOujW3T6/view?usp=drivesdk",
+      "fictional_stats": "heavy",
+      "status": "import_ready_not_runtime_integrated",
+      "sha256": "05ab0672e13be064bb0396a608ad6da5189360140dd122e2a44f850dcbd176e8",
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_tank_cannon"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    },
+    {
+      "id": "king_tiger",
+      "display_name": "Tiger II 素材型",
+      "model_path": "res://military_runtime/native/assets/catalog_tanks/models/king_tiger.glb",
+      "role": "heavy",
+      "aim_mode": "turret",
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -5,
+        15
+      ],
+      "triangles": 20508,
+      "source_sha256": "2be368a9bd237139869ab27e944e0654dfc9c60b0864de271a088fd76ba013cb",
+      "limitations": [
+        "Source names retained as identification only; no historical dimensional accuracy claimed."
+      ],
+      "source_drive_id": "1yblxlHFdRbkXF5X4Q2lSvGHIIZL50tsg",
+      "source_drive_url": "https://drive.google.com/file/d/1yblxlHFdRbkXF5X4Q2lSvGHIIZL50tsg/view?usp=drivesdk",
+      "fictional_stats": "heavy",
+      "status": "import_ready_not_runtime_integrated",
+      "sha256": "6a4dea83483aea9b0899a29db05b3c5c378a7cd2fd8d915460ef5689b3d9093c",
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_tank_cannon"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    },
+    {
+      "id": "leopard2",
+      "display_name": "Leopard 2A7V 素材型",
+      "model_path": "res://military_runtime/native/assets/catalog_tanks/models/leopard2.glb",
+      "role": "heavy",
+      "aim_mode": "turret",
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -5,
+        15
+      ],
+      "triangles": 10620,
+      "source_sha256": "2929f16c5df8b6184fa2d8261a980c77e2822dceb46d0dccb23036db9e4ce2be",
+      "limitations": [
+        "Source names retained as identification only; no historical dimensional accuracy claimed."
+      ],
+      "source_drive_id": "1fiBm-40vMUlq1xrSLh9SJby9YSJK1T2G",
+      "source_drive_url": "https://drive.google.com/file/d/1fiBm-40vMUlq1xrSLh9SJby9YSJK1T2G/view?usp=drivesdk",
+      "fictional_stats": "heavy",
+      "status": "import_ready_not_runtime_integrated",
+      "sha256": "a59a80c41bc2a00e3f48d0def2285428aadf7e2b9f7b64b44e58f57f3d4c88b4",
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_tank_cannon"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    },
+    {
+      "id": "tiger1",
+      "display_name": "Tiger I 素材型",
+      "model_path": "res://military_runtime/native/assets/catalog_tanks/models/tiger1.glb",
+      "role": "heavy",
+      "aim_mode": "turret",
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -5,
+        15
+      ],
+      "triangles": 9384,
+      "source_sha256": "72bddf96415c52263566c046aa52967f1bdc8973812e9e054064e4aae2787384",
+      "limitations": [
+        "Source names retained as identification only; no historical dimensional accuracy claimed."
+      ],
+      "source_drive_id": "13w_VHjwpxDk8-s5vaEcDO9nM9kK79doB",
+      "source_drive_url": "https://drive.google.com/file/d/13w_VHjwpxDk8-s5vaEcDO9nM9kK79doB/view?usp=drivesdk",
+      "fictional_stats": "heavy",
+      "status": "import_ready_not_runtime_integrated",
+      "sha256": "813c88f9712c7623dfadea0afaa2611ff3b3fb27cbe0db8c3d37a9b9412ac4ac",
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_tank_cannon"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    },
+    {
+      "id": "t35",
+      "display_name": "T-35 多炮塔素材型",
+      "model_path": "res://military_runtime/native/assets/catalog_tanks/models/t35.glb",
+      "role": "heavy",
+      "aim_mode": "primary_turret",
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -5,
+        15
+      ],
+      "triangles": 9716,
+      "source_sha256": "039ec54b249529a6fd85a92ae9d2d5ac369cc447844190cfaf4a554993b04a08",
+      "limitations": [
+        "Source names retained as identification only; no historical dimensional accuracy claimed.",
+        "Four auxiliary turrets remain static decorative geometry; primary turret alone controlled."
+      ],
+      "source_drive_id": "1ufeF_s56-jXC2fxwRiyqf2SugnHC7VIc",
+      "source_drive_url": "https://drive.google.com/file/d/1ufeF_s56-jXC2fxwRiyqf2SugnHC7VIc/view?usp=drivesdk",
+      "fictional_stats": "heavy",
+      "status": "import_ready_not_runtime_integrated",
+      "sha256": "58e54f915e2b525afcf31646ef81bd16e5bea0c4f58f3dced7bd0528628ec888",
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_tank_cannon"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    },
+    {
+      "id": "assault152",
+      "display_name": "152 突击炮素材型",
+      "model_path": "res://military_runtime/native/assets/catalog_tanks/models/assault152.glb",
+      "role": "assault",
+      "aim_mode": "limited_mount",
+      "turret_yaw_limit_degrees": 8,
+      "barrel_pitch_degrees": [
+        -5,
+        15
+      ],
+      "triangles": 7816,
+      "source_sha256": "e9a9ac66e39243b7f236985c90b68389027b79d4a8939015560f215c413dea7b",
+      "limitations": [
+        "Source names retained as identification only; no historical dimensional accuracy claimed."
+      ],
+      "source_drive_id": "1UxjWXzDhssJfuWhcv5O7-OnmEYr7e57a",
+      "source_drive_url": "https://drive.google.com/file/d/1UxjWXzDhssJfuWhcv5O7-OnmEYr7e57a/view?usp=drivesdk",
+      "fictional_stats": "heavy",
+      "status": "import_ready_not_runtime_integrated",
+      "sha256": "b55b309e0cfcf2b81649aadb0f01c6eb58d0b9ca6ffd74a62652810ae765887e",
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_tank_cannon"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    },
+    {
+      "id": "ft17",
+      "display_name": "FT-17 早期素材型",
+      "model_path": "res://military_runtime/native/assets/catalog_tanks/models/ft17.glb",
+      "role": "light",
+      "aim_mode": "turret",
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -5,
+        15
+      ],
+      "triangles": 4736,
+      "source_sha256": "94edba29741ab2241794eb3391f64b8c88b458ce3064fa9675d79dbab49fbbda",
+      "limitations": [
+        "Source names retained as identification only; no historical dimensional accuracy claimed."
+      ],
+      "source_drive_id": "13RUaZIvDu_DdYjLWSF6URNGvkaIHILef",
+      "source_drive_url": "https://drive.google.com/file/d/13RUaZIvDu_DdYjLWSF6URNGvkaIHILef/view?usp=drivesdk",
+      "fictional_stats": "light",
+      "status": "import_ready_not_runtime_integrated",
+      "sha256": "5448cc599da430172f053c4a1d7674da335505e0d94198cb107e837163cc01f8",
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_tank_cannon"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    }
+  ],
+  "deferred": [
+    {
+      "id": "mark_v",
+      "display_name": "Mark V 素材型",
+      "source_drive_id": "13_tVQg-eV0ggl1fci4iHcE-ooe3k_LuE",
+      "source_path": "res://military_runtime/native/assets/catalog_tanks/originals/godot_ww1_mark5_tank_combat.glb",
+      "status": "deferred_side_gun_controller",
+      "reason": "Valid 3,312-triangle tank mesh with side-mounted guns; current centerline turret controller would be incorrect. Preserve for side-gun implementation, not rejected geometry."
+    },
+    {
+      "id": "mlrs_rocket_artillery",
+      "display_name": "mlrs_rocket_artillery",
+      "source_drive_id": "1Wh4CGPxs_nPXLEyT4vmT35EUCya6Poc3",
+      "status": "future_vehicle_phase",
+      "reason": "User requested cars/other vehicles after current tank core. Valid GLB structure, not integrated or gameplay-tested.",
+      "bytes": 290016,
+      "sha256": "7e293d6f3e8aa1d27e7a52881e91aaf09be8860ee03af2ccf16042e6c6ed61b4",
+      "triangles": 3520,
+      "nodes": 10
+    },
+    {
+      "id": "apc_armored_vehicle",
+      "display_name": "apc_armored_vehicle",
+      "source_drive_id": "1EFz17ZnqNkmTr8ls-a3-EFMvj7Rotk_f",
+      "status": "future_vehicle_phase",
+      "reason": "User requested cars/other vehicles after current tank core. Valid GLB structure, not integrated or gameplay-tested.",
+      "bytes": 237060,
+      "sha256": "7b587b2b89ee5965ed33fa0648e271ee019f5535c45aacbde91507348b209f90",
+      "triangles": 2832,
+      "nodes": 12
+    }
+  ]
+}

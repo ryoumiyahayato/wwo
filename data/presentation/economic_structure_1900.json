@@ -1,0 +1,20 @@
+{
+  "schema_id": "economic_structure_reference_v1",
+  "reference_label": "约1900年就业结构",
+  "metric": "employment_share_bp",
+  "source_url": "https://www.elibrary.imf.org/abstract/book/9781451944242/ch01.xml",
+  "source_table": "Table 1.14, Structure of Employment in Five Leading Economies, 1900–95, circa 1900",
+  "definitions": {
+    "agriculture": "Source agriculture category",
+    "industry": "Goods minus agriculture: manufacturing, construction, mining and public utilities",
+    "services": "Market services plus nonmarket services",
+    "scope": "National reference, not current simulation output, GDP shares or local/colonial sector statistics"
+  },
+  "rows": {
+    "country_fra": {"agriculture": 4340, "industry": 3130, "services": 2530},
+    "german_empire": {"agriculture": 3990, "industry": 3900, "services": 2110},
+    "empire_of_japan": {"agriculture": 6480, "industry": 1450, "services": 2070},
+    "british_isles_1900": {"agriculture": 1300, "industry": 4370, "services": 4330},
+    "united_states_1900": {"agriculture": 3830, "industry": 2850, "services": 3320}
+  }
+}

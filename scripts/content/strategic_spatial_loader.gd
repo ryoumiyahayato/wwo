@@ -5,6 +5,7 @@ signal content_changed
 const INDEX_PATH: String = "res://data/strategic/index.json"
 const MAX_ACTIVE_REGIONS: int = 2
 const MEDIUM_LOD_MPP: float = 1500.0
+const MAX_PAN_MARGIN_KM: float = 35.0
 var content: LocalSpatialContent
 var errors: Array[String] = []
 var failure: String = ""
@@ -68,6 +69,7 @@ func request(center: Vector2, radius_km: float, date: String, mpp: float = 4500.
 	_required_physical.assign(coast_wanted)
 	_required_physical.sort()
 	var installed_regions := installed_physical.get("regions",[]) as Array
+	var coast_prefetch := physical_demand("medium", minf(MAX_PAN_MARGIN_KM, radius_km * 0.25)) if target_lod=="medium" else coast_wanted
 	var prepared_ink := true
 	for descriptor: Dictionary in _descriptors:
 		if str(descriptor.id) in coast_wanted and not descriptor.has("compiled_asset"): prepared_ink = false; break
@@ -81,12 +83,19 @@ func request(center: Vector2, radius_km: float, date: String, mpp: float = 4500.
 	if with_ink and not installed_physical.is_empty() and mpp<=2500.0:
 		var detail: Array[String] = []
 		for descriptor: Dictionary in _index.get("hydro_regions",[]) as Array:
-			if not _physical_intersects(descriptor.bounds as Array,center,radius_km): continue
+			var margin := minf(MAX_PAN_MARGIN_KM,radius_km * 0.25) if str(descriptor.id) in _wanted else 0.0
+			if not _physical_intersects(descriptor.bounds as Array,center,radius_km+margin): continue
 			if bool(descriptor.get("detail",false)):
-				if mpp<=float(descriptor.get("max_mpp",500.0)): detail.append(str(descriptor.id))
+				if mpp>float(descriptor.get("max_mpp",500.0)): continue
+				# A complete lake can be drawn on its own. It must not disappear
+				# because a neighbouring river core pushed the river budget over.
+				if bool(descriptor.get("standalone_lakes",false)):
+					wanted.append(str(descriptor.id))
+				else:
+					detail.append(str(descriptor.id))
 			else: wanted.append(str(descriptor.id))
 		if detail.size()<=4: wanted.append_array(detail)
-	wanted.append_array(coast_wanted)
+	wanted.append_array(coast_prefetch)
 	wanted.sort()
 	if wanted.is_empty():
 		release()
@@ -307,7 +316,10 @@ static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Ca
 				result.errors.append("Unadmitted strategic fact: " + fact_id)
 				return result
 			var feature := (fact.value as Dictionary).duplicate()
-			if bool(descriptor.get("natural_lakes_only",false)) and str(feature.get("kind",""))!="lake": continue
+			# The physical foundation also carries the admitted river backbone.
+			# Deferring rivers to political enrichment left the whole coarse LOD
+			# dry, and removed rivers again during every medium handoff.
+			if bool(descriptor.get("natural_lakes_only",false)) and str(feature.get("kind","")) not in ["lake","river"]: continue
 			if not LocalSpatialContent.historical_rail_alignment(feature): continue
 			if feature.has("geometry_asset"):
 				var asset := feature.geometry_asset as Dictionary
@@ -344,7 +356,7 @@ static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Ca
 						return result
 					display_overrides[old_id] = replacement.lod_geometry
 				if not display_overrides.is_empty(): feature["display_overrides_data"] = display_overrides
-			var native_display := with_ink and descriptor.has("compiled_asset")
+			var native_display := with_ink and descriptor.has("compiled_asset") and str(feature.kind) in ["land_reference","ocean_reference","coast"]
 			if ids.has(str(feature.get("id", ""))) or not valid_feature(feature,native_display) or fact.subject_id != str(feature.id) or fact.source_id != str(feature.source_id):
 				result.errors.append("Invalid/duplicate strategic feature: " + fact_id)
 				return result
@@ -354,7 +366,7 @@ static func _load(index: Dictionary, descriptors: Array[Dictionary], current: Ca
 				# is partitioned by an optional, separately sourced ink description.
 				_bind_ink(feature,ink)
 			if str(feature.kind)=="land_reference": feature["land_query"] = _land_query(feature.geometry as Dictionary)
-			if with_ink and descriptor.has("compiled_asset"):
+			if native_display:
 				feature["compiled_descriptor"] = descriptor
 				# Queries retain the actual physical polygon; display triangles
 				# live in the packed draw asset and are not held twice in Content.
@@ -497,7 +509,7 @@ static func _bind_ink(feature: Dictionary, ink: Dictionary) -> void:
 	feature["ink_references"] = ink.references
 	feature["ink_indices"] = ink.indices
 
-func physical_demand(lod: String = "") -> Array[String]:
+func physical_demand(lod: String = "", pan_margin_km: float = 0.0) -> Array[String]:
 	# Coarse is the finite global foundation. Medium remains a geographic cap.
 	if lod.is_empty(): return _required_physical.duplicate()
 	if lod=="coarse":
@@ -506,10 +518,11 @@ func physical_demand(lod: String = "") -> Array[String]:
 		global_ids.sort()
 		return global_ids
 	if _physical_view.is_empty() or lod not in ["coarse","medium"]: return []
-	if not _physical_demands.has(lod):
+	var cache_key := [lod,pan_margin_km]
+	if not _physical_demands.has(cache_key):
 		var selected: Array[String] = []
 		var center := _physical_view[0] as Vector2
-		var radius := float(_physical_view[1])
+		var radius := float(_physical_view[1])+pan_margin_km
 		for descriptor: Dictionary in _index.get("coast_regions",[]) as Array:
 			if not _physical_intersects(descriptor.bounds as Array,center,radius): continue
 			if lod=="coarse": selected.append(str(descriptor.id))
@@ -517,10 +530,10 @@ func physical_demand(lod: String = "") -> Array[String]:
 				for child: Dictionary in descriptor.get("medium_regions",[]) as Array:
 					if _physical_intersects(child.bounds as Array,center,radius): selected.append(str(child.id))
 		selected.sort()
-		_physical_demands[lod] = selected
+		_physical_demands[cache_key] = selected
 	# These are IDs only. Testing an installed coarse LOD reads no geometry
 	# and does not request a second set of map files or GPU objects.
-	return (_physical_demands[lod] as Array[String]).duplicate()
+	return (_physical_demands[cache_key] as Array[String]).duplicate()
 
 static func valid_feature(feature: Dictionary, native_display: bool = false) -> bool:
 	if str(feature.get("id", "")).is_empty() or feature.has("owner") or feature.has("controller_id") or feature.has("polity_id") or feature.has("administrative_region_id"):

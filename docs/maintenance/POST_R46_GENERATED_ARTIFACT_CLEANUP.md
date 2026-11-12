@@ -66,3 +66,12 @@
 
 R46当前预览与R45直接回退仍在原路径；R44目录保留全部来源和许可证。三个制作缓存今后可重建；正式游戏仍使用已交付地形包。R39/R40/R41/R42原预览EXE此前缺失的问题仍存在，本次未重建。清理不会修复地图绘制或证明加载时间下降。
 
+
+
+## 2026-10-30用户授权的旧安装包清理
+
+通过原 `tools/build_preview.ps1 cleanup --execute` 删除已登记且文件长度/修改时间仍匹配的R58、R60、R61 EXE，共3文件、4,564,387,272字节（约4.25GiB）。本轮用户明确要求清理旧构建和安装包，因此解除这三个旧安装包的历史保留配置；没有将候选视为已验收。R63保持CANDIDATE，R62保留为直接ROLLBACK。
+
+R59改为PROTECTED：`local-artifacts/terrain-lossless-20261027/baseline-directory.json`仍引用其EXE，`terrain_a0_sample.batch_webp`读取该包。R61压缩资源、manifest、原始地理资料、经济运行输出、军事工作线、存档和`.godot`导入缓存均未删除。
+
+后续删除R58残留`override.cfg`、`local-artifacts/terrain-ab-20261026/optional-sample.pck`及旧空目录的命令在启动前被自动审批拒绝，只返回`blocked by policy`，未执行。未换工具或路径重试；残留配置加入原保护清单。此前拒绝的缓存和r57-person-participation目录继续保留。

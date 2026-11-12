@@ -1,0 +1,103 @@
+{
+  "crew": [
+    {
+      "person_id": "player_vehicle:person:0",
+      "display_name": "林澄",
+      "hp": 7,
+      "alive": true,
+      "parts": {
+        "head": "healthy",
+        "torso": "healthy",
+        "left_arm": "injured",
+        "right_arm": "healthy",
+        "left_leg": "healthy",
+        "right_leg": "healthy"
+      },
+      "ammo": 30
+    },
+    {
+      "person_id": "player_vehicle:person:1",
+      "display_name": "周原",
+      "hp": 10,
+      "alive": true,
+      "parts": {
+        "head": "healthy",
+        "torso": "healthy",
+        "left_arm": "healthy",
+        "right_arm": "healthy",
+        "left_leg": "healthy",
+        "right_leg": "healthy"
+      },
+      "ammo": 30
+    },
+    {
+      "person_id": "player_vehicle:person:2",
+      "display_name": "许岑",
+      "hp": 10,
+      "alive": true,
+      "parts": {
+        "head": "healthy",
+        "torso": "healthy",
+        "left_arm": "healthy",
+        "right_arm": "healthy",
+        "left_leg": "healthy",
+        "right_leg": "healthy"
+      },
+      "ammo": 30
+    },
+    {
+      "person_id": "player_vehicle:person:3",
+      "display_name": "陆青",
+      "hp": 10,
+      "alive": true,
+      "parts": {
+        "head": "healthy",
+        "torso": "healthy",
+        "left_arm": "healthy",
+        "right_arm": "healthy",
+        "left_leg": "healthy",
+        "right_leg": "healthy"
+      },
+      "ammo": 30
+    },
+    {
+      "person_id": "player_vehicle:person:4",
+      "display_name": "沈川",
+      "hp": 10,
+      "alive": true,
+      "parts": {
+        "head": "healthy",
+        "torso": "healthy",
+        "left_arm": "healthy",
+        "right_arm": "healthy",
+        "left_leg": "healthy",
+        "right_leg": "healthy"
+      },
+      "ammo": 30
+    }
+  ],
+  "vehicle_id": "player_vehicle",
+  "model_id": "user_heavy_mbt",
+  "position_local": [
+    -6,
+    0,
+    -7
+  ],
+  "yaw": 3.141592653589793,
+  "absolute_seconds": 3600.0,
+  "local_elapsed": 0.0,
+  "prior_spent": {
+    "ap": 6,
+    "he": 2,
+    "smoke": 1
+  },
+  "shot_sequence": 0,
+  "shot_audit": [],
+  "schema": "wwo-local-lease-v1",
+  "source_kind": "SYNTHETIC_ISOLATED_HOST",
+  "region_id": "training:cedar-rivergate-ridgevale:50km",
+  "base_revision": 0,
+  "session_id": "004d7092-26ab-4736-9058-db3909901514",
+  "lease_id": "lease-5dfe159d-e4e0-4a2f-9062-034248e9d3e0",
+  "solver_owner": "godot_local"
+}

@@ -1,0 +1,18 @@
+{
+  "id":"british_irish_settlement_context",
+  "role":"NATIONAL_CARTOGRAPHIC_CONTEXT",
+  "name":"不列颠与爱尔兰 · 建成区参考",
+  "map_name":"不列颠与爱尔兰建成区",
+  "precision":"2022_GENERALISED_REFERENCE_NOT_1900_OR_INDIVIDUAL_BUILDINGS",
+  "anchor":[-3.0,54.0],
+  "content_bounds":[-11.0,49.5,2.1,61.1],
+  "overview_bounds":[-11.0,49.5,2.1,61.1],
+  "ground_mode":"cartographic_context",
+  "presentation_index":"res://assets/settlements/british_context/index.json",
+  "maximum_mpp":1800.0,
+  "cache_budget_bytes":8388608,
+  "building_ground_handoff":true,
+  "attribution":"ONS / OS, OGL v3.0. © Crown copyright and database right 2022. © CSO / Tailte Éireann, CC BY 4.0. © OpenStreetMap contributors, ODbL 1.0.",
+  "source":{"url":"https://geoportal.statistics.gov.uk/datasets/ons::built-up-areas-december-2022-boundaries-gb-bgg/about","publisher":"ONS / OS / CSO / Tailte Éireann","license":"OGL-3.0; CC-BY-4.0","basis":"MODERN_REFERENCE_NOT_1900"},
+  "limits":["伦敦原细层保留。建成区与其他重点城市楼廓使用现代资料。","北爱尔兰及邻区以 OSM 实际标绘的土地利用补充，统计口径与 ONS 建成区不同。"]
+}

@@ -1,0 +1,16 @@
+{
+  "geometry_basis": "Modern roof outlines in selected cities active around 1900. The windows are display coverage, not historical city boundaries.",
+  "cities": [
+    {"id":"belfast","name":"贝尔法斯特","name_en":"Belfast","anchor":[-5.9301,54.5973],"radius_km":5},
+    {"id":"birmingham","name":"伯明翰","name_en":"Birmingham","anchor":[-1.8904,52.4862],"radius_km":7},
+    {"id":"bristol","name":"布里斯托尔","name_en":"Bristol","anchor":[-2.5879,51.4545],"radius_km":5},
+    {"id":"cardiff","name":"卡迪夫","name_en":"Cardiff","anchor":[-3.1791,51.4816],"radius_km":4},
+    {"id":"edinburgh","name":"爱丁堡","name_en":"Edinburgh","anchor":[-3.1883,55.9533],"radius_km":5},
+    {"id":"glasgow","name":"格拉斯哥","name_en":"Glasgow","anchor":[-4.2518,55.8642],"radius_km":6},
+    {"id":"leeds","name":"利兹","name_en":"Leeds","anchor":[-1.5491,53.8008],"radius_km":6},
+    {"id":"liverpool","name":"利物浦","name_en":"Liverpool","anchor":[-2.9945,53.4005],"radius_km":6},
+    {"id":"manchester","name":"曼彻斯特","name_en":"Manchester","anchor":[-2.2426,53.4808],"radius_km":7},
+    {"id":"newcastle","name":"纽卡斯尔","name_en":"Newcastle","anchor":[-1.6178,54.9783],"radius_km":5},
+    {"id":"sheffield","name":"谢菲尔德","name_en":"Sheffield","anchor":[-1.4701,53.3811],"radius_km":5}
+  ]
+}

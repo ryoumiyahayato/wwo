@@ -3,10 +3,86 @@ extends SceneTree
 ## No game scene, save, simulation, GPU measurement or user camera assumptions.
 
 func _init() -> void:
+	if "--local-continuity" in OS.get_cmdline_user_args():
+		call_deferred("_local_continuity")
+		return
 	if "--queue" in OS.get_cmdline_user_args():
 		call_deferred("_queue_check")
 		return
 	call_deferred("_trace")
+
+func _local_continuity() -> void:
+	# Requested two-site diagnosis using the production loader and CPU mesh.
+	# No viewport, simulated world, framebuffer claim or new test entry.
+	var rows: Array = []
+	var before_root: String = ""
+	var worker: GDScript = preload("res://scripts/presentation/map/local_spatial_lod.gd")
+	var view_script: GDScript = preload("res://scripts/presentation/map/region_view.gd")
+	var content_script: GDScript
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--before-source="):before_root=arg.trim_prefix("--before-source=")
+	if not before_root.is_empty():
+		worker=GDScript.new();worker.source_code=FileAccess.get_file_as_string(before_root+"/scripts/presentation/map/local_spatial_lod.gd").replace("class_name LocalSpatialLod","")
+		view_script=GDScript.new();view_script.source_code=FileAccess.get_file_as_string(before_root+"/scripts/presentation/map/region_view.gd").replace("class_name RegionView","")
+		content_script=GDScript.new();content_script.source_code=FileAccess.get_file_as_string(before_root+"/scripts/content/local_spatial_content.gd").replace("class_name LocalSpatialContent","")
+		if worker.reload()!=OK or view_script.reload()!=OK or content_script.reload()!=OK:quit(1);return
+	for source: Dictionary in LocalSpatialLoader.SOURCES:
+		if source.anchor_id not in ["place:london","geographic_region:zermatt_west_reference"]: continue
+		var source_path: String = str(source.path) if before_root.is_empty() else before_root+"/"+str(source.path).trim_prefix("res://")
+		var content := LocalSpatialLoader._load(source_path,func()->bool:return true,str(source.anchor_id))
+		if not content.errors.is_empty():push_error(str(content.errors));quit(1);return
+		var surface := content.surface_reference
+		var frame := RegionProjection.frame(source.anchor)
+		var started := Time.get_ticks_usec()
+		var memory_before := OS.get_static_memory_usage()
+		var prepared := worker.call("prepare_terrain",surface,frame,content.features,content.surface_covers,func()->bool:return true) as Dictionary
+		var elapsed := Time.get_ticks_usec()-started
+		if prepared.has("error"):push_error(str(prepared.error));quit(1);return
+		var points := prepared.ray_vertices as PackedVector3Array
+		var bounds := AABB(points[0],Vector3.ZERO)
+		for point: Vector3 in points:bounds=bounds.expand(point)
+		var limit := float(view_script.call("_terrain_limit_mpp",surface))
+		var strengths: Dictionary = {}
+		for mpp: float in [2,4,8,12,24]:strengths[str(mpp)]=1.0-smoothstep(limit*.75,limit*1.35,mpp)
+		var native_unchanged: bool = true
+		var base: float = float(surface.height_rows_m[0][0])-(prepared.vertices[0] as Vector3).y
+		for index: int in prepared.vertices.size():
+			native_unchanged=native_unchanged and absf((prepared.vertices[index] as Vector3).y+base-float(surface.height_rows_m[index/int(surface.width)][index%int(surface.width)]))<0.002
+		var kinds: Dictionary = {};var placements: int = 0
+		for feature: Dictionary in content.features:
+			kinds[str(feature.kind)]=int(kinds.get(str(feature.kind),0))+1
+			placements+=(feature.get("miniature_layout",{}) as Dictionary).get("placements",[]).size()
+		var zoom: Dictionary = {}
+		var zoom_content: RefCounted=content
+		if content_script!=null:
+			zoom_content=content_script.new()
+			for property: String in ["metadata","surface_reference","features","has_content"]:zoom_content.set(property,content.get(property))
+		for distance: float in [0,1500,5000]:
+			var ll:=RegionProjection.lon_lat(RegionProjection.inverse(Vector2(distance*.001,0),frame))
+			var floor_mpp:=float(zoom_content.call("minimum_observation_mpp",ll,"1900-01-01"))
+			zoom[str(distance)]=floor_mpp if is_finite(floor_mpp) else "UNAVAILABLE"
+		rows.append({"place":source.anchor_id,"source_path":source.path,"source_grid":[surface.width,surface.height],"native_step_m":surface.get("display_spacing_m_approx",[]),"native_vertices":prepared.vertices.size(),"render_vertices":points.size(),"triangles":prepared.indices.size()/3,"render_bounds_metres":[bounds.position.x,bounds.position.z,bounds.end.x,bounds.end.z],"native_samples_unchanged":native_unchanged,"terrain_limit_mpp":limit,"display_strength":strengths,"zoom_east_offset_metres":zoom,"feature_kinds":kinds,"existing_miniature_placements":placements,"river_chart_only":surface.get("river_chart_only",false),"surface_covers":content.surface_covers.size(),"cpu_prepare_wall_us":elapsed,"retained_cpu_allocation_delta":OS.get_static_memory_usage()-memory_before,"prepared_variant_bytes":var_to_bytes(prepared).size(),"context_water_mask_bytes":(prepared.get("context_water_bytes",PackedByteArray()) as PackedByteArray).size(),"scope":"PRODUCTION_CPU_GEOMETRY_NOT_RENDERED_SCREENSHOTS"})
+		var context: Dictionary=(surface.get("presentation",{}) as Dictionary).get("context_height_asset",{})
+		if not context.is_empty():
+			var decoded:=GeographyLoader.decode_relief("context",{"context":context})
+			var image:=decoded.image as Image
+			var b:=context.bounds_lon_lat as Array
+			var samples: Array=[]
+			for offset: Vector2 in [Vector2(-2,0),Vector2(2,0),Vector2(0,-2),Vector2(0,2),Vector2(-5,0),Vector2(5,0),Vector2(0,-5),Vector2(0,5)]:
+				var ll:=RegionProjection.lon_lat(RegionProjection.inverse(offset,frame))
+				var pixel:=Vector2i((ll.x-float(b[0]))/(float(b[2])-float(b[0]))*image.get_width(),(float(b[3])-ll.y)/(float(b[3])-float(b[1]))*image.get_height()).clamp(Vector2i.ZERO,image.get_size()-Vector2i.ONE)
+				var value:=image.get_pixelv(pixel)
+				samples.append({"offset_km":[offset.x,offset.y],"height_m":200.0*(pow(26.0,value.r)-1.0),"support":value.a})
+			rows[-1]["source_context_samples"]=samples
+			decoded.clear();image=null
+		prepared.clear();points=PackedVector3Array()
+	var destination := ""
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--destination="):destination=arg.trim_prefix("--destination=")
+	if not destination.is_empty():
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(destination.get_base_dir()))
+		FileAccess.open(destination,FileAccess.WRITE).store_string(JSON.stringify(rows,"\t"))
+	print("LOCAL_CONTINUITY_CPU ",JSON.stringify(rows));quit(0)
 
 func _queue_decode(level: String, assets: Dictionary) -> Dictionary:
 	OS.delay_msec(80) # Finite worker interleaving, not a performance measurement.

@@ -1,0 +1,21 @@
+{
+  "id":"le_havre_modern_cartographic_reference",
+  "name":"勒阿弗尔 · 现代形态参考",
+  "name_en":"Le Havre · modern form reference",
+  "map_name":"勒阿弗尔",
+  "scale_grade":5,
+  "precision":"MODERN_BUILDING_PORT_AND_WATER_REFERENCE_NOT_1900_RECONSTRUCTION",
+  "minimum_mpp":8.0,
+  "maximum_mpp":96.0,
+  "anchor":[0.1079,49.4944],
+  "ground_mode":"cartographic_plane",
+  "presentation_index":"res://assets/settlements/le_havre_reference/index.json",
+  "overview_bounds":[0.055,49.475,0.185,49.535],
+  "content_bounds":[0.055,49.475,0.185,49.535],
+  "background_bounds":[-0.04,49.39,0.55,49.60],
+  "source":{"url":"https://data.geopf.fr/wfs/ows","publisher":"IGN BD TOPO","footprints":86288,"license":"Etalab-Open-Licence-2.0","basis":"MODERN_REFERENCE_NOT_1900"},
+  "caption":"勒阿弗尔 · 现代建筑与港池参考",
+  "water_reference_note_zh":"现代建筑、港池及岸线参考；不代表1900年港区或战前街区。",
+  "attribution":"建筑、水面：IGN BD TOPO · 开放许可2.0；绿地、高潮岸线：© OpenStreetMap contributors · ODbL",
+  "districts":[{"name":"勒阿弗尔","anchor":[0.1079,49.4944],"importance":2}]
+}

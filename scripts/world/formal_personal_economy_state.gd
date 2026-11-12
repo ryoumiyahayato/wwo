@@ -752,9 +752,10 @@ func prepare_native_source(person_id: String, source: Dictionary, kind: String) 
 	if not _persons.has_person(person_id) or kind not in ["native_order", "native_delivery", "native_opening", "native_balance", "native_handover"] or not source.get("source_id") is String or source["source_id"].is_empty() or not source.get("commodity_id") is String or not source["commodity_id"].begins_with("native:") or not FormalLedgerState.valid_amount(source.get("quantity")) or int(source["quantity"]) <= 0 or not FormalLedgerState.valid_amount(source.get("amount")) or not FormalLedgerState.valid_amount(source.get("effective_minute")): return {}
 	var record := source.duplicate(true)
 	record.merge({"record_id": "personal_life:" + str(_next_record_sequence), "kind": kind, "person_id": person_id, "quantity_scale": 1}, true)
+	if kind == "native_order": return {"record":record,"sequence":_next_record_sequence}
 	var good := str(source["commodity_id"]).trim_prefix("native:")
 	var candidate := {person_id: {good: _native_lots.get(person_id, {}).get(good, []).duplicate(true)}}
-	if kind != "native_order": _add_native_lot(candidate, record)
+	_add_native_lot(candidate, record)
 	return {"record": record, "good": good, "lots": candidate[person_id][good], "sequence": _next_record_sequence}
 
 func prepare_native_custody(fact: Dictionary) -> Dictionary:
@@ -795,9 +796,10 @@ static func _loss_sources_ready(lots: Dictionary, fact: Dictionary) -> bool:
 ## Synchronous adoption after business prechecks and Ledger adoption.
 func adopt_native_change(prepared: Dictionary) -> void:
 	assert(not prepared.is_empty() and prepared["sequence"] == _next_record_sequence)
-	var person := str(prepared["record"]["person_id"])
-	if not _native_lots.has(person): _native_lots[person] = {}
-	_native_lots[person][prepared["good"]] = prepared["lots"]
+	if prepared["record"]["kind"] != "native_order":
+		var person := str(prepared["record"]["person_id"])
+		if not _native_lots.has(person): _native_lots[person] = {}
+		_native_lots[person][prepared["good"]] = prepared["lots"]
 	_append_living_record(prepared["record"])
 
 func record_native_source(person_id: String, source: Dictionary, kind: String) -> bool:

@@ -1,0 +1,222 @@
+{
+  "id": "london_1890s_historical_overview",
+  "name": "London · 1890年代城市微缩地图",
+  "map_name": "伦敦",
+  "scale_grade": 7,
+  "scale_basis": {
+    "population": 4536267,
+    "year": 1901,
+    "scope": "Administrative County of London; population does not define this diagram footprint",
+    "source": "https://data.london.gov.uk/download/227f750f-69ab-4605-8e30-1f0ca6744527/f7e6c0a8-573e-4d76-889d-1735c1fd7209/Research-Memorandum-413.pdf"
+  },
+  "precision": "GENERALIZED_1891_1896_BUILDING_FOOTPRINTS_MODERN_WATER_AND_PARKS_DISPLAY_HEIGHTS",
+  "minimum_mpp": 8.0,
+  "maximum_mpp": 96.0,
+  "north_up_overview": true,
+  "anchor": [
+    -0.116,
+    51.506
+  ],
+  "ground_mode": "cartographic_plane",
+  "presentation_index": "res://assets/settlements/london_1890s/index.json",
+  "overview_bounds": [
+    -0.289381837443691,
+    51.425061108862806,
+    0.10072729680461372,
+    51.586938891137194
+  ],
+  "overview_basis": "Initial framing of the largest connected 3km cells with >=10% footprint-derived built cover; not an administrative or exact historic city boundary. All source tiles remain available.",
+  "content_bounds": [
+    -0.3690632,
+    51.348987,
+    0.1031522,
+    51.6150228
+  ],
+  "background_bounds": [
+    -0.84,
+    51.2,
+    0.33,
+    51.8
+  ],
+  "source": {
+    "url": "https://zenodo.org/records/21282700",
+    "file": "london_buildings_1891-96_corr_v1.gpkg",
+    "footprints": 1299040,
+    "crs": "EPSG:3857",
+    "period": "survey1891-1895/published1893-1896",
+    "license": "CC-BY-4.0"
+  },
+  "caption": "London 1891–1896 · 历史建筑轮廓 / 现代水面与绿地参考",
+  "water_reference_note_zh": "水面与绿地边界为现代参考，外围NE水面概化；不是1900年精确水岸或公园边界。",
+  "attribution": "建筑：Petitpierre 等 · CC BY 4.0；原图：NLS；水面与绿地：© OpenStreetMap contributors · ODbL",
+  "districts": [
+    {
+      "name": "Westminster",
+      "anchor": [
+        -0.1311,
+        51.4972
+      ],
+      "importance": 2
+    },
+    {
+      "name": "City",
+      "anchor": [
+        -0.0889,
+        51.5134
+      ],
+      "importance": 2
+    },
+    {
+      "name": "Southwark",
+      "anchor": [
+        -0.098,
+        51.5
+      ],
+      "importance": 2
+    },
+    {
+      "name": "Kensington",
+      "anchor": [
+        -0.19,
+        51.502
+      ],
+      "importance": 2
+    },
+    {
+      "name": "Paddington",
+      "anchor": [
+        -0.177,
+        51.518
+      ],
+      "importance": 1
+    },
+    {
+      "name": "Islington",
+      "anchor": [
+        -0.103,
+        51.538
+      ],
+      "importance": 2
+    },
+    {
+      "name": "Camden",
+      "anchor": [
+        -0.142,
+        51.54
+      ],
+      "importance": 1
+    },
+    {
+      "name": "Hackney",
+      "anchor": [
+        -0.059,
+        51.545
+      ],
+      "importance": 2
+    },
+    {
+      "name": "Poplar",
+      "anchor": [
+        -0.019,
+        51.511
+      ],
+      "importance": 2
+    },
+    {
+      "name": "Greenwich",
+      "anchor": [
+        -0.001,
+        51.481
+      ],
+      "importance": 2
+    },
+    {
+      "name": "Deptford",
+      "anchor": [
+        -0.027,
+        51.475
+      ],
+      "importance": 1
+    },
+    {
+      "name": "Battersea",
+      "anchor": [
+        -0.163,
+        51.47
+      ],
+      "importance": 2
+    },
+    {
+      "name": "Clapham",
+      "anchor": [
+        -0.138,
+        51.462
+      ],
+      "importance": 1
+    },
+    {
+      "name": "Brixton",
+      "anchor": [
+        -0.116,
+        51.461
+      ],
+      "importance": 2
+    },
+    {
+      "name": "Chelsea",
+      "anchor": [
+        -0.164,
+        51.487
+      ],
+      "importance": 1
+    },
+    {
+      "name": "Hammersmith",
+      "anchor": [
+        -0.225,
+        51.493
+      ],
+      "importance": 2
+    },
+    {
+      "name": "Fulham",
+      "anchor": [
+        -0.202,
+        51.477
+      ],
+      "importance": 1
+    },
+    {
+      "name": "Hampstead",
+      "anchor": [
+        -0.177,
+        51.556
+      ],
+      "importance": 1
+    },
+    {
+      "name": "Wandsworth",
+      "anchor": [
+        -0.192,
+        51.457
+      ],
+      "importance": 1
+    },
+    {
+      "name": "Waterloo",
+      "anchor": [
+        -0.1137,
+        51.5033
+      ],
+      "importance": 1
+    },
+    {
+      "name": "Charing Cross",
+      "anchor": [
+        -0.1248,
+        51.508
+      ],
+      "importance": 1
+    }
+  ]
+}

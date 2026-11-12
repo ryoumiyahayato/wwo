@@ -1,0 +1,21 @@
+{
+  "id": "rouen_modern_cartographic_reference",
+  "name": "鲁昂 · 现代形态参考",
+  "map_name": "鲁昂",
+  "scale_grade": 5,
+  "scale_basis": {"population_approximate": 116000, "year": 1901, "scope": "Historical city population reference only; not the modern geometry extent", "source": "https://georgesdeherme.fr/fileadmin/site/1_Georges_Deherme__1867-1937_/4_Bibliotheque/Nourrir_une_pensee._Articles_conserves_par_G._Deherme/19070100_Les_resultats.pdf"},
+  "precision": "MODERN_BUILDING_AND_WATER_REFERENCE_NOT_1900_RECONSTRUCTION",
+  "minimum_mpp": 8.0,
+  "maximum_mpp": 96.0,
+  "anchor": [1.0993, 49.4431],
+  "ground_mode": "cartographic_plane",
+  "presentation_index": "res://assets/settlements/rouen_reference/index.json",
+  "overview_bounds": [1.065, 49.42, 1.135, 49.46],
+  "content_bounds": [1.065, 49.42, 1.135, 49.46],
+  "background_bounds": [0.98, 49.35, 1.22, 49.52],
+  "source": {"url": "https://data.geopf.fr/wfs/ows", "publisher": "IGN BD TOPO", "layer": "BDTOPO_V3:batiment", "footprints": 45494, "license": "Etalab-Open-Licence-2.0"},
+  "caption": "鲁昂核心区 · IGN现代建筑轮廓参考",
+  "water_reference_note_zh": "建筑、水面及绿地为现代参考，不是1900年重建；建筑高度仅为显示假设。",
+  "attribution": "建筑与水面：IGN BD TOPO · 开放许可2.0；绿地：© OpenStreetMap contributors · ODbL",
+  "districts": [{"name": "鲁昂", "anchor": [1.0993, 49.4431], "importance": 2}]
+}

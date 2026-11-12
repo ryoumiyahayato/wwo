@@ -1,4 +1,5 @@
 shader_type canvas_item;
+uniform bool city_overview = false;
 render_mode unshaded;
 
 varying vec4 political_color;
@@ -8,6 +9,9 @@ uniform sampler2D relief_region : filter_linear, repeat_enable;
 uniform float relief_weight = 0.0;
 uniform float relief_detail_weight = 0.0;
 uniform float reference_opacity = 1.0;
+uniform float military_grid_step = 0.0;
+uniform vec4 military_grid_projection = vec4(0.0);
+uniform vec3 military_grid_origin = vec3(0.0);
 uniform sampler2D face_data : filter_nearest, repeat_disable;
 uniform sampler2D flag_texture : source_color, filter_linear, repeat_disable;
 uniform mat3 globe_basis = mat3(1.0);
@@ -148,6 +152,19 @@ void vertex() {
 	map_pixel = VERTEX;
 }
 
+float military_grid(vec2 ll) {
+	vec4 p=military_grid_projection;
+	float phi=radians(clamp(ll.y,-85.0,85.0));
+	float t=tan(3.14159265359*.25-phi*.5)/pow((1.0-p.w*sin(phi))/(1.0+p.w*sin(phi)),p.w*.5);
+	float rho=p.y*pow(t,p.x);
+	float angle=p.x*(radians(ll.x)-military_grid_origin.z);
+	vec2 xy=military_grid_origin.xy+vec2(rho*sin(angle),p.z-rho*cos(angle));
+	vec2 cell=xy/military_grid_step;
+	vec2 distance=min(fract(cell),1.0-fract(cell))*military_grid_step;
+	vec2 pixel=max(fwidth(xy),vec2(0.001));
+	return 1.0-smoothstep(0.25,1.0,min(distance.x/pixel.x,distance.y/pixel.y));
+}
+
 void fragment() {
 	vec2 terrain = vec2(0.5,0.0);
 	vec4 regional_surface = vec4(0.0);
@@ -175,24 +192,38 @@ void fragment() {
 		// independent neutral channel to ink, never shade that RGB twice.
 		physical *= mix(coarse_form,1.0,regional_coverage);
 	}
+	bool globe_ink = !region_mode && political_focus_style && political_weight>0.0 && !antarctic_land;
+	float pattern_weight = flag_weight;
+	if (!globe_ink) {
+		// Fade regional prints into the ground as the map approaches street scale.
+		vec2 uv_per_pixel = abs(dFdx(UV)) + abs(dFdy(UV));
+		float projected_span = min(1.0/max(uv_per_pixel.x,0.00001),1.0/max(uv_per_pixel.y,0.00001));
+		float print_strength = mix(0.62,0.82,smoothstep(0.60,0.96,political_emphasis));
+		pattern_weight *= smoothstep(12.0,48.0,projected_span) * print_strength
+			* mix(1.0,0.68,smoothstep(120.0,340.0,projected_span));
+	}
 	vec4 flag = vec4(0.0);
-	if (flag_weight>0.001 && political_color.a>0.0) { flag = texture(flag_texture,clamp(UV,vec2(0.0),vec2(1.0))); }
-	float luminance = dot(flag.rgb, vec3(0.2126, 0.7152, 0.0722));
-	float saturation = political_focus_style ? mix(0.32,0.86,political_emphasis) : map_saturation;
-	float brightness = political_focus_style ? mix(0.62,0.83,political_emphasis) : map_brightness;
-	vec3 flag_tone = mix(vec3(luminance), flag.rgb, saturation);
-	float peak = max(flag_tone.r, max(flag_tone.g, flag_tone.b));
-	// One scalar compresses bright colours without shifting their hue.
-	flag_tone *= brightness / (1.0 + highlight_compression * peak);
-	// The full flag supplies the face. Vertex colour only modulates selection;
-	// unassigned geography and explicit political colour fallbacks have no texture weight.
+	if (pattern_weight>0.001 && political_color.a>0.0) { flag = texture(flag_texture,clamp(UV,vec2(0.0),vec2(1.0))); }
+	vec3 flag_tone = flag.rgb;
 	vec3 political_tone = political_base_color;
-	if (political_focus_style) {
-		float value = dot(political_tone,vec3(0.2126,0.7152,0.0722));
-		political_tone = mix(vec3(value),political_tone,saturation)*mix(0.86,1.04,political_emphasis);
+	if (globe_ink) {
+		// Apply sunlight to the physical globe before laying down political ink.
+		physical = solar_ground(physical,globe_view_normal(map_pixel,globe_center,globe_radius));
+		ink_form = mix(1.0,ink_form,0.22);
+	} else {
+		float luminance = dot(flag.rgb,vec3(0.2126,0.7152,0.0722));
+		float saturation = political_focus_style ? mix(0.76,0.94,political_emphasis) : map_saturation;
+		flag_tone = mix(vec3(luminance),flag.rgb,saturation);
+		float peak = max(flag_tone.r,max(flag_tone.g,flag_tone.b));
+		float brightness = political_focus_style ? mix(0.84,0.98,political_emphasis) : map_brightness;
+		flag_tone *= brightness/(1.0+highlight_compression*peak);
+		if (political_focus_style) {
+			float value = dot(political_tone,vec3(0.2126,0.7152,0.0722));
+			political_tone = mix(vec3(value),political_tone,mix(0.26,0.67,political_emphasis))*mix(0.86,1.04,political_emphasis);
+		}
 	}
 	vec3 base = mix(physical, political_tone*ink_form, political_weight);
-	vec3 surface = mix(base, flag_tone * political_color.rgb*ink_form, political_color.a * flag.a * flag_weight);
+	vec3 surface = mix(base,flag_tone*ink_form,political_color.a*flag.a*pattern_weight);
 	// One global dark-tone rule, after selection modulation. A neutral lift
 	// preserves hue (all RGB channel differences scale together), including
 	// blue, red, green and brown. Bright white/yellow samples receive no lift.
@@ -204,6 +235,12 @@ void fragment() {
 	// Only the existing classified physical Antarctica triangles use this.
 	// This classification is not inferred from elevation or applied to flags.
 	if (antarctic_land) { surface = mix(surface,terrain_snow_base(terrain.g),0.80); }
-	if (!region_mode) { surface = solar_ground(surface,globe_view_normal(map_pixel,globe_center,globe_radius)); }
+	if (!region_mode && !globe_ink) { surface = solar_ground(surface,globe_view_normal(map_pixel,globe_center,globe_radius)); }
+	if (military_grid_step>0.0) {
+		vec2 uv=relief_uv_at_pixel(map_pixel);
+		float grid=military_grid(vec2((uv.x-.5)*360.0,(.5-uv.y)*180.0));
+		surface=mix(surface,vec3(0.75,0.82,0.70),grid*0.55);
+	}
 	COLOR = vec4(surface, reference_opacity);
+
 }

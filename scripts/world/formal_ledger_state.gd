@@ -5,6 +5,8 @@ extends RefCounted
 
 const SCHEMA_ID: String = "formal_ledger_state_v1"
 const DENOMINATION: String = "denomination:formal_simulation_minor_v1"
+const FRANC_1900: String = "denomination:franc_1900_centime"
+
 const SOURCE_ACCOUNT: String = "account:scenario_livelihood_r1"
 const SOURCE_OWNER: String = "scenario:livelihood_r1"
 const MAX_AMOUNT: int = 9007199254740991
@@ -24,6 +26,14 @@ var _reservations: Dictionary = {}
 var _reserved_by_account: Dictionary = {}
 var _currency_budgets: Dictionary = {}
 var _batches: Dictionary = {}
+
+## Valuation only. This creates neither metal nor a redeemable bank liability.
+static func currency_reference(currency: String) -> Dictionary:
+	if currency != FRANC_1900: return {"denomination": currency, "historical_mapping": "UNDEFINED"}
+	return {"denomination": currency, "unit": "centime", "minor_per_franc": 100,
+		"fine_gold_grams_per_franc": {"numerator": 9, "denominator": 31},
+		"fine_gold_micrograms_per_centime": {"numerator": 90000, "denominator": 31},
+		"institution": "GOLD_PARITY_REFERENCE_ONLY", "redemption": "NOT_CONFIGURED"}
 
 
 func enable_economy_r1() -> bool:

@@ -1,0 +1,17 @@
+{
+  "id":"germany_settlement_context",
+  "role":"NATIONAL_CARTOGRAPHIC_CONTEXT",
+  "name":"德国欧洲参考 · 建成区与城市轮廓",
+  "map_name":"德国建成区",
+  "precision":"MODERN_OSM_AND_WORLDCOVER_BUILT_UP_REFERENCE",
+  "anchor":[13.4,52.5],
+  "content_bounds":[5.3,47.0,23.3,56.0],
+  "overview_bounds":[5.3,47.0,23.3,56.0],
+  "ground_mode":"cartographic_context",
+  "presentation_index":"res://assets/settlements/germany_context/index.json",
+  "maximum_mpp":1800.0,
+  "cache_budget_bytes":8388608,
+  "attribution":"© OpenStreetMap contributors · ODbL-1.0 · ESA WorldCover 2021 · CC BY 4.0",
+  "source":{"url":"https://openfreemap.org/quick_start/","publisher":"OpenStreetMap contributors / OpenFreeMap / OpenMapTiles","license":"ODbL-1.0","basis":"MODERN_REFERENCE_NOT_1900"},
+  "coverage_source":{"url":"https://esa-worldcover.org/en/data-access","publisher":"ESA WorldCover 2021 v200","license":"CC-BY-4.0","basis":"32X_CATEGORICAL_OVERVIEW_CLASS_50"}
+}

@@ -1,0 +1,29 @@
+{
+  "id": "paris_modern_cartographic_reference",
+  "name": "巴黎 · 现代形态参考",
+  "map_name": "巴黎",
+  "scale_grade": 7,
+  "precision": "MODERN_BUILDING_AND_WATER_REFERENCE_NOT_1900_RECONSTRUCTION",
+  "minimum_mpp": 8.0,
+  "maximum_mpp": 96.0,
+  "anchor": [2.3522, 48.8566],
+  "ground_mode": "cartographic_plane",
+  "presentation_index": "res://assets/settlements/paris_reference/index.json",
+  "overview_bounds": [2.255, 48.815, 2.42, 48.957],
+  "content_bounds": [2.255, 48.815, 2.42, 48.957],
+  "building_coverage_bounds": [[2.255, 48.815, 2.42, 48.91], [2.29, 48.895, 2.415, 48.957]],
+  "building_mesh_inspection_only": true,
+  "background_bounds": [2.0, 48.65, 2.70, 49.05],
+  "source": {
+    "url": "https://carto2.apur.org/apur/rest/services/OPENDATA/EMPRISE_BATIE_PARIS/MapServer/0",
+    "publisher": "APUR",
+    "footprints": 127608,
+    "license": "ODbL-1.0",
+    "basis": "CURRENT_SURVIVING_BUILDINGS_NOT_A_HISTORICAL_RECONSTRUCTION"
+  },
+  "additional_sources": [{"publisher":"IGN BD TOPO","url":"https://data.geopf.fr/wfs/ows","layer":"BDTOPO_V3:batiment","license":"Etalab-Open-Licence-2.0","bounds":[2.29,48.895,2.415,48.957],"source_features":60277,"basis":"MODERN_REFERENCE_NOT_1900"}],
+  "caption": "巴黎及北部近郊 · 现代建筑轮廓参考",
+  "water_reference_note_zh": "建筑、水面及绿地为现代参考，不是1900年重建；建筑高度仅为显示假设。",
+  "attribution": "建筑：APUR · ODbL、IGN BD TOPO · 开放许可2.0；水面：IGN BD TOPO；绿地：© OpenStreetMap contributors · ODbL",
+  "districts": [{"name":"巴黎","anchor":[2.3522,48.8566],"importance":2},{"name":"圣但尼","anchor":[2.3574,48.9362],"importance":2},{"name":"奥贝维利耶","anchor":[2.3833,48.9139],"importance":2}]
+}

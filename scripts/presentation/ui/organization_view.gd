@@ -1,5 +1,6 @@
 class_name OrganizationPage
 extends RefCounted
+const UILocale = preload("res://scripts/presentation/ui/ui_locale.gd")
 var _rows: Array[Dictionary] = []
 var _by_id: Dictionary = {}
 var _memberships: Array[Dictionary] = []
@@ -8,6 +9,8 @@ var selected_id: String = ""
 var page: int = 0
 var own_only: bool = false
 var country_id: String = ""
+var has_personal_work: bool = false
+var drawer: String = "relations"
 const PAGE_SIZE: int = 9
 
 func refresh(rows: Array[Dictionary], memberships: Array[Dictionary]) -> void:
@@ -45,7 +48,10 @@ func draw(shell: MainShell, rect: Rect2) -> void:
 	if not selected_id.is_empty() and _by_id.has(selected_id):
 		_draw_detail(shell,rect,_by_id[selected_id] as Dictionary)
 		return
-	var title := "人物组织关系" if own_only else "组织架构" if not country_id.is_empty() else "组织词条"
+	if own_only:
+		_draw_person_drawers(shell,rect,records)
+		return
+	var title := "组织架构" if not country_id.is_empty() else "组织词条"
 	shell.heading(rect,title,"")
 	if records.is_empty():
 		shell.label(rect.position+Vector2(22,120),"暂无成员或任职记录。" if own_only else "暂无明确关联的组织资料。",13)
@@ -101,13 +107,31 @@ func draw(shell: MainShell, rect: Rect2) -> void:
 		shell.button(Rect2(rect.position.x+20,rect.end.y-35,82,25),"上一页","organization:previous",page>0)
 		shell.button(Rect2(rect.position.x+112,rect.end.y-35,82,25),"下一页","organization:next",(page+1)*count<records.size())
 
+func work_open() -> bool:
+	return own_only and selected_id.is_empty() and drawer=="work"
+
+func _draw_person_drawers(shell: MainShell, rect: Rect2, records: Array[Dictionary]) -> void:
+	shell.heading(rect,"人物组织关系","")
+	shell.button(Rect2(rect.position+Vector2(20,96),Vector2(rect.size.x-40,28)),("▾" if drawer=="relations" else "▸")+UILocale.text(" 组织关系 · %d") % records.size(),"organization:drawer:relations",true,drawer=="relations",13)
+	if has_personal_work:
+		shell.button(Rect2(rect.position+Vector2(20,132),Vector2(rect.size.x-40,28)),("▾" if drawer=="work" else "▸")+" 工作与经营","organization:drawer:work",true,drawer=="work",13)
+	var body := Rect2(rect.position+Vector2(20,176),rect.size-Vector2(40,194))
+	if drawer=="relations":
+		var entries: Array=[]
+		for row: Dictionary in records:
+			entries.append({"name_zh":str(row.label)+" · "+str(row.get("player_roles","")),"action":"organization:open:"+str(row.organization_id)})
+		if entries.is_empty(): shell.label(body.position+Vector2(0,18),"暂无成员或任职记录。",12)
+		else: shell.draw_administration_drawer(body,entries)
+	elif work_open() and has_personal_work:
+		shell.draw_administration_drawer(body,shell.person_page.work_drawer_rows())
+
 func _draw_detail(shell: MainShell, rect: Rect2, row: Dictionary) -> void:
 	shell.heading(rect,str(row.label),str(row.get("kind_label","")))
 	var facts: Array[String] = ["类型："+str(row.get("kind_label","未记录"))]
 	if not str(row.get("place_name","")).is_empty(): facts.append("所在地："+str(row.place_name))
 	if row.has("player_roles"): facts.append("人物关系："+str(row.player_roles))
 	if row.has("member_ids"): facts.append("实际成员："+str((row.member_ids as Array).size()))
-	if row.has("positions"): facts.append("已记录职务："+str((row.positions as Array).size()))
+	if not (row.get("positions",[]) as Array).is_empty(): facts.append("已记录职务："+str((row.positions as Array).size()))
 	facts.append("资料依据："+str(row.get("basis_label","未记录")))
 	shell.lines(rect.position+Vector2(22,118),facts,rect.size.x*0.52-30)
 	shell.wrapped(rect.position+Vector2(rect.size.x*0.54,118),str(row.get("case_text","")),rect.size.x*0.46-22,12,4)
@@ -120,3 +144,17 @@ func _draw_detail(shell: MainShell, rect: Rect2, row: Dictionary) -> void:
 
 func record_count() -> int:
 	return _records().size()
+
+func government_records(polity_id: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for row: Dictionary in _rows:
+		if str(row.get("organization_kind",""))=="government_body" and str(row.get("country_id",""))==polity_id:
+			result.append(row)
+	return result
+
+func player_government_roles(polity_id: String) -> Array[String]:
+	var roles: Array[String]=[]
+	for row: Dictionary in government_records(polity_id):
+		for title: String in row.get("player_positions",[]) as Array:
+			if not title.is_empty(): roles.append(title)
+	return roles

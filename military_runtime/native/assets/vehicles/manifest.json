@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "vehicles": [
+    {
+      "id": "armored_car_mg",
+      "display_name": "机枪装甲车",
+      "model_path": "res://military_runtime/native/assets/vehicles/armored_car_mg.glb",
+      "weapon": "mg",
+      "weapon_class": "mg",
+      "aim_mode": "turret",
+      "fictional_stats": "car",
+      "sha256": "b173b34ee12664d2e70053546be0dec2d8756c1e6aae7e880a9718ceaa686a85",
+      "triangles": 4524,
+      "triangles_by_module": {
+        "Hull": 3700,
+        "Turret": 572,
+        "Barrel": 252
+      },
+      "crew_roles": [
+        "commander",
+        "gunner",
+        "driver"
+      ],
+      "collision_proxy": {
+        "center": [
+          0,
+          1.02,
+          0
+        ],
+        "size": [
+          3.1,
+          2.04,
+          7.7
+        ]
+      },
+      "forward": [
+        0,
+        0,
+        -1
+      ],
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -15,
+        30
+      ],
+      "source": "assets/catalog_tanks/future_candidates/apc_armored_vehicle.glb",
+      "source_sha256": "7b587b2b89ee5965ed33fa0648e271ee019f5535c45aacbde91507348b209f90",
+      "license": "User supplied private prototype reuse; redistribution rights unverified",
+      "seat_nodes": [
+        "CrewSeat0",
+        "CrewSeat1",
+        "CrewSeat2"
+      ],
+      "exit_nodes": [
+        "Exit0",
+        "Exit1",
+        "Exit2"
+      ],
+      "limits": {
+        "yaw_degrees": 180,
+        "pitch_degrees": [
+          -15,
+          30
+        ]
+      },
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    },
+    {
+      "id": "armored_car_rocket",
+      "display_name": "短火箭炮装甲车",
+      "model_path": "res://military_runtime/native/assets/vehicles/armored_car_rocket.glb",
+      "weapon": "rocket",
+      "weapon_class": "short_rocket",
+      "aim_mode": "turret",
+      "fictional_stats": "car",
+      "sha256": "7f6eb8b0603d364619d8c703da8c1cf248954969995e82310f2de2d8f4964005",
+      "triangles": 4852,
+      "triangles_by_module": {
+        "Hull": 3700,
+        "Turret": 104,
+        "Barrel": 1048
+      },
+      "crew_roles": [
+        "commander",
+        "gunner",
+        "driver"
+      ],
+      "collision_proxy": {
+        "center": [
+          0,
+          1.02,
+          0
+        ],
+        "size": [
+          3.1,
+          2.04,
+          7.7
+        ]
+      },
+      "forward": [
+        0,
+        0,
+        -1
+      ],
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -15,
+        35
+      ],
+      "source": "assets/catalog_tanks/future_candidates/apc_armored_vehicle.glb",
+      "source_sha256": "7b587b2b89ee5965ed33fa0648e271ee019f5535c45aacbde91507348b209f90",
+      "license": "User supplied private prototype reuse; redistribution rights unverified",
+      "seat_nodes": [
+        "CrewSeat0",
+        "CrewSeat1",
+        "CrewSeat2"
+      ],
+      "exit_nodes": [
+        "Exit0",
+        "Exit1",
+        "Exit2"
+      ],
+      "limits": {
+        "yaw_degrees": 180,
+        "pitch_degrees": [
+          -15,
+          35
+        ]
+      },
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_short_rocket"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    },
+    {
+      "id": "armored_car_cannon",
+      "display_name": "加农炮装甲车",
+      "model_path": "res://military_runtime/native/assets/vehicles/armored_car_cannon.glb",
+      "weapon": "cannon",
+      "weapon_class": "cannon",
+      "aim_mode": "turret",
+      "fictional_stats": "car",
+      "sha256": "f335d0ad79c9a96a0a6eab40b87bfc4ff71d2442bfb12385dd2523aa31cbf95a",
+      "triangles": 4496,
+      "triangles_by_module": {
+        "Hull": 3700,
+        "Turret": 572,
+        "Barrel": 224
+      },
+      "crew_roles": [
+        "commander",
+        "gunner",
+        "driver"
+      ],
+      "collision_proxy": {
+        "center": [
+          0,
+          1.02,
+          0
+        ],
+        "size": [
+          3.1,
+          2.04,
+          7.7
+        ]
+      },
+      "forward": [
+        0,
+        0,
+        -1
+      ],
+      "turret_yaw_limit_degrees": 180,
+      "barrel_pitch_degrees": [
+        -10,
+        25
+      ],
+      "source": "assets/catalog_tanks/future_candidates/apc_armored_vehicle.glb",
+      "source_sha256": "7b587b2b89ee5965ed33fa0648e271ee019f5535c45aacbde91507348b209f90",
+      "license": "User supplied private prototype reuse; redistribution rights unverified",
+      "seat_nodes": [
+        "CrewSeat0",
+        "CrewSeat1",
+        "CrewSeat2"
+      ],
+      "exit_nodes": [
+        "Exit0",
+        "Exit1",
+        "Exit2"
+      ],
+      "limits": {
+        "yaw_degrees": 180,
+        "pitch_degrees": [
+          -10,
+          25
+        ]
+      },
+      "visual_weapons": {
+        "primary": {
+          "weapon_id": "game_car_cannon"
+        },
+        "mg": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "coax": {
+          "weapon_id": "game_vehicle_mg"
+        },
+        "roof": {
+          "weapon_id": "game_vehicle_mg"
+        }
+      },
+      "visual_weapons_notice": "Fictional art-tier fallback only; no caliber or historical weapon performance inferred."
+    }
+  ]
+}

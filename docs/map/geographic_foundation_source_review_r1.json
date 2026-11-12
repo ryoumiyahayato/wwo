@@ -9,6 +9,93 @@
   },
   "sources": [
     {
+      "source_id": "ons_cso_british_irish_built_up_reference_20261108",
+      "title": "Great Britain built-up areas 2022 and Ireland urban areas 2022",
+      "publisher": "ONS / Ordnance Survey / CSO / Tailte Éireann",
+      "locator": "https://geoportal.statistics.gov.uk/datasets/ons::built-up-areas-december-2022-boundaries-gb-bgg/about",
+      "additional_locator": "https://www.cso.ie/en/census/census2022/census2022urbanboundariesandbuiltupareas/",
+      "services": [
+        "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/BUA_2022_GB/FeatureServer/0",
+        "https://services-eu1.arcgis.com/BuS9rtTsYEV5C0xh/arcgis/rest/services/Urban_Areas_National_Statistical_Boundaries_2022_Generalised_20m/FeatureServer/5"
+      ],
+      "license": "GB OGL-3.0, Contains OS data Crown copyright and database right 2022; Ireland CC-BY-4.0",
+      "role": "2022_GENERALISED_REFERENCE_NOT_1900",
+      "source_features": {
+        "great_britain": 8545,
+        "ireland": 867
+      },
+      "outputs": {
+        "meshes": 732,
+        "mesh_bytes": 41347783,
+        "index_bytes": 240408
+      },
+      "limits": "Northern Ireland lacks same-scope acquired built-up reference. No planning-boundary substitution, individual buildings, historical extent, railway, population or economic inference. Raw sources outside res://."
+    },
+    {
+      "source_id": "le_havre_modern_form_reference_20261108",
+      "title": "Le Havre IGN buildings and Seine estuary/port-basin water; OSM parks",
+      "publisher": "IGN / OpenStreetMap contributors",
+      "locator": "https://data.geopf.fr/wfs/ows",
+      "license": "IGN Etalab-Open-Licence-2.0; parks ODbL-1.0",
+      "role": "MODERN_REFERENCE_NOT_1900_RECONSTRUCTION",
+      "building_bounds": [
+        0.055,
+        49.475,
+        0.185,
+        49.535
+      ],
+      "water_bounds": [
+        -0.04,
+        49.39,
+        0.55,
+        49.6
+      ],
+      "building_features": 86288,
+      "water_features": 3077,
+      "outputs": {
+        "meshes": 14,
+        "mesh_bytes": 4040707,
+        "index_bytes": 6174
+      },
+      "palette": "Offline source natures Estuaire / Retenue-bassin portuaire and installed ocean reference select coastal palette. Upstream colour transition retained; geometry and holes unchanged.",
+      "limits": "Modern port engineering does not reconstruct 1900, wartime destruction or historical rebuilding. No navigation, collision, transport capacity or formal building entities."
+    },
+    {
+      "source_id": "ign_plan_mainland_settlement_context_20261108",
+      "title": "IGN Plan generalised built-up, industrial and woodland reference",
+      "publisher": "IGN",
+      "locator": "https://www.data.gouv.fr/datasets/plan-ign",
+      "service": "https://data.geopf.fr/tms/1.0.0/PLAN.IGN/{z}/{x}/{y}.pbf",
+      "license": "Etalab-Open-Licence-2.0",
+      "role": "MODERN_GENERALISED_REFERENCE_NOT_1900",
+      "scope": "FXX source features inside finite mainland acquisition envelope and installed physical continental land. Corsica and overseas excluded; historical sovereignty unchanged.",
+      "outputs": "assets/settlements/france_context: 1063 meshes, 78563824 bytes; index 415315 bytes",
+      "limits": "No individual buildings, farms, crop production, historical urban extent or economic industry inference. Raw PBF remains outside res://."
+    },
+    {
+      "source_id": "lyon_modern_form_reference_20261108",
+      "title": "Lyon IGN BD TOPO building and water reference; OSM parks",
+      "publisher": "IGN / OpenStreetMap contributors",
+      "locator": "https://data.geopf.fr/wfs/ows",
+      "license": "IGN Etalab-Open-Licence-2.0; parks ODbL-1.0",
+      "role": "MODERN_REFERENCE_NOT_1900_RECONSTRUCTION",
+      "scope": "Buildings 4.77,45.72 to 4.90,45.81; water background 4.68,45.62 to 5.0,45.93",
+      "limits": "94342 building input features. Display heights assumed; no collision, navigation, ownership or formal building entities."
+    },
+    {
+      "source_id": "rfn_830000_plm_display_reference_20261108",
+      "title": "Paris-Lyon-Marseille historical corridor with modern RFN 830000 alignment",
+      "publisher": "SNCF / PLM / Auvergne-Rhone-Alpes regional heritage inventory",
+      "locator": "https://data.sncf.com/explore/dataset/formes-des-lignes-du-rfn/",
+      "historical_sources": [
+        "https://wikiplm.anciensreseaux.fr/index.php?title=Rapport_du_Conseil_d%E2%80%99administration_du_PLM_aux_actionnaires_du_30_avril_1858",
+        "https://patrimoine.auvergnerhonealpes.fr/dossier/IA69000240"
+      ],
+      "license": "RFN geometry ODbL-1.0; historical text not redistributed",
+      "role": "HISTORICAL_CORRIDOR_MODERN_ALIGNMENT_NOT_1900_TRACK",
+      "limits": "Later engineering remains in modern geometry. Split near the existing Lyon anchor is a display boundary, not a surveyed station or new capacity."
+    },
+    {
       "source_id": "natural_earth_coast_10m_5_1_2",
       "title": "Natural Earth physical coastline5.0.0-pre9 / land5.1.1, pinned v5.1.2",
       "publisher": "Natural Earth / NACIS; Tom Patterson and Nathaniel Vaughn Kelso",
@@ -210,6 +297,362 @@
           }
         ]
       }
+    },
+    {
+      "source_id": "osm_seine_coast_reference",
+      "title": "Modern Seine-mouth high-water coast",
+      "publisher": "© OpenStreetMap contributors",
+      "license": "ODbL-1.0",
+      "locator": "https://www.openstreetmap.org/copyright",
+      "retrieved_on": "2026-11-07",
+      "raw_path": "../offline-map-sources/seine_coast_reference/osm-coast.json",
+      "source_epoch": "modern; not 1900",
+      "ways": 116,
+      "vertices": 4548,
+      "version": "2026-11-08T06:12:22Z",
+      "access_metadata": {
+        "source_type": "PHYSICAL_REFERENCE",
+        "source_scale": "Mixed OSM source scale; accuracy unquantified",
+        "bounds_lon_lat": [
+          -0.6,
+          1.35,
+          49.15,
+          50.0
+        ],
+        "retrieved_on": "2026-11-08",
+        "historical_applicability": "Modern high-water reference, not 1900 port/coast reconstruction",
+        "data_transformation": "Directed-source polygonisation; 8m display simplification; only closed shoreline differences at real NE/OSM intersections. Acquisition-edge differences excluded."
+      },
+      "installed_closed_corrections": 33,
+      "excluded_edge_components": 2
+    },
+    {
+      "source_id": "france_major_cities_1901_display_20261108",
+      "title": "Every continental French commune above 100000 total population in 1901; bounded modern building prints",
+      "publisher": "Ministère de l’intérieur (population selection); IGN (modern geometry)",
+      "locator": "https://www.numdam.org/item/JSFS_1907__48__20_0.pdf",
+      "geometry_service": "https://data.geopf.fr/tms/1.0.0/PLAN.IGN/{z}/{x}/{y}.pbf",
+      "license": "IGN geometry Etalab-Open-Licence-2.0; population numbers transcribed, no historical text redistributed",
+      "role": "HISTORICAL_SELECTION_MODERN_FOOTPRINT_REFERENCE",
+      "cities": [
+        {
+          "id": "paris",
+          "name": "巴黎",
+          "population": 2714068,
+          "anchor": [
+            2.3522,
+            48.8566
+          ],
+          "radius_km": 10,
+          "name_en": "Paris"
+        },
+        {
+          "id": "marseille",
+          "name": "马赛",
+          "population": 491161,
+          "anchor": [
+            5.3698,
+            43.2965
+          ],
+          "radius_km": 6,
+          "name_en": "Marseille"
+        },
+        {
+          "id": "lyon",
+          "name": "里昂",
+          "population": 459099,
+          "anchor": [
+            4.8357,
+            45.764
+          ],
+          "radius_km": 5,
+          "name_en": "Lyon"
+        },
+        {
+          "id": "bordeaux",
+          "name": "波尔多",
+          "population": 256638,
+          "anchor": [
+            -0.5792,
+            44.8378
+          ],
+          "radius_km": 5,
+          "name_en": "Bordeaux"
+        },
+        {
+          "id": "lille",
+          "name": "里尔",
+          "population": 210696,
+          "anchor": [
+            3.063,
+            50.6292
+          ],
+          "radius_km": 5,
+          "name_en": "Lille"
+        },
+        {
+          "id": "toulouse",
+          "name": "图卢兹",
+          "population": 149841,
+          "anchor": [
+            1.4442,
+            43.6047
+          ],
+          "radius_km": 4,
+          "name_en": "Toulouse"
+        },
+        {
+          "id": "saint_etienne",
+          "name": "圣艾蒂安",
+          "population": 146559,
+          "anchor": [
+            4.3872,
+            45.4397
+          ],
+          "radius_km": 4,
+          "name_en": "Saint-Étienne"
+        },
+        {
+          "id": "nantes",
+          "name": "南特",
+          "population": 132990,
+          "anchor": [
+            -1.5536,
+            47.2184
+          ],
+          "radius_km": 4,
+          "name_en": "Nantes"
+        },
+        {
+          "id": "le_havre",
+          "name": "勒阿弗尔",
+          "population": 130196,
+          "anchor": [
+            0.1079,
+            49.4944
+          ],
+          "radius_km": 4,
+          "name_en": "Le Havre"
+        },
+        {
+          "id": "roubaix",
+          "name": "鲁贝",
+          "population": 124365,
+          "anchor": [
+            3.1746,
+            50.6927
+          ],
+          "radius_km": 3.5,
+          "name_en": "Roubaix"
+        },
+        {
+          "id": "rouen",
+          "name": "鲁昂",
+          "population": 116316,
+          "anchor": [
+            1.0993,
+            49.4431
+          ],
+          "radius_km": 4,
+          "name_en": "Rouen"
+        },
+        {
+          "id": "reims",
+          "name": "兰斯",
+          "population": 108385,
+          "anchor": [
+            4.0317,
+            49.2583
+          ],
+          "radius_km": 3.5,
+          "name_en": "Reims"
+        },
+        {
+          "id": "nice",
+          "name": "尼斯",
+          "population": 105109,
+          "anchor": [
+            7.262,
+            43.7102
+          ],
+          "radius_km": 4,
+          "name_en": "Nice"
+        },
+        {
+          "id": "nancy",
+          "name": "南锡",
+          "population": 102559,
+          "anchor": [
+            6.1844,
+            48.6921
+          ],
+          "radius_km": 3.5,
+          "name_en": "Nancy"
+        },
+        {
+          "id": "toulon",
+          "name": "土伦",
+          "population": 101602,
+          "anchor": [
+            5.928,
+            43.1242
+          ],
+          "radius_km": 4,
+          "name_en": "Toulon"
+        }
+      ],
+      "outputs": {
+        "resources": 770,
+        "bytes": 34440376,
+        "index_bytes": 771449
+      },
+      "limits": "Bounded modern source windows, not 1901 city limits, formal population, streets, collision or military navigation. Map prints use shared streamed R8 masks and no per-building nodes."
+    },
+    {
+      "source_id": "france_finite_coast_extensions_20261108",
+      "title": "Finite high-water corrections around selected mainland cities and Brittany",
+      "publisher": "IGN",
+      "locator": "https://data.geopf.fr/wfs/ows",
+      "license": "Etalab-Open-Licence-2.0",
+      "role": "MODERN_PHYSICAL_REFERENCE_NOT_1900_COAST",
+      "windows": [
+        {
+          "area": "brittany",
+          "source": {
+            "source_id": "ign_brittany_coast_reference",
+            "title": "Modern brittany high-water coast",
+            "publisher": "© IGN",
+            "version": "BD TOPO source read 2026-11-08",
+            "locator": "https://data.geopf.fr/wfs/ows",
+            "license": "Etalab-Open-Licence-2.0",
+            "access_metadata": {
+              "source_type": "PHYSICAL_REFERENCE",
+              "source_scale": "Mixed OSM source scale; accuracy unquantified",
+              "bounds_lon_lat": [
+                -5.3,
+                -1.6,
+                47.15,
+                49.15
+              ],
+              "retrieved_on": "2026-11-08",
+              "historical_applicability": "Modern high-water reference, not 1900 port/coast reconstruction",
+              "data_transformation": "IGN high-water lines polygonised; old admitted land labels dominant closed faces; 8m display simplification. Only closed shoreline differences replaced. Ambiguous labels and acquisition-edge differences are not invented."
+            }
+          },
+          "closed_corrections": 846,
+          "excluded_edge_components": 6,
+          "ambiguous_faces_preserved": 1
+        },
+        {
+          "area": "marseille",
+          "source": {
+            "source_id": "ign_marseille_coast_reference",
+            "title": "Modern marseille high-water coast",
+            "publisher": "© IGN",
+            "version": "BD TOPO source read 2026-11-08",
+            "locator": "https://data.geopf.fr/wfs/ows",
+            "license": "Etalab-Open-Licence-2.0",
+            "access_metadata": {
+              "source_type": "PHYSICAL_REFERENCE",
+              "source_scale": "Mixed OSM source scale; accuracy unquantified",
+              "bounds_lon_lat": [
+                4.85,
+                5.8,
+                42.95,
+                43.65
+              ],
+              "retrieved_on": "2026-11-08",
+              "historical_applicability": "Modern high-water reference, not 1900 port/coast reconstruction",
+              "data_transformation": "IGN high-water lines polygonised; old admitted land labels dominant closed faces; 8m display simplification. Only closed shoreline differences replaced. Ambiguous labels and acquisition-edge differences are not invented."
+            }
+          },
+          "closed_corrections": 106,
+          "excluded_edge_components": 6,
+          "ambiguous_faces_preserved": 4
+        },
+        {
+          "area": "nice_toulon",
+          "source": {
+            "source_id": "ign_nice_toulon_coast_reference",
+            "title": "Modern nice_toulon high-water coast",
+            "publisher": "© IGN",
+            "version": "BD CARTO V5 generalised source read 2026-11-08",
+            "locator": "https://data.geopf.fr/wfs/ows",
+            "license": "Etalab-Open-Licence-2.0",
+            "access_metadata": {
+              "source_type": "PHYSICAL_REFERENCE",
+              "source_scale": "Mixed OSM source scale; accuracy unquantified",
+              "bounds_lon_lat": [
+                5.65,
+                7.65,
+                42.95,
+                43.95
+              ],
+              "retrieved_on": "2026-11-08",
+              "historical_applicability": "Modern high-water reference, not 1900 port/coast reconstruction",
+              "data_transformation": "IGN high-water lines polygonised; old admitted land labels dominant closed faces; 8m display simplification. Only closed shoreline differences replaced. Ambiguous labels and acquisition-edge differences are not invented."
+            }
+          },
+          "closed_corrections": 115,
+          "excluded_edge_components": 2,
+          "ambiguous_faces_preserved": 1
+        },
+        {
+          "area": "gironde",
+          "source": {
+            "source_id": "ign_gironde_coast_reference",
+            "title": "Modern gironde high-water coast",
+            "publisher": "© IGN",
+            "version": "BD CARTO V5 generalised source read 2026-11-08",
+            "locator": "https://data.geopf.fr/wfs/ows",
+            "license": "Etalab-Open-Licence-2.0",
+            "access_metadata": {
+              "source_type": "PHYSICAL_REFERENCE",
+              "source_scale": "Mixed OSM source scale; accuracy unquantified",
+              "bounds_lon_lat": [
+                -1.4,
+                -0.25,
+                44.6,
+                45.7
+              ],
+              "retrieved_on": "2026-11-08",
+              "historical_applicability": "Modern high-water reference, not 1900 port/coast reconstruction",
+              "data_transformation": "IGN high-water lines polygonised; old admitted land labels dominant closed faces; 8m display simplification. Only closed shoreline differences replaced. Ambiguous labels and acquisition-edge differences are not invented."
+            }
+          },
+          "closed_corrections": 116,
+          "excluded_edge_components": 3,
+          "ambiguous_faces_preserved": 0
+        },
+        {
+          "area": "loire",
+          "source": {
+            "source_id": "ign_loire_coast_reference",
+            "title": "Modern loire high-water coast",
+            "publisher": "© IGN",
+            "version": "BD CARTO V5 generalised source read 2026-11-08",
+            "locator": "https://data.geopf.fr/wfs/ows",
+            "license": "Etalab-Open-Licence-2.0",
+            "access_metadata": {
+              "source_type": "PHYSICAL_REFERENCE",
+              "source_scale": "Mixed OSM source scale; accuracy unquantified",
+              "bounds_lon_lat": [
+                -2.7,
+                -1.1,
+                46.8,
+                47.6
+              ],
+              "retrieved_on": "2026-11-08",
+              "historical_applicability": "Modern high-water reference, not 1900 port/coast reconstruction",
+              "data_transformation": "IGN high-water lines polygonised; old admitted land labels dominant closed faces; 8m display simplification. Only closed shoreline differences replaced. Ambiguous labels and acquisition-edge differences are not invented."
+            }
+          },
+          "closed_corrections": 402,
+          "excluded_edge_components": 6,
+          "ambiguous_faces_preserved": 4
+        }
+      ],
+      "limits": "Two existing physical shards recompiled. Unclosed acquisition-edge differences and ambiguous faces retained from the old reference. Other French coast remains at previous precision."
     }
   ],
   "scope": "Content/Presentation only; no new sovereignty/controller/admin/land/simulation facts",
@@ -218,7 +661,8 @@
     "river": "Same thirty stable IDs,1:10M River records only, no forced joins or interpolation; degenerate display-only segments excluded",
     "lake": "Same19 stable IDs, topology-preserving offline1500m/300m from natural1:10M Lake/Alkaline Lake and explicit validCaspian component",
     "difference": "Offline exact physical-land vs existing display footprint differences, finite topology-preserving LOD and constrained display triangles. Original source/canonical political geometry unchanged. Triangles are a mesh, not adjacent formal polygon units.",
-    "residency": "24 coarse packets and314 nonempty fine packets within existing Content/evidence gate and static batches; onlyneededLOD; fixed bounds are invisible display packing, not administrative geometry"
+    "residency": "24 coarse packets and314 nonempty fine packets within existing Content/evidence gate and static batches; onlyneededLOD; fixed bounds are invisible display packing, not administrative geometry",
+    "seine_coast_20261107": "27 closed NE/OSM shoreline differences, source intersections only; 8m display simplification. Two edge-touching components unchanged. Land/water/coast/query and original historical intersections compiled only in two medium shards. One source river retains raw geometry and clips display at the installed sea."
   },
   "limitations": [
     "Modern1:10M reference is not10metre surveying or1900 shoreline/channel evidence. Provider accuracy not quantified.",
@@ -226,7 +670,8 @@
     "Complete raw Ocean polygon invalid and excluded; selected independentCaspian component valid. No make_valid or silent source repair.",
     "Physical difference inherits existingCShapes2.0 CC BY-NC-SA4.0. Noncommercial/share-alike restriction retained; Natural Earth itself public domain.",
     "1900 admission interval unchanged; later historical city/rail snapshots not invented.",
-    "APUR2021 cataloguep16 remains REFERENCE_ONLY/research. Online consultability is not redistribution permission; unrelated modernODbL does not license historical rasters. AdminBLOCKED_SOURCE."
+    "APUR2021 cataloguep16 remains REFERENCE_ONLY/research. Online consultability is not redistribution permission; unrelated modernODbL does not license historical rasters. AdminBLOCKED_SOURCE.",
+    "French coast refinement is incomplete. This finite Seine-mouth patch is modern high-water reference; acquisition-edge components and historical port engineering remain unresolved. No sovereignty inferred from new physical land."
   ],
   "new_settlements": [
     {

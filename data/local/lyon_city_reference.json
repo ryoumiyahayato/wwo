@@ -1,0 +1,21 @@
+{
+  "id":"lyon_modern_cartographic_reference",
+  "name":"里昂 · 现代形态参考",
+  "name_en":"Lyon · modern form reference",
+  "map_name":"里昂",
+  "scale_grade":6,
+  "precision":"MODERN_BUILDING_AND_WATER_REFERENCE_NOT_1900_RECONSTRUCTION",
+  "minimum_mpp":8.0,
+  "maximum_mpp":96.0,
+  "anchor":[4.8357,45.764],
+  "ground_mode":"cartographic_plane",
+  "presentation_index":"res://assets/settlements/lyon_reference/index.json",
+  "overview_bounds":[4.77,45.72,4.90,45.81],
+  "content_bounds":[4.77,45.72,4.90,45.81],
+  "background_bounds":[4.68,45.62,5.0,45.93],
+  "source":{"url":"https://data.geopf.fr/wfs/ows","publisher":"IGN BD TOPO","footprints":94342,"license":"Etalab-Open-Licence-2.0","basis":"MODERN_REFERENCE_NOT_1900"},
+  "caption":"里昂 · 现代建筑轮廓参考",
+  "water_reference_note_zh":"建筑、水面和绿地为现代参考，显示高度为假设。",
+  "attribution":"建筑、水面：IGN BD TOPO · 开放许可2.0；绿地：© OpenStreetMap contributors · ODbL",
+  "districts":[{"name":"里昂","anchor":[4.8357,45.764],"importance":2}]
+}

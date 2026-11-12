@@ -1,0 +1,34 @@
+{
+  "id": "iberian_settlement_context",
+  "role": "NATIONAL_CARTOGRAPHIC_CONTEXT",
+  "name": "伊比利亚半岛 · 建成区与城市轮廓",
+  "map_name": "伊比利亚建成区",
+  "precision": "MODERN_OSM_GENERALISED_REFERENCE_NOT_1900_OR_WORLD_BUILDINGS",
+  "anchor": [
+    -3.1,
+    39.95
+  ],
+  "content_bounds": [
+    -9.7,
+    35.9,
+    3.5,
+    44
+  ],
+  "overview_bounds": [
+    -9.7,
+    35.9,
+    3.5,
+    44
+  ],
+  "ground_mode": "cartographic_context",
+  "presentation_index": "res://assets/settlements/iberian_context/index.json",
+  "maximum_mpp": 1800,
+  "cache_budget_bytes": 8388608,
+  "attribution": "© OpenStreetMap contributors · ODbL-1.0 · OpenFreeMap / OpenMapTiles · Obra derivada de BTN · CC BY 4.0 · ign.es",
+  "source": {
+    "url": "https://openfreemap.org/quick_start/",
+    "publisher": "OpenStreetMap contributors / OpenFreeMap / OpenMapTiles",
+    "license": "ODbL-1.0",
+    "basis": "MODERN_REFERENCE_NOT_1900"
+  }
+}

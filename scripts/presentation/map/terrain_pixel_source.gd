@@ -80,7 +80,7 @@ static func inspect(relief: MapRelief, batch: Dictionary, ll: Vector2, mpp: floa
 	var total := Vector3.ZERO
 	var sum := 0.0
 	var strength := 0.0
-	for slot: String in ["base","secondary","0","1","2","3"]:
+	for slot: String in ["base","secondary","0","1","2","3","4","5"]:
 		var detail := slot not in ["base","secondary"]
 		var prefix := "surface_"+slot if not detail else "surface_tile_"+slot
 		var texture := material.get_shader_parameter(prefix) as Texture2D

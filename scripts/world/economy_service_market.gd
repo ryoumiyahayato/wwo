@@ -6,6 +6,7 @@ const Resident = preload("res://scripts/world/economy_resident_services.gd")
 const CONTRACT_FIELDS: Array[String]=["id","action_id","actor","client","payer","provider","provider_site","offer_id","facility_id","kind","source_site","good","quantity","periods_count","asset_id","accepted_minute","started_minute","end_minute","last_boundary","repair_result_minute","status","reason","paused","total","earned","paid","released","charge_numerator","work","material_sources","material_minute","custody_events","periods","payments","permission","supply_permission"]
 var _resident: Resident=Resident.new()
 const FORMAT := "economy_service_market_v1"
+const SPOILAGE_DENOMINATOR := 1440 * 1000
 var contracts: Dictionary = {}
 var changes: Dictionary = {}
 var error: String = ""
@@ -41,10 +42,16 @@ static func valid_configuration(settings: Dictionary, spec: Dictionary) -> bool:
 		if not value[key] is Array or value[key].size()>64: return false
 	var facilities: Dictionary={}
 	for f: Variant in value["facilities"]:
-		if not f is Dictionary or not FormalLedgerState.exact_fields(f,["id","provider","site_id","kind","capacity","unit","good_units","shared_storage_id","basis"]) or not f["id"] is String or facilities.has(f["id"]) or not spec["sites"].has(f["site_id"]) or spec["sites"][f["site_id"]]["firm_id"]!=f["provider"] or f["kind"] not in ["STORAGE","REPAIR","DINING","HAIRCUT","ANNOUNCEMENT"] or not FormalLedgerState.valid_amount(f["capacity"]) or f["capacity"]<1 or f["capacity"]>1000000 or not f["unit"] is String or f["unit"].is_empty() or not f["good_units"] is Dictionary or not f["shared_storage_id"] is String or f["basis"]!="EXPLICIT_DEVELOPMENT_SERVICE_FACILITY": return false
+		if not f is Dictionary or not EconomySliceConfig._fields(f,["id","provider","site_id","kind","capacity","unit","good_units","shared_storage_id","basis"],["spoilage"]) or not f["id"] is String or facilities.has(f["id"]) or not spec["sites"].has(f["site_id"]) or spec["sites"][f["site_id"]]["firm_id"]!=f["provider"] or f["kind"] not in ["STORAGE","REPAIR","DINING","HAIRCUT","ANNOUNCEMENT"] or not FormalLedgerState.valid_amount(f["capacity"]) or f["capacity"]<1 or f["capacity"]>1000000 or not f["unit"] is String or f["unit"].is_empty() or not f["good_units"] is Dictionary or not f["shared_storage_id"] is String or f["basis"]!="EXPLICIT_DEVELOPMENT_SERVICE_FACILITY": return false
 		for good: String in f["good_units"]:
 			if good not in spec["good_ids"] or not FormalLedgerState.valid_amount(f["good_units"][good]) or f["good_units"][good]<1 or f["good_units"][good]>1000: return false
 		if f["kind"]!="STORAGE" and (not f["good_units"].is_empty() or not f["shared_storage_id"].is_empty()): return false
+		if f.has("spoilage"):
+			if f["kind"]!="STORAGE" or not f["spoilage"] is Dictionary or f["spoilage"].is_empty(): return false
+			for good: String in f["spoilage"]:
+				var rates: Variant = f["spoilage"][good]
+				if not f["good_units"].has(good) or not rates is Dictionary or not FormalLedgerState.exact_fields(rates,["staffed","unstaffed"]): return false
+				if not FormalLedgerState.valid_amount(rates["staffed"]) or not FormalLedgerState.valid_amount(rates["unstaffed"]) or rates["staffed"]>rates["unstaffed"] or rates["unstaffed"]>1000: return false
 		if not f["shared_storage_id"].is_empty():
 			var found:=false
 			for shared: Dictionary in settings.get("transport_facilities",[]):
@@ -171,7 +178,7 @@ func available(id: String) -> int:
 	var used:=0
 	for key: String in _by_facility.get(id,{}): used+=_occupied(contracts[key])
 	var amount:=maxi(0,int(f["capacity"])-used)
-	if not f["shared_storage_id"].is_empty(): amount=mini(amount,int(floor(e._shared._node_available(f["shared_storage_id"],e._world.game_clock.total_minutes()))))
+	if not f["shared_storage_id"].is_empty(): amount=mini(amount,int(floor(e._shared.storage_space(f["shared_storage_id"],e._world.game_clock.total_minutes()))))
 	return amount
 
 func known(actor: String, offer: String, minute: int) -> bool:
@@ -392,12 +399,34 @@ func _storage(c: Dictionary, used: Dictionary, now: int) -> void:
 	if staffed:
 		c["charge_numerator"]+=units*int(o["price"])
 		c["earned"]=int(c["charge_numerator"])/1440
+	_spoil_stock(c,units,staffed,now)
 	c["periods"].append({"from":c["last_boundary"],"to":until,"minute":now,"unit_minutes":units,"staffed":staffed,"earned_delta":int(c["earned"])-previous})
 	c["last_boundary"]=until
 	c["reason"]="" if staffed else "PERIOD_UNSTAFFED_NO_NEW_FEE"
 	if until==c["end_minute"] or _quantity_at(c,now)==0:
 		c["status"]="COMPLETED" if _quantity_at(c,now)==0 else "EXPIRED_CUSTODY"
 		_release_future(c,"end:"+c["id"])
+
+func _spoil_stock(c: Dictionary, units: int, staffed: bool, now: int) -> void:
+	var rates: Dictionary = _facilities[c["facility_id"]].get("spoilage",{}).get(c["good"],{})
+	if rates.is_empty() or units<=0: return
+	# The contract already records the exposure of each day, including withdrawals.
+	# Retain its fractional loss without a second saved counter.
+	var remainder := 0
+	for period: Dictionary in c["periods"]:
+		var rate := int(rates["staffed" if period["staffed"] else "unstaffed"])
+		remainder = (remainder+int(period["unit_minutes"])*rate)%SPOILAGE_DENOMINATOR
+	var e:=economy()
+	var location := "SERVICE|"+str(c["id"])
+	var rate := int(rates["staffed" if staffed else "unstaffed"])
+	var amount := mini(int(e._lots.quantity_at(location,c["good"])),(remainder+units*rate)/SPOILAGE_DENOMINATOR)
+	if amount<=0: return
+	var actor: String = e.firm_manager_at(c["provider"],now)
+	var rows: Array[Dictionary] = e._lots.selection(location,c["good"],amount)
+	if not e._lots.ready(rows): return
+	var report: Dictionary = e._accept(actor,e._auto_command(actor,"report_cargo_loss",{"portions":rows,"basis":"CONFIGURED_WAREHOUSE_SPOILAGE","process":"STORAGE_UNIT_MINUTE_EXPOSURE"},c["id"]),actor!=e._world.player_state.player_id())
+	if report.get("accepted",false) and report.get("quantity",0)>0:
+		e._accept(actor,e._auto_command(actor,"notify_cargo_loss",{"loss_id":report["loss_id"],"recipient":c["client"],"delivery_minute":now,"basis":"WAREHOUSE_CUSTODY_NOTICE"},c["id"]),actor!=e._world.player_state.player_id())
 
 func unit_minutes(c: Dictionary, begin: int, end: int) -> int:
 	var cursor:=begin

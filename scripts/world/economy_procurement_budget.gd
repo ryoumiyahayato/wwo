@@ -7,6 +7,7 @@ var subject_aliases: Dictionary = {}
 var claims: Dictionary = {}
 var settlements: Dictionary = {}
 var _used: Dictionary = {} # Derived from claims, never saved.
+var _lot_totals: Dictionary = {} # Derived contract IDs using tail cancellation rounding.
 
 static func valid_rules(raw: Variant) -> bool:
 	if not raw is Array or raw.size() > 256: return false
@@ -36,7 +37,7 @@ func plan(subject: String, currency: String, category: String, amount: int, minu
 		return {"ok": true, "rule_id": r["id"], "subject": subject, "root_authority": r["root_authority"], "denomination": currency, "category": category, "amount": amount, "minute": minute}
 	return {"ok": not covered, "reason": "NO_EXPLICIT_BUDGET_WINDOW" if covered else "UNCONFIGURED_BUDGET_POLICY"}
 
-func commit(order_id: String, components: Array[Dictionary]) -> bool:
+func commit(order_id: String, components: Array[Dictionary], lot_total: bool = false) -> bool:
 	if claims.has(order_id): return false
 	var prepared: Array[Dictionary] = []
 	var additional: Dictionary = {}
@@ -49,6 +50,7 @@ func commit(order_id: String, components: Array[Dictionary]) -> bool:
 		additional[p["rule_id"]] = next
 		prepared.append({"rule_id": p["rule_id"], "category": p["category"], "total": p["amount"], "spent": 0, "released": 0})
 	claims[order_id] = prepared
+	if lot_total: _lot_totals[order_id] = true
 	for id: String in additional: _used[id] = int(_used.get(id, 0))+int(additional[id])
 	return true
 
@@ -61,7 +63,7 @@ func change_ready(order_id: String, cumulative_delivered: int, cumulative_cancel
 	if not FormalLedgerState.valid_amount(quantity) or quantity <= 0 or not FormalLedgerState.valid_amount(cumulative_delivered) or not FormalLedgerState.valid_amount(cumulative_cancelled) or cumulative_delivered > quantity-cumulative_cancelled: return false
 	for c: Dictionary in claims.get(order_id, []):
 		var spent := share(c["total"], cumulative_delivered, quantity)
-		var released := share(c["total"], cumulative_cancelled, quantity)
+		var released := cancel_share(order_id, c["total"], cumulative_cancelled, quantity)
 		if spent < int(c["spent"]) or released < int(c["released"]): return false
 	return true
 
@@ -70,7 +72,7 @@ func settle(event_id: String, order_id: String, delivered: int, cancelled: int, 
 	if settlements.has(event_id): return settlements[event_id] == fact
 	if not change_ready(order_id, delivered, cancelled, quantity): return false
 	for c: Dictionary in claims.get(order_id, []):
-		var released := share(c["total"], cancelled, quantity)
+		var released := cancel_share(order_id, c["total"], cancelled, quantity)
 		_used[c["rule_id"]] = int(_used.get(c["rule_id"], 0))-(released-int(c["released"]))
 		c["spent"] = share(c["total"], delivered, quantity)
 		c["released"] = released
@@ -83,6 +85,9 @@ func snapshot() -> Dictionary:
 func restore(raw: Variant, orders: Dictionary, transactions: FormalLedgerState, extra_contracts: Dictionary = {}) -> bool:
 	orders = orders.duplicate(true)
 	orders.merge(extra_contracts, false)
+	_lot_totals.clear()
+	for id: String in orders:
+		if orders[id].has("goods_amount"): _lot_totals[id] = true
 	if raw == null: return rules.is_empty()
 	if not raw is Dictionary or not FormalLedgerState.exact_fields(raw, ["claims", "settlements"]) or not raw["claims"] is Dictionary or not raw["settlements"] is Dictionary: return false
 	var used: Dictionary = {}
@@ -98,7 +103,7 @@ func restore(raw: Variant, orders: Dictionary, transactions: FormalLedgerState, 
 			var p := expected[i] as Dictionary
 			if not c is Dictionary or not FormalLedgerState.exact_fields(c, ["rule_id", "category", "total", "spent", "released"]): return false
 			var r := rule(str(c["rule_id"]))
-			if r.is_empty() or c["rule_id"] != p["rule_id"] or c["category"] != p["category"] or c["total"] != p["amount"] or not FormalLedgerState.valid_amount(c["total"]) or c["spent"] != share(c["total"], o["delivered"], o["quantity"]) or c["released"] != share(c["total"], o["cancelled"], o["quantity"]): return false
+			if r.is_empty() or c["rule_id"] != p["rule_id"] or c["category"] != p["category"] or c["total"] != p["amount"] or not FormalLedgerState.valid_amount(c["total"]) or c["spent"] != share(c["total"], o["delivered"], o["quantity"]) or c["released"] != cancel_share(id, c["total"], o["cancelled"], o["quantity"]): return false
 			used[r["id"]] = int(used.get(r["id"], 0))+int(c["total"])-int(c["released"])
 	for r: Dictionary in rules:
 		if int(used.get(r["id"], 0)) > int(r["limit"]): return false
@@ -120,7 +125,7 @@ func order_components(o: Dictionary) -> Array[Dictionary]:
 	var categories: Dictionary = {}
 	if o["kind"] in ["SERVICE","LEASE","CAPITAL_ASSET"]: categories[o["category"]] = int(o["quantity"])
 	if o["kind"]=="CAPITAL_FREIGHT": categories[o["category"]]=int(o["budget_amount"])
-	if o["kind"] == "SALE": categories["goods:"+str(o["good"])] = int(o["price"])*int(o["quantity"])
+	if o["kind"] == "SALE": categories["goods:"+str(o["good"])] = int(o.get("goods_amount", int(o["price"])*int(o["quantity"])))
 	for leg: Dictionary in o["route_legs"]:
 		var category := "freight:"+str(leg["edge_id"])
 		categories[category] = int(categories.get(category, 0))+int(leg["freight_per_unit"])*int(o["quantity"])
@@ -134,6 +139,9 @@ func order_components(o: Dictionary) -> Array[Dictionary]:
 
 static func change_shape(f: Dictionary, o: Dictionary) -> bool:
 	return FormalLedgerState.valid_amount(f["delivered"]) and FormalLedgerState.valid_amount(f["cancelled"]) and f["quantity"] == o["quantity"] and int(f["delivered"]) <= int(o["delivered"]) and int(f["cancelled"]) <= int(o["cancelled"])
+
+func cancel_share(order_id: String, total: int, quantity: int, contract_quantity: int) -> int:
+	return total - share(total, contract_quantity - quantity, contract_quantity) if _lot_totals.has(order_id) else share(total, quantity, contract_quantity)
 
 static func share(total: int, quantity: int, contract_quantity: int) -> int:
 	# Reuse Ledger's exact rational arithmetic; total*quantity may overflow int64.

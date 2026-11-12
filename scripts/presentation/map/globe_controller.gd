@@ -38,6 +38,7 @@ var _drag_moved: bool = false
 var _bearing_dragging: bool = false
 var _bearing_anchor := Vector3.ZERO
 var _bearing_pixel := Vector2.ZERO
+var _market_tween: Tween
 
 func begin_bearing(unit: Vector3, pixel: Vector2) -> void:
 	if unit.is_zero_approx():
@@ -79,6 +80,7 @@ func handle_input(event: InputEvent, globe_rect: Rect2, picked_unit: Vector3 = V
 		var wheel := button.button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN]
 		var over_view := Rect2(Vector2.ZERO,world_view.get("size",globe_rect.size)).has_point(button.position)
 		if button.pressed and (globe_rect.has_point(button.position) or wheel and over_view):
+			cancel_market_focus()
 			initial_framing_pending = false
 			if button.button_index == MOUSE_BUTTON_WHEEL_UP or button.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 				if region_camera.active:
@@ -131,7 +133,52 @@ func _process(delta: float) -> void:
 		set_process(false)
 
 func camera_motion_active() -> bool:
-	return _dragging or _bearing_dragging or is_processing()
+	return _dragging or _bearing_dragging or is_processing() or (_market_tween!=null and _market_tween.is_running())
+
+func cancel_market_focus() -> void:
+	if _market_tween!=null:
+		_market_tween.kill();_market_tween=null
+
+## One UI request per scope change. The same full-screen camera and original
+## WORLD/REGION/CITY handoff remain in charge; commodity changes never call it.
+func focus_market_view(unit: Vector3, pixel: Vector2, target_scale: float, viewport_size: Vector2, evaluate_scale: Callable) -> void:
+	if unit.is_zero_approx(): return
+	cancel_market_focus();suspend_motion();initial_framing_pending=false
+	var center := viewport_size*.5
+	var base_radius := minf(viewport_size.y/2.55,viewport_size.x*.49)
+	var from_scale := region_camera.km_per_pixel if region_camera.active else RegionProjection.EARTH_RADIUS_KM/(base_radius*zoom)
+	var start := region_camera.unit_at(center) if region_camera.active else _orientation.inverse()*Vector3.BACK
+	if start.is_zero_approx(): start=unit
+	var angle := region_camera.bearing if region_camera.active else RegionProjection.world_bearing(start,orientation())
+	if region_camera.active:
+		var geographic := RegionProjection.frame(RegionProjection.lon_lat(start))
+		var north := region_camera.project((start+geographic.y*.0001).normalized())-region_camera.project(start)
+		angle=atan2(north.x,-north.y)
+	region_camera.leave_local()
+	_market_tween=create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_method(func(t: float) -> void:
+		var scale := exp(lerpf(log(from_scale),log(target_scale),t))
+		var anchor := start.slerp(unit,t).normalized()
+		var at := center.lerp(pixel,t)
+		var heading := lerp_angle(angle,0.0,t)
+		if region_camera.active:
+			# Rebase this same azimuthal chart at its observed anchor. Geographic
+			# north, rather than a previous country's pan frame, defines the view.
+			region_camera.tangent_frame=RegionProjection.frame(RegionProjection.lon_lat(anchor))
+			region_camera.km_per_pixel=scale
+			region_camera.origin=at
+			region_camera.bearing=heading
+		else:
+			zoom=clampf(RegionProjection.EARTH_RADIUS_KM/(base_radius*scale),MIN_ZOOM,MAX_ZOOM)
+			var frame := RegionProjection.frame(RegionProjection.lon_lat(anchor)).transposed()
+			_orientation=(Quaternion(Vector3.BACK,-heading)*frame.get_rotation_quaternion()).normalized()
+			var xy := (at-center)/(base_radius*zoom)
+			xy=xy.limit_length(.8)
+			var direction := Vector3(xy.x,-xy.y,sqrt(maxf(0.0,1.0-xy.length_squared())))
+			_orientation=(Quaternion(_orientation*anchor,direction)*_orientation).normalized()
+		view_changed.emit()
+		if evaluate_scale.is_valid(): evaluate_scale.call()
+	,0.0,1.0,.85)
 
 func zoom_world_at(pixel: Vector2, factor: float, unit: Vector3, view: Dictionary) -> void:
 	zoom = clampf(zoom*factor,MIN_ZOOM,MAX_ZOOM)
@@ -193,7 +240,7 @@ func leave_local() -> void:
 	view_changed.emit()
 
 func offset_region(delta: Vector2) -> void:
-	region_camera.origin += delta
+	region_camera.pan(delta,region_camera.viewport_extent)
 	view_changed.emit()
 
 func suspend_motion() -> void:
@@ -231,13 +278,12 @@ func focus(anchor: Vector3) -> void:
 	suspend_motion()
 	region_camera.leave_local()
 	region_camera.active = false
-	var viewed_anchor := _orientation * anchor.normalized()
-	_orientation = (Quaternion(viewed_anchor, Vector3.BACK) * _orientation).normalized()
+	_orientation=RegionProjection.frame(RegionProjection.lon_lat(anchor.normalized())).transposed().get_rotation_quaternion().normalized()
 	zoom = maxf(zoom, 1.55)
 	view_changed.emit()
 
 func set_map_mode(mode: String) -> void:
-	if mode in ["political", "geographic", "economic", "fulfillment", "shortage"] and mode!=map_mode:
+	if mode in ["political", "geographic", "economic", "military", "fulfillment", "shortage"] and mode!=map_mode:
 		map_mode = mode
 		if mode in ["fulfillment","shortage"]: economic_mode = mode
 		appearance_changed.emit()

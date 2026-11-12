@@ -1,0 +1,17 @@
+{
+  "id":"benelux_settlement_context",
+  "role":"NATIONAL_CARTOGRAPHIC_CONTEXT",
+  "name":"比荷卢 · 建成区与城市轮廓参考",
+  "map_name":"比荷卢建成区",
+  "precision":"MODERN_OSM_GENERALISED_REFERENCE_NOT_1900_OR_WORLD_BUILDINGS",
+  "anchor":[4.8,51.5],
+  "content_bounds":[2.2,49.2,7.7,54.0],
+  "overview_bounds":[2.2,49.2,7.7,54.0],
+  "ground_mode":"cartographic_context",
+  "presentation_index":"res://assets/settlements/benelux_context/index.json",
+  "maximum_mpp":1800.0,
+  "cache_budget_bytes":8388608,
+  "building_ground_handoff":true,
+  "attribution":"© OpenStreetMap contributors · ODbL-1.0 · OpenFreeMap / OpenMapTiles",
+  "source":{"url":"https://openfreemap.org/quick_start/","publisher":"OpenStreetMap contributors / OpenFreeMap / OpenMapTiles","license":"ODbL-1.0","basis":"MODERN_REFERENCE_NOT_1900"}
+}
