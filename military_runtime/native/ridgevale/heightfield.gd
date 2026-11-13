@@ -8,7 +8,11 @@ const HEIGHT_FILE := "res://assets/terrain/region_slice/ridgevale/assets/height_
 var heights := PackedFloat32Array()
 var valid := false
 
-func _init() -> void:
+func _init(validated_samples: PackedFloat32Array = PackedFloat32Array()) -> void:
+	if validated_samples.size() == WIDTH * WIDTH:
+		heights = validated_samples
+		valid = true
+		return
 	var file := FileAccess.open(HEIGHT_FILE, FileAccess.READ)
 	if file == null or file.get_length() != WIDTH * WIDTH * 4:
 		push_error("Ridgevale heightfield missing or incorrect byte count")
