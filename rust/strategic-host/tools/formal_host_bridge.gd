@@ -7,6 +7,8 @@ const UILocale = preload("res://scripts/presentation/ui/ui_locale.gd")
 const RustCharacter = preload("res://scripts/formal/formal_rust_character.gd")
 var folder := ""
 var clock_ack := 0
+var tick_ack := 0
+var rust_clock := false
 var offset := 0
 var published := ""
 var finance_page := 0
@@ -31,6 +33,7 @@ func _initialize() -> void:
 	for arg: String in args:
 		if arg.begins_with("--formal-bridge="): folder=arg.trim_prefix("--formal-bridge=")
 		if arg=="--rust-menu": lobby_enabled=true
+		if arg=="--rust-clock": rust_clock=true
 	if folder.is_empty():
 		push_error("Pass the bridge directory with --formal-bridge")
 		quit(2)
@@ -49,10 +52,12 @@ func _poll() -> void:
 		return
 	var app := current_scene as FormalWorldApplication
 	if app==null or app._world==null: return
+	if rust_clock and not app.time_control.get_node("ClockTimer").is_stopped():
+		app.time_control.get_node("ClockTimer").stop()
 	_consume(app)
 	var shell := app.main_shell
 	var next_training := _training_phase(app)
-	var observed := [app._world.get_instance_id(), app._world.game_clock.total_minutes(), app.time_control.paused,
+	var observed := [app._world.get_instance_id(), app._world.game_clock.total_minutes(), app.time_control.paused, tick_ack,
 		app.time_control.speed, app.map_controller.selected_polity_id, shell._message_sequence, shell._slot_mode,
 		shell._slot_error, finance_page, offset, shell.current_page, training_open,next_training,app._departure_target,app._save_pending,
 		shell._confirmation.get("kind", ""), shell.status_message]
@@ -228,6 +233,16 @@ func _dispatch(app: FormalWorldApplication, request: Dictionary) -> void:
 			var speed := int(request.get("speed",0))
 			if speed in [0,1,2,4]: app._on_action_requested("time:%d" % speed)
 			clock_ack = int(request.get("serial",0))
+		"clock_tick":
+			var serial := int(request.get("serial",0))
+			if not rust_clock or serial <= tick_ack: return
+			tick_ack = serial
+			var minutes := int(request.get("minutes",0))
+			if not app.time_control.paused and not app._leaving and minutes in [15,30,60] \
+					and str(app._world.get_instance_id()) == request.get("world") \
+					and app._world.game_clock.total_minutes() == int(request.get("expected_minute",-1)) \
+					and app.time_control.speed == int(request.get("speed",-1)):
+				app._advance_world(minutes)
 		"host_action":
 			var action := str(request.get("action",""))
 			if lobby_enabled and action in ["system:main_menu","system:quit","departure:cancel","departure:save","departure:discard"]:
@@ -326,6 +341,7 @@ func _snapshot(app: FormalWorldApplication) -> Dictionary:
 	return {"schema":1,"date":{"year":date.year,"month":date.month,"day":date.day},"session":{"player":player,
 		"polity":app.map_controller.player_polity_id,"coordinates":place.get("lon_lat",[]),"place":str(place.get("place_id","")),
 		"clock_ack":clock_ack,"hour":date.hour,"minute":date.minute,"total_minutes":world.game_clock.total_minutes(),"paused":app.time_control.paused,"speed":app.time_control.speed,
+		"rust_clock":{"world":str(world.get_instance_id()),"tick_ack":tick_ack} if rust_clock else null,
 		"finance":{"summary":cash_text,"page":finance_page,"more":receipts.size()>count,"rows":rows},
 		"technology":{"country":"法兰西" if country==Pilot.FRANCE else str(Pilot.COUNTRIES.get(country,"本国")),
 			"foundation":_foundation(country),"public_country":str(Pilot.COUNTRIES.get(public,"")) if public!=country else "",

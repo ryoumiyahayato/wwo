@@ -1,5 +1,9 @@
 use std::{env, fs::{self, File, OpenOptions}, io, os::windows::process::CommandExt,
     path::{Path, PathBuf}, process::{Child, Command}, thread, time::{Duration, Instant, SystemTime, UNIX_EPOCH}};
+use crate::{formal_ui::Session, state::Request};
+use wwo_map_lab::formal_clock::TimeControl;
+
+const TICK_INTERVAL: Duration = Duration::from_millis(250);
 
 pub struct DesktopSession {
     pub state: PathBuf,
@@ -8,6 +12,10 @@ pub struct DesktopSession {
     control: PathBuf,
     child: Child,
     _slot_lock: File,
+    clock_world: String,
+    tick_serial: u64,
+    awaiting_tick: bool,
+    next_tick: Instant,
 }
 
 impl DesktopSession {
@@ -43,14 +51,15 @@ impl DesktopSession {
         let control = dir.join("godot-control.json");
         let child = Command::new(godot).current_dir(&project).arg("--path").arg(&project)
             .arg("--script").arg(script).arg("--log-file").arg(dir.join("godot.log"))
-            .args(["--", "--dev-preview", "--dev-background", "--rust-menu"])
+            .args(["--", "--dev-preview", "--dev-background", "--rust-menu", "--rust-clock"])
             .arg(format!("--observe-file={}", control.display())).arg(format!("--formal-bridge={}", dir.display()))
             .env("APPDATA", &profile).env("LOCALAPPDATA", &profile).env("WWO_DEV_USER_ROOT", &profile)
             .env("WWO_FORMAL_CHARACTER_BRIDGE", &dir)
             .env_remove("WWO_DEV_RESUME").creation_flags(0x0800_0000).spawn()?;
         Ok(Self { state: dir.join("world.json"), requests: dir.join("requests.ndjson"),
             preferences: profile.join("WWO_R68_Candidate/interface_settings.cfg"), control, child,
-            _slot_lock: lock })
+            _slot_lock: lock, clock_world: String::new(), tick_serial: 0, awaiting_tick: false,
+            next_tick: Instant::now() + TICK_INTERVAL })
     }
 
     pub fn poll(&mut self) {
@@ -61,6 +70,42 @@ impl DesktopSession {
             let marker = self.state.with_file_name("bridge-exited");
             if !marker.exists() { let _ = fs::write(marker, status.to_string()); }
         }
+    }
+
+    pub fn tick_clock(&mut self, session: Option<&Session>, now: Instant) -> io::Result<()> {
+        let Some((session, clock)) = session.and_then(|s| s.rust_clock.as_ref().map(|clock| (s, clock))) else {
+            self.clock_world.clear();
+            self.awaiting_tick = false;
+            return Ok(());
+        };
+        if self.clock_world != clock.world {
+            self.clock_world.clone_from(&clock.world);
+            self.awaiting_tick = false;
+            self.next_tick = now + TICK_INTERVAL;
+        }
+        if clock.tick_ack == self.tick_serial {
+            self.awaiting_tick = false;
+        }
+        if session.paused {
+            self.next_tick = now + TICK_INTERVAL;
+            return Ok(());
+        }
+        if self.awaiting_tick || now < self.next_tick {
+            return Ok(());
+        }
+
+        let control = TimeControl { paused: session.paused, speed: i64::from(session.speed) };
+        if let Some(minutes) = control.tick() {
+            let serial = self.tick_serial + 1;
+            self.next_tick = now + TICK_INTERVAL;
+            Request::ClockTick {
+                world: &clock.world, serial, expected_minute: session.total_minutes,
+                speed: session.speed, minutes,
+            }.output(Some(&self.requests))?;
+            self.tick_serial = serial;
+            self.awaiting_tick = true;
+        }
+        Ok(())
     }
 }
 

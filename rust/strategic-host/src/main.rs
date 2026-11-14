@@ -1148,6 +1148,13 @@ impl Host {
             }
             self.observe(event_loop);
         }
+        #[cfg(windows)]
+        if let Some(desktop) = &mut self.config.desktop {
+            if let Err(error) = desktop.tick_clock(self.state.session.as_ref(), now) {
+                self.feedback = format!("游戏时钟推进请求失败：{error}");
+                self.dirty = true;
+            }
+        }
     }
 }
 impl ApplicationHandler<Completion> for Host {
