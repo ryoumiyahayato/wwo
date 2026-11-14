@@ -3,8 +3,10 @@ extends RefCounted
 ## Cross-domain boundary order only. Domain algorithms remain in their owners.
 
 signal safe_boundary
+const RustCharacter = preload("res://scripts/formal/formal_rust_character.gd")
 
 var processing: bool = false
+var rust_character_world: WeakRef
 var _economy_r1: EconomyR1Slice
 var _clock: GameClock
 var _spatial: VNextSpatialWorld
@@ -31,6 +33,10 @@ func _init(clock: GameClock, spatial: VNextSpatialWorld, economy_state: FormalWo
 
 func advance_minutes(minutes: int) -> Dictionary:
 	if processing: return _error("Formal world is already advancing")
+	var world: WorldState = rust_character_world.get_ref() as WorldState if rust_character_world != null else null
+	if world != null and world.rust_character_day != _clock.current_day():
+		var character_error := RustCharacter.settle_day(world)
+		if not character_error.is_empty(): return _error(character_error)
 	processing = true
 	var result := _advance_minutes(minutes)
 	processing = false
@@ -105,6 +111,10 @@ func _advance_minutes(minutes: int) -> Dictionary:
 			if responsibility_organization_view == null: responsibility_organization_view = FormalWorldOrganizationView.new(_organization.snapshot())
 			if not _responsibilities.review_settled_day(boundary_hour,responsibility_organization_view,_politics,FormalWorldEconomyView.new(_economy_state.read_only_country_observation_snapshot())): return _error("Organization responsibility review failed at hour %d" % boundary_hour)
 			responsibility_review_days += 1
+			var world: WorldState = rust_character_world.get_ref() as WorldState if rust_character_world != null else null
+			if world != null:
+				var character_error := RustCharacter.settle_day(world)
+				if not character_error.is_empty(): return _error(character_error)
 		settled_through_hour = boundary_hour
 
 	if not _clock.advance_minutes(target_total_minutes - _clock.total_minutes()):

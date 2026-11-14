@@ -1,5 +1,6 @@
 class_name FormalWorldApplication
 extends Control
+const RustCharacter = preload("res://scripts/formal/formal_rust_character.gd")
 const EconomicText = preload("res://scripts/presentation/ui/formal_economic_text.gd")
 ## Scene assembly and UI action dispatch. Domain facts remain in their owners.
 
@@ -158,6 +159,11 @@ func _install_world(built: WorldBuildResult, focus_opening: bool = false) -> boo
 		main_shell.configure(presentation.errors,map_controller,time_control)
 		FormalWorldPresenter.show_initialization_error(main_shell,"地图资料准备失败："+"\n".join(presentation.errors))
 		return false
+	if RustCharacter.enabled() and built.world.rust_character_state.is_empty():
+		var character_error := RustCharacter.restore(built.world)
+		if not character_error.is_empty():
+			FormalWorldPresenter.show_initialization_error(main_shell, character_error)
+			return false
 	historical_content = presentation
 	_world = built.world
 	_economic_brief_key.clear()
@@ -209,6 +215,7 @@ func _advance_world(minutes: int) -> void:
 
 func _on_world_changed(change: Dictionary) -> void:
 	if change.has("success") and not bool(change["success"]):
+		time_control.paused = true
 		FormalWorldPresenter.show_advance_error(main_shell, str(change["error"]))
 		main_shell.queue_redraw()
 		return
@@ -733,8 +740,15 @@ func _on_action_requested(action: String) -> void:
 			var page := main_shell.economy_page
 			var market_id := _ui_economy.market_id_for_economic_aggregate(_ui_economy.economy_entity_for_polity(page.polity_id))
 			if personal.manages_native(person_id): market_id = page.selected_seller_site_id
-			result = personal.purchase(person_id,market_id,page.selected_commodity_id,page.quantity_milli,int(page.quote.get("unit_price",-1)),page.quote)
+			var character := RustCharacter.purchase(_world, page.quote)
+			if not character.is_empty() and not character.get("ok", false):
+				result = {"success": false, "error": str(character.error)}
+			elif not character.is_empty() and not character.payload.assessment.ready:
+				result = {"success": false, "error": "；".join(character.payload.assessment.explanation)}
+			else:
+				result = personal.purchase(person_id,market_id,page.selected_commodity_id,page.quantity_milli,int(page.quote.get("unit_price",-1)),page.quote)
 			if bool(result.get("success",false)):
+				RustCharacter.commit_purchase(_world, character)
 				main_shell.person_page.selected_commodity_id = page.selected_commodity_id
 				# One displayed quote is one purchase choice. The next purchase
 				# requires selecting an offer again, including a double click.

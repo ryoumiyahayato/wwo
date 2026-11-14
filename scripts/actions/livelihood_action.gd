@@ -10,6 +10,8 @@ static func execute(world: WorldState, person_id: String, command: Dictionary) -
 	if world == null: return {"accepted": false, "reason": "FEATURE_OFF"}
 	if person_id != world.player_state.player_id() or not world.person_overlay.has_person(person_id) or not world.person_overlay.is_alive(person_id):
 		return {"accepted": false, "reason": "NOT_CURRENT_ACTIVE_PERSON"}
+	if command.get("kind") == "work" and not world.rust_character_work_allowed:
+		return {"accepted": false, "reason": "身体状况无法承担工作"}
 	if command.get("kind") in ["terminate_legacy_wage", "cancel_legacy_arrangement", "convert_legacy_arrangement"]:
 		return world.personal_economy_state.request_livelihood_change(person_id, command)
 	if world.economy_r1 == null: return {"accepted": false, "reason": "FEATURE_OFF"}

@@ -6,8 +6,10 @@ const SAVE_PATH: String = "user://formal_world_1900.json"
 const SCHEMA_ID: String = "formal_world_simulation_v15"
 const ORGANIZATION_COMPOSITION_STATE_SCHEMA_ID: String = "formal_organization_composition_state_v1"
 const EVIDENCE_STATE_SCHEMA_ID: String = "historical_political_evidence_v1"
+const RustCharacter = preload("res://scripts/formal/formal_rust_character.gd")
 
 var error: String = ""
+var _world_ref: WeakRef
 var _save_metadata: Dictionary = {}
 var _economy_r1: EconomyR1Slice
 var _step_ref: WeakRef
@@ -43,6 +45,7 @@ var _explicit_organization_reference_injection: bool
 func _init(world: WorldState = null, person_reference_ids: Array[String] = [], place_reference_ids: Array[String] = [], explicit_reference_injection: bool = false) -> void:
 	# A menu load needs only the existing isolated candidate restoration path.
 	if world == null: return
+	_world_ref = weakref(world)
 	_economy_r1 = world.economy_r1
 	if _economy_r1 != null: _economy_r1.safe_boundary.connect(_complete_pending_save)
 	_game_clock = world.game_clock
@@ -96,6 +99,9 @@ func snapshot() -> Dictionary:
 	}
 	if _economy_r1 != null: state["economy_native"] = _economy_r1.snapshot()
 	if _person_travel != null: state["person_travel"] = _person_travel.snapshot()
+	var world := _world_ref.get_ref() as WorldState if _world_ref != null else null
+	if world != null and not world.rust_character_state.is_empty():
+		state[RustCharacter.SAVE_FIELD] = world.rust_character_state
 	return state
 
 func authoritative_fingerprint() -> String:
@@ -131,6 +137,10 @@ func restore_candidate(state: Dictionary) -> WorldBuildResult:
 		return r
 	if not _restore_candidate_state(r, state):
 		return _reject(r, r.error)
+	if state.has(RustCharacter.SAVE_FIELD) and not state[RustCharacter.SAVE_FIELD] is String:
+		return _reject(r, "Rust 人物存档字段无效。")
+	var character_error := RustCharacter.restore(r.world, state.get(RustCharacter.SAVE_FIELD))
+	if not character_error.is_empty(): return _reject(r, character_error)
 	r.simulation_step = SimulationStep.new(r.world.game_clock, r.world.spatial_world, r.world.economy_state, r.economy_simulation, r.world.organization_responsibility, r.world.organization_state, r.world.political_registry_view, r.world.personal_economy_state, r.world.economy_r1, r.world.person_travel)
 	r.persistence = FormalPersistence.new(r.world, r.organization_person_reference_ids, r.organization_place_reference_ids, r.explicit_organization_reference_injection)
 	r.persistence.bind_step(r.simulation_step)
@@ -165,7 +175,7 @@ func _restore_candidate_state(r: WorldBuildResult, state: Dictionary) -> bool:
 	if str(state.get("schema_id", "")) != SCHEMA_ID:
 		r.error = save_version_error(str(state.get("schema_id", "missing")))
 		return false
-	if state.size() != 18 + int(state.has("economy_native")) + int(state.has("person_travel")) or (state.has("economy_native") and not state["economy_native"] is Dictionary) or (state.has("person_travel") and not state["person_travel"] is Dictionary):
+	if state.size() != 18 + int(state.has("economy_native")) + int(state.has("person_travel")) + int(state.has(RustCharacter.SAVE_FIELD)) or (state.has("economy_native") and not state["economy_native"] is Dictionary) or (state.has("person_travel") and not state["person_travel"] is Dictionary):
 		r.error = "UNSUPPORTED SAVE FIELDS: personal money and employment require independent fields"
 		push_error(r.error)
 		return false
@@ -351,6 +361,9 @@ func save_to_user(slot: int = 1) -> SaveOperationResult:
 		_pending_slot = slot
 		return SaveOperationResult.fail("queued", "保存已排队，等待正式世界完成当前推进。", path)
 	var snapshot := snapshot()
+	var world := _world_ref.get_ref() as WorldState if _world_ref != null else null
+	if RustCharacter.enabled() and (world == null or world.rust_character_state.is_empty() or world.rust_character_day != _game_clock.current_day()):
+		return SaveOperationResult.fail("character_boundary", "Rust 人物状态尚未完成当日结算。", path)
 	var persistence_document := FormalWorldPersistenceDocument.encode(snapshot,_save_metadata)
 	if persistence_document.is_empty():
 		return SaveOperationResult.fail(
@@ -592,6 +605,8 @@ func _read_snapshot_file(path: String) -> SaveOperationResult:
 
 func bind_step(step: SimulationStep) -> void:
 	_step = step
+	if RustCharacter.enabled() and _world_ref != null:
+		step.rust_character_world = _world_ref
 	if not step.safe_boundary.is_connected(_complete_pending_save):
 		step.safe_boundary.connect(_complete_pending_save)
 
