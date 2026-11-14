@@ -14,6 +14,9 @@ pub trait CharacterHost {
     /// Conditions for the interval (day - 1, day], not today's conditions applied
     /// retroactively to a long advance. Missing facts abort the whole advance.
     fn living_conditions(&self, id: &str, day: u32) -> Option<LivingConditions>;
+    fn observed_conditions(&self, id: &str, day: u32) -> Option<ObservedConditions> {
+        self.living_conditions(id, day).map(Into::into)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -51,6 +54,15 @@ impl CharacterSystem {
     /// Settlement cursor only; the host clock is the world-time authority.
     pub fn day(&self) -> u32 {
         self.day
+    }
+    pub fn apply_next_event(&mut self, id: &str, event: LifeEvent) -> Result<Option<DeathNotice>> {
+        let next = self.record(id)?.event_sequence.checked_add(1)
+            .ok_or_else(|| Error("event sequence overflow".into()))?;
+        self.apply_event(id, next, event)
+    }
+    pub fn can_do_physical_work(&self, id: &str) -> Result<bool> {
+        let health = &self.record(id)?.health;
+        Ok(health.death.is_none() && health.current >= 250)
     }
     pub fn person_count(&self) -> usize {
         self.people.len()
@@ -256,6 +268,15 @@ impl CharacterSystem {
     /// Returns deaths exactly once. Host must adopt them with population/identity
     /// changes in the same candidate-world transaction (see README).
     pub fn advance_to(&mut self, day: u32, host: &impl CharacterHost) -> Result<Vec<DeathNotice>> {
+        self.advance(day, host, true)
+    }
+
+    /// For a host that can settle health and ageing but cannot commit a death.
+    pub fn advance_without_mortality(&mut self, day: u32, host: &impl CharacterHost) -> Result<()> {
+        self.advance(day, host, false).map(|_| ())
+    }
+
+    fn advance(&mut self, day: u32, host: &impl CharacterHost, mortality: bool) -> Result<Vec<DeathNotice>> {
         require(
             day >= self.day && day - self.day <= MAX_ADVANCE_DAYS,
             "backwards or oversized time advance",
@@ -273,25 +294,26 @@ impl CharacterSystem {
                         host.person_exists(&person.identity.id),
                         "host person disappeared",
                     )?;
-                    let conditions = host
-                        .living_conditions(&person.identity.id, current_day)
-                        .ok_or_else(|| Error("missing historical living conditions".into()))?;
-                    conditions.validate()?;
+                    let conditions = if mortality {
+                        let conditions = host.living_conditions(&person.identity.id, current_day)
+                            .ok_or_else(|| Error("missing historical living conditions".into()))?;
+                        conditions.validate()?;
+                        conditions.into()
+                    } else {
+                        host.observed_conditions(&person.identity.id, current_day)
+                            .ok_or_else(|| Error("missing day observation".into()))?
+                    };
+                    require([conditions.nutrition, conditions.medical_care, conditions.safety, conditions.rest]
+                        .into_iter().flatten().all(|value| value <= SCALE), "invalid living conditions")?;
                     self.rules.settle(
                         person,
                         current_day,
                         &conditions,
-                        mortality_roll(self.seed, &person.identity.id, current_day),
+                        mortality.then(|| mortality_roll(self.seed, &person.identity.id, current_day)),
                     );
-                } else {
-                    if person
-                        .health
-                        .disease
-                        .as_ref()
-                        .is_some_and(|d| d.until_day <= current_day)
-                    {
-                        person.health.disease = None;
-                    }
+                    person.validate(current_day)?;
+                } else if person.health.disease.as_ref().is_some_and(|d| d.until_day <= current_day) {
+                    person.health.disease = None;
                 }
                 if was_alive {
                     if let Some(death) = &person.health.death {

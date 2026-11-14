@@ -137,7 +137,7 @@ impl PersonRecord {
 }
 
 /// Host-provided, viewer-authorized facts. None means unknown, never zero/poor.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SocialFacts {
     pub nationality: Option<String>,
     pub family_background: Option<String>,
@@ -150,7 +150,7 @@ pub struct SocialFacts {
 }
 
 /// Deliberate projection, never serialized from the full backend record.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PersonView {
     pub id: String,
     pub name: String,

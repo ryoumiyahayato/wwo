@@ -87,6 +87,25 @@ pub struct LivingConditions {
     pub safety: u16,
     pub rest: u16,
 }
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ObservedConditions {
+    pub nutrition: Option<u16>,
+    pub medical_care: Option<u16>,
+    pub safety: Option<u16>,
+    pub rest: Option<u16>,
+}
+
+impl From<LivingConditions> for ObservedConditions {
+    fn from(value: LivingConditions) -> Self {
+        Self {
+            nutrition: Some(value.nutrition),
+            medical_care: Some(value.medical_care),
+            safety: Some(value.safety),
+            rest: Some(value.rest),
+        }
+    }
+}
 impl LivingConditions {
     pub(crate) fn validate(&self) -> Result<()> {
         require(
@@ -187,8 +206,8 @@ impl LifeRules {
         &self,
         person: &mut PersonRecord,
         day: u32,
-        conditions: &LivingConditions,
-        roll: u32,
+        conditions: &ObservedConditions,
+        mortality_roll: Option<u32>,
     ) {
         if person.health.death.is_some() {
             if person
@@ -208,15 +227,15 @@ impl LifeRules {
             .as_ref()
             .map_or(0, |d| u32::from(d.severity));
         let resistance = 500 + u32::from(person.identity.constitution);
-        let recovery = u32::from(self.recovery_per_day) * u32::from(conditions.nutrition) / 1000
-            * u32::from(conditions.rest)
-            / 1000
-            * resistance
-            / 1000
-            * (500 + u32::from(conditions.medical_care))
-            / 1000;
+        let recovery = match (conditions.nutrition, conditions.rest, conditions.medical_care) {
+            (Some(nutrition), Some(rest), Some(care)) => {
+                u32::from(self.recovery_per_day) * u32::from(nutrition) / 1000
+                    * u32::from(rest) / 1000 * resistance / 1000 * (500 + u32::from(care)) / 1000
+            }
+            _ => 0,
+        };
         let illness = u32::from(self.disease_damage_per_day) * severity / resistance;
-        let deprivation = u32::from(300u16.saturating_sub(conditions.nutrition)) / 30;
+        let deprivation = conditions.nutrition.map_or(0, |food| u32::from(300u16.saturating_sub(food)) / 30);
         person.health.current = (u32::from(person.health.current) + recovery)
             .saturating_sub(illness + deprivation)
             .min(u32::from(person.health.recovery_ceiling)) as u16;
@@ -232,11 +251,14 @@ impl LifeRules {
             baseline
         } else {
             ((u64::from(baseline) * 1000 / u64::from(resistance))
-                + u64::from(severity) * u64::from(1000 - conditions.medical_care) / 100
-                + u64::from(1000 - conditions.safety) / 10)
+                + conditions.medical_care.map_or(0, |care| u64::from(severity) * u64::from(1000 - care) / 100)
+                + conditions.safety.map_or(0, |safety| u64::from(1000 - safety) / 10))
                 .min(1_000_000) as u32
         };
-        if person.health.current == 0 || roll < risk {
+        if mortality_roll.is_none() && person.health.current == 0 {
+            person.health.current = u16::from(person.health.recovery_ceiling > 0);
+        }
+        if mortality_roll.is_some_and(|roll| person.health.current == 0 || roll < risk) {
             let cause = if person.health.disease.is_some() {
                 "疾病"
             } else if person.health.current == 0 {

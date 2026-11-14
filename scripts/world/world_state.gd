@@ -34,3 +34,7 @@ var authorization_check: AuthorizationCheck
 var military_map: VNextMilitaryMapAdapter
 var military_state: VNextMilitaryState
 var military_service: VNextMilitaryService
+var rust_character_state := ""
+var rust_character_day := -1
+var rust_character_profile: Dictionary = {}
+var rust_character_work_allowed := true
