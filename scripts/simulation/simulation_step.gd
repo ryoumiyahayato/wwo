@@ -7,6 +7,7 @@ const RustCharacter = preload("res://scripts/formal/formal_rust_character.gd")
 
 var processing: bool = false
 var rust_character_world: WeakRef
+var _pending_character_nutrition: Dictionary = {}
 var _economy_r1: EconomyR1Slice
 var _clock: GameClock
 var _spatial: VNextSpatialWorld
@@ -35,7 +36,7 @@ func advance_minutes(minutes: int) -> Dictionary:
 	if processing: return _error("Formal world is already advancing")
 	var world: WorldState = rust_character_world.get_ref() as WorldState if rust_character_world != null else null
 	if world != null and world.rust_character_day != _clock.current_day():
-		var character_error := RustCharacter.settle_day(world)
+		var character_error := _settle_character_day(world)
 		if not character_error.is_empty(): return _error(character_error)
 	processing = true
 	var result := _advance_minutes(minutes)
@@ -65,6 +66,7 @@ func _advance_minutes(minutes: int) -> Dictionary:
 	var travellers_arrived: int = 0
 	var residences_changed: int = 0
 	var responsibility_organization_view: FormalWorldOrganizationView = null
+	var character_world: WorldState = rust_character_world.get_ref() as WorldState if rust_character_world != null else null
 
 	# Use the existing formal clock for both day boundaries and active personal
 	# arrangements. Read only the next active due time, never transaction history.
@@ -93,8 +95,11 @@ func _advance_minutes(minutes: int) -> Dictionary:
 		wages_failed += int(wages.failed_periods)
 		if _economy_r1 != null:
 			if not _economy_r1.advance_time(): return _error(_economy_r1.error)
-			if boundary_minute == next_day_boundary_hour*60 and not _economy_r1.settle_day(false):
-				return _error(_economy_r1.error)
+			if boundary_minute == next_day_boundary_hour*60:
+				# The economy replaces these needs with the next day's records.
+				if character_world != null and RustCharacter.enabled():
+					_pending_character_nutrition = RustCharacter.completed_nutrition(character_world, _economy_r1.day)
+				if not _economy_r1.settle_day(false): return _error(_economy_r1.error)
 		if _economy_r1 != null and boundary_minute == next_transport and not _economy_r1.dispatch_shared_window(): return _error(_economy_r1.error)
 		if _travel != null: _travel.notify_arrivals(arrived)
 		var living := _personal_economy.settle_due_consumption()
@@ -111,9 +116,8 @@ func _advance_minutes(minutes: int) -> Dictionary:
 			if responsibility_organization_view == null: responsibility_organization_view = FormalWorldOrganizationView.new(_organization.snapshot())
 			if not _responsibilities.review_settled_day(boundary_hour,responsibility_organization_view,_politics,FormalWorldEconomyView.new(_economy_state.read_only_country_observation_snapshot())): return _error("Organization responsibility review failed at hour %d" % boundary_hour)
 			responsibility_review_days += 1
-			var world: WorldState = rust_character_world.get_ref() as WorldState if rust_character_world != null else null
-			if world != null:
-				var character_error := RustCharacter.settle_day(world)
+			if character_world != null:
+				var character_error := _settle_character_day(character_world)
 				if not character_error.is_empty(): return _error(character_error)
 		settled_through_hour = boundary_hour
 
@@ -148,6 +152,11 @@ func _advance_minutes(minutes: int) -> Dictionary:
 		"consumptions_completed":life_completed,
 		"consumptions_failed":life_failed,
 	}
+
+func _settle_character_day(world: WorldState) -> String:
+	var result := RustCharacter.settle_day(world, _pending_character_nutrition)
+	if result.is_empty(): _pending_character_nutrition.clear()
+	return result
 
 func _error(message: String) -> Dictionary:
 	push_error("SIMULATION STEP DATA ERROR: " + message)

@@ -25,11 +25,23 @@ static func restore(world: WorldState, value: Variant = null) -> String:
 	_install(world, response.payload)
 	return ""
 
-static func settle_day(world: WorldState) -> String:
+static func completed_nutrition(world: WorldState, day: int) -> Dictionary:
+	var economy := world.economy_r1
+	var nutrition: Dictionary = {}
+	if economy == null: return nutrition
+	for person: String in world.person_overlay.person_ids():
+		var need: Dictionary = economy._needs.get(person, {})
+		var food: Dictionary = need.get("categories", {}).get("food", {})
+		if int(need.get("day", -1)) != day or int(food.get("required", 0)) <= 0: continue
+		var fraction := float(food.satisfied) / float(food.required)
+		nutrition[person] = clampi(roundi(fraction * 1000.0), 0, 1000)
+	return nutrition
+
+static func settle_day(world: WorldState, nutrition: Dictionary) -> String:
 	if not enabled(): return ""
 	var day := world.game_clock.current_day()
 	if world.rust_character_day == day: return ""
-	var response := _request(world, "day", day, world.rust_character_day, world.rust_character_state)
+	var response := _request(world, "day", day, world.rust_character_day, world.rust_character_state, null, nutrition)
 	if not response.get("ok", false): return str(response.error)
 	_install(world, response.payload)
 	return ""
@@ -66,9 +78,8 @@ static func _install(world: WorldState, payload: Dictionary) -> void:
 	world.rust_character_profile["age_years"] = int(world.rust_character_profile.age_years)
 	world.rust_character_work_allowed = bool(payload.able_to_work)
 
-static func _request(world: WorldState, operation: String, day: int, settled_day: int, state: String, quote: Variant = null) -> Dictionary:
+static func _request(world: WorldState, operation: String, day: int, settled_day: int, state: String, quote: Variant = null, nutrition: Dictionary = {}) -> Dictionary:
 	var people: Dictionary = {}
-	var nutrition: Dictionary = {}
 	var work: Array[String] = []
 	var economy := world.economy_r1
 	var player := world.player_state.player_id()
@@ -82,12 +93,6 @@ static func _request(world: WorldState, operation: String, day: int, settled_day
 		people[person] = {"birth_day": birth_day, "alive": identity.alive,
 			"name": str(identity.get("name_zh", identity.get("name", identity.get("display_name", "姓名未记录")))),
 			"basis": str(facts.get("basis", "opening_birth_year_assumption"))}
-		if operation == "day" and economy != null:
-			var need: Dictionary = economy._needs.get(person, {})
-			var food: Dictionary = need.get("categories", {}).get("food", {})
-			if int(need.get("day", -1)) == day and int(food.get("required", 0)) > 0:
-				var fraction := float(food.satisfied) / float(food.required)
-				nutrition[person] = clampi(roundi(fraction * 1000.0), 0, 1000)
 	if operation == "day" and economy != null:
 		for id: String in economy._capital_work_ids:
 			var person := str(economy._work_records[id].actor)
