@@ -15,6 +15,8 @@ var finance_page := 0
 var checked_slots: Array[Dictionary] = []
 var revision: Array = []
 var market := MarketBridge.new()
+var property_feedback := ""
+var property_world := 0
 var training_open := false
 var training_state := "none"
 var menu_instance := 0
@@ -55,6 +57,9 @@ func _poll() -> void:
 	if rust_clock and not app.time_control.get_node("ClockTimer").is_stopped():
 		app.time_control.get_node("ClockTimer").stop()
 	_consume(app)
+	if property_world != app._world.get_instance_id():
+		property_world = app._world.get_instance_id()
+		property_feedback = ""
 	var shell := app.main_shell
 	var next_training := _training_phase(app)
 	var observed := [app._world.get_instance_id(), app._world.game_clock.total_minutes(), app.time_control.paused, tick_ack,
@@ -161,6 +166,18 @@ func _consume(app: FormalWorldApplication) -> void:
 func _dispatch(app: FormalWorldApplication, request: Dictionary) -> void:
 	var kind := str(request.get("kind",""))
 	match kind:
+		"consume":
+			if app._leaving or not app._departure_target.is_empty() or is_instance_valid(app._terrain_observation): return
+			var player := app._world.player_state.player_id()
+			var id := str(request.get("id",""))
+			var held := app._world.personal_economy_state.holding(player,id)
+			var quantity := int(request.get("quantity",0))
+			if quantity <= 0 or quantity != _single_consumption(held): return
+			app.main_shell.person_page.selected_commodity_id = id
+			app.main_shell.person_page.quantity_milli = quantity
+			app._on_action_requested("consume")
+			property_world = app._world.get_instance_id()
+			property_feedback = app.main_shell.status_message
 		"interface":
 			_apply_interface(request,app.main_shell._preferences)
 			app._refresh_ui()
@@ -307,8 +324,11 @@ func _snapshot(app: FormalWorldApplication) -> Dictionary:
 	var property: Array[Dictionary]=[]
 	for item: Dictionary in world.personal_economy_state.holding_rows(player,96,0):
 		var id := str(item.commodity_id)
+		var quantity := _single_consumption(item)
+		var can_consume := quantity > 0 and bool(world.personal_economy_state.consumption_quote(player,id,quantity).get("success",false))
 		property.append({"id":id,"label":EconomicText.good(id),"quantity":int(item.quantity_milli),
-			"scale":int(item.get("quantity_scale",1000)),"unit":str(item.get("unit_name_zh",""))})
+			"scale":int(item.get("quantity_scale",1000)),"unit":str(item.get("unit_name_zh","")),
+			"consume_quantity":quantity if can_consume else null})
 	var cash: Variant = finance.get("cash")
 	var relations: Variant=null
 	if shell.current_page=="organization" and shell.organization_page.own_only:
@@ -347,9 +367,12 @@ func _snapshot(app: FormalWorldApplication) -> Dictionary:
 			"foundation":_foundation(country),"public_country":str(Pilot.COUNTRIES.get(public,"")) if public!=country else "",
 			"public_foundation":_foundation(public) if public!=country else [],"project_active":not project.is_empty(),"milestones":milestones},
 		"messages":messages,"slots":slots,"slot_open":not shell._slot_mode.is_empty(),"slot_error":shell._slot_error,
-		"market":market.view(app),"property":property,"relations":relations,"training":training_state,
+		"market":market.view(app),"property":property,"property_feedback":property_feedback,"relations":relations,"training":training_state,
 		"character":RustCharacter.profile(world),
 		"departure":app._departure_target if not app._leaving else "","saving":app._save_pending}}
+
+func _single_consumption(holding: Dictionary) -> int:
+	return mini(int(holding.get("quantity_scale",1000)),int(holding.get("quantity_milli",0)))
 
 func _training_phase(app: FormalWorldApplication) -> String:
 	if app._terrain_open_pending: return "preparing"

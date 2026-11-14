@@ -13,6 +13,7 @@ pub struct Session {
     pub slots:Vec<Slot>, pub slot_open:bool, pub slot_error:String,
     #[serde(default)] pub market:Option<crate::market_ui::Market>,
     #[serde(default)] pub property:Vec<crate::market_ui::Holding>,
+    #[serde(default)] pub property_feedback: String,
     #[serde(default)] pub relations:Option<Relations>,
     #[serde(default)] pub character:Option<Character>,
     #[serde(default)] pub training:String,
@@ -169,6 +170,7 @@ pub enum Command {
     Training(&'static str),
     PortraitAction(usize,Page),Relation(Option<usize>),RelationDrawer(&'static str),
     WorkAction(usize,usize),WorkConfirm(bool),
+    Consume(usize),
     Lobby(crate::lobby::Command),Departure(&'static str),
 }
 pub const BRASS:[u8;4]=[167,137,81,255];
