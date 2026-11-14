@@ -3,7 +3,20 @@ use std::{env, fs::{self, File, OpenOptions}, io, os::windows::process::CommandE
 use crate::{formal_ui::Session, state::Request};
 use wwo_map_lab::formal_clock::TimeControl;
 
-const TICK_INTERVAL: Duration = Duration::from_millis(250);
+pub(crate) const TICK_INTERVAL: Duration = Duration::from_millis(250);
+
+pub(crate) fn lock_profile() -> io::Result<(PathBuf, File)> {
+    let local = env::var_os("LOCALAPPDATA").ok_or_else(|| io::Error::other("找不到 Windows 用户数据目录。"))?;
+    let profile = env::var("WWO_RUST_PROFILE").unwrap_or_else(|_| "Default".into());
+    if profile.is_empty() || profile.len() > 40 || !profile.bytes().all(|c| c.is_ascii_alphanumeric() || matches!(c, b'_' | b'-')) {
+        return Err(io::Error::other("WWO_RUST_PROFILE 无效。"));
+    }
+    let profile = PathBuf::from(local).join("WWO-Rust-Candidate").join("profiles").join(profile);
+    fs::create_dir_all(profile.join("WWO_R68_Candidate"))?;
+    let lock = OpenOptions::new().create(true).truncate(false).read(true).write(true).open(profile.join("session.lock"))?;
+    lock.try_lock().map_err(|e| io::Error::other(format!("候选档位正在使用，或无法打开档位。\n{e}")))?;
+    Ok((profile, lock))
+}
 
 pub struct DesktopSession {
     pub state: PathBuf,
@@ -35,15 +48,7 @@ impl DesktopSession {
         let script = home.join("tools/formal_host_bridge.gd");
         if !script.is_file() { return Err(io::Error::other(format!("缺少会话文件\n{}", script.display()))); }
 
-        let local = env::var_os("LOCALAPPDATA").ok_or_else(|| io::Error::other("找不到 Windows 用户数据目录。"))?;
-        let profile = env::var("WWO_RUST_PROFILE").unwrap_or_else(|_| "Default".into());
-        if profile.is_empty() || profile.len() > 40 || !profile.bytes().all(|c| c.is_ascii_alphanumeric() || matches!(c, b'_' | b'-')) {
-            return Err(io::Error::other("WWO_RUST_PROFILE 无效。"));
-        }
-        let profile = PathBuf::from(local).join("WWO-Rust-Candidate").join("profiles").join(profile);
-        fs::create_dir_all(profile.join("WWO_R68_Candidate"))?;
-        let lock = OpenOptions::new().create(true).truncate(false).read(true).write(true).open(profile.join("session.lock"))?;
-        lock.try_lock().map_err(|e| io::Error::other(format!("候选档位正在使用，或无法打开档位。\n{e}")))?;
+        let (profile, lock) = lock_profile()?;
 
         let time = SystemTime::now().duration_since(UNIX_EPOCH).map_err(io::Error::other)?.as_nanos();
         let dir = env::temp_dir().join(format!("WWO-V-desktop-{}-{time}", std::process::id()));
@@ -64,7 +69,7 @@ impl DesktopSession {
 
     pub fn poll(&mut self) {
         if let Some(folder) = self.state.parent() {
-            let _ = crate::formal_character::poll(folder);
+            let _ = wwo_map_lab::formal_character::poll(folder);
         }
         if let Ok(Some(status)) = self.child.try_wait() {
             let marker = self.state.with_file_name("bridge-exited");

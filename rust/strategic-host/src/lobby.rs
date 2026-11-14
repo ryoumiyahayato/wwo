@@ -6,6 +6,7 @@ use serde::Deserialize;
 pub struct Lobby {
     pub ready:bool,pub selection_ready:bool,pub busy:bool,pub status:String,
     #[serde(default)] pub loading:bool,
+    #[serde(default)] pub native:bool,
     pub choices:Vec<Opening>,pub slots:Vec<Slot>,
 }
 #[derive(Deserialize)]
@@ -68,12 +69,13 @@ impl Display<'_> {
                 for (i,(label,command)) in rows.into_iter().enumerate(){
                     self.row(&mut panels,&mut text,&mut hits,[x+24.,y+79.+i as f32*40.,width-48.,32.],label,command,false);
                 }
-                self.skin.text(&mut text,"R68 规则兼容 · Rust 候选",0,[x+24.,y+342.],width-48.,MUTED);
+                let runtime=if state.is_some_and(|s|s.native) {"Rust 原生世界"} else {"R68 规则兼容 · Rust 候选"};
+                self.skin.text(&mut text,runtime,0,[x+24.,y+342.],width-48.,MUTED);
             }
             Page::Selection=>{
                 let width=(w*0.43).min(430.);
-                let x=w-width-32.;let y=(h-376.)*0.5;
-                formal_ui::panel(&mut panels,[x,y,width,376.],[12,22,31,241]);
+                let x=w-width-32.;let y=(h-400.)*0.5;
+                formal_ui::panel(&mut panels,[x,y,width,400.],[12,22,31,241]);
                 self.skin.sprite(&mut art,"crest",[x+width*0.5-97.,y-50.,194.,55.]);
                 self.skin.text(&mut text,"国家档案  /  1900",1,[x+22.,y+15.],width-44.,IVORY);
                 let selected=world.polities.get(selection);
@@ -95,9 +97,9 @@ impl Display<'_> {
                         }
                     }
                 }
-                self.row(&mut panels,&mut text,&mut hits,[x+22.,y+270.,width-44.,32.],"进入世界",
+                self.row(&mut panels,&mut text,&mut hits,[x+22.,y+287.,width-44.,32.],"进入世界",
                     (opening.is_some()&&state.is_some_and(|s|s.selection_ready)&&!busy).then_some(action(Command::Enter)),true);
-                self.row(&mut panels,&mut text,&mut hits,[x+22.,y+313.,width-44.,30.],"返回主菜单",
+                self.row(&mut panels,&mut text,&mut hits,[x+22.,y+330.,width-44.,30.],"返回主菜单",
                     (!busy).then_some(action(Command::Page(Page::Home))),false);
             }
             Page::Load=>{
@@ -128,7 +130,7 @@ impl Display<'_> {
                     Some(action(Command::Page(Page::Home))),false);
                 }
             }
-            Page::Migration(status,page)=>self.migration_status(&mut panels,&mut text,&mut hits,status,page),
+            Page::Migration(status,page)=>self.migration_status(&mut panels,&mut text,&mut hits,status,page,state.is_some_and(|s|s.native)),
         }
         if !matches!(page,Page::Migration(_, _)) {
             let status=state.map(|s|s.status.as_str()).filter(|s|!s.is_empty()).unwrap_or(if busy{"正在进入世界。"}else if !ready{"正在连接 R68 正式规则。"}else{""});

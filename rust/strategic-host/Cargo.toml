@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+base64 = "0.22"
 wgpu = { version = "=24.0.5", default-features = false, features = ["wgsl", "vulkan-portability"] }
 winit = { version = "=0.30.12", default-features = false, features = ["rwh_06"] }
 bytemuck = { version = "1", features = ["derive"] }

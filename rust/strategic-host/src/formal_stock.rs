@@ -1,6 +1,78 @@
 use crate::formal_save::{field, integer, invalid, lookup, map, tagged};
 use serde_json::Value;
-use std::{collections::{BTreeMap, BTreeSet}, io};
+use serde::{Deserialize, Serialize};
+use std::{collections::{BTreeMap, BTreeSet, VecDeque}, io};
+
+use crate::formal_ledger::MAX_AMOUNT;
+
+#[derive(Default, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct PersonalHolding {
+    available_milli: i64,
+    consumed_milli: i64,
+    lots: VecDeque<PurchaseLot>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct PurchaseLot {
+    record_id: String,
+    remaining_milli: i64,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct ConsumptionAllocation {
+    pub purchase_record_id: String,
+    pub quantity_milli: i64,
+}
+
+impl PersonalHolding {
+    pub(crate) fn validate(&self, mut valid_lot: impl FnMut(&str) -> bool) -> bool {
+        (0..=MAX_AMOUNT).contains(&self.available_milli)
+            && (0..=MAX_AMOUNT).contains(&self.consumed_milli)
+            && self.lots.iter().try_fold(0i64, |sum, lot| {
+                ((1..=MAX_AMOUNT).contains(&lot.remaining_milli) && valid_lot(&lot.record_id))
+                    .then(|| sum.checked_add(lot.remaining_milli)).flatten()
+            }) == Some(self.available_milli)
+    }
+
+    pub(crate) fn available(&self) -> i64 {
+        self.available_milli
+    }
+
+    pub(crate) fn check_purchase(&self, quantity_milli: i64) -> io::Result<()> {
+        if !(1..=MAX_AMOUNT - self.available_milli).contains(&quantity_milli) {
+            return Err(invalid("personal holding would exceed formal bounds"));
+        }
+        Ok(())
+    }
+
+    pub(crate) fn record_purchase(&mut self, record_id: String, quantity_milli: i64) {
+        self.available_milli += quantity_milli;
+        self.lots.push_back(PurchaseLot { record_id, remaining_milli: quantity_milli });
+    }
+
+    pub(crate) fn consume(&mut self, quantity_milli: i64) -> io::Result<Vec<ConsumptionAllocation>> {
+        if !(1..=self.available_milli.min(MAX_AMOUNT - self.consumed_milli)).contains(&quantity_milli) {
+            return Err(invalid("personal stock or consumption bounds would be exceeded"));
+        }
+        let mut remaining = quantity_milli;
+        let mut allocations = Vec::new();
+        while remaining > 0 {
+            let lot = self.lots.front_mut().expect("available stock is backed by purchase lots");
+            let used = remaining.min(lot.remaining_milli);
+            lot.remaining_milli -= used;
+            remaining -= used;
+            allocations.push(ConsumptionAllocation { purchase_record_id: lot.record_id.clone(), quantity_milli: used });
+            if lot.remaining_milli == 0 {
+                self.lots.pop_front();
+            }
+        }
+        self.available_milli -= quantity_milli;
+        self.consumed_milli += quantity_milli;
+        Ok(allocations)
+    }
+}
 
 struct Portion<'a> {
     source: &'a str,

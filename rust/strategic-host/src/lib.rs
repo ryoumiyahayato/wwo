@@ -1,7 +1,14 @@
 pub mod calendar;
+pub mod formal_bootstrap;
+pub mod formal_character;
 pub mod formal_clock;
-mod formal_ledger;
+pub mod formal_macro;
+pub mod formal_population;
+pub mod formal_ledger;
 mod formal_purchase;
 pub mod formal_save;
 pub mod formal_step;
 mod formal_stock;
+pub mod formal_wages;
+pub mod formal_work;
+mod legacy_variant;

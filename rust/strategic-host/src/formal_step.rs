@@ -18,6 +18,7 @@ pub enum Phase {
     Residence,
     NativeScopes,
     OrganizationReview(i64),
+    CharacterDay,
 }
 
 #[derive(Default)]
@@ -42,6 +43,10 @@ pub trait WorldDomains {
     fn apply(&mut self, phase: Phase, clock: GameClock) -> io::Result<()>;
 }
 
+pub(crate) fn next_day_boundary(clock: GameClock) -> Option<i64> {
+    (clock.current_day() + 1).checked_mul(MINUTES_PER_DAY)
+}
+
 pub fn advance(clock: &mut GameClock, domains: &mut impl WorldDomains, minutes: i64) -> io::Result<()> {
     let mut target = *clock;
     target.advance_minutes(minutes)?;
@@ -55,7 +60,7 @@ pub fn advance(clock: &mut GameClock, domains: &mut impl WorldDomains, minutes: 
     let target = target.snapshot().total_minutes;
 
     loop {
-        let next_day = (settled_hour / 24 + 1).checked_mul(MINUTES_PER_DAY);
+        let next_day = next_day_boundary(*clock);
         let due = domains.boundaries();
         let next = [next_day, due.consumption, due.livelihood, due.transport, due.travel]
             .into_iter().flatten().min();
@@ -83,6 +88,7 @@ pub fn advance(clock: &mut GameClock, domains: &mut impl WorldDomains, minutes: 
             domains.apply(Phase::Residence, *clock)?;
             if native.is_some() { domains.apply(Phase::NativeScopes, *clock)?; }
             domains.apply(Phase::OrganizationReview(hour), *clock)?;
+            domains.apply(Phase::CharacterDay, *clock)?;
         }
         settled_hour = hour;
     }
@@ -133,7 +139,7 @@ mod tests {
             (NativeAdvance, 1440), (NativeSettleDay, 1440), (NativeDispatch, 1440),
             (TravelNotices, 1440), (Consumption, 1440), (MacroHours { from: 0, through: 24 }, 1440),
             (Livelihood, 1440), (ProposeNativeResidences, 1440), (Residence, 1440),
-            (NativeScopes, 1440), (OrganizationReview(24), 1440),
+            (NativeScopes, 1440), (OrganizationReview(24), 1440), (CharacterDay, 1440),
             (SpatialToHour(25), 1500), (MacroHours { from: 24, through: 25 }, 1500),
             (NativeAdvance, 1500), (Wages, 1500),
         ]);

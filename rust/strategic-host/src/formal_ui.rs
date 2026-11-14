@@ -40,7 +40,7 @@ struct Foundation {title:String,description:String,kind:String}
 struct Milestone {title:String,kind:String,effect:String,date:String}
 #[derive(Deserialize)]
 pub struct Message {source:String,received_at:String,text:String,pub action:String}
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize, serde::Serialize)]
 pub struct Slot {pub slot:u8,pub name:String,pub empty:bool,pub can_read:bool,pub description:String}
 #[derive(Deserialize)]
 pub struct Relations {
