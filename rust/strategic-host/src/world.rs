@@ -132,6 +132,8 @@ impl Polity {
 pub struct Admin {pub id:String,pub name:String,pub bounds:[f64;4],pub outlines:Vec<Vec<[f64;2]>>}
 #[derive(Deserialize)]
 pub struct World {
+    #[serde(default)]
+    pub map_release: String,
     pub tiles:Vec<Tile>,
     pub places:Vec<Place>,
     pub polities:Vec<Polity>,
@@ -144,8 +146,13 @@ pub struct Pixels {
     pub ids:Vec<u8>,
 }
 impl Pixels {
+    #[cfg(test)]
     pub fn read(root:&Path,tile:&Tile)->io::Result<Self> {
-        let pack=Pack::open(&root.join(&tile.path))?;
+        Self::read_version(root,tile,None)
+    }
+
+    pub fn read_version(root:&Path,tile:&Tile,signature:Option<&[u8;8]>)->io::Result<Self> {
+        let pack=Pack::open_version(&root.join(&tile.path),signature)?;
         let len=(tile.size[0]*tile.size[1]) as usize;
         let optional=|enabled,key,size| if enabled {pack.block(key,size)} else {Ok(Vec::new())};
         Ok(Self {
@@ -261,11 +268,11 @@ pub struct Reader {
     pub inflight:Option<usize>,
 }
 impl Reader {
-    pub fn new(root:PathBuf,proxy:EventLoopProxy<Completion>)->Self {
+    pub fn new(root:PathBuf,signature:Option<&'static [u8;8]>,proxy:EventLoopProxy<Completion>)->Self {
         let (sender,receiver)=mpsc::channel::<(usize,Tile,Instant)>();
         std::thread::Builder::new().name("WWO map streaming".into()).spawn(move || {
             while let Ok((id,tile,requested))=receiver.recv() {
-                if proxy.send_event(Completion{id,result:Pixels::read(&root,&tile),requested}).is_err(){break;}
+                if proxy.send_event(Completion{id,result:Pixels::read_version(&root,&tile,signature),requested}).is_err(){break;}
             }
         }).expect("map streaming thread");
         Self {sender,inflight:None}

@@ -9,6 +9,7 @@ mod compact;
 mod formal_ui;
 mod market_ui;
 mod lobby;
+mod map_release;
 mod migration_status;
 mod interface;
 mod overlay;
@@ -116,6 +117,7 @@ struct Observation {
 }
 struct Host {
     config:Config,window:Option<Arc<Window>>,renderer:Option<Renderer>,
+    map_root:PathBuf,map_signature:Option<&'static [u8;8]>,fatal_error:Option<String>,
     world:World,visuals:PoliticalVisuals,index:Index,base:Option<Page>,reader:Reader,cached:HashMap<usize,Resident>,
     failed:HashSet<usize>,candidate:Vec<usize>,visible:Vec<usize>,
     camera:Camera,size:[u32;2],mode:Mode,state:State,theme:bool,labels:bool,
@@ -125,7 +127,7 @@ struct Host {
     last_input_check:Instant,version:Option<SystemTime>,last_palette:Option<Date>,
     atlas:overlay::Atlas,started:Instant,trial:Trial,
     hud:Hud,skin:Skin,exit_requested:bool,
-    lobby_page:lobby::Page,lobby_country:usize,lobby_request:bool,
+    lobby_page:lobby::Page,lobby_country:usize,lobby_request:bool,country_directory:lobby::Directory,
     bridge_wait:Instant,seen_lobby_busy:bool,departure_requested:bool,
     loading_fade:Option<Instant>,loading_status:String,
     debug:bool,perf_at:Instant,perf_frames:u32,perf:Diagnostics,
@@ -133,7 +135,10 @@ struct Host {
     grid_step:f32,last_present:Instant,employment:state::EmploymentReference,market_focus_serial:u64,
 }
 fn font(path:&Path)->io::Result<Raster> {
-    let mut reader=png::Decoder::new(File::open(path)?).read_info()?;
+    decode_rgba(File::open(path)?)
+}
+fn decode_rgba(source:impl Read)->io::Result<Raster> {
+    let mut reader=png::Decoder::new(source).read_info()?;
     let mut pixels=vec![0;reader.output_buffer_size()];
     let info=reader.next_frame(&mut pixels)?;
     if info.color_type!=png::ColorType::Rgba || info.bit_depth!=png::BitDepth::Eight {return Err(io::Error::other("invalid type atlas"));}
@@ -144,10 +149,17 @@ fn ms(t:Instant)->f64 {t.elapsed().as_secs_f64()*1000.}
 
 impl Host {
     fn new(config:Config,events:&EventLoop<Completion>,started:Instant)->io::Result<Self> {
+        #[cfg(windows)]
+        let formal_map=config.native.is_some();
+        #[cfg(not(windows))]
+        let formal_map=false;
+        let map_root=if formal_map {map_release::root(&config.root)} else {config.root.clone()};
+        let map_signature=formal_map.then_some(map_release::TILE_SIGNATURE);
+        let world=if map_signature.is_some() {map_release::open(&map_root)?}
+            else {World::open(&map_root.join("world.json"))?};
+        if world.tiles.first().is_none_or(|t|t.level!=0) || world.polities.len()>255 || world.admin.len()>255 {return Err(io::Error::other("invalid world index"));}
         let atlas=overlay::Atlas::open(&config.root.join("type.json"))?;
         let mut skin=Skin::open(&config.root)?;
-        let world=World::open(&config.root.join("world.json"))?;
-        if world.tiles.first().is_none_or(|t|t.level!=0) || world.polities.len()>255 || world.admin.len()>255 {return Err(io::Error::other("invalid world index"));}
         let mut state=State::new();
         #[cfg(windows)]
         if let Some(native)=&config.native {native.update_view(&mut state)?;}
@@ -167,19 +179,20 @@ impl Host {
         let mode=Mode::Political;
         let preferences=config.preferences.as_deref().map(interface::Preferences::load).unwrap_or_default();
         skin.set_english(preferences.english);
-        let visuals=PoliticalVisuals::open(&config.root,&world)?;
+        let visuals=PoliticalVisuals::open(&map_root,&world)?;
         let employment=state::EmploymentReference::open(&config.root)?;
         let index=Index::new(&world.tiles);
-        let reader=Reader::new(config.root.clone(),events.create_proxy());
+        let reader=Reader::new(map_root.clone(),map_signature,events.create_proxy());
         let observation_id=config.observe.as_ref().and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
             .map(|input|input.id).unwrap_or_default();
-        Ok(Self {config,world,visuals,index,reader,state,camera:Camera::new(VIEW_SIZE),atlas,started,base:None,window:None,renderer:None,
+        Ok(Self {config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera:Camera::new(VIEW_SIZE),atlas,started,base:None,window:None,renderer:None,
             cached:HashMap::new(),failed:HashSet::new(),candidate:Vec::new(),visible:Vec::new(),
             size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,admin_page:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
             animate:false,next_date:Instant::now(),feedback:String::new(),dirty:true,last_input_check:Instant::now(),
             version:None,last_palette:None,trial:Trial{last:observation_id,..Trial::default()},hud:Hud{fullscreen:preferences.fullscreen,volume:preferences.volume,english:preferences.english,..Hud::default()},skin,exit_requested:false,
-            lobby_page:lobby::Page::Home,lobby_country,lobby_request:false,bridge_wait:Instant::now(),seen_lobby_busy:false,departure_requested:false,
+            lobby_page:lobby::Page::Home,lobby_country,lobby_request:false,country_directory:lobby::Directory::default(),
+            bridge_wait:Instant::now(),seen_lobby_busy:false,departure_requested:false,
             loading_fade:None,loading_status:String::new(),debug:false,perf_at:Instant::now(),perf_frames:0,
             perf:Diagnostics{rate:0.,cpu_ms:0.,tiles:0,visible:0,mib:0.,streaming:false},
             screenshot:None,screenshot_status:None,grid_step:50000.,last_present:started,employment,market_focus_serial:0})
@@ -510,12 +523,18 @@ impl Host {
         match command{
             Command::Page(page)=>{
                 self.lobby_page=page;
+                self.country_directory.search_active=false;
+                self.country_directory.drag=None;
                 self.lobby_request=false;self.seen_lobby_busy=false;
                 match page{
                     Page::Selection=>{
+                        self.country_directory=lobby::Directory::default();
+                        self.mode=Mode::Political;
                         self.camera.mpp=Camera::overview(self.size)/0.74;self.camera.update_level();
                         if let Some(lobby)=&mut self.state.lobby {lobby.selection_ready=false;}
                         self.emit(Request::Lobby{verb:"select",polity:"",slot:0});
+                        self.filter_countries();
+                        self.country_directory.reveal(self.size,self.lobby_country);
                     },
                     Page::Load=>self.emit(Request::Lobby{verb:"slots",polity:"",slot:0}),
                     Page::Home=>self.emit(Request::Lobby{verb:"home",polity:"",slot:0}),
@@ -524,12 +543,26 @@ impl Host {
             }
             Command::Country(index)=>{
                 if let Some(p)=self.world.polities.get(index){
+                    self.country_directory.search_active=false;
                     self.lobby_country=index;self.camera.focus(p.coordinates,self.camera.mpp);
+                    self.country_directory.reveal(self.size,index);
                 }
             }
+            Command::Search=>{
+                self.country_directory.search_active=true;
+                if let Some(window)=&self.window {window.set_ime_allowed(true);}
+            }
+            Command::ClearSearch=>{
+                self.country_directory.query.clear();
+                self.country_directory.search_active=false;
+                self.filter_countries();
+                self.country_directory.reveal(self.size,self.lobby_country);
+            }
             Command::Enter=>{
-                if let Some(p)=self.world.polities.get(self.lobby_country){
-                    let id=format!("state:{}",p.id);
+                if self.lobby_page!=Page::Selection || self.lobby_request {return;}
+                if let Some(id)=self.world.polities.get(self.lobby_country).and_then(|p|
+                    self.state.lobby.as_ref().filter(|s|s.selection_ready&&!s.busy).and_then(|s|s.opening(p))
+                ).map(|opening|opening.id.clone()){
                     self.lobby_request=true;self.bridge_wait=Instant::now();self.seen_lobby_busy=false;
                     self.emit(Request::Lobby{verb:"new",polity:&id,slot:0});
                 }
@@ -540,7 +573,24 @@ impl Host {
             }
             Command::Exit=>self.exit_requested=true,
         }
+        if !self.country_directory.search_active {
+            if let Some(window)=&self.window {window.set_ime_allowed(false);}
+        }
         self.dirty=true;
+    }
+    fn filter_countries(&mut self) {
+        self.country_directory.filter(&self.world,self.state.lobby.as_ref(),&self.state.date.to_string(),self.hud.english);
+        self.dirty=true;
+    }
+    fn scroll_countries(&mut self,point:[f64;2],steps:f64)->bool {
+        if self.in_lobby() && self.lobby_page==lobby::Page::Selection
+            && lobby::contains(lobby::Directory::panel(self.size),point)
+        {
+            self.country_directory.scroll(self.size,steps as f32);
+            self.dirty=true;
+            return true;
+        }
+        false
     }
     fn market_command(&mut self,verb:&'static str,index:usize){
         if self.state.session.is_none(){self.feedback="正式世界未连接".into();return;}
@@ -696,9 +746,18 @@ impl Host {
         if self.is_panel(p){return;}
         let hit=self.camera.vector(p,self.size).map(camera::geographic).map(|q|self.object_at(q)[0]);
         if self.in_lobby(){
+            if self.lobby_page!=lobby::Page::Selection {return;}
             if let Some(index)=hit.and_then(|v|v.checked_sub(1)).map(usize::from)
-                .filter(|&i|!self.world.polities[i].display_only){
-                self.lobby_country=index;self.dirty=true;
+                .filter(|&i|self.available(Object::Polity(i))){
+                self.lobby_country=index;
+                self.country_directory.search_active=false;
+                if !self.country_directory.query.is_empty() {
+                    self.country_directory.query.clear();
+                    self.filter_countries();
+                }
+                self.country_directory.reveal(self.size,index);
+                if let Some(window)=&self.window {window.set_ime_allowed(false);}
+                self.dirty=true;
             }
             return;
         }
@@ -710,8 +769,11 @@ impl Host {
         let contains=|[a,b,w,h]:[f32;4]| x>=f64::from(a)&&x<=f64::from(a+w)&&y>=f64::from(b)&&y<=f64::from(b+h);
         let [w,h]=self.size.map(|v|v as f32);
         if self.in_lobby(){
-            return self.lobby_page!=lobby::Page::Selection||self.lobby_request||
-                contains([w-(w*0.43).min(430.)-32.,(h-376.)*0.5,(w*0.43).min(430.),376.]);
+            return self.lobby_request||match self.lobby_page {
+                lobby::Page::Selection=>contains(lobby::profile(self.size))||contains(lobby::back(self.size))||
+                    contains(lobby::primary(self.size))||contains(lobby::Directory::panel(self.size)),
+                _=>true,
+            };
         }
         let radius=(w*0.056).clamp(52.,78.);
         let modal=self.hud.menu.modal();
@@ -765,16 +827,31 @@ impl Host {
         }
         if self.loading(){return;}
         if self.in_lobby(){
-            if key==Key::Named(NamedKey::Escape)&&!self.lobby_request{
+            if self.country_directory.search_active {
+                match key {
+                    Key::Named(NamedKey::Escape|NamedKey::Enter)=>{
+                        self.country_directory.search_active=false;
+                        if let Some(window)=&self.window {window.set_ime_allowed(false);}
+                        self.dirty=true;
+                    }
+                    Key::Named(NamedKey::Backspace)=>{
+                        self.country_directory.query.pop();
+                        self.filter_countries();
+                    }
+                    Key::Named(NamedKey::Space)=>self.type_country_search(" "),
+                    Key::Character(text)=>self.type_country_search(&text),
+                    _=>(),
+                }
+                return;
+            }
+            if matches!(key,Key::Named(NamedKey::Escape|NamedKey::Backspace))&&!self.lobby_request{
                 self.lobby_action(lobby::Command::Page(lobby::Page::Home));
             } else if key==Key::Named(NamedKey::Enter)&&!self.lobby_request {
                 if let Some(state)=&self.state.lobby{
                     if !state.busy {
                         match self.lobby_page {
                             lobby::Page::Home if state.ready=>self.lobby_action(lobby::Command::Page(lobby::Page::Selection)),
-                            lobby::Page::Selection if state.selection_ready && self.world.polities.get(self.lobby_country)
-                                .is_some_and(|p|state.choices.iter().any(|row|row.id.strip_prefix("state:")==Some(&p.id)))=>
-                                self.lobby_action(lobby::Command::Enter),
+                            lobby::Page::Selection=>self.lobby_action(lobby::Command::Enter),
                             _=>(),
                         }
                     }
@@ -864,6 +941,12 @@ impl Host {
         }
         self.dirty=true;
     }
+    fn type_country_search(&mut self,text:&str) {
+        let query=&mut self.country_directory.query;
+        let remaining=64_usize.saturating_sub(query.chars().count());
+        query.extend(text.chars().filter(|c|!c.is_control()).take(remaining));
+        self.filter_countries();
+    }
     fn rotate(&mut self,from:[f64;2],to:[f64;2],bearing:bool) {
         self.focus=None;
         if bearing{self.camera.bearing_drag(from,to,self.size);}else{self.camera.drag(from,to,self.size);}
@@ -949,7 +1032,7 @@ impl Host {
                 .unwrap_or(if self.lobby_request{"正在进入世界"}else{"正在读取地图资料"});
             (formal.loading(status,seconds),Vec::new())
         }else if self.in_lobby(){
-            formal.lobby(&self.world,self.state.lobby.as_ref(),self.lobby_page,self.lobby_country,self.lobby_request)
+            formal.lobby(&self.world,self.state.lobby.as_ref(),self.lobby_page,self.lobby_country,self.lobby_request,&self.country_directory)
         }else{ui::compose(&self.world,&self.atlas,&self.visuals,Ui{
             mode:self.mode,date:&date,camera:&self.camera,size:self.size,selected:self.selected,admin:&admin,details:self.details,admin_page:self.admin_page,
             search:self.search.as_deref(),search_results:&search,econ_label:&econ_label,econ_legend:&econ_legend,
@@ -1075,7 +1158,10 @@ impl Host {
                 self.locate([input.lon,input.lat],input.mpp); if input.value=="north" {self.camera.north_up();}
             }
             "click"=>self.click([input.x,input.y]),
-            "wheel"=>self.zoom([input.x,input.y],input.steps),
+            "wheel"=>{
+                let point=[input.x,input.y];
+                if !self.scroll_countries(point,input.steps){self.zoom(point,input.steps);}
+            }
             "drag"=>{
                 self.velocity=[0.;2];
                 self.trial.movement=Some(([input.x,input.y],[input.to_x,input.to_y],input.frames.clamp(1,180),0));
@@ -1107,7 +1193,7 @@ impl Host {
             self.hud=Hud{fullscreen:self.hud.fullscreen,volume:self.hud.volume,english:self.hud.english,..Hud::default()};
             self.selected=None;self.details=false;self.admin_page=None;
             self.search=None;self.history.clear();self.focus=None;self.velocity=[0.;2];self.hits.clear();
-            self.mode=Mode::Geographic;self.labels=false;
+            self.mode=Mode::Political;self.labels=false;
             self.camera=Camera::new(self.size);
             if let Some(point)=self.state.session.as_ref().and_then(|s| <[f64;2]>::try_from(s.coordinates.as_slice()).ok()) {
                 #[cfg(windows)]
@@ -1116,6 +1202,7 @@ impl Host {
                 let _=point;
             }
             self.lobby_page=lobby::Page::Home;self.lobby_request=false;
+            self.country_directory=lobby::Directory::default();
             self.departure_requested=false;
         }
         if let Some(lobby)=&self.state.lobby{
@@ -1234,32 +1321,47 @@ impl ApplicationHandler<Completion> for Host {
             }
             let hud=[font(&self.config.root.join("hud-art.png"))?,font(&self.config.root.join("hud-type.png"))?,
                 if self.config.managed{font(&self.config.root.join("menu-painting.png"))?}else{Raster{size:[1,1],pixels:vec![0;4]}}];
-            let hd=self.config.root.join("political-flags-hd.png");
-            let flag_path=if hd.is_file(){hd}else{self.config.root.join("political-flags.png")};
-            let globe_art=[font(&self.config.root.join("galactic-chart.png"))?,font(&self.config.root.join("ocean-detail-r68.png"))?,
-                font(&self.config.root.join("ocean-ice-r68.png"))?];
-            let renderer=pollster::block_on(Renderer::new(window.clone(),font(&self.config.root.join("type.png"))?,PoliticalVisuals::read_atlas(&flag_path)?,hud,globe_art,&layouts))?;
-            let pixels=Pixels::read(&self.config.root,&self.world.tiles[0])?;
+            let art=|name| {
+                if self.map_signature.is_some() {decode_rgba(map_release::open_art(&self.map_root,name)?)}
+                else {font(&self.map_root.join(name))}
+            };
+            let flags=if self.map_signature.is_some() {
+                PoliticalVisuals::decode_atlas(map_release::open_art(&self.map_root,"political-flags-hd.png")?)?
+            } else {
+                let hd=self.map_root.join("political-flags-hd.png");
+                let path=if hd.is_file(){hd}else{self.map_root.join("political-flags.png")};
+                PoliticalVisuals::read_atlas(&path)?
+            };
+            let globe_art=[art("galactic-chart.png")?,art("ocean-detail-r68.png")?,art("ocean-ice-r68.png")?];
+            let renderer=pollster::block_on(Renderer::new(window.clone(),font(&self.config.root.join("type.png"))?,flags,hud,globe_art,&layouts))?;
+            let pixels=Pixels::read_version(&self.map_root,&self.world.tiles[0],self.map_signature)?;
             let base=renderer.upload(&self.world.tiles[0],pixels);
             Ok((window,renderer,base))
         })();
         match result {
             Ok((window,renderer,base))=>{self.window=Some(window);self.renderer=Some(renderer);self.base=Some(base);}
-            Err(e)=>{record_error(&self.config.root,&e.to_string());event_loop.exit();}
+            Err(e)=>{self.fatal_error=Some(e.to_string());event_loop.exit();}
         }
     }
-    fn user_event(&mut self,_:&ActiveEventLoop,event:Completion) {
+    fn user_event(&mut self,event_loop:&ActiveEventLoop,event:Completion) {
         self.reader.inflight=None;
-        if self.candidate.contains(&event.id) {
-            match event.result {
-                Ok(pixels)=>{
+        match event.result {
+            Ok(pixels)=>{
+                if self.candidate.contains(&event.id) {
                     let tile=&self.world.tiles[event.id];
                     let page=self.renderer.as_ref().unwrap().upload(tile,pixels);
                     let now=Instant::now();
                     self.cached.insert(event.id,Resident{page,ready:now,used:now});
                     if self.trial.timing {self.trial.loads.push((tile.path.clone(),ms(event.requested)));}
                 }
-                Err(e)=>{self.failed.insert(event.id);self.feedback=format!("Source tile unavailable: {e}");}
+            }
+            Err(e) if self.map_signature.is_some()=>{
+                self.fatal_error=Some(format!("正式地图无法读取 {} · {e}",self.world.tiles[event.id].path));
+                event_loop.exit();
+            }
+            Err(e)=>{
+                self.failed.insert(event.id);
+                self.feedback=format!("Source tile unavailable: {e}");
             }
         }
         self.dirty=true;
@@ -1279,6 +1381,9 @@ impl ApplicationHandler<Completion> for Host {
             }
             WindowEvent::CursorMoved{position,..}=>{
                 let next:[f64;2]=position.into();self.cursor=next;
+                if self.country_directory.drag.is_some(){
+                    self.country_directory.slide(self.size,next[1]);self.dirty=true;return;
+                }
                 if self.hud.volume_drag {self.slide_volume();return;}
                 if self.hud.clock_drag.is_some(){self.hud.clock_drag=Some(formal_ui::clock_angle(next,self.size[0]));self.dirty=true;return;}
                 if let Some(mut d)=self.drag.take(){
@@ -1297,6 +1402,9 @@ impl ApplicationHandler<Completion> for Host {
             WindowEvent::MouseInput{state,button,..} if matches!(button,MouseButton::Left|MouseButton::Right)=>{
                 if state==ElementState::Pressed {
                     self.focus=None;self.velocity=[0.;2];
+                    if button==MouseButton::Left&&self.in_lobby()&&self.lobby_page==lobby::Page::Selection
+                        &&!self.loading()&&self.country_directory.grab(self.size,self.cursor)
+                    {self.drag=None;self.dirty=true;return;}
                     if button==MouseButton::Left&&self.volume_slider().is_some_and(|[x,y,w,h]|{
                         self.cursor[0]>=x&&self.cursor[0]<=x+w&&self.cursor[1]>=y&&self.cursor[1]<=y+h
                     }) {self.hud.volume_drag=true;self.slide_volume();return;}
@@ -1308,6 +1416,8 @@ impl ApplicationHandler<Completion> for Host {
                     let clock_surface=formal_ui::clock_hit(self.cursor,self.size[0],self.state.session.as_ref(),self.hud.mechanical.angle);
                     self.drag=(!clock_surface&&!self.is_panel(self.cursor)).then(||Drag{
                         at:self.cursor,origin:self.cursor,last:Instant::now(),bearing:button==MouseButton::Right,moved:false});
+                } else if button==MouseButton::Left&&self.country_directory.drag.take().is_some() {
+                    self.dirty=true;
                 } else if button==MouseButton::Left&&self.hud.volume_drag {
                     self.slide_volume();self.hud.volume_drag=false;
                 } else if button==MouseButton::Left&&self.hud.clock_drag.is_some() {
@@ -1324,6 +1434,7 @@ impl ApplicationHandler<Completion> for Host {
             }
             WindowEvent::MouseWheel{delta,..}=>{
                 let steps=match delta {MouseScrollDelta::LineDelta(_,y)=>f64::from(y),MouseScrollDelta::PixelDelta(p)=>p.y/96.};
+                if self.scroll_countries(self.cursor,steps) {return;}
                 let [w,h]=self.size.map(|n|n as f32);
                 let [x,y,width,height]=formal_ui::message_rect([w,h],((h+16.)*0.5).max(190.));
                 if self.hud.messages && (f64::from(x)..=f64::from(x+width)).contains(&self.cursor[0]) && (f64::from(y)..=f64::from(y+height)).contains(&self.cursor[1]){
@@ -1333,8 +1444,10 @@ impl ApplicationHandler<Completion> for Host {
                     self.action(Action::Hud(HudCommand::MarketScroll(-(steps.signum() as i32)*3)));
                 }else if !self.is_panel(self.cursor) {self.zoom(self.cursor,steps);}
             }
+            WindowEvent::Ime(winit::event::Ime::Commit(text)) if self.country_directory.search_active=>self.type_country_search(&text),
             WindowEvent::KeyboardInput{event,..} if event.state==ElementState::Pressed && !event.repeat=>self.key(event.logical_key),
-            WindowEvent::Focused(false)=>{self.drag=None;self.hud.volume_drag=false;self.dirty|=self.hud.clock_drag.take().is_some();self.velocity=[0.;2];}
+            WindowEvent::Focused(false)=>{self.drag=None;self.hud.volume_drag=false;self.dirty|=self.hud.clock_drag.take().is_some();
+                self.dirty|=self.country_directory.drag.take().is_some();self.velocity=[0.;2];}
             _=>(),
         }
     }
@@ -1348,7 +1461,8 @@ impl ApplicationHandler<Completion> for Host {
         }
         let fading=self.cached.values().any(|p|now.saturating_duration_since(p.ready)<Duration::from_millis(180));
         let expiry=self.cached.values().any(|p|now.saturating_duration_since(p.used)>CACHE_TTL);
-        let animated=self.loading()||self.state.session.is_some()||self.in_lobby()&&self.lobby_page==lobby::Page::Selection
+        let animated=self.loading()||self.state.session.is_some()
+            ||self.in_lobby()&&self.lobby_page==lobby::Page::Selection
             || self.selected.is_some_and(|o|matches!(o,Object::Polity(_)));
         let transitioning=self.loading_fade.is_some_and(|t|t.elapsed()<Duration::from_millis(320));
         if let Some(window)=&self.window {
@@ -1385,5 +1499,9 @@ fn run() -> Result<(),Box<dyn std::error::Error>> {
         Ok(app)=>app,Err(e)=>{record_error(&data,&e.to_string());return Err(e.into());}
     };
     events.run_app(&mut app)?;
+    if let Some(error)=app.fatal_error {
+        record_error(&data,&error);
+        return Err(io::Error::other(error).into());
+    }
     Ok(())
 }

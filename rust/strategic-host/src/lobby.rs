@@ -1,4 +1,4 @@
-use crate::{formal_ui::{self,Display,Slot,IVORY,MUTED},overlay::Mesh,ui::{Action,Hit},world::World};
+use crate::{formal_ui::{self,Display,Slot,IVORY,MUTED},overlay::Mesh,ui::{Action,Hit},world::{Polity,World}};
 use crate::migration_status::Status;
 use serde::Deserialize;
 
@@ -12,10 +12,133 @@ pub struct Lobby {
 #[derive(Deserialize)]
 pub struct Opening {pub id:String,label:String,place:String}
 
+impl Lobby {
+    pub fn opening(&self, polity: &Polity) -> Option<&Opening> {
+        self.choices.iter().find(|row| row.id.strip_prefix("state:") == Some(polity.id.as_str()))
+    }
+}
+
 #[derive(Clone,Copy,Debug,Default,PartialEq,Eq)]
 pub enum Page {#[default] Home,Selection,Load,Settings,Themes,Migration(Status,usize)}
 #[derive(Clone,Copy)]
-pub enum Command {Page(Page),Country(usize),Enter,Load(u8),Exit}
+pub enum Command {Page(Page),Country(usize),Search,ClearSearch,Enter,Load(u8),Exit}
+
+const ROW: f32 = 34.;
+pub type Rect = [f32;4];
+
+pub fn contains([x,y,w,h]: Rect, [px,py]: [f64;2]) -> bool {
+    (f64::from(x)..=f64::from(x+w)).contains(&px)
+        && (f64::from(y)..=f64::from(y+h)).contains(&py)
+}
+
+pub fn profile([w,h]:[u32;2]) -> Rect {
+    let width=(w as f32*0.43).min(430.);
+    [w as f32-width-32.,(h as f32*0.14).max(58.),width,174.]
+}
+
+pub fn primary(size:[u32;2]) -> Rect {
+    let [x,_,w,_]=profile(size);
+    [x,size[1] as f32*0.72,w,36.]
+}
+
+pub fn back([w,h]:[u32;2]) -> Rect {
+    [w as f32-168.,h as f32-59.,136.,31.]
+}
+
+fn polity_label<'a>(p: &'a Polity, opening: Option<&'a Opening>, english: bool) -> &'a str {
+    if english || p.name_zh.is_empty() {
+        &p.name
+    } else {
+        opening.map_or(&p.name_zh, |row| &row.label)
+    }
+}
+
+#[derive(Default)]
+pub struct Directory {
+    pub search_active: bool,
+    pub query: String,
+    pub drag: Option<f32>,
+    offset: f32,
+    entries: Vec<usize>,
+}
+
+impl Directory {
+    pub fn filter(&mut self, world: &World, lobby: Option<&Lobby>, date: &str, english: bool) {
+        let query = self.query.trim().to_lowercase();
+        let mut items: Vec<_> = world.polities.iter().enumerate().filter_map(|(index, polity)| {
+            if !polity.active(date) { return None; }
+            let opening = lobby.and_then(|state| state.opening(polity));
+            let label = polity_label(polity, opening, english).to_lowercase();
+            [label.as_str(), &polity.name.to_lowercase(), &polity.name_zh]
+                .iter().any(|name|name.contains(&query))
+                .then_some((opening.is_none(), label, index))
+        }).collect();
+        items.sort_unstable();
+        self.entries = items.into_iter().map(|(_,_,index)| index).collect();
+        self.offset = 0.;
+    }
+
+    pub fn panel([w,h]:[u32;2]) -> Rect {
+        let max_height = (h as f32 - 78.).min(530.);
+        let rows = ((max_height - 100.) / ROW).floor();
+        let height = 100. + rows * ROW;
+        let width=(w as f32 * 0.35).min(340.);
+        [24., (h as f32 - height) * 0.5, width,height]
+    }
+
+    pub fn list(&self, size: [u32;2]) -> Rect {
+        let [x,y,w,h] = Self::panel(size);
+        [x+12.,y+86.,w-24.,h-100.]
+    }
+
+    fn visible(&self, size: [u32;2]) -> usize {
+        (self.list(size)[3] / ROW) as usize
+    }
+
+    fn limit(&self, size: [u32;2]) -> f32 {
+        self.entries.len().saturating_sub(self.visible(size)) as f32
+    }
+
+    pub fn reveal(&mut self, size: [u32;2], selected: usize) {
+        let Some(index) = self.entries.iter().position(|&value|value == selected) else {return;};
+        let visible = self.visible(size);
+        let start = self.offset.floor() as usize;
+        if index < start {
+            self.offset = index as f32;
+        } else if index >= start + visible {
+            self.offset = (index + 1 - visible) as f32;
+        }
+        self.offset = self.offset.min(self.limit(size));
+    }
+
+    pub fn scroll(&mut self, size: [u32;2], steps: f32) {
+        self.offset = (self.offset - steps * 3.).clamp(0., self.limit(size));
+    }
+
+    fn scrollbar(&self, size: [u32;2]) -> Option<(Rect, Rect)> {
+        let limit = self.limit(size);
+        if limit == 0. { return None; }
+        let [x,y,w,h] = self.list(size);
+        let height = (h * self.visible(size) as f32 / self.entries.len() as f32).max(22.);
+        let top = y + self.offset.min(limit) / limit * (h - height);
+        Some(([x+w-13., y, 13.,h], [x+w-13.,top,13.,height]))
+    }
+
+    pub fn grab(&mut self, size: [u32;2], point: [f64;2]) -> bool {
+        let Some((track,thumb)) = self.scrollbar(size) else { return false; };
+        if !contains(track, point) { return false; }
+        self.drag = Some(if contains(thumb, point) {point[1] as f32 - thumb[1]} else {thumb[3] * 0.5});
+        self.slide(size, point[1]);
+        true
+    }
+
+    pub fn slide(&mut self, size: [u32;2], y: f64) {
+        if let (Some(grab), Some((track,thumb))) = (self.drag,self.scrollbar(size)) {
+            let position = ((y as f32-grab-track[1]) / (track[3]-thumb[3])).clamp(0.,1.);
+            self.offset = position * self.limit(size);
+        }
+    }
+}
 
 impl Display<'_> {
     pub fn loading(&self, status:&str, seconds:f32) -> [(Mesh,crate::ui::Ink);11] {
@@ -40,7 +163,7 @@ impl Display<'_> {
         mesh.image([0.,0.,w,h],[u-x,v-y,u+x,v+y],[255;4]);
     }
 
-    pub fn lobby(&self,world:&World,state:Option<&Lobby>,page:Page,selection:usize,waiting:bool)
+    pub fn lobby(&self,world:&World,state:Option<&Lobby>,page:Page,selection:usize,waiting:bool,directory:&Directory)
         -> ([(Mesh,crate::ui::Ink);11],Vec<Hit>)
     {
         use crate::ui::Ink;
@@ -73,34 +196,30 @@ impl Display<'_> {
                 self.skin.text(&mut text,runtime,0,[x+24.,y+342.],width-48.,MUTED);
             }
             Page::Selection=>{
-                let width=(w*0.43).min(430.);
-                let x=w-width-32.;let y=(h-400.)*0.5;
-                formal_ui::panel(&mut panels,[x,y,width,400.],[12,22,31,241]);
+                let [x,y,width,height]=profile(self.size);
+                formal_ui::panel(&mut panels,[x,y,width,height],[12,22,31,241]);
                 self.skin.sprite(&mut art,"crest",[x+width*0.5-97.,y-50.,194.,55.]);
                 self.skin.text(&mut text,"国家档案  /  1900",1,[x+22.,y+15.],width-44.,IVORY);
                 let selected=world.polities.get(selection);
-                let opening=state.and_then(|s|selected.and_then(|p|s.choices.iter().find(|row|row.id.strip_prefix("state:")==Some(p.id.as_str()))));
+                let opening=state.and_then(|s|selected.and_then(|p|s.opening(p)));
                 if let Some(p)=selected {
-                    let label=opening.map(|o|o.label.as_str()).unwrap_or(&p.name_zh);
-                    self.skin.text(&mut text,label,2,[x+103.,y+68.],width-120.,IVORY);
+                    let label=polity_label(p, opening, self.skin.english());
+                    self.skin.text(&mut text,label,1,[x+103.,y+73.],width-125.,IVORY);
                     if let Some(slot)=self.flags{flags.flag([x+22.,y+63.,68.,45.],slot);}
                 }
-                let identity=opening.map(|o|format!("{} · 居民 · 未就业",o.place)).unwrap_or_else(||"该地区暂无可选人物。".into());
-                self.skin.text(&mut text,"开局身份",0,[x+22.,y+118.],width-44.,MUTED);
-                self.skin.text(&mut text,&identity,0,[x+22.,y+143.],width-44.,IVORY);
-                if let Some(s)=state{
-                    for (i,choice) in s.choices.iter().enumerate(){
-                        if let Some(index)=world.polities.iter().position(|p|choice.id.strip_prefix("state:")==Some(p.id.as_str())){
-                            let col=(i%2) as f32;let line=(i/2) as f32;let cell=(width-52.)*0.5;
-                            self.row(&mut panels,&mut text,&mut hits,[x+22.+col*(cell+8.),y+187.+line*32.,cell,27.],
-                                &choice.label,(!busy).then_some(action(Command::Country(index))),index==selection);
-                        }
-                    }
+                if let Some(opening)=opening {
+                    let identity=format!("{} · 居民 · 未就业",opening.place);
+                    self.skin.text(&mut text,"开局身份",0,[x+22.,y+118.],width-44.,MUTED);
+                    self.skin.text(&mut text,&identity,0,[x+22.,y+141.],width-44.,IVORY);
+                } else {
+                    self.skin.text(&mut text,"仅可查看历史资料",0,[x+22.,y+132.],width-44.,MUTED);
                 }
-                self.row(&mut panels,&mut text,&mut hits,[x+22.,y+287.,width-44.,32.],"进入世界",
-                    (opening.is_some()&&state.is_some_and(|s|s.selection_ready)&&!busy).then_some(action(Command::Enter)),true);
-                self.row(&mut panels,&mut text,&mut hits,[x+22.,y+330.,width-44.,30.],"返回主菜单",
+                let can_enter=opening.is_some()&&state.is_some_and(|s|s.selection_ready)&&!busy;
+                self.row(&mut panels,&mut text,&mut hits,primary(self.size),"进入世界",
+                    can_enter.then_some(action(Command::Enter)),can_enter);
+                self.row(&mut panels,&mut text,&mut hits,back(self.size),"返回主菜单",
                     (!busy).then_some(action(Command::Page(Page::Home))),false);
+                self.country_directory(&mut panels,&mut text,&mut hits,world,state,directory,selection,busy);
             }
             Page::Load=>{
                 let width=500.;let x=(w-width)*0.5;let y=(h-400.)*0.5;
@@ -142,6 +261,48 @@ impl Display<'_> {
         }
         ([(Mesh::default(),Ink::Solid),(Mesh::default(),Ink::Text),(Mesh::default(),Ink::Instrument),(Mesh::default(),Ink::ClockGears),
           (background,Ink::MenuArt),(panels,Ink::Solid),(Mesh::default(),Ink::Text),(flags,Ink::Flag),(art,Ink::HudArt),(Mesh::default(),Ink::Solid),(text,Ink::HudText)],hits)
+    }
+
+    fn country_directory(&self,panels:&mut Mesh,text:&mut Mesh,hits:&mut Vec<Hit>,world:&World,
+        state:Option<&Lobby>,directory:&Directory,selection:usize,busy:bool)
+    {
+        let [x,y,w,h]=Directory::panel(self.size);
+        formal_ui::panel(panels,[x,y,w,h],[12,22,31,249]);
+        self.skin.text(text,"国家目录",1,[x+20.,y+12.],w-40.,IVORY);
+        let hint=if directory.query.is_empty() {"搜索国家或地区"} else { &directory.query };
+        let search_width=if directory.query.is_empty(){w-24.}else{w-74.};
+        self.row(panels,text,hits,[x+12.,y+46.,search_width,30.],hint,
+            (!busy).then_some(action(Command::Search)),directory.search_active);
+        if !directory.query.is_empty(){
+            self.row(panels,text,hits,[x+w-56.,y+46.,44.,30.],"清除",
+                (!busy).then_some(action(Command::ClearSearch)),false);
+        }
+        let [left,top,width,_]=directory.list(self.size);
+        let start=directory.offset.min(directory.limit(self.size)).floor() as usize;
+        for (row,&index) in directory.entries.iter().skip(start).take(directory.visible(self.size)).enumerate() {
+            let polity=&world.polities[index];
+            let opening=state.and_then(|s|s.opening(polity));
+            let title=polity_label(polity,opening,self.skin.english());
+            let row_y=top+row as f32*ROW;
+            let area=[left,row_y,width-19.,29.];
+            self.row(panels,text,hits,area,"",(!busy).then_some(action(Command::Country(index))),index==selection);
+            self.skin.text(text,title,0,[left+9.,row_y+6.],width-115.,IVORY);
+            let badge=if opening.is_some() {"可开局"} else {"仅查看"};
+            self.skin.text(text,badge,0,[left+width-94.,row_y+6.],54.,if opening.is_some(){IVORY}else{MUTED});
+            if index==selection {
+                let x=left+width-35.;
+                panels.line([x,row_y+15.],[x+4.,row_y+19.],2.,[230,202,147,255]);
+                panels.line([x+4.,row_y+19.],[x+12.,row_y+10.],2.,[230,202,147,255]);
+            }
+        }
+        if directory.entries.is_empty() {
+            self.skin.text(text,"没有匹配的国家",0,[left+9.,top+7.],width-18.,MUTED);
+        }
+        if let Some((track,thumb))=directory.scrollbar(self.size) {
+            panels.rect(track[0]+5.,track[1],3.,track[3],[85,75,53,255]);
+            panels.rect(thumb[0]+3.,thumb[1],7.,thumb[3],
+                if directory.drag.is_some() {[230,202,147,255]} else {[174,146,100,255]});
+        }
     }
 }
 
