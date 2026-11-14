@@ -55,7 +55,15 @@ struct Logistics {name:String,details:String}
 #[derive(Deserialize)]
 struct Sample {minute:u64,value:f64}
 #[derive(Deserialize)]
-pub struct Holding {pub id:String,label:String,pub quantity:i64,scale:i64,unit:String}
+pub struct Holding {
+    pub id: String,
+    label: String,
+    pub quantity: i64,
+    scale: i64,
+    unit: String,
+    #[serde(default)]
+    pub consume_quantity: Option<i64>,
+}
 
 impl Market {
     pub fn logistics_len(&self)->usize{self.logistics.len()}
@@ -97,12 +105,19 @@ impl Display<'_> {
         self.folio(m,art,t,hits,[x,y,w,h],"人物 · 持有物");
         let Some(s)=self.session else{self.skin.text(t,"正式世界未连接",0,[x+20.,y+75.],w-40.,MUTED);return;};
         if s.property.is_empty(){self.skin.text(t,"暂无个人持有物品。",0,[x+20.,y+75.],w-40.,MUTED);}
-        for (i,row) in s.property.iter().skip(self.hud.market_offset).take(((h-102.)/31.) as usize).enumerate(){
-            let top=y+74.+i as f32*31.;
+        for (index, row) in s.property.iter().enumerate().skip(self.hud.market_offset).take(((h-114.)/33.) as usize) {
+            let top=y+74.+(index-self.hud.market_offset) as f32*33.;
             self.skin.text(t,&row.label,0,[x+22.,top],w*0.36,IVORY);
-            self.skin.text(t,&format!("{} {}",format_quantity(row.quantity,row.scale),row.unit),0,[x+w*0.4,top],w*0.28,IVORY);
-            self.skin.text(t,&row.id,0,[x+w*0.64,top],w*0.34,MUTED);
-            m.line([x+22.,top+23.],[x+w-24.,top+23.],0.7,BRASS);
+            self.skin.text(t,&format!("{} {}",format_quantity(row.quantity,row.scale),row.unit),0,[x+w*0.4,top],w*0.30,IVORY);
+            if let Some(quantity) = row.consume_quantity {
+                self.row(m,t,hits,[x+w-138.,top-2.,114.,25.],
+                    &format!("消费 {}", format_quantity(quantity, row.scale)),
+                    Some(Action::Hud(Command::Consume(index))),false);
+            }
+            m.line([x+22.,top+26.],[x+w-24.,top+26.],0.7,BRASS);
+        }
+        if !s.property_feedback.is_empty() {
+            self.skin.text(t,&s.property_feedback,0,[x+22.,y+h-30.],w-44.,MUTED);
         }
     }
 

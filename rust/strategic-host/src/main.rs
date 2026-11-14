@@ -324,6 +324,13 @@ impl Host {
             HudCommand::WorkConfirm(confirmed)=>{
                 self.emit(Request::Relations{verb:if confirmed{"work_confirm"}else{"work_cancel"},id:""});
             }
+            HudCommand::Consume(index) => {
+                let choice = self.state.session.as_ref().and_then(|s| s.property.get(index))
+                    .and_then(|row| row.consume_quantity.map(|quantity| (row.id.clone(), quantity)));
+                if let Some((id, quantity)) = choice {
+                    self.emit(Request::Consume { id: &id, quantity });
+                }
+            }
             HudCommand::Relation(index)=>{
                 let id=index.and_then(|i|self.state.session.as_ref()?.relations.as_ref()?.rows.get(i))
                     .map(|row|row.id.clone());
