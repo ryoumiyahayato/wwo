@@ -1,9 +1,10 @@
+use crate::calendar::year_start_day;
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, fs, io, path::Path};
 use wwo_character_core::{
     ActionSpec, CharacterHost, CharacterSystem, ConditionEvidence, ConditionStatus, Error,
     Capability, CharacterSnapshot, Experience, Health, LifeEvent, LifeRules, LivingConditions,
-    ObservedConditions, OpportunityHost, PersonRecord, PersonSeed, Requirement, Result, SocialFacts,
+    ObservedConditions, OpportunityHost, PersonRecord, PersonSeed, PersonView, Requirement, Result, SocialFacts,
     SNAPSHOT_SCHEMA,
 };
 
@@ -28,10 +29,11 @@ struct Save {
 }
 
 const SAVE_SCHEMA: &str = "formal_character_state_v1";
+const SHARED_WORLD: &str = "formal_world_1900";
 
-#[derive(Deserialize)]
-struct Identity {
-    // R68 owns these fields. Only IDs and life state are admitted to the slot.
+#[derive(Clone, Deserialize)]
+pub(crate) struct Identity {
+    // The world owns these fields and supplies them on every restore.
     birth_day: i64,
     name: String,
     basis: String,
@@ -39,10 +41,102 @@ struct Identity {
 }
 
 impl Identity {
+    pub(crate) fn new(birth_year: i64, name: String, basis: String, alive: bool) -> Result<Self> {
+        if !(1700..=9999).contains(&birth_year) {
+            return Err(Error("formal person has no supported birth year".into()));
+        }
+        Ok(Self {
+            birth_day: year_start_day(birth_year) - year_start_day(1900),
+            name,
+            basis,
+            alive,
+        })
+    }
+
     fn seed(&self, id: &str, capabilities: BTreeMap<String, Capability>) -> PersonSeed {
         PersonSeed {
             id: id.into(), name: self.name.clone(), birth_day: self.birth_day,
             basis: self.basis.clone(), constitution: 500, capabilities,
+        }
+    }
+}
+
+pub(crate) fn opening_identity(year: u16) -> Result<Identity> {
+    Identity::new(i64::from(year), "姓名未记录".into(), "generated_simulation_assumption".into(), true)
+}
+
+#[derive(Serialize)]
+pub(crate) struct CharacterOutput {
+    pub state: String,
+    pub profile: PersonView,
+    pub day: u32,
+    assessment: Option<wwo_character_core::ActionAssessment>,
+    pub able_to_work: bool,
+}
+
+pub(crate) fn restore(
+    opening: &str,
+    player: &str,
+    people: BTreeMap<String, Identity>,
+    day: u32,
+    state: &str,
+) -> Result<CharacterOutput> {
+    run(Request::for_world(opening, player, people, day, state))
+}
+
+pub(crate) fn assess_purchase(
+    player: &str, people: &BTreeMap<String, Identity>, day: u32, state: &str,
+    market: &str, amount: u64, available: u64,
+) -> Result<CharacterOutput> {
+    let mut request = Request::initialize(SHARED_WORLD.to_owned(), player, people.clone(), day, state);
+    request.operation = "purchase".into();
+    request.quote = Some(Quote {
+        currency: crate::formal_ledger::CURRENCY.into(), amount, available: Some(available),
+        market: market.to_owned(), accessible: true,
+    });
+    let result = run(request)?;
+    if !result.assessment.as_ref().is_some_and(|decision| decision.ready) {
+        return Err(Error("当前人物状态不允许这笔购买".into()));
+    }
+    Ok(result)
+}
+
+pub(crate) fn advance_opening_day(
+    player: &str, people: &BTreeMap<String, Identity>, day: u32, state: &str, work: BTreeSet<String>,
+) -> Result<CharacterOutput> {
+    let mut request = Request::initialize(SHARED_WORLD.to_owned(), player, people.clone(), day, state);
+    request.operation = "day".into();
+    request.work = work;
+    request.settled_day = day.checked_sub(1).ok_or_else(|| Error("invalid character day".into()))?;
+    run(request)
+}
+
+pub(crate) fn opening_profile(
+    player: &str, people: &BTreeMap<String, Identity>, day: u32, state: &str,
+) -> Result<CharacterOutput> {
+    run(Request::initialize(SHARED_WORLD.to_owned(), player, people.clone(), day, state))
+}
+
+impl Request {
+    fn for_world(
+        opening: &str, player: &str, people: BTreeMap<String, Identity>, day: u32, state: &str,
+    ) -> Self {
+        Self::initialize(format!("{opening}|{player}"), player, people, day, state)
+    }
+
+    fn initialize(world: String, player: &str, people: BTreeMap<String, Identity>, day: u32, state: &str) -> Self {
+        Self {
+            operation: "restore".into(),
+            world,
+            day,
+            settled_day: day,
+            state: state.to_owned(),
+            people,
+            player: player.to_owned(),
+            social: SocialFacts::default(),
+            nutrition: BTreeMap::new(),
+            work: BTreeSet::new(),
+            quote: None,
         }
     }
 }
@@ -117,7 +211,10 @@ fn learning(system: &mut CharacterSystem, person: &str, domain: &str, label: &st
     Ok(())
 }
 
-fn run(input: Request) -> Result<serde_json::Value> {
+fn run(input: Request) -> Result<CharacterOutput> {
+    if !input.people.contains_key(&input.player) {
+        return Err(Error("selected player is missing from the formal world".into()));
+    }
     let mut system = if input.state.is_empty() {
         if input.operation != "restore" || input.day != input.settled_day {
             return Err(Error("missing formal character state".into()));
@@ -194,10 +291,7 @@ fn run(input: Request) -> Result<serde_json::Value> {
             event_sequence: record.event_sequence,
         })).collect(),
     }).map_err(|e| Error(e.to_string()))?;
-    Ok(serde_json::json!({
-        "state": state, "profile": profile, "day": input.day,
-        "assessment": assessment, "able_to_work": able_to_work,
-    }))
+    Ok(CharacterOutput { state, profile, day: input.day, assessment, able_to_work })
 }
 
 #[derive(Deserialize)]

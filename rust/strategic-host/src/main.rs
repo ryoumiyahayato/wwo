@@ -4,7 +4,7 @@ mod camera;
 #[cfg(windows)]
 mod desktop_start;
 #[cfg(windows)]
-mod formal_character;
+mod native_start;
 mod compact;
 mod formal_ui;
 mod market_ui;
@@ -42,16 +42,19 @@ struct Diagnostics {rate:f64,cpu_ms:f64,tiles:usize,visible:usize,mib:f64,stream
 
 struct Config {root:PathBuf,world:Option<PathBuf>,requests:Option<PathBuf>,scenario:Option<PathBuf>,observe:Option<PathBuf>,managed:bool,
     preferences:Option<PathBuf>,background:bool,
+    #[cfg(windows)] native:Option<native_start::NativeSession>,
     #[cfg(windows)] desktop:Option<desktop_start::DesktopSession>}
 impl Config {
     fn parse()->io::Result<Self> {
         let home=std::env::current_exe()?.parent().unwrap().to_owned();
         let mut result=Self{root:home.join("data"),world:None,requests:None,scenario:None,observe:None,managed:false,preferences:None,background:false,
-            #[cfg(windows)] desktop:None};
+            #[cfg(windows)] desktop:None,
+            #[cfg(windows)] native:None};
         let mut args=std::env::args_os().skip(1).peekable();
         #[cfg(windows)]
-        let mut start_game=args.peek().is_none() && std::env::current_exe()?.file_name().is_some_and(|s|
-            s.eq_ignore_ascii_case("WWO-Mechanical-Candidate.exe")||s.eq_ignore_ascii_case("WWO-Mechanical-Preview.exe")||s.eq_ignore_ascii_case("WWO-Start.exe")||s.eq_ignore_ascii_case("WWO-Start-UI.exe")||s.eq_ignore_ascii_case("WWO-ClockHUD-Local.exe")||s.eq_ignore_ascii_case("WWO-R68-UI-Local.exe")||s.eq_ignore_ascii_case("WWO-R68-UI.exe"));
+        let mut start_game=args.peek().is_none();
+        #[cfg(windows)]
+        let mut r68_comparison=false;
         while let Some(arg)=args.next() {
             let path=|args:&mut std::iter::Peekable<std::iter::Skip<std::env::ArgsOs>>| args.next().map(PathBuf::from).ok_or_else(||io::Error::other("missing argument path"));
             match arg.to_str() {
@@ -65,16 +68,26 @@ impl Config {
                 Some("--formal-menu")=>result.managed=true,
                 #[cfg(windows)]
                 Some("--play")=>start_game=true,
+                #[cfg(windows)]
+                Some("--r68")=>{start_game=true;r68_comparison=true;},
                 _=>return Err(io::Error::other(format!("unknown argument {arg:?}"))),
             }
         }
         #[cfg(windows)]
         if start_game {
-            if result.world.is_some()||result.requests.is_some()||result.scenario.is_some(){return Err(io::Error::other("--play starts its own R68 session"));}
-            let desktop=desktop_start::DesktopSession::start(&home)?;
-            result.world=Some(desktop.state.clone());result.requests=Some(desktop.requests.clone());
-            result.preferences=Some(desktop.preferences.clone());
-            result.managed=true;result.desktop=Some(desktop);
+            if result.world.is_some()||result.requests.is_some()||result.scenario.is_some(){return Err(io::Error::other("--play manages its own formal world"));}
+            result.managed=true;
+            if r68_comparison {
+                let desktop=desktop_start::DesktopSession::start(&home)?;
+                result.world=Some(desktop.state.clone());result.requests=Some(desktop.requests.clone());
+                result.preferences=Some(desktop.preferences.clone());
+                result.desktop=Some(desktop);
+            } else {
+                let native=native_start::NativeSession::start()?;
+                if result.preferences.is_none(){result.preferences=Some(native.preferences.clone());}
+                result.native=Some(native);
+                return Ok(result);
+            }
         }
         if result.world.is_some() && result.scenario.is_some(){return Err(io::Error::other("world input and isolated land test are exclusive"));}
         if result.managed&&(result.world.is_none()||result.requests.is_none()){return Err(io::Error::other("formal menu requires bridge snapshot and requests paths"));}
@@ -136,6 +149,8 @@ impl Host {
         let world=World::open(&config.root.join("world.json"))?;
         if world.tiles.first().is_none_or(|t|t.level!=0) || world.polities.len()>255 || world.admin.len()>255 {return Err(io::Error::other("invalid world index"));}
         let mut state=State::new();
+        #[cfg(windows)]
+        if let Some(native)=&config.native {native.update_view(&mut state)?;}
         if let Some(path)=&config.world {
             if !config.managed||path.exists(){state.input(path,&world)?;}
         }
@@ -181,6 +196,23 @@ impl Host {
         match object {Object::Place(i)=>self.world.places[i].id.clone(),Object::Polity(i)=>self.world.polities[i].map_id(),Object::Administration(i)=>self.world.admin[i].id.clone()}
     }
     fn emit(&mut self,request:Request<'_>) {
+        #[cfg(windows)]
+        if let Some(native)=&mut self.config.native {
+            let had_session=self.state.session.is_some();
+            let revision=native.revision;
+            self.feedback.clear();
+            let dispatched=native.dispatch(request);
+            let updated=native.update_view(&mut self.state);
+            self.exit_requested|=native.exit;
+            let loaded=native.revision!=revision;
+            match updated {
+                Ok(())=>self.world_view_changed(had_session, loaded, Instant::now()),
+                Err(error)=>self.feedback=error.to_string(),
+            }
+            if let Err(error)=dispatched {self.feedback=error.to_string();}
+            self.dirty=true;
+            return;
+        }
         if let Err(e)=request.output(self.config.requests.as_deref()) {self.feedback=format!("Host request: {e}");}
     }
     fn select(&mut self,object:Option<Object>) {
@@ -498,13 +530,13 @@ impl Host {
             Command::Enter=>{
                 if let Some(p)=self.world.polities.get(self.lobby_country){
                     let id=format!("state:{}",p.id);
-                    self.emit(Request::Lobby{verb:"new",polity:&id,slot:0});
                     self.lobby_request=true;self.bridge_wait=Instant::now();self.seen_lobby_busy=false;
+                    self.emit(Request::Lobby{verb:"new",polity:&id,slot:0});
                 }
             }
             Command::Load(slot)=>{
-                self.emit(Request::Lobby{verb:"load",polity:"",slot});
                 self.lobby_request=true;self.bridge_wait=Instant::now();self.seen_lobby_busy=false;
+                self.emit(Request::Lobby{verb:"load",polity:"",slot});
             }
             Command::Exit=>self.exit_requested=true,
         }
@@ -698,7 +730,7 @@ impl Host {
             })
     }
     fn set_date(&mut self,date:Date) {
-        if self.config.world.is_some(){self.feedback="Date comes from the connected world snapshot".into();self.dirty=true;return;}
+        if self.config.managed||self.config.world.is_some(){self.feedback="日期由正式世界时钟决定。".into();self.dirty=true;return;}
         self.state.date=date;
         if let Some(model)=self.state.timeline.as_mut(){model.set_date(date);}
         if self.selected.is_some_and(|o|!self.available(o)){self.select(None);}
@@ -1067,6 +1099,46 @@ impl Host {
         let response=serde_json::json!({"id":input.id,"state":self.status(),"extra":extra});
         if let Ok(bytes)=serde_json::to_vec(&response){let _=fs::write(path.with_extension("response.json"),bytes);}
     }
+    fn world_view_changed(&mut self, had_session:bool, loaded:bool, now:Instant) {
+        self.last_palette=None;
+        let connected=self.state.session.is_some();
+        if self.config.managed&&(had_session!=connected||loaded){
+            if connected {self.loading_fade=Some(now);self.loading_status="正在安装地图".into();}
+            self.hud=Hud{fullscreen:self.hud.fullscreen,volume:self.hud.volume,english:self.hud.english,..Hud::default()};
+            self.selected=None;self.details=false;self.admin_page=None;
+            self.search=None;self.history.clear();self.focus=None;self.velocity=[0.;2];self.hits.clear();
+            self.mode=Mode::Geographic;self.labels=false;
+            self.camera=Camera::new(self.size);
+            if let Some(point)=self.state.session.as_ref().and_then(|s| <[f64;2]>::try_from(s.coordinates.as_slice()).ok()) {
+                #[cfg(windows)]
+                if self.config.native.is_some() {self.camera.focus(point, 1400.);}
+                #[cfg(not(windows))]
+                let _=point;
+            }
+            self.lobby_page=lobby::Page::Home;self.lobby_request=false;
+            self.departure_requested=false;
+        }
+        if let Some(lobby)=&self.state.lobby{
+            self.seen_lobby_busy|=lobby.busy;
+            if self.lobby_request&&!lobby.busy&&(self.seen_lobby_busy||!lobby.status.is_empty()){self.lobby_request=false;}
+        }
+        if let Some(s)=&self.state.session{
+            if !s.departure.is_empty(){self.hud.menu=HudMenu::Departure;}
+            else if self.hud.menu==HudMenu::Departure{self.hud.menu=HudMenu::None;}
+            if self.hud.waiting_slot {
+                if !s.slot_open {self.hud.waiting_slot=false;self.hud.menu=HudMenu::None;}
+                else if !s.slot_error.is_empty() {self.hud.waiting_slot=false;}
+            }
+        }
+        if self.hud.page==HudPage::Market {
+            self.hits.clear();
+            if let Some(target)=self.state.session.as_ref().and_then(|s|s.market.as_ref()).and_then(|market|market.focus) {
+                self.apply_market_focus(target);
+            }
+        }
+        if self.selected.is_some_and(|o|!self.available(o)){self.selected=None;self.details=false;}
+    }
+
     fn poll(&mut self,event_loop:&ActiveEventLoop,now:Instant) {
         #[cfg(windows)]
         if let Some(desktop)=&mut self.config.desktop {desktop.poll();}
@@ -1111,39 +1183,8 @@ impl Host {
                     let had_session=self.state.session.is_some();
                     match self.state.input(path,&self.world){
                         Ok(())=>{
-                            self.version=version;self.last_palette=None;self.feedback.clear();
-                            let connected=self.state.session.is_some();
-                            if self.config.managed&&had_session!=connected{
-                                if connected {self.loading_fade=Some(now);self.loading_status="正在安装地图".into();}
-                                self.hud=Hud{fullscreen:self.hud.fullscreen,volume:self.hud.volume,english:self.hud.english,..Hud::default()};self.selected=None;self.details=false;self.admin_page=None;
-                                self.search=None;self.history.clear();self.focus=None;self.velocity=[0.;2];self.hits.clear();
-                                self.mode=Mode::Geographic;self.labels=false;
-                                self.camera=Camera::new(self.size);
-                                self.lobby_page=lobby::Page::Home;self.lobby_request=false;
-                                self.departure_requested=false;
-                            }
-                            if let Some(lobby)=&self.state.lobby{
-                                self.seen_lobby_busy|=lobby.busy;
-                                if self.lobby_request&&!lobby.busy&&(self.seen_lobby_busy||!lobby.status.is_empty()){self.lobby_request=false;}
-                            }
-                            if let Some(s)=&self.state.session{
-                                if !s.departure.is_empty(){self.hud.menu=HudMenu::Departure;}
-                                else if self.hud.menu==HudMenu::Departure{self.hud.menu=HudMenu::None;}
-                            }
-                            if self.hud.page==HudPage::Market {
-                                self.hits.clear();
-                                if let Some(target)=self.state.session.as_ref()
-                                    .and_then(|session|session.market.as_ref()).and_then(|market|market.focus) {
-                                    self.apply_market_focus(target);
-                                }
-                            }
-                            if self.hud.waiting_slot {
-                                if let Some(s)=&self.state.session {
-                                    if !s.slot_open {self.hud.waiting_slot=false;self.hud.menu=HudMenu::None;}
-                                    else if !s.slot_error.is_empty() {self.hud.waiting_slot=false;}
-                                }
-                            }
-                            if self.selected.is_some_and(|o|!self.available(o)){self.select(None);}
+                            self.version=version;self.feedback.clear();
+                            self.world_view_changed(had_session,false,now);
                         }
                         Err(e)=>self.feedback=format!("World snapshot: {e}"),
                     }
@@ -1154,6 +1195,17 @@ impl Host {
                 self.lobby_request=false;self.feedback="正在等待 R68，检查兼容进程日志。".into();self.dirty=true;
             }
             self.observe(event_loop);
+        }
+        #[cfg(windows)]
+        if let Some(native)=&mut self.config.native {
+            let result=native.tick(now).and_then(|changed| {
+                if changed {native.update_after_tick(&mut self.state)?;}
+                Ok(changed)
+            });
+            match result {
+                Ok(changed)=>self.dirty|=changed,
+                Err(error)=>{self.feedback=format!("游戏时钟推进失败：{error}");self.dirty=true;}
+            }
         }
         #[cfg(windows)]
         if let Some(desktop) = &mut self.config.desktop {

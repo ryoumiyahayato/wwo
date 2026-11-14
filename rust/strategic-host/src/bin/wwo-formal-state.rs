@@ -1,6 +1,6 @@
 use serde_json::json;
 use std::{error::Error, io, path::Path};
-use wwo_map_lab::{formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_save::SavedWorld};
+use wwo_map_lab::{formal_bootstrap::WorldBootstrap, formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_save::SavedWorld};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = std::env::args_os().skip(1);
@@ -33,6 +33,33 @@ fn main() -> Result<(), Box<dyn Error>> {
             let saved = SavedWorld::read(Path::new(&input))?;
             if let Some(path) = destination { saved.write_new(Path::new(&path))?; }
             show(&saved);
+        }
+        Some("inspect-markets") => {
+            let input = args.next().ok_or_else(usage)?;
+            if args.next().is_some() { return Err(usage().into()); }
+            let saved = SavedWorld::read(Path::new(&input))?;
+            let bootstrap = WorldBootstrap::load()?;
+            let economy = saved.restore_markets(&bootstrap)?;
+            println!("{}", json!({
+                "market_count": economy.markets().len(),
+                "in_transit": economy.shipments().len(),
+                "last_settled_hour": economy.last_settlement_hour(),
+                "has_character_state": saved.character_state().is_some(),
+                "regional_population": saved.restore_regional_population(&bootstrap)?,
+            }));
+        }
+        Some("inspect-character") => {
+            let input = args.next().ok_or_else(usage)?;
+            if args.next().is_some() { return Err(usage().into()); }
+            let saved = SavedWorld::read(Path::new(&input))?;
+            println!("{}", serde_json::to_string(&saved.restore_character()?)?);
+        }
+        Some("inspect-wages") => {
+            let input = args.next().ok_or_else(usage)?;
+            if args.next().is_some() { return Err(usage().into()); }
+            let saved = SavedWorld::read(Path::new(&input))?;
+            let claims = saved.restore_regional_wages()?;
+            println!("{}", json!({"open_regional_wages": claims.as_ref().map(|wages| wages.open_count())}));
         }
         Some("clock") => {
             let mut clock = GameClock::default();
@@ -68,5 +95,5 @@ fn show(saved: &SavedWorld) {
 
 fn usage() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput,
-        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, copy, clock or clock-control")
+        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-wages, copy, clock or clock-control")
 }

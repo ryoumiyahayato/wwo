@@ -26,6 +26,9 @@ pub(crate) fn buy(snapshot:&mut Value, quantity:i64, request:&str)->io::Result<S
         return Ok(order.to_owned());
     }
     if request!=native_id {return Err(invalid(format!("expected current purchase action ID {native_id}")));}
+    if lookup(world, "rust_character").is_some() {
+        return Err(invalid("this maintenance action cannot update the formal character state"));
+    }
     if minute!=0 || !map(field(economy,"orders")?)?.is_empty() {return Err(invalid("native purchase currently supports the first transaction in the French opening only"));}
     let config=map(field(economy,"config")?)?;
     let arrays=|key|tagged(field(config,key)?,"array");

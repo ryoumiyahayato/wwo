@@ -59,6 +59,7 @@ for entry in json.loads((r68 / "data/presentation/localization/names.json").read
             messages[zh] = en
 messages.update({"军事地图": "Military map", "打开市场": "Open market",
                  "R68 规则兼容 · Rust 候选": "R68 compatibility · Rust candidate",
+                 "Rust 原生世界": "Native Rust world",
                  "再次点击当前模式可返回基础地貌": "Select the active mode again to return to terrain"})
 (data / "messages-en-r68.json").write_text(json.dumps(messages, ensure_ascii=False), encoding="utf-8")
 Image.open(maps / "background/galactic_chart.png").convert("RGBA").save(data / "galactic-chart.png")
@@ -68,8 +69,10 @@ for name, source in (("detail", "pelagic_eddies_albedo.png"), ("ice", "polar_pac
     Image.open(ocean / source).convert("RGBA").save(data / f"ocean-{name}-r68.png")
 
 glyph_sources = [base / "src/formal_ui.rs", base / "src/market_ui.rs", base / "src/lobby.rs",
-                 base / "src/migration_status.rs", base / "src/formal_character.rs",
+                 base / "src/migration_status.rs", base / "src/formal_character.rs", base / "src/native_start.rs",
                  base / "tools/formal_host_bridge.gd", base / "tools/formal_market_bridge.gd"]
+glyph_sources += [base.parent.parent / "data/alpha/commodity_market_1900.json",
+                  base.parent.parent / "data/world_map/cities.json"]
 glyph_sources += [base.parent / "character-core/src/health.rs", base.parent / "character-core/src/action.rs"]
 glyph_sources += [r68 / "scripts/formal/formal_rust_character.gd"]
 glyph_sources += list((r68 / "scripts/presentation/ui").glob("*.gd"))
@@ -79,7 +82,7 @@ glyph_sources += [r68 / "scripts/formal/formal_world_menu.gd", r68 / "scripts/co
 glyph_sources += list((r68 / "data/local").glob("*.json"))
 chars = set()
 for path in glyph_sources:
-    chars.update(re.findall(r"[\u3000-\u9fff\uff00-\uffef−×—·]", path.read_text(encoding="utf-8")))
+    chars.update(re.findall(r"[\u3000-\u9fff\uff00-\uffef−×—·→]", path.read_text(encoding="utf-8")))
 world = json.loads((data / "world.json").read_text(encoding="utf-8"))
 for group in ("polities", "places"):
     for record in world[group]:
