@@ -88,6 +88,7 @@ impl State {
 pub enum Request<'a> {
     Inspect { id:&'a str }, Locate { id:&'a str }, SetMapMode { mode:&'static str },
     FinancePage {page:usize}, OpenSlots {mode:&'static str}, CloseSlots, Clock {speed:u32,serial:u64}, HostAction {action:&'a str},
+    ClockTick { world: &'a str, serial: u64, expected_minute: u64, speed: u32, minutes: i64 },
     Interface {volume:f64,locale:&'static str},
     Market {verb:&'a str,id:&'a str,site:&'a str,quantity:u64,token:u64,viewport:[u32;2]},
     Training {verb:&'a str},

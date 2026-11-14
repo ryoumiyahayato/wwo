@@ -8,6 +8,7 @@ pub struct Session {
     #[serde(default)] pub clock_ack:u64,
     pub hour:u32, pub minute:u32, pub paused:bool, pub speed:u32,
     #[serde(default)] pub total_minutes:u64,
+    #[serde(default)] pub rust_clock: Option<RustClock>,
     pub finance:Finance, pub technology:Technology, pub messages:Vec<Message>,
     pub slots:Vec<Slot>, pub slot_open:bool, pub slot_error:String,
     #[serde(default)] pub market:Option<crate::market_ui::Market>,
@@ -17,6 +18,11 @@ pub struct Session {
     #[serde(default)] pub training:String,
     #[serde(default)] pub departure:String,
     #[serde(default)] pub saving:bool,
+}
+#[derive(Deserialize)]
+pub struct RustClock {
+    pub world: String,
+    pub tick_ack: u64,
 }
 #[derive(Deserialize)]
 pub struct Finance {pub summary:String,pub page:usize,pub more:bool,pub rows:Vec<Receipt>}
