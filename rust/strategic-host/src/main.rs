@@ -1709,7 +1709,7 @@ impl ApplicationHandler<HostEvent> for Host {
             self.screenshot_status=None;self.dirty=true;
             if let Some(window)=&self.window{window.set_title("WWO | 1900 - Rust strategic host");}
         }
-        let fading=self.renderer.as_ref().is_some_and(|renderer|renderer.terrain_fading(now))||self.cached.values().any(|p|now.saturating_duration_since(p.ready)<Duration::from_millis(180));
+        let fading=self.renderer.as_ref().is_some_and(Renderer::terrain_fading)||self.cached.values().any(|p|now.saturating_duration_since(p.ready)<Duration::from_millis(180));
         let expiry=self.cached.values().any(|p|now.saturating_duration_since(p.used)>CACHE_TTL);
         let animated=self.loading()||self.state.session.is_some()
             ||self.in_lobby()&&self.lobby_page==lobby::Page::Selection
@@ -1727,6 +1727,7 @@ impl ApplicationHandler<HostEvent> for Host {
         }
         let fast=self.focus.is_some()||self.animate||self.trial.timing||self.trial.movement.is_some()||self.velocity[0].hypot(self.velocity[1])>9.||fading;
         let frame=now+Duration::from_millis(if fast||transitioning{16}else if animated{33}else{135});
+        let frame=if self.config.terrain_review && self.dirty {frame.min(self.last_present+Duration::from_millis(33))} else {frame};
         event_loop.set_control_flow(ControlFlow::WaitUntil(self.country_click.as_ref().map_or(frame,|click|frame.min(click.deadline))));
     }
 }

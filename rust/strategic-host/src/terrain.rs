@@ -503,8 +503,8 @@ impl Terrain {
         Ok(())
     }
 
-    pub fn fading(&self,now:Instant)->bool {
-        !self.selection.exact() && self.pages.values().any(|p|now.saturating_duration_since(p.ready).as_secs_f32()<0.23)
+    pub fn fading(&self)->bool {
+        self.pages.values().any(|page|page.fade<255)
     }
 }
 
