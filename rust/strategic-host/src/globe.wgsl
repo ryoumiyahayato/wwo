@@ -471,7 +471,7 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
 }
 @fragment fn map(@builtin(position) p:vec4f) -> @location(0) vec4f {
     let t=view.viewport.w;
-    let xy=(p.xy-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1.);
+    let xy=(p.xy-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1./view.chart_origin.z);
     let r=length(xy);
     let horizon=1.+t*(PI*.5-1.);
     let is_world=tile.options.w>.5;
