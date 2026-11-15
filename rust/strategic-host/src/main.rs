@@ -52,12 +52,14 @@ struct Diagnostics {rate:f64,cpu_ms:f64,tiles:usize,visible:usize,mib:f64,stream
 
 struct Config {root:PathBuf,world:Option<PathBuf>,requests:Option<PathBuf>,scenario:Option<PathBuf>,observe:Option<PathBuf>,managed:bool,
     preferences:Option<PathBuf>,terrain_candidate:Option<PathBuf>,background:bool,
+    terrain_review:bool,terrain_selection:terrain::LayerSelection,terrain_layer_candidate:Option<PathBuf>,
     #[cfg(windows)] native:Option<native_start::NativeSession>,
     #[cfg(windows)] desktop:Option<desktop_start::DesktopSession>}
 impl Config {
     fn parse()->io::Result<Self> {
         let home=std::env::current_exe()?.parent().unwrap().to_owned();
         let mut result=Self{root:home.join("data"),world:None,requests:None,scenario:None,observe:None,managed:false,preferences:None,terrain_candidate:None,background:false,
+            terrain_review:false,terrain_selection:terrain::LayerSelection::Auto,terrain_layer_candidate:None,
             #[cfg(windows)] desktop:None,
             #[cfg(windows)] native:None};
         let mut args=std::env::args_os().skip(1).peekable();
@@ -77,6 +79,16 @@ impl Config {
                 Some("--background")=>result.background=true,
                 Some("--preferences")=>result.preferences=Some(path(&mut args)?),
                 Some("--terrain-candidate")=>result.terrain_candidate=Some(path(&mut args)?),
+                Some("--terrain-review")=>result.terrain_review=true,
+                Some("--terrain-layer-candidate")=>result.terrain_layer_candidate=Some(path(&mut args)?),
+                Some(flag @ ("--terrain-level"|"--terrain-max-level"))=>{
+                    if !matches!(result.terrain_selection,terrain::LayerSelection::Auto){
+                        return Err(io::Error::other("choose one terrain layer option"));
+                    }
+                    let z=args.next().and_then(|v|v.to_str()?.parse::<u32>().ok()).filter(|&z|z<=7)
+                        .ok_or_else(||io::Error::other("terrain level must be an integer from 0 to 7"))?;
+                    result.terrain_selection=if flag=="--terrain-level" {terrain::LayerSelection::Exact(z)} else {terrain::LayerSelection::Maximum(z)};
+                }
                 Some("--land-test")=>result.scenario=Some(home.join("scenario-land-test.json")),
                 Some("--formal-menu")=>result.managed=true,
                 #[cfg(windows)]
@@ -87,6 +99,20 @@ impl Config {
                 Some("--r68")=>{start_game=true;r68_comparison=true;},
                 _=>return Err(io::Error::other(format!("unknown argument {arg:?}"))),
             }
+        }
+        if result.terrain_review {
+            #[cfg(windows)]
+            if start_game||map_comparison {return Err(io::Error::other("--terrain-review has its own map entry point"));}
+            if result.world.is_some()||result.requests.is_some()||result.scenario.is_some()||result.managed||result.preferences.is_some() {
+                return Err(io::Error::other("--terrain-review cannot load world sessions or preferences"));
+            }
+            if result.observe.is_none(){return Err(io::Error::other("--terrain-review requires --observe"));}
+            result.background=true;
+            if result.terrain_candidate.is_none(){result.terrain_candidate=Some(result.root.join(terrain::COMPACT_VERSION));}
+            return Ok(result);
+        }
+        if !matches!(result.terrain_selection,terrain::LayerSelection::Auto)||result.terrain_layer_candidate.is_some() {
+            return Err(io::Error::other("terrain layer options require --terrain-review"));
         }
         #[cfg(windows)]
         let standalone=map_comparison||result.world.is_some()||result.requests.is_some()||result.scenario.is_some()||result.managed;
@@ -122,6 +148,7 @@ struct Trial {
     terrain_decodes:Vec<f64>,
     movement:Option<([f64;2],[f64;2],u32,u32)>,
     window_position:Option<winit::dpi::PhysicalPosition<i32>>,
+    terrain_capture:Option<(String,PathBuf)>,
 }
 #[derive(Deserialize)]
 struct Observation {
@@ -172,15 +199,15 @@ fn ms(t:Instant)->f64 {t.elapsed().as_secs_f64()*1000.}
 impl Host {
     fn new(config:Config,events:&EventLoop<HostEvent>,started:Instant)->io::Result<Self> {
         #[cfg(windows)]
-        let formal_map=config.native.is_some();
+        let formal_map=config.native.is_some()||config.terrain_review;
         #[cfg(not(windows))]
-        let formal_map=false;
+        let formal_map=config.terrain_review;
         let map_root=if formal_map {map_release::root(&config.root)} else {config.root.clone()};
         let map_signature=formal_map.then_some(map_release::TILE_SIGNATURE);
         let natural=if formal_map {
             let packed=config.terrain_candidate.is_some();
             let natural_root=config.terrain_candidate.clone().unwrap_or_else(||config.root.join(terrain::VERSION));
-            Some((terrain::Catalogue::open(&natural_root,packed)?,events.create_proxy()))
+            Some((terrain::Catalogue::open(&natural_root,packed,config.terrain_selection,config.terrain_layer_candidate.clone())?,events.create_proxy()))
         }else{
             if config.terrain_candidate.is_some() {return Err(io::Error::other("--terrain-candidate requires the native game"));}
             None
@@ -207,9 +234,9 @@ impl Host {
             state.timeline=Some(model);
         }
         let connected=state.session.is_some();
-        let labels=!connected&&!config.managed;
+        let labels=!connected&&!config.managed&&!config.terrain_review;
         let lobby_country=world.polities.iter().position(|p|p.id=="country_fra").unwrap_or(0);
-        let mode=Mode::Political;
+        let mode=if config.terrain_review {Mode::Geographic} else {Mode::Political};
         let preferences=config.preferences.as_deref().map(interface::Preferences::load).unwrap_or_default();
         skin.set_english(preferences.english);
         let visuals=PoliticalVisuals::open(&map_root,&world)?;
@@ -217,7 +244,7 @@ impl Host {
         let index=Index::new(&world.tiles);
         let legacy_cover=natural.is_none()||config.scenario.is_some();
         let reader=Reader::new(map_root.clone(),map_signature,legacy_cover,events.create_proxy());
-        let observation_id=config.observe.as_ref().and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
+        let observation_id=config.observe.as_ref().filter(|_|!config.terrain_review).and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
             .map(|input|input.id).unwrap_or_default();
         Ok(Self {natural,events:events.create_proxy(),landmarks,config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
             cached:HashMap::new(),failed:HashSet::new(),candidate:Vec::new(),visible:Vec::new(),
@@ -1201,11 +1228,13 @@ impl Host {
         }).chain(hits).collect();
         renderer.update_terrain(&self.camera,self.size,now);
         view.map_style[2]=renderer.terrain_view_level() as f32;
+        view.set_terrain_exact(renderer.terrain_exact());
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);
         }
         let player_capture=self.screenshot.is_some();
-        let capture=self.screenshot.as_ref().or_else(||self.trial.captures.first()).map(PathBuf::as_path);
+        let capture=self.screenshot.as_ref().or_else(||self.trial.captures.first())
+            .or_else(||self.trial.terrain_capture.as_ref().map(|(_,path)|path)).map(PathBuf::as_path);
         let mut redraw=false;
         if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models)? {
             let presented=Instant::now();
@@ -1217,7 +1246,14 @@ impl Host {
                 if let Some(window)=&self.window{window.set_title(&status);}
                 self.screenshot_status=Some((presented,status));redraw=true;
             }
-            else if capture.is_some(){result?;self.trial.captures.remove(0);}
+            else if capture.is_some(){
+                result?;
+                if let Some((id,png))=self.trial.terrain_capture.take() {
+                    let samples=renderer.terrain_frame_samples(&self.camera,self.size);
+                    let extra=serde_json::json!({"png":png,"terrain_samples":samples});
+                    self.write_observation(&id,extra)?;
+                } else {self.trial.captures.remove(0);}
+            }
             else if self.trial.timing {
                 if let Some(prev)=self.trial.previous {self.trial.times.push(presented.duration_since(prev).as_secs_f64()*1000.);}
                 self.trial.previous=Some(presented);
@@ -1229,7 +1265,7 @@ impl Host {
                 if dt>=1.{self.perf.rate=f64::from(self.perf_frames)/dt;self.perf_frames=0;self.perf_at=presented;}
             }
         }
-        self.dirty=redraw || self.screenshot.is_some() || !self.trial.captures.is_empty();
+        self.dirty=redraw || self.screenshot.is_some() || !self.trial.captures.is_empty() || self.trial.terrain_capture.is_some();
         Ok(())
     }
     fn status(&self)->serde_json::Value {
@@ -1246,6 +1282,7 @@ impl Host {
         serde_json::json!({
             "level":match self.camera.level{Level::World=>"WORLD",Level::Region=>"REGION",Level::Local=>"LOCAL"},
             "mode":self.mode.key(),"center":self.camera.coordinates(),"mpp":self.camera.mpp,"orientation":self.camera.axes,
+            "viewport":self.size,"projection":if self.camera.blend()>0. {"azimuthal_equidistant"} else {"orthographic"},
             "pitch_degrees":self.camera.pitch().to_degrees(),
             "landmarks":self.renderer.as_ref().map(Renderer::resident_models),
             "model_instances":self.renderer.as_ref().map(Renderer::model_instances),
@@ -1258,7 +1295,7 @@ impl Host {
             "terrain":self.renderer.as_ref().and_then(Renderer::terrain_status),
             "workspace":format!("{:?}",self.hud.page),"menu":format!("{:?}",self.hud.menu),"messages":self.hud.messages,
             "session":session,"lobby":lobby,
-            "window":{"background":self.config.background,"focused":self.window.as_ref().is_some_and(|w|w.has_focus()),"visible":self.window.as_ref().and_then(|w|w.is_visible())}
+            "window":{"background":self.config.background,"offscreen":self.config.terrain_review,"focused":self.window.as_ref().is_some_and(|w|w.has_focus()),"visible":self.window.as_ref().and_then(|w|w.is_visible())}
         })
     }
     fn observe(&mut self,event_loop:&ActiveEventLoop) {
@@ -1313,8 +1350,17 @@ impl Host {
             "north"=>{self.camera.north_up();self.dirty=true;}
             "capture" if !input.label.is_empty() && input.label.bytes().all(|b|b.is_ascii_alphanumeric()||b==b'-')=>{
                 let screenshot=path.with_file_name(format!("{}.png",input.label));
+                if self.config.terrain_review {
+                    self.trial.terrain_capture=Some((input.id,screenshot));
+                    self.dirty=true;
+                    return;
+                }
                 self.trial.captures.push(screenshot.clone());
                 extra=serde_json::json!({"png":screenshot});self.dirty=true;
+            }
+            "terrain-samples" if self.config.terrain_review=>{
+                extra=self.renderer.as_ref().and_then(|r|r.terrain_frame_samples(&self.camera,self.size))
+                    .unwrap_or(serde_json::Value::Null);
             }
             "timing"=>{
                 self.trial.timing=!self.trial.timing;self.trial.previous=None;
@@ -1330,8 +1376,13 @@ impl Host {
             "quit"=>event_loop.exit(),
             _=>(),
         }
-        let response=serde_json::json!({"id":input.id,"state":self.status(),"extra":extra});
-        if let Ok(bytes)=serde_json::to_vec(&response){let _=fs::write(path.with_extension("response.json"),bytes);}
+        let _=self.write_observation(&input.id,extra);
+    }
+
+    fn write_observation(&self,id:&str,extra:serde_json::Value)->io::Result<()> {
+        let Some(path)=&self.config.observe else{return Ok(());};
+        let response=serde_json::json!({"id":id,"state":self.status(),"extra":extra});
+        fs::write(path.with_extension("response.json"),serde_json::to_vec(&response)?)
     }
     fn world_view_changed(&mut self, had_session:bool, loaded:bool, now:Instant) {
         self.last_palette=None;
@@ -1458,14 +1509,17 @@ impl Host {
 }
 impl ApplicationHandler<HostEvent> for Host {
     fn resumed(&mut self,event_loop:&ActiveEventLoop) {
-        if self.window.is_some(){return;}
+        if self.renderer.is_some(){return;}
         let result=(|| -> Result<_,Box<dyn std::error::Error>>{
-            let mut attributes=Window::default_attributes().with_title("WWO | 1900 - Rust strategic host")
-                .with_inner_size(PhysicalSize::new(VIEW_SIZE[0],VIEW_SIZE[1])).with_min_inner_size(LogicalSize::new(800.,480.))
-                .with_fullscreen((self.hud.fullscreen&&!self.config.background).then_some(winit::window::Fullscreen::Borderless(None)));
-            if self.config.background {attributes=attributes.with_active(false).with_position(winit::dpi::PhysicalPosition::new(10000,10000));}
-            let window=Arc::new(event_loop.create_window(attributes)?);
-            self.size=window.inner_size().into();self.camera=Camera::new(self.size);
+            let window=if self.config.terrain_review {None} else {
+                let mut attributes=Window::default_attributes().with_title("WWO | 1900 - Rust strategic host")
+                    .with_inner_size(PhysicalSize::new(VIEW_SIZE[0],VIEW_SIZE[1])).with_min_inner_size(LogicalSize::new(800.,480.))
+                    .with_fullscreen((self.hud.fullscreen&&!self.config.background).then_some(winit::window::Fullscreen::Borderless(None)));
+                if self.config.background {attributes=attributes.with_active(false).with_position(winit::dpi::PhysicalPosition::new(10000,10000));}
+                Some(Arc::new(event_loop.create_window(attributes)?))
+            };
+            if let Some(window)=&window {self.size=window.inner_size().into();}
+            self.camera=Camera::new(self.size);
             self.camera.local_models=self.landmarks.is_some();
             let mut layouts=Vec::new();
             if self.state.timeline.is_some() {
@@ -1487,14 +1541,21 @@ impl ApplicationHandler<HostEvent> for Host {
                 PoliticalVisuals::read_atlas(&path)?
             };
             let globe_art=[art("galactic-chart.png")?,art("ocean-detail-r68.png")?,art("ocean-ice-r68.png")?];
-            let renderer=pollster::block_on(Renderer::new(window.clone(),font(&self.config.root.join("type.png"))?,flags,hud,globe_art,&layouts,
-                self.natural.take(),self.events.clone()))?;
+            let atlas=font(&self.config.root.join("type.png"))?;
+            let renderer=if let Some(window)=&window {
+                pollster::block_on(Renderer::new(window.clone(),atlas,flags,hud,globe_art,&layouts,self.natural.take(),self.events.clone()))?
+            } else {
+                pollster::block_on(Renderer::new_offscreen(self.size,atlas,flags,hud,globe_art,&layouts,self.natural.take(),self.events.clone()))?
+            };
             let pixels=Pixels::read_version(&self.map_root,&self.world.tiles[0],self.map_signature,self.reader.cover)?;
             let base=renderer.upload(&self.world.tiles[0],pixels);
             Ok((window,renderer,base))
         })();
         match result {
-            Ok((window,renderer,base))=>{self.window=Some(window);self.renderer=Some(renderer);self.base=Some(base);}
+            Ok((window,renderer,base))=>{
+                self.window=window;self.renderer=Some(renderer);self.base=Some(base);
+                if self.config.terrain_review {self.dirty=false;}
+            }
             Err(e)=>{self.fatal_error=Some(e.to_string());event_loop.exit();}
         }
     }
@@ -1648,7 +1709,7 @@ impl ApplicationHandler<HostEvent> for Host {
             self.screenshot_status=None;self.dirty=true;
             if let Some(window)=&self.window{window.set_title("WWO | 1900 - Rust strategic host");}
         }
-        let fading=self.renderer.as_ref().is_some_and(|renderer|renderer.terrain_fading(now))||self.cached.values().any(|p|now.saturating_duration_since(p.ready)<Duration::from_millis(180));
+        let fading=self.renderer.as_ref().is_some_and(Renderer::terrain_fading)||self.cached.values().any(|p|now.saturating_duration_since(p.ready)<Duration::from_millis(180));
         let expiry=self.cached.values().any(|p|now.saturating_duration_since(p.used)>CACHE_TTL);
         let animated=self.loading()||self.state.session.is_some()
             ||self.in_lobby()&&self.lobby_page==lobby::Page::Selection
@@ -1657,22 +1718,28 @@ impl ApplicationHandler<HostEvent> for Host {
         if let Some(window)=&self.window {
             let periodic=(animated||transitioning||fading)&&now.saturating_duration_since(self.last_present)>=Duration::from_millis(if fading||transitioning{16}else{32});
             if self.dirty||expiry||periodic||self.trial.timing||!self.trial.captures.is_empty()||self.screenshot.is_some(){window.request_redraw();}
+        } else if self.config.terrain_review && self.renderer.is_some() {
+            let pending=self.dirty||fading||self.trial.timing;
+            let due=now.saturating_duration_since(self.last_present)>=Duration::from_millis(33);
+            if (pending&&due)||self.trial.terrain_capture.is_some() {
+                if let Err(error)=self.draw(){self.fatal_error=Some(error.to_string());event_loop.exit();}
+            }
         }
         let fast=self.focus.is_some()||self.animate||self.trial.timing||self.trial.movement.is_some()||self.velocity[0].hypot(self.velocity[1])>9.||fading;
         let frame=now+Duration::from_millis(if fast||transitioning{16}else if animated{33}else{135});
+        let frame=if self.config.terrain_review && self.dirty {frame.min(self.last_present+Duration::from_millis(33))} else {frame};
         event_loop.set_control_flow(ControlFlow::WaitUntil(self.country_click.as_ref().map_or(frame,|click|frame.min(click.deadline))));
     }
 }
 
-fn record_error(data:&Path,text:&str) {
+fn record_error(target:&Path,text:&str) {
     eprintln!("{text}");
-    let target=data.parent().unwrap_or(data).join("startup-error.txt");
     let _=fs::write(target,text);
 }
 fn main() {
     if let Err(e)=run(){
         #[cfg(windows)]
-        desktop_start::show_error(&e.to_string());
+        if !std::env::args_os().any(|arg|arg=="--terrain-review") {desktop_start::show_error(&e.to_string());}
         #[cfg(not(windows))]
         eprintln!("{e}");
         std::process::exit(1);
@@ -1681,16 +1748,17 @@ fn main() {
 fn run() -> Result<(),Box<dyn std::error::Error>> {
     let started=Instant::now();
     let args=Config::parse()?;
-    let error_root=args.root.clone();
-    std::panic::set_hook(Box::new(move |e|record_error(&error_root,&e.to_string())));
+    let error_log=if args.terrain_review {args.observe.as_ref().unwrap().with_extension("error.txt")}
+        else {args.root.parent().unwrap_or(&args.root).join("startup-error.txt")};
+    let panic_log=error_log.clone();
+    std::panic::set_hook(Box::new(move |e|record_error(&panic_log,&e.to_string())));
     let events=EventLoop::<HostEvent>::with_user_event().build()?;
-    let data=args.root.clone();
     let mut app=match Host::new(args,&events,started) {
-        Ok(app)=>app,Err(e)=>{record_error(&data,&e.to_string());return Err(e.into());}
+        Ok(app)=>app,Err(e)=>{record_error(&error_log,&e.to_string());return Err(e.into());}
     };
     events.run_app(&mut app)?;
     if let Some(error)=app.fatal_error {
-        record_error(&data,&error);
+        record_error(&error_log,&error);
         return Err(io::Error::other(error).into());
     }
     Ok(())

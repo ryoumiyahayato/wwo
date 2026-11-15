@@ -23,8 +23,25 @@ const MAX_PACK_PAGES: u32 = 256;
 const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bc7RgbaUnorm;
 const LOD_HYSTERESIS: f64 = 0.12;
 
-#[derive(Clone,Copy,Debug,PartialEq,Eq,Hash,Deserialize)]
+#[derive(Clone,Copy,Debug,PartialEq,Eq,Hash,Deserialize,serde::Serialize)]
 pub struct Key(pub u32,pub u32,pub u32);
+
+#[derive(Clone,Copy,Default,serde::Serialize)]
+#[serde(rename_all="snake_case")]
+pub enum LayerSelection {
+    #[default]
+    Auto,
+    Maximum(u32),
+    Exact(u32),
+}
+
+impl LayerSelection {
+    pub fn limit(self)->u32 {
+        match self {Self::Auto=>MAX_LEVEL, Self::Maximum(z)|Self::Exact(z)=>z}
+    }
+
+    pub fn exact(self)->bool {matches!(self,Self::Exact(_))}
+}
 
 impl Key {
     fn path(self, root:&Path) -> PathBuf {
@@ -49,7 +66,8 @@ impl Key {
     }
 }
 
-pub struct Catalogue {pages:Vec<Key>, source:Source, max_level:u32, version:&'static str}
+pub struct Catalogue {pages:Vec<Key>, source:Source, max_level:u32, version:&'static str,
+    selection:LayerSelection, layer_candidate:Option<PathBuf>}
 
 #[derive(Deserialize)]
 struct Manifest {
@@ -70,7 +88,7 @@ struct Level {z:u32,width:u32,height:u32,tiles:u32,bytes:u64}
 struct RiverTopology {file:String,reaches:u64,unresolved_downstream_ids:u64}
 
 impl Catalogue {
-    pub fn open(root:&Path,packed:bool) -> io::Result<Self> {
+    pub fn open(root:&Path,packed:bool,selection:LayerSelection,layer_candidate:Option<PathBuf>) -> io::Result<Self> {
         let path=root.join("index.json");
         let open=|| {
             let data:Manifest=serde_json::from_reader(fs::File::open(&path)?)?;
@@ -91,14 +109,29 @@ impl Catalogue {
                 || data.tile_size!=TILE_SIZE || data.gutter!=GUTTER || !valid_levels {
                 return Err(io::Error::other("自然地貌底图库版本或坐标不匹配"));
             }
+            if !matches!(selection,LayerSelection::Auto) && selection.limit()>=levels as u32 {
+                return Err(io::Error::other("指定地貌层级超出资源范围"));
+            }
+            if layer_candidate.is_some() && (!selection.exact() || !packed) {
+                return Err(io::Error::other("单层候选 QPK 需要指定层级及 QPK 底图库"));
+            }
             let mut pages=Vec::new();
             let mut packs=Vec::new();
-            for (z,level) in (0..).zip(data.levels) {
+            for (z,mut level) in (0..).zip(data.levels) {
                 let [width,height]=[2<<z,1<<z];
                 if (z,width,height,width*height)!=(level.z,level.width,level.height,level.tiles) {
                     return Err(io::Error::other(format!("Z{z} 全球分片清单不完整")));
                 }
-                if packed {packs.push(LevelPack::open(root,level,version)?);}
+                if packed {
+                    let replacement=layer_candidate.as_ref().filter(|_|z==selection.limit());
+                    let pack=if selection.exact() && z!=selection.limit() {None} else {
+                        let path=replacement.cloned().unwrap_or_else(||root.join(format!("{z}.qpk")));
+                        if replacement.is_some() {level.bytes=fs::metadata(&path)?.len();}
+                        Some(LevelPack::open(&path,level,version)?)
+                    };
+                    packs.push(pack);
+                }
+                if z>selection.limit() || selection.exact() && z!=selection.limit() {continue;}
                 for y in 0..height {
                     for x in 0..width {
                         let key=Key(z,x,y);
@@ -117,13 +150,13 @@ impl Catalogue {
                 return Err(io::Error::other("全球河网的拓扑资料不完整"));
             }
             let source=if packed {Source::Packs(packs)} else {Source::Files(root.to_owned())};
-            Ok(Self{pages,source,max_level:levels as u32-1,version})
+            Ok(Self{pages,source,max_level:levels as u32-1,version,selection,layer_candidate})
         };
         open().map_err(|error|io::Error::other(format!("无法读取自然地貌底图库。{} · {error}",path.display())))
     }
 }
 
-enum Source {Files(PathBuf),Packs(Vec<LevelPack>)}
+enum Source {Files(PathBuf),Packs(Vec<Option<LevelPack>>)}
 
 impl Source {
     fn read(&mut self,key:Key)->io::Result<DecodedTile> {
@@ -134,7 +167,8 @@ impl Source {
                 file.read_exact(&mut bytes)?;
                 Ok(DecodedTile{pixels:bytes,decode_time:Duration::ZERO})
             }
-            Self::Packs(packs)=>packs[key.0 as usize].read(key),
+            Self::Packs(packs)=>packs[key.0 as usize].as_mut()
+                .ok_or_else(||io::Error::other("地貌层级未打开"))?.read(key),
         }
     }
 }
@@ -147,8 +181,7 @@ enum ColorDecoder {
 struct LevelPack {file:fs::File,width:u32,offsets:Vec<u64>,decoder:ColorDecoder}
 
 impl LevelPack {
-    fn open(root:&Path,level:Level,version:&str)->io::Result<Self> {
-        let path=root.join(format!("{}.qpk",level.z));
+    fn open(path:&Path,level:Level,version:&str)->io::Result<Self> {
         let mut file=fs::File::open(path)?;
         let mut header=[0;HEADER_LEN];
         file.read_exact(&mut header)?;
@@ -246,12 +279,15 @@ pub struct Terrain {
     target_level:Option<u32>,
     projected_lod:f64,
     version:&'static str,
+    selection:LayerSelection,
+    layer_candidate:Option<PathBuf>,
+    required_pages:usize,
 }
 
 impl Terrain {
     pub fn new(device:&wgpu::Device,queue:&wgpu::Queue,data:Catalogue,
                proxy:EventLoopProxy<crate::HostEvent>) -> io::Result<Self> {
-        let Catalogue{pages,mut source,max_level,version}=data;
+        let Catalogue{pages,mut source,max_level,version,selection,layer_candidate}=data;
         let texture=|label,width,height,layers,mips,format| device.create_texture(&wgpu::TextureDescriptor{
             label:Some(label),
             size:wgpu::Extent3d{width,height,depth_or_array_layers:layers},
@@ -260,9 +296,11 @@ impl Terrain {
             view_formats:&[],
         });
         let base=texture("Global natural terrain Z0",PAGE_SIZE,PAGE_SIZE,2,1,FORMAT);
-        for x in 0..2 {
-            let tile=source.read(Key(0,x,0))?;
-            write_texture_layer(queue,&base,0,x,PAGE_SIZE,&tile.pixels);
+        if !selection.exact() || selection.limit()==0 {
+            for x in 0..2 {
+                let tile=source.read(Key(0,x,0))?;
+                write_texture_layer(queue,&base,0,x,PAGE_SIZE,&tile.pixels);
+            }
         }
         let capacity=if version!=VERSION {MAX_PACK_PAGES.min(device.limits().max_texture_array_layers)} else {MAX_PAGES};
         let atlas=texture("Natural terrain page cache",PAGE_SIZE,PAGE_SIZE,capacity,1,FORMAT);
@@ -285,7 +323,7 @@ impl Terrain {
         })?;
         Ok(Self{base,atlas,table,keys,sender,inflight:None,pages:HashMap::new(),
             slots:(0..capacity).rev().collect(),selected:Vec::new(),view:None,max_level,view_max:0,
-            target_level:None,projected_lod:0.,version})
+            target_level:None,projected_lod:0.,version,selection,layer_candidate,required_pages:0})
     }
 
     pub fn views(&self)->[wgpu::TextureView;3] {
@@ -298,6 +336,8 @@ impl Terrain {
         let wanted_by_level=(1..=self.max_level).map(|z|self.selected.iter().filter(|k|k.0==z).count()).collect::<Vec<_>>();
         serde_json::json!({
             "version": self.version,
+            "selection": self.selection,
+            "layer_candidate": self.layer_candidate,
             "max_level": self.max_level,
             "view_max_level": self.view_max,
             "target_level": self.target_level,
@@ -306,6 +346,9 @@ impl Terrain {
             "wanted_by_level": wanted_by_level,
             "resident_detail_pages": self.pages.len(),
             "wanted_detail_pages": self.selected.len(),
+            "required_detail_pages": self.required_pages,
+            "exact_view_over_capacity": self.selection.exact() && self.required_pages>self.selected.len(),
+            "selected_ready": self.selected.iter().all(|key|self.pages.get(key).is_some_and(|p|self.selection.exact()||p.fade==255)),
             "detail_capacity": self.atlas.depth_or_array_layers(),
             "loading": self.inflight.is_some(),
             "texture_payload_bytes": PAGE_SIZE * PAGE_SIZE * (2 + self.atlas.depth_or_array_layers()) + 4 * self.table.width() * self.table.height(),
@@ -315,6 +358,64 @@ impl Terrain {
     pub fn max_level(&self)->u32 {self.max_level}
     pub fn view_max(&self)->u32 {self.view_max}
     pub fn packed(&self)->bool {self.version!=VERSION}
+    pub fn exact(&self)->bool {self.selection.exact()}
+
+    pub fn frame_samples(&self,camera:&Camera,size:[u32;2])->serde_json::Value {
+        let [left,top]=[0.5,0.5];
+        let [right,bottom]=size.map(|n|f64::from(n)-0.5);
+        let [x,y]=size.map(|n|f64::from(n/2)+0.5);
+        let points=[("center",[x,y]),("north",[x,top]),("east",[right,y]),("south",[x,bottom]),("west",[left,y]),
+            ("northwest",[left,top]),("northeast",[right,top]),("southeast",[right,bottom]),("southwest",[left,bottom])];
+        let samples=points.map(|(name,pixel)|{
+            let sample=camera.vector(pixel,size).map(geographic).map(|ll|{
+                let coordinates=ll.map(|n|n as f32);
+                let lon=coordinates[0]/360.+0.5;
+                let uv=[lon-lon.floor(),(0.5-coordinates[1]/180.).clamp(0.,0.99999994)];
+                let target=cell(uv,self.target_level.unwrap_or(0)).0;
+                let mut remaining=1.;
+                let mut contributors=Vec::new();
+                let mut missing=false;
+                for z in (1..=self.view_max).rev() {
+                    let (key,q)=cell(uv,z);
+                    let coverage=if self.exact() {f32::from(self.pages.contains_key(&key) as u8)} else {self.coverage(key,q)};
+                    let weight=remaining*coverage;
+                    if weight>0. {contributors.push((key,weight));}
+                    remaining-=weight;
+                    if self.exact() {missing=coverage==0.;break;}
+                    if remaining<0.0001 {break;}
+                }
+                if !missing && remaining>=0.0001 {contributors.push((cell(uv,0).0,remaining));}
+                serde_json::json!({"lon_lat":ll,"target":target,"contributors":contributors,"missing_exact_page":missing})
+            });
+            serde_json::json!({"name":name,"pixel":pixel,"terrain":sample})
+        });
+        serde_json::json!({"method":"cpu_projection_and_submitted_gpu_page_table","samples":samples})
+    }
+
+    fn coverage(&self,key:Key,q:[f32;2])->f32 {
+        let Some(page)=self.pages.get(&key) else {return 0.;};
+        let fade=f32::from(page.fade)/255.;
+        let rim=q.map(|p|p.min(1.-p));
+        let [x,y]=q.map(|p|if p>0.5 {1} else {-1});
+        let Key(z,column,row)=key;
+        let columns=2i32<<z;
+        let rows=1i32<<z;
+        let readiness=|dx:i32,dy:i32| {
+            let column=(column as i32+dx).rem_euclid(columns) as u32;
+            let row=(row as i32+dy).clamp(0,rows-1) as u32;
+            self.pages.get(&Key(z,column,row)).map_or(0.,|p|f32::from(p.fade)/255.)
+        };
+        let collar=0.04;
+        let [edge_x,edge_y]=[
+            if rim[0]<collar {fade.min(readiness(x,0))} else {fade},
+            if rim[1]<collar {fade.min(readiness(0,y))} else {fade},
+        ];
+        let mut corner=edge_x.min(edge_y);
+        if rim[0].max(rim[1])<collar {corner=corner.min(readiness(x,y));}
+        let [tx,ty]=rim.map(|p|{let t=(p/collar).clamp(0.,1.);t*t*(3.-2.*t)});
+        let mix=|a,b,t|a+(b-a)*t;
+        mix(mix(corner,edge_y,tx),mix(edge_x,fade,tx),ty)
+    }
 
     pub fn update(&mut self,queue:&wgpu::Queue,camera:&Camera,size:[u32;2],now:Instant) {
         let middle=size.map(|dimension|f64::from(dimension)*0.5);
@@ -343,11 +444,12 @@ impl Terrain {
 
     fn select(&mut self,camera:&Camera,center:[f64;3],size:[u32;2],now:Instant) {
         self.projected_lod=projected_lod(camera,center,size);
-        let lod=self.projected_lod.clamp(0.,f64::from(self.max_level));
+        let limit=self.max_level.min(self.selection.limit());
+        let lod=self.projected_lod.clamp(0.,f64::from(limit));
         let threshold=0.5+LOD_HYSTERESIS;
         let low=(lod-threshold).ceil() as u32;
         let high=(lod+threshold).floor() as u32;
-        let target=self.target_level.unwrap_or(lod.round() as u32).clamp(low,high);
+        let target=if self.selection.exact() {limit} else {self.target_level.unwrap_or(lod.round() as u32).clamp(low,high).min(limit)};
         self.target_level=Some(target);
         self.selected.clear();
         let angle=camera.extent(size,180.);
@@ -361,7 +463,10 @@ impl Terrain {
         near.sort_unstable_by(|(a,x),(b,y)| a.0.cmp(&b.0).then_with(||y.total_cmp(x)));
         let capacity=self.atlas.depth_or_array_layers() as usize;
         self.view_max=target;
-        if let Some(&(Key(overflow,_,_),_))=near.get(capacity) {
+        self.required_pages=near.len();
+        if self.selection.exact() {
+            near.truncate(capacity);
+        } else if let Some(&(Key(overflow,_,_),_))=near.get(capacity) {
             // Keep a complete visible level where a polar view spans many longitudes.
             self.view_max=overflow-1;
             near.truncate(near.partition_point(|&(key,_)|key.0<overflow));
@@ -392,14 +497,20 @@ impl Terrain {
         };
         write_texture_layer(queue,&self.atlas,0,slot,PAGE_SIZE,&tile.pixels);
         let now=Instant::now();
-        Self::write_index(&self.table,queue,completion.key,slot+1);
-        self.pages.insert(completion.key,Page{slot,ready:now,used:now,fade:0});
+        let fade=if self.selection.exact() {255} else {0};
+        Self::write_index(&self.table,queue,completion.key,u32::from(fade)<<16|(slot+1));
+        self.pages.insert(completion.key,Page{slot,ready:now,used:now,fade});
         Ok(())
     }
 
-    pub fn fading(&self,now:Instant)->bool {
-        self.pages.values().any(|p|now.saturating_duration_since(p.ready).as_secs_f32()<0.23)
+    pub fn fading(&self)->bool {
+        self.pages.values().any(|page|page.fade<255)
     }
+}
+
+fn cell(uv:[f32;2],z:u32)->(Key,[f32;2]) {
+    let [x,y]=[uv[0]*(2u32<<z) as f32,uv[1]*(1u32<<z) as f32];
+    (Key(z,x as u32,y as u32),[x.fract(),y.fract()])
 }
 
 fn projected_lod(camera:&Camera,center:[f64;3],size:[u32;2])->f64 {

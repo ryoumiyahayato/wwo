@@ -188,7 +188,7 @@ fn page_readiness(cell:vec2i, columns:i32, rows:i32) -> f32 {
     let y=clamp(cell.y,0,rows-1)+rows-1;
     return f32(textureLoad(terrain_index,vec2i(x,y),0).r>>16u)/255.;
 }
-fn page_surface(uv:vec2f, zoom:i32) -> NaturalPage {
+fn page_surface(uv:vec2f, zoom:i32, exact:bool) -> NaturalPage {
     let rows=1i<<u32(zoom);
     let columns=rows*2;
     let offset=rows-1;
@@ -198,8 +198,10 @@ fn page_surface(uv:vec2f, zoom:i32) -> NaturalPage {
     let index=textureLoad(terrain_index,at,0).r;
     let slot=i32(index&65535u)-1;
     if slot<0 {return NaturalPage(vec4f(0.),0.);}
-    var fade=f32(index>>16u)/255.;
     let q=fract(position);
+    let refined=textureSampleLevel(terrain_detail,linear,(q*256.+4.)/264.,slot,0.);
+    if exact {return NaturalPage(refined,1.);}
+    var fade=f32(index>>16u)/255.;
     // Every cell meeting at an edge or corner uses the same refinement weight.
     // The common parent supplies unready portions at identical coordinates.
     let rim=min(q,1.-q);
@@ -222,15 +224,18 @@ fn page_surface(uv:vec2f, zoom:i32) -> NaturalPage {
         let t=smoothstep(vec2f(0.),vec2f(collar),rim);
         fade=mix(mix(corner,edge_y,t.x),mix(edge_x,fade,t.x),t.y);
     }
-    let refined=textureSampleLevel(terrain_detail,linear,(q*256.+4.)/264.,slot,0.);
     return NaturalPage(refined,fade);
 }
 fn natural_surface(ll:vec2f) -> vec4f {
     let uv=vec2f(fract(ll.x/360.+.5),clamp(.5-ll.y/180.,0.,.99999994));
+    if view.chart_origin.w>.5 && view.map_style.z>0. {
+        let page=page_surface(uv,i32(view.map_style.z),true);
+        return mix(vec4f(1.,0.,1.,0.),page.color,page.coverage);
+    }
     var color=vec4f(0.);
     var remaining=1.;
     for(var z=i32(view.map_style.z);z>0;z-=1) {
-        let page=page_surface(uv,z);
+        let page=page_surface(uv,z,false);
         let weight=remaining*page.coverage;
         color+=page.color*weight;
         remaining-=weight;

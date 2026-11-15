@@ -456,11 +456,13 @@ def verify_level(output, level):
                 status="generated_and_numeric_edges_verified")
 
 
-def verify_package(output):
+def verify_package(output, layer=None, index_only=False, candidate=None):
     index = json.loads((output / "index.json").read_text(encoding="utf-8"))
     if index["version"] in (PACK_VERSION, COMPACT_VERSION):
-        verify_packed(output, index)
+        verify_packed(output, index, layer, index_only, candidate)
         return
+    if layer is not None:
+        raise ValueError("Independent layer checks require a QPK package")
     declared_grid = tuple(index[field] for field in
                           ("version", "tile_matrix_set", "axes", "origin", "tile_size", "gutter"))
     if declared_grid != (VERSION, "WorldCRS84Quad", "longitude,latitude", [-180, 90], TILE, GUTTER):
@@ -497,13 +499,10 @@ def pack_path(root, level):
 class LevelPack:
     def __init__(self, file, level, version=PACK_VERSION):
         self.file, self.level = file, level
+        self.version = version
         self.nx, self.ny = 2 << level, 1 << level
         self.decoder = None
-        magic = PACK_MAGIC
-        if version == COMPACT_VERSION:
-            import zstandard
-            self.decoder = zstandard.ZstdDecompressor()
-            magic = COMPACT_MAGIC
+        magic = COMPACT_MAGIC if version == COMPACT_VERSION else PACK_MAGIC
         expected = HEADER.pack(magic, level, self.nx, self.ny)
         if file.read(HEADER.size) != expected:
             raise ValueError(f"Wrong packed terrain header at Z{level}")
@@ -514,24 +513,31 @@ class LevelPack:
                 or int(self.offsets[-1]) != os.fstat(file.fileno()).st_size):
             raise ValueError(f"Wrong packed terrain offsets at Z{level}")
 
-    def at(self, x, y):
+    def frame_sizes(self, x, y):
         i = y*self.nx+x
         start, end = map(int, self.offsets[i:i+2])
         if self.file.tell() != start:
             self.file.seek(start)
-        record = self.file.read(end-start)
-        z, tx, ty, size = PACK_RECORD.unpack_from(record)
-        if (z, tx, ty) != (self.level, x, y) or not 0 < size < len(record)-PACK_RECORD.size:
+        z, tx, ty, size = PACK_RECORD.unpack(self.file.read(PACK_RECORD.size))
+        height_size = end-start-PACK_RECORD.size-size
+        if (z, tx, ty) != (self.level, x, y) or size <= 0 or height_size <= 0:
             raise ValueError(f"Wrong packed tile coordinates or size at Z{self.level}/{x}/{y}")
-        color_end = PACK_RECORD.size+size
+        return size, height_size
+
+    def at(self, x, y):
+        color_size, height_size = self.frame_sizes(x, y)
+        color_frame, height_frame = self.file.read(color_size), self.file.read(height_size)
         dim = TILE+2*GUTTER
-        if self.decoder is None:
-            pixels = zlib.decompress(record[PACK_RECORD.size:color_end])
-            height = zlib.decompress(record[color_end:])
-        else:
-            pixels = self.decoder.decompress(record[PACK_RECORD.size:color_end], max_output_size=dim**2)
-            residual = self.decoder.decompress(record[color_end:], max_output_size=2*dim**2)
+        if self.version == COMPACT_VERSION:
+            if self.decoder is None:
+                import zstandard
+                self.decoder = zstandard.ZstdDecompressor()
+            pixels = self.decoder.decompress(color_frame, max_output_size=dim**2)
+            residual = self.decoder.decompress(height_frame, max_output_size=2*dim**2)
             height = restore_heights(residual, dim)
+        else:
+            pixels = zlib.decompress(color_frame)
+            height = zlib.decompress(height_frame)
         return (np.frombuffer(pixels, dtype="V16").reshape(dim//4,dim//4),
                 np.frombuffer(height, dtype="<i2").reshape(dim,dim))
 
@@ -554,9 +560,15 @@ def restore_heights(residual, dim):
     return delta.astype("<u2", copy=False).tobytes()
 
 
-def verify_packed_level(output, level, version=PACK_VERSION, reference=None):
-    with pack_path(output, level).open("rb") as file:
+def verify_packed_level(output, level, version=PACK_VERSION, reference=None, candidate=None, index_only=False):
+    with (candidate or pack_path(output, level)).open("rb") as file:
         pack = LevelPack(file, level, version)
+        if index_only:
+            for y in range(pack.ny):
+                for x in range(pack.nx):
+                    pack.frame_sizes(x, y)
+            return dict(z=level, width=pack.nx, height=pack.ny, tiles=pack.nx*pack.ny,
+                        bytes=int(pack.offsets[-1]), status="global_index_verified")
         if level == 0:
             return packed_edges(pack, None, reference)
         with pack_path(output, level-1).open("rb") as parent:
@@ -611,7 +623,7 @@ def packed_edges(pack, parent, reference=None):
                 parent_reduction_error_m=max_error, status="generated_and_numeric_edges_verified")
 
 
-def verify_packed(output, manifest):
+def verify_packed(output, manifest, layer=None, index_only=False, candidate=None):
     grid = tuple(manifest[key] for key in ("tile_matrix_set", "axes", "origin", "tile_size", "gutter"))
     if grid != ("WorldCRS84Quad", "longitude,latitude", [-180,90], TILE, GUTTER):
         raise ValueError("Wrong packed terrain grid")
@@ -622,10 +634,16 @@ def verify_packed(output, manifest):
     if version == COMPACT_VERSION and (
             levels != PACK_MAX_LEVEL+1 or manifest.get("compression") != COMPACT_FORMAT):
         raise ValueError("Wrong compact terrain compression or level count")
-    verify_topology(output, manifest)
-    for level, declared in enumerate(manifest["levels"]):
-        result = verify_packed_level(output, level, version)
-        if any(declared.get(key) != value for key,value in result.items()):
+    if layer is None:
+        verify_topology(output, manifest)
+    elif layer >= levels:
+        raise ValueError(f"Z{layer} is absent from the package")
+    for level in range(levels) if layer is None else (layer,):
+        declared = manifest["levels"][level]
+        result = verify_packed_level(output, level, version, candidate=candidate, index_only=index_only)
+        if any(declared.get(key) != value for key,value in result.items()
+               if not (candidate is not None and key in ("bytes", "parent_reduction_error_m"))
+               and not (index_only and key == "status")):
             raise ValueError(f"Z{level} inventory differs from stored resources")
         print(json.dumps(result), flush=True)
 
@@ -887,6 +905,9 @@ def advance_packed(sources, natural_earth, output, through):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verify", type=Path, metavar="PACKAGE", help="Check an existing global package")
+    parser.add_argument("--layer", type=int, choices=range(PACK_MAX_LEVEL+1), help="Check one packed level with --verify")
+    parser.add_argument("--index-only", action="store_true", help="Check every tile record header without decoding")
+    parser.add_argument("--layer-candidate", type=Path, metavar="QPK", help="Check a replacement QPK with --layer")
     parser.add_argument("--repack", type=Path, nargs=2, metavar=("ORIGINAL", "COMPACT"),
                         help="Losslessly repack and compare all global Z0–Z7 tiles")
     parser.add_argument("--through", type=int, choices=(5,6,7), help="Build or advance the 15 arc-second package")
@@ -894,6 +915,10 @@ def main():
     parser.add_argument("natural_earth",type=Path,nargs="?")
     parser.add_argument("output",type=Path,nargs="?")
     args = parser.parse_args()
+    if args.layer is not None and args.verify is None:
+        parser.error("--layer requires --verify")
+    if (args.index_only or args.layer_candidate is not None) and args.layer is None:
+        parser.error("--index-only and --layer-candidate require --layer")
     if args.repack is not None:
         if args.verify is not None or args.sources is not None or args.through is not None:
             parser.error("--repack does not accept other build arguments")
@@ -902,7 +927,7 @@ def main():
     if args.verify is not None:
         if args.sources is not None or args.through is not None:
             parser.error("--verify does not accept build arguments")
-        verify_package(args.verify)
+        verify_package(args.verify, args.layer, args.index_only, args.layer_candidate)
         return
     if args.output is None:
         parser.error("Build requires sources, natural_earth and output")

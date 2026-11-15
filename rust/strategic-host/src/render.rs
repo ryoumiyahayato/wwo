@@ -31,6 +31,10 @@ impl View {
         result.projection_origin=[x as f32,y as f32,camera.pitch().cos() as f32,0.];
         result
     }
+
+    pub fn set_terrain_exact(&mut self,exact:bool) {
+        self.projection_origin[3]=if exact {1.} else {0.};
+    }
 }
 #[repr(C)]
 #[derive(Clone,Copy,Pod,Zeroable)]
@@ -94,9 +98,13 @@ impl MeshBuffers {
     }
 }
 
+enum RenderTarget {
+    Window(wgpu::Surface<'static>,wgpu::SurfaceConfiguration),
+    Offscreen(wgpu::Texture),
+}
+
 pub struct Renderer {
-    surface:wgpu::Surface<'static>,
-    config:wgpu::SurfaceConfiguration,
+    target:RenderTarget,
     device:wgpu::Device,
     queue:wgpu::Queue,
     pub gpu:String,
@@ -317,6 +325,14 @@ fn create_texture_mips(device:&wgpu::Device,size:[u32;3],format:wgpu::TextureFor
     })
 }
 fn extent([width,height,depth_or_array_layers]:[u32;3])->wgpu::Extent3d {wgpu::Extent3d{width,height,depth_or_array_layers}}
+
+fn offscreen_texture(device:&wgpu::Device,[width,height]:[u32;2])->wgpu::Texture {
+    device.create_texture(&wgpu::TextureDescriptor {
+        label:Some("WWO offscreen frame"),size:extent([width,height,1]),mip_level_count:1,
+        sample_count:1,dimension:wgpu::TextureDimension::D2,format:wgpu::TextureFormat::Rgba8Unorm,
+        usage:wgpu::TextureUsages::RENDER_ATTACHMENT|wgpu::TextureUsages::COPY_SRC,view_formats:&[],
+    })
+}
 fn write_texture(queue:&wgpu::Queue,tex:&wgpu::Texture,[w,h,layers]:[u32;3],channels:u32,bytes:&[u8]) {
     write_texture_mip(queue,tex,[w,h,layers],channels,bytes,0);
 }
@@ -335,12 +351,20 @@ pub(crate) fn write_texture_layer(queue:&wgpu::Queue,texture:&wgpu::Texture,leve
 
 impl Renderer {
     pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
-        let size=window.inner_size();
+        let size=window.inner_size().into();
+        Self::with_target(Some(window),size,atlas,flags,hud,globe_art,layout_bytes,natural,events).await
+    }
+
+    pub async fn new_offscreen(size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
+        Self::with_target(None,size,atlas,flags,hud,globe_art,layout_bytes,natural,events).await
+    }
+
+    async fn with_target(window:Option<Arc<Window>>, size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
         let instance=wgpu::Instance::new(&wgpu::InstanceDescriptor {backends:wgpu::Backends::VULKAN,..Default::default()});
-        let surface=instance.create_surface(window).map_err(|e|e.to_string())?;
+        let surface=window.map(|window|instance.create_surface(window)).transpose().map_err(|e|e.to_string())?;
         let adapter=instance.request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference:wgpu::PowerPreference::HighPerformance,compatible_surface:Some(&surface),force_fallback_adapter:false
-        }).await.ok_or("A Vulkan adapter with window presentation is required")?;
+            power_preference:wgpu::PowerPreference::HighPerformance,compatible_surface:surface.as_ref(),force_fallback_adapter:false
+        }).await.ok_or(if surface.is_some(){"A Vulkan adapter with window presentation is required"}else{"A Vulkan adapter is required"})?;
         let info=adapter.get_info();
         let features=if natural.is_some() {wgpu::Features::TEXTURE_COMPRESSION_BC}else{wgpu::Features::empty()};
         if !adapter.features().contains(features) {return Err("自然地貌需要支持 BC7 纹理的 Vulkan 显卡。".into());}
@@ -349,15 +373,25 @@ impl Renderer {
             required_limits:wgpu::Limits {max_texture_dimension_2d:4096,..wgpu::Limits::downlevel_defaults()},
             memory_hints:wgpu::MemoryHints::MemoryUsage
         },None).await.map_err(|e|e.to_string())?;
-        let caps=surface.get_capabilities(&adapter);
-        let format=caps.formats.iter().copied().find(|f| matches!(f,wgpu::TextureFormat::Bgra8Unorm|wgpu::TextureFormat::Rgba8Unorm))
-            .ok_or("An 8-bit UNORM surface is required")?;
-        let config=wgpu::SurfaceConfiguration {
-            usage:wgpu::TextureUsages::RENDER_ATTACHMENT|(caps.usages&wgpu::TextureUsages::COPY_SRC),
-            format,width:size.width.max(1),height:size.height.max(1),present_mode:wgpu::PresentMode::Fifo,
-            desired_maximum_frame_latency:2,alpha_mode:caps.alpha_modes[0],view_formats:Vec::new()
+        let (target,format)=if let Some(surface)=surface {
+            let caps=surface.get_capabilities(&adapter);
+            let format=caps.formats.iter().copied().find(|f| matches!(f,wgpu::TextureFormat::Bgra8Unorm|wgpu::TextureFormat::Rgba8Unorm))
+                .ok_or("An 8-bit UNORM surface is required")?;
+            let config=wgpu::SurfaceConfiguration {
+                usage:wgpu::TextureUsages::RENDER_ATTACHMENT|(caps.usages&wgpu::TextureUsages::COPY_SRC),
+                format,width:size[0].max(1),height:size[1].max(1),present_mode:wgpu::PresentMode::Fifo,
+                desired_maximum_frame_latency:2,alpha_mode:caps.alpha_modes[0],view_formats:Vec::new()
+            };
+            surface.configure(&device,&config);
+            (RenderTarget::Window(surface,config),format)
+        }else{
+            if size.into_iter().any(|n|n==0||n>device.limits().max_texture_dimension_2d) {
+                return Err("Invalid offscreen viewport size".into());
+            }
+            let image=offscreen_texture(&device,size);
+            let format=image.format();
+            (RenderTarget::Offscreen(image),format)
         };
-        surface.configure(&device,&config);
         let fragment=wgpu::ShaderStages::FRAGMENT;
         let glob=layout(&device,&[uniform(0,fragment),sampler_entry(1),sampler_entry(2),sampled(3),
             texture_entry(4,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),sampled(5),
@@ -454,7 +488,7 @@ impl Renderer {
         let instrument=pipeline(&[&screen_layout,&font_layout,&instrument_layout],&hud_shader,"screen_vertex","instrument",&mesh_layout);
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
         let models=ModelLayer::new(&device,format,events);
-        Ok(Self{surface,config,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
+        Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
                 globe,terrain,solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models})
     }
 
@@ -489,19 +523,27 @@ impl Renderer {
 
     pub fn terrain_view_level(&self)->u32 {self.terrain.as_ref().map_or(0,Terrain::view_max)}
 
+    pub fn terrain_exact(&self)->bool {self.terrain.as_ref().is_some_and(Terrain::exact)}
+
     pub fn packed_terrain(&self)->bool {self.terrain.as_ref().is_some_and(Terrain::packed)}
 
     pub fn terrain_status(&self) -> Option<serde_json::Value> {
         self.terrain.as_ref().map(Terrain::status)
     }
 
-    pub fn terrain_fading(&self,now:Instant)->bool {
-        self.terrain.as_ref().is_some_and(|terrain|terrain.fading(now))
+    pub fn terrain_frame_samples(&self,camera:&Camera,size:[u32;2])->Option<serde_json::Value> {
+        self.terrain.as_ref().map(|terrain|terrain.frame_samples(camera,size))
+    }
+
+    pub fn terrain_fading(&self)->bool {
+        self.terrain.as_ref().is_some_and(Terrain::fading)
     }
 
     pub fn resize(&mut self,[w,h]:[u32;2]) {
-        self.config.width=w;self.config.height=h;
-        self.surface.configure(&self.device,&self.config);
+        if let RenderTarget::Window(surface,config)=&mut self.target {
+            config.width=w;config.height=h;
+            surface.configure(&self.device,config);
+        }
     }
     pub fn set_politics(&self,bytes:&[u8],flags:&[FlagUniform;256]) {
         write_texture(&self.queue,&self.palette,[256,2,1],4,bytes);
@@ -539,15 +581,22 @@ impl Renderer {
     }
     pub fn render(&mut self, view:&View,base:&Page,pages:&[(&Page,&Tile,[u32;4],f32)],
                   meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel])->io::Result<Option<io::Result<()>>> {
-        let frame=match self.surface.get_current_texture() {
-            Ok(frame)=>frame,
-            Err(wgpu::SurfaceError::Outdated|wgpu::SurfaceError::Lost)=>{
-                self.surface.configure(&self.device,&self.config);return Ok(None);
+        let frame=if let RenderTarget::Window(surface,config)=&self.target {
+            match surface.get_current_texture() {
+                Ok(frame)=>Some(frame),
+                Err(wgpu::SurfaceError::Outdated|wgpu::SurfaceError::Lost)=>{
+                    surface.configure(&self.device,config);return Ok(None);
+                }
+                Err(wgpu::SurfaceError::Timeout)=>return Ok(None),
+                Err(e)=>return Err(io::Error::other(e))
             }
-            Err(wgpu::SurfaceError::Timeout)=>return Ok(None),
-            Err(e)=>return Err(io::Error::other(e))
+        }else{None};
+        let (texture,copy_src)=match &self.target {
+            RenderTarget::Window(_,config)=>(&frame.as_ref().unwrap().texture,config.usage.contains(wgpu::TextureUsages::COPY_SRC)),
+            RenderTarget::Offscreen(texture)=>(texture,true),
         };
-        let [w,h]=[self.config.width,self.config.height];
+        let [w,h]=[texture.width(),texture.height()];
+        let format=texture.format();
         self.models.prepare(&self.device,&self.queue,[w,h],models);
         self.queue.write_buffer(&self.view,0,bytemuck::bytes_of(view));
         self.queue.write_buffer(&self.screen_size,0,bytemuck::cast_slice(&[w as f32,h as f32,0.,0.,1.,seconds,0.,0.]));
@@ -571,7 +620,7 @@ impl Renderer {
         }
         let layers=||meshes.iter().chain(fade.into_iter().flatten());
         for ((mesh,_),draw) in layers().zip(self.meshes.iter_mut()) {draw.upload(&self.device,&self.queue,mesh);}
-        let image=frame.texture.create_view(&Default::default());
+        let image=texture.create_view(&Default::default());
         let mut encoder=self.device.create_command_encoder(&Default::default());
         {
             let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -620,16 +669,16 @@ impl Renderer {
             }
         }
         let padded=(w*4).div_ceil(256)*256;
-        let readback=capture.filter(|_|self.config.usage.contains(wgpu::TextureUsages::COPY_SRC)).map(|_|{
+        let readback=capture.filter(|_|copy_src).map(|_|{
             let data=self.device.create_buffer(&wgpu::BufferDescriptor {label:Some("WWO capture"),size:u64::from(padded)*u64::from(h),
                 usage:wgpu::BufferUsages::COPY_DST|wgpu::BufferUsages::MAP_READ,mapped_at_creation:false});
-            encoder.copy_texture_to_buffer(wgpu::TexelCopyTextureInfo {texture:&frame.texture,mip_level:0,origin:wgpu::Origin3d::ZERO,aspect:wgpu::TextureAspect::All},
+            encoder.copy_texture_to_buffer(wgpu::TexelCopyTextureInfo {texture,mip_level:0,origin:wgpu::Origin3d::ZERO,aspect:wgpu::TextureAspect::All},
                 wgpu::TexelCopyBufferInfo {buffer:&data,layout:wgpu::TexelCopyBufferLayout{offset:0,bytes_per_row:Some(padded),rows_per_image:Some(h)}},
                 extent([w,h,1]));
             data
         });
         self.queue.submit([encoder.finish()]);
-        frame.present();
+        if let Some(frame)=frame {frame.present();}
         let saved=(|| -> io::Result<()> {
             let Some(path)=capture else{return Ok(());};
             let data=readback.ok_or_else(||io::Error::other("Vulkan surface does not support screenshot readback"))?;
@@ -641,7 +690,7 @@ impl Renderer {
             let raw=slice.get_mapped_range();
             let mut rgba=Vec::with_capacity((w*h*4) as usize);
             for row in raw.chunks_exact(padded as usize) {rgba.extend_from_slice(&row[..(w*4) as usize]);}
-            if self.config.format==wgpu::TextureFormat::Bgra8Unorm {
+            if format==wgpu::TextureFormat::Bgra8Unorm {
                 for pixel in rgba.chunks_exact_mut(4) {pixel.swap(0,2);}
             }
             let mut png=png::Encoder::new(std::fs::File::options().write(true).create_new(true).open(path)?,w,h);
