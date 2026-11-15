@@ -1,5 +1,7 @@
 use crate::{camera::{Camera,EARTH},compact::{Raster,Vertex},overlay::Mesh,politics::FlagUniform,terrain::{self,Terrain},ui::Ink,world::{Pixels,Tile}};
+use crate::landmarks::{self, ModelKey, ModelMesh, ModelVertex, VisibleModel};
 use bytemuck::{Pod,Zeroable};
+use std::collections::{HashMap, HashSet};
 use std::{io,path::Path,sync::Arc,time::Instant};
 use wgpu::util::DeviceExt;
 use winit::window::Window;
@@ -26,7 +28,7 @@ impl View {
         result.viewport=[size[0] as f32,size[1] as f32,(camera.mpp/EARTH) as f32,camera.blend() as f32];
         let (axes,[x,y])=camera.projection(size);
         result.projection_axes=axes.map(|[x,y,z]|[x as f32,y as f32,z as f32,0.]);
-        result.projection_origin=[x as f32,y as f32,0.,0.];
+        result.projection_origin=[x as f32,y as f32,camera.pitch().cos() as f32,0.];
         result
     }
 }
@@ -98,6 +100,7 @@ pub struct Renderer {
     device:wgpu::Device,
     queue:wgpu::Queue,
     pub gpu:String,
+    models: ModelLayer,
     view:wgpu::Buffer,
     globals:wgpu::BindGroup,
     pages:wgpu::BindGroupLayout,
@@ -123,6 +126,133 @@ pub struct Renderer {
     screen:wgpu::BindGroup,
     screen_size:wgpu::Buffer,
     meshes:[MeshBuffers;26],
+}
+
+struct ResidentModel {
+    vertices: wgpu::Buffer,
+    indices: wgpu::Buffer,
+    count: u32,
+    transform: wgpu::Buffer,
+    group: wgpu::BindGroup,
+}
+
+struct ModelLayer {
+    pipeline: wgpu::RenderPipeline,
+    layout: wgpu::BindGroupLayout,
+    depth: Option<([u32; 2], wgpu::TextureView)>,
+    residents: HashMap<ModelKey, ResidentModel>,
+    visible: HashSet<ModelKey>,
+    pending: HashSet<ModelKey>,
+    failed: HashSet<ModelKey>,
+    events: winit::event_loop::EventLoopProxy<crate::HostEvent>,
+}
+
+impl ModelLayer {
+    const DEPTH: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
+
+    fn new(device: &wgpu::Device, format: wgpu::TextureFormat, events: winit::event_loop::EventLoopProxy<crate::HostEvent>) -> Self {
+        let layout = layout(device, &[uniform(0, wgpu::ShaderStages::VERTEX)]);
+        let stages = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("WWO static model"), bind_group_layouts: &[&layout], push_constant_ranges: &[],
+        });
+        let shader = device.create_shader_module(wgpu::include_wgsl!("landmark.wgsl"));
+        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("WWO static models"), layout: Some(&stages), primitive: Default::default(),
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: Self::DEPTH, depth_write_enabled: true, depth_compare: wgpu::CompareFunction::Less,
+                stencil: Default::default(), bias: Default::default(),
+            }),
+            multisample: Default::default(), multiview: None, cache: None,
+            vertex: wgpu::VertexState {
+                module: &shader, entry_point: Some("model_vertex"), compilation_options: Default::default(),
+                buffers: &[wgpu::VertexBufferLayout {
+                    array_stride: std::mem::size_of::<ModelVertex>() as u64,
+                    step_mode: wgpu::VertexStepMode::Vertex,
+                    attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x4],
+                }],
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader, entry_point: Some("model_fragment"), compilation_options: Default::default(),
+                targets: &[Some(wgpu::ColorTargetState { format, blend: None, write_mask: wgpu::ColorWrites::ALL })],
+            }),
+        });
+        Self { pipeline, layout, depth: None, residents: HashMap::new(), visible: HashSet::new(),
+            pending: HashSet::new(), failed: HashSet::new(), events }
+    }
+
+    fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel]) {
+        self.visible.clear();
+        self.visible.extend(models.iter().map(|model| model.key));
+        self.residents.retain(|key, _| self.visible.contains(key));
+        if models.is_empty() {
+            self.depth = None;
+            return;
+        }
+        if self.depth.as_ref().is_none_or(|(previous, _)| *previous != size) {
+            let [width, height] = size;
+            let texture = device.create_texture(&wgpu::TextureDescriptor {
+                label: Some("WWO static model depth"), size: extent([width, height, 1]), mip_level_count: 1,
+                sample_count: 1, dimension: wgpu::TextureDimension::D2, format: Self::DEPTH,
+                usage: wgpu::TextureUsages::RENDER_ATTACHMENT, view_formats: &[],
+            });
+            self.depth = Some((size, texture.create_view(&Default::default())));
+        }
+        for model in models {
+            let key = model.key;
+            if let Some(resident) = self.residents.get(&key) {
+                queue.write_buffer(&resident.transform, 0, bytemuck::bytes_of(&model.clip_from_model));
+            } else if !self.failed.contains(&key) && self.pending.insert(key) {
+                let events = self.events.clone();
+                let created = std::thread::Builder::new().name("WWO model loading".into()).spawn(move || {
+                    let _ = events.send_event(crate::HostEvent::Model(key, landmarks::decode(key)));
+                });
+                if let Err(error) = created {
+                    self.pending.remove(&key);
+                    self.failed.insert(key);
+                    let _ = self.events.send_event(crate::HostEvent::Model(key, Err(error)));
+                }
+            }
+        }
+    }
+
+    fn complete(&mut self, device: &wgpu::Device, key: ModelKey, model: io::Result<ModelMesh>) -> io::Result<()> {
+        self.pending.remove(&key);
+        let model = model.inspect_err(|_| { self.failed.insert(key); })?;
+        if !self.visible.contains(&key) { return Ok(()); }
+        let upload = |contents, usage| device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("WWO static model"), contents, usage,
+        });
+        let transform = buffer(device, 64);
+        let group = bind(device, &self.layout, &[buf_resource(0, &transform)]);
+        self.residents.insert(key, ResidentModel {
+            vertices: upload(bytemuck::cast_slice(&model.vertices), wgpu::BufferUsages::VERTEX),
+            indices: upload(bytemuck::cast_slice(&model.indices), wgpu::BufferUsages::INDEX),
+            count: model.indices.len() as u32, transform, group,
+        });
+        Ok(())
+    }
+
+    fn draw(&self, encoder: &mut wgpu::CommandEncoder, image: &wgpu::TextureView) {
+        let Some((_, depth)) = &self.depth else { return; };
+        if self.residents.is_empty() { return; }
+        let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("WWO static models"), color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view: image, resolve_target: None,
+                ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store },
+            })],
+            depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                view: depth, depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Clear(1.), store: wgpu::StoreOp::Discard }),
+                stencil_ops: None,
+            }), occlusion_query_set: None, timestamp_writes: None,
+        });
+        pass.set_pipeline(&self.pipeline);
+        for model in self.residents.values() {
+            pass.set_bind_group(0, &model.group, &[]);
+            pass.set_vertex_buffer(0, model.vertices.slice(..));
+            pass.set_index_buffer(model.indices.slice(..), wgpu::IndexFormat::Uint32);
+            pass.draw_indexed(0..model.count, 0, 0..1);
+        }
+    }
 }
 
 fn layout(device:&wgpu::Device,entries:&[wgpu::BindGroupLayoutEntry])->wgpu::BindGroupLayout {
@@ -186,7 +316,7 @@ pub(crate) fn write_texture_layer(queue:&wgpu::Queue,texture:&wgpu::Texture,leve
 }
 
 impl Renderer {
-    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>)->Result<Self,String> {
+    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
         let size=window.inner_size();
         let instance=wgpu::Instance::new(&wgpu::InstanceDescriptor {backends:wgpu::Backends::VULKAN,..Default::default()});
         let surface=instance.create_surface(window).map_err(|e|e.to_string())?;
@@ -305,9 +435,22 @@ impl Renderer {
         let history_light=pipeline(&[&screen_layout],&hud_shader,"screen_vertex","history_light",&mesh_layout);
         let instrument=pipeline(&[&screen_layout,&font_layout,&instrument_layout],&hud_shader,"screen_vertex","instrument",&mesh_layout);
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
+        let models=ModelLayer::new(&device,format,events);
         Ok(Self{surface,config,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
-                globe,terrain,solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes})
+                globe,terrain,solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models})
     }
+
+    pub fn model_ready(&mut self, key: ModelKey, mesh: io::Result<ModelMesh>) -> io::Result<()> {
+        self.models.complete(&self.device, key, mesh)
+    }
+
+    pub fn resident_models(&self) -> Vec<(&'static str, &'static str)> {
+        let mut models:Vec<_>=self.models.residents.keys().map(|key|(key.model(),key.lod())).collect();
+        models.sort_unstable();
+        models
+    }
+
+    pub fn has_model(&self, key: ModelKey) -> bool { self.models.residents.contains_key(&key) }
     pub fn update_terrain(&mut self,camera:&Camera,size:[u32;2],now:Instant) {
         if let Some(terrain)=&mut self.terrain {terrain.update(&self.queue,camera,size,now);}
     }
@@ -370,7 +513,7 @@ impl Renderer {
         Page {group,uniform,ids:pixels.ids,water,bytes}
     }
     pub fn render(&mut self, view:&View,base:&Page,pages:&[(&Page,&Tile,[u32;4],f32)],
-                  meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>)->io::Result<Option<io::Result<()>>> {
+                  meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel])->io::Result<Option<io::Result<()>>> {
         let frame=match self.surface.get_current_texture() {
             Ok(frame)=>frame,
             Err(wgpu::SurfaceError::Outdated|wgpu::SurfaceError::Lost)=>{
@@ -380,6 +523,7 @@ impl Renderer {
             Err(e)=>return Err(io::Error::other(e))
         };
         let [w,h]=[self.config.width,self.config.height];
+        self.models.prepare(&self.device,&self.queue,[w,h],models);
         self.queue.write_buffer(&self.view,0,bytemuck::bytes_of(view));
         self.queue.write_buffer(&self.screen_size,0,bytemuck::cast_slice(&[w as f32,h as f32,0.,0.,1.,seconds,0.,0.]));
         for (page,tile,_,opacity) in pages {
@@ -406,7 +550,7 @@ impl Renderer {
         let mut encoder=self.device.create_command_encoder(&Default::default());
         {
             let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label:Some("WWO map and HUD"),color_attachments:&[Some(wgpu::RenderPassColorAttachment{
+                label:Some("WWO map"),color_attachments:&[Some(wgpu::RenderPassColorAttachment{
                     view:&image,resolve_target:None,ops:wgpu::Operations {load:wgpu::LoadOp::Clear(wgpu::Color::BLACK),store:wgpu::StoreOp::Store}
                 })],depth_stencil_attachment:None,occlusion_query_set:None,timestamp_writes:None
             });
@@ -420,8 +564,15 @@ impl Renderer {
                     pass.set_bind_group(1,&page.group,&[]);
                     pass.draw(0..3,0..1);
                 }
-                pass.set_scissor_rect(0,0,w,h);
             }
+        }
+        self.models.draw(&mut encoder, &image);
+        {
+            let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label:Some("WWO HUD"),color_attachments:&[Some(wgpu::RenderPassColorAttachment{
+                    view:&image,resolve_target:None,ops:wgpu::Operations {load:wgpu::LoadOp::Load,store:wgpu::StoreOp::Store}
+                })],depth_stencil_attachment:None,occlusion_query_set:None,timestamp_writes:None
+            });
             for ((_,ink),draw) in layers().zip(self.meshes.iter()) {
                 match ink {
                     Ink::ClockGears=>pass.set_pipeline(&self.clock_gears),
