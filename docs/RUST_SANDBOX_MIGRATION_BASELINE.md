@@ -18,6 +18,8 @@
 
 首个经济接入范围是已验证的两站点采购、生产、交付和成本链。先接可预留的企业实物货批和交付责任，再接批次执行和原采购决策。使用原生时钟和存档，逐笔核对实物、资金、工资责任和重复请求。保留原试验的开发参数标记。
 
+生产成本可从 Rust 已完成班次读取原始工时、工资金额、币种、已付与未付。`InitialWorld::completed_firm_work` 和本地维护命令 `wwo-formal-state inspect-firm-work <native-save> <firm-id> <day>` 共用原生工资责任。后续按原 `EconomyCostAllocation` 对已发生工资分配工时。当前返回班次成本输入，尚无生产批次分摊。
+
 ## 军事
 
 [PR #126](https://github.com/ryoumiyahayato/wwo/pull/126) 与 [固定运行报告](https://github.com/ryoumiyahayato/wwo/blob/f643199b48d630b371bc16b8d887707d4ea24ed1/docs/maps/layered_military_region.md) 记录旧正式入口和测试。独立军事仓库 [`1be6367`](https://github.com/ryoumiyahayato/wwo-military/tree/1be6367) 中，`military-godot/triple/{space,shell,port,test_continuity}.gd` 存有单一米制空间、同实例重入、乘员和弹药状态、返回协议及冷恢复测试。`modules/region_observation` 存有有界加载、地形边缘连接和局部碰撞。M 开发 v9／运行 v8 档案保留作规则来源和集成参考。

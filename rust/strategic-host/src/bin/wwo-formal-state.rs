@@ -1,7 +1,7 @@
 use serde_json::json;
 use std::{error::Error, io, path::Path};
 use wwo_map_lab::battlefield_terrain::{BattlefieldTerrain, REGION_ID};
-use wwo_map_lab::{formal_bootstrap::WorldBootstrap, formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_save::SavedWorld};
+use wwo_map_lab::{formal_bootstrap::WorldBootstrap, formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_save::{read_native_slot, SavedWorld}};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = std::env::args_os().skip(1);
@@ -73,6 +73,16 @@ fn main() -> Result<(), Box<dyn Error>> {
             let claims = saved.restore_regional_wages()?;
             println!("{}", json!({"open_regional_wages": claims.as_ref().map(|wages| wages.open_count())}));
         }
+        Some("inspect-firm-work") => {
+            let input = args.next().ok_or_else(usage)?;
+            let firm = args.next().ok_or_else(usage)?;
+            let firm = firm.to_str().ok_or_else(usage)?;
+            let day = args.next().ok_or_else(usage)?;
+            let day = day.to_str().ok_or_else(usage)?.parse()?;
+            if args.next().is_some() { return Err(usage().into()); }
+            let world = read_native_slot(Path::new(&input), &WorldBootstrap::load()?)?;
+            println!("{}", json!({"firm": firm, "work_day": day, "completed_work": world.completed_firm_work(firm, day)?}));
+        }
         Some("clock") => {
             let mut clock = GameClock::default();
             for input in args {
@@ -107,5 +117,5 @@ fn show(saved: &SavedWorld) {
 
 fn usage() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput,
-        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-wages, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
+        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
 }

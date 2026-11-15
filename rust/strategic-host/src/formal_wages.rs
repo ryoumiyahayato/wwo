@@ -28,6 +28,18 @@ pub struct WageClaims {
     through: GameClock,
 }
 
+#[derive(Debug, PartialEq, Serialize)]
+pub struct CompletedFirmWork<'a> {
+    pub work_id: &'a str,
+    pub worker: &'a str,
+    pub job: &'a str,
+    pub hours: i64,
+    pub denomination: &'a str,
+    pub accrued_wages: i64,
+    pub paid_wages: i64,
+    pub unpaid_wages: i64,
+}
+
 impl WageClaims {
     pub(crate) fn initialize() -> Self {
         Self { claims: BTreeMap::new(), through: GameClock::default() }
@@ -51,6 +63,22 @@ impl WageClaims {
     }
 
     pub(crate) fn claims(&self) -> &BTreeMap<String, Claim> { &self.claims }
+
+    pub(crate) fn completed_firm_work<'a>(
+        &'a self, firm: &str, day: i64,
+    ) -> Vec<CompletedFirmWork<'a>> {
+        self.claims.iter().filter(|(_, claim)| claim.employer == firm && claim.work_day == day)
+            .map(|(id, claim)| CompletedFirmWork {
+                work_id: id,
+                worker: &claim.worker,
+                job: &claim.job,
+                hours: claim.hours,
+                denomination: &claim.denomination,
+                accrued_wages: claim.amount,
+                paid_wages: claim.paid,
+                unpaid_wages: claim.amount - claim.paid,
+            }).collect()
+    }
 
     pub(crate) fn restore_shifts(
         claims: BTreeMap<String, Claim>, opening: &crate::formal_work::WorkOpening, ledger: &Ledger, clock: GameClock,
