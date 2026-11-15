@@ -57,6 +57,8 @@
 
 旧 Godot 4.6.3 项目保留作 R68 对照、迁移来源和局部回归，其入口为 `scenes/formal/formal_world_menu.tscn` → `scenes/formal/formal_world_main.tscn`。`FormalWorldApplication` 的旧版说明见 `docs/ARCHITECTURE.md` 与 `docs/UI_INFORMATION_ARCHITECTURE.md`。不恢复旧 FormalWorldSimulation、EconomyService、组件注册表、启动版本互锁或核验入口。
 
+经济以补齐和整合为主。军事优先恢复已有连续战场并研究 Rust 原生 3D 接入。开工前核对 [Rust 沙盒迁移基线](docs/RUST_SANDBOX_MIGRATION_BASELINE.md) 的既有实现、来源和待接入范围。
+
 ## 实现约束
 
 - UTF-8 与强类型 GDScript。单个组件承担原有职责。
@@ -75,4 +77,4 @@
 
 当前布局、功能缺口和其他工作线进度集中记录在现有 UI 说明。待办不产生空接口或虚假可点击行为。
 
-正式存档为 `user://formal_world_1900.json`，快照是 `formal_world_simulation_v15`，外层为 `formal_world_exact_variant_v1`。内部存档指纹绑定仍存在，字段与恢复依赖留待单独清理。`VNextWorldRuntime` 是隔离运行容器，旧嵌套存档分支仍保留。市场按实际身份集合处理，不要求恰好 50 个。Prototype、Alpha 旧读取宿主和 V2 旧 UI 已退出正式实现，不从历史指引恢复其入口。
+Rust 正式存档使用 `wwo_rust_formal_world_v1`，槽位与配置目录见 [宿主文档](rust/strategic-host/README.md)。R68 对照存档为 `user://formal_world_1900.json`，快照是 `formal_world_simulation_v15`，外层为 `formal_world_exact_variant_v1`。旧格式的内部存档指纹绑定仍存在，字段与恢复依赖留待单独清理。`VNextWorldRuntime` 是隔离运行容器，旧嵌套存档分支仍保留。市场按实际身份集合处理，不要求恰好 50 个。Prototype、Alpha 旧读取宿主和 V2 旧 UI 已退出正式实现，不从历史指引恢复其入口。

@@ -2,19 +2,30 @@
 
 `main` 是唯一正式开发线。当前 Windows 游戏由 WWO 的 [Rust 宿主](rust/strategic-host/README.md) 运行。入口是 [`rust/strategic-host/src/main.rs`](rust/strategic-host/src/main.rs)，原生会话和持久化在同一宿主内。winit 提供窗口和输入事件，wgpu 提供图形接口。人物规则复用 [character-core](rust/character-core/README.md)。
 
-当前版本可进入 1900 年正式世界，操作地理、政治、经济和军事地图，推进同一套世界时钟，交易和结算工资，并保存及恢复原生档案。[运行核实与模块归属](docs/RUST_HOST_RUNTIME_REVIEW.md) 记录了隔离 Windows 实跑的范围、第三方库、原 Godot/R68 对照入口和待迁移功能。
+当前 Windows 预览可进入 1900 年正式世界，切换地理、政治、经济和军事地图，推进世界时钟，交易和结算工资，并保存及恢复原生档案。[Rust 宿主运行核实](docs/RUST_HOST_RUNTIME_REVIEW.md) 记录了实跑的 EXE、测试范围、模块归属和旧版对照入口。
 
-Godot 4.6.3 工程及 R68 继续用于旧版对照、资产复用和迁移验证。旧工程入口见 [project.godot](project.godot)。[经济与军事沙盒](docs/RUST_SANDBOX_MIGRATION_BASELINE.md) 各自保留测试入口，接入正式游戏时共用 Rust 世界、人物和时间。[全球地貌验收规程](rust/strategic-host/README.md#全球地图验收) 适用于每次全球地图验收。
+Godot 4.6.3 工程及 R68 用于旧版对照、资产复用和迁移验证。通过 `--r68` 进入 R68 对照。旧工程入口见 [project.godot](project.godot)。
+
+## 经济和军事
+
+- 经济以补齐和整合为主。Rust 已有统计市场、个人库存、工资责任和已完班次成本输入。沿用经济沙盒中已验证的企业生产与交付链，接入现有账本、货批和时钟。企业生产批次成本仍待分配。
+- 军事优先恢复既有连续战场，并研究 Rust 原生 3D 接入。当前 Rust 维护工具能读取 Ridgevale 训练区原有的 4 米和 50 米高程。连续场景、单位状态和 3D 玩法的迁移范围见 [Rust 沙盒迁移基线](docs/RUST_SANDBOX_MIGRATION_BASELINE.md)。
 
 ## 构建与恢复
 
 Windows x64 使用 Rust MSVC 工具链、MSVC C++ Build Tools 和 Windows SDK。在仓库根目录运行：
 
 ```powershell
-cargo build --release --locked --manifest-path rust/strategic-host/Cargo.toml --bin wwo-map-lab
+cargo build --release --locked --manifest-path rust/strategic-host/Cargo.toml --bin wwo-map-lab --bin wwo-formal-state
 ```
 
-运行时需同阶段的 `data/`，也可传 `--play --data <目录>`。私有 [Rust Windows 阶段资源包](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115) 保存已经实跑的 EXE、共同运行数据和独立的压缩 Z7 资源。按附件说明恢复到空目录。Z7 资源为候选，使用随包 `Play-WWO-WorldCRS84Quad-Compact.cmd`。历史 Godot 资源另见 [R57 归档与恢复清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json) 及 [恢复工具](tools/archive/restore_main_resources.py)。
+新构建的入口是 `wwo-map-lab.exe --play --data <阶段数据目录>`。`wwo-formal-state.exe` 提供企业班次检查和训练地形读取。
+
+私有 [Rust Windows 阶段资源包](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115) 保存实跑的预览 EXE、运行数据、压缩地貌和训练高程。Release 标签固定阶段源码版本。附件说明登记来源、恢复目录及回读状态。
+
+- 基础预览解开运行 TAR 到空目录，启动 `WWO-Country-Records.exe`。
+- Z7 候选再解开 Z0–Z6 TAR 到同一目录，将 `7.qpk` 放入 `data/worldcrs84quad-15s-v2/`，运行随包 `Play-WWO-WorldCRS84Quad-Compact.cmd`。地图画面验收使用 [全球地貌验收规程](rust/strategic-host/README.md#全球地图验收)。
+- 历史 Godot 资源按 [R57 归档与恢复清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json) 及 [恢复工具](tools/archive/restore_main_resources.py) 处理。
 
 ## 阶段提交
 

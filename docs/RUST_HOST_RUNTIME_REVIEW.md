@@ -6,6 +6,8 @@
 
 ## Windows 实跑范围
 
+以下记录对应 2026-11-15 的 Windows 实跑。阶段源码、运行附件和云端回读状态见 [Rust Windows 阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)。主线后续修改以 `main` 的提交为准。
+
 - 当前桌面运行的是 "WWO-Country-Records.exe"。从当前发布目录逐字节核对副本，在同一台 Windows 11 的 AppContainer 中以 "--play --observe … --background" 运行该 EXE。文档中列出的 "WWO-Mechanical-Preview.exe" 用自己的数据另测至法国开局。
 - 两个隔离包只有 EXE 和运行数据。启动环境未提供 Godot 或 R68 路径。进程令牌能读随包数据，读取现有 Godot EXE、R68 项目和旧主项目均返回 Windows 错误 5。监视了从创建到退出的进程和动态模块事件。三次正式运行各只有自身 EXE，未观察到 Godot 子进程、Godot DLL 或旧脚本宿主。
 - 当前 EXE 实测法国新开局、地理／政治／经济／军事图层切换和区域缩放、打开 65 项报价的法国市场、买入 1.000 面包、巴黎工坊签约及登记工作。市场成交扣除 265，工坊两小时工资入账 6，现金从 2,500 变为 2,241。存档中的市场结算进度是第 51 小时。
