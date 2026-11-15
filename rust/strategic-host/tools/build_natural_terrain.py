@@ -289,7 +289,7 @@ def rasterize(tree, width, rect):
     return bits.reshape(y1-y0,2,x1-x0,2).mean(axis=(1,3), dtype=np.float32)
 
 
-def surface(relief, cover, vectors, width, rect):
+def surface(relief, cover, vectors, width, rect, *, elevation_snow):
     # One extra sample on each side for metric central differences, independent of page padding.
     x0,y0,x1,y1 = rect
     lon,lat = grid(width, (x0-1,y0-1,x1+1,y1+1))
@@ -306,8 +306,10 @@ def surface(relief, cover, vectors, width, rect):
     light = np.clip(.98+.53*(light-1),.57,1.22)
     high = np.clip((z-480)/3800,0,1)
     rock = np.clip((slope-.19)*.54+high*.49,0,.77)
-    snow = np.clip((z-(5200-32*np.abs(lat)))/900,0,.91)
-    snow = np.maximum(snow, rasterize(vectors["glaciated_areas"],width,rect)*.96)
+    # WorldCover class 70 contributes snow and ice through the base palette.
+    snow = rasterize(vectors["glaciated_areas"],width,rect)*.96
+    if elevation_snow:
+        snow = np.maximum(np.clip((z-(5200-32*np.abs(lat)))/900,0,.91), snow)
     color = cover.at(lon,lat[:,0])
     # Latitude and elevation supply the same climatic tint in all levels.
     polar = np.clip((np.abs(lat) + np.maximum(z, 0)*.003 - 63)/22, 0, .48)
@@ -331,7 +333,7 @@ def build_master(scratch, relief, cover, vectors, width):
     water = np.memmap(scratch / "water", mode="w+", shape=shape, dtype=np.uint8)
     for y in range(0, shape[0], STRIPE):
         end = min(shape[0], y+STRIPE)
-        rgb, z, land, river, _ = surface(relief, cover, vectors, width, (0, y, width, end))
+        rgb, z, land, river, _ = surface(relief, cover, vectors, width, (0, y, width, end), elevation_snow=True)
         ground[y:end] = np.clip(rgb*255+.5, 0, 255).astype(np.uint8)
         height[y:end] = z
         coast[y:end] = (land*255+.5).astype(np.uint8)
@@ -739,6 +741,7 @@ def build_packed_mother(scratch, sources, natural_earth, output):
                                "vertical_reference": "SRTM15+ sea-level reference"},
                     "land_cover": "ESA WorldCover 2021 reduced cache at 562 cells per 3 degrees; modern reference",
                     "coasts_lakes_glaciers": "Natural Earth 1:10m coastlines, lakes and glaciation; modern reference",
+                     "permanent_snow_and_ice": "ESA WorldCover 2021 v200 class 70 and Natural Earth 1:10m glaciated areas",
                     "rivers": "HydroRIVERS v1.0; modern reference, https://www.hydrosheds.org/products/hydrorivers"},
         "land_cover_license": {"license": "CC BY 4.0", "url": "https://doi.org/10.5281/zenodo.7254221",
                                 "attribution": "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium"},
@@ -759,7 +762,7 @@ def build_packed_mother(scratch, sources, natural_earth, output):
         for y in range(0, rows, stripe_rows):
             end = min(rows, y+stripe_rows)
             rect = (0,y,width,end)
-            ground, z, land, inland_water, lake = surface(relief, cover, vectors, width, rect)
+            ground, z, land, inland_water, lake = surface(relief, cover, vectors, width, rect, elevation_snow=False)
             color[y:end,:,:3] = shade_packed_water(ground,z,land,lake,rasterize(enclosed,width,rect))
             color[y:end,:,3] = np.rint(255*np.maximum(1-land,inland_water)).astype(np.uint8)
             height[y:end] = z
