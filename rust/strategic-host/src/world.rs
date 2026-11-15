@@ -148,16 +148,16 @@ pub struct Pixels {
 impl Pixels {
     #[cfg(test)]
     pub fn read(root:&Path,tile:&Tile)->io::Result<Self> {
-        Self::read_version(root,tile,None)
+        Self::read_version(root,tile,None,true)
     }
 
-    pub fn read_version(root:&Path,tile:&Tile,signature:Option<&[u8;8]>)->io::Result<Self> {
+    pub fn read_version(root:&Path,tile:&Tile,signature:Option<&[u8;8]>,cover:bool)->io::Result<Self> {
         let pack=Pack::open_version(&root.join(&tile.path),signature)?;
         let len=(tile.size[0]*tile.size[1]) as usize;
         let optional=|enabled,key,size| if enabled {pack.block(key,size)} else {Ok(Vec::new())};
         Ok(Self {
             terrain:pack.block("render/terrain",len*4)?,
-            cover:optional(tile.cover,"render/cover",tile.cover_size())?,
+            cover:optional(cover&&tile.cover,"render/cover",tile.cover_size())?,
             city:optional(tile.city,"render/city",len*2)?,
             ids:optional(tile.ids,"render/polity",len*2)?,
         })
@@ -266,16 +266,17 @@ pub struct Completion {
 pub struct Reader {
     sender:mpsc::Sender<(usize,Tile,Instant)>,
     pub inflight:Option<usize>,
+    pub cover:bool,
 }
 impl Reader {
-    pub fn new(root:PathBuf,signature:Option<&'static [u8;8]>,proxy:EventLoopProxy<Completion>)->Self {
+    pub fn new(root:PathBuf,signature:Option<&'static [u8;8]>,cover:bool,proxy:EventLoopProxy<crate::HostEvent>)->Self {
         let (sender,receiver)=mpsc::channel::<(usize,Tile,Instant)>();
         std::thread::Builder::new().name("WWO map streaming".into()).spawn(move || {
             while let Ok((id,tile,requested))=receiver.recv() {
-                if proxy.send_event(Completion{id,result:Pixels::read_version(&root,&tile,signature),requested}).is_err(){break;}
+                if proxy.send_event(crate::HostEvent::Map(Completion{id,result:Pixels::read_version(&root,&tile,signature,cover),requested})).is_err(){break;}
             }
         }).expect("map streaming thread");
-        Self {sender,inflight:None}
+        Self {sender,inflight:None,cover}
     }
     pub fn request(&mut self,id:usize,tile:&Tile) {
         if self.inflight.is_none() && self.sender.send((id,tile.clone(),Instant::now())).is_ok() {

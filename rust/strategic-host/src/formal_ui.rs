@@ -1,4 +1,5 @@
-use crate::{overlay::Mesh, ui::{Action,Hit,Mode}, camera::Camera};
+use crate::{overlay::Mesh, ui::{Action,CountryAction,CountryPanel,CountryView,Hit,Mode}, camera::Camera,
+    world::{Admin,Polity,World}};
 use serde::Deserialize;
 use std::{collections::HashMap, fs::File, io, path::Path};
 
@@ -80,7 +81,16 @@ pub struct Skin {
     english:bool,
     messages:HashMap<String,String>,
     fragments:Vec<(String,String)>,
+    geography:GeographyNames,
 }
+#[derive(Default,Deserialize)]
+struct GeographyNames {
+    names:HashMap<String,LocalizedName>,
+    directories:HashMap<String,Vec<String>>,
+}
+#[derive(Deserialize)]
+struct LocalizedName {zh:String,en:String}
+pub struct AdminRecord<'a> {pub name:&'a str,pub original:&'a str,pub boundary:Option<usize>}
 #[derive(Deserialize)]
 pub struct MapSymbol {
     pub screen_px:f32,
@@ -105,10 +115,40 @@ impl Skin {
                 Ok(file)=>serde_json::from_reader(file)?,
                 Err(error) if error.kind()==io::ErrorKind::NotFound=>HashMap::new(),
                 Err(error)=>return Err(error),
+            },geography:match File::open(root.join("hud-geography.json")){
+                Ok(file)=>serde_json::from_reader(file)?,
+                Err(error) if error.kind()==io::ErrorKind::NotFound=>GeographyNames::default(),
+                Err(error)=>return Err(error),
             },english:false,messages,fragments})
     }
     pub fn set_english(&mut self,value:bool){self.english=value;}
     pub fn english(&self)->bool {self.english}
+    pub fn choose<'a>(&self,zh:&'a str,en:&'a str)->&'a str {if self.english {en}else{zh}}
+    fn geographic_name<'a>(&'a self,id:&str)->Option<&'a str>{
+        let record=self.geography.names.get(id)?;
+        Some(self.choose(&record.zh,&record.en)).filter(|name|!name.is_empty())
+    }
+    pub fn country_name<'a>(&'a self,p:&'a Polity)->&'a str{
+        self.geographic_name(&p.map_id()).unwrap_or_else(||{
+            if self.english||p.name_zh.is_empty(){&p.name}else{&p.name_zh}
+        })
+    }
+    pub fn division_name<'a>(&'a self,admin:&'a Admin)->&'a str {
+        self.geographic_name(&admin.id).unwrap_or(&admin.name)
+    }
+    pub fn admin_count(&self,world:&World,p:&Polity)->usize{
+        if p.id=="country_fra" {world.admin.len()}
+        else {self.geography.directories.get(&p.id).map_or(0,Vec::len)}
+    }
+    pub fn admin_record<'a>(&'a self,world:&'a World,p:&Polity,index:usize)->Option<AdminRecord<'a>>{
+        if p.id=="country_fra" {
+            let record=world.admin.get(index)?;
+            return Some(AdminRecord{name:self.division_name(record),original:&record.name,boundary:Some(index)});
+        }
+        let id=self.geography.directories.get(&p.id)?.get(index)?;
+        let original=&self.geography.names.get(id)?.en;
+        Some(AdminRecord{name:self.geographic_name(id)?,original,boundary:None})
+    }
     fn localized<'a>(&'a self,value:&'a str)->std::borrow::Cow<'a,str> {
         use std::borrow::Cow;
         if !self.english {return Cow::Borrowed(value);}
@@ -140,6 +180,38 @@ impl Skin {
             if x+advance>end {break;}
             mesh.image([x-2.,y,w,h],[u/2048.,v/2048.,(u+w)/2048.,(v+h)/2048.],color);
             x+=advance;
+        }
+    }
+
+    pub(crate) fn paragraph(&self,mesh:&mut Mesh,s:&str,font:usize,[left,top,width,height]:[f32;4],color:[u8;4],scale:f32) {
+        let localized = self.localized(s);
+        let glyphs: Vec<_> = localized.chars().map(|ch| (ch, self.glyph(font,ch))).collect();
+        let Some((_,[_,_,_,line_height,_])) = glyphs.first().copied() else { return; };
+        let mut rest = glyphs.as_slice();
+        let mut y = top;
+        while !rest.is_empty() && y + line_height * scale <= top + height {
+            let mut used = 0.;
+            let mut count = 0;
+            let mut word_end = 0;
+            for (ch,[_,_,_,_,advance]) in rest {
+                if ch.is_whitespace() { word_end = count; }
+                if (used + advance) * scale > width { break; }
+                used += advance;
+                count += 1;
+                if !ch.is_ascii() { word_end = count; }
+            }
+            if count == 0 { break; }
+            if count < rest.len() && word_end > 0 { count = word_end; }
+            let mut x = left;
+            for (_,[u,v,w,h,advance]) in &rest[..count] {
+                mesh.image([x-2.*scale,y,w*scale,h*scale],[u/2048.,v/2048.,(u+w)/2048.,(v+h)/2048.],color);
+                x += advance * scale;
+            }
+            rest = &rest[count..];
+            while rest.first().is_some_and(|(ch,_)| ch.is_whitespace()) {
+                rest = &rest[1..];
+            }
+            y += (line_height - 2.) * scale;
         }
     }
 }
@@ -179,6 +251,26 @@ pub(crate) const IVORY:[u8;4]=[237,227,202,255];
 pub(crate) const MUTED:[u8;4]=[166,186,183,255];
 const FACE:[u8;4]=[33,33,36,220];
 
+fn polity_status<'a>(skin:&Skin,p:&'a Polity)->&'a str {
+    let (zh,en)=match p.status.as_str() {
+        "sovereign"|"independent_state"=>("主权国家","Sovereign state"),
+        "colony"=>("殖民地","Colony"),
+        "protectorate"|"protected_territory"=>("保护地","Protectorate"),
+        "dependency"=>("属地","Dependency"),
+        "dominion"=>("自治领","Dominion"),
+        "condominium"=>("共管领地","Condominium"),
+        "contested"=>("争议地区","Disputed territory"),
+        "occupied"=>("占领区","Occupied territory"),
+        "COMPANY_ADMINISTRATION"=>("公司管理参考","Company administration"),
+        "LOCAL_ADMINISTRATION"=>("地方行政参考","Local administration"),
+        "LOCAL_DYNASTIC_ADMINISTRATION"=>("地方王朝行政参考","Local dynastic administration"),
+        "MACRO_DISPLAY_AGGREGATE"=>("区域显示参考","Regional map reference"),
+        "PROTECTED_LOCAL_AUTHORITIES"|"PROTECTED_LOCAL_AUTHORITY"=>("受保护地方政权","Protected local authority"),
+        _=>("历史政治实体","Historical political entity"),
+    };
+    skin.choose(zh,en)
+}
+
 fn cornered([x,y,w,h]:[f32;4],c:f32)->[[f32;2];8] {
     [[x+c,y],[x+w-c,y],[x+w,y+c],[x+w,y+h-c],[x+w-c,y+h],[x+c,y+h],[x,y+h-c],[x,y+c]]
 }
@@ -206,8 +298,8 @@ fn arc(m:&mut Mesh,[x,y]:[f32;2],r:f32,a:f32,b:f32,width:f32,color:[u8;4]){
 pub struct Display<'a> {
     pub skin:&'a Skin,pub hud:&'a Hud,pub session:Option<&'a Session>,pub date:crate::timeline::Date,
     pub camera:&'a Camera,pub size:[u32;2],pub mode:Mode,pub flags:Option<u8>,pub cursor:[f64;2],
-    pub source:&'a str,pub feedback:&'a str,pub labels:bool,
-    pub selected_polity:Option<(&'a crate::world::Polity,bool,Option<u8>)>,
+    pub source:&'a str,pub feedback:&'a str,pub labels:bool,pub modern_terrain:bool,
+    pub country:Option<(&'a World,CountryPanel,Option<u8>)>,
     pub managed:bool,
     pub debug:Option<&'a crate::Diagnostics>,
 }
@@ -290,8 +382,10 @@ impl Display<'_> {
         if let Some(session)=self.session {
             let x=w-72.*factor;
             let time=format!("{:02}:{:02}",session.hour,session.minute);
+            let day=if self.skin.english(){format!("{:02}/{:02}",self.date.month,self.date.day)}
+                else{format!("{:02}月{:02}日",self.date.month,self.date.day)};
             for (value,font,baseline,ascent) in [(format!("{:04}",self.date.year),1,48.,20.),
-                (format!("{:02}月{:02}日",self.date.month,self.date.day),4,72.,10.),(time,3,96.,13.)] {
+                (day,4,72.,10.),(time,3,96.,13.)] {
                 let y=baseline*factor-ascent-2.;
                 for offset in [[-1.,0.],[1.,0.],[0.,-1.],[0.,1.]] {
                     self.center(text,&value,font,[x+offset[0],y+offset[1]],radius,[5,8,8,230]);
@@ -312,7 +406,8 @@ impl Display<'_> {
         self.draw_clock(art,clock,text,hits);
         if self.hud.menu.modal(){self.menu(panels,text,hits,radius);return;}
         if self.hud.menu==Menu::None && clock_hit(self.cursor,self.size[0],self.session,self.hud.mechanical.angle) && self.hud.clock_drag.is_none() {
-            let hint="拖动指针调节速度 · 顶端暂停，向下加快 · 空格开始或暂停";
+            let hint=visual.choose("拖动指针调节速度 · 顶端暂停，向下加快 · 空格开始或暂停",
+                "Drag to set speed · Top to pause · Space to toggle");
             let width=visual.width(hint,0)+28.;
             let x=(w-clock_radius(w)-width-12.).max(12.);
             let y=(self.cursor[1] as f32+16.).min(h-48.);
@@ -363,6 +458,13 @@ impl Display<'_> {
         for x in [start,start+length]{panels.line([x,h-18.],[x,h-11.],1.,BRASS);}
         let scale=if metres>=1000.{format!("{} km",metres/1000.)}else{format!("{metres} m")};
         visual.text(text,&scale,0,[start+length+8.,h-25.],75.,MUTED);
+        if self.modern_terrain && self.hud.page==Page::Map {
+            let label=visual.choose("现代地表参照","Modern terrain reference");
+            let width=visual.width(label,0)+18.;
+            let x=w-26.-width;
+            panel(panels,[x,h-109.,width,23.],[8,14,21,214]);
+            visual.text(text,label,0,[x+9.,h-108.],width-14.,MUTED);
+        }
         if !self.feedback.is_empty() && self.hud.menu==Menu::None {
             let width=(w-64.).min(680.);let x=(w-width)*0.5;
             panel(panels,[x,59.,width,32.],[8,13,20,249]);
@@ -371,7 +473,7 @@ impl Display<'_> {
         if self.hud.page==Page::Map && self.hud.menu==Menu::None {
             let shortcut=match self.mode {
                 Mode::Economic if s.is_some()=>Some(("打开市场",Command::Market("open",0),false)),
-                Mode::Political if s.is_some()=>Some(("国家概况",Command::PlayerCountry,false)),
+                Mode::Political if s.is_some()=>Some((visual.choose("国家概况","My country"),Command::PlayerCountry,false)),
                 Mode::Military=>Some(("25 / 50 km 方格",Command::MilitaryGrid,self.hud.military_grid)),
                 _=>None,
             };
@@ -391,9 +493,6 @@ impl Display<'_> {
                 self.row(panels,text,hits,[w-280.,h-114.,87.,25.],"结束训练",Some(Action::Hud(Command::Training("end"))),false);
             }
         }
-        if let Some((polity,details,flag))=self.selected_polity.filter(|_|self.hud.page==Page::Map){
-            self.country(panels,art,text,flags,hits,polity,details,flag);
-        }
         match self.hud.page {
             Page::Map=>(),
             Page::Finance=>self.finance(panels,art,text,hits),
@@ -402,6 +501,9 @@ impl Display<'_> {
             Page::Market=>self.market(panels,art,text,hits),
             Page::Relations=>self.relations(panels,text,hits),
             Page::Property=>self.property(panels,art,text,hits),
+        }
+        if let Some((world,country,flag))=self.country {
+            self.country(world,country,flag,panels,art,text,flags,hits);
         }
         if self.hud.messages {self.messages(panels,text,hits,center);}
         self.menu(panels,text,hits,radius);
@@ -431,61 +533,116 @@ impl Display<'_> {
     }
 
     fn hit(hits:&mut Vec<Hit>,area:[f32;4],command:Command){hits.push(Hit{area,action:Action::Hud(command)});}
-    fn country(&self,m:&mut Mesh,art:&mut Mesh,t:&mut Mesh,flags:&mut Mesh,hits:&mut Vec<Hit>,p:&crate::world::Polity,details:bool,flag:Option<u8>){
-        let title=if p.name_zh.is_empty(){&p.name}else{&p.name_zh};
-        let [x,y,w,h]=[12.,83.,280.,270.];
-        m.rect(x,y,w,h,[6,11,17,229]);
-        m.line([x,y],[x+w,y],1.,RIM);
-        self.skin.text(t,if p.display_only {"历史显示区"} else {"政治实体"},0,[x+12.,y+10.],220.,BRASS);
-        self.skin.text(t,title,1,[x+12.,y+35.],248.,IVORY);
-        self.skin.text(t,&self.date.to_string(),0,[x+12.,y+65.],248.,MUTED);
-        if let Some(slot)=flag {flags.flag([x+w-72.,y+60.,55.,34.],slot);}
-        let identity=format!("历史身份 · {title}");
-        let status=match p.status.as_str(){
-            "sovereign"=>"主权国家","colony"=>"殖民地","protectorate"=>"保护国",
-            "COMPANY_ADMINISTRATION"=>"公司管理参考","MACRO_DISPLAY_AGGREGATE"=>"区域显示参考",
-            _ if p.display_only=>"历史行政与归属参考",_=>p.status.as_str(),
+    pub(crate) fn country(&self,world:&World,country:CountryPanel,flag:Option<u8>,
+        m:&mut Mesh,art:&mut Mesh,t:&mut Mesh,flags:&mut Mesh,hits:&mut Vec<Hit>)
+    {
+        use CountryAction as Go;
+        let skin=self.skin;
+        let say=|zh,en|skin.choose(zh,en);
+        let p=&world.polities[country.polity];
+        let name=skin.country_name(p);
+        let area=country.rect(self.size);
+        let [x,y,w,h]=area;
+        panel(m,area,[11,19,28,255]);
+        let heading=match country.view {
+            CountryView::Summary=>say("国家简卡","Country summary"),
+            CountryView::Record=>say("国家资料","Country record"),
+            CountryView::Directory(_)=>say("历史行政名录","Historical administrative directory"),
+            CountryView::Region{..}=>say("历史行政区资料","Historical division record"),
         };
-        let date=format!("适用起始 · {}",p.from_date);
-        let id=p.map_id();
-        for (i,value) in [identity.as_str(),status,&date,&id].into_iter().enumerate(){
-            self.skin.text(t,value,0,[x+12.,y+90.+i as f32*21.],248.,IVORY);
-        }
-        self.row(m,t,hits,[x+w-35.,y+8.,26.,25.],"×",Some(Action::Close),false);
-        self.row(m,t,hits,[x+11.,y+h-34.,84.,24.],"完整资料",Some(Action::Details),false);
-        self.row(m,t,hits,[x+w-91.,y+h-34.,79.,24.],"地图定位",Some(Action::Locate),false);
-        if details {
-            let [w,h]=self.size.map(|v|v as f32);
-            let area=[(w-504.)*0.5,105.,504.,294_f32.min(h-116.)];
-            let [a,b,c,d]=area;
-            panel(m,area,FACE);
-            self.skin.sprite(art,"country_crest",[a+c*0.5-103.,b-44.,206.,48.]);
-            self.center(t,title,1,[a+c*0.5,b+14.],c-76.,IVORY);
-            self.row(m,t,hits,[a+c-40.,b-29.,26.,25.],"×",Some(Action::Details),false);
-            if let Some(slot)=flag {flags.flag([a+c-108.,b+71.,83.,51.],slot);}
-            let rows=if p.display_only {
-                let boundary=match p.boundary_kind.as_str(){
-                    "APPROXIMATE_FOR_1900_01_01"|"APPROXIMATE_CARTOGRAPHIC_BOUNDARY"=>"近似历史边界",
-                    _=>p.boundary_kind.as_str(),
-                };
-                vec![format!("显示 ID   {id}"),format!("历史资料   {}",p.authority_id),
-                    format!("有效期   {} – {}",p.from_date,p.to_date),
-                    format!("{}   {}   {}",boundary,p.geometry_feature_id,p.source_geometry_date)]
-            } else {
-                vec![format!("政治实体 ID   {id}"),format!("历史身份   {title}"),
-                    format!("有效期   {} – {}",p.from_date,p.to_date),"资料来源   WWO / CShapes 2.0".into(),
-                    format!("首都   {}",p.capital)]
-            };
-            for (i,label) in rows.iter().enumerate(){
-                self.skin.text(t,label,0,[a+22.,b+54.+i as f32*26.],c-44.,IVORY);
-            }
-            if !p.authority_note.is_empty() {
-                for (i,words) in p.authority_note.split_whitespace().collect::<Vec<_>>().chunks(9).enumerate() {
-                    self.skin.text(t,&words.join(" "),0,[a+22.,b+169.+i as f32*20.],c-44.,MUTED);
+        skin.text(t,heading,0,[x+18.,y+12.],w-72.,BRASS);
+        self.row(m,t,hits,[x+w-40.,y+9.,26.,25.],"×",Some(Action::Country(Go::Close)),false);
+        let bottom=y+h-45.;
+        match country.view {
+            CountryView::Summary|CountryView::Record=>{
+                let summary=matches!(country.view,CountryView::Summary);
+                if !summary {skin.sprite(art,"country_crest",[x+w*0.5-103.,y-40.,206.,44.]);}
+                skin.paragraph(t,name,1,[x+18.,y+38.,w-36.,54.],IVORY,1.);
+                let status=polity_status(skin,p);
+                let capital=skin.geographic_name(&format!("name:{}",p.capital))
+                    .or_else(||world.places.iter().find(|place|place.name==p.capital &&
+                        (place.coordinates[0]-p.capital_coordinates[0]).abs()<0.5 &&
+                        (place.coordinates[1]-p.capital_coordinates[1]).abs()<0.5)
+                        .and_then(|place|(!place.name_zh.is_empty()&&!skin.english()).then_some(place.name_zh.as_str())))
+                    .unwrap_or(&p.capital);
+                let width=w-if flag.is_some() && !summary {122.}else{36.};
+                if let Some(slot)=flag {
+                    let flag_y=if summary {bottom-15.}else{y+94.};
+                    flags.flag([x+w-92.,flag_y,70.,44.],slot);
+                }
+                let mut rows=vec![if summary {status.into()}else{format!("{} · {status}",say("历史身份","Historical status"))}];
+                if !capital.is_empty() {rows.push(format!("{} · {capital}",say("首都","Capital")));}
+                if !summary {
+                    rows.push(format!("{} · {} — {}",say("资料有效期","Record dates"),p.from_date,p.to_date));
+                    if let Some(controller)=world.polities.iter().find(|state|state.id==p.controller_id) {
+                        rows.push(format!("{} · {}",say("历史管辖","Historical authority"),skin.country_name(controller)));
+                    }
+                    rows.push(format!("{} · {}",say("资料来源","Source"),if p.display_only && !p.authority_id.is_empty(){&p.authority_id}else{"WWO / CShapes 2.0"}));
+                    if p.authority_note.is_empty(){
+                        rows.push(p.map_id());
+                    }
+                }
+                for (i,row) in rows.iter().enumerate(){
+                    skin.text(t,row,0,[x+18.,y+96.+i as f32*23.],if i<2{width}else{w-36.},IVORY);
+                }
+                if summary {
+                    self.row(m,t,hits,[x+18.,bottom,136.,29.],say("完整资料","Full record"),Some(Action::Country(Go::Record)),false);
+                } else {
+                    if p.display_only && !p.boundary_kind.is_empty() {
+                        let boundary=if p.boundary_kind.starts_with("APPROXIMATE") {
+                            say("近似历史边界","Approximate historical boundary")
+                        }else{say("历史边界参考","Historical boundary reference")};
+                        let source=format!("{boundary} · {}  {}",p.geometry_feature_id,p.source_geometry_date);
+                        skin.text(t,&source,0,[x+18.,bottom-25.],w-36.,MUTED);
+                    }
+                    if !p.authority_note.is_empty() {
+                        let note=format!("{} · {}",say("史料原文","Source note"),p.authority_note);
+                        let top=y+96.+rows.len() as f32*23.;
+                        skin.paragraph(t,&note,0,[x+18.,top,w-36.,(bottom-28.-top).max(0.)],MUTED,0.9);
+                    }
+                    if skin.admin_count(world,p)>0 {
+                        self.row(m,t,hits,[x+18.,bottom,300.,29.],say("历史行政名录","Historical administrative directory"),Some(Action::Country(Go::Directory)),false);
+                    }
+                    if self.session.is_none_or(|s|s.polity!=p.map_id()) {
+                        self.row(m,t,hits,[x+w-115.,bottom,98.,29.],say("返回","Back"),Some(Action::Country(Go::Back)),false);
+                    }
                 }
             }
-            if !p.capital.is_empty() {self.row(m,t,hits,[a+22.,b+d-45.,202.,29.],"定位首都",Some(Action::Capital),false);}
-            if p.id=="country_fra" {self.row(m,t,hits,[a+c-245.,b+d-45.,223.,29.],"历史省名录",Some(Action::AdminPage(0)),false);}
+            CountryView::Directory(page)=>{
+                let limit=country.rows(self.size);
+                let count=skin.admin_count(world,p);
+                let page=page.min(count.saturating_sub(1)/limit);
+                let subtitle=format!("{name} · {}",say("1900 年公开史料","Public records, 1900"));
+                skin.text(t,&subtitle,0,[x+18.,y+39.],w-36.,MUTED);
+                for (r,index) in (page*limit..count).take(limit).enumerate(){
+                    if let Some(record)=skin.admin_record(world,p,index) {
+                        self.row(m,t,hits,[x+18.,y+65.+r as f32*29.,w-36.,25.],record.name,
+                            Some(Action::Country(Go::Region(index))),false);
+                    }
+                }
+                if page>0 {
+                    self.row(m,t,hits,[x+18.,bottom,110.,29.],say("上一页","Previous"),Some(Action::Country(Go::Page(-1))),false);
+                }
+                if (page+1)*limit<count {
+                    self.row(m,t,hits,[x+138.,bottom,110.,29.],say("下一页","Next"),Some(Action::Country(Go::Page(1))),false);
+                }
+                self.row(m,t,hits,[x+w-115.,bottom,98.,29.],say("返回","Back"),Some(Action::Country(Go::Back)),false);
+            }
+            CountryView::Region{index,..}=>{
+                let Some(record)=skin.admin_record(world,p,index) else{return;};
+                skin.paragraph(t,record.name,1,[x+18.,y+39.,w-36.,53.],IVORY,1.);
+                skin.text(t,&format!("{name} · {}",say("1900 年","1900")),0,[x+18.,y+99.],w-36.,IVORY);
+                if record.name!=record.original {
+                    skin.text(t,&format!("{} · {}",say("历史原名","Historical name"),record.original),0,[x+18.,y+125.],w-36.,MUTED);
+                }
+                let description=if record.boundary.is_some() {say("边界资料 · 法国历史地理重建（TRF-GIS）","Boundary source · French historical reconstruction (TRF-GIS)")}
+                    else {say("本条目为公开历史名称资料。","This entry is a public historical name record.")};
+                skin.paragraph(t,description,0,[x+18.,y+157.,w-36.,68.],MUTED,1.);
+                if let Some(boundary)=record.boundary {
+                    self.row(m,t,hits,[x+18.,bottom,174.,29.],say("查看地图边界","Show map boundary"),Some(Action::Country(Go::Boundary(boundary))),false);
+                }
+                self.row(m,t,hits,[x+w-115.,bottom,98.,29.],say("返回","Back"),Some(Action::Country(Go::Back)),false);
+            }
         }
     }
     fn center(&self,t:&mut Mesh,label:&str,font:usize,[x,y]:[f32;2],limit:f32,color:[u8;4]){
@@ -545,6 +702,7 @@ impl Display<'_> {
     pub fn page_rect(&self)->Option<[f32;4]>{page_rect(self.hud,self.size)}
     fn relations(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>){
         let Some([x,y,w,max_height])=self.page_rect() else{return;};
+        let say=|zh,en|self.skin.choose(zh,en);
         let view=self.session.and_then(|session|session.relations.as_ref());
         let selected=view.and_then(|view|view.rows.iter().find(|row|row.id==view.selected));
         let height=match view {
@@ -555,11 +713,11 @@ impl Display<'_> {
         };
         panel(m,[x,y,w,height],FACE);
         arc(m,[x+w*0.5,y+height-5.],10.,3.142,6.283,4.,BRASS);
-        self.skin.text(t,selected.map_or("人物组织关系",|row|row.label.as_str()),1,[x+20.,y+14.],w-110.,IVORY);
-        self.row(m,t,hits,[x+w-80.,y+12.,64.,26.],"返回",Some(Action::Hud(
+        self.skin.text(t,selected.map_or(say("人物组织关系","Character relations"),|row|row.label.as_str()),1,[x+20.,y+14.],w-110.,IVORY);
+        self.row(m,t,hits,[x+w-80.,y+12.,64.,26.],say("返回","Back"),Some(Action::Hud(
             if selected.is_some(){Command::Relation(None)}else{Command::Page(Page::Map)})),false);
         let Some(view)=view else {
-            self.skin.text(t,"正在读取组织关系",0,[x+20.,y+72.],w-40.,MUTED);
+            self.skin.text(t,say("正在读取组织关系","Loading relations"),0,[x+20.,y+72.],w-40.,MUTED);
             return;
         };
         if let Some(row)=selected {
@@ -568,7 +726,10 @@ impl Display<'_> {
             }
             return;
         }
-        for (index,(drawer,label)) in [("relations",format!("组织关系 · {}",view.rows.len())),("work","工作与经营".into())].into_iter().enumerate() {
+        for (index,(drawer,label)) in [
+            ("relations",format!("{} · {}",say("组织关系","Organisational ties"),view.rows.len())),
+            ("work",say("工作与经营","Work and business").into())
+        ].into_iter().enumerate() {
             if index==1 && !view.has_work {continue;}
             let expanded=view.drawer==drawer;
             let top=y+96.+index as f32*36.;
@@ -584,7 +745,7 @@ impl Display<'_> {
             if let Some(confirmation)=&view.confirmation {
                 self.skin.text(t,&confirmation.title,1,[x+20.,y+186.],w-40.,IVORY);
                 self.skin.text(t,&confirmation.body,0,[x+20.,y+225.],w-40.,MUTED);
-                for (index,(label, confirmed)) in [("确认",true),("取消",false)].into_iter().enumerate() {
+                for (index,(label, confirmed)) in [(say("确认","Confirm"),true),(say("取消","Cancel"),false)].into_iter().enumerate() {
                     self.row(m,t,hits,[x+20.+index as f32*120.,y+260.,110.,26.],label,Some(Action::Hud(Command::WorkConfirm(confirmed))),false);
                 }
                 return;
@@ -609,7 +770,7 @@ impl Display<'_> {
         }
         if view.drawer!="relations" {return;}
         if view.rows.is_empty(){
-            self.skin.text(t,"暂无成员或任职记录。",0,[x+20.,y+179.],w-40.,MUTED);
+            self.skin.text(t,say("暂无成员或任职记录。","No membership or position records."),0,[x+20.,y+179.],w-40.,MUTED);
         }
         for (i,row) in view.rows.iter().enumerate().skip(self.hud.market_offset).take(((height-180.)/34.) as usize) {
             self.row(m,t,hits,[x+20.,y+176.+(i-self.hud.market_offset) as f32*34.,w-40.,29.],
@@ -618,19 +779,26 @@ impl Display<'_> {
     }
     fn character(&self, m: &mut Mesh, art: &mut Mesh, t: &mut Mesh, hits: &mut Vec<Hit>) {
         let Some([x,y,w,h]) = self.page_rect() else { return; };
-        self.folio(m,art,t,hits,[x,y,w,h],"人物资料");
+        let skin=self.skin;
+        let say=|zh,en|skin.choose(zh,en);
+        self.folio(m,art,t,hits,[x,y,w,h],say("人物资料","Character record"));
         let Some(character) = self.session.and_then(|s| s.character.as_ref()) else { return; };
         let profile = &character.profile;
         let social = &profile.social;
-        let caption = format!("{} · 约 {} 岁 · {}", profile.name, profile.age_years, profile.health_status);
+        let caption=if skin.english(){
+            format!("{} · About {} years old · {}",skin.localized(&profile.name),profile.age_years,skin.localized(&profile.health_status))
+        }else{format!("{} · 约 {} 岁 · {}",profile.name,profile.age_years,profile.health_status)};
+        let absent=say("暂无记录","No record");
+        let settled=if skin.english(){format!("Health and ageing are modelled · Game day {}",character.settled_day+1)}
+            else{format!("健康与衰老模型采用开发假设 · 已结算游戏第 {} 日",character.settled_day+1)};
         let entries = [
             caption,
-            format!("健康与衰老模型采用开发假设 · 已结算游戏第 {} 日", character.settled_day + 1),
-            format!("工作 · {}", social.occupation.as_deref().unwrap_or("暂无记录")),
-            social.economic_situation.as_deref().unwrap_or("现金资料不可用").into(),
-            format!("组织 · {}", social.relationships.as_deref().filter(|r| !r.is_empty()).map_or_else(|| "暂无记录".into(), |r| r.join("、"))),
-            format!("职务 · {}", social.positions.as_deref().filter(|r| !r.is_empty()).map_or_else(|| "暂无记录".into(), |r| r.join("、"))),
-            format!("经历 · {}", if profile.history.is_empty() { "暂无记录".into() } else { profile.history.join("、") }),
+            settled,
+            format!("{} · {}",say("工作","Work"),social.occupation.as_deref().unwrap_or(absent)),
+            social.economic_situation.as_deref().unwrap_or(say("现金资料不可用","Cash record unavailable")).into(),
+            format!("{} · {}",say("组织","Organisations"),social.relationships.as_deref().filter(|r|!r.is_empty()).map_or_else(||absent.into(),|r|r.join("、"))),
+            format!("{} · {}",say("职务","Positions"),social.positions.as_deref().filter(|r|!r.is_empty()).map_or_else(||absent.into(),|r|r.join("、"))),
+            format!("{} · {}",say("经历","History"),if profile.history.is_empty(){absent.into()}else{profile.history.join("、")}),
         ];
         for (index, entry) in entries.iter().enumerate() {
             self.skin.text(t, entry, 0, [x+22.,y+61.+index as f32*28.], w-44., IVORY);
@@ -645,11 +813,11 @@ impl Display<'_> {
             }
         }
         for (index, (label, action)) in [
-            ("地图定位", Command::LocatePlayer),
-            ("关系与工作", Command::Page(Page::Relations)),
-            ("持有物", Command::Page(Page::Property)),
+            (say("定位人物","Find player"), Command::LocatePlayer),
+            (say("关系与工作","Work & relations"), Command::Page(Page::Relations)),
+            (say("持有物","Inventory"), Command::Page(Page::Property)),
         ].into_iter().enumerate() {
-            self.row(m,t,hits,[x+22.+index as f32*120.,y+h-45.,110.,26.],label,Some(Action::Hud(action)),false);
+            self.row(m,t,hits,[x+22.+index as f32*166.,y+h-45.,155.,26.],label,Some(Action::Hud(action)),false);
         }
     }
     fn finance(&self,m:&mut Mesh,art:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>){
@@ -754,9 +922,9 @@ impl Display<'_> {
     }
     fn menu(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,radius:f32){
         let [w,h]=self.size.map(|v|v as f32);
-        let dark=[8,13,20,249];
         let menu=self.hud.menu;
         if menu==Menu::None{return;}
+        let dark=[8,13,20,if menu==Menu::MapModes{255}else{249}];
         let [x,y,width,height]=menu_rect(self.hud.menu,self.size,radius);
         if menu.modal(){
             m.rect(0.,0.,w,h,[0,0,0,130]);hits.clear();
@@ -890,6 +1058,9 @@ pub fn menu_rect(menu:Menu,size:[u32;2],radius:f32)->[f32;4]{
         Menu::Departure=>[(w-440.)*0.5,(h-150.)*0.5,440.,150.],
         Menu::None=>[0.;4],
     }
+}
+pub fn map_modes_rect(size:[u32;2])->[f32;4] {
+    menu_rect(Menu::MapModes,size,(size[0] as f32*0.056).clamp(52.,78.))
 }
 pub fn message_rect([w,h]:[f32;2],center:f32)->[f32;4]{
     let width=(w*0.34).min(320.);

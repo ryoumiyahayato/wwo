@@ -9,7 +9,7 @@ struct View {
     chart_origin: vec4f,
     settings: vec4f, // seasonal day, mode, politics available, theme
     selection: vec4f, // polity number, land changes, administrative index, France index
-    map_style: vec4f, // military grid step in metres (w)
+    map_style: vec4f, // terrain catalogue zoom (y), selected terrain zoom (z), military grid step (w)
     edits: array<LandEdit, 12>,
 };
 struct LandEdit { area: vec4f, state: vec4f };
@@ -30,6 +30,9 @@ struct Tile {
 @group(0) @binding(7) var galactic_chart: texture_2d<f32>;
 @group(0) @binding(8) var ocean_detail: texture_2d<f32>;
 @group(0) @binding(9) var ocean_ice: texture_2d<f32>;
+@group(0) @binding(10) var terrain_world: texture_2d_array<f32>;
+@group(0) @binding(11) var terrain_detail: texture_2d_array<f32>;
+@group(0) @binding(12) var terrain_index: texture_2d<u32>;
 @group(1) @binding(0) var<uniform> tile: Tile;
 @group(1) @binding(1) var terrain_data: texture_2d<f32>;
 @group(1) @binding(2) var material_data: texture_2d<f32>;
@@ -174,6 +177,67 @@ fn political_flag(slot:u32, uv:vec2f) -> vec4f {
     let sample_uv=(cell+vec2f(.5)+clamp(uv,vec2f(0.),vec2f(1.))*(span-1.))/size;
     return textureSampleLevel(flags,linear,sample_uv,0.);
 }
+fn natural_global(uv:vec2f) -> vec4f {
+    let half=i32(floor(uv.x*2.));
+    let local=vec2f(fract(uv.x*2.),uv.y);
+    return textureSampleLevel(terrain_world,linear,(local*256.+4.)/264.,half,0.);
+}
+struct NaturalPage { color:vec4f, coverage:f32 }
+fn page_readiness(cell:vec2i, columns:i32, rows:i32) -> f32 {
+    let x=(cell.x+columns)%columns;
+    let y=clamp(cell.y,0,rows-1)+rows-1;
+    return f32(textureLoad(terrain_index,vec2i(x,y),0).r>>16u)/255.;
+}
+fn page_surface(uv:vec2f, zoom:i32) -> NaturalPage {
+    let rows=1i<<u32(zoom);
+    let columns=rows*2;
+    let offset=rows-1;
+    let position=uv*vec2f(f32(columns),f32(rows));
+    let cell=vec2i(floor(position));
+    let at=vec2i(cell.x,cell.y+offset);
+    let index=textureLoad(terrain_index,at,0).r;
+    let slot=i32(index&65535u)-1;
+    if slot<0 {return NaturalPage(vec4f(0.),0.);}
+    var fade=f32(index>>16u)/255.;
+    let q=fract(position);
+    // Every cell meeting at an edge or corner uses the same refinement weight.
+    // The common parent supplies unready portions at identical coordinates.
+    let rim=min(q,1.-q);
+    let collar=.04;
+    let dx=vec2i(select(-1,1,q.x>.5),0);
+    let dy=vec2i(0,select(-1,1,q.y>.5));
+    var edge_x=fade;
+    var edge_y=fade;
+    if rim.x<collar {
+        edge_x=min(fade,page_readiness(cell+dx,columns,rows));
+    }
+    if rim.y<collar {
+        edge_y=min(fade,page_readiness(cell+dy,columns,rows));
+    }
+    if min(rim.x,rim.y)<collar {
+        var corner=min(edge_x,edge_y);
+        if max(rim.x,rim.y)<collar {
+            corner=min(corner,page_readiness(cell+dx+dy,columns,rows));
+        }
+        let t=smoothstep(vec2f(0.),vec2f(collar),rim);
+        fade=mix(mix(corner,edge_y,t.x),mix(edge_x,fade,t.x),t.y);
+    }
+    let refined=textureSampleLevel(terrain_detail,linear,(q*256.+4.)/264.,slot,0.);
+    return NaturalPage(refined,fade);
+}
+fn natural_surface(ll:vec2f) -> vec4f {
+    let uv=vec2f(fract(ll.x/360.+.5),clamp(.5-ll.y/180.,0.,.99999994));
+    var color=vec4f(0.);
+    var remaining=1.;
+    for(var z=i32(view.map_style.z);z>0;z-=1) {
+        let page=page_surface(uv,z);
+        let weight=remaining*page.coverage;
+        color+=page.color*weight;
+        remaining-=weight;
+        if remaining<.0001 {return color;}
+    }
+    return color+natural_global(uv)*remaining;
+}
 fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f {
     let dims=vec2f(textureDimensions(terrain_data));
     let du=1./dims;
@@ -183,10 +247,15 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
     let metres=(tile.extent.zw-tile.extent.xy)*111195.*vec2f(max(.035,cos(lat)),1.);
     let dx=max(1.,metres.x*du.x);
     let dy=max(1.,metres.y*du.y);
-    let grad=vec2f(
-        height(raw(uv+vec2f(du.x,0.)))-height(raw(uv-vec2f(du.x,0.))),
-        height(raw(uv+vec2f(0.,du.y)))-height(raw(uv-vec2f(0.,du.y)))
-    )/(2.*vec2f(dx,dy));
+    let base_mpp=view.viewport.z*EARTH;
+    let use_natural=view.map_style.y>.5;
+    var grad=vec2f(0.);
+    if !use_natural {
+        grad=vec2f(
+            height(raw(uv+vec2f(du.x,0.)))-height(raw(uv-vec2f(du.x,0.))),
+            height(raw(uv+vec2f(0.,du.y)))-height(raw(uv-vec2f(0.,du.y)))
+        )/(2.*vec2f(dx,dy));
+    }
     let slope=length(grad);
     let south=select(0.,182.5,ll.y<0.);
     let day=(view.settings.x+south)%365.;
@@ -206,11 +275,11 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
     let log_height=log(1.+max(z,0.)/400.)/log(16.);
     var color=mix(mix(vec3f(.41,.45,.37),vec3f(.50,.48,.40),smoothstep(.08,.60,log_height)),
         vec3f(.60,.57,.50),smoothstep(.60,.98,log_height));
-    let base_mpp=view.viewport.z*EARTH;
+    var terrain=vec4f(0.);
     var forest=0.;
     var urban=0.;
     let has_cover=tile.options.y==1.;
-    if has_cover {
+    if has_cover && (!use_natural || view.selection.y>0.) {
         let cover_uv=uv;
         let footprint=du*clamp(base_mpp/min(dx,dy),0.,4.)*.45;
         let v=textureSampleLevel(material_data,linear,cover_uv,0.)*.40
@@ -228,7 +297,7 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
     let southward=grad.y/max(.13,slope);
     let snowline=mix(4150.,850.,cold*season_strength)-max(0.,abs(ll.y)-44.)*74.;
     let snow=smoothstep(snowline-190.,snowline+320.,z-160.*southward)*(1.-.53*forest);
-    if has_cover {
+    if !use_natural && has_cover {
         color=mix(color,vec3f(.90,.94,.93),snow*.91);
     }else if ll.y< -60. {
         color=mix(color,mix(vec3f(.70,.78,.81),vec3f(.84,.88,.89),smoothstep(.04,.82,log_height)),.80);
@@ -237,7 +306,11 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
     let normal=normalize(vec3f(-grad*1.5,1.));
     var relief_light=clamp(.92+.58*(dot(normal,sun)-sun.z),.48,1.12);
     color *= relief_light;
-    if tile.options.y>=5. {
+    if use_natural {
+        terrain=natural_surface(ll);
+        color=terrain.rgb;
+        relief_light=clamp(.57+dot(color,vec3f(.30,.55,.15))*.68,.70,1.19);
+    } else if tile.options.y>=5. {
         let level = log2(max(1.,base_mpp/min(dx,dy)));
         let source = textureSampleLevel(material_data,linear,uv,level);
         let encoding = tile.options.y-5.;
@@ -266,11 +339,11 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
             color=mix(color,mix(vec3f(.60,.588,.512),print.rgb,.75),print.a);
         }
     }
-    if has_cover && base_mpp<150. {
+    if has_cover && base_mpp<150. && (!use_natural || view.selection.y>0.) {
         let m=ll*111195.*vec2f(cos(lat),1.);
         let detail=(noise(m/43.)-.5)*(1.-smoothstep(9.,43.,base_mpp));
         let grain=(noise(m/239.)-.5)*.022+detail*.039;
-        color+=grain;
+        if !use_natural {color+=grain;}
         for (var i=0u;i<u32(view.selection.y);i++) {
             let edit=view.edits[i];
             let d=(ll-edit.area.xy)*111195.*vec2f(cos(lat),1.)/edit.area.zw;
@@ -305,11 +378,13 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
     }
     if view.settings.w>.5 {
         let l=dot(color,vec3f(.30,.55,.15));
-        color=mix(color,vec3f(l)*mix(vec3f(.85,.98,.90),vec3f(1.17,1.05,.91),smoothstep(150.,3350.,z)),.68);
+        let warm_form=select(smoothstep(150.,3350.,z),smoothstep(.43,.76,l),use_natural);
+        color=mix(color,vec3f(l)*mix(vec3f(.85,.98,.90),vec3f(1.17,1.05,.91),warm_form),.68);
     }
     let regional=clamp(view.viewport.w,0.,1.);
     let lighting=1.-regional;
     color=mix(color,solar_ground(color,normal_view),lighting);
+    let lit_terrain=color;
     if view.settings.y>.5 && view.settings.y<2.5 {
         let dims_id=vec2i(textureDimensions(owners));
         let at=vec2i(floor(uv*vec2f(dims_id)));
@@ -364,11 +439,16 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
             }
         }
     }
-    let sea=mix(chart_ocean(ll,normal_world,normal_view),vec3f(.12,.20,.23),regional);
-    let lake=mix(vec3f(.23,.46,.54),solar_ground(vec3f(.23,.46,.54),normal_view),lighting);
-    let water=mix(lake,sea,data.a);
-    color=mix(color,water,data.b);
-    color=mix(color,vec3f(.69,.67,.59),bridges*data.b*.82);
+    if use_natural {
+        color=mix(color,lit_terrain,terrain.a);
+        color=mix(color,vec3f(.69,.67,.59),bridges*terrain.a*.82);
+    } else {
+        let sea=mix(chart_ocean(ll,normal_world,normal_view),vec3f(.12,.20,.23),regional);
+        let lake=mix(vec3f(.23,.46,.54),solar_ground(vec3f(.23,.46,.54),normal_view),lighting);
+        let water=mix(lake,sea,data.a);
+        color=mix(color,water,data.b);
+        color=mix(color,vec3f(.69,.67,.59),bridges*data.b*.82);
+    }
     if view.settings.y>2.5 && view.map_style.w>0. {
         // R68's Lambert-93 origin and 50/25 km spacing. This is a display grid;
         // its France mask does not claim the original topology's cell membership.
@@ -399,6 +479,7 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
         if !is_world {discard;}
         return vec4f(sky(p.xy),1.);
     }
+    if !is_world && view.map_style.y>.5 && (view.settings.y<.5 || view.settings.y>2.5 && view.map_style.w<=0.) && tile.options.z<.5 && view.selection.y<.5 {discard;}
     let a=select(asin(min(r,1.)),r,t>0.);
     let k=select(1.,sin(a)/max(r,.00000001),r>.00000001);
     let v=normalize(view.chart_east.xyz*(xy.x*k)+view.chart_north.xyz*(xy.y*k)+view.chart_forward.xyz*cos(a));

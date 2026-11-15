@@ -52,16 +52,52 @@ canvas.save(data / "hud-art.png")
 maps = r68 / "assets/maps"
 shutil.copyfile(r68 / "data/presentation/economic_structure_1900.json", data / "economic-structure-r68.json")
 messages = json.loads((r68 / "data/presentation/localization/messages_en.json").read_text(encoding="utf-8"))
-for entry in json.loads((r68 / "data/presentation/localization/names.json").read_text(encoding="utf-8")).values():
+profiles_path = base.parent.parent / "data/world_map/historical/major_state_profiles_1900.json"
+profiles = json.loads(profiles_path.read_text(encoding="utf-8"))["profiles"]
+opening_briefs = {entry["entity_id"]: entry.get("opening_brief_zh") or entry.get("brief_zh", "")
+                  for entry in profiles}
+for polity, translation in {
+    "british_isles_1900": "Britain is a monarchy with overseas colonies. The South African War began in 1899 and continues, making imperial policy in southern Africa a public issue.",
+    "german_empire": "Founded in 1871, the German Empire combines monarchical authority with an imperial parliament. Parliament participates in legislation and budgeting, while the emperor and government retain substantial power.",
+}.items():
+    messages.setdefault(opening_briefs[polity], translation)
+names = json.loads((r68 / "data/presentation/localization/names.json").read_text(encoding="utf-8"))
+for entry in names.values():
     for field in ("name", "capital"):
         zh, en = entry.get("zh", {}).get(field), entry.get("en", {}).get(field)
         if zh and en:
             messages[zh] = en
 messages.update({"军事地图": "Military map", "打开市场": "Open market",
+                 "良好": "Good health", "身体虚弱": "Weak", "患病": "Ill",
+                 "危重": "Critical", "已去世": "Deceased",
+                 "有永久损伤，状况稳定": "Stable with permanent injury",
+                 "现金": "Cash", "暂无记录": "No record",
+                 "人物特质": "Character traits", "暂无历史简介": "No historical overview available",
+                 "可开局": "Playable", "仅查看": "View only",
                  "R68 规则兼容 · Rust 候选": "R68 compatibility · Rust candidate",
                  "Rust 原生世界": "Native Rust world",
                  "再次点击当前模式可返回基础地貌": "Select the active mode again to return to terrain"})
 (data / "messages-en-r68.json").write_text(json.dumps(messages, ensure_ascii=False), encoding="utf-8")
+historical = r68 / "data/world_map/historical"
+geographic_names = {
+    key: {language: entry.get(language, {}).get("name", "") for language in ("zh", "en")}
+    for key, entry in names.items()
+}
+directory_sources = json.loads((historical / "historical_admin1_1900.json").read_text(encoding="utf-8"))
+britain = next(country for country in directory_sources["countries"] if country["entity_id"] == "british_isles_1900")
+british_regions = {label["zh"]: key for key, label in geographic_names.items()
+                   if key.startswith("name:") and label["zh"] in britain["units"]}
+germany = json.loads((historical / "german_administration_1900_identity.json").read_text(encoding="utf-8"))
+german_regions = [unit for unit in germany["units"] if unit["level"] == 1]
+for unit in german_regions:
+    geographic_names[unit["id"]] = {"zh": unit["name_zh"], "en": unit["historical_name"]}
+directories = {
+    britain["entity_id"]: [british_regions[name] for name in britain["units"]],
+    germany["entity_id"]: [unit["id"] for unit in german_regions],
+}
+(data / "hud-geography.json").write_text(
+    json.dumps({"names": geographic_names, "directories": directories}, ensure_ascii=False), encoding="utf-8"
+)
 Image.open(maps / "background/galactic_chart.png").convert("RGBA").save(data / "galactic-chart.png")
 ocean = maps / "ocean/orbital_r24"
 for name, source in (("detail", "pelagic_eddies_albedo.png"), ("ice", "polar_pack_ice_albedo.png")):
@@ -69,6 +105,7 @@ for name, source in (("detail", "pelagic_eddies_albedo.png"), ("ice", "polar_pac
     Image.open(ocean / source).convert("RGBA").save(data / f"ocean-{name}-r68.png")
 
 glyph_sources = [base / "src/formal_ui.rs", base / "src/market_ui.rs", base / "src/lobby.rs",
+                 base / "src/ui.rs", base / "src/main.rs",
                  base / "src/migration_status.rs", base / "src/formal_character.rs", base / "src/native_start.rs",
                  base / "tools/formal_host_bridge.gd", base / "tools/formal_market_bridge.gd"]
 glyph_sources += [base.parent.parent / "data/alpha/commodity_market_1900.json",
@@ -83,6 +120,11 @@ glyph_sources += list((r68 / "data/local").glob("*.json"))
 chars = set()
 for path in glyph_sources:
     chars.update(re.findall(r"[\u3000-\u9fff\uff00-\uffef−×—·→]", path.read_text(encoding="utf-8")))
+for brief in opening_briefs.values():
+    chars.update(re.findall(r"[\u3000-\u9fff\uff00-\uffef]", brief))
+for labels in geographic_names.values():
+    for name in labels.values():
+        chars.update(name)
 world = json.loads((data / "world.json").read_text(encoding="utf-8"))
 for group in ("polities", "places"):
     for record in world[group]:
@@ -98,7 +140,7 @@ settings_chars = set("主音量地图名称开启关闭语言简体中文窗口�
 for font_id, size in enumerate((15, 20, 24, 13, 10, 13, 11, 12)):
     serif = ImageFont.truetype(str(font_path), size)
     latin = ImageFont.truetype(str(latin_path), size)
-    font_chars = chars if font_id < 3 else settings_chars if font_id >= 5 else "0123456789:月日—?"
+    font_chars = chars if font_id < 3 else settings_chars if font_id >= 5 else "0123456789:/月日—?"
     button_font = ImageFont.truetype("C:/Windows/Fonts/msyh.ttc", size) if font_id == 6 else None
     for char in sorted(font_chars):
         font = button_font or (latin if char.isascii() and 0 < font_id < 5 else serif)

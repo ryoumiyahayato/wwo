@@ -1,6 +1,7 @@
 use crate::{formal_ui::{self,Display,Slot,IVORY,MUTED},overlay::Mesh,ui::{Action,Hit},world::{Polity,World}};
 use crate::migration_status::Status;
 use serde::Deserialize;
+use std::sync::LazyLock;
 
 #[derive(Deserialize)]
 pub struct Lobby {
@@ -23,7 +24,6 @@ pub enum Page {#[default] Home,Selection,Load,Settings,Themes,Migration(Status,u
 #[derive(Clone,Copy)]
 pub enum Command {Page(Page),Country(usize),Search,ClearSearch,Enter,Load(u8),Exit}
 
-const ROW: f32 = 34.;
 pub type Rect = [f32;4];
 
 pub fn contains([x,y,w,h]: Rect, [px,py]: [f64;2]) -> bool {
@@ -31,19 +31,67 @@ pub fn contains([x,y,w,h]: Rect, [px,py]: [f64;2]) -> bool {
         && (f64::from(y)..=f64::from(y+h)).contains(&py)
 }
 
-pub fn profile([w,h]:[u32;2]) -> Rect {
-    let width=(w as f32*0.43).min(430.);
-    [w as f32-width-32.,(h as f32*0.14).max(58.),width,174.]
+pub struct SelectionLayout {
+    profile: Rect,
+    traits: Rect,
+    pub directory: Rect,
+    primary: Rect,
+    back: Rect,
 }
 
-pub fn primary(size:[u32;2]) -> Rect {
-    let [x,_,w,_]=profile(size);
-    [x,size[1] as f32*0.72,w,36.]
+impl SelectionLayout {
+    pub fn new(size: [u32;2]) -> Self {
+        let [w, h] = size.map(|n| n as f32);
+        let width = Self::column_width(w);
+        let left = Self::margin(w);
+        let right = w - left - width;
+        let top = (h * 0.115).clamp(60., 104.);
+        let profile_height = (h * 0.315).clamp(188., 226.);
+        let directory_top = top + profile_height + 12.;
+        let action_top = h - 66.;
+        let action_width = 118.;
+        Self {
+            profile: [right, top, width, profile_height],
+            traits: [left, top, width, action_top - top + 30.],
+            directory: [right, directory_top, width, action_top - directory_top - 10.],
+            primary: [right + width - action_width, action_top, action_width, 30.],
+            back: [left, 18., 36., 34.],
+        }
+    }
+
+    pub fn contains(&self, point: [f64;2]) -> bool {
+        [self.profile, self.traits, self.directory, self.primary, self.back]
+            .into_iter().any(|area| contains(area, point))
+    }
+
+    pub fn globe_mpp(size: [u32;2]) -> f64 {
+        let width = size[0] as f32;
+        let center_width = width - (Self::margin(width) + Self::column_width(width)) * 2.;
+        let diameter = (size[1] as f32 * 0.61).min(center_width - 24.).max(1.);
+        2. * crate::camera::EARTH / f64::from(diameter)
+    }
+
+    fn column_width(width: f32) -> f32 { (width * 0.28).min(350.) }
+
+    fn margin(width: f32) -> f32 { (width * 0.024).clamp(20., 32.) }
 }
 
-pub fn back([w,h]:[u32;2]) -> Rect {
-    [w as f32-168.,h as f32-59.,136.,31.]
+#[derive(Deserialize)]
+struct HistoricalProfile {
+    entity_id: String,
+    #[serde(default)]
+    opening_brief_zh: String,
+    #[serde(default)]
+    brief_zh: String,
 }
+
+static COUNTRY_PROFILES: LazyLock<Vec<HistoricalProfile>> = LazyLock::new(|| {
+    #[derive(Deserialize)]
+    struct Profiles { profiles: Vec<HistoricalProfile> }
+    let data = include_str!("../../../data/world_map/historical/major_state_profiles_1900.json");
+    serde_json::from_str::<Profiles>(data)
+        .expect("invalid 1900 historical state profiles").profiles
+});
 
 fn polity_label<'a>(p: &'a Polity, opening: Option<&'a Opening>, english: bool) -> &'a str {
     if english || p.name_zh.is_empty() {
@@ -78,21 +126,18 @@ impl Directory {
         self.offset = 0.;
     }
 
-    pub fn panel([w,h]:[u32;2]) -> Rect {
-        let max_height = (h as f32 - 78.).min(530.);
-        let rows = ((max_height - 100.) / ROW).floor();
-        let height = 100. + rows * ROW;
-        let width=(w as f32 * 0.35).min(340.);
-        [24., (h as f32 - height) * 0.5, width,height]
+    pub fn list(&self, size: [u32;2]) -> Rect {
+        let [x,y,w,h] = SelectionLayout::new(size).directory;
+        let top = if size[1] < 560 { 62. } else { 78. };
+        let row = Self::row_height(size);
+        let height = ((h - top - 8.).max(0.) / row).floor() * row;
+        [x+12.,y+top,w-24.,height]
     }
 
-    pub fn list(&self, size: [u32;2]) -> Rect {
-        let [x,y,w,h] = Self::panel(size);
-        [x+12.,y+86.,w-24.,h-100.]
-    }
+    fn row_height(size: [u32;2]) -> f32 { if size[1] < 560 { 26. } else { 30. } }
 
     fn visible(&self, size: [u32;2]) -> usize {
-        (self.list(size)[3] / ROW) as usize
+        (self.list(size)[3] / Self::row_height(size)) as usize
     }
 
     fn limit(&self, size: [u32;2]) -> f32 {
@@ -119,7 +164,8 @@ impl Directory {
         let limit = self.limit(size);
         if limit == 0. { return None; }
         let [x,y,w,h] = self.list(size);
-        let height = (h * self.visible(size) as f32 / self.entries.len() as f32).max(22.);
+        if h == 0. { return None; }
+        let height = (h * self.visible(size) as f32 / self.entries.len() as f32).max(14.);
         let top = y + self.offset.min(limit) / limit * (h - height);
         Some(([x+w-13., y, 13.,h], [x+w-13.,top,13.,height]))
     }
@@ -141,7 +187,7 @@ impl Directory {
 }
 
 impl Display<'_> {
-    pub fn loading(&self, status:&str, seconds:f32) -> [(Mesh,crate::ui::Ink);11] {
+    pub fn loading(&self, status:&str, seconds:f32) -> crate::ui::Layers {
         use crate::ui::Ink;
         let [w,h]=self.size.map(|n|n as f32);
         let mut painting=Mesh::default();let mut shade=Mesh::default();let mut label=Mesh::default();let mut strip=Mesh::default();
@@ -151,6 +197,7 @@ impl Display<'_> {
         self.skin.text(&mut label,status,0,[48.,h-73.],w-96.,IVORY);
         strip.image([48.,h-39.,w-96.,3.],[0.,0.,1.,1.],[255;4]);
         [(Mesh::default(),Ink::Solid),(Mesh::default(),Ink::Text),(Mesh::default(),Ink::Instrument),(Mesh::default(),Ink::ClockGears),
+         (Mesh::default(),Ink::HudArt),(Mesh::default(),Ink::HudText),
          (painting,Ink::MenuArt),(shade,Ink::Solid),(strip,Ink::Loading),(Mesh::default(),Ink::Flag),
          (Mesh::default(),Ink::HudArt),(Mesh::default(),Ink::Solid),(label,Ink::HudText)]
     }
@@ -164,7 +211,7 @@ impl Display<'_> {
     }
 
     pub fn lobby(&self,world:&World,state:Option<&Lobby>,page:Page,selection:usize,waiting:bool,directory:&Directory)
-        -> ([(Mesh,crate::ui::Ink);11],Vec<Hit>)
+        -> (crate::ui::Layers,Vec<Hit>)
     {
         use crate::ui::Ink;
         let [w,h]=self.size.map(|n|n as f32);
@@ -196,29 +243,48 @@ impl Display<'_> {
                 self.skin.text(&mut text,runtime,0,[x+24.,y+342.],width-48.,MUTED);
             }
             Page::Selection=>{
-                let [x,y,width,height]=profile(self.size);
-                formal_ui::panel(&mut panels,[x,y,width,height],[12,22,31,241]);
-                self.skin.sprite(&mut art,"crest",[x+width*0.5-97.,y-50.,194.,55.]);
-                self.skin.text(&mut text,"国家档案  /  1900",1,[x+22.,y+15.],width-44.,IVORY);
+                let layout = SelectionLayout::new(self.size);
+                let [x,y,width,height] = layout.profile;
+                formal_ui::panel(&mut panels,layout.profile,[12,22,31,249]);
+                self.skin.sprite(&mut art,"crest",[x+width*0.5-80.,y-41.,160.,45.]);
+                let heading=self.skin.choose("国家档案 / 1900","Country profile / 1900");
+                self.skin.text(&mut text,heading,1,[x+18.,y+13.],width-36.,IVORY);
                 let selected=world.polities.get(selection);
                 let opening=state.and_then(|s|selected.and_then(|p|s.opening(p)));
                 if let Some(p)=selected {
                     let label=polity_label(p, opening, self.skin.english());
-                    self.skin.text(&mut text,label,1,[x+103.,y+73.],width-125.,IVORY);
-                    if let Some(slot)=self.flags{flags.flag([x+22.,y+63.,68.,45.],slot);}
+                    let name_left=if self.flags.is_some(){82.}else{18.};
+                    self.skin.paragraph(&mut text,label,1,[x+name_left,y+40.,width-name_left-18.,52.],IVORY,1.);
+                    if let Some(slot)=self.flags{flags.flag([x+18.,y+46.,52.,35.],slot);}
+                    let status = opening.map_or_else(|| "仅查看".to_owned(),
+                        |row| format!("{} · 居民 · 未就业", row.place));
+                    self.skin.text(&mut text,&status,0,[x+18.,y+91.],width-36.,MUTED);
+                    let brief = COUNTRY_PROFILES.iter().find(|row| row.entity_id == p.id)
+                        .map(|row| if row.opening_brief_zh.is_empty() { &row.brief_zh } else { &row.opening_brief_zh })
+                        .map(String::as_str).filter(|brief| !brief.is_empty());
+                    let scale = (width / 300.).clamp(0.8, 1.);
+                    self.skin.paragraph(&mut text,brief.unwrap_or("暂无历史简介"),0,
+                        [x+18.,y+112.,width-36.,height-122.],IVORY,scale);
                 }
-                if let Some(opening)=opening {
-                    let identity=format!("{} · 居民 · 未就业",opening.place);
-                    self.skin.text(&mut text,"开局身份",0,[x+22.,y+118.],width-44.,MUTED);
-                    self.skin.text(&mut text,&identity,0,[x+22.,y+141.],width-44.,IVORY);
-                } else {
-                    self.skin.text(&mut text,"仅可查看历史资料",0,[x+22.,y+132.],width-44.,MUTED);
-                }
+                let [traits_x, traits_y, traits_width, _] = layout.traits;
+                formal_ui::panel(&mut panels,layout.traits,[12,22,31,249]);
+                self.skin.text(&mut text,"人物特质",1,[traits_x+18.,traits_y+13.],traits_width-36.,IVORY);
                 let can_enter=opening.is_some()&&state.is_some_and(|s|s.selection_ready)&&!busy;
-                self.row(&mut panels,&mut text,&mut hits,primary(self.size),"进入世界",
+                self.row(&mut panels,&mut text,&mut hits,layout.primary,"",
                     can_enter.then_some(action(Command::Enter)),can_enter);
-                self.row(&mut panels,&mut text,&mut hits,back(self.size),"返回主菜单",
-                    (!busy).then_some(action(Command::Page(Page::Home))),false);
+                let [button_x,button_y,button_width,_]=layout.primary;
+                let label=self.skin.choose("进入世界","Enter world");
+                let label_width=self.skin.width(label,0);
+                self.skin.text(&mut text,label,0,[button_x+(button_width-label_width)*0.5,button_y+5.],
+                    button_width,if can_enter{IVORY}else{MUTED});
+                self.row(&mut panels,&mut text,&mut hits,layout.back,"",
+                    (!busy).then_some(action(Command::Page(Page::Home))),!busy&&contains(layout.back,self.cursor));
+                let [back_x,back_y,_,_]=layout.back;
+                let arrow=[back_x+10.,back_y+17.];
+                let color=if busy{MUTED}else{IVORY};
+                panels.line(arrow,[back_x+26.,back_y+17.],1.6,color);
+                panels.line(arrow,[back_x+16.,back_y+11.],1.6,color);
+                panels.line(arrow,[back_x+16.,back_y+23.],1.6,color);
                 self.country_directory(&mut panels,&mut text,&mut hits,world,state,directory,selection,busy);
             }
             Page::Load=>{
@@ -260,35 +326,40 @@ impl Display<'_> {
             }
         }
         ([(Mesh::default(),Ink::Solid),(Mesh::default(),Ink::Text),(Mesh::default(),Ink::Instrument),(Mesh::default(),Ink::ClockGears),
+          (Mesh::default(),Ink::HudArt),(Mesh::default(),Ink::HudText),
           (background,Ink::MenuArt),(panels,Ink::Solid),(Mesh::default(),Ink::Text),(flags,Ink::Flag),(art,Ink::HudArt),(Mesh::default(),Ink::Solid),(text,Ink::HudText)],hits)
     }
 
     fn country_directory(&self,panels:&mut Mesh,text:&mut Mesh,hits:&mut Vec<Hit>,world:&World,
         state:Option<&Lobby>,directory:&Directory,selection:usize,busy:bool)
     {
-        let [x,y,w,h]=Directory::panel(self.size);
-        formal_ui::panel(panels,[x,y,w,h],[12,22,31,249]);
-        self.skin.text(text,"国家目录",1,[x+20.,y+12.],w-40.,IVORY);
+        let area = SelectionLayout::new(self.size).directory;
+        let [x,y,w,_] = area;
+        let compact = self.size[1] < 560;
+        let (heading_font, search_top, search_height) = if compact { (0, 28., 28.) } else { (1, 40., 30.) };
+        formal_ui::panel(panels,area,[12,22,31,249]);
+        self.skin.text(text,"国家目录",heading_font,[x+18.,y+6.],w-36.,IVORY);
         let hint=if directory.query.is_empty() {"搜索国家或地区"} else { &directory.query };
         let search_width=if directory.query.is_empty(){w-24.}else{w-74.};
-        self.row(panels,text,hits,[x+12.,y+46.,search_width,30.],hint,
+        self.row(panels,text,hits,[x+12.,y+search_top,search_width,search_height],hint,
             (!busy).then_some(action(Command::Search)),directory.search_active);
         if !directory.query.is_empty(){
-            self.row(panels,text,hits,[x+w-56.,y+46.,44.,30.],"清除",
+            self.row(panels,text,hits,[x+w-56.,y+search_top,44.,search_height],"清除",
                 (!busy).then_some(action(Command::ClearSearch)),false);
         }
         let [left,top,width,_]=directory.list(self.size);
         let start=directory.offset.min(directory.limit(self.size)).floor() as usize;
+        let row_height = Directory::row_height(self.size);
         for (row,&index) in directory.entries.iter().skip(start).take(directory.visible(self.size)).enumerate() {
             let polity=&world.polities[index];
             let opening=state.and_then(|s|s.opening(polity));
             let title=polity_label(polity,opening,self.skin.english());
-            let row_y=top+row as f32*ROW;
-            let area=[left,row_y,width-19.,29.];
+            let row_y=top+row as f32*row_height;
+            let area=[left,row_y,width-19.,row_height-3.];
             self.row(panels,text,hits,area,"",(!busy).then_some(action(Command::Country(index))),index==selection);
-            self.skin.text(text,title,0,[left+9.,row_y+6.],width-115.,IVORY);
+            self.skin.text(text,title,0,[left+9.,row_y+3.],width-115.,IVORY);
             let badge=if opening.is_some() {"可开局"} else {"仅查看"};
-            self.skin.text(text,badge,0,[left+width-94.,row_y+6.],54.,if opening.is_some(){IVORY}else{MUTED});
+            self.skin.text(text,badge,0,[left+width-94.,row_y+3.],54.,if opening.is_some(){IVORY}else{MUTED});
             if index==selection {
                 let x=left+width-35.;
                 panels.line([x,row_y+15.],[x+4.,row_y+19.],2.,[230,202,147,255]);
