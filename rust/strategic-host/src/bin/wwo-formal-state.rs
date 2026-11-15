@@ -1,11 +1,23 @@
 use serde_json::json;
 use std::{error::Error, io, path::Path};
+use wwo_map_lab::battlefield_terrain::{BattlefieldTerrain, REGION_ID};
 use wwo_map_lab::{formal_bootstrap::WorldBootstrap, formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_save::SavedWorld};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = std::env::args_os().skip(1);
     let command = args.next();
     match command.as_deref().and_then(|arg| arg.to_str()) {
+        Some("military-terrain") => {
+            let root = args.next().ok_or_else(usage)?;
+            let terrain = BattlefieldTerrain::open(Path::new(&root))?;
+            while let Some(x) = args.next() {
+                let z = args.next().ok_or_else(usage)?;
+                let x: f64 = x.to_str().ok_or_else(usage)?.parse()?;
+                let z: f64 = z.to_str().ok_or_else(usage)?.parse()?;
+                if !x.is_finite() || !z.is_finite() { return Err(usage().into()); }
+                println!("{}", json!({"region_id": REGION_ID, "x_m": x, "z_m": z, "sample": terrain.sample(x, z)}));
+            }
+        }
         Some("new-france") => {
             let opening = args.next().ok_or_else(usage)?;
             let destination = args.next().ok_or_else(usage)?;
@@ -95,5 +107,5 @@ fn show(saved: &SavedWorld) {
 
 fn usage() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput,
-        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-wages, copy, clock or clock-control")
+        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-wages, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
 }

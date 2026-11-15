@@ -1,3 +1,4 @@
+pub mod battlefield_terrain;
 pub mod calendar;
 pub mod formal_bootstrap;
 pub mod formal_character;
