@@ -1,5 +1,3 @@
-@group(0) @binding(0) var<uniform> clip_from_model: mat4x4f;
-
 struct Output {
     @builtin(position) position: vec4f,
     @location(0) normal: vec3f,
@@ -10,7 +8,12 @@ struct Output {
     @location(0) position: vec3f,
     @location(1) normal: vec3f,
     @location(2) color: vec4f,
+    @location(3) column_x: vec4f,
+    @location(4) column_y: vec4f,
+    @location(5) column_z: vec4f,
+    @location(6) origin: vec4f,
 ) -> Output {
+    let clip_from_model = mat4x4f(column_x, column_y, column_z, origin);
     return Output(clip_from_model * vec4f(position, 1.), normal, color);
 }
 

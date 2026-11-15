@@ -132,13 +132,12 @@ struct ResidentModel {
     vertices: wgpu::Buffer,
     indices: wgpu::Buffer,
     count: u32,
-    transform: wgpu::Buffer,
-    group: wgpu::BindGroup,
+    instance_buffer: wgpu::Buffer,
+    transforms: Vec<[[f32; 4]; 4]>,
 }
 
 struct ModelLayer {
     pipeline: wgpu::RenderPipeline,
-    layout: wgpu::BindGroupLayout,
     depth: Option<([u32; 2], wgpu::TextureView)>,
     residents: HashMap<ModelKey, ResidentModel>,
     visible: HashSet<ModelKey>,
@@ -151,9 +150,8 @@ impl ModelLayer {
     const DEPTH: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
 
     fn new(device: &wgpu::Device, format: wgpu::TextureFormat, events: winit::event_loop::EventLoopProxy<crate::HostEvent>) -> Self {
-        let layout = layout(device, &[uniform(0, wgpu::ShaderStages::VERTEX)]);
         let stages = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("WWO static model"), bind_group_layouts: &[&layout], push_constant_ranges: &[],
+            label: Some("WWO static model"), bind_group_layouts: &[], push_constant_ranges: &[],
         });
         let shader = device.create_shader_module(wgpu::include_wgsl!("landmark.wgsl"));
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -169,6 +167,10 @@ impl ModelLayer {
                     array_stride: std::mem::size_of::<ModelVertex>() as u64,
                     step_mode: wgpu::VertexStepMode::Vertex,
                     attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x4],
+                }, wgpu::VertexBufferLayout {
+                    array_stride: 64,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: &wgpu::vertex_attr_array![3=>Float32x4, 4=>Float32x4, 5=>Float32x4, 6=>Float32x4],
                 }],
             },
             fragment: Some(wgpu::FragmentState {
@@ -176,7 +178,7 @@ impl ModelLayer {
                 targets: &[Some(wgpu::ColorTargetState { format, blend: None, write_mask: wgpu::ColorWrites::ALL })],
             }),
         });
-        Self { pipeline, layout, depth: None, residents: HashMap::new(), visible: HashSet::new(),
+        Self { pipeline, depth: None, residents: HashMap::new(), visible: HashSet::new(),
             pending: HashSet::new(), failed: HashSet::new(), events }
     }
 
@@ -197,10 +199,13 @@ impl ModelLayer {
             });
             self.depth = Some((size, texture.create_view(&Default::default())));
         }
+        for resident in self.residents.values_mut() {
+            resident.transforms.clear();
+        }
         for model in models {
             let key = model.key;
-            if let Some(resident) = self.residents.get(&key) {
-                queue.write_buffer(&resident.transform, 0, bytemuck::bytes_of(&model.clip_from_model));
+            if let Some(resident) = self.residents.get_mut(&key) {
+                resident.transforms.push(model.clip_from_model);
             } else if !self.failed.contains(&key) && self.pending.insert(key) {
                 let events = self.events.clone();
                 let created = std::thread::Builder::new().name("WWO model loading".into()).spawn(move || {
@@ -213,6 +218,20 @@ impl ModelLayer {
                 }
             }
         }
+        for resident in self.residents.values_mut() {
+            let transforms = bytemuck::cast_slice(&resident.transforms);
+            if transforms.len() as u64 > resident.instance_buffer.size() {
+                resident.instance_buffer = Self::instance_buffer(device, transforms.len().next_power_of_two() as u64);
+            }
+            queue.write_buffer(&resident.instance_buffer, 0, transforms);
+        }
+    }
+
+    fn instance_buffer(device: &wgpu::Device, size: u64) -> wgpu::Buffer {
+        device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("WWO static model instances"), size,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST, mapped_at_creation: false,
+        })
     }
 
     fn complete(&mut self, device: &wgpu::Device, key: ModelKey, model: io::Result<ModelMesh>) -> io::Result<()> {
@@ -222,12 +241,11 @@ impl ModelLayer {
         let upload = |contents, usage| device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("WWO static model"), contents, usage,
         });
-        let transform = buffer(device, 64);
-        let group = bind(device, &self.layout, &[buf_resource(0, &transform)]);
         self.residents.insert(key, ResidentModel {
             vertices: upload(bytemuck::cast_slice(&model.vertices), wgpu::BufferUsages::VERTEX),
             indices: upload(bytemuck::cast_slice(&model.indices), wgpu::BufferUsages::INDEX),
-            count: model.indices.len() as u32, transform, group,
+            count: model.indices.len() as u32, instance_buffer: Self::instance_buffer(device, 64),
+            transforms: Vec::new(),
         });
         Ok(())
     }
@@ -247,10 +265,10 @@ impl ModelLayer {
         });
         pass.set_pipeline(&self.pipeline);
         for model in self.residents.values() {
-            pass.set_bind_group(0, &model.group, &[]);
             pass.set_vertex_buffer(0, model.vertices.slice(..));
+            pass.set_vertex_buffer(1, model.instance_buffer.slice(..));
             pass.set_index_buffer(model.indices.slice(..), wgpu::IndexFormat::Uint32);
-            pass.draw_indexed(0..model.count, 0, 0..1);
+            pass.draw_indexed(0..model.count, 0, 0..model.transforms.len() as u32);
         }
     }
 }
@@ -446,6 +464,13 @@ impl Renderer {
 
     pub fn resident_models(&self) -> Vec<(&'static str, &'static str)> {
         let mut models:Vec<_>=self.models.residents.keys().map(|key|(key.model(),key.lod())).collect();
+        models.sort_unstable();
+        models
+    }
+
+    pub fn model_instances(&self) -> Vec<(&'static str, usize)> {
+        let mut models: Vec<_> = self.models.residents.iter()
+            .map(|(key, model)| (key.model(), model.transforms.len())).collect();
         models.sort_unstable();
         models
     }

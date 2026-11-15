@@ -1248,6 +1248,7 @@ impl Host {
             "mode":self.mode.key(),"center":self.camera.coordinates(),"mpp":self.camera.mpp,"orientation":self.camera.axes,
             "pitch_degrees":self.camera.pitch().to_degrees(),
             "landmarks":self.renderer.as_ref().map(Renderer::resident_models),
+            "model_instances":self.renderer.as_ref().map(Renderer::model_instances),
             "selection":self.selected.map_or(String::new(),|o|self.id(o)),"date":self.state.date.to_string(),
             "cache_bytes":self.cached.values().map(|p|p.page.bytes).sum::<usize>(),
             "base_bytes":self.base.as_ref().map_or(0,|p|p.bytes),"resident":self.cached.len(),
