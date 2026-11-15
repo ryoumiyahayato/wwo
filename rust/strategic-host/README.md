@@ -1,6 +1,6 @@
 # WWO Rust Windows 游戏
 
-`wwo-map-lab` 是 `WWO-Mechanical-Preview.exe` 的源码。用 `cargo build --release --locked --bin wwo-map-lab` 构建。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。用 Pillow 执行 `python tools/build_hud.py <R68 项目> <游戏数据目录>` 可更新界面字形。
+`wwo-map-lab` 是当前原生 Windows 游戏入口。在此目录用 `cargo build --release --locked --bin wwo-map-lab --bin wwo-formal-state` 构建。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。阶段归档包含 `WWO-Country-Records.exe`、Z7 候选 EXE 和运行数据，恢复步骤见 [仓库 README](../../README.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。用 Pillow 执行 `python tools/build_hud.py <R68 项目> <游戏数据目录>` 可更新界面字形。
 
 正式入口从 `data/maps/regional-2026-11-14/` 读取领土、旗纹和原有专题地图数据。用 `python tools/package_map_release.py <保留的 2026-11-14 区域地图数据目录> <游戏数据目录>` 发布这部分资源。正式入口会检查目录、旗纹资料和地图分片版本，版本不符或缺失时会报告错误。
 
