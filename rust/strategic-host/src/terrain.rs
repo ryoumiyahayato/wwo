@@ -240,7 +240,7 @@ pub struct Terrain {
     pages:HashMap<Key,Page>,
     slots:Vec<u32>,
     selected:Vec<Key>,
-    view:Option<([[f64;3];3],[f64;2],f64,f64,[u32;2])>,
+    view:Option<([[f64;3];3],[f64;2],f64,f64,f64,[u32;2])>,
     max_level:u32,
     view_max:u32,
     target_level:Option<u32>,
@@ -320,7 +320,7 @@ impl Terrain {
         let middle=size.map(|dimension|f64::from(dimension)*0.5);
         let center=camera.vector(middle,size).unwrap_or(camera.axes[2]);
         let (axes,origin)=camera.projection(size);
-        let view=(axes,origin,camera.mpp,camera.blend(),size);
+        let view=(axes,origin,camera.mpp,camera.blend(),camera.pitch(),size);
         if self.view!=Some(view) {
             self.view=Some(view);
             self.select(camera,center,size,now);

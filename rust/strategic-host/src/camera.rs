@@ -39,6 +39,8 @@ pub struct Camera {
     pub axes: [V3;3],
     pub mpp:f64,
     pub level:Level,
+    pub local_models: bool,
+    pub oblique: bool,
     region: Option<Region>,
 }
 
@@ -58,12 +60,18 @@ impl Region {
 
 impl Camera {
     pub fn new(size:[u32;2]) -> Self {
-        Self { axes:frame([2.3522,48.8566]),mpp:Self::overview(size),level:Level::World,region:None }
+        Self { axes:frame([2.3522,48.8566]),mpp:Self::overview(size),level:Level::World,
+            local_models:false,oblique:true,region:None }
     }
     pub fn overview([width,height]:[u32;2]) -> f64 {
         EARTH / ((f64::from(height)/2.55).min(f64::from(width)*0.49)*1.05)
     }
     pub fn blend(&self) -> f64 { if self.region.is_some() {1.} else {0.} }
+    pub fn pitch(&self) -> f64 {
+        if self.local_models && self.oblique && self.region.is_some() {
+            0.84 * (1. - smooth(30., 150., self.mpp))
+        } else { 0. }
+    }
     pub fn coordinates(&self) -> [f64;2] { geographic(self.axes[2]) }
     pub fn projection(&self, size: [u32;2]) -> ([V3;3], [f64;2]) {
         let mut center = size.map(|n| f64::from(n)*0.5);
@@ -74,7 +82,7 @@ impl Camera {
     pub fn vector(&self, p:[f64;2], size:[u32;2]) -> Option<V3> {
         let (axes, center) = self.projection(size);
         let x=(p[0]-center[0])*self.mpp/EARTH;
-        let y=(center[1]-p[1])*self.mpp/EARTH;
+        let y=(center[1]-p[1])*self.mpp/(EARTH*self.pitch().cos());
         let r=x.hypot(y);
         let t=self.blend();
         if r>1.+t*(FRAC_PI_2-1.) { return None; }
@@ -92,7 +100,7 @@ impl Camera {
         let t=self.blend();
         let k=if r>1e-12 { (1.-t)+t*a/r } else {1.};
         let scale=EARTH/self.mpp*k;
-        Some([center[0]+x*scale,center[1]-y*scale])
+        Some([center[0]+x*scale,center[1]-y*scale*self.pitch().cos()])
     }
     pub fn project(&self,p:[f64;2],size:[u32;2])->Option<[f64;2]> { self.project_vec(frame(p)[2],size) }
     fn align(&mut self, before:V3,after:V3) {
@@ -122,12 +130,13 @@ impl Camera {
         }
     }
     pub fn bearing_drag(&mut self, a:[f64;2],b:[f64;2],size:[u32;2]) {
+        let compression=self.pitch().cos();
         if let Some(region) = &mut self.region {
             let angle = (b[0]-a[0])*0.008;
             let (sine,cosine) = angle.sin_cos();
             let mid = size.map(|n|f64::from(n)*0.5);
-            let [x,y] = [mid[0]+region.offset[0]-a[0],mid[1]+region.offset[1]-a[1]];
-            region.offset = [a[0]-mid[0]+x*cosine-y*sine,a[1]-mid[1]+x*sine+y*cosine];
+            let [x,y] = [mid[0]+region.offset[0]-a[0],(mid[1]+region.offset[1]-a[1])/compression];
+            region.offset = [a[0]-mid[0]+x*cosine-y*sine,a[1]-mid[1]+(x*sine+y*cosine)*compression];
             region.bearing += angle;
             self.constrain_region(size);
             return;
@@ -139,31 +148,27 @@ impl Camera {
     }
     pub fn zoom(&mut self, point:[f64;2],factor:f64,size:[u32;2]) {
         let before=self.vector(point,size);
-        let minimum=if inside(self.coordinates(),PARIS_CITY) {8.} else {25.};
-        let old_mpp = self.mpp;
+        let minimum=if self.local_models && local_city(self.coordinates()) {1.5}
+            else if inside(self.coordinates(),PARIS_CITY) {8.} else {25.};
         self.mpp=(self.mpp*factor).clamp(minimum,Self::overview(size)/0.74);
-        if let Some(region) = &mut self.region {
-            let mid = size.map(|n|f64::from(n)*0.5);
-            for i in 0..2 {region.offset[i]=(point[i]-mid[i])+(region.offset[i]+mid[i]-point[i])*old_mpp/self.mpp;}
-            self.constrain_region(size);
-        }
-        let was_regional = self.region.is_some();
         self.update_level();
-        if was_regional {
-            if self.region.is_none() {
-                if let (Some(before),Some(after))=(before,self.vector(point,size)) {self.align(before,after);}
-            }
-            return;
-        }
-        if let (Some(before),Some(after))=(before,self.vector(point,size)) {
+        if let Some(before)=before {
             if let Some(region) = &mut self.region {
-                let axes = region.basis();
-                let [x,y,z] = axes.map(|axis| dot(axis,before));
-                let sine = x.hypot(y);
-                let scale = if sine>1e-12 {EARTH/self.mpp*sine.atan2(z)/sine} else {EARTH/self.mpp};
-                region.offset = [point[0]-f64::from(size[0])*0.5-x*scale,point[1]-f64::from(size[1])*0.5+y*scale];
+                region.offset=[0.;2];
+                if let Some(projected)=self.project_vec(before,size) {
+                    self.region.as_mut().unwrap().offset=std::array::from_fn(|i|point[i]-projected[i]);
+                }
                 self.constrain_region(size);
-            } else {self.align(before,after);}
+            } else if let Some(after)=self.vector(point,size) {self.align(before,after);}
+            self.update_level();
+        }
+    }
+    pub fn toggle_oblique(&mut self, size:[u32;2]) {
+        let center=size.map(|n|f64::from(n)*0.5);
+        let anchor=self.vector(center,size);
+        self.oblique=!self.oblique;
+        if let Some(projected)=anchor.and_then(|v|self.project_vec(v,size)) {
+            self.drag(projected,center,size);
         }
     }
     pub fn focus(&mut self,point:[f64;2],mpp:f64) {
@@ -235,7 +240,8 @@ impl Camera {
             let bearing=-dot(axes[1],self.axes[0]).atan2(dot(axes[1],self.axes[1]));
             self.region=Some(Region {axes,offset:[0.;2],bearing});
         }
-        let local=inside(self.coordinates(),PARIS_CITY);
+        let point=self.coordinates();
+        let local=inside(point,PARIS_CITY)||(self.local_models&&local_city(point));
         self.level=match self.level {
             _ if self.mpp>=EXIT => Level::World,
             _ if self.region.is_none() => Level::World,
@@ -245,7 +251,8 @@ impl Camera {
         };
     }
     pub fn extent(&self,size:[u32;2],extra:f64) -> f64 {
-        let r=(f64::from(size[0]).hypot(f64::from(size[1]))*0.5+extra)*self.mpp/EARTH;
+        let height=f64::from(size[1])/self.pitch().cos();
+        let r=(f64::from(size[0]).hypot(height)*0.5+extra)*self.mpp/EARTH;
         if self.blend()==1. {r.min(PI)} else {r.min(1.).asin()}
     }
 }
@@ -279,6 +286,11 @@ pub fn fit_bounds(bounds:[f64;4],size:[u32;2])->Option<([f64;2],f64)> {
 
 pub const PARIS_CITY:[f64;4]=[2.255,48.815,2.420,48.957];
 pub fn inside([x,y]:[f64;2],[w,s,e,n]:[f64;4])->bool { w<=x && x<=e && s<=y && y<=n }
+
+fn local_city(point:[f64;2])->bool {
+    [PARIS_CITY,[-0.20,51.46,-0.06,51.55],[13.32,52.47,13.46,52.57],[31.08,29.92,31.20,30.03]]
+        .into_iter().any(|bounds|inside(point,bounds))
+}
 
 #[cfg(test)]
 mod tests {

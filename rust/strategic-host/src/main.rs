@@ -9,6 +9,7 @@ mod compact;
 mod formal_ui;
 mod market_ui;
 mod lobby;
+mod landmarks;
 mod map_release;
 mod migration_status;
 mod interface;
@@ -36,7 +37,11 @@ use winit::{application::ApplicationHandler,dpi::{LogicalSize,PhysicalSize},even
             event_loop::{ActiveEventLoop,ControlFlow,EventLoop},keyboard::{Key,NamedKey},window::{Window,WindowId}};
 use world::{Completion,Index,Pixels,Reader,World};
 
-enum HostEvent { Map(Completion), Terrain(terrain::Completion) }
+enum HostEvent {
+    Map(Completion),
+    Terrain(terrain::Completion),
+    Model(landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
+}
 
 const CACHE_BUDGET:usize=112*1024*1024;
 const CACHE_TTL:Duration=Duration::from_secs(2);
@@ -130,6 +135,8 @@ struct Observation {
 }
 struct Host {
     natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<HostEvent>)>,
+    events:winit::event_loop::EventLoopProxy<HostEvent>,
+    landmarks:Option<landmarks::Landmarks>,
     config:Config,window:Option<Arc<Window>>,renderer:Option<Renderer>,
     map_root:PathBuf,map_signature:Option<&'static [u8;8]>,fatal_error:Option<String>,
     world:World,visuals:PoliticalVisuals,index:Index,base:Option<Page>,reader:Reader,cached:HashMap<usize,Resident>,
@@ -178,8 +185,11 @@ impl Host {
             if config.terrain_candidate.is_some() {return Err(io::Error::other("--terrain-candidate requires the native game"));}
             None
         };
-        let world=if map_signature.is_some() {map_release::open(&map_root)?}
+        let mut world=if map_signature.is_some() {map_release::open(&map_root)?}
             else {World::open(&map_root.join("world.json"))?};
+        let landmarks=if formal_map {Some(landmarks::Landmarks::install(&mut world)?)} else {None};
+        let mut camera=Camera::new(VIEW_SIZE);
+        camera.local_models=landmarks.is_some();
         if world.tiles.first().is_none_or(|t|t.level!=0) || world.polities.len()>255 || world.admin.len()>255 {return Err(io::Error::other("invalid world index"));}
         let atlas=overlay::Atlas::open(&config.root.join("type.json"))?;
         let mut skin=Skin::open(&config.root)?;
@@ -209,7 +219,7 @@ impl Host {
         let reader=Reader::new(map_root.clone(),map_signature,legacy_cover,events.create_proxy());
         let observation_id=config.observe.as_ref().and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
             .map(|input|input.id).unwrap_or_default();
-        Ok(Self {natural,config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera:Camera::new(VIEW_SIZE),atlas,started,base:None,window:None,renderer:None,
+        Ok(Self {natural,events:events.create_proxy(),landmarks,config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
             cached:HashMap::new(),failed:HashSet::new(),candidate:Vec::new(),visible:Vec::new(),
             size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,country:None,country_click:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
@@ -257,7 +267,12 @@ impl Host {
         self.details=false;
         self.selected=object.filter(|o|self.available(*o));
         if let Some(object)=self.selected {
-            if !matches!(object,Object::Polity(i) if self.world.polities[i].display_only) {
+            let display_only=match object {
+                Object::Polity(i)=>self.world.polities[i].display_only,
+                Object::Place(i)=>self.landmarks.as_ref().is_some_and(|landmarks|landmarks.contains(i)),
+                Object::Administration(_)=>false,
+            };
+            if !display_only {
                 self.emit(Request::Inspect{id:&self.id(object)});
             }
         }
@@ -331,18 +346,22 @@ impl Host {
         self.dirty=true;
     }
     fn locate_object(&mut self,object:Object) {
+        let landmark=match object {
+            Object::Place(index)=>self.landmarks.as_ref().and_then(|models|models.focus(index)),
+            _=>None,
+        };
         let (target,mpp)=match object {
             Object::Administration(i)=>{
                 let Some(target)=camera::fit_bounds(self.world.admin[i].bounds,self.size) else{return;};
                 target
             }
-            Object::Place(i)=>(self.world.places[i].coordinates,if self.world.places[i].id=="place:paris" {36.}else{210.}),
+            Object::Place(i)=>landmark.unwrap_or_else(||(self.world.places[i].coordinates,if self.world.places[i].id=="place:paris" {36.}else{210.})),
             Object::Polity(i)=>self.visuals.record(i).focus(self.size).unwrap_or((self.world.polities[i].coordinates,1800.)),
         };
         if !matches!(object,Object::Place(_)) {
             self.focus_on(object,(target,mpp));
         } else {
-            self.emit(Request::Locate{id:&self.id(object)});
+            if landmark.is_none(){self.emit(Request::Locate{id:&self.id(object)});}
             self.locate(target,mpp);
         }
         self.search=None;
@@ -1028,6 +1047,9 @@ impl Host {
                 "g"=>self.action(Action::Mode(Mode::Geographic)),"p"=>self.action(Action::Mode(Mode::Political)),
                 "e"=>self.action(Action::Mode(Mode::Economic)),"/"=>self.action(Action::Search),
                 "t"=>self.theme=!self.theme,"n"=>self.labels=!self.labels,"["=>self.set_date(self.state.date.offset(-1)),"]"=>self.set_date(self.state.date.offset(1)),
+                "v" if self.landmarks.is_some()&&self.hud.page==HudPage::Map=>{
+                    self.focus=None;self.velocity=[0.;2];self.camera.toggle_oblique(self.size);
+                }
                 "r"=>{self.camera.north_up();},"1" if self.state.session.is_none()=>self.locate([11.12108,46.06787],260.),
                 "2" if self.state.session.is_none()=>self.locate([2.3522,48.8566],33.),"3" if self.state.session.is_none()=>self.locate([8.94439,44.40478],125.),
                 "l"=>if let Some(test)=&self.state.timeline {let q=test.sites[self.site].center_lon_lat;self.locate(q,12.);},
@@ -1158,7 +1180,6 @@ impl Host {
                 fade=Some(old);
             }
         }
-        self.hits=hits;
         let paris_ready=self.visible.iter().filter(|&&id|self.world.tiles[id].city).all(|id|self.cached.contains_key(id));
         let needs_overlay=matches!(self.mode,Mode::Political|Mode::Economic)
             ||self.mode==Mode::Military&&view.map_style[3]>0.;
@@ -1171,7 +1192,13 @@ impl Host {
             let scissor=self.index.scissor(id,&self.camera,self.size)?;
             (opacity>0.).then_some((&p.page,tile,scissor,opacity))
         }).collect();
+        let models=if loading||self.in_lobby() {Vec::new()} else {
+            self.landmarks.as_ref().map_or_else(Vec::new,|catalogue|catalogue.visible(&date,&self.camera,self.size))
+        };
         let renderer=self.renderer.as_mut().unwrap();
+        self.hits=models.iter().filter(|model|renderer.has_model(model.key)).map(|model|Hit {
+            area:model.screen_bounds,action:Action::Select(Object::Place(model.place)),
+        }).chain(hits).collect();
         renderer.update_terrain(&self.camera,self.size,now);
         view.map_style[2]=renderer.terrain_view_level() as f32;
         if self.last_palette!=Some(self.state.date) {
@@ -1180,7 +1207,7 @@ impl Host {
         let player_capture=self.screenshot.is_some();
         let capture=self.screenshot.as_ref().or_else(||self.trial.captures.first()).map(PathBuf::as_path);
         let mut redraw=false;
-        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture)? {
+        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models)? {
             let presented=Instant::now();
             self.last_present=presented;
             if self.trial.first.is_none(){self.trial.first=Some(ms(self.started));}
@@ -1219,6 +1246,8 @@ impl Host {
         serde_json::json!({
             "level":match self.camera.level{Level::World=>"WORLD",Level::Region=>"REGION",Level::Local=>"LOCAL"},
             "mode":self.mode.key(),"center":self.camera.coordinates(),"mpp":self.camera.mpp,"orientation":self.camera.axes,
+            "pitch_degrees":self.camera.pitch().to_degrees(),
+            "landmarks":self.renderer.as_ref().map(Renderer::resident_models),
             "selection":self.selected.map_or(String::new(),|o|self.id(o)),"date":self.state.date.to_string(),
             "cache_bytes":self.cached.values().map(|p|p.page.bytes).sum::<usize>(),
             "base_bytes":self.base.as_ref().map_or(0,|p|p.bytes),"resident":self.cached.len(),
@@ -1313,6 +1342,7 @@ impl Host {
             self.search=None;self.history.clear();self.focus=None;self.velocity=[0.;2];self.hits.clear();
             self.mode=Mode::Political;self.labels=false;
             self.camera=Camera::new(self.size);
+            self.camera.local_models=self.landmarks.is_some();
             if let Some(point)=self.state.session.as_ref().and_then(|s| <[f64;2]>::try_from(s.coordinates.as_slice()).ok()) {
                 #[cfg(windows)]
                 if self.config.native.is_some() {self.camera.focus(point, 1400.);}
@@ -1435,6 +1465,7 @@ impl ApplicationHandler<HostEvent> for Host {
             if self.config.background {attributes=attributes.with_active(false).with_position(winit::dpi::PhysicalPosition::new(10000,10000));}
             let window=Arc::new(event_loop.create_window(attributes)?);
             self.size=window.inner_size().into();self.camera=Camera::new(self.size);
+            self.camera.local_models=self.landmarks.is_some();
             let mut layouts=Vec::new();
             if self.state.timeline.is_some() {
                 let file=File::open(self.config.root.join("land-layout.rgba.z"))?;
@@ -1456,7 +1487,7 @@ impl ApplicationHandler<HostEvent> for Host {
             };
             let globe_art=[art("galactic-chart.png")?,art("ocean-detail-r68.png")?,art("ocean-ice-r68.png")?];
             let renderer=pollster::block_on(Renderer::new(window.clone(),font(&self.config.root.join("type.png"))?,flags,hud,globe_art,&layouts,
-                self.natural.take()))?;
+                self.natural.take(),self.events.clone()))?;
             let pixels=Pixels::read_version(&self.map_root,&self.world.tiles[0],self.map_signature,self.reader.cover)?;
             let base=renderer.upload(&self.world.tiles[0],pixels);
             Ok((window,renderer,base))
@@ -1469,6 +1500,15 @@ impl ApplicationHandler<HostEvent> for Host {
     fn user_event(&mut self,event_loop:&ActiveEventLoop,event:HostEvent) {
         let event=match event {
             HostEvent::Map(event)=>event,
+            HostEvent::Model(key,mesh)=>{
+                if let Some(renderer)=&mut self.renderer {
+                    if let Err(error)=renderer.model_ready(key,mesh) {
+                        self.feedback=format!("R68 GLB · {error}");
+                    }
+                    self.dirty=true;
+                }
+                return;
+            }
             HostEvent::Terrain(event)=>{
                 if let Some(renderer)=&mut self.renderer {
                     if self.trial.timing {
