@@ -10,6 +10,7 @@ use std::{
 };
 
 pub const REGIONS: [&str; 3] = ["alps", "paris", "genoa"];
+const LEGACY_SIGNATURE: &[u8; 8] = b"WWOCM2\0\0";
 
 #[derive(Clone)]
 pub struct Pack {
@@ -40,14 +41,35 @@ pub struct Raster {
 }
 
 impl Pack {
-    pub fn open(path: &Path) -> io::Result<Self> {
-        let mut file = File::open(path)?;
-        let mut prefix = [0; 12];
-        file.read_exact(&mut prefix)?;
-        if &prefix[..8] != b"WWOCM2\0\0" {
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "WWOCM2 signature"));
+    pub fn check_signature(path: &Path, expected: &[u8; 8]) -> io::Result<()> {
+        let mut file = File::open(path).map_err(|e|{
+            io::Error::new(e.kind(),format!("{} · {e}",path.display()))
+        })?;
+        Self::read_signature(&mut file, path, expected)
+    }
+
+    fn read_signature(file: &mut File, path: &Path, expected: &[u8; 8]) -> io::Result<()> {
+        let mut signature = [0; 8];
+        file.read_exact(&mut signature).map_err(|e|{
+            io::Error::new(e.kind(),format!("{} · {e}",path.display()))
+        })?;
+        if &signature != expected {
+            return Err(io::Error::new(io::ErrorKind::InvalidData, format!(
+                "地图分片格式不匹配。{} 需要 {}，实际为 {}",
+                path.display(),
+                String::from_utf8_lossy(expected).trim_end_matches('\0'),
+                String::from_utf8_lossy(&signature).trim_end_matches('\0'),
+            )));
         }
-        let length = u32::from_le_bytes(prefix[8..].try_into().unwrap());
+        Ok(())
+    }
+
+    pub fn open_version(path: &Path, signature: Option<&[u8; 8]>) -> io::Result<Self> {
+        let mut file = File::open(path)?;
+        Self::read_signature(&mut file, path, signature.unwrap_or(LEGACY_SIGNATURE))?;
+        let mut length = [0; 4];
+        file.read_exact(&mut length)?;
+        let length = u32::from_le_bytes(length);
         if length > 1024 * 1024 {
             return Err(io::Error::new(io::ErrorKind::InvalidData, "WWOCM2 index length"));
         }

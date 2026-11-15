@@ -1,7 +1,7 @@
 use crate::{compact::Raster, ui::active, world::World};
 use bytemuck::{Pod, Zeroable};
 use serde::Deserialize;
-use std::{fs::File, io, path::Path};
+use std::{fs::File, io::{self, Read}, path::Path};
 
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
@@ -34,12 +34,20 @@ pub struct PoliticalVisual {
 }
 #[derive(Deserialize)]
 pub struct PoliticalVisuals {
+    #[serde(default)]
+    map_release: String,
     polities: Vec<PoliticalVisual>,
 }
 
 impl PoliticalVisuals {
     pub fn open(root: &Path, world: &World) -> io::Result<Self> {
         let result: Self = serde_json::from_reader(File::open(root.join("political-flags.json"))?)?;
+        if !world.map_release.is_empty() && result.map_release != world.map_release {
+            return Err(io::Error::other(format!(
+                "领土旗纹资源版本不匹配。需要 {}，实际为 {:?}",
+                world.map_release, result.map_release,
+            )));
+        }
         if result.polities.len() != world.polities.len()
             || result.polities.iter().zip(&world.polities).any(|(v, p)| v.id != p.id)
         {
@@ -78,7 +86,11 @@ impl PoliticalVisuals {
     }
 
     pub fn read_atlas(path: &Path) -> io::Result<Raster> {
-        let mut reader = png::Decoder::new(File::open(path)?).read_info()?;
+        Self::decode_atlas(File::open(path)?)
+    }
+
+    pub fn decode_atlas(source: impl Read) -> io::Result<Raster> {
+        let mut reader = png::Decoder::new(source).read_info()?;
         let mut pixels = vec![0; reader.output_buffer_size()];
         let info = reader.next_frame(&mut pixels)?;
         if info.color_type != png::ColorType::Rgba || info.bit_depth != png::BitDepth::Eight

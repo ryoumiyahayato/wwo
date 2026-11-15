@@ -9,12 +9,14 @@ mod compact;
 mod formal_ui;
 mod market_ui;
 mod lobby;
+mod map_release;
 mod migration_status;
 mod interface;
 mod overlay;
 mod politics;
 mod render;
 mod state;
+mod terrain;
 mod timeline;
 mod ui;
 mod world;
@@ -29,30 +31,35 @@ use state::{Request,State};
 use std::{collections::{HashMap,HashSet},fs::{self,File},io::{self,Read},path::{Path,PathBuf},
           sync::Arc,time::{Duration,Instant,SystemTime}};
 use timeline::Date;
-use ui::{Action,Hit,Mode,Object,Ui};
+use ui::{Action,CountryAction,CountryPanel,CountryView,Hit,Mode,Object,Ui};
 use winit::{application::ApplicationHandler,dpi::{LogicalSize,PhysicalSize},event::{ElementState,MouseButton,MouseScrollDelta,WindowEvent},
             event_loop::{ActiveEventLoop,ControlFlow,EventLoop},keyboard::{Key,NamedKey},window::{Window,WindowId}};
 use world::{Completion,Index,Pixels,Reader,World};
 
+enum HostEvent { Map(Completion), Terrain(terrain::Completion) }
+
 const CACHE_BUDGET:usize=112*1024*1024;
 const CACHE_TTL:Duration=Duration::from_secs(2);
 const VIEW_SIZE:[u32;2]=[1280,720];
+const COUNTRY_DOUBLE_CLICK:Duration=Duration::from_millis(380);
 
 struct Diagnostics {rate:f64,cpu_ms:f64,tiles:usize,visible:usize,mib:f64,streaming:bool}
 
 struct Config {root:PathBuf,world:Option<PathBuf>,requests:Option<PathBuf>,scenario:Option<PathBuf>,observe:Option<PathBuf>,managed:bool,
-    preferences:Option<PathBuf>,background:bool,
+    preferences:Option<PathBuf>,terrain_candidate:Option<PathBuf>,background:bool,
     #[cfg(windows)] native:Option<native_start::NativeSession>,
     #[cfg(windows)] desktop:Option<desktop_start::DesktopSession>}
 impl Config {
     fn parse()->io::Result<Self> {
         let home=std::env::current_exe()?.parent().unwrap().to_owned();
-        let mut result=Self{root:home.join("data"),world:None,requests:None,scenario:None,observe:None,managed:false,preferences:None,background:false,
+        let mut result=Self{root:home.join("data"),world:None,requests:None,scenario:None,observe:None,managed:false,preferences:None,terrain_candidate:None,background:false,
             #[cfg(windows)] desktop:None,
             #[cfg(windows)] native:None};
         let mut args=std::env::args_os().skip(1).peekable();
         #[cfg(windows)]
-        let mut start_game=args.peek().is_none();
+        let mut start_game=false;
+        #[cfg(windows)]
+        let mut map_comparison=false;
         #[cfg(windows)]
         let mut r68_comparison=false;
         while let Some(arg)=args.next() {
@@ -64,18 +71,23 @@ impl Config {
                 Some("--observe")=>result.observe=Some(path(&mut args)?),
                 Some("--background")=>result.background=true,
                 Some("--preferences")=>result.preferences=Some(path(&mut args)?),
+                Some("--terrain-candidate")=>result.terrain_candidate=Some(path(&mut args)?),
                 Some("--land-test")=>result.scenario=Some(home.join("scenario-land-test.json")),
                 Some("--formal-menu")=>result.managed=true,
                 #[cfg(windows)]
                 Some("--play")=>start_game=true,
+                #[cfg(windows)]
+                Some("--map-comparison")=>map_comparison=true,
                 #[cfg(windows)]
                 Some("--r68")=>{start_game=true;r68_comparison=true;},
                 _=>return Err(io::Error::other(format!("unknown argument {arg:?}"))),
             }
         }
         #[cfg(windows)]
-        if start_game {
-            if result.world.is_some()||result.requests.is_some()||result.scenario.is_some(){return Err(io::Error::other("--play manages its own formal world"));}
+        let standalone=map_comparison||result.world.is_some()||result.requests.is_some()||result.scenario.is_some()||result.managed;
+        #[cfg(windows)]
+        if start_game||!standalone {
+            if standalone{return Err(io::Error::other("--play and --r68 manage their own world; standalone map options cannot be combined with them"));}
             result.managed=true;
             if r68_comparison {
                 let desktop=desktop_start::DesktopSession::start(&home)?;
@@ -98,9 +110,11 @@ struct Resident {page:Page,ready:Instant,used:Instant}
 struct Drag {at:[f64;2],origin:[f64;2],last:Instant,bearing:bool,moved:bool}
 struct Pose {camera:Camera,object:Option<Object>}
 struct Focus {start:Instant, camera:Camera, target:[f64;2], mpp:f64}
+struct CountryClick {polity:usize,point:[f64;2],deadline:Instant}
 #[derive(Default)]
 struct Trial {
     last:String,timing:bool,times:Vec<f64>,previous:Option<Instant>,captures:Vec<PathBuf>,first:Option<f64>,loads:Vec<(String,f64)>,
+    terrain_decodes:Vec<f64>,
     movement:Option<([f64;2],[f64;2],u32,u32)>,
     window_position:Option<winit::dpi::PhysicalPosition<i32>>,
 }
@@ -115,17 +129,20 @@ struct Observation {
     #[serde(default)] value:String,
 }
 struct Host {
+    natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<HostEvent>)>,
     config:Config,window:Option<Arc<Window>>,renderer:Option<Renderer>,
+    map_root:PathBuf,map_signature:Option<&'static [u8;8]>,fatal_error:Option<String>,
     world:World,visuals:PoliticalVisuals,index:Index,base:Option<Page>,reader:Reader,cached:HashMap<usize,Resident>,
     failed:HashSet<usize>,candidate:Vec<usize>,visible:Vec<usize>,
     camera:Camera,size:[u32;2],mode:Mode,state:State,theme:bool,labels:bool,
-    selected:Option<Object>,details:bool,admin_page:Option<usize>,search:Option<String>,history:Vec<Pose>,focus:Option<Focus>,site:usize,
+    selected:Option<Object>,details:bool,country:Option<CountryPanel>,country_click:Option<CountryClick>,
+    search:Option<String>,history:Vec<Pose>,focus:Option<Focus>,site:usize,
     hits:Vec<Hit>,shown_markers:HashSet<usize>,cursor:[f64;2],drag:Option<Drag>,velocity:[f64;2],moved_at:Instant,
     animate:bool,next_date:Instant,feedback:String,dirty:bool,
     last_input_check:Instant,version:Option<SystemTime>,last_palette:Option<Date>,
     atlas:overlay::Atlas,started:Instant,trial:Trial,
     hud:Hud,skin:Skin,exit_requested:bool,
-    lobby_page:lobby::Page,lobby_country:usize,lobby_request:bool,
+    lobby_page:lobby::Page,lobby_country:usize,lobby_request:bool,country_directory:lobby::Directory,
     bridge_wait:Instant,seen_lobby_busy:bool,departure_requested:bool,
     loading_fade:Option<Instant>,loading_status:String,
     debug:bool,perf_at:Instant,perf_frames:u32,perf:Diagnostics,
@@ -133,7 +150,10 @@ struct Host {
     grid_step:f32,last_present:Instant,employment:state::EmploymentReference,market_focus_serial:u64,
 }
 fn font(path:&Path)->io::Result<Raster> {
-    let mut reader=png::Decoder::new(File::open(path)?).read_info()?;
+    decode_rgba(File::open(path)?)
+}
+fn decode_rgba(source:impl Read)->io::Result<Raster> {
+    let mut reader=png::Decoder::new(source).read_info()?;
     let mut pixels=vec![0;reader.output_buffer_size()];
     let info=reader.next_frame(&mut pixels)?;
     if info.color_type!=png::ColorType::Rgba || info.bit_depth!=png::BitDepth::Eight {return Err(io::Error::other("invalid type atlas"));}
@@ -143,11 +163,26 @@ fn font(path:&Path)->io::Result<Raster> {
 fn ms(t:Instant)->f64 {t.elapsed().as_secs_f64()*1000.}
 
 impl Host {
-    fn new(config:Config,events:&EventLoop<Completion>,started:Instant)->io::Result<Self> {
+    fn new(config:Config,events:&EventLoop<HostEvent>,started:Instant)->io::Result<Self> {
+        #[cfg(windows)]
+        let formal_map=config.native.is_some();
+        #[cfg(not(windows))]
+        let formal_map=false;
+        let map_root=if formal_map {map_release::root(&config.root)} else {config.root.clone()};
+        let map_signature=formal_map.then_some(map_release::TILE_SIGNATURE);
+        let natural=if formal_map {
+            let packed=config.terrain_candidate.is_some();
+            let natural_root=config.terrain_candidate.clone().unwrap_or_else(||config.root.join(terrain::VERSION));
+            Some((terrain::Catalogue::open(&natural_root,packed)?,events.create_proxy()))
+        }else{
+            if config.terrain_candidate.is_some() {return Err(io::Error::other("--terrain-candidate requires the native game"));}
+            None
+        };
+        let world=if map_signature.is_some() {map_release::open(&map_root)?}
+            else {World::open(&map_root.join("world.json"))?};
+        if world.tiles.first().is_none_or(|t|t.level!=0) || world.polities.len()>255 || world.admin.len()>255 {return Err(io::Error::other("invalid world index"));}
         let atlas=overlay::Atlas::open(&config.root.join("type.json"))?;
         let mut skin=Skin::open(&config.root)?;
-        let world=World::open(&config.root.join("world.json"))?;
-        if world.tiles.first().is_none_or(|t|t.level!=0) || world.polities.len()>255 || world.admin.len()>255 {return Err(io::Error::other("invalid world index"));}
         let mut state=State::new();
         #[cfg(windows)]
         if let Some(native)=&config.native {native.update_view(&mut state)?;}
@@ -167,19 +202,21 @@ impl Host {
         let mode=Mode::Political;
         let preferences=config.preferences.as_deref().map(interface::Preferences::load).unwrap_or_default();
         skin.set_english(preferences.english);
-        let visuals=PoliticalVisuals::open(&config.root,&world)?;
+        let visuals=PoliticalVisuals::open(&map_root,&world)?;
         let employment=state::EmploymentReference::open(&config.root)?;
         let index=Index::new(&world.tiles);
-        let reader=Reader::new(config.root.clone(),events.create_proxy());
+        let legacy_cover=natural.is_none()||config.scenario.is_some();
+        let reader=Reader::new(map_root.clone(),map_signature,legacy_cover,events.create_proxy());
         let observation_id=config.observe.as_ref().and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
             .map(|input|input.id).unwrap_or_default();
-        Ok(Self {config,world,visuals,index,reader,state,camera:Camera::new(VIEW_SIZE),atlas,started,base:None,window:None,renderer:None,
+        Ok(Self {natural,config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera:Camera::new(VIEW_SIZE),atlas,started,base:None,window:None,renderer:None,
             cached:HashMap::new(),failed:HashSet::new(),candidate:Vec::new(),visible:Vec::new(),
-            size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,admin_page:None,search:None,history:Vec::new(),focus:None,site:0,
+            size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,country:None,country_click:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
             animate:false,next_date:Instant::now(),feedback:String::new(),dirty:true,last_input_check:Instant::now(),
             version:None,last_palette:None,trial:Trial{last:observation_id,..Trial::default()},hud:Hud{fullscreen:preferences.fullscreen,volume:preferences.volume,english:preferences.english,..Hud::default()},skin,exit_requested:false,
-            lobby_page:lobby::Page::Home,lobby_country,lobby_request:false,bridge_wait:Instant::now(),seen_lobby_busy:false,departure_requested:false,
+            lobby_page:lobby::Page::Home,lobby_country,lobby_request:false,country_directory:lobby::Directory::default(),
+            bridge_wait:Instant::now(),seen_lobby_busy:false,departure_requested:false,
             loading_fade:None,loading_status:String::new(),debug:false,perf_at:Instant::now(),perf_frames:0,
             perf:Diagnostics{rate:0.,cpu_ms:0.,tiles:0,visible:0,mib:0.,streaming:false},
             screenshot:None,screenshot_status:None,grid_step:50000.,last_present:started,employment,market_focus_serial:0})
@@ -216,15 +253,65 @@ impl Host {
         if let Err(e)=request.output(self.config.requests.as_deref()) {self.feedback=format!("Host request: {e}");}
     }
     fn select(&mut self,object:Option<Object>) {
-        self.admin_page=None;
+        self.country=None;
+        self.details=false;
         self.selected=object.filter(|o|self.available(*o));
         if let Some(object)=self.selected {
             if !matches!(object,Object::Polity(i) if self.world.polities[i].display_only) {
                 self.emit(Request::Inspect{id:&self.id(object)});
             }
         }
-        else {self.details=false;}
         self.dirty=true;
+    }
+    fn open_country(&mut self,polity:usize) {
+        if !self.available(Object::Polity(polity)){return;}
+        if self.country.is_some_and(|panel|panel.polity==polity){return;}
+        self.select(Some(Object::Polity(polity)));
+        let view=if self.player_polity()==Some(polity){CountryView::Record}else{CountryView::Summary};
+        self.country=Some(CountryPanel{polity,view});
+    }
+    fn click_country(&mut self,polity:usize,point:[f64;2]) {
+        let now=Instant::now();
+        if self.country_click.take().is_some_and(|first|first.polity==polity && now<=first.deadline &&
+            (point[0]-first.point[0]).hypot(point[1]-first.point[1])<=8.) {
+            let object=Object::Polity(polity);
+            self.country=None;
+            self.details=false;
+            self.selected=Some(object);
+            let target=self.visuals.record(polity).focus(self.size).unwrap_or((self.world.polities[polity].coordinates,1800.));
+            self.focus_on(object,target);
+        }else{
+            self.country_click=Some(CountryClick{polity,point,deadline:now+COUNTRY_DOUBLE_CLICK});
+        }
+    }
+    fn country_action(&mut self,action:CountryAction) {
+        use CountryAction as Go;
+        let Some(mut panel)=self.country.take() else{return;};
+        let count=self.skin.admin_count(&self.world,&self.world.polities[panel.polity]);
+        panel.view=match (action,panel.view) {
+            (Go::Close,_)=>{
+                if self.selected==Some(Object::Polity(panel.polity)){self.selected=None;}
+                return;
+            }
+            (Go::Back,CountryView::Directory(_))=>CountryView::Record,
+            (Go::Back,CountryView::Region{page,..})=>CountryView::Directory(page),
+            (Go::Back,CountryView::Record) if self.player_polity()!=Some(panel.polity)=>CountryView::Summary,
+            (Go::Record,CountryView::Summary)=>CountryView::Record,
+            (Go::Directory,CountryView::Record) if count>0=>CountryView::Directory(0),
+            (Go::Page(step),CountryView::Directory(page))=>{
+                let last=count.saturating_sub(1)/panel.rows(self.size);
+                CountryView::Directory(page.saturating_add_signed(step as isize).min(last))
+            }
+            (Go::Region(index),CountryView::Directory(_)) if index<count=>CountryView::Region{page:index/panel.rows(self.size),index},
+            (Go::Boundary(index),view @ CountryView::Region{..})=>{
+                if let Some(target)=camera::fit_bounds(self.world.admin[index].bounds,self.size){
+                    self.focus_on(Object::Administration(index),target);
+                }
+                view
+            }
+            (_,view)=>view,
+        };
+        self.country=Some(panel);
     }
     fn save_pose(&mut self) {
         if self.history.len()>=24 {self.history.remove(0);}
@@ -234,37 +321,35 @@ impl Host {
         self.focus=None;self.save_pose();self.camera.focus(target,mpp);
         self.velocity=[0.;2];self.details=false;self.search=None;self.dirty=true;
     }
-    fn locate_object(&mut self,object:Object,capital:bool) {
+    fn focus_on(&mut self,object:Object,(target,mpp):([f64;2],f64)) {
+        if !matches!(object,Object::Polity(i) if self.world.polities[i].display_only) {
+            self.emit(Request::Locate{id:&self.id(object)});
+        }
+        self.save_pose();
+        self.focus=Some(Focus{start:Instant::now(),camera:self.camera.clone(),target,mpp});
+        self.velocity=[0.;2];
+        self.dirty=true;
+    }
+    fn locate_object(&mut self,object:Object) {
         let (target,mpp)=match object {
             Object::Administration(i)=>{
                 let Some(target)=camera::fit_bounds(self.world.admin[i].bounds,self.size) else{return;};
                 target
             }
             Object::Place(i)=>(self.world.places[i].coordinates,if self.world.places[i].id=="place:paris" {36.}else{210.}),
-            Object::Polity(i)=>{
-                let p=&self.world.polities[i];
-                if capital {
-                    let center=self.world.places.iter().find(|c|c.name==p.capital && camera::dot(camera::frame(c.coordinates)[2],camera::frame(p.capital_coordinates)[2])>0.9999).map_or(p.capital_coordinates,|c|c.coordinates);
-                    (center,if p.capital=="Paris"{36.}else{650.})
-                }
-                else {self.visuals.record(i).focus(self.size).unwrap_or((p.coordinates,1800.))}
-            }
+            Object::Polity(i)=>self.visuals.record(i).focus(self.size).unwrap_or((self.world.polities[i].coordinates,1800.)),
         };
-        if !matches!(object,Object::Polity(i) if self.world.polities[i].display_only) {
-            self.emit(Request::Locate{id:&self.id(object)});
-        }
-        if !matches!(object,Object::Place(_)) && !capital {
-            self.save_pose();
-            self.focus=Some(Focus{start:Instant::now(),camera:self.camera.clone(),target,mpp});
-            self.velocity=[0.;2];
-            self.details=false;
-            self.search=None;
+        if !matches!(object,Object::Place(_)) {
+            self.focus_on(object,(target,mpp));
         } else {
+            self.emit(Request::Locate{id:&self.id(object)});
             self.locate(target,mpp);
         }
-        self.select(Some(object));
+        self.search=None;
+        if let Object::Polity(polity)=object{self.open_country(polity);}else{self.select(Some(object));}
     }
     fn action(&mut self,action:Action) {
+        self.country_click=None;
         self.feedback.clear();
         match action {
             Action::Mode(mode)=>{
@@ -274,24 +359,22 @@ impl Host {
             }
             Action::Home=>{
                 self.focus=None;self.save_pose();self.camera.mpp=Camera::overview(self.size);self.camera.update_level();
-                self.velocity=[0.;2];self.details=false;self.admin_page=None;self.search=None;
+                self.velocity=[0.;2];self.details=false;self.country=None;self.search=None;
             }
             Action::Back=>{
                 self.focus=None;
                 if let Some(p)=self.history.pop(){self.camera=p.camera;self.select(p.object);}
-                self.velocity=[0.;2];self.details=false;self.admin_page=None;self.search=None;
+                self.velocity=[0.;2];self.details=false;self.country=None;self.search=None;
             }
             Action::Search=>{
-                self.details=false;self.admin_page=None;
+                self.details=false;self.country=None;
                 self.search=if self.search.is_some(){None}else{Some(String::new())};
             }
             Action::Close=>self.select(None),
-            Action::Details=>{self.admin_page=None;self.details=!self.details;}
-            Action::AdminPage(-2)=>self.admin_page=None,
-            Action::AdminPage(delta)=>self.admin_page=Some(self.admin_page.unwrap_or(0).saturating_add_signed(delta as isize)),
-            Action::Locate=>if let Some(o)=self.selected{self.locate_object(o,false);},
-            Action::Capital=>if let Some(o)=self.selected{self.locate_object(o,true);},
-            Action::Select(o)=>if self.search.is_some()||self.admin_page.is_some(){self.locate_object(o,false);}else{
+            Action::Details=>self.details=!self.details,
+            Action::Country(go)=>self.country_action(go),
+            Action::Locate=>if let Some(o)=self.selected{self.locate_object(o);},
+            Action::Select(o)=>if self.search.is_some(){self.locate_object(o);}else{
                 self.select(Some(o));
                 if let Object::Place(i)=o {
                     if self.hud.page==HudPage::Market {
@@ -340,7 +423,7 @@ impl Host {
                 }
                 self.hud.page=page;self.hud.menu=HudMenu::None;
                 self.hud.market_offset=0;
-                self.details=false;self.admin_page=None;self.search=None;
+                self.details=false;self.country=None;self.search=None;
             }
             HudCommand::PortraitAction(_,page)=>self.hud_action(HudCommand::Page(page)),
             HudCommand::RelationDrawer(id)=>{
@@ -427,9 +510,7 @@ impl Host {
                 }
             }
             HudCommand::PlayerCountry=>{
-                if let Some(i)=self.player_polity(){
-                    self.hud.page=HudPage::Map;self.select(Some(Object::Polity(i)));self.details=true;
-                }
+                if let Some(i)=self.player_polity(){self.open_country(i);}
             }
             HudCommand::Slot(slot)=>{
                 let overwrite=self.state.session.as_ref().and_then(|s|s.slots.iter().find(|r|r.slot==slot)).is_some_and(|row|!row.empty);
@@ -510,12 +591,18 @@ impl Host {
         match command{
             Command::Page(page)=>{
                 self.lobby_page=page;
+                self.country_directory.search_active=false;
+                self.country_directory.drag=None;
                 self.lobby_request=false;self.seen_lobby_busy=false;
                 match page{
                     Page::Selection=>{
-                        self.camera.mpp=Camera::overview(self.size)/0.74;self.camera.update_level();
+                        self.country_directory=lobby::Directory::default();
+                        self.mode=Mode::Political;
+                        self.camera.mpp=lobby::SelectionLayout::globe_mpp(self.size);self.camera.update_level();
                         if let Some(lobby)=&mut self.state.lobby {lobby.selection_ready=false;}
                         self.emit(Request::Lobby{verb:"select",polity:"",slot:0});
+                        self.filter_countries();
+                        self.country_directory.reveal(self.size,self.lobby_country);
                     },
                     Page::Load=>self.emit(Request::Lobby{verb:"slots",polity:"",slot:0}),
                     Page::Home=>self.emit(Request::Lobby{verb:"home",polity:"",slot:0}),
@@ -524,12 +611,26 @@ impl Host {
             }
             Command::Country(index)=>{
                 if let Some(p)=self.world.polities.get(index){
+                    self.country_directory.search_active=false;
                     self.lobby_country=index;self.camera.focus(p.coordinates,self.camera.mpp);
+                    self.country_directory.reveal(self.size,index);
                 }
             }
+            Command::Search=>{
+                self.country_directory.search_active=true;
+                if let Some(window)=&self.window {window.set_ime_allowed(true);}
+            }
+            Command::ClearSearch=>{
+                self.country_directory.query.clear();
+                self.country_directory.search_active=false;
+                self.filter_countries();
+                self.country_directory.reveal(self.size,self.lobby_country);
+            }
             Command::Enter=>{
-                if let Some(p)=self.world.polities.get(self.lobby_country){
-                    let id=format!("state:{}",p.id);
+                if self.lobby_page!=Page::Selection || self.lobby_request {return;}
+                if let Some(id)=self.world.polities.get(self.lobby_country).and_then(|p|
+                    self.state.lobby.as_ref().filter(|s|s.selection_ready&&!s.busy).and_then(|s|s.opening(p))
+                ).map(|opening|opening.id.clone()){
                     self.lobby_request=true;self.bridge_wait=Instant::now();self.seen_lobby_busy=false;
                     self.emit(Request::Lobby{verb:"new",polity:&id,slot:0});
                 }
@@ -540,7 +641,24 @@ impl Host {
             }
             Command::Exit=>self.exit_requested=true,
         }
+        if !self.country_directory.search_active {
+            if let Some(window)=&self.window {window.set_ime_allowed(false);}
+        }
         self.dirty=true;
+    }
+    fn filter_countries(&mut self) {
+        self.country_directory.filter(&self.world,self.state.lobby.as_ref(),&self.state.date.to_string(),self.hud.english);
+        self.dirty=true;
+    }
+    fn scroll_countries(&mut self,point:[f64;2],steps:f64)->bool {
+        if self.in_lobby() && self.lobby_page==lobby::Page::Selection
+            && lobby::contains(lobby::SelectionLayout::new(self.size).directory,point)
+        {
+            self.country_directory.scroll(self.size,steps as f32);
+            self.dirty=true;
+            return true;
+        }
+        false
     }
     fn market_command(&mut self,verb:&'static str,index:usize){
         if self.state.session.is_none(){self.feedback="正式世界未连接".into();return;}
@@ -549,7 +667,7 @@ impl Host {
             let selected=self.selected.filter(|o|matches!(o,Object::Polity(i) if !self.world.polities[*i].display_only));
             let id=selected.map(|o|self.id(o)).unwrap_or_default();
             self.hud.page=HudPage::Market;self.hud.menu=HudMenu::None;self.hud.market_chooser=None;
-            self.hud.market_offset=0;self.details=false;self.admin_page=None;self.search=None;
+            self.hud.market_offset=0;self.details=false;self.country=None;self.search=None;
             self.emit(Request::Market{verb,id:&id,site:"",quantity:0,token:0,viewport:self.size});return;
         }
         if verb=="close"{
@@ -638,7 +756,8 @@ impl Host {
         self.emit(Request::HostAction{action:&action});
     }
     fn player_polity(&self)->Option<usize>{
-        let id=self.state.session.as_ref()?.polity.strip_prefix("state:")?;
+        let id=&self.state.session.as_ref()?.polity;
+        let id=id.strip_prefix("state:").unwrap_or(id);
         self.world.polities.iter().position(|p|p.id==id)
     }
     fn search_results(&self)->Vec<Object> {
@@ -648,14 +767,15 @@ impl Host {
             .chain(self.world.polities.iter().enumerate().map(|(i,p)|(Object::Polity(i),p.rank,&p.name,&p.id)));
         let mut rows:Vec<_>=items.filter_map(|(o,rank,name,id)| {
             let name=name.to_ascii_lowercase();
-            ((name.contains(&q)||id.contains(&q)||q.strip_prefix("state:")==Some(id))&&self.available(o))
-                .then(||(name!=q,!name.starts_with(&q),rank,name,o))
+            let localized=ui::object_name(&self.world,&self.skin,o).to_ascii_lowercase();
+            ((name.contains(&q)||localized.contains(&q)||id.contains(&q)||q.strip_prefix("state:")==Some(id))&&self.available(o))
+                .then(||(localized!=q&&name!=q,!localized.starts_with(&q)&&!name.starts_with(&q),rank,localized,o))
         }).collect();
         rows.sort_by(|a,b|(&a.0,&a.1,&a.2,&a.3).cmp(&(&b.0,&b.1,&b.2,&b.3)));
         rows.into_iter().take(6).map(|r|r.4).collect()
     }
     fn accept_search(&mut self) {
-        if let Some(o)=self.search_results().first().copied(){self.locate_object(o,false);return;}
+        if let Some(o)=self.search_results().first().copied(){self.locate_object(o);return;}
         if let Some(q)=self.search.as_ref() {
             let values:Result<Vec<f64>,_>=q.split(|c:char|c.is_whitespace()||c==',').filter(|s|!s.is_empty()).map(str::parse).collect();
             if let Ok(v)=values {
@@ -664,7 +784,7 @@ impl Host {
                 }
             }
         }
-        self.feedback="No matching geographic object".into();
+        self.feedback=self.skin.choose("没有匹配的地点或国家","No matching place or country").into();
     }
     fn object_at(&self,q:[f64;2])->[u8;2] {
         let dated=|[owner,admin]:[u8;2]| {
@@ -683,26 +803,62 @@ impl Host {
     fn click(&mut self,p:[f64;2]) {
         if self.loading(){return;}
         let [x,y]=p.map(|v|v as f32);
+        let contains=|[a,b,w,h]:[f32;4]| x>=a&&x<=a+w&&y>=b&&y<=b+h;
+        if self.hud.menu==HudMenu::MapModes&&contains(formal_ui::map_modes_rect(self.size)) {
+            if let Some(hit)=self.hits.iter().find(|hit|matches!(hit.action,Action::Mode(_))&&contains(hit.area)) {
+                self.action(hit.action);
+            }
+            return;
+        }
+        let radius=(self.size[0] as f32*0.056).clamp(52.,78.);
+        let in_menu=self.hud.menu!=HudMenu::None&&contains(formal_ui::menu_rect(self.hud.menu,self.size,radius));
+        let in_country=!self.hud.menu.modal()&&self.country.is_some_and(|panel|contains(panel.rect(self.size)));
         if let Some(hit)=self.hits.iter().rev().find(|h|{
-            let [a,b,w,d]=h.area;
-            let gear=matches!(h.action,Action::Hud(HudCommand::Menu(HudMenu::System)))&&b==0.;
+            let gear=matches!(h.action,Action::Hud(HudCommand::Menu(HudMenu::System)))&&h.area[1]==0.;
             let portrait=match h.action{Action::Hud(HudCommand::PortraitAction(i,_))=>formal_ui::portrait_action_hit(i,self.size[1] as f32,p),_=>true};
-            x>=a&&x<=a+w&&y>=b&&y<=b+d&&(!gear||formal_ui::gear_hit(p,self.size[0]))
+            contains(h.area)&&(!gear||formal_ui::gear_hit(p,self.size[0]))
                 &&portrait
-                &&(!self.details||!matches!(h.action,Action::Select(_))||self.admin_page.is_some())
+                &&(!in_menu||!matches!(h.action,Action::Country(_)|Action::Select(_)))
+                &&(!in_country||in_menu||matches!(h.action,Action::Country(_)))
+                &&(!self.details||!matches!(h.action,Action::Select(_))||self.search.is_some())
         }) {
-            let action=hit.action;self.action(action);return;
+            let action=hit.action;
+            match action {
+                Action::Hud(HudCommand::PlayerCountry) if self.search.is_none()&&self.hud.menu==HudMenu::None
+                    && p[0]<=104. && p[1]<=76.=>{
+                    if let Some(i)=self.player_polity(){self.click_country(i,p);}
+                }
+                Action::Select(Object::Polity(i)) if self.search.is_none()&&self.hud.menu==HudMenu::None&&self.hud.page==HudPage::Map=>{
+                    self.click_country(i,p);
+                }
+                _=>self.action(action),
+            }
+            return;
         }
         if self.is_panel(p){return;}
         let hit=self.camera.vector(p,self.size).map(camera::geographic).map(|q|self.object_at(q)[0]);
         if self.in_lobby(){
+            if self.lobby_page!=lobby::Page::Selection {return;}
             if let Some(index)=hit.and_then(|v|v.checked_sub(1)).map(usize::from)
-                .filter(|&i|!self.world.polities[i].display_only){
-                self.lobby_country=index;self.dirty=true;
+                .filter(|&i|self.available(Object::Polity(i))){
+                self.lobby_country=index;
+                self.country_directory.search_active=false;
+                if !self.country_directory.query.is_empty() {
+                    self.country_directory.query.clear();
+                    self.filter_countries();
+                }
+                self.country_directory.reveal(self.size,index);
+                if let Some(window)=&self.window {window.set_ime_allowed(false);}
+                self.dirty=true;
             }
             return;
         }
-        self.select(hit.and_then(|v|v.checked_sub(1)).map(|i|Object::Polity(i as usize)));
+        let polity=hit.and_then(|v|v.checked_sub(1)).map(usize::from);
+        if self.hud.page==HudPage::Map {
+            if let Some(i)=polity.filter(|_|self.hud.menu==HudMenu::None){self.click_country(i,p);return;}
+        }
+        self.country_click=None;
+        self.select(polity.map(Object::Polity));
     }
     fn is_panel(&self,p:[f64;2])->bool {
         if self.loading(){return true;}
@@ -710,12 +866,15 @@ impl Host {
         let contains=|[a,b,w,h]:[f32;4]| x>=f64::from(a)&&x<=f64::from(a+w)&&y>=f64::from(b)&&y<=f64::from(b+h);
         let [w,h]=self.size.map(|v|v as f32);
         if self.in_lobby(){
-            return self.lobby_page!=lobby::Page::Selection||self.lobby_request||
-                contains([w-(w*0.43).min(430.)-32.,(h-376.)*0.5,(w*0.43).min(430.),376.]);
+            return self.lobby_request||match self.lobby_page {
+                lobby::Page::Selection=>lobby::SelectionLayout::new(self.size).contains(p),
+                _=>true,
+            };
         }
         let radius=(w*0.056).clamp(52.,78.);
         let modal=self.hud.menu.modal();
         modal||self.search.is_some()||self.details||
+            self.country.is_some_and(|country|contains(country.rect(self.size)))||
             formal_ui::page_rect(&self.hud,self.size).is_some_and(contains)||
             (self.hud.menu!=HudMenu::None&&contains(formal_ui::menu_rect(self.hud.menu,self.size,radius)))||
             (self.hud.messages&&contains(formal_ui::message_rect([w,h],((h+16.)*0.5).max(190.))))||
@@ -724,7 +883,7 @@ impl Host {
                 !matches!(hit.action,Action::Select(_))&&contains(hit.area)&&(!gear||formal_ui::gear_hit(p,self.size[0]))
             })||
             (self.hud.page==HudPage::Map && match self.selected {
-                Some(Object::Polity(_))=>contains([12.,83.,280.,270.]),
+                Some(Object::Polity(_))=>false,
                 Some(_)=>contains([17.,73.,300.,213.]),
                 None=>false,
             })
@@ -753,6 +912,7 @@ impl Host {
         self.dirty=true;
     }
     fn key(&mut self,key:Key) {
+        self.country_click=None;
         if key==Key::Named(NamedKey::F8){self.hud.mechanical.hidden=!self.hud.mechanical.hidden;self.dirty=true;return;}
         if key==Key::Named(NamedKey::F12){self.queue_screenshot();return;}
         if key==Key::Named(NamedKey::F10){
@@ -765,16 +925,31 @@ impl Host {
         }
         if self.loading(){return;}
         if self.in_lobby(){
-            if key==Key::Named(NamedKey::Escape)&&!self.lobby_request{
+            if self.country_directory.search_active {
+                match key {
+                    Key::Named(NamedKey::Escape|NamedKey::Enter)=>{
+                        self.country_directory.search_active=false;
+                        if let Some(window)=&self.window {window.set_ime_allowed(false);}
+                        self.dirty=true;
+                    }
+                    Key::Named(NamedKey::Backspace)=>{
+                        self.country_directory.query.pop();
+                        self.filter_countries();
+                    }
+                    Key::Named(NamedKey::Space)=>self.type_country_search(" "),
+                    Key::Character(text)=>self.type_country_search(&text),
+                    _=>(),
+                }
+                return;
+            }
+            if matches!(key,Key::Named(NamedKey::Escape|NamedKey::Backspace))&&!self.lobby_request{
                 self.lobby_action(lobby::Command::Page(lobby::Page::Home));
             } else if key==Key::Named(NamedKey::Enter)&&!self.lobby_request {
                 if let Some(state)=&self.state.lobby{
                     if !state.busy {
                         match self.lobby_page {
                             lobby::Page::Home if state.ready=>self.lobby_action(lobby::Command::Page(lobby::Page::Selection)),
-                            lobby::Page::Selection if state.selection_ready && self.world.polities.get(self.lobby_country)
-                                .is_some_and(|p|state.choices.iter().any(|row|row.id.strip_prefix("state:")==Some(&p.id)))=>
-                                self.lobby_action(lobby::Command::Enter),
+                            lobby::Page::Selection=>self.lobby_action(lobby::Command::Enter),
                             _=>(),
                         }
                     }
@@ -828,7 +1003,8 @@ impl Host {
         let year=self.state.date.year;
         match key {
             Key::Named(NamedKey::Home)=>self.action(Action::Home),
-            Key::Named(NamedKey::Escape)=>if self.hud.clock_drag.take().is_some(){}else if self.hud.menu!=HudMenu::None{self.hud_action(HudCommand::Menu(HudMenu::None));}else if self.hud.messages{self.hud.messages=false;}else if self.hud.page!=HudPage::Map{self.hud_action(HudCommand::Page(HudPage::Map));}else if self.admin_page.take().is_some(){}else if self.details{self.details=false;}else{self.hud.menu=HudMenu::System;},
+            Key::Named(NamedKey::Escape)=>if self.hud.clock_drag.take().is_some(){}else if self.hud.menu!=HudMenu::None{self.hud_action(HudCommand::Menu(HudMenu::None));}else if self.country.is_some(){self.country_action(CountryAction::Close);}else if self.hud.messages{self.hud.messages=false;}else if self.hud.page!=HudPage::Map{self.hud_action(HudCommand::Page(HudPage::Map));}else if self.details{self.details=false;}else{self.hud.menu=HudMenu::System;},
+            Key::Named(NamedKey::Backspace) if self.country.is_some()=>self.country_action(CountryAction::Back),
             Key::Named(NamedKey::Backspace) if self.hud.page==HudPage::Relations=>{
                 let has_detail=self.state.session.as_ref().and_then(|s|s.relations.as_ref())
                     .is_some_and(|view|!view.selected.is_empty());
@@ -864,6 +1040,12 @@ impl Host {
         }
         self.dirty=true;
     }
+    fn type_country_search(&mut self,text:&str) {
+        let query=&mut self.country_directory.query;
+        let remaining=64_usize.saturating_sub(query.chars().count());
+        query.extend(text.chars().filter(|c|!c.is_control()).take(remaining));
+        self.filter_countries();
+    }
     fn rotate(&mut self,from:[f64;2],to:[f64;2],bearing:bool) {
         self.focus=None;
         if bearing{self.camera.bearing_drag(from,to,self.size);}else{self.camera.drag(from,to,self.size);}
@@ -880,7 +1062,7 @@ impl Host {
         if self.reader.inflight.is_some(){return;}
         let Some(i)=self.visible.iter().chain(self.candidate.iter()).copied().find(|i|!self.cached.contains_key(i)&&!self.failed.contains(i))else{return;};
         let tile=&self.world.tiles[i];
-        let required=tile.data_size();
+        let required=tile.data_size()-if self.reader.cover {0}else{tile.cover_size()};
         let mut occupied=self.cached.values().map(|p|p.page.bytes).sum::<usize>();
         if occupied+required>CACHE_BUDGET {
             let mut evict:Vec<_>=self.cached.iter().filter(|(id,_)|!self.visible.contains(id))
@@ -901,6 +1083,7 @@ impl Host {
         let active=World::active_politics(&date);
         if self.camera.mpp<700.{self.grid_step=25000.;}else if self.camera.mpp>900.{self.grid_step=50000.;}
         view.settings=[self.state.date.season_day(),self.mode.index() as f32,u8::from(active) as f32,u8::from(self.theme) as f32];
+        view.map_style[1]=self.renderer.as_ref().unwrap().terrain_max_level() as f32;
         view.map_style[3]=if self.hud.military_grid{self.grid_step}else{0.};
         view.selection[3]=self.world.polities.iter().position(|p|p.id=="country_fra").map_or(0.,|i|(i+1) as f32);
         view.map_style[0]=self.player_polity().map_or(0.,|i|(i+1) as f32);
@@ -919,12 +1102,16 @@ impl Host {
         }
         let center=self.camera.coordinates();
         let coord=self.camera.vector(self.cursor,self.size).map(camera::geographic);
-        let mouse=coord.map_or("Cursor: space".into(),|p|format!("Cursor: {:.4}, {:.4}",p[0],p[1]));
+        let pointer=self.skin.choose("坐标","Coordinates");
+        let mouse=coord.map_or_else(||self.skin.choose("坐标 · 太空","Coordinates · Space").into(),
+            |p|format!("{pointer} · {:.4}, {:.4}",p[0],p[1]));
         let owner=coord.map_or([0,0],|p|self.object_at(p));
         let admin=if active {owner[1].checked_sub(1).and_then(|i|self.world.admin.get(i as usize))
-            .map_or(String::new(),|p|format!("{} / {}",p.name,p.id.trim_start_matches("administrative_region:")))}else{String::new()};
-        let mut source=self.visible.iter().rev().find(|&&id|self.cached.contains_key(&id)&&camera::inside(center,self.world.tiles[id].core))
-            .map_or("World / R68 ETOPO relief",|&id|self.world.tiles[id].source.as_str()).to_owned();
+            .map_or(String::new(),|p|self.skin.division_name(p).into())}else{String::new()};
+        let mut source=if self.renderer.as_ref().unwrap().packed_terrain() {
+            self.skin.choose("SRTM15+ V2.5.5 · ESA · HydroRIVERS（现代参照）","SRTM15+ V2.5.5 · ESA · HydroRIVERS (modern reference)").to_owned()
+        } else if view.map_style[1]>0. {self.skin.choose("SRTM15+ · ESA · HydroRIVERS（现代参照）","SRTM15+ · ESA · HydroRIVERS (modern reference)").to_owned()}else{self.visible.iter().rev().find(|&&id|self.cached.contains_key(&id)&&camera::inside(center,self.world.tiles[id].core))
+            .map_or("World / R68 ETOPO relief",|&id|self.world.tiles[id].source.as_str()).to_owned()};
         if source=="Paris" {source.push_str(" / APUR, IGN, (c) OpenStreetMap contributors / modern");}
         if self.mode!=Mode::Geographic && !active {source.push_str(" / historical boundaries unavailable");}
         if let Some(model)=&self.state.timeline {source=format!("SIMULATION   {} / {}",model.sites[self.site].label,model.at(self.site).label());}
@@ -932,15 +1119,16 @@ impl Host {
         let search=self.search_results();
         let flag_index=if self.in_lobby(){Some(self.lobby_country)}else{self.player_polity()};
         let flags=flag_index.map(|i|self.visuals.record(i)).filter(|v|v.active(&date)).map(|v|v.flag);
-        let selected_polity=self.selected.and_then(|o|match o{
-            Object::Polity(i)=>{let v=self.visuals.record(i);Some((&self.world.polities[i],self.details,v.active(&date).then_some(v.flag)))},
-            _=>None,
+        let country=self.country.map(|panel|{
+            let flag=self.visuals.record(panel.polity);
+            (&self.world,panel,flag.active(&date).then_some(flag.flag))
         });
         self.perf.tiles=self.cached.len();self.perf.visible=self.visible.len();
         self.perf.mib=self.cached.values().map(|p|p.page.bytes).sum::<usize>() as f64 / 1048576.;
         self.perf.streaming=self.reader.inflight.is_some();
-        let formal=formal_ui::Display{skin:&self.skin,hud:&self.hud,session:self.state.session.as_ref(),date:self.state.date,selected_polity,
+        let formal=formal_ui::Display{skin:&self.skin,hud:&self.hud,session:self.state.session.as_ref(),date:self.state.date,country,
             camera:&self.camera,size:self.size,mode:self.mode,flags,cursor:self.cursor,source:&source,feedback:&self.feedback,labels:self.labels,managed:self.config.managed,
+            modern_terrain:view.map_style[1]>0.,
             debug:self.debug.then_some(&self.perf)};
         let seconds=self.started.elapsed().as_secs_f32();
         let loading=self.loading();
@@ -949,9 +1137,9 @@ impl Host {
                 .unwrap_or(if self.lobby_request{"正在进入世界"}else{"正在读取地图资料"});
             (formal.loading(status,seconds),Vec::new())
         }else if self.in_lobby(){
-            formal.lobby(&self.world,self.state.lobby.as_ref(),self.lobby_page,self.lobby_country,self.lobby_request)
-        }else{ui::compose(&self.world,&self.atlas,&self.visuals,Ui{
-            mode:self.mode,date:&date,camera:&self.camera,size:self.size,selected:self.selected,admin:&admin,details:self.details,admin_page:self.admin_page,
+            formal.lobby(&self.world,self.state.lobby.as_ref(),self.lobby_page,self.lobby_country,self.lobby_request,&self.country_directory)
+        }else{ui::compose(&self.world,&self.atlas,Ui{
+            mode:self.mode,date:&date,camera:&self.camera,size:self.size,selected:self.selected,admin:&admin,details:self.details,country:self.country,
             search:self.search.as_deref(),search_results:&search,econ_label:&econ_label,econ_legend:&econ_legend,
             mouse:&mouse,labels:self.labels,formal,
         },&mut self.shown_markers)};
@@ -972,8 +1160,11 @@ impl Host {
         }
         self.hits=hits;
         let paris_ready=self.visible.iter().filter(|&&id|self.world.tiles[id].city).all(|id|self.cached.contains_key(id));
+        let needs_overlay=matches!(self.mode,Mode::Political|Mode::Economic)
+            ||self.mode==Mode::Military&&view.map_style[3]>0.;
         let pages:Vec<_>=self.visible.iter().filter_map(|&id| {
             let tile=&self.world.tiles[id];
+            if view.map_style[1]>0.&&!needs_overlay&&!tile.city&&view.selection[1]<0.5{return None;}
             if tile.city&&!paris_ready{return None;}
             let p=self.cached.get(&id)?;
             let opacity=(now.duration_since(p.ready).as_secs_f32()/0.16).clamp(0.,1.)*tile.weight(self.camera.mpp);
@@ -981,6 +1172,8 @@ impl Host {
             (opacity>0.).then_some((&p.page,tile,scissor,opacity))
         }).collect();
         let renderer=self.renderer.as_mut().unwrap();
+        renderer.update_terrain(&self.camera,self.size,now);
+        view.map_style[2]=renderer.terrain_view_level() as f32;
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);
         }
@@ -1032,6 +1225,7 @@ impl Host {
             "wanted":self.visible.len(),"ready":self.visible.iter().filter(|i|self.cached.contains_key(i)).count(),
             "inflight":self.reader.inflight.is_some(),"first_frame_ms":self.trial.first,
             "gpu":self.renderer.as_ref().map(|r|&r.gpu),"feedback":self.feedback,
+            "terrain":self.renderer.as_ref().and_then(Renderer::terrain_status),
             "workspace":format!("{:?}",self.hud.page),"menu":format!("{:?}",self.hud.menu),"messages":self.hud.messages,
             "session":session,"lobby":lobby,
             "window":{"background":self.config.background,"focused":self.window.as_ref().is_some_and(|w|w.has_focus()),"visible":self.window.as_ref().and_then(|w|w.is_visible())}
@@ -1071,11 +1265,15 @@ impl Host {
                     self.dirty=true;
                 }
             }
-            "focus" if (-180. ..=180.).contains(&input.lon)&&(-90. ..=90.).contains(&input.lat)&&(10. ..=36000.).contains(&input.mpp)=>{
+            "focus" if (-180. ..=180.).contains(&input.lon)&&(-90. ..=90.).contains(&input.lat)&&(10. ..=90_000.).contains(&input.mpp)=>{
+                self.country_click=None;
                 self.locate([input.lon,input.lat],input.mpp); if input.value=="north" {self.camera.north_up();}
             }
             "click"=>self.click([input.x,input.y]),
-            "wheel"=>self.zoom([input.x,input.y],input.steps),
+            "wheel"=>{
+                let point=[input.x,input.y];
+                if !self.scroll_countries(point,input.steps){self.zoom(point,input.steps);}
+            }
             "drag"=>{
                 self.velocity=[0.;2];
                 self.trial.movement=Some(([input.x,input.y],[input.to_x,input.to_y],input.frames.clamp(1,180),0));
@@ -1090,8 +1288,14 @@ impl Host {
             }
             "timing"=>{
                 self.trial.timing=!self.trial.timing;self.trial.previous=None;
-                if self.trial.timing{self.trial.times.clear();self.trial.loads.clear();}
-                else {extra=serde_json::json!({"interval_ms":self.trial.times,"tile_load_ms":self.trial.loads});}
+                if self.trial.timing{
+                    self.trial.times.clear();
+                    self.trial.loads.clear();
+                    self.trial.terrain_decodes.clear();
+                } else {
+                    extra=serde_json::json!({"interval_ms":self.trial.times,"tile_load_ms":self.trial.loads,
+                        "terrain_decode_ms":self.trial.terrain_decodes});
+                }
             }
             "quit"=>event_loop.exit(),
             _=>(),
@@ -1105,9 +1309,9 @@ impl Host {
         if self.config.managed&&(had_session!=connected||loaded){
             if connected {self.loading_fade=Some(now);self.loading_status="正在安装地图".into();}
             self.hud=Hud{fullscreen:self.hud.fullscreen,volume:self.hud.volume,english:self.hud.english,..Hud::default()};
-            self.selected=None;self.details=false;self.admin_page=None;
+            self.selected=None;self.details=false;self.country=None;self.country_click=None;
             self.search=None;self.history.clear();self.focus=None;self.velocity=[0.;2];self.hits.clear();
-            self.mode=Mode::Geographic;self.labels=false;
+            self.mode=Mode::Political;self.labels=false;
             self.camera=Camera::new(self.size);
             if let Some(point)=self.state.session.as_ref().and_then(|s| <[f64;2]>::try_from(s.coordinates.as_slice()).ok()) {
                 #[cfg(windows)]
@@ -1116,6 +1320,7 @@ impl Host {
                 let _=point;
             }
             self.lobby_page=lobby::Page::Home;self.lobby_request=false;
+            self.country_directory=lobby::Directory::default();
             self.departure_requested=false;
         }
         if let Some(lobby)=&self.state.lobby{
@@ -1136,13 +1341,17 @@ impl Host {
                 self.apply_market_focus(target);
             }
         }
-        if self.selected.is_some_and(|o|!self.available(o)){self.selected=None;self.details=false;}
+        if self.selected.is_some_and(|o|!self.available(o)){self.selected=None;self.details=false;self.country=None;}
     }
 
     fn poll(&mut self,event_loop:&ActiveEventLoop,now:Instant) {
         #[cfg(windows)]
         if let Some(desktop)=&mut self.config.desktop {desktop.poll();}
         if self.exit_requested {event_loop.exit();return;}
+        if self.country_click.as_ref().is_some_and(|click|now>=click.deadline) {
+            let click=self.country_click.take().unwrap();
+            self.open_country(click.polity);
+        }
         if let Some(focus)=self.focus.take() {
             let progress=(now.saturating_duration_since(focus.start).as_secs_f64()/0.85).min(1.);
             let t=if progress<0.5 {4.*progress.powi(3)} else {1.-4.*(1.-progress).powi(3)};
@@ -1216,7 +1425,7 @@ impl Host {
         }
     }
 }
-impl ApplicationHandler<Completion> for Host {
+impl ApplicationHandler<HostEvent> for Host {
     fn resumed(&mut self,event_loop:&ActiveEventLoop) {
         if self.window.is_some(){return;}
         let result=(|| -> Result<_,Box<dyn std::error::Error>>{
@@ -1234,32 +1443,67 @@ impl ApplicationHandler<Completion> for Host {
             }
             let hud=[font(&self.config.root.join("hud-art.png"))?,font(&self.config.root.join("hud-type.png"))?,
                 if self.config.managed{font(&self.config.root.join("menu-painting.png"))?}else{Raster{size:[1,1],pixels:vec![0;4]}}];
-            let hd=self.config.root.join("political-flags-hd.png");
-            let flag_path=if hd.is_file(){hd}else{self.config.root.join("political-flags.png")};
-            let globe_art=[font(&self.config.root.join("galactic-chart.png"))?,font(&self.config.root.join("ocean-detail-r68.png"))?,
-                font(&self.config.root.join("ocean-ice-r68.png"))?];
-            let renderer=pollster::block_on(Renderer::new(window.clone(),font(&self.config.root.join("type.png"))?,PoliticalVisuals::read_atlas(&flag_path)?,hud,globe_art,&layouts))?;
-            let pixels=Pixels::read(&self.config.root,&self.world.tiles[0])?;
+            let art=|name| {
+                if self.map_signature.is_some() {decode_rgba(map_release::open_art(&self.map_root,name)?)}
+                else {font(&self.map_root.join(name))}
+            };
+            let flags=if self.map_signature.is_some() {
+                PoliticalVisuals::decode_atlas(map_release::open_art(&self.map_root,"political-flags-hd.png")?)?
+            } else {
+                let hd=self.map_root.join("political-flags-hd.png");
+                let path=if hd.is_file(){hd}else{self.map_root.join("political-flags.png")};
+                PoliticalVisuals::read_atlas(&path)?
+            };
+            let globe_art=[art("galactic-chart.png")?,art("ocean-detail-r68.png")?,art("ocean-ice-r68.png")?];
+            let renderer=pollster::block_on(Renderer::new(window.clone(),font(&self.config.root.join("type.png"))?,flags,hud,globe_art,&layouts,
+                self.natural.take()))?;
+            let pixels=Pixels::read_version(&self.map_root,&self.world.tiles[0],self.map_signature,self.reader.cover)?;
             let base=renderer.upload(&self.world.tiles[0],pixels);
             Ok((window,renderer,base))
         })();
         match result {
             Ok((window,renderer,base))=>{self.window=Some(window);self.renderer=Some(renderer);self.base=Some(base);}
-            Err(e)=>{record_error(&self.config.root,&e.to_string());event_loop.exit();}
+            Err(e)=>{self.fatal_error=Some(e.to_string());event_loop.exit();}
         }
     }
-    fn user_event(&mut self,_:&ActiveEventLoop,event:Completion) {
+    fn user_event(&mut self,event_loop:&ActiveEventLoop,event:HostEvent) {
+        let event=match event {
+            HostEvent::Map(event)=>event,
+            HostEvent::Terrain(event)=>{
+                if let Some(renderer)=&mut self.renderer {
+                    if self.trial.timing {
+                        if let Ok(tile)=&event.result {
+                            let terrain::Key(z,x,y)=event.key;
+                            self.trial.loads.push((format!("terrain/{z}/{x}/{y}"),ms(event.requested)));
+                            self.trial.terrain_decodes.push(tile.decode_time.as_secs_f64()*1000.);
+                        }
+                    }
+                    if let Err(error)=renderer.terrain_ready(event) {
+                        self.fatal_error=Some(error.to_string());event_loop.exit();return;
+                    }
+                    self.dirty=true;
+                }
+                return;
+            }
+        };
         self.reader.inflight=None;
-        if self.candidate.contains(&event.id) {
-            match event.result {
-                Ok(pixels)=>{
+        match event.result {
+            Ok(pixels)=>{
+                if self.candidate.contains(&event.id) {
                     let tile=&self.world.tiles[event.id];
                     let page=self.renderer.as_ref().unwrap().upload(tile,pixels);
                     let now=Instant::now();
                     self.cached.insert(event.id,Resident{page,ready:now,used:now});
                     if self.trial.timing {self.trial.loads.push((tile.path.clone(),ms(event.requested)));}
                 }
-                Err(e)=>{self.failed.insert(event.id);self.feedback=format!("Source tile unavailable: {e}");}
+            }
+            Err(e) if self.map_signature.is_some()=>{
+                self.fatal_error=Some(format!("正式地图无法读取 {} · {e}",self.world.tiles[event.id].path));
+                event_loop.exit();
+            }
+            Err(e)=>{
+                self.failed.insert(event.id);
+                self.feedback=format!("Source tile unavailable: {e}");
             }
         }
         self.dirty=true;
@@ -1271,18 +1515,26 @@ impl ApplicationHandler<Completion> for Host {
                 else{event_loop.exit();}
             }
             WindowEvent::Resized(s) if s.width>0&&s.height>0=>{
+                if self.in_lobby() && self.lobby_page == lobby::Page::Selection && self.camera.level == Level::World {
+                    let previous = lobby::SelectionLayout::globe_mpp(self.size);
+                    let resized = lobby::SelectionLayout::globe_mpp(s.into());
+                    self.camera.mpp *= resized / previous;
+                }
                 self.size=s.into();self.camera.constrain_region(self.size);
                 if let Some(r)=self.renderer.as_mut(){r.resize(self.size);}self.dirty=true;
             }
             WindowEvent::RedrawRequested if self.renderer.is_some()=>{
-                if let Err(e)=self.draw(){record_error(&self.config.root,&e.to_string());event_loop.exit();}
+                if let Err(e)=self.draw(){self.fatal_error=Some(e.to_string());event_loop.exit();}
             }
             WindowEvent::CursorMoved{position,..}=>{
                 let next:[f64;2]=position.into();self.cursor=next;
+                if self.country_directory.drag.is_some(){
+                    self.country_directory.slide(self.size,next[1]);self.dirty=true;return;
+                }
                 if self.hud.volume_drag {self.slide_volume();return;}
                 if self.hud.clock_drag.is_some(){self.hud.clock_drag=Some(formal_ui::clock_angle(next,self.size[0]));self.dirty=true;return;}
                 if let Some(mut d)=self.drag.take(){
-                    if (next[0]-d.origin[0]).hypot(next[1]-d.origin[1])>3. {d.moved=true;}
+                    if (next[0]-d.origin[0]).hypot(next[1]-d.origin[1])>3. {d.moved=true;self.country_click=None;}
                     if d.moved {
                         let now=Instant::now();let dt=now.duration_since(d.last).as_secs_f64().max(0.005);
                         if !d.bearing {
@@ -1297,6 +1549,9 @@ impl ApplicationHandler<Completion> for Host {
             WindowEvent::MouseInput{state,button,..} if matches!(button,MouseButton::Left|MouseButton::Right)=>{
                 if state==ElementState::Pressed {
                     self.focus=None;self.velocity=[0.;2];
+                    if button==MouseButton::Left&&self.in_lobby()&&self.lobby_page==lobby::Page::Selection
+                        &&!self.loading()&&self.country_directory.grab(self.size,self.cursor)
+                    {self.drag=None;self.dirty=true;return;}
                     if button==MouseButton::Left&&self.volume_slider().is_some_and(|[x,y,w,h]|{
                         self.cursor[0]>=x&&self.cursor[0]<=x+w&&self.cursor[1]>=y&&self.cursor[1]<=y+h
                     }) {self.hud.volume_drag=true;self.slide_volume();return;}
@@ -1308,6 +1563,8 @@ impl ApplicationHandler<Completion> for Host {
                     let clock_surface=formal_ui::clock_hit(self.cursor,self.size[0],self.state.session.as_ref(),self.hud.mechanical.angle);
                     self.drag=(!clock_surface&&!self.is_panel(self.cursor)).then(||Drag{
                         at:self.cursor,origin:self.cursor,last:Instant::now(),bearing:button==MouseButton::Right,moved:false});
+                } else if button==MouseButton::Left&&self.country_directory.drag.take().is_some() {
+                    self.dirty=true;
                 } else if button==MouseButton::Left&&self.hud.volume_drag {
                     self.slide_volume();self.hud.volume_drag=false;
                 } else if button==MouseButton::Left&&self.hud.clock_drag.is_some() {
@@ -1323,7 +1580,9 @@ impl ApplicationHandler<Completion> for Host {
                 } else if button==MouseButton::Left && !formal_ui::clock_hit(self.cursor,self.size[0],self.state.session.as_ref(),self.hud.mechanical.angle) {self.click(self.cursor);}
             }
             WindowEvent::MouseWheel{delta,..}=>{
+                self.country_click=None;
                 let steps=match delta {MouseScrollDelta::LineDelta(_,y)=>f64::from(y),MouseScrollDelta::PixelDelta(p)=>p.y/96.};
+                if self.scroll_countries(self.cursor,steps) {return;}
                 let [w,h]=self.size.map(|n|n as f32);
                 let [x,y,width,height]=formal_ui::message_rect([w,h],((h+16.)*0.5).max(190.));
                 if self.hud.messages && (f64::from(x)..=f64::from(x+width)).contains(&self.cursor[0]) && (f64::from(y)..=f64::from(y+height)).contains(&self.cursor[1]){
@@ -1333,8 +1592,10 @@ impl ApplicationHandler<Completion> for Host {
                     self.action(Action::Hud(HudCommand::MarketScroll(-(steps.signum() as i32)*3)));
                 }else if !self.is_panel(self.cursor) {self.zoom(self.cursor,steps);}
             }
+            WindowEvent::Ime(winit::event::Ime::Commit(text)) if self.country_directory.search_active=>self.type_country_search(&text),
             WindowEvent::KeyboardInput{event,..} if event.state==ElementState::Pressed && !event.repeat=>self.key(event.logical_key),
-            WindowEvent::Focused(false)=>{self.drag=None;self.hud.volume_drag=false;self.dirty|=self.hud.clock_drag.take().is_some();self.velocity=[0.;2];}
+            WindowEvent::Focused(false)=>{self.drag=None;self.country_click=None;self.hud.volume_drag=false;self.dirty|=self.hud.clock_drag.take().is_some();
+                self.dirty|=self.country_directory.drag.take().is_some();self.velocity=[0.;2];}
             _=>(),
         }
     }
@@ -1346,9 +1607,10 @@ impl ApplicationHandler<Completion> for Host {
             self.screenshot_status=None;self.dirty=true;
             if let Some(window)=&self.window{window.set_title("WWO | 1900 - Rust strategic host");}
         }
-        let fading=self.cached.values().any(|p|now.saturating_duration_since(p.ready)<Duration::from_millis(180));
+        let fading=self.renderer.as_ref().is_some_and(|renderer|renderer.terrain_fading(now))||self.cached.values().any(|p|now.saturating_duration_since(p.ready)<Duration::from_millis(180));
         let expiry=self.cached.values().any(|p|now.saturating_duration_since(p.used)>CACHE_TTL);
-        let animated=self.loading()||self.state.session.is_some()||self.in_lobby()&&self.lobby_page==lobby::Page::Selection
+        let animated=self.loading()||self.state.session.is_some()
+            ||self.in_lobby()&&self.lobby_page==lobby::Page::Selection
             || self.selected.is_some_and(|o|matches!(o,Object::Polity(_)));
         let transitioning=self.loading_fade.is_some_and(|t|t.elapsed()<Duration::from_millis(320));
         if let Some(window)=&self.window {
@@ -1356,7 +1618,8 @@ impl ApplicationHandler<Completion> for Host {
             if self.dirty||expiry||periodic||self.trial.timing||!self.trial.captures.is_empty()||self.screenshot.is_some(){window.request_redraw();}
         }
         let fast=self.focus.is_some()||self.animate||self.trial.timing||self.trial.movement.is_some()||self.velocity[0].hypot(self.velocity[1])>9.||fading;
-        event_loop.set_control_flow(ControlFlow::WaitUntil(now+Duration::from_millis(if fast||transitioning{16}else if animated{33}else{135})));
+        let frame=now+Duration::from_millis(if fast||transitioning{16}else if animated{33}else{135});
+        event_loop.set_control_flow(ControlFlow::WaitUntil(self.country_click.as_ref().map_or(frame,|click|frame.min(click.deadline))));
     }
 }
 
@@ -1379,11 +1642,15 @@ fn run() -> Result<(),Box<dyn std::error::Error>> {
     let args=Config::parse()?;
     let error_root=args.root.clone();
     std::panic::set_hook(Box::new(move |e|record_error(&error_root,&e.to_string())));
-    let events=EventLoop::<Completion>::with_user_event().build()?;
+    let events=EventLoop::<HostEvent>::with_user_event().build()?;
     let data=args.root.clone();
     let mut app=match Host::new(args,&events,started) {
         Ok(app)=>app,Err(e)=>{record_error(&data,&e.to_string());return Err(e.into());}
     };
     events.run_app(&mut app)?;
+    if let Some(error)=app.fatal_error {
+        record_error(&data,&error);
+        return Err(io::Error::other(error).into());
+    }
     Ok(())
 }

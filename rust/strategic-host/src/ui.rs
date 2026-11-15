@@ -1,7 +1,6 @@
-use crate::{camera::Camera,overlay::{Atlas,Mesh},world::{Place,Polity,World}};
+use crate::{camera::Camera,overlay::{Atlas,Mesh},world::{Place,World}};
 use std::cmp::Ordering;
 use std::collections::HashSet;
-use crate::politics::PoliticalVisuals;
 #[derive(Clone,Copy)]
 pub enum Ink { HudArtGlass, ClockGears, Solid, Text, Flag, HudArt, HudText, Instrument, MenuArt, Loading, HistoryLight }
 
@@ -19,8 +18,25 @@ impl Mode {
 #[derive(Clone,Copy,Debug,PartialEq,Eq)]
 pub enum Object {Place(usize),Polity(usize),Administration(usize)}
 #[derive(Clone,Copy)]
+pub enum CountryView {Summary,Record,Directory(usize),Region {page:usize,index:usize}}
+#[derive(Clone,Copy)]
+pub struct CountryPanel {pub polity:usize,pub view:CountryView}
+impl CountryPanel {
+    pub fn rect(self,[width,height]:[u32;2])->[f32;4] {
+        if matches!(self.view,CountryView::Summary) {return [12.,83.,300.,222.];}
+        let w=(width as f32-44.).min(550.);
+        let h:f32=match self.view {CountryView::Directory(_)=>392.,_=>311.};
+        [(width as f32-w)*0.5,103.,w,h.min(height as f32-115.)]
+    }
+    pub fn rows(self,size:[u32;2])->usize {
+        ((self.rect(size)[3]-116.)/29.).floor().max(1.) as usize
+    }
+}
+#[derive(Clone,Copy)]
+pub enum CountryAction {Close,Back,Record,Directory,Page(i32),Region(usize),Boundary(usize)}
+#[derive(Clone,Copy)]
 pub enum Action {
-    Mode(Mode),Home,Back,Search,Close,Details,Locate,Capital,Select(Object),AdminPage(i32),
+    Mode(Mode),Home,Back,Search,Close,Details,Locate,Select(Object),Country(CountryAction),
     Hud(crate::formal_ui::Command),
 }
 #[derive(Clone,Copy)]
@@ -34,7 +50,7 @@ pub struct Ui<'a> {
     pub selected:Option<Object>,
     pub admin:&'a str,
     pub details:bool,
-    pub admin_page:Option<usize>,
+    pub country:Option<CountryPanel>,
     pub search:Option<&'a str>,
     pub search_results:&'a [Object],
     pub econ_label:&'a str,
@@ -45,17 +61,14 @@ pub struct Ui<'a> {
 }
 
 pub fn active(date:&str,from:&str,to:&str)->bool {(from.is_empty() || date>=from) && (to.is_empty() || date<to)}
-pub fn name(world:&World,obj:Object)->&str {
-    match obj {Object::Place(i)=>&world.places[i].name,Object::Polity(i)=>&world.polities[i].name,Object::Administration(i)=>&world.admin[i].name}
-}
-pub fn labels<'a>(world:&'a World,ui:&Ui<'_>)->Vec<Label<'a>> {
+fn labels<'a>(world:&'a World,ui:&Ui<'a>)->Vec<Label<'a>> {
     let mut list=Vec::new();
     let threshold=ui.camera.mpp;
     if ui.mode==Mode::Political && World::active_politics(ui.date) && threshold>570. {
         for (i,p) in world.polities.iter().enumerate() {
             if p.rank>2 && threshold>6100. || !active(ui.date,&p.from_date,&p.to_date) {continue;}
             if let Some(xy)=ui.camera.project(p.coordinates,ui.size) {
-                list.push(Label{object:Object::Polity(i),xy:xy.map(|v|v as f32),name:&p.name,rank:p.rank+1});
+                list.push(Label{object:Object::Polity(i),xy:xy.map(|v|v as f32),name:ui.formal.skin.country_name(p),rank:p.rank+1});
             }
         }
     }
@@ -68,31 +81,32 @@ pub fn labels<'a>(world:&'a World,ui:&Ui<'_>)->Vec<Label<'a>> {
     list
 }
 fn measure(a:&Atlas,variant:usize,s:&str)->f32 {s.chars().map(|c|a.glyph(variant,c)[2]).sum()}
-fn title(m:&mut Mesh,a:&Atlas,variant:usize,value:&str,x:f32,y:f32) {m.text(a,variant,value,[x,y],LIGHT);}
 fn panel(m:&mut Mesh,x:f32,y:f32,w:f32,h:f32) {
     m.rect(x,y,w,h,PANEL);m.rect(x,y,w,1.,GOLD);m.rect(x,y+h-1.,w,1.,LINE);
 }
-fn button(m:&mut Mesh,t:&mut Mesh,a:&Atlas,hits:&mut Vec<Hit>,area:[f32;4],label:&str,action:Action,on:bool) {
-    let [x,y,w,h]=area;
-    m.rect(x,y,w,h,if on{[63,66,58,255]}else{[33,45,51,248]});
-    if on{m.rect(x,y+h-2.,w,2.,GOLD);}
-    let tx=x+(w-measure(a,0,label))*0.5;
-    t.text(a,0,label,[tx,y+3.],LIGHT);
-    hits.push(Hit{area,action});
-}
 fn intersects([x,y,w,h]:[f32;4],[a,b,c,d]:[f32;4])->bool{x<a+c && x+w>a && y<b+d && y+h>b}
+
+fn place_visible(mode:Mode,place:&Place)->bool {
+    let kind=place.symbol.as_str();
+    match mode {
+        Mode::Geographic=>true,
+        Mode::Political=>matches!(kind,"capital"|"admin_primary"|"city"|"town"|"settlement"|"village"),
+        Mode::Economic=>matches!(kind,"capital"|"city"|"town"|"settlement"|"station"|"port"),
+        Mode::Military=>matches!(kind,"capital"|"admin_primary"|"city"|"castle"|"fort"|"bridge"|"station"|"port"),
+    }
+}
 
 fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mut HashSet<usize>,
     art:&mut Mesh,text:&mut Mesh,map:&mut Mesh,hits:&mut Vec<Hit>)
 {
-    use crate::formal_ui::{Command, Menu, IVORY};
+    use crate::formal_ui::{Command, IVORY};
     let [w,h]=ui.size.map(|n|n as f32);
     let skin=ui.formal.skin;
     let regional=ui.camera.level!=crate::camera::Level::World;
-    let [mx,my]=ui.formal.cursor.map(|n|n as f32);
     let mut candidates=Vec::new();
     for (index,place) in world.places.iter().enumerate() {
-        if !place.display_symbol || !active(ui.date,&place.from_date,&place.to_date) {continue;}
+        if !ui.labels || !place.display_symbol || !place_visible(ui.mode,place)
+            || !active(ui.date,&place.from_date,&place.to_date) {continue;}
         let chosen=ui.selected==Some(Object::Place(index));
         let Some(spec)=skin.map_symbols.get(&place.symbol) else {continue;};
         let mut limit=if regional {spec.region_max_mpp} else {spec.world_max_mpp};
@@ -118,8 +132,6 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
         if !chosen&&occupied.iter().any(|&old|intersects([x-2.,y-2.,px+4.,px+4.],old)) {continue;}
         occupied.push([x-2.,y-2.,px+4.,px+4.]);
         let pick=[x-4.,y-4.,px+8.,px+8.];
-        let hover=ui.formal.hud.menu==Menu::None && place.selectable
-            && mx>=pick[0] && mx<pick[0]+pick[2] && my>=pick[1] && my<pick[1]+pick[3];
         let asset=format!("map_{kind}");
         skin.tinted_sprite(art,&asset,[x-1.25,y-1.25,px+2.5,px+2.5],[25,38,36,217]);
         let color=if place.selectable {[255;4]} else {[184,184,184,153]};
@@ -127,10 +139,9 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
         if chosen {map.line([x+px/2.-4.,y+px+2.],[x+px/2.+4.,y+px+2.],1.5,GOLD);}
         if place.selectable {hits.push(Hit{area:pick,action:Action::Select(Object::Place(i))});}
         previous.insert(i);
-        placed.push((place,[x+px+4.,y+px*0.5-7.],chosen,hover));
+        placed.push((place,[x+px+4.,y+px*0.5-7.],chosen));
     }
-    for (place,[x,y],chosen,hover) in placed {
-        if !ui.labels&&!place.reference&&!chosen&&!hover {continue;}
+    for (place,[x,y],chosen) in placed {
         let name=if skin.english()||place.name_zh.is_empty(){&place.name}else{&place.name_zh};
         let width=skin.width(name,0);
         let area=[x-2.,y-2.,width+4.,19.];
@@ -172,22 +183,31 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
     }
 }
 
-pub fn compose(world:&World,a:&Atlas,visuals:&PoliticalVisuals,ui:Ui<'_>,markers:&mut HashSet<usize>)->([(Mesh,Ink);11],Vec<Hit>) {
+pub type Layers = [(Mesh,Ink);13];
+
+pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(Layers,Vec<Hit>) {
     let [w,h]=ui.size.map(|x|x as f32);
-    let mut map=Mesh::default();let mut labels_mesh=Mesh::default();
+    let mut map=Mesh::default();let labels_mesh=Mesh::default();
     let mut panels=Mesh::default();let mut text=Mesh::default();let mut flags=Mesh::default();
     let mut hud_art=Mesh::default();let mut hud_type=Mesh::default();let mut instrument=Mesh::default();let mut clock=Mesh::default();
+    let mut marker_art=Mesh::default();
+    let mut marker_type=Mesh::default();
     let mut hits=Vec::new();
     if ui.formal.hud.menu.modal() {
         ui.formal.draw(&mut panels,&mut hud_art,&mut hud_type,&mut clock,&mut flags,&mut instrument,&mut hits);
         return ([(map,Ink::Solid),(labels_mesh,Ink::Text),(instrument,Ink::Instrument),(Mesh::default(),Ink::HistoryLight),
-            (panels,Ink::Solid),(text,Ink::Text),(flags,Ink::Flag),(ui.formal.clock_gears(),Ink::ClockGears),(hud_art,if ui.formal.hud.mechanical.hidden {Ink::HudArt}else{Ink::HudArtGlass}),(clock,Ink::Solid),(hud_type,Ink::HudText)],hits);
+            (marker_art,Ink::HudArt),(marker_type,Ink::HudText),(panels,Ink::Solid),(text,Ink::Text),(flags,Ink::Flag),(ui.formal.clock_gears(),Ink::ClockGears),(hud_art,if ui.formal.hud.mechanical.hidden {Ink::HudArt}else{Ink::HudArtGlass}),(clock,Ink::Solid),(hud_type,Ink::HudText)],hits);
     }
     let mut occupied=vec![[0.,0.,w,55.],[0.,h-51.,w,51.]];
-    if ui.selected.is_some(){occupied.push([12.,75.,308.,280.]);}
+    if matches!(ui.selected,Some(Object::Place(_)|Object::Administration(_))){occupied.push([17.,73.,300.,213.]);}
     if let Some(rect)=ui.formal.page_rect(){occupied.push(rect);}
-    if ui.details {occupied.push([w/2.-255.,104.,510.,if ui.admin_page.is_some(){395.}else{302.}]);}
-    if let Some(Object::Administration(i))=ui.selected.filter(|_|ui.mode==Mode::Political) {
+    if ui.details {occupied.push([w/2.-252.,105.,504.,294.]);}
+    if let Some(country)=ui.country {occupied.push(country.rect(ui.size));}
+    let region=ui.country.and_then(|country|match country.view {
+        CountryView::Region{index,..}=>ui.formal.skin.admin_record(world,&world.polities[country.polity],index).and_then(|record|record.boundary),
+        _=>None,
+    }).map(Object::Administration);
+    if let Some(Object::Administration(i))=region.or(ui.selected).filter(|_|ui.mode==Mode::Political) {
         for ring in &world.admin[i].outlines {
             let mut previous:Option<[f32;2]>=None;
             for &point in ring {
@@ -205,7 +225,7 @@ pub fn compose(world:&World,a:&Atlas,visuals:&PoliticalVisuals,ui:Ui<'_>,markers
         if occupied.len()>95 {break;}
         let [x,y]=label.xy;
         let variant=usize::from(label.rank==0 && ui.camera.mpp<10000.);
-        let length=measure(a,variant,label.name);
+        let length=ui.formal.skin.width(label.name,variant);
         let pad=-length*0.5;
         let area=[x+pad-4.,y-10.,length+10.,22.];
         if x<8. || x>w-8. || y<55. || y>h-51. || area[0]<4. || area[0]+area[2]>w-3.
@@ -214,88 +234,67 @@ pub fn compose(world:&World,a:&Atlas,visuals:&PoliticalVisuals,ui:Ui<'_>,markers
         let selected=Some(label.object)==ui.selected;
         let top=y-13.;
         for [dx,dy] in [[-1.,0.],[1.,0.],[0.,-1.],[0.,1.]] {
-            labels_mesh.text(a,variant,label.name,[x+pad+dx,top+dy],[16,28,30,230]);
+            ui.formal.skin.text(&mut marker_type,label.name,variant,[x+pad+dx,top+dy],length+1.,[16,28,30,230]);
         }
-        labels_mesh.text(a,variant,label.name,[x+pad,top],if selected{[255,222,138,255]}else{LIGHT});
+        ui.formal.skin.text(&mut marker_type,label.name,variant,[x+pad,top],length+1.,if selected{[255,222,138,255]}else{LIGHT});
+        hits.push(Hit{area,action:Action::Select(label.object)});
     }
-    place_symbols(world,&ui,&mut occupied,markers,&mut hud_art,&mut hud_type,&mut map,&mut hits);
-    if let Some(object)=ui.selected.filter(|o|ui.formal.hud.page==crate::formal_ui::Page::Map&&(!matches!(o,Object::Polity(_))||ui.admin_page.is_some())) {
+    place_symbols(world,&ui,&mut occupied,markers,&mut marker_art,&mut marker_type,&mut map,&mut hits);
+    let skin=ui.formal.skin;
+    if let Some(object)=ui.selected.filter(|o|ui.formal.hud.page==crate::formal_ui::Page::Map&&!matches!(o,Object::Polity(_))) {
         let x=17.;let y=73.;let width=300.;
         panel(&mut panels,x,y,width,213.);
         let (label,id,desc,extra)=match object {
-            Object::Polity(i)=>{
-                let p=&world.polities[i];
-                let flag=visuals.record(i);
-                if flag.active(ui.date) && !ui.details {flags.flag([x+211.,y+85.,71.,37.],flag.flag);}
-                ("Political entity",format!("state:{}",p.id),p.status.replace('_'," "),if p.capital.is_empty(){String::new()}else{format!("Capital   {}",p.capital)})
-            },
+            Object::Polity(_)=>unreachable!(),
             Object::Place(i)=>{
                 let p=&world.places[i];
-                ("Place",p.id.clone(),format!("{:.4} / {:.4}",p.coordinates[0],p.coordinates[1]),ui.admin.into())
+                (skin.choose("地点","Place"),p.id.clone(),format!("{:.4} / {:.4}",p.coordinates[0],p.coordinates[1]),ui.admin.into())
             },
             Object::Administration(i)=>{
                 let region=&world.admin[i];
-                ("Historical department",region.id.clone(),"France / 1900".into(),"Boundary reference / TRF-GIS".into())
+                (skin.choose("历史行政区","Historical department"),region.id.clone(),skin.choose("法国 · 1900 年","France · 1900").into(),"TRF-GIS".into())
             }
         };
-        text.text(a,0,label,[x+15.,y+9.],GOLD);
-        button(&mut panels,&mut text,a,&mut hits,[x+width-40.,y+9.,27.,25.],"x",Action::Close,false);
-        title(&mut text,a,1,name(world,object),x+15.,y+35.);
-        text.text(a,0,&id,[x+15.,y+67.],SUBTLE);
-        text.text(a,0,&desc,[x+15.,y+93.],LIGHT);
-        text.text(a,0,&extra,[x+15.,y+118.],LIGHT);
-
-        button(&mut panels,&mut text,a,&mut hits,[x+15.,y+174.,123.,28.],"Map focus",Action::Locate,false);
-        button(&mut panels,&mut text,a,&mut hits,[x+147.,y+174.,135.,28.],"Full record",Action::Details,false);
+        skin.text(&mut hud_type,label,0,[x+15.,y+9.],230.,GOLD);
+        ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+width-40.,y+9.,27.,25.],"×",Some(Action::Close),false);
+        skin.text(&mut hud_type,object_name(world,skin,object),1,[x+15.,y+35.],270.,LIGHT);
+        for (i,line) in [&id,&desc,&extra].into_iter().enumerate() {
+            skin.text(&mut hud_type,line,0,[x+15.,y+67.+i as f32*26.],270.,SUBTLE);
+        }
+        ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,y+174.,123.,28.],skin.choose("定位地点","Focus location"),Some(Action::Locate),false);
+        ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+147.,y+174.,135.,28.],skin.choose("完整资料","Full record"),Some(Action::Details),false);
     }
-    if ui.details && ui.admin_page.is_none() && !matches!(ui.selected,Some(Object::Polity(_))) {
+    if ui.details {
         if let Some(object)=ui.selected {
             let x=w/2.-252.;let y=105.;
             panel(&mut panels,x,y,504.,294.);
-            title(&mut text,a,2,name(world,object),x+22.,y+16.);
-            button(&mut panels,&mut text,a,&mut hits,[x+454.,y+15.,29.,27.],"x",Action::Details,false);
-            match object {
-                Object::Polity(i)=>{
-                    let flag=visuals.record(i);
-                    if flag.active(ui.date) {flags.flag([x+390.,y+69.,89.,46.],flag.flag);}
-                    polity_detail(world,&world.polities[i],x,y,a,&mut panels,&mut text,&mut hits);
-                    if world.polities[i].id=="country_fra" {
-                        button(&mut panels,&mut text,a,&mut hits,[x+255.,y+245.,224.,31.],"Historical departments",Action::AdminPage(0),false);
-                    }
+            skin.text(&mut hud_type,object_name(world,skin,object),1,[x+22.,y+16.],420.,LIGHT);
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+454.,y+15.,29.,27.],"×",Some(Action::Details),false);
+            let lines=match object {
+                Object::Polity(_)=>Vec::new(),
+                Object::Place(i)=>{
+                    let p=&world.places[i];
+                    vec![p.id.clone(),format!("{}  {:.6}",skin.choose("经度","Longitude"),p.coordinates[0]),
+                        format!("{}  {:.6}",skin.choose("纬度","Latitude"),p.coordinates[1]),
+                        format!("{}  {}",skin.choose("地图标注等级","Map label rank"),p.rank)]
                 }
-                Object::Place(i)=>place_detail(&world.places[i],x,y,a,&mut text),
                 Object::Administration(i)=>{
-                    title(&mut text,a,0,&world.admin[i].id,x+22.,y+75.);
-                    title(&mut text,a,0,"Historical geography   France, 1900 / TRF-GIS",x+22.,y+111.);
-                    button(&mut panels,&mut text,a,&mut hits,[x+22.,y+245.,225.,31.],"Show boundary on map",Action::Locate,false);
+                    vec![world.admin[i].id.clone(),skin.choose("法国 · 1900 年 · TRF-GIS","France · 1900 · TRF-GIS").into()]
                 }
+            };
+            for (i,line) in lines.iter().enumerate(){
+                skin.text(&mut hud_type,line,0,[x+22.,y+75.+i as f32*28.],460.,LIGHT);
             }
         }
-    }
-    if let Some(page)=ui.admin_page {
-        let x=w/2.-252.;let y=105.;
-        let rows:Vec<_>=world.admin.iter().enumerate().skip(page*8).take(8).collect();
-        panel(&mut panels,x,y,504.,393.);
-        title(&mut text,a,1,"French historical departments / 1900",x+18.,y+11.);
-        for (r,(index,record)) in rows.iter().enumerate() {
-            button(&mut panels,&mut text,a,&mut hits,[x+20.,y+52.+r as f32*32.,464.,27.],
-                &record.name,Action::Select(Object::Administration(*index)),false);
-        }
-        if page>0 {
-            button(&mut panels,&mut text,a,&mut hits,[x+20.,y+330.,110.,29.],"Previous",Action::AdminPage(-1),false);
-        }
-        if (page+1)*8<world.admin.len() {
-            button(&mut panels,&mut text,a,&mut hits,[x+137.,y+330.,110.,29.],"Next",Action::AdminPage(1),false);
-        }
-        button(&mut panels,&mut text,a,&mut hits,[x+371.,y+330.,110.,29.],"Back",Action::AdminPage(-2),false);
     }
     if let Some(query)=ui.search {
         let x=w/2.-226.;
         panel(&mut panels,x,61.,452.,78.+ui.search_results.len() as f32*30.);
-        title(&mut text,a,0,"Locate a place, polity, or longitude latitude",x+15.,70.);
-        title(&mut text,a,1,&format!("{query}_"),x+15.,94.);
+        skin.text(&mut hud_type,skin.choose("搜索地点、国家或经纬度","Search for a place, country, or coordinates"),0,[x+15.,70.],420.,LIGHT);
+        skin.text(&mut hud_type,&format!("{query}_"),1,[x+15.,94.],420.,LIGHT);
         for (i,&object) in ui.search_results.iter().enumerate() {
-            button(&mut panels,&mut text,a,&mut hits,[x+15.,132.+i as f32*30.,420.,27.],name(world,object),Action::Select(object),i==0);
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,132.+i as f32*30.,420.,27.],
+                object_name(world,skin,object),Some(Action::Select(object)),i==0);
         }
     }
     let mut debug_right=145.;
@@ -315,43 +314,28 @@ pub fn compose(world:&World,a:&Atlas,visuals:&PoliticalVisuals,ui:Ui<'_>,markers
     }
     if ui.formal.hud.page==crate::formal_ui::Page::Map {
         let y=h-45.;
-        for (i,(label,action)) in [("Locate",Action::Search),("Back",Action::Back),("Globe",Action::Home)].into_iter().enumerate(){
-            button(&mut panels,&mut text,a,&mut hits,[w-215.+i as f32*65.,y-35.,61.,25.],label,action,false);
+        let mut x=w-233.;
+        for (label,action,width) in [(skin.choose("搜索","Search"),Action::Search,74.),(skin.choose("返回","Back"),Action::Back,62.),(skin.choose("全球","Globe"),Action::Home,62.)]{
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x,y-35.,width,25.],label,Some(action),false);
+            x+=width+4.;
         }
-        text.text(a,0,ui.mouse,[w-215.,h-49.],SUBTLE);
+        skin.text(&mut hud_type,ui.mouse,0,[w-233.,h-49.],230.,SUBTLE);
     }
-    if !ui.formal.hud.messages && ui.admin_page.is_none() && ui.search.is_none() && !ui.details {
+    if !ui.formal.hud.messages && ui.country.is_none() && ui.search.is_none() && !ui.details {
         let left=match ui.selected{Some(Object::Polity(_))=>359.,Some(_)=>293.,None=>145.};
         ui.formal.diagnostics(&mut panels,&mut hud_type,left,debug_right);
     }
     let history_light=ui.formal.history_light();
-    if ui.admin_page.is_some(){
-        let mut formal=ui.formal;
-        formal.selected_polity=None;
-        formal.draw(&mut panels,&mut hud_art,&mut hud_type,&mut clock,&mut flags,&mut instrument,&mut hits);
-    }else{
     ui.formal.draw(&mut panels,&mut hud_art,&mut hud_type,&mut clock,&mut flags,&mut instrument,&mut hits);
-    }
     ([(map,Ink::Solid),(labels_mesh,Ink::Text),(instrument,Ink::Instrument),(history_light,Ink::HistoryLight),
+      (marker_art,Ink::HudArt),(marker_type,Ink::HudText),
       (panels,Ink::Solid),(text,Ink::Text),(flags,Ink::Flag),(ui.formal.clock_gears(),Ink::ClockGears),(hud_art,if ui.formal.hud.mechanical.hidden {Ink::HudArt}else{Ink::HudArtGlass}),(clock,Ink::Solid),(hud_type,Ink::HudText)],hits)
 }
 
-fn polity_detail(world:&World,p:&Polity,x:f32,y:f32,a:&Atlas,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>) {
-    let authority=world.polities.iter().find(|v|v.id==p.controller_id).map(|v|v.name.as_str()).unwrap_or("No linked controller");
-    let lines=[
-        format!("WWO runtime ID   state:{}",p.id),format!("Historical source ID   {}",p.id),
-        format!("Recorded validity   {}  to  {}",p.from_date,p.to_date),
-        format!("Status   {}",p.status.replace('_'," ")),format!("Authority reference   {authority}"),
-        "Boundary source   WWO / CShapes 2.0, 1900 snapshot".into(),
-    ];
-    for (i,value) in lines.iter().enumerate() {t.text(a,0,value,[x+23.,y+73.+i as f32*25.],LIGHT);}
-    if !p.capital.is_empty() {
-        button(m,t,a,hits,[x+22.,y+245.,225.,31.],&format!("Locate {}",p.capital),Action::Capital,false);
-    }
-}
-fn place_detail(p:&Place,x:f32,y:f32,a:&Atlas,t:&mut Mesh) {
-    for (i,s) in [p.id.clone(),format!("Longitude   {:.6}",p.coordinates[0]),format!("Latitude   {:.6}",p.coordinates[1]),
-        format!("Strategic rank   {}",p.rank),"Source   WWO place catalogue".into()].into_iter().enumerate() {
-        t.text(a,0,&s,[x+22.,y+75.+i as f32*28.],LIGHT);
+pub fn object_name<'a>(world:&'a World,skin:&'a crate::formal_ui::Skin,object:Object)->&'a str {
+    match object {
+        Object::Place(i)=>{let p=&world.places[i];if skin.english()||p.name_zh.is_empty(){&p.name}else{&p.name_zh}},
+        Object::Polity(i)=>skin.country_name(&world.polities[i]),
+        Object::Administration(i)=>skin.division_name(&world.admin[i]),
     }
 }

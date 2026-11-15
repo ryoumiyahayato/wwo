@@ -1,6 +1,6 @@
-use crate::{camera::{Camera,EARTH},compact::{Raster,Vertex},overlay::Mesh,politics::FlagUniform,ui::Ink,world::{Pixels,Tile}};
+use crate::{camera::{Camera,EARTH},compact::{Raster,Vertex},overlay::Mesh,politics::FlagUniform,terrain::{self,Terrain},ui::Ink,world::{Pixels,Tile}};
 use bytemuck::{Pod,Zeroable};
-use std::{io,path::Path,sync::Arc};
+use std::{io,path::Path,sync::Arc,time::Instant};
 use wgpu::util::DeviceExt;
 use winit::window::Window;
 
@@ -105,6 +105,7 @@ pub struct Renderer {
     flag_poses:wgpu::Texture,
     fallback:[wgpu::TextureView;3],
     globe:wgpu::RenderPipeline,
+    terrain:Option<Terrain>,
     solid:wgpu::RenderPipeline,
     text:wgpu::RenderPipeline,
     flag:wgpu::RenderPipeline,
@@ -121,7 +122,7 @@ pub struct Renderer {
     instrument_view:wgpu::BindGroup,
     screen:wgpu::BindGroup,
     screen_size:wgpu::Buffer,
-    meshes:[MeshBuffers;22],
+    meshes:[MeshBuffers;26],
 }
 
 fn layout(device:&wgpu::Device,entries:&[wgpu::BindGroupLayoutEntry])->wgpu::BindGroupLayout {
@@ -176,8 +177,16 @@ fn write_texture_mip(queue:&wgpu::Queue,tex:&wgpu::Texture,[w,h,layers]:[u32;3],
         bytes,wgpu::TexelCopyBufferLayout {offset:0,bytes_per_row:Some(w*channels),rows_per_image:Some(h)},extent([w,h,layers]));
 }
 
+pub(crate) fn write_texture_layer(queue:&wgpu::Queue,texture:&wgpu::Texture,level:u32,layer:u32,
+                                  size:u32,bytes:&[u8]) {
+    queue.write_texture(wgpu::TexelCopyTextureInfo {
+        texture,mip_level:level,origin:wgpu::Origin3d{x:0,y:0,z:layer},aspect:wgpu::TextureAspect::All,
+    },bytes,wgpu::TexelCopyBufferLayout{offset:0,bytes_per_row:Some(size*4),rows_per_image:None},
+    extent([size,size,1]));
+}
+
 impl Renderer {
-    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8])->Result<Self,String> {
+    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>)->Result<Self,String> {
         let size=window.inner_size();
         let instance=wgpu::Instance::new(&wgpu::InstanceDescriptor {backends:wgpu::Backends::VULKAN,..Default::default()});
         let surface=instance.create_surface(window).map_err(|e|e.to_string())?;
@@ -185,8 +194,10 @@ impl Renderer {
             power_preference:wgpu::PowerPreference::HighPerformance,compatible_surface:Some(&surface),force_fallback_adapter:false
         }).await.ok_or("A Vulkan adapter with window presentation is required")?;
         let info=adapter.get_info();
+        let features=if natural.is_some() {wgpu::Features::TEXTURE_COMPRESSION_BC}else{wgpu::Features::empty()};
+        if !adapter.features().contains(features) {return Err("自然地貌需要支持 BC7 纹理的 Vulkan 显卡。".into());}
         let (device,queue)=adapter.request_device(&wgpu::DeviceDescriptor {
-            label:Some("WWO strategic map host"),required_features:wgpu::Features::empty(),
+            label:Some("WWO strategic map host"),required_features:features,
             required_limits:wgpu::Limits {max_texture_dimension_2d:4096,..wgpu::Limits::downlevel_defaults()},
             memory_hints:wgpu::MemoryHints::MemoryUsage
         },None).await.map_err(|e|e.to_string())?;
@@ -202,7 +213,10 @@ impl Renderer {
         let fragment=wgpu::ShaderStages::FRAGMENT;
         let glob=layout(&device,&[uniform(0,fragment),sampler_entry(1),sampler_entry(2),sampled(3),
             texture_entry(4,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),sampled(5),
-            texture_entry(6,wgpu::TextureSampleType::Float{filterable:false},wgpu::TextureViewDimension::D2),sampled(7),sampled(8),sampled(9)]);
+            texture_entry(6,wgpu::TextureSampleType::Float{filterable:false},wgpu::TextureViewDimension::D2),sampled(7),sampled(8),sampled(9),
+            texture_entry(10,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
+            texture_entry(11,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
+            texture_entry(12,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2)]);
         let pages=layout(&device,&[uniform(0,fragment),sampled(1),sampled(2),sampled(3),
             texture_entry(4,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2)]);
         let screen_layout=layout(&device,&[uniform(0,wgpu::ShaderStages::VERTEX_FRAGMENT)]);
@@ -213,7 +227,8 @@ impl Renderer {
             mipmap_filter:wgpu::FilterMode::Linear,..Default::default()
         });
         let wrap=device.create_sampler(&wgpu::SamplerDescriptor {
-            address_mode_u:wgpu::AddressMode::Repeat,mag_filter:wgpu::FilterMode::Linear,min_filter:wgpu::FilterMode::Linear,..Default::default()
+            address_mode_u:wgpu::AddressMode::Repeat,mag_filter:wgpu::FilterMode::Linear,min_filter:wgpu::FilterMode::Linear,
+            mipmap_filter:wgpu::FilterMode::Linear,..Default::default()
         });
         let view=buffer(&device,std::mem::size_of::<View>());
         let instrument_view=bind(&device,&instrument_layout,&[buf_resource(0,&view)]);
@@ -236,9 +251,19 @@ impl Renderer {
             write_texture(&queue,&texture,[w,h,1],4,&image.pixels);
             texture.create_view(&Default::default())
         });
+        let terrain=natural.map(|(catalogue,proxy)|Terrain::new(&device,&queue,catalogue,proxy))
+            .transpose().map_err(|error|error.to_string())?;
+        let [terrain_world,terrain_detail,terrain_index]=if let Some(terrain)=&terrain {
+            terrain.views()
+        }else{
+            let empty=||create_texture(&device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm)
+                .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()});
+            [empty(),empty(),create_texture(&device,[1,1,1],wgpu::TextureFormat::R32Uint).create_view(&Default::default())]
+        };
         let globals=bind(&device,&glob,&[buf_resource(0,&view),sampler_resource(1,&linear),sampler_resource(2,&wrap),
             tex_resource(3,&palette_view),tex_resource(4,&scenario),tex_resource(5,&flags),tex_resource(6,&flag_pose_view),
-            tex_resource(7,&galactic_chart),tex_resource(8,&ocean_detail),tex_resource(9,&ocean_ice)]);
+            tex_resource(7,&galactic_chart),tex_resource(8,&ocean_detail),tex_resource(9,&ocean_ice),
+            tex_resource(10,&terrain_world),tex_resource(11,&terrain_detail),tex_resource(12,&terrain_index)]);
         let flag_art=bind(&device,&font_layout,&[tex_resource(0,&flags),sampler_resource(1,&linear)]);
         let [w,h]=atlas.size;
         let font=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
@@ -281,8 +306,31 @@ impl Renderer {
         let instrument=pipeline(&[&screen_layout,&font_layout,&instrument_layout],&hud_shader,"screen_vertex","instrument",&mesh_layout);
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
         Ok(Self{surface,config,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
-                globe,solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes})
+                globe,terrain,solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes})
     }
+    pub fn update_terrain(&mut self,camera:&Camera,size:[u32;2],now:Instant) {
+        if let Some(terrain)=&mut self.terrain {terrain.update(&self.queue,camera,size,now);}
+    }
+
+    pub fn terrain_ready(&mut self,completion:terrain::Completion)->io::Result<()> {
+        if let Some(terrain)=&mut self.terrain {terrain.complete(&self.queue,completion)?;}
+        Ok(())
+    }
+
+    pub fn terrain_max_level(&self)->u32 {self.terrain.as_ref().map_or(0,Terrain::max_level)}
+
+    pub fn terrain_view_level(&self)->u32 {self.terrain.as_ref().map_or(0,Terrain::view_max)}
+
+    pub fn packed_terrain(&self)->bool {self.terrain.as_ref().is_some_and(Terrain::packed)}
+
+    pub fn terrain_status(&self) -> Option<serde_json::Value> {
+        self.terrain.as_ref().map(Terrain::status)
+    }
+
+    pub fn terrain_fading(&self,now:Instant)->bool {
+        self.terrain.as_ref().is_some_and(|terrain|terrain.fading(now))
+    }
+
     pub fn resize(&mut self,[w,h]:[u32;2]) {
         self.config.width=w;self.config.height=h;
         self.surface.configure(&self.device,&self.config);
@@ -322,7 +370,7 @@ impl Renderer {
         Page {group,uniform,ids:pixels.ids,water,bytes}
     }
     pub fn render(&mut self, view:&View,base:&Page,pages:&[(&Page,&Tile,[u32;4],f32)],
-                  meshes:&[(Mesh,Ink);11],fade:Option<&[(Mesh,Ink);11]>,seconds:f32,show_map:bool,capture:Option<&Path>)->io::Result<Option<io::Result<()>>> {
+                  meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>)->io::Result<Option<io::Result<()>>> {
         let frame=match self.surface.get_current_texture() {
             Ok(frame)=>frame,
             Err(wgpu::SurfaceError::Outdated|wgpu::SurfaceError::Lost)=>{

@@ -1,49 +1,25 @@
-# WWO · GitHub main 开发入口
+# WWO
 
-当前主工仍为 **R57代21 CANDIDATE，accepted=false，1,759,546,768字节**；R56为 **ROLLBACK，1,834,465,568字节**。唯一正式开发基线和默认分支为 **`main`**。本轮治理不生成EXE，不改变候选登记，不自动promote。
+`main` 是唯一正式开发线。当前 Windows 游戏由 WWO 的 [Rust 宿主](rust/strategic-host/README.md) 运行。入口是 [`rust/strategic-host/src/main.rs`](rust/strategic-host/src/main.rs)，原生会话和持久化在同一宿主内。winit 提供窗口和输入事件，wgpu 提供图形接口。人物规则复用 [character-core](rust/character-core/README.md)。
 
-## Rust 人物系统
+当前版本可进入 1900 年正式世界，操作地理、政治、经济和军事地图，推进同一套世界时钟，交易和结算工资，并保存及恢复原生档案。[运行核实与模块归属](docs/RUST_HOST_RUNTIME_REVIEW.md) 记录了隔离 Windows 实跑的范围、第三方库、原 Godot/R68 对照入口和待迁移功能。
 
-[rust/character-core](rust/character-core/README.md) 是面向 Rust 迁移的独立人物规则库，包含隐藏能力、经历、健康寿命、社会机会条件评估和版本化存档。可运行示例及宿主接口见模块说明；尚未接入正式游戏主循环、UI 或经济执行，不改变下面所述的现有 Godot 入口。
+Godot 4.6.3 工程及 R68 继续用于旧版对照、资产复用和迁移验证。旧工程入口见 [project.godot](project.godot)。经济和军事沙盒各自保留测试入口，接入正式游戏时共用 Rust 世界、人物和时间。[全球地貌验收规程](rust/strategic-host/README.md#全球地图验收) 适用于每次全球地图验收。
 
-## 在线开发
+## 构建与恢复
 
-一个新任务从最新 `main` 建立一个短期分支，提交一个面向 `main` 的PR。必要自动验证成功并完成审查后才合并；完成后退出短期分支，不建立永久主线副本。不要用 `[skip ci]` 跳过需要的检查。
+Windows x64 使用 Rust MSVC 工具链、MSVC C++ Build Tools 和 Windows SDK。在仓库根目录运行：
 
-普通PR运行 [Main validation](.github/workflows/main-validation.yml)：源码差异格式、修改过的Python/JSON语法与Actions配置检查；Godot 4.6.3无界面导入，以及既有个人账务、巴黎双雇主、有限原料交易局部回归。检查无路径过滤，便于设置稳定必需状态 `Source checks` 和 `Formal economy and person`。原料交易使用仓库归档的第30日检查点副本，保存写入隔离目录；不下载全量地貌BIN、不导出候选包。检查失败、资料缺失或超时均不是通过。
+```powershell
+cargo build --release --locked --manifest-path rust/strategic-host/Cargo.toml --bin wwo-map-lab
+```
 
-原有长跑、完整领域、研究流程保留为手动检查。Windows安装包只接受明确的手动构建确认，发布草稿另有默认关闭的输入；普通PR或合并不创建Release、不覆盖历史附件。正式发布与代码合并分离，仍须资源恢复和真实游戏验收。线上检查不能替代实际游戏验收，R57仍为CANDIDATE，R56继续保留。
+运行时需同阶段的 `data/`，也可传 `--play --data <目录>`。私有 [Rust Windows 阶段资源包](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115) 保存已经实跑的 EXE、共同运行数据和独立的压缩 Z7 资源。按附件说明恢复到空目录。Z7 资源为候选，使用随包 `Play-WWO-WorldCRS84Quad-Compact.cmd`。历史 Godot 资源另见 [R57 归档与恢复清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json) 及 [恢复工具](tools/archive/restore_main_resources.py)。
 
-军事、经济及独立研究线保持隔离。不能从分支名称推断已合入，不能将研究策略直接接入主WWO；独立PR分别审查，不自动合并或删除。历史候选使用固定归档提交、[构建登记](docs/archive/main-wwo-r57-g21-20261024/build-identity/preview_registry.json)和私有附件管理。
+## 阶段提交
 
-本轮核对、权限阻塞、旧PR处理及旧分支退出条件见 [主线治理记录](docs/maintenance/MAIN_GOVERNANCE_2026-10-25.md)。下一项主体任务只准备独立PR范围：[巴黎两家企业的自主经营约束](docs/maintenance/PARIS_AUTONOMOUS_ENTERPRISE_SCOPE_2026-10-25.md)。
+1. 每完成一个可验证阶段，先本地运行相关检查，再提交源码、配置、测试和报告。使用短期分支和 PR，按 [Main validation](.github/workflows/main-validation.yml) 完成检查后合入 `main`。
+2. 大型运行资源、必要原件及发布包使用私有附件。记录版本、来源、对应提交和存储服务提供的完整性信息。玩家存档、凭据、私人资料及可重建缓存不得进入 Git 或附件。
+3. 从远端重新读取 `main`、代码、构建文件、报告和对应附件。在独立目录回下载和验证本阶段所需的恢复范围。报告提交 ID、附件、实际恢复结果和仅在本机的内容。云端同步和已要求的恢复检查完成后才标记完整交付。
 
-## 已保存内容
-
-主工当前源码、场景、Opening配置、UID、脚本、工具和说明在仓库实际路径。入口是 [project.godot](project.godot) → [正式菜单](scenes/formal/formal_world_menu.tscn)。引擎为Godot 4.6.3 Compatibility。
-
-地貌运行BIN、R57现存制作输入、运行证据、隔离测试存档及来源材料在私有草稿附件。本次用户在得知LOCAL_ONLY清单后要求补传剩余原件；R57/R56 EXE、builds/windows历史发行、当前.godot冻结缓存、GIS Python库、模型/BLEND/图像和现存原始数据组件均已补存并逐包实际回下载。没有把大文件提交普通Git，没有发布正式Release。部分原件作者或再分发许可仍未明确，原说明保留；私人备份不将其改为可公开发布素材。
-
-[统一清单](docs/archive/main-wwo-r57-g21-20261024/inventory.json)保存原路径、字节、附件对象ID、提供方返回的完整性元数据、分段偏移、回读状态和本地处置。相同文件逐字节确认后只存一份主体，`file_aliases`记录不同恢复位置。此前README中的“模型/二进制/缓存未上传”状态已由本次补存更新，原始历史报告不改写。
-
-## 恢复与边界
-
-先clone仓库的 `main`；恢复历史代21时检出固定归档提交 [`2be78dee796cda0e70478f6b4435ac9505a5a936`](https://github.com/ryoumiyahayato/wwo/commit/2be78dee796cda0e70478f6b4435ac9505a5a936)，不要依赖待退出的旧主线分支名。再用[恢复工具](tools/archive/restore_main_resources.py)读取统一清单，恢复到唯一的新目录。完整恢复需要 `--scope all`；只恢复运行依赖可用 `--scope runtime`。工具通过现有gh认证取得私有附件；不依赖原D盘资源链接，不覆盖已有文件。`--only-path`可选精确文件。检查点与真实玩家五槽分开，恢复测试用户目录不会自动写回AppData。
-
-当前源码是接续快照；构建输入23,048项曾与代21登记的大小、mtime相符，没有构建时源码提交可证明EXE逐字节对应。驱动和报告有构建后的变化，未重导出。
-
-已有能力与限制：普通人物生活、有限NPC自主生活、岗位流转、多雇主及30日连续运行/日24真实冷恢复已有记录。代21只证明玩家参与条件下有限原料交易，不证明持续自主补货。巴黎性能P1、菜单超时及其他未定位问题保留。见[代21报告](docs/map/R57_ORDINARY_MATERIAL_TRADE_2026-10-24.md)、[运行证据](docs/archive/main-wwo-r57-g21-20261024/evidence/)与[地图剩余问题](docs/map/R57_MAP_INTERACTION_CLOSEOUT_2026-10-22.md)。
-
-本轮是现存文件的私人归档。已有输入不等于所有历史全球GIS/DEM来源齐全；原本缺失的输入未凭空补齐。外部Godot/Blender/Python安装和其他工作线不包含在主工文件包中。文件层回读与样本恢复不等于重新通过无缓存引擎导入、完整重建或游戏冷恢复；本轮没有运行这些验证。
-
-## 本地处置
-
-前轮已删除77个目录和45个独立文件，详情仍见清单resource_supplement.cleanup。本轮剩余原件上传后没有自动删除。按用户要求提供[PowerShell清理指令](tools/archive/cleanup_uploaded_remaining.ps1)：先预览，明确传入已核实提交和-Execute才删除。默认只处理remaining_originals_backup.manual_cleanup_files；额外传入-IncludeMainSource时加入同一清单的main_worktree_cleanup_files，包含已核对的主工源码和运行资源。归档后变化、链接或运行占用会停止操作，不改属性、不强制删除、不改回收站重试。
-
-经济45项和主工此前被拒绝165份仍排除；共享/混合服务目录、真实玩家存档、凭据及其他工作线不进入这份清理指令。不能据此清空整个D:/programs/WWO。经济第23代另见[经济归档](https://github.com/ryoumiyahayato/wwo-economy-lab/releases/tag/economy-gen23-closeout-20261024)，军事另见[军事归档](https://github.com/ryoumiyahayato/wwo/tree/archive/military-full-20261024)。后续由用户直接安排，不启动新开发或旧协调。
-
-私有附件：https://github.com/ryoumiyahayato/wwo/releases/tag/untagged-efeded1f78503dcbe026
-
-本次补存：92包，3370832726字节有效包体；实际网络总流量未计量。
-
-本次另从固定提交下载恢复工具和清单，实际恢复一份模型、一个空文件别名及其主体，并核对复用已存在的相同Git导入配置；内容与原件一致。工具不读取旧源目录。未启动引擎。
+代码合并、资源归档和正式候选提升分别记录。长期开发规则见 [AGENTS.md](AGENTS.md)。

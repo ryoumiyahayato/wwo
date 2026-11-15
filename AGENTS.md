@@ -32,6 +32,9 @@
 ## GitHub 开发基线
 
 - 唯一正式开发基线为 `main`；一个任务一个短期分支或PR，经必要检查和审查后进入main。
+- 每完成一个可运行、可验证的阶段，先做本地局部验证，再提交并推送源码、配置、测试及报告。有 PR 时等必要检查通过后合入 `main`，及时退出短期分支。
+- 大型地图、模型、必要原件、重要证据及预留发布包使用私有资源包或 Release 附件，登记版本、来源、对应提交及完整性信息。排除真实玩家存档、凭据、私人资料、可重建缓存及重复副本。
+- 合入后实际核对远端 `main`、构建输入、开发报告和附件。从远端下载到独立目录复核阶段恢复，报告提交 ID、资源状态、已验证范围和仅在本机的文件。完成同步和恢复验证前，成果保持未完整交付。
 - 普通PR使用 `Main validation` 的轻量检查和有界正式领域回归；旧完整流程保持手动。资料缺失、跳过或未运行不可写为通过。
 - Windows构建与Release独立手动授权；不因普通PR导出，不自动promote。历史候选按固定提交与私有附件恢复。
 - 军事、经济及独立研究保持隔离，不自动合并、删除或移植策略。不建立永久主线副本。
@@ -50,9 +53,9 @@
 
 ## 项目与当前入口
 
-项目为 `D:/programs/WWO/wwo`，使用 Godot 4.6.3 标准版和 Compatibility。正式入口为 `scenes/formal/formal_world_menu.tscn` → `scenes/formal/formal_world_main.tscn`。
+当前 Windows 正式入口是 [`rust/strategic-host`](rust/strategic-host/README.md) 的 `wwo-map-lab --play`。启动、世界模拟、地图和原生存档的模块归属见 [Rust 宿主运行核实](docs/RUST_HOST_RUNTIME_REVIEW.md)。全球地图验收按 [七大洲抽样规程](rust/strategic-host/README.md#全球地图验收) 执行。
 
-`FormalWorldApplication` 连接场景、WorldBootstrap、WorldState、SimulationStep、FormalPersistence、HistoricalLoader、FormalWorldPresenter、MainShell 和 GlobeRenderer。当前说明为 `docs/ARCHITECTURE.md` 与 `docs/UI_INFORMATION_ARCHITECTURE.md`。不恢复旧 FormalWorldSimulation、EconomyService、组件注册表、启动版本互锁或核验入口。
+旧 Godot 4.6.3 项目保留作 R68 对照、迁移来源和局部回归，其入口为 `scenes/formal/formal_world_menu.tscn` → `scenes/formal/formal_world_main.tscn`。`FormalWorldApplication` 的旧版说明见 `docs/ARCHITECTURE.md` 与 `docs/UI_INFORMATION_ARCHITECTURE.md`。不恢复旧 FormalWorldSimulation、EconomyService、组件注册表、启动版本互锁或核验入口。
 
 ## 实现约束
 
