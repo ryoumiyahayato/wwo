@@ -11,6 +11,7 @@ use crate::{
     formal_work::{Job, WorkOpening, WorkState},
 };
 pub use crate::formal_stock::ConsumptionAllocation;
+pub use crate::formal_wages::CompletedFirmWork;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 use std::{
@@ -185,6 +186,13 @@ impl InitialWorld {
     pub fn employment(&self) -> Option<(&Job, bool, &str)> {
         let job = self.work.contract(&self.work_opening, &self.player)?;
         Some((job, self.work.booking(&self.player).is_some(), self.work_opening.organization(&job.employer)?))
+    }
+
+    pub fn completed_firm_work(&self, firm: &str, day: i64) -> io::Result<Vec<CompletedFirmWork<'_>>> {
+        if self.work_opening.organization(firm).is_none() || !(1..=self.clock.current_day()).contains(&day) {
+            return Err(invalid("completed company work requires a known firm and completed day"));
+        }
+        Ok(self.wages.completed_firm_work(firm, day))
     }
 
     pub fn apply_for_work(&mut self, job: &str) -> io::Result<()> {
@@ -1030,6 +1038,29 @@ mod tests {
         assert!(world.character().history.is_empty());
         assert_eq!(world.consume_statistical_stock(qing, good, 1000).unwrap().allocations[0].quantity_milli, 1000);
         assert_eq!(world.person_holding_milli(qing, good), 0);
+    }
+
+    #[test]
+    fn firm_work_cost_comes_from_completed_shifts_before_and_after_payment() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("country_fra").unwrap();
+        let firm = "firm:opening_paris_bakery";
+        let workshop = "firm:opening_paris_workshop";
+        let managed = BTreeMap::new();
+        assert!(world.completed_firm_work(firm, 1).is_err());
+        world.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+        let work = world.completed_firm_work(firm, 1).unwrap();
+        assert_eq!(work.len(), 1);
+        assert_eq!((work[0].hours, work[0].accrued_wages, work[0].paid_wages, work[0].unpaid_wages), (2, 8, 0, 8));
+        assert!(world.completed_firm_work(workshop, 1).unwrap().is_empty());
+        assert!(world.completed_firm_work("firm:unknown", 1).is_err());
+        let restored = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+        assert_eq!(restored.completed_firm_work(firm, 1).unwrap(), work);
+        let work_id = work[0].work_id.to_owned();
+        world.advance_migrated_domains(2 * MINUTES_PER_DAY, &managed).unwrap();
+        let paid = world.completed_firm_work(firm, 1).unwrap();
+        assert_eq!(paid[0].work_id, work_id);
+        assert_eq!((paid[0].accrued_wages, paid[0].paid_wages, paid[0].unpaid_wages), (8, 8, 0));
     }
 
     #[test]
