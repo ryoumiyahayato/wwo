@@ -535,8 +535,8 @@ impl Renderer {
         self.terrain.as_ref().map(|terrain|terrain.frame_samples(camera,size))
     }
 
-    pub fn terrain_fading(&self,now:Instant)->bool {
-        self.terrain.as_ref().is_some_and(|terrain|terrain.fading(now))
+    pub fn terrain_fading(&self)->bool {
+        self.terrain.as_ref().is_some_and(Terrain::fading)
     }
 
     pub fn resize(&mut self,[w,h]:[u32;2]) {
