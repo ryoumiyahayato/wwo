@@ -523,7 +523,7 @@ impl Renderer {
     pub fn terrain_max_level(&self)->u32 {self.terrain.as_ref().map_or(0,Terrain::max_level)}
 
     pub fn terrain_view_level(&self)->u32 {self.terrain.as_ref().map_or(0,Terrain::view_max)}
-    pub fn terrain_finest_mix(&self)->f32 {self.terrain.as_ref().map_or(0.,Terrain::finest_mix)}
+    pub fn terrain_viewport_mix(&self)->[f32;2] {self.terrain.as_ref().map_or([0.;2],Terrain::viewport_mix)}
 
     pub fn terrain_exact(&self)->bool {self.terrain.as_ref().is_some_and(Terrain::exact)}
 

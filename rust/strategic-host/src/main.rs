@@ -1228,7 +1228,7 @@ impl Host {
         }).chain(hits).collect();
         renderer.update_terrain(&self.camera,self.size,now);
         view.map_style[2]=renderer.terrain_view_level() as f32;
-        view.natural_lod[0]=renderer.terrain_finest_mix();
+        view.natural_lod[..2].copy_from_slice(&renderer.terrain_viewport_mix());
         view.set_terrain_exact(renderer.terrain_exact());
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);
