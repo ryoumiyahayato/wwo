@@ -1,5 +1,54 @@
 # Z7 全球逐页视觉验收
 
+## 欧洲首批原图
+
+**东阿尔卑斯山脊和山麓** · `7/138/30` · 14.765625°E／47.109375°N · 515 米／像素
+
+![东阿尔卑斯固定 Z7 区域原图](terrain-z7-visual/europe-eastern-alps-z7-138-30.png)
+
+**维斯瓦河与中欧平原** · `7/142/26` · 20.390625°E／52.734375°N · 500 米／像素
+
+![维斯瓦河固定 Z7 区域原图](terrain-z7-visual/europe-vistula-z7-142-26.png)
+
+**库尔斯沙嘴及潟湖** · `7/142/24` · 陆地补镜 20.874440°E／55.214423°N · 490 米／像素
+
+![库尔斯沙嘴固定 Z7 陆地补镜原图](terrain-z7-visual/europe-curonian-z7-142-24.png)
+
+三张均为 1280×720 Rust/wgpu Vulkan 离屏原图。所选层已就绪，目标页实绘 Z7，权重 1。库尔斯沙嘴页的几何中心在海上，两档各加一张页内陆地补镜。陆地、沙嘴与潟湖同时可见。 [库尔斯沙嘴地理说明](https://whc.unesco.org/en/list/994)
+
+### 审查与待核
+
+首批范围为 `X=136…143, Y=24…31`，11.25–22.5°E、45–56.25°N。原图逐张查看，共 62 页、258 图，其中 39 页为纯陆地、23 页含海岸或内陆水体。5 页添加两档陆地补镜。PASS 56，FAIL 0，SOURCE_UNCERTAIN 6。本批的两张纯海页 `7/140/24`、`7/141/24` 留到海洋批次。已审页的山脊、平原、河谷和湖岸未见确认的页边硬缝。
+
+| 瓦片 | 实拍现象和证据 |
+| --- | --- |
+| `7/141/25` | 维斯瓦河近岸有短断线，约 18.9361°E／54.3180°N。波兰水务资料记载该出海渠道于 1891–1895 年开挖。仍需逐像元区分河线终点、海岸遮罩和栅格采样。 [原图](terrain-z7-visual/europe-vistula-mouth-z7-141-25.png) · [维斯瓦河流域资料](https://apgw.gov.pl/static/cms/doc/soos/Wisla/SOOS_Prognoza_IIaPGW_Wis%C2%88a.pdf) |
+| `7/141/28` | 18.8737°E／49.9331°N 的蓝色水体落在本项目 Natural Earth 湖泊多边形内，与上维斯瓦河 Goczałkowice 水库位置相符。水库于 1956 年启用。1900 年旧河道与滩地仍待考证。 [卡托维兹国家档案馆](https://katowice.ap.gov.pl/ap/tekst/u-rode-wisy-jezioro-goczakowickie) |
+| `7/139/29` | 新锡德尔湖在 16.7330°E／47.8608°N 呈灰绿。当地资料记录开阔水面浑浊、芦苇带内水色不同。当前色值和生成来源待核。 [布尔根兰州湿地资料](https://www.burgenland.at/fileadmin/user_upload/Bilder/Umwelt/20200520_Burgenlaendische-Feuchtgebiete-und-ihre-Bedeutung-im-Naturschutz.pdf) |
+| `7/136/30`、`7/137/30` | 12.3095–12.8171°E、约 47.28–47.30°N 可见浅色窄纹，重叠近景中复现，穿过共享页边。河谷沉积、土地覆盖和着色贡献待定位。 [萨尔茨堡州地形资料](https://www.salzburg.gv.at/themen/wasser/see/zellersee3d) |
+| `7/142/30` | 蒂萨河附近约 20.64°E／47.57°N 有较宽蓝色段，点位未落入项目 Natural Earth 湖泊多边形。当地现代水库于 1978 年形成，当前河线是否另受现代数据影响仍待核。 [匈牙利中蒂萨区水务局](https://www.kotivizig.hu/kozep-tisza-videki/tisza-to/a-tisza-to-vizrendszere) |
+
+### 连续缩放
+
+东阿尔卑斯四页交汇，14.0625°E／47.8125°N。两条路径使用同一候选和 256 页图集。复核切换帧未见可见的逐页矩形淡入及缺页黑块。
+
+| 路径 | 连续 GPU 帧 | 画面和状态 |
+| --- | ---: | --- |
+| 快速拉远 530→970 米／像素、两次反向 | 64 | 实绘 Z7／Z6。第 12 帧拉远和改变取景后，Z7 权重从 0.85 降到第 18 帧的 0，山脊细节随整屏权重变淡。Z7 可见需求峰值 126 页，细节页请求峰值 269，常驻峰值 256。离屏捕获间隔 p50／p95 为 44.25／53.54 ms。 [录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-europe-east-alps-530-970.mp4) |
+| 冷缓存连续滚轮尺度往返，970–534 米／像素 | 68 | 初期实绘 Z4→Z5→Z6→Z7。反向时实际整屏退层，清晰度变化可见。Z7 可见需求峰值 84 页，细节页请求峰值 457，常驻峰值 222。离屏捕获间隔 p50／p95 为 44.40／85.84 ms。 [录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-europe-east-alps-wheel.mp4) |
+
+132 帧的九点采样未标记缺页，同帧各点 Z7 权重差为 0。录像按实际帧顺序以 20 FPS 编码。回读间隔包含观测开销，正式游戏 FPS 和显存为 NOT_RUN。 [连续帧机位、实绘瓦片与权重](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-europe-motion.json.gz)
+
+### 队列与恢复
+
+此前按 `Y=0–7`、X 递增调度，十二批集中在北极。保留原 768 页和全部回执。现有 CSV 增加 Natural Earth 陆地类别、陆地占比、陆地取景和实拍地区。仍按原始编号关联结论。批内略过已审页，混合页按实际陆地交集入队。取景在几何中心落水时增加页内陆地镜头。陆地类别服务施工优先级。页内资料和 1900 年状态仍由人工按证据核对。
+
+后续从欧洲剩余阿尔卑斯及中欧向斯堪的纳维亚和东欧推进，然后依次处理东亚、中南半岛、欧亚其余陆地、北美和南美、非洲、澳大利亚及其余岛岸。极地陆地随后补检，纯海页最后集中处理。当前镜头复用 `SCAR-ADD-7.13-z7-v3`，本批修改仅涉及取景与同一份账本。用户视觉结论待提交。
+
+[累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b13.csv) · [欧洲首批查图索引](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y024-x136-europe.jpg) · [258 张原始 PNG 及对应回执](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y024-x136-europe.zip)
+
+## 已有冰架与运行时修复
+
 基线为 [PR #153](https://github.com/ryoumiyahayato/wwo/pull/153) 合并提交 `8d496fdfa0080f0951df3f38002139bb07964906`。沿用其 Z6 候选及既有 Rust/wgpu 管线。Z7 原包、PR #152 候选和正式回退保留。用户视觉验收未通过。正式游戏继续使用已接受的资源。
 
 ## 症状和根因
@@ -64,7 +113,7 @@ HydroRIVERS v1 的季节与历史证据有限。现场画面反投和模型距�
 
 按 Y=0…127、X=0…255 编号，瓦片西缘为 `-180+X×1.40625°`，北缘为 `90-Y×1.40625°`。每个 8×8 批次记录相机、两个倍率、必要覆盖子图、版本、实绘页、混合、页预算和原图路径。逐页结论来自逐图查看。缩略图供查找原图，局部专题独立记录。
 
-累计实际逐页目视完成 **768／32,768（2.34375%）**。PASS 652，FAIL 0，SOURCE_UNCERTAIN 116，NOT_RENDERED 32,000。已完成十二批，每批 416 张逐页原图，另有极区两档共用实拍。范围为 `X=0…95, Y=0…7`。
+累计实际逐页查看 **830／32,768（2.53%）**。PASS 708，FAIL 0，SOURCE_UNCERTAIN 122，NOT_RENDERED 31,938。含北极十二批 `X=0…95, Y=0…7` 共 768 页及欧洲首批 62 页。北极每批 416 张逐页原图，另有极区两档共用实拍。
 
 首批 `X=0…7, Y=0…7` 为 58 页 PASS、6 页 SOURCE_UNCERTAIN。北极辅助图覆盖常规视角最北端的窄带，共用原图在每个相关页记录中列出。北冰洋 `7/0–3/0` 的区域 02/05 与近景 04/08 等镜有淡细纹，`7/2–3/3` 的重叠近景 00 有短纵暗纹。
 
@@ -159,11 +208,11 @@ GEBCO 全球 TID 服务在第五批 `7/32–33/0` 的三个疑点返还 41（算
 续拍使用上一版本已验证的 Rust 宿主。先恢复本次索引指定的候选资源。每个取景保留实际 Z7 回执，逐张复核时从原图路径读图。重新索引应同时提供已经归档的上批 ZIP 和原有人工记录。
 
 ```text
-python rust/strategic-host/tools/capture_z7_pages.py --exe <Rust宿主> --data <只读游戏数据> --terrain-candidate <候选目录> --program-revision <实际程序提交> --out <实拍目录> --batch-x 88 --batch-y 0
-python rust/strategic-host/tools/index_z7_pages.py --captures <实拍目录> --out <归档目录> --review <已查看原图的记录.csv> --batch-x 88 --batch-y 0 --zip
+python rust/strategic-host/tools/capture_z7_pages.py --exe <Rust宿主> --data <只读游戏数据> --terrain-candidate <候选目录> --program-revision <实际程序提交> --out <实拍目录> --natural-earth <现有NaturalEarth目录> --review-region europe --review-index <上批累计.csv> --batch-x 128 --batch-y 24
+python rust/strategic-host/tools/index_z7_pages.py --captures <实拍目录> --out <归档目录> --review <历史逐页记录.csv> --review <本批实际目视记录.csv> --natural-earth <现有NaturalEarth目录> --review-region europe --batch-x 128 --batch-y 24 --zip
 ```
 
-[累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b11.csv) · [首批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x000.zip) · [第二批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x008.zip) · [第三批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x016.zip) · [第四批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x024.zip) · [第五批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x032.zip) · [第六批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x040.zip) · [第七批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x048.zip) · [第八批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x056.zip) · [第九批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x064.zip) · [第十批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x072.zip) · [八个原坐标 24 张原图及两极图](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-site-png.zip)。
+[截至第十一批的累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b11.csv) · [首批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x000.zip) · [第二批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x008.zip) · [第三批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x016.zip) · [第四批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x024.zip) · [第五批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x032.zip) · [第六批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x040.zip) · [第七批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x048.zip) · [第八批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x056.zip) · [第九批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x064.zip) · [第十批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x072.zip) · [八个原坐标 24 张原图及两极图](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-site-png.zip)。
 
 ## 保留项与恢复
 
