@@ -227,7 +227,9 @@ fn page_surface(uv:vec2f, zoom:i32, exact:bool) -> NaturalPage {
     return NaturalPage(refined,fade);
 }
 fn natural_surface(ll:vec2f) -> vec4f {
-    let uv=vec2f(fract(ll.x/360.+.5),clamp(.5-ll.y/180.,0.,.99999994));
+    // Keep a rounded-up longitude fraction inside the last column at the antimeridian.
+    let u=min(fract(ll.x/360.+.5),.99999994);
+    let uv=vec2f(u,clamp(.5-ll.y/180.,0.,.99999994));
     if view.chart_origin.w>.5 && view.map_style.z>0. {
         let page=page_surface(uv,i32(view.map_style.z),true);
         return mix(vec4f(1.,0.,1.,0.),page.color,page.coverage);
