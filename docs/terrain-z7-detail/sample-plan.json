@@ -1,0 +1,310 @@
+{
+  "layer": 7,
+  "tile_matrix_set": "WorldCRS84Quad",
+  "frozen_at": "2026-11-16T17:43:38+08:00",
+  "asset": {
+    "archive": "terrain-surface-20261115",
+    "version": "worldcrs84quad-15s-v2",
+    "file": "7.qpk"
+  },
+  "sampling": {
+    "seed": 2026111607,
+    "prng": "CPython random.Random (MT19937), randrange",
+    "versions": {
+      "python": "3.12.15",
+      "shapely": "2.2.0",
+      "geos": "3.14.1",
+      "pyshp": "3.1.7",
+      "pyproj": "3.8.0",
+      "proj": "9.8.1"
+    },
+    "sources": [
+      {
+        "name": "Natural Earth Admin 0 Map Units 1:110m",
+        "version": "5.1.1",
+        "path": "C:/Users/agcrf/AppData/Local/Temp/wwo-terrain-review-20261115/ne_110m_admin_0_map_units.zip"
+      },
+      {
+        "name": "Natural Earth Land 1:110m",
+        "version": "4.1.0",
+        "path": "land110.zip"
+      },
+      {
+        "name": "Natural Earth Land 1:10m",
+        "version": "5.1.1",
+        "path": "us10-land.zip",
+        "use": "机位在同一瓦片内校准陆地，不进入候选池"
+      }
+    ],
+    "pool_rule": "以 110m 行政单元和陆地相交划分各洲。沿乌拉尔、里海、大高加索及土耳其海峡近似切分跨洲行政单元。白令海峡和阿留申按自然地理归洲。印尼岛片中心在东经 131 度及以东时归大洋洲。南纬 60 度以南陆地归南极洲。选取与各洲陆地相交面积为正的瓦片。",
+    "europe_asia_cut_lon_lat": [
+      [
+        70,
+        90
+      ],
+      [
+        67,
+        70
+      ],
+      [
+        64,
+        66
+      ],
+      [
+        59.5,
+        60
+      ],
+      [
+        59.5,
+        55
+      ],
+      [
+        59.5,
+        51.5
+      ],
+      [
+        55,
+        51.3
+      ],
+      [
+        53,
+        49.9
+      ],
+      [
+        51.9,
+        47.1
+      ],
+      [
+        50.6,
+        45
+      ],
+      [
+        49,
+        42
+      ],
+      [
+        47.7,
+        41.3
+      ],
+      [
+        44.8,
+        42.6
+      ],
+      [
+        41.8,
+        43.4
+      ],
+      [
+        39.8,
+        43.55
+      ],
+      [
+        36,
+        43
+      ],
+      [
+        29.05,
+        41.17
+      ],
+      [
+        28.8,
+        40.85
+      ],
+      [
+        26.4,
+        40.13
+      ],
+      [
+        26.1,
+        39.0
+      ],
+      [
+        20,
+        32
+      ]
+    ],
+    "pool_limits": "110m 数据简化小岛、岸线和欧亚分界。1:10m 陆地仅用于校准入选瓦片内的相机中心。",
+    "draw_rule": "按亚洲、欧洲、非洲、北美洲、南美洲、大洋洲、南极洲顺序，各排除所列旧 Z7 瓦片。候选按 Z/X/Y 升序，每洲等概率抽取一张。",
+    "anchor_rule": "以 110m 洲域与瓦片相交。中心经 10m 陆地确认后保留。其余用距中心最近的同瓦片 10m 陆地，经简化岸线关联限制。找不到相应 10m 几何时采用 110m 岸线。以 WGS84 方位等距计算距离，等距按经度、纬度，在瓦片内侧保留 1e-8 度。",
+    "scale_rule": "区域为 605×sqrt((1+cos(lat)^2)/2) 与 50×(90−|lat|) 的较小值，以 5 m/px 取整并在极区必要时收紧。近景为区域倍率的 75%，以 5 m/px 取整。页数为按现行球面包围半径和 180 像素预取求得的取景估算。"
+  },
+  "camera": {
+    "viewport_width": 1280,
+    "viewport_height": 720,
+    "bearing": "north",
+    "pitch_degrees": 0,
+    "projection": "azimuthal_equidistant",
+    "terrain_selection": "exact",
+    "terrain_level": 7
+  },
+  "random": [
+    {
+      "id": "asia",
+      "continent": "亚洲",
+      "tile": [
+        7,
+        198,
+        26
+      ],
+      "excluded_previous_tile": [
+        7,
+        226,
+        21
+      ],
+      "excluded_previous_tile_present": true,
+      "candidate_count": 3153,
+      "draw_index_zero_based": 1570,
+      "lon": 99.140625,
+      "lat": 52.734375,
+      "anchor": "tile-center",
+      "regional_mpp": 500,
+      "close_mpp": 375,
+      "regional_estimated_pages": 63,
+      "close_estimated_pages": 41
+    },
+    {
+      "id": "europe",
+      "continent": "欧洲",
+      "tile": [
+        7,
+        144,
+        32
+      ],
+      "excluded_previous_tile": [
+        7,
+        135,
+        30
+      ],
+      "excluded_previous_tile_present": true,
+      "candidate_count": 998,
+      "draw_index_zero_based": 441,
+      "lon": 23.203125,
+      "lat": 44.296875,
+      "anchor": "tile-center",
+      "regional_mpp": 525,
+      "close_mpp": 395,
+      "regional_estimated_pages": 61,
+      "close_estimated_pages": 35
+    },
+    {
+      "id": "africa",
+      "continent": "非洲",
+      "tile": [
+        7,
+        131,
+        50
+      ],
+      "excluded_previous_tile": [
+        7,
+        127,
+        40
+      ],
+      "excluded_previous_tile_present": true,
+      "candidate_count": 1423,
+      "draw_index_zero_based": 317,
+      "lon": 4.921875,
+      "lat": 18.984375,
+      "anchor": "tile-center",
+      "regional_mpp": 590,
+      "close_mpp": 440,
+      "regional_estimated_pages": 59,
+      "close_estimated_pages": 37
+    },
+    {
+      "id": "north-america",
+      "continent": "北美洲",
+      "tile": [
+        7,
+        73,
+        38
+      ],
+      "excluded_previous_tile": [
+        7,
+        57,
+        32
+      ],
+      "excluded_previous_tile_present": true,
+      "candidate_count": 2420,
+      "draw_index_zero_based": 1699,
+      "lon": -76.640625,
+      "lat": 35.859375,
+      "anchor": "tile-center",
+      "regional_mpp": 550,
+      "close_mpp": 410,
+      "regional_estimated_pages": 57,
+      "close_estimated_pages": 33
+    },
+    {
+      "id": "south-america",
+      "continent": "南美洲",
+      "tile": [
+        7,
+        70,
+        68
+      ],
+      "excluded_previous_tile": [
+        7,
+        83,
+        79
+      ],
+      "excluded_previous_tile_present": true,
+      "candidate_count": 888,
+      "draw_index_zero_based": 5,
+      "lon": -80.8121240258,
+      "lat": -6.2789283256,
+      "anchor": "nearest-land-refined-10m",
+      "regional_mpp": 605,
+      "close_mpp": 455,
+      "regional_estimated_pages": 60,
+      "close_estimated_pages": 37
+    },
+    {
+      "id": "oceania",
+      "continent": "大洋洲",
+      "tile": [
+        7,
+        230,
+        78
+      ],
+      "excluded_previous_tile": [
+        7,
+        243,
+        60
+      ],
+      "excluded_previous_tile_present": false,
+      "candidate_count": 556,
+      "draw_index_zero_based": 363,
+      "lon": 144.140625,
+      "lat": -20.390625,
+      "anchor": "tile-center",
+      "regional_mpp": 585,
+      "close_mpp": 440,
+      "regional_estimated_pages": 57,
+      "close_estimated_pages": 37
+    },
+    {
+      "id": "antarctica",
+      "continent": "南极洲",
+      "tile": [
+        7,
+        248,
+        116
+      ],
+      "excluded_previous_tile": [
+        7,
+        50,
+        127
+      ],
+      "excluded_previous_tile_present": true,
+      "candidate_count": 3314,
+      "draw_index_zero_based": 3272,
+      "lon": 169.214610222,
+      "lat": -73.276462498,
+      "anchor": "nearest-land-refined-10m",
+      "regional_mpp": 445,
+      "close_mpp": 335,
+      "regional_estimated_pages": 107,
+      "close_estimated_pages": 67
+    }
+  ]
+}

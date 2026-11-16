@@ -24,6 +24,7 @@ from rasterio.transform import from_origin
 from rasterio.windows import Window
 from scipy.ndimage import label
 import shapefile
+from shapely import clip_by_rect, intersects_xy, make_valid, prepare
 from shapely.affinity import translate
 from shapely.geometry import LineString, Polygon, box, shape
 from shapely.strtree import STRtree
@@ -804,6 +805,127 @@ def write_level_records(path, level, magic, records):
         file.write(offsets.tobytes())
 
 
+def ice_shelf_polygons(source):
+    data = json.loads(source.read_text(encoding="utf-8"))
+    if (data.get("spatialReference", {}).get("wkid") != 3031
+            or data.get("geometryType") != "esriGeometryPolygon"
+            or data.get("exceededTransferLimit")):
+        raise ValueError("Expected a complete SCAR ADD polygon extract in EPSG:3031")
+    floating, grounded = [], []
+    for feature in data["features"]:
+        surface_type = feature["attributes"]["surface"]
+        if surface_type not in ("ice shelf", "ice tongue", "land", "rumple"):
+            continue
+        points, parts = [], []
+        for ring in feature["geometry"]["rings"]:
+            parts.append(len(points))
+            points.extend(ring)
+        polygon = shape(shapefile.Shape(shapeType=5, points=points, parts=parts).__geo_interface__)
+        if polygon.is_empty:
+            raise ValueError(f"Invalid SCAR ADD polygon {feature['attributes']['FID']}")
+        if not polygon.is_valid:
+            polygon = make_valid(polygon)
+        group = grounded if surface_type in ("land", "rumple") else floating
+        group.append(polygon)
+    if not floating or not grounded:
+        raise ValueError("Expected both floating ice and grounded coastline from SCAR ADD")
+    land = STRtree(grounded)
+    polygons = floating.copy()
+    for shelf in floating:
+        # Old Natural Earth land and newer ADD shelves do not share the same
+        # grounding line. Reconcile mapped ground near it without growing the ice
+        # out into water or changing the underlying physical mask.
+        vicinity = shelf.buffer(10_000)
+        for index in land.query(vicinity, predicate="intersects"):
+            segment = clip_by_rect(grounded[index], *vicinity.bounds)
+            ground = make_valid(segment).intersection(vicinity)
+            if ground.area:
+                polygons.append(ground)
+    for polygon in polygons:
+        prepare(polygon)
+    return STRtree(polygons)
+
+
+def floating_ice_coverage(polygons, projection, nx, ny, x, y):
+    step = 360/(nx*TILE)
+    columns = np.arange(x*TILE-GUTTER, (x+1)*TILE+GUTTER)
+    rows = np.arange(y*TILE-GUTTER, (y+1)*TILE+GUTTER).clip(0, ny*TILE-1)
+    west, east = columns[[0,-1]]*step-180
+    north, south = 90-rows[[0,-1]]*step
+    if south-step > -60:
+        return None
+    bounds = projection.transform_bounds(west, south-step, east+step, north)
+    selected = polygons.geometries.take(polygons.query(box(*bounds)))
+    if not len(selected):
+        return None
+    coverage = np.zeros((len(rows),len(columns)), dtype=np.uint8)
+    for dx, dy in ((.25,.25), (.75,.25), (.25,.75), (.75,.75)):
+        lon = ((columns+dx) % (nx*TILE))*step-180
+        lat = 90-(rows+dy)*step
+        lon, lat = np.meshgrid(lon,lat)
+        east, north = projection.transform(lon,lat)
+        ice = np.zeros(coverage.shape, dtype=bool)
+        for polygon in selected:
+            ice |= intersects_xy(polygon, east, north)
+        coverage += ice
+    return coverage if coverage.any() else None
+
+
+def write_ice_shelf_candidate(original, source, destination):
+    """Apply SCAR ADD floating-ice color at Z7 without rewriting the DEM or other layers."""
+    from pyproj import Transformer
+    import zstandard
+
+    if destination.exists():
+        raise FileExistsError(destination)
+    polygons = ice_shelf_polygons(source)
+    projection = Transformer.from_crs(4326, 3031, always_xy=True)
+    decode = zstandard.ZstdDecompressor()
+    encode = zstandard.ZstdCompressor(level=COMPACT_STRENGTH)
+    dim = TILE+2*GUTTER
+    block_dim = dim//4
+    ice_color = np.array([215,226,229], dtype=np.float32)
+    changed = 0
+
+    with original.open("rb") as file:
+        pack = LevelPack(file, PACK_MAX_LEVEL, COMPACT_VERSION)
+
+        def records():
+            nonlocal changed
+            for y in range(pack.ny):
+                for x in range(pack.nx):
+                    color_size, height_size = pack.frame_sizes(x,y)
+                    color = file.read(color_size)
+                    height = file.read(height_size)
+                    coverage = floating_ice_coverage(polygons, projection, pack.nx, pack.ny, x, y)
+                    if coverage is not None:
+                        raw = decode.decompress(color, max_output_size=dim**2)
+                        pixels = np.array(Image.frombytes("RGBA", (dim,dim), raw, "bcn", (7,"BC7")))
+                        amount = coverage.astype(np.float32)*pixels[...,3]/(4*255)
+                        if amount.any():
+                            rgb = pixels[...,:3]
+                            rgb[:] = np.rint(rgb+(ice_color-rgb)*amount[...,None]).astype(np.uint8)
+                            bc7 = ispc_texcomp.compress_blocks_bc7(
+                                ispc_texcomp.RGBASurface(pixels.tobytes(), dim, dim), ENCODER)
+                            # Reuse the original blocks wherever no pixel changed. Padded edge
+                            # blocks use the same global samples and stay identical across tiles.
+                            updated = amount.reshape(block_dim,4,block_dim,4).any(axis=(1,3)).ravel()
+                            blocks = np.frombuffer(raw,dtype="V16").copy()
+                            blocks[updated] = np.frombuffer(bc7,dtype="V16")[updated]
+                            color = encode.compress(blocks.tobytes())
+                            changed += 1
+                    yield PACK_RECORD.pack(pack.level,x,y,len(color))+color+height
+
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with TemporaryDirectory(dir=destination.parent) as folder:
+            staged = Path(folder)/destination.name
+            write_level_records(staged, pack.level, COMPACT_MAGIC, records())
+            if not changed:
+                raise ValueError("No Z7 tiles changed")
+            staged.rename(destination)
+    print(f"Z7: {pack.nx*pack.ny} tiles, {changed} color records updated, original height frames preserved")
+
+
 def write_level_pack(path, scratch, level):
     color, height = packed_rasters(scratch, level, "r")
     nx, ny = 2 << level, 1 << level
@@ -913,6 +1035,8 @@ def main():
     parser.add_argument("--layer-candidate", type=Path, metavar="QPK", help="Check a replacement QPK with --layer")
     parser.add_argument("--repack", type=Path, nargs=2, metavar=("ORIGINAL", "COMPACT"),
                         help="Losslessly repack and compare all global Z0–Z7 tiles")
+    parser.add_argument("--ice-shelf-candidate", type=Path, nargs=3, metavar=("ORIGINAL_Z7", "SCAR_ADD_JSON", "CANDIDATE_Z7"),
+                        help="Build a complete Z7 QPK with SCAR ADD floating-ice color")
     parser.add_argument("--through", type=int, choices=(5,6,7), help="Build or advance the 15 arc-second package")
     parser.add_argument("sources",type=Path,nargs="?")
     parser.add_argument("natural_earth",type=Path,nargs="?")
@@ -922,6 +1046,11 @@ def main():
         parser.error("--layer requires --verify")
     if (args.index_only or args.layer_candidate is not None) and args.layer is None:
         parser.error("--index-only and --layer-candidate require --layer")
+    if args.ice_shelf_candidate is not None:
+        if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources)):
+            parser.error("--ice-shelf-candidate does not accept other build arguments")
+        write_ice_shelf_candidate(*args.ice_shelf_candidate)
+        return
     if args.repack is not None:
         if args.verify is not None or args.sources is not None or args.through is not None:
             parser.error("--repack does not accept other build arguments")
