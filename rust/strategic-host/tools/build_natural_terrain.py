@@ -714,10 +714,14 @@ def inland_holes(land_shapes):
             for ring in polygon.interiors]
 
 
+def packed_ocean_color(z):
+    depth = np.clip(-z/5100, 0, 1)**.43
+    return np.array([.17,.32,.38],np.float32)-depth[...,None]*np.array([.092,.128,.122],np.float32)
+
+
 def shade_packed_water(ground, z, land, lake, enclosed):
     sea = np.maximum(0, (1-land)*(1-lake)-enclosed)
-    depth = np.clip(-z/5100, 0, 1)**.43
-    ocean = np.array([.17,.32,.38],np.float32)-depth[...,None]*np.array([.092,.128,.122],np.float32)
+    ocean = packed_ocean_color(z)
     inland = np.array([.15,.29,.36],np.float32)
     ground *= land[...,None]
     ground += ocean*sea[...,None] + inland*np.maximum(0,1-land-sea)[...,None]
@@ -805,7 +809,7 @@ def write_level_records(path, level, magic, records):
         file.write(offsets.tobytes())
 
 
-def ice_shelf_polygons(source):
+def ice_shelf_polygons(source, grounding_distance=10_000):
     data = json.loads(source.read_text(encoding="utf-8"))
     if (data.get("spatialReference", {}).get("wkid") != 3031
             or data.get("geometryType") != "esriGeometryPolygon"
@@ -835,7 +839,7 @@ def ice_shelf_polygons(source):
         # Old Natural Earth land and newer ADD shelves do not share the same
         # grounding line. Reconcile mapped ground near it without growing the ice
         # out into water or changing the underlying physical mask.
-        vicinity = shelf.buffer(10_000)
+        vicinity = shelf.buffer(grounding_distance)
         for index in land.query(vicinity, predicate="intersects"):
             segment = clip_by_rect(grounded[index], *vicinity.bounds)
             ground = make_valid(segment).intersection(vicinity)
@@ -846,7 +850,7 @@ def ice_shelf_polygons(source):
     return STRtree(polygons)
 
 
-def floating_ice_coverage(polygons, projection, nx, ny, x, y):
+def floating_ice_coverage(polygons, projection, nx, ny, x, y, samples=2):
     step = 360/(nx*TILE)
     columns = np.arange(x*TILE-GUTTER, (x+1)*TILE+GUTTER)
     rows = np.arange(y*TILE-GUTTER, (y+1)*TILE+GUTTER).clip(0, ny*TILE-1)
@@ -855,19 +859,24 @@ def floating_ice_coverage(polygons, projection, nx, ny, x, y):
     if south-step > -60:
         return None
     bounds = projection.transform_bounds(west, south-step, east+step, north)
-    selected = polygons.geometries.take(polygons.query(box(*bounds)))
+    footprint = box(*bounds)
+    selected = polygons.geometries.take(polygons.query(footprint))
     if not len(selected):
         return None
+    if samples > 2 and any(polygon.covers(footprint.buffer(2)) for polygon in selected):
+        return np.full((len(rows),len(columns)), samples*samples, dtype=np.uint8)
     coverage = np.zeros((len(rows),len(columns)), dtype=np.uint8)
-    for dx, dy in ((.25,.25), (.75,.25), (.25,.75), (.75,.75)):
-        lon = ((columns+dx) % (nx*TILE))*step-180
-        lat = 90-(rows+dy)*step
-        lon, lat = np.meshgrid(lon,lat)
-        east, north = projection.transform(lon,lat)
-        ice = np.zeros(coverage.shape, dtype=bool)
-        for polygon in selected:
-            ice |= intersects_xy(polygon, east, north)
-        coverage += ice
+    offsets = (np.arange(samples)+.5)/samples
+    for dy in offsets:
+        for dx in offsets:
+            lon = ((columns+dx) % (nx*TILE))*step-180
+            lat = 90-(rows+dy)*step
+            lon, lat = np.meshgrid(lon,lat)
+            east, north = projection.transform(lon,lat)
+            ice = np.zeros(coverage.shape, dtype=bool)
+            for polygon in selected:
+                ice |= intersects_xy(polygon, east, north)
+            coverage += ice
     return coverage if coverage.any() else None
 
 
@@ -933,19 +942,22 @@ def recolor_bc7_preserving_alpha(original, pixels, opaque_encoder):
     return bits.to_bytes(16,"little")
 
 
-def write_ice_shelf_candidate(original, source, destination):
+def write_ice_shelf_candidate(original, source, destination, *, refine_edges=False):
     """Apply SCAR ADD floating-ice color to a complete Z6 or Z7 QPK."""
     from pyproj import Transformer
     import zstandard
 
     if destination.exists():
         raise FileExistsError(destination)
-    polygons = ice_shelf_polygons(source)
+    # The old 10 km clip truncates mapped ground at Ronne and Amery.
+    # Only the SCAR ground polygons can extend coverage into this collar.
+    polygons = ice_shelf_polygons(source, grounding_distance=15_000 if refine_edges else 10_000)
     projection = Transformer.from_crs(4326, 3031, always_xy=True)
     decode = zstandard.ZstdDecompressor()
     encode = zstandard.ZstdCompressor(level=COMPACT_STRENGTH)
     dim = TILE+2*GUTTER
     block_dim = dim//4
+    samples = 4 if refine_edges else 2
     ice_color = np.array([215,226,229], dtype=np.float32)
     changed = 0
     refitted_alpha_blocks = 0
@@ -957,9 +969,12 @@ def write_ice_shelf_candidate(original, source, destination):
         _, level, _, _ = HEADER.unpack(header)
         if level not in (6, 7):
             raise ValueError("Floating-ice candidates require a Z6 or Z7 QPK")
+        if refine_edges and level != 7:
+            raise ValueError("Ice-shelf edge refinement requires a Z7 QPK")
         file.seek(0)
         pack = LevelPack(file, level, COMPACT_VERSION)
-        opaque_encoder = ispc_texcomp.BC7EncSettings.from_profile("fast") if level == 6 else None
+        preserve_alpha = level == 6 or refine_edges
+        opaque_encoder = ispc_texcomp.BC7EncSettings.from_profile("fast") if preserve_alpha else None
 
         def records():
             nonlocal changed, refitted_alpha_blocks
@@ -968,14 +983,21 @@ def write_ice_shelf_candidate(original, source, destination):
                     color_size, height_size = pack.frame_sizes(x,y)
                     color = file.read(color_size)
                     height = file.read(height_size)
-                    coverage = floating_ice_coverage(polygons, projection, pack.nx, pack.ny, x, y)
+                    coverage = floating_ice_coverage(polygons, projection, pack.nx, pack.ny, x, y, samples)
                     if coverage is not None:
                         raw = decode.decompress(color, max_output_size=dim**2)
                         pixels = np.array(Image.frombytes("RGBA", (dim,dim), raw, "bcn", (7,"BC7")))
-                        amount = coverage.astype(np.float32)*pixels[...,3]/(4*255)
+                        amount = coverage.astype(np.float32)*pixels[...,3]/(samples*samples*255)
                         if amount.any():
                             rgb = pixels[...,:3]
-                            rgb[:] = np.rint(rgb+(ice_color-rgb)*amount[...,None]).astype(np.uint8)
+                            water_rgb = rgb
+                            if refine_edges:
+                                # The original shore pixels already combine sea and ground.
+                                # Replace their water contribution without tinting the ground again.
+                                residual = decode.decompress(height, max_output_size=dim**2*2)
+                                z = np.frombuffer(restore_heights(residual, dim), dtype="<i2").reshape(dim,dim)
+                                water_rgb = np.where(pixels[...,3:4] == 255, rgb, packed_ocean_color(z)*255)
+                            rgb[:] = np.rint(np.clip(rgb+(ice_color-water_rgb)*amount[...,None], 0, 255)).astype(np.uint8)
                             bc7 = ispc_texcomp.compress_blocks_bc7(
                                 ispc_texcomp.RGBASurface(pixels.tobytes(), dim, dim), ENCODER)
                             # Reuse the original blocks wherever no pixel changed. Padded edge
@@ -983,7 +1005,7 @@ def write_ice_shelf_candidate(original, source, destination):
                             updated = amount.reshape(block_dim,4,block_dim,4).any(axis=(1,3)).ravel()
                             blocks = np.frombuffer(raw,dtype="V16").copy()
                             blocks[updated] = np.frombuffer(bc7,dtype="V16")[updated]
-                            if level == 6:
+                            if preserve_alpha:
                                 decoded = np.asarray(Image.frombytes("RGBA", (dim, dim), bc7, "bcn", (7, "BC7")))
                                 alpha_changed = (decoded[...,3] != pixels[...,3])
                                 alpha_changed = alpha_changed.reshape(block_dim,4,block_dim,4).any(axis=(1,3)).ravel()
@@ -995,9 +1017,9 @@ def write_ice_shelf_candidate(original, source, destination):
                                     refitted_alpha_blocks += 1
                                 decoded = Image.frombytes("RGBA", (dim,dim), blocks.tobytes(), "bcn", (7,"BC7"))
                                 if not np.array_equal(np.asarray(decoded)[...,3], pixels[...,3]):
-                                    raise ValueError(f"Changed decoded water coverage at Z6/{x}/{y}")
+                                    raise ValueError(f"Changed decoded water coverage at Z{level}/{x}/{y}")
                             recolored = encode.compress(blocks.tobytes())
-                            changed += int(level == 7 or recolored != color)
+                            changed += int((level == 7 and not refine_edges) or recolored != color)
                             color = recolored
                     yield PACK_RECORD.pack(pack.level,x,y,len(color))+color+height
 
@@ -1009,8 +1031,8 @@ def write_ice_shelf_candidate(original, source, destination):
                 raise ValueError(f"No Z{level} tiles changed")
             staged.rename(destination)
     print(f"Z{level}: {pack.nx*pack.ny} tiles, {changed} color records updated, original height frames preserved")
-    if level == 6:
-        print(f"Z6: {refitted_alpha_blocks} BC7 blocks refitted with exact decoded water coverage")
+    if preserve_alpha:
+        print(f"Z{level}: {refitted_alpha_blocks} BC7 blocks refitted with exact decoded water coverage")
 
 
 def write_level_pack(path, scratch, level):
@@ -1124,6 +1146,8 @@ def main():
                         help="Losslessly repack and compare all global Z0–Z7 tiles")
     parser.add_argument("--ice-shelf-candidate", type=Path, nargs=3, metavar=("ORIGINAL_QPK", "SCAR_ADD_JSON", "CANDIDATE_QPK"),
                         help="Build a complete Z6 or Z7 QPK with SCAR ADD floating-ice color")
+    parser.add_argument("--refine-ice-shelf-edges", action="store_true",
+                        help="Use 4x4 coverage and preserve decoded water coverage in a Z7 ice-shelf candidate")
     parser.add_argument("--through", type=int, choices=(5,6,7), help="Build or advance the 15 arc-second package")
     parser.add_argument("sources",type=Path,nargs="?")
     parser.add_argument("natural_earth",type=Path,nargs="?")
@@ -1133,10 +1157,12 @@ def main():
         parser.error("--layer requires --verify")
     if (args.index_only or args.layer_candidate is not None) and args.layer is None:
         parser.error("--index-only and --layer-candidate require --layer")
+    if args.refine_ice_shelf_edges and args.ice_shelf_candidate is None:
+        parser.error("--refine-ice-shelf-edges requires --ice-shelf-candidate")
     if args.ice_shelf_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources)):
             parser.error("--ice-shelf-candidate does not accept other build arguments")
-        write_ice_shelf_candidate(*args.ice_shelf_candidate)
+        write_ice_shelf_candidate(*args.ice_shelf_candidate, refine_edges=args.refine_ice_shelf_edges)
         return
     if args.repack is not None:
         if args.verify is not None or args.sources is not None or args.through is not None:
