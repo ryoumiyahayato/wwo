@@ -23,9 +23,10 @@ const MAX_PACK_PAGES: u32 = 256;
 const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bc7RgbaUnorm;
 const LOD_HYSTERESIS: f64 = 0.12;
 const PAGE_FADE_SECONDS: f32 = 0.22;
-const GROUPED_LOD_START: u32 = 4;
+const GROUPED_LOD_START: u32 = 3;
 const GROUPED_LOD_COUNT: usize = (MAX_LEVEL-GROUPED_LOD_START+1) as usize;
 const GROUPED_LOADS_PER_FRAME: u32 = 3;
+const COARSE_CACHE_LEVEL: u32 = 3;
 
 fn grouped_lod(level:u32)->Option<usize> {
     level.checked_sub(GROUPED_LOD_START).map(|index|index as usize).filter(|index|*index<GROUPED_LOD_COUNT)
@@ -551,6 +552,11 @@ impl Terrain {
         let viewport=camera.extent(size,0.);
         let prefetch=camera.extent(size,180.);
         let exact=self.selection.exact();
+        let capacity=self.atlas.depth_or_array_layers() as usize;
+        // Keep the coarse globe in spare slots while crossing the two adjacent transitions.
+        let coarse_pages=((1usize..=COARSE_CACHE_LEVEL as usize).map(|level|2<<(2*level))).sum::<usize>();
+        let reserve_coarse=!exact && (COARSE_CACHE_LEVEL..=COARSE_CACHE_LEVEL+1).contains(&target)
+            && capacity>=coarse_pages;
         // Keep a grouped parent ready for a rapid zoom-out. A mip
         // doubles the span, including the ordinary margin, without adding atlas slots.
         let parent_prefetch=if !exact && target>GROUPED_LOD_START {
@@ -572,8 +578,9 @@ impl Terrain {
         for tile in self.keys.iter().take_while(|tile|tile.key.0<=inspected) {
             let proximity=dot(center,tile.axis);
             let near_view=proximity>=(prefetch+tile.radius).min(std::f64::consts::PI).cos();
-            let reserved=parent_prefetch>0. && tile.key.0<target
-                && proximity>=(parent_prefetch+tile.radius).min(std::f64::consts::PI).cos();
+            let reserved=(reserve_coarse && tile.key.0<=COARSE_CACHE_LEVEL)
+                || (parent_prefetch>0. && tile.key.0<target
+                    && proximity>=(parent_prefetch+tile.radius).min(std::f64::consts::PI).cos());
             if near_view || reserved {
                 let in_view=proximity>=(viewport+tile.radius).min(std::f64::consts::PI).cos();
                 if let Some(index)=grouped_lod(tile.key.0) {
@@ -600,7 +607,6 @@ impl Terrain {
         // Keep the normal prefetch ring intact. Reserve the wider view in spare slots.
         near.sort_unstable_by(|(a,x,priority),(b,y,other_priority)|
             other_priority.cmp(priority).then_with(||a.0.cmp(&b.0)).then_with(||y.total_cmp(x)));
-        let capacity=self.atlas.depth_or_array_layers() as usize;
         self.view_max=target;
         self.required_pages=near.len();
         if let Some(&(Key(overflow,_,_),_,2))=near.get(capacity) {
