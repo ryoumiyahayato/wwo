@@ -1,11 +1,13 @@
 """Collect Z7 page views through the Rust terrain-review observer."""
 import argparse
 from bisect import bisect_right
+import csv
 from functools import lru_cache
 import json
 import math
 import os
 from pathlib import Path
+import re
 import struct
 import subprocess
 import time
@@ -49,25 +51,27 @@ LONGITUDE_OFFSETS = [math.cos(math.radians(i * STEP)) for i in range(COLS)]
 
 
 @lru_cache(maxsize=48)
-def page_clearances(lat):
+def page_clearances(lat, longitude_offset=0):
     """Angular center-to-bounding-cap clearance, as used by exact Z7 selection."""
     phi = math.radians(lat)
     angle = PREFETCH_RADIUS * MAX_MPP / EARTH
     sin_center, cos_center = math.sin(phi), math.cos(phi)
+    offsets = (LONGITUDE_OFFSETS if longitude_offset == 0 else
+               [math.cos(math.radians(i * STEP - longitude_offset)) for i in range(COLS)])
     clearances = []
     for row, sine, cosine, cap_radius in ROWS_GEOMETRY:
         if abs(row - phi) > angle + cap_radius:
             continue
         a, b = sine * sin_center, cosine * cos_center
-        for offset in LONGITUDE_OFFSETS:
+        for offset in offsets:
             clearance = math.acos(min(1, max(-1, a + b * offset))) - cap_radius
             if clearance <= angle:
                 clearances.append(clearance)
     return sorted(clearances)
 
 
-def scale_limit(lat, capacity):
-    clearances = page_clearances(lat)
+def scale_limit(lat, capacity, longitude_offset=0):
+    clearances = page_clearances(lat, longitude_offset)
     if len(clearances) <= capacity:
         return MAX_MPP
     return max(0, 0.96 * clearances[capacity] * EARTH / PREFETCH_RADIUS)
@@ -113,12 +117,12 @@ def missing_intervals(covered, south, north):
     return missing
 
 
-def page_view(lat, mpp, south, north):
-    clearances = page_clearances(lat)
+def page_view(lat, mpp, south, north, width=STEP, longitude_offset=0):
+    clearances = page_clearances(lat, longitude_offset)
     return {
         'lat': lat,
         'mpp': mpp,
-        'planned_full_longitude_latitude_band': fit_band(lat, mpp, south, north),
+        'planned_full_longitude_latitude_band': fit_band(lat, mpp, south, north, width),
         'estimated_visible_pages': bisect_right(clearances, HALF_DIAGONAL * mpp / EARTH),
         'estimated_prefetch_pages': bisect_right(clearances, PREFETCH_RADIUS * mpp / EARTH),
     }
@@ -207,6 +211,10 @@ def geographic(x, y, axes, mpp, pitch):
     return math.degrees(math.atan2(vx, vz)), math.degrees(math.asin(max(-1, min(1, vy))))
 
 
+def longitude_span(lon, west, east):
+    return 2 * max(abs((edge - lon + 180) % 360 - 180) for edge in (west, east))
+
+
 def geometry(tile_bounds, state, lon):
     """Describe the actual north-up azimuthal view returned with the PNG."""
     west, south, east, north = tile_bounds
@@ -231,7 +239,8 @@ def geometry(tile_bounds, state, lon):
         'tile_projected_pixel_envelope_approx': [
             min(screenx), min(screeny), max(screenx), max(screeny),
         ],
-        'tile_full_longitude_latitude_band': fit_band(state['center'][1], mpp, south, north),
+        'tile_full_longitude_latitude_band': fit_band(
+            state['center'][1], mpp, south, north, longitude_span(state['center'][0], west, east)),
         'review_radius_pixels': REVIEW_RADIUS_PX, 'scope': 'Covered bands stay within the central HUD-safe disk.',
     }
     return measured
@@ -431,7 +440,7 @@ def actual_coverage(views, south, north):
     }
 
 
-def page(host, args, work, resource, x, y, capacity):
+def page(host, args, work, resource, x, y, capacity, land=None):
     key = [7, x, y]
     tile_bounds = bounds(x, y)
     west, south, east, north = tile_bounds
@@ -444,16 +453,25 @@ def page(host, args, work, resource, x, y, capacity):
                         'southwest': [west, south], 'southeast': [east, south],
                         'center': [lon, (south + north) / 2],
                     }, scopes={}))
+    if land is not None:
+        current.update(review_region=args.review_region, land=land)
     for scope, details in row_views(y, capacity).items():
         part = current['scopes'].setdefault(scope, dict(views={}))
         part['planned_uncovered_latitude_bands'] = details['planned_uncovered_latitude_bands']
-        for order, planned in enumerate(details['views']):
-            label = f'z7-y{y:03}-x{x:03}-{scope}-{order:02}'
+        views = [(f'{order:02}', lon, planned) for order, planned in enumerate(details['views'])]
+        if land and land['land_focus_added']:
+            focus_lon, focus_lat = land['land_focus']
+            offset = focus_lon - lon
+            mpp = min(details['views'][0]['mpp'], math.floor(scale_limit(focus_lat, capacity, offset)))
+            planned = page_view(focus_lat, mpp, south, north, longitude_span(focus_lon, west, east), offset)
+            views.append(('land', focus_lon, planned))
+        for suffix, view_lon, planned in views:
+            label = f'z7-y{y:03}-x{x:03}-{scope}-{suffix}'
             saved = part['views'].get(label)
             if (saved and saved['status'] == 'captured_review_pending'
                     and png_size(work / saved['img']) == (WIDTH, HEIGHT)):
                 continue
-            part['views'][label] = capture(host, args, work, key, tile_bounds, lon, planned, label)
+            part['views'][label] = capture(host, args, work, key, tile_bounds, view_lon, planned, label)
             part['coverage'] = actual_coverage(part['views'], south, north)
             write(file, current)
     print(f'Z7/{x}/{y}', {name: [r['status'] for r in part['views'].values()]
@@ -466,6 +484,86 @@ def batches(x, y, count):
     for index in range(start, min(ROWS // BATCH * columns, start + count)):
         yy, xx = divmod(index, columns)
         yield xx * BATCH, yy * BATCH
+
+
+def load_land_geometry(natural_earth):
+    """Return a tile lookup using the generator's Natural Earth land and lake geometry."""
+    from build_natural_terrain import physical_shapes
+    from shapely import make_valid, union_all
+    from shapely.geometry import Point, box
+    from shapely.strtree import STRtree
+
+    def polygons(shape):
+        if shape.is_empty:
+            return
+        if shape.geom_type == 'Polygon':
+            yield shape
+        elif shape.geom_type in ('MultiPolygon', 'GeometryCollection'):
+            for part in shape.geoms:
+                yield from polygons(part)
+
+    land = [part for shape in physical_shapes(natural_earth, 'land')
+            for part in polygons(shape if shape.is_valid else make_valid(shape))]
+    lakes = [shape if shape.is_valid else make_valid(shape)
+             for shape in physical_shapes(natural_earth, 'lakes')]
+    land_tree, lake_tree = STRtree(land), STRtree(lakes)
+    greenland, antarctica = Point(-42, 73), Point(0, -85)
+    northern_mainland = (Point(100, 60), Point(-105, 55))
+    polar_continents = {index for index, shape in enumerate(land)
+                        if shape.covers(greenland) or shape.covers(antarctica)}
+    polar_islands = {index for index, shape in enumerate(land) if shape.bounds[3] > 74
+                     and not any(shape.covers(point) for point in northern_mainland)}
+
+    @lru_cache(maxsize=None)
+    def land_info(x, y):
+        west, south, east, north = bounds(x, y)
+        tile = box(west, south, east, north)
+        center = Point((west + east) / 2, (south + north) / 2)
+        pieces, polar_pieces = [], []
+        arctic = box(west, max(south, 74), east, north) if north > 74 else None
+        for index in land_tree.query(tile, predicate='intersects'):
+            intersection = land[index].intersection(tile)
+            if intersection.area > 0:
+                pieces.append(intersection)
+                if index in polar_continents:
+                    polar_pieces.append(intersection)
+                elif arctic is not None and index in polar_islands:
+                    polar_pieces.append(intersection.intersection(arctic))
+        dry = union_all(pieces)
+        water = union_all([lakes[index].intersection(tile)
+                           for index in lake_tree.query(tile, predicate='intersects')])
+        dry = dry.difference(water)
+        if dry.area == 0:
+            kind = 'INLAND_WATER' if pieces and water.area > 0 else 'OCEAN_ONLY'
+            return dict(land_class=kind, land_fraction=0, land_focus=None, land_focus_added=False)
+        if polar_pieces and dry.difference(union_all(polar_pieces)).area == 0:
+            kind = 'POLAR_LAND'
+        else:
+            kind = 'LAND_INTERIOR' if dry.equals(tile) else 'LAND_COAST'
+        added = not dry.contains(center)
+        focus = max(polygons(dry), key=lambda shape: shape.area).representative_point() if added else center
+        # Fraction is measured in the same WorldCRS84Quad coordinates as the tile.
+        return dict(land_class=kind, land_fraction=min(1.0, dry.area / tile.area),
+                    land_focus=[focus.x, focus.y], land_focus_added=added)
+
+    return land_info
+
+
+def reviewed_ordinals(path):
+    with path.open(newline='', encoding='utf-8-sig') as file:
+        return {int(row['ordinal']) for row in csv.DictReader(file)
+                if row['visual_status'] in ('PASS', 'FAIL', 'SOURCE_UNCERTAIN')}
+
+
+def regional_pages(x, y, land_info, reviewed, region):
+    classes = {'LAND_INTERIOR', 'LAND_COAST', 'INLAND_WATER'}
+    if region == 'polar':
+        classes = {'POLAR_LAND'}
+    elif region == 'ocean':
+        classes = {'OCEAN_ONLY'}
+    return {(xx, yy): land for yy in range(y, y + BATCH) for xx in range(x, x + BATCH)
+            if 1 + yy * COLS + xx not in reviewed
+            and (land := land_info(xx, yy))['land_class'] in classes}
 
 
 def load_resource(path):
@@ -506,17 +604,22 @@ def write_header(path, header):
     write(path, header)
 
 
-def run_batch(args, resource, x, y):
-    work = args.out / f'batch-y{y:03}-x{x:03}'
+def run_batch(args, resource, x, y, planned=None):
+    suffix = '-' + args.review_region if args.review_region else ''
+    work = args.out / f'batch-y{y:03}-x{x:03}{suffix}'
     work.mkdir(parents=True, exist_ok=True)
     with Observer(args, work) as host:
         capacity = terrain_capacity(host, args.timeout)
-        write_header(work / 'batch.json',
-                     dict(resource=resource, bounds_xy=[x, y, x + BATCH, y + BATCH],
-                          viewport=[WIDTH, HEIGHT], safe_review_radius_pixels=REVIEW_RADIUS_PX, order='Y then X', detail_capacity=capacity))
-        for yy in range(y, y + BATCH):
-            for xx in range(x, x + BATCH):
-                page(host, args, work, resource, xx, yy, capacity)
+        header = dict(resource=resource, bounds_xy=[x, y, x + BATCH, y + BATCH],
+                      viewport=[WIDTH, HEIGHT], safe_review_radius_pixels=REVIEW_RADIUS_PX,
+                      order='Y then X', detail_capacity=capacity)
+        if planned is None:
+            planned = {(xx, yy): None for yy in range(y, y + BATCH) for xx in range(x, x + BATCH)}
+        else:
+            header.update(review_region=args.review_region, planned_pages=[list(key) for key in planned])
+        write_header(work / 'batch.json', header)
+        for (xx, yy), land in planned.items():
+            page(host, args, work, resource, xx, yy, capacity, land)
 
 
 def pole_views(capacity):
@@ -560,30 +663,50 @@ def main():
     parser.add_argument('--terrain-candidate', type=Path)
     parser.add_argument('--out', type=Path)
     parser.add_argument('--program-revision', help='Build provenance supplied by the operator.')
-    parser.add_argument('--batch-x', type=int, default=0, help='First block X, aligned to eight.')
-    parser.add_argument('--batch-y', type=int, default=0, help='First block Y, aligned to eight.')
+    parser.add_argument('--batch-x', type=int, help='First block X, aligned to eight.')
+    parser.add_argument('--batch-y', type=int, help='First block Y, aligned to eight.')
     parser.add_argument('--batches', type=int, default=1)
     parser.add_argument('--timeout', type=float, default=25)
     parser.add_argument('--attempts', type=int, choices=range(1, 4), default=2)
     parser.add_argument('--poles', action='store_true', help='Capture exact north and south polar views separately.')
     parser.add_argument('--plan', action='store_true', help='Show geometric camera counts without launching Rust.')
+    parser.add_argument('--natural-earth', type=Path, help='Source directory with us10-land.zip and us10-lakes.zip.')
+    parser.add_argument('--review-region', help='A region slug for land review, or polar or ocean.')
+    parser.add_argument('--review-index', type=Path, help='Cumulative visual review CSV to omit already-reviewed pages.')
     args = parser.parse_args()
+    if args.review_region:
+        if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', args.review_region):
+            parser.error('--review-region must be a lowercase slug')
+        if (not args.natural_earth or not args.review_index or args.batches != 1 or args.poles
+                or args.batch_x is None or args.batch_y is None):
+            parser.error('--review-region requires --natural-earth, --review-index and explicit coordinates for one batch')
+    args.batch_x = 0 if args.batch_x is None else args.batch_x
+    args.batch_y = 0 if args.batch_y is None else args.batch_y
     if (not 0 <= args.batch_x < COLS or not 0 <= args.batch_y < ROWS
             or args.batch_x % BATCH or args.batch_y % BATCH or args.batches < 1
             or args.timeout <= 0):
         parser.error('Bad 8×8 batch coordinates, batch count or timeout')
     pending = batches(args.batch_x, args.batch_y, args.batches)
+    planned = None
+    if args.review_region:
+        planned = regional_pages(args.batch_x, args.batch_y, load_land_geometry(args.natural_earth),
+                                 reviewed_ordinals(args.review_index), args.review_region)
     if args.plan and args.poles:
         print(json.dumps(dict(capacity_assumed=256, pole_views=pole_views(256)), ensure_ascii=False))
         return
     if args.plan:
         for x, y in pending:
             report = {yy: row_views(yy, 256) for yy in range(y, y + BATCH)}
-            print(json.dumps(dict(batch_xy=[x, y], capacity_assumed=256, review_radius_pixels=REVIEW_RADIUS_PX,
-                                  rows=report,
-                                  captures=BATCH * sum(len(part['views']) for scopes in report.values()
-                                                       for part in scopes.values())),
-                             ensure_ascii=False))
+            plan = dict(batch_xy=[x, y], capacity_assumed=256, review_radius_pixels=REVIEW_RADIUS_PX, rows=report)
+            if planned is None:
+                plan['captures'] = BATCH * sum(len(part['views']) for scopes in report.values()
+                                               for part in scopes.values())
+            else:
+                plan.update(review_region=args.review_region, planned_pages=[dict(page=[7, xx, yy], **info)
+                                                                            for (xx, yy), info in planned.items()],
+                            captures=sum(sum(len(part['views']) for part in report[yy].values())
+                                         + 2 * info['land_focus_added'] for (_, yy), info in planned.items()))
+            print(json.dumps(plan, ensure_ascii=False))
         return
 
     for parameter in ('exe', 'data', 'terrain_candidate', 'out'):
@@ -597,8 +720,11 @@ def main():
     if args.poles:
         capture_poles(args, resource)
         return
+    if planned == {}:
+        print(f'No unreviewed pages matching the {args.review_region} batch', flush=True)
+        return
     for x, y in pending:
-        run_batch(args, resource, x, y)
+        run_batch(args, resource, x, y, planned)
 
 
 if __name__ == '__main__':
