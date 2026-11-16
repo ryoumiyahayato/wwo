@@ -871,8 +871,70 @@ def floating_ice_coverage(polygons, projection, nx, ny, x, y):
     return coverage if coverage.any() else None
 
 
+def recolor_bc7_preserving_alpha(original, pixels, opaque_encoder):
+    """Fit a BC7 color block while preserving each of its decoded alpha samples."""
+    if np.all(pixels[...,3] == 255):
+        opaque = ispc_texcomp.compress_blocks_bc7(
+            ispc_texcomp.RGBASurface(pixels.tobytes(), 4, 4), opaque_encoder)
+        if (opaque[0] & 0b1111111) == 0b1000000:
+            # Mode 6 shares endpoint p-bits with alpha. Force both alpha endpoints
+            # to 255, which can adjust the RGB endpoint low bits by one step.
+            alpha_endpoints_and_pbits = 0xFFFF << 49
+            bits = int.from_bytes(opaque, "little") | alpha_endpoints_and_pbits
+            return bits.to_bytes(16, "little")
+        return opaque
+
+    bits = int.from_bytes(original, "little")
+    mode = (bits & -bits).bit_length() - 1
+    # First endpoint bit, width of one endpoint per encoded channel, endpoints per channel.
+    start, widths, count = {
+        4: (8, (5,5,5,6), 2), 5: (8, (7,7,7,8), 2),
+        6: (7, (7,7,7,7), 2), 7: (14, (5,5,5,5), 4),
+    }[mode]
+    fields = []
+    for width in widths:
+        fields.append((start, width))
+        start += width*count
+    if mode in (4,5):
+        rotation = (bits >> (mode+1)) & 3
+        if rotation:
+            fields[rotation-1], fields[3] = fields[3], fields[rotation-1]
+
+    # Probe the original interpolation using one maximum endpoint at a time.
+    # The probes clear p-bits; the final block keeps the original p-bits,
+    # selectors, subsets, rotation and physical alpha endpoints.
+    has_pbits = mode in (6,7)
+    probe_base = bits
+    if has_pbits:
+        probe_base &= ~(((1 << count)-1) << start)
+    for offset, width in fields[:3]:
+        probe_base &= ~(((1 << (count*width))-1) << offset)
+    scales = np.array([255-(1 << (7-width)) if has_pbits else 255 for _,width in fields[:3]])
+    weights = np.empty((16,3,count))
+    for endpoint in range(count):
+        probe = probe_base
+        for offset, width in fields[:3]:
+            probe |= ((1 << width)-1) << (offset+width*endpoint)
+        rgba = Image.frombytes("RGBA", (4,4), probe.to_bytes(16,"little"), "bcn", (7,"BC7"))
+        weights[:,:,endpoint] = np.asarray(rgba).reshape(16,4)[:,:3]/scales
+
+    target = pixels.reshape(16,4)
+    for channel, (offset, width) in enumerate(fields[:3]):
+        endpoints = np.linalg.lstsq(weights[:,channel], target[:,channel], rcond=None)[0]
+        mask = (1 << width)-1
+        for endpoint, value in enumerate(endpoints):
+            if has_pbits:
+                pbit = (bits >> (start+endpoint)) & 1
+                value = (value*((1 << (width+1))-1)/255-pbit)/2
+            else:
+                value *= mask/255
+            field = offset+width*endpoint
+            bits = (bits & ~(mask << field)) | (max(0,min(mask,round(value))) << field)
+    return bits.to_bytes(16,"little")
+
+
 def write_ice_shelf_candidate(original, source, destination):
-    """Apply SCAR ADD floating-ice color at Z7 without rewriting the DEM or other layers."""
+    """Apply SCAR ADD floating-ice color to a complete Z6 or Z7 QPK."""
     from pyproj import Transformer
     import zstandard
 
@@ -886,12 +948,21 @@ def write_ice_shelf_candidate(original, source, destination):
     block_dim = dim//4
     ice_color = np.array([215,226,229], dtype=np.float32)
     changed = 0
+    refitted_alpha_blocks = 0
 
     with original.open("rb") as file:
-        pack = LevelPack(file, PACK_MAX_LEVEL, COMPACT_VERSION)
+        header = file.read(HEADER.size)
+        if len(header) != HEADER.size:
+            raise ValueError("Incomplete packed terrain header")
+        _, level, _, _ = HEADER.unpack(header)
+        if level not in (6, 7):
+            raise ValueError("Floating-ice candidates require a Z6 or Z7 QPK")
+        file.seek(0)
+        pack = LevelPack(file, level, COMPACT_VERSION)
+        opaque_encoder = ispc_texcomp.BC7EncSettings.from_profile("fast") if level == 6 else None
 
         def records():
-            nonlocal changed
+            nonlocal changed, refitted_alpha_blocks
             for y in range(pack.ny):
                 for x in range(pack.nx):
                     color_size, height_size = pack.frame_sizes(x,y)
@@ -912,8 +983,22 @@ def write_ice_shelf_candidate(original, source, destination):
                             updated = amount.reshape(block_dim,4,block_dim,4).any(axis=(1,3)).ravel()
                             blocks = np.frombuffer(raw,dtype="V16").copy()
                             blocks[updated] = np.frombuffer(bc7,dtype="V16")[updated]
-                            color = encode.compress(blocks.tobytes())
-                            changed += 1
+                            if level == 6:
+                                decoded = np.asarray(Image.frombytes("RGBA", (dim, dim), bc7, "bcn", (7, "BC7")))
+                                alpha_changed = (decoded[...,3] != pixels[...,3])
+                                alpha_changed = alpha_changed.reshape(block_dim,4,block_dim,4).any(axis=(1,3)).ravel()
+                                for index in np.flatnonzero(updated & alpha_changed):
+                                    row, col = divmod(int(index), block_dim)
+                                    target = pixels[4*row:4*(row+1),4*col:4*(col+1)]
+                                    blocks[index] = np.void(recolor_bc7_preserving_alpha(
+                                        raw[16*index:16*(index+1)], target, opaque_encoder))
+                                    refitted_alpha_blocks += 1
+                                decoded = Image.frombytes("RGBA", (dim,dim), blocks.tobytes(), "bcn", (7,"BC7"))
+                                if not np.array_equal(np.asarray(decoded)[...,3], pixels[...,3]):
+                                    raise ValueError(f"Changed decoded water coverage at Z6/{x}/{y}")
+                            recolored = encode.compress(blocks.tobytes())
+                            changed += int(level == 7 or recolored != color)
+                            color = recolored
                     yield PACK_RECORD.pack(pack.level,x,y,len(color))+color+height
 
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -921,9 +1006,11 @@ def write_ice_shelf_candidate(original, source, destination):
             staged = Path(folder)/destination.name
             write_level_records(staged, pack.level, COMPACT_MAGIC, records())
             if not changed:
-                raise ValueError("No Z7 tiles changed")
+                raise ValueError(f"No Z{level} tiles changed")
             staged.rename(destination)
-    print(f"Z7: {pack.nx*pack.ny} tiles, {changed} color records updated, original height frames preserved")
+    print(f"Z{level}: {pack.nx*pack.ny} tiles, {changed} color records updated, original height frames preserved")
+    if level == 6:
+        print(f"Z6: {refitted_alpha_blocks} BC7 blocks refitted with exact decoded water coverage")
 
 
 def write_level_pack(path, scratch, level):
@@ -1035,8 +1122,8 @@ def main():
     parser.add_argument("--layer-candidate", type=Path, metavar="QPK", help="Check a replacement QPK with --layer")
     parser.add_argument("--repack", type=Path, nargs=2, metavar=("ORIGINAL", "COMPACT"),
                         help="Losslessly repack and compare all global Z0–Z7 tiles")
-    parser.add_argument("--ice-shelf-candidate", type=Path, nargs=3, metavar=("ORIGINAL_Z7", "SCAR_ADD_JSON", "CANDIDATE_Z7"),
-                        help="Build a complete Z7 QPK with SCAR ADD floating-ice color")
+    parser.add_argument("--ice-shelf-candidate", type=Path, nargs=3, metavar=("ORIGINAL_QPK", "SCAR_ADD_JSON", "CANDIDATE_QPK"),
+                        help="Build a complete Z6 or Z7 QPK with SCAR ADD floating-ice color")
     parser.add_argument("--through", type=int, choices=(5,6,7), help="Build or advance the 15 arc-second package")
     parser.add_argument("sources",type=Path,nargs="?")
     parser.add_argument("natural_earth",type=Path,nargs="?")
