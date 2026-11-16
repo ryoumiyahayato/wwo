@@ -23,7 +23,7 @@ const MAX_PACK_PAGES: u32 = 256;
 const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bc7RgbaUnorm;
 const LOD_HYSTERESIS: f64 = 0.12;
 const PAGE_FADE_SECONDS: f32 = 0.22;
-const GROUPED_LOD_START: u32 = 5;
+const GROUPED_LOD_START: u32 = 4;
 const GROUPED_LOD_COUNT: usize = (MAX_LEVEL-GROUPED_LOD_START+1) as usize;
 const GROUPED_LOADS_PER_FRAME: u32 = 3;
 
@@ -299,9 +299,11 @@ impl ViewportTransition {
             self.goal=0.;
             return;
         }
-        // Reduce detail before the exit threshold, even with an already warm atlas.
+        // World views keep full contrast through most of the exit range.
+        // Higher layers have more room to start yielding to their parent earlier.
         let exit=f64::from(level)-0.5-LOD_HYSTERESIS;
-        let t=((lod-exit)/0.37).clamp(0.,1.) as f32;
+        let exit_span=if level<=4 {0.05} else {0.37};
+        let t=((lod-exit)/exit_span).clamp(0.,1.) as f32;
         self.goal=if target {t*t*(3.-2.*t)} else {0.};
         // Reserve the existing prefetch margin for panning and widening the view.
         // A missing tile approaching the view lowers the whole transition together.
