@@ -22,6 +22,8 @@ const MAX_PAGES: u32 = 160;
 const MAX_PACK_PAGES: u32 = 256;
 const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bc7RgbaUnorm;
 const LOD_HYSTERESIS: f64 = 0.12;
+const PAGE_FADE_SECONDS: f32 = 0.22;
+const FINEST_LOADS_PER_FRAME: u32 = 3;
 
 #[derive(Clone,Copy,Debug,PartialEq,Eq,Hash,Deserialize,serde::Serialize)]
 pub struct Key(pub u32,pub u32,pub u32);
@@ -263,6 +265,47 @@ struct Page {
 
 struct Visible {key:Key,axis:[f64;3],radius:f64}
 
+#[derive(Default)]
+struct FinestTransition {
+    nearby:Vec<(Key,f32)>,
+    visible:usize,
+    parents:Vec<Key>,
+    missing:usize,
+    mix:f32,
+    goal:f32,
+    previous:Option<Instant>,
+}
+
+impl FinestTransition {
+    fn update(&mut self,pages:&HashMap<Key,Page>,target:bool,lod:f64,now:Instant) {
+        let seconds=self.previous.replace(now).map_or(0.,|then|now.saturating_duration_since(then).as_secs_f32());
+        self.missing=0;
+        let mut coverage=1_f32;
+        for &(key,margin) in &self.nearby {
+            if !pages.contains_key(&key) {
+                self.missing+=usize::from(margin==0.);
+                coverage=coverage.min(margin);
+            }
+        }
+        if self.visible==0 || coverage==0.
+            || !self.parents.iter().all(|key|pages.get(key).is_some_and(|page|page.fade==255)) {
+            self.mix=0.;
+            self.goal=0.;
+            return;
+        }
+        // Reduce detail before the exit threshold, even with an already warm atlas.
+        let exit=f64::from(MAX_LEVEL)-0.5-LOD_HYSTERESIS;
+        let t=((lod-exit)/0.37).clamp(0.,1.) as f32;
+        self.goal=if target {t*t*(3.-2.*t)} else {0.};
+        // Reserve the existing prefetch margin for panning and widening the view.
+        // A missing tile approaching the view lowers the whole transition together.
+        let ceiling=coverage*coverage*(3.-2.*coverage);
+        self.goal=self.goal.min(ceiling);
+        let step=seconds.min(1./30.)/PAGE_FADE_SECONDS;
+        self.mix=(self.mix+(self.goal-self.mix).clamp(-step,step)).min(ceiling);
+    }
+}
+
 pub struct Terrain {
     base:wgpu::Texture,
     atlas:wgpu::Texture,
@@ -270,6 +313,7 @@ pub struct Terrain {
     keys:Vec<Visible>,
     sender:mpsc::Sender<(Key,Instant)>,
     inflight:Option<Key>,
+    requests_this_frame:u32,
     pages:HashMap<Key,Page>,
     slots:Vec<u32>,
     selected:Vec<Key>,
@@ -283,6 +327,7 @@ pub struct Terrain {
     layer_candidate:Option<PathBuf>,
     required_pages:usize,
     viewport_pages:usize,
+    finest:FinestTransition,
 }
 
 impl Terrain {
@@ -322,9 +367,10 @@ impl Terrain {
                 if worker.send_event(crate::HostEvent::Terrain(Completion{key,requested,result})).is_err(){break;}
             }
         })?;
-        Ok(Self{base,atlas,table,keys,sender,inflight:None,pages:HashMap::new(),
+        Ok(Self{base,atlas,table,keys,sender,inflight:None,requests_this_frame:0,pages:HashMap::new(),
             slots:(0..capacity).rev().collect(),selected:Vec::new(),view:None,max_level,view_max:0,
-            target_level:None,projected_lod:0.,version,selection,layer_candidate,required_pages:0,viewport_pages:0})
+            target_level:None,projected_lod:0.,version,selection,layer_candidate,required_pages:0,viewport_pages:0,
+            finest:FinestTransition::default()})
     }
 
     pub fn views(&self)->[wgpu::TextureView;3] {
@@ -341,6 +387,10 @@ impl Terrain {
             "layer_candidate": self.layer_candidate,
             "max_level": self.max_level,
             "view_max_level": self.view_max,
+            "draw_max_level": self.view_max(),
+            "z7_view_weight": if self.exact() && self.view_max==MAX_LEVEL {1.} else {self.finest.mix},
+            "z7_view_pages": self.finest.visible,
+            "z7_view_missing_pages": self.finest.missing,
             "target_level": self.target_level,
             "projected_lod": self.projected_lod,
             "resident_by_level": resident_by_level,
@@ -350,7 +400,8 @@ impl Terrain {
             "required_detail_pages": self.required_pages,
             "viewport_detail_pages": self.viewport_pages,
             "exact_view_over_capacity": self.selection.exact() && self.required_pages>self.selected.len(),
-            "selected_ready": self.selected.iter().all(|key|self.pages.get(key).is_some_and(|p|self.selection.exact()||p.fade==255)),
+            "selected_ready": self.selected.iter().all(|key|self.pages.get(key).is_some_and(|p|self.selection.exact()||p.fade==255))
+                && self.finest.mix==self.finest.goal,
             "detail_capacity": self.atlas.depth_or_array_layers(),
             "loading": self.inflight.is_some(),
             "texture_payload_bytes": PAGE_SIZE * PAGE_SIZE * (2 + self.atlas.depth_or_array_layers()) + 4 * self.table.width() * self.table.height(),
@@ -358,7 +409,10 @@ impl Terrain {
     }
 
     pub fn max_level(&self)->u32 {self.max_level}
-    pub fn view_max(&self)->u32 {self.view_max}
+    pub fn view_max(&self)->u32 {
+        if self.exact() {self.view_max} else if self.finest.mix>0. {MAX_LEVEL} else {self.view_max.min(MAX_LEVEL-1)}
+    }
+    pub fn finest_mix(&self)->f32 {self.finest.mix}
     pub fn packed(&self)->bool {self.version!=VERSION}
     pub fn exact(&self)->bool {self.selection.exact()}
 
@@ -377,9 +431,11 @@ impl Terrain {
                 let mut remaining=1.;
                 let mut contributors=Vec::new();
                 let mut missing=false;
-                for z in (1..=self.view_max).rev() {
+                for z in (1..=self.view_max()).rev() {
                     let (key,q)=cell(uv,z);
-                    let coverage=if self.exact() {f32::from(self.pages.contains_key(&key) as u8)} else {self.coverage(key,q)};
+                    let coverage=if self.exact() {f32::from(self.pages.contains_key(&key) as u8)}
+                        else if z==MAX_LEVEL {if self.pages.contains_key(&key) {self.finest.mix} else {0.}}
+                        else {self.coverage(key,q)};
                     let weight=remaining*coverage;
                     if weight>0. {contributors.push((key,weight));}
                     remaining-=weight;
@@ -430,16 +486,25 @@ impl Terrain {
         }
         for (&key,page) in &mut self.pages {
             if page.fade==255 {continue;}
-            let progress=(now.saturating_duration_since(page.ready).as_secs_f32()/0.22).clamp(0.,1.);
+            let progress=(now.saturating_duration_since(page.ready).as_secs_f32()/PAGE_FADE_SECONDS).clamp(0.,1.);
             let fade=(progress*255.).round() as u8;
             if fade!=page.fade {
                 page.fade=fade;
                 Self::write_index(&self.table,queue,key,u32::from(fade)<<16|(page.slot+1));
             }
         }
+        self.finest.update(&self.pages,!self.exact() && self.view_max==MAX_LEVEL,self.projected_lod,now);
+        self.requests_this_frame=0;
+        self.request_page(now);
+    }
+
+    fn request_page(&mut self,now:Instant) {
         if self.inflight.is_none() {
             if let Some(&key)=self.selected.iter().find(|key|!self.pages.contains_key(key)) {
-                if self.sender.send((key,now)).is_ok(){self.inflight=Some(key);}
+                if self.sender.send((key,now)).is_ok(){
+                    self.inflight=Some(key);
+                    self.requests_this_frame+=1;
+                }
             }
         }
     }
@@ -457,14 +522,32 @@ impl Terrain {
         let viewport=camera.extent(size,0.);
         let prefetch=camera.extent(size,180.);
         let exact=self.selection.exact();
+        let hold_finest=!exact && self.finest.mix>0. && target>=MAX_LEVEL-1;
+        let visible_finest=!exact && (target==MAX_LEVEL || hold_finest);
+        self.finest.nearby.clear();
+        self.finest.visible=0;
+        self.finest.parents.clear();
         let mut near=Vec::new();
         self.viewport_pages=0;
-        for tile in self.keys.iter().take_while(|tile|tile.key.0<=target) {
+        let inspected=if visible_finest {MAX_LEVEL} else {target};
+        for tile in self.keys.iter().take_while(|tile|tile.key.0<=inspected) {
             let proximity=dot(center,tile.axis);
             if proximity>=(prefetch+tile.radius).min(std::f64::consts::PI).cos() {
                 let in_view=proximity>=(viewport+tile.radius).min(std::f64::consts::PI).cos();
-                self.viewport_pages+=usize::from(in_view);
-                near.push((tile.key,proximity,!exact&&in_view));
+                if visible_finest {
+                    if tile.key.0==MAX_LEVEL {
+                        let margin=if in_view {0.} else {
+                            ((proximity.clamp(-1.,1.).acos()-tile.radius-viewport)/(prefetch-viewport)).clamp(0.,1.) as f32
+                        };
+                        self.finest.nearby.push((tile.key,margin));
+                        self.finest.visible+=usize::from(in_view);
+                    }
+                    if in_view && tile.key.0==MAX_LEVEL-1 {self.finest.parents.push(tile.key);}
+                }
+                if tile.key.0<=target {
+                    self.viewport_pages+=usize::from(in_view);
+                    near.push((tile.key,proximity,!exact&&in_view));
+                }
             }
         }
         // Load visible parents before their children, then spend spare slots on prefetch.
@@ -478,6 +561,7 @@ impl Terrain {
             self.view_max=overflow.saturating_sub(1);
             near.retain(|&(key,_,_)|key.0<=self.view_max);
         }
+        if self.view_max<MAX_LEVEL-1 {self.finest.visible=0;}
         self.selected.extend(near.iter().take(capacity).map(|&(key,_,_)|key));
         for key in &self.selected {
             if let Some(page)=self.pages.get_mut(key){page.used=now;}
@@ -504,14 +588,17 @@ impl Terrain {
         };
         write_texture_layer(queue,&self.atlas,0,slot,PAGE_SIZE,&tile.pixels);
         let now=Instant::now();
-        let fade=if self.selection.exact() {255} else {0};
+        let fade=if self.exact() || completion.key.0==MAX_LEVEL {255} else {0};
         Self::write_index(&self.table,queue,completion.key,u32::from(fade)<<16|(slot+1));
         self.pages.insert(completion.key,Page{slot,ready:now,used:now,fade});
+        if !self.exact() && self.view_max==MAX_LEVEL && self.requests_this_frame<FINEST_LOADS_PER_FRAME {
+            self.request_page(now);
+        }
         Ok(())
     }
 
     pub fn fading(&self)->bool {
-        self.pages.values().any(|page|page.fade<255)
+        self.finest.mix!=self.finest.goal || self.pages.values().any(|page|page.fade<255)
     }
 }
 

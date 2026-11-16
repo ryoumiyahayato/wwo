@@ -11,6 +11,7 @@ struct View {
     selection: vec4f, // polity number, land changes, administrative index, France index
     map_style: vec4f, // terrain catalogue zoom (y), selected terrain zoom (z), military grid step (w)
     edits: array<LandEdit, 12>,
+    natural_lod: vec4f, // common Z7 opacity (x)
 };
 struct LandEdit { area: vec4f, state: vec4f };
 struct Tile {
@@ -237,8 +238,10 @@ fn natural_surface(ll:vec2f) -> vec4f {
     var color=vec4f(0.);
     var remaining=1.;
     for(var z=i32(view.map_style.z);z>0;z-=1) {
-        let page=page_surface(uv,z,false);
-        let weight=remaining*page.coverage;
+        // Z7 is exposed only after the viewport's page set is complete.
+        let finest=z==7;
+        let page=page_surface(uv,z,finest);
+        let weight=remaining*page.coverage*select(1.,view.natural_lod.x,finest);
         color+=page.color*weight;
         remaining-=weight;
         if remaining<.0001 {return color;}
