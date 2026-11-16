@@ -23,7 +23,7 @@ const MAX_PACK_PAGES: u32 = 256;
 const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bc7RgbaUnorm;
 const LOD_HYSTERESIS: f64 = 0.12;
 const PAGE_FADE_SECONDS: f32 = 0.22;
-const GROUPED_LOD_START: u32 = 6;
+const GROUPED_LOD_START: u32 = 5;
 const GROUPED_LOD_COUNT: usize = (MAX_LEVEL-GROUPED_LOD_START+1) as usize;
 const GROUPED_LOADS_PER_FRAME: u32 = 3;
 
@@ -387,19 +387,13 @@ impl Terrain {
     pub fn status(&self) -> serde_json::Value {
         let resident_by_level=(1..=self.max_level).map(|z|self.pages.keys().filter(|k|k.0==z).count()).collect::<Vec<_>>();
         let wanted_by_level=(1..=self.max_level).map(|z|self.selected.iter().filter(|k|k.0==z).count()).collect::<Vec<_>>();
-        serde_json::json!({
+        let mut status=serde_json::json!({
             "version": self.version,
             "selection": self.selection,
             "layer_candidate": self.layer_candidate,
             "max_level": self.max_level,
             "view_max_level": self.view_max,
             "draw_max_level": self.view_max(),
-            "z6_view_weight": if self.exact() && self.view_max==6 {1.} else {self.transitions[0].mix},
-            "z6_view_pages": self.transitions[0].visible,
-            "z6_view_missing_pages": self.transitions[0].missing,
-            "z7_view_weight": if self.exact() && self.view_max==7 {1.} else {self.transitions[1].mix},
-            "z7_view_pages": self.transitions[1].visible,
-            "z7_view_missing_pages": self.transitions[1].missing,
             "target_level": self.target_level,
             "projected_lod": self.projected_lod,
             "resident_by_level": resident_by_level,
@@ -414,7 +408,15 @@ impl Terrain {
             "detail_capacity": self.atlas.depth_or_array_layers(),
             "loading": self.inflight.is_some(),
             "texture_payload_bytes": PAGE_SIZE * PAGE_SIZE * (2 + self.atlas.depth_or_array_layers()) + 4 * self.table.width() * self.table.height(),
-        })
+        });
+        for (i,transition) in self.transitions.iter().enumerate() {
+            let level=GROUPED_LOD_START+i as u32;
+            let weight=if self.exact() && self.view_max==level {1.} else {transition.mix};
+            status[format!("z{level}_view_weight")]=weight.into();
+            status[format!("z{level}_view_pages")]=transition.visible.into();
+            status[format!("z{level}_view_missing_pages")]=transition.missing.into();
+        }
+        status
     }
 
     pub fn max_level(&self)->u32 {self.max_level}
@@ -423,8 +425,13 @@ impl Terrain {
         self.transitions.iter().rposition(|transition|transition.mix>0.)
             .map_or(self.view_max.min(GROUPED_LOD_START-1),|index|GROUPED_LOD_START+index as u32)
     }
-    pub fn viewport_mix(&self)->[f32;2] {
-        [self.transitions[0].mix,self.transitions[1].mix]
+    pub fn viewport_mix(&self)->[[f32;4];2] {
+        let mut weights=[[-1.;4];2];
+        for (index,transition) in self.transitions.iter().enumerate() {
+            let level=GROUPED_LOD_START as usize+index;
+            weights[level/4][level%4]=transition.mix;
+        }
+        weights
     }
     pub fn packed(&self)->bool {self.version!=VERSION}
     pub fn exact(&self)->bool {self.selection.exact()}
@@ -542,9 +549,9 @@ impl Terrain {
         let viewport=camera.extent(size,0.);
         let prefetch=camera.extent(size,180.);
         let exact=self.selection.exact();
-        // Keep the coarser view ready for a rapid zoom-out from Z7. A mip
+        // Keep a grouped parent ready for a rapid zoom-out. A mip
         // doubles the span, including the ordinary margin, without adding atlas slots.
-        let parent_prefetch=if !exact && target==7 {
+        let parent_prefetch=if !exact && target>GROUPED_LOD_START {
             let half_diagonal=f64::from(size[0]).hypot(f64::from(size[1])/camera.pitch().cos())*0.5;
             camera.extent(size,half_diagonal+360.)
         } else {0.};
