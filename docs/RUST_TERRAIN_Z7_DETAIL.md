@@ -1,5 +1,7 @@
 # Z7 地貌细节第二阶段
 
+下文记录 PR #152 候选。用户视觉验收未通过。冰架异常修复及全球逐页验收进度见 [Z7 全球逐页视觉验收](RUST_TERRAIN_Z7_VISUAL.md)。
+
 基线为 [PR #151](https://github.com/ryoumiyahayato/wwo/pull/151) 和私有 Release 的 [原版 7.qpk](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/7.qpk)。候选沿用 `worldcrs84quad-15s-v2`，表面修订标记为 `SCAR-ADD-7.13-z7-v2`。正式地图采用原资源。用户视觉验收待确认。
 
 ## 浮冰架修复
