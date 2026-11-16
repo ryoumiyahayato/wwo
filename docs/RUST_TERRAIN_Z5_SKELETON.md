@@ -71,4 +71,6 @@ Z4/Z5 冷加载在阿尔卑斯固定 2,120 米／像素复现拼贴。基线第 
 
 ![撒哈拉水线和马斯克林外海细色带实拍](terrain-z5/source-questions.jpg)
 
+**确认的地理缺陷。** 南极区域图和南极点图各有一处永久浮冰架绘为蓝水。点查罗斯冰架约 166.2583°W、84.4318°S 和威德尔海一侧约 51.8965°W、81.6525°S，均命中公开冰架面。母数据的陆地和冰川掩模未覆盖，着色走水面路径。待精修时在共享规则中补充浮冰架表面，保留海域属性，重新核对受影响的全球层级。历史冰架边界另行取证。[Natural Earth 冰架](https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-antarctic-ice-shelves/) · [英国南极调查局地理资料](https://www.bas.ac.uk/project/add/)
+
 [候选索引](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/index.json) · [私有正式回退归档](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)
