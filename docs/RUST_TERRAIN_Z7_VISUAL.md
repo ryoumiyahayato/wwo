@@ -18,11 +18,11 @@
 
 ### 审查与待核
 
-首批范围为 `X=136…143, Y=24…31`，11.25–22.5°E、45–56.25°N。原图逐张查看，共 62 页、258 图，其中 39 页为纯陆地、23 页含海岸或内陆水体。5 页添加两档陆地补镜。PASS 56，FAIL 0，SOURCE_UNCERTAIN 6。本批的两张纯海页 `7/140/24`、`7/141/24` 留到海洋批次。已审页的山脊、平原、河谷和湖岸未见确认的页边硬缝。
+首批范围为 `X=136…143, Y=24…31`，11.25–22.5°E、45–56.25°N。原图逐张查看，共 62 页、258 图，其中 39 页为纯陆地、23 页含海岸或内陆水体。5 页添加两档陆地补镜。PASS 56，FAIL 1，SOURCE_UNCERTAIN 5。本批的两张纯海页 `7/140/24`、`7/141/24` 留到海洋批次。已审页未见确认的页边硬缝。
 
 | 瓦片 | 实拍现象和证据 |
 | --- | --- |
-| `7/141/25` | 维斯瓦河近岸有短断线，约 18.9361°E／54.3180°N。波兰水务资料记载该出海渠道于 1891–1895 年开挖。仍需逐像元区分河线终点、海岸遮罩和栅格采样。 [原图](terrain-z7-visual/europe-vistula-mouth-z7-141-25.png) · [维斯瓦河流域资料](https://apgw.gov.pl/static/cms/doc/soos/Wisla/SOOS_Prognoza_IIaPGW_Wis%C2%88a.pdf) |
+| `7/141/25` | FAIL。维斯瓦河近岸断线，约 18.9361°E／54.3180°N。HydroRIVERS v1 公共矢量中的出口 20265844 距项目 Natural Earth 海岸约 4.31 公里，按生成器河宽缓冲后仍隔约 3.66 公里。候选本地拓扑中同 ID 为末段。原包和候选 BC7 记录相同，18.9354°E 取样列的水域 alpha 从 54.315°N 的 150 变为 54.320–54.330°N 的 0，断口已存在于源栅格。波兰水务史料确认渠道于 1895 年通海。待取得可定位的渠道几何并验证同类源线与海岸错位后，再决定整层修正规则。 [原图](terrain-z7-visual/europe-vistula-mouth-z7-141-25.png) · [波兰水务史料](https://gdansk.wody.gov.pl/aktualnosci/675-125-lat-od-przekopu-wisly) · [河网记录](https://maps.fsc.org/server/rest/services/Hosted/Optimized_Hyrdo/FeatureServer/0/query?where=hyriv_id%3D20265844&f=geojson&outSR=4326) |
 | `7/141/28` | 18.8737°E／49.9331°N 的蓝色水体落在本项目 Natural Earth 湖泊多边形内，与上维斯瓦河 Goczałkowice 水库位置相符。水库于 1956 年启用。1900 年旧河道与滩地仍待考证。 [卡托维兹国家档案馆](https://katowice.ap.gov.pl/ap/tekst/u-rode-wisy-jezioro-goczakowickie) |
 | `7/139/29` | 新锡德尔湖在 16.7330°E／47.8608°N 呈灰绿。当地资料记录开阔水面浑浊、芦苇带内水色不同。当前色值和生成来源待核。 [布尔根兰州湿地资料](https://www.burgenland.at/fileadmin/user_upload/Bilder/Umwelt/20200520_Burgenlaendische-Feuchtgebiete-und-ihre-Bedeutung-im-Naturschutz.pdf) |
 | `7/136/30`、`7/137/30` | 12.3095–12.8171°E、约 47.28–47.30°N 可见浅色窄纹，重叠近景中复现，穿过共享页边。河谷沉积、土地覆盖和着色贡献待定位。 [萨尔茨堡州地形资料](https://www.salzburg.gv.at/themen/wasser/see/zellersee3d) |
@@ -45,7 +45,7 @@
 
 后续从欧洲剩余阿尔卑斯及中欧向斯堪的纳维亚和东欧推进，然后依次处理东亚、中南半岛、欧亚其余陆地、北美和南美、非洲、澳大利亚及其余岛岸。极地陆地随后补检，纯海页最后集中处理。当前镜头复用 `SCAR-ADD-7.13-z7-v3`，本批修改仅涉及取景与同一份账本。用户视觉结论待提交。
 
-[累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b13.csv) · [欧洲首批查图索引](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y024-x136-europe.jpg) · [258 张原始 PNG 及对应回执](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y024-x136-europe.zip)
+[累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b13-review.csv) · [欧洲首批查图索引](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y024-x136-europe-reviewed.jpg) · [258 张原始 PNG 及对应回执](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y024-x136-europe.zip)
 
 ## 已有冰架与运行时修复
 
@@ -113,7 +113,7 @@ HydroRIVERS v1 的季节与历史证据有限。现场画面反投和模型距�
 
 按 Y=0…127、X=0…255 编号，瓦片西缘为 `-180+X×1.40625°`，北缘为 `90-Y×1.40625°`。每个 8×8 批次记录相机、两个倍率、必要覆盖子图、版本、实绘页、混合、页预算和原图路径。逐页结论来自逐图查看。缩略图供查找原图，局部专题独立记录。
 
-累计实际逐页查看 **830／32,768（2.53%）**。PASS 708，FAIL 0，SOURCE_UNCERTAIN 122，NOT_RENDERED 31,938。含北极十二批 `X=0…95, Y=0…7` 共 768 页及欧洲首批 62 页。北极每批 416 张逐页原图，另有极区两档共用实拍。
+累计实际逐页查看 **830／32,768（2.53%）**。PASS 708，FAIL 1，SOURCE_UNCERTAIN 121，NOT_RENDERED 31,938。含北极十二批 `X=0…95, Y=0…7` 共 768 页及欧洲首批 62 页。北极每批 416 张逐页原图，另有极区两档共用实拍。
 
 首批 `X=0…7, Y=0…7` 为 58 页 PASS、6 页 SOURCE_UNCERTAIN。北极辅助图覆盖常规视角最北端的窄带，共用原图在每个相关页记录中列出。北冰洋 `7/0–3/0` 的区域 02/05 与近景 04/08 等镜有淡细纹，`7/2–3/3` 的重叠近景 00 有短纵暗纹。
 
