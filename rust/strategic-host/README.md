@@ -14,13 +14,15 @@
 
 © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium.
 
+WorldCover 2021 v200 是现代地表覆盖，用于地貌配色。1900 年政治边界、经济和交通资料采用各自的历史来源。1900 年的地表覆盖尚未重建。
+
 Z5–Z7 的预览使用同一网格和新的全球高程母栅格。原始输入为 GMT 的 SRTM15+ V2.5.5，15 角秒、像元中心配准，统一使用米。将下载文件保存为原始资料缓存中的 `gmt-15s-p-nju.grd`。较低层从同一母栅格降采样，独立的 Z4 预览可继续运行。地表采用 ESA WorldCover 缓存原有的每 3° 562 个样点。湖泊、海岸、冰川和河流沿用相同来源和统一规则。[GMT 高程文件](https://mirror.nju.edu.cn/gmtdata/earth_relief_15s_p.grd) · [SRTM15+ 方法](https://doi.org/10.1029/2019EA000658)
 
 使用 `python tools/build_natural_terrain.py --through 5 <原始资料缓存> <Natural Earth 矢量目录> <输出目录>/worldcrs84quad-15s-v1` 生成到 Z5。通过构建核验并检查 Rust 实机后，以 `--through 6` 和 `--through 7` 续建。每级压成一个可定位瓦片的文件，构建核验解压后的共享高程、颜色、两极边界和父子高程。阶段间复用同一份临时母栅格，Z7 打包后清理临时栅格。运行候选时传入 `--play --data <原有游戏数据目录> --terrain-candidate <worldcrs84quad-15s-v1>`。Rust 只读取当前视野所需的地貌颜色，政治、经济和军事资源继续从原有数据目录加载。
 
 使用 `python tools/build_natural_terrain.py --repack <worldcrs84quad-15s-v1> <worldcrs84quad-15s-v2>` 从完整 Z0–Z7 包生成压缩候选。重打包和复核 v2 需要 Python 的 `zstandard`。每级一个带索引的 `.qpk`，颜色和高程分别存成独立的 Zstandard 帧，压缩等级为 6。保留 BC7 原始块、Alpha 海陆覆盖和 4 像素边缘。16 位有符号米制高程以水平及垂直差分、ZigZag 及字节平面可逆存储。生成时逐瓦片对照原包，并复核全球共享边缘、两极、反经线、父子高程和原有河网。试运行时将 `--terrain-candidate` 指向 v2 目录。
 
-LOD 使用视口中心的投影比例。将当前纬度的东西、南北采样轴换算为屏幕像素，以两轴均方根求目标层级。相邻等级以半个层级为切换中心，滞回范围为上下各 0.12 级。视野超过固定瓦片缓存时使用可完整覆盖视口的较粗层。目标瓦片就绪前显示父级，边缘跟随相邻瓦片就绪状态过渡。观察接口的 `terrain_decode_ms` 记录颜色帧解压，`tile_load_ms` 记录请求到工作线程结果送达的时间。
+LOD 使用视口中心的投影比例。将当前纬度的东西、南北采样轴换算为屏幕像素，以两轴均方根求目标层级。相邻等级以半个层级为切换中心，滞回范围为上下各 0.12 级。自动模式优先加载视口及其父级。剩余页用于预取视口外的地貌。视口本身超过固定页预算时使用可完整覆盖视口的较粗层。观察接口的 `viewport_detail_pages` 记录视口包围范围内到目标层的页数，`required_detail_pages` 含预取范围。目标瓦片就绪前显示父级，边缘跟随相邻瓦片就绪状态过渡。`terrain_decode_ms` 记录颜色帧解压，`tile_load_ms` 记录请求到工作线程结果送达的时间。
 
 法国、英国、德国、俄罗斯、清帝国和日本共用一份 1900 年历史资料和模拟规则。选择国家会选定玩家及其开局地点。50 个统计市场共用 Rust 正式时钟。Rust 执行跨日市场结算、统计货运、当地统计市场现货交易、个人库存和消费。巴黎的原开局岗位、劳动合同、工作和有限企业余额下的工资由 Rust 执行。
 

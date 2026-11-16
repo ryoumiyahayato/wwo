@@ -1739,7 +1739,8 @@ fn record_error(target:&Path,text:&str) {
 fn main() {
     if let Err(e)=run(){
         #[cfg(windows)]
-        if !std::env::args_os().any(|arg|arg=="--terrain-review") {desktop_start::show_error(&e.to_string());}
+        if std::env::args_os().any(|arg|arg=="--terrain-review"||arg=="--background") {eprintln!("{e}");}
+        else {desktop_start::show_error(&e.to_string());}
         #[cfg(not(windows))]
         eprintln!("{e}");
         std::process::exit(1);
@@ -1748,8 +1749,9 @@ fn main() {
 fn run() -> Result<(),Box<dyn std::error::Error>> {
     let started=Instant::now();
     let args=Config::parse()?;
-    let error_log=if args.terrain_review {args.observe.as_ref().unwrap().with_extension("error.txt")}
-        else {args.root.parent().unwrap_or(&args.root).join("startup-error.txt")};
+    let error_log=args.observe.as_ref().filter(|_|args.background).map_or_else(
+        ||args.root.parent().unwrap_or(&args.root).join("startup-error.txt"),
+        |path|path.with_extension("error.txt"));
     let panic_log=error_log.clone();
     std::panic::set_hook(Box::new(move |e|record_error(&panic_log,&e.to_string())));
     let events=EventLoop::<HostEvent>::with_user_event().build()?;
