@@ -58,3 +58,16 @@ QPK 高程用于地貌源和接缝数据验证。该观察入口以地球面渲�
 - 复用完整 [Z7 QPK](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/7.qpk) 与同发布的 `index.json`、Z6。正式回退归档为 [rust-native-windows-20261115](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)。
 - [同取景修复前后连续帧](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-seams-before-after.mp4) · [跨层和固定层连续帧](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-seams-motion.mp4) · [像素变化范围](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-seams-pixel-footprint.png) · [逐帧回执、全球检查及正式窗口帧时](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-seam-observations.json.gz)
 - [格陵兰冰面](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-reference-greenland.png) · [马斯克林海台](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-reference-mascarene.png)
+
+## 530 → 970 米／像素专项收尾
+
+阿尔卑斯与瓦登海各以相同中心、无旋转、1280×720 连续比较自动 LOD、锁定 Z7 和锁定 Z6。锁层对照在先加载的 970 米／像素取景下准备好广域瓦片，再回到 530 执行相同输入。每条保留 64 个 GPU 帧。帧号从 0 起，第 11 帧为 530，第 12 帧跳至 970。
+
+| 中央画面 960×450，8 位亮度值 | 阿尔卑斯 | 瓦登海 |
+| --- | ---: | ---: |
+| 自动 LOD，整个缩放的亮度平均绝对差 | 28.47 | 21.81 |
+| 始终锁定 Z7，单纯缩放的亮度平均绝对差 | 29.69 | 22.26 |
+| 同为 970，纯 Z7 与自动 Z6 的亮度平均绝对差 | 4.78 | 2.37 |
+| 同为 970，LOD 单独造成的平均亮度偏移 | +0.10 | +0.06 |
+
+自动第 12 帧的中央区域与相同倍率的纯 Z6 对照及自动第 13 帧逐像素一致。缩放扩大取景是明暗和颜色变化的主因；LOD 另有局部纹理阶跃。历史暖缓存缺 32 张，本次阿尔卑斯冷路线缺 58 张。单帧直接越过预取缓冲，推进前无法保证新视口所需瓦片齐备。现有整幅回退保留，弱化局部细节的变化仍发生在一帧。附 [同输入连续画面对照](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-fast-jump-comparison.mp4) 和 [回执](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-fast-jump-frames.json.gz)。
