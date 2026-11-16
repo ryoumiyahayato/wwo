@@ -64,7 +64,7 @@ HydroRIVERS v1 的季节与历史证据有限。现场画面反投和模型距�
 
 按 Y=0…127、X=0…255 编号，瓦片西缘为 `-180+X×1.40625°`，北缘为 `90-Y×1.40625°`。每个 8×8 批次记录相机、两个倍率、必要覆盖子图、版本、实绘页、混合、页预算和原图路径。逐页结论来自逐图查看。缩略图供查找原图，局部专题独立记录。
 
-累计实际逐页目视完成 **256／32,768（0.781%）**。PASS 247，FAIL 0，SOURCE_UNCERTAIN 9，NOT_RENDERED 32,512。已完成四批各 416 张逐页原图，另有极区两档共用实拍。
+累计实际逐页目视完成 **320／32,768（0.977%）**。PASS 309，FAIL 0，SOURCE_UNCERTAIN 11，NOT_RENDERED 32,448。已完成五批各 416 张逐页原图，另有极区两档共用实拍。
 
 首批 `X=0…7, Y=0…7` 为 58 页 PASS、6 页 SOURCE_UNCERTAIN。北极辅助图覆盖常规视角最北端的窄带，共用原图在每个相关页记录中列出。北冰洋 `7/0–3/0` 的区域 02/05 与近景 04/08 等镜有淡细纹，`7/2–3/3` 的重叠近景 00 有短纵暗纹。
 
@@ -88,14 +88,20 @@ HydroRIVERS v1 的季节与历史证据有限。现场画面反投和模型距�
 
 第三批 `7/19/0` 区域 02 镜中，横切斜纹的四个 GPU 像素 (792,517)、(796,517)、(800,517)、(804,517) 的 G 值为 55、52、52、54，WGS84 反投对应 SRTM15+ 深度约为 −3,142、−4,016、−4,000、−3,427 米。斜纹跨多个 BC7 块，三版 QPK 原始记录一致。四个代表点在 SRTM15+ V2.5.5 的 SID 小窗为 0，在 GEBCO 2024 北极 TID 格网中为 41（算法插值）。显示变化来自深度格网，细束是否对应实际海底结构仍待核实。 [SRTM15+ 版本说明](https://topex.ucsd.edu/pub/srtm15_plus/README_V2.5.txt) · [GEBCO 北极服务](https://www.gebco.net/data-products/gebco-web-services/web-map-service#test-wms-layers-for-polar-regions) · [TID 编码](https://www.gebco.net/gebco-tid-grid)
 
+第五批 `X=32…39, Y=0…7` 为 62 页 PASS、2 页 SOURCE_UNCERTAIN。`7/32/0` 近景 00 在 (632,466) 与 (620,522) 处可见页内暗纹，反投为 134.54032°W／89.25492°N 与 134.88788°W／89.23273°N。`7/33/0` 西缘内可见弱尾迹，近景 03 位于 133.48145°W／89.04060°N。两页四角及同层边界未见矩形硬缝。部分画面在 89.43°N 还观察到目标范围外 `7/62–65/0` 的类似细纹，等该批逐页复核。
+
+![第五批 64 页导航](terrain-z7-visual/batch-y000-x032.jpg)
+
+![Z7/32/0 近景 00 原始 GPU 帧，暗纹位于画面下方](terrain-z7-visual/arctic-stripes-z7-32-0.png)
+
 续拍使用上一版本已验证的 Rust 宿主。先恢复本次索引指定的候选资源。每个取景保留实际 Z7 回执，逐张复核时从原图路径读图。重新索引应同时提供已经归档的上批 ZIP 和原有人工记录。
 
 ```text
-python rust/strategic-host/tools/capture_z7_pages.py --exe <Rust宿主> --data <只读游戏数据> --terrain-candidate <候选目录> --program-revision <实际程序提交> --out <实拍目录> --batch-x 32 --batch-y 0
-python rust/strategic-host/tools/index_z7_pages.py --captures <实拍目录> --out <归档目录> --review <已查看原图的记录.csv> --batch-x 32 --batch-y 0 --zip
+python rust/strategic-host/tools/capture_z7_pages.py --exe <Rust宿主> --data <只读游戏数据> --terrain-candidate <候选目录> --program-revision <实际程序提交> --out <实拍目录> --batch-x 40 --batch-y 0
+python rust/strategic-host/tools/index_z7_pages.py --captures <实拍目录> --out <归档目录> --review <已查看原图的记录.csv> --batch-x 40 --batch-y 0 --zip
 ```
 
-[累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b04.csv) · [首批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x000.zip) · [第二批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x008.zip) · [第三批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x016.zip) · [第四批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x024.zip) · [八个原坐标 24 张原图及两极图](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-site-png.zip)。
+[累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b05.csv) · [首批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x000.zip) · [第二批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x008.zip) · [第三批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x016.zip) · [第四批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x024.zip) · [第五批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x032.zip) · [八个原坐标 24 张原图及两极图](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-site-png.zip)。
 
 ## 保留项与恢复
 
