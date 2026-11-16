@@ -64,7 +64,7 @@ HydroRIVERS v1 的季节与历史证据有限。现场画面反投和模型距�
 
 按 Y=0…127、X=0…255 编号，瓦片西缘为 `-180+X×1.40625°`，北缘为 `90-Y×1.40625°`。每个 8×8 批次记录相机、两个倍率、必要覆盖子图、版本、实绘页、混合、页预算和原图路径。逐页结论来自逐图查看。缩略图供查找原图，局部专题独立记录。
 
-累计实际逐页目视完成 **576／32,768（1.7578125%）**。PASS 523，FAIL 0，SOURCE_UNCERTAIN 53，NOT_RENDERED 32,192。已完成九批，每批 416 张逐页原图，另有极区两档共用实拍。范围为 `X=0…71, Y=0…7`。
+累计实际逐页目视完成 **640／32,768（1.953125%）**。PASS 565，FAIL 0，SOURCE_UNCERTAIN 75，NOT_RENDERED 32,128。已完成十批，每批 416 张逐页原图，另有极区两档共用实拍。范围为 `X=0…79, Y=0…7`。
 
 首批 `X=0…7, Y=0…7` 为 58 页 PASS、6 页 SOURCE_UNCERTAIN。北极辅助图覆盖常规视角最北端的窄带，共用原图在每个相关页记录中列出。北冰洋 `7/0–3/0` 的区域 02/05 与近景 04/08 等镜有淡细纹，`7/2–3/3` 的重叠近景 00 有短纵暗纹。
 
@@ -134,14 +134,22 @@ GEBCO 全球 TID 服务在第五批 `7/32–33/0` 的三个疑点返还 41（算
 
 沃顿半岛白色突缘在 `7/67/5` 的一处取样位于 85.254839°W、82.469655°N。QPK 水域通道为 0，高程 +8 米，Natural Earth 标注陆地和冰盖，CanVec 1:50,000 海岸数据也将该点置于岸上。西侧 86.056415°W、82.307785°N 的浅青取样位于 `7/66/5`，水域通道为 255，近岸高程 0 米。加拿大航路指南记载 Alert Point 及东岸为低矮覆冰海岸，邻近水域浅于 100 米。上述取样支持保留陆冰与浅水颜色。峡湾直线轮廓的完整来源及 1900 年岸形仍待核实。 [CanVec](https://open.canada.ca/data/en/dataset/8ba2aa2a-7bb9-4448-b4d7-f164409fe056?res_page=1) · [加拿大航路指南，第 12 章](https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/chs-shc-ARC402-eng-202501-41273515.pdf)
 
+第十批 `X=72…79, Y=0…7` 为 42 页 PASS、22 页 SOURCE_UNCERTAIN。疑点包括 Y0 近极暗纹、Y4 北埃尔斯米尔岛外海浅青轮廓、Y6 冰盖斜纹及近岸和冰面线。逐页 CSV 记录对应镜号和坐标。格陵兰冰面蓝折线的旁页证据位于 `7/82/7`，约 63.85–64.59°W、79.62°N，留待该页两档覆盖复核。黑曾湖与钱德勒峡湾之间存在拉格尔斯河，`7/78/5` 实绘的直线感仍需核对河段形状。 [加拿大航路指南，第 11 章](https://publications.gc.ca/collections/collection_2022/mpo-dfo/Fs74-4-2021-12-eng.pdf)
+
+![第十批 64 页导航](terrain-z7-visual/batch-y000-x072.jpg)
+
+![Z7/74/4 沃德亨特外海轮廓原始 GPU 帧](terrain-z7-visual/ward-hunt-z7-74-4.png)
+
+沃德亨特外海的浅青轮廓从 `7/72/4` 延伸至 `7/75/4`。`7/73/4` 在 76.640625°W 的 83.189080°N 与 83.122009°N 两点，QPK 高程为 −86、0 米，水域通道均为 255。SRTM15+ 同点插值为 −90.93、−0.62 米。`7/74/4` 在 75.234375°W 的 83.207372°N 与 83.142333°N 两点，QPK 高程为 −149、0 米，SRTM15+ 为 −149.17、0 米。这四点在 Natural Earth 陆地、湖泊及冰盖多边形之外，原版和候选对应像元一致。海色随深度变化，可见轮廓来自输入格网的近零深度区。1960 年测绘描述沃德亨特冰架外缘约在 83°12′N，记录与部分轮廓邻近。格网是否沿用了历史冰面高程及当代实测水深仍待核实，本批保留原数据。 [1960 年沃德亨特冰架取芯研究](https://www.cambridge.org/core/journals/journal-of-glaciology/article/ice-core-studies-of-ward-hunt-ice-shelf-1960/EB841F473CD3E5F1BADEB359A0357542) · [SRTM15+ 版本说明](https://topex.ucsd.edu/pub/srtm15_plus/README_V2.5.txt)
+
 续拍使用上一版本已验证的 Rust 宿主。先恢复本次索引指定的候选资源。每个取景保留实际 Z7 回执，逐张复核时从原图路径读图。重新索引应同时提供已经归档的上批 ZIP 和原有人工记录。
 
 ```text
-python rust/strategic-host/tools/capture_z7_pages.py --exe <Rust宿主> --data <只读游戏数据> --terrain-candidate <候选目录> --program-revision <实际程序提交> --out <实拍目录> --batch-x 72 --batch-y 0
-python rust/strategic-host/tools/index_z7_pages.py --captures <实拍目录> --out <归档目录> --review <已查看原图的记录.csv> --batch-x 72 --batch-y 0 --zip
+python rust/strategic-host/tools/capture_z7_pages.py --exe <Rust宿主> --data <只读游戏数据> --terrain-candidate <候选目录> --program-revision <实际程序提交> --out <实拍目录> --batch-x 80 --batch-y 0
+python rust/strategic-host/tools/index_z7_pages.py --captures <实拍目录> --out <归档目录> --review <已查看原图的记录.csv> --batch-x 80 --batch-y 0 --zip
 ```
 
-[累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b09.csv) · [首批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x000.zip) · [第二批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x008.zip) · [第三批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x016.zip) · [第四批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x024.zip) · [第五批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x032.zip) · [第六批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x040.zip) · [第七批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x048.zip) · [第八批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x056.zip) · [第九批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x064.zip) · [八个原坐标 24 张原图及两极图](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-site-png.zip)。
+[累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b10.csv) · [首批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x000.zip) · [第二批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x008.zip) · [第三批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x016.zip) · [第四批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x024.zip) · [第五批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x032.zip) · [第六批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x040.zip) · [第七批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x048.zip) · [第八批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x056.zip) · [第九批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x064.zip) · [第十批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x072.zip) · [八个原坐标 24 张原图及两极图](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-site-png.zip)。
 
 ## 保留项与恢复
 
