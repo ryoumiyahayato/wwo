@@ -291,7 +291,9 @@ impl ViewportTransition {
         for &(key,margin) in &self.nearby {
             if !pages.contains_key(&key) {
                 self.missing+=usize::from(margin==0.);
-                coverage=coverage.min(margin);
+                // An outgoing Z7 needs its current viewport, even when no
+                // further detail is available outside the retreating view.
+                if target || level!=MAX_LEVEL || margin==0. {coverage=coverage.min(margin);}
             }
         }
         if self.visible==0 || coverage==0.
@@ -306,12 +308,13 @@ impl ViewportTransition {
         let exit_span=if level<=4 {0.05} else {0.37};
         let t=((lod-exit)/exit_span).clamp(0.,1.) as f32;
         self.goal=if target {t*t*(3.-2.*t)} else {0.};
-        // Reserve the existing prefetch margin for panning and widening the view.
-        // A missing tile approaching the view lowers the whole transition together.
+        // Start yielding before a missing tile enters the viewport. At Z7 the
+        // margin is advisory: complete visible coverage can still fade gradually.
         let ceiling=coverage*coverage*(3.-2.*coverage);
         self.goal=self.goal.min(ceiling);
         let step=seconds.min(1./30.)/PAGE_FADE_SECONDS;
-        self.mix=(self.mix+(self.goal-self.mix).clamp(-step,step)).min(ceiling);
+        self.mix+=(self.goal-self.mix).clamp(-step,step);
+        if level!=MAX_LEVEL {self.mix=self.mix.min(ceiling);}
     }
 }
 
@@ -557,12 +560,16 @@ impl Terrain {
         let coarse_pages=((1usize..=COARSE_CACHE_LEVEL as usize).map(|level|2<<(2*level))).sum::<usize>();
         let reserve_coarse=!exact && (COARSE_CACHE_LEVEL..=COARSE_CACHE_LEVEL+1).contains(&target)
             && capacity>=coarse_pages;
+        let half_diagonal=f64::from(size[0]).hypot(f64::from(size[1])/camera.pitch().cos())*0.5;
         // Keep a grouped parent ready for a rapid zoom-out. A mip
         // doubles the span, including the ordinary margin, without adding atlas slots.
         let parent_prefetch=if !exact && target>GROUPED_LOD_START {
-            let half_diagonal=f64::from(size[0]).hypot(f64::from(size[1])/camera.pitch().cos())*0.5;
             camera.extent(size,half_diagonal+360.)
         } else {0.};
+        // Spare slots can retain detail through about three outward wheel steps.
+        // Visible pages, the ordinary margin and the immediate parent have priority.
+        let retreat_prefetch=if !exact && target==MAX_LEVEL {camera.extent(size,half_diagonal*0.85)}else{0.};
+        let retiring_detail=!exact && target+1==MAX_LEVEL && self.transitions[GROUPED_LOD_COUNT-1].mix>0.;
         let mut needed=[false;GROUPED_LOD_COUNT];
         let mut inspected=target;
         for (index,transition) in self.transitions.iter_mut().enumerate() {
@@ -581,7 +588,9 @@ impl Terrain {
             let reserved=(reserve_coarse && tile.key.0<=COARSE_CACHE_LEVEL)
                 || (parent_prefetch>0. && tile.key.0<target
                     && proximity>=(parent_prefetch+tile.radius).min(std::f64::consts::PI).cos());
-            if near_view || reserved {
+            let retreat_detail=retreat_prefetch>0. && tile.key.0==MAX_LEVEL
+                && proximity>=(retreat_prefetch+tile.radius).min(std::f64::consts::PI).cos();
+            if near_view || reserved || retreat_detail {
                 let in_view=proximity>=(viewport+tile.radius).min(std::f64::consts::PI).cos();
                 if let Some(index)=grouped_lod(tile.key.0) {
                     if needed[index] && near_view {
@@ -599,8 +608,12 @@ impl Terrain {
                 }
                 if tile.key.0<=target {
                     self.viewport_pages+=usize::from(in_view);
-                    let priority=if !exact && in_view {2} else {u8::from(near_view)};
+                    let priority=if !exact && in_view {4} else if near_view {3}
+                        else if target==MAX_LEVEL && tile.key.0+1==target {2}
+                        else {u8::from(retreat_detail)};
                     near.push((tile.key,proximity,priority));
+                } else if retiring_detail && in_view && self.pages.contains_key(&tile.key) {
+                    near.push((tile.key,proximity,2));
                 }
             }
         }
@@ -609,7 +622,7 @@ impl Terrain {
             other_priority.cmp(priority).then_with(||a.0.cmp(&b.0)).then_with(||y.total_cmp(x)));
         self.view_max=target;
         self.required_pages=near.len();
-        if let Some(&(Key(overflow,_,_),_,2))=near.get(capacity) {
+        if let Some(&(Key(overflow,_,_),_,4))=near.get(capacity) {
             // Keep a complete visible level when the viewport itself exceeds the budget.
             self.view_max=overflow.saturating_sub(1);
             near.retain(|&(key,_,_)|key.0<=self.view_max);
