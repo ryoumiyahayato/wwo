@@ -64,7 +64,7 @@ HydroRIVERS v1 的季节与历史证据有限。现场画面反投和模型距�
 
 按 Y=0…127、X=0…255 编号，瓦片西缘为 `-180+X×1.40625°`，北缘为 `90-Y×1.40625°`。每个 8×8 批次记录相机、两个倍率、必要覆盖子图、版本、实绘页、混合、页预算和原图路径。逐页结论来自逐图查看。缩略图供查找原图，局部专题独立记录。
 
-累计实际逐页目视完成 **384／32,768（1.172%）**。PASS 365，FAIL 0，SOURCE_UNCERTAIN 19，NOT_RENDERED 32,384。已完成六批各 416 张逐页原图，另有极区两档共用实拍。
+累计实际逐页目视完成 **448／32,768（1.367%）**。PASS 421，FAIL 0，SOURCE_UNCERTAIN 27，NOT_RENDERED 32,320。已完成七批各 416 张逐页原图，另有极区两档共用实拍。
 
 首批 `X=0…7, Y=0…7` 为 58 页 PASS、6 页 SOURCE_UNCERTAIN。北极辅助图覆盖常规视角最北端的窄带，共用原图在每个相关页记录中列出。北冰洋 `7/0–3/0` 的区域 02/05 与近景 04/08 等镜有淡细纹，`7/2–3/3` 的重叠近景 00 有短纵暗纹。
 
@@ -94,7 +94,7 @@ HydroRIVERS v1 的季节与历史证据有限。现场画面反投和模型距�
 
 ![Z7/32/0 近景 00 原始 GPU 帧，暗纹位于画面下方](terrain-z7-visual/arctic-stripes-z7-32-0.png)
 
-第六批 `X=40…47, Y=0…7` 为 56 页 PASS、8 页 SOURCE_UNCERTAIN。`7/40–47/0` 近景可见低对比细纹，目标页的四边、四角和极点交汇未见硬缝。以 `7/47/0` 为例，近景 00 镜的 (625,500) 回算为 113.63642°W、89.24126°N。相同目标的区域 00 两侧较强的斜纹分别落在 `7/33/0` 和 `7/64/0`。每个页内细纹的坐标和镜号见累计逐页 CSV。下一批为 `X=48…55, Y=0…7`。
+第六批 `X=40…47, Y=0…7` 为 56 页 PASS、8 页 SOURCE_UNCERTAIN。`7/40–47/0` 近景可见低对比细纹，目标页的四边、四角和极点交汇未见硬缝。以 `7/47/0` 为例，近景 00 镜的 (625,500) 回算为 113.63642°W、89.24126°N。相同目标的区域 00 两侧较强的斜纹分别落在 `7/33/0` 和 `7/64/0`。每个页内细纹的坐标和镜号见累计逐页 CSV。
 
 ![第六批 64 页导航](terrain-z7-visual/batch-y000-x040.jpg)
 
@@ -102,14 +102,22 @@ HydroRIVERS v1 的季节与历史证据有限。现场画面反投和模型距�
 
 GEBCO 全球 TID 服务在第五批 `7/32–33/0` 的三个疑点返还 41（算法插值），在马斯克林条带与两侧三个疑点返还 40（卫星重力约束插值）。这些代码记录来源类型，现场深度仍待核实。候选仍使用原始高程。 [GEBCO 全球 WMS](https://www.gebco.net/data-products/gebco-web-services/web-map-service) · [TID 编码](https://www.gebco.net/gebco-tid-grid)
 
+第七批 `X=48…55, Y=0…7` 为 56 页 PASS、8 页 SOURCE_UNCERTAIN。`7/48–55/0` 的近景 06 可见淡放射细纹。以 `7/55/0` 为例，像素 (625,408) 对应 102.52041°W、89.42048°N。该批目标页的共享边及极点交汇未见硬缝。第七行南侧群岛岸线及水道跨页连续。
+
+![第七批 64 页导航](terrain-z7-visual/batch-y000-x048.jpg)
+
+另将第六批 `7/46/0` 近景 00 的四个横切像素反投至约 89.2571°N。由 115.05190°W 向东至 114.86879°W，GPU 的 G 值为 60、61、60、61。SRTM15+ V2.5.5 在同点的双线性深度为 −1,950、−1,825、−1,982、−1,863 米。GEBCO 全球 2026 TID 在四点均为 41（插值），北极区域 2024 TID 均为 11（多波束）。SRTM15+ 的高纬底图使用 200 米极地投影的 IBCAO V4。母格网本身在代表性横切上高低交替，资料版本间的测线标识不同，四点的实地深度及整片细纹成因仍待证。 [SRTM15+ 版本说明](https://topex.ucsd.edu/pub/srtm15_plus/README_V2.5.txt) · [IBCAO V4](https://www.gebco.net/about/committees-and-groups/scrum/ibcao/ibcao-v4) · [GEBCO 来源分类](https://www.gebco.net/gebco-tid-grid)
+
+![Z7/46/0 近景 00 原始 GPU 帧，横切位于画面 (625–631,460)](terrain-z7-visual/arctic-stripes-z7-46-0.png)
+
 续拍使用上一版本已验证的 Rust 宿主。先恢复本次索引指定的候选资源。每个取景保留实际 Z7 回执，逐张复核时从原图路径读图。重新索引应同时提供已经归档的上批 ZIP 和原有人工记录。
 
 ```text
-python rust/strategic-host/tools/capture_z7_pages.py --exe <Rust宿主> --data <只读游戏数据> --terrain-candidate <候选目录> --program-revision <实际程序提交> --out <实拍目录> --batch-x 48 --batch-y 0
-python rust/strategic-host/tools/index_z7_pages.py --captures <实拍目录> --out <归档目录> --review <已查看原图的记录.csv> --batch-x 48 --batch-y 0 --zip
+python rust/strategic-host/tools/capture_z7_pages.py --exe <Rust宿主> --data <只读游戏数据> --terrain-candidate <候选目录> --program-revision <实际程序提交> --out <实拍目录> --batch-x 56 --batch-y 0
+python rust/strategic-host/tools/index_z7_pages.py --captures <实拍目录> --out <归档目录> --review <已查看原图的记录.csv> --batch-x 56 --batch-y 0 --zip
 ```
 
-[累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b06.csv) · [首批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x000.zip) · [第二批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x008.zip) · [第三批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x016.zip) · [第四批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x024.zip) · [第五批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x032.zip) · [第六批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x040.zip) · [八个原坐标 24 张原图及两极图](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-site-png.zip)。
+[累计逐页 CSV](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-global-pages-b07.csv) · [首批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x000.zip) · [第二批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x008.zip) · [第三批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x016.zip) · [第四批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x024.zip) · [第五批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x032.zip) · [第六批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x040.zip) · [第七批原始 PNG 及同帧坐标和状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-batch-y000-x048.zip) · [八个原坐标 24 张原图及两极图](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-site-png.zip)。
 
 ## 保留项与恢复
 
