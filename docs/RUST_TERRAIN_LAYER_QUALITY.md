@@ -179,13 +179,13 @@ S3 独立复核 Z7 旧版 30 组 PNG 与同帧状态。所有截图背景离屏�
 | Z4 | 32 × 16 | 512 | 992 | 0 | 0.75 |
 | Z5 | 64 × 32 | 2,048 | 4,032 | 0 | 1.00 |
 | Z6 | 128 × 64 | 8,192 | 16,256 | 0 | 0.75 |
-| Z7 | 256 × 128 | 32,768 | 待核验 | 待核验 | 待核验 |
+| Z7 | 256 × 128 | 32,768 | 65,280 | 0 | 0.75 |
 
 ### 单层候选实际画面
 
-每层有 14 张七洲随机截图，两档各一张，另有地貌和边界专项。Z4 的 22 张正式取景采用重抽的 12 张与保留的南极两张，首轮剩余 12 张另存。Z3 和 Z5 各补一张新西兰陆地区域作为大洋洲专项，分别为 `168,-44 / 7000 m/px / 3/15/5` 与 `172,-42 / 1850 m/px / 5/62/23`。
+每层有 14 张七洲随机截图，两档各一张，八层合计 112 张。另有地貌和边界专项。Z4 的 22 张正式取景采用重抽的 12 张与保留的南极两张，首轮剩余 12 张另存。Z3 和 Z5 各补一张新西兰陆地区域作为大洋洲专项，分别为 `168,-44 / 7000 m/px / 3/15/5` 与 `172,-42 / 1850 m/px / 5/62/23`。
 
-Z0–Z6 随机帧的实际中心瓦片和倍率均与冻结表一致。Z0–Z2 为正射投影，Z3 按取景使用正射或方位等距，Z4–Z6 为方位等距。窗口状态均为离屏、未聚焦、无正式会话。可见地表的九点采样中仅有指定层贡献，稳定回执记录所选页已就绪。Z6 两个极点专项各占 256 页。Z0–Z2 的正射视界外采样点没有地表，低层细河道与小岛岸线超出判读尺度。
+Z0–Z7 随机帧的实际中心瓦片和倍率均与冻结表一致。Z0–Z2 为正射投影，Z3 按取景使用正射或方位等距，Z4–Z7 为方位等距。窗口状态均为离屏、未聚焦、无正式会话。可见地表的九点采样中仅有指定层贡献，稳定回执记录所选页已就绪。Z6、Z7 的两个极点专项各占 256 页。Z7 的南极随机两档为 80、60 m/px，分别使用 225、173 页。Z0–Z2 的正射视界外采样点没有地表，低层细河道与小岛岸线超出判读尺度。
 
 | 层 | 七洲两档及地貌结论 | 专项画面及施工结论 | 责任与状态 |
 | --- | --- | --- | --- |
@@ -196,14 +196,27 @@ Z0–Z6 随机帧的实际中心瓦片和倍率均与冻结表一致。Z0–Z2 �
 | Z4 | 河套与戈壁、高加索与里海、几内亚湾和刚果盆地、哈德孙湾和格陵兰、北安第斯、昆士兰至新几内亚沿岸、南极冰盖可辨。 | 22 帧，加留首轮 12 帧。密西西比、阿塔卡马、海岸及开阔水面可辨。羌塘白斑减退。外海条带和冰盖河线待查源。 | S1 全球修复、M0 出包与取景、S3 复核。数据与画面已核。 |
 | Z5 | 印度及孟加拉湾、乌拉尔、马达加斯加、加拿大北部、安第斯至亚马孙、太平洋西部岛区、南极冰面可辨。 | 23 帧。新西兰南岛山脉、峡岸及库克海峡可辨。羌塘恢复岩土色。撒哈拉水道色与马达加斯加外海条带待查源。 | S1 全球修复、M0 出包与取景、S3 复核。数据与画面已核。 |
 | Z6 | 河西走廊周边戈壁、斯瓦尔巴冰岸、非洲沙漠、落基山脉至平原、拉普拉塔低地、马里亚纳岛链、南极内陆冰面可辨。 | 22 帧。萨瓦河谷、迪纳拉山脉、尼罗河三角洲、开阔海面和边界可辨。羌塘恢复山影、湖泊和岩土色。 | S1 全球修复、M0 出包与取景、S3 复核。数据与画面已核。 |
-| Z7 | 旧版两档七洲诊断已独立复核。 | 候选整层待生成，之后检原问题和重抽七洲。 | S1 全球修复已写入共享生成规则。候选画面及统一运行时验收待完成。 |
+| Z7 | 鄂霍次克海岸山地、阿尔卑斯与前缘湖群、撒哈拉北缘、南达科他平原和密苏里河、安第斯前缘与大查科、科斯雷岛及浅海、南极内陆冰可辨。 | 32 帧。羌塘大面积泛白消退，零散峰顶雪仍可见。喜马拉雅、安第斯积雪和南极半岛冰岸可辨。加看博斯腾湖、Óbidos、塔里木下游、多佛海峡和新西兰北岛。 | S1 全球修复、M0 出包与取景、S3 复核。数据与画面已核。 |
 
-阶段实拍静帧未见明显同层矩形接缝、缺页或黑块。样本海面不判定季节海冰。候选仍待统一运行时复核。
+188 张分层及补充帧中，抽样静帧未见明显同层瓦片接缝、整页缺口或黑块。另保留 Z4 首轮 12 张补充。样本海面无法判定季节海冰。Z7 的 32 帧共检查 288 个有效采样点，全部只由 Z7 绘制。
 
+### 统一运行时的跨层取景
+
+完整候选库以 `--terrain-candidate` 进入自动 LOD。阿尔卑斯 `11.25,46.4`、羌塘 `89,33`、太平洋反经线 `179.85,-17.5` 各由 90,000 缩入至 360 m/px 再缩出。各处 19 个相机节点，各拍加载中、稳定各一张，共 114 帧。稳定帧的有效地表样本全部由单层绘制，选中页均就绪。
+
+| 地点 | 加载中中心混合 | 稳定结果 |
+| --- | --- | --- |
+| 阿尔卑斯 360 m/px | `7/136/31` 16.2%，`6/68/15` 83.8% | Z7 权重 1。回到 6,200 m/px 时 Z4 需 262 页，超过 256 页预算，整视图降至 Z3。 |
+| 羌塘 720 m/px | `7/191/40` 54.1%，`6/95/20` 45.9% | Z7 权重 1。裸地、湖泊与雪线在缩放过程中可辨。 |
+| 太平洋反经线 720 m/px | `7/255/76` 53.7%，`6/127/38` 46.3% | Z7 权重 1，经线两侧均取到实际瓦片。 |
+
+S2 复核页表、过渡与稳定帧，抽查未见明显黑块或矩形拼贴。17 个加载中帧的 26 个有效采样点出现相邻层混合，覆盖 Z0/Z1 至 Z6/Z7。6,200 m/px 的整视图降级与原版一致。连续高频输入的闪烁和正式游戏帧时仍未测。
+
+在高纬反经线 `179.8,65.7 / 355 m/px`，强制 Z7 的原版与候选都在 `(665,271)`、`(666,586)` 出现纯品红诊断像素。两点逆投影都紧贴 180°。着色器对经度作单精度环绕，结果可舍入到 1，令最后一列的页表访问越界。地貌着色器和 CPU 页表诊断把经度限制在有效范围内。新 Rust Release 构建用同机位分别复拍原版和候选，原先各两点均消失。再以 `179.9999,65.7 / 355 m/px` 跨线取景，也是零品红像素。用完整候选复拍 `179.85,-17.5` 自动 Z6→Z7，1,450 m/px 稳定 Z6，720 m/px 加载先混合 Z7 61.2% 和 Z6 38.8%，随后稳定为 Z7。[修复前](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-antimeridian-before-runtime-fix.png) · [修复后](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-antimeridian-fixed.png) · [自动切换](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/pacific-z6-z7-transition.png) · [自动稳定](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/pacific-z7-stable.png)
 
 ### 已定位的表现留项
 
-- 撒哈拉 Z5 `13°E, 25°N` 的蓝灰水道与 Z4 格陵兰冰盖的蓝线共用静态河网样式。源筛选用集水面积或长期平均流量，生成器未区分常流、间歇径流与冰面径流。点查格陵兰 `47.866°W, 68.165°N` 等四处位于冰川掩模内、湖泊掩模外。该区有实测夏季融水河，截图上的具体河段及季节尚待对应。博斯腾湖以东的孤立水线也保留待查。此规则影响 Z0–Z7。[HydroRIVERS 数据说明](https://www.hydrosheds.org/products/hydrorivers) · [格陵兰融水观测](https://www.cambridge.org/core/journals/journal-of-glaciology/article/seasonal-evolution-of-supraglacial-lakes-and-rivers-on-the-southwest-greenland-ice-sheet/A58F5C5FA511466BA1F55C5F8399FFDC)
+- 撒哈拉 Z5 `13°E, 25°N` 的蓝灰水道与 Z4 格陵兰冰盖的蓝线共用静态河网样式。源筛选用集水面积或长期平均流量，生成器未区分常流、间歇径流与冰面径流。点查格陵兰 `47.866°W, 68.165°N` 等四处位于冰川掩模内、湖泊掩模外。该区有实测夏季融水河，截图上的具体河段及季节尚待对应。博斯腾湖以东的孤立水线和 Z7 撒哈拉北缘的断续蓝线仍见于候选。Óbidos 主干连通，示意河宽与细弯存在概化。此规则影响 Z0–Z7。[HydroRIVERS 数据说明](https://www.hydrosheds.org/products/hydrorivers) · [格陵兰融水观测](https://www.cambridge.org/core/journals/journal-of-glaciology/article/seasonal-evolution-of-supraglacial-lakes-and-rivers-on-the-southwest-greenland-ice-sheet/A58F5C5FA511466BA1F55C5F8399FFDC)
 - 几内亚湾 Z4 和马达加斯加以东 Z5 的淡条带出现在已完整加载的连续海面。源点查匹配 SRTM15+ 的海深起伏。马达加斯加外海的宽亮带与实测马斯克林海台相符。本地缺少用于区分细条带的测深来源栅格，影响同一套 Z0–Z7 海深着色。[马斯克林海台航测](https://nora.nerc.ac.uk/id/eprint/144020/) · [SRTM15+ 数据论文](https://doi.org/10.1029/2019EA000658)
 
 ### 归档与恢复
@@ -211,5 +224,9 @@ Z0–Z6 随机帧的实际中心瓦片和倍率均与冻结表一致。Z0–Z2 �
 [全球候选私有 Release](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115) 按层保留 QPK 和少量关键帧。当前候选、可重拍 PNG、同帧 JSON 和母栅格在 `offline-map-sources/migration-20261115/terrain-quality-20261115`。原版 QPK 和原版关键帧见 [Windows 私有 Release](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)。
 
 关键帧来自所列相机参数。Z3 羌塘为固定取景，Z4 北安第斯为重抽近景，Z5 新西兰为补拍，Z6 尼罗河为固定地貌专项。[Z3 羌塘](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z3-tibet-grassland-after.png) · [Z4 北安第斯](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z4-northern-andes.png) · [Z5 新西兰南岛](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z5-south-island.png) · [Z6 尼罗河三角洲](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z6-nile-delta.png)
+
+Z7 固定地貌专项保留羌塘修复前后、喜马拉雅、南极半岛和湄公河三角洲。各图均为实际离屏帧。[羌塘原版](https://github.com/ryoumiyahayato/wwo/releases/download/rust-native-windows-20261115/z7-tibet-grassland-before.png) · [羌塘候选](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-tibet-grassland-after.png) · [喜马拉雅](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-himalaya-after.png) · [南极半岛](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-antarctic-peninsula-after.png) · [湄公河三角洲](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-mekong-delta.png)
+
+将候选 Release 的 `0.qpk` 至 `7.qpk`、`index.json` 和 `river-topology.u32` 下载到独立的 `worldcrs84quad-15s-v2` 目录。沿用 Windows Release 的其余运行数据与 [Rust 验收入口](../rust/strategic-host/README.md#全球地图验收)。整库用 `--terrain-candidate <候选目录>` 加载。单层按表选 QPK，用 `--terrain-level Z --terrain-layer-candidate <Z.qpk>` 单独复验，正式目录中的原版仍可回退。完整性和实际运行恢复结果记入候选 Release 说明。
 
 重任务串行。每次只运行一个全球生成、压缩、离屏或大型资源传输任务。正式游戏保留原版，此次归档供候选验收和恢复。

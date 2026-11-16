@@ -370,7 +370,7 @@ impl Terrain {
             let sample=camera.vector(pixel,size).map(geographic).map(|ll|{
                 let coordinates=ll.map(|n|n as f32);
                 let lon=coordinates[0]/360.+0.5;
-                let uv=[lon-lon.floor(),(0.5-coordinates[1]/180.).clamp(0.,0.99999994)];
+                let uv=[(lon-lon.floor()).min(0.99999994),(0.5-coordinates[1]/180.).clamp(0.,0.99999994)];
                 let target=cell(uv,self.target_level.unwrap_or(0)).0;
                 let mut remaining=1.;
                 let mut contributors=Vec::new();
