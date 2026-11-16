@@ -20,7 +20,7 @@ pub struct View {
     pub selection:[f32;4],
     pub map_style:[f32;4],
     pub edits:[Edit;crate::timeline::MAX_SITES],
-    pub natural_lod:[f32;4],
+    pub natural_lod:[[f32;4];2],
 }
 impl View {
     pub fn new(camera:&Camera,size:[u32;2])->Self {
@@ -523,7 +523,7 @@ impl Renderer {
     pub fn terrain_max_level(&self)->u32 {self.terrain.as_ref().map_or(0,Terrain::max_level)}
 
     pub fn terrain_view_level(&self)->u32 {self.terrain.as_ref().map_or(0,Terrain::view_max)}
-    pub fn terrain_viewport_mix(&self)->[f32;2] {self.terrain.as_ref().map_or([0.;2],Terrain::viewport_mix)}
+    pub fn terrain_viewport_mix(&self)->[[f32;4];2] {self.terrain.as_ref().map_or([[-1.;4];2],Terrain::viewport_mix)}
 
     pub fn terrain_exact(&self)->bool {self.terrain.as_ref().is_some_and(Terrain::exact)}
 
