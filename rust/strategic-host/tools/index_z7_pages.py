@@ -22,6 +22,7 @@ COLUMNS = (
     'manifest_version', 'surface_revision', 'program_revision',
     'receipt', 'regional_pngs', 'close_pngs', 'pole_pngs', 'release_zip',
 )
+LAND_COLUMNS = ('review_region', 'land_class', 'land_fraction', 'land_focus_lon', 'land_focus_lat')
 
 
 def page_reviews(files):
@@ -68,7 +69,7 @@ def load_pole(root, pole, scope, resource):
     return None
 
 
-def summarize(root, receipt, x, y, review, archived_batches):
+def summarize(root, receipt, x, y, review, archived_batches, land_info=None):
     ordinal = 1 + y * COLS + x
     west, south, east, north = bounds(x, y)
     data = dict.fromkeys(COLUMNS, '')
@@ -76,6 +77,11 @@ def summarize(root, receipt, x, y, review, archived_batches):
                 east_lon=east, north_lat=north, center_lon=(west + east)/2,
                 center_lat=(south + north)/2, capture_state='NOT_ATTEMPTED',
                 visual_status='NOT_RENDERED', **review)
+    if land_info is not None:
+        land = land_info(x, y)
+        lon, lat = land.get('land_focus') or ('', '')
+        data.update(review_region='', land_class=land['land_class'],
+                    land_fraction=land['land_fraction'], land_focus_lon=lon, land_focus_lat=lat)
     if receipt is None:
         return data, None, []
 
@@ -90,6 +96,8 @@ def summarize(root, receipt, x, y, review, archived_batches):
                 surface_revision=resource.get('surface_revision', ''),
                 program_revision=resource.get('program_revision', ''),
                 receipt=receipt.relative_to(root).as_posix())
+    if land_info is not None:
+        data['review_region'] = doc.get('review_region', '')
 
     archive_paths = [(receipt, True)]
     both_complete, any_png, valid_png, thumbnail = True, False, False, None
@@ -97,8 +105,11 @@ def summarize(root, receipt, x, y, review, archived_batches):
     for scope, plan in row_views(y, header['detail_capacity']).items():
         views = doc['scopes'].get(scope, {}).get('views', {})
         intervals, images, valid = [], [], 0
-        for i, _ in enumerate(plan['views']):
-            label = f'z7-y{y:03}-x{x:03}-{scope}-{i:02}'
+        views_expected = [f'{i:02}' for i, _ in enumerate(plan['views'])]
+        if doc.get('land', {}).get('land_focus_added'):
+            views_expected.insert(0, 'land')
+        for suffix in views_expected:
+            label = f'z7-y{y:03}-x{x:03}-{scope}-{suffix}'
             view = views.get(label, {})
             png = receipt.parent / (label + '.png')
             if view.get('img') != png.name or png_size(png) != (WIDTH, HEIGHT):
@@ -123,9 +134,9 @@ def summarize(root, receipt, x, y, review, archived_batches):
                     poles.append(image.relative_to(root).as_posix())
                     archive_paths.extend(((image, False), (record, True)))
                     missing = missing_intervals(combine(intervals), south, north)
-        complete = valid == len(plan['views']) and not missing
+        complete = valid == len(views_expected) and not missing
         both_complete = both_complete and complete
-        data[f'scope_captures_{scope}'] = f'{valid}/{len(plan["views"])}'
+        data[f'scope_captures_{scope}'] = f'{valid}/{len(views_expected)}'
         data[f'uncovered_{scope}_latitude_bands'] = json.dumps(missing, separators=(',', ':'))
         data[f'{scope}_pngs'] = ';'.join(images)
     data['pole_pngs'] = ';'.join(poles)
@@ -192,6 +203,7 @@ def zip_batch(output, root, files):
                 archive.write(path, arcname)
     pending.rename(output)
 
+
 def scan_receipts(root):
     pages = {}
     for path in root.glob('batch-y*-x*/z7-y*-x*.json'):
@@ -202,7 +214,7 @@ def scan_receipts(root):
         if (x, y) in pages:
             raise ValueError(f'Duplicate page receipt {path.name}')
         origin = f'batch-y{y // BATCH * BATCH:03}-x{x // BATCH * BATCH:03}'
-        if path.parent.name != origin:
+        if not re.fullmatch(re.escape(origin) + r'(?:-[a-z0-9]+(?:-[a-z0-9]+)*)?', path.parent.name):
             raise ValueError(f'{path.name} is placed in the wrong batch')
         pages[x, y] = path
     return pages
@@ -216,6 +228,9 @@ def main():
                         help='UTF-8 CSV with ordinal,reviewer,status,note. Repeat for non-overlapping reviews.')
     parser.add_argument('--batch-x', type=int, default=0)
     parser.add_argument('--batch-y', type=int, default=0)
+    parser.add_argument('--review-region', help='Region suffix for the selected batch, for example europe.')
+    parser.add_argument('--natural-earth', type=Path,
+                        help='Directory of the generator’s Natural Earth physical ZIPs.')
     parser.add_argument('--zip', action='store_true',
                         help='Also write one ZIP_STORED archive of this 8×8 batch and its pole evidence.')
     args = parser.parse_args()
@@ -225,6 +240,14 @@ def main():
     if not args.captures.is_dir():
         parser.error('Capture directory does not exist')
     batch = f'batch-y{y0:03}-x{x0:03}'
+    if args.review_region:
+        if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', args.review_region) or not args.natural_earth:
+            parser.error('--review-region requires a lowercase slug and --natural-earth')
+        batch += '-' + args.review_region
+    land_info = None
+    if args.natural_earth:
+        from capture_z7_pages import load_land_geometry
+        land_info = load_land_geometry(args.natural_earth)
     archive = f'z7-visual-{batch}.zip' if args.zip else ''
     paths = scan_receipts(args.captures)
     reviews = page_reviews(args.review)
@@ -239,19 +262,20 @@ def main():
     index = args.out / 'z7-visual-global-pages.csv'
     pending = index.with_suffix('.csv.tmp')
     with pending.open('w', newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, COLUMNS)
+        writer = csv.DictWriter(file, COLUMNS + (LAND_COLUMNS if land_info is not None else ()))
         writer.writeheader()
         for y in range(ROWS):
             for x in range(COLS):
                 ordinal = 1 + y * COLS + x
-                row, thumb, originals = summarize(
-                    args.captures, paths.get((x, y)), x, y, reviews.get(ordinal, {}),
-                    archived_batches,
-                )
+                path = paths.get((x, y))
+                row, thumb, originals = summarize(args.captures, path, x, y,
+                                                   reviews.get(ordinal, {}), archived_batches, land_info)
                 writer.writerow(row)
                 if x0 <= x < x0 + BATCH and y0 <= y < y0 + BATCH:
-                    cells.append((row, thumb))
-                    files.extend(originals)
+                    in_batch = path is not None and path.parent.name == batch
+                    cells.append((row, thumb if in_batch else None))
+                    if in_batch:
+                        files.extend(originals)
     write_sheet(args.out / f'z7-visual-{batch}.jpg', cells, x0, y0)
     if archive:
         if not any(not is_receipt for _, is_receipt in files):
