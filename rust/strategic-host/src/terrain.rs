@@ -282,6 +282,7 @@ pub struct Terrain {
     selection:LayerSelection,
     layer_candidate:Option<PathBuf>,
     required_pages:usize,
+    viewport_pages:usize,
 }
 
 impl Terrain {
@@ -323,7 +324,7 @@ impl Terrain {
         })?;
         Ok(Self{base,atlas,table,keys,sender,inflight:None,pages:HashMap::new(),
             slots:(0..capacity).rev().collect(),selected:Vec::new(),view:None,max_level,view_max:0,
-            target_level:None,projected_lod:0.,version,selection,layer_candidate,required_pages:0})
+            target_level:None,projected_lod:0.,version,selection,layer_candidate,required_pages:0,viewport_pages:0})
     }
 
     pub fn views(&self)->[wgpu::TextureView;3] {
@@ -347,6 +348,7 @@ impl Terrain {
             "resident_detail_pages": self.pages.len(),
             "wanted_detail_pages": self.selected.len(),
             "required_detail_pages": self.required_pages,
+            "viewport_detail_pages": self.viewport_pages,
             "exact_view_over_capacity": self.selection.exact() && self.required_pages>self.selected.len(),
             "selected_ready": self.selected.iter().all(|key|self.pages.get(key).is_some_and(|p|self.selection.exact()||p.fade==255)),
             "detail_capacity": self.atlas.depth_or_array_layers(),
@@ -452,26 +454,31 @@ impl Terrain {
         let target=if self.selection.exact() {limit} else {self.target_level.unwrap_or(lod.round() as u32).clamp(low,high).min(limit)};
         self.target_level=Some(target);
         self.selected.clear();
-        let angle=camera.extent(size,180.);
+        let viewport=camera.extent(size,0.);
+        let prefetch=camera.extent(size,180.);
+        let exact=self.selection.exact();
         let mut near=Vec::new();
+        self.viewport_pages=0;
         for tile in self.keys.iter().take_while(|tile|tile.key.0<=target) {
             let proximity=dot(center,tile.axis);
-            if proximity>=(angle+tile.radius).min(std::f64::consts::PI).cos() {
-                near.push((tile.key,proximity));
+            if proximity>=(prefetch+tile.radius).min(std::f64::consts::PI).cos() {
+                let in_view=proximity>=(viewport+tile.radius).min(std::f64::consts::PI).cos();
+                self.viewport_pages+=usize::from(in_view);
+                near.push((tile.key,proximity,!exact&&in_view));
             }
         }
-        near.sort_unstable_by(|(a,x),(b,y)| a.0.cmp(&b.0).then_with(||y.total_cmp(x)));
+        // Load visible parents before their children, then spend spare slots on prefetch.
+        near.sort_unstable_by(|(a,x,in_view),(b,y,other_in_view)|
+            other_in_view.cmp(in_view).then_with(||a.0.cmp(&b.0)).then_with(||y.total_cmp(x)));
         let capacity=self.atlas.depth_or_array_layers() as usize;
         self.view_max=target;
         self.required_pages=near.len();
-        if self.selection.exact() {
-            near.truncate(capacity);
-        } else if let Some(&(Key(overflow,_,_),_))=near.get(capacity) {
-            // Keep a complete visible level where a polar view spans many longitudes.
-            self.view_max=overflow-1;
-            near.truncate(near.partition_point(|&(key,_)|key.0<overflow));
+        if let Some(&(Key(overflow,_,_),_,true))=near.get(capacity) {
+            // Keep a complete visible level when the viewport itself exceeds the budget.
+            self.view_max=overflow.saturating_sub(1);
+            near.retain(|&(key,_,_)|key.0<=self.view_max);
         }
-        self.selected.extend(near.iter().map(|&(key,_)|key));
+        self.selected.extend(near.iter().take(capacity).map(|&(key,_,_)|key));
         for key in &self.selected {
             if let Some(page)=self.pages.get_mut(key){page.used=now;}
         }
