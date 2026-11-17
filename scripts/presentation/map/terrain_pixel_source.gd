@@ -80,7 +80,7 @@ static func inspect(relief: MapRelief, batch: Dictionary, ll: Vector2, mpp: floa
 	var total := Vector3.ZERO
 	var sum := 0.0
 	var strength := 0.0
-	for slot: String in ["base","secondary","0","1","2","3"]:
+	for slot: String in ["base","secondary","0","1","2","3","4","5"]:
 		var detail := slot not in ["base","secondary"]
 		var prefix := "surface_"+slot if not detail else "surface_tile_"+slot
 		var texture := material.get_shader_parameter(prefix) as Texture2D
@@ -105,6 +105,16 @@ static func inspect(relief: MapRelief, batch: Dictionary, ll: Vector2, mpp: floa
 		var estimate := maxf(0.0,log(maxf(mpp/grid,1.0))/log(2.0))
 		var mip := mini(image.get_mipmap_count(),int(floor(estimate)))
 		var value := sample(image,uv,mip)
+		var mip_zero := sample(image,uv,0)
+		if not detail and bool(material.get_shader_parameter(prefix+"_split")):
+			var tail := material.get_shader_parameter(prefix+"_ba") as Texture2D
+			var ba := tail.get_image()
+			var channels := sample(ba,uv,mip)
+			var zero := sample(ba,uv,0)
+			value.b = channels.r
+			value.a = channels.g
+			mip_zero.b = zero.r
+			mip_zero.a = zero.g
 		var decoded := decode(value,encoding,cover)
 		var weight := float(decoded.coverage)
 		if detail:
@@ -119,7 +129,7 @@ static func inspect(relief: MapRelief, batch: Dictionary, ll: Vector2, mpp: floa
 			else:
 				var combined := base_coverage+weight*(1-base_coverage)
 				colour=colour.lerp(decoded.rgb,weight/maxf(combined,.000001)); base_coverage=combined
-		layers.append({"slot":slot,"id":id,"path":asset.get("path"),"bounds":serial(bounds),"uv":serial(uv),"encoding":encoding,"precision":asset.get("precision",{}),"display_grid_m_ns":grid,"cpu_isotropic_mip_estimate":estimate,"cpu_sample_mip":mip,"mip0_rgba":serial(sample(image,uv,0)),"sample_rgba":serial(value),"decoded":serial(decoded),"cover_weight":cover,"spatial_weight":weight})
+		layers.append({"slot":slot,"id":id,"path":asset.get("path"),"bounds":serial(bounds),"uv":serial(uv),"encoding":encoding,"precision":asset.get("precision",{}),"display_grid_m_ns":grid,"cpu_isotropic_mip_estimate":estimate,"cpu_sample_mip":mip,"mip0_rgba":serial(mip_zero),"sample_rgba":serial(value),"decoded":serial(decoded),"cover_weight":cover,"spatial_weight":weight})
 	if sum>0: colour=colour.lerp(total/sum,minf(sum,1.0))
 	result["cpu_surface_rgb"] = serial(colour)
 	result["cpu_surface_coverage"] = base_coverage*float(material.get_shader_parameter("surface_weight"))

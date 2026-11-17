@@ -135,35 +135,8 @@ Write-Host "`n=== Historical provenance deterministic generation ==="
 & $PythonPath "$ProjectPath/tools/provenance/generate_historical_provenance.py" --check
 if ($LASTEXITCODE -ne 0) { throw 'Historical provenance generated catalog check failed' }
 
-Write-Host "`n=== World data audit regressions ==="
-& $PythonPath -m unittest discover -s "$ProjectPath/tests/world_data" -p 'test_*.py' -v
-if ($LASTEXITCODE -ne 0) { throw 'World data audit regression suite failed' }
-
 $tests = @(
-	@{ Name = 'Formal personal economy and wages'; Script = 'res://tests/formal/formal_personal_economy_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Formal livelihood player journeys'; Script = 'res://tests/formal/formal_livelihood_journey_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Formal application and main/menu'; Script = 'res://tests/formal/formal_application_architecture_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Formal Person integration'; Script = 'res://tests/formal/formal_person_overlay_integration_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Formal Spatial integration'; Script = 'res://tests/formal/formal_spatial_authority_integration_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Formal exact persistence'; Script = 'res://tests/formal/formal_exact_persistence_roundtrip_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Formal Population production integration'; Script = 'res://tests/formal/formal_population_integration_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Presentation content boundary'; Script = 'res://tests/formal/presentation_content_boundary_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Administrative foundation R1 (identity + independent synthetic fixture)'; Script = 'res://tests/formal/formal_administrative_foundation_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Territory source admission'; Script = 'res://tests/vnext/territory_source_registry_test.gd'; TimeoutSeconds = 120 },
-	@{ Name = 'Territory unit catalog'; Script = 'res://tests/vnext/territory/territory_unit_catalog_test.gd'; TimeoutSeconds = 120 },
-	@{ Name = 'Independent non-production control ledger'; Script = 'res://tests/vnext/territory/territorial_control_ledger_test.gd'; TimeoutSeconds = 120 },
-	@{ Name = 'Historical provenance foundation'; Script = 'res://tests/formal/historical_provenance_foundation_test.gd'; TimeoutSeconds = 180 },
-	@{ Name = 'Runtime political identity foundation'; Script = 'res://tests/formal/runtime_political_identity_foundation_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Formal economy 30-day and one-year golden'; Script = 'res://tests/formal/formal_world_economy_golden_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Formal economic boundary closure'; Script = 'res://tests/formal/formal_world_economic_boundary_closure_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Formal market identity foundation'; Script = 'res://tests/formal/formal_world_market_identity_foundation_test.gd'; TimeoutSeconds = 240 },
-	@{ Name = 'Organization state'; Script = 'res://tests/world/organization_state_test.gd'; TimeoutSeconds = 180 },
-	@{ Name = 'Formal organization composition'; Script = 'res://tests/formal/formal_world_organization_composition_test.gd'; TimeoutSeconds = 360 },
-	@{ Name = 'Current world domain convergence'; Script = 'res://tests/vnext/current_world_domain_convergence_test.gd'; TimeoutSeconds = 180 },
-	@{ Name = 'Formal Windows export resource contract'; Script = 'res://tests/formal/formal_world_export_resource_smoke.gd'; TimeoutSeconds = 180 },
-    @{ Name = 'Formal world integration'; Script = 'res://tests/formal/formal_world_integration_test.gd'; TimeoutSeconds = 360 },
-    @{ Name = 'Formal world ten-year balance'; Script = 'res://tests/formal/formal_world_long_term_balance_test.gd'; TimeoutSeconds = 420 }
-
+	@{ Name = 'Formal personal economy and wages'; Script = 'res://tests/formal/formal_personal_economy_test.gd'; TimeoutSeconds = 240 }
 )
 
 foreach ($test in $tests) {

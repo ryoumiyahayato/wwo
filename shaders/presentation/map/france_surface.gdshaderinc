@@ -1,11 +1,15 @@
 // Linear-data material on the existing physical triangles / native DEM.
 // It never defines coastline, political membership or historical land use.
 uniform sampler2D surface_base : filter_linear_mipmap, repeat_disable;
+uniform sampler2D surface_base_ba : filter_linear_mipmap, repeat_disable;
+uniform bool surface_base_split = false;
 uniform vec4 surface_base_bounds = vec4(0.0);
 uniform int surface_base_encoding = 0;
 uniform vec4 surface_base_feather = vec4(0.0);
 uniform float surface_base_opacity = 1.0;
 uniform sampler2D surface_secondary : filter_linear_mipmap, repeat_disable;
+uniform sampler2D surface_secondary_ba : filter_linear_mipmap, repeat_disable;
+uniform bool surface_secondary_split = false;
 uniform vec4 surface_secondary_bounds = vec4(0.0);
 uniform int surface_secondary_encoding = 0;
 uniform vec4 surface_secondary_feather = vec4(0.0);
@@ -15,6 +19,7 @@ uniform float surface_detail_weight = 0.0;
 // Source-aware observed-cover contribution. No extra sampler or map layer.
 uniform float surface_cover_base = 1.0;
 uniform float surface_cover_secondary = 1.0;
+uniform float surface_print_detail = 1.0;
 uniform float surface_cover_0 = 1.0;
 uniform float surface_cover_1 = 1.0;
 uniform float surface_cover_2 = 1.0;
@@ -44,6 +49,20 @@ uniform vec4 surface_core_2 = vec4(0.0);
 uniform vec4 surface_edges_2 = vec4(0.0);
 uniform vec4 surface_core_3 = vec4(0.0);
 uniform vec4 surface_edges_3 = vec4(0.0);
+uniform float surface_cover_4 = 1.0;
+uniform sampler2D surface_tile_4 : filter_linear_mipmap, repeat_disable;
+uniform vec4 surface_bounds_4 = vec4(0.0);
+uniform float surface_inset_4 = 0.0;
+uniform int surface_encoding_4 = 0;
+uniform vec4 surface_core_4 = vec4(0.0);
+uniform vec4 surface_edges_4 = vec4(0.0);
+uniform float surface_cover_5 = 1.0;
+uniform sampler2D surface_tile_5 : filter_linear_mipmap, repeat_disable;
+uniform vec4 surface_bounds_5 = vec4(0.0);
+uniform float surface_inset_5 = 0.0;
+uniform int surface_encoding_5 = 0;
+uniform vec4 surface_core_5 = vec4(0.0);
+uniform vec4 surface_edges_5 = vec4(0.0);
 
 vec2 surface_ll(vec2 ll, vec4 bounds) {
 	ll.x += 360.0*floor(((bounds.x+bounds.z)*0.5-ll.x)/360.0+0.5);
@@ -78,6 +97,14 @@ bool surface_contains(vec2 ll, vec4 bounds) {
 // Canonical value: linear terrain colour + fixed DEM hillshade. Coverage is
 // separate so the unchanged French height/tree data and R43 observed cover
 // use the same material slots without averaging incompatible channel meanings.
+vec4 surface_cartography(vec3 observed, float form, float resolved) {
+	// Keep the DEM's landform even after coarse cover colour yields to map
+	// geometry. Both sides of a source handoff use the same relief palette.
+	float relief = mix(1.0,form,0.78);
+	vec3 ground = vec3(0.60,0.588,0.512)*relief;
+	return vec4(mix(ground,observed,resolved*surface_print_detail),relief);
+}
+
 vec4 surface_decode(vec4 value, int encoding, float cover_weight, out float coverage) {
 	if (encoding==6) {
 		// RGB retains observed classes; A is independent metric DEM print.
@@ -85,20 +112,23 @@ vec4 surface_decode(vec4 value, int encoding, float cover_weight, out float cove
 		// A / .57 is the independent neutral DEM print relative to its lowland
 		// reference tone. RGB already carries illumination; ink consumes A.
 		coverage = smoothstep(0.01,0.075,value.a);
-		return vec4(mix(vec3(1.015,1.0,0.88)*value.a,value.rgb,cover_weight),value.a/0.57);
+		return surface_cartography(value.rgb,value.a/0.57,cover_weight);
 	}
 	if (encoding==5) {
 		coverage = value.a;
-		return vec4(value.rgb,1.0);
+		// This legacy format bakes relief and land cover together into RGB.
+		// Keep some of that signal at close scales, where a separate hillshade
+		// cannot be recovered and a zero cover weight flattens the landscape.
+		return surface_cartography(value.rgb,1.0,mix(0.45,1.0,cover_weight));
 	}
 	if (encoding>=1) {
 		// All legacy material writers reserve zero for outside-source support;
 		// valid fixed shade is at least.48, encoded as at least.08 here.
 		coverage = smoothstep(0.01,0.075,value.a);
-		return vec4(value.rgb*(0.4+value.a),0.4+value.a);
+		return surface_cartography(value.rgb*(0.4+value.a),0.4+value.a,cover_weight);
 	}
 	coverage = value.a;
-	return vec4(surface_palette(value)*(0.4+value.g),0.4+value.g);
+	return surface_cartography(surface_palette(value)*(0.4+value.g),0.4+value.g,cover_weight);
 }
 
 float surface_source_edge(vec2 ll, vec4 core, vec4 edges) {
@@ -126,6 +156,10 @@ vec4 surface_detail(vec4 value, vec2 ll) {
 	if (w>0.0) { vec4 v=surface_decode(texture(surface_tile_2,surface_uv(ll,surface_bounds_2)),surface_encoding_2,surface_cover_2,coverage); w*=coverage; total+=v*w; sum+=w; strength=max(strength,w); }
 	w = surface_tile_weight(ll,surface_bounds_3,surface_inset_3)*surface_source_edge(ll,surface_core_3,surface_edges_3);
 	if (w>0.0) { vec4 v=surface_decode(texture(surface_tile_3,surface_uv(ll,surface_bounds_3)),surface_encoding_3,surface_cover_3,coverage); w*=coverage; total+=v*w; sum+=w; strength=max(strength,w); }
+	w = surface_tile_weight(ll,surface_bounds_4,surface_inset_4)*surface_source_edge(ll,surface_core_4,surface_edges_4);
+	if (w>0.0) { vec4 v=surface_decode(texture(surface_tile_4,surface_uv(ll,surface_bounds_4)),surface_encoding_4,surface_cover_4,coverage); w*=coverage; total+=v*w; sum+=w; strength=max(strength,w); }
+	w = surface_tile_weight(ll,surface_bounds_5,surface_inset_5)*surface_source_edge(ll,surface_core_5,surface_edges_5);
+	if (w>0.0) { vec4 v=surface_decode(texture(surface_tile_5,surface_uv(ll,surface_bounds_5)),surface_encoding_5,surface_cover_5,coverage); w*=coverage; total+=v*w; sum+=w; strength=max(strength,w); }
 	// Fade each exposed source/LOD edge. A merged rectangle cannot describe
 	// gaps, non-rectangular selections or a GLO90-to-ETOPO transition.
 	// Complementary overlap weights describe coverage together. Taking only
@@ -148,12 +182,18 @@ vec4 surface_sample(vec2 ll, out float coverage) {
 	vec4 value = vec4(0.0,0.0,0.0,1.0);
 	if (surface_weight<=0.0) { return value; }
 	if (surface_contains(ll,surface_base_bounds)) {
-		value = surface_decode(texture(surface_base,surface_uv(ll,surface_base_bounds)),surface_base_encoding,surface_cover_base,coverage);
+		vec2 uv = surface_uv(ll,surface_base_bounds);
+		vec4 source = texture(surface_base,uv);
+		if (surface_base_split) { source.ba = texture(surface_base_ba,uv).rg; }
+		value = surface_decode(source,surface_base_encoding,surface_cover_base,coverage);
 		coverage *= surface_extent_weight(ll,surface_base_bounds,surface_base_feather)*surface_base_opacity;
 	}
 	if (surface_contains(ll,surface_secondary_bounds)) {
 		float second_coverage;
-		vec4 second = surface_decode(texture(surface_secondary,surface_uv(ll,surface_secondary_bounds)),surface_secondary_encoding,surface_cover_secondary,second_coverage);
+		vec2 uv = surface_uv(ll,surface_secondary_bounds);
+		vec4 source = texture(surface_secondary,uv);
+		if (surface_secondary_split) { source.ba = texture(surface_secondary_ba,uv).rg; }
+		vec4 second = surface_decode(source,surface_secondary_encoding,surface_cover_secondary,second_coverage);
 		second_coverage *= surface_extent_weight(ll,surface_secondary_bounds,surface_secondary_feather)*surface_secondary_opacity;
 		float combined = coverage+second_coverage*(1.0-coverage);
 		value = mix(value,second,second_coverage/max(combined,0.000001));

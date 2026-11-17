@@ -2,7 +2,10 @@ shader_type canvas_item;
 render_mode unshaded;
 
 uniform vec4 water_color = vec4(0.25,0.36,0.37,1.0);
+uniform vec2 water_color_transition = vec2(0.0);
+uniform vec4 water_color_far = vec4(0.12,0.20,0.23,1.0);
 varying vec2 map_pixel;
+varying float water_longitude;
 uniform sampler2D face_data : filter_nearest, repeat_disable;
 uniform mat3 globe_basis = mat3(1.0);
 uniform vec2 globe_center = vec2(0.0);
@@ -34,6 +37,7 @@ vec2 screen_point(vec3 point) {
 }
 
 void vertex() {
+	water_longitude = 0.0;
 	// The same source faces and linear horizon intersections as GlobeProjection.
 	// A clipped triangle has at most four points, hence at most two triangle fans.
 	int face = VERTEX_ID / 6;
@@ -81,6 +85,10 @@ void vertex() {
 			vec2 covered = point;
 			VERTEX = covered;
 			local_vertex_height = local_displacement(view_units[corner==0 ? 0 : fan+corner]);
+			if (water_color_transition.y>water_color_transition.x) {
+				vec3 earth = transpose(globe_basis)*view_units[corner==0 ? 0 : fan+corner];
+				water_longitude = degrees(atan(earth.x,earth.z));
+			}
 		}
 	}
 	map_pixel = VERTEX;
@@ -90,6 +98,9 @@ void vertex() {
 
 void fragment() {
 	COLOR=water_color;
+	if (region_mode && water_color_transition.y>water_color_transition.x) {
+		COLOR.rgb = mix(COLOR.rgb,water_color_far.rgb,smoothstep(water_color_transition.x,water_color_transition.y,water_longitude));
+	}
 	if (!region_mode) {
 		vec3 normal_view = globe_view_normal(map_pixel,globe_center,globe_radius);
 		COLOR.rgb = ocean_surface ? chart_ocean(water_color.rgb,normal_view,globe_basis) : solar_ground(water_color.rgb,normal_view);

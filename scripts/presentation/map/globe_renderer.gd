@@ -1,10 +1,148 @@
 class_name GlobeRenderer
 extends Control
+const UILocale = preload("res://scripts/presentation/ui/ui_locale.gd")
+const CityOverview = preload("res://scripts/presentation/map/city_miniature.gd")
+var _city_sample_grade: int = 0
+var _city_entering: bool = false
+var observation_profile: bool = false
+var observation_costs: Dictionary = {}
+var observation_return: Dictionary = {}
+var observation_camera_rejection: Dictionary = {}
+
+
+func _city_source_profile() -> Dictionary:
+	if controller!=null and controller.region_camera.active:
+		var camera := controller.region_camera
+		if camera.local_active:
+			var current := CityOverview.for_place(camera.local_place_id)
+			if not current.is_empty(): return current
+		var unit := camera.unit_at(size*.5)
+		if not unit.is_zero_approx():
+			var at := CityOverview.at_position(RegionProjection.lon_lat(unit))
+			if not at.is_empty(): return at
+	return CityOverview.for_content(local_content.content) if local_content!=null else {}
+
+func _selected_city_profile() -> Dictionary:
+	if controller==null: return {}
+	if _city_display_active(): return _city_source_profile()
+	if not controller.selected_place_id.is_empty(): return CityOverview.for_place(controller.selected_place_id)
+	var unit := controller.region_camera.unit_at(size*.5) if controller.region_camera.active else Vector3.ZERO
+	if unit.is_zero_approx(): return {}
+	var source := LocalSpatialLoader.source_at(RegionProjection.lon_lat(unit))
+	return CityOverview.for_place(str(source.get("anchor_id", "")))
+
+func _city_display_active() -> bool:
+	return controller!=null and controller.region_camera.local_active and _strategic_mpp()<100.0 and not _city_source_profile().is_empty()
+
+func _city_plane_active() -> bool:
+	return _city_display_active() and _city_source_profile().has("presentation_index")
+
+func _city_safe_rect() -> Rect2:
+	var result := Rect2(Vector2(18,130),Vector2(maxf(200,size.x-36),maxf(200,size.y-178)))
+	for rect: Rect2 in _label_exclusions():
+		if rect.position.x>size.x*.5 and rect.size.y>180: result.size.x=minf(result.end.x,rect.position.x-20)-result.position.x
+	return result
+
+func _focus_city_overview() -> void:
+	if _city_entering: return
+	var target := _selected_city_profile()
+	if target.is_empty():
+		map_notice.emit("当前选择没有城市整体资料。")
+		return
+	_city_entering=true
+	var anchor := Vector2(float(target.anchor[0]),float(target.anchor[1]))
+	if _city_source_profile().get("id", "")!=target.id or not controller.region_camera.active:
+		await _locate_local_reference(anchor)
+		var deadline := Time.get_ticks_msec()+15000
+		while is_inside_tree() and _city_source_profile().get("id", "")!=target.id and Time.get_ticks_msec()<deadline: await get_tree().process_frame
+	_city_entering=false
+	if _city_source_profile().get("id", "")!=target.id:
+		map_notice.emit("城市资料尚未准备完成，请稍后重试。")
+		return
+	controller.region_camera.local_suppressed=false
+	var camera := controller.region_camera
+	var profile := _city_source_profile()
+	if profile.has("presentation_index"):
+		# Prebuilt meshes and all geographic anchors use this existing chart.
+		# Rebase only on the player's explicit whole-city framing action.
+		camera.leave_local()
+		camera.tangent_frame=RegionProjection.frame(anchor)
+	if profile.get("north_up_overview",false): camera.bearing=0.0
+	var safe := _city_safe_rect()
+	var area := CityOverview.extent(profile)
+	var footprint := Rect2()
+	var first := true
+	for ll: Vector2 in [area.position,area.end,Vector2(area.end.x,area.position.y),Vector2(area.position.x,area.end.y)]:
+		var point: Vector2=RegionProjection.screen_axes(camera.bearing)*(RegionProjection.forward(GlobeProjection.lon_lat_to_unit(ll),camera.tangent_frame)*1000.0)
+		footprint=Rect2(point,Vector2.ZERO) if first else footprint.expand(point)
+		first=false
+	var mpp := maxf(float(profile.minimum_mpp),maxf(footprint.size.x/(safe.size.x*.65),footprint.size.y/(safe.size.y*.90)))
+	var unit := GlobeProjection.lon_lat_to_unit(area.get_center())
+	camera.local_min_km_per_pixel=float(profile.minimum_mpp)*.001
+	camera.km_per_pixel=mpp*.001
+	camera.origin=safe.get_center()-RegionProjection.screen_axes(camera.bearing)*(RegionProjection.forward(unit,camera.tangent_frame)/camera.km_per_pixel)
+	camera.boundary_limited=false
+	_evaluate_scale()
+	controller.suspend_motion()
+	controller.view_changed.emit()
+
+func _draw_city_labels() -> void:
+	var occupied: Array[Rect2]=[]
+	for profile: Dictionary in region_view.city_profiles: _draw_city_profile_labels(profile,occupied)
+
+func _draw_city_profile_labels(profile: Dictionary, occupied: Array[Rect2]) -> void:
+	var national: bool=profile.get("role","")=="NATIONAL_CARTOGRAPHIC_CONTEXT"
+	var districts: Array=profile.get("districts",[])
+	if national:
+		var layer := region_view.city_layers.get(str(profile.id)) as CityMiniature
+		if layer==null: return
+		districts=layer._presentation.get("building_print",{}).get("cities",[])
+		if districts.is_empty(): return
+	var strength := CityOverview.display_strength(_strategic_mpp())
+	if strength<=.001: return
+	var safe := _city_safe_rect()
+	if _strategic_mpp()>=64.0: safe=Rect2(Vector2(16,70),size-Vector2(32,122))
+	var bottom := safe.end.y
+	safe.size.y=bottom-safe.position.y
+	if not national and _strategic_mpp()>=64.0: districts=[{"name":profile.get("map_name",profile.name),"anchor":profile.anchor,"importance":2}]
+	for district: Dictionary in districts:
+		if national and str(district.get("name","")).is_empty(): continue
+		if _strategic_mpp()>40.0 and int(district.get("importance",2))<2: continue
+		var point := region_view.chart_screen_point(GlobeProjection.lon_lat_to_unit(Vector2(float(district.anchor[0]),float(district.anchor[1]))),controller.region_camera)
+		if not safe.grow(-10).has_point(point): continue
+		if national:
+			var existing := false
+			for symbol: Dictionary in _symbol_layout:
+				if (symbol.rect as Rect2).get_center().distance_to(point)<26.0: existing=true;break
+			if existing: continue
+		var district_name := UILocale.name(district) if national else UILocale.text(str(district.name))
+		var text_size := ThemeDB.fallback_font.get_string_size(district_name,HORIZONTAL_ALIGNMENT_LEFT,-1,15)
+		var baseline := point+Vector2(5,-12)
+		baseline.x=minf(baseline.x,safe.end.x-text_size.x-10)
+		var label := Rect2(baseline+Vector2(-5,-18),text_size+Vector2(10,8))
+		if not safe.encloses(label): continue
+		var overlap := false
+		for other: Rect2 in occupied:
+			if label.grow(5).intersects(other): overlap=true;break
+		if overlap: continue
+		occupied.append(label)
+		draw_string_outline(ThemeDB.fallback_font,baseline,district_name,HORIZONTAL_ALIGNMENT_LEFT,-1,15,5,Color(.10,.13,.12,strength))
+		draw_string(ThemeDB.fallback_font,baseline,district_name,HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color(.98,.94,.78,strength))
+	for raw: Array in profile.get("water_reference_limits", []):
+		var point := region_view.chart_screen_point(GlobeProjection.lon_lat_to_unit(Vector2(float(raw[0]),float(raw[1]))),controller.region_camera)
+		if safe.grow(-48).has_point(point):
+			draw_string_outline(ThemeDB.fallback_font,point+Vector2(10,-16),UILocale.text("河面参考范围"),HORIZONTAL_ALIGNMENT_LEFT,-1,12,4,Color(.14,.18,.16))
+			draw_string(ThemeDB.fallback_font,point+Vector2(10,-16),UILocale.text("河面参考范围"),HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(.94,.91,.76))
+
+
 signal place_content_ready
 signal current_politics_changed(state_changed: bool)
 signal map_notice(message: String)
 signal geographic_reference_selected(reference: Dictionary)
 signal topic_selected(place_id: String, subject_id: String)
+signal player_selected
+var _player_unit := Vector3.ZERO
+var _player_marker_rect := Rect2()
 ## One map renderer: geographic surfaces, final display borders and controller input.
 const POLITICAL_UNDER_COLOR: Color = Color(0.60, 0.61, 0.54, 0.82)
 const POLITICAL_UNDER_WIDTH: float = 1.05
@@ -12,6 +150,37 @@ const POLITICAL_UNDER_WIDTH: float = 1.05
 var preserve_on_reparent: bool = false
 var show_footer: bool = false
 var inspection_preview: bool = false
+var observation_suspended: bool = false
+const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
+var _map_budget := FrameBudget.new()
+
+func suspend_for_observation(active: bool) -> void:
+	# The unchanged camera can return immediately to the global foundation.
+	if observation_suspended == active: return
+	observation_suspended = active
+	if controller != null: controller.suspend_motion()
+	visible = not active
+	if active:
+		relief.retain_world()
+		if not _world_layer.display_installed(): _world_layer.clear()
+		_region_layer.clear()
+		local_layer.clear()
+		if strategic_content!=null: strategic_content.release()
+		if local_content!=null: local_content.release()
+		region_view.release_landmarks(false,true)
+		_cancel_overlay_display()
+		strategic_layer = _world_layer
+		_bind_relief()
+		_transition_elapsed = -1.0
+		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		region_view.viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		set_process(_has_pending_preparation())
+	else:
+		_resource_demand_dirty = true
+		_view_dirty = true
+		set_process(true)
+		queue_redraw()
+
 var screenshot: Node
 var controller: GlobeController
 var spatial_world: VNextSpatialWorld
@@ -28,8 +197,11 @@ var _political_view: RuntimePoliticalEntityView
 var _territory_spatial: VNextSpatialWorld
 var _territory_control: TerritoryState
 var _current_land_rows: Dictionary = {}
+var _military_grid_step_m: int = 50000
 var _current_cells: Dictionary = {}
 var _current_political_revision: int = 0
+var _ink_style_revision: int = 0
+var _ink_weight_key: Array = []
 var _selected_land_context: String = ""
 var _pointer_selection: bool = false
 var _clipped_border_cells: Dictionary = {}
@@ -68,6 +240,9 @@ var _topic_flow: Node2D
 var _topic_flow_enabled: bool = true
 const EconomicFlowOverlay = preload("res://scripts/presentation/map/economy/formal_economic_flow_overlay.gd")
 var _topic_places: Array[Dictionary] = []
+var _logistics_observation: Dictionary = {}
+var _logistics_by_place: Dictionary = {}
+var _logistics_hits: Array[Dictionary] = []
 var _unassigned_pick: bool = false
 var _center := Vector2.ZERO
 var _radius: float = 220.0
@@ -116,15 +291,19 @@ var _footer_scale: String = ""
 var _footer_prefix_width: float = 0.0
 var _overlay_batches: Dictionary = {}
 var _overlay_demand: Array[Dictionary] = []
-var _overlay_thread: Thread
+var _overlay_thread: MapJobs.Job
 var _overlay_thread_owner: VNextSpatialWorld
 var _overlay_upload_owner: VNextSpatialWorld
 var _overlay_generation: int = 0
-var _overlay_mutex := Mutex.new()
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+var _overlay_preparation := preload("res://scripts/presentation/map/map_overlay_preparation.gd").new()
 var _overlay_uploads: Array[Dictionary] = []
 var _overlay_installing: Dictionary = {}
+var _overlay_retiring: Array[Dictionary] = []
 var _overlay_query_id: String = ""
 var _overlay_view := Rect2()
+var _overlay_projection_key: Array = []
+var _overlay_projection := Rect2()
 var _overlay_revision: int = -1
 var _overlay_owner: VNextSpatialWorld
 var _overlay_request: Array = []
@@ -133,6 +312,7 @@ var _overlay_coast_key: String = ""
 var _administrative_display_dirty: bool = false
 var _terrain_probe_enabled: bool = "--r57-terrain-probe" in OS.get_cmdline_user_args()
 var _terrain_probe_counts: Dictionary = {}
+var _location_generation: int = 0
 
 
 static func _parameter(batch: Dictionary, name: StringName, value: Variant) -> void:
@@ -149,17 +329,40 @@ static func bind_ocean_material(material: ShaderMaterial) -> void:
 	material.set_shader_parameter("ocean_ice",load("res://assets/maps/ocean/orbital_r24/polar_pack_ice_albedo.png"))
 
 static func local_chart_uniforms(batch: Dictionary, coverage: Dictionary, mask_water: bool = false, local_lines: bool = false) -> void:
+	# A city's rectangular water request can contain gaps. Its painted water
+	# overlays the chart; the rectangle alone is not proof of lake coverage.
+	if str(batch.get("kind",""))=="lake" and bool(coverage.get("water_owner",false)) and coverage.get("water")==null:
+		mask_water=false
+	# Acquired city water also owns its bank outline. An old coast stroke
+	# through the same sourced area is not a second authoritative shoreline.
+	if str(batch.get("kind",""))=="coast" and bool(coverage.get("water_owner",false)):
+		mask_water=true;local_lines=true
+	# A camera pan changes projection uniforms, not source ownership. Hundreds
+	# of installed boundary chunks otherwise repeat every chart-field lookup.
+	if batch.has("chart_coverage") and batch.chart_coverage==coverage and batch.chart_mask==mask_water and batch.chart_lines==local_lines: return
+	batch["chart_coverage"]=coverage.duplicate()
+	batch["chart_mask"]=mask_water
+	batch["chart_lines"]=local_lines
+	_parameter(batch,"city_overview",bool(coverage.get("city_overview",false)))
 	# This function owns all chart parameters. Empty coverage already wrote
 	# every disabled value, including null samplers, on its first submission.
 	if coverage.is_empty() and batch.has("parameters") and (batch.parameters as Dictionary).get(&"local_projection",-1.0)==0.0: return
 	_parameter(batch,"local_bounds",coverage.get("bounds",Vector4.ZERO))
+	_parameter(batch,"local_mask_bounds",coverage.get("mask_bounds",coverage.get("bounds",Vector4.ZERO)))
+	_parameter(batch,"local_mask_edge",coverage.get("mask_edge",coverage.get("edge",Vector2.ONE*.12)))
 	_parameter(batch,"local_edge",coverage.get("edge",Vector2.ONE*0.12))
 	_parameter(batch,"local_height",coverage.get("height"))
+	_parameter(batch,"local_height_layout",coverage.get("height_layout",Vector4.ZERO))
+	_parameter(batch,"local_height_stride",coverage.get("height_stride",1.0))
+	_parameter(batch,"local_height_bounds",coverage.get("height_bounds",Vector4.ZERO))
 	_parameter(batch,"local_water",coverage.get("water") if mask_water else null)
 	_parameter(batch,"local_projection",0.0 if coverage.is_empty() else 1.0)
 	_parameter(batch,"local_vertical_pixels",coverage.get("vertical_pixels",0.0))
 	_parameter(batch,"local_cover_strength",coverage.get("strength",0.0) if mask_water else 0.0)
 	_parameter(batch,"local_line_owner",local_lines and bool(coverage.get("local_lines",false)))
+	_parameter(batch,"local_water_owner",mask_water and bool(coverage.get("water_owner",false)))
+	_parameter(batch,"local_line_bounds",coverage.get("line_bounds",Vector4.ZERO))
+	_parameter(batch,"local_secondary_bounds",coverage.get("secondary_bounds",Vector4.ZERO))
 
 static func _bounds(batch: Dictionary, viewport_size: Vector2) -> void:
 	if batch.get("bounds_size",Vector2.ZERO) != viewport_size:
@@ -198,6 +401,7 @@ func _ready() -> void:
 		controller.select(controller.selected_polity_id,str(row["place_id"]))
 		map_notice.emit(str(row["id"])+" · "+str(row["model"][1])+" · "+str(row["source"])+"；显示假设，非建筑坐标。"))
 	local_layer.annotation_canvas = region_view.annotation_canvas
+	region_view.frame_budget = _map_budget
 	for layer: LocalSpatialLayer in [_world_layer,_region_layer]: layer.annotation_canvas = region_view.annotation_canvas
 	_physical_background = {"material": ($HemisphereViewportContainer/HemisphereViewport/GlobeSurface/Surface as MeshInstance3D).material_override}
 	bind_ocean_material(_physical_background.material as ShaderMaterial)
@@ -207,21 +411,23 @@ func _ready() -> void:
 		layer.preparation_failed.connect(func(message: String) -> void: map_notice.emit(message))
 		layer.display_changed.connect(_on_spatial_display_changed.bind(layer))
 	local_layer.display_changed.connect(_on_spatial_display_changed)
-	screenshot = preload("res://scripts/presentation/ui/native_screenshot.gd").new()
-	screenshot.name = "NativeScreenshot"
+	screenshot = get_tree().root.get_node_or_null("NativeObservation")
+	if screenshot==null:
+		screenshot = preload("res://scripts/presentation/ui/native_screenshot.gd").new()
+		screenshot.name = "NativeScreenshot"
+		add_child(screenshot)
 	screenshot.set("renderer",self)
-	add_child(screenshot)
 	set_process(false)
 
 func _exit_tree() -> void:
 	if preserve_on_reparent: return
 	_disconnect_current_politics()
-	_overlay_mutex.lock()
-	_overlay_generation += 1
-	_overlay_mutex.unlock()
-	if _overlay_thread != null: _overlay_thread.wait_to_finish()
+	_overlay_generation = _overlay_preparation.invalidate()
+	MapJobs.abandon(_overlay_thread)
+	_overlay_thread = null
 	_clear_overlay_installing()
 	_clear_overlay_batches()
+	_drain_overlay_retirement(false)
 	_world_labels.clear()
 	if _footer_prefix_item.is_valid(): RenderingServer.free_rid(_footer_prefix_item)
 	if _footer_scale_item.is_valid(): RenderingServer.free_rid(_footer_scale_item)
@@ -302,6 +508,7 @@ func install_source_geometry(meshes: Dictionary) -> void:
 
 func bind_controller(value: GlobeController) -> void:
 	controller = value
+	controller.region_camera.pose_valid=_camera_pose_valid
 	local_layer.local_projection = region_view.chart_screen_point.bind(controller.region_camera)
 	for layer: LocalSpatialLayer in [_world_layer,_region_layer]: layer.local_projection = region_view.chart_screen_point.bind(controller.region_camera)
 	if not controller.view_changed.is_connected(_invalidate_projection): controller.view_changed.connect(_invalidate_projection)
@@ -457,7 +664,14 @@ func _current_land_at(unit: Vector3) -> String:
 	var topology := _territory_spatial.land_topology()
 	if topology==null: return ""
 	var id := topology.pick_geographic(RegionProjection.lon_lat(unit))
+	if controller.map_mode=="military": return id
 	return id if strategic_layer.political_cells_installed().has(id) and _current_land_rows.has(id) else ""
+
+func _land_sovereign(id: String) -> String:
+	if _current_land_rows.has(id): return str(_current_land_rows[id].sovereign)
+	if _territory_spatial==null: return ""
+	var sovereign: Variant=_territory_spatial.land_facts(id).get("sovereign_polity_id")
+	return str(sovereign) if sovereign!=null else ""
 
 func _on_map_selection() -> void:
 	if not _pointer_selection: _selected_land_context = ""
@@ -510,6 +724,15 @@ func refresh_economic_observation(registry: RuntimePoliticalEntityView, evidence
 	for background: Dictionary in [_physical_background,region_view.background]: background.erase("surface_appearance_style")
 	_invalidate_appearance()
 
+func set_economic_output(show_values: bool, values: Dictionary) -> void:
+	if political.show_output_values==show_values and political.output_values==values: return
+	political.show_output_values = show_values
+	political.output_values = values
+	political.output_maximum = 0.0
+	for value: float in values.values(): political.output_maximum = maxf(political.output_maximum,value)
+	for background: Dictionary in [_physical_background,region_view.background]: background.erase("surface_appearance_style")
+	_invalidate_appearance()
+
 func _shared_border_display(original: Array[Dictionary]) -> Array[Dictionary]:
 	var document := content.presentation_document("shared_borders")
 	if document.is_empty(): return original
@@ -521,22 +744,80 @@ func _shared_border_display(original: Array[Dictionary]) -> Array[Dictionary]:
 		for point: Vector3 in boundary.points: points.append(RegionProjection.lon_lat(point))
 		if str(boundary.kind) != "macro" or area.intersects(GlobeProjection.lon_lat_bounds([points]),true): output.append(boundary)
 	var current_owners := political.get("_whole_owner_by_feature") as Dictionary
+	var details: Dictionary = {}
+	for detail: Dictionary in document.get("regional_frontiers",[]):
+		var pair: Array = (detail.source_features as Array).duplicate()
+		pair.sort()
+		var key := "|".join(pair)
+		if not details.has(key): details[key] = []
+		(details[key] as Array).append_array(detail.lines)
+	var replacements: Dictionary = {}
+	for frontier: Dictionary in document.get("frontier_overrides",[]):
+		var features := frontier.source_features as Array
+		var owners := _frontier_owners(features,current_owners)
+		if owners.size()!=features.size(): continue
+		var valid_from := str(document.valid_from)
+		var valid_to := str(document.valid_to)
+		for feature: String in features:
+			var validity: Dictionary = _source_validity.get(feature,{})
+			var first := str(validity.get("valid_from",valid_from))
+			var last := str(validity.get("valid_to",valid_to))
+			if first>valid_from: valid_from=first
+			if last<valid_to: valid_to=last
+		if political.display_date<valid_from or political.display_date>=valid_to: continue
+		if features.size()==2:
+			var pair := features.duplicate()
+			pair.sort()
+			replacements["|".join(pair)] = true
+		for line: Array in frontier.lines:
+			output.append(_frontier_line(line,owners,valid_from,valid_to,"all"))
+	var emitted_details: Dictionary = {}
 	for boundary: Dictionary in document.get("boundaries",[]) as Array:
 		var features := boundary.source_features as Array
-		var owners := PackedStringArray()
-		for feature: String in features:
-			var owner := str(current_owners.get(feature,""))
-			if not owner.is_empty() and owner not in owners: owners.append(owner)
+		var pair := features.duplicate()
+		pair.sort()
+		var pair_key := "|".join(pair)
+		if replacements.has(pair_key): continue
+		var owners := _frontier_owners(features,current_owners)
 		if owners.size()!=2: continue
-		var coordinates := PackedVector2Array()
-		for point: Array in boundary.points: coordinates.append(Vector2(float(point[0]),float(point[1])))
+		var coordinates := _frontier_coordinates(boundary.points)
 		if area.intersects(GlobeProjection.lon_lat_bounds([coordinates]),true): continue
-		output.append({"points":GlobeProjection.display_line(coordinates),"owners":owners,"kind":"macro","valid_from":boundary.valid_from,"valid_to":boundary.valid_to})
+		var has_detail := details.has(pair_key)
+		output.append({"points":GlobeProjection.display_line(coordinates),"owners":owners,"kind":"macro","valid_from":boundary.valid_from,"valid_to":boundary.valid_to,"frontier_lod":"strategic" if has_detail else "all"})
+		var period_key := pair_key+"|"+str(boundary.valid_from)+"|"+str(boundary.valid_to)
+		if has_detail and not emitted_details.has(period_key):
+			for line: Array in details[pair_key]:
+				output.append(_frontier_line(line,owners,str(boundary.valid_from),str(boundary.valid_to),"regional"))
+			emitted_details[period_key] = true
 	return output
 
+static func _frontier_owners(features: Array, current_owners: Dictionary) -> PackedStringArray:
+	var owners := PackedStringArray()
+	for feature: String in features:
+		var owner := str(current_owners.get(feature,""))
+		if not owner.is_empty() and owner not in owners: owners.append(owner)
+	return owners
+
+static func _frontier_coordinates(line: Array) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	for point: Array in line: points.append(Vector2(float(point[0]),float(point[1])))
+	return points
+
+static func _frontier_line(line: Array, owners: PackedStringArray, valid_from: String, valid_to: String, lod: String) -> Dictionary:
+	return {"points":GlobeProjection.display_line(_frontier_coordinates(line)),"owners":owners,"kind":"macro","valid_from":valid_from,"valid_to":valid_to,"frontier_lod":lod}
+
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
+		_invalidate_spatial_display()
 	if what == NOTIFICATION_RESIZED and is_node_ready():
+		if controller!=null and controller.region_camera.active:
+			controller.region_camera.fit_requested_scale(size,size*.5)
 		_invalidate_projection()
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_node_ready() and controller!=null:
+		controller.suspend_motion()
+		for target: SubViewport in [_viewport,region_view.viewport]:
+			if target.render_target_update_mode==SubViewport.UPDATE_ALWAYS:
+				target.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 func _invalidate_projection() -> void:
 	_camera_dirty = true
@@ -583,7 +864,7 @@ func _ensure_camera() -> void:
 	if not _camera_dirty or controller==null: return
 	_camera_dirty = false
 	_container.position = Vector2.ZERO
-	_container.size = size
+	if _container.size!=size: _container.size = size
 	if _viewport.size!=Vector2i(size): _viewport.size = Vector2i(size)
 	_center = size * 0.5
 	var base_radius := minf(size.y / 2.55, size.x * 0.49)
@@ -596,8 +877,8 @@ func _ensure_camera() -> void:
 	region_view.resize(size)
 	if controller.region_camera.active: _globe_rect = Rect2(Vector2.ZERO,size)
 
-func _ensure_view() -> void:
-	if not _view_dirty or controller==null: return
+func _ensure_view() -> LocalSpatialLayer:
+	if not _view_dirty or controller==null: return null
 	_ensure_camera()
 	_view_dirty = false
 	var regional := controller.region_camera.active
@@ -612,7 +893,7 @@ func _ensure_view() -> void:
 	# Queries need current picking/settlement positions, but the final draw
 	# commits GPU uniforms and collision-prioritized glyphs once below.
 	local_layer.update(controller.region_camera, controller, political.display_date, size, false)
-	_update_strategic_layer(false)
+	var prepared_layer := _update_strategic_layer(false)
 	_anchors.clear()
 	_place_points.clear()
 	var basis := controller.orientation()
@@ -654,6 +935,7 @@ func _ensure_view() -> void:
 			var unit := GlobeProjection.lon_lat_to_unit(Vector2(float(coordinates[0]),float(coordinates[1])))
 			var rotated := basis * unit
 			if rotated.z >= 0.0: _anchors[id] = GlobeProjection.sphere_screen(rotated,_center,_radius)
+	return prepared_layer
 
 func _clear_political_ink() -> void:
 	_political_ink.clear()
@@ -688,14 +970,24 @@ func _update_political_ink(regional: bool = false) -> void:
 	# CPU style records only. Camera and terrain uniforms belong to physical batches.
 	var batches := _political_ink
 	var mpp := _strategic_mpp()
-	var flag_blend := MapScaleStyle.flag_weight(mpp) if controller.administrative_map_active() else 0.0
-	var fill_weight := 0.0 if controller.map_mode in ["geographic","economic"] else MapScaleStyle.political_weight(mpp) if controller.map_mode == "political" else 1.0
+	var flag_blend := 0.0
+	var fill_weight := 0.0 if controller.map_mode in ["geographic","military"] else MapScaleStyle.economic_country_weight(mpp) if controller.map_mode=="economic" else MapScaleStyle.political_weight(mpp) if controller.map_mode == "political" else 1.0
+	if controller.administrative_map_active():
+		flag_blend = MapScaleStyle.flag_weight(mpp) if regional else 1.0
+		if not regional: fill_weight = 0.86
+	var relief_began: int=Time.get_ticks_usec() if observation_profile else 0
 	_sync_relief()
+	if observation_profile: observation_costs["relief_request_us"]=Time.get_ticks_usec()-relief_began
 	var background := region_view.background if regional else _physical_background
 	_parameter(background,"ocean_tone",HydrographyStyle.OCEAN_COLOR)
 	if not regional: _parameter(background,"globe_basis",controller.orientation())
 	var appearance_key: Array = [controller.map_mode,controller.player_polity_id,controller.selected_polity_id,_focus_border_key,regional and region_view.ready]
 	var appearance_changed: bool = background.get("surface_appearance_style",[]) != appearance_key
+	var weight_key: Array = [appearance_key,political.display_date,flag_blend,fill_weight]
+	var thematic := controller.map_mode in ["economic","fulfillment","shortage"]
+	if not appearance_changed and not thematic and _ink_weight_key==weight_key: return
+	_ink_weight_key=weight_key
+	_ink_style_revision+=1
 	for owner: String in batches:
 		var batch := batches[owner] as Dictionary
 		if appearance_changed: _update_ink_appearance(batch,owner,flag_blend,fill_weight)
@@ -705,6 +997,8 @@ func _update_political_ink(regional: bool = false) -> void:
 		# An unavailable country statistic contributes no thematic ink. Physical
 		# triangles with/without an ownership partition retain the same terrain.
 		var available := controller.map_mode not in ["fulfillment","shortage"] or political.economic_available(owner)
+		if controller.map_mode=="economic" and political.show_output_values:
+			available = political.output_value(owner)!=null
 		(batch.parameters as Dictionary)["political_weight"] = fill_weight if dated and available else 0.0
 	background["surface_appearance_style"] = appearance_key
 
@@ -749,28 +1043,40 @@ func _update_ink_appearance(batch: Dictionary, owner: String, flag_blend: float,
 	batch["flag_texture"] = texture
 
 func _sync_relief(mpp: float = -1.0) -> void:
+	# CITY and REGION use the same physical reference and bounded demand.
 	if mpp < 0.0:
 		mpp = controller.region_camera.km_per_pixel * 1000.0 if controller.region_camera.active else RegionProjection.world_scale(RegionProjection.world_unit(_center, _center, _radius, controller.orientation()), controller.orientation(), _radius) * 1000.0
 	var camera := controller.region_camera
 	var center := RegionProjection.lon_lat(camera.valid_anchor(size).unit as Vector3) if camera.active else RegionProjection.lon_lat(RegionProjection.world_unit(_center,_center,_radius,controller.orientation()))
 	var footprint := {"frame":camera.tangent_frame,"origin":camera.origin,"bearing":camera.bearing,"size":size,"step":camera.km_per_pixel,"extent":camera.extent_km} if camera.active else {}
-	if relief.request(visible,mpp,center,size.length()*mpp*0.0005 if camera.active else 10000.0,camera.active,footprint):
+	var selection_began: int=Time.get_ticks_usec() if observation_profile else 0
+	var changed := relief.request(visible,mpp,center,size.length()*mpp*0.0005 if camera.active else 10000.0,camera.active,footprint,not _physical_demand_installed())
+	if observation_profile: observation_costs["relief_selection_us"]=Time.get_ticks_usec()-selection_began
+	var binding_began: int=Time.get_ticks_usec() if observation_profile else 0
+	if changed:
 		_bind_relief()
+	if observation_profile: observation_costs["relief_binding_us"]=Time.get_ticks_usec()-binding_began
 	if relief.preparing(): set_process(visible)
 
 func _bind_relief() -> void:
 	# Only installed physical land retains relief textures.
+	var observed: int=Time.get_ticks_usec() if observation_profile else 0
 	var window := _relief_description()
+	if observation_profile: observation_costs["relief_description_us"]=Time.get_ticks_usec()-observed;observed=Time.get_ticks_usec()
 	# The inactive precision is intentionally unbound by hide_display().
 	# Rebinding it here only makes the same commit clear every sampler again.
 	# A successor receives the current window in _update_strategic_layer()
 	# before its complete physical version can become visible.
 	strategic_layer.set_reference_window(window)
+	if observation_profile: observation_costs["relief_layer_us"]=Time.get_ticks_usec()-observed;observed=Time.get_ticks_usec()
 	region_view.set_surface_reference(window.surface as Dictionary)
+	if observation_profile: observation_costs["relief_region_us"]=Time.get_ticks_usec()-observed
 
 func _relief_description() -> Dictionary:
 	var window := relief.window_description(_strategic_mpp())
 	window["surface"] = relief.surface_description(_strategic_mpp())
+	var city_weight := 1.0-smoothstep(40.0,140.0,_strategic_mpp()) if not region_view.city_profiles.is_empty() else 0.0
+	window.surface["print_detail"]=lerpf(1.0,.60,city_weight)
 	return window
 
 static func _relief_window_uniforms(batch: Dictionary, window: Dictionary) -> void:
@@ -783,26 +1089,37 @@ static func _relief_window_uniforms(batch: Dictionary, window: Dictionary) -> vo
 
 static func _surface_uniforms(batch: Dictionary, surface: Dictionary) -> void:
 	if batch.get("surface_reference",null)==surface: return
+	var previous: Dictionary=batch.get("surface_reference",{})
 	batch["surface_reference"] = surface
+	_parameter(batch,"surface_print_detail",surface.get("print_detail",1.0))
 	var base := surface.get("base",{}) as Dictionary
-	_parameter(batch,"surface_base",base.get("texture"))
-	_parameter(batch,"surface_base_bounds",base.get("bounds",Vector4.ZERO))
-	_parameter(batch,"surface_base_encoding",base.get("encoding",0))
-	_parameter(batch,"surface_base_feather",base.get("feather",Vector4.ZERO))
-	_parameter(batch,"surface_base_opacity",base.get("opacity",1.0))
-	_parameter(batch,"surface_cover_base",base.get("cover_weight",1.0))
+	if not batch.has("parameters") or previous.get("base",null)!=base:
+		_parameter(batch,"surface_base",base.get("texture"))
+		_parameter(batch,"surface_base_ba",base.get("ba"))
+		_parameter(batch,"surface_base_split",base.get("ba")!=null)
+		_parameter(batch,"surface_base_bounds",base.get("bounds",Vector4.ZERO))
+		_parameter(batch,"surface_base_encoding",base.get("encoding",0))
+		_parameter(batch,"surface_base_feather",base.get("feather",Vector4.ZERO))
+		_parameter(batch,"surface_base_opacity",base.get("opacity",1.0))
+		_parameter(batch,"surface_cover_base",base.get("cover_weight",1.0))
 	var secondary := surface.get("secondary",{}) as Dictionary
-	_parameter(batch,"surface_secondary",secondary.get("texture"))
-	_parameter(batch,"surface_secondary_bounds",secondary.get("bounds",Vector4.ZERO))
-	_parameter(batch,"surface_secondary_encoding",secondary.get("encoding",0))
-	_parameter(batch,"surface_secondary_feather",secondary.get("feather",Vector4.ZERO))
-	_parameter(batch,"surface_secondary_opacity",secondary.get("opacity",1.0))
-	_parameter(batch,"surface_cover_secondary",secondary.get("cover_weight",1.0))
+	if previous.get("secondary",null)!=secondary:
+		_parameter(batch,"surface_secondary",secondary.get("texture"))
+		_parameter(batch,"surface_secondary_ba",secondary.get("ba"))
+		_parameter(batch,"surface_secondary_split",secondary.get("ba")!=null)
+		_parameter(batch,"surface_secondary_bounds",secondary.get("bounds",Vector4.ZERO))
+		_parameter(batch,"surface_secondary_encoding",secondary.get("encoding",0))
+		_parameter(batch,"surface_secondary_feather",secondary.get("feather",Vector4.ZERO))
+		_parameter(batch,"surface_secondary_opacity",secondary.get("opacity",1.0))
+		_parameter(batch,"surface_cover_secondary",secondary.get("cover_weight",1.0))
 	_parameter(batch,"surface_weight",surface.get("weight",0.0))
 	_parameter(batch,"surface_detail_weight",surface.get("detail_weight",0.0))
 	var tiles := surface.get("tiles",[]) as Array
-	for index: int in range(4):
+	var previous_tiles: Array=previous.get("tiles",[])
+	for index: int in range(MapRelief.SURFACE_SLOTS):
 		var tile := tiles[index] as Dictionary if index<tiles.size() else {}
+		if previous.has("tiles") and index<previous_tiles.size() and previous_tiles[index]==tile: continue
+		if previous.has("tiles") and index>=previous_tiles.size() and tile.is_empty(): continue
 		_parameter(batch,"surface_tile_%d"%index,tile.get("texture"))
 		_parameter(batch,"surface_bounds_%d"%index,tile.get("bounds",Vector4.ZERO))
 		_parameter(batch,"surface_inset_%d"%index,tile.get("inset",0.0))
@@ -848,8 +1165,9 @@ func _prepare_boundary_batches() -> void:
 		owners.sort()
 		var valid_from := str(border.get("valid_from","0001-01-01"))
 		var valid_to := str(border.get("valid_to","9999-12-31"))
-		var key := "|".join(owners)+"|"+valid_from+"|"+valid_to
-		if not groups.has(key): groups[key] = {"owners":owners,"lines":[],"valid_from":valid_from,"valid_to":valid_to}
+		var frontier_lod := str(border.get("frontier_lod","all"))
+		var key := "|".join(owners)+"|"+valid_from+"|"+valid_to+"|"+frontier_lod
+		if not groups.has(key): groups[key] = {"owners":owners,"lines":[],"valid_from":valid_from,"valid_to":valid_to,"frontier_lod":frontier_lod}
 		(groups[key].lines as Array).append(border)
 	var shader := preload("res://shaders/presentation/map/globe_boundary.gdshader")
 	for key: String in groups:
@@ -878,7 +1196,7 @@ func _prepare_boundary_batches() -> void:
 			for index: int in range(points.size()):
 				angle = maxf(angle,axis.angle_to(points[index]))
 				if index>0: angle = maxf(angle,axis.angle_to(points[index-1])+points[index-1].angle_to(points[index]))
-		_boundary_batches.append({"geometry":geometry,"material":material,"item":item,"kind":"macro","owners":group.owners,"source_lines":lines,"cull_axis":axis,"cull_angle":minf(angle,PI),"valid_from":group.valid_from,"valid_to":group.valid_to})
+		_boundary_batches.append({"geometry":geometry,"material":material,"item":item,"kind":"macro","owners":group.owners,"source_lines":lines,"cull_axis":axis,"cull_angle":minf(angle,PI),"valid_from":group.valid_from,"valid_to":group.valid_to,"frontier_lod":group.frontier_lod})
 
 func _refresh_historical_border_geometry() -> void:
 	var cells: Dictionary = {}
@@ -937,6 +1255,9 @@ func _draw_boundaries(regional: bool = false) -> void:
 	var physical_ready := _physical_demand_installed()
 	var canvas := region_view.annotation_canvas if regional else _viewport.world_2d.canvas
 	var camera := controller.region_camera
+	# Select the sourced line before the difference spans a city-scale view.
+	var regional_frontier := regional and camera.km_per_pixel<1.2
+	var regional_width := 0.75*(1.0-smoothstep(0.4,2.4,camera.km_per_pixel)) if regional else 0.0
 	var anchor := camera.valid_anchor(size) if regional else {}
 	var center := anchor.unit as Vector3 if regional else controller.orientation().transposed()*Vector3.BACK
 	var view_angle := PI*0.5+16.0/maxf(_radius,1.0)
@@ -948,7 +1269,8 @@ func _draw_boundaries(regional: bool = false) -> void:
 		if batch.get("parent_canvas",RID())!=canvas:
 			RenderingServer.canvas_item_set_parent(batch.item as RID,canvas)
 			batch["parent_canvas"] = canvas
-		var shown := physical_ready and (controller.administrative_map_active() or controller.administrative_layer_active()) and political.display_date>=str(batch.valid_from) and political.display_date<str(batch.valid_to)
+		var shown := physical_ready and (controller.administrative_map_active() or controller.administrative_layer_active() or controller.map_mode=="economic") and political.display_date>=str(batch.valid_from) and political.display_date<str(batch.valid_to)
+		if batch.frontier_lod!="all": shown=shown and (batch.frontier_lod=="regional")==regional_frontier
 		if shown and float(batch.get("cull_angle",PI))<PI*0.5:
 			shown = (batch.cull_axis as Vector3).angle_to(center)<=float(batch.cull_angle)+view_angle
 		if shown!=bool(batch.get("visible",true)):
@@ -959,7 +1281,7 @@ func _draw_boundaries(regional: bool = false) -> void:
 		local_chart_uniforms(batch,local_layer.local_coverage if regional else {})
 		var home := controller.administrative_map_active() and controller.player_polity_id in (batch.owners as Array)
 		_parameter(batch,"stroke_color",HOME_BORDER_COLOR if home else POLITICAL_UNDER_COLOR)
-		_parameter(batch,"stroke_width",1.35 if home else POLITICAL_UNDER_WIDTH)
+		_parameter(batch,"stroke_width",(1.35 if home else POLITICAL_UNDER_WIDTH)+regional_width)
 		if regional: _set_region_uniforms(batch)
 		else:
 			_parameter(batch,"globe_basis",controller.orientation())
@@ -967,7 +1289,7 @@ func _draw_boundaries(regional: bool = false) -> void:
 			_parameter(batch,"globe_radius",_radius)
 		_bounds(batch,size)
 
-func _commit_map_view(view_was_dirty: bool) -> void:
+func _commit_map_view(view_was_dirty: bool, prepared_layer: LocalSpatialLayer = null) -> void:
 	if controller==null or not _can_submit_map_view(): return
 	var commit_map := _map_canvas_dirty or view_was_dirty or _local_display_dirty
 	_map_canvas_dirty = false # Later callbacks retain their new invalidation.
@@ -975,21 +1297,32 @@ func _commit_map_view(view_was_dirty: bool) -> void:
 	_administrative_display_dirty = false
 	var regional := controller.region_camera.active
 	if commit_map:
+		if regional: region_view.set_lighting_scale(controller.region_camera.km_per_pixel)
+		var observed: int=Time.get_ticks_usec() if observation_profile else 0
 		_sync_political_focus()
 		_update_political_ink(regional)
-		local_layer.update(controller.region_camera,controller,political.display_date,size,true)
-		_update_strategic_layer(true)
+		if observation_profile: observation_costs["politics_us"]=Time.get_ticks_usec()-observed;observed=Time.get_ticks_usec()
+		local_layer.update(controller.region_camera,controller,political.display_date,size,true,{},prepared_layer==null or _view_dirty)
+		if observation_profile: observation_costs["local_us"]=Time.get_ticks_usec()-observed;observed=Time.get_ticks_usec()
+		_update_strategic_layer(true,prepared_layer)
+		if observation_profile: observation_costs["strategic_us"]=Time.get_ticks_usec()-observed;observed=Time.get_ticks_usec()
 		_sync_landmark_display()
+		if observation_profile: observation_costs["landmarks_us"]=Time.get_ticks_usec()-observed
 		_local_display_dirty = false
 		_place_points.merge(strategic_layer.visible_places,true)
 		_place_points.merge(local_layer.visible_places,true)
+		observed=Time.get_ticks_usec() if observation_profile else 0
 		_draw_boundaries(regional)
+		if observation_profile: observation_costs["national_borders_us"]=Time.get_ticks_usec()-observed
 	if commit_map or administrative_changed:
 		# A completed line batch changes neither symbol identities nor their
 		# positions. Demand/view changes already invalidate the existing layout.
 		if commit_map: _symbol_layout_dirty = true
+		var observed: int=Time.get_ticks_usec() if observation_profile else 0
 		_update_overlay_batches(_overlay_local_view() if regional and spatial_world!=null else Rect2(),not commit_map and not _symbol_layout_dirty)
+		if observation_profile: observation_costs["overlay_display_us"]=Time.get_ticks_usec()-observed;observed=Time.get_ticks_usec()
 		_request_map_frame(regional)
+		if observation_profile: observation_costs["map_submit_us"]=Time.get_ticks_usec()-observed
 	if _transition_elapsed>=0.0:
 		if _transition_started==0:
 			_transition_started = Time.get_ticks_usec()
@@ -1001,12 +1334,17 @@ func _commit_map_view(view_was_dirty: bool) -> void:
 	else: _show_submitted_canvas(regional)
 
 func _draw() -> void:
+	_player_marker_rect=Rect2()
 	if region_view.internal_load_active():
-		draw_string(ThemeDB.fallback_font,Vector2(28,92),"内部高负载 · 额外模型为测试实例 · 不写入存档",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color(0.94,0.76,0.35))
+		draw_string(ThemeDB.fallback_font,Vector2(28,92),UILocale.text("内部高负载 · 额外模型为测试实例 · 不写入存档"),HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color(0.94,0.76,0.35))
 	if controller==null: return
 	var regional := controller.region_camera.active
+	if controller.region_camera.local_active:
+		_draw_local_data_boundary()
+	_draw_city_labels()
 	_world_labels.update(self,_country_font,_anchors,_world_label_records,Rect2(Vector2.ZERO,size),controller.zoom,controller.selected_polity_id,controller.hovered_polity_id,controller.labels_enabled,not regional and _transition_elapsed < 0.0,_label_exclusions())
 	if _transition_elapsed >= 0.0:
+		_draw_player_marker()
 		return
 	# CanvasItem drawing belongs to this callback. The commit prepares meshes
 	# and materials; it cannot issue these country/geographic text commands.
@@ -1017,8 +1355,9 @@ func _draw() -> void:
 		region_view.update_labels(self,controller.region_camera,controller,_font,size,covered,_label_exclusions())
 	else: region_view.country_label_rects.clear()
 	_prepare_symbol_layout()
-	_symbol_atlas.draw(self,_symbol_layout,controller.selected_place_id,controller.hovered_place_id)
 	_draw_topic_information()
+	_symbol_atlas.draw(self,_symbol_layout,controller.selected_place_id,controller.hovered_place_id)
+	_draw_logistics_badges()
 	_draw_symbol_labels()
 	_draw_administrative_labels()
 	for entity_id: String in _anchors:
@@ -1035,8 +1374,33 @@ func _draw() -> void:
 		if not attribution.is_empty(): source = attribution
 	if regional and not relief.surface_description(metric*1000.0).is_empty():
 		source += " · 现代真实高程／WorldCover 2021 参考"
-	if show_footer: _update_footer(space+" · "+source+"   ","%.0f 米/像素" % (metric * 1000.0))
+	if show_footer: _update_footer(UILocale.text(space+" · "+source+"   "),UILocale.text("%.0f 米/像素") % (metric * 1000.0))
 	_present_civilian_facilities()
+	_draw_player_marker()
+
+func set_player_place(place: Dictionary) -> void:
+	var coordinates := place.get("lon_lat",(place.get("geometry",{}) as Dictionary).get("coordinates",[])) as Array
+	var unit := Vector3.ZERO
+	if coordinates.size()==2:
+		unit=GlobeProjection.lon_lat_to_unit(Vector2(float(coordinates[0]),float(coordinates[1])))
+	if unit==_player_unit: return
+	_player_unit=unit
+	queue_redraw()
+
+func _draw_player_marker() -> void:
+	if _player_unit.is_zero_approx(): return
+	if not controller.region_camera.active and (controller.orientation()*_player_unit).z<=0.0: return
+	var ground := screen_point(_player_unit)
+	if not ground.is_finite() or not Rect2(Vector2.ZERO,size).has_point(ground): return
+	var center := ground-Vector2(0,17)
+	var blue := Color("438fe3")
+	draw_colored_polygon(PackedVector2Array([ground,center+Vector2(-8,4),center+Vector2(8,4)]),Color.WHITE)
+	draw_colored_polygon(PackedVector2Array([ground-Vector2(0,3),center+Vector2(-6,3),center+Vector2(6,3)]),blue)
+	draw_circle(center,11,Color.WHITE)
+	draw_circle(center,9,blue)
+	draw_circle(center+Vector2(0,-3),2.5,Color.WHITE)
+	draw_arc(center+Vector2(0,5),4.5,PI,TAU,10,Color.WHITE,2,true)
+	_player_marker_rect=Rect2(center-Vector2(12,12),Vector2(24,31))
 
 ## Value-only shared topic contract. Geography, authority and resource demand
 ## are untouched; badges reuse admitted place symbols and their picking order.
@@ -1066,6 +1430,18 @@ func set_topic_links(rows: Array[Dictionary]) -> void:
 	_topic_links=normalized;_topic_paths.clear();_topic_projected.clear();_topic_projection_key.clear()
 	if spatial_world!=null:
 		for link:Dictionary in _topic_links:
+			if str(link.get("kind","")) in ["rail_reference","shipping_reference"]:
+				var rail_units := PackedVector3Array()
+				for ll: Array in link.get("coordinates",[]):
+					if ll.size()==2: rail_units.append(GlobeProjection.lon_lat_to_unit(Vector2(float(ll[0]),float(ll[1]))))
+				_topic_paths[str(link.id)]={"units":rail_units,"local":false}
+				var levels: Dictionary={}
+				for level: String in link.get("lod_coordinates",{}):
+					var level_units := PackedVector3Array()
+					for ll: Array in link.lod_coordinates[level]: level_units.append(GlobeProjection.lon_lat_to_unit(Vector2(float(ll[0]),float(ll[1]))))
+					levels[level]=level_units
+				if not levels.is_empty(): _topic_paths[str(link.id)]["levels"]=levels
+				continue
 			var a:=spatial_world.get_place(str(link.get("from","")));var b:=spatial_world.get_place(str(link.get("to","")))
 			if not a.get("lon_lat") is Array or not b.get("lon_lat") is Array:continue
 			if a.lon_lat.size()!=2 or b.lon_lat.size()!=2:continue
@@ -1094,24 +1470,138 @@ func _topic_points(link:Dictionary) -> PackedVector2Array:
 	var id:=str(link.get("id",""))
 	if _topic_projected.has(id):return _topic_projected[id]
 	var points:=PackedVector2Array();var source:Dictionary=_topic_paths.get(id,{})
+	if str(link.get("kind",""))=="shipping_reference": _prepare_shipping_path(link,source)
 	var units:PackedVector3Array=source.get("units",PackedVector3Array())
+	if source.has("levels"):
+		units=source.levels["overview" if _strategic_mpp()>250.0 else "district" if _strategic_mpp()>60.0 else "near"]
 	if units.is_empty():return points
 	if bool(source.get("local",false)):
+		if id.begins_with("logistics:"): return points
 		if str(link.get("kind",""))=="transport" or (not controller.region_camera.active and (controller.orientation()*units[0]).z<0):return points
 		var point:=screen_point(units[0])
 		if not point.is_finite():return points
 		for index:int in range(25):points.append(point+Vector2(0,-12)+Vector2.from_angle(.35+float(index)*TAU/24.0)*9.0)
 	else:
 		for unit:Vector3 in units:
-			points.append(screen_point(unit) if controller.region_camera.active or (controller.orientation()*unit).z>=0 else Vector2(INF,INF))
+			points.append(screen_point(unit) if not unit.is_zero_approx() and (controller.region_camera.active or (controller.orientation()*unit).z>=0) else Vector2(INF,INF))
 	_topic_projected[id]=points
 	return points
+
+func _prepare_shipping_path(link: Dictionary, source: Dictionary) -> void:
+	var reference := strategic_layer.physical_reference()
+	var key := str(reference.get("key",""))
+	if source.get("water_key","unprepared")==key: return
+	source["water_key"]=key
+	var line := PackedVector2Array()
+	for ll: Array in link.get("coordinates",[]): line.append(Vector2(float(ll[0]),float(ll[1])))
+	var tracks: Array[PackedVector2Array]=[]
+	# The legacy waypoints are a schematic corridor, not a surveyed sea lane.
+	# Use only portions inside installed coverage and outside physical land.
+	for bounds: Array in reference.get("coverage",[]):
+		var cell := PackedVector2Array([Vector2(bounds[0],bounds[2]),Vector2(bounds[1],bounds[2]),Vector2(bounds[1],bounds[3]),Vector2(bounds[0],bounds[3])])
+		tracks.append_array(Geometry2D.intersect_polyline_with_polygon(line,cell))
+	for land: Dictionary in reference.get("land",[]):
+		var remaining: Array[PackedVector2Array]=[]
+		for track: PackedVector2Array in tracks:
+			remaining.append_array(Geometry2D.clip_polyline_with_polygon(track,(land.rings as Array)[0] as PackedVector2Array))
+		tracks=remaining
+		if tracks.is_empty(): break
+	var units := PackedVector3Array()
+	for track: PackedVector2Array in tracks:
+		if not units.is_empty(): units.append(Vector3.ZERO)
+		for index: int in range(1,track.size()):
+			var a := GlobeProjection.lon_lat_to_unit(track[index-1])
+			var b := GlobeProjection.lon_lat_to_unit(track[index])
+			var count := clampi(int(ceil(a.angle_to(b)*6371.0088/2.0)),1,256)
+			if index==1: units.append(a)
+			for step: int in range(1,count+1): units.append(a.slerp(b,float(step)/count))
+	source["units"]=units
 
 func set_topic_places(rows: Array[Dictionary]) -> void:
 	if _topic_places==rows:return
 	_topic_places=rows.slice(0,96)
 	_symbol_layout_dirty=true
 	queue_redraw()
+
+func set_logistics_observation(value: Dictionary) -> void:
+	if _logistics_observation==value: return
+	_logistics_observation=value;_logistics_by_place.clear();_logistics_hits.clear()
+	for row: Dictionary in value.get("nodes",[]): _logistics_by_place[str(row.place_id)]=row
+	queue_redraw()
+
+func _draw_logistics_badges() -> void:
+	_logistics_hits.clear()
+	if controller.map_mode!="economic": return
+	# Public station coordinates, independent of private stock/warehouse sites.
+	if controller.region_camera.active and _strategic_mpp()<350.0:
+		for station: Dictionary in _logistics_observation.get("stations",[]):
+			var ll: Array=station.coordinates
+			var point := screen_point(GlobeProjection.lon_lat_to_unit(Vector2(float(ll[0]),float(ll[1]))))
+			if point.is_finite() and Rect2(Vector2.ZERO,size).has_point(point):
+				draw_circle(point,3.1,Color("4b5553"))
+				draw_circle(point,1.7,Color("d7d5b9"))
+				_logistics_hits.append({"rect":Rect2(point-Vector2(6,6),Vector2(12,12)),"station":station})
+	var occupied: Dictionary = {}
+	for rect: Rect2 in _symbol_exclusions: MapSymbolAtlas.occupy(rect,occupied)
+	for rect: Rect2 in local_layer.label_rects: MapSymbolAtlas.occupy(rect,occupied)
+	var candidates: Array[Dictionary] = []
+	for row: Dictionary in _symbol_layout:
+		MapSymbolAtlas.occupy(row.rect,occupied)
+		var place := FormalEconomicMapObservation.canonical_place(str(row.id))
+		if not _logistics_by_place.has(place): continue
+		var data := _logistics_by_place[place] as Dictionary
+		var warehouses := int(data.get("warehouses",0))
+		var transit := int(data.get("transit_orders",0))
+		var pending := int(data.get("pending_orders",0))
+		if warehouses+transit+pending==0: continue
+		var score := (4 if transit>0 else 0)+(2 if pending>0 else 0)+(1 if warehouses>0 else 0)
+		candidates.append({"place":place,"rect":row.rect,"data":data,"score":score,"warehouses":warehouses,"transit":transit,"pending":pending})
+	candidates.sort_custom(func(a: Dictionary,b: Dictionary) -> bool:
+		return str(a.place)<str(b.place) if a.score==b.score else int(a.score)>int(b.score))
+	var shown := 0
+	var budget := 8 if controller.region_camera.active else 4
+	var viewport := Rect2(Vector2.ZERO,size).grow(-5)
+	for row: Dictionary in candidates:
+		if shown>=budget: break
+		var parts: Array[String] = []
+		if row.warehouses>0: parts.append(UILocale.text("仓储 %d")%int(row.warehouses))
+		if row.transit>0: parts.append(UILocale.text("在途 %d")%int(row.transit))
+		if row.pending>0: parts.append(UILocale.text("待发 %d")%int(row.pending))
+		var caption := " · ".join(parts)
+		var font := GlobeLabels.font_for_name(_font,caption)
+		var extent := Vector2(ceilf(font.get_string_size(caption,HORIZONTAL_ALIGNMENT_LEFT,-1,11).x)+12,20)
+		var base := row.rect as Rect2
+		var place := str(row.place)
+		for point: Vector2 in [Vector2(base.end.x+5,base.end.y+3),Vector2(base.position.x-extent.x-5,base.end.y+3),Vector2(base.end.x+5,base.position.y-extent.y-3)]:
+			var box := Rect2(point,extent)
+			if not viewport.encloses(box) or not MapSymbolAtlas.free_rect(box.grow(2),occupied): continue
+			var edge := Color("82b1c0") if row.transit>0 else Color("d5b477")
+			draw_rect(box,Color(0.045,0.085,0.105,0.94))
+			draw_line(box.position,Vector2(box.position.x,box.end.y),edge,1.5)
+			draw_string(font,box.position+Vector2(6,14),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("eee5cf"))
+			MapSymbolAtlas.occupy(box.grow(2),occupied)
+			_logistics_hits.append({"rect":box,"place_id":place,"data":row.data})
+			shown += 1
+			break
+		if not _topic_hits.has(place): _topic_hits[place]={"subject_id":""}
+
+func _get_tooltip(at_position: Vector2) -> String:
+	if controller==null or controller.map_mode!="economic": return ""
+	if is_instance_valid(_topic_flow) and _topic_flow.visible:
+		for hit: Rect2 in _topic_flow.ship_hits:
+			if hit.has_point(at_position): return UILocale.text("商船示意 · 航运联系，非实时船位")
+	for hit: Dictionary in _logistics_hits:
+		if not (hit.rect as Rect2).has_point(at_position): continue
+		if hit.has("station"): return UILocale.text(str(hit.station.name))+"\n"+UILocale.text("铁路走廊：历史资料；线位：现代参考")
+		var text := FormalEconomicText.logistics_brief(hit.data,_logistics_observation.get("units",{}))
+		text+="\n"+UILocale.text("城市汇总；光点表示在途订单方向，非车船位置")
+		if _logistics_observation.get("truncated",false): text+="\n"+UILocale.text("只列本次可见记录，更多见运输账目")
+		return text
+	if political.show_output_values:
+		var owner := _polity_at(at_position)
+		var value: Variant = political.output_value(owner)
+		if value!=null: return UILocale.text("模拟日产值 · %.0f 生丁/日")%float(value)
+	return ""
 
 func topic_place_ids() -> Array[String]:
 	var ids: Array[String] = []
@@ -1129,8 +1619,7 @@ func _draw_topic_information() -> void:
 	_topic_hits.clear()
 	var mode := controller.map_mode
 	if is_instance_valid(_topic_flow):_topic_flow.visible=mode=="economic"
-	if mode not in ["political","geographic","economic"]: return
-	if mode!="economic" and not controller.economic_supplements_enabled: return
+	if mode!="economic": return
 	var budget := 24 if mode=="economic" and controller.region_camera.local_active else 16 if mode=="economic" and controller.region_camera.active else 12 if mode=="economic" else 12 if controller.region_camera.local_active else 8 if controller.region_camera.active else 2
 	for row: Dictionary in _symbol_layout:
 		var fact := _topic_by_place.get(str(row.id),{}) as Dictionary
@@ -1141,49 +1630,47 @@ func _draw_topic_information() -> void:
 			if fact.kind!="country_statistics": continue
 		var id := str(fact.place_id)
 		if _topic_hits.has(id): continue
-		var color := Color("63c5b5") if fact.kind in ["owned_site","site"] else Color("86aeca") if fact.kind=="country_statistics" else Color("bda1dc") if fact.kind=="transport_node" else Color("dfb56d")
-		var rect := row.rect as Rect2
-		if bool(row.get("topic_locator_only",false)):
-			draw_line(row.point as Vector2,rect.get_center(),color*Color(1,1,1,.6),1.0,true)
-		var badge:=rect.end-Vector2(2,2)
-		var kinds:Array=fact.get("node_kinds",[])
-		draw_circle(badge,6.0,Color("14262c"))
-		if fact.kind in ["owned_site","site"]:
-			draw_rect(Rect2(badge-Vector2(4,4),Vector2(8,8)),color,false,1.8)
-			var count:=int(fact.get("site_count",1))
-			if count>1:draw_string(_font,badge+Vector2(7,4),str(count),HORIZONTAL_ALIGNMENT_LEFT,-1,11,color)
-		elif fact.kind=="country_statistics":
-			for index:int in range(3):draw_line(badge+Vector2(-4+index*3,4),badge+Vector2(-4+index*3,-2-index),color,1.8,true)
-		elif fact.kind=="transport_node":
-			draw_polyline(PackedVector2Array([badge+Vector2(0,-5),badge+Vector2(5,0),badge+Vector2(0,5),badge+Vector2(-5,0),badge+Vector2(0,-5)]),color,1.8,true)
-		else:draw_circle(badge,3.0,color)
-		if "transport_node" in kinds and fact.kind!="transport_node":draw_circle(badge+Vector2(-8,0),2.4,Color("bda1dc"))
+		# Economic facts share the city symbol and hit target at its true anchor.
 		_topic_hits[id] = fact
 		if _topic_hits.size()>=budget: break
 	if is_instance_valid(_topic_flow):_topic_flow.visible=mode=="economic"
 	if mode!="economic" or _topic_links.is_empty() or spatial_world==null:return
 	var rc:=controller.region_camera
 	var projection_key:Array=[controller.orientation(),controller.zoom,size,rc.active,rc.local_active,rc.tangent_frame,rc.origin,rc.km_per_pixel,rc.bearing]
+	projection_key.append(strategic_layer.physical_reference().get("key",""))
 	var changed:bool=projection_key!=_topic_projection_key
 	if changed:_topic_projection_key=projection_key;_topic_projected.clear()
 	var flows:Array[Dictionary]=[]
 	for link:Dictionary in _topic_links:
 		_draw_topic_link(link)
+		if str(link.get("kind","")) in ["rail_reference","shipping_reference"] and (not controller.region_camera.active or _strategic_mpp()>2200.0): continue
 		if changed and bool(link.get("animate",false)) and flows.size()<16:
-			var points:=_topic_points(link);var contiguous:=PackedVector2Array();var best:=PackedVector2Array()
+			var points:=_topic_points(link);var contiguous:=PackedVector2Array();var pieces:Array[PackedVector2Array]=[]
 			for point:Vector2 in points:
 				if point.is_finite():contiguous.append(point)
 				else:
-					if contiguous.size()>best.size():best=contiguous
+					if contiguous.size()>1:pieces.append(contiguous)
 					contiguous=PackedVector2Array()
-			if contiguous.size()>best.size():best=contiguous
-			var length:float=0.0
-			for index:int in range(1,best.size()):length+=best[index-1].distance_to(best[index])
-			if length>0:flows.append({"points":best,"length":length,"observed_minute":int(link.get("observed_minute",0))})
+			if contiguous.size()>1:pieces.append(contiguous)
+			var viewport := PackedVector2Array([Vector2(-8,-8),Vector2(size.x+8,-8),size+Vector2(8,8),Vector2(-8,size.y+8)])
+			# Clip every water-contiguous piece before choosing visible content.
+			# The longest open-sea piece must not suppress a visible harbour piece.
+			for piece:PackedVector2Array in pieces:
+				for clipped: PackedVector2Array in Geometry2D.intersect_polyline_with_polygon(piece,viewport):
+					if flows.size()>=16: break
+					var length:float=0.0
+					for index:int in range(1,clipped.size()):length+=clipped[index-1].distance_to(clipped[index])
+					if length>0:flows.append({"points":clipped,"length":length,"rail":str(link.get("kind",""))=="rail_reference","ship":str(link.get("kind",""))=="shipping_reference","directions":link.get("flow_directions",[1]),"observed_minute":int(link.get("observed_minute",0))})
 	if changed:_ensure_topic_flow();_topic_flow.call("update_paths",flows)
 
 func _draw_topic_link(link:Dictionary) -> void:
+	# Contract endpoints alone do not define a railway alignment.
+	if str(link.get("id","")).begins_with("logistics:"): return
 	var kind:=str(link.get("kind",""))
+	if kind=="shipping_reference": return
+	if kind=="rail_reference":
+		_draw_rail_reference(link)
+		return
 	var status:=str(link.get("status",""))
 	var color:=Color("caaa73")
 	var width:=1.5
@@ -1200,6 +1687,7 @@ func _draw_topic_link(link:Dictionary) -> void:
 	elif kind=="contract":
 		if status in ["DELIVERED","CANCELLED"] or str(link.get("state","")).contains("历史"):color=Color(0.48,0.53,0.49,0.65)
 		elif status=="TRANSIT":color=Color("dc986b")
+		if str(link.get("id","")).begins_with("logistics:"): dashed=status!="TRANSIT"
 	var viewport:=Rect2(Vector2.ZERO,size).grow(12)
 	var points:=_topic_points(link)
 	if points.size()<2:return
@@ -1220,6 +1708,22 @@ func _draw_topic_link(link:Dictionary) -> void:
 	if kind=="cargo" and status in ["WAITING","WAITING_TRANSFER","LOADING","WAITING_UNLOAD","UNLOADING","AWAITING_RECIPIENT"]:
 		var point:=points[points.size()-1] if status in ["WAITING_UNLOAD","UNLOADING","AWAITING_RECIPIENT"] else points[0]
 		if point.is_finite() and viewport.has_point(point):draw_arc(point,6,0,TAU,16,color,2.0,true)
+
+func _draw_rail_reference(link: Dictionary) -> void:
+	if not controller.region_camera.active or _strategic_mpp()>2200.0: return
+	var points := _topic_points(link)
+	var strip := PackedVector2Array()
+	for point: Vector2 in points:
+		if point.is_finite(): strip.append(point)
+		else:
+			_draw_rail_strip(strip);strip=PackedVector2Array()
+	_draw_rail_strip(strip)
+
+func _draw_rail_strip(points: PackedVector2Array) -> void:
+	if points.size()<2: return
+	# Fine continuous cartographic track. No marching dashes or arrowheads.
+	draw_polyline(points,Color(.83,.82,.70,.50),2.6,true)
+	draw_polyline(points,Color(.27,.32,.30,.85),1.2,true)
 
 func _draw_topic_arrow(tip:Vector2,direction:Vector2,color:Color,width:float) -> void:
 	var normal:=Vector2(-direction.y,direction.x)
@@ -1250,6 +1754,17 @@ func _prepare_symbol_layout() -> void:
 		if not Rect2(Vector2.ZERO,size).has_point(point): continue
 		records[id] = record
 		points[id] = point
+	if controller.region_camera.active:
+		var mpp := _strategic_mpp()
+		var viewport := Rect2(Vector2.ZERO,size)
+		for reference: Dictionary in _symbol_atlas.reference_places():
+			if mpp>float(reference.max_mpp): continue
+			var id := str(reference.id)
+			var ll := reference.lon_lat as Array
+			var point := screen_point(GlobeProjection.lon_lat_to_unit(Vector2(float(ll[0]),float(ll[1]))))
+			if not viewport.has_point(point): continue
+			records[id] = reference
+			points[id] = point
 	# These are existing observer-known Catalog anchors, not new settlements.
 	# Admit them through the same atlas budget and occupied-rectangle rules.
 	var topic_aliases:Dictionary={}
@@ -1266,7 +1781,7 @@ func _prepare_symbol_layout() -> void:
 		records[id]=record;points[id]=point
 	# Reuse only the already requested administrative identities. Their known
 	# chief-lieu coordinates are not new settlements, polygon centroids or facts.
-	if controller.region_camera.active and spatial_world!=null:
+	if controller.region_camera.active and spatial_world!=null and not _city_display_active():
 		for row: Dictionary in _overlay_demand:
 			if row.kind!="administration": continue
 			var record := row.get("capital_symbol",{}) as Dictionary
@@ -1283,6 +1798,7 @@ func _prepare_symbol_layout() -> void:
 	for id: String in points:
 		var record := records.get(id,{}) as Dictionary
 		if record.is_empty() or str(record.get("display_kind",""))=="physical_cover": continue
+		if not UILocale.map_name_available(record): continue
 		var model := region_view.landmark_visible(id) or region_view.settlement_visible(id)
 		candidates.append({"id":id,"record":record,"point":points[id],"model":model,"topic_locator":topic_aliases.has(id)})
 	var occupied: Dictionary = {}
@@ -1292,13 +1808,14 @@ func _prepare_symbol_layout() -> void:
 	local_layer.label_rects.clear()
 	strategic_layer.label_rects.clear()
 	for row: Dictionary in _symbol_layout:
-		if (not bool(row.model) or bool(row.get("topic_locator",false))) and bool((row.record as Dictionary).get("symbol_selectable",true)): _symbol_hits[str(row.id)] = (row.rect as Rect2).grow(4.0)
+		if bool((row.record as Dictionary).get("symbol_selectable",true)): _symbol_hits[str(row.id)] = (row.rect as Rect2).grow(4.0)
 	for row: Dictionary in _symbol_layout:
 		var id := str(row.id)
 		var selected := id==controller.selected_place_id
-		if (bool(row.model) or bool(row.get("topic_locator_only",false))) and not selected: continue
+		if bool(row.get("topic_locator_only",false)) and not selected: continue
 		if not selected and _symbol_text.size()>=40: continue
-		var name := str((row.record as Dictionary).get("display_name",(row.record as Dictionary).get("name","")))
+		var record := row.record as Dictionary
+		var name := UILocale.name(record.merged({"name":record.get("display_name",record.get("name",""))},true))
 		if name.is_empty(): continue
 		if not _city_fonts.has(name):
 			if _city_fonts.size()>=256: _city_fonts.clear()
@@ -1312,7 +1829,7 @@ func _prepare_symbol_layout() -> void:
 		if not Rect2(Vector2.ZERO,size).encloses(text_box): continue
 		if not selected and not MapSymbolAtlas.free_rect(text_box.grow(2.0),occupied): continue
 		MapSymbolAtlas.occupy(text_box.grow(2.0),occupied)
-		_symbol_text.append({"id":id,"name":name,"font":font,"baseline":baseline})
+		_symbol_text.append({"id":id,"name":name,"font":font,"baseline":baseline,"reference":id.begins_with("map_reference:")})
 		local_layer.label_rects.append(text_box)
 	if not _topic_places.is_empty():
 		var current:Dictionary={}
@@ -1321,7 +1838,7 @@ func _prepare_symbol_layout() -> void:
 
 func _draw_symbol_labels() -> void:
 	for label: Dictionary in _symbol_text:
-		if not controller.labels_enabled and str(label.id) not in [controller.selected_place_id,controller.hovered_place_id]: continue
+		if not controller.labels_enabled and not bool(label.reference) and str(label.id) not in [controller.selected_place_id,controller.hovered_place_id]: continue
 		var font := label.font as Font
 		font.draw_string_outline(get_canvas_item(),label.baseline as Vector2,str(label.name),HORIZONTAL_ALIGNMENT_LEFT,-1,13,2,Color(0.16,0.19,0.17,0.85))
 		draw_string(font,label.baseline as Vector2,str(label.name),HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color(0.94,0.92,0.83))
@@ -1374,11 +1891,18 @@ func _gui_input(event: InputEvent) -> void:
 			return
 	var wheel := event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN]
 	var camera_input := wheel or event is InputEventMouseButton and (event as InputEventMouseButton).button_index in [MOUSE_BUTTON_LEFT,MOUSE_BUTTON_RIGHT] or event is InputEventMouseMotion and (controller._dragging or controller._bearing_dragging)
+	if camera_input:
+		_location_generation+=1
 	if input_blocked.is_valid() and event is InputEventMouse:
 		if bool(input_blocked.call(get_global_transform()*(event as InputEventMouse).position)):
 			controller.suspend_motion()
 			controller.hover("", "")
 			return
+	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed and _player_marker_rect.has_point(event.position):
+		controller.suspend_motion()
+		player_selected.emit()
+		accept_event()
+		return
 	if camera_input and _transition_elapsed>=0.0:
 		# New input supersedes a cosmetic fade; it does not wait for its timer
 		# or a pending LOD. The next valid draw selects the current camera.
@@ -1394,16 +1918,7 @@ func _gui_input(event: InputEvent) -> void:
 	var unit := Vector3.ZERO if manipulating else unit_at(_last_pointer)
 	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT:
 		controller.begin_bearing(unit,_last_pointer)
-	var minimum_mpp := 2.0
-	if wheel and controller.region_camera.active:
-		var anchor := controller.region_camera.unit_at(size*.5)
-		if not anchor.is_zero_approx():
-			var ll := RegionProjection.lon_lat(anchor)
-			minimum_mpp = relief.minimum_observation_mpp(ll)
-			if local_content!=null and local_content.content!=null:
-				minimum_mpp = minf(minimum_mpp,local_content.content.minimum_observation_mpp(ll,political.display_date))
-		if (event as InputEventMouseButton).button_index==MOUSE_BUTTON_WHEEL_UP and _strategic_mpp()<=minimum_mpp*1.02:
-			map_notice.emit("已达此处资料的有效观察尺度；更近LOCAL需有对应地形或聚落内容。")
+	var minimum_mpp := 2.0 # Full proposed pose is checked by RegionCamera.
 	var clicked := controller.handle_input(event,_globe_rect,unit,{"center":_center,"base_radius":minf(size.y/2.55,size.x*0.49),"size":size,"minimum_mpp":minimum_mpp})
 	# A drag changes the camera, never the selected object. Picking every
 	# intermediate pointer duplicates projection work along fragmented shores.
@@ -1435,6 +1950,10 @@ func _gui_input(event: InputEvent) -> void:
 				for row: Dictionary in _overlay_demand:
 					if row.kind=="administration" and _overlay_batches.has(str(row.id)): displayed.append(str(row.id))
 				place_id = spatial_world.pick_administration(RegionProjection.lon_lat(picked),political.display_date,displayed)
+				if not place_id.is_empty() and not UILocale.map_name_available(spatial_world.administrative_identity(place_id)):
+					controller.hover("", "")
+					accept_event()
+					return
 				if not place_id.is_empty() and place_id!=controller.selected_place_id and str(spatial_world.administrative_identity(place_id).get("polity_id",""))!=controller.player_polity_id: place_id = ""
 		if place_id.is_empty() and not physical_water:
 			var geographic := _geographic_at(point)
@@ -1456,14 +1975,22 @@ func _gui_input(event: InputEvent) -> void:
 		elif not place_id.is_empty():
 			var place := _display_place(place_id)
 			polity_id = _political_view.runtime_id_for_source(str(place.get("parent_country_id", "")))
+		if not place_id.is_empty():
+			var named: Dictionary = spatial_world.administrative_identity(place_id) if spatial_world!=null and place_id.begins_with("administrative_region:") else _geographic_records.get(place_id,{}) if _geographic_records.has(place_id) else _display_place(place_id)
+			if not UILocale.map_name_available(named):
+				controller.hover("", "")
+				accept_event()
+				return
 		var current_land := _current_land_at(unit_at(point)) if not physical_water else ""
-		if not current_land.is_empty(): polity_id = str(_current_land_rows[current_land].sovereign)
+		if not current_land.is_empty(): polity_id = _land_sovereign(current_land)
 		controller.hover(polity_id, place_id)
 		if clicked:
 			_selected_land_context = current_land
 			if _symbol_place_records.has(place_id) and not place_id.begins_with("administrative_region:"):
 				var reference := (_symbol_place_records[place_id] as Dictionary).duplicate()
-				reference.merge({"place_id":place_id,"name":str(reference.get("display_name",reference.get("name",place_id))),"spatial_kind":"historical place reference"},true)
+				var name := str(reference.get("display_name",reference.get("name","")))
+				reference.merge({"place_id":place_id,"name":UILocale.name(reference) if name.is_empty() else name},true)
+				if not reference.has("spatial_kind"): reference["spatial_kind"]="historical place reference"
 				geographic_reference_selected.emit(reference)
 			# A real place remains selectable when its legacy country reference has
 			# no current polity crosswalk. Do not infer that mapping from a polygon.
@@ -1486,7 +2013,139 @@ func _stabilize_local_anchor(unit: Vector3, pixel: Vector2) -> void:
 	var actual := region_view.chart_screen_point(unit,camera)
 	var correction := pixel-actual
 	if correction.length_squared()>0.0001:
-		controller.offset_region(correction)
+		camera.pan(correction,size)
+		controller.view_changed.emit()
+
+func _return_to_region() -> void:
+	if controller==null: return
+	var camera := controller.region_camera
+	if not camera.local_active: return
+	var observed: int = Time.get_ticks_usec() if observation_profile else 0
+	if observation_profile: observation_return = {"requested_us": observed, "first_valid_frame_us": 0}
+	controller.suspend_motion()
+	var anchor := unit_at(size*.5)
+	if observation_profile: observation_return["anchor_us"] = Time.get_ticks_usec() - observed
+	camera.leave_local()
+	camera.local_suppressed=true
+	if not anchor.is_zero_approx(): camera.origin+=size*.5-camera.project(anchor)
+	# Preserve chart, centre, bearing, selection and world state. REGION can
+	# subsequently zoom out or explicitly locate another source.
+	camera.fit_requested_scale(size,size*.5)
+	if observation_profile: observation_return["fit_finished_us"] = Time.get_ticks_usec()
+	controller.view_changed.emit()
+	if observation_profile: observation_return["callback_us"] = Time.get_ticks_usec() - observed
+
+func _locate_local_reference(ll: Vector2) -> void:
+	_location_generation+=1
+	var generation := _location_generation
+	var catalogue_size := relief._assets.size()
+	var unit := GlobeProjection.lon_lat_to_unit(ll)
+	controller.focus_region(unit,size*.5,.18,0.0,size)
+	# WORLD initially knows only its foundation. Let the existing catalogue
+	# request complete, then honour this explicit location's scale once.
+	if controller.region_camera.km_per_pixel<=.181: return
+	var deadline := Time.get_ticks_msec()+15000
+	while is_inside_tree() and generation==_location_generation and relief._assets.size()==catalogue_size and Time.get_ticks_msec()<deadline:
+		await get_tree().process_frame
+	if is_inside_tree() and generation==_location_generation and relief._assets.size()!=catalogue_size:
+		controller.focus_region(unit,size*.5,.18,0.0,size)
+
+func _camera_pose_valid(at_origin: Vector2, scale: float, angle: float, viewport_size: Vector2) -> bool:
+	if controller==null: return true
+	var camera := controller.region_camera
+	var city_data := _city_source_profile()
+	# A flat vector chart keeps its own geographic extent. Raster sampling
+	# quality controls the displayed relief, not whether the user may pan or
+	# leave that raster's footprint. Fine 3D admission is checked below.
+	if not camera.local_active: return true
+	# The city is a map presentation, not fine 3D terrain. Its qualified pose
+	# selects CITY in _evaluate_scale; moving out hands back to REGION.
+	if city_data.has("presentation_index"): return true
+	if camera.local_active and not city_data.is_empty() and scale<.1:
+		var valid := CityOverview.pose_valid(city_data,camera,at_origin,scale,angle,_city_safe_rect(),region_view.elevation_for_scale(camera,scale*1000.0),viewport_size)
+		if not valid: observation_camera_rejection={"reason":"CITY_FOOTPRINT","mpp":scale*1000.0}
+		return valid
+	var regions: Array[Dictionary]=[]
+	var content_reference: LocalSpatialContent
+	if local_content!=null: content_reference=local_content.content
+	if content_reference!=null and content_reference.display_active_on(political.display_date): regions=content_reference.observation_regions()
+	# An oblique terrain ray can meet any height in the displayed source.
+	# REGION's flat chart is exactly the zero-height case. Orthographic ground
+	# compensation is the same as RegionView._chart_transform, including yaw.
+	var heights: Array[float]=[0.0]
+	if camera.local_active and content_reference!=null and not content_reference.surface_reference.is_empty():
+		var d := content_reference.surface_reference
+		var base := float(d.height_rows_m[int(d.height)/2][int(d.width)/2])
+		var low := float(d.height_min_m)-base;var high := float(d.height_max_m)-base
+		if (d.get("presentation",{}) as Dictionary).has("context_height_asset"):
+			low=minf(low,-base);high=maxf(high,5000.0-base) # documented log-height range
+		if region_view._local_surface_key==str(d.content_path) and not region_view._surface_display_heights.is_empty():
+			low=region_view._surface_ground_range.x;high=region_view._surface_ground_range.y
+		var elevation := region_view.elevation_for_scale(camera,scale*1000.0)
+		heights=[low*cos(elevation)*.001,high*cos(elevation)*.001]
+	var axes := RegionProjection.screen_axes(angle)
+	var ground := PackedVector2Array()
+	for height: float in heights:
+		for corner: Vector2 in [Vector2.ZERO,Vector2(viewport_size.x,0),viewport_size,Vector2(0,viewport_size.y)]:
+			ground.append(axes.basis_xform_inv((corner-at_origin)*scale+Vector2(0,height)))
+	var hull := Geometry2D.convex_hull(ground)
+	var footprint := PackedVector2Array()
+	var centre_ll := RegionProjection.lon_lat(RegionProjection.inverse(axes.basis_xform_inv((viewport_size*.5-at_origin)*scale),camera.tangent_frame))
+	for index: int in range(hull.size()-1):
+		for sample: int in range(5):
+			var ll := RegionProjection.lon_lat(RegionProjection.inverse(hull[index].lerp(hull[index+1],float(sample)/5.0),camera.tangent_frame))
+			ll.x+=360.0*roundf((centre_ll.x-ll.x)/360.0)
+			footprint.append(ll)
+	if not relief.supports_footprint(footprint,scale*1000.0,regions):
+		observation_camera_rejection={"reason":"RELIEF_COVERAGE","mpp":scale*1000.0}
+		return false
+	if scale>=RegionCamera.LOCAL_EXIT_KM_PER_PIXEL: return true
+	# A finer REGION colour page cannot qualify the coarser 3D height mesh
+	# drawn over it. Qualify every visible context portion against that mesh's
+	# own output spacing, except where an admitted fine survey replaces it.
+	var shift := Transform2D(0.0,-centre_ll)
+	for region: Dictionary in regions:
+		if str(region.grade)!="generalized" or scale*1000.0+0.001>=float(region.minimum_mpp): continue
+		var remaining: Array[PackedVector2Array]=Geometry2D.intersect_polygons(shift*footprint,shift*(region.polygon as PackedVector2Array))
+		for fine: Dictionary in regions:
+			if str(fine.grade)!="survey" or scale*1000.0<float(fine.minimum_mpp): continue
+			var holes: Array[PackedVector2Array]=[shift*(fine.polygon as PackedVector2Array)]
+			remaining=GlobeProjection.subtract_holes(remaining,holes)
+		if remaining.any(func(piece: PackedVector2Array) -> bool: return absf(GlobeProjection.polygon_area(piece))>0.000000001): return false
+	# The qualifying native patch must remain under the central ground rays.
+	# Outer pixels may use REGION only when that same scale qualifies there.
+	# In a narrow survey, this admits an honest overview, never fine 3D outside
+	# its polygon. At deep scales the entire footprint must fit fine coverage.
+	for height: float in heights:
+		var centre := axes.basis_xform_inv((viewport_size*.5-at_origin)*scale+Vector2(0,height))
+		var inside := false
+		for region: Dictionary in regions:
+			if scale*1000.0+0.001<float(region.minimum_mpp): continue
+			var polygon := PackedVector2Array()
+			for ll: Vector2 in region.polygon as PackedVector2Array: polygon.append(RegionProjection.forward(GlobeProjection.lon_lat_to_unit(ll),camera.tangent_frame))
+			if not Geometry2D.is_point_in_polygon(centre,polygon): continue
+			var clearance := INF
+			for index: int in range(polygon.size()): clearance=minf(clearance,centre.distance_to(Geometry2D.get_closest_point_to_segment(centre,polygon[index],polygon[(index+1)%polygon.size()])))
+			# Up to 32 pixels, bounded by two real output samples. Zooming out
+			# must not inflate the safety collar until it traps the whole source.
+			if clearance>=minf(scale*32.0,float(region.minimum_mpp)*LocalSpatialContent.OUTPUT_SAMPLE_PIXELS*.002): inside=true;break
+		if not inside: return false
+	return true
+
+func _draw_local_data_boundary() -> void:
+	var camera := controller.region_camera
+	if not _city_source_profile().is_empty(): return
+	if local_content==null or local_content.content==null: return
+	for region: Dictionary in local_content.content.observation_regions():
+		var ring := PackedVector2Array()
+		var polygon := region.polygon as PackedVector2Array
+		for index: int in range(polygon.size()):
+			for sample: int in range(8):
+				var ll := polygon[index].lerp(polygon[(index+1)%polygon.size()],float(sample)/8.0)
+				ring.append(region_view.chart_screen_point(GlobeProjection.lon_lat_to_unit(ll),camera))
+		if ring.is_empty(): continue
+		ring.append(ring[0])
+		draw_polyline(ring,Color(0.84,0.74,0.47,0.62 if str(region.grade)=="generalized" else 0.35),1.0,true)
 
 func _polity_at(point: Vector2) -> String:
 	_unassigned_pick = false
@@ -1495,7 +2154,7 @@ func _polity_at(point: Vector2) -> String:
 	if unit.is_zero_approx(): return ""
 	var current_id := _current_land_at(unit)
 	if not current_id.is_empty():
-		var sovereign := str(_current_land_rows[current_id].sovereign)
+		var sovereign := _land_sovereign(current_id)
 		_unassigned_pick = sovereign.is_empty()
 		return sovereign
 	var chart_point := camera.project(unit) if camera.local_active else point
@@ -1521,6 +2180,9 @@ func _picked_political_identity(owner: String) -> String:
 	return runtime_id if not runtime_id.is_empty() and _political_view.has_entity(runtime_id) else owner
 
 func _place_at(point: Vector2) -> String:
+	if controller.map_mode=="economic":
+		for hit: Dictionary in _logistics_hits:
+			if hit.has("place_id") and (hit.rect as Rect2).has_point(point): return str(hit.place_id)
 	if controller.region_camera.active:
 		for id: String in region_view.landmark_screen_bounds:
 			if region_view.landmark_visible(id) and (region_view.landmark_screen_bounds[id] as Rect2).has_point(point): return id
@@ -1618,6 +2280,31 @@ func set_internal_load_test(active: bool) -> void:
 	region_view.set_internal_load_test(active)
 	_invalidate_spatial_display()
 
+func country_observation(polity_id: String, available: Vector2) -> Dictionary:
+	var anchor: Vector3=political.anchors.get(polity_id,Vector3.ZERO)
+	var scale := .05
+	var best := Rect2()
+	var best_ring := PackedVector2Array()
+	var best_area := -1.0
+	var feature := str(political.boundary_features.get(polity_id,""))
+	for part: Dictionary in content.parts(feature):
+		var ring: PackedVector2Array=part.outer
+		if ring.is_empty(): continue
+		ring=GlobeProjection.unwrap_ring(ring,ring[0].x)
+		var bounds := GlobeProjection.lon_lat_bounds([ring])
+		var area := absf(GlobeProjection.polygon_area(ring))*maxf(.01,cos(deg_to_rad(bounds.get_center().y)))
+		if area>best_area: best=bounds;best_ring=ring;best_area=area
+	if best.has_area():
+		anchor=GlobeProjection.lon_lat_to_unit(best.get_center())
+		var frame := RegionProjection.frame(best.get_center())
+		var projected := Rect2()
+		var first := true
+		for ll: Vector2 in best_ring:
+			var km := RegionProjection.forward(GlobeProjection.lon_lat_to_unit(ll),frame)
+			projected=Rect2(km,Vector2.ZERO) if first else projected.expand(km);first=false
+		scale=maxf(projected.size.x/maxf(180,available.x),projected.size.y/maxf(240,available.y))*1.16
+	return {"anchor":anchor,"scale":maxf(.008,scale)}
+
 func focus_selection() -> void:
 	_transition_elapsed = -1.0
 	_container.modulate.a = 1.0
@@ -1634,7 +2321,8 @@ func focus_selection() -> void:
 		var coordinates := (_geographic_records[controller.selected_place_id] as Dictionary).lon_lat as Array
 		controller.focus(GlobeProjection.lon_lat_to_unit(Vector2(float(coordinates[0]),float(coordinates[1]))))
 		return
-	controller.focus(political.anchors.get(controller.selected_polity_id, Vector3.ZERO) as Vector3)
+	var target := country_observation(controller.selected_polity_id,size-Vector2(80,180))
+	controller.focus_market_view(target.anchor as Vector3,size*.5,float(target.scale),size,_evaluate_scale)
 
 func _on_mouse_exited() -> void:
 	if controller != null:
@@ -1720,17 +2408,31 @@ func _evaluate_scale() -> void:
 		_begin_transition(controller.region_camera.active)
 	var camera := controller.region_camera
 	if not camera.active: return
+	var city_data := _city_source_profile()
 	if camera.local_active:
-		if camera.km_per_pixel>=RegionCamera.LOCAL_EXIT_KM_PER_PIXEL: controller.leave_local()
+		if city_data.has("presentation_index"):
+			if not CityOverview.pose_valid(city_data,camera,camera.origin,camera.km_per_pixel,camera.bearing,_city_safe_rect(),region_view.elevation_at(camera),size): controller.leave_local()
+		elif camera.km_per_pixel>=RegionCamera.LOCAL_EXIT_KM_PER_PIXEL: controller.leave_local()
 		return
+	if camera.km_per_pixel>=RegionCamera.LOCAL_EXIT_KM_PER_PIXEL: camera.local_suppressed=false
 	var unit := camera.valid_anchor(size).unit as Vector3
 	if camera.scale_at(unit)>RegionCamera.LOCAL_ENTER_KM_PER_PIXEL or not region_view.ready: return
 	if local_content==null or local_content.content==null or not local_content.content.covers(RegionProjection.lon_lat(unit)) or not local_content.content.display_active_on(political.display_date): return
 	if not bool(local_content.content.metadata.get("local_enabled",true)): return
-	if not is_finite(local_content.content.minimum_observation_mpp(RegionProjection.lon_lat(unit),political.display_date)): return
-	var anchor := local_content.content.metadata.get("anchor_lon_lat",[]) as Array
+	if city_data.get("ground_mode","")=="cartographic_plane":
+		# A flat sourced city display uses its own acquired coverage, not a
+		# separate landmark DEM patch. This admits neither terrain nor entities.
+		var b: Array=city_data.content_bounds
+		var area := Rect2(Vector2(float(b[0]),float(b[1])),Vector2(float(b[2])-float(b[0]),float(b[3])-float(b[1])))
+		camera.local_regions=[{"polygon":LocalSpatialContent._bounds_polygon(area),"minimum_mpp":float(city_data.minimum_mpp),"grade":"generalized"}]
+	else:
+		if not is_finite(local_content.content.minimum_observation_mpp(RegionProjection.lon_lat(unit),political.display_date)): return
+		camera.local_regions=local_content.content.observation_regions()
+	if camera.local_regions.is_empty(): return
+	var anchor := city_data.get("anchor",local_content.content.metadata.get("anchor_lon_lat",[])) as Array
 	var anchor_unit := GlobeProjection.lon_lat_to_unit(Vector2(float(anchor[0]),float(anchor[1])))
-	controller.enter_local(anchor_unit,camera.project(anchor_unit),size,str(local_content.content.metadata.anchor_place_id),float(local_content.content.metadata.get("local_min_mpp",25.0)))
+	if city_data.has("presentation_index") and not CityOverview.pose_valid(city_data,camera,camera.origin,camera.km_per_pixel,camera.bearing,_city_safe_rect(),region_view.elevation_at(camera),size): return
+	controller.enter_local(anchor_unit,camera.project(anchor_unit),size,str(city_data.get("place_id",local_content.content.metadata.anchor_place_id)),float(city_data.get("minimum_mpp",local_content.content.metadata.get("local_min_mpp",25.0))))
 
 func _sync_local_resources() -> void:
 	if local_content == null:
@@ -1738,7 +2440,11 @@ func _sync_local_resources() -> void:
 	var camera := controller.region_camera
 	var center_unit := camera.unit_at(size*0.5) if camera.active else unit_at(size*0.5)
 	var request_unit := center_unit
-	if camera.active and (center_unit.is_zero_approx() or not LocalSpatialLoader.covers(RegionProjection.lon_lat(center_unit))):
+	var retained_city := _city_source_profile()
+	if camera.local_active and retained_city.has("presentation_index"):
+		var anchor: Array=retained_city.anchor
+		request_unit=GlobeProjection.lon_lat_to_unit(Vector2(float(anchor[0]),float(anchor[1])))
+	elif camera.active and (center_unit.is_zero_approx() or not LocalSpatialLoader.covers(RegionProjection.lon_lat(center_unit))):
 		for anchor: Vector2 in LocalSpatialLoader.anchors():
 			var candidate := GlobeProjection.lon_lat_to_unit(anchor)
 			if Rect2(Vector2.ZERO,size).has_point(camera.project(candidate)):
@@ -1754,7 +2460,7 @@ func _sync_local_resources() -> void:
 	local_content.request(RegionProjection.lon_lat(request_unit))
 	if local_content.preparing(): set_process(visible)
 	if local_content.content == null: return
-	if local_content.content.errors.is_empty() and camera.local_active and camera.local_place_id!=str(local_content.content.metadata.anchor_place_id):
+	if local_content.content.errors.is_empty() and camera.local_active and camera.local_place_id!=str(local_content.content.metadata.anchor_place_id) and _city_source_profile().is_empty():
 		# Both synchronous reuse and asynchronous completion retain the chart,
 		# bearing and scale while admitting the new LOCAL anchor.
 		camera.leave_local()
@@ -1768,6 +2474,7 @@ func _sync_local_resources() -> void:
 		local_layer.release_gpu()
 
 func _sync_landmark_display() -> bool:
+	var observed: int = Time.get_ticks_usec() if observation_profile else 0
 	var visuals: Array[Dictionary] = []
 	if visible and controller.region_camera.active and region_view.ready and local_content!=null and local_content.content!=null and local_content.content.errors.is_empty():
 		for visual: Dictionary in local_content.content.landmark_visuals():
@@ -1795,10 +2502,17 @@ func _sync_landmark_display() -> bool:
 	if not surface.is_empty(): settlements = local_content.content.settlement_visuals(political.display_date)
 	var covers: Array[Dictionary] = []
 	if not surface.is_empty(): covers = local_content.content.surface_covers
+	region_view.city_profile = _city_source_profile() if _city_display_active() else {}
+	region_view.city_profiles = CityOverview.visible_profiles(controller.region_camera,size) if visible else []
+	if _city_sample_grade>0 and not region_view.city_profile.is_empty(): region_view.city_profile=CityOverview.sample(region_view.city_profile,_city_sample_grade)
+	if _city_sample_grade>0 and not region_view.city_profile.is_empty(): region_view.city_profiles=[region_view.city_profile]
+	if observation_profile: observation_costs["landmark_demand_us"]=Time.get_ticks_usec()-observed; observed=Time.get_ticks_usec()
 	region_view.update_landmarks(visuals,controller.region_camera,size,surface,lines,settlements,covers)
+	if observation_profile: observation_costs["landmark_scene_us"]=Time.get_ticks_usec()-observed; observed=Time.get_ticks_usec()
 	region_view.set_map_style(_local_ground_style())
 	region_view.set_surface_reference(relief.surface_description(_strategic_mpp()))
 	var coverage_changed := _sync_local_coverage()
+	if observation_profile: observation_costs["landmark_coverage_us"]=Time.get_ticks_usec()-observed
 	if controller.region_camera.local_active:
 		for id: String in _place_points:
 			var place := _display_place(id)
@@ -1816,15 +2530,20 @@ func _sync_local_coverage() -> bool:
 	# sampler references are cleared even during asynchronous shard handoff.
 	var signature: Array = []
 	if not coverage.is_empty():
-		signature = [coverage.bounds,coverage.edge,(coverage.water as Texture2D).get_instance_id(),(coverage.height as Texture2D).get_instance_id(),coverage.strength,coverage.vertical_pixels,coverage.local_lines]
+		signature = [coverage.bounds,coverage.edge,(coverage.water as Texture2D).get_instance_id() if coverage.water!=null else 0,(coverage.height as Texture2D).get_instance_id() if coverage.height!=null else 0,coverage.strength,coverage.vertical_pixels,coverage.local_lines,coverage.get("city_overview",false),coverage.get("water_owner",false),coverage.get("line_bounds",Vector4.ZERO),coverage.get("secondary_bounds",Vector4.ZERO)]
 	var changed := _local_coverage_signature!=signature
+	var held_textures := _local_coverage_signature.size()>3 and (int(_local_coverage_signature[2])!=0 or int(_local_coverage_signature[3])!=0)
 	_local_coverage_signature = signature
 	if changed:
 		local_layer.set_local_coverage(coverage)
+		# Keep physical land active; only the covered river symbols hand over.
 		for layer: LocalSpatialLayer in [_world_layer,_region_layer]: layer.set_local_coverage(coverage)
-		for batch: Dictionary in _boundary_batches: local_chart_uniforms(batch,coverage)
-		for batches: Array in _overlay_batches.values():
-			for batch: Dictionary in batches: local_chart_uniforms(batch,coverage)
+		# Visible annotation batches receive the current chart in their normal
+		# draw below. Visit hidden annotations only to release actual old samplers.
+		if held_textures:
+			for batch: Dictionary in _boundary_batches: local_chart_uniforms(batch,coverage)
+			for batches: Array in _overlay_batches.values():
+				for batch: Dictionary in batches: local_chart_uniforms(batch,coverage)
 	return changed
 
 func _on_local_frame_ready() -> void:
@@ -1836,7 +2555,7 @@ func _on_local_frame_ready() -> void:
 func _local_ground_style() -> Dictionary:
 	var shade := MapScaleStyle.relief_weight(_strategic_mpp(),controller.map_mode)
 	var neutral := {"tone":Color(0.42,0.50,0.46),"weight":0.0,"relief":shade}
-	if controller.map_mode=="geographic": return neutral
+	if controller.map_mode in ["geographic","military"]: return neutral
 	if local_content==null or local_content.content==null: return neutral
 	var source := ""
 	var anchor := str(local_content.content.metadata.anchor_place_id)
@@ -1893,7 +2612,12 @@ func _sync_strategic_resources() -> void:
 		if _strategic_failure!=strategic_content.failure: map_notice.emit(strategic_content.failure)
 		_strategic_failure = strategic_content.failure
 		return
-	if target==_region_layer: target.discard_uncovered_preparation(strategic_content.physical_demand("medium"))
+	if target==_region_layer:
+		var wanted := strategic_content.physical_demand("medium")
+		var previous: Array = target.physical_reference().get("regions",[])
+		if not previous.is_empty() and not wanted.any(func(id: String) -> bool: return id in previous):
+			target.clear()
+		else: target.discard_uncovered_preparation(wanted)
 	_strategic_failure = ""
 	if strategic_content.preparing() and not _strategic_waiting:
 		_strategic_waiting = true
@@ -1965,19 +2689,24 @@ func _physical_ink_frames() -> Dictionary:
 func _strategic_mpp() -> float:
 	return controller.region_camera.km_per_pixel*1000.0 if controller.region_camera.active else RegionProjection.EARTH_RADIUS_KM/maxf(_radius,1.0)*1000.0
 
-func _update_strategic_layer(commit_canvas: bool = true) -> void:
+func _update_strategic_layer(commit_canvas: bool = true, prepared_layer: LocalSpatialLayer = null) -> LocalSpatialLayer:
 	var lod_name := _prepared_view_lod()
 	if lod_name.is_empty(): lod_name = _installed_view_lod()
 	var target := _region_layer if lod_name=="medium" else _world_layer
+	# Cities add sourced geometry over the same physical base at every scale.
 	target.reference_relief = relief.textures
 	target.set_reference_window(_relief_description())
 	target.suppressed_places = local_layer.visible_places
-	target.update(controller.region_camera,controller,political.display_date,size,commit_canvas,{"mpp":_strategic_mpp(),"center":_center,"radius":_radius,"canvas":_viewport.world_2d.canvas,"display_lod":lod_name,"install_physical":true,"ink_styles":_political_ink,"ink_owners":political._whole_owner_by_feature,"current_land_owners":_current_land_rows,"local_river_replacements":_local_river_replacements()})
+	var observed: int=Time.get_ticks_usec() if observation_profile else 0
+	target.update(controller.region_camera,controller,political.display_date,size,commit_canvas,{"mpp":_strategic_mpp(),"city_overview":_city_display_active(),"center":_center,"radius":_radius,"canvas":_viewport.world_2d.canvas,"display_lod":lod_name,"install_physical":true,"observation_costs":observation_costs if observation_profile else {},"military_grid":_military_grid_style(),"ink_styles":_political_ink,"ink_revision":_ink_style_revision,"ownership_revision":_current_political_revision,"ink_owners":political._whole_owner_by_feature,"current_land_owners":_current_land_rows,"local_river_replacements":_local_river_replacements()},target!=prepared_layer or _view_dirty)
+	if observation_profile: observation_costs["strategic_update_us"]=Time.get_ticks_usec()-observed;observed=Time.get_ticks_usec()
 	if commit_canvas:
 		strategic_layer = target
 		(_world_layer if target==_region_layer else _region_layer).hide_display()
 		if target==_world_layer and (not controller.region_camera.active or _strategic_mpp()>StrategicSpatialLoader.MEDIUM_LOD_MPP) and _region_layer.content_reference()!=null:
 			_region_layer.clear() # The global image is submitted before local retirement.
+	if observation_profile: observation_costs["strategic_retire_us"]=Time.get_ticks_usec()-observed
+	return target
 
 func _local_river_replacements() -> Dictionary:
 	# This exact source pair was traced in the post-R46 audit. A completed
@@ -1988,37 +2717,59 @@ func _local_river_replacements() -> Dictionary:
 	var center := GlobeProjection.lon_lat_to_unit(Vector2(float(anchor[0]),float(anchor[1])))
 	return {"river:seine":Vector4(center.x,center.y,center.z,cos(float(content.metadata.radius_km)/6371.0088))}
 
+func _military_grid_style() -> Dictionary:
+	if controller.map_mode!="military" or spatial_world==null: return {}
+	var topology := spatial_world.land_topology()
+	if topology==null:return {}
+	var projection: Dictionary=topology._seed.projection
+	var origin: Array=projection.origin_m
+	# Only two metric levels. The 25 km grid subdivides each 50 km cell;
+	# zoom changes visibility, never the geographic origin or cell dimensions.
+	var mpp := _strategic_mpp()
+	if _military_grid_step_m==50000 and mpp<700.0: _military_grid_step_m=25000
+	elif _military_grid_step_m==25000 and mpp>900.0: _military_grid_step_m=50000
+	return {"step":float(_military_grid_step_m),"projection":Vector4(topology._n,topology._af,topology._rho0,topology._eccentricity),"origin":Vector3(float(projection.x_0)-float(origin[0]),float(projection.y_0)-float(origin[1]),deg_to_rad(float(projection.lon_0)))}
+
 func _label_exclusions() -> Array[Rect2]:
 	var result: Array[Rect2] = []
 	if label_exclusions.is_valid(): result.assign(label_exclusions.call())
 	return result
 
 func _overlay_local_view() -> Rect2:
+	var camera := controller.region_camera
+	var topology := spatial_world.land_topology()
+	var key: Array = [topology.get_instance_id(),camera.tangent_frame,camera.origin,camera.km_per_pixel,camera.bearing,size]
+	if key==_overlay_projection_key: return _overlay_projection
+	_overlay_projection_key = key
 	var bounds := Rect2()
 	var first := true
-	var topology := spatial_world.land_topology()
 	for ratio: Vector2 in [Vector2.ZERO,Vector2(0.5,0),Vector2(1,0),Vector2(0,0.5),Vector2(0.5,0.5),Vector2(1,0.5),Vector2(0,1),Vector2(0.5,1),Vector2.ONE]:
-		var unit := controller.region_camera.unit_at(size*ratio)
+		var unit := camera.unit_at(size*ratio)
 		if unit.is_zero_approx(): continue
 		var point := topology.from_geographic(RegionProjection.lon_lat(unit))
 		if first: bounds = Rect2(point,Vector2.ZERO); first = false
 		else: bounds = bounds.expand(point)
-	return bounds
+	_overlay_projection = bounds
+	return _overlay_projection
 
 func _sync_overlay_resources() -> void:
+	# CITY owns district presentation. Regional administrative detail resumes on exit.
+	if _city_display_active(): return
 	if spatial_world==null or spatial_world.land_topology()==null: return
 	if not spatial_world.administrative_display_changed.is_connected(_on_administrative_display_changed): spatial_world.administrative_display_changed.connect(_on_administrative_display_changed)
 	var camera := controller.region_camera
 	var show := visible and camera.active
-	var current_borders: Array[Dictionary] = []
-	if visible and (controller.administrative_map_active() or controller.map_mode=="economic"): current_borders = _current_border_rows()
 	var mpp := _strategic_mpp()
 	var topology := spatial_world.land_topology()
 	var revision := topology.display_revision()
 	var coast_key := str(strategic_layer.physical_reference().get("key",""))
-	var signature: Array = [spatial_world,controller.map_mode,revision,spatial_world.administrative_display_revision(),_boundary_source_revision,coast_key,_current_political_revision,strategic_layer.political_cells_installed(),controller.player_polity_id,show,camera.active,camera.tangent_frame,camera.origin,camera.km_per_pixel,size,controller.administrative_layer_active(),controller.selected_place_id,political.display_date]
+	var signature: Array = [spatial_world,controller.map_mode,revision,spatial_world.administrative_display_revision(),_boundary_source_revision,coast_key,_current_political_revision,strategic_layer.political_cells_installed(),controller.player_polity_id,show,camera.active,camera.tangent_frame,camera.origin,camera.km_per_pixel,camera.bearing,size,controller.administrative_layer_active(),controller.selected_place_id,political.display_date]
 	if signature==_overlay_request: return
 	_overlay_request = signature
+	var current_borders: Array[Dictionary] = []
+	var observed: int = Time.get_ticks_usec() if observation_profile else 0
+	if visible and (controller.administrative_map_active() or controller.map_mode=="economic"): current_borders = _current_border_rows()
+	if observation_profile: observation_costs["overlay_borders_us"]=Time.get_ticks_usec()-observed; observed=Time.get_ticks_usec()
 	var view := _overlay_local_view() if show else topology.coverage_bounds() if not current_borders.is_empty() else Rect2()
 	var padded_view := view.grow(maxf(mpp*60.0,maxf(view.size.x,view.size.y)*0.15)) if camera.active and view.has_area() else view
 	var bounded_window := not camera.active or _overlay_view.size.x<=padded_view.size.x*2.0 and _overlay_view.size.y<=padded_view.size.y*2.0
@@ -2034,32 +2785,29 @@ func _sync_overlay_resources() -> void:
 		# country's entire administrative query or an in-flight worker's demand.
 		return
 	_overlay_demand_key = demand_key
+	if observation_profile: observation_costs["overlay_window_us"]=Time.get_ticks_usec()-observed; observed=Time.get_ticks_usec()
 	for row: Dictionary in spatial_world.request_administrative_boundaries(preparation_view,political.display_date,mpp,show and controller.administrative_layer_active(),selected,controller.player_polity_id):
 		row["kind"] = "administration"
 		var shared_strokes := str(row.id).begins_with("administrative_region:france_") or str(row.id).begins_with("administrative_region:germany_")
 		row["variant"] = "interior" if shared_strokes else "outline" if str(row.id)==selected else "interior"
-		var identity := spatial_world.administrative_identity(str(row.id))
-		var ll := identity.get("capital_lon_lat",[]) as Array
-		if ll.size()==2 and political.display_date>=str(identity.get("valid_from","1900-01-01")) and political.display_date<str(identity.get("valid_to","1901-01-01")):
-			var capital_id := str(identity.get("capital_place_id",""))
-			if capital_id.is_empty(): capital_id = str(row.id)
-			identity.merge({"id":capital_id,"kind":"settlement","display_name":str(identity.get("capital_name",identity.get("historical_name",""))),"map_symbol":"admin_primary" if int(identity.get("level",1))<=1 else "admin_secondary"},true)
-			row["capital_symbol"] = identity
+		var capital := spatial_world.administrative_capital_symbol(str(row.id),political.display_date)
+		if not capital.is_empty(): row["capital_symbol"] = capital
 		demand.append(row)
+	if observation_profile: observation_costs["overlay_demand_us"]=Time.get_ticks_usec()-observed
 	# Keep one padded display window, including hidden layer batches, for toggles.
 	var reuse_window := same_window
 	_overlay_owner = spatial_world
 	_overlay_coast_key = coast_key
 	if demand==_overlay_demand and query_id==_overlay_query_id and reuse_window:
 		return
-	_overlay_mutex.lock()
-	_overlay_generation += 1
-	_overlay_mutex.unlock()
+	_overlay_generation = _overlay_preparation.invalidate()
+	MapJobs.cancel_queued(_overlay_thread)
 	_overlay_demand = demand
 	_symbol_layout_dirty = true
 	_overlay_query_id = query_id
 	if not reuse_window: _overlay_view = preparation_view
 	_overlay_revision = revision
+	var retire_at: int=Time.get_ticks_usec() if observation_profile else 0
 	_clear_overlay_installing()
 	# Evict geometry only on a changed geographic window or topology; switching
 	# a layer off leaves the bounded current window available for reuse.
@@ -2067,15 +2815,12 @@ func _sync_overlay_resources() -> void:
 		_clear_overlay_batches()
 		spatial_world.retain_administrative_boundaries([])
 	_retire_overlay_demand()
+	if observation_profile: observation_costs["overlay_retire_us"]=Time.get_ticks_usec()-retire_at;retire_at=Time.get_ticks_usec()
 	_start_overlay_prepare()
-
-func _overlay_current(generation: int) -> bool:
-	_overlay_mutex.lock()
-	var current := generation==_overlay_generation
-	_overlay_mutex.unlock()
-	return current
+	if observation_profile: observation_costs["overlay_start_us"]=Time.get_ticks_usec()-retire_at
 
 func _start_overlay_prepare() -> void:
+	if not _overlay_retiring.is_empty(): set_process(visible);return
 	if _overlay_thread!=null: set_process(visible); return
 	var missing: Array[Dictionary] = []
 	for row: Dictionary in _overlay_demand:
@@ -2089,268 +2834,31 @@ func _start_overlay_prepare() -> void:
 	if missing.is_empty() and query.is_empty(): return
 	var physical_water: Array[Dictionary] = []
 	physical_water.assign(strategic_layer.physical_reference().get("water",[]) as Array)
-	_overlay_thread = Thread.new()
-	_overlay_thread_owner = spatial_world
-	var error := _overlay_thread.start(_prepare_overlay.bind(missing,query,spatial_world.land_topology(),_overlay_view,_overlay_revision,_overlay_generation,physical_water,strategic_layer.political_cells_installed()))
-	if error!=OK:
-		_overlay_thread = null
-		_overlay_thread_owner = null
-		map_notice.emit("行政显示准备无法启动："+error_string(error))
+	var work := _overlay_preparation.prepare.bind(missing,query,spatial_world.land_topology(),_overlay_view,_overlay_revision,_overlay_generation,physical_water)
+	_overlay_thread = MapJobs.submit(work,"administrative geometry and query",MapJobs.VISIBLE,_overlay_preparation)
+	_overlay_thread_owner = spatial_world if _overlay_thread!=null else null
 	set_process(visible)
 
-func _prepare_overlay(rows: Array[Dictionary], query: Dictionary, topology: LandTopology, view: Rect2, revision: int, generation: int, physical_water: Array[Dictionary], current_cells: Dictionary) -> Dictionary:
-	var uploads: Array[Dictionary] = []
-	var query_components: Array = []
-	var water_cuts: Array[Dictionary] = []
-	if not rows.is_empty():
-		water_cuts = _overlay_water_cuts(physical_water,topology,view,generation)
-	for row: Dictionary in rows:
-		if not _overlay_current(generation): return {"generation":generation,"uploads":[]}
-		var components: Array = []
-		var paths: Array[Dictionary] = []
-		if row.kind in ["sovereignty","control"]:
-			paths = _current_shared_paths(row,topology,generation)
-		elif str(row.get("basis",""))=="current_members":
-			paths = _member_overlay_paths(row,topology,view,generation)
-		else:
-			var document := AdministrativeLoader.department_geometry(row.descriptor,str(row.lod))
-			if not _overlay_current(generation): return {"generation":generation,"uploads":[]}
-			for part: Array in document.get("display_pick_polygons",document.get("local_polygons",[])) as Array:
-				var rings: Array[PackedVector2Array] = []
-				for raw: Variant in part: rings.append(topology._polygon_from_value(raw))
-				components.append(rings)
-			if str(row.id)==str(query.get("id","")) and row.lod=="detail":
-				for part: Array in document.get("local_polygons",[]) as Array:
-					var rings: Array[PackedVector2Array] = []
-					for raw: Variant in part: rings.append(topology._polygon_from_value(raw))
-					query_components.append(rings)
-			var display_rings: Array[Dictionary] = []
-			if document.has("display_lines"):
-				var field := "display_outline_lines" if row.get("variant","")=="outline" else "display_lines"
-				for raw: Array in document.get(field,[]) as Array: display_rings.append({"points":topology._polygon_from_value(raw),"closed":false})
-			else:
-				for part: Array in components:
-					for ring: PackedVector2Array in part: display_rings.append({"points":ring,"closed":true})
-			for display_ring: Dictionary in display_rings:
-				var ring := display_ring.points as PackedVector2Array
-				if ring.size()<2: continue
-				var edges := ring.size() if bool(display_ring.closed) else ring.size()-1
-				var points := PackedVector3Array()
-				for index: int in range(edges):
-					var a := ring[index]
-					var b := ring[(index+1)%ring.size()]
-					if view.intersects(Rect2(a,Vector2.ZERO).expand(b),true):
-						if points.is_empty(): points.append(GlobeProjection.lon_lat_to_unit(topology.to_geographic(a)))
-						points.append_array(_projected_overlay_segment(a,b,topology,str(row.lod)=="detail").slice(1))
-					elif points.size()>1:
-						paths.append({"points":points}); points = PackedVector3Array()
-					if not _overlay_current(generation): return {"generation":generation,"uploads":[]}
-				if points.size()>1: paths.append({"points":points})
-		# Both inputs are historical land-boundary ink, not maritime claims.
-		# Apply the same installed physical-water display cut to both.
-		if not water_cuts.is_empty(): paths = _clip_overlay_water(paths,water_cuts,generation)
-		var lines: Array[Dictionary] = []
-		var segments := 0
-		var chunks: Array[Dictionary] = []
-		for path: Dictionary in paths:
-			var points := path.points as PackedVector3Array
-			var loop := points.size()>2 and points[0].is_equal_approx(points[-1])
-			var start := 0
-			while start<points.size()-1:
-				var end := mini(start+256,points.size()-1)
-				var line := {"kind":"overlay","points":points.slice(start,end+1)}
-				if start>0: line["before"] = points[start-1]
-				elif loop: line["before"] = points[-2]
-				elif path.has("before"): line["before"] = path.before
-				if end<points.size()-1: line["after"] = points[end+1]
-				elif loop: line["after"] = points[1]
-				elif path.has("after"): line["after"] = path.after
-				lines.append(line)
-				segments += end-start
-				start = end
-				if segments>=2048:
-					chunks.append(GlobeBoundaryBatch.encode(lines,"overlay",true))
-					lines = []; segments = 0
-				if not _overlay_current(generation): return {"generation":generation,"uploads":[]}
-		if not lines.is_empty(): chunks.append(GlobeBoundaryBatch.encode(lines,"overlay",true))
-		if chunks.is_empty(): chunks.append({})
-		for index: int in range(chunks.size()):
-			uploads.append({"id":row.id,"kind":row.kind,"level":row.get("level",1),"lod":row.lod,"variant":row.get("variant",""),"encoded":chunks[index],"last":index==chunks.size()-1,"basis":row.get("basis",""),"owners":row.get("owners",[]),"components":components if index==chunks.size()-1 and row.kind=="administration" else []})
-	var overlaps: Dictionary = {}
-	if not query.is_empty() and _overlay_current(generation):
-		if query_components.is_empty():
-			for part: Array in AdministrativeLoader.department_geometry(query.descriptor,"detail").get("local_polygons",[]) as Array:
-				var rings: Array[PackedVector2Array] = []
-				for raw: Variant in part: rings.append(topology._polygon_from_value(raw))
-				query_components.append(rings)
-		for id: String in query.polygons:
-			if not _overlay_current(generation): return {"generation":generation,"uploads":[]}
-			var points := query.polygons[id] as PackedVector2Array
-			var overlap := 0.0
-			var bounds := LandTopology._polygon_bounds(points)
-			for part: Array in query_components:
-				if not bounds.intersects(LandTopology._polygon_bounds(part[0]),true): continue
-				overlap += topology._intersection_area(points,part[0])
-				for index: int in range(1,part.size()): overlap -= topology._intersection_area(points,part[index])
-			if overlap>0.0: overlaps[id] = overlap
-	return {"generation":generation,"uploads":uploads,"query":str(query.get("id","")),"overlaps":overlaps,"revision":revision}
-
-func _overlay_water_cuts(features: Array[Dictionary], topology: LandTopology, view: Rect2, generation: int) -> Array[Dictionary]:
-	# Installed physical water polygons only. These cuts affect ink, never
-	# historical GIS, political membership or the separate picking components.
-	var result: Array[Dictionary] = []
-	if not view.has_area(): return result
-	var reference := topology.to_geographic(view.get_center()).x
-	var origin := topology.to_geographic(view.position)
-	origin.x = reference+wrapf(origin.x-reference,-180.0,180.0)
-	var geographic_view := Rect2(origin,Vector2.ZERO)
-	for point: Vector2 in [view.end,Vector2(view.end.x,view.position.y),Vector2(view.position.x,view.end.y),view.get_center()]:
-		var coordinate := topology.to_geographic(point)
-		coordinate.x = reference+wrapf(coordinate.x-reference,-180.0,180.0)
-		geographic_view = geographic_view.expand(coordinate)
-	if geographic_view.size.x>180.0: return result
-	var shift := Transform2D(0.0,-geographic_view.get_center())
-	for feature: Dictionary in features:
-		for part: Array in (feature.geometry as Dictionary).coordinates as Array:
-			if not _overlay_current(generation): return []
-			var rings: Array[PackedVector2Array] = []
-			for raw: Array in part:
-				var ring := PackedVector2Array()
-				for coordinate: Array in raw: ring.append(Vector2(float(coordinate[0]),float(coordinate[1])))
-				rings.append(GlobeProjection.unwrap_ring(ring,reference))
-			if rings.is_empty() or not geographic_view.intersects(GlobeProjection.lon_lat_bounds([rings[0]]),true): continue
-			var holes: Array[Dictionary] = []
-			for index: int in range(1,rings.size()):
-				var hole := shift*rings[index]
-				holes.append({"polygon":hole,"bounds":GlobeProjection.lon_lat_bounds([hole])})
-			var exterior := shift*rings[0]
-			result.append({"polygon":exterior,"holes":holes,"bounds":GlobeProjection.lon_lat_bounds([exterior]),"shift":shift})
-	return result
-
-func _clip_overlay_water(paths: Array[Dictionary], cuts: Array[Dictionary], generation: int) -> Array[Dictionary]:
-	var result: Array[Dictionary] = []
-	var shift := cuts[0].shift as Transform2D
-	var reference := -shift.origin.x
-	for path: Dictionary in paths:
-		var line := PackedVector2Array()
-		# The path and water must occupy the same longitude copy. Normalized
-		# +/-180 coordinates otherwise turn a short coastal segment into a chord.
-		for point: Vector3 in path.points as PackedVector3Array:
-			var coordinate := RegionProjection.lon_lat(point)
-			coordinate.x = reference+wrapf(coordinate.x-reference,-180.0,180.0)
-			line.append(coordinate)
-		var shifted := shift*line
-		var bounds := GlobeProjection.lon_lat_bounds([shifted])
-		var candidates: Array[Dictionary] = []
-		for cut: Dictionary in cuts:
-			if (cut.bounds as Rect2).intersects(bounds,true): candidates.append(cut)
-		if candidates.is_empty():
-			result.append(path)
-			continue
-		var pieces: Array[PackedVector2Array] = [shifted]
-		for cut: Dictionary in candidates:
-			if not _overlay_current(generation): return []
-			var next: Array[PackedVector2Array] = []
-			for piece: PackedVector2Array in pieces:
-				if not (cut.bounds as Rect2).intersects(GlobeProjection.lon_lat_bounds([piece]),true): next.append(piece)
-				else:
-					# W = exterior minus land holes. Keep outside(exterior) plus
-					# inside(each hole), without triangulating or subtracting global
-					# water polygons again just to clip a bounded historical line.
-					next.append_array(Geometry2D.clip_polyline_with_polygon(piece,cut.polygon))
-					var piece_bounds := GlobeProjection.lon_lat_bounds([piece])
-					for hole: Dictionary in cut.holes:
-						if not _overlay_current(generation): return []
-						if (hole.bounds as Rect2).intersects(piece_bounds,true):
-							next.append_array(Geometry2D.intersect_polyline_with_polygon(piece,hole.polygon))
-			pieces = next
-			if pieces.is_empty(): break
-		for piece: PackedVector2Array in pieces:
-			if piece.size()>1: result.append({"points":GlobeProjection.display_line(shift.affine_inverse()*piece)})
-	return result
-
-func _projected_overlay_segment(a: Vector2, b: Vector2, topology: LandTopology, detail: bool) -> PackedVector3Array:
-	# Historical GIS segments are straight in their source chart, not in the
-	# current screen projection. Sample that same segment; never snap it to a coast.
-	var steps := maxi(1,ceili(a.distance_to(b)/(2000.0 if detail else 12000.0)))
-	var points := PackedVector3Array()
-	for step: int in range(steps+1):
-		points.append(GlobeProjection.lon_lat_to_unit(topology.to_geographic(a.lerp(b,float(step)/steps))))
-	return points
-
-
-
-func _current_shared_paths(row: Dictionary, topology: LandTopology, generation: int) -> Array[Dictionary]:
-	# Only a real shared edge of two known formal units can become this border.
-	# Unknown exterior coverage is not filled in as an invented national frontier.
-	var result: Array[Dictionary] = []
-	var first := row.polygons[0] as PackedVector2Array
-	var second := row.polygons[1] as PackedVector2Array
-	for index: int in range(first.size()):
-		var a := first[index]
-		var b := first[(index+1)%first.size()]
-		var direction := b-a
-		var length_squared := direction.length_squared()
-		if length_squared<=0.0: continue
-		for edge: int in range(second.size()):
-			if not _overlay_current(generation): return []
-			var c := second[edge]
-			var d := second[(edge+1)%second.size()]
-			if absf(direction.cross(c-a))/sqrt(length_squared)>0.01 or absf(direction.cross(d-a))/sqrt(length_squared)>0.01: continue
-			var low := clampf(minf((c-a).dot(direction),(d-a).dot(direction))/length_squared,0.0,1.0)
-			var high := clampf(maxf((c-a).dot(direction),(d-a).dot(direction))/length_squared,0.0,1.0)
-			if high>low: result.append({"points":_projected_overlay_segment(a.lerp(b,low),a.lerp(b,high),topology,true)})
-	return result
-
-func _member_overlay_paths(row: Dictionary, topology: LandTopology, view: Rect2, generation: int) -> Array[Dictionary]:
-	# Remove only shared edges of actual members. Unknown land remains outside the outline.
-	var result: Array[Dictionary] = []
-	for id: String in row.polygons:
-		var ring := row.polygons[id] as PackedVector2Array
-		for index: int in range(ring.size()):
-			if not _overlay_current(generation): return []
-			var a := ring[index]
-			var b := ring[(index+1)%ring.size()]
-			if not view.intersects(Rect2(a,Vector2.ZERO).expand(b),true): continue
-			var direction := b-a
-			var length_squared := direction.length_squared()
-			if length_squared<=0.0: continue
-			var covered: Array[Vector2] = []
-			var cuts: Array[float] = [0.0,1.0]
-			for neighbor: PackedVector2Array in row.neighbors.get(id,[]):
-				for edge: int in range(neighbor.size()):
-					var c := neighbor[edge]
-					var d := neighbor[(edge+1)%neighbor.size()]
-					if absf(direction.cross(c-a))/sqrt(length_squared)>0.01 or absf(direction.cross(d-a))/sqrt(length_squared)>0.01: continue
-					var low := clampf(minf((c-a).dot(direction),(d-a).dot(direction))/length_squared,0.0,1.0)
-					var high := clampf(maxf((c-a).dot(direction),(d-a).dot(direction))/length_squared,0.0,1.0)
-					if high<=low: continue
-					covered.append(Vector2(low,high)); cuts.append(low); cuts.append(high)
-			cuts.sort()
-			for interval: int in range(cuts.size()-1):
-				if cuts[interval+1]<=cuts[interval]: continue
-				var midpoint := (cuts[interval]+cuts[interval+1])*0.5
-				var shared := false
-				for span: Vector2 in covered:
-					if midpoint>=span.x and midpoint<=span.y: shared = true; break
-				if shared: continue
-				result.append({"points":_projected_overlay_segment(a.lerp(b,cuts[interval]),a.lerp(b,cuts[interval+1]),topology,str(row.lod)=="detail")})
-	return result
-
 func _poll_overlay_prepare() -> void:
-	if _overlay_thread!=null and not _overlay_thread.is_alive():
-		var result := _overlay_thread.wait_to_finish() as Dictionary
+	if not _overlay_retiring.is_empty():
+		_drain_overlay_retirement()
+		if not _overlay_retiring.is_empty(): return
+		_start_overlay_prepare()
+	if _overlay_thread!=null and _overlay_thread.completed:
+		var result: Variant = _overlay_thread.take()
 		_overlay_thread = null
 		var same_world := _overlay_thread_owner==spatial_world
 		_overlay_thread_owner = null
-		if same_world and int(result.generation)==_overlay_generation:
+		if same_world and result is Dictionary and int(result.generation)==_overlay_generation:
 			_overlay_uploads.assign(result.uploads)
 			_overlay_upload_owner = spatial_world
 			if not str(result.get("query","")).is_empty():
 				spatial_world.install_administrative_coverage(str(result.query),result.overlaps,int(result.revision))
 				_overlay_query_id = ""
 				place_content_ready.emit()
-		elif same_world: _start_overlay_prepare()
+		elif same_world:
+			if result is Dictionary: _overlay_retiring.append_array(result.get("uploads",[]) as Array)
+			_start_overlay_prepare()
 		else:
 			_clear_overlay_installing()
 			_overlay_request.clear()
@@ -2364,7 +2872,12 @@ func _poll_overlay_prepare() -> void:
 	var started := Time.get_ticks_usec()
 	var changed := false
 	while not _overlay_uploads.is_empty():
+		var row := _overlay_uploads.front() as Dictionary
+		var bytes := FrameBudget.packed_bytes(row.encoded)
+		if not _map_budget.claim_upload(bytes): break
+		var began := Time.get_ticks_usec()
 		changed = _install_overlay_row(_overlay_uploads.pop_front() as Dictionary) or changed
+		_map_budget.finish_upload(began,"administrative geometry")
 		if Time.get_ticks_usec()-started>=2000: break
 	if changed:
 		# These are annotation/picking changes. Physical surfaces, relief and
@@ -2389,34 +2902,57 @@ func _install_overlay_row(row: Dictionary) -> bool:
 	if geometry.segment_count>0: RenderingServer.canvas_item_add_mesh(item,geometry.mesh.get_rid())
 	var id := str(row.id)
 	if not _overlay_installing.has(id): _overlay_installing[id] = []
-	_overlay_installing[id].append({"id":id,"kind":row.kind,"level":row.get("level",1),"lod":row.lod,"variant":row.get("variant",""),"geometry":geometry,"material":material,"item":item,"owners":row.get("owners",[])})
+	_overlay_installing[id].append({"id":id,"kind":row.kind,"level":row.get("level",1),"lod":row.lod,"variant":row.get("variant",""),"geometry":geometry,"material":material,"item":item,"owners":row.get("owners",[]),"cull_axis":row.encoded.get("cull_axis",Vector3.ZERO),"cull_angle":row.encoded.get("cull_angle",PI)})
 	if bool(row.last):
 		if _overlay_batches.has(id):
-			for previous: Dictionary in _overlay_batches[id]: RenderingServer.free_rid(previous.item)
+			for previous: Dictionary in _overlay_batches[id]: _retire_overlay_batch(previous)
 		_overlay_batches[id] = _overlay_installing[id]
 		_overlay_installing.erase(id)
 		if row.kind=="administration" and row.get("basis","")!="current_members": spatial_world.install_administrative_boundary(id,row.components,str(row.lod))
 		return true
 	return false
 
+func _cancel_overlay_display() -> void:
+	_overlay_generation = _overlay_preparation.invalidate()
+	MapJobs.cancel_queued(_overlay_thread)
+	_overlay_demand.clear()
+	_overlay_request.clear()
+	_overlay_query_id = ""
+	_clear_overlay_installing()
+	_clear_overlay_batches()
+	if spatial_world!=null: spatial_world.retain_administrative_boundaries([])
+
 func _clear_overlay_batches() -> void:
 	for group: Array in _overlay_batches.values():
-		for batch: Dictionary in group: RenderingServer.free_rid(batch.item)
+		for batch: Dictionary in group: _retire_overlay_batch(batch)
 	_overlay_batches.clear()
 
 func _clear_overlay_installing() -> void:
+	_overlay_retiring.append_array(_overlay_uploads)
 	_overlay_uploads.clear()
 	_overlay_upload_owner = null
 	for group: Array in _overlay_installing.values():
-		for batch: Dictionary in group: RenderingServer.free_rid(batch.item)
+		for batch: Dictionary in group: _retire_overlay_batch(batch)
 	_overlay_installing.clear()
+
+func _retire_overlay_batch(batch: Dictionary) -> void:
+	RenderingServer.canvas_item_set_visible(batch.item,false)
+	_overlay_retiring.append(batch)
+
+func _drain_overlay_retirement(bounded: bool = true) -> void:
+	var began := Time.get_ticks_usec()
+	while not _overlay_retiring.is_empty() and (not bounded or _map_budget.claim_retirement()):
+		var batch: Dictionary=_overlay_retiring.pop_back()
+		if batch.has("item"): RenderingServer.free_rid(batch.item)
+		batch.clear()
+		if bounded and Time.get_ticks_usec()-began>=2000: break
 
 func _retire_overlay_demand() -> void:
 	var keep: Array[String] = []
 	for row: Dictionary in _overlay_demand: keep.append(str(row.id))
 	for id: String in _overlay_batches.keys():
 		if id in keep: continue
-		for batch: Dictionary in _overlay_batches[id]: RenderingServer.free_rid(batch.item)
+		for batch: Dictionary in _overlay_batches[id]: _retire_overlay_batch(batch)
 		_overlay_batches.erase(id)
 	# This evicts display/picking components only, never administrative identity
 	# or actual land membership. A replacement LOD keeps its previous components
@@ -2432,14 +2968,23 @@ func _update_overlay_batches(view: Rect2, install_only: bool = false) -> void:
 	var regional := controller.region_camera.active
 	var padded_view := view.grow(_strategic_mpp()*8.0)
 	var opacity := lerpf(1.0,0.72,smoothstep(650.0,2400.0,_strategic_mpp()))
+	var anchor := controller.region_camera.valid_anchor(size) if regional else {}
+	var center := anchor.unit as Vector3 if regional else controller.orientation().transposed()*Vector3.BACK
+	var view_angle := PI*.5+16.0/maxf(_radius,1.0)
+	if regional:
+		view_angle=0.0
+		for corner: Vector2 in [Vector2.ZERO,Vector2(size.x,0),size,Vector2(0,size.y)]:
+			view_angle=maxf(view_angle,(corner.distance_to(anchor.pixel as Vector2)+16.0)*controller.region_camera.km_per_pixel/RegionProjection.EARTH_RADIUS_KM)
 	for id: String in _overlay_batches:
 		for batch: Dictionary in _overlay_batches[id]:
 			# Initialisation sets parent_canvas only after the batch becomes
 			# visible. View, demand and style changes still update every batch.
 			if install_only and batch.has("parent_canvas"): continue
 			var show: bool = visible and physical_ready and (regional or str(batch.kind) in ["sovereignty","control"]) and wanted.has(id)
-			if show and batch.kind=="administration":
-				show = (wanted[id].bounds as Rect2).intersects(padded_view,true)
+			if show and batch.kind in ["administration","military_grid"]:
+				show = (not _city_display_active() or batch.kind=="military_grid") and (wanted[id].bounds as Rect2).intersects(padded_view,true)
+			if show and float(batch.get("cull_angle",PI))<PI*.5:
+				show=(batch.cull_axis as Vector3).angle_to(center)<=float(batch.cull_angle)+view_angle
 			if show!=bool(batch.get("visible",false)):
 				RenderingServer.canvas_item_set_visible(batch.item,show)
 				batch["visible"] = show
@@ -2457,6 +3002,7 @@ func _update_overlay_batches(view: Rect2, install_only: bool = false) -> void:
 			_bounds(batch,size)
 			var selected: bool = id==controller.selected_place_id
 			var color := Color(0.80,0.57,0.29,0.82) if batch.kind=="control" else POLITICAL_UNDER_COLOR if batch.kind=="sovereignty" else colors.admin_line as Color
+			if batch.kind=="military_grid": color=Color("a4b79a");color.a=0.70
 			var level := int(batch.get("level",1))
 			if batch.kind=="administration" and level>1:
 				color = color.lerp(Color(0.55,0.57,0.53,color.a),0.18*minf(float(level-1),3.0))
@@ -2464,12 +3010,13 @@ func _update_overlay_batches(view: Rect2, install_only: bool = false) -> void:
 			color.a *= opacity
 			if selected: color = Color(0.67,0.75,0.76,0.82)
 			_parameter(batch,"stroke_color",color)
-			var width := 1.05 if batch.kind in ["sovereignty","control"] else 1.35 if selected else maxf(0.50,0.85-0.10*float(level))
+			var width := 1.35 if selected else 0.65 if batch.kind=="military_grid" else 1.05 if batch.kind in ["sovereignty","control"] else maxf(0.50,0.85-0.10*float(level))
 			_parameter(batch,"stroke_width",width)
 
 
 
 func _draw_administrative_labels() -> void:
+	if _city_display_active(): return
 	if not controller.administrative_layer_active() or spatial_world==null or not controller.region_camera.active: return
 	if not controller.labels_enabled: return
 	var occupied := _label_exclusions()
@@ -2486,7 +3033,8 @@ func _draw_administrative_labels() -> void:
 		var unit := GlobeProjection.lon_lat_to_unit(spatial_world.land_topology().to_geographic((row.bounds as Rect2).get_center()))
 		var center := screen_point(unit)
 		if not center.is_finite() or not Rect2(Vector2.ZERO,size).grow(32.0).has_point(center): continue
-		var text := str(spatial_world.administrative_identity(id).get("historical_name",""))
+		var identity := spatial_world.administrative_identity(id)
+		var text := UILocale.name(identity.merged({"id":id}))
 		if not _admin_label_metrics.has(text):
 			if _admin_label_metrics.size()>=128: _admin_label_metrics.erase(_admin_label_metrics.keys()[0])
 			var face := GlobeLabels.font_for_name(_font,text)
@@ -2541,25 +3089,47 @@ func _request_map_frame(regional: bool) -> void:
 		consumer.queue_redraw()
 		if moving: set_process(visible)
 		return
-	target.render_target_update_mode = SubViewport.UPDATE_ALWAYS if moving else SubViewport.UPDATE_ONCE
+	var window := get_window()
+	var foreground := window.has_focus() and window.mode!=Window.MODE_MINIMIZED
+	target.render_target_update_mode = SubViewport.UPDATE_ALWAYS if moving and foreground else SubViewport.UPDATE_ONCE
 	consumer.queue_redraw()
+	if observation_profile and regional and not controller.region_camera.local_active and not observation_return.is_empty() and not observation_return.has("submitted_us"):
+		observation_return["submitted_us"] = Time.get_ticks_usec()
+		RenderingServer.frame_post_draw.connect(_observe_region_frame.bind(observation_return["requested_us"]), CONNECT_ONE_SHOT)
 	if moving: set_process(visible)
 
+func _observe_region_frame(requested: int) -> void:
+	if not observation_return.is_empty() and int(observation_return["requested_us"]) == requested and controller.region_camera.active and not controller.region_camera.local_active:
+		observation_return["first_valid_frame_us"] = Time.get_ticks_usec()
+
 func _process(_delta: float) -> void:
+	var observed_at: int=Time.get_ticks_usec() if observation_profile else 0
+	if observation_profile: observation_costs={"frame":Engine.get_process_frames()}
+	_map_budget.reset(observation_costs if observation_profile else {})
+	for layer: LocalSpatialLayer in [_world_layer,_region_layer,local_layer]: layer.drain_retirement(_map_budget)
 	if not visible:
 		# Join cancelled workers and discard their results even while hidden.
 		# This processing stops as soon as the existing requests have drained.
 		_poll_overlay_prepare()
 		if strategic_content!=null: strategic_content.poll()
 		if local_content!=null: local_content.poll()
-		local_layer.prepare_step(_font)
-		_world_layer.prepare_step(_font)
-		_region_layer.prepare_step(_font)
+		local_layer.prepare_step(_font,_map_budget)
+		_world_layer.prepare_step(_font,_map_budget)
+		_region_layer.prepare_step(_font,_map_budget)
 		region_view.prepare_landmarks()
-		relief.poll()
+		relief.poll(_map_budget)
 		set_process(_has_pending_preparation())
 		return
-	_poll_overlay_prepare()
+	# Reconcile a moved camera before collecting completed uploads.
+	_ensure_camera()
+	var camera_demand_changed := _resource_demand_dirty
+	if camera_demand_changed:
+		_resource_demand_dirty = false
+		_sync_relief()
+		_sync_local_resources()
+		_sync_strategic_resources()
+	var preparation_at: int=Time.get_ticks_usec() if observation_profile else 0
+	if observation_profile: observation_costs["prepare_overlay_us"]=preparation_at-observed_at
 	var previous_surface_base: Variant = relief.textures.get("europe_r48_base")
 	var previous_canary_base: Variant = relief.textures.get("canary_r45_base")
 	var previous_siberian_base: Variant = relief.textures.get("siberian_r50_base")
@@ -2567,7 +3137,7 @@ func _process(_delta: float) -> void:
 	var previous_asian_east: Variant = relief.textures.get("asia_east_r51_base")
 	var previous_shared_surface: Variant = relief.textures.get("euro_afro_arabia_r53_base")
 	var previous_greenland: Variant = relief.textures.get("greenland_r52_base")
-	if relief.poll():
+	if relief.poll(_map_budget):
 		_bind_relief()
 		var asian_west_ready: bool = relief.textures.get("asia_west_r51_base")!=previous_asian_west and relief.textures.has("asia_west_r51_base")
 		var asian_east_ready: bool = relief.textures.get("asia_east_r51_base")!=previous_asian_east and relief.textures.has("asia_east_r51_base")
@@ -2581,11 +3151,14 @@ func _process(_delta: float) -> void:
 			map_notice.emit("区域地貌：现代真实高程与WorldCover 2021参考；共享地理瓦片，不代表1900年土地利用。")
 		# Loading a texture must invalidate the cached viewport, not just glyphs.
 		_invalidate_appearance()
+	if observation_profile: observation_costs["prepare_relief_us"]=Time.get_ticks_usec()-preparation_at;preparation_at=Time.get_ticks_usec()
 	if strategic_content != null: strategic_content.poll()
+	if observation_profile: observation_costs["prepare_strategic_us"]=Time.get_ticks_usec()-preparation_at;preparation_at=Time.get_ticks_usec()
 	for layer: LocalSpatialLayer in [_world_layer,_region_layer]:
 		if layer.preparing:
-			layer.prepare_step(_font)
+			layer.prepare_step(_font,_map_budget)
 			if layer.ready and not layer.preparing: _invalidate_spatial_display()
+	if observation_profile: observation_costs["prepare_geometry_us"]=Time.get_ticks_usec()-preparation_at;preparation_at=Time.get_ticks_usec()
 	if local_content != null and local_content.poll():
 		if local_content.content.errors.is_empty():
 			_sync_local_resources()
@@ -2593,13 +3166,11 @@ func _process(_delta: float) -> void:
 		_invalidate_spatial_display()
 		place_content_ready.emit()
 	if local_layer.preparing:
-		local_layer.prepare_step(_font)
+		local_layer.prepare_step(_font,_map_budget)
 		if local_layer.ready and not local_layer.preparing:
 			_evaluate_scale()
 			_invalidate_spatial_display()
-	if region_view.prepare_landmarks():
-		_local_display_dirty = true
-		queue_redraw()
+	if observation_profile: observation_costs["preparation_us"]=Time.get_ticks_usec()-observed_at
 	_ensure_camera()
 	if _label_setting!=controller.labels_enabled:
 		_label_setting = controller.labels_enabled
@@ -2609,16 +3180,34 @@ func _process(_delta: float) -> void:
 		_view_dirty = true
 	if controller.region_camera.active and not region_view.ready: region_view.begin(_political_ink)
 	var demand_changed := _resource_demand_dirty or _strategic_content_dirty
+	var observed_demand: int=Time.get_ticks_usec() if observation_profile else 0
 	if demand_changed:
 		_resource_demand_dirty = false
 		_strategic_content_dirty = false
 		_sync_local_resources()
+		if observation_profile: observation_costs["demand_local_us"]=Time.get_ticks_usec()-observed_demand;observed_demand=Time.get_ticks_usec()
 		_sync_strategic_resources()
-	if demand_changed or _administrative_display_dirty:
+		if observation_profile: observation_costs["demand_strategic_us"]=Time.get_ticks_usec()-observed_demand;observed_demand=Time.get_ticks_usec()
+	if camera_demand_changed or demand_changed or _administrative_display_dirty:
 		_sync_overlay_resources()
+		if observation_profile: observation_costs["demand_overlay_us"]=Time.get_ticks_usec()-observed_demand
+	_poll_overlay_prepare()
 	var view_was_dirty := _view_dirty
-	_ensure_view()
-	if _map_canvas_dirty or view_was_dirty or _administrative_display_dirty or _local_display_dirty: _commit_map_view(view_was_dirty)
+	var observed_view: int=Time.get_ticks_usec() if observation_profile else 0
+	var prepared_layer := _ensure_view()
+	if observation_profile: observation_costs["view_us"]=Time.get_ticks_usec()-observed_view
+	var observed_commit: int=Time.get_ticks_usec() if observation_profile else 0
+	if _map_canvas_dirty or view_was_dirty or _administrative_display_dirty or _local_display_dirty: _commit_map_view(view_was_dirty,prepared_layer)
+	# Publish the current city/model demand before accepting finished loads.
+	if region_view.prepare_landmarks():
+		_local_display_dirty = true
+		queue_redraw()
+	if observation_profile:
+		observation_costs["commit_us"]=Time.get_ticks_usec()-observed_commit
+		observation_costs["map_us"]=Time.get_ticks_usec()-observed_at
+		observation_costs["upload_bytes"]=_map_budget.uploaded_bytes
+		observation_costs["upload_operations"]=_map_budget.operations
+		observation_costs["retire_operations"]=_map_budget.retired
 	if _transition_elapsed >= 0.0 and _transition_started>0:
 		_transition_elapsed = float(Time.get_ticks_usec() - _transition_started) / 1000000.0
 		var weight := clampf(_transition_elapsed / TRANSITION_SECONDS, 0.0, 1.0)
@@ -2645,7 +3234,7 @@ func _process(_delta: float) -> void:
 		set_process(false)
 
 func _has_pending_preparation() -> bool:
-	return _overlay_thread!=null or not _overlay_uploads.is_empty() or relief.preparing() or region_view.landmark_preparing() or _world_layer.preparing or _region_layer.preparing or local_layer.preparing or (strategic_content!=null and strategic_content.preparing()) or (local_content!=null and local_content.preparing())
+	return _overlay_thread!=null or not _overlay_uploads.is_empty() or not _overlay_retiring.is_empty() or relief.preparing() or region_view.landmark_preparing() or _world_layer.preparing or _region_layer.preparing or local_layer.preparing or _world_layer.retirement_pending() or _region_layer.retirement_pending() or local_layer.retirement_pending() or (strategic_content!=null and strategic_content.preparing()) or (local_content!=null and local_content.preparing())
 
 func _on_strategic_content_changed() -> void:
 	_strategic_content_dirty = true
@@ -2679,10 +3268,14 @@ func _on_administrative_display_changed() -> void:
 	place_content_ready.emit()
 
 func _on_visibility_changed() -> void:
+	if observation_suspended:
+		set_process(false)
+		return
 	if controller == null:
 		return
 	if not visible:
 		civilian_facilities.present({},false,false)
+		_cancel_overlay_display()
 		_sync_relief()
 		_world_layer.clear()
 		_region_layer.clear()

@@ -83,7 +83,7 @@ static func encode(boundaries: Array[Dictionary], kind: String, compact_internal
 			segment += 1
 	return {"height":height,"values":values.to_byte_array(),"vertices":vertices,"indices":indices,"segments":segment_count}
 
-func upload(payload: Dictionary) -> void:
+func upload(payload: Dictionary, budget: RefCounted = null) -> void:
 	mesh.clear_surfaces()
 	data = null
 	vertex_count = 0
@@ -92,9 +92,13 @@ func upload(payload: Dictionary) -> void:
 	if payload.is_empty(): return
 	vertex_count = (payload.vertices as PackedVector2Array).size()
 	index_count = (payload.indices as PackedInt32Array).size()
+	var began := Time.get_ticks_usec() if budget!=null and not budget.observations.is_empty() else 0
 	data = ImageTexture.create_from_image(Image.create_from_data(DATA_WIDTH,int(payload.height),false,Image.FORMAT_RGBAF,payload.values as PackedByteArray))
+	if began>0: budget.observe("texture_api_us",began)
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = payload.vertices
 	arrays[Mesh.ARRAY_INDEX] = payload.indices
+	if began>0: began = Time.get_ticks_usec()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+	if began>0: budget.observe("mesh_api_us",began)

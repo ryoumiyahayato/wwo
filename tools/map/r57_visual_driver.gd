@@ -91,6 +91,10 @@ func tracked_decode(level: String, admitted: Dictionary) -> Dictionary:
 	return result
 
 func _ready() -> void:
+	if acceptance=="terrain-region":
+		set_process(false)
+		terrain_region_run.call_deferred()
+		return
 	if acceptance=="native-screenshot":
 		set_process(false)
 		native_screenshot_run.call_deferred()
@@ -380,11 +384,23 @@ func native_screenshot_run() -> void:
 	FileAccess.open(output.path_join("window-handle.json"),FileAccess.WRITE).store_string(JSON.stringify({"pid":OS.get_process_id(),"hwnd":DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE,get_window().get_window_id())}))
 	var menu: Object=get_parent()
 	reparent(get_tree().root)
+	var a0_live: RefCounted = get_tree().get_meta("terrain_a0_live") as RefCounted if get_tree().has_meta("terrain_a0_live") else null
+	var new_paused := a0_live!=null and OS.get_environment("WWO_TERRAIN_A0_NEW")=="1"
 	var slot_path := FormalPersistence.existing_slot_path(1)
-	print("NATIVE_SCREENSHOT_START user_dir=",OS.get_user_data_dir()," slot=",slot_path)
-	if slot_path.is_empty():
+	print("NATIVE_SCREENSHOT_START user_dir=",OS.get_user_data_dir()," slot=",slot_path," new_paused=",new_paused)
+	if slot_path.is_empty() and not new_paused:
 		acceptance_save("native-screenshot",{"error":"slot1_missing","user_dir":OS.get_user_data_dir()});get_tree().quit(4);return
-	menu.call("_enter_world","load",1)
+	if new_paused:
+		menu.call("_show_page","selection")
+		var preview_deadline := Time.get_ticks_msec()+120000
+		while Time.get_ticks_msec()<preview_deadline and menu.get("_preview_ready")!=true:
+			await get_tree().process_frame
+		if menu.get("_preview_ready")!=true:
+			acceptance_save("observations",{"error":"formal_menu_preview_not_ready"});get_tree().quit(4);return
+	if new_paused and OS.get_environment("WWO_LAYER_FLOW_REVIEW")=="1":
+		await native_layer_flow_run(menu,a0_live)
+		return
+	menu.call("_enter_world","new" if new_paused else "load",0 if new_paused else 1)
 	var deadline := Time.get_ticks_msec()+120000
 	var host: Object
 	while Time.get_ticks_msec()<deadline:
@@ -397,7 +413,10 @@ func native_screenshot_run() -> void:
 	host.get("main_shell").call("set_page","map")
 	var authority := economic_authority_state(host)
 	var save_path := FormalPersistence.existing_slot_path(1)
-	var save_before := FileAccess.get_file_as_bytes(save_path)
+	var save_before := FileAccess.get_file_as_bytes(save_path) if not save_path.is_empty() else PackedByteArray()
+	if a0_live!=null:
+		await a0_live.call("run",self,host,authority,save_path,save_before)
+		return
 	var report: Dictionary={"pid":OS.get_process_id(),"slot":1,"window_unfocusable":get_window().unfocusable,"cases":[],"idle":[]}
 	var paris := GlobeProjection.lon_lat_to_unit(Vector2(2.3522,48.8566))
 	for place: String in ["world","paris","zermatt"]:
@@ -467,6 +486,39 @@ func native_screenshot_run() -> void:
 	report["window_focused"]=get_window().has_focus()
 	acceptance_save("native-screenshot",report)
 	print("NATIVE_SCREENSHOT_DONE")
+	get_tree().quit()
+
+func native_layer_flow_run(menu: Object, observer: RefCounted) -> void:
+	# The normal menu's renderer is the one handed to the formal world. This
+	# finite map-only scope neither installs nor claims to validate economy UI.
+	renderer = menu.get("_renderer");controller = menu.get("_controller")
+	for child: Node in menu.get_children():
+		if child is Control and child!=renderer: (child as Control).hide()
+	renderer.set("input_blocked",Callable());renderer.set("label_exclusions",Callable())
+	renderer.set("modulate",Color.WHITE)
+	observer.set("driver",self);observer.set("renderer",renderer);observer.set("controller",controller)
+	var counts: Dictionary = {"local":0,"world":0,"region":0}
+	for name: String in ["local","world","region"]:
+		var layer: LocalSpatialLayer = renderer.get("local_layer" if name=="local" else "_"+name+"_layer")
+		var original := layer.symbol_limit
+		layer.symbol_limit = func(feature: Dictionary,id: String) -> float:
+			counts[name] += 1
+			return float(original.call(feature,id))
+	var cases: Array[Dictionary] = []
+	for name: String in ["world","region","local"]:
+		var unit := GlobeProjection.lon_lat_to_unit(Vector2(7.7063088,46.0079880) if name=="local" else Vector2(2.3522,48.8566))
+		controller.set_map_mode("political")
+		if name=="world": controller.focus(unit);controller.set_world_zoom(.86)
+		else:
+			controller.focus_region(unit,renderer.size*.5,.002 if name=="local" else 1.2,.32,renderer.size)
+			if name=="local": controller.enter_local(unit,renderer.size*.5,renderer.size,"geographic_region:zermatt_west_reference",2.0)
+		var settled: Dictionary = await observer.call("settle")
+		acceptance_image("layer-flow-"+name)
+		for key: String in counts: counts[key] = 0
+		var drag: Dictionary = await observer.call("sample",true)
+		cases.append({"mode":name,"settled":settled,"drag":drag,"symbol_limit_calls":counts.duplicate(),"world_labels":renderer.get("_world_layer").get("_labels").size(),"region_labels":renderer.get("_region_layer").get("_labels").size(),"local_labels":renderer.get("local_layer").get("_labels").size()})
+	acceptance_save("observations",{"scope":"normal_menu_renderer_only","formal_world_or_economy_validated":false,"cases":cases})
+	print("NATIVE_SCREENSHOT_DONE layer_flow")
 	get_tree().quit()
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -608,6 +660,133 @@ func resource_settle() -> void:
 		if not renderer.call("_has_pending_preparation") and not renderer.region_view._landmark_render_pending: break
 	await wait_seconds(1)
 
+func regional_map_profile(host: Object, label: String) -> void:
+	# Requested same-save map comparison; reuse the existing finite sampler.
+	toolbar_review_running=true
+	renderer=host.get("map_renderer");controller=host.get("map_controller")
+	var model: Object=host.get("_world")
+	var view: Object=host.get("main_shell").get("economic_map")
+	var before: Dictionary=host.get("_persistence").snapshot()
+	perf_relief=renderer.get("relief");perf_region=renderer.get("_region_layer");perf_world=renderer.get("_world_layer");perf_local=renderer.get("local_layer")
+	RenderingServer.frame_pre_draw.connect(performance_pre_draw)
+	RenderingServer.frame_post_draw.connect(performance_post_draw)
+	set_process(true)
+	controller.labels_enabled=false
+	controller.set_map_mode("economic")
+	host.call("_focus_economic_place","place:paris")
+	controller.set_world_zoom(2.8)
+	host.call("_query_economic_details","firm:network:mill1",0)
+	var settled_ms:int=await settle()
+	if settled_ms<0:
+		RenderingServer.frame_pre_draw.disconnect(performance_pre_draw);RenderingServer.frame_post_draw.disconnect(performance_post_draw)
+		set_process(false);perf_phases.clear()
+		acceptance_save(label,{"label":label,"status":"NOT_MEASURED","reason":"Static settle failed; sampling and live stopped","authority_unchanged":before==host.get("_persistence").snapshot(),"phases":[],"live_status":"NOT_MEASURED"})
+		print("REGIONAL_MAP_PROFILE_STOPPED ",label," static settle failed; not measured")
+		toolbar_review_running=false
+		return
+	await wait_seconds(3)
+	perf_phases.clear()
+	var modes: Array[String]=["ordinary","economic_closed","economic_details"]
+	if view.has_method("set_flow_animation"):modes.append_array(["flow_off","flow_on"])
+	for cycle: int in range(2):
+		var order: Array[String]=modes.duplicate()
+		if cycle==1:order.reverse()
+		for mode: String in order:
+			controller.set_map_mode("political" if mode=="ordinary" else "economic")
+			if mode!="ordinary":
+				var collapsed: bool=mode=="economic_closed"
+				if bool(view.get("_details_collapsed"))!=collapsed:view.call("_toggle_details")
+				if view.has_method("set_flow_animation"):view.call("set_flow_animation",mode=="flow_on")
+			await wait_seconds(1)
+			performance_begin(str(cycle)+"/"+mode)
+			await wait_seconds(4)
+			performance_end()
+	var report: Dictionary={"label":label,"case_id":model.economy_r1.config.case_id,"minute":model.game_clock.total_minutes(),"resolution":get_window().size,"device":RenderingServer.get_video_adapter_name(),"authority_unchanged":before==host.get("_persistence").snapshot(),"sampling":"Existing performance_tick. Interval and CPU process, NOT GPU duration. No PNG/readback in timed phases.","phases":[]}
+	for phase: Dictionary in perf_phases:
+		var times: Array[float]=[];var cpu: Array[float]=[];var unfocused: int=0;var loading: int=0
+		for frame: Array in phase.frames:
+			times.append(float(frame[2])/1000.0);cpu.append(float(frame[3])/1000.0)
+			if not frame[8]:unfocused+=1
+			if frame[6]:loading+=1
+		times.sort();cpu.sort()
+		report.phases.append({"name":phase.phase,"samples":times.size(),"unfocused":unfocused,"loading":loading,"p50_ms":times[times.size()/2] if not times.is_empty() else 0,"p95_ms":times[int((times.size()-1)*.95)] if not times.is_empty() else 0,"max_ms":times.back() if not times.is_empty() else 0,"cpu_p95_ms":cpu[int((cpu.size()-1)*.95)] if not cpu.is_empty() else 0,"resources":phase.end})
+	RenderingServer.frame_pre_draw.disconnect(performance_pre_draw)
+	RenderingServer.frame_post_draw.disconnect(performance_post_draw)
+	set_process(false);perf_phases.clear()
+	if not bool(report.authority_unchanged):
+		report["status"]="INVALID_STATIC_AUTHORITY_CHANGED";report["live_status"]="NOT_MEASURED"
+	acceptance_save(label,report)
+	if bool(report.authority_unchanged) and "--regional-map-live" in OS.get_cmdline_user_args():await regional_map_live_profile(host,before,label)
+	print("REGIONAL_MAP_PROFILE_COMPLETE ",label," authority_unchanged=",report.authority_unchanged)
+	toolbar_review_running=false
+
+func regional_map_live_profile(host: Object, input: Dictionary, label: String) -> void:
+	# Original restore/install and camera setup are outside all timed phases.
+	var control:TimeControl=host.get("time_control")
+	var view:Object=host.get("main_shell").get("economic_map")
+	var original_speed:int=control.speed
+	var city:Array[String]=["place:paris"]
+	var observer:String=host.get("_world").player_state.player_id()
+	var selected_site:String=""
+	for node:Dictionary in host.get("_world").economy_r1.network_view(observer,city,128).get("nodes",[]):
+		if str(node.get("kind",""))=="site" and str(node.get("firm_id",""))=="firm:network:mill1":selected_site=str(node.get("site_id",""));break
+	var report:Dictionary={"label":label,"requested_delta":1440,"sampling":"Same input restored per case. Original TimeControl 1x advances 1440 game minutes at 15 minutes per .25s Timer tick, capped at 45s. Native day start/end are observed, not inferred. Frame intervals and process monitor, NOT GPU duration; max frame alone does not attribute cost to daily settlement.","selected_site":selected_site,"cases":[],"restored_to_input":false}
+	if selected_site.is_empty():
+		report["error"]="Known Paris mill1 site missing; no live advance";acceptance_save(label+"-live",report);return
+	RenderingServer.frame_pre_draw.connect(performance_pre_draw);RenderingServer.frame_post_draw.connect(performance_post_draw)
+	set_process(true)
+	for mode:String in ["ordinary","economic_closed","economic_details","flow_off","flow_on"]:
+		if not control.paused:control.toggle_pause()
+		var built:WorldBuildResult=host.get("_persistence").restore_candidate(input)
+		if not built.success or not bool(host.call("_install_world",built,false)):
+			report["error"]="Original restore/install failed before "+mode;break
+		controller.labels_enabled=false;controller.set_map_mode("political" if mode=="ordinary" else "economic")
+		host.call("_focus_economic_place","place:paris");controller.set_world_zoom(2.8)
+		if mode!="ordinary":
+			host.call("_query_economic_details","firm:network:mill1",0);view.set("selected_site",selected_site)
+			view.call("set_details_open",mode!="economic_closed");view.call("set_flow_animation",mode=="flow_on")
+		var settled_ms:int=await settle()
+		if settled_ms<0:
+			report["status"]="STOPPED_NOT_MEASURED";report["unmeasured_case"]=mode;report["error"]="Live settle failed; sampling stopped";break
+		await wait_seconds(.3)
+		var start_equal:bool=host.get("_persistence").snapshot()==input
+		var model:Object=host.get("_world")
+		var start:int=model.game_clock.total_minutes()
+		var day_start:int=model.economy_r1.day
+		if not start_equal:report["error"]="Authority start differed before "+mode;break
+		var timer:Timer=control.get_node("ClockTimer") as Timer
+		await timer.timeout
+		perf_phases.clear();performance_begin("live/"+mode);control.set_speed(1)
+		var deadline:int=Time.get_ticks_msec()+45000
+		while model.game_clock.total_minutes()<start+1440 and Time.get_ticks_msec()<deadline:await get_tree().process_frame
+		control.toggle_pause();performance_end()
+		var intervals:Array[float]=[];var processes:Array[float]=[];var unfocused:int=0;var loading:int=0
+		for frame:Array in perf_phases[0].frames:
+			intervals.append(float(frame[2])/1000.0);processes.append(float(frame[3])/1000.0)
+			if not frame[8]:unfocused+=1
+			if frame[6]:loading+=1
+		intervals.sort();processes.sort()
+		var receipt_count:int=0;var cross_place:int=0
+		var end_minute:int=model.game_clock.total_minutes()
+		var day_end:int=model.economy_r1.day
+		for receipt:Dictionary in view.get("_receipt_facts"):
+			var age:int=end_minute-int(receipt.minute)
+			if age<0 or age>7*1440:continue
+			receipt_count+=1
+			if str(receipt.from)!=str(receipt.to):cross_place+=1
+		report.cases.append({"mode":mode,"authority_start_equal":start_equal,"start_minute":start,"end_minute":end_minute,"delta_minutes":end_minute-start,"requested_delta":1440,"day_start":day_start,"day_end":day_end,"day_delta":day_end-day_start,"focused_missing":unfocused,"loading":loading,"samples":intervals.size(),"p95_ms":intervals[int((intervals.size()-1)*.95)] if not intervals.is_empty() else 0,"max_ms":intervals.back() if not intervals.is_empty() else 0,"process_monitor_p95_ms":processes[int((processes.size()-1)*.95)] if not processes.is_empty() else 0,"visible_receipts":receipt_count,"cross_place_receipts":cross_place,"resources":perf_phases[0].end})
+		if end_minute!=start+1440:report["error"]="Live target not exact; stopped after "+mode;break
+	if not control.paused:control.toggle_pause()
+	var restored:WorldBuildResult=host.get("_persistence").restore_candidate(input)
+	if restored.success and bool(host.call("_install_world",restored,false)):report["restored_to_input"]=host.get("_persistence").snapshot()==input
+	control.speed=original_speed
+	RenderingServer.frame_pre_draw.disconnect(performance_pre_draw);RenderingServer.frame_post_draw.disconnect(performance_post_draw)
+	perf_phases.clear();set_process(false);acceptance_save(label+"-live",report)
+	controller.labels_enabled=false;controller.set_map_mode("economic")
+	host.call("_focus_economic_place","place:paris");controller.set_world_zoom(2.8)
+	host.call("_query_economic_details","firm:network:mill1",0);view.set("selected_site",selected_site)
+	print("REGIONAL_MAP_LIVE_COMPLETE ",label," restored=",report.restored_to_input," cases=",report.cases.size())
+
 func toolbar_review() -> void:
 	# Requested finite GPU/UI observation. The normal menu loaded the existing
 	# world. This route never constructs, advances, saves or replaces that world.
@@ -618,9 +797,17 @@ func toolbar_review() -> void:
 	var label: String="review"
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--toolbar-review-label="):label=arg.trim_prefix("--toolbar-review-label=")
+	if output.is_empty() and "--regional-map-profile" in OS.get_cmdline_user_args():output=ProjectSettings.globalize_path("res://local-artifacts/regional-economy-performance")
+	if output.is_empty() and "--city-overview-profile" in OS.get_cmdline_user_args():output=ProjectSettings.globalize_path("res://local-artifacts/city-overview-20261029")
 	if label.validate_filename()!=label or not output.is_absolute_path() or output.is_empty():return
 	if FileAccess.file_exists(output+"/"+label+".json"):return
 	if DirAccess.make_dir_recursive_absolute(output)!=OK:return
+	if "--city-overview-profile" in OS.get_cmdline_user_args():
+		await city_overview_profile(host,label)
+		return
+	if "--regional-map-profile" in OS.get_cmdline_user_args():
+		await regional_map_profile(host,label)
+		return
 	toolbar_review_running=true
 	renderer=host.get("map_renderer");controller=host.get("map_controller")
 	var shell: Object=host.get("main_shell")
@@ -695,6 +882,83 @@ func toolbar_review() -> void:
 	print("TOOLBAR_REVIEW_COMPLETE ",output,"/",label,".json unchanged=",summary.same_authority and summary.same_native_snapshot and summary.same_personal_snapshot)
 	toolbar_review_running=false
 
+func city_overview_profile(host: Object, label: String) -> void:
+	# The requested finite city run reuses this observer's frame sampler.
+	toolbar_review_running=true
+	renderer=host.get("map_renderer");controller=host.get("map_controller")
+	var before: Dictionary=host.get("_persistence").snapshot()
+	perf_relief=renderer.get("relief");perf_region=renderer.get("_region_layer");perf_world=renderer.get("_world_layer");perf_local=renderer.get("local_layer")
+	RenderingServer.frame_pre_draw.connect(performance_pre_draw)
+	RenderingServer.frame_post_draw.connect(performance_post_draw)
+	set_process(true);perf_phases.clear()
+	controller.set_map_mode("geographic")
+	var report: Dictionary={"gpu":RenderingServer.get_video_adapter_name(),"method":RenderingServer.get_current_rendering_method(),"window":TerrainPixelSource.serial(renderer.size),"captures":[],"bounds":[],"phases":[]}
+	var began := Time.get_ticks_msec()
+	performance_begin("first_city_entry")
+	await renderer.call("_focus_city_overview")
+	await resource_settle()
+	performance_end()
+	report["first_entry_ms"]=Time.get_ticks_msec()-began
+	report.captures.append(await renderer.screenshot.capture("city-fit"))
+	# Same native world, same bearing and window: zoom out to the earlier band.
+	controller.region_camera.zoom_at(renderer.size*.5,116.8/(controller.region_camera.km_per_pixel*1000.0),renderer.size)
+	controller.view_changed.emit()
+	await resource_settle()
+	report.captures.append(await renderer.screenshot.capture("london-remote"))
+	await renderer.call("_focus_city_overview");await resource_settle()
+	performance_begin("city_pan_zoom")
+	await performance_drag(Vector2(4,0),20)
+	await performance_drag(Vector2(-4,0),20)
+	for i: int in 5: performance_wheel(MOUSE_BUTTON_WHEEL_DOWN);await wait_seconds(.2)
+	report["tested_zoom_out_mpp"]=controller.region_camera.km_per_pixel*1000.0
+	for i: int in 5: performance_wheel(MOUSE_BUTTON_WHEEL_UP);await wait_seconds(.2)
+	await wait_seconds(2)
+	performance_end()
+	for angle: float in [85.0,55.0,12.0]:
+		renderer.region_view.set_inspection_elevation(angle)
+		await renderer.call("_focus_city_overview");await resource_settle()
+		performance_begin("boundary_angle_"+str(angle))
+		for i: int in 6: await performance_drag(Vector2(65,0),12)
+		var camera: RegionCamera=controller.region_camera
+		var stopped := camera.origin
+		await performance_drag(Vector2(65,0),12)
+		report.bounds.append({"angle":angle,"limited":camera.boundary_limited,"extra_drag_pixels":camera.origin.distance_to(stopped),"mpp":camera.km_per_pixel*1000,"origin":TerrainPixelSource.serial(camera.origin)})
+		performance_end()
+		if angle==55: report.captures.append(await renderer.screenshot.capture("city-edge"))
+		var pixel: Vector2=renderer._city_safe_rect().get_center()
+		camera.rotate_at(camera.unit_at(pixel),pixel,PI*.25,renderer.size);controller.view_changed.emit()
+		await resource_settle()
+	renderer.region_view.set_inspection_elevation(55)
+	controller.region_camera.bearing=0
+	await renderer.call("_focus_city_overview");await resource_settle()
+	for grade: int in [1,4,7]:
+		renderer.set("_city_sample_grade",grade);controller.view_changed.emit();await resource_settle()
+		report.captures.append(await renderer.screenshot.capture("grade_"+str(grade)))
+	renderer.set("_city_sample_grade",0);controller.view_changed.emit();await resource_settle()
+	report["before_exit"]=renderer.screenshot.metadata()
+	renderer.call("_return_to_region");await resource_settle()
+	report.captures.append(await renderer.screenshot.capture("return_region"))
+	report["after_exit"]=renderer.screenshot.metadata()
+	began=Time.get_ticks_msec()
+	await renderer.call("_focus_city_overview");await resource_settle()
+	report["reentry_ms"]=Time.get_ticks_msec()-began
+	report["after_reentry"]=renderer.screenshot.metadata()
+	renderer.call("_return_to_region");await resource_settle()
+	report["second_exit"]=renderer.screenshot.metadata()
+	await renderer.call("_locate_local_reference",Vector2(2.3522,48.8566));await resource_settle()
+	report["paris_relocated"]=renderer.screenshot.metadata()
+	report["authority_unchanged"]=before==host.get("_persistence").snapshot()
+	for phase: Dictionary in perf_phases:
+		var times: Array=[];var draws: Array=[];var unfocused: int=0
+		for frame: Array in phase.frames:
+			times.append(float(frame[2])/1000.0);draws.append(frame[9]);unfocused+=0 if frame[8] else 1
+		times.sort();draws.sort()
+		report.phases.append({"name":phase.phase,"samples":times.size(),"unfocused":unfocused,"p95_ms":times[int((times.size()-1)*.95)] if not times.is_empty() else 0,"max_ms":times.back() if not times.is_empty() else 0,"draw_calls_p95":draws[int((draws.size()-1)*.95)] if not draws.is_empty() else 0,"resources":phase.end})
+	RenderingServer.frame_pre_draw.disconnect(performance_pre_draw);RenderingServer.frame_post_draw.disconnect(performance_post_draw)
+	perf_phases.clear();set_process(false);acceptance_save(label,report)
+	toolbar_review_running=false
+	print("CITY_OVERVIEW_COMPLETE unchanged=",report.authority_unchanged)
+
 func acceptance_visual(world: Object) -> void:
 	var places: Array=[
 		["oceania_interior",133.88,-23.7,500.0],["oceania_join",178.3,-17.8,1500.0],["oceania_coast",113.7,-25.0,500.0],
@@ -708,6 +972,15 @@ func acceptance_visual(world: Object) -> void:
 		["benelux",4.9,51.7,500.0],["greenland_center",-42.0,73.5,1500.0],["greenland_west",-49.5,69.2,1500.0]]
 	var requested:=OS.get_environment("WWO_VISUAL_PLACES").split(",",false)
 	if not requested.is_empty():places=places.filter(func(v:Array)->bool:return str(v[0]) in requested)
+	for shot: Array in [["world",2.3522,48.8566],["world_asia",105.0,30.0],["world_americas",-85.0,20.0],["world_pole",0.0,-80.0]]:
+		if str(shot[0]) not in requested: continue
+		controller.call("set_map_mode","political")
+		controller.call("focus",GlobeProjection.lon_lat_to_unit(Vector2(float(shot[1]),float(shot[2]))))
+		controller.call("set_world_zoom",.86)
+		await settle();await wait_seconds(.5)
+		acceptance_image(str(shot[0]))
+		results.append({"place":shot[0],"snapshot":dynamic_snapshot()})
+		controller.call("set_map_mode","geographic")
 	for place: Array in places:
 		world.get("main_shell").set("_context_open",false)
 		acceptance_phase=str(place[0])+"_first_entry";tracking=true;last_tick=0;intervals.clear();slow_frames.clear()
@@ -718,6 +991,11 @@ func acceptance_visual(world: Object) -> void:
 		controller.call("focus_region",GlobeProjection.lon_lat_to_unit(Vector2(place[1],place[2])),renderer.get("size")*.5,scale*.001,0.0,renderer.get("size"))
 		var prepared_ms:=await settle();await wait_seconds(1)
 		var point:=state_point(str(place[0]));point["requested_mpp"]=place[3];point["center_floor_mpp"]=floor_mpp;point["prepared_ms"]=prepared_ms
+		var relief: MapRelief = renderer.get("relief")
+		point["catalogue_assets"] = relief._assets.size()
+		if relief.has_method("_surface_candidates"):
+			var view := relief._surface_view
+			point["indexed_candidates"] = relief.call("_surface_candidates",view.grow_individual(view.size.x*.5,view.size.y*.5,view.size.x*.5,view.size.y*.5)).size()
 		acceptance_phase=str(place[0])+"_installed"
 		if str(place[0]).begins_with("greenland") or place[0]=="africa_join":
 			await wait_seconds(10);point["idle10"]=state_point(str(place[0])+"_10")
@@ -737,6 +1015,34 @@ func acceptance_visual(world: Object) -> void:
 		point["world_exit"]={"textures":(renderer.get("relief") as MapRelief).textures.keys(),"texture_mem":Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),"video_mem":Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)}
 		results.append(point);acceptance_save("visual",{"selection_ms":selection_ms,"device":RenderingServer.get_video_adapter_name(),"windows":results})
 		print("R57_ACCEPT visual ",place[0]," actual_mpp=",point.mpp," active=",point.active," errors=",point.errors)
+	for place: Array in [["zermatt",7.703304,46.010743,"geographic_region:zermatt_west_reference",2.0],["london",-0.1246,51.5007,"place:london",4.0]]:
+		if str(place[0]) not in requested: continue
+		var unit := GlobeProjection.lon_lat_to_unit(Vector2(float(place[1]),float(place[2])))
+		controller.call("focus_region",unit,renderer.get("size")*.5,float(place[4])*.001,0.0,renderer.get("size"))
+		controller.call("enter_local",unit,renderer.get("size")*.5,renderer.get("size"),str(place[3]),2.0)
+		renderer.get("region_view").call("set_inspection_elevation",-1.0)
+		controller.view_changed.emit()
+		var prepared_ms := await settle()
+		await wait_seconds(.5)
+		var view: RegionView = renderer.get("region_view")
+		var surface := view._surface_reference
+		var row: Dictionary = {"place":place[0],"prepared_ms":prepared_ms,"mesh_installed":view._local_surface_mesh!=null,"source":surface.get("source_id",""),"grid":[surface.get("width",0),surface.get("height",0)],"step_degrees":surface.get("step_degrees",0),"snapshot":dynamic_snapshot()}
+		row["native_vertices"] = view._surface_vertices.size()
+		row["render_vertices"] = view._surface_ray_vertices.size()
+		row["line_vertices"] = view._surface_line_mesh.surface_get_array_len(0) if view._surface_line_mesh!=null else 0
+		row["model_instances"] = view._landmark_instances.size()
+		tracking=true;last_tick=0;intervals.clear();slow_frames.clear()
+		await wait_seconds(1.2)
+		tracking=false;row["idle_performance"]=acceptance_performance()
+		tracking=true;last_tick=0;intervals.clear();slow_frames.clear()
+		await performance_drag(Vector2(3,0),8);await performance_drag(Vector2(-3,0),8)
+		tracking=false;row["drag_performance"]=acceptance_performance()
+		row["repeat_settle_ms"] = await settle()
+		results.append(row)
+		acceptance_image(str(place[0]))
+		acceptance_save("visual",{"selection_ms":selection_ms,"device":RenderingServer.get_video_adapter_name(),"windows":results})
+		if not bool(row.mesh_installed): get_tree().quit(5);return
+	acceptance_save("visual",{"selection_ms":selection_ms,"device":RenderingServer.get_video_adapter_name(),"windows":results})
 	world.set("_departure_target","menu");world.call("_leave_world");await wait_seconds(.5);get_tree().quit(0)
 
 func acceptance_features(world: Object) -> void:
@@ -781,11 +1087,11 @@ func acceptance_features(world: Object) -> void:
 			if cycle==0:acceptance_image("mode_"+mode)
 	tracking=false
 	var feature_result:Dictionary={"mode_points":observed,"mode_performance":acceptance_performance()}
-	shell.call("_activate","map_mode:political");await settle();shell.set("_map_modes_open",true);shell.call("queue_redraw");await wait_seconds(.2)
+	shell.call("_activate","map_mode:political");await settle();shell.set("_menu",MainShell.Menu.MAP_MODES);shell.call("queue_redraw");await wait_seconds(.2)
 	feature_result["menu_actions"]=[]
 	for hit:Dictionary in shell._hits:
 		if str(hit.action).begins_with("map"):feature_result.menu_actions.append(hit.action)
-	acceptance_image("political_menu");shell.set("_map_modes_open",false);shell.call("queue_redraw")
+	acceptance_image("political_menu");shell.set("_menu",MainShell.Menu.NONE);shell.call("queue_redraw")
 	var pixel:Vector2=renderer.get("size")*Vector2(.62,.55)
 	await settle();await wait_seconds(.3)
 	feature_result["country_query"]=renderer.call("_polity_at",pixel)
@@ -1339,12 +1645,12 @@ func mode_review(world: Object) -> void:
 			FileAccess.open(output+"/bindings.json",FileAccess.WRITE).store_string(JSON.stringify(results))
 			print("R57_MODE ",label," actual_mpp=",point.mpp," active=",point.active," errors=",point.errors)
 			if place[0]=="france" and place[3]==500.0 and mode=="political":
-				world.get("main_shell").set("_map_modes_open",true)
+				world.get("main_shell").set("_menu",MainShell.Menu.MAP_MODES)
 				world.get("main_shell").call("queue_redraw")
 				await wait_seconds(.15)
 				RenderingServer.force_draw(false)
 				get_viewport().get_texture().get_image().save_png(output+"/political_menu.png")
-				world.get("main_shell").set("_map_modes_open",false)
+				world.get("main_shell").set("_menu",MainShell.Menu.NONE)
 				world.get("main_shell").call("queue_redraw")
 	tracking=false
 	controller.call("focus",GlobeProjection.lon_lat_to_unit(Vector2(2.5,48.5)))
@@ -1362,7 +1668,7 @@ func settle() -> int:
 	while Time.get_ticks_msec()<deadline:
 		await get_tree().process_frame
 		var relief: MapRelief = renderer.get("relief")
-		if not relief.preparing() and not bool(renderer.get("strategic_content").call("preparing")) and not bool(renderer.get("_region_layer").get("preparing")) and not bool(renderer.get("_map_canvas_dirty")) and not bool(renderer.get("_resource_demand_dirty")):
+		if not relief.preparing() and not bool(renderer.get("strategic_content").call("preparing")) and not bool(renderer.get("_region_layer").get("preparing")) and not bool(renderer.get("local_content").call("preparing")) and not renderer.get("region_view").landmark_preparing() and not bool(renderer.get("_map_canvas_dirty")) and not bool(renderer.get("_resource_demand_dirty")):
 			await wait_seconds(.2)
 			if not relief.preparing(): return Time.get_ticks_msec()-began
 	return -1
@@ -2936,3 +3242,313 @@ func acceptance_living_ui(host: Object) -> void:
 	r["complete"]=r.final.actors[player].totals.work_hours==6 and r.final.actors[player].totals.income==18 and r.final.actors[player].cash==2516 and r.final.actors[player].totals.categories.food.satisfied==1 and r.final.actors[player].inventory.bread==0
 	ok=ok and r.complete and r.map_return_context and r.two_jobs_visible and r.select_only and r.cancel_no_action and r.empty_order_no_quantity and r.repeat_work_disabled and r.pending_no_work and r.other_job_full and r.other_job_no_click and r.restores.all(func(x:Dictionary)->bool:return x.visible_controls and x.same_world_state and x.selection_same and x.bytes>0)
 	await economic_action_finish(host,r,"LIVING_UI_COMPLETE" if ok else "LIVING_UI_FAILED",0 if ok else 5)
+
+
+func terrain_region_sample(label: String, seconds: float, target: Control=null) -> Dictionary:
+	FileAccess.open(output+"/phase.json",FileAccess.WRITE).store_string(JSON.stringify({"phase":label}))
+	var values: Array[float]=[]
+	var begin:=Time.get_ticks_usec()
+	var previous:=begin
+	while Time.get_ticks_usec()-begin<int(seconds*1000000):
+		await get_tree().process_frame
+		if target!=null and values.size()%6==0:
+			if label=="zoom":
+				var wheel:=InputEventMouseButton.new()
+				wheel.position=Vector2(640,420)
+				wheel.button_index=MOUSE_BUTTON_WHEEL_UP if values.size()%48<24 else MOUSE_BUTTON_WHEEL_DOWN
+				wheel.pressed=true
+				get_viewport().push_input(wheel,true)
+				var wheel_up:=wheel.duplicate() as InputEventMouseButton
+				wheel_up.pressed=false
+				get_viewport().push_input(wheel_up,true)
+			elif label=="drag":
+				var motion:=InputEventMouseMotion.new()
+				motion.position=Vector2(640+values.size(),420)
+				motion.relative=Vector2(6,0)
+				motion.button_mask=MOUSE_BUTTON_MASK_LEFT
+				get_viewport().push_input(motion,true)
+		var now:=Time.get_ticks_usec()
+		values.append((now-previous)/1000.0)
+		previous=now
+	values.sort()
+	return {"phase":label,"frames":values.size(),"p95_frame_ms":values[mini(values.size()-1,int(values.size()*.95))],"max_frame_ms":values.back(),"process_ms":Performance.get_monitor(Performance.TIME_PROCESS)*1000,"draw_calls":Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),"texture_bytes":Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED),"static_bytes":OS.get_static_memory_usage(),"window_focused":get_window().has_focus()}
+
+func terrain_region_image(label: String) -> void:
+	await get_tree().process_frame
+	RenderingServer.force_draw(false)
+	get_viewport().get_texture().get_image().save_png(output+"/"+label+".png")
+	print("REGION_IMAGE ",label)
+
+func terrain_training_key(code: Key, pressed: bool) -> void:
+	var event: InputEventKey = InputEventKey.new()
+	event.keycode = code
+	event.physical_keycode = code
+	event.pressed = pressed
+	# The native controller polls physical keys; this is generated ordinary input,
+	# not a direct vehicle-position write or a second driving implementation.
+	Input.parse_input_event(event)
+
+func terrain_training_aim(target: Node3D, native_camera: Camera3D, controls: Control, aim_height: float = 1.0) -> void:
+	for attempt: int in range(4):
+		var direction: Vector3 = (target.global_position + Vector3(0, aim_height, 0) - native_camera.global_position).normalized()
+		var desired_yaw: float = atan2(-direction.x, -direction.z)
+		var desired_pitch: float = asin(clampf(direction.y, -1.0, 1.0))
+		var delta_look: Vector2 = Vector2(wrapf(float(controls.get("camera_yaw")) - desired_yaw, -PI, PI), float(controls.get("camera_pitch")) - desired_pitch) / 0.0048
+		await mouse_button(Vector2(680,340), MOUSE_BUTTON_LEFT, true)
+		var motion: InputEventMouseMotion = InputEventMouseMotion.new()
+		motion.position = Vector2(680,340)
+		motion.relative = delta_look
+		motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+		get_viewport().push_input(motion, true)
+		await mouse_button(Vector2(680,340), MOUSE_BUTTON_LEFT, false)
+		await wait_seconds(0.8)
+	# Observe the original mechanical slew; never snap its desired or actual pose.
+	for frame: int in range(480):
+		await get_tree().physics_frame
+		if not bool(controls.get("main").get("aiming_pending")): break
+
+func terrain_training_crew_roundtrip(session: Node, battle: Node3D, controls: Control) -> Dictionary:
+	var hero: Node3D = battle.get("hero") as Node3D
+	var crew_host: Node = battle.get("crew_host") as Node
+	var pid: String = str(crew_host.call("commander_person_id"))
+	var actor: CharacterBody3D = battle.get("ai_host").get("actors")[pid] as CharacterBody3D
+	var actor_id: int = actor.get_instance_id()
+	var before: Dictionary = session.call("get_status") as Dictionary
+	for frame: int in range(180):
+		if absf(float(hero.get_meta("vehicle_speed", 0.0))) <= 0.5: break
+		await get_tree().physics_frame
+	var board_rect: Rect2 = controls.call("board_exit_rect")
+	await mouse_button(board_rect.get_center(), MOUSE_BUTTON_LEFT, true)
+	await mouse_button(board_rect.get_center(), MOUSE_BUTTON_LEFT, false)
+	await wait_seconds(0.25)
+	var exited: Dictionary = session.call("get_status") as Dictionary
+	var report: Dictionary = {"exited": exited.get("on_foot", false), "after_exit": exited}
+	if not bool(report.exited):
+		report["ok"] = false
+		return report
+	var exit_position: Vector3 = actor.global_position
+	var yaw: float = float(controls.get("camera_yaw"))
+	var forward: Vector3 = Vector3(-sin(yaw),0,-cos(yaw))
+	var right: Vector3 = Vector3(cos(yaw),0,-sin(yaw))
+	var directions: Array[Vector3] = [forward,-forward,right,-right]
+	var codes: Array[Key] = [KEY_W,KEY_S,KEY_D,KEY_A]
+	var away: Vector3 = (actor.global_position - hero.global_position) * Vector3(1,0,1)
+	var chosen: int = 0
+	for index: int in range(1,4):
+		if away.dot(directions[index]) > away.dot(directions[chosen]): chosen=index
+	terrain_training_key(codes[chosen], true)
+	for frame: int in range(360):
+		await get_tree().physics_frame
+		if actor.global_position.distance_to(hero.global_position)>6.2: break
+	terrain_training_key(codes[chosen], false)
+	await wait_seconds(0.15)
+	report["walked_metres"] = actor.global_position.distance_to(exit_position)
+	report["outside_boarding_range_m"] = actor.global_position.distance_to(hero.global_position)
+	await terrain_region_image("15-original-commander-on-foot")
+	terrain_training_key(codes[chosen ^ 1], true)
+	for frame: int in range(300):
+		await get_tree().physics_frame
+		if actor.global_position.distance_to(hero.global_position)<5.4: break
+	terrain_training_key(codes[chosen ^ 1], false)
+	await wait_seconds(0.15)
+	report["boarding_access"] = crew_host.call("boarding_access", pid)
+	board_rect = controls.call("board_exit_rect")
+	await mouse_button(board_rect.get_center(), MOUSE_BUTTON_LEFT, true)
+	await mouse_button(board_rect.get_center(), MOUSE_BUTTON_LEFT, false)
+	await wait_seconds(0.3)
+	var returned: Dictionary = session.call("get_status") as Dictionary
+	report["after_return"] = returned
+	report["same_actor"] = actor_id == (battle.get("ai_host").get("actors")[pid] as Node).get_instance_id()
+	report["injury_and_ammo_preserved"] = before.crew[0].hp == returned.crew[0].hp and before.crew[0].parts == returned.crew[0].parts and before.ammo.spent == returned.ammo.spent and before.ammo.total == returned.ammo.total
+	report["ok"] = not bool(returned.get("on_foot",true)) and report.same_actor and report.injury_and_ammo_preserved and returned.crew_registry.vehicles.player_vehicle.seats["0"].person_id == pid and float(report.walked_metres)>1.0
+	await terrain_region_image("16-original-commander-reboarded")
+	return report
+
+func terrain_training_review(observation: Control, phases: Array) -> Dictionary:
+	var report: Dictionary = {"requested": true, "ok": false}
+	var clicked: bool = await economic_button(observation, "原生坦克训练（隔离）")
+	for attempt: int in range(1800):
+		var status_data: Dictionary = observation.call("get_training_status") as Dictionary
+		if status_data.get("ready", false) or status_data.get("state", "") == "failed": break
+		await get_tree().process_frame
+	var session: Node = observation.get("_training") as Node
+	if not clicked or not is_instance_valid(session):
+		report["error"] = "original_training_did_not_start"
+		return report
+	var first: Dictionary = session.call("get_status") as Dictionary
+	if not bool(first.get("ready", false)):
+		report["error"] = first
+		return report
+	var battle: Node3D = session.call("get_native_battle") as Node3D
+	var controls: Control = battle.get("battle_controls") as Control
+	var hero: Node3D = battle.get("hero") as Node3D
+	var target: Node3D = battle.get("target") as Node3D
+	var native_camera: Camera3D = session.call("get_native_camera") as Camera3D
+	var hero_id: int = hero.get_instance_id()
+	report["initial"] = first
+	phases.append(await terrain_region_sample("training_idle", 3))
+	await terrain_region_image("10-native-training-ready")
+	# Aim by the original manual drag. No snap, forced roll, target assignment,
+	# damage write, stock grant or instant projectile settlement is used.
+	await terrain_training_aim(target, native_camera, controls)
+	var before_shot: Dictionary = session.call("get_status") as Dictionary
+	terrain_training_key(KEY_SPACE, true)
+	await wait_seconds(0.12)
+	terrain_training_key(KEY_SPACE, false)
+	await terrain_region_image("11-native-cannon-fired")
+	phases.append(await terrain_region_sample("training_projectile_impact", 4))
+	var after_shot: Dictionary = session.call("get_status") as Dictionary
+	report["before_shot"] = before_shot
+	report["after_shot"] = after_shot
+	await terrain_region_image("12-native-real-impact")
+	var drive_start: Vector3 = hero.position
+	terrain_training_key(KEY_W, true)
+	phases.append(await terrain_region_sample("training_driving", 3))
+	terrain_training_key(KEY_A, true)
+	phases.append(await terrain_region_sample("training_steering", 1.4))
+	terrain_training_key(KEY_W, false)
+	terrain_training_key(KEY_A, false)
+	await wait_seconds(0.8)
+	report["driven_metres"] = drive_start.distance_to(hero.position)
+	report["after_drive"] = session.call("get_status")
+	await terrain_region_image("13-native-driving-steering")
+	# Same AP pool, after actual movement to a different incidence. A blocked first
+	# shot is kept as fact; neither penetration nor a crew wound is forced here.
+	report["first_shot"] = after_shot
+	await terrain_training_aim(target, native_camera, controls, 0.65)
+	terrain_training_key(KEY_SPACE, true)
+	await wait_seconds(0.12)
+	terrain_training_key(KEY_SPACE, false)
+	phases.append(await terrain_region_sample("training_second_incidence", 4))
+	after_shot = session.call("get_status") as Dictionary
+	report["after_shot"] = after_shot
+	await terrain_region_image("17-native-second-incidence")
+	report["crew_roundtrip"] = await terrain_training_crew_roundtrip(session, battle, controls)
+	observation.call("_pause_training")
+	var paused_before: Dictionary = session.call("get_status") as Dictionary
+	phases.append(await terrain_region_sample("training_paused_observation", 2))
+	var paused_after: Dictionary = session.call("get_status") as Dictionary
+	report["paused_state_preserved"] = paused_before.native_ammo == paused_after.native_ammo and paused_before.crew == paused_after.crew and paused_before.target == paused_after.target and paused_before.elapsed == paused_after.elapsed
+	report["resumed_by_button"] = await economic_button(observation, "恢复原训练（弹药 / 伤损保留）")
+	await wait_seconds(0.5)
+	report["same_vehicle_instance"] = hero_id == (session.call("get_native_battle").get("hero") as Node3D).get_instance_id()
+	report["same_session"] = first.session_id == (session.call("get_status") as Dictionary).session_id
+	observation.call("_pause_training")
+	await terrain_region_image("14-observe-after-preserved-training")
+	var initial_crew: Array = first.get("crew", []) as Array
+	var shot_rows: Array = after_shot.get("shot_audit", []) as Array
+	report["original_injury_preserved"] = initial_crew.size() == 5 and int(initial_crew[0].hp) == 7 and initial_crew[0].parts.left_arm == "injured"
+	report["legal_cannon_fired"] = shot_rows.any(func(row: Dictionary) -> bool: return row.get("accepted", false) and row.get("weapon", "") == "tank_cannon")
+	report["projectile_contact_recorded"] = shot_rows.any(func(row: Dictionary) -> bool: return row.get("flight_state", "") == "impacted" and float(row.get("flight_seconds", 0)) > 0)
+	report["target_changed"] = before_shot.target != after_shot.target
+	report["ok"] = report.legal_cannon_fired and report.projectile_contact_recorded and report.original_injury_preserved and report.paused_state_preserved and report.same_vehicle_instance and report.same_session and bool(report.crew_roundtrip.get("ok", false)) and float(report.driven_metres) > 5.0
+	return report
+
+func terrain_region_run() -> void:
+	if output.is_empty() or not OS.get_user_data_dir().get_file().begins_with("WWO_R57_Visual_Region_"):
+		push_error("Region review requires its own explicit output and isolated user directory: "+OS.get_user_data_dir())
+		get_tree().quit(2)
+		return
+	DirAccess.make_dir_recursive_absolute(output)
+	print("REGION_USER_DIR ",OS.get_user_data_dir())
+	FileAccess.open(output.path_join("window-handle.json"),FileAccess.WRITE).store_string(JSON.stringify({"pid":OS.get_process_id(),"hwnd":DisplayServer.window_get_native_handle(DisplayServer.WINDOW_HANDLE,get_window().get_window_id())}))
+	get_window().title="WWO · 原正式世界 → 分层军事地貌"
+	await wait_seconds(1)
+	var menu: Node=get_tree().current_scene
+	var ok:=await economic_button(menu,"开始")
+	for attempt: int in range(1800):
+		if menu.get("_preview_ready")==true: break
+		await get_tree().process_frame
+	await wait_seconds(.6)
+	await terrain_region_image("01-legal-person-selection")
+	ok=await economic_button(menu,"进入世界") and ok
+	var host: Node
+	for attempt: int in range(1800):
+		var candidate:=get_tree().current_scene
+		if candidate is FormalWorldApplication and candidate.get("_world")!=null:
+			host=candidate
+			break
+		await get_tree().process_frame
+	if host==null:
+		push_error("Normal menu could not install its formal world")
+		get_tree().quit(3)
+		return
+	renderer=host.get("map_renderer")
+	controller=host.get("map_controller")
+	await wait_seconds(3)
+	var shell: Object=host.get("main_shell")
+	var world: WorldState=host.get("_world")
+	var person_id:=world.player_state.player_id()
+	var person_before:=world.person_overlay.person(person_id).duplicate(true)
+	var facts_before: Dictionary=host.get("_persistence").snapshot()
+	var pose_before: Array=[controller.orientation(),controller.zoom,controller.region_camera.origin,controller.region_camera.km_per_pixel,controller.selected_place_id,controller.selected_polity_id]
+	await terrain_region_image("02-original-formal-world")
+	ok=await economic_click(shell,"map:mode_menu") and ok
+	ok=await economic_click(shell,"terrain:open") and ok
+	var observation: Control=host.get("_terrain_observation")
+	if observation==null:
+		push_error("Military terrain visible menu entry did not open")
+		get_tree().quit(4)
+		return
+	var ground: Node3D=observation.get("terrain")
+	for attempt: int in range(3600):
+		if ground!=null and ground.call("is_ready") and not ground.call("get_status").loading and int(ground.call("get_status").queued_tiles)==0: break
+		await get_tree().process_frame
+	await wait_seconds(1)
+	await terrain_region_image("03-region-50km")
+	var phases: Array=[]
+	phases.append(await terrain_region_sample("50km_idle",3))
+	ok=await economic_button(observation,"25 km") and ok
+	await wait_seconds(1)
+	await terrain_region_image("04-region-25km")
+	ok=await economic_button(observation,"进入选中 5 km") and ok
+	phases.append(await terrain_region_sample("enter_5km",3))
+	await terrain_region_image("05-native-5km")
+	phases.append(await terrain_region_sample("5km_idle",3))
+	ok=await economic_button(observation,"村庄 / 道路") and ok
+	phases.append(await terrain_region_sample("enter_detail",3))
+	await terrain_region_image("06-village-materials")
+	phases.append(await terrain_region_sample("village_idle",3))
+	phases.append(await terrain_region_sample("zoom",3,observation))
+	await mouse_button(Vector2(640,420),MOUSE_BUTTON_LEFT,true)
+	phases.append(await terrain_region_sample("drag",3,observation))
+	await mouse_button(Vector2(820,420),MOUSE_BUTTON_LEFT,false)
+	ok=await economic_button(observation,"步行观察（隔离）") and ok
+	for attempt: int in range(1200):
+		if observation.get("_walking")==true: break
+		await get_tree().process_frame
+	var walked:=false
+	var start:=Vector3.ZERO
+	var finish:=Vector3.ZERO
+	var body:=observation.get("_walker") as CharacterBody3D
+	if body!=null:
+		start=body.position
+		var down:=InputEventKey.new();down.keycode=KEY_W;down.pressed=true;get_viewport().push_input(down,true)
+		phases.append(await terrain_region_sample("walking_motion",4))
+		var up:=InputEventKey.new();up.keycode=KEY_W;up.pressed=false;get_viewport().push_input(up,true)
+		await wait_seconds(.5)
+		finish=body.position
+		walked=start.distance_to(finish)>5 and body.is_on_floor()
+	await terrain_region_image("07-isolated-walking")
+	phases.append(await terrain_region_sample("walking_still",3))
+	var training_report: Dictionary = {"requested": false}
+	if OS.get_environment("WWO_VISUAL_MILITARY_TRAINING") == "1":
+		training_report = await terrain_training_review(observation, phases)
+		ok = bool(training_report.get("ok", false)) and ok
+	else:
+		ok=await economic_button(observation,"上一级 / Esc") and ok
+	ok=await economic_button(observation,"上一级 / Esc") and ok
+	phases.append(await terrain_region_sample("return_region",2))
+	await terrain_region_image("08-return-selected-region")
+	var ground_status: Dictionary=ground.call("get_status")
+	ok=await economic_button(observation,"返回正式世界") and ok
+	phases.append(await terrain_region_sample("return_formal",2))
+	await terrain_region_image("09-return-original-world")
+	var facts_after: Dictionary=host.get("_persistence").snapshot()
+	ok=ok and host.get("_terrain_observation")==null
+	var camera_same:=pose_before==[controller.orientation(),controller.zoom,controller.region_camera.origin,controller.region_camera.km_per_pixel,controller.selected_place_id,controller.selected_polity_id]
+	var result: Dictionary={"normal_menu_clicks":ok,"world_same_instance":world==host.get("_world"),"world_snapshot_unchanged":facts_before==facts_after,"person_unchanged":person_before==world.person_overlay.person(person_id),"camera_and_selection_unchanged":camera_same,"person_id":person_id,"minute":world.game_clock.total_minutes(),"isolated_walked_on_collision":walked,"walk_start_m":str(start),"walk_end_m":str(finish),"terrain_status_after_return_to_region":ground_status,"military_training":training_report,"phases":phases,"renderer_method":RenderingServer.get_current_rendering_method(),"adapter":RenderingServer.get_video_adapter_name(),"user_dir":OS.get_user_data_dir(),"note":"Native no-focus visible window. Frame/process metrics are not GPU execution time. No saving or formal deployment; combat, when explicitly requested, belongs only to the isolated native training session."}
+	var file:=FileAccess.open(output+"/region-result.json",FileAccess.WRITE)
+	file.store_string(JSON.stringify(result,"\t"))
+	print("REGION_REVIEW_RESULT ",JSON.stringify(result))
+	get_tree().quit(0 if ok and walked and facts_before==facts_after and camera_same else 5)

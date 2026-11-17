@@ -1,0 +1,73 @@
+{
+  "vehicle": {
+    "id": "mlrs_prototype",
+    "display_name": "八轨火箭试验车",
+    "role": "heavy",
+    "aim_mode": "limited_mount",
+    "turret_yaw_limit_degrees": 8,
+    "barrel_pitch_degrees": [
+      20,
+      65
+    ],
+    "fictional_stats": "heavy",
+    "weapon_class": "cannon",
+    "fire_profile": "game_high_arc",
+    "status": "fictional_prototype",
+    "limitations": [
+      "Modern source chassis with fictional eight-rail rack, not historical Katyusha/BM-13.",
+      "Finite eight-round salvo; no automatic reload or ammo replenishment.",
+      "Geometry spread uses individual real rail origins; optional random dispersion defaults zero."
+    ]
+  },
+  "collision_proxy": {
+    "hull": {
+      "center": [
+        0,
+        1,
+        0
+      ],
+      "size": [
+        2.3,
+        1.4,
+        6
+      ]
+    },
+    "turret": {
+      "center": [
+        0,
+        -0.2,
+        0
+      ],
+      "size": [
+        1.7,
+        0.2,
+        2
+      ]
+    },
+    "tracks_left": {
+      "center": [
+        -1.3,
+        0.6,
+        0
+      ],
+      "size": [
+        0.4,
+        1.2,
+        6
+      ]
+    },
+    "tracks_right": {
+      "center": [
+        1.3,
+        0.6,
+        0
+      ],
+      "size": [
+        0.4,
+        1.2,
+        6
+      ]
+    }
+  },
+  "notice": "Approximate gameplay boxes, not precise armor planes or historic thickness."
+}

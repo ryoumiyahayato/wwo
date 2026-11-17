@@ -1,6 +1,7 @@
 class_name LocalSpatialContent
 extends RefCounted
 ## A detached Content shard; no simulation owner or persistent state.
+const OUTPUT_SAMPLE_PIXELS: float = 2.0
 
 var metadata: Dictionary = {}
 var features: Array[Dictionary] = []
@@ -12,6 +13,7 @@ var line_chunks: Array[Dictionary] = []
 var surface_reference: Dictionary = {}
 var surface_covers: Array[Dictionary] = []
 var geometry_mutex := Mutex.new()
+var _observation_regions: Array[Dictionary] = []
 
 func landmark_visuals() -> Array[Dictionary]:
 	# Placement references decorate admitted places; they never become world places.
@@ -24,30 +26,66 @@ func settlement_visuals(date: String) -> Array[Dictionary]:
 	# Admitted geographic references carry display-only module placements.
 	# They never create a settlement, building owner or transport operator.
 	var result: Array[Dictionary] = []
+	if bool(metadata.get("concept_settlements_debug_only",false)): return result
 	for feature: Dictionary in features:
 		if feature.has("miniature_layout") and str(feature.valid_from)<=date and date<str(feature.valid_to):
 			result.append(feature)
 	return result
 
 func minimum_observation_mpp(ll: Vector2, date: String) -> float:
-	# A shard's 300km query disc is not 300km of detailed urban terrain.
 	if not display_active_on(date): return INF
 	var result := INF
-	var surface := surface_reference
-	if not surface.is_empty():
-		var west := float(surface.west_cell_centre)
-		var north := float(surface.north_cell_centre)
-		var step := float(surface.step_degrees)
-		if ll.x>=west and ll.x<=west+(int(surface.width)-1)*step and ll.y<=north and ll.y>=north-(int(surface.height)-1)*step:
-			result = maxf(float(metadata.get("local_min_mpp",25.0)),step*111195.0*.25)
-	var unit := GlobeProjection.lon_lat_to_unit(ll)
-	for visual: Dictionary in landmark_visuals():
-		if not landmark_visible_on(visual,date) or str(visual.get("model_path","")).is_empty(): continue
-		var p := (visual.geometry as Dictionary).coordinates as Array
-		var distance := unit.angle_to(GlobeProjection.lon_lat_to_unit(Vector2(float(p[0]),float(p[1]))))*6371.0088
-		# The finite model neighbourhood permits observation, not invented blocks.
-		if distance<=2.5: result=minf(result,float(metadata.get("local_min_mpp",25.0)))
+	for region: Dictionary in observation_regions():
+		if Geometry2D.is_point_in_polygon(ll,region.polygon as PackedVector2Array): result=minf(result,float(region.minimum_mpp))
 	return result
+
+func observation_regions() -> Array[Dictionary]:
+	# Display samples, not the resolution of the original survey or loader disc.
+	if not _observation_regions.is_empty() or surface_reference.is_empty(): return _observation_regions
+	var d := surface_reference
+	var step := float(d.step_degrees)
+	var bounds := Rect2(Vector2(float(d.west_cell_centre),float(d.north_cell_centre)-(int(d.height)-1)*step),Vector2(int(d.width)-1,int(d.height)-1)*step)
+	_observation_regions.append({"polygon":_bounds_polygon(bounds),"minimum_mpp":maxf(float(metadata.get("local_min_mpp",2.0)),step*111195.0/OUTPUT_SAMPLE_PIXELS),"grade":"survey"})
+	var layout := context_layout(d)
+	if not layout.is_empty():
+		var context := (d.presentation as Dictionary).context_height_asset as Dictionary
+		var spacing := context.display_spacing_m_approx as Array
+		var output_step := maxf(float(spacing[0]),float(spacing[1]))
+		output_step=maxf(output_step,float(layout.stride)*step*111195.0)
+		_observation_regions.append({"polygon":_bounds_polygon(layout.bounds as Rect2),"minimum_mpp":output_step/OUTPUT_SAMPLE_PIXELS,"grade":"generalized"})
+	return _observation_regions
+
+static func _bounds_polygon(bounds: Rect2) -> PackedVector2Array:
+	return PackedVector2Array([bounds.position,Vector2(bounds.end.x,bounds.position.y),bounds.end,Vector2(bounds.position.x,bounds.end.y)])
+
+static func context_layout(d: Dictionary) -> Dictionary:
+	# This is also the terrain worker's layout. Its cell-centre clipping and
+	# bounded strip count are the actual geometry, not an advertised radius.
+	var options := d.get("presentation",{}) as Dictionary
+	var source := options.get("context_height_asset",{}) as Dictionary
+	if source.is_empty(): return {}
+	var step := float(d.step_degrees)
+	var extent := Vector2i(int(d.width)-1,int(d.height)-1)
+	var anchor := d.anchor_lon_lat as Array
+	var metres := Vector2(cos(deg_to_rad(float(anchor[1]))),1.0)*step*111195.0
+	var radius := clampf(float(options.get("context_radius_m",8000.0)),1000.0,12000.0)
+	var stride := clampi(roundi(float(source.display_spacing_degrees[1])/step),2,16)
+	var b := source.bounds_lon_lat as Array
+	var pad := Vector2(float(source.display_spacing_degrees[0]),float(source.display_spacing_degrees[1]))*.5
+	var west := float(d.west_cell_centre);var north := float(d.north_cell_centre)
+	var available_low := Vector2((west-float(b[0])-pad.x)/step,(float(b[3])-pad.y-north)/step)
+	var available_high := Vector2((float(b[2])-pad.x-west)/step-extent.x,(north-float(b[1])-pad.y)/step-extent.y)
+	var low := Vector2i.ZERO;var high := Vector2i.ZERO
+	for axis: int in range(2):
+		low[axis]=clampi(floori(minf(radius/metres[axis],available_low[axis])/stride),0,64)
+		high[axis]=clampi(floori(minf(radius/metres[axis],available_high[axis])/stride),0,64)
+	var xs: Array[int]=[];var ys: Array[int]=[]
+	for axis: int in range(2):
+		var values: Array[int]=xs if axis==0 else ys
+		for cell: int in range(-low[axis]*stride,0,stride): values.append(cell)
+		for cell: int in range(extent[axis]+1): values.append(cell)
+		for cell: int in range(extent[axis]+stride,extent[axis]+high[axis]*stride+1,stride): values.append(cell)
+	return {"xs":xs,"ys":ys,"low":low,"stride":stride,"bounds":Rect2(Vector2(west+xs[0]*step,north-ys[-1]*step),Vector2(xs[-1]-xs[0],ys[-1]-ys[0])*step)}
 
 func active_on(date: String) -> bool:
 	return errors.is_empty() and (has_content or not features.is_empty()) and str(metadata.get("valid_from", "")) <= date and date < str(metadata.get("valid_to", ""))

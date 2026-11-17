@@ -10,6 +10,7 @@ const LINE_COLORS: Dictionary = {
 }
 const WIDTHS: Dictionary = {"rail": 2.4, "river": 0.95, "coast": 0.7}
 const SURFACE_COLORS: Dictionary = {
+	"river_surface": Color(0.34,0.46,0.45,1.0),
 	"lake": Color(0.25, 0.36, 0.37, 1.0),
 	"inland_sea": Color(0.13, 0.23, 0.27, 1.0),
 	"historical_sea_reference": OCEAN_COLOR,
@@ -21,8 +22,19 @@ const WATER_MITER_LIMIT: float = 1.5
 const WATER_FEATHER: float = 0.70
 const LEGACY_MITER_LIMIT: float = 3.0
 const LEGACY_FEATHER: float = 1.25
+static var _london_water_transition: Vector2 = Vector2.INF
+
+static func surface_transition(feature_id: String) -> Vector2:
+	if not feature_id.begins_with("lake:london_thames_surface:"): return Vector2.ZERO
+	if not _london_water_transition.is_finite():
+		var value: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://assets/settlements/london_1890s/index.json"))
+		var data: Dictionary = value if value is Dictionary else {}
+		var limits: Array = (data.get("water_lods",{}) as Dictionary).get("color_transition_longitudes",[])
+		_london_water_transition = Vector2(float(limits[0]),float(limits[1])) if limits.size()==2 else Vector2.ZERO
+	return _london_water_transition
 
 static func surface_class(feature: Dictionary) -> String:
+	if str(feature.get("water_class","")) == "river_surface": return "river_surface"
 	if str(feature.get("kind",""))=="lake" and str(feature.get("water_class",""))=="playa_reference": return "playa_reference"
 	if str(feature.get("kind",""))=="lake" and str(feature.get("water_class",""))=="modern_sea_reference": return "modern_sea_reference"
 	# Explicit admitted chart-derived water, never inferred from height/name.

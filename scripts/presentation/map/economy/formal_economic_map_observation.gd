@@ -7,11 +7,12 @@ const ORDER_PAGE = 32
 const NODE_BUDGET = 128
 const PLACE_BUDGET = 96
 const FACT_BUDGET = 64
-const CITY_SITUATION_BUDGET = 8
+const CITY_SITUATION_BUDGET = 1
 static var _hub_stamp: Array = []
 static var _hub_data: Dictionary = {}
 static var _city_stamp: Array = []
 static var _city_data: Dictionary = {}
+static var _rail_reference: Dictionary = {}
 
 static func stamp(world: WorldState) -> Array:
 	if world==null:return []
@@ -40,6 +41,59 @@ static func node_network(world: WorldState, places: Array[String] = []) -> Dicti
 		_city_data=world.economy_r1.network_view(world.player_state.player_id(),places,NODE_BUDGET)
 	return _city_data
 
+static func logistics(world: WorldState, places: Array[String]) -> Dictionary:
+	if world==null or world.economy_r1==null: return {}
+	var cities: Array[String]=[]
+	for hub: Dictionary in hubs(world).get("hubs",[]):
+		var id := str(hub.get("place_id",""))
+		if id in places: cities.append(id)
+	var result := world.economy_r1.logistics_map_view(world.player_state.player_id(),cities)
+	if result.is_empty(): return result
+	if _rail_reference.is_empty():
+		var file := FileAccess.open("res://data/presentation/economic_rail_reference.json",FileAccess.READ)
+		if file!=null:
+			var parsed: Variant=JSON.parse_string(file.get_as_text())
+			if parsed is Dictionary: _rail_reference=parsed
+	var calendar := world.game_clock.current_date()
+	var date := "%04d-%02d-%02d"%[int(calendar.year),int(calendar.month),int(calendar.day)]
+	if date<str(_rail_reference.get("valid_from","")) or date>=str(_rail_reference.get("valid_to","")): return result
+	var rails: Array[Dictionary]=[]
+	for source: Dictionary in _rail_reference.get("rails",[]):
+		var row := source.duplicate()
+		row.merge({"kind":"rail_reference","animate":false,"directed":false,"flow_directions":[]})
+		for activity: Dictionary in result.get("route_activity",[]):
+			if str(source.line_id) not in (_rail_reference.get("corridor_lines",{}).get(str(activity.source_link_id),[]) as Array): continue
+			var origin := world.spatial_catalog.get_place(str(activity.from))
+			var destination := world.spatial_catalog.get_place(str(activity.to))
+			var coordinates: Array=source.coordinates
+			if not _coordinates(origin) or not _coordinates(destination) or coordinates.size()<2: continue
+			var direction := 1 if _rail_vertex(coordinates,origin.lon_lat)<_rail_vertex(coordinates,destination.lon_lat) else -1
+			if direction not in row.flow_directions: row.flow_directions.append(direction)
+			row.animate=true
+		rails.append(row)
+	result["railways"]=rails
+	var shipping: Array[Dictionary]=[]
+	for activity: Dictionary in result.get("route_activity",[]):
+		if not str(activity.source_link_id).begins_with("shipping_"): continue
+		var source := world.spatial_catalog.get_link(str(activity.source_link_id))
+		var points: Array=source.get("waypoints_lon_lat",[])
+		if points.size()<2: continue
+		shipping.append({"id":"shipping_reference:"+str(activity.source_link_id),"kind":"shipping_reference","coordinates":points,"animate":true,"directed":false,"flow_directions":[1 if str(activity.from)==str(source.get("from_place_id","")) else -1],"basis":"EXISTING_DEVELOPMENT_CORRIDOR_WATER_ONLY_COSMETIC_NOT_SHIP_POSITION"})
+	result["shipping"]=shipping
+	result["stations"]=_rail_reference.get("stations",[])
+	result["rail_basis"]=_rail_reference.get("basis","")
+	return result
+
+static func _rail_vertex(coordinates: Array, location: Array) -> int:
+	var nearest := 0
+	var distance := INF
+	var target := Vector2(float(location[0]),float(location[1]))
+	for index: int in range(coordinates.size()):
+		var ll := Vector2(float(coordinates[index][0]),float(coordinates[index][1]))
+		var value := target.distance_squared_to(ll)
+		if value<distance: distance=value;nearest=index
+	return nearest
+
 static func canonical_place(id: String) -> String:
 	return VNextSpatialCatalog.map_id_to_place_id(VNextSpatialCatalog.place_query_to_map_id(id))
 
@@ -62,7 +116,7 @@ static func known_places(world: WorldState) -> Array[Dictionary]:
 		rows.append(point)
 	return rows
 
-static func brief(world: WorldState, places: Array[String], polity_id: String, capital: Dictionary) -> Array[Dictionary]:
+static func brief(world: WorldState, places: Array[String], _polity_id: String, _capital: Dictionary) -> Array[Dictionary]:
 	var facts:Array[Dictionary]=[]
 	if world==null:return facts
 	for hub:Dictionary in hubs(world).get("hubs",[]):
@@ -73,15 +127,6 @@ static func brief(world: WorldState, places: Array[String], polity_id: String, c
 		var fact:=_fact(world,row,world.spatial_catalog.get_place(id))
 		if not fact.is_empty():facts.append(fact)
 		if facts.size()>=FACT_BUDGET-1:break
-	if not polity_id.is_empty() and not capital.is_empty():
-		var summary:=world.economy_state.country_summary(polity_id)
-		var fulfillment:Variant=summary.get("daily_totals",{}).get("fulfillment_bp")
-		var place_id:=canonical_place(str(capital.get("id","")))
-		if (fulfillment is float or fulfillment is int) and float(fulfillment)>=0 and place_id in places:
-			var row:Dictionary={"source_id":str(summary.get("market_id","")),"subject_id":"aggregate:"+polity_id,"place_id":place_id,"kind":"country_statistics","state":"国家统计 · 满足率 %.1f%%"%(float(fulfillment)/100.0),"basis":"FORMAL_SETTLED_COUNTRY_STATISTICS","priority":40}
-			var fact:=_fact(world,row,capital)
-			if not fact.is_empty():
-				fact["position_kind"]="COUNTRY_STATISTIC_AT_CAPITAL_ANCHOR";fact["knowledge"]="PUBLIC_COUNTRY_STATISTICS";facts.append(fact)
 	return facts
 
 static func _fact(world: WorldState, row: Dictionary, place: Dictionary) -> Dictionary:
@@ -112,29 +157,6 @@ static func _player_context(world: WorldState, authorized: Dictionary) -> Dictio
 	if personal.get("inventory") is Dictionary:context["inventory"]=(personal["inventory"] as Dictionary).duplicate(true)
 	return context
 
-static func _city_situations(world: WorldState, city: Dictionary, place_id: String, authorized: Dictionary, preferred_site: String = "", preferred_firm: String = "") -> Dictionary:
-	var rows:Array[Dictionary]=[]
-	var seen:Dictionary={}
-	var candidates:Array[Dictionary]=[]
-	var preferred_index:int=-1
-	if world.economy_r1!=null:
-		for node:Dictionary in city.get("nodes",[]):
-			var firm:=str(node.get("firm_id",""));var site:=str(node.get("site_id",""))
-			if str(node.get("kind",""))!="site" or str(node.get("place_id",""))!=place_id or site.is_empty() or seen.has(site):continue
-			if not authorized.has(firm) or str(authorized[firm].get("kind",""))!="firm":continue
-			seen[site]=true
-			if site==preferred_site and (preferred_firm.is_empty() or firm==preferred_firm):preferred_index=candidates.size()
-			elif preferred_index<0 and firm==preferred_firm:preferred_index=candidates.size()
-			candidates.append(node)
-		if preferred_index>0:
-			var preferred:Dictionary=candidates.pop_at(preferred_index)
-			candidates.push_front(preferred)
-		for index:int in range(mini(CITY_SITUATION_BUDGET,candidates.size())):
-			var node:Dictionary=candidates[index]
-			var situation:=world.economy_r1.business_situation(world.player_state.player_id(),str(node.get("firm_id","")),str(node.get("site_id","")))
-			if not situation.is_empty():rows.append(situation)
-	return {"rows":rows,"limit":CITY_SITUATION_BUDGET,"truncated":candidates.size()>CITY_SITUATION_BUDGET or bool(city.get("truncated",false))}
-
 static func _page_has_order(page: Dictionary, id: String) -> bool:
 	if id.is_empty():return false
 	for order:Dictionary in page.get("firm",{}).get("orders",[]):
@@ -155,14 +177,12 @@ static func details(world: WorldState, polity_id: String, requested_subject: Str
 	result["pending_cancellation"]={};result["follow_order_id"]="";result["follow_notice"]=""
 	var city:=node_network(world,[place_id]) if not place_id.is_empty() else {}
 	result["node_network"]=city
-	result["read_scope"]={"kind":"CITY_PLAYER_AND_AUTHORIZED_SITE_SITUATIONS","observed_minute":world.game_clock.total_minutes(),"identity_limit":NODE_BUDGET,"identity_truncated":city.get("truncated"),"city_situation_limit":CITY_SITUATION_BUDGET,"personal_order_limit":0}
+	result["read_scope"]={"kind":"CITY_KNOWN_IDENTITIES","observed_minute":world.game_clock.total_minutes(),"identity_limit":NODE_BUDGET,"identity_truncated":city.get("truncated"),"city_situation_limit":0,"personal_order_limit":0}
 	var choices:Array[Dictionary]=[{"id":"","name":"城市总览","kind":"hub"}]
 	var authorized:Dictionary={}
 	for row:Dictionary in result.authorized_subjects:authorized[str(row.id)]=row
-	result["player_context"]=_player_context(world,authorized)
-	var situations:=_city_situations(world,city,place_id,authorized,site_id,requested_subject)
-	result["city_business_situations"]=situations["rows"]
-	result["city_situation_limit"]=situations["limit"];result["city_situations_truncated"]=situations["truncated"]
+	result["player_context"]={};result["city_business_situations"]=[]
+	result["city_situation_limit"]=CITY_SITUATION_BUDGET;result["city_situations_truncated"]=false
 	var seen:Dictionary={}
 	for node:Dictionary in city.get("nodes",[]):
 		var firm:=str(node.get("firm_id",""))
@@ -212,9 +232,12 @@ static func details(world: WorldState, polity_id: String, requested_subject: Str
 			result["pending_cancellation"]=native.cancel_pending_view(observer,requested_order)
 		else:result["follow_notice"]="目标未出现在当前本站授权页；未改变城市/站点或推定货位。可在原订单页继续查看。"
 	var own:Dictionary=page.get("firm",{})
+	result["player_context"]=_player_context(world,authorized)
 	result["orders_total"]=int(page.get("orders_total",0));result["offset"]=int(page.get("offset",0));result["next_offset"]=int(page.get("next_offset",0));result["truncated"]=bool(page.get("truncated",false))
 	result["selected_site"]=requested_site
 	if subject!=observer and not requested_site.is_empty():
+		var situation:=native.business_situation(observer,subject,requested_site)
+		if not situation.is_empty():result["city_business_situations"].append(situation)
 		var production:=native.economy_production_view(observer,subject,requested_site)
 		if not production.is_empty():result["production_details"][requested_site]=production
 	result["firm"]=own;result["market_network"]=Network.project(own)

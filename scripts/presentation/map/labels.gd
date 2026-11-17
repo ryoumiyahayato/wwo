@@ -1,5 +1,6 @@
 class_name GlobeLabels
 extends RefCounted
+const UILocale = preload("res://scripts/presentation/ui/ui_locale.gd")
 var _glyphs: Dictionary = {}
 var label_rects: Array[Rect2] = []
 
@@ -25,6 +26,7 @@ func update(canvas: CanvasItem, font: Font, anchors: Dictionary, records: Dictio
 	for entity_id: String in _glyphs.keys():
 		var record := records.get(entity_id,{}) as Dictionary
 		var name := str(record.get("short_name_zh",record.get("name_zh",record.get("name",entity_id))))
+		name=UILocale.name(record) if entity_id.begins_with("administrative_region:") else UILocale.text(name)
 		var glyph := _glyphs[entity_id] as Dictionary
 		if record.is_empty() or str(glyph.name) != name:
 			_glyphs.erase(entity_id)
@@ -41,6 +43,7 @@ func update(canvas: CanvasItem, font: Font, anchors: Dictionary, records: Dictio
 		var entity_id := str(candidate.id)
 		var record := records.get(entity_id,{}) as Dictionary
 		var name := str(record.get("short_name_zh",record.get("name_zh",record.get("name",entity_id))))
+		name=UILocale.name(record) if entity_id.begins_with("administrative_region:") else UILocale.text(name)
 		if not _glyphs.has(entity_id):
 			var label_font := font_for_name(font,name)
 			var font_size := 15 if bool(record.get("geography",false)) else 16 if int(record.get("label_rank",record.get("rank",9)))<=3 else 14

@@ -16,6 +16,7 @@ var cache_enabled: bool = true # Derived query policy; never saved or an admissi
 const CACHE_LIMIT: int = 512
 var _path_cache: Dictionary = {}
 var _cache_until: int = 0
+var _infrastructure_revision: int = -1
 var _site_ids: Array[String] = []
 var _sites_by_place: Dictionary = {}
 var _edge_ids: Array[String] = []
@@ -38,7 +39,10 @@ func invalidate_paths() -> void:
 
 func _query_epoch(e: RefCounted) -> void:
 	var now: int = e._world.game_clock.total_minutes()
-	if _cache_until > now: return
+	var spatial: VNextSpatialWorld = e._world.spatial_world
+	var revision_now: int = spatial.infrastructure_revision if spatial != null else -1
+	if _cache_until > now and _infrastructure_revision == revision_now: return
+	_infrastructure_revision = revision_now
 	_path_cache.clear()
 	_cache_until = FormalLedgerState.MAX_AMOUNT
 	# Availability of a future departure changes only when its final configured
@@ -82,11 +86,11 @@ func rebuild(spec: Dictionary, routes: Dictionary, settings: Dictionary) -> void
 			if not _sites_by_place.has(location):_sites_by_place[location]=[]
 			_sites_by_place[location].append(site)
 	_site_ids.sort()
-	for producer: Dictionary in settings.get("local_producers",[]):
+	for producer: Dictionary in settings.get("local_producers",[]) + settings.get("resource_producers",[]):
 		var actor: String=str(producer["actor"])
 		var place: String=str(spec["actors"][actor]["place_id"])
 		_place_identity(place)
-		nodes[actor]=_identity(actor,"local_producer",place,actor,"",actor,producer["basis"])
+		nodes[actor]=_identity(actor,"local_producer",place,actor,"",actor,producer.get("basis", producer.get("resource", {}).get("quantity_basis", "")))
 	for row: Dictionary in settings.get("transport_nodes", []):
 		var place: String = row["place_id"]
 		_place_identity(place)
@@ -183,6 +187,7 @@ func _shortest(e: RefCounted, buyer: String, origin: String, destination: String
 			var row: Dictionary = _routes[id]
 			if row["from_place_id"] == row["to_place_id"]: continue
 			if e._shared.alias_requires_binding(id): continue
+			if at_minute < 0 and not e._cargo_link_open(row): continue
 			if not e._shared.bindings.has(id) and int(e._transport.get("edges", {}).get(id, {}).get("capacity", row["capacity"])) <= 0: continue
 			var ids: Array = current["edge_ids"].duplicate()
 			ids.append(id)
@@ -276,7 +281,7 @@ func view(e: RefCounted, observer: String, places: Array[String], limit: int) ->
 		_add_node(result, selected, site_row, budget)
 		_add_edge(result, selected, _relation("operates:" + id, "operates", firm, id, row["place_id"], row["place_id"], id, site_row["visibility"]), budget)
 		_add_edge(result, selected, _relation("located_at:" + id, "located_at", id, row["place_id"], row["place_id"], row["place_id"], id, "ADMITTED_SITE_PLACE"), budget)
-	for producer: Dictionary in e.config.get("local_producers",[]):
+	for producer: Dictionary in e.config.get("local_producers",[]) + e.config.get("resource_producers",[]):
 		var actor: String=str(producer["actor"])
 		if not known_sites.has(actor) and observer!=actor:continue
 		var row: Dictionary=nodes[actor].duplicate()

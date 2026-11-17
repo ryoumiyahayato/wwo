@@ -19,13 +19,23 @@ export_credentials.cfg
 
 # Local builds and logs
 build/
+!/tools/build/
+/tools/build/*
+!/tools/build/README.md
+!/tools/build/plugin.cfg
+!/tools/build/preview.py
+!/tools/build/preview_policy.json
+!/tools/build/r68-relief.json
+!/tools/build/terrain_export.gd
+!/tools/build/terrain_export.gd.uid
 builds/
 logs/
 *.log
 
 # Local review and profiling output
 artifacts/
-local-artifacts/
+local-artifacts/*
+!local-artifacts/.gdignore
 *.png.import
 *.jpg.import
 *.jpeg.import

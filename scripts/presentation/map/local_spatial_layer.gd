@@ -5,6 +5,13 @@ signal preparation_failed(message: String)
 ## Prepared line meshes and glyphs on the existing regional canvas.
 
 const PREPARE_BUDGET_USEC: int = 2000
+const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+const MAX_STAGED_BYTES: int = 224 * 1024 * 1024
+const MAX_GEOMETRY_BYTES: int = 256 * 1024 * 1024
+const MAX_RETIRED_BATCHES: int = 2048
+var _retiring: Array[Dictionary] = []
+var _geometry_bytes: int = 0
 const DRAW_ORDER: int = 100000
 var rail_style: int = 2
 var ready: bool = false
@@ -17,7 +24,7 @@ var label_rects: Array[Rect2] = []
 var available_lods: Dictionary = {}
 var active_lod: String = ""
 var _chunks: Array[Dictionary] = []
-var _lod_thread: Thread
+var _lod_thread: MapJobs.Job
 var _lod_generation: int = 0
 var _generation: int = 0
 var _generation_mutex := Mutex.new()
@@ -25,6 +32,7 @@ var _batches: Array[Dictionary] = []
 var _fallback_batches: Array[Dictionary] = []
 var _fallback_lod: String = ""
 var _physical_reference: Dictionary = {}
+var observation_hidden_kinds: Array[String] = []
 var _places: Dictionary = {}
 var _labels: Array[Dictionary] = []
 var _content: LocalSpatialContent
@@ -42,6 +50,7 @@ var strategic: bool = false
 var suppressed_places: Dictionary = {}
 var reference_relief: Dictionary = {}
 var _reference_window: Dictionary = {}
+var _reference_revision: int = 0
 var _ink_frames: Dictionary = {}
 var _political_cells: Dictionary = {}
 var _installed_political_cells: Dictionary = {}
@@ -58,6 +67,7 @@ var local_projection: Callable
 var symbol_limit: Callable
 
 func set_local_coverage(coverage: Dictionary) -> void:
+	if local_coverage==coverage: return
 	local_coverage = coverage
 	# Presentation readiness changes only these existing chart samplers. It
 	# does not invalidate country fill, geographic requests or installed meshes.
@@ -69,11 +79,25 @@ func set_local_coverage(coverage: Dictionary) -> void:
 
 func set_reference_window(window: Dictionary) -> void:
 	if _reference_window==window: return
+	var textures_changed := _reference_texture_key(_reference_window)!=_reference_texture_key(window)
 	_reference_window = window
-	# Retired textures must leave hidden/fallback material parameters as well.
+	_reference_revision += 1
+	# update() binds visible land before submitting the canvas. Weight changes
+	# do not visit hidden materials. A changed sampler set releases only hidden
+	# materials that actually still retain a sampler, preserving their empty cache.
+	if not textures_changed: return
 	for group: Array[Dictionary] in [_batches,_fallback_batches]:
 		for batch: Dictionary in group:
-			if str(batch.get("kind",""))=="land_reference": GlobeRenderer._relief_window_uniforms(batch,window)
+			if str(batch.get("kind",""))!="land_reference" or bool(batch.get("visible",false)):continue
+			if not (batch.get("surface_reference",{}) as Dictionary).is_empty() or (batch.get("parameters",{}) as Dictionary).get("relief_window")!=null:
+				GlobeRenderer._relief_window_uniforms(batch,{})
+			batch.erase("reference_revision")
+
+static func _reference_texture_key(window: Dictionary) -> Array:
+	var surface: Dictionary=window.get("surface",{})
+	var result: Array=[window.get("texture"),surface.get("base",{}).get("texture"),surface.get("secondary",{}).get("texture")]
+	for tile: Dictionary in surface.get("tiles",[]):result.append(tile.get("texture"))
+	return result
 
 func _lod(mpp: float) -> String:
 	var value := MapScaleStyle.lod(mpp)
@@ -96,7 +120,10 @@ func begin(content: LocalSpatialContent, canvas: RID, mpp: float = 4500.0, ink_f
 		previous = _fallback_batches
 		previous_lod = _fallback_lod
 		_fallback_batches = []
+	var previous_coverage := local_coverage
 	clear()
+	# A shard handoff retires geometry, not the current LOCAL presentation.
+	local_coverage = previous_coverage
 	_fallback_batches = previous
 	_fallback_lod = previous_lod
 	if strategic and not previous_physical.is_empty(): _physical_reference = previous_physical
@@ -224,7 +251,7 @@ func _finish_political_patch() -> void:
 			batch.complete = true
 			batch.political_patch = false
 		elif (_replace_noncoast and str(batch.kind) not in ["coast","ocean_reference","land_reference"]) or (str(batch.kind)=="land_reference" and str(batch.get("source_feature_id","")) in _upload_political_features):
-			RenderingServer.free_rid(batch.item as RID)
+			_retire_batch(batch)
 			_batches.remove_at(index)
 	_installed_political_cells = _job_cells
 	if _replace_noncoast: _physical_reference["ink_enabled"] = true
@@ -270,15 +297,14 @@ func _queue_preparation() -> void:
 	for lod_name: String in _wanted:
 		if not _cpu_ready.has(lod_name) and not available_lods.has(lod_name): missing.append(lod_name)
 	if not missing.is_empty():
-		_lod_thread = Thread.new()
 		_lod_generation = _generation
 		_job_cells = _political_cells if not strategic or bool(_content.metadata.get("ink_enabled",false)) else {}
 		_job_political_features = []
 		_pending_political_features.clear()
-		var error := _lod_thread.start(_prepare_job.bind(_content,missing,_generation,_ink_frames,_job_cells,[]))
-		if error!=OK:
-			_lod_thread = null
-			_fail_preparation("无法启动地图几何线程："+error_string(error))
+		var priority := MapJobs.FOUNDATION if strategic and _target=="coarse" else MapJobs.VISIBLE
+		_lod_thread = MapJobs.submit(_prepare_job.bind(_content,missing,_generation,_ink_frames,_job_cells,[]),"map geometry",priority,self)
+		if _lod_thread==null:
+			_fail_preparation("地图几何任务队列已满。")
 			return
 		preparing = true
 		return
@@ -286,13 +312,11 @@ func _queue_preparation() -> void:
 		_job_political_features = _pending_political_features.duplicate()
 		_pending_political_features.clear()
 		_job_cells = _political_cells
-		_lod_thread = Thread.new()
 		_lod_generation = _generation
 		var patch_lods: Array[String] = [_target]
-		var error := _lod_thread.start(_prepare_job.bind(_content,patch_lods,_generation,_ink_frames,_job_cells,_job_political_features))
-		if error!=OK:
-			_lod_thread = null
-			_fail_preparation("无法启动政治显示线程："+error_string(error))
+		_lod_thread = MapJobs.submit(_prepare_job.bind(_content,patch_lods,_generation,_ink_frames,_job_cells,_job_political_features),"map ink geometry",MapJobs.VISIBLE,self)
+		if _lod_thread==null:
+			_fail_preparation("政治显示任务队列已满。")
 			return
 		preparing = true
 		return
@@ -314,7 +338,7 @@ func _queue_preparation() -> void:
 func _prepare_job(source: LocalSpatialContent, lods: Array[String], generation: int, frames: Dictionary, cells: Dictionary, only: Array) -> Dictionary:
 	var features: Array[String] = []
 	features.assign(only)
-	var result := LocalSpatialLod.prepare(source,lods,_preparation_current.bind(generation),frames,cells,features)
+	var result := LocalSpatialLod.prepare(source,lods,_preparation_current.bind(generation),frames,cells,features,MAX_STAGED_BYTES)
 	result["request"] = {"generation":generation,"lods":lods.duplicate(),"regions":source.metadata.get("regions",[]),"source_groups":source.line_chunks.size(),"features":features}
 	return result
 
@@ -356,7 +380,7 @@ func _trim_gpu() -> void:
 		var batch := _batches[index]
 		var protected := not available_lods.has(_target) and str(batch.lod)==fallback
 		if str(batch.lod) not in _wanted and str(batch.lod)!=pending and not protected:
-			RenderingServer.free_rid(batch.item as RID)
+			_retire_batch(batch)
 			available_lods.erase(str(batch.lod))
 			_batches.remove_at(index)
 
@@ -367,7 +391,7 @@ func release_gpu() -> void:
 	_resident = false
 	_physical_reference = {}
 	_clear_fallback()
-	for batch: Dictionary in _batches: RenderingServer.free_rid(batch.item as RID)
+	for batch: Dictionary in _batches: _retire_batch(batch)
 	_batches.clear()
 	_upload_chunks.clear()
 	_cursor = 0
@@ -381,23 +405,23 @@ func release_gpu() -> void:
 	ready = false
 	preparing = _lod_thread != null
 
-func prepare_step(font: Font) -> bool:
+func prepare_step(font: Font, budget: FrameBudget = null) -> bool:
 	if _step_active:
 		_step_active = false
 		_fail_preparation("地图几何或绘制资源安装中断，请查看游戏错误日志。")
 		return false
 	_step_active = true
-	var changed := _prepare_step(font)
+	var changed := _prepare_step(font,budget)
 	_step_active = false
 	return changed
 
-func _prepare_step(font: Font) -> bool:
+func _prepare_step(font: Font, budget: FrameBudget) -> bool:
 	if not preparing and _lod_thread==null: return false
 	var step_started := Time.get_ticks_usec()
 	if _lod_thread != null:
-		if _lod_thread.is_alive():
+		if not _lod_thread.completed:
 			return false
-		var returned: Variant = _lod_thread.wait_to_finish()
+		var returned: Variant = _lod_thread.take()
 		_lod_thread = null
 		if returned is Dictionary:
 			var r := returned as Dictionary
@@ -443,6 +467,20 @@ func _prepare_step(font: Font) -> bool:
 		return false
 	while _cursor < _upload_chunks.size():
 		var line := _upload_chunks[_cursor]
+		var bytes := int(line.get("upload_bytes",0))
+		if _geometry_bytes + bytes > MAX_GEOMETRY_BYTES:
+			if strategic and _target=="medium" and not _fallback_batches.is_empty():
+				# The separate WORLD slot is already complete. Use it while the
+				# two medium versions cannot coexist within the same budget.
+				_clear_fallback()
+				_physical_reference = {}
+				display_changed.emit()
+				return false
+			if not _retiring.is_empty(): return false
+			_fail_preparation("地图几何超过当前绘制驻留预算（%d 字节已驻留，%d 字节待提交）。"%[_geometry_bytes,bytes])
+			return false
+		if budget!=null and not budget.claim_upload(bytes): return false
+		var upload_started := Time.get_ticks_usec()
 		var geometry: RefCounted
 		var surface := line.has("face_count")
 		var mesh: ArrayMesh
@@ -451,13 +489,13 @@ func _prepare_step(font: Font) -> bool:
 			var surfaces := GlobeSurfaceBatch.new()
 			# Surface geometry includes physical land and water. Its kind, not
 			# this mesh representation, determines geographic meaning.
-			surfaces.upload(line.payload as Dictionary)
+			surfaces.upload(line.payload as Dictionary,budget)
 			geometry = surfaces
 			mesh = surfaces.mesh
 			texture = surfaces.data
 		else:
 			var strokes := GlobeBoundaryBatch.new()
-			strokes.upload(line.payload as Dictionary)
+			strokes.upload(line.payload as Dictionary,budget)
 			geometry = strokes
 			mesh = strokes.mesh
 			texture = strokes.data
@@ -479,6 +517,8 @@ func _prepare_step(font: Font) -> bool:
 		material.set_shader_parameter("face_data" if surface else "line_data", texture)
 		if surface and not land_reference:
 			material.set_shader_parameter("water_color", HydrographyStyle.color(str(line.kind), str(line.get("water_class", "lake"))))
+			material.set_shader_parameter("water_color_transition",line.get("water_transition",HydrographyStyle.surface_transition(str(line.get("source_feature_id",line.get("feature_id",""))))))
+			material.set_shader_parameter("water_color_far",HydrographyStyle.OCEAN_COLOR)
 		elif not surface:
 			material.set_shader_parameter("stroke_color", HydrographyStyle.line_color(str(line.kind),str(line.get("water_line_style",""))))
 			var dash := HydrographyStyle.line_dash(str(line.get("water_line_style","")))
@@ -495,6 +535,9 @@ func _prepare_step(font: Font) -> bool:
 		RenderingServer.canvas_item_add_mesh(item, mesh.get_rid())
 		RenderingServer.canvas_item_set_visible(item, false)
 		_batches.append({"item": item, "material": material, "geometry": geometry, "lod":line.lod, "kind":line.kind, "visible":false, "complete":false, "surface": surface, "ink_reference":line.get("ink_reference",""),"source_feature_id":line.get("source_feature_id",""),"original_ink_reference":line.get("original_ink_reference",""),"component_uv":line.get("component_uv",false),"political_patch":not _upload_political_features.is_empty(),"texture":RID(),"water_class": line.get("water_class", "lake"), "replacement_key":line.get("replacement_key",""),"water_line_style":line.get("water_line_style",""), "faces": int(line.get("face_count",0)), "cull_axis":line.get("cull_axis",Vector3.ZERO),"cull_angle":line.get("cull_angle",PI)})
+		_batches.back()["upload_bytes"] = bytes
+		_geometry_bytes += bytes
+		if budget!=null: budget.finish_upload(upload_started,str(line.kind))
 		# The installed geometry owns its mesh, texture and required picking data.
 		# Encoded staging arrays are no longer needed by either content level.
 		line.erase("payload")
@@ -539,7 +582,7 @@ func _fail_preparation(message: String) -> void:
 func _discard_unpublished() -> void:
 	for index: int in range(_batches.size()-1,-1,-1):
 		if not bool(_batches[index].get("complete",false)) or bool(_batches[index].get("political_patch",false)):
-			RenderingServer.free_rid(_batches[index].item as RID)
+			_retire_batch(_batches[index])
 			_batches.remove_at(index)
 	for lod_name: String in _cpu_ready: available_lods.erase(lod_name)
 	_cpu_ready.clear()
@@ -593,6 +636,7 @@ func _cancel_preparation() -> void:
 	_generation_mutex.lock()
 	_generation += 1
 	_generation_mutex.unlock()
+	MapJobs.cancel_queued(_lod_thread)
 
 func _preparation_current(generation: int) -> bool:
 	_generation_mutex.lock()
@@ -643,7 +687,12 @@ func physical_land_at(point: Vector2, camera: RegionCamera, world_view: Dictiona
 		if not hole: return true
 	return false
 
-func update(camera: RegionCamera, controller: GlobeController, date: String, viewport_size: Vector2, commit_canvas: bool = true, world_view: Dictionary = {}) -> void:
+func update(camera: RegionCamera, controller: GlobeController, date: String, viewport_size: Vector2, commit_canvas: bool = true, world_view: Dictionary = {}, prepare_picking: bool = true) -> void:
+	var costs: Dictionary=world_view.get("observation_costs",{})
+	var observed: int=Time.get_ticks_usec() if not costs.is_empty() else 0
+	var sampler_us: int=0
+	var max_batch_us: int=0
+	var max_batch_kind: String=""
 	var regional := camera.active
 	var geometry_ready := _resident and (not available_lods.is_empty() or not _fallback_batches.is_empty())
 	var covered := strategic or _content!=null and _content.covers(RegionProjection.lon_lat(camera.valid_anchor(viewport_size).unit as Vector3))
@@ -657,8 +706,9 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 	active_lod = str(world_view.get("display_lod","")) if strategic and show else _lod(mpp) if show else ""
 	if show and not strategic and not available_lods.has(active_lod):
 		active_lod = str(available_lods.keys()[0]) if not available_lods.is_empty() else _fallback_lod
-	visible_places.clear()
-	label_rects.clear()
+	if not commit_canvas:
+		_update_places(camera,controller,date,viewport_size,world_view,show,mpp)
+		return
 	var weights: Dictionary = {}
 	var colors: Dictionary = {}
 	if commit_canvas:
@@ -689,8 +739,16 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 		view_angle = 0.0
 		for corner: Vector2 in [Vector2.ZERO,Vector2(viewport_size.x,0),viewport_size,Vector2(0,viewport_size.y)]:
 			view_angle = maxf(view_angle,(corner.distance_to(anchor.pixel as Vector2)+8.0)*camera.km_per_pixel/6371.0088)
+	var date_active := _content.active_on(date) if _content!=null else false
+	var relief_world: Texture2D = reference_relief.get("world")
+	var relief_region: Texture2D = reference_relief.get("region")
+	var relief_weight := MapScaleStyle.relief_weight(mpp,controller.map_mode) if relief_world!=null else 0.0
+	var relief_detail := MapScaleStyle.relief_detail_weight(mpp) if relief_region!=null else 0.0
+	var grid := world_view.get("military_grid",{}) as Dictionary
+	var ink_revision := int(world_view.get("ink_revision",-1))
+	var land_style: Array = [ink_revision,world_view.get("ownership_revision",-1),controller.player_polity_id,grid,relief_world.get_instance_id() if relief_world!=null else 0,relief_region.get_instance_id() if relief_region!=null else 0,relief_weight,relief_detail]
 	for batch: Dictionary in _batches + _fallback_batches:
-		if not commit_canvas: break
+		var batch_at: int=Time.get_ticks_usec() if observed>0 else 0
 		var kind := str(batch.kind)
 		var target_canvas := annotation_canvas if regional and annotation_canvas.is_valid() and kind not in ["land_reference","ocean_reference"] else canvas
 		if batch.get("parent_canvas",RID())!=target_canvas:
@@ -703,14 +761,17 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 				batch["display_order"] = order
 
 		var weight := float(weights[str(batch.kind)])
-		var dated := _content.active_on(date) or strategic and kind in ["land_reference","coast"]
+		var dated := date_active or strategic and kind in ["land_reference","coast"]
 		var published := bool(batch.get("complete",false)) or publishing and str(batch.lod)==_target
-		var visible := show and dated and published and str(batch.lod) == active_lod and weight > 0.001
+		var visible := show and dated and published and str(batch.lod) == active_lod and weight > 0.001 and kind not in observation_hidden_kinds
 		# A load-time enclosing spherical cap rejects wholly offscreen batches.
 		# This visits existing batches, never polygons, on controlled redraws.
 		if visible and not view_center.is_zero_approx() and float(batch.cull_angle)<PI*0.5:
-			visible = (batch.cull_axis as Vector3).angle_to(view_center) <= float(batch.cull_angle)+view_angle
+			var axis := batch.cull_axis as Vector3
+			if not axis.is_zero_approx():
+				visible = axis.dot(view_center) >= cos(minf(PI,float(batch.cull_angle)+view_angle))
 		if visible:
+			if kind=="land_reference": GlobeRenderer._parameter(batch,"city_overview",regional and bool(world_view.get("city_overview",false)))
 			# Coverage changes already clear every hidden sampler in set_local_coverage.
 			# New visible batches receive it here, without revisiting all hidden ink.
 			if kind in ["river","lake","water_surface","coast","rail"]:
@@ -728,7 +789,8 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 					color = HydrographyStyle.line_color(kind,str(batch.water_line_style))
 					color.a *= weight
 				GlobeRenderer._parameter(batch,"stroke_color",color)
-			if kind=="land_reference":
+			if kind=="land_reference" and (ink_revision<0 or batch.get("land_style",[])!=land_style):
+				batch["land_style"]=land_style
 				# Ink is an exact optional partition of physical land. It changes
 				# material inputs, never shape, height, selection or ownership facts.
 				var reference := str(batch.get("ink_reference",""))
@@ -736,6 +798,11 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 				var owners := world_view.get("ink_owners",{}) as Dictionary
 				var current := world_view.get("current_land_owners",{}) as Dictionary
 				var owner := str((current.get(reference,{}) as Dictionary).get("sovereign","")) if reference.begins_with("territory_unit:") else reference if reference.begins_with("political_map_region:") else str(owners.get(reference,""))
+				var own_grid: bool=not grid.is_empty() and not owner.is_empty() and owner==controller.player_polity_id
+				GlobeRenderer._parameter(batch,"military_grid_step",float(grid.get("step",0.0)) if own_grid else 0.0)
+				if own_grid:
+					GlobeRenderer._parameter(batch,"military_grid_projection",grid.projection)
+					GlobeRenderer._parameter(batch,"military_grid_origin",grid.origin)
 				var style := styles.get(owner,{}) as Dictionary if not owner.is_empty() else {}
 				var parameters := style.get("parameters",{}) as Dictionary
 				for parameter: String in ["surface_color","political_base_color","political_focus_style","political_emphasis","flag_weight","political_weight","flag_bounds","flag_uv_scale","flag_uv_offset","flag_uv_rotation"]:
@@ -759,11 +826,16 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 				# implicit canvas TEXTURE/UV state.
 				GlobeRenderer._parameter(batch,"flag_texture",null if new_sovereign else style.get("flag_texture"))
 				GlobeRenderer._parameter(batch,"reference_opacity",weight)
-				GlobeRenderer._parameter(batch,"relief_world",reference_relief.get("world"))
-				GlobeRenderer._parameter(batch,"relief_region",reference_relief.get("region"))
-				GlobeRenderer._parameter(batch,"relief_weight",MapScaleStyle.relief_weight(mpp,controller.map_mode) if reference_relief.has("world") else 0.0)
-				GlobeRenderer._parameter(batch,"relief_detail_weight",MapScaleStyle.relief_detail_weight(mpp) if reference_relief.has("region") else 0.0)
-				if not batch.has("surface_reference"): GlobeRenderer._relief_window_uniforms(batch,_reference_window if regional else {})
+				GlobeRenderer._parameter(batch,"relief_world",relief_world)
+				GlobeRenderer._parameter(batch,"relief_region",relief_region)
+				GlobeRenderer._parameter(batch,"relief_weight",relief_weight)
+				GlobeRenderer._parameter(batch,"relief_detail_weight",relief_detail)
+			if kind=="land_reference":
+				if int(batch.get("reference_revision",-1))!=_reference_revision or not batch.has("surface_reference"):
+					var sampler_at: int=Time.get_ticks_usec() if observed>0 else 0
+					GlobeRenderer._relief_window_uniforms(batch,_reference_window)
+					if observed>0: sampler_us+=Time.get_ticks_usec()-sampler_at
+					batch["reference_revision"]=_reference_revision
 			if not bool(batch.surface):
 				GlobeRenderer._parameter(batch, "rail_style", rail_style if str(batch.kind)=="rail" else 0)
 				GlobeRenderer._parameter(batch,"river_replacement",world_view.get("local_river_replacements",{}).get(str(batch.get("replacement_key","")),Vector4.ZERO) if regional else Vector4.ZERO)
@@ -777,6 +849,11 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 		if visible != bool(batch.visible):
 			RenderingServer.canvas_item_set_visible(batch.item as RID, visible)
 			batch.visible = visible
+		if observed>0 and Time.get_ticks_usec()-batch_at>max_batch_us:
+			max_batch_us=Time.get_ticks_usec()-batch_at
+			max_batch_kind=kind
+	if observed>0: costs["surface_batches_us"]=Time.get_ticks_usec()-observed;costs["surface_samplers_us"]=sampler_us;observed=Time.get_ticks_usec()
+	if observed>0: costs["surface_max_batch_us"]=max_batch_us;costs["surface_max_batch_kind"]=max_batch_kind
 	if publishing:
 		var previous_physical: Array = [_physical_reference.get("key",""),_physical_reference.get("ink_enabled",false)]
 		var previous_cells := _installed_political_cells
@@ -793,6 +870,16 @@ func update(camera: RegionCamera, controller: GlobeController, date: String, vie
 		_queue_preparation()
 		if completed_lod or patched or previous_physical!=[_physical_reference.get("key",""),_physical_reference.get("ink_enabled",false)] or previous_cells!=_installed_political_cells:
 			display_changed.emit()
+	# A same-input CPU query already prepared picking before this publication.
+	# A changed target/appearance still takes the ordinary complete query path.
+	if observed>0: costs["surface_publication_us"]=Time.get_ticks_usec()-observed;observed=Time.get_ticks_usec()
+	if prepare_picking: _update_places(camera,controller,date,viewport_size,world_view,show,mpp)
+	if observed>0: costs["surface_picking_us"]=Time.get_ticks_usec()-observed
+
+func _update_places(camera: RegionCamera, controller: GlobeController, date: String, viewport_size: Vector2, world_view: Dictionary, show: bool, mpp: float) -> void:
+	visible_places.clear()
+	label_rects.clear()
+	var regional := camera.active
 	var changed_frame := _frame != camera.tangent_frame
 	if show:
 		_frame = camera.tangent_frame
@@ -842,7 +929,7 @@ func clear() -> void:
 	_cancel_preparation()
 	_clear_fallback()
 	for batch: Dictionary in _batches:
-		RenderingServer.free_rid(batch.item as RID)
+		_retire_batch(batch)
 	_batches.clear()
 	_chunks.clear()
 	_upload_chunks.clear()
@@ -862,10 +949,9 @@ func clear() -> void:
 	if not retired.is_empty() and _lod_thread == null:
 		# Reuse the cancelled geometry slot. Only detached CPU containers move
 		# here; meshes, materials and CanvasItems have already been released.
-		_lod_thread = Thread.new()
 		_lod_generation = _generation-1
-		if _lod_thread.start(LocalSpatialLayer._release_content_data.bind(retired)) != OK:
-			_lod_thread = null
+		_lod_thread = MapJobs.submit(LocalSpatialLayer._release_content_data.bind(retired),"retire map source",MapJobs.OPTIONAL)
+		if _lod_thread==null:
 			retired.clear()
 	preparing = _lod_thread != null
 	reference_relief = {}
@@ -895,6 +981,7 @@ func hide_display() -> void:
 		if release_detail and str(batch.kind)=="land_reference":
 			GlobeRenderer._parameter(batch,"relief_region",null)
 			GlobeRenderer._relief_window_uniforms(batch,{})
+			batch.erase("reference_revision")
 	if release_detail:
 		reference_relief = {"world":reference_relief.get("world")}
 		_reference_window = {}
@@ -903,12 +990,29 @@ func hide_display() -> void:
 
 func dispose() -> void:
 	clear()
-	if _lod_thread != null:
-		_lod_thread.wait_to_finish()
-		_lod_thread = null
+	drain_retirement()
+	MapJobs.abandon(_lod_thread)
+	_lod_thread = null
 
 func _clear_fallback() -> void:
 	for batch: Dictionary in _fallback_batches:
-		RenderingServer.free_rid(batch.item as RID)
+		_retire_batch(batch)
 	_fallback_batches.clear()
 	_fallback_lod = ""
+
+func _retire_batch(batch: Dictionary) -> void:
+	RenderingServer.canvas_item_set_visible(batch.item as RID,false)
+	if _retiring.size() >= MAX_RETIRED_BATCHES:
+		_free_batch(_retiring.pop_back())
+	_retiring.append(batch)
+
+func _free_batch(batch: Dictionary) -> void:
+	RenderingServer.free_rid(batch.item as RID)
+	_geometry_bytes -= int(batch.get("upload_bytes",0))
+
+func retirement_pending() -> bool:
+	return not _retiring.is_empty()
+
+func drain_retirement(budget: FrameBudget = null) -> void:
+	while not _retiring.is_empty() and (budget==null or budget.claim_retirement()):
+		_free_batch(_retiring.pop_back())

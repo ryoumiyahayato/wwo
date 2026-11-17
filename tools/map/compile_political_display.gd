@@ -39,6 +39,7 @@ func _compile() -> void:
 	var total_bytes := 0
 	var entries: Array[Dictionary] = []
 	for descriptor: Dictionary in descriptors:
+		if args.size()>1 and str(descriptor.id) not in args.slice(1): continue
 		# Always compile from the existing original derivatives, even on rerun.
 		var raw := descriptor.duplicate()
 		raw.erase("compiled_asset")
@@ -51,21 +52,32 @@ func _compile() -> void:
 		if prepared.has("error"):
 			push_error(str(descriptor.id)+": "+str(prepared.error)); quit(1); return
 		var chunks := prepared.chunks as Array
+		if args.size()>1: chunks = chunks.filter(func(c: Dictionary) -> bool: return str(c.kind) in ["land_reference","coast"])
 		var faces := 0
 		for chunk: Dictionary in chunks: faces += int(chunk.get("face_count",0))
 		var name := str(descriptor.id)+".display"
 		var path := output.path_join(name)
 		var file := FileAccess.open_compressed(path,FileAccess.WRITE,FileAccess.COMPRESSION_DEFLATE)
 		if file==null: push_error("Cannot write "+path); quit(1); return
-		file.store_var({"schema_id":"physical_political_display_r37","physical_shard_id":descriptor.id,"lod":descriptor.lod,"bounds":descriptor.bounds,"role":"DISPLAY_ONLY_NOT_SOVEREIGNTY","component_uv":true,"source_geometry":"res://data/strategic/"+str(descriptor.id)+".geom","source_ink":descriptor.get("ink_asset",{}),"chunks":chunks})
+		var source_geometry := str(descriptor.path).get_base_dir().path_join(str(descriptor.id)+".geom")
+		file.store_var({"schema_id":"physical_political_display_r37","physical_shard_id":descriptor.id,"lod":descriptor.lod,"bounds":descriptor.bounds,"role":"DISPLAY_ONLY_NOT_SOVEREIGNTY","component_uv":true,"source_geometry":source_geometry,"source_document":descriptor.path,"source_ink":descriptor.get("ink_asset",{}),"chunks":chunks})
 		file.close()
 		var size := FileAccess.get_file_as_bytes(path).size()
-		descriptor["compiled_asset"] = {"path":"res://data/strategic/"+name,"encoding":"GODOT_COMPRESSED_VARIANT_R37","bytes":size,"faces":faces,"batches":chunks.size()}
+		descriptor["compiled_asset"] = {"path":output.path_join(name) if args.size()>1 else "res://data/strategic/"+name,"encoding":"GODOT_COMPRESSED_VARIANT_R37","source_geometry":source_geometry,"bytes":size,"faces":faces,"batches":chunks.size()}
 		entries.append({"id":descriptor.id,"file":name,"bytes":size,"faces":faces,"batches":chunks.size(),"lod":descriptor.lod})
 		total_faces += faces
 		total_batches += chunks.size()
 		total_bytes += size
 		print("Compiled ",descriptor.id," faces=",faces," batches=",chunks.size()," bytes=",size)
+	if args.size()>1:
+		for field: String in ["bytes","faces","batches"]:
+			var total := 0
+			for descriptor: Dictionary in descriptors: total+=int((descriptor.get("compiled_asset",{}) as Dictionary).get(field,0))
+			index.prepared_political_display[field]=total
+		var selected_index := FileAccess.open(output.path_join("index.json"),FileAccess.WRITE)
+		selected_index.store_string(JSON.stringify(index)); selected_index.close()
+		print("SELECTED_COMPLETE files=",entries.size()," faces=",total_faces," bytes=",total_bytes)
+		quit(0); return
 	index["prepared_political_display"] = {"schema_id":"physical_political_display_r37","date":"1900-01-01","method":"Existing R27 physical/ink partition; original connected historical polygon UV; unchanged 2-degree spherical subdivision and native face/boundary encoder; bounded runtime LOD selection.","source":"Natural Earth 5.1.2 modern physical reference + existing 1900 CShapes/Arabia display intersections","license":"Physical Natural Earth public domain; CShapes derivatives CC BY-NC-SA 4.0; existing source notices remain applicable.","generator":"tools/map/build_geographic_foundation.py --compile-display --apply --godot <Godot 4.6.3 console>","files":entries.size(),"bytes":total_bytes,"faces":total_faces,"batches":total_batches}
 	var query_path := output.path_join("historical_reference_1900.display")
 	var query_file := FileAccess.open_compressed(query_path,FileAccess.WRITE,FileAccess.COMPRESSION_DEFLATE)

@@ -6,13 +6,12 @@ The existing loader consumes admitted source geometry and prepared display data.
 import json,re,zlib,collections,sys
 from pathlib import Path
 import requests
+from shapely import get_parts
 from shapely.geometry import shape,box,Polygon,MultiLineString,mapping
 from shapely.ops import transform,unary_union,linemerge
 from shapely.strtree import STRtree
 from pyproj import Transformer
-import build_spain_hydro_r45 as acquisition
-
-shared=acquisition.shared;ROOT=shared.ROOT
+ROOT=Path(__file__).resolve().parents[2]
 WORK=ROOT/'local-artifacts/benelux-surface-r46/hydro'
 HISTORY=WORK.parent/'history'
 BOUNDS=(2.2,49.2,7.6,54.2)
@@ -21,6 +20,8 @@ ENGINEERING=re.compile(r'kanaal|canal|kanal|vaart|gracht|drain|ditch|reservoir|g
 LATE_CHANNEL=re.compile(r'bergsche maas|^ijsselmeer$',re.I)
 UNREVIEWED_LAKE=re.compile(r'ijsselmeer|amstelmeer|oostvaardersplassen|lepelaarsplassen|noorderplassen|bovenwater|bagger|grind|stausee|baldeneysee|harkortsee|hengsteysee|kemnader',re.I)
 RD_TO_GEO=Transformer.from_crs(28992,4326,always_xy=True).transform
+TO_METRES=Transformer.from_crs(4326,3035,always_xy=True).transform
+TO_DEGREES=Transformer.from_crs(3035,4326,always_xy=True).transform
 
 
 def history_water(display_window=(110000,470000,198000,590000), output_dir=None):
@@ -33,7 +34,7 @@ def history_water(display_window=(110000,470000,198000,590000), output_dir=None)
     doc=json.loads(path.read_text(encoding='utf8'))
     if len(doc['features'])!=int(doc['totalFeatures']):raise ValueError('Incomplete historical coast source')
     mainland=next(f for f in doc['features'] if f['properties']['opmerking']=='Kustlijn vaste land')
-    line=max(shared.parts(shape(mainland['geometry']),'LineString'),key=lambda p:p.length)
+    line=max(get_parts(shape(mainland['geometry'])),key=lambda p:p.length)
     points=list(line.coords)
     # Computational closure is OUTSIDE the supported display window. It is
     # not presented as a historical coast or a dyke across the open sea.
@@ -44,7 +45,8 @@ def history_water(display_window=(110000,470000,198000,590000), output_dir=None)
     water=Polygon(closure).intersection(window);islands=[];closures=[]
     for f in doc['features']:
         if f is mainland:continue
-        for ring in shared.parts(shape(f['geometry']),'LineString'):
+        for ring in get_parts(shape(f['geometry'])):
+            if ring.geom_type!='LineString':continue
             if ring.is_closed:islands.append(Polygon(ring));continue
             # Named island perimeter endpoints, not unrelated line snapping.
             # Original endpoints remain; record the short explicit closure.
@@ -62,7 +64,7 @@ def history_water(display_window=(110000,470000,198000,590000), output_dir=None)
         display_window_rd=list(display_window),computational_closure_outside_window=True,
         island_endpoint_closures=closures,area_km2=water.area/1e6,
         uncertainty='1905 chart-derived wet/dry line is a near-1900 reference, not exact 1900 tide, depth or surveyed shore. No world land identity altered.'),indent=2),encoding='utf8')
-    return transform(shared.TO_METRES,geographic)
+    return transform(TO_METRES,geographic)
 
 
 def registry():
@@ -142,6 +144,8 @@ def old_display_overrides(bounds,overview):
             if not g.intersects(cut):continue
             data={}
             for lod,raw in original['lod_geometry'].items():
+                if raw == '@geometry.coordinates':
+                    raw = original['geometry']['coordinates']
                 if f['kind']=='river':
                     reduced=shape(dict(type='MultiLineString',coordinates=raw)).difference(cut)
                     data[lod]=[list(map(list,line.coords)) for line in shared.parts(reduced,'LineString')]
@@ -178,6 +182,8 @@ def write(name,entries,bounds,overview):
 
 
 if __name__=='__main__':
+    import build_spain_hydro_r45 as acquisition
+    shared=acquisition.shared
     acquisition.WORK=WORK;acquisition.REGIONS=[('benelux',BOUNDS)];acquisition.acquire()
     historical=history_water();items=features(historical);descriptors=[]
     descriptors.append(write('benelux_hydro_overview_r46',[(e,e['geometry']) for e in items if e['main']],[2.2,7.6,49.2,54.2],True))

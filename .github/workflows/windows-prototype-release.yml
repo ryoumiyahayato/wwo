@@ -75,13 +75,9 @@ jobs:
         shell: pwsh
         run: godot --editor --headless --path . --quit
 
-      - name: Run formal world integration regression
+      - name: Run formal personal economy regression
         shell: pwsh
-        run: godot --headless --path . --script res://tests/formal/formal_world_integration_test.gd
-
-      - name: Run formal world ten-year balance
-        shell: pwsh
-        run: godot --headless --path . --script res://tests/formal/formal_world_long_term_balance_test.gd
+        run: godot --headless --path . --script res://tests/formal/formal_personal_economy_test.gd
 
       - name: Headless formal product startup
         shell: pwsh

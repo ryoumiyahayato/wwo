@@ -12,9 +12,11 @@ config_version=5
 
 config/name="1900"
 config/version="0.001a"
-config/build_label="WWO R59 — Authorized Economic Production Details Preview"
-config/build_id="wwo-r59-authorized-economic-production-details"
-config/build_sequence=59
+config/build_label="WWO R68 — Map Integration Candidate"
+config/build_id="wwo-r68-map-integration-candidate"
+config/build_sequence=68
+config/use_custom_user_dir.debug=true
+config/custom_user_dir_name.debug="WWO_R68_Candidate"
 run/main_scene="res://scenes/formal/formal_world_menu.tscn"
 run/max_fps=60
 run/low_processor_mode=true
@@ -31,6 +33,10 @@ window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://tools/build/plugin.cfg")
 
 [input]
 

@@ -29,6 +29,222 @@ static func stock(values: Dictionary = {}) -> Dictionary:
 	result.merge(values, true)
 	return result
 
+## Small resource/market selection in the SAME WorldBootstrap. No alternate runtime.
+static func resource_request(households_only: bool = false) -> Dictionary:
+	var base: Dictionary = template()
+	var result: Dictionary = {}
+	for key: String in ["format", "host_personal_accounts", "management_scope", "goods", "need_categories", "route", "carriers", "production_enabled", "player_choice", "stock_horizon", "cost_accounting"]: result[key] = base[key].duplicate(true) if base[key] is Array or base[key] is Dictionary else base[key]
+	result["case_id"] = "FORMAL_RESOURCE_MARKET_PILOT"
+	result["management_scope"]["id"] = "scope:formal_resource_market_pilot"
+	var selected: Array[String] = ["firm:network:grain", "firm:network:mill1", "firm:network:bakery1"]
+	for key: String in ["actors", "firms", "jobs", "information", "development_organizations", "firm_operations", "routes", "transport_nodes"]: result[key] = []
+	for row: Dictionary in base["firms"]:
+		if row["id"] not in selected: continue
+		row["sites"][0]["suppliers"] = []
+		row["manager"] = row["id"]
+		if row["id"] == "firm:network:mill1":
+			row["manager"] = PLAYER
+			row["cash"] = 600 # Finite pilot working capital, never an automatic solvency guarantee.
+			row["sites"][0]["activities"][0]["materials"]["coal"] = 1 # Explicit steam-milling recipe assumption.
+		for activity: Dictionary in row["sites"][0]["activities"]: activity["hours"] = 1
+		if row["id"] == "firm:network:grain":
+			row["sites"][0]["activities"] = []
+			row["sites"][0]["capacity"] = 0
+			row["sites"][0]["stock"] = stock({"grain": 24})
+			row["sites"][0]["prices"]["grain"] = 5
+		result["firms"].append(row)
+	for key: String in ["jobs", "development_organizations", "firm_operations"]:
+		for row: Dictionary in base[key]:
+			if row.get("employer", row.get("firm_id", row.get("firm", ""))) in selected:
+				if key == "firm_operations": row["manage_jobs"] = true
+				if key == "jobs": row["hours"] = 1
+				result[key].append(row)
+	for row: Dictionary in base["actors"]:
+		if row["id"] in [PLAYER, "cohort:network:mill1", "cohort:network:bakery1"]:
+			row["daily_need"] = 1
+			row["needs"] = {"food": 1, "clothing": 0, "household": 0}
+			if row["kind"] == "cohort": row["cohort_profile"] = {"stratum_id": "wage_workers", "label": "加工雇员", "occupation": "processing", "labor_members": 1, "max_jobs": 1, "job_ids": ["job:network:" + str(row["id"]).trim_prefix("cohort:network:")], "job_search_days": 7, "basis": "EXPLICIT_DEVELOPMENT_COHORT_STRATUM", "need_rates": {"food": {"numerator": 1, "denominator": 10}}}
+			result["actors"].append(row)
+	for row: Dictionary in base["transport_nodes"]:
+		if row["place_id"] in ["place:paris", "place:rouen", "place:lyon"]: result["transport_nodes"].append(row)
+	var receivers: Array[String] = [PLAYER, "firm:network:grain", "firm:network:mill1", "firm:network:bakery1", "cohort:resource:farm", "cohort:resource:mine", "cohort:network:mill1", "cohort:network:bakery1"]
+	for row: Dictionary in base["routes"]:
+		if row["from_place_id"] in ["place:paris", "place:rouen", "place:lyon"] and row["to_place_id"] in ["place:paris", "place:rouen", "place:lyon"]:
+			row["known_to"] = receivers.duplicate()
+			row["capacity_manager"] = NETWORK_OPERATOR
+			result["routes"].append(row)
+	var data: Dictionary = FormalEconomicOpening._integers(JSON.parse_string(FileAccess.get_file_as_string("res://data/land/economic_resources_france_pilot.json")))
+	result["resource_producers"] = []
+	for index: int in data["resources"].size():
+		var r: Dictionary = data["resources"][index]
+		var actor: String = "cohort:resource:farm" if index == 0 else "cohort:resource:mine"
+		var good: String = "grain" if index == 0 else "coal"
+		result["actors"].append({"id": actor, "kind": "cohort", "control": "automatic", "members": 2, "account_id": "account:" + actor, "cash": 60, "stock": stock({"grain": 32} if index == 0 else {}), "skill": 1, "daily_need": 1, "needs": {"food": 1, "clothing": 0, "household": 0}, "population_start": 100 + index * 2, "place_id": r["place_id"], "population_unit_id": "country_fra", "cohort_profile": {"stratum_id": "self_employed", "label": "资源生产家庭", "occupation": good, "labor_members": 2, "max_jobs": 1, "job_ids": [], "job_search_days": 7, "basis": "EXPLICIT_DEVELOPMENT_COHORT_STRATUM", "need_rates": {"food": {"numerator": 1, "denominator": 50}}}})
+		result["resource_producers"].append({"actor": actor, "good": good, "price": 3 if index == 0 else 2, "resource": r})
+	for good: Dictionary in result["goods"]:
+		if good["id"] == "grain": good["needs"] = {"food": 1}
+	# All notices remain original delayed supplier messages; no global supplier scan.
+	for observer: String in receivers:
+		var receiver: String = "site:network:" + observer.trim_prefix("firm:network:") if observer.begins_with("firm:network:") else observer
+		for pair: Array in [["cohort:resource:farm", "grain", "cohort:resource:farm"], ["cohort:resource:mine", "coal", "cohort:resource:mine"], ["firm:network:grain", "grain", "site:network:grain"], ["firm:network:mill1", "flour", "site:network:mill1"], ["firm:network:bakery1", "bread", "site:network:bakery1"]]:
+			if observer != pair[0]:
+				var candidate: String = "|".join(pair)
+				result["information"].append({"actor": receiver, "kind": "supplier", "candidate": candidate, "delivery_day": 0})
+				for firm: Dictionary in result["firms"]:
+					if firm["id"] == observer: firm["sites"][0]["suppliers"].append(candidate)
+	for row: Dictionary in result["jobs"]:
+		result["information"].append({"actor": "cohort:network:" + str(row["id"]).trim_prefix("job:network:"), "kind": "job", "candidate": row["id"], "delivery_day": 0})
+	result["unified_market"] = {"period_days": 7, "request_days": 14, "eta_permille": 50, "damping_permille": 500, "deadband_permille": 100, "maximum_price": 1000000}
+	if households_only:
+		for key: String in ["firms", "jobs", "development_organizations", "firm_operations"]: result[key] = []
+		var ids: Array = [PLAYER, "cohort:resource:farm", "cohort:resource:mine"]
+		result["actors"] = result["actors"].filter(func(row: Dictionary) -> bool: return row["id"] in ids)
+		result["information"] = result["information"].filter(func(row: Dictionary) -> bool: return row["actor"] in ids and row["kind"] == "supplier" and str(row["candidate"]).get_slice("|", 0) in ids)
+		for row: Dictionary in result["routes"]:
+			row["known_to"] = ids.duplicate()
+			row.erase("capacity_manager")
+	return {"format": "HOST_REGION_SELECTION", "person_ids": [], "select_people_at_sites": true, "configuration": result}
+
+## Opt-in quantities for CPU scale comparisons. No historical calibration or
+## runtime grant. The original resource_request and its opening remain intact.
+static func resource_scale_request(scale: int, scenario: String = "balanced") -> Dictionary:
+	var request: Dictionary = resource_request()
+	var cfg: Dictionary = request["configuration"]
+	var supply: int = 2 if scenario == "surplus" else 1
+	var population: int = 10 if scenario == "shortage" else 1
+	var cursor: int = 100
+	for actor: Dictionary in cfg["actors"]:
+		if actor["kind"] != "cohort": continue
+		var households: int = 1 if actor["id"] == "cohort:resource:farm" else population
+		actor["members"] *= scale * households
+		actor["population_start"] = cursor
+		cursor += int(actor["members"])
+		actor["cash"] *= scale * households
+		actor["cohort_profile"]["labor_members"] *= scale
+		for good: String in actor["stock"]: actor["stock"][good] *= scale
+		if actor["id"] == "cohort:resource:farm": actor["stock"]["grain"] += 20 * scale * (supply - 1)
+	for row: Dictionary in cfg["resource_producers"]:
+		var resource: Dictionary = row["resource"]
+		if resource["kind"] == "crop":
+			resource["land_units"] *= scale * supply
+			resource["food_reserve"] *= scale
+		else:
+			for key: String in ["geological_quantity", "discovered_quantity", "units_per_day"]: resource[key] *= scale
+			for event: Dictionary in resource["discovery"]: event["quantity"] *= scale
+	for firm: Dictionary in cfg["firms"]:
+		firm["cash"] *= scale
+		for site: Dictionary in firm["sites"]:
+			site["capacity"] *= scale
+			for good: String in site["stock"]: site["stock"][good] *= scale
+			for good: String in site["targets"]: site["targets"][good] *= scale
+			# The control merchant only liquidates opening grain (target zero).
+			# This explicit revolving-stock target permits funded resale, not supply.
+			if firm["id"] == "firm:network:grain": site["targets"]["grain"] = 4 * scale
+			for activity: Dictionary in site["activities"]:
+				activity["process"]["max_batches_per_cycle"] *= scale
+				activity["process"]["lifetime_batch_limit"] *= scale
+	for job: Dictionary in cfg["jobs"]: job["positions"] *= scale
+	var transport: int = maxi(1, scale / 100) if scenario == "bottleneck" else scale
+	cfg["route"]["capacity"] *= transport
+	for edge: Dictionary in cfg["routes"]: edge["capacity"] *= transport
+	for node: Dictionary in cfg["transport_nodes"]: node["capacity"] *= transport
+	return request
+
+## Proportion/household experiment in the same Formal world. Old scale controls
+## remain unchanged. Basket and operating assumptions are in the resource book.
+static func resource_cycle_request(scale: int = 100, scenario: String = "normal") -> Dictionary:
+	var request: Dictionary = resource_scale_request(scale)
+	var cfg: Dictionary = request["configuration"]
+	for category: Dictionary in cfg["need_categories"]:
+		if category["id"] != "food": category["priority"] += 1
+	cfg["need_categories"].append({"id": "fuel", "mode": "flow", "priority": 1})
+	for good: Dictionary in cfg["goods"]:
+		if good["id"] in ["grain", "flour"]: good["needs"] = {"food": 1000}
+		if good["id"] == "bread": good["needs"] = {"food": 500}
+		if good["id"] == "coal": good["needs"] = {"fuel": 25}
+	var cursor: int = 100
+	for actor: Dictionary in cfg["actors"]:
+		actor["needs"] = {"food": 500, "fuel": 10, "clothing": 0, "household": 0}
+		actor["daily_need"] = 500
+		if actor["kind"] != "cohort": continue
+		var farm: bool = actor["id"] == "cohort:resource:farm"
+		var mine: bool = actor["id"] == "cohort:resource:mine"
+		if mine: actor["needs"]["food"] = 600; actor["daily_need"] = 600
+		actor["members"] = scale / (5 if farm else 10 if mine else 20)
+		actor["population_start"] = cursor; cursor += int(actor["members"])
+		actor["cash"] = int(actor["members"]) * (30 if farm or mine else 60)
+		var profile: Dictionary = actor["cohort_profile"]
+		profile["labor_members"] = actor["members"]
+		profile["need_rates"] = {"food": {"numerator": 600 if mine else 500, "denominator": 1}, "fuel": {"numerator": 10, "denominator": 1}}
+		profile["category_priority"] = ["food", "fuel"]
+		if not farm and not mine: profile["goods_preference"] = {"food": ["bread", "flour", "grain"]}
+	for row: Dictionary in cfg["resource_producers"]:
+		var r: Dictionary = row["resource"]
+		if r["kind"] == "crop":
+			# Re-group the same area/seed/yield into 0.1ha capacity units. Work
+			# rates are declared developer estimates, not measured 1900 labor.
+			r["land_units"] /= 10; r["land_unit_m2"] *= 10
+			r["seed_per_unit"] *= 10; r["yield_per_unit"] *= 10
+			if scenario == "supply": r["weather_by_year_permille"]["1901"] = 500
+		else:
+			row["price"] = 4
+			row["stock_cover_days"] = 7 if scenario == "adjusted" else 14
+	for firm: Dictionary in cfg["firms"]:
+		firm["cash"] /= 20
+		firm["manager"] = firm["id"]
+		for site: Dictionary in firm["sites"]:
+			for good: String in site["targets"]: site["targets"][good] /= 10
+			for activity: Dictionary in site["activities"]:
+				if firm["id"] == "firm:network:mill1":
+					activity["materials"]["grain"] = 5; activity["outputs"]["flour"] = 4
+					activity["process"]["gross_outputs"]["flour"] = 5
+				else:
+					activity["materials"]["flour"] = 5; activity["materials"]["coal"] = 1
+					activity["outputs"]["bread"] = 10; activity["hours"] = 2
+					activity["process"]["gross_outputs"]["bread"] = 10
+	for job: Dictionary in cfg["jobs"]:
+		job["positions"] = scale / 20; job["wage_per_hour"] = 8
+	for policy: Dictionary in cfg["firm_operations"]:
+		if policy["firm"] == "firm:network:grain":
+			policy["sales_cover_days"] = 7 if scenario == "adjusted" else 14
+			policy["resale_margin_permille"] = 100 if scenario == "adjusted" else 0
+		elif scenario == "adjusted": policy["demand_shifts"] = true
+	cfg["labor_response_policies"] = []
+	for actor: Dictionary in cfg["actors"]:
+		if actor["id"].begins_with("cohort:network:"): cfg["labor_response_policies"].append({"actor": actor["id"], "arrears_days": 7, "basis": "EXPLICIT_DEVELOPMENT_LABOR_RESPONSE"})
+	return request
+
+## Explicit new opening, never an asset conversion or a reinterpretation of saves.
+## Paris references applied to this finite France slice; regional prices, opening
+## wealth and eight-hour normalization remain declared development assumptions.
+static func resource_franc_request(reserve: bool = false) -> Dictionary:
+	var request: Dictionary = resource_cycle_request(100, "normal")
+	var cfg: Dictionary = request["configuration"]
+	cfg["case_id"] = "FORMAL_FRANCE_1900_CENTIME_REFERENCE"
+	cfg["settlement_currency"] = FormalLedgerState.FRANC_1900
+	cfg["currency_accounts"] = []
+	for key: String in ["actors", "firms", "carriers"]:
+		for subject: Dictionary in cfg.get(key, []):
+			cfg["currency_accounts"].append({"owner": subject["id"], "account_id": "account:franc1900:" + str(subject["id"]), "denomination": FormalLedgerState.FRANC_1900, "cash": int(subject["cash"]) * 20})
+			subject["cash"] = 0
+	for firm: Dictionary in cfg["firms"]:
+		firm["denomination"] = FormalLedgerState.FRANC_1900
+		for site: Dictionary in firm["sites"]:
+			for good: String in site["prices"]:
+				site["prices"][good] = {"grain": 19, "flour": 37, "bread": 22, "coal": 6}.get(good, int(site["prices"][good]) * 20)
+	for job: Dictionary in cfg["jobs"]:
+		job["denomination"] = FormalLedgerState.FRANC_1900
+		job["wage_per_hour"] = 45 # 3.60 Fr / normalized 8h; not guaranteed daily work.
+	for row: Dictionary in cfg["resource_producers"]:
+		row["price"] = 19 if row["good"] == "grain" else 6
+		if row["resource"]["kind"] == "crop":
+			if reserve: row["seasonal_reserve"] = true
+		else:
+			# 466c/day / 8h * original 2h/kg = 116.5c/kg, rounded up.
+			row["resource"]["economic_cost"] = 117
+	# One centime per original route unit is an explicit freight assumption.
+	return request
+
 static func _process(outputs: Dictionary, rejects: Dictionary, unavailable: String) -> Dictionary:
 	var gross := outputs.duplicate(true)
 	var waste: Dictionary = {}
@@ -218,10 +434,47 @@ static func _install_channel_transport(result: Dictionary, population_starts: Di
 
 ## Separate opt-in regional case. The original template/request and saved native
 ## configurations above are never rewritten or upgraded by selecting this case.
-static func regional_request(person_ids: Array[String] = [], lyon_shared: bool = true) -> Dictionary:
-	return {"format": "HOST_REGION_SELECTION", "person_ids": person_ids.duplicate(), "select_people_at_sites": person_ids.is_empty(), "configuration": regional_template(lyon_shared)}
+static func regional_request(person_ids: Array[String] = [], lyon_shared: bool = true, numeric_rouen: bool = true) -> Dictionary:
+	return {"format": "HOST_REGION_SELECTION", "person_ids": person_ids.duplicate(), "select_people_at_sites": person_ids.is_empty(), "configuration": regional_template(lyon_shared,numeric_rouen)}
 
-static func regional_template(lyon_shared: bool = true) -> Dictionary:
+static func add_warehouse_pilot(result: Dictionary) -> void:
+	# One explicit lease pool per existing handling site. Grain/flour and bread
+	# occupy the same declared payload units as freight.
+	var market := {"facilities":[],"offers":[],"authorities":[],"npc_policies":[],"basis":"EXPLICIT_DEVELOPMENT_SERVICE_MARKET"}
+	result["service_market"] = market
+	var nodes: Array[Dictionary] = [
+		{"key":"paris","site":"site:regional:station:paris","provider":"firm:network:wholesale1","job":"job:regional:station:paris",
+			"clients":["firm:network:mill1","firm:network:bakery1"],"shared":"facility:regional:site:regional:station:paris:STORAGE_OCCUPANCY",
+			"unit":REGIONAL_PAYLOAD_UNIT,"capacity":8,"price":2,"bread":[75,165],"grain":[4,12]},
+		{"key":"london","site":"site:network:wholesale2","provider":"firm:network:wholesale2","job":"job:network:handling:london_port",
+			"clients":["firm:network:mill2"],"shared":"facility:network:site:network:wholesale2:STORAGE_OCCUPANCY",
+			"unit":REGIONAL_PAYLOAD_UNIT,"capacity":16,"price":1,"bread":[115,210],"grain":[8,22]},
+	]
+	for node: Dictionary in nodes:
+		var facility := "facility:warehouse:"+str(node["key"])
+		var offer := "service_offer:warehouse:"+str(node["key"])
+		var provider: String = node["provider"]
+		var currency := FormalLedgerState.DENOMINATION
+		var spoilage: Dictionary = {}
+		for good: String in ["grain","flour","bread"]:
+			var rates: Array = node["bread"] if good=="bread" else node["grain"]
+			spoilage[good] = {"staffed":rates[0],"unstaffed":rates[1]}
+		market["facilities"].append({"id":facility,"provider":provider,"site_id":node["site"],"kind":"STORAGE",
+			"capacity":node["capacity"],"unit":node["unit"],"good_units":{"grain":1,"flour":1,"bread":1},"shared_storage_id":node["shared"],
+			"basis":"EXPLICIT_DEVELOPMENT_SERVICE_FACILITY","spoilage":spoilage})
+		var known: Array = node["clients"].duplicate()
+		if node["key"]=="london": known.append("firm:network:mill1") # Published terms, not remote deposit authority.
+		market["offers"].append({"id":offer,"facility_id":facility,"kind":"STORAGE","denomination":currency,"price":node["price"],
+			"valid_from":0,"valid_until":60*1440,"known_to":known,"notice_minute":0,"job_ids":[node["job"]],"hours_per_day":2,
+			"cancel_rule":"UNSTARTED_REPAIR_OR_STORAGE_RETURN","basis":"EXPLICIT_DEVELOPMENT_SERVICE_OFFER",
+			"storage_terms":{"period_minutes":1440,"max_periods":30,"intake_hours":1,"supervision_hours":1,"charge_rule":"CUMULATIVE_UNIT_MINUTES_FLOOR"}})
+		for firm: String in [provider]+node["clients"]:
+			var operations: Array[String] = ["supply" if firm==provider else "purchase","control"]
+			market["authorities"].append({"id":"service_authority:warehouse:"+firm,"firm":firm,"controller":PLAYER if firm=="firm:network:mill1" else firm,
+				"operations":operations,"denomination":currency,"limit":480,"start_minute":0,"end_minute":60*1440,
+				"root_authority":"","basis":"EXPLICIT_DEVELOPMENT_SERVICE_AUTHORITY"})
+
+static func regional_template(lyon_shared: bool = true, numeric_rouen: bool = false) -> Dictionary:
 	var result := template()
 	result["case_id"] = REGIONAL_CASE_ID
 	result["management_scope"]["id"] = "scope:economic_regional_industry_development"
@@ -252,6 +505,9 @@ static func regional_template(lyon_shared: bool = true) -> Dictionary:
 		for site: Dictionary in firm["sites"]:
 			for activity: Dictionary in site["activities"]: activity["process"]["max_batches_per_cycle"] = 4
 	_install_regional_rail(result, population_start, lyon_shared)
+	if numeric_rouen:
+		for binding: Dictionary in result["shared_transport"]:
+			if binding["source_link_id"] == REGIONAL_RAIL_LINK: binding["capacity_model"] = "WINDOW_THROUGHPUT"
 	population_start += 3 if lyon_shared else 2
 	_install_regional_family(result, population_start)
 	_install_regional_search(result)

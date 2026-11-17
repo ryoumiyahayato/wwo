@@ -1,15 +1,32 @@
 class_name MapRelief
 extends RefCounted
 ## Shared global/native LODs and bounded geographic surface packs.
-const PREWARM_MPP: float = 8500.0
-const RELEASE_MPP: float = 11000.0
+const PREWARM_MPP: float = MapScaleStyle.GLOBAL_RELIEF_DETAIL_BEGIN_MPP
+const RELEASE_MPP: float = MapScaleStyle.GLOBAL_RELIEF_RELEASE_MPP
+# Six visible pages cover the common 3-by-2 seam crossing without replacing
+# their observed material with a much coarser eight-degree page.
+const SURFACE_SLOTS: int = 6
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
+const RESIDENT_BYTES: int = 320 * 1024 * 1024
+const STAGED_BASE_BYTES: int = 24 * 1024 * 1024
 var textures: Dictionary = {}
 var errors: Array[String] = []
 var decode_asset: Callable
 var _assets: Dictionary = {}
 var _wanted: Array[String] = []
 var _attempted: Dictionary = {}
-var _thread: Thread
+var _thread: MapJobs.Job
+var _decode_mutex := Mutex.new()
+var _generation: int = 0
+var _worker_generation: int = 0
+var _ready_image: Image
+var _ready_base_ba: Image
+var _staged_base_rg: ImageTexture
+var _base_ba: Dictionary[String,ImageTexture] = {}
+var _ready_storage: String
+var _texture_storage: Dictionary[String,String] = {}
+var _texture_bytes: Dictionary = {}
 var _level: String = ""
 var _demand_key: Array = []
 var _window: String = ""
@@ -18,9 +35,67 @@ var _surface_wanted: Array[String] = []
 var _surface_active: Array[String] = []
 var _surface_view := Rect2()
 var _surface_refinement_weight: float = 0.0
+# Derived metadata only. Images and residency remain in textures/_wanted.
+var _surface_index_size: int = -1
+var _surface_grid: Dictionary = {}
+var _surface_foundations: Array[Dictionary] = []
+var _surface_bases: Array[Dictionary] = []
+var _surface_successors: Dictionary = {}
+var _window_levels: Array[String] = []
 
-func request(visible: bool, mpp: float, center: Vector2 = Vector2(INF,INF), radius_km: float = 0.0, regional: bool = true, footprint: Dictionary = {}) -> bool:
-	var key: Array = [visible,mpp,center,radius_km,regional,footprint,_assets.size()]
+func _surface_successor(level: String) -> String:
+	# Explicit catalogue replacements also apply to the established domain
+	# selector, not just to detail-page indexing.
+	_index_surfaces()
+	var visited: Dictionary = {}
+	while not visited.has(level):
+		visited[level]=true
+		var next := str(_surface_successors.get(level,level))
+		if next==level: break
+		level=next
+	return level
+
+func _index_surfaces() -> void:
+	if _surface_index_size==_assets.size(): return
+	_surface_grid.clear()
+	_surface_foundations.clear()
+	_surface_bases.clear()
+	_surface_successors.clear()
+	_window_levels.clear()
+	var replaced: Dictionary = {}
+	for asset: Dictionary in _assets.values():
+		for id: String in asset.get("surface_replaces",[]) as Array: replaced[id] = true
+	for level: String in _assets:
+		var asset := _assets[level] as Dictionary
+		if not asset.has("surface_role") and asset.has("bounds_lon_lat"): _window_levels.append(level)
+		if str(asset.get("surface_role",""))=="base":
+			for old: String in asset.get("surface_replaces",[]) as Array:
+				if not _surface_successors.has(old): _surface_successors[old]=level
+		if str(asset.get("surface_role",""))=="base" and not replaced.has(level) and asset.has("bounds_lon_lat"):
+			_surface_bases.append({"asset":asset,"bounds":_surface_frame(asset.get("core_bounds_lon_lat",asset.bounds_lon_lat) as Array)})
+		if bool(asset.get("foundation_domain",false)):
+			_surface_foundations.append({"id":level,"catalog":"sampling_catalog","bounds":_surface_frame(asset.core_bounds_lon_lat as Array)})
+		if str(asset.get("surface_role",""))!="detail" or replaced.has(level): continue
+		var bounds := _surface_frame(asset.core_bounds_lon_lat as Array)
+		var page := {"id":level,"asset":asset,"bounds":bounds}
+		for y: int in range(clampi(floori((bounds.position.y+90.0)/10.0),0,17),clampi(floori((bounds.end.y+90.0)/10.0),0,17)+1):
+			for x: int in range(floori((bounds.position.x+180.0)/10.0),floori((bounds.end.x+180.0)/10.0)+1):
+				var cell := Vector2i(wrapi(x,0,36),y)
+				if not _surface_grid.has(cell): _surface_grid[cell] = []
+				(_surface_grid[cell] as Array).append(page)
+	_surface_index_size = _assets.size()
+
+func _surface_candidates(view: Rect2) -> Array:
+	_index_surfaces()
+	var pages: Dictionary = {}
+	for y: int in range(clampi(floori((view.position.y+90.0)/10.0),0,17),clampi(floori((view.end.y+90.0)/10.0),0,17)+1):
+		for x: int in range(floori((view.position.x+180.0)/10.0),floori((view.end.x+180.0)/10.0)+1):
+			for page: Dictionary in _surface_grid.get(Vector2i(wrapi(x,0,36),y),[]) as Array:
+				pages[page.id] = page
+	return pages.values()
+
+func request(visible: bool, mpp: float, center: Vector2 = Vector2(INF,INF), radius_km: float = 0.0, regional: bool = true, footprint: Dictionary = {}, foundation_only: bool = false) -> bool:
+	var key: Array = [visible,mpp,center,radius_km,regional,footprint,_assets.size(),foundation_only]
 	var previous_mpp := float(_demand_key[1]) if not _demand_key.is_empty() else mpp
 	var previous_refinement := _surface_refinement_weight
 	var previous_longitude := _surface_view.get_center().x
@@ -28,17 +103,18 @@ func request(visible: bool, mpp: float, center: Vector2 = Vector2(INF,INF), radi
 	if _demand_key!=key:
 		_demand_key = key
 		_wanted.assign(["world"] if visible else [])
-		if visible and (mpp <= PREWARM_MPP or (textures.has("region") and mpp < RELEASE_MPP)):
+		if visible and not foundation_only and (mpp <= PREWARM_MPP or (textures.has("region") and mpp < RELEASE_MPP)):
 			_wanted.append("region")
-		_desired_window = _choose_window(center,radius_km,mpp) if visible and regional and center.is_finite() else ""
+		_desired_window = _choose_window(center,radius_km,mpp) if visible and not foundation_only and regional and center.is_finite() else ""
 		if not _desired_window.is_empty(): _wanted.append(_desired_window)
 		var active := _window
 		if textures.has(_desired_window): _window = _desired_window
-		elif not visible or not regional or not center.is_finite() or not _window_intersects(_window,center,radius_km,mpp): _window = ""
+		elif not visible or foundation_only or not regional or not center.is_finite() or not _window_intersects(_window,center,radius_km,mpp): _window = ""
 		if not _window.is_empty() and _window not in _wanted: _wanted.append(_window)
 		changed = active!=_window
-		_surface_wanted = _choose_surface(visible,mpp,center,radius_km,regional,footprint)
+		_surface_wanted = _choose_surface(visible and not foundation_only,mpp,center,radius_km,regional,footprint)
 		_wanted.append_array(_surface_wanted)
+		_cancel_obsolete()
 	var previous_surface := _surface_active.duplicate()
 	_refresh_surface_active()
 	changed = changed or previous_surface!=_surface_active
@@ -55,28 +131,103 @@ func request(visible: bool, mpp: float, center: Vector2 = Vector2(INF,INF), radi
 	return changed
 
 func _start_decode() -> void:
-	if _thread == null and decode_asset.is_valid():
+	if _thread == null and _ready_image == null and decode_asset.is_valid():
 		for level: String in _wanted:
 			if not textures.has(level) and not _attempted.has(level):
 				_level = level
 				_attempted[level] = true
 				# Asset records are immutable; only the worker catalogue dictionary changes.
 				# Copying every nested record blocks wheel input as the library grows.
-				_thread = Thread.new()
-				var error := _thread.start(decode_asset.bind(level, _assets.duplicate()))
-				if error!=OK:
-					errors.append("无法启动地貌读取："+error_string(error))
-					_thread = null
+				_worker_generation = _generation
+				_thread = MapJobs.submit(_decode.bind(decode_asset,level,_assets.duplicate(),_worker_generation,MapJobs.measuring),"relief read",MapJobs.FOUNDATION if level=="world" else MapJobs.VISIBLE,self)
+				if _thread==null: _attempted.erase(level)
 				break
 
 func _retire_textures() -> bool:
 	var changed := false
 	for level: String in textures.keys():
 		if level not in _wanted and level not in _surface_active:
-			textures.erase(level)
-			_attempted.erase(level)
+			_drop_texture(level)
 			changed = true
 	return changed
+
+func _decode(reader: Callable, level: String, assets: Dictionary, generation: int, measured: bool) -> Dictionary:
+	var current := _decode_current.bind(generation)
+	if reader == GeographyLoader.decode_relief:
+		var result := GeographyLoader.decode_relief(level,assets,current,measured)
+		var image := result.get("image") as Image
+		var asset := assets.get(level,{}) as Dictionary
+		if image!=null and asset.get("surface_role")=="base" and image.get_data_size()>STAGED_BASE_BYTES and image.get_format()==Image.FORMAT_RGBA8 and image.get_width()<=8192:
+			var started := Time.get_ticks_usec() if measured else 0
+			var ba := _base_ba_image(image,current)
+			if ba!=null and current.call():
+				image.convert(Image.FORMAT_RG8)
+				result["base_ba"] = ba
+			if measured: result["decode_us"] = int(result.get("decode_us",0))+Time.get_ticks_usec()-started
+		return result
+	return reader.call(level,assets)
+
+static func _base_ba_image(image: Image, current: Callable) -> Image:
+	# Interpret RGBA as adjacent RG/BA pairs. Godot's centre-sampled 2:1
+	# nearest resize selects the odd pair, without changing any channel byte.
+	var output := PackedByteArray()
+	var raw := image.get_data()
+	var width := image.get_width()
+	var height := image.get_height()
+	var offset := 0
+	for level: int in image.get_mipmap_count()+1:
+		if not current.call(): return null
+		var next := offset+width*height*4
+		var pairs := Image.create_from_data(width*2,height,false,Image.FORMAT_RG8,raw.slice(offset,next))
+		pairs.resize(width,height,Image.INTERPOLATE_NEAREST)
+		output.append_array(pairs.get_data())
+		width = maxi(1,width/2)
+		height = maxi(1,height/2)
+		offset = next
+	return Image.create_from_data(image.get_width(),image.get_height(),image.has_mipmaps(),Image.FORMAT_RG8,output)
+
+func _decode_current(generation: int) -> bool:
+	_decode_mutex.lock()
+	var current := _generation == generation
+	_decode_mutex.unlock()
+	return current
+
+func _cancel_obsolete() -> void:
+	if _level in _wanted: return
+	_decode_mutex.lock()
+	_generation += 1
+	_decode_mutex.unlock()
+	MapJobs.cancel_queued(_thread)
+	if _ready_image != null:
+		_ready_image = null
+		_ready_base_ba = null
+		_staged_base_rg = null
+		_attempted.erase(_level)
+
+func _drop_texture(level: String) -> void:
+	textures.erase(level)
+	_base_ba.erase(level)
+	_texture_bytes.erase(level)
+	_texture_storage.erase(level)
+	_attempted.erase(level)
+
+func storage_for(level: String) -> String:
+	return _texture_storage.get(level,"")
+
+func resident_bytes() -> int:
+	var result := 0
+	for bytes: int in _texture_bytes.values(): result += bytes
+	return result
+
+func retain_world() -> void:
+	_wanted.assign(["world"] if textures.has("world") else [])
+	_surface_wanted.clear()
+	_surface_active.clear()
+	_window = ""
+	_desired_window = ""
+	_demand_key.clear()
+	_cancel_obsolete()
+	_retire_textures()
 
 func _choose_surface(visible: bool, mpp: float, center: Vector2, radius_km: float, regional: bool, footprint: Dictionary = {}, explanation: Dictionary = {}) -> Array[String]:
 	var wanted: Array[String] = []
@@ -92,7 +243,7 @@ func _choose_surface(visible: bool, mpp: float, center: Vector2, radius_km: floa
 	_surface_view = view
 	# The same R57 catalogue admits continental foundation metadata only in
 	# REGION. WORLD and country selection never preload continental images.
-	if regional and mpp<=4500.0 and not _assets.has("global_region_r57_oceania_base0"):
+	if regional and mpp<=5500.0 and not _assets.has("global_region_r57_oceania_base0"):
 		for domain: Rect2 in [Rect2(104,-56,75.25,56),Rect2(-88,-56,56,72),Rect2(-179.25,0,131.25,84),Rect2(-20,-36,76,48),Rect2(56,-16,123.25,56),Rect2(64,32,115.25,52)]:
 			if _overlap(domain,view)>0.0: return ["sampling_catalog"]
 	# Current shared material admission precedes image requests in this domain.
@@ -117,11 +268,10 @@ func _choose_surface(visible: bool, mpp: float, center: Vector2, radius_km: floa
 	for domain: Dictionary in domains:
 		if (domain.bounds as Rect2).encloses(view): established_full = true
 	if not established_full:
-		for asset: Dictionary in _assets.values():
-			if not bool(asset.get("foundation_domain",false)): continue
-			var b := asset.core_bounds_lon_lat as Array
-			domains.append({"id":str(asset.id).get_slice(":",1),"catalog":"sampling_catalog","bounds":Rect2(float(b[0]),float(b[1]),float(b[2])-float(b[0]),float(b[3])-float(b[1]))})
+		_index_surfaces()
+		domains.append_array(_surface_foundations)
 	for domain: Dictionary in domains:
+		domain.id=_surface_successor(str(domain.id))
 		if mpp>float(domain.get("max_mpp",4500.0)): continue
 		# A permitted macro surface is optional and focus-bounded in WORLD.
 		# The default country globe never opens regional image catalogues.
@@ -140,17 +290,11 @@ func _choose_surface(visible: bool, mpp: float, center: Vector2, radius_km: floa
 	# One geographic grid, independent of catalogue or country. Prefer the
 	# smaller, fully supported core for duplicate/collar candidates.
 	var cells: Dictionary = {}
-	var replaced: Dictionary = {}
-	for candidate: Dictionary in _assets.values():
-		for old_id: String in candidate.get("surface_replaces",[]) as Array:
-			replaced[old_id] = true
 	var nearby := view.grow_individual(view.size.x*0.5,view.size.y*0.5,view.size.x*0.5,view.size.y*0.5)
-	for level: String in _assets:
-		var asset := _assets[level] as Dictionary
-		if str(asset.get("surface_role",""))!="detail": continue
-		if replaced.has(level): continue
-		var b := asset.core_bounds_lon_lat as Array
-		var bounds := Rect2(float(b[0]),float(b[1]),float(b[2])-float(b[0]),float(b[3])-float(b[1]))
+	for page: Dictionary in _surface_candidates(nearby):
+		var level := str(page.id)
+		var asset := page.asset as Dictionary
+		var bounds := page.bounds as Rect2
 		if _overlap(bounds,nearby)<=0.0: continue
 		var span := int(asset.get("surface_lod_degrees",2))
 		if mpp>float(asset.get("surface_display_max_mpp",750.0)): continue
@@ -169,59 +313,73 @@ func _choose_surface(visible: bool, mpp: float, center: Vector2, radius_km: floa
 		if bool(a.visible) and not is_equal_approx(float(a.overlap),float(b.overlap)): return float(a.overlap)>float(b.overlap)
 		if not bool(a.visible) and bool(a.resident)!=bool(b.resident): return bool(a.resident)
 		return str(a.id)<str(b.id) if is_equal_approx(float(a.distance),float(b.distance)) else float(a.distance)<float(b.distance))
-	# Choose one real geographic page level that fits the same four slots.
+	# Choose one real geographic page level that fits the same bounded slots.
 	# A wide screen can use intermediate material rather than falling directly
-	# from four 2-degree cores to the 120-arcsecond overview. No runtime atlas.
+	# from visible 2-degree cores to the 120-arcsecond overview. No runtime atlas.
 	var has_middle := false
 	for row: Dictionary in candidates:
 		if int(row.span)>2 and bool(row.visible): has_middle = true
+	# The padded admission/prewarm frame is not the set of visible pixels.
+	# A bounded proof may admit a complete bounded screen even when that
+	# larger frame has gaps. Uncertain/polar/clipped charts keep the old rule.
+	var screen_view := certified_screen_footprint(footprint,center) if not footprint.is_empty() else Rect2()
+	if explanation.has("groups"): explanation["certified_screen_bounds"] = [screen_view.position.x,screen_view.position.y,screen_view.end.x,screen_view.end.y] if screen_view.has_area() else []
 	var chosen: Array = []
+	var chosen_covers_screen := false
 	var best_step := INF
-	if explanation.has("groups"): explanation["replaced_ids"] = replaced.keys()
+	if explanation.has("groups"):
+		var replaced: Dictionary = {}
+		for asset: Dictionary in _assets.values():
+			for id: String in asset.get("surface_replaces",[]) as Array: replaced[id] = true
+		explanation["replaced_ids"] = replaced.keys()
 	for span: int in [2,8,16]:
 		var same: Array = candidates.filter(func(row: Dictionary) -> bool: return int(row.span)==span)
 		if same.is_empty(): continue
 		var area := 0.0
 		var count := 0
 		var source_total := 0.0
+		var cores: Array[Rect2] = []
 		for row: Dictionary in same:
-			if bool(row.visible) and count<4:
+			if bool(row.visible) and count<SURFACE_SLOTS:
 				area += float(row.overlap)
 				var asset := _assets[str(row.id)] as Dictionary
+				cores.append(_surface_frame(asset.core_bounds_lon_lat as Array))
 				var output_step := float((asset.display_spacing_degrees as Array)[1])*111195.0
 				source_total += float(row.overlap)*(float(row.source_step)+output_step*.05)
 				count += 1
+		var covers_screen := screen_view.has_area() and cores_cover_view(cores,screen_view)
 		if explanation.has("groups"):
-			(explanation.groups as Array).append({"span_degrees":span,"visible_candidates":same.filter(func(row: Dictionary) -> bool: return bool(row.visible)).size(),"first_four_view_coverage":area/maxf(_overlap(view,view),.000001),"source_score_m":source_total/maxf(area,.000001),"ids":same.map(func(row: Dictionary) -> String: return str(row.id))})
-		if area>=_overlap(view,view)*.995 or not has_middle:
+			(explanation.groups as Array).append({"span_degrees":span,"visible_candidates":same.filter(func(row: Dictionary) -> bool: return bool(row.visible)).size(),"selected_view_coverage":area/maxf(_overlap(view,view),.000001),"screen_coverage_certified":covers_screen,"source_score_m":source_total/maxf(area,.000001),"ids":same.map(func(row: Dictionary) -> String: return str(row.id))})
+		if covers_screen or area>=_overlap(view,view)*.995 or not has_middle:
 			var step := source_total/maxf(area,.000001)
 			# A smaller rectangle is not evidence of a better measurement. For
 			# equal source information prefer the continuous page, not more uploads.
 			if step<=best_step*1.02:
 				chosen = same
+				chosen_covers_screen = covers_screen
 				best_step = step
 	if chosen.is_empty(): return wanted
 	candidates = chosen
 	var visible_count := 0
 	for row: Dictionary in candidates:
 		if bool(row.visible): visible_count += 1
-	# A complete geographic overview owns wide views. Do not install four
+	# A complete geographic overview owns wide views. Do not install
 	# arbitrary crisp islands where this LOD cannot cover the current screen.
 	_surface_refinement_weight = 1.0
-	if visible_count>4:
+	if visible_count>SURFACE_SLOTS and not chosen_covers_screen:
 		var all_area := 0.0
 		var selected_area := 0.0
 		for index: int in range(visible_count):
 			all_area += float(candidates[index].overlap)
-			if index<4: selected_area += float(candidates[index].overlap)
+			if index<SURFACE_SLOTS: selected_area += float(candidates[index].overlap)
 		_surface_refinement_weight = smoothstep(.92,.999,selected_area/maxf(all_area,.000001))
 		if _surface_refinement_weight<=0.001: return wanted
 	var selected_asset := _assets[str(candidates[0].id)] as Dictionary
 	_surface_refinement_weight *= 1.0-smoothstep(float(selected_asset.get("surface_fade_mpp",300.0)),float(selected_asset.get("surface_display_max_mpp",750.0)),mpp)
-	var spare := mini(2,maxi(0,4-visible_count))
+	var spare := mini(2,maxi(0,SURFACE_SLOTS-visible_count))
 	var admitted := 0
 	for row: Dictionary in candidates:
-		if bool(row.visible) and admitted<4:
+		if bool(row.visible) and admitted<SURFACE_SLOTS:
 			wanted.append(str(row.id))
 			admitted += 1
 		elif spare>0:
@@ -258,23 +416,76 @@ static func source_step(asset: Dictionary, view: Rect2) -> float:
 	return maxf(output,fallback-improvement/maxf(_overlap(view,view),.000000000001))
 
 func minimum_observation_mpp(ll: Vector2) -> float:
-	# At most four screen pixels per real DEM/output sample. Inspect actual
+	# At most two screen pixels per real DEM/output sample. Inspect actual
 	# source coverage, including finer pages not resident yet; never load here.
 	# The global REGION image has a 4096x2048 grid (~9.77km), although
 	# its ETOPO input was ~1.85km. Output spacing also bounds useful zoom.
 	var best := float((_assets.get("region",{}) as Dictionary).get("equatorial_pixel_m",9773.0051))
-	var replaced := {}
-	for asset: Dictionary in _assets.values():
-		for old: String in asset.get("surface_replaces",[]) as Array: replaced[old]=true
-	for id: String in _assets:
-		var asset := _assets[id] as Dictionary
-		if str(asset.get("surface_role","")) not in ["base","detail"] or replaced.has(id): continue
+	var candidates := _surface_candidates(Rect2(ll-Vector2.ONE*.00001,Vector2.ONE*.00002))
+	candidates.append_array(_surface_bases)
+	for page: Dictionary in candidates:
+		var asset := page.asset as Dictionary
 		var b := asset.get("core_bounds_lon_lat",asset.get("bounds_lon_lat",[])) as Array
 		if b.size()!=4: continue
 		var x := ll.x+360.0*roundf(((float(b[0])+float(b[2]))*.5-ll.x)/360.0)
 		if x<float(b[0]) or x>float(b[2]) or ll.y<float(b[1]) or ll.y>float(b[3]): continue
 		best = minf(best,source_step(asset,Rect2(Vector2(x,ll.y)-Vector2.ONE*.00001,Vector2.ONE*.00002)))
-	return maxf(2.0,best*.25)
+	return maxf(2.0,best/LocalSpatialContent.OUTPUT_SAMPLE_PIXELS)
+
+func supports_footprint(polygon: PackedVector2Array, mpp: float, local_regions: Array[Dictionary]) -> bool:
+	# Subtract the union of qualifying coverage from the actual ground polygon.
+	# A centre-only query (or a regular sample grid) can miss a narrow data gap.
+	var global_floor := float((_assets.get("region",{}) as Dictionary).get("equatorial_pixel_m",9773.0051))/LocalSpatialContent.OUTPUT_SAMPLE_PIXELS
+	if mpp>=global_floor: return true
+	var remaining: Array[PackedVector2Array] = [polygon]
+	var view := GlobeProjection.lon_lat_bounds([polygon])
+	var regions: Array[Dictionary] = local_regions.duplicate()
+	var pages := _surface_candidates(view)
+	pages.append_array(_surface_bases)
+	for page: Dictionary in pages:
+		# Immutable catalogue coverage is reused across all proposed zoom poses.
+		# Only intersecting rectangles reach the polygon union below.
+		for support: Dictionary in _support_rectangles(page):
+			if mpp+0.001<float(support.minimum_mpp): continue
+			var bounds := support.bounds as Rect2
+			bounds.position.x+=360.0*roundf((view.get_center().x-bounds.get_center().x)/360.0)
+			if not bounds.intersects(view,true): continue
+			if bounds.encloses(view): return true
+			regions.append({"polygon":LocalSpatialContent._bounds_polygon(bounds),"minimum_mpp":support.minimum_mpp})
+	# Boolean operations run near zero to retain small windows in float builds.
+	var shift := Transform2D(0.0,-view.get_center())
+	remaining=[shift*polygon]
+	for region: Dictionary in regions:
+		if mpp+0.001<float(region.minimum_mpp): continue
+		var ring := (region.polygon as PackedVector2Array).duplicate()
+		var longitude_shift := 360.0*roundf((view.get_center().x-GlobeProjection.lon_lat_bounds([ring]).get_center().x)/360.0)
+		for index: int in range(ring.size()): ring[index].x+=longitude_shift
+		var holes: Array[PackedVector2Array]=[shift*ring]
+		remaining=GlobeProjection.subtract_holes(remaining,holes)
+		if remaining.is_empty(): return true
+	# Numerical slivers from neighbouring survey/page edges are subpixel.
+	var area := 0.0
+	for piece: PackedVector2Array in remaining: area+=absf(GlobeProjection.polygon_area(piece))
+	return area<0.000000001
+
+func _support_rectangles(page: Dictionary) -> Array[Dictionary]:
+	if page.has("support_rectangles"): return page.support_rectangles
+	var asset := page.asset as Dictionary
+	var bounds := page.bounds as Rect2
+	var precision := asset.get("precision",{}) as Dictionary
+	var cells := precision.get("dem_cells",[]) as Array
+	var result: Array[Dictionary] = []
+	if cells.is_empty():
+		result.append({"bounds":bounds,"minimum_mpp":source_step(asset,bounds)/LocalSpatialContent.OUTPUT_SAMPLE_PIXELS})
+	else:
+		var output := float((asset.display_spacing_degrees as Array)[1])*111195.0
+		result.append({"bounds":bounds,"minimum_mpp":maxf(output,float(precision.get("dem_fallback_m_ns",1853.25)))/LocalSpatialContent.OUTPUT_SAMPLE_PIXELS})
+		for cell: Dictionary in cells:
+			var b := cell.bounds as Array
+			var cell_bounds := Rect2(float(b[0]),float(b[1]),float(b[2])-float(b[0]),float(b[3])-float(b[1])).intersection(bounds)
+			if cell_bounds.has_area(): result.append({"bounds":cell_bounds,"minimum_mpp":maxf(output,float(cell.m))/LocalSpatialContent.OUTPUT_SAMPLE_PIXELS})
+	page["support_rectangles"] = result
+	return result
 
 static func projected_footprint(chart: Dictionary, center: Vector2) -> Rect2:
 	# Use the real azimuthal-equidistant chart, including its pan and bearing.
@@ -300,6 +511,66 @@ static func projected_footprint(chart: Dictionary, center: Vector2) -> Rect2:
 			output = output.expand(Vector2(center.x-180.0,pole*90.0)).expand(Vector2(center.x+180.0,pole*90.0))
 	# Small conservative collar for sampled curved extrema, not fixed degrees.
 	return output.grow_individual(output.size.x*.02,output.size.y*.02,output.size.x*.02,output.size.y*.02)
+
+static func certified_screen_footprint(chart: Dictionary, center: Vector2) -> Rect2:
+	# Certificate, not a tighter guessed bbox: exp on the sphere is 1-Lipschitz
+	# in chart kilometres. Any boundary point lies within half a sampled edge
+	# segment of a sample. Add one screen pixel and a floating-point collar.
+	# Away from poles, lat/continuous lon have no interior chart extrema.
+	var viewport := chart.size as Vector2
+	var origin := chart.origin as Vector2
+	var step := float(chart.step)
+	if step<=0.0 or not viewport.is_finite() or viewport.x<=0.0 or viewport.y<=0.0: return Rect2()
+	var axes := RegionProjection.screen_axes(float(chart.bearing))
+	var frame := chart.frame as Basis
+	var corners: Array[Vector2] = [Vector2.ZERO,Vector2(viewport.x,0.0),viewport,Vector2(0.0,viewport.y)]
+	for corner: Vector2 in corners:
+		var distance := corner.distance_to(origin)*step
+		if distance>float(chart.extent) or distance>=PI*6371.0088: return Rect2()
+	for pole: float in [-1.0,1.0]:
+		var km := RegionProjection.forward(Vector3(0,pole,0),frame)
+		if km.is_finite() and Rect2(Vector2.ZERO,viewport).grow(1.0).has_point(origin+axes*(km/step)): return Rect2()
+	var output := Rect2()
+	var initialized := false
+	var longest_segment := 0.0
+	for edge: int in range(4):
+		var start := corners[edge]
+		var delta := corners[(edge+1)%4]-start
+		# At most512 inverse projections per changed demand, never pixel scans.
+		var segments := clampi(ceili(delta.length()/8.0),8,128)
+		longest_segment = maxf(longest_segment,delta.length()/segments)
+		for i: int in range(segments):
+			var pixel := start+delta*(float(i)/segments)
+			var km := axes.basis_xform_inv(pixel-origin)*step
+			var ll := RegionProjection.lon_lat(RegionProjection.inverse(km,frame))
+			if not ll.is_finite(): return Rect2()
+			ll.x += 360.0*roundf((center.x-ll.x)/360.0)
+			output = output.expand(ll) if initialized else Rect2(ll,Vector2.ZERO)
+			initialized = true
+	var latitude_error := rad_to_deg((longest_segment*0.5+1.0)*step/6371.0088)+0.0001
+	var absolute_latitude := maxf(absf(output.position.y),absf(output.end.y))+latitude_error
+	# Near poles or ambiguous longitude turns, retain established admission.
+	if absolute_latitude>=80.0 or output.size.x>=180.0: return Rect2()
+	var longitude_error := latitude_error/cos(deg_to_rad(absolute_latitude))
+	return output.grow_individual(longitude_error,latitude_error,longitude_error,latitude_error)
+
+static func cores_cover_view(cores: Array[Rect2], view: Rect2) -> bool:
+	# Exact rectangle-union containment, not summed areas (which can double
+	# count overlaps). The certificate must leave no positive-area gap.
+	if not view.has_area(): return false
+	var remaining: Array[Rect2] = [view]
+	for core: Rect2 in cores:
+		var next: Array[Rect2] = []
+		for gap: Rect2 in remaining:
+			var hit := gap.intersection(core)
+			if not hit.has_area():
+				next.append(gap)
+				continue
+			for part: Rect2 in [Rect2(gap.position,Vector2(hit.position.x-gap.position.x,gap.size.y)),Rect2(Vector2(hit.end.x,gap.position.y),Vector2(gap.end.x-hit.end.x,gap.size.y)),Rect2(Vector2(hit.position.x,gap.position.y),Vector2(hit.size.x,hit.position.y-gap.position.y)),Rect2(Vector2(hit.position.x,hit.end.y),Vector2(hit.size.x,gap.end.y-hit.end.y))]:
+				if part.has_area(): next.append(part)
+		remaining = next
+		if remaining.is_empty(): return true
+	return false
 
 func surface_description(mpp: float) -> Dictionary:
 	var bases: Array[Dictionary] = []
@@ -398,7 +669,7 @@ func _refresh_surface_active() -> void:
 	details.sort_custom(order)
 	_surface_active.clear()
 	for row: Dictionary in bases.slice(0,2): _surface_active.append(str(row.id))
-	for row: Dictionary in details.slice(0,4): _surface_active.append(str(row.id))
+	for row: Dictionary in details.slice(0,SURFACE_SLOTS): _surface_active.append(str(row.id))
 
 func _surface_overlap(bounds: Rect2) -> float:
 	return _overlap(bounds,_surface_view)
@@ -416,13 +687,13 @@ func _surface_asset(level: String) -> Dictionary:
 	var b := asset.bounds_lon_lat as Array
 	var feather := asset.get("surface_feather_degrees",[0,0,0,0]) as Array
 	var frame := _surface_frame(b)
-	var cover_step := float((asset.get("precision",{}) as Dictionary).get("cover_m_ns_max",0.0))
+	var output_step := float((asset.get("display_spacing_degrees", [0.0, frame.size.y/maxi(1,int(asset.get("height",1)))]) as Array)[1])*111195.0
+	var cover_step := maxf(output_step,float((asset.get("precision",{}) as Dictionary).get("cover_m_ns_max",0.0)))
 	# A148m source baked into an869m page no longer carries148m boundaries.
 	# Both production resampling and original classification limit its detail.
-	if cover_step>0: cover_step=maxf(cover_step,float((asset.display_spacing_degrees as Array)[1])*111195.0)
 	var mpp := float(_demand_key[1]) if _demand_key.size()>1 else 1000.0
-	var cover_weight := smoothstep(cover_step/8.0,cover_step/2.0,mpp) if cover_step>0 else 1.0
-	return {"id":level,"texture":textures[level],"bounds":Vector4(frame.position.x,frame.position.y,frame.end.x,frame.end.y),"inset":float(asset.core_inset_degrees),"encoding":int(asset.get("surface_encoding",0)),"cover_weight":cover_weight,"feather":Vector4(float(feather[0]),float(feather[1]),float(feather[2]),float(feather[3])),"max_mpp":float(asset.get("surface_display_max_mpp",4500.0)),"fade_mpp":float(asset.get("surface_fade_mpp",2500.0))}
+	var cover_weight := smoothstep(cover_step/6.0,cover_step/2.0,mpp) if cover_step>0 else 1.0
+	return {"id":level,"texture":textures[level],"ba":_base_ba.get(level),"bounds":Vector4(frame.position.x,frame.position.y,frame.end.x,frame.end.y),"inset":float(asset.core_inset_degrees),"encoding":int(asset.get("surface_encoding",0)),"cover_weight":cover_weight,"feather":Vector4(float(feather[0]),float(feather[1]),float(feather[2]),float(feather[3])),"max_mpp":float(asset.get("surface_display_max_mpp",4500.0)),"fade_mpp":float(asset.get("surface_fade_mpp",2500.0))}
 
 func _surface_frame(bounds: Array) -> Rect2:
 	# The four neighbouring cores share the same longitude turn. Merging
@@ -432,9 +703,10 @@ func _surface_frame(bounds: Array) -> Rect2:
 	return frame
 
 func _choose_window(center: Vector2, radius_km: float, mpp: float) -> String:
+	_index_surfaces()
 	var chosen := ""
 	var nearest := INF
-	for level: String in _assets:
+	for level: String in _window_levels:
 		var asset := _assets[level] as Dictionary
 		if not _window_intersects(level,center,radius_km,mpp): continue
 		var a := asset.anchor_lon_lat as Array
@@ -454,7 +726,7 @@ func _window_intersects(level: String, center: Vector2, radius_km: float, mpp: f
 	# Native kilometre cells add an intermediate cartographic band. Do not
 	# magnify the residual into supposed fine LOCAL terrain indefinitely.
 	var native_step := float((asset.native_spacing_m_approx as Array)[1])
-	if mpp<native_step*0.05*(0.65 if textures.has(level) else 1.0): return false
+	if mpp<native_step/LocalSpatialContent.OUTPUT_SAMPLE_PIXELS: return false
 	var latitude_margin := radius_km/111.195
 	var longitude_margin := latitude_margin/maxf(0.15,cos(deg_to_rad(center.y)))
 	var b := asset.bounds_lon_lat as Array
@@ -465,20 +737,33 @@ func window_description(mpp: float) -> Dictionary:
 	var asset := _assets[_window] as Dictionary
 	var b := asset.bounds_lon_lat as Array
 	var native_step := float((asset.native_spacing_m_approx as Array)[1])
-	var weight := (1.0-smoothstep(550.0,float(asset.release_mpp),mpp))*smoothstep(native_step*0.05,native_step*0.20,mpp)
+	var minimum := native_step/LocalSpatialContent.OUTPUT_SAMPLE_PIXELS
+	var weight := (1.0-smoothstep(550.0,float(asset.release_mpp),mpp))*smoothstep(minimum,minimum*2.0,mpp)
 	return {"texture":textures[_window],"bounds":Vector4(float(b[0]),float(b[1]),float(b[2]),float(b[3])),"weight":weight,"edge":float(asset.edge_fraction)}
 
 func preparing() -> bool:
-	return _thread != null
+	return _thread != null or _ready_image != null
 
-func poll() -> bool:
-	if _thread == null or _thread.is_alive():
-		return false
-	var result := _thread.wait_to_finish() as Dictionary
+func poll(budget: FrameBudget = null) -> bool:
+	if _ready_image != null: return _upload_ready(budget)
+	if _thread == null or not _thread.completed: return false
+	var result: Variant = _thread.take()
 	_thread = null
+	if _worker_generation != _generation or _level not in _wanted:
+		_attempted.erase(_level)
+		_start_decode()
+		return false
+	if not result is Dictionary:
+		errors.append("地貌读取未返回结果")
+		_start_decode()
+		return false
+	if budget!=null and not budget.observations.is_empty() and result.has("read_us"):
+		budget.observations["relief_read_us"] = result.read_us
+		budget.observations["relief_decode_us"] = result.decode_us
 	errors.append_array(result.errors as Array[String])
 	if result.has("assets"):
 		_assets.merge(result.assets as Dictionary)
+		_surface_index_size = -1
 		# Precision enriches immutable source records even if an older regional
 		# catalogue arrived first. Never relabel a texture with another path/codec.
 		for id: String in result.assets as Dictionary:
@@ -489,18 +774,50 @@ func poll() -> bool:
 	if not result.errors.is_empty():
 		_start_decode()
 		return false
-	if _level not in _wanted:
-		_attempted.erase(_level)
-		# A cancelled image produces no appearance invalidation. Drain the
-		# current bounded demand here; otherwise the last stale result leaves
-		# wanted images idle until another mouse/geometry event happens.
-		_start_decode()
-		return false
 	if not result.has("image"):
 		_start_decode()
 		return true # Catalogue changes demand, not pixels.
-	var texture := ImageTexture.create_from_image(result.image as Image)
-	textures[_level] = texture
+	_ready_image = result.image as Image
+	_ready_base_ba = result.get("base_ba") as Image
+	_ready_storage = str(result.get("storage","legacy"))
+	return _upload_ready(budget)
+
+func _upload_ready(budget: FrameBudget) -> bool:
+	var bytes := _ready_image.get_data_size()+(_ready_base_ba.get_data_size() if _ready_base_ba!=null else 0)
+	if bytes > FrameBudget.UPLOAD_BYTES or resident_bytes()+bytes > RESIDENT_BYTES:
+		# Drop obsolete refinements as a group. The world texture still covers
+		# every pixel until a complete replacement can be published.
+		var changed := false
+		for level: String in textures.keys():
+			if level=="world" or level in _wanted: continue
+			_surface_active.erase(level)
+			_drop_texture(level)
+			changed = true
+		if bytes > FrameBudget.UPLOAD_BYTES or resident_bytes()+bytes > RESIDENT_BYTES:
+			_ready_image = null
+			_ready_base_ba = null
+			_staged_base_rg = null
+			_start_decode()
+			return changed
+		if changed: return true
+	var upload := _ready_image if _staged_base_rg==null else _ready_base_ba
+	if budget!=null and (budget.operations>0 or not budget.claim_upload(upload.get_data_size())): return false
+	var started := Time.get_ticks_usec()
+	var texture := ImageTexture.create_from_image(upload)
+	if budget!=null:
+		budget.observe("texture_api_us",started)
+		budget.finish_upload(started,"relief page "+_level)
+	if _ready_base_ba!=null and _staged_base_rg==null:
+		_staged_base_rg = texture
+		return false
+	if _staged_base_rg!=null:
+		_base_ba[_level] = texture
+	textures[_level] = texture if _staged_base_rg==null else _staged_base_rg
+	_texture_bytes[_level] = bytes
+	_texture_storage[_level] = _ready_storage
+	_ready_image = null
+	_ready_base_ba = null
+	_staged_base_rg = null
 	_refresh_surface_active()
 	_retire_textures()
 	if _level==_desired_window: _window = _level
@@ -510,17 +827,27 @@ func poll() -> bool:
 	# previous texture only after the replacement is actually available.
 	for level: String in textures.keys():
 		if level.begins_with("native_") and level!=_window and level!=_desired_window:
-			textures.erase(level)
-			_attempted.erase(level)
+			_drop_texture(level)
 	_start_decode()
 	return true
 
 func dispose() -> void:
-	if _thread != null:
-		_thread.wait_to_finish()
-		_thread = null
+	_decode_mutex.lock()
+	_generation += 1
+	_decode_mutex.unlock()
+	MapJobs.abandon(_thread)
+	_thread = null
 	textures.clear()
+	_base_ba.clear()
+	_texture_bytes.clear()
+	_texture_storage.clear()
+	_ready_image = null
+	_ready_base_ba = null
+	_staged_base_rg = null
 	_assets.clear()
+	_surface_grid.clear()
+	_surface_foundations.clear()
+	_surface_index_size = -1
 	_attempted.clear()
 	_wanted.clear()
 	_demand_key.clear()

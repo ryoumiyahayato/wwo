@@ -1,5 +1,10 @@
 class_name RegionView
 extends RefCounted
+const CityOverview = preload("res://scripts/presentation/map/city_miniature.gd")
+const MapJobs = preload("res://scripts/presentation/map/map_jobs.gd")
+const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
+var frame_budget: FrameBudget
+var _city_load_slots: Dictionary = {}
 ## Cached regional canvas; political ink records share CPU identity geometry.
 signal landmark_display_changed
 signal landmark_load_failed(message: String)
@@ -15,15 +20,20 @@ var _map_annotation_layer: CanvasLayer
 var _local_overlay_layer: CanvasLayer
 var _local_container: TextureRect
 var _local_viewport: SubViewport
+var _local_notice: Label
+var _local_context_labels: Array[Dictionary] = []
 var _local_render_rect := Rect2()
 var _local_render_generation: int = 0
 var ready: bool = false
 var _background: RID
 var background: Dictionary = {}
+var _light_material: ShaderMaterial
+var _light_scale: float = 0.0
 var _labels: Array[Dictionary] = []
 var country_label_rects: Array[Rect2] = []
 const MINIATURE_ELEVATION: float = 0.9599310886 # 55 degrees; shared chart ground.
 const MAX_CACHED_LANDMARK_SCENES: int = 2
+const MAX_PENDING_LANDMARK_SCENES: int = 2
 const SETTLEMENT_MODULE_PATH: String = "res://assets/settlements/urban_landscape_r40.glb"
 var landmark_screen_bounds: Dictionary = {}
 var _landmark_scenes: Dictionary = {}
@@ -40,12 +50,14 @@ var _local_camera_inverse := Transform3D.IDENTITY
 var _landmark_view_key: Array = []
 var _landmark_presented: Dictionary = {}
 var _landmark_render_pending: bool = false
+var _landmark_frame_callback: Callable
 var _local_surface: MeshInstance3D
 var _local_surface_mesh: ArrayMesh
 var _local_surface_key: String = ""
 var _local_surface_anchor := Vector2.ZERO
 var _surface_reference: Dictionary = {}
-var _surface_thread: Thread
+var _surface_thread: MapJobs.Job
+var _landmark_waiting_for_slot: bool
 var _surface_build_key: Array = []
 var _surface_wanted_key: Array = []
 var _surface_cpu_ready: Dictionary = {}
@@ -70,6 +82,14 @@ var _surface_water_chunks: Array[Dictionary] = []
 var _surface_water_mask: ImageTexture
 var _surface_woodland_mask: ImageTexture
 var _surface_height_texture: ImageTexture
+var _surface_display_heights := PackedFloat32Array()
+var _surface_ground_range := Vector2.ZERO
+var _surface_height_size := Vector2i.ZERO
+var _surface_height_layout := Vector4.ZERO
+var _surface_height_stride: float = 1.0
+var _surface_height_bounds := Vector4.ZERO
+var _surface_context_water_mask: ImageTexture
+var _surface_context_water_bounds := Vector4.ZERO
 const COVER_MASK_SIZE: int = 256
 var _surface_material: ShaderMaterial
 var _surface_style_key: Array = []
@@ -87,6 +107,69 @@ var _settlement_demanded: bool = false
 var _woodland_positions: Array[Vector3] = []
 var _woodland_nodes: Array[MultiMeshInstance3D] = []
 var _internal_scene_load: RefCounted
+var _constraint_camera: RegionCamera
+var _constraint_viewport := Vector2.ZERO
+var city := CityOverview.new()
+var city_profile: Dictionary = {}
+var city_profiles: Array[Dictionary] = []
+var city_layers: Dictionary = {}
+
+func city_views() -> Array[CityMiniature]:
+	var result: Array[CityMiniature]=[]
+	for layer: CityMiniature in city_layers.values(): result.append(layer)
+	return result
+
+func city_node_count() -> int:
+	var count := 0
+	for layer: CityMiniature in city_layers.values(): count+=layer.nodes.size()+layer._context_items.size()
+	return count
+
+func city_pending_count() -> int:
+	var count := 0
+	for layer: CityMiniature in city_layers.values(): count+=layer._pending_meshes.size()
+	for layer: CityMiniature in city_layers.values():
+		if layer._presentation_job!=null or layer._context_install_pending or layer._waiting_for_slot or not layer._retiring_context.is_empty(): count+=1
+	return count
+
+func city_cache_count() -> int:
+	var count := 0
+	for layer: CityMiniature in city_layers.values(): count+=layer._mesh_cache.size()
+	return count
+
+func city_states() -> Array[Dictionary]:
+	var result: Array[Dictionary]=[]
+	for id: String in city_layers:
+		var layer := city_layers[id] as CityMiniature
+		var bytes := 0
+		for amount: int in layer._mesh_bytes.values(): bytes+=amount
+		var prints := 0
+		for item: Dictionary in layer._context_items.values():
+			if int(item.tile.z)>=12: prints+=1
+		result.append({"profile":id,"place_id":layer.profile.get("place_id",""),"name":layer.profile.get("map_name",""),"active":not layer.profile.is_empty(),"nodes":layer.nodes.size(),"context_2d_items":layer._context_items.size(),"building_print_items":prints,"building_print_lod":layer._context_print_level if prints>0 else 0,"cache_bytes":bytes,"cache_budget_bytes":layer.cache_budget_bytes,"context_lod":layer._context_level if not layer._context_items.is_empty() else 0,"pending_meshes":layer._pending_meshes.size(),"cached_meshes":layer._mesh_cache.size(),"water":layer.water_state()})
+	return result
+
+func _sync_city_layers() -> void:
+	var wanted: Dictionary={}
+	var has_context: bool=city_profiles.any(func(row: Dictionary)->bool:return row.get("role","")=="NATIONAL_CARTOGRAPHIC_CONTEXT")
+	var detailed_count := city_profiles.filter(func(row: Dictionary)->bool:return row.get("role","")!="NATIONAL_CARTOGRAPHIC_CONTEXT").size()
+	var context_count := city_profiles.size()-detailed_count
+	for data: Dictionary in city_profiles:
+		var id := str(data.id)
+		wanted[id]=true
+		if not city_layers.has(id): city_layers[id]=CityOverview.new()
+		var layer := city_layers[id] as CityMiniature
+		layer.load_slots = _city_load_slots
+		layer.frame_budget = frame_budget
+		var context: bool=data.get("role","")=="NATIONAL_CARTOGRAPHIC_CONTEXT"
+		(city_layers[id] as CityMiniature).cache_budget_bytes=int(8*1024*1024/maxi(1,context_count)) if context else int((40 if has_context else 48)*1024*1024/maxi(1,detailed_count))
+	for id: String in city_layers.keys():
+		if wanted.has(id): continue
+		var layer := city_layers[id] as CityMiniature
+		if not layer.profile.is_empty(): layer.clear()
+		if not layer.preparing(): city_layers.erase(id)
+	if city_layers.has(str(city_profile.get("id",""))): city=city_layers[str(city_profile.id)] as CityMiniature
+	elif not city_profiles.is_empty(): city=city_layers[str(city_profiles[0].id)] as CityMiniature
+	elif not city._mesh_cache.is_empty() or city.preparing() or not city.nodes.is_empty(): city=CityOverview.new()
 
 func set_internal_load_test(active: bool) -> void:
 	if not OS.has_feature("internal_landmark_preview") and not OS.has_feature("editor"): return
@@ -121,6 +204,8 @@ func initialize(parent: Control) -> void:
 	viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	container.add_child(viewport)
 	container.texture = viewport.get_texture()
+	_light_material = ShaderMaterial.new()
+	_light_material.shader = preload("res://shaders/presentation/map/region_light.gdshader")
 	_map_background_layer = CanvasLayer.new()
 	_map_background_layer.layer = -1
 	viewport.add_child(_map_background_layer)
@@ -139,6 +224,16 @@ func initialize(parent: Control) -> void:
 	material.shader = load("res://shaders/presentation/map/relief_background.gdshader") as Shader
 	RenderingServer.canvas_item_set_material(_background, material.get_rid())
 	background = {"material": material, "item": _background}
+
+func set_lighting_scale(km_per_pixel: float) -> void:
+	var scale := km_per_pixel if km_per_pixel>0.9 else 0.0
+	if scale==_light_scale: return
+	_light_scale = scale
+	if scale>0.0:
+		_light_material.set_shader_parameter("km_per_pixel",scale)
+		container.material = _light_material
+	else:
+		container.material = null
 
 func resize(viewport_size: Vector2) -> void:
 	if container.size == viewport_size:
@@ -240,11 +335,13 @@ func update_labels(canvas: CanvasItem, camera: RegionCamera, controller: GlobeCo
 
 func dispose() -> void:
 	clear()
-	if _surface_thread!=null:
-		_surface_thread.wait_to_finish()
-		_surface_thread = null
+	for layer: CityMiniature in city_layers.values(): layer.dispose()
+	city_layers.clear()
+	MapJobs.abandon(_surface_thread)
+	_surface_thread = null
 	_landmark_scenes.clear()
 	_landmark_scene_order.clear()
+	for path: String in _landmark_pending: MapJobs.abandon_resource(path)
 	_landmark_pending.clear()
 	_local_surface_mesh = null
 	_surface_reference.clear()
@@ -252,7 +349,7 @@ func dispose() -> void:
 		RenderingServer.free_rid(_background)
 
 func landmark_preparing() -> bool:
-	return _surface_thread!=null or not _landmark_pending.is_empty() or (_internal_scene_load!=null and bool(_internal_scene_load.call("preparing")))
+	return city_pending_count()>0 or _surface_thread!=null or not _surface_cpu_ready.is_empty() or _landmark_waiting_for_slot or not _landmark_pending.is_empty() or (_internal_scene_load!=null and bool(_internal_scene_load.call("preparing")))
 
 func landmark_visible(id: String) -> bool:
 	return _local_container!=null and _local_container.visible and _landmark_presented.has(id) and _landmark_instances.has(id) and (_landmark_instances[id] as Node3D).visible and landmark_screen_bounds.has(id)
@@ -267,36 +364,55 @@ func settlement_at(pixel: Vector2) -> String:
 			if rectangle.has_point(pixel): return id
 	return ""
 
+func _request_landmark(path: String) -> void:
+	var error := MapJobs.request_resource(path,"PackedScene")
+	if error==OK: _landmark_pending[path] = true
+	elif error==ERR_BUSY: _landmark_waiting_for_slot = true
+	else: _landmark_failed_load(path)
+
 func _landmark_failed_load(path: String) -> void:
 	_landmark_failed[path] = true
 	landmark_load_failed.emit("地标模型读取失败，暂保留地图剪影。")
 
 func prepare_landmarks() -> bool:
-	var completed := _poll_surface_preparation()
+	var completed := _poll_surface_preparation() or _landmark_waiting_for_slot
+	_landmark_waiting_for_slot = false
+	var city_began := Time.get_ticks_usec()
+	for id: String in city_layers.keys():
+		var layer := city_layers[id] as CityMiniature
+		var remaining := 2000-(Time.get_ticks_usec()-city_began)
+		if remaining>0: completed=layer.poll(remaining) or completed
+		if layer.profile.is_empty() and not layer.preparing(): city_layers.erase(id)
 	if _internal_scene_load!=null: completed = bool(_internal_scene_load.call("poll")) or completed
 	for path: String in _landmark_pending.keys():
 		var status := ResourceLoader.load_threaded_get_status(path)
 		if status==ResourceLoader.THREAD_LOAD_IN_PROGRESS: continue
-		if status==ResourceLoader.THREAD_LOAD_LOADED:
-			var scene := ResourceLoader.load_threaded_get(path) as PackedScene
+		var wanted := _settlement_demanded if path==SETTLEMENT_MODULE_PATH else _landmark_wanted_paths.has(path)
+		if wanted and frame_budget!=null and not frame_budget.claim_upload(0): break
+		var started := Time.get_ticks_usec()
+		var scene := MapJobs.take_resource(path) as PackedScene
+		if frame_budget!=null: frame_budget.observe("native_get_us",started)
+		if wanted:
 			if scene!=null:
-				# A retired LOCAL composition does not retain a late bundle result.
-				if (_settlement_demanded if path==SETTLEMENT_MODULE_PATH else _landmark_wanted_paths.has(path)):
-					_landmark_scenes[path] = scene
-					_touch_landmark_scene(path)
+				_landmark_scenes[path] = scene
+				_touch_landmark_scene(path)
 			else: _landmark_failed_load(path)
-		else: _landmark_failed_load(path)
 		_landmark_pending.erase(path)
 		completed = true
+		if wanted and frame_budget!=null:
+			frame_budget.finish_upload(started,"landmark load")
+			break
 	_trim_landmark_scenes()
 	if completed: _landmark_view_key.clear()
 	return completed
 
 func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport_size: Vector2, surface: Dictionary = {}, reference_lines: Array[Dictionary] = [], settlements: Array[Dictionary] = [], covers: Array[Dictionary] = []) -> void:
+	_constraint_camera=camera
+	_constraint_viewport=viewport_size
 	var wanted: Dictionary = {}
 	if ready and camera.active and camera.local_active:
 		for visual: Dictionary in visuals:
-			var limit := model_limit_mpp(visual)*(1.35 if _landmark_instances.has(str(visual.id)) else 1.0)
+			var limit := maxf(model_limit_mpp(visual),24.0 if not city_profile.is_empty() else 0.0)*(1.35 if _landmark_instances.has(str(visual.id)) else 1.0)
 			if camera.local_place_id!=str(visual.get("local_anchor_id",visual.anchor_place_id)) or camera.km_per_pixel*1000.0>limit: continue
 			wanted[str(visual.id)] = visual
 	_landmark_wanted_paths.clear()
@@ -317,10 +433,8 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 			if _landmark_scenes.has(path): _touch_landmark_scene(path)
 			continue
 		if not _landmark_scenes.has(path):
-			if not _landmark_pending.has(path) and not _landmark_failed.has(path):
-				if ResourceLoader.load_threaded_request(path,"PackedScene")==OK:
-					_landmark_pending[path] = true
-				else: _landmark_failed_load(path)
+			if _landmark_pending.size()<MAX_PENDING_LANDMARK_SCENES and not _landmark_pending.has(path) and not _landmark_failed.has(path):
+				_request_landmark(path)
 			continue
 		_touch_landmark_scene(path)
 		var node := (_landmark_scenes[path] as PackedScene).instantiate()
@@ -338,10 +452,18 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 	_local_elevation = elevation_at(camera)
 	_update_surface_demand(surface,camera,viewport_size,reference_lines,covers)
 	var settlement_wanted := _settlement_demand(settlements,camera,viewport_size)
+	_sync_city_layers()
 	_trim_landmark_scenes()
-	if _landmark_instances.is_empty() and _local_surface==null:
+	var detailed := false
+	for data: Dictionary in city_profiles:
+		if data.get("role","")=="NATIONAL_CARTOGRAPHIC_CONTEXT":
+			if (city_layers[str(data.id)] as CityMiniature)._update_context(self,data,camera,viewport_size):
+				viewport.render_target_update_mode=SubViewport.UPDATE_ONCE
+		else: detailed=true
+	if detailed: _enable_landmark_3d()
+	if _landmark_instances.is_empty() and _local_surface==null and not detailed:
 		if _internal_scene_load!=null: _internal_scene_load.call("clear")
-		if _surface_wanted_key.is_empty() and wanted.is_empty(): release_landmarks()
+		if _surface_wanted_key.is_empty() and wanted.is_empty(): release_landmarks(true)
 		elif _local_container!=null and _local_container.visible:
 			# The old projection's geometry has retired while its successor waits.
 			# A cached image of that old scene is not valid transition content.
@@ -352,7 +474,9 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 			_surface_presented_key = ""
 			canvas_update_requested.emit()
 		return
-	var key: Array = [camera.tangent_frame,camera.origin,camera.km_per_pixel,camera.bearing,viewport_size,_landmark_instances.keys(),_local_surface!=null,settlement_wanted.keys(),_settlement_meshes.size()]
+	var city_ids: Array=[]
+	for data: Dictionary in city_profiles: city_ids.append(data.id)
+	var key: Array = [camera.tangent_frame,camera.origin,camera.km_per_pixel,camera.bearing,viewport_size,_landmark_instances.keys(),_local_surface!=null,settlement_wanted.keys(),_settlement_meshes.size(),city_ids]
 	if key==_landmark_view_key: return
 	_landmark_view_key = key
 	_update_local_camera(camera,viewport_size)
@@ -367,6 +491,9 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 		var visual := wanted[id] as Dictionary
 		_update_landmark_pose(_landmark_instances[id] as Node3D,visual,camera,viewport_size)
 	_update_settlement_batches(settlement_wanted,camera,viewport_size)
+	for data: Dictionary in city_profiles:
+		if data.get("role","")=="NATIONAL_CARTOGRAPHIC_CONTEXT": continue
+		(city_layers[str(data.id)] as CityMiniature).update(self,data,camera,viewport_size)
 	if _internal_scene_load!=null: _internal_scene_load.call("update",self,camera,viewport_size)
 	_update_local_render_rect(camera,viewport_size)
 	if _local_viewport==null or not _local_container.visible: return
@@ -374,7 +501,9 @@ func update_landmarks(visuals: Array[Dictionary], camera: RegionCamera, viewport
 	canvas_update_requested.emit()
 	if not _landmark_render_pending:
 		_landmark_render_pending = true
-		RenderingServer.frame_post_draw.connect(_landmark_frame_ready.bind(_local_render_generation),CONNECT_ONE_SHOT)
+		_landmark_frame_callback=_landmark_frame_ready.bind(_local_render_generation)
+		if not RenderingServer.frame_post_draw.is_connected(_landmark_frame_callback):
+			RenderingServer.frame_post_draw.connect(_landmark_frame_callback,CONNECT_ONE_SHOT)
 
 func _metric_landmark(source: Node3D, visual: Dictionary) -> Node3D:
 	# Internal pilot GLBs use schematic units and include decorative ground.
@@ -469,6 +598,10 @@ func _update_local_render_rect(camera: RegionCamera, viewport_size: Vector2) -> 
 	if _settlement_render_bounds.has_area():
 		bounds = bounds.merge(_settlement_render_bounds) if initialized else _settlement_render_bounds
 		initialized = true
+	for layer: CityMiniature in city_layers.values():
+		if layer.nodes.is_empty(): continue
+		bounds = bounds.merge(layer.render_bounds) if initialized else layer.render_bounds
+		initialized = true
 	if _internal_scene_load!=null:
 		var extra := _internal_scene_load.call("render_bounds",self) as Rect2
 		if extra.has_area():
@@ -486,7 +619,7 @@ func _update_local_render_rect(camera: RegionCamera, viewport_size: Vector2) -> 
 		return
 	# Pixel-for-pixel crop, not resolution scaling. Quantized dimensions and
 	# a small guard keep ordinary pan from reallocating the target each frame.
-	var target_size := (visible_bounds.size/128.0).ceil()*128.0
+	var target_size := viewport_size if not city_profiles.is_empty() else (visible_bounds.size/128.0).ceil()*128.0
 	target_size = target_size.min(viewport_size).max(Vector2(2,2))
 	var origin := (visible_bounds.get_center()-target_size*0.5).floor().clamp(Vector2.ZERO,(viewport_size-target_size).max(Vector2.ZERO))
 	var next := Rect2(origin,target_size)
@@ -498,11 +631,19 @@ func _update_local_render_rect(camera: RegionCamera, viewport_size: Vector2) -> 
 	_update_local_camera(camera,viewport_size)
 
 func set_inspection_elevation(degrees: float) -> void:
+	var previous := inspection_elevation_degrees
 	inspection_elevation_degrees = degrees
+	if _constraint_camera!=null and _constraint_camera.local_active and not _constraint_camera.accepts(_constraint_camera.origin,_constraint_camera.km_per_pixel,_constraint_camera.bearing,_constraint_viewport):
+		inspection_elevation_degrees=previous
+		landmark_load_failed.emit("此俯角的地面覆盖超出有效资料；请缩小或返回 REGION。")
+		return
 	_local_camera_key.clear()
 	_landmark_view_key.clear()
 
 func elevation_at(camera: RegionCamera) -> float:
+	return elevation_for_scale(camera,camera.km_per_pixel*1000.0)
+
+func elevation_for_scale(camera: RegionCamera, mpp: float) -> float:
 	# Menu-only inspection; no player/formation visibility or physics reads this.
 	if inspection_elevation_degrees >= 0.0:
 		return deg_to_rad(clampf(inspection_elevation_degrees, 8.0, 88.0))
@@ -511,11 +652,12 @@ func elevation_at(camera: RegionCamera) -> float:
 		var d := _surface_reference
 		var step := float(d.step_degrees)*111195.0
 		var span := minf((int(d.width)-1)*step*cos(deg_to_rad(float((d.anchor_lon_lat as Array)[1]))),(int(d.height)-1)*step)
+		if (d.get("presentation",{}) as Dictionary).has("context_height_asset"):span+=2.0*float(d.presentation.get("context_radius_m",8000.0))
 		var relief := float(d.get("height_max_m",0.0))-float(d.get("height_min_m",0.0))
 		# A narrow mountain survey is not a complete oblique landscape. Keep
 		# its true heights, but limit the camera's screen-space vertical reach.
 		if relief>span*0.25: elevation = maxf(elevation,acos(clampf(span*0.25/relief,0.0,1.0)))
-	return lerpf(elevation,PI*0.5,smoothstep(110.0,RegionCamera.LOCAL_ENTER_KM_PER_PIXEL*1000.0,camera.km_per_pixel*1000.0))
+	return lerpf(elevation,PI*0.5,smoothstep(110.0,RegionCamera.LOCAL_ENTER_KM_PER_PIXEL*1000.0,mpp))
 
 func _chart_transform(unit: Vector3, camera: RegionCamera, viewport_size: Vector2) -> Transform3D:
 	var axes := RegionProjection.screen_axes(camera.bearing)
@@ -542,16 +684,35 @@ static func _terrain_limit_mpp(surface: Dictionary) -> float:
 	var step := float(surface.step_degrees)*111195.0
 	var latitude := float((surface.anchor_lon_lat as Array)[1])
 	var span := minf((int(surface.width)-1)*step*cos(deg_to_rad(latitude)),(int(surface.height)-1)*step)
+	if (surface.get("presentation",{}) as Dictionary).has("context_height_asset"): return float(surface.display_max_mpp)
 	return minf(float(surface.display_max_mpp),clampf(span/96.0,4.0,24.0))
 
 func coverage_description(camera: RegionCamera) -> Dictionary:
+	var water_boxes: Array[Vector4]=[]
+	for layer: CityMiniature in city_views():
+		if layer.profile.get("ground_mode","")!="cartographic_plane" or int(layer.water_state().active_nodes)==0: continue
+		var b: Array=layer._water_data.get("bounds",[])
+		if b.size()==4: water_boxes.append(Vector4(float(b[0]),float(b[1]),float(b[2]),float(b[3])))
+	if not water_boxes.is_empty():
+		return {"bounds":water_boxes[0],"edge":Vector2.ONE*.04,"water":null,"height":null,"strength":CityOverview.display_strength(camera.km_per_pixel*1000.0),"vertical_pixels":0.0,"city_overview":false,"local_lines":true,"line_bounds":water_boxes[0],"water_owner":true,"secondary_bounds":water_boxes[1] if water_boxes.size()>1 else Vector4.ZERO}
 	if _local_surface==null or not camera.local_active or _surface_presented_key!=_local_surface_key: return {}
 	if _surface_strength(camera)<=0.001: return {}
 	var d := _surface_reference
 	var extent := Vector2(int(d.width)-1,int(d.height)-1)
 	var west := float(d.west_cell_centre)
 	var north := float(d.north_cell_centre)
-	return {"bounds":Vector4(west,north-extent.y*float(d.step_degrees),west+extent.x*float(d.step_degrees),north),"edge":Vector2(maxf(2.0,extent.x*0.12)/extent.x,maxf(2.0,extent.y*0.12)/extent.y),"water":_surface_water_mask,"height":_surface_height_texture,"strength":_surface_strength(camera),"vertical_pixels":cos(elevation_at(camera))/(camera.km_per_pixel*1000.0),"local_lines":_surface_line_mesh!=null and not bool(d.get("river_chart_only",false))}
+	var result: Dictionary={"bounds":Vector4(west,north-extent.y*float(d.step_degrees),west+extent.x*float(d.step_degrees),north),"height_bounds":_surface_height_bounds,"height_layout":_surface_height_layout,"height_stride":_surface_height_stride,"edge":Vector2(maxf(2.0,extent.x*0.12)/extent.x,maxf(2.0,extent.y*0.12)/extent.y),"water":_surface_water_mask,"height":_surface_height_texture,"strength":_surface_strength(camera),"vertical_pixels":cos(elevation_at(camera))/(camera.km_per_pixel*1000.0),"local_lines":_surface_line_mesh!=null and not bool(d.get("river_chart_only",false))}
+	result["city_overview"] = not city_profile.is_empty()
+	if _surface_context_water_mask!=null:
+		result["mask_bounds"]=_surface_context_water_bounds;result["mask_edge"]=Vector2.ONE*.05;result["local_lines"]=true
+		# The schematic centreline is not a second river through the acquired
+		# panel. Unknown continuation stays unknown beyond its bounded water.
+		result["line_bounds"]=_surface_context_water_bounds
+	if not city_profile.is_empty():
+		var city_extent := CityOverview.extent(city_profile).grow(.1)
+		result["line_bounds"]=Vector4(city_extent.position.x,city_extent.position.y,city_extent.end.x,city_extent.end.y)
+		result["local_lines"]=true
+	return result
 
 func set_map_style(style: Dictionary) -> void:
 	var key: Array = [style.tone,style.weight,style.relief]
@@ -576,7 +737,7 @@ func set_surface_reference(surface: Dictionary) -> void:
 func chart_screen_point(unit: Vector3, camera: RegionCamera) -> Vector2:
 	var point := camera.project(unit)
 	var coordinate := RegionProjection.lon_lat(unit)
-	if camera.local_active and _local_surface!=null and _surface_strength(camera)>0.001 and _surface_contains(coordinate):
+	if camera.local_active and city_profile.get("ground_mode","")!="cartographic_plane" and _local_surface!=null and _surface_strength(camera)>0.001 and _surface_contains(coordinate):
 		point.y -= _surface_ground_y(coordinate)*cos(elevation_at(camera))/(camera.km_per_pixel*1000.0)
 	return point
 
@@ -590,7 +751,15 @@ func _settlement_demand(features: Array[Dictionary], camera: RegionCamera, viewp
 			var coordinate := Vector2(float(raw[0]),float(raw[1]))
 			if not _surface_contains(coordinate): continue
 			var point := camera.project(GlobeProjection.lon_lat_to_unit(coordinate))
-			if Rect2(Vector2.ZERO,viewport_size).grow(500.0/(camera.km_per_pixel*1000.0)+128.0).has_point(point): wanted[str(feature.id)] = feature
+			var visible_bounds:=Rect2(Vector2.ZERO,viewport_size).grow(500.0/(camera.km_per_pixel*1000.0)+128.0)
+			var in_view:=visible_bounds.has_point(point)
+			if not in_view:
+				for placement: Dictionary in layout.placements:
+					if not placement.has("reference_anchor_lon_lat"):continue
+					var anchor:=placement.reference_anchor_lon_lat as Array
+					if visible_bounds.has_point(camera.project(GlobeProjection.lon_lat_to_unit(Vector2(float(anchor[0]),float(anchor[1]))))):
+						in_view=true;break
+			if in_view:wanted[str(feature.id)] = feature
 	_settlement_demanded = not wanted.is_empty()
 	if not _settlement_demanded:
 		_release_settlements()
@@ -598,9 +767,8 @@ func _settlement_demand(features: Array[Dictionary], camera: RegionCamera, viewp
 	if not _settlement_meshes.is_empty(): return wanted
 	if _landmark_failed.has(SETTLEMENT_MODULE_PATH): return wanted
 	if not _landmark_scenes.has(SETTLEMENT_MODULE_PATH):
-		if not _landmark_pending.has(SETTLEMENT_MODULE_PATH):
-			if ResourceLoader.load_threaded_request(SETTLEMENT_MODULE_PATH,"PackedScene")==OK: _landmark_pending[SETTLEMENT_MODULE_PATH] = true
-			else: _landmark_failed_load(SETTLEMENT_MODULE_PATH)
+		if _landmark_pending.size()<MAX_PENDING_LANDMARK_SCENES and not _landmark_pending.has(SETTLEMENT_MODULE_PATH):
+			_request_landmark(SETTLEMENT_MODULE_PATH)
 		return wanted
 	var source := (_landmark_scenes[SETTLEMENT_MODULE_PATH] as PackedScene).instantiate()
 	var nodes: Array[Node] = [source]
@@ -642,7 +810,11 @@ func _update_settlement_batches(features: Dictionary, camera: RegionCamera, view
 				if mpp>=float(layout.get("lod_switch_mpp",8.0)) and _settlement_meshes.has(module+"_far"): module += "_far"
 				if not _settlement_meshes.has(module): continue
 				var offset := placement.offset_m as Array
-				var unit := RegionProjection.inverse(Vector2(float(offset[0]),float(offset[1]))/1000.0,geographic)
+				var placement_frame:=geographic
+				if placement.has("reference_anchor_lon_lat"):
+					var reference:=placement.reference_anchor_lon_lat as Array
+					placement_frame=RegionProjection.frame(Vector2(float(reference[0]),float(reference[1])))
+				var unit := RegionProjection.inverse(Vector2(float(offset[0]),float(offset[1]))/1000.0,placement_frame)
 				var coordinate := RegionProjection.lon_lat(unit)
 				if not _surface_contains(coordinate): continue
 				var metric := (RegionProjection.forward(unit,_surface_chart_frame)-_surface_chart_anchor_km)*1000.0
@@ -751,6 +923,7 @@ func _enable_landmark_3d() -> void:
 	_local_viewport.name = "LocalGeometryTarget"
 	_local_viewport.size = Vector2i(2,2)
 	_local_viewport.transparent_bg = true
+	_local_viewport.msaa_3d=Viewport.MSAA_4X
 	_local_viewport.world_2d = World2D.new()
 	_local_viewport.world_3d = World3D.new()
 	_local_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
@@ -844,7 +1017,7 @@ static func model_limit_mpp(visual: Dictionary) -> float:
 	return minf(float(visual.model_max_mpp),clampf(float(visual.get("model_admission_mpp",size/20.0)),4.0,24.0))
 
 func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_size: Vector2, reference_lines: Array[Dictionary], covers: Array[Dictionary]) -> void:
-	var show := ready and camera.local_active and not surface.is_empty() and not _landmark_failed.has(str(surface.get("content_path","")))
+	var show: bool = city_profile.get("ground_mode", "")!="cartographic_plane" and ready and camera.local_active and not surface.is_empty() and not _landmark_failed.has(str(surface.get("content_path","")))
 	var mpp := camera.km_per_pixel*1000.0
 	if show:
 		show = mpp>float(surface.display_min_mpp) and mpp<=_terrain_limit_mpp(surface)*(1.35 if _local_surface!=null or not _surface_wanted_key.is_empty() else 1.0)
@@ -896,9 +1069,12 @@ func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_
 	if _surface_cpu_ready.is_empty():
 		if _surface_thread==null:
 			_surface_build_key = demand_key+[_surface_generation]
-			_surface_thread = Thread.new()
-			_surface_thread.start(LocalSpatialLod.prepare_terrain.bind(surface,camera.tangent_frame,reference_lines,covers,_surface_preparation_current.bind(_surface_generation)))
+			var work := LocalSpatialLod.prepare_terrain.bind(surface,camera.tangent_frame,reference_lines,covers,_surface_preparation_current.bind(_surface_generation))
+			_surface_thread = MapJobs.submit(work,"local surface geometry",MapJobs.VISIBLE,self)
 		return
+	var upload_bytes := int(_surface_cpu_ready.get("upload_bytes",0))
+	if frame_budget!=null and not frame_budget.claim_upload(upload_bytes): return
+	var upload_started := Time.get_ticks_usec()
 	if _local_surface!=null:
 		for node: MeshInstance3D in [_local_surface,_surface_cover,_surface_lines]:
 			if node!=null:
@@ -912,6 +1088,7 @@ func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_
 	_local_surface_key = source_key
 	_surface_chart_frame = camera.tangent_frame
 	_install_surface_geometry(_surface_cpu_ready)
+	if frame_budget!=null: frame_budget.finish_upload(upload_started,"local terrain")
 	_surface_cpu_ready = {}
 	_surface_presented_key = ""
 	_enable_landmark_3d()
@@ -921,9 +1098,54 @@ func _update_surface_demand(surface: Dictionary, camera: RegionCamera, viewport_
 		_local_surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_surface_material = ShaderMaterial.new()
 		_surface_material.shader = preload("res://shaders/presentation/map/local_terrain.gdshader")
-		_surface_material.set_shader_parameter("native_detail",(surface.get("presentation",{}) as Dictionary).has("context_height_asset"))
+		_surface_material.set_shader_parameter("context_terrain",(surface.get("presentation",{}) as Dictionary).has("context_height_asset"))
 		var native_extent := Vector2(int(surface.width)-1,int(surface.height)-1)*float(surface.step_degrees)
 		_surface_material.set_shader_parameter("survey_bounds",Vector4(float(surface.west_cell_centre),float(surface.north_cell_centre)-native_extent.y,float(surface.west_cell_centre)+native_extent.x,float(surface.north_cell_centre)))
+		_surface_material.set_shader_parameter("context_water_enabled",_surface_context_water_mask!=null)
+		_surface_material.set_shader_parameter("context_water_mask",_surface_context_water_mask)
+		_surface_material.set_shader_parameter("context_water_bounds",_surface_context_water_bounds)
+		var urban: Dictionary=(surface.get("presentation",{}) as Dictionary).get("urban_context",{})
+		var urban_enabled: bool=internal_load_active() and urban.get("role")=="CONCEPTUAL_SPATIAL_CONTEXT_NOT_1900_SURVEY"
+		_surface_material.set_shader_parameter("urban_enabled",urban_enabled)
+		if urban_enabled:
+			_local_notice=Label.new()
+			_local_notice.text="概念街区，非1900年测绘 · 水域为有限现代参考"
+			_local_notice.position=Vector2(110,75)
+			_local_notice.mouse_filter=Control.MOUSE_FILTER_IGNORE
+			_local_notice.add_theme_font_override("font",load("res://assets/fonts/map/SourceHanSerifCN-Regular.otf"))
+			_local_notice.add_theme_font_size_override("font_size",14)
+			_local_notice.add_theme_color_override("font_color",Color(0.91,0.85,0.68))
+			_local_notice.add_theme_color_override("font_shadow_color",Color(0.13,0.17,0.16))
+			_local_notice.add_theme_constant_override("shadow_offset_x",1)
+			_local_notice.add_theme_constant_override("shadow_offset_y",1)
+			_map_annotation_layer.add_child(_local_notice)
+		if urban_enabled:
+			var centres:=PackedVector4Array();centres.resize(4)
+			var routes:=PackedVector4Array();routes.resize(4)
+			for index: int in range(mini(4,urban.get("centres",[]).size())):
+				var row: Array=urban.centres[index]
+				var unit:=GlobeProjection.lon_lat_to_unit(Vector2(float(row[0]),float(row[1])))
+				var metric: Vector2=(RegionProjection.forward(unit,_surface_chart_frame)-_surface_chart_anchor_km)*1000.0
+				centres[index]=Vector4(metric.x,metric.y,clampf(float(row[2]),0,1500),1)
+				if index<urban.get("labels",[]).size():
+					var label:=Label.new()
+					label.text=str(urban.labels[index])
+					label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+					label.add_theme_font_override("font",_local_notice.get_theme_font("font"))
+					label.add_theme_font_size_override("font_size",14)
+					label.add_theme_color_override("font_color",Color(0.95,0.87,0.66))
+					label.add_theme_color_override("font_shadow_color",Color(0.13,0.17,0.16))
+					label.add_theme_constant_override("shadow_offset_x",1)
+					label.add_theme_constant_override("shadow_offset_y",1)
+					_map_annotation_layer.add_child(label)
+					_local_context_labels.append({"label":label,"unit":unit})
+			for index: int in range(mini(4,urban.get("connections",[]).size())):
+				var row: Array=urban.connections[index]
+				var a: Vector2=(RegionProjection.forward(GlobeProjection.lon_lat_to_unit(Vector2(float(row[0]),float(row[1]))),_surface_chart_frame)-_surface_chart_anchor_km)*1000.0
+				var b: Vector2=(RegionProjection.forward(GlobeProjection.lon_lat_to_unit(Vector2(float(row[2]),float(row[3]))),_surface_chart_frame)-_surface_chart_anchor_km)*1000.0
+				routes[index]=Vector4(a.x,a.y,b.x,b.y)
+			_surface_material.set_shader_parameter("urban_centres",centres)
+			_surface_material.set_shader_parameter("urban_connections",routes)
 		_surface_material.set_shader_parameter("woodland_enabled",_surface_woodland_mask!=null)
 		if _surface_woodland_mask!=null: _surface_material.set_shader_parameter("woodland_mask",_surface_woodland_mask)
 		var palette := (surface.get("presentation",{}) as Dictionary).get("palette",{}) as Dictionary
@@ -964,6 +1186,7 @@ func _install_woodland_instances() -> void:
 	if _woodland_positions.is_empty(): return
 	var material := StandardMaterial3D.new()
 	material.vertex_color_use_as_albedo = true
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material.roughness = 1.0
 	for variant: int in range(3):
@@ -1035,6 +1258,7 @@ func _edge_weight(grid: Vector2) -> float:
 func _surface_ground_y(coordinate: Vector2) -> float:
 	if _surface_vertices.is_empty(): return 0.0
 	var grid := _surface_grid(coordinate)
+	if not _surface_display_heights.is_empty():return LocalSpatialLod.height_sample(_surface_display_heights,_surface_height_size,LocalSpatialLod.height_grid(grid,_surface_height_layout,_surface_height_stride))
 	var width := int(_surface_reference.width)
 	var column := clampi(int(grid.x),0,width-2)
 	var row := clampi(int(grid.y),0,int(_surface_reference.height)-2)
@@ -1048,21 +1272,34 @@ func _surface_ground_y(coordinate: Vector2) -> float:
 
 func _surface_contains(coordinate: Vector2) -> bool:
 	if _surface_reference.is_empty(): return false
+	if not _surface_display_heights.is_empty():return coordinate.x>=_surface_height_bounds.x and coordinate.x<=_surface_height_bounds.z and coordinate.y>=_surface_height_bounds.y and coordinate.y<=_surface_height_bounds.w
 	var west := float(_surface_reference.west_cell_centre)
 	var north := float(_surface_reference.north_cell_centre)
 	var step := float(_surface_reference.step_degrees)
 	return coordinate.x>=west and coordinate.x<=west+(int(_surface_reference.width)-1)*step and coordinate.y<=north and coordinate.y>=north-(int(_surface_reference.height)-1)*step
 
 func _update_surface_pose(camera: RegionCamera, viewport_size: Vector2) -> void:
-	_surface_pick_view = [camera.tangent_frame,camera.origin,camera.km_per_pixel,camera.bearing,viewport_size,_local_surface_key]
+	var view: Array = [camera.tangent_frame,camera.origin,camera.km_per_pixel,camera.bearing,viewport_size,_local_surface_key,elevation_at(camera)]
+	if view!=_surface_pick_view:
+		_surface_pick_view=view
+		_surface_pick_pixel=Vector2(INF,INF)
+		_surface_pick_unit=Vector3.ZERO
 	var unit := GlobeProjection.lon_lat_to_unit(_local_surface_anchor)
 	_local_surface.transform = _chart_transform(unit,camera,viewport_size)
 	_local_surface.force_update_transform()
 	var strength := _surface_strength(camera)
-	_local_surface.visible = strength>0.001
+	# London overview uses a cartographic ground plane. The acquired DSM stays
+	# cached for detailed observation; it must not cut through diagram geometry.
+	_local_surface.visible = strength>0.001 and city_profile.get("ground_mode","")!="cartographic_plane"
 	if _surface_material!=null:
+		_surface_material.set_shader_parameter("city_overview",not city_profile.is_empty())
 		if strength!=_surface_strength_value: _surface_material.set_shader_parameter("local_strength",strength)
 	_surface_strength_value = strength
+	for row: Dictionary in _local_context_labels:
+		var label:=row.label as Label
+		var point:=surface_screen_point(row.unit,camera)+Vector2(12,-26)
+		label.visible=strength>0.95 and Rect2(Vector2(110,120),viewport_size-Vector2(200,230)).has_point(point)
+		label.position=point
 	_surface_pick_pixel = Vector2(INF,INF)
 	if _surface_lines!=null: _surface_lines.transform = _local_surface.transform
 	for node: MultiMeshInstance3D in _woodland_nodes:
@@ -1071,10 +1308,10 @@ func _update_surface_pose(camera: RegionCamera, viewport_size: Vector2) -> void:
 		node.visible = strength>0.95 and camera.km_per_pixel*1000.0<=float(detail.get("max_mpp",12.0))
 	if _surface_cover!=null:
 		_surface_cover.transform = _local_surface.transform
-		_surface_cover.visible = strength>0.001
+		_surface_cover.visible = strength>0.001 and city_profile.is_empty()
 	for instance: MeshInstance3D in [_surface_lines]:
 		if instance==null: continue
-		instance.visible = strength>0.001
+		instance.visible = strength>0.001 and city_profile.is_empty()
 		var material := instance.material_override as StandardMaterial3D
 		var color := material.albedo_color
 		color.a = strength
@@ -1082,7 +1319,7 @@ func _update_surface_pose(camera: RegionCamera, viewport_size: Vector2) -> void:
 
 func surface_unit_at(pixel: Vector2, camera: RegionCamera, viewport_size: Vector2) -> Vector3:
 	if _local_surface==null or _landmark_camera==null or _surface_chart_frame!=camera.tangent_frame: return Vector3.ZERO
-	var view: Array = [camera.tangent_frame,camera.origin,camera.km_per_pixel,camera.bearing,viewport_size,_local_surface_key]
+	var view: Array = [camera.tangent_frame,camera.origin,camera.km_per_pixel,camera.bearing,viewport_size,_local_surface_key,elevation_at(camera)]
 	# A current crop contains every rendered terrain pixel. Outside it the
 	# existing flat chart owns input; do not traverse native DEM triangles.
 	# A pending camera move must first update its pose, so never reject against
@@ -1132,11 +1369,21 @@ func surface_screen_point(unit: Vector3, camera: RegionCamera) -> Vector2:
 	if _local_surface==null or not _local_surface.visible or _landmark_camera==null or not _surface_contains(coordinate): return Vector2(INF,INF)
 	return chart_screen_point(unit,camera)
 
-func release_landmarks() -> void:
+func release_landmarks(keep_context: bool = false, drop_scene_cache: bool = false) -> void:
+	for id: String in city_layers.keys():
+		var layer := city_layers[id] as CityMiniature
+		if keep_context and layer.profile.get("role","")=="NATIONAL_CARTOGRAPHIC_CONTEXT": continue
+		layer.clear()
+		if not layer.preparing(): city_layers.erase(id)
+	city=CityOverview.new()
 	if _internal_scene_load!=null: _internal_scene_load.call("clear")
 	_cancel_surface_preparation()
 	_release_settlements()
 	_landmark_wanted_paths.clear()
+	_landmark_waiting_for_slot = false
+	if drop_scene_cache:
+		_landmark_scenes.clear()
+		_landmark_scene_order.clear()
 	landmark_screen_bounds.clear()
 	_landmark_presented.clear()
 	_landmark_instances.clear()
@@ -1152,6 +1399,9 @@ func release_landmarks() -> void:
 		_landmark_light = null
 		_local_camera_key.clear()
 		_local_render_generation += 1
+		if _landmark_frame_callback.is_valid() and RenderingServer.frame_post_draw.is_connected(_landmark_frame_callback):
+			RenderingServer.frame_post_draw.disconnect(_landmark_frame_callback)
+		_landmark_frame_callback=Callable()
 		_landmark_render_pending = false
 		_local_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		_local_viewport.find_world_3d().environment = null
@@ -1164,6 +1414,11 @@ func release_landmarks() -> void:
 	_trim_landmark_scenes()
 
 func _release_surface_geometry() -> void:
+	for row: Dictionary in _local_context_labels:(row.label as Label).queue_free()
+	_local_context_labels.clear()
+	if _local_notice!=null:
+		_local_notice.queue_free()
+		_local_notice=null
 	for node: MultiMeshInstance3D in _woodland_nodes:
 		node.visible = false
 		node.multimesh = null
@@ -1185,6 +1440,8 @@ func _release_surface_geometry() -> void:
 	_surface_water_mask = null
 	_surface_woodland_mask = null
 	_surface_height_texture = null
+	_surface_context_water_mask=null;_surface_context_water_bounds=Vector4.ZERO
+	_surface_display_heights.clear();_surface_height_size=Vector2i.ZERO;_surface_height_layout=Vector4.ZERO;_surface_height_stride=1.0;_surface_height_bounds=Vector4.ZERO
 	_surface_vertices = PackedVector3Array()
 	_surface_ray_vertices = PackedVector3Array()
 	_surface_indices = PackedInt32Array()
@@ -1208,6 +1465,7 @@ func _cancel_surface_preparation() -> void:
 	_surface_mutex.lock()
 	_surface_generation += 1
 	_surface_mutex.unlock()
+	MapJobs.cancel_queued(_surface_thread)
 	_surface_wanted_key.clear()
 	_surface_cpu_ready = {}
 
@@ -1218,8 +1476,8 @@ func _surface_preparation_current(generation: int) -> bool:
 	return current
 
 func _poll_surface_preparation() -> bool:
-	if _surface_thread==null or _surface_thread.is_alive(): return false
-	var returned: Variant = _surface_thread.wait_to_finish()
+	if _surface_thread==null or not _surface_thread.completed: return false
+	var returned: Variant = _surface_thread.take()
 	_surface_thread = null
 	if not _surface_wanted_key.is_empty() and _surface_build_key==_surface_wanted_key+[_surface_generation]:
 		var valid := returned is Dictionary
@@ -1233,7 +1491,17 @@ func _poll_surface_preparation() -> bool:
 			_surface_wanted_key.clear()
 			_surface_cpu_ready = {}
 			landmark_load_failed.emit("LOCAL地形准备未返回完整结果，暂保留区域地貌和地点标识。")
-		else: _surface_cpu_ready = returned as Dictionary
+		else:
+			_surface_cpu_ready = returned as Dictionary
+			var bytes := 0
+			for field: String in ["terrain_arrays","cover_arrays","line_arrays","height_bytes","water_bytes","woodland_bytes","context_water_bytes"]:
+				bytes += FrameBudget.packed_bytes(_surface_cpu_ready.get(field))
+			if bytes>FrameBudget.UPLOAD_BYTES:
+				_landmark_failed[str(_surface_wanted_key[0])] = true
+				_surface_wanted_key.clear()
+				_surface_cpu_ready = {}
+				landmark_load_failed.emit("LOCAL地形超过当前绘制预算，暂保留区域地貌。")
+			else: _surface_cpu_ready["upload_bytes"] = bytes
 	return true
 
 func _install_surface_geometry(data: Dictionary) -> void:
@@ -1250,7 +1518,16 @@ func _install_surface_geometry(data: Dictionary) -> void:
 	_woodland_positions.assign(data.get("woodland_positions",[]) as Array)
 	_surface_woodland_mask = null if woodland_bytes.is_empty() else ImageTexture.create_from_image(Image.create_from_data(COVER_MASK_SIZE,COVER_MASK_SIZE,false,Image.FORMAT_R8,woodland_bytes))
 	_surface_water_mask = ImageTexture.create_from_image(Image.create_from_data(1,1,false,Image.FORMAT_L8,PackedByteArray([0])) if water_bytes.is_empty() else Image.create_from_data(COVER_MASK_SIZE,COVER_MASK_SIZE,false,Image.FORMAT_L8,water_bytes))
-	_surface_height_texture = ImageTexture.create_from_image(Image.create_from_data(int(_surface_reference.width),int(_surface_reference.height),false,Image.FORMAT_RF,data.height_bytes))
+	_surface_height_size=data.height_size;_surface_height_layout=data.height_layout;_surface_height_stride=data.height_stride;_surface_height_bounds=data.height_bounds
+	_surface_display_heights=(data.height_bytes as PackedByteArray).to_float32_array()
+	_surface_ground_range=Vector2(INF,-INF)
+	for value: float in _surface_display_heights:
+		_surface_ground_range.x=minf(_surface_ground_range.x,value)
+		_surface_ground_range.y=maxf(_surface_ground_range.y,value)
+	_surface_height_texture = ImageTexture.create_from_image(Image.create_from_data(_surface_height_size.x,_surface_height_size.y,false,Image.FORMAT_RF,data.height_bytes))
+	var context_water_bytes:=data.get("context_water_bytes",PackedByteArray()) as PackedByteArray
+	_surface_context_water_bounds=data.get("context_water_bounds",Vector4.ZERO)
+	_surface_context_water_mask=null if context_water_bytes.is_empty() else ImageTexture.create_from_image(Image.create_from_data(512,512,false,Image.FORMAT_R8,context_water_bytes))
 	_local_surface_mesh = ArrayMesh.new()
 	var arrays := data.terrain_arrays as Array
 	if not (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).is_empty(): _local_surface_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)

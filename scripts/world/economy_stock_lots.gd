@@ -8,7 +8,10 @@ var losses: Dictionary = {}
 var next_id: int = 1
 var costs: RefCounted
 var _by_location: Dictionary = {}
+var _ordered_location: Dictionary = {} # Derived active IDs; quantity-only reads reuse the order.
 var _by_owner: Dictionary = {}
+var _owner_history: Dictionary = {} # Derived portion IDs, including consumed/moved portions.
+var _owner_outgoing: Dictionary = {} # Child IDs only when legal ownership changes.
 var _reservations: Dictionary = {}
 var _projection: Dictionary = {}
 var _view: Dictionary = {}
@@ -39,12 +42,13 @@ func _project_key(p: Dictionary) -> String:
 	if _actors.has(p["owner"]): return p["owner"]
 	return str(p["location"]).trim_prefix("SITE|") if str(p["location"]).begins_with("SITE|") else ""
 
-func _index(p: Dictionary, sign: int) -> void:
+func _index(p: Dictionary, sign: int, keep_order: bool = false) -> void:
 	if not _by_owner.has(p["owner"]): _by_owner[p["owner"]] = {}
 	if sign > 0 and int(p["remaining"]) > 0: _by_owner[p["owner"]][p["id"]] = true
 	else: _by_owner[p["owner"]].erase(p["id"])
 	var loc := str(p["location"])
 	var key := loc+"#"+str(p["good"])
+	if not keep_order: _ordered_location.erase(key)
 	if not _by_location.has(key): _by_location[key] = {}
 	if sign > 0 and int(p["remaining"]) > 0: _by_location[key][p["id"]] = true
 	else: _by_location[key].erase(p["id"])
@@ -70,6 +74,7 @@ func _add(source: String, quantity: int, owner: String, location: String, place:
 	var s := sources[source] as Dictionary
 	var p := {"id": id, "parent_portion_id": parent, "source_id": source, "good": s["good"], "unit": s["unit"], "quantity": quantity, "remaining": quantity, "consumed": 0, "lost": 0, "moved": 0, "owner": owner, "custodian": custodian, "location": location, "place_id": place, "acquisition_id": acquisition, "reserved_for": reserved, "opened_minute": minute, "closed_minute": -1}
 	portions[id] = p
+	_index_history(p)
 	if costs != null: costs.portion_added(p)
 	_index(p, 1)
 	if not reserved.is_empty():
@@ -80,8 +85,12 @@ func _add(source: String, quantity: int, owner: String, location: String, place:
 func selection(location: String, good: String, quantity: int, reserved: String = "", acquisition: String = "") -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var left := quantity
-	var ids: Array = _by_location.get(location+"#"+good, {}).keys()
-	ids.sort_custom(func(a: String, b: String) -> bool: return int(a.trim_prefix("portion:")) < int(b.trim_prefix("portion:")))
+	var key: String = location + "#" + good
+	if not _ordered_location.has(key):
+		var ordered: Array = _by_location.get(key, {}).keys()
+		ordered.sort_custom(func(a: String, b: String) -> bool: return int(a.trim_prefix("portion:")) < int(b.trim_prefix("portion:")))
+		_ordered_location[key] = ordered
+	var ids: Array = _ordered_location[key]
 	for id: String in ids:
 		var p := portions[id] as Dictionary
 		if p["reserved_for"] != reserved or (not acquisition.is_empty() and p["acquisition_id"] != acquisition): continue
@@ -104,13 +113,14 @@ func ready(rows: Array[Dictionary]) -> bool:
 	return true
 
 func _subtract(p: Dictionary, q: int, field: String, minute: int) -> void:
-	_index(p, -1)
+	var survives: bool = q < int(p["remaining"])
+	_index(p, -1, survives)
 	p["remaining"] = int(p["remaining"])-q
 	p[field] = int(p[field])+q
 	if int(p["remaining"]) == 0:
 		p["closed_minute"] = minute
 		if not str(p["reserved_for"]).is_empty(): _reservations.get(p["reserved_for"], {}).erase(p["id"])
-	_index(p, 1)
+	_index(p, 1, survives)
 
 func move(rows: Array[Dictionary], location: String, place: String, minute: int, owner: String = "", acquisition: String = "", reservation: String = "", custodian: String = "") -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
@@ -216,21 +226,34 @@ func restore(raw: Variant, expected: Dictionary, units: Dictionary, valid_owners
 	losses = raw["losses"].duplicate(true)
 	next_id = raw["next_id"]
 	_by_location.clear()
+	_ordered_location.clear()
 	_by_owner.clear()
+	_owner_history.clear()
+	_owner_outgoing.clear()
 	_reservations.clear()
 	_projection.clear()
 	_view_dirty = true
 	for subject: String in expected: ensure_subject(subject)
 	for p: Dictionary in portions.values():
+		_index_history(p)
 		_index(p, 1)
 		if int(p["remaining"]) > 0 and not str(p["reserved_for"]).is_empty():
 			if not _reservations.has(p["reserved_for"]): _reservations[p["reserved_for"]] = {}
 			_reservations[p["reserved_for"]][p["id"]] = true
 	return _projection == expected
 
-func quantity_at(location: String, good: String) -> int:
+func _index_history(p: Dictionary) -> void:
+	if not _owner_history.has(p["owner"]): _owner_history[p["owner"]] = []
+	_owner_history[p["owner"]].append(p["id"])
+	var parent: Dictionary = portions.get(p["parent_portion_id"], {})
+	if not parent.is_empty() and parent["owner"] != p["owner"]:
+		if not _owner_outgoing.has(parent["owner"]): _owner_outgoing[parent["owner"]] = []
+		_owner_outgoing[parent["owner"]].append(p["id"])
+
+func quantity_at(location: String, good: String, available_only: bool = false) -> int:
 	var q := 0
-	for id: String in _by_location.get(location+"#"+good, {}): q += int(portions[id]["remaining"])
+	for id: String in _by_location.get(location+"#"+good, {}):
+		if not available_only or str(portions[id]["reserved_for"]).is_empty(): q += int(portions[id]["remaining"])
 	return q
 
 func reserved_quantity(ref: String) -> int:

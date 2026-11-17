@@ -67,7 +67,8 @@ static func valid_configuration(settings: Dictionary, spec: Dictionary) -> bool:
 	for good: Dictionary in settings.get("goods", []): uses[good["id"]] = good.get("capital_uses", [])
 	var seen: Dictionary = {}
 	for row: Variant in value["templates"]:
-		if not row is Dictionary or not EconomySliceConfig._fields(row, ["id", "firm", "site_id", "kind", "asset_type", "capacity", "activities", "materials", "hours", "hours_per_day", "duration_minutes", "max_projects", "budget", "cash_floor", "denomination", "basis"], ["maintenance", "building", "service_days"]): return false
+		if not row is Dictionary or not EconomySliceConfig._fields(row, ["id", "firm", "site_id", "kind", "asset_type", "capacity", "activities", "materials", "hours", "hours_per_day", "duration_minutes", "max_projects", "budget", "cash_floor", "denomination", "basis"], ["maintenance", "building", "service_days", "requires_materials_at_start"]): return false
+		if row.has("requires_materials_at_start") and (not row["requires_materials_at_start"] is bool or row["kind"] != "INSTALL"): return false
 		for key: String in ["id", "firm", "site_id", "asset_type", "denomination"]:
 			if not row[key] is String or row[key].is_empty(): return false
 		if seen.has(row["id"]) or not firms.has(row["firm"]) or not sites.has(row["site_id"]) or sites[row["site_id"]]["firm_id"] != row["firm"] or row["kind"] not in ["EXPAND", "INSTALL", "NEW_SITE"]+BUILD_KINDS or row["basis"] != "DEVELOPMENT_CAPITAL_PERMISSION": return false
@@ -164,6 +165,16 @@ func template(id: String) -> Dictionary:
 		_templates_ready = true
 	return _templates.get(id, {})
 
+func starting_blocker(terms: Dictionary, budget: int) -> String:
+	var e := _economy()
+	var site: String = terms["site_id"]
+	for good: String in terms["materials"]:
+		if e.capital_free_goods(site,good)<int(terms["materials"][good]): return "CAPITAL_GOODS_NOT_AT_SITE"
+	var firm: String = terms["firm"]
+	if e._world.ledger_state.available_balance(e._account(firm,terms["denomination"]))<budget+e._capital_cash_protected(firm,terms):
+		return "CONSTRUCTION_REAL_CASH_NOT_AVAILABLE"
+	return ""
+
 func request(actor: String, payload: Dictionary, action_id: String, kind: String) -> Dictionary:
 	var e := _economy()
 	var now := e._world.game_clock.total_minutes()
@@ -217,6 +228,9 @@ func request(actor: String, payload: Dictionary, action_id: String, kind: String
 		for id: String in _active:
 			if projects[id]["asset_id"] == original["id"]: return _reject("MAINTENANCE_ALREADY_REQUESTED")
 	var construction:Dictionary={}
+	if not maintenance and terms.get("requires_materials_at_start",false):
+		var blocker := starting_blocker(terms,int(payload["budget"]))
+		if not blocker.is_empty(): return _reject(blocker)
 	if not maintenance and terms["kind"] in BUILD_KINDS:
 		construction=construction_permission(actor,terms,int(payload["budget"]),now)
 		if not construction.get("ok",false):return _reject(construction.get("reason","NO_CONSTRUCTION_PERMISSION"))

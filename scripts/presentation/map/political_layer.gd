@@ -1,9 +1,13 @@
 class_name PoliticalLayer
 extends RefCounted
+const STRUCTURE = preload("res://scripts/presentation/map/economy/economic_structure_style.gd")
 ## World-scale PoliticalMapRegions; historical/local authority stays in content.
 
 var records: Dictionary = {}
 var economies: Dictionary = {}
+var show_output_values: bool = false
+var output_values: Dictionary = {}
+var output_maximum: float = 0.0
 var anchors: Dictionary = {}
 var places: Dictionary = {}
 var resolved_visuals: Dictionary = {}
@@ -413,8 +417,18 @@ func economic_available(entity_id: String) -> bool:
 	var value: Variant = totals.get("fulfillment_bp")
 	return (value is int or value is float) and is_finite(float(value)) and float(value)>=0.0 and float(value)<=10000.0
 
+func output_value(entity_id: String) -> Variant:
+	var aggregate := str((economies.get(entity_id,{}) as Dictionary).get("economic_aggregate_id",""))
+	return output_values.get(aggregate)
+
 func color(entity_id: String, mode: String) -> Color:
 	if mode=="geographic": return Color("69745e")
+	if mode=="military": return Color("69745e")
+	if mode=="economic":
+		if show_output_values:
+			var value: Variant = output_value(entity_id)
+			return STRUCTURE.output_color(float(value),output_maximum) if value!=null else Color("465451")
+		return STRUCTURE.color(str((records.get(entity_id,{}) as Dictionary).get("source_historical_id","")))
 	if mode != "political":
 		var economy := economies.get(entity_id, {}) as Dictionary
 		var totals := economy.get("daily_totals", {}) as Dictionary

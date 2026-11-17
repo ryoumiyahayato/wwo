@@ -110,7 +110,7 @@ def independent_foundation(out, with_ink=False):
    values.append(fact(f,id,src,src['access_metadata']['data_transformation'],'APPROXIMATE'))
   lines=[list(map(list,line.coords)) for line in parts(shore,'LineString') if len(line.coords)>1]
   if lines:
-   key='coast:'+id;geometries[key]={'geometry':{'type':'MultiLineString','coordinates':lines},'lod_geometry':{lod:lines}}
+   key='coast:'+id;geometries[key]={'geometry':{'type':'MultiLineString','coordinates':lines},'lod_geometry':{lod:'@geometry.coordinates'}}
    values.append(fact({'id':key,'kind':'coast','display_name':'Physical coastline','presentation_lods':[lod],'source_type':'PHYSICAL_REFERENCE','source_geometry_file':physical_file.name,'lod_tolerance_m':{lod:TOLERANCES[lod]}},id,src,'Boundary of the same globally simplified independent land; tile cut edges are not coast.','APPROXIMATE'))
   path=out/(id+'.json');side=path.with_suffix('.geom')
   decoded=json.dumps(geometries,ensure_ascii=False,separators=(',',':')).encode();side.write_bytes(zlib.compress(decoded,9))

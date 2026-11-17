@@ -1,6 +1,8 @@
 class_name FormalEconomyMapView
 extends Control
 const EconomicText = preload("res://scripts/presentation/ui/formal_economic_text.gd")
+const Structure = preload("res://scripts/presentation/map/economy/economic_structure_style.gd")
+const UILocale = preload("res://scripts/presentation/ui/ui_locale.gd")
 ## UI over the installed GlobeRenderer. No map foundation or Runtime is created.
 ## Order/cargo formatting reused from the frozen economy-consumer-access view.
 signal query_requested(subject: String, offset: int)
@@ -12,6 +14,7 @@ signal links_changed(rows: Array[Dictionary])
 signal business_requested(subject_id: String, site_id: String)
 signal statistics_requested
 signal demand_changed
+signal output_chain_changed
 signal flow_animation_changed(enabled: bool)
 signal personal_market_requested
 signal pending_cancellation_requested(order_id: String)
@@ -20,6 +23,7 @@ var snapshot: Dictionary = {}
 var network: Dictionary = {}
 var contacts: Dictionary = {}
 var public_network: Dictionary = {}
+var logistics: Dictionary = {}
 var selected_node: String = ""
 const LINK_BUDGET = 48
 const PLACE_MENU_BUDGET = 128
@@ -30,11 +34,14 @@ var selected_site: String = ""
 var selected_order: String = ""
 var selected_good: String = "all"
 var full: bool = false
+var output_chain: String = "food"
+var _show_overview: bool = true
+var _output_panel: PanelContainer
+var _output_hint: Label
+var _output_scale: HBoxContainer
 var show_contacts: bool = false
 var show_routes: bool = true
-var show_receipts: bool = true
 var _updating: bool = false
-var _toolbar: HBoxContainer
 var _side: PanelContainer
 var _heading: Label
 var _details: RichTextLabel
@@ -47,9 +54,7 @@ var _expand: Button
 var _previous: Button
 var _next: Button
 var _business: Button
-var _return_map: Button
 var _managed_subject: bool = false
-var _detail_toggle: Button
 var _details_collapsed: bool = true
 var research_expanded: bool = false
 var flow_animation_enabled: bool = true
@@ -69,32 +74,76 @@ var _jobs: Button
 var _personal_market: Button
 var _cancel_pending: Button
 var _navigation_pending: Dictionary = {}
+var city_position: Callable
+var _inspection_topic: String = "city"
+var _city_card: PanelContainer
+var _city_title: Label
+var _city_brief: Label
+var _city_subjects: OptionButton
+var _city_routes: Button
+var _inspect_switch: Button
 
 func _ready() -> void:
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme=UIDrawing.shell_theme()
-	_toolbar=HBoxContainer.new();add_child(_toolbar)
-	# Keep one compact primary row. City shortcuts remain in its native menu.
-	_toolbar.theme=theme.duplicate(true)
-	_toolbar.theme.default_font_size=14
-	for state:String in ["normal","hover","pressed","disabled","focus"]:
-		var box:=_toolbar.theme.get_stylebox(state,"Button") as StyleBoxFlat
-		box.content_margin_top=5;box.content_margin_bottom=5
-		box.content_margin_left=10;box.content_margin_right=10
-	_button(_toolbar,"定位所选",func():focus_requested.emit(selected_place))
-	var locations:=MenuButton.new();locations.text="地点";locations.flat=false
-	locations.tooltip_text="巴黎 / 里昂 / 马赛；只定位镜头。";_toolbar.add_child(locations)
-	var places:Array[String]=[]
-	for p: Array in [["巴黎","place:paris"],["里昂","place:lyon"],["马赛","place:marseille"]]:
-		places.append(str(p[1]));locations.get_popup().add_item(str(p[0]),places.size()-1)
-	locations.get_popup().id_pressed.connect(func(id:int):focus_requested.emit(places[id]))
-	_detail_toggle=_button(_toolbar,"展开详情",_toggle_details)
-	_return_map=_button(_toolbar,"返回政治地图",func():back_requested.emit())
-	_toolbar.minimum_size_changed.connect(_layout)
+	_city_card=PanelContainer.new();add_child(_city_card)
+	var paper:=StyleBoxFlat.new();paper.bg_color=Color(0.055,0.085,0.10,1.0)
+	paper.border_color=Color(0.57,0.48,0.29);paper.set_border_width_all(1);paper.set_corner_radius_all(6)
+	paper.content_margin_left=14;paper.content_margin_right=14;paper.content_margin_top=10;paper.content_margin_bottom=10
+	_city_card.add_theme_stylebox_override("panel",paper)
+	_output_panel = PanelContainer.new()
+	_output_panel.position = Vector2(16,92)
+	_output_panel.add_theme_stylebox_override("panel",paper)
+	add_child(_output_panel)
+	var output_column := VBoxContainer.new()
+	_output_panel.add_child(output_column)
+	var chain_select := OptionButton.new()
+	chain_select.custom_minimum_size.x = 192
+	for id: String in Structure.OUTPUT_CHAINS:
+		chain_select.add_item(UILocale.text(Structure.OUTPUT_CHAINS[id].label))
+		chain_select.set_item_metadata(chain_select.item_count-1,id)
+	chain_select.item_selected.connect(func(index: int) -> void:
+		output_chain = str(chain_select.get_item_metadata(index))
+		output_chain_changed.emit())
+	output_column.add_child(chain_select)
+	_output_hint = Label.new()
+	_output_hint.add_theme_font_size_override("font_size",11)
+	output_column.add_child(_output_hint)
+	_output_scale = HBoxContainer.new()
+	_output_scale.add_theme_constant_override("separation",2)
+	output_column.add_child(_output_scale)
+	for step: int in range(5):
+		var sample := ColorRect.new()
+		sample.custom_minimum_size = Vector2(17,7)
+		sample.color = Structure.OUTPUT_LOW.lerp(Structure.OUTPUT_HIGH,float(step)/4.0)
+		_output_scale.add_child(sample)
+	var scale_note := Label.new()
+	scale_note.text = UILocale.text("较低 → 较高")
+	scale_note.add_theme_font_size_override("font_size",10)
+	_output_scale.add_child(scale_note)
+	set_output_summary(false)
+	_output_panel.hide()
+	var city_column:=VBoxContainer.new();city_column.add_theme_constant_override("separation",6);_city_card.add_child(city_column)
+	var title_row:=HBoxContainer.new();city_column.add_child(title_row)
+	_city_title=Label.new();_city_title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_city_title.add_theme_font_size_override("font_size",18);title_row.add_child(_city_title)
+	_button(title_row,"×",func():set_details_open(false))
+	_city_brief=Label.new();_city_brief.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_city_brief.custom_minimum_size.x=260;city_column.add_child(_city_brief)
+	_city_subjects=OptionButton.new();_city_subjects.fit_to_longest_item=false;_city_subjects.clip_text=true;city_column.add_child(_city_subjects)
+	_city_subjects.item_selected.connect(func(index:int):
+		if not _updating and index>0:
+			_inspection_topic="business";query_requested.emit(str(_city_subjects.get_item_metadata(index)),0))
+	var city_actions:=HBoxContainer.new();city_column.add_child(city_actions)
+	_city_routes=_button(city_actions,"交通联系",func():
+		_inspection_topic="transport"
+		for row: Dictionary in snapshot.get("subjects",[]):
+			if row.get("kind")=="firm": query_requested.emit(str(row.id),0);return
+		_detail();_layout())
+	_button(city_actions,"定位",func():focus_requested.emit(selected_place))
 	_side=PanelContainer.new();add_child(_side);_side.mouse_filter=Control.MOUSE_FILTER_STOP
+	_side.add_theme_stylebox_override("panel",paper.duplicate())
 	# A compact local theme: do not shrink the installed shell or map toolbar.
-	_side.theme=theme.duplicate(true);_side.theme.default_font_size=13
+	_side.theme=theme.duplicate(true);_side.theme.default_font_size=14
 	for type:String in ["Button","OptionButton","CheckButton"]:
 		for state:String in ["normal","hover","pressed","disabled","focus"]:
 			var box:=_side.theme.get_stylebox(state,"Button").duplicate() as StyleBoxFlat
@@ -105,7 +154,11 @@ func _ready() -> void:
 	_heading=Label.new();_heading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(_heading)
 	var actions:=HBoxContainer.new();column.add_child(actions)
 	_expand=_button(actions,"完整经济地图",func():expand_requested.emit())
-	_button(actions,"关闭详情",func():back_requested.emit())
+	_button(actions,"返回城市",func():
+		_inspection_topic="city";selected_order="";query_requested.emit("",0))
+	_inspect_switch=_button(actions,"运输与订单",func():
+		_inspection_topic="business" if _inspection_topic=="transport" else "transport"
+		selected_order="";_detail();_layout())
 	var navigation:=HBoxContainer.new();column.add_child(navigation)
 	_business=_button(navigation,"经营所选站点",func():business_requested.emit(str(snapshot.get("subject","")),selected_site))
 	_button(navigation,"国家统计",func():statistics_requested.emit())
@@ -116,6 +169,7 @@ func _ready() -> void:
 	_subjects=OptionButton.new();_subjects.fit_to_longest_item=false;column.add_child(_subjects)
 	_subjects.item_selected.connect(func(index:int):
 		if not _updating:
+			_inspection_topic="business" if not str(_subjects.get_item_metadata(index)).is_empty() else "city"
 			selected_site="";selected_order="";_page_offsets.clear()
 			query_requested.emit(str(_subjects.get_item_metadata(index)),0))
 	_places=OptionButton.new();_places.fit_to_longest_item=false;column.add_child(_places)
@@ -131,17 +185,15 @@ func _ready() -> void:
 	_orders=OptionButton.new();_orders.fit_to_longest_item=false;column.add_child(_orders)
 	_orders.item_selected.connect(func(index:int):
 		if not _updating:
-			selected_order=str(_orders.get_item_metadata(index));_detail();demand_changed.emit())
+			selected_order=str(_orders.get_item_metadata(index));_inspection_topic="transport";_detail();_layout();demand_changed.emit())
 	_goods_select=OptionButton.new();_goods_select.add_item("全部商品");_goods_select.set_item_metadata(0,"all");column.add_child(_goods_select)
 	_goods_select.item_selected.connect(func(index:int):selected_good=str(_goods_select.get_item_metadata(index));_detail())
 	var options:=HBoxContainer.new();column.add_child(options)
-	var routes:=CheckButton.new();routes.text="通路";routes.tooltip_text="已知通路/开发交通许可；不推定当前畅通、剩余运力或成交。";routes.button_pressed=true;options.add_child(routes)
+	var routes:=CheckButton.new();routes.text="线路";routes.tooltip_text="铁路走廊：历史资料；线位：现代参考";routes.button_pressed=true;options.add_child(routes)
 	routes.toggled.connect(func(on:bool):show_routes=on;_publish_links())
 	_flow_toggle=CheckButton.new();_flow_toggle.text="流动";_flow_toggle.button_pressed=flow_animation_enabled
-	_flow_toggle.tooltip_text="近7日已确认交付的方向脉冲，不是当前货批位置。只随世界时间变化，暂停冻结。";options.add_child(_flow_toggle)
+	_flow_toggle.tooltip_text="光点表示在途订单方向，非车船位置；不推进游戏时间。";options.add_child(_flow_toggle)
 	_flow_toggle.toggled.connect(set_flow_animation)
-	var receipts:=CheckButton.new();receipts.text="到货7日";receipts.tooltip_text="本页授权订单近7日实际到货收据；不是当前在途。";receipts.button_pressed=true;options.add_child(receipts)
-	receipts.toggled.connect(func(on:bool):show_receipts=on;_publish_links())
 	_details=RichTextLabel.new();_details.custom_minimum_size=Vector2(0,140);_details.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_details.size_flags_vertical=Control.SIZE_EXPAND_FILL;_details.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_details.scroll_active=true;column.add_child(_details)
 	_cancel_pending=_button(column,"取消本单未发部分",_request_pending_cancellation)
 	_cancel_pending.visible=false;_cancel_pending.disabled=true
@@ -158,7 +210,9 @@ func _ready() -> void:
 	_research_toggle=_button(column,"展开研发细节",func():
 		research_expanded=not research_expanded
 		_research_toggle.text="收起研发细节" if research_expanded else "展开研发细节"
-		_menu_key.clear();_detail())
+		_menu_key.clear();_detail();_layout())
+	_side.minimum_size_changed.connect(_layout)
+	_city_card.minimum_size_changed.connect(_layout)
 	resized.connect(_layout);_layout();hide()
 
 func _button(parent:Control,text:String,action:Callable) -> Button:
@@ -166,17 +220,55 @@ func _button(parent:Control,text:String,action:Callable) -> Button:
 
 func _layout() -> void:
 	if _side==null:return
-	_toolbar.position=Vector2(124,66);_toolbar.size=_toolbar.get_combined_minimum_size()
-	_side.position=Vector2(maxf(12,size.x-348),142);_side.size=Vector2(332,maxf(360,size.y-154))
+	var inspecting:=not _details_collapsed and _inspection_topic!="city"
+	_heading.text=place_name(selected_place)+(" · 运输账目" if _inspection_topic=="transport" else " · 经营账簿")
+	_side.visible=inspecting;_city_card.visible=not _details_collapsed and not inspecting
+	_output_panel.visible=full and _show_overview
+	_subjects.visible=research_expanded and inspecting
+	_places.visible=inspecting and _inspection_topic=="business"
+	_orders.visible=inspecting and _inspection_topic=="transport" and not network.get("edges",{}).is_empty()
+	_goods_select.visible=_orders.visible and selected_order.is_empty()
+	_expand.visible=false
+	_inspect_switch.visible=inspecting and not str(snapshot.get("subject","")).is_empty()
+	_inspect_switch.text="经营账簿" if _inspection_topic=="transport" else "运输与订单"
+	_jobs.visible=false;_personal_market.visible=false
+	_business.visible=inspecting and _inspection_topic=="business" and not _business.disabled
+	_previous.get_parent().visible=inspecting and _inspection_topic=="transport"
+	_flow_toggle.get_parent().visible=inspecting and (_inspection_topic=="transport" or research_expanded)
+	_side.position=Vector2(maxf(128,size.x-438),170);_side.size=Vector2(410,maxf(300,size.y-334))
+	if _city_card.visible:
+		var card_size:=Vector2(296,maxf(174,_city_card.get_combined_minimum_size().y))
+		_city_card.size=card_size
+		var anchor:=city_position.call(selected_place) as Vector2 if city_position.is_valid() else Vector2(size.x*.5,size.y*.5)
+		var top := 220.0 if full else 164.0
+		var safe:=Rect2(Vector2(128,top),Vector2(maxf(300,size.x-148),maxf(210,size.y-top-128)))
+		var corner:=Vector2(size.x-card_size.x-24,180)
+		if anchor.is_finite():
+			for offset:Vector2 in [Vector2(24,-card_size.y*.5),Vector2(-card_size.x-24,-card_size.y*.5),Vector2(24,24),Vector2(-card_size.x-24,24)]:
+				if safe.encloses(Rect2(anchor+offset,card_size)):corner=anchor+offset;break
+		_city_card.position=corner.clamp(safe.position,(safe.end-card_size).max(safe.position))
+	queue_redraw()
 
-func _toggle_details() -> void:
-	set_details_open(_details_collapsed)
+func _draw() -> void:
+	if not visible or _details_collapsed or _inspection_topic!="city" or not city_position.is_valid():return
+	var anchor:=city_position.call(selected_place) as Vector2
+	if not anchor.is_finite() or not Rect2(Vector2.ZERO,size).has_point(anchor):return
+	var card:=Rect2(_city_card.position,_city_card.size)
+	var end:=anchor.clamp(card.position,card.end)
+	draw_line(anchor,end,Color(0.67,0.57,0.35,0.85),1.0,true)
+	draw_circle(anchor,4,Color(0.85,0.74,0.47),false,1.5,true)
 
 func set_details_open(open: bool) -> void:
 	if _details_collapsed==(not open):return
 	_details_collapsed=not open
-	_side.visible=open
-	_detail_toggle.text="收起详情" if open else "展开详情"
+	if not open:
+		_inspection_topic="city";network={};contacts={};public_network={}
+		_order_index.clear();_receipt_facts.clear();_flow_scope.clear();_menu_key.clear()
+		_details.text="";_subjects.clear();_places.clear();_orders.clear()
+		snapshot=snapshot.duplicate()
+		for key:String in ["firm","market_network","market_contacts","node_network","production_details","pending_cancellation","player_context"]:snapshot[key]={}
+		snapshot["city_business_situations"]=[];snapshot["details_loaded"]=false
+		var empty:Array[Dictionary]=[];links_changed.emit(empty)
 	_layout();demand_changed.emit()
 
 func set_flow_animation(enabled: bool) -> void:
@@ -197,27 +289,41 @@ func occlusions() -> Array[Rect2]:
 	var rows:Array[Rect2]=[]
 	if visible:
 		if _side.visible:rows.append(Rect2(_side.position,_side.size))
-		if full:rows.append(Rect2(_toolbar.position,_toolbar.size))
+		if _city_card.visible:rows.append(Rect2(_city_card.position,_city_card.size))
+		if _output_panel.visible:rows.append(Rect2(_output_panel.position,_output_panel.size))
 	return rows
+
+func show_overview(enabled: bool) -> void:
+	_show_overview = enabled
+	if _output_panel!=null: _output_panel.visible = enabled and full
+
+func set_output_summary(has_values: bool) -> void:
+	if _output_hint==null: return
+	_output_scale.visible = has_values and output_chain!="structure"
+	if output_chain=="structure":
+		_output_hint.text = UILocale.text("1900 年产业结构参考")
+	else:
+		_output_hint.text = UILocale.text("模拟日产值 · 生丁/日" if has_values else "暂无该产业链的日结产值")
 
 func navigation_state() -> Dictionary:
 	# Identifiers/preferences only. Never retain the old observation in history.
 	var source:Dictionary=_navigation_pending if not _navigation_pending.is_empty() else snapshot
-	return {"world_id":int(source.get("world_id",_flow_world_id)),"observer":str(source.get("observer",_flow_observer)),"subject":str(source.get("subject","")),"place":selected_place,"site":selected_site,"order":selected_order,"offset":int(source.get("offset",0)),"details":not _details_collapsed,"research":research_expanded,"expanded":full}
+	return {"world_id":int(source.get("world_id",_flow_world_id)),"observer":str(source.get("observer",_flow_observer)),"subject":str(source.get("subject","")),"place":selected_place,"site":selected_site,"order":selected_order,"offset":int(source.get("offset",0)),"details":not _details_collapsed,"research":research_expanded,"expanded":full,"inspection_topic":_inspection_topic}
 
 func restore_navigation(state:Dictionary) -> void:
 	_navigation_pending={"world_id":int(state.get("world_id",0)),"observer":str(state.get("observer","")),"subject":str(state.get("subject","")),"offset":maxi(0,int(state.get("offset",0)))}
 	selected_place=FormalEconomicMapObservation.canonical_place(str(state.get("place","place:paris")))
 	selected_site=str(state.get("site",""));selected_order=str(state.get("order",""));selected_node=""
 	_details_collapsed=not bool(state.get("details",false));research_expanded=bool(state.get("research",false));full=bool(state.get("expanded",false))
+	_inspection_topic=str(state.get("inspection_topic","city"))
+	if _inspection_topic not in ["city","business","transport"]:_inspection_topic="city"
 	_page_offsets.clear();_menu_key.clear()
 	if not is_node_ready():return
 	_subjects.clear();_places.clear();_orders.clear();_goods_select.clear();_details.text=""
 	_business.disabled=true;_jobs.disabled=true;_personal_market.disabled=true
 	_cancel_pending.visible=false;_cancel_pending.disabled=true
-	_detail_toggle.text="展开详情" if _details_collapsed else "收起详情"
 	_research_toggle.text="收起研发细节" if research_expanded else "展开研发细节"
-	_side.visible=not _details_collapsed;_toolbar.visible=full
+	_layout()
 	# No show(), signals, observer reads, focus or world mutation here.
 
 func present(value:Dictionary, source_catalog:VNextSpatialCatalog, expanded:bool, return_mode:String="political") -> void:
@@ -252,14 +358,12 @@ func present(value:Dictionary, source_catalog:VNextSpatialCatalog, expanded:bool
 		_rebuild_order_index();_collect_receipts()
 		var follow:=str(value.get("follow_order_id",""))
 		if not follow.is_empty() and _order_index.has(follow):selected_order=follow
-	_detail_toggle.text="展开详情" if _details_collapsed else "收起详情"
 	_research_toggle.text="收起研发细节" if research_expanded else "展开研发细节"
-	_toolbar.visible=full;_expand.visible=not full;_side.visible=not _details_collapsed
-	_return_map.text="返回地理地图" if return_mode=="geographic" else "返回政治地图"
+	_expand.visible=not full;_side.visible=not _details_collapsed
 	if not _details_collapsed:
 		_update_menus(value)
 		var date:Dictionary=value.get("date",{})
-		_heading.text=place_name(selected_place)+" · 城市经济\n%04d-%02d-%02d %02d:%02d"%[int(date.get("year",1900)),int(date.get("month",1)),int(date.get("day",1)),int(date.get("hour",0)),int(date.get("minute",0))]
+		_heading.text=place_name(selected_place)+(" · 运输账目" if _inspection_topic=="transport" else " · 经营账簿")
 		_page.text="本页%d条%s"%[(network.get("edges",{}) as Dictionary).size()," · 还有后页" if bool(value.get("truncated",false)) else ""]
 		_page.tooltip_text="相关主体逆序索引%d条；本站页可能继续扫描，索引不是本站或全市场订单总量。"%int(value.get("orders_total",0))
 		_previous.disabled=_page_offsets.is_empty()
@@ -268,6 +372,31 @@ func present(value:Dictionary, source_catalog:VNextSpatialCatalog, expanded:bool
 	_updating=false
 	if _details_collapsed:_publish_links() # Open details already publish once in _detail().
 	show()
+	_update_city_card();_layout()
+
+func _update_city_card() -> void:
+	_city_title.text=place_name(selected_place)
+	var hub:=_hub();var goods:Array[String]=[]
+	for good:String in hub.get("known_goods",[]):
+		goods.append(EconomicText.good(good))
+		if goods.size()>=4:break
+	_city_brief.text="已知经营："+" · ".join(goods) if not goods.is_empty() else "尚未收到本城经营商品资料"
+	_city_brief.text+="\n已知站点 %s · 主体 %s"%[str(hub.get("known_site_count","未知")),str(hub.get("known_subject_count","未知"))]
+	for row: Dictionary in logistics.get("nodes",[]):
+		if str(row.place_id)==selected_place:
+			var brief := EconomicText.logistics_brief(row,logistics.get("units",{}))
+			if not brief.is_empty(): _city_brief.text+="\n"+brief
+			break
+	_city_subjects.clear();_city_subjects.add_item("选择本城企业或仓储经营者")
+	for row:Dictionary in snapshot.get("subjects",[]):
+		if row.get("kind") not in ["firm","public_firm"]:continue
+		_city_subjects.add_item(str(row.name));_city_subjects.set_item_metadata(_city_subjects.item_count-1,str(row.id))
+
+func set_logistics_observation(value: Dictionary) -> void:
+	if logistics==value: return
+	logistics=value
+	if is_node_ready():
+		_update_city_card();_publish_links();_layout()
 
 func _update_menus(value:Dictionary) -> void:
 	var subject:=str(value.get("subject",""))
@@ -295,7 +424,7 @@ func _update_menus(value:Dictionary) -> void:
 		_places.add_item(EconomicText.site(str(node.get("site_id",""))))
 		_places.set_item_metadata(_places.item_count-1,{"place_id":selected_place,"site_id":str(node.get("site_id","")),"node_id":str(node.get("id","")),"subject_id":firm})
 	_sync_site_selection()
-	_orders.clear();_orders.add_item("经营概要／选择订单");_orders.set_item_metadata(0,"")
+	_orders.clear();_orders.add_item("运输汇总／选择订单");_orders.set_item_metadata(0,"")
 	for row:Array in order_rows:
 		_orders.add_item(EconomicText.good(str(row[1]))+" · "+str(row[2])+(" · "+str(row[0]) if research_expanded else ""));_orders.set_item_metadata(_orders.item_count-1,str(row[0]))
 		if str(row[0])==selected_order:_orders.select(_orders.item_count-1)
@@ -312,9 +441,10 @@ func _update_menus(value:Dictionary) -> void:
 		if good==selected_good:_goods_select.select(_goods_select.item_count-1)
 
 func clear_observation() -> void:
-	hide();snapshot={};network={};contacts={};public_network={};selected_node="";catalog=null
+	hide();snapshot={};network={};contacts={};public_network={};logistics={};selected_node="";catalog=null
 	_details_collapsed=true;research_expanded=false
-	_detail_toggle.text="展开详情";_research_toggle.text="展开研发细节"
+	_inspection_topic="city"
+	_research_toggle.text="展开研发细节"
 	_menu_key.clear();_receipt_facts.clear();_page_offsets.clear();_flow_subject="";_flow_observer="";_flow_world_id=0
 	_order_index.clear();_flow_scope.clear();_receipt_source_count=0;_receipt_truncated=false;_navigation_pending.clear()
 	_cancel_pending.visible=false;_cancel_pending.disabled=true;_jobs.disabled=true;_personal_market.disabled=true
@@ -326,6 +456,7 @@ func clear_observation() -> void:
 	links_changed.emit(empty)
 
 func select_place(id:String) -> void:
+	_inspection_topic="city"
 	selected_place=FormalEconomicMapObservation.canonical_place(id);selected_order="";selected_node="";selected_site=""
 	_page_offsets.clear();_menu_key.clear()
 	# The next demanded city read replaces the body; do not relabel old private
@@ -348,6 +479,7 @@ func _sync_site_selection() -> void:
 		if row.place_id==selected_place and ((not selected_node.is_empty() and str(row.get("node_id",""))==selected_node) or (selected_node.is_empty() and str(row.site_id)==selected_site)):_places.select(index);break
 
 func follow_order(id:String, place_id:String, site_id:String) -> void:
+	_inspection_topic="transport"
 	selected_place=FormalEconomicMapObservation.canonical_place(place_id)
 	selected_site=site_id;selected_order=id;selected_node=""
 
@@ -561,7 +693,7 @@ func _business_situations_text() -> String:
 		if activities.size()>2:rows.append("另有 %d 项生产活动，进入原经营页查看。"%(activities.size()-2))
 		var automation:Dictionary=situation.get("automation",{})
 		rows.append("按活动原料规则自动补货；没有独立自动采购开关。" if str(automation.get("mode",""))=="ACTIVITY_DRIVEN_INPUTS" else "本站按既有库存目标补货，不把贸易库存当产出。")
-		rows.append("停产不取消原订单/工资；维护、服务投入仍按各自规则。合同供给不等于到货实物。")
+		if research_expanded:rows.append("停产不取消原订单/工资；维护、服务投入仍按各自规则。合同供给不等于到货实物。")
 	if matched>shown:rows.append("另有 %d 个本城获权站点，请在站点下拉选择查看。"%(matched-shown))
 	if bool(snapshot.get("city_situations_truncated",false)) and (matched>0 or subject.is_empty()):rows.append("处境最多读本城 %d 个获权站点，身份页或处境已截断；未见不等于没有。"%int(snapshot.get("city_situation_limit",8)))
 	return "\n".join(rows)
@@ -634,6 +766,16 @@ func _sales_text() -> String:
 func _detail() -> void:
 	if _details==null or _details_collapsed:return
 	_cancel_pending.visible=false;_cancel_pending.disabled=true
+	if _inspection_topic=="city":
+		_details.text="";_publish_links();return
+	if _inspection_topic=="transport" and selected_order.is_empty():
+		var routes:Array[String]=[]
+		for edge:Dictionary in public_network.get("edges",[]):
+			if str(edge.get("kind",""))!="transport" or selected_place not in [str(edge.get("from_place_id","")),str(edge.get("to_place_id",""))]:continue
+			routes.append("%s → %s\n%s"%[place_name(str(edge.get("from_place_id",""))),place_name(str(edge.get("to_place_id",""))),_route_status(edge)])
+			if routes.size()>=3:break
+		_details.text="\n\n".join(routes)+"\n\n"+_freight_summary()+"\n\n虚线表示已知联系；方向脉冲仅表示已确认交付。"
+		_publish_links();return
 	var lines:Array[String]=[_player_situation_text()]
 	var subject:=str(snapshot.get("subject",""));var hub:=_hub()
 	var follow_notice:=str(snapshot.get("follow_notice",""))
@@ -684,14 +826,13 @@ func _detail() -> void:
 			for operation:Dictionary in own.get("operations",[]):
 				if str(operation.get("site_id",""))!=selected_site:continue
 				lines.append("本站在库："+_goods(operation.get("inventory",{}))+"\n可用："+_goods(operation.get("free_inventory",{}))+" · 已承诺："+_goods(operation.get("committed_inventory",{})))
-			lines.append(_freight_summary())
-			lines.append("本页授权订单 %d；报价/岗位/工资见原人物或经营页，不能推定别家私账。"%(network.get("edges",{}) as Dictionary).size())
+			lines.append("相关订单 %d · 运输与订单可查等待及到货。"%_order_index.size())
+			if research_expanded:lines.append(_freight_summary())
 			if research_expanded:lines.append(_flow_scope_text())
 	var identity_notice:=_identity_notice_text()
 	if not identity_notice.is_empty():lines.append(identity_notice)
 	if research_expanded:lines.append(_public_place_text())
-	lines.append("地图仅城市锚点。虚线为已知通路/合同责任；流动脉冲仅表示本页近7日已确认交付方向，不是实时货物坐标。")
-	lines.append(str(snapshot.get("identity_notice","")))
+	if research_expanded:lines.append("地图锚点不表示实货位置。虚线为已知通路/合同责任；方向脉冲来自近7日交付收据。")
 	_details.text="\n\n".join(lines);_publish_links()
 
 func _rebuild_order_index() -> void:
@@ -731,34 +872,11 @@ func _add_link(rows:Array[Dictionary], row:Dictionary, budget:int) -> void:
 		row["source_count"]=int(row.get("source_count",1));rows.append(row)
 
 func _publish_links() -> void:
-	var rows:Array[Dictionary]=[]
-	var activity_budget:=LINK_BUDGET-16 if show_routes else LINK_BUDGET
-	var now:=int(snapshot.get("minute",0))
-	if full:
-		if show_receipts:
-			for receipt:Dictionary in _receipt_facts:
-				if int(receipt.minute)>now or now-int(receipt.minute)>7*1440:continue
-				if selected_good not in ["all",str(receipt.good)] or (not selected_order.is_empty() and str(receipt.order_id)!=selected_order):continue
-				_add_link(rows,{"id":str(receipt.id),"from":str(receipt.from),"to":str(receipt.to),"good":str(receipt.good),"kind":"receipt","status":"DELIVERED","state":"近7日已确认交付 · 非当前在途","directed":true,"quantity":receipt.quantity,"observed_minute":receipt.minute,"animate":true},activity_budget)
-		# Local physical facts are never animated as a remote position.
-		if bool(snapshot.get("details_loaded",false)):
-			var seen_cargo:Dictionary={}
-			for cargo:Dictionary in network.get("cargo",{}).values():
-				var sid:=str(cargo.get("cargo_id",""));var physical:Variant=cargo.get("physical_quantity")
-				if sid.is_empty() or seen_cargo.has(sid) or not physical is int or str(cargo.get("stage",""))=="TRANSIT":continue
-				if selected_good not in ["all",str(cargo.good)] or int(physical)<=0:continue
-				if not selected_order.is_empty() and str(cargo.order_id)!=selected_order:continue
-				seen_cargo[sid]=true
-				_add_link(rows,{"id":sid,"from":str(cargo.get("leg_from_node","")),"to":str(cargo.get("leg_to_node","")),"good":str(cargo.good),"kind":"cargo","status":str(cargo.stage),"state":"授权本地实物观察 · "+EconomicText.cargo_stage(str(cargo.stage))+"（段联系非位置）","directed":true,"quantity":physical,"animate":false},activity_budget)
-		for edge:Dictionary in network.get("edges",{}).values():
-			if selected_good not in ["all",str(edge.good)] or (not selected_order.is_empty() and str(edge.order_id)!=selected_order):continue
-			_add_link(rows,{"id":str(edge.order_id),"from":str(edge.from_node),"to":str(edge.to_node),"good":str(edge.good),"kind":"contract","status":str(edge.get("status","UNKNOWN")),"state":"上次授权页观察到的合同责任（非实物） · "+_edge_status(edge),"directed":true,"animate":false},activity_budget)
-		if show_routes:
-			var corridor_count:=0
-			for edge:Dictionary in public_network.get("edges",[]):
-				if corridor_count>=16:break
-				if str(edge.get("kind",""))!="transport" or str(edge.get("from_place_id",""))==str(edge.get("to_place_id","")):continue
-				_add_link(rows,{"id":str(edge.get("id","")),"from":str(edge.get("from_place_id","")),"to":str(edge.get("to_place_id","")),"kind":"transport","status":"KNOWN_CORRIDOR_NOT_A_TRADE","state":_route_status(edge),"directed":true},LINK_BUDGET);corridor_count+=1
+	# Endpoint-only contracts remain in the order records, not on the rail map.
+	var rows: Array[Dictionary]=[]
+	if full and show_routes:
+		for rail: Dictionary in logistics.get("railways",[]): rows.append(rail)
+		for shipping: Dictionary in logistics.get("shipping",[]): rows.append(shipping)
 	links_changed.emit(rows)
 
 func _edge_status(edge: Dictionary) -> String:

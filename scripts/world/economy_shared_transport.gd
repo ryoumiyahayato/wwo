@@ -9,6 +9,8 @@ var entries: Dictionary = {}
 var facilities: Dictionary = {} # Explicit node facilities at admitted host sites.
 var node_uses: Dictionary = {}
 var _active_node_uses: Dictionary = {}
+var _node_uses_by_facility: Dictionary = {} # Derived IDs; node_uses owns amounts.
+var _storage_by_shipment: Dictionary = {}
 var _node_throughput: Dictionary = {}
 var _total_hours: Dictionary = {}
 var _hours: Dictionary = {} # Derived by site/day, never a workforce authority.
@@ -23,11 +25,12 @@ static func valid_configuration(raw: Variant) -> bool:
 	if not raw is Array or raw.size() > 32: return false
 	var ids: Dictionary = {}
 	for r: Variant in raw:
-		if not r is Dictionary or not EconomySliceConfig._fields(r, ["edge_id", "source_link_id", "entry_minutes", "weight_unit", "vehicle_id", "vehicle_payload", "handling_site", "handling_hours_per_unit", "basis"], ["window_minutes", "loading_minutes", "travel_minutes", "vehicle_hold_minutes", "node_resources", "legacy_node_limit_basis"]) or ids.has(r["edge_id"]): return false
+		if not r is Dictionary or not EconomySliceConfig._fields(r, ["edge_id", "source_link_id", "entry_minutes", "weight_unit", "vehicle_id", "vehicle_payload", "handling_site", "handling_hours_per_unit", "basis"], ["window_minutes", "loading_minutes", "travel_minutes", "vehicle_hold_minutes", "node_resources", "legacy_node_limit_basis", "capacity_model"]) or ids.has(r["edge_id"]): return false
 		for k: String in ["edge_id", "source_link_id", "weight_unit", "vehicle_id", "handling_site", "basis"]:
 			if not r[k] is String or r[k].is_empty(): return false
 		if not r["entry_minutes"] is Array or r["entry_minutes"].is_empty() or r["entry_minutes"].size() > 256 or not FormalLedgerState.valid_amount(r["vehicle_payload"]) or int(r["vehicle_payload"]) <= 0 or not FormalLedgerState.valid_amount(r["handling_hours_per_unit"]) or int(r["handling_hours_per_unit"]) <= 0: return false
 		var timed: bool = r.has("window_minutes") or r.has("loading_minutes") or r.has("travel_minutes") or r.has("vehicle_hold_minutes")
+		if r.has("capacity_model") and (r["capacity_model"] != "WINDOW_THROUGHPUT" or not timed): return false
 		if timed:
 			for k: String in ["window_minutes", "loading_minutes", "travel_minutes", "vehicle_hold_minutes"]:
 				if not FormalLedgerState.valid_amount(r.get(k)): return false
@@ -72,14 +75,39 @@ func _node_capacity(id: String, now: int) -> float:
 
 func _node_used(id: String, now: int) -> float:
 	var used := float(_node_throughput.get(id+"|"+str(now/60), 0.0)) if facilities[id]["kind"] == "HANDLING_THROUGHPUT" else 0.0
-	for use_id: String in _active_node_uses.keys():
+	for use_id: String in (_node_uses_by_facility.get(id,{}) as Dictionary).keys():
 		var use := node_uses[use_id] as Dictionary
-		if int(use["end_minute"]) >= 0 and int(use["end_minute"]) <= now: _active_node_uses.erase(use_id); continue
-		if use["facility_id"] == id: used += float(use["amount"])-float(use["released_amount"])
+		if int(use["end_minute"]) >= 0 and int(use["end_minute"]) <= now:
+			_retire_node_use(use_id);continue
+		used += float(use["amount"])-float(use["released_amount"])
 	return used+economy()._service_market.shared_occupancy(id,now)
+
+func _index_node_use(id: String) -> void:
+	var use := node_uses[id] as Dictionary
+	var facility := str(use["facility_id"])
+	if not _node_uses_by_facility.has(facility): _node_uses_by_facility[facility] = {}
+	_node_uses_by_facility[facility][id] = true
+	if facilities[facility]["kind"] == "STORAGE_OCCUPANCY":
+		if not _storage_by_shipment.has(use["shipment_id"]): _storage_by_shipment[use["shipment_id"]] = {}
+		_storage_by_shipment[use["shipment_id"]][id] = true
+
+func _retire_node_use(id: String) -> void:
+	_active_node_uses.erase(id)
+	var facility := str(node_uses[id]["facility_id"])
+	var facility_ids := _node_uses_by_facility.get(facility,{}) as Dictionary
+	facility_ids.erase(id)
+	if facility_ids.is_empty(): _node_uses_by_facility.erase(facility)
+	var shipment := str(node_uses[id]["shipment_id"])
+	var storage_ids := _storage_by_shipment.get(shipment,{}) as Dictionary
+	storage_ids.erase(id)
+	if storage_ids.is_empty(): _storage_by_shipment.erase(shipment)
 
 func _node_available(id: String, now: int) -> float:
 	return maxf(0.0, _node_capacity(id,now)-_node_used(id,now))
+
+func storage_space(id: String, now: int) -> float:
+	var incoming := _incoming_storage_total(id)
+	return maxf(0.0,_node_available(id,now)-incoming) if incoming>=0.0 else 0.0
 
 func service_intake_ready(id: String, now: int) -> bool:
 	return facilities.has(id) and _node_used(id,now)<=_node_capacity(id,now)+VNextInfrastructureLinkState.CAPACITY_EPSILON
@@ -96,12 +124,13 @@ func _node_use(id: String, shipment_id: String, leg: int, facility: String, good
 	if facilities[facility]["kind"] == "HANDLING_THROUGHPUT":
 		var key := facility+"|"+str(minute/60)
 		_node_throughput[key] = float(_node_throughput.get(key,0.0))+amount
-	else: _active_node_uses[id] = true
+	else:
+		_active_node_uses[id] = true
+		_index_node_use(id)
 
 func _storage_use(shipment_id: String) -> String:
-	for id: String in _active_node_uses:
-		if node_uses[id]["shipment_id"] == shipment_id and facilities[node_uses[id]["facility_id"]]["kind"] == "STORAGE_OCCUPANCY": return id
-	return ""
+	var ids := _storage_by_shipment.get(shipment_id,{}) as Dictionary
+	return str(ids.keys()[0]) if not ids.is_empty() else ""
 
 func release_storage(shipment_id: String, good: Variant, quantity_value: int, event_id: String) -> void:
 	var id := _storage_use(shipment_id)
@@ -115,7 +144,7 @@ func release_storage(shipment_id: String, good: Variant, quantity_value: int, ev
 	assert(amount <= float(use["amount"])-float(use["released_amount"])+VNextInfrastructureLinkState.CAPACITY_EPSILON)
 	use["releases"][event_id] = {"amount":amount,"minute":economy()._world.game_clock.total_minutes()}
 	use["released_amount"] += amount
-	if is_equal_approx(float(use["released_amount"]),float(use["amount"])): _active_node_uses.erase(id)
+	if is_equal_approx(float(use["released_amount"]),float(use["amount"])): _retire_node_use(id)
 
 # Inbound pressure is derived from current adopted cargo, not a reservation ledger.
 func _incoming_storage_amount(storage: String, c: Dictionary) -> float:
@@ -155,10 +184,7 @@ func _node_entry_limit(binding: Dictionary, good: Variant, now: int) -> int:
 	var storage: String = str(n["destination_storage"])
 	var storage_weight: float = _node_amount(storage, good, 1)
 	if storage_weight <= 0.0: return 0
-	var incoming: float = _incoming_storage_total(storage)
-	if incoming < 0.0: return 0 # An unconvertible adopted load is never zero-weight.
-	var available: float = maxf(0.0, _node_available(storage, now) - incoming)
-	return mini(result, int(floor(available / storage_weight)))
+	return mini(result, int(floor(storage_space(storage,now) / storage_weight)))
 
 ## Arrival is at the actual vehicle/node, never an unbounded warehouse.
 func arrive(shipment: Dictionary, order: Dictionary) -> bool:
@@ -216,6 +242,7 @@ func bind(e: RefCounted) -> bool:
 		var destination := str(link.get("to_place_id", VNextSpatialCatalog.map_id_to_place_id(str(link.get("to_map_id", "")))))
 		if not ((origin == edge["from_place_id"] and destination == edge["to_place_id"]) or (destination == edge["from_place_id"] and origin == edge["to_place_id"])): return false
 		for other: Dictionary in bindings.values():
+			if other["vehicle_id"] == r["vehicle_id"] and other.get("capacity_model","") != r.get("capacity_model",""): return false
 			if other["vehicle_id"] == r["vehicle_id"] and (other["vehicle_payload"] != r["vehicle_payload"] or other["weight_unit"] != r["weight_unit"]): return false
 			if other["vehicle_id"] == r["vehicle_id"] and other.has("vehicle_hold_minutes") != r.has("vehicle_hold_minutes"): return false
 		if r.has("node_resources"):
@@ -247,7 +274,7 @@ func window_open(binding: Dictionary, now: int) -> bool:
 
 func _vehicle_available(binding: Dictionary, now: int) -> float:
 	var used := float(_vehicle_usage.get(str(binding["vehicle_id"])+"|"+str(now/60), 0.0))
-	if binding.has("vehicle_hold_minutes"):
+	if binding.has("vehicle_hold_minutes") and binding.get("capacity_model","") != "WINDOW_THROUGHPUT":
 		used = 0.0
 		for id: String in _active_vehicles.keys():
 			var a := entries[id] as Dictionary
@@ -482,7 +509,7 @@ func enter(shipment_id: String, leg_index: int, edge_id: String, good: Variant, 
 		entries[id].erase("good"); entries[id]["asset_id"]=good["asset_id"]
 	if r.has("window_minutes"):
 		entries[id].merge({"loading_end_minute": now+int(r["loading_minutes"]), "arrival_minute": now+int(r["loading_minutes"])+int(r["travel_minutes"]), "release_minute": now+int(r["vehicle_hold_minutes"])})
-		_active_vehicles[id] = true
+		if r.get("capacity_model","") != "WINDOW_THROUGHPUT": _active_vehicles[id] = true
 	return true
 
 func node_completion_minute(shipment_id: String, leg: int) -> int:
@@ -493,8 +520,11 @@ func has_node_arrival(shipment_id: String, leg: int) -> bool:
 
 func shipment_node_view(shipment_id: String) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
-	for id: String in _active_node_uses:
+	var now: int = economy()._world.game_clock.total_minutes()
+	for id: String in _active_node_uses.keys():
 		var use := node_uses[id] as Dictionary
+		if int(use["end_minute"])>=0 and int(use["end_minute"])<=now:
+			_retire_node_use(id);continue
 		if use["shipment_id"] == shipment_id:
 			result.append({"facility_id":use["facility_id"],"kind":facilities[use["facility_id"]]["kind"],"unit":facilities[use["facility_id"]]["unit"],"occupied":float(use["amount"])-float(use["released_amount"]),"end_minute":use["end_minute"]})
 	return result
@@ -641,6 +671,8 @@ func _restore_nodes(raw: Dictionary, saved: Dictionary) -> bool:
 				if not source.has(prefix+key) or source[prefix+key]["minute"]!=source[prefix+"destination_handling"]["minute"] or source[prefix+key]["quantity"]!=source[prefix+"destination_handling"]["quantity"]: return false
 	node_uses=source.duplicate(true)
 	_active_node_uses=active
+	_node_uses_by_facility.clear();_storage_by_shipment.clear()
+	for id: String in active: _index_node_use(id)
 	_node_throughput=throughput
 	return true
 
@@ -689,6 +721,7 @@ func restore(raw: Variant, saved: Dictionary) -> bool:
 		var vkey := str(a["vehicle_id"])+"|"+str(int(a["minute"])/60)
 		vehicles[vkey] = float(vehicles.get(vkey, 0.0))+float(fact["amount"])
 		if not r.has("window_minutes") and float(vehicles[vkey]) > float(r["vehicle_payload"]): return false
+		if r.get("capacity_model","") == "WINDOW_THROUGHPUT" and float(vehicles[vkey]) > float(r["vehicle_payload"])+VNextInfrastructureLinkState.CAPACITY_EPSILON: return false
 		if r.has("window_minutes"):
 			if a.get("loading_end_minute") != int(a["minute"])+int(r["loading_minutes"]) or a.get("arrival_minute") != int(a["loading_end_minute"])+int(r["travel_minutes"]) or a.get("release_minute") != int(a["minute"])+int(r["vehicle_hold_minutes"]): return false
 		elif a.has("release_minute") or a.has("loading_end_minute") or a.has("arrival_minute"): return false
@@ -740,6 +773,7 @@ func restore(raw: Variant, saved: Dictionary) -> bool:
 	_active_vehicles.clear()
 	for id: String in entries:
 		var a := entries[id] as Dictionary
+		if bindings[a["edge_id"]].get("capacity_model","") == "WINDOW_THROUGHPUT": continue
 		if not a.has("release_minute"): continue
 		var occupied := 0.0
 		for other: Dictionary in entries.values():

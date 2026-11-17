@@ -3,8 +3,9 @@ extends RefCounted
 ## Finite load-time caches derived from admitted facts, never new source facts.
 const TOLERANCE_M: Dictionary = {"coarse": 600.0, "medium": 120.0, "local": 0.0}
 const EARTH_RADIUS_M: float = 6371008.8
+const FrameBudget = preload("res://scripts/presentation/map/map_frame_budget.gd")
 
-static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse", "medium", "local"], current: Callable = Callable(), ink_frames: Dictionary = {}, political_cells: Dictionary = {}, only_features: Array[String] = []) -> Dictionary:
+static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse", "medium", "local"], current: Callable = Callable(), ink_frames: Dictionary = {}, political_cells: Dictionary = {}, only_features: Array[String] = [], max_staged_bytes: int = 0) -> Dictionary:
 	# Hold immutable source references inside this worker. The installed layer
 	# may keep the old Content alive until its complete successor is displayed.
 	content.geometry_mutex.lock()
@@ -12,6 +13,7 @@ static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse
 	var source_features := content.features
 	content.geometry_mutex.unlock()
 	var chunks: Array[Dictionary] = []
+	var staged_bytes := 0
 	# Only actual legal-sovereign changes alter the initial display partition.
 	var changed_cells: Dictionary = {}
 	for id: String in political_cells:
@@ -37,6 +39,10 @@ static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse
 				if not only_features.is_empty() and str(chunk.land_feature_id) not in only_features: continue
 				var compiled := _prepared_display(chunk,changed_cells,only_features,ink_frames,current)
 				if compiled.has("error"): return compiled
+				for batch: Dictionary in compiled.chunks as Array:
+					staged_bytes += _measure_payload(batch)
+					if max_staged_bytes>0 and staged_bytes>max_staged_bytes:
+						return {"error":"地图绘制包超过预备预算（%d 字节）。"%staged_bytes}
 				chunks.append_array(compiled.chunks as Array)
 				continue
 			var kind := str(chunk.kind)
@@ -112,13 +118,14 @@ static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse
 				# A complete physical partition is drawn once. References identify
 				# exact historical intersections, never a nearby country donor.
 				var water_class := HydrographyStyle.surface_class(chunk)
+				var water_transition := HydrographyStyle.surface_transition(str(chunk.feature_id))
 				for face: Dictionary in faces:
 					var reference := str(face.get("ink_reference",""))
 					var original := str(face.get("original_ink_reference",""))
 					face.erase("original_ink_reference")
 					face.erase("ink_reference")
-					var key := kind+":"+water_class+":"+reference+":"+original+(":"+str(chunk.feature_id) if kind=="land_reference" else "")
-					if not surface_groups.has(key): surface_groups[key] = {"kind":kind,"water_class":water_class,"faces":[],"feature_ids":[],"ink_reference":reference,"original_ink_reference":original}
+					var key := kind+":"+water_class+":"+str(water_transition)+":"+reference+":"+original+(":"+str(chunk.feature_id) if kind=="land_reference" else "")
+					if not surface_groups.has(key): surface_groups[key] = {"kind":kind,"water_class":water_class,"water_transition":water_transition,"faces":[],"feature_ids":[],"ink_reference":reference,"original_ink_reference":original}
 					(surface_groups[key].faces as Array).append(face)
 					if chunk.feature_id not in surface_groups[key].feature_ids: (surface_groups[key].feature_ids as Array).append(chunk.feature_id)
 				continue
@@ -173,7 +180,7 @@ static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse
 			var group := surface_groups[key] as Dictionary
 			var faces := group.faces as Array
 			for first: int in range(0,faces.size(),2048):
-				chunks.append({"kind":group.kind,"lod":lod_name,"faces":faces.slice(first,first+2048),"feature_id":group.feature_ids[0],"source_feature_ids":group.feature_ids,"water_class":group.water_class,"ink_reference":group.ink_reference,"source_feature_id":group.feature_ids[0],"original_ink_reference":group.original_ink_reference,"component_uv":group.kind=="land_reference"})
+				chunks.append({"kind":group.kind,"lod":lod_name,"faces":faces.slice(first,first+2048),"feature_id":group.feature_ids[0],"source_feature_ids":group.feature_ids,"water_class":group.water_class,"water_transition":group.water_transition,"ink_reference":group.ink_reference,"source_feature_id":group.feature_ids[0],"original_ink_reference":group.original_ink_reference,"component_uv":group.kind=="land_reference"})
 		for key: String in groups:
 			if not (groups[key] as Array).is_empty():
 				chunks.append((group_styles[key] as Dictionary).merged({"boundaries":groups[key]}))
@@ -211,11 +218,20 @@ static func prepare(content: LocalSpatialContent, lods: Array[String] = ["coarse
 			boundaries.assign(chunk.boundaries as Array)
 			chunk["payload"] = GlobeBoundaryBatch.encode(boundaries,str(chunk.kind),str(chunk.kind) in ["coast","river"])
 			chunk.erase("boundaries")
+		staged_bytes += _measure_payload(chunk)
+		if max_staged_bytes>0 and staged_bytes>max_staged_bytes:
+			return {"error":"地图绘制包超过预备预算（%d 字节）。"%staged_bytes}
 	# All float32-degenerate faces may legitimately encode to no draw. Omit
 	# those empty batches here; an actual upload failure must not be ignored.
 	for index: int in range(chunks.size()-1,-1,-1):
 		if (chunks[index].payload as Dictionary).is_empty(): chunks.remove_at(index)
 	return {"chunks":chunks, "lods":lods}
+
+static func _measure_payload(chunk: Dictionary) -> int:
+	var payload := chunk.get("payload",{}) as Dictionary
+	var bytes := FrameBudget.packed_bytes(payload)
+	chunk["upload_bytes"] = bytes - FrameBudget.packed_bytes(payload.get("pick_chunks",[]))
+	return bytes
 
 static func _component_frame(description: Variant, triangle: PackedVector2Array) -> Rect2:
 	if description is Rect2: return description
@@ -380,6 +396,20 @@ static func prepare_terrain(surface: Dictionary, frame: Basis, lines: Array[Dict
 	var job := TerrainPreparation.new()
 	return job.prepare(surface,frame,lines,covers,current)
 
+static func height_grid(grid: Vector2, layout: Vector4, stride: float) -> Vector2:
+	var result := grid
+	for axis: int in range(2):
+		var extent: float = layout[axis+2]
+		result[axis] = layout[axis]+(grid[axis]/stride if grid[axis]<0.0 else extent+(grid[axis]-extent)/stride if grid[axis]>extent else grid[axis])
+	return result
+
+static func height_sample(values: PackedFloat32Array, size: Vector2i, grid: Vector2) -> float:
+	var cell := Vector2i(grid.floor()).clamp(Vector2i.ZERO,size-Vector2i(2,2))
+	var t := (grid-Vector2(cell)).clamp(Vector2.ZERO,Vector2.ONE)
+	var a := values[cell.y*size.x+cell.x];var b := values[cell.y*size.x+cell.x+1]
+	var c := values[(cell.y+1)*size.x+cell.x];var d := values[(cell.y+1)*size.x+cell.x+1]
+	return a+(b-a)*t.x+(c-a)*t.y if t.x+t.y<=1.0 else d+(c-d)*(1.0-t.x)+(b-d)*(1.0-t.y)
+
 class TerrainPreparation:
 	extends RefCounted
 	const COVER_MASK_SIZE: int = 256
@@ -399,6 +429,13 @@ class TerrainPreparation:
 	var _surface_water_bytes := PackedByteArray()
 	var _woodland_bytes := PackedByteArray()
 	var _height_bytes := PackedByteArray()
+	var _height_size := Vector2i.ZERO
+	var _height_layout := Vector4.ZERO
+	var _height_stride: float = 1.0
+	var _height_bounds := Vector4.ZERO
+	var _display_heights := PackedFloat32Array()
+	var _context_water_bytes := PackedByteArray()
+	var _context_water_bounds := Vector4.ZERO
 	var _terrain_arrays: Array = []
 	var _cover_arrays: Array = []
 	var _line_arrays: Array = []
@@ -430,6 +467,8 @@ class TerrainPreparation:
 		if not current.call(): return {}
 		_make_surface_mesh()
 		if not current.call(): return {}
+		_make_context_water(lines)
+		if not current.call(): return {}
 		_make_woodland_positions()
 		if not current.call(): return {}
 		_make_surface_lines(lines)
@@ -439,7 +478,44 @@ class TerrainPreparation:
 		return {"anchor":_local_surface_anchor,"anchor_km":_surface_chart_anchor_km,
 			"vertices":_surface_vertices,"ray_vertices":_surface_ray_vertices,"indices":_surface_indices,"pick_chunks":_surface_pick_chunks,
 			"water_vertices":_surface_water_vertices,"water_chunks":_surface_water_chunks,"water_bytes":_surface_water_bytes,
-			"woodland_bytes":_woodland_bytes,"woodland_positions":_woodland_positions,"height_bytes":_height_bytes,"terrain_arrays":_terrain_arrays,"cover_arrays":_cover_arrays,"line_arrays":_line_arrays}
+			"woodland_bytes":_woodland_bytes,"woodland_positions":_woodland_positions,"height_bytes":_height_bytes,"height_size":_height_size,"height_layout":_height_layout,"height_stride":_height_stride,"height_bounds":_height_bounds,"context_water_bytes":_context_water_bytes,"context_water_bounds":_context_water_bounds,"terrain_arrays":_terrain_arrays,"cover_arrays":_cover_arrays,"line_arrays":_line_arrays}
+
+	func _make_context_water(features: Array[Dictionary]) -> void:
+		if not bool((_surface_reference.get("presentation",{}) as Dictionary).get("show_bounded_water",false)):return
+		var polygons: Array[Array] = []
+		var bounds := Rect2();var first := true
+		for feature: Dictionary in features:
+			if feature.get("kind")!="water_surface":continue
+			var geometry:=feature.get("geometry",{}) as Dictionary
+			var shapes: Array = [geometry.coordinates] if geometry.get("type")=="Polygon" else geometry.get("coordinates",[])
+			for polygon: Array in shapes:
+				var rings: Array[PackedVector2Array] = []
+				for raw: Array in polygon:
+					var ring:=PackedVector2Array()
+					for point: Array in raw:
+						var ll:=Vector2(float(point[0]),float(point[1]));ring.append(ll)
+						bounds=Rect2(ll,Vector2.ZERO) if first else bounds.expand(ll);first=false
+					rings.append(ring)
+				polygons.append(rings)
+		if first or not bounds.has_area():return
+		_context_water_bounds=Vector4(bounds.position.x,bounds.position.y,bounds.end.x,bounds.end.y)
+		_context_water_bytes.resize(512*512);_context_water_bytes.fill(0)
+		for row: int in range(512):
+			if not _current.call():return
+			var latitude:=lerpf(bounds.end.y,bounds.position.y,(row+.5)/512.0)
+			for polygon: Array in polygons:
+				# Even-odd scanlines preserve acquired island holes. Cost follows
+				# polygon edges and filled spans, not pixel-count times all edges.
+				var crossings: Array[float] = []
+				for ring: PackedVector2Array in polygon:
+					for index: int in range(ring.size()):
+						var a:=ring[index];var b:=ring[(index+1)%ring.size()]
+						if (a.y>latitude)!=(b.y>latitude):crossings.append(a.x+(b.x-a.x)*(latitude-a.y)/(b.y-a.y))
+				crossings.sort()
+				for index: int in range(0,crossings.size()-1,2):
+					var first_column:=clampi(ceili((crossings[index]-bounds.position.x)/bounds.size.x*512.0-.5),0,512)
+					var last_column:=clampi(ceili((crossings[index+1]-bounds.position.x)/bounds.size.x*512.0-.5),0,512)
+					for column: int in range(first_column,last_column):_context_water_bytes[row*512+column]=255
 
 	func _surface_metric(unit: Vector3) -> Vector2:
 		return (RegionProjection.forward(unit,_surface_chart_frame)-_surface_chart_anchor_km)*1000.0
@@ -471,6 +547,7 @@ class TerrainPreparation:
 	func _surface_ground_y(coordinate: Vector2) -> float:
 		if _surface_vertices.is_empty(): return 0.0
 		var grid := _surface_grid(coordinate)
+		if not _display_heights.is_empty():return LocalSpatialLod.height_sample(_display_heights,_height_size,LocalSpatialLod.height_grid(grid,_height_layout,_height_stride))
 		var width := int(_surface_reference.width)
 		var column := clampi(int(grid.x),0,width-2)
 		var row := clampi(int(grid.y),0,int(_surface_reference.height)-2)
@@ -634,6 +711,9 @@ class TerrainPreparation:
 		var heights := PackedFloat32Array()
 		for vertex: Vector3 in vertices: heights.append(vertex.y)
 		_height_bytes = heights.to_byte_array()
+		_height_size = Vector2i(int(d.width),int(d.height))
+		_height_layout = Vector4(0,0,int(d.width)-1,int(d.height)-1)
+		_height_bounds = Vector4(float(d.west_cell_centre),float(d.north_cell_centre)-(int(d.height)-1)*float(d.step_degrees),float(d.west_cell_centre)+(int(d.width)-1)*float(d.step_degrees),float(d.north_cell_centre))
 		var arrays: Array = []
 		arrays.resize(Mesh.ARRAY_MAX)
 		var render_vertices := vertices.duplicate()
@@ -689,7 +769,15 @@ class TerrainPreparation:
 			var context_arrays := _context_ring(render_vertices,render_normals,render_colors,render_survey_uv,render_relief_uv)
 			render_vertices = context_arrays.vertices; render_normals = context_arrays.normals
 			render_colors = context_arrays.colors; render_survey_uv = context_arrays.uv; render_relief_uv = context_arrays.uv2
-			pick_groups[Vector2i(-1,-1)] = context_arrays.indices
+			# Reuse the existing AABB picker with bounded context tiles. A single
+			# 16km bucket made the first mouse press visit every outer triangle.
+			var context_indices:=PackedInt32Array(context_arrays.indices)
+			for offset: int in range(0,context_indices.size(),3):
+				var a:=context_indices[offset];var b:=context_indices[offset+1];var c:=context_indices[offset+2]
+				var centre:=(render_vertices[a]+render_vertices[b]+render_vertices[c])/3.0
+				var tile:=Vector2i(floori(centre.x/1000.0),floori(centre.z/1000.0))
+				if not pick_groups.has(tile):pick_groups[tile]=[]
+				(pick_groups[tile] as Array).append_array([a,b,c])
 		render_indices = PackedInt32Array()
 		_surface_pick_chunks.clear()
 		for group: Array in pick_groups.values():
@@ -698,6 +786,27 @@ class TerrainPreparation:
 			var bounds := AABB(render_vertices[render_indices[start]],Vector3.ZERO)
 			for index: int in range(start,render_indices.size()): bounds = bounds.expand(render_vertices[render_indices[index]])
 			_surface_pick_chunks.append({"start":start,"end":render_indices.size(),"bounds":bounds.grow(0.01)})
+		if _context_image!=null:
+			# The product grid retains fine rows/columns through the outer ring.
+			# Triangle normals there would change their sampling footprint at those
+			# rows and print a cross. Differentiate the SAME joined height field at
+			# the context source spacing, independent of tessellation density.
+			var source:=(_surface_reference.presentation as Dictionary).context_height_asset as Dictionary
+			var delta:=Vector2(float(source.display_spacing_degrees[0]),float(source.display_spacing_degrees[1]))/float(d.step_degrees)*0.5
+			var metres:=Vector2(cos(deg_to_rad(_local_surface_anchor.y)),1.0)*float(d.step_degrees)*111195.0
+			var axes:=RegionProjection.tangent_axes(GlobeProjection.lon_lat_to_unit(_local_surface_anchor),_surface_chart_frame)
+			var normal_basis:=Basis(Vector3(axes.x.x,0,-axes.x.y),Vector3.UP,Vector3(-axes.y.x,0,axes.y.y))
+			for index: int in range(render_vertices.size()):
+				if index%192==0 and not _current.call():return
+				var grid:=render_survey_uv[index]*extent
+				# One derivative of the joined height field on BOTH sides of the
+				# survey edge. Heights and fine interior sampling remain intact.
+				var distance:=((grid-grid.clamp(Vector2.ZERO,extent))*metres).length()
+				var sample_delta:=Vector2.ONE.lerp(delta,smoothstep(0.0,400.0,distance))
+				var gradient_samples: Array[float]=[]
+				for offset: Vector2 in [Vector2(-sample_delta.x,0),Vector2(sample_delta.x,0),Vector2(0,-sample_delta.y),Vector2(0,sample_delta.y)]:
+					gradient_samples.append(LocalSpatialLod.height_sample(_display_heights,_height_size,LocalSpatialLod.height_grid(grid+offset,_height_layout,_height_stride)))
+				render_normals[index]=(normal_basis*Vector3(-(gradient_samples[1]-gradient_samples[0])/(2.0*sample_delta.x*metres.x),1.0,-(gradient_samples[3]-gradient_samples[2])/(2.0*sample_delta.y*metres.y))).normalized()
 		arrays[Mesh.ARRAY_VERTEX] = render_vertices
 		arrays[Mesh.ARRAY_NORMAL] = render_normals
 		arrays[Mesh.ARRAY_COLOR] = render_colors
@@ -725,18 +834,22 @@ class TerrainPreparation:
 	func _context_ring(vertices: PackedVector3Array, normals: PackedVector3Array, colors: PackedColorArray, uv: PackedVector2Array, uv2: PackedVector2Array) -> Dictionary:
 		var d := _surface_reference
 		var extent := Vector2i(int(d.width)-1,int(d.height)-1)
-		var xs: Array[int] = []; var ys: Array[int] = []
-		for axis: int in range(2):
-			var values: Array[int] = xs if axis==0 else ys
-			for cell: int in range(-128,0,8): values.append(cell)
-			for cell: int in range(extent[axis]+1): values.append(cell)
-			for cell: int in range(extent[axis]+8,extent[axis]+129,8): values.append(cell)
+		var step := float(d.step_degrees)
+		var metres := Vector2(step*111195.0*cos(deg_to_rad(_local_surface_anchor.y)),step*111195.0)
+		var west := float(d.west_cell_centre);var north := float(d.north_cell_centre)
+		var layout := LocalSpatialContent.context_layout(d)
+		var xs: Array[int]=layout.xs;var ys: Array[int]=layout.ys
+		var low := layout.low as Vector2i
+		var stride := int(layout.stride)
+		_height_size=Vector2i(xs.size(),ys.size());_height_layout=Vector4(low.x,low.y,extent.x,extent.y);_height_stride=stride
+		_height_bounds=Vector4(west+xs[0]*step,north-ys[-1]*step,west+xs[-1]*step,north-ys[0]*step)
+		_display_heights.resize(xs.size()*ys.size())
 		var lookup := PackedInt32Array(); var indices := PackedInt32Array()
 		for y: int in ys:
 			if not _current.call(): return {"vertices":vertices,"normals":normals,"colors":colors,"uv":uv,"uv2":uv2,"indices":[]}
 			for x: int in xs:
 				if x>=0 and x<=extent.x and y>=0 and y<=extent.y:
-					lookup.append(y*int(d.width)+x);continue
+					lookup.append(y*int(d.width)+x);_display_heights[lookup.size()-1]=vertices[lookup[-1]].y;continue
 				var grid := Vector2(x,y)
 				var edge := grid.clamp(Vector2.ZERO,Vector2(extent))
 				var coordinate := Vector2(float(d.west_cell_centre)+x*float(d.step_degrees),float(d.north_cell_centre)-y*float(d.step_degrees))
@@ -746,10 +859,11 @@ class TerrainPreparation:
 				# A labelled display transition reconciles DSM/DTM and vertical datum
 				# differences in a 400m collar; the acquired native samples stay intact.
 				var h := _context_height(coordinate)+(_surface_height(boundary)-_context_height(boundary))*(1.0-smoothstep(0.0,400.0,distance))
-				var rim := minf(minf(x+128.0,extent.x+128.0-x),minf(y+128.0,extent.y+128.0-y))
-				var weight := smoothstep(0.0,24.0,rim)
+				var rim := minf(minf(x-xs[0],xs[-1]-x)*metres.x,minf(y-ys[0],ys[-1]-y)*metres.y)
+				var weight := smoothstep(0.0,600.0,rim)
 				lookup.append(vertices.size())
-				vertices.append(Vector3(metric.x,(h-_surface_base_height)*weight,-metric.y))
+				vertices.append(Vector3(metric.x,h-_surface_base_height,-metric.y))
+				_display_heights[lookup.size()-1]=h-_surface_base_height
 				normals.append(Vector3.ZERO);colors.append(Color(0,0,0,weight))
 				uv.append(grid/Vector2(extent));uv2.append(Vector2(log(1.0+maxf(0.0,h)/400.0)/log(16.0),0.0))
 		for row: int in range(ys.size()-1):
@@ -757,12 +871,8 @@ class TerrainPreparation:
 				if xs[column]>=0 and xs[column+1]<=extent.x and ys[row]>=0 and ys[row+1]<=extent.y: continue
 				var a := row*xs.size()+column;var b := a+1;var c := a+xs.size();var e := c+1
 				indices.append_array([lookup[a],lookup[c],lookup[b],lookup[b],lookup[c],lookup[e]])
-		for offset: int in range(0,indices.size(),3):
-			var a := indices[offset];var b := indices[offset+1];var c := indices[offset+2]
-			var normal := (vertices[b]-vertices[a]).cross(vertices[c]-vertices[a])
-			for id: int in [a,b,c]:
-				if id>=_surface_vertices.size(): normals[id]+=normal
-		for id: int in range(_surface_vertices.size(),normals.size()): normals[id]=normals[id].normalized()
+		# Context normals use the joined height field in _make_surface_mesh.
+		_height_bytes=_display_heights.to_byte_array()
 		return {"vertices":vertices,"normals":normals,"colors":colors,"uv":uv,"uv2":uv2,"indices":Array(indices)}
 
 	func _make_surface_cover() -> void:
@@ -861,7 +971,14 @@ class TerrainPreparation:
 		_line_arrays = arrays
 
 	func _append_height_contours(vertices: PackedVector3Array, colors: PackedColorArray) -> void:
-		var interval := float((_surface_reference.get("presentation",{}) as Dictionary).get("contour_interval_m",0.0))
+		# About twelve readable height bands from this admitted DEM, using the
+		# existing contour geometry. Explicit presentation intervals still win.
+		var range_m := float(_surface_reference.get("height_max_m",0.0))-float(_surface_reference.get("height_min_m",0.0))
+		var raw_step := maxf(1.0,range_m/12.0)
+		var decade := pow(10.0,floor(log(raw_step)/log(10.0)))
+		var fraction := raw_step/decade
+		var default_interval := decade*(1.0 if fraction<=1.0 else 2.0 if fraction<=2.0 else 5.0 if fraction<=5.0 else 10.0) if range_m>1.0 else 0.0
+		var interval := float((_surface_reference.get("presentation",{}) as Dictionary).get("contour_interval_m",default_interval))
 		if interval<=0.0: return
 		var width := int(_surface_reference.width)
 		for row: int in range(int(_surface_reference.height)-1):

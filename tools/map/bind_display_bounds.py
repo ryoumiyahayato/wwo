@@ -15,7 +15,8 @@ for descriptor in descriptors:
  packed=asset_path.read_bytes();geometries=json.loads(zlib.decompress(packed));before=json.dumps(geometries,separators=(',',':'))
  for geometry in geometries.values():
   geometry['geometry']['coordinates']=bound_display_coordinates(geometry['geometry']['coordinates'],descriptor['bounds'])
-  for lod,coordinates in geometry['lod_geometry'].items():geometry['lod_geometry'][lod]=bound_display_coordinates(coordinates,descriptor['bounds'])
+  for lod,coordinates in geometry['lod_geometry'].items():
+   if coordinates != '@geometry.coordinates':geometry['lod_geometry'][lod]=bound_display_coordinates(coordinates,descriptor['bounds'])
  raw=json.dumps(geometries,ensure_ascii=False,separators=(',',':')).encode();new=zlib.compress(raw,9)
  if before==json.dumps(geometries,separators=(',',':')):continue
  asset_path.write_bytes(new)

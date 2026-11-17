@@ -1,0 +1,7 @@
+# Native originals are recovered locally by the existing resource installer.
+*.glb
+*.png
+*.f32
+*.wav
+*.ogg
+*.import

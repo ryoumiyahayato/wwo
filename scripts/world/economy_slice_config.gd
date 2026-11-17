@@ -27,7 +27,7 @@ const FIELDS: Array[String] = ["format", "case_id", "actors", "firms", "jobs", "
 const Credit = preload("res://scripts/world/economy_bilateral_credit.gd")
 const Exchange = preload("res://scripts/world/economy_currency_exchange.gd")
 const Assets = preload("res://scripts/world/economy_asset_market.gd")
-const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations", "opening_organizations", "opening_residents", "material_renewals", "opening_job_choice", "liquidity_policies", "labor_response_policies", "firm_finance_authorities", "cost_accounting", "service_market", "lease_market", "retail_sites", "commercial_information", "labor_market", "wind_down", "capital_resale", "capital_transport", "local_quotation_experiment", "equity_call_market", "equity_primary", "equity_distribution", "corporate_decisions", "local_producers"]
+const OPTIONAL_FIELDS: Array[String] = ["credit_offers", "currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search", "goods", "need_categories", "host_personal_accounts", "management_scope", "person_travel", "runtime_expansions", "personal_storage", "residence_permissions", "commodity_mappings", "place_population_bindings", "npc_residence", "firm_management_permissions", "capital_investment", "procurement_budgets", "shared_transport", "transport_facilities", "development_organizations", "opening_organizations", "opening_residents", "material_renewals", "opening_job_choice", "liquidity_policies", "labor_response_policies", "firm_finance_authorities", "cost_accounting", "service_market", "lease_market", "retail_sites", "commercial_information", "labor_market", "wind_down", "capital_resale", "capital_transport", "local_quotation_experiment", "equity_call_market", "equity_primary", "equity_distribution", "corporate_decisions", "local_producers", "resource_producers", "unified_market", "settlement_currency"]
 ## Extra accounts declare finite minor-unit endowments, including zero accounts.
 ## FX offers use target-minor/source-minor rational rates and a fixed source fee.
 ## Routes are directed shared physical edges, with same-currency freight per unit.
@@ -288,7 +288,7 @@ static func valid(value: Dictionary) -> bool:
 			if firm.get("cargo_settlement_basis") != "EXPLICIT_DEVELOPMENT_CARGO_SETTLEMENT_AUTHORITY" or not firm["cargo_settlement_controller"] is String or firm["cargo_settlement_controller"] not in [firm["id"], firm.get("manager", firm["id"])]: return false
 		elif firm.has("cargo_settlement_basis"): return false
 		firms[firm["id"]] = firm
-	if firms.is_empty() or firms.size() > 32:
+	if (firms.is_empty() and value.get("resource_producers", []).is_empty()) or firms.size() > 32:
 		return false
 	for job: Variant in value["jobs"]:
 		if not job is Dictionary or not _fields(job, ["id", "employer", "positions", "skill", "hours", "place", "wage_per_hour", "wage_delay"], ["denomination", "notice_delay", "site_id"]) or not job["id"] is String or not str(job["id"]).begins_with("job:") or jobs.has(job["id"]) or not firms.has(job["employer"]) or not _place(job["place"]) or not sites.has(job.get("site_id", configured_primary(firms, job["employer"]))) or sites[job.get("site_id", configured_primary(firms, job["employer"]))]["firm_id"] != job["employer"] or job["place"] != sites[job.get("site_id", configured_primary(firms, job["employer"]))]["place_id"]:
@@ -360,6 +360,7 @@ static func _place(value: Variant) -> bool:
 	return value is String and str(value).begins_with("place:") and str(value).length() > 6
 
 static func _finance(value: Dictionary, actors: Dictionary, firms: Dictionary, jobs: Dictionary, accounts: Dictionary) -> bool:
+	if value.has("settlement_currency") and value["settlement_currency"] != FormalLedgerState.FRANC_1900: return false
 	for field: String in ["currency_accounts", "carriers", "fx_offers", "routes", "assets", "transport_paths", "transport_nodes", "npc_finance", "firm_operations", "price_policies", "purchase_limits", "supplier_directory", "supplier_search"]:
 		if not value.get(field, []) is Array or value.get(field, []).size() > 256:
 			return false
@@ -392,6 +393,9 @@ static func _finance(value: Dictionary, actors: Dictionary, firms: Dictionary, j
 	for denomination: String in budgets:
 		if accounts.has(FormalLedgerState.currency_source(denomination)):
 			return false
+	if value.has("settlement_currency"):
+		for id: String in subjects:
+			if not owner_currencies[id].has(value["settlement_currency"]): return false
 	for row: Dictionary in firms.values():
 		if not FormalLedgerState.currency_id(row.get("denomination", FormalLedgerState.DENOMINATION)) or not owner_currencies[row["id"]].has(row.get("denomination", FormalLedgerState.DENOMINATION)):
 			return false
@@ -534,8 +538,11 @@ static func _operations(value: Dictionary, actors: Dictionary, firms: Dictionary
 	var sites := spec["sites"] as Dictionary
 	var seen: Dictionary = {}
 	for row: Variant in value.get("firm_operations", []):
-		if not row is Dictionary or not _fields(row, ["firm", "planning_horizon", "buffer_days", "demand_window", "manage_jobs"], ["site_id"]) or not firms.has(row["firm"]) or seen.has(str(row.get("site_id", row["firm"]))) or not row["manage_jobs"] is bool:
+		if not row is Dictionary or not _fields(row, ["firm", "planning_horizon", "buffer_days", "demand_window", "manage_jobs"], ["site_id", "sales_cover_days", "resale_margin_permille", "demand_shifts"]) or not firms.has(row["firm"]) or seen.has(str(row.get("site_id", row["firm"]))) or not row["manage_jobs"] is bool:
 			return false
+		for key: String in ["sales_cover_days", "resale_margin_permille"]:
+			if row.has(key) and (not _number(row[key]) or int(row[key]) > (30 if key == "sales_cover_days" else 1000)): return false
+		if row.has("demand_shifts") and not row["demand_shifts"] is bool: return false
 		for key: String in ["planning_horizon", "buffer_days", "demand_window"]:
 			if not _number(row[key], 0 if key == "buffer_days" else 1) or int(row[key]) > 30:
 				return false

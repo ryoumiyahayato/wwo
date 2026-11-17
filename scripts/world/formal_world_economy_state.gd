@@ -416,6 +416,28 @@ func read_only_snapshot() -> Dictionary:
 	}
 
 
+func read_only_output_values(goods: Array) -> Dictionary:
+	var active_goods: Array[String] = []
+	for good: String in goods:
+		if float((_commodities.get(good,{}) as Dictionary).get("base_daily_units_per_million",0.0))>0.0:
+			active_goods.append(good)
+	var values: Dictionary = {}
+	for market_id: String in market_states:
+		var state := market_states[market_id] as Dictionary
+		if int(state.get("last_settlement_hour",0))<=0: continue
+		var metrics := state.get("daily_metrics",{}) as Dictionary
+		var prices := state.get("prices",{}) as Dictionary
+		var value := 0.0
+		var known := false
+		for good: String in active_goods:
+			var row := metrics.get(good,{}) as Dictionary
+			if not row.has("produced") or not prices.has(good): continue
+			value += float(row.produced)*float(prices[good])
+			known = true
+		if known: values[_market_registry.economic_aggregate_id_for_market(market_id)] = value
+	return values
+
+
 func read_only_presentation_snapshot() -> Dictionary:
 	# Panels and map colours need summaries and market identities, not copied
 	# commodity inventories, shipments, routes or the entire settlement history.

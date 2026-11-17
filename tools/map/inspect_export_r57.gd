@@ -2,6 +2,10 @@ extends SceneTree
 ## Read the exported PCK directory and one native surface; no game scene.
 
 func _init() -> void:
+	for argument: String in OS.get_cmdline_user_args():
+		if argument.begins_with("--pack-recipe="):
+			_pack_resources(argument.trim_prefix("--pack-recipe="))
+			return
 	var scope_path := ""
 	var output := ""
 	var foundation_only := false
@@ -61,3 +65,35 @@ func _init() -> void:
 	var good := missing.is_empty() and retained_exclusions.is_empty() and unexpected_research.is_empty() and (decoded.errors as Array).is_empty() and (sample.errors as Array).is_empty()
 	print("R57 exported resource read ",good)
 	quit(0 if good else 1)
+
+
+func _pack_resources(recipe_path: String) -> void:
+	# Repack the frozen preview, not the working tree. Each virtual path is
+	# added exactly once; external candidates replace rather than append bytes.
+	var recipe: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(recipe_path)) as Dictionary
+	if not ProjectSettings.load_resource_pack(str(recipe.baseline),true):
+		push_error("Cannot mount frozen baseline PCK")
+		quit(1)
+		return
+	var output := str(recipe.outputs.complete)
+	var packer := PCKPacker.new()
+	if packer.pck_start(output)!=OK:
+		push_error("Cannot create candidate PCK: "+output)
+		quit(1)
+		return
+	var count := 0
+	for entry: Dictionary in recipe.entries:
+		var source := str(entry.get("source","res://"+str(entry.path)))
+		if packer.add_file("res://"+str(entry.path),source)!=OK:
+			push_error("Cannot pack replacement resource: "+str(entry.path))
+			quit(1)
+			return
+		count += 1
+		if count%1000==0:
+			print("LOSSLESS_PACK_PROGRESS ",count)
+	if packer.flush()!=OK:
+		push_error("Cannot finish candidate PCK")
+		quit(1)
+		return
+	print("LOSSLESS_PACK_DONE entries=",count," path=",output)
+	quit()

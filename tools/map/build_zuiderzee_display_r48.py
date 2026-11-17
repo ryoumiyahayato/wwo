@@ -1,4 +1,4 @@
-"""Move only the display frame into open water; retain all R46/source files."""
+"""Keep the sourced 1905 shoreline at overview and regional precision."""
 import json
 import zlib
 from pathlib import Path
@@ -14,9 +14,12 @@ def main():
     # The former northern edge cut Vlieland; the eastern edge cut the source
     # coast near the IJssel mouth. No source shoreline vertex is moved.
     water = original.history_water((110000,470000,199000,592000), ROOT/'local-artifacts/terrain-recovery-r48/history')
-    geographic = transform(original.shared.TO_DEGREES,water.simplify(80,preserve_topology=True))
-    faces = transform(original.shared.TO_DEGREES,constrained_delaunay_triangles(water.simplify(80,preserve_topology=True)))
-    triangles = [[list(map(list,t.exterior.coords))] for t in faces.geoms]
+    regional = water.simplify(16,preserve_topology=True)
+    geographic = transform(original.TO_DEGREES,regional)
+    def triangles(surface):
+        faces = transform(original.TO_DEGREES,constrained_delaunay_triangles(surface))
+        return [[list(map(list,t.exterior.coords))] for t in faces.geoms]
+    coarse,medium=triangles(water.simplify(80,preserve_topology=True)),triangles(regional)
     folder = ROOT/'data/strategic'
     document = json.loads((folder/'benelux_hydro_overview_r46.json').read_text(encoding='utf8'))
     geometry = json.loads(zlib.decompress((folder/'benelux_hydro_overview_r46.geom').read_bytes()))
@@ -32,10 +35,10 @@ def main():
         query = mapping(geographic)
         if query['type'] == 'Polygon':
             query = dict(type='MultiPolygon', coordinates=[query['coordinates']])
-        geometry[ident] = dict(geometry=query,lod_geometry=dict(coarse=triangles,medium=triangles))
+        geometry[ident] = dict(geometry=query,lod_geometry=dict(coarse=coarse,medium=medium))
         feature['display_frame_revision'] = 'R48: original 1905 coast; RD frame [110000,470000,199000,592000]'
         fact['generator'] = 'tools/map/build_zuiderzee_display_r48.py'
-        fact['methodology'] += ' R48 relocates only the clipping frame off physical land; original shore and island coordinates preserved.'
+        fact['methodology'] += ' R48 relocates the clipping frame off physical land. Regional display simplifies the original 1905 shore at 16m; overview at 80m.'
     jp = folder/'benelux_hydro_overview_r48.json'
     gp = folder/'benelux_hydro_overview_r48.geom'
     jp.write_text(json.dumps(document,ensure_ascii=False,separators=(',',':')),encoding='utf8')
@@ -46,7 +49,7 @@ def main():
         if row['id']=='benelux_hydro_overview_r46':
             row.update(path='res://data/strategic/'+jp.name,bytes=jp.stat().st_size,geometry_bytes=gp.stat().st_size)
     index_path.write_text(json.dumps(index,ensure_ascii=False,separators=(',',':')),encoding='utf8')
-    print('Historical sea display:',len(triangles),'triangles;',jp.stat().st_size+gp.stat().st_size,'bytes; stable IDs unchanged')
+    print('Historical sea display:',len(coarse),len(medium),'triangles;',jp.stat().st_size+gp.stat().st_size,'bytes; stable IDs unchanged')
 
 
 if __name__ == '__main__':

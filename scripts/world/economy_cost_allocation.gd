@@ -244,7 +244,7 @@ func delivery(id: String, order: Dictionary, prior: Array[Dictionary], moved: Ar
 		_index_sale(id)
 	if order["kind"]=="PERSONAL_FREIGHT": return
 	var cost:=empty_cost() if order["kind"]=="SALE" else cost_of(prior)
-	if order["kind"]=="SALE": cost["amounts"][order["denomination"]]=q*int(order["price"])
+	if order["kind"]=="SALE": cost["amounts"][order["denomination"]]=e._receipt_goods_amount(receipt, order)
 	var capitalize: bool=e.config["cost_accounting"]["freight_treatment"]=="BUYER_ACQUISITION"
 	if capitalize:
 		combine(cost,_freight_cost(order,q))
@@ -311,6 +311,15 @@ func _index_production(id: String) -> void:
 	if not _production_days[key].has(p["day"]): _production_days[key][p["day"]]=[]
 	_production_days[key][p["day"]].append(id)
 
+func recent_sales(site: String, good: String, window: int) -> int:
+	var e := economy()
+	var quantity: int = 0
+	for date: int in range(maxi(0, e.day - window + 1), e.day + 1):
+		for id: String in _sales_days.get(site, {}).get(date, []):
+			var receipt: Dictionary = e._delivery_receipts[id]
+			if e._orders[receipt["order_id"]]["good"] == good: quantity += int(receipt["quantity"])
+	return quantity
+
 func view(firm: String, window: int) -> Dictionary:
 	var result:={"enabled":enabled,"start_minute":start_minute,"basis":"KNOWN_DIRECT_COST_AND_LIMITED_GROSS_CONTRIBUTION_NOT_NET_PROFIT","sales_revenue":{},"comparable_revenue":{},"sold_known_cost":{},"contribution":{},"unknown_sales":0,"inventory":{},"joint_outputs":[],"production_batches":[],"capital_projects":[],"loss_known_cost":{},"unallocated_wages":{}}
 	if not enabled: return result
@@ -337,7 +346,7 @@ func view(firm: String, window: int) -> Dictionary:
 				var r:=e._delivery_receipts[id] as Dictionary
 				var o:=e._orders[r["order_id"]] as Dictionary
 				var currency:=str(o["denomination"])
-				var revenue:=int(r["quantity"])*int(o["price"])
+				var revenue: int=e._receipt_goods_amount(r, o)
 				result["sales_revenue"][currency]=int(result["sales_revenue"].get(currency,0))+revenue
 				var cost:=cost_of(sales[id])
 				for unit: String in cost["amounts"]: result["sold_known_cost"][unit]=int(result["sold_known_cost"].get(unit,0))+int(cost["amounts"][unit])
@@ -389,7 +398,7 @@ func view(firm: String, window: int) -> Dictionary:
 	result["delivered_sale_payment_basis"]="ORIGINAL_LEDGER_BATCH_PAYMENT_BEFORE_PHYSICAL_ADOPTION"
 	for id: String in e._active_by_buyer.get(firm,{}):
 		var order:=e._orders[id] as Dictionary
-		var amount: int=(int(order["pending"])+int(order["transit"]))*int(order["price"])
+		var amount: int=e._reserved_amount(order) - (int(order["pending"])+int(order["transit"]))*e._freight(order["route_legs"])
 		result["unfulfilled_purchase_obligations"][order["denomination"]]=int(result["unfulfilled_purchase_obligations"].get(order["denomination"],0))+amount
 	for tx: Dictionary in e._world.ledger_state.own_transactions(firm,maxi(0,e.day-window+1)*1440):
 		var currency:=str(tx["denomination"])
@@ -607,7 +616,10 @@ func activity_scores(site: String, window: int) -> Dictionary:
 		for id: String in _sales_days.get(site,{}).get(date,[]):
 			var receipt:=e._delivery_receipts[id] as Dictionary
 			var order:=e._orders[receipt["order_id"]] as Dictionary
+			var sales_offset: int = 0
 			for r: Dictionary in sales[id]:
+				var revenue: int = int(FormalLedgerState.ratio(e._receipt_goods_amount(receipt, order), sales_offset + int(r["quantity"]), int(receipt["quantity"]))["quotient"]) - int(FormalLedgerState.ratio(e._receipt_goods_amount(receipt, order), sales_offset, int(receipt["quantity"]))["quotient"])
+				sales_offset += int(r["quantity"])
 				var b:=bases[r["basis"]] as Dictionary
 				if b["kind"]!="OUTPUT": continue
 				var p:=productions[b["refs"]["production"]] as Dictionary
@@ -623,7 +635,7 @@ func activity_scores(site: String, window: int) -> Dictionary:
 				if scores[key]["currency"]!=currency:
 					scores[key]["currency"]="INCOMPARABLE_CURRENCIES"
 					continue
-				scores[key]["margin"]+=int(r["quantity"])*int(order["price"])-int(cost["amounts"][currency])
+				scores[key]["margin"]+=revenue-int(cost["amounts"][currency])
 				scores[key]["units"]+=int(r["quantity"])
 	for d: Dictionary in e._cargo_fulfilment.cost_dispositions(e._owner(site),maxi(0,e.day-window+1)):
 		if d["status"]=="PROPOSED" or d["terms"]["mode"]!="REFUND" or d["terms"]["payment"]["payer"]!=e._owner(site): continue
@@ -1029,7 +1041,7 @@ func _validate_basis_references() -> bool:
 				var physical:=e._lots.portions[portion["portion"]] as Dictionary
 				if physical["owner"]!=order["seller"] or physical["good"]!=order["good"] or physical["location"]!=_acquisition_origin(order,receipt): return false
 			var expected:=empty_cost() if order["kind"]=="SALE" else cost_of(r["prior"])
-			if order["kind"]=="SALE": expected["amounts"][order["denomination"]]=int(receipt["quantity"])*int(order["price"])
+			if order["kind"]=="SALE": expected["amounts"][order["denomination"]]=e._receipt_goods_amount(receipt, order)
 			if r["capitalized_freight"]: combine(expected,_freight_cost(order,receipt["quantity"]))
 			if b["quantity"]!=receipt["quantity"] or b["amounts"]!=expected["amounts"] or b["unknown"]!=expected["unknown"] or b["owner"]!=order["buyer"]: return false
 	for id: String in e._delivery_receipts:

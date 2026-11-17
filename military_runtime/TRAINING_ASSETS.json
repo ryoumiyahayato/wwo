@@ -1,0 +1,168 @@
+{
+  "schema": "wwo-native-training-models-v1",
+  "package_filename": "wwo-native-training-models-v1.zip",
+  "install_namespace": "military_runtime/native",
+  "source_repository": "ryoumiyahayato/wwo",
+  "source_archive_commit": "3c48266b335cfa448953d26b9698abb6dd207a34",
+  "source_release_id": 422607066,
+  "source_tag": "untagged-75a9dbc800223cbf8a18",
+  "manifest_git_source": "wwo-military HEAD:provenance/archive/manifest.json.gz",
+  "archive_prefix": "formal-combat-authority-20261024/runtime/",
+  "source_provenance": "Copied from the existing restoration-receipt.json; original HTTP range addresses and byte counts only.",
+  "scope": "Eight original GLBs only. Nine prefixed runtime JSON files are source-delivered and are not included in this attachment.",
+  "binary_bytes": 2855928,
+  "files": [
+    {
+      "relative_path": "assets/user_derived/models/user_heavy_mbt_aimable.glb",
+      "bytes": 604496,
+      "source_archive_path": "formal-combat-authority-20261024/runtime/assets/user_derived/models/user_heavy_mbt_aimable.glb",
+      "range_addresses": [
+        {
+          "source_asset_id": 671734702,
+          "source_part": "military-current-0001.zip.part001",
+          "local_offset": 30903363,
+          "compressed_bytes": 116115,
+          "uncompressed_bytes": 604496,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 30903477,
+          "retrieved_range_start": 30903363,
+          "retrieved_range_bytes": 116627
+        }
+      ]
+    },
+    {
+      "relative_path": "assets/models/kestrel_scout.glb",
+      "bytes": 1744900,
+      "source_archive_path": "formal-combat-authority-20261024/runtime/assets/models/kestrel_scout.glb",
+      "range_addresses": [
+        {
+          "source_asset_id": 671734702,
+          "source_part": "military-current-0001.zip.part001",
+          "local_offset": 21455767,
+          "compressed_bytes": 332147,
+          "uncompressed_bytes": 1744900,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 21455881,
+          "retrieved_range_start": 21455767,
+          "retrieved_range_bytes": 332659
+        }
+      ]
+    },
+    {
+      "relative_path": "assets/user_derived/models/user_rifleman_armed.glb",
+      "bytes": 213244,
+      "source_archive_path": "formal-combat-authority-20261024/runtime/assets/user_derived/models/user_rifleman_armed.glb",
+      "range_addresses": [
+        {
+          "source_asset_id": 671734702,
+          "source_part": "military-current-0001.zip.part001",
+          "local_offset": 31020218,
+          "compressed_bytes": 30109,
+          "uncompressed_bytes": 213244,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 31020332,
+          "retrieved_range_start": 31020218,
+          "retrieved_range_bytes": 30621
+        }
+      ]
+    },
+    {
+      "relative_path": "assets/user_derived/models/user_rifleman_near.glb",
+      "bytes": 253632,
+      "source_archive_path": "formal-combat-authority-20261024/runtime/assets/user_derived/models/user_rifleman_near.glb",
+      "range_addresses": [
+        {
+          "source_asset_id": 671734702,
+          "source_part": "military-current-0001.zip.part001",
+          "local_offset": 31051067,
+          "compressed_bytes": 84988,
+          "uncompressed_bytes": 253632,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 31051181,
+          "retrieved_range_start": 31051067,
+          "retrieved_range_bytes": 85500
+        }
+      ]
+    },
+    {
+      "relative_path": "assets/artillery_shell/artillery_shell_lod0.glb",
+      "bytes": 15060,
+      "source_archive_path": "formal-combat-authority-20261024/runtime/assets/artillery_shell/artillery_shell_lod0.glb",
+      "range_addresses": [
+        {
+          "source_asset_id": 671734702,
+          "source_part": "military-current-0001.zip.part001",
+          "local_offset": 269687,
+          "compressed_bytes": 4744,
+          "uncompressed_bytes": 15060,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 269801,
+          "retrieved_range_start": 269687,
+          "retrieved_range_bytes": 5256
+        }
+      ]
+    },
+    {
+      "relative_path": "assets/artillery_shell/artillery_shell_lod1.glb",
+      "bytes": 5808,
+      "source_archive_path": "formal-combat-authority-20261024/runtime/assets/artillery_shell/artillery_shell_lod1.glb",
+      "range_addresses": [
+        {
+          "source_asset_id": 671734702,
+          "source_part": "military-current-0001.zip.part001",
+          "local_offset": 275162,
+          "compressed_bytes": 2009,
+          "uncompressed_bytes": 5808,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 275276,
+          "retrieved_range_start": 275162,
+          "retrieved_range_bytes": 2521
+        }
+      ]
+    },
+    {
+      "relative_path": "cedar/assets/tank_hull_dressing.glb",
+      "bytes": 10616,
+      "source_archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/tank_hull_dressing.glb",
+      "range_addresses": [
+        {
+          "source_asset_id": 671734702,
+          "source_part": "military-current-0001.zip.part001",
+          "local_offset": 50476005,
+          "compressed_bytes": 3104,
+          "uncompressed_bytes": 10616,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 50476119,
+          "retrieved_range_start": 50476005,
+          "retrieved_range_bytes": 3616
+        }
+      ]
+    },
+    {
+      "relative_path": "cedar/assets/tank_turret_dressing.glb",
+      "bytes": 8172,
+      "source_archive_path": "formal-combat-authority-20261024/runtime/cedar/assets/tank_turret_dressing.glb",
+      "range_addresses": [
+        {
+          "source_asset_id": 671734702,
+          "source_part": "military-current-0001.zip.part001",
+          "local_offset": 50479838,
+          "compressed_bytes": 2620,
+          "uncompressed_bytes": 8172,
+          "method": 8,
+          "flags": 0,
+          "archive_data_offset": 50479952,
+          "retrieved_range_start": 50479838,
+          "retrieved_range_bytes": 3132
+        }
+      ]
+    }
+  ]
+}

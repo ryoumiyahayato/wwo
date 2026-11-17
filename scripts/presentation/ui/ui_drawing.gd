@@ -1,6 +1,27 @@
 class_name UIDrawing
 extends RefCounted
+
+const FOLIO_PAPER := Color("eee5cf")
+const FOLIO_SHADE := Color("36393a")
+const FOLIO_INK := Color("eee5cf")
+const FOLIO_MUTED := Color("b6bcba")
+const FOLIO_RULE := Color("8e7751")
+const FOLIO_BINDING := Color("282b2d")
+const FOLIO_BRASS := Color("bd9858")
+const FOLIO_BACKGROUND := Color(0.13,0.13,0.14,0.86)
+const ENAMEL := Color("142532")
+const BRASS_SHADOW := Color("594022")
+const BRASS_LIGHT := Color("e6c888")
+const FOLIO_HEADER_HEIGHT := 54.0
+const UILocale = preload("res://scripts/presentation/ui/ui_locale.gd")
+enum Folio { GENERAL, MARKET, POLITICS }
+const FOLIO_ART := {
+	Folio.GENERAL: {"texture":"folio","crest":Rect2(186,0,715,202)},
+	Folio.MARKET: {"texture":"market","crest":Rect2(138,0,810,190)},
+	Folio.POLITICS: {"texture":"politics","crest":Rect2(130,0,820,190)},
+}
 ## Shared drawing primitives; no world data or input state.
+static var _history_light_texture: GradientTexture2D
 
 static func create_font() -> SystemFont:
 	var font := SystemFont.new()
@@ -12,33 +33,31 @@ static func panel(canvas: CanvasItem, rect: Rect2, fill: Color, border: Color) -
 	canvas.draw_rect(rect, border, false, 1.0)
 
 static func label(canvas: CanvasItem, font: Font, point: Vector2, text: String, font_size: int = 12, color: Color = Color(0.90, 0.91, 0.84, 1.0), width: float = -1.0) -> void:
-	canvas.draw_string(font, point, text, HORIZONTAL_ALIGNMENT_LEFT, width, font_size, color)
+	canvas.draw_string(font, point, UILocale.text(text), HORIZONTAL_ALIGNMENT_LEFT, width, font_size, color)
 
-static func archive_drawer(canvas: CanvasItem, rect: Rect2, style: Dictionary) -> void:
-	canvas.draw_rect(rect,style.body as Color)
-	var edge := style.metal as Color
-	edge.a = 0.55
-	canvas.draw_line(rect.position+Vector2(1,6),Vector2(rect.position.x+1,rect.end.y-6),edge,1,true)
-	canvas.draw_line(rect.position+Vector2(9,3),Vector2(rect.end.x,rect.position.y+3),style.seam,3,true)
-	canvas.draw_line(Vector2(rect.position.x+9,rect.end.y-3),rect.end-Vector2(0,3),style.seam,3,true)
-	canvas.draw_line(rect.position+Vector2(14,59),Vector2(rect.end.x-36,rect.position.y+59),Color(0.39,0.57,0.56,0.25),1,true)
-	for y: float in [12.0,rect.size.y-12.0]:
-		canvas.draw_circle(rect.position+Vector2(7,y),1.7,style.bronze)
-		canvas.draw_line(rect.position+Vector2(6,y),rect.position+Vector2(8,y),style.highlight,0.7,true)
+# Present an already configured information dialog; content stays with its caller.
+static func present_information_dialog(parent: Control, dialog: AcceptDialog) -> void:
+	dialog.theme = system_theme()
+	dialog.title = UILocale.text(dialog.title)
+	dialog.dialog_text = UILocale.text(dialog.dialog_text)
+	dialog.dialog_autowrap = true
+	parent.add_child(dialog)
+	dialog.get_ok_button().text = UILocale.text("关闭")
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	dialog.popup_centered(Vector2i(mini(620,int(parent.size.x)-40),mini(440,int(parent.size.y)-40)))
 
-static func archive_handle(canvas: CanvasItem, rect: Rect2, style: Dictionary, opened: bool, hovered: bool) -> void:
-	var shape := PackedVector2Array([Vector2(7,0),Vector2(rect.size.x,0),rect.size,Vector2(7,rect.size.y),Vector2(0,rect.size.y-8),Vector2(0,8)])
-	canvas.draw_colored_polygon(shape,Color(0.07,0.12,0.14,0.98) if hovered else style.body)
-	canvas.draw_polyline(PackedVector2Array([Vector2(7,1),Vector2(1,8),Vector2(1,rect.size.y-8),Vector2(7,rect.size.y-1)]),style.highlight if hovered else style.metal,1,true)
-	var middle := rect.get_center()
-	for offset: float in [-9.0,0.0,9.0]: canvas.draw_line(middle+Vector2(-3,offset),middle+Vector2(3,offset),style.muted,1,true)
-	var sign := 1.0 if opened else -1.0
-	canvas.draw_polyline(PackedVector2Array([middle+Vector2(-sign*2,-23),middle+Vector2(sign*2,-19),middle+Vector2(-sign*2,-15)]),style.highlight,1,true)
+static func archive_drawer(canvas: CanvasItem, rect: Rect2) -> void:
+	folio(canvas,rect,0.0)
+	folio_rail(canvas,Rect2(rect.position+Vector2(16,66),Vector2(rect.size.x-52,1)))
+
+static func archive_handle(canvas: CanvasItem, rect: Rect2, opened: bool, hovered: bool) -> void:
+	var tint := Color.WHITE if hovered or opened else Color("e1d8c6")
+	_art(canvas,_theme_art("message_handle"),rect,Rect2(379,125,370,1265),Vector2(1024,1536),tint)
 
 static func archive_notice(canvas: CanvasItem, rect: Rect2, style: Dictionary, attention: bool) -> void:
-	canvas.draw_rect(rect,style.body)
-	canvas.draw_line(Vector2(2,10),Vector2(2,rect.size.y-10),style.status if attention else style.teal,2,true)
-	canvas.draw_line(Vector2(12,rect.size.y-2),Vector2(rect.size.x-12,rect.size.y-2),Color(0.58,0.47,0.29,0.24),1,true)
+	folio_frame(canvas,rect,style.body)
+	canvas.draw_line(rect.position+Vector2(9,14),Vector2(rect.position.x+9,rect.end.y-14),style.status if attention else style.teal,2,true)
 
 static func nautical_globe(canvas: CanvasItem, center: Vector2, radius: float, glow: float = 0.0) -> void:
 	var brass := InterfaceSettings.theme_parameters().brass as Color
@@ -143,120 +162,217 @@ static func _nautical_band(canvas: CanvasItem, center: Vector2, radii: Vector2, 
 	canvas.draw_polyline(inner,dark,0.8,true)
 	canvas.draw_polyline(outer,edge,0.8,true)
 
-static func _ellipse_points(center: Vector2, radii: Vector2, steps: int = 48) -> PackedVector2Array:
-	var points := PackedVector2Array()
-	for index: int in range(steps):
-		var angle := TAU*float(index)/float(steps)
-		points.append(center+Vector2(cos(angle)*radii.x,sin(angle)*radii.y))
-	return points
-
 static func _closed_outline(canvas: CanvasItem, points: PackedVector2Array, color: Color, width: float) -> void:
 	var outline := points.duplicate()
 	outline.append(points[0])
 	canvas.draw_polyline(outline,color,width,true)
 
-static func _instrument_hub(canvas: CanvasItem, center: Vector2, radius: float, palette: Dictionary) -> void:
-	canvas.draw_circle(center+Vector2(0.6,1.0),radius+1.0,palette.seam as Color)
-	canvas.draw_circle(center,radius,palette.bronze as Color)
-	canvas.draw_circle(center,radius-1.2,palette.metal as Color)
-	canvas.draw_arc(center,radius-0.5,PI*1.10,PI*1.95,12,palette.highlight as Color,0.9,true)
-	canvas.draw_circle(center,1.3,palette.seam as Color)
-	canvas.draw_line(center+Vector2(-1.6,-0.3),center+Vector2(1.6,0.3),palette.bronze as Color,0.8,true)
+static func quarter_clock_frame(canvas: CanvasItem, corner: Vector2, radius: float, palette: Dictionary, angles: Array[float]) -> void:
+	var dial := _theme_art("dial_compact" if radius<=132.0 else "dial_large")
+	canvas.draw_texture_rect(dial,Rect2(corner-Vector2(radius,0),Vector2.ONE*radius),false)
+	for degrees: float in angles:
+		var direction := Vector2.from_angle(deg_to_rad(degrees))
+		var tangent := direction.orthogonal()
+		var inner := corner+direction*(radius*.775)
+		var outer := corner+direction*(radius*.895)
+		var marker := PackedVector2Array([inner-tangent,outer-tangent*1.6,outer+tangent*1.6,inner+tangent])
+		canvas.draw_colored_polygon(marker,palette.metal as Color)
+		_closed_outline(canvas,marker,palette.seam as Color,0.8)
 
-static func quarter_clock_frame(canvas: CanvasItem, corner: Vector2, radius: float, palette: Dictionary) -> void:
-	# A face-on quadrant: its centre is at the top-right screen edge.
-	var face := PackedVector2Array([corner])
-	for index: int in range(65):
-		var angle := PI*0.5+PI*0.5*float(index)/64.0
-		face.append(corner+Vector2(cos(angle),sin(angle))*radius)
-	canvas.draw_colored_polygon(face,palette.body as Color)
-	canvas.draw_arc(corner+Vector2(-1,1),radius,PI*0.5,PI,64,palette.seam as Color,10.0,true)
-	canvas.draw_arc(corner,radius-1,PI*0.5,PI,64,palette.bronze as Color,8.0,true)
-	canvas.draw_arc(corner,radius-2.0,PI*0.5,PI,64,palette.metal as Color,4.5,true)
-	canvas.draw_arc(corner,radius,PI*0.5,PI,64,palette.highlight as Color,0.9,true)
-	canvas.draw_arc(corner,radius-11,PI*0.5+0.025,PI-0.025,64,palette.bronze as Color,0.8,true)
-	for index: int in range(1,40):
-		var angle := PI*0.5+PI*0.5*float(index)/40.0
-		var direction := Vector2(cos(angle),sin(angle))
-		var major := index%5==0
-		canvas.draw_line(corner+direction*(radius-(18.0 if major else 13.5)),corner+direction*(radius-5),palette.highlight as Color if major else palette.metal as Color,1.2 if major else 0.65,true)
-	_instrument_hub(canvas,corner+Vector2(-10,10),5.0,palette)
-	_instrument_hub(canvas,corner+Vector2(-radius+8,4),3.0,palette)
-	_instrument_hub(canvas,corner+Vector2(-4,radius-8),3.0,palette)
+static func clock_menu_gear(canvas: CanvasItem, center: Vector2, radius: float, palette: Dictionary, active: bool) -> void:
+	canvas.draw_colored_polygon(_gear_segment(center,radius,PI*.5,PI,32),palette.highlight as Color if active else palette.metal as Color)
+	canvas.draw_arc(center,radius*.59,PI*.5,PI,32,palette.bronze as Color,1.3,true)
+	canvas.draw_circle(center,radius*.26,palette.body as Color)
+	for hole: int in range(3):
+		var at := center+Vector2.from_angle(deg_to_rad(105.0+30.0*hole))*radius*.51
+		canvas.draw_circle(at,radius*.055,palette.body as Color)
 
-static func quarter_clock_indicator(canvas: CanvasItem, corner: Vector2, radius: float, palette: Dictionary, minute_of_day: int, paused: bool) -> void:
-	# The indicator travels along the rim; no hand crosses the date or controls.
-	var phase := float(posmod(minute_of_day,1440))/1440.0
-	var angle := PI-PI*0.5*phase
-	var direction := Vector2(cos(angle),sin(angle))
-	var tangent := Vector2(-direction.y,direction.x)
-	var tip := corner+direction*(radius-20)
-	canvas.draw_colored_polygon(PackedVector2Array([tip,tip+direction*12+tangent*3,tip+direction*12-tangent*3]),palette.status as Color if paused else palette.highlight as Color)
+static func _gear_segment(center: Vector2, radius: float, from: float, to: float, segments: int) -> PackedVector2Array:
+	var points := PackedVector2Array([center])
+	for index: int in range(segments+1):
+		var angle := lerpf(from,to,float(index)/segments)
+		var reach := radius*(1.0 if index%4 in [1,2] else .84)
+		points.append(center+Vector2.from_angle(angle)*reach)
+	return points
 
-static func history_track_frame(canvas: CanvasItem, rect: Rect2, palette: Dictionary) -> void:
-	var line := PackedVector2Array()
-	var echo := PackedVector2Array()
-	for index: int in range(49):
-		var t := float(index)/48.0
-		var point := rect.position+Vector2(rect.size.x*t,rect.size.y*4.0*t*(1.0-t))
-		line.append(point)
-		echo.append(point-Vector2(0,4))
-	var teal := palette.teal as Color
-	teal.a = 0.24
-	canvas.draw_polyline(echo,teal,0.7,true)
-	canvas.draw_polyline(line,palette.metal as Color,1.0,true)
-	# These short graduations belong to the instrument, not to event records.
-	for index: int in range(1,12):
-		var t := float(index)/12.0
-		var point := rect.position+Vector2(rect.size.x*t,rect.size.y*4.0*t*(1.0-t))
+static func clock_speed_hand(canvas: CanvasItem, pivot: Vector2, length: float, angle: float, palette: Dictionary, dragging: bool, stopped: bool) -> void:
+	var direction := Vector2.from_angle(angle)
+	var tangent := direction.orthogonal()
+	var factor := length/143.0
+	var metal := (palette.metal as Color).lerp(palette.highlight as Color,0.65 if dragging else 0.25 if stopped else 0.4)
+	metal.a=1.0
+	# A continuous lancet hand; the gear covers its root, with no central ring.
+	var hand := PackedVector2Array()
+	for point: Vector2 in [Vector2(0,-3.5),Vector2(.22,-3.5),Vector2(.35,-2.3),Vector2(.77,-1.5),Vector2(1,0),Vector2(.77,1.5),Vector2(.35,2.3),Vector2(.22,3.5),Vector2(0,3.5)]:
+		hand.append(pivot+direction*(point.x*length)+tangent*(point.y*factor))
+	_closed_outline(canvas,hand,palette.seam as Color,2.8*factor)
+	canvas.draw_colored_polygon(hand,metal)
+	canvas.draw_line(pivot+direction*(length*.22),pivot+direction*(length*.9),palette.highlight as Color,maxf(0.6,factor),true)
+
+static func workspace_surface(canvas: CanvasItem, rect: Rect2, face: Color, accent: Color) -> void:
+	var p := rect.position
+	var e := rect.end
+	var shape := PackedVector2Array([p+Vector2(10,0),Vector2(e.x,p.y),e-Vector2(0,10),e-Vector2(10,0),Vector2(p.x,e.y),p+Vector2(0,10)])
+	canvas.draw_colored_polygon(shape,face)
+	_closed_outline(canvas,shape,Color(accent,.29),1.0)
+	canvas.draw_line(p+Vector2(10,0),p+Vector2(80,0),accent,2.0,true)
+
+static func _art(canvas: CanvasItem, texture: Texture2D, dest: Rect2, source: Rect2, original_size: Vector2, tint: Color = Color.WHITE) -> void:
+	var scale_to_texture := texture.get_size()/original_size
+	canvas.draw_texture_rect_region(texture,dest,Rect2(source.position*scale_to_texture,source.size*scale_to_texture),tint)
+
+static func _theme_art(key: String) -> Texture2D:
+	return InterfaceSettings.theme_parameters().art[key] as Texture2D
+
+static func folio_frame(canvas: CanvasItem, rect: Rect2, fill: Color = FOLIO_BACKGROUND) -> void:
+	var corner := minf(12.0,minf(rect.size.x,rect.size.y)*0.25)
+	var rim := _folio_outline(rect.grow(-4.0),corner)
+	canvas.draw_colored_polygon(rim,fill)
+	_closed_outline(canvas,rim,BRASS_SHADOW,4.0)
+	_closed_outline(canvas,rim,FOLIO_BRASS,1.5)
+	if minf(rect.size.x,rect.size.y)>=48.0:
+		_closed_outline(canvas,_folio_outline(rect.grow(-9.0),corner-3.0),Color(FOLIO_RULE,.68),1.0)
+
+static func folio(canvas: CanvasItem, rect: Rect2, header_height: float, skin: Folio = Folio.GENERAL) -> void:
+	folio_frame(canvas,rect)
+	if rect.size.y>=150.0:
+		var pivot := Vector2(rect.get_center().x,rect.end.y-9.0)
+		var radius := clampf(minf(rect.size.x,rect.size.y)*.047,12.0,17.0)
+		canvas.draw_colored_polygon(_gear_segment(pivot,radius,PI,TAU,32),FOLIO_BRASS)
+		canvas.draw_arc(pivot,radius*.88,PI,TAU,24,BRASS_LIGHT,1.0,true)
+		canvas.draw_arc(pivot,radius*.46,PI,TAU,18,BRASS_SHADOW,2.0,true)
+	if header_height<=0.0: return
+	var art: Dictionary = FOLIO_ART[skin]
+	var source: Rect2 = art.crest
+	var ornament_width := minf(194.0 if skin==Folio.GENERAL else 224.0,rect.size.x*.44)
+	var ornament_size := source.size*(ornament_width/source.size.x)
+	var ornament_position := Vector2(rect.get_center().x-ornament_size.x*.5,rect.position.y-ornament_size.y+5.0)
+	_art(canvas,_theme_art(str(art.texture)),Rect2(ornament_position,ornament_size),source,Vector2(1086,1448))
+	_closed_outline(canvas,_folio_outline(_folio_plaque(rect),10.0),FOLIO_RULE,1.2)
+	folio_rail(canvas,Rect2(rect.position+Vector2(16,header_height),Vector2(rect.size.x-32,3)))
+
+static func _folio_plaque(rect: Rect2) -> Rect2:
+	return Rect2(rect.position+Vector2(18,11),Vector2(rect.size.x-36,FOLIO_HEADER_HEIGHT-16))
+
+static func _folio_outline(rect: Rect2, corner: float) -> PackedVector2Array:
+	var p := rect.position
+	var e := rect.end
+	return PackedVector2Array([
+		Vector2(p.x+corner,p.y),Vector2(e.x-corner,p.y),Vector2(e.x,p.y+corner),Vector2(e.x,e.y-corner),
+		Vector2(e.x-corner,e.y),Vector2(p.x+corner,e.y),Vector2(p.x,e.y-corner),Vector2(p.x,p.y+corner)])
+
+static func folio_title(canvas: CanvasItem, font: Font, rect: Rect2, text: String, font_size: int) -> void:
+	var plaque := _folio_plaque(rect)
+	# Use the opening between the engraved laurels as the text area.
+	centered_fit_text(canvas,font,plaque.grow_individual(-plaque.size.x*.12,-3,-plaque.size.x*.12,-3),text,font_size,15,FOLIO_PAPER)
+
+static func text_row_height(font_size: int) -> float:
+	return ceilf(float(font_size)*1.65)+2.0
+
+static func centered_fit_text(canvas: CanvasItem, font: Font, rect: Rect2, text: String, font_size: int, min_font_size: int, color: Color) -> void:
+	var measured := font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x
+	while font_size>min_font_size and (measured>rect.size.x or font.get_height(font_size)>rect.size.y):
+		font_size-=1
+		measured=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x
+	var line := TextLine.new()
+	line.add_string(text,font,font_size)
+	line.width=rect.size.x
+	line.alignment=HORIZONTAL_ALIGNMENT_CENTER
+	line.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	line.draw(canvas.get_canvas_item(),Vector2(rect.position.x,rect.get_center().y-line.get_size().y*.5),color)
+
+static func folio_rail(canvas: CanvasItem, rect: Rect2) -> void:
+	var y := rect.get_center().y
+	canvas.draw_line(Vector2(rect.position.x,y),Vector2(rect.end.x,y),FOLIO_RULE,1.0,true)
+
+static func folio_button_style(fill: Color, border: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = fill
+	box.border_color = border
+	box.set_border_width_all(1)
+	box.content_margin_left = 12
+	box.content_margin_right = 12
+	box.content_margin_top = 7
+	box.content_margin_bottom = 7
+	return box
+
+static func _draw_history_light(canvas: CanvasItem, rect: Rect2, strength: float) -> void:
+	if strength<=0.0: return
+	if _history_light_texture==null:
+		var falloff := Gradient.new()
+		falloff.offsets = PackedFloat32Array([0.0,0.22,0.50,0.76,1.0])
+		falloff.colors = PackedColorArray([Color.WHITE,Color(1,1,1,.68),Color(1,1,1,.30),Color(1,1,1,.065),Color(1,1,1,0)])
+		_history_light_texture = GradientTexture2D.new()
+		_history_light_texture.width = 192
+		_history_light_texture.height = 192
+		_history_light_texture.gradient = falloff
+		_history_light_texture.fill = GradientTexture2D.FILL_RADIAL
+		_history_light_texture.fill_from = Vector2(0.5,0.5)
+		_history_light_texture.fill_to = Vector2(0.5,1.0)
+	var source := Vector2(rect.get_center().x+rect.size.x*0.06,-6.0)
+	var halo := Vector2(rect.size.x*1.12,196.0)
+	var shaft := Vector2(rect.size.x*0.38,244.0)
+	canvas.draw_texture_rect(_history_light_texture,Rect2(source-halo*0.5,halo),false,Color(Color("edb97d"),0.17*strength))
+	canvas.draw_texture_rect(_history_light_texture,Rect2(source-shaft*0.5,shaft),false,Color(Color("fff0c7"),0.09*strength))
+
+static func history_track_frame(canvas: CanvasItem, rect: Rect2, palette: Dictionary, progress: float, sunlight: float) -> void:
+	_draw_history_light(canvas,rect,sunlight)
+	var brass := palette.metal as Color
+	var light := palette.ivory as Color
+	_history_trail(canvas,rect,1.0,Color(brass,.025),Color(brass,.12),4.6)
+	_history_trail(canvas,rect,1.0,Color(brass,.08),Color(light,.52),1.55)
+	var head := history_point(rect,1.0)
+	canvas.draw_circle(head,3.5,Color(light,.15),true,-1.0,true)
+	canvas.draw_circle(head,1.8,Color(light,.65),true,-1.0,true)
+	if progress>0.0:
+		_history_trail(canvas,rect,progress,Color(0.42,0.66,0.63,0.15),Color(Color("a8d6ca"),.56),1.35)
+
+static func _history_trail(canvas: CanvasItem, rect: Rect2, end: float, tail: Color, head: Color, width: float) -> void:
+	const SAMPLES := 49
+	var vertices := PackedVector2Array()
+	var colors := PackedColorArray()
+	vertices.resize(SAMPLES*2)
+	colors.resize(SAMPLES*2)
+	for index: int in range(SAMPLES):
+		var fraction := float(index)/float(SAMPLES-1)
+		var t := fraction*end
+		var point := history_point(rect,t)
 		var normal := Vector2(-rect.size.y*4.0*(1.0-2.0*t),rect.size.x).normalized()
-		canvas.draw_line(point,point+normal*(4.0 if index%3==0 else 2.0),teal,0.8,true)
-	var end := Vector2(rect.end.x,rect.position.y)
-	canvas.draw_arc(end,6.0,0,TAU,24,palette.bronze as Color,2.0,true)
-	canvas.draw_arc(end,5.0,0,TAU,24,palette.highlight as Color,0.8,true)
-	canvas.draw_circle(end,2.0,palette.ivory as Color)
-	canvas.draw_line(end+Vector2(0,8),end+Vector2(0,13),palette.metal as Color,0.8,true)
+		var offset := normal*lerpf(0.12,width,pow(fraction,1.4))
+		var color := tail.lerp(head,smoothstep(0.04,1.0,fraction))
+		var opposite := SAMPLES*2-1-index
+		vertices[index] = point+offset
+		vertices[opposite] = point-offset
+		colors[index] = color
+		colors[opposite] = color
+	canvas.draw_polygon(vertices,colors)
 
-static func history_track_indicator(canvas: CanvasItem, rect: Rect2, palette: Dictionary, minute_of_day: int) -> void:
-	var end := Vector2(rect.end.x,rect.position.y)
-	var angle := -PI*0.5+TAU*float(posmod(minute_of_day,1440))/1440.0
-	canvas.draw_line(end,end+Vector2(cos(angle),sin(angle))*4.0,palette.teal as Color,1.0,true)
+static func history_point(rect: Rect2, t: float) -> Vector2:
+	return rect.position+Vector2(rect.size.x*t,rect.size.y*4.0*t*(1.0-t))
 
-static func portrait_cameo(canvas: CanvasItem, rect: Rect2, palette: Dictionary, active: bool) -> void:
-	var center := rect.get_center()
-	var radii := rect.size*0.5-Vector2(4,4)
-	var outer := _ellipse_points(center,radii)
-	canvas.draw_colored_polygon(_ellipse_points(center+Vector2(1,2),radii+Vector2(2,2)),palette.seam as Color)
-	canvas.draw_colored_polygon(outer,palette.bronze as Color)
-	canvas.draw_colored_polygon(_ellipse_points(center,radii-Vector2(3,3)),palette.metal as Color)
-	canvas.draw_colored_polygon(_ellipse_points(center,radii-Vector2(6,6)),palette.body as Color)
-	_closed_outline(canvas,outer,palette.highlight as Color if active else palette.metal as Color,1.1)
-	_closed_outline(canvas,_ellipse_points(center,radii-Vector2(5,5)),palette.highlight as Color,0.7)
-	# Only a centred head and connected shoulders occupy the interior.
-	var figure := palette.muted as Color
-	figure.a = 0.90
-	canvas.draw_colored_polygon(_ellipse_points(center+Vector2(0,-12),Vector2(8,10),24),figure)
-	var body := PackedVector2Array([Vector2(-4,-4),Vector2(4,-4),Vector2(5,3),Vector2(16,9),Vector2(19,22),Vector2(10,27),Vector2(-10,27),Vector2(-19,22),Vector2(-16,9),Vector2(-5,3)])
-	for index: int in range(body.size()): body[index] += center
-	canvas.draw_colored_polygon(body,figure)
+static func technology_marker(canvas: CanvasItem, center: Vector2, shape: String, radius: float, light: float = 1.0) -> void:
+	var points := PackedVector2Array()
+	var color := Color("f1d49a")
+	match shape:
+		"drive":
+			color = Color("a8d6ca")
+			points = PackedVector2Array([Vector2(-.76,-.72),Vector2(.9,0),Vector2(-.76,.72),Vector2(-.38,0)])
+		"public":
+			color = Color("96b5d2")
+			points = PackedVector2Array([Vector2.UP,Vector2.RIGHT,Vector2.DOWN,Vector2.LEFT])
+		_:
+			points = PackedVector2Array([Vector2(0,-1),Vector2(.24,-.24),Vector2(.8,0),Vector2(.24,.24),Vector2(0,1),Vector2(-.24,.24),Vector2(-.8,0),Vector2(-.24,-.24)])
+	for index: int in points.size():
+		points[index] = center+points[index]*radius
+	canvas.draw_colored_polygon(points,Color(color,light))
+	_closed_outline(canvas,points,Color(.035,.067,.09,.85),.75)
 
-static func portrait_action(canvas: CanvasItem, center: Vector2, palette: Dictionary, kind: String, active: bool) -> void:
-	var color := palette.highlight as Color if active else palette.muted as Color
-	canvas.draw_circle(center,13,palette.body as Color)
-	canvas.draw_arc(center,12,0,TAU,24,palette.metal as Color,0.8,true)
-	match kind:
-		"details":
-			canvas.draw_arc(center+Vector2(0,-4),3,0,TAU,12,color,1.2,true)
-			canvas.draw_arc(center+Vector2(0,6),6,PI,TAU,16,color,1.2,true)
-		"accounts":
-			canvas.draw_rect(Rect2(center-Vector2(6,7),Vector2(12,14)),color,false,1.1)
-			canvas.draw_line(center+Vector2(-2,-7),center+Vector2(-2,7),color,0.8,true)
-			canvas.draw_line(center+Vector2(1,-3),center+Vector2(4,-3),color,0.8,true)
-			canvas.draw_line(center+Vector2(1,2),center+Vector2(4,2),color,0.8,true)
-		"relations":
-			for point: Vector2 in [Vector2(-6,4),Vector2(0,-6),Vector2(6,4)]:
-				canvas.draw_line(center,center+point,color,0.8,true)
-				canvas.draw_arc(center+point,2.3,0,TAU,12,color,1.0,true)
+static func portrait_cameo(canvas: CanvasItem, rect: Rect2, active: bool) -> void:
+	_art(canvas,_theme_art("portrait"),rect,Rect2(27,12,954,1446),Vector2(1024,1536),Color.WHITE if active else Color("f2ece0"))
+
+static func portrait_action(canvas: CanvasItem, center: Vector2, kind: String, active: bool) -> void:
+	var art := _theme_art("belongings" if kind=="details" else kind)
+	_art(canvas,art,Rect2(center-Vector2(19,21),Vector2(38,42)),Rect2(77,24,1100,1200),Vector2(1254,1254),Color.WHITE if active else Color("e7dece"))
 
 static func instrument_button(canvas: CanvasItem, rect: Rect2, palette: Dictionary, hovered: bool, selected: bool) -> void:
 	var p := rect.position
@@ -300,6 +416,67 @@ static func shell_theme() -> Theme:
 	theme.set_color("font_hover_color","PopupMenu",Color(0.96,0.89,0.69))
 	theme.set_color("font_color","CheckButton",Color(0.86,0.83,0.73))
 	return theme
+
+static func system_theme() -> Theme:
+	var theme := shell_theme()
+	var palette := InterfaceSettings.theme_parameters()
+	var hud := palette.hud as Dictionary
+	for state: String in ["normal","hover","pressed","hover_pressed","disabled","focus"]:
+		var fill := hud.body as Color
+		var border := hud.metal as Color
+		match state:
+			"hover": fill = fill.lightened(0.08)
+			"pressed","hover_pressed": fill = hud.teal as Color
+			"disabled": border = Color(border,0.45)
+			"focus": fill = Color.TRANSPARENT
+		if state in ["hover","pressed","hover_pressed","focus"]: border = hud.highlight as Color
+		var box := folio_button_style(fill,border)
+		box.set_corner_radius_all(3)
+		for type: String in ["Button","OptionButton","CheckButton"]:
+			theme.set_stylebox(state,type,box)
+	for type: String in ["Button","OptionButton","CheckButton"]:
+		theme.set_color("font_color",type,FOLIO_INK)
+		theme.set_color("font_disabled_color",type,FOLIO_MUTED)
+	theme.set_stylebox("hover","PopupMenu",theme.get_stylebox("hover","Button"))
+	var rule := StyleBoxLine.new()
+	rule.color = FOLIO_RULE
+	theme.set_stylebox("separator","HSeparator",rule)
+	theme.set_stylebox("slider","HSlider",_system_slider_track(hud.seam as Color,FOLIO_RULE))
+	theme.set_stylebox("grabber_area","HSlider",_system_slider_track(FOLIO_RULE,FOLIO_RULE))
+	theme.set_stylebox("grabber_area_highlight","HSlider",_system_slider_track(FOLIO_BRASS,FOLIO_RULE))
+	theme.set_icon("grabber","HSlider",_system_indicator(14,3,FOLIO_BRASS))
+	theme.set_icon("grabber_highlight","HSlider",_system_indicator(14,3,BRASS_LIGHT))
+	theme.set_icon("grabber_disabled","HSlider",_system_indicator(14,3,FOLIO_MUTED))
+	theme.set_icon("checked","CheckButton",_system_indicator(30,19,BRASS_LIGHT))
+	theme.set_icon("unchecked","CheckButton",_system_indicator(30,3,FOLIO_MUTED))
+	theme.set_icon("checked_disabled","CheckButton",_system_indicator(30,19,FOLIO_MUTED))
+	theme.set_icon("unchecked_disabled","CheckButton",_system_indicator(30,3,FOLIO_MUTED))
+	var dialog_panel := folio_button_style(palette.panel as Color,FOLIO_BRASS)
+	for side: Side in [SIDE_LEFT,SIDE_TOP,SIDE_RIGHT,SIDE_BOTTOM]:
+		dialog_panel.set_content_margin(side,18)
+	theme.set_stylebox("panel","AcceptDialog",dialog_panel)
+	var title_frame := folio_button_style(ENAMEL,FOLIO_RULE)
+	title_frame.set_expand_margin(SIDE_TOP,32)
+	theme.set_stylebox("embedded_border","Window",title_frame)
+	theme.set_stylebox("embedded_unfocused_border","Window",title_frame)
+	theme.set_constant("title_height","Window",32)
+	theme.set_color("title_color","Window",FOLIO_INK)
+	return theme
+
+static func _system_slider_track(fill: Color, border: Color) -> StyleBoxFlat:
+	var track := folio_button_style(fill,border)
+	track.content_margin_top = 3
+	track.content_margin_bottom = 3
+	track.content_margin_left = 0
+	track.content_margin_right = 0
+	return track
+
+static func _system_indicator(width: int, knob_x: int, face: Color) -> ImageTexture:
+	var image := Image.create_empty(width,14,false,Image.FORMAT_RGBA8)
+	image.fill(FOLIO_RULE)
+	image.fill_rect(Rect2i(1,1,width-2,12),ENAMEL)
+	image.fill_rect(Rect2i(knob_x,3,8,8),face)
+	return ImageTexture.create_from_image(image)
 
 static func location_diagram(canvas: CanvasItem, rect: Rect2, lon_lat: Vector2) -> void:
 	canvas.draw_rect(rect,Color(0.06,0.12,0.12,0.65))
