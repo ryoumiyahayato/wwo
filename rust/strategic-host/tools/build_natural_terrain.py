@@ -3,12 +3,14 @@
 import argparse
 import os
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager, ExitStack, nullcontext
+from datetime import datetime
 import filecmp
 from functools import lru_cache, partial
 from io import BytesIO
 import json
 from pathlib import Path
-from shutil import copyfile
+from shutil import copyfile, disk_usage
 from struct import Struct, unpack_from
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
@@ -21,8 +23,9 @@ import rasterio
 from rasterio import features
 from rasterio.enums import Resampling
 from rasterio.transform import from_origin
+from rasterio.vrt import WarpedVRT
 from rasterio.windows import Window
-from scipy.ndimage import label
+from scipy.ndimage import gaussian_filter, label
 import shapefile
 from shapely import clip_by_rect, intersects_xy, make_valid, prepare
 from shapely.affinity import translate
@@ -74,6 +77,8 @@ LAND_PALETTE = np.array([
 LAND_FRACTIONS = np.eye(len(LAND_COVER_CODES), dtype=np.float32)
 LAND_CLASS_LOOKUP = LAND_FRACTIONS[np.zeros(256, dtype=np.int32)]
 LAND_CLASS_LOOKUP[list(LAND_COVER_CODES)] = LAND_FRACTIONS
+HISTORICAL_CROP = LAND_COVER_CODES.index(40)
+HISTORICAL_CROP_REPLACEMENT = tuple(LAND_COVER_CODES.index(code) for code in (0,10,20,30,50,60))
 
 
 def centres(start, stop):
@@ -358,7 +363,45 @@ def smooth_weight(lower, upper, value):
     return t*t*(3-2*t)
 
 
-def z7_land_material(relief, cover, glaciers, width, rect):
+def read_wrapped_grid(source, rect):
+    x0,y0,x1,y1 = rect
+    left = x0 % source.width
+    first = min(source.width-left,x1-x0)
+    boundless = y0 < 0 or y1 > source.height
+    values = source.read(1,window=Window(left,y0,first,y1-y0),boundless=boundless)
+    if first == x1-x0:
+        return values
+    wrap = source.read(1,window=Window(0,y0,x1-x0-first,y1-y0),boundless=boundless)
+    return np.hstack((values,wrap))
+
+
+def apply_historical_cropland(fractions, estimate):
+    crop = fractions[...,HISTORICAL_CROP].copy()
+    other = fractions[...,HISTORICAL_CROP_REPLACEMENT]
+    eligible = other.sum(axis=-1)
+    valid = np.isfinite(estimate) & (estimate>=0) & (estimate<=1)
+    target = np.where(valid,np.minimum(estimate,crop+eligible),crop)
+    added = np.maximum(target-crop,0)
+    lost = np.maximum(crop-target,0)
+    scale = 1-np.divide(added,eligible,out=np.zeros_like(eligible),where=eligible>0)
+    fractions[...,HISTORICAL_CROP_REPLACEMENT] = other*scale[...,None]
+    # The reconstruction tracks crops only. The freed area has unknown cover.
+    fractions[...,0] += lost
+    fractions[...,HISTORICAL_CROP] = target
+
+
+def historical_cropland_grid(source, width):
+    step = 1/120
+    if (source.count != 1 or source.shape != (21600,43200) or source.crs is None
+            or source.crs.to_epsg() != 4326
+            or not source.transform.almost_equals(from_origin(-180,90,step,step))):
+        raise ValueError("Expected global WGS84 30 arc-second Cao 1900 cropland fractions")
+    step = 360/width
+    return WarpedVRT(source,width=width,height=width//2,transform=from_origin(-180,90,step,step),
+                     dtype="float32",nodata=np.nan,resampling=Resampling.average)
+
+
+def z7_land_material(relief, cover, glaciers, width, rect, historical_cropland=None, dunes=None):
     """Derive Z7 land colors from measured relief and modern cover, on the global grid."""
     x0,top,x1,bottom = rect
     y0,y1 = max(0,top),min(width//2,bottom)
@@ -377,6 +420,8 @@ def z7_land_material(relief, cover, glaciers, width, rect):
     slope = np.hypot(dx,dy)
     relief_span = np.maximum.reduce((center,north,south,west,east))-np.minimum.reduce((center,north,south,west,east))
     fractions = cover.fractions(lon[1:-1],lat[1:-1])
+    if historical_cropland is not None:
+        apply_historical_cropland(fractions,read_wrapped_grid(historical_cropland,(x0,y0,x1,y1)))
     unknown, _, shrubs, grass, crop, _, bare, ice, mapped_water, wetland, _, moss = np.moveaxis(fractions,-1,0)
     color = fractions @ LAND_PALETTE
 
@@ -384,7 +429,14 @@ def z7_land_material(relief, cover, glaciers, width, rect):
     # to shade that class. The result is a material cue, not mapped lithology.
     rugged = np.maximum(smooth_weight(.14,.53,slope), smooth_weight(100,400,relief_span))
     exposed = np.array([.51,.47,.41],np.float32)
-    color += (exposed-LAND_PALETTE[6])*(bare*rugged)[...,None]
+    dune_cover = 0
+    if dunes is not None:
+        # Resolve the composition of the bare-ground fraction only.
+        # Mixed vegetation, snow and water retain their original cover fractions.
+        dune_cover = dunes.material_weight((x0,y0,x1,y1))*bare
+        sand = np.array([.775,.632,.433],np.float32)
+        color += (sand-LAND_PALETTE[6])*dune_cover[...,None]
+    color += (exposed-LAND_PALETTE[6])*((bare-dune_cover)*rugged)[...,None]
     # Retain tree, shrub and crop cover at any altitude. Rock influence on
     # transitional land is confined to steep, locally rugged terrain.
     outcrop = .40*smooth_weight(.37,.86,slope)*smooth_weight(150,390,relief_span)
@@ -403,6 +455,23 @@ def z7_land_material(relief, cover, glaciers, width, rect):
     material = np.dstack((np.clip(color*light[...,None],0,1),np.clip(1-mapped_water,0,1)))
     if y0 != top or y1 != bottom:
         return np.pad(material,((y0-top,bottom-y1),(0,0),(0,0)),mode="edge")
+    return material
+
+
+def z6_land_material(fine_material, rect, width):
+    """Area-average the same land albedo that is used to build Z7."""
+    x0, top, x1, bottom = rect
+    y0, y1 = max(0, top), min(width//2, bottom)
+    fine = fine_material((2*x0, 2*y0, 2*x1, 2*y1))
+    rgb = fine[..., :3]
+    edit_weight = fine[..., 3:]
+    shape = (y1-y0, 2, x1-x0, 2)
+    weight = edit_weight.reshape(*shape, 1).mean(axis=(1, 3))
+    weighted_rgb = (rgb*edit_weight).reshape(*shape, 3).mean(axis=(1, 3))
+    color = np.divide(weighted_rgb, weight, out=np.zeros_like(weighted_rgb), where=weight>0)
+    material = np.concatenate((color, weight), axis=-1)
+    if y0 != top or y1 != bottom:
+        return np.pad(material, ((y0-top, bottom-y1), (0, 0), (0, 0)), mode="edge")
     return material
 
 
@@ -731,7 +800,7 @@ def verify_packed(output, manifest, layer=None, index_only=False, candidate=None
         print(json.dumps(result), flush=True)
 
 
-def build(sources, natural_earth, output):
+def build(sources, natural_earth, output, *, scratch=None):
     relief = global_relief(sources / "gmt-1m-nju.grd")
     cover = LandCover(sources / "worldcover")
     vectors = {key: STRtree(physical_shapes(natural_earth,key)) for key in
@@ -742,7 +811,7 @@ def build(sources, natural_earth, output):
         vectors["rivers_lake_centerlines"] = river_tree
     print(f"HydroRIVERS {reaches} reaches, {displayed} rasterized",flush=True)
     levels = []
-    with TemporaryDirectory(dir=output.parent) as folder:
+    with staging_directory(output.parent, scratch) as folder:
         print("Building the global mother raster", flush=True)
         color, height = build_master(Path(folder),relief,cover,vectors,8192*2)
         for level in range(MAX_LEVEL + 1):
@@ -1022,7 +1091,7 @@ def recolor_bc7_preserving_alpha(original, pixels, opaque_encoder):
     return bits.to_bytes(16,"little")
 
 
-def write_ice_shelf_candidate(original, source, destination, *, refine_edges=False):
+def write_ice_shelf_candidate(original, source, destination, *, refine_edges=False, scratch=None):
     """Apply SCAR ADD floating-ice color to a complete Z6 or Z7 QPK."""
     from pyproj import Transformer
     import zstandard
@@ -1104,7 +1173,7 @@ def write_ice_shelf_candidate(original, source, destination, *, refine_edges=Fal
                     yield PACK_RECORD.pack(pack.level,x,y,len(color))+color+height
 
         destination.parent.mkdir(parents=True, exist_ok=True)
-        with TemporaryDirectory(dir=destination.parent) as folder:
+        with staging_directory(destination.parent, scratch) as folder:
             staged = Path(folder)/destination.name
             write_level_records(staged, pack.level, COMPACT_MAGIC, records())
             if not changed:
@@ -1229,7 +1298,7 @@ def water_color_frame(color, coverage, decode, encode):
     return encode.compress(blocks.tobytes())
 
 
-def write_water_candidate(original, destination, footprints, coverage_at):
+def write_water_candidate(original, destination, footprints, coverage_at, *, scratch=None):
     """Apply one water inventory to the complete Z7 QPK without rebuilding elevations."""
     import zstandard
 
@@ -1261,7 +1330,7 @@ def write_water_candidate(original, destination, footprints, coverage_at):
                     yield PACK_RECORD.pack(pack.level, x, y, len(color)) + color + height
 
         destination.parent.mkdir(parents=True, exist_ok=True)
-        with TemporaryDirectory(dir=destination.parent) as folder:
+        with staging_directory(destination.parent, scratch) as folder:
             staged = Path(folder)/destination.name
             write_level_records(staged, pack.level, COMPACT_MAGIC, records())
             if not changed:
@@ -1270,18 +1339,110 @@ def write_water_candidate(original, destination, footprints, coverage_at):
     print(f"Z7: {pack.nx*pack.ny} tiles, updated color records {changed}, original height frames preserved")
 
 
-def write_outlet_candidate(original, source, natural_earth, destination):
+def write_outlet_candidate(original, source, natural_earth, destination, *, scratch=None):
     corridors = outlet_corridors(source)
     land = STRtree([geom if geom.is_valid else make_valid(geom)
                     for geom in physical_shapes(natural_earth, "land")])
     coverage_at = partial(outlet_water_coverage, corridors, land)
-    write_water_candidate(original, destination, corridors, coverage_at)
+    write_water_candidate(original, destination, corridors, coverage_at, scratch=scratch)
 
 
-def write_inland_water_candidate(original, source, destination):
+def write_inland_water_candidate(original, source, destination, *, scratch=None):
     lakes = inland_water_polygons(source)
     coverage_at = partial(inland_water_coverage, lakes)
-    write_water_candidate(original, destination, lakes, coverage_at)
+    write_water_candidate(original, destination, lakes, coverage_at, scratch=scratch)
+
+
+def fractional_edges(edges, length):
+    locations = np.clip(edges,0,length)
+    pixel = np.minimum(np.floor(locations).astype(np.intp),length-1)
+    return pixel, locations-pixel
+
+
+def sand_coverage(tile, eastings, northings):
+    # Integrate only the source cells that overlap this target window.
+    x = (eastings-tile.bounds.left)/30
+    y = (tile.bounds.top-northings)/30
+    left, right = max(0, int(np.floor(x[0]))), min(tile.width, int(np.ceil(x[-1])))
+    top, bottom = max(0, int(np.floor(y[0]))), min(tile.height, int(np.ceil(y[-1])))
+    width, length = right-left, bottom-top
+    if width <= 0 or length <= 0:
+        return None
+    columns, column_fraction = fractional_edges(x-left, width)
+    rows, row_fraction = fractional_edges(y-top, length)
+    horizontal = np.zeros((length,len(columns)-1),dtype=np.float32)
+    for start in range(0,length,STRIPE):
+        height = min(STRIPE,length-start)
+        classes = tile.read(1, window=Window(left,top+start,width,height), masked=True).filled(255)
+        # ClassificationScheme.xlsx: 0–8 are dunes or sand sheets, 10 is
+        # parabolic dunes. Class 9 is non-sand ground.
+        mapped = (classes <= 8) | (classes == 10)
+        if mapped.any():
+            counts = np.zeros((height,width+1),dtype=np.uint16)
+            np.cumsum(mapped,axis=1,dtype=np.uint16,out=counts[:,1:])
+            at_edges = counts[:,columns]+mapped[:,columns]*column_fraction
+            horizontal[start:start+height] = np.diff(at_edges,axis=1)
+    if not horizontal.any():
+        return None
+    counts = np.zeros((length+1,horizontal.shape[1]),dtype=np.float64)
+    np.cumsum(horizontal,axis=0,dtype=np.float64,out=counts[1:])
+    at_edges = counts[rows]+horizontal[rows]*row_fraction[:,None]
+    return np.diff(at_edges,axis=0)/(np.diff(y)[:,None]*np.diff(x))
+
+
+class DuneCoverage:
+    """GSDP30 v1 Landsat classification, read in source windows."""
+    def __init__(self, archive, width):
+        self.width = width
+        self.members = sorted(name for name in archive.namelist() if name.endswith(".tif"))
+        if len(self.members) != 331:
+            raise ValueError("Expected the 331 GeoTIFFs of GSDP30 version 1")
+        bounds = []
+        for member in self.members:
+            with rasterio.MemoryFile(archive.read(member)) as memory, memory.open() as tile:
+                expected = from_origin(tile.bounds.left, tile.bounds.top, 30, 30)
+                if (tile.crs is None or tile.crs.to_epsg() != 3857 or tile.shape != (15360,15360)
+                        or tile.transform != expected or tile.nodata != 255):
+                    raise ValueError(f"Unexpected GSDP30 raster grid in {member}")
+                bounds.append(box(*tile.bounds))
+        self.index = STRtree(bounds)
+        for i, j in self.index.query(bounds, predicate="intersects").T:
+            if i<j and bounds[i].intersection(bounds[j]).area>1:
+                raise ValueError(f"Overlapping GSDP30 rasters: {self.members[i]}, {self.members[j]}")
+        self.read = lru_cache(maxsize=8)(archive.read)
+
+    def fractions(self, rect):
+        x0,y0,x1,y1 = rect
+        step = 360/self.width
+        left = x0 % self.width
+        first = min(self.width-left, x1-x0)
+        radius = 6378137
+        lat = np.deg2rad(90-np.arange(y0,y1+1)*step)
+        northings = np.arcsinh(np.tan(lat))*radius
+        result = np.zeros((y1-y0,x1-x0),dtype=np.float32)
+        for start, dest in ((left,result[:,:first]), (0,result[:,first:])):
+            if not dest.shape[1]:
+                continue
+            eastings = np.deg2rad(np.arange(start,start+dest.shape[1]+1)*step-180)*radius
+            footprint = box(eastings[0],northings[-1],eastings[-1],northings[0])
+            for i in sorted(self.index.query(footprint)):
+                with rasterio.MemoryFile(self.read(self.members[i])) as memory, memory.open() as tile:
+                    fraction = sand_coverage(tile,eastings,northings)
+                    if fraction is not None:
+                        dest += fraction
+        return np.clip(result,0,1,out=result)
+
+    def material_weight(self, rect):
+        # Soften the albedo transition at classification edges. Read a halo
+        # on the global grid so both sides of each QPK overlap agree.
+        x0,y0,x1,y1 = rect
+        radius = 8
+        top = max(0,y0-radius)
+        bottom = min(self.width//2,y1+radius)
+        coverage = self.fractions((x0-radius,top,x1+radius,bottom))
+        if coverage.any():
+            coverage = gaussian_filter(coverage, sigma=2.5, radius=radius, mode="nearest")
+        return coverage[y0-top:y1-top,radius:-radius]
 
 
 def land_material_color_frame(color, material, decode, encode, opaque_encoder):
@@ -1293,8 +1454,10 @@ def land_material_color_frame(color, material, decode, encode, opaque_encoder):
     land = coverage < 255
     if not land.any():
         return color
-    ground = material()
     rgb = pixels[...,:3]
+    ground = material(rgb)
+    if ground is None:
+        return color
     weight = ground[...,3]*((255-coverage).astype(np.float32)/255)
     updated_rgb = np.rint(rgb + (ground[...,:3]*255-rgb)*weight[...,None]).astype(np.uint8)
     changed = (updated_rgb!=rgb).reshape(block_dim,4,block_dim,4,3).any(axis=(1,3,4)).ravel()
@@ -1319,28 +1482,57 @@ def land_material_color_frame(color, material, decode, encode, opaque_encoder):
     return encode.compress(material_blocks)
 
 
-def write_z7_land_candidate(original, sources, natural_earth, destination, *, preview_pages=None):
-    """Build Z7 land albedo for one globally registered source grid."""
-    import zstandard
-
-    if destination.exists():
-        raise FileExistsError(destination)
+@contextmanager
+def land_material_recipe(sources, natural_earth, level, historical_cropland=None, sand_dunes=None):
+    """Use one globally registered source grid for Z6 and Z7 land albedo."""
+    if level not in (6, 7):
+        raise ValueError("Shared land materials currently support Z6 and Z7")
     cover = LandCover(sources/"worldcover", native=True)
-    width = 2*TILE << PACK_MAX_LEVEL
+    fine_width = 2*TILE << PACK_MAX_LEVEL
+    width = 2*TILE << level
     collar = GUTTER*360/width
     glacier_shapes = physical_shapes(natural_earth,"glaciated_areas")
     across_west = [translate(geometry,xoff=-360) for geometry in glacier_shapes if geometry.bounds[2] > 180-collar]
     across_east = [translate(geometry,xoff=360) for geometry in glacier_shapes if geometry.bounds[0] < collar-180]
     glaciers = STRtree(glacier_shapes+across_west+across_east)
+    with rasterio.Env(GDAL_CACHEMAX=192*2**20), rasterio.open(sources/DEM_15S) as source, ExitStack() as inputs:
+        relief = Relief15s(source)
+        historical = None
+        if historical_cropland is not None:
+            crops = inputs.enter_context(rasterio.open(historical_cropland))
+            historical = inputs.enter_context(historical_cropland_grid(crops,fine_width))
+        dunes = None
+        if sand_dunes is not None:
+            dunes = DuneCoverage(inputs.enter_context(ZipFile(sand_dunes)),fine_width)
+        fine = partial(z7_land_material, relief, cover, glaciers, fine_width,
+                       historical_cropland=historical, dunes=dunes)
+        if level == 7:
+            yield fine
+        else:
+            yield partial(z6_land_material, fine, width=width)
+
+
+def write_land_candidate(original, sources, natural_earth, destination, *, preview_pages=None,
+                         historical_cropland=None, sand_dunes=None, level=7, scratch=None):
+    with land_material_recipe(sources, natural_earth, level, historical_cropland, sand_dunes) as recipe:
+        def material(rect, _rgb):
+            return recipe(rect)
+        write_material_candidate(original, destination, material, preview_pages=preview_pages,
+                                 level=level, scratch=scratch)
+
+
+def write_material_candidate(original, destination, material, *, preview_pages=None, level=7, scratch=None):
+    import zstandard
+
+    if destination.exists():
+        raise FileExistsError(destination)
     decode = zstandard.ZstdDecompressor()
     encode = zstandard.ZstdCompressor(level=COMPACT_STRENGTH)
     opaque_encoder = ispc_texcomp.BC7EncSettings.from_profile("fast")
     changed = 0
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with (original.open("rb") as file, rasterio.Env(GDAL_CACHEMAX=192*2**20),
-          rasterio.open(sources/DEM_15S) as source, TemporaryDirectory(dir=destination.parent) as folder):
-        pack = LevelPack(file, PACK_MAX_LEVEL, COMPACT_VERSION)
-        relief = Relief15s(source)
+    with original.open("rb") as file, staging_directory(destination.parent, scratch) as folder:
+        pack = LevelPack(file, level, COMPACT_VERSION)
 
         def records():
             nonlocal changed
@@ -1350,20 +1542,19 @@ def write_z7_land_candidate(original, sources, natural_earth, destination, *, pr
                     color,height = file.read(color_size),file.read(height_size)
                     if preview_pages is None or (x,y) in preview_pages:
                         rect = (x*TILE-GUTTER,y*TILE-GUTTER,(x+1)*TILE+GUTTER,(y+1)*TILE+GUTTER)
-                        material = partial(z7_land_material,relief,cover,glaciers,width,rect)
-                        updated = land_material_color_frame(color,material,decode,encode,opaque_encoder)
+                        updated = land_material_color_frame(color,partial(material,rect),decode,encode,opaque_encoder)
                         changed += int(updated != color)
                         color = updated
                     yield PACK_RECORD.pack(pack.level,x,y,len(color))+color+height
                 if (y+1)%8 == 0 and preview_pages is None:
-                    print(f"Z7 land materials: {y+1}/{pack.ny} rows, {changed} pages rebuilt",flush=True)
+                    print(f"Z{level} land materials: {y+1}/{pack.ny} rows, {changed} pages rebuilt",flush=True)
 
         staged = Path(folder)/destination.name
         write_level_records(staged,pack.level,COMPACT_MAGIC,records())
         if not changed:
-            raise ValueError("No Z7 land materials changed")
+            raise ValueError(f"No Z{level} land materials changed")
         staged.rename(destination)
-    print(f"Z7: {pack.nx*pack.ny} pages, {changed} rebuilt land colors; original height and water coverage preserved")
+    print(f"Z{level}: {pack.nx*pack.ny} pages, {changed} rebuilt land colors; original height and water coverage preserved")
 
 
 def write_level_pack(path, scratch, level):
@@ -1401,7 +1592,7 @@ def write_compact_level(path, original, level):
         write_level_records(path, level, COMPACT_MAGIC, (record for row in rows for record in row))
 
 
-def compact_package(original, output):
+def compact_package(original, output, *, scratch=None):
     manifest = json.loads((original / "index.json").read_text(encoding="utf-8"))
     if manifest["version"] != PACK_VERSION or len(manifest["levels"]) != PACK_MAX_LEVEL+1:
         raise ValueError("Repacking requires the complete original Z0–Z7 package")
@@ -1409,7 +1600,7 @@ def compact_package(original, output):
         raise ValueError(f"Output already exists: {output}")
     original_levels = manifest["levels"]
     manifest.update(version=COMPACT_VERSION, compression=COMPACT_FORMAT, levels=[])
-    with TemporaryDirectory(dir=output.parent) as folder:
+    with staging_directory(output.parent, scratch) as folder:
         staged = Path(folder) / COMPACT_VERSION
         staged.mkdir()
         river_file = "river-topology.u32"
@@ -1430,17 +1621,21 @@ def compact_package(original, output):
         staged.rename(output)
 
 
-def advance_packed(sources, natural_earth, output, through):
+def advance_packed(sources, natural_earth, output, through, job, cleanup):
     output.mkdir(parents=True, exist_ok=True)
     scratch = output.with_name(output.name+".working")
-    scratch.mkdir(exist_ok=True)
     ready = scratch / "mother.json"
     index = output / "index.json"
     if not ready.exists():
         if index.exists():
             raise ValueError("This package has an index but no matching working mother raster")
-        manifest = build_packed_mother(scratch, sources, natural_earth, output)
-        ready.write_text(json.dumps(manifest), encoding="utf-8")
+        if scratch.exists():
+            raise ValueError(f"Unfinished mother raster from an earlier run: {scratch}")
+        staged = job / "mother"
+        staged.mkdir()
+        manifest = build_packed_mother(staged, sources, natural_earth, output)
+        (staged / ready.name).write_text(json.dumps(manifest), encoding="utf-8")
+        staged.rename(scratch)
     else:
         manifest = json.loads((index if index.exists() else ready).read_text(encoding="utf-8"))
         if manifest["version"] != PACK_VERSION:
@@ -1448,23 +1643,80 @@ def advance_packed(sources, natural_earth, output, through):
     for level in range(len(manifest["levels"]), through+1):
         print(f"Writing Z{level} global terrain", flush=True)
         path = pack_path(output, level)
-        temporary = path.with_suffix(".part")
+        temporary = job / path.name
         write_level_pack(temporary, scratch, level)
+        result = verify_packed_level(output, level, candidate=temporary)
         temporary.replace(path)
-        result = verify_packed_level(output, level)
         manifest["levels"].append(result)
         print(json.dumps(result), flush=True)
     if len(manifest["levels"]) != through+1:
         raise ValueError("Packed terrain levels can only advance")
-    temporary = index.with_suffix(".part")
+    temporary = job / index.name
     temporary.write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
     temporary.replace(index)
     if through == PACK_MAX_LEVEL:
-        for level in range(PACK_MAX_LEVEL+1):
-            (scratch / f"{level}.rgba").unlink()
-            (scratch / f"{level}.height").unlink()
-        ready.unlink()
-        scratch.rmdir()
+        cleanup.callback(remove_completed_mother, scratch, ready)
+
+
+def remove_completed_mother(scratch, ready):
+    for level in range(PACK_MAX_LEVEL+1):
+        (scratch / f"{level}.rgba").unlink()
+        (scratch / f"{level}.height").unlink()
+    ready.unlink()
+    scratch.rmdir()
+
+
+def staging_directory(parent, scratch):
+    return TemporaryDirectory(dir=parent) if scratch is None else nullcontext(scratch)
+
+
+@contextmanager
+def generation_disk_usage(output, estimated_bytes):
+    output = output.resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    volumes = {Path(output.anchor)}
+    if os.name == "nt":
+        volumes.update(path for path in (Path("C:/"), Path("D:/")) if path.is_dir())
+    log_path = output.parent / "terrain-disk-usage.jsonl"
+    started = datetime.now().astimezone().isoformat()
+
+    def record(state, scratch=None, cleanup_error=None):
+        data = dict(started=started, time=datetime.now().astimezone().isoformat(),
+                    output=str(output), state=state, estimated_new_bytes=estimated_bytes,
+                    free_bytes={str(volume): disk_usage(volume).free for volume in sorted(volumes)})
+        if scratch is not None:
+            data["scratch"] = str(scratch)
+        if cleanup_error is not None:
+            data["cleanup_error"] = str(cleanup_error)
+        line = json.dumps(data, ensure_ascii=False)
+        print(line, flush=True)
+        try:
+            with log_path.open("a", encoding="utf-8") as file:
+                file.write(line + "\n")
+        except OSError as error:
+            print(f"Could not save the disk log: {error}", flush=True)
+
+    if estimated_bytes > 10_000_000_000:
+        print(f"Estimated new disk use: {estimated_bytes / 1e9:.1f} GB on {output.anchor}", flush=True)
+    cleanup = ExitStack()
+    scratch = None
+    outcome = "failed_or_cancelled"
+    try:
+        scratch = Path(cleanup.enter_context(TemporaryDirectory(dir=output.parent, prefix="terrain-job-")))
+        record("started", scratch)
+        yield scratch, cleanup
+        outcome = "finished"
+    finally:
+        try:
+            record(outcome, scratch)
+        finally:
+            try:
+                cleanup.close()
+            except BaseException as error:
+                record("cleanup_failed", scratch, error)
+                raise
+            else:
+                record("cleaned", scratch)
 
 
 def main():
@@ -1486,9 +1738,16 @@ def main():
     terrain_candidate.add_argument("--inland-water-candidate", type=Path, nargs=3,
                         metavar=("ORIGINAL_QPK", "LAKES_GEOJSON", "CANDIDATE_QPK"),
                         help="Build a complete Z7 QPK with documented missing inland water")
+    terrain_candidate.add_argument("--z6-land-candidate", type=Path, nargs=4,
+                        metavar=("ORIGINAL_QPK", "SOURCES", "NATURAL_EARTH", "CANDIDATE_QPK"),
+                        help="Build a complete Z6 QPK using the Z7 land material source grid")
     terrain_candidate.add_argument("--z7-land-candidate", type=Path, nargs=4,
                         metavar=("ORIGINAL_QPK", "SOURCES", "NATURAL_EARTH", "CANDIDATE_QPK"),
                         help="Build a complete Z7 QPK with terrain-derived land materials")
+    parser.add_argument("--historical-cropland",type=Path,metavar="CAO_1900_TIFF",
+                        help="Apply Cao 1900 reconstructed cropland fractions in a land candidate")
+    parser.add_argument("--sand-dunes", type=Path, metavar="GSDP30_ZIP",
+                        help="Read mapped dune coverage from GSDP30 in a land candidate")
     parser.add_argument("--through", type=int, choices=(5,6,7), help="Build or advance the 15 arc-second package")
     parser.add_argument("sources",type=Path,nargs="?")
     parser.add_argument("natural_earth",type=Path,nargs="?")
@@ -1500,30 +1759,45 @@ def main():
         parser.error("--index-only and --layer-candidate require --layer")
     if args.refine_ice_shelf_edges and args.ice_shelf_candidate is None:
         parser.error("--refine-ice-shelf-edges requires --ice-shelf-candidate")
-    if args.z7_land_candidate is not None:
+    land_candidate = args.z7_land_candidate or args.z6_land_candidate
+    if args.historical_cropland is not None and land_candidate is None:
+        parser.error("--historical-cropland requires a Z6 or Z7 land candidate")
+    if args.sand_dunes is not None and land_candidate is None:
+        parser.error("--sand-dunes requires a Z6 or Z7 land candidate")
+    if land_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,
                                            args.ice_shelf_candidate)):
-            parser.error("--z7-land-candidate does not accept other build arguments")
-        write_z7_land_candidate(*args.z7_land_candidate)
+            parser.error("Land candidate generation does not accept other build arguments")
+        level = 7 if args.z7_land_candidate else 6
+        with generation_disk_usage(land_candidate[-1], 3_000_000_000) as (scratch, _):
+            write_land_candidate(*land_candidate,historical_cropland=args.historical_cropland,
+                                 sand_dunes=args.sand_dunes,level=level,scratch=scratch)
         return
     if args.river_outlet_candidate is not None or args.inland_water_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,
                                            args.ice_shelf_candidate)):
             parser.error("Water candidates do not accept other build arguments")
         if args.river_outlet_candidate is not None:
-            write_outlet_candidate(*args.river_outlet_candidate)
+            with generation_disk_usage(args.river_outlet_candidate[-1], 3_000_000_000) as (scratch, _):
+                write_outlet_candidate(*args.river_outlet_candidate, scratch=scratch)
         else:
-            write_inland_water_candidate(*args.inland_water_candidate)
+            with generation_disk_usage(args.inland_water_candidate[-1], 3_000_000_000) as (scratch, _):
+                write_inland_water_candidate(*args.inland_water_candidate, scratch=scratch)
         return
     if args.ice_shelf_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources)):
             parser.error("--ice-shelf-candidate does not accept other build arguments")
-        write_ice_shelf_candidate(*args.ice_shelf_candidate, refine_edges=args.refine_ice_shelf_edges)
+        with generation_disk_usage(args.ice_shelf_candidate[-1], 3_000_000_000) as (scratch, _):
+            write_ice_shelf_candidate(*args.ice_shelf_candidate, refine_edges=args.refine_ice_shelf_edges,
+                                      scratch=scratch)
         return
     if args.repack is not None:
         if args.verify is not None or args.sources is not None or args.through is not None:
             parser.error("--repack does not accept other build arguments")
-        compact_package(*args.repack)
+        original, output = args.repack
+        estimate = sum(path.stat().st_size for path in original.glob("*.qpk")) + 1_000_000_000
+        with generation_disk_usage(output, estimate) as (scratch, _):
+            compact_package(original, output, scratch=scratch)
         return
     if args.verify is not None:
         if args.sources is not None or args.through is not None:
@@ -1536,15 +1810,17 @@ def main():
     if args.through is not None:
         if output.name != PACK_VERSION:
             parser.error(f"Expected the output directory name {PACK_VERSION}")
-        advance_packed(args.sources,args.natural_earth,output,args.through)
+        ready = output.with_name(output.name+".working") / "mother.json"
+        estimate = 10_000_000_000 if ready.exists() else 36_000_000_000
+        with generation_disk_usage(output, estimate) as (scratch, cleanup):
+            advance_packed(args.sources,args.natural_earth,output,args.through,scratch,cleanup)
         return
     if output.exists():
         parser.error(f"Output already exists: {output}")
-    output.parent.mkdir(parents=True,exist_ok=True)
-    with TemporaryDirectory(dir=output.parent) as folder:
-        staged = Path(folder)/VERSION
+    with generation_disk_usage(output, 6_000_000_000) as (scratch, _):
+        staged = scratch / VERSION
         staged.mkdir()
-        build(args.sources,args.natural_earth,staged)
+        build(args.sources,args.natural_earth,staged,scratch=scratch)
         staged.rename(output)
 
 

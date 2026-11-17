@@ -56,6 +56,48 @@ RTX 3050 Laptop GPU／Vulkan。工作集增加 32–45 MiB。此处记录一次�
 python rust/strategic-host/tools/build_natural_terrain.py --z7-land-candidate <补湖候选>/7.qpk <WorldCover与DEM目录> <NaturalEarth目录> <独立候选>/7.qpk
 ```
 
+### Z6 与 Z7 共用陆地材质
+
+`--z6-land-candidate` 使用与 Z7 相同的原始高程、地表覆盖和冰川资料。每个 Z6 像元按陆地编辑权重聚合这套规则生成的 2×2 个 Z7 样本。四周填充按同一全球网格计算，极区先聚合有效行再复制边缘。QPK 写入沿用原 Z6 压缩高程和解码水覆盖。共享规则仍需复验海岸混合色与南极浮冰架颜色。
+
+四处局部试制共读取 126 张 Z6 瓦片，更新 118 张颜色帧。126 张瓦片的原压缩高程、水覆盖以及试制范围内 207 条共享边保持一致。530 米／像素的固定层 Vulkan 实拍中，逐像素最大 RGB 通道差的 p95 在阿尔卑斯从 35 降至 21、亚马孙从 14 降至 11、洱海从 42 降至 19、纳米布从 27 降至 9（满量程 255）。洱海仍存在独立水文差异，原 Z6 水体遮罩缺少 Z7 已补绘的湖面。本次适用范围为这四处试制，全球 Z6 QPK 尚未生成。
+
+阿尔卑斯同机位重复同一组滚轮输入，各采集 24 张真实 GPU 帧。快速拉远后停在 836 米／像素，两组均从 Z7 约三成贡献转为纯 Z6。当相机停止且 Z7 淡出时，录像中央裁切的 RGB 变化中位数由 (3, 3, 2) 降至 (0, 0, 0)。两轮图集容量均为 256 页。局部试制的动态测试使用原 Z6 预取外围页，取景路径以外未验证。
+
+### 沙丘与砂质地表
+
+Z6、Z7 的陆地生成命令支持 `--sand-dunes GSDP30.zip`。Zheng 等人的 GSDP30 v1 使用 2017 年 Landsat-8 资料分类沙丘与沙席。生成器依据源图有效掩膜读取相关窗口，把沙丘和沙席类别以覆盖面积归并到 Z7，并沿用同一规则聚合到 Z6。覆盖比例参与 WorldCover 裸地部分的材质混合。相邻页使用同一采样坐标。植被、冰雪和水体沿用现有地表输入。GSDP30 提供现代砂质地表参考。地形起伏继续使用原高程。 [GSDP30 v1 与分类表](https://zenodo.org/records/13907012) · [原始论文](https://doi.org/10.1016/j.isprsjprs.2024.10.002) · [CC BY 4.0 元数据](https://api.datacite.org/dois/10.5281/zenodo.13907012)
+
+Fezzan 和纳米布用同一砂丘材料规则试制。Z7 更新 50 页，Z6 更新 18 页。范围内分别核对 80 条和 24 条共享边的 BC7 重叠块。原压缩高程和解码后的水覆盖一致。覆盖比例在全球采样坐标上平滑，减弱源分类直角边界。纳米布取景为 15.410°E／24.470°S、230 米／像素。 [同机位改动前](terrain-z7-visual/detail-namib-before.png)
+
+![固定 Z7 纳米布砂质地表候选实拍](terrain-z7-visual/detail-namib-after.png)
+
+### 多尺度近景材质
+
+Rust/wgpu 在地理坐标上采样四通道材质图，分别用于林地、土壤和草地、裸岩、砂质地表。材质信号按视距和像素覆盖范围减弱。底色按归一化色度匹配原地表调色板，耕地与岩石的选择不再受整体明暗直接驱动。新增纹理及完整 mip 链为 87,380 字节。地表高程与分类精度仍以原数据为准。
+
+同一候选库和同机位下，亚马孙平坦林区内部的相邻像素平均 RGB 差从 1.155 降至 0.491（满量程 255）。阿尔卑斯、洱海、亚马孙和纳米布均复核固定 Z7，另以 530 米／像素复核 Z6。两级烘焙底色仍有差异，共享生成规则的效果另见前项。亚马孙本图取景为 62°W／3°S、155 米／像素。 [同机位改动前](terrain-z7-visual/detail-amazon-before.png)
+
+![固定 Z7 亚马孙近景实际 Vulkan 画面](terrain-z7-visual/detail-amazon-after.png)
+
+同一组阿尔卑斯滚轮输入各采集 24 帧，实绘 Z7、Z6 和两级混合。两版常驻页峰值均为 256，请求范围含预取峰值 371 页，实际视口峰值 117 页。每帧 9 个采样点均有实绘页。两组截图均为 RTX 3050 Laptop GPU／Vulkan 离屏。正式长时间运行和最低档性能未测。 [改动前录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-detail-material-wheel-before.mp4) · [改动后录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-detail-material-wheel-after.mp4)
+
+正式 Rust 游戏用独立后台会话，在同一 QPK 和相同缩放及平移输入下前后各检查地理、政治、经济、军事专题。四个专题均正常进入，交互后地貌页全部就绪。每专题约 600 个呈现间隔，p95 从 7.35–7.49 ms 变为 7.29–7.41 ms。工作集从 362–374 MiB 变为 341–350 MiB。Windows 进程专用显存读数从 430–446 MiB 变为 449–465 MiB。显存多约 19.6 MiB，来自本次两次运行的进程计数，原因未隔离。取景 11.250°E／46.40625°N、210 米／像素。 [同机位改动前](terrain-z7-visual/detail-alps-game-before.png)
+
+![改良材质在正式 Rust 游戏地理专题的后台实拍](terrain-z7-visual/detail-alps-game-after.png)
+
+### 1900 年耕地输入
+
+生成时可附加 `--historical-cropland globalCropland_1900CE.tif`。Cao 等人的数据以 30 角秒网格记录重建的耕地面积占比。生成器将其按面积重采样至 Z7。增加的耕地只在可替换的陆地类别间分配。缩减的耕地归为未知地表。水体、湿地、红树林和冰雪的输入比例不参与替换。森林和湿地等其余类别仍以现代资料作参照。 [论文](https://essd.copernicus.org/articles/13/5403/2021/) · [1900 年原始 GeoTIFF](https://zenodo.org/records/5105689/files/globalCropland_1900CE.tif?download=1)
+
+荷兰 Groningen、中国山东、巴西帕拉州和亚马孙中部用原始栅格做了各 24×24 个 Z7 像元的局部重采样。前三区的耕地占比和底色发生变化，亚马孙中部的耕地占比和底色相同。四个窗口的水覆盖权重一致。随后按原始 GeoTIFF 的字节范围读取三个机位的输入，在格罗宁根、山东和帕拉州各制作 Z7 的 3×3 页试制。27 张原始页中有 24 张采用历史耕地后出现颜色变化。两份试制沿用同一压缩高程帧，27 页解码水覆盖均与原页相同。两份 QPK 只在清单标记的页有真实地貌，只供取景复核。未生成全球历史 QPK。
+
+**山东平原** · 116.450°E／36.500°N · 85 米／像素 · 实绘 `7/210/38`。同机位可看到耕地重分配后局部底色改变。未核实的森林、湿地和岸线保留其原资料属性。 [仅用现代地表的原图](terrain-z7-visual/detail-shandong-modern.png)
+
+![接入 1900 年耕地输入后的固定 Z7 实拍](terrain-z7-visual/detail-shandong-1900.png)
+
+[试制范围与来源](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-cropland-pilot-scope.json) · [现代对照 QPK](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-cropland-pilot-modern.qpk) · [1900 年耕地 QPK](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-cropland-pilot-1900.qpk)
+
 ## 全球陆地水文精修
 
 全球 Z7 共用同一份陆地、海岸和水文施工队列。欧洲首批和维斯瓦河提供了原始取景。陆地专项实拍延伸到东亚、湄公河三角洲、天山、恒河—布拉马普特拉平原、纳米布、乍得湖、落基山、亚马孙、安第斯、澳大利亚墨累河和新西兰南岛。逐页记录继续使用原有坐标和状态。

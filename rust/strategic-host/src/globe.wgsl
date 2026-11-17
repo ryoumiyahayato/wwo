@@ -34,6 +34,8 @@ struct Tile {
 @group(0) @binding(10) var terrain_world: texture_2d_array<f32>;
 @group(0) @binding(11) var terrain_detail: texture_2d_array<f32>;
 @group(0) @binding(12) var terrain_index: texture_2d<u32>;
+@group(0) @binding(13) var land_surface: texture_2d<f32>;
+@group(0) @binding(14) var land_repeat: sampler;
 @group(1) @binding(0) var<uniform> tile: Tile;
 @group(1) @binding(1) var terrain_data: texture_2d<f32>;
 @group(1) @binding(2) var material_data: texture_2d<f32>;
@@ -42,6 +44,7 @@ struct Tile {
 
 const PI: f32 = 3.14159265358979;
 const EARTH: f32 = 6371008.8;
+const LAND_DETAIL_MPP: f32 = 760.;
 const CHART_SUN_VIEW: vec3f = vec3f(.100,.970,.222);
 @vertex fn triangle(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
     let p = array<vec2f,3>(vec2f(-1.,-1.),vec2f(3.,-1.),vec2f(-1.,3.));
@@ -248,6 +251,52 @@ fn natural_surface(ll:vec2f) -> vec4f {
     }
     return color+natural_global(uv)*remaining;
 }
+fn land_material_band(earth:vec3f, planes:vec3f, footprint:f32, period:f32) -> vec4f {
+    let world=earth*(EARTH/period);
+    let p=world+sin(world.zxy*.19+vec3f(.4,1.7,2.8))*.46;
+    let mip=log2(max(1.,footprint*f32(textureDimensions(land_surface).x)/period));
+    return textureSampleLevel(land_surface,land_repeat,p.yz,mip)*planes.x
+        +textureSampleLevel(land_surface,land_repeat,p.xz+vec2f(.21,.43),mip)*planes.y
+        +textureSampleLevel(land_surface,land_repeat,p.xy+vec2f(.67,.29),mip)*planes.z;
+}
+fn land_chroma(rgb:vec3f) -> vec2f {
+    return vec2f(rgb.g-rgb.r,rgb.r+rgb.g-2.*rgb.b)/max(.001,rgb.r+rgb.g+rgb.b);
+}
+fn land_palette_weight(chroma:vec2f, reference:vec3f, radius:f32) -> f32 {
+    return 1.-smoothstep(.008,radius,distance(chroma,land_chroma(reference)));
+}
+fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
+    let base=terrain.rgb;
+    let land=1.-smoothstep(.02,.42,terrain.a);
+    let brightest=max(base.r,max(base.g,base.b));
+    let darkest=min(base.r,min(base.g,base.b));
+    let snow=smoothstep(.58,.82,darkest)*(1.-smoothstep(.06,.17,brightest-darkest));
+    if land*(1.-snow)<.001 || footprint>=LAND_DETAIL_MPP || all(base==vec3f(1.,0.,1.)) {return base;}
+
+    // Use the baked palette as a cue for artistic motifs. Normalize away
+    // multiplicative relief lighting before comparing Z6/Z7 or shaded slopes.
+    let chroma=land_chroma(base);
+    let woods=max(land_palette_weight(chroma,vec3f(.255,.41,.31),.106),
+                  land_palette_weight(chroma,vec3f(.25,.41,.33),.106));
+    let soil=max(land_palette_weight(chroma,vec3f(.61,.57,.36),.060),
+                 .60*land_palette_weight(chroma,vec3f(.47,.53,.33),.100));
+    let rock=land_palette_weight(chroma,vec3f(.51,.47,.41),.105);
+    let sand=land_palette_weight(chroma,vec3f(.775,.632,.433),.051);
+    let motifs=vec4f(woods,soil,rock,sand);
+    let materials=motifs/max(1.,dot(motifs,vec4f(1.)));
+
+    let facing=abs(earth)*abs(earth);
+    let planes=facing*facing/dot(facing,facing);
+    let broad=land_material_band(earth,planes,footprint,14500.)-.5;
+    // Broad forest and sand grain stays weaker than exposed rock. The baked
+    // geographic albedo and shading remain legible on flat, uniform surfaces.
+    var relief=dot(broad,materials*vec4f(.16,.18,.33,.17))*(1.-smoothstep(210.,LAND_DETAIL_MPP,footprint));
+    if footprint<102. {
+        let fine=land_material_band(earth,planes,footprint,2900.)-.5;
+        relief+=dot(fine,materials*vec4f(.13,.12,.20,.12))*(1.-smoothstep(38.,102.,footprint));
+    }
+    return clamp(base*(1.+relief*land*(1.-snow)),vec3f(0.),vec3f(1.));
+}
 fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f {
     let dims=vec2f(textureDimensions(terrain_data));
     let du=1./dims;
@@ -319,7 +368,11 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
     if use_natural {
         terrain=natural_surface(ll);
         color=terrain.rgb;
-        relief_light=clamp(.57+dot(color,vec3f(.30,.55,.15))*.68,.70,1.19);
+        if view.settings.y<.5 && base_mpp<LAND_DETAIL_MPP {
+            let foreshortening=mix(max(.25,dot(normal_world,view.chart_forward.xyz)),1.,view.viewport.w);
+            color=natural_land_material(terrain,normal_world,base_mpp/foreshortening);
+        }
+        relief_light=clamp(.57+dot(terrain.rgb,vec3f(.30,.55,.15))*.68,.70,1.19);
     } else if tile.options.y>=5. {
         let level = log2(max(1.,base_mpp/min(dx,dy)));
         let source = textureSampleLevel(material_data,linear,uv,level);
