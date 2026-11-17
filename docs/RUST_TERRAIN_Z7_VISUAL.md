@@ -13,9 +13,44 @@
 | 亚马孙马瑙斯 | 60.020°W／3.170°S · 140、280 | 林地与洪泛低地。河道宽度沿用原水文资源 |
 | 纳米布 | 15.410°E／24.470°S · 155、285 | 实测沙丘起伏、裸露高地与干旱植被。间歇河另列水文问题。 [纳米布沙海](https://science.nasa.gov/earth-observatory/namib-sand-sea-149130/) |
 
-**东阿尔卑斯同机位试制** · 14.765625°E／47.109375°N · 515 米／像素 · Vulkan 原图 · Z7 权重 1。山麓林地和耕地的区分更清楚，保留山谷的阴影。 [改动前原图](terrain-z7-visual/land-material-alps-before.png)
+完整全球候选为 1,617,397,662 字节。32,768 页完整解码，13,553 页更新陆地颜色，65,280 条共享边逐块一致。共享边高程误差 0 米，Z6 父层高程归约最大误差 0.75 米。生成器沿用原压缩高程帧和已解码的水覆盖。候选版本为 `terrain-cover-relief-land-v1-20261117`。
 
-![东阿尔卑斯固定 Z7 陆地材质试制](terrain-z7-visual/land-material-alps-after.png)
+**东阿尔卑斯** · 14.765625°E／47.109375°N · 515 米／像素。山麓林地和耕地的区分更清楚，保留山谷的阴影。 [改动前原图](terrain-z7-visual/land-material-alps-before.png)
+
+![完整候选固定 Z7 原图，东阿尔卑斯山地和耕地](terrain-z7-visual/land-material-alps-after.png)
+
+**洱海** · 100.202°E／25.800°N · 165 米／像素。近湖坡面林地与盆地平地分开，已补绘的开阔湖面保留。 [改动前原图](terrain-z7-visual/land-material-erhai-before.png)
+
+![完整候选固定 Z7 原图，洱海周围的林地和平地](terrain-z7-visual/land-material-erhai-after.png)
+
+**马瑙斯** · 60.020°W／3.170°S · 280 米／像素。低地与成片林地的色差更容易辨认。窄河线仍需用水文资料处理。 [改动前原图](terrain-z7-visual/land-material-amazon-before.png)
+
+![完整候选固定 Z7 原图，马瑙斯周围的森林和低地](terrain-z7-visual/land-material-amazon-after.png)
+
+**纳米布** · 15.410°E／24.470°S · 285 米／像素。沙丘走向和岩质起伏来自高程，内陆和海岸地表的配色分界仍可见。 [改动前原图](terrain-z7-visual/land-material-namib-before.png)
+
+![完整候选固定 Z7 原图，纳米布海岸和沙丘](terrain-z7-visual/land-material-namib-after.png)
+
+以上为相同 Rust/wgpu Vulkan 宿主的 1280×720 原画面。定点复用已冻结的七洲随机机位，两档各 7 张，便于与上次材质对照。取景均为固定 Z7，权重 1。七洲和阿尔卑斯四角、斐济反经线、南北极的实拍范围内未见新的明显矩形贴片。南极点原有浅十字细线和罗斯冰架前缘原有深蓝斜缺口仍可见。旱地蓝色水线与秘鲁部分河线的常流性仍待水文复核。植被在超出采样尺度的近景仍有颗粒。 [七洲抽样机位](terrain-z7-detail/sample-plan.json)
+
+阿尔卑斯用相同相机和输入采集修复前后各 64 帧，包含 530→970 米／像素拉远、往返、平移和旋转。第 11 帧中心贡献为 Z7 0.85、Z6 0.15，第 17 帧完全回退到 Z6，第 35 帧恢复 Z7。录像复核检查范围内未见逐块淡入，退层时可见整体细节和色调渐变。可见页峰值 109，细节请求峰值 325，常驻页峰值 256，九点逐帧采样无缺页。回读间隔 p50／p95 为 44.71／47.44 → 44.70／47.58 ms。此间隔含帧回读。北极冷缓存 53 帧，可见细节需求峰值 764 页，Z7 需求峰值 512 页，实际九点采样用完整父层，无缺页。 [阿尔卑斯原版录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-land-material-alps-before.mp4) · [阿尔卑斯候选录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-land-material-alps-after.mp4) · [北极页预算录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-land-material-polar-budget.mp4)
+
+**其他原图** · [北美外滩及潟湖](terrain-z7-visual/land-material-north-america.png) · [澳洲东北内陆](terrain-z7-visual/land-material-oceania.png) · [南极沿岸](terrain-z7-visual/land-material-antarctica.png) · [阿尔卑斯四页交汇](terrain-z7-visual/land-material-alps-corner.png) · [南极点原有细线](terrain-z7-visual/land-material-south-pole.png)
+
+正式 Rust 宿主在独立后台 1900 会话执行地理、政治、经济和军事专题的有限回归。两份地貌用同一设备、相机和滚轮输入。全部专题可显示，地图细节图集常驻峰值均为 256 页。
+
+| 专题 | 帧间隔 p95，毫秒 | 进程工作集，MiB | 专用显存，MiB |
+|---|---:|---:|---:|
+| 地理 | 7.42 → 7.40 | 338 → 383 | 474 → 454 |
+| 政治 | 7.36 → 7.44 | 340 → 372 | 474 → 454 |
+| 经济 | 7.34 → 7.39 | 340 → 373 | 474 → 454 |
+| 军事 | 7.35 → 7.35 | 340 → 373 | 474 → 454 |
+
+RTX 3050 Laptop GPU／Vulkan。工作集增加 32–45 MiB。此处记录一次有界回归，长期驻留情况待测。
+
+![正式 Rust 背景会话原图，1900 年地理专题](terrain-z7-visual/land-material-native.png)
+
+在独立目录以新附件作为 `7.qpk` 和 `index.json`，其余层级及河网拓扑沿用补湖候选。全量逐页视觉账本仍保留，定点和七洲样本未计为整页审核。Z7 用户视觉接受待定。 [全球候选 QPK](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-land-material-7.qpk) · [资源清单](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-land-material-index.json) · [两档原图、页表和连续帧回执](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-land-material-originals.zip)
 
 ```text
 python rust/strategic-host/tools/build_natural_terrain.py --z7-land-candidate <补湖候选>/7.qpk <WorldCover与DEM目录> <NaturalEarth目录> <独立候选>/7.qpk
