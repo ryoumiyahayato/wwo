@@ -195,7 +195,41 @@ fn page_readiness(cell:vec2i, columns:i32, rows:i32) -> f32 {
     let y=clamp(cell.y,0,rows-1)+rows-1;
     return f32(textureLoad(terrain_index,vec2i(x,y),0).r>>16u)/255.;
 }
-fn page_surface(uv:vec2f, zoom:i32, exact:bool) -> NaturalPage {
+fn coastal_surface(base:vec4f, at:vec2f, slot:i32, coast:vec3f) -> vec4f {
+    let water=coast.x;
+    let change=water-base.a;
+    if coast.y<=0. || abs(change)<=.008 {return base;}
+    // Resolve surrounding albedo from the padded QPK. Agreed water keeps
+    // its original color, including gradients from the existing bathymetry.
+    let offsets=array<vec2f,8>(vec2f(3.25,0.),vec2f(-3.25,0.),vec2f(0.,3.25),vec2f(0.,-3.25),
+                              vec2f(2.3,2.3),vec2f(2.3,-2.3),vec2f(-2.3,2.3),vec2f(-2.3,-2.3));
+    var dry=vec4f(0.);
+    var wet=vec4f(0.);
+    for(var i=0u;i<8u;i+=1u) {
+        let side=textureSampleLevel(terrain_detail,linear,at+offsets[i]/264.,slot,0.);
+        dry+=vec4f(side.rgb,1.)*(1.-smoothstep(.02,.28,side.a));
+        let blue=smoothstep(.025,.075,min(side.b,side.g)-side.r);
+        wet+=vec4f(side.rgb,1.)*smoothstep(.9,.99,side.a)*blue;
+    }
+    let dry_support=smoothstep(.05,.75,dry.a);
+    let bare=smoothstep(.65,.95,coast.z);
+    // A rocky islet can be smaller than one QPK cell. Use the observed
+    // bare class for its albedo where no independent dry donor exists.
+    let bare_color=vec3f(.67,.55,.37);
+    let land_color=mix(bare_color,dry.rgb/max(dry.a,.001),dry_support);
+    let water_color=wet.rgb/max(wet.a,.001);
+    let support=mix(max(dry_support,bare),smoothstep(.035,.65,wet.a),water);
+    let original=mix(land_color,water_color,base.a);
+    let resolved=mix(land_color,water_color,water);
+    // Keep the original terrain shading as coverage agrees. Limit the
+    // residual when the two masks disagree, where it can contain a fringe
+    // of the old shoreline instead of local terrain or bathymetry.
+    let residual=base.rgb-original;
+    let relief=mix(residual,clamp(residual,vec3f(-.025),vec3f(.025)),smoothstep(.06,.4,abs(change)));
+    let color=clamp(resolved+relief,vec3f(0.),vec3f(1.));
+    return mix(base,vec4f(color,water),coast.y*support*smoothstep(.008,.025,abs(change)));
+}
+fn page_surface(uv:vec2f, zoom:i32, exact:bool, coast:vec3f) -> NaturalPage {
     let rows=1i<<u32(zoom);
     let columns=rows*2;
     let offset=rows-1;
@@ -206,7 +240,9 @@ fn page_surface(uv:vec2f, zoom:i32, exact:bool) -> NaturalPage {
     let slot=i32(index&65535u)-1;
     if slot<0 {return NaturalPage(vec4f(0.),0.);}
     let q=fract(position);
-    let refined=textureSampleLevel(terrain_detail,linear,(q*256.+4.)/264.,slot,0.);
+    let sample_uv=(q*256.+4.)/264.;
+    let base=textureSampleLevel(terrain_detail,linear,sample_uv,slot,0.);
+    let refined=coastal_surface(base,sample_uv,slot,coast);
     if exact {return NaturalPage(refined,1.);}
     var fade=f32(index>>16u)/255.;
     // Every cell meeting at an edge or corner uses the same refinement weight.
@@ -233,12 +269,39 @@ fn page_surface(uv:vec2f, zoom:i32, exact:bool) -> NaturalPage {
     }
     return NaturalPage(refined,fade);
 }
-fn natural_surface(ll:vec2f) -> vec4f {
+fn close_surface_position(ll:vec2f) -> vec2f {
+    let middle=(close_extent.x+close_extent.z)*.5;
+    let delta=ll.x-middle;
+    let lon=ll.x-360.*floor((delta+180.)/360.);
+    return vec2f(lon-close_extent.x,close_extent.w-ll.y)/(close_extent.zw-close_extent.xy);
+}
+fn close_surface_span() -> vec2f {
+    let latitude_scale=cos(radians((close_extent.y+close_extent.w)*.5));
+    return (close_extent.zw-close_extent.xy)*111195.*vec2f(latitude_scale,1.);
+}
+fn close_surface_lod(span:vec2f,footprint:f32) -> f32 {
+    let source_spacing=span/vec2f(textureDimensions(close_surface));
+    return log2(max(1.,footprint/min(source_spacing.x,source_spacing.y)));
+}
+fn coastal_observation(ll:vec2f,footprint:f32) -> vec3f {
+    if view.close_sample.w<.5 || view.close_sample.x<=0. || view.settings.y>=.5 {return vec3f(0.);}
+    let uv=close_surface_position(ll);
+    let distance=min(uv,1.-uv);
+    if min(distance.x,distance.y)<=0. {return vec3f(0.);}
+    let span=close_surface_span();
+    let observed=textureSampleLevel(close_surface,linear,uv,close_surface_lod(span,footprint));
+    let edge=distance*span;
+    let validity=smoothstep(.55,.99,observed.a);
+    let weight=view.close_sample.x*validity*smoothstep(0.,900.,min(edge.x,edge.y));
+    let coverage=clamp(observed.rg/max(observed.a,.01),vec2f(0.),vec2f(1.));
+    return vec3f(coverage.r,weight,coverage.g/max(.01,1.-coverage.r));
+}
+fn natural_surface(ll:vec2f, footprint:f32) -> vec4f {
     // Keep a rounded-up longitude fraction inside the last column at the antimeridian.
     let u=min(fract(ll.x/360.+.5),.99999994);
     let uv=vec2f(u,clamp(.5-ll.y/180.,0.,.99999994));
     if view.chart_origin.w>.5 && view.map_style.z>0. {
-        let page=page_surface(uv,i32(view.map_style.z),true);
+        let page=page_surface(uv,i32(view.map_style.z),true,vec3f(0.));
         return mix(vec4f(1.,0.,1.,0.),page.color,page.coverage);
     }
     var color=vec4f(0.);
@@ -246,7 +309,12 @@ fn natural_surface(ll:vec2f) -> vec4f {
     for(var z=i32(view.map_style.z);z>0;z-=1) {
         let opacity=view.natural_lod[u32(z)/4u][u32(z)%4u];
         let grouped=opacity>=0.;
-        let page=page_surface(uv,z,grouped);
+        var coast=vec3f(0.);
+        if z==7 && opacity>.75 {
+            coast=coastal_observation(ll,footprint);
+            coast.y*=smoothstep(.75,1.,opacity);
+        }
+        let page=page_surface(uv,z,grouped,coast);
         let weight=remaining*page.coverage*select(1.,opacity,grouped);
         color+=page.color*weight;
         remaining-=weight;
@@ -303,20 +371,14 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
 
 fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
     let weight=view.close_sample.x;
-    if weight<=0. || all(base.rgb==vec3f(1.,0.,1.)) {return base;}
-    let span=close_extent.zw-close_extent.xy;
-    let middle=(close_extent.x+close_extent.z)*.5;
-    let delta=ll.x-middle;
-    let lon=middle+delta-360.*floor((delta+180.)/360.);
-    let uv=vec2f(lon-close_extent.x,close_extent.w-ll.y)/span;
+    if weight<=0. || view.close_sample.w>.5 || all(base.rgb==vec3f(1.,0.,1.)) {return base;}
+    let uv=close_surface_position(ll);
     let streamed=view.close_sample.y>.5;
     let survey=view.close_sample.z>.5;
     let distance=min(uv,1.-uv);
     if streamed && min(distance.x,distance.y)<=0. {return base;}
-    let latitude_scale=cos(radians((close_extent.y+close_extent.w)*.5));
-    let span_metres=span*111195.*vec2f(latitude_scale,1.);
-    let source_spacing=span_metres/vec2f(textureDimensions(close_surface));
-    let lod=log2(max(1.,footprint/min(source_spacing.x,source_spacing.y)));
+    let span_metres=close_surface_span();
+    let lod=close_surface_lod(span_metres,footprint);
     let sample=textureSampleLevel(close_surface,linear,uv,lod);
     if survey {
         // RGB stores surveyed water, forest and cropland area, premultiplied
@@ -415,12 +477,12 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
     var relief_light=clamp(.92+.58*(dot(normal,sun)-sun.z),.48,1.12);
     color *= relief_light;
     if use_natural {
-        terrain=natural_surface(ll);
+        let foreshortening=mix(max(.25,dot(normal_world,view.chart_forward.xyz)),1.,view.viewport.w);
+        let footprint=base_mpp/foreshortening;
+        let detail_footprint=footprint/max(.3,view.chart_origin.z);
+        terrain=natural_surface(ll,detail_footprint);
         color=terrain.rgb;
         if view.settings.y<.5 && base_mpp<LAND_DETAIL_MPP {
-            let foreshortening=mix(max(.25,dot(normal_world,view.chart_forward.xyz)),1.,view.viewport.w);
-            let footprint=base_mpp/foreshortening;
-            let detail_footprint=footprint/max(.3,view.chart_origin.z);
             if view.close_sample.z>.5 {
                 terrain=close_terrain(ll,detail_footprint,terrain);
                 color=natural_land_material(terrain,normal_world,footprint);

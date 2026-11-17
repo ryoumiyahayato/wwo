@@ -300,6 +300,7 @@ pub struct Display<'a> {
     pub camera:&'a Camera,pub size:[u32;2],pub mode:Mode,pub flags:Option<u8>,pub cursor:[f64;2],
     pub source:&'a str,pub feedback:&'a str,pub labels:bool,pub modern_terrain:bool,
     pub surveyed_terrain:bool,
+    pub modern_coast:bool,
     pub country:Option<(&'a World,CountryPanel,Option<u8>)>,
     pub managed:bool,
     pub debug:Option<&'a crate::Diagnostics>,
@@ -462,6 +463,8 @@ impl Display<'_> {
         if self.modern_terrain && self.hud.page==Page::Map {
             let label=if self.surveyed_terrain {
                 visual.choose("历史测绘与现代地表参照","Historical survey and modern terrain reference")
+            } else if self.modern_coast {
+                visual.choose("现代海岸参照","Modern coastline reference")
             } else {
                 visual.choose("现代地表参照","Modern terrain reference")
             };

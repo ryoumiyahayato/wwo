@@ -15,12 +15,14 @@ pub enum Surface {
     #[default]
     Material,
     Survey,
+    Coast,
 }
 
 pub const FILE_NAME: &str = "terrain-detail-v1.qdt";
 pub const MIPS: u32 = 4;
 const MATERIAL_FORMAT: &[u8; 8] = b"WWODTL01";
 const SURVEY_FORMAT: &[u8; 8] = b"WWODTL02";
+const COAST_FORMAT: &[u8; 8] = b"WWODTL03";
 const MAX_INDEX: u32 = 131_072;
 const MAX_MPP: f64 = 110.;
 
@@ -54,11 +56,12 @@ pub fn mips([width, height]: [u32; 2]) -> impl Iterator<Item = (u32, [u32; 2], u
 pub struct Catalogue {
     path: PathBuf,
     data_offset: u64,
+    allow_coast: bool,
     pub regions: Vec<Region>,
 }
 
 impl Catalogue {
-    pub fn open(path: &Path) -> io::Result<Self> {
+    pub fn open(path: &Path, allow_coast: bool) -> io::Result<Self> {
         let invalid = || io::Error::new(io::ErrorKind::InvalidData, "Invalid terrain detail catalogue");
         let mut file = File::open(path)?;
         let mut magic = [0; 8];
@@ -66,7 +69,7 @@ impl Catalogue {
         file.read_exact(&mut magic)?;
         file.read_exact(&mut length)?;
         let length = u32::from_le_bytes(length);
-        if (&magic != MATERIAL_FORMAT && &magic != SURVEY_FORMAT) || length == 0 || length > MAX_INDEX {
+        if ![MATERIAL_FORMAT, SURVEY_FORMAT, COAST_FORMAT].contains(&&magic) || length == 0 || length > MAX_INDEX {
             return Err(invalid());
         }
         let mut index = vec![0; length as usize];
@@ -79,6 +82,11 @@ impl Catalogue {
         }
         for (i, region) in regions.iter().enumerate() {
             let [west, south, east, north] = region.extent;
+            let surface_valid = match region.surface {
+                Surface::Material => true,
+                Surface::Survey => &magic != MATERIAL_FORMAT && !region.modern_reference,
+                Surface::Coast => &magic == COAST_FORMAT && region.modern_reference,
+            };
             if region.id.is_empty() || region.id.len() > 64
                 || !region.id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
                 || (i > 0 && regions[i - 1].id >= region.id)
@@ -86,7 +94,7 @@ impl Catalogue {
                 || !(-90. <= south && south < north && north <= 90.)
                 || region.size.iter().any(|&s| !(32..=2048).contains(&s) || s % 32 != 0)
                 || region.sources.is_empty() || region.sources.iter().any(|source| source.is_empty())
-                || (matches!(region.surface, Surface::Survey) && (&magic != SURVEY_FORMAT || region.modern_reference))
+                || !surface_valid
                 || region.offset != end - data_offset
                 || !(1..=6 * 1024 * 1024).contains(&region.bytes)
             {
@@ -97,7 +105,7 @@ impl Catalogue {
         if file.metadata()?.len() != end {
             return Err(invalid());
         }
-        Ok(Self { path: path.to_owned(), data_offset, regions })
+        Ok(Self { path: path.to_owned(), data_offset, allow_coast, regions })
     }
 
     pub fn read(&self, index: usize) -> io::Result<Vec<u8>> {
@@ -181,7 +189,15 @@ impl Stream {
             let view = view_extent(corners, center);
             self.catalogue.regions.iter().enumerate()
                 .filter(|(index, _)| !self.failed.contains(index))
-                .map(|(index, region)| (index, matches!(region.surface, Surface::Survey), overlap(region.extent, view, center)))
+                .filter(|(_, region)| self.catalogue.allow_coast || !matches!(region.surface, Surface::Coast))
+                .map(|(index, region)| {
+                    let priority = match region.surface {
+                        Surface::Material => 0,
+                        Surface::Coast => 1,
+                        Surface::Survey => 2,
+                    };
+                    (index, priority, overlap(region.extent, view, center))
+                })
                 .filter(|&(_, _, area)| area > 0.)
                 .max_by(|a, b| a.1.cmp(&b.1).then_with(|| a.2.total_cmp(&b.2)))
                 .map(|(index, _, _)| index)

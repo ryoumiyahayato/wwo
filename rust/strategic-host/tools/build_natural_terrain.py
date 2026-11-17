@@ -363,16 +363,16 @@ def smooth_weight(lower, upper, value):
     return t*t*(3-2*t)
 
 
-def read_wrapped_grid(source, rect):
+def read_wrapped_grid(source, rect, index=1):
     x0,y0,x1,y1 = rect
     left = x0 % source.width
     first = min(source.width-left,x1-x0)
     boundless = y0 < 0 or y1 > source.height
-    values = source.read(1,window=Window(left,y0,first,y1-y0),boundless=boundless)
+    values = source.read(index,window=Window(left,y0,first,y1-y0),boundless=boundless)
     if first == x1-x0:
         return values
-    wrap = source.read(1,window=Window(0,y0,x1-x0-first,y1-y0),boundless=boundless)
-    return np.hstack((values,wrap))
+    wrap = source.read(index,window=Window(0,y0,x1-x0-first,y1-y0),boundless=boundless)
+    return np.concatenate((values,wrap),axis=-1)
 
 
 def apply_historical_cropland(fractions, estimate):
@@ -401,7 +401,26 @@ def historical_cropland_grid(source, width):
                      dtype="float32",nodata=np.nan,resampling=Resampling.average)
 
 
-def z7_land_material(relief, cover, glaciers, width, rect, historical_cropland=None, dunes=None):
+def worldcover_fraction_grid(source, width):
+    step = 360/width
+    if (source.crs is None or source.crs.to_epsg() != 4326
+            or source.shape != (width//2,width)
+            or not source.transform.almost_equals(from_origin(-180,90,step,step))
+            or source.dtypes != ("uint8",)*len(LAND_COVER_CODES)
+            or source.descriptions != tuple(map(str,LAND_COVER_CODES))
+            or source.tags().get("product") != "ESA WorldCover 2021 v200"):
+        raise ValueError("Expected ESA WorldCover class fractions on the Z7 grid")
+    return source
+
+
+def apply_worldcover_fractions(fractions, source, rect):
+    native = np.moveaxis(read_wrapped_grid(source,rect,index=None),0,-1)
+    total = native.sum(axis=-1,keepdims=True,dtype=np.float32)
+    np.divide(native,total,out=fractions,where=total>0)
+
+
+def z7_land_material(relief, cover, glaciers, width, rect, historical_cropland=None, dunes=None,
+                     worldcover_fractions=None):
     """Derive Z7 land colors from measured relief and modern cover, on the global grid."""
     x0,top,x1,bottom = rect
     y0,y1 = max(0,top),min(width//2,bottom)
@@ -420,6 +439,8 @@ def z7_land_material(relief, cover, glaciers, width, rect, historical_cropland=N
     slope = np.hypot(dx,dy)
     relief_span = np.maximum.reduce((center,north,south,west,east))-np.minimum.reduce((center,north,south,west,east))
     fractions = cover.fractions(lon[1:-1],lat[1:-1])
+    if worldcover_fractions is not None:
+        apply_worldcover_fractions(fractions,worldcover_fractions,(x0,y0,x1,y1))
     if historical_cropland is not None:
         apply_historical_cropland(fractions,read_wrapped_grid(historical_cropland,(x0,y0,x1,y1)))
     unknown, _, shrubs, grass, crop, _, bare, ice, mapped_water, wetland, _, moss = np.moveaxis(fractions,-1,0)
@@ -1483,7 +1504,8 @@ def land_material_color_frame(color, material, decode, encode, opaque_encoder):
 
 
 @contextmanager
-def land_material_recipe(sources, natural_earth, level, historical_cropland=None, sand_dunes=None):
+def land_material_recipe(sources, natural_earth, level, historical_cropland=None, sand_dunes=None,
+                         worldcover_fractions=None):
     """Use one globally registered source grid for Z6 and Z7 land albedo."""
     if level not in (6, 7):
         raise ValueError("Shared land materials currently support Z6 and Z7")
@@ -1504,8 +1526,12 @@ def land_material_recipe(sources, natural_earth, level, historical_cropland=None
         dunes = None
         if sand_dunes is not None:
             dunes = DuneCoverage(inputs.enter_context(ZipFile(sand_dunes)),fine_width)
+        fractions = None
+        if worldcover_fractions is not None:
+            native = inputs.enter_context(rasterio.open(worldcover_fractions))
+            fractions = worldcover_fraction_grid(native,fine_width)
         fine = partial(z7_land_material, relief, cover, glaciers, fine_width,
-                       historical_cropland=historical, dunes=dunes)
+                       historical_cropland=historical, dunes=dunes, worldcover_fractions=fractions)
         if level == 7:
             yield fine
         else:
@@ -1513,8 +1539,10 @@ def land_material_recipe(sources, natural_earth, level, historical_cropland=None
 
 
 def write_land_candidate(original, sources, natural_earth, destination, *, preview_pages=None,
-                         historical_cropland=None, sand_dunes=None, level=7, scratch=None):
-    with land_material_recipe(sources, natural_earth, level, historical_cropland, sand_dunes) as recipe:
+                         historical_cropland=None, sand_dunes=None, worldcover_fractions=None,
+                         level=7, scratch=None):
+    with land_material_recipe(sources, natural_earth, level, historical_cropland, sand_dunes,
+                              worldcover_fractions) as recipe:
         def material(rect, _rgb):
             return recipe(rect)
         write_material_candidate(original, destination, material, preview_pages=preview_pages,
@@ -1748,6 +1776,8 @@ def main():
                         help="Apply Cao 1900 reconstructed cropland fractions in a land candidate")
     parser.add_argument("--sand-dunes", type=Path, metavar="GSDP30_ZIP",
                         help="Read mapped dune coverage from GSDP30 in a land candidate")
+    parser.add_argument("--worldcover-fractions", type=Path, metavar="WORLDCOVER_TIFF",
+                        help="Use modern ESA WorldCover area fractions on the Z7 grid")
     parser.add_argument("--through", type=int, choices=(5,6,7), help="Build or advance the 15 arc-second package")
     parser.add_argument("sources",type=Path,nargs="?")
     parser.add_argument("natural_earth",type=Path,nargs="?")
@@ -1764,6 +1794,8 @@ def main():
         parser.error("--historical-cropland requires a Z6 or Z7 land candidate")
     if args.sand_dunes is not None and land_candidate is None:
         parser.error("--sand-dunes requires a Z6 or Z7 land candidate")
+    if args.worldcover_fractions is not None and land_candidate is None:
+        parser.error("--worldcover-fractions requires a Z6 or Z7 land candidate")
     if land_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,
                                            args.ice_shelf_candidate)):
@@ -1771,7 +1803,8 @@ def main():
         level = 7 if args.z7_land_candidate else 6
         with generation_disk_usage(land_candidate[-1], 3_000_000_000) as (scratch, _):
             write_land_candidate(*land_candidate,historical_cropland=args.historical_cropland,
-                                 sand_dunes=args.sand_dunes,level=level,scratch=scratch)
+                                 sand_dunes=args.sand_dunes,worldcover_fractions=args.worldcover_fractions,
+                                 level=level,scratch=scratch)
         return
     if args.river_outlet_candidate is not None or args.inland_water_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,

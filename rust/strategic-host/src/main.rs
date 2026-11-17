@@ -1195,6 +1195,7 @@ impl Host {
             camera:&self.camera,size:self.size,mode:self.mode,flags,cursor:self.cursor,source:&source,feedback:&self.feedback,labels:self.labels,managed:self.config.managed,
             modern_terrain:view.map_style[1]>0.,
             surveyed_terrain:view.close_sample[0]>0. && view.close_sample[2]>0.5,
+            modern_coast:view.close_sample[0]>0. && view.close_sample[3]>0.5,
             debug:self.debug.then_some(&self.perf)};
         let seconds=self.started.elapsed().as_secs_f32();
         let loading=self.loading();
@@ -1566,9 +1567,9 @@ impl ApplicationHandler<HostEvent> for Host {
                 let default_dir=self.config.terrain_candidate.clone().unwrap_or_else(||self.config.root.join(terrain::VERSION));
                 let default=default_dir.join(terrain_detail::FILE_NAME);
                 if let Some(path)=&self.config.terrain_detail {
-                    Some(terrain_detail::Catalogue::open(path)?)
+                    Some(terrain_detail::Catalogue::open(path,true)?)
                 } else {
-                    match terrain_detail::Catalogue::open(&default) {
+                    match terrain_detail::Catalogue::open(&default,false) {
                         Ok(catalogue)=>Some(catalogue),
                         Err(error) if error.kind()==io::ErrorKind::NotFound=>None,
                         Err(error)=>{

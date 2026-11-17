@@ -19,6 +19,7 @@ from build_natural_terrain import COMPACT_STRENGTH, ENCODER, generation_disk_usa
 HEADER = Struct("<8sI")
 MATERIAL_MAGIC = b"WWODTL01"
 SURVEY_MAGIC = b"WWODTL02"
+COAST_MAGIC = b"WWODTL03"
 MAX_INDEX_BYTES = 131_072
 MIP_COUNT = 4
 
@@ -51,8 +52,10 @@ def read_manifest(path):
             or any(not isinstance(source, str) or not source.strip() for source in sources)
             or not isinstance(modern_reference, bool)):
         raise ValueError(f"{path}: expected sources and a modern_reference boolean")
-    if surface not in ("material", "survey") or (surface == "survey" and modern_reference):
-        raise ValueError(f"{path}: expected a material or historical survey surface")
+    if surface not in ("material", "survey", "coast") or (
+        surface == "survey" and modern_reference or surface == "coast" and not modern_reference
+    ):
+        raise ValueError(f"{path}: expected a material, historical survey, or modern coastal reference")
 
     name = data.get("image")
     if not isinstance(name, str):
@@ -112,7 +115,8 @@ def write_package(output, manifests):
     regions = [entry for entry, _ in samples]
     if len({entry["id"] for entry in regions}) != len(regions):
         raise ValueError("Duplicate terrain-detail region ID")
-    magic = SURVEY_MAGIC if any(entry["surface"] == "survey" for entry in regions) else MATERIAL_MAGIC
+    surfaces = {entry["surface"] for entry in regions}
+    magic = COAST_MAGIC if "coast" in surfaces else SURVEY_MAGIC if "survey" in surfaces else MATERIAL_MAGIC
     index_bytes(regions)
     raw_bytes = sum(width * height * 85 // 64 for width, height in
                     (entry["size"] for entry in regions))
