@@ -36,6 +36,8 @@ struct Tile {
 @group(0) @binding(12) var terrain_index: texture_2d<u32>;
 @group(0) @binding(13) var land_surface: texture_2d<f32>;
 @group(0) @binding(14) var land_repeat: sampler;
+@group(0) @binding(15) var close_surface: texture_2d<f32>;
+@group(0) @binding(16) var<uniform> close_extent: vec4f;
 @group(1) @binding(0) var<uniform> tile: Tile;
 @group(1) @binding(1) var terrain_data: texture_2d<f32>;
 @group(1) @binding(2) var material_data: texture_2d<f32>;
@@ -297,6 +299,19 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     }
     return clamp(base*(1.+relief*land*(1.-snow)),vec3f(0.),vec3f(1.));
 }
+
+fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
+    let span=close_extent.zw-close_extent.xy;
+    if span.x<=0. || footprint>=130. {return base;}
+    let uv=vec2f(ll.x-close_extent.x,close_extent.w-ll.y)/span;
+    let margin=min(min(uv.x,uv.y),min(1.-uv.x,1.-uv.y));
+    if margin<=0. {return base;}
+    let latitude_scale=cos(radians((close_extent.y+close_extent.w)*.5));
+    let source_spacing=span*111195.*vec2f(latitude_scale,1.)/vec2f(textureDimensions(close_surface));
+    let lod=log2(max(1.,footprint/min(source_spacing.x,source_spacing.y)));
+    let sample=textureSampleLevel(close_surface,linear,uv,lod);
+    return mix(base,sample,smoothstep(0.,.04,margin)*(1.-smoothstep(48.,130.,footprint)));
+}
 fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f {
     let dims=vec2f(textureDimensions(terrain_data));
     let du=1./dims;
@@ -370,7 +385,11 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
         color=terrain.rgb;
         if view.settings.y<.5 && base_mpp<LAND_DETAIL_MPP {
             let foreshortening=mix(max(.25,dot(normal_world,view.chart_forward.xyz)),1.,view.viewport.w);
-            color=natural_land_material(terrain,normal_world,base_mpp/foreshortening);
+            let footprint=base_mpp/foreshortening;
+            color=natural_land_material(terrain,normal_world,footprint);
+            let close=close_terrain(ll,footprint/max(.3,view.chart_origin.z),vec4f(color,terrain.a));
+            color=close.rgb;
+            terrain.a=close.a;
         }
         relief_light=clamp(.57+dot(terrain.rgb,vec3f(.30,.55,.15))*.68,.70,1.19);
     } else if tile.options.y>=5. {
