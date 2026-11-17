@@ -53,6 +53,7 @@ struct Diagnostics {rate:f64,cpu_ms:f64,tiles:usize,visible:usize,mib:f64,stream
 struct Config {root:PathBuf,world:Option<PathBuf>,requests:Option<PathBuf>,scenario:Option<PathBuf>,observe:Option<PathBuf>,managed:bool,
     preferences:Option<PathBuf>,terrain_candidate:Option<PathBuf>,background:bool,
     terrain_review:bool,terrain_selection:terrain::LayerSelection,terrain_layer_candidate:Option<PathBuf>,
+    terrain_close_sample:Option<PathBuf>,
     #[cfg(windows)] native:Option<native_start::NativeSession>,
     #[cfg(windows)] desktop:Option<desktop_start::DesktopSession>}
 impl Config {
@@ -60,6 +61,7 @@ impl Config {
         let home=std::env::current_exe()?.parent().unwrap().to_owned();
         let mut result=Self{root:home.join("data"),world:None,requests:None,scenario:None,observe:None,managed:false,preferences:None,terrain_candidate:None,background:false,
             terrain_review:false,terrain_selection:terrain::LayerSelection::Auto,terrain_layer_candidate:None,
+            terrain_close_sample:None,
             #[cfg(windows)] desktop:None,
             #[cfg(windows)] native:None};
         let mut args=std::env::args_os().skip(1).peekable();
@@ -81,6 +83,7 @@ impl Config {
                 Some("--terrain-candidate")=>result.terrain_candidate=Some(path(&mut args)?),
                 Some("--terrain-review")=>result.terrain_review=true,
                 Some("--terrain-layer-candidate")=>result.terrain_layer_candidate=Some(path(&mut args)?),
+                Some("--terrain-close-sample")=>result.terrain_close_sample=Some(path(&mut args)?),
                 Some(flag @ ("--terrain-level"|"--terrain-max-level"))=>{
                     if !matches!(result.terrain_selection,terrain::LayerSelection::Auto){
                         return Err(io::Error::other("choose one terrain layer option"));
@@ -111,7 +114,8 @@ impl Config {
             if result.terrain_candidate.is_none(){result.terrain_candidate=Some(result.root.join(terrain::COMPACT_VERSION));}
             return Ok(result);
         }
-        if !matches!(result.terrain_selection,terrain::LayerSelection::Auto)||result.terrain_layer_candidate.is_some() {
+        if !matches!(result.terrain_selection,terrain::LayerSelection::Auto)||result.terrain_layer_candidate.is_some()
+            ||result.terrain_close_sample.is_some() {
             return Err(io::Error::other("terrain layer options require --terrain-review"));
         }
         #[cfg(windows)]
@@ -1133,6 +1137,7 @@ impl Host {
         if self.camera.mpp<700.{self.grid_step=25000.;}else if self.camera.mpp>900.{self.grid_step=50000.;}
         view.settings=[self.state.date.season_day(),self.mode.index() as f32,u8::from(active) as f32,u8::from(self.theme) as f32];
         view.map_style[1]=self.renderer.as_ref().unwrap().terrain_max_level() as f32;
+        view.close_sample[0]=self.renderer.as_ref().unwrap().close_sample_weight(&self.camera,self.size);
         view.map_style[3]=if self.hud.military_grid{self.grid_step}else{0.};
         view.selection[3]=self.world.polities.iter().position(|p|p.id=="country_fra").map_or(0.,|i|(i+1) as f32);
         view.map_style[0]=self.player_polity().map_or(0.,|i|(i+1) as f32);
@@ -1546,7 +1551,8 @@ impl ApplicationHandler<HostEvent> for Host {
             let renderer=if let Some(window)=&window {
                 pollster::block_on(Renderer::new(window.clone(),atlas,flags,hud,globe_art,&layouts,self.natural.take(),self.events.clone()))?
             } else {
-                pollster::block_on(Renderer::new_offscreen(self.size,atlas,flags,hud,globe_art,&layouts,self.natural.take(),self.events.clone()))?
+                let sample=self.config.terrain_close_sample.as_deref().map(render::CloseSample::read).transpose()?;
+                pollster::block_on(Renderer::new_offscreen(self.size,atlas,flags,hud,globe_art,&layouts,self.natural.take(),sample,self.events.clone()))?
             };
             let pixels=Pixels::read_version(&self.map_root,&self.world.tiles[0],self.map_signature,self.reader.cover)?;
             let base=renderer.upload(&self.world.tiles[0],pixels);
