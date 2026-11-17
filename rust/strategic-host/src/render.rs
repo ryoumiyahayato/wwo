@@ -399,7 +399,8 @@ impl Renderer {
             texture_entry(6,wgpu::TextureSampleType::Float{filterable:false},wgpu::TextureViewDimension::D2),sampled(7),sampled(8),sampled(9),
             texture_entry(10,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
             texture_entry(11,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
-            texture_entry(12,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2)]);
+            texture_entry(12,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2),
+            sampled(13),sampler_entry(14)]);
         let pages=layout(&device,&[uniform(0,fragment),sampled(1),sampled(2),sampled(3),
             texture_entry(4,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2)]);
         let screen_layout=layout(&device,&[uniform(0,wgpu::ShaderStages::VERTEX_FRAGMENT)]);
@@ -411,6 +412,11 @@ impl Renderer {
         });
         let wrap=device.create_sampler(&wgpu::SamplerDescriptor {
             address_mode_u:wgpu::AddressMode::Repeat,mag_filter:wgpu::FilterMode::Linear,min_filter:wgpu::FilterMode::Linear,
+            mipmap_filter:wgpu::FilterMode::Linear,..Default::default()
+        });
+        let land_repeat=device.create_sampler(&wgpu::SamplerDescriptor {
+            address_mode_u:wgpu::AddressMode::Repeat,address_mode_v:wgpu::AddressMode::Repeat,
+            mag_filter:wgpu::FilterMode::Linear,min_filter:wgpu::FilterMode::Linear,
             mipmap_filter:wgpu::FilterMode::Linear,..Default::default()
         });
         let view=buffer(&device,std::mem::size_of::<View>());
@@ -443,10 +449,36 @@ impl Renderer {
                 .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()});
             [empty(),empty(),create_texture(&device,[1,1,1],wgpu::TextureFormat::R32Uint).create_view(&Default::default())]
         };
+        let land_art=crate::decode_rgba(&include_bytes!("land-material.png")[..])
+            .map_err(|error|error.to_string())?;
+        let [material_w,material_h]=land_art.size;
+        let levels=material_w.ilog2()+1;
+        let land_surface=create_texture_mips(&device,[material_w,material_h,1],wgpu::TextureFormat::Rgba8Unorm,levels);
+        let mut pixels=land_art.pixels;
+        for level in 0..levels {
+            let [w,h]=[material_w>>level,material_h>>level];
+            write_texture_mip(&queue,&land_surface,[w,h,1],4,&pixels,level);
+            if w==1 { break; }
+            let mut reduced=Vec::with_capacity(pixels.len()/4);
+            for y in (0..h).step_by(2) {
+                for x in (0..w).step_by(2) {
+                    let row=(y*w+x) as usize*4;
+                    let next=row+w as usize*4;
+                    for c in 0..4 {
+                        let sum=u16::from(pixels[row+c])+u16::from(pixels[row+c+4])
+                            +u16::from(pixels[next+c])+u16::from(pixels[next+c+4]);
+                        reduced.push(((sum+2)/4) as u8);
+                    }
+                }
+            }
+            pixels=reduced;
+        }
+        let land_surface=land_surface.create_view(&Default::default());
         let globals=bind(&device,&glob,&[buf_resource(0,&view),sampler_resource(1,&linear),sampler_resource(2,&wrap),
             tex_resource(3,&palette_view),tex_resource(4,&scenario),tex_resource(5,&flags),tex_resource(6,&flag_pose_view),
             tex_resource(7,&galactic_chart),tex_resource(8,&ocean_detail),tex_resource(9,&ocean_ice),
-            tex_resource(10,&terrain_world),tex_resource(11,&terrain_detail),tex_resource(12,&terrain_index)]);
+            tex_resource(10,&terrain_world),tex_resource(11,&terrain_detail),tex_resource(12,&terrain_index),
+            tex_resource(13,&land_surface),sampler_resource(14,&land_repeat)]);
         let flag_art=bind(&device,&font_layout,&[tex_resource(0,&flags),sampler_resource(1,&linear)]);
         let [w,h]=atlas.size;
         let font=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
