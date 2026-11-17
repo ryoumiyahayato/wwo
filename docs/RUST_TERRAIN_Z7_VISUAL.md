@@ -13,6 +13,10 @@
 | 亚马孙马瑙斯 | 60.020°W／3.170°S · 140、280 | 林地与洪泛低地。河道宽度沿用原水文资源 |
 | 纳米布 | 15.410°E／24.470°S · 155、285 | 实测沙丘起伏、裸露高地与干旱植被。间歇河另列水文问题。 [纳米布沙海](https://science.nasa.gov/earth-observatory/namib-sand-sea-149130/) |
 
+**东阿尔卑斯同机位试制** · 14.765625°E／47.109375°N · 515 米／像素 · Vulkan 原图 · Z7 权重 1。山麓林地和耕地的区分更清楚，保留山谷的阴影。 [改动前原图](terrain-z7-visual/land-material-alps-before.png)
+
+![东阿尔卑斯固定 Z7 陆地材质试制](terrain-z7-visual/land-material-alps-after.png)
+
 ```text
 python rust/strategic-host/tools/build_natural_terrain.py --z7-land-candidate <补湖候选>/7.qpk <WorldCover与DEM目录> <NaturalEarth目录> <独立候选>/7.qpk
 ```
