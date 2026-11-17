@@ -65,6 +65,15 @@ NEUTRAL = np.array([.57, .57, .43], dtype=np.float32)
 ENCODER = ispc_texcomp.BC7EncSettings.from_profile("alpha_fast")
 RIVER_COLOR = np.array([.20, .38, .45], dtype=np.float32)
 RIVER_OPACITY = .78
+LAND_COVER_CODES = (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100)
+LAND_PALETTE = np.array([
+    [.53,.51,.37], [.255,.41,.31], [.47,.49,.35], [.47,.53,.33],
+    [.61,.57,.36], [.53,.51,.37], [.73,.61,.44], [.89,.92,.91],
+    [.53,.51,.37], [.36,.46,.34], [.25,.41,.33], [.47,.49,.36],
+], dtype=np.float32)
+LAND_FRACTIONS = np.eye(len(LAND_COVER_CODES), dtype=np.float32)
+LAND_CLASS_LOOKUP = LAND_FRACTIONS[np.zeros(256, dtype=np.int32)]
+LAND_CLASS_LOOKUP[list(LAND_COVER_CODES)] = LAND_FRACTIONS
 
 
 def centres(start, stop):
@@ -125,15 +134,25 @@ class Relief15s:
             raise ValueError("Expected the GMT pixel-registered SRTM15+ V2.5.5 15 arc-second grid")
         self.scale = source.scales[0]
         self.offset = source.offsets[0]
+        self.last_extent = None
+        self.last_stripe = None
+
+    def stripe(self, start, stop):
+        if self.last_extent == (start, stop):
+            return self.last_stripe
+        stripe = self.source.read(1, window=Window(0, start, self.source.width, stop-start))
+        if self.source.nodata is not None and np.any(stripe == self.source.nodata):
+            raise ValueError(f"Missing elevation in GMT source rows {start}–{stop}")
+        self.last_extent = (start, stop)
+        self.last_stripe = stripe
+        return stripe
 
     def at(self, lon, lat):
         x = (lon+180)*240-.5
         y = np.clip((90-lat)*240-.5, 0, self.source.height-1)
         start = int(np.floor(y.min()))
         stop = min(self.source.height, int(np.floor(y.max()))+2)
-        stripe = self.source.read(1, window=Window(0, start, self.source.width, stop-start))
-        if self.source.nodata is not None and np.any(stripe == self.source.nodata):
-            raise ValueError(f"Missing elevation in GMT source rows {start}–{stop}")
+        stripe = self.stripe(start, stop)
         return sample(stripe, x, y-start, wrap=True)*self.scale+self.offset
 
 
@@ -165,7 +184,13 @@ class LandCover:
             return np.array(image)
 
     def at(self, lon, lat):
-        # The same globally registered albedo field at all elevations and LODs.
+        return self.sample(lon, lat, self.lookup, NEUTRAL)
+
+    def fractions(self, lon, lat):
+        return self.sample(lon, lat, LAND_CLASS_LOOKUP, LAND_FRACTIONS[0])
+
+    def sample(self, lon, lat, lookup, default):
+        # Globally registered source cells, with the same interpolation on both sides of each page.
         step = 3/self.span
         x = (lon+180)/step-.5
         y = (90-lat)/step-.5
@@ -175,7 +200,7 @@ class LandCover:
             xx = (xi+dx) % (120*self.span)
             yy = np.clip(yi+dy,0,60*self.span-1)
             cc, rr = xx//self.span, yy//self.span
-            result = np.broadcast_to(NEUTRAL, (len(lat),len(lon),3)).copy()
+            result = np.broadcast_to(default, (len(lat),len(lon),len(default))).copy()
             # Missing WorldCover tiles are ocean and ice outside its observed coverage.
             for r in np.unique(rr):
                 ii = np.flatnonzero(rr==r)
@@ -184,7 +209,7 @@ class LandCover:
                     if tile is not None:
                         jj = np.flatnonzero(cc==c)
                         positions = (yy[ii,None]%self.span,xx[jj]%self.span)
-                        color = (self.lookup[self.codes(tile)[positions]] if isinstance(tile, Path)
+                        color = (lookup[self.codes(tile)[positions]] if isinstance(tile, Path)
                                  else tile[positions] * (1/255))
                         result[ii[:,None],jj] = color
             return result
@@ -326,6 +351,59 @@ def surface(relief, cover, vectors, width, rect, *, elevation_snow):
     water = np.maximum(lake,river*RIVER_OPACITY) * land
     color += (RIVER_COLOR-color)*water[...,None]
     return color, z, land, water, lake
+
+
+def smooth_weight(lower, upper, value):
+    t = np.clip((value-lower)/(upper-lower), 0, 1)
+    return t*t*(3-2*t)
+
+
+def z7_land_material(relief, cover, glaciers, width, rect):
+    """Derive Z7 land colors from measured relief and modern cover, on the global grid."""
+    x0,top,x1,bottom = rect
+    y0,y1 = max(0,top),min(width//2,bottom)
+    lon,lat = grid(width, (x0-1,y0-1,x1+1,y1+1))
+    lon = (lon+180)%360-180
+    lat = np.clip(lat, -90+180/width, 90-180/width)
+    z = relief.at(lon, lat)
+    ground = np.maximum(z, -450)
+    center = ground[1:-1,1:-1]
+    north, south = ground[:-2,1:-1], ground[2:,1:-1]
+    west, east = ground[1:-1,:-2], ground[1:-1,2:]
+    step = M_PER_DEGREE*360/width
+    meridian = np.maximum(.035, np.cos(np.radians(lat[1:-1,None])))
+    dx = (east-west)/(2*step*meridian)
+    dy = (south-north)/(2*step)
+    slope = np.hypot(dx,dy)
+    relief_span = np.maximum.reduce((center,north,south,west,east))-np.minimum.reduce((center,north,south,west,east))
+    fractions = cover.fractions(lon[1:-1],lat[1:-1])
+    unknown, _, shrubs, grass, crop, _, bare, ice, mapped_water, wetland, _, moss = np.moveaxis(fractions,-1,0)
+    color = fractions @ LAND_PALETTE
+
+    # WorldCover groups rock, sand and sparsely vegetated ground. Use terrain form
+    # to shade that class. The result is a material cue, not mapped lithology.
+    rugged = np.maximum(smooth_weight(.14,.53,slope), smooth_weight(100,400,relief_span))
+    exposed = np.array([.51,.47,.41],np.float32)
+    color += (exposed-LAND_PALETTE[6])*(bare*rugged)[...,None]
+    # Retain tree, shrub and crop cover at any altitude. Rock influence on
+    # transitional land is confined to steep, locally rugged terrain.
+    outcrop = .40*smooth_weight(.37,.86,slope)*smooth_weight(150,390,relief_span)
+    color += (exposed-color)*(outcrop*(unknown+grass+.5*shrubs+.55*moss))[...,None]
+    concavity = (north+south+east+west)*.25-center
+    lowland = smooth_weight(5,55,concavity)*(1-smooth_weight(.08,.24,slope))
+    color += (np.array([.37,.44,.31],np.float32)-color)*(.21*lowland*(grass+crop+wetland))[...,None]
+
+    ice_shape = rasterize(glaciers,width,(x0,y0,x1,y1))
+    color += (LAND_PALETTE[7]-color)*np.maximum(0,ice_shape-ice)[...,None]
+    directional = (1+.91*dx+.82*dy)/np.sqrt(1+2.1*slope**2)
+    ridge_and_valley = np.clip(-concavity/180,-1,1)*smooth_weight(.10,.45,slope)
+    light = np.clip(1+(.51+.10*rugged)*(directional-1)+.055*ridge_and_valley,.58,1.22)
+    # A modern water classification cannot establish a historical shoreline.
+    # Keep the accepted color where the modern data identify water.
+    material = np.dstack((np.clip(color*light[...,None],0,1),np.clip(1-mapped_water,0,1)))
+    if y0 != top or y1 != bottom:
+        return np.pad(material,((y0-top,bottom-y1),(0,0),(0,0)),mode="edge")
+    return material
 
 
 def build_master(scratch, relief, cover, vectors, width):
@@ -1206,6 +1284,88 @@ def write_inland_water_candidate(original, source, destination):
     write_water_candidate(original, destination, lakes, coverage_at)
 
 
+def land_material_color_frame(color, material, decode, encode, opaque_encoder):
+    dim = TILE+2*GUTTER
+    block_dim = dim//4
+    raw = decode.decompress(color, max_output_size=dim**2)
+    pixels = np.array(Image.frombytes("RGBA",(dim,dim),raw,"bcn",(7,"BC7")))
+    coverage = pixels[...,3]
+    land = coverage < 255
+    if not land.any():
+        return color
+    ground = material()
+    rgb = pixels[...,:3]
+    weight = ground[...,3]*((255-coverage).astype(np.float32)/255)
+    updated_rgb = np.rint(rgb + (ground[...,:3]*255-rgb)*weight[...,None]).astype(np.uint8)
+    changed = (updated_rgb!=rgb).reshape(block_dim,4,block_dim,4,3).any(axis=(1,3,4)).ravel()
+    if not changed.any():
+        return color
+    rgb[:] = updated_rgb
+    encoded = ispc_texcomp.compress_blocks_bc7(ispc_texcomp.RGBASurface(pixels.tobytes(),dim,dim),ENCODER)
+    decoded = np.asarray(Image.frombytes("RGBA",(dim,dim),encoded,"bcn",(7,"BC7")))
+    affected_alpha = (decoded[...,3]!=coverage).reshape(block_dim,4,block_dim,4).any(axis=(1,3)).ravel()
+    blocks = np.frombuffer(raw,dtype="V16").copy()
+    blocks[changed] = np.frombuffer(encoded,dtype="V16")[changed]
+    repairs = np.flatnonzero(changed & affected_alpha)
+    for index in repairs:
+        row,col = divmod(int(index),block_dim)
+        target = pixels[4*row:4*(row+1),4*col:4*(col+1)]
+        blocks[index] = np.void(recolor_bc7_preserving_alpha(raw[16*index:16*(index+1)],target,opaque_encoder))
+    material_blocks = blocks.tobytes()
+    if repairs.size:
+        updated = np.asarray(Image.frombytes("RGBA",(dim,dim),material_blocks,"bcn",(7,"BC7")))
+        if not np.array_equal(updated[...,3],coverage):
+            raise ValueError("Land material build changed decoded water coverage")
+    return encode.compress(material_blocks)
+
+
+def write_z7_land_candidate(original, sources, natural_earth, destination, *, preview_pages=None):
+    """Build Z7 land albedo for one globally registered source grid."""
+    import zstandard
+
+    if destination.exists():
+        raise FileExistsError(destination)
+    cover = LandCover(sources/"worldcover", native=True)
+    width = 2*TILE << PACK_MAX_LEVEL
+    collar = GUTTER*360/width
+    glacier_shapes = physical_shapes(natural_earth,"glaciated_areas")
+    across_west = [translate(geometry,xoff=-360) for geometry in glacier_shapes if geometry.bounds[2] > 180-collar]
+    across_east = [translate(geometry,xoff=360) for geometry in glacier_shapes if geometry.bounds[0] < collar-180]
+    glaciers = STRtree(glacier_shapes+across_west+across_east)
+    decode = zstandard.ZstdDecompressor()
+    encode = zstandard.ZstdCompressor(level=COMPACT_STRENGTH)
+    opaque_encoder = ispc_texcomp.BC7EncSettings.from_profile("fast")
+    changed = 0
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with (original.open("rb") as file, rasterio.Env(GDAL_CACHEMAX=192*2**20),
+          rasterio.open(sources/DEM_15S) as source, TemporaryDirectory(dir=destination.parent) as folder):
+        pack = LevelPack(file, PACK_MAX_LEVEL, COMPACT_VERSION)
+        relief = Relief15s(source)
+
+        def records():
+            nonlocal changed
+            for y in range(pack.ny):
+                for x in range(pack.nx):
+                    color_size,height_size = pack.frame_sizes(x,y)
+                    color,height = file.read(color_size),file.read(height_size)
+                    if preview_pages is None or (x,y) in preview_pages:
+                        rect = (x*TILE-GUTTER,y*TILE-GUTTER,(x+1)*TILE+GUTTER,(y+1)*TILE+GUTTER)
+                        material = partial(z7_land_material,relief,cover,glaciers,width,rect)
+                        updated = land_material_color_frame(color,material,decode,encode,opaque_encoder)
+                        changed += int(updated != color)
+                        color = updated
+                    yield PACK_RECORD.pack(pack.level,x,y,len(color))+color+height
+                if (y+1)%8 == 0 and preview_pages is None:
+                    print(f"Z7 land materials: {y+1}/{pack.ny} rows, {changed} pages rebuilt",flush=True)
+
+        staged = Path(folder)/destination.name
+        write_level_records(staged,pack.level,COMPACT_MAGIC,records())
+        if not changed:
+            raise ValueError("No Z7 land materials changed")
+        staged.rename(destination)
+    print(f"Z7: {pack.nx*pack.ny} pages, {changed} rebuilt land colors; original height and water coverage preserved")
+
+
 def write_level_pack(path, scratch, level):
     color, height = packed_rasters(scratch, level, "r")
     nx, ny = 2 << level, 1 << level
@@ -1319,13 +1479,16 @@ def main():
                         help="Build a complete Z6 or Z7 QPK with SCAR ADD floating-ice color")
     parser.add_argument("--refine-ice-shelf-edges", action="store_true",
                         help="Use 4x4 coverage and preserve decoded water coverage in a Z7 ice-shelf candidate")
-    water_candidate = parser.add_mutually_exclusive_group()
-    water_candidate.add_argument("--river-outlet-candidate", type=Path, nargs=4,
+    terrain_candidate = parser.add_mutually_exclusive_group()
+    terrain_candidate.add_argument("--river-outlet-candidate", type=Path, nargs=4,
                         metavar=("ORIGINAL_QPK", "OUTLETS_GEOJSON", "NATURAL_EARTH", "CANDIDATE_QPK"),
                         help="Build a complete Z7 QPK with documented river outlet connections")
-    water_candidate.add_argument("--inland-water-candidate", type=Path, nargs=3,
+    terrain_candidate.add_argument("--inland-water-candidate", type=Path, nargs=3,
                         metavar=("ORIGINAL_QPK", "LAKES_GEOJSON", "CANDIDATE_QPK"),
                         help="Build a complete Z7 QPK with documented missing inland water")
+    terrain_candidate.add_argument("--z7-land-candidate", type=Path, nargs=4,
+                        metavar=("ORIGINAL_QPK", "SOURCES", "NATURAL_EARTH", "CANDIDATE_QPK"),
+                        help="Build a complete Z7 QPK with terrain-derived land materials")
     parser.add_argument("--through", type=int, choices=(5,6,7), help="Build or advance the 15 arc-second package")
     parser.add_argument("sources",type=Path,nargs="?")
     parser.add_argument("natural_earth",type=Path,nargs="?")
@@ -1337,6 +1500,12 @@ def main():
         parser.error("--index-only and --layer-candidate require --layer")
     if args.refine_ice_shelf_edges and args.ice_shelf_candidate is None:
         parser.error("--refine-ice-shelf-edges requires --ice-shelf-candidate")
+    if args.z7_land_candidate is not None:
+        if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,
+                                           args.ice_shelf_candidate)):
+            parser.error("--z7-land-candidate does not accept other build arguments")
+        write_z7_land_candidate(*args.z7_land_candidate)
+        return
     if args.river_outlet_candidate is not None or args.inland_water_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,
                                            args.ice_shelf_candidate)):
