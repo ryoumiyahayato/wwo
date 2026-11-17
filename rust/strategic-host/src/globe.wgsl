@@ -310,14 +310,15 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
     let lon=middle+delta-360.*floor((delta+180.)/360.);
     let uv=vec2f(lon-close_extent.x,close_extent.w-ll.y)/span;
     let streamed=view.close_sample.y>.5;
+    let survey=view.close_sample.z>.5;
     let distance=min(uv,1.-uv);
-    let coverage=select(1.,smoothstep(0.,.14,distance.x)*smoothstep(0.,.14,distance.y),streamed);
-    if coverage<=0. {return base;}
+    if streamed && min(distance.x,distance.y)<=0. {return base;}
     let latitude_scale=cos(radians((close_extent.y+close_extent.w)*.5));
-    let source_spacing=span*111195.*vec2f(latitude_scale,1.)/vec2f(textureDimensions(close_surface));
+    let span_metres=span*111195.*vec2f(latitude_scale,1.);
+    let source_spacing=span_metres/vec2f(textureDimensions(close_surface));
     let lod=log2(max(1.,footprint/min(source_spacing.x,source_spacing.y)));
     let sample=textureSampleLevel(close_surface,linear,uv,lod);
-    if view.close_sample.z>.5 {
+    if survey {
         // RGB stores surveyed water, forest and cropland area, premultiplied
         // by the valid survey coverage. Outside the mapped area use the QPK.
         let surveyed=clamp((sample.a-.02)/.98,0.,1.);
@@ -328,7 +329,11 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
             +occupied.r*vec3f(.20,.38,.45)
             +occupied.g*vec3f(.255,.41,.31)
             +occupied.b*vec3f(.57,.54,.36);
-        return mix(base,vec4f(surface,occupied.r),surveyed*weight*coverage);
+        // Give explicitly cropped packages a short edge fade too. The survey
+        // raster already feathers the actual mapped boundary in metres.
+        let edge=distance*span_metres;
+        let crop=smoothstep(0.,400.,min(edge.x,edge.y));
+        return mix(base,vec4f(surface,occupied.r),surveyed*weight*crop);
     }
     if streamed {
         // Keep the global albedo and the authoritative water coverage. The
@@ -336,6 +341,7 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
         let reference=textureSampleLevel(close_surface,linear,uv,3.);
         let land=1.-smoothstep(.02,.50,max(max(base.a,sample.a),reference.a));
         let detail=clamp(sample.rgb-reference.rgb,vec3f(-.13),vec3f(.13));
+        let coverage=smoothstep(0.,.14,distance.x)*smoothstep(0.,.14,distance.y);
         return vec4f(clamp(base.rgb+detail*(weight*coverage*land),vec3f(0.),vec3f(1.)),base.a);
     }
     return mix(base,sample,weight);

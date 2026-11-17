@@ -181,10 +181,10 @@ impl Stream {
             let view = view_extent(corners, center);
             self.catalogue.regions.iter().enumerate()
                 .filter(|(index, _)| !self.failed.contains(index))
-                .map(|(index, region)| (index, overlap(region.extent, view, center)))
-                .filter(|&(_, area)| area > 0.)
-                .max_by(|a, b| a.1.total_cmp(&b.1))
-                .map(|(index, _)| index)
+                .map(|(index, region)| (index, matches!(region.surface, Surface::Survey), overlap(region.extent, view, center)))
+                .filter(|&(_, _, area)| area > 0.)
+                .max_by(|a, b| a.1.cmp(&b.1).then_with(|| a.2.total_cmp(&b.2)))
+                .map(|(index, _, _)| index)
         });
         let scale = 1. - smooth(75., MAX_MPP, camera.mpp) as f32;
         self.target_weight = self.wanted.filter(|&index| self.resident == Some(index)).map_or(0., |_| scale);
