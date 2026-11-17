@@ -12,6 +12,7 @@ struct View {
     map_style: vec4f, // terrain catalogue zoom (y), selected terrain zoom (z), military grid step (w)
     edits: array<LandEdit, 12>,
     natural_lod: array<vec4f, 2>, // opacity indexed by Z, or -1 for per-page blending
+    close_sample: vec4f,
 };
 struct LandEdit { area: vec4f, state: vec4f };
 struct Tile {
@@ -301,16 +302,15 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
 }
 
 fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
+    let weight=view.close_sample.x;
+    if weight<=0. || all(base.rgb==vec3f(1.,0.,1.)) {return base;}
     let span=close_extent.zw-close_extent.xy;
-    if span.x<=0. || footprint>=130. {return base;}
     let uv=vec2f(ll.x-close_extent.x,close_extent.w-ll.y)/span;
-    let margin=min(min(uv.x,uv.y),min(1.-uv.x,1.-uv.y));
-    if margin<=0. {return base;}
     let latitude_scale=cos(radians((close_extent.y+close_extent.w)*.5));
     let source_spacing=span*111195.*vec2f(latitude_scale,1.)/vec2f(textureDimensions(close_surface));
     let lod=log2(max(1.,footprint/min(source_spacing.x,source_spacing.y)));
     let sample=textureSampleLevel(close_surface,linear,uv,lod);
-    return mix(base,sample,smoothstep(0.,.04,margin)*(1.-smoothstep(48.,130.,footprint)));
+    return mix(base,sample,weight);
 }
 fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f {
     let dims=vec2f(textureDimensions(terrain_data));

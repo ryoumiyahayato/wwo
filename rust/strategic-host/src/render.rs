@@ -1,4 +1,4 @@
-use crate::{camera::{Camera,EARTH},compact::{Raster,Vertex},overlay::Mesh,politics::FlagUniform,terrain::{self,Terrain},ui::Ink,world::{Pixels,Tile}};
+use crate::{camera::{Camera,EARTH,geographic,smooth},compact::{Raster,Vertex},overlay::Mesh,politics::FlagUniform,terrain::{self,Terrain},ui::Ink,world::{Pixels,Tile}};
 use crate::landmarks::{self, ModelKey, ModelMesh, ModelVertex, VisibleModel};
 use bytemuck::{Pod,Zeroable};
 use std::collections::{HashMap, HashSet};
@@ -21,6 +21,7 @@ pub struct View {
     pub map_style:[f32;4],
     pub edits:[Edit;crate::timeline::MAX_SITES],
     pub natural_lod:[[f32;4];2],
+    pub close_sample:[f32;4],
 }
 impl View {
     pub fn new(camera:&Camera,size:[u32;2])->Self {
@@ -118,6 +119,7 @@ pub struct Renderer {
     fallback:[wgpu::TextureView;3],
     globe:wgpu::RenderPipeline,
     terrain:Option<Terrain>,
+    close_extent:Option<[f64;4]>,
     solid:wgpu::RenderPipeline,
     text:wgpu::RenderPipeline,
     flag:wgpu::RenderPipeline,
@@ -521,13 +523,14 @@ impl Renderer {
             pixels=downsample_rgba(&pixels,w,h);
         }
         let land_surface=land_surface.create_view(&Default::default());
-        let (close_surface,close_extent)=CloseSample::upload(close,&device,&queue);
+        let close_extent=close.as_ref().map(|sample|sample.extent.map(f64::from));
+        let (close_surface,close_bounds)=CloseSample::upload(close,&device,&queue);
         let globals=bind(&device,&glob,&[buf_resource(0,&view),sampler_resource(1,&linear),sampler_resource(2,&wrap),
             tex_resource(3,&palette_view),tex_resource(4,&scenario),tex_resource(5,&flags),tex_resource(6,&flag_pose_view),
             tex_resource(7,&galactic_chart),tex_resource(8,&ocean_detail),tex_resource(9,&ocean_ice),
             tex_resource(10,&terrain_world),tex_resource(11,&terrain_detail),tex_resource(12,&terrain_index),
             tex_resource(13,&land_surface),sampler_resource(14,&land_repeat),
-            tex_resource(15,&close_surface),buf_resource(16,&close_extent)]);
+            tex_resource(15,&close_surface),buf_resource(16,&close_bounds)]);
         let flag_art=bind(&device,&font_layout,&[tex_resource(0,&flags),sampler_resource(1,&linear)]);
         let [w,h]=atlas.size;
         let font=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
@@ -571,7 +574,22 @@ impl Renderer {
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
         let models=ModelLayer::new(&device,format,events);
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
-                globe,terrain,solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models})
+                globe,terrain,close_extent,solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models})
+    }
+
+    pub fn close_sample_weight(&self,camera:&Camera,size:[u32;2])->f32 {
+        let Some([west,south,east,north])=self.close_extent else {return 0.;};
+        let [width,height]=size.map(f64::from);
+        let mut margin:f64=1.;
+        for point in [[0.,0.],[width,0.],[0.,height],[width,height]] {
+            let Some(ray)=camera.vector(point,size) else {return 0.;};
+            let [lon,lat]=geographic(ray);
+            let x=(lon-west)/(east-west);
+            let y=(lat-south)/(north-south);
+            margin=margin.min(x).min(y).min(1.-x).min(1.-y);
+        }
+        // Fade the whole view before it reaches the edge of the local source.
+        smooth(0.,0.09,margin) as f32
     }
 
     pub fn model_ready(&mut self, key: ModelKey, mesh: io::Result<ModelMesh>) -> io::Result<()> {

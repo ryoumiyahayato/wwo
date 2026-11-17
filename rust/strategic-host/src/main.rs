@@ -1137,6 +1137,7 @@ impl Host {
         if self.camera.mpp<700.{self.grid_step=25000.;}else if self.camera.mpp>900.{self.grid_step=50000.;}
         view.settings=[self.state.date.season_day(),self.mode.index() as f32,u8::from(active) as f32,u8::from(self.theme) as f32];
         view.map_style[1]=self.renderer.as_ref().unwrap().terrain_max_level() as f32;
+        view.close_sample[0]=self.renderer.as_ref().unwrap().close_sample_weight(&self.camera,self.size);
         view.map_style[3]=if self.hud.military_grid{self.grid_step}else{0.};
         view.selection[3]=self.world.polities.iter().position(|p|p.id=="country_fra").map_or(0.,|i|(i+1) as f32);
         view.map_style[0]=self.player_polity().map_or(0.,|i|(i+1) as f32);
