@@ -299,6 +299,7 @@ pub struct Display<'a> {
     pub skin:&'a Skin,pub hud:&'a Hud,pub session:Option<&'a Session>,pub date:crate::timeline::Date,
     pub camera:&'a Camera,pub size:[u32;2],pub mode:Mode,pub flags:Option<u8>,pub cursor:[f64;2],
     pub source:&'a str,pub feedback:&'a str,pub labels:bool,pub modern_terrain:bool,
+    pub surveyed_terrain:bool,
     pub country:Option<(&'a World,CountryPanel,Option<u8>)>,
     pub managed:bool,
     pub debug:Option<&'a crate::Diagnostics>,
@@ -459,7 +460,11 @@ impl Display<'_> {
         let scale=if metres>=1000.{format!("{} km",metres/1000.)}else{format!("{metres} m")};
         visual.text(text,&scale,0,[start+length+8.,h-25.],75.,MUTED);
         if self.modern_terrain && self.hud.page==Page::Map {
-            let label=visual.choose("现代地表参照","Modern terrain reference");
+            let label=if self.surveyed_terrain {
+                visual.choose("历史测绘与现代地表参照","Historical survey and modern terrain reference")
+            } else {
+                visual.choose("现代地表参照","Modern terrain reference")
+            };
             let width=visual.width(label,0)+18.;
             let x=w-26.-width;
             panel(panels,[x,h-109.,width,23.],[8,14,21,214]);

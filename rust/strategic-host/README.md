@@ -30,7 +30,9 @@ LOD 使用视口中心的投影比例。将当前纬度的东西、南北采样�
 
 用 `wwo-map-lab --play --data <游戏数据目录> --terrain-candidate <QPK目录> --terrain-detail <terrain-detail-v1.qdt>` 从正常游戏入口加载独立候选。候选 QPK 目录或默认正式 QPK 目录中已有同名 QDT 时也可自动发现。自动包缺失或无法读取时沿用原地貌。显式指定的无效包会报错。
 
-用 `python tools/build_terrain_detail.py --output <terrain-detail-v1.qdt> <样区清单.json> ...` 打包有 WGS84 范围和来源记录的样区。候选含波河平原、蒂萨河平原、法加拉什山和怀俄明短草原。正式地理地图在近景按视口交集一次加载一个样区。纹理随缩放和覆盖边缘渐隐。QPK 继续提供底色与海陆遮罩。样区的现代地表资料沿用“现代地表参照”的标注。当前候选补充陆地材质，河湖轮廓仍来自底图。
+用 `python tools/build_terrain_detail.py --output <terrain-detail-v1.qdt> <样区清单.json> ...` 打包有 WGS84 范围和来源记录的样区。首版候选含波河平原、蒂萨河平原、法加拉什山和怀俄明短草原。正式地理地图在近景按视口交集一次加载一个样区。纹理随缩放和覆盖边缘渐隐。QPK 提供底色、海陆遮罩和河湖轮廓。首版候选补充陆地材质，并标注“现代地表参照”。
+
+历史测绘候选可用 `python tools/build_terrain_survey.py <USGS-KMZ> --output <目录> --stem <地区ID> --source <来源URL>` 生成清单，再与原样区用同一打包命令生成独立 QDT。含历史调查数据的包使用新版文件头，Rust 游戏仍能读取已有材质包。用 `--terrain-detail` 指向新包试运行。地理地图只在有效调查覆盖内使用历史水面、林地和耕地，按距离与倍率渐隐。高程和游戏世界数据仍由原有资源提供。密西西比河 Pool 13 来自约 1890 年代、1:20,000 的测绘。25 米为栅格取样间距，湿草甸、沙洲和泥滩在当前候选中使用同一颜色。区域外仍显示现代参考。 [调查来源](https://umesc.usgs.gov/data_library/umesc_metadata/land_cover/umesc_1890s_mrc_lcu.html)
 
 蒂萨河平原的正式游戏同机位画面为 20.15°E、46.71°N、25 米／像素。两图均用完整 Z7，右图启用近景候选。[1920×1080 覆盖边缘](../../docs/terrain-z7-visual/play-detail-tisza-1080p.png) · [候选资源和滚轮录像](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115)
 

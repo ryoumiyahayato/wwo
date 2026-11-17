@@ -588,7 +588,10 @@ impl Renderer {
             if let Some(index)=detail.update(camera,size,enabled,now) {
                 if terrain.request_detail(index,detail.catalogue.clone()) {detail.requested(index);}
             }
-            return [detail.weight,1.,0.,0.];
+            let survey=detail.resident.is_some_and(|index| {
+                matches!(detail.catalogue.regions[index].surface,terrain_detail::Surface::Survey)
+            });
+            return [detail.weight,1.,if survey {1.} else {0.},0.];
         }
         let weight=self.close_extent.and_then(|extent|terrain_detail::viewport(camera,size)
             .map(|corners|terrain_detail::extent_weight(extent,corners))).unwrap_or(0.);

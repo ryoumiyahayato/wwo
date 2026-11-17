@@ -17,7 +17,8 @@ from build_natural_terrain import COMPACT_STRENGTH, ENCODER, generation_disk_usa
 
 
 HEADER = Struct("<8sI")
-MAGIC = b"WWODTL01"
+MATERIAL_MAGIC = b"WWODTL01"
+SURVEY_MAGIC = b"WWODTL02"
 MAX_INDEX_BYTES = 131_072
 MIP_COUNT = 4
 
@@ -45,10 +46,13 @@ def read_manifest(path):
 
     sources = data.get("sources")
     modern_reference = data.get("modern_reference")
+    surface = data.get("surface", "material")
     if (not isinstance(sources, list) or not sources
             or any(not isinstance(source, str) or not source.strip() for source in sources)
             or not isinstance(modern_reference, bool)):
         raise ValueError(f"{path}: expected sources and a modern_reference boolean")
+    if surface not in ("material", "survey") or (surface == "survey" and modern_reference):
+        raise ValueError(f"{path}: expected a material or historical survey surface")
 
     name = data.get("image")
     if not isinstance(name, str):
@@ -72,6 +76,7 @@ def read_manifest(path):
         "bytes": 0,
         "sources": sources,
         "modern_reference": modern_reference,
+        "surface": surface,
     }, image_path
 
 
@@ -107,6 +112,7 @@ def write_package(output, manifests):
     regions = [entry for entry, _ in samples]
     if len({entry["id"] for entry in regions}) != len(regions):
         raise ValueError("Duplicate terrain-detail region ID")
+    magic = SURVEY_MAGIC if any(entry["surface"] == "survey" for entry in regions) else MATERIAL_MAGIC
     index_bytes(regions)
     raw_bytes = sum(width * height * 85 // 64 for width, height in
                     (entry["size"] for entry in regions))
@@ -125,7 +131,7 @@ def write_package(output, manifests):
         index = index_bytes(regions)
         staged = scratch / "package.qdt"
         with staged.open("wb") as package, payload.open("rb") as source:
-            package.write(HEADER.pack(MAGIC, len(index)))
+            package.write(HEADER.pack(magic, len(index)))
             package.write(index)
             copyfileobj(source, package)
         os.link(staged, output)
