@@ -9,9 +9,18 @@ use std::{
     time::Instant,
 };
 
+#[derive(Clone, Copy, Default, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Surface {
+    #[default]
+    Material,
+    Survey,
+}
+
 pub const FILE_NAME: &str = "terrain-detail-v1.qdt";
 pub const MIPS: u32 = 4;
-const FORMAT: &[u8; 8] = b"WWODTL01";
+const MATERIAL_FORMAT: &[u8; 8] = b"WWODTL01";
+const SURVEY_FORMAT: &[u8; 8] = b"WWODTL02";
 const MAX_INDEX: u32 = 131_072;
 const MAX_MPP: f64 = 110.;
 
@@ -31,6 +40,8 @@ pub struct Region {
     bytes: u32,
     sources: Vec<String>,
     modern_reference: bool,
+    #[serde(default)]
+    pub surface: Surface,
 }
 
 pub fn mips([width, height]: [u32; 2]) -> impl Iterator<Item = (u32, [u32; 2], usize)> {
@@ -55,7 +66,7 @@ impl Catalogue {
         file.read_exact(&mut magic)?;
         file.read_exact(&mut length)?;
         let length = u32::from_le_bytes(length);
-        if &magic != FORMAT || length == 0 || length > MAX_INDEX {
+        if (&magic != MATERIAL_FORMAT && &magic != SURVEY_FORMAT) || length == 0 || length > MAX_INDEX {
             return Err(invalid());
         }
         let mut index = vec![0; length as usize];
@@ -75,6 +86,7 @@ impl Catalogue {
                 || !(-90. <= south && south < north && north <= 90.)
                 || region.size.iter().any(|&s| !(32..=2048).contains(&s) || s % 32 != 0)
                 || region.sources.is_empty() || region.sources.iter().any(|source| source.is_empty())
+                || (matches!(region.surface, Surface::Survey) && (&magic != SURVEY_FORMAT || region.modern_reference))
                 || region.offset != end - data_offset
                 || !(1..=6 * 1024 * 1024).contains(&region.bytes)
             {

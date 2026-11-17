@@ -1194,6 +1194,7 @@ impl Host {
         let formal=formal_ui::Display{skin:&self.skin,hud:&self.hud,session:self.state.session.as_ref(),date:self.state.date,country,
             camera:&self.camera,size:self.size,mode:self.mode,flags,cursor:self.cursor,source:&source,feedback:&self.feedback,labels:self.labels,managed:self.config.managed,
             modern_terrain:view.map_style[1]>0.,
+            surveyed_terrain:view.close_sample[0]>0. && view.close_sample[2]>0.5,
             debug:self.debug.then_some(&self.perf)};
         let seconds=self.started.elapsed().as_secs_f32();
         let loading=self.loading();

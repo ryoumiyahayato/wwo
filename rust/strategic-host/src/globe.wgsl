@@ -317,6 +317,19 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
     let source_spacing=span*111195.*vec2f(latitude_scale,1.)/vec2f(textureDimensions(close_surface));
     let lod=log2(max(1.,footprint/min(source_spacing.x,source_spacing.y)));
     let sample=textureSampleLevel(close_surface,linear,uv,lod);
+    if view.close_sample.z>.5 {
+        // RGB stores surveyed water, forest and cropland area, premultiplied
+        // by the valid survey coverage. Outside the mapped area use the QPK.
+        let surveyed=clamp((sample.a-.02)/.98,0.,1.);
+        let fractions=clamp(sample.rgb/max(sample.a,.02),vec3f(0.),vec3f(1.));
+        let occupied=fractions/max(1.,dot(fractions,vec3f(1.)));
+        let other=max(0.,1.-dot(occupied,vec3f(1.)));
+        let surface=other*vec3f(.43,.51,.33)
+            +occupied.r*vec3f(.20,.38,.45)
+            +occupied.g*vec3f(.255,.41,.31)
+            +occupied.b*vec3f(.57,.54,.36);
+        return mix(base,vec4f(surface,occupied.r),surveyed*weight*coverage);
+    }
     if streamed {
         // Keep the global albedo and the authoritative water coverage. The
         // native-source residual adds only local contrast inside valid land.
@@ -401,10 +414,16 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
         if view.settings.y<.5 && base_mpp<LAND_DETAIL_MPP {
             let foreshortening=mix(max(.25,dot(normal_world,view.chart_forward.xyz)),1.,view.viewport.w);
             let footprint=base_mpp/foreshortening;
-            color=natural_land_material(terrain,normal_world,footprint);
-            let close=close_terrain(ll,footprint/max(.3,view.chart_origin.z),vec4f(color,terrain.a));
-            color=close.rgb;
-            terrain.a=close.a;
+            let detail_footprint=footprint/max(.3,view.chart_origin.z);
+            if view.close_sample.z>.5 {
+                terrain=close_terrain(ll,detail_footprint,terrain);
+                color=natural_land_material(terrain,normal_world,footprint);
+            } else {
+                color=natural_land_material(terrain,normal_world,footprint);
+                let close=close_terrain(ll,detail_footprint,vec4f(color,terrain.a));
+                color=close.rgb;
+                terrain.a=close.a;
+            }
         }
         relief_light=clamp(.57+dot(terrain.rgb,vec3f(.30,.55,.15))*.68,.70,1.19);
     } else if tile.options.y>=5. {
