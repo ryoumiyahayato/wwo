@@ -63,6 +63,8 @@ COVER_COLORS = {
 }
 NEUTRAL = np.array([.57, .57, .43], dtype=np.float32)
 ENCODER = ispc_texcomp.BC7EncSettings.from_profile("alpha_fast")
+RIVER_COLOR = np.array([.20, .38, .45], dtype=np.float32)
+RIVER_OPACITY = .78
 
 
 def centres(start, stop):
@@ -277,7 +279,7 @@ def hydrography(source, output, scratch):
     return STRtree(geometries), len(ids),len(displayed)
 
 
-def rasterize(tree, width, rect):
+def rasterize(tree, width, rect, *, samples=2):
     x0,y0,x1,y1 = rect
     step = 360/width
     west,north = x0*step-180, 90-y0*step
@@ -285,9 +287,9 @@ def rasterize(tree, width, rect):
     selected = tree.geometries.take(tree.query(box(west,south,east,north), predicate="intersects"))
     if not len(selected):
         return np.zeros((y1-y0,x1-x0), dtype=np.float32)
-    bits = features.rasterize(selected, out_shape=((y1-y0)*2,(x1-x0)*2), dtype="uint8",
-                              transform=from_origin(west,north,step/2,step/2))
-    return bits.reshape(y1-y0,2,x1-x0,2).mean(axis=(1,3), dtype=np.float32)
+    bits = features.rasterize(selected, out_shape=((y1-y0)*samples,(x1-x0)*samples), dtype="uint8",
+                              transform=from_origin(west,north,step/samples,step/samples))
+    return bits.reshape(y1-y0,samples,x1-x0,samples).mean(axis=(1,3), dtype=np.float32)
 
 
 def surface(relief, cover, vectors, width, rect, *, elevation_snow):
@@ -321,8 +323,8 @@ def surface(relief, cover, vectors, width, rect, *, elevation_snow):
     land = rasterize(vectors["land"],width,rect)
     lake = rasterize(vectors["lakes"],width,rect)
     river = rasterize(vectors["rivers_lake_centerlines"],width,rect)
-    water = np.maximum(lake,river*.78) * land
-    color += (np.array([.20,.38,.45],np.float32)-color)*water[...,None]
+    water = np.maximum(lake,river*RIVER_OPACITY) * land
+    color += (RIVER_COLOR-color)*water[...,None]
     return color, z, land, water, lake
 
 
@@ -1035,6 +1037,126 @@ def write_ice_shelf_candidate(original, source, destination, *, refine_edges=Fal
         print(f"Z{level}: {refitted_alpha_blocks} BC7 blocks refitted with exact decoded water coverage")
 
 
+def outlet_corridors(source):
+    """Buffer documented outlet alignments in metres and wrap them on the global grid."""
+    from pyproj import Transformer
+    from shapely import transform
+
+    entries = json.loads(source.read_text(encoding="utf-8"))
+    if entries.get("type") != "FeatureCollection" or not entries.get("features"):
+        raise ValueError("Expected documented outlet features in WGS84")
+    polygons = []
+    for feature in entries["features"]:
+        line = shape(feature["geometry"])
+        props = feature["properties"]
+        half_width = float(props["half_width_metres"])
+        if (line.geom_type != "LineString" or line.is_empty or not line.is_valid
+                or not np.isfinite(half_width) or half_width <= 0):
+            raise ValueError(f"Invalid outlet geometry or width for {props.get('name')}")
+        points = np.array(line.coords)
+        if (points.shape[1] != 2 or not np.isfinite(points).all() or np.any(np.abs(points[:,0]) > 180)
+                or np.any(np.abs(points[:,1]) >= 90)):
+            raise ValueError("Outlet coordinates must be WGS84 longitude and latitude")
+        points[:,0] = np.degrees(np.unwrap(np.radians(points[:,0])))
+        lon, lat = points[0]
+        local = f"+proj=aeqd +lon_0={lon} +lat_0={lat} +ellps=WGS84 +units=m"
+        forward = Transformer.from_crs(4326, local, always_xy=True, force_over=True)
+        reverse = Transformer.from_crs(local, 4326, always_xy=True, force_over=True)
+        metric = transform(LineString(points), forward.transform, interleaved=False)
+        corridor = transform(metric.buffer(half_width), reverse.transform, interleaved=False)
+        polygons.append(corridor)
+        if corridor.bounds[0] < -180:
+            polygons.append(translate(corridor, xoff=360))
+        if corridor.bounds[2] > 180:
+            polygons.append(translate(corridor, xoff=-360))
+    return STRtree(polygons)
+
+
+def outlet_color_frame(color, rect, width, corridors, land, decode, encode):
+    coverage = rasterize(corridors, width, rect, samples=4)
+    if not coverage.any():
+        return color
+    x0, y0, x1, y1 = rect
+    land_cover = rasterize(land, width, rect)
+    if x0 < 0:
+        land_cover[:,:-x0] = rasterize(land, width, (width+x0, y0, width, y1))
+    if x1 > width:
+        land_cover[:,width-x0:] = rasterize(land, width, (0, y0, x1-width, y1))
+    if y0 < 0:
+        coverage[:-y0] = coverage[-y0]
+        land_cover[:-y0] = land_cover[-y0]
+    if y1 > width//2:
+        coverage[width//2-y0:] = coverage[width//2-y0-1]
+        land_cover[width//2-y0:] = land_cover[width//2-y0-1]
+    inland = coverage * land_cover * RIVER_OPACITY
+    dim = TILE + 2*GUTTER
+    raw = decode.decompress(color, max_output_size=dim**2)
+    pixels = np.array(Image.frombytes("RGBA", (dim, dim), raw, "bcn", (7, "BC7")))
+    alpha = pixels[...,3].astype(np.float32) / 255
+    # At an outlet a texel can contain both an estuary channel and ocean. Keep
+    # the mapped ocean fraction while applying the river material to the land.
+    mouth = np.where(inland > 0, (1-land_cover) + inland, 0)
+    target = np.rint(np.maximum(mouth, alpha)*255).astype(np.uint8)
+    affected = target > pixels[...,3]
+    if not affected.any():
+        return color
+    addition = (target[affected]/255 - alpha[affected]) / (1 - alpha[affected])
+    before = pixels[affected,:3].astype(np.float32)
+    pixels[affected,:3] = np.rint(before + (RIVER_COLOR*255 - before)*addition[:,None])
+    pixels[...,3] = target
+
+    rendered = ispc_texcomp.compress_blocks_bc7(
+        ispc_texcomp.RGBASurface(pixels.tobytes(), dim, dim), ENCODER)
+    update = affected.reshape(dim//4, 4, dim//4, 4).any(axis=(1, 3)).ravel()
+    blocks = np.frombuffer(raw, dtype="V16").copy()
+    blocks[update] = np.frombuffer(rendered, dtype="V16")[update]
+    return encode.compress(blocks.tobytes())
+
+
+def write_outlet_candidate(original, source, natural_earth, destination):
+    """Apply the outlet inventory to a complete Z7 QPK without rebuilding elevations."""
+    import zstandard
+
+    if destination.exists():
+        raise FileExistsError(destination)
+    corridors = outlet_corridors(source)
+    land = STRtree([geom if geom.is_valid else make_valid(geom)
+                    for geom in physical_shapes(natural_earth, "land")])
+    decode = zstandard.ZstdDecompressor()
+    encode = zstandard.ZstdCompressor(level=COMPACT_STRENGTH)
+    changed = []
+
+    with original.open("rb") as file:
+        pack = LevelPack(file, PACK_MAX_LEVEL, COMPACT_VERSION)
+        width = pack.nx*TILE
+        step = 360/width
+
+        def records():
+            for y in range(pack.ny):
+                for x in range(pack.nx):
+                    color_size, height_size = pack.frame_sizes(x, y)
+                    color, height = file.read(color_size), file.read(height_size)
+                    rect = (x*TILE-GUTTER, y*TILE-GUTTER,
+                            (x+1)*TILE+GUTTER, (y+1)*TILE+GUTTER)
+                    x0, y0, x1, y1 = rect
+                    bounds = box(x0*step-180, 90-y1*step, x1*step-180, 90-y0*step)
+                    if corridors.query(bounds, predicate="intersects").size:
+                        updated = outlet_color_frame(color, rect, width, corridors, land, decode, encode)
+                        if updated != color:
+                            changed.append((x, y))
+                            color = updated
+                    yield PACK_RECORD.pack(pack.level, x, y, len(color)) + color + height
+
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with TemporaryDirectory(dir=destination.parent) as folder:
+            staged = Path(folder)/destination.name
+            write_level_records(staged, pack.level, COMPACT_MAGIC, records())
+            if not changed:
+                raise ValueError("No Z7 outlet coverage changed")
+            staged.rename(destination)
+    print(f"Z7: {pack.nx*pack.ny} tiles, updated color records {changed}, original height frames preserved")
+
+
 def write_level_pack(path, scratch, level):
     color, height = packed_rasters(scratch, level, "r")
     nx, ny = 2 << level, 1 << level
@@ -1148,6 +1270,9 @@ def main():
                         help="Build a complete Z6 or Z7 QPK with SCAR ADD floating-ice color")
     parser.add_argument("--refine-ice-shelf-edges", action="store_true",
                         help="Use 4x4 coverage and preserve decoded water coverage in a Z7 ice-shelf candidate")
+    parser.add_argument("--river-outlet-candidate", type=Path, nargs=4,
+                        metavar=("ORIGINAL_QPK", "OUTLETS_GEOJSON", "NATURAL_EARTH", "CANDIDATE_QPK"),
+                        help="Build a complete Z7 QPK with documented river outlet connections")
     parser.add_argument("--through", type=int, choices=(5,6,7), help="Build or advance the 15 arc-second package")
     parser.add_argument("sources",type=Path,nargs="?")
     parser.add_argument("natural_earth",type=Path,nargs="?")
@@ -1159,6 +1284,12 @@ def main():
         parser.error("--index-only and --layer-candidate require --layer")
     if args.refine_ice_shelf_edges and args.ice_shelf_candidate is None:
         parser.error("--refine-ice-shelf-edges requires --ice-shelf-candidate")
+    if args.river_outlet_candidate is not None:
+        if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,
+                                           args.ice_shelf_candidate)):
+            parser.error("--river-outlet-candidate does not accept other build arguments")
+        write_outlet_candidate(*args.river_outlet_candidate)
+        return
     if args.ice_shelf_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources)):
             parser.error("--ice-shelf-candidate does not accept other build arguments")
