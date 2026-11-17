@@ -1,5 +1,22 @@
 # Z7 全球逐页视觉验收
 
+## 全球 Z7 陆地材质
+
+原规则随海拔上升统一叠加岩色。新规则用 WorldCover 地表类别区分森林、耕地、草地、湿地和裸地，以 SRTM15+ 高程计算坡度、局部起伏和谷脊，与 Natural Earth 冰川范围共同决定陆地配色和坡面明暗。陡峻裸露处偏岩色，低起伏裸地偏沙土色。坡度用随纬度变化的像元间距计算。地表细节来自已有数据的采样。 [WorldCover 2021](https://esa-worldcover.org/en/data-access) · [SRTM15+ V2.5.5](https://catalog.data.gov/dataset/global-bathymetry-and-topography-at-15-arc-sec-srtm15-v2-5-5-81b08) · [Natural Earth 冰川](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-glaciated-areas/)
+
+生成器在补湖候选上更新整层陆地颜色，沿用原高程和已解码的水覆盖。陆海混合 BC7 块重新量化。WorldCover 缓存的地表采样约 19.2 角秒，Z7 赤道附近南北采样约 611 米。森林、耕地、湿地等配色基于现代资料，1900 年的覆盖范围另需历史证据。裸地配色使用地类与地形，具体岩性与土壤组成需要对应资料。 [WorldCover 类别说明](https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/docs/WorldCover_PUM_V2.0.pdf) · [HILDA+ 历史陆地覆盖资料](https://landchange.imk-ifu.kit.edu/hilda)
+
+| 取景 | 经纬度 · 米／像素 | 同机位检查项 |
+|---|---|---|
+| 洱海 | 100.202°E／25.800°N · 165、390 | 山麓林地、盆地平地与已补绘湖面 |
+| 东阿尔卑斯 | 14.765625°E／47.109375°N · 240、515 | 山地林色、陡坡阴影、冰雪与谷地耕地 |
+| 亚马孙马瑙斯 | 60.020°W／3.170°S · 140、280 | 林地与洪泛低地。河道宽度沿用原水文资源 |
+| 纳米布 | 15.410°E／24.470°S · 155、285 | 实测沙丘起伏、裸露高地与干旱植被。间歇河另列水文问题。 [纳米布沙海](https://science.nasa.gov/earth-observatory/namib-sand-sea-149130/) |
+
+```text
+python rust/strategic-host/tools/build_natural_terrain.py --z7-land-candidate <补湖候选>/7.qpk <WorldCover与DEM目录> <NaturalEarth目录> <独立候选>/7.qpk
+```
+
 ## 全球陆地水文精修
 
 全球 Z7 共用同一份陆地、海岸和水文施工队列。欧洲首批和维斯瓦河提供了原始取景。陆地专项实拍延伸到东亚、湄公河三角洲、天山、恒河—布拉马普特拉平原、纳米布、乍得湖、落基山、亚马孙、安第斯、澳大利亚墨累河和新西兰南岛。逐页记录继续使用原有坐标和状态。
