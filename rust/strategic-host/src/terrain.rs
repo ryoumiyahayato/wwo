@@ -1,7 +1,7 @@
-use crate::{camera::{dot,frame,geographic,Camera},render::write_texture_layer};
+use crate::{camera::{dot,frame,geographic,Camera},render::write_texture_layer,terrain_detail};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;
-use std::{collections::HashMap,fs,io::{self,Read,Seek,SeekFrom},path::{Path,PathBuf},sync::mpsc,time::{Duration,Instant}};
+use std::{collections::HashMap,fs,io::{self,Read,Seek,SeekFrom},path::{Path,PathBuf},sync::{mpsc,Arc},time::{Duration,Instant}};
 use winit::event_loop::EventLoopProxy;
 
 pub const VERSION: &str = "worldcrs84quad-z4-v3";
@@ -263,6 +263,11 @@ fn open_tile(path:&Path,key:Key,magic:&[u8;8],bytes_per_pixel:u32) -> io::Result
 pub struct DecodedTile {pixels:Vec<u8>,pub decode_time:Duration}
 pub struct Completion {pub key:Key,pub requested:Instant,pub result:io::Result<DecodedTile>}
 
+enum DecodeRequest {
+    Page(Key, Instant),
+    Detail(usize, Arc<terrain_detail::Catalogue>),
+}
+
 struct Page {
     slot:u32,
     ready:Instant,
@@ -323,7 +328,7 @@ pub struct Terrain {
     atlas:wgpu::Texture,
     table:wgpu::Texture,
     keys:Vec<Visible>,
-    sender:mpsc::Sender<(Key,Instant)>,
+    sender:mpsc::Sender<DecodeRequest>,
     inflight:Option<Key>,
     requests_this_frame:u32,
     pages:HashMap<Key,Page>,
@@ -371,18 +376,24 @@ impl Terrain {
                 dot(axis,frame([x,y])[2]).clamp(-1.,1.).acos()).fold(0.,f64::max);
             Visible {key,axis,radius}
         }).collect();
-        let (sender,receiver)=mpsc::channel::<(Key,Instant)>();
-        let worker=proxy;
+        let (sender,receiver)=mpsc::channel();
         std::thread::Builder::new().name("WWO natural terrain".into()).spawn(move||{
-            while let Ok((key,requested))=receiver.recv() {
-                let result=source.read(key);
-                if worker.send_event(crate::HostEvent::Terrain(Completion{key,requested,result})).is_err(){break;}
+            while let Ok(request)=receiver.recv() {
+                let event=match request {
+                    DecodeRequest::Page(key,requested)=>crate::HostEvent::Terrain(Completion{key,requested,result:source.read(key)}),
+                    DecodeRequest::Detail(index,catalogue)=>crate::HostEvent::TerrainDetail(index,catalogue.read(index)),
+                };
+                if proxy.send_event(event).is_err(){break;}
             }
         })?;
         Ok(Self{base,atlas,table,keys,sender,inflight:None,requests_this_frame:0,pages:HashMap::new(),
             slots:(0..capacity).rev().collect(),selected:Vec::new(),view:None,max_level,view_max:0,
             target_level:None,projected_lod:0.,version,selection,layer_candidate,required_pages:0,viewport_pages:0,
             transitions:Default::default()})
+    }
+
+    pub fn request_detail(&self, index:usize, catalogue:Arc<terrain_detail::Catalogue>) -> bool {
+        self.sender.send(DecodeRequest::Detail(index,catalogue)).is_ok()
     }
 
     pub fn views(&self)->[wgpu::TextureView;3] {
@@ -534,7 +545,7 @@ impl Terrain {
     fn request_page(&mut self,now:Instant) {
         if self.inflight.is_none() {
             if let Some(&key)=self.selected.iter().find(|key|!self.pages.contains_key(key)) {
-                if self.sender.send((key,now)).is_ok(){
+                if self.sender.send(DecodeRequest::Page(key,now)).is_ok(){
                     self.inflight=Some(key);
                     self.requests_this_frame+=1;
                 }
