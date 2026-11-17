@@ -4,7 +4,7 @@ import argparse
 import os
 from concurrent.futures import ThreadPoolExecutor
 import filecmp
-from functools import lru_cache
+from functools import lru_cache, partial
 from io import BytesIO
 import json
 from pathlib import Path
@@ -1072,10 +1072,10 @@ def outlet_corridors(source):
     return STRtree(polygons)
 
 
-def outlet_color_frame(color, rect, width, corridors, land, decode, encode):
+def outlet_water_coverage(corridors, land, width, rect):
     coverage = rasterize(corridors, width, rect, samples=4)
     if not coverage.any():
-        return color
+        return coverage
     x0, y0, x1, y1 = rect
     land_cover = rasterize(land, width, rect)
     if x0 < 0:
@@ -1089,14 +1089,52 @@ def outlet_color_frame(color, rect, width, corridors, land, decode, encode):
         coverage[width//2-y0:] = coverage[width//2-y0-1]
         land_cover[width//2-y0:] = land_cover[width//2-y0-1]
     inland = coverage * land_cover * RIVER_OPACITY
+    # Keep the mapped ocean fraction while applying river material to the land.
+    return np.where(inland > 0, (1-land_cover) + inland, 0)
+
+
+def inland_water_polygons(source):
+    entries = json.loads(source.read_text(encoding="utf-8"))
+    if entries.get("type") != "FeatureCollection" or not entries.get("features"):
+        raise ValueError("Expected documented inland water features in WGS84")
+    polygons = []
+    gutter_degrees = 360 * GUTTER / ((2*TILE) << PACK_MAX_LEVEL)
+    for feature in entries["features"]:
+        geom = shape(feature["geometry"])
+        name = feature["properties"].get("name")
+        if geom.geom_type not in ("Polygon", "MultiPolygon") or geom.is_empty or not geom.is_valid:
+            raise ValueError(f"Invalid inland water polygon for {name}")
+        parts = geom.geoms if geom.geom_type == "MultiPolygon" else (geom,)
+        for polygon in parts:
+            west, south, east, north = polygon.bounds
+            if not (-180 <= west < east <= 180 and -90 < south < north < 90 and east-west < 180):
+                raise ValueError(f"Expected WGS84 inland water split at the antimeridian for {name}")
+            polygons.append(polygon)
+            # The QPK gutter includes samples from the other side of the antimeridian.
+            if west < -180 + gutter_degrees:
+                polygons.append(translate(polygon, xoff=360))
+            if east > 180 - gutter_degrees:
+                polygons.append(translate(polygon, xoff=-360))
+    return STRtree(polygons)
+
+
+def inland_water_coverage(lakes, width, rect):
+    coverage = rasterize(lakes, width, rect, samples=4)
+    y0, y1 = rect[1], rect[3]
+    if y0 < 0 or y1 > width//2:
+        rows = np.clip(np.arange(y0, y1), 0, width//2-1) - y0
+        return coverage[rows]
+    return coverage
+
+
+def water_color_frame(color, coverage, decode, encode):
+    if not coverage.any():
+        return color
     dim = TILE + 2*GUTTER
     raw = decode.decompress(color, max_output_size=dim**2)
     pixels = np.array(Image.frombytes("RGBA", (dim, dim), raw, "bcn", (7, "BC7")))
     alpha = pixels[...,3].astype(np.float32) / 255
-    # At an outlet a texel can contain both an estuary channel and ocean. Keep
-    # the mapped ocean fraction while applying the river material to the land.
-    mouth = np.where(inland > 0, (1-land_cover) + inland, 0)
-    target = np.rint(np.maximum(mouth, alpha)*255).astype(np.uint8)
+    target = np.rint(np.maximum(coverage, alpha)*255).astype(np.uint8)
     affected = target > pixels[...,3]
     if not affected.any():
         return color
@@ -1113,15 +1151,12 @@ def outlet_color_frame(color, rect, width, corridors, land, decode, encode):
     return encode.compress(blocks.tobytes())
 
 
-def write_outlet_candidate(original, source, natural_earth, destination):
-    """Apply the outlet inventory to a complete Z7 QPK without rebuilding elevations."""
+def write_water_candidate(original, destination, footprints, coverage_at):
+    """Apply one water inventory to the complete Z7 QPK without rebuilding elevations."""
     import zstandard
 
     if destination.exists():
         raise FileExistsError(destination)
-    corridors = outlet_corridors(source)
-    land = STRtree([geom if geom.is_valid else make_valid(geom)
-                    for geom in physical_shapes(natural_earth, "land")])
     decode = zstandard.ZstdDecompressor()
     encode = zstandard.ZstdCompressor(level=COMPACT_STRENGTH)
     changed = []
@@ -1140,8 +1175,8 @@ def write_outlet_candidate(original, source, natural_earth, destination):
                             (x+1)*TILE+GUTTER, (y+1)*TILE+GUTTER)
                     x0, y0, x1, y1 = rect
                     bounds = box(x0*step-180, 90-y1*step, x1*step-180, 90-y0*step)
-                    if corridors.query(bounds, predicate="intersects").size:
-                        updated = outlet_color_frame(color, rect, width, corridors, land, decode, encode)
+                    if footprints.query(bounds, predicate="intersects").size:
+                        updated = water_color_frame(color, coverage_at(width, rect), decode, encode)
                         if updated != color:
                             changed.append((x, y))
                             color = updated
@@ -1152,9 +1187,23 @@ def write_outlet_candidate(original, source, natural_earth, destination):
             staged = Path(folder)/destination.name
             write_level_records(staged, pack.level, COMPACT_MAGIC, records())
             if not changed:
-                raise ValueError("No Z7 outlet coverage changed")
+                raise ValueError("No Z7 water coverage changed")
             staged.rename(destination)
     print(f"Z7: {pack.nx*pack.ny} tiles, updated color records {changed}, original height frames preserved")
+
+
+def write_outlet_candidate(original, source, natural_earth, destination):
+    corridors = outlet_corridors(source)
+    land = STRtree([geom if geom.is_valid else make_valid(geom)
+                    for geom in physical_shapes(natural_earth, "land")])
+    coverage_at = partial(outlet_water_coverage, corridors, land)
+    write_water_candidate(original, destination, corridors, coverage_at)
+
+
+def write_inland_water_candidate(original, source, destination):
+    lakes = inland_water_polygons(source)
+    coverage_at = partial(inland_water_coverage, lakes)
+    write_water_candidate(original, destination, lakes, coverage_at)
 
 
 def write_level_pack(path, scratch, level):
@@ -1270,9 +1319,13 @@ def main():
                         help="Build a complete Z6 or Z7 QPK with SCAR ADD floating-ice color")
     parser.add_argument("--refine-ice-shelf-edges", action="store_true",
                         help="Use 4x4 coverage and preserve decoded water coverage in a Z7 ice-shelf candidate")
-    parser.add_argument("--river-outlet-candidate", type=Path, nargs=4,
+    water_candidate = parser.add_mutually_exclusive_group()
+    water_candidate.add_argument("--river-outlet-candidate", type=Path, nargs=4,
                         metavar=("ORIGINAL_QPK", "OUTLETS_GEOJSON", "NATURAL_EARTH", "CANDIDATE_QPK"),
                         help="Build a complete Z7 QPK with documented river outlet connections")
+    water_candidate.add_argument("--inland-water-candidate", type=Path, nargs=3,
+                        metavar=("ORIGINAL_QPK", "LAKES_GEOJSON", "CANDIDATE_QPK"),
+                        help="Build a complete Z7 QPK with documented missing inland water")
     parser.add_argument("--through", type=int, choices=(5,6,7), help="Build or advance the 15 arc-second package")
     parser.add_argument("sources",type=Path,nargs="?")
     parser.add_argument("natural_earth",type=Path,nargs="?")
@@ -1284,11 +1337,14 @@ def main():
         parser.error("--index-only and --layer-candidate require --layer")
     if args.refine_ice_shelf_edges and args.ice_shelf_candidate is None:
         parser.error("--refine-ice-shelf-edges requires --ice-shelf-candidate")
-    if args.river_outlet_candidate is not None:
+    if args.river_outlet_candidate is not None or args.inland_water_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,
                                            args.ice_shelf_candidate)):
-            parser.error("--river-outlet-candidate does not accept other build arguments")
-        write_outlet_candidate(*args.river_outlet_candidate)
+            parser.error("Water candidates do not accept other build arguments")
+        if args.river_outlet_candidate is not None:
+            write_outlet_candidate(*args.river_outlet_candidate)
+        else:
+            write_inland_water_candidate(*args.inland_water_candidate)
         return
     if args.ice_shelf_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources)):
