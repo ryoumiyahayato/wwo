@@ -1,5 +1,62 @@
 # Z7 全球逐页视觉验收
 
+## 全球陆地水文精修
+
+全球 Z7 共用同一份陆地、海岸和水文施工队列。欧洲首批和维斯瓦河提供了原始取景。陆地专项实拍延伸到东亚、湄公河三角洲、天山、恒河—布拉马普特拉平原、纳米布、乍得湖、落基山、亚马孙、安第斯、澳大利亚墨累河和新西兰南岛。逐页记录继续使用原有坐标和状态。
+
+| 原因 | 已查实的情况与处理 |
+|---|---|
+| 开阔湖面漏绘 | 母数据只从 Natural Earth 湖面和海陆、HydroRIVERS 等生成水覆盖。部分真实湖泊已在地表分类中呈现形状，水覆盖却仍为陆地。同一规则为有地理和历史来源的湖面补入 Z7。 |
+| 河网末段与海岸错位 | 维斯瓦已有同机位修复。河口位置、岸线年代和水文拓扑分别核对，再把有证据的同类河口加入既有记录。 |
+| 河宽、汊河和季节性 | 马瑙斯实拍的主河只呈现窄线。需核查该段的实际宽度和汊道。纳米布的查乌查布为间歇河，止于沙丘间洼地。两地的水线需按各自水文事实处理。 [巴西历史图档](https://atom-museuhistorico.museus.gov.br/downloads/mapas-e-plantas.pdf) · [纳米布沙海资料](https://science.nasa.gov/earth-observatory/namib-sand-sea-149130/) |
+| 近代调水、筑坝及岸线变动 | 新锡德尔湖 1901 年岸线处于低水位。莫诺湖、奈瓦沙湖、戈恰乌科维采水库和须德海有各自的水位或工程史，留在历史边界专项。 [新锡德尔湖 1901 年资料](https://www.burgenland.at/fileadmin/user_upload/Natura2000_MP__NeusiedlerSee_web.pdf#page=16) · [莫诺湖水位](https://pubs.usgs.gov/of/2015/1108/pdf/ofr2015-1108.pdf) · [波兰国家档案馆](https://katowice.ap.gov.pl/ap/tekst/u-rode-wisy-jezioro-goczakowickie) |
+| 材质地类和页边 | 东阿尔卑斯已查到的浅纹跨两页连续。低处草地或耕地、邻坡树冠和坡光共同形成反差，保留地貌颜色。WorldCover 为现代材质参考，约 1900 年地表覆盖另需历史资料。 |
+
+从 HydroLAKES 筛查面积至少 100 平方公里的 1,708 条记录。在单个代表点同时满足现有湖面缺失、落入陆地及原 Z7 Alpha 小于 16 时列为疑点，共 569 条。现代水库、盐沼和季节性湖面也可能满足该条件。该筛查用于定位复核位置。
+
+本次修复采用 10 个在约 1900 年已有记录的开阔水体。用带内环的 WGS84 湖面，在同一全球纹理坐标下执行 4×4 采样。水覆盖用原值与补湖覆盖取较大值，沿用现有湖泊色。触达的 BC7 块重编码，会影响块内量化。现代水面形状用于恢复开阔湖体，近岸工程、湿地和精确的 1900 年水位仍待考证。源资料和许可随每个要素记录。 [几何及历史依据](terrain-z7-visual/z7-inland-water.geojson) · [HydroLAKES 来源与许可](https://www.hydrosheds.org/products/hydrolakes)
+
+| 开阔湖体 | 取景经纬度 | 中心 Z7 页 |
+|---|---|---|
+| 基姆湖 | 12.463°E／47.871°N | `7/136/29` |
+| 图恩湖 | 7.701°E／46.686°N | `7/133/30` |
+| 纳沙泰尔湖 | 6.850°E／46.904°N | `7/132/30` |
+| 猪苗代湖 | 140.094°E／37.457°N | `7/227/37` |
+| 洱海 | 100.202°E／25.800°N | `7/199/45` |
+| 阿蒂特兰湖 | 91.190°W／14.689°N | `7/63/53` |
+| 托多斯洛斯桑托斯湖 | 72.217°W／41.095°S | `7/76/93` |
+| 阿特林湖 | 133.740°W／59.550°N | `7/32/21` |
+| 马伊恩东贝湖 | 18.480°E／2.140°S | `7/141/65` |
+| 瓦卡蒂普湖北臂 | 168.392°E／44.988°S | `7/247/95` |
+
+完整候选为 1,607,880,723 字节。全层解码 32,768 页，32,768 份高程压缩帧与上一候选一致。65,280 条共享边及受影响页的 64 次对角重叠比较通过。16 页更新颜色与水覆盖。Z0–Z6 及河网拓扑沿用原候选。
+
+**洱海** · `7/199/45` · 165 米／像素 · [同机位修复前](terrain-z7-visual/inland-erhai-before.png)
+
+![固定 Z7 实拍，洱海由陆地色恢复为水面](terrain-z7-visual/inland-erhai-after.png)
+
+**马伊恩东贝湖** · `7/141/65` · 265 米／像素 · [同机位修复前](terrain-z7-visual/inland-mai-ndombe-before.png)
+
+![固定 Z7 实拍，马伊恩东贝湖恢复为开阔水面](terrain-z7-visual/inland-mai-ndombe-after.png)
+
+**瓦卡蒂普湖四页交汇** · 168.750°E／45.000°S · 245 米／像素 · [同机位修复前](terrain-z7-visual/inland-wakatipu-corner-before.png)
+
+![固定 Z7 实拍，瓦卡蒂普湖跨四页交汇处保持连续](terrain-z7-visual/inland-wakatipu-corner-after.png)
+
+以上为实际 Vulkan 离屏画面。静态取景 Z7 权重为 1，选定页就绪。瓦卡蒂普湖四角静态实拍未见可辨的十字缝。瓦卡蒂普南支仍有浅色细纹，智利湖内和马伊恩东贝北湾有少量浅绿点，待核对岛屿、湿地与像元量化。
+
+**其他陆地原始画面** · [湄公河三角洲](terrain-z7-visual/land-mainland-se-asia-mekong.png) · [纳米布沿岸沙丘](terrain-z7-visual/land-africa-namib.png) · [亚马孙森林与河网](terrain-z7-visual/land-south-america-amazon.png)
+
+瓦卡蒂普湖同机位采集修复前后各 64 个连续帧，包含 530→970 米／像素快速拉远、反向滚轮、平移和旋转。修复后第 10 帧中心 Z7/Z6 权重为 0.85/0.15，第 12 帧为 0.55/0.45，第 20 帧由 Z6 实绘，第 35 帧恢复 Z7。可见页峰值 104，细节请求峰值 316，常驻页峰值 256。九点逐帧采样未记录缺页，复看未见逐块矩形淡入。连续回读间隔 p50/p95 为 40.16/43.86 → 39.23/43.73 ms。该指标包含采集开销。 [修复前录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-inland-water-wakatipu-before.mp4) · [修复后录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-inland-water-wakatipu-after.mp4)
+
+洱海临界倍率往返 50 帧。可见页峰值 110，细节请求峰值 344，常驻页峰值 256。九点采样未记录缺页。790 米／像素时中心为 0.47 Z7 加 0.53 Z6。旧 Z6 缺少同一湖面，拉远后湖面逐步消失，归入相邻层材质差。正式游戏 FPS、工作集、专用显存为 NOT_RUN。 [洱海往返录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-inland-water-erhai-reversal.mp4)
+
+恢复时把附件放入独立候选目录，分别命名为 `7.qpk` 和 `index.json`，其余层和拓扑沿用维斯瓦候选。全层逐页视觉账本保持 830/32,768，尚有 31,938 页未完成。本轮定点实拍未计为整页审查。用户视觉接受待定。 [完整全球 Z7 QPK](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-inland-water-7.qpk) · [候选清单](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-inland-water-index.json) · [原图与逐帧状态](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-inland-water-gpu-evidence.zip)
+
+```text
+python rust/strategic-host/tools/build_natural_terrain.py --inland-water-candidate <维斯瓦候选目录>/7.qpk docs/terrain-z7-visual/z7-inland-water.geojson <独立候选目录>/7.qpk
+```
+
 ## 维斯瓦河口修复
 
 Z7 `7/141/25`，格但斯克湾。原画面在 18.9361°E／54.3180°N 附近断线。HydroRIVERS 末段 `20265844` 到 Natural Earth 海岸相差约 4.31 公里，原 QPK 在断口没有河道覆盖。1895 年开通的维斯瓦导流渠已经通海。1903 年出版的图幅采用 1898 年测绘和 1899 年河口测深，所绘沙丘开口距现代水系末端约 1.9 公里。候选以现代水务中心线接入现有海岸，约 1900 年的岸线仍待重建。 [历史图幅](https://igrek.amzp.pl/TK25_1679) · [波兰水务局](https://gdansk.wody.gov.pl/aktualnosci/675-125-lat-od-przekopu-wisly) · [工程档案及现代线路](terrain-z7-visual/vistula-outlet.geojson)
