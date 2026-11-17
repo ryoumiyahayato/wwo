@@ -1,5 +1,33 @@
 # Z7 全球逐页视觉验收
 
+## 维斯瓦河口修复
+
+Z7 `7/141/25`，格但斯克湾。原画面在 18.9361°E／54.3180°N 附近断线。HydroRIVERS 末段 `20265844` 到 Natural Earth 海岸相差约 4.31 公里，原 QPK 在断口没有河道覆盖。1895 年开通的维斯瓦导流渠已经通海。1903 年出版的图幅采用 1898 年测绘和 1899 年河口测深，所绘沙丘开口距现代水系末端约 1.9 公里。候选以现代水务中心线接入现有海岸，约 1900 年的岸线仍待重建。 [历史图幅](https://igrek.amzp.pl/TK25_1679) · [波兰水务局](https://gdansk.wody.gov.pl/aktualnosci/675-125-lat-od-przekopu-wisly) · [工程档案及现代线路](terrain-z7-visual/vistula-outlet.geojson)
+
+生成器读取有据可查的河口记录，以 4×4 覆盖采样将现有河水材质接至海岸。宽度采用 400 米，处于同期工程记录的 250–450 米范围内。全层候选保留冰架修复，只更新 `7/141/25` 中 4 个 BC7 块。河网拓扑和高程帧沿用原资源。局部复核中，纯海水 Alpha 保持 255，目标页与相邻页的 4 条边、4 个角重叠逐块一致。
+
+**修复后，区域原图。** 18.984375°E／54.140625°N，272 米／像素。 [同机位修复前](terrain-z7-visual/europe-vistula-mouth-z7-141-25.png)
+
+![维斯瓦河连入波罗的海，固定 Z7 区域原图](terrain-z7-visual/vistula-outlet-regional-after.png)
+
+**近景修复前。** 18.943°E／54.335°N，38 米／像素。
+
+![维斯瓦河入海前中断，Rust/wgpu 原图](terrain-z7-visual/vistula-outlet-before.png)
+
+**同机位修复后。** 河道延续至海水。近景仍显示底图采样尺度。固定取景均以 1280×720 Vulkan 离屏输出，`selected_ready=true`，Z7 权重 1。
+
+![同机位，维斯瓦河连接海水，Rust/wgpu 原图](terrain-z7-visual/vistula-outlet-after.png)
+
+修复前后各采集 58 个真实连续帧。530→970 米／像素快拉远时，候选中心 Z7 权重从 1 降到 0，并在 970 米／像素稳定实绘 `6/70/12`。过渡初始帧出现完整更低层贡献。实际视口 Z7 需求峰值 140 页，细节请求峰值 343，常驻峰值 256。九点采样未标记缺页，复核画面未见逐页矩形贴片。旧 Z6 沿用原河口，拉远后的河口一致性留待 Z6 修复。RTX 3050 Laptop GPU 本次离屏回读间隔 p50／p95 由 40.70／44.61 ms 变为 40.80／44.28 ms。正式游戏 FPS、工作集、专用显存为 NOT_RUN。 [修复前录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-vistula-original-wheel.mp4) · [修复后录像](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-vistula-final-wheel.mp4) · [机位与逐帧回执](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-vistula-captures.json.gz)
+
+候选 `SCAR-ADD-7.13-z7-v3-vistula-20261117` 有 32,768 页，1,607,880,702 字节。全层索引检查通过。恢复时将新附件用作独立候选目录内的 `7.qpk` 和 `index.json`，其余 QPK 和拓扑沿用原候选。 [完整 Z7 候选](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-vistula-7.qpk) · [候选清单](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-vistula-index.json) · [先前 Z7 候选](https://github.com/ryoumiyahayato/wwo/releases/download/terrain-surface-20261115/z7-visual-7.qpk)
+
+```text
+python rust/strategic-host/tools/build_natural_terrain.py --river-outlet-candidate <原候选目录>/7.qpk docs/terrain-z7-visual/vistula-outlet.geojson <含 us10-land.zip 的 Natural Earth 目录> <独立候选目录>/7.qpk
+```
+
+原逐页记录保留。本轮实拍关闭 Z7 河口断线这一项，未增加整页审查数量。用户视觉验收待定，正式资源待用户决定。
+
 ## 欧洲首批原图
 
 **东阿尔卑斯山脊和山麓** · `7/138/30` · 14.765625°E／47.109375°N · 515 米／像素
