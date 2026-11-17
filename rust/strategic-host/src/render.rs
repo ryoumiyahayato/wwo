@@ -1,5 +1,6 @@
-use crate::{camera::{Camera,EARTH,geographic,smooth},compact::{Raster,Vertex},overlay::Mesh,politics::FlagUniform,terrain::{self,Terrain},ui::Ink,world::{Pixels,Tile}};
+use crate::{camera::{Camera,EARTH},compact::{Raster,Vertex},overlay::Mesh,politics::FlagUniform,terrain::{self,Terrain},ui::Ink,world::{Pixels,Tile}};
 use crate::landmarks::{self, ModelKey, ModelMesh, ModelVertex, VisibleModel};
+use crate::terrain_detail;
 use bytemuck::{Pod,Zeroable};
 use std::collections::{HashMap, HashSet};
 use std::{fs::File,io,path::{Path,PathBuf},sync::Arc,time::Instant};
@@ -120,6 +121,9 @@ pub struct Renderer {
     globe:wgpu::RenderPipeline,
     terrain:Option<Terrain>,
     close_extent:Option<[f64;4]>,
+    close_layout:wgpu::BindGroupLayout,
+    close_group:wgpu::BindGroup,
+    detail:Option<terrain_detail::Stream>,
     solid:wgpu::RenderPipeline,
     text:wgpu::RenderPipeline,
     flag:wgpu::RenderPipeline,
@@ -412,16 +416,16 @@ pub(crate) fn write_texture_layer(queue:&wgpu::Queue,texture:&wgpu::Texture,leve
 }
 
 impl Renderer {
-    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
+    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
         let size=window.inner_size().into();
-        Self::with_target(Some(window),size,atlas,flags,hud,globe_art,layout_bytes,natural,None,events).await
+        Self::with_target(Some(window),size,atlas,flags,hud,globe_art,layout_bytes,natural,None,detail,events).await
     }
 
-    pub async fn new_offscreen(size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
-        Self::with_target(None,size,atlas,flags,hud,globe_art,layout_bytes,natural,close,events).await
+    pub async fn new_offscreen(size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
+        Self::with_target(None,size,atlas,flags,hud,globe_art,layout_bytes,natural,close,detail,events).await
     }
 
-    async fn with_target(window:Option<Arc<Window>>, size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
+    async fn with_target(window:Option<Arc<Window>>, size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
         let instance=wgpu::Instance::new(&wgpu::InstanceDescriptor {backends:wgpu::Backends::VULKAN,..Default::default()});
         let surface=window.map(|window|instance.create_surface(window)).transpose().map_err(|e|e.to_string())?;
         let adapter=instance.request_adapter(&wgpu::RequestAdapterOptions {
@@ -461,7 +465,8 @@ impl Renderer {
             texture_entry(10,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
             texture_entry(11,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
             texture_entry(12,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2),
-            sampled(13),sampler_entry(14),sampled(15),uniform(16,fragment)]);
+            sampled(13),sampler_entry(14)]);
+        let close_layout=layout(&device,&[sampled(0),uniform(1,fragment)]);
         let pages=layout(&device,&[uniform(0,fragment),sampled(1),sampled(2),sampled(3),
             texture_entry(4,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2)]);
         let screen_layout=layout(&device,&[uniform(0,wgpu::ShaderStages::VERTEX_FRAGMENT)]);
@@ -525,12 +530,12 @@ impl Renderer {
         let land_surface=land_surface.create_view(&Default::default());
         let close_extent=close.as_ref().map(|sample|sample.extent.map(f64::from));
         let (close_surface,close_bounds)=CloseSample::upload(close,&device,&queue);
+        let close_group=bind(&device,&close_layout,&[tex_resource(0,&close_surface),buf_resource(1,&close_bounds)]);
         let globals=bind(&device,&glob,&[buf_resource(0,&view),sampler_resource(1,&linear),sampler_resource(2,&wrap),
             tex_resource(3,&palette_view),tex_resource(4,&scenario),tex_resource(5,&flags),tex_resource(6,&flag_pose_view),
             tex_resource(7,&galactic_chart),tex_resource(8,&ocean_detail),tex_resource(9,&ocean_ice),
             tex_resource(10,&terrain_world),tex_resource(11,&terrain_detail),tex_resource(12,&terrain_index),
-            tex_resource(13,&land_surface),sampler_resource(14,&land_repeat),
-            tex_resource(15,&close_surface),buf_resource(16,&close_bounds)]);
+            tex_resource(13,&land_surface),sampler_resource(14,&land_repeat)]);
         let flag_art=bind(&device,&font_layout,&[tex_resource(0,&flags),sampler_resource(1,&linear)]);
         let [w,h]=atlas.size;
         let font=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
@@ -562,7 +567,7 @@ impl Renderer {
                     targets:&[Some(wgpu::ColorTargetState{format,blend:Some(wgpu::BlendState::ALPHA_BLENDING),write_mask:wgpu::ColorWrites::ALL})]})
             })
         };
-        let globe=pipeline(&[&glob,&pages],&globe_shader,"triangle","map",&[]);
+        let globe=pipeline(&[&glob,&pages,&close_layout],&globe_shader,"triangle","map",&[]);
         let solid=pipeline(&[&screen_layout],&hud_shader,"screen_vertex","solid",&mesh_layout);
         let text=pipeline(&[&screen_layout,&font_layout],&hud_shader,"screen_vertex","image",&mesh_layout);
         let flag=pipeline(&[&screen_layout,&font_layout],&hud_shader,"screen_vertex","flag",&mesh_layout);
@@ -574,22 +579,46 @@ impl Renderer {
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
         let models=ModelLayer::new(&device,format,events);
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
-                globe,terrain,close_extent,solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models})
+                globe,terrain,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
+                solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models})
     }
 
-    pub fn close_sample_weight(&self,camera:&Camera,size:[u32;2])->f32 {
-        let Some([west,south,east,north])=self.close_extent else {return 0.;};
-        let [width,height]=size.map(f64::from);
-        let mut margin:f64=1.;
-        for point in [[0.,0.],[width,0.],[0.,height],[width,height]] {
-            let Some(ray)=camera.vector(point,size) else {return 0.;};
-            let [lon,lat]=geographic(ray);
-            let x=(lon-west)/(east-west);
-            let y=(lat-south)/(north-south);
-            margin=margin.min(x).min(y).min(1.-x).min(1.-y);
+    pub fn update_close_terrain(&mut self,camera:&Camera,size:[u32;2],enabled:bool,now:Instant)->[f32;4] {
+        if let (Some(detail),Some(terrain))=(&mut self.detail,&self.terrain) {
+            if let Some(index)=detail.update(camera,size,enabled,now) {
+                if terrain.request_detail(index,detail.catalogue.clone()) {detail.requested(index);}
+            }
+            return [detail.weight,1.,0.,0.];
         }
-        // Fade the whole view before it reaches the edge of the local source.
-        smooth(0.,0.09,margin) as f32
+        let weight=self.close_extent.and_then(|extent|terrain_detail::viewport(camera,size)
+            .map(|corners|terrain_detail::extent_weight(extent,corners))).unwrap_or(0.);
+        [weight,0.,0.,0.]
+    }
+
+    pub fn close_terrain_ready(&mut self,index:usize,result:io::Result<Vec<u8>>) {
+        let Some(detail)=&mut self.detail else {return;};
+        if !detail.completed(index,result.is_ok()) {return;}
+        let Ok(blocks)=result else {return;};
+        let region=&detail.catalogue.regions[index];
+        let [w,h]=region.size;
+        let texture=create_texture_mips(&self.device,[w,h,1],wgpu::TextureFormat::Bc7RgbaUnorm,terrain_detail::MIPS);
+        let mut offset=0;
+        for (level,[width,height],length) in terrain_detail::mips(region.size) {
+            self.queue.write_texture(wgpu::TexelCopyTextureInfo {
+                texture:&texture,mip_level:level,origin:wgpu::Origin3d::ZERO,aspect:wgpu::TextureAspect::All,
+            },&blocks[offset..offset+length],wgpu::TexelCopyBufferLayout {
+                offset:0,bytes_per_row:Some(width*4),rows_per_image:None,
+            },extent([width,height,1]));
+            offset+=length;
+        }
+        let view=texture.create_view(&Default::default());
+        let bounds=buffer(&self.device,std::mem::size_of::<[f32;4]>());
+        self.queue.write_buffer(&bounds,0,bytemuck::bytes_of(&region.extent.map(|d| d as f32)));
+        self.close_group=bind(&self.device,&self.close_layout,&[tex_resource(0,&view),buf_resource(1,&bounds)]);
+    }
+
+    pub fn close_terrain_status(&self)->Option<serde_json::Value> {
+        self.detail.as_ref().map(terrain_detail::Stream::status)
     }
 
     pub fn model_ready(&mut self, key: ModelKey, mesh: io::Result<ModelMesh>) -> io::Result<()> {
@@ -638,6 +667,7 @@ impl Renderer {
 
     pub fn terrain_fading(&self)->bool {
         self.terrain.as_ref().is_some_and(Terrain::fading)
+            || self.detail.as_ref().is_some_and(terrain_detail::Stream::fading)
     }
 
     pub fn resize(&mut self,[w,h]:[u32;2]) {
@@ -733,6 +763,7 @@ impl Renderer {
                 pass.set_pipeline(&self.globe);
                 pass.set_bind_group(0,&self.globals,&[]);
                 pass.set_bind_group(1,&base.group,&[]);
+                pass.set_bind_group(2,&self.close_group,&[]);
                 pass.draw(0..3,0..1);
                 for (page,_,[x,y,w,h],_) in pages {
                     pass.set_scissor_rect(*x,*y,*w,*h);

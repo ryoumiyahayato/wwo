@@ -37,8 +37,8 @@ struct Tile {
 @group(0) @binding(12) var terrain_index: texture_2d<u32>;
 @group(0) @binding(13) var land_surface: texture_2d<f32>;
 @group(0) @binding(14) var land_repeat: sampler;
-@group(0) @binding(15) var close_surface: texture_2d<f32>;
-@group(0) @binding(16) var<uniform> close_extent: vec4f;
+@group(2) @binding(0) var close_surface: texture_2d<f32>;
+@group(2) @binding(1) var<uniform> close_extent: vec4f;
 @group(1) @binding(0) var<uniform> tile: Tile;
 @group(1) @binding(1) var terrain_data: texture_2d<f32>;
 @group(1) @binding(2) var material_data: texture_2d<f32>;
@@ -305,11 +305,26 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
     let weight=view.close_sample.x;
     if weight<=0. || all(base.rgb==vec3f(1.,0.,1.)) {return base;}
     let span=close_extent.zw-close_extent.xy;
-    let uv=vec2f(ll.x-close_extent.x,close_extent.w-ll.y)/span;
+    let middle=(close_extent.x+close_extent.z)*.5;
+    let delta=ll.x-middle;
+    let lon=middle+delta-360.*floor((delta+180.)/360.);
+    let uv=vec2f(lon-close_extent.x,close_extent.w-ll.y)/span;
+    let streamed=view.close_sample.y>.5;
+    let distance=min(uv,1.-uv);
+    let coverage=select(1.,smoothstep(0.,.14,distance.x)*smoothstep(0.,.14,distance.y),streamed);
+    if coverage<=0. {return base;}
     let latitude_scale=cos(radians((close_extent.y+close_extent.w)*.5));
     let source_spacing=span*111195.*vec2f(latitude_scale,1.)/vec2f(textureDimensions(close_surface));
     let lod=log2(max(1.,footprint/min(source_spacing.x,source_spacing.y)));
     let sample=textureSampleLevel(close_surface,linear,uv,lod);
+    if streamed {
+        // Keep the global albedo and the authoritative water coverage. The
+        // native-source residual adds only local contrast inside valid land.
+        let reference=textureSampleLevel(close_surface,linear,uv,3.);
+        let land=1.-smoothstep(.02,.50,max(max(base.a,sample.a),reference.a));
+        let detail=clamp(sample.rgb-reference.rgb,vec3f(-.13),vec3f(.13));
+        return vec4f(clamp(base.rgb+detail*(weight*coverage*land),vec3f(0.),vec3f(1.)),base.a);
+    }
     return mix(base,sample,weight);
 }
 fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f {

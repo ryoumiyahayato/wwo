@@ -18,6 +18,7 @@ mod politics;
 mod render;
 mod state;
 mod terrain;
+mod terrain_detail;
 mod timeline;
 mod ui;
 mod world;
@@ -40,6 +41,7 @@ use world::{Completion,Index,Pixels,Reader,World};
 enum HostEvent {
     Map(Completion),
     Terrain(terrain::Completion),
+    TerrainDetail(usize,io::Result<Vec<u8>>),
     Model(landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
 }
 
@@ -54,6 +56,7 @@ struct Config {root:PathBuf,world:Option<PathBuf>,requests:Option<PathBuf>,scena
     preferences:Option<PathBuf>,terrain_candidate:Option<PathBuf>,background:bool,
     terrain_review:bool,terrain_selection:terrain::LayerSelection,terrain_layer_candidate:Option<PathBuf>,
     terrain_close_sample:Option<PathBuf>,
+    terrain_detail:Option<PathBuf>,
     #[cfg(windows)] native:Option<native_start::NativeSession>,
     #[cfg(windows)] desktop:Option<desktop_start::DesktopSession>}
 impl Config {
@@ -61,7 +64,7 @@ impl Config {
         let home=std::env::current_exe()?.parent().unwrap().to_owned();
         let mut result=Self{root:home.join("data"),world:None,requests:None,scenario:None,observe:None,managed:false,preferences:None,terrain_candidate:None,background:false,
             terrain_review:false,terrain_selection:terrain::LayerSelection::Auto,terrain_layer_candidate:None,
-            terrain_close_sample:None,
+            terrain_close_sample:None,terrain_detail:None,
             #[cfg(windows)] desktop:None,
             #[cfg(windows)] native:None};
         let mut args=std::env::args_os().skip(1).peekable();
@@ -84,6 +87,7 @@ impl Config {
                 Some("--terrain-review")=>result.terrain_review=true,
                 Some("--terrain-layer-candidate")=>result.terrain_layer_candidate=Some(path(&mut args)?),
                 Some("--terrain-close-sample")=>result.terrain_close_sample=Some(path(&mut args)?),
+                Some("--terrain-detail")=>result.terrain_detail=Some(path(&mut args)?),
                 Some(flag @ ("--terrain-level"|"--terrain-max-level"))=>{
                     if !matches!(result.terrain_selection,terrain::LayerSelection::Auto){
                         return Err(io::Error::other("choose one terrain layer option"));
@@ -110,6 +114,10 @@ impl Config {
                 return Err(io::Error::other("--terrain-review cannot load world sessions or preferences"));
             }
             if result.observe.is_none(){return Err(io::Error::other("--terrain-review requires --observe"));}
+            if result.terrain_detail.is_some() && (result.terrain_close_sample.is_some()
+                || !matches!(result.terrain_selection,terrain::LayerSelection::Auto)) {
+                return Err(io::Error::other("--terrain-detail uses automatic terrain selection"));
+            }
             result.background=true;
             if result.terrain_candidate.is_none(){result.terrain_candidate=Some(result.root.join(terrain::COMPACT_VERSION));}
             return Ok(result);
@@ -213,7 +221,9 @@ impl Host {
             let natural_root=config.terrain_candidate.clone().unwrap_or_else(||config.root.join(terrain::VERSION));
             Some((terrain::Catalogue::open(&natural_root,packed,config.terrain_selection,config.terrain_layer_candidate.clone())?,events.create_proxy()))
         }else{
-            if config.terrain_candidate.is_some() {return Err(io::Error::other("--terrain-candidate requires the native game"));}
+            if config.terrain_candidate.is_some() || config.terrain_detail.is_some() {
+                return Err(io::Error::other("Terrain candidates require the native game"));
+            }
             None
         };
         let mut world=if map_signature.is_some() {map_release::open(&map_root)?}
@@ -1137,7 +1147,8 @@ impl Host {
         if self.camera.mpp<700.{self.grid_step=25000.;}else if self.camera.mpp>900.{self.grid_step=50000.;}
         view.settings=[self.state.date.season_day(),self.mode.index() as f32,u8::from(active) as f32,u8::from(self.theme) as f32];
         view.map_style[1]=self.renderer.as_ref().unwrap().terrain_max_level() as f32;
-        view.close_sample[0]=self.renderer.as_ref().unwrap().close_sample_weight(&self.camera,self.size);
+        let land_detail=self.mode==Mode::Geographic && !self.in_lobby();
+        view.close_sample=self.renderer.as_mut().unwrap().update_close_terrain(&self.camera,self.size,land_detail,now);
         view.map_style[3]=if self.hud.military_grid{self.grid_step}else{0.};
         view.selection[3]=self.world.polities.iter().position(|p|p.id=="country_fra").map_or(0.,|i|(i+1) as f32);
         view.map_style[0]=self.player_polity().map_or(0.,|i|(i+1) as f32);
@@ -1299,6 +1310,7 @@ impl Host {
             "inflight":self.reader.inflight.is_some(),"first_frame_ms":self.trial.first,
             "gpu":self.renderer.as_ref().map(|r|&r.gpu),"feedback":self.feedback,
             "terrain":self.renderer.as_ref().and_then(Renderer::terrain_status),
+            "terrain_detail":self.renderer.as_ref().and_then(Renderer::close_terrain_status),
             "workspace":format!("{:?}",self.hud.page),"menu":format!("{:?}",self.hud.menu),"messages":self.hud.messages,
             "session":session,"lobby":lobby,
             "window":{"background":self.config.background,"offscreen":self.config.terrain_review,"focused":self.window.as_ref().is_some_and(|w|w.has_focus()),"visible":self.window.as_ref().and_then(|w|w.is_visible())}
@@ -1548,11 +1560,28 @@ impl ApplicationHandler<HostEvent> for Host {
             };
             let globe_art=[art("galactic-chart.png")?,art("ocean-detail-r68.png")?,art("ocean-ice-r68.png")?];
             let atlas=font(&self.config.root.join("type.png"))?;
+            let detail=if self.natural.is_some() && self.config.terrain_close_sample.is_none()
+                && matches!(self.config.terrain_selection,terrain::LayerSelection::Auto) {
+                let default_dir=self.config.terrain_candidate.clone().unwrap_or_else(||self.config.root.join(terrain::VERSION));
+                let default=default_dir.join(terrain_detail::FILE_NAME);
+                if let Some(path)=&self.config.terrain_detail {
+                    Some(terrain_detail::Catalogue::open(path)?)
+                } else {
+                    match terrain_detail::Catalogue::open(&default) {
+                        Ok(catalogue)=>Some(catalogue),
+                        Err(error) if error.kind()==io::ErrorKind::NotFound=>None,
+                        Err(error)=>{
+                            eprintln!("Terrain detail {}: {error}",default.display());
+                            None
+                        }
+                    }
+                }
+            }else{None};
             let renderer=if let Some(window)=&window {
-                pollster::block_on(Renderer::new(window.clone(),atlas,flags,hud,globe_art,&layouts,self.natural.take(),self.events.clone()))?
+                pollster::block_on(Renderer::new(window.clone(),atlas,flags,hud,globe_art,&layouts,self.natural.take(),detail,self.events.clone()))?
             } else {
                 let sample=self.config.terrain_close_sample.as_deref().map(render::CloseSample::read).transpose()?;
-                pollster::block_on(Renderer::new_offscreen(self.size,atlas,flags,hud,globe_art,&layouts,self.natural.take(),sample,self.events.clone()))?
+                pollster::block_on(Renderer::new_offscreen(self.size,atlas,flags,hud,globe_art,&layouts,self.natural.take(),sample,detail,self.events.clone()))?
             };
             let pixels=Pixels::read_version(&self.map_root,&self.world.tiles[0],self.map_signature,self.reader.cover)?;
             let base=renderer.upload(&self.world.tiles[0],pixels);
@@ -1590,6 +1619,13 @@ impl ApplicationHandler<HostEvent> for Host {
                     if let Err(error)=renderer.terrain_ready(event) {
                         self.fatal_error=Some(error.to_string());event_loop.exit();return;
                     }
+                    self.dirty=true;
+                }
+                return;
+            }
+            HostEvent::TerrainDetail(index,result)=>{
+                if let Some(renderer)=&mut self.renderer {
+                    renderer.close_terrain_ready(index,result);
                     self.dirty=true;
                 }
                 return;
