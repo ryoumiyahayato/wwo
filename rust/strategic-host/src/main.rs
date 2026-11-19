@@ -377,7 +377,7 @@ impl Host {
         self.history.push(Pose{camera:self.camera.clone(),object:self.selected});
     }
     fn locate(&mut self,target:[f64;2],mpp:f64) {
-        self.focus=None;self.save_pose();self.camera.focus(target,mpp);
+        self.focus=None;self.save_pose();self.camera.focus(target,mpp,self.size);
         self.velocity=[0.;2];self.details=false;self.search=None;self.dirty=true;
     }
     fn focus_on(&mut self,object:Object,(target,mpp):([f64;2],f64)) {
@@ -391,7 +391,7 @@ impl Host {
     }
     fn locate_object(&mut self,object:Object) {
         let landmark=match object {
-            Object::Place(index)=>self.landmarks.as_ref().and_then(|models|models.focus(index)),
+            Object::Place(index)=>self.landmarks.as_ref().and_then(|models|models.focus(index,&self.camera)),
             _=>None,
         };
         let (target,mpp)=match object {
@@ -421,7 +421,7 @@ impl Host {
                 self.emit(Request::SetMapMode{mode:mode.key()});
             }
             Action::Home=>{
-                self.focus=None;self.save_pose();self.camera.mpp=Camera::overview(self.size);self.camera.update_level();
+                self.focus=None;self.save_pose();self.camera.set_scale(Camera::overview(self.size));
                 self.velocity=[0.;2];self.details=false;self.country=None;self.search=None;
             }
             Action::Back=>{
@@ -661,7 +661,7 @@ impl Host {
                     Page::Selection=>{
                         self.country_directory=lobby::Directory::default();
                         self.mode=Mode::Political;
-                        self.camera.mpp=lobby::SelectionLayout::globe_mpp(self.size);self.camera.update_level();
+                        self.camera.set_scale(lobby::SelectionLayout::globe_mpp(self.size));
                         if let Some(lobby)=&mut self.state.lobby {lobby.selection_ready=false;}
                         self.emit(Request::Lobby{verb:"select",polity:"",slot:0});
                         self.filter_countries();
@@ -675,7 +675,7 @@ impl Host {
             Command::Country(index)=>{
                 if let Some(p)=self.world.polities.get(index){
                     self.country_directory.search_active=false;
-                    self.lobby_country=index;self.camera.focus(p.coordinates,self.camera.mpp);
+                    self.lobby_country=index;self.camera.focus(p.coordinates,self.camera.mpp,self.size);
                     self.country_directory.reveal(self.size,index);
                 }
             }
@@ -1427,11 +1427,11 @@ impl Host {
             self.selected=None;self.details=false;self.country=None;self.country_click=None;
             self.search=None;self.history.clear();self.focus=None;self.velocity=[0.;2];self.hits.clear();
             self.mode=Mode::Political;self.labels=false;
-            self.camera=Camera::new(self.size);
+            self.camera.reset(self.size);
             self.camera.local_models=self.landmarks.is_some();
             if let Some(point)=self.state.session.as_ref().and_then(|s| <[f64;2]>::try_from(s.coordinates.as_slice()).ok()) {
                 #[cfg(windows)]
-                if self.config.native.is_some() {self.camera.focus(point, 1400.);}
+                if self.config.native.is_some() {self.camera.focus(point,1400.,self.size);}
                 #[cfg(not(windows))]
                 let _=point;
             }
@@ -1474,11 +1474,13 @@ impl Host {
             let level=self.camera.level;
             self.camera=focus.camera.clone();
             self.camera.level=level;
-            self.camera.focus_toward(focus.target,t,focus.mpp);
+            self.camera.focus_toward(focus.target,t,focus.mpp,self.size);
             self.dirty=true;
             if progress<1. {self.focus=Some(focus);}
         }
         if self.trial.timing&&self.trial.times.len()>=36_000 {self.trial.timing=false;}
+        let scripted=self.trial.movement.map(|(a,b,steps,_)|
+            std::array::from_fn(|i|(b[i]-a[i])/(f64::from(steps)*0.016)));
         if let Some((from,to,steps,mut i))=self.trial.movement.take() {
             let lerp=|t:f64|[from[0]+(to[0]-from[0])*t,from[1]+(to[1]-from[1])*t];
             let a=lerp(f64::from(i)/f64::from(steps));let b=lerp(f64::from(i+1)/f64::from(steps));self.rotate(a,b,false);
@@ -1491,6 +1493,14 @@ impl Host {
             self.rotate(center,end,false);
             self.velocity=self.velocity.map(|v|v*(-dt*7.8).exp());self.moved_at=now;
         }
+        let motion=scripted.unwrap_or_else(||match &self.drag {
+            Some(d) if !d.bearing && now.saturating_duration_since(d.last)<Duration::from_millis(100)=>self.velocity,
+            None=>self.velocity,
+            _=>[0.;2],
+        });
+        let pointer=if self.drag.as_ref().is_some_and(|d|d.moved&&!d.bearing) {self.cursor}
+            else {self.size.map(|n|f64::from(n)*0.5)};
+        if self.focus.is_none() && self.camera.track_scale(self.size,motion,pointer,now) {self.dirty=true;}
         if self.animate&&now>=self.next_date {
             self.next_date=now+Duration::from_millis(85);self.set_date(self.state.date.offset(1));
         }
@@ -1593,6 +1603,14 @@ impl ApplicationHandler<HostEvent> for Host {
                     }
                 }
             }else{None};
+            if self.map_signature.is_some()&&!self.config.terrain_review {
+                let mut precision=self.world.city_detail(&self.map_root);
+                if let Some(detail)=&detail {
+                    precision.extend(detail.regions.iter().filter(|r|matches!(r.surface,terrain_detail::Surface::Survey))
+                        .map(|r|camera::DetailRegion::new(r.extent,r.extent,r.size,false)));
+                }
+                self.camera.set_detail(precision);
+            }
             let renderer=if let Some(window)=&window {
                 pollster::block_on(Renderer::new(window.clone(),atlas,flags,hud,globe_art,&layouts,self.natural.take(),detail,self.events.clone()))?
             } else {
@@ -1679,7 +1697,7 @@ impl ApplicationHandler<HostEvent> for Host {
                 if self.in_lobby() && self.lobby_page == lobby::Page::Selection && self.camera.level == Level::World {
                     let previous = lobby::SelectionLayout::globe_mpp(self.size);
                     let resized = lobby::SelectionLayout::globe_mpp(s.into());
-                    self.camera.mpp *= resized / previous;
+                    self.camera.set_scale(self.camera.mpp*resized/previous);
                 }
                 self.size=s.into();self.camera.constrain_region(self.size);
                 if let Some(r)=self.renderer.as_mut(){r.resize(self.size);}self.dirty=true;

@@ -15,6 +15,8 @@ const COMMAND_BYTES: u64 = 16;
 const MAX_CHUNKS: usize = 1_728;
 const CACHE_CHUNKS: usize = 2_560;
 const BUILDS_PER_FRAME: usize = 32;
+// End of the individual crown blend in landscape_vertex.
+const STAND_ONLY_MPP: f64 = 21.;
 
 type Chunk = [u32; 4];
 
@@ -43,6 +45,9 @@ pub struct Landscape {
     chunks: wgpu::Buffer,
     draws: wgpu::Buffer,
     vertices: wgpu::Buffer,
+    crown_vertices: [u32; 3],
+    stand_vertices: u32,
+    stand_only: bool,
     instances: wgpu::Buffer,
     depth: Option<([u32; 2], wgpu::TextureView)>,
     previous: Option<LandscapeView>,
@@ -75,6 +80,8 @@ impl Landscape {
                 command
             });
         let commands = [mesh_commands[0], mesh_commands[1], mesh_commands[2], mesh_commands[0], mesh_commands[3]];
+        let crown_vertices = [commands[0][0], commands[1][0], commands[3][0]];
+        let stand_vertices = commands[4][0];
         let vertices = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Landscape shared meshes"),
             contents: bytemuck::cast_slice(&vertices.into_iter().flatten().collect::<Vec<_>>()),
@@ -169,11 +176,11 @@ impl Landscape {
                 buffers: &[
                     wgpu::VertexBufferLayout {
                         array_stride: std::mem::size_of::<Vertex>() as u64, step_mode: wgpu::VertexStepMode::Vertex,
-                        attributes: &wgpu::vertex_attr_array![0=>Float32x3,1=>Float32x3,2=>Float32,3=>Float32],
+                        attributes: &wgpu::vertex_attr_array![0=>Float32x3,1=>Float32x3,2=>Float32,3=>Float32,4=>Float32],
                     },
                     wgpu::VertexBufferLayout {
                         array_stride: INSTANCE_BYTES, step_mode: wgpu::VertexStepMode::Instance,
-                        attributes: &wgpu::vertex_attr_array![4=>Uint32x4],
+                        attributes: &wgpu::vertex_attr_array![5=>Uint32x4],
                     },
                 ],
             },
@@ -199,6 +206,9 @@ impl Landscape {
             chunks,
             draws,
             vertices,
+            crown_vertices,
+            stand_vertices,
+            stand_only: false,
             instances,
             depth: None,
             previous: None,
@@ -233,6 +243,14 @@ impl Landscape {
             self.previous = None;
             self.pending = false;
             return;
+        }
+        let stand_only = camera.mpp >= STAND_ONLY_MPP;
+        if stand_only != self.stand_only {
+            for (kind, full) in [0, 1, 3].into_iter().zip(self.crown_vertices) {
+                let count = if stand_only { self.stand_vertices } else { full };
+                queue.write_buffer(&self.draws, kind * COMMAND_BYTES, bytemuck::bytes_of(&count));
+            }
+            self.stand_only = stand_only;
         }
         let view = LandscapeView {
             projection: camera.projection(size), size, mpp: camera.mpp,

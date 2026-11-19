@@ -1,10 +1,12 @@
-use std::f64::consts::{FRAC_PI_2, PI};
+use std::{f64::consts::{FRAC_PI_2, PI}, sync::Arc, time::{Duration, Instant}};
 
 pub const EARTH: f64 = 6_371_008.8;
 pub const ENTER: f64 = 5500.;
 pub const EXIT: f64 = 7000.;
 pub const CITY_ENTER: f64 = 200.;
 pub const CITY_EXIT: f64 = 280.;
+pub const SCALE_TARGET_PIXELS: f64 = 80.;
+pub const CONTEXT_MPP: f64 = 2000. / SCALE_TARGET_PIXELS;
 pub type V3 = [f64; 3];
 
 pub fn dot(a: V3, b: V3) -> f64 { a[0]*b[0] + a[1]*b[1] + a[2]*b[2] }
@@ -34,6 +36,31 @@ fn rotation(v: V3,axis:V3,angle:f64)->V3 {
 
 #[derive(Clone,Copy,PartialEq)]
 pub enum Level { World, Region, Local }
+
+#[derive(Clone, Copy)]
+pub struct DetailRegion { pub extent: [f64; 4], pub minimum: f64, pub city: bool }
+
+impl DetailRegion {
+    pub fn new(extent:[f64;4], bounds:[f64;4], size:[u32;2], city:bool)->Self {
+        let [w,s,e,n]=bounds;
+        let metres=EARTH*PI/180.;
+        let dx=(e-w)*((s+n)*0.5).to_radians().cos()*metres/f64::from(size[0]);
+        let dy=(n-s)*metres/f64::from(size[1]);
+        Self {extent,minimum:dx.max(dy).clamp(1.5,CONTEXT_MPP),city}
+    }
+
+    fn floor(self,[lon,lat]:[f64;2],size:[u32;2],requested:f64)->f64 {
+        let [w,s,e,n]=self.extent;
+        let metre=EARTH*PI/180.;
+        let lon_m=metre*lat.to_radians().cos();
+        let eye=requested.max(self.minimum).min(CONTEXT_MPP);
+        let x=(lon-w).min(e-lon)*lon_m-f64::from(size[0])*eye*0.28;
+        let y=(lat-s).min(n-lat)*metre-f64::from(size[1])*eye*0.28;
+        let range=(eye*145.).max(900.);
+        CONTEXT_MPP+(self.minimum-CONTEXT_MPP)*smooth(0.,range,x.min(y))
+    }
+}
+
 #[derive(Clone)]
 pub struct Camera {
     pub axes: [V3;3],
@@ -42,6 +69,10 @@ pub struct Camera {
     pub local_models: bool,
     pub oblique: bool,
     region: Option<Region>,
+    detail: Option<Arc<[DetailRegion]>>,
+    requested_mpp: f64,
+    scale_step: Option<Instant>,
+    last_widening: Option<Instant>,
 }
 
 #[derive(Clone)]
@@ -60,8 +91,10 @@ impl Region {
 
 impl Camera {
     pub fn new(size:[u32;2]) -> Self {
-        Self { axes:frame([2.3522,48.8566]),mpp:Self::overview(size),level:Level::World,
-            local_models:false,oblique:true,region:None }
+        let mpp=Self::overview(size);
+        Self { axes:frame([2.3522,48.8566]),mpp,level:Level::World,
+            local_models:false,oblique:true,region:None,detail:None,requested_mpp:mpp,
+            scale_step:None,last_widening:None }
     }
     pub fn overview([width,height]:[u32;2]) -> f64 {
         EARTH / ((f64::from(height)/2.55).min(f64::from(width)*0.49)*1.05)
@@ -129,6 +162,53 @@ impl Camera {
             self.axes=self.axes.map(|v|rotation(v,self.axes[0],y));
         }
     }
+    pub fn set_detail(&mut self,detail:Vec<DetailRegion>) { self.detail=Some(detail.into()); }
+
+    pub fn reset(&mut self,size:[u32;2]) {
+        let detail=self.detail.take();
+        *self=Self::new(size);
+        self.detail=detail;
+    }
+
+    pub fn has_city_ground(&self,point:[f64;2])->bool {
+        self.detail.as_ref().is_none_or(|regions|regions.iter().any(|r|r.city&&inside(point,r.extent)))
+    }
+
+    pub fn precision_enabled(&self)->bool {self.detail.is_some()}
+
+    pub fn set_scale(&mut self,mpp:f64) {
+        self.mpp=mpp;
+        self.requested_mpp=mpp;
+        self.update_level();
+    }
+
+    fn minimum_at(&self,point:[f64;2],size:[u32;2],requested:f64)->f64 {
+        self.detail.as_ref().map_or_else(|| {
+            if self.local_models&&local_city(point) {1.5}
+            else if inside(point,PARIS_CITY) {8.} else {CONTEXT_MPP}
+        },|regions|regions.iter().fold(CONTEXT_MPP,|floor,r|floor.min(r.floor(point,size,requested))))
+    }
+
+    pub fn track_scale(&mut self,size:[u32;2],motion:[f64;2],anchor:[f64;2],now:Instant)->bool {
+        let dt=self.scale_step.replace(now).map_or(0.,|prev|now.saturating_duration_since(prev).as_secs_f64());
+        if self.detail.is_none() || self.mpp.max(self.requested_mpp)>CONTEXT_MPP+0.001 {return false;}
+        let center=size.map(|v|f64::from(v)*0.5);
+        let next=std::array::from_fn(|i|center[i]-(motion[i]*0.25).clamp(-center[i]*0.60,center[i]*0.60));
+        let minimum=self.minimum_at(self.coordinates(),size,self.requested_mpp);
+        let ahead=self.vector(next,size).map_or(minimum,|v|self.minimum_at(geographic(v),size,self.requested_mpp));
+        let target=self.requested_mpp.max(minimum).max(ahead);
+        if target==self.mpp {return false;}
+        if (target-self.mpp).abs()<=0.01 {
+            self.scale_at(anchor,target,size);
+            return true;
+        }
+        let widening=target>self.mpp;
+        if widening {self.last_widening=Some(now);}
+        if !widening&&self.last_widening.is_some_and(|t|now.saturating_duration_since(t)<Duration::from_millis(155)) {return true;}
+        let weight=1.-(-dt.min(0.065)*if widening {16.} else {6.}).exp();
+        self.scale_at(anchor,self.mpp+(target-self.mpp)*weight,size);
+        true
+    }
     pub fn bearing_drag(&mut self, a:[f64;2],b:[f64;2],size:[u32;2]) {
         let compression=self.pitch().cos();
         if let Some(region) = &mut self.region {
@@ -147,10 +227,18 @@ impl Camera {
         self.axes=self.axes.map(|v|rotation(v,self.axes[2],angle));
     }
     pub fn zoom(&mut self, point:[f64;2],factor:f64,size:[u32;2]) {
+        let from=if factor>1. {self.mpp}else{self.requested_mpp.min(self.mpp)};
+        let requested=(from*factor).clamp(1.5,Self::overview(size)/0.74);
+        let minimum=self.minimum_at(self.coordinates(),size,requested);
+        // Turning the wheel at a constrained boundary keeps the previous choice.
+        if factor<1. && minimum>=self.mpp-0.01 && self.requested_mpp<self.mpp-0.01 {return;}
+        self.requested_mpp=requested.max(minimum);
+        self.scale_at(point,self.requested_mpp,size);
+    }
+
+    fn scale_at(&mut self,point:[f64;2],mpp:f64,size:[u32;2]) {
         let before=self.vector(point,size);
-        let minimum=if self.local_models && local_city(self.coordinates()) {1.5}
-            else if inside(self.coordinates(),PARIS_CITY) {8.} else {25.};
-        self.mpp=(self.mpp*factor).clamp(minimum,Self::overview(size)/0.74);
+        self.mpp=mpp;
         self.update_level();
         if let Some(before)=before {
             if let Some(region) = &mut self.region {
@@ -171,17 +259,21 @@ impl Camera {
             self.drag(projected,center,size);
         }
     }
-    pub fn focus(&mut self,point:[f64;2],mpp:f64) {
+    pub fn focus(&mut self,point:[f64;2],mpp:f64,size:[u32;2]) {
         self.region=None;
         let wanted=frame(point)[2];
         if dot(wanted,self.axes[2])< -0.99999 {self.axes=frame(point);}
         else {self.align(wanted,self.axes[2]);}
-        self.mpp=mpp;
+        self.mpp=if self.detail.is_some() {mpp.max(self.minimum_at(point,size,mpp))} else {mpp};
+        self.requested_mpp=self.mpp;
+        self.last_widening=None;
         self.update_level();
     }
     pub fn focus_at(&mut self, point:[f64;2], mpp:f64, offset:[f64;2], size:[u32;2]) {
+        let mpp=if self.detail.is_some() {mpp.max(self.minimum_at(point,size,mpp))}else{mpp};
         self.axes=frame(point);
         self.mpp=mpp;
+        self.requested_mpp=mpp;
         self.region=(mpp<=ENTER).then_some(Region {axes:self.axes,offset,bearing:0.});
         if self.region.is_some() {
             self.constrain_region(size);
@@ -191,7 +283,7 @@ impl Camera {
         }
         self.update_level();
     }
-    pub fn focus_toward(&mut self, target: [f64; 2], t: f64, destination_scale: f64) {
+    pub fn focus_toward(&mut self, target: [f64; 2], t: f64, destination_scale: f64, size:[u32;2]) {
         self.region=None;
         let axis = frame(target)[2];
         let start = self.axes[2];
@@ -207,6 +299,8 @@ impl Camera {
             self.axes = self.axes.map(|v| rotation(v, self.axes[2], -correction * t));
         }
         self.mpp = (self.mpp.ln() + (destination_scale.ln() - self.mpp.ln()) * t).exp();
+        if self.detail.is_some() {self.mpp=self.mpp.max(self.minimum_at(self.coordinates(),size,self.mpp));}
+        self.requested_mpp=self.mpp;
         self.update_level();
     }
     pub fn north_up(&mut self) {
@@ -301,7 +395,7 @@ mod tests {
         let p=[905.,278.];
         for start in [[2.35,48.86],[179.95,4.],[-170.,89.9],[0.,-89.8]] {
             let mut camera=Camera::new(size);
-            camera.focus(start,7300.);
+            camera.focus(start,7300.,size);
             let anchor=camera.vector(p,size).unwrap();
             for _ in 0..20 {
                 camera.zoom(p,1./1.22,size);

@@ -298,26 +298,37 @@ struct LandscapeVertex {
     @location(2) edge: f32,
     @location(3) @interpolate(flat) kind: u32,
     @location(4) @interpolate(flat) lod: vec2f,
+    @location(5) @interpolate(flat) tree: u32,
 };
 
 @vertex
 fn landscape_vertex(
     @location(0) offset: vec3f, @location(1) normal: vec3f, @location(2) tone: f32, @location(3) edge: f32,
-    @location(4) item: vec4u,
+    @location(4) crown: f32, @location(5) item: vec4u,
 ) -> LandscapeVertex {
     let columns = item.z & 262143u;
     let kind = (item.z>>18u)&7u;
     let step = 1u << ((item.z>>21u)&7u);
     let density = f32(item.z>>24u)/127.;
+    let mpp = view.viewport.z*EARTH;
+    let tree = crown > 0.;
+    let stand = kind == 0u || kind == 1u || kind == 3u;
+    let stand_mix = smoothstep(9.,21.,mpp);
+    let representation = select(1.,select(stand_mix,1.-stand_mix,tree),stand);
+    if representation <= .012 {
+        return LandscapeVertex(vec4f(2.,2.,0.,1.),vec3f(0.),vec4f(0.),0.,kind,vec2f(0.),0u);
+    }
     let ll = landscape_coordinates(item.xy,columns);
     let height = f32(item.w&65535u)-32768.;
     let grade = (vec2f(f32((item.w>>16u)&255u),f32(item.w>>24u))-128.)/127.;
     let seed = landscape_seed(item.xy);
-    let hue = landscape_random(seed+8733u);
-    let shape = landscape_random(seed+6371u);
+    let variation = seed+u32(crown)*8461u;
+    let hue = landscape_random(variation+8733u);
+    let shape = landscape_random(variation+6371u);
     var bearing = landscape_random(seed+3191u)*(2.*PI);
     var radius = mix(87.,158.,shape)*mix(.84,1.16,density);
-    var form = vec3f(radius,radius*mix(.77,1.11,hue),mix(39.,78.,shape));
+    var form = vec3f(radius,radius*mix(.77,1.11,hue),mix(9.,21.,shape));
+    var tree_center = vec2f(0.);
     var ground_grade = grade*.93;
     let climate = smoothstep(32.,64.,abs(ll.y)+smoothstep(550.,2200.,height)*16.);
     if kind == 1u {
@@ -331,22 +342,33 @@ fn landscape_vertex(
         form *= vec3f(.66,.73,.28);
     } else if kind == 4u {
         let spread = f32(step)*mix(1.,.75,smoothstep(16.,32.,f32(step)));
-        form *= vec3f(spread*1.07,spread*.92,mix(.8,1.7,min(1.,f32(step)/16.)));
+        form *= vec3f(spread*1.07,spread*.92,1.);
+    }
+    if tree {
+        let i = u32(crown)-1u;
+        let tile = vec2f(f32(i%7u),f32(i/7u))-3.;
+        let jitter = vec2f(landscape_random(variation+399u),landscape_random(variation+791u))-.5;
+        tree_center = (tile+jitter*.85)*20.;
+        let r = mix(4.6,9.6,shape);
+        form = vec3f(r,r*mix(.79,1.08,hue),mix(8.,21.,shape));
+        if kind == 1u { form *= vec3f(.71,.71,1.15); }
+        if kind == 3u { form *= vec3f(.54,.54,.29); }
     }
     let c = cos(bearing);
     let s = sin(bearing);
     let rotate = mat2x2f(c,s,-s,c);
-    let xy = rotate*(offset.xy*form.xy);
+    let apparent = min(form.x,form.y)*2./mpp;
+    // Give subpixel crowns raster coverage while preserving their projected area.
+    let filter_width = select(1.,max(1.,1.4/apparent),tree);
+    let xy = rotate*(offset.xy*form.xy*filter_width+tree_center);
     let altitude = offset.z*form.z;
     let ground = dot(xy,ground_grade);
     let site = ll+degrees(xy/(EARTH*vec2f(max(.012,cos(radians(ll.y))),1.)));
     var pixels = landscape_pixels(landscape_world(site));
     let pitch = sqrt(max(0.,1.-view.chart_origin.z*view.chart_origin.z));
-    let mpp = view.viewport.z*EARTH;
     let footprint = mpp*max(1.,sqrt(view.viewport.x*view.viewport.y/2073600.));
     let lod = vec2f(landscape_model_weight(step,footprint),landscape_model_weight(step,max(58.,footprint)));
-    let apparent = min(form.x,form.y)*2./mpp;
-    let visibility = smoothstep(2.,4.5,apparent);
+    let visibility = representation*select(smoothstep(2.,4.5,apparent),1./(filter_width*filter_width),tree);
     pixels.y -= altitude*pitch/mpp;
     let z = height+ground+altitude;
     let depth = clamp(.56-(z+(pixels.y-view.viewport.y*.5)*mpp*pitch)/440000.,.002,.998);
@@ -358,24 +380,31 @@ fn landscape_vertex(
     let vertical = normal.z/form.z;
     let facing = normalize(vec3f(flat-ground_grade*vertical,vertical));
     let light = .88+.26*max(0.,dot(facing,LANDSCAPE_SUN));
-    let color = clamp((base+pigment)*light*mix(1.,tone,.70),vec3f(0.),vec3f(1.));
-    return LandscapeVertex(clip,vec3f(site,z),vec4f(color,visibility),edge,kind,lod);
+    let canopy_light = select(vec3f(0.),vec3f(.050,.067,.027),tree);
+    let color = clamp((base+pigment+canopy_light)*light*mix(1.,tone,.70),vec3f(0.),vec3f(1.));
+    return LandscapeVertex(clip,vec3f(site,z),vec4f(color,visibility),edge,kind,lod,select(0u,1u,tree));
 }
 
 fn landscape_object_mask(page: LandscapePage, input: LandscapeVertex) -> f32 {
     let land = 1.-smoothstep(.10,.44,landscape_coverage(page));
     let cover = landscape_material(page);
-    let open_ground=1.-smoothstep(.21,.82,cover.urban);
-    if input.kind < 4u {
+    let open_ground=1.-smoothstep(.16,.69,cover.urban);
+    if input.kind != 4u {
         let clearance = input.site.z-landscape_elevation(page,vec2f(0.));
-        return land*open_ground*smoothstep(-4.,0.,clearance);
+        let wooded=cover.forest+cover.shrub*.65;
+        let growth=select(smoothstep(.17,.68,wooded),smoothstep(.12,.56,wooded),input.tree!=0u);
+        return land*open_ground*smoothstep(-4.,0.,clearance)*select(growth,1.,input.kind==2u);
     }
-    return land*open_ground*smoothstep(.17,.75,cover.forest+cover.shrub*.55);
+    let wooded=cover.forest+cover.shrub*.55;
+    return land*open_ground*smoothstep(.17,.75,wooded);
 }
 
 @fragment
 fn landscape_fragment(input: LandscapeVertex) -> @location(0) vec4f {
-    let edge = smoothstep(0.,max(fwidth(input.edge)*.68,.001),input.edge);
+    let rim = fwidth(input.edge)*.68;
+    // A subpixel crown spans several short triangles. Keep the rim filter
+    // inside those triangles; the vertex shader already filters projected area.
+    let edge = smoothstep(0.,max(select(rim,min(rim,.55),input.tree!=0u),.001),input.edge);
     if input.color.a*max(input.lod.x,input.lod.y) <= .012 { discard; }
     let mpp = view.viewport.z*EARTH;
     var fine = 0.;
