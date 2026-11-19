@@ -26,6 +26,12 @@ Z5–Z7 的预览使用同一网格和新的全球高程母栅格。原始输入
 
 LOD 使用视口中心的投影比例。将当前纬度的东西、南北采样轴换算为屏幕像素，以两轴均方根求目标层级。相邻等级以半个层级为切换中心，滞回范围为上下各 0.12 级。自动模式优先加载视口及其父级。剩余页用于预取视口外的地貌。视口本身超过固定页预算时使用可完整覆盖视口的较粗层。观察接口的 `viewport_detail_pages` 记录视口包围范围内到目标层的页数，`required_detail_pages` 含预取范围。目标瓦片就绪前显示父级，边缘跟随相邻瓦片就绪状态过渡。`terrain_decode_ms` 记录颜色帧解压，`tile_load_ms` 记录请求到工作线程结果送达的时间。
 
+### Z7 森林和山地
+
+将 `landscape-cover-v1.qsc` 放在 `worldcrs84quad-15s-v2` 的 QPK 和 `index.json` 同目录。正式入口 `wwo-map-lab --play` 自动加载。独立复验可用 `--terrain-candidate <QPK库目录>`。进入游戏后按 `G` 切换地理模式，滚轮放大。覆盖包缺失时，兼容的显卡继续使用 QPK 高程增强地貌。[Z7 景观归档](https://github.com/ryoumiyahayato/wwo/releases/tag/z7-landscape-20261119) · [实机记录](Z7_LANDSCAPE.md)
+
+覆盖包由现有 ESA WorldCover 2021 v200 分类缓存生成。运行 `python tools/build_landscape_cover.py <worldcover缓存目录> <输出目录>/landscape-cover-v1.qsc`，需 NumPy、Pillow 和 zstandard。阔叶、针叶和岩壁共用三种网格。树冠是按纬度、高程和覆盖类型生成的景观群组，单株位置、树种和空地细节为视觉推定。山脊、坡面光照、实例海拔和坡度使用 Z7 QPK 的 SRTM15+ 高程。近景阴影、岩面色带和岩壁小形体补充地貌，受底层高程采样间距限制。[覆盖来源和许可](https://doi.org/10.5281/zenodo.7254221)
+
 ### 近景地表候选
 
 用 `wwo-map-lab --play --data <游戏数据目录> --terrain-candidate <QPK目录> --terrain-detail <terrain-detail-v1.qdt>` 从正常游戏入口加载独立候选。候选 QPK 目录或默认正式 QPK 目录中已有同名 QDT 时也可自动发现。自动包缺失或无法读取时沿用原地貌。显式指定的无效包会报错。

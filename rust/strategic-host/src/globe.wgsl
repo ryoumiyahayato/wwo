@@ -37,6 +37,7 @@ struct Tile {
 @group(0) @binding(12) var terrain_index: texture_2d<u32>;
 @group(0) @binding(13) var land_surface: texture_2d<f32>;
 @group(0) @binding(14) var land_repeat: sampler;
+@group(0) @binding(15) var landscape_data: texture_2d_array<f32>;
 @group(2) @binding(0) var close_surface: texture_2d<f32>;
 @group(2) @binding(1) var<uniform> close_extent: vec4f;
 @group(1) @binding(0) var<uniform> tile: Tile;
@@ -193,7 +194,7 @@ struct NaturalPage { color:vec4f, coverage:f32 }
 fn page_readiness(cell:vec2i, columns:i32, rows:i32) -> f32 {
     let x=(cell.x+columns)%columns;
     let y=clamp(cell.y,0,rows-1)+rows-1;
-    return f32(textureLoad(terrain_index,vec2i(x,y),0).r>>16u)/255.;
+    return f32((textureLoad(terrain_index,vec2i(x,y),0).r>>16u)&255u)/255.;
 }
 fn page_surface(uv:vec2f, zoom:i32, exact:bool) -> NaturalPage {
     let rows=1i<<u32(zoom);
@@ -208,7 +209,7 @@ fn page_surface(uv:vec2f, zoom:i32, exact:bool) -> NaturalPage {
     let q=fract(position);
     let refined=textureSampleLevel(terrain_detail,linear,(q*256.+4.)/264.,slot,0.);
     if exact {return NaturalPage(refined,1.);}
-    var fade=f32(index>>16u)/255.;
+    var fade=f32((index>>16u)&255u)/255.;
     // Every cell meeting at an edge or corner uses the same refinement weight.
     // The common parent supplies unready portions at identical coordinates.
     let rim=min(q,1.-q);
@@ -431,6 +432,7 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
                 terrain.a=close.a;
             }
         }
+        color=landscape_relief(color,ll,normal_world,terrain.a,base_mpp);
         relief_light=clamp(.57+dot(terrain.rgb,vec3f(.30,.55,.15))*.68,.70,1.19);
     } else if tile.options.y>=5. {
         let level = log2(max(1.,base_mpp/min(dx,dy)));
