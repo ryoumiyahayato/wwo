@@ -1227,13 +1227,11 @@ impl Host {
                 fade=Some(old);
             }
         }
-        let paris_ready=self.visible.iter().filter(|&&id|self.world.tiles[id].city).all(|id|self.cached.contains_key(id));
         let needs_overlay=matches!(self.mode,Mode::Political|Mode::Economic)
             ||self.mode==Mode::Military&&view.map_style[3]>0.;
         let pages:Vec<_>=self.visible.iter().filter_map(|&id| {
             let tile=&self.world.tiles[id];
             if view.map_style[1]>0.&&!needs_overlay&&!tile.city&&view.selection[1]<0.5{return None;}
-            if tile.city&&!paris_ready{return None;}
             let p=self.cached.get(&id)?;
             let opacity=(now.duration_since(p.ready).as_secs_f32()/0.16).clamp(0.,1.)*tile.weight(self.camera.mpp);
             let scissor=self.index.scissor(id,&self.camera,self.size)?;
@@ -1243,7 +1241,7 @@ impl Host {
             self.landmarks.as_ref().map_or_else(Vec::new,|catalogue|catalogue.visible(&date,&self.camera,self.size))
         };
         let renderer=self.renderer.as_mut().unwrap();
-        self.hits=models.iter().filter(|model|renderer.has_model(model.key)).map(|model|Hit {
+        self.hits=models.iter().filter(|model|renderer.has_model(model)).map(|model|Hit {
             area:model.screen_bounds,action:Action::Select(Object::Place(model.place)),
         }).chain(hits).collect();
         renderer.update_terrain(&self.camera,self.size,now)?;
@@ -1251,7 +1249,6 @@ impl Host {
         view.natural_lod=renderer.terrain_viewport_mix();
         view.set_terrain_exact(renderer.terrain_exact());
         let landscape_enabled=!loading&&(!self.config.managed||self.state.session.is_some())&&self.mode==Mode::Geographic;
-        if landscape_enabled && view.map_style[2]>=6. {view.set_city_grounds(&models);}
         renderer.prepare_landscape(&self.camera,self.size,landscape_enabled);
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);

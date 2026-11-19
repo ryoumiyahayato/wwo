@@ -93,8 +93,6 @@ struct Settlement {
 #[derive(Deserialize)]
 struct SettlementLayout {
     max_mpp: f64,
-    scale_max: f64,
-    target_height_px: f64,
     lod_switch_mpp: f64,
     placements: Vec<SettlementPlacement>,
 }
@@ -117,12 +115,10 @@ struct CityModel {
 
 struct CityLayout {
     center: [f64; 2],
-    ground: [f32; 4],
+    search_mpp: f64,
     from: String,
     to: String,
     max_mpp: f64,
-    max_scale: f64,
-    target_height: f64,
     lod_mpp: f64,
     models: Vec<CityModel>,
 }
@@ -152,6 +148,8 @@ impl ModelKey {
         }
     }
 
+    pub fn is_city(self) -> bool { matches!(self.asset, ModelAsset::City(_)) }
+
     pub fn lod(self) -> &'static str {
         match self.lod { Lod::Single => "Single", Lod::Far => "Far", Lod::Near => "Near" }
     }
@@ -162,7 +160,8 @@ pub struct VisibleModel {
     pub place: usize,
     pub screen_bounds: [f32; 4],
     pub clip_from_model: [[f32; 4]; 4],
-    pub city_ground: Option<[f32; 4]>,
+    pub lod_range: [f32; 2],
+    pub alternate: Option<(ModelKey, f32)>,
 }
 
 impl Landmarks {
@@ -222,7 +221,7 @@ impl Landmarks {
                 let reach=width.hypot(depth)+85.;
                 for i in 0..2 {radius[i]=radius[i].max(offset[i].abs()+reach);}
             }
-            city.ground=[lon as f32,lat as f32,radius[0] as f32,radius[1] as f32];
+            city.search_mpp=(radius[0].max(radius[1])/65.).clamp(city.lod_mpp*0.82,city.max_mpp*0.62);
         }
         Ok(Self { landmarks: models, cities, city_bounds })
     }
@@ -237,34 +236,38 @@ impl Landmarks {
             row.project(*place, *asset, date, camera, pitch, size)
         }).collect();
         for (&place, city) in &self.cities {
-            if camera.mpp >= city.max_mpp || !crate::ui::active(date, &city.from, &city.to) { continue; }
-            let lod = if camera.mpp >= city.lod_mpp { Lod::Far } else { Lod::Near };
-            let weight = 1. - camera::smooth(city.max_mpp * 0.75, city.max_mpp, camera.mpp);
-            if weight <= 0.02 { continue; }
-            visible.extend(city.models.iter().filter_map(|model| {
-                let bounds = self.city_bounds[model.module][usize::from(lod == Lod::Far)];
-                let height = (bounds.1[1] - bounds.0[1]) * model.scale[1] * pitch.sin();
-                let scale = (city.target_height * camera.mpp / height.max(1.))
-                    .clamp(1., city.max_scale) * weight;
-                ModelPose {
-                    key: ModelKey { asset: ModelAsset::City(model.module), lod },
-                    anchor: model.anchor, heading: model.heading, datum: 0.,
-                    dimensions: model.scale.map(|component| component * scale),
-                    bounds,
-                }.project(place, camera, pitch, size).map(|mut visible|{
-                    visible.city_ground=Some(city.ground);
-                    visible
-                })
-            }));
+            let opacity=city.opacity(date,camera.mpp);
+            if opacity <= 0. { continue; }
+            let far=camera::smooth(city.lod_mpp*0.8,city.lod_mpp*1.2,camera.mpp);
+            let crossover=(opacity*(1.-far)) as f32;
+            let opacity=opacity as f32;
+            for model in &city.models {
+                let [near,far]=self.city_bounds[model.module];
+                let bounds=(std::array::from_fn(|i|near.0[i].min(far.0[i])),
+                            std::array::from_fn(|i|near.1[i].max(far.1[i])));
+                // The mesh, placement offsets and both LODs use the same metre scale.
+                let key=|lod|ModelKey { asset:ModelAsset::City(model.module),lod };
+                let Some(mut high)= (ModelPose {
+                    key:key(Lod::Near),anchor:model.anchor,heading:model.heading,
+                    datum:bounds.0[1]*model.scale[1],dimensions:model.scale,bounds,
+                }).project(place,camera,pitch,size) else {continue;};
+                let low=VisibleModel{key:key(Lod::Far),lod_range:[crossover,opacity],
+                    alternate:Some((high.key,opacity)),..high};
+                high.lod_range=[0.,crossover];
+                high.alternate=Some((low.key,opacity));
+                visible.extend([high,low]);
+            }
         }
         visible
     }
 
     pub fn focus(&self, place: usize) -> Option<([f64; 2], f64)> {
-        if let Some(city) = self.cities.get(&place) { return Some((city.center, 2.)); }
+        if let Some(city) = self.cities.get(&place) { return Some((city.center,city.search_mpp)); }
         let (_, _, row) = self.landmarks.iter().find(|(i, _, _)| *i == place)?;
         let size = row.model_height_m.max(row.model_base_width_m);
-        Some((row.anchor(), (size / 120.).clamp(1.5, 8.)))
+        // Leave context around the authored footprint when jumping to a landmark.
+        let mpp=(size/84.).clamp(1.8,8.).min(row.model_lod_switch_mpp.unwrap_or(8.));
+        Some((row.anchor(),mpp))
     }
 }
 
@@ -279,16 +282,17 @@ fn install_place(world: &mut World, place: Place) -> usize {
 }
 
 impl CityLayout {
+    fn opacity(&self,date:&str,mpp:f64)->f64 {
+        if !crate::ui::active(date,&self.from,&self.to) { return 0.; }
+        let close=camera::smooth(self.lod_mpp*0.30,self.lod_mpp*0.65,mpp);
+        let distant=1.-camera::smooth(self.max_mpp*0.75,self.max_mpp,mpp);
+        close*distant
+    }
+
     fn from_source(center: [f64; 2], from: String, to: String, layout: SettlementLayout) -> io::Result<Self> {
-        let models = layout.placements.into_iter().enumerate().map(|(index, row)| {
+        let models = layout.placements.into_iter().map(|row| {
             let module = R40_MODULES.iter().position(|name| **name == row.module)
                 .ok_or_else(|| io::Error::other("unknown R40 city module"))?;
-            let index = index + 1;
-            let variation = [
-                0.90 + 0.03 * (index % 3) as f64,
-                0.88 + 0.04 * (index % 4) as f64,
-                0.92 + 0.025 * (index % 3) as f64,
-            ];
             let reference = row.reference_anchor_lon_lat.unwrap_or(center);
             let [east_m, north_m] = row.offset_m;
             let radius = east_m.hypot(north_m);
@@ -299,10 +303,10 @@ impl CityLayout {
                 normal[i] * cos + (east[i] * east_m + north[i] * north_m) * per_meter
             }));
             Ok(CityModel { module, anchor, heading: row.heading_degrees,
-                scale: std::array::from_fn(|i| row.scale[i] * variation[i]) })
+                scale: row.scale })
         }).collect::<io::Result<_>>()?;
-        Ok(Self { center, ground:[0.;4], from, to, max_mpp: layout.max_mpp, max_scale: layout.scale_max,
-            target_height: layout.target_height_px, lod_mpp: layout.lod_switch_mpp, models })
+        Ok(Self { center, search_mpp:layout.lod_switch_mpp, from, to,
+            max_mpp: layout.max_mpp, lod_mpp: layout.lod_switch_mpp, models })
     }
 }
 
@@ -382,7 +386,8 @@ impl ModelPose {
             key: self.key, place,
             clip_from_model: transform.to_cols_array_2d(),
             screen_bounds: [left - 3., top - 3., right - left + 6., bottom - top + 6.],
-            city_ground: None,
+            lod_range: [0.,1.],
+            alternate: None,
         })
     }
 }

@@ -13,7 +13,6 @@ struct View {
     edits: array<LandEdit, 12>,
     natural_lod: array<vec4f, 2>, // opacity indexed by Z, or -1 for per-page blending
     close_sample: vec4f,
-    city_grounds: array<vec4f,4>,
 };
 struct LandEdit { area: vec4f, state: vec4f };
 struct Tile {
@@ -192,48 +191,41 @@ fn natural_global(uv:vec2f) -> vec4f {
     return textureSampleLevel(terrain_world,linear,(local*256.+4.)/264.,half,0.);
 }
 struct NaturalPage { color:vec4f, coverage:f32 }
-fn page_readiness(cell:vec2i, columns:i32, rows:i32) -> f32 {
+fn page_readiness(cell:vec2i, columns:i32, rows:i32, shift:u32) -> f32 {
     let x=(cell.x+columns)%columns;
     let y=clamp(cell.y,0,rows-1)+rows-1;
-    return f32((textureLoad(terrain_index,vec2i(x,y),0).r>>16u)&255u)/255.;
+    return f32((textureLoad(terrain_index,vec2i(x,y),0).r>>shift)&255u)/255.;
+}
+fn page_coverage(cell:vec2i, q:vec2f, rows:i32, shift:u32, fade:f32) -> f32 {
+    if fade<=0. {return 0.;}
+    // Colour and relief share the same fallback at edges and corners.
+    let rim=min(q,1.-q);
+    let collar=.04;
+    if min(rim.x,rim.y)>=collar {return fade;}
+    let dx=vec2i(select(-1,1,q.x>.5),0);
+    let dy=vec2i(0,select(-1,1,q.y>.5));
+    let edge_x=select(fade,min(fade,page_readiness(cell+dx,rows*2,rows,shift)),rim.x<collar);
+    let edge_y=select(fade,min(fade,page_readiness(cell+dy,rows*2,rows,shift)),rim.y<collar);
+    var corner=min(edge_x,edge_y);
+    if max(rim.x,rim.y)<collar {
+        corner=min(corner,page_readiness(cell+dx+dy,rows*2,rows,shift));
+    }
+    let t=smoothstep(vec2f(0.),vec2f(collar),rim);
+    return mix(mix(corner,edge_y,t.x),mix(edge_x,fade,t.x),t.y);
 }
 fn page_surface(uv:vec2f, zoom:i32, exact:bool) -> NaturalPage {
     let rows=1i<<u32(zoom);
-    let columns=rows*2;
-    let offset=rows-1;
-    let position=uv*vec2f(f32(columns),f32(rows));
-    let cell=vec2i(floor(position));
-    let at=vec2i(cell.x,cell.y+offset);
-    let index=textureLoad(terrain_index,at,0).r;
+    let position=uv*vec2f(f32(rows*2),f32(rows));
+    let cell=vec2i(position);
+    let index=textureLoad(terrain_index,cell+vec2i(0,rows-1),0).r;
     let slot=i32(index&65535u)-1;
     if slot<0 {return NaturalPage(vec4f(0.),0.);}
     let q=fract(position);
+    let fade=f32((index>>16u)&255u)/255.;
+    if fade<=0. && !exact {return NaturalPage(vec4f(0.),0.);}
     let refined=textureSampleLevel(terrain_detail,linear,(q*256.+4.)/264.,slot,0.);
     if exact {return NaturalPage(refined,1.);}
-    var fade=f32((index>>16u)&255u)/255.;
-    // Every cell meeting at an edge or corner uses the same refinement weight.
-    // The common parent supplies unready portions at identical coordinates.
-    let rim=min(q,1.-q);
-    let collar=.04;
-    let dx=vec2i(select(-1,1,q.x>.5),0);
-    let dy=vec2i(0,select(-1,1,q.y>.5));
-    var edge_x=fade;
-    var edge_y=fade;
-    if rim.x<collar {
-        edge_x=min(fade,page_readiness(cell+dx,columns,rows));
-    }
-    if rim.y<collar {
-        edge_y=min(fade,page_readiness(cell+dy,columns,rows));
-    }
-    if min(rim.x,rim.y)<collar {
-        var corner=min(edge_x,edge_y);
-        if max(rim.x,rim.y)<collar {
-            corner=min(corner,page_readiness(cell+dx+dy,columns,rows));
-        }
-        let t=smoothstep(vec2f(0.),vec2f(collar),rim);
-        fade=mix(mix(corner,edge_y,t.x),mix(edge_x,fade,t.x),t.y);
-    }
-    return NaturalPage(refined,fade);
+    return NaturalPage(refined,page_coverage(cell,q,rows,16u,fade));
 }
 fn natural_surface(ll:vec2f) -> vec4f {
     // Keep a rounded-up longitude fraction inside the last column at the antimeridian.
@@ -248,7 +240,8 @@ fn natural_surface(ll:vec2f) -> vec4f {
     for(var z=i32(view.map_style.z);z>0;z-=1) {
         let opacity=view.natural_lod[u32(z)/4u][u32(z)%4u];
         let grouped=opacity>=0.;
-        let page=page_surface(uv,z,grouped);
+        if opacity==0. {continue;}
+        let page=page_surface(uv,z,false);
         let weight=remaining*page.coverage*select(1.,opacity,grouped);
         color+=page.color*weight;
         remaining-=weight;
@@ -263,19 +256,6 @@ fn land_material_band(earth:vec3f, planes:vec3f, footprint:f32, period:f32) -> v
     return textureSampleLevel(land_surface,land_repeat,p.yz,mip)*planes.x
         +textureSampleLevel(land_surface,land_repeat,p.xz+vec2f(.21,.43),mip)*planes.y
         +textureSampleLevel(land_surface,land_repeat,p.xy+vec2f(.67,.29),mip)*planes.z;
-}
-fn city_ground_weight(ll:vec2f) -> f32 {
-    if view.city_grounds[0].z<=0. {return 0.;}
-    var weight=0.;
-    for (var i=0u; i<4u; i++) {
-        let bounds=view.city_grounds[i];
-        if bounds.z<=0. {break;}
-        let delta=ll.x-bounds.x;
-        let longitude=delta-360.*floor((delta+180.)/360.);
-        let offset=radians(vec2f(longitude*cos(radians(bounds.y)),ll.y-bounds.y))*EARTH;
-        weight=max(weight,1.-smoothstep(.56,1.21,length(offset/bounds.zw)));
-    }
-    return weight;
 }
 fn land_chroma(rgb:vec3f) -> vec2f {
     return vec2f(rgb.g-rgb.r,rgb.r+rgb.g-2.*rgb.b)/max(.001,rgb.r+rgb.g+rgb.b);
@@ -439,14 +419,6 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
             color=terrain.rgb;
         }
         color=landscape_relief(color,ll,normal_world,terrain.a,base_mpp);
-        let built=city_ground_weight(ll)*(1.-smoothstep(.02,.45,terrain.a));
-        if built>.001 {
-            let facing=abs(normal_world)*abs(normal_world);
-            let planes=facing*facing/dot(facing,facing);
-            let courts=land_material_band(normal_world,planes,base_mpp,382.);
-            let paving=mix(vec3f(.43,.367,.291),vec3f(.54,.499,.418),courts.b);
-            color=mix(color,paving*(.86+.27*courts.a),built*.74);
-        }
         relief_light=clamp(.57+dot(terrain.rgb,vec3f(.30,.55,.15))*.68,.70,1.19);
     } else if tile.options.y>=5. {
         let level = log2(max(1.,base_mpp/min(dx,dy)));
@@ -607,6 +579,30 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
     }
     return color;
 }
+// Geographic city pages carry feature coverage. Let the QPK pass own the
+// continuous ground so loading a local page only reveals buildings and bridges.
+fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32) -> vec4f {
+    let detail=1.-smoothstep(16.,66.,mpp);
+    if detail<=0. {return vec4f(0.);}
+    let buildings=textureSampleLevel(city_data,linear,uv,0.).rg;
+    let du=1./vec2f(textureDimensions(city_data));
+    let edge=textureSampleLevel(city_data,linear,uv-du*.82,0.).r;
+    let shadow=max(0.,edge-buildings.r)*detail*.49;
+    if max(max(buildings.r,buildings.g),shadow)<=.001 {return vec4f(0.);}
+    var terrain=natural_surface(ll);
+    if view.map_style.z>=6. {
+        terrain=close_terrain(ll,mpp/max(.3,view.chart_origin.z),terrain);
+    }
+    let land=1.-terrain.a;
+    let facade=mix(vec3f(.68,.56,.48),vec3f(.80,.71,.62),max(0.,buildings.r-edge));
+    let wall=buildings.r*detail*.91*land;
+    let bridge=buildings.g*detail*mix(.88,.82,terrain.a);
+    let shading=shadow*land;
+    let color=(vec3f(.36,.32,.31)*shading*(1.-wall)+facade*wall)*(1.-bridge)
+        +mix(vec3f(.82,.76,.67),vec3f(.69,.67,.59),terrain.a)*bridge;
+    let alpha=(shading*(1.-wall)+wall)*(1.-bridge)+bridge;
+    return vec4f(color/max(.0001,alpha),alpha);
+}
 @fragment fn map(@builtin(position) p:vec4f) -> @location(0) vec4f {
     let t=view.viewport.w;
     let xy=(p.xy-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1./view.chart_origin.z);
@@ -626,14 +622,18 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
     let uv=vec2f((ll.x-tile.extent.x)/(tile.extent.z-tile.extent.x),
                  (tile.extent.w-ll.y)/(tile.extent.w-tile.extent.y));
     let normal_view=vec3f(dot(v,view.east.xyz),dot(v,view.north.xyz),dot(v,view.forward.xyz));
+    let edge_distance=min(min(ll.x-tile.region.x,tile.region.z-ll.x)*max(.08,cos(radians(ll.y))),
+                          min(ll.y-tile.region.y,tile.region.w-ll.y))*111195.;
+    let blend=select(smoothstep(0.,max(select(1400.,2400.,tile.options.z>.5),view.viewport.z*EARTH*30.),edge_distance),1.,is_world);
+    if tile.options.z>.5 && view.map_style.y>.5 && view.settings.y<.5 && view.selection.y<.5 {
+        let ink=geographic_city_ink(ll,uv,view.viewport.z*EARTH);
+        return vec4f(ink.rgb,ink.a*tile.options.x*blend);
+    }
     var color=shade_map(ll,uv,v,normal_view);
     if is_world {
         let edge=1.-smoothstep(0.,view.viewport.z*1.2,horizon-r);
         color=mix(color,sky(p.xy),edge*.47);
     }
-    let edge_distance=min(min(ll.x-tile.region.x,tile.region.z-ll.x)*max(.08,cos(radians(ll.y))),
-                          min(ll.y-tile.region.y,tile.region.w-ll.y))*111195.;
-    let blend=select(smoothstep(0.,max(select(1400.,2400.,tile.options.z>.5),view.viewport.z*EARTH*30.),edge_distance),1.,is_world);
     let rim=vec4f(ll-tile.core.xy,tile.core.zw-ll);
     let feather=select(vec4f(1.),smoothstep(vec4f(0.),max(tile.edges,vec4f(.00001)),rim),tile.edges>vec4f(0.));
     let page_blend=select(blend,feather.x*feather.y*feather.z*feather.w,tile.options.y>=5.);

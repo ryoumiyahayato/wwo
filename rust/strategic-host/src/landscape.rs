@@ -251,7 +251,7 @@ impl Landscape {
             if view.level >= 7 && footprint < 72. {
                 visible_chunks(camera, size, 1, &mut self.requested);
             }
-            if (view.level == 6 || footprint > 34.) && footprint < 300. {
+            if footprint < 300. {
                 visible_chunks(camera, size, 4, &mut self.requested);
             }
             if footprint > 143. && footprint < 650. {

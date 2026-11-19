@@ -4,7 +4,7 @@ use crate::terrain_detail;
 use crate::landscape::Landscape;
 use bytemuck::{Pod,Zeroable};
 use std::collections::{HashMap, HashSet};
-use std::{fs::File,io,path::{Path,PathBuf},sync::Arc,time::Instant};
+use std::{fs::File,io,path::{Path,PathBuf},sync::Arc,time::{Duration,Instant}};
 use wgpu::util::DeviceExt;
 use winit::window::Window;
 
@@ -24,7 +24,6 @@ pub struct View {
     pub edits:[Edit;crate::timeline::MAX_SITES],
     pub natural_lod:[[f32;4];2],
     pub close_sample:[f32;4],
-    city_grounds:[[f32;4];4],
 }
 impl View {
     pub fn new(camera:&Camera,size:[u32;2])->Self {
@@ -41,16 +40,6 @@ impl View {
         self.projection_origin[3]=if exact {1.} else {0.};
     }
 
-    pub fn set_city_grounds(&mut self, models:&[VisibleModel]) {
-        let mut preceding=None;
-        let grounds=models.iter().filter_map(|model|{
-            let bounds=model.city_ground?;
-            if preceding==Some(model.place) {return None;}
-            preceding=Some(model.place);
-            Some(bounds)
-        });
-        for (slot,ground) in self.city_grounds.iter_mut().zip(grounds) {*slot=ground;}
-    }
 }
 #[repr(C)]
 #[derive(Clone,Copy,Pod,Zeroable)]
@@ -217,12 +206,20 @@ impl GroundSurface {
     }
 }
 
+#[repr(C)]
+#[derive(Clone,Copy,Pod,Zeroable)]
+struct ModelInstance {
+    clip_from_model:[[f32;4];4],
+    lod_range:[f32;2],
+}
+
 struct ResidentModel {
     vertices: wgpu::Buffer,
     indices: wgpu::Buffer,
     count: u32,
     instance_buffer: wgpu::Buffer,
-    transforms: Vec<[[f32; 4]; 4]>,
+    transforms: Vec<ModelInstance>,
+    last_drawn: Instant,
 }
 
 struct ModelLayer {
@@ -237,6 +234,7 @@ struct ModelLayer {
 
 impl ModelLayer {
     const DEPTH: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
+    const CITY_LOD_CACHE_TIME: Duration = Duration::from_secs(2);
 
     fn new(device: &wgpu::Device, format: wgpu::TextureFormat, events: winit::event_loop::EventLoopProxy<crate::HostEvent>) -> Self {
         let stages = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -257,9 +255,9 @@ impl ModelLayer {
                     step_mode: wgpu::VertexStepMode::Vertex,
                     attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x4],
                 }, wgpu::VertexBufferLayout {
-                    array_stride: 64,
+                    array_stride: std::mem::size_of::<ModelInstance>() as u64,
                     step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: &wgpu::vertex_attr_array![3=>Float32x4, 4=>Float32x4, 5=>Float32x4, 6=>Float32x4],
+                    attributes: &wgpu::vertex_attr_array![3=>Float32x4, 4=>Float32x4, 5=>Float32x4, 6=>Float32x4, 7=>Float32x2],
                 }],
             },
             fragment: Some(wgpu::FragmentState {
@@ -272,9 +270,13 @@ impl ModelLayer {
     }
 
     fn prepare(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, size: [u32; 2], models: &[VisibleModel]) {
+        let now = Instant::now();
         self.visible.clear();
-        self.visible.extend(models.iter().map(|model| model.key));
-        self.residents.retain(|key, _| self.visible.contains(key));
+        self.visible.extend(models.iter().filter(|model| model.lod_range[0] < model.lod_range[1]).map(|model| model.key));
+        self.residents.retain(|key, model| {
+            self.visible.contains(key) || (key.is_city() && now.duration_since(model.last_drawn) < Self::CITY_LOD_CACHE_TIME)
+        });
+        for resident in self.residents.values_mut() { resident.transforms.clear(); }
         if models.is_empty() {
             self.depth = None;
             return;
@@ -288,14 +290,15 @@ impl ModelLayer {
             });
             self.depth = Some((size, texture.create_view(&Default::default())));
         }
-        for resident in self.residents.values_mut() {
-            resident.transforms.clear();
-        }
         for model in models {
             let key = model.key;
+            let lod_range=self.lod_range(model);
             if let Some(resident) = self.residents.get_mut(&key) {
-                resident.transforms.push(model.clip_from_model);
-            } else if !self.failed.contains(&key) && self.pending.insert(key) {
+                if lod_range[0]<lod_range[1] {
+                    resident.transforms.push(ModelInstance{clip_from_model:model.clip_from_model,lod_range});
+                    resident.last_drawn = now;
+                }
+            } else if self.visible.contains(&key) && !self.failed.contains(&key) && self.pending.insert(key) {
                 let events = self.events.clone();
                 let created = std::thread::Builder::new().name("WWO model loading".into()).spawn(move || {
                     let _ = events.send_event(crate::HostEvent::Model(key, landmarks::decode(key)));
@@ -307,13 +310,20 @@ impl ModelLayer {
                 }
             }
         }
-        for resident in self.residents.values_mut() {
+        for resident in self.residents.values_mut().filter(|model|!model.transforms.is_empty()) {
             let transforms = bytemuck::cast_slice(&resident.transforms);
             if transforms.len() as u64 > resident.instance_buffer.size() {
                 resident.instance_buffer = Self::instance_buffer(device, transforms.len().next_power_of_two() as u64);
             }
             queue.write_buffer(&resident.instance_buffer, 0, transforms);
         }
+    }
+
+    fn lod_range(&self,model:&VisibleModel)->[f32;2] {
+        if let Some((key,opacity))=model.alternate {
+            if !self.residents.contains_key(&key) {return [0.,opacity];}
+        }
+        model.lod_range
     }
 
     fn instance_buffer(device: &wgpu::Device, size: u64) -> wgpu::Buffer {
@@ -333,8 +343,8 @@ impl ModelLayer {
         self.residents.insert(key, ResidentModel {
             vertices: upload(bytemuck::cast_slice(&model.vertices), wgpu::BufferUsages::VERTEX),
             indices: upload(bytemuck::cast_slice(&model.indices), wgpu::BufferUsages::INDEX),
-            count: model.indices.len() as u32, instance_buffer: Self::instance_buffer(device, 64),
-            transforms: Vec::new(),
+            count: model.indices.len() as u32, instance_buffer: Self::instance_buffer(device, std::mem::size_of::<ModelInstance>() as u64),
+            transforms: Vec::new(), last_drawn: Instant::now(),
         });
         Ok(())
     }
@@ -353,7 +363,7 @@ impl ModelLayer {
             }), occlusion_query_set: None, timestamp_writes: None,
         });
         pass.set_pipeline(&self.pipeline);
-        for model in self.residents.values() {
+        for model in self.residents.values().filter(|model|!model.transforms.is_empty()) {
             pass.set_vertex_buffer(0, model.vertices.slice(..));
             pass.set_vertex_buffer(1, model.instance_buffer.slice(..));
             pass.set_index_buffer(model.indices.slice(..), wgpu::IndexFormat::Uint32);
@@ -710,12 +720,16 @@ impl Renderer {
 
     pub fn model_instances(&self) -> Vec<(&'static str, usize)> {
         let mut models: Vec<_> = self.models.residents.iter()
+            .filter(|(_,model)|!model.transforms.is_empty())
             .map(|(key, model)| (key.model(), model.transforms.len())).collect();
         models.sort_unstable();
         models
     }
 
-    pub fn has_model(&self, key: ModelKey) -> bool { self.models.residents.contains_key(&key) }
+    pub fn has_model(&self, model:&VisibleModel) -> bool {
+        let [low,high]=self.models.lod_range(model);
+        low<high && self.models.residents.contains_key(&model.key)
+    }
     pub fn update_terrain(&mut self,camera:&Camera,size:[u32;2],now:Instant)->io::Result<()> {
         if let Some(terrain)=&mut self.terrain {
             terrain.update(&self.queue,camera,size,now);

@@ -5,13 +5,16 @@ struct LandscapePage {
     fade: f32,
 };
 
-fn landscape_page(ll: vec2f, level: u32) -> LandscapePage {
+fn landscape_page(ll: vec2f, level: u32, at_surface: bool) -> LandscapePage {
     let uv = vec2f(min(fract(ll.x / 360. + .5), .99999994), clamp(.5 - ll.y / 180., 0., .99999994));
-    let rows = 1u << level;
-    let cell = uv * vec2f(f32(rows*2u), f32(rows));
-    let at = vec2i(cell) + vec2i(0, i32(rows)-1);
-    let index = textureLoad(terrain_index, at, 0).r;
-    return LandscapePage(fract(cell) * 256. + 4., i32(index & 65535u) - 1, f32(index >> 24u) / 255.);
+    let rows = 1i << level;
+    let position = uv * vec2f(f32(rows*2), f32(rows));
+    let cell = vec2i(position);
+    let index = textureLoad(terrain_index, cell+vec2i(0,rows-1), 0).r;
+    let q = fract(position);
+    var fade = f32(index >> 24u) / 255.;
+    if at_surface && view.chart_origin.w <= .5 { fade=page_coverage(cell,q,rows,24u,fade); }
+    return LandscapePage(q * 256. + 4., i32(index & 65535u) - 1, fade);
 }
 
 fn landscape_elevation(page: LandscapePage, offset: vec2f) -> f32 {
@@ -25,7 +28,8 @@ fn landscape_coverage(page: LandscapePage) -> f32 {
 
 fn landscape_surface_weight(level: u32) -> f32 {
     if view.map_style.z < f32(level) || view.settings.y >= .5 { return 0.; }
-    return select(clamp(view.natural_lod[1][level-4u], 0., 1.), 1., view.chart_origin.w > .5);
+    if view.chart_origin.w > .5 { return select(0.,1.,view.map_style.z == f32(level)); }
+    return clamp(view.natural_lod[1][level-4u], 0., 1.);
 }
 
 fn landscape_slope(page: LandscapePage, latitude: f32, radius: f32, level: u32) -> vec2f {
@@ -126,7 +130,7 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
         let grains = land_material_band(relief_world,planes,mpp,3670.) - .5;
         let texture = grains.r*(land.forest*.34+land.shrub*.22)
             + grains.g*land.grass*.43 + grains.a*(land.soil*.49+land.bare*.29+scree*.25)
-            + grains.b*(exposed*.91+scree*.37) + grains.a*land.snow*.08
+            + grains.b*(exposed*.91+scree*.37) + grains.a*(land.snow*.08+land.urban*.13)
             + motif.b*exposed*.17;
         color *= 1. + texture*near;
     }
@@ -139,17 +143,14 @@ fn landscape_relief(base: vec3f, ll: vec2f, world: vec3f, water: f32, mpp: f32) 
     let modern = 1. - landscape_survey_mask(ll,mpp);
     let strength = (1.-smoothstep(880.,1720.,mpp)) * (1.-smoothstep(.04,.65,water)) * modern;
     if strength <= .001 { return base; }
-    let child = landscape_page(ll,7u);
+    let child = landscape_page(ll,7u,true);
     let fine = landscape_surface_weight(7u)*child.fade;
     var surface = base;
     var regional = 0.;
     if fine < .999 {
-        let parent = landscape_page(ll,6u);
+        let parent = landscape_page(ll,6u,true);
         regional = landscape_surface_weight(6u)*parent.fade;
         if regional > .001 { surface = mix(base,ground_motif(base,ll,world,parent,6u,mpp),regional); }
-    }
-    if max(fine,regional) <= .001 {
-        return mix(base,natural_land_material(vec4f(base,water),world,mpp),modern);
     }
     if fine > .001 { surface = mix(surface,ground_motif(base,ll,world,child,7u,mpp),fine); }
     return mix(base,surface,strength);
@@ -235,15 +236,8 @@ fn landscape_build(@builtin(global_invocation_id) id: vec3u) {
     }
     let ll = landscape_coordinates(cell,columns);
     let world = landscape_world(ll);
-    var level = 6u;
-    var page = landscape_page(ll,6u);
-    if step == 1u || (view.chart_origin.w > .5 && view.map_style.z == 7.) {
-        let fine = landscape_page(ll,7u);
-        if fine.fade > 0. {
-            level = 7u;
-            page = fine;
-        }
-    }
+    let level = select(6u,7u,step == 1u || (view.chart_origin.w > .5 && view.map_style.z == 7.));
+    let page = landscape_page(ll,level,false);
     if page.fade <= 0. || landscape_coverage(page) >= .20 { return; }
     let cover = textureLoad(landscape_data,vec2i(page.texel),page.slot,0);
     let code = u32(round(cover.a*15.));
@@ -303,6 +297,7 @@ struct LandscapeVertex {
     @location(1) color: vec4f,
     @location(2) edge: f32,
     @location(3) @interpolate(flat) kind: u32,
+    @location(4) @interpolate(flat) lod: vec2f,
 };
 
 @vertex
@@ -348,11 +343,10 @@ fn landscape_vertex(
     var pixels = landscape_pixels(landscape_world(site));
     let pitch = sqrt(max(0.,1.-view.chart_origin.z*view.chart_origin.z));
     let mpp = view.viewport.z*EARTH;
-    let footprint = max(select(58.,0.,view.map_style.z >= 7.),mpp*max(1.,sqrt(view.viewport.x*view.viewport.y/2073600.)));
-    let lod = landscape_model_weight(step,footprint);
+    let footprint = mpp*max(1.,sqrt(view.viewport.x*view.viewport.y/2073600.));
+    let lod = vec2f(landscape_model_weight(step,footprint),landscape_model_weight(step,max(58.,footprint)));
     let apparent = min(form.x,form.y)*2./mpp;
     let visibility = smoothstep(2.,4.5,apparent);
-    let opacity = lod*visibility;
     pixels.y -= altitude*pitch/mpp;
     let z = height+ground+altitude;
     let depth = clamp(.56-(z+(pixels.y-view.viewport.y*.5)*mpp*pitch)/440000.,.002,.998);
@@ -365,30 +359,48 @@ fn landscape_vertex(
     let facing = normalize(vec3f(flat-ground_grade*vertical,vertical));
     let light = .88+.26*max(0.,dot(facing,LANDSCAPE_SUN));
     let color = clamp((base+pigment)*light*mix(1.,tone,.70),vec3f(0.),vec3f(1.));
-    return LandscapeVertex(clip,vec3f(site,z),vec4f(color,opacity),edge,kind);
+    return LandscapeVertex(clip,vec3f(site,z),vec4f(color,visibility),edge,kind,lod);
+}
+
+fn landscape_object_mask(page: LandscapePage, input: LandscapeVertex) -> f32 {
+    let land = 1.-smoothstep(.10,.44,landscape_coverage(page));
+    let cover = landscape_material(page);
+    let open_ground=1.-smoothstep(.21,.82,cover.urban);
+    if input.kind < 4u {
+        let clearance = input.site.z-landscape_elevation(page,vec2f(0.));
+        return land*open_ground*smoothstep(-4.,0.,clearance);
+    }
+    return land*open_ground*smoothstep(.17,.75,cover.forest+cover.shrub*.55);
 }
 
 @fragment
 fn landscape_fragment(input: LandscapeVertex) -> @location(0) vec4f {
     let edge = smoothstep(0.,max(fwidth(input.edge)*.68,.001),input.edge);
+    if input.color.a*max(input.lod.x,input.lod.y) <= .012 { discard; }
     let mpp = view.viewport.z*EARTH;
-    let fine = landscape_page(input.site.xy,7u);
-    var page = fine;
-    var strength = landscape_surface_weight(7u)*fine.fade;
-    if strength <= .001 {
-        page = landscape_page(input.site.xy,6u);
-        strength = landscape_surface_weight(6u)*page.fade;
+    var fine = 0.;
+    var strength = 0.;
+    let zoom_fine = landscape_surface_weight(7u);
+    if zoom_fine > .001 {
+        let page = landscape_page(input.site.xy,7u,true);
+        fine = zoom_fine*page.fade;
+        if fine*input.lod.x > .001 {
+            strength = fine*input.lod.x*landscape_object_mask(page,input);
+        }
+    }
+    if input.kind == 4u && (1.-fine)*input.lod.y > .001 {
+        let zoom_regional = landscape_surface_weight(6u);
+        if zoom_regional > .001 {
+            let page = landscape_page(input.site.xy,6u,true);
+            let regional = zoom_regional*page.fade;
+            if regional > .001 {
+                strength += (1.-fine)*regional*input.lod.y*landscape_object_mask(page,input);
+            }
+        }
     }
     if strength <= .001 { discard; }
-    if input.kind < 4u && input.site.z < landscape_elevation(page,vec2f(0.))-2. { discard; }
-    let water = 1.-smoothstep(.10,.44,landscape_coverage(page));
     let modern = 1.-landscape_survey_mask(input.site.xy,mpp);
-    var material = 1.;
-    if input.kind == 4u {
-        let cover = landscape_material(page);
-        material = smoothstep(.17,.75,cover.forest+cover.shrub*.55);
-    }
-    let opacity = input.color.a*edge*water*modern*strength*material*(1.-city_ground_weight(input.site.xy));
+    let opacity = input.color.a*edge*modern*strength;
     if opacity <= .012 { discard; }
     return vec4f(input.color.rgb,opacity);
 }
