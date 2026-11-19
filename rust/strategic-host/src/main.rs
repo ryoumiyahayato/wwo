@@ -19,6 +19,9 @@ mod render;
 mod state;
 mod terrain;
 mod terrain_detail;
+mod landscape;
+mod landscape_cover;
+mod landscape_models;
 mod timeline;
 mod ui;
 mod world;
@@ -1247,6 +1250,8 @@ impl Host {
         view.map_style[2]=renderer.terrain_view_level() as f32;
         view.natural_lod=renderer.terrain_viewport_mix();
         view.set_terrain_exact(renderer.terrain_exact());
+        let landscape_enabled=!loading&&(!self.config.managed||self.state.session.is_some())&&self.mode==Mode::Geographic;
+        renderer.prepare_landscape(&self.camera,self.size,landscape_enabled);
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);
         }
@@ -1377,7 +1382,7 @@ impl Host {
                 self.trial.captures.push(screenshot.clone());
                 extra=serde_json::json!({"png":screenshot});self.dirty=true;
             }
-            "terrain-samples" if self.config.terrain_review=>{
+            "terrain-samples"=>{
                 extra=self.renderer.as_ref().and_then(|r|r.terrain_frame_samples(&self.camera,self.size))
                     .unwrap_or(serde_json::Value::Null);
             }

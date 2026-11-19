@@ -1,6 +1,7 @@
 use crate::{camera::{Camera,EARTH},compact::{Raster,Vertex},overlay::Mesh,politics::FlagUniform,terrain::{self,Terrain},ui::Ink,world::{Pixels,Tile}};
 use crate::landmarks::{self, ModelKey, ModelMesh, ModelVertex, VisibleModel};
 use crate::terrain_detail;
+use crate::landscape::Landscape;
 use bytemuck::{Pod,Zeroable};
 use std::collections::{HashMap, HashSet};
 use std::{fs::File,io,path::{Path,PathBuf},sync::Arc,time::Instant};
@@ -112,6 +113,7 @@ pub struct Renderer {
     queue:wgpu::Queue,
     pub gpu:String,
     models: ModelLayer,
+    landscape: Option<Landscape>,
     view:wgpu::Buffer,
     globals:wgpu::BindGroup,
     pages:wgpu::BindGroupLayout,
@@ -432,11 +434,14 @@ impl Renderer {
             power_preference:wgpu::PowerPreference::HighPerformance,compatible_surface:surface.as_ref(),force_fallback_adapter:false
         }).await.ok_or(if surface.is_some(){"A Vulkan adapter with window presentation is required"}else{"A Vulkan adapter is required"})?;
         let info=adapter.get_info();
+        let landscape_supported=adapter.limits().max_sampled_textures_per_shader_stage>=17;
         let features=if natural.is_some() {wgpu::Features::TEXTURE_COMPRESSION_BC}else{wgpu::Features::empty()};
         if !adapter.features().contains(features) {return Err("自然地貌需要支持 BC7 纹理的 Vulkan 显卡。".into());}
         let (device,queue)=adapter.request_device(&wgpu::DeviceDescriptor {
             label:Some("WWO strategic map host"),required_features:features,
-            required_limits:wgpu::Limits {max_texture_dimension_2d:4096,..wgpu::Limits::downlevel_defaults()},
+            required_limits:wgpu::Limits {max_texture_dimension_2d:4096,
+                max_sampled_textures_per_shader_stage:if landscape_supported {17}else{16},
+                ..wgpu::Limits::downlevel_defaults()},
             memory_hints:wgpu::MemoryHints::MemoryUsage
         },None).await.map_err(|e|e.to_string())?;
         let (target,format)=if let Some(surface)=surface {
@@ -459,13 +464,20 @@ impl Renderer {
             (RenderTarget::Offscreen(image),format)
         };
         let fragment=wgpu::ShaderStages::FRAGMENT;
-        let glob=layout(&device,&[uniform(0,fragment),sampler_entry(1),sampler_entry(2),sampled(3),
+        let compute_fragment=fragment|wgpu::ShaderStages::COMPUTE;
+        let mut global_entries=vec![uniform(0,compute_fragment|wgpu::ShaderStages::VERTEX),
+            wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..sampler_entry(1)},sampler_entry(2),sampled(3),
             texture_entry(4,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),sampled(5),
             texture_entry(6,wgpu::TextureSampleType::Float{filterable:false},wgpu::TextureViewDimension::D2),sampled(7),sampled(8),sampled(9),
             texture_entry(10,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
-            texture_entry(11,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
-            texture_entry(12,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2),
-            sampled(13),sampler_entry(14)]);
+            wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..texture_entry(11,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)},
+            wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..texture_entry(12,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2)},
+            sampled(13),sampler_entry(14)];
+        if landscape_supported {
+            global_entries.push(wgpu::BindGroupLayoutEntry{visibility:compute_fragment,
+                ..texture_entry(15,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)});
+        }
+        let glob=layout(&device,&global_entries);
         let close_layout=layout(&device,&[sampled(0),uniform(1,fragment)]);
         let pages=layout(&device,&[uniform(0,fragment),sampled(1),sampled(2),sampled(3),
             texture_entry(4,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2)]);
@@ -506,14 +518,14 @@ impl Renderer {
             write_texture(&queue,&texture,[w,h,1],4,&image.pixels);
             texture.create_view(&Default::default())
         });
-        let terrain=natural.map(|(catalogue,proxy)|Terrain::new(&device,&queue,catalogue,proxy))
+        let terrain=natural.map(|(catalogue,proxy)|Terrain::new(&device,&queue,catalogue,proxy,landscape_supported))
             .transpose().map_err(|error|error.to_string())?;
-        let [terrain_world,terrain_detail,terrain_index]=if let Some(terrain)=&terrain {
+        let [terrain_world,terrain_detail,terrain_index,landscape_data]=if let Some(terrain)=&terrain {
             terrain.views()
         }else{
             let empty=||create_texture(&device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm)
                 .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()});
-            [empty(),empty(),create_texture(&device,[1,1,1],wgpu::TextureFormat::R32Uint).create_view(&Default::default())]
+            [empty(),empty(),create_texture(&device,[1,1,1],wgpu::TextureFormat::R32Uint).create_view(&Default::default()),empty()]
         };
         let land_art=crate::decode_rgba(&include_bytes!("land-material.png")[..])
             .map_err(|error|error.to_string())?;
@@ -531,11 +543,13 @@ impl Renderer {
         let close_extent=close.as_ref().map(|sample|sample.extent.map(f64::from));
         let (close_surface,close_bounds)=CloseSample::upload(close,&device,&queue);
         let close_group=bind(&device,&close_layout,&[tex_resource(0,&close_surface),buf_resource(1,&close_bounds)]);
-        let globals=bind(&device,&glob,&[buf_resource(0,&view),sampler_resource(1,&linear),sampler_resource(2,&wrap),
+        let mut global_resources=vec![buf_resource(0,&view),sampler_resource(1,&linear),sampler_resource(2,&wrap),
             tex_resource(3,&palette_view),tex_resource(4,&scenario),tex_resource(5,&flags),tex_resource(6,&flag_pose_view),
             tex_resource(7,&galactic_chart),tex_resource(8,&ocean_detail),tex_resource(9,&ocean_ice),
             tex_resource(10,&terrain_world),tex_resource(11,&terrain_detail),tex_resource(12,&terrain_index),
-            tex_resource(13,&land_surface),sampler_resource(14,&land_repeat)]);
+            tex_resource(13,&land_surface),sampler_resource(14,&land_repeat)];
+        if landscape_supported {global_resources.push(tex_resource(15,&landscape_data));}
+        let globals=bind(&device,&glob,&global_resources);
         let flag_art=bind(&device,&font_layout,&[tex_resource(0,&flags),sampler_resource(1,&linear)]);
         let [w,h]=atlas.size;
         let font=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
@@ -553,7 +567,14 @@ impl Renderer {
             write_texture(&queue,&tex,[1,1,1],n,&[0;4][..n as usize]);
             tex.create_view(&Default::default())
         });
-        let globe_shader=device.create_shader_module(wgpu::include_wgsl!("globe.wgsl"));
+        let globe_source=include_str!("globe.wgsl");
+        let scenery_source=if landscape_supported {include_str!("landscape.wgsl")} else {
+            "fn landscape_relief(base:vec3f, ll:vec2f, world:vec3f, water:f32, mpp:f32)->vec3f {return base;}"
+        };
+        let globe_shader=device.create_shader_module(wgpu::ShaderModuleDescriptor{
+            label:Some("WWO globe and Z7 landscape"),
+            source:wgpu::ShaderSource::Wgsl(format!("{globe_source}\n{scenery_source}").into()),
+        });
         let hud_shader=device.create_shader_module(wgpu::include_wgsl!("hud.wgsl"));
         let mesh_layout=[wgpu::VertexBufferLayout {array_stride:std::mem::size_of::<Vertex>() as u64,
             step_mode:wgpu::VertexStepMode::Vertex,attributes:&wgpu::vertex_attr_array![0=>Float32x2,1=>Unorm8x4,2=>Float32x2]}];
@@ -578,9 +599,11 @@ impl Renderer {
         let instrument=pipeline(&[&screen_layout,&font_layout,&instrument_layout],&hud_shader,"screen_vertex","instrument",&mesh_layout);
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
         let models=ModelLayer::new(&device,format,events);
+        let landscape=terrain.as_ref().filter(|terrain|terrain.landscape_cover())
+            .map(|_|Landscape::new(&device,format,[&glob,&pages,&close_layout],&globe_shader));
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
                 globe,terrain,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
-                solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models})
+                solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models,landscape})
     }
 
     pub fn update_close_terrain(&mut self,camera:&Camera,size:[u32;2],enabled:bool,now:Instant)->[f32;4] {
@@ -646,6 +669,12 @@ impl Renderer {
         if let Some(terrain)=&mut self.terrain {terrain.update(&self.queue,camera,size,now);}
     }
 
+    pub fn prepare_landscape(&mut self,camera:&Camera,size:[u32;2],enabled:bool) {
+        if let (Some(layer),Some(terrain))=(&mut self.landscape,&self.terrain) {
+            layer.prepare(&self.queue,camera,size,terrain.landscape_revision(),enabled&&terrain.view_max()==7);
+        }
+    }
+
     pub fn terrain_ready(&mut self,completion:terrain::Completion)->io::Result<()> {
         if let Some(terrain)=&mut self.terrain {terrain.complete(&self.queue,completion)?;}
         Ok(())
@@ -661,7 +690,11 @@ impl Renderer {
     pub fn packed_terrain(&self)->bool {self.terrain.as_ref().is_some_and(Terrain::packed)}
 
     pub fn terrain_status(&self) -> Option<serde_json::Value> {
-        self.terrain.as_ref().map(Terrain::status)
+        self.terrain.as_ref().map(|terrain|{
+            let mut status=terrain.status();
+            status["landscape_chunks"]=self.landscape.as_ref().map_or(0,Landscape::visible_chunks).into();
+            status
+        })
     }
 
     pub fn terrain_frame_samples(&self,camera:&Camera,size:[u32;2])->Option<serde_json::Value> {
@@ -774,6 +807,9 @@ impl Renderer {
                     pass.draw(0..3,0..1);
                 }
             }
+        }
+        if let Some(layer)=&mut self.landscape {
+            layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group],[w,h]);
         }
         self.models.draw(&mut encoder, &image);
         {
