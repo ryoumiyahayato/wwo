@@ -341,6 +341,24 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
     }
     return mix(base,sample,weight);
 }
+
+fn natural_water_color(color:vec3f, world:vec3f, depth:f32, coverage:f32, mpp:f32) -> vec3f {
+    if coverage <= .04 || mpp > 18000. { return color; }
+    let ice = smoothstep(.47,.68,min(color.r,color.g));
+    let surface = smoothstep(.28,.88,coverage)*(1.-ice)*(1.-smoothstep(6400.,18000.,mpp));
+    let shelf = smoothstep(2.,22.,depth)*(1.-smoothstep(80.,640.,depth));
+    let off_shore = smoothstep(105.,2400.,depth);
+    // Relief controls the marine shelf. Inland water retains the mapped basin color.
+    let p = world*(EARTH/530.);
+    let bend = sin(dot(p,vec3f(.13,-.41,.25))) + sin(dot(p,vec3f(-.32,.12,.17)));
+    let swell = sin(dot(p,vec3f(.91,.61,-.73))+3.6*bend)*.33
+        + sin(dot(p,vec3f(-.18,.67,.48))-3.1*bend)*.27;
+    let wave = swell*(1.-smoothstep(160.,630.,mpp));
+    let inland = vec3f(.010,.019,.023)*wave;
+    let marine = vec3f(.018,.062,.059)*shelf+vec3f(.010,.019,.026)*wave;
+    return clamp(color+mix(inland,marine,max(shelf,off_shore))*surface,vec3f(0.),vec3f(1.));
+}
+
 fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f {
     let dims=vec2f(textureDimensions(terrain_data));
     let du=1./dims;
@@ -419,6 +437,9 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
             color=terrain.rgb;
         }
         color=landscape_relief(color,ll,normal_world,terrain.a,base_mpp);
+        if view.chart_origin.w <= .5 {
+            color=natural_water_color(color,normal_world,max(0.,-z)*data.a,terrain.a,base_mpp);
+        }
         relief_light=clamp(.57+dot(terrain.rgb,vec3f(.30,.55,.15))*.68,.70,1.19);
     } else if tile.options.y>=5. {
         let level = log2(max(1.,base_mpp/min(dx,dy)));
@@ -603,6 +624,43 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32) -> vec4f {
     let alpha=(shading*(1.-wall)+wall)*(1.-bridge)+bridge;
     return vec4f(color/max(.0001,alpha),alpha);
 }
+
+fn chart_normal(xy:vec2f,r:f32,t:f32) -> vec3f {
+    let a=select(asin(min(r,1.)),r,t>0.);
+    let k=select(1.,sin(a)/max(r,.00000001),r>.00000001);
+    return normalize(view.chart_east.xyz*(xy.x*k)+view.chart_north.xyz*(xy.y*k)+view.chart_forward.xyz*cos(a));
+}
+
+struct RiverStroke {
+    @builtin(position) clip:vec4f,
+    @location(0) ink:vec4f,
+    @location(1) side:f32,
+}
+
+@vertex fn river_stroke(@location(0) pixel:vec2f,@location(1) ink:vec4f,@location(2) uv:vec2f) -> RiverStroke {
+    let clip=pixel/view.viewport.xy*vec2f(2.,-2.)+vec2f(-1.,1.);
+    return RiverStroke(vec4f(clip,0.,1.),ink,uv.x);
+}
+
+@fragment fn river_ink(stroke:RiverStroke) -> @location(0) vec4f {
+    let xy=(stroke.clip.xy-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1./view.chart_origin.z);
+    let r=length(xy);
+    if r>=1.+view.viewport.w*(PI*.5-1.) {discard;}
+    let v=chart_normal(xy,r,view.viewport.w);
+    let ll=degrees(vec2f(atan2(v.x,v.z),atan2(v.y,length(v.xz))));
+    let water=natural_surface(ll).a;
+    var surveyed=0.;
+    if view.close_sample.z>.5 {
+        let mpp=view.viewport.z*EARTH/max(.3,view.chart_origin.z);
+        // A negative sentinel lets the same survey coverage mask protect
+        // surveyed ground and water while using only its valid footprint.
+        surveyed=clamp(1.+close_terrain(ll,mpp,vec4f(0.,0.,0.,-1.)).a,0.,1.);
+    }
+    let alpha=stroke.ink.a*(1.-smoothstep(.20,.95,abs(stroke.side)))
+        *(1.-smoothstep(.14,.57,water))*(1.-surveyed);
+    return vec4f(stroke.ink.rgb,alpha);
+}
+
 @fragment fn map(@builtin(position) p:vec4f) -> @location(0) vec4f {
     let t=view.viewport.w;
     let xy=(p.xy-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1./view.chart_origin.z);
@@ -614,9 +672,7 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32) -> vec4f {
         return vec4f(sky(p.xy),1.);
     }
     if !is_world && view.map_style.y>.5 && (view.settings.y<.5 || view.settings.y>2.5 && view.map_style.w<=0.) && tile.options.z<.5 && view.selection.y<.5 {discard;}
-    let a=select(asin(min(r,1.)),r,t>0.);
-    let k=select(1.,sin(a)/max(r,.00000001),r>.00000001);
-    let v=normalize(view.chart_east.xyz*(xy.x*k)+view.chart_north.xyz*(xy.y*k)+view.chart_forward.xyz*cos(a));
+    let v=chart_normal(xy,r,t);
     let ll=degrees(vec2f(atan2(v.x,v.z),atan2(v.y,length(v.xz))));
     if !is_world && (ll.x<tile.core.x || ll.y<tile.core.y || ll.x>=tile.core.z || ll.y>=tile.core.w) {discard;}
     let uv=vec2f((ll.x-tile.extent.x)/(tile.extent.z-tile.extent.x),

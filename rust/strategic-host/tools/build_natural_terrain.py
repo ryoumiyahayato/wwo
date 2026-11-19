@@ -11,7 +11,7 @@ from io import BytesIO
 import json
 from pathlib import Path
 from shutil import copyfile, disk_usage
-from struct import Struct, unpack_from
+from struct import Struct, pack, unpack_from
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 import zlib
@@ -252,7 +252,7 @@ def hydro_attributes(dbf):
             for name,(offset,width) in offsets.items()}
 
 
-def river_polygons(shp, width):
+def river_lines(shp):
     # Keep physical lines crossing the antimeridian on both sides of the grid.
     for start,end in zip(shp.parts,[*shp.parts[1:],len(shp.points)]):
         points = np.asarray(shp.points[start:end])
@@ -260,15 +260,15 @@ def river_polygons(shp, width):
             continue
         if np.ptp(points[:,0])>180:
             points[:,0] = np.degrees(np.unwrap(np.radians(points[:,0])))
-        polygon = LineString(points).buffer(width,quad_segs=2)
-        yield polygon
-        if polygon.bounds[0]<-180:
-            yield translate(polygon,xoff=360)
-        if polygon.bounds[2]>180:
-            yield translate(polygon,xoff=-360)
+        line = LineString(points)
+        yield line
+        if line.bounds[0]<-180:
+            yield translate(line,xoff=360)
+        if line.bounds[2]>180:
+            yield translate(line,xoff=-360)
 
 
-def hydrography(source, output, scratch):
+def hydrography(source, output, scratch, *, recover_legacy=False):
     stem = "HydroRIVERS_v10_shp/HydroRIVERS_v10"
     with ZipFile(source) as archive:
         for extension in (".dbf",".shp",".shx"):
@@ -287,7 +287,8 @@ def hydrography(source, output, scratch):
         raise ValueError(f"Unresolved HydroRIVERS downstream identifiers: {missing[:20]}")
 
     connectivity = np.column_stack((sorted_ids,downstream[order])).astype("<u4",copy=False)
-    connectivity.tofile(output/"river-topology.u32")
+    if output is not None:
+        connectivity.tofile(output/"river-topology.u32")
 
     # Use a global visibility threshold and retain downstream links to the outlet.
     # The topology retains all reaches, including those below Z4 resolution.
@@ -301,24 +302,54 @@ def hydrography(source, output, scratch):
         front = np.unique(following[~selected[following]])
         selected[front] = True
     displayed = np.flatnonzero(selected)
-    geometries = []
+    lines, legacy = [], []
     with shapefile.Reader(str(base)) as reader:
         for row in displayed:
-            half_width = .006 if area[row]>=15_000 or flow[row]>=1000 else .004
-            geometries.extend(river_polygons(reader.shape(int(row)),half_width))
-    return STRtree(geometries), len(ids),len(displayed)
+            reach = int(ids[row])
+            for line in river_lines(reader.shape(int(row))):
+                lines.append((reach,line))
+                if recover_legacy:
+                    half_width = .006 if area[row]>=15_000 or flow[row]>=1000 else .004
+                    legacy.append(line.buffer(half_width,quad_segs=2))
+    return lines, STRtree(legacy), len(ids), len(displayed)
 
 
-def rasterize(tree, width, rect, *, samples=2):
+def write_river_lines(path, lines):
+    with path.open("wb") as stream:
+        stream.write(b"WWORIV01")
+        for reach, line in lines:
+            points = np.asarray(line.simplify(.00009).coords)
+            for a, b in zip(points[:-1], points[1:]):
+                if not -180 <= (a[0]+b[0])*.5 < 180:
+                    continue
+                # Keep each segment inside the renderer's geographic culling margin.
+                steps = max(1, int(np.ceil(np.max(np.abs(b-a))/1.8)))
+                section = np.linspace(a,b,steps+1)
+                for start, end in zip(section[:-1],section[1:]):
+                    stream.write(pack("<I4f",reach,*start,*end))
+
+
+def rasterize(tree, width, rect, *, samples=2, touched=False, interior=False):
     x0,y0,x1,y1 = rect
     step = 360/width
     west,north = x0*step-180, 90-y0*step
     east,south = x1*step-180, 90-y1*step
-    selected = tree.geometries.take(tree.query(box(west,south,east,north), predicate="intersects"))
+    bounds = box(west,south,east,north)
+    selected = tree.geometries.take(tree.query(bounds, predicate="intersects"))
     if not len(selected):
         return np.zeros((y1-y0,x1-x0), dtype=np.float32)
+    if interior:
+        # Detailed global shoreline polygons can enclose many interior pages.
+        # A prepared containment check avoids rasterizing the entire continent.
+        if any(geometry.covers(bounds) for geometry in selected):
+            return np.ones((y1-y0,x1-x0), dtype=np.float32)
+        selected = [clip_by_rect(geometry,west,south,east,north) for geometry in selected]
+        selected = [geometry for geometry in selected if not geometry.is_empty]
+        if not selected:
+            return np.zeros((y1-y0,x1-x0), dtype=np.float32)
     bits = features.rasterize(selected, out_shape=((y1-y0)*samples,(x1-x0)*samples), dtype="uint8",
-                              transform=from_origin(west,north,step/samples,step/samples))
+                              transform=from_origin(west,north,step/samples,step/samples),
+                              all_touched=touched)
     return bits.reshape(y1-y0,samples,x1-x0,samples).mean(axis=(1,3), dtype=np.float32)
 
 
@@ -352,8 +383,7 @@ def surface(relief, cover, vectors, width, rect, *, elevation_snow):
     color *= light[...,None]
     land = rasterize(vectors["land"],width,rect)
     lake = rasterize(vectors["lakes"],width,rect)
-    river = rasterize(vectors["rivers_lake_centerlines"],width,rect)
-    water = np.maximum(lake,river*RIVER_OPACITY) * land
+    water = lake * land
     color += (RIVER_COLOR-color)*water[...,None]
     return color, z, land, water, lake
 
@@ -807,9 +837,9 @@ def build(sources, natural_earth, output, *, scratch=None):
                ("land","lakes","glaciated_areas")}
     print("Preparing the global river network",flush=True)
     with TemporaryDirectory(dir=output.parent) as folder:
-        river_tree, reaches, displayed = hydrography(sources/"HydroRIVERS_v10_shp.zip",output,Path(folder))
-        vectors["rivers_lake_centerlines"] = river_tree
-    print(f"HydroRIVERS {reaches} reaches, {displayed} rasterized",flush=True)
+        lines, _, reaches, displayed = hydrography(sources/"HydroRIVERS_v10_shp.zip",output,Path(folder))
+        write_river_lines(output/"river-centrelines.qhl",lines)
+    print(f"HydroRIVERS {reaches} reaches, {displayed} centreline symbols",flush=True)
     levels = []
     with staging_directory(output.parent, scratch) as folder:
         print("Building the global mother raster", flush=True)
@@ -843,7 +873,8 @@ def build(sources, natural_earth, output, *, scratch=None):
         "gaps": ["No global 1900 land-cover or reservoir reconstruction",
                  "HydroRIVERS resolution is coarser north of 60 degrees; streams below its source thresholds and Antarctic ice drainage are not represented",
                  "Z5 and higher not generated"],
-        "river_topology": {"file":"river-topology.u32","reaches":reaches,"rasterized_reaches":displayed,
+        "river_topology": {"file":"river-topology.u32","reaches":reaches,"rasterized_reaches":0,
+            "centreline_reaches":displayed,
             "format":"uint32 little endian pairs (HYRIV_ID, NEXT_DOWN), sorted by ID; terminal NEXT_DOWN=0",
             "unresolved_downstream_ids":0},
     }
@@ -884,8 +915,8 @@ def build_packed_mother(scratch, sources, natural_earth, output):
     enclosed = STRtree(inland_holes(vectors["land"].geometries))
     print("Preparing the global river network", flush=True)
     with TemporaryDirectory(dir=scratch) as unpacked:
-        river_tree, reaches, displayed = hydrography(sources / "HydroRIVERS_v10_shp.zip", output, Path(unpacked))
-        vectors["rivers_lake_centerlines"] = river_tree
+        lines, _, reaches, displayed = hydrography(sources / "HydroRIVERS_v10_shp.zip", output, Path(unpacked))
+        write_river_lines(output/"river-centrelines.qhl",lines)
     manifest = {
         "version": PACK_VERSION, "tile_matrix_set": "WorldCRS84Quad", "axes": "longitude,latitude",
         "origin": [-180,90], "tile_size": TILE, "gutter": GUTTER, "levels": [],
@@ -900,7 +931,7 @@ def build_packed_mother(scratch, sources, natural_earth, output):
         "land_cover_license": {"license": "CC BY 4.0", "url": "https://doi.org/10.5281/zenodo.7254221",
                                 "attribution": "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium"},
         "river_topology": {"file": "river-topology.u32", "reaches": reaches,
-                           "rasterized_reaches": displayed, "unresolved_downstream_ids": 0,
+                           "rasterized_reaches": 0, "centreline_reaches": displayed, "unresolved_downstream_ids": 0,
                            "format": "uint32 little endian pairs (HYRIV_ID, NEXT_DOWN), sorted by ID; terminal NEXT_DOWN=0"},
         "gaps": ["No global reconstruction of 1900 land cover or reservoirs",
                  "Bathymetry includes gravity-predicted estimates; 15 arc seconds is grid spacing",
@@ -1353,6 +1384,99 @@ def write_inland_water_candidate(original, source, destination, *, scratch=None)
     write_water_candidate(original, destination, lakes, coverage_at, scratch=scratch)
 
 
+def write_hydrology_candidate(original, sources, natural_earth, destination, *, scratch=None):
+    """Replace legacy buffered centreline coverage without copying or changing QPK heights."""
+    import zstandard
+
+    if destination.exists():
+        raise ValueError(f"Output already exists: {destination}")
+    with staging_directory(destination.parent, scratch) as folder:
+        folder = Path(folder)
+        lines, legacy, _, _ = hydrography(sources/"HydroRIVERS_v10_shp.zip",None,folder,
+                                          recover_legacy=True)
+        write_river_lines(folder/"river-centrelines.qhl",lines)
+        del lines
+        land_shapes = physical_shapes(natural_earth,"land")
+        lake_shapes = physical_shapes(natural_earth,"lakes")
+        def wrapped(shapes):
+            return STRtree(shapes
+                + [translate(g,xoff=360) for g in shapes if g.bounds[0] < -177]
+                + [translate(g,xoff=-360) for g in shapes if g.bounds[2] > 177])
+        land, lakes = wrapped(land_shapes), wrapped(lake_shapes)
+        prepare(land.geometries)
+        cover = LandCover(sources/"worldcover",native=True)
+        mapped_water = LAND_CLASS_LOOKUP[:,8:9].copy()
+        decode = zstandard.ZstdDecompressor()
+        encode = zstandard.ZstdCompressor(level=COMPACT_STRENGTH)
+        paths = [pack_path(original,z) for z in range(PACK_MAX_LEVEL+1)]
+        bytes_per_level = [path.stat().st_size for path in paths]
+        offset = np.zeros(1+sum(2 << (2*z) for z in range(PACK_MAX_LEVEL+1)),dtype="<u8")
+        dim = TILE+2*GUTTER
+        water_rgb = RIVER_COLOR*255
+        with (folder/"hydrology-color.qhw").open("wb") as target:
+            target.write(pack("<8s8Q",b"WWOHYD01",*bytes_per_level))
+            target.write(offset.tobytes())
+            page = 0
+            for z,path in enumerate(paths):
+                changed = 0
+                with path.open("rb") as source:
+                    atlas = LevelPack(source,z,COMPACT_VERSION)
+                    width = atlas.nx*TILE
+                    step = 360/width
+                    for y in range(atlas.ny):
+                        for x in range(atlas.nx):
+                            offset[page] = target.tell()
+                            page += 1
+                            rect = (x*TILE-GUTTER,y*TILE-GUTTER,(x+1)*TILE+GUTTER,(y+1)*TILE+GUTTER)
+                            x0,y0,x1,y1 = rect
+                            bounds = box(x0*step-180,90-y1*step,x1*step-180,90-y0*step)
+                            if not legacy.query(bounds,predicate="intersects").size:
+                                continue
+                            count, _ = atlas.frame_sizes(x,y)
+                            raw = decode.decompress(source.read(count),max_output_size=dim**2)
+                            pixels = np.array(Image.frombytes("RGBA",(dim,dim),raw,"bcn",(7,"BC7")))
+                            alpha = pixels[...,3].astype(np.float32)/255
+                            footprint = rasterize(legacy,width,rect,samples=1,touched=True)>0
+                            dry_land = rasterize(land,width,rect,interior=True)>=.99
+                            legitimate = rasterize(lakes,width,rect)
+                            lon,lat = grid(width,rect)
+                            if z >= 6:
+                                observed = cover.sample(lon,lat,mapped_water,np.zeros(1,dtype=np.float32))[...,0]
+                                legitimate = np.maximum(legitimate,observed)
+                            repair = footprint & dry_land & (alpha-legitimate>.035) & (alpha < .90)
+                            if not repair.any():
+                                continue
+                            # Undo the old colour blend. Z6/Z7 have since been re-tinted:
+                            # restore the exposed part from the same cover palette there.
+                            tint = pixels[...,:3].astype(np.float32)
+                            original_ground = (tint-alpha[...,None]*water_rgb) / (1-alpha[...,None]).clip(.10,1.)
+                            if z >= 6:
+                                mapped = cover.sample(lon,lat,LAND_PALETTE[LAND_CLASS_LOOKUP.argmax(axis=1)],
+                                                      LAND_PALETTE[0])*255
+                                weight = smooth_weight(.18,.60,alpha)[...,None]
+                                original_ground = original_ground*(1-weight)+mapped*weight
+                            clean = legitimate[...,None]
+                            rgb = original_ground*(1-clean)+clean*water_rgb
+                            pixels[repair,:3] = np.rint(rgb[repair]).clip(0,255).astype(np.uint8)
+                            pixels[repair,3] = np.rint(legitimate[repair]*255).astype(np.uint8)
+                            blocks = np.frombuffer(raw,dtype="V16").copy()
+                            update = repair.reshape(dim//4,4,dim//4,4).any(axis=(1,3))
+                            changed_pixels = pixels.reshape(dim//4,4,dim//4,4,4).transpose(0,2,1,3,4)[update]
+                            strip = changed_pixels.transpose(1,0,2,3).copy(order="C")
+                            patched = ispc_texcomp.compress_blocks_bc7(
+                                ispc_texcomp.RGBASurface(strip.tobytes(),4*len(changed_pixels),4),ENCODER)
+                            blocks[update.ravel()] = np.frombuffer(patched,dtype="V16")
+                            target.write(encode.compress(blocks.tobytes()))
+                            changed += 1
+                print(f"Z{z}: {changed} colour pages updated",flush=True)
+            offset[-1] = target.tell()
+            target.seek(Struct("<8s8Q").size)
+            target.write(offset.tobytes())
+        destination.mkdir(parents=True,exist_ok=True)
+        for name in ("hydrology-color.qhw","river-centrelines.qhl"):
+            (folder/name).rename(destination/name)
+
+
 def fractional_edges(edges, length):
     locations = np.clip(edges,0,length)
     pixel = np.minimum(np.floor(locations).astype(np.intp),length-1)
@@ -1644,6 +1768,8 @@ def compact_package(original, output, *, scratch=None):
         staged.mkdir()
         river_file = "river-topology.u32"
         copyfile(original / river_file, staged / river_file)
+        if (original / "river-centrelines.qhl").is_file():
+            copyfile(original / "river-centrelines.qhl", staged / "river-centrelines.qhl")
         verify_topology(staged, manifest)
         if not filecmp.cmp(original / river_file, staged / river_file, shallow=False):
             raise ValueError("Changed global river topology")
@@ -1771,6 +1897,9 @@ def main():
     parser.add_argument("--refine-ice-shelf-edges", action="store_true",
                         help="Use 4x4 coverage and preserve decoded water coverage in a Z7 ice-shelf candidate")
     terrain_candidate = parser.add_mutually_exclusive_group()
+    terrain_candidate.add_argument("--hydrology-candidate", type=Path, nargs=4,
+                        metavar=("ORIGINAL", "SOURCES", "NATURAL_EARTH", "CANDIDATE"),
+                        help="Repair legacy river coverage with sparse QPK colors and HydroRIVERS centrelines")
     terrain_candidate.add_argument("--river-outlet-candidate", type=Path, nargs=4,
                         metavar=("ORIGINAL_QPK", "OUTLETS_GEOJSON", "NATURAL_EARTH", "CANDIDATE_QPK"),
                         help="Build a complete Z7 QPK with documented river outlet connections")
@@ -1806,6 +1935,13 @@ def main():
         parser.error("--historical-cropland requires a Z6 or Z7 land candidate")
     if args.sand_dunes is not None and land_candidate is None:
         parser.error("--sand-dunes requires a Z6 or Z7 land candidate")
+    if args.hydrology_candidate is not None:
+        if any(arg is not None for arg in (args.verify, args.repack, args.through, args.sources,
+                                           args.ice_shelf_candidate)):
+            parser.error("Hydrology candidate generation does not accept other build arguments")
+        with generation_disk_usage(args.hydrology_candidate[-1], 3_000_000_000) as (scratch, _):
+            write_hydrology_candidate(*args.hydrology_candidate, scratch=scratch)
+        return
     if args.z6_from_z7 is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,
                                            args.ice_shelf_candidate)):

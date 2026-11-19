@@ -19,6 +19,7 @@ mod render;
 mod state;
 mod terrain;
 mod terrain_detail;
+mod hydrology;
 mod landscape;
 mod landscape_cover;
 mod landscape_models;
@@ -45,6 +46,7 @@ enum HostEvent {
     Map(Completion),
     Terrain(terrain::Completion),
     TerrainDetail(usize,io::Result<Vec<u8>>),
+    Rivers(io::Result<hydrology::Rivers>),
     Model(landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
 }
 
@@ -1250,6 +1252,7 @@ impl Host {
         view.set_terrain_exact(renderer.terrain_exact());
         let landscape_enabled=!loading&&(!self.config.managed||self.state.session.is_some())&&self.mode==Mode::Geographic;
         renderer.prepare_landscape(&self.camera,self.size,landscape_enabled);
+        renderer.prepare_rivers(&self.camera,self.size,landscape_enabled&&!renderer.terrain_exact());
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);
         }
@@ -1662,6 +1665,13 @@ impl ApplicationHandler<HostEvent> for Host {
             HostEvent::TerrainDetail(index,result)=>{
                 if let Some(renderer)=&mut self.renderer {
                     renderer.close_terrain_ready(index,result);
+                    self.dirty=true;
+                }
+                return;
+            }
+            HostEvent::Rivers(result)=>{
+                if let Some(renderer)=&mut self.renderer {
+                    renderer.rivers_ready(result);
                     self.dirty=true;
                 }
                 return;

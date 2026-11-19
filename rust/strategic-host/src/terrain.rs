@@ -76,7 +76,7 @@ impl Key {
 }
 
 pub struct Catalogue {pages:Vec<Key>, source:Source, max_level:u32, version:&'static str,
-    selection:LayerSelection, layer_candidate:Option<PathBuf>, cover_root:Option<PathBuf>}
+    selection:LayerSelection, layer_candidate:Option<PathBuf>, cover_root:Option<PathBuf>, river_lines:Option<PathBuf>}
 
 #[derive(Deserialize)]
 struct Manifest {
@@ -126,7 +126,9 @@ impl Catalogue {
             }
             let mut pages=Vec::new();
             let mut packs=Vec::new();
+            let mut lengths=[0;MAX_LEVEL as usize+1];
             for (z,mut level) in (0..).zip(data.levels) {
+                lengths[z as usize]=level.bytes;
                 let [width,height]=[2<<z,1<<z];
                 if (z,width,height,width*height)!=(level.z,level.width,level.height,level.tiles) {
                     return Err(io::Error::other(format!("Z{z} 全球分片清单不完整")));
@@ -158,16 +160,28 @@ impl Catalogue {
                 || fs::metadata(root.join(&river.file))?.len()!=RIVER_REACHES*8 {
                 return Err(io::Error::other("全球河网的拓扑资料不完整"));
             }
-            let source=if packed {Source::Packs(packs)} else {Source::Files(root.to_owned())};
+            let water_path=root.join("hydrology-color.qhw");
+            let river_path=root.join("river-centrelines.qhl");
+            let use_water=layer_candidate.is_none();
+            let water=if use_water && water_path.is_file() {
+                if version!=COMPACT_VERSION || !river_path.is_file() {
+                    return Err(io::Error::other("水文修订需要匹配的 QPK 和河流中心线"));
+                }
+                Some(WaterColors::open(&water_path,lengths)?)
+            } else {None};
+            let river_lines=(use_water&&!selection.exact()&&selection.limit()>=6&&river_path.is_file()).then_some(river_path);
+            let source=if packed {Source::Packs(packs,water)} else {Source::Files(root.to_owned())};
             let cover_root=(version==COMPACT_VERSION && selection.limit()>=6
                 && CoverPack::FILE_NAMES.iter().any(|name|root.join(name).is_file())).then(||root.to_owned());
-            Ok(Self{pages,source,max_level:levels as u32-1,version,selection,layer_candidate,cover_root})
+            Ok(Self{pages,source,max_level:levels as u32-1,version,selection,layer_candidate,cover_root,river_lines})
         };
         open().map_err(|error|io::Error::other(format!("无法读取自然地貌底图库。{} · {error}",path.display())))
     }
+
+    pub fn river_lines(&self)->Option<&Path> {self.river_lines.as_deref()}
 }
 
-enum Source {Files(PathBuf),Packs(Vec<Option<LevelPack>>)}
+enum Source {Files(PathBuf),Packs(Vec<Option<LevelPack>>,Option<WaterColors>)}
 
 impl Source {
     fn read(&mut self,key:Key,cover:Option<&mut CoverPack>,landscape:bool)->io::Result<DecodedTile> {
@@ -178,9 +192,48 @@ impl Source {
                 file.read_exact(&mut bytes)?;
                 Ok(DecodedTile{pixels:bytes,landscape:None,decode_time:Duration::ZERO})
             }
-            Self::Packs(packs)=>packs[key.0 as usize].as_mut()
-                .ok_or_else(||io::Error::other("地貌层级未打开"))?.read(key,cover,landscape),
+            Self::Packs(packs,water)=>{
+                let override_frame=water.as_mut().map(|colors|colors.frame(key)).transpose()?.flatten();
+                packs[key.0 as usize].as_mut().ok_or_else(||io::Error::other("地貌层级未打开"))?
+                    .read(key,cover,landscape,override_frame)
+            }
         }
+    }
+}
+
+struct WaterColors {file:fs::File, offsets:Vec<u64>}
+
+impl WaterColors {
+    fn open(path:&Path,lengths:[u64;8])->io::Result<Self> {
+        let mut file=fs::File::open(path)?;
+        let mut header=[0;72];
+        file.read_exact(&mut header)?;
+        if &header[..8]!=b"WWOHYD01" || header[8..].chunks_exact(8).zip(lengths)
+            .any(|(bytes,len)|bytes!=len.to_le_bytes()) {
+            return Err(io::Error::other("水文颜色与此 QPK 版本不匹配"));
+        }
+        let pages=(0..=MAX_LEVEL).map(|z|2<<(2*z)).sum::<usize>();
+        let mut raw=vec![0;(pages+1)*8];
+        file.read_exact(&mut raw)?;
+        let offsets:Vec<_>=raw.chunks_exact(8).map(|bytes|u64::from_le_bytes(bytes.try_into().unwrap())).collect();
+        if offsets[0]!=(header.len()+raw.len()) as u64 || offsets.last()!=Some(&file.metadata()?.len())
+            || offsets.windows(2).any(|range|range[1].checked_sub(range[0])
+                .is_none_or(|len|len>u64::from(PAGE_SIZE*PAGE_SIZE+1024))) {
+            return Err(io::Error::other("水文颜色页索引无效"));
+        }
+        Ok(Self{file,offsets})
+    }
+
+    fn frame(&mut self,Key(z,x,y):Key)->io::Result<Option<Vec<u8>>> {
+        let preceding=(0..z).map(|level|2<<(2*level)).sum::<u32>();
+        let index=(preceding+y*(2<<z)+x) as usize;
+        let offset=self.offsets[index];
+        let len=self.offsets[index+1]-offset;
+        if len==0 {return Ok(None);}
+        let mut frame=vec![0;len as usize];
+        self.file.seek(SeekFrom::Start(offset))?;
+        self.file.read_exact(&mut frame)?;
+        Ok(Some(frame))
     }
 }
 
@@ -215,7 +268,7 @@ impl LevelPack {
         Ok(Self{file,width:level.width,offsets,decoder})
     }
 
-    fn read(&mut self,key:Key,cover:Option<&mut CoverPack>,landscape:bool)->io::Result<DecodedTile> {
+    fn read(&mut self,key:Key,cover:Option<&mut CoverPack>,landscape:bool,override_frame:Option<Vec<u8>>)->io::Result<DecodedTile> {
         let Key(z,x,y)=key;
         let i=(y*self.width+x) as usize;
         let offset=self.offsets[i];
@@ -228,8 +281,14 @@ impl LevelPack {
             return Err(io::Error::other(format!("地貌包分片坐标或大小无效 · Z{z}/{x}/{y}")));
         }
         let size=(PAGE_SIZE*PAGE_SIZE) as usize;
-        let mut frame=vec![0;count as usize];
-        self.file.read_exact(&mut frame)?;
+        let mut frame=if let Some(frame)=override_frame {
+            self.file.seek(SeekFrom::Current(i64::from(count)))?;
+            frame
+        } else {
+            let mut frame=vec![0;count as usize];
+            self.file.read_exact(&mut frame)?;
+            frame
+        };
         let started=Instant::now();
         let pixels=match &mut self.decoder {
             ColorDecoder::Deflate=>{
@@ -358,6 +417,7 @@ pub struct Terrain {
     landscape:Option<wgpu::Texture>,
     height_enabled:bool,
     landscape_cover:bool,
+    water_colors:bool,
     landscape_revision:u32,
     keys:Vec<Visible>,
     sender:mpsc::Sender<DecodeRequest>,
@@ -382,7 +442,8 @@ pub struct Terrain {
 impl Terrain {
     pub fn new(device:&wgpu::Device,queue:&wgpu::Queue,data:Catalogue,
                proxy:EventLoopProxy<crate::HostEvent>,landscape_supported:bool) -> io::Result<Self> {
-        let Catalogue{pages,mut source,max_level,version,selection,layer_candidate,mut cover_root}=data;
+        let Catalogue{pages,mut source,max_level,version,selection,layer_candidate,mut cover_root,..}=data;
+        let water_colors=matches!(&source,Source::Packs(_,Some(_)));
         let texture=|label,width,height,layers,mips,format| device.create_texture(&wgpu::TextureDescriptor{
             label:Some(label),
             size:wgpu::Extent3d{width,height,depth_or_array_layers:layers},
@@ -435,7 +496,7 @@ impl Terrain {
                 if proxy.send_event(event).is_err(){break;}
             }
         })?;
-        Ok(Self{base,atlas,table,landscape:None,height_enabled,landscape_cover,landscape_revision:0,keys,sender,inflight:None,requests_this_frame:0,pages:HashMap::new(),
+        Ok(Self{base,atlas,table,landscape:None,height_enabled,landscape_cover,water_colors,landscape_revision:0,keys,sender,inflight:None,requests_this_frame:0,pages:HashMap::new(),
             slots:(0..capacity).rev().collect(),selected:Vec::new(),view:None,max_level,view_max:0,
             target_level:None,projected_lod:0.,version,selection,layer_candidate,required_pages:0,viewport_pages:0,
             transitions:Default::default()})
@@ -519,6 +580,7 @@ impl Terrain {
                 && self.transitions.iter().all(|transition|transition.mix==transition.goal),
             "detail_capacity": self.atlas.depth_or_array_layers(),
             "loading": self.inflight.is_some(),
+            "hydrology_colors": self.water_colors,
             "landscape_cover": self.landscape_cover,
             "landscape_texture_bytes": self.landscape.as_ref().map_or(0,|texture|
                 texture.width()*texture.height()*texture.depth_or_array_layers()*4),

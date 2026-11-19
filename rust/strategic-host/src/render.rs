@@ -2,6 +2,7 @@ use crate::{camera::{Camera,EARTH},compact::{Raster,Vertex},overlay::Mesh,politi
 use crate::landmarks::{self, ModelKey, ModelMesh, ModelVertex, VisibleModel};
 use crate::terrain_detail;
 use crate::landscape::{Landscape,LandscapeCounts};
+use crate::hydrology::Rivers;
 use bytemuck::{Pod,Zeroable};
 use std::collections::{HashMap, HashSet};
 use std::{fs::File,io,path::{Path,PathBuf},sync::Arc,time::{Duration,Instant}};
@@ -108,6 +109,12 @@ enum RenderTarget {
     Offscreen(wgpu::Texture),
 }
 
+struct RiverLayer {
+    rivers: Option<Rivers>,
+    pipeline: wgpu::RenderPipeline,
+    mesh: MeshBuffers,
+}
+
 pub struct Renderer {
     target:RenderTarget,
     device:wgpu::Device,
@@ -125,6 +132,7 @@ pub struct Renderer {
     fallback:[wgpu::TextureView;3],
     globe:wgpu::RenderPipeline,
     terrain:Option<Terrain>,
+    rivers:Option<RiverLayer>,
     close_extent:Option<[f64;4]>,
     close_layout:wgpu::BindGroupLayout,
     close_group:wgpu::BindGroup,
@@ -593,6 +601,7 @@ impl Renderer {
             write_texture(&queue,&texture,[w,h,1],4,&image.pixels);
             texture.create_view(&Default::default())
         });
+        let river_source=natural.as_ref().and_then(|(catalogue,_)|catalogue.river_lines()).map(Path::to_owned);
         let terrain=natural.map(|(catalogue,proxy)|Terrain::new(&device,&queue,catalogue,proxy,landscape_supported))
             .transpose().map_err(|error|error.to_string())?;
         let [terrain_world,terrain_detail,terrain_index]=if let Some(terrain)=&terrain {
@@ -653,6 +662,18 @@ impl Renderer {
             })
         };
         let globe=pipeline(&[&glob,&pages,&close_layout,&surface.layout],&globe_shader,"triangle","map",&[]);
+        let rivers=river_source.map(|source| {
+            let proxy=events.clone();
+            std::thread::spawn(move || {
+                let result=Rivers::open(&source).map_err(|error|io::Error::other(format!("{} · {error}",source.display())));
+                let _=proxy.send_event(crate::HostEvent::Rivers(result));
+            });
+            RiverLayer {
+                rivers:None,
+                pipeline:pipeline(&[&glob,&pages,&close_layout,&surface.layout],&globe_shader,"river_stroke","river_ink",&mesh_layout),
+                mesh:MeshBuffers::new(&device,16384,4096),
+            }
+        });
         let solid=pipeline(&[&screen_layout],&hud_shader,"screen_vertex","solid",&mesh_layout);
         let text=pipeline(&[&screen_layout,&font_layout],&hud_shader,"screen_vertex","image",&mesh_layout);
         let flag=pipeline(&[&screen_layout,&font_layout],&hud_shader,"screen_vertex","flag",&mesh_layout);
@@ -665,7 +686,7 @@ impl Renderer {
         let models=ModelLayer::new(&device,format,events);
         let landscape_pipeline=landscape_supported.then_some((format,glob,globe_shader));
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
-                globe,terrain,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
+                globe,terrain,rivers,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
                 solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models,
                 landscape:None,landscape_pipeline,surface})
     }
@@ -756,6 +777,25 @@ impl Renderer {
         }
     }
 
+    pub fn prepare_rivers(&mut self,camera:&Camera,size:[u32;2],enabled:bool) {
+        let Some(layer)=&mut self.rivers else {return;};
+        if let Some(mesh)=layer.rivers.as_mut().and_then(|rivers|rivers.project(camera,size,enabled)) {
+            layer.mesh.upload(&self.device,&self.queue,mesh);
+        }
+    }
+
+    pub fn rivers_ready(&mut self,result:io::Result<Rivers>) {
+        if let Some(layer)=&mut self.rivers {
+            match result {
+                Ok(rivers)=>layer.rivers=Some(rivers),
+                Err(error)=>{
+                    eprintln!("无法打开河流中心线 · {error}");
+                    self.rivers=None;
+                }
+            }
+        }
+    }
+
     pub fn terrain_ready(&mut self,completion:terrain::Completion)->io::Result<()> {
         if let Some(terrain)=&mut self.terrain {terrain.complete(&self.queue,completion)?;}
         Ok(())
@@ -778,6 +818,7 @@ impl Renderer {
             status["landscape_built_chunks"]=self.landscape.as_ref().map_or(0,Landscape::built_chunks).into();
             status["landscape_pending"]=self.landscape.as_ref().is_some_and(Landscape::pending).into();
             status["surface_material_loaded"]=self.surface.loaded.into();
+            status["river_centrelines_ready"]=self.rivers.as_ref().is_some_and(|layer|layer.rivers.is_some()).into();
             status
         })
     }
@@ -892,6 +933,11 @@ impl Renderer {
                 pass.set_bind_group(2,&self.close_group,&[]);
                 pass.set_bind_group(3,&self.surface.group,&[]);
                 pass.draw(0..3,0..1);
+                if let Some(layer)=self.rivers.as_ref().filter(|layer|layer.rivers.as_ref().is_some_and(Rivers::visible)) {
+                    pass.set_pipeline(&layer.pipeline);
+                    layer.mesh.draw(&mut pass);
+                    pass.set_pipeline(&self.globe);
+                }
                 for (page,_,[x,y,w,h],_) in pages {
                     pass.set_scissor_rect(*x,*y,*w,*h);
                     pass.set_bind_group(1,&page.group,&[]);
