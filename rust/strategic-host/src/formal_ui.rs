@@ -450,7 +450,7 @@ impl Display<'_> {
             visual.sprite(art,"messages",[w-36.,center-61.,36.,122.]);
             Self::hit(hits,[w-36.,center-61.,36.,122.],Command::Messages);
         }
-        let target=self.camera.mpp*80.;
+        let target=self.camera.mpp*crate::camera::SCALE_TARGET_PIXELS;
         let magnitude=10_f64.powf(target.log10().floor());
         let metres=[5.,2.,1.].into_iter().map(|n|n*magnitude).find(|n|*n<=target).unwrap_or(magnitude);
         let length=(metres/self.camera.mpp) as f32;
