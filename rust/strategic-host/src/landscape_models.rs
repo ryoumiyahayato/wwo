@@ -8,6 +8,7 @@ pub struct Vertex {
     normal: [f32; 3],
     tone: f32,
     edge: f32,
+    crown: f32,
 }
 
 fn face(mesh: &mut Vec<Vertex>, points: [Vec3; 3], edge: [f32; 3], tone: f32) {
@@ -19,7 +20,24 @@ fn face(mesh: &mut Vec<Vertex>, points: [Vec3; 3], edge: [f32; 3], tone: f32) {
         normal: normal.to_array(),
         tone,
         edge,
+        crown: 0.,
     }));
+}
+
+fn stand(outline: &[(f32, f32)], group: &[Vertex]) -> Vec<Vertex> {
+    // Keep the stand first so the indirect draw can omit subpixel crowns.
+    let mut mesh = group.to_vec();
+    for tree in 1..=25 {
+        let start = mesh.len();
+        for i in 0..outline.len() {
+            let (ax, ay) = outline[i];
+            let (bx, by) = outline[(i + 1) % outline.len()];
+            face(&mut mesh, [Vec3::new(ax, ay, 0.52), Vec3::new(bx, by, 0.52),
+                Vec3::new(0.12, -0.10, 1.)], [0., 0., 1.], 1.);
+        }
+        for vertex in &mut mesh[start..] { vertex.crown = tree as f32; }
+    }
+    mesh
 }
 
 fn crown(
@@ -79,58 +97,6 @@ pub fn meshes() -> [Vec<Vertex>; 4] {
         (0.31, -0.92),
         (0.48, -0.32),
     ];
-    let mut broadleaf = Vec::new();
-    crown(
-        &mut broadleaf,
-        &lobed,
-        Vec3::new(-0.22, 0.03, 0.27),
-        [0.79, 0.85],
-        Vec3::new(-0.29, -0.08, 0.96),
-        0.96,
-    );
-    crown(
-        &mut broadleaf,
-        &lobed,
-        Vec3::new(0.42, 0.28, 0.33),
-        [0.63, 0.67],
-        Vec3::new(0.35, 0.23, 1.09),
-        1.13,
-    );
-    crown(
-        &mut broadleaf,
-        &lobed,
-        Vec3::new(0.25, -0.42, 0.23),
-        [0.62, 0.58],
-        Vec3::new(0.29, -0.39, 0.76),
-        1.02,
-    );
-
-    let mut conifer = Vec::new();
-    crown(
-        &mut conifer,
-        &needles,
-        Vec3::new(0., 0., 0.25),
-        [1., 0.95],
-        Vec3::new(0.01, 0., 0.90),
-        0.89,
-    );
-    crown(
-        &mut conifer,
-        &needles,
-        Vec3::new(0., 0., 0.55),
-        [0.77, 0.76],
-        Vec3::new(0.03, 0.03, 1.23),
-        1.04,
-    );
-    crown(
-        &mut conifer,
-        &needles,
-        Vec3::new(0.03, 0.03, 0.84),
-        [0.47, 0.48],
-        Vec3::new(0.05, 0.04, 1.55),
-        1.20,
-    );
-
     let mut rock = Vec::new();
     let base = [
         Vec3::new(1., -0.17, -0.24),
@@ -165,18 +131,16 @@ pub fn meshes() -> [Vec<Vertex>; 4] {
             band * 1.10,
         );
     }
-    let outline = [
-        (1., 0.05), (0.61, 0.70), (0.10, 0.97), (-0.53, 0.72),
-        (-0.89, 0.07), (-0.66, -0.58), (0.02, -0.89), (0.67, -0.58),
-    ];
+    let outline = [(1., 0.05), (0.10, 0.97), (-0.81, 0.57), (-0.66, -0.58), (0.30, -0.88)];
     let mut group = Vec::new();
-    crown(
-        &mut group, &outline, Vec3::new(-0.30,0.09,0.29), [0.78,0.86],
-        Vec3::new(-0.48,0.13,0.85),0.96,
-    );
-    crown(
-        &mut group, &outline, Vec3::new(0.33,-0.17,0.25), [0.72,0.67],
-        Vec3::new(0.30,-0.23,0.68),1.08,
-    );
+    for (x, y, r, h, tone) in [(-0.60, 0.12, 0.46, 0.72, 0.93),
+        (-0.31, -0.47, 0.44, 0.85, 1.03), (-0.33, 0.53, 0.43, 0.72, 1.05),
+        (0.21, 0.30, 0.49, 0.94, 1.0), (0.29, -0.41, 0.46, 0.70, 0.90),
+        (0.63, -0.01, 0.42, 0.83, 1.07)] {
+        crown(&mut group, &outline, Vec3::new(x, y, 0.25), [r, r * 0.92],
+            Vec3::new(x - 0.04, y + 0.03, h), tone);
+    }
+    let broadleaf = stand(&[lobed[0],lobed[2],lobed[4],lobed[6],lobed[8]], &group);
+    let conifer = stand(&[needles[0],needles[1],needles[2],needles[4],needles[6],needles[8]], &group);
     [broadleaf, conifer, rock, group]
 }
