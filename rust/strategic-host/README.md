@@ -12,6 +12,8 @@
 
 候选高程沿用 GMT 的 SRTM15+ V2.1 全球 60 角秒网格。海底数据包含估算区，网格间距与测量精度分别记录。海岸、湖泊及冰川使用 Natural Earth 1:10m。HydroRIVERS v1.0 的河段和下游编号保存在 `river-topology.u32`，构建输入为 `HydroRIVERS_v10_shp.zip`。地表覆盖来自 ESA WorldCover 2021 v200。现代覆盖、水文和湖库作为参照，缺口见 `index.json`。[GMT](https://docs.generic-mapping-tools.org/6.2/datasets/remote-data.html) · [SRTM15+](https://doi.org/10.1029/2019EA000658) · [Natural Earth](https://www.naturalearthdata.com/about/terms-of-use/) · [HydroRIVERS](https://www.hydrosheds.org/products/hydrorivers) · [ESA WorldCover CC BY 4.0](https://doi.org/10.5281/zenodo.7254221)
 
+`river-centrelines.qhl` 按同一 HydroRIVERS 河段编号绘制地图线符号。水面覆盖取自地貌包和有效的近景测绘数据。旧版地貌包可用 `tools/build_natural_terrain.py --hydrology-candidate <现有QPK库> <地貌来源> <Natural Earth目录> <输出目录>` 生成 `hydrology-color.qhw` 和 `river-centrelines.qhl`。把两份文件放入对应的候选库，再用 `wwo-map-lab --play --terrain-candidate <候选库>` 启动。颜色补页复用原 QPK 页表和高程。WorldCover 永久水体保留生产库中已有的近景水域覆盖。中心线表示现代参考河网，线宽采用屏幕符号尺寸。
+
 © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium.
 
 WorldCover 2021 v200 是现代地表覆盖，用于地貌配色。1900 年政治边界、经济和交通资料采用各自的历史来源。1900 年的地表覆盖尚未重建。
