@@ -1387,10 +1387,12 @@ impl Host {
             "landscape-counts"=>{
                 if let Some(renderer)=&self.renderer {
                     extra=match renderer.landscape_counts() {
-                        Ok((draw_calls,counts))=>serde_json::json!({
-                            "draw_calls":draw_calls,
-                            "instances":counts.iter().sum::<u32>(),
-                            "by_mesh":counts,
+                        Ok(counts)=>serde_json::json!({
+                            "draw_calls":counts.draw_calls,
+                            "instances":counts.by_mesh.iter().sum::<u32>(),
+                            "by_mesh":counts.by_mesh,
+                            "vertex_invocations":counts.vertex_invocations,
+                            "gpu_ms":counts.gpu_ms,
                         }),
                         Err(error)=>serde_json::json!({"error":error.to_string()}),
                     };
@@ -1612,7 +1614,7 @@ impl ApplicationHandler<HostEvent> for Host {
                 self.camera.set_detail(precision);
             }
             let renderer=if let Some(window)=&window {
-                pollster::block_on(Renderer::new(window.clone(),atlas,flags,hud,globe_art,&layouts,self.natural.take(),detail,self.events.clone()))?
+                pollster::block_on(Renderer::new(window.clone(),atlas,flags,hud,globe_art,&layouts,self.natural.take(),detail,self.events.clone(),self.config.observe.is_some()))?
             } else {
                 let sample=self.config.terrain_close_sample.as_deref().map(render::CloseSample::read).transpose()?;
                 pollster::block_on(Renderer::new_offscreen(self.size,atlas,flags,hud,globe_art,&layouts,self.natural.take(),sample,detail,self.events.clone()))?
