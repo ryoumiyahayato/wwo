@@ -329,9 +329,7 @@ struct Visible {key:Key,axis:[f64;3],radius:f64}
 
 #[derive(Default)]
 struct ViewportTransition {
-    nearby:Vec<(Key,f32)>,
-    visible:usize,
-    parents:Vec<Key>,
+    visible:Vec<Key>,
     missing:usize,
     mix:f32,
     goal:f32,
@@ -341,35 +339,15 @@ struct ViewportTransition {
 impl ViewportTransition {
     fn update(&mut self,pages:&HashMap<Key,Page>,level:u32,target:bool,lod:f64,now:Instant) {
         let seconds=self.previous.replace(now).map_or(0.,|then|now.saturating_duration_since(then).as_secs_f32());
-        self.missing=0;
-        let mut coverage=1_f32;
-        for &(key,margin) in &self.nearby {
-            if !pages.contains_key(&key) {
-                self.missing+=usize::from(margin==0.);
-                // An outgoing Z7 needs its current viewport, even when no
-                // further detail is available outside the retreating view.
-                if target || level!=MAX_LEVEL || margin==0. {coverage=coverage.min(margin);}
-            }
-        }
-        if self.visible==0 || coverage==0.
-            || !self.parents.iter().all(|key|pages.get(key).is_some_and(|page|page.fade==255)) {
-            self.mix=0.;
-            self.goal=0.;
-            return;
-        }
-        // World views keep full contrast through most of the exit range.
-        // Higher layers have more room to start yielding to their parent earlier.
+        self.missing=self.visible.iter().filter(|key|!pages.contains_key(key)).count();
+        // Zoom determines layer opacity. Page readiness is applied at the sampled
+        // location, so a missing neighbour cannot retire the whole layer.
         let exit=f64::from(level)-0.5-LOD_HYSTERESIS;
         let exit_span=if level<=4 {0.05} else {0.37};
         let t=((lod-exit)/exit_span).clamp(0.,1.) as f32;
         self.goal=if target {t*t*(3.-2.*t)} else {0.};
-        // Start yielding before a missing tile enters the viewport. At Z7 the
-        // margin is advisory: complete visible coverage can still fade gradually.
-        let ceiling=coverage*coverage*(3.-2.*coverage);
-        self.goal=self.goal.min(ceiling);
         let step=seconds.min(1./30.)/PAGE_FADE_SECONDS;
         self.mix+=(self.goal-self.mix).clamp(-step,step);
-        if level!=MAX_LEVEL {self.mix=self.mix.min(ceiling);}
     }
 }
 
@@ -500,7 +478,8 @@ impl Terrain {
         let top=f64::from(y)/98_304.;
         let bottom=f64::from(y+size)/98_304.;
         output.clear();
-        for z in 6..=if step == 1 || self.exact() {7}else{6} {
+        let first=if step==1 && !self.exact() {7}else{6};
+        for z in first..=if step==1 || self.exact() {7}else{6} {
             let rows=1i32<<z;
             let cols=2*rows;
             let first_row=((top*f64::from(rows)).floor() as i32).clamp(0,rows-1);
@@ -549,7 +528,7 @@ impl Terrain {
             let level=GROUPED_LOD_START+i as u32;
             let weight=if self.exact() && self.view_max==level {1.} else {transition.mix};
             status[format!("z{level}_view_weight")]=weight.into();
-            status[format!("z{level}_view_pages")]=transition.visible.into();
+            status[format!("z{level}_view_pages")]=transition.visible.len().into();
             status[format!("z{level}_view_missing_pages")]=transition.missing.into();
         }
         status
@@ -593,7 +572,7 @@ impl Terrain {
                     let (key,q)=cell(uv,z);
                     let coverage=if self.exact() {f32::from(self.pages.contains_key(&key) as u8)}
                         else if let Some(index)=grouped_lod(z) {
-                            if self.pages.contains_key(&key) {self.transitions[index].mix} else {0.}
+                            self.coverage(key,q)*self.transitions[index].mix
                         }
                         else {self.coverage(key,q)};
                     let weight=remaining*coverage;
@@ -658,7 +637,6 @@ impl Terrain {
         let exact=self.exact();
         for (index,transition) in self.transitions.iter_mut().enumerate() {
             let level=GROUPED_LOD_START+index as u32;
-            if self.view_max<level-1 {transition.visible=0;}
             transition.update(&self.pages,level,!exact && self.view_max>=level,self.projected_lod,now);
         }
         self.requests_this_frame=0;
@@ -703,16 +681,13 @@ impl Terrain {
         // Spare slots can retain detail through about three outward wheel steps.
         // Visible pages, the ordinary margin and the immediate parent have priority.
         let retreat_prefetch=if !exact && target==MAX_LEVEL {camera.extent(size,half_diagonal*0.85)}else{0.};
-        let retiring_detail=!exact && target+1==MAX_LEVEL && self.transitions[GROUPED_LOD_COUNT-1].mix>0.;
         let mut needed=[false;GROUPED_LOD_COUNT];
         let mut inspected=target;
         for (index,transition) in self.transitions.iter_mut().enumerate() {
             let level=GROUPED_LOD_START+index as u32;
-            needed[index]=!exact && (target>=level || transition.mix>0. && target==level-1);
+            needed[index]=!exact && (target>=level || transition.mix>0.);
             if needed[index] {inspected=inspected.max(level);}
-            transition.nearby.clear();
-            transition.visible=0;
-            transition.parents.clear();
+            transition.visible.clear();
         }
         let mut near=Vec::new();
         self.viewport_pages=0;
@@ -726,28 +701,21 @@ impl Terrain {
                 && proximity>=(retreat_prefetch+tile.radius).min(std::f64::consts::PI).cos();
             if near_view || reserved || retreat_detail {
                 let in_view=proximity>=(viewport+tile.radius).min(std::f64::consts::PI).cos();
-                if let Some(index)=grouped_lod(tile.key.0) {
-                    if needed[index] && near_view {
-                        let margin=if in_view {0.} else {
-                            ((proximity.clamp(-1.,1.).acos()-tile.radius-viewport)/(prefetch-viewport)).clamp(0.,1.) as f32
-                        };
-                        self.transitions[index].nearby.push((tile.key,margin));
-                        self.transitions[index].visible+=usize::from(in_view);
-                    }
-                }
                 if in_view {
-                    if let Some(index)=grouped_lod(tile.key.0+1) {
-                        if needed[index] {self.transitions[index].parents.push(tile.key);}
+                    if let Some(index)=grouped_lod(tile.key.0).filter(|&index|needed[index]) {
+                        self.transitions[index].visible.push(tile.key);
                     }
                 }
                 if tile.key.0<=target {
                     self.viewport_pages+=usize::from(in_view);
-                    let priority=if !exact && in_view {4} else if near_view {3}
+                    let priority=if !exact && in_view {5} else if near_view {3}
                         else if target==MAX_LEVEL && tile.key.0+1==target {2}
                         else {u8::from(retreat_detail)};
                     near.push((tile.key,proximity,priority));
-                } else if retiring_detail && in_view && self.pages.contains_key(&tile.key) {
-                    near.push((tile.key,proximity,2));
+                } else if in_view && self.pages.contains_key(&tile.key)
+                    && grouped_lod(tile.key.0).is_some_and(|index|needed[index]) {
+                    // Keep already visible pages through the outgoing zoom fade.
+                    near.push((tile.key,proximity,4));
                 }
             }
         }
@@ -756,7 +724,7 @@ impl Terrain {
             other_priority.cmp(priority).then_with(||a.0.cmp(&b.0)).then_with(||y.total_cmp(x)));
         self.view_max=target;
         self.required_pages=near.len();
-        if let Some(&(Key(overflow,_,_),_,4))=near.get(capacity) {
+        if let Some(&(Key(overflow,_,_),_,5))=near.get(capacity) {
             // Keep a complete visible level when the viewport itself exceeds the budget.
             self.view_max=overflow.saturating_sub(1);
             near.retain(|&(key,_,_)|key.0<=self.view_max);
@@ -798,7 +766,7 @@ impl Terrain {
             1
         });
         let now=Instant::now();
-        let fade=if self.exact() || grouped_lod(completion.key.0).is_some() {255} else {0};
+        let fade=if self.exact() {255} else {0};
         let page=Page{slot,ready:now,used:now,fade,landscape_fade};
         Self::write_index(&self.table,queue,completion.key,page.index());
         self.pages.insert(completion.key,page);
