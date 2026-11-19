@@ -46,7 +46,7 @@ impl DetailRegion {
         let metres=EARTH*PI/180.;
         let dx=(e-w)*((s+n)*0.5).to_radians().cos()*metres/f64::from(size[0]);
         let dy=(n-s)*metres/f64::from(size[1]);
-        Self {extent,minimum:(dx.max(dy)*1.60).clamp(1.5,CONTEXT_MPP),city}
+        Self {extent,minimum:dx.max(dy).clamp(1.5,CONTEXT_MPP),city}
     }
 
     fn floor(self,[lon,lat]:[f64;2],size:[u32;2],requested:f64)->f64 {

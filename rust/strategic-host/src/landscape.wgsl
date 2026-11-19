@@ -346,9 +346,9 @@ fn landscape_vertex(
     }
     if tree {
         let i = u32(crown)-1u;
-        let tile = vec2f(f32(i%5u),f32(i/5u))-2.;
+        let tile = vec2f(f32(i%7u),f32(i/7u))-3.;
         let jitter = vec2f(landscape_random(variation+399u),landscape_random(variation+791u))-.5;
-        tree_center = (tile+jitter*.85)*29.;
+        tree_center = (tile+jitter*.85)*20.;
         let r = mix(4.6,9.6,shape);
         form = vec3f(r,r*mix(.79,1.08,hue),mix(8.,21.,shape));
         if kind == 1u { form *= vec3f(.71,.71,1.15); }
@@ -380,7 +380,8 @@ fn landscape_vertex(
     let vertical = normal.z/form.z;
     let facing = normalize(vec3f(flat-ground_grade*vertical,vertical));
     let light = .88+.26*max(0.,dot(facing,LANDSCAPE_SUN));
-    let color = clamp((base+pigment)*light*mix(1.,tone,.70),vec3f(0.),vec3f(1.));
+    let canopy_light = select(vec3f(0.),vec3f(.050,.067,.027),tree);
+    let color = clamp((base+pigment+canopy_light)*light*mix(1.,tone,.70),vec3f(0.),vec3f(1.));
     return LandscapeVertex(clip,vec3f(site,z),vec4f(color,visibility),edge,kind,lod,select(0u,1u,tree));
 }
 
@@ -400,7 +401,10 @@ fn landscape_object_mask(page: LandscapePage, input: LandscapeVertex) -> f32 {
 
 @fragment
 fn landscape_fragment(input: LandscapeVertex) -> @location(0) vec4f {
-    let edge = smoothstep(0.,max(fwidth(input.edge)*.68,.001),input.edge);
+    let rim = fwidth(input.edge)*.68;
+    // A subpixel crown spans several short triangles. Keep the rim filter
+    // inside those triangles; the vertex shader already filters projected area.
+    let edge = smoothstep(0.,max(select(rim,min(rim,.55),input.tree!=0u),.001),input.edge);
     if input.color.a*max(input.lod.x,input.lod.y) <= .012 { discard; }
     let mpp = view.viewport.z*EARTH;
     var fine = 0.;

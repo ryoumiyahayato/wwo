@@ -27,7 +27,7 @@ fn face(mesh: &mut Vec<Vertex>, points: [Vec3; 3], edge: [f32; 3], tone: f32) {
 fn stand(outline: &[(f32, f32)], group: &[Vertex]) -> Vec<Vertex> {
     // Keep the stand first so the indirect draw can omit subpixel crowns.
     let mut mesh = group.to_vec();
-    for tree in 1..=25 {
+    for tree in 1..=49 {
         let start = mesh.len();
         for i in 0..outline.len() {
             let (ax, ay) = outline[i];
