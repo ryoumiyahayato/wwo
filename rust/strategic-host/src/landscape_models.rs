@@ -54,7 +54,7 @@ fn crown(
     }
 }
 
-pub fn meshes() -> [Vec<Vertex>; 3] {
+pub fn meshes() -> [Vec<Vertex>; 4] {
     let lobed = [
         (1., 0.),
         (0.64, 0.34),
@@ -165,5 +165,18 @@ pub fn meshes() -> [Vec<Vertex>; 3] {
             band * 1.10,
         );
     }
-    [broadleaf, conifer, rock]
+    let outline = [
+        (1., 0.05), (0.61, 0.70), (0.10, 0.97), (-0.53, 0.72),
+        (-0.89, 0.07), (-0.66, -0.58), (0.02, -0.89), (0.67, -0.58),
+    ];
+    let mut group = Vec::new();
+    crown(
+        &mut group, &outline, Vec3::new(-0.30,0.09,0.29), [0.78,0.86],
+        Vec3::new(-0.48,0.13,0.85),0.96,
+    );
+    crown(
+        &mut group, &outline, Vec3::new(0.33,-0.17,0.25), [0.72,0.67],
+        Vec3::new(0.30,-0.23,0.68),1.08,
+    );
+    [broadleaf, conifer, rock, group]
 }

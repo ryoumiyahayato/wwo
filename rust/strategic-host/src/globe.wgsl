@@ -13,6 +13,7 @@ struct View {
     edits: array<LandEdit, 12>,
     natural_lod: array<vec4f, 2>, // opacity indexed by Z, or -1 for per-page blending
     close_sample: vec4f,
+    city_grounds: array<vec4f,4>,
 };
 struct LandEdit { area: vec4f, state: vec4f };
 struct Tile {
@@ -35,9 +36,9 @@ struct Tile {
 @group(0) @binding(10) var terrain_world: texture_2d_array<f32>;
 @group(0) @binding(11) var terrain_detail: texture_2d_array<f32>;
 @group(0) @binding(12) var terrain_index: texture_2d<u32>;
-@group(0) @binding(13) var land_surface: texture_2d<f32>;
-@group(0) @binding(14) var land_repeat: sampler;
-@group(0) @binding(15) var landscape_data: texture_2d_array<f32>;
+@group(3) @binding(0) var land_surface: texture_2d<f32>;
+@group(3) @binding(1) var land_repeat: sampler;
+@group(3) @binding(2) var landscape_data: texture_2d_array<f32>;
 @group(2) @binding(0) var close_surface: texture_2d<f32>;
 @group(2) @binding(1) var<uniform> close_extent: vec4f;
 @group(1) @binding(0) var<uniform> tile: Tile;
@@ -263,6 +264,19 @@ fn land_material_band(earth:vec3f, planes:vec3f, footprint:f32, period:f32) -> v
         +textureSampleLevel(land_surface,land_repeat,p.xz+vec2f(.21,.43),mip)*planes.y
         +textureSampleLevel(land_surface,land_repeat,p.xy+vec2f(.67,.29),mip)*planes.z;
 }
+fn city_ground_weight(ll:vec2f) -> f32 {
+    if view.city_grounds[0].z<=0. {return 0.;}
+    var weight=0.;
+    for (var i=0u; i<4u; i++) {
+        let bounds=view.city_grounds[i];
+        if bounds.z<=0. {break;}
+        let delta=ll.x-bounds.x;
+        let longitude=delta-360.*floor((delta+180.)/360.);
+        let offset=radians(vec2f(longitude*cos(radians(bounds.y)),ll.y-bounds.y))*EARTH;
+        weight=max(weight,1.-smoothstep(.56,1.21,length(offset/bounds.zw)));
+    }
+    return weight;
+}
 fn land_chroma(rgb:vec3f) -> vec2f {
     return vec2f(rgb.g-rgb.r,rgb.r+rgb.g-2.*rgb.b)/max(.001,rgb.r+rgb.g+rgb.b);
 }
@@ -418,21 +432,21 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f) -> vec3f
     if use_natural {
         terrain=natural_surface(ll);
         color=terrain.rgb;
-        if view.settings.y<.5 && base_mpp<LAND_DETAIL_MPP {
+        if view.settings.y<.5 && view.map_style.z>=6. && base_mpp<LAND_DETAIL_MPP {
             let foreshortening=mix(max(.25,dot(normal_world,view.chart_forward.xyz)),1.,view.viewport.w);
-            let footprint=base_mpp/foreshortening;
-            let detail_footprint=footprint/max(.3,view.chart_origin.z);
-            if view.close_sample.z>.5 {
-                terrain=close_terrain(ll,detail_footprint,terrain);
-                color=natural_land_material(terrain,normal_world,footprint);
-            } else {
-                color=natural_land_material(terrain,normal_world,footprint);
-                let close=close_terrain(ll,detail_footprint,vec4f(color,terrain.a));
-                color=close.rgb;
-                terrain.a=close.a;
-            }
+            let detail_footprint=base_mpp/(foreshortening*max(.3,view.chart_origin.z));
+            terrain=close_terrain(ll,detail_footprint,terrain);
+            color=terrain.rgb;
         }
         color=landscape_relief(color,ll,normal_world,terrain.a,base_mpp);
+        let built=city_ground_weight(ll)*(1.-smoothstep(.02,.45,terrain.a));
+        if built>.001 {
+            let facing=abs(normal_world)*abs(normal_world);
+            let planes=facing*facing/dot(facing,facing);
+            let courts=land_material_band(normal_world,planes,base_mpp,382.);
+            let paving=mix(vec3f(.43,.367,.291),vec3f(.54,.499,.418),courts.b);
+            color=mix(color,paving*(.86+.27*courts.a),built*.74);
+        }
         relief_light=clamp(.57+dot(terrain.rgb,vec3f(.30,.55,.15))*.68,.70,1.19);
     } else if tile.options.y>=5. {
         let level = log2(max(1.,base_mpp/min(dx,dy)));
