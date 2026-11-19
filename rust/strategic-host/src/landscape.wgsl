@@ -112,7 +112,7 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
     let vegetation = mix(base,mix(vec3f(.428,.482,.259),vec3f(.389,.435,.256),alpine),near*.49)
         * (1. + motif.g*.076);
     let earth = mix(base,vec3f(.53,.435,.297),near*.59) * (1. + motif.a*.39);
-    let snow = mix(base,vec3f(.738,.815,.838),near*.39) * (1. + motif.b*.16);
+    let snow = mix(base,mix(vec3f(.72,.79,.82),vec3f(.82,.87,.88),.5+motif.a),near*.73);
     let stone = max(steep*.88,land.bare*mix(.37,.94,alpine));
     let exposed = (1.-land.forest*.89)*(1.-land.snow)*(1.-land.urban) * stone;
     let scree = land.bare * smoothstep(.10,.36,gradient) * (1.-smoothstep(.46,.88,gradient));
@@ -126,11 +126,12 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
         let grains = land_material_band(relief_world,planes,mpp,3670.) - .5;
         let texture = grains.r*(land.forest*.34+land.shrub*.22)
             + grains.g*land.grass*.43 + grains.a*(land.soil*.49+land.bare*.29+scree*.25)
-            + grains.b*(exposed*.91+scree*.37+land.snow*.15)
+            + grains.b*(exposed*.91+scree*.37) + grains.a*land.snow*.08
             + motif.b*exposed*.17;
         color *= 1. + texture*near;
     }
-    return clamp(color * (1.+relief),vec3f(0.),vec3f(1.));
+    let icelight = clamp(relief,-.32,.075);
+    return clamp(color * (1.+mix(relief,icelight,land.snow*near)),vec3f(0.),vec3f(1.));
 }
 
 fn landscape_relief(base: vec3f, ll: vec2f, world: vec3f, water: f32, mpp: f32) -> vec3f {
