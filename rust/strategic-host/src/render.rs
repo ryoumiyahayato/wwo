@@ -1,7 +1,7 @@
 use crate::{camera::{Camera,EARTH},compact::{Raster,Vertex},overlay::Mesh,politics::FlagUniform,terrain::{self,Terrain},ui::Ink,world::{Pixels,Tile}};
 use crate::landmarks::{self, ModelKey, ModelMesh, ModelVertex, VisibleModel};
 use crate::terrain_detail;
-use crate::landscape::Landscape;
+use crate::landscape::{Landscape,LandscapeCounts};
 use bytemuck::{Pod,Zeroable};
 use std::collections::{HashMap, HashSet};
 use std::{fs::File,io,path::{Path,PathBuf},sync::Arc,time::{Duration,Instant}};
@@ -500,16 +500,16 @@ pub(crate) fn write_texture_layer(queue:&wgpu::Queue,texture:&wgpu::Texture,leve
 }
 
 impl Renderer {
-    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
+    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
         let size=window.inner_size().into();
-        Self::with_target(Some(window),size,atlas,flags,hud,globe_art,layout_bytes,natural,None,detail,events).await
+        Self::with_target(Some(window),size,atlas,flags,hud,globe_art,layout_bytes,natural,None,detail,events,observe).await
     }
 
     pub async fn new_offscreen(size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
-        Self::with_target(None,size,atlas,flags,hud,globe_art,layout_bytes,natural,close,detail,events).await
+        Self::with_target(None,size,atlas,flags,hud,globe_art,layout_bytes,natural,close,detail,events,false).await
     }
 
-    async fn with_target(window:Option<Arc<Window>>, size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
+    async fn with_target(window:Option<Arc<Window>>, size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
         let instance=wgpu::Instance::new(&wgpu::InstanceDescriptor {backends:wgpu::Backends::VULKAN,..Default::default()});
         let surface=window.map(|window|instance.create_surface(window)).transpose().map_err(|e|e.to_string())?;
         let adapter=instance.request_adapter(&wgpu::RequestAdapterOptions {
@@ -517,8 +517,11 @@ impl Renderer {
         }).await.ok_or(if surface.is_some(){"A Vulkan adapter with window presentation is required"}else{"A Vulkan adapter is required"})?;
         let info=adapter.get_info();
         let landscape_supported=adapter.limits().max_sampled_textures_per_shader_stage>=17;
-        let features=if natural.is_some() {wgpu::Features::TEXTURE_COMPRESSION_BC}else{wgpu::Features::empty()};
+        let mut features=if natural.is_some() {wgpu::Features::TEXTURE_COMPRESSION_BC}else{wgpu::Features::empty()};
         if !adapter.features().contains(features) {return Err("自然地貌需要支持 BC7 纹理的 Vulkan 显卡。".into());}
+        if observe && landscape_supported {
+            features |= adapter.features() & (wgpu::Features::TIMESTAMP_QUERY|wgpu::Features::PIPELINE_STATISTICS_QUERY);
+        }
         let (device,queue)=adapter.request_device(&wgpu::DeviceDescriptor {
             label:Some("WWO strategic map host"),required_features:features,
             required_limits:wgpu::Limits {max_texture_dimension_2d:4096,
@@ -789,8 +792,8 @@ impl Renderer {
             || self.landscape.as_ref().is_some_and(Landscape::pending)
     }
 
-    pub fn landscape_counts(&self)->io::Result<(u32,[u32;5])> {
-        self.landscape.as_ref().map_or(Ok((0,[0;5])),|layer|layer.counts(&self.device,&self.queue))
+    pub fn landscape_counts(&self)->io::Result<LandscapeCounts> {
+        self.landscape.as_ref().map_or(Ok(LandscapeCounts::default()),|layer|layer.counts(&self.device,&self.queue))
     }
 
     pub fn resize(&mut self,[w,h]:[u32;2]) {

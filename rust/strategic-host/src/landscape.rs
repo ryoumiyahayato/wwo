@@ -11,7 +11,7 @@ const CHUNK_SIDE: i32 = 16;
 const LATITUDE_CELLS: i32 = 98_304;
 const CAPACITY: u64 = 65_536;
 const INSTANCE_BYTES: u64 = 16;
-const COMMAND_BYTES: u64 = 16;
+const DRAW_BYTES: u64 = 20;
 const MAX_CHUNKS: usize = 1_728;
 const CACHE_CHUNKS: usize = 2_560;
 const BUILDS_PER_FRAME: usize = 32;
@@ -19,6 +19,14 @@ const BUILDS_PER_FRAME: usize = 32;
 const STAND_ONLY_MPP: f64 = 21.;
 
 type Chunk = [u32; 4];
+
+#[derive(Default)]
+pub struct LandscapeCounts {
+    pub draw_calls: u32,
+    pub by_mesh: [u32; 5],
+    pub vertex_invocations: Option<u64>,
+    pub gpu_ms: Option<f64>,
+}
 
 #[derive(Clone, Copy, PartialEq)]
 struct LandscapeView {
@@ -45,8 +53,9 @@ pub struct Landscape {
     chunks: wgpu::Buffer,
     draws: wgpu::Buffer,
     vertices: wgpu::Buffer,
-    crown_vertices: [u32; 3],
-    stand_vertices: u32,
+    indices: wgpu::Buffer,
+    crown_indices: [u32; 3],
+    stand_indices: u32,
     stand_only: bool,
     instances: wgpu::Buffer,
     depth: Option<([u32; 2], wgpu::TextureView)>,
@@ -61,6 +70,9 @@ pub struct Landscape {
     built_total: u64,
     collect_needed: bool,
     pending: bool,
+    timestamps: Option<wgpu::QuerySet>,
+    statistics: Option<wgpu::QuerySet>,
+    profiled: bool,
 }
 
 impl Landscape {
@@ -71,21 +83,34 @@ impl Landscape {
         shader: &wgpu::ShaderModule,
     ) -> Self {
         use wgpu::BufferUsages as Usage;
-        let vertices = landscape_models::meshes();
-        let mut first = 0;
-        let mesh_commands = vertices.each_ref().map(|vertices| {
-                let len = vertices.len() as u32;
-                let command = [len, 0, first, 0];
-                first += len;
-                command
-            });
+        let meshes = landscape_models::meshes();
+        let query = |feature, ty, count| device.features().contains(feature).then(|| {
+            device.create_query_set(&wgpu::QuerySetDescriptor { label: Some("Landscape observation"), ty, count })
+        });
+        let timestamps = query(wgpu::Features::TIMESTAMP_QUERY, wgpu::QueryType::Timestamp, 2);
+        let statistics = query(wgpu::Features::PIPELINE_STATISTICS_QUERY,
+            wgpu::QueryType::PipelineStatistics(wgpu::PipelineStatisticsTypes::VERTEX_SHADER_INVOCATIONS), 1);
+        let mut first_index = 0;
+        let mut base_vertex = 0;
+        let mesh_commands = meshes.each_ref().map(|mesh| {
+            let count = mesh.indices.len() as u32;
+            let command = [count, 0, first_index, base_vertex, 0];
+            first_index += count;
+            base_vertex += mesh.vertices.len() as u32;
+            command
+        });
         let commands = [mesh_commands[0], mesh_commands[1], mesh_commands[2], mesh_commands[0], mesh_commands[3]];
-        let crown_vertices = [commands[0][0], commands[1][0], commands[3][0]];
-        let stand_vertices = commands[4][0];
+        let crown_indices = [commands[0][0], commands[1][0], commands[3][0]];
+        let stand_indices = commands[4][0];
         let vertices = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Landscape shared meshes"),
-            contents: bytemuck::cast_slice(&vertices.into_iter().flatten().collect::<Vec<_>>()),
+            contents: bytemuck::cast_slice(&meshes.iter().flat_map(|mesh|mesh.vertices.iter().copied()).collect::<Vec<_>>()),
             usage: Usage::VERTEX,
+        });
+        let indices = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Landscape shared mesh indices"),
+            contents: bytemuck::cast_slice(&meshes.into_iter().flat_map(|mesh|mesh.indices).collect::<Vec<_>>()),
+            usage: Usage::INDEX,
         });
         let draws = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Landscape draw commands"),
@@ -102,7 +127,7 @@ impl Landscape {
         };
         let chunks = buffer(
             "Visible and dirty landscape chunks",
-            COMMAND_BYTES * (MAX_CHUNKS + BUILDS_PER_FRAME) as u64,
+            (size_of::<Chunk>() * (MAX_CHUNKS + BUILDS_PER_FRAME)) as u64,
             Usage::STORAGE | Usage::COPY_DST,
         );
         let instances = buffer(
@@ -206,8 +231,9 @@ impl Landscape {
             chunks,
             draws,
             vertices,
-            crown_vertices,
-            stand_vertices,
+            indices,
+            crown_indices,
+            stand_indices,
             stand_only: false,
             instances,
             depth: None,
@@ -222,6 +248,9 @@ impl Landscape {
             built_total: 0,
             collect_needed: false,
             pending: false,
+            timestamps,
+            statistics,
+            profiled: false,
         }
     }
 
@@ -246,9 +275,9 @@ impl Landscape {
         }
         let stand_only = camera.mpp >= STAND_ONLY_MPP;
         if stand_only != self.stand_only {
-            for (kind, full) in [0, 1, 3].into_iter().zip(self.crown_vertices) {
-                let count = if stand_only { self.stand_vertices } else { full };
-                queue.write_buffer(&self.draws, kind * COMMAND_BYTES, bytemuck::bytes_of(&count));
+            for (kind, full) in [0, 1, 3].into_iter().zip(self.crown_indices) {
+                let count = if stand_only { self.stand_indices } else { full };
+                queue.write_buffer(&self.draws, kind * DRAW_BYTES, bytemuck::bytes_of(&count));
             }
             self.stand_only = stand_only;
         }
@@ -327,7 +356,7 @@ impl Landscape {
             queue.write_buffer(&self.chunks, 0, bytemuck::cast_slice(&active));
         }
         if !dirty.is_empty() {
-            queue.write_buffer(&self.chunks, COMMAND_BYTES*MAX_CHUNKS as u64, bytemuck::cast_slice(&dirty));
+            queue.write_buffer(&self.chunks, (size_of::<Chunk>()*MAX_CHUNKS) as u64, bytemuck::cast_slice(&dirty));
         }
         self.active = active;
     }
@@ -337,16 +366,35 @@ impl Landscape {
     pub fn built_chunks(&self) -> u64 {self.built_total}
     pub fn pending(&self) -> bool {self.pending}
 
-    pub fn counts(&self, device:&wgpu::Device, queue:&wgpu::Queue) -> std::io::Result<(u32,[u32;5])> {
-        if self.active.is_empty() {return Ok((0,[0;5]));}
-        let size=KINDS*COMMAND_BYTES;
+    pub fn counts(&self, device:&wgpu::Device, queue:&wgpu::Queue) -> std::io::Result<LandscapeCounts> {
+        if self.active.is_empty() {return Ok(LandscapeCounts::default());}
+        let size=KINDS*DRAW_BYTES;
+        let query_offset = u64::from(wgpu::QUERY_RESOLVE_BUFFER_ALIGNMENT);
+        let timestamps = self.timestamps.as_ref().filter(|_| self.profiled);
+        let statistics = self.statistics.as_ref().filter(|_| self.profiled);
         let data=device.create_buffer(&wgpu::BufferDescriptor {
-            label:Some("Landscape draw count readback"), size,
+            label:Some("Landscape draw count readback"), size:size+24,
             usage:wgpu::BufferUsages::COPY_DST|wgpu::BufferUsages::MAP_READ,
             mapped_at_creation:false,
         });
         let mut encoder=device.create_command_encoder(&Default::default());
         encoder.copy_buffer_to_buffer(&self.draws,0,&data,0,size);
+        if timestamps.is_some() || statistics.is_some() {
+            let queries = device.create_buffer(&wgpu::BufferDescriptor {
+                label: Some("Landscape query resolve"),
+                size: query_offset+8,
+                usage: wgpu::BufferUsages::QUERY_RESOLVE|wgpu::BufferUsages::COPY_SRC,
+                mapped_at_creation: false,
+            });
+            if let Some(set) = timestamps {
+                encoder.resolve_query_set(set,0..2,&queries,0);
+                encoder.copy_buffer_to_buffer(&queries,0,&data,size,16);
+            }
+            if let Some(set) = statistics {
+                encoder.resolve_query_set(set,0..1,&queries,query_offset);
+                encoder.copy_buffer_to_buffer(&queries,query_offset,&data,size+16,8);
+            }
+        }
         let submission=queue.submit([encoder.finish()]);
         let slice=data.slice(..);
         let (send,receive)=std::sync::mpsc::channel();
@@ -354,8 +402,16 @@ impl Landscape {
         let _=device.poll(wgpu::Maintain::WaitForSubmissionIndex(submission));
         receive.recv().map_err(std::io::Error::other)?.map_err(std::io::Error::other)?;
         let mapped=slice.get_mapped_range();
-        let words:&[u32]=bytemuck::cast_slice(&mapped);
-        Ok((KINDS as u32,std::array::from_fn(|kind|words[kind*4+1])))
+        let (draws,queries)=mapped.split_at(size as usize);
+        let words:&[u32]=bytemuck::cast_slice(draws);
+        let query_word=|index: usize| u64::from_ne_bytes(queries[index*8..(index+1)*8].try_into().unwrap());
+        Ok(LandscapeCounts {
+            draw_calls: KINDS as u32,
+            by_mesh: std::array::from_fn(|kind|words[kind*(DRAW_BYTES as usize/4)+1]),
+            vertex_invocations: statistics.map(|_|query_word(2)),
+            gpu_ms: timestamps.map(|_|query_word(1).saturating_sub(query_word(0)) as f64
+                * f64::from(queue.get_timestamp_period()) / 1_000_000.),
+        })
     }
 
     pub fn draw(
@@ -371,7 +427,7 @@ impl Landscape {
         }
         if self.collect_needed {
             for kind in 0..KINDS {
-                encoder.clear_buffer(&self.draws, kind * COMMAND_BYTES + 4, Some(4));
+                encoder.clear_buffer(&self.draws, kind * DRAW_BYTES + 4, Some(4));
             }
             {
                 let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
@@ -431,18 +487,24 @@ impl Landscape {
                 stencil_ops: None,
             }),
             occlusion_query_set: None,
-            timestamp_writes: None,
+            timestamp_writes: self.timestamps.as_ref().map(|query_set| wgpu::RenderPassTimestampWrites {
+                query_set, beginning_of_pass_write_index: Some(0), end_of_pass_write_index: Some(1),
+            }),
         });
         pass.set_pipeline(&self.render);
         for (slot, group) in view_groups.into_iter().enumerate() {
             pass.set_bind_group(slot as u32, group, &[]);
         }
         pass.set_vertex_buffer(0, self.vertices.slice(..));
+        pass.set_index_buffer(self.indices.slice(..), wgpu::IndexFormat::Uint16);
+        if let Some(set) = &self.statistics { pass.begin_pipeline_statistics_query(set,0); }
         for kind in 0..KINDS {
             let bytes = CAPACITY * INSTANCE_BYTES;
             pass.set_vertex_buffer(1, self.instances.slice(kind * bytes..(kind + 1) * bytes));
-            pass.draw_indirect(&self.draws, kind * COMMAND_BYTES);
+            pass.draw_indexed_indirect(&self.draws, kind * DRAW_BYTES);
         }
+        if self.statistics.is_some() { pass.end_pipeline_statistics_query(); }
+        self.profiled = true;
     }
 }
 
