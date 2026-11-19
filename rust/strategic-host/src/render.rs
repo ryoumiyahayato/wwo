@@ -24,6 +24,7 @@ pub struct View {
     pub edits:[Edit;crate::timeline::MAX_SITES],
     pub natural_lod:[[f32;4];2],
     pub close_sample:[f32;4],
+    city_grounds:[[f32;4];4],
 }
 impl View {
     pub fn new(camera:&Camera,size:[u32;2])->Self {
@@ -38,6 +39,17 @@ impl View {
 
     pub fn set_terrain_exact(&mut self,exact:bool) {
         self.projection_origin[3]=if exact {1.} else {0.};
+    }
+
+    pub fn set_city_grounds(&mut self, models:&[VisibleModel]) {
+        let mut preceding=None;
+        let grounds=models.iter().filter_map(|model|{
+            let bounds=model.city_ground?;
+            if preceding==Some(model.place) {return None;}
+            preceding=Some(model.place);
+            Some(bounds)
+        });
+        for (slot,ground) in self.city_grounds.iter_mut().zip(grounds) {*slot=ground;}
     }
 }
 #[repr(C)]
@@ -114,6 +126,8 @@ pub struct Renderer {
     pub gpu:String,
     models: ModelLayer,
     landscape: Option<Landscape>,
+    landscape_pipeline: Option<(wgpu::TextureFormat,wgpu::BindGroupLayout,wgpu::ShaderModule)>,
+    surface: GroundSurface,
     view:wgpu::Buffer,
     globals:wgpu::BindGroup,
     pages:wgpu::BindGroupLayout,
@@ -143,6 +157,64 @@ pub struct Renderer {
     screen:wgpu::BindGroup,
     screen_size:wgpu::Buffer,
     meshes:[MeshBuffers;26],
+}
+
+struct GroundSurface {
+    layout:wgpu::BindGroupLayout,
+    group:wgpu::BindGroup,
+    repeat:wgpu::Sampler,
+    height:Option<wgpu::TextureView>,
+    loaded:bool,
+}
+
+impl GroundSurface {
+    fn new(device:&wgpu::Device, supported:bool)->Self {
+        let mut entries=vec![sampled(0),sampler_entry(1)];
+        let height=supported.then(||{
+            entries.push(wgpu::BindGroupLayoutEntry{
+                visibility:wgpu::ShaderStages::FRAGMENT|wgpu::ShaderStages::COMPUTE,
+                ..texture_entry(2,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)
+            });
+            create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm)
+                .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()})
+        });
+        let layout=layout(device,&entries);
+        let repeat=device.create_sampler(&wgpu::SamplerDescriptor{
+            address_mode_u:wgpu::AddressMode::Repeat,address_mode_v:wgpu::AddressMode::Repeat,
+            mag_filter:wgpu::FilterMode::Linear,min_filter:wgpu::FilterMode::Linear,
+            mipmap_filter:wgpu::FilterMode::Linear,..Default::default()
+        });
+        let placeholder=create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm);
+        let group=Self::bind(device,&layout,&repeat,&placeholder,height.as_ref());
+        Self{layout,group,repeat,height,loaded:false}
+    }
+
+    fn bind(device:&wgpu::Device, layout:&wgpu::BindGroupLayout, repeat:&wgpu::Sampler,
+            surface:&wgpu::Texture, height:Option<&wgpu::TextureView>)->wgpu::BindGroup {
+        let view=surface.create_view(&Default::default());
+        let mut entries=vec![tex_resource(0,&view),sampler_resource(1,repeat)];
+        if let Some(height)=height {entries.push(tex_resource(2,height));}
+        bind(device,layout,&entries)
+    }
+
+    fn load(&mut self, device:&wgpu::Device, queue:&wgpu::Queue, height:Option<wgpu::TextureView>)->io::Result<()> {
+        if self.loaded {return Ok(());}
+        let art=crate::decode_rgba(&include_bytes!("land-material.png")[..])?;
+        let [width,height_px]=art.size;
+        let levels=width.ilog2()+1;
+        let texture=create_texture_mips(device,[width,height_px,1],wgpu::TextureFormat::Rgba8Unorm,levels);
+        let mut pixels=art.pixels;
+        for level in 0..levels {
+            let [w,h]=[width>>level,height_px>>level];
+            write_texture_mip(queue,&texture,[w,h,1],4,&pixels,level);
+            if w==1 {break;}
+            pixels=downsample_rgba(&pixels,w,h);
+        }
+        if height.is_some() {self.height=height;}
+        self.group=Self::bind(device,&self.layout,&self.repeat,&texture,self.height.as_ref());
+        self.loaded=true;
+        Ok(())
+    }
 }
 
 struct ResidentModel {
@@ -465,18 +537,13 @@ impl Renderer {
         };
         let fragment=wgpu::ShaderStages::FRAGMENT;
         let compute_fragment=fragment|wgpu::ShaderStages::COMPUTE;
-        let mut global_entries=vec![uniform(0,compute_fragment|wgpu::ShaderStages::VERTEX),
+        let global_entries=[uniform(0,compute_fragment|wgpu::ShaderStages::VERTEX),
             wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..sampler_entry(1)},sampler_entry(2),sampled(3),
             texture_entry(4,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),sampled(5),
             texture_entry(6,wgpu::TextureSampleType::Float{filterable:false},wgpu::TextureViewDimension::D2),sampled(7),sampled(8),sampled(9),
             texture_entry(10,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
             wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..texture_entry(11,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)},
-            wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..texture_entry(12,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2)},
-            sampled(13),sampler_entry(14)];
-        if landscape_supported {
-            global_entries.push(wgpu::BindGroupLayoutEntry{visibility:compute_fragment,
-                ..texture_entry(15,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)});
-        }
+            wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..texture_entry(12,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2)}];
         let glob=layout(&device,&global_entries);
         let close_layout=layout(&device,&[sampled(0),uniform(1,fragment)]);
         let pages=layout(&device,&[uniform(0,fragment),sampled(1),sampled(2),sampled(3),
@@ -490,11 +557,6 @@ impl Renderer {
         });
         let wrap=device.create_sampler(&wgpu::SamplerDescriptor {
             address_mode_u:wgpu::AddressMode::Repeat,mag_filter:wgpu::FilterMode::Linear,min_filter:wgpu::FilterMode::Linear,
-            mipmap_filter:wgpu::FilterMode::Linear,..Default::default()
-        });
-        let land_repeat=device.create_sampler(&wgpu::SamplerDescriptor {
-            address_mode_u:wgpu::AddressMode::Repeat,address_mode_v:wgpu::AddressMode::Repeat,
-            mag_filter:wgpu::FilterMode::Linear,min_filter:wgpu::FilterMode::Linear,
             mipmap_filter:wgpu::FilterMode::Linear,..Default::default()
         });
         let view=buffer(&device,std::mem::size_of::<View>());
@@ -520,35 +582,21 @@ impl Renderer {
         });
         let terrain=natural.map(|(catalogue,proxy)|Terrain::new(&device,&queue,catalogue,proxy,landscape_supported))
             .transpose().map_err(|error|error.to_string())?;
-        let [terrain_world,terrain_detail,terrain_index,landscape_data]=if let Some(terrain)=&terrain {
+        let [terrain_world,terrain_detail,terrain_index]=if let Some(terrain)=&terrain {
             terrain.views()
         }else{
             let empty=||create_texture(&device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm)
                 .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()});
-            [empty(),empty(),create_texture(&device,[1,1,1],wgpu::TextureFormat::R32Uint).create_view(&Default::default()),empty()]
+            [empty(),empty(),create_texture(&device,[1,1,1],wgpu::TextureFormat::R32Uint).create_view(&Default::default())]
         };
-        let land_art=crate::decode_rgba(&include_bytes!("land-material.png")[..])
-            .map_err(|error|error.to_string())?;
-        let [material_w,material_h]=land_art.size;
-        let levels=material_w.ilog2()+1;
-        let land_surface=create_texture_mips(&device,[material_w,material_h,1],wgpu::TextureFormat::Rgba8Unorm,levels);
-        let mut pixels=land_art.pixels;
-        for level in 0..levels {
-            let [w,h]=[material_w>>level,material_h>>level];
-            write_texture_mip(&queue,&land_surface,[w,h,1],4,&pixels,level);
-            if w==1 { break; }
-            pixels=downsample_rgba(&pixels,w,h);
-        }
-        let land_surface=land_surface.create_view(&Default::default());
+        let surface=GroundSurface::new(&device,landscape_supported);
         let close_extent=close.as_ref().map(|sample|sample.extent.map(f64::from));
         let (close_surface,close_bounds)=CloseSample::upload(close,&device,&queue);
         let close_group=bind(&device,&close_layout,&[tex_resource(0,&close_surface),buf_resource(1,&close_bounds)]);
-        let mut global_resources=vec![buf_resource(0,&view),sampler_resource(1,&linear),sampler_resource(2,&wrap),
+        let global_resources=[buf_resource(0,&view),sampler_resource(1,&linear),sampler_resource(2,&wrap),
             tex_resource(3,&palette_view),tex_resource(4,&scenario),tex_resource(5,&flags),tex_resource(6,&flag_pose_view),
             tex_resource(7,&galactic_chart),tex_resource(8,&ocean_detail),tex_resource(9,&ocean_ice),
-            tex_resource(10,&terrain_world),tex_resource(11,&terrain_detail),tex_resource(12,&terrain_index),
-            tex_resource(13,&land_surface),sampler_resource(14,&land_repeat)];
-        if landscape_supported {global_resources.push(tex_resource(15,&landscape_data));}
+            tex_resource(10,&terrain_world),tex_resource(11,&terrain_detail),tex_resource(12,&terrain_index)];
         let globals=bind(&device,&glob,&global_resources);
         let flag_art=bind(&device,&font_layout,&[tex_resource(0,&flags),sampler_resource(1,&linear)]);
         let [w,h]=atlas.size;
@@ -569,7 +617,10 @@ impl Renderer {
         });
         let globe_source=include_str!("globe.wgsl");
         let scenery_source=if landscape_supported {include_str!("landscape.wgsl")} else {
-            "fn landscape_relief(base:vec3f, ll:vec2f, world:vec3f, water:f32, mpp:f32)->vec3f {return base;}"
+            "fn landscape_relief(base:vec3f, ll:vec2f, world:vec3f, water:f32, mpp:f32)->vec3f {
+                if view.settings.y>=.5 || view.map_style.z<6. {return base;}
+                return natural_land_material(vec4f(base,water),world,mpp);
+            }"
         };
         let globe_shader=device.create_shader_module(wgpu::ShaderModuleDescriptor{
             label:Some("WWO globe and Z7 landscape"),
@@ -588,7 +639,7 @@ impl Renderer {
                     targets:&[Some(wgpu::ColorTargetState{format,blend:Some(wgpu::BlendState::ALPHA_BLENDING),write_mask:wgpu::ColorWrites::ALL})]})
             })
         };
-        let globe=pipeline(&[&glob,&pages,&close_layout],&globe_shader,"triangle","map",&[]);
+        let globe=pipeline(&[&glob,&pages,&close_layout,&surface.layout],&globe_shader,"triangle","map",&[]);
         let solid=pipeline(&[&screen_layout],&hud_shader,"screen_vertex","solid",&mesh_layout);
         let text=pipeline(&[&screen_layout,&font_layout],&hud_shader,"screen_vertex","image",&mesh_layout);
         let flag=pipeline(&[&screen_layout,&font_layout],&hud_shader,"screen_vertex","flag",&mesh_layout);
@@ -599,11 +650,11 @@ impl Renderer {
         let instrument=pipeline(&[&screen_layout,&font_layout,&instrument_layout],&hud_shader,"screen_vertex","instrument",&mesh_layout);
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
         let models=ModelLayer::new(&device,format,events);
-        let landscape=terrain.as_ref().filter(|terrain|terrain.landscape_cover())
-            .map(|_|Landscape::new(&device,format,[&glob,&pages,&close_layout],&globe_shader));
+        let landscape_pipeline=landscape_supported.then_some((format,glob,globe_shader));
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
                 globe,terrain,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
-                solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models,landscape})
+                solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models,
+                landscape:None,landscape_pipeline,surface})
     }
 
     pub fn update_close_terrain(&mut self,camera:&Camera,size:[u32;2],enabled:bool,now:Instant)->[f32;4] {
@@ -665,13 +716,26 @@ impl Renderer {
     }
 
     pub fn has_model(&self, key: ModelKey) -> bool { self.models.residents.contains_key(&key) }
-    pub fn update_terrain(&mut self,camera:&Camera,size:[u32;2],now:Instant) {
-        if let Some(terrain)=&mut self.terrain {terrain.update(&self.queue,camera,size,now);}
+    pub fn update_terrain(&mut self,camera:&Camera,size:[u32;2],now:Instant)->io::Result<()> {
+        if let Some(terrain)=&mut self.terrain {
+            terrain.update(&self.queue,camera,size,now);
+            if terrain.view_demand()>=6 && !self.surface.loaded {
+                let height=terrain.enable_landscape(&self.device);
+                self.surface.load(&self.device,&self.queue,height)?;
+            }
+        }
+        Ok(())
     }
 
     pub fn prepare_landscape(&mut self,camera:&Camera,size:[u32;2],enabled:bool) {
+        let enabled=enabled&&self.terrain.as_ref().is_some_and(|terrain|terrain.view_max()>=6);
+        if enabled && camera.mpp<1460. && self.terrain.as_ref().is_some_and(Terrain::landscape_cover) {
+            if let Some((format,glob,shader))=self.landscape_pipeline.take() {
+                self.landscape=Some(Landscape::new(&self.device,format,[&glob,&self.pages,&self.close_layout,&self.surface.layout],&shader));
+            }
+        }
         if let (Some(layer),Some(terrain))=(&mut self.landscape,&self.terrain) {
-            layer.prepare(&self.queue,camera,size,terrain.landscape_revision(),enabled&&terrain.view_max()==7);
+            layer.prepare(&self.queue,camera,size,terrain,enabled);
         }
     }
 
@@ -693,6 +757,10 @@ impl Renderer {
         self.terrain.as_ref().map(|terrain|{
             let mut status=terrain.status();
             status["landscape_chunks"]=self.landscape.as_ref().map_or(0,Landscape::visible_chunks).into();
+            status["landscape_cached_chunks"]=self.landscape.as_ref().map_or(0,Landscape::cached_chunks).into();
+            status["landscape_built_chunks"]=self.landscape.as_ref().map_or(0,Landscape::built_chunks).into();
+            status["landscape_pending"]=self.landscape.as_ref().is_some_and(Landscape::pending).into();
+            status["surface_material_loaded"]=self.surface.loaded.into();
             status
         })
     }
@@ -704,6 +772,11 @@ impl Renderer {
     pub fn terrain_fading(&self)->bool {
         self.terrain.as_ref().is_some_and(Terrain::fading)
             || self.detail.as_ref().is_some_and(terrain_detail::Stream::fading)
+            || self.landscape.as_ref().is_some_and(Landscape::pending)
+    }
+
+    pub fn landscape_counts(&self)->io::Result<(u32,[u32;5])> {
+        self.landscape.as_ref().map_or(Ok((0,[0;5])),|layer|layer.counts(&self.device,&self.queue))
     }
 
     pub fn resize(&mut self,[w,h]:[u32;2]) {
@@ -800,6 +873,7 @@ impl Renderer {
                 pass.set_bind_group(0,&self.globals,&[]);
                 pass.set_bind_group(1,&base.group,&[]);
                 pass.set_bind_group(2,&self.close_group,&[]);
+                pass.set_bind_group(3,&self.surface.group,&[]);
                 pass.draw(0..3,0..1);
                 for (page,_,[x,y,w,h],_) in pages {
                     pass.set_scissor_rect(*x,*y,*w,*h);
@@ -809,7 +883,7 @@ impl Renderer {
             }
         }
         if let Some(layer)=&mut self.landscape {
-            layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group],[w,h]);
+            layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group,&self.surface.group],[w,h]);
         }
         self.models.draw(&mut encoder, &image);
         {

@@ -1246,11 +1246,12 @@ impl Host {
         self.hits=models.iter().filter(|model|renderer.has_model(model.key)).map(|model|Hit {
             area:model.screen_bounds,action:Action::Select(Object::Place(model.place)),
         }).chain(hits).collect();
-        renderer.update_terrain(&self.camera,self.size,now);
+        renderer.update_terrain(&self.camera,self.size,now)?;
         view.map_style[2]=renderer.terrain_view_level() as f32;
         view.natural_lod=renderer.terrain_viewport_mix();
         view.set_terrain_exact(renderer.terrain_exact());
         let landscape_enabled=!loading&&(!self.config.managed||self.state.session.is_some())&&self.mode==Mode::Geographic;
+        if landscape_enabled && view.map_style[2]>=6. {view.set_city_grounds(&models);}
         renderer.prepare_landscape(&self.camera,self.size,landscape_enabled);
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);
@@ -1385,6 +1386,18 @@ impl Host {
             "terrain-samples"=>{
                 extra=self.renderer.as_ref().and_then(|r|r.terrain_frame_samples(&self.camera,self.size))
                     .unwrap_or(serde_json::Value::Null);
+            }
+            "landscape-counts"=>{
+                if let Some(renderer)=&self.renderer {
+                    extra=match renderer.landscape_counts() {
+                        Ok((draw_calls,counts))=>serde_json::json!({
+                            "draw_calls":draw_calls,
+                            "instances":counts.iter().sum::<u32>(),
+                            "by_mesh":counts,
+                        }),
+                        Err(error)=>serde_json::json!({"error":error.to_string()}),
+                    };
+                }
             }
             "timing"=>{
                 self.trial.timing=!self.trial.timing;self.trial.previous=None;

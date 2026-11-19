@@ -1521,6 +1521,45 @@ def write_land_candidate(original, sources, natural_earth, destination, *, previ
                                  level=level, scratch=scratch)
 
 
+def write_parent_land_candidate(original, fine, destination, *, scratch=None):
+    """Reduce the deployed Z7 land colors onto Z6, preserving Z6 water and heights."""
+    import zstandard
+
+    dim = TILE + 2 * GUTTER
+    decode = zstandard.ZstdDecompressor()
+    with fine.open("rb") as file:
+        pack = LevelPack(file, 7, COMPACT_VERSION)
+
+        @lru_cache(maxsize=4 * pack.nx)
+        def child(x, y):
+            color_size, _ = pack.frame_sizes(x, y)
+            blocks = decode.decompress(file.read(color_size), max_output_size=dim**2)
+            return np.asarray(Image.frombytes("RGBA", (dim, dim), blocks, "bcn", (7, "BC7")))
+
+        def material(rect, _rgb):
+            x0, y0, x1, y1 = rect
+            xx = np.arange(2*x0, 2*x1) % (TILE*pack.nx)
+            yy = np.arange(2*y0, 2*y1).clip(0, TILE*pack.ny-1)
+            fine_pixels = np.empty((dim*2, dim*2, 4), dtype=np.uint8)
+            columns = xx // TILE
+            rows = yy // TILE
+            for row in np.unique(rows):
+                iy = np.flatnonzero(rows == row)
+                sy = yy[iy] % TILE + GUTTER
+                for column in np.unique(columns):
+                    ix = np.flatnonzero(columns == column)
+                    sx = xx[ix] % TILE + GUTTER
+                    fine_pixels[np.ix_(iy,ix)] = child(int(column),int(row))[np.ix_(sy,sx)]
+
+            samples = fine_pixels.reshape(dim,2,dim,2,4).astype(np.float32) / 255.
+            land = 1. - samples[...,3:4]
+            amount = land.sum(axis=(1,3))
+            rgb = (samples[...,:3]*land).sum(axis=(1,3)) / np.maximum(amount,1e-6)
+            return np.concatenate((rgb, np.clip(amount,0.,1.)), axis=-1)
+
+        write_material_candidate(original, destination, material, level=6, scratch=scratch)
+
+
 def write_material_candidate(original, destination, material, *, preview_pages=None, level=7, scratch=None):
     import zstandard
 
@@ -1744,6 +1783,9 @@ def main():
     terrain_candidate.add_argument("--z7-land-candidate", type=Path, nargs=4,
                         metavar=("ORIGINAL_QPK", "SOURCES", "NATURAL_EARTH", "CANDIDATE_QPK"),
                         help="Build a complete Z7 QPK with terrain-derived land materials")
+    terrain_candidate.add_argument("--z6-from-z7", type=Path, nargs=3,
+                        metavar=("ORIGINAL_Z6", "COLORED_Z7", "CANDIDATE_Z6"),
+                        help="Use the deployed Z7 land colors while retaining Z6 water and elevations")
     parser.add_argument("--historical-cropland",type=Path,metavar="CAO_1900_TIFF",
                         help="Apply Cao 1900 reconstructed cropland fractions in a land candidate")
     parser.add_argument("--sand-dunes", type=Path, metavar="GSDP30_ZIP",
@@ -1764,6 +1806,13 @@ def main():
         parser.error("--historical-cropland requires a Z6 or Z7 land candidate")
     if args.sand_dunes is not None and land_candidate is None:
         parser.error("--sand-dunes requires a Z6 or Z7 land candidate")
+    if args.z6_from_z7 is not None:
+        if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,
+                                           args.ice_shelf_candidate)):
+            parser.error("Z6 palette reduction does not accept other build arguments")
+        with generation_disk_usage(args.z6_from_z7[-1], 1_000_000_000) as (scratch, _):
+            write_parent_land_candidate(*args.z6_from_z7, scratch=scratch)
+        return
     if land_candidate is not None:
         if any(arg is not None for arg in (args.verify,args.repack,args.through,args.sources,
                                            args.ice_shelf_candidate)):

@@ -1,4 +1,4 @@
-"""Pack the existing ESA WorldCover 2021 v200 class cache for Z7 scenery."""
+"""Pack the existing ESA WorldCover 2021 v200 class cache for Z6 and Z7."""
 
 import argparse
 from functools import lru_cache
@@ -29,10 +29,8 @@ def build(source, output):
         tiles[(87 - lat) // 3, (lon + 180) // 3] = source / f"{key}.png"
 
     classes = np.zeros(256, dtype=np.uint8)
-    classes[[10, 95]] = 1  # Tree cover and mangroves
-    classes[60] = 2        # Bare / sparse vegetation
-    classes[[20, 30, 100]] = 3  # Shrubland, grassland, moss and lichen
-    classes[70] = 4        # Snow and ice
+    codes = (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100)
+    classes[list(codes)] = np.arange(len(codes), dtype=np.uint8)
 
     @lru_cache(maxsize=256)
     def load(path):
@@ -50,24 +48,27 @@ def build(source, output):
         return [(int(group), np.flatnonzero(groups == group), indices[groups == group] % SOURCE)
                 for group in np.unique(groups)]
 
-    columns = [slices(x, WIDTH, 120, True) for x in range(WIDTH)]
     compressor = ZstdCompressor(level=4)
-    header = pack("<8sIII", b"WWOZ7LC1", WIDTH, HEIGHT, PAGE)
+    header = pack("<8sIII", b"WWOZ7LC2", WIDTH, HEIGHT, PAGE)
+    levels = ((WIDTH//2, HEIGHT//2), (WIDTH, HEIGHT))
+    count = sum(width*height for width, height in levels)
     offsets = []
     with output.open("xb") as stream:
         stream.write(header)
-        stream.seek(8 * (WIDTH * HEIGHT + 1), 1)
-        for y in range(HEIGHT):
-            rows = slices(y, HEIGHT, 60, False)
-            for cols in columns:
-                offsets.append(stream.tell())
-                data = np.zeros((PAGE, PAGE), dtype=np.uint8)
-                for row, yy, ry in rows:
-                    for col, xx, rx in cols:
-                        if path := tiles.get((row, col)):
-                            data[np.ix_(yy, xx)] = load(path)[np.ix_(ry, rx)]
-                if data.any():
-                    stream.write(compressor.compress(data.tobytes()))
+        stream.seek(8 * (count + 1), 1)
+        for width, height in levels:
+            columns = [slices(x, width, 120, True) for x in range(width)]
+            for y in range(height):
+                rows = slices(y, height, 60, False)
+                for cols in columns:
+                    offsets.append(stream.tell())
+                    data = np.zeros((PAGE, PAGE), dtype=np.uint8)
+                    for row, yy, ry in rows:
+                        for col, xx, rx in cols:
+                            if path := tiles.get((row, col)):
+                                data[np.ix_(yy, xx)] = load(path)[np.ix_(ry, rx)]
+                    if data.any():
+                        stream.write(compressor.compress(data.tobytes()))
         offsets.append(stream.tell())
         stream.seek(len(header))
         stream.write(pack(f"<{len(offsets)}Q", *offsets))

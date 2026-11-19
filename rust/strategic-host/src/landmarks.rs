@@ -117,6 +117,7 @@ struct CityModel {
 
 struct CityLayout {
     center: [f64; 2],
+    ground: [f32; 4],
     from: String,
     to: String,
     max_mpp: f64,
@@ -161,6 +162,7 @@ pub struct VisibleModel {
     pub place: usize,
     pub screen_bounds: [f32; 4],
     pub clip_from_model: [[f32; 4]; 4],
+    pub city_ground: Option<[f32; 4]>,
 }
 
 impl Landmarks {
@@ -204,9 +206,24 @@ impl Landmarks {
             return Err(io::Error::other("R68 landmark catalogue and models differ"));
         }
         let glb = gltf::Gltf::from_slice(R40_MODELS).map_err(io::Error::other)?;
-        let city_bounds = (0..R40_MODULES.len()).map(|module| {
+        let city_bounds: Vec<_> = (0..R40_MODULES.len()).map(|module| {
             Ok([city_bounds(&glb, module, Lod::Near)?, city_bounds(&glb, module, Lod::Far)?])
         }).collect::<io::Result<_>>()?;
+        for city in cities.values_mut() {
+            let [lon,lat]=city.center;
+            let metres=camera::EARTH*std::f64::consts::PI/180.;
+            let mut radius=[80_f64;2];
+            for model in &city.models {
+                let delta=(model.anchor[0]-lon+180.).rem_euclid(360.)-180.;
+                let offset=[delta*metres*lat.to_radians().cos(),(model.anchor[1]-lat)*metres];
+                let (min,max)=city_bounds[model.module][0];
+                let width=model.scale[0]*min[0].abs().max(max[0].abs());
+                let depth=model.scale[2]*min[2].abs().max(max[2].abs());
+                let reach=width.hypot(depth)+85.;
+                for i in 0..2 {radius[i]=radius[i].max(offset[i].abs()+reach);}
+            }
+            city.ground=[lon as f32,lat as f32,radius[0] as f32,radius[1] as f32];
+        }
         Ok(Self { landmarks: models, cities, city_bounds })
     }
 
@@ -234,7 +251,10 @@ impl Landmarks {
                     anchor: model.anchor, heading: model.heading, datum: 0.,
                     dimensions: model.scale.map(|component| component * scale),
                     bounds,
-                }.project(place, camera, pitch, size)
+                }.project(place, camera, pitch, size).map(|mut visible|{
+                    visible.city_ground=Some(city.ground);
+                    visible
+                })
             }));
         }
         visible
@@ -281,7 +301,7 @@ impl CityLayout {
             Ok(CityModel { module, anchor, heading: row.heading_degrees,
                 scale: std::array::from_fn(|i| row.scale[i] * variation[i]) })
         }).collect::<io::Result<_>>()?;
-        Ok(Self { center, from, to, max_mpp: layout.max_mpp, max_scale: layout.scale_max,
+        Ok(Self { center, ground:[0.;4], from, to, max_mpp: layout.max_mpp, max_scale: layout.scale_max,
             target_height: layout.target_height_px, lod_mpp: layout.lod_switch_mpp, models })
     }
 }
@@ -362,6 +382,7 @@ impl ModelPose {
             key: self.key, place,
             clip_from_model: transform.to_cols_array_2d(),
             screen_bounds: [left - 3., top - 3., right - left + 6., bottom - top + 6.],
+            city_ground: None,
         })
     }
 }
