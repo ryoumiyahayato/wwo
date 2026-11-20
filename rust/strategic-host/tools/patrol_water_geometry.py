@@ -24,21 +24,36 @@ def shore_sections(source, ponds):
     levels = []
     sections = []
     edges = Counter()
+    polar_closures = 0
     for level, geometry in shoreline_sources(source,ponds):
         for polygon in polygon_parts(geometry):
             for ring in (polygon.exterior, *polygon.interiors):
                 points = np.asarray(ring.coords)
                 if np.any(np.abs(np.diff(points[:, 0])) > 180):
                     raise ValueError('Patrol index requires dateline-split GSHHG')
-                # Short runs keep the geographic index local even for continents.
-                for i in range(0, len(points)-1, 96):
-                    part = points[i:i+97]
-                    if not np.any(np.diff(part, axis=0)):
-                        continue
-                    sections.append(LineString(part))
-                    levels.append(level)
-                    edges[level] += len(part)-1
-    return STRtree(sections), np.asarray(levels), edges
+                cuts = []
+                if level == 5:
+                    before, after = points[:-1], points[1:]
+                    # The Antarctic ice-front parts close through the South Pole
+                    # along meridians and on the bottom of the geographic grid.
+                    at_pole = before[:,1] == -90
+                    to_pole = after[:,1] == -90
+                    along_meridian = before[:,0] == after[:,0]
+                    cuts = np.flatnonzero((at_pole & to_pole) |
+                                          ((at_pole | to_pole) & along_meridian)).tolist()
+                    polar_closures += len(cuts)
+                start = 0
+                for end in (*cuts, len(points)-1):
+                    # Short runs keep the geographic index local even for continents.
+                    for i in range(start, end, 96):
+                        part = points[i:min(i+96, end)+1]
+                        if not np.any(np.diff(part, axis=0)):
+                            continue
+                        sections.append(LineString(part))
+                        levels.append(level)
+                        edges[level] += len(part)-1
+                    start = end+1
+    return STRtree(sections), np.asarray(levels), edges, polar_closures
 
 
 def river_cells(kind, payload):
@@ -151,7 +166,7 @@ def line_parts(line):
 
 
 def build_plan(args):
-    tree, levels, edges = shore_sections(args.shoreline,args.shoreline_ponds)
+    tree, levels, edges, polar_closures = shore_sections(args.shoreline,args.shoreline_ponds)
     coarse = {}
     near = []
     with args.qwg.open('rb') as source:
@@ -189,7 +204,7 @@ def build_plan(args):
     result.extend(near)
     write(args.plan, dict(shoreline=str(args.shoreline.resolve()), qwg=str(args.qwg.resolve()),
                           shoreline_ponds=str(args.shoreline_ponds.resolve()) if args.shoreline_ponds else None,
-                          gshhg_edges=edges, views=result))
+                          gshhg_edges=edges, gshhg_polar_closures=polar_closures, views=result))
     print(dict(sorted(Counter(view['z'] for view in result).items())), flush=True)
 
 
