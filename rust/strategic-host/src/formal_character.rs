@@ -379,7 +379,7 @@ fn run(input: Request) -> Result<CharacterOutput> {
             format!("识字 · {}", player.language().label())
         } else { Education::HomeWork.label().into() });
         profile.history.splice(0..0, player.history().iter().map(|past| {
-            format!("{}–{} {}", past.start_year, past.end_year, past.label)
+            format!("{}-{} {}", past.start_year, past.end_year, past.label)
         }));
     }
     let snapshot = system.snapshot();

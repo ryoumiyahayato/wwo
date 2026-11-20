@@ -30,6 +30,8 @@
 
 继续使用 `wwo_rust_formal_world_v1` 和 `formal_character_state_v1`。缺少序章字段的旧档保留原出生日期、健康、经历与账本，并沿用可阅读的界面。新档保存预约、识字进度、已结算来源和已代读公告。在病伤或衰老结算中死亡后，同步更新人物身份、人口归属和雇佣状态，存留已入账财产与正当欠薪。
 
+Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒，确认日期和公告被遮蔽。预约教师代读后，只有课堂公告可读。原生手动档在退出后恢复代读记录。完成三次识字课后，法语信息和日期恢复可读。全局地图验收为 `NOT_RUN`。
+
 局部检查使用 `cargo test --locked --manifest-path rust/character-core/Cargo.toml --lib player::tests` 和 `cargo test --release --locked --manifest-path rust/strategic-host/Cargo.toml --lib player_prologue_tests`，从仓库根目录执行。
 
 ## 正式水文资源
