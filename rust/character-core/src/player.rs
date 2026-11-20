@@ -723,6 +723,20 @@ mod tests {
     }
 
     #[test]
+    fn apprentice_grows_faster_only_at_matching_work() {
+        let player = Prologue {
+            age: 18,
+            family: Family::Ordinary,
+            education: Education::HomeWork,
+            youth: Youth::Apprentice,
+            temperament: Temperament::Persist,
+        }
+        .build(Language::French)
+        .unwrap();
+        assert!((player.work_rate(true) / player.work_rate(false) - 1.10).abs() < 1e-10);
+    }
+
+    #[test]
     fn rejects_a_repeated_lesson_before_growing() {
         let mut player = adult();
         player

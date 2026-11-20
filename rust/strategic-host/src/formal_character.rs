@@ -327,7 +327,8 @@ fn run(input: Request) -> Result<CharacterOutput> {
                     if !survived(person) { continue; }
                     if active && person == &input.player {
                         let source = format!("shift:{job}:{}", input.day);
-                        system.completed_player_work(person, &source, true)?;
+                        let matches_apprenticeship = job == "job:opening_paris_workshop";
+                        system.completed_player_work(person, &source, matches_apprenticeship)?;
                     } else {
                         learning(&mut system, person, "employment", "完成正式工作", 35)?;
                     }
