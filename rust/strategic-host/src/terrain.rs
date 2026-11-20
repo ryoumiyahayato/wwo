@@ -1,7 +1,7 @@
 use crate::{camera::{dot,frame,geographic,Camera},landscape_cover::CoverPack,render::write_texture_layer,terrain_detail};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;
-use std::{collections::HashMap,fs,io::{self,Read,Seek,SeekFrom},path::{Path,PathBuf},sync::{mpsc,Arc},time::{Duration,Instant}};
+use std::{collections::{HashMap,HashSet},fs,io::{self,Read,Seek,SeekFrom},path::{Path,PathBuf},sync::{mpsc,Arc},time::{Duration,Instant}};
 use winit::event_loop::EventLoopProxy;
 
 pub const VERSION: &str = "worldcrs84quad-z4-v3";
@@ -371,7 +371,7 @@ enum DecodeRequest {
 
 struct Page {
     slot:u32,
-    ready:Instant,
+    ready:Option<Instant>,
     used:Instant,
     fade:u8,
     landscape_fade:Option<u8>,
@@ -426,7 +426,7 @@ pub struct Terrain {
     pages:HashMap<Key,Page>,
     slots:Vec<u32>,
     selected:Vec<Key>,
-    view:Option<([[f64;3];3],[f64;2],f64,f64,f64,[u32;2])>,
+    view:Option<([[f64;3];3],[f64;2],f64,f64,f64,[u32;2],[f64;3])>,
     max_level:u32,
     view_max:u32,
     target_level:Option<u32>,
@@ -530,7 +530,7 @@ impl Terrain {
 
     pub fn landscape_revision(&self)->u32 {self.landscape_revision}
 
-    pub fn landscape_dependencies(&self, [x,y,columns,step]:[u32;4], output:&mut Vec<bool>) -> bool {
+    pub fn landscape_dependencies(&self, [x,y,columns,step]:[u32;4], output:&mut Vec<(Key,bool)>) {
         let size=16*step;
         // Representative sites can move by one fine longitude cell.
         let margin=f64::from(step)/f64::from(columns);
@@ -549,12 +549,19 @@ impl Terrain {
             let last_col=(right*f64::from(cols)).floor() as i32;
             for row in first_row..=last_row {
                 for col in first_col..=last_col.min(first_col+cols-1) {
-                    output.push(self.pages.get(&Key(z,col.rem_euclid(cols) as u32,row as u32))
-                        .is_some_and(|page|page.landscape_fade.is_some()));
+                    let key=Key(z,col.rem_euclid(cols) as u32,row as u32);
+                    output.push((key,self.pages.get(&key).is_some_and(|page|page.landscape_fade.is_some())));
                 }
             }
         }
-        output.iter().any(|&ready|ready)
+    }
+
+    pub fn reveal_pages(&mut self,pending:&HashSet<Key>,now:Instant) {
+        // Build commands for the other pages are in the current frame. Both
+        // channels of their page-table fade start on the following frame.
+        for (key,page) in &mut self.pages {
+            if page.ready.is_none() && !pending.contains(key) {page.ready=Some(now);}
+        }
     }
 
     pub fn status(&self) -> serde_json::Value {
@@ -572,6 +579,7 @@ impl Terrain {
             "resident_by_level": resident_by_level,
             "wanted_by_level": wanted_by_level,
             "resident_detail_pages": self.pages.len(),
+            "pages_waiting_for_landscape": self.pages.values().filter(|page|page.ready.is_none()).count(),
             "wanted_detail_pages": self.selected.len(),
             "required_detail_pages": self.required_pages,
             "viewport_detail_pages": self.viewport_pages,
@@ -680,14 +688,16 @@ impl Terrain {
         let middle=size.map(|dimension|f64::from(dimension)*0.5);
         let center=camera.vector(middle,size).unwrap_or(camera.axes[2]);
         let (axes,origin)=camera.projection(size);
-        let view=(axes,origin,camera.mpp,camera.blend(),camera.pitch(),size);
+        let view=(axes,origin,camera.mpp,camera.blend(),camera.pitch(),size,center);
         if self.view!=Some(view) {
+            let previous=self.view.as_ref().map(|(..,center)|*center);
             self.view=Some(view);
-            self.select(camera,center,size,now);
+            self.select(camera,center,previous,size,now);
         }
         for (&key,page) in &mut self.pages {
             if page.fade==255 && page.landscape_fade.is_none_or(|fade|fade==255) {continue;}
-            let progress=(now.saturating_duration_since(page.ready).as_secs_f32()/PAGE_FADE_SECONDS).clamp(0.,1.);
+            let Some(ready)=page.ready else {continue;};
+            let progress=(now.saturating_duration_since(ready).as_secs_f32()/PAGE_FADE_SECONDS).clamp(0.,1.);
             let fade=(progress*255.).round() as u8;
             let before=page.index();
             page.fade=page.fade.max(fade);
@@ -716,7 +726,7 @@ impl Terrain {
         }
     }
 
-    fn select(&mut self,camera:&Camera,center:[f64;3],size:[u32;2],now:Instant) {
+    fn select(&mut self,camera:&Camera,center:[f64;3],previous:Option<[f64;3]>,size:[u32;2],now:Instant) {
         self.projected_lod=projected_lod(camera,center,size);
         let limit=self.max_level.min(self.selection.limit());
         let lod=self.projected_lod.clamp(0.,f64::from(limit));
@@ -728,6 +738,12 @@ impl Terrain {
         self.selected.clear();
         let viewport=camera.extent(size,0.);
         let prefetch=camera.extent(size,180.);
+        let ahead=previous.map_or(center,|previous| {
+            let movement=std::array::from_fn::<_,3,_>(|i|center[i]-previous[i]);
+            let distance=dot(movement,movement).sqrt();
+            let fraction=(prefetch-viewport).max(0.)/distance.max(1e-8);
+            std::array::from_fn(|i|center[i]+movement[i]*fraction.min(3.))
+        });
         let exact=self.selection.exact();
         let capacity=self.atlas.depth_or_array_layers() as usize;
         // Keep the coarse globe in spare slots while crossing the two adjacent transitions.
@@ -773,7 +789,8 @@ impl Terrain {
                     let priority=if !exact && in_view {5} else if near_view {3}
                         else if target==MAX_LEVEL && tile.key.0+1==target {2}
                         else {u8::from(retreat_detail)};
-                    near.push((tile.key,proximity,priority));
+                    let score=if in_view {proximity}else{dot(ahead,tile.axis)};
+                    near.push((tile.key,score,priority));
                 } else if in_view && self.pages.contains_key(&tile.key)
                     && grouped_lod(tile.key.0).is_some_and(|index|needed[index]) {
                     // Keep already visible pages through the outgoing zoom fade.
@@ -825,11 +842,12 @@ impl Terrain {
                 &pixels,wgpu::TexelCopyBufferLayout{offset:0,bytes_per_row:Some(4*PAGE_SIZE),rows_per_image:None},
                 wgpu::Extent3d{width:PAGE_SIZE,height:PAGE_SIZE,depth_or_array_layers:1},
             );
-            1
+            1 // Available to instance builds while the surface fade is still zero.
         });
         let now=Instant::now();
         let fade=if self.exact() {255} else {0};
-        let page=Page{slot,ready:now,used:now,fade,landscape_fade};
+        let ready=(landscape_fade.is_none() || self.exact()).then_some(now);
+        let page=Page{slot,ready,used:now,fade,landscape_fade};
         Self::write_index(&self.table,queue,completion.key,page.index());
         self.pages.insert(completion.key,page);
         if !self.exact() && self.view_max>=GROUPED_LOD_START && self.requests_this_frame<GROUPED_LOADS_PER_FRAME {

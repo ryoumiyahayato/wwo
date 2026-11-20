@@ -1,9 +1,9 @@
 use crate::{
     camera::{frame, Camera},
     landscape_models::{self, Vertex},
-    terrain::Terrain,
+    terrain::{Key, Terrain},
 };
-use std::{collections::HashMap, f64::consts::PI};
+use std::{collections::{HashMap, HashSet}, f64::consts::PI};
 use wgpu::util::DeviceExt;
 
 const KINDS: u64 = 5;
@@ -15,6 +15,7 @@ const DRAW_BYTES: u64 = 20;
 const MAX_CHUNKS: usize = 1_728;
 const CACHE_CHUNKS: usize = 2_560;
 const BUILDS_PER_FRAME: usize = 32;
+const KEEP_SITES: u32 = 1 << 31;
 // End of the individual crown blend in landscape_vertex.
 const STAND_ONLY_MPP: f64 = 21.;
 
@@ -70,6 +71,7 @@ pub struct Landscape {
     built_total: u64,
     collect_needed: bool,
     pending: bool,
+    awaiting_pages: HashSet<Key>,
     timestamps: Option<wgpu::QuerySet>,
     statistics: Option<wgpu::QuerySet>,
     profiled: bool,
@@ -248,6 +250,7 @@ impl Landscape {
             built_total: 0,
             collect_needed: false,
             pending: false,
+            awaiting_pages: HashSet::new(),
             timestamps,
             statistics,
             profiled: false,
@@ -266,6 +269,7 @@ impl Landscape {
             .sqrt()
             .max(1.);
         let footprint = camera.mpp * scale;
+        self.awaiting_pages.clear();
         if !enabled || footprint >= 1460. {
             self.active.clear();
             self.requested.clear();
@@ -283,7 +287,7 @@ impl Landscape {
         }
         let view = LandscapeView {
             projection: camera.projection(size), size, mpp: camera.mpp,
-            pitch: camera.pitch(), level: terrain.view_max(),
+            pitch: camera.pitch(), level: terrain.view_max().max(terrain.view_demand()),
         };
         let revision = terrain.landscape_revision();
         let view_changed = self.previous != Some(view);
@@ -320,12 +324,23 @@ impl Landscape {
         let mut evictable = None;
         for &chunk in &self.requested {
             let current = self.cache.get(&chunk).is_some_and(|cached|cached.revision==revision);
-            if !current && !terrain.landscape_dependencies(chunk,&mut pages) {continue;}
-            let is_valid = current || self.cache.get(&chunk).is_some_and(|cached|cached.pages==pages);
+            let cached = self.cache.get(&chunk);
+            if !current {terrain.landscape_dependencies(chunk,&mut pages);}
+            if cached.is_none() && !pages.iter().any(|&(_,ready)|ready) {continue;}
+            // Evicting a QPK page does not invalidate its deterministic sites.
+            // Only a newly available dependency can add sites to this slot.
+            let is_valid = current || cached.is_some_and(|cached|
+                cached.pages.iter().zip(&pages).all(|(&built,&(_,ready))|built || !ready));
             let build = !is_valid && dirty.len() < BUILDS_PER_FRAME;
+            let keep_sites = cached.is_some();
+            if !is_valid && !build {
+                self.awaiting_pages.extend(pages.iter().filter_map(|&(key,ready)|ready.then_some(key)));
+            }
             self.pending |= !is_valid && !build;
             let slot = if let Some(cached) = self.cache.get_mut(&chunk) {
-                if build {cached.pages.clone_from(&pages);}
+                if build {
+                    for (built,&(_,ready)) in cached.pages.iter_mut().zip(&pages) {*built |= ready;}
+                }
                 if build || is_valid {cached.revision=revision;}
                 cached.slot
             } else if build {
@@ -339,14 +354,18 @@ impl Landscape {
                     let (_,victim)=victims.pop().expect("landscape cache exceeds visible chunk capacity");
                     self.cache.remove(&victim).unwrap().slot
                 });
-                self.cache.insert(chunk,CachedChunk{slot,used:self.frame,revision,pages:pages.clone()});
+                self.cache.insert(chunk,CachedChunk {
+                    slot, used:self.frame, revision, pages:pages.iter().map(|&(_,ready)|ready).collect(),
+                });
                 slot
             } else {
                 continue;
             };
             let [x,y,columns,step] = chunk;
             let command = [x,y,columns,(slot<<6)|step];
-            if build {dirty.push(command);}
+            if build {
+                dirty.push([x,y,columns,command[3]|if keep_sites {KEEP_SITES}else{0}]);
+            }
             active.push(command);
         }
         active.sort_unstable();
@@ -365,6 +384,7 @@ impl Landscape {
     pub fn cached_chunks(&self) -> usize {self.cache.len()}
     pub fn built_chunks(&self) -> u64 {self.built_total}
     pub fn pending(&self) -> bool {self.pending}
+    pub fn awaiting_pages(&self) -> &HashSet<Key> {&self.awaiting_pages}
 
     pub fn counts(&self, device:&wgpu::Device, queue:&wgpu::Queue) -> std::io::Result<LandscapeCounts> {
         if self.active.is_empty() {return Ok(LandscapeCounts::default());}
