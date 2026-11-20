@@ -44,12 +44,12 @@ impl View {
 }
 #[repr(C)]
 #[derive(Clone,Copy,Pod,Zeroable)]
-struct TileState {extent:[f32;4],core:[f32;4],region:[f32;4],options:[f32;4],edges:[f32;4]}
+struct TileState {extent:[f32;4],core:[f32;4],region:[f32;4],options:[f32;4],edges:[f32;4],edge_ready:[f32;4]}
 impl TileState {
-    fn new(tile:&Tile,opacity:f32,edges:[f32;4])->Self {
+    fn new(tile:&Tile,opacity:f32,edges:[f32;4],edge_ready:[f32;4])->Self {
         let cast=|values:[f64;4]| values.map(|a|a as f32);
         Self {extent:cast(tile.bounds),core:cast(tile.core),region:cast(tile.group),
-              options:[opacity,f32::from(tile.printed+u8::from(tile.cover)),u8::from(tile.city) as f32,u8::from(tile.level==0) as f32],edges}
+              options:[opacity,f32::from(tile.printed+u8::from(tile.cover)),u8::from(tile.city) as f32,u8::from(tile.level==0) as f32],edges,edge_ready}
     }
 }
 pub struct Page {
@@ -765,15 +765,19 @@ impl Renderer {
         Ok(())
     }
 
-    pub fn prepare_landscape(&mut self,camera:&Camera,size:[u32;2],enabled:bool) {
-        let enabled=enabled&&self.terrain.as_ref().is_some_and(|terrain|terrain.view_max()>=6);
-        if enabled && camera.mpp<1460. && self.terrain.as_ref().is_some_and(Terrain::landscape_cover) {
+    fn prepare_landscape(&mut self,camera:&Camera,size:[u32;2],enabled:bool,now:Instant) {
+        let Some(terrain)=&mut self.terrain else {return;};
+        let enabled=enabled&&terrain.view_max().max(terrain.view_demand())>=6;
+        if enabled && camera.mpp<1460. && terrain.landscape_cover() {
             if let Some((format,glob,shader))=self.landscape_pipeline.take() {
                 self.landscape=Some(Landscape::new(&self.device,format,[&glob,&self.pages,&self.close_layout,&self.surface.layout],&shader));
             }
         }
-        if let (Some(layer),Some(terrain))=(&mut self.landscape,&self.terrain) {
+        if let Some(layer)=&mut self.landscape {
             layer.prepare(&self.queue,camera,size,terrain,enabled);
+            terrain.reveal_pages(layer.awaiting_pages(),now);
+        } else {
+            terrain.reveal_pages(&HashSet::new(),now);
         }
     }
 
@@ -849,7 +853,7 @@ impl Renderer {
     }
     pub fn upload(&self,tile:&Tile,pixels:Pixels)->Page {
         let uniform=self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor{label:None,
-            contents:bytemuck::bytes_of(&TileState::new(tile,1.,[0.;4])),usage:wgpu::BufferUsages::UNIFORM|wgpu::BufferUsages::COPY_DST});
+            contents:bytemuck::bytes_of(&TileState::new(tile,1.,[0.;4],[0.;4])),usage:wgpu::BufferUsages::UNIFORM|wgpu::BufferUsages::COPY_DST});
         let [w,h]=tile.size;
         let textures=[
             (wgpu::TextureFormat::Rgba8Unorm,pixels.terrain.as_slice()),
@@ -858,7 +862,11 @@ impl Renderer {
             (wgpu::TextureFormat::Rg8Uint,pixels.ids.as_slice()),
         ].into_iter().enumerate().map(|(index,(format,data))|{
             if data.is_empty(){return None;}
-            let levels=if index==1&&tile.surface_span>0 {w.max(h).ilog2()+1} else {1};
+            let levels=match index {
+                1 if tile.surface_span>0 => w.max(h).ilog2()+1,
+                2 => tile.city_levels(),
+                _ => 1,
+            };
             let tex=create_texture_mips(&self.device,[w,h,1],format,levels);
             let channels=format.block_copy_size(None).unwrap();
             let mut start=0;
@@ -878,7 +886,8 @@ impl Renderer {
         Page {group,uniform,ids:pixels.ids,water,bytes}
     }
     pub fn render(&mut self, view:&View,base:&Page,pages:&[(&Page,&Tile,[u32;4],f32)],
-                  meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel])->io::Result<Option<io::Result<()>>> {
+                  meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel],
+                  (camera,landscape_enabled,now):(&Camera,bool,Instant))->io::Result<Option<io::Result<()>>> {
         let frame=if let RenderTarget::Window(surface,config)=&self.target {
             match surface.get_current_texture() {
                 Ok(frame)=>Some(frame),
@@ -889,6 +898,11 @@ impl Renderer {
                 Err(e)=>return Err(io::Error::other(e))
             }
         }else{None};
+        let size=match &self.target {
+            RenderTarget::Window(_,config)=>[config.width,config.height],
+            RenderTarget::Offscreen(texture)=>[texture.width(),texture.height()],
+        };
+        self.prepare_landscape(camera,size,landscape_enabled,now);
         let (texture,copy_src)=match &self.target {
             RenderTarget::Window(_,config)=>(&frame.as_ref().unwrap().texture,config.usage.contains(wgpu::TextureUsages::COPY_SRC)),
             RenderTarget::Offscreen(texture)=>(texture,true),
@@ -899,22 +913,31 @@ impl Renderer {
         self.queue.write_buffer(&self.view,0,bytemuck::bytes_of(view));
         self.queue.write_buffer(&self.screen_size,0,bytemuck::cast_slice(&[w as f32,h as f32,0.,0.,1.,seconds,0.,0.]));
         for (page,tile,_,opacity) in pages {
-            let mut edges=[tile.surface_inset as f32;4];
-            if tile.surface_span>0 {
+            let edges=if tile.city {
+                let [w,s,e,n]=tile.bounds;
+                [((e-w)*5./f64::from(tile.size[0])) as f32,((n-s)*5./f64::from(tile.size[1])) as f32,
+                 ((e-w)*5./f64::from(tile.size[0])) as f32,((n-s)*5./f64::from(tile.size[1])) as f32]
+            } else {[tile.surface_inset as f32;4]};
+            let mut edge_ready=[0.;4];
+            if tile.surface_span>0 || tile.city {
                 let [west,south,east,north]=tile.core;
-                for (_,neighbor,_,_) in pages.iter().filter(|(_,neighbor,_,_)|neighbor.surface_span==tile.surface_span) {
+                for (_,neighbor,_,alpha) in pages.iter().filter(|(_,neighbor,_,_)| {
+                    if tile.city {neighbor.city&&neighbor.group==tile.group}
+                    else {neighbor.surface_span==tile.surface_span}
+                }) {
                     let [w,s,e,n]=neighbor.core;
+                    let shared=(*alpha/opacity.max(0.001)).min(1.);
                     if s==south&&n==north {
-                        if e==west {edges[0]=0.;}
-                        if w==east {edges[2]=0.;}
+                        if e==west {edge_ready[0]=shared;}
+                        if w==east {edge_ready[2]=shared;}
                     }
                     if w==west&&e==east {
-                        if n==south {edges[1]=0.;}
-                        if s==north {edges[3]=0.;}
+                        if n==south {edge_ready[1]=shared;}
+                        if s==north {edge_ready[3]=shared;}
                     }
                 }
             }
-            self.queue.write_buffer(&page.uniform,0,bytemuck::bytes_of(&TileState::new(tile,*opacity,edges)));
+            self.queue.write_buffer(&page.uniform,0,bytemuck::bytes_of(&TileState::new(tile,*opacity,edges,edge_ready)));
         }
         let layers=||meshes.iter().chain(fade.into_iter().flatten());
         for ((mesh,_),draw) in layers().zip(self.meshes.iter_mut()) {draw.upload(&self.device,&self.queue,mesh);}

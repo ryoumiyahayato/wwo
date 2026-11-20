@@ -64,8 +64,17 @@ impl Tile {
     }
 
     pub fn data_size(&self)->usize {
-        self.size.iter().product::<u32>() as usize * (4+usize::from(self.city)*2+usize::from(self.ids)*2)
-            + self.cover_size()
+        self.size.iter().product::<u32>() as usize * (4+usize::from(self.ids)*2)
+            + self.cover_size()+self.city_size()
+    }
+
+    pub fn city_levels(&self)->u32 { (self.size[0].max(self.size[1]).ilog2()+1).min(4) }
+
+    fn city_size(&self)->usize {
+        if !self.city {return 0;}
+        (0..self.city_levels()).map(|level| {
+            ((self.size[0]>>level).max(1)*(self.size[1]>>level).max(1)*2) as usize
+        }).sum()
     }
 
     pub fn offset_of(&self,[lon,lat]:[f64;2])->usize {
@@ -155,10 +164,41 @@ impl Pixels {
         let pack=Pack::open_version(&root.join(&tile.path),signature)?;
         let len=(tile.size[0]*tile.size[1]) as usize;
         let optional=|enabled,key,size| if enabled {pack.block(key,size)} else {Ok(Vec::new())};
+        let mut city=optional(tile.city,"render/city",len*2)?;
+        if tile.city {
+            city.reserve(tile.city_size()-city.len());
+            let [mut width,mut height]=tile.size.map(|n|n as usize);
+            let mut start=0;
+            for _ in 1..tile.city_levels() {
+                let next_width=(width/2).max(1);
+                let next_height=(height/2).max(1);
+                for y in 0..next_height {
+                    for x in 0..next_width {
+                        let x0=x*width/next_width;
+                        let x1=(x+1)*width/next_width;
+                        let y0=y*height/next_height;
+                        let y1=(y+1)*height/next_height;
+                        let mut coverage=[0u32;2];
+                        for sy in y0..y1 {
+                            for sx in x0..x1 {
+                                let at=start+(sy*width+sx)*2;
+                                coverage[0]+=u32::from(city[at]);
+                                coverage[1]+=u32::from(city[at+1]);
+                            }
+                        }
+                        let count=((x1-x0)*(y1-y0)) as u32;
+                        city.extend(coverage.map(|sum|((sum+count/2)/count) as u8));
+                    }
+                }
+                start+=width*height*2;
+                width=next_width;
+                height=next_height;
+            }
+        }
         Ok(Self {
             terrain:pack.block("render/terrain",len*4)?,
             cover:optional(cover&&tile.cover,"render/cover",tile.cover_size())?,
-            city:optional(tile.city,"render/city",len*2)?,
+            city,
             ids:optional(tile.ids,"render/polity",len*2)?,
         })
     }

@@ -13,7 +13,11 @@ fn landscape_page(ll: vec2f, level: u32, at_surface: bool) -> LandscapePage {
     let index = textureLoad(terrain_index, cell+vec2i(0,rows-1), 0).r;
     let q = fract(position);
     var fade = f32(index >> 24u) / 255.;
-    if at_surface && view.chart_origin.w <= .5 { fade=page_coverage(cell,q,rows,24u,fade); }
+    if at_surface && view.chart_origin.w <= .5 {
+        // A decoded height page can seed build work before color is visible.
+        if fade <= 1./255. {fade=0.;}
+        else {fade=page_coverage(cell,q,rows,24u,fade);}
+    }
     return LandscapePage(q * 256. + 4., i32(index & 65535u) - 1, fade);
 }
 
@@ -253,14 +257,13 @@ fn landscape_model_weight(step: u32, footprint: f32) -> f32 {
 }
 
 fn landscape_local_index(id: vec3u, chunk: vec4u) -> u32 {
-    return (chunk.w >> 6u)*256u + id.y*16u + id.x;
+    return ((chunk.w & 0x7fffffffu) >> 6u)*256u + id.y*16u + id.x;
 }
 
 @compute @workgroup_size(8,8,1)
 fn landscape_build(@builtin(global_invocation_id) id: vec3u) {
     let chunk = landscape_chunks[LANDSCAPE_VISIBLE+id.z];
     let cache_index = landscape_local_index(id,chunk);
-    landscape_cache[cache_index].style = 0u;
     let step = chunk.w & 63u;
     var cell = chunk.xy + id.xy*step + vec2u(step/2u);
     var columns = chunk.z;
@@ -275,7 +278,12 @@ fn landscape_build(@builtin(global_invocation_id) id: vec3u) {
     let world = landscape_world(ll);
     let level = select(6u,7u,step == 1u || (view.chart_origin.w > .5 && view.map_style.z == 7.));
     let page = landscape_page(ll,level,false);
-    if page.fade <= 0. || landscape_coverage(page) >= .20 { return; }
+    if page.fade <= 0. {
+        if (chunk.w & 0x80000000u) == 0u {landscape_cache[cache_index].style = 0u;}
+        return;
+    }
+    landscape_cache[cache_index].style = 0u;
+    if landscape_coverage(page) >= .20 { return; }
     let cover = textureLoad(landscape_data,vec2i(page.texel),page.slot,0);
     let code = u32(round(cover.a*15.));
     if code == 0u || code == 5u || code == 7u || code == 8u { return; }

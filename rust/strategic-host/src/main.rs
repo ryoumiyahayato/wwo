@@ -1128,7 +1128,12 @@ impl Host {
         for id in &self.candidate {if let Some(p)=self.cached.get_mut(id){p.used=now;}}
         self.cached.retain(|_,p|now.duration_since(p.used)<=CACHE_TTL);
         if self.reader.inflight.is_some(){return;}
-        let Some(i)=self.visible.iter().chain(self.candidate.iter()).copied().find(|i|!self.cached.contains_key(i)&&!self.failed.contains(i))else{return;};
+        let city_first=self.mode==Mode::Geographic && self.camera.mpp<66.
+            && self.renderer.as_ref().is_some_and(|r|r.terrain_max_level()>0);
+        let city=self.visible.iter().filter(|&&id|city_first&&self.world.tiles[id].city
+            && self.index.scissor(id,&self.camera,self.size).is_some());
+        let Some(i)=city.chain(self.visible.iter()).chain(self.candidate.iter()).copied()
+            .find(|i|!self.cached.contains_key(i)&&!self.failed.contains(i))else{return;};
         let tile=&self.world.tiles[i];
         let required=tile.data_size()-if self.reader.cover {0}else{tile.cover_size()};
         let mut occupied=self.cached.values().map(|p|p.page.bytes).sum::<usize>();
@@ -1235,7 +1240,8 @@ impl Host {
             let tile=&self.world.tiles[id];
             if view.map_style[1]>0.&&!needs_overlay&&!tile.city&&view.selection[1]<0.5{return None;}
             let p=self.cached.get(&id)?;
-            let opacity=(now.duration_since(p.ready).as_secs_f32()/0.16).clamp(0.,1.)*tile.weight(self.camera.mpp);
+            let progress=(now.duration_since(p.ready).as_secs_f32()/0.16).clamp(0.,1.);
+            let opacity=progress*progress*(3.-2.*progress)*tile.weight(self.camera.mpp);
             let scissor=self.index.scissor(id,&self.camera,self.size)?;
             (opacity>0.).then_some((&p.page,tile,scissor,opacity))
         }).collect();
@@ -1251,7 +1257,6 @@ impl Host {
         view.natural_lod=renderer.terrain_viewport_mix();
         view.set_terrain_exact(renderer.terrain_exact());
         let landscape_enabled=!loading&&(!self.config.managed||self.state.session.is_some())&&self.mode==Mode::Geographic;
-        renderer.prepare_landscape(&self.camera,self.size,landscape_enabled);
         renderer.prepare_rivers(&self.camera,self.size,landscape_enabled&&!renderer.terrain_exact());
         if self.last_palette!=Some(self.state.date) {
             renderer.set_politics(&self.state.palette(&self.world,&date,&self.visuals,&self.employment),&self.visuals.uniforms(&date));self.last_palette=Some(self.state.date);
@@ -1260,7 +1265,8 @@ impl Host {
         let capture=self.screenshot.as_ref().or_else(||self.trial.captures.first())
             .or_else(||self.trial.terrain_capture.as_ref().map(|(_,path)|path)).map(PathBuf::as_path);
         let mut redraw=false;
-        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models)? {
+        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,
+            (&self.camera,landscape_enabled,now))? {
             let presented=Instant::now();
             self.last_present=presented;
             if self.trial.first.is_none(){self.trial.first=Some(ms(self.started));}
@@ -1274,7 +1280,9 @@ impl Host {
                 result?;
                 if let Some((id,png))=self.trial.terrain_capture.take() {
                     let samples=renderer.terrain_frame_samples(&self.camera,self.size);
-                    let extra=serde_json::json!({"png":png,"terrain_samples":samples});
+                    let city_pages=pages.iter().filter(|(_,tile,_,_)|tile.city).map(|(_,tile,_,alpha)|
+                        serde_json::json!({"path":tile.path,"core":tile.core,"opacity":alpha})).collect::<Vec<_>>();
+                    let extra=serde_json::json!({"png":png,"terrain_samples":samples,"city_pages":city_pages});
                     self.write_observation(&id,extra)?;
                 } else {self.trial.captures.remove(0);}
             }
@@ -1375,7 +1383,7 @@ impl Host {
             "north"=>{self.camera.north_up();self.dirty=true;}
             "capture" if !input.label.is_empty() && input.label.bytes().all(|b|b.is_ascii_alphanumeric()||b==b'-')=>{
                 let screenshot=path.with_file_name(format!("{}.png",input.label));
-                if self.config.terrain_review {
+                if self.config.terrain_review || input.value=="terrain-samples" {
                     self.trial.terrain_capture=Some((input.id,screenshot));
                     self.dirty=true;
                     return;
