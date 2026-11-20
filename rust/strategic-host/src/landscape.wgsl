@@ -167,7 +167,7 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
     }
     let curvature = clamp((2.*height-shoulder-ridge)/160.,-.17,.19);
     let drainage = .16*(sunlight-.48)+.12*steep+curvature;
-    let sward = .5+sediment.x*.76+sediment.y*.22;
+    let sward = .5+sediment.x*.58+sediment.y*.18;
     let dry = clamp(.51+(sward-.5)*.54+drainage,0.,1.);
     let meadow = .10*(1.-smoothstep(700.,1280.,mpp))+.38*near;
     let grass = mix(base,mix(vec3f(.423,.479,.294),vec3f(.575,.536,.355),dry),meadow);
@@ -175,7 +175,7 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
     let moss = mix(base,vec3f(.376,.435,.313),near*.38) * (1. + motif.g*.076);
     let sandy = land_palette_weight(land_chroma(base),vec3f(.775,.632,.433),.082);
     let earth = mix(base,mix(vec3f(.55,.455,.325),vec3f(.70,.56,.37),sandy),near*.22)
-        * (1. + sediment.x*.13 + sediment.y*.04);
+        * (1. + sediment.x*.085 + sediment.y*.025);
     let tilled = mix(base,mix(vec3f(.49,.41,.30),vec3f(.52,.52,.32),smoothstep(.21,.72,sward)),near*.42)
         * (1. + motif.a*.24 + motif.g*.12);
     let snow = mix(base,mix(vec3f(.72,.79,.82),vec3f(.82,.87,.88),.5+motif.a),near*.73);
@@ -187,18 +187,18 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
         + (forest-base)*land.forest + (grass-base)*land.grass + (shrub-base)*land.shrub
         + (moss-base)*land.damp
         + (tilled-base)*land.crop + (earth-base)*land.bare + (snow-base)*land.snow
-        + base*((sediment.x*.13+sediment.y*.08)*neutral+motif.a*land.urban*.19);
+        + base*((sediment.x*.085+sediment.y*.05)*neutral+motif.a*land.urban*.19);
     color = mix(color,mix(base,mineral,near*.87),exposed);
     if near > .001 {
         let relief_world = world*(1.+height/EARTH)+vec3f(motif.a,motif.g,motif.b)*.00027;
         let grains = land_material_band(relief_world,planes,mpp,2630.) - .5;
         let grit = mix(grains.g,grains.a,.5+sediment.x*.45);
         let texture = grains.r*(land.forest*.40+land.shrub*.25)
-            + grains.g*(land.grass*.12+land.damp*.31+land.crop*.23)
+            + grains.g*(land.grass*.17+land.damp*.31+land.crop*.23)
             + grains.a*(land.crop*.38+scree*.25)
-            + grit*(land.bare*.11+neutral*.13+land.grass*.04)
-            + (sediment.x*.08+sediment.y*.11)*land.grass
-            + sediment.y*land.bare*mix(.06,.10,sandy)
+            + grit*(land.bare*.17+neutral*.16+land.grass*.04)
+            + (sediment.x*.055+sediment.y*.065)*land.grass
+            + sediment.y*land.bare*mix(.035,.065,sandy)
             + grains.b*(exposed*.91+scree*.37+land.urban*.20)
             + grains.a*(land.snow*.11+land.urban*.24)
             + motif.b*exposed*.17;

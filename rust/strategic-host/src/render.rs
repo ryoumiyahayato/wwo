@@ -584,16 +584,16 @@ pub(crate) fn write_texture_layer(queue:&wgpu::Queue,texture:&wgpu::Texture,leve
 }
 
 impl Renderer {
-    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
+    pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;2], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
         let size=window.inner_size().into();
         Self::with_target(Some(window),size,atlas,flags,hud,globe_art,layout_bytes,natural,None,detail,events,observe).await
     }
 
-    pub async fn new_offscreen(size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
+    pub async fn new_offscreen(size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;2], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>)->Result<Self,String> {
         Self::with_target(None,size,atlas,flags,hud,globe_art,layout_bytes,natural,close,detail,events,false).await
     }
 
-    async fn with_target(window:Option<Arc<Window>>, size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;3], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
+    async fn with_target(window:Option<Arc<Window>>, size:[u32;2], atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;2], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, close:Option<CloseSample>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
         let instance=wgpu::Instance::new(&wgpu::InstanceDescriptor {backends:wgpu::Backends::VULKAN,..Default::default()});
         let surface=window.map(|window|instance.create_surface(window)).transpose().map_err(|e|e.to_string())?;
         let adapter=instance.request_adapter(&wgpu::RequestAdapterOptions {
@@ -637,7 +637,7 @@ impl Renderer {
         let global_entries=[uniform(0,compute_fragment|wgpu::ShaderStages::VERTEX),
             wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..sampler_entry(1)},sampler_entry(2),sampled(3),
             texture_entry(4,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),sampled(5),
-            texture_entry(6,wgpu::TextureSampleType::Float{filterable:false},wgpu::TextureViewDimension::D2),sampled(7),sampled(8),sampled(9),
+            texture_entry(6,wgpu::TextureSampleType::Float{filterable:false},wgpu::TextureViewDimension::D2),sampled(7),sampled(8),
             texture_entry(10,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array),
             wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..texture_entry(11,wgpu::TextureSampleType::Float{filterable:true},wgpu::TextureViewDimension::D2Array)},
             wgpu::BindGroupLayoutEntry{visibility:compute_fragment,..texture_entry(12,wgpu::TextureSampleType::Uint,wgpu::TextureViewDimension::D2)}];
@@ -671,7 +671,7 @@ impl Renderer {
         let flag_texture=create_texture(&device,[flags.size[0],flags.size[1],1],wgpu::TextureFormat::Rgba8Unorm);
         write_texture(&queue,&flag_texture,[flags.size[0],flags.size[1],1],4,&flags.pixels);
         let flags=flag_texture.create_view(&Default::default());
-        let [galactic_chart,ocean_detail,ocean_ice]=globe_art.map(|image|{
+        let [galactic_chart,ocean_material]=globe_art.map(|image|{
             let [w,h]=image.size;
             let texture=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
             write_texture(&queue,&texture,[w,h,1],4,&image.pixels);
@@ -700,7 +700,7 @@ impl Renderer {
         let close_group=bind(&device,&close_layout,&[tex_resource(0,&close_surface),buf_resource(1,&close_bounds)]);
         let global_resources=[buf_resource(0,&view),sampler_resource(1,&linear),sampler_resource(2,&wrap),
             tex_resource(3,&palette_view),tex_resource(4,&scenario),tex_resource(5,&flags),tex_resource(6,&flag_pose_view),
-            tex_resource(7,&galactic_chart),tex_resource(8,&ocean_detail),tex_resource(9,&ocean_ice),
+            tex_resource(7,&galactic_chart),tex_resource(8,&ocean_material),
             tex_resource(10,&terrain_world),tex_resource(11,&terrain_detail),tex_resource(12,&terrain_index)];
         let globals=bind(&device,&glob,&global_resources);
         let flag_art=bind(&device,&font_layout,&[tex_resource(0,&flags),sampler_resource(1,&linear)]);

@@ -8,11 +8,9 @@ use std::{
 
 pub const VERSION: &str = "regional-2026-11-14";
 pub const TILE_SIGNATURE: &[u8; 8] = b"WWORGN1\0";
-const ART_FILES: [&str; 4] = [
+const ART_FILES: [&str; 2] = [
     "political-flags-hd.png",
     "galactic-chart.png",
-    "ocean-detail-r68.png",
-    "ocean-ice-r68.png",
 ];
 
 pub fn root(data: &Path) -> PathBuf {

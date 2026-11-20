@@ -74,6 +74,12 @@ LOD 使用视口中心的投影比例。将当前纬度的东西、南北采样�
 
 原生游戏支持手动槽位、保存并退出及重启读档。每个档位保存在 `%LOCALAPPDATA%/WWO-Rust-Candidate/profiles/<配置名>/formal-world`，默认配置名为 `Default`，可用 `WWO_RUST_PROFILE` 指定。存档包含时间、人口、人物、市场、在途货物、账本、库存、合同和工资权益。
 
+## 地表与海洋贴图来源
+
+`python tools/build_surface_textures.py` 使用 Python 和 Pillow 生成 `src/land-material.png` 与 `src/ocean-material.png`。生成器只读内置随机种子和梯度参数。两张贴图均为 WWO 程序化素材，按 CC0-1.0 提供。土地贴图 RGBA 四通道分别保存林冠、草土、岩石和沉积物强度。海洋贴图的红色和 Alpha 通道分别保存远景海面和浮冰变化。新构建直接内嵌两张贴图。旧包里的 `ocean-detail-r68.png` 和 `ocean-ice-r68.png` 曾取自 R24 本地预览素材，分发授权缺少记录。新版构建和区域打包不读这两张旧图。
+
+QPK 底色由高程、地类和矢量水域经项目调色与计算生成。现代近景 QDT 使用 ESA WorldCover 地类和 Copernicus DEM。密西西比历史 QDT 将 USGS 发布的 1890 年代调查多边形映射为地类和水域颜色。局部城市楼廓、道路与水面归属各自的数据许可。地标模型和 HUD 图集单独加载。原菜单画作的 CC0 署名见 [菜单素材来源](../../assets/menu/ATTRIBUTION.md)。
+
 ## R68 地标和城市 3D
 
 正式地图用 `/` 搜索埃菲尔铁塔、巴黎北站、耶拿桥、威斯敏斯特钟楼、威斯敏斯特桥、Friedrichstraße 车站或吉萨金字塔。定位后可点击模型查看地标 ID 和经纬度。滚轮缩放，右键拖动改变方位，`V` 切换倾斜与俯视。四种地图模式共用地标位置和模型。查询使用地图资料，人物所在地继续由正式世界管理。

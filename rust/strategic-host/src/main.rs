@@ -1614,7 +1614,7 @@ impl ApplicationHandler<HostEvent> for Host {
                 let path=if hd.is_file(){hd}else{self.map_root.join("political-flags.png")};
                 PoliticalVisuals::read_atlas(&path)?
             };
-            let globe_art=[art("galactic-chart.png")?,art("ocean-detail-r68.png")?,art("ocean-ice-r68.png")?];
+            let globe_art=[art("galactic-chart.png")?,decode_rgba(&include_bytes!("ocean-material.png")[..])?];
             let atlas=font(&self.config.root.join("type.png"))?;
             let detail=if self.natural.is_some() && self.config.terrain_close_sample.is_none()
                 && matches!(self.config.terrain_selection,terrain::LayerSelection::Auto) {
