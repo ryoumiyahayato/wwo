@@ -287,8 +287,6 @@ fn water_page_area(page:u32, q:vec2f) -> u32 {
 // The raster carries the area and its age origin. A parked camera can reuse it
 // through the handoff without rerunning the polygon tests each frame.
 fn water_area(ll:vec2f) -> u32 {
-    if arrayLength(&water_geometry)<32768u || view.chart_origin.w>.5
-        || view.viewport.z*EARTH>=4200. {return 0u;}
     let tile_uv=min(vec2f(fract(ll.x/360.+.5),clamp(.5-ll.y/180.,0.,1.)),vec2f(.99999994));
     let grid=tile_uv*vec2f(256.,128.);
     let tile_cell=vec2u(grid);
@@ -833,8 +831,13 @@ struct RiverStroke {
     return RiverStroke(vec4f(clip,0.,1.),ink,uv.x);
 }
 
-fn river_coordinates(xy:vec2f) -> vec2f {
-    let v=chart_normal(xy,length(xy),view.viewport.w);
+fn river_coordinates(xy:vec2f,r:f32) -> vec2f {
+    var angle=r;
+    if view.viewport.w<=0. {angle=asin(min(r,1.));}
+    let scale=select(1.,sin(angle)/max(r,.00000001),r>.00000001);
+    // Both angular coordinates are invariant under normalization.
+    let v=view.chart_east.xyz*(xy.x*scale)+view.chart_north.xyz*(xy.y*scale)
+        +view.chart_forward.xyz*cos(angle);
     return degrees(vec2f(atan2(v.x,v.z),atan2(v.y,length(v.xz))));
 }
 
@@ -844,11 +847,18 @@ fn raster_water(@builtin(global_invocation_id) id:vec3u) {
     if any(id.xy>=size) {return;}
     let p=vec2f(id.xy)+.5;
     let xy=(p-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1./view.chart_origin.z);
+    let r=length(xy);
     var area=0u;
-    if length(xy)<1.+view.viewport.w*(PI*.5-1.) {
-        area=water_area(river_coordinates(xy));
+    if r<1.+view.viewport.w*(PI*.5-1.) {
+        area=water_area(river_coordinates(xy,r));
     }
     water_output[id.y*size.x+id.x]=area;
+}
+
+fn inland_water(pixel:vec2f) -> f32 {
+    let sample=screen_water(pixel);
+    if (sample&3u)!=3u {return 0.;}
+    return water_weight(sample);
 }
 
 fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
@@ -862,12 +872,20 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
         let offset=across_step*f32(i);
         for (var side=0u;side<2u;side++) {
             let p=pixel+select(offset,-offset,side==1u);
-            let center=screen_water(p);
-            if (center&3u)!=3u {continue;}
-            let before=screen_water(p-along);
-            let after=screen_water(p+along);
-            if (before&3u)!=3u || (after&3u)!=3u {continue;}
-            coverage=max(coverage,min(water_weight(center),min(water_weight(before),water_weight(after))));
+            let center=inland_water(p);
+            if center<=coverage {continue;}
+            // Let the observed channel bend by a sample across the stroke.
+            // A crossing still needs water on both ends to hide the symbol.
+            var before=inland_water(p-along);
+            var after=inland_water(p+along);
+            if before<center {
+                before=max(before,max(inland_water(p-along+across_step),inland_water(p-along-across_step)));
+            }
+            if before<=coverage {continue;}
+            if after<center {
+                after=max(after,max(inland_water(p+along+across_step),inland_water(p+along-across_step)));
+            }
+            coverage=max(coverage,min(center,min(before,after)));
             if coverage>=.999 {return 1.;}
         }
     }
@@ -879,13 +897,12 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
     let xy=(stroke.clip.xy-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1./view.chart_origin.z);
     let r=length(xy);
     if r>=1.+view.viewport.w*(PI*.5-1.) {discard;}
-    let ll=river_coordinates(xy);
     let sample=screen_water(stroke.clip.xy);
     let area=sample&3u;
     let exact=water_weight(sample)>=.999;
     if area>1u && exact {discard;}
     var water=0.;
-    if !exact {water=water_coverage(sample,natural_surface(ll).a);}
+    if !exact {water=water_coverage(sample,natural_surface(river_coordinates(xy,r)).a);}
     if water>=.57 {discard;}
     var distinct=1.;
     // At smaller map scales the displacement is comparable to a stroke pixel.
@@ -900,7 +917,7 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
         let mpp=view.viewport.z*EARTH/max(.3,view.chart_origin.z);
         // A negative sentinel lets the same survey coverage mask protect
         // surveyed ground and water while using only its valid footprint.
-        surveyed=clamp(1.+close_terrain(ll,mpp,vec4f(0.,0.,0.,-1.)).a,0.,1.);
+        surveyed=clamp(1.+close_terrain(river_coordinates(xy,r),mpp,vec4f(0.,0.,0.,-1.)).a,0.,1.);
     }
     let alpha=stroke.ink.a*(1.-smoothstep(.20,.95,abs(stroke.side)))
         *(1.-smoothstep(.14,.57,water))*(1.-surveyed)*distinct;

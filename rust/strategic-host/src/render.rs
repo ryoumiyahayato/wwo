@@ -1010,7 +1010,7 @@ impl Renderer {
         self.models.prepare(&self.device,&self.queue,[w,h],models);
         let mut frame_view=*view;
         if let Some(water)=&self.water_pages {
-            frame_view.water_clock=water.shader_clock(Instant::now());
+            frame_view.water_clock=water.shader_clock(now);
         }
         self.queue.write_buffer(&self.view,0,bytemuck::bytes_of(&frame_view));
         self.queue.write_buffer(&self.screen_size,0,bytemuck::cast_slice(&[w as f32,h as f32,0.,0.,1.,seconds,0.,0.]));

@@ -28,6 +28,8 @@
 
 Z4 至 Z7 共享水陆位置。复杂几何按视野和移动方向预取。缺页和远景使用 QPK。地表、城市和景观共用水陆状态和接替权重。已有明确边界的历史调查图层优先。实测水域覆盖对应河段时抑制重复的中心线符号。水面轮廓与原河段拓扑可分别追溯。
 
+[水域接替阶段的正式游戏画面与遗留缺陷](WATER_HANDOFF.md)
+
 Z6 和 Z7 的地面材质独立于实例模型。用地分片可用时按地类及坡面混合材质。未知地类用中性土壤，待载地类页使用 QPK 色调和共用材质。观察模式可用 `{"id":"ground","action":"landscape-models","value":"hide"}` 只隐藏景观实例，`show` 恢复。
 
 © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium.
