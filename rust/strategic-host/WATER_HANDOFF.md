@@ -2,6 +2,24 @@
 
 全球水文未通过验收。密西西比河口的主汊和挪威的岛屿在近景可辨。塞纳河面状水域可见，部分弯道仍有细蓝线。挪威冷跳转可见岸线从模糊父页变清晰。近岸锯齿和潮滩色块仍可见。
 
+## 挪威近岸补修
+
+挪威 `5.5, 60.46` 邻区曾有两格整块误填。用 GSHHG 全精度岸线和 GRWL 水面重算 `7/131/20`、`7/132/20`、`7/131/21`、`7/132/21`。裁剪先判断完整包含，再取多边形交集。其余 QWG 页复用原记录。QPK 底图沿用原包。
+
+拖动反向时保留已完成的预取页。页缓存需要压缩时先保留当前视野，再保留最近用过的页。预取页首次入画时直接使用。视野内的缺页仍按像素从 QPK 接替，露地颜色使用地表页的共享边缘权重。
+
+塞纳河按实际水面遮蔽重叠的中心线。相同机位关闭线符号后，巴黎近景的宽平行水道仍可见。30 米观测掩膜在近景仍有台阶。草原、沙地和裸地保留 Z6/Z7 材质，用低对比度的粗细两档地表变化。
+
+默认目录使用解压后 1,386,724,892 字节的 `water-geometry.qwg`。归档附件为 771,391,143 字节的 `water-geometry-norway.qwg.zst`。[补修资源](https://github.com/ryoumiyahayato/wwo/releases/download/water-page-handoff-20261120/water-geometry-norway.qwg.zst)
+
+普通 `--play` 已进入正式世界。录像使用默认资源目录。挪威两处旧误填，以及 25、34、42、115 米/像素的近景未见整格矩形。往返拖动和 42 → 2734 → 42 米/像素缩放中未见大矩形闪现，地表目标层为 Z7 → Z5 → Z7。冷跳转仍可看出 QPK 父页先粗后细。密西西比 28 米/像素可见主汊和连续岛岸，潮滩有直边和色块。巴黎与蒙古仍有零散偏离水面的细线。[25 秒正式游戏录像](https://github.com/ryoumiyahayato/wwo/releases/download/water-page-handoff-20261120/hydrology-norway-play.mp4)
+
+RTX 3050 Laptop GPU，Vulkan，1280×720。挪威、巴黎、三角洲、阿尔卑斯和草原拖动 P95 为 7.42–7.59 毫秒，与补修前的 7.44–7.67 毫秒相近。沙地静止 P95 从 7.33 到 8.64 毫秒，拖动从 7.45 到 7.54 毫秒。森林、阿尔卑斯和巴黎的景观实例数相同。水域视口缓冲保持 3.52 MiB，几何缓冲保持 12 MiB。水域分类的独立 GPU 时间未测。
+
+从私有归档下载后，独立目录复用已装 QPK、QHW、QHL、QSC 和游戏文件。正式入口自动选中恢复资源。挪威两处近景 QWG 页均驻留 `4/4`，巴黎为 `2/2`。
+
+## PR #183 原阶段
+
 [42 秒正式游戏录像](https://github.com/ryoumiyahayato/wwo/releases/download/water-page-handoff-20261120/hydrology-play.mp4) · [七洲画面](https://github.com/ryoumiyahayato/wwo/releases/download/water-page-handoff-20261120/seven-continents.jpg) · [固定点画面](https://github.com/ryoumiyahayato/wwo/releases/download/water-page-handoff-20261120/hydrology-fixed-views.jpg)
 
 ## 实现与加载过程

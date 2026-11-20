@@ -14,7 +14,7 @@
 
 `river-centrelines.qhl` 按 HydroRIVERS v1.0 河段编号绘制屏幕线符号。线符号没有水域面积或通航宽度。旧版地貌包可用 `tools/build_natural_terrain.py --hydrology-candidate <现有QPK库> <地貌来源> <Natural Earth目录> <输出目录>` 生成修正后的 `hydrology-color.qhw` 和 `river-centrelines.qhl`。修复按 Natural Earth 陆地和水域移除旧版河宽像素。WorldCover 用于恢复陆地色调。颜色补页复用原 QPK 页表和高程。
 
-`tools/build_natural_terrain.py --water-geometry <GSHHG全精度压缩包> <候选库>/water-geometry.qwg --measured-river-mask <GRWL_mask_V01.01.zip>` 生成独立 WGS84 页。岸线支持 GSHHG Shapefile 压缩包或 Basemap 的全精度数据 wheel。加入 Landsat 水域需 `pyproj` 和 `tifffile`。GSHHG 提供海岸、湖泊及嵌套岛屿。GRWL 的正值水面提供干流、潮汐水道和连通湖库，零值保留已有水域。已知河岸范围优先。`--documented-river-widths <GeoJSON>` 仅在无观测水面覆盖的河段按米制构造水面。输入中心线需包含 `half_width_metres`、`width_source` 和 `width_epoch`，归档时保留原始 GeoJSON。其余河段使用线符号。
+`tools/build_natural_terrain.py --water-geometry <GSHHG全精度压缩包> <候选库>/water-geometry.qwg --measured-river-mask <GRWL_mask_V01.01.zip>` 生成独立 WGS84 页。岸线支持 GSHHG Shapefile 压缩包或 Basemap 的全精度数据 wheel。加入 Landsat 水域需 `pyproj` 和 `tifffile`。GSHHG 提供海岸、湖泊及嵌套岛屿。GRWL 的正值水面提供干流、潮汐水道和连通湖库，零值保留已有水域。已知河岸范围优先。`--documented-river-widths <GeoJSON>` 仅在无观测水面覆盖的河段按米制构造水面。输入中心线需包含 `half_width_metres`、`width_source` 和 `width_epoch`，归档时保留原始 GeoJSON。其余河段使用线符号。局部重算使用 `--water-pages-from <现有QWG>` 和一个或多个 `--water-page X Y`，其余页面从现有包复制。
 
 候选使用 Basemap 2.0.0 随包的 GSHHG 2.3.6 全精度几何和 GRWL v01.01 的 30 米 Landsat 平均流量水域掩膜。岸线和卫星观测均为现代参照。1900 年精确河岸及航道宽度仍待对应历史资料。GRWL 掩膜是中间产品，细小水道和潮滩边界精度取决于资料。[GSHHG](https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html) · [Basemap 数据及 LGPL-3.0-or-later](https://pypi.org/project/basemap-data-hires/) · [Allen 与 Pavelsky 2018](https://doi.org/10.1126/science.aat0636) · [GRWL v01.01，CC BY 4.0](https://doi.org/10.5281/zenodo.1297434)
 
@@ -23,7 +23,7 @@
 - `0.qpk` 至 `5.qpk` 和 `river-topology.u32` 取自 [Rust Windows 阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)。
 - `6.qpk`、`index.json` 和 `landscape-cover-v2.qsc` 取自 [Z6/Z7 地表阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/z6-z7-surface-20261119)。将 `z6-land-material-6.qpk` 命名为 `6.qpk`。
 - `7.qpk` 使用 [Z7 地表归档](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115) 的 `z7-land-material-7.qpk`。
-- `water-geometry.qwg` 解压自 [水域接替阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/water-page-handoff-20261120) 的 `water-geometry.qwg.zst`。配套 `hydrology-color.qhw` 取自 [水域几何阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/global-water-geometry-20261120)。
+- 从 [水域接替阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/water-page-handoff-20261120) 下载 `water-geometry-norway.qwg.zst`，解压后命名为 `water-geometry.qwg`。配套 `hydrology-color.qhw` 取自 [水域几何阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/global-water-geometry-20261120)。
 - `river-centrelines.qhl` 取自 [河网阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/global-hydrology-20261119)。
 
 Z4 至 Z7 共享水陆位置。复杂几何按视野和移动方向预取。缺页和远景使用 QPK。地表、城市和景观共用水陆状态和接替权重。已有明确边界的历史调查图层优先。实测水域覆盖对应河段时抑制重复的中心线符号。水面轮廓与原河段拓扑可分别追溯。
