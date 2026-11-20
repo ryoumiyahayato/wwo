@@ -344,6 +344,24 @@ class WaterProbes:
                                          'degree': edge, 'pixels': [run[0], run[-1]]})
         return suspects
 
+    def separate_boundary_colors(self, diagnostics, state):
+        suspects = diagnostics.get('suspect')
+        if not suspects:
+            return diagnostics
+        axes, mpp = state['orientation'], state['mpp']
+        stable, mixed = [], []
+        for x, y, expected in suspects:
+            expected_water = expected == 'expected_water'
+            # The screenshot probe takes the median of these same 25 pixels.
+            # A narrow island or channel can sit between the four outer probes.
+            uniform = all((self.area(*geographic(x+dx+.5,y+dy+.5,axes,mpp,0)) > 1)
+                          == expected_water for dx in range(-2,3) for dy in range(-2,3))
+            (stable if uniform else mixed).append([x,y,expected])
+        if not mixed:
+            return diagnostics
+        return {**diagnostics, 'suspect': stable, 'mixed_boundary': mixed,
+                'status': 'check_suspect_pixels' if stable else 'source_boundary_in_probe'}
+
 
 def capture_view(host, view, scratch, directory, probes):
     camera = dict(lon=view['lon'],lat=view['lat'],mpp=view['mpp'],value='north')
@@ -486,6 +504,14 @@ def report(args):
                 latest[key] = record, path
     counts = {z: Counter() for z in (4,5,6,7)}
     flagged = []
+    qwg = Path(plan['qwg'])
+    if qwg.is_file():
+        with qwg.open('rb') as source:
+            water = WaterProbes(source)
+            for record, _ in latest.values():
+                diagnostics = record.get('color_probes', {})
+                if diagnostics.get('suspect'):
+                    record['color_probes'] = water.separate_boundary_colors(diagnostics, record['state'])
     for view in plan['views']:
         if args.z is not None and view['z'] not in args.z:
             continue
@@ -508,6 +534,7 @@ def report(args):
         diagnostics = record.get('color_probes', {})
         coverage = record.get('water_coverage')
         if (record['status'] != 'captured_review_pending' or diagnostics.get('suspect')
+                or diagnostics.get('mixed_boundary')
                 or coverage in ('qpk_for_missing_qwg_pages','water_budget_unknown')):
             flagged.append(dict(view=view, image=str(image), status=record['status'],
                                 water_coverage=coverage,color_probes=diagnostics))
@@ -518,7 +545,7 @@ def report(args):
     result = dict(counts=counts, flagged=flagged)
     if args.inspect_seams:
         result['seam_flags'] = []
-        with Path(plan['qwg']).open('rb') as source:
+        with qwg.open('rb') as source:
             probes = WaterProbes(source)
             for view in plan['views']:
                 z = view['z']
