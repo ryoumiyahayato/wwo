@@ -32,8 +32,7 @@ struct Tile {
 @group(0) @binding(5) var flags: texture_2d<f32>;
 @group(0) @binding(6) var flag_poses: texture_2d<f32>;
 @group(0) @binding(7) var galactic_chart: texture_2d<f32>;
-@group(0) @binding(8) var ocean_detail: texture_2d<f32>;
-@group(0) @binding(9) var ocean_ice: texture_2d<f32>;
+@group(0) @binding(8) var ocean_material: texture_2d<f32>;
 @group(0) @binding(10) var terrain_world: texture_2d_array<f32>;
 @group(0) @binding(11) var terrain_detail: texture_2d_array<f32>;
 @group(0) @binding(12) var terrain_index: texture_2d<u32>;
@@ -80,12 +79,12 @@ fn solar_ground(ink:vec3f, normal:vec3f)->vec3f {
 }
 fn chart_ocean(ll:vec2f,earth:vec3f,normal:vec3f)->vec3f {
     let uv=vec2f(ll.x/360.+.5,clamp(.5-ll.y/180.,.03125,.96875));
-    let detail=textureSampleLevel(ocean_detail,world_sampler,uv,0.).b;
+    let detail=textureSampleLevel(ocean_material,world_sampler,uv,0.).r;
     let variation=clamp((detail-.28)*2.2,-.18,.18)*(1.-smoothstep(.86,.98,abs(earth.y)));
     var base=mix(vec3f(.12,.20,.23),vec3f(.055,.20,.29),.75)*(1.+variation);
     base+=vec3f(-.010,.012,.020)*variation;
     let polar=select(smoothstep(.91355,.97815,-earth.y)*.46,smoothstep(.95106,.99452,earth.y)*.82,earth.y>0.);
-    let floe=textureSampleLevel(ocean_ice,world_sampler,fract(earth.xz*2.2+.5),0.).b;
+    let floe=textureSampleLevel(ocean_material,world_sampler,fract(earth.xz*2.2+.5),0.).a;
     let ice=polar*mix(.93,1.,floe);
     base=mix(base,vec3f(.61,.73,.78),ice);
     let half_vector=normalize(CHART_SUN_VIEW+vec3f(0.,0.,1.));
@@ -389,11 +388,13 @@ fn water_surface(ll:vec2f, sample:u32, base:vec4f, ground:vec3f, depth:f32) -> v
 }
 fn land_material_band(earth:vec3f, planes:vec3f, footprint:f32, period:f32) -> vec4f {
     let world=earth*(EARTH/period);
-    let p=world+sin(world.zxy*.19+vec3f(.4,1.7,2.8))*.46;
+    // Turn the grain across projection planes and bend repeat intervals in world space.
+    let p=world+sin(world.zxy*vec3f(.17,.21,.14)+vec3f(.4,1.7,2.8))*.81;
+    let turn=mat2x2f(vec2f(.8660254,.5),vec2f(-.5,.8660254));
     let mip=log2(max(1.,footprint*f32(textureDimensions(land_surface).x)/period));
     return textureSampleLevel(land_surface,land_repeat,p.yz,mip)*planes.x
-        +textureSampleLevel(land_surface,land_repeat,p.xz+vec2f(.21,.43),mip)*planes.y
-        +textureSampleLevel(land_surface,land_repeat,p.xy+vec2f(.67,.29),mip)*planes.z;
+        +textureSampleLevel(land_surface,land_repeat,turn*p.xz+vec2f(.21,.43),mip)*planes.y
+        +textureSampleLevel(land_surface,land_repeat,p.yx*turn+vec2f(.67,.29),mip)*planes.z;
 }
 fn sediment_structure(earth:vec3f, footprint:f32) -> vec2f {
     // Sample the continental variation and the grain at different scales.

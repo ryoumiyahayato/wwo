@@ -99,11 +99,6 @@ directories = {
     json.dumps({"names": geographic_names, "directories": directories}, ensure_ascii=False), encoding="utf-8"
 )
 Image.open(maps / "background/galactic_chart.png").convert("RGBA").save(data / "galactic-chart.png")
-ocean = maps / "ocean/orbital_r24"
-for name, source in (("detail", "pelagic_eddies_albedo.png"), ("ice", "polar_pack_ice_albedo.png")):
-    # R68's imported originals have mip generation disabled.
-    Image.open(ocean / source).convert("RGBA").save(data / f"ocean-{name}-r68.png")
-
 glyph_sources = [base / "src/formal_ui.rs", base / "src/market_ui.rs", base / "src/lobby.rs",
                  base / "src/ui.rs", base / "src/main.rs",
                  base / "src/migration_status.rs", base / "src/formal_character.rs", base / "src/native_start.rs",

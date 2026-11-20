@@ -13,8 +13,6 @@ TILE_SIGNATURE = b"WWORGN1\0"
 ART = (
     "political-flags-hd.png",
     "galactic-chart.png",
-    "ocean-detail-r68.png",
-    "ocean-ice-r68.png",
 )
 
 
