@@ -252,8 +252,8 @@ impl WaterPages {
                             .iter()
                             .any(|&(i, visible)| visible && self.pages[i].index == key);
                         touches_view |= visible;
-                        // A page prefetched off screen is authoritative on its first appearance.
-                        // Keep completed reads even if the player reversed direction meanwhile.
+                        // Keep off-screen prefetches resident after a reversal.
+                        // Their handoff stamp starts when the page first becomes visible.
                         words[0] = if visible { stamp } else { 0 };
                         Some((key, words))
                     }
