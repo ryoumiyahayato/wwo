@@ -218,12 +218,14 @@ impl WaterPages {
                 .into_iter()
                 .filter_map(|(key, result)| match result {
                     Ok(mut words) => {
-                        let &(_, visible) = self
+                        let visible = self
                             .desired
                             .iter()
-                            .find(|&&(i, _)| self.pages[i].index == key)?;
+                            .any(|&(i, visible)| visible && self.pages[i].index == key);
                         touches_view |= visible;
-                        words[0] = stamp;
+                        // A page prefetched off screen is authoritative on its first appearance.
+                        // Keep completed reads even if the player reversed direction meanwhile.
+                        words[0] = if visible { stamp } else { 0 };
                         Some((key, words))
                     }
                     Err(error) => {
@@ -361,10 +363,11 @@ impl WaterPages {
                 .iter()
                 .map(|&(i, _)| self.pages[i].index)
                 .collect();
+            let selected: HashSet<_> = order.iter().copied().collect();
             let mut previous: Vec<_> = self
                 .resident
                 .iter()
-                .filter(|(_, page)| page.last_needed != self.selection_number)
+                .filter(|(key, _)| !selected.contains(key))
                 .map(|(&key, page)| (key, page.last_needed))
                 .collect();
             previous.sort_unstable_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));

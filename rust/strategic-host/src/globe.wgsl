@@ -330,7 +330,8 @@ fn exposed_ground(ll:vec2f, fallback:vec3f) -> vec3f {
     let local=uv*vec2f(f32(rows*2),f32(rows));
     let index=textureLoad(terrain_index,vec2i(local)+vec2i(0,rows-1),0).r;
     let slot=i32(index&65535u)-1;
-    let ready=f32((index>>16u)&255u)/255.;
+    let lod=f32((index>>16u)&255u)/255.;
+    let ready=page_coverage(vec2i(local),fract(local),rows,16u,lod);
     if slot<0 || ready<=.01 {return geographic_ground_tint(ll,fallback);}
     // Use the shared gutters and samples where the base map observes land.
     let texel=fract(local)*256.+4.;
@@ -348,7 +349,7 @@ fn exposed_ground(ll:vec2f, fallback:vec3f) -> vec3f {
             total+=dry;
         }
     }
-    let support=ready*smoothstep(.02,.7,total);
+    let support=ready*smoothstep(.02,1.3,total);
     if support>=.999 {return sum/total;}
     return mix(geographic_ground_tint(ll,fallback),sum/max(.001,total),support);
 }
@@ -359,16 +360,17 @@ fn water_surface(ll:vec2f, sample:u32, base:vec4f, ground:vec3f, depth:f32) -> v
     if zoom<=0. {return base;}
     let area=sample&3u;
     let w=water_weight(sample);
-    if area<=1u && base.a<.015 {return base;}
+    if area<=1u && base.a<.005 {return base;}
     let sea=mix(vec3f(.18,.37,.43),vec3f(.095,.25,.34),smoothstep(9.,240.,depth));
     let river=vec3f(.20,.38,.45);
     let preserve=smoothstep(640.,2450.,view.viewport.z*EARTH)*smoothstep(.88,.995,base.a);
-    let ice=smoothstep(.46,.68,min(base.r,base.g))*smoothstep(.80,.98,base.a);
+    let ice=smoothstep(52.,68.,abs(ll.y))
+        *smoothstep(.46,.68,min(base.r,base.g))*smoothstep(.80,.98,base.a);
     let retain=max(ice,preserve);
     let ink=mix(select(sea,river,area==3u),base.rgb,retain);
     if w>=.999 {
         if area>1u {return vec4f(ink,1.);}
-        let ground_color=mix(base.rgb,exposed_ground(ll,ground),smoothstep(.015,.15,base.a));
+        let ground_color=mix(base.rgb,exposed_ground(ll,ground),smoothstep(.005,.18,base.a));
         return vec4f(ground_color,0.);
     }
     let lake=vec3f(.15,.29,.36);
@@ -380,7 +382,7 @@ fn water_surface(ll:vec2f, sample:u32, base:vec4f, ground:vec3f, depth:f32) -> v
                      zoom*smoothstep(.15,.92,base.a));
     if w<=0. {return vec4f(fallback,base.a);}
     if area==1u {
-        let exposed=mix(base.rgb,exposed_ground(ll,ground),smoothstep(.015,.15,base.a));
+        let exposed=mix(base.rgb,exposed_ground(ll,ground),smoothstep(.005,.18,base.a));
         return vec4f(mix(fallback,exposed,w),base.a*(1.-w));
     }
     return vec4f(mix(fallback,ink,w),mix(base.a,1.,w));
@@ -394,14 +396,14 @@ fn land_material_band(earth:vec3f, planes:vec3f, footprint:f32, period:f32) -> v
         +textureSampleLevel(land_surface,land_repeat,p.xy+vec2f(.67,.29),mip)*planes.z;
 }
 fn sediment_structure(earth:vec3f, footprint:f32) -> vec2f {
-    // A volume field keeps detail the same size in every region, including
-    // where a flat projection would stretch grain into long parallel bands.
-    let p=earth*(EARTH/2700.);
-    let drift=ground_field(p)-.5;
+    // Sample the continental variation and the grain at different scales.
+    // Gradient noise avoids the isolated dark and light cells of value noise.
+    let p=earth*(EARTH/5200.);
+    let drift=ground_field(p);
     var grain=0.;
-    if footprint<155. {
-        grain=(ground_field(p*4.2+vec3f(3.7,12.1,6.3)+drift*.8)-.5)
-            *(1.-smoothstep(34.,155.,footprint));
+    if footprint<106. {
+        let local=p*vec3f(9.,15.,19.)+vec3f(3.7,12.1,6.3)+drift*1.26;
+        grain=ground_field(local)*(1.-smoothstep(38.,106.,footprint));
     }
     return vec2f(drift*(1.-smoothstep(410.,1550.,footprint)),grain);
 }
@@ -441,7 +443,7 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     var relief=dot(broad,solid*vec4f(.19,.15,.28,0.))*(1.-smoothstep(210.,LAND_MATERIAL_MPP,footprint));
     if solid.w+solid.y>.01 {
         let sediment=sediment_structure(earth,footprint);
-        relief+=dot(sediment,vec2f(.16,.23))*(solid.w+solid.y*.55);
+        relief+=dot(sediment,vec2f(.16,.12))*(solid.w+solid.y*.55);
     }
     if footprint<102. {
         let fine=land_material_band(earth,planes,footprint,2150.)-.5;
@@ -861,31 +863,41 @@ fn inland_water(pixel:vec2f) -> f32 {
     return water_weight(sample);
 }
 
+fn nearby_inland_water(pixel:vec2f, across:vec2f, adjacent:vec2f, narrow:f32) -> f32 {
+    let center=inland_water(pixel);
+    if center>=.999 {return center;}
+    let lateral=max(center,max(inland_water(pixel+across),inland_water(pixel-across)));
+    if lateral>=.999 || narrow<=0. {return lateral;}
+    return max(lateral,narrow*max(inland_water(pixel+adjacent),inland_water(pixel-adjacent)));
+}
+
 fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
-    let screen_per_metre=vec2f(1.,-view.chart_origin.z)/(view.viewport.z*EARTH);
+    let mpp=view.viewport.z*EARTH;
+    let screen_per_metre=vec2f(1.,-view.chart_origin.z)/mpp;
+    // A 15 arcsecond centerline can be several hundred metres away from
+    // the measured channel. Keep the search in world metres when zooming.
     let across_step=across*screen_per_metre*70.;
-    let along=vec2f(-across.y,across.x)*screen_per_metre*160.;
-    // Reuse the rendered coverage. Both ends must see the channel to avoid
-    // removing a tributary where it meets water on just one end.
+    let tangent=vec2f(-across.y,across.x)*screen_per_metre;
+    let along=tangent*max(160.,mpp*2.);
+    // At this footprint a measured narrow river can miss a pixel centre.
+    let narrow=smoothstep(24.,38.,mpp)*(1.-smoothstep(85.,130.,mpp));
+    let adjacent=normalize(tangent);
+    // Allow a short gap in the observed area. Both along-reach anchors still
+    // need water, so a tributary meeting a mapped river keeps its own symbol.
     var coverage=0.;
-    for (var i=1u;i<=8u;i++) {
+    for (var i=0u;i<=select(8u,14u,narrow>0.);i++) {
         let offset=across_step*f32(i);
-        for (var side=0u;side<2u;side++) {
+        for (var side=0u;side<select(2u,1u,i==0u);side++) {
             let p=pixel+select(offset,-offset,side==1u);
-            let center=inland_water(p);
-            if center<=coverage {continue;}
-            // Let the observed channel bend by a sample across the stroke.
-            // A crossing still needs water on both ends to hide the symbol.
-            var before=inland_water(p-along);
-            var after=inland_water(p+along);
-            if before<center {
-                before=max(before,max(inland_water(p-along+across_step),inland_water(p-along-across_step)));
-            }
+            let before=nearby_inland_water(p-along,across_step,adjacent,narrow);
             if before<=coverage {continue;}
-            if after<center {
-                after=max(after,max(inland_water(p+along+across_step),inland_water(p+along-across_step)));
+            let after=nearby_inland_water(p+along,across_step,adjacent,narrow);
+            var overlap=min(before,after);
+            if i>8u && overlap>coverage {
+                // Require continuous measured water on the more distant match.
+                overlap=min(overlap,nearby_inland_water(p,across_step,adjacent,narrow))*narrow;
             }
-            coverage=max(coverage,min(center,min(before,after)));
+            coverage=max(coverage,overlap);
             if coverage>=.999 {return 1.;}
         }
     }
@@ -893,7 +905,7 @@ fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
 }
 
 @fragment fn river_ink(stroke:RiverStroke) -> @location(0) vec4f {
-    let direction=vec2f(dpdx(stroke.side),-dpdy(stroke.side)/view.chart_origin.z);
+    let direction=vec2f(dpdx(stroke.side),-dpdy(stroke.side)*view.chart_origin.z);
     let xy=(stroke.clip.xy-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1./view.chart_origin.z);
     let r=length(xy);
     if r>=1.+view.viewport.w*(PI*.5-1.) {discard;}

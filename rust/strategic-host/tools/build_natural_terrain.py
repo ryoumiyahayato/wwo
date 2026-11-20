@@ -25,6 +25,7 @@ from rasterio import features
 from rasterio.enums import Resampling
 from rasterio.transform import from_origin
 from rasterio.vrt import WarpedVRT
+from rasterio.warp import transform_bounds
 from rasterio.windows import Window
 from scipy.ndimage import gaussian_filter, label
 import shapefile
@@ -1377,11 +1378,6 @@ def shoreline_polygons(path):
 
 
 def clip_water_polygon(polygon, bounds):
-    clipped = clip_by_rect(polygon,*bounds)
-    if clipped.is_valid:
-        return clipped
-    # Fast clipping can leave holes touching the exterior. Feeding that
-    # result into the next crop can fill the surrounding cell instead.
     return polygon.intersection(box(*bounds))
 
 
@@ -1433,13 +1429,19 @@ def observed_raster_windows(tile, content, tiff):
                          min(4*height,tile.height-row*height))
 
 
-def observed_river_tile(content, name):
+def observed_river_tile(content, name, bounds=None):
     from pyproj import Transformer
     from tifffile import TiffFile
 
-    with rasterio.MemoryFile(content) as memory, memory.open() as tile, TiffFile(BytesIO(content)) as tiff:
+    with rasterio.MemoryFile(content) as memory, memory.open() as tile, ExitStack() as selected:
         if tile.crs is None:
             raise ValueError(f"GRWL mask has no coordinate system: {name}")
+        if bounds is not None:
+            w,s,e,n = transform_bounds(tile.crs,4326,*tile.bounds)
+            longitude = (e >= bounds[0] and w <= bounds[2]) if w <= e else (e >= bounds[0] or w <= bounds[2])
+            if not longitude or n < bounds[1] or s > bounds[3]:
+                return
+        tiff = selected.enter_context(TiffFile(BytesIO(content)))
         geographic = Transformer.from_crs(tile.crs,4326,always_xy=True,force_over=True)
         # Polygonize in disjoint source windows. Shared raster-grid edges
         # need no overlap and cannot add water between cells.
@@ -1457,7 +1459,7 @@ def observed_river_tile(content, name):
                     yield from project_river_mask(part,geographic)
 
 
-def measured_river_polygons(path):
+def measured_river_polygons(path, bounds=None):
     # GRWL maps water connected to the river network at mean discharge.
     # Zero is unknown or dry, so it cannot erase a mapped lake.
     with ZipFile(path) as archive, rasterio.Env(GDAL_CACHEMAX=64*1024**2):
@@ -1466,7 +1468,7 @@ def measured_river_polygons(path):
             raise ValueError("GRWL archive contains no water masks")
 
         def read(name):
-            return list(observed_river_tile(archive.read(name), name))
+            return list(observed_river_tile(archive.read(name), name, bounds))
 
         with ThreadPoolExecutor(max_workers=4) as pool:
             # Keep the work queue bounded so decoded rasters are temporary.
@@ -1492,15 +1494,15 @@ def project_river_mask(polygon, geographic):
 
 
 def clipped_water(polygons, bounds, parent=0):
-    w,s,e,n = bounds
-    area = (e-w)*(n-s)
+    rect = box(*bounds)
     parts = []
     for level, polygon in polygons:
-        for part in polygon_parts(clip_water_polygon(polygon,bounds)):
-            if part.area >= area*(1-1e-11):
-                parent ^= level
-            elif part.area > 0:
-                parts.append((level,part))
+        if polygon.covers(rect):
+            parent ^= level
+        else:
+            for part in polygon_parts(polygon.intersection(rect)):
+                if part.area > 0:
+                    parts.append((level,part))
     return parent, parts
 
 
@@ -1540,10 +1542,15 @@ def water_cell(parts, bits, origin, cell_y):
     return result
 
 
-def water_page(tree, flags, x, y):
+def water_page_bounds(x, y):
     w = x*WATER_STEP-180
     s = 90-(y+1)*WATER_STEP
-    bounds = w,s,w+WATER_STEP,s+WATER_STEP
+    return w,s,w+WATER_STEP,s+WATER_STEP
+
+
+def water_page(tree, flags, x, y):
+    bounds = water_page_bounds(x,y)
+    w,s,_,_ = bounds
     found = tree.query(box(*bounds),predicate="intersects")
     shoreline, source_bits = [], {}
     for i in found:
@@ -1577,23 +1584,55 @@ def water_page(tree, flags, x, y):
     return 0, np.asarray(words,dtype="<u4").tobytes()
 
 
-def write_water_geometry(shoreline, destination, *, measured_rivers=None, documented_widths=None, scratch=None):
+def water_pack_index(file):
+    pages = WATER_COLUMNS*WATER_ROWS
+    if file.read(8) != b"WWOWAT01":
+        raise ValueError("Expected an existing WGS84 water pack")
+    offsets = np.frombuffer(file.read((pages+1)*8),dtype="<u8")
+    classes = file.read(pages)
+    if (offsets.size != pages+1 or len(classes) != pages or offsets[0] != file.tell()
+            or offsets[-1] != file.seek(0,os.SEEK_END)
+            or np.any(offsets[1:] < offsets[:-1])):
+        raise ValueError("Invalid WGS84 water pack index")
+    return offsets,classes
+
+
+def write_water_geometry(shoreline, destination, *, measured_rivers=None, documented_widths=None,
+                         scratch=None, original=None, replace_pages=()):
     """Use nested water/land polygons; centreline strokes have a separate pack."""
     if destination.exists():
         raise ValueError(f"Output already exists: {destination}")
+    selected = {y*WATER_COLUMNS+x for x,y in replace_pages}
+    bounds = None
+    domain = None
+    if selected:
+        rectangles = [water_page_bounds(x,y) for x,y in replace_pages]
+        bounds = (min(rect[0] for rect in rectangles),min(rect[1] for rect in rectangles),
+                  max(rect[2] for rect in rectangles),max(rect[3] for rect in rectangles))
+        domain = box(*bounds)
     pieces,flags = [],[]
-    for level,geometry in shoreline_polygons(shoreline):
-        if not geometry.is_valid:
-            geometry = make_valid(geometry)
+
+    def add(geometry, flag):
+        if domain is not None:
+            if not geometry.intersects(domain):
+                return
+            geometry = geometry.intersection(domain)
         for polygon in polygon_parts(geometry):
             for part in split_shoreline(polygon):
                 pieces.append(part)
-                flags.append(1 << (0 if level==5 else level-1))
+                flags.append(flag)
+
+    for level,geometry in shoreline_polygons(shoreline):
+        if bounds is not None:
+            w,s,e,n = geometry.bounds
+            if e < bounds[0] or n < bounds[1] or w > bounds[2] or s > bounds[3]:
+                continue
+        if not geometry.is_valid:
+            geometry = make_valid(geometry)
+        add(geometry,1 << (0 if level==5 else level-1))
     if measured_rivers is not None:
-        for source,polygon in measured_river_polygons(measured_rivers):
-            for part in split_shoreline(polygon):
-                pieces.append(part)
-                flags.append(16+source)
+        for source,polygon in measured_river_polygons(measured_rivers,bounds):
+            add(polygon,16+source)
     if documented_widths is not None:
         measured = STRtree([part for flag,part in zip(flags,pieces) if flag != 1])
         next_source = max(flags,default=16)+1
@@ -1602,13 +1641,12 @@ def write_water_geometry(shoreline, destination, *, measured_rivers=None, docume
         for corridor in outlet_corridors(documented_widths).geometries:
             if measured.query(corridor,predicate="intersects").size:
                 continue
-            for part in polygon_parts(clip_water_polygon(corridor,(-180,-90,180,90))):
-                for piece in split_shoreline(part):
-                    pieces.append(piece)
-                    flags.append(next_source)
+            add(clip_water_polygon(corridor,(-180,-90,180,90)),next_source)
             next_source += 1
     tree = STRtree(pieces)
-    with staging_directory(destination.parent,scratch) as folder:
+    source_file = original.open("rb") if original is not None else nullcontext()
+    with source_file as source, staging_directory(destination.parent,scratch) as folder:
+        source_offsets,source_classes = water_pack_index(source) if source is not None else (None,None)
         candidate = Path(folder)/destination.name
         pages = WATER_COLUMNS*WATER_ROWS
         offsets = np.zeros(pages+1,dtype="<u8")
@@ -1621,9 +1659,19 @@ def write_water_geometry(shoreline, destination, *, measured_rivers=None, docume
                 for x in range(WATER_COLUMNS):
                     page = y*WATER_COLUMNS+x
                     offsets[page] = target.tell()
-                    classes[page],payload = water_page(tree,flags,x,y)
+                    if source is None or page in selected:
+                        classes[page],payload = water_page(tree,flags,x,y)
+                        if source is not None:
+                            print(f"Rebuilt water page 7/{x}/{y}: {len(payload)} bytes",flush=True)
+                    else:
+                        begin,end = int(source_offsets[page]),int(source_offsets[page+1])
+                        classes[page] = source_classes[page]
+                        source.seek(begin)
+                        payload = source.read(end-begin)
+                        if len(payload) != end-begin:
+                            raise ValueError(f"Truncated source water page 7/{x}/{y}")
                     target.write(payload)
-                if y%16==15:
+                if source is None and y%16==15:
                     print(f"WGS84 water rows {y+1}/{WATER_ROWS}",flush=True)
             offsets[-1] = target.tell()
             target.seek(8)
@@ -2203,6 +2251,10 @@ def main():
                         help="Build a viewport-streamed WGS84 water pack from full GSHHG polygons")
     parser.add_argument("--measured-river-mask",type=Path,metavar="GRWL_MASK_ZIP",
                         help="Add WGS84 Landsat GRWL water polygons and tidal channels to --water-geometry")
+    parser.add_argument("--water-pages-from",type=Path,metavar="EXISTING_QWG",
+                        help="Copy unchanged pages from this pack when rebuilding selected water pages")
+    parser.add_argument("--water-page",type=int,nargs=2,action="append",metavar=("X","Y"),
+                        help="Rebuild this Z7 water page from the supplied sources; repeat for adjacent pages")
     parser.add_argument("--documented-river-widths",type=Path,metavar="WIDTHS_GEOJSON",
                         help="Add sourced metre widths only for reaches without mapped surface polygons")
     terrain_candidate.add_argument("--hydrology-candidate", type=Path, nargs=4,
@@ -2236,10 +2288,16 @@ def main():
         parser.error("--measured-river-mask requires --water-geometry")
     if args.documented_river_widths is not None and args.water_geometry is None:
         parser.error("--documented-river-widths requires --water-geometry")
+    if args.water_page is not None or args.water_pages_from is not None:
+        if args.water_geometry is None or not args.water_page or args.water_pages_from is None:
+            parser.error("--water-page and --water-pages-from require each other and --water-geometry")
+        if any(not (0 <= x < WATER_COLUMNS and 0 <= y < WATER_ROWS) for x,y in args.water_page):
+            parser.error("Water page coordinates are outside Z7")
     if args.water_geometry is not None:
         with generation_disk_usage(args.water_geometry[-1], 1_500_000_000) as (scratch, _):
             write_water_geometry(*args.water_geometry, measured_rivers=args.measured_river_mask,
-                                 documented_widths=args.documented_river_widths,scratch=scratch)
+                                 documented_widths=args.documented_river_widths,scratch=scratch,
+                                 original=args.water_pages_from,replace_pages=args.water_page or ())
         return
     if args.layer is not None and args.verify is None:
         parser.error("--layer requires --verify")
