@@ -224,8 +224,16 @@ def capture_view(host, view, scratch, directory, probes):
     while not ready(state, view) and time.monotonic() < deadline:
         state = host.ask('status')['state']
     label = view['key']
-    frame = host.ask('capture', label=label, value='terrain-samples')
     img = scratch/f'{label}.png'
+    frame = host.ask('capture', label=label, value='terrain-samples')
+    # The focus acknowledgement can still describe the previously drawn page table.
+    # Retry against a rendered frame after the new selections settle.
+    if not ready(frame['state'], view) and time.monotonic() < deadline:
+        state = frame['state']
+        while not ready(state, view) and time.monotonic() < deadline:
+            state = host.ask('status')['state']
+        img.unlink(missing_ok=True)
+        frame = host.ask('capture', label=label, value='terrain-samples')
     if png_size(img) != tuple(frame['state']['viewport']):
         raise OSError('Missing patrol capture from game')
     state = frame['state']
@@ -300,7 +308,8 @@ def patrol(args):
     # PNGs live only until the corresponding persistent review image is written.
     with TemporaryDirectory(dir=args.output,prefix='capture-') as temporary:
         scratch = Path(temporary)
-        with Observer(args,scratch,play=True) as host, log.open('a',encoding='utf-8') as output, qwg.open('rb') as source:
+        with (Observer(args,scratch,play=True,log_path=args.output/'game.log') as host,
+              log.open('a',encoding='utf-8') as output, qwg.open('rb') as source):
             probes = WaterProbes(source)
             host.ask('state',timeout=65,refresh=True)
             host.ask('click',x=200,y=257)

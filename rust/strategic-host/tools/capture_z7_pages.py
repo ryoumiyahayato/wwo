@@ -258,10 +258,10 @@ def read(path):
 
 
 class Observer:
-    def __init__(self, args, work, *, play=False):
+    def __init__(self, args, work, *, play=False, log_path=None):
         self.request = work / 'map.json'
         self.response = work / 'map.response.json'
-        self.log = (work / 'observer.log').open('ab')
+        self.log = (log_path if log_path is not None else work / 'observer.log').open('ab')
         self.play = play
         mode = ['--play', '--background'] if play else ['--terrain-review', '--terrain-level', '7']
         command = [str(args.exe), *mode, '--observe', str(self.request)]
