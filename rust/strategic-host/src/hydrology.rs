@@ -8,6 +8,7 @@ use std::{
     io::{self, Read, Seek, SeekFrom},
     path::Path,
     sync::mpsc,
+    time::{Duration, Instant},
 };
 
 const WATER_COLUMNS: usize = 256;
@@ -15,7 +16,11 @@ const WATER_ROWS: usize = 128;
 const WATER_PAGES: usize = WATER_COLUMNS * WATER_ROWS;
 const WATER_WORDS: usize = 3 * 1024 * 1024;
 pub const WATER_MPP: f64 = 4200.;
-const WATER_PREFETCH: f64 = 280.;
+const WATER_PREFETCH_MPP: f64 = 5000.;
+const WATER_PREFETCH: f64 = 320.;
+const HANDOFF: Duration = Duration::from_millis(80);
+const HANDOFF_TICK_LIMIT: u32 = 1 << 30;
+const WATER_BATCH: usize = 32;
 
 struct WaterPage {
     index: usize,
@@ -26,17 +31,27 @@ struct WaterPage {
 
 type WaterBatch = Vec<(usize, io::Result<Vec<u32>>)>;
 
+struct ResidentWaterPage {
+    words: Vec<u32>,
+    last_needed: u64,
+}
+
 pub struct WaterPages {
     classes: Vec<u32>,
+    table: Vec<u32>,
     pages: Vec<WaterPage>,
-    desired: Vec<usize>,
-    resident: HashMap<usize, Vec<u32>>,
+    desired: Vec<(usize, bool)>,
+    resident: HashMap<usize, ResidentWaterPage>,
+    used_words: usize,
     request: mpsc::Sender<Vec<(usize, std::ops::Range<u64>)>>,
     ready: mpsc::Receiver<WaterBatch>,
     unavailable: HashSet<usize>,
     inflight: bool,
-    selection: Option<(V3, f64, f64)>,
-    drawn: usize,
+    selection: Option<(V3, V3, f64, f64)>,
+    previous_view: Option<(V3, Instant)>,
+    selection_number: u64,
+    epoch: Instant,
+    handoff_until: Instant,
     revision: u64,
 }
 
@@ -139,13 +154,13 @@ impl WaterPages {
                         .map(|(index, range)| {
                             let result = (|| {
                                 let mut words =
-                                    vec![0u32; ((range.end - range.start) / 4) as usize];
+                                    vec![0u32; 1 + ((range.end - range.start) / 4) as usize];
                                 file.seek(SeekFrom::Start(range.start))?;
-                                file.read_exact(bytemuck::cast_slice_mut(&mut words))?;
+                                file.read_exact(bytemuck::cast_slice_mut(&mut words[1..]))?;
                                 words
                                     .iter_mut()
                                     .for_each(|word| *word = u32::from_le(*word));
-                                if !valid_water_page(&words) {
+                                if !valid_water_page(&words[1..]) {
                                     return Err(io::Error::other("无效的水域几何页"));
                                 }
                                 Ok(words)
@@ -158,17 +173,23 @@ impl WaterPages {
                     }
                 }
             })?;
+        let epoch = Instant::now();
         Ok(Self {
+            table: classes.clone(),
             classes,
             pages,
             desired: Vec::new(),
             resident: HashMap::new(),
+            used_words: WATER_PAGES,
             request,
             ready,
             unavailable: HashSet::new(),
             inflight: false,
             selection: None,
-            drawn: 0,
+            previous_view: None,
+            selection_number: 0,
+            epoch,
+            handoff_until: epoch,
             revision: 0,
         })
     }
@@ -179,123 +200,222 @@ impl WaterPages {
         buffer: &wgpu::Buffer,
         camera: &Camera,
         size: [u32; 2],
+        now: Instant,
     ) {
-        let active = camera.mpp < WATER_MPP;
-        let mut changed = false;
+        if camera.mpp < WATER_PREFETCH_MPP {
+            self.select(camera, size, now);
+        } else {
+            self.selection = None;
+            self.previous_view = None;
+            self.desired.clear();
+        }
+
         if let Ok(results) = self.ready.try_recv() {
             self.inflight = false;
-            for (page, result) in results {
-                match result {
-                    Ok(data) if active => {
-                        self.resident.insert(page, data);
-                        changed = true;
+            let stamp = self.tick(now);
+            let mut touches_view = false;
+            let arrivals: Vec<_> = results
+                .into_iter()
+                .filter_map(|(key, result)| match result {
+                    Ok(mut words) => {
+                        let &(_, visible) = self
+                            .desired
+                            .iter()
+                            .find(|&&(i, _)| self.pages[i].index == key)?;
+                        touches_view |= visible;
+                        words[0] = stamp;
+                        Some((key, words))
                     }
-                    Ok(_) => {}
                     Err(error) => {
-                        self.unavailable.insert(page);
-                        eprintln!("Water geometry page {page} fallback: {error}");
+                        self.unavailable.insert(key);
+                        eprintln!("Water geometry page {key} fallback: {error}");
+                        None
                     }
-                }
-            }
-        }
-        if !active {
-            return;
-        }
-        let screen_center = size.map(|value| value as f64 * 0.5);
-        let (axes, center) = camera.projection(size);
-        let axis = camera.vector(screen_center, size).unwrap_or(axes[2]);
-        let offset = (center[0] - screen_center[0])
-            .hypot((center[1] - screen_center[1]) / camera.pitch().cos());
-        let radius = camera.extent(size, WATER_PREFETCH + offset);
-        let slack = (camera.mpp * 65. / EARTH).cos();
-        if self.selection.is_none_or(|(previous, reach, mpp)| {
-            dot(previous, axis) < slack
-                || (radius - reach).abs() > camera.mpp * 40. / EARTH
-                || (mpp / camera.mpp - 1.).abs() > 0.12
-        }) {
-            self.selection = Some((axis, radius, camera.mpp));
-            let mut nearby: Vec<_> = self
-                .pages
-                .iter()
-                .enumerate()
-                .filter_map(|(index, page)| {
-                    let alignment = dot(axis, page.axis);
-                    (alignment >= (radius + page.radius).cos()).then_some((index, alignment))
                 })
                 .collect();
-            nearby.sort_unstable_by(|(_, a), (_, b)| b.total_cmp(a));
-            let mut budget = WATER_WORDS - WATER_PAGES;
-            let mut desired = Vec::new();
-            for (index, _) in nearby {
-                let page = &self.pages[index];
-                let words = ((page.range.end - page.range.start) / 4) as usize;
-                if words > budget {
-                    continue;
-                }
-                budget -= words;
-                desired.push(index);
-            }
-            desired.sort_unstable();
-            if self.desired != desired {
-                self.desired = desired;
-                changed = true;
-            }
-        }
-        if changed {
-            let mut words = self.classes.clone();
-            self.drawn = 0;
-            for &index in &self.desired {
-                let key = self.pages[index].index;
-                if let Some(data) = self.resident.get(&key) {
-                    words[key] = words.len() as u32;
-                    words.extend_from_slice(data);
-                    self.drawn += 1;
+            if !arrivals.is_empty() {
+                self.publish(queue, buffer, arrivals);
+                if touches_view {
+                    self.revision += 1;
+                    self.handoff_until = now + HANDOFF;
                 }
             }
-            queue.write_buffer(buffer, 0, bytemuck::cast_slice(&words));
-            self.revision += 1;
-            // Keep the last surrounding pages for a short reversal within the same budget.
-            let mut spare = WATER_WORDS - words.len();
-            self.resident.retain(|&index, data| {
-                if words[index] != 0 {
-                    return true;
-                }
-                if data.len() > spare {
-                    return false;
-                }
-                spare -= data.len();
-                true
-            });
         }
         if !self.inflight {
-            let mut pending: Vec<_> = self
+            let pending: Vec<_> = self
                 .desired
                 .iter()
-                .filter_map(|&index| {
-                    let page = &self.pages[index];
-                    (!self.resident.contains_key(&page.index)
-                        && !self.unavailable.contains(&page.index))
-                    .then_some(page)
+                .map(|&(i, _)| &self.pages[i])
+                .filter(|page| {
+                    !self.resident.contains_key(&page.index)
+                        && !self.unavailable.contains(&page.index)
                 })
+                .take(WATER_BATCH)
+                .map(|page| (page.index, page.range.clone()))
                 .collect();
-            if !pending.is_empty() {
-                pending.sort_unstable_by(|a, b| dot(axis, b.axis).total_cmp(&dot(axis, a.axis)));
-                let pending = pending
-                    .into_iter()
-                    .take(96)
-                    .map(|page| (page.index, page.range.clone()))
-                    .collect();
-                self.inflight = self.request.send(pending).is_ok();
+            self.inflight = !pending.is_empty() && self.request.send(pending).is_ok();
+        }
+    }
+
+    fn select(&mut self, camera: &Camera, size: [u32; 2], now: Instant) {
+        let center = size.map(|value| f64::from(value) * 0.5);
+        let (axes, origin) = camera.projection(size);
+        let axis = camera.vector(center, size).unwrap_or(axes[2]);
+        let mut ahead = axis;
+        if let Some((previous, time)) = self.previous_view.replace((axis, now)) {
+            let elapsed = now.saturating_duration_since(time).as_secs_f64();
+            if let Some(point) = camera.project_vec(previous, size) {
+                let dx = center[0] - point[0];
+                let dy = center[1] - point[1];
+                let distance = dx.hypot(dy);
+                if elapsed > 0. && elapsed < 0.25 && distance > 0.1 && distance < 170. {
+                    let lead = (0.14 / elapsed).min(490. / distance);
+                    ahead = camera
+                        .vector([center[0] + dx * lead, center[1] + dy * lead], size)
+                        .unwrap_or(axis);
+                }
+            }
+        }
+        let offset = (origin[0] - center[0]).hypot((origin[1] - center[1]) / camera.pitch().cos());
+        // Include selection slack so prefetch-only uploads cannot alter the current raster.
+        let view_radius = camera.extent(size, offset + 96.);
+        let radius = camera.extent(size, offset + WATER_PREFETCH);
+        let slack = (camera.mpp * 48. / EARTH).cos();
+        let ahead_slack = (camera.mpp * 110. / EARTH).cos();
+        if self.selection.is_some_and(|(previous, lead, reach, mpp)| {
+            dot(previous, axis) >= slack
+                && dot(lead, ahead) >= ahead_slack
+                && (radius - reach).abs() <= camera.mpp * 40. / EARTH
+                && (mpp / camera.mpp - 1.).abs() <= 0.10
+        }) {
+            return;
+        }
+        self.selection = Some((axis, ahead, radius, camera.mpp));
+        self.selection_number += 1;
+        let mut nearby: Vec<_> = self
+            .pages
+            .iter()
+            .enumerate()
+            .filter_map(|(i, page)| {
+                let center = dot(axis, page.axis);
+                let lead = dot(ahead, page.axis);
+                (center.max(lead) >= (radius + page.radius).cos()).then(|| {
+                    let visible = center >= (view_radius + page.radius).cos();
+                    (i, visible, if visible { center } else { lead.max(center) })
+                })
+            })
+            .collect();
+        nearby.sort_unstable_by(|a, b| b.1.cmp(&a.1).then_with(|| b.2.total_cmp(&a.2)));
+        self.desired.clear();
+        let mut budget = WATER_WORDS - WATER_PAGES;
+        for (i, visible, _) in nearby {
+            let page = &self.pages[i];
+            let words = 1 + ((page.range.end - page.range.start) / 4) as usize;
+            if words <= budget {
+                budget -= words;
+                self.desired.push((i, visible));
+                if let Some(resident) = self.resident.get_mut(&page.index) {
+                    resident.last_needed = self.selection_number;
+                }
             }
         }
     }
 
-    pub fn inflight(&self) -> bool {
-        self.inflight
+    fn publish(
+        &mut self,
+        queue: &wgpu::Queue,
+        buffer: &wgpu::Buffer,
+        arrivals: Vec<(usize, Vec<u32>)>,
+    ) {
+        let added: usize = arrivals.iter().map(|(_, words)| words.len()).sum();
+        if self.used_words + added <= WATER_WORDS {
+            for (key, words) in arrivals {
+                let offset = self.used_words;
+                self.table[key] = offset as u32;
+                queue.write_buffer(buffer, (offset * 4) as u64, bytemuck::cast_slice(&words));
+                self.used_words += words.len();
+                self.resident.insert(
+                    key,
+                    ResidentWaterPage {
+                        words,
+                        last_needed: self.selection_number,
+                    },
+                );
+            }
+            queue.write_buffer(buffer, 0, bytemuck::cast_slice(&self.table));
+        } else {
+            // Compact only under pressure. Keep the selected footprint first,
+            // then recently used pages for reversals and zooming back in.
+            for (key, words) in arrivals {
+                self.resident.insert(
+                    key,
+                    ResidentWaterPage {
+                        words,
+                        last_needed: self.selection_number,
+                    },
+                );
+            }
+            self.table.copy_from_slice(&self.classes);
+            let mut order: Vec<_> = self
+                .desired
+                .iter()
+                .map(|&(i, _)| self.pages[i].index)
+                .collect();
+            let mut previous: Vec<_> = self
+                .resident
+                .iter()
+                .filter(|(_, page)| page.last_needed != self.selection_number)
+                .map(|(&key, page)| (key, page.last_needed))
+                .collect();
+            previous.sort_unstable_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+            order.extend(previous.into_iter().map(|(key, _)| key));
+            let mut words = self.classes.clone();
+            for key in order {
+                if let Some(page) = self.resident.get(&key) {
+                    if words.len() + page.words.len() <= WATER_WORDS {
+                        self.table[key] = words.len() as u32;
+                        words.extend_from_slice(&page.words);
+                    }
+                }
+            }
+            self.resident.retain(|&key, _| self.table[key] != 0);
+            self.used_words = words.len();
+            words[..WATER_PAGES].copy_from_slice(&self.table);
+            queue.write_buffer(buffer, 0, bytemuck::cast_slice(&words));
+        }
     }
 
-    pub fn status(&self) -> (usize, usize) {
-        (self.drawn, self.desired.len())
+    fn tick(&self, now: Instant) -> u32 {
+        let elapsed = now.saturating_duration_since(self.epoch).as_millis() / 4 + 1;
+        if elapsed < u128::from(HANDOFF_TICK_LIMIT) {
+            elapsed as u32
+        } else {
+            0
+        }
+    }
+
+    pub fn shader_clock(&self, now: Instant) -> u32 {
+        let tick = self.tick(now);
+        if tick == 0 { HANDOFF_TICK_LIMIT } else { tick }
+    }
+
+    pub fn pending(&self) -> bool {
+        self.inflight || Instant::now() < self.handoff_until
+    }
+
+    pub fn status(&self) -> ([usize; 2], [usize; 2]) {
+        let mut loaded = [0; 2];
+        let mut wanted = [0; 2];
+        for &(index, visible) in &self.desired {
+            let ready = usize::from(self.resident.contains_key(&self.pages[index].index));
+            wanted[0] += 1;
+            loaded[0] += ready;
+            if visible {
+                wanted[1] += 1;
+                loaded[1] += ready;
+            }
+        }
+        (loaded, wanted)
     }
 
     pub fn revision(&self) -> u64 {

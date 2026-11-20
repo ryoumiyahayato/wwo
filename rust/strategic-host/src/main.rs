@@ -153,6 +153,17 @@ impl Config {
         if result.managed&&(result.world.is_none()||result.requests.is_none()){return Err(io::Error::other("formal menu requires bridge snapshot and requests paths"));}
         Ok(result)
     }
+
+    fn terrain_root(&self) -> (PathBuf, bool) {
+        if let Some(path)=&self.terrain_candidate {return (path.clone(),true);}
+        let hydrology=self.root.join(terrain::HYDROLOGY_DIRECTORY);
+        if terrain::compact_files_present(&hydrology)
+            && ["water-geometry.qwg","hydrology-color.qhw","river-centrelines.qhl"]
+                .iter().all(|name|hydrology.join(name).is_file()) {return (hydrology,true);}
+        let compact=self.root.join(terrain::COMPACT_VERSION);
+        if terrain::compact_files_present(&compact) {return (compact,true);}
+        (self.root.join(terrain::VERSION),false)
+    }
 }
 struct Resident {page:Page,ready:Instant,used:Instant}
 struct Drag {at:[f64;2],origin:[f64;2],last:Instant,bearing:bool,moved:bool}
@@ -223,9 +234,10 @@ impl Host {
         let map_root=if formal_map {map_release::root(&config.root)} else {config.root.clone()};
         let map_signature=formal_map.then_some(map_release::TILE_SIGNATURE);
         let natural=if formal_map {
-            let packed=config.terrain_candidate.is_some();
-            let natural_root=config.terrain_candidate.clone().unwrap_or_else(||config.root.join(terrain::VERSION));
-            Some((terrain::Catalogue::open(&natural_root,packed,config.terrain_selection,config.terrain_layer_candidate.clone())?,events.create_proxy()))
+            let (natural_root,packed)=config.terrain_root();
+            let catalogue=terrain::Catalogue::open(&natural_root,packed,config.terrain_selection,config.terrain_layer_candidate.clone())?;
+            if config.observe.is_some() {eprintln!("Terrain catalogue · {}",natural_root.display());}
+            Some((catalogue,events.create_proxy()))
         }else{
             if config.terrain_candidate.is_some() || config.terrain_detail.is_some() {
                 return Err(io::Error::other("Terrain candidates require the native game"));
@@ -1606,7 +1618,7 @@ impl ApplicationHandler<HostEvent> for Host {
             let atlas=font(&self.config.root.join("type.png"))?;
             let detail=if self.natural.is_some() && self.config.terrain_close_sample.is_none()
                 && matches!(self.config.terrain_selection,terrain::LayerSelection::Auto) {
-                let default_dir=self.config.terrain_candidate.clone().unwrap_or_else(||self.config.root.join(terrain::VERSION));
+                let (default_dir,_)=self.config.terrain_root();
                 let default=default_dir.join(terrain_detail::FILE_NAME);
                 if let Some(path)=&self.config.terrain_detail {
                     Some(terrain_detail::Catalogue::open(path)?)

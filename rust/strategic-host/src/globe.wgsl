@@ -12,7 +12,8 @@ struct View {
     map_style: vec4f, // terrain catalogue zoom (y), selected terrain zoom (z), military grid step (w)
     edits: array<LandEdit, 12>,
     natural_lod: array<vec4f, 2>, // opacity indexed by Z, or -1 for per-page blending
-    close_sample: vec4f,
+    close_sample: vec3f, // detail weight, streamed, historical survey
+    water_clock: u32,
 };
 struct LandEdit { area: vec4f, state: vec4f };
 struct Tile {
@@ -255,15 +256,7 @@ fn natural_surface(ll:vec2f) -> vec4f {
     return color+natural_global(uv)*remaining;
 }
 
-fn water_area(ll:vec2f) -> u32 {
-    if arrayLength(&water_geometry)<32768u || view.chart_origin.w>.5
-        || view.viewport.z*EARTH>=4200. {return 0u;}
-    let tile_uv=min(vec2f(fract(ll.x/360.+.5),clamp(.5-ll.y/180.,0.,1.)),vec2f(.99999994));
-    let grid=tile_uv*vec2f(256.,128.);
-    let tile_cell=vec2u(grid);
-    let page=water_geometry[tile_cell.y*256u+tile_cell.x];
-    if page<=3u {return page;}
-    let q=vec2f(fract(grid.x),min(1.-fract(grid.y),.99999994));
+fn water_page_area(page:u32, q:vec2f) -> u32 {
     let cell=vec2u(q*8.);
     let start=water_geometry[page+cell.y*8u+cell.x];
     if start<=3u {return start;}
@@ -291,6 +284,20 @@ fn water_area(ll:vec2f) -> u32 {
     return select(2u,1u,(bits&1u)!=0u);
 }
 
+// The raster carries the area and its age origin. A parked camera can reuse it
+// through the handoff without rerunning the polygon tests each frame.
+fn water_area(ll:vec2f) -> u32 {
+    if arrayLength(&water_geometry)<32768u || view.chart_origin.w>.5
+        || view.viewport.z*EARTH>=4200. {return 0u;}
+    let tile_uv=min(vec2f(fract(ll.x/360.+.5),clamp(.5-ll.y/180.,0.,1.)),vec2f(.99999994));
+    let grid=tile_uv*vec2f(256.,128.);
+    let tile_cell=vec2u(grid);
+    let page=water_geometry[tile_cell.y*256u+tile_cell.x];
+    if page<=3u {return page;}
+    let q=vec2f(fract(grid.x),min(1.-fract(grid.y),.99999994));
+    return (water_geometry[page]<<2u)|water_page_area(page+1u,q);
+}
+
 fn geographic_water_weight() -> f32 {
     return 1.-smoothstep(2600.,4200.,view.viewport.z*EARTH);
 }
@@ -305,8 +312,17 @@ fn screen_water(pixel:vec2f) -> u32 {
     return water_pixels[index];
 }
 
-fn water_coverage(area:u32, fallback:f32) -> f32 {
-    return select(mix(fallback,select(0.,1.,area>1u),geographic_water_weight()),fallback,area==0u);
+fn water_weight(sample:u32) -> f32 {
+    if sample==0u {return 0.;}
+    let stamp=sample>>2u;
+    if stamp==0u {return geographic_water_weight();}
+    // 20 four-millisecond ticks. Only pixels whose coverage or basin
+    // differs from the fallback change while this local handoff runs.
+    return smoothstep(0.,20.,f32(max(view.water_clock,stamp)-stamp))*geographic_water_weight();
+}
+
+fn water_coverage(sample:u32, fallback:f32) -> f32 {
+    return mix(fallback,select(0.,1.,(sample&3u)>1u),water_weight(sample));
 }
 
 fn exposed_ground(ll:vec2f, fallback:vec3f) -> vec3f {
@@ -339,21 +355,37 @@ fn exposed_ground(ll:vec2f, fallback:vec3f) -> vec3f {
     return mix(geographic_ground_tint(ll,fallback),sum/max(.001,total),support);
 }
 
-fn water_surface(ll:vec2f, area:u32, base:vec4f, ground:vec3f, depth:f32) -> vec4f {
-    if area==0u {return base;}
-    let w=geographic_water_weight();
-    if area==1u {
-        if base.a<.015 {return base;}
-        let exposed=mix(base.rgb,exposed_ground(ll,ground),smoothstep(.015,.15,base.a));
-        return mix(base,vec4f(exposed,0.),w);
-    }
+fn water_surface(ll:vec2f, sample:u32, base:vec4f, ground:vec3f, depth:f32) -> vec4f {
+    if view.water_clock==0u || view.chart_origin.w>.5 {return base;}
+    let zoom=geographic_water_weight();
+    if zoom<=0. {return base;}
+    let area=sample&3u;
+    let w=water_weight(sample);
+    if area<=1u && base.a<.015 {return base;}
     let sea=mix(vec3f(.18,.37,.43),vec3f(.095,.25,.34),smoothstep(9.,240.,depth));
-    // Keep the established bathymetric colors during distant page handoffs.
-    // At close scales the coarse color edge can reveal the former shoreline.
+    let river=vec3f(.20,.38,.45);
     let preserve=smoothstep(640.,2450.,view.viewport.z*EARTH)*smoothstep(.88,.995,base.a);
-    let ink=mix(select(sea,vec3f(.20,.38,.45),area==3u),base.rgb,preserve);
     let ice=smoothstep(.46,.68,min(base.r,base.g))*smoothstep(.80,.98,base.a);
-    return mix(base,vec4f(mix(ink,base.rgb,ice),1.),w);
+    let retain=max(ice,preserve);
+    let ink=mix(select(sea,river,area==3u),base.rgb,retain);
+    if w>=.999 {
+        if area>1u {return vec4f(ink,1.);}
+        let ground_color=mix(base.rgb,exposed_ground(ll,ground),smoothstep(.015,.15,base.a));
+        return vec4f(ground_color,0.);
+    }
+    let lake=vec3f(.15,.29,.36);
+    let basin=max(1.-smoothstep(.012,.040,distance(base.rgb,river)),
+                  (1.-smoothstep(.009,.027,distance(base.rgb,lake)))*(1.-smoothstep(5.,38.,depth)));
+    // Render agreed water with the same pigments while geometry is in flight.
+    // The QPK samples still define fallback coverage and large-scale bathymetry.
+    let fallback=mix(base.rgb,mix(mix(sea,river,basin),base.rgb,retain),
+                     zoom*smoothstep(.15,.92,base.a));
+    if w<=0. {return vec4f(fallback,base.a);}
+    if area==1u {
+        let exposed=mix(base.rgb,exposed_ground(ll,ground),smoothstep(.015,.15,base.a));
+        return vec4f(mix(fallback,exposed,w),base.a*(1.-w));
+    }
+    return vec4f(mix(fallback,ink,w),mix(base.a,1.,w));
 }
 fn land_material_band(earth:vec3f, planes:vec3f, footprint:f32, period:f32) -> vec4f {
     let world=earth*(EARTH/period);
@@ -362,6 +394,18 @@ fn land_material_band(earth:vec3f, planes:vec3f, footprint:f32, period:f32) -> v
     return textureSampleLevel(land_surface,land_repeat,p.yz,mip)*planes.x
         +textureSampleLevel(land_surface,land_repeat,p.xz+vec2f(.21,.43),mip)*planes.y
         +textureSampleLevel(land_surface,land_repeat,p.xy+vec2f(.67,.29),mip)*planes.z;
+}
+fn sediment_structure(earth:vec3f, footprint:f32) -> vec2f {
+    // A volume field keeps detail the same size in every region, including
+    // where a flat projection would stretch grain into long parallel bands.
+    let p=earth*(EARTH/2700.);
+    let drift=ground_field(p)-.5;
+    var grain=0.;
+    if footprint<155. {
+        grain=(ground_field(p*4.2+vec3f(3.7,12.1,6.3)+drift*.8)-.5)
+            *(1.-smoothstep(34.,155.,footprint));
+    }
+    return vec2f(drift*(1.-smoothstep(410.,1550.,footprint)),grain);
 }
 fn land_chroma(rgb:vec3f) -> vec2f {
     return vec2f(rgb.g-rgb.r,rgb.r+rgb.g-2.*rgb.b)/max(.001,rgb.r+rgb.g+rgb.b);
@@ -388,7 +432,7 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     let sand=land_palette_weight(chroma,vec3f(.775,.632,.433),.051);
     let motifs=vec4f(woods,soil,rock,sand);
     let total=dot(motifs,vec4f(1.));
-    let materials=motifs/max(1.,total)+vec4f(0.,0.,.25,.75)*(1.-min(1.,total));
+    let materials=motifs/max(1.,total)+vec4f(0.,0.,.12,.88)*(1.-min(1.,total));
 
     let facing=abs(earth)*abs(earth);
     let planes=facing*facing/dot(facing,facing);
@@ -396,10 +440,14 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     // Broad forest and sand grain stays weaker than exposed rock. The baked
     // geographic albedo and shading remain legible on flat, uniform surfaces.
     let solid=mix(materials,vec4f(0.,0.,.12,.30),snow);
-    var relief=dot(broad,solid*vec4f(.19,.23,.37,.27))*(1.-smoothstep(210.,LAND_MATERIAL_MPP,footprint));
+    var relief=dot(broad,solid*vec4f(.19,.15,.28,0.))*(1.-smoothstep(210.,LAND_MATERIAL_MPP,footprint));
+    if solid.w+solid.y>.01 {
+        let sediment=sediment_structure(earth,footprint);
+        relief+=dot(sediment,vec2f(.16,.23))*(solid.w+solid.y*.55);
+    }
     if footprint<102. {
         let fine=land_material_band(earth,planes,footprint,2150.)-.5;
-        relief+=dot(fine,solid*vec4f(.18,.21,.32,.37))*(1.-smoothstep(38.,102.,footprint));
+        relief+=dot(fine,solid*vec4f(.18,.12,.28,0.))*(1.-smoothstep(38.,102.,footprint));
     }
     return clamp(base*(1.+relief*land),vec3f(0.),vec3f(1.));
 }
@@ -803,24 +851,30 @@ fn raster_water(@builtin(global_invocation_id) id:vec3u) {
     water_output[id.y*size.x+id.x]=area;
 }
 
-fn parallel_water_area(ll:vec2f, xy:vec2f, across:vec2f) -> bool {
+fn parallel_water_area(ll:vec2f, xy:vec2f, across:vec2f) -> f32 {
     let q=river_coordinates(xy+across*(70./EARTH));
     let delta=q-ll;
     let across_step=vec2f(delta.x-360.*round(delta.x/360.),delta.y);
     let latitude_scale=max(.025,cos(radians(ll.y)));
-    let along=vec2f(-across_step.y/latitude_scale,across_step.x*latitude_scale)*(95./70.);
+    let along=vec2f(-across_step.y/latitude_scale,across_step.x*latitude_scale)*(160./70.);
     // A generalized centreline can wander off its observed channel. Hide a
     // redundant symbol if that channel runs parallel on either side. A confluence
     // on only one end stays connected to the mapped water.
+    var coverage=0.;
     for (var i=1u;i<=8u;i++) {
         let offset=across_step*f32(i);
         for (var side=0u;side<2u;side++) {
             let p=ll+select(offset,-offset,side==1u);
-            if water_area(p)==3u && water_area(p-along)==3u
-                && water_area(p+along)==3u {return true;}
+            let center=water_area(p);
+            if (center&3u)!=3u {continue;}
+            let before=water_area(p-along);
+            let after=water_area(p+along);
+            if (before&3u)!=3u || (after&3u)!=3u {continue;}
+            coverage=max(coverage,min(water_weight(center),min(water_weight(before),water_weight(after))));
+            if coverage>=.999 {return 1.;}
         }
     }
-    return false;
+    return coverage;
 }
 
 @fragment fn river_ink(stroke:RiverStroke) -> @location(0) vec4f {
@@ -829,16 +883,21 @@ fn parallel_water_area(ll:vec2f, xy:vec2f, across:vec2f) -> bool {
     let r=length(xy);
     if r>=1.+view.viewport.w*(PI*.5-1.) {discard;}
     let ll=river_coordinates(xy);
-    let area=screen_water(stroke.clip.xy);
-    let exact=area!=0u && geographic_water_weight()>=.999;
+    let sample=screen_water(stroke.clip.xy);
+    let area=sample&3u;
+    let exact=water_weight(sample)>=.999;
     if area>1u && exact {discard;}
-    let near=1.-smoothstep(120.,195.,view.viewport.z*EARTH);
-    var distinct=1.;
-    if area==1u && near>0. && dot(direction,direction)>0.
-        && parallel_water_area(ll,xy,normalize(direction)) {distinct=1.-near;}
-    if distinct<=.001 {discard;}
     var water=0.;
-    if !exact {water=water_coverage(area,natural_surface(ll).a);}
+    if !exact {water=water_coverage(sample,natural_surface(ll).a);}
+    if water>=.57 {discard;}
+    var distinct=1.;
+    // At smaller map scales the displacement is comparable to a stroke pixel.
+    // The coverage above already masks the visible overlap.
+    let near=1.-smoothstep(290.,440.,view.viewport.z*EARTH);
+    if area!=0u && near>0. && dot(direction,direction)>0. {
+        distinct=1.-near*parallel_water_area(ll,xy,normalize(direction));
+    }
+    if distinct<=.001 {discard;}
     var surveyed=0.;
     if view.close_sample.z>.5 {
         let mpp=view.viewport.z*EARTH/max(.3,view.chart_origin.z);
