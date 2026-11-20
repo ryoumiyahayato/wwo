@@ -54,3 +54,11 @@ projected tail分离；稳定bucket修订不创建第二份责任。先按当前
 按当前公开offer的release-by计算采购；UNKNOWN/late余额仍占真实exposure。
 取消请求不释放责任，确认数量上限约束replacement。保持原320 safety、recipe、search、
 FIFO、物质结算及全部历史证据。performance分别记录active扫描与只追加的报告档案。
+
+涉及Round6时运行全部七个历史入口并加`python verify_round6.py`。多个FirmNode共用
+一个物质/订单/shipment权威；正式coal/steel统一S2，supplier+commodity库存承诺跨buyer
+共享，quote不预留，accept重新核对。局部计划不能读取其他企业plan/backlog，跨企业
+需求只能经实际寻址request/order传播；重复needID与gross重试分开。C0/C1明示分配顺序，
+known-edge轮次有界。旧单链oracle control保留显式旧S0/P3边界，不冒充正式网络全轨迹
+等价。保留饥饿、分布偏差和capacity缺口；守恒/gate不批准策略或经济真实性。
+371文件完整档案在Git外生成，hash/file-set冻结；决策active成本和world/archive成本分报。

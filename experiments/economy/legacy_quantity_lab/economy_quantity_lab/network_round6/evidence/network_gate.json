@@ -1,0 +1,12 @@
+{
+  "NETWORK_EXTENSIBILITY_GATE": "PASS",
+  "checks": {
+    "accounts": true,
+    "S5_600": true,
+    "S10_600": true,
+    "bounded_known_degree": true,
+    "cases": true,
+    "shared_probe": true
+  },
+  "scope": "requires correctness entry point too; tested structural extension, not economic realism or formal adoption"
+}

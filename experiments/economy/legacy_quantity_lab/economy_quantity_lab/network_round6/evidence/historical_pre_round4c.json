@@ -1,0 +1,65 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "status": "passed",
+  "checks": [
+    {
+      "name": "round4c_tests",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-m",
+        "unittest",
+        "-v",
+        "test_supplier_search.py"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\search_round4c",
+      "exit_code": 0,
+      "elapsed_seconds": 13.926446299999952,
+      "test_count": 32
+    },
+    {
+      "name": "replay_a",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\search_round4c\\run_supplier_search_experiment.py",
+        "--output-dir",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round6-pre\\round4c-verification-byvnfixf\\replay_a",
+        "--execution-log",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round6-pre\\round4c-verification-byvnfixf\\replay_a_execution.json"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 9.70212679999895
+    },
+    {
+      "name": "replay_b",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\search_round4c\\run_supplier_search_experiment.py",
+        "--output-dir",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round6-pre\\round4c-verification-byvnfixf\\replay_b",
+        "--execution-log",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round6-pre\\round4c-verification-byvnfixf\\replay_b_execution.json"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 9.247453700001643
+    }
+  ],
+  "run_directory": "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round6-pre\\round4c-verification-byvnfixf",
+  "replay_a": {
+    "files_reproduced": 184,
+    "summary_sha256": "37624a453a9563da0732fde9b13f5c81a58b3c9b3f7e69a0f7a30328cfab0f8a",
+    "cases": 18,
+    "days": 10800,
+    "EXTENSIBILITY_GATE": "PASS"
+  },
+  "replay_b": {
+    "files_reproduced": 184,
+    "summary_sha256": "37624a453a9563da0732fde9b13f5c81a58b3c9b3f7e69a0f7a30328cfab0f8a",
+    "cases": 18,
+    "days": 10800,
+    "EXTENSIBILITY_GATE": "PASS"
+  },
+  "elapsed_seconds": 33.143109199998435
+}

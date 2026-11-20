@@ -158,3 +158,22 @@ Wide H10最终backlog1268/0/0，但step-up为6/141/141，取消没有改善stale
 结果、时序证据、性能和结构限制见
 [Round5B报告](economy_quantity_lab/release_round5b/EXECUTABLE_PLANNING_REPORT.md)。
 EXECUTABLE_PLANNING_GATE只支持扩大研究网络；不批准候选正式采用或集成WWO。
+
+## Round6共享多企业生产网络
+
+Round5B PR #7已合并；tag `economy-lab-v0.5b-executable-planning`冻结main
+`48b280a37be8f5fd72f0c277f4ae435e675efa1f`。新增`network_round6/`在同一库存、订单、
+FIFO及shipment权威下运行多个FirmNode；正式coal/steel采购统一S2、共享库存承诺，
+C0稳定队列与C1确定性比例分配只改变本轮稀缺分配。企业规划只读取自身事实，跨企业
+需求通过被寻址的公开request/order传播；每个buyer只访问known候选。
+
+24×600日网络、两个600日旧边界control、共享取消及结构专项已实际运行。
+50项检查、两个完整371文件字节重放由`python verify_round6.py`协调；提交前后运行
+全部七个历史入口，214项旧检查及旧证据继续复现。旧oracle control明确保留S0/P3；
+正式generic S1用统一S2/局部规划，其完整轨迹不冒充旧算法等价。
+
+煤稀缺C0/C1末backlog3532/3521接近，但缺口分布为0/3532与1760/1761；非对称需求
+反例和S10饥饿结果均保留。S5/S10各600日，known报价随30/60边增长，完整档案亦有成本。
+见[Round6报告](economy_quantity_lab/network_round6/MULTI_FIRM_NETWORK_REPORT.md)。
+NETWORK_EXTENSIBILITY_GATE只支持所测网络结构扩展；下一方向建议最小Pricing/Market
+Clearing比较研究，本轮不加入价格或开始下一轮，不接入WWO。

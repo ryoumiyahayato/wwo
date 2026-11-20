@@ -2,7 +2,7 @@ name: Verify quantity economy research
 
 on:
   push:
-    branches: [main, bootstrap/economy-lab-round2, research/order-commitment-round3, research/supplier-admission-round4a, research/multi-supplier-round4b, research/supplier-search-round4c, research/demand-planning-round5, research/executable-planning-round5b]
+    branches: [main, bootstrap/economy-lab-round2, research/order-commitment-round3, research/supplier-admission-round4a, research/multi-supplier-round4b, research/supplier-search-round4c, research/demand-planning-round5, research/executable-planning-round5b, research/multi-firm-network-round6]
   pull_request:
   workflow_dispatch:
 
@@ -31,6 +31,8 @@ jobs:
         run: python verify_round5.py --output-dir artifacts
       - name: Verify executable planning release and reconciliation twice
         run: python verify_round5b.py --output-dir artifacts
+      - name: Verify shared multi-firm networks and exact replay twice
+        run: python verify_round6.py --output-dir artifacts
       - name: Preserve reproduction evidence
         if: always()
         uses: actions/upload-artifact@v4

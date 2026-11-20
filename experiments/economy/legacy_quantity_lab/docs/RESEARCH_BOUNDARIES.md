@@ -65,3 +65,18 @@ The four-lead and five-stage probes exercise interfaces; they are not four new p
 suppliers or a settled multi-firm network. Steel still uses the original S0 admission.
 EXECUTABLE_PLANNING_GATE supports further Multi-Firm Production Network research only.
 No price, finance, households, optimizer, full scheduler or WWO integration is approved.
+
+## Round6 boundary
+
+Round5B is merged/tagged. Opt-in generic recipe and multi-sink orchestration hooks reuse one
+original inventory/order/FIFO/receive authority. Formal coal and steel share S2 admission;
+FirmNode plans use only own facts and addressed public requests. Shared seller/good stock
+commitments and explicit C0/C1 contention are tested in actual multi-buyer worlds.
+The 600-day legacy compatibility controls retain old P3/S0 explicitly; they are not evidence
+that the formal local-plan/S2 trajectory equals the old central-plan/S0 trajectory.
+24 networks include bounded-degree S5/S10 for600days; 50 checks and two371-file exact replays
+support NETWORK_EXTENSIBILITY_GATE only within tested goods, recipes and scales.
+ID starvation, pro-rata distribution costs, production bottlenecks and fixed sink topology
+remain. Known-edge decisions avoid supplier all-pairs; world ledgers and archives still cost.
+Pricing / Market Clearing is recommended as a future comparison question, not implemented
+or approved here. No next round, household, finance, scheduler rewrite or WWO integration.

@@ -1,0 +1,398 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "base": "48b280a37be8f5fd72f0c277f4ae435e675efa1f",
+  "network_cases": 24,
+  "network_days": 14400,
+  "compatibility_cases": 2,
+  "compatibility_days": 1200,
+  "max_quantity_residual": 0,
+  "max_firm_residual": 0,
+  "max_order_residual": 0,
+  "cases": [
+    {
+      "case_id": "B_normal_C0_S2",
+      "seconds": 2.3887205999999424,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.07855079988075886,
+        "planning_seconds": 0.8331112999585457,
+        "production_delivery_seconds": 0.16871420000097714,
+        "procurement_seconds": 0.82060540002567,
+        "dispatch_seconds": 0.04798229991138214,
+        "account_seconds": 0.03835480000998359,
+        "report_archive_seconds": 0.3605604999756906
+      },
+      "export_seconds": 0.9083468000026187,
+      "serialized_output_bytes": 12217107,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "B_normal_C1_S2",
+      "seconds": 2.7351536999995005,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.09387999995669816,
+        "planning_seconds": 0.9096751999750268,
+        "production_delivery_seconds": 0.20188200014672475,
+        "procurement_seconds": 1.0105400999964331,
+        "dispatch_seconds": 0.05865449998964323,
+        "account_seconds": 0.04615589991590241,
+        "report_archive_seconds": 0.40924859994265717
+      },
+      "export_seconds": 0.6354183000003104,
+      "serialized_output_bytes": 12490783,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "C_DE_coal_scarcity_C0_S2",
+      "seconds": 1.9792229000013322,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.0748189002260915,
+        "planning_seconds": 0.6594289999848115,
+        "production_delivery_seconds": 0.1257533000825788,
+        "procurement_seconds": 0.6781834001521929,
+        "dispatch_seconds": 0.05018000009295065,
+        "account_seconds": 0.03201830007310491,
+        "report_archive_seconds": 0.35494790001393994
+      },
+      "export_seconds": 0.5326731000022846,
+      "serialized_output_bytes": 12121578,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "C_DE_coal_scarcity_C1_S2",
+      "seconds": 2.1154810000007274,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.08151259993610438,
+        "planning_seconds": 0.70708560001367,
+        "production_delivery_seconds": 0.12589800007845042,
+        "procurement_seconds": 0.7163335999139235,
+        "dispatch_seconds": 0.05848830012109829,
+        "account_seconds": 0.03455340004438767,
+        "report_archive_seconds": 0.38768190000700997
+      },
+      "export_seconds": 0.5571606999947107,
+      "serialized_output_bytes": 12601479,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "F_steel_scarcity_C0_S2",
+      "seconds": 2.477463200004422,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.0856065998741542,
+        "planning_seconds": 0.7857510999019723,
+        "production_delivery_seconds": 0.1740804000000935,
+        "procurement_seconds": 0.9620291000464931,
+        "dispatch_seconds": 0.05538460012758151,
+        "account_seconds": 0.042152000081841834,
+        "report_archive_seconds": 0.3681188000991824
+      },
+      "export_seconds": 0.6618391000010888,
+      "serialized_output_bytes": 13575523,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "F_steel_scarcity_C1_S2",
+      "seconds": 2.4671486000006553,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.08756409992201952,
+        "planning_seconds": 0.785337300010724,
+        "production_delivery_seconds": 0.17139370000222698,
+        "procurement_seconds": 0.9388118000060786,
+        "dispatch_seconds": 0.062251899973489344,
+        "account_seconds": 0.044619999920541886,
+        "report_archive_seconds": 0.37270980004541343
+      },
+      "export_seconds": 0.6993941999971867,
+      "serialized_output_bytes": 13912178,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "G_shutdown_C0_S2",
+      "seconds": 2.366585400006443,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.08381810006540036,
+        "planning_seconds": 0.8117231000724132,
+        "production_delivery_seconds": 0.1597627000155626,
+        "procurement_seconds": 0.8241074999314151,
+        "dispatch_seconds": 0.04577749998134095,
+        "account_seconds": 0.04050509993248852,
+        "report_archive_seconds": 0.3963242000027094
+      },
+      "export_seconds": 0.5753886999955284,
+      "serialized_output_bytes": 12317145,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "G_shutdown_C1_S2",
+      "seconds": 2.444750800001202,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.08689329999469919,
+        "planning_seconds": 0.8667560999965644,
+        "production_delivery_seconds": 0.1547657999471994,
+        "procurement_seconds": 0.8510446000145748,
+        "dispatch_seconds": 0.04650190012034727,
+        "account_seconds": 0.04139849997591227,
+        "report_archive_seconds": 0.39270349998696474
+      },
+      "export_seconds": 0.572834700004023,
+      "serialized_output_bytes": 12918420,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "H_asymmetric_lead_C0_S2",
+      "seconds": 2.860079999998561,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.08377689995541004,
+        "planning_seconds": 0.9374278000759659,
+        "production_delivery_seconds": 0.24865510009112768,
+        "procurement_seconds": 1.0490520000385004,
+        "dispatch_seconds": 0.04790150005283067,
+        "account_seconds": 0.05707390006136848,
+        "report_archive_seconds": 0.4315846000754391
+      },
+      "export_seconds": 0.5928147000013269,
+      "serialized_output_bytes": 13173178,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "H_asymmetric_lead_C1_S2",
+      "seconds": 2.7657197000007727,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.07573619997128844,
+        "planning_seconds": 0.950924899931124,
+        "production_delivery_seconds": 0.24098469992168248,
+        "procurement_seconds": 0.9810796000310802,
+        "dispatch_seconds": 0.04566120001982199,
+        "account_seconds": 0.05420249992312165,
+        "report_archive_seconds": 0.4130140000197571
+      },
+      "export_seconds": 0.5721757999999681,
+      "serialized_output_bytes": 13187875,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "I_asymmetric_demand_C0_S2",
+      "seconds": 1.7510379000013927,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.05922639997152146,
+        "planning_seconds": 0.6007628000152181,
+        "production_delivery_seconds": 0.11023979996389244,
+        "procurement_seconds": 0.5826415000628913,
+        "dispatch_seconds": 0.028335700058960356,
+        "account_seconds": 0.025011000063386746,
+        "report_archive_seconds": 0.3410241000674432
+      },
+      "export_seconds": 0.527239399998507,
+      "serialized_output_bytes": 11868022,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "I_asymmetric_demand_C1_S2",
+      "seconds": 1.9409433999971952,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.0743691000607214,
+        "planning_seconds": 0.6339377999247517,
+        "production_delivery_seconds": 0.11969369997677859,
+        "procurement_seconds": 0.7099789000567398,
+        "dispatch_seconds": 0.04992069997388171,
+        "account_seconds": 0.03137510003580246,
+        "report_archive_seconds": 0.3176702001292142
+      },
+      "export_seconds": 0.5616050000026007,
+      "serialized_output_bytes": 12005327,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "J_step_up_C0_S2",
+      "seconds": 2.502728899999056,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.08984669993515126,
+        "planning_seconds": 0.7979853999931947,
+        "production_delivery_seconds": 0.1788926999506657,
+        "procurement_seconds": 0.9119570999973803,
+        "dispatch_seconds": 0.056017399932898115,
+        "account_seconds": 0.044566899981873576,
+        "report_archive_seconds": 0.4190568999838433
+      },
+      "export_seconds": 0.6178618999983883,
+      "serialized_output_bytes": 13068493,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "J_step_up_C1_S2",
+      "seconds": 2.5266782000035164,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.0873404999365448,
+        "planning_seconds": 0.8419975999859162,
+        "production_delivery_seconds": 0.18337229997996474,
+        "procurement_seconds": 0.9060870000321302,
+        "dispatch_seconds": 0.05532819988002302,
+        "account_seconds": 0.0435391999053536,
+        "report_archive_seconds": 0.40386979992035776
+      },
+      "export_seconds": 0.5892951000059838,
+      "serialized_output_bytes": 12947271,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "K_recovery_C0_S2",
+      "seconds": 2.2042732999980217,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.07285089993820293,
+        "planning_seconds": 0.7981190999416867,
+        "production_delivery_seconds": 0.16154110001662048,
+        "procurement_seconds": 0.7374708000425017,
+        "dispatch_seconds": 0.04502140000113286,
+        "account_seconds": 0.038225600008445326,
+        "report_archive_seconds": 0.34676510009740014
+      },
+      "export_seconds": 0.5570748999962234,
+      "serialized_output_bytes": 12229978,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "K_recovery_C1_S2",
+      "seconds": 2.3074001999993925,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.0844744000933133,
+        "planning_seconds": 0.7617447000156972,
+        "production_delivery_seconds": 0.17150899997795932,
+        "procurement_seconds": 0.8421590000652941,
+        "dispatch_seconds": 0.04903430004924303,
+        "account_seconds": 0.04044300006353296,
+        "report_archive_seconds": 0.3535085000185063
+      },
+      "export_seconds": 0.5671134000003804,
+      "serialized_output_bytes": 12510379,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "M_bottleneck_C0_S2",
+      "seconds": 2.1046017999979085,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.07334460008132737,
+        "planning_seconds": 0.7295376998881693,
+        "production_delivery_seconds": 0.1427115998667432,
+        "procurement_seconds": 0.7363640999392373,
+        "dispatch_seconds": 0.03573169996525394,
+        "account_seconds": 0.03258050006115809,
+        "report_archive_seconds": 0.35019180006929673
+      },
+      "export_seconds": 0.603926900002989,
+      "serialized_output_bytes": 12809283,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "M_bottleneck_C1_S2",
+      "seconds": 2.106023799999093,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.07427630002348451,
+        "planning_seconds": 0.758537499983504,
+        "production_delivery_seconds": 0.1358476000095834,
+        "procurement_seconds": 0.7146177998947678,
+        "dispatch_seconds": 0.04655910002475139,
+        "account_seconds": 0.03380019996984629,
+        "report_archive_seconds": 0.3381269000383327
+      },
+      "export_seconds": 0.7626287000020966,
+      "serialized_output_bytes": 13052861,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "S1_C0",
+      "seconds": 1.0120106000031228,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.04861120002169628,
+        "planning_seconds": 0.3594895999485743,
+        "production_delivery_seconds": 0.07807659995887661,
+        "procurement_seconds": 0.28807310006232,
+        "dispatch_seconds": 0.02797209996788297,
+        "account_seconds": 0.022165599919389933,
+        "report_archive_seconds": 0.18400090000068303
+      },
+      "export_seconds": 0.26621809999778634,
+      "serialized_output_bytes": 5349847,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "S1_C1",
+      "seconds": 0.8574191000006977,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.038245199888478965,
+        "planning_seconds": 0.31006230004277313,
+        "production_delivery_seconds": 0.06136319996585371,
+        "procurement_seconds": 0.26054949993704213,
+        "dispatch_seconds": 0.022147300049255136,
+        "account_seconds": 0.017245299968635663,
+        "report_archive_seconds": 0.144964799968875
+      },
+      "export_seconds": 0.2290424999955576,
+      "serialized_output_bytes": 5349847,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "S5_C0",
+      "seconds": 8.237988700006099,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.23285829994711094,
+        "planning_seconds": 2.811747000174364,
+        "production_delivery_seconds": 0.47321490004105726,
+        "procurement_seconds": 3.1816605999410967,
+        "dispatch_seconds": 0.14090300002862932,
+        "account_seconds": 0.09710180005640723,
+        "report_archive_seconds": 1.292811100007384
+      },
+      "export_seconds": 2.1085106000027736,
+      "serialized_output_bytes": 48850550,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "S5_C1",
+      "seconds": 9.462868399998115,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.30461890011065407,
+        "planning_seconds": 2.7445068999004434,
+        "production_delivery_seconds": 0.5489237001165748,
+        "procurement_seconds": 4.181539100027294,
+        "dispatch_seconds": 0.2313242000163882,
+        "account_seconds": 0.13216589998773998,
+        "report_archive_seconds": 1.312234999932116
+      },
+      "export_seconds": 2.368459299999813,
+      "serialized_output_bytes": 54409178,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "S10_C0",
+      "seconds": 16.840777899997192,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.4201234999927692,
+        "planning_seconds": 5.5527830001447,
+        "production_delivery_seconds": 0.9632633999062818,
+        "procurement_seconds": 6.631743199868652,
+        "dispatch_seconds": 0.23732899995229673,
+        "account_seconds": 0.1781967998831533,
+        "report_archive_seconds": 2.844911500062153
+      },
+      "export_seconds": 4.24127390000649,
+      "serialized_output_bytes": 97880237,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    },
+    {
+      "case_id": "S10_C1",
+      "seconds": 21.14360289999604,
+      "phase_seconds": {
+        "receive_observations_seconds": 0.5931084998228471,
+        "planning_seconds": 6.02697260001878,
+        "production_delivery_seconds": 1.1378663999421406,
+        "procurement_seconds": 9.195304599947121,
+        "dispatch_seconds": 0.4456171999772778,
+        "account_seconds": 0.25600090001535136,
+        "report_archive_seconds": 3.4762546999991173
+      },
+      "export_seconds": 5.677846399994451,
+      "serialized_output_bytes": 108742397,
+      "scope": "construction/world/planning/settlement/observation archives, export separately; not SLA"
+    }
+  ],
+  "total_seconds": 99.5986810000104
+}

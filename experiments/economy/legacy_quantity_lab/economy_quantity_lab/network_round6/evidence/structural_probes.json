@@ -1,0 +1,41 @@
+{
+  "scope": "actual100-day shared network worlds; reversal and100 sleeping firms, not matching-only mocks",
+  "days": 100,
+  "outcome_equal": true,
+  "requests_equal": true,
+  "quotes_equal": true,
+  "normal_metrics": {
+    "route_settlement_visits": 808,
+    "world_ledger_firm_visits": 606,
+    "planning_firm_visits": 600,
+    "offer_queries": 1600,
+    "known_candidate_visits": 1600,
+    "visibility_offer_queries": 800,
+    "firm_settlement_visits": 600,
+    "matching_offer_queries": 800,
+    "contention_allocations": 431,
+    "live_supply_visits": 4796,
+    "procurement_rounds": 200,
+    "max_rounds": 2,
+    "active_order_peak": 13,
+    "active_shipment_peak": 13
+  },
+  "sleeping_metrics": {
+    "route_settlement_visits": 808,
+    "world_ledger_firm_visits": 10706,
+    "planning_firm_visits": 600,
+    "offer_queries": 1600,
+    "known_candidate_visits": 1600,
+    "visibility_offer_queries": 800,
+    "firm_settlement_visits": 600,
+    "matching_offer_queries": 800,
+    "contention_allocations": 431,
+    "live_supply_visits": 4796,
+    "procurement_rounds": 200,
+    "max_rounds": 2,
+    "active_order_peak": 13,
+    "active_shipment_peak": 13
+  },
+  "normal_firms": 6,
+  "sleeping_firms": 106
+}
