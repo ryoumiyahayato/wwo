@@ -222,10 +222,11 @@ def capture_view(host, view, scratch, directory, probes):
     deadline = time.monotonic()+6
     while not ready(state, view) and time.monotonic() < deadline:
         state = host.ask('status')['state']
-    frame = host.ask('capture', label='patrol', value='terrain-samples')
-    img = scratch/'patrol.png'
+    label = view['key']
+    frame = host.ask('capture', label=label, value='terrain-samples')
+    img = scratch/f'{label}.png'
     if png_size(img) != tuple(frame['state']['viewport']):
-        raise RuntimeError('Missing patrol capture from game')
+        raise OSError('Missing patrol capture from game')
     state = frame['state']
     terrain = state['terrain']
     sample = frame['extra']['terrain_samples']['samples'][0]['terrain']
@@ -235,7 +236,6 @@ def capture_view(host, view, scratch, directory, probes):
     rect_covered = (view_radius(view['rect']) <= 265*state['mpp']
                     and min(state['viewport']) >= 2*265)
     admitted = ready(state,view)
-    label = view['key']
     with Image.open(img) as image:
         image = image.convert('RGB')
         diagnostics = probes.review(image,state,admitted)
@@ -279,6 +279,7 @@ def patrol(args):
                 received[record['key']] = record['status'],record['image']
     views = [view for view in plan['views']
              if (args.z is None or view['z'] == args.z)
+             and (args.key is None or view['key'] in args.key)
              and (view['key'] not in received or
                   received[view['key']][0] != 'captured_review_pending' or
                   not (args.output/received[view['key']][1]).is_file())]
@@ -298,10 +299,13 @@ def patrol(args):
                     raise RuntimeError('Could not enter the normal game world')
             host.ask('key',value='g')
             for i,view in enumerate(views[:args.limit],1):
-                record = capture_view(host,view,scratch,args.output,probes)
+                try:
+                    record = capture_view(host,view,scratch,args.output,probes)
+                except (OSError, TimeoutError) as error:
+                    record = dict(key=view['key'],image=None,status='capture_failed',error=str(error))
                 output.write(json.dumps(record,ensure_ascii=False,separators=(',',':'))+'\n')
                 output.flush()
-                if i == 1 or i%50 == 0:
+                if i == 1 or i%50 == 0 or record['status'] == 'capture_failed':
                     print(i,view['key'],record['status'],flush=True)
 
 
@@ -321,6 +325,7 @@ def main():
     capture.add_argument('--profile',default='WWO-ShorelinePatrol')
     capture.add_argument('--limit',type=int)
     capture.add_argument('--z',type=int,choices=(4,5,6,7))
+    capture.add_argument('--key',action='append',help='Capture a specific view key, repeat for several views')
     capture.set_defaults(run=patrol)
     args = cli.parse_args()
     args.run(args)
