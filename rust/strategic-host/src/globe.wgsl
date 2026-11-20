@@ -851,24 +851,21 @@ fn raster_water(@builtin(global_invocation_id) id:vec3u) {
     water_output[id.y*size.x+id.x]=area;
 }
 
-fn parallel_water_area(ll:vec2f, xy:vec2f, across:vec2f) -> f32 {
-    let q=river_coordinates(xy+across*(70./EARTH));
-    let delta=q-ll;
-    let across_step=vec2f(delta.x-360.*round(delta.x/360.),delta.y);
-    let latitude_scale=max(.025,cos(radians(ll.y)));
-    let along=vec2f(-across_step.y/latitude_scale,across_step.x*latitude_scale)*(160./70.);
-    // A generalized centreline can wander off its observed channel. Hide a
-    // redundant symbol if that channel runs parallel on either side. A confluence
-    // on only one end stays connected to the mapped water.
+fn parallel_water_area(pixel:vec2f, across:vec2f) -> f32 {
+    let screen_per_metre=vec2f(1.,-view.chart_origin.z)/(view.viewport.z*EARTH);
+    let across_step=across*screen_per_metre*70.;
+    let along=vec2f(-across.y,across.x)*screen_per_metre*160.;
+    // Reuse the rendered coverage. Both ends must see the channel to avoid
+    // removing a tributary where it meets water on just one end.
     var coverage=0.;
     for (var i=1u;i<=8u;i++) {
         let offset=across_step*f32(i);
         for (var side=0u;side<2u;side++) {
-            let p=ll+select(offset,-offset,side==1u);
-            let center=water_area(p);
+            let p=pixel+select(offset,-offset,side==1u);
+            let center=screen_water(p);
             if (center&3u)!=3u {continue;}
-            let before=water_area(p-along);
-            let after=water_area(p+along);
+            let before=screen_water(p-along);
+            let after=screen_water(p+along);
             if (before&3u)!=3u || (after&3u)!=3u {continue;}
             coverage=max(coverage,min(water_weight(center),min(water_weight(before),water_weight(after))));
             if coverage>=.999 {return 1.;}
@@ -895,7 +892,7 @@ fn parallel_water_area(ll:vec2f, xy:vec2f, across:vec2f) -> f32 {
     // The coverage above already masks the visible overlap.
     let near=1.-smoothstep(290.,440.,view.viewport.z*EARTH);
     if area!=0u && near>0. && dot(direction,direction)>0. {
-        distinct=1.-near*parallel_water_area(ll,xy,normalize(direction));
+        distinct=1.-near*parallel_water_area(stroke.clip.xy,normalize(direction));
     }
     if distinct<=.001 {discard;}
     var surveyed=0.;

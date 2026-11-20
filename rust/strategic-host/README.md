@@ -80,7 +80,7 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 ## 全球地图验收
 
-无窗口验收使用正式 Vulkan/wgpu 地图管线。运行 `wwo-map-lab --terrain-review --data <运行数据目录> --observe <临时目录/map.json>`。默认读取该数据目录下的 `worldcrs84quad-15s-v2`。可通过 `--terrain-candidate <QPK库目录>` 指定候选库。`--terrain-level 0..7` 只打开并绘制指定层，缺页显示紫色。超过显存页预算时，响应中的 `exact_view_over_capacity` 标为真，可缩小取景范围。`--terrain-max-level 0..7` 限制自动 LOD 的最高层，并保留父级回退。严格观察单层替换时可另传 `--terrain-layer-candidate <候选.qpk>`，使用该库共享清单及河网资料，原 QPK 保留。
+无窗口验收使用正式 Vulkan/wgpu 地图管线。运行 `wwo-map-lab --terrain-review --data <运行数据目录> --observe <临时目录/map.json>`。底图库沿用正式入口的默认选择规则。可通过 `--terrain-candidate <QPK库目录>` 指定候选库。`--terrain-level 0..7` 只打开并绘制指定层，缺页显示紫色。超过显存页预算时，响应中的 `exact_view_over_capacity` 标为真，可缩小取景范围。`--terrain-max-level 0..7` 限制自动 LOD 的最高层，并保留父级回退。严格观察单层替换时可另传 `--terrain-layer-candidate <候选.qpk>`，使用该库共享清单及河网资料，原 QPK 保留。
 
 观察请求写入 `--observe` 指定的 JSON。每次使用新 `id`。`{"id":"pose-1","action":"focus","lon":11.25,"lat":46.4,"mpp":1000,"value":"north"}` 设置取景。`terrain-samples` 查询页表，`capture` 带 `label` 写入同目录 PNG，响应在 PNG 保存后写入。响应记录视口、投影、目标层、视图上限和九处像素中心的瓦片 ID 与混合权重。采样由 CPU 投影和实际提交的页表计算，贴近边界时可能与 GPU 投影有浮点差异。`selected_ready` 表示选中页全部上传，自动模式同时等待混合完成。`quit` 退出。该入口不打开游戏档案、不推进世界、不创建游戏窗口。
 
