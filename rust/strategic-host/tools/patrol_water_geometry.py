@@ -309,6 +309,42 @@ def patrol(args):
                     print(i,view['key'],record['status'],flush=True)
 
 
+def report(args):
+    plan = read(args.plan)
+    latest = {}
+    log = args.output/'patrol.jsonl'
+    if log.exists():
+        with log.open(encoding='utf-8') as records:
+            for line in records:
+                record = json.loads(line)
+                latest[record['key']] = record
+    counts = {z: Counter() for z in (4,5,6,7)}
+    flagged = []
+    for view in plan['views']:
+        key = view['key']
+        level = counts[view['z']]
+        level['planned'] += 1
+        record = latest.get(key)
+        if record is None:
+            level['not_captured'] += 1
+            continue
+        image = record['image']
+        if not image or not (args.output/image).is_file():
+            level['missing_image'] += 1
+            continue
+        level[record['status']] += 1
+        diagnostics = record.get('color_probes', {})
+        if record['status'] != 'captured_review_pending' or diagnostics.get('suspect'):
+            flagged.append(dict(view=view, image=image, status=record['status'],
+                                color_probes=diagnostics))
+        if diagnostics.get('status'):
+            level[diagnostics['status']] += 1
+    result = dict(counts=counts, flagged=flagged)
+    if args.report_file:
+        write(args.report_file,result)
+    print(json.dumps(counts,ensure_ascii=False,indent=2))
+
+
 def main():
     cli = argparse.ArgumentParser(description=__doc__)
     commands = cli.add_subparsers(required=True)
@@ -327,6 +363,11 @@ def main():
     capture.add_argument('--z',type=int,choices=(4,5,6,7))
     capture.add_argument('--key',action='append',help='Capture a specific view key, repeat for several views')
     capture.set_defaults(run=patrol)
+    summary = commands.add_parser('report', help='Count captured views and list gaps or suspect colors')
+    summary.add_argument('plan',type=Path)
+    summary.add_argument('output',type=Path)
+    summary.add_argument('--report-file',type=Path)
+    summary.set_defaults(run=report)
     args = cli.parse_args()
     args.run(args)
 
