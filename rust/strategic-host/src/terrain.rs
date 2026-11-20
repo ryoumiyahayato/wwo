@@ -76,7 +76,8 @@ impl Key {
 }
 
 pub struct Catalogue {pages:Vec<Key>, source:Source, max_level:u32, version:&'static str,
-    selection:LayerSelection, layer_candidate:Option<PathBuf>, cover_root:Option<PathBuf>, river_lines:Option<PathBuf>}
+    selection:LayerSelection, layer_candidate:Option<PathBuf>, cover_root:Option<PathBuf>,
+    river_lines:Option<PathBuf>, water_geometry:Option<PathBuf>}
 
 #[derive(Deserialize)]
 struct Manifest {
@@ -162,6 +163,7 @@ impl Catalogue {
             }
             let water_path=root.join("hydrology-color.qhw");
             let river_path=root.join("river-centrelines.qhl");
+            let geometry_path=root.join("water-geometry.qwg");
             let use_water=layer_candidate.is_none();
             let water=if use_water && water_path.is_file() {
                 if version!=COMPACT_VERSION || !river_path.is_file() {
@@ -169,16 +171,19 @@ impl Catalogue {
                 }
                 Some(WaterColors::open(&water_path,lengths)?)
             } else {None};
-            let river_lines=(use_water&&!selection.exact()&&selection.limit()>=6&&river_path.is_file()).then_some(river_path);
+            let river_lines=(use_water&&!selection.exact()&&selection.limit()>=4&&river_path.is_file()).then_some(river_path);
+            let water_geometry=(use_water&&!selection.exact()&&selection.limit()>=4
+                && version==COMPACT_VERSION&&geometry_path.is_file()).then_some(geometry_path);
             let source=if packed {Source::Packs(packs,water)} else {Source::Files(root.to_owned())};
             let cover_root=(version==COMPACT_VERSION && selection.limit()>=6
                 && CoverPack::FILE_NAMES.iter().any(|name|root.join(name).is_file())).then(||root.to_owned());
-            Ok(Self{pages,source,max_level:levels as u32-1,version,selection,layer_candidate,cover_root,river_lines})
+            Ok(Self{pages,source,max_level:levels as u32-1,version,selection,layer_candidate,cover_root,river_lines,water_geometry})
         };
         open().map_err(|error|io::Error::other(format!("无法读取自然地貌底图库。{} · {error}",path.display())))
     }
 
     pub fn river_lines(&self)->Option<&Path> {self.river_lines.as_deref()}
+    pub fn water_geometry(&self)->Option<&Path> {self.water_geometry.as_deref()}
 }
 
 enum Source {Files(PathBuf),Packs(Vec<Option<LevelPack>>,Option<WaterColors>)}

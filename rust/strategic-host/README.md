@@ -12,7 +12,15 @@
 
 候选高程沿用 GMT 的 SRTM15+ V2.1 全球 60 角秒网格。海底数据包含估算区，网格间距与测量精度分别记录。海岸、湖泊及冰川使用 Natural Earth 1:10m。HydroRIVERS v1.0 的河段和下游编号保存在 `river-topology.u32`，构建输入为 `HydroRIVERS_v10_shp.zip`。地表覆盖来自 ESA WorldCover 2021 v200。现代覆盖、水文和湖库作为参照，缺口见 `index.json`。[GMT](https://docs.generic-mapping-tools.org/6.2/datasets/remote-data.html) · [SRTM15+](https://doi.org/10.1029/2019EA000658) · [Natural Earth](https://www.naturalearthdata.com/about/terms-of-use/) · [HydroRIVERS](https://www.hydrosheds.org/products/hydrorivers) · [ESA WorldCover CC BY 4.0](https://doi.org/10.5281/zenodo.7254221)
 
-`river-centrelines.qhl` 按同一 HydroRIVERS 河段编号绘制地图线符号。水面覆盖取自地貌包和有效的近景测绘数据。旧版地貌包可用 `tools/build_natural_terrain.py --hydrology-candidate <现有QPK库> <地貌来源> <Natural Earth目录> <输出目录>` 生成 `hydrology-color.qhw` 和 `river-centrelines.qhl`。把两份文件放入对应的候选库，再用 `wwo-map-lab --play --terrain-candidate <候选库>` 启动。颜色补页复用原 QPK 页表和高程。WorldCover 永久水体保留生产库中已有的近景水域覆盖。中心线表示现代参考河网，线宽采用屏幕符号尺寸。
+`river-centrelines.qhl` 按 HydroRIVERS v1.0 河段编号绘制屏幕线符号。线符号没有水域面积或通航宽度。旧版地貌包可用 `tools/build_natural_terrain.py --hydrology-candidate <现有QPK库> <地貌来源> <Natural Earth目录> <输出目录>` 生成修正后的 `hydrology-color.qhw` 和 `river-centrelines.qhl`。修复按 Natural Earth 陆地和水域移除旧版河宽像素。WorldCover 用于恢复陆地色调。颜色补页复用原 QPK 页表和高程。
+
+`tools/build_natural_terrain.py --water-geometry <GSHHG全精度压缩包> <候选库>/water-geometry.qwg --measured-river-mask <GRWL_mask_V01.01.zip>` 生成独立 WGS84 页。岸线支持 GSHHG Shapefile 压缩包或 Basemap 的全精度数据 wheel。加入 Landsat 水域需 `pyproj` 和 `tifffile`。GSHHG 提供海岸、湖泊及嵌套岛屿。GRWL 的正值水面提供干流、潮汐水道和连通湖库，零值保留已有水域。已知河岸范围优先。`--documented-river-widths <GeoJSON>` 仅在无观测水面覆盖的河段按米制构造水面。输入中心线需包含 `half_width_metres`、`width_source` 和 `width_epoch`，归档时保留原始 GeoJSON。其余河段使用线符号。
+
+候选使用 Basemap 2.0.0 随包的 GSHHG 2.3.6 全精度几何和 GRWL v01.01 的 30 米 Landsat 平均流量水域掩膜。岸线和卫星观测均为现代参照。1900 年精确河岸及航道宽度仍待对应历史资料。GRWL 掩膜是中间产品，细小水道和潮滩边界精度取决于资料。[GSHHG](https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html) · [Basemap 数据及 LGPL-3.0-or-later](https://pypi.org/project/basemap-data-hires/) · [Allen 与 Pavelsky 2018](https://doi.org/10.1126/science.aat0636) · [GRWL v01.01，CC BY 4.0](https://doi.org/10.5281/zenodo.1297434)
+
+将三份文件置于原 QPK 的隔离候选库，用 `wwo-map-lab --play --terrain-candidate <候选库>` 运行。Z4 至 Z7 共享水陆位置。复杂几何按视野驻留，缺页和远景使用 QPK。视口投影为地表、城市和景观提供同一份水陆判断。有明确覆盖的历史调查图层优先。水面显示、水域轮廓和原河段拓扑可分别追溯。
+
+Z6 和 Z7 的地面材质独立于实例模型。用地分片可用时按地类及坡面混合材质。未知地类用中性土壤，待载地类页使用 QPK 色调和共用材质。观察模式可用 `{"id":"ground","action":"landscape-models","value":"hide"}` 只隐藏景观实例，`show` 恢复。
 
 © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium.
 

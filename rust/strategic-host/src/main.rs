@@ -166,6 +166,7 @@ struct Trial {
     movement:Option<([f64;2],[f64;2],u32,u32)>,
     window_position:Option<winit::dpi::PhysicalPosition<i32>>,
     terrain_capture:Option<(String,PathBuf)>,
+    hide_landscape_models:bool,
 }
 #[derive(Deserialize)]
 struct Observation {
@@ -1266,7 +1267,7 @@ impl Host {
             .or_else(||self.trial.terrain_capture.as_ref().map(|(_,path)|path)).map(PathBuf::as_path);
         let mut redraw=false;
         if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,
-            (&self.camera,landscape_enabled,now))? {
+            (&self.camera,landscape_enabled&&!self.trial.hide_landscape_models,now))? {
             let presented=Instant::now();
             self.last_present=presented;
             if self.trial.first.is_none(){self.trial.first=Some(ms(self.started));}
@@ -1408,6 +1409,10 @@ impl Host {
                         Err(error)=>serde_json::json!({"error":error.to_string()}),
                     };
                 }
+            }
+            "landscape-models" if matches!(input.value.as_str(),"show"|"hide")=>{
+                self.trial.hide_landscape_models=input.value=="hide";
+                self.dirty=true;
             }
             "timing"=>{
                 self.trial.timing=!self.trial.timing;self.trial.previous=None;
