@@ -29,7 +29,7 @@ from rasterio.warp import transform_bounds
 from rasterio.windows import Window
 from scipy.ndimage import gaussian_filter, label
 import shapefile
-from shapely import clip_by_rect, intersects_xy, make_valid, prepare, transform, union_all
+from shapely import clip_by_rect, intersects_xy, linestrings, make_valid, prepare, transform, union_all
 from shapely.affinity import translate
 from shapely.geometry import LineString, Polygon, box, shape
 from shapely.strtree import STRtree
@@ -55,6 +55,8 @@ TILE = 256
 GUTTER = 4
 MAX_LEVEL = 4
 RIVER_REACHES = 8_477_883
+RIVER_MAGIC = b"WWORIV01"
+RIVER_SEGMENT = np.dtype([("reach", "<u4"), ("coordinates", "<f4", (2, 2))])
 HEADER = Struct("<8sIII")
 COLOR_MAGIC = b"WWOQ3BC7"
 HEIGHT_MAGIC = b"WWOQ3I16"
@@ -320,7 +322,7 @@ def hydrography(source, output, scratch, *, recover_legacy=False):
 
 def write_river_lines(path, lines):
     with path.open("wb") as stream:
-        stream.write(b"WWORIV01")
+        stream.write(RIVER_MAGIC)
         for reach, line in lines:
             points = np.asarray(line.simplify(.00009).coords)
             for a, b in zip(points[:-1], points[1:]):
@@ -331,6 +333,52 @@ def write_river_lines(path, lines):
                 section = np.linspace(a,b,steps+1)
                 for start, end in zip(section[:-1],section[1:]):
                     stream.write(pack("<I4f",reach,*start,*end))
+
+
+def river_segment_on_ice(cover, segment):
+    start, end = segment.astype(np.float64)
+    # Sample at half the spacing of the reduced WorldCover grid.
+    count = max(3, 1+int(np.ceil(np.max(np.abs(end-start))*cover.span/1.5)))
+    lon, lat = np.linspace(start, end, count).T
+    columns = ((lon+180)*cover.span/3).astype(int) % (120*cover.span)
+    rows = np.clip(((90-lat)*cover.span/3).astype(int), 0, 60*cover.span-1)
+    for row, column in zip(rows, columns):
+        tile = cover.tiles.get((87-3*(row//cover.span), -180+3*(column//cover.span)))
+        if tile is None or cover.codes(tile)[row%cover.span, column%cover.span] != 70:
+            return False
+    return True
+
+
+def write_river_ice_candidate(original, worldcover, natural_earth, destination):
+    if destination.exists():
+        raise FileExistsError(destination)
+    cover = LandCover(worldcover, native=True)
+    shapes = physical_shapes(natural_earth, "glaciated_areas")
+    ice = STRtree([geometry if geometry.is_valid else make_valid(geometry) for geometry in shapes])
+    removed = 0
+    # Keep the complete hydrographic topology and any observed water in QWG.
+    # Remove only display segments on land ice confirmed by both modern sources.
+    with TemporaryDirectory(dir=destination.parent,prefix="river-ice-") as scratch:
+        staged = Path(scratch)/destination.name
+        with original.open("rb") as source, staged.open("wb") as stream:
+            if source.read(len(RIVER_MAGIC)) != RIVER_MAGIC:
+                raise ValueError("Invalid river centreline header")
+            size = os.fstat(source.fileno()).st_size-len(RIVER_MAGIC)
+            if size % RIVER_SEGMENT.itemsize:
+                raise ValueError("Truncated river centreline record")
+            stream.write(RIVER_MAGIC)
+            while payload := source.read(32768*RIVER_SEGMENT.itemsize):
+                block = np.frombuffer(payload, dtype=RIVER_SEGMENT)
+                coordinates = block["coordinates"]
+                inside = np.unique(ice.query(linestrings(coordinates), predicate="covered_by")[0])
+                keep = np.ones(len(block), dtype=bool)
+                for index in inside:
+                    if river_segment_on_ice(cover, coordinates[index]):
+                        keep[index] = False
+                        removed += 1
+                stream.write(block[keep].tobytes())
+        destination.hardlink_to(staged)
+    print(f"River display segments suppressed on land ice: {removed}/{size//RIVER_SEGMENT.itemsize}")
 
 
 def rasterize(tree, width, rect, *, samples=2, touched=False, interior=False):
@@ -2356,6 +2404,9 @@ def main():
     terrain_candidate.add_argument("--hydrology-candidate", type=Path, nargs=4,
                         metavar=("ORIGINAL", "SOURCES", "NATURAL_EARTH", "CANDIDATE"),
                         help="Repair legacy river coverage with sparse QPK colors and HydroRIVERS centrelines")
+    terrain_candidate.add_argument("--river-ice-candidate", type=Path, nargs=4,
+                        metavar=("ORIGINAL_QHL", "WORLDCOVER_CACHE", "NATURAL_EARTH", "CANDIDATE_QHL"),
+                        help="Suppress display-only river segments on confirmed land ice")
     terrain_candidate.add_argument("--river-outlet-candidate", type=Path, nargs=4,
                         metavar=("ORIGINAL_QPK", "OUTLETS_GEOJSON", "NATURAL_EARTH", "CANDIDATE_QPK"),
                         help="Build a complete Z7 QPK with documented river outlet connections")
@@ -2380,6 +2431,9 @@ def main():
     parser.add_argument("natural_earth",type=Path,nargs="?")
     parser.add_argument("output",type=Path,nargs="?")
     args = parser.parse_args()
+    if args.river_ice_candidate is not None:
+        write_river_ice_candidate(*args.river_ice_candidate)
+        return
     if args.shoreline_ponds is not None and args.water_geometry is None:
         parser.error("--shoreline-ponds requires --water-geometry")
     if args.measured_river_mask is not None and args.water_geometry is None:
