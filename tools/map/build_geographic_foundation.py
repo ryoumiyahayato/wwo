@@ -151,12 +151,16 @@ def independent_foundation(out, with_ink=False):
  write(out/'index.json',index)
  print(json.dumps({'physical_shards':sum(1+len(p['medium_regions']) for p in parents),'physical_source':src['source_id'],'political_ink_optional':with_ink,'bytes':sum(p.stat().st_size for p in out.glob('physical_*') if p.is_file())}),flush=True)
 def main():
- parser=argparse.ArgumentParser();parser.add_argument('--apply',action='store_true');parser.add_argument('--output',type=Path);parser.add_argument('--independent',action='store_true',help='Generate only the independent physical foundation');parser.add_argument('--political-ink',action='store_true');parser.add_argument('--compile-display',action='store_true',help='Compile existing physical/ink derivatives with the native Godot encoder, without rebuilding GIS');parser.add_argument('--godot',type=Path);args=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('--apply',action='store_true');parser.add_argument('--output',type=Path);parser.add_argument('--independent',action='store_true',help='Generate only the independent physical foundation');parser.add_argument('--political-ink',action='store_true');parser.add_argument('--compile-display',action='store_true',help='Compile existing physical/ink derivatives with the native Godot encoder, without rebuilding GIS');parser.add_argument('--godot',type=Path);parser.add_argument('--r68-project',type=Path,default=ROOT,help='Restored R68 source checkout for --compile-display');args=parser.parse_args()
  if args.apply and args.output:parser.error('--apply and --output are mutually exclusive')
  out=args.output or (ROOT/'data/strategic' if args.apply else WORK/'candidate');out.mkdir(parents=True,exist_ok=True)
  if args.compile_display:
   if not args.godot or not args.godot.is_file():parser.error('--compile-display requires --godot pointing to the Godot 4.6.3 console')
-  subprocess.run([str(args.godot),'--headless','--path',str(ROOT),'--script','res://tools/map/compile_political_display.gd','--',str(out.resolve())],cwd=ROOT,check=True)
+  project = args.r68_project.resolve()
+  compiler = project / 'tools/map/compile_political_display.gd'
+  if not (project / 'project.godot').is_file() or not compiler.is_file():
+   parser.error('--compile-display requires --r68-project pointing to the archived R68 source checkout')
+  subprocess.run([str(args.godot.resolve()),'--headless','--path',str(project),'--script','res://tools/map/compile_political_display.gd','--',str(out.resolve())],cwd=project,check=True)
   return
  if args.independent:
   independent_foundation(out,args.political_ink);return

@@ -1,6 +1,6 @@
 # WWO Rust Windows 游戏
 
-`wwo-map-lab` 是当前原生 Windows 游戏入口。在此目录用 `cargo build --release --locked --bin wwo-map-lab --bin wwo-formal-state` 构建。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。阶段归档包含 `WWO-Country-Records.exe`、Z7 候选 EXE 和运行数据，恢复步骤见 [仓库 README](../../README.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。用 Pillow 执行 `python tools/build_hud.py <R68 项目> <游戏数据目录>` 可更新界面字形。
+`wwo-map-lab` 是当前原生 Windows 游戏入口。在此目录用 `cargo build --release --locked --bin wwo-map-lab --bin wwo-formal-state` 构建。双击 EXE 或传入 `--play` 开始游戏。EXE 旁需要战略地图的 `data/`。`--data`、`--observe` 和 `--background` 均沿用正式入口。阶段归档包含 `WWO-Country-Records.exe`、Z7 候选 EXE 和运行数据，恢复步骤见 [仓库 README](../../README.md#构建与恢复)。旧地图的独立对照使用 `--map-comparison --data <旧地图目录>`。界面字形更新使用归档项目和 Pillow，运行 `python tools/build_hud.py <R68 项目> <游戏数据目录>`。
 
 正式入口从 `data/maps/regional-2026-11-14/` 读取领土、旗纹和原有专题地图数据。用 `python tools/package_map_release.py <保留的 2026-11-14 区域地图数据目录> <游戏数据目录>` 发布这部分资源。正式入口会检查目录、旗纹资料和地图分片版本，版本不符或缺失时会报告错误。
 
@@ -17,6 +17,8 @@
 `tools/build_natural_terrain.py --water-geometry <GSHHG全精度压缩包> <候选库>/water-geometry.qwg --measured-river-mask <GRWL_mask_V01.01.zip>` 生成独立 WGS84 页。岸线支持 GSHHG Shapefile 压缩包或 Basemap 的全精度数据 wheel。加入 Landsat 水域需 `pyproj` 和 `tifffile`。GSHHG 提供海岸、湖泊及嵌套岛屿。GRWL 的正值水面提供干流、潮汐水道和连通湖库，零值保留已有水域。已知河岸范围优先。`--documented-river-widths <GeoJSON>` 仅在无观测水面覆盖的河段按米制构造水面。输入中心线需包含 `half_width_metres`、`width_source` 和 `width_epoch`，归档时保留原始 GeoJSON。其余河段使用线符号。局部重算使用 `--water-pages-from <现有QWG>` 和一个或多个 `--water-page X Y`，其余页面从现有包复制。
 
 候选使用 Basemap 2.0.0 随包的 GSHHG 2.3.6 全精度几何和 GRWL v01.01 的 30 米 Landsat 平均流量水域掩膜。岸线和卫星观测均为现代参照。1900 年精确河岸及航道宽度仍待对应历史资料。GRWL 掩膜是中间产品，细小水道和潮滩边界精度取决于资料。[GSHHG](https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html) · [Basemap 数据及 LGPL-3.0-or-later](https://pypi.org/project/basemap-data-hires/) · [Allen 与 Pavelsky 2018](https://doi.org/10.1126/science.aat0636) · [GRWL v01.01，CC BY 4.0](https://doi.org/10.5281/zenodo.1297434)
+
+## 正式水文资源
 
 正式入口优先读取 `data/worldcrs84quad-15s-v2-hydrology/`，否则读取可用的旧库。在水文目录内恢复下列文件。QHW 按各层 QPK 大小核对配套版本。完整恢复后用 `wwo-map-lab --play` 启动。显式 `--terrain-candidate <候选库>` 仍可指定对照版本。
 
@@ -113,4 +115,6 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 正式构建交付后，用独立档案确认启动、世界推进、地图切换和重启读档。保留当前发布、必要回退及对应数据，清理本次已退出的观察会话、重复打包和可再生构建输出。地貌构建的临时母栅格用于续建，只有当前预定层级生成并核验后才清理。移除已合并的临时工作树前，核对 `main`、远程引用、未提交和未跟踪文件，再用 `git worktree remove`。R68 和未合并的独立工作线保留原工程与资产。
 
-传入 `--r68` 可进入原有 R68 对照模式。该模式使用原有存档目录和 EXE 旁的两个 `tools/formal_*_bridge.gd`。通过 `WWO_R68_PROJECT` 和 `WWO_GODOT_EXE` 指定对照项目和 Godot 4.6.3。原生大厅只读写原生槽。维护工具 `wwo-formal-state` 可读取原版法国 v15 存档的部分领域。
+## R68 对照
+
+按 [R68 源码恢复步骤](../../README.md#恢复-r68-源码) 获取旧项目。传入 `--r68` 可进入 R68 对照模式。该模式使用原有存档目录。将本目录 `tools/` 下的两个 `formal_*_bridge.gd` 放到 EXE 旁的 `tools/` 目录。通过 `WWO_R68_PROJECT` 和 `WWO_GODOT_EXE` 指定对照项目和 Godot 4.6.3。原生大厅只读写原生槽。维护工具 `wwo-formal-state` 可读取原版法国 v15 存档的部分领域。
