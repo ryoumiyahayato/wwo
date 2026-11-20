@@ -203,6 +203,23 @@ def ready(state, view):
             and at_camera(state, view['lon'], view['lat'], view['mpp']))
 
 
+def project_grid(lon, lat, orientation, mpp):
+    lon, lat = np.broadcast_arrays(np.radians(lon), np.radians(lat))
+    cosine = np.cos(lat)
+    vectors = np.stack((np.sin(lon)*cosine, np.sin(lat), np.cos(lon)*cosine), axis=-1)
+    east, north, up = (vectors @ np.asarray(orientation).T).T
+    across = np.hypot(east, north)
+    scale = np.arctan2(across, up)/np.maximum(across, 1e-15)*EARTH/mpp
+    return np.stack((WIDTH/2+east*scale, HEIGHT/2-north*scale), axis=-1)
+
+
+def clear_color_class(colors):
+    r, g, b = colors.T
+    blue = (b > g+4) & (g > r+11) & (r < .82*b)
+    ground = (g > b+7) | (r > b+9)
+    return np.select((blue, ground), (2, 1))
+
+
 class WaterProbes:
     def __init__(self, source):
         self.source = source
@@ -268,6 +285,49 @@ class WaterProbes:
                     suspect.append([x,y,'expected_water' if water else 'expected_land'])
         return dict(status='check_suspect_pixels' if suspect else 'no_clear_sample_mismatch',
                     counts=compared,suspect=suspect)
+
+    def seams(self, image, state, rect):
+        if state['viewport'] != [WIDTH, HEIGHT] or abs(state['pitch_degrees']) > 1e-5:
+            return None
+        w, s, e, n = rect
+        axes, mpp = state['orientation'], state['mpp']
+        colors = np.asarray(image.convert('RGB'), dtype=np.int16)
+        step = WATER_STEP/WATER_GRID
+        suspects = []
+        # Compare both sides of each projected QWG cell edge. Ignore real shorelines
+        # in the reference and look for a sustained color change across the same surface.
+        for axis, low, high, start, end, origin in ((0,w,e,s,n,-180), (1,s,n,w,e,-90)):
+            offset = np.array([4, 0] if axis == 0 else [0, 4])
+            for index in range(math.ceil((low-origin)/step), math.floor((high-origin)/step)+1):
+                edge = origin+index*step
+                endpoints = (edge, [start, end]) if axis == 0 else ([start, end], edge)
+                first, last = project_grid(*endpoints, axes, mpp)
+                count = 1+min(512, math.ceil(np.linalg.norm(last-first)/7))
+                along = np.linspace(start, end, count)
+                line = (edge, along) if axis == 0 else (along, edge)
+                points = np.rint(project_grid(*line, axes, mpp)).astype(int)
+                x, y = points.T
+                points = points[(x >= 150) & (x < 1130) & (y >= 92) & (y < 616)]
+                left, right = points-offset, points+offset
+                actual_left = clear_color_class(colors[left[:,1], left[:,0]])
+                actual_right = clear_color_class(colors[right[:,1], right[:,0]])
+                changed = (actual_left > 0) & (actual_right > 0) & (actual_left != actual_right)
+                previous, run = -2, []
+                for i in np.flatnonzero(changed):
+                    px, py = left[i]+.5
+                    qx, qy = right[i]+.5
+                    left_water = self.area(*geographic(px, py, axes, mpp, 0)) > 1
+                    right_water = self.area(*geographic(qx, qy, axes, mpp, 0)) > 1
+                    if left_water != right_water:
+                        continue
+                    if i != previous+1:
+                        run = []
+                    run.append(points[i].tolist())
+                    previous = i
+                    if len(run) == 4:
+                        suspects.append({'grid': 'lon' if axis == 0 else 'lat',
+                                         'degree': edge, 'pixels': [run[0], run[-1]]})
+        return suspects
 
 
 def capture_view(host, view, scratch, directory, probes):
@@ -431,6 +491,28 @@ def report(args):
         if coverage:
             level[coverage] += 1
     result = dict(counts=counts, flagged=flagged)
+    if args.inspect_seams:
+        result['seam_flags'] = []
+        with Path(plan['qwg']).open('rb') as source:
+            probes = WaterProbes(source)
+            for view in plan['views']:
+                z = view['z']
+                if args.z is not None and z not in args.z:
+                    continue
+                record = latest.get(view['key'])
+                if record is None or record['status'] != 'captured_review_pending':
+                    continue
+                image_path = args.output/record['image']
+                if not image_path.is_file():
+                    continue
+                with Image.open(image_path) as image:
+                    suspects = probes.seams(image, record['state'], view['rect'])
+                if suspects is None:
+                    continue
+                counts[z]['seam_screens_checked'] += 1
+                if suspects:
+                    counts[z]['suspect_seam_screens'] += 1
+                    result['seam_flags'].append(dict(view=view,image=record['image'],seams=suspects))
     if args.report_file:
         write(args.report_file,result)
     print(json.dumps(counts,ensure_ascii=False,indent=2))
@@ -463,6 +545,8 @@ def main():
     summary.add_argument('output',type=Path)
     summary.add_argument('--report-file',type=Path)
     summary.add_argument('--z',type=int,choices=(4,5,6,7),action='append')
+    summary.add_argument('--inspect-seams',action='store_true',
+                         help='Look for sustained water/land color changes along QWG cell edges')
     summary.set_defaults(run=report)
     args = cli.parse_args()
     args.run(args)
