@@ -1,3 +1,0 @@
-LABEL_AND_QUERY_ONLY.
-Greenland and Antarctica: exact exterior/holes from existing admitted modern physical source ne_10m_land_v512.geojson, feature 0, MultiPolygon components 32 and 0. Natural Earth public domain. The annotation geometry is used for picking only; it is never submitted as another land or political surface.
-Eritrea and French Somaliland: pointers to admitted CShapes gw_531/gw_522 geometry. Display annotation only while the dated association is unresolved. Political-unit dates, historical national flags, runtime world entities and save schema are unchanged.
