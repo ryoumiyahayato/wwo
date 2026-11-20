@@ -258,40 +258,50 @@ def read(path):
 
 
 class Observer:
-    def __init__(self, args, work):
+    def __init__(self, args, work, *, play=False):
         self.request = work / 'map.json'
         self.response = work / 'map.response.json'
         self.log = (work / 'observer.log').open('ab')
-        command = [
-            str(args.exe), '--terrain-review', '--terrain-level', '7',
-            '--data', str(args.data), '--terrain-candidate', str(args.terrain_candidate),
-            '--observe', str(self.request),
-        ]
+        self.play = play
+        mode = ['--play', '--background'] if play else ['--terrain-review', '--terrain-level', '7']
+        command = [str(args.exe), *mode, '--observe', str(self.request)]
+        if args.data is not None:
+            command.extend(['--data', str(args.data)])
+        if args.terrain_candidate is not None:
+            command.extend(['--terrain-candidate', str(args.terrain_candidate)])
         try:
             self.process = subprocess.Popen(
                 command, stdout=self.log, stderr=self.log,
-                env={**os.environ, 'WWO_RUST_PROFILE': 'Z7PageReview-' + uuid.uuid4().hex[:12]},
+                cwd=args.exe.resolve().parent if play else None,
+                env={**os.environ, 'WWO_RUST_PROFILE': args.profile if play else
+                     'Z7PageReview-' + uuid.uuid4().hex[:12]},
                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
             )
         except OSError:
             self.log.close()
             raise
 
-    def ask(self, action, timeout=25, **parameters):
-        request_id = uuid.uuid4().hex
-        write(self.request, dict(id=request_id, action=action, **parameters))
+    def ask(self, action, timeout=25, *, refresh=False, **parameters):
+        requests = set()
+        sent = float('-inf')
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             if self.process.poll() is not None:
                 raise RuntimeError(f'Rust observer stopped, see {self.log.name}')
+            now = time.monotonic()
+            if not requests or refresh and now-sent >= .45:
+                request_id = uuid.uuid4().hex
+                requests.add(request_id)
+                write(self.request, dict(id=request_id, action=action, **parameters))
+                sent = now
             try:
                 response = read(self.response)
             except (OSError, ValueError):
                 response = {}
-            if response.get('id') == request_id:
+            if response.get('id') in requests:
                 window = response['state']['window']
-                if not window['offscreen'] or window['focused']:
-                    raise RuntimeError('Expected an offscreen observer without focus')
+                if window['offscreen'] == self.play or window['focused']:
+                    raise RuntimeError('Observer render mode or window focus changed')
                 return response
             time.sleep(0.025)
         raise TimeoutError(f'Rust observer timed out on {action}')

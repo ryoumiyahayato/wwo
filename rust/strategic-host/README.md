@@ -18,6 +18,10 @@
 
 候选使用 Basemap 2.0.0 随包的 GSHHG 2.3.6 全精度几何和 GRWL v01.01 的 30 米 Landsat 平均流量水域掩膜。岸线和卫星观测均为现代参照。1900 年精确河岸及航道宽度仍待对应历史资料。GRWL 掩膜是中间产品，细小水道和潮滩边界精度取决于资料。[GSHHG](https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html) · [Basemap 数据及 LGPL-3.0-or-later](https://pypi.org/project/basemap-data-hires/) · [Allen 与 Pavelsky 2018](https://doi.org/10.1126/science.aat0636) · [GRWL v01.01，CC BY 4.0](https://doi.org/10.5281/zenodo.1297434)
 
+全局核查时为生成命令传入完整来源，再加 `--water-pages-from <现有QWG> --audit-water-pages <变更记录.jsonl>`。工具逐页计算当前水陆分类输入，保留等价的旧页。记录列出变化的小格和整格水陆类别变更。Basemap 2.0.0 的全精度包缺少湖中岛内池塘。使用该 wheel 时加 `--shoreline-ponds <GSHHG Shapefile 压缩包>` 补充官方第 4 层。主数据已有第 4 层时沿用主数据。
+
+`tools/patrol_water_geometry.py index <岸线压缩包> <QWG> <巡视索引.json>` 将 GSHHG 岸段和 QWG 内陆水面编入 Z4–Z7 视图。复杂岸段使用更近的取景。若构建时补充了第 4 层，索引使用同一份 `--shoreline-ponds`。`tools/patrol_water_geometry.py capture <wwo-map-lab.exe> <巡视索引.json> <输出目录>` 从正式游戏逐个取景，可用 `--z` 和 `--limit` 分批运行。记录包含相机、地貌实际层级、QWG 驻留和颜色探查。颜色探查标记近景中疑似反色的采样点。巡视状态还需依据海陆边缘、过渡画面和来源精度核查。
+
 ## 正式水文资源
 
 正式入口优先读取 `data/worldcrs84quad-15s-v2-hydrology/`，否则读取可用的旧库。在水文目录内恢复下列文件。QHW 按各层 QPK 大小核对配套版本。完整恢复后用 `wwo-map-lab --play` 启动。显式 `--terrain-candidate <候选库>` 仍可指定对照版本。
