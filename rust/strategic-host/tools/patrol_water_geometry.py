@@ -466,14 +466,24 @@ def patrol(args):
 def report(args):
     plan = read(args.plan)
     latest = {}
-    log = args.output/'patrol.jsonl'
-    if log.exists():
+    for directory in (args.output, *args.include):
+        log = directory/'patrol.jsonl'
+        if not log.exists():
+            continue
         with log.open(encoding='utf-8') as records:
             for line in records:
                 if not line.endswith('\n'):
                     break
                 record = json.loads(line)
-                latest[record['key']] = record
+                key = record['key']
+                image = record['image']
+                path = directory/image if image is not None else None
+                previous = latest.get(key)
+                if (previous is not None and previous[0]['status'] == 'captured_review_pending'
+                        and previous[1] is not None and previous[1].is_file()
+                        and (record['status'] != 'captured_review_pending' or path is None or not path.is_file())):
+                    continue
+                latest[key] = record, path
     counts = {z: Counter() for z in (4,5,6,7)}
     flagged = []
     for view in plan['views']:
@@ -484,12 +494,12 @@ def report(args):
         members = len(view['members']) if 'members' in view else 1
         level['planned'] += 1
         level['planned_regions'] += members
-        record = latest.get(key)
-        if record is None:
+        capture = latest.get(key)
+        if capture is None:
             level['not_captured'] += 1
             continue
-        image = record['image']
-        if not image or not (args.output/image).is_file():
+        record, image = capture
+        if image is None or not image.is_file():
             level['missing_image'] += 1
             continue
         level[record['status']] += 1
@@ -499,7 +509,7 @@ def report(args):
         coverage = record.get('water_coverage')
         if (record['status'] != 'captured_review_pending' or diagnostics.get('suspect')
                 or coverage in ('qpk_for_missing_qwg_pages','water_budget_unknown')):
-            flagged.append(dict(view=view, image=image, status=record['status'],
+            flagged.append(dict(view=view, image=str(image), status=record['status'],
                                 water_coverage=coverage,color_probes=diagnostics))
         if diagnostics.get('status'):
             level[diagnostics['status']] += 1
@@ -514,11 +524,12 @@ def report(args):
                 z = view['z']
                 if args.z is not None and z not in args.z:
                     continue
-                record = latest.get(view['key'])
-                if record is None or record['status'] != 'captured_review_pending':
+                capture = latest.get(view['key'])
+                if capture is None:
                     continue
-                image_path = args.output/record['image']
-                if not image_path.is_file():
+                record, image_path = capture
+                if (record['status'] != 'captured_review_pending' or image_path is None
+                        or not image_path.is_file()):
                     continue
                 with Image.open(image_path) as image:
                     suspects = probes.seams(image, record['state'], view['rect'])
@@ -527,7 +538,7 @@ def report(args):
                 counts[z]['seam_screens_checked'] += 1
                 if suspects:
                     counts[z]['suspect_seam_screens'] += 1
-                    result['seam_flags'].append(dict(view=view,image=record['image'],seams=suspects))
+                    result['seam_flags'].append(dict(view=view,image=str(image_path),seams=suspects))
     if args.report_file:
         write(args.report_file,result)
     print(json.dumps(counts,ensure_ascii=False,indent=2))
@@ -560,6 +571,8 @@ def main():
     summary.add_argument('output',type=Path)
     summary.add_argument('--report-file',type=Path)
     summary.add_argument('--z',type=int,choices=(4,5,6,7),action='append')
+    summary.add_argument('--include',type=Path,action='append',default=[],
+                         help='Read receipts from another patrol batch')
     summary.add_argument('--inspect-seams',action='store_true',
                          help='Look for sustained water/land color changes along QWG cell edges')
     summary.set_defaults(run=report)
