@@ -919,6 +919,7 @@ impl Renderer {
                 status["water_geometry_view_wanted"]=wanted[1].into();
                 status["water_geometry_view_missing_outside_budget"]=water.missing_view_pages_outside_budget().into();
                 status["water_geometry_buffer_bytes"]=self.surface.water.size().into();
+                status["water_geometry_handoff_active"]=water.handoff_active().into();
                 status["water_viewport_buffer_bytes"]=self.surface.water_pixels.size().into();
             }
             status

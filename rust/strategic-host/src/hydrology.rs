@@ -217,6 +217,32 @@ impl WaterPages {
     ) {
         if camera.mpp < WATER_PREFETCH_MPP {
             self.select(camera, size, now);
+            // A page prefetched outside the viewport has stamp 0. Start its
+            // normal handoff when it first enters the visible footprint,
+            // rather than exposing a hard rectangular water/land transition.
+            let stamp = self.tick(now);
+            let mut activated = false;
+            for &(i, visible) in &self.desired {
+                if !visible {
+                    continue;
+                }
+                let key = self.pages[i].index;
+                if let Some(page) = self.resident.get_mut(&key) {
+                    if page.words[0] == 0 && stamp != 0 {
+                        page.words[0] = stamp;
+                        queue.write_buffer(
+                            buffer,
+                            u64::from(self.table[key]) * 4,
+                            bytemuck::bytes_of(&stamp),
+                        );
+                        activated = true;
+                    }
+                }
+            }
+            if activated {
+                self.revision += 1;
+                self.handoff_until = now + HANDOFF;
+            }
         } else {
             self.selection = None;
             self.previous_view = None;
@@ -237,8 +263,8 @@ impl WaterPages {
                             .iter()
                             .any(|&(i, visible)| visible && self.pages[i].index == key);
                         touches_view |= visible;
-                        // A page prefetched off screen is authoritative on its first appearance.
-                        // Keep completed reads even if the player reversed direction meanwhile.
+                        // Keep off-screen prefetches resident after a reversal.
+                        // Their handoff stamp starts when the page first becomes visible.
                         words[0] = if visible { stamp } else { 0 };
                         Some((key, words))
                     }
@@ -298,26 +324,6 @@ impl WaterPages {
         let radius = camera.extent(size, offset + WATER_PREFETCH);
         let slack = (camera.mpp * 48. / EARTH).cos();
         let ahead_slack = (camera.mpp * 110. / EARTH).cos();
-        let roll_slack = (48. / center[0].hypot(center[1]).max(48.)).cos();
-        if self.selection.as_ref().is_some_and(|previous| {
-            previous.size == size
-                && dot(previous.center, axis) >= slack
-                && dot(previous.ahead, ahead) >= ahead_slack
-                && dot(previous.east, axes[0]) >= roll_slack
-                && (radius - previous.radius).abs() <= camera.mpp * 40. / EARTH
-                && (previous.mpp / camera.mpp - 1.).abs() <= 0.10
-        }) {
-            return;
-        }
-        self.selection = Some(WaterSelection {
-            center: axis,
-            ahead,
-            east: axes[0],
-            radius,
-            mpp: camera.mpp,
-            size,
-        });
-        self.selection_number += 1;
         let pixel_scale = EARTH / camera.mpp;
         let pitch = camera.pitch().cos();
         let regional = camera.blend() > 0.;
@@ -341,6 +347,33 @@ impl WaterPages {
             let outside = outside_x.max(outside_y);
             if outside <= 0. { 2 } else if outside <= WATER_VIEW_MARGIN { 1 } else { 0 }
         };
+        let roll_slack = (48. / center[0].hypot(center[1]).max(48.)).cos();
+        if self.selection.as_ref().is_some_and(|previous| {
+            previous.size == size
+                && dot(previous.center, axis) >= slack
+                && dot(previous.ahead, ahead) >= ahead_slack
+                && dot(previous.east, axes[0]) >= roll_slack
+                && (radius - previous.radius).abs() <= camera.mpp * 40. / EARTH
+                && (previous.mpp / camera.mpp - 1.).abs() <= 0.10
+        }) {
+            // Camera movement inside the selection slack can still expose a
+            // prefetched page. Refresh visibility without a global reselect.
+            for (i, visible) in &mut self.desired {
+                let page = &self.pages[*i];
+                *visible = dot(axis, page.axis) >= (view_radius + page.radius).cos()
+                    && screen_priority(page) > 0;
+            }
+            return;
+        }
+        self.selection = Some(WaterSelection {
+            center: axis,
+            ahead,
+            east: axes[0],
+            radius,
+            mpp: camera.mpp,
+            size,
+        });
+        self.selection_number += 1;
         let mut nearby: Vec<_> = self
             .pages
             .iter()
@@ -458,7 +491,11 @@ impl WaterPages {
     }
 
     pub fn pending(&self) -> bool {
-        self.inflight || Instant::now() < self.handoff_until
+        self.inflight || self.handoff_active()
+    }
+
+    pub fn handoff_active(&self) -> bool {
+        Instant::now() < self.handoff_until
     }
 
     pub fn status(&self) -> ([usize; 2], [usize; 2]) {

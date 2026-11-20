@@ -19,6 +19,9 @@ from build_natural_terrain import (WATER_COLUMNS, WATER_GRID, WATER_ROWS,
 from capture_z7_pages import (EARTH, WIDTH, HEIGHT, Observer, at_camera, bounds, dot, geographic,
                               png_size, read, vector, write)
 
+CAPTURED_VIEWS = ('captured_review_pending', 'captured_with_water_fallback')
+FALLBACK_COVERAGE = ('qpk_for_missing_qwg_pages', 'water_budget_unknown')
+
 
 def shore_sections(source, ponds):
     levels = []
@@ -208,13 +211,15 @@ def build_plan(args):
     print(dict(sorted(Counter(view['z'] for view in result).items())), flush=True)
 
 
-def ready(state, view):
+def ready(state, view, *, require_full_qwg=False):
     terrain = state.get('terrain')
     if not terrain or not terrain['selected_ready'] or state['mode'] != 'geographic':
         return False
-    return (terrain['water_geometry_buffer_bytes'] > 0
-            and (state['mpp'] >= 4200
-                 or terrain['water_geometry_view_resident'] == terrain['water_geometry_view_wanted'])
+    water_ready = (state['mpp'] >= 4200
+                   or (terrain['water_geometry_view_resident'] == terrain['water_geometry_view_wanted']
+                       and not terrain.get('water_geometry_handoff_active', False)
+                       and (not require_full_qwg or terrain.get('water_geometry_view_missing_outside_budget') == 0)))
+    return (terrain['water_geometry_buffer_bytes'] > 0 and water_ready
             and at_camera(state, view['lon'], view['lat'], view['mpp']))
 
 
@@ -411,13 +416,16 @@ def capture_view(host, view, scratch, directory, probes):
         diagnostics = probes.review(image,state,admitted and water_coverage == 'qwg',wide)
         image.save(directory/f'{label}.jpg', quality=82)
     img.unlink()
+    status = 'capture_has_fallback_or_gap'
+    if admitted and rect_covered and level_confirmed:
+        status = ('captured_review_pending' if ready(state,view,require_full_qwg=True)
+                  else 'captured_with_water_fallback')
     return dict(key=label, image=f'{label}.jpg', state=state,
                 samples=frame['extra']['terrain_samples']['samples'],
                 rect_covered=admitted and rect_covered, level_confirmed=level_confirmed,
                 water_coverage=water_coverage,
                 color_probes=diagnostics,
-                status=('captured_review_pending' if admitted and rect_covered and level_confirmed
-                        else 'capture_has_fallback_or_gap'))
+                status=status)
 
 
 def patrol(args):
@@ -452,7 +460,7 @@ def patrol(args):
              if (args.z is None or view['z'] in args.z)
              and (args.key is None or view['key'] in args.key)
              and (view['key'] not in received or
-                  received[view['key']][0] != 'captured_review_pending' or
+                  received[view['key']][0] not in CAPTURED_VIEWS or
                   not (args.output/received[view['key']][1]).is_file())]
     if not views:
         return
@@ -493,13 +501,16 @@ def report(args):
                 if not line.endswith('\n'):
                     break
                 record = json.loads(line)
+                if (record['status'] == 'captured_review_pending'
+                        and record.get('water_coverage') in FALLBACK_COVERAGE):
+                    record['status'] = 'captured_with_water_fallback'
                 key = record['key']
                 image = record['image']
                 path = directory/image if image is not None else None
                 previous = latest.get(key)
-                if (previous is not None and previous[0]['status'] == 'captured_review_pending'
+                if (previous is not None and previous[0]['status'] in CAPTURED_VIEWS
                         and previous[1] is not None and previous[1].is_file()
-                        and (record['status'] != 'captured_review_pending' or path is None or not path.is_file())):
+                        and (record['status'] not in CAPTURED_VIEWS or path is None or not path.is_file())):
                     continue
                 latest[key] = record, path
     counts = {z: Counter() for z in (4,5,6,7)}
@@ -529,13 +540,13 @@ def report(args):
             level['missing_image'] += 1
             continue
         level[record['status']] += 1
-        if record['status'] == 'captured_review_pending':
+        if record['status'] in CAPTURED_VIEWS:
             level['regions_in_view'] += members
         diagnostics = record.get('color_probes', {})
         coverage = record.get('water_coverage')
         if (record['status'] != 'captured_review_pending' or diagnostics.get('suspect')
                 or diagnostics.get('mixed_boundary')
-                or coverage in ('qpk_for_missing_qwg_pages','water_budget_unknown')):
+                or coverage in FALLBACK_COVERAGE):
             flagged.append(dict(view=view, image=str(image), status=record['status'],
                                 water_coverage=coverage,color_probes=diagnostics))
         if diagnostics.get('status'):
@@ -555,7 +566,7 @@ def report(args):
                 if capture is None:
                     continue
                 record, image_path = capture
-                if (record['status'] != 'captured_review_pending' or image_path is None
+                if (record['status'] not in CAPTURED_VIEWS or image_path is None
                         or not image_path.is_file()):
                     continue
                 with Image.open(image_path) as image:
