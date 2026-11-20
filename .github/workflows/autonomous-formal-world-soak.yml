@@ -19,7 +19,7 @@ jobs:
       - name: Checkout exact head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.ref == 'refs/heads/main' && 'refs/tags/archive/godot-r68-source-20261120' || github.sha }}
 
       - name: Verify exact validation head
         shell: pwsh

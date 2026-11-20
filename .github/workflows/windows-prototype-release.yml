@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: refs/tags/archive/godot-r68-source-20261120
 
       - name: Install Godot 4.6.3
         shell: pwsh
@@ -125,7 +125,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: refs/tags/archive/godot-r68-source-20261120
 
       - name: Download validated Windows export
         uses: actions/download-artifact@v4
@@ -261,6 +261,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.publish_draft
         uses: ncipollo/release-action@v1
         with:
+          commit: e5ad57d882e33debc367b1f5154948e888ef3c2a
           tag: manual-candidate-${{ github.run_id }}
           name: WWO manual candidate ${{ github.run_id }}
           draft: true
@@ -272,4 +273,4 @@ jobs:
           body: |
             明确手动请求的草稿候选安装包；不覆盖既有Release或附件，不代表实机验收或promote。
             安装标识固定；再次安装会覆盖旧版本，不建立新的存档体系。
-            对应提交：${{ github.sha }}
+            对应源码归档：archive/godot-r68-source-20261120

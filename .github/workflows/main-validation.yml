@@ -57,101 +57,14 @@ jobs:
           tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
           "$RUNNER_TEMP/actionlint" -shellcheck= -pyflakes=
 
-  formal-regressions:
-    name: Formal economy and person
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      GODOT_BIN: ${{ github.workspace }}/work/ci-godot/Godot_v4.6.3-stable_linux.x86_64
-      XDG_CONFIG_HOME: ${{ github.workspace }}/work/wwo-config
-      XDG_CACHE_HOME: ${{ github.workspace }}/work/wwo-cache
-      XDG_DATA_HOME: ${{ github.workspace }}/work/wwo-import-user
+  rust-windows:
+    name: Build Rust Windows game
+    runs-on: windows-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install pinned Godot
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$(dirname "$GODOT_BIN")" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_DATA_HOME"
-          curl --fail --location --retry 3 \
-            https://github.com/godotengine/godot-builds/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip \
-            --output "$RUNNER_TEMP/godot.zip"
-          unzip -q "$RUNNER_TEMP/godot.zip" -d "$(dirname "$GODOT_BIN")"
-          chmod +x "$GODOT_BIN"
-          test "$("$GODOT_BIN" --version)" = '4.6.3.stable.official.7d41c59c4'
-      - name: Import source and run bounded existing regressions
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import os, pathlib, re, shutil, subprocess
-          logs = pathlib.Path('work/main-ci-logs')
-          logs.mkdir(parents=True, exist_ok=True)
-          engine = os.environ['GODOT_BIN']
-          common = [engine, '--headless', '--audio-driver', 'Dummy', '--path', '.']
-          engine_errors = re.compile(
-              r'SCRIPT ERROR|Parse Error|Failed to load|Failed loading resource|'
-              r'Cannot load resource|Error loading resource|No loader found|'
-              r'Cannot instantiate script|Failed to instantiate|Could not resolve class|'
-              r'Could not find type|Cannot get class|Invalid call|Invalid get index|'
-              r'Assertion failed|Resource file not found', re.I)
-          def run(name, args, env, is_test):
-              log = logs / (name + '.log')
-              try:
-                  with log.open('w') as output:
-                      result = subprocess.run(common + args, env=env, stdout=output,
-                                              stderr=subprocess.STDOUT, timeout=240)
-              finally:
-                  text = log.read_text()
-                  print(text, flush=True)
-              if result.returncode or engine_errors.search(text):
-                  raise SystemExit(name + ': process or engine error')
-              if not is_test:
-                  if re.search(r'^ERROR:', text, re.M):
-                      raise SystemExit(name + ': import error')
-                  return
-              summaries = re.findall(r'^.*?:\s*(\d+)\s+checks,\s*(\d+)\s+failures\s*$', text, re.M)
-              # Same negative-test contract as tools/run_validation.ps1:
-              # expected business rejections may push_error; engine errors never pass.
-              if (not summaries or int(summaries[-1][0]) <= 0
-                      or any(int(failures) for _, failures in summaries)
-                      or 'FAIL:' in text):
-                  raise SystemExit(name + ': missing or failing test completion')
-          run('import', ['--editor', '--quit'], dict(os.environ), False)
-          script = 'res://tests/formal/formal_personal_economy_test.gd'
-          for name, option in [('personal', None), ('two-employers', '--native-multi-employer'),
-                               ('material-trade', '--native-material-trade')]:
-              user = pathlib.Path(os.environ['RUNNER_TEMP']) / ('wwo-' + name)
-              user.mkdir(parents=True, exist_ok=True)
-              env = dict(os.environ, XDG_DATA_HOME=str(user), APPDATA=str(user))
-              if option == '--native-material-trade':
-                  # Real archived pre-mandate save; no generated stand-in or full resource restore.
-                  fixture = pathlib.Path('docs/archive/main-wwo-r57-g21-20261024/checkpoints/30day-main.json')
-                  target = user / 'WWO_R57_Visual_Living_UI_20261023/formal_world_1900_manual_3.json'
-                  target.parent.mkdir(parents=True, exist_ok=True)
-                  shutil.copyfile(fixture, target)
-              args = ['--script', script] + (['--', option] if option else [])
-              run(name, args, env, True)
-          PY
-      - name: Summarize results without artifact storage
-        if: always()
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import os, pathlib, re
-          rows = ['## Existing formal regression results', '',
-                  'Full diagnostics remain in this job log; no artifact upload is required.', '',
-                  '| Suite | Checks | Failures |', '|---|---|---|']
-          for name in ['personal', 'two-employers', 'material-trade']:
-              path = pathlib.Path('work/main-ci-logs') / (name + '.log')
-              text = path.read_text() if path.exists() else ''
-              matches = re.findall(r'^.*?:\s*(\d+)\s+checks,\s*(\d+)\s+failures\s*$', text, re.M)
-              cells = matches[-1] if matches else ('NOT COMPLETED', 'See failed execution step')
-              rows.append('| ' + name + ' | ' + ' | '.join(cells) + ' |')
-          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
-              output.write('\n'.join(rows) + '\n')
-          PY
+      - name: Build the formal game and state tool
+        working-directory: rust/strategic-host
+        run: cargo +stable build --release --locked --bin wwo-map-lab --bin wwo-formal-state

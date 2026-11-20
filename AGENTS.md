@@ -32,16 +32,16 @@
 ## GitHub 开发基线
 
 - 唯一正式开发基线为 `main`；一个任务一个短期分支或PR，经必要检查和审查后进入main。
-- 每完成一个可运行、可验证的阶段，先做本地局部验证，再提交并推送源码、配置、测试及报告。有 PR 时等必要检查通过后合入 `main`，及时退出短期分支。
+- 每完成一个可运行、可验证的阶段，先做本地局部验证，在同一轮提交并推送源码、配置、测试及报告，核对远端分支提交。施工中的改动留在对应开发分支。有 PR 时等必要检查通过后合入 `main`，及时退出短期分支。
 - 大型地图、模型、必要原件、重要证据及预留发布包使用私有资源包或 Release 附件，登记版本、来源、对应提交及完整性信息。排除真实玩家存档、凭据、私人资料、可重建缓存及重复副本。
 - 合入后实际核对远端 `main`、构建输入、开发报告和附件。从远端下载到独立目录复核阶段恢复，报告提交 ID、资源状态、已验证范围和仅在本机的文件。完成同步和恢复验证前，成果保持未完整交付。
-- 普通PR使用 `Main validation` 的轻量检查和有界正式领域回归；旧完整流程保持手动。资料缺失、跳过或未运行不可写为通过。
+- 普通 PR 使用 `Main validation` 的源码检查和 Windows Rust 构建。旧 Godot 流程保持手动，默认读取 R68 源码归档。资料缺失、跳过或未运行不可写为通过。
 - 按用户授权核验 Windows 构建和私有阶段归档。普通 PR 不自动导出安装包。正式发布或提升候选由用户决定。历史候选按固定提交与私有附件恢复。
 - 军事、经济及独立研究保持隔离，不自动合并、删除或移植策略。不建立永久主线副本。
 
 ## 构建产物保留
 
-- 内部预览统一使用`tools/build_preview.ps1 build --version R数字`。禁止另建手工导出候选目录；该入口完成技术校验、候选登记和自动清退。没有正式运行输入变化时不重导出。
+- 历史 Godot 内部预览在归档工作树使用`tools/build_preview.ps1 build --version R数字`。禁止另建手工导出候选目录；该入口完成技术校验、候选登记和自动清退。没有正式运行输入变化时不重导出。
 - 用户明确通过实机验收后，使用同入口的`promote R数字 --acceptance "用户确认内容" --execute`提升版本并清退旧普通回退。不得把技术导出成功当作实机验收。
 - `tools/build/preview_policy.json`与`builds/preview_registry.json`管理保护和候选状态。R57未验收前保留R56。正式Release、R19/R30、原始来源、许可证和未知资料不进入清理范围。
 - 地貌制作通过带输入/输出元数据的增量recipe执行。R50—R57脚本默认复用现有目录；明确重制才传`--rebuild`或`--refresh`并声明临时预算。不得为普通预览重新下载原始资料。
@@ -55,13 +55,13 @@
 
 当前 Windows 正式入口是 [`rust/strategic-host`](rust/strategic-host/README.md) 的 `wwo-map-lab --play`。启动、世界模拟、地图和原生存档的模块归属见 [Rust 宿主运行核实](docs/RUST_HOST_RUNTIME_REVIEW.md)。全球地图验收按 [七大洲抽样规程](rust/strategic-host/README.md#全球地图验收) 执行。
 
-旧 Godot 4.6.3 项目保留作 R68 对照、迁移来源和局部回归，其入口为 `scenes/formal/formal_world_menu.tscn` → `scenes/formal/formal_world_main.tscn`。`FormalWorldApplication` 的旧版说明见 `docs/ARCHITECTURE.md` 与 `docs/UI_INFORMATION_ARCHITECTURE.md`。不恢复旧 FormalWorldSimulation、EconomyService、组件注册表、启动版本互锁或核验入口。
+旧 Godot 4.6.3 项目在 [R68 源码归档](https://github.com/ryoumiyahayato/wwo/tree/archive/godot-r68-source-20261120) 保留作对照、迁移来源和局部回归。恢复步骤见 [README](README.md#恢复-r68-源码)。旧入口为 `scenes/formal/formal_world_menu.tscn` → `scenes/formal/formal_world_main.tscn`。`FormalWorldApplication` 的旧版说明见 `docs/ARCHITECTURE.md` 与 `docs/UI_INFORMATION_ARCHITECTURE.md`。不恢复旧 FormalWorldSimulation、EconomyService、组件注册表、启动版本互锁或核验入口。
 
 经济以补齐和整合为主。军事优先恢复已有连续战场并研究 Rust 原生 3D 接入。开工前核对 [Rust 沙盒迁移基线](docs/RUST_SANDBOX_MIGRATION_BASELINE.md) 的既有实现、来源和待接入范围。
 
 ## 实现约束
 
-- UTF-8 与强类型 GDScript。单个组件承担原有职责。
+- 使用 UTF-8。单个组件承担原有职责。
 - 界面显示并发出请求，计算留在现有领域实现，世界事实保存在原有状态中。
 - 地图选择不修改人物、国籍、所在地或控制对象。只有明确定位才移动视角。
 - 人物账务读取现有 Ledger 与 PersonalEconomy，页面刷新不分配现金或结算工资。
