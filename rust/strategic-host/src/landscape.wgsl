@@ -184,9 +184,11 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
     if near > .001 {
         let relief_world = world*(1.+height/EARTH)+vec3f(motif.a,motif.g,motif.b)*.00027;
         let grains = land_material_band(relief_world,planes,mpp,2630.) - .5;
+        let grit = mix(grains.g,grains.a,.5+sediment.x*.45);
         let texture = grains.r*(land.forest*.40+land.shrub*.25)
             + grains.g*(land.grass*.13+land.damp*.31+land.crop*.23)
             + grains.a*(land.crop*.38+scree*.25)
+            + grit*(land.bare*.17+neutral*.13+land.grass*.05)
             + (sediment.x*.10+sediment.y*.22)*land.grass
             + grains.b*(exposed*.91+scree*.37+land.urban*.20)
             + grains.a*(land.snow*.11+land.urban*.24)

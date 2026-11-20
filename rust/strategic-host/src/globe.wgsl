@@ -447,7 +447,7 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     }
     if footprint<102. {
         let fine=land_material_band(earth,planes,footprint,2150.)-.5;
-        relief+=dot(fine,solid*vec4f(.18,.12,.28,0.))*(1.-smoothstep(38.,102.,footprint));
+        relief+=dot(fine,solid*vec4f(.18,.12,.28,.12))*(1.-smoothstep(38.,102.,footprint));
     }
     return clamp(base*(1.+relief*land),vec3f(0.),vec3f(1.));
 }
