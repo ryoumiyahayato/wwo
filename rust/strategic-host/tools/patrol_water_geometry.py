@@ -214,9 +214,12 @@ class WaterProbes:
 
 
 def capture_view(host, view, scratch, directory, probes):
-    host.ask('focus', lon=view['lon'], lat=view['lat'], mpp=view['mpp'], value='north')
+    camera = dict(lon=view['lon'],lat=view['lat'],mpp=view['mpp'],value='north')
+    state = host.ask('focus',**camera)['state']
+    if abs(state['pitch_degrees']) > 1e-6:
+        host.ask('key',value='v')
+        state = host.ask('focus',**camera)['state']
     deadline = time.monotonic()+6
-    state = host.ask('status')['state']
     while not ready(state, view) and time.monotonic() < deadline:
         state = host.ask('status')['state']
     frame = host.ask('capture', label='patrol', value='terrain-samples')
@@ -270,14 +273,15 @@ def patrol(args):
         write(binding, inventory)
     received = {}
     if log.exists():
-        for line in log.read_text(encoding='utf-8').splitlines():
-            record = json.loads(line)
-            received[record['key']] = record
+        with log.open(encoding='utf-8') as records:
+            for line in records:
+                record = json.loads(line)
+                received[record['key']] = record['status'],record['image']
     views = [view for view in plan['views']
              if (args.z is None or view['z'] == args.z)
              and (view['key'] not in received or
-                  received[view['key']]['status'] != 'captured_review_pending' or
-                  not (args.output/received[view['key']]['image']).is_file())]
+                  received[view['key']][0] != 'captured_review_pending' or
+                  not (args.output/received[view['key']][1]).is_file())]
     if not views:
         return
     # PNGs live only until the corresponding persistent review image is written.
@@ -293,8 +297,6 @@ def patrol(args):
                 if time.monotonic() >= deadline:
                     raise RuntimeError('Could not enter the normal game world')
             host.ask('key',value='g')
-            if abs(host.ask('status')['state']['pitch_degrees']) > 1e-6:
-                host.ask('key',value='v')
             for i,view in enumerate(views[:args.limit],1):
                 record = capture_view(host,view,scratch,args.output,probes)
                 output.write(json.dumps(record,ensure_ascii=False,separators=(',',':'))+'\n')
