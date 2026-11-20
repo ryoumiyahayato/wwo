@@ -1,0 +1,112 @@
+{
+  "archive": "WWO_Economy_Goal_Cycle02_Source_Restore.zip",
+  "bundle_explicit_prerequisite": "93633b4321dc288bd14b064350cc7fb053529bae",
+  "bundle_recovered_HEAD": "f8c2915894b9a99deb147414a1f7ee18486d200f",
+  "bytes": 5859120,
+  "commands": [
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stderr": "",
+      "stdout": "f8c2915894b9a99deb147414a1f7ee18486d200f\n"
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "git",
+        "fsck",
+        "--full"
+      ],
+      "exit": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "git",
+        "bundle",
+        "verify",
+        "/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi/handoff/economy-goal-cycle02.bundle"
+      ],
+      "exit": 0,
+      "stderr": "/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi/handoff/economy-goal-cycle02.bundle is okay\n",
+      "stdout": "The bundle contains this ref:\nf8c2915894b9a99deb147414a1f7ee18486d200f HEAD\nThe bundle requires this ref:\n93633b4321dc288bd14b064350cc7fb053529bae \nThe bundle uses this hash algorithm: sha1\n"
+    },
+    {
+      "command": [
+        "git",
+        "checkout",
+        "--detach",
+        "93633b4321dc288bd14b064350cc7fb053529bae"
+      ],
+      "exit": 0,
+      "stderr": "HEAD is now at 93633b4 Record completed local export checks and precise continuation state\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi/handoff/economy-goal-cycle02.patch"
+      ],
+      "exit": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "git",
+        "checkout",
+        "research/economy-goal-cycle-02"
+      ],
+      "exit": 0,
+      "stderr": "Previous HEAD position was 93633b4 Record completed local export checks and precise continuation state\nSwitched to branch 'research/economy-goal-cycle-02'\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stderr": "",
+      "stdout": "f8c2915894b9a99deb147414a1f7ee18486d200f\n"
+    },
+    {
+      "command": [
+        "python",
+        "verify_goal_cycle01.py",
+        "--correctness-only"
+      ],
+      "exit": 0,
+      "stderr": "",
+      "stdout": "new_correctness_tests: ['/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python', '-m', 'unittest', 'discover', '-s', '.', '-p', 'test_cycle.py', '-v']\nnew_correctness_tests: passed\nlog_corruptions: ['/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python', '/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi/source/economy_quantity_lab/goal_cycle01/corruption_probes.py', '--output-dir', '/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi/source/.local/goal-cycle01/final-verification-tysj_bjr/corruptions']\nlog_corruptions: passed\n{\n  \"status\": \"PASS\",\n  \"checks\": [\n    {\n      \"name\": \"new_correctness_tests\",\n      \"command\": [\n        \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python\",\n        \"-m\",\n        \"unittest\",\n        \"discover\",\n        \"-s\",\n        \".\",\n        \"-p\",\n        \"test_cycle.py\",\n        \"-v\"\n      ],\n      \"cwd\": \"/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi/source/economy_quantity_lab/goal_cycle01\",\n      \"exit_code\": 0,\n      \"elapsed_seconds\": 13.862385742999322,\n      \"test_count\": 42\n    },\n    {\n      \"name\": \"log_corruptions\",\n      \"command\": [\n        \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python\",\n        \"/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi/source/economy_quantity_lab/goal_cycle01/corruption_probes.py\",\n        \"--output-dir\",\n        \"/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi/source/.local/goal-cycle01/final-verification-tysj_bjr/corruptions\"\n      ],\n      \"cwd\": \"/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi/source\",\n      \"exit_code\": 0,\n      \"elapsed_seconds\": 0.23767061800026568\n    }\n  ],\n  \"run_directory\": \"/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi/source/.local/goal-cycle01/final-verification-tysj_bjr\",\n  \"elapsed_seconds\": 14.10046013900137\n}\n"
+    }
+  ],
+  "correctness_only_exit": 0,
+  "final_sealed_HEAD": "f8c2915894b9a99deb147414a1f7ee18486d200f",
+  "git_and_handoff_members": 550,
+  "patch_apply_check_from_cycle01": true,
+  "restored_source_delta_files": 51,
+  "sha256": "885668981df71846514a94173141acdb58df68efd7d77b9261f05626b561f707",
+  "source_fsck": true,
+  "source_restore_temp": "/workspace/scratch/4f9820a941fc/cycle02-source-restore-vvbdlczi",
+  "status": "PASS",
+  "tracked_source_files": 508,
+  "verified_member_sha256": 1058
+}

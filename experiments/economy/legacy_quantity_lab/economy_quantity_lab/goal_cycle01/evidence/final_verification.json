@@ -1,0 +1,191 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "new_correctness_tests",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        ".",
+        "-p",
+        "test_cycle.py",
+        "-v"
+      ],
+      "cwd": "/workspace/wwo-economy-lab/economy_quantity_lab/goal_cycle01",
+      "exit_code": 0,
+      "elapsed_seconds": 23.313576552999848,
+      "test_count": 42
+    },
+    {
+      "name": "log_corruptions",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/economy_quantity_lab/goal_cycle01/corruption_probes.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/corruptions"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 0.28388017299994317
+    },
+    {
+      "name": "historical_baseline",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/verify_baseline.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical",
+        "--strict-bytes"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 10.179213591999996
+    },
+    {
+      "name": "historical_round3",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/verify_round3.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 13.959294243000159
+    },
+    {
+      "name": "historical_round4a",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/verify_round4a.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 8.944392923000123
+    },
+    {
+      "name": "historical_round4b",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/verify_round4b.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 20.04945417199997
+    },
+    {
+      "name": "historical_round4c",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/verify_round4c.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 34.32434093100005
+    },
+    {
+      "name": "historical_round5",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/verify_round5.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 172.60699357800013
+    },
+    {
+      "name": "historical_round5b",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/verify_round5b.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 348.0243999869999
+    },
+    {
+      "name": "historical_round6_tests",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_multi_firm.py"
+      ],
+      "cwd": "/workspace/wwo-economy-lab/economy_quantity_lab/network_round6",
+      "exit_code": 0,
+      "elapsed_seconds": 20.961781659999815,
+      "test_count": 50
+    },
+    {
+      "name": "historical_round6_economics",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/economy_quantity_lab/network_round6/run_multi_firm_experiment.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/round6_economics",
+        "--execution-log",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/round6_execution.json"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 133.4082715919999
+    },
+    {
+      "name": "replay_a",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/economy_quantity_lab/goal_cycle01/run_cycle.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/replay_a"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 675.338234024
+    },
+    {
+      "name": "replay_b",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/economy_quantity_lab/goal_cycle01/run_cycle.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/replay_b"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 741.5399971659999
+    }
+  ],
+  "run_directory": "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd",
+  "round6_source_delta": {
+    "status": "PASS",
+    "changed_sources": {
+      "economy_quantity_lab/network_round6/network_simulation.py": {
+        "old": "0f8697142c7d1a966102d9e2fc81adfe1632c3ef550ba14d3762a5e1212613d7",
+        "new": "7cc5e177d7e41ecc8b3b26d9389c83722422cc7d57ed803709ae5dfa952560ba"
+      }
+    },
+    "policy": "Only explicitly authorized hook source differs. Original economic golden outputs/file set unchanged. Original strict verifier remains unchanged and reports this provenance delta."
+  },
+  "round6_economic_files_matched": 370,
+  "formal_replays": {
+    "cases_each": 50,
+    "days_each": 66000,
+    "matched_files": 353,
+    "economic_manifest_sha256": "852447e45bfabac966ff1789962deb745cf08cbda418b69ca8d791997e19c9ba"
+  },
+  "elapsed_seconds": 2203.702137446
+}

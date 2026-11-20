@@ -1,0 +1,840 @@
+[
+  {
+    "case_id": "normal_C1_S2",
+    "reason": "N0 retains original quantity checks; no payment trace",
+    "status": "NOT_APPLICABLE"
+  },
+  {
+    "case_id": "normal_S2_N1_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 17308,
+    "live_orders": 9,
+    "orders": 2581,
+    "shipments": 2581,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "normal_S2_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 22137,
+    "live_orders": 12,
+    "orders": 3794,
+    "shipments": 3794,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "normal_S2_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 19350,
+    "live_orders": 12,
+    "orders": 3053,
+    "shipments": 3053,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "coal_scarcity_C1_S2",
+    "reason": "N0 retains original quantity checks; no payment trace",
+    "status": "NOT_APPLICABLE"
+  },
+  {
+    "case_id": "coal_scarcity_S2_N1_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 20970,
+    "live_orders": 8,
+    "orders": 3598,
+    "shipments": 3598,
+    "status": "PASS",
+    "total_money": 97470400
+  },
+  {
+    "case_id": "coal_scarcity_S2_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 20970,
+    "live_orders": 8,
+    "orders": 3598,
+    "shipments": 3598,
+    "status": "PASS",
+    "total_money": 97470400
+  },
+  {
+    "case_id": "coal_scarcity_S2_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 20970,
+    "live_orders": 8,
+    "orders": 3598,
+    "shipments": 3598,
+    "status": "PASS",
+    "total_money": 97470400
+  },
+  {
+    "case_id": "steel_scarcity_C1_S2",
+    "reason": "N0 retains original quantity checks; no payment trace",
+    "status": "NOT_APPLICABLE"
+  },
+  {
+    "case_id": "steel_scarcity_S2_N1_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 20962,
+    "live_orders": 12,
+    "orders": 3598,
+    "shipments": 3598,
+    "status": "PASS",
+    "total_money": 75318400
+  },
+  {
+    "case_id": "steel_scarcity_S2_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 20962,
+    "live_orders": 12,
+    "orders": 3598,
+    "shipments": 3598,
+    "status": "PASS",
+    "total_money": 75318400
+  },
+  {
+    "case_id": "steel_scarcity_S2_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 20962,
+    "live_orders": 12,
+    "orders": 3598,
+    "shipments": 3598,
+    "status": "PASS",
+    "total_money": 75318400
+  },
+  {
+    "case_id": "asymmetric_demand_C1_S2",
+    "reason": "N0 retains original quantity checks; no payment trace",
+    "status": "NOT_APPLICABLE"
+  },
+  {
+    "case_id": "asymmetric_demand_S2_N1_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 19198,
+    "live_orders": 8,
+    "orders": 3155,
+    "shipments": 3155,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "asymmetric_demand_S2_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 19214,
+    "live_orders": 8,
+    "orders": 3159,
+    "shipments": 3159,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "asymmetric_demand_S2_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 19214,
+    "live_orders": 8,
+    "orders": 3159,
+    "shipments": 3159,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "step_up_C1_S2",
+    "reason": "N0 retains original quantity checks; no payment trace",
+    "status": "NOT_APPLICABLE"
+  },
+  {
+    "case_id": "step_up_S2_N1_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 19187,
+    "live_orders": 12,
+    "orders": 3015,
+    "shipments": 3015,
+    "status": "PASS",
+    "total_money": 96270400
+  },
+  {
+    "case_id": "step_up_S2_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 25607,
+    "live_orders": 16,
+    "orders": 4622,
+    "shipments": 4622,
+    "status": "PASS",
+    "total_money": 96270400
+  },
+  {
+    "case_id": "step_up_S2_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 19434,
+    "live_orders": 12,
+    "orders": 3074,
+    "shipments": 3074,
+    "status": "PASS",
+    "total_money": 96270400
+  },
+  {
+    "case_id": "asymmetric_lead_C1_S2",
+    "reason": "N0 retains original quantity checks; no payment trace",
+    "status": "NOT_APPLICABLE"
+  },
+  {
+    "case_id": "asymmetric_lead_S2_N1_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 15922,
+    "live_orders": 22,
+    "orders": 2469,
+    "shipments": 2483,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "asymmetric_lead_S2_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 15923,
+    "live_orders": 22,
+    "orders": 2470,
+    "shipments": 2483,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "asymmetric_lead_S2_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 15923,
+    "live_orders": 22,
+    "orders": 2470,
+    "shipments": 2483,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "recovery_C1_S2",
+    "reason": "N0 retains original quantity checks; no payment trace",
+    "status": "NOT_APPLICABLE"
+  },
+  {
+    "case_id": "recovery_S2_N1_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 17369,
+    "live_orders": 9,
+    "orders": 2603,
+    "shipments": 2603,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "recovery_S2_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 22137,
+    "live_orders": 12,
+    "orders": 3794,
+    "shipments": 3794,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "recovery_S2_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 18810,
+    "live_orders": 11,
+    "orders": 2944,
+    "shipments": 2944,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "shutdown_C1_S2",
+    "reason": "N0 retains original quantity checks; no payment trace",
+    "status": "NOT_APPLICABLE"
+  },
+  {
+    "case_id": "shutdown_S2_N1_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 13394,
+    "live_orders": 6,
+    "orders": 1938,
+    "shipments": 1938,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "shutdown_S2_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 14163,
+    "live_orders": 6,
+    "orders": 2131,
+    "shipments": 2131,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "shutdown_S2_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 13881,
+    "live_orders": 6,
+    "orders": 2057,
+    "shipments": 2057,
+    "status": "PASS",
+    "total_money": 90270400
+  },
+  {
+    "case_id": "normal_S2_N2_nonbinding_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 133137,
+    "live_orders": 12,
+    "orders": 22794,
+    "shipments": 22794,
+    "status": "PASS",
+    "total_money": 524670400
+  },
+  {
+    "case_id": "normal_S2_N3_nonbinding_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 115350,
+    "live_orders": 12,
+    "orders": 18053,
+    "shipments": 18053,
+    "status": "PASS",
+    "total_money": 524670400
+  },
+  {
+    "case_id": "normal_S2_N2_finite_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 7278,
+    "live_orders": 0,
+    "orders": 1283,
+    "shipments": 1284,
+    "status": "PASS",
+    "total_money": 3168000
+  },
+  {
+    "case_id": "normal_S2_N3_finite_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 6149,
+    "live_orders": 0,
+    "orders": 1023,
+    "shipments": 1025,
+    "status": "PASS",
+    "total_money": 3168000
+  },
+  {
+    "case_id": "coal_scarcity_S2_N2_nonbinding_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 125970,
+    "live_orders": 8,
+    "orders": 21598,
+    "shipments": 21598,
+    "status": "PASS",
+    "total_money": 567870400
+  },
+  {
+    "case_id": "coal_scarcity_S2_N3_nonbinding_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 125970,
+    "live_orders": 8,
+    "orders": 21598,
+    "shipments": 21598,
+    "status": "PASS",
+    "total_money": 567870400
+  },
+  {
+    "case_id": "coal_scarcity_S2_N2_finite_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 7227,
+    "live_orders": 0,
+    "orders": 1267,
+    "shipments": 1269,
+    "status": "PASS",
+    "total_money": 3408000
+  },
+  {
+    "case_id": "coal_scarcity_S2_N3_finite_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 6008,
+    "live_orders": 0,
+    "orders": 1046,
+    "shipments": 1048,
+    "status": "PASS",
+    "total_money": 3408000
+  },
+  {
+    "case_id": "recovery_S2_N2_nonbinding_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 133137,
+    "live_orders": 12,
+    "orders": 22794,
+    "shipments": 22794,
+    "status": "PASS",
+    "total_money": 524670400
+  },
+  {
+    "case_id": "recovery_S2_N3_nonbinding_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 111810,
+    "live_orders": 11,
+    "orders": 17344,
+    "shipments": 17344,
+    "status": "PASS",
+    "total_money": 524670400
+  },
+  {
+    "case_id": "recovery_S2_N2_finite_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 7278,
+    "live_orders": 0,
+    "orders": 1283,
+    "shipments": 1284,
+    "status": "PASS",
+    "total_money": 3168000
+  },
+  {
+    "case_id": "recovery_S2_N3_finite_3600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 6018,
+    "live_orders": 0,
+    "orders": 999,
+    "shipments": 1001,
+    "status": "PASS",
+    "total_money": 3168000
+  },
+  {
+    "case_id": "normal_S5_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 90460,
+    "live_orders": 44,
+    "orders": 16191,
+    "shipments": 16191,
+    "status": "PASS",
+    "total_money": 375952000
+  },
+  {
+    "case_id": "normal_S5_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 90460,
+    "live_orders": 44,
+    "orders": 16191,
+    "shipments": 16191,
+    "status": "PASS",
+    "total_money": 375952000
+  },
+  {
+    "case_id": "normal_S10_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 180321,
+    "live_orders": 80,
+    "orders": 32378,
+    "shipments": 32378,
+    "status": "PASS",
+    "total_money": 751904000
+  },
+  {
+    "case_id": "normal_S10_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 180321,
+    "live_orders": 80,
+    "orders": 32378,
+    "shipments": 32378,
+    "status": "PASS",
+    "total_money": 751904000
+  },
+  {
+    "case_id": "normal_S20_N2_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 369999,
+    "live_orders": 152,
+    "orders": 67092,
+    "shipments": 67092,
+    "status": "PASS",
+    "total_money": 1503808000
+  },
+  {
+    "case_id": "normal_S20_N3_nonbinding_600",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 369999,
+    "live_orders": 152,
+    "orders": 67092,
+    "shipments": 67092,
+    "status": "PASS",
+    "total_money": 1503808000
+  }
+]

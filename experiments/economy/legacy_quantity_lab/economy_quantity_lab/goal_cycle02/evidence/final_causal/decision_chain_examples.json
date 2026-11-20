@@ -1,0 +1,3975 @@
+{
+  "date_separated_610": {
+    "classification": "NO_MATCHED_COMPETITIVE_OPPORTUNITY",
+    "requests": [
+      {
+        "day": 610,
+        "event": "request",
+        "locked_price": 49,
+        "request": {
+          "accepted_lines": {
+            "B2:coal:614": 20
+          },
+          "accepted_quantity": 20,
+          "buyer_id": "B2",
+          "commodity": "coal",
+          "expected_arrival_day": 614,
+          "financially_uncovered_need": 0,
+          "lines": [
+            {
+              "commodity": "coal",
+              "need_by_day": 614,
+              "need_id": "B2:coal:614",
+              "quantity": 20,
+              "source_bucket_id": "B2:coal:614:FIRM"
+            }
+          ],
+          "order_id": 3099,
+          "pool_available_at_round": 400,
+          "posted_price": 49,
+          "price_uncovered_need": 0,
+          "procurement_need_id": "B2:coal:614",
+          "procurement_round": 0,
+          "promised_dispatch_by_day": 612,
+          "quoted_quantity": 300,
+          "rejected_quantity": 0,
+          "rejections": {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "STALE_NEED": 0
+          },
+          "request_day": 610,
+          "request_id": 3099,
+          "requested_quantity": 20,
+          "route_atp_at_acceptance": 300,
+          "supplier_id": "A",
+          "uncommitted_at_acceptance": 400
+        }
+      },
+      {
+        "day": 610,
+        "event": "request",
+        "locked_price": 360,
+        "request": {
+          "accepted_lines": {
+            "B1:coal:616": 28
+          },
+          "accepted_quantity": 28,
+          "buyer_id": "B1",
+          "commodity": "coal",
+          "expected_arrival_day": 616,
+          "financially_uncovered_need": 0,
+          "lines": [
+            {
+              "commodity": "coal",
+              "need_by_day": 616,
+              "need_id": "B1:coal:616",
+              "quantity": 36,
+              "source_bucket_id": "B1:coal:616:FIRM"
+            }
+          ],
+          "order_id": 3102,
+          "pool_available_at_round": 60,
+          "posted_price": 360,
+          "price_uncovered_need": 0,
+          "procurement_need_id": "B1:coal:616",
+          "procurement_round": 1,
+          "promised_dispatch_by_day": 612,
+          "quoted_quantity": 60,
+          "rejected_quantity": 8,
+          "rejections": {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "STALE_NEED": 0
+          },
+          "request_day": 610,
+          "request_id": 3102,
+          "requested_quantity": 36,
+          "route_atp_at_acceptance": 180,
+          "supplier_id": "D",
+          "uncommitted_at_acceptance": 60
+        }
+      },
+      {
+        "day": 610,
+        "event": "request",
+        "locked_price": 360,
+        "request": {
+          "accepted_lines": {
+            "B2:coal:616": 32
+          },
+          "accepted_quantity": 32,
+          "buyer_id": "B2",
+          "commodity": "coal",
+          "expected_arrival_day": 616,
+          "financially_uncovered_need": 0,
+          "lines": [
+            {
+              "commodity": "coal",
+              "need_by_day": 616,
+              "need_id": "B2:coal:616",
+              "quantity": 40,
+              "source_bucket_id": "B2:coal:616:FIRM"
+            }
+          ],
+          "order_id": 3103,
+          "pool_available_at_round": 60,
+          "posted_price": 360,
+          "price_uncovered_need": 0,
+          "procurement_need_id": "B2:coal:616",
+          "procurement_round": 1,
+          "promised_dispatch_by_day": 612,
+          "quoted_quantity": 60,
+          "rejected_quantity": 8,
+          "rejections": {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "STALE_NEED": 0
+          },
+          "request_day": 610,
+          "request_id": 3103,
+          "requested_quantity": 40,
+          "route_atp_at_acceptance": 180,
+          "supplier_id": "D",
+          "uncommitted_at_acceptance": 32
+        }
+      }
+    ]
+  },
+  "first_D_cap": {
+    "clamp_blocked": true,
+    "commodity": "coal",
+    "day": 609,
+    "direction": "UP",
+    "event": "price_update",
+    "local": {
+      "accepted_quantity": 420,
+      "distinct_requests": 14,
+      "distinct_unresolved": 14,
+      "free_stock": 0,
+      "information": [
+        [
+          "B1",
+          "B1:coal:609"
+        ],
+        [
+          "B1",
+          "B1:coal:610"
+        ],
+        [
+          "B1",
+          "B1:coal:611"
+        ],
+        [
+          "B1",
+          "B1:coal:612"
+        ],
+        [
+          "B1",
+          "B1:coal:613"
+        ],
+        [
+          "B1",
+          "B1:coal:614"
+        ],
+        [
+          "B1",
+          "B1:coal:615"
+        ],
+        [
+          "B2",
+          "B2:coal:609"
+        ],
+        [
+          "B2",
+          "B2:coal:610"
+        ],
+        [
+          "B2",
+          "B2:coal:611"
+        ],
+        [
+          "B2",
+          "B2:coal:612"
+        ],
+        [
+          "B2",
+          "B2:coal:613"
+        ],
+        [
+          "B2",
+          "B2:coal:614"
+        ],
+        [
+          "B2",
+          "B2:coal:615"
+        ]
+      ],
+      "interests": [
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B1",
+          "date": 609,
+          "need_id": "B1:coal:609"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B1",
+          "date": 610,
+          "need_id": "B1:coal:610"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B1",
+          "date": 611,
+          "need_id": "B1:coal:611"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B1",
+          "date": 612,
+          "need_id": "B1:coal:612"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B1",
+          "date": 613,
+          "need_id": "B1:coal:613"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B1",
+          "date": 614,
+          "need_id": "B1:coal:614"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B1",
+          "date": 615,
+          "need_id": "B1:coal:615"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B2",
+          "date": 609,
+          "need_id": "B2:coal:609"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B2",
+          "date": 610,
+          "need_id": "B2:coal:610"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B2",
+          "date": 611,
+          "need_id": "B2:coal:611"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B2",
+          "date": 612,
+          "need_id": "B2:coal:612"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B2",
+          "date": 613,
+          "need_id": "B2:coal:613"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B2",
+          "date": 614,
+          "need_id": "B2:coal:614"
+        },
+        {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "buyer": "B2",
+          "date": 615,
+          "need_id": "B2:coal:615"
+        }
+      ],
+      "old_price": 358,
+      "shipped": 420,
+      "window_end": 609,
+      "window_start": 603
+    },
+    "pending_price": 360,
+    "result": {
+      "cash_refused": 0,
+      "commodity": "coal",
+      "day": 609,
+      "effective_day": 610,
+      "free_stock": 0,
+      "information_count": 14,
+      "lower_hit": false,
+      "old_price": 358,
+      "physical_unmet": 112,
+      "price": 360,
+      "price_refused": 0,
+      "reason": "OBSERVED_PHYSICAL_PRESSURE",
+      "seller": "D",
+      "shipped": 420,
+      "step": 7,
+      "unclamped": 365,
+      "upper_hit": true
+    },
+    "seller": "D",
+    "tick_blocked": false
+  },
+  "long_boundary_events": [
+    {
+      "day": 1000,
+      "event": "request",
+      "locked_price": 49,
+      "request": {
+        "accepted_lines": {
+          "B2:coal:1004": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "B2",
+        "commodity": "coal",
+        "expected_arrival_day": 1004,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 1004,
+            "need_id": "B2:coal:1004",
+            "quantity": 20,
+            "source_bucket_id": "B2:coal:1004:FIRM"
+          }
+        ],
+        "order_id": 5049,
+        "pool_available_at_round": 400,
+        "posted_price": 49,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B2:coal:1004",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 1002,
+        "quoted_quantity": 300,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 1000,
+        "request_id": 5049,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 300,
+        "supplier_id": "A",
+        "uncommitted_at_acceptance": 400
+      }
+    },
+    {
+      "day": 1000,
+      "event": "request",
+      "locked_price": 306,
+      "request": {
+        "accepted_lines": {
+          "C1:steel:1003": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "C1",
+        "commodity": "steel",
+        "expected_arrival_day": 1003,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 1003,
+            "need_id": "C1:steel:1003",
+            "quantity": 20,
+            "source_bucket_id": "C1:steel:1003:FIRM"
+          }
+        ],
+        "order_id": 5050,
+        "pool_available_at_round": 58,
+        "posted_price": 306,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "C1:steel:1003",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 1002,
+        "quoted_quantity": 58,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 1000,
+        "request_id": 5050,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "B1",
+        "uncommitted_at_acceptance": 58
+      }
+    },
+    {
+      "day": 1000,
+      "event": "request",
+      "locked_price": 306,
+      "request": {
+        "accepted_lines": {
+          "C2:steel:1003": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "C2",
+        "commodity": "steel",
+        "expected_arrival_day": 1003,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 1003,
+            "need_id": "C2:steel:1003",
+            "quantity": 20,
+            "source_bucket_id": "C2:steel:1003:FIRM"
+          }
+        ],
+        "order_id": 5051,
+        "pool_available_at_round": 58,
+        "posted_price": 306,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "C2:steel:1003",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 1002,
+        "quoted_quantity": 58,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 1000,
+        "request_id": 5051,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "B1",
+        "uncommitted_at_acceptance": 38
+      }
+    },
+    {
+      "day": 1000,
+      "event": "request",
+      "locked_price": 360,
+      "request": {
+        "accepted_lines": {
+          "B1:coal:1006": 28
+        },
+        "accepted_quantity": 28,
+        "buyer_id": "B1",
+        "commodity": "coal",
+        "expected_arrival_day": 1006,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 1006,
+            "need_id": "B1:coal:1006",
+            "quantity": 36,
+            "source_bucket_id": "B1:coal:1006:FIRM"
+          }
+        ],
+        "order_id": 5052,
+        "pool_available_at_round": 60,
+        "posted_price": 360,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B1:coal:1006",
+        "procurement_round": 1,
+        "promised_dispatch_by_day": 1002,
+        "quoted_quantity": 60,
+        "rejected_quantity": 8,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 1000,
+        "request_id": 5052,
+        "requested_quantity": 36,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "D",
+        "uncommitted_at_acceptance": 60
+      }
+    },
+    {
+      "day": 1000,
+      "event": "request",
+      "locked_price": 360,
+      "request": {
+        "accepted_lines": {
+          "B2:coal:1006": 32
+        },
+        "accepted_quantity": 32,
+        "buyer_id": "B2",
+        "commodity": "coal",
+        "expected_arrival_day": 1006,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 1006,
+            "need_id": "B2:coal:1006",
+            "quantity": 40,
+            "source_bucket_id": "B2:coal:1006:FIRM"
+          }
+        ],
+        "order_id": 5053,
+        "pool_available_at_round": 60,
+        "posted_price": 360,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B2:coal:1006",
+        "procurement_round": 1,
+        "promised_dispatch_by_day": 1002,
+        "quoted_quantity": 60,
+        "rejected_quantity": 8,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 1000,
+        "request_id": 5053,
+        "requested_quantity": 40,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "D",
+        "uncommitted_at_acceptance": 32
+      }
+    },
+    {
+      "active_buckets": 54,
+      "customer_identity_cache": 5060,
+      "day": 1000,
+      "event": "day_link",
+      "production": {
+        "A": {
+          "coal": 20
+        },
+        "B1": {
+          "steel": 19
+        },
+        "B2": {
+          "steel": 21
+        },
+        "C1": {
+          "machine": 5
+        },
+        "C2": {
+          "machine": 5
+        },
+        "D": {
+          "coal": 60
+        }
+      },
+      "release_identity_cache": 12104,
+      "sinks": {
+        "T1": {
+          "backlog": 0,
+          "delivered": 5000,
+          "firm": "C1",
+          "received": 5000
+        },
+        "T2": {
+          "backlog": 0,
+          "delivered": 5000,
+          "firm": "C2",
+          "received": 5000
+        }
+      }
+    },
+    {
+      "day": 3598,
+      "event": "request",
+      "locked_price": 49,
+      "request": {
+        "accepted_lines": {
+          "B2:coal:3602": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "B2",
+        "commodity": "coal",
+        "expected_arrival_day": 3602,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 3602,
+            "need_id": "B2:coal:3602",
+            "quantity": 20,
+            "source_bucket_id": "B2:coal:3602:FIRM"
+          }
+        ],
+        "order_id": 18039,
+        "pool_available_at_round": 400,
+        "posted_price": 49,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B2:coal:3602",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3600,
+        "quoted_quantity": 300,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3598,
+        "request_id": 18039,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 300,
+        "supplier_id": "A",
+        "uncommitted_at_acceptance": 400
+      }
+    },
+    {
+      "day": 3598,
+      "event": "request",
+      "locked_price": 306,
+      "request": {
+        "accepted_lines": {
+          "C1:steel:3601": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "C1",
+        "commodity": "steel",
+        "expected_arrival_day": 3601,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 3601,
+            "need_id": "C1:steel:3601",
+            "quantity": 20,
+            "source_bucket_id": "C1:steel:3601:FIRM"
+          }
+        ],
+        "order_id": 18040,
+        "pool_available_at_round": 58,
+        "posted_price": 306,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "C1:steel:3601",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3600,
+        "quoted_quantity": 58,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3598,
+        "request_id": 18040,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "B1",
+        "uncommitted_at_acceptance": 58
+      }
+    },
+    {
+      "day": 3598,
+      "event": "request",
+      "locked_price": 306,
+      "request": {
+        "accepted_lines": {
+          "C2:steel:3601": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "C2",
+        "commodity": "steel",
+        "expected_arrival_day": 3601,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 3601,
+            "need_id": "C2:steel:3601",
+            "quantity": 20,
+            "source_bucket_id": "C2:steel:3601:FIRM"
+          }
+        ],
+        "order_id": 18041,
+        "pool_available_at_round": 58,
+        "posted_price": 306,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "C2:steel:3601",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3600,
+        "quoted_quantity": 58,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3598,
+        "request_id": 18041,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "B1",
+        "uncommitted_at_acceptance": 38
+      }
+    },
+    {
+      "day": 3598,
+      "event": "request",
+      "locked_price": 360,
+      "request": {
+        "accepted_lines": {
+          "B1:coal:3604": 28
+        },
+        "accepted_quantity": 28,
+        "buyer_id": "B1",
+        "commodity": "coal",
+        "expected_arrival_day": 3604,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 3604,
+            "need_id": "B1:coal:3604",
+            "quantity": 36,
+            "source_bucket_id": "B1:coal:3604:FIRM"
+          }
+        ],
+        "order_id": 18042,
+        "pool_available_at_round": 60,
+        "posted_price": 360,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B1:coal:3604",
+        "procurement_round": 1,
+        "promised_dispatch_by_day": 3600,
+        "quoted_quantity": 60,
+        "rejected_quantity": 8,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3598,
+        "request_id": 18042,
+        "requested_quantity": 36,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "D",
+        "uncommitted_at_acceptance": 60
+      }
+    },
+    {
+      "day": 3598,
+      "event": "request",
+      "locked_price": 360,
+      "request": {
+        "accepted_lines": {
+          "B2:coal:3604": 32
+        },
+        "accepted_quantity": 32,
+        "buyer_id": "B2",
+        "commodity": "coal",
+        "expected_arrival_day": 3604,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 3604,
+            "need_id": "B2:coal:3604",
+            "quantity": 40,
+            "source_bucket_id": "B2:coal:3604:FIRM"
+          }
+        ],
+        "order_id": 18043,
+        "pool_available_at_round": 60,
+        "posted_price": 360,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B2:coal:3604",
+        "procurement_round": 1,
+        "promised_dispatch_by_day": 3600,
+        "quoted_quantity": 60,
+        "rejected_quantity": 8,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3598,
+        "request_id": 18043,
+        "requested_quantity": 40,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "D",
+        "uncommitted_at_acceptance": 32
+      }
+    },
+    {
+      "clamp_blocked": false,
+      "commodity": "coal",
+      "day": 3598,
+      "direction": "HOLD",
+      "event": "price_update",
+      "local": {
+        "accepted_quantity": 140,
+        "distinct_requests": 7,
+        "distinct_unresolved": 0,
+        "free_stock": 380,
+        "information": [
+          [
+            "B1",
+            "B1:coal:3597"
+          ],
+          [
+            "B1",
+            "B1:coal:3599"
+          ],
+          [
+            "B1",
+            "B1:coal:3601"
+          ],
+          [
+            "B2",
+            "B2:coal:3596"
+          ],
+          [
+            "B2",
+            "B2:coal:3598"
+          ],
+          [
+            "B2",
+            "B2:coal:3600"
+          ],
+          [
+            "B2",
+            "B2:coal:3602"
+          ]
+        ],
+        "interests": [
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "B1",
+            "date": 3597,
+            "need_id": "B1:coal:3597"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "B1",
+            "date": 3599,
+            "need_id": "B1:coal:3599"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "B1",
+            "date": 3601,
+            "need_id": "B1:coal:3601"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3596,
+            "need_id": "B2:coal:3596"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3598,
+            "need_id": "B2:coal:3598"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3600,
+            "need_id": "B2:coal:3600"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3602,
+            "need_id": "B2:coal:3602"
+          }
+        ],
+        "old_price": 49,
+        "shipped": 140,
+        "window_end": 3598,
+        "window_start": 3592
+      },
+      "pending_price": 49,
+      "result": {
+        "cash_refused": 0,
+        "commodity": "coal",
+        "day": 3598,
+        "effective_day": 3599,
+        "free_stock": 380,
+        "information_count": 7,
+        "lower_hit": false,
+        "old_price": 49,
+        "physical_unmet": 0,
+        "price": 49,
+        "price_refused": 0,
+        "reason": "IDLE_STOCK",
+        "seller": "A",
+        "shipped": 140,
+        "step": 0,
+        "unclamped": 49,
+        "upper_hit": false
+      },
+      "seller": "A",
+      "tick_blocked": true
+    },
+    {
+      "clamp_blocked": false,
+      "commodity": "steel",
+      "day": 3598,
+      "direction": "HOLD",
+      "event": "price_update",
+      "local": {
+        "accepted_quantity": 160,
+        "distinct_requests": 8,
+        "distinct_unresolved": 0,
+        "free_stock": 18,
+        "information": [
+          [
+            "C1",
+            "C1:steel:3595"
+          ],
+          [
+            "C1",
+            "C1:steel:3597"
+          ],
+          [
+            "C1",
+            "C1:steel:3599"
+          ],
+          [
+            "C1",
+            "C1:steel:3601"
+          ],
+          [
+            "C2",
+            "C2:steel:3595"
+          ],
+          [
+            "C2",
+            "C2:steel:3597"
+          ],
+          [
+            "C2",
+            "C2:steel:3599"
+          ],
+          [
+            "C2",
+            "C2:steel:3601"
+          ]
+        ],
+        "interests": [
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C1",
+            "date": 3595,
+            "need_id": "C1:steel:3595"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C1",
+            "date": 3597,
+            "need_id": "C1:steel:3597"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C1",
+            "date": 3599,
+            "need_id": "C1:steel:3599"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C1",
+            "date": 3601,
+            "need_id": "C1:steel:3601"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C2",
+            "date": 3595,
+            "need_id": "C2:steel:3595"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C2",
+            "date": 3597,
+            "need_id": "C2:steel:3597"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C2",
+            "date": 3599,
+            "need_id": "C2:steel:3599"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C2",
+            "date": 3601,
+            "need_id": "C2:steel:3601"
+          }
+        ],
+        "old_price": 306,
+        "shipped": 160,
+        "window_end": 3598,
+        "window_start": 3592
+      },
+      "pending_price": 306,
+      "result": {
+        "cash_refused": 0,
+        "commodity": "steel",
+        "day": 3598,
+        "effective_day": 3599,
+        "free_stock": 18,
+        "information_count": 8,
+        "lower_hit": false,
+        "old_price": 306,
+        "physical_unmet": 0,
+        "price": 306,
+        "price_refused": 0,
+        "reason": "HOLD",
+        "seller": "B1",
+        "shipped": 160,
+        "step": 6,
+        "unclamped": 306,
+        "upper_hit": false
+      },
+      "seller": "B1",
+      "tick_blocked": false
+    },
+    {
+      "clamp_blocked": false,
+      "commodity": "steel",
+      "day": 3598,
+      "direction": "HOLD",
+      "event": "price_update",
+      "local": {
+        "accepted_quantity": 120,
+        "distinct_requests": 6,
+        "distinct_unresolved": 0,
+        "free_stock": 39,
+        "information": [
+          [
+            "C1",
+            "C1:steel:3596"
+          ],
+          [
+            "C1",
+            "C1:steel:3598"
+          ],
+          [
+            "C1",
+            "C1:steel:3600"
+          ],
+          [
+            "C2",
+            "C2:steel:3596"
+          ],
+          [
+            "C2",
+            "C2:steel:3598"
+          ],
+          [
+            "C2",
+            "C2:steel:3600"
+          ]
+        ],
+        "interests": [
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C1",
+            "date": 3596,
+            "need_id": "C1:steel:3596"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C1",
+            "date": 3598,
+            "need_id": "C1:steel:3598"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C1",
+            "date": 3600,
+            "need_id": "C1:steel:3600"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C2",
+            "date": 3596,
+            "need_id": "C2:steel:3596"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C2",
+            "date": 3598,
+            "need_id": "C2:steel:3598"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 0,
+            "PRICE_LIMIT": 0,
+            "buyer": "C2",
+            "date": 3600,
+            "need_id": "C2:steel:3600"
+          }
+        ],
+        "old_price": 306,
+        "shipped": 120,
+        "window_end": 3598,
+        "window_start": 3592
+      },
+      "pending_price": 306,
+      "result": {
+        "cash_refused": 0,
+        "commodity": "steel",
+        "day": 3598,
+        "effective_day": 3599,
+        "free_stock": 39,
+        "information_count": 6,
+        "lower_hit": false,
+        "old_price": 306,
+        "physical_unmet": 0,
+        "price": 306,
+        "price_refused": 0,
+        "reason": "HOLD",
+        "seller": "B2",
+        "shipped": 120,
+        "step": 6,
+        "unclamped": 306,
+        "upper_hit": false
+      },
+      "seller": "B2",
+      "tick_blocked": false
+    },
+    {
+      "clamp_blocked": true,
+      "commodity": "coal",
+      "day": 3598,
+      "direction": "HOLD",
+      "event": "price_update",
+      "local": {
+        "accepted_quantity": 420,
+        "distinct_requests": 14,
+        "distinct_unresolved": 14,
+        "free_stock": 0,
+        "information": [
+          [
+            "B1",
+            "B1:coal:3598"
+          ],
+          [
+            "B1",
+            "B1:coal:3599"
+          ],
+          [
+            "B1",
+            "B1:coal:3600"
+          ],
+          [
+            "B1",
+            "B1:coal:3601"
+          ],
+          [
+            "B1",
+            "B1:coal:3602"
+          ],
+          [
+            "B1",
+            "B1:coal:3603"
+          ],
+          [
+            "B1",
+            "B1:coal:3604"
+          ],
+          [
+            "B2",
+            "B2:coal:3598"
+          ],
+          [
+            "B2",
+            "B2:coal:3599"
+          ],
+          [
+            "B2",
+            "B2:coal:3600"
+          ],
+          [
+            "B2",
+            "B2:coal:3601"
+          ],
+          [
+            "B2",
+            "B2:coal:3602"
+          ],
+          [
+            "B2",
+            "B2:coal:3603"
+          ],
+          [
+            "B2",
+            "B2:coal:3604"
+          ]
+        ],
+        "interests": [
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B1",
+            "date": 3598,
+            "need_id": "B1:coal:3598"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B1",
+            "date": 3599,
+            "need_id": "B1:coal:3599"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B1",
+            "date": 3600,
+            "need_id": "B1:coal:3600"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B1",
+            "date": 3601,
+            "need_id": "B1:coal:3601"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B1",
+            "date": 3602,
+            "need_id": "B1:coal:3602"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B1",
+            "date": 3603,
+            "need_id": "B1:coal:3603"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B1",
+            "date": 3604,
+            "need_id": "B1:coal:3604"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3598,
+            "need_id": "B2:coal:3598"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3599,
+            "need_id": "B2:coal:3599"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3600,
+            "need_id": "B2:coal:3600"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3601,
+            "need_id": "B2:coal:3601"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3602,
+            "need_id": "B2:coal:3602"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3603,
+            "need_id": "B2:coal:3603"
+          },
+          {
+            "CASH": 0,
+            "PHYSICAL": 8,
+            "PRICE_LIMIT": 0,
+            "buyer": "B2",
+            "date": 3604,
+            "need_id": "B2:coal:3604"
+          }
+        ],
+        "old_price": 360,
+        "shipped": 420,
+        "window_end": 3598,
+        "window_start": 3592
+      },
+      "pending_price": 360,
+      "result": {
+        "cash_refused": 0,
+        "commodity": "coal",
+        "day": 3598,
+        "effective_day": 3599,
+        "free_stock": 0,
+        "information_count": 14,
+        "lower_hit": false,
+        "old_price": 360,
+        "physical_unmet": 112,
+        "price": 360,
+        "price_refused": 0,
+        "reason": "OBSERVED_PHYSICAL_PRESSURE",
+        "seller": "D",
+        "shipped": 420,
+        "step": 7,
+        "unclamped": 367,
+        "upper_hit": true
+      },
+      "seller": "D",
+      "tick_blocked": false
+    },
+    {
+      "active_buckets": 54,
+      "customer_identity_cache": 18050,
+      "day": 3598,
+      "event": "day_link",
+      "production": {
+        "A": {
+          "coal": 20
+        },
+        "B1": {
+          "steel": 19
+        },
+        "B2": {
+          "steel": 21
+        },
+        "C1": {
+          "machine": 5
+        },
+        "C2": {
+          "machine": 5
+        },
+        "D": {
+          "coal": 60
+        }
+      },
+      "release_identity_cache": 43280,
+      "sinks": {
+        "T1": {
+          "backlog": 0,
+          "delivered": 17990,
+          "firm": "C1",
+          "received": 17990
+        },
+        "T2": {
+          "backlog": 0,
+          "delivered": 17990,
+          "firm": "C2",
+          "received": 17990
+        }
+      }
+    },
+    {
+      "day": 3599,
+      "event": "request",
+      "locked_price": 49,
+      "request": {
+        "accepted_lines": {
+          "B1:coal:3603": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "B1",
+        "commodity": "coal",
+        "expected_arrival_day": 3603,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 3603,
+            "need_id": "B1:coal:3603",
+            "quantity": 20,
+            "source_bucket_id": "B1:coal:3603:FIRM"
+          }
+        ],
+        "order_id": 18044,
+        "pool_available_at_round": 400,
+        "posted_price": 49,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B1:coal:3603",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3601,
+        "quoted_quantity": 300,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3599,
+        "request_id": 18044,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 300,
+        "supplier_id": "A",
+        "uncommitted_at_acceptance": 400
+      }
+    },
+    {
+      "day": 3599,
+      "event": "request",
+      "locked_price": 306,
+      "request": {
+        "accepted_lines": {
+          "C1:steel:3602": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "C1",
+        "commodity": "steel",
+        "expected_arrival_day": 3602,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 3602,
+            "need_id": "C1:steel:3602",
+            "quantity": 20,
+            "source_bucket_id": "C1:steel:3602:FIRM"
+          }
+        ],
+        "order_id": 18045,
+        "pool_available_at_round": 58,
+        "posted_price": 306,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "C1:steel:3602",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3601,
+        "quoted_quantity": 58,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3599,
+        "request_id": 18045,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "B2",
+        "uncommitted_at_acceptance": 58
+      }
+    },
+    {
+      "day": 3599,
+      "event": "request",
+      "locked_price": 306,
+      "request": {
+        "accepted_lines": {
+          "C2:steel:3602": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "C2",
+        "commodity": "steel",
+        "expected_arrival_day": 3602,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 3602,
+            "need_id": "C2:steel:3602",
+            "quantity": 20,
+            "source_bucket_id": "C2:steel:3602:FIRM"
+          }
+        ],
+        "order_id": 18046,
+        "pool_available_at_round": 58,
+        "posted_price": 306,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "C2:steel:3602",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3601,
+        "quoted_quantity": 58,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3599,
+        "request_id": 18046,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "B2",
+        "uncommitted_at_acceptance": 38
+      }
+    },
+    {
+      "day": 3599,
+      "event": "request",
+      "locked_price": 360,
+      "request": {
+        "accepted_lines": {
+          "B1:coal:3605": 32
+        },
+        "accepted_quantity": 32,
+        "buyer_id": "B1",
+        "commodity": "coal",
+        "expected_arrival_day": 3605,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 3605,
+            "need_id": "B1:coal:3605",
+            "quantity": 40,
+            "source_bucket_id": "B1:coal:3605:FIRM"
+          }
+        ],
+        "order_id": 18047,
+        "pool_available_at_round": 60,
+        "posted_price": 360,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B1:coal:3605",
+        "procurement_round": 1,
+        "promised_dispatch_by_day": 3601,
+        "quoted_quantity": 60,
+        "rejected_quantity": 8,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3599,
+        "request_id": 18047,
+        "requested_quantity": 40,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "D",
+        "uncommitted_at_acceptance": 60
+      }
+    },
+    {
+      "day": 3599,
+      "event": "request",
+      "locked_price": 360,
+      "request": {
+        "accepted_lines": {
+          "B2:coal:3605": 28
+        },
+        "accepted_quantity": 28,
+        "buyer_id": "B2",
+        "commodity": "coal",
+        "expected_arrival_day": 3605,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 3605,
+            "need_id": "B2:coal:3605",
+            "quantity": 36,
+            "source_bucket_id": "B2:coal:3605:FIRM"
+          }
+        ],
+        "order_id": 18048,
+        "pool_available_at_round": 60,
+        "posted_price": 360,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B2:coal:3605",
+        "procurement_round": 1,
+        "promised_dispatch_by_day": 3601,
+        "quoted_quantity": 60,
+        "rejected_quantity": 8,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3599,
+        "request_id": 18048,
+        "requested_quantity": 36,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "D",
+        "uncommitted_at_acceptance": 28
+      }
+    },
+    {
+      "active_buckets": 54,
+      "customer_identity_cache": 18055,
+      "day": 3599,
+      "event": "day_link",
+      "production": {
+        "A": {
+          "coal": 20
+        },
+        "B1": {
+          "steel": 21
+        },
+        "B2": {
+          "steel": 19
+        },
+        "C1": {
+          "machine": 5
+        },
+        "C2": {
+          "machine": 5
+        },
+        "D": {
+          "coal": 60
+        }
+      },
+      "release_identity_cache": 43292,
+      "sinks": {
+        "T1": {
+          "backlog": 0,
+          "delivered": 17995,
+          "firm": "C1",
+          "received": 17995
+        },
+        "T2": {
+          "backlog": 0,
+          "delivered": 17995,
+          "firm": "C2",
+          "received": 17995
+        }
+      }
+    },
+    {
+      "day": 3600,
+      "event": "request",
+      "locked_price": 49,
+      "request": {
+        "accepted_lines": {
+          "B2:coal:3604": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "B2",
+        "commodity": "coal",
+        "expected_arrival_day": 3604,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 3604,
+            "need_id": "B2:coal:3604",
+            "quantity": 20,
+            "source_bucket_id": "B2:coal:3604:FIRM"
+          }
+        ],
+        "order_id": 18049,
+        "pool_available_at_round": 400,
+        "posted_price": 49,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B2:coal:3604",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3602,
+        "quoted_quantity": 300,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3600,
+        "request_id": 18049,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 300,
+        "supplier_id": "A",
+        "uncommitted_at_acceptance": 400
+      }
+    },
+    {
+      "day": 3600,
+      "event": "request",
+      "locked_price": 306,
+      "request": {
+        "accepted_lines": {
+          "C1:steel:3603": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "C1",
+        "commodity": "steel",
+        "expected_arrival_day": 3603,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 3603,
+            "need_id": "C1:steel:3603",
+            "quantity": 20,
+            "source_bucket_id": "C1:steel:3603:FIRM"
+          }
+        ],
+        "order_id": 18050,
+        "pool_available_at_round": 58,
+        "posted_price": 306,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "C1:steel:3603",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3602,
+        "quoted_quantity": 58,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3600,
+        "request_id": 18050,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "B1",
+        "uncommitted_at_acceptance": 58
+      }
+    },
+    {
+      "day": 3600,
+      "event": "request",
+      "locked_price": 306,
+      "request": {
+        "accepted_lines": {
+          "C2:steel:3603": 20
+        },
+        "accepted_quantity": 20,
+        "buyer_id": "C2",
+        "commodity": "steel",
+        "expected_arrival_day": 3603,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 3603,
+            "need_id": "C2:steel:3603",
+            "quantity": 20,
+            "source_bucket_id": "C2:steel:3603:FIRM"
+          }
+        ],
+        "order_id": 18051,
+        "pool_available_at_round": 58,
+        "posted_price": 306,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "C2:steel:3603",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3602,
+        "quoted_quantity": 58,
+        "rejected_quantity": 0,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 0,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3600,
+        "request_id": 18051,
+        "requested_quantity": 20,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "B1",
+        "uncommitted_at_acceptance": 38
+      }
+    },
+    {
+      "day": 3600,
+      "event": "request",
+      "locked_price": 360,
+      "request": {
+        "accepted_lines": {
+          "B1:coal:3606": 28
+        },
+        "accepted_quantity": 28,
+        "buyer_id": "B1",
+        "commodity": "coal",
+        "expected_arrival_day": 3606,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 3606,
+            "need_id": "B1:coal:3606",
+            "quantity": 36,
+            "source_bucket_id": "B1:coal:3606:FIRM"
+          }
+        ],
+        "order_id": 18052,
+        "pool_available_at_round": 60,
+        "posted_price": 360,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B1:coal:3606",
+        "procurement_round": 1,
+        "promised_dispatch_by_day": 3602,
+        "quoted_quantity": 60,
+        "rejected_quantity": 8,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3600,
+        "request_id": 18052,
+        "requested_quantity": 36,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "D",
+        "uncommitted_at_acceptance": 60
+      }
+    },
+    {
+      "day": 3600,
+      "event": "request",
+      "locked_price": 360,
+      "request": {
+        "accepted_lines": {
+          "B2:coal:3606": 32
+        },
+        "accepted_quantity": 32,
+        "buyer_id": "B2",
+        "commodity": "coal",
+        "expected_arrival_day": 3606,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 3606,
+            "need_id": "B2:coal:3606",
+            "quantity": 40,
+            "source_bucket_id": "B2:coal:3606:FIRM"
+          }
+        ],
+        "order_id": 18053,
+        "pool_available_at_round": 60,
+        "posted_price": 360,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "B2:coal:3606",
+        "procurement_round": 1,
+        "promised_dispatch_by_day": 3602,
+        "quoted_quantity": 60,
+        "rejected_quantity": 8,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 8,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 3600,
+        "request_id": 18053,
+        "requested_quantity": 40,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "D",
+        "uncommitted_at_acceptance": 32
+      }
+    },
+    {
+      "active_buckets": 54,
+      "customer_identity_cache": 18060,
+      "day": 3600,
+      "event": "day_link",
+      "production": {
+        "A": {
+          "coal": 20
+        },
+        "B1": {
+          "steel": 19
+        },
+        "B2": {
+          "steel": 21
+        },
+        "C1": {
+          "machine": 5
+        },
+        "C2": {
+          "machine": 5
+        },
+        "D": {
+          "coal": 60
+        }
+      },
+      "release_identity_cache": 43304,
+      "sinks": {
+        "T1": {
+          "backlog": 0,
+          "delivered": 18000,
+          "firm": "C1",
+          "received": 18000
+        },
+        "T2": {
+          "backlog": 0,
+          "delivered": 18000,
+          "firm": "C2",
+          "received": 18000
+        }
+      }
+    }
+  ],
+  "physical_prior_to_price": {
+    "actual_request": {
+      "day": 1,
+      "event": "request",
+      "locked_price": 270,
+      "request": {
+        "accepted_lines": {
+          "C1:steel:4": 10
+        },
+        "accepted_quantity": 10,
+        "buyer_id": "C1",
+        "commodity": "steel",
+        "expected_arrival_day": 4,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 4,
+            "need_id": "C1:steel:4",
+            "quantity": 24,
+            "source_bucket_id": "C1:steel:4:FIRM"
+          }
+        ],
+        "order_id": 1,
+        "pool_available_at_round": 20,
+        "posted_price": 270,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "C1:steel:4",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3,
+        "quoted_quantity": 20,
+        "rejected_quantity": 14,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 14,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 1,
+        "request_id": 1,
+        "requested_quantity": 24,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "B2",
+        "uncommitted_at_acceptance": 20
+      }
+    },
+    "source": ".local/cycle02/replay_a/M2_T_EQUAL_FEASIBLE_P_HETEROGENEOUS_R_PRICE_FIRST_600"
+  },
+  "price_changed_real_choice": {
+    "actual_order_dispatch_arrival_payment": [
+      {
+        "buyer": "C1",
+        "commodity": "steel",
+        "day": 1,
+        "event": "accepted",
+        "locked_price": 270,
+        "order_id": 1,
+        "quantity": 10,
+        "reserved_value": 2700,
+        "route": "B2>C1:steel",
+        "seller": "B2"
+      },
+      {
+        "arrival_day": 2,
+        "day": 1,
+        "event": "dispatched",
+        "order_id": 1,
+        "quantity": 10,
+        "shipment_id": 3
+      },
+      {
+        "day": 2,
+        "event": "arrived",
+        "order_id": 1,
+        "quantity": 10,
+        "shipment_id": 3
+      },
+      {
+        "buyer": "C1",
+        "buyer_debit": 2700,
+        "day": 2,
+        "event": "payment",
+        "locked_price": 270,
+        "order_id": 1,
+        "quantity": 10,
+        "reserved_release": 2700,
+        "seller": "B2",
+        "seller_credit": 2700,
+        "shipment_id": 3
+      }
+    ],
+    "actual_request": {
+      "day": 1,
+      "event": "request",
+      "locked_price": 270,
+      "request": {
+        "accepted_lines": {
+          "C1:steel:4": 10
+        },
+        "accepted_quantity": 10,
+        "buyer_id": "C1",
+        "commodity": "steel",
+        "expected_arrival_day": 4,
+        "financially_uncovered_need": 0,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 4,
+            "need_id": "C1:steel:4",
+            "quantity": 24,
+            "source_bucket_id": "C1:steel:4:FIRM"
+          }
+        ],
+        "order_id": 1,
+        "pool_available_at_round": 20,
+        "posted_price": 270,
+        "price_uncovered_need": 0,
+        "procurement_need_id": "C1:steel:4",
+        "procurement_round": 0,
+        "promised_dispatch_by_day": 3,
+        "quoted_quantity": 20,
+        "rejected_quantity": 14,
+        "rejections": {
+          "CASH": 0,
+          "PHYSICAL": 14,
+          "PRICE_LIMIT": 0,
+          "STALE_NEED": 0
+        },
+        "request_day": 1,
+        "request_id": 1,
+        "requested_quantity": 24,
+        "route_atp_at_acceptance": 180,
+        "supplier_id": "B2",
+        "uncommitted_at_acceptance": 20
+      }
+    },
+    "observed_decision": {
+      "boundary": 1,
+      "buyer": "C1",
+      "buyer_visible_information": {
+        "available_cash": 24065200,
+        "max_unit_price": 1200,
+        "offers": [
+          {
+            "commodity": "steel",
+            "expected_arrival_day": 4,
+            "max_acceptable_quantity": 20,
+            "offer_day": 1,
+            "posted_price": 300,
+            "promised_dispatch_by_day": 3,
+            "route_lead_time": 1,
+            "supplier_id": "B1",
+            "supply_basis": "STOCK_CONFIRMED"
+          },
+          {
+            "commodity": "steel",
+            "expected_arrival_day": 4,
+            "max_acceptable_quantity": 20,
+            "offer_day": 1,
+            "posted_price": 270,
+            "promised_dispatch_by_day": 3,
+            "route_lead_time": 1,
+            "supplier_id": "B2",
+            "supply_basis": "STOCK_CONFIRMED"
+          }
+        ],
+        "procurement_gap": {
+          "exposure_room": 220,
+          "procurement_need_plan": 10,
+          "procurement_need_safety": 14,
+          "procurement_need_total": 24,
+          "real_exposure": 36,
+          "timely_release_gap": 24,
+          "visible_exposure": 256
+        }
+      },
+      "commodity": "steel",
+      "day": 1,
+      "decision_id": 3,
+      "event": "decision",
+      "intent": {
+        "buyer_id": "C1",
+        "commodity": "steel",
+        "expected_arrival_day": 4,
+        "lines": [
+          {
+            "commodity": "steel",
+            "need_by_day": 4,
+            "need_id": "C1:steel:4",
+            "quantity": 24,
+            "source_bucket_id": "C1:steel:4:FIRM"
+          }
+        ],
+        "procurement_need_id": "C1:steel:4",
+        "procurement_round": 0,
+        "quoted_quantity": 20,
+        "request_day": 1,
+        "requested_quantity": 24,
+        "supplier_id": "B2"
+      },
+      "known": [
+        "B1",
+        "B2"
+      ],
+      "phase": "MATCHING",
+      "queried": [
+        "B1",
+        "B2"
+      ],
+      "requirements": [
+        {
+          "bucket_id": "C1:steel:2:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": -1,
+              "release_due": true,
+              "supplier": "B1",
+              "timely": false
+            },
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": -1,
+              "release_due": true,
+              "supplier": "B2",
+              "timely": false
+            }
+          ],
+          "created_day": 1,
+          "gap": 0,
+          "matched_competitive": false,
+          "need_by_day": 2,
+          "need_id": "C1:steel:2",
+          "quantity": 24,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "C1:steel:3:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 0,
+              "release_due": true,
+              "supplier": "B1",
+              "timely": false
+            },
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 0,
+              "release_due": true,
+              "supplier": "B2",
+              "timely": false
+            }
+          ],
+          "created_day": 1,
+          "gap": 12,
+          "matched_competitive": false,
+          "need_by_day": 3,
+          "need_id": "C1:steel:3",
+          "quantity": 24,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "C1:steel:4:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "HIGHER_PRICE_THAN_ELIGIBLE_ALTERNATIVE"
+              ],
+              "current_atp": 20,
+              "eligible": true,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 1,
+              "release_due": true,
+              "supplier": "B1",
+              "timely": true
+            },
+            {
+              "constraints": [],
+              "current_atp": 20,
+              "eligible": true,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 1,
+              "release_due": true,
+              "supplier": "B2",
+              "timely": true
+            }
+          ],
+          "created_day": 1,
+          "gap": 24,
+          "matched_competitive": true,
+          "need_by_day": 4,
+          "need_id": "C1:steel:4",
+          "quantity": 24,
+          "requirement_class": "FIRM",
+          "shadow_differs": true,
+          "shadow_legacy": "B1",
+          "shadow_price_first": "B2"
+        },
+        {
+          "bucket_id": "C1:steel:5:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 2,
+              "release_due": false,
+              "supplier": "B1",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 2,
+              "release_due": false,
+              "supplier": "B2",
+              "timely": true
+            }
+          ],
+          "created_day": 1,
+          "gap": 24,
+          "matched_competitive": false,
+          "need_by_day": 5,
+          "need_id": "C1:steel:5",
+          "quantity": 24,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "C1:steel:6:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 3,
+              "release_due": false,
+              "supplier": "B1",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 3,
+              "release_due": false,
+              "supplier": "B2",
+              "timely": true
+            }
+          ],
+          "created_day": 1,
+          "gap": 20,
+          "matched_competitive": false,
+          "need_by_day": 6,
+          "need_id": "C1:steel:6",
+          "quantity": 20,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "C1:steel:7:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 4,
+              "release_due": false,
+              "supplier": "B1",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 4,
+              "release_due": false,
+              "supplier": "B2",
+              "timely": true
+            }
+          ],
+          "created_day": 1,
+          "gap": 20,
+          "matched_competitive": false,
+          "need_by_day": 7,
+          "need_id": "C1:steel:7",
+          "quantity": 20,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "C1:steel:8:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 5,
+              "release_due": false,
+              "supplier": "B1",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 5,
+              "release_due": false,
+              "supplier": "B2",
+              "timely": true
+            }
+          ],
+          "created_day": 1,
+          "gap": 20,
+          "matched_competitive": false,
+          "need_by_day": 8,
+          "need_id": "C1:steel:8",
+          "quantity": 20,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "C1:steel:9:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 6,
+              "release_due": false,
+              "supplier": "B1",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 6,
+              "release_due": false,
+              "supplier": "B2",
+              "timely": true
+            }
+          ],
+          "created_day": 1,
+          "gap": 20,
+          "matched_competitive": false,
+          "need_by_day": 9,
+          "need_id": "C1:steel:9",
+          "quantity": 20,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "C1:steel:10:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 7,
+              "release_due": false,
+              "supplier": "B1",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 7,
+              "release_due": false,
+              "supplier": "B2",
+              "timely": true
+            }
+          ],
+          "created_day": 1,
+          "gap": 20,
+          "matched_competitive": false,
+          "need_by_day": 10,
+          "need_id": "C1:steel:10",
+          "quantity": 20,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "C1:steel:11:PROJECTED",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 8,
+              "release_due": false,
+              "supplier": "B1",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 8,
+              "release_due": false,
+              "supplier": "B2",
+              "timely": true
+            }
+          ],
+          "created_day": 1,
+          "gap": 20,
+          "matched_competitive": false,
+          "need_by_day": 11,
+          "need_id": "C1:steel:11",
+          "quantity": 20,
+          "requirement_class": "PROJECTED",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "C1:steel:12:PROJECTED",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 9,
+              "release_due": false,
+              "supplier": "B1",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 9,
+              "release_due": false,
+              "supplier": "B2",
+              "timely": true
+            }
+          ],
+          "created_day": 1,
+          "gap": 20,
+          "matched_competitive": false,
+          "need_by_day": 12,
+          "need_id": "C1:steel:12",
+          "quantity": 20,
+          "requirement_class": "PROJECTED",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "C1:steel:13:PROJECTED",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 300,
+              "quoted_quantity": 20,
+              "release_day": 10,
+              "release_due": false,
+              "supplier": "B1",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 20,
+              "eligible": false,
+              "expected_arrival": 4,
+              "posted_price": 270,
+              "quoted_quantity": 20,
+              "release_day": 10,
+              "release_due": false,
+              "supplier": "B2",
+              "timely": true
+            }
+          ],
+          "created_day": 1,
+          "gap": 20,
+          "matched_competitive": false,
+          "need_by_day": 13,
+          "need_id": "C1:steel:13",
+          "quantity": 20,
+          "requirement_class": "PROJECTED",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        }
+      ],
+      "round": 0,
+      "scope": "SHADOW_SAME_STATE_ONLY",
+      "selected_supplier": "B2",
+      "world_diagnostic": {
+        "current_resources": {
+          "B1": {
+            "current_atp": 20,
+            "stock_atp": 20,
+            "transport_available": 180
+          },
+          "B2": {
+            "current_atp": 20,
+            "stock_atp": 20,
+            "transport_available": 180
+          }
+        },
+        "unknown_suppliers": []
+      }
+    },
+    "own_plan": {
+      "actual": {
+        "machine": 6
+      },
+      "allocations": [
+        {
+          "available_by_day": 1,
+          "bucket_id": "C1:steel:1:FIRM",
+          "kind": "ON_HAND",
+          "lot_id": "stock:C1:steel",
+          "need_by_day": 1,
+          "order_id": null,
+          "quantity": 24,
+          "requirement_class": "FIRM"
+        },
+        {
+          "available_by_day": 1,
+          "bucket_id": "C1:steel:2:FIRM",
+          "kind": "ON_HAND",
+          "lot_id": "stock:C1:steel",
+          "need_by_day": 2,
+          "order_id": null,
+          "quantity": 24,
+          "requirement_class": "FIRM"
+        },
+        {
+          "available_by_day": 1,
+          "bucket_id": "C1:steel:3:FIRM",
+          "kind": "ON_HAND",
+          "lot_id": "stock:C1:steel",
+          "need_by_day": 3,
+          "order_id": null,
+          "quantity": 12,
+          "requirement_class": "FIRM"
+        }
+      ],
+      "customer_pending": {
+        "machine": 0
+      },
+      "day": 1,
+      "event": "own_plan",
+      "firm": "C1",
+      "observed_rates": {
+        "machine": "5"
+      },
+      "plans": [
+        {
+          "actual_output": 6,
+          "basis": "OWN_OBSERVED_REQUESTS_ORDERS_AND_DEMAND",
+          "capacity": 8,
+          "commodity": "machine",
+          "day": 1,
+          "firm_id": "C1",
+          "planned_output": 6,
+          "production_day": 1,
+          "requirement_class": "FIRM"
+        },
+        {
+          "actual_output": null,
+          "basis": "OWN_OBSERVED_REQUESTS_ORDERS_AND_DEMAND",
+          "capacity": 8,
+          "commodity": "machine",
+          "day": 1,
+          "firm_id": "C1",
+          "planned_output": 6,
+          "production_day": 2,
+          "requirement_class": "FIRM"
+        },
+        {
+          "actual_output": null,
+          "basis": "OWN_OBSERVED_REQUESTS_ORDERS_AND_DEMAND",
+          "capacity": 8,
+          "commodity": "machine",
+          "day": 1,
+          "firm_id": "C1",
+          "planned_output": 6,
+          "production_day": 3,
+          "requirement_class": "FIRM"
+        },
+        {
+          "actual_output": null,
+          "basis": "OWN_OBSERVED_REQUESTS_ORDERS_AND_DEMAND",
+          "capacity": 8,
+          "commodity": "machine",
+          "day": 1,
+          "firm_id": "C1",
+          "planned_output": 6,
+          "production_day": 4,
+          "requirement_class": "FIRM"
+        },
+        {
+          "actual_output": null,
+          "basis": "OWN_OBSERVED_REQUESTS_ORDERS_AND_DEMAND",
+          "capacity": 8,
+          "commodity": "machine",
+          "day": 1,
+          "firm_id": "C1",
+          "planned_output": 6,
+          "production_day": 5,
+          "requirement_class": "FIRM"
+        },
+        {
+          "actual_output": null,
+          "basis": "OWN_OBSERVED_REQUESTS_ORDERS_AND_DEMAND",
+          "capacity": 8,
+          "commodity": "machine",
+          "day": 1,
+          "firm_id": "C1",
+          "planned_output": 5,
+          "production_day": 6,
+          "requirement_class": "FIRM"
+        },
+        {
+          "actual_output": null,
+          "basis": "OWN_OBSERVED_REQUESTS_ORDERS_AND_DEMAND",
+          "capacity": 8,
+          "commodity": "machine",
+          "day": 1,
+          "firm_id": "C1",
+          "planned_output": 5,
+          "production_day": 7,
+          "requirement_class": "FIRM"
+        },
+        {
+          "actual_output": null,
+          "basis": "OWN_OBSERVED_REQUESTS_ORDERS_AND_DEMAND",
+          "capacity": 8,
+          "commodity": "machine",
+          "day": 1,
+          "firm_id": "C1",
+          "planned_output": 5,
+          "production_day": 8,
+          "requirement_class": "FIRM"
+        },
+        {
+          "actual_output": null,
+          "basis": "OWN_OBSERVED_REQUESTS_ORDERS_AND_DEMAND",
+          "capacity": 8,
+          "commodity": "machine",
+          "day": 1,
+          "firm_id": "C1",
+          "planned_output": 5,
+          "production_day": 9,
+          "requirement_class": "FIRM"
+        },
+        {
+          "actual_output": null,
+          "basis": "OWN_OBSERVED_REQUESTS_ORDERS_AND_DEMAND",
+          "capacity": 8,
+          "commodity": "machine",
+          "day": 1,
+          "firm_id": "C1",
+          "planned_output": 5,
+          "production_day": 10,
+          "requirement_class": "FIRM"
+        }
+      ],
+      "requirements": [
+        {
+          "allocated": 24,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 24,
+          "last_revised_day": 1,
+          "need_by_day": 1,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 0,
+          "quantity": 24,
+          "release_by_day": -2,
+          "requirement_bucket_id": "C1:steel:1:FIRM",
+          "requirement_class": "FIRM",
+          "revision_delta": 24,
+          "timely_gap": 0
+        },
+        {
+          "allocated": 24,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 24,
+          "last_revised_day": 1,
+          "need_by_day": 2,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 0,
+          "quantity": 24,
+          "release_by_day": -1,
+          "requirement_bucket_id": "C1:steel:2:FIRM",
+          "requirement_class": "FIRM",
+          "revision_delta": 24,
+          "timely_gap": 0
+        },
+        {
+          "allocated": 12,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 24,
+          "last_revised_day": 1,
+          "need_by_day": 3,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 0,
+          "quantity": 24,
+          "release_by_day": 0,
+          "requirement_bucket_id": "C1:steel:3:FIRM",
+          "requirement_class": "FIRM",
+          "revision_delta": 24,
+          "timely_gap": 12
+        },
+        {
+          "allocated": 0,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 24,
+          "last_revised_day": 1,
+          "need_by_day": 4,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 0,
+          "quantity": 24,
+          "release_by_day": 1,
+          "requirement_bucket_id": "C1:steel:4:FIRM",
+          "requirement_class": "FIRM",
+          "revision_delta": 24,
+          "timely_gap": 24
+        },
+        {
+          "allocated": 0,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 24,
+          "last_revised_day": 1,
+          "need_by_day": 5,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 0,
+          "quantity": 24,
+          "release_by_day": 2,
+          "requirement_bucket_id": "C1:steel:5:FIRM",
+          "requirement_class": "FIRM",
+          "revision_delta": 24,
+          "timely_gap": 24
+        },
+        {
+          "allocated": 0,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 20,
+          "last_revised_day": 1,
+          "need_by_day": 6,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 0,
+          "quantity": 20,
+          "release_by_day": 3,
+          "requirement_bucket_id": "C1:steel:6:FIRM",
+          "requirement_class": "FIRM",
+          "revision_delta": 20,
+          "timely_gap": 20
+        },
+        {
+          "allocated": 0,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 20,
+          "last_revised_day": 1,
+          "need_by_day": 7,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 0,
+          "quantity": 20,
+          "release_by_day": 4,
+          "requirement_bucket_id": "C1:steel:7:FIRM",
+          "requirement_class": "FIRM",
+          "revision_delta": 20,
+          "timely_gap": 20
+        },
+        {
+          "allocated": 0,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 20,
+          "last_revised_day": 1,
+          "need_by_day": 8,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 0,
+          "quantity": 20,
+          "release_by_day": 5,
+          "requirement_bucket_id": "C1:steel:8:FIRM",
+          "requirement_class": "FIRM",
+          "revision_delta": 20,
+          "timely_gap": 20
+        },
+        {
+          "allocated": 0,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 20,
+          "last_revised_day": 1,
+          "need_by_day": 9,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 0,
+          "quantity": 20,
+          "release_by_day": 6,
+          "requirement_bucket_id": "C1:steel:9:FIRM",
+          "requirement_class": "FIRM",
+          "revision_delta": 20,
+          "timely_gap": 20
+        },
+        {
+          "allocated": 0,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 20,
+          "last_revised_day": 1,
+          "need_by_day": 10,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 0,
+          "quantity": 20,
+          "release_by_day": 7,
+          "requirement_bucket_id": "C1:steel:10:FIRM",
+          "requirement_class": "FIRM",
+          "revision_delta": 20,
+          "timely_gap": 20
+        },
+        {
+          "allocated": 0,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 0,
+          "last_revised_day": 1,
+          "need_by_day": 11,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 20,
+          "quantity": 20,
+          "release_by_day": 8,
+          "requirement_bucket_id": "C1:steel:11:PROJECTED",
+          "requirement_class": "PROJECTED",
+          "revision_delta": 20,
+          "timely_gap": 20
+        },
+        {
+          "allocated": 0,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 0,
+          "last_revised_day": 1,
+          "need_by_day": 12,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 20,
+          "quantity": 20,
+          "release_by_day": 9,
+          "requirement_bucket_id": "C1:steel:12:PROJECTED",
+          "requirement_class": "PROJECTED",
+          "revision_delta": 20,
+          "timely_gap": 20
+        },
+        {
+          "allocated": 0,
+          "basis": "OWN_RECIPE_AGGREGATE",
+          "commodity": "steel",
+          "created_day": 1,
+          "firm_qty": 0,
+          "last_revised_day": 1,
+          "need_by_day": 13,
+          "previous_qty": 0,
+          "producer": "C1",
+          "projected_qty": 20,
+          "quantity": 20,
+          "release_by_day": 10,
+          "requirement_bucket_id": "C1:steel:13:PROJECTED",
+          "requirement_class": "PROJECTED",
+          "revision_delta": 20,
+          "timely_gap": 20
+        }
+      ],
+      "terminal_backlog": {
+        "machine": 5
+      }
+    },
+    "scope": "Material arrives in the buyer stock pool and supports recorded subsequent production/terminal deliveries. Fungible stock does not identify which exact delivered machine contains a particular cargo.",
+    "source": ".local/cycle02/replay_a/M2_T_EQUAL_FEASIBLE_P_HETEROGENEOUS_R_PRICE_FIRST_600",
+    "subsequent_same_inventory_pool_consumption_production_terminal": [
+      {
+        "commodity": "steel",
+        "day": 2,
+        "event": "consumed",
+        "firm": "C1",
+        "quantity": 24
+      },
+      {
+        "commodity": "machine",
+        "day": 2,
+        "event": "produced",
+        "firm": "C1",
+        "quantity": 6
+      },
+      {
+        "buyer": "external:T1",
+        "buyer_debit": 10000,
+        "commodity": "machine",
+        "day": 2,
+        "event": "terminal",
+        "locked_price": 2000,
+        "quantity": 5,
+        "seller": "C1",
+        "seller_credit": 10000,
+        "sink_id": "T1"
+      },
+      {
+        "commodity": "steel",
+        "day": 3,
+        "event": "consumed",
+        "firm": "C1",
+        "quantity": 24
+      },
+      {
+        "commodity": "machine",
+        "day": 3,
+        "event": "produced",
+        "firm": "C1",
+        "quantity": 6
+      },
+      {
+        "buyer": "external:T1",
+        "buyer_debit": 10000,
+        "commodity": "machine",
+        "day": 3,
+        "event": "terminal",
+        "locked_price": 2000,
+        "quantity": 5,
+        "seller": "C1",
+        "seller_credit": 10000,
+        "sink_id": "T1"
+      },
+      {
+        "commodity": "steel",
+        "day": 4,
+        "event": "consumed",
+        "firm": "C1",
+        "quantity": 24
+      },
+      {
+        "commodity": "machine",
+        "day": 4,
+        "event": "produced",
+        "firm": "C1",
+        "quantity": 6
+      },
+      {
+        "buyer": "external:T1",
+        "buyer_debit": 10000,
+        "commodity": "machine",
+        "day": 4,
+        "event": "terminal",
+        "locked_price": 2000,
+        "quantity": 5,
+        "seller": "C1",
+        "seller_credit": 10000,
+        "sink_id": "T1"
+      }
+    ]
+  },
+  "quote_change_without_eligible_choice_change": {
+    "actual_decision": {
+      "boundary": 610,
+      "buyer": "B2",
+      "buyer_visible_information": {
+        "available_cash": 87044850,
+        "max_unit_price": 400,
+        "offers": [
+          {
+            "commodity": "coal",
+            "expected_arrival_day": 614,
+            "max_acceptable_quantity": 300,
+            "offer_day": 610,
+            "posted_price": 49,
+            "promised_dispatch_by_day": 612,
+            "route_lead_time": 2,
+            "supplier_id": "A",
+            "supply_basis": "STOCK_CONFIRMED"
+          },
+          {
+            "commodity": "coal",
+            "expected_arrival_day": 616,
+            "max_acceptable_quantity": 60,
+            "offer_day": 610,
+            "posted_price": 360,
+            "promised_dispatch_by_day": 612,
+            "route_lead_time": 4,
+            "supplier_id": "D",
+            "supply_basis": "STOCK_CONFIRMED"
+          }
+        ],
+        "procurement_gap": {
+          "exposure_room": 440,
+          "procurement_need_plan": 40,
+          "procurement_need_safety": 0,
+          "procurement_need_total": 40,
+          "real_exposure": 162,
+          "timely_release_gap": 40,
+          "visible_exposure": 602
+        }
+      },
+      "commodity": "coal",
+      "day": 610,
+      "decision_id": 7979,
+      "event": "decision",
+      "intent": {
+        "buyer_id": "B2",
+        "commodity": "coal",
+        "expected_arrival_day": 616,
+        "lines": [
+          {
+            "commodity": "coal",
+            "need_by_day": 616,
+            "need_id": "B2:coal:616",
+            "quantity": 40,
+            "source_bucket_id": "B2:coal:616:FIRM"
+          }
+        ],
+        "procurement_need_id": "B2:coal:616",
+        "procurement_round": 1,
+        "quoted_quantity": 60,
+        "request_day": 610,
+        "requested_quantity": 40,
+        "supplier_id": "D"
+      },
+      "known": [
+        "A",
+        "D"
+      ],
+      "phase": "MATCHING",
+      "queried": [
+        "A",
+        "D"
+      ],
+      "requirements": [
+        {
+          "bucket_id": "B2:coal:611:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 607,
+              "release_due": true,
+              "supplier": "A",
+              "timely": false
+            },
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 605,
+              "release_due": true,
+              "supplier": "D",
+              "timely": false
+            }
+          ],
+          "created_day": 596,
+          "gap": 0,
+          "matched_competitive": false,
+          "need_by_day": 611,
+          "need_id": "B2:coal:611",
+          "quantity": 42,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:612:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 608,
+              "release_due": true,
+              "supplier": "A",
+              "timely": false
+            },
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 606,
+              "release_due": true,
+              "supplier": "D",
+              "timely": false
+            }
+          ],
+          "created_day": 597,
+          "gap": 0,
+          "matched_competitive": false,
+          "need_by_day": 612,
+          "need_id": "B2:coal:612",
+          "quantity": 40,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:613:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 609,
+              "release_due": true,
+              "supplier": "A",
+              "timely": false
+            },
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 607,
+              "release_due": true,
+              "supplier": "D",
+              "timely": false
+            }
+          ],
+          "created_day": 598,
+          "gap": 0,
+          "matched_competitive": false,
+          "need_by_day": 613,
+          "need_id": "B2:coal:613",
+          "quantity": 40,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:614:FIRM",
+          "candidates": [
+            {
+              "constraints": [],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 610,
+              "release_due": true,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 608,
+              "release_due": true,
+              "supplier": "D",
+              "timely": false
+            }
+          ],
+          "created_day": 599,
+          "gap": 0,
+          "matched_competitive": false,
+          "need_by_day": 614,
+          "need_id": "B2:coal:614",
+          "quantity": 40,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:615:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 611,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "LATE_FOR_REQUIREMENT"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 609,
+              "release_due": true,
+              "supplier": "D",
+              "timely": false
+            }
+          ],
+          "created_day": 600,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 615,
+          "need_id": "B2:coal:615",
+          "quantity": 40,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:616:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 612,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [],
+              "current_atp": 60,
+              "eligible": true,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 610,
+              "release_due": true,
+              "supplier": "D",
+              "timely": true
+            }
+          ],
+          "created_day": 601,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 616,
+          "need_id": "B2:coal:616",
+          "quantity": 40,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": "D",
+          "shadow_price_first": "D"
+        },
+        {
+          "bucket_id": "B2:coal:617:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 613,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 611,
+              "release_due": false,
+              "supplier": "D",
+              "timely": true
+            }
+          ],
+          "created_day": 602,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 617,
+          "need_id": "B2:coal:617",
+          "quantity": 40,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:618:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 614,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 612,
+              "release_due": false,
+              "supplier": "D",
+              "timely": true
+            }
+          ],
+          "created_day": 603,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 618,
+          "need_id": "B2:coal:618",
+          "quantity": 40,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:619:FIRM",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 615,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 613,
+              "release_due": false,
+              "supplier": "D",
+              "timely": true
+            }
+          ],
+          "created_day": 604,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 619,
+          "need_id": "B2:coal:619",
+          "quantity": 40,
+          "requirement_class": "FIRM",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:620:PROJECTED",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 616,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 614,
+              "release_due": false,
+              "supplier": "D",
+              "timely": true
+            }
+          ],
+          "created_day": 605,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 620,
+          "need_id": "B2:coal:620",
+          "quantity": 40,
+          "requirement_class": "PROJECTED",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:621:PROJECTED",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 617,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 615,
+              "release_due": false,
+              "supplier": "D",
+              "timely": true
+            }
+          ],
+          "created_day": 606,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 621,
+          "need_id": "B2:coal:621",
+          "quantity": 40,
+          "requirement_class": "PROJECTED",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:622:PROJECTED",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 618,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 616,
+              "release_due": false,
+              "supplier": "D",
+              "timely": true
+            }
+          ],
+          "created_day": 607,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 622,
+          "need_id": "B2:coal:622",
+          "quantity": 40,
+          "requirement_class": "PROJECTED",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:623:PROJECTED",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 619,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 617,
+              "release_due": false,
+              "supplier": "D",
+              "timely": true
+            }
+          ],
+          "created_day": 608,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 623,
+          "need_id": "B2:coal:623",
+          "quantity": 40,
+          "requirement_class": "PROJECTED",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:624:PROJECTED",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 620,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 618,
+              "release_due": false,
+              "supplier": "D",
+              "timely": true
+            }
+          ],
+          "created_day": 609,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 624,
+          "need_id": "B2:coal:624",
+          "quantity": 40,
+          "requirement_class": "PROJECTED",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        },
+        {
+          "bucket_id": "B2:coal:625:PROJECTED",
+          "candidates": [
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 280,
+              "eligible": false,
+              "expected_arrival": 614,
+              "posted_price": 49,
+              "quoted_quantity": 300,
+              "release_day": 621,
+              "release_due": false,
+              "supplier": "A",
+              "timely": true
+            },
+            {
+              "constraints": [
+                "OTHER_EXPLICIT_REASON:RELEASE_NOT_DUE"
+              ],
+              "current_atp": 60,
+              "eligible": false,
+              "expected_arrival": 616,
+              "posted_price": 360,
+              "quoted_quantity": 60,
+              "release_day": 619,
+              "release_due": false,
+              "supplier": "D",
+              "timely": true
+            }
+          ],
+          "created_day": 610,
+          "gap": 40,
+          "matched_competitive": false,
+          "need_by_day": 625,
+          "need_id": "B2:coal:625",
+          "quantity": 40,
+          "requirement_class": "PROJECTED",
+          "shadow_differs": false,
+          "shadow_legacy": null,
+          "shadow_price_first": null
+        }
+      ],
+      "round": 1,
+      "scope": "SHADOW_SAME_STATE_ONLY",
+      "selected_supplier": "D",
+      "world_diagnostic": {
+        "current_resources": {
+          "A": {
+            "current_atp": 280,
+            "stock_atp": 380,
+            "transport_available": 280
+          },
+          "D": {
+            "current_atp": 60,
+            "stock_atp": 60,
+            "transport_available": 180
+          }
+        },
+        "unknown_suppliers": []
+      }
+    },
+    "explanation": "For need616 on decision610, A ETA614 is timely but release612 is not due; only D ETA616 is executable. Changing358 to360 preserves eligibility and same-state selected supplier. This is a read-only local price-change shadow, not a rerun counterfactual.",
+    "new_D_quote": 360,
+    "prior_D_quote": 358
+  }
+}

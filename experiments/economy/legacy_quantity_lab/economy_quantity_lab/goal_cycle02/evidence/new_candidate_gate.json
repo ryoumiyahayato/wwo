@@ -1,0 +1,62 @@
+{
+  "NEW_PRICE_CANDIDATE_GATE": "PASS",
+  "decided_utc": "2026-10-08T03:21:04.430860+00:00",
+  "source_commit": "42981ee",
+  "source_evidence": ".local/cycle02/replay_a; all39 pre-candidate cases/59400 days and their dual/causal audits complete",
+  "conditions": [
+    {
+      "id": 1,
+      "status": "PASS",
+      "evidence": "Observed v1 110/112 willingness-bound oscillator persists through3598; seller resets seven-day window, re-raises after a no-sales PRICE-refusal window."
+    },
+    {
+      "id": 2,
+      "status": "PASS",
+      "evidence": "Same coal physical fixture N2=6079/N3nonbind=6079/N3bind=4843 at600;36079/36079/28429 at3600; actual idle400 stock and PRICE refusals, CASH0."
+    },
+    {
+      "id": 3,
+      "status": "PASS",
+      "evidence": "Shared coal scarcity has one known raw seller A; counterexample is not cross-lead A/D comparison."
+    },
+    {
+      "id": 4,
+      "status": "PASS",
+      "evidence": "Uses only own posted price, actual received PRICE/CASH rejections, own accepted quantity and free stock in completed window."
+    },
+    {
+      "id": 5,
+      "status": "PASS",
+      "evidence": "One pure local function and one integer remembered ceiling per seller-good, candidate switchable to unchanged v1."
+    },
+    {
+      "id": 6,
+      "status": "PASS",
+      "evidence": "Same-input N3/N4 comparisons on both limit groups600/3600, same scale, still-unrun v2 mixed/asymmetric holdouts; zero-accepted/PRICE windows and real goods are discriminators."
+    },
+    {
+      "id": 7,
+      "status": "PASS",
+      "evidence": "No new finance, buyer adaptive bid, global market, world/future information or settlement system."
+    }
+  ],
+  "candidate": "local-zero-accept-refusal-bound-v1",
+  "proposal_sha256": "ec4c2975c8b308b8e7ddf5e5f159439f325664ebec26be0a6459566d559ac10f",
+  "rule_parameters": {
+    "window_days": 7,
+    "unit_tick": 1,
+    "learning_requires": [
+      "information_count>0",
+      "PRICE>0",
+      "accepted==0",
+      "free_stock>0",
+      "CASH==0"
+    ],
+    "learned_target": "max(original_floor, min(previous_ceiling,current-tick))",
+    "price_formula": "No new information: hold price and memory. Otherwise max(original_floor,current-step,min(original_cap,current+step,v1_price,new_ceiling));2% rate limit has priority over instant ceiling compliance."
+  },
+  "holdout_status": "Original H2/v2 unrun; static terminal funding revision also unrun; freeze corrected funds alongside candidate before first holdout",
+  "counterexample_classification": "MODEL_COUNTEREXAMPLE",
+  "candidate_revisions_allowed": 2,
+  "candidate_versions_selected": 1
+}

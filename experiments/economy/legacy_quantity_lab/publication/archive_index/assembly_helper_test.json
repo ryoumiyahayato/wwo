@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "mode": "three actual ZIP-wrapped testchunks; final bytes and SHA checked",
+  "exit": 0,
+  "stdout": "verified 1\nverified 2\nverified 3\nPASS /tmp/cycle02-assembly-test-h7lzpjfz/out.zip 7351 f26477cb15d3353bf2a6bc22221f1d4157e0b8d390eacb6abc0d4b9fb4c4f416\n"
+}

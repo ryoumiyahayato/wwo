@@ -1,0 +1,3562 @@
+{
+  "LOCAL_SEALED_HEAD": "f8c2915894b9a99deb147414a1f7ee18486d200f",
+  "SEALED_TREE_SHA": "1ba98d135463f450197611a8cd94ae1a3588b463",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8849078901eb49fc3a474f6e66a49a2ef69adbfb",
+      "size": 477
+    },
+    {
+      "path": ".github/workflows/verify-baseline.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3c3244e2eadbea3fd51461ae795bb66b6a7e5ebc",
+      "size": 2614
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce632c8fadc681bbbe95441f78c043bc97e55e8c",
+      "size": 424
+    },
+    {
+      "path": "AGENTS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e21884cd1279679ce75f5b47b0bd26328467bea8",
+      "size": 5038
+    },
+    {
+      "path": "BASELINE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5fc996fc6212d49078836afacd4d50286c6689f1",
+      "size": 5215
+    },
+    {
+      "path": "DECISIONS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4d7e9d1ce17dac3f071f308803d00241816a726",
+      "size": 5076
+    },
+    {
+      "path": "EXECUTION_PLAN.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bfec516542e9115c4df7f46bab3ea28a4412573b",
+      "size": 3118
+    },
+    {
+      "path": "GOAL_CYCLE02_CANDIDATE_PROPOSAL.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a42b8e1e17437f16c5ee3b3e8b78537abdb60fd2",
+      "size": 3406
+    },
+    {
+      "path": "GOAL_CYCLE02_DECISIONS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c628b0dcbcb9821b307fa7fbd7d21fd1a7c3b389",
+      "size": 8207
+    },
+    {
+      "path": "GOAL_CYCLE02_PLAN.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "01d29fa9d1e26b4ca2cd030de09d15e63310bb98",
+      "size": 1833
+    },
+    {
+      "path": "GOAL_CYCLE02_REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc574a7dd29bdbfdf20c5ab38b18a3736f673617",
+      "size": 20408
+    },
+    {
+      "path": "GOAL_CYCLE02_RESTORE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8bd95f4ad6be6df347f57b529f533e08a77c622c",
+      "size": 2765
+    },
+    {
+      "path": "GOAL_CYCLE02_STATE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "512bbc6e8a0633621c3c98c6937ea6d2a82b1eb3",
+      "size": 7839
+    },
+    {
+      "path": "GOAL_CYCLE02_USER_PROMPT.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eb8e3a6ca30365c523545fb77a96ce5a7613d046",
+      "size": 32089
+    },
+    {
+      "path": "GOAL_STATE.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e99f8c3f85563311af801c66c685b3f9fef24fb",
+      "size": 4592
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3f163a33eed00c18e477c5661a284a694e6f0f37",
+      "size": 11150
+    },
+    {
+      "path": "build_cycle02_evidence.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "30cec1b73694f7c0e2715f9770319b95522237ab",
+      "size": 7964
+    },
+    {
+      "path": "check_cycle02_cross_party.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1b1d67e3d1eff810bf0a7b179534cd10f1c5fc7",
+      "size": 2349
+    },
+    {
+      "path": "check_cycle02_ghost_need.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "019fe7b39e4877fa4de2dbc423fb95faf9551d24",
+      "size": 2188
+    },
+    {
+      "path": "docs/RESEARCH_BOUNDARIES.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78fc4ce758b6470c8b1fedd5739e91ef2d470d24",
+      "size": 6113
+    },
+    {
+      "path": "docs/initial_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b0d5ef5f2ba4b2089fb9ce945451d6cd8bdad75c",
+      "size": 43403
+    },
+    {
+      "path": "docs/source_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca96084896eeeffe0495ebefbce0a672d1ed3707",
+      "size": 26341
+    },
+    {
+      "path": "economy_quantity_lab/REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8bca28f6f177015b405fc68687ae982023191e0b",
+      "size": 9542
+    },
+    {
+      "path": "economy_quantity_lab/baseline.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4102d26d8f5744728507a24545fdb31df88bd635",
+      "size": 23520
+    },
+    {
+      "path": "economy_quantity_lab/baseline_order_trace.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "01d41c8118110bed08e985acb18abe7079ca77a4",
+      "size": 55182
+    },
+    {
+      "path": "economy_quantity_lab/economy.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "503256450ca60b8898bd900ed2e3143eedf19198",
+      "size": 12820
+    },
+    {
+      "path": "economy_quantity_lab/fixture.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76b5c7a0f18cbee4c776681c205c995d769f09f8",
+      "size": 1282
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/DRAFT_PR.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b437cb06ed42e438e45ac1f21aaef81b2b0af07a",
+      "size": 2551
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "489bb788122d5eedc1bf81b388bd3a2201c1c915",
+      "size": 4820
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f56b624d445ceb74debf1c0493182b5861530d53",
+      "size": 12827
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/cash.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3de700fbaf3a5a4610463a632785f02cf527da5",
+      "size": 2031
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/corruption_probes.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "594edd378374a2e9c7937e47e974e373549ff295",
+      "size": 3522
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/cycle_fixtures.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "87f83692e08dcde6550530158d7cef18040e5ac0",
+      "size": 5631
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/actual_run_counts.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "be41dcd034e14db8045d00232d2f7012b42cd78d",
+      "size": 683
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/baseline_exact_round6.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a866999ce54c643a36441d612ef5bbcee83f3de1",
+      "size": 392
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/baseline_execution.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e2fb4cdace157075772dfcbb4fb6b4cdd0278c3c",
+      "size": 3336
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/baseline_verification_records.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54c03c6c0b0c9d18217de5ad879fa7991e23aa7e",
+      "size": 71572
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/dated_diagnostic_reproduction.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58f90d2853e2e2628b1972601e7d1606547fdeab",
+      "size": 2616
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/dated_request_diagnostic.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9a01b95a80e22182ffcee6b8061ebff2fdfae8fb",
+      "size": 877
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/dated_requests.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7fdce0dfede900e669d8f5a243402c168923da4c",
+      "size": 79122
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/development_failure_v1.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "17c22bc219709f51ac6c060892e73e6888bef92f",
+      "size": 10273
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/development_failure_v2.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af8d3b0a7a9ffe0a332d18408406b78b8a106a1f",
+      "size": 5546
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/failed_or_not_run.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f45123a005c95b858ac8d9d2ed2ee551d481cf1d",
+      "size": 1641
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/final_corruptions.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02cb550ca7cbf918b5cdf5e3f5f686bc8994612f",
+      "size": 913
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/final_history_round3-verification-dilf_hj7.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c58ac25d0a3caee213e614935fb5c4d3bb832cbc",
+      "size": 2582
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/final_history_round4a-verification-sfgy7twf.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "26eead2ea9400ca1f98da33c93d0be44644c7f39",
+      "size": 2561
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/final_history_round4b-verification-acx_dnet.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7fa21e26bc886e8a5175bf0180507aef0c6a4c5",
+      "size": 2540
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/final_history_round4c-verification-nb_k8nnt.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b922b149ce5739caa57f7e73bc7434cc742d26e8",
+      "size": 2577
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/final_history_round5-verification-5n3b35ht.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a639281091aa454c064be56fda7e663aab8a5855",
+      "size": 2590
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/final_history_round5b-verification-2dc924wj.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00910a6e47cc0ceac9b01659f221188a544199ff",
+      "size": 2602
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/final_history_verification-9x2y3n7t.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ebd2f79b37a3250f7f52edf194efec1e36de501",
+      "size": 50449
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/final_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6c79582933ab525f58256e661e1d85d4acacfa5",
+      "size": 6998
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_a_audits.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "980da3281c18382a354028d94aa22e8875c5c3e3",
+      "size": 18775
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_a_config_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0452e26aff35771daf32ffb2c244361369b4cac0",
+      "size": 6234
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_a_execution.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d8e303d7512e3141bd3b90861ff03ef5a79007b",
+      "size": 1733
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_a_hash_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60fd3b7ffa22001e924a177aa40bed273dfdbba7",
+      "size": 41117
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_a_performance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9a0e58040393313636bda3e8f326ece98685195",
+      "size": 39730
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_a_summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef10ebe90c48b487ce4a31f9621096ef4b77091b",
+      "size": 226153
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_b_audits.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "980da3281c18382a354028d94aa22e8875c5c3e3",
+      "size": 18775
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_b_execution.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5a63f4157cf540a2e20f503663d619fa299652e",
+      "size": 1729
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_b_hash_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60fd3b7ffa22001e924a177aa40bed273dfdbba7",
+      "size": 41117
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_b_performance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18c2ed4ad8f4c92089da6d290c5bc12c47014fe5",
+      "size": 39730
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/formal_b_summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef10ebe90c48b487ce4a31f9621096ef4b77091b",
+      "size": 226153
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/funding_audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "87fcc8f237eee2e6fce842e3782c2c4fbd484c26",
+      "size": 27165
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/paired_analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e8dcd313f74b97a411677cc8fa014c17f26a7d3f",
+      "size": 6210
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/pre_evaluation_manifest_v1.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "abb85ad33ffdd91dc431bfbac376e67fc88fb875",
+      "size": 3431
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/pre_formal_correctness.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5fb2dbc440c08db1cea16f9065ad3c4e6a4f77ef",
+      "size": 1123
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/pre_formal_corruptions.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02cb550ca7cbf918b5cdf5e3f5f686bc8994612f",
+      "size": 913
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/scale_smoke_audits.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "470b02e100d61047fd4f8288c30cd26e28f46749",
+      "size": 2487
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/scale_smoke_execution.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0665ce072e9ee92e6230ca1d6332d4557d00b357",
+      "size": 1729
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/scale_smoke_performance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "adde919e6800d8c8e5fc303e515279bcf3670414",
+      "size": 4782
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/scale_smoke_summary.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7328d3fc644f8ce965230782438a206c3c08a814",
+      "size": 104266
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/source_audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5b10b9a4679b429874e6b002ce1bfc87934a666",
+      "size": 607
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/evidence/stage_status.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc21c8be60db4df4f7f91d04e27ee06601b20116",
+      "size": 751
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/observation.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9decab3e4552b58069643dc0cd757a1f77e5ec77",
+      "size": 9254
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/offline_audit.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e44bf0c2ceb6bd5aad7ad2d5401418aa183ee02",
+      "size": 12119
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/payment_policy.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9a8ec0d1b2a17083c83dcedcc75c92c77e96c54",
+      "size": 11580
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/pricing.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c13e20004bb873cd6a71c91a41f62a3041fe2e29",
+      "size": 1276
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/run_cycle.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2cdc10d43e6cfa215df96d012dfe6c66522d911c",
+      "size": 5460
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle01/test_cycle.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88728c6c674c67a6b64b31592c925f20cf970c53",
+      "size": 18656
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/DRAFT_PR.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3017072f35ee9d5c2406fb363386304d47b79f7",
+      "size": 2137
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/analyze.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4af703f376631723ddc8f0da994848b9d6ecd77",
+      "size": 7883
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/causal.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d95bbb129e744e249d47a2d4343464428c29cde7",
+      "size": 11261
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/causal_audit.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a387cacde6100fab1f75701b39d8255cd005aed7",
+      "size": 21223
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/corruption_probes02.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ecebf5549977509240b17f2f5740fefe9e708c32",
+      "size": 4006
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/auditor_source_revision.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8382cd8952c247305c3f0825717881e4616b15f7",
+      "size": 1729
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/candidate_tests.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7cc64764db03b05db47006772215bd3b9d572e2",
+      "size": 1446
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/cycle01_frozen_reproduction.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "36e551b51976b71e3377d372bd81f945596a7579",
+      "size": 252
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/factorial_P_T_contrasts.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fc392c753fd12bd825d9414480582104c1d065f9",
+      "size": 6713
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_base_tests.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c628fc60edfac9cd4ed3953406d9b7a104050ec5",
+      "size": 1640
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_causal/N4_negative_controls.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c16e8540114e3ec4182bac8372eaeb6330a55062",
+      "size": 7166
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_causal/decision_chain_examples.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "32c6087ea1aed9f65dd5a6b5a61faadf07b144bb",
+      "size": 107086
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_causal/identity_normalized_controls.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7c195db6455f7d8fa0d6a61739e00f94f03a9517",
+      "size": 530
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_cycle01_immutability.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "679cd73fc864954c08293b48ca4708e0a0a01432",
+      "size": 196
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_metrics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "653d674c9b7c41339d0346da539f0d86b9769d4e",
+      "size": 173581
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_metrics.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c1333221e1a3c084b4f2104b23c0033f683112ae",
+      "size": 328394
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_paired_analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fe31fe76354986657d5efbea098dedb110eb74a",
+      "size": 219448
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_postprocessing_source_revision.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b33cd4376916aef63434588c4500aebacba7656",
+      "size": 1007
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_raw_archive_validation.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "316d8164a743228f03c32b22e3933df540a8d242",
+      "size": 322
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_reaudit_v4_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5af3fbd4a3569d00dc7c66dae33935794f7b0003",
+      "size": 2130
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_source_delta_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0fee6bbc870e15ff95c7d10da36650062aaa5c5c",
+      "size": 11303
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_two_process_hash_equality.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5482a8bf9940c2b7b808b5d3823aa24d84f30f92",
+      "size": 357
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/holdout_funding_revision.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "84219391fb34f78092bec48d3424f1181e688b23",
+      "size": 76047
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/identity_normalized_controls.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f03d7f07d6652fb48a27441f5b4fe49ad977381",
+      "size": 530
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/new_candidate_gate.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3c183d08debe6d0067c0aeb4ba619c2565db9892",
+      "size": 2617
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/platform_interruption_20261008.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a7d78186fb9d0173be8555800d6f89323d4e1964",
+      "size": 1304
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/pre_candidate_decision_chain_examples.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5ba874851da592a64a794b7689756a5da618ef2",
+      "size": 107102
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/preformal_auditfix_tests.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c036738c233b07686a8190a8c8a918849a415cb5",
+      "size": 1640
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/preformal_corruptions.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c16511b354f05fa8f970111a097853641f4d274b",
+      "size": 1361
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/seal_baseline_verification.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5effa6f686aa5d407c090d5d698df9bc0d615cc",
+      "size": 1483
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/evidence/source_continuity.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8bb9bbb0b638276a8b4657538355e4b17bb55eb6",
+      "size": 1891
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/fixtures.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11d4d68a7b8bacf4a58eed2791d1f1242d4ffe56",
+      "size": 5964
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/run_controls.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9ee16ab3874a6ab0e43dbbc4dc9d0f6d493a34e0",
+      "size": 4276
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/run_cycle02.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7add6a7a6331b7af582309e0d3e22dc04de3359d",
+      "size": 5525
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02/test_cycle02.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54a698cff478c8d47ae7f47449694a1a766e151a",
+      "size": 5771
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02_candidate/learning.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "871bb1eed00566fe6709ccb7fe5397820a3402d7",
+      "size": 4287
+    },
+    {
+      "path": "economy_quantity_lab/goal_cycle02_candidate/test_candidate.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2a6fd3cbf0ac8a906736de0404501a6a28c1e56b",
+      "size": 4162
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/INVENTORY_COMPARISON_REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b424056e2231cf739e9059cefc2741788eb3bc79",
+      "size": 17101
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5bc0a0348d67cfb4e05447cbcc71575a4c4795fb",
+      "size": 1029
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/input_access.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e6406d97e5a314738abc3d794b002b2da811dd88",
+      "size": 1727
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inputs/WWO_Codex_第二轮库存控制对照提示词.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7e75fd05cbf465a88503bfcd7e552ad7c1ef7870",
+      "size": 4887
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inputs/WWO_Codex_续做指令_库存控制候选与对照实验.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "24b26ff099188f4ff12954a1c127c5a29f17d321",
+      "size": 13201
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inputs/WWO_数量实验_独立复核.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "61ee0f2ad8e0a1301c332332690ff74272e81569",
+      "size": 7512
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6891e0ae5abc99a1c0224a76be4af963a2c5d096",
+      "size": 1561
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "14e86f41074a4aed429f1b8bb23fd681b49c80e1",
+      "size": 88926
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cde4d1e755eb4953be1b8ac45796567b6f238e08",
+      "size": 145341
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c25c6e8c3886a898d5c4a4fd02e706a882e6f228",
+      "size": 1236
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd10c394b694b057683ba2953fcceecc2b3c9d12",
+      "size": 1697
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cfa6c64119de92ec6c4c21776ee8dad30ff2a790",
+      "size": 89283
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e1d23d01a9dd8596ce180935076a7eeeb874fdfb",
+      "size": 150812
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel0_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3f7972efd990d2e206611327829ef1db4f77741b",
+      "size": 1752
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0cc55d74eb5a98470727c136ea7b67a3b760b7d3",
+      "size": 1565
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7b2daf67811b6f856230e3b4f819e34245a6763",
+      "size": 87150
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "364bda036725aae8406071be0a6ba279b0a2c595",
+      "size": 141879
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f920c7385f56863f22715baedee379efe9d83878",
+      "size": 1193
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "27b9722aa20de48a681fb49c30effbdc74c79d6b",
+      "size": 1701
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "59a016e5b893f96628319e30a3676b4163c9a1a2",
+      "size": 87774
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d424fc2cf212ab85e8f576057064f156e2e981e",
+      "size": 147747
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel40_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a3ef0dbfec0c5bf281ea617046d8a9853a112c1b",
+      "size": 1711
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb158b214d7acf9f21a002ddcf12e091c5e880c9",
+      "size": 1565
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eaf4f8ce954b44ede191df38426560ceee513fc9",
+      "size": 88964
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "21f653c25f2cb09765d285bc1b622196521299fb",
+      "size": 141900
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1e2644e8a7a7176c5af6d5ac5470b5b88fa86c8",
+      "size": 1198
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "48ffe2f209ba8fe3eb4b4b5268a5f5d4bb02ced6",
+      "size": 1701
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2823050d5150814b9237159dc3ae6a630865ae75",
+      "size": 89292
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1348ea47c429fee52c3686f362b3e5894c1b0821",
+      "size": 147601
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/A_steel80_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec2a925c08ee1a43e6f01a2d8c828b749d4ca4ff",
+      "size": 1618
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f01363491bc3f7ce83191280c3d4728e1b9a2cc9",
+      "size": 1561
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7b2daf67811b6f856230e3b4f819e34245a6763",
+      "size": 87150
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "364bda036725aae8406071be0a6ba279b0a2c595",
+      "size": 141879
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f920c7385f56863f22715baedee379efe9d83878",
+      "size": 1193
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2068f2737d6d55d6a45a9d548b1965a0a511dada",
+      "size": 1697
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "59a016e5b893f96628319e30a3676b4163c9a1a2",
+      "size": 87774
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d424fc2cf212ab85e8f576057064f156e2e981e",
+      "size": 147747
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H0_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a3ef0dbfec0c5bf281ea617046d8a9853a112c1b",
+      "size": 1711
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5df7d8126dca1335759ca0f44ecb8c0a72f9b1fb",
+      "size": 1564
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dec8c6c32c40b221a02ae43fbe895d967725f84f",
+      "size": 85341
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "100aec0734e3302ad65d839eba823fd8ea163933",
+      "size": 139946
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7abae961470d0741b47d6ebe171820c2c32a23ce",
+      "size": 1193
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb844d811c0085bc5c94bb450415d425d5a27f10",
+      "size": 1700
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ea3a16b3a6f324970361664f5af886770e11dddf",
+      "size": 88826
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41ba84906ffa249438216218fe180542fc62b4df",
+      "size": 154330
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b0_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "833314a6dc871df8dd81bff2912b727cbeee3def",
+      "size": 2230
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d27657b11545de738207ea3607d6a8c6f55cc60",
+      "size": 1564
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7b2daf67811b6f856230e3b4f819e34245a6763",
+      "size": 87150
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "364bda036725aae8406071be0a6ba279b0a2c595",
+      "size": 141879
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f920c7385f56863f22715baedee379efe9d83878",
+      "size": 1193
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4d25ba98c761c6e2e0a1fda2792d3623d0b76cc",
+      "size": 1700
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "59a016e5b893f96628319e30a3676b4163c9a1a2",
+      "size": 87774
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d424fc2cf212ab85e8f576057064f156e2e981e",
+      "size": 147747
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b2_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a3ef0dbfec0c5bf281ea617046d8a9853a112c1b",
+      "size": 1711
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0d7ea1c33813a49f76be2b951a10951f26f3d47c",
+      "size": 1564
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4a016b4a140c6dd27c095b5bd7f12aa964a06ce",
+      "size": 87180
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bec0a566887fac7121f77849591aa272c3505a3d",
+      "size": 143735
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b3561f0408099e4c91ba299dc45ca712937b3343",
+      "size": 1294
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a80c59736601d3884ab9f70e2fd34283c8062d29",
+      "size": 1700
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "251260d9b70d9dfe25b10415658e34f0f43eddf4",
+      "size": 87764
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00c1a5476883cff026a35da67c6f7f19c9863022",
+      "size": 150413
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L2_H1_b4_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e951ddfa1138590c923356fa55c0158622dd8423",
+      "size": 1719
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b79313c9650bb41fc2215d9d3589dec2233c2b00",
+      "size": 1561
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a1f2b1de031370907a8da06e1ea2c53f82120a5",
+      "size": 85359
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54f77e92c0db40bbbd0f11e91ccf0890f9fc3480",
+      "size": 164738
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "323cc7c9c1c1ad8b05e57ce6bcde1522289b99da",
+      "size": 1291
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b86713bd8640521654b36387e8554510fcbd9059",
+      "size": 1697
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b3d7046f8388625937bd686dc5bfe1af5944adb",
+      "size": 89638
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d081fa0e851f7d87eaa8e4fa080ccbab7e764936",
+      "size": 183466
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H0_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d78facc398a17a32965c295e32d6307cd485fab0",
+      "size": 2267
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8642729778706a01c8ee7a445815e97e876ed825",
+      "size": 1564
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a1f2b1de031370907a8da06e1ea2c53f82120a5",
+      "size": 85359
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54f77e92c0db40bbbd0f11e91ccf0890f9fc3480",
+      "size": 164738
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "323cc7c9c1c1ad8b05e57ce6bcde1522289b99da",
+      "size": 1291
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "023fdfa6bf59a371fbfecf82f19ed5d9bd921ae7",
+      "size": 1700
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b3d7046f8388625937bd686dc5bfe1af5944adb",
+      "size": 89638
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d081fa0e851f7d87eaa8e4fa080ccbab7e764936",
+      "size": 183466
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b0_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d78facc398a17a32965c295e32d6307cd485fab0",
+      "size": 2267
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "456ffc422b6be24223eb12fc52210430e6c3a52c",
+      "size": 1564
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d70cb3d2ce2d496b8567f528820bb677f810818",
+      "size": 87177
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "87fcea0dd4b9bf314d5c2b421a876b567e8fddbc",
+      "size": 169095
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7384f87f4faaed88ddcab54c67a21c702102aa1c",
+      "size": 1392
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "53960ab08d2cc0833f6838938e0bdabdf147acb2",
+      "size": 1700
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "897482f1d2c867f5d9f85147a649ce1977cc684d",
+      "size": 87763
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d141ccd06599a30d2490f9149fd6ab72b2852ee",
+      "size": 174681
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b2_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1e5ad8e76a2a8bef41ef852c2d07ce3eacb4bb35",
+      "size": 1996
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cb18e8264ed2011bff1049c10243018d6f4e0871",
+      "size": 1564
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d47072f42c9648e2e8dcb175621b244bdfdde8f4",
+      "size": 87220
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "15709914ec96b63c345433b2c8b6865375d7470f",
+      "size": 171051
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e687676ccd63060b53fbb9df3b21ef8c1bd02b2c",
+      "size": 1570
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1cdf83f00293779b0fcd22e7c2323d0c54040677",
+      "size": 1700
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3269210742fd1867466af99930236de7f348d58e",
+      "size": 87832
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9ff19edc990652be2b1a4bba6fab7fd40aec5d2",
+      "size": 178061
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L4_H1_b4_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67996f8e0bd9d16539f001f1786e64a637ddfd1e",
+      "size": 2081
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1706b24ceb122dbdb17b9c1a563df371d3a18cf3",
+      "size": 1561
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c041837c1d3ef8431a2ac1a656a3a8f5e34026f7",
+      "size": 84826
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d6f001a897459f0da7f803223da7c3f09ccd5d9d",
+      "size": 208419
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f5d394214363dc4be4319d1bddcb3bb34577d4f6",
+      "size": 1303
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b56ac5e0f8be11dbaebf17f35c05ad3119a6b804",
+      "size": 1697
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f612929b936aeb2fb7d6c5987edf1cae2a6c9f20",
+      "size": 89071
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "203ffd848ee2b848211f7e66306aa8de335bddbf",
+      "size": 253996
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H0_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f86b5f938191068c249a3a4856f62d3c70f8f5bb",
+      "size": 2514
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "159dba9fbca96e78d921940ed2a7b240b741ef3b",
+      "size": 1564
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ac11896c13d81719076913cb3ec0c41307ebc100",
+      "size": 88775
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "142de4cc0f2eb473d556c4a3eb54ca4b56596b88",
+      "size": 227749
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "72ddf7e230420f4d7efecd92013176dd10b59d11",
+      "size": 2052
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f13103ddaea97ce38cf3821094bdc4b391fc2b93",
+      "size": 1700
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b825ff2fdb54f5f5932985de572bde4a89410d02",
+      "size": 90233
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e01d84667d9b8d2cfb910902264e0b4067f71ad",
+      "size": 240246
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b0_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f212bacac243ac2035b425c543d033f6fb582b6",
+      "size": 2436
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8771e930fd27afae3c6a21f8f9df7e403a00c184",
+      "size": 1564
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebef3baf80321664b74075cdef875a075bf35976",
+      "size": 87231
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af824d7385b64046821136a7afec70cfa14b8029",
+      "size": 224919
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d35daac8470bd320e25a86ced7a1a77e79252c2",
+      "size": 1883
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16da2e533fb5be7f134e2d2183d8794fdb88af95",
+      "size": 1700
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bddb10e6c805f7a9ec20eb73fa18015c5ef7bd09",
+      "size": 87750
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78b03c714ddd6fc91a53c22e2d9d25c46755ec43",
+      "size": 231169
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b2_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "39680a9d656a3739d5b101c6a8b0eec1ee6f265a",
+      "size": 2166
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_baseline/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "818019c5bb016f4f3592c94cad2165d04290396d",
+      "size": 1564
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_baseline/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56bba8fa634443ca611d7080101868186fd44a6c",
+      "size": 87293
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_baseline/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd5fd299185457eea87787583081f11bbb1ec233",
+      "size": 227102
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_baseline/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78000b4560b8bb5c49a602067093efeb9f74a934",
+      "size": 2071
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_shock/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5273861204fc82d7f9eacf5b107a5218d1e55a72",
+      "size": 1700
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_shock/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b8fa7ffd2f39bb345b2b2c6ec5fd5c8a4e0788e",
+      "size": 87902
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_shock/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3b651e187e553bbd594ba774222c6591015c278f",
+      "size": 234353
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/B_L8_H1_b4_shock/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e02b7e106cb14f41fa7f610316f58c452c80c3cd",
+      "size": 2354
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/C_shutdown_H0/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a0cc3b0547e8a9c70d3612a1c2a699a2f7e770c",
+      "size": 1700
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/C_shutdown_H0/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "33c0818edf48131807248b1f7b47978f8443b5c2",
+      "size": 79718
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/C_shutdown_H0/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2904fcf70ac40192fdf7dd5a704f2f5de90aa7ee",
+      "size": 163354
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/C_shutdown_H0/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c20dc8da6499f502cc15a480d6df6db9098d88a1",
+      "size": 738
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover100_H0/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db24dffb2d331851c9746618634819fb8cee8ae9",
+      "size": 1699
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover100_H0/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "59a016e5b893f96628319e30a3676b4163c9a1a2",
+      "size": 87774
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover100_H0/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d424fc2cf212ab85e8f576057064f156e2e981e",
+      "size": 147747
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover100_H0/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a3ef0dbfec0c5bf281ea617046d8a9853a112c1b",
+      "size": 1711
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover80_H0/config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7e59d65931c56a62a967aff2f867bb695ada9f73",
+      "size": 1807
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover80_H0/daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4f3403026a86f4c3779c1ffa1fa2e590c03f068",
+      "size": 88714
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover80_H0/diagnostics.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "69bc4df6cdfff7d086b5808a940252bf64053ecb",
+      "size": 161425
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/D_recover80_H0/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "946917a1f5ad8c6a6e404046f30a33b2d2bc754b",
+      "size": 2092
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92805aec0f8210350eaa3a65c171f2aefc08fa22",
+      "size": 11497
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/period_summary.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d14a15fbee510b1839be841a39c7bcef7f52c94",
+      "size": 33835
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_comparison_results/summary.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f73a9b83e041298b3087e3ee25893fe019cf2e40",
+      "size": 25183
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/inventory_policy.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e2127d53b4dd6788fdf72c5adf29f123ab2b2a83",
+      "size": 3699
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/package_inventory_comparison.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "66bd12419d1777c2bb3be9f5e1a550e88e99d7f8",
+      "size": 6570
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/provenance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fc4b63b2290884b7773fa66a93c7ada4e2d6ef04",
+      "size": 15613
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/run_inventory_comparison.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "325771846a556c4be87227d0b8ce55cf2bfbb0ab",
+      "size": 16389
+    },
+    {
+      "path": "economy_quantity_lab/inventory_round2/test_inventory_comparison.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8052620bf025565adecf6425389400947c6b2ed",
+      "size": 6815
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/MULTI_SUPPLIER_REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dbee94aa9c725611f412b3f13a3ad195372dee85",
+      "size": 15330
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/H_split_prelude.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "258be1cdf438e3f7fc17ca0f57de22f689664cda",
+      "size": 4587
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/I_insufficient_prelude.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "740a7df648302063cbdc0f6462b2de9d32d57c11",
+      "size": 4613
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/J_overdue_M1_prelude.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca20d6e90f0312c2ec5fb5fe916cc2c149518f2c",
+      "size": 1785
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/J_overdue_M1_switching.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "722c73cf6f323e6ad489df18e64884edad1de771",
+      "size": 65
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/J_overdue_M2_prelude.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca20d6e90f0312c2ec5fb5fe916cc2c149518f2c",
+      "size": 1785
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/J_overdue_M2_switching.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f92559534ae0cc777e4bb0e01663d5d99160b054",
+      "size": 1235
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/base_audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "877c1f82b4d28d683a8555456058646b05a62a94",
+      "size": 1418
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f695b2a8a0bda0cbc66e127f9f90020915263a56",
+      "size": 3401
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/hash_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e844e81ba563d849fc1f5f77c81b039a5a25e568",
+      "size": 11851
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/input_access.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a29845c399333ca2dd250d70ff9c3bf16a5e343d",
+      "size": 381
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bac63998ae90e783428c2a64a9911b3ecf1b7c0a",
+      "size": 2054
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/memory_execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "12a0922c9bbe0fe2f0a5da4d04955653a5142b39",
+      "size": 3443
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/post_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5ce044fd7bdba44a6f73947bae9aea928eb01483",
+      "size": 55111
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/post_round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a483091f9fdbdefd5b557598c3a1277c0bcc52f4",
+      "size": 2776
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/post_round4a_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07a09d07d3902e2dd03ab1ff7583615f30316e3d",
+      "size": 2755
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/pre_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f6f3ff91a1b7cb53491bf5dc07ab8d5b28427e5b",
+      "size": 55035
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/pre_round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "366fb7aa7e13600e0df57fb4778c30dbad0ff7c0",
+      "size": 2699
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/pre_round4a_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6e52889b2c112751c491fae93d16fe11bb17c864",
+      "size": 2680
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/probes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc55765dc14d4aabe64372a5dad6bbacbef08743",
+      "size": 16105
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/round4b_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9bd1405f02b26af3bc7b2a6e42be9c8a4de1469c",
+      "size": 2697
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/selected_daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91cf40c9d44d9a25f1306824cf847c5417f8e758",
+      "size": 89407
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/stock_gate.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e6836d4610b25984342f433049ff4a2dfe16a08",
+      "size": 3925
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/summary.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd88aa6abef2ab6f69e941f8e9ae6920836c1d7f",
+      "size": 4558
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/evidence/trajectory_comparison.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d5b33f4f9abf88931b64dc325cfdffdb77a8c5b6",
+      "size": 1720
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/inputs/ROUND4B_REQUEST.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "96a5260eefc04736ebfa368305af64a5705024e6",
+      "size": 22931
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/multi_supplier.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "135ab79273114f2e75983a513addd2cbab13cf07",
+      "size": 15724
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/run_multi_supplier_experiment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b4f580d38382be29b2db042f8e5cb68449d086c3",
+      "size": 16188
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/stock_admission.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "409c6ec976091a7b1388a8cf36af234d637a170f",
+      "size": 7520
+    },
+    {
+      "path": "economy_quantity_lab/multi_round4b/test_multi_supplier.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f3de8133001644cd5707c940f15c160b14fd7d5",
+      "size": 15312
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/MULTI_FIRM_NETWORK_REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "463e34a35d88f977bebc089464ea344c887a1707",
+      "size": 23393
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/baseline_audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4bb899fb30ae45feeb44ef85f64693d9b76e847",
+      "size": 281
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/derive_evidence.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b719f1ab093926ddf55e5b5b1b3eaeb87ef3b852",
+      "size": 6531
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/edge_work.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "45723b913e0156fbcc99ccbe98d8ce4199423221",
+      "size": 452286
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/execution.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aaa712317e7fa126fe92971cfb06f0e6ce645158",
+      "size": 16731
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/final_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d26a9492d5148bbce15e361d6c5c664cfd7cbdc",
+      "size": 2553
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/hash_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9449106ae8fd0e7599be53219ede794e8211e98e",
+      "size": 39514
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_post_round3.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d95838c74ecfc1afd10ee75c90167727d7ac2220",
+      "size": 2555
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_post_round4a.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "275098224c8a946096fc5332e47bc01ab2731311",
+      "size": 2534
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_post_round4b.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5e47ae505bcaa267545490b5357e9c30fe04c1e7",
+      "size": 2513
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_post_round4c.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5ed68081b1862447b5ad58e15860adbfe1776b10",
+      "size": 2550
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_post_round5.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "66f053dcf5bdc0ff31550660ac88bba29d39f189",
+      "size": 2566
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_post_round5b.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "df1715a8e50880fd4e0e5c6276dea42144ec7a30",
+      "size": 2574
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_post_verification-3cwn8ef1.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "95b7028a9eb54f83c8bed579a368f661f33ec55c",
+      "size": 54891
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_pre_round3.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90e357e5c1e3f11c5d9e70106703c72284732cd2",
+      "size": 2550
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_pre_round4a.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "335fa317bfcec92979d4ce2e035203eb54a8c5c8",
+      "size": 2529
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_pre_round4b.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b82c13fd471f02b1db568196217f33aaba04b60",
+      "size": 2510
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_pre_round4c.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20e0679e708a2c9c9d23f6f5c59c6bdc98c00272",
+      "size": 2545
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_pre_round5.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e32d11ec80794152e6e1c745c1524f93b5555e22",
+      "size": 2560
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_pre_round5b.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ae43cb5ca4c59028a71fd0164af15f053bc53363",
+      "size": 2568
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/historical_pre_verification-se5d9l0a.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce68cbbe40e11aca50d8eaf39443b183743a90fd",
+      "size": 54886
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "129bfec6625f35f3f60c99c5a87e5bff01edb25c",
+      "size": 4376
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/network_analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d945a75d9f4b072fa49a0000164e28d3e91a6031",
+      "size": 5382684
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/network_gate.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58b0bd8072d10fdb41a9a9c01f215a61c76abe3a",
+      "size": 324
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/provenance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91b78fae0348101350c3b265fc79143fa87b59eb",
+      "size": 13320
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/shared_commitment_probes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41224e4c6ffc0f8be7f7edb91d93f60cf8c36d63",
+      "size": 122231
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/structural_probes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f26266c9557e602507753369d434bdf5a6c8e5a",
+      "size": 1214
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/evidence/summary.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5bace8be84c57d049c5ee3090460870a74faa960",
+      "size": 10696
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/firm_network.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3a828711629987059c700500eba8bdde3331c04",
+      "size": 8257
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/inputs/ROUND6_REQUEST.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e68d536b057c4f82a5a18b99d1695dad244d961b",
+      "size": 30537
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/network_fixtures.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "639218cf1d4514a0dd2fc2d725079d1b48c56124",
+      "size": 5646
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/network_simulation.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "84147142dd4bdf342c001924d86969a7f5e6f08a",
+      "size": 28034
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/run_multi_firm_experiment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0179e22d8f7ca2f71630c25766972520f41fb5a9",
+      "size": 14169
+    },
+    {
+      "path": "economy_quantity_lab/network_round6/test_multi_firm.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4edcd1287e39f128b6355f866c6f6a554ecee45",
+      "size": 17845
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/ORDER_COMMITMENT_REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "61fb48cf9dbe7edbf5fbff81a7ed4963f04d6d47",
+      "size": 15545
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/commitment_adapter.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4c561b1d96bb1a0781bb8c3bbbe4f0bb0212f6a2",
+      "size": 11287
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9a3179f06402c1fc03a43783412640ea448fb579",
+      "size": 4032
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/full_shutdown_R0/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5607ce0f1f7766ed6ee79be1d654f1d6b6fcaaeb",
+      "size": 2363
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/full_shutdown_R1/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ae02e97e0d97a8d629e4fd36ab9593c79b9e509",
+      "size": 2449
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/full_shutdown_R2/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19c1c242b21a35512bd5d67b7dc3f59010a970c9",
+      "size": 2452
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/hash_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fef1732e38d10523692d9fbc1c9ef52321cd9376",
+      "size": 6082
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "727bd536a5bcd693205195e00521fbe3da7c62c5",
+      "size": 3993
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/memory_execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "712ff928c58fc1b4bfadbd4c13a087b9d8e48dcf",
+      "size": 4193
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/no_promise_shock_R1/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35ffcad4a580b0b1af8bdd977f2f4dcbfb2f95fc",
+      "size": 2179
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/no_promise_shutdown_R1/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f675ea00b7c8f6747891c4e93bffbebf980514dc",
+      "size": 1098
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/normal_R0/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "63c58f3c4415ba57800da1256e59d005aa582f90",
+      "size": 1761
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/normal_R1/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "63c58f3c4415ba57800da1256e59d005aa582f90",
+      "size": 1761
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/normal_R2/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "63c58f3c4415ba57800da1256e59d005aa582f90",
+      "size": 1761
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/period_summary.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db1f1d77d13646931982f655980c3b93a7aac631",
+      "size": 5001
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/physical_comparison.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "81c085d71b68ed1b7d1f521b6f766fb5f5aaaa41",
+      "size": 5819
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/post_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e99f4d698a4db5b7d05c8589244aa30844db9c4",
+      "size": 55003
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/pre_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7137c78aaf904ad51c92555e979a6389653155e4",
+      "size": 54972
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28a5c27451d25ee4f20030a6292b87c95990649d",
+      "size": 2607
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/shock_R0/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3b5d661089fdce2dda95d514818dc538dbf3bc2",
+      "size": 3245
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/shock_R1/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "617c90042d8751b93d0cf751ab2770486dfc2388",
+      "size": 3454
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/shock_R2/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9dc235a685cb6cd3c62c4459b4267d01b06765a",
+      "size": 3189
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/shutdown_R0/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1427d75bfaebadc4f87f1fbd380aa02b2ff41ddd",
+      "size": 1300
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/shutdown_R1/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5160f700ff1db52fbb065563cf2648f4f7f482ee",
+      "size": 1445
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/shutdown_R2/event_evidence.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88945adbae36c34f0b8977553510d9d5496ecb8f",
+      "size": 1591
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/evidence/summary.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b5a458587cf1c63783de403e0dcfc30e168f10f9",
+      "size": 7628
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/inputs/ROUND3_REQUEST.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed936b60c7157cdd63a52af99728573ccff54518",
+      "size": 17002
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/order_commitment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ef07daf05b8d6b12e1192db14d2608433b89d38",
+      "size": 4144
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/run_order_commitment_experiment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1a1295e536c106ee697a2ebb05ba829352e95d8f",
+      "size": 13466
+    },
+    {
+      "path": "economy_quantity_lab/order_round3/test_order_commitment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "443ae7ed779f23b54ec693c423832789d907198a",
+      "size": 13008
+    },
+    {
+      "path": "economy_quantity_lab/package_experiment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4c8e2bc73739203ce05017548cdf14aba720a4ac",
+      "size": 2421
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/DEMAND_PLANNING_REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a846a6429ae1b8aa0afbcc2a1e6a4f85654bbe85",
+      "size": 17289
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/demand_planning.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4eb683f6146e5be3b1d1fcfaafdd6498e5428c4",
+      "size": 9915
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/base_audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ef549a4bf80aba4428d15c8c444eb4d179b59b7",
+      "size": 264
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/corrected_exposure_defect.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "096e1e7efe5840436988a261a6f11946f5fb44b0",
+      "size": 674
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/diagnostic_analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1fdcfe3428d824f10c3777221b2578f64dfc8f1a",
+      "size": 86978
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "84678c45198434357f4ccabe79bc5ed2bbe6622f",
+      "size": 11976
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/hash_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc64f66487c158d01bf6ace6a783a63274b0a7be",
+      "size": 83745
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cf5b590db7f87656af6b651fc95a3561902c4f64",
+      "size": 3115
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/matched_discovery_probe.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "65e8ec6a746c72c2aefcbd0728496eb0b012b8d8",
+      "size": 4623
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/measure_planning_memory.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bd5bbace25d96a9703c68aa564f3e3131132b7d3",
+      "size": 1767
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/memory_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8bbb78cd66cbb156578329fa63f05bc0396ba694",
+      "size": 716
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/planning_gate.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1dd6a6e4d3d89b4fe5e429bdd8d9c6af4f5bbeb1",
+      "size": 283
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/post_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6899d3660b20bbe8de2aed599ce62f8ce9fc806d",
+      "size": 54891
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/post_round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8a0868880194f4be8ac0b093bc36f4857e54ba96",
+      "size": 2555
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/post_round4a_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f689db4daa300e4a240983114b97fb064b9118ce",
+      "size": 2534
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/post_round4b_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "75016fd57ed07a78cdba35df5930a10f77d1079b",
+      "size": 2514
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/post_round4c_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd22a510c8a8a8b24a19146edf1650b440f797d5",
+      "size": 2549
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/pre_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7e3334a14d2e22fa8f85ef4242a7c40a92e5e01",
+      "size": 54887
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/pre_round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8073e649cda2e8ac199894f6530b7b01a9ba3da3",
+      "size": 2552
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/pre_round4a_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6dd14be3edcb8689a5dd60b8ccc6618e9f1a3388",
+      "size": 2528
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/pre_round4b_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c3af4444f31b3799358f39f8d5cc1b5f1b5584bc",
+      "size": 2509
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/pre_round4c_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "72610626a0e2a236a6769ada1099463989b0850c",
+      "size": 2546
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/probes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a429a8ab0f294187c3e14410ee0bfeb453eaf076",
+      "size": 3072
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/provenance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc4343de7aa615ce5a1ff2a8841e14919185d792",
+      "size": 2187
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/round5_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "374bd98cbff35a5d474d41322c1cc8ee3e3373c9",
+      "size": 2641
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/run_matched_discovery_probe.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "87d082c48bf33f0599d398d2730d59632d4689de",
+      "size": 1200
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/selected_daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bfff15acde504db4828dc0782af504ccb6f3d0f8",
+      "size": 675930
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/evidence/summary.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58b4efa853b69c204860553c328029931c57972f",
+      "size": 9566
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/inputs/ROUND5_REQUEST.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54b2fa3c12a530c96b1326d58e19658023fe3c5e",
+      "size": 23167
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/planning_simulation.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "98ad6512ef6644d995b47aef76f9d99ce2677c94",
+      "size": 20105
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/run_demand_planning_experiment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "274fe372dc705b3185dc561b183ff08a91ea2002",
+      "size": 12390
+    },
+    {
+      "path": "economy_quantity_lab/planning_round5/test_demand_planning.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d8975a5decc7be4d69003540ca3faf31acaf8891",
+      "size": 14824
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/EXECUTABLE_PLANNING_REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f041f30f418b748e564d255088c21d7fbd640c4",
+      "size": 15709
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/analyze_release_results.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2874951949d0000f53a8926f0e393dda064c4e8a",
+      "size": 3657
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/base_audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "518cc28f1d82011ebb238e8a0b6423b80692f548",
+      "size": 281
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/corrected_diagnostic_defect.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d5497a2b7f789ebf8d613131c0b4bc406d7579ed",
+      "size": 1539
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/correctness_contracts.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d20bc6ce5a707095981626026997c4e450d47da",
+      "size": 2351
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/diagnostic_analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d70b14e05823099cd14df5a011b1de7ca2c073c3",
+      "size": 179476
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/execution_gate.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5031a7e0335fc6f6b09726d7f2624c9d3e28065f",
+      "size": 364
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f0b5e9223cc1e53cd6a4d1a9ce876cee99a96f3",
+      "size": 9250
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/hash_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b643a7c0614cae7af5cd19ce5c7bcd2eedca243b",
+      "size": 68538
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/interface_probes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "14b122cab61bceee420525729e6af0d0b444a6c2",
+      "size": 33419
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "717ac2d96d938bd688fb11ee75a4ef8aeda43f28",
+      "size": 3673
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/matched_discovery_probe.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ea220b90347624d98818e1a0e8053d159618f783",
+      "size": 4260
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/measure_release_memory.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18a200206d37aaee74ec98582557f00c8f844f92",
+      "size": 1833
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/memory_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5fd3e578a08eaea63b00e902ce99d246821e562e",
+      "size": 717
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/partial_dispatch_probe.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4dbb851d7dd9215c201f7b3b762909ec7dc2e2ba",
+      "size": 96941
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/post_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "12e5060830bf01beea8dd66278f530b89d9f2d8a",
+      "size": 54900
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/post_round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "63c3b9e37b252bc90aad3e2006c59011dcbc1e9c",
+      "size": 2566
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/post_round4a_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2bb5228aeb4b3e92942edda3fc327d348570de65",
+      "size": 2543
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/post_round4b_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa02e2582742710f51605d1594df0a181713b5e2",
+      "size": 2522
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/post_round4c_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "321f8efa7d3a02c6878472e58e027f6481ebe7f0",
+      "size": 2560
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/post_round5_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e337db7ca4b28875058d7abcc8e5d7814f4348f3",
+      "size": 2575
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/pre_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f73d5a421491f9b5662cb5390db26fba3b78c6a",
+      "size": 54891
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/pre_round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9646c819578eff0faf8dacbbbc364d6ba8e8614",
+      "size": 2556
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/pre_round4a_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3f7c8b7c4a58a5d972f720f705e4fd5d417a9787",
+      "size": 2535
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/pre_round4b_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9a2ed6350611d6266fefd938f9a5360e3b576d7f",
+      "size": 2514
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/pre_round4c_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a22c6da93a17faa0347433ff6de1dba41e2fee13",
+      "size": 2551
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/pre_round5_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b4f82fa65fbdb1a982c12b43a4f8ff94c48ce53e",
+      "size": 2566
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/provenance.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "87854f42b430cf61dad39f691109d84c31a01325",
+      "size": 3221
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/replay_a_execution.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "74f746a9d5b75638e58655e611a0c92921e92b4b",
+      "size": 9255
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/replay_b_execution.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "becbb6d5541ea1ef2ec5191bb14a0468c4d9c45b",
+      "size": 9248
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/round5b_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28273021f8eac104412b9369c4fb2d3136d1aaba",
+      "size": 2511
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/run_matched_release_probe.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc16978d7128d90b0d23d82104937b88a407bbcc",
+      "size": 1182
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/selected_daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e7d2d49789eeda24d61ceff150fcd0cfcb5c8d6",
+      "size": 114893
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/evidence/summary.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1cab24608407c745edafb48477200ad257fdc94e",
+      "size": 6420
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/inputs/ROUND5B_REQUEST.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "905a5b59fcec6ecaf19955ff1104d73e76c2bd71",
+      "size": 24388
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/planning_release.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b10a6e2f7d429290c51c99a87e3fc446726bbc73",
+      "size": 10407
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/release_simulation.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47d3fdb37875bc5bc4532db065bf580fca8b71d4",
+      "size": 17155
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/run_executable_planning_experiment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9522238efa2b32896f115602b37512052346ea61",
+      "size": 13913
+    },
+    {
+      "path": "economy_quantity_lab/release_round5b/test_planning_release.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e08315d2798ef83db73406aa924a8aa210b4c4a3",
+      "size": 18304
+    },
+    {
+      "path": "economy_quantity_lab/run_experiment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1317455f9779eda92246d2bd164bb6349c8c1207",
+      "size": 1383
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/SUPPLIER_SEARCH_REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "853298647c3262930ba396d5c2372d1932be1c67",
+      "size": 15324
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/B_insufficient_Q1_discoveries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "06f2759762f8115872187d22435882c02fbcaf02",
+      "size": 128
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/B_insufficient_Q1_search.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a494aabefe532d8b44691efd65aeaa276caa0dc2",
+      "size": 2503
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/D_regional_Q1_discoveries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "159ff98f4b57e05edaf45386e01594337f6c030e",
+      "size": 255
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/D_regional_Q1_search.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba9a06302949e4adeccf87fdeff1f04d91b82c0f",
+      "size": 2888
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/E_wide_Q1_discoveries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31b20ede31f7e32a5ffaf533ac4bab27dcf6242e",
+      "size": 128
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/E_wide_Q1_search.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f40f7939514a3671ef31681acdc40e44eb13bf2f",
+      "size": 3514
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/F_bad_Q1_discoveries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "84274248ea3889c9f3b53fd03570148d4e55d115",
+      "size": 255
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/F_bad_Q1_search.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b4e7c067e3807802a602cf09c3a8d4e9b5cf09e",
+      "size": 2885
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/J_timing_Q0_discoveries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b042cee69659ab6de87bdfac1df8f194a7d9538",
+      "size": 129
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/J_timing_Q0_search.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7204c58cfd205320a5f32d6366e35a3619bd2f22",
+      "size": 58
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/J_timing_Q1_discoveries.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "50af45868a5285e74cca1f452f1da737d074b904",
+      "size": 128
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/J_timing_Q1_search.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18d3a9354c8f2a9520a086fde9461e81468fda98",
+      "size": 1437
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/base_audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "53e014ab7be0abb81b128eb057f30cc0f688327c",
+      "size": 1421
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef99d2839560d7222d1d806d76e2fcb21bcd2c04",
+      "size": 4477
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/extensibility_probes.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3620caf961d2376964d78e17ab27f5b53db02306",
+      "size": 12569
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/extension_gate.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a53ba1275b851a0272368104d6a2c01ee9c041e4",
+      "size": 430
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/failure_mode_analysis.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f20a91df4443b523522bf4bf9752722e3beece3e",
+      "size": 570
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/hash_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07e312f06df34b1fa95b204d134192ca52301b8e",
+      "size": 18722
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/input_access.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c325171476496ae3c89664eab15c8256025297da",
+      "size": 368
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b0d28b8c7b44d0ff11ebe7466522180a1b72dede",
+      "size": 2602
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/memory_execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6e1fe80e6b17158596eaa8f9043d71691a8178a0",
+      "size": 4538
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/post_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2242736df586eea9e59ff559095d93403ae1bdcc",
+      "size": 55101
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/post_round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "169aca2307d64cff584d52c771e22073903a593e",
+      "size": 2767
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/post_round4a_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec22f93d0bd9a9e10308e17c23b25e8abc2eef4f",
+      "size": 2745
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/post_round4b_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77d09701d15e19dfe03e86a45420cc95e5b09d67",
+      "size": 2728
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/pre_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "760c0bc2fbf7a8b4fc4354316d619aa0483ef52d",
+      "size": 55041
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/pre_round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "df70feb2e3e3f9ea38b9824e617b31495b207bbc",
+      "size": 2709
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/pre_round4a_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9ce68df3fc0005aca960c355e1e687873db5a962",
+      "size": 2687
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/pre_round4b_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2a78bfdccbe19543082f2199f5c2e48fc2e4688",
+      "size": 2667
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/round4c_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b236dc6c51763da3995b01d39d4497c1d487b5a5",
+      "size": 2729
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/selected_daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "808d09f4172e506778bd9fca519e881fa80999f1",
+      "size": 22739
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/evidence/summary.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a7a7ad036050087f6ce4a16cde3a519e64e125e",
+      "size": 3134
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/inputs/ROUND4C_REQUEST.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6aaebf6c347216c614a02353d589b787e65f4c35",
+      "size": 19931
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/run_supplier_search_experiment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60b494537e9ed077f7511466e7f370a3c1d0f652",
+      "size": 17300
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/search_simulation.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "487b42dd7473a17a809da78e3fc87feab1311f49",
+      "size": 12680
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/supplier_directory.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af89e07a48b37721101903cf7faba95d4eb28f73",
+      "size": 6557
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/supplier_pool.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c5387f16e2d0d6ba9896f763e670edf721ce1af9",
+      "size": 1822
+    },
+    {
+      "path": "economy_quantity_lab/search_round4c/test_supplier_search.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c7bc5ae52516f980b6663be0d4fc8625c760867",
+      "size": 15864
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/SUPPLIER_ADMISSION_REPORT.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91fc7b2aca9166ef6c927da42f3ade530e2d9422",
+      "size": 12594
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/base_audit.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "81994ce4fb758997429c3c7940c08b4e9791ecf2",
+      "size": 1428
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/cancellation_cases.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78bdffd6354260ff58ff4bfd02e6518411066abf",
+      "size": 1959
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8fe3ca32a6b736dbf0f7b557f9633cdbeaca8b9c",
+      "size": 2490
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/hash_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07983b417a21241c87158fcf5d4a4a0e2e6e511f",
+      "size": 4396
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/input_access.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71cf91b0d4431a80763abdd4773c79513205b1fd",
+      "size": 384
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ee6b0f92c7f7ca8580714c2c03b0401830456be",
+      "size": 1753
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/memory_execution_log.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3dec451a20b64a5c8eb7bb82173dd3360515460e",
+      "size": 2516
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/physical_comparison.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e54a4d8429ced7962179eca0829beeca8cd675f",
+      "size": 3843
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/post_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aaf95bba7e4b4749d9020ea087260194a601debf",
+      "size": 55103
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/post_round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2dc851d0ce131c71e678996ed66d3bd924e1cf4f",
+      "size": 2768
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/pre_baseline_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "81b183ee5b3fe4a6404dc121de5082bcdc08fd32",
+      "size": 55053
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/pre_round3_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ade084569288047e29dd9286563026af33eafd72",
+      "size": 2718
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/round4a_verification.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6bcb830975b2f7675ff54f5bd9002a626341e703",
+      "size": 2747
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/selected_daily.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c398e10182c71abb409afc29f8a10147cc6c657d",
+      "size": 34625
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/stock_shortage_probe.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "446d973d3624b0cab57552b208433d312bc4205a",
+      "size": 22926
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/evidence/summary.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "69558bfbd2e6ba3f9996dfe631cf13afd5f50126",
+      "size": 2515
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/inputs/ROUND4A_REQUEST.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f1c41851bc33440634924444e2f1062b28281f67",
+      "size": 16704
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/run_supplier_admission_experiment.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf4a6d6c6b5c295d9a7d338711037eb650ffdf05",
+      "size": 11488
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/supplier_admission.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "197ae49c23056bf60a364c12f9bca0a6d2b5779f",
+      "size": 11568
+    },
+    {
+      "path": "economy_quantity_lab/supplier_round4a/test_supplier_admission.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f0318bd400bc5e4f5c37c71c0b4ed504b9eab1b",
+      "size": 12892
+    },
+    {
+      "path": "economy_quantity_lab/test_economy.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5f5905f7a4bf234440446ac38e99fb9ae3204179",
+      "size": 6329
+    },
+    {
+      "path": "economy_quantity_lab/transport_shock.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d5d8dc810f01e740263b993277b8a506b4c84cfd",
+      "size": 23828
+    },
+    {
+      "path": "economy_quantity_lab/transport_shock_order_trace.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "14f43bb48b6534324f2e12745cc7da0ff0727924",
+      "size": 74857
+    },
+    {
+      "path": "experiments_manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a69b6155b3675dd632d04a736ac0bfd1cc1ab27",
+      "size": 4426
+    },
+    {
+      "path": "experiments_manifest_cycle02.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f6e15d3c7a89bf4b86f05be0668df8da5f0b9fd",
+      "size": 683659
+    },
+    {
+      "path": "experiments_manifest_cycle02_final.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4619a650a9697756aa3603d6fcbc5fa8d1faa6a4",
+      "size": 907374
+    },
+    {
+      "path": "reaudit_cycle02.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ec34e0b2a56343cd2ad9808883705c570325518",
+      "size": 2993
+    },
+    {
+      "path": "verify_baseline.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7c9b64d994a677c0d9ca0c056081c2b1fc497b6",
+      "size": 8068
+    },
+    {
+      "path": "verify_goal_cycle01.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cdc162bf4cf51095312fa129ad96ac6f6e13519e",
+      "size": 4787
+    },
+    {
+      "path": "verify_goal_cycle02.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "191b753a4df74e62956c97614d9ddf8983f96977",
+      "size": 3967
+    },
+    {
+      "path": "verify_round3.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "941f04e3e66d3f763f2b7c521153247280f84903",
+      "size": 3539
+    },
+    {
+      "path": "verify_round4a.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a30f577cf9921b322a3752ff1b6ab82763ab945",
+      "size": 2945
+    },
+    {
+      "path": "verify_round4b.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a1bb5bdafae505be1e034d021ecb395b15ce251",
+      "size": 3024
+    },
+    {
+      "path": "verify_round4c.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "33dbb555dc855a07268d855205405d5e6904c70b",
+      "size": 3234
+    },
+    {
+      "path": "verify_round5.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28ccd26d86099dc0780b5e89dd8195fc419d1b2a",
+      "size": 3138
+    },
+    {
+      "path": "verify_round5b.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "08a35401f8d4c88d8af3b48cd52671a566fd55e2",
+      "size": 3152
+    },
+    {
+      "path": "verify_round6.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f1ba4aa2703e8578cc85d05175dc5a253d474e0a",
+      "size": 3225
+    },
+    {
+      "path": "write_cycle02_metrics.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71116fa281e877827411db662996363ced130c1b",
+      "size": 3179
+    }
+  ]
+}

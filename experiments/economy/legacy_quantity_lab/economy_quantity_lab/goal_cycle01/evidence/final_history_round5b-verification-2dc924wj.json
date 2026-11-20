@@ -1,0 +1,65 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "status": "passed",
+  "checks": [
+    {
+      "name": "round5b_tests",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_planning_release.py"
+      ],
+      "cwd": "/workspace/wwo-economy-lab/economy_quantity_lab/release_round5b",
+      "exit_code": 0,
+      "elapsed_seconds": 58.41410153300012,
+      "test_count": 45
+    },
+    {
+      "name": "replay_a",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/economy_quantity_lab/release_round5b/run_executable_planning_experiment.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical/round5b-verification-2dc924wj/replay_a",
+        "--execution-log",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical/round5b-verification-2dc924wj/replay_a_execution.json"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 140.87904983399994
+    },
+    {
+      "name": "replay_b",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/wwo-economy-lab/economy_quantity_lab/release_round5b/run_executable_planning_experiment.py",
+        "--output-dir",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical/round5b-verification-2dc924wj/replay_b",
+        "--execution-log",
+        "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical/round5b-verification-2dc924wj/replay_b_execution.json"
+      ],
+      "cwd": "/workspace/wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 145.55841499200005
+    }
+  ],
+  "run_directory": "/workspace/wwo-economy-lab/.local/goal-cycle01/final-verification-sze0jumd/historical/round5b-verification-2dc924wj",
+  "replay_a": {
+    "files_reproduced": 629,
+    "summary_sha256": "8768ac91cdd7db8eee354f1cd0591808e7ee4fff1e89637c990af8bf8e338016",
+    "cases": 39,
+    "days": 23400,
+    "EXECUTABLE_PLANNING_GATE": "PASS"
+  },
+  "replay_b": {
+    "files_reproduced": 629,
+    "summary_sha256": "8768ac91cdd7db8eee354f1cd0591808e7ee4fff1e89637c990af8bf8e338016",
+    "cases": 39,
+    "days": 23400,
+    "EXECUTABLE_PLANNING_GATE": "PASS"
+  },
+  "elapsed_seconds": 347.97323077400006
+}

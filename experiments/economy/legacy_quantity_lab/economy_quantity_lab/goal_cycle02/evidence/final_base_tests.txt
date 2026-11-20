@@ -1,0 +1,19 @@
+test_diagnostics_world_truth_is_separate (test_cycle02.Cycle02Tests.test_diagnostics_world_truth_is_separate) ... ok
+test_fixed_binding_and_cash_separation (test_cycle02.Cycle02Tests.test_fixed_binding_and_cash_separation) ... ok
+test_frozen_configuration_shapes (test_cycle02.Cycle02Tests.test_frozen_configuration_shapes) ... ok
+test_future_information_prefix_isolation (test_cycle02.Cycle02Tests.test_future_information_prefix_isolation) ... ok
+test_heterogeneity_without_price_rank_same_physical (test_cycle02.Cycle02Tests.test_heterogeneity_without_price_rank_same_physical) ... ok
+test_holdouts_have_known_equal_and_mixed_leads (test_cycle02.Cycle02Tests.test_holdouts_have_known_equal_and_mixed_leads) ... ok
+test_no_event_day_price_window_reconstruction (test_cycle02.Cycle02Tests.test_no_event_day_price_window_reconstruction) ... ok
+test_nominal_unit_transform (test_cycle02.Cycle02Tests.test_nominal_unit_transform) ... ok
+test_observers60 (test_cycle02.Cycle02Tests.test_observers60) ... ok
+test_price_boundary_and_ticks (test_cycle02.Cycle02Tests.test_price_boundary_and_ticks) ... ok
+test_real_equal_date_competition_exists (test_cycle02.Cycle02Tests.test_real_equal_date_competition_exists) ... ok
+test_reversed_containers_and_requests (test_cycle02.Cycle02Tests.test_reversed_containers_and_requests) ... ok
+test_trace_cannot_change_authority (test_cycle02.Cycle02Tests.test_trace_cannot_change_authority) ... ok
+test_uniform_price_rank_equals_legacy (test_cycle02.Cycle02Tests.test_uniform_price_rank_equals_legacy) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 20.336s
+
+OK

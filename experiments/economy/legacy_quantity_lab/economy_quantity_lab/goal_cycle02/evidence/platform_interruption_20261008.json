@@ -1,0 +1,35 @@
+{
+  "checked_utc": "2026-10-08T04:11:12.436093+00:00",
+  "execution_commit": "710dac38d82a4d48609e88c9f974a927e9b6c686",
+  "source_digest_unchanged": true,
+  "manifest_sha256": "6b2cc5f69b4d09cfec7c32aad16d81ecd1898f56aa774cd24ea5b90091edf8bf",
+  "records": [
+    {
+      "replay": "replay_a",
+      "session": 46851,
+      "session_probe": "Unknown process id",
+      "last_IO_utc": "2026-10-08T03:47:05Z",
+      "completed_cases": 52,
+      "completed_days": 85200,
+      "partial_case": "SCALE_S10_N4_EXPERIMENTAL_600",
+      "last_complete_daily_record": 553,
+      "exit_code": null,
+      "completed_full_manifest": false,
+      "status": "ENVIRONMENT_BLOCKER_PLATFORM_INTERRUPTION"
+    },
+    {
+      "replay": "replay_b",
+      "session": 16164,
+      "session_probe": "Unknown process id",
+      "last_IO_utc": "2026-10-08T03:47:05Z",
+      "completed_cases": 52,
+      "completed_days": 85200,
+      "partial_case": "SCALE_S10_N4_EXPERIMENTAL_600",
+      "last_complete_daily_record": 599,
+      "exit_code": null,
+      "completed_full_manifest": false,
+      "status": "ENVIRONMENT_BLOCKER_PLATFORM_INTERRUPTION"
+    }
+  ],
+  "decision": "Preserve originals. Fresh complete59-case independent replays required; no mid-case concatenation or fabricated process completion. Budget not reset."
+}

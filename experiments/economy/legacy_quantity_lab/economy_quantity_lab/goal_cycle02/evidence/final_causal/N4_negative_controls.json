@@ -1,0 +1,162 @@
+[
+  {
+    "N3": "H2_asymmetric_limits_scarcity_N3_600",
+    "N4": "H2_asymmetric_limits_scarcity_N4_EXPERIMENTAL_600",
+    "authoritative_economic_hash_same": false,
+    "learned_windows": 8,
+    "memory_target_price_blocks": 474,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 0,
+    "zero_PRICE_negative_control": false
+  },
+  {
+    "N3": "H2_mixed_date_competition_N3_600",
+    "N4": "H2_mixed_date_competition_N4_EXPERIMENTAL_600",
+    "authoritative_economic_hash_same": false,
+    "learned_windows": 14,
+    "memory_target_price_blocks": 111,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 0,
+    "zero_PRICE_negative_control": false
+  },
+  {
+    "N3": "M3_coal_scarcity_N3_L_BINDING_600",
+    "N4": "M3_coal_scarcity_N4_EXPERIMENTAL_L_BINDING_600",
+    "authoritative_economic_hash_same": false,
+    "learned_windows": 14,
+    "memory_target_price_blocks": 215,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 0,
+    "zero_PRICE_negative_control": false
+  },
+  {
+    "N3": "M3_coal_scarcity_N3_L_NONBINDING_600",
+    "N4": "M3_coal_scarcity_N4_EXPERIMENTAL_L_NONBINDING_600",
+    "authoritative_economic_hash_same": true,
+    "learned_windows": 0,
+    "memory_target_price_blocks": 0,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 28,
+    "zero_PRICE_negative_control": true
+  },
+  {
+    "N3": "M3_normal_N3_L_BINDING_600",
+    "N4": "M3_normal_N4_EXPERIMENTAL_L_BINDING_600",
+    "authoritative_economic_hash_same": false,
+    "learned_windows": 2,
+    "memory_target_price_blocks": 59,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 0,
+    "zero_PRICE_negative_control": false
+  },
+  {
+    "N3": "M3_normal_N3_L_NONBINDING_600",
+    "N4": "M3_normal_N4_EXPERIMENTAL_L_NONBINDING_600",
+    "authoritative_economic_hash_same": true,
+    "learned_windows": 0,
+    "memory_target_price_blocks": 0,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 0,
+    "zero_PRICE_negative_control": true
+  },
+  {
+    "N3": "M3_recovery_N3_L_BINDING_600",
+    "N4": "M3_recovery_N4_EXPERIMENTAL_L_BINDING_600",
+    "authoritative_economic_hash_same": false,
+    "learned_windows": 2,
+    "memory_target_price_blocks": 59,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 0,
+    "zero_PRICE_negative_control": false
+  },
+  {
+    "N3": "M3_recovery_N3_L_NONBINDING_600",
+    "N4": "M3_recovery_N4_EXPERIMENTAL_L_NONBINDING_600",
+    "authoritative_economic_hash_same": true,
+    "learned_windows": 0,
+    "memory_target_price_blocks": 0,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 0,
+    "zero_PRICE_negative_control": true
+  },
+  {
+    "N3": "M4_coal_scarcity_N3_L_BINDING_3600",
+    "N4": "M4_coal_scarcity_N4_EXPERIMENTAL_L_BINDING_3600",
+    "authoritative_economic_hash_same": false,
+    "learned_windows": 14,
+    "memory_target_price_blocks": 1502,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 0,
+    "zero_PRICE_negative_control": false
+  },
+  {
+    "N3": "M4_coal_scarcity_N3_L_NONBINDING_3600",
+    "N4": "M4_coal_scarcity_N4_EXPERIMENTAL_L_NONBINDING_3600",
+    "authoritative_economic_hash_same": true,
+    "learned_windows": 0,
+    "memory_target_price_blocks": 0,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 1315,
+    "zero_PRICE_negative_control": true
+  },
+  {
+    "N3": "M4_normal_N3_L_BINDING_3600",
+    "N4": "M4_normal_N4_EXPERIMENTAL_L_BINDING_3600",
+    "authoritative_economic_hash_same": false,
+    "learned_windows": 2,
+    "memory_target_price_blocks": 488,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 0,
+    "zero_PRICE_negative_control": false
+  },
+  {
+    "N3": "M4_normal_N3_L_NONBINDING_3600",
+    "N4": "M4_normal_N4_EXPERIMENTAL_L_NONBINDING_3600",
+    "authoritative_economic_hash_same": true,
+    "learned_windows": 0,
+    "memory_target_price_blocks": 0,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 428,
+    "zero_PRICE_negative_control": true
+  },
+  {
+    "N3": "M4_recovery_N3_L_BINDING_3600",
+    "N4": "M4_recovery_N4_EXPERIMENTAL_L_BINDING_3600",
+    "authoritative_economic_hash_same": false,
+    "learned_windows": 2,
+    "memory_target_price_blocks": 488,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 0,
+    "zero_PRICE_negative_control": false
+  },
+  {
+    "N3": "M4_recovery_N3_L_NONBINDING_3600",
+    "N4": "M4_recovery_N4_EXPERIMENTAL_L_NONBINDING_3600",
+    "authoritative_economic_hash_same": true,
+    "learned_windows": 0,
+    "memory_target_price_blocks": 0,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 428,
+    "zero_PRICE_negative_control": true
+  },
+  {
+    "N3": "SCALE_S10_N3_600",
+    "N4": "SCALE_S10_N4_EXPERIMENTAL_600",
+    "authoritative_economic_hash_same": true,
+    "learned_windows": 0,
+    "memory_target_price_blocks": 0,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 136,
+    "zero_PRICE_negative_control": true
+  },
+  {
+    "N3": "SCALE_S5_N3_600",
+    "N4": "SCALE_S5_N4_EXPERIMENTAL_600",
+    "authoritative_economic_hash_same": true,
+    "learned_windows": 0,
+    "memory_target_price_blocks": 0,
+    "note": "N4 upper/lower_hit/unclamped are inherited v1 proposal flags, not claims that memory-constrained final quote reached original bound.",
+    "original_v1_floor_cap_blocks": 67,
+    "zero_PRICE_negative_control": true
+  }
+]

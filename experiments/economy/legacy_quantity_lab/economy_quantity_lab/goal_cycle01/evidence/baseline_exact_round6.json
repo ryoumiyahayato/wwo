@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "verify_round6.py",
+    "--output-dir",
+    ".local/goal-cycle01/baseline-exact-round6"
+  ],
+  "exit_code": 0,
+  "seconds": 334.30022710699996,
+  "started": "2026-10-07T16:39:23.119078+00:00",
+  "source_state": "exact BASE_SHA network source; all seven prior historical sources unchanged"
+}

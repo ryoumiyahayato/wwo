@@ -1,0 +1,116 @@
+[
+  {
+    "case_id": "normal_S5_N2_nonbinding_20",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 2880,
+    "live_orders": 44,
+    "orders": 531,
+    "shipments": 531,
+    "status": "PASS",
+    "total_money": 25632000
+  },
+  {
+    "case_id": "normal_S5_N3_nonbinding_20",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 2880,
+    "live_orders": 44,
+    "orders": 531,
+    "shipments": 531,
+    "status": "PASS",
+    "total_money": 25632000
+  },
+  {
+    "case_id": "normal_S10_N2_nonbinding_20",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 5741,
+    "live_orders": 80,
+    "orders": 1058,
+    "shipments": 1058,
+    "status": "PASS",
+    "total_money": 51264000
+  },
+  {
+    "case_id": "normal_S10_N3_nonbinding_20",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 5741,
+    "live_orders": 80,
+    "orders": 1058,
+    "shipments": 1058,
+    "status": "PASS",
+    "total_money": 51264000
+  },
+  {
+    "case_id": "normal_S20_N2_nonbinding_20",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 11559,
+    "live_orders": 152,
+    "orders": 2132,
+    "shipments": 2132,
+    "status": "PASS",
+    "total_money": 102528000
+  },
+  {
+    "case_id": "normal_S20_N3_nonbinding_20",
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 11559,
+    "live_orders": 152,
+    "orders": 2132,
+    "shipments": 2132,
+    "status": "PASS",
+    "total_money": 102528000
+  }
+]

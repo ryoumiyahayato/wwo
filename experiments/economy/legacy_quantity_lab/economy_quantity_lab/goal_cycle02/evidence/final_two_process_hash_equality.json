@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "cases_each": 59,
+  "days_each": 89400,
+  "successful_independent_processes": 2,
+  "matched_files": 533,
+  "hash_manifest_sha256": "4b781ce29f023ad80453c7789156c49b847b4d93f3fddb814e87e5512d8db044",
+  "execution_source_commit": "710dac38d82a4d48609e88c9f974a927e9b6c686",
+  "interrupted_processes_are_not_counted_as_success": true
+}

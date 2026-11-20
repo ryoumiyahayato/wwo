@@ -1,0 +1,80 @@
+[
+  {
+    "case_id": "normal_S5_N2_nonbinding_20",
+    "elapsed_seconds": 0.5017013950000546,
+    "known_edge_quote_allocation_seconds": 0.2720106209997084,
+    "logging_metrics_archive_export_seconds": 0.09422758300956957,
+    "material_order_cash_settlement_seconds": 0.06357145799915997,
+    "note": "Linux ru_maxrss actual process high-water across preceding cases; not per-case isolated RSS. Hook timing includes reconcile in production/procurement; streaming event write time overlaps settlement. Categories are attribution, not additive exclusive CPU spans.",
+    "offline_audit_seconds": 0.031899096000188365,
+    "planning_reconcile_seconds": 0.0858015519993387,
+    "process_rss_high_water_bytes": 20570112,
+    "python_gc_tracked_objects_end": 18421,
+    "serialized_bytes": 608750
+  },
+  {
+    "case_id": "normal_S5_N3_nonbinding_20",
+    "elapsed_seconds": 0.5120398050000858,
+    "known_edge_quote_allocation_seconds": 0.2756317829996533,
+    "logging_metrics_archive_export_seconds": 0.09301560099515882,
+    "material_order_cash_settlement_seconds": 0.06163963300082287,
+    "note": "Linux ru_maxrss actual process high-water across preceding cases; not per-case isolated RSS. Hook timing includes reconcile in production/procurement; streaming event write time overlaps settlement. Categories are attribution, not additive exclusive CPU spans.",
+    "offline_audit_seconds": 0.029165863000116588,
+    "planning_reconcile_seconds": 0.1003482350001832,
+    "process_rss_high_water_bytes": 21356544,
+    "python_gc_tracked_objects_end": 18090,
+    "serialized_bytes": 613717
+  },
+  {
+    "case_id": "normal_S10_N2_nonbinding_20",
+    "elapsed_seconds": 0.9911619709998831,
+    "known_edge_quote_allocation_seconds": 0.5416695280000567,
+    "logging_metrics_archive_export_seconds": 0.19288855000695548,
+    "material_order_cash_settlement_seconds": 0.11286024100081704,
+    "note": "Linux ru_maxrss actual process high-water across preceding cases; not per-case isolated RSS. Hook timing includes reconcile in production/procurement; streaming event write time overlaps settlement. Categories are attribution, not additive exclusive CPU spans.",
+    "offline_audit_seconds": 0.06730288900007508,
+    "planning_reconcile_seconds": 0.1769539119993624,
+    "process_rss_high_water_bytes": 23060480,
+    "python_gc_tracked_objects_end": 19925,
+    "serialized_bytes": 1206814
+  },
+  {
+    "case_id": "normal_S10_N3_nonbinding_20",
+    "elapsed_seconds": 1.0734722689999217,
+    "known_edge_quote_allocation_seconds": 0.6119607530004032,
+    "logging_metrics_archive_export_seconds": 0.1969964689931203,
+    "material_order_cash_settlement_seconds": 0.12101755400067304,
+    "note": "Linux ru_maxrss actual process high-water across preceding cases; not per-case isolated RSS. Hook timing includes reconcile in production/procurement; streaming event write time overlaps settlement. Categories are attribution, not additive exclusive CPU spans.",
+    "offline_audit_seconds": 0.07916571299983843,
+    "planning_reconcile_seconds": 0.1799679399998695,
+    "process_rss_high_water_bytes": 23977984,
+    "python_gc_tracked_objects_end": 19929,
+    "serialized_bytes": 1215926
+  },
+  {
+    "case_id": "normal_S20_N2_nonbinding_20",
+    "elapsed_seconds": 2.2194366460000765,
+    "known_edge_quote_allocation_seconds": 1.3201501290006945,
+    "logging_metrics_archive_export_seconds": 0.38416858598793624,
+    "material_order_cash_settlement_seconds": 0.2308969450002678,
+    "note": "Linux ru_maxrss actual process high-water across preceding cases; not per-case isolated RSS. Hook timing includes reconcile in production/procurement; streaming event write time overlaps settlement. Categories are attribution, not additive exclusive CPU spans.",
+    "offline_audit_seconds": 0.2176818519999415,
+    "planning_reconcile_seconds": 0.35244324800009963,
+    "process_rss_high_water_bytes": 27123712,
+    "python_gc_tracked_objects_end": 23652,
+    "serialized_bytes": 2431007
+  },
+  {
+    "case_id": "normal_S20_N3_nonbinding_20",
+    "elapsed_seconds": 2.1586632989999543,
+    "known_edge_quote_allocation_seconds": 1.2797552389988596,
+    "logging_metrics_archive_export_seconds": 0.37328550600045673,
+    "material_order_cash_settlement_seconds": 0.22763920099919233,
+    "note": "Linux ru_maxrss actual process high-water across preceding cases; not per-case isolated RSS. Hook timing includes reconcile in production/procurement; streaming event write time overlaps settlement. Categories are attribution, not additive exclusive CPU spans.",
+    "offline_audit_seconds": 0.22231783500001256,
+    "planning_reconcile_seconds": 0.34372087599990664,
+    "process_rss_high_water_bytes": 28958720,
+    "python_gc_tracked_objects_end": 23658,
+    "serialized_bytes": 2449035
+  }
+]

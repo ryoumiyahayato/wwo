@@ -1,0 +1,24 @@
+{
+  "audit_pass": 42,
+  "cases": 50,
+  "code_hashes": {
+    "economy_quantity_lab/goal_cycle01/cash.py": "60d6a73d0b7b8be56fdf7f20682bc3e67e4fce45be7409e61cb4f1db9717cacc",
+    "economy_quantity_lab/goal_cycle01/corruption_probes.py": "55a69ffaec9177bd76723427b360d99ff015bc02b7241021547ee74b1cdd0cfc",
+    "economy_quantity_lab/goal_cycle01/cycle_fixtures.py": "bd2f40b2830b845b97bd82724999f070c9aecdec49c5a24901e24781e73cba0b",
+    "economy_quantity_lab/goal_cycle01/observation.py": "82f4bf14f45a8b30f5c123560652f0cfc4eedcc698aef9be27acf39e7534e625",
+    "economy_quantity_lab/goal_cycle01/offline_audit.py": "0caf57f4f39f09936c5c2fd1d72e2f8482b85804cc5b96295c2e286f1ad913e8",
+    "economy_quantity_lab/goal_cycle01/payment_policy.py": "e5c7f4b77b8d35020f400027d5b80cca48238b65d732ef56f3f3741436cbc987",
+    "economy_quantity_lab/goal_cycle01/pricing.py": "e7745473964a1391eb6fb509c5a715590148d5547d464267b5d92b7e771fb96d",
+    "economy_quantity_lab/goal_cycle01/run_cycle.py": "a9ab11736d25cf4dd51adfb32849ebaf96066c16921fd098627edb0a3195a558",
+    "economy_quantity_lab/goal_cycle01/test_cycle.py": "11a12a8db9bbafe89cce66e9824401f7330ba8f0abc1d52a010088d3d96f2486",
+    "economy_quantity_lab/network_round6/network_simulation.py": "7cc5e177d7e41ecc8b3b26d9389c83722422cc7d57ed803709ae5dfa952560ba",
+    "experiments_manifest.json": "ff5cb33b04119e2c8e0459abe218d176d215de5158fa655485f5467bd617cb28",
+    "verify_goal_cycle01.py": "65d32f0e5ea981c8f666022cc9526603021f8ff333b54875c3c7cb7419588b6b"
+  },
+  "days": 66000,
+  "elapsed_seconds": 741.345735377,
+  "observer": "compact",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "status": "PASS"
+}

@@ -1,0 +1,4370 @@
+[
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 590,
+    "eta": 594,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 594,
+        "need_id": "B2:coal:594",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:594:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 590,
+    "eta": 596,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 596,
+        "need_id": "B1:coal:596",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:596:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 590,
+    "eta": 596,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 596,
+        "need_id": "B2:coal:596",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:596:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 591,
+    "eta": 595,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 595,
+        "need_id": "B1:coal:595",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:595:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 591,
+    "eta": 597,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 597,
+        "need_id": "B1:coal:597",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:597:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 591,
+    "eta": 597,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 597,
+        "need_id": "B2:coal:597",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:597:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 592,
+    "eta": 596,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 596,
+        "need_id": "B2:coal:596",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:596:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 592,
+    "eta": 598,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 598,
+        "need_id": "B1:coal:598",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:598:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 592,
+    "eta": 598,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 598,
+        "need_id": "B2:coal:598",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:598:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 593,
+    "eta": 597,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 597,
+        "need_id": "B1:coal:597",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:597:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 593,
+    "eta": 599,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 599,
+        "need_id": "B1:coal:599",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:599:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 593,
+    "eta": 599,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 599,
+        "need_id": "B2:coal:599",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:599:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 594,
+    "eta": 598,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 598,
+        "need_id": "B2:coal:598",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:598:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 594,
+    "eta": 600,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 600,
+        "need_id": "B1:coal:600",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:600:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 594,
+    "eta": 600,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 600,
+        "need_id": "B2:coal:600",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:600:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 595,
+    "eta": 599,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 599,
+        "need_id": "B1:coal:599",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:599:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 595,
+    "eta": 601,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 601,
+        "need_id": "B1:coal:601",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:601:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 595,
+    "eta": 601,
+    "known_prices": {
+      "A": 49,
+      "D": 345
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 601,
+        "need_id": "B2:coal:601",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:601:FIRM"
+      }
+    ],
+    "price": 345,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 596,
+    "eta": 600,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 600,
+        "need_id": "B2:coal:600",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:600:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 596,
+    "eta": 602,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 602,
+        "need_id": "B1:coal:602",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:602:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 596,
+    "eta": 602,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 602,
+        "need_id": "B2:coal:602",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:602:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 597,
+    "eta": 601,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 601,
+        "need_id": "B1:coal:601",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:601:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 597,
+    "eta": 603,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 603,
+        "need_id": "B1:coal:603",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:603:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 597,
+    "eta": 603,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 603,
+        "need_id": "B2:coal:603",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:603:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 598,
+    "eta": 602,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 602,
+        "need_id": "B2:coal:602",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:602:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 598,
+    "eta": 604,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 604,
+        "need_id": "B1:coal:604",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:604:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 598,
+    "eta": 604,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 604,
+        "need_id": "B2:coal:604",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:604:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 599,
+    "eta": 603,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 603,
+        "need_id": "B1:coal:603",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:603:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 599,
+    "eta": 605,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 605,
+        "need_id": "B1:coal:605",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:605:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 599,
+    "eta": 605,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 605,
+        "need_id": "B2:coal:605",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:605:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 600,
+    "eta": 604,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 604,
+        "need_id": "B2:coal:604",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:604:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 600,
+    "eta": 606,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 606,
+        "need_id": "B1:coal:606",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:606:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 600,
+    "eta": 606,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 606,
+        "need_id": "B2:coal:606",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:606:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 601,
+    "eta": 605,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 605,
+        "need_id": "B1:coal:605",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:605:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 601,
+    "eta": 607,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 607,
+        "need_id": "B1:coal:607",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:607:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 601,
+    "eta": 607,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 607,
+        "need_id": "B2:coal:607",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:607:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 602,
+    "eta": 606,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 606,
+        "need_id": "B2:coal:606",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:606:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 602,
+    "eta": 608,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 608,
+        "need_id": "B1:coal:608",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:608:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 602,
+    "eta": 608,
+    "known_prices": {
+      "A": 49,
+      "D": 351
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 608,
+        "need_id": "B2:coal:608",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:608:FIRM"
+      }
+    ],
+    "price": 351,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 603,
+    "eta": 607,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 607,
+        "need_id": "B1:coal:607",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:607:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 603,
+    "eta": 609,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 609,
+        "need_id": "B1:coal:609",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:609:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 603,
+    "eta": 609,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 609,
+        "need_id": "B2:coal:609",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:609:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 604,
+    "eta": 608,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 608,
+        "need_id": "B2:coal:608",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:608:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 604,
+    "eta": 610,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 610,
+        "need_id": "B1:coal:610",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:610:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 604,
+    "eta": 610,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 610,
+        "need_id": "B2:coal:610",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:610:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 605,
+    "eta": 609,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 609,
+        "need_id": "B1:coal:609",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:609:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 605,
+    "eta": 611,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 611,
+        "need_id": "B1:coal:611",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:611:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 605,
+    "eta": 611,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 611,
+        "need_id": "B2:coal:611",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:611:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 606,
+    "eta": 610,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 610,
+        "need_id": "B2:coal:610",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:610:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 606,
+    "eta": 612,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 612,
+        "need_id": "B1:coal:612",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:612:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 606,
+    "eta": 612,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 612,
+        "need_id": "B2:coal:612",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:612:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 607,
+    "eta": 611,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 611,
+        "need_id": "B1:coal:611",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:611:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 607,
+    "eta": 613,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 613,
+        "need_id": "B1:coal:613",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:613:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 607,
+    "eta": 613,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 613,
+        "need_id": "B2:coal:613",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:613:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 608,
+    "eta": 612,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 612,
+        "need_id": "B2:coal:612",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:612:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 608,
+    "eta": 614,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 614,
+        "need_id": "B1:coal:614",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:614:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 608,
+    "eta": 614,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 614,
+        "need_id": "B2:coal:614",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:614:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 609,
+    "eta": 613,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 613,
+        "need_id": "B1:coal:613",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:613:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 609,
+    "eta": 615,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 615,
+        "need_id": "B1:coal:615",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:615:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 609,
+    "eta": 615,
+    "known_prices": {
+      "A": 49,
+      "D": 358
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 615,
+        "need_id": "B2:coal:615",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:615:FIRM"
+      }
+    ],
+    "price": 358,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 610,
+    "eta": 614,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 614,
+        "need_id": "B2:coal:614",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:614:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 610,
+    "eta": 616,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 616,
+        "need_id": "B1:coal:616",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:616:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 610,
+    "eta": 616,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 616,
+        "need_id": "B2:coal:616",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:616:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 611,
+    "eta": 615,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 615,
+        "need_id": "B1:coal:615",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:615:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 611,
+    "eta": 617,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 617,
+        "need_id": "B1:coal:617",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:617:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 611,
+    "eta": 617,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 617,
+        "need_id": "B2:coal:617",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:617:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 612,
+    "eta": 616,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 616,
+        "need_id": "B2:coal:616",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:616:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 612,
+    "eta": 618,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 618,
+        "need_id": "B1:coal:618",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:618:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 612,
+    "eta": 618,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 618,
+        "need_id": "B2:coal:618",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:618:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 613,
+    "eta": 617,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 617,
+        "need_id": "B1:coal:617",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:617:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 613,
+    "eta": 619,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 619,
+        "need_id": "B1:coal:619",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:619:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 613,
+    "eta": 619,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 619,
+        "need_id": "B2:coal:619",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:619:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 614,
+    "eta": 618,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 618,
+        "need_id": "B2:coal:618",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:618:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 614,
+    "eta": 620,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 620,
+        "need_id": "B1:coal:620",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:620:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 614,
+    "eta": 620,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 620,
+        "need_id": "B2:coal:620",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:620:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 615,
+    "eta": 619,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 619,
+        "need_id": "B1:coal:619",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:619:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 615,
+    "eta": 621,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 621,
+        "need_id": "B1:coal:621",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:621:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 615,
+    "eta": 621,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 621,
+        "need_id": "B2:coal:621",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:621:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 616,
+    "eta": 620,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 620,
+        "need_id": "B2:coal:620",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:620:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 616,
+    "eta": 622,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 622,
+        "need_id": "B1:coal:622",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:622:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 616,
+    "eta": 622,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 622,
+        "need_id": "B2:coal:622",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:622:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 617,
+    "eta": 621,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 621,
+        "need_id": "B1:coal:621",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:621:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 617,
+    "eta": 623,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 623,
+        "need_id": "B1:coal:623",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:623:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 617,
+    "eta": 623,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 623,
+        "need_id": "B2:coal:623",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:623:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 618,
+    "eta": 622,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 622,
+        "need_id": "B2:coal:622",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:622:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 618,
+    "eta": 624,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 624,
+        "need_id": "B1:coal:624",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:624:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 618,
+    "eta": 624,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 624,
+        "need_id": "B2:coal:624",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:624:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 619,
+    "eta": 623,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 623,
+        "need_id": "B1:coal:623",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:623:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 619,
+    "eta": 625,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 625,
+        "need_id": "B1:coal:625",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:625:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 619,
+    "eta": 625,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 625,
+        "need_id": "B2:coal:625",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:625:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 620,
+    "eta": 624,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 624,
+        "need_id": "B2:coal:624",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:624:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 620,
+    "eta": 626,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 626,
+        "need_id": "B1:coal:626",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:626:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 620,
+    "eta": 626,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 626,
+        "need_id": "B2:coal:626",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:626:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 621,
+    "eta": 625,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 625,
+        "need_id": "B1:coal:625",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:625:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 621,
+    "eta": 627,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 627,
+        "need_id": "B1:coal:627",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:627:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 621,
+    "eta": 627,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 627,
+        "need_id": "B2:coal:627",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:627:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 622,
+    "eta": 626,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 626,
+        "need_id": "B2:coal:626",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:626:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 622,
+    "eta": 628,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 628,
+        "need_id": "B1:coal:628",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:628:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 622,
+    "eta": 628,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 628,
+        "need_id": "B2:coal:628",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:628:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 623,
+    "eta": 627,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 627,
+        "need_id": "B1:coal:627",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:627:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 623,
+    "eta": 629,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 629,
+        "need_id": "B1:coal:629",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:629:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 623,
+    "eta": 629,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 629,
+        "need_id": "B2:coal:629",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:629:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 624,
+    "eta": 628,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 628,
+        "need_id": "B2:coal:628",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:628:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 624,
+    "eta": 630,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 630,
+        "need_id": "B1:coal:630",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:630:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 624,
+    "eta": 630,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 630,
+        "need_id": "B2:coal:630",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:630:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 625,
+    "eta": 629,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 629,
+        "need_id": "B1:coal:629",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:629:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 625,
+    "eta": 631,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 631,
+        "need_id": "B1:coal:631",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:631:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 625,
+    "eta": 631,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 631,
+        "need_id": "B2:coal:631",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:631:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 626,
+    "eta": 630,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 630,
+        "need_id": "B2:coal:630",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:630:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 626,
+    "eta": 632,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 632,
+        "need_id": "B1:coal:632",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:632:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 626,
+    "eta": 632,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 632,
+        "need_id": "B2:coal:632",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:632:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 627,
+    "eta": 631,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 631,
+        "need_id": "B1:coal:631",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:631:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 627,
+    "eta": 633,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 633,
+        "need_id": "B1:coal:633",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:633:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 627,
+    "eta": 633,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 633,
+        "need_id": "B2:coal:633",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:633:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 628,
+    "eta": 632,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 632,
+        "need_id": "B2:coal:632",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:632:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 628,
+    "eta": 634,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 634,
+        "need_id": "B1:coal:634",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:634:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 628,
+    "eta": 634,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 634,
+        "need_id": "B2:coal:634",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:634:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 629,
+    "eta": 633,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 633,
+        "need_id": "B1:coal:633",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:633:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 629,
+    "eta": 635,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 635,
+        "need_id": "B1:coal:635",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:635:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 629,
+    "eta": 635,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 635,
+        "need_id": "B2:coal:635",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:635:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 630,
+    "eta": 634,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 634,
+        "need_id": "B2:coal:634",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:634:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 630,
+    "eta": 636,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 636,
+        "need_id": "B1:coal:636",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:636:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 630,
+    "eta": 636,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 636,
+        "need_id": "B2:coal:636",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:636:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 990,
+    "eta": 994,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 994,
+        "need_id": "B2:coal:994",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:994:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 990,
+    "eta": 996,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 996,
+        "need_id": "B1:coal:996",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:996:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 990,
+    "eta": 996,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 996,
+        "need_id": "B2:coal:996",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:996:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 991,
+    "eta": 995,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 995,
+        "need_id": "B1:coal:995",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:995:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 991,
+    "eta": 997,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 997,
+        "need_id": "B1:coal:997",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:997:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 991,
+    "eta": 997,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 997,
+        "need_id": "B2:coal:997",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:997:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 992,
+    "eta": 996,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 996,
+        "need_id": "B2:coal:996",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:996:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 992,
+    "eta": 998,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 998,
+        "need_id": "B1:coal:998",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:998:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 992,
+    "eta": 998,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 998,
+        "need_id": "B2:coal:998",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:998:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 993,
+    "eta": 997,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 997,
+        "need_id": "B1:coal:997",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:997:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 993,
+    "eta": 999,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 999,
+        "need_id": "B1:coal:999",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:999:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 993,
+    "eta": 999,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 999,
+        "need_id": "B2:coal:999",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:999:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 994,
+    "eta": 998,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 998,
+        "need_id": "B2:coal:998",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:998:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 994,
+    "eta": 1000,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1000,
+        "need_id": "B1:coal:1000",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:1000:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 994,
+    "eta": 1000,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1000,
+        "need_id": "B2:coal:1000",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:1000:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 995,
+    "eta": 999,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 999,
+        "need_id": "B1:coal:999",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:999:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 995,
+    "eta": 1001,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1001,
+        "need_id": "B1:coal:1001",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:1001:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 995,
+    "eta": 1001,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1001,
+        "need_id": "B2:coal:1001",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:1001:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 996,
+    "eta": 1000,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1000,
+        "need_id": "B2:coal:1000",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:1000:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 996,
+    "eta": 1002,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1002,
+        "need_id": "B1:coal:1002",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:1002:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 996,
+    "eta": 1002,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1002,
+        "need_id": "B2:coal:1002",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:1002:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 997,
+    "eta": 1001,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1001,
+        "need_id": "B1:coal:1001",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:1001:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 997,
+    "eta": 1003,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1003,
+        "need_id": "B1:coal:1003",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:1003:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 997,
+    "eta": 1003,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1003,
+        "need_id": "B2:coal:1003",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:1003:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 998,
+    "eta": 1002,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1002,
+        "need_id": "B2:coal:1002",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:1002:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 998,
+    "eta": 1004,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1004,
+        "need_id": "B1:coal:1004",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:1004:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 998,
+    "eta": 1004,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1004,
+        "need_id": "B2:coal:1004",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:1004:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B1",
+    "day": 999,
+    "eta": 1003,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1003,
+        "need_id": "B1:coal:1003",
+        "quantity": 20,
+        "source_bucket_id": "B1:coal:1003:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B1",
+    "day": 999,
+    "eta": 1005,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1005,
+        "need_id": "B1:coal:1005",
+        "quantity": 40,
+        "source_bucket_id": "B1:coal:1005:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B2",
+    "day": 999,
+    "eta": 1005,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1005,
+        "need_id": "B2:coal:1005",
+        "quantity": 36,
+        "source_bucket_id": "B2:coal:1005:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 20,
+    "buyer": "B2",
+    "day": 1000,
+    "eta": 1004,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1004,
+        "need_id": "B2:coal:1004",
+        "quantity": 20,
+        "source_bucket_id": "B2:coal:1004:FIRM"
+      }
+    ],
+    "price": 49,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 0,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 20,
+    "seller": "A"
+  },
+  {
+    "accepted": 28,
+    "buyer": "B1",
+    "day": 1000,
+    "eta": 1006,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1006,
+        "need_id": "B1:coal:1006",
+        "quantity": 36,
+        "source_bucket_id": "B1:coal:1006:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 36,
+    "seller": "D"
+  },
+  {
+    "accepted": 32,
+    "buyer": "B2",
+    "day": 1000,
+    "eta": 1006,
+    "known_prices": {
+      "A": 49,
+      "D": 360
+    },
+    "lines": [
+      {
+        "commodity": "coal",
+        "need_by_day": 1006,
+        "need_id": "B2:coal:1006",
+        "quantity": 40,
+        "source_bucket_id": "B2:coal:1006:FIRM"
+      }
+    ],
+    "price": 360,
+    "rejections": {
+      "CASH": 0,
+      "PHYSICAL": 8,
+      "PRICE_LIMIT": 0,
+      "STALE_NEED": 0
+    },
+    "requested": 40,
+    "seller": "D"
+  }
+]

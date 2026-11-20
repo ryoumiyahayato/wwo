@@ -1,0 +1,316 @@
+{
+  "added_files": [
+    {
+      "bytes": 3406,
+      "change": "ADDED",
+      "path": "GOAL_CYCLE02_CANDIDATE_PROPOSAL.md",
+      "sha256": "ec4c2975c8b308b8e7ddf5e5f159439f325664ebec26be0a6459566d559ac10f"
+    },
+    {
+      "bytes": 8207,
+      "change": "ADDED",
+      "path": "GOAL_CYCLE02_DECISIONS.md",
+      "sha256": "3e0b0c5f18231d30c11307beb4ef1ba692800fba1e86a9044a6e54f211888b09"
+    },
+    {
+      "bytes": 1833,
+      "change": "ADDED",
+      "path": "GOAL_CYCLE02_PLAN.md",
+      "sha256": "5ee8999438c28badc07fb6c2913a1e477ab157f8e854b874fa7f8979574097e8"
+    },
+    {
+      "bytes": 20408,
+      "change": "ADDED",
+      "path": "GOAL_CYCLE02_REPORT.md",
+      "sha256": "e7185b5c4ec4f307de8c93b4d29c8faac3c4350e90e7f07c192fd42e8be2ba7b"
+    },
+    {
+      "bytes": 2765,
+      "change": "ADDED",
+      "path": "GOAL_CYCLE02_RESTORE.md",
+      "sha256": "aa1a8918a647185c7cd07c3a39e15c29c75817a37bd28650588de50de93060c8"
+    },
+    {
+      "bytes": 7839,
+      "change": "ADDED",
+      "path": "GOAL_CYCLE02_STATE.json",
+      "sha256": "73abddf43dc9f7c90479f307d9d140d6939b5184aa0676b2856b18d630fb012f"
+    },
+    {
+      "bytes": 32089,
+      "change": "ADDED",
+      "path": "GOAL_CYCLE02_USER_PROMPT.txt",
+      "sha256": "a8916c9e4f1b3ba0c21db767a47d6f654ee9f4b8f0f5647e02adfe4a1e2eab79"
+    },
+    {
+      "bytes": 7964,
+      "change": "ADDED",
+      "path": "build_cycle02_evidence.py",
+      "sha256": "70ce325b071065e26e2f302ef7ed3757f55a3978dc55fa38e31cff1149c16b9c"
+    },
+    {
+      "bytes": 2349,
+      "change": "ADDED",
+      "path": "check_cycle02_cross_party.py",
+      "sha256": "fad837f7ff173e3023fbfb2570fe94e9e1cf6e27728807f2924eb2059b23c065"
+    },
+    {
+      "bytes": 2188,
+      "change": "ADDED",
+      "path": "check_cycle02_ghost_need.py",
+      "sha256": "1a86b7f1a449f2a10ec15527c952aeb41b73526302976c2f647a1c61a207107a"
+    },
+    {
+      "bytes": 2137,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/DRAFT_PR.md",
+      "sha256": "fd65b1aee4a1bf1ebbf6260d567fad3e9a3077c1f3a456e4fcd3707348b59191"
+    },
+    {
+      "bytes": 7883,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/analyze.py",
+      "sha256": "ceb2c4fd7b1b431cddcb1f0ff01b424e23e916b616d9b0b96f754283b00e3275"
+    },
+    {
+      "bytes": 11261,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/causal.py",
+      "sha256": "6841c8466862b5a4b0356de22a7678fcd68622c5e33c02ce1f14dd763879fe80"
+    },
+    {
+      "bytes": 21223,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/causal_audit.py",
+      "sha256": "275b76f658d0b1d4d746e036852780cab490e59b4404333d84545bd706f38fbe"
+    },
+    {
+      "bytes": 4006,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/corruption_probes02.py",
+      "sha256": "22f024172e0da2fb178c2fa0192701797714694354b32882617776e992281445"
+    },
+    {
+      "bytes": 1729,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/auditor_source_revision.json",
+      "sha256": "0a8c59df99d30ab93bf45b318fb85178e89bd76b4ff7ab663b6640ccd7db34a4"
+    },
+    {
+      "bytes": 1446,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/candidate_tests.txt",
+      "sha256": "39325070a231c155d45e051b60d291b9b1b5521ad680caeadcedb83ce1ea24c5"
+    },
+    {
+      "bytes": 252,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/cycle01_frozen_reproduction.json",
+      "sha256": "ace8ecdb11131ace75025bc0d3c06a79cbcfe059cdb207d95c415014ccb8dbf6"
+    },
+    {
+      "bytes": 6713,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/factorial_P_T_contrasts.json",
+      "sha256": "01e75c93e2bed96792593dfb6893caf1dcb7b40d6c08e7649ffff42edf747e6d"
+    },
+    {
+      "bytes": 1640,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_base_tests.txt",
+      "sha256": "7003304537003e8a1abc601f2d7a0abf45ccafec0b6df4c463b76eba1dad67b4"
+    },
+    {
+      "bytes": 7166,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_causal/N4_negative_controls.json",
+      "sha256": "73c79709ce0e722ff7d5143b0e2d308ab6542d3eb32d6345cb4e5f45add8f4a4"
+    },
+    {
+      "bytes": 107086,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_causal/decision_chain_examples.json",
+      "sha256": "b6cf93a621232504c0b989f6a7ceb9d5e5a1d4467d4adaafd7cda347f6804e87"
+    },
+    {
+      "bytes": 530,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_causal/identity_normalized_controls.json",
+      "sha256": "38b3ef7679262c1f0fcfa0e9764389f1e13711ce88d04a660e5d1862b7d2ab5d"
+    },
+    {
+      "bytes": 196,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_cycle01_immutability.json",
+      "sha256": "db8ed5fe33c0a22402976ebc25222cd417ace457d25973391d7d53e90319cd76"
+    },
+    {
+      "bytes": 173641,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_metrics.csv",
+      "sha256": "bcceacf04dd67c003ba71f3502f2673e9123c5bfeb7a75edd826c81ce16464c0"
+    },
+    {
+      "bytes": 328394,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_metrics.json",
+      "sha256": "b07b6f77eba9855f08501ad531e3f530a9da25228d66146d0fa91ea2bd5ee2fa"
+    },
+    {
+      "bytes": 219448,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_paired_analysis.json",
+      "sha256": "8c45bacae1127c9ab4ec93542145909f7a3963318c808e6f1061677816487679"
+    },
+    {
+      "bytes": 1007,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_postprocessing_source_revision.json",
+      "sha256": "02b4f832a51cba26db0f82161e596473924300de7dbe05c4b7f59d1a5398b06e"
+    },
+    {
+      "bytes": 322,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_raw_archive_validation.json",
+      "sha256": "f7ec5f0eddb581c6e4673f06e7cf5104f76b6f09f25fcc5d1fa720910986ec9d"
+    },
+    {
+      "bytes": 2130,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_reaudit_v4_verification.json",
+      "sha256": "01b5d00a084eece6a028d93414fdf9e44a0c9bf2692d7663fe9ac18a92f06042"
+    },
+    {
+      "bytes": 357,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/final_two_process_hash_equality.json",
+      "sha256": "d53e1a1b959e642f0a1841b29477df7d26329aab51b240e991ce5e89041f0225"
+    },
+    {
+      "bytes": 76047,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/holdout_funding_revision.json",
+      "sha256": "c23d7651b9f278b2ff1352f80641c85730955492d50140938dd99dc1c7c9489a"
+    },
+    {
+      "bytes": 530,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/identity_normalized_controls.json",
+      "sha256": "68776ea5467df63053078fd3ab2a5c4a70608532c03b2a627479a36a7781e0bd"
+    },
+    {
+      "bytes": 2617,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/new_candidate_gate.json",
+      "sha256": "84554e73f58874c19ec34ade569e686f4a28c3d8b16251dc9f474fd0315473fa"
+    },
+    {
+      "bytes": 1304,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/platform_interruption_20261008.json",
+      "sha256": "ff76e15c29a4a808ec720a2fce20dbfd6cd8cb98f278f4b3281ebfdbb105c6fb"
+    },
+    {
+      "bytes": 107102,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/pre_candidate_decision_chain_examples.json",
+      "sha256": "3a257818917ea17c1a9c94e3b2d8d603f620d0e516e03f284c66768a6bf07d49"
+    },
+    {
+      "bytes": 1640,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/preformal_auditfix_tests.txt",
+      "sha256": "10b70a65c74a912ad8994de19bb1352e226f3cc6cb021367b13b5dd019d70dec"
+    },
+    {
+      "bytes": 1361,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/preformal_corruptions.json",
+      "sha256": "d458d0549acb5f6bee801aa5e91f0a7a5d6a1763e390ff7a95d7a1ee63066967"
+    },
+    {
+      "bytes": 1483,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/seal_baseline_verification.txt",
+      "sha256": "d7eb9d9cf02a025349ba350616a1e53cd53fca5d8dc1e10bea7c8b2dab93d047"
+    },
+    {
+      "bytes": 1891,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/evidence/source_continuity.json",
+      "sha256": "b2c13d900b01f801cd6e8900276ab9da4e9dcc8a0b0d975b684e257e11946854"
+    },
+    {
+      "bytes": 5964,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/fixtures.py",
+      "sha256": "af7448e22d7c7290260647c40c525f0f7b1284d58f78473e4fbc2ba9d49dcf8c"
+    },
+    {
+      "bytes": 4276,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/run_controls.py",
+      "sha256": "6f5aeb27e3c43672e234df108ea073914b10ff1cb83d8ef074c9319d381eb513"
+    },
+    {
+      "bytes": 5525,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/run_cycle02.py",
+      "sha256": "a6b9778a7e0b04294796c1a87eef42bf6da2d6e95a3b146f93fb1e86fc23239b"
+    },
+    {
+      "bytes": 5771,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02/test_cycle02.py",
+      "sha256": "88286ea014148b45574b26ab5a6c08e153a842305ba325ed7f12a6cd07b5652f"
+    },
+    {
+      "bytes": 4287,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02_candidate/learning.py",
+      "sha256": "a065a183ca9cd5060f0b8cc1312c49882f57e94e352816449979d642a7c91e5a"
+    },
+    {
+      "bytes": 4162,
+      "change": "ADDED",
+      "path": "economy_quantity_lab/goal_cycle02_candidate/test_candidate.py",
+      "sha256": "6d7f27e953fed9070b1c8190f2d2ebf5e70a138622eafbdfe030b119b93523af"
+    },
+    {
+      "bytes": 683659,
+      "change": "ADDED",
+      "path": "experiments_manifest_cycle02.json",
+      "sha256": "e34955c496b5c6a825a6112b2901adadd54f2cd868a96b0d0a7070e55bcf98f0"
+    },
+    {
+      "bytes": 907374,
+      "change": "ADDED",
+      "path": "experiments_manifest_cycle02_final.json",
+      "sha256": "6b2cc5f69b4d09cfec7c32aad16d81ecd1898f56aa774cd24ea5b90091edf8bf"
+    },
+    {
+      "bytes": 2993,
+      "change": "ADDED",
+      "path": "reaudit_cycle02.py",
+      "sha256": "594dbb880d13b953722f663c32ec2b798783efc6af8a4597506e36c0a586e0f7"
+    },
+    {
+      "bytes": 3967,
+      "change": "ADDED",
+      "path": "verify_goal_cycle02.py",
+      "sha256": "08cb4c9ef93846ee046961d3c565594bc1db3f12a58145d8f9fc50a84adee70a"
+    },
+    {
+      "bytes": 3179,
+      "change": "ADDED",
+      "path": "write_cycle02_metrics.py",
+      "sha256": "6091590d717fc22ead8a924f024e522a345162ae45acf257b63db17c51465966"
+    }
+  ],
+  "changed_original_files": [],
+  "economic_execution_commit": "710dac38d82a4d48609e88c9f974a927e9b6c686",
+  "postprocessing_revision_evidence": "final_postprocessing_source_revision.json",
+  "relative_to": "93633b4321dc288bd14b064350cc7fb053529bae",
+  "self_manifest_excluded": "avoids circular hash",
+  "unchanged_original_files": 456
+}

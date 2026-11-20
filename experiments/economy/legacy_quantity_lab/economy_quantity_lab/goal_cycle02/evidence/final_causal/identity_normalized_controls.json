@@ -1,0 +1,15 @@
+{
+  "classification": "POLICY_STABLE_ID_TIE_BREAK_SENSITIVITY",
+  "first_identity_normalized_cash_difference": 2,
+  "first_identity_normalized_production_difference": 2,
+  "first_identity_normalized_quantity_difference": 2,
+  "mapping_back": {
+    "A1": "B2",
+    "A2": "C2",
+    "X": "D",
+    "Y": "A",
+    "Z1": "B1",
+    "Z2": "C1"
+  },
+  "note": "Original identities are restored before comparison. Raw hashes with changed names alone are not evidence of tie-break sensitivity. Both final sink deliveries remain unchanged."
+}

@@ -1,0 +1,14 @@
+Python: 3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]; evidence: /workspace/shared/wwo-economy-cycle02/.local/verification-wyfdk0ir
+Baseline: inventory-round2-2026-10-07; 156 source hashes passed
+original_tests: ['/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python', '-m', 'unittest', '-v', 'test_economy.py']
+original_tests: passed
+round2_tests: ['/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python', '-m', 'unittest', '-v', 'test_inventory_comparison.py']
+round2_tests: passed
+baseline_reproduction: ['/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python', 'run_experiment.py', '--output-dir', '/workspace/shared/wwo-economy-cycle02/.local/verification-wyfdk0ir/baseline']
+baseline_reproduction: passed
+round2_comparison: ['/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python', 'run_inventory_comparison.py', '--output-dir', '/workspace/shared/wwo-economy-cycle02/.local/verification-wyfdk0ir/round2', '--execution-log', '/workspace/shared/wwo-economy-cycle02/.local/verification-wyfdk0ir/execution_log.json']
+round2_comparison: passed
+Outputs: 139/139 direct byte matches; 0 Windows JSON LF-compatible matches
+summary SHA-256: 02f43c06496eae20959a1ab89885942bc5dffe272cfb283c17ee70e3ae8c0d02
+period_summary SHA-256: 90731e7f8baec95134c7651d4240a727fd74e8a9ac5fc7de872e733d7d38d336
+Verification passed: /workspace/shared/wwo-economy-cycle02/.local/verification-wyfdk0ir/verification.json

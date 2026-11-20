@@ -1,0 +1,65 @@
+{
+  "causal_checker_sha256": "275b76f658d0b1d4d746e036852780cab490e59b4404333d84545bd706f38fbe",
+  "causal_checker_version": "v4-post-execution",
+  "elapsed_seconds": 689.1144911849988,
+  "execution_source_commit": "710dac38d82a4d48609e88c9f974a927e9b6c686",
+  "formal_cases_reaudited": 118,
+  "independent_accounting_rechecks": 118,
+  "independent_causal_rechecks": 118,
+  "negative": [
+    {
+      "error": "need-by/timely/release mismatch",
+      "name": "EARLIER_NEED_BY_UNCHANGED_TIMELY",
+      "status": "PASS_EXPECTED_REJECTION"
+    },
+    {
+      "error": "PRICE rejection mislabeled",
+      "name": "PRICE_MISCLASSIFIED_AS_CASH",
+      "status": "PASS_EXPECTED_REJECTION"
+    },
+    {
+      "error": "payment uses changed quote",
+      "name": "LOCKED_PRICE_PLUS_ONE",
+      "status": "PASS_EXPECTED_REJECTION"
+    },
+    {
+      "error": "payment uses changed quote",
+      "name": "LOCKED_PRICE_CHANGED_TO_REAL_LATEST_QUOTE",
+      "status": "PASS_EXPECTED_REJECTION"
+    },
+    {
+      "error": "line stable ID/date mismatch",
+      "name": "ACCEPTED_ORDER_LINE_EARLIER_NEED_BY",
+      "status": "PASS_EXPECTED_REJECTION"
+    },
+    {
+      "error": "retry counted as distinct new information",
+      "name": "RETRY_COUNTED_AS_DISTINCT_NEED",
+      "status": "PASS_EXPECTED_REJECTION"
+    },
+    {
+      "error": "arrival without matching payment",
+      "name": "MISSING_ARRIVAL_PAYMENT",
+      "status": "PASS_EXPECTED_REJECTION"
+    },
+    {
+      "error": "unknown offer in buyer selectable set",
+      "name": "UNKNOWN_SUPPLIER_IN_SELECTABLE_SET",
+      "status": "PASS_EXPECTED_REJECTION"
+    },
+    {
+      "error": "accepted need keys differ from actual request lines",
+      "name": "GHOST_ACCEPTED_NEED_WITH_CONSERVED_TOTAL",
+      "status": "PASS_EXPECTED_REJECTION"
+    },
+    {
+      "error": "accepted event parties/route differ from dated request",
+      "name": "SWAPPED_ORDER_IDS_SAME_DATE_QUANTITY_PRICE_DIFFERENT_BUYER",
+      "status": "PASS_EXPECTED_REJECTION"
+    }
+  ],
+  "negative_logs_reaudited": 10,
+  "runtime_rerun": false,
+  "status": "PASS",
+  "utc": "2026-10-08T04:59:53.347479+00:00"
+}

@@ -1,0 +1,3104 @@
+{
+  "utc": "2026-10-08T03:15:58.658061+00:00",
+  "reason": "EXPERIMENT_DESIGN_DEFECT found statically before any H2/v2 result. Terminal demand6 had funding for5. Increase only required accounts by declared days*maximum daily demand*terminal posted payment. No demand/price/limit/physical change.",
+  "unrun": true,
+  "original_manifest_sha256": "e34955c496b5c6a825a6112b2901adadd54f2cd868a96b0d0a7070e55bcf98f0",
+  "revisions": [
+    {
+      "case_id": "H2_mixed_date_competition_N2_600",
+      "original_config_sha256": "efa5ab2b47cf0498b3cdbcb3e8d6759ec73da274cfea082a77a31ed160b44df3",
+      "revised_config_sha256": "d568ffad081756a6563ba8f2a0f3c11fad3bc628d758175bbc95a041c286f3c3",
+      "changes": {
+        "external:T1": {
+          "old": 6000000,
+          "required_bound": 7200000
+        }
+      },
+      "config": {
+        "capacity_events": [],
+        "case_id": "H2_mixed_date_competition_N2_600",
+        "contention": "C1",
+        "days": 600,
+        "economics": {
+          "balances": {
+            "A": 0,
+            "B1": 15080000,
+            "B2": 15080000,
+            "C1": 24055200,
+            "C2": 24055200,
+            "D": 0,
+            "E": 0,
+            "external:T1": 7200000,
+            "external:T2": 6000000
+          },
+          "feedback": true,
+          "funding": "nonbinding",
+          "limits": {
+            "A": {},
+            "B1": {
+              "coal": 110
+            },
+            "B2": {
+              "coal": 110
+            },
+            "C1": {
+              "steel": 330
+            },
+            "C2": {
+              "steel": 330
+            },
+            "D": {},
+            "E": {}
+          },
+          "mode": "N2",
+          "price_observer": true,
+          "prices": {
+            "A:coal": 100,
+            "B1:steel": 300,
+            "B2:steel": 270,
+            "D:coal": 90,
+            "E:coal": 95
+          },
+          "terminal_prices": {
+            "T1": 2000,
+            "T2": 2000
+          },
+          "tick": 1
+        },
+        "firms": [
+          {
+            "active": true,
+            "capacities": {
+              "coal": 100
+            },
+            "firm_id": "A",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:A",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "A"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "coal": 60
+            },
+            "firm_id": "D",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:D",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "D"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B1",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "A",
+                "D",
+                "E"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B1",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B1"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B2",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "D",
+                "A",
+                "E"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B2",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B2"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C1",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B1",
+                "B2"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C1",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C1"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C2",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B2",
+                "B1"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C2",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C2"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "coal": 70
+            },
+            "firm_id": "E",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:E",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "E"
+              }
+            ]
+          }
+        ],
+        "holdout_status": "UNRUN_V2; v1 had20-day correctness-test exposure and is development only",
+        "horizon": 10,
+        "inventory": {
+          "A": {
+            "coal": 400,
+            "machine": 0,
+            "steel": 0
+          },
+          "B1": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "B2": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "C1": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C2": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "D": {
+            "coal": 400,
+            "machine": 0,
+            "steel": 0
+          },
+          "E": {
+            "coal": 410,
+            "machine": 0,
+            "steel": 0
+          }
+        },
+        "route_events": {},
+        "routes": [
+          {
+            "buyer_id": "B1",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "A"
+          },
+          {
+            "buyer_id": "B1",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 6,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B2",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 6,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B2",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "A"
+          },
+          {
+            "buyer_id": "C1",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          },
+          {
+            "buyer_id": "C1",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C2",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C2",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          },
+          {
+            "buyer_id": "B1",
+            "capacity": 80,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "E"
+          },
+          {
+            "buyer_id": "B2",
+            "capacity": 80,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "E"
+          }
+        ],
+        "scale": "S2",
+        "scope": "All coal and steel S2; local observed requests/orders only. Scarcity C/D/E explicitly T1=T2=8 to sustain120-coal planned capacity; normal default5+5.",
+        "sinks": [
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                6
+              ]
+            ],
+            "firm_id": "C1",
+            "sink_id": "T1"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C2",
+            "sink_id": "T2"
+          }
+        ],
+        "suite": "held_out",
+        "treatment": "normal"
+      }
+    },
+    {
+      "case_id": "H2_mixed_date_competition_N3_600",
+      "original_config_sha256": "b393520b00d7b2c035f20351943225a2d6c4176628b375dc9059880744818e3e",
+      "revised_config_sha256": "150cb1bfde2871af8495399b435f0b238dc0daf05c02c029215b75fcab755a83",
+      "changes": {
+        "external:T1": {
+          "old": 6000000,
+          "required_bound": 7200000
+        }
+      },
+      "config": {
+        "capacity_events": [],
+        "case_id": "H2_mixed_date_competition_N3_600",
+        "contention": "C1",
+        "days": 600,
+        "economics": {
+          "balances": {
+            "A": 0,
+            "B1": 15080000,
+            "B2": 15080000,
+            "C1": 24055200,
+            "C2": 24055200,
+            "D": 0,
+            "E": 0,
+            "external:T1": 7200000,
+            "external:T2": 6000000
+          },
+          "feedback": true,
+          "funding": "nonbinding",
+          "limits": {
+            "A": {},
+            "B1": {
+              "coal": 110
+            },
+            "B2": {
+              "coal": 110
+            },
+            "C1": {
+              "steel": 330
+            },
+            "C2": {
+              "steel": 330
+            },
+            "D": {},
+            "E": {}
+          },
+          "mode": "N3",
+          "price_observer": true,
+          "prices": {
+            "A:coal": 100,
+            "B1:steel": 300,
+            "B2:steel": 270,
+            "D:coal": 90,
+            "E:coal": 95
+          },
+          "terminal_prices": {
+            "T1": 2000,
+            "T2": 2000
+          },
+          "tick": 1
+        },
+        "firms": [
+          {
+            "active": true,
+            "capacities": {
+              "coal": 100
+            },
+            "firm_id": "A",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:A",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "A"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "coal": 60
+            },
+            "firm_id": "D",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:D",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "D"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B1",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "A",
+                "D",
+                "E"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B1",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B1"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B2",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "D",
+                "A",
+                "E"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B2",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B2"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C1",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B1",
+                "B2"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C1",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C1"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C2",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B2",
+                "B1"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C2",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C2"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "coal": 70
+            },
+            "firm_id": "E",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:E",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "E"
+              }
+            ]
+          }
+        ],
+        "holdout_status": "UNRUN_V2; v1 had20-day correctness-test exposure and is development only",
+        "horizon": 10,
+        "inventory": {
+          "A": {
+            "coal": 400,
+            "machine": 0,
+            "steel": 0
+          },
+          "B1": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "B2": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "C1": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C2": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "D": {
+            "coal": 400,
+            "machine": 0,
+            "steel": 0
+          },
+          "E": {
+            "coal": 410,
+            "machine": 0,
+            "steel": 0
+          }
+        },
+        "route_events": {},
+        "routes": [
+          {
+            "buyer_id": "B1",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "A"
+          },
+          {
+            "buyer_id": "B1",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 6,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B2",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 6,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B2",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "A"
+          },
+          {
+            "buyer_id": "C1",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          },
+          {
+            "buyer_id": "C1",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C2",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C2",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          },
+          {
+            "buyer_id": "B1",
+            "capacity": 80,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "E"
+          },
+          {
+            "buyer_id": "B2",
+            "capacity": 80,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "E"
+          }
+        ],
+        "scale": "S2",
+        "scope": "All coal and steel S2; local observed requests/orders only. Scarcity C/D/E explicitly T1=T2=8 to sustain120-coal planned capacity; normal default5+5.",
+        "sinks": [
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                6
+              ]
+            ],
+            "firm_id": "C1",
+            "sink_id": "T1"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C2",
+            "sink_id": "T2"
+          }
+        ],
+        "suite": "held_out",
+        "treatment": "normal"
+      }
+    },
+    {
+      "case_id": "H2_asymmetric_limits_scarcity_N2_600",
+      "original_config_sha256": "0f8022305767293b22b6ec17830795d0325bbcdb0cc4b0a607a3d8fd6f1b28d4",
+      "revised_config_sha256": "073e0eab365b59eac073c2da0769fa5c7bf5cd11a076f0e75aefaac6bc004e24",
+      "changes": {
+        "external:T1": {
+          "old": 6000000,
+          "required_bound": 7200000
+        }
+      },
+      "config": {
+        "capacity_events": [],
+        "case_id": "H2_asymmetric_limits_scarcity_N2_600",
+        "contention": "C1",
+        "days": 600,
+        "economics": {
+          "balances": {
+            "A": 0,
+            "B1": 15080000,
+            "B2": 15080000,
+            "B3": 15080000,
+            "B4": 15080000,
+            "B5": 15080000,
+            "C1": 24055200,
+            "C10": 24055200,
+            "C2": 24055200,
+            "C3": 24055200,
+            "C4": 24055200,
+            "C5": 24055200,
+            "C6": 24055200,
+            "C7": 24055200,
+            "C8": 24055200,
+            "C9": 24055200,
+            "D": 0,
+            "R3": 0,
+            "external:T1": 7200000,
+            "external:T10": 6000000,
+            "external:T2": 6000000,
+            "external:T3": 6000000,
+            "external:T4": 6000000,
+            "external:T5": 6000000,
+            "external:T6": 6000000,
+            "external:T7": 6000000,
+            "external:T8": 6000000,
+            "external:T9": 6000000
+          },
+          "feedback": true,
+          "funding": "nonbinding",
+          "limits": {
+            "A": {},
+            "B1": {
+              "coal": 99
+            },
+            "B2": {
+              "coal": 145
+            },
+            "B3": {
+              "coal": 145
+            },
+            "B4": {
+              "coal": 145
+            },
+            "B5": {
+              "coal": 145
+            },
+            "C1": {
+              "steel": 280
+            },
+            "C10": {
+              "steel": 335
+            },
+            "C2": {
+              "steel": 335
+            },
+            "C3": {
+              "steel": 335
+            },
+            "C4": {
+              "steel": 335
+            },
+            "C5": {
+              "steel": 335
+            },
+            "C6": {
+              "steel": 335
+            },
+            "C7": {
+              "steel": 335
+            },
+            "C8": {
+              "steel": 335
+            },
+            "C9": {
+              "steel": 335
+            },
+            "D": {},
+            "R3": {}
+          },
+          "mode": "N2",
+          "price_observer": true,
+          "prices": {
+            "A:coal": 100,
+            "B1:steel": 300,
+            "B2:steel": 270,
+            "B3:steel": 300,
+            "B4:steel": 270,
+            "B5:steel": 300,
+            "D:coal": 90,
+            "R3:coal": 100
+          },
+          "terminal_prices": {
+            "T1": 2000,
+            "T10": 2000,
+            "T2": 2000,
+            "T3": 2000,
+            "T4": 2000,
+            "T5": 2000,
+            "T6": 2000,
+            "T7": 2000,
+            "T8": 2000,
+            "T9": 2000
+          },
+          "tick": 1
+        },
+        "firms": [
+          {
+            "active": true,
+            "capacities": {
+              "coal": 50
+            },
+            "firm_id": "A",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:A",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "A"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "coal": 40
+            },
+            "firm_id": "D",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:D",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "D"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "coal": 50
+            },
+            "firm_id": "R3",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:R3",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "R3"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B1",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "A",
+                "D"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B1",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B1"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B2",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "D",
+                "R3"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B2",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B2"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B3",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "R3",
+                "A"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B3",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B3"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B4",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "A",
+                "D"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B4",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B4"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B5",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "D",
+                "R3"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B5",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B5"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C1",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B1",
+                "B2"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C1",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C1"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C2",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B2",
+                "B3"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C2",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C2"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C3",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B3",
+                "B4"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C3",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C3"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C4",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B4",
+                "B5"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C4",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C4"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C5",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B5",
+                "B1"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C5",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C5"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C6",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B1",
+                "B2"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C6",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C6"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C7",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B2",
+                "B3"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C7",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C7"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C8",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B3",
+                "B4"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C8",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C8"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C9",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B4",
+                "B5"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C9",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C9"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C10",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B5",
+                "B1"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C10",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C10"
+              }
+            ]
+          }
+        ],
+        "holdout_status": "UNRUN_V2; v1 had20-day correctness-test exposure and is development only",
+        "horizon": 10,
+        "inventory": {
+          "A": {
+            "coal": 400,
+            "machine": 0,
+            "steel": 0
+          },
+          "B1": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "B2": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "B3": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "B4": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "B5": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "C1": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C10": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C2": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C3": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C4": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C5": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C6": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C7": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C8": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C9": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "D": {
+            "coal": 400,
+            "machine": 0,
+            "steel": 0
+          },
+          "R3": {
+            "coal": 400,
+            "machine": 0,
+            "steel": 0
+          }
+        },
+        "route_events": {},
+        "routes": [
+          {
+            "buyer_id": "B1",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "A"
+          },
+          {
+            "buyer_id": "B1",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 4,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B2",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 4,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B2",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "R3"
+          },
+          {
+            "buyer_id": "B3",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "R3"
+          },
+          {
+            "buyer_id": "B3",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "A"
+          },
+          {
+            "buyer_id": "B4",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "A"
+          },
+          {
+            "buyer_id": "B4",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 4,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B5",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 4,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B5",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "R3"
+          },
+          {
+            "buyer_id": "C1",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          },
+          {
+            "buyer_id": "C1",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C2",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C2",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B3"
+          },
+          {
+            "buyer_id": "C3",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B3"
+          },
+          {
+            "buyer_id": "C3",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B4"
+          },
+          {
+            "buyer_id": "C4",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B4"
+          },
+          {
+            "buyer_id": "C4",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B5"
+          },
+          {
+            "buyer_id": "C5",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B5"
+          },
+          {
+            "buyer_id": "C5",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          },
+          {
+            "buyer_id": "C6",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          },
+          {
+            "buyer_id": "C6",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C7",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C7",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B3"
+          },
+          {
+            "buyer_id": "C8",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B3"
+          },
+          {
+            "buyer_id": "C8",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B4"
+          },
+          {
+            "buyer_id": "C9",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B4"
+          },
+          {
+            "buyer_id": "C9",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B5"
+          },
+          {
+            "buyer_id": "C10",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B5"
+          },
+          {
+            "buyer_id": "C10",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          }
+        ],
+        "scale": "S5",
+        "scope": "All coal and steel S2; local observed requests/orders only. Scarcity C/D/E explicitly T1=T2=8 to sustain120-coal planned capacity; normal default5+5.",
+        "sinks": [
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                6
+              ]
+            ],
+            "firm_id": "C1",
+            "sink_id": "T1"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C2",
+            "sink_id": "T2"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C3",
+            "sink_id": "T3"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C4",
+            "sink_id": "T4"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C5",
+            "sink_id": "T5"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C6",
+            "sink_id": "T6"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C7",
+            "sink_id": "T7"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C8",
+            "sink_id": "T8"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C9",
+            "sink_id": "T9"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C10",
+            "sink_id": "T10"
+          }
+        ],
+        "suite": "held_out",
+        "treatment": "normal"
+      }
+    },
+    {
+      "case_id": "H2_asymmetric_limits_scarcity_N3_600",
+      "original_config_sha256": "c0bd2e991633a482c899db34bb7b3e4de255bc1c68f381465c283cbd318dbb09",
+      "revised_config_sha256": "84d1909ac35b2e1b25767c1fa1eced7446f37c7bc3e28d62747ad81ccd4deedb",
+      "changes": {
+        "external:T1": {
+          "old": 6000000,
+          "required_bound": 7200000
+        }
+      },
+      "config": {
+        "capacity_events": [],
+        "case_id": "H2_asymmetric_limits_scarcity_N3_600",
+        "contention": "C1",
+        "days": 600,
+        "economics": {
+          "balances": {
+            "A": 0,
+            "B1": 15080000,
+            "B2": 15080000,
+            "B3": 15080000,
+            "B4": 15080000,
+            "B5": 15080000,
+            "C1": 24055200,
+            "C10": 24055200,
+            "C2": 24055200,
+            "C3": 24055200,
+            "C4": 24055200,
+            "C5": 24055200,
+            "C6": 24055200,
+            "C7": 24055200,
+            "C8": 24055200,
+            "C9": 24055200,
+            "D": 0,
+            "R3": 0,
+            "external:T1": 7200000,
+            "external:T10": 6000000,
+            "external:T2": 6000000,
+            "external:T3": 6000000,
+            "external:T4": 6000000,
+            "external:T5": 6000000,
+            "external:T6": 6000000,
+            "external:T7": 6000000,
+            "external:T8": 6000000,
+            "external:T9": 6000000
+          },
+          "feedback": true,
+          "funding": "nonbinding",
+          "limits": {
+            "A": {},
+            "B1": {
+              "coal": 99
+            },
+            "B2": {
+              "coal": 145
+            },
+            "B3": {
+              "coal": 145
+            },
+            "B4": {
+              "coal": 145
+            },
+            "B5": {
+              "coal": 145
+            },
+            "C1": {
+              "steel": 280
+            },
+            "C10": {
+              "steel": 335
+            },
+            "C2": {
+              "steel": 335
+            },
+            "C3": {
+              "steel": 335
+            },
+            "C4": {
+              "steel": 335
+            },
+            "C5": {
+              "steel": 335
+            },
+            "C6": {
+              "steel": 335
+            },
+            "C7": {
+              "steel": 335
+            },
+            "C8": {
+              "steel": 335
+            },
+            "C9": {
+              "steel": 335
+            },
+            "D": {},
+            "R3": {}
+          },
+          "mode": "N3",
+          "price_observer": true,
+          "prices": {
+            "A:coal": 100,
+            "B1:steel": 300,
+            "B2:steel": 270,
+            "B3:steel": 300,
+            "B4:steel": 270,
+            "B5:steel": 300,
+            "D:coal": 90,
+            "R3:coal": 100
+          },
+          "terminal_prices": {
+            "T1": 2000,
+            "T10": 2000,
+            "T2": 2000,
+            "T3": 2000,
+            "T4": 2000,
+            "T5": 2000,
+            "T6": 2000,
+            "T7": 2000,
+            "T8": 2000,
+            "T9": 2000
+          },
+          "tick": 1
+        },
+        "firms": [
+          {
+            "active": true,
+            "capacities": {
+              "coal": 50
+            },
+            "firm_id": "A",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:A",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "A"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "coal": 40
+            },
+            "firm_id": "D",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:D",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "D"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "coal": 50
+            },
+            "firm_id": "R3",
+            "firm_type": "RAW_SUPPLIER",
+            "input_targets": {},
+            "knowledge": {},
+            "output_targets": {
+              "coal": 400
+            },
+            "place_id": "place:R3",
+            "recipes": [
+              {
+                "inputs": [],
+                "output_commodity": "coal",
+                "output_quantity": 1,
+                "producer_id": "R3"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B1",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "A",
+                "D"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B1",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B1"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B2",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "D",
+                "R3"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B2",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B2"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B3",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "R3",
+                "A"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B3",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B3"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B4",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "A",
+                "D"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B4",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B4"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "steel": 30
+            },
+            "firm_id": "B5",
+            "firm_type": "PROCESSOR",
+            "input_targets": {
+              "coal": 160
+            },
+            "knowledge": {
+              "coal": [
+                "D",
+                "R3"
+              ]
+            },
+            "output_targets": {
+              "steel": 20
+            },
+            "place_id": "place:B5",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "coal",
+                    2
+                  ]
+                ],
+                "output_commodity": "steel",
+                "output_quantity": 1,
+                "producer_id": "B5"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C1",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B1",
+                "B2"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C1",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C1"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C2",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B2",
+                "B3"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C2",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C2"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C3",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B3",
+                "B4"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C3",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C3"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C4",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B4",
+                "B5"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C4",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C4"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C5",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B5",
+                "B1"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C5",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C5"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C6",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B1",
+                "B2"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C6",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C6"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C7",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B2",
+                "B3"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C7",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C7"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C8",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B3",
+                "B4"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C8",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C8"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C9",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B4",
+                "B5"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C9",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C9"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "capacities": {
+              "machine": 8
+            },
+            "firm_id": "C10",
+            "firm_type": "FINAL_PRODUCER",
+            "input_targets": {
+              "steel": 50
+            },
+            "knowledge": {
+              "steel": [
+                "B5",
+                "B1"
+              ]
+            },
+            "output_targets": {
+              "machine": 0
+            },
+            "place_id": "place:C10",
+            "recipes": [
+              {
+                "inputs": [
+                  [
+                    "steel",
+                    4
+                  ]
+                ],
+                "output_commodity": "machine",
+                "output_quantity": 1,
+                "producer_id": "C10"
+              }
+            ]
+          }
+        ],
+        "holdout_status": "UNRUN_V2; v1 had20-day correctness-test exposure and is development only",
+        "horizon": 10,
+        "inventory": {
+          "A": {
+            "coal": 400,
+            "machine": 0,
+            "steel": 0
+          },
+          "B1": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "B2": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "B3": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "B4": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "B5": {
+            "coal": 160,
+            "machine": 0,
+            "steel": 20
+          },
+          "C1": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C10": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C2": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C3": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C4": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C5": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C6": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C7": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C8": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "C9": {
+            "coal": 0,
+            "machine": 0,
+            "steel": 60
+          },
+          "D": {
+            "coal": 400,
+            "machine": 0,
+            "steel": 0
+          },
+          "R3": {
+            "coal": 400,
+            "machine": 0,
+            "steel": 0
+          }
+        },
+        "route_events": {},
+        "routes": [
+          {
+            "buyer_id": "B1",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "A"
+          },
+          {
+            "buyer_id": "B1",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 4,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B2",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 4,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B2",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "R3"
+          },
+          {
+            "buyer_id": "B3",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "R3"
+          },
+          {
+            "buyer_id": "B3",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "A"
+          },
+          {
+            "buyer_id": "B4",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "A"
+          },
+          {
+            "buyer_id": "B4",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 4,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B5",
+            "capacity": 60,
+            "commodity": "coal",
+            "lead_time": 4,
+            "seller_id": "D"
+          },
+          {
+            "buyer_id": "B5",
+            "capacity": 100,
+            "commodity": "coal",
+            "lead_time": 2,
+            "seller_id": "R3"
+          },
+          {
+            "buyer_id": "C1",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          },
+          {
+            "buyer_id": "C1",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C2",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C2",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B3"
+          },
+          {
+            "buyer_id": "C3",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B3"
+          },
+          {
+            "buyer_id": "C3",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B4"
+          },
+          {
+            "buyer_id": "C4",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B4"
+          },
+          {
+            "buyer_id": "C4",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B5"
+          },
+          {
+            "buyer_id": "C5",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B5"
+          },
+          {
+            "buyer_id": "C5",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          },
+          {
+            "buyer_id": "C6",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          },
+          {
+            "buyer_id": "C6",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C7",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B2"
+          },
+          {
+            "buyer_id": "C7",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B3"
+          },
+          {
+            "buyer_id": "C8",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B3"
+          },
+          {
+            "buyer_id": "C8",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B4"
+          },
+          {
+            "buyer_id": "C9",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B4"
+          },
+          {
+            "buyer_id": "C9",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B5"
+          },
+          {
+            "buyer_id": "C10",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B5"
+          },
+          {
+            "buyer_id": "C10",
+            "capacity": 60,
+            "commodity": "steel",
+            "lead_time": 1,
+            "seller_id": "B1"
+          }
+        ],
+        "scale": "S5",
+        "scope": "All coal and steel S2; local observed requests/orders only. Scarcity C/D/E explicitly T1=T2=8 to sustain120-coal planned capacity; normal default5+5.",
+        "sinks": [
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                6
+              ]
+            ],
+            "firm_id": "C1",
+            "sink_id": "T1"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C2",
+            "sink_id": "T2"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C3",
+            "sink_id": "T3"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C4",
+            "sink_id": "T4"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C5",
+            "sink_id": "T5"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C6",
+            "sink_id": "T6"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C7",
+            "sink_id": "T7"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C8",
+            "sink_id": "T8"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C9",
+            "sink_id": "T9"
+          },
+          {
+            "commodity": "machine",
+            "demand_intervals": [
+              [
+                1,
+                10000,
+                4
+              ]
+            ],
+            "firm_id": "C10",
+            "sink_id": "T10"
+          }
+        ],
+        "suite": "held_out",
+        "treatment": "normal"
+      }
+    }
+  ]
+}

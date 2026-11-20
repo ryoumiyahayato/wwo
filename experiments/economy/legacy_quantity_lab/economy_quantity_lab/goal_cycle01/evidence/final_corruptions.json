@@ -1,0 +1,37 @@
+[
+  {
+    "case": "duplicate_payment",
+    "error": "1",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "case": "missing_seller_income",
+    "error": "buyer/seller payment mismatch",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "case": "arrival_above_dispatch",
+    "error": "arrival exceeds/differs from dispatch",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "case": "cancel_in_transit",
+    "error": "cancel includes in-transit quantity",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "case": "payment_new_quote",
+    "error": "payment uses changed quote",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "case": "same_balance_two_reservations",
+    "error": "same balance reserved twice",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "case": "terminal_missing_cash",
+    "error": "terminal delivery lacks cash transfer",
+    "status": "PASS_EXPECTED_REJECTION"
+  }
+]

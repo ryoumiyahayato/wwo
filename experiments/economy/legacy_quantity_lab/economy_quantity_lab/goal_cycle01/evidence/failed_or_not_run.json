@@ -1,0 +1,49 @@
+{
+  "development_failures": [
+    {
+      "classification": "IMPLEMENTATION_DEFECT",
+      "id": "I01",
+      "reason": "C1 physical contention labelled cash rejection",
+      "status": "FIXED"
+    },
+    {
+      "classification": "IMPLEMENTATION_DEFECT",
+      "id": "I02",
+      "reason": "Reason dict mutated by local signal allocation",
+      "status": "FIXED"
+    },
+    {
+      "classification": "EXPERIMENT_DESIGN_DEFECT",
+      "id": "E01-E05",
+      "reason": "Initial stock/date/guard/production assumptions in failed test probes",
+      "status": "CORRECTED"
+    },
+    {
+      "classification": "EXPERIMENT_DESIGN_DEFECT",
+      "id": "E06",
+      "reason": "Global per-account bound widened funding with network size",
+      "status": "CORRECTED_PRE_FORMAL"
+    },
+    {
+      "classification": "EXPERIMENT_DESIGN_DEFECT",
+      "id": "E07",
+      "reason": "One manual Python smoke driver imported network_simulation before cycle_fixtures/bootstrap and raised ModuleNotFoundError; corrected import order, subsequent100-day audit PASS",
+      "status": "FIXED"
+    },
+    {
+      "classification": "EXPERIMENT_DESIGN_DEFECT",
+      "id": "V01",
+      "reason": "First Round6 check overlapped hook write, manifest-only mismatch; restored exact base and two371-file replays passed",
+      "status": "CORRECTED"
+    }
+  ],
+  "not_run": [
+    "Remote CI",
+    "Windows Goal Cycle01 runner",
+    "WWO integration",
+    "Price-limited600/3600-day matrix (price-limit correctness probes only)",
+    "Full/off3600-day observer modes (100-day authority equivalence only)"
+  ],
+  "environment_blockers": [],
+  "model_revisions_used": 0
+}

@@ -1,0 +1,126 @@
+{
+  "version": "goal-cycle01-v2",
+  "frozen_before_candidate_results": true,
+  "base_sha": "334d3f546824415604b7645a91a61196fb2bad83",
+  "modes": {
+    "N0": "Round6 C1 untouched control",
+    "N1": "uniform prices, original ranking and C1",
+    "N2": "heterogeneous fixed public offers: price then complete old tie-break",
+    "N3": "same N2 setup, only local posted-price updates"
+  },
+  "main": {
+    "days": 600,
+    "modes": [
+      "N0",
+      "N1",
+      "N2",
+      "N3"
+    ],
+    "funding": "nonbinding",
+    "treatments": [
+      "normal",
+      "coal_scarcity",
+      "steel_scarcity",
+      "asymmetric_demand",
+      "step_up",
+      "asymmetric_lead",
+      "recovery",
+      "shutdown"
+    ],
+    "mapping": {
+      "normal": "Round6 B",
+      "coal_scarcity": "Round6 C_DE",
+      "steel_scarcity": "Round6 F",
+      "asymmetric_demand": "Round6 I",
+      "step_up": "Round6 J (fixed sink sales topology)",
+      "asymmetric_lead": "Round6 H",
+      "recovery": "Round6 K",
+      "shutdown": "Round6 G (one surviving steel supplier, fixed topology)"
+    }
+  },
+  "long": {
+    "days": 3600,
+    "modes": [
+      "N2",
+      "N3"
+    ],
+    "funding": [
+      "nonbinding",
+      "finite"
+    ],
+    "treatments": [
+      "normal",
+      "coal_scarcity",
+      "recovery"
+    ]
+  },
+  "scale": {
+    "days": 600,
+    "smoke_days": 20,
+    "modes": [
+      "N2",
+      "N3"
+    ],
+    "scales": [
+      "S5",
+      "S10",
+      "S20"
+    ],
+    "S20": "double S10 groups via existing deterministic ring method:10 raw,20 steel,40 machine=70 active;degree<=2;per-firm parameters unchanged"
+  },
+  "prices": {
+    "uniform": {
+      "coal": 100,
+      "steel": 300
+    },
+    "heterogeneous": "alternating canonical producer IDs at base or 90% of base; no seller hidden information",
+    "terminal": 2000,
+    "limit": "4 * base price per commodity",
+    "tick": 1,
+    "currency": "integer laboratory units; no real currency conversion"
+  },
+  "funding": {
+    "nonbinding": "per firm: (days+23) * all-capacity daily input cost at 4*base price + (initial own input stock + own input targets) at 4*base price; assume zero sales revenue. Margin23=H10 + max fixture lead8 + promise2 + spare3. Raw firms need no initial buying funds. Per sink: days * maximum declared daily demand * fixed terminal price. Identical per-firm rule at every scale; no firm count factor; no recharge.",
+    "finite": "per firm 20 days of its own capacity input cost at safety price bound + initial inventory replenishment allowance; per sink 20 days max declared demand * terminal price; never recharge",
+    "factor": 1
+  },
+  "candidate": {
+    "version": "local-window-v1",
+    "window": 7,
+    "effective_delay": 1,
+    "relative_step_max_percent": 2,
+    "min_initial_fraction": "1/4",
+    "max_initial_multiple": 4,
+    "rounding": "floor 2% to tick multiple; hold if step<tick; lower bound ceiling(initial/4) to tick, upper=4*initial",
+    "formula": "if no received new information:hold; if own free inventory >= 2*max(window shipped,1):down; else if price/cash refusals and free inventory>0:down; else if distinct physical unmet>0 and shipped>0 and free inventory<shipped:up; else hold",
+    "request_dedup": "max unresolved quantity per (buyer,need_id,reason) in completed window, expiry by need_by_day; retries never sum"
+  },
+  "metrics": [
+    "per-sink delivery/backlog",
+    "total delivery/backlog",
+    "continuous nonproduction days per firm",
+    "input allocations per buyer",
+    "stock/transit",
+    "cash balance/reserved",
+    "exclusive rejection quantities by reason",
+    "posted price path",
+    "clamp boundary hits",
+    "four timing categories",
+    "Python traced peak bytes",
+    "file bytes",
+    "Python GC object count"
+  ],
+  "development_probes": [
+    "payment lifecycle",
+    "rollback injection",
+    "observer equivalence",
+    "no capacity",
+    "idle stock",
+    "dedup repeated need"
+  ],
+  "held_evaluation": "main/long/scale fixtures; correctness inspection permitted; no tuning on their model output",
+  "replays": "two independent processes of the complete main+long+scale formal configuration set; performance excluded from economic hashes",
+  "model_revisions_allowed": 2,
+  "model_revisions_used": 0,
+  "design_revision": "E06: replaced global per-account bound before any formal matrix observations, to remove scale-dependent per-firm funding slack; original v1 manifest preserved."
+}

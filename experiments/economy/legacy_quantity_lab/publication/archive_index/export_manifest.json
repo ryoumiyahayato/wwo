@@ -1,0 +1,50 @@
+{
+  "CAUSAL_ATTRIBUTION_GATE": "PASS",
+  "MODEL_VALUE_ASSESSMENT": "MIXED",
+  "SOURCE_CONTINUITY_GATE": "PASS",
+  "bundle": {
+    "bytes": 208430,
+    "path": "economy-goal-cycle02.bundle",
+    "requires_commit": "93633b4321dc288bd14b064350cc7fb053529bae",
+    "sha256": "ac7bc21b8f069e9d9dcc63c77f6ef6edf15ef2d92b91b584d0514814a68a5fb3"
+  },
+  "economic_execution_commit": "710dac38d82a4d48609e88c9f974a927e9b6c686",
+  "exit_status": "GOAL_COMPLETE",
+  "final_analyzer_sha256": "ceb2c4fd7b1b431cddcb1f0ff01b424e23e916b616d9b0b96f754283b00e3275",
+  "final_checker_sha256": "275b76f658d0b1d4d746e036852780cab490e59b4404333d84545bd706f38fbe",
+  "final_sealed_HEAD": "f8c2915894b9a99deb147414a1f7ee18486d200f",
+  "formal_hash_manifest_sha256": "4b781ce29f023ad80453c7789156c49b847b4d93f3fddb814e87e5512d8db044",
+  "frozen_final_manifest_sha256": "6b2cc5f69b4d09cfec7c32aad16d81ecd1898f56aa774cd24ea5b90091edf8bf",
+  "full_raw_evidence_component": {
+    "archive": "WWO_Economy_Goal_Cycle02_Full_Raw_Evidence.zip",
+    "bytes": 7320357049,
+    "elapsed_seconds": 84.51808127199911,
+    "file_count": 7829,
+    "sha256": "38908f6fbe4331b945dbbafcd6240e289dfb6101fc96cd5549faa30ee2264905",
+    "status": "PASS",
+    "uncompressed_bytes": 17903783381,
+    "verified_member_sha256": 7829
+  },
+  "goal": "WWO Economy GoalCycle02",
+  "library_delivery_details": "LIBRARY_DELIVERY.json",
+  "library_delivery_status": "ALL15_RAW_PARTS_PLUS_REPORT_SOURCE_READING_SAVED",
+  "library_raw_distribution": "15 ZIP-wrapped binary chunks defined by raw_parts_manifest.json; original 7.32GB ZIP kept locally. Library writes verified separately, never inferred from local validation.",
+  "original_cycle01_source_files_changed": 0,
+  "patch": {
+    "bytes": 2939354,
+    "path": "economy-goal-cycle02.patch",
+    "sha256": "274a2db5e3d617055c33f2f837b836569e95f4c5d481b5abcefbb7bbe3c6dd59"
+  },
+  "source_restore_component": {
+    "archive": "WWO_Economy_Goal_Cycle02_Source_Restore.zip",
+    "bundle_explicit_prerequisite": "93633b4321dc288bd14b064350cc7fb053529bae",
+    "bundle_recovered_HEAD": "f8c2915894b9a99deb147414a1f7ee18486d200f",
+    "bytes": 5859120,
+    "correctness_only_exit": 0,
+    "patch_apply_check_from_cycle01": true,
+    "sha256": "885668981df71846514a94173141acdb58df68efd7d77b9261f05626b561f707",
+    "source_fsck": true,
+    "verified_member_sha256": 1058
+  },
+  "source_tree_files": 508
+}

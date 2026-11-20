@@ -1,0 +1,6 @@
+{
+  "status": "PASS_ECONOMIC_FILES",
+  "files": 353,
+  "differences": {},
+  "scope": "Config provenance can differ by Python/platform identity; economic files and summaries compared against original frozen evidence, not merely between two new runs."
+}

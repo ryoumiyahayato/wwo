@@ -1,0 +1,304 @@
+[
+  {
+    "suite": "main",
+    "treatment": "asymmetric_demand",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": true,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "main",
+    "treatment": "asymmetric_lead",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": true,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "main",
+    "treatment": "coal_scarcity",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": true,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "main",
+    "treatment": "normal",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "main",
+    "treatment": "recovery",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "main",
+    "treatment": "shutdown",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": -3,
+    "sink_backlog_changes": {
+      "T1": 1,
+      "T2": 2
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "DEGRADED"
+  },
+  {
+    "suite": "main",
+    "treatment": "steel_scarcity",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": true,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "main",
+    "treatment": "step_up",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "long",
+    "treatment": "coal_scarcity",
+    "scale": "S2",
+    "funding": "finite",
+    "days": 3600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "long",
+    "treatment": "coal_scarcity",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 3600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": true,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "long",
+    "treatment": "normal",
+    "scale": "S2",
+    "funding": "finite",
+    "days": 3600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "long",
+    "treatment": "normal",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 3600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "long",
+    "treatment": "recovery",
+    "scale": "S2",
+    "funding": "finite",
+    "days": 3600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "long",
+    "treatment": "recovery",
+    "scale": "S2",
+    "funding": "nonbinding",
+    "days": 3600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T2": 0
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "scale",
+    "treatment": "normal",
+    "scale": "S10",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": -977,
+      "T10": 186,
+      "T11": -908,
+      "T12": -607,
+      "T13": 561,
+      "T14": 628,
+      "T15": -626,
+      "T16": -769,
+      "T17": 71,
+      "T18": 1278,
+      "T19": 0,
+      "T2": -561,
+      "T20": 326,
+      "T3": 652,
+      "T4": 628,
+      "T5": -627,
+      "T6": -721,
+      "T7": 141,
+      "T8": 1279,
+      "T9": 46
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "MIXED"
+  },
+  {
+    "suite": "scale",
+    "treatment": "normal",
+    "scale": "S20",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": 0,
+    "sink_backlog_changes": {
+      "T1": 0,
+      "T10": 0,
+      "T11": 0,
+      "T12": 0,
+      "T13": 0,
+      "T14": 0,
+      "T15": 0,
+      "T16": 0,
+      "T17": 0,
+      "T18": 0,
+      "T19": 0,
+      "T2": 0,
+      "T20": 0,
+      "T21": 0,
+      "T22": 0,
+      "T23": 0,
+      "T24": 0,
+      "T25": 0,
+      "T26": 0,
+      "T27": 0,
+      "T28": 0,
+      "T29": 0,
+      "T3": 0,
+      "T30": 0,
+      "T31": 0,
+      "T32": 0,
+      "T33": 0,
+      "T34": 0,
+      "T35": 0,
+      "T36": 0,
+      "T37": 0,
+      "T38": 0,
+      "T39": 0,
+      "T4": 0,
+      "T40": 0,
+      "T5": 0,
+      "T6": 0,
+      "T7": 0,
+      "T8": 0,
+      "T9": 0
+    },
+    "same_physical_summary_trajectory": true,
+    "MODEL_RESULT": "INCONCLUSIVE"
+  },
+  {
+    "suite": "scale",
+    "treatment": "normal",
+    "scale": "S5",
+    "funding": "nonbinding",
+    "days": 600,
+    "N3_minus_N2_delivery": 8,
+    "sink_backlog_changes": {
+      "T1": -4,
+      "T10": 16,
+      "T2": -66,
+      "T3": 3,
+      "T4": -7,
+      "T5": 0,
+      "T6": 10,
+      "T7": 9,
+      "T8": 26,
+      "T9": 5
+    },
+    "same_physical_summary_trajectory": false,
+    "MODEL_RESULT": "MIXED"
+  }
+]

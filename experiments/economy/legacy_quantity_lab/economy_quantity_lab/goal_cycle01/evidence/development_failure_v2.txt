@@ -1,0 +1,53 @@
+test_above_limit_rejected_need_not_disappeared (test_cycle.ControlsTests.test_above_limit_rejected_need_not_disappeared) ... ok
+test_cheapest_equivalent_source_changes_route (test_cycle.ControlsTests.test_cheapest_equivalent_source_changes_route) ... ok
+test_feedback_disabled_degrades_to_fixed (test_cycle.ControlsTests.test_feedback_disabled_degrades_to_fixed) ... ok
+test_finance_relief_cannot_remove_sink_topology_bottleneck (test_cycle.ControlsTests.test_finance_relief_cannot_remove_sink_topology_bottleneck) ... ok
+test_financial_uncovered_no_borrowing (test_cycle.ControlsTests.test_financial_uncovered_no_borrowing) ... FAIL
+test_future_demand_price_capacity_prefix (test_cycle.ControlsTests.test_future_demand_price_capacity_prefix) ... ok
+test_low_price_long_lead_not_timely (test_cycle.ControlsTests.test_low_price_long_lead_not_timely) ... ok
+test_n1_original_physical_rows_orders_requests_equal_n0 (test_cycle.ControlsTests.test_n1_original_physical_rows_orders_requests_equal_n0) ... ok
+test_nominal_unit_scaling_physical_invariance (test_cycle.ControlsTests.test_nominal_unit_scaling_physical_invariance) ... ok
+test_nonbinding_more_cash_same_physical_path (test_cycle.ControlsTests.test_nonbinding_more_cash_same_physical_path) ... ok
+test_remaining_cash_and_need_after_earlier_acceptance (test_cycle.ControlsTests.test_remaining_cash_and_need_after_earlier_acceptance) ... ok
+test_reversed_firm_route_request_insertion (test_cycle.ControlsTests.test_reversed_firm_route_request_insertion) ... ok
+test_unknown_supplier_no_price_query (test_cycle.ControlsTests.test_unknown_supplier_no_price_query) ... ok
+test_cash_rejection_with_stock_not_mechanically_raise (test_cycle.FeedbackTests.test_cash_rejection_with_stock_not_mechanically_raise) ... ok
+test_idle_stock_cannot_label_sustained_physical_shortage (test_cycle.FeedbackTests.test_idle_stock_cannot_label_sustained_physical_shortage) ... ok
+test_no_actual_supply_cannot_create_goods (test_cycle.FeedbackTests.test_no_actual_supply_cannot_create_goods) ... ok
+test_no_new_information_hold (test_cycle.FeedbackTests.test_no_new_information_hold) ... ok
+test_price_observer_switch_cannot_change_behavior (test_cycle.FeedbackTests.test_price_observer_switch_cannot_change_behavior) ... ok
+test_pure_signature_local_only (test_cycle.FeedbackTests.test_pure_signature_local_only) ... ok
+test_retries_do_not_inflate_local_signal (test_cycle.FeedbackTests.test_retries_do_not_inflate_local_signal) ... ok
+test_seven_day_update_next_day_and_old_order_lock (test_cycle.FeedbackTests.test_seven_day_update_next_day_and_old_order_lock) ... ok
+test_step_clamp_tick_positive (test_cycle.FeedbackTests.test_step_clamp_tick_positive) ... ok
+test_account_identity_and_reserved_inside_balance (test_cycle.PaymentTests.test_account_identity_and_reserved_inside_balance) ... ok
+test_arrival_thirty_then_confirm_cancel_fifty (test_cycle.PaymentTests.test_arrival_thirty_then_confirm_cancel_fifty) ... ok
+test_cash_insufficient_partial_accept_stock_sufficient (test_cycle.PaymentTests.test_cash_insufficient_partial_accept_stock_sufficient) ... ok
+test_dispatch_does_not_pay (test_cycle.PaymentTests.test_dispatch_does_not_pay) ... ok
+test_duplicate_arrival_scheduler_cannot_repay (test_cycle.PaymentTests.test_duplicate_arrival_scheduler_cannot_repay) ... ok
+test_each_transaction_stage_fully_rolls_back (test_cycle.PaymentTests.test_each_transaction_stage_fully_rolls_back) ... ok
+test_integer_money_rejects_bool_float_negative_string (test_cycle.PaymentTests.test_integer_money_rejects_bool_float_negative_string) ... ok
+test_multi_firm_e2e_material_and_money (test_cycle.PaymentTests.test_multi_firm_e2e_material_and_money) ... ok
+test_negative_zero_and_invalid_posted_prices (test_cycle.PaymentTests.test_negative_zero_and_invalid_posted_prices) ... ok
+test_old_order_price_locked (test_cycle.PaymentTests.test_old_order_price_locked) ... ok
+test_quote_neither_cash_nor_inventory_reserves (test_cycle.PaymentTests.test_quote_neither_cash_nor_inventory_reserves) ... ok
+test_same_buyer_two_inputs_share_cash (test_cycle.PaymentTests.test_same_buyer_two_inputs_share_cash) ... ok
+test_same_round_two_sellers_share_real_cash (test_cycle.PaymentTests.test_same_round_two_sellers_share_real_cash) ... ok
+test_terminal_insufficient_no_fictitious_revenue (test_cycle.PaymentTests.test_terminal_insufficient_no_fictitious_revenue) ... ok
+test_waiting_cancel_dispatch_thirty_releases_only_fifty (test_cycle.PaymentTests.test_waiting_cancel_dispatch_thirty_releases_only_fifty) ... ok
+test_full_compact_off_authority_identical (test_cycle.StreamingTests.test_full_compact_off_authority_identical) ... ok
+test_s20_bounded_degree_same_firm_parameters (test_cycle.StreamingTests.test_s20_bounded_degree_same_firm_parameters) ... ok
+
+======================================================================
+FAIL: test_financial_uncovered_no_borrowing (test_cycle.ControlsTests.test_financial_uncovered_no_borrowing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/wwo-economy-lab/economy_quantity_lab/goal_cycle01/test_cycle.py", line 169, in test_financial_uncovered_no_borrowing
+    self.assertGreater(s.economics.rejections['CASH'],0);self.assertGreater(s.firms['B1'].procurement['coal']['procurement_need_total'],0)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 not greater than 0
+
+----------------------------------------------------------------------
+Ran 39 tests in 17.693s
+
+FAILED (failures=1)

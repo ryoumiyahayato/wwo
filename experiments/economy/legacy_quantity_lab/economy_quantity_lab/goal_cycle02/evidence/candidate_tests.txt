@@ -1,0 +1,16 @@
+test_cash_physical_or_no_price_does_not_learn (test_candidate.CandidateTests.test_cash_physical_or_no_price_does_not_learn) ... ok
+test_disabled_candidate_is_exact_v1_authority (test_candidate.CandidateTests.test_disabled_candidate_is_exact_v1_authority) ... ok
+test_local_pure_signature (test_candidate.CandidateTests.test_local_pure_signature) ... ok
+test_no_information_holds_price_and_memory_first (test_candidate.CandidateTests.test_no_information_holds_price_and_memory_first) ... ok
+test_one_cash_accounts_and_no_future_information (test_candidate.CandidateTests.test_one_cash_accounts_and_no_future_information) ... ok
+test_rate_limit_priority_over_instant_memory (test_candidate.CandidateTests.test_rate_limit_priority_over_instant_memory) ... ok
+test_real_price_zero_accept_learns (test_candidate.CandidateTests.test_real_price_zero_accept_learns) ... ok
+test_some_high_bid_acceptance_prevents_low_bid_bound (test_candidate.CandidateTests.test_some_high_bid_acceptance_prevents_low_bid_bound) ... ok
+test_tick_floor_and_integer_validation (test_candidate.CandidateTests.test_tick_floor_and_integer_validation) ... ok
+test_trace_toggle_cannot_change_policy (test_candidate.CandidateTests.test_trace_toggle_cannot_change_policy) ... ok
+test_unit_scaling_pure_and_real (test_candidate.CandidateTests.test_unit_scaling_pure_and_real) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 7.277s
+
+OK

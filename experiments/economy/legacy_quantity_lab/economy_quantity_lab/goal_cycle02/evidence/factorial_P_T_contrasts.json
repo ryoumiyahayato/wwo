@@ -1,0 +1,194 @@
+[
+  {
+    "left": "M2_T_EQUAL_FEASIBLE_P_UNIFORM_R_LEGACY_600",
+    "right": "M2_T_EQUAL_FEASIBLE_P_HETEROGENEOUS_R_LEGACY_600",
+    "first_divergence": {
+      "decision": null,
+      "accepted": null,
+      "shipment": null,
+      "arrival": null,
+      "production": null,
+      "terminal": null
+    },
+    "real_dated_arrival_buckets_different": 0,
+    "arrival_bucket_scope": "Union of actual arrival-day/buyer/good/need-id/need-by buckets compared by supplier quantity. Long-run trajectories progressively diverge; not independent same-state interventions at every date.",
+    "deliveries_delta": 0,
+    "backlog_delta": 0,
+    "by_sink_deliveries_delta": {
+      "T1": 0,
+      "T2": 0
+    },
+    "physical_hash_same": true,
+    "classification": "UNCHANGED_TOTAL",
+    "service_distribution_changed": false,
+    "comparison_axis": "P"
+  },
+  {
+    "left": "M2_T_EQUAL_FEASIBLE_P_UNIFORM_R_PRICE_FIRST_600",
+    "right": "M2_T_EQUAL_FEASIBLE_P_HETEROGENEOUS_R_PRICE_FIRST_600",
+    "first_divergence": {
+      "decision": 1,
+      "accepted": 1,
+      "shipment": 2,
+      "arrival": 3,
+      "production": 2,
+      "terminal": null
+    },
+    "real_dated_arrival_buckets_different": 3027,
+    "arrival_bucket_scope": "Union of actual arrival-day/buyer/good/need-id/need-by buckets compared by supplier quantity. Long-run trajectories progressively diverge; not independent same-state interventions at every date.",
+    "deliveries_delta": 0,
+    "backlog_delta": 0,
+    "by_sink_deliveries_delta": {
+      "T1": 0,
+      "T2": 0
+    },
+    "physical_hash_same": false,
+    "classification": "UNCHANGED_TOTAL",
+    "service_distribution_changed": false,
+    "comparison_axis": "P"
+  },
+  {
+    "left": "M2_T_MIXED_LEAD_P_UNIFORM_R_LEGACY_600",
+    "right": "M2_T_MIXED_LEAD_P_HETEROGENEOUS_R_LEGACY_600",
+    "first_divergence": {
+      "decision": null,
+      "accepted": null,
+      "shipment": null,
+      "arrival": null,
+      "production": null,
+      "terminal": null
+    },
+    "real_dated_arrival_buckets_different": 0,
+    "arrival_bucket_scope": "Union of actual arrival-day/buyer/good/need-id/need-by buckets compared by supplier quantity. Long-run trajectories progressively diverge; not independent same-state interventions at every date.",
+    "deliveries_delta": 0,
+    "backlog_delta": 0,
+    "by_sink_deliveries_delta": {
+      "T1": 0,
+      "T2": 0
+    },
+    "physical_hash_same": true,
+    "classification": "UNCHANGED_TOTAL",
+    "service_distribution_changed": false,
+    "comparison_axis": "P"
+  },
+  {
+    "left": "M2_T_MIXED_LEAD_P_UNIFORM_R_PRICE_FIRST_600",
+    "right": "M2_T_MIXED_LEAD_P_HETEROGENEOUS_R_PRICE_FIRST_600",
+    "first_divergence": {
+      "decision": 1,
+      "accepted": 1,
+      "shipment": 2,
+      "arrival": 3,
+      "production": 2,
+      "terminal": null
+    },
+    "real_dated_arrival_buckets_different": 3077,
+    "arrival_bucket_scope": "Union of actual arrival-day/buyer/good/need-id/need-by buckets compared by supplier quantity. Long-run trajectories progressively diverge; not independent same-state interventions at every date.",
+    "deliveries_delta": 0,
+    "backlog_delta": 0,
+    "by_sink_deliveries_delta": {
+      "T1": 0,
+      "T2": 0
+    },
+    "physical_hash_same": false,
+    "classification": "UNCHANGED_TOTAL",
+    "service_distribution_changed": false,
+    "comparison_axis": "P"
+  },
+  {
+    "left": "M2_T_EQUAL_FEASIBLE_P_UNIFORM_R_LEGACY_600",
+    "right": "M2_T_MIXED_LEAD_P_UNIFORM_R_LEGACY_600",
+    "first_divergence": {
+      "decision": 2,
+      "accepted": 2,
+      "shipment": 2,
+      "arrival": 5,
+      "production": 3,
+      "terminal": null
+    },
+    "real_dated_arrival_buckets_different": 1649,
+    "arrival_bucket_scope": "Union of actual arrival-day/buyer/good/need-id/need-by buckets compared by supplier quantity. Long-run trajectories progressively diverge; not independent same-state interventions at every date.",
+    "deliveries_delta": 0,
+    "backlog_delta": 0,
+    "by_sink_deliveries_delta": {
+      "T1": 0,
+      "T2": 0
+    },
+    "physical_hash_same": false,
+    "classification": "UNCHANGED_TOTAL",
+    "service_distribution_changed": false,
+    "comparison_axis": "T"
+  },
+  {
+    "left": "M2_T_EQUAL_FEASIBLE_P_UNIFORM_R_PRICE_FIRST_600",
+    "right": "M2_T_MIXED_LEAD_P_UNIFORM_R_PRICE_FIRST_600",
+    "first_divergence": {
+      "decision": 2,
+      "accepted": 2,
+      "shipment": 2,
+      "arrival": 5,
+      "production": 3,
+      "terminal": null
+    },
+    "real_dated_arrival_buckets_different": 1649,
+    "arrival_bucket_scope": "Union of actual arrival-day/buyer/good/need-id/need-by buckets compared by supplier quantity. Long-run trajectories progressively diverge; not independent same-state interventions at every date.",
+    "deliveries_delta": 0,
+    "backlog_delta": 0,
+    "by_sink_deliveries_delta": {
+      "T1": 0,
+      "T2": 0
+    },
+    "physical_hash_same": false,
+    "classification": "UNCHANGED_TOTAL",
+    "service_distribution_changed": false,
+    "comparison_axis": "T"
+  },
+  {
+    "left": "M2_T_EQUAL_FEASIBLE_P_HETEROGENEOUS_R_LEGACY_600",
+    "right": "M2_T_MIXED_LEAD_P_HETEROGENEOUS_R_LEGACY_600",
+    "first_divergence": {
+      "decision": 2,
+      "accepted": 2,
+      "shipment": 2,
+      "arrival": 5,
+      "production": 3,
+      "terminal": null
+    },
+    "real_dated_arrival_buckets_different": 1649,
+    "arrival_bucket_scope": "Union of actual arrival-day/buyer/good/need-id/need-by buckets compared by supplier quantity. Long-run trajectories progressively diverge; not independent same-state interventions at every date.",
+    "deliveries_delta": 0,
+    "backlog_delta": 0,
+    "by_sink_deliveries_delta": {
+      "T1": 0,
+      "T2": 0
+    },
+    "physical_hash_same": false,
+    "classification": "UNCHANGED_TOTAL",
+    "service_distribution_changed": false,
+    "comparison_axis": "T"
+  },
+  {
+    "left": "M2_T_EQUAL_FEASIBLE_P_HETEROGENEOUS_R_PRICE_FIRST_600",
+    "right": "M2_T_MIXED_LEAD_P_HETEROGENEOUS_R_PRICE_FIRST_600",
+    "first_divergence": {
+      "decision": 2,
+      "accepted": 2,
+      "shipment": 2,
+      "arrival": 4,
+      "production": 3,
+      "terminal": null
+    },
+    "real_dated_arrival_buckets_different": 1621,
+    "arrival_bucket_scope": "Union of actual arrival-day/buyer/good/need-id/need-by buckets compared by supplier quantity. Long-run trajectories progressively diverge; not independent same-state interventions at every date.",
+    "deliveries_delta": 0,
+    "backlog_delta": 0,
+    "by_sink_deliveries_delta": {
+      "T1": 0,
+      "T2": 0
+    },
+    "physical_hash_same": false,
+    "classification": "UNCHANGED_TOTAL",
+    "service_distribution_changed": false,
+    "comparison_axis": "T"
+  }
+]

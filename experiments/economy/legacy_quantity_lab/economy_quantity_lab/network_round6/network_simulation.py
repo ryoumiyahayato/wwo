@@ -56,10 +56,16 @@ class NetworkSimulation(AdmissionSimulation):
                     production={},replenishment={})
         CommitmentSimulation.__init__(self,config,'network',policy='R2',promise_window_days=2)
         for key,node in self.firms.items():node.inventories=self.stock[key]
+        self.economics=None
+        if case.get('economics'):
+            from payment_policy import PaymentPolicy
+            self.economics=PaymentPolicy(self,case['economics'])
 
     def add_flow(self,firm,good,field,quantity):
         self.flow[firm][good][field]+=quantity
         if self.day_flow:self.day_flow[firm][good][field]+=quantity
+        if getattr(self,'economics',None) and field in ('produced','consumed') and quantity:
+            self.economics.emit(field,firm=firm,commodity=good,quantity=quantity)
 
     def record_event(self,event,order,shipment=None,quantity=0):
         CommitmentSimulation.record_event(self,event,order,shipment,quantity)
@@ -75,6 +81,7 @@ class NetworkSimulation(AdmissionSimulation):
                 self.route_slots[order.route].dispatched(self.day,quantity)
                 self.add_flow(seller,good,'dispatched',quantity)
         elif event=='arrived':self.add_flow(buyer,good,'received',quantity)
+        if getattr(self,'economics',None):self.economics.order_event(event,order,shipment,quantity)
 
     def quote(self,buyer,good,seller,phase='MATCHING'):
         if seller not in self.firms[buyer].knowledge.get(good,set()):raise ValueError('unknown supplier query')
@@ -86,7 +93,7 @@ class NetworkSimulation(AdmissionSimulation):
         self.metrics['offer_queries']+=1;self.metrics['known_candidate_visits']+=1
         self.metrics[phase.lower()+'_offer_queries']+=1
         self.quotes.append(dict(day=self.day,buyer_id=buyer,phase=phase,**asdict(offer)))
-        return offer
+        return self.economics.quote(offer) if self.economics else offer
 
     def supply_lots(self,buyer):
         node=self.firms[buyer];result=[]
@@ -166,7 +173,11 @@ class NetworkSimulation(AdmissionSimulation):
         total=0
         for sid in sorted(self.sinks):
             s=self.sinks[sid];fid=s['firm_id'];good=s['commodity']
-            q=min(s['backlog'],self.stock[fid][good]);s['backlog']-=q;s['delivered']+=q
+            q=min(s['backlog'],self.stock[fid][good])
+            if self.economics:
+                q=self.economics.terminal_quantity(s,q)
+                self.economics.terminal_payment(s,q)
+            s['backlog']-=q;s['delivered']+=q
             self.stock[fid][good]-=q;self.firms[fid].terminal_backlog[good]-=q
             self.add_flow(fid,good,'terminal',q);total+=q
             self.sink_rows.append(dict(day=self.day,sink_id=sid,firm_id=fid,commodity=good,
@@ -211,7 +222,8 @@ class NetworkSimulation(AdmissionSimulation):
             for request in group:
                 route=self.route_index[(request['buyer_id'],good,seller)]
                 quote=self.route_slots[route].quote(self.day,self.capacity(route,self.day));quotes[request['buyer_id']]=quote
-                limits[request['buyer_id']]=sum(s['remaining_slot'] for s in quote)
+                physical=sum(s['remaining_slot'] for s in quote)
+                limits[request['buyer_id']]=self.economics.limit(request,physical) if self.economics else physical
             allocated=contention(group,free,self.contention_policy,limits)
             total_requested=sum(r['requested_quantity'] for r in group)
             self.round_records.append(dict(day=self.day,round=group[0]['procurement_round'],supplier=seller,commodity=good,
@@ -223,10 +235,20 @@ class NetworkSimulation(AdmissionSimulation):
                 buyer=request['buyer_id'];q=allocated[buyer];route=self.route_index[(buyer,good,seller)]
                 onhand=self.stock[seller][good];current_free=self.stock_commitments.uncommitted(seller,good,onhand)
                 slots=self.route_slots[route];current_quote=slots.quote(self.day,self.capacity(route,self.day))
+                physical_cap=min(current_free,sum(s['remaining_slot'] for s in current_quote))
+                current_need=request['requested_quantity']
+                if self.economics and 'procurement_need_id' in request:
+                    self.reconcile_firm(buyer)
+                    fresh=self.procurement_intent(buyer,good,self.quote(buyer,good,seller,'RECHECK'),request['procurement_round'])
+                    current_need=min(current_need,fresh['requested_quantity'] if fresh else 0)
+                    q=min(q,current_need)
+                financial_cap=self.economics.limit(request,physical_cap) if self.economics else physical_cap
+                if self.economics:q=min(q,financial_cap)
                 require(q<=min(current_free,sum(s['remaining_slot'] for s in current_quote)),'acceptance recheck')
-                order=self.accept_order(route,q) if q else None
+                order=(self.economics.accept(route,q,current_quote) if self.economics else self.accept_order(route,q)) if q else None
                 if order:
-                    slots.reserve(order.id,q,current_quote);self.stock_commitments.reserve(order.id,seller,good,q,onhand)
+                    if not self.economics:
+                        slots.reserve(order.id,q,current_quote);self.stock_commitments.reserve(order.id,seller,good,q,onhand)
                     self.order_request[order.id]=request['request_id']
                 accepted_lines={};left=q
                 for line in request['lines']:
@@ -235,6 +257,7 @@ class NetworkSimulation(AdmissionSimulation):
                     order_id=order.id if order else None,promised_dispatch_by_day=self.day+2 if order else None,
                     pool_available_at_round=free,uncommitted_at_acceptance=current_free,route_atp_at_acceptance=sum(s['remaining_slot'] for s in current_quote),
                     accepted_lines=accepted_lines)
+                if self.economics:self.economics.request_result(response,physical_cap,financial_cap,current_need)
                 self.requests.append(response);self.requests_by_day[self.day].append(response);responses.append(response)
                 self.firms[seller].customer_histories[good].observe(self.day,buyer,request['lines'],accepted_lines)
                 self.reconcile_firm(buyer)
@@ -246,7 +269,8 @@ class NetworkSimulation(AdmissionSimulation):
         for buyer in self.active_firms:
             node=self.firms[buyer];self.reconcile_firm(buyer)
             for good,known in sorted(node.knowledge.items()):
-                candidates[(buyer,good)]=ranked_offers([self.quote(buyer,good,s,'MATCHING') for s in sorted(known)])
+                offers=[self.quote(buyer,good,s,'MATCHING') for s in sorted(known)]
+                candidates[(buyer,good)]=self.economics.rank(offers) if self.economics else ranked_offers(offers)
         maximum=max(map(len,candidates.values()),default=0)
         for round_number in range(maximum):
             intents=[]
@@ -299,10 +323,12 @@ class NetworkSimulation(AdmissionSimulation):
         for fid,node in self.firms.items():
             for good,q in node.customer_pending.items():require(q==pending_pool[(fid,good)],'local customer order observation')
         for s in self.sinks.values():require(s['received']==s['delivered']+s['backlog'],'sink identity')
+        if getattr(self,'economics',None):self.economics.check()
         return residuals
 
     def step(self):
         self.day+=1
+        if self.economics:self.economics.begin_day()
         started=time.perf_counter()
         opening=deepcopy(self.stock)
         self.day_flow={k:{g:dict(received=0,produced=0,consumed=0,dispatched=0,terminal=0) for g in GOODS} for k in self.stock}
@@ -351,6 +377,11 @@ class NetworkSimulation(AdmissionSimulation):
             stock_commitment_entries=len(self.stock_commitments.entries),
             allocation_candidates=sum(n.release.allocation_candidates for n in self.firms.values()),
             archived_revisions=sum(len(n.release.revisions) for n in self.firms.values()),world_firms=len(self.firms),active_firms=len(self.active_firms)))
+        if self.economics:
+            price_started=time.perf_counter();self.economics.end_day()
+            price_elapsed=time.perf_counter()-price_started
+            self.timing['price_update_seconds']+=price_elapsed
+            started+=price_elapsed
         self.timing['report_archive_seconds']+=time.perf_counter()-started
         return row
 

@@ -1,0 +1,143 @@
+{
+  "code_hashes": {
+    "economy_quantity_lab/goal_cycle01/cash.py": "60d6a73d0b7b8be56fdf7f20682bc3e67e4fce45be7409e61cb4f1db9717cacc",
+    "economy_quantity_lab/goal_cycle01/corruption_probes.py": "55a69ffaec9177bd76723427b360d99ff015bc02b7241021547ee74b1cdd0cfc",
+    "economy_quantity_lab/goal_cycle01/cycle_fixtures.py": "bd2f40b2830b845b97bd82724999f070c9aecdec49c5a24901e24781e73cba0b",
+    "economy_quantity_lab/goal_cycle01/observation.py": "82f4bf14f45a8b30f5c123560652f0cfc4eedcc698aef9be27acf39e7534e625",
+    "economy_quantity_lab/goal_cycle01/offline_audit.py": "0caf57f4f39f09936c5c2fd1d72e2f8482b85804cc5b96295c2e286f1ad913e8",
+    "economy_quantity_lab/goal_cycle01/payment_policy.py": "e5c7f4b77b8d35020f400027d5b80cca48238b65d732ef56f3f3741436cbc987",
+    "economy_quantity_lab/goal_cycle01/pricing.py": "e7745473964a1391eb6fb509c5a715590148d5547d464267b5d92b7e771fb96d",
+    "economy_quantity_lab/goal_cycle01/run_cycle.py": "a9ab11736d25cf4dd51adfb32849ebaf96066c16921fd098627edb0a3195a558",
+    "economy_quantity_lab/goal_cycle01/test_cycle.py": "11a12a8db9bbafe89cce66e9824401f7330ba8f0abc1d52a010088d3d96f2486",
+    "economy_quantity_lab/network_round6/network_simulation.py": "7cc5e177d7e41ecc8b3b26d9389c83722422cc7d57ed803709ae5dfa952560ba",
+    "experiments_manifest.json": "ff5cb33b04119e2c8e0459abe218d176d215de5158fa655485f5467bd617cb28",
+    "verify_goal_cycle01.py": "65d32f0e5ea981c8f666022cc9526603021f8ff333b54875c3c7cb7419588b6b"
+  },
+  "manifest": {
+    "base_sha": "334d3f546824415604b7645a91a61196fb2bad83",
+    "candidate": {
+      "effective_delay": 1,
+      "formula": "if no received new information:hold; if own free inventory >= 2*max(window shipped,1):down; else if price/cash refusals and free inventory>0:down; else if distinct physical unmet>0 and shipped>0 and free inventory<shipped:up; else hold",
+      "max_initial_multiple": 4,
+      "min_initial_fraction": "1/4",
+      "relative_step_max_percent": 2,
+      "request_dedup": "max unresolved quantity per (buyer,need_id,reason) in completed window, expiry by need_by_day; retries never sum",
+      "rounding": "floor 2% to tick multiple; hold if step<tick; lower bound ceiling(initial/4) to tick, upper=4*initial",
+      "version": "local-window-v1",
+      "window": 7
+    },
+    "design_revision": "E06: replaced global per-account bound before any formal matrix observations, to remove scale-dependent per-firm funding slack; original v1 manifest preserved.",
+    "development_probes": [
+      "payment lifecycle",
+      "rollback injection",
+      "observer equivalence",
+      "no capacity",
+      "idle stock",
+      "dedup repeated need"
+    ],
+    "frozen_before_candidate_results": true,
+    "funding": {
+      "factor": 1,
+      "finite": "per firm 20 days of its own capacity input cost at safety price bound + initial inventory replenishment allowance; per sink 20 days max declared demand * terminal price; never recharge",
+      "nonbinding": "per firm: (days+23) * all-capacity daily input cost at 4*base price + (initial own input stock + own input targets) at 4*base price; assume zero sales revenue. Margin23=H10 + max fixture lead8 + promise2 + spare3. Raw firms need no initial buying funds. Per sink: days * maximum declared daily demand * fixed terminal price. Identical per-firm rule at every scale; no firm count factor; no recharge."
+    },
+    "held_evaluation": "main/long/scale fixtures; correctness inspection permitted; no tuning on their model output",
+    "long": {
+      "days": 3600,
+      "funding": [
+        "nonbinding",
+        "finite"
+      ],
+      "modes": [
+        "N2",
+        "N3"
+      ],
+      "treatments": [
+        "normal",
+        "coal_scarcity",
+        "recovery"
+      ]
+    },
+    "main": {
+      "days": 600,
+      "funding": "nonbinding",
+      "mapping": {
+        "asymmetric_demand": "Round6 I",
+        "asymmetric_lead": "Round6 H",
+        "coal_scarcity": "Round6 C_DE",
+        "normal": "Round6 B",
+        "recovery": "Round6 K",
+        "shutdown": "Round6 G (one surviving steel supplier, fixed topology)",
+        "steel_scarcity": "Round6 F",
+        "step_up": "Round6 J (fixed sink sales topology)"
+      },
+      "modes": [
+        "N0",
+        "N1",
+        "N2",
+        "N3"
+      ],
+      "treatments": [
+        "normal",
+        "coal_scarcity",
+        "steel_scarcity",
+        "asymmetric_demand",
+        "step_up",
+        "asymmetric_lead",
+        "recovery",
+        "shutdown"
+      ]
+    },
+    "metrics": [
+      "per-sink delivery/backlog",
+      "total delivery/backlog",
+      "continuous nonproduction days per firm",
+      "input allocations per buyer",
+      "stock/transit",
+      "cash balance/reserved",
+      "exclusive rejection quantities by reason",
+      "posted price path",
+      "clamp boundary hits",
+      "four timing categories",
+      "Python traced peak bytes",
+      "file bytes",
+      "Python GC object count"
+    ],
+    "model_revisions_allowed": 2,
+    "model_revisions_used": 0,
+    "modes": {
+      "N0": "Round6 C1 untouched control",
+      "N1": "uniform prices, original ranking and C1",
+      "N2": "heterogeneous fixed public offers: price then complete old tie-break",
+      "N3": "same N2 setup, only local posted-price updates"
+    },
+    "prices": {
+      "currency": "integer laboratory units; no real currency conversion",
+      "heterogeneous": "alternating canonical producer IDs at base or 90% of base; no seller hidden information",
+      "limit": "4 * base price per commodity",
+      "terminal": 2000,
+      "tick": 1,
+      "uniform": {
+        "coal": 100,
+        "steel": 300
+      }
+    },
+    "replays": "two independent processes of the complete main+long+scale formal configuration set; performance excluded from economic hashes",
+    "scale": {
+      "S20": "double S10 groups via existing deterministic ring method:10 raw,20 steel,40 machine=70 active;degree<=2;per-firm parameters unchanged",
+      "days": 600,
+      "modes": [
+        "N2",
+        "N3"
+      ],
+      "scales": [
+        "S5",
+        "S10",
+        "S20"
+      ],
+      "smoke_days": 20
+    },
+    "version": "goal-cycle01-v2"
+  },
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]"
+}

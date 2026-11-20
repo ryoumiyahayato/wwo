@@ -1,0 +1,38 @@
+[
+  {
+    "stage": "M0",
+    "IMPLEMENTATION_GATE": "PASS",
+    "MODEL_RESULT": "NOT_APPLICABLE",
+    "STAGE_STATUS": "DONE"
+  },
+  {
+    "stage": "M1",
+    "IMPLEMENTATION_GATE": "PASS",
+    "MODEL_RESULT": "NOT_APPLICABLE",
+    "STAGE_STATUS": "DONE"
+  },
+  {
+    "stage": "M2",
+    "IMPLEMENTATION_GATE": "PASS",
+    "MODEL_RESULT": "INCONCLUSIVE",
+    "STAGE_STATUS": "DONE"
+  },
+  {
+    "stage": "M3",
+    "IMPLEMENTATION_GATE": "PASS",
+    "MODEL_RESULT": "MIXED",
+    "STAGE_STATUS": "DONE"
+  },
+  {
+    "stage": "M4",
+    "IMPLEMENTATION_GATE": "PASS",
+    "MODEL_RESULT": "MIXED",
+    "STAGE_STATUS": "DONE"
+  },
+  {
+    "stage": "M5",
+    "IMPLEMENTATION_GATE": "PASS",
+    "MODEL_RESULT": "NOT_APPLICABLE",
+    "STAGE_STATUS": "DONE"
+  }
+]

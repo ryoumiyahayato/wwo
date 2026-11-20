@@ -1,0 +1,1376 @@
+WWO Economy Lab — Goal Cycle 02
+
+日期化采购、价格信号与市场行为的因果归因及稳健性实验
+
+你现在继续独立研究仓库：
+
+"ryoumiyahayato/wwo-economy-lab"
+
+本次任务名称：
+
+Goal Cycle 02 — Dated Procurement, Price Signal Attribution & Robustness
+
+这是一轮实际执行的长期研究任务，沿用 Goal Cycle 01 的目标驱动、阶段验收、失败分类和中断恢复方式。
+
+如果本指令由 dot 转交网页 Codex，必须完整传递，不得只保留任务标题或改写为“继续优化价格”。
+
+本轮以 Goal Cycle 01 的真实代码与验证成果为起点，而不是远端旧 Round6。
+
+本轮任务不是重新开发现金结算，不是重复 Goal Cycle 01，也不是立即增加第二套动态定价算法。
+
+目标是查清：
+
+1. 现有价格机制究竟通过哪些真实决策改变资源分配。
+2. 价格排序、供应商 lead time、"need_by_day" 与采购释放日期怎样相互影响。
+3. 已观察到的长期涨价和上限命中，究竟来自什么本地信号。
+4. 现有模型在买方愿付上限真正形成约束时会怎样表现。
+5. 这些行为在更长周期、不同供应商结构和多企业网络中是否具有可复现性。
+6. 是否存在足够证据支持下一轮修改价格形成机制，或者应该转向家庭、消费、资金循环等其他模块。
+
+本轮优先提高实验的可解释性和可反驳性，不以最终交付量提高作为完成条件。
+
+---
+
+一、必须继承的研究事实
+
+Goal Cycle 01 已报告完成 M0—M5。
+
+已经具有：
+
+- 唯一 CashAccounts；
+- 原子化现金、库存和运输槽预留；
+- 订单锁价；
+- 实际到货付款；
+- 确认取消释放；
+- 有限终端需求付款；
+- N0/N1/N2/N3 四层对照；
+- 一套7日局部动态报价候选；
+- compact/full/off 观察模式；
+- 独立离线账目重建与主动破坏检查。
+
+已经报告的关键验证：
+
+- 264项历史检查；
+- 42项新增检查；
+- 两个独立进程各50案例、66,000模拟日；
+- 353份经济结果文件一致；
+- 84次支付案例离线核对；
+- 7种主动破坏日志检出。
+
+这些数据是需要核验并继承的研究基线，不是本轮重新创造的成果。
+
+既有策略
+
+"N0"：Round6 C1 原物理分配规则。
+
+"N1"：原采购排序、原稀缺规则，加名义价格和实际支付。
+
+"N2"：固定异质报价，已知供应商内价格优先，保持日期可行性和原有完整 tie-break。
+
+"N3"：与 N2 相同的初始条件，仅允许卖方按本地已完成7日窗口调整新报价。
+
+不得改变这些历史模式的定义。
+
+重要反例
+
+Goal Cycle 01 已发现：
+
+- 多数正式场景 N2/N3 最终实体服务相同；
+- shutdown 场景 N3 比 N2 少交付3；
+- S5 N3 多交付8，但某些 sink 服务反而变差；
+- S10 总交付相同，sink分布明显不同；
+- S20 总量与终点分布相同；
+- 正常3600日 N3 在第609日首次出现 D 报价上限命中；
+- 长周期正常交付完整，并不代表价格稳定；
+- A 与 D 在关键日期对应不同 need-by bucket；
+- 有限终端付款账户耗尽，会造成数千日连续无生产。
+
+这些现象不能归为同一个原因。
+
+不得直接宣称：
+
+“动态价格有问题，所以需要另一种价格公式。”
+
+也不得宣称：
+
+“交付量不变，所以价格机制没有价值。”
+
+---
+
+二、研究总边界
+
+本周期允许：
+
+- 新增研究诊断；
+- 分离实验控制变量；
+- 增加受限买方报价场景；
+- 增加相同日期的真实竞争反事实；
+- 增加长周期边界实验；
+- 小范围修正已复现的 correctness defect；
+- 在证据充分时增加至多一个新的局部价格候选。
+
+本周期禁止：
+
+- 银行；
+- 信贷；
+- 利息；
+- 工资；
+- 税收；
+- 分红；
+- 家庭；
+- 新的劳动市场；
+- 企业破产；
+- 股票；
+- 货币发行；
+- 全国统一市场；
+- 全局供需均衡求解；
+- 机器学习价格预测；
+- 中央经济计划器；
+- 全新生产和物流结算引擎；
+- 正式 WWO 集成。
+
+不得因为价格无法自然形成完整均衡，就自动补上上述系统。
+
+所有交易仍然通过已知供应商、真实订单、真实物资和现有支付账完成。
+
+---
+
+三、长期执行规则
+
+本轮以大约10小时作为研究预算上限。
+
+实际开始时记录UTC开始时间和预算边界。续做不得重新计算十小时。
+
+预算不是必须耗尽的执行时长。达到完整验收以后立即结束。
+
+到预算最后20%时：
+
+- 不再增加新机制；
+- 不再扩大实验矩阵；
+- 不再发起无必要的参数扫描；
+- 优先完成正确性、复现、报告和封存。
+
+每个里程碑按以下顺序执行：
+
+最小实现 → 专项测试 → 真实场景 → 负向案例 → 失败分类 → 必要修正 → 阶段验收 → 下一阶段。
+
+只要本阶段通过，不需要反问用户是否继续。
+
+如果一个阶段存在真正 correctness blocker，只停止依赖该错误机制的后续实现；其他独立审计、实验设计和交接工作继续。
+
+不得通过反复执行相同验证或等待命令来填满预算。
+
+失败分类
+
+必须保留四种类别：
+
+"IMPLEMENTATION_DEFECT"
+
+代码违反数量账、资金账、信息边界、时间顺序、订单语义或确定性。
+
+"MODEL_COUNTEREXAMPLE"
+
+代码正确执行规则，但出现涨价失控、资源饥饿、服务恶化、价格触顶等。
+
+"EXPERIMENT_DESIGN_DEFECT"
+
+对照没有隔离变量，缺少真正可比较的报价机会，所谓非资金约束场景实际被资金阻断等。
+
+"ENVIRONMENT_BLOCKER"
+
+源代码不可访问、网络权限、工具或执行额度限制。
+
+不能把 MODEL_COUNTEREXAMPLE 当作必须修正的代码错误。
+
+不能通过刷新 golden outputs 让错误通过。
+
+---
+
+M0 — 恢复真实 Goal Cycle 01 基线
+
+这是本轮第一道硬门。
+
+上一轮没有 push、创建 PR、merge 或 tag。
+
+因此远端 "wwo-economy-lab" 不保证含有 Goal Cycle 01 代码。
+
+不得直接从远端 Round6 创建新分支后声称已继承价格系统。
+
+M0.1 已知来源
+
+仓库：
+
+"ryoumiyahayato/wwo-economy-lab"
+
+Goal Cycle 01 基线：
+
+"334d3f546824415604b7645a91a61196fb2bad83"
+
+已验证经济实现提交：
+
+"ae1e3b29b8e3437c55be4c4f82f44dad6be0d9b7"
+
+最终封存提交：
+
+"93633b4321dc288bd14b064350cc7fb053529bae"
+
+原工作分支：
+
+"research/economy-goal-cycle-01"
+
+原完整成果包：
+
+"WWO_Economy_Goal_Cycle01.zip"
+
+来源包声明：
+
+30,775,867 bytes
+
+SHA-256：
+
+"3f19b853ab4c7a2e14055382971d15e8c5c99a4af187083907591247f2834ecf"
+
+其中 Git bundle：
+
+"economy-goal-cycle01.bundle"
+
+声明 SHA-256：
+
+"9c08d896745b21d70e371e903163569fd258fe598b83985d5e486e230df64555"
+
+其中 patch：
+
+"economy-goal-cycle01.patch"
+
+声明 SHA-256：
+
+"8f25800585b06dbbb4c50c1715a6c5cde1a78efab7732f93f9ca2d9fc21716b4"
+
+以上哈希是原交接记录中的期望值，执行时必须读取实际文件重新核对。
+
+M0.2 恢复优先级
+
+第一优先：
+
+当前工作区已经包含原分支和最终提交。
+
+第二优先：
+
+使用完整成果包中的 Git bundle，在具有 BASE_SHA 的仓库恢复原提交。
+
+第三优先：
+
+仅当 bundle 不可用且完整 patch 存在时，校验 base 并应用 patch，明确记录无法保留原提交身份的限制。
+
+禁止：
+
+- 重复应用 patch；
+- 将 bundle 当成完整独立仓库；
+- 把阅读摘取包当成源码包；
+- 根据报告文字重新生成价格系统；
+- 擅自修改远端分支来解决恢复问题。
+
+阅读摘取包只用于研究事实与证据核对，不足以恢复源码。
+
+如果源码、bundle、patch 都无法取得：
+
+只能完成 M0 的只读审计、后续实验设计和阻塞交接。
+
+标记：
+
+"SOURCE_RESTORE_BLOCKED"
+
+不得在旧 Round6 上重新实现 Cycle 01 并伪称接续成功。
+
+M0.3 新分支
+
+恢复完成后建立：
+
+"research/economy-goal-cycle-02"
+
+不得修改已经完成的 Goal Cycle 01 历史状态。
+
+新建独立：
+
+- Cycle02执行计划；
+- Cycle02状态；
+- Cycle02实验manifest；
+- Cycle02决策和失败记录。
+
+M0.4 验证政策
+
+首先运行：
+
+"python verify_goal_cycle01.py --correctness-only"
+
+再核对 Goal Cycle 01 最终源码 digest。
+
+有必要时运行完整：
+
+"python verify_goal_cycle01.py"
+
+并使用全新输出目录。
+
+注意：
+
+Round6 原 strict verifier 对已经明确授权修改的 "network_simulation.py" 存在历史源码哈希差异。
+
+不得因为这个已知来源差异就：
+
+- 修改原 Round6 manifest；
+- 重新冻结旧 golden；
+- 声称全部旧严格源码校验原样通过。
+
+继续使用实际 source delta、冻结经济输出和 Cycle01 新验证入口分别核对。
+
+本轮后续新增的源代码差异也必须独立归档。
+
+M0完成条件：真实Cycle01代码存在、来源可追溯、基本验证通过、可恢复状态已建立。
+
+完成后自动进入 M1。
+
+---
+
+M1 — 价格决策因果链的可观察化
+
+本阶段原则：
+
+先观察，不修改任何价格或采购决策。
+
+目标是从：
+
+“某个报价涨了”
+
+推进到：
+
+“哪个已知买方、哪张采购需求、哪一个需要日期、哪些真实报价及约束，导致了什么选择”。
+
+M1.1 建立决策链记录
+
+至少能够关联：
+
+"Terminal Demand"
+
+→ "Firm Production Requirement"
+
+→ "Material Requirement"
+
+→ "need_id / need_by_day"
+
+→ "SupplierOffer"
+
+→ "Candidate Eligibility"
+
+→ "Price Ranking"
+
+→ "PurchaseRequest"
+
+→ "Accepted / Rejected"
+
+→ "Dispatch"
+
+→ "Arrival"
+
+→ "Production"
+
+→ "Terminal Delivery"
+
+只允许观察已经真实发生的事件。
+
+不得为了观察而改变同一日内部的结算顺序。
+
+M1.2 每个采购决策至少记录
+
+- buyer；
+- commodity；
+- need_id；
+- need_by_day；
+- release_day；
+- decision_day；
+- known supplier IDs；
+- 真正被查询的supplier；
+- supplier posted price；
+- locked price；
+- conservative expected arrival；
+- 是否及时可行；
+- supplier stock ATP；
+- transport slot availability；
+- buyer max unit price；
+- available cash；
+- 当前采购缺口；
+- request / accepted / rejected 数量；
+- 被选择的排序原因；
+- 真实后来发运与到货日期。
+
+必须区分：
+
+"WORLD_DIAGNOSTIC"
+
+和
+
+"BUYER_VISIBLE_INFORMATION"
+
+世界真值可用于离线报告，但不能通过日志或适配器反向进入买方决策。
+
+M1.3 归因类别
+
+每次未选择供应商至少明确区分：
+
+- "UNKNOWN_SUPPLIER"
+- "LATE_FOR_REQUIREMENT"
+- "NO_PHYSICAL_ATP"
+- "PRICE_ABOVE_LIMIT"
+- "INSUFFICIENT_CASH"
+- "HIGHER_PRICE_THAN_ELIGIBLE_ALTERNATIVE"
+- "OLD_SORT_TIE_BREAK"
+- "OTHER_EXPLICIT_REASON"
+
+多约束同时生效时可以记录多个 binding constraints。
+
+不要为了得到整洁百分比而强行把多因归入单一原因。
+
+M1.4 重点核对 Cycle01 日期反例
+
+固定检查：
+
+- 第590—630日；
+- 第609日第一次报价触顶附近；
+- 第610日的A/D报价、请求及need-by；
+- 第1000日；
+- 第3600日及接近末日的长周期窗口。
+
+已有交接记录表明：
+
+A价格49的请求对应较早的 need-by；
+
+D价格360的请求对应更晚的 need-by。
+
+必须重新从真实事件理解这件事。
+
+重点回答：
+
+A与D究竟有没有在同一个决策边界、面对同一个实际可执行需求日期展开竞争？
+
+如果没有：
+
+明确标为：
+
+"NO_MATCHED_COMPETITIVE_OPPORTUNITY"
+
+不能把这对价格直接解释成竞争市场中的异常价格差。
+
+M1.5 Shadow decision
+
+允许增加只读 shadow ranking。
+
+它在相同的真实当日报价快照上计算：
+
+- 原排序会选择什么；
+- 价格优先排序会选择什么。
+
+但 shadow 不创建订单、不预留现金、不预留库存、不改变生产。
+
+shadow结果仅代表：
+
+同状态下的决策规则差异。
+
+它不代表真实执行后的长期反事实结果。
+
+后者必须由独立实验运行。
+
+M1验收
+
+必须能够输出一份可复核的决策链，解释至少：
+
+- 一个价格实际改变采购选择的事件；
+- 一个价格变化但没有改变真实采购选择的事件；
+- 一个日期不一致使价格不可直接比较的事件；
+- 一个物理约束优先于价格的事件。
+
+如果真实数据中不存在某类事件：
+
+明确记为 NOT_OBSERVED，并在 M2 设计受控反例。
+
+不能伪造事件。
+
+M1所有诊断开关必须保持原经济hash不变。
+
+---
+
+M2 — 价格排序与采购日期的正交对照
+
+本阶段目标：
+
+不要再把异质价格和价格优先排序捆绑成一个不可拆解的处理变量。
+
+M2.1 建立两个独立控制维度
+
+维度P：报价结构
+
+"P_UNIFORM"
+
+同一商品同一组卖家具有统一固定报价。
+
+"P_HETEROGENEOUS"
+
+卖家具有事先固定的不同报价。
+
+维度R：已知报价排序
+
+"R_LEGACY"
+
+保持原来日期和既有 tie-break 的排序。
+
+"R_PRICE_FIRST"
+
+仍然先排除日期不可行的offer，再在可行offer中价格优先。
+
+因此形成四个组合：
+
+| R_LEGACY| R_PRICE_FIRST
+P_UNIFORM| 对照1| 对照2
+P_HETEROGENEOUS| 对照3| 对照4
+
+这四组：
+
+- 拥有相同物理网络；
+- 相同初始stock；
+- 相同capacity；
+- 相同buyer known set；
+- 相同终端需求；
+- 相同买方限价；
+- 事先保证资金不形成约束；
+- 使用同一C1共享稀缺分配规则。
+
+不能同时改变库存缓冲或其他生产参数。
+
+M2.2 再建立日期维度
+
+"T_EQUAL_FEASIBLE"
+
+多个卖家的offer能够覆盖相同的实际need-by日期。
+
+"T_MIXED_LEAD"
+
+卖家具有不同lead，因而可能承接不同日期需求。
+
+将上面四个价格/排序组合分别放入两种日期结构。
+
+形成最低：
+
+2 × 2 × 2 = 8组独立600日实验。
+
+M2.3 必须真的存在可比较的机会
+
+在 "T_EQUAL_FEASIBLE" 中，至少要实际出现：
+
+- 同一个buyer；
+- 同一个commodity；
+- 同一个need_id；
+- 同一个need_by_day；
+- 同一采购决策边界；
+- 至少两个当前已知、正量、及时可行且可支付的offer；
+- 不同posted price。
+
+如果整个场景没有发生过这种机会：
+
+不能判定“价格排序没有作用”。
+
+应标记：
+
+"EXPERIMENT_DESIGN_DEFECT"
+
+调整开发fixture使比较真正存在，然后冻结正式实验。
+
+不得在看到正式结果以后为制造改善而修改fixture。
+
+M2.4 区分局部决策与长期后果
+
+局部比较：
+
+在同一个真实状态下，不同排序选择的差异。
+
+长期比较：
+
+在完全相同起始状态下运行600日，观察状态逐渐分叉。
+
+不得因为两条长期轨迹后期库存不同，就继续称它们每一天仍是“同状态价格比较”。
+
+输出：
+
+- first divergent decision day；
+- first divergent accepted order；
+- first divergent shipment；
+- first divergent production；
+- first divergent terminal delivery。
+
+如果价格组的实体轨迹在价格能够影响决策之前已经分叉：
+
+优先调查实现正确性。
+
+M2.5 ID与容器顺序
+
+改变：
+
+- supplier构造顺序；
+- request列表顺序；
+- firm插入顺序。
+
+保持正式稳定ID。
+
+结果不得因容器顺序产生未声明差异。
+
+另做一次稳定ID重标号实验，用来识别政策本身是否对ID tie-break敏感；不能把重标号后的不同结果直接称为实现不确定。
+
+M2验收
+
+必须能够分别回答：
+
+1. 价格不同但排序不看价格会怎样？
+2. 排序价格优先但卖家价格完全一样会怎样？
+3. 同日期真实竞争时价格会怎样影响采购？
+4. 不同到货日期时价格作用为什么受限？
+5. 哪些实体结果来自报价差异，哪些来自lead差异？
+
+不要求任何价格组合的backlog更低。
+
+---
+
+M3 — 买方价格边界与资金边界的分离
+
+Goal Cycle 01 的正式非资金约束矩阵没有完整覆盖长期价格受限买方行为。
+
+本阶段必须补充这部分。
+
+M3.1 分离三种约束
+
+- "PHYSICAL_AVAILABILITY"
+- "BUYER_MAX_PRICE"
+- "BUYER_AVAILABLE_CASH"
+
+三者必须分别记录。
+
+不能把：
+
+“价格超过愿付上限”
+
+写成：
+
+“买方缺少现金”。
+
+也不能把：
+
+“供应商库存不足”
+
+写成：
+
+“价格太高无人购买”。
+
+M3.2 两类买方报价上限
+
+"L_NONBINDING"
+
+上限足够高，实际运行确认未触发价格拒绝。
+
+"L_BINDING"
+
+设置明确、有限的单位愿付上限，使部分报价调整能够真实导致：
+
+- supplier不再可选；
+- buyer更换供应商；
+- 或采购需求暂时未满足。
+
+上限必须在正式评估前冻结。
+
+可以根据 Cycle01 已知价格范围设计开发fixture，但必须声明：
+
+上限选择参考过Cycle01历史结果。
+
+因此这不是对旧Cycle01结果的独立盲测。
+
+新增正式holdout不得再按其结果调上限。
+
+M3.3 核心矩阵
+
+至少选择三类有实际经济差异的场景：
+
+- normal；
+- shared coal scarcity；
+- route disruption / recovery。
+
+运行：
+
+"N2 fixed quote"
+
+与：
+
+"N3 local quote feedback"
+
+再分别对照：
+
+"L_NONBINDING"
+
+与：
+
+"L_BINDING"
+
+因此至少：
+
+3 × 2 × 2 = 12组600日。
+
+主矩阵资金仍须真正 nonbinding。
+
+M3.4 真实资金约束专项
+
+另外建立两组相同物理需求但资金不同的实验：
+
+- 有足够现金；
+- 明确现金不足。
+
+这项只检验现金是否独立影响购买，不用于宣称动态价格优劣。
+
+必须实际区分：
+
+- PRICE拒绝；
+- CASH拒绝；
+- PHYSICAL拒绝；
+- terminal账户不足。
+
+M3.5 买方响应
+
+买方最高愿付价固定。
+
+不要增加：
+
+- 随backlog上涨的自动bid；
+- 需求弹性函数；
+- 家庭效用；
+- 广告；
+- 价格预期；
+- 赊购。
+
+本轮只研究最小的：
+
+报价变化 → 采购选择或拒绝变化。
+
+M3验收
+
+至少真实观察或清晰否证：
+
+- 报价变化能否改变buyer choice；
+- 哪些报价变化因日期不可行而没有行为后果；
+- 什么情况下买方限价确实约束采购；
+- cash不约束时，PRICE拒绝是否仍出现；
+- 价格导致的采购不足与物理资源不足如何区分。
+
+不得只根据价格路径变化判定“市场有反应”。
+
+---
+
+M4 — 现有动态报价长期异常的机制归因
+
+本阶段原则：
+
+先审查 N3 v1，不默认新增新算法。
+
+M4.1 固定原候选
+
+保留：
+
+"local-window-v1"
+
+- 7日已完成观察窗口；
+- 下一日新报价生效；
+- 单次相对变化不超过2%；
+- 整数tick；
+- 初始价格1/4至4倍的边界；
+- buyer+need_id+reason去重；
+- 仅允许卖方本地已观察事实。
+
+不得改写这一候选的历史定义。
+
+M4.2 记录每次价格更新的完整理由
+
+至少：
+
+- supplier；
+- commodity；
+- decision day；
+- old price；
+- new price；
+- window起止；
+- free stock；
+- shipped quantity；
+- accepted quantity；
+- distinct unresolved requests；
+- physical rejections；
+- PRICE rejections；
+- CASH rejections；
+- HOLD / UP / DOWN；
+- clamp/tick是否阻止变化。
+
+理由只能使用更新当时允许使用的本地事实。
+
+不得使用最终backlog或其他企业内部计划反向生成价格理由。
+
+M4.3 价格触顶专项
+
+完整复用正常 N3 非资金约束3600日。
+
+必须实际核对：
+
+- 首次上限命中日期；
+- 当时D的真实库存和发运；
+- 对应distinct need identities；
+- 对应need-by日期；
+- 买方是否有同日期其他可执行offer；
+- 上涨是否改变买方请求或accepted；
+- 上涨以后卖方得到的新增销售是否真正增加。
+
+不能把供应商存在长期未满足请求自动解释为“价格应该不断涨”。
+
+也不能反过来宣称“价格触顶就是代码错误”。
+
+M4.4 价格边界与整数tick
+
+独立研究：
+
+- 触顶；
+- 触底；
+- step小于tick；
+- clamp后长期不变；
+- 没有新信息时的hold。
+
+增加比例计价单位变换：
+
+将价格、买方限价、cash、terminal付款和tick按相同比例转换。
+
+保持真实购买力与比较规则不变。
+
+如果仅改变计价单位就改变实体行为：
+
+排查rounding和整数tick语义。
+
+不同tick精度可以作为独立候选实验，但不得和纯计价单位变换混为一谈。
+
+M4.5 完整长期矩阵
+
+至少选择：
+
+normal；
+coal scarcity；
+recovery。
+
+比较：
+
+N2/N3。
+
+包括：
+
+- 非资金约束；
+- 明确价格上限约束。
+
+每组3600日。
+
+若与M3共享完全相同的已验证配置，可在manifest中引用真实完成的实验，不重复伪称运行。
+
+资金有限的原Cycle01长期反例保留，不自动扩大为银行研究。
+
+M4.6 长期观察与档案
+
+至少验证：
+
+- 3600日 compact/off 的权威经济结果一致；
+- 代表性600日 full/compact/off 一致；
+- 正常N3价格更新、现金、订单和实体轨迹可离线重建；
+- 不为每天保存完整历史世界状态；
+- 日常决策不扫描完整档案；
+- 历史need identity缓存增长单独量化。
+
+旧Cycle01只完成100日full/off等价的部分，不得声称这些新长跑已经验证过。
+
+M4.7 规模
+
+至少：
+
+- S5 N2/N3各600日；
+- S10 N2/N3各600日。
+
+S20若已有可复用Cycle01配置，可以保留作为对照，或在预算足够时完成本轮新增诊断。
+
+本轮不需要继续扩到500或1000企业。
+
+重点不是继续扩大N，而是回答价格归因在现有多企业规模上是否成立。
+
+分别记录：
+
+- planning/reconcile；
+- known-edge报价与分配；
+- 物资/订单/资金结算；
+- 诊断/档案；
+- 最小审计事件。
+
+不要从单机Lab耗时推断WWO全球性能。
+
+---
+
+M5 — 有证据的有界修订与独立复核
+
+本阶段包含两个不同决策。
+
+M5.1 是否值得新增价格候选
+
+首先根据M1—M4回答：
+
+"NEW_PRICE_CANDIDATE_GATE"
+
+可能值：
+
+"PASS"
+
+"FAIL"
+
+"INSUFFICIENT_EVIDENCE"
+
+只有同时满足以下条件才为PASS：
+
+1. 明确复现了 v1 的一个具体机制缺陷或可检验策略限制；
+2. 该问题不是单纯物理产能不足；
+3. 不是供应商面对不同need-by日期的正常结果被错误比较；
+4. 可以使用卖方实际能够观察到的本地事实研究；
+5. 能提出一个局部、纯函数、可关闭的最小修改；
+6. 可以设计真正区分旧候选与新候选的反事实；
+7. 修改不会要求引入新的货币、金融或全局信息系统。
+
+若PASS：
+
+允许实现至多一个新的价格反馈候选。
+
+候选名称、公式、参数、输入和取整规则必须在运行正式对照以前冻结。
+
+原N3不得被覆盖。
+
+新增候选只能作为独立模式，例如：
+
+"N4_EXPERIMENTAL"
+
+不得在看到holdout表现后反复修改直到改善。
+
+最多允许两次带明确因果理由的修订，并保留每个失败版本。
+
+如果Gate FAIL或INSUFFICIENT_EVIDENCE：
+
+不强制创建N4。
+
+这仍然可以完成Goal Cycle02。
+
+因为本轮主要目标是因果归因，不是必须发明更好的价格公式。
+
+M5.2 Holdout
+
+在冻结正式候选前，建立至少两个未用于调参的场景：
+
+- 一个短/长lead混合的真实日期竞争场景；
+- 一个非对称买方限价/稀缺的多企业场景。
+
+记录其参数与hash。
+
+候选确定以后才运行。
+
+不能把调候选的开发场景冒充独立验证。
+
+若没有新增N4：
+
+holdout仍比较N2/N3，并报告模型结果。
+
+M5.3 独立账目检查
+
+继续复用Goal Cycle01的标准库离线审计器。
+
+不得复制第二套经济runtime。
+
+对所有新增正式支付案例重新核对：
+
+- 商品守恒；
+- firm flow；
+- order数量；
+- accepted锁价；
+- cash balance；
+- reservation；
+- delivery payment；
+- cancellation；
+- terminal payment。
+
+另外增加专门的价格/日期一致性检查。
+
+至少主动破坏日志副本：
+
+1. 将某订单的need-by日期提前，却保持“不变的及时报价”标志；
+2. 把一张价格超限拒绝错误归类成现金不足；
+3. 将订单锁价改成最新报价；
+4. 把同一need_id的重试计为新的独立需求；
+5. 删除一笔真实到货付款；
+6. 把未知供应商的报价加入buyer可选集合。
+
+注意：
+
+账目审计与价格因果审计属于不同检查。
+
+不得仅因为现金守恒就宣称日期/价格决策正确。
+
+M5.4 反事实效果指标
+
+每一组必须同时报告：
+
+- real machine deliveries；
+- total backlog；
+- backlog by sink；
+- machine-days；
+- 生产连续性；
+- firm投入接受量；
+- supplier分配份额；
+- 真实库存和在途；
+- cash/locked payments；
+- PRICE/CASH/PHYSICAL拒绝；
+- posted price path；
+- clamp hits；
+- matched competitive opportunities；
+- 价格实际改变决策次数；
+- 价格改变决策后产生真实不同到货的次数。
+
+参考成交值可以报告。
+
+但不能叫：
+
+- welfare；
+- GDP；
+- profit；
+- consumer surplus。
+
+---
+
+六、总验收门槛
+
+本轮分别设置三个Gate。
+
+A. SOURCE_CONTINUITY_GATE
+
+PASS要求：
+
+- 恢复真实Goal Cycle01最终源码；
+- 来源commit可追溯；
+- bundle或patch可核验；
+- 原价格/支付行为可以重现；
+- 新施工没有把Round6旧代码冒充Cycle01。
+
+B. CAUSAL_ATTRIBUTION_GATE
+
+PASS要求：
+
+- 能关联需求ID、need-by、报价、接受与后续物资；
+- 能区分相同日期真实竞争与不同日期分工；
+- 同状态shadow判断和真实反事实明确分离；
+- 正交价格/排序/日期实验完成；
+- buyer限价和cash约束分别验证；
+- 长期报价触顶获得可追溯本地信号解释；
+- future information isolation成立；
+- 离线双账与新增因果检查通过；
+- 反例完整保留。
+
+PASS不要求：
+
+- N3比N2好；
+- 价格收敛；
+- backlog下降；
+- 总交付增加。
+
+C. MODEL_VALUE_ASSESSMENT
+
+只能是：
+
+- "PROMISING"
+- "MIXED"
+- "WEAK"
+- "INCONCLUSIVE"
+
+必须根据多场景实际实体后果、价格行为和边界说明。
+
+不能因为正确性PASS就给PROMISING。
+
+不能因为某个模型结果很差就自动把因果Gate记FAIL。
+
+---
+
+七、完整实验复现与预算纪律
+
+必须在正式评估前冻结：
+
+"experiments_manifest_cycle02.json"
+
+至少区分：
+
+"development"
+
+"main_evaluation"
+
+"long_evaluation"
+
+"scale_evaluation"
+
+"held_out"
+
+"diagnostic"
+
+不能把开发探针的成功率和正式矩阵成功率混合。
+
+完整验证：
+
+1. 全部历史正确性；
+2. Goal Cycle01 frozen行为；
+3. Cycle02新增正确性；
+4. M2/M3/M4实际正式实验；
+5. 新增离线审计；
+6. 日志破坏反证；
+7. 两个独立进程重放正式配置集；
+8. 完整文件集合与经济摘要hash；
+9. provenance及允许源码变化核对。
+
+确定性经济结果与运行时间、内存高水位等非确定性数据分离。
+
+如果长任务预算不足：
+
+优先次序为：
+
+已完成代码正确性 → M2日期/价格因果对照 → M3买方价格约束 → M4长期反例 → M5独立核对与封存。
+
+禁止在预算末尾启动大型新算法，导致现有结果无人验证。
+
+---
+
+八、持久状态与中断恢复
+
+不得覆盖Goal Cycle01已完成的：
+
+"GOAL_STATE.json"
+
+"EXECUTION_PLAN.md"
+
+"DECISIONS.md"
+
+建议使用独立文件：
+
+"GOAL_CYCLE02_STATE.json"
+
+"GOAL_CYCLE02_PLAN.md"
+
+"GOAL_CYCLE02_DECISIONS.md"
+
+每次阶段更新至少记录：
+
+- source commit；
+- working branch；
+- current milestone；
+- completed milestones；
+- validated source digest；
+- current code commit；
+- frozen manifest hash；
+- actual executed cases；
+- model counterexamples；
+- implementation defects；
+- resource/budget status；
+- currently running command；
+- exact NEXT_ACTION。
+
+运行中的长验证不得被另一个续做任务重复启动。
+
+原进程完成以后优先读取已经保存的退出码、manifest和结果，再判断是否需要重跑。
+
+如果因平台限制中断：
+
+必须在停止前保存：
+
+"LAST_VALIDATED_COMMIT"
+
+"COMPLETED_MILESTONES"
+
+"FAILED_OR_NOT_RUN"
+
+"CURRENT_BLOCKER"
+
+"NEXT_ACTION"
+
+再次启动时从这些文件继续。
+
+不得因为聊天上下文丢失就从M0重新开发已完成代码。
+
+---
+
+九、Git与成果交付
+
+本轮允许：
+
+- 独立本地研究分支；
+- 必要checkpoint commits；
+- 新研究目录；
+- 实验、审计、报告和补丁生成。
+
+本轮不自动：
+
+- push；
+- 创建远端PR；
+- merge；
+- 修改main；
+- 发布tag；
+- 接入正式WWO。
+
+远端Git操作的失败不能阻止已拥有源码的本地研究。
+
+最终交付至少：
+
+1. "GOAL_CYCLE02_REPORT.md"
+2. 阶段状态和决策记录
+3. frozen experiment manifest
+4. 价格/日期决策链证据
+5. 正交对照结果
+6. 有限买方价格约束结果
+7. 3600日长期反例核对
+8. 正式实验summary和完整hash manifest
+9. 离线审计
+10. 主动破坏日志测试
+11. 未解决问题与实际未运行项目
+12. 原始代码补丁或Git bundle
+13. 可供审查的Draft PR正文
+
+如果生成完整成果ZIP：
+
+必须明确区分：
+
+- 全量可恢复包；
+- 仅阅读摘要包；
+- 必须依赖某个BASE_SHA的bundle。
+
+不能把阅读摘取包称为完整源码交付。
+
+---
+
+十、最终报告必须回答的问题
+
+1. Cycle01的真实代码是否已恢复并验证？
+2. 旧动态报价触顶的直接局部信号是什么？
+3. D的长期高价是否可以在不同时期、不同need-by的条件下合理解释？
+4. 是否存在真正同日期、同需求ID的多个及时可执行报价竞争？
+5. 价格排序实际改变了多少次决策？
+6. 决策变化有多少次最终传导到真实物资交付？
+7. 价格变化但实体结果不变的主要原因是什么？
+8. 报价异质性与价格优先排序分别起什么作用？
+9. 价格和lead time的交互是否明显？
+10. 买方愿付上限真的约束采购时，N3的行为发生了什么？
+11. 现金不足造成的结果与价格超限有何不同？
+12. 长期报价上限是否由真实持续局部短缺推动，还是受到日期化释放及反馈口径影响？
+13. 哪些机制只在人工fixture中起作用？
+14. 600日与3600日结论是否不同？
+15. S5/S10结果是否仍存在明显服务分布差异？
+16. 是否有证据支持一个新的局部报价候选？
+17. 如果没有新增候选，为什么这是合理研究结论？
+18. 哪些发现属于implementation defect，哪些属于model counterexample？
+19. 目前的价格机制究竟增加了哪些真实可观察的经济行为？
+20. 下一轮最小且最有证据的方向是什么？
+
+不得只给：
+
+“新增若干测试，全部PASS，所以价格系统已完成。”
+
+---
+
+十一、下一方向只允许建议，不自动执行
+
+根据结果可以建议：
+
+A. Price Formation Revision
+
+仅在已有明确局部反馈缺陷及可检验改法时。
+
+B. Household / Consumption Entry
+
+如果当前最大问题是最终需求始终由外部付款账户和fixture产生，缺少真实预算约束下的个体需求。
+
+C. Cash Circulation / Working Capital
+
+如果资金循环边界已经成为主要限制，但不得直接等同于需要银行和信贷。
+
+D. Shared Logistics
+
+如果多个企业实际在共享运输设施上的竞争比价格作用更关键。
+
+E. More Network Validation
+
+如果现有可比竞争机会仍然不足。
+
+只能推荐一个优先方向，并说明为什么其余暂缓。
+
+---
+
+十二、最终状态格式
+
+最终必须报告：
+
+Goal Cycle 02
+
+"SOURCE_CONTINUITY_GATE = PASS / FAIL"
+
+"CAUSAL_ATTRIBUTION_GATE = PASS / FAIL"
+
+"MODEL_VALUE_ASSESSMENT = PROMISING / MIXED / WEAK / INCONCLUSIVE"
+
+阶段：
+
+- M0 — Source & Baseline
+- M1 — Decision Attribution
+- M2 — Price / Date Factorial
+- M3 — Buyer Price Constraints
+- M4 — Long-run Robustness
+- M5 — Independent Audit & Handoff
+
+每一项：
+
+"DONE / PARTIAL / BLOCKED"
+
+版本：
+
+- BASE_SHA
+- Cycle01 recovered HEAD
+- Cycle02 working branch
+- LAST_VALIDATED_COMMIT
+- final sealed HEAD
+
+实际执行：
+
+- scenario count
+- simulated days
+- tests
+- audits
+- independent replays
+- file hashes
+- remote CI status
+
+结果：
+
+- improved cases
+- degraded cases
+- unchanged cases
+- important counterexamples
+- price/date attribution findings
+- untested boundaries
+
+最终退出状态只能选择：
+
+- "GOAL_COMPLETE"
+- "PARTIAL_REVIEWABLE"
+- "CORRECTNESS_BLOCKED"
+- "SOURCE_RESTORE_BLOCKED"
+- "ENVIRONMENT_BLOCKED"
+- "BUDGET_CHECKPOINT"
+
+完成以后停止。
+
+不得自动开启Goal Cycle 03。

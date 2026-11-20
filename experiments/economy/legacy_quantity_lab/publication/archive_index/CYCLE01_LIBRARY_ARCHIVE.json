@@ -1,0 +1,14 @@
+{
+  "complete_archive": {
+    "file_name": "WWO_Economy_Goal_Cycle01.zip",
+    "library_file_id": "libfile_f04da0e12d748191934ddcf022c4f06c",
+    "bytes": 30775867,
+    "sha256": "3f19b853ab4c7a2e14055382971d15e8c5c99a4af187083907591247f2834ecf"
+  },
+  "LOCAL_SEALED_HEAD": "93633b4321dc288bd14b064350cc7fb053529bae",
+  "BASE_SHA": "334d3f546824415604b7645a91a61196fb2bad83",
+  "bundle_sha256": "9c08d896745b21d70e371e903163569fd258fe598b83985d5e486e230df64555",
+  "bundle_requires_commit": "334d3f546824415604b7645a91a61196fb2bad83",
+  "patch_sha256": "8f25800585b06dbbb4c50c1715a6c5cde1a78efab7732f93f9ca2d9fc21716b4",
+  "supplemental_complete_source_restoration": "Cycle02 Source_Restore.zip contains original Cycle01 objects and declared Round6 shallow boundary; full Cycle02 raw archive also preserves original Cycle01 ZIP."
+}

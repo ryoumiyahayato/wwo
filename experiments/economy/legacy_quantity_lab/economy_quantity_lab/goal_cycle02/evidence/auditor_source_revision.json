@@ -1,0 +1,24 @@
+{
+  "reason": "Empty physical/event day reconstruction defect. Auditor and regression-test changes only; runtime/fixture/config freeze unchanged.",
+  "utc": "2026-10-08T03:07:21.006757+00:00",
+  "changes": {
+    "economy_quantity_lab/goal_cycle02/causal_audit.py": {
+      "frozen_v1": "14bc183c6751f1276e8d751e45324a894c15fadd76aff843f2d8c146155d0931",
+      "audited_v2": "d4a56cdbf21994d38134a3c3df587c8feeede8d2eee826fb0c1f4961faef4371"
+    },
+    "economy_quantity_lab/goal_cycle02/test_cycle02.py": {
+      "frozen_v1": "6615494b9d37b956bd2ba7577bc70ca8419b1f643e2e76569abf9da33239e381",
+      "audited_v2": "88286ea014148b45574b26ab5a6c08e153a842305ba325ed7f12a6cd07b5652f"
+    }
+  },
+  "corrected_execution_source_hashes": {
+    "economy_quantity_lab/goal_cycle02/analyze.py": "6ba41a9be155790dd023e93e17e608e081a2fe10e9c822280ab099ce8ef0c240",
+    "economy_quantity_lab/goal_cycle02/causal.py": "cb332c6e35eb803d9e60aba9b3697f66e7f2e8b321ca592abe3698672754e08f",
+    "economy_quantity_lab/goal_cycle02/causal_audit.py": "d4a56cdbf21994d38134a3c3df587c8feeede8d2eee826fb0c1f4961faef4371",
+    "economy_quantity_lab/goal_cycle02/corruption_probes02.py": "22f024172e0da2fb178c2fa0192701797714694354b32882617776e992281445",
+    "economy_quantity_lab/goal_cycle02/fixtures.py": "af7448e22d7c7290260647c40c525f0f7b1284d58f78473e4fbc2ba9d49dcf8c",
+    "economy_quantity_lab/goal_cycle02/run_controls.py": "6f5aeb27e3c43672e234df108ea073914b10ff1cb83d8ef074c9319d381eb513",
+    "economy_quantity_lab/goal_cycle02/run_cycle02.py": "61cf9c5043a2a32a42576a8def661226a8b43a3b9ab43636ad661190e8f36115",
+    "economy_quantity_lab/goal_cycle02/test_cycle02.py": "88286ea014148b45574b26ab5a6c08e153a842305ba325ed7f12a6cd07b5652f"
+  }
+}

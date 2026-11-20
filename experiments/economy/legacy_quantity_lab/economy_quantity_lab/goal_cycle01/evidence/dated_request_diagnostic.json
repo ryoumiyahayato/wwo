@@ -1,0 +1,28 @@
+{
+  "actual_days": 1000,
+  "audit": {
+    "checks": [
+      "cash transfers",
+      "reservation",
+      "locked price",
+      "order lifecycle",
+      "firm commodity flows",
+      "recipes",
+      "world commodities",
+      "terminal delivery/payment"
+    ],
+    "events": 32150,
+    "live_orders": 12,
+    "orders": 5053,
+    "shipments": 5053,
+    "status": "PASS",
+    "total_money": 524670400
+  },
+  "classification": "MODEL_COUNTEREXAMPLE",
+  "configured_horizon": 3600,
+  "diagnostic_economic_hash": "bbd10baef255905ec6750451c2f876b17a47c8cf5ccee786ab73addcde3166a8",
+  "elapsed_seconds": 7.3675776579998455,
+  "official_prefix_economic_hash": "bbd10baef255905ec6750451c2f876b17a47c8cf5ccee786ab73addcde3166a8",
+  "scope": "Additional observational prefix diagnostic, not a replacement for any3600-day formal run; model/config/funding unchanged.",
+  "status": "PASS"
+}

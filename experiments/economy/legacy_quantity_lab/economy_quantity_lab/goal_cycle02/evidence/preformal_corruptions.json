@@ -1,0 +1,50 @@
+[
+  {
+    "checker": "causal",
+    "error": "need-by/timely/release mismatch",
+    "name": "EARLIER_NEED_BY_UNCHANGED_TIMELY",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "checker": "causal",
+    "error": "PRICE rejection mislabeled",
+    "name": "PRICE_MISCLASSIFIED_AS_CASH",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "checker": "accounting",
+    "error": "payment uses changed quote",
+    "name": "LOCKED_PRICE_PLUS_ONE",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "checker": "accounting",
+    "error": "payment uses changed quote",
+    "name": "LOCKED_PRICE_CHANGED_TO_REAL_LATEST_QUOTE",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "checker": "causal",
+    "error": "line stable ID/date mismatch",
+    "name": "ACCEPTED_ORDER_LINE_EARLIER_NEED_BY",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "checker": "causal",
+    "error": "retry counted as distinct new information",
+    "name": "RETRY_COUNTED_AS_DISTINCT_NEED",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "checker": "accounting",
+    "error": "arrival without matching payment",
+    "name": "MISSING_ARRIVAL_PAYMENT",
+    "status": "PASS_EXPECTED_REJECTION"
+  },
+  {
+    "checker": "causal",
+    "error": "unknown offer in buyer selectable set",
+    "name": "UNKNOWN_SUPPLIER_IN_SELECTABLE_SET",
+    "status": "PASS_EXPECTED_REJECTION"
+  }
+]

@@ -2,7 +2,7 @@ name: Verify quantity economy research
 
 on:
   push:
-    branches: [main, bootstrap/economy-lab-round2, research/order-commitment-round3, research/supplier-admission-round4a, research/multi-supplier-round4b, research/supplier-search-round4c, research/demand-planning-round5, research/executable-planning-round5b, research/multi-firm-network-round6]
+    branches: [main, bootstrap/economy-lab-round2, research/order-commitment-round3, research/supplier-admission-round4a, research/multi-supplier-round4b, research/supplier-search-round4c, research/demand-planning-round5, research/executable-planning-round5b, research/multi-firm-network-round6, research/economy-goal-cycle-01]
   pull_request:
   workflow_dispatch:
 
@@ -18,21 +18,32 @@ jobs:
         with:
           python-version: '3.12'
       - name: Run original tests and all deterministic experiments
+        if: ${{ hashFiles('verify_goal_cycle01.py') == '' }}
         run: python verify_baseline.py --strict-bytes --output-dir artifacts
       - name: Verify order commitment experiments twice
+        if: ${{ hashFiles('verify_goal_cycle01.py') == '' }}
         run: python verify_round3.py --output-dir artifacts
       - name: Verify supplier admission experiments twice
+        if: ${{ hashFiles('verify_goal_cycle01.py') == '' }}
         run: python verify_round4a.py --output-dir artifacts
       - name: Verify multi-supplier matching experiments twice
+        if: ${{ hashFiles('verify_goal_cycle01.py') == '' }}
         run: python verify_round4b.py --output-dir artifacts
       - name: Verify indexed supplier search and scale experiments twice
+        if: ${{ hashFiles('verify_goal_cycle01.py') == '' }}
         run: python verify_round4c.py --output-dir artifacts
       - name: Verify demand planning and time-phased coverage twice
+        if: ${{ hashFiles('verify_goal_cycle01.py') == '' }}
         run: python verify_round5.py --output-dir artifacts
       - name: Verify executable planning release and reconciliation twice
+        if: ${{ hashFiles('verify_goal_cycle01.py') == '' }}
         run: python verify_round5b.py --output-dir artifacts
       - name: Verify shared multi-firm networks and exact replay twice
+        if: ${{ hashFiles('verify_goal_cycle01.py') == '' }}
         run: python verify_round6.py --output-dir artifacts
+      - name: Verify Goal Cycle payments, historical economics, and two full replays
+        if: ${{ hashFiles('verify_goal_cycle01.py') != '' }}
+        run: python verify_goal_cycle01.py --output-dir artifacts
       - name: Preserve reproduction evidence
         if: always()
         uses: actions/upload-artifact@v4

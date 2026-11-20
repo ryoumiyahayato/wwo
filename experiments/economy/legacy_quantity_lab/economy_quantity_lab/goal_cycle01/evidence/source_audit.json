@@ -1,0 +1,14 @@
+{
+  "repo": "/workspace/wwo-economy-lab",
+  "origin": "https://github.com/ryoumiyahayato/wwo-economy-lab.git",
+  "base_sha": "334d3f546824415604b7645a91a61196fb2bad83",
+  "base_tree": "ea3748f55539194eb55e499ec7624d9871a8864c",
+  "branch": "research/economy-goal-cycle-01",
+  "start_utc": "2026-10-07T16:22:30Z",
+  "remote_verified_refs": [
+    "refs/heads/research/multi-firm-network-round6",
+    "refs/pull/8/head"
+  ],
+  "permissions": "local-only; no push, remote PR, merge, tag, external service",
+  "skills": "AGENTS.md read at main and exact Round6; no repository/workspace .agents/skills present"
+}

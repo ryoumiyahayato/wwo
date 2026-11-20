@@ -1,0 +1,128 @@
+{
+  "format": "Each component is ZIP_STORED containing the named binary chunk plus PART.json. In order, the chunks reconstruct the full original ZIP; component ZIP files are NOT directly concatenated.",
+  "original_archive": "WWO_Economy_Goal_Cycle02_Full_Raw_Evidence.zip",
+  "original_bytes": 7320357049,
+  "original_sha256": "38908f6fbe4331b945dbbafcd6240e289dfb6101fc96cd5549faa30ee2264905",
+  "parts": [
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_01_of_15.zip",
+      "index": 1,
+      "member": "raw.part001",
+      "offset": 0,
+      "sha256": "b764e29bb082336ae6559265ed728a3b19b142f96885eab75661943d5ce10142"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_02_of_15.zip",
+      "index": 2,
+      "member": "raw.part002",
+      "offset": 490000000,
+      "sha256": "7b99095bb8e9c3f6ad3cb7a4865e9bc1c821305a81a6eae9c77835432e4b1a87"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_03_of_15.zip",
+      "index": 3,
+      "member": "raw.part003",
+      "offset": 980000000,
+      "sha256": "97d3400c672e1c28646419a1e9437dc20a04edffff28fcd2dadbed71e3e652f7"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_04_of_15.zip",
+      "index": 4,
+      "member": "raw.part004",
+      "offset": 1470000000,
+      "sha256": "6a5cc3f6b3f7a305e3f4b75248eed23977e47c9460e2e2a7bb22093ea717d635"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_05_of_15.zip",
+      "index": 5,
+      "member": "raw.part005",
+      "offset": 1960000000,
+      "sha256": "b172a5742a9495e9902d05977e980bae85c050d7e94dcddb33a8f8290a540966"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_06_of_15.zip",
+      "index": 6,
+      "member": "raw.part006",
+      "offset": 2450000000,
+      "sha256": "54ccc8bc4746908c5b03a5bd91f7c20142bfac47e512c62fa7945327d2f523d8"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_07_of_15.zip",
+      "index": 7,
+      "member": "raw.part007",
+      "offset": 2940000000,
+      "sha256": "35cf435fc206abbb2c0d12c2edcf822ad7d8fa60e81a9f6b43b76d6ea33730dd"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_08_of_15.zip",
+      "index": 8,
+      "member": "raw.part008",
+      "offset": 3430000000,
+      "sha256": "407ca73a657a36f30a2af8dfeea0641931700726e03474fd2fb3e5d80b4274cb"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_09_of_15.zip",
+      "index": 9,
+      "member": "raw.part009",
+      "offset": 3920000000,
+      "sha256": "38916be4f39f5ccf8db6e1c543a1feb26f7c3597d524098b96563b56156910d6"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_10_of_15.zip",
+      "index": 10,
+      "member": "raw.part010",
+      "offset": 4410000000,
+      "sha256": "27e5f5bfb72b30876ccedfc7844f4ae227fdda59f9ee4ee77f573c7f0625e25f"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_11_of_15.zip",
+      "index": 11,
+      "member": "raw.part011",
+      "offset": 4900000000,
+      "sha256": "bad04201d814f7b31798eb321ad782184bc046be9f70585b4429d6ddd2be454f"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_12_of_15.zip",
+      "index": 12,
+      "member": "raw.part012",
+      "offset": 5390000000,
+      "sha256": "59bfe83f00f7d723f85af155d1cd76a6a5c9af717442c1beee1077627c554f41"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_13_of_15.zip",
+      "index": 13,
+      "member": "raw.part013",
+      "offset": 5880000000,
+      "sha256": "44cac57128cd9d96ae9bd5bc263a1bb3a283310d0b7eb02ae193e99830a4684f"
+    },
+    {
+      "bytes": 490000000,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_14_of_15.zip",
+      "index": 14,
+      "member": "raw.part014",
+      "offset": 6370000000,
+      "sha256": "3db096979a82b5fcc6d97ce1eaf6d0b52f8efa8b7a626da882b53aa415c6c5c6"
+    },
+    {
+      "bytes": 460357049,
+      "filename": "WWO_Economy_Goal_Cycle02_Raw_Part_15_of_15.zip",
+      "index": 15,
+      "member": "raw.part015",
+      "offset": 6860000000,
+      "sha256": "b442c35b8adcb377184984166eb13f13c5d266d7aed4d7e5b2533e7bc845c6f2"
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "CAUSAL_ATTRIBUTION_GATE": "PASS",
+  "COMPLETED_MILESTONES": [
+    "M0",
+    "M1",
+    "M2",
+    "M3",
+    "M4",
+    "M5"
+  ],
+  "CURRENT_BLOCKER": null,
+  "EXIT_STATUS": "GOAL_COMPLETE",
+  "FAILED_OR_NOT_RUN": [
+    "Original final attempt interrupted: each52 complete cases, S10 N4 partial553/599 days, unknown exit; retained and excluded from successful replays",
+    "Remote CI, Windows and production/global WWO benchmarks NOT_RUN; no formal cancelled-order event in final matrix"
+  ],
+  "LAST_VALIDATED_COMMIT": "710dac38d82a4d48609e88c9f974a927e9b6c686",
+  "LAST_VALIDATED_EXECUTION_COMMIT": "710dac38d82a4d48609e88c9f974a927e9b6c686",
+  "MODEL_VALUE_ASSESSMENT": "MIXED",
+  "NEW_PRICE_CANDIDATE_GATE": "PASS",
+  "NEXT_ACTION": "STOP after native Library delivery of verified source restoration component, full raw evidence component, report and reading package. No Cycle03. Exact sealed HEAD/package hashes and delivery IDs are in external handoff/export_manifest.json.",
+  "SOURCE_CONTINUITY_GATE": "PASS",
+  "actual_executed_cases": 118,
+  "actual_executed_days": 178800,
+  "base_sha": "334d3f546824415604b7645a91a61196fb2bad83",
+  "budget": {
+    "deadline_utc": "2026-10-08T12:39:06Z",
+    "mechanism_freeze_utc": "2026-10-08T10:39:06Z",
+    "start_utc": "2026-10-08T02:39:06Z"
+  },
+  "candidate": "local-zero-accept-refusal-bound-v1",
+  "checker_version": "v4-post-execution",
+  "completed_milestones": [
+    "M0",
+    "M1",
+    "M2",
+    "M3",
+    "M4",
+    "M5"
+  ],
+  "current_code_commit": "710dac38d82a4d48609e88c9f974a927e9b6c686",
+  "current_milestone": "COMPLETE \u2014 sealing verified restoration artifacts",
+  "currently_running_commands": [],
+  "diagnostic_controls": {
+    "cases": 12,
+    "days": 13200
+  },
+  "experiment_design_defects": [
+    "Two v1 holdout families each exposed by20-day correctness test; v2 configurations frozen unrun",
+    "H2 terminal funds static upper-bound defect corrected before anyholdout execution; original funding hashes retained",
+    "Pre-candidate runner incorrectly assumed only FAIL/INSUFFICIENT Gate;39 completed cases retained and controlled transition made at genuine PASS"
+  ],
+  "final_frozen_manifest_hash": "6b2cc5f69b4d09cfec7c32aad16d81ecd1898f56aa774cd24ea5b90091edf8bf",
+  "final_sealed_HEAD": "recorded by external handoff/export_manifest.json (avoids self-referential commit)",
+  "final_v4_audit": {
+    "causal_checker_sha256": "275b76f658d0b1d4d746e036852780cab490e59b4404333d84545bd706f38fbe",
+    "causal_checker_version": "v4-post-execution",
+    "elapsed_seconds": 689.1144911849988,
+    "execution_source_commit": "710dac38d82a4d48609e88c9f974a927e9b6c686",
+    "formal_cases_reaudited": 118,
+    "independent_accounting_rechecks": 118,
+    "independent_causal_rechecks": 118,
+    "negative": [
+      {
+        "error": "need-by/timely/release mismatch",
+        "name": "EARLIER_NEED_BY_UNCHANGED_TIMELY",
+        "status": "PASS_EXPECTED_REJECTION"
+      },
+      {
+        "error": "PRICE rejection mislabeled",
+        "name": "PRICE_MISCLASSIFIED_AS_CASH",
+        "status": "PASS_EXPECTED_REJECTION"
+      },
+      {
+        "error": "payment uses changed quote",
+        "name": "LOCKED_PRICE_PLUS_ONE",
+        "status": "PASS_EXPECTED_REJECTION"
+      },
+      {
+        "error": "payment uses changed quote",
+        "name": "LOCKED_PRICE_CHANGED_TO_REAL_LATEST_QUOTE",
+        "status": "PASS_EXPECTED_REJECTION"
+      },
+      {
+        "error": "line stable ID/date mismatch",
+        "name": "ACCEPTED_ORDER_LINE_EARLIER_NEED_BY",
+        "status": "PASS_EXPECTED_REJECTION"
+      },
+      {
+        "error": "retry counted as distinct new information",
+        "name": "RETRY_COUNTED_AS_DISTINCT_NEED",
+        "status": "PASS_EXPECTED_REJECTION"
+      },
+      {
+        "error": "arrival without matching payment",
+        "name": "MISSING_ARRIVAL_PAYMENT",
+        "status": "PASS_EXPECTED_REJECTION"
+      },
+      {
+        "error": "unknown offer in buyer selectable set",
+        "name": "UNKNOWN_SUPPLIER_IN_SELECTABLE_SET",
+        "status": "PASS_EXPECTED_REJECTION"
+      },
+      {
+        "error": "accepted need keys differ from actual request lines",
+        "name": "GHOST_ACCEPTED_NEED_WITH_CONSERVED_TOTAL",
+        "status": "PASS_EXPECTED_REJECTION"
+      },
+      {
+        "error": "accepted event parties/route differ from dated request",
+        "name": "SWAPPED_ORDER_IDS_SAME_DATE_QUANTITY_PRICE_DIFFERENT_BUYER",
+        "status": "PASS_EXPECTED_REJECTION"
+      }
+    ],
+    "negative_logs_reaudited": 10,
+    "runtime_rerun": false,
+    "status": "PASS",
+    "utc": "2026-10-08T04:59:53.347479+00:00"
+  },
+  "frozen_manifest_hash": "e34955c496b5c6a825a6112b2901adadd54f2cd868a96b0d0a7070e55bcf98f0",
+  "implementation_defects": [
+    "Research statistics counted legacy later-round shadow selection as strong effect, fixed before formal freeze",
+    "Independent causal audit missing empty-event days, fixed v2; failed formal15 completed cases preserved",
+    "Post-execution analyze cache overwrite repaired only offline; execution fingerprint retained",
+    "v3 offline audit accepted ghost need with conserved total and cross-buyer same-price order swap; v4 strengthened and118 archives plus10 negatives reaudited"
+  ],
+  "independent_replays": {
+    "cases_each": 59,
+    "completed": 2,
+    "days_each": 89400,
+    "deterministic_files": 533,
+    "exit_codes": [
+      0,
+      0
+    ]
+  },
+  "last_updated": "2026-10-08T05:17:29.570332+00:00",
+  "matched_files": 533,
+  "model_counterexamples": [
+    "D first cap609/effective610, date-separated A/D releases",
+    "Coal-scarcity binding N3 persistent110/112 oscillator:4843 vs6079 at600,28429 vs36079 at3600, CASH0",
+    "Low terminal cash2/6000 delivered; cash and willingness distinct",
+    "N4 improves asymmetrical holdout total49 vsN3 while T4/T9 services decline579/670",
+    "N4 coal improves N3 but remains60 belowN2 at both600 and3600 horizons"
+  ],
+  "resource_status": "No active simulation or audit; full raw archive assembly/stream validation is separate handoff IO. Original ten-hour budget unchanged.",
+  "running_command": null,
+  "source_commit": "93633b4321dc288bd14b064350cc7fb053529bae",
+  "successful_final_replays": 2,
+  "tests_cycle02": {
+    "attribution": 14,
+    "candidate": 11
+  },
+  "validated_source_digest": {
+    "economy_quantity_lab/goal_cycle01/cash.py": "60d6a73d0b7b8be56fdf7f20682bc3e67e4fce45be7409e61cb4f1db9717cacc",
+    "economy_quantity_lab/goal_cycle01/corruption_probes.py": "55a69ffaec9177bd76723427b360d99ff015bc02b7241021547ee74b1cdd0cfc",
+    "economy_quantity_lab/goal_cycle01/cycle_fixtures.py": "bd2f40b2830b845b97bd82724999f070c9aecdec49c5a24901e24781e73cba0b",
+    "economy_quantity_lab/goal_cycle01/observation.py": "82f4bf14f45a8b30f5c123560652f0cfc4eedcc698aef9be27acf39e7534e625",
+    "economy_quantity_lab/goal_cycle01/offline_audit.py": "0caf57f4f39f09936c5c2fd1d72e2f8482b85804cc5b96295c2e286f1ad913e8",
+    "economy_quantity_lab/goal_cycle01/payment_policy.py": "e5c7f4b77b8d35020f400027d5b80cca48238b65d732ef56f3f3741436cbc987",
+    "economy_quantity_lab/goal_cycle01/pricing.py": "e7745473964a1391eb6fb509c5a715590148d5547d464267b5d92b7e771fb96d",
+    "economy_quantity_lab/goal_cycle01/run_cycle.py": "a9ab11736d25cf4dd51adfb32849ebaf96066c16921fd098627edb0a3195a558",
+    "economy_quantity_lab/goal_cycle01/test_cycle.py": "11a12a8db9bbafe89cce66e9824401f7330ba8f0abc1d52a010088d3d96f2486",
+    "economy_quantity_lab/network_round6/network_simulation.py": "7cc5e177d7e41ecc8b3b26d9389c83722422cc7d57ed803709ae5dfa952560ba",
+    "experiments_manifest.json": "ff5cb33b04119e2c8e0459abe218d176d215de5158fa655485f5467bd617cb28",
+    "verify_goal_cycle01.py": "65d32f0e5ea981c8f666022cc9526603021f8ff333b54875c3c7cb7419588b6b"
+  },
+  "working_branch": "research/economy-goal-cycle-02"
+}
