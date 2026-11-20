@@ -18,6 +18,20 @@
 
 候选使用 Basemap 2.0.0 随包的 GSHHG 2.3.6 全精度几何和 GRWL v01.01 的 30 米 Landsat 平均流量水域掩膜。岸线和卫星观测均为现代参照。1900 年精确河岸及航道宽度仍待对应历史资料。GRWL 掩膜是中间产品，细小水道和潮滩边界精度取决于资料。[GSHHG](https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html) · [Basemap 数据及 LGPL-3.0-or-later](https://pypi.org/project/basemap-data-hires/) · [Allen 与 Pavelsky 2018](https://doi.org/10.1126/science.aat0636) · [GRWL v01.01，CC BY 4.0](https://doi.org/10.5281/zenodo.1297434)
 
+## 人生序章与人物存档
+
+原生新局从国家选择进入五步序章，再确认人物。可选 18、20、25 岁。商号帮工和继续读书要求年满 20 岁且受过读写教育。人物档案保存履历、特质和可见健康状态，八项基础属性在后台计算。
+
+选「在家帮工，未学读写」可复现不识字开局。进入世界后打开人物页，在 16:00 前安排课程或请本地识字课堂的教师代读。活动随正式游戏时间结算。代读只传达该课堂公告。完成课程可阅读本地语言，其他语言的地图和国家资料仍须有相应阅读能力。未标明语言的地图文字保持遮蔽。暂停、设置与存读档始终可用。
+
+开局现金以 [既有生活规则](../../data/formal/player_livelihood_r1.json) 为基准。贫寒、普通和富裕分别获得 500、2500、10000 个模拟货币最小单位，记入正式 Ledger 的现有个人账户。识字教育分别来自邻里、本地学校或家庭教师。现金倍率、教育与家庭资源、[课程和工伤参数](../../data/character/opening_activities.json) 都是开发假设。家庭独立资产和可互动的亲缘关系待接入。
+
+[特质数据](../../data/character/player_traits_v0_2.json) 来自修订稿。第一批 14 项可通过序章或正式学习取得，作用于学习、工作和健康等事件。善辩、亲善、多疑、审慎、果断、商历、任职、军旅为 `NOT_WIRED`，人物界面不提供。多疑、审慎、果断及军旅的公式和服役登记已在人物库实现。
+
+继续使用 `wwo_rust_formal_world_v1` 和 `formal_character_state_v1`。缺少序章字段的旧档保留原出生日期、健康、经历与账本，并沿用可阅读的界面。新档保存预约、识字进度、已结算来源和已代读公告。在病伤或衰老结算中死亡后，同步更新人物身份、人口归属和雇佣状态，存留已入账财产与正当欠薪。
+
+局部检查使用 `cargo test --locked --manifest-path rust/character-core/Cargo.toml --lib player::tests` 和 `cargo test --release --locked --manifest-path rust/strategic-host/Cargo.toml --lib player_prologue_tests`，从仓库根目录执行。
+
 ## 正式水文资源
 
 正式入口优先读取 `data/worldcrs84quad-15s-v2-hydrology/`，否则读取可用的旧库。在水文目录内恢复下列文件。QHW 按各层 QPK 大小核对配套版本。完整恢复后用 `wwo-map-lab --play` 启动。显式 `--terrain-candidate <候选库>` 仍可指定对照版本。

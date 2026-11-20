@@ -94,6 +94,8 @@ pub enum Request<'a> {
     Training {verb:&'a str},
     Relations {verb:&'a str,id:&'a str},
     Consume { id: &'a str, quantity: i64 },
+    NewPlayer { polity: &'a str, prologue: wwo_character_core::Prologue },
+    PersonalActivity { activity: wwo_map_lab::formal_bootstrap::PersonalActivity },
     Lobby {verb:&'static str,polity:&'a str,slot:u8},
 }
 impl Request<'_> {

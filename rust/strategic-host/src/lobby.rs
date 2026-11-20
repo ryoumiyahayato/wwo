@@ -11,7 +11,13 @@ pub struct Lobby {
     pub choices:Vec<Opening>,pub slots:Vec<Slot>,
 }
 #[derive(Deserialize)]
-pub struct Opening {pub id:String,label:String,place:String}
+pub struct Opening {
+    pub id: String,
+    pub label: String,
+    pub place: String,
+    #[serde(default)] pub language: Option<wwo_character_core::Language>,
+    #[serde(default)] pub cash: Option<i64>,
+}
 
 impl Lobby {
     pub fn opening(&self, polity: &Polity) -> Option<&Opening> {
@@ -20,9 +26,9 @@ impl Lobby {
 }
 
 #[derive(Clone,Copy,Debug,Default,PartialEq,Eq)]
-pub enum Page {#[default] Home,Selection,Load,Settings,Themes,Migration(Status,usize)}
+pub enum Page {#[default] Home,Selection,Prologue,Load,Settings,Themes,Migration(Status,usize)}
 #[derive(Clone,Copy)]
-pub enum Command {Page(Page),Country(usize),Search,ClearSearch,Enter,Load(u8),Exit}
+pub enum Command {Page(Page),Country(usize),Search,ClearSearch,Enter,PrologueChoice(usize),PrologueNext,PrologueBack,Load(u8),Exit}
 
 pub type Rect = [f32;4];
 
@@ -210,7 +216,7 @@ impl Display<'_> {
         mesh.image([0.,0.,w,h],[u-x,v-y,u+x,v+y],[255;4]);
     }
 
-    pub fn lobby(&self,world:&World,state:Option<&Lobby>,page:Page,selection:usize,waiting:bool,directory:&Directory)
+    pub fn lobby(&self,world:&World,state:Option<&Lobby>,page:Page,selection:usize,waiting:bool,directory:&Directory,draft:Option<&crate::prologue_ui::Draft>)
         -> (crate::ui::Layers,Vec<Hit>)
     {
         use crate::ui::Ink;
@@ -268,12 +274,21 @@ impl Display<'_> {
                 }
                 let [traits_x, traits_y, traits_width, _] = layout.traits;
                 formal_ui::panel(&mut panels,layout.traits,[12,22,31,249]);
-                self.skin.text(&mut text,"人物特质",1,[traits_x+18.,traits_y+13.],traits_width-36.,IVORY);
+                self.skin.text(&mut text,self.skin.choose("开局设置","New game"),1,[traits_x+18.,traits_y+13.],traits_width-36.,IVORY);
+                let summary = draft.filter(|draft| draft.country == selection).map(|draft| {
+                    format!("{} {} · {}", draft.opening.age, self.skin.choose("岁", "years old"), draft.opening.family.label())
+                });
+                self.skin.text(&mut text,self.skin.choose("人物摘要","Character summary"),0,
+                    [traits_x+18.,traits_y+53.],traits_width-36.,IVORY);
+                self.skin.paragraph(&mut text,summary.as_deref().unwrap_or(self.skin.choose(
+                    "选择国家后，开始人生序章。","Choose a country to begin the prologue.")),0,
+                    [traits_x+18.,traits_y+84.,traits_width-36.,80.],MUTED,1.);
                 let can_enter=opening.is_some()&&state.is_some_and(|s|s.selection_ready)&&!busy;
                 self.row(&mut panels,&mut text,&mut hits,layout.primary,"",
                     can_enter.then_some(action(Command::Enter)),can_enter);
                 let [button_x,button_y,button_width,_]=layout.primary;
-                let label=self.skin.choose("进入世界","Enter world");
+                let label=if state.is_some_and(|s|s.native) {self.skin.choose("人生序章","Prologue")}
+                    else {self.skin.choose("进入世界","Enter world")};
                 let label_width=self.skin.width(label,0);
                 self.skin.text(&mut text,label,0,[button_x+(button_width-label_width)*0.5,button_y+5.],
                     button_width,if can_enter{IVORY}else{MUTED});
@@ -286,6 +301,13 @@ impl Display<'_> {
                 panels.line(arrow,[back_x+16.,back_y+11.],1.6,color);
                 panels.line(arrow,[back_x+16.,back_y+23.],1.6,color);
                 self.country_directory(&mut panels,&mut text,&mut hits,world,state,directory,selection,busy);
+            }
+            Page::Prologue=>{
+                if let Some((draft, opening)) = draft.and_then(|draft| {
+                    world.polities.get(draft.country).and_then(|polity| state?.opening(polity)).map(|opening| (draft, opening))
+                }) {
+                    self.draw_prologue(&mut panels,&mut text,&mut hits,draft,opening);
+                }
             }
             Page::Load=>{
                 let width=500.;let x=(w-width)*0.5;let y=(h-400.)*0.5;

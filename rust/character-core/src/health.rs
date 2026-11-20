@@ -234,6 +234,9 @@ impl LifeRules {
             }
             _ => 0,
         };
+        let recovery = if recovery > 0 {
+            (f64::from(recovery) * person.player.as_ref().map_or(1.0, |player| player.recovery_rate())).round() as u32
+        } else { 0 };
         let illness = u32::from(self.disease_damage_per_day) * severity / resistance;
         let deprivation = conditions.nutrition.map_or(0, |food| u32::from(300u16.saturating_sub(food)) / 30);
         person.health.current = (u32::from(person.health.current) + recovery)
@@ -255,10 +258,7 @@ impl LifeRules {
                 + conditions.safety.map_or(0, |safety| u64::from(1000 - safety) / 10))
                 .min(1_000_000) as u32
         };
-        if mortality_roll.is_none() && person.health.current == 0 {
-            person.health.current = u16::from(person.health.recovery_ceiling > 0);
-        }
-        if mortality_roll.is_some_and(|roll| person.health.current == 0 || roll < risk) {
+        if person.health.current == 0 || mortality_roll.is_some_and(|roll| roll < risk) {
             let cause = if person.health.disease.is_some() {
                 "疾病"
             } else if person.health.current == 0 {

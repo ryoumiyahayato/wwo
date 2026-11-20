@@ -5,7 +5,7 @@ use wwo_character_core::{
     ActionSpec, CharacterHost, CharacterSystem, ConditionEvidence, ConditionStatus, Error,
     Capability, CharacterSnapshot, Experience, Health, LifeEvent, LifeRules, LivingConditions,
     ObservedConditions, OpportunityHost, PersonRecord, PersonSeed, PersonView, Requirement, Result, SocialFacts,
-    SNAPSHOT_SCHEMA,
+    SNAPSHOT_SCHEMA, DeathNotice, Education, Language, PlayerDevelopment,
 };
 
 #[derive(Serialize, Deserialize)]
@@ -16,6 +16,8 @@ struct SavedPerson {
     capabilities: BTreeMap<String, Capability>,
     experiences: BTreeMap<String, Experience>,
     event_sequence: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    player: Option<PlayerDevelopment>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -53,6 +55,8 @@ impl Identity {
         })
     }
 
+    pub(crate) fn record_death(&mut self) { self.alive = false; }
+
     fn seed(&self, id: &str, capabilities: BTreeMap<String, Capability>) -> PersonSeed {
         PersonSeed {
             id: id.into(), name: self.name.clone(), birth_day: self.birth_day,
@@ -72,6 +76,10 @@ pub(crate) struct CharacterOutput {
     pub day: u32,
     assessment: Option<wwo_character_core::ActionAssessment>,
     pub able_to_work: bool,
+    #[serde(skip)]
+    pub development: Option<PlayerDevelopment>,
+    #[serde(skip)]
+    pub deaths: Vec<DeathNotice>,
 }
 
 pub(crate) fn restore(
@@ -101,12 +109,51 @@ pub(crate) fn assess_purchase(
     Ok(result)
 }
 
+pub(crate) fn opening_with_prologue(
+    player: &str, people: &BTreeMap<String, Identity>, development: PlayerDevelopment,
+) -> Result<CharacterOutput> {
+    let mut input = Request::initialize(SHARED_WORLD.into(), player, people.clone(), 0, "");
+    input.prologue = Some(development);
+    run(input)
+}
+
+pub(crate) fn restore_native_identities(
+    player: &str, people: &mut BTreeMap<String, Identity>, day: u32, state: &str,
+) -> Result<Vec<DeathNotice>> {
+    let save: Save = serde_json::from_str(state).map_err(|error| Error(error.to_string()))?;
+    if save.schema != SAVE_SCHEMA || save.day != day || save.people.keys().ne(people.keys()) {
+        return Err(Error("formal character dates or roster differ".into()));
+    }
+    let mut deaths = Vec::new();
+    for (id, saved) in save.people {
+        let identity = people.get_mut(&id).unwrap();
+        if let Some(development) = saved.player {
+            if id != player { return Err(Error("player profile belongs to a different identity".into())); }
+            *identity = opening_identity(development.birth_year())?;
+        }
+        if let Some(death) = saved.health.death {
+            identity.alive = false;
+            deaths.push(DeathNotice { person_id: id, death });
+        }
+    }
+    Ok(deaths)
+}
+
+#[derive(Default)]
+pub(crate) struct DayActivity {
+    pub work: BTreeMap<String, String>,
+    pub lesson: Option<(Language, u16, String)>,
+    pub rest: bool,
+    pub nutrition: Option<u16>,
+    pub injury: Option<(u16, u16)>,
+}
+
 pub(crate) fn advance_opening_day(
-    player: &str, people: &BTreeMap<String, Identity>, day: u32, state: &str, work: BTreeSet<String>,
+    player: &str, people: &BTreeMap<String, Identity>, day: u32, state: &str, activity: DayActivity,
 ) -> Result<CharacterOutput> {
     let mut request = Request::initialize(SHARED_WORLD.to_owned(), player, people.clone(), day, state);
     request.operation = "day".into();
-    request.work = work;
+    request.activity = Some(activity);
     request.settled_day = day.checked_sub(1).ok_or_else(|| Error("invalid character day".into()))?;
     run(request)
 }
@@ -136,6 +183,8 @@ impl Request {
             social: SocialFacts::default(),
             nutrition: BTreeMap::new(),
             work: BTreeSet::new(),
+            activity: None,
+            prologue: None,
             quote: None,
         }
     }
@@ -157,6 +206,10 @@ struct Request {
     #[serde(default)]
     work: BTreeSet<String>,
     quote: Option<Quote>,
+    #[serde(skip)]
+    activity: Option<DayActivity>,
+    #[serde(skip)]
+    prologue: Option<PlayerDevelopment>,
 }
 
 #[derive(Deserialize)]
@@ -179,7 +232,11 @@ impl CharacterHost for Request {
 
     fn observed_conditions(&self, id: &str, day: u32) -> Option<ObservedConditions> {
         (day == self.day && self.people.contains_key(id)).then(|| ObservedConditions {
-            nutrition: self.nutrition.get(id).copied(),
+            nutrition: self.activity.as_ref().filter(|_| id == self.player)
+                .and_then(|activity| activity.nutrition).or_else(|| self.nutrition.get(id).copied()),
+            rest: self.activity.as_ref().filter(|activity| id == self.player && activity.rest).map(|_| 1000),
+            // A rest day records no treatment. Absence of a treatment is distinct from unknown care.
+            medical_care: self.activity.as_ref().filter(|activity| id == self.player && activity.rest).map(|_| 0),
             ..ObservedConditions::default()
         })
     }
@@ -229,7 +286,7 @@ fn run(input: Request) -> Result<CharacterOutput> {
             let person = input.people.get(&id).ok_or_else(|| Error(format!("unknown formal person {id}")))?;
             Ok(PersonRecord {
                 identity: person.seed(&id, saved.capabilities), registered_day: saved.registered_day,
-                health: saved.health, experiences: saved.experiences, event_sequence: saved.event_sequence,
+                health: saved.health, experiences: saved.experiences, event_sequence: saved.event_sequence, player: saved.player,
             })
         }).collect::<Result<Vec<_>>>()?;
         CharacterSystem::from_snapshot(CharacterSnapshot {
@@ -254,12 +311,43 @@ fn run(input: Request) -> Result<CharacterOutput> {
         system.register(identity.seed(id, BTreeMap::new()), &input)?;
     }
     let mut assessment = None;
+    let mut deaths = Vec::new();
     match input.operation.as_str() {
-        "restore" if input.day == system.day() => {}
+        "restore" if input.day == system.day() => {
+            if let Some(development) = input.prologue.clone() {
+                system.create_player(&input.player, development)?;
+            }
+        }
         "day" if system.day().checked_add(1) == Some(input.day) => {
-            system.advance_without_mortality(input.day, &input)?;
-            for person in &input.work {
-                learning(&mut system, person, "employment", "完成正式工作", 35)?;
+            let active = system.player_development(&input.player).is_some();
+            deaths = system.advance_observed(input.day, &input, active.then_some(input.player.as_str()))?;
+            let survived = |person: &str| !deaths.iter().any(|death| death.person_id == person);
+            if let Some(activity) = &input.activity {
+                for (person, job) in &activity.work {
+                    if !survived(person) { continue; }
+                    if active && person == &input.player {
+                        let source = format!("shift:{job}:{}", input.day);
+                        system.completed_player_work(person, &source, true)?;
+                    } else {
+                        learning(&mut system, person, "employment", "完成正式工作", 35)?;
+                    }
+                }
+                if survived(&input.player) {
+                    if let Some((language, effort, source)) = &activity.lesson {
+                        system.completed_reading_lesson(&input.player, *language, *effort, source)?;
+                    }
+                    if let Some((damage, loss)) = activity.injury {
+                        if let Some(death) = system.apply_next_event(&input.player, LifeEvent::Injury {
+                            label: "班次中的工伤".into(), damage, permanent_loss: loss,
+                        })? {
+                            deaths.push(death);
+                        }
+                    }
+                }
+            } else {
+                for person in input.work.iter().filter(|person| survived(person)) {
+                    learning(&mut system, person, "employment", "完成正式工作", 35)?;
+                }
             }
         }
         "purchase" if input.day == system.day() => {
@@ -281,17 +369,36 @@ fn run(input: Request) -> Result<CharacterOutput> {
         _ => return Err(Error("invalid operation or formal day mismatch".into())),
     }
     let able_to_work = system.can_do_physical_work(&input.player)?;
-    let profile = system.view(&input.player, input.social)?;
+    let development = system.player_development(&input.player).cloned();
+    let mut profile = system.view(&input.player, input.social)?;
+    if let Some(player) = &development {
+        let origin = player.opening();
+        profile.age_years = formal_age(player.birth_year(), input.day, &system, &input.player);
+        profile.social.family_background = Some(origin.family.label().into());
+        profile.social.education = Some(if player.can_read(player.language()) {
+            format!("识字 · {}", player.language().label())
+        } else { Education::HomeWork.label().into() });
+        profile.history.splice(0..0, player.history().iter().map(|past| {
+            format!("{}–{} {}", past.start_year, past.end_year, past.label)
+        }));
+    }
     let snapshot = system.snapshot();
     let state = serde_json::to_string(&Save {
         schema: SAVE_SCHEMA.into(), world: snapshot.world_id, day: snapshot.day, rules: snapshot.rules,
         people: snapshot.people.into_iter().map(|record| (record.identity.id, SavedPerson {
             registered_day: record.registered_day, health: record.health,
             capabilities: record.identity.capabilities, experiences: record.experiences,
-            event_sequence: record.event_sequence,
+            event_sequence: record.event_sequence, player: record.player,
         })).collect(),
     }).map_err(|e| Error(e.to_string()))?;
-    Ok(CharacterOutput { state, profile, day: input.day, assessment, able_to_work })
+    Ok(CharacterOutput { state, profile, day: input.day, assessment, able_to_work, development, deaths })
+}
+
+fn formal_age(birth_year: u16, day: u32, system: &CharacterSystem, id: &str) -> u32 {
+    let day = system.death(id).map_or(day, |death| death.day);
+    let mut clock = crate::formal_clock::GameClock::default();
+    clock.advance_minutes(i64::from(day) * crate::formal_clock::MINUTES_PER_DAY).unwrap();
+    (clock.current_date().year - i64::from(birth_year)) as u32
 }
 
 #[derive(Deserialize)]

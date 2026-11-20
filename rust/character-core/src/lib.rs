@@ -4,11 +4,13 @@
 mod action;
 mod health;
 mod model;
+mod player;
 mod system;
 
 pub use action::*;
 pub use health::*;
 pub use model::*;
+pub use player::*;
 pub use system::*;
 
 #[derive(Debug, Clone, PartialEq, Eq)]

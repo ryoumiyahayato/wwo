@@ -1,0 +1,18 @@
+{
+  "basis": "GENERATED_SIMULATION_ASSUMPTION",
+  "lesson_effort": 340,
+  "lesson_start_hour": 16,
+  "lesson_hours": 2,
+  "meal_milli_for_recovery": 1000,
+  "work_injury_interval": 32,
+  "work_injury_damage": 90,
+  "work_injury_permanent_loss": 40,
+  "openings": {
+    "country_fra": "French",
+    "british_isles_1900": "English",
+    "german_empire": "German",
+    "russian_empire": "Russian",
+    "qing_empire": "WrittenChinese",
+    "empire_of_japan": "Japanese"
+  }
+}

@@ -120,8 +120,8 @@ impl WorkState {
         Ok(())
     }
 
-    pub(crate) fn book_automatic(&mut self, opening: &WorkOpening, clock: GameClock) {
-        for actor in opening.automatic() {
+    pub(crate) fn book_automatic(&mut self, opening: &WorkOpening, clock: GameClock, alive: impl Fn(&str) -> bool) {
+        for actor in opening.automatic().filter(|actor| alive(actor)) {
             if !self.contracts.contains_key(actor) {
                 let jobs = opening.jobs(actor, clock.current_day()).filter(|job| self.vacancies(job) > 0);
                 if let Some(job) = jobs.max_by_key(|job| (job.wage_per_hour, std::cmp::Reverse(&job.id))) {
@@ -133,6 +133,13 @@ impl WorkState {
     }
 
     pub(crate) fn booked_workers(&self) -> impl Iterator<Item = &String> { self.bookings.keys() }
+
+    pub(crate) fn record_death(&mut self, actor: &str) {
+        self.bookings.remove(actor);
+        self.contracts.remove(actor);
+    }
+
+    pub(crate) fn has_contract(&self, actor: &str) -> bool { self.contracts.contains_key(actor) }
 
     pub(crate) fn complete(&mut self) { self.bookings.clear(); }
 
