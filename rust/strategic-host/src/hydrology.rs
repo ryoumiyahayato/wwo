@@ -41,6 +41,7 @@ pub struct WaterPages {
     table: Vec<u32>,
     pages: Vec<WaterPage>,
     desired: Vec<(usize, bool)>,
+    visible_outside_budget: Vec<usize>,
     resident: HashMap<usize, ResidentWaterPage>,
     used_words: usize,
     request: mpsc::Sender<Vec<(usize, std::ops::Range<u64>)>>,
@@ -179,6 +180,7 @@ impl WaterPages {
             classes,
             pages,
             desired: Vec::new(),
+            visible_outside_budget: Vec::new(),
             resident: HashMap::new(),
             used_words: WATER_PAGES,
             request,
@@ -208,6 +210,7 @@ impl WaterPages {
             self.selection = None;
             self.previous_view = None;
             self.desired.clear();
+            self.visible_outside_budget.clear();
         }
 
         if let Ok(results) = self.ready.try_recv() {
@@ -309,6 +312,7 @@ impl WaterPages {
             .collect();
         nearby.sort_unstable_by(|a, b| b.1.cmp(&a.1).then_with(|| b.2.total_cmp(&a.2)));
         self.desired.clear();
+        self.visible_outside_budget.clear();
         let mut budget = WATER_WORDS - WATER_PAGES;
         for (i, visible, _) in nearby {
             let page = &self.pages[i];
@@ -319,6 +323,8 @@ impl WaterPages {
                 if let Some(resident) = self.resident.get_mut(&page.index) {
                     resident.last_needed = self.selection_number;
                 }
+            } else if visible {
+                self.visible_outside_budget.push(page.index);
             }
         }
     }
@@ -419,6 +425,13 @@ impl WaterPages {
             }
         }
         (loaded, wanted)
+    }
+
+    pub fn missing_view_pages_outside_budget(&self) -> usize {
+        self.visible_outside_budget
+            .iter()
+            .filter(|key| !self.resident.contains_key(*key))
+            .count()
     }
 
     pub fn revision(&self) -> u64 {

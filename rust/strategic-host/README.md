@@ -20,7 +20,7 @@
 
 全局核查时为生成命令传入完整来源，再加 `--water-pages-from <现有QWG> --audit-water-pages <变更记录.jsonl>`。工具逐页计算当前水陆分类输入，保留等价的旧页。记录列出变化的小格和整格水陆类别变更。Basemap 2.0.0 的全精度包缺少湖中岛内池塘。使用该 wheel 时加 `--shoreline-ponds <GSHHG Shapefile 压缩包>` 补充官方第 4 层。主数据已有第 4 层时沿用主数据。
 
-`tools/patrol_water_geometry.py index <岸线压缩包> <QWG> <巡视索引.json>` 将 GSHHG 岸段和 QWG 内陆水面编入 Z4–Z7 视图。复杂岸段使用更近的取景。若构建时补充了第 4 层，索引使用同一份 `--shoreline-ponds`。`tools/patrol_water_geometry.py capture <wwo-map-lab.exe> <巡视索引.json> <输出目录>` 从正式游戏逐个取景，可用 `--z` 和 `--limit` 分批运行，用 `--key` 补拍具体视图。记录包含相机、地貌实际层级、QWG 驻留和颜色探查。`report <巡视索引.json> <输出目录> --report-file <记录.json>` 按层汇总实拍与缺失，并列出出现资源回退或疑似反色的取景。巡视状态还需依据海陆边缘、过渡画面和来源精度核查。
+`tools/patrol_water_geometry.py index <岸线压缩包> <QWG> <巡视索引.json>` 将 GSHHG 岸段和 QWG 内陆水面编入 Z4–Z7 视图。复杂岸段使用更近的取景。若构建时补充了第 4 层，索引使用同一份 `--shoreline-ponds`。`tools/patrol_water_geometry.py capture <wwo-map-lab.exe> <巡视索引.json> <输出目录>` 从正式游戏逐个取景，可用 `--z` 和 `--limit` 分批运行，用 `--key` 补拍具体视图。记录包含相机、地貌实际层级、QWG 驻留和颜色探查。QWG 驻留记录按渲染器的视口安全边缘计算，区分缩放混合、远景 QPK 和待载或超出容量的页。`report <巡视索引.json> <输出目录> --report-file <记录.json>` 按层汇总实拍与缺失，并列出出现资源回退或疑似反色的取景。巡视状态还需依据海陆边缘、过渡画面和来源精度核查。
 
 ## 正式水文资源
 

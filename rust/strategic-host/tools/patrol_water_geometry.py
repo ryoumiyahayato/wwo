@@ -143,7 +143,8 @@ def ready(state, view):
     if not terrain or not terrain['selected_ready'] or state['mode'] != 'geographic':
         return False
     return (terrain['water_geometry_buffer_bytes'] > 0
-            and terrain['water_geometry_view_resident'] == terrain['water_geometry_view_wanted']
+            and (state['mpp'] >= 4200
+                 or terrain['water_geometry_view_resident'] == terrain['water_geometry_view_wanted'])
             and at_camera(state, view['lon'], view['lat'], view['mpp']))
 
 
@@ -236,14 +237,25 @@ def capture_view(host, view, scratch, directory, probes):
     rect_covered = (view_radius(view['rect']) <= 265*state['mpp']
                     and min(state['viewport']) >= 2*265)
     admitted = ready(state,view)
+    mpp = state['mpp']
+    budget_gap = terrain.get('water_geometry_view_missing_outside_budget')
+    if mpp >= 4200:
+        water_coverage = 'qpk_at_scale'
+    elif budget_gap is None:
+        water_coverage = 'water_budget_unknown'
+    elif budget_gap or terrain['water_geometry_view_resident'] != terrain['water_geometry_view_wanted']:
+        water_coverage = 'qpk_for_missing_qwg_pages'
+    else:
+        water_coverage = 'qwg' if mpp <= 2600 else 'qpk_qwg_scale_mix'
     with Image.open(img) as image:
         image = image.convert('RGB')
-        diagnostics = probes.review(image,state,admitted)
+        diagnostics = probes.review(image,state,admitted and water_coverage == 'qwg')
         image.save(directory/f'{label}.jpg', quality=82)
     img.unlink()
     return dict(key=label, image=f'{label}.jpg', state=state,
                 samples=frame['extra']['terrain_samples']['samples'],
                 rect_covered=admitted and rect_covered, level_confirmed=level_confirmed,
+                water_coverage=water_coverage,
                 color_probes=diagnostics,
                 status=('captured_review_pending' if admitted and rect_covered and level_confirmed
                         else 'capture_has_fallback_or_gap'))
@@ -334,11 +346,15 @@ def report(args):
             continue
         level[record['status']] += 1
         diagnostics = record.get('color_probes', {})
-        if record['status'] != 'captured_review_pending' or diagnostics.get('suspect'):
+        coverage = record.get('water_coverage')
+        if (record['status'] != 'captured_review_pending' or diagnostics.get('suspect')
+                or coverage in ('qpk_for_missing_qwg_pages','water_budget_unknown')):
             flagged.append(dict(view=view, image=image, status=record['status'],
-                                color_probes=diagnostics))
+                                water_coverage=coverage,color_probes=diagnostics))
         if diagnostics.get('status'):
             level[diagnostics['status']] += 1
+        if coverage:
+            level[coverage] += 1
     result = dict(counts=counts, flagged=flagged)
     if args.report_file:
         write(args.report_file,result)
