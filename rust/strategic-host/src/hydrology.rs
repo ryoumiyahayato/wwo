@@ -206,6 +206,32 @@ impl WaterPages {
     ) {
         if camera.mpp < WATER_PREFETCH_MPP {
             self.select(camera, size, now);
+            // A page prefetched outside the viewport has stamp 0. Start its
+            // normal handoff when it first enters the visible footprint,
+            // rather than exposing a hard rectangular water/land transition.
+            let stamp = self.tick(now);
+            let mut activated = false;
+            for &(i, visible) in &self.desired {
+                if !visible {
+                    continue;
+                }
+                let key = self.pages[i].index;
+                if let Some(page) = self.resident.get_mut(&key) {
+                    if page.words[0] == 0 {
+                        page.words[0] = stamp;
+                        queue.write_buffer(
+                            buffer,
+                            u64::from(self.table[key]) * 4,
+                            bytemuck::bytes_of(&stamp),
+                        );
+                        activated = true;
+                    }
+                }
+            }
+            if activated {
+                self.revision += 1;
+                self.handoff_until = now + HANDOFF;
+            }
         } else {
             self.selection = None;
             self.previous_view = None;
@@ -293,6 +319,12 @@ impl WaterPages {
                 && (radius - reach).abs() <= camera.mpp * 40. / EARTH
                 && (mpp / camera.mpp - 1.).abs() <= 0.10
         }) {
+            // Camera movement inside the selection slack can still expose a
+            // prefetched page. Refresh visibility without a global reselect.
+            for (i, visible) in &mut self.desired {
+                let page = &self.pages[*i];
+                *visible = dot(axis, page.axis) >= (view_radius + page.radius).cos();
+            }
             return;
         }
         self.selection = Some((axis, ahead, radius, camera.mpp));
