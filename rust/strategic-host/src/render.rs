@@ -133,6 +133,7 @@ pub struct Renderer {
     globe:wgpu::RenderPipeline,
     terrain:Option<Terrain>,
     rivers:Option<RiverLayer>,
+    water_pages:Option<crate::hydrology::WaterPages>,
     close_extent:Option<[f64;4]>,
     close_layout:wgpu::BindGroupLayout,
     close_group:wgpu::BindGroup,
@@ -161,11 +162,37 @@ struct GroundSurface {
     group:wgpu::BindGroup,
     repeat:wgpu::Sampler,
     height:Option<wgpu::TextureView>,
+    art:wgpu::TextureView,
+    water:wgpu::Buffer,
+    water_pixels:wgpu::Buffer,
+    water_raster:Option<WaterRaster>,
     loaded:bool,
 }
 
+struct WaterRaster {
+    pipeline:wgpu::ComputePipeline,
+    view:wgpu::BindGroup,
+    gaps:[wgpu::BindGroup;2],
+    buffers:Option<wgpu::BindGroup>,
+    size:[u32;2],
+    previous:Option<([[f32;4];3],[f32;4],[f32;4],u64)>,
+}
+
+fn water_storage(binding:u32, visibility:wgpu::ShaderStages, read_only:bool)->wgpu::BindGroupLayoutEntry {
+    entry(binding,visibility,wgpu::BindingType::Buffer {
+        ty:wgpu::BufferBindingType::Storage {read_only},has_dynamic_offset:false,min_binding_size:None,
+    })
+}
+
+fn water_pixels(device:&wgpu::Device, bytes:u64)->wgpu::Buffer {
+    device.create_buffer(&wgpu::BufferDescriptor {
+        label:Some("Water surface viewport classification"),size:bytes,
+        usage:wgpu::BufferUsages::STORAGE,mapped_at_creation:false,
+    })
+}
+
 impl GroundSurface {
-    fn new(device:&wgpu::Device, supported:bool)->Self {
+    fn new(device:&wgpu::Device, supported:bool, water_available:bool)->Self {
         let mut entries=vec![sampled(0),sampler_entry(1)];
         let height=supported.then(||{
             entries.push(wgpu::BindGroupLayoutEntry{
@@ -175,21 +202,26 @@ impl GroundSurface {
             create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm)
                 .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()})
         });
+        entries.push(water_storage(3,wgpu::ShaderStages::FRAGMENT,true));
+        entries.push(water_storage(4,wgpu::ShaderStages::FRAGMENT,true));
         let layout=layout(device,&entries);
         let repeat=device.create_sampler(&wgpu::SamplerDescriptor{
             address_mode_u:wgpu::AddressMode::Repeat,address_mode_v:wgpu::AddressMode::Repeat,
             mag_filter:wgpu::FilterMode::Linear,min_filter:wgpu::FilterMode::Linear,
             mipmap_filter:wgpu::FilterMode::Linear,..Default::default()
         });
-        let placeholder=create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm);
-        let group=Self::bind(device,&layout,&repeat,&placeholder,height.as_ref());
-        Self{layout,group,repeat,height,loaded:false}
+        let art=create_texture(device,[1,1,1],wgpu::TextureFormat::Rgba8Unorm).create_view(&Default::default());
+        let water=crate::hydrology::water_buffer(device,water_available);
+        let water_pixels=water_pixels(device,4);
+        let group=Self::bind(device,&layout,&repeat,&art,height.as_ref(),&water,&water_pixels);
+        Self{layout,group,repeat,height,art,water,water_pixels,water_raster:None,loaded:false}
     }
 
     fn bind(device:&wgpu::Device, layout:&wgpu::BindGroupLayout, repeat:&wgpu::Sampler,
-            surface:&wgpu::Texture, height:Option<&wgpu::TextureView>)->wgpu::BindGroup {
-        let view=surface.create_view(&Default::default());
-        let mut entries=vec![tex_resource(0,&view),sampler_resource(1,repeat)];
+            art:&wgpu::TextureView, height:Option<&wgpu::TextureView>,
+            water:&wgpu::Buffer, pixels:&wgpu::Buffer)->wgpu::BindGroup {
+        let mut entries=vec![tex_resource(0,art),sampler_resource(1,repeat),
+            buf_resource(3,water),buf_resource(4,pixels)];
         if let Some(height)=height {entries.push(tex_resource(2,height));}
         bind(device,layout,&entries)
     }
@@ -208,9 +240,52 @@ impl GroundSurface {
             pixels=downsample_rgba(&pixels,w,h);
         }
         if height.is_some() {self.height=height;}
-        self.group=Self::bind(device,&self.layout,&self.repeat,&texture,self.height.as_ref());
+        self.art=texture.create_view(&Default::default());
+        self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,self.height.as_ref(),
+            &self.water,&self.water_pixels);
         self.loaded=true;
         Ok(())
+    }
+
+    fn init_water_raster(&mut self,device:&wgpu::Device,shader:&wgpu::ShaderModule,view:&wgpu::Buffer) {
+        let pipeline=device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor{
+            label:Some("Project visible water boundaries"),layout:None,module:shader,
+            entry_point:Some("raster_water"),compilation_options:Default::default(),cache:None,
+        });
+        let view=bind(device,&pipeline.get_bind_group_layout(0),&[buf_resource(0,view)]);
+        let gaps=[1,2].map(|i|bind(device,&pipeline.get_bind_group_layout(i),&[]));
+        self.water_raster=Some(WaterRaster{pipeline,view,gaps,buffers:None,size:[0,0],previous:None});
+    }
+
+    fn project_water(&mut self,device:&wgpu::Device,encoder:&mut wgpu::CommandEncoder,
+                     size:[u32;2],view:&View,revision:u64) {
+        if view.viewport[2]*EARTH as f32>=crate::hydrology::WATER_MPP as f32
+            || view.projection_origin[3]>0.5 {return;}
+        let Some(raster)=&mut self.water_raster else {return;};
+        if raster.size!=size {
+            raster.size=size;
+            let bytes=u64::from(size[0])*u64::from(size[1])*4;
+            let fits=bytes<=u64::from(device.limits().max_storage_buffer_binding_size);
+            self.water_pixels=water_pixels(device,if fits {bytes} else {4});
+            raster.buffers=fits.then(||bind(device,&raster.pipeline.get_bind_group_layout(3),
+                &[buf_resource(3,&self.water),buf_resource(5,&self.water_pixels)]));
+            self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,self.height.as_ref(),
+                &self.water,&self.water_pixels);
+            raster.previous=None;
+        }
+        let Some(buffers)=&raster.buffers else {return;};
+        let key=(view.projection_axes,view.projection_origin,view.viewport,revision);
+        if raster.previous==Some(key) {return;}
+        raster.previous=Some(key);
+        let mut pass=encoder.begin_compute_pass(&wgpu::ComputePassDescriptor{
+            label:Some("Project visible water boundaries"),timestamp_writes:None,
+        });
+        pass.set_pipeline(&raster.pipeline);
+        pass.set_bind_group(0,&raster.view,&[]);
+        pass.set_bind_group(1,&raster.gaps[0],&[]);
+        pass.set_bind_group(2,&raster.gaps[1],&[]);
+        pass.set_bind_group(3,buffers,&[]);
+        pass.dispatch_workgroups(size[0].div_ceil(8),size[1].div_ceil(8),1);
     }
 }
 
@@ -602,6 +677,7 @@ impl Renderer {
             texture.create_view(&Default::default())
         });
         let river_source=natural.as_ref().and_then(|(catalogue,_)|catalogue.river_lines()).map(Path::to_owned);
+        let water_source=natural.as_ref().and_then(|(catalogue,_)|catalogue.water_geometry()).map(Path::to_owned);
         let terrain=natural.map(|(catalogue,proxy)|Terrain::new(&device,&queue,catalogue,proxy,landscape_supported))
             .transpose().map_err(|error|error.to_string())?;
         let [terrain_world,terrain_detail,terrain_index]=if let Some(terrain)=&terrain {
@@ -611,7 +687,13 @@ impl Renderer {
                 .create_view(&wgpu::TextureViewDescriptor{dimension:Some(wgpu::TextureViewDimension::D2Array),..Default::default()});
             [empty(),empty(),create_texture(&device,[1,1,1],wgpu::TextureFormat::R32Uint).create_view(&Default::default())]
         };
-        let surface=GroundSurface::new(&device,landscape_supported);
+        let mut surface=GroundSurface::new(&device,landscape_supported,water_source.is_some());
+        let water_pages=water_source.and_then(|source| {
+            match crate::hydrology::WaterPages::open(&source,&queue,&surface.water) {
+                Ok(pages)=>Some(pages),
+                Err(error)=>{eprintln!("Water geometry fallback · {} · {error}",source.display());None}
+            }
+        });
         let close_extent=close.as_ref().map(|sample|sample.extent.map(f64::from));
         let (close_surface,close_bounds)=CloseSample::upload(close,&device,&queue);
         let close_group=bind(&device,&close_layout,&[tex_resource(0,&close_surface),buf_resource(1,&close_bounds)]);
@@ -639,7 +721,8 @@ impl Renderer {
         });
         let globe_source=include_str!("globe.wgsl");
         let scenery_source=if landscape_supported {include_str!("landscape.wgsl")} else {
-            "fn landscape_relief(base:vec3f, ll:vec2f, world:vec3f, water:f32, mpp:f32)->vec3f {
+            "fn geographic_ground_tint(ll:vec2f, fallback:vec3f)->vec3f {return fallback;}
+            fn landscape_relief(base:vec3f, ll:vec2f, world:vec3f, water:f32, mpp:f32)->vec3f {
                 if view.settings.y>=.5 || view.map_style.z<6. {return base;}
                 return natural_land_material(vec4f(base,water),world,mpp);
             }"
@@ -648,6 +731,7 @@ impl Renderer {
             label:Some("WWO globe and Z7 landscape"),
             source:wgpu::ShaderSource::Wgsl(format!("{globe_source}\n{scenery_source}").into()),
         });
+        if water_pages.is_some() {surface.init_water_raster(&device,&globe_shader,&view);}
         let hud_shader=device.create_shader_module(wgpu::include_wgsl!("hud.wgsl"));
         let mesh_layout=[wgpu::VertexBufferLayout {array_stride:std::mem::size_of::<Vertex>() as u64,
             step_mode:wgpu::VertexStepMode::Vertex,attributes:&wgpu::vertex_attr_array![0=>Float32x2,1=>Unorm8x4,2=>Float32x2]}];
@@ -686,7 +770,7 @@ impl Renderer {
         let models=ModelLayer::new(&device,format,events);
         let landscape_pipeline=landscape_supported.then_some((format,glob,globe_shader));
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
-                globe,terrain,rivers,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
+                globe,terrain,rivers,water_pages,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
                 solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models,
                 landscape:None,landscape_pipeline,surface})
     }
@@ -757,6 +841,9 @@ impl Renderer {
     pub fn update_terrain(&mut self,camera:&Camera,size:[u32;2],now:Instant)->io::Result<()> {
         if let Some(terrain)=&mut self.terrain {
             terrain.update(&self.queue,camera,size,now);
+            if let Some(water)=&mut self.water_pages {
+                water.update(&self.queue,&self.surface.water,camera,size);
+            }
             if terrain.view_demand()>=6 && !self.surface.loaded {
                 let height=terrain.enable_landscape(&self.device);
                 self.surface.load(&self.device,&self.queue,height)?;
@@ -823,6 +910,13 @@ impl Renderer {
             status["landscape_pending"]=self.landscape.as_ref().is_some_and(Landscape::pending).into();
             status["surface_material_loaded"]=self.surface.loaded.into();
             status["river_centrelines_ready"]=self.rivers.as_ref().is_some_and(|layer|layer.rivers.is_some()).into();
+            if let Some(water)=&self.water_pages {
+                let (resident, wanted)=water.status();
+                status["water_geometry_resident"]=resident.into();
+                status["water_geometry_wanted"]=wanted.into();
+                status["water_geometry_buffer_bytes"]=self.surface.water.size().into();
+                status["water_viewport_buffer_bytes"]=self.surface.water_pixels.size().into();
+            }
             status
         })
     }
@@ -835,6 +929,7 @@ impl Renderer {
         self.terrain.as_ref().is_some_and(Terrain::fading)
             || self.detail.as_ref().is_some_and(terrain_detail::Stream::fading)
             || self.landscape.as_ref().is_some_and(Landscape::pending)
+            || self.water_pages.as_ref().is_some_and(crate::hydrology::WaterPages::inflight)
     }
 
     pub fn landscape_counts(&self)->io::Result<LandscapeCounts> {
@@ -943,6 +1038,11 @@ impl Renderer {
         for ((mesh,_),draw) in layers().zip(self.meshes.iter_mut()) {draw.upload(&self.device,&self.queue,mesh);}
         let image=texture.create_view(&Default::default());
         let mut encoder=self.device.create_command_encoder(&Default::default());
+        if show_map {
+            if let Some(water)=&self.water_pages {
+                self.surface.project_water(&self.device,&mut encoder,[w,h],view,water.revision());
+            }
+        }
         {
             let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label:Some("WWO map"),color_attachments:&[Some(wgpu::RenderPassColorAttachment{

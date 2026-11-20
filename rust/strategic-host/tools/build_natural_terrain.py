@@ -2,6 +2,7 @@
 
 import argparse
 import os
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager, ExitStack, nullcontext
 from datetime import datetime
@@ -27,7 +28,7 @@ from rasterio.vrt import WarpedVRT
 from rasterio.windows import Window
 from scipy.ndimage import gaussian_filter, label
 import shapefile
-from shapely import clip_by_rect, intersects_xy, make_valid, prepare
+from shapely import clip_by_rect, intersects_xy, make_valid, prepare, transform, union_all
 from shapely.affinity import translate
 from shapely.geometry import LineString, Polygon, box, shape
 from shapely.strtree import STRtree
@@ -309,6 +310,8 @@ def hydrography(source, output, scratch, *, recover_legacy=False):
             for line in river_lines(reader.shape(int(row))):
                 lines.append((reach,line))
                 if recover_legacy:
+                    # Only locate bad pixels in preexisting QPKs. This area
+                    # never feeds a new water mask or the hydrographic network.
                     half_width = .006 if area[row]>=15_000 or flow[row]>=1000 else .004
                     legacy.append(line.buffer(half_width,quad_segs=2))
     return lines, STRtree(legacy), len(ids), len(displayed)
@@ -1218,7 +1221,6 @@ def write_ice_shelf_candidate(original, source, destination, *, refine_edges=Fal
 def outlet_corridors(source):
     """Buffer documented outlet alignments in metres and wrap them on the global grid."""
     from pyproj import Transformer
-    from shapely import transform
 
     entries = json.loads(source.read_text(encoding="utf-8"))
     if entries.get("type") != "FeatureCollection" or not entries.get("features"):
@@ -1228,6 +1230,8 @@ def outlet_corridors(source):
         line = shape(feature["geometry"])
         props = feature["properties"]
         half_width = float(props["half_width_metres"])
+        if not props.get("width_source") or not props.get("width_epoch"):
+            raise ValueError(f"Missing measurement source or date for {props.get('name')}")
         if (line.geom_type != "LineString" or line.is_empty or not line.is_valid
                 or not np.isfinite(half_width) or half_width <= 0):
             raise ValueError(f"Invalid outlet geometry or width for {props.get('name')}")
@@ -1329,6 +1333,294 @@ def water_color_frame(color, coverage, decode, encode):
     return encode.compress(blocks.tobytes())
 
 
+WATER_COLUMNS, WATER_ROWS = 256, 128
+WATER_STEP = 360 / WATER_COLUMNS
+WATER_GRID = 8
+WATER_BANDS = 8
+WATER_QUANTIZATION = 65472
+
+
+def polygon_parts(geometry):
+    if geometry.is_empty:
+        return
+    if geometry.geom_type == "Polygon":
+        yield geometry
+    elif geometry.geom_type in ("MultiPolygon", "GeometryCollection"):
+        for part in geometry.geoms:
+            yield from polygon_parts(part)
+
+
+def shoreline_polygons(path):
+    """Read full-resolution, dateline-split GSHHG rings in WGS84."""
+    with ZipFile(path) as archive:
+        shapefiles = [name for name in archive.namelist()
+                      if "/f/GSHHS_f_L" in name and name.endswith(".shp")]
+        if shapefiles:
+            for name in shapefiles:
+                level = int(Path(name).stem[-1])
+                if level not in (1, 2, 3, 4, 5):
+                    continue
+                with shapefile.Reader(shp=BytesIO(archive.read(name))) as reader:
+                    for record in reader.iterShapes():
+                        yield level, shape(record.__geo_interface__)
+            return
+        directory = "mpl_toolkits/basemap_data"
+        coordinates = archive.read(f"{directory}/gshhs_f.dat")
+        for row in archive.read(f"{directory}/gshhsmeta_f.dat").splitlines():
+            level, _, points, _, _, offset, length, _ = row.split()
+            level = int(level)
+            if level not in (1, 2, 3, 4, 5) or int(points) < 4:
+                continue
+            offset, length = int(offset), int(length)
+            ring = np.frombuffer(coordinates, dtype="<f4", count=length//4, offset=offset)
+            yield level, Polygon(ring.reshape(-1, 2))
+
+
+def split_shoreline(polygon):
+    # Subdivide the continental polygons once before querying individual pages.
+    w, s, e, n = polygon.bounds
+    span = WATER_STEP*8
+    if max(e-w,n-s) <= span:
+        yield polygon
+        return
+    if e-w >= n-s:
+        split = (w+e)*.5
+        rectangles = [(w-1,s-1,split,n+1),(split,s-1,e+1,n+1)]
+    else:
+        split = (s+n)*.5
+        rectangles = [(w-1,s-1,e+1,split),(w-1,split,e+1,n+1)]
+    for bounds in rectangles:
+        for part in polygon_parts(clip_by_rect(polygon,*bounds)):
+            yield from split_shoreline(part)
+
+
+def observed_raster_windows(tile, content, tiff):
+    """Find data windows without decompressing identical, proven dry blocks."""
+    page = tiff.pages[0]
+    height,width = tile.block_shapes[0]
+    cols = (tile.width+width-1)//width
+    rows = (tile.height+height-1)//height
+    empty = np.zeros((rows,cols),dtype=bool)
+    offsets,counts = page.dataoffsets,page.databytecounts
+    if page.is_tiled and len(offsets)==rows*cols and len(counts)==len(offsets):
+        common = Counter(counts).most_common(1)[0][0]
+        # Confirm the most common compressed block actually decodes to zero.
+        first = next((i for i,size in enumerate(counts) if size==common
+                      and (i//cols+1)*height<=tile.height and (i%cols+1)*width<=tile.width),None)
+        if first is not None:
+            row,col = divmod(first,cols)
+            if not tile.read(1,window=Window(col*width,row*height,width,height)).any():
+                start = offsets[first]
+                dry = memoryview(content)[start:start+common]
+                empty = np.fromiter(
+                    (size==common and memoryview(content)[offset:offset+size]==dry
+                     for offset,size in zip(offsets,counts)),dtype=bool,count=len(offsets)
+                ).reshape(rows,cols)
+    for row in range(0,rows,4):
+        for col in range(0,cols,8):
+            if empty[row:row+4,col:col+8].all():
+                continue
+            yield Window(col*width,row*height,min(8*width,tile.width-col*width),
+                         min(4*height,tile.height-row*height))
+
+
+def observed_river_tile(content, name):
+    from pyproj import Transformer
+    from tifffile import TiffFile
+
+    with rasterio.MemoryFile(content) as memory, memory.open() as tile, TiffFile(BytesIO(content)) as tiff:
+        if tile.crs is None:
+            raise ValueError(f"GRWL mask has no coordinate system: {name}")
+        geographic = Transformer.from_crs(tile.crs,4326,always_xy=True,force_over=True)
+        # Polygonize in disjoint source windows. Shared raster-grid edges
+        # need no overlap and cannot add water between cells.
+        for window in observed_raster_windows(tile,content,tiff):
+            values = tile.read(1,window=window)
+            wet = (values==255) | (values==180) | (values==126) | (values==86)
+            if not wet.any():
+                continue
+            coordinates = tile.window_transform(window)
+            for geometry,_ in features.shapes(wet.view(np.uint8),mask=wet,transform=coordinates):
+                polygon = shape(geometry)
+                if not polygon.is_valid:
+                    polygon = make_valid(polygon)
+                for part in polygon_parts(polygon):
+                    yield from project_river_mask(part,geographic)
+
+
+def measured_river_polygons(path):
+    # GRWL maps water connected to the river network at mean discharge.
+    # Zero is unknown or dry, so it cannot erase a mapped lake.
+    with ZipFile(path) as archive, rasterio.Env(GDAL_CACHEMAX=64*1024**2):
+        names = [name for name in archive.namelist() if name.lower().endswith((".tif",".tiff"))]
+        if not names:
+            raise ValueError("GRWL archive contains no water masks")
+
+        def read(name):
+            return list(observed_river_tile(archive.read(name), name))
+
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            # Keep the work queue bounded so decoded rasters are temporary.
+            for offset in range(0,len(names),16):
+                for index,polygons in enumerate(pool.map(read,names[offset:offset+16]),offset+1):
+                    for polygon in polygons:
+                        yield index,polygon
+                    if index%100==0 or index==len(names):
+                        print(f"Landsat river mask tiles {index}/{len(names)}",flush=True)
+
+
+def project_river_mask(polygon, geographic):
+    projected = transform(polygon,geographic.transform,interleaved=False)
+    west,_,east,_ = projected.bounds
+    if west >= -180 and east <= 180:
+        yield projected
+        return
+    for offset in (-360,0,360):
+        if east+offset > -180 and west+offset < 180:
+            yield from polygon_parts(clip_by_rect(translate(projected,xoff=offset),-180,-90,180,90))
+
+
+def clipped_water(polygons, bounds, parent=0):
+    w,s,e,n = bounds
+    area = (e-w)*(n-s)
+    parts = []
+    for level, polygon in polygons:
+        for part in polygon_parts(clip_by_rect(polygon,*bounds)):
+            if part.area >= area*(1-1e-11):
+                parent ^= level
+            elif part.area > 0:
+                parts.append((level,part))
+    return parent, parts
+
+
+def water_class(bits):
+    if bits >> 4:
+        return 3 if bits & 1 else 2
+    if bits & 8:
+        return 3
+    if bits & 4:
+        return 1
+    if bits & 2:
+        return 3
+    return 1 if bits & 1 else 2
+
+
+def water_cell(parts, bits, origin, cell_y):
+    bands = [[] for _ in range(WATER_BANDS)]
+    for level,polygon in parts:
+        for ring in (polygon.exterior,*polygon.interiors):
+            points = np.rint((np.asarray(ring.coords)-origin)
+                             * (WATER_QUANTIZATION/WATER_STEP)).clip(0,WATER_QUANTIZATION).astype(np.uint32)
+            for a,b in zip(points[:-1],points[1:]):
+                if a[1]==b[1]:
+                    continue
+                if a[1]>b[1]:
+                    a,b = b,a
+                first = max(0,int(a[1])*64//WATER_QUANTIZATION-cell_y*8)
+                last = min(7,int(b[1])*64//WATER_QUANTIZATION-cell_y*8)
+                segment = (int(a[0]) | int(a[1])<<16, int(b[0]) | int(b[1])<<16, level)
+                for band in range(first,last+1):
+                    bands[band].extend(segment)
+    result = [bits]+[0]*(WATER_BANDS+1)
+    for band,edges in enumerate(bands,1):
+        result[band] = len(result)
+        result.extend(edges)
+    result[WATER_BANDS+1] = len(result)
+    return result
+
+
+def water_page(tree, flags, x, y):
+    w = x*WATER_STEP-180
+    s = 90-(y+1)*WATER_STEP
+    bounds = w,s,w+WATER_STEP,s+WATER_STEP
+    found = tree.query(box(*bounds),predicate="intersects")
+    shoreline, source_bits = [], {}
+    for i in found:
+        flag = flags[i]
+        if flag >= 16:
+            # Parity is independent for each UTM mask. The renderer then takes
+            # their union, so overlapping observations cannot cancel water.
+            flag = source_bits.setdefault(flag, 16 << len(source_bits))
+            if flag >= 1 << 32:
+                raise ValueError("Too many overlapping river mask sources")
+        shoreline.append((flag,tree.geometries[i]))
+    bits,parts = clipped_water(shoreline,bounds)
+    if not parts:
+        return water_class(bits), b""
+    words = [0]*(WATER_GRID**2)
+    cells = STRtree([part for _,part in parts]) if len(parts)>8 else None
+    step = WATER_STEP/WATER_GRID
+    for row in range(WATER_GRID):
+        for col in range(WATER_GRID):
+            cell_bounds = (w+col*step,s+row*step,w+(col+1)*step,s+(row+1)*step)
+            nearby = (parts[i] for i in cells.query(box(*cell_bounds))) if cells is not None else parts
+            cell_bits,cell_parts = clipped_water(nearby,cell_bounds,bits)
+            at = row*WATER_GRID+col
+            if cell_parts:
+                words[at] = len(words)+4
+                words.extend(water_cell(cell_parts,cell_bits,(w,s),row))
+            else:
+                words[at] = water_class(cell_bits)
+    if words[0] <= 3 and all(word==words[0] for word in words):
+        return words[0], b""
+    return 0, np.asarray(words,dtype="<u4").tobytes()
+
+
+def write_water_geometry(shoreline, destination, *, measured_rivers=None, documented_widths=None, scratch=None):
+    """Use nested water/land polygons; centreline strokes have a separate pack."""
+    if destination.exists():
+        raise ValueError(f"Output already exists: {destination}")
+    pieces,flags = [],[]
+    for level,geometry in shoreline_polygons(shoreline):
+        if not geometry.is_valid:
+            geometry = make_valid(geometry)
+        for polygon in polygon_parts(geometry):
+            for part in split_shoreline(polygon):
+                pieces.append(part)
+                flags.append(1 << (0 if level==5 else level-1))
+    if measured_rivers is not None:
+        for source,polygon in measured_river_polygons(measured_rivers):
+            for part in split_shoreline(polygon):
+                pieces.append(part)
+                flags.append(16+source)
+    if documented_widths is not None:
+        measured = STRtree([part for flag,part in zip(flags,pieces) if flag != 1])
+        next_source = max(flags,default=16)+1
+        # An observed channel or lake owns its reach. Width-only inputs can
+        # fill unserved reaches, without widening an already mapped bank.
+        for corridor in outlet_corridors(documented_widths).geometries:
+            if measured.query(corridor,predicate="intersects").size:
+                continue
+            for part in polygon_parts(clip_by_rect(corridor,-180,-90,180,90)):
+                for piece in split_shoreline(part):
+                    pieces.append(piece)
+                    flags.append(next_source)
+            next_source += 1
+    tree = STRtree(pieces)
+    with staging_directory(destination.parent,scratch) as folder:
+        candidate = Path(folder)/destination.name
+        pages = WATER_COLUMNS*WATER_ROWS
+        offsets = np.zeros(pages+1,dtype="<u8")
+        classes = bytearray(pages)
+        with candidate.open("wb") as target:
+            target.write(b"WWOWAT01")
+            target.write(offsets.tobytes())
+            target.write(classes)
+            for y in range(WATER_ROWS):
+                for x in range(WATER_COLUMNS):
+                    page = y*WATER_COLUMNS+x
+                    offsets[page] = target.tell()
+                    classes[page],payload = water_page(tree,flags,x,y)
+                    target.write(payload)
+                if y%16==15:
+                    print(f"WGS84 water rows {y+1}/{WATER_ROWS}",flush=True)
+            offsets[-1] = target.tell()
+            target.seek(8)
+            target.write(offsets.tobytes())
+            target.write(classes)
+        candidate.rename(destination)
+
+
 def write_water_candidate(original, destination, footprints, coverage_at, *, scratch=None):
     """Apply one water inventory to the complete Z7 QPK without rebuilding elevations."""
     import zstandard
@@ -1405,7 +1697,7 @@ def write_hydrology_candidate(original, sources, natural_earth, destination, *, 
         land, lakes = wrapped(land_shapes), wrapped(lake_shapes)
         prepare(land.geometries)
         cover = LandCover(sources/"worldcover",native=True)
-        mapped_water = LAND_CLASS_LOOKUP[:,8:9].copy()
+        # Do not use fractional satellite coverage as a river bank or inferred width.
         decode = zstandard.ZstdDecompressor()
         encode = zstandard.ZstdCompressor(level=COMPACT_STRENGTH)
         paths = [pack_path(original,z) for z in range(PACK_MAX_LEVEL+1)]
@@ -1440,21 +1732,19 @@ def write_hydrology_candidate(original, sources, natural_earth, destination, *, 
                             dry_land = rasterize(land,width,rect,interior=True)>=.99
                             legitimate = rasterize(lakes,width,rect)
                             lon,lat = grid(width,rect)
-                            if z >= 6:
-                                observed = cover.sample(lon,lat,mapped_water,np.zeros(1,dtype=np.float32))[...,0]
-                                legitimate = np.maximum(legitimate,observed)
-                            repair = footprint & dry_land & (alpha-legitimate>.035) & (alpha < .90)
+                            repair = footprint & dry_land & (alpha-legitimate>.035)
                             if not repair.any():
                                 continue
                             # Undo the old colour blend. Z6/Z7 have since been re-tinted:
                             # restore the exposed part from the same cover palette there.
                             tint = pixels[...,:3].astype(np.float32)
                             original_ground = (tint-alpha[...,None]*water_rgb) / (1-alpha[...,None]).clip(.10,1.)
-                            if z >= 6:
-                                mapped = cover.sample(lon,lat,LAND_PALETTE[LAND_CLASS_LOOKUP.argmax(axis=1)],
-                                                      LAND_PALETTE[0])*255
-                                weight = smooth_weight(.18,.60,alpha)[...,None]
-                                original_ground = original_ground*(1-weight)+mapped*weight
+                            # Fully covered pixels have no recoverable ground colour.
+                            # Reconstruct their land tint from the independent cover source.
+                            mapped = cover.sample(lon,lat,LAND_PALETTE[LAND_CLASS_LOOKUP.argmax(axis=1)],
+                                                  LAND_PALETTE[0])*255
+                            weight = smooth_weight(.18,.60,alpha)[...,None]
+                            original_ground = original_ground*(1-weight)+mapped*weight
                             clean = legitimate[...,None]
                             rgb = original_ground*(1-clean)+clean*water_rgb
                             pixels[repair,:3] = np.rint(rgb[repair]).clip(0,255).astype(np.uint8)
@@ -1897,6 +2187,13 @@ def main():
     parser.add_argument("--refine-ice-shelf-edges", action="store_true",
                         help="Use 4x4 coverage and preserve decoded water coverage in a Z7 ice-shelf candidate")
     terrain_candidate = parser.add_mutually_exclusive_group()
+    terrain_candidate.add_argument("--water-geometry", type=Path, nargs=2,
+                        metavar=("GSHHG_ARCHIVE", "WATER_PACK"),
+                        help="Build a viewport-streamed WGS84 water pack from full GSHHG polygons")
+    parser.add_argument("--measured-river-mask",type=Path,metavar="GRWL_MASK_ZIP",
+                        help="Add WGS84 Landsat GRWL water polygons and tidal channels to --water-geometry")
+    parser.add_argument("--documented-river-widths",type=Path,metavar="WIDTHS_GEOJSON",
+                        help="Add sourced metre widths only for reaches without mapped surface polygons")
     terrain_candidate.add_argument("--hydrology-candidate", type=Path, nargs=4,
                         metavar=("ORIGINAL", "SOURCES", "NATURAL_EARTH", "CANDIDATE"),
                         help="Repair legacy river coverage with sparse QPK colors and HydroRIVERS centrelines")
@@ -1924,6 +2221,15 @@ def main():
     parser.add_argument("natural_earth",type=Path,nargs="?")
     parser.add_argument("output",type=Path,nargs="?")
     args = parser.parse_args()
+    if args.measured_river_mask is not None and args.water_geometry is None:
+        parser.error("--measured-river-mask requires --water-geometry")
+    if args.documented_river_widths is not None and args.water_geometry is None:
+        parser.error("--documented-river-widths requires --water-geometry")
+    if args.water_geometry is not None:
+        with generation_disk_usage(args.water_geometry[-1], 1_500_000_000) as (scratch, _):
+            write_water_geometry(*args.water_geometry, measured_rivers=args.measured_river_mask,
+                                 documented_widths=args.documented_river_widths,scratch=scratch)
+        return
     if args.layer is not None and args.verify is None:
         parser.error("--layer requires --verify")
     if (args.index_only or args.layer_candidate is not None) and args.layer is None:
