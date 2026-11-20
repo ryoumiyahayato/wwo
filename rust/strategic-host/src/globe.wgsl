@@ -645,8 +645,12 @@ fn geographic_city_ink(ll:vec2f,uv:vec2f,mpp:f32,edge_distance:f32) -> vec4f {
     let support=smoothstep(0.,mix(320.,670.,built),edge_distance);
     let facade=mix(vec3f(.68,.56,.48),vec3f(.80,.71,.62),max(0.,buildings.r-edge));
     let wall=buildings.r*detail*mix(.70,.91,built)*land;
-    let road_color=mix(mix(terrain.rgb,vec3f(.69,.64,.54),.42),vec3f(.81,.75,.65),built);
-    let road=buildings.g*detail*mix(mix(.58,.27,woods),.88,built);
+    // Wide mapped strokes survive the screen-space filter at the fringe.
+    let stroke=smoothstep(.13,.48,buildings.g);
+    let local_road=mix(terrain.rgb,vec3f(.76,.70,.59),mix(.39,.75,stroke));
+    let road_color=mix(local_road,vec3f(.81,.75,.65),built);
+    let fringe=mix(mix(.54,.79,stroke),mix(.27,.51,stroke),woods);
+    let road=buildings.g*detail*mix(fringe,.88,built);
     let bridge=mix(road,buildings.g*detail*.82,terrain.a);
     let shading=shadow*land*mix(.45,1.,built);
     let color=(vec3f(.36,.32,.31)*shading*(1.-wall)+facade*wall)*(1.-bridge)
