@@ -22,6 +22,8 @@
 
 `tools/patrol_water_geometry.py index <岸线压缩包> <QWG> <巡视索引.json>` 将 GSHHG 岸段和 QWG 内陆水面编入 Z4–Z7 视图。复杂岸段使用更近的取景。若构建时补充了第 4 层，索引使用同一份 `--shoreline-ponds`。`tools/patrol_water_geometry.py capture <wwo-map-lab.exe> <巡视索引.json> <输出目录>` 从正式游戏逐个取景，可用 `--z` 和 `--limit` 分批运行，用 `--key` 补拍具体视图。记录包含相机、地貌实际层级、QWG 驻留和颜色探查。QWG 驻留记录按渲染器的视口安全边缘计算，区分缩放混合、远景 QPK 和待载或超出容量的页。`report <巡视索引.json> <输出目录> --report-file <记录.json>` 按层汇总实拍与缺失，并列出出现资源回退或疑似反色的取景。巡视状态还需依据海陆边缘、过渡画面和来源精度核查。
 
+`batch-near <巡视索引.json> <Z7巡视索引.json>` 将同一纬带相邻的近景区段放入一个安全视野。每组保持原取景的最细米／像素，记录组内所有区段的编号。Z4–Z6 继续用原索引。
+
 ## 正式水文资源
 
 正式入口优先读取 `data/worldcrs84quad-15s-v2-hydrology/`，否则读取可用的旧库。在水文目录内恢复下列文件。QHW 按各层 QPK 大小核对配套版本。完整恢复后用 `wwo-map-lab --play` 启动。显式 `--terrain-candidate <候选库>` 仍可指定对照版本。

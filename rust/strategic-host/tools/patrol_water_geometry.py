@@ -1,6 +1,6 @@
 """Index the whole shoreline and capture its regions in the normal game."""
 import argparse
-from collections import Counter
+from collections import Counter, defaultdict
 from functools import lru_cache
 import json
 import math
@@ -56,6 +56,61 @@ def view_radius(rect):
     center = vector((w+e)/2, (s+n)/2)
     return EARTH*max(math.acos(max(-1., min(1., dot(center, vector(lon, lat)))))
                      for lon in (w, e) for lat in (s, n))
+
+
+def wide_view_fits(rect, mpp):
+    west, south, east, north = rect
+    half_lon, half_lat = (math.radians((east-west)/2), math.radians((north-south)/2))
+    if half_lon > math.radians(3):
+        return False
+    angle = view_radius(rect)/EARTH
+    correction = angle/math.sin(angle) if angle else 1.
+    cosine = math.cos(math.radians(min(abs(south), abs(north)) if south*north>0 else 0))
+    sine = abs(math.sin(math.radians((south+north)/2)))
+    # Bounds for east and north components of the north-up spherical projection.
+    scale = correction*EARTH/mpp
+    return (cosine*math.sin(half_lon)*scale <= 475
+            and (math.sin(half_lat)+cosine*sine*(1-math.cos(half_lon)))*scale <= 250)
+
+
+def batch_near(args):
+    plan = read(args.plan)
+    bands = defaultdict(list)
+    for view in plan['views']:
+        if view['z'] == 7:
+            west,south,east,north = view['rect']
+            bands[south,north,east-west].append(view)
+    groups = []
+    for (south,north,_),views in bands.items():
+        views.sort(key=lambda view: view['rect'][0])
+        group = []
+        for view in views:
+            west,_,east,_ = view['rect']
+            if group and (west != group[-1]['rect'][2] or not wide_view_fits(
+                    (group[0]['rect'][0],south,east,north),
+                    min(item['mpp'] for item in (*group,view)))):
+                groups.append(group)
+                group = []
+            group.append(view)
+        groups.append(group)
+    result = []
+    for group in groups:
+        first = group[0]
+        if len(group) == 1:
+            result.append(first)
+            continue
+        west,south,_,north = first['rect']
+        rect = (west,south,group[-1]['rect'][2],north)
+        view = view_record(first['key']+'-batch',7,rect,
+                           {level for item in group for level in item['gshhg_levels']},
+                           sum(item['vertices'] for item in group),
+                           sum(item['measured_water_cells'] for item in group))
+        view['mpp'] = min(item['mpp'] for item in group)
+        view['members'] = [item['key'] for item in group]
+        result.append(view)
+    plan['views'] = sorted(result,key=lambda view: (-view['lat'],view['lon']))
+    write(args.output,plan)
+    print(f"{sum(map(len,groups))} shoreline sections in {len(result)} Z7 views",flush=True)
 
 
 def view_record(key, z, rect, levels, vertices, observed):
@@ -180,7 +235,7 @@ class WaterProbes:
                     bits ^= flag
         return water_class(bits)
 
-    def review(self, image, state, admitted):
+    def review(self, image, state, admitted, wide):
         # At wider scales the game mixes or replaces QWG with the base map.
         mpp = state['mpp']
         if not admitted or mpp > 2600 or state['viewport'] != [WIDTH,HEIGHT]:
@@ -189,9 +244,10 @@ class WaterProbes:
         axes = state['orientation']
         compared = Counter()
         suspect = []
+        horizontal = 440 if wide else 220
         for dy in range(-220,221,44):
-            for dx in range(-220,221,44):
-                if dx*dx+dy*dy > 250**2:
+            for dx in range(-horizontal,horizontal+1,44):
+                if not wide and dx*dx+dy*dy > 250**2:
                     continue
                 x,y = WIDTH//2+dx,HEIGHT//2+dy
                 ll = geographic(x+.5,y+.5,axes,mpp,0)
@@ -242,8 +298,10 @@ def capture_view(host, view, scratch, directory, probes):
     contributors = sample['contributors']
     level_confirmed = (terrain['target_level'] == view['z'] and
                        sum(weight for page,weight in contributors if page and page[0] == view['z']) >= .99)
-    rect_covered = (view_radius(view['rect']) <= 265*state['mpp']
-                    and min(state['viewport']) >= 2*265)
+    wide = 'members' in view
+    rect_covered = ((wide_view_fits(view['rect'],state['mpp']) and state['viewport'] == [WIDTH,HEIGHT])
+                    if wide else (view_radius(view['rect']) <= 265*state['mpp']
+                                  and min(state['viewport']) >= 2*265))
     admitted = ready(state,view)
     mpp = state['mpp']
     budget_gap = terrain.get('water_geometry_view_missing_outside_budget')
@@ -257,7 +315,7 @@ def capture_view(host, view, scratch, directory, probes):
         water_coverage = 'qwg' if mpp <= 2600 else 'qpk_qwg_scale_mix'
     with Image.open(img) as image:
         image = image.convert('RGB')
-        diagnostics = probes.review(image,state,admitted and water_coverage == 'qwg')
+        diagnostics = probes.review(image,state,admitted and water_coverage == 'qwg',wide)
         image.save(directory/f'{label}.jpg', quality=82)
     img.unlink()
     return dict(key=label, image=f'{label}.jpg', state=state,
@@ -298,7 +356,7 @@ def patrol(args):
                 record = json.loads(line)
                 received[record['key']] = record['status'],record['image']
     views = [view for view in plan['views']
-             if (args.z is None or view['z'] == args.z)
+             if (args.z is None or view['z'] in args.z)
              and (args.key is None or view['key'] in args.key)
              and (view['key'] not in received or
                   received[view['key']][0] != 'captured_review_pending' or
@@ -337,14 +395,20 @@ def report(args):
     if log.exists():
         with log.open(encoding='utf-8') as records:
             for line in records:
+                if not line.endswith('\n'):
+                    break
                 record = json.loads(line)
                 latest[record['key']] = record
     counts = {z: Counter() for z in (4,5,6,7)}
     flagged = []
     for view in plan['views']:
+        if args.z is not None and view['z'] not in args.z:
+            continue
         key = view['key']
         level = counts[view['z']]
+        members = len(view['members']) if 'members' in view else 1
         level['planned'] += 1
+        level['planned_regions'] += members
         record = latest.get(key)
         if record is None:
             level['not_captured'] += 1
@@ -354,6 +418,8 @@ def report(args):
             level['missing_image'] += 1
             continue
         level[record['status']] += 1
+        if record['status'] == 'captured_review_pending':
+            level['regions_in_view'] += members
         diagnostics = record.get('color_probes', {})
         coverage = record.get('water_coverage')
         if (record['status'] != 'captured_review_pending' or diagnostics.get('suspect')
@@ -378,6 +444,10 @@ def main():
         index.add_argument(argument,type=Path)
     index.add_argument('--shoreline-ponds',type=Path)
     index.set_defaults(run=build_plan)
+    near = commands.add_parser('batch-near', help='Group adjacent Z7 regions at their original ground scale')
+    near.add_argument('plan',type=Path)
+    near.add_argument('output',type=Path)
+    near.set_defaults(run=batch_near)
     capture = commands.add_parser('capture')
     for argument in ('exe','plan','output'):
         capture.add_argument(argument,type=Path)
@@ -385,13 +455,14 @@ def main():
     capture.add_argument('--terrain-candidate',type=Path)
     capture.add_argument('--profile',default='WWO-ShorelinePatrol')
     capture.add_argument('--limit',type=int)
-    capture.add_argument('--z',type=int,choices=(4,5,6,7))
+    capture.add_argument('--z',type=int,choices=(4,5,6,7),action='append')
     capture.add_argument('--key',action='append',help='Capture a specific view key, repeat for several views')
     capture.set_defaults(run=patrol)
     summary = commands.add_parser('report', help='Count captured views and list gaps or suspect colors')
     summary.add_argument('plan',type=Path)
     summary.add_argument('output',type=Path)
     summary.add_argument('--report-file',type=Path)
+    summary.add_argument('--z',type=int,choices=(4,5,6,7),action='append')
     summary.set_defaults(run=report)
     args = cli.parse_args()
     args.run(args)
