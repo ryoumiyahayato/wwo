@@ -214,7 +214,8 @@ def ready(state, view):
         return False
     return (terrain['water_geometry_buffer_bytes'] > 0
             and (state['mpp'] >= 4200
-                 or terrain['water_geometry_view_resident'] == terrain['water_geometry_view_wanted'])
+                 or (terrain['water_geometry_view_resident'] == terrain['water_geometry_view_wanted']
+                     and terrain.get('water_geometry_view_missing_outside_budget', 0) == 0))
             and at_camera(state, view['lon'], view['lat'], view['mpp']))
 
 
