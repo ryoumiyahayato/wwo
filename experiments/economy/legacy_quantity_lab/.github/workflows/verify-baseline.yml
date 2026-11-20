@@ -1,0 +1,41 @@
+name: Verify quantity economy research
+
+on:
+  push:
+    branches: [main, bootstrap/economy-lab-round2, research/order-commitment-round3, research/supplier-admission-round4a, research/multi-supplier-round4b, research/supplier-search-round4c, research/demand-planning-round5, research/executable-planning-round5b]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run original tests and all deterministic experiments
+        run: python verify_baseline.py --strict-bytes --output-dir artifacts
+      - name: Verify order commitment experiments twice
+        run: python verify_round3.py --output-dir artifacts
+      - name: Verify supplier admission experiments twice
+        run: python verify_round4a.py --output-dir artifacts
+      - name: Verify multi-supplier matching experiments twice
+        run: python verify_round4b.py --output-dir artifacts
+      - name: Verify indexed supplier search and scale experiments twice
+        run: python verify_round4c.py --output-dir artifacts
+      - name: Verify demand planning and time-phased coverage twice
+        run: python verify_round5.py --output-dir artifacts
+      - name: Verify executable planning release and reconciliation twice
+        run: python verify_round5b.py --output-dir artifacts
+      - name: Preserve reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quantity-economy-reproduction
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,30 @@
+{
+  "base": "366fe77704ee3d4ec9088ba1c544c46096289e40",
+  "tag": "economy-lab-v0.4c-supplier-search",
+  "tag_object": "0c0e1f21843c4f21c0d86a7a35cdac25b63c79f1",
+  "branch": "research/demand-planning-round5",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "original_request_sha256": "a64e973b479ea5114193a4d1d298f85e7fbed3673ce90d3ae69c3325e1bf6ef6",
+  "lf_request_sha256": "88e24addbddc3bd49411e7ae643bc214b3172dba20b7ccbe8cfff9e4171cefd0",
+  "output_files": 784,
+  "summary_sha256": "4841f66e3eebe6773f77fe25edb5606030668e4c357b4ebf77fb43984a9acf77",
+  "output_bytes": 517513082,
+  "original_verification_note": "first old-wrapper run began on verified PR5 head before signed merge object synchronization completed; source trees equal; subsequent wrappers and all post wrappers used merged tree",
+  "commands": [
+    "python verify_baseline.py --output-dir .local/round5-pre",
+    "python verify_round3.py --output-dir .local/round5-pre",
+    "python verify_round4a.py --output-dir .local/round5-pre",
+    "python verify_round4b.py --output-dir .local/round5-pre",
+    "python verify_round4c.py --output-dir .local/round5-pre",
+    "python verify_baseline.py --output-dir .local/round5-post",
+    "python verify_round3.py --output-dir .local/round5-post",
+    "python verify_round4a.py --output-dir .local/round5-post",
+    "python verify_round4b.py --output-dir .local/round5-post",
+    "python verify_round4c.py --output-dir .local/round5-post",
+    "python economy_quantity_lab/planning_round5/run_demand_planning_experiment.py --output-dir .local/round5-release-all-producers --execution-log .local/round5-release-all-producers-execution.json",
+    "python verify_round5.py --output-dir .local/round5-final-all-producers",
+    "python economy_quantity_lab/planning_round5/evidence/run_matched_discovery_probe.py --output .local/round5-final-matched-discovery.json",
+    "python economy_quantity_lab/planning_round5/evidence/measure_planning_memory.py --output-dir .local/round5-memory --reference-dir .local/round5-release-all-producers"
+  ],
+  "verification_status": "passed; all commands exit 0; all 40 tests; two complete 784-file replays"
+}

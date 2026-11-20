@@ -1,0 +1,92 @@
+{
+  "baseline_id": "A_steel0_baseline",
+  "buffer_days": null,
+  "case_id": "A_steel0_shock",
+  "coal_target": 320,
+  "config": {
+    "daily_terminal_demand": 10,
+    "days": 600,
+    "initial_inventory": {
+      "A": {
+        "coal": 400,
+        "machine": 0,
+        "steel": 0
+      },
+      "B": {
+        "coal": 320,
+        "machine": 0,
+        "steel": 40
+      },
+      "C": {
+        "coal": 0,
+        "machine": 0,
+        "steel": 120
+      }
+    },
+    "production": {
+      "A": {
+        "capacity": 100,
+        "coal_target": 400
+      },
+      "B": {
+        "capacity": 60,
+        "coal_per_steel": 2,
+        "steel_target": 0
+      },
+      "C": {
+        "capacity": 15,
+        "steel_per_machine": 4
+      }
+    },
+    "replenishment": {
+      "B": {
+        "commodity": "coal",
+        "known_suppliers": [
+          "A"
+        ],
+        "target": 320
+      },
+      "C": {
+        "commodity": "steel",
+        "known_suppliers": [
+          "B"
+        ],
+        "target": 120
+      }
+    },
+    "routes": {
+      "A_B": {
+        "buyer": "B",
+        "capacity": 100,
+        "commodity": "coal",
+        "lead_time": 2,
+        "supplier": "A"
+      },
+      "B_C": {
+        "buyer": "C",
+        "capacity": 60,
+        "commodity": "steel",
+        "lead_time": 1,
+        "supplier": "B"
+      }
+    },
+    "scenarios": {
+      "experiment": {
+        "A_B": [
+          {
+            "capacity": 30,
+            "first_day": 50,
+            "last_day": 79
+          }
+        ]
+      }
+    }
+  },
+  "group": "A",
+  "lead_days": 2,
+  "planned_coal_per_day": 80,
+  "policy": "H0",
+  "recovery_capacity": 100,
+  "steel_target": 0,
+  "treatment": "shock"
+}

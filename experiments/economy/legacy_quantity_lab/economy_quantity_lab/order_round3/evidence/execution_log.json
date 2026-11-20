@@ -1,0 +1,137 @@
+{
+  "case_count": 14,
+  "cases": [
+    {
+      "active_scan_visits": 2393,
+      "case_id": "normal_R0",
+      "elapsed_seconds": 0.08013260000006994,
+      "max_active_orders": 2,
+      "max_supplier_queue": 1,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 2991,
+      "case_id": "normal_R1",
+      "elapsed_seconds": 0.07696639999994659,
+      "max_active_orders": 2,
+      "max_supplier_queue": 1,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 2393,
+      "case_id": "normal_R2",
+      "elapsed_seconds": 0.0802825999999186,
+      "max_active_orders": 2,
+      "max_supplier_queue": 1,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 3783,
+      "case_id": "shock_R0",
+      "elapsed_seconds": 0.08696549999967829,
+      "max_active_orders": 11,
+      "max_supplier_queue": 10,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 8276,
+      "case_id": "shock_R1",
+      "elapsed_seconds": 0.10297189999982947,
+      "max_active_orders": 23,
+      "max_supplier_queue": 22,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 3291,
+      "case_id": "shock_R2",
+      "elapsed_seconds": 0.10288409999975556,
+      "max_active_orders": 4,
+      "max_supplier_queue": 3,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 8413,
+      "case_id": "shutdown_R0",
+      "elapsed_seconds": 0.058317799999713316,
+      "max_active_orders": 4,
+      "max_supplier_queue": 4,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 608526,
+      "case_id": "shutdown_R1",
+      "elapsed_seconds": 1.1175112000000809,
+      "max_active_orders": 551,
+      "max_supplier_queue": 551,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 6223,
+      "case_id": "shutdown_R2",
+      "elapsed_seconds": 0.06934499999988475,
+      "max_active_orders": 3,
+      "max_supplier_queue": 3,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 3627,
+      "case_id": "full_shutdown_R0",
+      "elapsed_seconds": 0.09420030000001134,
+      "max_active_orders": 4,
+      "max_supplier_queue": 4,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 11912,
+      "case_id": "full_shutdown_R1",
+      "elapsed_seconds": 0.10490910000044096,
+      "max_active_orders": 31,
+      "max_supplier_queue": 31,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 3502,
+      "case_id": "full_shutdown_R2",
+      "elapsed_seconds": 0.08449509999991278,
+      "max_active_orders": 4,
+      "max_supplier_queue": 3,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 4748,
+      "case_id": "no_promise_shock_R1",
+      "elapsed_seconds": 0.08383490000051097,
+      "max_active_orders": 11,
+      "max_supplier_queue": 10,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    },
+    {
+      "active_scan_visits": 10655,
+      "case_id": "no_promise_shutdown_R1",
+      "elapsed_seconds": 0.05490789999930712,
+      "max_active_orders": 4,
+      "max_supplier_queue": 4,
+      "tracemalloc_peak_bytes": null,
+      "tracemalloc_retained_bytes": null
+    }
+  ],
+  "elapsed_seconds": 2.8565654000003633,
+  "max_abs_order_residual": 0,
+  "max_abs_quantity_residual": 0,
+  "memory_measurement": null,
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "simulated_case_days": 8400
+}

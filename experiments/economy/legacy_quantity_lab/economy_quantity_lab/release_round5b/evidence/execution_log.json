@@ -1,0 +1,245 @@
+{
+  "base": "98ead27160fec2eecb545f3bc9f67e690e13bbf1",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "case_count": 39,
+  "case_days": 23400,
+  "max_quantity_residual": 0,
+  "max_order_residual": 0,
+  "cases": [
+    {
+      "case_id": "A_normal_X0_H10",
+      "seconds": 0.9525930000017979,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "A_normal_X1_H10",
+      "seconds": 2.1393123000016203,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "A_normal_X2_H10",
+      "seconds": 2.149677999997948,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "B_wide_X0_H10",
+      "seconds": 1.7128909999992175,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "B_wide_X1_H10",
+      "seconds": 2.998002100001031,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "B_wide_X2_H10",
+      "seconds": 3.040659099999175,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "C_wide_X0_H5",
+      "seconds": 1.1229993000015384,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "C_wide_X1_H5",
+      "seconds": 2.1520998000014515,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "C_wide_X2_H5",
+      "seconds": 2.166499200000544,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "D_wide_X0_H20",
+      "seconds": 2.5629499000024225,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "D_wide_X1_H20",
+      "seconds": 4.779388300001301,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "D_wide_X2_H20",
+      "seconds": 4.904681800002436,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "E_mixed_lead_X0_H10",
+      "seconds": 1.4834334999977727,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "E_mixed_lead_X1_H10",
+      "seconds": 2.8357565000005707,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "E_mixed_lead_X2_H10",
+      "seconds": 2.856349300000147,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "F_step_up_X0_H10",
+      "seconds": 1.3338409000025422,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "F_step_up_X1_H10",
+      "seconds": 2.562931300002674,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "F_step_up_X2_H10",
+      "seconds": 2.6337486000011268,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "G_step_down_X0_H10",
+      "seconds": 1.0527355999984138,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "G_step_down_X1_H10",
+      "seconds": 1.9040155000002414,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "G_step_down_X2_H10",
+      "seconds": 1.9772319000003336,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "H_spike_X0_H10",
+      "seconds": 1.0523450000000594,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "H_spike_X1_H10",
+      "seconds": 2.6683386000004248,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "H_spike_X2_H10",
+      "seconds": 2.686061000000336,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "I_insufficient_X0_H10",
+      "seconds": 1.6320932999988145,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "I_insufficient_X1_H10",
+      "seconds": 3.613575100000162,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "I_insufficient_X2_H10",
+      "seconds": 3.629783000000316,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "J_factory_cap_X0_H10",
+      "seconds": 1.0192734000011114,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "J_factory_cap_X1_H10",
+      "seconds": 1.818205300001864,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "J_factory_cap_X2_H10",
+      "seconds": 1.9080474999973376,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "K_steel_cap_X0_H10",
+      "seconds": 1.2981510999998136,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "K_steel_cap_X1_H10",
+      "seconds": 2.891310400002112,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "K_steel_cap_X2_H10",
+      "seconds": 3.033017000001564,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "L_stale_X0_H10",
+      "seconds": 1.5122986999995192,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "L_stale_X1_H10",
+      "seconds": 3.290627599999425,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "L_stale_X2_H10",
+      "seconds": 3.26816609999878,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "R_recovery_X0_H10",
+      "seconds": 1.0574567999974533,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "R_recovery_X1_H10",
+      "seconds": 1.7337200000001758,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    },
+    {
+      "case_id": "R_recovery_X2_H10",
+      "seconds": 1.862275800001953,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/reconciliation/archives; excludes file export; not RSS"
+    }
+  ],
+  "total_seconds": 89.29654260001553
+}

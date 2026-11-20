@@ -1,0 +1,16 @@
+day,event,route,order_id,ordered_day,ordered_quantity,shipment_id,quantity,dispatch_day,arrival_day,pending_dispatch,in_transit,delivered
+1,accepted,B_C,1,1,40,,40,,,40,0,0
+1,dispatched,B_C,1,1,40,1,40,1,2,0,40,0
+2,arrived,B_C,1,1,40,1,40,1,2,0,0,40
+2,accepted,A_B,2,2,80,,80,,,80,0,0
+2,dispatched,A_B,2,2,80,2,80,2,4,0,80,0
+4,arrived,A_B,2,2,80,2,80,2,4,0,0,80
+50,accepted,A_B,98,50,80,,80,,,80,0,0
+50,accepted,B_C,99,50,40,,40,,,40,0,0
+50,dispatched,B_C,99,50,40,98,40,50,51,0,40,0
+51,arrived,B_C,99,50,40,98,40,50,51,0,0,40
+51,accepted,A_B,100,51,80,,80,,,80,0,0
+52,accepted,A_B,102,52,80,,80,,,80,0,0
+54,accepted,B_C,106,54,40,,40,,,40,0,0
+55,accepted,B_C,107,55,40,,40,,,40,0,0
+56,accepted,B_C,108,56,40,,40,,,40,0,0

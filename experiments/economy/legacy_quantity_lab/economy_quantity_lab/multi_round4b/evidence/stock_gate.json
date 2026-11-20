@@ -1,0 +1,148 @@
+{
+  "stage3": "PASS",
+  "single_request": [
+    {
+      "policy": "S1",
+      "request": {
+        "request_id": 1,
+        "buyer_id": "B",
+        "supplier_id": "A",
+        "commodity": "coal",
+        "requested_quantity": 320,
+        "request_day": 0,
+        "accepted_quantity": 300,
+        "rejected_quantity": 20,
+        "acceptance_day": 0,
+        "rejection_reason": "TRANSPORT_ATP",
+        "promised_dispatch_by_day": 2,
+        "promised_quantity": 300,
+        "order_id": 1,
+        "ATP": 300,
+        "slots_before": [
+          {
+            "day": 0,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 1,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 2,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          }
+        ],
+        "slots_after": [
+          {
+            "day": 0,
+            "slot_capacity": 100,
+            "committed_quantity": 100,
+            "dispatched_quantity": 0,
+            "remaining_slot": 0
+          },
+          {
+            "day": 1,
+            "slot_capacity": 100,
+            "committed_quantity": 100,
+            "dispatched_quantity": 0,
+            "remaining_slot": 0
+          },
+          {
+            "day": 2,
+            "slot_capacity": 100,
+            "committed_quantity": 100,
+            "dispatched_quantity": 0,
+            "remaining_slot": 0
+          }
+        ]
+      },
+      "order_count": 1,
+      "shipment_count": 0,
+      "open_need": 20
+    },
+    {
+      "policy": "S2",
+      "request": {
+        "request_id": 1,
+        "buyer_id": "B",
+        "supplier_id": "A",
+        "commodity": "coal",
+        "requested_quantity": 320,
+        "request_day": 0,
+        "accepted_quantity": 0,
+        "rejected_quantity": 320,
+        "acceptance_day": 0,
+        "order_id": null,
+        "rejection_reason": "STOCK_OR_TRANSPORT_ATP",
+        "promised_dispatch_by_day": null,
+        "promised_quantity": 0,
+        "supply_basis": "STOCK_CONFIRMED",
+        "transport_atp": 300,
+        "uncommitted_sellable_stock": 0,
+        "stock_confirmed_atp": 0,
+        "stock_on_hand": 0,
+        "stock_committed_after": 0,
+        "slots_before": [
+          {
+            "day": 0,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 1,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 2,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          }
+        ],
+        "slots_after": [
+          {
+            "day": 0,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 1,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 2,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          }
+        ]
+      },
+      "order_count": 0,
+      "shipment_count": 0,
+      "open_need": 320
+    }
+  ],
+  "legacy_ten_day_accepted": 320,
+  "control_note": "single transport ATP100*(2+1)=300; archived320 was cumulative over10 days"
+}

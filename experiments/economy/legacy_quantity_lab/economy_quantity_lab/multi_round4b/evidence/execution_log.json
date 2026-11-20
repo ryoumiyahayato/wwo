@@ -1,0 +1,93 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "case_count": 14,
+  "simulated_case_days": 8400,
+  "max_abs_quantity_residual": 0,
+  "max_abs_order_residual": 0,
+  "runs": [
+    {
+      "case_id": "A_single_S2",
+      "seconds": 0.14602429999831656,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "A_D_unknown",
+      "seconds": 0.1600890999998228,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "B_normal_M0",
+      "seconds": 0.22138710000035644,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "B_normal_M1",
+      "seconds": 0.17586949999895296,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "C_shock_M0",
+      "seconds": 0.1723591000009037,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "C_shock_M1",
+      "seconds": 0.16827960000046005,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "D_shutdown_unknown",
+      "seconds": 0.11291170000004058,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "E_discovery60",
+      "seconds": 0.2318513999998686,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "F_discovery90",
+      "seconds": 0.33915540000089095,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "G_A_stockout",
+      "seconds": 0.34380549999877985,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "H_split",
+      "seconds": 0.18581990000166115,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "I_insufficient",
+      "seconds": 0.19748360000085086,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "J_overdue_M1",
+      "seconds": 0.21494220000022324,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    },
+    {
+      "case_id": "J_overdue_M2",
+      "seconds": 0.2616460000008374,
+      "tracemalloc_peak_bytes": null,
+      "scope": "simulation plus indexed observation and retained archives/rows; excludes export; not RSS"
+    }
+  ]
+}

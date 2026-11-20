@@ -1,0 +1,54 @@
+{
+  "discoveries": [],
+  "switches": [
+    {
+      "day": 3,
+      "event": "SWITCH_REQUESTED",
+      "source_supplier": "A",
+      "old_order_id": 1,
+      "requested_quantity": 80,
+      "prospective_supplier": "D"
+    },
+    {
+      "day": 4,
+      "event": "SWITCH_CONFIRMED",
+      "source_supplier": "A",
+      "old_order_id": 1,
+      "confirmed_quantity": 80,
+      "no_longer_cancellable_qty": 0
+    },
+    {
+      "day": 4,
+      "event": "REPLACEMENT_ACCEPTED",
+      "source_supplier": "A",
+      "old_order_id": 1,
+      "replacement_supplier": "D",
+      "replacement_order_id": 7,
+      "replacement_quantity": 80
+    }
+  ],
+  "cancellations": [
+    {
+      "order_id": 1,
+      "state": "CANCEL_REQUESTED",
+      "request_day": 3,
+      "confirm_day": 4,
+      "requested_cancel_qty": 80,
+      "pending_at_request": 80,
+      "confirmed_cancel_qty": 0,
+      "no_longer_cancellable_qty": 0,
+      "confirmation_delay": 1
+    },
+    {
+      "order_id": 1,
+      "state": "CANCEL_CONFIRMED",
+      "request_day": 3,
+      "confirm_day": 4,
+      "requested_cancel_qty": 80,
+      "pending_at_request": 80,
+      "confirmed_cancel_qty": 80,
+      "no_longer_cancellable_qty": 0,
+      "confirmation_delay": 1
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "status": "passed",
+  "checks": [
+    {
+      "name": "round5b_tests",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-m",
+        "unittest",
+        "-v",
+        "test_planning_release.py"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\release_round5b",
+      "exit_code": 0,
+      "elapsed_seconds": 48.455806799996935,
+      "test_count": 45
+    },
+    {
+      "name": "replay_a",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\release_round5b\\run_executable_planning_experiment.py",
+        "--output-dir",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round5b-verification-7c9ewrnt\\replay_a",
+        "--execution-log",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round5b-verification-7c9ewrnt\\replay_a_execution.json"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 133.75174530000004
+    },
+    {
+      "name": "replay_b",
+      "command": [
+        "C:\\Users\\agcrf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\economy_quantity_lab\\release_round5b\\run_executable_planning_experiment.py",
+        "--output-dir",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round5b-verification-7c9ewrnt\\replay_b",
+        "--execution-log",
+        "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round5b-verification-7c9ewrnt\\replay_b_execution.json"
+      ],
+      "cwd": "C:\\Users\\agcrf\\wwo-economy-lab",
+      "exit_code": 0,
+      "elapsed_seconds": 138.9241086999973
+    }
+  ],
+  "run_directory": "C:\\Users\\agcrf\\wwo-economy-lab\\.local\\round5b-verification-7c9ewrnt",
+  "replay_a": {
+    "files_reproduced": 629,
+    "summary_sha256": "8768ac91cdd7db8eee354f1cd0591808e7ee4fff1e89637c990af8bf8e338016",
+    "cases": 39,
+    "days": 23400,
+    "EXECUTABLE_PLANNING_GATE": "PASS"
+  },
+  "replay_b": {
+    "files_reproduced": 629,
+    "summary_sha256": "8768ac91cdd7db8eee354f1cd0591808e7ee4fff1e89637c990af8bf8e338016",
+    "cases": 39,
+    "days": 23400,
+    "EXECUTABLE_PLANNING_GATE": "PASS"
+  },
+  "elapsed_seconds": 324.57953160000034
+}

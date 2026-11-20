@@ -1,0 +1,14 @@
+[
+  {
+    "day": 7,
+    "event": "SUPPLIER_DISCOVERED",
+    "supplier_id": "S003",
+    "source": "bounded_directory_result"
+  },
+  {
+    "day": 10,
+    "event": "SUPPLIER_DISCOVERED",
+    "supplier_id": "E",
+    "source": "bounded_directory_result"
+  }
+]

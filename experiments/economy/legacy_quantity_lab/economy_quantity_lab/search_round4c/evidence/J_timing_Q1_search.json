@@ -1,0 +1,72 @@
+{
+  "requests": [
+    {
+      "search_id": "B-coal-0001",
+      "buyer": "B",
+      "commodity": "coal",
+      "scope": "LOCAL",
+      "requested_day": 50,
+      "delivery_day": 51,
+      "result_limit": 3,
+      "status": "COMPLETED"
+    }
+  ],
+  "events": [
+    {
+      "day": 50,
+      "event": "SEARCH_REQUESTED",
+      "buyer": "B",
+      "commodity": "coal",
+      "search_id": "B-coal-0001",
+      "scope": "LOCAL",
+      "requested_day": 50,
+      "delivery_day": 51,
+      "result_limit": 3,
+      "status": "PENDING"
+    },
+    {
+      "day": 51,
+      "event": "SEARCH_COMPLETED",
+      "buyer": "B",
+      "commodity": "coal",
+      "search_id": "B-coal-0001",
+      "scope": "LOCAL",
+      "requested_day": 50,
+      "delivery_day": 51,
+      "result_limit": 3,
+      "results": [
+        {
+          "supplier_id": "E",
+          "commodity": "coal",
+          "search_zone": "Z0",
+          "place_id": "place_E",
+          "route_available": true,
+          "nominal_lead_band": 2,
+          "advertised_capacity_band": "up_to_100",
+          "active": true,
+          "discoverability_channel": "DIRECTORY"
+        }
+      ]
+    }
+  ],
+  "query_audit": [
+    {
+      "commodity": "coal",
+      "scope": "LOCAL",
+      "zones": [
+        "Z0"
+      ],
+      "bucket_sizes": [
+        3
+      ],
+      "inspected_ids": [
+        "A",
+        "E",
+        "D"
+      ],
+      "result_ids": [
+        "E"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "status": "CORRECTED before final freeze",
+  "cause": "expired plan IDs released live procurement reservations; untimed accepted steel balances were repeatedly repurchased by rolling dates",
+  "exploratory_final_pending": {
+    "wide_P3_H10": "17000",
+    "steel_cap_P3_H10": "17960",
+    "insufficient_P3_H10": "17750"
+  },
+  "correction": "Separate timely coverage from live procurement exposure; derive portfolio net requirement from active recipe/capacity-bounded gross requirements and all real position. No target or supplier/search tuning.",
+  "regression": "test_rolling_plan_does_not_rebuy_expired_accepted_exposure, 600 days each for three failure fixtures"
+}

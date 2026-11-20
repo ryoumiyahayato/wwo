@@ -1,0 +1,43 @@
+{
+  "headRefOid": "4212492508895eff89076d661af0d926af45911b",
+  "mergeCommit": {
+    "oid": "42e2ad240716901b6ec0684f3ec4abbe0dc9be31"
+  },
+  "mergedAt": "2026-10-07T07:41:57Z",
+  "state": "MERGED",
+  "statusCheckRollup": [
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-07T06:38:44Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/ryoumiyahayato/wwo-economy-lab/actions/runs/37582588991/job/112665421223",
+      "name": "reproduce",
+      "startedAt": "2026-10-07T06:38:07Z",
+      "status": "COMPLETED",
+      "workflowName": "Verify quantity economy research"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-07T06:38:40Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/ryoumiyahayato/wwo-economy-lab/actions/runs/37582584528/job/112665406680",
+      "name": "reproduce",
+      "startedAt": "2026-10-07T06:38:04Z",
+      "status": "COMPLETED",
+      "workflowName": "Verify quantity economy research"
+    }
+  ],
+  "pre_merge_audit": {
+    "head": "4212492508895eff89076d661af0d926af45911b",
+    "mergeable": "MERGEABLE",
+    "mergeStateStatus": "CLEAN",
+    "reviews": [],
+    "unresolved_review_threads": [],
+    "viewerPermission": "ADMIN"
+  },
+  "tag": {
+    "name": "economy-lab-v0.3-order-commitment",
+    "object": "784458cc38dd4bad406de51a37034f5b189b147a",
+    "target": "42e2ad240716901b6ec0684f3ec4abbe0dc9be31"
+  }
+}

@@ -1,0 +1,3270 @@
+{
+  "recovery_P0_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "178",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "173",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "78",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "73",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": null
+      }
+    ],
+    "max_steel_position": 120.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "recovery_P1_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "178",
+        "unconstrained_machine_requirement": "193.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "173",
+        "unconstrained_machine_requirement": "188.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "78",
+        "unconstrained_machine_requirement": "93.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "73",
+        "unconstrained_machine_requirement": "88.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "10.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "10.0"
+      }
+    ],
+    "max_steel_position": 120.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "recovery_P2_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "105",
+        "unconstrained_machine_requirement": "220.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "100",
+        "unconstrained_machine_requirement": "215.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "13",
+        "terminal_backlog": "12",
+        "unconstrained_machine_requirement": "125.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "13",
+        "terminal_backlog": "9",
+        "unconstrained_machine_requirement": "122.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "100.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "100.0"
+      }
+    ],
+    "max_steel_position": 540.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "recovery_P3_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "105",
+        "unconstrained_machine_requirement": "220.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "15",
+        "terminal_backlog": "100",
+        "unconstrained_machine_requirement": "215.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "13",
+        "terminal_backlog": "12",
+        "unconstrained_machine_requirement": "125.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "13",
+        "terminal_backlog": "9",
+        "unconstrained_machine_requirement": "122.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "100.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "100.0"
+      }
+    ],
+    "max_steel_position": 540.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "spike_P0_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "10.25",
+        "production_C": "15",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "13",
+        "terminal_backlog": "20",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "14.75",
+        "production_C": "12",
+        "terminal_backlog": "18",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": null
+      }
+    ],
+    "max_steel_position": 120.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "spike_P1_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "10.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "10.25",
+        "production_C": "15",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "15.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "13",
+        "terminal_backlog": "20",
+        "unconstrained_machine_requirement": "33.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "14.75",
+        "production_C": "12",
+        "terminal_backlog": "18",
+        "unconstrained_machine_requirement": "30.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "10.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "10.0"
+      }
+    ],
+    "max_steel_position": 120.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "spike_P2_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "100.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "10.25",
+        "production_C": "11",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "107.5"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "6",
+        "unconstrained_machine_requirement": "171.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "14.75",
+        "production_C": "15",
+        "terminal_backlog": "1",
+        "unconstrained_machine_requirement": "163.5"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "9",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "84.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "91.0"
+      }
+    ],
+    "max_steel_position": 460.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "spike_P3_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "100.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "10.25",
+        "production_C": "11",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "107.5"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "6",
+        "unconstrained_machine_requirement": "171.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "14.75",
+        "production_C": "15",
+        "terminal_backlog": "1",
+        "unconstrained_machine_requirement": "163.5"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "9",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "84.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "91.0"
+      }
+    ],
+    "max_steel_position": 460.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "step_down_P0_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "12",
+        "terminal_backlog": "218",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "14.5",
+        "production_C": "13",
+        "terminal_backlog": "210",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "12",
+        "terminal_backlog": "68",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "13",
+        "terminal_backlog": "60",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "5",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "5",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": null
+      }
+    ],
+    "max_steel_position": 120.0,
+    "max_machine_output_after80": 13,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "step_down_P1_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "12",
+        "terminal_backlog": "218",
+        "unconstrained_machine_requirement": "230.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "14.5",
+        "production_C": "13",
+        "terminal_backlog": "210",
+        "unconstrained_machine_requirement": "223.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "12",
+        "terminal_backlog": "68",
+        "unconstrained_machine_requirement": "80.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "13",
+        "terminal_backlog": "60",
+        "unconstrained_machine_requirement": "73.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "5",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "5.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "5",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "5.0"
+      }
+    ],
+    "max_steel_position": 120.0,
+    "max_machine_output_after80": 13,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "step_down_P2_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "165.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "14.5",
+        "production_C": "15",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "150.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "2",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "17.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "2",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "20.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "5",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "41.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "5",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "41.0"
+      }
+    ],
+    "max_steel_position": 540.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "step_down_P3_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "165.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "14.5",
+        "production_C": "15",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "150.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "2",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "17.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "2",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "20.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "5",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "41.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "5",
+        "observed_daily_demand": "5.0",
+        "production_C": "5",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "41.0"
+      }
+    ],
+    "max_steel_position": 480.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "0",
+    "final_need": "0"
+  },
+  "step_up_P0_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "10.25",
+        "production_C": "15",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "13",
+        "terminal_backlog": "20",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "12",
+        "terminal_backlog": "23",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "13",
+        "terminal_backlog": "70",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "12",
+        "terminal_backlog": "98",
+        "unconstrained_machine_requirement": null
+      }
+    ],
+    "max_steel_position": 120.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "68",
+    "final_need": "0"
+  },
+  "step_up_P1_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "10.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "10.25",
+        "production_C": "15",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "15.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "13",
+        "terminal_backlog": "20",
+        "unconstrained_machine_requirement": "33.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "12",
+        "terminal_backlog": "23",
+        "unconstrained_machine_requirement": "35.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "13",
+        "terminal_backlog": "70",
+        "unconstrained_machine_requirement": "83.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "12",
+        "terminal_backlog": "98",
+        "unconstrained_machine_requirement": "110.0"
+      }
+    ],
+    "max_steel_position": 120.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "68",
+    "final_need": "0"
+  },
+  "step_up_P2_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "100.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "10.25",
+        "production_C": "11",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "107.5"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "6",
+        "unconstrained_machine_requirement": "171.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "6",
+        "unconstrained_machine_requirement": "171.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "6",
+        "unconstrained_machine_requirement": "171.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "6",
+        "unconstrained_machine_requirement": "171.0"
+      }
+    ],
+    "max_steel_position": 460.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "362",
+    "final_need": "0"
+  },
+  "step_up_P3_H10": {
+    "discoveries": [],
+    "search_events": [],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "100.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "10.25",
+        "production_C": "11",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "107.5"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "6",
+        "unconstrained_machine_requirement": "171.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "6",
+        "unconstrained_machine_requirement": "171.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "6",
+        "unconstrained_machine_requirement": "171.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "15",
+        "observed_daily_demand": "15.0",
+        "production_C": "15",
+        "terminal_backlog": "6",
+        "unconstrained_machine_requirement": "171.0"
+      }
+    ],
+    "max_steel_position": 460.0,
+    "max_machine_output_after80": 15,
+    "final_steel_pending": "362",
+    "final_need": "0"
+  },
+  "wide_P0_H10": {
+    "discoveries": [
+      {
+        "day": 17,
+        "event": "SUPPLIER_DISCOVERED",
+        "supplier_id": "E",
+        "source": "bounded_directory_result"
+      }
+    ],
+    "search_events": [
+      {
+        "day": 6,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 6,
+        "delivery_day": 7,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 7,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 6,
+        "delivery_day": 7,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 7,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 7,
+        "delivery_day": 10,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 10,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 7,
+        "delivery_day": 10,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 10,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 10,
+        "delivery_day": 17,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 17,
+        "event": "SEARCH_COMPLETED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 10,
+        "delivery_day": 17,
+        "result_limit": 3,
+        "results": [
+          {
+            "supplier_id": "E",
+            "commodity": "coal",
+            "search_zone": "Z7",
+            "place_id": "place_E",
+            "route_available": true,
+            "nominal_lead_band": 8,
+            "advertised_capacity_band": "up_to_100",
+            "active": true,
+            "discoverability_channel": "DIRECTORY"
+          }
+        ]
+      }
+    ],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "184",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "187",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "229",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "232",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "272",
+        "unconstrained_machine_requirement": null
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "297",
+        "unconstrained_machine_requirement": null
+      }
+    ],
+    "max_steel_position": 120.0,
+    "max_machine_output_after80": 10,
+    "final_steel_pending": "87",
+    "final_need": "0"
+  },
+  "wide_P1_H10": {
+    "discoveries": [
+      {
+        "day": 17,
+        "event": "SUPPLIER_DISCOVERED",
+        "supplier_id": "E",
+        "source": "bounded_directory_result"
+      }
+    ],
+    "search_events": [
+      {
+        "day": 6,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 6,
+        "delivery_day": 7,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 7,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 6,
+        "delivery_day": 7,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 7,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 7,
+        "delivery_day": 10,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 10,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 7,
+        "delivery_day": 10,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 10,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 10,
+        "delivery_day": 17,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 17,
+        "event": "SEARCH_COMPLETED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 10,
+        "delivery_day": 17,
+        "result_limit": 3,
+        "results": [
+          {
+            "supplier_id": "E",
+            "commodity": "coal",
+            "search_zone": "Z7",
+            "place_id": "place_E",
+            "route_available": true,
+            "nominal_lead_band": 8,
+            "advertised_capacity_band": "up_to_100",
+            "active": true,
+            "discoverability_channel": "DIRECTORY"
+          }
+        ]
+      }
+    ],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "184",
+        "unconstrained_machine_requirement": "192.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "187",
+        "unconstrained_machine_requirement": "194.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "229",
+        "unconstrained_machine_requirement": "237.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "232",
+        "unconstrained_machine_requirement": "239.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "272",
+        "unconstrained_machine_requirement": "279.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "297",
+        "unconstrained_machine_requirement": "304.0"
+      }
+    ],
+    "max_steel_position": 120.0,
+    "max_machine_output_after80": 10,
+    "final_steel_pending": "87",
+    "final_need": "0"
+  },
+  "wide_P2_H10": {
+    "discoveries": [
+      {
+        "day": 12,
+        "event": "SUPPLIER_DISCOVERED",
+        "supplier_id": "E",
+        "source": "bounded_directory_result"
+      }
+    ],
+    "search_events": [
+      {
+        "day": 1,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 1,
+        "delivery_day": 2,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 2,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 1,
+        "delivery_day": 2,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 2,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 2,
+        "delivery_day": 5,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 5,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 2,
+        "delivery_day": 5,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 5,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 5,
+        "delivery_day": 12,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 12,
+        "event": "SEARCH_COMPLETED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 5,
+        "delivery_day": 12,
+        "result_limit": 3,
+        "results": [
+          {
+            "supplier_id": "E",
+            "commodity": "coal",
+            "search_zone": "Z7",
+            "place_id": "place_E",
+            "route_available": true,
+            "nominal_lead_band": 8,
+            "advertised_capacity_band": "up_to_100",
+            "active": true,
+            "discoverability_channel": "DIRECTORY"
+          }
+        ]
+      }
+    ],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "3",
+        "unconstrained_machine_requirement": "113.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "3",
+        "unconstrained_machine_requirement": "113.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "3",
+        "unconstrained_machine_requirement": "113.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "3",
+        "unconstrained_machine_requirement": "113.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "3",
+        "unconstrained_machine_requirement": "113.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "3",
+        "unconstrained_machine_requirement": "113.0"
+      }
+    ],
+    "max_steel_position": 412.0,
+    "max_machine_output_after80": 10,
+    "final_steel_pending": "362",
+    "final_need": "0"
+  },
+  "wide_P2_H20": {
+    "discoveries": [
+      {
+        "day": 12,
+        "event": "SUPPLIER_DISCOVERED",
+        "supplier_id": "E",
+        "source": "bounded_directory_result"
+      }
+    ],
+    "search_events": [
+      {
+        "day": 1,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 1,
+        "delivery_day": 2,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 2,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 1,
+        "delivery_day": 2,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 2,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 2,
+        "delivery_day": 5,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 5,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 2,
+        "delivery_day": 5,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 5,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 5,
+        "delivery_day": 12,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 12,
+        "event": "SEARCH_COMPLETED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 5,
+        "delivery_day": 12,
+        "result_limit": 3,
+        "results": [
+          {
+            "supplier_id": "E",
+            "commodity": "coal",
+            "search_zone": "Z7",
+            "place_id": "place_E",
+            "route_available": true,
+            "nominal_lead_band": 8,
+            "advertised_capacity_band": "up_to_100",
+            "active": true,
+            "discoverability_channel": "DIRECTORY"
+          }
+        ]
+      }
+    ],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      }
+    ],
+    "max_steel_position": 796.0,
+    "max_machine_output_after80": 10,
+    "final_steel_pending": "348",
+    "final_need": "0"
+  },
+  "wide_P2_H5": {
+    "discoveries": [
+      {
+        "day": 14,
+        "event": "SUPPLIER_DISCOVERED",
+        "supplier_id": "E",
+        "source": "bounded_directory_result"
+      }
+    ],
+    "search_events": [
+      {
+        "day": 3,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 3,
+        "delivery_day": 4,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 4,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 3,
+        "delivery_day": 4,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 4,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 4,
+        "delivery_day": 7,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 7,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 4,
+        "delivery_day": 7,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 7,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 7,
+        "delivery_day": 14,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 14,
+        "event": "SEARCH_COMPLETED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 7,
+        "delivery_day": 14,
+        "result_limit": 3,
+        "results": [
+          {
+            "supplier_id": "E",
+            "commodity": "coal",
+            "search_zone": "Z7",
+            "place_id": "place_E",
+            "route_available": true,
+            "nominal_lead_band": 8,
+            "advertised_capacity_band": "up_to_100",
+            "active": true,
+            "discoverability_channel": "DIRECTORY"
+          }
+        ]
+      }
+    ],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "127",
+        "unconstrained_machine_requirement": "184.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "129",
+        "unconstrained_machine_requirement": "187.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "12",
+        "terminal_backlog": "155",
+        "unconstrained_machine_requirement": "217.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "157",
+        "unconstrained_machine_requirement": "215.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "185",
+        "unconstrained_machine_requirement": "243.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "204",
+        "unconstrained_machine_requirement": "261.0"
+      }
+    ],
+    "max_steel_position": 240.0,
+    "max_machine_output_after80": 14,
+    "final_steel_pending": "195",
+    "final_need": "0"
+  },
+  "wide_P3_H10": {
+    "discoveries": [
+      {
+        "day": 12,
+        "event": "SUPPLIER_DISCOVERED",
+        "supplier_id": "E",
+        "source": "bounded_directory_result"
+      }
+    ],
+    "search_events": [
+      {
+        "day": 1,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 1,
+        "delivery_day": 2,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 2,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 1,
+        "delivery_day": 2,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 2,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 2,
+        "delivery_day": 5,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 5,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 2,
+        "delivery_day": 5,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 5,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 5,
+        "delivery_day": 12,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 12,
+        "event": "SEARCH_COMPLETED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 5,
+        "delivery_day": 12,
+        "result_limit": 3,
+        "results": [
+          {
+            "supplier_id": "E",
+            "commodity": "coal",
+            "search_zone": "Z7",
+            "place_id": "place_E",
+            "route_available": true,
+            "nominal_lead_band": 8,
+            "advertised_capacity_band": "up_to_100",
+            "active": true,
+            "discoverability_channel": "DIRECTORY"
+          }
+        ]
+      },
+      {
+        "day": 32,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0004",
+        "scope": "LOCAL",
+        "requested_day": 32,
+        "delivery_day": 33,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 33,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0004",
+        "scope": "LOCAL",
+        "requested_day": 32,
+        "delivery_day": 33,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 35,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0005",
+        "scope": "REGIONAL",
+        "requested_day": 35,
+        "delivery_day": 38,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 38,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0005",
+        "scope": "REGIONAL",
+        "requested_day": 35,
+        "delivery_day": 38,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 42,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0006",
+        "scope": "WIDE",
+        "requested_day": 42,
+        "delivery_day": 49,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 49,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0006",
+        "scope": "WIDE",
+        "requested_day": 42,
+        "delivery_day": 49,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 63,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0007",
+        "scope": "LOCAL",
+        "requested_day": 63,
+        "delivery_day": 64,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 64,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0007",
+        "scope": "LOCAL",
+        "requested_day": 63,
+        "delivery_day": 64,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 68,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0008",
+        "scope": "REGIONAL",
+        "requested_day": 68,
+        "delivery_day": 71,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 71,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0008",
+        "scope": "REGIONAL",
+        "requested_day": 68,
+        "delivery_day": 71,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 79,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0009",
+        "scope": "WIDE",
+        "requested_day": 79,
+        "delivery_day": 86,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 86,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0009",
+        "scope": "WIDE",
+        "requested_day": 79,
+        "delivery_day": 86,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 94,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0010",
+        "scope": "LOCAL",
+        "requested_day": 94,
+        "delivery_day": 95,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 95,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0010",
+        "scope": "LOCAL",
+        "requested_day": 94,
+        "delivery_day": 95,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 101,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0011",
+        "scope": "REGIONAL",
+        "requested_day": 101,
+        "delivery_day": 104,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 104,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0011",
+        "scope": "REGIONAL",
+        "requested_day": 101,
+        "delivery_day": 104,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 116,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0012",
+        "scope": "WIDE",
+        "requested_day": 116,
+        "delivery_day": 123,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 123,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0012",
+        "scope": "WIDE",
+        "requested_day": 116,
+        "delivery_day": 123,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 125,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0013",
+        "scope": "LOCAL",
+        "requested_day": 125,
+        "delivery_day": 126,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 126,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0013",
+        "scope": "LOCAL",
+        "requested_day": 125,
+        "delivery_day": 126,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 134,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0014",
+        "scope": "REGIONAL",
+        "requested_day": 134,
+        "delivery_day": 137,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 137,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0014",
+        "scope": "REGIONAL",
+        "requested_day": 134,
+        "delivery_day": 137,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 153,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0015",
+        "scope": "WIDE",
+        "requested_day": 153,
+        "delivery_day": 160,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 160,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0015",
+        "scope": "WIDE",
+        "requested_day": 153,
+        "delivery_day": 160,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 160,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0016",
+        "scope": "LOCAL",
+        "requested_day": 160,
+        "delivery_day": 161,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 161,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0016",
+        "scope": "LOCAL",
+        "requested_day": 160,
+        "delivery_day": 161,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 167,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0017",
+        "scope": "REGIONAL",
+        "requested_day": 167,
+        "delivery_day": 170,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 170,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0017",
+        "scope": "REGIONAL",
+        "requested_day": 167,
+        "delivery_day": 170,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 190,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0018",
+        "scope": "WIDE",
+        "requested_day": 190,
+        "delivery_day": 197,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 197,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0018",
+        "scope": "WIDE",
+        "requested_day": 190,
+        "delivery_day": 197,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 197,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0019",
+        "scope": "LOCAL",
+        "requested_day": 197,
+        "delivery_day": 198,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 198,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0019",
+        "scope": "LOCAL",
+        "requested_day": 197,
+        "delivery_day": 198,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 200,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0020",
+        "scope": "REGIONAL",
+        "requested_day": 200,
+        "delivery_day": 203,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 203,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0020",
+        "scope": "REGIONAL",
+        "requested_day": 200,
+        "delivery_day": 203,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 227,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0021",
+        "scope": "WIDE",
+        "requested_day": 227,
+        "delivery_day": 234,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 234,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0021",
+        "scope": "WIDE",
+        "requested_day": 227,
+        "delivery_day": 234,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 234,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0022",
+        "scope": "LOCAL",
+        "requested_day": 234,
+        "delivery_day": 235,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 235,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0022",
+        "scope": "LOCAL",
+        "requested_day": 234,
+        "delivery_day": 235,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 235,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0023",
+        "scope": "REGIONAL",
+        "requested_day": 235,
+        "delivery_day": 238,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 238,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0023",
+        "scope": "REGIONAL",
+        "requested_day": 235,
+        "delivery_day": 238,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 264,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0024",
+        "scope": "WIDE",
+        "requested_day": 264,
+        "delivery_day": 271,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 271,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0024",
+        "scope": "WIDE",
+        "requested_day": 264,
+        "delivery_day": 271,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 271,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0025",
+        "scope": "LOCAL",
+        "requested_day": 271,
+        "delivery_day": 272,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 272,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0025",
+        "scope": "LOCAL",
+        "requested_day": 271,
+        "delivery_day": 272,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 272,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0026",
+        "scope": "REGIONAL",
+        "requested_day": 272,
+        "delivery_day": 275,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 275,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0026",
+        "scope": "REGIONAL",
+        "requested_day": 272,
+        "delivery_day": 275,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 301,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0027",
+        "scope": "WIDE",
+        "requested_day": 301,
+        "delivery_day": 308,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 308,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0027",
+        "scope": "WIDE",
+        "requested_day": 301,
+        "delivery_day": 308,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 308,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0028",
+        "scope": "LOCAL",
+        "requested_day": 308,
+        "delivery_day": 309,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 309,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0028",
+        "scope": "LOCAL",
+        "requested_day": 308,
+        "delivery_day": 309,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 309,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0029",
+        "scope": "REGIONAL",
+        "requested_day": 309,
+        "delivery_day": 312,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 312,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0029",
+        "scope": "REGIONAL",
+        "requested_day": 309,
+        "delivery_day": 312,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 338,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0030",
+        "scope": "WIDE",
+        "requested_day": 338,
+        "delivery_day": 345,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 345,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0030",
+        "scope": "WIDE",
+        "requested_day": 338,
+        "delivery_day": 345,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 345,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0031",
+        "scope": "LOCAL",
+        "requested_day": 345,
+        "delivery_day": 346,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 346,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0031",
+        "scope": "LOCAL",
+        "requested_day": 345,
+        "delivery_day": 346,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 346,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0032",
+        "scope": "REGIONAL",
+        "requested_day": 346,
+        "delivery_day": 349,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 349,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0032",
+        "scope": "REGIONAL",
+        "requested_day": 346,
+        "delivery_day": 349,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 375,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0033",
+        "scope": "WIDE",
+        "requested_day": 375,
+        "delivery_day": 382,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 382,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0033",
+        "scope": "WIDE",
+        "requested_day": 375,
+        "delivery_day": 382,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 382,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0034",
+        "scope": "LOCAL",
+        "requested_day": 382,
+        "delivery_day": 383,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 383,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0034",
+        "scope": "LOCAL",
+        "requested_day": 382,
+        "delivery_day": 383,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 383,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0035",
+        "scope": "REGIONAL",
+        "requested_day": 383,
+        "delivery_day": 386,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 386,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0035",
+        "scope": "REGIONAL",
+        "requested_day": 383,
+        "delivery_day": 386,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 412,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0036",
+        "scope": "WIDE",
+        "requested_day": 412,
+        "delivery_day": 419,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 419,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0036",
+        "scope": "WIDE",
+        "requested_day": 412,
+        "delivery_day": 419,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 419,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0037",
+        "scope": "LOCAL",
+        "requested_day": 419,
+        "delivery_day": 420,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 420,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0037",
+        "scope": "LOCAL",
+        "requested_day": 419,
+        "delivery_day": 420,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 420,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0038",
+        "scope": "REGIONAL",
+        "requested_day": 420,
+        "delivery_day": 423,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 423,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0038",
+        "scope": "REGIONAL",
+        "requested_day": 420,
+        "delivery_day": 423,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 449,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0039",
+        "scope": "WIDE",
+        "requested_day": 449,
+        "delivery_day": 456,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 456,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0039",
+        "scope": "WIDE",
+        "requested_day": 449,
+        "delivery_day": 456,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 456,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0040",
+        "scope": "LOCAL",
+        "requested_day": 456,
+        "delivery_day": 457,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 457,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0040",
+        "scope": "LOCAL",
+        "requested_day": 456,
+        "delivery_day": 457,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 457,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0041",
+        "scope": "REGIONAL",
+        "requested_day": 457,
+        "delivery_day": 460,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 460,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0041",
+        "scope": "REGIONAL",
+        "requested_day": 457,
+        "delivery_day": 460,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 486,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0042",
+        "scope": "WIDE",
+        "requested_day": 486,
+        "delivery_day": 493,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 493,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0042",
+        "scope": "WIDE",
+        "requested_day": 486,
+        "delivery_day": 493,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 493,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0043",
+        "scope": "LOCAL",
+        "requested_day": 493,
+        "delivery_day": 494,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 494,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0043",
+        "scope": "LOCAL",
+        "requested_day": 493,
+        "delivery_day": 494,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 494,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0044",
+        "scope": "REGIONAL",
+        "requested_day": 494,
+        "delivery_day": 497,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 497,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0044",
+        "scope": "REGIONAL",
+        "requested_day": 494,
+        "delivery_day": 497,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 523,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0045",
+        "scope": "WIDE",
+        "requested_day": 523,
+        "delivery_day": 530,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 530,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0045",
+        "scope": "WIDE",
+        "requested_day": 523,
+        "delivery_day": 530,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 530,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0046",
+        "scope": "LOCAL",
+        "requested_day": 530,
+        "delivery_day": 531,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 531,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0046",
+        "scope": "LOCAL",
+        "requested_day": 530,
+        "delivery_day": 531,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 531,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0047",
+        "scope": "REGIONAL",
+        "requested_day": 531,
+        "delivery_day": 534,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 534,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0047",
+        "scope": "REGIONAL",
+        "requested_day": 531,
+        "delivery_day": 534,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 560,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0048",
+        "scope": "WIDE",
+        "requested_day": 560,
+        "delivery_day": 567,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 567,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0048",
+        "scope": "WIDE",
+        "requested_day": 560,
+        "delivery_day": 567,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 567,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0049",
+        "scope": "LOCAL",
+        "requested_day": 567,
+        "delivery_day": 568,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 568,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0049",
+        "scope": "LOCAL",
+        "requested_day": 567,
+        "delivery_day": 568,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 568,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0050",
+        "scope": "REGIONAL",
+        "requested_day": 568,
+        "delivery_day": 571,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 571,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0050",
+        "scope": "REGIONAL",
+        "requested_day": 568,
+        "delivery_day": 571,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 597,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0051",
+        "scope": "WIDE",
+        "requested_day": 597,
+        "delivery_day": 604,
+        "result_limit": 3,
+        "status": "PENDING"
+      }
+    ],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "173",
+        "unconstrained_machine_requirement": "280.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "175",
+        "unconstrained_machine_requirement": "283.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "215",
+        "unconstrained_machine_requirement": "323.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "218",
+        "unconstrained_machine_requirement": "325.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "260",
+        "unconstrained_machine_requirement": "368.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "283",
+        "unconstrained_machine_requirement": "390.0"
+      }
+    ],
+    "max_steel_position": 540.0,
+    "max_machine_output_after80": 10,
+    "final_steel_pending": "508",
+    "final_need": "670"
+  },
+  "wide_P3_H20": {
+    "discoveries": [
+      {
+        "day": 12,
+        "event": "SUPPLIER_DISCOVERED",
+        "supplier_id": "E",
+        "source": "bounded_directory_result"
+      }
+    ],
+    "search_events": [
+      {
+        "day": 1,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 1,
+        "delivery_day": 2,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 2,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 1,
+        "delivery_day": 2,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 2,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 2,
+        "delivery_day": 5,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 5,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 2,
+        "delivery_day": 5,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 5,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 5,
+        "delivery_day": 12,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 12,
+        "event": "SEARCH_COMPLETED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 5,
+        "delivery_day": 12,
+        "result_limit": 3,
+        "results": [
+          {
+            "supplier_id": "E",
+            "commodity": "coal",
+            "search_zone": "Z7",
+            "place_id": "place_E",
+            "route_available": true,
+            "nominal_lead_band": 8,
+            "advertised_capacity_band": "up_to_100",
+            "active": true,
+            "discoverability_channel": "DIRECTORY"
+          }
+        ]
+      }
+    ],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "0",
+        "unconstrained_machine_requirement": "200.0"
+      }
+    ],
+    "max_steel_position": 796.0,
+    "max_machine_output_after80": 10,
+    "final_steel_pending": "360",
+    "final_need": "0"
+  },
+  "wide_P3_H5": {
+    "discoveries": [
+      {
+        "day": 14,
+        "event": "SUPPLIER_DISCOVERED",
+        "supplier_id": "E",
+        "source": "bounded_directory_result"
+      }
+    ],
+    "search_events": [
+      {
+        "day": 3,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 3,
+        "delivery_day": 4,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 4,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0001",
+        "scope": "LOCAL",
+        "requested_day": 3,
+        "delivery_day": 4,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 4,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 4,
+        "delivery_day": 7,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 7,
+        "event": "SEARCH_COMPLETED_NO_RESULTS",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0002",
+        "scope": "REGIONAL",
+        "requested_day": 4,
+        "delivery_day": 7,
+        "result_limit": 3,
+        "results": []
+      },
+      {
+        "day": 7,
+        "event": "SEARCH_REQUESTED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 7,
+        "delivery_day": 14,
+        "result_limit": 3,
+        "status": "PENDING"
+      },
+      {
+        "day": 14,
+        "event": "SEARCH_COMPLETED",
+        "buyer": "B",
+        "commodity": "coal",
+        "search_id": "B-coal-0003",
+        "scope": "WIDE",
+        "requested_day": 7,
+        "delivery_day": 14,
+        "result_limit": 3,
+        "results": [
+          {
+            "supplier_id": "E",
+            "commodity": "coal",
+            "search_zone": "Z7",
+            "place_id": "place_E",
+            "route_available": true,
+            "nominal_lead_band": 8,
+            "advertised_capacity_band": "up_to_100",
+            "active": true,
+            "discoverability_channel": "DIRECTORY"
+          }
+        ]
+      }
+    ],
+    "demand_rate_points": [
+      {
+        "day": "99",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "177",
+        "unconstrained_machine_requirement": "234.0"
+      },
+      {
+        "day": "100",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "179",
+        "unconstrained_machine_requirement": "237.0"
+      },
+      {
+        "day": "119",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "10",
+        "terminal_backlog": "219",
+        "unconstrained_machine_requirement": "279.0"
+      },
+      {
+        "day": "120",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "7",
+        "terminal_backlog": "222",
+        "unconstrained_machine_requirement": "279.0"
+      },
+      {
+        "day": "139",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "264",
+        "unconstrained_machine_requirement": "322.0"
+      },
+      {
+        "day": "150",
+        "current_terminal_orders": "10",
+        "observed_daily_demand": "10.0",
+        "production_C": "8",
+        "terminal_backlog": "289",
+        "unconstrained_machine_requirement": "347.0"
+      }
+    ],
+    "max_steel_position": 240.0,
+    "max_machine_output_after80": 10,
+    "final_steel_pending": "207",
+    "final_need": "78"
+  }
+}

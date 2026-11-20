@@ -1,0 +1,5807 @@
+{
+  "A_normal_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "160",
+      "C_steel_on_hand": "320",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "0",
+      "total_in_transit": "160",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "160",
+      "C_steel_on_hand": "320",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "320",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 10.0,
+      "days_above10": 0,
+      "coal_arrivals": 41680.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ]
+  },
+  "A_normal_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "76",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "24",
+      "total_in_transit": "220",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "56",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "336",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 10.0,
+      "days_above10": 0,
+      "coal_arrivals": 41700.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "336"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "336"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 9596
+  },
+  "A_normal_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "76",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "24",
+      "total_in_transit": "220",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "56",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "336",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 10.0,
+      "days_above10": 0,
+      "coal_arrivals": 41700.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "336"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "336"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 9596
+  },
+  "B_wide_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "120",
+      "total_in_transit": "200",
+      "B_C_pending_dispatch": "508",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.81,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "320",
+      "terminal_backlog": "63"
+    },
+    "recovery80plus": {
+      "max_machine_production": 10.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "173",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "175",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "175",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "195",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "215",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "218",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "240",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1265",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1268",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ]
+  },
+  "B_wide_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "10",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "0",
+      "total_in_transit": "640",
+      "B_C_pending_dispatch": "342",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1238"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.05,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "12",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "690",
+      "terminal_backlog": "2"
+    },
+    "recovery80plus": {
+      "max_machine_production": 11.0,
+      "days_above10": 51,
+      "coal_arrivals": 510.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1376",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1372",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1366",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1340",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "620"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "9",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1340",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "618"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1338",
+        "steel_visible_requirement": "764",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "618"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1396",
+        "steel_visible_requirement": "776",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1498",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1490",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      }
+    ],
+    "first_E_projected_release": {
+      "day": 18,
+      "bucket_id": "B:coal:28:PROJECTED",
+      "supplier_id": "E",
+      "requirement_class": "PROJECTED",
+      "need_by_day": 28,
+      "conservative_supply_lead": 10,
+      "release_by_day": 18,
+      "offer_arrival": 28,
+      "timely": true,
+      "release_due": true,
+      "gap": 80,
+      "executable_qty": 80
+    },
+    "first_E_accepted": {
+      "day": 18,
+      "buyer": "B",
+      "supplier": "E",
+      "requested": 80,
+      "accepted": 80,
+      "order_id": 52,
+      "action": "NEW_RELEASE",
+      "old_order_id": null,
+      "offer_arrival": 28,
+      "exposure_before": 300,
+      "visible_requirement_exposure": 1358
+    },
+    "date_bounds_verified": true,
+    "allocation_records_verified": 12237
+  },
+  "B_wide_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "10",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "0",
+      "total_in_transit": "640",
+      "B_C_pending_dispatch": "342",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1238"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.05,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "12",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "690",
+      "terminal_backlog": "2"
+    },
+    "recovery80plus": {
+      "max_machine_production": 11.0,
+      "days_above10": 51,
+      "coal_arrivals": 510.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1376",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1372",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1366",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1340",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "620"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "9",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1340",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "618"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1338",
+        "steel_visible_requirement": "764",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "618"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1396",
+        "steel_visible_requirement": "776",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1498",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1490",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      }
+    ],
+    "first_E_projected_release": {
+      "day": 18,
+      "bucket_id": "B:coal:28:PROJECTED",
+      "supplier_id": "E",
+      "requirement_class": "PROJECTED",
+      "need_by_day": 28,
+      "conservative_supply_lead": 10,
+      "release_by_day": 18,
+      "offer_arrival": 28,
+      "timely": true,
+      "release_due": true,
+      "gap": 80,
+      "executable_qty": 80
+    },
+    "first_E_accepted": {
+      "day": 18,
+      "buyer": "B",
+      "supplier": "E",
+      "requested": 80,
+      "accepted": 80,
+      "order_id": 52,
+      "action": "NEW_RELEASE",
+      "old_order_id": null,
+      "offer_arrival": 28,
+      "exposure_before": 300,
+      "visible_requirement_exposure": 1358
+    },
+    "date_bounds_verified": true,
+    "allocation_records_verified": 12237
+  },
+  "C_wide_X0_H5": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "3",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "120",
+      "total_in_transit": "200",
+      "B_C_pending_dispatch": "207",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.81,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "3",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "320",
+      "terminal_backlog": "67"
+    },
+    "recovery80plus": {
+      "max_machine_production": 10.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "177",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "179",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "182",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "202",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "219",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "222",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "244",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1269",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1272",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ]
+  },
+  "C_wide_X1_H5": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "12",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "0",
+      "total_in_transit": "640",
+      "B_C_pending_dispatch": "68",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1228"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "70",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "608",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 10.0,
+      "days_above10": 0,
+      "coal_arrivals": 0.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      }
+    ],
+    "first_E_projected_release": {
+      "day": 15,
+      "bucket_id": "B:coal:25:PROJECTED",
+      "supplier_id": "E",
+      "requirement_class": "PROJECTED",
+      "need_by_day": 25,
+      "conservative_supply_lead": 10,
+      "release_by_day": 15,
+      "offer_arrival": 25,
+      "timely": true,
+      "release_due": true,
+      "gap": 80,
+      "executable_qty": 80
+    },
+    "first_E_accepted": {
+      "day": 15,
+      "buyer": "B",
+      "supplier": "E",
+      "requested": 80,
+      "accepted": 80,
+      "order_id": 36,
+      "action": "NEW_RELEASE",
+      "old_order_id": null,
+      "offer_arrival": 25,
+      "exposure_before": 300,
+      "visible_requirement_exposure": 1080
+    },
+    "date_bounds_verified": true,
+    "allocation_records_verified": 11851
+  },
+  "C_wide_X2_H5": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "12",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "0",
+      "total_in_transit": "640",
+      "B_C_pending_dispatch": "68",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1228"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "70",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "608",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 10.0,
+      "days_above10": 0,
+      "coal_arrivals": 0.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "972",
+        "steel_visible_requirement": "560",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      }
+    ],
+    "first_E_projected_release": {
+      "day": 15,
+      "bucket_id": "B:coal:25:PROJECTED",
+      "supplier_id": "E",
+      "requirement_class": "PROJECTED",
+      "need_by_day": 25,
+      "conservative_supply_lead": 10,
+      "release_by_day": 15,
+      "offer_arrival": 25,
+      "timely": true,
+      "release_due": true,
+      "gap": 80,
+      "executable_qty": 80
+    },
+    "first_E_accepted": {
+      "day": 15,
+      "buyer": "B",
+      "supplier": "E",
+      "requested": 80,
+      "accepted": 80,
+      "order_id": 36,
+      "action": "NEW_RELEASE",
+      "old_order_id": null,
+      "offer_arrival": 25,
+      "exposure_before": 300,
+      "visible_requirement_exposure": 1080
+    },
+    "date_bounds_verified": true,
+    "allocation_records_verified": 11851
+  },
+  "D_wide_X0_H20": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "370",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "92",
+      "total_in_transit": "332",
+      "B_C_pending_dispatch": "360",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "359",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "458",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 10.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "452"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "468"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "482"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "464"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "422"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "432"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "442"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "420"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "424"
+      }
+    ]
+  },
+  "D_wide_X1_H20": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "0",
+      "total_in_transit": "654",
+      "B_C_pending_dispatch": "781",
+      "B_C_in_transit": "41",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1258"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 9.925,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 81,
+      "delivery": 81,
+      "backlog_clear": 131
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "0",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "622",
+      "terminal_backlog": "17"
+    },
+    "recovery80plus": {
+      "max_machine_production": 12.0,
+      "days_above10": 115,
+      "coal_arrivals": 1050.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "21",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2290",
+        "steel_visible_requirement": "1276",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "632"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "21",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2296",
+        "steel_visible_requirement": "1276",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "634"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "21",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2296",
+        "steel_visible_requirement": "1276",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "634"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "18",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "2400",
+        "steel_visible_requirement": "1268",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "666"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "12",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2472",
+        "steel_visible_requirement": "1240",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "704"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "11",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "2464",
+        "steel_visible_requirement": "1240",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "702"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "2450",
+        "steel_visible_requirement": "1204",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "700"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "5",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2346",
+        "steel_visible_requirement": "1216",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "654"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "5",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2354",
+        "steel_visible_requirement": "1216",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "654"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": {
+      "day": 15,
+      "buyer": "B",
+      "supplier": "E",
+      "requested": 68,
+      "accepted": 68,
+      "order_id": 45,
+      "action": "NEW_RELEASE",
+      "old_order_id": null,
+      "offer_arrival": 25,
+      "exposure_before": 300,
+      "visible_requirement_exposure": 2092
+    },
+    "date_bounds_verified": true,
+    "allocation_records_verified": 10363
+  },
+  "D_wide_X2_H20": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "0",
+      "total_in_transit": "654",
+      "B_C_pending_dispatch": "781",
+      "B_C_in_transit": "41",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1258"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 9.925,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 81,
+      "delivery": 81,
+      "backlog_clear": 131
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "0",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "622",
+      "terminal_backlog": "17"
+    },
+    "recovery80plus": {
+      "max_machine_production": 12.0,
+      "days_above10": 115,
+      "coal_arrivals": 1050.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "21",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2290",
+        "steel_visible_requirement": "1276",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "632"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "21",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2296",
+        "steel_visible_requirement": "1276",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "634"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "21",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2296",
+        "steel_visible_requirement": "1276",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "634"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "18",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "2400",
+        "steel_visible_requirement": "1268",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "666"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "12",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2472",
+        "steel_visible_requirement": "1240",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "704"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "11",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "2464",
+        "steel_visible_requirement": "1240",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "702"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "2450",
+        "steel_visible_requirement": "1204",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "700"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "5",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2346",
+        "steel_visible_requirement": "1216",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "654"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "5",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "2354",
+        "steel_visible_requirement": "1216",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "654"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": {
+      "day": 15,
+      "buyer": "B",
+      "supplier": "E",
+      "requested": 68,
+      "accepted": 68,
+      "order_id": 45,
+      "action": "NEW_RELEASE",
+      "old_order_id": null,
+      "offer_arrival": 25,
+      "exposure_before": 300,
+      "visible_requirement_exposure": 2092
+    },
+    "date_bounds_verified": true,
+    "allocation_records_verified": 10363
+  },
+  "E_mixed_lead_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "3",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "60",
+      "total_in_transit": "260",
+      "B_C_pending_dispatch": "522",
+      "B_C_in_transit": "15",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 6.875,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "320",
+      "terminal_backlog": "113"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 130,
+      "coal_arrivals": 28630.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "267",
+        "production_C": "12",
+        "terminal_delivery": "12",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "262",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "263",
+        "production_C": "9",
+        "terminal_delivery": "9",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "294",
+        "production_C": "4",
+        "terminal_delivery": "4",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "325",
+        "production_C": "4",
+        "terminal_delivery": "4",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "332",
+        "production_C": "3",
+        "terminal_delivery": "3",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "369",
+        "production_C": "4",
+        "terminal_delivery": "4",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1825",
+        "production_C": "4",
+        "terminal_delivery": "4",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1832",
+        "production_C": "3",
+        "terminal_delivery": "3",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ]
+  },
+  "E_mixed_lead_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "3",
+      "C_machine_on_hand": "2",
+      "total_live_pending": "0",
+      "total_in_transit": "632",
+      "B_C_pending_dispatch": "282",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1238"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 9.96,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 89
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "1",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "640",
+      "terminal_backlog": "2"
+    },
+    "recovery80plus": {
+      "max_machine_production": 11.0,
+      "days_above10": 57,
+      "coal_arrivals": 41716.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1574",
+        "steel_visible_requirement": "772",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "652"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1574",
+        "steel_visible_requirement": "768",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "652"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1570",
+        "steel_visible_requirement": "764",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "652"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1498",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1432",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1422",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1352",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "632"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1360",
+        "steel_visible_requirement": "780",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "632"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "8",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1376",
+        "steel_visible_requirement": "780",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "632"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 11522
+  },
+  "E_mixed_lead_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "3",
+      "C_machine_on_hand": "2",
+      "total_live_pending": "0",
+      "total_in_transit": "632",
+      "B_C_pending_dispatch": "282",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1238"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 9.96,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 89
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "1",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "640",
+      "terminal_backlog": "2"
+    },
+    "recovery80plus": {
+      "max_machine_production": 11.0,
+      "days_above10": 57,
+      "coal_arrivals": 41716.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1574",
+        "steel_visible_requirement": "772",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "652"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1574",
+        "steel_visible_requirement": "768",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "652"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1570",
+        "steel_visible_requirement": "764",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "652"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1498",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1432",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1422",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1352",
+        "steel_visible_requirement": "760",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "632"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1360",
+        "steel_visible_requirement": "780",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "632"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "8",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1376",
+        "steel_visible_requirement": "780",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "632"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 11522
+  },
+  "F_step_up_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "2",
+      "C_steel_on_hand": "38",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "200",
+      "total_in_transit": "280",
+      "B_C_pending_dispatch": "362",
+      "B_C_in_transit": "60",
+      "observed_daily_demand": "15.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 15.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "160",
+      "C_steel_on_hand": "320",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "320",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 501,
+      "coal_arrivals": 60910.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.25",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.5",
+        "terminal_backlog": "0",
+        "production_C": "12",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "12.75",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "396"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "482"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "482"
+      }
+    ]
+  },
+  "F_step_up_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "0",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "120",
+      "total_in_transit": "360",
+      "B_C_pending_dispatch": "555",
+      "B_C_in_transit": "60",
+      "observed_daily_demand": "15.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 15.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "56",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "336",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 500,
+      "coal_arrivals": 60336.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.25",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1088",
+        "steel_visible_requirement": "652",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "374"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.5",
+        "terminal_backlog": "0",
+        "production_C": "12",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1132",
+        "steel_visible_requirement": "672",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "386"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "12.75",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1480",
+        "steel_visible_requirement": "848",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "428"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "22",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "1498",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "414"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "25",
+        "production_C": "12",
+        "terminal_delivery": "12",
+        "coal_visible_requirement": "1500",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "412"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "66",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "1504",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "414"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "141",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1790",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "141",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1790",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 7273
+  },
+  "F_step_up_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "0",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "120",
+      "total_in_transit": "360",
+      "B_C_pending_dispatch": "555",
+      "B_C_in_transit": "60",
+      "observed_daily_demand": "15.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 15.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "56",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "336",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 500,
+      "coal_arrivals": 60336.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.25",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1088",
+        "steel_visible_requirement": "652",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "374"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.5",
+        "terminal_backlog": "0",
+        "production_C": "12",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1132",
+        "steel_visible_requirement": "672",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "386"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "12.75",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1480",
+        "steel_visible_requirement": "848",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "428"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "22",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "1498",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "414"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "25",
+        "production_C": "12",
+        "terminal_delivery": "12",
+        "coal_visible_requirement": "1500",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "412"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "66",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "1504",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "414"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "141",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1790",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "141",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1790",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 7273
+  },
+  "G_step_down_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "240",
+      "C_steel_on_hand": "124",
+      "C_machine_on_hand": "14",
+      "total_live_pending": "0",
+      "total_in_transit": "80",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "20",
+      "observed_daily_demand": "5.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 5.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "2",
+      "C_steel_on_hand": "58",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "482",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 24,
+      "coal_arrivals": 22882.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "0",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "482"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "14.5",
+        "terminal_backlog": "0",
+        "production_C": "15",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "482"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "14.0",
+        "terminal_backlog": "0",
+        "production_C": "14",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "482"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "9.5",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "2",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "2",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "4",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ]
+  },
+  "G_step_down_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "32",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "5",
+      "total_live_pending": "40",
+      "total_in_transit": "160",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "20",
+      "observed_daily_demand": "5.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 5.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 115
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "468",
+      "terminal_backlog": "120"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 33,
+      "coal_arrivals": 23720.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "135",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1790",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "14.5",
+        "terminal_backlog": "125",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1790",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "14.0",
+        "terminal_backlog": "115",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1742",
+        "steel_visible_requirement": "876",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "9.5",
+        "terminal_backlog": "26",
+        "production_C": "14",
+        "terminal_delivery": "14",
+        "coal_visible_requirement": "1550",
+        "steel_visible_requirement": "724",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "672",
+        "steel_visible_requirement": "300",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "71",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "612",
+        "steel_visible_requirement": "300",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "51",
+        "global_supply_position": "260"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "292",
+        "steel_visible_requirement": "300",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "198"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "492",
+        "steel_visible_requirement": "300",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "384",
+        "steel_visible_requirement": "300",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "232"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 9887
+  },
+  "G_step_down_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "32",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "5",
+      "total_live_pending": "40",
+      "total_in_transit": "160",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "20",
+      "observed_daily_demand": "5.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 5.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 115
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "468",
+      "terminal_backlog": "120"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 33,
+      "coal_arrivals": 23720.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "135",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1790",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "14.5",
+        "terminal_backlog": "125",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1790",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "14.0",
+        "terminal_backlog": "115",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1742",
+        "steel_visible_requirement": "876",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "9.5",
+        "terminal_backlog": "26",
+        "production_C": "14",
+        "terminal_delivery": "14",
+        "coal_visible_requirement": "1550",
+        "steel_visible_requirement": "724",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "480"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "672",
+        "steel_visible_requirement": "300",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "71",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "612",
+        "steel_visible_requirement": "300",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "51",
+        "global_supply_position": "260"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "292",
+        "steel_visible_requirement": "300",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "198"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "492",
+        "steel_visible_requirement": "300",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "5.0",
+        "terminal_backlog": "0",
+        "production_C": "5",
+        "terminal_delivery": "5",
+        "coal_visible_requirement": "384",
+        "steel_visible_requirement": "300",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "232"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 9887
+  },
+  "H_spike_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "160",
+      "C_steel_on_hand": "284",
+      "C_machine_on_hand": "19",
+      "total_live_pending": "0",
+      "total_in_transit": "160",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "160",
+      "C_steel_on_hand": "320",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "320",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 31,
+      "coal_arrivals": 42480.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.25",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.5",
+        "terminal_backlog": "0",
+        "production_C": "12",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "12.75",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "14.75",
+        "terminal_backlog": "1",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "12.25",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ]
+  },
+  "H_spike_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "7",
+      "total_live_pending": "120",
+      "total_in_transit": "280",
+      "B_C_pending_dispatch": "357",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "56",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "336",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 59,
+      "coal_arrivals": 42244.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.25",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1088",
+        "steel_visible_requirement": "652",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "374"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.5",
+        "terminal_backlog": "0",
+        "production_C": "12",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1132",
+        "steel_visible_requirement": "672",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "386"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "12.75",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1480",
+        "steel_visible_requirement": "848",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "428"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "22",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "1498",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "414"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "14.75",
+        "terminal_backlog": "20",
+        "production_C": "12",
+        "terminal_delivery": "12",
+        "coal_visible_requirement": "1500",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "412"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "12.25",
+        "terminal_backlog": "11",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "1372",
+        "steel_visible_requirement": "832",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "410"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1194",
+        "steel_visible_requirement": "608",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "400"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1194",
+        "steel_visible_requirement": "608",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "400"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 7780
+  },
+  "H_spike_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "7",
+      "total_live_pending": "120",
+      "total_in_transit": "280",
+      "B_C_pending_dispatch": "357",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 80
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "56",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "336",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 59,
+      "coal_arrivals": 42244.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "984",
+        "steel_visible_requirement": "600",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.25",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1088",
+        "steel_visible_requirement": "652",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "374"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.5",
+        "terminal_backlog": "0",
+        "production_C": "12",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1132",
+        "steel_visible_requirement": "672",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "386"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "12.75",
+        "terminal_backlog": "6",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1480",
+        "steel_visible_requirement": "848",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "428"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "15.0",
+        "terminal_backlog": "22",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "1498",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "414"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "14.75",
+        "terminal_backlog": "20",
+        "production_C": "12",
+        "terminal_delivery": "12",
+        "coal_visible_requirement": "1500",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "412"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "12.25",
+        "terminal_backlog": "11",
+        "production_C": "11",
+        "terminal_delivery": "11",
+        "coal_visible_requirement": "1372",
+        "steel_visible_requirement": "832",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "410"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1194",
+        "steel_visible_requirement": "608",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "400"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "1194",
+        "steel_visible_requirement": "608",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "400"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 7780
+  },
+  "I_insufficient_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "0",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "120",
+      "total_in_transit": "180",
+      "B_C_pending_dispatch": "510",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.5,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "300",
+      "terminal_backlog": "73"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "198",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "200",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "203",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "225",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "248",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "250",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "275",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1448",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1450",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      }
+    ]
+  },
+  "I_insufficient_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "1",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "120",
+      "total_in_transit": "180",
+      "B_C_pending_dispatch": "869",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.5,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "3",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "300",
+      "terminal_backlog": "77"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "202",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "204",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "207",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "229",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "252",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "254",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "279",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1452",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1454",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 8470
+  },
+  "I_insufficient_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "1",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "120",
+      "total_in_transit": "180",
+      "B_C_pending_dispatch": "869",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.5,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "3",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "300",
+      "terminal_backlog": "77"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "202",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "204",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "207",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "229",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "252",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "254",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "279",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1452",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1454",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "300"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 8470
+  },
+  "J_factory_cap_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "192",
+      "C_steel_on_hand": "256",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "0",
+      "total_in_transit": "128",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "32",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 8.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "192",
+      "C_steel_on_hand": "256",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "320",
+      "terminal_backlog": "98"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 33344.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "198",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "200",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "202",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "220",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "238",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "240",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "260",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1198",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1200",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ]
+  },
+  "J_factory_cap_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "88",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "0",
+      "total_in_transit": "256",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "32",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 8.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "64",
+      "C_steel_on_hand": "88",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "320",
+      "terminal_backlog": "98"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 33280.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "198",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "200",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "256"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "202",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "220",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "256"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "238",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "240",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "256"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "260",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "256"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1198",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1200",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "256"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 8394
+  },
+  "J_factory_cap_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "88",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "0",
+      "total_in_transit": "256",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "32",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 8.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "64",
+      "C_steel_on_hand": "88",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "320",
+      "terminal_backlog": "98"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 33280.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "198",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "200",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "256"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "202",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "220",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "256"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "238",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "240",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "256"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "260",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "256"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1198",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1200",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "744",
+        "steel_visible_requirement": "480",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "256"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 8394
+  },
+  "K_steel_cap_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "400",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "0",
+      "total_in_transit": "120",
+      "B_C_pending_dispatch": "508",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.5,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "400",
+      "C_steel_on_hand": "0",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "520",
+      "terminal_backlog": "90"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "215",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "520"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "218",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "520"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "220",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "520"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "243",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "520"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "265",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "520"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "268",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "520"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "293",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "520"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1465",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "520"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1468",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "520"
+      }
+    ]
+  },
+  "K_steel_cap_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "80",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "0",
+      "total_in_transit": "240",
+      "B_C_pending_dispatch": "868",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.5,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "80",
+      "C_steel_on_hand": "0",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "320",
+      "terminal_backlog": "90"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "215",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "218",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "220",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "243",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "265",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "268",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "293",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1465",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1468",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 7518
+  },
+  "K_steel_cap_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "80",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "0",
+      "total_in_transit": "240",
+      "B_C_pending_dispatch": "868",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.5,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "80",
+      "C_steel_on_hand": "0",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "320",
+      "terminal_backlog": "90"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "215",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "218",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "220",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "243",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "265",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "268",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "293",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1465",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1468",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "900",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 7518
+  },
+  "L_stale_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "200",
+      "total_in_transit": "240",
+      "B_C_pending_dispatch": "508",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.5,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "0",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "440",
+      "terminal_backlog": "80"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "205",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "208",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "210",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "233",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "255",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "258",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "283",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1455",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1458",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      }
+    ]
+  },
+  "L_stale_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "0",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "200",
+      "total_in_transit": "240",
+      "B_C_pending_dispatch": "870",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.5,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "2",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "440",
+      "terminal_backlog": "82"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "207",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "209",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "212",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "234",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "257",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "259",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "284",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1457",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1459",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "440"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 5786
+  },
+  "L_stale_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "3",
+      "C_machine_on_hand": "0",
+      "total_live_pending": "120",
+      "total_in_transit": "240",
+      "B_C_pending_dispatch": "867",
+      "B_C_in_transit": "30",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1230"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 7.5,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": null,
+      "delivery": null,
+      "backlog_clear": null
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "0",
+      "C_steel_on_hand": "1",
+      "C_machine_on_hand": "0",
+      "global_supply_position": "360",
+      "terminal_backlog": "89"
+    },
+    "recovery80plus": {
+      "max_machine_production": 8.0,
+      "days_above10": 0,
+      "coal_arrivals": 31260.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "214",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "217",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "219",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "242",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "264",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "267",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "292",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1464",
+        "production_C": "8",
+        "terminal_delivery": "8",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "1467",
+        "production_C": "7",
+        "terminal_delivery": "7",
+        "coal_visible_requirement": "1800",
+        "steel_visible_requirement": "900",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 6084
+  },
+  "R_recovery_X0_H10": {
+    "final": {
+      "B_coal_on_hand": "160",
+      "C_steel_on_hand": "320",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "0",
+      "total_in_transit": "160",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "0"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 125
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "160",
+      "C_steel_on_hand": "320",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "320",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 52,
+      "coal_arrivals": 43920.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "105",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "832"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "100",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "828"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "95",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "832"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "50",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "816"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "12",
+        "production_C": "13",
+        "terminal_delivery": "13",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "680"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "9",
+        "production_C": "13",
+        "terminal_delivery": "13",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "640"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "11",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "0",
+        "steel_visible_requirement": "0",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ]
+  },
+  "R_recovery_X1_H10": {
+    "final": {
+      "B_coal_on_hand": "100",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "60",
+      "total_in_transit": "160",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1226"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 139
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "80",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "240",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 67,
+      "coal_arrivals": 43940.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "178",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1560",
+        "steel_visible_requirement": "780",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "173",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1528",
+        "steel_visible_requirement": "764",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "168",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1528",
+        "steel_visible_requirement": "764",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "123",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1400",
+        "steel_visible_requirement": "700",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "78",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1400",
+        "steel_visible_requirement": "700",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "73",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1400",
+        "steel_visible_requirement": "700",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "24",
+        "production_C": "14",
+        "terminal_delivery": "14",
+        "coal_visible_requirement": "1400",
+        "steel_visible_requirement": "656",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "824",
+        "steel_visible_requirement": "520",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "240"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "824",
+        "steel_visible_requirement": "520",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 5823
+  },
+  "R_recovery_X2_H10": {
+    "final": {
+      "B_coal_on_hand": "100",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "total_live_pending": "60",
+      "total_in_transit": "160",
+      "B_C_pending_dispatch": "0",
+      "B_C_in_transit": "40",
+      "observed_daily_demand": "10.0",
+      "unique_absolute_date_buckets": "1226"
+    },
+    "days_with_exposure_block": 0,
+    "late200_production_mean": 10.0,
+    "recovery_windows": {
+      "scope": "20-day means production/delivery>=10; backlog all zero; independent start dates, never whole-chain recovery",
+      "production": 80,
+      "delivery": 80,
+      "backlog_clear": 139
+    },
+    "pre_shutdown_day49": {
+      "B_coal_on_hand": "80",
+      "C_steel_on_hand": "80",
+      "C_machine_on_hand": "10",
+      "global_supply_position": "240",
+      "terminal_backlog": "0"
+    },
+    "recovery80plus": {
+      "max_machine_production": 15.0,
+      "days_above10": 67,
+      "coal_arrivals": 43940.0
+    },
+    "transitions": [
+      {
+        "day": "99",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "178",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1560",
+        "steel_visible_requirement": "780",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "100",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "173",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1528",
+        "steel_visible_requirement": "764",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "101",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "168",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1528",
+        "steel_visible_requirement": "764",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "110",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "123",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1400",
+        "steel_visible_requirement": "700",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "119",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "78",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1400",
+        "steel_visible_requirement": "700",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "120",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "73",
+        "production_C": "15",
+        "terminal_delivery": "15",
+        "coal_visible_requirement": "1400",
+        "steel_visible_requirement": "700",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "130",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "24",
+        "production_C": "14",
+        "terminal_delivery": "14",
+        "coal_visible_requirement": "1400",
+        "steel_visible_requirement": "656",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "360"
+      },
+      {
+        "day": "599",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "824",
+        "steel_visible_requirement": "520",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "240"
+      },
+      {
+        "day": "600",
+        "observed_daily_demand": "10.0",
+        "terminal_backlog": "0",
+        "production_C": "10",
+        "terminal_delivery": "10",
+        "coal_visible_requirement": "824",
+        "steel_visible_requirement": "520",
+        "coal_excess_exposure": "0",
+        "steel_excess_exposure": "0",
+        "global_supply_position": "320"
+      }
+    ],
+    "first_E_projected_release": null,
+    "first_E_accepted": null,
+    "date_bounds_verified": true,
+    "allocation_records_verified": 5823
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "EXTENSIBILITY_GATE": "PASS",
+  "checks": {
+    "world200": true,
+    "fixed_known_work": true,
+    "search_changes_knowledge": true,
+    "bounded_indexed_results": true,
+    "commodity_isolation": true,
+    "shared_two_buyer_stock": true,
+    "quantity_order_accounts": true
+  },
+  "scope": "expressiveness and tested interface bounds; latency/future isolation also verified by the test entry point, not economic validity"
+}

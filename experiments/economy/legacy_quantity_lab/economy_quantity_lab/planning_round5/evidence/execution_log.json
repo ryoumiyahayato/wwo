@@ -1,0 +1,323 @@
+{
+  "base": "366fe77704ee3d4ec9088ba1c544c46096289e40",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "case_count": 52,
+  "simulated_case_days": 31200,
+  "max_quantity_residual": 0,
+  "max_order_residual": 0,
+  "cases": [
+    {
+      "case_id": "normal_P0_H10",
+      "seconds": 0.3799131000014313,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "normal_P1_H10",
+      "seconds": 0.5485155000023951,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "normal_P2_H10",
+      "seconds": 1.2052751000010176,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "normal_P3_H10",
+      "seconds": 1.2849575000000186,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "step_up_P0_H10",
+      "seconds": 0.4360491000006732,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "step_up_P1_H10",
+      "seconds": 0.5585544000023219,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "step_up_P2_H10",
+      "seconds": 1.6199411999987205,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "step_up_P3_H10",
+      "seconds": 1.993289599999116,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "step_down_P0_H10",
+      "seconds": 0.3792370999981358,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "step_down_P1_H10",
+      "seconds": 0.7019498999979987,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "step_down_P2_H10",
+      "seconds": 1.4250697999996191,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "step_down_P3_H10",
+      "seconds": 1.573799699999654,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "spike_P0_H10",
+      "seconds": 0.3952086999997846,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "spike_P1_H10",
+      "seconds": 0.6202804999993532,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "spike_P2_H10",
+      "seconds": 1.2896946000000753,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "spike_P3_H10",
+      "seconds": 1.270401400000992,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "wide_P0_H10",
+      "seconds": 0.49247549999927287,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "wide_P1_H10",
+      "seconds": 0.9357497999990301,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "wide_P2_H10",
+      "seconds": 2.8365078999995603,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "wide_P3_H10",
+      "seconds": 2.6475914000002376,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "long_lead_P0_H10",
+      "seconds": 0.38313860000198474,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "long_lead_P1_H10",
+      "seconds": 0.5206270000016957,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "long_lead_P2_H10",
+      "seconds": 1.8630604999998468,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "long_lead_P3_H10",
+      "seconds": 1.7298608000019158,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "mixed_lead_P0_H10",
+      "seconds": 0.6885033999969892,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "mixed_lead_P1_H10",
+      "seconds": 1.4128834000002826,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "mixed_lead_P2_H10",
+      "seconds": 2.516713900000468,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "mixed_lead_P3_H10",
+      "seconds": 1.5048384999972768,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "insufficient_P0_H10",
+      "seconds": 0.44080720000056317,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "insufficient_P1_H10",
+      "seconds": 0.6440930999997363,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "insufficient_P2_H10",
+      "seconds": 1.9753626000019722,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "insufficient_P3_H10",
+      "seconds": 1.6538147999999637,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "factory_cap_P0_H10",
+      "seconds": 0.304346799999621,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "factory_cap_P1_H10",
+      "seconds": 0.5701768999970227,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "factory_cap_P2_H10",
+      "seconds": 1.2265695999994932,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "factory_cap_P3_H10",
+      "seconds": 1.556062200001179,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "steel_cap_P0_H10",
+      "seconds": 0.4971621000004234,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "steel_cap_P1_H10",
+      "seconds": 0.7439424999975017,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "steel_cap_P2_H10",
+      "seconds": 1.5506902000015543,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "steel_cap_P3_H10",
+      "seconds": 1.7453491000014765,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "recovery_P0_H10",
+      "seconds": 0.4553691000000981,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "recovery_P1_H10",
+      "seconds": 0.6244366999999329,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "recovery_P2_H10",
+      "seconds": 1.1078491000007489,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "recovery_P3_H10",
+      "seconds": 1.241464899998391,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "normal_P2_H5",
+      "seconds": 0.8385523999968427,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "normal_P2_H20",
+      "seconds": 1.8190931999997701,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "normal_P3_H5",
+      "seconds": 0.7098177000007126,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "normal_P3_H20",
+      "seconds": 1.6745857999994769,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "wide_P2_H5",
+      "seconds": 1.5155301000013424,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "wide_P2_H20",
+      "seconds": 2.9742736000007426,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "wide_P3_H5",
+      "seconds": 1.2647093999985373,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    },
+    {
+      "case_id": "wide_P3_H20",
+      "seconds": 3.08918740000081,
+      "tracemalloc_peak_bytes": null,
+      "scope": "construction/simulation/planning/observation/archive; excludes file export; not RSS"
+    }
+  ],
+  "total_seconds": 63.43733439999778
+}

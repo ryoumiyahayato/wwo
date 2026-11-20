@@ -1,0 +1,18 @@
+[
+  {
+    "case_id": "normal_P2_H10",
+    "seconds": 7.051821999997628,
+    "peak_bytes": 43321753,
+    "daily_sha256": "dcbe05465dfb415cb1d9f4463b756896698cd3930bf841d50b82c0bb317bad1c",
+    "daily_bytes_equal": true,
+    "scope": "fresh simulation/planning/indexes/archives and observations; excludes file export; tracemalloc allocation peak, not RSS"
+  },
+  {
+    "case_id": "wide_P3_H10",
+    "seconds": 14.628035599998839,
+    "peak_bytes": 49799564,
+    "daily_sha256": "2c9c443ad314a393b8bd1b397d644560fc6966d53c10f3d85dae0f7f02b6a57c",
+    "daily_bytes_equal": true,
+    "scope": "fresh simulation/planning/indexes/archives and observations; excludes file export; tracemalloc allocation peak, not RSS"
+  }
+]

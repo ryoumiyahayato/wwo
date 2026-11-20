@@ -1,0 +1,68 @@
+{
+  "profiles": [
+    {
+      "case_id": "E_discovery60",
+      "from_day": 60,
+      "first_positive_D_B_dispatch": 60,
+      "first_positive_D_B_arrival": 64,
+      "first_positive_production_C": 65,
+      "first_positive_terminal_delivery": 65,
+      "post50_max_coal_on_hand": 160
+    },
+    {
+      "case_id": "F_discovery90",
+      "from_day": 90,
+      "first_positive_D_B_dispatch": 90,
+      "first_positive_D_B_arrival": 94,
+      "first_positive_production_C": 95,
+      "first_positive_terminal_delivery": 95,
+      "post50_max_coal_on_hand": 160
+    },
+    {
+      "case_id": "C_shock_M1",
+      "from_day": 50,
+      "first_positive_D_B_dispatch": 51,
+      "first_positive_D_B_arrival": 55,
+      "first_positive_production_C": 50,
+      "first_positive_terminal_delivery": 50,
+      "post50_max_coal_on_hand": 160
+    }
+  ],
+  "J_physical_columns": [
+    "A_coal_on_hand",
+    "A_steel_on_hand",
+    "A_machine_on_hand",
+    "B_coal_on_hand",
+    "B_steel_on_hand",
+    "B_machine_on_hand",
+    "C_coal_on_hand",
+    "C_steel_on_hand",
+    "C_machine_on_hand",
+    "D_coal_on_hand",
+    "D_steel_on_hand",
+    "D_machine_on_hand",
+    "production_A",
+    "production_B",
+    "production_C",
+    "production_D",
+    "A_B_dispatch",
+    "A_B_arrival",
+    "A_B_in_transit",
+    "B_C_dispatch",
+    "B_C_arrival",
+    "B_C_in_transit",
+    "D_B_dispatch",
+    "D_B_arrival",
+    "D_B_in_transit",
+    "terminal_backlog",
+    "terminal_delivery",
+    "cumulative_coal_mined",
+    "cumulative_steel_produced",
+    "cumulative_machine_produced",
+    "cumulative_terminal_delivered",
+    "cumulative_A_extraction",
+    "cumulative_D_extraction",
+    "total_in_transit"
+  ],
+  "J_physical_difference_count": 0
+}

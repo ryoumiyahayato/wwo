@@ -1,0 +1,598 @@
+{
+  "stock_gate": "PASS",
+  "requests": [
+    {
+      "policy": "S1",
+      "response": {
+        "request_id": 1,
+        "buyer_id": "B",
+        "supplier_id": "A",
+        "commodity": "coal",
+        "requested_quantity": 320,
+        "request_day": 0,
+        "accepted_quantity": 300,
+        "rejected_quantity": 20,
+        "acceptance_day": 0,
+        "rejection_reason": "TRANSPORT_ATP",
+        "promised_dispatch_by_day": 2,
+        "promised_quantity": 300,
+        "order_id": 1,
+        "ATP": 300,
+        "slots_before": [
+          {
+            "day": 0,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 1,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 2,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          }
+        ],
+        "slots_after": [
+          {
+            "day": 0,
+            "slot_capacity": 100,
+            "committed_quantity": 100,
+            "dispatched_quantity": 0,
+            "remaining_slot": 0
+          },
+          {
+            "day": 1,
+            "slot_capacity": 100,
+            "committed_quantity": 100,
+            "dispatched_quantity": 0,
+            "remaining_slot": 0
+          },
+          {
+            "day": 2,
+            "slot_capacity": 100,
+            "committed_quantity": 100,
+            "dispatched_quantity": 0,
+            "remaining_slot": 0
+          }
+        ]
+      },
+      "open_need": 20,
+      "orders": 1,
+      "shipments": 0
+    },
+    {
+      "policy": "S2",
+      "response": {
+        "request_id": 1,
+        "buyer_id": "B",
+        "supplier_id": "A",
+        "commodity": "coal",
+        "requested_quantity": 320,
+        "request_day": 0,
+        "accepted_quantity": 0,
+        "rejected_quantity": 320,
+        "acceptance_day": 0,
+        "order_id": null,
+        "rejection_reason": "STOCK_OR_TRANSPORT_ATP",
+        "promised_dispatch_by_day": null,
+        "promised_quantity": 0,
+        "supply_basis": "STOCK_CONFIRMED",
+        "transport_atp": 300,
+        "uncommitted_sellable_stock": 0,
+        "stock_confirmed_atp": 0,
+        "stock_on_hand": 0,
+        "rejected_due_transport": 20,
+        "rejected_due_stock": 300,
+        "stock_committed_after": 0,
+        "stock_commitment_entries_after": 0,
+        "slot_entries_after": 0,
+        "slots_before": [
+          {
+            "day": 0,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 1,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 2,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          }
+        ],
+        "slots_after": [
+          {
+            "day": 0,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 1,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 2,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          }
+        ]
+      },
+      "open_need": 320,
+      "orders": 0,
+      "shipments": 0
+    }
+  ],
+  "S1_legacy_ten_day_accepted": 320,
+  "control_note": "single ATP=100*(2+1)=300; archived320 is cumulative, not a single admission",
+  "switch_probe": {
+    "scope": "synthetic overdue order-state fixture at Day3, no intervening production; quantities settled by original dispatch and Round4A confirmation",
+    "waiting_need": 0,
+    "waiting_D_accepted": 0,
+    "confirmed_cancelled": 50,
+    "old_in_transit": 30,
+    "D_replacement": 50,
+    "events": [
+      {
+        "day": 3,
+        "event": "SWITCH_REQUESTED",
+        "source_supplier": "A",
+        "old_order_id": 1,
+        "requested_quantity": 80,
+        "prospective_supplier": "D"
+      },
+      {
+        "day": 4,
+        "event": "SWITCH_CONFIRMED",
+        "source_supplier": "A",
+        "old_order_id": 1,
+        "confirmed_quantity": 50,
+        "no_longer_cancellable_qty": 30
+      },
+      {
+        "day": 4,
+        "event": "REPLACEMENT_ACCEPTED",
+        "source_supplier": "A",
+        "old_order_id": 1,
+        "replacement_supplier": "D",
+        "replacement_order_id": 2,
+        "replacement_quantity": 50
+      }
+    ],
+    "cancellations": [
+      {
+        "order_id": 1,
+        "state": "CANCEL_REQUESTED",
+        "request_day": 3,
+        "confirm_day": 4,
+        "requested_cancel_qty": 80,
+        "pending_at_request": 80,
+        "confirmed_cancel_qty": 0,
+        "no_longer_cancellable_qty": 0,
+        "confirmation_delay": 1
+      },
+      {
+        "order_id": 1,
+        "state": "CANCEL_CONFIRMED",
+        "request_day": 3,
+        "confirm_day": 4,
+        "requested_cancel_qty": 80,
+        "pending_at_request": 80,
+        "confirmed_cancel_qty": 50,
+        "no_longer_cancellable_qty": 30,
+        "confirmation_delay": 1
+      }
+    ],
+    "request_trace": [
+      {
+        "request_id": 1,
+        "buyer_id": "B",
+        "supplier_id": "A",
+        "commodity": "coal",
+        "requested_quantity": 80,
+        "request_day": 0,
+        "accepted_quantity": 80,
+        "rejected_quantity": 0,
+        "acceptance_day": 0,
+        "order_id": 1,
+        "rejection_reason": null,
+        "promised_dispatch_by_day": 2,
+        "promised_quantity": 80,
+        "supply_basis": "STOCK_CONFIRMED",
+        "transport_atp": 90,
+        "uncommitted_sellable_stock": 400,
+        "stock_confirmed_atp": 90,
+        "stock_on_hand": 400,
+        "rejected_due_transport": 0,
+        "rejected_due_stock": 0,
+        "stock_committed_after": 80,
+        "stock_commitment_entries_after": 1,
+        "slot_entries_after": 3,
+        "slots_before": [
+          {
+            "day": 0,
+            "slot_capacity": 30,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 30
+          },
+          {
+            "day": 1,
+            "slot_capacity": 30,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 30
+          },
+          {
+            "day": 2,
+            "slot_capacity": 30,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 30
+          }
+        ],
+        "slots_after": [
+          {
+            "day": 0,
+            "slot_capacity": 30,
+            "committed_quantity": 30,
+            "dispatched_quantity": 0,
+            "remaining_slot": 0
+          },
+          {
+            "day": 1,
+            "slot_capacity": 30,
+            "committed_quantity": 30,
+            "dispatched_quantity": 0,
+            "remaining_slot": 0
+          },
+          {
+            "day": 2,
+            "slot_capacity": 30,
+            "committed_quantity": 20,
+            "dispatched_quantity": 0,
+            "remaining_slot": 10
+          }
+        ]
+      },
+      {
+        "request_id": 2,
+        "buyer_id": "B",
+        "supplier_id": "D",
+        "commodity": "coal",
+        "requested_quantity": 50,
+        "request_day": 4,
+        "accepted_quantity": 50,
+        "rejected_quantity": 0,
+        "acceptance_day": 4,
+        "order_id": 2,
+        "rejection_reason": null,
+        "promised_dispatch_by_day": 6,
+        "promised_quantity": 50,
+        "supply_basis": "STOCK_CONFIRMED",
+        "transport_atp": 180,
+        "uncommitted_sellable_stock": 400,
+        "stock_confirmed_atp": 180,
+        "stock_on_hand": 400,
+        "rejected_due_transport": 0,
+        "rejected_due_stock": 0,
+        "stock_committed_after": 50,
+        "stock_commitment_entries_after": 1,
+        "slot_entries_after": 1,
+        "slots_before": [
+          {
+            "day": 4,
+            "slot_capacity": 60,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 60
+          },
+          {
+            "day": 5,
+            "slot_capacity": 60,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 60
+          },
+          {
+            "day": 6,
+            "slot_capacity": 60,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 60
+          }
+        ],
+        "slots_after": [
+          {
+            "day": 4,
+            "slot_capacity": 60,
+            "committed_quantity": 50,
+            "dispatched_quantity": 0,
+            "remaining_slot": 10
+          },
+          {
+            "day": 5,
+            "slot_capacity": 60,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 60
+          },
+          {
+            "day": 6,
+            "slot_capacity": 60,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 60
+          }
+        ]
+      }
+    ],
+    "order_trace": [
+      {
+        "day": 0,
+        "event": "accepted",
+        "route": "A_B",
+        "order_id": 1,
+        "accepted_day": 0,
+        "promise_window_days": 2,
+        "promised_dispatch_by_day": 2,
+        "promise_status": "PROMISED",
+        "ordered_quantity": 80,
+        "quantity": 80,
+        "pending_dispatch": 80,
+        "in_transit": 0,
+        "delivered": 0,
+        "cancelled": 0,
+        "shipment_id": null,
+        "dispatch_day": null,
+        "arrival_day": null
+      },
+      {
+        "day": 3,
+        "event": "promise_breach",
+        "route": "A_B",
+        "order_id": 1,
+        "accepted_day": 0,
+        "promise_window_days": 2,
+        "promised_dispatch_by_day": 2,
+        "promise_status": "OVERDUE",
+        "ordered_quantity": 80,
+        "quantity": 80,
+        "pending_dispatch": 80,
+        "in_transit": 0,
+        "delivered": 0,
+        "cancelled": 0,
+        "shipment_id": null,
+        "dispatch_day": null,
+        "arrival_day": null
+      },
+      {
+        "day": 3,
+        "event": "dispatched",
+        "route": "A_B",
+        "order_id": 1,
+        "accepted_day": 0,
+        "promise_window_days": 2,
+        "promised_dispatch_by_day": 2,
+        "promise_status": "OVERDUE",
+        "ordered_quantity": 80,
+        "quantity": 30,
+        "pending_dispatch": 50,
+        "in_transit": 30,
+        "delivered": 0,
+        "cancelled": 0,
+        "shipment_id": 1,
+        "dispatch_day": 3,
+        "arrival_day": 5
+      },
+      {
+        "day": 4,
+        "event": "cancelled",
+        "route": "A_B",
+        "order_id": 1,
+        "accepted_day": 0,
+        "promise_window_days": 2,
+        "promised_dispatch_by_day": 2,
+        "promise_status": "NO_PENDING",
+        "ordered_quantity": 80,
+        "quantity": 50,
+        "pending_dispatch": 0,
+        "in_transit": 30,
+        "delivered": 0,
+        "cancelled": 50,
+        "shipment_id": null,
+        "dispatch_day": null,
+        "arrival_day": null
+      },
+      {
+        "day": 4,
+        "event": "accepted",
+        "route": "D_B",
+        "order_id": 2,
+        "accepted_day": 4,
+        "promise_window_days": 2,
+        "promised_dispatch_by_day": 6,
+        "promise_status": "PROMISED",
+        "ordered_quantity": 50,
+        "quantity": 50,
+        "pending_dispatch": 50,
+        "in_transit": 0,
+        "delivered": 0,
+        "cancelled": 0,
+        "shipment_id": null,
+        "dispatch_day": null,
+        "arrival_day": null
+      }
+    ]
+  },
+  "conservatism": {
+    "today": {
+      "request_id": 1,
+      "buyer_id": "B",
+      "supplier_id": "A",
+      "commodity": "coal",
+      "requested_quantity": 80,
+      "request_day": 0,
+      "accepted_quantity": 0,
+      "rejected_quantity": 80,
+      "acceptance_day": 0,
+      "order_id": null,
+      "rejection_reason": "STOCK_OR_TRANSPORT_ATP",
+      "promised_dispatch_by_day": null,
+      "promised_quantity": 0,
+      "supply_basis": "STOCK_CONFIRMED",
+      "transport_atp": 300,
+      "uncommitted_sellable_stock": 0,
+      "stock_confirmed_atp": 0,
+      "stock_on_hand": 0,
+      "rejected_due_transport": 0,
+      "rejected_due_stock": 80,
+      "stock_committed_after": 0,
+      "stock_commitment_entries_after": 0,
+      "slot_entries_after": 0,
+      "slots_before": [
+        {
+          "day": 0,
+          "slot_capacity": 100,
+          "committed_quantity": 0,
+          "dispatched_quantity": 0,
+          "remaining_slot": 100
+        },
+        {
+          "day": 1,
+          "slot_capacity": 100,
+          "committed_quantity": 0,
+          "dispatched_quantity": 0,
+          "remaining_slot": 100
+        },
+        {
+          "day": 2,
+          "slot_capacity": 100,
+          "committed_quantity": 0,
+          "dispatched_quantity": 0,
+          "remaining_slot": 100
+        }
+      ],
+      "slots_after": [
+        {
+          "day": 0,
+          "slot_capacity": 100,
+          "committed_quantity": 0,
+          "dispatched_quantity": 0,
+          "remaining_slot": 100
+        },
+        {
+          "day": 1,
+          "slot_capacity": 100,
+          "committed_quantity": 0,
+          "dispatched_quantity": 0,
+          "remaining_slot": 100
+        },
+        {
+          "day": 2,
+          "slot_capacity": 100,
+          "committed_quantity": 0,
+          "dispatched_quantity": 0,
+          "remaining_slot": 100
+        }
+      ]
+    },
+    "tomorrow": [
+      {
+        "request_id": 2,
+        "buyer_id": "B",
+        "supplier_id": "A",
+        "commodity": "coal",
+        "requested_quantity": 320,
+        "request_day": 1,
+        "accepted_quantity": 100,
+        "rejected_quantity": 220,
+        "acceptance_day": 1,
+        "order_id": 1,
+        "rejection_reason": "STOCK_OR_TRANSPORT_ATP",
+        "promised_dispatch_by_day": 3,
+        "promised_quantity": 100,
+        "supply_basis": "STOCK_CONFIRMED",
+        "transport_atp": 300,
+        "uncommitted_sellable_stock": 100,
+        "stock_confirmed_atp": 100,
+        "stock_on_hand": 100,
+        "rejected_due_transport": 20,
+        "rejected_due_stock": 200,
+        "stock_committed_after": 100,
+        "stock_commitment_entries_after": 1,
+        "slot_entries_after": 1,
+        "slots_before": [
+          {
+            "day": 1,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 2,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 3,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          }
+        ],
+        "slots_after": [
+          {
+            "day": 1,
+            "slot_capacity": 100,
+            "committed_quantity": 100,
+            "dispatched_quantity": 0,
+            "remaining_slot": 0
+          },
+          {
+            "day": 2,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          },
+          {
+            "day": 3,
+            "slot_capacity": 100,
+            "committed_quantity": 0,
+            "dispatched_quantity": 0,
+            "remaining_slot": 100
+          }
+        ]
+      }
+    ]
+  }
+}

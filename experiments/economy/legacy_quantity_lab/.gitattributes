@@ -1,0 +1,13 @@
+*.py text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.zip binary
+# Imported CSVs use csv.DictWriter's CRLF on all operating systems.
+# Preserve their published bytes and hashes; never normalize this evidence.
+economy_quantity_lab/*.csv -text
+economy_quantity_lab/inventory_round2/inventory_comparison_results/**/*.csv -text
+economy_quantity_lab/inventory_round2/inventory_comparison_results/*.csv -text

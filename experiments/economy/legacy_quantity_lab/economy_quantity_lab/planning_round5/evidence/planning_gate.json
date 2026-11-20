@@ -1,0 +1,10 @@
+{
+  "PLANNING_EXTENSIBILITY_GATE": "PASS",
+  "checks": {
+    "accounts": true,
+    "bounded_active_requirements": true,
+    "all_cases": true,
+    "probes": true
+  },
+  "scope": "full PASS additionally requires correctness test entry point; performance is not economic validation"
+}
