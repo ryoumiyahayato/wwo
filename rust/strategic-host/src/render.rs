@@ -17,6 +17,7 @@ pub struct Edit {pub area:[f32;4],pub state:[f32;4]}
 pub struct View {
     axes:[[f32;4];3],
     viewport:[f32;4],
+    // East axis uses its fourth lane for surface animation time.
     projection_axes:[[f32;4];3],
     projection_origin:[f32;4],
     pub settings:[f32;4],
@@ -724,8 +725,8 @@ impl Renderer {
         let scenery_source=if landscape_supported {include_str!("landscape.wgsl")} else {
             "fn geographic_ground_tint(ll:vec2f, fallback:vec3f)->vec3f {return fallback;}
             fn landscape_relief(base:vec3f, ll:vec2f, world:vec3f, water:f32, mpp:f32)->vec3f {
-                if view.settings.y>=.5 || view.map_style.z<6. {return base;}
-                return natural_land_material(vec4f(base,water),world,mpp);
+                if view.settings.y>=.5 || view.map_style.z<5. {return base;}
+                return mix(base,natural_land_material(vec4f(base,water),world,mpp),ground_material_weight(water,mpp));
             }"
         };
         let globe_shader=device.create_shader_module(wgpu::ShaderModuleDescriptor{
@@ -1011,6 +1012,7 @@ impl Renderer {
         let format=texture.format();
         self.models.prepare(&self.device,&self.queue,[w,h],models);
         let mut frame_view=*view;
+        frame_view.projection_axes[0][3]=seconds;
         if let Some(water)=&self.water_pages {
             frame_view.water_clock=water.shader_clock(now);
         }
