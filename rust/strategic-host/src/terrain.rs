@@ -7,6 +7,7 @@ use winit::event_loop::EventLoopProxy;
 pub const VERSION: &str = "worldcrs84quad-z4-v3";
 pub const PACK_VERSION: &str = "worldcrs84quad-15s-v1";
 pub const COMPACT_VERSION: &str = "worldcrs84quad-15s-v2";
+pub const HYDROLOGY_DIRECTORY: &str = "worldcrs84quad-15s-v2-hydrology";
 const PACK_MAGIC: &[u8;8] = b"WWOQ4PK1";
 const COMPACT_MAGIC: &[u8;8] = b"WWOQ4PK2";
 const RECORD_HEADER: usize = 16;
@@ -27,6 +28,12 @@ const GROUPED_LOD_START: u32 = 1;
 const GROUPED_LOD_COUNT: usize = (MAX_LEVEL-GROUPED_LOD_START+1) as usize;
 const GROUPED_LOADS_PER_FRAME: u32 = 3;
 const COARSE_CACHE_LEVEL: u32 = 3;
+
+pub fn compact_files_present(root: &Path) -> bool {
+    root.join("index.json").is_file()
+        && root.join("river-topology.u32").is_file()
+        && (0..=MAX_LEVEL).all(|z| root.join(format!("{z}.qpk")).is_file())
+}
 
 fn grouped_lod(level:u32)->Option<usize> {
     level.checked_sub(GROUPED_LOD_START).map(|index|index as usize).filter(|index|*index<GROUPED_LOD_COUNT)

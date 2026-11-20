@@ -24,7 +24,8 @@ pub struct View {
     pub map_style:[f32;4],
     pub edits:[Edit;crate::timeline::MAX_SITES],
     pub natural_lod:[[f32;4];2],
-    pub close_sample:[f32;4],
+    pub close_sample:[f32;3],
+    water_clock:u32,
 }
 impl View {
     pub fn new(camera:&Camera,size:[u32;2])->Self {
@@ -775,7 +776,7 @@ impl Renderer {
                 landscape:None,landscape_pipeline,surface})
     }
 
-    pub fn update_close_terrain(&mut self,camera:&Camera,size:[u32;2],enabled:bool,now:Instant)->[f32;4] {
+    pub fn update_close_terrain(&mut self,camera:&Camera,size:[u32;2],enabled:bool,now:Instant)->[f32;3] {
         if let (Some(detail),Some(terrain))=(&mut self.detail,&self.terrain) {
             if let Some(index)=detail.update(camera,size,enabled,now) {
                 if terrain.request_detail(index,detail.catalogue.clone()) {detail.requested(index);}
@@ -783,11 +784,11 @@ impl Renderer {
             let survey=detail.resident.is_some_and(|index| {
                 matches!(detail.catalogue.regions[index].surface,terrain_detail::Surface::Survey)
             });
-            return [detail.weight,1.,if survey {1.} else {0.},0.];
+            return [detail.weight,1.,if survey {1.} else {0.}];
         }
         let weight=self.close_extent.and_then(|extent|terrain_detail::viewport(camera,size)
             .map(|corners|terrain_detail::extent_weight(extent,corners))).unwrap_or(0.);
-        [weight,0.,0.,0.]
+        [weight,0.,0.]
     }
 
     pub fn close_terrain_ready(&mut self,index:usize,result:io::Result<Vec<u8>>) {
@@ -842,7 +843,7 @@ impl Renderer {
         if let Some(terrain)=&mut self.terrain {
             terrain.update(&self.queue,camera,size,now);
             if let Some(water)=&mut self.water_pages {
-                water.update(&self.queue,&self.surface.water,camera,size);
+                water.update(&self.queue,&self.surface.water,camera,size,now);
             }
             if terrain.view_demand()>=6 && !self.surface.loaded {
                 let height=terrain.enable_landscape(&self.device);
@@ -912,8 +913,10 @@ impl Renderer {
             status["river_centrelines_ready"]=self.rivers.as_ref().is_some_and(|layer|layer.rivers.is_some()).into();
             if let Some(water)=&self.water_pages {
                 let (resident, wanted)=water.status();
-                status["water_geometry_resident"]=resident.into();
-                status["water_geometry_wanted"]=wanted.into();
+                status["water_geometry_resident"]=resident[0].into();
+                status["water_geometry_wanted"]=wanted[0].into();
+                status["water_geometry_view_resident"]=resident[1].into();
+                status["water_geometry_view_wanted"]=wanted[1].into();
                 status["water_geometry_buffer_bytes"]=self.surface.water.size().into();
                 status["water_viewport_buffer_bytes"]=self.surface.water_pixels.size().into();
             }
@@ -929,7 +932,7 @@ impl Renderer {
         self.terrain.as_ref().is_some_and(Terrain::fading)
             || self.detail.as_ref().is_some_and(terrain_detail::Stream::fading)
             || self.landscape.as_ref().is_some_and(Landscape::pending)
-            || self.water_pages.as_ref().is_some_and(crate::hydrology::WaterPages::inflight)
+            || self.water_pages.as_ref().is_some_and(crate::hydrology::WaterPages::pending)
     }
 
     pub fn landscape_counts(&self)->io::Result<LandscapeCounts> {
@@ -1005,7 +1008,11 @@ impl Renderer {
         let [w,h]=[texture.width(),texture.height()];
         let format=texture.format();
         self.models.prepare(&self.device,&self.queue,[w,h],models);
-        self.queue.write_buffer(&self.view,0,bytemuck::bytes_of(view));
+        let mut frame_view=*view;
+        if let Some(water)=&self.water_pages {
+            frame_view.water_clock=water.shader_clock(now);
+        }
+        self.queue.write_buffer(&self.view,0,bytemuck::bytes_of(&frame_view));
         self.queue.write_buffer(&self.screen_size,0,bytemuck::cast_slice(&[w as f32,h as f32,0.,0.,1.,seconds,0.,0.]));
         for (page,tile,_,opacity) in pages {
             let edges=if tile.city {

@@ -18,7 +18,17 @@
 
 候选使用 Basemap 2.0.0 随包的 GSHHG 2.3.6 全精度几何和 GRWL v01.01 的 30 米 Landsat 平均流量水域掩膜。岸线和卫星观测均为现代参照。1900 年精确河岸及航道宽度仍待对应历史资料。GRWL 掩膜是中间产品，细小水道和潮滩边界精度取决于资料。[GSHHG](https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html) · [Basemap 数据及 LGPL-3.0-or-later](https://pypi.org/project/basemap-data-hires/) · [Allen 与 Pavelsky 2018](https://doi.org/10.1126/science.aat0636) · [GRWL v01.01，CC BY 4.0](https://doi.org/10.5281/zenodo.1297434)
 
-将三份文件置于原 QPK 的隔离候选库，用 `wwo-map-lab --play --terrain-candidate <候选库>` 运行。Z4 至 Z7 共享水陆位置。复杂几何按视野驻留，缺页和远景使用 QPK。视口投影为地表、城市和景观提供同一份水陆判断。有明确覆盖的历史调查图层优先。水面显示、水域轮廓和原河段拓扑可分别追溯。
+正式入口优先读取 `data/worldcrs84quad-15s-v2-hydrology/`，否则读取可用的旧库。在水文目录内恢复下列文件。QHW 按各层 QPK 大小核对配套版本。完整恢复后用 `wwo-map-lab --play` 启动。显式 `--terrain-candidate <候选库>` 仍可指定对照版本。
+
+- `0.qpk` 至 `5.qpk` 和 `river-topology.u32` 取自 [Rust Windows 阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)。
+- `6.qpk`、`index.json` 和 `landscape-cover-v2.qsc` 取自 [Z6/Z7 地表阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/z6-z7-surface-20261119)。将 `z6-land-material-6.qpk` 命名为 `6.qpk`。
+- `7.qpk` 使用 [Z7 地表归档](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115) 的 `z7-land-material-7.qpk`。
+- `water-geometry.qwg` 解压自 [水域接替阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/water-page-handoff-20261120) 的 `water-geometry.qwg.zst`。配套 `hydrology-color.qhw` 取自 [水域几何阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/global-water-geometry-20261120)。
+- `river-centrelines.qhl` 取自 [河网阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/global-hydrology-20261119)。
+
+Z4 至 Z7 共享水陆位置。复杂几何按视野和移动方向预取。缺页和远景使用 QPK。地表、城市和景观共用水陆状态和接替权重。已有明确边界的历史调查图层优先。实测水域覆盖对应河段时抑制重复的中心线符号。水面轮廓与原河段拓扑可分别追溯。
+
+[水域接替阶段的正式游戏画面与遗留缺陷](WATER_HANDOFF.md)
 
 Z6 和 Z7 的地面材质独立于实例模型。用地分片可用时按地类及坡面混合材质。未知地类用中性土壤，待载地类页使用 QPK 色调和共用材质。观察模式可用 `{"id":"ground","action":"landscape-models","value":"hide"}` 只隐藏景观实例，`show` 恢复。
 
@@ -72,7 +82,7 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 ## 全球地图验收
 
-无窗口验收使用正式 Vulkan/wgpu 地图管线。运行 `wwo-map-lab --terrain-review --data <运行数据目录> --observe <临时目录/map.json>`。默认读取该数据目录下的 `worldcrs84quad-15s-v2`。可通过 `--terrain-candidate <QPK库目录>` 指定候选库。`--terrain-level 0..7` 只打开并绘制指定层，缺页显示紫色。超过显存页预算时，响应中的 `exact_view_over_capacity` 标为真，可缩小取景范围。`--terrain-max-level 0..7` 限制自动 LOD 的最高层，并保留父级回退。严格观察单层替换时可另传 `--terrain-layer-candidate <候选.qpk>`，使用该库共享清单及河网资料，原 QPK 保留。
+无窗口验收使用正式 Vulkan/wgpu 地图管线。运行 `wwo-map-lab --terrain-review --data <运行数据目录> --observe <临时目录/map.json>`。底图库沿用正式入口的默认选择规则。可通过 `--terrain-candidate <QPK库目录>` 指定候选库。`--terrain-level 0..7` 只打开并绘制指定层，缺页显示紫色。超过显存页预算时，响应中的 `exact_view_over_capacity` 标为真，可缩小取景范围。`--terrain-max-level 0..7` 限制自动 LOD 的最高层，并保留父级回退。严格观察单层替换时可另传 `--terrain-layer-candidate <候选.qpk>`，使用该库共享清单及河网资料，原 QPK 保留。
 
 观察请求写入 `--observe` 指定的 JSON。每次使用新 `id`。`{"id":"pose-1","action":"focus","lon":11.25,"lat":46.4,"mpp":1000,"value":"north"}` 设置取景。`terrain-samples` 查询页表，`capture` 带 `label` 写入同目录 PNG，响应在 PNG 保存后写入。响应记录视口、投影、目标层、视图上限和九处像素中心的瓦片 ID 与混合权重。采样由 CPU 投影和实际提交的页表计算，贴近边界时可能与 GPU 投影有浮点差异。`selected_ready` 表示选中页全部上传，自动模式同时等待混合完成。`quit` 退出。该入口不打开游戏档案、不推进世界、不创建游戏窗口。
 

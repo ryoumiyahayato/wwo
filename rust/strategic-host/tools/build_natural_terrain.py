@@ -1376,6 +1376,15 @@ def shoreline_polygons(path):
             yield level, Polygon(ring.reshape(-1, 2))
 
 
+def clip_water_polygon(polygon, bounds):
+    clipped = clip_by_rect(polygon,*bounds)
+    if clipped.is_valid:
+        return clipped
+    # Fast clipping can leave holes touching the exterior. Feeding that
+    # result into the next crop can fill the surrounding cell instead.
+    return polygon.intersection(box(*bounds))
+
+
 def split_shoreline(polygon):
     # Subdivide the continental polygons once before querying individual pages.
     w, s, e, n = polygon.bounds
@@ -1390,7 +1399,7 @@ def split_shoreline(polygon):
         split = (s+n)*.5
         rectangles = [(w-1,s-1,e+1,split),(w-1,split,e+1,n+1)]
     for bounds in rectangles:
-        for part in polygon_parts(clip_by_rect(polygon,*bounds)):
+        for part in polygon_parts(clip_water_polygon(polygon,bounds)):
             yield from split_shoreline(part)
 
 
@@ -1471,13 +1480,15 @@ def measured_river_polygons(path):
 
 def project_river_mask(polygon, geographic):
     projected = transform(polygon,geographic.transform,interleaved=False)
+    if not projected.is_valid:
+        projected = make_valid(projected)
     west,_,east,_ = projected.bounds
     if west >= -180 and east <= 180:
-        yield projected
+        yield from polygon_parts(projected)
         return
     for offset in (-360,0,360):
         if east+offset > -180 and west+offset < 180:
-            yield from polygon_parts(clip_by_rect(translate(projected,xoff=offset),-180,-90,180,90))
+            yield from polygon_parts(clip_water_polygon(translate(projected,xoff=offset),(-180,-90,180,90)))
 
 
 def clipped_water(polygons, bounds, parent=0):
@@ -1485,7 +1496,7 @@ def clipped_water(polygons, bounds, parent=0):
     area = (e-w)*(n-s)
     parts = []
     for level, polygon in polygons:
-        for part in polygon_parts(clip_by_rect(polygon,*bounds)):
+        for part in polygon_parts(clip_water_polygon(polygon,bounds)):
             if part.area >= area*(1-1e-11):
                 parent ^= level
             elif part.area > 0:
@@ -1591,7 +1602,7 @@ def write_water_geometry(shoreline, destination, *, measured_rivers=None, docume
         for corridor in outlet_corridors(documented_widths).geometries:
             if measured.query(corridor,predicate="intersects").size:
                 continue
-            for part in polygon_parts(clip_by_rect(corridor,-180,-90,180,90)):
+            for part in polygon_parts(clip_water_polygon(corridor,(-180,-90,180,90))):
                 for piece in split_shoreline(part):
                     pieces.append(piece)
                     flags.append(next_source)
