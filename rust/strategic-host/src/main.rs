@@ -532,6 +532,11 @@ impl Host {
                     .filter(|a|a.enabled).map(|a|a.id.clone());
                 if let Some(id)=id{self.emit(Request::Relations{verb:"work_action",id:&id});}
             }
+            HudCommand::OralWorkAction(revision)=>{
+                let id=self.state.session.as_ref().and_then(|s|s.activities.as_ref())
+                    .and_then(|a|a.oral_work_action(revision)).map(str::to_owned);
+                if let Some(id)=id{self.emit(Request::Relations{verb:"work_action",id:&id});}
+            }
             HudCommand::WorkConfirm(confirmed)=>{
                 self.emit(Request::Relations{verb:if confirmed{"work_confirm"}else{"work_cancel"},id:""});
             }

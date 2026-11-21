@@ -33,6 +33,7 @@ struct OpeningActivities {
     work_injury_damage: u16,
     work_injury_permanent_loss: u16,
     openings: BTreeMap<String, Language>,
+    written_job_notices: BTreeMap<String, String>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -48,6 +49,7 @@ struct PlayerDay {
     booking: Option<ActivityBooking>,
     food_milli: i64,
     last_read_notice: Option<i64>,
+    written_job_notice: bool,
 }
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -400,7 +402,31 @@ impl InitialWorld {
 
     pub fn jobs(&self) -> impl Iterator<Item = (&Job, usize)> {
         self.work.local_jobs(&self.work_opening, &self.player, self.player_current_place(), self.clock.current_day())
+            .filter(|job| self.can_access_player_job(&job.id))
             .map(|job| (job, self.work.vacancies(job)))
+    }
+
+    fn player_written_job(&self) -> Option<&str> {
+        if !self.player_day.written_job_notice { return None; }
+        self.activities.written_job_notices.get(&self.player().opening_source_id).map(String::as_str)
+    }
+
+    fn can_access_player_job(&self, job: &str) -> bool {
+        self.player_written_job() != Some(job) || self.can_read_opening_language()
+            || self.player_day.last_read_notice.is_some()
+    }
+
+    pub fn oral_work_offer(&self) -> Option<(&Job, usize)> {
+        self.player_day.last_read_notice?;
+        let known = self.player_written_job()?;
+        if self.work.has_contract(&self.player) || !self.eligible_for_civil_work(&self.player) { return None; }
+        self.jobs().find(|(job, _)| job.id == known)
+    }
+
+    pub fn oral_work_employment(&self) -> Option<(&Job, bool)> {
+        self.player_day.last_read_notice?;
+        let (job, booked, _) = self.employment()?;
+        (self.player_written_job() == Some(job.id.as_str())).then_some((job, booked))
     }
 
     pub fn employment(&self) -> Option<(&Job, bool, &str)> {
@@ -458,6 +484,9 @@ impl InitialWorld {
 
     pub fn apply_for_work_as(&mut self, person: &str, job: &str) -> io::Result<()> {
         if !self.eligible_for_civil_work(person) { return Err(invalid("当前健康或服役状态不允许民间就业。")); }
+        if person == self.player && !self.can_access_player_job(job) {
+            return Err(invalid("人物还未能读懂或听取这份招聘公告。"));
+        }
         let place = self.current_place(person).map(str::to_owned);
         self.work.apply(&self.work_opening, person, job, place.as_deref(), self.clock.current_day())
     }
@@ -1023,14 +1052,22 @@ impl WorldBootstrap {
             world.add_opening_person("country_fra", resident.place_id, resident.person_id.clone(), resident.claim_id)?;
             residents.insert(resident.person_id, resident.opening_cash);
         }
+        let work = WorkOpening::load()?;
+        let activities = load_opening_activities()?;
+        for (source, job) in &activities.written_job_notices {
+            let actor = format!("person:formal_generated_{source}_0001");
+            if !world.people.get(&actor).is_some_and(|person| {
+                work.jobs(&actor, Some(&person.place_id), 0).any(|row| row.id == *job)
+            }) { return Err(invalid("written employment notice has no accessible opening job")); }
+        }
         Ok(Self {
             world: Arc::new(world),
             populations,
             markets: Arc::new(markets),
             residents,
-            work: Arc::new(WorkOpening::load()?),
+            work: Arc::new(work),
             enterprise_opening: Arc::new(EnterpriseOpening::load()?),
-            activities: Arc::new(load_opening_activities()?),
+            activities: Arc::new(activities),
         })
     }
 
@@ -1104,7 +1141,10 @@ impl WorldBootstrap {
             homes: BTreeMap::new(),
             service: ServiceRoster::default(),
             activities: Arc::clone(&self.activities),
-            player_day: PlayerDay::default(),
+            player_day: PlayerDay {
+                written_job_notice: prologue.is_some() && self.activities.written_job_notices.contains_key(source_id),
+                ..PlayerDay::default()
+            },
         })
     }
 
@@ -1213,6 +1253,7 @@ impl WorldBootstrap {
         if world.opening_language().is_some_and(|language| self.opening_language(&saved.opening) != Some(language))
             || !(0..=1000).contains(&world.player_day.food_milli)
             || invalid_booking
+            || world.player_day.written_job_notice && (world.opening_language().is_none() || world.player_written_job().is_none())
             || world.player_day.last_read_notice.is_some_and(|notice| {
                 !(MINUTES_PER_DAY..=minute).contains(&notice) || notice % MINUTES_PER_DAY != 0
             })
@@ -1891,7 +1932,13 @@ mod tests {
     #[test]
     #[ignore = "measure the formal-world opening and one year of gameplay"]
     fn population_world_year_measurement() {
+        measure_population_year(0);
+        measure_population_year(100);
+    }
+
+    fn measure_population_year(groups_per_unit: u64) {
         use crate::formal_save::{read_native_slot, write_native_slot};
+        use crate::formal_population::{CohortBirthYears, CohortDefinition, CohortProvenance};
         use std::time::{Instant, SystemTime, UNIX_EPOCH};
         let start = Instant::now();
         let bootstrap = WorldBootstrap::load().unwrap();
@@ -1899,6 +1946,20 @@ mod tests {
         let start = Instant::now();
         let mut world = bootstrap.create("country_fra").unwrap();
         let opening = start.elapsed();
+        let start = Instant::now();
+        let units: Vec<_> = world.population_units().keys().cloned().collect();
+        for unit in &units {
+            for index in 0..groups_per_unit {
+                let birth_year = 1801 + index as i64;
+                world.population.alloc_cohort(
+                    unit, CohortId::new("fixture:annual_population", format!("{unit}:{index}")).unwrap(),
+                    CohortDefinition { provenance: CohortProvenance::Fixture, sex: None,
+                        birth_years: Some(CohortBirthYears { earliest: birth_year, latest: birth_year }) },
+                    2000, 0,
+                ).unwrap();
+            }
+        }
+        let cohort_setup = start.elapsed();
         day_measurement::enable();
         let start = Instant::now();
         world.advance_migrated_domains(365 * MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
@@ -1920,9 +1981,10 @@ mod tests {
         assert_eq!(world.clock(), loaded.clock());
         assert_eq!(world.population_units(), loaded.population_units());
         assert!(world.snapshot() == loaded.snapshot(), "restored annual snapshot differs");
-        println!("units={} residents={} named={} inputs_ms={} opening_ms={} year_ms={} save_bytes={} save_ms={} restore_ms={}",
-            world.population_units().len(), world.population_units().values().sum::<u64>(), world.identities.len(),
-            inputs.as_millis(), opening.as_millis(), year.as_millis(), bytes, save.as_millis(), restore.as_millis());
+        println!("units={} residents={} named={} fixture_groups={} inputs_ms={} opening_ms={} cohort_setup_ms={} year_ms={} save_bytes={} save_ms={} restore_ms={}",
+            units.len(), world.population_units().values().sum::<u64>(), world.identities.len(),
+            units.len() as u64 * groups_per_unit, inputs.as_millis(), opening.as_millis(),
+            cohort_setup.as_millis(), year.as_millis(), bytes, save.as_millis(), restore.as_millis());
         println!("average_day_us work_and_wages={work} enterprise={enterprise} livelihood={livelihood} character_and_population={health} market={market}");
     }
 

@@ -7,6 +7,7 @@
   "work_injury_interval": 32,
   "work_injury_damage": 90,
   "work_injury_permanent_loss": 40,
+  "written_job_notices": {"country_fra": "job:opening_paris_workshop"},
   "openings": {
     "country_fra": "French",
     "british_isles_1900": "English",

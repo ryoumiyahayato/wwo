@@ -1,6 +1,6 @@
 use crate::{
     desktop_start::{lock_profile, TICK_INTERVAL},
-    formal_ui::{Session, Slot},
+    formal_ui::{OralWorkFeedback, Session, Slot},
     lobby::Lobby,
     state::{Request, State},
     timeline::Date,
@@ -37,6 +37,7 @@ pub struct NativeSession {
     selected_organization: String,
     property_feedback: String,
     work_feedback: String,
+    oral_work_feedback: Option<OralWorkFeedback>,
     work_revision: u64,
 }
 
@@ -76,6 +77,7 @@ impl NativeSession {
             lobby_status: String::new(), departure: None, exit: false, market: None, market_serial: 0,
             relations: None, pending_job: None, selected_organization: String::new(), property_feedback: String::new(),
             work_feedback: String::new(),
+            oral_work_feedback: None,
             work_revision: 0,
         };
         session.refresh_slots();
@@ -97,6 +99,7 @@ impl NativeSession {
         self.selected_organization.clear();
         self.property_feedback.clear();
         self.work_feedback.clear();
+        self.oral_work_feedback = None;
         self.work_revision += 1;
     }
 
@@ -242,8 +245,10 @@ impl NativeSession {
     fn relations_action(&mut self, verb: &str, id: &str) {
         let Some(world) = &mut self.world else { return; };
         self.work_revision += 1;
+        let work_panel = self.relations.as_deref() == Some("work");
+        let oral_panel = self.relations.is_none();
         match verb {
-            "open" => self.relations = Some("relations".into()),
+            "open" => { self.relations = Some("relations".into()); self.pending_job = None; }
             "close" => { self.relations = None; self.pending_job = None; self.selected_organization.clear(); }
             "drawer" if matches!(id, "relations" | "work") => {
                 self.relations = Some(id.to_owned());
@@ -251,27 +256,47 @@ impl NativeSession {
             }
             "select" if world.employment().is_some_and(|(_, _, org)| org == id) => self.selected_organization = id.into(),
             "back" => self.selected_organization.clear(),
-            "work_action" if self.relations.as_deref() == Some("work") => {
+            "work_action" if work_panel || oral_panel => {
                 if let Some(job) = id.strip_prefix("person:job_request:") {
-                    if world.employment().is_none() && world.jobs().any(|(row, spots)| row.id == job && spots > 0) {
+                    let available = if oral_panel {
+                        world.oral_work_offer().is_some_and(|(row, spots)| row.id == job && spots > 0)
+                    } else {
+                        world.employment().is_none() && world.jobs().any(|(row, spots)| row.id == job && spots > 0)
+                    };
+                    if available {
                         self.pending_job = Some(job.into());
-                        self.work_feedback.clear();
+                        if oral_panel { self.oral_work_feedback = None; }
+                        else { self.work_feedback.clear(); }
+                    } else if oral_panel {
+                        self.oral_work_feedback = Some(OralWorkFeedback::Unavailable);
                     } else {
                         self.work_feedback = "该岗位当前无法申请。".into();
                     }
-                } else {
+                } else if oral_panel && id == "native:work" && world.oral_work_employment().is_some() {
+                    let booked = world.can_book_work() && perform_work_action(world, id).is_ok();
+                    self.oral_work_feedback = (!booked).then_some(OralWorkFeedback::Unavailable);
+                } else if work_panel {
                     self.work_feedback = match perform_work_action(world, id) {
                         Ok(message) => message,
                         Err(error) => error.to_string(),
                     };
                 }
             }
-            "work_confirm" if self.relations.as_deref() == Some("work") => {
+            "work_confirm" if work_panel || oral_panel => {
                 if let Some(job) = self.pending_job.take() {
-                    self.work_feedback = match world.apply_for_work(&job) {
-                        Ok(()) => "劳动合同已签订。".into(),
-                        Err(error) => error.to_string(),
-                    };
+                    if oral_panel {
+                        let available = world.oral_work_offer().is_some_and(|(row, spots)| row.id == job && spots > 0);
+                        self.oral_work_feedback = Some(if available && world.apply_for_work(&job).is_ok() {
+                            OralWorkFeedback::Signed
+                        } else {
+                            OralWorkFeedback::Unavailable
+                        });
+                    } else {
+                        self.work_feedback = match world.apply_for_work(&job) {
+                            Ok(()) => "劳动合同已签订。".into(),
+                            Err(error) => error.to_string(),
+                        };
+                    }
                 }
             }
             "work_cancel" => self.pending_job = None,
@@ -391,12 +416,35 @@ impl NativeSession {
         }).collect();
         let mut character = serde_json::to_value(world.character_for_player())?;
         character["settled_day"] = json!(clock.current_day());
+        let oral_work = world.oral_work_employment().map(|(job, booked)| {
+            (job, "native:work".to_owned(), json!({
+                "kind":"contract", "booked":booked, "can_book":world.can_book_work(),
+                "present":place == Some(job.place.as_str()),
+            }))
+        }).or_else(|| world.oral_work_offer().map(|(job, vacancies)| {
+            (job, format!("person:job_request:{}",job.id), json!({
+                "kind":"offer", "vacancies":vacancies,
+                "confirming":self.relations.is_none() && self.pending_job.as_deref() == Some(job.id.as_str()),
+            }))
+        }));
+        let oral_work = oral_work.map(|(job, action, state)| json!({
+            "employer":employer_label(&job.employer),
+            "employer_english":match job.employer.as_str() {
+                "firm:opening_paris_workshop" => "Paris workshop",
+                "firm:opening_paris_bakery" => "Paris bakery",
+                id => employer_label(id),
+            },
+            "hours":job.hours,"wage_per_hour":job.wage_per_hour,"wage_delay":job.wage_delay,
+            "action":action,"revision":self.work_revision,"state":state,
+        }));
         let activities = world.opening_language().map(|language| json!({
             "language": language, "scheduled": world.scheduled_activity(),
             "lesson":world.can_schedule_personal_activity(PersonalActivity::Lesson),
             "rest":world.can_schedule_personal_activity(PersonalActivity::Rest),
             "read_notice":world.can_schedule_personal_activity(PersonalActivity::ReadNotice),
             "oral_notice":world.last_read_notice().map(|_| format!("课堂教师口述 · {}", world.lesson_notice())),
+            "oral_work":oral_work,
+            "oral_work_feedback":self.oral_work_feedback,
         }));
         let messages = world.opening_language().map(|_| json!([{
             "source":"本地识字课堂", "received_at":"", "text":world.lesson_notice(), "action":""
@@ -439,6 +487,7 @@ impl NativeSession {
                     activities.lesson = world.can_schedule_personal_activity(PersonalActivity::Lesson);
                     activities.rest = world.can_schedule_personal_activity(PersonalActivity::Rest);
                     activities.read_notice = world.can_schedule_personal_activity(PersonalActivity::ReadNotice);
+                    activities.refresh_oral_work_booking(|| world.can_book_work());
                 }
                 if let Some(market) = view.market.as_mut() {
                     market.minute = view.total_minutes;
