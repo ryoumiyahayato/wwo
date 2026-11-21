@@ -77,6 +77,25 @@ fn main() -> Result<(), Box<dyn Error>> {
                 None => bootstrap.create("country_fra")?,
             };
             let population = world.population();
+            if unit == "world" {
+                println!("{}", json!({
+                    "date": world.clock().current_date(),
+                    "unit_id": unit,
+                    "statistical_scope": "world",
+                    "structure": population.structure(None, world.clock()),
+                }));
+                return Ok(());
+            }
+            if let Some(city) = unit.strip_prefix("city:") {
+                let reference = wwo_map_lab::formal_population::city_population_reference(city)?
+                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown historical city key"))?;
+                println!("{}", json!({
+                    "unit_id": unit,
+                    "statistical_scope": "dated_city_reference",
+                    "reference": reference,
+                }));
+                return Ok(());
+            }
             let total = population.population_total(unit)
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown statistical population unit"))?;
             let partitions = population.partitions(unit).map(|(id, name, count)| {
@@ -103,6 +122,22 @@ fn main() -> Result<(), Box<dyn Error>> {
                 "admitted_opening": admitted,
                 "legacy_estimate": population.opening_estimate(unit)?,
                 "partitions": partitions,
+                "structure": population.structure(Some(unit), world.clock()),
+            }));
+        }
+        Some("inspect-intake") => {
+            let path = args.next().ok_or_else(usage)?;
+            let person = args.next().ok_or_else(usage)?;
+            let person = person.to_str().ok_or_else(usage)?;
+            if args.next().is_some() { return Err(usage().into()); }
+            let world = read_native_slot(Path::new(&path), &WorldBootstrap::load()?)?;
+            let livelihood = world.person_livelihood(person)
+                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown formal resident"))?;
+            println!("{}", json!({
+                "person_id": person,
+                "last_settled_day": livelihood.last_day,
+                "last_recorded_intake": livelihood.last_food_intake,
+                "last_recorded_energy": livelihood.last_food_intake.map(|intake| intake.recorded_energy()),
             }));
         }
         Some("inspect-wages") => {
@@ -156,5 +191,5 @@ fn show(saved: &SavedWorld) {
 
 fn usage() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput,
-        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <unit-id> [<native-save>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
+        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <world|unit-id|city:city-key> [<native-save>], inspect-intake <native-save> <person-id>, inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
 }

@@ -1,0 +1,318 @@
+{
+  "unit_id": "cshapes_gw_750",
+  "population_value": 294000000,
+  "date": "1900-01-01",
+  "units": [
+    {
+      "unit_id": "raj_agra_oudh",
+      "source_unit_ids": [
+        "raj_comparable_row_12"
+      ],
+      "name": "United Provinces of Agra and Oudh",
+      "endpoint_values": [
+        46905085,
+        47692076
+      ],
+      "population_value": 47600781,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 12: United Provinces of Agra and Oudh.",
+      "scope": "The census groups Agra and Oudh in one row. Their two subrows and the United Provinces States are outside this partition count.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_ajmer_merwara",
+      "source_unit_ids": [
+        "raj_comparable_row_01"
+      ],
+      "name": "Ajmer-Merwara",
+      "endpoint_values": [
+        542358,
+        476912
+      ],
+      "population_value": 484504,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 1: Ajmer-Merwara.",
+      "scope": "British Ajmer-Merwara is a separate row from the Rajputana Agency that administers it.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_baroda_state",
+      "source_unit_ids": [
+        "raj_comparable_row_13"
+      ],
+      "name": "Baroda State",
+      "endpoint_values": [
+        2415396,
+        1952692
+      ],
+      "population_value": 2006368,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 13: Baroda State.",
+      "scope": "The Baroda State is separately returned from the Bombay Presidency districts with which it was geographically interspersed. General Report §106.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_bengal_province",
+      "source_unit_ids": [
+        "raj_comparable_row_04"
+      ],
+      "name": "Bengal",
+      "endpoint_values": [
+        71346987,
+        74744892
+      ],
+      "population_value": 74350716,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 4: Bengal.",
+      "scope": "The directly administered Bengal return precedes the 1905 partition. The Bengal States and French Chandernagore are separate census returns.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_berar",
+      "source_unit_ids": [
+        "raj_comparable_row_05"
+      ],
+      "name": "Berar",
+      "endpoint_values": [
+        2897491,
+        2754016
+      ],
+      "population_value": 2770660,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 5: Berar.",
+      "scope": "Berar is printed apart from the Hyderabad State and Central Provinces. The transfer of administration to the Central Provinces followed in 1903.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_bombay_presidency",
+      "source_unit_ids": [
+        "raj_comparable_bombay_ex_aden"
+      ],
+      "name": "Bombay Presidency excluding Aden",
+      "endpoint_values": [
+        18857044,
+        18538396
+      ],
+      "population_value": 18575361,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 6 (Bombay Presidency) minus its Aden subrow, persons.",
+      "scope": "Row 6 minus the Aden subrow at both endpoints. The remaining persons are the directly administered Bombay and Sind components, separate from the Bombay States and Baroda.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_bombay_states",
+      "source_unit_ids": [
+        "raj_comparable_row_15"
+      ],
+      "name": "Bombay States",
+      "endpoint_values": [
+        8059298,
+        6885839
+      ],
+      "population_value": 7021967,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 15: Bombay States.",
+      "scope": "The Bombay States are a separate peer group from the Bombay Presidency and Baroda, as tabulated in II-A.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_central_india_agency",
+      "source_unit_ids": [
+        "raj_comparable_row_16"
+      ],
+      "name": "Central India Agency",
+      "endpoint_values": [
+        10318812,
+        8628781
+      ],
+      "population_value": 8824834,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 16: Central India Agency.",
+      "scope": "The Agency includes Gwalior. Gwalior is a subrow and enters the parent tally once. Central Provinces States are a separate peer row.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_central_provinces",
+      "source_unit_ids": [
+        "raj_comparable_row_08"
+      ],
+      "name": "Central Provinces",
+      "endpoint_values": [
+        10784294,
+        9876646
+      ],
+      "population_value": 9981938,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 8: Central Provinces.",
+      "scope": "The directly administered Central Provinces are separate from Central Provinces States and Berar.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_central_provinces_states",
+      "source_unit_ids": [
+        "raj_comparable_row_17"
+      ],
+      "name": "Central Provinces States",
+      "endpoint_values": [
+        2160511,
+        1996383
+      ],
+      "population_value": 2015423,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 17: Central Provinces States.",
+      "scope": "The grouped Central Provinces States are separately returned from the Central Provinces, the Central India Agency and Berar.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_coorg",
+      "source_unit_ids": [
+        "raj_comparable_row_09"
+      ],
+      "name": "Coorg",
+      "endpoint_values": [
+        173055,
+        180607
+      ],
+      "population_value": 179731,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 9: Coorg.",
+      "scope": "Coorg was a separate census reporting territory under its Chief Commissioner.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_hyderabad_state",
+      "source_unit_ids": [
+        "raj_comparable_row_18"
+      ],
+      "name": "Hyderabad States",
+      "endpoint_values": [
+        11537040,
+        11141142
+      ],
+      "population_value": 11187068,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 18: Hyderabad States.",
+      "scope": "Hyderabad State excludes Berar (a separate province in table II-A row 5). French Yanam lies in the Madras Godavari district. Imperial Gazetteer of India vol. IV, Native States appendix I, Hyderabad footnote; vol. XXIV p. 413.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_madras_presidency",
+      "source_unit_ids": [
+        "raj_comparable_row_10"
+      ],
+      "name": "Madras",
+      "endpoint_values": [
+        35630440,
+        38209436
+      ],
+      "population_value": 37910258,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 10: Madras.",
+      "scope": "The directly administered Madras return uses the table's coastal and island reporting scope. Madras States and the French settlements have separate census returns.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_madras_states",
+      "source_unit_ids": [
+        "raj_comparable_row_20"
+      ],
+      "name": "Madras States",
+      "endpoint_values": [
+        3700622,
+        4188086
+      ],
+      "population_value": 4131538,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 20: Madras States.",
+      "scope": "Cochin and Travancore are included in the Madras States total. Their individually reported numbers are subrows. General Report §§146–147.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_mysore_state",
+      "source_unit_ids": [
+        "raj_comparable_row_21"
+      ],
+      "name": "Mysore State",
+      "endpoint_values": [
+        4943604,
+        5539399
+      ],
+      "population_value": 5470284,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 21: Mysore State.",
+      "scope": "Mysore includes Bangalore Civil and Military Station. Census of India 1901, Mysore report, p. 19. The station and city populations are already contained here.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_rajputana_agency",
+      "source_unit_ids": [
+        "raj_comparable_row_23"
+      ],
+      "name": "Rajputana Agency",
+      "endpoint_values": [
+        12220343,
+        9723301
+      ],
+      "population_value": 10012972,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 23: Rajputana Agency.",
+      "scope": "The Agency is a peer of British Ajmer-Merwara. The 1891 return includes the source's estimate of the Bhil population, per Table II-A p. 9.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_united_provinces_states",
+      "source_unit_ids": [
+        "raj_comparable_row_24"
+      ],
+      "name": "United Provinces States",
+      "endpoint_values": [
+        792491,
+        802097
+      ],
+      "population_value": 800983,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 24: United Provinces States.",
+      "scope": "The census separately returns the United Provinces States and the directly administered Agra and Oudh.",
+      "place_ids": []
+    }
+  ],
+  "source_id": "india_census_1901_comparable_area",
+  "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6.",
+  "endpoint_dates": [
+    "1891-02-26",
+    "1901-03-01"
+  ],
+  "method": "Day-weighted linear interpolation between comparable enumeration endpoints, rounded to the nearest person. Each area is rounded independently. The census supplies no 1900 count or uncertainty interval. Famine and migration could change the timing of intercensal growth or decline.",
+  "scope": "Partition of the old India control using peer statistical areas in the 1891 comparison geography. Isolated frontier or enumeration differences stay in the residual. The source units have no WWO province polygons.",
+  "legacy_unlocated_balance": 50674614,
+  "legacy_control_source": "data/alpha/historical_world_economy_1900/countries_compact.json: cshapes_gw_750 population_value",
+  "uncertainty_kind": "The unlocated remainder is an accounting residual with unknown geographic distribution and census error.",
+  "balance_basis": {
+    "comparable_area_excluding_aden": 291140210,
+    "comparable_area_minus_admitted": 47814824,
+    "comparable_rows_left_out": [
+      {
+        "source_unit_id": "raj_comparable_row_02",
+        "population_value": 16181,
+        "reason": "The comparison omits Indigenous Andamanese and Nicobarese not enumerated in the 1891 census."
+      },
+      {
+        "source_unit_id": "raj_comparable_row_03",
+        "population_value": 5721183,
+        "reason": "The Assam comparison excludes first enumerations and adjusts jurisdiction. The Manipur and Lushai frontier coverage needs reconciliation."
+      },
+      {
+        "source_unit_id": "raj_comparable_row_07",
+        "population_value": 8958798,
+        "reason": "The comparison omits first enumerations in the Shan States and Chin Hills."
+      },
+      {
+        "source_unit_id": "raj_comparable_row_11",
+        "population_value": 22206352,
+        "reason": "The comparable Punjab return combines the later North-West Frontier Province with Punjab and omits first-enumerated frontier districts."
+      },
+      {
+        "source_unit_id": "raj_comparable_row_14",
+        "population_value": 3643922,
+        "reason": "The Sikkim adjustment and external boundary prevent adopting the Bengal States comparison as a WWO subdivision."
+      },
+      {
+        "source_unit_id": "raj_comparable_row_19",
+        "population_value": 2863627,
+        "reason": "The Kashmir return needs alignment of northern and eastern border jurisdictions. The General Report §53 records uncertainty in the jurisdiction areas."
+      },
+      {
+        "source_unit_id": "raj_comparable_row_22",
+        "population_value": 4404762,
+        "reason": "The Punjab States comparison adjusts the later return and needs an opening boundary crosswalk on the northwest frontier."
+      }
+    ],
+    "comparable_rows_left_out_total": 47814825,
+    "legacy_control_minus_comparable_area": 2859790,
+    "excluded_aden": 43986,
+    "scope": "The implied balance includes published comparison areas held out and the arithmetic difference between the legacy and comparable controls. The source rounds the combined and component estimates independently. There is no measured 1900 population for the unenumerated remainder."
+  }
+}

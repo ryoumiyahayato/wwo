@@ -2,7 +2,7 @@ use super::MAX_POPULATION;
 use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{collections::BTreeMap, io, sync::OnceLock};
+use std::{collections::BTreeMap, io::{self, BufRead, BufReader}, sync::OnceLock};
 
 const SOURCE: &[u8] = include_bytes!("../../../../data/alpha/historical_world_economy_1900/countries_compact.json");
 const SCHEMA: &str = "historical_world_economy_1900_compact_country_table_v1";
@@ -41,6 +41,20 @@ pub(super) fn opening_estimate(unit: &str) -> io::Result<Option<HistoricalPopula
     static ESTIMATES: OnceLock<io::Result<Estimates>> = OnceLock::new();
     Ok(ESTIMATES.get_or_init(read_estimates).as_ref()
         .map_err(|error| invalid(error.to_string()))?.get(unit).copied())
+}
+
+/// Dated evidence from the historical catalogue, outside the live population
+/// ledger. A city is already part of its parent population.
+pub fn city_population_reference(city_key: &str) -> io::Result<Option<Value>> {
+    let bytes = include_bytes!("../../../../data/historical_population_1900/cities_1900.jsonl.gz");
+    let rows = BufReader::new(flate2::read::GzDecoder::new(bytes.as_slice()));
+    for line in rows.lines() {
+        let row: Value = serde_json::from_str(&line?)?;
+        if row["city_key"].as_str() == Some(city_key) {
+            return Ok(Some(row));
+        }
+    }
+    Ok(None)
 }
 
 fn read_estimates() -> io::Result<Estimates> {

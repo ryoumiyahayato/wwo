@@ -111,7 +111,7 @@
       "ft_mongolia"
     ],
     "opening_replacement": null,
-    "legacy_unlocated_balance": 345628683,
+    "legacy_unlocated_balance": 266288210,
     "replacement_minus_legacy": 0,
     "status": "legacy_control_with_verified_subdivisions",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -297,7 +297,7 @@
       "ft_india"
     ],
     "opening_replacement": null,
-    "legacy_unlocated_balance": 277342648,
+    "legacy_unlocated_balance": 50674614,
     "replacement_minus_legacy": 0,
     "status": "legacy_control_with_verified_subdivisions",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -1085,10 +1085,10 @@
     "research_candidates": [
       "ft_uruguay"
     ],
-    "opening_replacement": null,
+    "opening_replacement": 908090,
     "legacy_unlocated_balance": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "replacement_minus_legacy": -31910,
+    "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {

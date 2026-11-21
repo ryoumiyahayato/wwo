@@ -1,0 +1,230 @@
+[
+  {
+    "id": "russia_empire_1897",
+    "published_scope": "Russian Empire excluding Finland",
+    "source_id": "rus_age_97",
+    "observed_unit_id": "ru_census_1897_ex_finland",
+    "observed_date": "1897-02-09",
+    "locator": "rus_age_97.php?reg=0, rows 3–126",
+    "definition": "Published age and sex for the population counted by the first imperial census. Single years, an open upper age range and age not stated are retained.",
+    "opening_unit_id": "ft_russia_empire_ussr",
+    "uncertainty": "Imperial shares cover the core empire excluding Finland; Bukhara and Khiva were reported separately in the opening source. The opening total is a separate reconstructed estimate. Enumeration error, age heaping, migration and the shift from February 1897 to January 1900 are unquantified.",
+    "broad_observation": true
+  },
+  {
+    "source_id": "british_empire_census_1901",
+    "locator": "Table 4, printed p. 12 (census dates, p. 71)",
+    "definition": "Age last birthday. Sex and ages as printed; cumulative under-five rows are subtotals. The census night started on 31 March and the compendium describes results as of 1 April.",
+    "observed_date": "1901-03-31",
+    "id": "england_wales_1901",
+    "published_scope": "England and Wales",
+    "observed_unit_id": "uk_england_wales",
+    "broad_observation": true
+  },
+  {
+    "source_id": "british_empire_census_1901",
+    "locator": "Table 4, printed p. 12 (census dates, p. 71)",
+    "definition": "Age last birthday. Sex and ages as printed; cumulative under-five rows are subtotals. The census night started on 31 March and the compendium describes results as of 1 April.",
+    "observed_date": "1901-03-31",
+    "id": "scotland_1901",
+    "published_scope": "Scotland",
+    "observed_unit_id": "uk_scotland",
+    "opening_unit_id": "administrative_region:uk_constituent_scotland",
+    "uncertainty": "The opening partition and census cover the same historical jurisdiction. Change in age and sex shares between January 1900 and the census is unquantified. The census age groups and enumeration errors are retained.",
+    "broad_observation": true
+  },
+  {
+    "source_id": "british_empire_census_1901",
+    "locator": "Table 4, printed p. 12 (census dates, p. 71)",
+    "definition": "Age last birthday. Sex and ages as printed; cumulative under-five rows are subtotals. The census night started on 31 March and the compendium describes results as of 1 April.",
+    "observed_date": "1901-03-31",
+    "id": "ireland_1901",
+    "published_scope": "Ireland",
+    "observed_unit_id": "uk_ireland",
+    "opening_unit_id": "administrative_region:uk_constituent_ireland",
+    "uncertainty": "The opening partition and census cover the same historical jurisdiction. Change in age and sex shares between January 1900 and the census is unquantified. The census age groups and enumeration errors are retained.",
+    "broad_observation": true
+  },
+  {
+    "source_id": "british_empire_census_1901",
+    "locator": "Table 4, printed p. 14 (census dates, p. 71)",
+    "observed_date": "1901-03-01",
+    "id": "india_1901",
+    "published_scope": "India",
+    "observed_unit_id": "british_india_empire_1901",
+    "definition": "British Indian Empire, including areas whose ages were unrecorded. The unknown-age row includes 983,756 people in such areas.",
+    "broad_observation": true
+  },
+  {
+    "source_id": "british_empire_census_1901",
+    "locator": "Table 4, printed p. 14 (census dates, p. 71)",
+    "observed_date": "1901-03-01",
+    "id": "ceylon_1901",
+    "published_scope": "Ceylon",
+    "observed_unit_id": "cshapes_gw_780",
+    "definition": "Ceylon census population, including the military and excluding 4,914 prisoners of war.",
+    "broad_observation": true,
+    "opening_unit_id": "cshapes_gw_780",
+    "uncertainty": "The Gazette opening count and later census both cover the island. The census includes the military and excludes 4,914 prisoners of war. The Gazette derives the previous quarter-end island estimate with natural increase and net migrant labour. Differences in military coverage, changes since January 1900 and enumeration or age reporting errors are unquantified."
+  },
+  {
+    "id": "seychelles_1901",
+    "published_scope": "Seychelles Islands",
+    "source_id": "british_empire_census_1901",
+    "observed_unit_id": "seychelles_islands_1901",
+    "observed_date": "1901-05-31",
+    "locator": "Table 4, printed p. 18 (census date, p. 71)",
+    "definition": "Seychelles Islands, as enumerated in the British Empire census. Under-five subtotal overlaps the two age bands shown above it.",
+    "broad_observation": true
+  },
+  {
+    "id": "us_mainland_1900",
+    "published_scope": "Mainland of the United States",
+    "source_id": "us_twelfth_census_abstract",
+    "observed_unit_id": "united_states_1900",
+    "observed_date": "1900-06-01",
+    "locator": "Table 11, printed p. 11; Volume II, Table XXI",
+    "definition": "Mainland census, excluding overseas military and naval counts. Includes unknown-age returns reported in the Abstract.",
+    "broad_observation": true
+  },
+  {
+    "id": "new_zealand_1901",
+    "published_scope": "Colony of New Zealand population excluding Māori",
+    "source_id": "nz_census_1901_ages",
+    "observed_unit_id": "nz_colony_non_maori_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Part IV, Ages of the People; detailed table, Including Chinese columns",
+    "definition": "Includes Chinese residents and excludes Māori; the source enumerates Māori separately. The table preserves two unknown-age categories. The published persons figure for age 3 differs by 5 from the printed male and female sum.",
+    "broad_observation": true
+  },
+  {
+    "id": "canada_1901",
+    "observed_unit_id": "dominion_of_canada",
+    "published_scope": "Dominion of Canada",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 190 (census dates, p. 71)",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": true
+  },
+  {
+    "id": "ca_british_columbia_1901",
+    "observed_unit_id": "ca_british_columbia",
+    "published_scope": "British Columbia",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 190 (census dates, p. 71)",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": false,
+    "opening_unit_id": "ca_british_columbia",
+    "uncertainty": "The published April 1901 age and sex shares are held at the interpolated January 1900 population of the same historical scope. Change in age and sex shares, age reporting and enumeration error are unquantified."
+  },
+  {
+    "id": "ca_manitoba_1901",
+    "observed_unit_id": "ca_manitoba",
+    "published_scope": "Manitoba",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 190 (census dates, p. 71)",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": false,
+    "opening_unit_id": "ca_manitoba",
+    "uncertainty": "The published April 1901 age and sex shares are held at the interpolated January 1900 population of the same historical scope. Change in age and sex shares, age reporting and enumeration error are unquantified."
+  },
+  {
+    "id": "ca_new_brunswick_1901",
+    "observed_unit_id": "ca_new_brunswick",
+    "published_scope": "New Brunswick",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 190 (census dates, p. 71)",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": false,
+    "opening_unit_id": "ca_new_brunswick",
+    "uncertainty": "The published April 1901 age and sex shares are held at the interpolated January 1900 population of the same historical scope. Change in age and sex shares, age reporting and enumeration error are unquantified."
+  },
+  {
+    "id": "ca_nova_scotia_1901",
+    "observed_unit_id": "ca_nova_scotia",
+    "published_scope": "Nova Scotia",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 191 (census dates, p. 71)",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": false,
+    "opening_unit_id": "ca_nova_scotia",
+    "uncertainty": "The published April 1901 age and sex shares are held at the interpolated January 1900 population of the same historical scope. Change in age and sex shares, age reporting and enumeration error are unquantified."
+  },
+  {
+    "id": "ca_ontario_1901",
+    "observed_unit_id": "ca_ontario",
+    "published_scope": "Ontario",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 191 (census dates, p. 71)",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": false,
+    "opening_unit_id": "ca_ontario",
+    "uncertainty": "The published April 1901 age and sex shares are held at the interpolated January 1900 population of the same historical scope. Change in age and sex shares, age reporting and enumeration error are unquantified."
+  },
+  {
+    "id": "ca_prince_edward_island_1901",
+    "observed_unit_id": "ca_prince_edward_island",
+    "published_scope": "Prince Edward Island",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 191 (census dates, p. 71)",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": false,
+    "opening_unit_id": "ca_prince_edward_island",
+    "uncertainty": "The published April 1901 age and sex shares are held at the interpolated January 1900 population of the same historical scope. Change in age and sex shares, age reporting and enumeration error are unquantified."
+  },
+  {
+    "id": "ca_quebec_1901",
+    "observed_unit_id": "ca_quebec_1901",
+    "published_scope": "Quebec",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 191 (census dates, p. 71)",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": false
+  },
+  {
+    "id": "ca_organized_territories_1901",
+    "observed_unit_id": "ca_organized_territories",
+    "published_scope": "North-West Territories",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 191 (census dates, p. 71)",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": false,
+    "opening_unit_id": "ca_organized_territories",
+    "uncertainty": "The published April 1901 age and sex shares are held at the interpolated January 1900 population of the same historical scope. Change in age and sex shares, age reporting and enumeration error are unquantified."
+  },
+  {
+    "id": "ca_unorganized_territories_1901",
+    "observed_unit_id": "ca_unorganized_territories_1901",
+    "published_scope": "Unorganised Territories",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 191 (census dates, p. 71)",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": false
+  },
+  {
+    "id": "ca_quebec_unorganized_1901",
+    "observed_unit_id": "ca_quebec_and_unorganized_territories",
+    "published_scope": "Quebec and Unorganised Territories combined",
+    "source_id": "british_empire_census_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Canada, Table 5, printed p. 191, Quebec and Unorganised Territories columns added by age and sex",
+    "definition": "Canadian census population by last completed age. The fourth Canadian census uses the close of 31 March; the British compendium describes results as of 1 April.",
+    "broad_observation": false,
+    "component_panels": [
+      "ca_quebec_1901",
+      "ca_unorganized_territories_1901"
+    ],
+    "opening_unit_id": "ca_quebec_and_unorganized_territories",
+    "uncertainty": "The published April 1901 age and sex shares are held at the interpolated January 1900 population of the same historical scope. Change in age and sex shares, age reporting and enumeration error are unquantified. Both published jurisdictions are combined to account for the 1898 Quebec boundary change."
+  }
+]

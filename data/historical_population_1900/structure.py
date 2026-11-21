@@ -1,9 +1,15 @@
 """Build nonadditive demographic observations retaining historical labels and scopes."""
 import csv
+import json
 import re
 from pathlib import Path
 
 HERE=Path(__file__).resolve().parent/"collections"
+AGE_SOURCES = HERE / "age_sex"
+OPENING_METHOD = (
+    "Hold the census age-by-sex shares at 1900-01-01. Apply the source ratios to "
+    "the anonymous opening balance using integer largest remainders."
+)
 
 def read_csv(path):
     with path.open(encoding="utf8",newline="") as f:
@@ -13,6 +19,11 @@ def province_key(name):
     return re.sub(r"\s+(губерния|область|обл\.?)$","",name.strip().casefold())
 
 def dimensions(population):
+    age_panels = age_sex_panels()
+    russian_panel, russian_rows = next(
+        (panel, rows) for panel, rows in age_panels if panel["id"] == "russia_empire_1897"
+    )
+    russian_ages = {row["label"]: row for row in russian_rows}
     provinces={province_key(r["name"]): r for r in population if r.get("source_id")=="russia_first_census"
                and r.get("parent_id")=="ru_census_1897_ex_finland"}
     result=[]
@@ -23,13 +34,20 @@ def dimensions(population):
         province=provinces.get(province_key(name))
         scope=(province["unit_id"] if province else "ru_census_1897_ex_finland" if param=="0" else f"{tab}:reg:{param}")
         cells={k:int(raw[k]) if raw[k].isdigit() else raw[k] or None for k in ["male","female","both","literate_male","literate_female","literate_both"]}
-        result.append(dict(unit_id=scope,published_scope=name,date="1897-02-09",source_id=tab,
+        observation = dict(unit_id=scope,published_scope=name,date="1897-02-09",source_id=tab,
             locator=f"{tab}.php?reg={param}, row {raw['row']}",category=raw["category"],subcategory=raw["subcategory"] or None,
             dialect=raw["dialect"] or None,measure="published persons",values=cells,
             definition={"rus_lan_97":"Reported mother tongue; overlapping headings, languages and dialects.",
                         "rus_rel_97":"Religious denomination reported by the original census.",
                         "rus_sos_97":"Legal estate (soslovie) reported by the original census.",
-                        "rus_age_97":"Age, sex and literacy. Printed subtotals overlap single-year ages."}[tab]))
+                        "rus_age_97":"Age, sex and literacy. Printed subtotals overlap single-year ages."}[tab])
+        if tab == "rus_age_97" and param == "0":
+            row = russian_ages[raw["category"]]
+            observation.update(
+                dimension="age_by_sex", panel_id=russian_panel["id"], row_role=row["role"],
+                age_min=row["age_min"], age_max=row["age_max"],
+            )
+        result.append(observation)
     occupations=read_csv(HERE/"demography"/"occupation.csv")
     for field in ["male","female","total"]:
         if sum(int(r[field]) for r in occupations[2:])!=int(occupations[1][field]):
@@ -43,4 +61,95 @@ def dimensions(population):
             locator="I, printed p. 104, Switzerland annual rows, cols. 9–10",
             category="households and persons",values=dict(households=households,ordinary_residents=residents,persons_present=present),
             definition="Published household count, usual residents and de facto population are distinct. Population in private households is not identified separately; household size is unknown."))
+    for panel, rows in age_panels:
+        if panel["source_id"] == "rus_age_97" or "component_panels" in panel:
+            continue
+        for row in rows:
+            result.append(dict(
+                unit_id=panel["observed_unit_id"], published_scope=panel["published_scope"],
+                date=panel["observed_date"], source_id=panel["source_id"],
+                locator=f"{panel['locator']}, {row['label']}", category=row["label"],
+                measure="published persons", values={key: row[key] for key in ("both", "male", "female")},
+                definition=panel["definition"], dimension="age_by_sex", panel_id=panel["id"], row_role=row["role"],
+                age_min=row["age_min"], age_max=row["age_max"],
+            ))
     return result
+
+
+def age_sex_panels():
+    panels = json.loads((AGE_SOURCES / "panels.json").read_text(encoding="utf8"))
+    by_panel = {panel["id"]: [] for panel in panels}
+    for row in read_csv(AGE_SOURCES / "age_sex.csv"):
+        for key in ("age_min", "age_max", "both", "male", "female"):
+            row[key] = int(row[key]) if row[key] else None
+        by_panel[row["panel"]].append(row)
+
+    russian = by_panel["russia_empire_1897"]
+    for row in read_csv(HERE / "russia" / "structure.csv"):
+        if row["source_table"] != "rus_age_97" or row["region_parameter"] != "0":
+            continue
+        label = row["category"]
+        if label == "Дети моложе 1 года":
+            age_min = age_max = 0
+        elif label.isdecimal():
+            age_min = age_max = int(label)
+        elif label == "110 и более":
+            age_min, age_max = 110, None
+        else:
+            age_min = age_max = None
+        russian.append(dict(
+            label=label, age_min=age_min, age_max=age_max,
+            role="total" if label == "ИТОГО" else "subtotal" if "-" in label else "band",
+            **{key: int(row[key]) for key in ("both", "male", "female")},
+        ))
+    for panel in panels:
+        if "component_panels" not in panel:
+            continue
+        components = [by_panel[panel_id] for panel_id in panel["component_panels"]]
+        for matched_rows in zip(*components, strict=True):
+            row = matched_rows[0].copy()
+            if any(
+                component[key] != row[key]
+                for component in matched_rows[1:]
+                for key in ("label", "role", "age_min", "age_max")
+            ):
+                raise ValueError(f"{panel['id']}: component age groups do not match")
+            for key in ("both", "male", "female"):
+                row[key] = sum(component[key] for component in matched_rows)
+            by_panel[panel["id"]].append(row)
+    return [(panel, by_panel[panel["id"]]) for panel in panels]
+
+
+def opening_structure(opening_groups):
+    opening_totals = {
+        unit["unit_id"]: unit["population_value"]
+        for group in opening_groups
+        for unit in (group["units"] or [group])
+    }
+    groups = []
+    for panel, rows in age_sex_panels():
+        unit_id = panel.get("opening_unit_id")
+        if unit_id is None:
+            continue
+        totals = [row for row in rows if row["role"] == "total"]
+        bands = [
+            {key: row[key] for key in ("label", "age_min", "age_max", "male", "female")}
+            for row in rows if row["role"] == "band"
+        ]
+        if len(totals) != 1:
+            raise ValueError(f"{panel['id']}: expected one printed age table control")
+        total = totals[0]
+        for sex in ("male", "female"):
+            if sum(band[sex] for band in bands) != total[sex]:
+                raise ValueError(f"{panel['id']}: {sex} age rows do not sum to the printed total")
+        if total["male"] + total["female"] != total["both"]:
+            raise ValueError(f"{panel['id']}: published sex totals do not sum to the population")
+        for band in bands:
+            low, high = band["age_min"], band["age_max"]
+            band["id"] = "unknown" if low is None else f"age_{low}_{high if high is not None else 'plus'}"
+        groups.append(dict(
+            unit_id=unit_id, opening_total=opening_totals[unit_id], observed_total=total["both"],
+            method=OPENING_METHOD, bands=bands,
+            **{key: panel[key] for key in ("source_id", "observed_unit_id", "observed_date", "locator", "uncertainty")},
+        ))
+    return dict(version=1, groups=sorted(groups, key=lambda group: group["unit_id"]))

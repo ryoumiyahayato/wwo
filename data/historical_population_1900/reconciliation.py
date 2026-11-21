@@ -1,7 +1,100 @@
 """Parent controls and source conflicts. Dated observations are never balances."""
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import date
 from fractions import Fraction
+
+from geography import DATE, opening_scope_links, research_scope_note
+from opening import sourced_people
+
+
+def world_accounts(study, selection, legacy, target):
+    """Trace the published research total and the separate opening authority."""
+    rows = {r["unit_id"]: r for r in study}
+    roots = {g["unit_id"]: g for g in selection}
+    legacy_economies = {r["unit_id"]: r for r in legacy if r["role"] == "economic_statistical_unit"}
+    changes = [r for r in legacy_economies.values() if r["replacement_minus_legacy"] is not None]
+    added = [g for g in selection if g["unit_id"] not in legacy_economies]
+    untouched = [r for r in legacy_economies.values() if r["status"] == "legacy_only"]
+    residuals = [r for r in legacy if r["role"] == "excluded_economic_residual"]
+    legacy_total = sum(r["population_value"] for r in legacy_economies.values())
+    replacement_delta = sum(r["replacement_minus_legacy"] for r in changes)
+    additions_total = sum(g["population_value"] for g in added)
+    authoritative = legacy_total + replacement_delta + additions_total
+    documented = sum(sourced_people(g) for g in selection)
+    untouched_total = sum(r["population_value"] for r in untouched)
+    unlocated_total = sum(g.get("legacy_unlocated_balance", 0) for g in selection)
+
+    reviewed = []
+    for link in opening_scope_links(selection, study):
+        selected = [roots[key] for key in link["opening_root_ids"]]
+        research = [rows[key] for key in link["research_unit_ids"]]
+        regions = sorted({r["region"] for r in research})
+        opening_people = sum(sourced_people(g) for g in selected)
+        research_people = sum(r["population_value"] for r in research) if research else None
+        reviewed.append(dict(**link, research_regions=regions, research_people=research_people,
+            documented_opening_people=opening_people,
+            opening_people_including_retained_balances=sum(g["population_value"] for g in selected),
+            research_minus_documented=research_people-opening_people if research else None))
+    linked = {key: entry for entry in reviewed for key in entry["research_unit_ids"]}
+
+    register = []
+    for row in study:
+        key = row["unit_id"]
+        comparison = linked.get(key)
+        register.append(dict(unit_id=key, name=row["name"], region=row["region"], population_value=row["population_value"],
+            population_lower=row["population_lower"], population_upper=row["population_upper"], quality=row["quality"],
+            source_id=row["source_id"], locator=row["locator"], method_locator=row.get("method_locator"),
+            candidate_polity_ids=row["candidate_polity_ids"],
+            comparison_id=comparison["comparison_id"] if comparison else None,
+            opening_disposition=comparison["scope_relation"] if comparison else "research_only",
+            note=comparison["note"] if comparison else research_scope_note(row)))
+
+    by_region = defaultdict(list)
+    for row in register:
+        by_region[row["region"]].append(row)
+    research_regions = {}
+    for region, entries in sorted(by_region.items()):
+        comparisons = [entry for entry in reviewed if entry["research_regions"] == [region]]
+        production_roots = sorted(key for entry in comparisons for key in entry["opening_root_ids"])
+        production_people = sum(sourced_people(roots[key]) for key in production_roots)
+        regional_total = sum(row["population_value"] for row in entries)
+        research_only = [r for r in entries if r["opening_disposition"] == "research_only"]
+        research_regions[region] = dict(statistical_units=len(entries), opening_research_estimate=regional_total,
+            units_with_polity_candidates=sum(bool(r["candidate_polity_ids"]) for r in entries),
+            people_without_polity_candidate=sum(r["population_value"] for r in entries if not r["candidate_polity_ids"]),
+            grades=dict(Counter(r["quality"] for r in entries)), production_root_ids=production_roots,
+            production_people=production_people, production_pct_of_regional_research_estimate=round(100*production_people/regional_total, 3),
+            people_with_opening_subdivision=sum(sourced_people(roots[key]) for key in production_roots if roots[key]["units"]),
+            research_only_units=len(research_only), research_only_people=sum(r["population_value"] for r in research_only))
+
+    component_total = sum(r["population_value"] for r in study)
+    research_only_total = sum(r["population_value"] for r in register if r["opening_disposition"] == "research_only")
+    compared_differences = defaultdict(int)
+    for entry in reviewed:
+        if entry["research_minus_documented"] is not None:
+            compared_differences[entry["scope_relation"]] += entry["research_minus_documented"]
+    unlinked_opening = sum(entry["documented_opening_people"] for entry in reviewed if not entry["research_unit_ids"])
+    signed_changes = dict(published_minus_component_sum=target-component_total,
+        research_only_component_people=research_only_total, comparisons_by_scope=dict(compared_differences),
+        opening_without_benchmark_link=-unlinked_opening, untouched_legacy_controls=-untouched_total,
+        unlocated_balances_under_retained_controls=-unlocated_total)
+    return dict(reference_date=DATE,
+        accounting_note="Research is a benchmark at published statistical extents. Opening is an independent authority with retained legacy accounts. Differences involving unmatched extents, dates or sources are arithmetic and cannot locate people.",
+        research_regions=research_regions, research_units=register, opening_comparisons=reviewed,
+        opening_comparisons_without_single_region=[entry["comparison_id"] for entry in reviewed if len(entry["research_regions"]) != 1],
+        legacy_to_opening=dict(legacy_economic_accounts=len(legacy_economies), legacy_economic_population=legacy_total,
+            changes_to_existing_accounts=[dict(unit_id=r["unit_id"], people=r["replacement_minus_legacy"])
+                for r in changes if r["status"] == "replaced_for_new_games"],
+            net_replacements=replacement_delta,
+            added_opening_accounts=[dict(unit_id=g["unit_id"], people=g["population_value"]) for g in added],
+            net_additions=additions_total, authoritative_opening_population=authoritative,
+            excluded_economic_residuals=[dict(unit_id=r["unit_id"], people=r["population_value"]) for r in residuals],
+            excluded_residual_sum_nonexclusive=sum(r["population_value"] for r in residuals)),
+        research_to_opening=dict(published_research_estimate=target, research_component_sum=component_total,
+            documented_opening_population=documented, untouched_legacy_population=untouched_total,
+            retained_unlocated_population=unlocated_total, authoritative_opening_population=authoritative,
+            published_minus_documented_opening=target-documented, signed_components_of_difference=signed_changes,
+            published_minus_authoritative_opening=target-authoritative))
 
 _DANISH_TOWN_DISTRICTS = {
     "dk_faroe", "dk_island_south", "dk_island_west", "dk_island_northeast",

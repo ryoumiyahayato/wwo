@@ -1,9 +1,9 @@
-use super::MAX_POPULATION;
+use super::{demography::OpeningDemography, MAX_POPULATION};
 use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, io, sync::OnceLock};
 
-const VERSION: u32 = 1;
+pub(crate) const CURRENT_VERSION: u32 = 2;
 
 #[derive(Debug, Serialize)]
 pub struct OpeningPopulationEstimate {
@@ -11,9 +11,22 @@ pub struct OpeningPopulationEstimate {
     pub source_id: String,
     pub locator: String,
     pub method: String,
+    #[serde(flatten)]
+    context: EstimateContext,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+struct EstimateContext {
+    date: Option<String>,
+    scope: Option<String>,
+    population_lower: Option<u64>,
+    population_upper: Option<u64>,
+    uncertainty_kind: Option<String>,
 }
 
 pub(crate) struct HistoricalOpening {
+    version: u32,
+    pub(super) demography: OpeningDemography,
     estimates: BTreeMap<String, OpeningPopulationEstimate>,
     pub(super) partitions: BTreeMap<String, Partition>,
     pub(super) standalone: BTreeMap<String, u64>,
@@ -39,6 +52,8 @@ struct Group {
     source_id: String,
     locator: String,
     method: String,
+    #[serde(flatten)]
+    context: EstimateContext,
     units: Vec<Unit>,
     legacy_unlocated_balance: Option<u64>,
 }
@@ -50,23 +65,31 @@ struct Unit {
     population_value: u64,
     source_id: Option<String>,
     locator: Option<String>,
+    method: Option<String>,
+    #[serde(flatten)]
+    context: EstimateContext,
     #[serde(default)]
     place_ids: Vec<String>,
 }
 
 impl HistoricalOpening {
     pub(crate) fn load<'a>(
+        version: u32,
         legacy: &BTreeMap<String, u64>,
         known_polity: impl Fn(&str) -> bool,
         market_at: impl Fn(&str) -> Option<&'a str>,
     ) -> io::Result<Self> {
-        let manifest: Manifest = serde_json::from_slice(include_bytes!(
-            "../../../../data/historical_population_1900/opening.json"
-        ))?;
-        if manifest.version != VERSION || manifest.groups.is_empty() {
+        let bytes: &[u8] = match version {
+            1 => include_bytes!("../../../../data/historical_population_1900/opening.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v2.json"),
+            _ => return Err(invalid("unsupported historical population opening version")),
+        };
+        let manifest: Manifest = serde_json::from_slice(bytes)?;
+        if manifest.version != version || manifest.groups.is_empty() {
             return Err(invalid("unsupported historical population opening"));
         }
         let mut opening = Self {
+            version, demography: OpeningDemography::default(),
             estimates: BTreeMap::new(), partitions: BTreeMap::new(), standalone: BTreeMap::new(),
             declared_places: BTreeMap::new(), places: OnceLock::new(),
         };
@@ -101,7 +124,17 @@ impl HistoricalOpening {
                 }
                 opening.estimates.insert(id.clone(), OpeningPopulationEstimate {
                     population_value: leaf.population_value, source_id: leaf.source_id.unwrap_or_else(|| group.source_id.clone()),
-                    locator: leaf.locator.unwrap_or_else(|| group.locator.clone()), method: group.method.clone(),
+                    locator: leaf.locator.unwrap_or_else(|| group.locator.clone()),
+                    method: leaf.method.unwrap_or_else(|| group.method.clone()),
+                    context: EstimateContext {
+                        date: leaf.context.date.or_else(|| group.context.date.clone()),
+                        scope: leaf.context.scope,
+                        population_lower: leaf.context.population_lower,
+                        population_upper: leaf.context.population_upper,
+                        uncertainty_kind: leaf.context.uncertainty_kind.or_else(|| {
+                            if group.legacy_unlocated_balance.is_none() { group.context.uncertainty_kind.clone() } else { None }
+                        }),
+                    },
                 });
                 opening.partitions.insert(id, Partition { parent: root.clone(), name: leaf.name });
             }
@@ -118,7 +151,7 @@ impl HistoricalOpening {
             }
             if opening.estimates.insert(root.clone(), OpeningPopulationEstimate {
                 population_value: group.population_value, source_id: group.source_id,
-                locator: group.locator, method: group.method,
+                locator: group.locator, method: group.method, context: group.context,
             }).is_some() {
                 return Err(invalid(format!("repeated historical population group {root}")));
             }
@@ -128,6 +161,9 @@ impl HistoricalOpening {
             sum.checked_add(value).filter(|&sum| sum <= MAX_POPULATION)
         }).is_none() {
             return Err(invalid("historical opening exceeds the supported population"));
+        }
+        if version == CURRENT_VERSION {
+            opening.demography = OpeningDemography::load(&opening)?;
         }
         Ok(opening)
     }
@@ -142,7 +178,7 @@ impl HistoricalOpening {
         self.standalone.keys().map(String::as_str)
     }
 
-    pub(crate) fn version(&self) -> u32 { VERSION }
+    pub(crate) fn version(&self) -> u32 { self.version }
 
     pub(super) fn estimate(&self, unit: &str) -> Option<&OpeningPopulationEstimate> {
         self.estimates.get(unit)

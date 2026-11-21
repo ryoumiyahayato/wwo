@@ -1,0 +1,5 @@
+research_id	root_id	scope
+ft_tunisia	beylicate_of_tunis	The Regency of Tunis under the French protectorate. Separate from metropolitan France, Algeria and the retained Ottoman economy. Appendix I uses a modeled growth rate before 1906 because early enumerations covered the French population only. Adopt the territorial reconstruction without assigning provincial populations.
+ft_british_honduras_belize	cshapes_gw_80	British Honduras within colonial boundaries, separate from Honduras, Guatemala and Mexico. Appendix I uses Bulmer-Thomas Tables A.1 and C.1 and compares with Kuczynski vol. III p. 4 and the 1901 colonial census.
+ft_jamaica	cshapes_gw_51	Jamaica island. Cayman and Turks and Caicos are separate study series. Appendix I uses Bulmer-Thomas Tables A.1 and C.1. Jamaica did not take the 1901 imperial census, so the opening uses the historical reconstruction.
+ft_uruguay	uruguay_1900	The independent republic, separate from Argentina and Brazil. Appendix I uses the national estimate from Bulmer-Thomas Table 3.1. Uruguay's statistical office records no general census between 1860 and 1908.
