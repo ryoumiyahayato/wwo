@@ -1,0 +1,21 @@
+research_id	root_id	scope
+ft_japan	empire_of_japan	Home islands. Table 2.1 of Historical Statistics of Japan and the 1920 census anchor. Taiwan is a separate study series and WWO dependency.
+ft_belgium	kingdom_of_belgium	Post-1839 Belgium, separate from Luxembourg, Netherlands and Congo Free State.
+ft_bulgaria	principality_of_bulgaria	Bulgaria with Eastern Rumelia after 1885; historical statistics and census, before the Balkan Wars.
+ft_chile	chile_1900	Perez-Brignoli uses the Chilean 1895 and 1907 benchmarks; the interpolated country figure is a reconstruction.
+ft_italy	kingdom_of_italy	Kingdom after annexation of Rome and Veneto, before acquisition of Austrian territories. Colonies separate.
+ft_luxembourg	kingdom_of_luxembourg	Grand Duchy after the 1839 partition. Use the established WWO economic alias for the same political unit.
+ft_malta	cshapes_gw_338	Maltese islands series from Statistical Yearbook Malta; separate from United Kingdom.
+ft_netherlands	kingdom_of_netherlands	European territory after the 1839 settlement including Eastern Limburg. Overseas colonies separate.
+ft_portugal	kingdom_of_portugal	Metropole plus Madeira and Azores as specified in Appendix I. Overseas possessions separately enumerated.
+ft_puerto_rico	cshapes_gw_6	Puerto Rico separately enumerated under US administration; independent 1899 War Department census. Continental US opening excludes it.
+ft_serbia_yugoslavia	kingdom_of_serbia	1900 Kingdom of Serbia. Historical Statistics Serbia from 1879 to 1910; Montenegro remains separate.
+ft_spain	kingdom_of_spain	Spain including Canary and Balearic Islands (Appendix I note 129). Overseas possessions excluded.
+ft_norway	sweden_norway_union	Norway, under the Swedish crown; Statistics Norway 1968 table 20.
+ft_sweden	sweden_norway_union	Sweden alone; Lund historical series explicitly excludes both Norway and Finland.
+ft_russia_empire_ussr	russian_empire	Empire excluding Finland. 1897 census extrapolated by Sifman's correction for duplicated movers; Khiva and Bukhara have a separate source series.
+ft_finland	russian_empire	Grand Duchy of Finland under Russian crown. Separate study unit and excluded from Russian census total.
+ft_australia	australia_colonies_1900	Six pre-federation colonies combined under WWO economic alias. Study explicitly adds the Smith Aboriginal reconstruction; state-level ABS figures have narrower enumeration.
+ft_united_kingdom	british_isles_1900	England and Wales, Scotland and the whole island of Ireland. Crown dependencies and colonies are outside these three series.
+ft_iceland	iceland_under_denmark	Iceland, enumerated separately from the Danish metropole. Danish yearbook provides independent 1901 territorial control.
+ft_brasil	brazil_1900	National official IBGE annual series to 1900, continued with CELADE. Acre transferred from Bolivia only in 1903.

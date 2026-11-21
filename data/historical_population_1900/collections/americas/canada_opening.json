@@ -1,0 +1,90 @@
+{
+  "unit_id": "dominion_of_canada",
+  "date": "1900-01-01",
+  "population_value": 5304314,
+  "source_id": "ca_census_1901_vol1_table1",
+  "locator": "Vol. I, Table I, pp. 2-3, 1891 and 1901 columns",
+  "endpoint_dates": [
+    "1891-04-06",
+    "1901-03-31"
+  ],
+  "country_endpoint_values": [
+    4833239,
+    5371315
+  ],
+  "method": "Linear interpolation by elapsed days (1596/1823), followed by largest-remainder rounding to the national total. Quebec and the unorganized territories are combined across the 1898 boundary change. The remaining four territories are combined on the 1901 electoral limits.",
+  "units": [
+    {
+      "unit_id": "ca_british_columbia",
+      "name": "British Columbia",
+      "population_value": 168635,
+      "endpoint_values": [
+        98173,
+        178657
+      ]
+    },
+    {
+      "unit_id": "ca_manitoba",
+      "name": "Manitoba",
+      "population_value": 242422,
+      "endpoint_values": [
+        152506,
+        255211
+      ]
+    },
+    {
+      "unit_id": "ca_new_brunswick",
+      "name": "New Brunswick",
+      "population_value": 329893,
+      "endpoint_values": [
+        321263,
+        331120
+      ]
+    },
+    {
+      "unit_id": "ca_nova_scotia",
+      "name": "Nova Scotia",
+      "population_value": 458431,
+      "endpoint_values": [
+        450396,
+        459574
+      ]
+    },
+    {
+      "unit_id": "ca_ontario",
+      "name": "Ontario",
+      "population_value": 2174402,
+      "endpoint_values": [
+        2114321,
+        2182947
+      ]
+    },
+    {
+      "unit_id": "ca_organized_territories",
+      "name": "Organized Territories",
+      "population_value": 147467,
+      "endpoint_values": [
+        66799,
+        158940
+      ]
+    },
+    {
+      "unit_id": "ca_prince_edward_island",
+      "name": "Prince Edward Island",
+      "population_value": 103983,
+      "endpoint_values": [
+        109078,
+        103259
+      ]
+    },
+    {
+      "unit_id": "ca_quebec_and_unorganized_territories",
+      "name": "Quebec and Unorganized Territories",
+      "population_value": 1679081,
+      "endpoint_values": [
+        1520703,
+        1701607
+      ]
+    }
+  ]
+}

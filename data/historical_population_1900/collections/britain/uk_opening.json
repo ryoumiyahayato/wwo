@@ -1,0 +1,54 @@
+{
+  "unit_id": "british_isles_1900",
+  "date": "1900-01-01",
+  "source_id": "uk_general_census_report_1901",
+  "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901",
+  "endpoint_dates": [
+    "1891-04-05",
+    "1901-03-31"
+  ],
+  "country_endpoint_values": [
+    37732922,
+    41458721
+  ],
+  "method": "Linear interpolation over 3193/3647 elapsed days in the three census divisions. Integer counts apportioned by largest remainders to the interpolated United Kingdom total.",
+  "population_value": 40994912,
+  "units": [
+    {
+      "unit_id": "uk_england_wales",
+      "name": "England and Wales",
+      "endpoint_values": [
+        29002525,
+        32527843
+      ],
+      "population_value": 32088991,
+      "place_ids": [
+        "place:london",
+        "place:dover"
+      ],
+      "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, England and Wales"
+    },
+    {
+      "unit_id": "uk_scotland",
+      "name": "Scotland",
+      "endpoint_values": [
+        4025647,
+        4472103
+      ],
+      "population_value": 4416526,
+      "place_ids": [],
+      "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, Scotland"
+    },
+    {
+      "unit_id": "uk_ireland",
+      "name": "Ireland",
+      "endpoint_values": [
+        4704750,
+        4458775
+      ],
+      "population_value": 4489395,
+      "place_ids": [],
+      "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, Ireland"
+    }
+  ]
+}

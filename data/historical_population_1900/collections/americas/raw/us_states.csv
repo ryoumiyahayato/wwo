@@ -1,0 +1,51 @@
+division,name,kind,population_1890_general,population_1890_special,population_1890,population_1900,printed_page
+North Atlantic,Maine,state,661086,,661086,694466,xxi
+North Atlantic,New Hampshire,state,376530,,376530,411588,xxi
+North Atlantic,Vermont,state,332422,,332422,343641,xxi
+North Atlantic,Massachusetts,state,2238943,4,2238947,2805346,xxi
+North Atlantic,Rhode Island,state,345506,,345506,428556,xxi
+North Atlantic,Connecticut,state,746258,,746258,908420,xxi
+North Atlantic,New York,state,5997853,5321,6003174,7268894,xxi
+North Atlantic,New Jersey,state,1444933,,1444933,1883669,xxi
+North Atlantic,Pennsylvania,state,5258014,99,5258113,6302115,xxi
+South Atlantic,Delaware,state,168493,,168493,184735,xxi
+South Atlantic,Maryland,state,1042390,,1042390,1188044,xxi
+South Atlantic,District of Columbia,federal district,230392,,230392,278718,xxi
+South Atlantic,Virginia,state,1655980,,1655980,1854184,xxi
+South Atlantic,West Virginia,state,762794,,762794,958800,xxi
+South Atlantic,North Carolina,state,1617947,2,1617949,1893810,xxi
+South Atlantic,South Carolina,state,1151149,,1151149,1340316,xxi
+South Atlantic,Georgia,state,1837353,,1837353,2216331,xxi
+South Atlantic,Florida,state,391422,,391422,528542,xxi
+North Central,Ohio,state,3672316,13,3672329,4157545,xxi
+North Central,Indiana,state,2192404,,2192404,2516462,xxi
+North Central,Illinois,state,3826351,1,3826352,4821550,xxi
+North Central,Michigan,state,2093889,1,2093890,2420982,xxi
+North Central,Wisconsin,state,1686880,6450,1693330,2069042,xxi
+North Central,Minnesota,state,1301826,8457,1310283,1751394,xxi
+North Central,Iowa,state,1911896,401,1912297,2231853,xxi
+North Central,Missouri,state,2679184,1,2679185,3106665,xxi
+North Central,North Dakota,state,182719,8264,190983,319146,xxi
+North Central,South Dakota,state,328808,19792,348600,401570,xxi
+North Central,Nebraska,state,1058910,3746,1062656,1066300,xxi
+North Central,Kansas,state,1427096,1012,1428108,1470495,xxi
+South Central,Kentucky,state,1858635,,1858635,2147174,xxi
+South Central,Tennessee,state,1767518,,1767518,2020616,xxi
+South Central,Alabama,state,1513017,384,1513401,1828697,xxi
+South Central,Mississippi,state,1289600,,1289600,1551270,xxi
+South Central,Louisiana,state,1118587,1,1118588,1381625,xxii
+South Central,Texas,state,2235523,4,2235527,3048710,xxii
+South Central,Indian Territory,territory,,180182,180182,392060,xxii
+South Central,Oklahoma Territory,territory,61834,16641,78475,398331,xxii
+South Central,Arkansas,state,1128179,32,1128211,1311564,xxii
+Western,Montana,state,132159,10765,142924,243329,xxii
+Western,Wyoming,state,60705,1850,62555,92531,xxii
+Western,Colorado,state,412198,1051,413249,539700,xxii
+Western,New Mexico,territory,153593,6689,160282,195310,xxii
+Western,Arizona,territory,59620,28623,88243,122931,xxii
+Western,Utah,state,207905,2874,210779,276749,xxii
+Western,Nevada,state,45761,1594,47355,42335,xxii
+Western,Idaho,state,84385,4163,88548,161772,xxii
+Western,Washington,state,349390,7842,357232,518103,xxii
+Western,Oregon,state,313767,3937,317704,413536,xxii
+Western,California,state,1208130,5268,1213398,1485053,xxii

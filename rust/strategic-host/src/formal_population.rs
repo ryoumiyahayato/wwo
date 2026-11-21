@@ -1,16 +1,19 @@
 mod historical;
 mod native;
+mod opening;
 #[cfg(test)]
 mod tests;
 
 pub use historical::HistoricalPopulationEstimate;
 pub(crate) use native::PopulationSnapshot;
+pub(crate) use opening::HistoricalOpening;
+pub use opening::OpeningPopulationEstimate;
 
 use crate::formal_clock::GameClock;
 use crate::formal_save::{field, integer, invalid, lookup, map, tagged};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{collections::BTreeMap, io};
+use std::{collections::BTreeMap, io, sync::Arc};
 
 pub(crate) const MAX_POPULATION: u64 = 9_007_199_254_740_991;
 
@@ -18,10 +21,17 @@ pub(crate) const MAX_POPULATION: u64 = 9_007_199_254_740_991;
 /// travel have separate owners and do not change these totals.
 #[derive(Clone)]
 pub struct Population {
+    // Market totals retain their existing national/coextensive statistical scope.
     totals: BTreeMap<String, u64>,
+    standalone: BTreeMap<String, u64>,
+    // Each resident belongs to exactly one pool. The pool at a partitioned
+    // parent holds residents whose finer statistical residence is unavailable.
+    pools: BTreeMap<String, u64>,
     global_total: u64,
+    opening: Option<Arc<HistoricalOpening>>,
     named: BTreeMap<String, String>,
     named_counts: BTreeMap<String, u64>,
+    pool_named_counts: BTreeMap<String, u64>,
     deceased: BTreeMap<String, Option<i64>>,
     cohort_definitions: BTreeMap<CohortId, CohortDefinition>,
     cohorts: BTreeMap<String, BTreeMap<CohortId, u64>>,
@@ -100,9 +110,13 @@ impl Population {
     pub(crate) fn initialize(totals: BTreeMap<String, u64>) -> Self {
         Self {
             global_total: totals.values().sum(),
+            pools: totals.clone(),
             totals,
+            standalone: BTreeMap::new(),
+            opening: None,
             named: BTreeMap::new(),
             named_counts: BTreeMap::new(),
+            pool_named_counts: BTreeMap::new(),
             deceased: BTreeMap::new(),
             cohort_definitions: BTreeMap::new(),
             cohorts: BTreeMap::new(),
@@ -110,14 +124,76 @@ impl Population {
         }
     }
 
+    pub(crate) fn initialize_historical(legacy: &BTreeMap<String, u64>, opening: Arc<HistoricalOpening>) -> Self {
+        let mut state = Self::initialize(opening.totals(legacy));
+        state.standalone = opening.standalone.clone();
+        state.global_total += state.standalone.values().sum::<u64>();
+        state.pools.extend(state.standalone.clone());
+        for (id, partition) in &opening.partitions {
+            let count = opening.estimate(id).expect("partition opening estimate").population_value;
+            *state.pools.get_mut(&partition.parent).expect("partition parent") -= count;
+            state.pools.insert(id.clone(), count);
+        }
+        state.opening = Some(opening);
+        state
+    }
+
     pub fn totals(&self) -> &BTreeMap<String, u64> {
         &self.totals
+    }
+
+    pub fn standalone_totals(&self) -> &BTreeMap<String, u64> { &self.standalone }
+
+    pub fn population_total(&self, unit: &str) -> Option<u64> {
+        self.totals.get(unit).or_else(|| self.standalone.get(unit)).or_else(|| self.pools.get(unit)).copied()
+    }
+
+    pub fn partitions<'a>(&'a self, parent: &'a str) -> impl Iterator<Item = (&'a str, &'a str, u64)> + 'a {
+        self.opening.iter().flat_map(|opening| &opening.partitions).filter_map(move |(id, partition)| {
+            (partition.parent == parent).then(|| (id.as_str(), partition.name.as_str(), self.pools[id]))
+        })
+    }
+
+    /// Residents directly assigned to this unit, excluding all nested shares.
+    pub fn resident_pool(&self, unit: &str) -> Option<u64> { self.pools.get(unit).copied() }
+
+    pub fn admitted_opening(&self, unit: &str) -> Option<&OpeningPopulationEstimate> {
+        self.opening.as_ref()?.estimate(unit)
+    }
+
+    pub(crate) fn opening_version(&self) -> Option<u32> {
+        self.opening.as_ref().map(|opening| opening.version())
+    }
+
+    pub(crate) fn partition_at(&self, place: &str) -> Option<&str> {
+        self.opening.as_ref()?.unit_at(place)
+    }
+
+    pub(crate) fn parent_unit(&self, unit: &str) -> Option<&str> {
+        if let Some(partition) = self.opening.as_ref().and_then(|opening| opening.partitions.get(unit)) {
+            return Some(&partition.parent);
+        }
+        self.totals.get_key_value(unit).or_else(|| self.standalone.get_key_value(unit))
+            .map(|(id, _)| id.as_str())
+    }
+
+    fn change_total(&mut self, pool: &str, members: u64, increase: bool) {
+        let root = self.parent_unit(pool).expect("known population pool").to_owned();
+        let total = self.totals.get_mut(&root).or_else(|| self.standalone.get_mut(&root)).expect("population parent");
+        let count = self.pools.get_mut(pool).expect("population pool");
+        if increase {
+            *total += members;
+            *count += members;
+        } else {
+            *total -= members;
+            *count -= members;
+        }
     }
 
     /// Historical opening estimate for this economic unit. Movement and vital
     /// events update current residents independently of the source estimates.
     pub fn opening_estimate(&self, unit: &str) -> io::Result<Option<HistoricalPopulationEstimate>> {
-        if !self.totals.contains_key(unit) { return Ok(None); }
+        if !self.totals.contains_key(unit) || self.admitted_opening(unit).is_some() { return Ok(None); }
         historical::opening_estimate(unit)
     }
 
@@ -139,14 +215,17 @@ impl Population {
 
     /// All residents without a named claim, including separately evidenced cohorts.
     pub fn background(&self, unit: &str) -> Option<u64> {
-        self.totals.get(unit).map(|total| total - self.named_count(unit))
+        self.population_total(unit).map(|total| {
+            let counts = if self.parent_unit(unit) == Some(unit) { &self.named_counts } else { &self.pool_named_counts };
+            total - counts.get(unit).copied().unwrap_or(0)
+        })
     }
 
-    /// Remainder of the aggregate estimate without a demographic breakdown.
+    /// Residents of the exclusive pool without a named claim or demographic breakdown.
     pub fn unclassified(&self, unit: &str) -> Option<u64> {
-        self.background(unit).map(|background| {
+        self.resident_pool(unit).map(|pool| {
             let classified: u64 = self.cohorts.get(unit).into_iter().flat_map(|rows| rows.values()).sum();
-            background - classified
+            pool - self.pool_named_counts.get(unit).copied().unwrap_or(0) - classified
         })
     }
 
@@ -218,7 +297,8 @@ impl Population {
             match field(row, "kind")?.as_str() {
                 Some("named") => {
                     if lifecycle.get(id).is_none_or(|(_, active)| *active) {
-                        if let Some(unit) = self.unit_for_person(id) {
+                        if let Some(unit) = self.unit_for_person(id).and_then(|unit| self.parent_unit(unit))
+                            .filter(|unit| self.totals.contains_key(*unit)) {
                             *counts.entry(unit.to_owned()).or_insert(0) += 1;
                         }
                     }
@@ -262,13 +342,19 @@ impl Population {
 
     fn insert_claim(&mut self, person: &str, unit: &str) {
         self.named.insert(person.to_owned(), unit.to_owned());
-        *self.named_counts.entry(unit.to_owned()).or_default() += 1;
+        self.add_named(unit);
+    }
+
+    fn add_named(&mut self, unit: &str) {
+        let root = self.parent_unit(unit).expect("named population parent").to_owned();
+        *self.named_counts.entry(root).or_default() += 1;
+        *self.pool_named_counts.entry(unit.to_owned()).or_default() += 1;
     }
 
     fn retire_claim(&mut self, person: &str, minute: Option<i64>) -> io::Result<()> {
         let (person, unit) = self.named.remove_entry(person)
             .ok_or_else(|| invalid("deceased person has no active population claim"))?;
-        *self.totals.get_mut(&unit).expect("named population unit") -= 1;
+        self.change_total(&unit, 1, false);
         self.subtract_named(&unit);
         self.global_total -= 1;
         self.deceased.insert(person, minute);
@@ -276,9 +362,12 @@ impl Population {
     }
 
     fn subtract_named(&mut self, unit: &str) {
-        let count = self.named_counts.get_mut(unit).expect("named population count");
-        *count -= 1;
-        if *count == 0 { self.named_counts.remove(unit); }
+        let root = self.parent_unit(unit).expect("named population parent").to_owned();
+        for (counts, id) in [(&mut self.named_counts, root.as_str()), (&mut self.pool_named_counts, unit)] {
+            let count = counts.get_mut(id).expect("named population count");
+            *count -= 1;
+            if *count == 0 { counts.remove(id); }
+        }
     }
 
     fn named_count(&self, unit: &str) -> u64 {

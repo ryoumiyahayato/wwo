@@ -1,0 +1,611 @@
+[
+  {
+    "id": "us_twelfth_census_vol1",
+    "title": "Twelfth Census of the United States, Volume I, Population Part I",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/prod2/decennial/documents/33405927v1ch01.pdf",
+    "locator": "pp. xix–xxii and lxviii–lxxxi, Tables III, V, XXII, XXIII and XXVII",
+    "rights": "U.S. federal public domain",
+    "raw_path": "raw/us_states.csv",
+    "collection": "americas"
+  },
+  {
+    "id": "us_twelfth_census_vol2",
+    "title": "Twelfth Census of the United States, Volume II, Population Part II",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p2.pdf",
+    "locator": "Table I, total population, mainland of the United States",
+    "rights": "U.S. federal public domain",
+    "collection": "americas"
+  },
+  {
+    "id": "us_twelfth_census_places",
+    "title": "Twelfth Census of the United States, Volume I, Cities, Towns and Boroughs",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/prod2/decennial/documents/33405927v1ch08.pdf",
+    "locator": "Table 8, pp. 438 onward",
+    "rights": "U.S. federal public domain",
+    "collection": "americas"
+  },
+  {
+    "id": "us_twelfth_census_abstract",
+    "title": "Abstract of the Twelfth Census of the United States: 1900",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/abstract/1900-census-1902-abstract.pdf",
+    "locator": "Tables 1 and 35; county table for Oklahoma and footnote on Greer",
+    "rights": "U.S. federal public domain",
+    "collection": "americas"
+  },
+  {
+    "id": "us_census_gibson_urban",
+    "title": "Population of the 100 Largest Cities and Other Urban Places in the United States, 1790 to 1990",
+    "publisher": "U.S. Census Bureau, Population Division",
+    "url": "https://www.census.gov/library/working-papers/1998/demo/POP-twps0027.html",
+    "locator": "Campbell Gibson, Working Paper 27, Tables 12 and 13, 1890 and 1900",
+    "rights": "U.S. federal public domain",
+    "raw_paths": [
+      "raw/us_urban_tab12.txt",
+      "raw/us_urban_tab13.txt"
+    ],
+    "table_urls": [
+      "https://www2.census.gov/library/working-papers/1998/demographics/pop-twps0027/tab12.txt",
+      "https://www2.census.gov/library/working-papers/1998/demographics/pop-twps0027/tab13.txt"
+    ],
+    "collection": "americas"
+  },
+  {
+    "id": "us_census_alaska_enumeration",
+    "title": "Getting to Hard-to-Reach Villages Before Spring Thaw and Start of Hunting Season",
+    "publisher": "U.S. Census Bureau",
+    "url": "https://www.census.gov/library/stories/2019/07/alaska-remote-areas-always-first-counted-decennial-census.html",
+    "locator": "1890 and 1900 sections, fieldwork chronology and final counts",
+    "rights": "U.S. federal text and published statistical values",
+    "collection": "americas"
+  },
+  {
+    "id": "us_census_cuba_pr_1899",
+    "title": "Population of States and Territories, comparison of federal and War Department censuses",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/prod2/decennial/documents/33405927v1ch01.pdf",
+    "locator": "p. xix, separate 1899 censuses of Cuba and Puerto Rico",
+    "rights": "U.S. federal public domain",
+    "collection": "americas"
+  },
+  {
+    "id": "us_census_puerto_rico_1899",
+    "title": "Report on the Census of Porto Rico, 1899",
+    "publisher": "U.S. War Department",
+    "url": "https://www2.census.gov/library/publications/decennial/island-areas/1899/1899-census-porto-rico.pdf",
+    "locator": "Total population; Population at each census; Population by departments",
+    "rights": "U.S. federal public domain",
+    "collection": "americas"
+  },
+  {
+    "id": "cu_census_1907_ch4",
+    "title": "Census of the Republic of Cuba, 1907",
+    "publisher": "U.S. Government Printing Office, for the Provisional Administration of Cuba",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/cuba-1907/04771803ch4.pdf",
+    "locator": "Population Tables, No. 1 and No. 2, 1899 and 1907 rows or columns",
+    "rights": "U.S. federal public domain",
+    "reference_day_source": "https://www.govinfo.gov/content/pkg/SERIALSET-05239_00_00-006-0155-0000/pdf/SERIALSET-05239_00_00-006-0155-0000.pdf",
+    "collection": "americas"
+  },
+  {
+    "id": "ca_yearbook_1901_p80",
+    "title": "Statistical Year-Book, Census of 1901",
+    "publisher": "Department of Agriculture, Dominion of Canada",
+    "url": "https://www66.statcan.gc.ca/eng/1901/190100960080_Census%2C%201901.pdf",
+    "locator": "p. 80, population of Canada by census years",
+    "rights": "Historical Government of Canada publication, public domain in Canada",
+    "raw_path": "raw/canada_yearbook_1901_p80.pdf",
+    "collection": "americas"
+  },
+  {
+    "id": "ca_census_1901_vol1_table1",
+    "title": "Fourth Census of Canada, 1901, Volume I: Population",
+    "publisher": "Census Office, Department of Agriculture, Dominion of Canada",
+    "url": "https://publications.gc.ca/collections/collection_2018/parl/x12-3/X12-3-A-1903-eng.pdf",
+    "locator": "pp. 2–3, Table I, Population by provinces and districts, 1891 and 1901",
+    "rights": "Historical Government of Canada publication, public domain in Canada",
+    "raw_path": "raw/censuses.csv",
+    "collection": "americas"
+  },
+  {
+    "id": "ca_yearbook_1901_p603",
+    "title": "Statistical Year-Book, Indigenous Population",
+    "publisher": "Department of Agriculture, Dominion of Canada",
+    "url": "https://www66.statcan.gc.ca/eng/1901/190106240608_Indian.pdf",
+    "locator": "p. 603, Census of 1901 and distinct Department of Indian Affairs table",
+    "rights": "Historical Government of Canada publication, public domain in Canada",
+    "raw_path": "raw/canada_yearbook_1901_p603.pdf",
+    "collection": "americas"
+  },
+  {
+    "id": "ca_yearbook_2012_table241",
+    "title": "Canada Year Book 2012, Population by province and territory",
+    "publisher": "Statistics Canada",
+    "url": "https://www150.statcan.gc.ca/n1/pub/11-402-x/2012000/chap/pop/tbl/tbl01-eng.htm",
+    "locator": "Table 24.1, 1891 and 1901 columns, note 1",
+    "rights": "Statistics Canada Open Licence; table values with attribution",
+    "collection": "americas"
+  },
+  {
+    "id": "ca_yearbook_1950_newfoundland",
+    "title": "Canada Year Book 1950, Population Statistics for Newfoundland",
+    "publisher": "Dominion Bureau of Statistics",
+    "url": "https://www66.statcan.gc.ca/eng/1950/195002270173_p.%20173.pdf",
+    "locator": "p. 173, Table 23 and note 1",
+    "rights": "Historical Government of Canada publication; table values",
+    "collection": "americas"
+  },
+  {
+    "id": "nf_census_1901_table1",
+    "title": "Census of Newfoundland and Labrador, 1901, Volume I",
+    "publisher": "Colonial Secretary's Office, Newfoundland",
+    "url": "https://collections.mun.ca/digital/collection/cns_tools/id/158303/",
+    "locator": "p. viii, Table I, Newfoundland, Labrador, and grand total, 1891 and 1901 columns",
+    "rights": "Historical colonial government publication, public domain in Canada",
+    "reference_day_source": "https://www.stats.gov.nl.ca/publications/Historical/PDF/Historical_Statistics_of_Newfoundland_and_Labrador_V2_N7_1994.pdf",
+    "collection": "americas"
+  },
+  {
+    "id": "mx_yearbook_1941_table11",
+    "title": "Anuario Estadístico de los Estados Unidos Mexicanos, 1941",
+    "publisher": "Dirección General de Estadística, digitized by INEGI",
+    "url": "https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/historicos/1334/702825140410/702825140410_1.pdf",
+    "locator": "pp. 24–25, Table 11; dates from INEGI 1895 and 1900 census program metadata",
+    "rights": "Historical public-sector statistical values; transcription with attribution",
+    "collection": "americas"
+  },
+  {
+    "id": "mx_inegi_census_centennial",
+    "title": "Estados Unidos Mexicanos: Cien años de censos de población",
+    "publisher": "Instituto Nacional de Estadística, Geografía e Informática",
+    "url": "https://internet.contenidos.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/historicos/2104/702825491406/702825491406_1.pdf",
+    "locator": "p. 68, Población por entidad federativa, 1895–1990",
+    "rights": "Official statistical values; transcription with attribution",
+    "collection": "americas"
+  },
+  {
+    "id": "mx_census_1930_baja_norte",
+    "title": "Quinto Censo de Población, Baja California (Distrito Norte)",
+    "publisher": "Dirección General de Estadística, digitized by INEGI",
+    "url": "https://www.inegi.org.mx/contenido/productos/prod_serv/contenidos/espanol/bvinegi/productos/censos/poblacion/1930/bc/QCPBCDN30I.pdf",
+    "locator": "Gráfica de población del Distrito Norte de Baja California, censos de 1900, 1910, 1921 y 1930, 1900 row",
+    "rights": "Historical public-sector statistical values; transcription with attribution",
+    "collection": "americas"
+  },
+  {
+    "id": "br_dge_1908_state_table",
+    "title": "Boletim Commemorativo da Exposição Nacional de 1908",
+    "publisher": "Directoria Geral de Estatistica, Brazil; digitized by the Federal Senate",
+    "url": "https://www2.senado.leg.br/bdsf/bitstream/handle/id/863203/000036005_Boletim_commemorativo_exposicao_nacional_1908.pdf?isAllowed=y&sequence=1",
+    "locator": "pp. 73–74, População do Brazil por Estados (1872–1908), 1890 and 1900 columns and footnotes",
+    "rights": "Historical Brazilian government publication; transcription of statistical values with attribution",
+    "raw_path": "raw/censuses.csv",
+    "collection": "americas"
+  },
+  {
+    "id": "br_ibge_sinopse_2000_table14",
+    "title": "Sinopse preliminar do Censo Demográfico 2000",
+    "publisher": "Instituto Brasileiro de Geografia e Estatística",
+    "url": "https://biblioteca.ibge.gov.br/visualizacao/periodicos/308/cd_2000_v7.pdf",
+    "locator": "PDF p. 44, Table 1.4, 31.12.1890 and 31.12.1900 columns",
+    "rights": "IBGE historical statistical values; transcription with attribution",
+    "raw_path": "raw/brazil_ibge_2000_table14.pdf",
+    "collection": "americas"
+  },
+  {
+    "id": "br_ibge_census_history",
+    "title": "História das Estatísticas Brasileiras",
+    "publisher": "Instituto Brasileiro de Geografia e Estatística",
+    "url": "https://www.ibge.gov.br/biblioteca/visualizacao/livros/liv42899.pdf",
+    "locator": "1900 census discussion and original synopsis versus later volume",
+    "rights": "IBGE historical statistical values; transcription with attribution",
+    "collection": "americas"
+  },
+  {
+    "id": "ar_dge_bulletin_219",
+    "title": "El comercio exterior argentino en 1936 y 1935 y estadísticas económicas retrospectivas",
+    "publisher": "Dirección General de Estadística de la Nación, digitized by INDEC",
+    "url": "https://biblioteca.indec.gob.ar/bases/minde/17_1937_219.pdf",
+    "locator": "p. 98, Table XLIII(a), Capital Federal y Provincias",
+    "rights": "Historical public-sector statistical values; transcription with attribution",
+    "collection": "americas"
+  },
+  {
+    "id": "ar_indec_historical_census",
+    "title": "Historia estadística argentina: Segundo Censo Nacional",
+    "publisher": "Instituto Nacional de Estadística y Censos",
+    "url": "https://www.indec.gob.ar/indec/web/Institucional-Indec-Historia-2",
+    "locator": "1895 section; directly enumerated and two omitted categories",
+    "rights": "INDEC statistical values; transcription with attribution",
+    "collection": "americas"
+  },
+  {
+    "id": "ar_censo_1947_retrospective",
+    "title": "IV Censo General de la Nación, Tomo I",
+    "publisher": "Dirección Nacional del Servicio Estadístico, digitized by INDEC",
+    "url": "https://biblioteca.indec.gob.ar/bases/minde/1c1947t1master.pdf",
+    "locator": "p. XXVIII, Censos Nacionales, 1895 and 1914 rows",
+    "rights": "Historical public-sector statistical values; transcription with attribution",
+    "collection": "americas"
+  },
+  {
+    "id": "uk_general_census_report_1901",
+    "title": "Census of England and Wales, 1901. General Report with Appendices",
+    "publisher": "General Register Office / HMSO (London, 1904)",
+    "url": "https://www.visionofbritain.org.uk/census/EW1901GEN/14",
+    "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901",
+    "rights": "Historical census numbers transcribed; digital report is linked.",
+    "companion_table": "https://wellcomecollection.org/works/mbq6vgjb",
+    "dates_reference": "https://www.nationalarchives.gov.uk/help-with-your-research/research-guides/census-records/",
+    "collection": "britain"
+  },
+  {
+    "id": "ireland_general_census_1911",
+    "title": "Census of Ireland, 1911. General Report, with Tables and Appendix",
+    "publisher": "Census of Ireland; HMSO (Dublin, 1913); digitized by Central Statistics Office",
+    "url": "https://www.cso.ie/en/media/csoie/releasespublications/documents/ep/storiesfromcensus1911/census1911originalreports/459-General_report%2C_Ireland%2C_1911.pdf",
+    "locator": "Tables 43 (p. 62), 48 and 48A (p. 65), PDF leaves 128 and 131.",
+    "rights": "Historical census counts transcribed; the digitized original is linked.",
+    "collection": "britain"
+  },
+  {
+    "id": "england_wales_summary_tables_1901",
+    "title": "Census of England and Wales, 1901. Summary Tables",
+    "publisher": "General Register Office / HMSO, London; Wellcome Collection",
+    "url": "https://wellcomecollection.org/works/ka7g6w5z/items?manifest=6&canvas=16",
+    "locator": "Table III, printed p. 6, Ancient Counties, Persons 1891 and 1901.",
+    "rights": "Historical census facts transcribed. Wellcome Collection marks the digitized volume Public Domain Mark.",
+    "manifest_url": "https://iiif.wellcomecollection.org/presentation/v2/b32183161_0006",
+    "page_image": "https://iiif.wellcomecollection.org/image/b32183161_0006_0016.jp2/full/2100,/0/default.jpg",
+    "collection": "britain"
+  },
+  {
+    "id": "insee_sgf_censuses",
+    "title": "Données historiques de la Statistique générale de France — Recensements de 1851 à 1921",
+    "publisher": "Statistique générale de la France; ICPSR transcription; Insee electronic tables (12 January 2010)",
+    "url": "https://www.insee.fr/fr/statistiques/2653233",
+    "locator": "REC_T256.dbf V21 (1896), V22 (1901); REC_T24.dbf V132 (1896); REC_T214.dbf V89 (1901). libelles_var_rec.dbf specifies the variables.",
+    "rights": "Source: Insee, 2010-01-12. Licence Ouverte / Open Licence 2.0 (Etalab); field extraction, identity mapping and interpolations by WWO.",
+    "rights_url": "https://www.insee.fr/fr/information/2008466",
+    "dates_url": "https://www.bnsp.insee.fr/ark:/12148/bc6p06z2rd0.pdf",
+    "coverage": "Contemporary metropolitan départements, Territoire de Belfort and arrondissements. Overseas populations excluded.",
+    "collection": "cities_europe"
+  },
+  {
+    "id": "de_jahrbuch_1902_census",
+    "title": "Statistisches Jahrbuch für das Deutsche Reich 1902, I.1 Die Bundesstaaten nach Fläche und Bevölkerung",
+    "publisher": "Kaiserliches Statistisches Amt; digital copy, Universitätsbibliothek Mannheim",
+    "url": "https://digi.bib.uni-mannheim.de/fileadmin/statjahrb/514401303_1902/pdf/514401303_0010.pdf",
+    "locator": "Printed p. 1, section I, table 1, Ortsanwesende Bevölkerung; 2 December 1895 and 1 December 1900, zusammen.",
+    "rights": "Factual population counts transcribed from the 1902 German imperial statistical yearbook. No scanned image is redistributed.",
+    "coverage": "German Empire within its European census territory; 25 constituent states and Reichsland Elsaß-Lothringen; 14 Prussian subdivisions. Overseas possessions excluded.",
+    "collection": "cities_europe"
+  },
+  {
+    "id": "reba_chandler_1900",
+    "title": "Chandler Population Data, version 3, chandlerV2.csv (AD_1900)",
+    "publisher": "Meredith Reba, Femke Reitsma and Karen C. Seto; figshare (2016), after Tertius Chandler, Four Thousand Years of Urban Growth (1987)",
+    "url": "https://doi.org/10.6084/m9.figshare.2059494.v3",
+    "locator": "chandlerV2.csv, Figshare file 5407640. One-based data records after the header. AD_1900 >= 50,000.",
+    "rights": "CC BY 4.0. Reba, Reitsma & Seto (2016), after Chandler (1987). WWO selected and normalized the AD_1900 column and added geography/quality labels.",
+    "rights_url": "https://creativecommons.org/licenses/by/4.0/",
+    "download_url": "https://ndownloader.figstatic.com/files/5407640",
+    "methodology": "https://doi.org/10.1038/sdata.2016.34",
+    "coverage": "Urban population estimates compiled for AD 1900. Settlement footprints vary, and geocoding certainty describes location alone. No uniform municipal-boundary or exact census-day interpretation.",
+    "collection": "cities_europe"
+  },
+  {
+    "id": "mcgd_v22",
+    "title": "Modern China Geospatial Database – Main Dataset, version 2.2",
+    "publisher": "Christian Henriot, Aix-Marseille Université / ENP China, Zenodo",
+    "url": "https://doi.org/10.5281/zenodo.8063584",
+    "locator": "MCGD_Data_V2.2.csv, LocID and NameID. city_chinese_names.csv lists both the Chinese and linked romanization identifiers.",
+    "rights": "CC BY 4.0. WWO links selected name variants to Reba city records by reported locality and the gazetteer LocID.",
+    "collection": "cities_europe"
+  },
+  {
+    "id": "us_gazetteer_places_2024",
+    "title": "2024 Gazetteer Files, national places",
+    "publisher": "U.S. Census Bureau",
+    "url": "https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.2024.html",
+    "locator": "2024_Gaz_place_national.zip, GEOID, INTPTLAT, INTPTLONG. Place codes are cited in the individual quality notes.",
+    "rights": "US federal government geographic data. Used for coordinate comparisons only.",
+    "collection": "cities_europe"
+  },
+  {
+    "id": "jersey_census_1901",
+    "title": "Census, 1901 – Islands in the British Seas: Jersey",
+    "publisher": "Census Office, HMSO",
+    "url": "https://boleat.com/materials/1901.pdf",
+    "locator": "Printed p. 20, Jersey tables 1 and 2 and accompanying notes",
+    "rights": "Numeric facts transcribed from the original census page.",
+    "collection": "crown_islands"
+  },
+  {
+    "id": "uk_preliminary_report_1911",
+    "title": "1911 Census of England and Wales, Preliminary Report",
+    "publisher": "Census Office, HMSO; transcription by University of Portsmouth",
+    "url": "https://www.visionofbritain.org.uk/census/EW1911PRE/2",
+    "locator": "Report section on Islands in the British Seas",
+    "rights": "Historical numeric facts from the report.",
+    "collection": "crown_islands"
+  },
+  {
+    "id": "dk_yearbook_1903_dependencies",
+    "title": "Statistisk Aarbog 1903, Tabel C. Statistiske Oversigter vedrørende Færøerne, Island, Grønland og de dansk-vestindiske Øer",
+    "publisher": "Statens Statistiske Bureau, Copenhagen; digital edition, Danmarks Statistik",
+    "url": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=12689&sid=oversigter",
+    "locator": "Tables A.1 p. 177, B.1 p. 179, C.1 p. 182, D.1 p. 183 and p. 184 table 2 note 1. Population figures by census date.",
+    "rights": "Numerical facts manually transcribed from the 1903 statistical yearbook. Scanned pages are available at the publisher.",
+    "collection": "danish"
+  },
+  {
+    "id": "us_occupation_special_report",
+    "title": "Occupations at the Twelfth Census (1900)",
+    "publisher": "United States Census Office, Government Printing Office",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/occupations/1900-census-occupations-7.pdf",
+    "locator": "General Tables, Table 1, pp. 7–8; enumeration area p. 5",
+    "rights": "US federal statistical publication. Numeric facts transcribed.",
+    "collection": "demography"
+  },
+  {
+    "id": "india_statistical_abstract_1905",
+    "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39",
+    "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/index.html",
+    "locator": "Tables 1, 2 and 6; separate table workbooks",
+    "rights": "1905 statistical publication. Numeric facts transcribed; the digital workbooks are linked.",
+    "files": {
+      "1": "https://dsal.uchicago.edu/statistics/1894_excel/1894.001.XLS",
+      "2": "https://dsal.uchicago.edu/statistics/1894_excel/1894.002.XLS",
+      "6": "https://dsal.uchicago.edu/statistics/1894_excel/1894.006.XLS"
+    },
+    "collection": "eastern"
+  },
+  {
+    "id": "british_empire_census_1901",
+    "title": "Census of the British Empire, 1901",
+    "publisher": "General Register Office / HMSO (London, 1906)",
+    "url": "https://wellcomecollection.org/works/mbq6vgjb",
+    "locator": "Summary table 2 (pp. 2–6); census dates p. 71; individual colony tables as cited",
+    "rights": "Wellcome Collection marks its digital copy Public Domain Mark 1.0.",
+    "manifest_url": "https://iiif.wellcomecollection.org/presentation/v2/b32183173",
+    "collection": "eastern"
+  },
+  {
+    "id": "china_year_book_1919",
+    "title": "The China Year Book, 1919–20",
+    "publisher": "H. T. Montague Bell and H. G. W. Woodhead; George Routledge & Sons (London), E. P. Dutton & Co. (New York)",
+    "url": "https://www.bnasie.eu/Asset/Source/bnBook_ID-2751_No-01.pdf",
+    "locator": "Chapter I, pp. 1–3; PDF leaves 27–29. Population table p. 3 is printed sideways.",
+    "rights": "1919 publication. Numeric facts transcribed directly from the scan.",
+    "collection": "eastern"
+  },
+  {
+    "id": "cao_qing_provincial_reconstruction",
+    "title": "Population Expansion and Demographic Pressure in Qing China (1644–1911)",
+    "publisher": "Ni Yuping, Tsinghua University Press (2023). Table credits Cao Shuji, Population History, vol. 4 pp. 451–452 and vol. 5 pp. 703–704.",
+    "url": "https://www.tup.tsinghua.edu.cn/upload/books/yz/096340-01.pdf",
+    "locator": "Chapter 1, Table 1.1, printed pp. 17–18 (PDF pp. 31–32), 1880 and 1910 columns.",
+    "rights": "Numeric facts with attribution; no publisher text, figures or scans redistributed.",
+    "collection": "eastern"
+  },
+  {
+    "id": "nz_official_yearbook_1900",
+    "title": "New Zealand Official Year-Book, 1900",
+    "publisher": "Registrar-General of New Zealand; Government Printer",
+    "url": "https://www3.stats.govt.nz/New_Zealand_Official_Yearbooks/1900/NZOYB_1900.html",
+    "locator": "Section I: Population; opening table and Estimated Populations of Provincial Districts.",
+    "rights": "1900 official statistical publication; numeric facts transcribed.",
+    "collection": "eastern"
+  },
+  {
+    "id": "abs_historical_population_2021",
+    "title": "Historical population, 2021: Population size and growth",
+    "publisher": "Australian Bureau of Statistics, released 16 July 2024",
+    "url": "https://www.abs.gov.au/statistics/people/population/historical-population/2021/HPDC1.xlsx",
+    "locator": "Table 1, persons rows 24–32, dated 31 December; footnotes (a) and (b).",
+    "rights": "Australian Bureau of Statistics, numeric facts attributed; workbook linked.",
+    "collection": "eastern"
+  },
+  {
+    "id": "japan_statistical_yearbook_72",
+    "title": "Japan Statistical Yearbook, 72nd edition",
+    "publisher": "Statistics Bureau, Ministry of Internal Affairs and Communications",
+    "url": "https://www.stat.go.jp/data/nenkan/72nenkan/zenbun/jp72/book/book.pdf",
+    "locator": "Chapter 2, table 2-1, Total Population, pre-census series and footnote.",
+    "rights": "Statistical facts attributed to the Statistics Bureau; original linked.",
+    "collection": "eastern"
+  },
+  {
+    "id": "egypt_historical_census_primary_tables",
+    "title": "Demographic Change in Rural Egypt, 1882–1917: Primary census data",
+    "publisher": "Hirofumi Tanada, Waseda University; Hitotsubashi University Institute of Economic Research. Based on Gouvernement Égyptien (1898), Recensement général de l’Égypte, vols. I–III, and Ministry of Finance (1909), The Census of Egypt taken in 1907.",
+    "url": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/97_22.html",
+    "locator": "Appendices 2-1 and 3-1, Markaz and Madina tables; table 2 for census dates; table 4 for cities outside the markaz series.",
+    "rights": "Factual values from the historical censuses via attributed research transcription; source HTML and study are linked.",
+    "files": {
+      "ap2-1.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap2-1.htm",
+      "ap2-1-2.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap2-1-2.htm",
+      "ap3-1.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap3-1.htm",
+      "ap3-1-2.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap3-1-2.htm",
+      "table2.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/table2.htm",
+      "table4.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/table4.htm"
+    },
+    "original_1907_scan": "https://sites.dlib.nyu.edu/viewer/books/princeton_aco003741/display",
+    "collection": "eastern"
+  },
+  {
+    "id": "ceylon_gazette_5741_q1_1900",
+    "title": "Supplement to the Ceylon Government Gazette, no. 5,741: Report on the Vital Statistics of the Colony during the First Quarter of 1900",
+    "publisher": "Ceylon Registrar-General, Government Printer (Colombo); digitized by Noolaham",
+    "url": "https://noolaham.net/project/1023/102287/102287.pdf",
+    "locator": "Section I, p. 1, and Table I, p. 9, first-quarter opening estimate by province and district",
+    "rights": "Factual values transcribed from a 1900 official publication; the digitized original is linked.",
+    "collection": "eastern"
+  },
+  {
+    "id": "mauritius_demographic_digest",
+    "title": "Digest of Demographic Statistics 2016",
+    "publisher": "Statistics Mauritius, Ministry of Finance and Economic Development",
+    "url": "https://statsmauritius.govmu.org/Documents/Statistics/Digests/Demography/Digest_Demo_Yr16.pdf",
+    "locator": "Table 1.3, Population growth in intercensal periods, rows 6 March 1891 and 1 April 1901. Columns for Mauritius, Rodrigues and two-island total.",
+    "rights": "Statistical facts transcribed and attributed to Statistics Mauritius.",
+    "companion_table": "https://statsmauritius.govmu.org/Documents/Statistics/Digests/Annual_Digest/Annual_Digest_Statistics_Yr08.pdf",
+    "collection": "eastern"
+  },
+  {
+    "id": "egypt_world_population_conference_1954",
+    "title": "Contributions to demography through new census enquiries (E/CONF.13/230)",
+    "publisher": "Hasan M. Husein, World Population Conference, United Nations (1954)",
+    "url": "https://digitallibrary.un.org/record/4028612/files/E_CONF.13_230-EN.pdf",
+    "locator": "Table I, p. 1, census years 1897 and 1907.",
+    "rights": "Census facts transcribed with attribution; original paper linked.",
+    "collection": "eastern"
+  },
+  {
+    "id": "jp_cabinet_1909_resident_prefectures",
+    "title": "道府縣現住人口 自明治十七年至同四十年",
+    "publisher": "内閣統計局, 1909",
+    "url": "https://doi.org/10.11501/805921",
+    "locator": "凡例 一–三, printed pp. 2–12, 乙種道府縣現住人口",
+    "rights": "Public-domain historical government statistical publication. Numerical transcription only.",
+    "interpretation_url": "https://www.stat.go.jp/english/data/nenkan/1431-02e.html",
+    "collection": "japan_taiwan"
+  },
+  {
+    "id": "tw_governor_general_1900",
+    "title": "臺灣總督府第四統計書（明治三十三年）",
+    "publisher": "臺灣總督府, 1902. National Archives of Japan digital collection.",
+    "url": "https://www.digital.archives.go.jp/item/750223",
+    "locator": "Tables XVII–XVIII, printed pp. 55–57, PDF images 40–41",
+    "rights": "Historical government statistics. Selected numerical facts transcribed from the public archive.",
+    "download_url": "https://www.digital.archives.go.jp/content/item/da12/C100048915200/raw/0710.pdf",
+    "collection": "japan_taiwan"
+  },
+  {
+    "id": "li_statistisches_tabellenwerk_1960",
+    "title": "Statistisches Tabellenwerk Liechtenstein, Heft 1 (1960)",
+    "publisher": "Amt für Statistik des Fürstentums Liechtenstein, Vaduz",
+    "locator": "Wohnbevölkerung nach Gemeinden, 1812–1958; Ehe, Geburt, Tod, Jahreswerte",
+    "url": "https://www.statistikportal.li/statistikportal/publications/101-statistisches-jahrbuch/1960/01/1/101.1960.01_01_statistisches-tabellenwerk-heft1-1960.pdf",
+    "rights": "Numerical facts only; reference to digitized official statistical tables.",
+    "collection": "liechtenstein"
+  },
+  {
+    "id": "russia_first_census",
+    "title": "First General Census of the Russian Empire 1897, provincial returns, volumes I–LXXXIX",
+    "publisher": "Central Statistical Committee, Ministry of the Interior, St Petersburg 1903–1905; Demoscope Weekly numerical transcription",
+    "url": "https://www.demoscope.ru/weekly/ssp/rus_gub_97.php",
+    "locator": "Наличное население в губерниях, уездах, городах Российской Империи (без Финляндии); table parameter reg=1…89, row numbers include two header rows",
+    "rights": "Historical numerical facts only. No republication licence for Demoscope page layout or editorial text asserted.",
+    "geometry": "Kessler/Markevich, RISTAT https://doi.org/10.34894/NQOASN; exact parent/name match only. No assumption of unchanged 1900 boundaries.",
+    "collection": "russia"
+  },
+  {
+    "id": "ru_presidential_library",
+    "title": "Проведена Первая всеобщая перепись населения Российской империи",
+    "publisher": "Presidential Library of the Russian Federation",
+    "url": "https://www.prlib.ru/history/619019",
+    "locator": "28 January (9 February) 1897, empire population of both sexes",
+    "rights": "Factual extract and citation only.",
+    "collection": "russia"
+  },
+  {
+    "id": "rus_rel_97",
+    "title": "First General Census of the Russian Empire, 1897, Table XII: religious denomination",
+    "publisher": "Central Statistical Committee; Demoscope Weekly numeric transcription",
+    "url": "https://www.demoscope.ru/weekly/ssp/rus_rel_97.php",
+    "locator": "structure.csv retains table parameter reg, published scope, and original table row counting headers",
+    "rights": "Numeric facts from historical census; original web layout and editorial text not redistributed.",
+    "collection": "russia"
+  },
+  {
+    "id": "rus_sos_97",
+    "title": "First General Census of the Russian Empire, 1897, Table VIII: legal estates",
+    "publisher": "Central Statistical Committee; Demoscope Weekly numeric transcription",
+    "url": "https://www.demoscope.ru/weekly/ssp/rus_sos_97.php",
+    "locator": "structure.csv retains table parameter reg, published scope, and original table row counting headers",
+    "rights": "Numeric facts from historical census; original web layout and editorial text not redistributed.",
+    "collection": "russia"
+  },
+  {
+    "id": "rus_lan_97",
+    "title": "First General Census of the Russian Empire, 1897, Table XIII: mother tongue",
+    "publisher": "Central Statistical Committee; Demoscope Weekly numeric transcription",
+    "url": "https://www.demoscope.ru/weekly/ssp/rus_lan_97.php",
+    "locator": "structure.csv retains table parameter reg, published scope, and original table row counting headers",
+    "rights": "Numeric facts from historical census; original web layout and editorial text not redistributed.",
+    "collection": "russia"
+  },
+  {
+    "id": "rus_age_97",
+    "title": "First General Census of the Russian Empire, 1897, Age, sex and literacy",
+    "publisher": "Central Statistical Committee; Demoscope Weekly numeric transcription",
+    "url": "https://www.demoscope.ru/weekly/ssp/rus_age_97.php",
+    "locator": "structure.csv retains table parameter reg, published scope, and original table row counting headers",
+    "rights": "Numeric facts from historical census; original web layout and editorial text not redistributed.",
+    "collection": "russia"
+  },
+  {
+    "id": "swiss_federal_census_comparison_1911",
+    "title": "Vorläufige Resultate der eidgenössischen Volkszählung vom 1. Dezember 1910, verglichen mit früheren Volkszählungen",
+    "publisher": "Federal census returns published in Zeitschrift für schweizerische Statistik (1911), pp. 101–143",
+    "url": "https://www.sses.swiss/journal/archive/pdf/1911/1911-I-8.pdf",
+    "locator": "Definitions p. 101; Table I p. 104; Table IV pp. 142–143, retrospective 1888 and 1900 census columns",
+    "rights": "Numeric facts transcribed from 1911 publication; no reproduction of its layout. Canton totals cross-checked against Statistisches Jahrbuch der Schweiz 1919, III.a.3.",
+    "independent_url": "https://istmat.org/files/uploads/53038/statistisches_jahrbuch_der_schweiz_1919.pdf",
+    "collection": "swiss"
+  },
+  {
+    "id": "ft_world_v5",
+    "title": "Federico–Tena World Population Historical Database, List of Polities V5",
+    "publisher": "e-cienciaDatos / Universidad Carlos III de Madrid",
+    "url": "https://doi.org/10.21950/3SK54X",
+    "locator": "Country series rows 103–104; Summary data rows 104–105 (thousands)",
+    "rights": "CC BY 4.0. Giovanni Federico and Antonio Tena-Junguito. WWO extracts, converts units and interpolates.",
+    "downloads": {
+      "world_2026.xlsx": "https://edatos.consorciomadrono.es/api/access/datafile/51075?format=original",
+      "world_2026_readme.pdf": "https://edatos.consorciomadrono.es/api/access/datafile/51076?format=original",
+      "world_2025.xlsx": "https://edatos.consorciomadrono.es/api/access/datafile/34045?format=original"
+    },
+    "methods": "https://hdl.handle.net/10016/45843",
+    "african_revision": "See 2026 workbook Sources and V4 African Population Database (Frankema and Jerven).",
+    "collection": "world"
+  },
+  {
+    "id": "ft_world_v4",
+    "title": "Federico–Tena historical-border series V4, 2025",
+    "publisher": "e-cienciaDatos",
+    "url": "https://doi.org/10.21950/3SK54X",
+    "locator": "V4 Country series!EC103:EC104; Trucial coast omitted from V5 country sheet",
+    "rights": "CC BY 4.0. Giovanni Federico and Antonio Tena-Junguito. WWO extracts, converts units and interpolates.",
+    "download": "https://edatos.consorciomadrono.es/api/access/datafile/34045?format=original",
+    "collection": "world"
+  },
+  {
+    "id": "ft_quality_2025",
+    "title": "Quality Assessment Population (2025)",
+    "publisher": "e-cienciaDatos",
+    "url": "https://doi.org/10.21950/U6AANV",
+    "locator": "Quality Assessment rows 103–104. Numerical sensitivity assumptions in working paper p.27.",
+    "rights": "CC BY 4.0. Giovanni Federico and Antonio Tena-Junguito. WWO extracts, converts units and interpolates.",
+    "downloads": {
+      "quality_2025.xlsx": "https://edatos.consorciomadrono.es/api/access/datafile/34065?format=original",
+      "quality_2025_readme.pdf": "https://edatos.consorciomadrono.es/api/access/datafile/34066?format=original"
+    },
+    "collection": "world"
+  },
+  {
+    "id": "census_world_comparison",
+    "title": "Historical Estimates of World Population",
+    "publisher": "US Census Bureau, International Programs Center",
+    "url": "https://www.census.gov/data/tables/time-series/demo/international-programs/historical-est-worldpop.html",
+    "locator": "1900 AD row; population in millions, lower/upper summary. Original references listed below the table.",
+    "rights": "Factual numeric extract from US federal table; underlying researchers credited by the publisher.",
+    "collection": "world"
+  }
+]

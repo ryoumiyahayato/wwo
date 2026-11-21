@@ -1,0 +1,57 @@
+England|27483490|30807243
+Wales|1519035|1720600
+Bedfordshire|160704|171240
+Berkshire|239138|256509
+Buckinghamshire|185284|195764
+Cambridgeshire|188961|190682
+Cheshire|730058|815099
+Cornwall|322571|322334
+Cumberland|266549|266933
+Derbyshire|528033|620322
+Devonshire|631808|661314
+Dorsetshire|194517|202936
+Durham|1016454|1187361
+Essex|785445|1085771
+Gloucestershire|599947|634729
+Hampshire|690097|797634
+Herefordshire|115949|114380
+Hertfordshire|220162|250152
+Huntingdonshire|57761|57771
+Kent|1142324|1348841
+Lancashire|3926760|4406409
+Leicestershire|373584|434019
+Lincolnshire|472878|498858
+Middlesex|3251671|3585323
+Monmouthshire|252416|292317
+Norfolk|454516|460120
+Northamptonshire|302183|338088
+Northumberland|506442|603498
+Nottinghamshire|445823|514578
+Oxfordshire|185240|181120
+Rutlandshire|20659|19709
+Shropshire|236339|239324
+Somersetshire|484337|508256
+Staffordshire|1083424|1234506
+Suffolk|371235|384293
+Surrey|1731343|2012744
+Sussex|550446|605202
+Warwickshire|805072|897835
+Westmorland|66098|64303
+Wiltshire|264997|273869
+Worcestershire|413744|488338
+Yorkshire, East Riding|341546|384997
+Yorkshire, North Riding|360076|379396
+Yorkshire, West Riding|2439895|2744848
+York (Parliamentary Borough)|67004|75521
+Anglesey|50098|50606
+Brecknockshire|57031|59907
+Cardiganshire|62630|60240
+Carmarthenshire|130566|135328
+Carnarvonshire|118204|126883
+Denbighshire|117872|129942
+Flintshire|77277|81700
+Glamorganshire|687218|859931
+Merionethshire|49212|49149
+Montgomeryshire|58003|54901
+Pembrokeshire|89133|88732
+Radnorshire|21791|23281

@@ -66,6 +66,45 @@ fn main() -> Result<(), Box<dyn Error>> {
             let saved = SavedWorld::read(Path::new(&input))?;
             println!("{}", serde_json::to_string(&saved.restore_character()?)?);
         }
+        Some("inspect-population") => {
+            let unit = args.next().ok_or_else(usage)?;
+            let unit = unit.to_str().ok_or_else(usage)?;
+            let input = args.next();
+            if args.next().is_some() { return Err(usage().into()); }
+            let bootstrap = WorldBootstrap::load()?;
+            let world = match input {
+                Some(path) => read_native_slot(Path::new(&path), &bootstrap)?,
+                None => bootstrap.create("country_fra")?,
+            };
+            let population = world.population();
+            let total = population.population_total(unit)
+                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown statistical population unit"))?;
+            let partitions = population.partitions(unit).map(|(id, name, count)| {
+                json!({"unit_id": id, "name": name, "population_total": count})
+            }).collect::<Vec<_>>();
+            let admitted = population.admitted_opening(unit);
+            let scope = if !partitions.is_empty() {
+                "partitioned_aggregate"
+            } else if population.totals().contains_key(unit) {
+                "national_market"
+            } else if population.standalone_totals().contains_key(unit) {
+                "standalone_territory"
+            } else {
+                "statistical_partition"
+            };
+            println!("{}", json!({
+                "date": world.clock().current_date(),
+                "unit_id": unit,
+                "statistical_scope": scope,
+                "opening_basis": if admitted.is_some() { "historical_source" } else { "legacy_economic_estimate" },
+                "population_total": total,
+                "direct_residents": population.resident_pool(unit),
+                "background_population": population.background(unit),
+                "admitted_opening": admitted,
+                "legacy_estimate": population.opening_estimate(unit)?,
+                "partitions": partitions,
+            }));
+        }
         Some("inspect-wages") => {
             let input = args.next().ok_or_else(usage)?;
             if args.next().is_some() { return Err(usage().into()); }
@@ -117,5 +156,5 @@ fn show(saved: &SavedWorld) {
 
 fn usage() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput,
-        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
+        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <unit-id> [<native-save>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
 }

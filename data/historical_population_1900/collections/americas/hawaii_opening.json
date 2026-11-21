@@ -1,0 +1,17 @@
+{
+  "unit_id": "cshapes_gw_4",
+  "date": "1900-01-01",
+  "population_value": 151193,
+  "source_id": "us_twelfth_census_vol1",
+  "locator": "pp. xix-xx, Table III, Hawaii, with footnote",
+  "endpoint_dates": [
+    "1890-12-28",
+    "1900-06-01"
+  ],
+  "country_endpoint_values": [
+    89990,
+    154001
+  ],
+  "method": "Linear interpolation by elapsed days (3291/3442), rounded once. Includes the Hawaiian Islands as reported by both censuses. Hawaii is outside the mainland group.",
+  "units": []
+}

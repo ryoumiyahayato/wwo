@@ -1,0 +1,21 @@
+{
+  "unit_id": "colony_of_newfoundland",
+  "date": "1900-01-01",
+  "population_value": 218307,
+  "source_id": "nf_census_1901_table1",
+  "locator": "1901 Census, Table I, p. viii, grand total; Newfoundland Historical Statistics (1994), Table A-1, footnote 2 for dates",
+  "endpoint_dates": [
+    "1891-06-01",
+    "1901-06-01"
+  ],
+  "country_endpoint_values": [
+    202040,
+    220984
+  ],
+  "method": "Linear interpolation by elapsed days (784/913), rounded once. Uses the June 1 historical reference-day convention reported by the Newfoundland Statistics Agency. Original comparative table identifies census years. Both totals include the Labrador area in the historical returns.",
+  "units": [],
+  "endpoint_date_precision": [
+    "June 1 by official retrospective convention",
+    "June 1 by official retrospective convention"
+  ]
+}
