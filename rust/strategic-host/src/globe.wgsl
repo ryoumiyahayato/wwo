@@ -14,6 +14,7 @@ struct View {
     natural_lod: array<vec4f, 2>, // opacity indexed by Z, or -1 for per-page blending
     close_sample: vec3f, // detail weight, streamed, historical survey
     water_clock: u32,
+    military_cell: vec4f, // easting index, northing index, step metres, active
 };
 struct LandEdit { area: vec4f, state: vec4f };
 struct Tile {
@@ -791,14 +792,22 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
         let ts=tan(PI*.25-phi*.5)/pow((1.-e)/(1.+e),.040909595);
         let rho=11754255.426*pow(ts,.725607765);
         let theta=.725607765*radians(ll.x-3.);
-        let cell=(vec2f(52000.,-262000.)+vec2f(rho*sin(theta),6055612.05-rho*cos(theta)))/view.map_style.w;
+        let shifted=vec2f(52000.,-262000.)+vec2f(rho*sin(theta),6055612.05-rho*cos(theta));
+        let cell=shifted/view.map_style.w;
         let pixel_span=max(fwidth(cell),vec2f(.00001));
         let gap=abs(fract(cell+vec2f(.5))-.5)/pixel_span;
         let stroke=(1.-smoothstep(.22,.95,min(gap.x,gap.y)))*(1.-smoothstep(2200.,5000.,base_mpp));
+        let selected=shifted/max(1.,view.military_cell.z)-view.military_cell.xy;
+        let selected_span=max(fwidth(selected),vec2f(.00001));
+        let edge=min(selected,vec2f(1.)-selected)/selected_span;
+        let distance=min(edge.x,edge.y);
+        let inside=smoothstep(-1.,0.,distance)*view.military_cell.w;
+        let rim=inside*(1.-smoothstep(1.,2.4,distance));
         let grid_dims=vec2i(textureDimensions(owners));
         let grid_id=ids(vec2i(floor(uv*vec2f(grid_dims))),grid_dims);
         if view.settings.z>.5 && grid_id.x!=0u && grid_id.x==u32(view.selection.w) && ll.y>41. && ll.y<52. {
             color=mix(color,vec3f(.72,.81,.63),stroke*(1.-data.b)*.65);
+            color=mix(color,vec3f(.93,.72,.38),(.12*inside+.73*rim)*(1.-data.b));
         }
     }
     return color;

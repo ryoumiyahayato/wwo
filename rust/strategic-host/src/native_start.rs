@@ -82,6 +82,10 @@ impl NativeSession {
         self.world.as_ref()
     }
 
+    pub fn active_world_mut(&mut self) -> Option<&mut InitialWorld> {
+        self.world.as_mut()
+    }
+
     pub fn start() -> io::Result<Self> {
         let (profile, lock) = lock_profile()?;
         let preferences = profile.join("WWO_R68_Candidate/interface_settings.cfg");

@@ -3,6 +3,7 @@ use flate2::read::ZlibDecoder;
 use serde::Deserialize;
 use std::{collections::{HashMap,HashSet},fs,io::{self,Read,Seek,SeekFrom},path::{Path,PathBuf},sync::{mpsc,Arc},time::{Duration,Instant}};
 use winit::event_loop::EventLoopProxy;
+use wwo_map_lab::{battlefield_terrain::{BattlefieldTerrain, REGION_BOUNDS}, military_grid::MilitaryCell};
 
 pub const VERSION: &str = "worldcrs84quad-z4-v3";
 pub const PACK_VERSION: &str = "worldcrs84quad-15s-v1";
@@ -103,6 +104,74 @@ struct Level {z:u32,width:u32,height:u32,tiles:u32,bytes:u64}
 
 #[derive(Deserialize)]
 struct RiverTopology {file:String,reaches:u64,unresolved_downstream_ids:u64}
+
+/// Read the actual map elevations for the selected cell's 50 km parent and project
+/// them into the shared battlefield coordinate system. The lattice interpolates Z7
+/// samples, whose latitude spacing is about 610 m.
+pub fn battlefield(root: &Path, cell: MilitaryCell) -> io::Result<BattlefieldTerrain> {
+    const SPACING_M: u32 = 250;
+    let manifest: Manifest = serde_json::from_reader(fs::File::open(root.join("index.json"))?)?;
+    let width = 2 << MAX_LEVEL;
+    let height = 1 << MAX_LEVEL;
+    let level = manifest.levels.into_iter().find(|level| level.z == MAX_LEVEL)
+        .filter(|level| (level.width, level.height, level.tiles) == (width, height, width * height));
+    let Some(level) = level.filter(|_| manifest.version == COMPACT_VERSION
+        && manifest.tile_matrix_set == "WorldCRS84Quad" && manifest.axes == "longitude,latitude"
+        && manifest.origin == [-180, 90] && manifest.tile_size == TILE_SIZE && manifest.gutter == GUTTER
+        && cell.is_valid()) else {
+        return Err(io::Error::new(io::ErrorKind::InvalidData, "军事格需要有效的 Z7 全球高程资源"));
+    };
+    let mut pack = LevelPack::open(&root.join(format!("{MAX_LEVEL}.qpk")), level, COMPACT_VERSION)?;
+    let mut land_cover = CoverPack::FILE_NAMES.iter().map(|name| root.join(name))
+        .find(|path| path.is_file()).map(|path| CoverPack::open(&path, PAGE_SIZE)).transpose()?;
+    let mut pages = HashMap::new();
+    let region = cell.region();
+    let [min_x, min_z, max_x, max_z] = REGION_BOUNDS;
+    let spacing = f64::from(SPACING_M);
+    let columns = ((max_x - min_x) / spacing) as usize + 1;
+    let rows = ((max_z - min_z) / spacing) as usize + 1;
+    let mut heights = Vec::with_capacity(columns * rows);
+    let mut cover = Vec::with_capacity(columns * rows);
+    let texels_per_degree = f64::from(width * TILE_SIZE) / 360.;
+    let tile_size = f64::from(TILE_SIZE);
+    for row in 0..rows {
+        for col in 0..columns {
+            let [lon, lat] = region.local_to_lon_lat([min_x + col as f64 * spacing, min_z + row as f64 * spacing]);
+            let u = (lon + 180.) * texels_per_degree;
+            let v = (90. - lat) * texels_per_degree;
+            let x = (u / tile_size).floor() as u32;
+            let y = (v / tile_size).floor() as u32;
+            let key = Key(MAX_LEVEL, x, y);
+            let page = match pages.entry(key) {
+                std::collections::hash_map::Entry::Occupied(entry) => entry.into_mut(),
+                std::collections::hash_map::Entry::Vacant(entry) => {
+                    let elevations = pack.heights(key)?;
+                    let cover = land_cover.as_mut().map(|pack| {
+                        pack.read(MAX_LEVEL, x, y, (PAGE_SIZE * PAGE_SIZE) as usize)
+                    }).transpose()?;
+                    entry.insert((elevations, cover))
+                }
+            };
+            // Source coordinates are pixel centers. Gutters contain adjoining samples.
+            let local_u = u - f64::from(x * TILE_SIZE) + f64::from(GUTTER) - 0.5;
+            let local_v = v - f64::from(y * TILE_SIZE) + f64::from(GUTTER) - 0.5;
+            let page_width = PAGE_SIZE as usize;
+            let at = local_v as usize * page_width + local_u as usize;
+            let [a, b, c, d] = [at, at + 1, at + page_width, at + page_width + 1]
+                .map(|index| f64::from(page.0[index]));
+            let north = a + (b - a) * local_u.fract();
+            let south = c + (d - c) * local_u.fract();
+            let elevation = north + (south - north) * local_v.fract();
+            let nearest = local_v.round() as usize * page_width + local_u.round() as usize;
+            let class = page.1.as_ref().map_or(0, |classes| classes[nearest]);
+            let class = if class == 0 && elevation < 0. { 8 } else { class };
+            let elevation = if class == 8 { elevation.max(0.) } else { elevation };
+            heights.push(elevation as f32);
+            cover.push(class);
+        }
+    }
+    BattlefieldTerrain::from_geographic_heights(SPACING_M, heights, cover)
+}
 
 impl Catalogue {
     pub fn open(root:&Path,packed:bool,selection:LayerSelection,layer_candidate:Option<PathBuf>) -> io::Result<Self> {
@@ -280,8 +349,11 @@ impl LevelPack {
         Ok(Self{file,width:level.width,offsets,decoder})
     }
 
-    fn read(&mut self,key:Key,cover:Option<&mut CoverPack>,landscape:bool,override_frame:Option<Vec<u8>>)->io::Result<DecodedTile> {
+    fn record(&mut self, key: Key) -> io::Result<(u32, usize)> {
         let Key(z,x,y)=key;
+        if x>=self.width || y>=self.width/2 {
+            return Err(io::Error::new(io::ErrorKind::InvalidInput, "地貌分片超出范围"));
+        }
         let i=(y*self.width+x) as usize;
         let offset=self.offsets[i];
         let mut header=[0;RECORD_HEADER];
@@ -292,6 +364,28 @@ impl LevelPack {
             || count==0 || offset+RECORD_HEADER as u64+u64::from(count)>=self.offsets[i+1] {
             return Err(io::Error::other(format!("地貌包分片坐标或大小无效 · Z{z}/{x}/{y}")));
         }
+        let height_len=(self.offsets[i+1]-offset-RECORD_HEADER as u64-u64::from(count)) as usize;
+        Ok((count, height_len))
+    }
+
+    fn heights(&mut self, key: Key) -> io::Result<Vec<i16>> {
+        let (color_len, height_len) = self.record(key)?;
+        let ColorDecoder::Zstandard(decoder) = &mut self.decoder else {
+            return Err(io::Error::new(io::ErrorKind::InvalidData, "军事格需要 compact QPK 高程"));
+        };
+        self.file.seek(SeekFrom::Current(i64::from(color_len)))?;
+        let mut frame = vec![0; height_len];
+        self.file.read_exact(&mut frame)?;
+        let size = (PAGE_SIZE * PAGE_SIZE) as usize;
+        let residual = decoder.decompress(&frame, size * 2)?;
+        let mut heights = Vec::with_capacity(size);
+        unpack_heights(&residual, |_, height| heights.push(height as i16))?;
+        Ok(heights)
+    }
+
+    fn read(&mut self,key:Key,cover:Option<&mut CoverPack>,landscape:bool,override_frame:Option<Vec<u8>>)->io::Result<DecodedTile> {
+        let Key(z,x,y)=key;
+        let (count,height_len)=self.record(key)?;
         let size=(PAGE_SIZE*PAGE_SIZE) as usize;
         let mut frame=if let Some(frame)=override_frame {
             self.file.seek(SeekFrom::Current(i64::from(count)))?;
@@ -315,8 +409,7 @@ impl LevelPack {
         }
         let landscape=match &mut self.decoder {
             ColorDecoder::Zstandard(decoder) if z>=6&&landscape=>{
-                let count=self.offsets[i+1]-offset-RECORD_HEADER as u64-u64::from(count);
-                frame.resize(count as usize,0);
+                frame.resize(height_len,0);
                 self.file.read_exact(&mut frame)?;
                 let residual=decoder.decompress(&frame,size*2)?;
                 let classes=cover.and_then(|cover|match cover.read(z,x,y,size) {
@@ -349,13 +442,12 @@ fn open_tile(path:&Path,key:Key,magic:&[u8;8],bytes_per_pixel:u32) -> io::Result
     Ok(file)
 }
 
-fn landscape_pixels(residual:&[u8],classes:Option<&[u8]>)->io::Result<Vec<u8>> {
+fn unpack_heights(residual: &[u8], mut sample: impl FnMut(usize, u16)) -> io::Result<()> {
     let width=PAGE_SIZE as usize;
     let size=width*width;
     if residual.len()!=size*2 {
         return Err(io::Error::other("近景地貌高程数据大小无效"));
     }
-    let mut pixels=Vec::with_capacity(size*4);
     let mut above=[0u16;PAGE_SIZE as usize];
     for y in 0..width {
         let mut height=0u16;
@@ -365,11 +457,19 @@ fn landscape_pixels(residual:&[u8],classes:Option<&[u8]>)->io::Result<Vec<u8>> {
             let delta=(zigzag>>1)^0u16.wrapping_sub(zigzag&1);
             *column=column.wrapping_add(delta);
             height=height.wrapping_add(*column);
-            let [low,high]=(height^0x8000).to_le_bytes();
-            let class=classes.map_or(0,|cells|cells[i]);
-            pixels.extend([low,high,if matches!(class,1|10) {255}else{0},class*17]);
+            sample(i, height);
         }
     }
+    Ok(())
+}
+
+fn landscape_pixels(residual:&[u8],classes:Option<&[u8]>)->io::Result<Vec<u8>> {
+    let mut pixels=Vec::with_capacity((PAGE_SIZE*PAGE_SIZE*4) as usize);
+    unpack_heights(residual, |i, height| {
+        let [low,high]=(height^0x8000).to_le_bytes();
+        let class=classes.map_or(0,|cells|cells[i]);
+        pixels.extend([low,high,if matches!(class,1|10) {255}else{0},class*17]);
+    })?;
     Ok(pixels)
 }
 
