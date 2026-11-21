@@ -6,7 +6,7 @@ from collections import Counter, defaultdict
 
 from pathlib import Path
 from geography import catalogue, legacy_audit
-from opening import groups, sourced_people
+from opening import groups, located_people, sourced_people
 from structure import age_sex_panels, dimensions, opening_structure
 from reconciliation import comparisons, asian_estimates, world_accounts
 from cities import city_index
@@ -37,26 +37,41 @@ def bucket(n):
     return "500k+"
 
 def opening_age_coverage(selection, legacy, structure_opening, comparison_rows):
-    modeled = {g["unit_id"]: g["opening_total"] for g in structure_opening["groups"]}
     parents = {u["unit_id"]: g["unit_id"] for g in selection for u in g["units"]}
     controls = {g["unit_id"]: g["population_value"] for g in selection}
     controls.update({r["unit_id"]: r["population_value"] for r in legacy if r["status"]=="legacy_only"})
     supported = defaultdict(int)
-    for unit, count in modeled.items():
-        supported[parents.get(unit, unit)] += count
+    age_unknown = defaultdict(int)
+    for group in structure_opening["groups"]:
+        unit = group["unit_id"]
+        root = parents.get(unit, unit)
+        total = group["opening_total"]
+        observed = group["observed_total"]
+        cells = []
+        for band in group["bands"]:
+            for field, sex in (("female", "f"), ("male", "m")):
+                if band[field]:
+                    count, remainder = divmod(total * band[field], observed)
+                    cells.append((-remainder, f"{band['id']}:{sex}", count, band["age_min"] is None))
+        remaining = total - sum(cell[2] for cell in cells)
+        age_unknown[root] += sum(count + (rank < remaining)
+                                 for rank, (_, _, count, unknown) in enumerate(sorted(cells)) if unknown)
+        supported[root] += total
     regions = {key: row["research_regions"][0] for row in comparison_rows if len(row["research_regions"])==1
                for key in row["opening_root_ids"]}
-    totals_by_region = defaultdict(lambda: dict(opening_control=0, in_model_pools=0, outside_model_pools=0))
+    totals_by_region = defaultdict(Counter)
+    world = Counter()
     roots = []
     for key, count in sorted(controls.items()):
-        coverage = dict(opening_control=count, in_model_pools=supported[key], outside_model_pools=count-supported[key])
+        coverage = dict(opening_control=count, in_model_pools=supported[key], outside_model_pools=count-supported[key],
+                        modeled_age_and_sex=supported[key]-age_unknown[key], modeled_sex_age_unknown=age_unknown[key])
         region = regions.get(key)
         totals = totals_by_region[region or "no_reviewed_research_region"]
-        for field, people in coverage.items():
-            totals[field] += people
+        totals.update(coverage)
+        world.update(coverage)
         roots.append(dict(opening_unit_id=key, research_region=region, **coverage))
-    return dict(note="Opening controls before named-resident deductions or source-age-unknown allocations. Dated census populations are separate figures. Totals use historical research regions where a reviewed comparison exists.",
-                opening_roots=roots, by_research_region=dict(totals_by_region))
+    return dict(note="Opening controls before named-resident deductions. Source-age-unknown cells remain unknown after integer apportionment. Dated census populations are separate. Unknown research regions do not inherit a continent from political control.",
+                opening_roots=roots, by_research_region=dict(totals_by_region), world=dict(world))
 
 
 def opening_count_basis(selection, legacy, world_reference):
@@ -66,14 +81,22 @@ def opening_count_basis(selection, legacy, world_reference):
     for group in selection:
         source = group["source_id"]
         basis = ("published_historical_estimates" if source.startswith("ft_world_") or source in
-                 {"cao_qing_provincial_reconstruction", "natal_statistical_yearbook_1909_macdonald"}
+                 {"cao_qing_provincial_reconstruction", "natal_statistical_yearbook_1909_macdonald",
+                  "cape_colony_1899_imperial_conference"}
                  else "date_models_from_territorial_returns")
-        sourced = sourced_people(group)
+        sourced = group.get("research_unlocated_balance", sourced_people(group))
         retained = group.get("legacy_unlocated_balance", 0)
         counts[basis] += sourced
         counts["retained_legacy_estimates"] += retained
         accounts.append(dict(unit_id=group["unit_id"], source_id=source,
                              sourced_people=sourced, sourced_basis=basis, retained_legacy_people=retained))
+        if "research_unlocated_balance" in group:
+            for leaf in group["units"]:
+                leaf_basis = "date_models_from_territorial_returns"
+                counts[leaf_basis] += leaf["population_value"]
+                accounts.append(dict(unit_id=leaf["unit_id"], source_id=leaf["source_id"],
+                                     sourced_people=leaf["population_value"], sourced_basis=leaf_basis,
+                                     retained_legacy_people=0, parent_id=group["unit_id"]))
     for row in legacy:
         if row["status"] == "legacy_only":
             retained = row["population_value"]
@@ -111,6 +134,25 @@ def residuals(rows):
             meaning="Residents outside the listed cities; may include other towns and rural settlements.",
             status="disjoint_subtraction" if difference>=0 else "conflict_quarantined"))
     return sorted(result + us_residuals(rows), key=lambda r: (r["source_id"], r["parent_id"], r["date"]))
+
+
+def england_wales_habitations():
+    path = COL / "england_wales_habitations" / "habitations.json"
+    census = json.loads(path.read_text(encoding="utf8"))
+    district_returns = census["districts"].values()
+    rooms = census["by_rooms_in_overcrowded_tenement"].values()
+    if (sum(row["population"] for row in district_returns) != census["total_population"]
+        or sum(row["overcrowded_tenements_1_to_4_rooms"] for row in district_returns) != census["overcrowded_tenements_1_to_4_rooms"]
+        or sum(row["occupants_of_these_tenements"] for row in district_returns) != census["occupants_of_these_tenements"]
+        or sum(row["tenements"] for row in rooms) != census["overcrowded_tenements_1_to_4_rooms"]
+        or sum(row["occupants"] for row in rooms) != census["occupants_of_these_tenements"]):
+        raise ValueError("England and Wales housing census breakdowns do not close")
+    metadata = {key: census.pop(key) for key in ("unit_id", "date", "source_id")}
+    return dict(**metadata, dimension="housing_and_urban_rural", category="published census observation",
+        locator="General Report, sections II.1 and II.4 population controls; section III, pp. 39–41, tenements and overcrowding.",
+        definition="Census-night population within the statutory urban and rural districts then in force, excluding the islands in the British seas. The report counts separate occupations. The overcrowding measure covers only one- to four-room tenements with more than two occupants per room. It supplies neither floor area nor a complete count of overcrowding in all dwellings.",
+        values=census)
+
 
 def main():
     observations=[]
@@ -153,7 +195,7 @@ def main():
                    accounting_role="alternative_reconstruction_nonadditive")
     observations.extend(derived)
     regional_counts["asian_interpolation"]=len(derived)
-    selection=groups(observations, version=3)
+    selection=groups(observations, version=4)
     bengal=next(u for g in selection for u in g["units"] if u["unit_id"]=="raj_bengal_province")
     bengal["place_ids"].append("place:kolkata")
     bengal["place_evidence"]={"place:kolkata": {
@@ -195,7 +237,9 @@ def main():
         population_outside_evidence_opening_estimate=target-total,legacy_only_people=legacy_only,
         authoritative_total_for_new_game=total+legacy_only,
         roots_with_partitions=len(parts),disjoint_leaves=sum(len(g["units"]) for g in parts),
-        people_in_partitions=sum(sourced_people(g) for g in parts),
+        people_in_partitions=sum(located_people(g) for g in parts),
+        unlocated_balances_under_research_controls=[dict(unit_id=g["unit_id"], people=g["research_unlocated_balance"])
+            for g in selection if "research_unlocated_balance" in g],
         partitions_with_explicit_places=sum(bool(u.get("place_ids")) for g in parts for u in g["units"]),
         people_in_partitions_with_explicit_places=sum(u["population_value"] for g in parts for u in g["units"] if u.get("place_ids")),
         political_catalogue_at_opening=len(areas),political_catalogue_with_research_candidate=sum(bool(r["study_candidates"]) for r in areas),
@@ -218,6 +262,7 @@ def main():
     summary["city_index_unresolved"]=sum(r["representative_record"] is None for r in city_catalog)
     records("cities_1900.jsonl.gz",city_catalog)
     structural=dimensions(observations)
+    structural.append(england_wales_habitations())
     structure_opening=opening_structure(selection)
     summary["structural_observations_by_source"]=dict(Counter(r["source_id"] for r in structural))
     summary["structure_opening_pool_controls"]=sum(g["opening_total"] for g in structure_opening["groups"])
@@ -245,8 +290,8 @@ def main():
     records("demography_1900.jsonl.gz",structural)
     records("parent_reconciliation.jsonl.gz",audit)
     json_file("opening.json",dict(version=1,groups=groups(observations, version=1)))
-    json_file("opening_v3.json",dict(version=3,groups=selection))
-    json_file("opening_structure_v3.json",structure_opening)
+    json_file("opening_v4.json",dict(version=4,groups=selection))
+    json_file("opening_structure_v4.json",structure_opening)
     json_file("sources.json",list(manifest.values()))
     json_file("summary.json",summary)
     json_file("legacy_audit.json",legacy)
