@@ -1,0 +1,13 @@
+{
+  "stations": [
+    {
+      "regiment_id": "fra_157th_infantry",
+      "name": "157e régiment d’infanterie",
+      "name_zh": "法国第157步兵团",
+      "polity_id": "country_fra",
+      "place_id": "place:lyon",
+      "source": "H. Tassel, Présence militaire en Ubaye, pp. 23–24",
+      "source_url": "https://www.alpinsubayens.fr/wp-content/uploads/2017/04/Histoire-de-la-pr%C3%A9sence-militaire-en-Ubaye.pdf"
+    }
+  ]
+}

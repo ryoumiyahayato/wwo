@@ -215,7 +215,13 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     let mut occupied=vec![[0.,0.,w,55.],[0.,h-51.,w,51.]];
     if matches!(ui.selected,Some(Object::Place(_)|Object::Administration(_))){occupied.push([17.,73.,300.,213.]);}
     if let Some(rect)=ui.formal.page_rect(){occupied.push(rect);}
-    if ui.details {occupied.push([w/2.-252.,105.,504.,294.]);}
+    let opening_stations = match ui.selected {
+        Some(Object::Place(index)) if ui.details && ui.mode == Mode::Military => ui.formal.written_world
+            .map_or(&[][..], |host| host.regimental_opening_stations(&world.places[index].id)),
+        _ => &[],
+    };
+    let detail_height = 294. + 56. * opening_stations.len().saturating_sub(1) as f32;
+    if ui.details {occupied.push([w/2.-252.,105.,504.,detail_height]);}
     if let Some(country)=ui.country {occupied.push(country.rect(ui.size));}
     if let Some(detail)=ui.transport_detail {occupied.push(detail.rect(ui.size));}
     let region=ui.country.and_then(|country|match country.view {
@@ -306,11 +312,11 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         if let Some(object)=ui.selected {
             let readable = can_read_object(world, ui.formal.written_world, object);
             let x=w/2.-252.;let y=105.;
-            panel(&mut panels,x,y,504.,294.);
+            panel(&mut panels,x,y,504.,detail_height);
             if readable { skin.text(&mut hud_type,object_name(world,skin,object),1,[x+22.,y+16.],420.,LIGHT); }
             else { ui.formal.ink_block(&mut panels,[x+22.,y+23.,174.,11.]); }
             ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+454.,y+15.,29.,27.],"×",Some(Action::Details),false);
-            let lines=match object {
+            let mut lines=match object {
                 Object::Polity(_)=>Vec::new(),
                 Object::Place(i)=>{
                     let p=&world.places[i];
@@ -322,6 +328,13 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
                     vec![world.admin[i].id.clone(),skin.choose("法国 · 1900 年 · TRF-GIS","France · 1900 · TRF-GIS").into()]
                 }
             };
+            if !opening_stations.is_empty() {
+                lines.push(skin.choose("团本部驻地 · 1900-01-01", "Regimental central station · 1900-01-01").into());
+                for station in opening_stations {
+                    lines.push(skin.choose(&station.name_zh, &station.name).into());
+                    lines.push(station.source.clone());
+                }
+            }
             for (i,line) in lines.iter().enumerate(){
                 if readable { skin.text(&mut hud_type,line,0,[x+22.,y+75.+i as f32*28.],460.,LIGHT); }
                 else { ui.formal.ink_block(&mut panels,[x+22.,y+82.+i as f32*28.,195.,11.]); }
