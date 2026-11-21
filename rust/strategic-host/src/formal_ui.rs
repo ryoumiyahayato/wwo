@@ -1331,7 +1331,8 @@ pub fn page_rect(hud:&Hud,size:[u32;2])->Option<[f32;4]>{
         Page::Finance=>{let a=(w-155.).min(900.);Some([(w-a)*0.5,106.,a,(h-150.).min(420.)])}
         Page::Character=>{let a=(w-155.).min(820.);Some([(w-a)*0.5,106.,a,(h-142.).min(460.)])}
         Page::Travel=>{
-            let height=if hud.transport_steps || hud.transport_lots_open || hud.transport_directory.is_some() {462.} else {367.};
+            let height=if hud.transport_lots_open || hud.transport_directory.is_some() {462.}
+                else if hud.transport_steps {550.} else {367.};
             Some([18.,86.,(w-36.).min(502.),(h-142.).min(height)])
         },
         Page::Technology=>{

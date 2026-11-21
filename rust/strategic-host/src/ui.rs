@@ -321,12 +321,18 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
                 Object::Polity(_)=>Vec::new(),
                 Object::Place(i)=>{
                     let p=&world.places[i];
-                    vec![p.id.clone(),format!("{}  {:.6}",skin.choose("经度","Longitude"),p.coordinates[0]),
-                        format!("{}  {:.6}",skin.choose("纬度","Latitude"),p.coordinates[1]),
-                        format!("{}  {}",skin.choose("地图标注等级","Map label rank"),p.rank)]
+                    let mut details=vec![format!("{}  {:.6}",skin.choose("经度","Longitude"),p.coordinates[0]),
+                        format!("{}  {:.6}",skin.choose("纬度","Latitude"),p.coordinates[1])];
+                    if ui.formal.debug.is_some() {
+                        details.push(p.id.clone());
+                        details.push(format!("{}  {}",skin.choose("地图标注等级","Map label rank"),p.rank));
+                    }
+                    details
                 }
                 Object::Administration(i)=>{
-                    vec![world.admin[i].id.clone(),skin.choose("法国 · 1900 年 · TRF-GIS","France · 1900 · TRF-GIS").into()]
+                    let mut details=vec![skin.choose("法国 · 1900 年 · TRF-GIS","France · 1900 · TRF-GIS").into()];
+                    if ui.formal.debug.is_some() { details.push(world.admin[i].id.clone()); }
+                    details
                 }
             };
             if !opening_stations.is_empty() {

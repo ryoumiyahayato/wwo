@@ -282,10 +282,7 @@ fn transport(verb: &'static str, index: usize) -> Option<Action> {
 
 impl Display<'_> {
     pub(crate) fn travel_page(&self, panels: &mut Mesh, art: &mut Mesh, text: &mut Mesh, hits: &mut Vec<Hit>) {
-        let Some([x, y, w, mut h]) = self.page_rect() else { return };
-        if self.hud.transport_steps && self.hud.transport_directory.is_none() {
-            h = (h + 96.).min(self.size[1] as f32 - y - 34.);
-        }
+        let Some([x, y, w, h]) = self.page_rect() else { return };
         self.folio(panels, art, text, hits, [x, y, w, h], "运输");
         self.transport_form(panels, text, hits, [x + 17., y + 55., w - 34., h - 65.], false);
     }
