@@ -7,6 +7,7 @@ from collections import Counter, defaultdict
 from itertools import chain
 from pathlib import Path
 
+from opening import ENGLAND_WALES_OCCUPATION_REMAINDER
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
 from social_india_princely import india_princely_residence, madras_states_religion, travancore_language
@@ -456,6 +457,53 @@ def netherlands_occupation(pools):
         yield pool_id, "occupation", marginal
 
 
+def england_wales_occupation(pools):
+    anglesey_id = "administrative_region:gb_historic_anglesey"
+    remainder_id = ENGLAND_WALES_OCCUPATION_REMAINDER
+    national_source = "england_wales_1901_occupation_orders"
+    county_source = "anglesey_1901_occupation_orders"
+    path = COLLECTIONS / "england_wales_occupation_1901" / "occupation.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    classifications = {}
+    unknowns = {}
+    for key, control in (("england_wales", 14_328_727), ("anglesey", 21_606)):
+        counts = {row["order_label"]: int(row[key]) for row in rows
+                  if row["order_id"] not in ("XXIII", "UNKNOWN")}
+        if len(counts) != 22 or sum(counts.values()) != control:
+            raise ValueError(f"{key}: named occupation orders do not close to the census total")
+        classifications[key] = counts
+        unknowns[key] = sum(int(row[key]) for row in rows if row["order_id"] in ("XXIII", "UNKNOWN"))
+    national = classifications["england_wales"]
+    local = classifications["anglesey"]
+    if sum(national.values()) + unknowns["england_wales"] != sum(
+        pools[key]["endpoint_values"][-1] for key in (anglesey_id, remainder_id)
+    ):
+        raise ValueError("England and Wales occupation and opening controls cover different populations")
+    remaining = {label: count - local[label] for label, count in national.items()}
+    definition = ("The 22 named occupation orders cover persons aged ten and over, including the temporarily "
+                  "unemployed who reported their usual occupation. Children under ten and persons without "
+                  "a specified occupation or unoccupied are unassigned.")
+    for unit_id, source, observed_unit, scope, locator, counts, unknown in (
+        (anglesey_id, county_source, "uk_ancient_area_anglesey", "Ancient county of Anglesey",
+         "County of Anglesey, Table XXXII, printed pp. 23–26", local, unknowns["anglesey"]),
+        (remainder_id, national_source, "uk_england_wales", "England and Wales excluding Anglesey",
+         "Summary Tables XXXV pp. 186–201 less Anglesey Table XXXII pp. 23–26",
+         remaining, unknowns["england_wales"] - unknowns["anglesey"]),
+    ):
+        unit = pools[unit_id]
+        margin = distribution(
+            unit["population_value"], classification=national_source, source=source,
+            date="1901-03-31", observed_unit=observed_unit, scope=scope, locator=locator,
+            total=unit["endpoint_values"][-1], observed_counts=counts, unknown=unknown,
+            definition=definition,
+        )
+        if unit_id == remainder_id:
+            margin["source_ids"].append(county_source)
+            margin["method"] = "Subtract the same-category Anglesey census counts from England and Wales. " + SHARE_METHOD
+        yield unit_id, "occupation", margin
+
+
 def england_wales_housing(pools):
     with (COLLECTIONS / "england_wales_habitations" / "overcrowding.csv").open(encoding="utf8", newline="") as table:
         for row in csv.DictReader(table):
@@ -599,6 +647,8 @@ def opening_social(opening_groups, *, version):
                 classification="austria_1900_locality_population_size",
             ),
         )
+    if version >= 17:
+        marginals = chain(marginals, england_wales_occupation(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

@@ -133,9 +133,9 @@
     "research_candidates": [
       "ft_france"
     ],
-    "opening_replacement": 38852684,
+    "opening_replacement": 38852748,
     "legacy_unlocated_balance": null,
-    "replacement_minus_legacy": -1847316,
+    "replacement_minus_legacy": -1847252,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },

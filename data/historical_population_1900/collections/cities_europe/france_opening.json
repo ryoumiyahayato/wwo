@@ -1,7 +1,7 @@
 {
   "unit_id": "country_fra",
   "date": "1900-01-01",
-  "population_value": 38852684,
+  "population_value": 38852748,
   "source_id": "insee_sgf_censuses",
   "locator": "REC_T256.dbf record 1, V3=00 V4=00 V6=FRANCE, V21 + REC_T256.dbf record 1, V3=00 V4=00 V6=FRANCE, V22",
   "method": "sum_of_linearly_interpolated_first_level_census_units",
@@ -14,7 +14,7 @@
     38961945
   ],
   "country_interpolated_value": 38852746,
-  "difference_from_country_interpolation": -62,
+  "difference_from_country_interpolation": 2,
   "units": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -85,12 +85,12 @@
     {
       "unit_id": "administrative_region:france_ardeche",
       "name": "Ardèche",
-      "population_value": 355929,
+      "population_value": 356005,
       "place_ids": [],
-      "locator": "REC_T256.dbf record 8, V3=07 V4=00 V6=ARDECHE, V21 + REC_T256.dbf record 8, V3=07 V4=00 V6=ARDECHE, V22",
+      "locator": "REC_T256.dbf record 8, V3=07 V4=00 V6=ARDECHE, V21 + REC_T256.dbf record 8, V3=07 V4=00 V6=ARDECHE, V120",
       "endpoint_values": [
         363501,
-        353464
+        353564
       ]
     },
     {
@@ -936,11 +936,11 @@
     {
       "unit_id": "administrative_region:france_vendee",
       "name": "Vendée",
-      "population_value": 441427,
+      "population_value": 441415,
       "place_ids": [],
-      "locator": "REC_T256.dbf record 86, V3=85 V4=00 V6=VENDEE, V21 + REC_T256.dbf record 86, V3=85 V4=00 V6=VENDEE, V22",
+      "locator": "REC_T256.dbf record 86, V3=85 V4=00 V6=VENDEE, V114 + REC_T256.dbf record 86, V3=85 V4=00 V6=VENDEE, V22",
       "endpoint_values": [
-        441783,
+        441735,
         441311
       ]
     },

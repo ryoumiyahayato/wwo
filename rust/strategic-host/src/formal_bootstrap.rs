@@ -2085,7 +2085,7 @@ mod tests {
         assert_eq!(france.sources.polities().len(), 146);
         assert_eq!(france.population_units().len(), 50);
         for (id, city, flag, population) in [
-            ("country_fra", "paris", "france_tricolour_1794", 38_852_684),
+            ("country_fra", "paris", "france_tricolour_1794", 38_852_748),
             ("british_isles_1900", "london", "uk_union_1801", 41_500_000),
             ("german_empire", "berlin", "german_empire_1867", 55_619_152),
             ("russian_empire", "st_petersburg", "russia_1896", 136_000_000),
@@ -2336,6 +2336,34 @@ mod tests {
     }
 
     #[test]
+    fn historical_england_wales_occupation_stays_at_the_census_scope() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let current = bootstrap.create("country_fra").unwrap();
+        let scope = "uk_england_wales_except_anglesey";
+        let county = "administrative_region:gb_historic_anglesey";
+        let world = current.population();
+        assert_eq!(world.population_total(scope), Some(32_038_448));
+        assert_eq!(world.population_total(county), Some(50_543));
+        let occupation = &world.social_distribution(Some(scope)).unwrap().dimensions["occupation"];
+        assert_eq!(occupation.assigned_residents, 14_113_822);
+        assert_eq!(occupation.assigned_residents + occupation.unknown_residents, 32_038_448);
+        let original = occupation.direct_opening_distribution.unwrap();
+        assert_eq!((original.observed_total, original.observed_unknown), (32_477_237, 18_170_116));
+        assert_eq!(occupation.by_classification["england_wales_1901_occupation_orders"]["Agriculture"], 1_106_572);
+        let local = &world.social_distribution(Some(county)).unwrap().dimensions["occupation"];
+        assert_eq!(local.assigned_residents, 21_579);
+        assert_eq!(local.by_classification["england_wales_1901_occupation_orders"]["Agriculture"], 6_868);
+        assert_eq!(world.social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 49_325_409);
+
+        let previous = bootstrap.base_opening_version("country_fra", None, Some(16)).unwrap();
+        assert_eq!(world.population_total(county), previous.population().population_total(county));
+        let county_structure = current.inspect_population(county).unwrap().structure.unwrap();
+        let previous_structure = previous.inspect_population(county).unwrap().structure.unwrap();
+        assert_eq!(county_structure.residents_with_cohort_age_and_sex, previous_structure.residents_with_cohort_age_and_sex);
+        assert_eq!(previous.population().population_total(scope), None);
+    }
+
+    #[test]
     fn historical_population_structure_and_old_openings_restore() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create("country_fra").unwrap();
@@ -2347,7 +2375,19 @@ mod tests {
         let argentan = "administrative_region:france_arrondissement_612";
         let domfront = "administrative_region:france_arrondissement_613";
         assert_eq!(world.population().resident_pool(orne), None);
-        assert_eq!(world.population().population_total(destination), Some(38_852_684));
+        assert_eq!(world.population().population_total(destination), Some(38_852_748));
+        for (province, people, districts) in [
+            ("ardeche", 356_005, 3),
+            ("cher", 346_079, 3),
+            ("vendee", 441_415, 3),
+            ("vosges", 421_180, 5),
+        ] {
+            let unit = format!("administrative_region:france_{province}");
+            let report = world.inspect_population(&unit).unwrap();
+            assert_eq!(report.population_total, Some(people));
+            assert_eq!(report.children.len(), districts);
+            assert_eq!(report.children.iter().map(|district| district.population_total).sum::<u64>(), people);
+        }
         let division = world.inspect_population(orne).unwrap();
         assert_eq!(division.population_total, Some(329_951));
         assert_eq!(division.children.len(), 4);

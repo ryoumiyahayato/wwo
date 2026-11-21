@@ -11,6 +11,12 @@ FILES = {
     "chandlerV2.csv": "https://ndownloader.figstatic.com/files/5407640",
     **{f"REC_T{n}.dbf": f"{SGF}REC_T{n}.dbf" for n in (24, 214, 256)},
 }
+FRENCH_POPULATION_FIELDS = {
+    (214, "18", "02", "V89"): "V78",     # Bourges, 1901
+    (214, "88", "02", "V89"): "V78",     # Épinal, 1901
+    (256, "07", "00", "V22"): "V120",   # Ardèche, 1901
+    (256, "85", "00", "V21"): "V114",   # Vendée, 1896
+}
 
 
 def read_original(name):
@@ -57,6 +63,7 @@ def extract():
                 if row["V1"] not in level:
                     continue
                 for col in columns:
+                    col = FRENCH_POPULATION_FIELDS.get((n, row["V3"], row["V4"], col), col)
                     if row[col] and int(row[col]) > 0:
                         writer.writerow([n, rec, row["V1"], row["V3"], row["V4"], row["V6"], col, row[col]])
 

@@ -129,9 +129,9 @@
         "sweden_norway_union",
         "swiss_confederation"
       ],
-      "production_people": 408702574,
+      "production_people": 408702638,
       "production_pct_of_regional_research_estimate": 97.509,
-      "people_with_opening_subdivision": 344142176,
+      "people_with_opening_subdivision": 344142240,
       "research_only_units": 9,
       "research_only_people": 10103353
     },
@@ -3202,9 +3202,9 @@
         "Europe"
       ],
       "research_people": 38915205,
-      "documented_opening_people": 38852684,
-      "opening_people_including_retained_balances": 38852684,
-      "research_minus_documented": 62521
+      "documented_opening_people": 38852748,
+      "opening_people_including_retained_balances": 38852748,
+      "research_minus_documented": 62457
     },
     {
       "comparison_id": "germany",
@@ -4008,7 +4008,7 @@
       },
       {
         "unit_id": "country_fra",
-        "people": -1847316
+        "people": -1847252
       },
       {
         "unit_id": "austria_hungary",
@@ -4111,7 +4111,7 @@
         "people": -8679
       }
     ],
-    "net_replacements": -7080595,
+    "net_replacements": -7080531,
     "added_opening_accounts": [
       {
         "unit_id": "beylicate_of_tunis",
@@ -4211,7 +4211,7 @@
       }
     ],
     "net_additions": 61332775,
-    "authoritative_opening_population": 1465272180,
+    "authoritative_opening_population": 1465272244,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4251,16 +4251,16 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1329287972,
+    "documented_opening_population": 1329288036,
     "untouched_legacy_population": 101880000,
     "retained_unlocated_population": 34104208,
-    "authoritative_opening_population": 1465272180,
-    "published_minus_documented_opening": 265786276,
+    "authoritative_opening_population": 1465272244,
+    "published_minus_documented_opening": 265786212,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 224844706,
       "comparisons_by_scope": {
-        "comparable_extent": 2063421,
+        "comparable_extent": 2063357,
         "scope_unconfirmed": 86844,
         "partial_extent": 38790877,
         "adopted_research_series": 426
@@ -4269,6 +4269,6 @@
       "untouched_legacy_controls": -101880000,
       "unlocated_balances_under_retained_controls": -34104208
     },
-    "published_minus_authoritative_opening": 129802068
+    "published_minus_authoritative_opening": 129802004
   }
 }
