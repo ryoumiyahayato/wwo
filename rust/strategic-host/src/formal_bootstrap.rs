@@ -1149,16 +1149,20 @@ impl WorldBootstrap {
             residents.insert(id, opening_cash);
         }
         let has_paris = world.population_unit_at("place:paris") == Some("country_fra");
-        let (work, enterprise_opening) = if has_paris {
+        let enterprise_opening = if has_paris {
             for resident in load_regional_residents()? {
                 world.add_opening_person("country_fra", resident.place_id, resident.person_id.clone(), resident.claim_id)?;
                 residents.insert(resident.person_id, resident.opening_cash);
             }
-            (WorkOpening::load()?, EnterpriseOpening::load()?)
+            EnterpriseOpening::load()?
         } else {
-            (WorkOpening::default(), EnterpriseOpening::default())
+            EnterpriseOpening::default()
         };
         let network = crate::transport::map_data::load_world_network(&world, 0)?;
+        let work = WorkOpening::load(|unit, place| {
+            let node = network.routing_node(place)?;
+            (network.unit_at(node) == Some(unit)).then(|| node.to_owned())
+        })?;
         for (polity_id, unit) in &world.polity_population_bindings {
             if opening_people.contains_key(polity_id) || populations[unit] == 0 { continue; }
             let Some(place) = network.capital_node(polity_id) else { continue; };
@@ -1179,7 +1183,7 @@ impl WorldBootstrap {
             (person.opening_source_id.clone(), label.to_owned())
         }).collect();
         let mut activities = load_opening_activities()?;
-        activities.written_job_notices.retain(|source, _| opening_people.contains_key(source) && has_paris);
+        activities.written_job_notices.retain(|source, job| opening_people.contains_key(source) && work.entry_job(job).is_some());
         for (source, job) in &activities.written_job_notices {
             let actor = format!("person:formal_generated_{source}_0001");
             if !world.people.get(&actor).is_some_and(|person| {
@@ -1337,6 +1341,7 @@ impl WorldBootstrap {
         world.macro_economy.restore_arrivals(saved.last_arrivals, clock.snapshot().total_minutes)?;
         let mut ledger = Ledger::restore(&saved.ledger, true)?;
         ledger.ensure_transport_account()?;
+        self.work.ensure_market_accounts(&mut ledger)?;
         if ledger.last_minute() > saved.clock.total_minutes || world.identities.keys().any(|id| ledger.default_account(id).is_none()) {
             return Err(invalid("ledger and world timelines differ or personal accounts are missing"));
         }

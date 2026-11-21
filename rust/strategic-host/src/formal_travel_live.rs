@@ -163,7 +163,7 @@ impl InitialWorld {
         let station = self.last_station();
         let network = self.transport.network();
         let local = self.transport.connections(station).filter_map(move |(id, _, _)| {
-            network.node(id).is_some_and(|node| node.kind == NodeKind::City).then_some(id)
+            network.node(id).is_some_and(|node| matches!(node.kind, NodeKind::City | NodeKind::Port)).then_some(id)
         }).collect::<BTreeSet<_>>();
         let nearby = local.iter().copied().collect::<Vec<_>>();
         nearby.into_iter().chain(network.nodes().filter_map(move |node| {

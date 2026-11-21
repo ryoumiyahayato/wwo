@@ -673,7 +673,7 @@ impl NativeSession {
                 else if current != Some(job.place.as_str()) { "劳动合同有效 · 当前不在工作地点" }
                 else if can_book { "可登记本日工作" }
                 else { "劳动合同有效 · 本日无法登记" };
-            work.push(json!({"label":employer_label(&job.employer),
+            work.push(json!({"label":job.label.as_deref().unwrap_or_else(|| employer_label(&job.employer)),
                 "details":[format!("每班 {} 小时 · 时薪 {} · {} 日后发薪",job.hours,job.wage_per_hour,job.wage_delay),
                            status],
                 "actions":[work_action("登记工作", "native:work", can_book),
@@ -686,7 +686,7 @@ impl NativeSession {
                     "actions":if consult {vec![work_action("咨询本地招聘", "native:consult_work", true)]} else {Vec::new()}}));
             }
             for (job, vacancies) in jobs {
-                work.push(json!({"label":employer_label(&job.employer),
+                work.push(json!({"label":job.label.as_deref().unwrap_or_else(|| employer_label(&job.employer)),
                     "details":[format!("空缺 {vacancies} · 每班 {} 小时 · 时薪 {}",job.hours,job.wage_per_hour)],
                     "actions":[work_action("申请", &format!("person:job_request:{}",job.id), vacancies > 0)]}));
             }
@@ -749,6 +749,7 @@ fn employer_label(id: &str) -> &str {
     match id {
         "firm:opening_paris_workshop" => "巴黎工坊",
         "firm:opening_paris_bakery" => "巴黎面包坊",
+        "market:legacy_aggregate:empire_of_japan" => "日本地区市场（横滨港）",
         _ => id,
     }
 }
@@ -800,7 +801,13 @@ impl TransportPage {
         let page_size = crate::transport_ui::PAGE_SIZE;
         let mut remaining = world.transport_destinations().skip(self.destination_page * page_size);
         let destinations: Vec<_> = remaining.by_ref().take(page_size)
-            .map(|id| json!({"id":id,"label":world.place_name(id)})).collect();
+            .map(|id| {
+                let name = world.place_name(id);
+                let label = if world.transport().node(id).is_some_and(|node| node.kind == crate::transport::NodeKind::Port) {
+                    format!("{name} · 码头")
+                } else { name.to_owned() };
+                json!({"id":id,"label":label})
+            }).collect();
         let destinations_next = remaining.next().is_some();
         let preview = world.travel_preview().filter(|plan| plan.departure_minute() >= now);
         let mut passenger_lines = Vec::new();
