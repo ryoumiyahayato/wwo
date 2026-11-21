@@ -157,6 +157,64 @@ def run(args, scratch):
             write(args.output/'troyes.json', dict(before=battle, after=after, resumed=resumed))
             return
 
+        if args.section == 'material':
+            x,y = (value/2 for value in extent)
+            for label,lon,lat,zoom_scale,near in args.routes['material']:
+                def zoom_to(mpp):
+                    current = status()['mpp']
+                    host.ask('wheel',x=x,y=y,steps=math.log(current/mpp,1.22))
+
+                levels = [('z5',5.), ('z5-z6',5.565), ('z6',6.),
+                          ('z6-z7',6.565), ('z7',7.12)]
+                stages = [(name,zoom_scale/2**lod) for name,lod in levels] + [('near',near)]
+                if args.material_transitions_only:
+                    stable(f'{label}-z7',(lon,lat,stages[-2][1]))
+                    for name,mpp in reversed(stages[:-2]):
+                        zoom_to(mpp)
+                        capture(f'{label}-{name}',settled=settle())
+                    continue
+
+                stable(f'{label}-z5',(lon,lat,stages[0][1]))
+                for name,mpp in stages[1:]:
+                    zoom_to(mpp)
+                    capture(f'{label}-in-{name}',settled=settle())
+
+                def roundtrip():
+                    pan(frames=20,offsets=(-180,180))
+                    time.sleep(.55)
+                    pan(True,frames=20,offsets=(-180,180))
+                    time.sleep(.55)
+
+                timed(f'{label}-near-pan',roundtrip)
+                capture(f'{label}-pan-return',settled=settle())
+
+                def retreat():
+                    for _,mpp in reversed(stages[:-1]):
+                        zoom_to(mpp)
+                        time.sleep(.38)
+
+                timed(f'{label}-zoom-return',retreat)
+                capture(f'{label}-zoom-return',settled=settle())
+
+                # With the finer level already selected, the outward wheel route
+                # visits both partially blended states inside the LOD hysteresis.
+                stable(f'{label}-z7',(lon,lat,stages[-2][1]))
+                for name,mpp in reversed(stages[:-2]):
+                    if name == 'z5':
+                        break
+                    zoom_to(mpp)
+                    capture(f'{label}-{name}',settled=settle())
+
+                if label in ('troyes','nearshore'):
+                    focus((lon,lat,stages[0][1]))
+                    settle()
+                    # Record actual game frames on a second, densely stepped route.
+                    for index in range(49):
+                        progress = 1.-abs(index/24.-1.)
+                        zoom_to(stages[0][1]*(near/stages[0][1])**progress)
+                        capture(f'{label}-motion-{index:02}')
+            return
+
         if args.section in ('all', 'edges'):
             edge = (179.88,-16.77,135)
             stable('dateline-before',edge)
@@ -262,9 +320,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ('exe','data','frozen','output'):
         parser.add_argument(key, type=lambda value: Path(value).resolve())
-    parser.add_argument('--section', choices=('all','views','nile','zoom','edges','troyes'), default='all')
+    parser.add_argument('--section', choices=('all','views','nile','zoom','edges','troyes','material'), default='all')
     parser.add_argument('--nile-drag-frames', type=int, choices=(18,24), default=24)
     parser.add_argument('--profile-frames', action='store_true')
+    parser.add_argument('--material-transitions-only', action='store_true')
     args = parser.parse_args()
     args.routes = read(args.frozen)
     args.output.mkdir(parents=True)

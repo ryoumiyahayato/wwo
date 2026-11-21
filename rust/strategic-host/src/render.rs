@@ -250,18 +250,8 @@ impl GroundSurface {
     fn load(&mut self, device:&wgpu::Device, queue:&wgpu::Queue, height:Option<wgpu::TextureView>)->io::Result<()> {
         if self.loaded {return Ok(());}
         let art=crate::decode_rgba(&include_bytes!("land-material.png")[..])?;
-        let [width,height_px]=art.size;
-        let levels=width.ilog2()+1;
-        let texture=create_texture_mips(device,[width,height_px,1],wgpu::TextureFormat::Rgba8Unorm,levels);
-        let mut pixels=art.pixels;
-        for level in 0..levels {
-            let [w,h]=[width>>level,height_px>>level];
-            write_texture_mip(queue,&texture,[w,h,1],4,&pixels,level);
-            if w==1 {break;}
-            pixels=downsample_rgba(&pixels,w,h);
-        }
         if height.is_some() {self.height=height;}
-        self.art=texture.create_view(&Default::default());
+        self.art=material_texture(device,queue,art);
         self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,self.height.as_ref(),
             &self.water,&self.water_pixels);
         self.loaded=true;
@@ -515,6 +505,18 @@ fn buffer(device:&wgpu::Device,size:usize)->wgpu::Buffer {
 fn create_texture(device:&wgpu::Device,size:[u32;3],format:wgpu::TextureFormat)->wgpu::Texture {
     create_texture_mips(device,size,format,1)
 }
+fn material_texture(device:&wgpu::Device,queue:&wgpu::Queue,art:Raster)->wgpu::TextureView {
+    let [width,height]=art.size;
+    let levels=width.min(height).ilog2()+1;
+    let texture=create_texture_mips(device,[width,height,1],wgpu::TextureFormat::Rgba8Unorm,levels);
+    let mut pixels=art.pixels;
+    for level in 0..levels {
+        let [w,h]=[width>>level,height>>level];
+        write_texture_mip(queue,&texture,[w,h,1],4,&pixels,level);
+        if level+1<levels {pixels=downsample_rgba(&pixels,w,h);}
+    }
+    texture.create_view(&Default::default())
+}
 fn create_texture_mips(device:&wgpu::Device,size:[u32;3],format:wgpu::TextureFormat,levels:u32)->wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label:Some("WWO map inputs"),size:extent(size),mip_level_count:levels,sample_count:1,dimension:wgpu::TextureDimension::D2,
@@ -767,12 +769,12 @@ impl Renderer {
         let flag_texture=create_texture(&device,[flags.size[0],flags.size[1],1],wgpu::TextureFormat::Rgba8Unorm);
         write_texture(&queue,&flag_texture,[flags.size[0],flags.size[1],1],4,&flags.pixels);
         let flags=flag_texture.create_view(&Default::default());
-        let [galactic_chart,ocean_material]=globe_art.map(|image|{
-            let [w,h]=image.size;
-            let texture=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
-            write_texture(&queue,&texture,[w,h,1],4,&image.pixels);
-            texture.create_view(&Default::default())
-        });
+        let [chart,ocean]=globe_art;
+        let [w,h]=chart.size;
+        let texture=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
+        write_texture(&queue,&texture,[w,h,1],4,&chart.pixels);
+        let galactic_chart=texture.create_view(&Default::default());
+        let ocean_material=material_texture(&device,&queue,ocean);
         let river_source=natural.as_ref().and_then(|(catalogue,_)|catalogue.river_lines()).map(Path::to_owned);
         let water_source=natural.as_ref().and_then(|(catalogue,_)|catalogue.water_geometry()).map(Path::to_owned);
         let terrain=natural.map(|(catalogue,proxy)|Terrain::new(&device,&queue,catalogue,proxy,landscape_supported))

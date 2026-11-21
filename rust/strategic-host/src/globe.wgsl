@@ -389,8 +389,9 @@ fn water_surface(ll:vec2f, sample:u32, base:vec4f, ground:vec3f, depth:f32) -> v
 }
 fn land_material_band(earth:vec3f, planes:vec3f, footprint:f32, period:f32) -> vec4f {
     let world=earth*(EARTH/period);
-    // Turn the grain across projection planes and bend repeat intervals in world space.
-    let p=world+sin(world.zxy*vec3f(.17,.21,.14)+vec3f(.4,1.7,2.8))*.81;
+    // Change the phase over a few repeats, in the same coordinates for every LOD.
+    let phase=ground_field(world*vec3f(.33,.28,.36)+vec3f(1.7,4.1,7.3));
+    let p=world+phase*vec3f(1.12,-.83,.71);
     let turn=mat2x2f(vec2f(.8660254,.5),vec2f(-.5,.8660254));
     let mip=log2(max(1.,footprint*f32(textureDimensions(land_surface).x)/period));
     return textureSampleLevel(land_surface,land_repeat,p.yz,mip)*planes.x
@@ -538,6 +539,16 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
     return mix(base,sample,weight);
 }
 
+fn water_packets(point:vec3f, planes:vec3f, footprint:f32, period:f32, channel:u32) -> f32 {
+    let p=point/period;
+    let mip=log2(max(1.,footprint*f32(textureDimensions(ocean_material).x)/period));
+    let turn=mat2x2f(vec2f(.8,.6),vec2f(-.6,.8));
+    let x=textureSampleLevel(ocean_material,land_repeat,p.zy+vec2f(.16,.39),mip);
+    let y=textureSampleLevel(ocean_material,land_repeat,turn*p.zx+vec2f(.82,.33),mip);
+    let z=textureSampleLevel(ocean_material,land_repeat,p.yx*turn+vec2f(.37,.68),mip);
+    return dot(vec3f(x[channel],y[channel],z[channel])-.5,planes);
+}
+
 fn natural_water_color(color:vec3f, world:vec3f, depth:f32, coverage:f32, mpp:f32, area:u32) -> vec3f {
     if coverage <= .04 || mpp > 18000. { return color; }
     let ice = smoothstep(.47,.68,min(color.r,color.g));
@@ -548,16 +559,24 @@ fn natural_water_color(color:vec3f, world:vec3f, depth:f32, coverage:f32, mpp:f3
     var wave = 0.;
     let basin=area&3u;
     let marine=mix(open,select(0.,1.,basin==2u),water_weight(area));
-    if mpp < 630. && marine>.01 {
-        // Counter-propagating phases and moving bends prevent a shared cycle.
-        // Fallback depth can be zero in mapped fjords. Use QWG where available.
+    if view.map_style.z>=5. && mpp<2200. && surface>.001 && (marine>.01 || (basin==3u && mpp<270.)) {
+        // Advect independently seeded crests, with a world-space warp across repeats.
         let time = view.chart_east.w;
-        let p = world*(EARTH/530.);
-        let bend = sin(dot(p,vec3f(.13,-.41,.25))+.025*time)
-            + sin(dot(p,vec3f(-.32,.12,.17))-.01768*time);
-        let swell = sin(dot(p,vec3f(.91,.61,-.73))+3.6*bend+.06124*time)*.39
-            + sin(dot(p,vec3f(-.18,.67,.48))-3.1*bend-.047*time)*.31;
-        wave = swell*marine*smoothstep(.82,1.,coverage)*(1.-smoothstep(160.,630.,mpp));
+        let point=world*EARTH;
+        let warp=ground_field(point/47500.+vec3f(.6,2.9,6.3));
+        let facing=world*world;
+        let planes=facing*facing/dot(facing,facing);
+        if marine>.01 {
+            let swells=point+warp*vec3f(47000.,-26000.,71000.)-time*vec3f(2.3,.4,1.3);
+            wave=water_packets(swells,planes,mpp,106000.,1u)
+                *marine*mix(1.42,2.05,off_shore)*(1.-smoothstep(720.,2200.,mpp));
+        }
+        if mpp<270. {
+            let chop=point+warp*vec3f(-7200.,9600.,4400.)+time*vec3f(.38,-.22,.64);
+            wave+=water_packets(chop,planes,mpp,15800.,2u)
+                * max(marine*1.20,select(0.,.36,basin==3u))*(1.-smoothstep(68.,270.,mpp));
+        }
+        wave*=smoothstep(.82,1.,coverage);
     }
     let pigment = vec3f(.018,.062,.059)*shelf*open
         + mix(vec3f(.010,.019,.023),vec3f(.009,.017,.024),open)*wave;

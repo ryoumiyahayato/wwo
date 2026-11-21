@@ -37,6 +37,19 @@ def field(seed, shape, detail, detail_ratio):
     return lambda u, v: broad(u, v) + detail_ratio * fine(u, v)
 
 
+def wave_packets(seed, crests, patches):
+    crest = gradient_field(seed, *crests)
+    bend = gradient_field(seed + 1, *patches)
+    envelope = gradient_field(seed + 2, *patches)
+
+    def sample(u, v):
+        displacement = bend(u, v) * 1.8 / crests[1]
+        strength = min(1, max(0, (envelope(u, v) + 0.18) * 2.2))
+        return crest(u, v + displacement) * strength
+
+    return sample
+
+
 def surface(size, fields):
     def channel(u, v, sample, center, amplitude):
         return min(255, max(0, round(255 * (center + amplitude * sample(u, v)))))
@@ -47,8 +60,7 @@ def surface(size, fields):
         for x in range(size)
         for signal in fields
     )
-    mode = "RGBA" if len(fields) == 4 else "LA"
-    return Image.frombytes(mode, (size, size), bytes(pixels)).convert("RGBA")
+    return Image.frombytes("RGBA", (size, size), bytes(pixels))
 
 
 def build(output):
@@ -64,6 +76,8 @@ def build(output):
     # Match the shader's existing neutral open-water level and ice modulation.
     ocean = (
         (field(41, (9, 5), (24, 13), 0.28), 0.28, 0.21),
+        (wave_packets(61, (4, 17), (7, 6)), 0.5, 0.92),
+        (wave_packets(71, (8, 29), (9, 11)), 0.5, 1.18),
         (field(47, (16, 13), (43, 29), 0.34), 0.73, 0.28),
     )
     surface(256, ocean).save(output / "ocean-material.png", optimize=True)
