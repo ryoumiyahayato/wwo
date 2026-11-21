@@ -122,5 +122,51 @@
     "opening_from_version": 7,
     "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
     "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_madras",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 83, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "British Madras Presidency, all religions, excluding separately returned Madras States",
+    "observed_unit_id": "raj_madras_presidency_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The printed 25–30 female headcount is 1,595,213. The three printed female civil condition cells, 37,046, 1,379,491 and 178,706, add to 1,595,243. The latter figure also closes the printed 25–30 persons control and the all-age female total. This observation keeps the original printed cell.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_madras_opening",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 83, columns 1–4, 7, 10 and 13. Table II-A, printed pp. 9–10",
+    "published_scope": "British Madras Presidency, all religions, excluding separately returned Madras States",
+    "observed_unit_id": "raj_madras_presidency_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Uses the census bands with the 25–30 female cell derived from the three printed female civil-condition components. The original observation retains the conflicting published cell.",
+    "broad_observation": false,
+    "component_panels": [
+      "india_census_1901_table_vii_madras"
+    ],
+    "component_count_corrections": {
+      "india_census_1901_table_vii_madras": {
+        "25–30": {
+          "female": 1595243
+        }
+      }
+    },
+    "opening_unit_id": "raj_madras_presidency",
+    "opening_from_version": 8,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified."
+  },
+  {
+    "id": "india_census_1901_table_vii_coorg",
+    "source_id": "india_census_1901_coorg_age",
+    "locator": "Vol. XIV, Table VII, all religions, printed p. 44, columns 2–5. Vol. I-A, Table II-A, printed pp. 9–10",
+    "published_scope": "Coorg province, all religions",
+    "observed_unit_id": "raj_coorg_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The original age rows close to the printed total and the 1901 Table II-A endpoint. The table prints no separate unknown-age row.",
+    "opening_unit_id": "raj_coorg",
+    "opening_from_version": 8,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
+    "broad_observation": false
   }
 ]

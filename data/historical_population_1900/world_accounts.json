@@ -90,9 +90,9 @@
         "korean_empire",
         "qing_empire"
       ],
-      "production_people": 534942825,
-      "production_pct_of_regional_research_estimate": 59.812,
-      "people_with_opening_subdivision": 454111535,
+      "production_people": 572431719,
+      "production_pct_of_regional_research_estimate": 64.003,
+      "people_with_opening_subdivision": 491600429,
       "research_only_units": 27,
       "research_only_people": 89458537
     },
@@ -3365,9 +3365,9 @@
         "Asia"
       ],
       "research_people": 400038694,
-      "documented_opening_people": 182693817,
+      "documented_opening_people": 220182711,
       "opening_people_including_retained_balances": 400000000,
-      "research_minus_documented": 217344877
+      "research_minus_documented": 179855983
     },
     {
       "comparison_id": "reunion",
@@ -4251,23 +4251,23 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1086446502,
+    "documented_opening_population": 1123935396,
     "untouched_legacy_population": 101880000,
-    "retained_unlocated_population": 277065688,
+    "retained_unlocated_population": 239576794,
     "authoritative_opening_population": 1465392190,
-    "published_minus_documented_opening": 508627746,
+    "published_minus_documented_opening": 471138852,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 224844706,
       "comparisons_by_scope": {
         "comparable_extent": 1943838,
         "scope_unconfirmed": 86843,
-        "partial_extent": 281752357,
+        "partial_extent": 244263463,
         "adopted_research_series": 0
       },
       "opening_without_benchmark_link": 0,
       "untouched_legacy_controls": -101880000,
-      "unlocated_balances_under_retained_controls": -277065688
+      "unlocated_balances_under_retained_controls": -239576794
     },
     "published_minus_authoritative_opening": 129682058
   }

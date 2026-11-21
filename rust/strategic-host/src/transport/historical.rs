@@ -1363,7 +1363,7 @@ mod tests {
         let opening = sources.historical_population.as_ref().unwrap();
         let leaf_counts = counts(&net, opening.partition_identities().map(|(id, _, _)| id));
         let root_counts = counts(&net, opening.standalone_ids());
-        assert_eq!(leaf_counts.iter().sum::<usize>(), 362);
+        assert_eq!(leaf_counts.iter().sum::<usize>(), 365);
         let attached = opening.residence_places().count();
         for (place, leaf) in opening.residence_places() {
             assert_eq!(net.population_at(place), Some(leaf));

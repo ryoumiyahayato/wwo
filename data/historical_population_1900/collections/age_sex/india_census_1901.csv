@@ -194,3 +194,41 @@ india_census_1901_table_vii_rajputana,55–60,band,55,59,178100,96792,81308
 india_census_1901_table_vii_rajputana,60 and over,band,60,,435591,209782,225809
 india_census_1901_table_vii_rajputana,Unspecified,band,,,42,28,14
 india_census_1901_table_vii_rajputana,Total,total,,,9723301,5104246,4619055
+india_census_1901_table_vii_madras,0–1,band,0,0,1129460,553433,576027
+india_census_1901_table_vii_madras,1–2,band,1,1,611309,298104,313205
+india_census_1901_table_vii_madras,2–3,band,2,2,1086149,527866,558283
+india_census_1901_table_vii_madras,3–4,band,3,3,1205962,583469,622493
+india_census_1901_table_vii_madras,4–5,band,4,4,1141791,559831,581960
+india_census_1901_table_vii_madras,Total 0–5,subtotal,0,4,5174671,2522703,2651968
+india_census_1901_table_vii_madras,5–10,band,5,9,5427184,2702526,2724658
+india_census_1901_table_vii_madras,10–15,band,10,14,4660327,2450297,2210030
+india_census_1901_table_vii_madras,15–20,band,15,19,3023564,1555383,1468181
+india_census_1901_table_vii_madras,20–25,band,20,24,3014988,1341227,1673761
+india_census_1901_table_vii_madras,25–30,band,25,29,3019282,1424039,1595213
+india_census_1901_table_vii_madras,30–35,band,30,34,3263144,1538775,1724369
+india_census_1901_table_vii_madras,35–40,band,35,39,2131747,1126653,1005094
+india_census_1901_table_vii_madras,40–45,band,40,44,2570165,1263286,1306879
+india_census_1901_table_vii_madras,45–50,band,45,49,1325381,707151,618230
+india_census_1901_table_vii_madras,50–55,band,50,54,1803777,875016,928761
+india_census_1901_table_vii_madras,55–60,band,55,59,669033,356627,312406
+india_census_1901_table_vii_madras,60 and over,band,60,,2126173,977601,1148572
+india_census_1901_table_vii_madras,Total,total,,,38209436,18841284,19368152
+india_census_1901_table_vii_coorg,0–1,band,0,0,5580,2762,2818
+india_census_1901_table_vii_coorg,1–2,band,1,1,1646,809,837
+india_census_1901_table_vii_coorg,2–3,band,2,2,4136,2051,2085
+india_census_1901_table_vii_coorg,3–4,band,3,3,3828,1823,2005
+india_census_1901_table_vii_coorg,4–5,band,4,4,4275,2126,2149
+india_census_1901_table_vii_coorg,Total 0–5,subtotal,0,4,19465,9571,9894
+india_census_1901_table_vii_coorg,5–10,band,5,9,22438,11242,11196
+india_census_1901_table_vii_coorg,10–15,band,10,14,22270,11885,10385
+india_census_1901_table_vii_coorg,15–20,band,15,19,17488,9743,7745
+india_census_1901_table_vii_coorg,20–25,band,20,24,18464,10153,8311
+india_census_1901_table_vii_coorg,25–30,band,25,29,20923,12210,8713
+india_census_1901_table_vii_coorg,30–35,band,30,34,17481,10739,6742
+india_census_1901_table_vii_coorg,35–40,band,35,39,12249,7889,4360
+india_census_1901_table_vii_coorg,40–45,band,40,44,10682,6446,4236
+india_census_1901_table_vii_coorg,45–50,band,45,49,5763,3477,2286
+india_census_1901_table_vii_coorg,50–55,band,50,54,5978,3169,2809
+india_census_1901_table_vii_coorg,55–60,band,55,59,2349,1307,1042
+india_census_1901_table_vii_coorg,60 and over,band,60,,5057,2427,2630
+india_census_1901_table_vii_coorg,Total,total,,,180607,100258,80349

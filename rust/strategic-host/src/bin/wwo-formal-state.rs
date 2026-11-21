@@ -1,7 +1,7 @@
 use serde_json::json;
 use std::{error::Error, io, path::Path};
 use wwo_map_lab::battlefield_terrain::{BattlefieldTerrain, REGION_ID};
-use wwo_map_lab::formal_population::historical_food::{historical_food_case, HISTORICAL_FOOD_CASES, TOKYO_SHINAMI_HOUSEHOLD};
+use wwo_map_lab::formal_population::historical_food::{historical_food_case, HISTORICAL_FOOD_CASES, SANDY_SPRING_HOUSEHOLD, TOKYO_SHINAMI_HOUSEHOLD};
 use wwo_map_lab::{formal_bootstrap::WorldBootstrap, formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_population::{city_population_reference, population_archive, structural_coverage_reference}, formal_save::{read_native_slot, SavedWorld}};
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -222,6 +222,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let id = id.to_str().ok_or_else(usage)?;
                 if id == TOKYO_SHINAMI_HOUSEHOLD.id {
                     println!("{}", serde_json::to_string(&TOKYO_SHINAMI_HOUSEHOLD)?);
+                } else if id == SANDY_SPRING_HOUSEHOLD.id {
+                    println!("{}", serde_json::to_string(&SANDY_SPRING_HOUSEHOLD)?);
                 } else {
                     let case = historical_food_case(id)
                         .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown historical food account"))?;
@@ -231,6 +233,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let mut cases = HISTORICAL_FOOD_CASES.iter().map(serde_json::to_value)
                     .collect::<Result<Vec<_>, _>>()?;
                 cases.push(serde_json::to_value(&TOKYO_SHINAMI_HOUSEHOLD)?);
+                cases.push(serde_json::to_value(&SANDY_SPRING_HOUSEHOLD)?);
                 println!("{}", serde_json::to_string(&cases)?);
             }
         }

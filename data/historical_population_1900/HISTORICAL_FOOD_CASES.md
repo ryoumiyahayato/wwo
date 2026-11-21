@@ -34,3 +34,7 @@
 换算采用 1 lb = 453.59237 g。购入原重行已包含原表所用的不可食部分比例。煮薯行以已经煮好的重量为输入。账本商品重量若缺少制备口径，无法在这三行中选择。样本最小值和最大值仅描述该报告的分析样本。
 
 W. O. Atwater 和 A. P. Bryant，美国农业部 Office of Experiment Stations Bulletin 28 修订本，1906 年修正版，第 68 页。数值取自美国政府原版。[原始成分表](https://www.ars.usda.gov/ARSUserFiles/80400530/pdf/hist/oes_1906_bul_28re.pdf)
+
+## 马里兰州 Sandy Spring 住户
+
+1899 年 1 月，雇主商店抄录一户账目。家中用餐 7 人，自报家庭成员 9 人。两名在外工作子女的汇款未知。账内两份工资共 25 美元，食物 5.06，柴木 2.50，照明用油 0.28，衣鞋 2.30，房租 2.50，水罐 0.50，肥皂 0.10，火柴 0.02。支出合计 13.26 美元。原表未给柴木数量、炊事和取暖分量、医疗开支或实际摄入。保留实录月份，排除报告另列的年度外推。查询 `inspect-food-history sandy_spring_merchant_ledger_1899_01`。[美国劳工部公报 32，William Taylor Thom，印刷第 94–95 页](https://tile.loc.gov/storage-services/service/rbc/lcrbmrp/t8050/t8050.pdf#page=60)

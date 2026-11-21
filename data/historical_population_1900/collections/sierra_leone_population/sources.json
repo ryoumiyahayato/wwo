@@ -1,0 +1,46 @@
+[
+  {
+    "id": "british_empire_census_1901_sierra_leone_scope",
+    "title": "Census of the British Empire, 1901. Sierra Leone returns and explanatory notes",
+    "publisher": "General Register Office / HMSO, 1906. Wellcome Collection digital copy.",
+    "url": "https://wellcomecollection.org/works/mbq6vgjb",
+    "locator": "Printed p. 71, census dates and coverage, Sierra Leone; printed p. 142, section 15, tables 1–3 and note to table 1.",
+    "rights": "Wellcome Collection marks this copy Public Domain Mark 1.0. Historical population facts and bibliographic references only.",
+    "date_note": "The source identifies the Colony census only by year. It explicitly gives no census for the Protectorate. The Protectorate figure has no separate headcount date. The note on p. 142 states that the 1891 Colony total of 74,835 covers a different geographical area from the 1901 total.",
+    "boundary_note": "The Colony return of 76,655 includes the Sierra Leone Peninsula subtotal of 67,782, Sherbro 5,490, Isles de Los 1,422, Tassoh 1,079 and Kikonkeh 882. Freetown district's 34,463 is included in the Peninsula subtotal. The separate Protectorate estimate of 949,827 includes Ronietta 400,000, Karene 200,000, Bandajuma 109,584, Panguma 183,857 and Koinadugu 56,386. The separate Colony and Protectorate totals and their district detail are already in collections/eastern. The roster reflects administrative reporting boundaries. For example, the 1896 delimitation ordinance treated some still legally colonial areas as part of the Protectorate for administration. The combined statistical scope has no exact opening-map crosswalk. The WWO CShapes Sierra Leone polygon ends at longitude 13.2932 degrees west and therefore excludes Isles de Los. Its eastern extent includes Kailahun, which the 1911 treaty returned to the British side in exchange for other territory after the 1903 demarcation. Removing only Isles de Los does not establish a boundary match.",
+    "references": [
+      {
+        "url": "https://iiif.wellcomecollection.org/presentation/v2/b32183173",
+        "locator": "Wellcome IIIF manifest. Use the original image canvases for printed pp. 71 and 142."
+      },
+      {
+        "url": "https://www.sierra-leone.org/Books/Report_by_Her_Majesty_s_Commissioner_and.pdf",
+        "locator": "Report by Her Majesty's Commissioner on the Insurrection in the Sierra Leone Protectorate, C. 9388, paragraphs 26–27. Gives the 31 August 1896 proclamation and the Protectorate's five administrative districts."
+      },
+      {
+        "url": "https://wacapc-africa.com/rex-v-dixon/",
+        "locator": "Rex v Dixon, West African Court of Appeal, 1939. Discusses Port Loko and the administrative treatment of colonial areas under the Protectorate Delimitation Ordinance, 1896."
+      },
+      {
+        "url": "https://www.legislation.gov.uk/ukpga/Edw7/4/33/pdfs/ukpga_19040033_en.pdf",
+        "locator": "Anglo-French Convention of 8 April 1904, Schedule, Article VI. The United Kingdom ceded its rights over Isles de Los to France."
+      },
+      {
+        "url": "https://treaties.fcdo.gov.uk/data/Library2/pdf/1911-TS0016.pdf",
+        "locator": "Convention between the United Kingdom and Liberia, signed 21 January 1911, preamble and Article I. Gives the boundary replacing the 1903 demarcation."
+      },
+      {
+        "url": "https://history.state.gov/historicaldocuments/frus1911/d436",
+        "locator": "Foreign Relations of the United States, 1911, document 436, 12 December 1910. Quotes Liberia's account of the agreement exchanging Kanre-Lahun for the Morro-Mano tract."
+      },
+      {
+        "url": "https://library.law.fsu.edu/Digital-Collections/LimitsinSeas/pdf/ibs129.pdf",
+        "locator": "U.S. Department of State, International Boundary Study No. 129, printed pp. 4–5. Describes the 1903 line and 1911 exchange."
+      },
+      {
+        "url": "https://icr.ethz.ch/data/cshapes/",
+        "locator": "WWO uses cshapes_gw_451 from data/world_map/historical/cshapes_1900_snapshot.json, dated 12 March 1900. The formal map has a combined Sierra Leone polity, without separate Colony and Protectorate polygons."
+      }
+    ]
+  }
+]

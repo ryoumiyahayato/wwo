@@ -2232,7 +2232,9 @@ mod tests {
         let qing = world.population();
         assert_eq!(qing.population_total("qing_empire"), Some(400_000_000));
         for (label, unit) in [("qing_empire:label:7", "qing_hist_jiangxi"), ("qing_empire:label:8", "qing_hist_zhejiang"),
-            ("qing_empire:label:18", "qing_hist_guizhou"), ("qing_empire:label:5", "qing_hist_jiangsu")]
+            ("qing_empire:label:18", "qing_hist_guizhou"), ("qing_empire:label:5", "qing_hist_jiangsu"),
+            ("qing_empire:label:3", "qing_hist_shanxi"), ("qing_empire:label:16", "qing_hist_guangxi"),
+            ("qing_empire:label:17", "qing_hist_yunnan")]
         {
             let archive = crate::formal_population::population_archive(label).unwrap().unwrap();
             assert!(archive.geographies.iter().any(|row| row["opening_id"] == unit));
@@ -2246,6 +2248,17 @@ mod tests {
         let mysore = world.population().structure(Some("raj_mysore_state"), clock).unwrap();
         assert_eq!(mysore.population_total, 5_470_284);
         assert_eq!(mysore.residents_with_cohort_age_and_sex, 5_470_284);
+        let madras = world.population().structure(Some("raj_madras_presidency"), clock).unwrap();
+        assert_eq!(madras.population_total, 37_910_258);
+        assert_eq!(madras.residents_with_cohort_age_and_sex, 37_910_258);
+        let coverage = crate::formal_population::structural_coverage_reference("british_isles_1900").unwrap().unwrap();
+        let crowded = &coverage["panels"]["england_wales_1901_crowded_small_tenements"];
+        assert_eq!(crowded["directly_classified_count"], 2_667_506);
+        assert_eq!(crowded["count_of_reported_tenements"], 392_414);
+        let coverage = crate::formal_population::structural_coverage_reference("russian_empire").unwrap().unwrap();
+        let language = &coverage["panels"]["russia_1897_mother_tongue"];
+        assert_eq!(language["directly_classified_count"], 125_634_894);
+        assert_eq!(language["unreported_count"], 5_127);
         let ecuador = crate::formal_population::population_archive("ecuador_1900").unwrap().unwrap();
         assert!(ecuador.candidate_research_population.iter().any(|row| {
             row["unit_id"] == "ft_ecuador" && row["date"] == "1900-01-01" && row["population_value"] == 1_100_787
@@ -2335,6 +2348,13 @@ mod tests {
         let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
         assert_eq!(restored.population().global_total(), 1_465_392_190);
         assert_eq!(restored.population().population_total("qing_hist_zhejiang"), None);
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(7)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        assert_eq!(restored.population().global_total(), 1_465_392_190);
+        assert_eq!(restored.population().population_total("qing_hist_guangxi"), None);
         assert_eq!(restored.snapshot(), old_saved);
     }
 
@@ -2491,6 +2511,8 @@ mod tests {
 
     #[test]
     fn anonymous_transfer_changes_market_demand_without_changing_supply() {
+        let dry_rice = crate::formal_population::needs::conditional_market_food_energy("rice", 0.453_592_37).unwrap();
+        assert_eq!((dry_rice.kcal.lower, dry_rice.kcal.upper), (1_600.0, 1_690.0));
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create("qing_empire").unwrap();
         let mut unchanged = bootstrap.create("qing_empire").unwrap();
@@ -2529,6 +2551,12 @@ mod tests {
             let flow = potatoes.last_settlement.as_ref().unwrap();
             assert_eq!(flow.removed_from_macro_stock_units, staple(&world, country).consumed);
             assert!(flow.energy_in_removed_stock.is_none());
+            let potato_energy = flow.conditional_energy_in_removed_stock.unwrap();
+            let removed_pounds = flow.removed_from_macro_stock_units * f64::from(potatoes.market_unit_mass_kg) / 0.453_592_37;
+            assert!((potato_energy.kcal.lower - 228.0 * removed_pounds).abs() < 0.01);
+            assert!((potato_energy.kcal.upper - 456.0 * removed_pounds).abs() < 0.01);
+            let rice = flows.iter().find(|row| row.commodity == "rice").unwrap();
+            assert!(rice.last_settlement.as_ref().unwrap().energy_in_removed_stock.is_none());
         }
         let mut restored = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
         for active in [&mut world, &mut restored] {
@@ -2545,17 +2573,18 @@ mod tests {
         let market = "market:legacy_aggregate:russian_empire";
         let good = "potatoes";
         let price = world.macro_economy().markets()["russian_empire"].commodities[good].price_centimes;
+        let first_record = world.next_living_record;
         world.buy_local_stock(market, good, 1000, price, "first").unwrap();
         world.buy_local_stock(market, good, 2000, price, "second").unwrap();
         let cash = world.balance().unwrap().cash;
         assert!(world.consume_purchased_stock(good, 4000).is_err());
         assert_eq!(world.holding_milli(good), 3000);
         let consumption = world.consume_purchased_stock(good, 1500).unwrap();
-        assert_eq!(consumption.record_id, "personal_life:3");
+        assert_eq!(consumption.record_id, format!("personal_life:{}", first_record + 2));
         assert_eq!(consumption.effective_minute, 0);
         assert_eq!(consumption.allocations, [
-            ConsumptionAllocation { purchase_record_id: "personal_life:1".into(), quantity_milli: 1000 },
-            ConsumptionAllocation { purchase_record_id: "personal_life:2".into(), quantity_milli: 500 },
+            ConsumptionAllocation { purchase_record_id: format!("personal_life:{first_record}"), quantity_milli: 1000 },
+            ConsumptionAllocation { purchase_record_id: format!("personal_life:{}", first_record + 1), quantity_milli: 500 },
         ]);
         assert_eq!(world.holding_milli(good), 1500);
         assert_eq!(world.balance().unwrap().cash, cash);

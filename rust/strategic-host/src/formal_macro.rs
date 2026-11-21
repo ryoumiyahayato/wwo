@@ -2,7 +2,7 @@ use crate::{
     formal_bootstrap::{columns, local_id},
     formal_clock::{GameClock, MINUTES_PER_DAY, MINUTES_PER_HOUR},
     formal_ledger::{Ledger, PaymentLeg, TRANSPORT_ACCOUNT, MAX_AMOUNT},
-    formal_population::needs::{recorded_food_energy, FoodEnergyEstimate},
+    formal_population::needs::{conditional_market_food_energy, recorded_food_energy, FoodEnergyEstimate},
     transport::{operations::{Operations, Traffic}, ModeSet},
     formal_save::{field, lookup, integer, invalid, map, number, tagged, typed_int, typed_map},
     legacy_variant::encode_number,
@@ -140,6 +140,7 @@ pub struct MarketFoodSettlement {
     pub removed_from_macro_stock_units: f64,
     pub unmet_modeled_demand_units: f64,
     pub energy_in_removed_stock: Option<FoodEnergyEstimate>,
+    pub conditional_energy_in_removed_stock: Option<FoodEnergyEstimate>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -214,14 +215,17 @@ impl MacroEconomy {
                 market_unit_mass_kg: commodity.unit_mass_kg,
                 inventory_units: state.inventory,
                 price_centimes_per_market_unit: state.price_centimes,
-                last_settlement: market.daily_totals.as_ref().map(|_| MarketFoodSettlement {
-                    hour: self.last_settlement_hour,
-                    modeled_demand_units: state.demanded,
-                    modeled_local_production_units: state.produced,
-                    removed_from_macro_stock_units: state.consumed,
-                    unmet_modeled_demand_units: state.unmet,
-                    energy_in_removed_stock: recorded_food_energy(&commodity.commodity_id,
-                        state.consumed * f64::from(commodity.unit_mass_kg)),
+                last_settlement: market.daily_totals.as_ref().map(|_| {
+                    let removed_kg = state.consumed * f64::from(commodity.unit_mass_kg);
+                    MarketFoodSettlement {
+                        hour: self.last_settlement_hour,
+                        modeled_demand_units: state.demanded,
+                        modeled_local_production_units: state.produced,
+                        removed_from_macro_stock_units: state.consumed,
+                        unmet_modeled_demand_units: state.unmet,
+                        energy_in_removed_stock: recorded_food_energy(&commodity.commodity_id, removed_kg),
+                        conditional_energy_in_removed_stock: conditional_market_food_energy(&commodity.commodity_id, removed_kg),
+                    }
                 }),
             }
         }))

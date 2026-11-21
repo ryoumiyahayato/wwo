@@ -43,6 +43,66 @@
         "Africa"
       ]
     },
+    "england_wales_1901_crowded_small_tenements": {
+      "panel_id": "england_wales_1901_crowded_small_tenements",
+      "dimension": "housing",
+      "status": "reviewed",
+      "observed_unit_id": "uk_england_wales",
+      "observed_date": "1901-03-31",
+      "source_id": "england_wales_census_1901_general_report",
+      "locator": "General Report, sections II.1 and II.4 population controls; section III, pp. 39–41, tenements and overcrowding.",
+      "classification_id": "england_wales_1901_more_than_two_occupants_per_room",
+      "eligible_universe": "Census-night population within the statutory urban and rural districts then in force, excluding the islands in the British seas. The report counts separate occupations. The overcrowding measure covers only one- to four-room tenements with more than two occupants per room. It supplies neither floor area nor a complete count of overcrowding in all dwellings.",
+      "measure_unit": "persons",
+      "eligible_denominator": 32527843,
+      "directly_classified_count": 2667506,
+      "category_relationship": "reported_subset",
+      "categories": [
+        {
+          "label": "urban",
+          "count": 2230999,
+          "locator": "General Report, sections II.1 and II.4 population controls; section III, pp. 39–41, tenements and overcrowding.",
+          "role": "category"
+        },
+        {
+          "label": "rural",
+          "count": 436507,
+          "locator": "General Report, sections II.1 and II.4 population controls; section III, pp. 39–41, tenements and overcrowding.",
+          "role": "category"
+        }
+      ],
+      "research_unit_ids": [
+        "ft_united_kingdom"
+      ],
+      "opening_links": [
+        {
+          "unit_id": "british_isles_1900",
+          "scope_relation": "subset"
+        }
+      ],
+      "count_of_reported_tenements": 392414,
+      "by_rooms_in_reported_tenement": {
+        "1": {
+          "tenements": 66669,
+          "occupants": 245586
+        },
+        "2": {
+          "tenements": 147527,
+          "occupants": 884672
+        },
+        "3": {
+          "tenements": 102556,
+          "occupants": 807596
+        },
+        "4": {
+          "tenements": 75662,
+          "occupants": 729652
+        }
+      },
+      "research_regions": [
+        "Europe"
+      ]
+    },
     "england_wales_1901_residence": {
       "panel_id": "england_wales_1901_residence",
       "dimension": "residence",
@@ -184,6 +244,666 @@
           "scope_relation": "subset"
         }
       ],
+      "research_regions": [
+        "Europe"
+      ]
+    },
+    "russia_1897_mother_tongue": {
+      "panel_id": "russia_1897_mother_tongue",
+      "dimension": "language",
+      "status": "reviewed",
+      "observed_unit_id": "ru_census_1897_ex_finland",
+      "observed_date": "1897-02-09",
+      "source_id": "rus_lan_97",
+      "locator": "Table XIII; rus_lan_97.php?reg=0, rows 2–109",
+      "classification_id": "russian_1897_reported_mother_tongue",
+      "eligible_universe": "Residents in the published 1897 enumeration of the Russian Empire excluding Finland, Khiva, Bukhara and the table's separate extra-territorial and at-sea return.",
+      "measure_unit": "persons",
+      "eligible_denominator": 125640021,
+      "directly_classified_count": 125634894,
+      "category_relationship": "reported_subset",
+      "categories": [
+        {
+          "label": "Русский",
+          "count": 55667469,
+          "locator": "rus_lan_97.php?reg=0, row 2",
+          "role": "category"
+        },
+        {
+          "label": "Русский",
+          "count": 22380551,
+          "locator": "rus_lan_97.php?reg=0, row 3",
+          "role": "category"
+        },
+        {
+          "label": "Русский",
+          "count": 5885547,
+          "locator": "rus_lan_97.php?reg=0, row 4",
+          "role": "category"
+        },
+        {
+          "label": "Польский",
+          "count": 7931307,
+          "locator": "rus_lan_97.php?reg=0, row 6",
+          "role": "category"
+        },
+        {
+          "label": "Остальные славянские языки",
+          "count": 50385,
+          "locator": "rus_lan_97.php?reg=0, row 7",
+          "role": "category"
+        },
+        {
+          "label": "Остальные славянские языки",
+          "count": 1815,
+          "locator": "rus_lan_97.php?reg=0, row 8",
+          "role": "category"
+        },
+        {
+          "label": "Остальные славянские языки",
+          "count": 172659,
+          "locator": "rus_lan_97.php?reg=0, row 9",
+          "role": "category"
+        },
+        {
+          "label": "Литовско-латышские наречия",
+          "count": 1210510,
+          "locator": "rus_lan_97.php?reg=0, row 10",
+          "role": "category"
+        },
+        {
+          "label": "Литовско-латышские наречия",
+          "count": 448022,
+          "locator": "rus_lan_97.php?reg=0, row 11",
+          "role": "category"
+        },
+        {
+          "label": "Литовско-латышские наречия",
+          "count": 1435937,
+          "locator": "rus_lan_97.php?reg=0, row 12",
+          "role": "category"
+        },
+        {
+          "label": "Романские языки",
+          "count": 1121669,
+          "locator": "rus_lan_97.php?reg=0, row 13",
+          "role": "category"
+        },
+        {
+          "label": "Романские языки",
+          "count": 16433,
+          "locator": "rus_lan_97.php?reg=0, row 14",
+          "role": "category"
+        },
+        {
+          "label": "Романские языки",
+          "count": 4760,
+          "locator": "rus_lan_97.php?reg=0, row 15",
+          "role": "category"
+        },
+        {
+          "label": "Романские языки",
+          "count": 138,
+          "locator": "rus_lan_97.php?reg=0, row 16",
+          "role": "category"
+        },
+        {
+          "label": "Немецкий",
+          "count": 1790489,
+          "locator": "rus_lan_97.php?reg=0, row 17",
+          "role": "category"
+        },
+        {
+          "label": "Прочие германские языки",
+          "count": 14199,
+          "locator": "rus_lan_97.php?reg=0, row 18",
+          "role": "category"
+        },
+        {
+          "label": "Прочие германские языки",
+          "count": 1640,
+          "locator": "rus_lan_97.php?reg=0, row 19",
+          "role": "category"
+        },
+        {
+          "label": "Прочие германские языки",
+          "count": 335,
+          "locator": "rus_lan_97.php?reg=0, row 20",
+          "role": "category"
+        },
+        {
+          "label": "Прочие германские языки",
+          "count": 7054,
+          "locator": "rus_lan_97.php?reg=0, row 21",
+          "role": "category"
+        },
+        {
+          "label": "Еврейский",
+          "count": 5063156,
+          "locator": "rus_lan_97.php?reg=0, row 22",
+          "role": "category"
+        },
+        {
+          "label": "Картвельские наречия",
+          "count": 823968,
+          "locator": "rus_lan_97.php?reg=0, row 23",
+          "role": "category"
+        },
+        {
+          "label": "Картвельские наречия",
+          "count": 273186,
+          "locator": "rus_lan_97.php?reg=0, row 24",
+          "role": "category"
+        },
+        {
+          "label": "Картвельские наречия",
+          "count": 239625,
+          "locator": "rus_lan_97.php?reg=0, row 25",
+          "role": "category"
+        },
+        {
+          "label": "Картвельские наречия",
+          "count": 15756,
+          "locator": "rus_lan_97.php?reg=0, row 26",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 186925,
+          "locator": "rus_lan_97.php?reg=0, row 27",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 936,
+          "locator": "rus_lan_97.php?reg=0, row 28",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 1173096,
+          "locator": "rus_lan_97.php?reg=0, row 29",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 31723,
+          "locator": "rus_lan_97.php?reg=0, row 30",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 350397,
+          "locator": "rus_lan_97.php?reg=0, row 31",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 35291,
+          "locator": "rus_lan_97.php?reg=0, row 32",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 95056,
+          "locator": "rus_lan_97.php?reg=0, row 33",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 99949,
+          "locator": "rus_lan_97.php?reg=0, row 34",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 171716,
+          "locator": "rus_lan_97.php?reg=0, row 35",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 312,
+          "locator": "rus_lan_97.php?reg=0, row 36",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 44582,
+          "locator": "rus_lan_97.php?reg=0, row 37",
+          "role": "category"
+        },
+        {
+          "label": "Остальные индо-европейские наречия",
+          "count": 614,
+          "locator": "rus_lan_97.php?reg=0, row 38",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 98561,
+          "locator": "rus_lan_97.php?reg=0, row 39",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 46286,
+          "locator": "rus_lan_97.php?reg=0, row 40",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 72103,
+          "locator": "rus_lan_97.php?reg=0, row 41",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 226496,
+          "locator": "rus_lan_97.php?reg=0, row 42",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 47409,
+          "locator": "rus_lan_97.php?reg=0, row 43",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 413,
+          "locator": "rus_lan_97.php?reg=0, row 44",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 212692,
+          "locator": "rus_lan_97.php?reg=0, row 45",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 130209,
+          "locator": "rus_lan_97.php?reg=0, row 46",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 159213,
+          "locator": "rus_lan_97.php?reg=0, row 47",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 7100,
+          "locator": "rus_lan_97.php?reg=0, row 48",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 90880,
+          "locator": "rus_lan_97.php?reg=0, row 49",
+          "role": "category"
+        },
+        {
+          "label": "Наречия кавказских горцев",
+          "count": 420,
+          "locator": "rus_lan_97.php?reg=0, row 50",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 143068,
+          "locator": "rus_lan_97.php?reg=0, row 51",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 420970,
+          "locator": "rus_lan_97.php?reg=0, row 52",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 208101,
+          "locator": "rus_lan_97.php?reg=0, row 53",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 13774,
+          "locator": "rus_lan_97.php?reg=0, row 54",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 25820,
+          "locator": "rus_lan_97.php?reg=0, row 55",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 1002738,
+          "locator": "rus_lan_97.php?reg=0, row 56",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 1812,
+          "locator": "rus_lan_97.php?reg=0, row 57",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 153618,
+          "locator": "rus_lan_97.php?reg=0, row 58",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 104691,
+          "locator": "rus_lan_97.php?reg=0, row 59",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 1023841,
+          "locator": "rus_lan_97.php?reg=0, row 60",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 375439,
+          "locator": "rus_lan_97.php?reg=0, row 61",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 7651,
+          "locator": "rus_lan_97.php?reg=0, row 62",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 19663,
+          "locator": "rus_lan_97.php?reg=0, row 63",
+          "role": "category"
+        },
+        {
+          "label": "Финские наречия",
+          "count": 961,
+          "locator": "rus_lan_97.php?reg=0, row 64",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 3737627,
+          "locator": "rus_lan_97.php?reg=0, row 65",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 1321363,
+          "locator": "rus_lan_97.php?reg=0, row 66",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 53847,
+          "locator": "rus_lan_97.php?reg=0, row 67",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 117773,
+          "locator": "rus_lan_97.php?reg=0, row 68",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 843755,
+          "locator": "rus_lan_97.php?reg=0, row 69",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 27223,
+          "locator": "rus_lan_97.php?reg=0, row 70",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 83408,
+          "locator": "rus_lan_97.php?reg=0, row 71",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 64080,
+          "locator": "rus_lan_97.php?reg=0, row 72",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 208822,
+          "locator": "rus_lan_97.php?reg=0, row 73",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 29902,
+          "locator": "rus_lan_97.php?reg=0, row 74",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 281357,
+          "locator": "rus_lan_97.php?reg=0, row 75",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 4084139,
+          "locator": "rus_lan_97.php?reg=0, row 76",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 201682,
+          "locator": "rus_lan_97.php?reg=0, row 77",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 7607,
+          "locator": "rus_lan_97.php?reg=0, row 78",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 104274,
+          "locator": "rus_lan_97.php?reg=0, row 79",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 968655,
+          "locator": "rus_lan_97.php?reg=0, row 80",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 726534,
+          "locator": "rus_lan_97.php?reg=0, row 81",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 56469,
+          "locator": "rus_lan_97.php?reg=0, row 82",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 14938,
+          "locator": "rus_lan_97.php?reg=0, row 83",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 440412,
+          "locator": "rus_lan_97.php?reg=0, row 84",
+          "role": "category"
+        },
+        {
+          "label": "Турецко-татарские наречия",
+          "count": 227384,
+          "locator": "rus_lan_97.php?reg=0, row 85",
+          "role": "category"
+        },
+        {
+          "label": "Монголо-бурятские наречия",
+          "count": 190648,
+          "locator": "rus_lan_97.php?reg=0, row 86",
+          "role": "category"
+        },
+        {
+          "label": "Монголо-бурятские наречия",
+          "count": 288663,
+          "locator": "rus_lan_97.php?reg=0, row 87",
+          "role": "category"
+        },
+        {
+          "label": "Монголо-бурятские наречия",
+          "count": 817,
+          "locator": "rus_lan_97.php?reg=0, row 88",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 15877,
+          "locator": "rus_lan_97.php?reg=0, row 89",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 66270,
+          "locator": "rus_lan_97.php?reg=0, row 90",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 3394,
+          "locator": "rus_lan_97.php?reg=0, row 91",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 11795,
+          "locator": "rus_lan_97.php?reg=0, row 92",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 6058,
+          "locator": "rus_lan_97.php?reg=0, row 93",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 3978,
+          "locator": "rus_lan_97.php?reg=0, row 94",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 948,
+          "locator": "rus_lan_97.php?reg=0, row 95",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 506,
+          "locator": "rus_lan_97.php?reg=0, row 96",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 1099,
+          "locator": "rus_lan_97.php?reg=0, row 97",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 6194,
+          "locator": "rus_lan_97.php?reg=0, row 98",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 1446,
+          "locator": "rus_lan_97.php?reg=0, row 99",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 584,
+          "locator": "rus_lan_97.php?reg=0, row 100",
+          "role": "category"
+        },
+        {
+          "label": "Наречия остальных северных племен",
+          "count": 994,
+          "locator": "rus_lan_97.php?reg=0, row 101",
+          "role": "category"
+        },
+        {
+          "label": "Языки культурн. нар. Крайнего Востока",
+          "count": 57459,
+          "locator": "rus_lan_97.php?reg=0, row 102",
+          "role": "category"
+        },
+        {
+          "label": "Языки культурн. нар. Крайнего Востока",
+          "count": 26005,
+          "locator": "rus_lan_97.php?reg=0, row 103",
+          "role": "category"
+        },
+        {
+          "label": "Языки культурн. нар. Крайнего Востока",
+          "count": 2649,
+          "locator": "rus_lan_97.php?reg=0, row 104",
+          "role": "category"
+        },
+        {
+          "label": "Прочие языки и наречия",
+          "count": 1696,
+          "locator": "rus_lan_97.php?reg=0, row 105",
+          "role": "category"
+        },
+        {
+          "label": "Прочие языки и наречия",
+          "count": 5353,
+          "locator": "rus_lan_97.php?reg=0, row 106",
+          "role": "category"
+        },
+        {
+          "label": "Прочие языки и наречия",
+          "count": 74,
+          "locator": "rus_lan_97.php?reg=0, row 107",
+          "role": "category"
+        }
+      ],
+      "research_unit_ids": [
+        "ft_russia_empire_ussr"
+      ],
+      "opening_links": [
+        {
+          "unit_id": "russian_empire",
+          "scope_relation": "subset"
+        }
+      ],
+      "unreported_count": 5127,
       "research_regions": [
         "Europe"
       ]
@@ -521,6 +1241,16 @@
         "opening_unknown_people": 1465392190,
         "opening_status": "unknown"
       },
+      "housing": {
+        "reviewed_panels": [
+          "england_wales_1901_crowded_small_tenements"
+        ],
+        "candidate_panels": [],
+        "opening_roots_with_same_extent_dated_panel": [],
+        "opening_known_people": null,
+        "opening_unknown_people": 1465392190,
+        "opening_status": "unknown"
+      },
       "literacy": {
         "reviewed_panels": [
           "russia_1897_literacy"
@@ -586,7 +1316,9 @@
         "opening_status": "unknown"
       },
       "language": {
-        "reviewed_panels": [],
+        "reviewed_panels": [
+          "russia_1897_mother_tongue"
+        ],
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
@@ -618,6 +1350,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 18751672,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -711,6 +1451,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 128108928,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -819,6 +1567,14 @@
           "opening_unknown_people": 802923622,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 802923622,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -919,6 +1675,16 @@
           "opening_unknown_people": 408822583,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [
+            "england_wales_1901_crowded_small_tenements"
+          ],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 408822583,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [
             "russia_1897_literacy"
@@ -980,7 +1746,9 @@
           "opening_status": "unknown"
         },
         "language": {
-          "reviewed_panels": [],
+          "reviewed_panels": [
+            "russia_1897_mother_tongue"
+          ],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
@@ -1009,6 +1777,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 4905385,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -1105,6 +1881,14 @@
         "opening_status": "unknown"
       },
       "households": {
+        "reviewed_panels": [],
+        "candidate_panels": [],
+        "opening_roots_with_same_extent_dated_panel": [],
+        "opening_known_people": null,
+        "opening_unknown_people": 101880000,
+        "opening_status": "unknown"
+      },
+      "housing": {
         "reviewed_panels": [],
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
@@ -1209,6 +1993,14 @@
           "opening_unknown_people": 4624686,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 4624686,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -1298,6 +2090,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 3837578,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -1401,6 +2201,14 @@
           "opening_unknown_people": 45000882,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 45000882,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -1490,6 +2298,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 1713013,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -1591,6 +2407,14 @@
           "opening_unknown_people": 1700000,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 1700000,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -1680,6 +2504,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 17021073,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -1785,6 +2617,16 @@
           "opening_unknown_people": 40994912,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [
+            "england_wales_1901_crowded_small_tenements"
+          ],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 40994912,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -1874,6 +2716,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 2890099,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -1977,6 +2827,14 @@
           "opening_unknown_people": 218307,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 218307,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -2064,6 +2922,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 15000000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -2167,6 +3033,14 @@
           "opening_unknown_people": 38852684,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 38852684,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -2256,6 +3130,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 62288,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -2361,6 +3243,14 @@
           "opening_unknown_people": 54404,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 54404,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -2457,6 +3347,14 @@
           "opening_unknown_people": 182672,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 182672,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -2546,6 +3444,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 151193,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -2651,6 +3557,14 @@
           "opening_unknown_people": 146008,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 146008,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -2740,6 +3654,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 742520,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -2843,6 +3765,14 @@
           "opening_unknown_people": 266739,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 266739,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -2932,6 +3862,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 193861,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -3037,6 +3975,14 @@
           "opening_unknown_people": 2265556,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 2265556,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -3126,6 +4072,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 929970,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -3229,6 +4183,14 @@
           "opening_unknown_people": 305255,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 305255,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -3318,6 +4280,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 2644620,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -3421,6 +4391,14 @@
           "opening_unknown_people": 173254,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 173254,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -3517,6 +4495,14 @@
           "opening_unknown_people": 373996,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 373996,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -3606,6 +4592,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 960208,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -3711,6 +4705,14 @@
           "opening_unknown_people": 212734,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 212734,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -3802,6 +4804,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 294000000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -3905,6 +4915,14 @@
           "opening_unknown_people": 3469224,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 3469224,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -3994,6 +5012,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 36671,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -4097,6 +5123,14 @@
           "opening_unknown_people": 44363679,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 44363679,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -4186,6 +5220,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 796359,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -4289,6 +5331,14 @@
           "opening_unknown_people": 120255,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 120255,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -4378,6 +5428,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 1585419,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -4481,6 +5539,14 @@
           "opening_unknown_people": 5304314,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 5304314,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -4568,6 +5634,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 5000000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -4671,6 +5745,14 @@
           "opening_unknown_people": 44012686,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 44012686,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -4758,6 +5840,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 11000000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -4861,6 +5951,14 @@
           "opening_unknown_people": 55619152,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 55619152,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -4950,6 +6048,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 78086,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -5053,6 +6159,14 @@
           "opening_unknown_people": 10000000,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 10000000,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -5142,6 +6256,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 6713135,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -5243,6 +6365,14 @@
           "opening_unknown_people": 2450000,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 2450000,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -5330,6 +6460,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 2500000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -5433,6 +6571,14 @@
           "opening_unknown_people": 32296914,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 32296914,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -5529,6 +6675,14 @@
           "opening_unknown_people": 231321,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 231321,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -5616,6 +6770,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 5600000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -5719,6 +6881,14 @@
           "opening_unknown_people": 5141915,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 5141915,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -5808,6 +6978,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 5404156,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -5911,6 +7089,14 @@
           "opening_unknown_people": 5956690,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 5956690,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -6007,6 +7193,14 @@
           "opening_unknown_people": 2471816,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 2471816,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -6094,6 +7288,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 10000000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -6197,6 +7399,14 @@
           "opening_unknown_people": 18511807,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 18511807,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -6286,6 +7496,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 17078033,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -6389,6 +7607,14 @@
           "opening_unknown_people": 13447810,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 13447810,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -6476,6 +7702,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 5000000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -6577,6 +7811,14 @@
           "opening_unknown_people": 390000,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 390000,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -6664,6 +7906,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 24000000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -6765,6 +8015,14 @@
           "opening_unknown_people": 640000,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 640000,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -6859,6 +8117,14 @@
           "opening_unknown_people": 10000000,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 10000000,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -6946,6 +8212,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 3800000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -7049,6 +8323,14 @@
           "opening_unknown_people": 3715205,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 3715205,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -7138,6 +8420,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 400000000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -7241,6 +8531,14 @@
           "opening_unknown_people": 4124729,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 4124729,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -7328,6 +8626,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 1000000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -7433,6 +8739,14 @@
           "opening_unknown_people": 135382043,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 135382043,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [
             "russia_1897_literacy"
@@ -7494,7 +8808,9 @@
           "opening_status": "unknown"
         },
         "language": {
-          "reviewed_panels": [],
+          "reviewed_panels": [
+            "russia_1897_mother_tongue"
+          ],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
@@ -7524,6 +8840,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 1400000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -7627,6 +8951,14 @@
           "opening_unknown_people": 1668263,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 1668263,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -7723,6 +9055,14 @@
           "opening_unknown_people": 200000,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 200000,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -7812,6 +9152,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 7315799,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -7919,6 +9267,14 @@
           "opening_unknown_people": 3285131,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 3285131,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -8008,6 +9364,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 75454976,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -8113,6 +9477,14 @@
           "opening_unknown_people": 908090,
           "opening_status": "unknown"
         },
+        "housing": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 908090,
+          "opening_status": "unknown"
+        },
         "literacy": {
           "reviewed_panels": [],
           "candidate_panels": [],
@@ -8200,6 +9572,14 @@
           "opening_status": "unknown"
         },
         "households": {
+          "reviewed_panels": [],
+          "candidate_panels": [],
+          "opening_roots_with_same_extent_dated_panel": [],
+          "opening_known_people": null,
+          "opening_unknown_people": 2400000,
+          "opening_status": "unknown"
+        },
+        "housing": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],

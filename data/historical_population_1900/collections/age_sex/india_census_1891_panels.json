@@ -1,0 +1,12 @@
+[
+  {
+    "id": "india_census_1891_table_vii_a_national",
+    "source_id": "india_census_1891_original_age",
+    "locator": "Vol. I, Table VII-A, Summary, Part 1, India row, printed pp. 98–103, columns 2–39. Explanatory note, printed p. 97",
+    "published_scope": "India, all religions, population tabulated for age",
+    "observed_unit_id": "british_india_empire_1891_age_tabulation",
+    "observed_date": "1891-02-26",
+    "definition": "The printed sex columns cover 286,640,271 persons. The census distributed blank age returns within the published provincial or state religion tabulations and shifted Punjab and its feudatories’ ages to completed years. The table omits 583,160 persons in tracts where ages were not collected, including 306,547 males and 276,613 females. The original table has no separate both-sex or unknown-age columns.",
+    "broad_observation": false
+  }
+]

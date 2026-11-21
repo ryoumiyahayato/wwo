@@ -200,6 +200,10 @@ def qing_interior(observations, version):
         with revised.open(encoding="utf8") as f:
             by_unit.update((link["unit_id"], link) for link in csv.DictReader(f, delimiter="\t"))
         links = list(by_unit.values())
+    if version >= 8:
+        expanded = path.with_name("qing_interior_v8_crosswalk.tsv")
+        with expanded.open(encoding="utf8") as f:
+            links.extend(csv.DictReader(f, delimiter="\t"))
     leaves = []
     for link in links:
         row = by_id[link["unit_id"]]
@@ -227,6 +231,8 @@ def qing_interior(observations, version):
             additional_partition_source=additional.relative_to(HERE).as_posix())
     if version >= 7:
         group["revised_partition_source"] = revised.relative_to(HERE).as_posix()
+    if version >= 8:
+        group["expanded_partition_source"] = expanded.relative_to(HERE).as_posix()
     return group
 
 

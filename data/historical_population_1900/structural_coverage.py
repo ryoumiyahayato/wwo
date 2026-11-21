@@ -3,7 +3,7 @@
 from collections import defaultdict
 
 
-DIMENSIONS = ("residence", "households", "literacy", "occupation", "religion",
+DIMENSIONS = ("residence", "households", "housing", "literacy", "occupation", "religion",
               "education", "labor_force", "health", "military_eligibility", "language", "social_status")
 RUSSIA = "ru_census_1897_ex_finland"
 US = "us_twelfth_census_entire_enumeration"
@@ -69,6 +69,21 @@ def _reviewed_panels(population, structural):
                      categories=[_cell(row["category"], row["values"]["both"], row) for row in religion
                                  if 2 <= int(row["locator"].rsplit(" ", 1)[-1]) <= 17],
                      closure="complete_partition", locator="rus_rel_97.php?reg=0, rows 2–18")
+    language = {int(row["locator"].rsplit(" ", 1)[-1]): row
+                for row in structural_by_source_unit["rus_lan_97", RUSSIA]
+                if row["locator"].startswith("rus_lan_97.php?reg=0, row ")}
+    if all(index in language for index in range(2, 110)):
+        # Row 5 repeats rows 2–4 as a subtotal. Row 108 has no recorded mother tongue.
+        cells = [_cell(language[index]["category"], language[index]["values"]["both"], language[index])
+                 for index in range(2, 108) if index != 5]
+        total, unreported = language[109]["values"]["both"], language[108]["values"]["both"]
+        if sum(cell["count"] for cell in cells) + unreported == total:
+            panel = _panel("russia_1897_mother_tongue", "language", language[109], russia_research, russia_opening,
+                           "russian_1897_reported_mother_tongue", russian_universe,
+                           denominator=total, categories=cells, closure="reported_subset",
+                           locator="Table XIII; rus_lan_97.php?reg=0, rows 2–109")
+            panel["unreported_count"] = unreported
+            yield panel
     literacy = next((row for row in structural_by_source_unit["rus_age_97", RUSSIA]
                      if row["row_role"] == "total"), None)
     if literacy:
@@ -100,6 +115,14 @@ def _reviewed_panels(population, structural):
                      denominator=values["total_population"], closure="complete_partition",
                      categories=[_cell(label, values["districts"][label]["population"], row)
                                  for label in ("urban", "rural")])
+        housing = _panel("england_wales_1901_crowded_small_tenements", "housing", row, ["ft_united_kingdom"],
+                         [("british_isles_1900", "subset")], "england_wales_1901_more_than_two_occupants_per_room",
+                         row["definition"], denominator=values["total_population"], closure="reported_subset",
+                         categories=[_cell(label, values["districts"][label]["occupants_of_these_tenements"], row)
+                                     for label in ("urban", "rural")])
+        housing["count_of_reported_tenements"] = values["overcrowded_tenements_1_to_4_rooms"]
+        housing["by_rooms_in_reported_tenement"] = values["by_rooms_in_overcrowded_tenement"]
+        yield housing
 
     for panel_id, source, unit, date, research, root, universe in (
         ("india_1901_residence", "india_statistical_abstract_1905", "raj_indian_empire", "1901-03-01",

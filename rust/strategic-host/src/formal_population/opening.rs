@@ -3,7 +3,7 @@ use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io, sync::OnceLock};
 
-pub(crate) const CURRENT_VERSION: u32 = 7;
+pub(crate) const CURRENT_VERSION: u32 = 8;
 
 #[derive(Debug, Serialize)]
 pub struct OpeningPopulationEstimate {
@@ -97,7 +97,8 @@ impl HistoricalOpening {
             4 => include_bytes!("../../../../data/historical_population_1900/opening_v4.json"),
             5 => include_bytes!("../../../../data/historical_population_1900/opening_v5.json"),
             6 => include_bytes!("../../../../data/historical_population_1900/opening_v6.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v7.json"),
+            7 => include_bytes!("../../../../data/historical_population_1900/opening_v7.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v8.json"),
             _ => return Err(invalid("unsupported historical population opening version")),
         };
         let manifest: Manifest = serde_json::from_slice(bytes)?;
@@ -199,7 +200,8 @@ impl HistoricalOpening {
             4 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v4.json"),
             5 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v5.json"),
             6 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v6.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v7.json"),
+            7 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v7.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v8.json"),
             _ => return Ok(opening),
         };
         opening.demography = OpeningDemography::load(&opening, demography)?;

@@ -147,6 +147,8 @@ pub(super) fn published_domestic_water_service_reference(
 #[serde(rename_all = "snake_case")]
 pub enum FoodEnergySource {
     UsdaBulletin28WheatBreadReference,
+    UsdaBulletin28FreshPotatoWithTwentyPercentRefuse,
+    UsdaBulletin28DryEdibleRice,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]
@@ -159,21 +161,52 @@ pub struct FoodEnergyEstimate {
 /// Energy reference for food recorded as consumed. An unspecified product or
 /// preparation has no estimate.
 pub fn recorded_food_energy(good: &str, consumed_kg: f64) -> Option<FoodEnergyEstimate> {
-    if good != "bread" || !consumed_kg.is_finite() || consumed_kg <= 0.0 {
+    if good != "bread" {
         return None;
     }
 
     // USDA Bulletin 28 (1906 revision), p. 61, as-purchased sample averages:
     // whole wheat bread and white bread (all analyses), in kcal per pound.
-    let consumed_pounds = consumed_kg / 0.453_592_37;
+    food_energy_for_mass(consumed_kg, 1_140.0, 1_215.0,
+        FoodEnergySource::UsdaBulletin28WheatBreadReference)
+}
+
+/// A component of the removed agricultural mass may be edible. The reference
+/// applies only under the product and preparation conditions indicated by its
+/// source. Household intake cannot be inferred from a stock debit.
+pub(crate) fn conditional_market_food_energy(good: &str, raw_kg: f64) -> Option<FoodEnergyEstimate> {
+    if raw_kg <= 0.0 {
+        return None;
+    }
+    match good {
+        "potatoes" => {
+            use super::historical_food::{potato_energy_for_mass_grams, PotatoMassBasis};
+
+            // Bulletin 28, p. 68. The fresh as-purchased row has 20% refuse.
+            let kcal = potato_energy_for_mass_grams(raw_kg * 800.0, PotatoMassBasis::FreshEdiblePortion)?
+                .observed_sample_range_kcal?;
+            Some(FoodEnergyEstimate { kcal, source: FoodEnergySource::UsdaBulletin28FreshPotatoWithTwentyPercentRefuse })
+        }
+        // Bulletin 28, p. 57. Use the dry rice series only if the entire mass
+        // is dry edible grain. The ledger's rice can represent other forms.
+        "rice" => food_energy_for_mass(raw_kg, 1_600.0, 1_690.0,
+            FoodEnergySource::UsdaBulletin28DryEdibleRice),
+        _ => None,
+    }
+}
+
+fn food_energy_for_mass(
+    mass_kg: f64, lower_per_pound: f64, upper_per_pound: f64, source: FoodEnergySource,
+) -> Option<FoodEnergyEstimate> {
+    if !mass_kg.is_finite() || mass_kg <= 0.0 {
+        return None;
+    }
+    let pounds = mass_kg / 0.453_592_37;
     let kcal = QuantityRange {
-        lower: 1_140.0 * consumed_pounds,
-        upper: 1_215.0 * consumed_pounds,
+        lower: lower_per_pound * pounds,
+        upper: upper_per_pound * pounds,
     };
-    kcal.is_valid().then_some(FoodEnergyEstimate {
-        kcal,
-        source: FoodEnergySource::UsdaBulletin28WheatBreadReference,
-    })
+    kcal.is_valid().then_some(FoodEnergyEstimate { kcal, source })
 }
 
 pub fn physiological_requirements(input: PhysiologicalInputs) -> PhysiologicalRequirements {
