@@ -1,0 +1,24 @@
+{
+  "basis": "GENERATED_OPENING_CONFIGURATION",
+  "notice": "商号、互助会、行业偏好、姓名和职位均为模拟设定。只在有正式人口归属的开局城市登记。商号从零资金经营有正式需求的商品。未指定行业时按地区需求估值选业。柜台以一小时为一班，每单占用一班，代办费按工坊入门时薪计。人物从当地未分类人口实名化，开局设定年龄三十岁。",
+  "job_terms": {"positions":1,"hours":1,"wage_per_hour":3,"wage_delay":1,"skill":1},
+  "industries": [
+    {"id":"fuel","name":"燃料商行","goods":["coal","kerosene","candles_matches"]},
+    {"id":"paper","name":"纸品商行","goods":["paper"]},
+    {"id":"grain","name":"粮食商行","goods":["flour","bread","pulses"]},
+    {"id":"textiles","name":"衣料商行","goods":["clothing","silk_goods","fine_clothing"]},
+    {"id":"fish","name":"水产商行","goods":["fish","preserved_food"]}
+  ],
+  "local_preferences": {
+    "paris":{"coordinator":"露易丝·莫罗","member":"埃米尔·佩兰"},
+    "london":{"industry":"fuel","founder":"埃莉诺·克拉克","coordinator":"托马斯·摩尔","member":"艾丽斯·埃文斯"},
+    "berlin":{"industry":"paper","founder":"玛尔塔·韦伯","coordinator":"卡尔·克莱因","member":"保罗·费舍尔"},
+    "st_petersburg":{"industry":"grain","founder":"安娜·彼得罗娃","coordinator":"尼古拉·索科洛夫","member":"伊万·别洛夫"},
+    "beijing":{"industry":"textiles","founder":"周瑞和","coordinator":"李秀英","member":"陈永泰"},
+    "tokyo":{"industry":"fish","founder":"松田清","coordinator":"小川春","member":"田中正夫"}
+  },
+  "paris_firm_names": {
+    "firm:opening_paris_workshop":{"name":"巴黎粮食工坊","founder":"马塞尔·罗贝尔"},
+    "firm:opening_paris_bakery":{"name":"巴黎面包坊","founder":"玛德莱娜·杜瓦尔"}
+  }
+}

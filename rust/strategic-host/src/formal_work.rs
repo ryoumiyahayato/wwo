@@ -6,15 +6,16 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io};
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub(crate) struct WorkOpening {
     jobs: Vec<Job>,
     firms: Vec<Firm>,
     actors: Vec<Actor>,
     information: Vec<Notice>,
+    labor_response_policies: Vec<LaborResponse>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct Job {
     pub id: String,
     pub employer: String,
@@ -24,16 +25,27 @@ pub struct Job {
     pub wage_per_hour: i64,
     pub wage_delay: i64,
     skill: u64,
+    notice_delay: i64,
 }
 
-#[derive(Deserialize)]
-struct Firm { id: String, account_id: String, cash: i64, host_organization_id: String }
+#[derive(Clone, Deserialize)]
+struct Firm {
+    id: String,
+    account_id: String,
+    cash: i64,
+    host_organization_id: String,
+    #[serde(skip)]
+    regional: bool,
+}
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 struct Actor { id: String, skill: u64, control: String }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 struct Notice { actor: String, kind: String, candidate: String, delivery_day: i64 }
+
+#[derive(Clone, Deserialize)]
+struct LaborResponse { actor: String, arrears_days: i64 }
 
 #[derive(Default, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -42,6 +54,8 @@ pub(crate) struct WorkState {
     bookings: BTreeMap<String, i64>,
     #[serde(default)]
     local_notices: BTreeMap<String, BTreeSet<String>>,
+    #[serde(default)]
+    referrals: BTreeMap<String, BTreeMap<String, i64>>,
 }
 
 impl WorkOpening {
@@ -52,6 +66,7 @@ impl WorkOpening {
             if !ids.insert(&job.id) || !(1..=24).contains(&job.hours) || job.positions == 0
                 || !(0..=MAX_AMOUNT / job.hours.max(1)).contains(&job.wage_per_hour)
                 || !(0..=365).contains(&job.wage_delay)
+                || !(0..=365).contains(&job.notice_delay)
                 || !opening.firms.iter().any(|firm| firm.id == job.employer)
             {
                 return Err(invalid("invalid formal opening employment terms"));
@@ -65,6 +80,47 @@ impl WorkOpening {
             ledger.open_firm(&firm.id, &firm.account_id, firm.cash)?;
         }
         Ok(())
+    }
+
+    pub(crate) fn register_regional<'a>(&mut self, organizations: impl Iterator<Item = &'a crate::formal_bootstrap::organization_registration::Organization>) -> io::Result<()> {
+        for organization in organizations {
+            let Some(terms) = organization.terms else { continue };
+            let firm = organization.firm.as_ref().ok_or_else(|| invalid("营业岗位缺少雇主"))?;
+            let id = organization.jobs.first().ok_or_else(|| invalid("营业组织缺少岗位"))?;
+            let account = organization.account.as_ref().ok_or_else(|| invalid("营业组织缺少账户"))?;
+            if terms.positions == 0 || !(1..=24).contains(&terms.hours) || !(0..=365).contains(&terms.wage_delay)
+                || !(1..=MAX_AMOUNT / terms.hours).contains(&terms.wage_per_hour)
+                || self.firms.iter().any(|row| row.id == *firm || row.account_id == *account)
+                || self.jobs.iter().any(|row| row.id == *id) {
+                return Err(invalid("营业岗位条款无效或登记重复"));
+            }
+            self.firms.push(Firm { id: firm.clone(), account_id: account.clone(), cash: 0,
+                host_organization_id: organization.id.clone(), regional: true });
+            self.jobs.push(Job { id: id.clone(), employer: firm.clone(), place: organization.place.clone(),
+                positions: terms.positions, hours: terms.hours, wage_per_hour: terms.wage_per_hour,
+                wage_delay: terms.wage_delay, skill: terms.skill, notice_delay: 0 });
+        }
+        Ok(())
+    }
+
+    pub(crate) fn ensure_regional_accounts(&self, ledger: &mut Ledger) -> io::Result<()> {
+        for firm in self.firms.iter().filter(|firm| firm.regional) {
+            if let Some(existing) = ledger.default_account(&firm.id) {
+                if existing.account_id != firm.account_id { return Err(invalid("企业账户与登记不符")); }
+            } else {
+                ledger.open_firm(&firm.id, &firm.account_id, 0)?;
+            }
+        }
+        Ok(())
+    }
+
+    pub(crate) fn entry_jobs_at<'a>(&'a self, place: &'a str) -> impl Iterator<Item = &'a Job> {
+        self.jobs.iter().filter(move |job| job.place == place && job.skill <= 1)
+    }
+
+    pub(crate) fn refuses_arrears(&self, actor: &str, oldest_due: impl FnOnce() -> Option<i64>, day: i64) -> bool {
+        self.labor_response_policies.iter().find(|policy| policy.actor == actor)
+            .is_some_and(|policy| oldest_due().is_some_and(|due| day - due >= policy.arrears_days))
     }
 
     fn known_jobs<'a>(&'a self, actor_id: &'a str, day: i64) -> impl Iterator<Item = &'a Job> {
@@ -85,11 +141,19 @@ impl WorkOpening {
     }
 
     pub(crate) fn entry_job(&self, id: &str) -> Option<&Job> {
-        self.jobs.iter().find(|job| job.id == id && job.skill <= 1)
+        self.job(id).filter(|job| job.skill <= 1)
+    }
+
+    pub(crate) fn job(&self, id: &str) -> Option<&Job> {
+        self.jobs.iter().find(|job| job.id == id)
     }
 
     pub(crate) fn organization(&self, employer: &str) -> Option<&str> {
         self.firms.iter().find(|firm| firm.id == employer).map(|firm| firm.host_organization_id.as_str())
+    }
+
+    pub(crate) fn regional_employer(&self, employer: &str) -> bool {
+        self.firms.iter().any(|firm| firm.regional && firm.id == employer)
     }
 
     pub(crate) fn automatic(&self) -> impl Iterator<Item = &str> {
@@ -98,6 +162,25 @@ impl WorkOpening {
 }
 
 impl WorkState {
+    pub(crate) fn learn_referral(&mut self, actor: &str, job: &str, day: i64) {
+        self.referrals.entry(actor.to_owned()).or_default().entry(job.to_owned()).or_insert(day);
+    }
+
+    pub(crate) fn has_referral(&self, actor: &str, job: &str) -> bool {
+        self.referrals.get(actor).is_some_and(|jobs| jobs.contains_key(job))
+    }
+
+    pub(crate) fn referrals(&self) -> impl Iterator<Item = (&str, &str, i64)> {
+        self.referrals.iter().flat_map(|(person, jobs)| jobs.iter().map(move |(job, &day)| (person.as_str(), job.as_str(), day)))
+    }
+
+    pub(crate) fn ready_to_apply(&self, opening: &WorkOpening, actor: &str, job: &Job, day: i64) -> bool {
+        opening.known_jobs(actor, day).any(|known| known.id == job.id)
+            || self.local_notices.get(actor).is_some_and(|known| known.contains(&job.id))
+            || self.referrals.get(actor).and_then(|known| known.get(&job.id))
+                .is_some_and(|learned| day - learned >= job.notice_delay)
+    }
+
     pub(crate) fn consult_local_notices(&mut self, opening: &WorkOpening, actor: &str, place: &str) {
         let seen = opening.jobs.iter().filter(|job| job.place == place && job.skill <= 1)
             .map(|job| job.id.clone()).collect::<BTreeSet<_>>();
@@ -114,6 +197,7 @@ impl WorkState {
 
     fn knows_job(&self, opening: &WorkOpening, actor: &str, job: &Job, day: i64) -> bool {
         opening.known_jobs(actor, day).any(|row| row.id == job.id)
+            || self.has_referral(actor, &job.id)
             || self.local_notices.get(actor).is_some_and(|seen| seen.contains(&job.id))
     }
 
@@ -190,12 +274,15 @@ impl WorkState {
     pub(crate) fn forget_actor(&mut self, actor: &str) {
         self.remove_actor(actor);
         self.local_notices.remove(actor);
+        self.referrals.remove(actor);
     }
 
     pub(crate) fn complete(&mut self) { self.bookings.clear(); }
 
     pub(crate) fn validate<'a>(&self, opening: &WorkOpening, clock: GameClock, present_place: impl Fn(&str) -> Option<&'a str>, alive: impl Fn(&str) -> bool) -> bool {
-        self.local_notices.iter().all(|(actor, seen)| alive(actor) && !seen.is_empty() && seen.iter().all(|id| {
+        self.referrals.iter().all(|(person, jobs)| alive(person) && !jobs.is_empty() && jobs.iter().all(|(job, learned)| {
+            (0..=clock.current_day()).contains(learned) && opening.entry_job(job).is_some()
+        })) && self.local_notices.iter().all(|(actor, seen)| alive(actor) && !seen.is_empty() && seen.iter().all(|id| {
             opening.jobs.iter().any(|job| &job.id == id && job.skill <= 1)
         })) && self.contracts.iter().all(|(actor, job)| alive(actor) && opening.jobs.iter().any(|row| {
             row.id == *job && self.knows_job(opening, actor, row, clock.current_day())
