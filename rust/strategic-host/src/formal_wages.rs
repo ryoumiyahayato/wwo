@@ -64,6 +64,11 @@ impl WageClaims {
 
     pub(crate) fn claims(&self) -> &BTreeMap<String, Claim> { &self.claims }
 
+    pub(crate) fn oldest_unpaid_day(&self, person: &str, employer: &str) -> Option<i64> {
+        self.claims.values().filter(|claim| claim.worker == person && claim.employer == employer && claim.paid < claim.amount)
+            .map(|claim| claim.due_day).min()
+    }
+
     pub(crate) fn completed_firm_work<'a>(
         &'a self, firm: &str, day: i64,
     ) -> Vec<CompletedFirmWork<'a>> {

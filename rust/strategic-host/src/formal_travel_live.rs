@@ -232,7 +232,7 @@ impl InitialWorld {
         self.pay_passage(&self.player.clone(), amount, id)
     }
 
-    fn pay_passage(&mut self, person: &str, amount: i64, id: u64) -> io::Result<()> {
+    pub(super) fn pay_passage(&mut self, person: &str, amount: i64, id: u64) -> io::Result<()> {
         let payer = self.ledger.default_account(person).ok_or_else(|| invalid("人物账户缺失。"))?.account_id.to_owned();
         self.ledger.transfer(&format!("transport:fare:{id}"), &payer, TRANSPORT_ACCOUNT, amount,
             self.clock.snapshot().total_minutes, "transport_fare", &format!("transport:{id}"))
@@ -242,7 +242,7 @@ impl InitialWorld {
         self.refund_passage(&self.player.clone(), amount, id)
     }
 
-    fn refund_passage(&mut self, person: &str, amount: i64, id: u64) -> io::Result<()> {
+    pub(super) fn refund_passage(&mut self, person: &str, amount: i64, id: u64) -> io::Result<()> {
         if amount == 0 { return Ok(()); }
         let payer = self.ledger.default_account(person).ok_or_else(|| invalid("人物账户缺失。"))?.account_id.to_owned();
         self.ledger.transfer(&format!("transport:refund:{id}"), TRANSPORT_ACCOUNT, &payer, amount,

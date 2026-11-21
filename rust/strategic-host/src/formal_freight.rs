@@ -68,6 +68,8 @@ pub enum FreightState {
 }
 
 impl FreightLot {
+    pub fn owner(&self) -> &str { &self.owner }
+
     fn dispatch_origin(&self) -> io::Result<&str> {
         match &self.state {
             FreightState::Purchased => Ok(&self.origin),
@@ -102,14 +104,19 @@ fn load(quantity_milli: i64) -> io::Result<u32> {
 
 impl InitialWorld {
     pub fn freight_lots(&self) -> impl DoubleEndedIterator<Item = &FreightLot> {
-        self.freight.lots.values()
+        self.freight.lots.values().filter(|lot| self.can_manage_lot(lot))
+    }
+
+    fn can_manage_lot(&self, lot: &FreightLot) -> bool {
+        self.player_alive() && (lot.owner == self.player || self.work_opening.organization(&lot.owner)
+            .is_some_and(|org| self.organization_can_manage(org, &self.player)))
     }
 
     fn owned_lot(&self, id: u64) -> io::Result<&FreightLot> {
         self.freight
             .lots
             .get(&id)
-            .filter(|lot| lot.owner == self.player && self.player_alive())
+            .filter(|lot| self.can_manage_lot(lot))
             .ok_or_else(|| invalid("货批不存在或当前人物无权处置。"))
     }
 
@@ -119,6 +126,30 @@ impl InitialWorld {
         quantity_milli: i64,
         quoted_unit_price: i64,
     ) -> io::Result<u64> {
+        self.buy_owned_freight(self.player.clone(), good, quantity_milli, quoted_unit_price)
+    }
+
+    pub fn organization_freight_offer(&self, shop: &str, good: &str) -> Option<(i64, i64, i64)> {
+        let org = self.organization(shop)?;
+        if !org.is_merchant() || !self.organization_can_manage(shop, &self.player)
+            || self.player_current_place()? != org.place || !org.goods.iter().any(|id| id == good) {
+            return None;
+        }
+        let price = self.macro_economy.markets().get(&org.unit)?.commodities.get(good)?.price_centimes;
+        if price <= 0 { return None; }
+        let qty = (1000 + price - 1) / price;
+        let amount = self.macro_economy.quote(&org.unit, good, qty).ok()?;
+        (self.ledger.default_account(org.firm.as_deref()?)?.available >= amount).then_some((qty, price, amount))
+    }
+
+    pub fn buy_organization_freight(&mut self, shop: &str, good: &str, price: i64) -> io::Result<u64> {
+        let (qty, current, _) = self.organization_freight_offer(shop, good).ok_or_else(|| invalid("企业当前无法现场购货。"))?;
+        if current != price { return Err(invalid("购货报价已变动。")); }
+        let firm = self.organization(shop).and_then(|org| org.firm.clone()).expect("quoted enterprise");
+        self.buy_owned_freight(firm, good, qty, price)
+    }
+
+    fn buy_owned_freight(&mut self, owner: String, good: &str, quantity_milli: i64, quoted_unit_price: i64) -> io::Result<u64> {
         if !self.player_alive() || self.passenger_in_transit() {
             return Err(invalid("人物当前无法在场办理购货。"));
         }
@@ -145,7 +176,7 @@ impl InitialWorld {
         let mut lot = FreightLot {
             id,
             origin,
-            owner: self.player.clone(),
+            owner,
             good: good.into(),
             quantity_milli,
             purchase_unit_price: quoted_unit_price,
@@ -156,7 +187,7 @@ impl InitialWorld {
         };
         let reference = lot.purchase_reference();
         let available = self
-            .balance()
+            .ledger.default_account(&lot.owner)
             .ok_or_else(|| invalid("缺少货主现金账户。"))?
             .available;
         let day =
@@ -169,7 +200,7 @@ impl InitialWorld {
             quantity_milli,
             quoted_unit_price,
             |amount| {
-                let character = formal_character::assess_purchase(
+                let character = (lot.owner == self.player).then(|| formal_character::assess_purchase(
                     &self.player,
                     &self.identities,
                     day,
@@ -177,14 +208,13 @@ impl InitialWorld {
                     &market,
                     amount as u64,
                     available as u64,
-                )
-                .map_err(io::Error::other)?;
+                )).transpose().map_err(io::Error::other)?;
                 self.ledger
-                    .buy_from_market(&self.player, &market, &reference, amount, minute)?;
+                    .buy_from_market(&lot.owner, &market, &reference, amount, minute)?;
                 Ok(character)
             },
         )?;
-        self.character = character;
+        if let Some(character) = character { self.character = character; }
         lot.purchase_centimes = paid;
         self.freight.lots.insert(id, lot);
         Ok(id)
@@ -230,7 +260,8 @@ impl InitialWorld {
             .filter(|n| *n <= MAX_AMOUNT)
             .ok_or_else(|| invalid("累计托运费超出正式范围。"))?;
         let reservation_id = self.transport.reserve_freight(plan)?;
-        if let Err(error) = self.pay_transport(fare, reservation_id) {
+        let payer = self.freight.lots[&id].owner.clone();
+        if let Err(error) = self.pay_passage(&payer, fare, reservation_id) {
             self.transport.finish(reservation_id);
             return Err(error);
         }
@@ -276,7 +307,8 @@ impl InitialWorld {
         for (reservation_id, id, place, refund) in stopped {
             let next = if let Some(amount) = refund {
                 if amount > 0 {
-                    self.refund_transport(amount, reservation_id)?;
+                    let payer = self.freight.lots[&id].owner.clone();
+                    self.refund_passage(&payer, amount, reservation_id)?;
                 }
                 FreightState::Interrupted {
                     place: place.clone(),
@@ -336,7 +368,7 @@ impl InitialWorld {
             |market, amount| {
                 self.ledger.pay_market_bid(
                     market,
-                    &self.player,
+                    &lot.owner,
                     &reference,
                     amount,
                     self.clock.snapshot().total_minutes,
@@ -360,11 +392,9 @@ impl InitialWorld {
         let mut used = BTreeSet::new();
         let mut moving = BTreeMap::new();
         let mut sales = 0;
-        let account = self
-            .balance()
-            .ok_or_else(|| invalid("货主账户缺失。"))?
-            .account_id;
         for (index, (&id, lot)) in self.freight.lots.iter().enumerate() {
+            let account = self.ledger.default_account(&lot.owner).ok_or_else(|| invalid("货主账户缺失。"))?.account_id;
+            let company = self.work_opening.organization(&lot.owner).and_then(|id| self.organization(id));
             let units = load(lot.quantity_milli)?;
             let unit = self
                 .sources
@@ -380,7 +410,8 @@ impl InitialWorld {
                 i128::from(lot.quantity_milli) * i128::from(lot.purchase_unit_price);
             if id != index as u64 + 1
                 || lot.id != id
-                || lot.owner != self.player
+                || (lot.owner != self.player && !company.is_some_and(|org| org.is_merchant()
+                    && org.place == lot.origin && org.goods.contains(&lot.good)))
                 || !self.macro_economy.purchasable(&lot.good)
                 || lot.purchase_unit_price <= 0
                 || !(1..=MAX_AMOUNT).contains(&lot.purchase_centimes)
