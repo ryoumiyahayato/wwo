@@ -513,7 +513,8 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
         let crop_ink=vec3f(.57,.54,.36);
         var crop_surface=crop_ink;
         if base.a>=0. && occupied.b>.12 && footprint<180. {
-            crop_surface=cultivated_fields(crop_ink,landscape_world(ll),footprint,occupied.b);
+            let crop=occupied.b*(1.-smoothstep(.04,.26,occupied.r));
+            crop_surface=cultivated_fields(crop_ink,ll,landscape_world(ll),footprint,crop);
         }
         let surface=other*vec3f(.43,.51,.33)
             +occupied.r*vec3f(.20,.38,.45)

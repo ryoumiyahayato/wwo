@@ -111,44 +111,103 @@ fn landscape_survey_mask(ll: vec2f, mpp: f32) -> f32 {
     return clamp(1. + survey.a, 0., 1.);
 }
 
-fn field_parcels(base: vec3f, metres: vec2f, mpp: f32) -> vec3f {
-    let spacing = vec2f(430.,310.);
+struct FieldPattern {
+    spacing: vec2f,
+    stagger: f32,
+    curvature: f32,
+};
+
+fn field_parcels(base: vec3f, metres: vec2f, mpp: f32, pattern: FieldPattern) -> vec3f {
+    let spacing = pattern.spacing;
     let grid = metres/spacing;
-    let bent = grid + .085*sin(grid.yx*vec2f(.63,.38));
-    let row = bitcast<u32>(i32(floor(bent.y)))*24571u;
-    let parcels = bent + vec2f(landscape_random(row),0.);
-    let column = bitcast<u32>(i32(floor(parcels.x)));
-    let plant = landscape_random(column*116831u + row);
-    let tint = mix(vec3f(.55,.46,.32),vec3f(.46,.54,.30),plant);
-    let surface = mix(base,tint,.24)*(1.+(plant-.5)*.14);
+    let rows = grid.y + pattern.curvature*sin(grid.x*.38);
+    let row_index = floor(rows);
+    let row = bitcast<u32>(i32(row_index))*24571u;
+    let parcels = vec2f(grid.x + pattern.stagger*landscape_random(row) + pattern.curvature*sin(rows*.63), rows);
+    let column = floor(parcels.x);
+    let plant = landscape_random(bitcast<u32>(i32(column))*116831u + row);
+    // A second slower variation groups crop colours without repeating an image.
+    let group = bitcast<u32>(i32(floor(column*.25)))*1069u
+        + bitcast<u32>(i32(floor(row_index/3.)))*5233u;
+    let growth = plant*.76 + landscape_random(group)*.24;
+    let tint = mix(vec3f(.57,.49,.34),vec3f(.43,.54,.30),growth);
+    let surface = mix(base,tint,.32)*(1.+(growth-.5)*.21);
 
     let phase = fract(parcels);
     let sides = min(phase,1.-phase)*spacing;
-    let boundary = 1.-smoothstep(4.,max(12.,mpp*.64),min(sides.x,sides.y));
-    return mix(surface,vec3f(.39,.44,.28),boundary*min(1.,17./mpp)*.23);
+    let boundary = 1.-smoothstep(3.,max(8.,mpp*.64),min(sides.x,sides.y));
+    let headland = mix(surface,base*vec3f(.91,.94,.87),.56);
+    let resolved = 1.-smoothstep(min(spacing.x,spacing.y)*.27,min(spacing.x,spacing.y)*.82,mpp);
+    return mix(base,mix(surface,headland,boundary*min(1.,18./mpp)),resolved);
 }
 
-fn cultivated_fields(base: vec3f, world: vec3f, mpp: f32, cover: f32) -> vec3f {
-    let visible = smoothstep(.12,.72,cover)*(1. - smoothstep(64.,180.,mpp));
-    if visible <= .001 { return base; }
+fn field_region(ll: vec2f, centre: vec2f, half_extent: vec2f) -> f32 {
+    let delta = abs(ll-centre)/half_extent;
+    return 1.-smoothstep(.72,1.,max(delta.x,delta.y));
+}
 
-    // Project WGS84 directions onto a rotated set of Earth-centred planes.
-    // Usually only one plane contributes. Blend where the planes meet so
-    // fields stay fixed across camera movement, map pages and the dateline.
+fn field_metres(ll: vec2f, origin: vec2f) -> vec2f {
+    return (ll-origin)*111195.*vec2f(cos(radians(origin.y)),1.);
+}
+
+fn world_field_parcels(base: vec3f, world: vec3f, mpp: f32) -> vec3f {
+    // Keep the world projection continuous where the planes meet.
     let rotated = vec3f(dot(world,vec3f(.80,.60,0.)),
         dot(world,vec3f(-.36,.48,.80)),dot(world,vec3f(.48,-.64,.60)));
     let metres = rotated*EARTH;
     let facing = abs(rotated);
     let strongest = max(facing.x,max(facing.y,facing.z));
     let weights = smoothstep(vec3f(strongest-.006),vec3f(strongest),facing);
+    let pattern = FieldPattern(vec2f(430.,310.),.82,.085);
     var ink = vec3f(0.);
-    if weights.x > 0. { ink += field_parcels(base,metres.yz,mpp)*weights.x; }
-    if weights.y > 0. { ink += field_parcels(base,metres.zx,mpp)*weights.y; }
-    if weights.z > 0. { ink += field_parcels(base,metres.xy,mpp)*weights.z; }
-    return mix(base,ink/dot(weights,vec3f(1.)),visible);
+    if weights.x > 0. { ink += field_parcels(base,metres.yz,mpp,pattern)*weights.x; }
+    if weights.y > 0. { ink += field_parcels(base,metres.zx,mpp,pattern)*weights.y; }
+    if weights.z > 0. { ink += field_parcels(base,metres.xy,mpp,pattern)*weights.z; }
+    return ink/dot(weights,vec3f(1.));
 }
 
-fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level: u32, mpp: f32) -> vec3f {
+fn cultivated_fields(base: vec3f, ll: vec2f, world: vec3f, mpp: f32, cover: f32) -> vec3f {
+    let visible = smoothstep(.12,.72,cover)*(1. - smoothstep(64.,180.,mpp));
+    if visible <= .001 { return base; }
+
+    var region = field_region(ll,vec2f(-93.,42.),vec2f(10.8,5.5));
+    var ink = base;
+    if region > 0. {
+        // A nominal quarter-quarter section is about 400 metres on a side.
+        ink = field_parcels(base,field_metres(ll,vec2f(-94.,42.)),mpp,FieldPattern(vec2f(402.,402.),.14,.0));
+    } else {
+        region = field_region(ll,vec2f(31.06,30.91),vec2f(1.27,.79));
+        if region > 0. {
+            // Rosetta and Damietta tangents from the existing Natural Earth
+            // river source guide the fan. The field lines are visual estimates.
+            let rosetta = 30.79347 - (ll.y-30.69444)*(.01620/.24463);
+            let damietta = 31.24814 + (ll.y-30.85041)*(.11686/.20325);
+            let fan = vec2f((ll.x-rosetta)*45500./max(.32,damietta-rosetta),(ll.y-30.87)*111195.);
+            ink = field_parcels(base,fan,mpp,FieldPattern(vec2f(112.,520.),.45,.025));
+        } else {
+            region = field_region(ll,vec2f(10.97,44.99),vec2f(3.3,1.08));
+            if region > 0. {
+                let pattern = FieldPattern(vec2f(440.,205.),.78,.044);
+                let reno = field_region(ll,vec2f(11.30,44.71),vec2f(.54,.24));
+                if reno < 1. {
+                    ink = field_parcels(base,field_metres(ll,vec2f(11.,45.)),mpp,pattern);
+                }
+                if reno > 0. {
+                    // HydroRIVERS segments 20510450 and 20509223 run through
+                    // the lower Reno plain, about 39 degrees east of north.
+                    let axis = vec2f(.629,.777);
+                    let metres = field_metres(ll,vec2f(11.30,44.71));
+                    let aligned = vec2f(dot(metres,axis),dot(metres,vec2f(-axis.y,axis.x)));
+                    ink = mix(ink,field_parcels(base,aligned,mpp,pattern),reno);
+                }
+            }
+        }
+    }
+    if region < 1. { ink = mix(world_field_parcels(base,world,mpp),ink,region); }
+    return mix(base,ink,visible);
+}
+
+fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level: u32, water: f32, mpp: f32) -> vec3f {
     let near = 1. - smoothstep(90., 430., mpp);
     let slope = landscape_slope(page,ll.y,mix(1.18,.49,near),level);
     let height = landscape_elevation(page, vec2f(0.));
@@ -207,7 +266,8 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
         + (moss-base)*land.damp
         + (tilled-base)*land.crop + (earth-base)*land.bare + (snow-base)*land.snow
         + base*((sediment.x*.085+sediment.y*.05)*neutral+motif.a*land.urban*.19);
-    color = cultivated_fields(color,world,mpp,land.crop*(1.-steep));
+    let dry_crop = land.crop*(1.-steep)*(1.-smoothstep(.04,.26,max(land.damp,water)));
+    color = cultivated_fields(color,ll,world,mpp,dry_crop);
     color = mix(color,mix(base,mineral,near*.87),exposed);
     if near > .001 {
         let relief_world = world*(1.+height/EARTH)+vec3f(motif.a,motif.g,motif.b)*.00027;
@@ -241,9 +301,9 @@ fn landscape_relief(base: vec3f, ll: vec2f, world: vec3f, water: f32, mpp: f32) 
     if fine < .999 {
         let parent = landscape_page(ll,6u,true);
         regional = landscape_surface_weight(6u)*parent.fade;
-        if regional > .001 { surface = ground_motif(base,ll,world,parent,6u,mpp)*regional; }
+        if regional > .001 { surface = ground_motif(base,ll,world,parent,6u,water,mpp)*regional; }
     }
-    if fine > .001 { surface = surface*(1.-fine)+ground_motif(base,ll,world,child,7u,mpp)*fine; }
+    if fine > .001 { surface = surface*(1.-fine)+ground_motif(base,ll,world,child,7u,water,mpp)*fine; }
     surface *= modern;
     let uncovered = 1.-modern*(fine+regional*(1.-fine));
     if uncovered > .001 {
