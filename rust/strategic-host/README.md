@@ -172,6 +172,12 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 每轮另列 180° 经线、南北两极、同级瓦片边界和不同精度交界的固定专项检查。专项结果单列，七大洲随机样本仍须齐全。
 
+### 全球数据层对照
+
+在 `rust/strategic-host` 运行 `python tools/compare_map_geography.py <正式地貌库目录> <Natural Earth 矢量目录> <GSHHG 压缩包> <WorldCover 分类缓存> <NOAA 全球高程> <输出.json> --shoreline-ponds <GSHHG 第4层压缩包> --antarctic-coast <SCAR ADD EPSG:3031 压缩包>`。脚本逐页读取 QWG、QPK、QHW、QSC，并遍历 QHL 河段。报告按 Z0–Z7 记录适用的海陆、水体、地类和高程对照，列出较大的差异和对应分片。需要 NumPy、Pillow、rasterio、SciPy、Shapely 2 和 zstandard。
+
+Natural Earth 1:10m 参照陆地、岛屿、湖泊、河线和冰川，GSHHG 参照 QPK/QHW 的水陆边界，SCAR ADD 区分南极接地陆地、浮冰架和冰舌。ESA WorldCover 2021 交叉检查 QWG 的常年水和冰雪，同时验证同源 QSC 的投影与分类。参考文件及采样尺度随输出保存。全球比对网格为 8192×4096，等经纬采样。NOAA 高程和河线距离只用于发现异常范围。河线与面状水域分别统计，河线距离无河宽含义。资料定义、年代及精度造成的差异应与正式游戏已复现的缺陷分别记录。
+
 ### 正式游戏动态路线
 
 在 `rust/strategic-host` 运行 `python tools/observe_global_motion.py <wwo-map-lab.exe> <运行数据目录> <已冻结的路线.json> <新输出目录>`。脚本启动 `--play --background --observe`，以独立档案进入正常游戏。进程为冷启动，系统文件缓存照常。输出保留正式渲染 PNG、游戏日志和 `frames.json`。`frames.json` 记录九个画面位置实际使用的分片和混合权重。`settled: false` 表示在等待上限内仍有资源尚未就绪。
