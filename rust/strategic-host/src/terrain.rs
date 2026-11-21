@@ -135,7 +135,7 @@ struct RiverTopology {file:String,reaches:u64,unresolved_downstream_ids:u64}
 /// Read the actual map elevations for the selected cell's 50 km parent and project
 /// them into the shared battlefield coordinate system. The lattice interpolates Z7
 /// samples, whose latitude spacing is about 610 m.
-pub fn battlefield(root: &Path, cell: MilitaryCell) -> io::Result<BattlefieldTerrain> {
+pub fn battlefield(root: &Path, cell: MilitaryCell) -> io::Result<(BattlefieldTerrain, Vec<[u32; 3]>)> {
     const SPACING_M: u32 = 250;
     let manifest: Manifest = serde_json::from_reader(fs::File::open(root.join("index.json"))?)?;
     let width = 2 << MAX_LEVEL;
@@ -197,7 +197,9 @@ pub fn battlefield(root: &Path, cell: MilitaryCell) -> io::Result<BattlefieldTer
             cover.push(class);
         }
     }
-    BattlefieldTerrain::from_geographic_heights(SPACING_M, heights, cover)
+    let mut keys: Vec<_> = pages.keys().map(|key| [key.0, key.1, key.2]).collect();
+    keys.sort_unstable();
+    Ok((BattlefieldTerrain::from_geographic_heights(SPACING_M, heights, cover)?, keys))
 }
 
 impl Catalogue {

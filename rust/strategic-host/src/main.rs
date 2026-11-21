@@ -187,10 +187,22 @@ struct Trial {
     profile_frames:bool,
     frames:Vec<FrameTiming>,
     load_frames:Vec<usize>,
+    battle_openings:Vec<BattleOpeningTiming>,
     movement:Option<([f64;2],[f64;2],u32,u32)>,
     window_position:Option<winit::dpi::PhysicalPosition<i32>>,
     terrain_capture:Option<(String,PathBuf)>,
     hide_landscape_models:bool,
+}
+
+#[derive(serde::Serialize)]
+struct BattleOpeningTiming {
+    frame:usize,
+    terrain_cpu_ms:f64,
+    terrain_pages:Vec<[u32;3]>,
+    scene_cpu_ms:f64,
+    original_vehicle_model:bool,
+    deployment_cpu_ms:f64,
+    total_cpu_ms:f64,
 }
 
 #[derive(serde::Serialize)]
@@ -1071,23 +1083,25 @@ impl Host {
         self.config.battlefield_data.clone().unwrap_or_else(|| self.config.root.join("battlefield"))
     }
 
-    fn load_battle_terrain(&mut self, cell:MilitaryCell) -> io::Result<()> {
+    fn load_battle_terrain(&mut self, cell:MilitaryCell) -> io::Result<Vec<[u32;3]>> {
         let region=cell.region();
-        if self.battle_terrain.as_ref().is_some_and(|(loaded,_)|*loaded==region){return Ok(());}
+        if self.battle_terrain.as_ref().is_some_and(|(loaded,_)|*loaded==region){return Ok(Vec::new());}
         let (root,packed)=self.config.terrain_root();
         if !packed {return Err(io::Error::other("Compact terrain data is required"));}
-        let terrain=terrain::battlefield(&root,region)?;
+        let (terrain,pages)=terrain::battlefield(&root,region)?;
         if let Some(renderer)=&mut self.renderer {renderer.clear_battle();}
         self.battle_terrain=Some((region,terrain));
-        Ok(())
+        Ok(pages)
     }
 
     fn open_battle(&mut self, selection:SelectedMilitaryCell) -> io::Result<()> {
         let Some(world)=self.written_world() else{return Ok(());};
+        let timing=self.trial.timing_frame(false).map(|frame|(frame,Instant::now()));
         let region=selection.cell.region();
         let create=world.needs_land_deployment(selection.cell);
         if let Some(message)=self.battle_location_message(region){return Err(io::Error::other(message));}
-        self.load_battle_terrain(region)?;
+        let terrain_pages=self.load_battle_terrain(region)?;
+        let terrain_done=timing.map(|_|Instant::now());
         let root = self.battle_root();
         let (_,terrain)=self.battle_terrain.as_ref().unwrap();
         let center=region.local_at(selection.coordinates).ok_or_else(||io::Error::other("Position outside battlefield"))?;
@@ -1098,8 +1112,11 @@ impl Host {
         })) {
             return Err(io::Error::other(self.skin.choose("该位置没有足够的陆地部署编队，请选择方格内陆位置。", "Select a position farther inland to deploy both formations.")));
         }
-        self.renderer.as_mut().ok_or_else(|| io::Error::other("Vulkan surface is not ready"))?
-            .prepare_battle(terrain, &root)?;
+        let renderer=self.renderer.as_mut().ok_or_else(|| io::Error::other("Vulkan surface is not ready"))?;
+        let scene_started=timing.map(|_|Instant::now());
+        renderer.prepare_battle(terrain, &root)?;
+        let scene_done=timing.map(|_|Instant::now());
+        let original_vehicle_model=renderer.battle_uses_original_model();
         #[cfg(windows)]
         if let Some(native)=&mut self.config.native {
             if let (Some(world), Some(battle))=(native.active_world_mut(), deployment) {
@@ -1113,6 +1130,16 @@ impl Host {
             self.feedback.clear();
             self.last_present = Instant::now();
             self.reset_battle_fps();
+        }
+        if let (Some((frame,started)),Some(terrain_done),Some(scene_started),Some(scene_done))=
+            (timing,terrain_done,scene_started,scene_done) {
+            let millis=|start:Instant,end:Instant| end.duration_since(start).as_secs_f64()*1000.;
+            let done=Instant::now();
+            self.trial.battle_openings.push(BattleOpeningTiming {
+                frame, terrain_cpu_ms:millis(started,terrain_done), terrain_pages,
+                scene_cpu_ms:millis(scene_started,scene_done), original_vehicle_model,
+                deployment_cpu_ms:millis(scene_done,done), total_cpu_ms:millis(started,done),
+            });
         }
         Ok(())
     }
@@ -1970,6 +1997,7 @@ impl Host {
                     self.trial.profile_frames=input.value=="profile";
                     self.trial.frames.clear();
                     self.trial.load_frames.clear();
+                    self.trial.battle_openings.clear();
                     if self.trial.profile_frames {
                         if let Some(renderer)=&mut self.renderer {renderer.start_frame_timing();}
                     }
@@ -1980,7 +2008,8 @@ impl Host {
                     let gpu=self.renderer.as_mut().and_then(Renderer::finish_frame_timing);
                     extra=serde_json::json!({"interval_ms":self.trial.times,"tile_load_ms":self.trial.loads,
                         "terrain_decode_ms":self.trial.terrain_decodes,"frames":self.trial.frames,
-                        "gpu_frame_ms":gpu,"load_frame_indices":self.trial.load_frames});
+                        "gpu_frame_ms":gpu,"load_frame_indices":self.trial.load_frames,
+                        "battle_openings":self.trial.battle_openings});
                 }
             }
             "quit"=>event_loop.exit(),
