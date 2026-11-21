@@ -996,7 +996,8 @@ impl TransportPage {
         }).collect();
         let mut freight_lines = Vec::new();
         let mut freight_actions = Vec::new();
-        if let Some(lot) = self.lot.and_then(|id| world.freight_lots().find(|lot| lot.id == id)) {
+        let lot = self.lot.and_then(|id| world.freight_lots().find(|lot| lot.id == id));
+        if let Some(lot) = lot {
             let units = lot.quantity_milli as f64 / 1000.0;
             let unit = world.macro_economy().commodity_info(&lot.good).map_or("", |term| term.2);
             let tonnes = world.macro_economy().freight_tonnes(&lot.good, units).unwrap_or_default();
@@ -1052,6 +1053,8 @@ impl TransportPage {
             "active":world.passenger_in_transit(), "passenger_lines":passenger_lines,
             "passenger_notice":if self.passenger_feedback.is_empty() {world.travel_notice()}else{&self.passenger_feedback},
             "travel_confirm":preview.is_some() && !world.passenger_in_transit(),
+            "freight_can_plan":lot.is_some_and(|lot| matches!(lot.state,
+                FreightState::Purchased | FreightState::Interrupted { .. } | FreightState::Delivered { .. })),
             "lots":lots, "freight_lines":freight_lines, "freight_notice":self.freight_feedback,
             "freight_actions":freight_actions
         })

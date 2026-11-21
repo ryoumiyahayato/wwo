@@ -128,7 +128,7 @@ impl Context<'_> {
         if !self.world.can_read_place_record(id) {
             if self.world.can_book_transport_to(id) {
                 d.title = self.place(id).into();
-                self.destination(id, "设为运输目的地".into(), d);
+                self.destination(id, "运往此处".into(), d);
             }
             return Some(());
         }
@@ -141,7 +141,7 @@ impl Context<'_> {
         if self.mode == Mode::Political {
             if let Some(name) = self.jurisdiction(id) { d.summary.push(name.into()); }
         }
-        self.destination(id, "设为运输目的地".into(), d);
+        self.destination(id, "运往此处".into(), d);
         if self.mode == Mode::Economic {
             if let Some(unit) = self.world.population_unit_at(id)
                 .filter(|unit| self.world.macro_economy().markets().contains_key(*unit)) {
@@ -187,18 +187,23 @@ impl Context<'_> {
             self.destination(endpoint, format!("运往 {}", self.place(endpoint)), d);
         }
         let geometry = self.scene.segment_geometry(id);
-        if edge.mode == TransportMode::Shipping && geometry == GeometryEvidence::Unmapped {
-            d.summary.push("航迹待核实".into());
+        match geometry {
+            GeometryEvidence::EstimatedSeaTrack => d.summary.push("估计航迹".into()),
+            GeometryEvidence::SeaRelation => d.summary.push("港口运输关系 · 航迹待核实".into()),
+            GeometryEvidence::Unmapped if edge.mode == TransportMode::Shipping => d.summary.push("航迹待核实".into()),
+            _ => (),
         }
         d.details.push(match geometry {
             GeometryEvidence::HistoricalCorridor => "走廊有历史线位资料",
+            GeometryEvidence::EstimatedSeaTrack => "按历史通航走廊估计，参考现有水陆边界",
+            GeometryEvidence::SeaRelation => "虚线指示承运关系，具体航道待考证",
             GeometryEvidence::Schematic => "端点示意",
             GeometryEvidence::Unmapped if edge.mode == TransportMode::Shipping => "海运联系 · 航迹未确认",
             GeometryEvidence::Unmapped => "运营连接 · 线位未确认",
         }.into());
         d.details.push(format!("基准运行 {} 分钟", edge.profile.travel_minutes));
         if id == "shipping_channel" {
-            d.details.push("泰晤士河口受潮流和水深限制。航时为估计。".into());
+            d.details.push("泰晤士河口的历史水深与分时潮位待核实。".into());
         }
         if self.debug {
             if let Some(evidence) = network.evidence(id) { d.details.push(evidence.source.clone()); }
@@ -254,6 +259,8 @@ pub struct TransportView {
     pub can_move_home: bool,
     pub can_commute: bool,
     pub active: bool,
+    #[serde(default)]
+    pub freight_can_plan: bool,
     pub passenger_lines: Vec<String>,
     pub passenger_notice: String,
     pub travel_confirm: bool,
@@ -261,6 +268,16 @@ pub struct TransportView {
     pub freight_lines: Vec<String>,
     pub freight_notice: String,
     pub freight_actions: Vec<TransportAction>,
+}
+
+impl TransportView {
+    pub fn planning(&self) -> bool {
+        if self.cargo {
+            self.freight_can_plan
+        } else {
+            !self.active
+        }
+    }
 }
 
 #[derive(Deserialize, PartialEq)]
@@ -319,7 +336,9 @@ impl Display<'_> {
             else { format!("运往 {}", v.destination_label) };
         self.skin.text(t,&heading,1,[x,top],w,IVORY);
         top += 30.;
-        self.row(m,t,hits,[x,top,half-4.,27.],"在地图点选",action(Command::PickTransportDestination),false);
+        if v.planning() {
+            self.skin.text(t,"点击地图上的城市或港口",0,[x,top+5.],half-4.,MUTED);
+        }
         self.row(m,t,hits,[x+half,top,half,27.],"搜索地点",action(Command::TransportDirectory),false);
         top += 36.;
         if !freight {
