@@ -390,8 +390,7 @@ impl NativeSession {
         let Some(world) = &mut self.world else { return };
         let page = &mut self.transport;
         let result = match verb {
-            "city" | "destination" if world.can_select_transport_destination(id)
-                && world.can_read_place_record(id) => {
+            "city" | "destination" if world.can_book_transport_to(id) => {
                 page.destination = id.into();
                 page.refresh_quote(world);
                 return;
@@ -882,7 +881,7 @@ impl TransportPage {
                     3 => node.kind == NodeKind::Area,
                     _ => matches!(node.kind, NodeKind::City | NodeKind::Port | NodeKind::Area),
                 };
-                category && node.id != world.last_station() && world.can_read_place_record(&node.id)
+                category && node.id != world.last_station() && world.can_book_transport_to(&node.id)
                     && net.coverage(&node.id) == NodeCoverage::Connected
                     && (self.query.is_empty() || world.place_name(&node.id).to_lowercase().contains(&self.query)
                         || node.id.to_lowercase().contains(&self.query))

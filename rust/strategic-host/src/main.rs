@@ -1061,8 +1061,7 @@ impl Host {
     }
 
     fn choose_transport_destination(&mut self, id: &str) -> bool {
-        if !self.written_world().is_some_and(|world|world.can_select_transport_destination(id)
-            && world.can_read_place_record(id)) {
+        if !self.written_world().is_some_and(|world|world.can_book_transport_to(id)) {
             return false;
         }
         self.hud_action(HudCommand::Page(HudPage::Travel));
