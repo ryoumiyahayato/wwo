@@ -71,7 +71,7 @@ impl Population {
                 Change::AnonymousDeaths { unit, cohort, members } => ("death", Some(unit.as_str()), None, *members, cohort.as_ref()),
             };
             unit.is_none_or(|scope| [source, destination].into_iter().flatten().any(|place| {
-                place == scope || self.parent_unit(place) == Some(scope)
+                self.pool_in_scope(place, scope)
             })).then_some(super::PopulationChange {
                 minute: event.minute, kind, unit_id: source, destination, members: Some(members), cohort_id,
             })

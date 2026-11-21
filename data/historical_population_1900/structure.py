@@ -5,7 +5,7 @@ import re
 from fractions import Fraction
 from pathlib import Path
 
-from opening import apportion
+from opening import DATE, apportion, opening_fraction
 
 HERE=Path(__file__).resolve().parent/"collections"
 AGE_SOURCES = HERE / "age_sex"
@@ -131,15 +131,18 @@ def age_sex_panels():
     panels.extend(json.loads((AGE_SOURCES / "india_census_1891_panels.json").read_text(encoding="utf8")))
     panels.extend(json.loads((AGE_SOURCES / "cape_1904_panels.json").read_text(encoding="utf8")))
     panels.extend(json.loads((AGE_SOURCES / "opening_1900_regional_panels.json").read_text(encoding="utf8")))
-    netherlands = HERE / "netherlands_census_1899"
-    panels.extend(json.loads((netherlands / "panels.json").read_text(encoding="utf8")))
+    regional_sources = (
+        HERE / "netherlands_census_1899", HERE / "nordic_population_1900", HERE / "swiss_census_ages",
+    )
+    for source in regional_sources:
+        panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
     by_panel = {panel["id"]: [] for panel in panels}
     filenames = (
         "age_sex.csv", "us_census_1900.csv", "uk_county_age.csv", "france_census_1901.csv",
         "germany_census_1900.csv", "india_census_1901.csv", "india_census_1891.csv", "cape_1904.csv",
         "opening_1900_regional_ages.csv",
     )
-    for path in [*(AGE_SOURCES / name for name in filenames), netherlands / "age_sex.csv"]:
+    for path in [*(AGE_SOURCES / name for name in filenames), *(source / "age_sex.csv" for source in regional_sources)]:
         for row in read_csv(path):
             for key in ("age_min", "age_max", "both", "male", "female"):
                 row[key] = int(row[key]) if row[key] else None
@@ -317,12 +320,54 @@ def russian_regional_age_models(panels, observations):
     return result
 
 
+def swiss_opening_age_model(panels, group):
+    first_panel, first_rows = panels["switzerland_1888"]
+    last_panel, last_rows = panels["switzerland_1900"]
+    dates = [first_panel["observed_date"], last_panel["observed_date"]]
+    if dates != group["endpoint_dates"]:
+        raise ValueError("Swiss age tables and canton controls use different census dates")
+    first = opening_age_group(first_panel, first_rows, group["unit_id"], group["country_endpoint_values"][0])
+    last = opening_age_group(last_panel, last_rows, group["unit_id"], group["country_endpoint_values"][1])
+    if [first["observed_total"], last["observed_total"]] != group["country_endpoint_values"]:
+        raise ValueError("Swiss age tables and canton controls use different census populations")
+    fraction = opening_fraction(dates)
+    quotas = {
+        (early["id"], sex): early[sex] * (1 - fraction) + late[sex] * fraction
+        for early, late in zip(first["bands"], last["bands"], strict=True)
+        for sex in SEX_COUNTS
+    }
+    allocated = apportion(quotas, group["population_value"])
+    male = sum(count for (_, sex), count in allocated.items() if sex == "male")
+    bands = [
+        band | {sex: allocated[band["id"], sex] for sex in SEX_COUNTS} | dict(
+            role="band", both=sum(allocated[band["id"], sex] for sex in SEX_COUNTS),
+        ) for band in first["bands"]
+    ]
+    control = dict(role="total", both=group["population_value"], male=male, female=group["population_value"] - male)
+    model = last_panel | dict(
+        id="switzerland_opening_model",
+        observed_date=DATE,
+        locator=f"{last_panel['locator']} Census columns {dates[0]} and {dates[1]}.",
+        opening_method="Interpolate each national age and sex count between both censuses at 1900-01-01. "
+        "Use largest remainders to close to the national resident total and apply the resulting shares to each canton.",
+        uncertainty="Canton differences and intercensal changes are unquantified. The opening-age distribution "
+        "is a national model based on both censuses.",
+    )
+    return model, [control, *bands]
+
+
 def opening_structure(opening_groups, observations, *, version=6):
+    statistical_aggregates = {
+        unit["unit_id"]: unit
+        for group in opening_groups
+        for unit in group.get("statistical_aggregates", ())
+    }
     opening_balances = {
         unit["unit_id"]: unit
         for group in opening_groups
         for unit in (group["units"] or [group])
-    }
+        if "statistical_parent" not in unit
+    } | statistical_aggregates
     opening_totals = {unit_id: unit["population_value"] for unit_id, unit in opening_balances.items()}
     groups = []
     panels = {panel["id"]: (panel, rows) for panel, rows in age_sex_panels()}
@@ -338,6 +383,14 @@ def opening_structure(opening_groups, observations, *, version=6):
         ) and unit_id not in opening_totals:
             continue
         groups.append(opening_age_group(panel, rows, unit_id, opening_totals[unit_id]))
+    if version >= 13:
+        for group in opening_groups:
+            if group["unit_id"] == "swiss_confederation":
+                swiss = swiss_opening_age_model(panels, group)
+                groups.extend(
+                    opening_age_group(*swiss, unit["unit_id"], unit["population_value"])
+                    for unit in group["units"]
+                )
     if version >= 10:
         models = russian_regional_age_models(panels, observations)
         remaining_uk = england_wales_remaining_ages(panels)
@@ -366,7 +419,11 @@ def opening_structure(opening_groups, observations, *, version=6):
             "16,136 residents whose sex was undetermined. The last published age band combines the "
             "oldest residents and unreported ages, so it is assigned unknown age. Provincial differences, "
             "the legal versus present population, and change between January 1900 and March 1901 are unquantified.",
-        ), france_rows
+        )
+        france_aggregate = france | dict(
+            opening_method=france["opening_method"] + " Province-rounded cells are allocated across qualifying "
+            "arrondissements in proportion to their remaining anonymous capacity, with cumulative integer rounding.",
+        )
         used = {group["unit_id"] for group in groups}
         for unit_id, unit in opening_balances.items():
             if unit_id in used:
@@ -380,7 +437,7 @@ def opening_structure(opening_groups, observations, *, version=6):
             elif parent == "administrative_region:uk_constituent_ireland":
                 model = ireland
             elif unit_id.startswith("administrative_region:france_"):
-                model = france
+                model = (france_aggregate if unit_id in statistical_aggregates else france), france_rows
             elif unit_id == "empire_of_japan" or unit_id.startswith("jp_otsu_pref_"):
                 model = japan
             if model is not None:

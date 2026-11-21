@@ -598,6 +598,21 @@
     "collection": "austria_hungary"
   },
   {
+    "id": "belgium_census_provinces_1890_1900",
+    "title": "Annuaire statistique de la Belgique et du Congo belge, 1912. Population par arrondissement administratif au 31 décembre.",
+    "publisher": "Ministère de l’Intérieur de Belgique, Statistique générale",
+    "url": "https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf",
+    "locator": "Printed p. 42. The 1890 and 1900 general census columns, province subtotals and kingdom total, men, women and both sexes.",
+    "scope": "Usual residents (population de droit) of the nine provinces of the Kingdom of Belgium under the 1890 and 1900 census boundaries, including people temporarily absent. Congo Free State, the Grand Duchy of Luxembourg, and the later eastern cantons are outside the scope. Brabant is the historical undivided province.",
+    "rights": "Historical official statistical publication digitized by Statbel. Numerical transcription.",
+    "extract": "Transcribe the nine La province subtotals and the Le Royaume control for each census. The arrondissement rows are already included in the province subtotals. Both census controls close in total and separately by sex.",
+    "original_census": {
+      "url": "https://doc.statbel.fgov.be/publications/S210.B4/S210.B4F_Recensement_1900_Tome_1-a.pdf",
+      "locator": "1900 general census, vol. I, introduction printed p. XI, Table IV. Population par province."
+    },
+    "collection": "belgium_provinces_1900"
+  },
+  {
     "id": "bosnia_herzegovina_demography_2024",
     "title": "Demography 2024",
     "publisher": "Agency for Statistics of Bosnia and Herzegovina, Sarajevo, 2025.",
@@ -1701,6 +1716,26 @@
     "collection": "netherlands_census_1899"
   },
   {
+    "id": "nl_cbs_1899_occupation",
+    "title": "Beroepstelling 1899",
+    "publisher": "Statistics Netherlands (CBS) and Netherlands Institute for Scientific Information Services (NIWI)",
+    "url": "https://www.cbs.nl/nl-nl/cijfers/detail/7381bt",
+    "rights": "CC BY 4.0. Source: CBS, NIWI.",
+    "rights_url": "https://data.overheid.nl/dataset/3873-beroepstelling-1899",
+    "observed_date": "1899-12-31",
+    "reference_time": "Midnight at the start of 1900-01-01.",
+    "scope": "National and provincial 1899 census tabulations. Provincial totals cover all municipalities, including those with 5,000 or fewer inhabitants represented only by a provincial aggregate. Each observation is the sex-specific or combined all-age count.",
+    "extraction": {
+      "file": "occupation.csv",
+      "data_url": "https://opendata.cbs.nl/ODataApi/OData/7381bt/TypedDataSet",
+      "occupation_metadata_url": "https://opendata.cbs.nl/ODataApi/OData/7381bt/Beroepen",
+      "geography_metadata_url": "https://opendata.cbs.nl/ODataApi/OData/7381bt/Gebieden",
+      "filter": "Gebieden NL1000 and the 11 PVxx00 province totals. Beroepen 49990000S, 50980000S, 39980000S, 40980000S, 41980000S, 42980000S, 43980000S, 44980000S, 46980000S, 47980000S and 48980000S. All three Geslacht keys.",
+      "method": "Export the 396 filtered rows in source order as UTF-8 CSV. Ongehuwd_1 and Gehuwd_2 are the two all-age cells used for a count. OnbekendeBurgerlijkeStaat_3 is a footnote subset already included in Ongehuwd_1. Pagina_33 records the original volume and page. Retain population and principal occupation controls, pensioners, unknown occupation and without-occupation rows as observation context. Groningen and North Holland have inconsistent printed combined population controls. The runtime uses the independent matched general-census population and the six occupational group counts reproduced by the separate-sex series. Use the separate-sex sum for South Holland trade and transport, where the published combined count is one higher. The inconsistent national-minus-province remainder is unassigned."
+    },
+    "collection": "netherlands_occupation_1899"
+  },
+  {
     "id": "nl_cbs_1899_religion",
     "title": "Volkstelling; indeeling naar de kerkelijke gezindten en den leeftijd, 1899",
     "publisher": "Statistics Netherlands (CBS) and Netherlands Institute for Scientific Information Services (NIWI)",
@@ -1839,6 +1874,39 @@
       }
     ],
     "collection": "nigeria_lagos_population"
+  },
+  {
+    "id": "se_scb_population_tab5890",
+    "title": "Population by age and sex. Year 1860–",
+    "publisher": "Statistics Sweden (SCB)",
+    "url": "https://www.statistikdatabasen.scb.se/pxweb/sv/ssd/START_BE_BE0101_BE0101A/BefolkningR1860N/",
+    "locator": "PxWeb v2 TAB5890, population, 1899 and 1900, males and females, all age codes.",
+    "rights": "CC0. Source Statistics Sweden. age_sex.csv selects the populated historic age brackets and sums the two published sexes.",
+    "rights_url": "https://www.scb.se/en/services/open-data-api/",
+    "raw_path": "scb_tab5890.json",
+    "table_urls": [
+      "https://statistikdatabasen.scb.se/api/v2/tables/TAB5890",
+      "https://statistikdatabasen.scb.se/api/v2/tables/TAB5890/data?lang=en&valueCodes%5BTid%5D=1899,1900&valueCodes%5BAlder%5D=*&valueCodes%5BKon%5D=1,2&valueCodes%5BContentsCode%5D=0000053A&outputFormat=json-stat2"
+    ],
+    "extract": "Use age codes 0–89 as single years, historical code 90 as 90 or older per the table note, and tot for the sex totals. Codes above 90 are not published separate ages for 1899 and 1900. The reported dates are December 31.",
+    "collection": "nordic_population_1900"
+  },
+  {
+    "id": "no_ssb_population_10211",
+    "title": "Population, by sex and age (1735–)",
+    "publisher": "Statistics Norway (SSB)",
+    "url": "https://www.ssb.no/en/statbank1/table/10211",
+    "locator": "StatBank 10211, Population 1 January, 1900 and 1901. Statistical Yearbook of Norway 2010, table 48, gives the totals by sex.",
+    "rights": "CC BY 4.0. Source Statistics Norway. age_sex.csv pivots the three published sex codes.",
+    "rights_url": "https://www.ssb.no/en/api",
+    "raw_path": "ssb_10211.json",
+    "table_urls": [
+      "https://data.ssb.no/api/v0/en/table/10211",
+      "https://www.ssb.no/a/histstat/in/in_7906.pdf",
+      "https://www.ssb.no/historisk-statistikk/_/attachment/inline/3fbeb79f-7cc7-48ae-adaa-eae2f031a9b7%3A88604a4c72785c93d6b08f5d20966e1d63a99640/2010.pdf"
+    ],
+    "extract": "POST a JSON query selecting (item filter) Alder codes 000–104 and 105+, Kjonn codes 0, 1 and 2, ContentsCode Personer, and Tid 1900 and 1901. Response format json. Published ages sum to the independent January 1 sex totals. Statistics Norway reconstructed the 1846–1900 age and sex series from census and demographic reports.",
+    "collection": "nordic_population_1900"
   },
   {
     "id": "ph_census_1903_vol2",
@@ -2012,6 +2080,23 @@
     "collection": "russia"
   },
   {
+    "id": "ru_1897_census_vol13_reading",
+    "title": "First General Census of the Russian Empire, 1897. Vol. XIII. Ekaterinoslav Governorate",
+    "publisher": "Central Statistical Committee of the Ministry of Internal Affairs, 1904",
+    "url": "https://www.libr.dp.ua/fullkr/index.php?pbp=696",
+    "original_table_scan": "https://old.libr.dp.ua/fullkr/696/0031.jpg",
+    "definition_url": "https://rosstat.gov.ru/storage/document/document_history_publication/2018-06/25/gramot.pdf",
+    "rights": "Historical public-domain census tables. Numerical transcription only.",
+    "observed_date": "1897-02-09",
+    "scope": "Ekaterinoslav Governorate. Persons present of both sexes, including infants and persons of unknown age. The four province-wide totals agree with the geographic scope and population by sex already used at opening.",
+    "extraction": {
+      "file": "literacy.csv",
+      "locator": "Vol. XIII, table IIIb: Распределеніе населенія по полу, возрасту (по годамъ) и грамотности, pp. 12–13, Въ губерніи, ИТОГО, columns 2–5.",
+      "method": "Transcribe the two population totals and the two Of whom able to read totals from the province-wide total row. Reading ability includes reading syllable by syllable. The table does not identify unanswered literacy questions separately. Its complement is labeled Not recorded as able to read. This is used as an all-age marginal without assigning reading ability to age cohorts."
+    },
+    "collection": "russia_literacy_1897"
+  },
+  {
     "id": "saint_helena_colonial_annual_report_1899",
     "title": "Colonial Reports—Annual no. 309, St. Helena, Report for 1899",
     "publisher": "British Colonial Office, HMSO, December 1900.",
@@ -2088,6 +2173,18 @@
     "rights": "Numeric facts transcribed from 1911 publication; no reproduction of its layout. Canton totals cross-checked against Statistisches Jahrbuch der Schweiz 1919, III.a.3.",
     "independent_url": "https://istmat.org/files/uploads/53038/statistisches_jahrbuch_der_schweiz_1919.pdf",
     "collection": "swiss"
+  },
+  {
+    "id": "ch_bfs_census_age_1888_1900",
+    "title": "Statistisches Jahrbuch der Schweiz 1950 — Wohnbevölkerung der Schweiz nach Alter und Geschlecht seit 1860",
+    "publisher": "Swiss Federal Statistical Office",
+    "url": "https://dam-api.bfs.admin.ch/hub/api/dam/assets/346171/master",
+    "locator": "Printed pp. 22–23: both-sex age totals and age by sex. Census columns 1888 and 1900. Unknown age is shown by dashes in both columns.",
+    "rights": "Numeric facts transcribed from the publication.",
+    "raw_path": "age_sex.csv",
+    "extract": "The absolute figures in the 1888 and 1900 columns are retained. The male 1888 count age 30–34 is 90,918 in the 1950 yearbook and the contemporary 1898 yearbook. The census dates and total usual residents match the 1911 comparison reprinted in the swiss collection, printed p. 104.",
+    "independent_url": "https://istmat.org/files/uploads/53017/statistisches_jahrbuch_der_schweiz_1898.pdf",
+    "collection": "swiss_census_ages"
   },
   {
     "id": "jp_tokyo_prefecture_statistics_1900",

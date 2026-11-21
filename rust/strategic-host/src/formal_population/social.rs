@@ -121,7 +121,7 @@ impl Population {
         let mut maximum = 0;
         let mut affected_resident_pools = 0;
         for (id, region) in self.opening.iter().flat_map(|opening| &opening.social.regions) {
-            if unit.is_some_and(|unit| unit != id && self.parent_unit(id) != Some(unit)) {
+            if unit.is_some_and(|unit| !self.pool_in_scope(id, unit)) {
                 continue;
             }
             let outflow = self.history.social_outflow.get(id).copied().unwrap_or(0);

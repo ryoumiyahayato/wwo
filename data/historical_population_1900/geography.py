@@ -112,6 +112,7 @@ def catalogue(rows, groups):
     local = defaultdict(set)
     polity_studies = defaultdict(list)
     group_at = defaultdict(list)
+    statistical_aggregates = set()
     shared_openings = defaultdict(set)
     source_openings = defaultdict(set)
     label_openings = {}
@@ -124,6 +125,10 @@ def catalogue(rows, groups):
             group_at[link].append(group["unit_id"])
             if scope:
                 local[link].add(group["unit_id"])
+        for aggregate in group.get("statistical_aggregates", []):
+            key = aggregate["unit_id"]
+            group_at[key].append(key)
+            statistical_aggregates.add(key)
         for leaf in group["units"]:
             key = leaf["unit_id"]
             group_at[key].append(key)
@@ -162,7 +167,9 @@ def catalogue(rows, groups):
                 polity=u.get("polity_id"),parent=u.get("parent_region_id"),valid_from=u.get("valid_from"),valid_to=u.get("valid_to"),
                 geometry_status=u.get("boundary_reference_status"),historical_observation_ids=sorted(local[key]),opening_ids=group_at[key],
                 shared_opening_ids=sorted(shared_openings[key]),
-                status="opening_partition" if group_at[key] else "member_of_shared_partition" if shared_openings[key] else "dated_population_evidence" if local[key] else "population_unknown"))
+                status="opening_statistical_aggregate" if key in statistical_aggregates else
+                    "opening_partition" if group_at[key] else "member_of_shared_partition" if shared_openings[key] else
+                    "dated_population_evidence" if local[key] else "population_unknown"))
     for p in read(MAP/"historical_admin1_1900.json")["countries"]:
         for i,name in enumerate(p["units"],1):
             key = f"{p['entity_id']}:label:{i}"

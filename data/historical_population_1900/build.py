@@ -17,7 +17,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 12
+OPENING_VERSION = 13
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -40,7 +40,8 @@ def bucket(n):
     return "500k+"
 
 def opening_age_coverage(selection, legacy, structure_opening, comparison_rows):
-    parents = {u["unit_id"]: g["unit_id"] for g in selection for u in g["units"]}
+    parents = {u["unit_id"]: g["unit_id"] for g in selection
+               for u in [*g["units"], *g.get("statistical_aggregates", [])]}
     controls = {g["unit_id"]: g["population_value"] for g in selection}
     controls.update({r["unit_id"]: r["population_value"] for r in legacy if r["status"]=="legacy_only"})
     supported = defaultdict(int)
@@ -88,6 +89,7 @@ def opening_count_basis(selection, legacy, world_reference):
         elif source.startswith("ft_world_") or source in {
             "cao_qing_provincial_reconstruction", "natal_statistical_yearbook_1909_macdonald",
             "cape_colony_1899_imperial_conference", "zanzibar_statesmans_year_book_1899",
+            "se_scb_population_tab5890",
         }:
             basis = "published_historical_estimates"
         else:

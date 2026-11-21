@@ -1,0 +1,24 @@
+[
+  {
+    "id": "switzerland_1888",
+    "observed_unit_id": "swiss_confederation",
+    "published_scope": "Switzerland",
+    "observed_date": "1888-12-01",
+    "source_id": "ch_bfs_census_age_1888_1900",
+    "locator": "Statistisches Jahrbuch der Schweiz 1950, printed p. 23, resident population by age and sex.",
+    "definition": "Usual residents of Switzerland enumerated on the census date. Five-year age bands with 80 and over combined.",
+    "uncertainty": "The unknown-age row is empty in print. The published age and sex totals account for all usual residents.",
+    "broad_observation": true
+  },
+  {
+    "id": "switzerland_1900",
+    "observed_unit_id": "swiss_confederation",
+    "published_scope": "Switzerland",
+    "observed_date": "1900-12-01",
+    "source_id": "ch_bfs_census_age_1888_1900",
+    "locator": "Statistisches Jahrbuch der Schweiz 1950, printed p. 23, resident population by age and sex.",
+    "definition": "Usual residents of Switzerland enumerated on the census date. Five-year age bands with 80 and over combined.",
+    "uncertainty": "The unknown-age row is empty in print. The published age and sex totals account for all usual residents.",
+    "broad_observation": true
+  }
+]

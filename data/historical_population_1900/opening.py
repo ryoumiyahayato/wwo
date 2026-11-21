@@ -82,6 +82,96 @@ def interpolate_partition(rows, parent, dates):
     ) for unit, rows in observed.items()]
 
 
+FR_ARRONDISSEMENT_PLACES = {
+    "place:marseille": "133",
+    "place:port_marseille": "133",
+    "place:brest": "291",
+    "place:port_brest": "291",
+    "place:toulouse": "313",
+    "place:bordeaux": "332",
+    "place:port_bordeaux": "332",
+    "place:nantes": "442",
+    # Calais belonged to the Boulogne-sur-Mer arrondissement.
+    "place:calais": "623",
+    "place:port_calais": "623",
+    "place:lyon": "691",
+    "place:paris": "751",
+    "place:le_havre": "762",
+    "place:port_le_havre": "762",
+    "place:rouen": "763",
+}
+
+
+def add_french_arrondissements(group, observations):
+    dates = group["endpoint_dates"]
+    prefix = "administrative_region:france_arrondissement_"
+    references = defaultdict(dict)
+    endpoints = defaultdict(list)
+    for row in observations:
+        if row["source_id"] != group["source_id"] or row.get("administrative_level") != 2:
+            continue
+        department, unit = row["parent_id"], row["unit_id"]
+        if row.get("wwo_id") != unit or not unit.startswith(prefix):
+            continue
+        if row["date"] in dates:
+            endpoints[department].append(row)
+        elif row["date"] == DATE and row["method"] == "linear_daily_interpolation_within_department":
+            if unit in references[department] or row["control_unit_id"] != department:
+                raise ValueError(f"Invalid opening arrondissement reference {unit}")
+            references[department][unit] = row
+
+    units = []
+    aggregates = []
+    for department in group["units"]:
+        parent = department["unit_id"]
+        if parent not in references:
+            units.append(department)
+            continue
+
+        children = interpolate_partition(endpoints[parent], department, dates)
+        expected = references.pop(parent)
+        if {child["unit_id"] for child in children} != expected.keys():
+            raise ValueError(f"Arrondissement endpoint coverage differs from opening references for {parent}")
+
+        by_id = {child["unit_id"]: child for child in children}
+        for place in department["place_ids"]:
+            target = FR_ARRONDISSEMENT_PLACES.get(place)
+            if target is None or (prefix + target) not in by_id:
+                raise ValueError(f"Missing arrondissement residence binding for {place} in {parent}")
+            by_id[prefix + target]["place_ids"].append(place)
+
+        for child in children:
+            evidence = expected[child["unit_id"]]
+            if (child["population_value"] != evidence["population_value"]
+                    or department["population_value"] != evidence["control_population_value"]):
+                raise ValueError(f"Arrondissement opening differs from the archived reconstruction for {child['unit_id']}")
+            child.update(
+                statistical_parent=parent,
+                date=DATE,
+                locator=evidence["locator"],
+                reconstruction_observation=evidence["record_id"],
+                uncertainty_kind=evidence["quality_note"],
+            )
+        aggregates.append(dict(
+            unit_id=parent, name=department["name"], population_value=department["population_value"],
+            source_id=group["source_id"], locator=department["locator"],
+            method="Sum of reconciled arrondissement opening estimates within the interpolated département control.",
+            date=DATE, scope=next(iter(expected.values()))["definition"],
+            population_lower=None, population_upper=None,
+            uncertainty_kind="Enumeration coverage and interpolation error have no quantified interval.",
+            endpoint_dates=dates, endpoint_values=department["endpoint_values"],
+        ))
+        units.extend(children)
+
+    if references:
+        raise ValueError(f"Arrondissement references have no département control: {sorted(references)}")
+    group["units"] = units
+    group["statistical_aggregates"] = aggregates
+    group["method"] += (
+        "; reconciled arrondissement leaves replace the département pool wherever the census partition closes."
+    )
+
+
 def add_british_county_partitions(group, observations):
     scotland_id = "administrative_region:uk_constituent_scotland"
     ireland_id = "administrative_region:uk_constituent_ireland"
@@ -252,6 +342,35 @@ def netherlands_opening(previous, observations):
             locator=row["locator"], source_id=source, method=method, scope=row["definition"],
             source_dates=[DATE], source_observations=[row["record_id"]], place_ids=places.get(row["unit_id"], []),
         ) for row in provinces],
+    )
+
+
+def add_nordic_population_controls(group, observations):
+    sources = {
+        "ft_sweden": ("se_scb_population_tab5890", "1899-12-31"),
+        "ft_norway": ("no_ssb_population_10211", DATE),
+    }
+    counts = {row["unit_id"]: row for row in observations
+              if sources.get(row["unit_id"]) == (row["source_id"], row["date"])}
+    leaves = []
+    for previous in group["units"]:
+        row = counts[previous["unit_id"]]
+        leaves.append(dict(
+            unit_id=row["unit_id"], name=row["name"], population_value=row["population_value"],
+            date=DATE, source_id=row["source_id"], source_dates=[row["date"]],
+            locator=row["locator"], scope=row["definition"], source_observations=[row["record_id"]],
+            method="Use the published opening-time resident stock. No date interpolation is applied.",
+        ))
+    group.pop("endpoint_dates")
+    group.pop("country_endpoint_values")
+    group.update(
+        alternative_research_value=group["population_value"],
+        population_value=sum(row["population_value"] for row in leaves), units=leaves,
+        source_id=sources["ft_sweden"][0], locator=" / ".join(row["locator"] for row in leaves),
+        method="Sum Sweden's year-end 1899 registered population and Norway's reconstructed population at January 1, 1900.",
+        scope="Sweden and Norway, separately tabulated within their political union.",
+        population_lower=None, population_upper=None,
+        uncertainty_kind="Registry coverage and Norway's reconstruction error have no quantified interval.",
     )
 
 
@@ -470,6 +589,52 @@ def add_java_and_madura(group, observations):
     )]
 
 
+def belgium_opening(previous, observations):
+    source = "belgium_census_provinces_1890_1900"
+    national_id = "be_census_kingdom"
+    dates = ["1890-12-31", "1900-12-31"]
+    provinces = (
+        "antwerp", "brabant", "west_flanders", "east_flanders", "hainaut",
+        "liege", "limburg", "luxembourg", "namur",
+    )
+    labels = {f"be_census_{province}": f"{previous['unit_id']}:label:{index}"
+              for index, province in enumerate(provinces, 1)}
+    places = {
+        "be_census_antwerp": ["place:antwerp"],
+        "be_census_brabant": ["place:brussels"],
+        "be_census_west_flanders": ["place:kortrijk"],
+        "be_census_east_flanders": ["place:ghent"],
+        "be_census_hainaut": ["place:tournai"],
+    }
+    rows = [row for row in observations if row["source_id"] == source and row["date"] in dates]
+    national = sorted((row for row in rows if row["unit_id"] == national_id), key=lambda row: row["date"])
+    if [row["date"] for row in national] != dates:
+        raise ValueError("Missing or duplicate census control for Belgium")
+    endpoints = [row["population_value"] for row in national]
+    fraction = opening_fraction(dates)
+    population = round(endpoints[0] + (endpoints[1] - endpoints[0]) * fraction)
+    province_rows = [row for row in rows if row["parent_id"] == national_id and row["kind"] == "admin"]
+    if {row["unit_id"] for row in province_rows} != labels.keys():
+        raise ValueError("The Belgian census must cover all nine historical provinces")
+    leaves = interpolate_partition(province_rows, dict(
+        unit_id=previous["unit_id"], name="Belgium", population_value=population, endpoint_values=endpoints,
+    ), dates)
+    for leaf in leaves:
+        leaf["wwo_admin_label"] = labels[leaf["unit_id"]]
+        leaf["place_ids"] = places.get(leaf["unit_id"], [])
+    return dict(
+        unit_id=previous["unit_id"], date=DATE, source_id=source,
+        population_value=population, endpoint_dates=dates, country_endpoint_values=endpoints,
+        source_observations=[row["record_id"] for row in national],
+        locator=" / ".join(row["locator"] for row in national),
+        method=f"Linear daily interpolation of the two census totals, elapsed fraction {fraction}. Round once.",
+        scope=("Usual residents of the historical nine-province Kingdom of Belgium, including people temporarily absent. "
+               "Luxembourg here refers to the Belgian province. The Grand Duchy and Congo Free State are separate."),
+        research_unit_ids=previous["research_unit_ids"], alternative_research_value=previous["population_value"],
+        partition_source="collections/belgium_provinces_1900/observations.jsonl", units=leaves,
+    )
+
+
 def qing_interior(observations, version):
     path = HERE / "collections/eastern/qing_interior_crosswalk.tsv"
     by_id = {r["unit_id"]: r for r in observations
@@ -638,6 +803,11 @@ def groups(observations, version=1):
     if version >= 12:
         root = "kingdom_of_netherlands"
         result[root] = netherlands_opening(result[root], observations)
+    if version >= 13:
+        add_french_arrondissements(result["country_fra"], observations)
+        add_nordic_population_controls(result["sweden_norway_union"], observations)
+        root = "kingdom_of_belgium"
+        result[root] = belgium_opening(result[root], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

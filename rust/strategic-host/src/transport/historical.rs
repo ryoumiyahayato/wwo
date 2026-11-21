@@ -787,7 +787,19 @@ impl Builder {
             .iter()
             .flat_map(|s| [s.from.clone(), s.to.clone()])
             .collect();
-        for (id, parent, label) in opening.partition_identities() {
+        // Keep existing provincial routes when a census partition gains district accounts.
+        // Only the districts bind residents to the physical stops.
+        for (id, _, _, members) in opening.statistical_scopes() {
+            let places: Vec<_> = members.iter()
+                .filter_map(|child| places_by_leaf.get(child.as_str()))
+                .flatten()
+                .cloned()
+                .collect();
+            places_by_leaf.insert(id, places);
+        }
+        let identities = opening.partition_identities()
+            .chain(opening.statistical_scopes().map(|(id, parent, label, _)| (id, parent, label)));
+        for (id, parent, label) in identities {
             let market = self.catalogue.areas.contains_key(parent).then_some(parent);
             self.register(id, NodeKind::Identity, label, market, None);
             self.catalogue.population_nodes.insert(id.into());
@@ -1387,14 +1399,18 @@ mod tests {
             assert!(net.area_node(root).is_none());
         }
         println!("population partitions {leaf_counts:?}; standalone {root_counts:?}; explicit places {attached}");
-        let leaf = "administrative_region:france_seine";
+        let seine = "administrative_region:france_seine";
+        let paris = "administrative_region:france_arrondissement_751";
+        assert_eq!(net.population_at("place:paris"), Some(paris));
+        assert_eq!(net.population_at(seine), Some(seine));
         let dest = "us_state_new_york";
         let to = net.routing_node(dest).unwrap().to_owned();
         let physical = net.route(&query("place:paris", &to, ModeSet::ALL)).unwrap();
         assert_eq!(
-            net.route(&query(leaf, dest, ModeSet::ALL)).unwrap(),
+            net.route(&query(seine, dest, ModeSet::ALL)).unwrap(),
             physical
         );
+        assert_eq!(net.route(&query(paris, dest, ModeSet::ALL)).unwrap(), physical);
         assert!(net
             .segments()
             .all(|s| !net.catalogue.population_nodes.contains(&s.from)

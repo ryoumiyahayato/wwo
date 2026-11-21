@@ -104,7 +104,7 @@ impl Population {
         };
         let account_id = if live { Some(unit) } else { site_account };
         let parent_id = if live {
-            self.parent_unit(unit)
+            self.statistical_parent(unit).or_else(|| self.parent_unit(unit))
                 .map(|parent| if parent == unit { "world" } else { parent })
         } else {
             None
@@ -201,7 +201,7 @@ impl Population {
                 })
                 .collect()
         } else if live {
-            self.partitions(unit)
+            self.statistical_children(unit)
                 .map(|(id, name, count)| PopulationChild {
                     unit_id: id,
                     name,
@@ -219,7 +219,7 @@ impl Population {
                 if site_account.is_some() {
                     place == unit
                 } else {
-                    account_id == Some(account)
+                    account_id.is_some_and(|id| account == id || self.statistical_parent(account) == Some(id))
                 }
             })
             .map(|(place, _)| place)
