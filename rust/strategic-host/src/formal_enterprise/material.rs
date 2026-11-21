@@ -228,7 +228,7 @@ mod tests {
         const BAKER: &str = "firm:opening_paris_bakery";
         const SUPPLIER: &str = "firm:opening_paris_workshop";
         let workers = ["person:formal_generated_country_fra_0001", "person:formal_generated_country_fra_0002", "person:replacement_baker"];
-        let jobs = WorkOpening::load().unwrap();
+        let jobs = WorkOpening::load(|unit, place| (unit == "country_fra").then(|| place.to_owned())).unwrap();
         let opening = EnterpriseOpening::load().unwrap();
         let mut firms = Enterprises::initialize(&opening, 0);
         let mut ledger = Ledger::initialize_people(workers.map(|person| (person, 0))).unwrap();

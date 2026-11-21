@@ -1,4 +1,4 @@
-use crate::formal_bootstrap::{InitialWorld, WorldBootstrap, WorldSnapshot, OPENINGS};
+use crate::formal_bootstrap::{local_id, InitialWorld, WorldBootstrap, WorldSnapshot};
 use crate::formal_character::{self, Identity};
 use crate::formal_clock::{ClockSnapshot, GameClock};
 use crate::formal_ledger::{Balance, Ledger, CURRENCY};
@@ -34,7 +34,7 @@ pub struct NativeSlotSummary {
 
 impl NativeSlotSummary {
     fn validate(&self) -> io::Result<GameClock> {
-        if !OPENINGS.iter().any(|(source, _)| self.opening == *source) {
+        if !local_id(&self.opening) {
             return Err(invalid("unknown native save opening"));
         }
         GameClock::restore(self.clock)

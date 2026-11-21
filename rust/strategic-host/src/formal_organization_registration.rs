@@ -136,7 +136,7 @@ impl InitialWorld {
         if self.market_unit_at(place) != Some(&shop.unit) { return Ok(()); }
         let residents: Vec<_> = directory.at(place).flat_map(|org| std::iter::once(&org.officer)
             .chain(org.opening_member.as_ref()).map(move |officer| (org, officer))).collect();
-        let unit = self.residence_unit_at(place).expect("merchant market has a residence unit");
+        let Some(unit) = self.residence_unit_at(place) else { return Ok(()); };
         if self.population.unclassified(unit).unwrap_or(0) < residents.len() as u64
             || residents.iter().any(|(_, officer)| self.person(&officer.person).is_some()
                 || self.ledger.default_account(&officer.person).is_some()) { return Ok(()); }
@@ -446,7 +446,7 @@ mod tests {
         }
         // Reproduce the preceding native account roster: named residents and the two Paris firms.
         old.ledger = Ledger::initialize_people(bootstrap.residents.iter().map(|(person, cash)| (person.as_str(), *cash))).unwrap();
-        WorkOpening::load().unwrap().open_accounts(&mut old.ledger).unwrap();
+        WorkOpening::load(|unit, place| (unit == "country_fra").then(|| place.to_owned())).unwrap().open_accounts(&mut old.ledger).unwrap();
         old.ledger.ensure_transport_account().unwrap();
         old.advance_migrated_domains(60, &BTreeMap::new()).unwrap();
         let price = old.macro_economy().markets()["german_empire"].commodities["bread"].price_centimes;

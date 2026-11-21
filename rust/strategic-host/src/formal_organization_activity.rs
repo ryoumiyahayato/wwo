@@ -175,7 +175,8 @@ impl InitialWorld {
     pub(crate) fn can_take_organization_job(&self, person: &str, job: &Job) -> bool {
         let Some(id) = self.work_opening.organization(&job.employer) else { return false };
         !self.organization_can_manage(id, person)
-            && (self.enterprise_opening.has_firm(&job.employer) || self.merchant_needs_worker(&job.employer))
+            && (self.work_opening.market_employer(&job.employer) || self.enterprise_opening.has_firm(&job.employer)
+                || self.merchant_needs_worker(&job.employer))
             && self.employer_current(person, job)
     }
 

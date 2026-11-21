@@ -280,14 +280,18 @@ impl Display<'_> {
                 });
                 self.skin.text(&mut text,self.skin.choose("人物摘要","Character summary"),0,
                     [traits_x+18.,traits_y+53.],traits_width-36.,IVORY);
-                self.skin.paragraph(&mut text,summary.as_deref().unwrap_or(self.skin.choose(
-                    "选择国家后，开始人生序章。","Choose a country to begin the prologue.")),0,
+                let opening_summary = if opening.is_some_and(|row| row.language.is_none()) {
+                    self.skin.choose("以当地居民身份开局。", "Start as a local resident.")
+                } else {
+                    self.skin.choose("选择国家后，开始人生序章。", "Choose a country to begin the prologue.")
+                };
+                self.skin.paragraph(&mut text,summary.as_deref().unwrap_or(opening_summary),0,
                     [traits_x+18.,traits_y+84.,traits_width-36.,80.],MUTED,1.);
                 let can_enter=opening.is_some()&&state.is_some_and(|s|s.selection_ready)&&!busy;
                 self.row(&mut panels,&mut text,&mut hits,layout.primary,"",
                     can_enter.then_some(action(Command::Enter)),can_enter);
                 let [button_x,button_y,button_width,_]=layout.primary;
-                let label=if state.is_some_and(|s|s.native) {self.skin.choose("人生序章","Prologue")}
+                let label=if state.is_some_and(|s|s.native) && opening.is_some_and(|row| row.language.is_some()) {self.skin.choose("人生序章","Prologue")}
                     else {self.skin.choose("进入世界","Enter world")};
                 let label_width=self.skin.width(label,0);
                 self.skin.text(&mut text,label,0,[button_x+(button_width-label_width)*0.5,button_y+5.],

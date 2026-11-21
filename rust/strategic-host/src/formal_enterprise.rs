@@ -4,7 +4,7 @@ use std::{collections::BTreeMap, io};
 mod material;
 pub(crate) use material::MaterialOrder;
 
-#[derive(Deserialize)]
+#[derive(Default, Deserialize)]
 pub(crate) struct EnterpriseOpening {
     production_enabled: bool,
     firms: Vec<Firm>,

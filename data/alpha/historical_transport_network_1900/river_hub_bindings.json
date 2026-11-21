@@ -1,0 +1,18 @@
+{
+  "description": "Resolve named stops in multi-entity river rows where the compact source does not pair stops with countries. Each binding applies only within the named corridor. The country list is unordered.",
+  "sources": {
+    "cshapes": "WWO data/world_map/historical/cshapes_1900_snapshot.json, CShapes 2.0 snapshot 1900-03-12, intersected with the GeoNames settlement coordinates in gateway_positions.json. Only unambiguous matches among the listed historical units are used.",
+    "peru": "Municipalidad Provincial de Maynas, Ordenanza Municipal 008-2025-A-MPM, establishment of Iquitos as an Amazon river port in 1864. https://www.gob.pe/institucion/munimaynas/normas-legales/7379566-008-2025-a-mpm",
+    "brazil": "IBGE, Revista Brasileira de Geografia 51(2), historical account of the Belem–Manaus navigation line in Brazil. https://biblioteca.ibge.gov.br/visualizacao/periodicos/115/rbg_1989_v51_n2.pdf"
+  },
+  "bindings": [
+    ["river:great_lakes_st_lawrence", "Chicago", "united_states_1900", "cshapes"],
+    ["river:great_lakes_st_lawrence", "Detroit", "united_states_1900", "cshapes"],
+    ["river:great_lakes_st_lawrence", "Buffalo", "united_states_1900", "cshapes"],
+    ["river:rhine", "Mannheim", "german_empire", "cshapes"],
+    ["river:danube", "Budapest", "austria_hungary", "cshapes"],
+    ["river:amazon", "Iquitos", "peru_1900", "peru"],
+    ["river:amazon", "Manaus", "brazil_1900", "brazil"],
+    ["river:amazon", "Belem", "brazil_1900", "brazil"]
+  ]
+}
