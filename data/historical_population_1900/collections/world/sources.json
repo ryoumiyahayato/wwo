@@ -1,0 +1,46 @@
+[
+  {
+    "id": "ft_world_v5",
+    "title": "Federico–Tena World Population Historical Database, List of Polities V5",
+    "publisher": "e-cienciaDatos / Universidad Carlos III de Madrid",
+    "url": "https://doi.org/10.21950/3SK54X",
+    "locator": "Country series rows 103–104; Summary data rows 104–105 (thousands)",
+    "rights": "CC BY 4.0. Giovanni Federico and Antonio Tena-Junguito. WWO extracts, converts units and interpolates.",
+    "downloads": {
+      "world_2026.xlsx": "https://edatos.consorciomadrono.es/api/access/datafile/51075?format=original",
+      "world_2026_readme.pdf": "https://edatos.consorciomadrono.es/api/access/datafile/51076?format=original",
+      "world_2025.xlsx": "https://edatos.consorciomadrono.es/api/access/datafile/34045?format=original"
+    },
+    "methods": "https://hdl.handle.net/10016/45843",
+    "african_revision": "See 2026 workbook Sources and V4 African Population Database (Frankema and Jerven)."
+  },
+  {
+    "id": "ft_world_v4",
+    "title": "Federico–Tena historical-border series V4, 2025",
+    "publisher": "e-cienciaDatos",
+    "url": "https://doi.org/10.21950/3SK54X",
+    "locator": "V4 Country series!EC103:EC104; Trucial coast omitted from V5 country sheet",
+    "rights": "CC BY 4.0. Giovanni Federico and Antonio Tena-Junguito. WWO extracts, converts units and interpolates.",
+    "download": "https://edatos.consorciomadrono.es/api/access/datafile/34045?format=original"
+  },
+  {
+    "id": "ft_quality_2025",
+    "title": "Quality Assessment Population (2025)",
+    "publisher": "e-cienciaDatos",
+    "url": "https://doi.org/10.21950/U6AANV",
+    "locator": "Quality Assessment rows 103–104. Numerical sensitivity assumptions in working paper p.27.",
+    "rights": "CC BY 4.0. Giovanni Federico and Antonio Tena-Junguito. WWO extracts, converts units and interpolates.",
+    "downloads": {
+      "quality_2025.xlsx": "https://edatos.consorciomadrono.es/api/access/datafile/34065?format=original",
+      "quality_2025_readme.pdf": "https://edatos.consorciomadrono.es/api/access/datafile/34066?format=original"
+    }
+  },
+  {
+    "id": "census_world_comparison",
+    "title": "Historical Estimates of World Population",
+    "publisher": "US Census Bureau, International Programs Center",
+    "url": "https://www.census.gov/data/tables/time-series/demo/international-programs/historical-est-worldpop.html",
+    "locator": "1900 AD row; population in millions, lower/upper summary. Original references listed below the table.",
+    "rights": "Factual numeric extract from US federal table; underlying researchers credited by the publisher."
+  }
+]

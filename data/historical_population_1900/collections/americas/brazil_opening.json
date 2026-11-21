@@ -1,0 +1,207 @@
+{
+  "unit_id": "brazil_1900",
+  "date": "1900-01-01",
+  "population_value": 17021073,
+  "source_id": "br_dge_1908_state_table",
+  "locator": "pp. 73-74, População do Brazil por Estados, 1890 and 1900 columns; Distrito Federal and Brazil total footnotes",
+  "endpoint_dates": [
+    "1890-12-31",
+    "1900-12-31"
+  ],
+  "country_endpoint_values": [
+    14333915,
+    17318556
+  ],
+  "method": "Linear interpolation by elapsed days (822/913), followed by largest-remainder rounding to the national total. Acre is outside both endpoints. The 1900 Federal District endpoint is the official estimate published in 1908. Pará follows the reported administrative totals.",
+  "units": [
+    {
+      "unit_id": "br_alagoas",
+      "name": "Alagoas",
+      "population_value": 635535,
+      "endpoint_values": [
+        511440,
+        649273
+      ]
+    },
+    {
+      "unit_id": "br_amazonas",
+      "name": "Amazonas",
+      "population_value": 239605,
+      "endpoint_values": [
+        147915,
+        249756
+      ]
+    },
+    {
+      "unit_id": "br_bahia",
+      "name": "Bahia",
+      "population_value": 2098206,
+      "endpoint_values": [
+        1919802,
+        2117956
+      ]
+    },
+    {
+      "unit_id": "br_ceara",
+      "name": "Ceará",
+      "population_value": 844797,
+      "endpoint_values": [
+        805687,
+        849127
+      ]
+    },
+    {
+      "unit_id": "br_espirito_santo",
+      "name": "Espírito Santo",
+      "population_value": 202429,
+      "endpoint_values": [
+        135997,
+        209783
+      ]
+    },
+    {
+      "unit_id": "br_federal_district_1900",
+      "name": "Distrito Federal (Rio de Janeiro)",
+      "population_value": 674729,
+      "endpoint_values": [
+        522651,
+        691565
+      ]
+    },
+    {
+      "unit_id": "br_goias",
+      "name": "Goiás",
+      "population_value": 252522,
+      "endpoint_values": [
+        227572,
+        255284
+      ]
+    },
+    {
+      "unit_id": "br_maranhao",
+      "name": "Maranhão",
+      "population_value": 492485,
+      "endpoint_values": [
+        430854,
+        499308
+      ]
+    },
+    {
+      "unit_id": "br_mato_grosso",
+      "name": "Mato Grosso",
+      "population_value": 115514,
+      "endpoint_values": [
+        92827,
+        118025
+      ]
+    },
+    {
+      "unit_id": "br_minas_gerais",
+      "name": "Minas Gerais",
+      "population_value": 3553569,
+      "endpoint_values": [
+        3184099,
+        3594471
+      ]
+    },
+    {
+      "unit_id": "br_para",
+      "name": "Pará",
+      "population_value": 433704,
+      "endpoint_values": [
+        328455,
+        445356
+      ]
+    },
+    {
+      "unit_id": "br_paraiba",
+      "name": "Paraíba",
+      "population_value": 487440,
+      "endpoint_values": [
+        457232,
+        490784
+      ]
+    },
+    {
+      "unit_id": "br_parana",
+      "name": "Paraná",
+      "population_value": 319397,
+      "endpoint_values": [
+        249491,
+        327136
+      ]
+    },
+    {
+      "unit_id": "br_pernambuco",
+      "name": "Pernambuco",
+      "population_value": 1163406,
+      "endpoint_values": [
+        1030224,
+        1178150
+      ]
+    },
+    {
+      "unit_id": "br_piaui",
+      "name": "Piauí",
+      "population_value": 327678,
+      "endpoint_values": [
+        267609,
+        334328
+      ]
+    },
+    {
+      "unit_id": "br_rio_de_janeiro",
+      "name": "Rio de Janeiro",
+      "population_value": 921136,
+      "endpoint_values": [
+        876884,
+        926035
+      ]
+    },
+    {
+      "unit_id": "br_rio_grande_do_norte",
+      "name": "Rio Grande do Norte",
+      "population_value": 273715,
+      "endpoint_values": [
+        268273,
+        274317
+      ]
+    },
+    {
+      "unit_id": "br_rio_grande_do_sul",
+      "name": "Rio Grande do Sul",
+      "population_value": 1123991,
+      "endpoint_values": [
+        897455,
+        1149070
+      ]
+    },
+    {
+      "unit_id": "br_santa_catarina",
+      "name": "Santa Catarina",
+      "population_value": 316649,
+      "endpoint_values": [
+        283769,
+        320289
+      ]
+    },
+    {
+      "unit_id": "br_sao_paulo",
+      "name": "São Paulo",
+      "population_value": 2192821,
+      "endpoint_values": [
+        1384753,
+        2282279
+      ]
+    },
+    {
+      "unit_id": "br_sergipe",
+      "name": "Sergipe",
+      "population_value": 351745,
+      "endpoint_values": [
+        310926,
+        356264
+      ]
+    }
+  ]
+}

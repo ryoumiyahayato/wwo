@@ -1,0 +1,466 @@
+{
+  "unit_id": "united_states_1900",
+  "date": "1900-01-01",
+  "population_value": 75454976,
+  "source_id": "us_twelfth_census_vol1",
+  "locator": "Vol. I, Table V, pp. xxi-xxii; Vol. II, Table I mainland totals",
+  "endpoint_dates": [
+    "1890-06-02",
+    "1900-06-01"
+  ],
+  "country_endpoint_values": [
+    62947714,
+    75994575
+  ],
+  "method": "Linear interpolation by elapsed days (3500/3651), followed by largest-remainder rounding to the national total. Oklahoma Territory and Indian Territory form one statistical unit.",
+  "units": [
+    {
+      "unit_id": "us_arizona",
+      "name": "Arizona",
+      "population_value": 121496,
+      "endpoint_values": [
+        88243,
+        122931
+      ]
+    },
+    {
+      "unit_id": "us_district_of_columbia",
+      "name": "District of Columbia",
+      "population_value": 276719,
+      "endpoint_values": [
+        230392,
+        278718
+      ],
+      "place_ids": [
+        "place:washington"
+      ]
+    },
+    {
+      "unit_id": "us_new_mexico",
+      "name": "New Mexico",
+      "population_value": 193861,
+      "endpoint_values": [
+        160282,
+        195310
+      ]
+    },
+    {
+      "unit_id": "us_oklahoma_and_indian_territories",
+      "name": "Oklahoma Territory and Indian Territory",
+      "population_value": 768399,
+      "endpoint_values": [
+        258657,
+        790391
+      ]
+    },
+    {
+      "unit_id": "us_state_alabama",
+      "name": "Alabama",
+      "population_value": 1815657,
+      "endpoint_values": [
+        1513401,
+        1828697
+      ]
+    },
+    {
+      "unit_id": "us_state_arkansas",
+      "name": "Arkansas",
+      "population_value": 1303981,
+      "endpoint_values": [
+        1128211,
+        1311564
+      ]
+    },
+    {
+      "unit_id": "us_state_california",
+      "name": "California",
+      "population_value": 1473818,
+      "endpoint_values": [
+        1213398,
+        1485053
+      ]
+    },
+    {
+      "unit_id": "us_state_colorado",
+      "name": "Colorado",
+      "population_value": 534470,
+      "endpoint_values": [
+        413249,
+        539700
+      ]
+    },
+    {
+      "unit_id": "us_state_connecticut",
+      "name": "Connecticut",
+      "population_value": 901713,
+      "endpoint_values": [
+        746258,
+        908420
+      ]
+    },
+    {
+      "unit_id": "us_state_delaware",
+      "name": "Delaware",
+      "population_value": 184063,
+      "endpoint_values": [
+        168493,
+        184735
+      ]
+    },
+    {
+      "unit_id": "us_state_florida",
+      "name": "Florida",
+      "population_value": 522871,
+      "endpoint_values": [
+        391422,
+        528542
+      ]
+    },
+    {
+      "unit_id": "us_state_georgia",
+      "name": "Georgia",
+      "population_value": 2200657,
+      "endpoint_values": [
+        1837353,
+        2216331
+      ]
+    },
+    {
+      "unit_id": "us_state_idaho",
+      "name": "Idaho",
+      "population_value": 158744,
+      "endpoint_values": [
+        88548,
+        161772
+      ]
+    },
+    {
+      "unit_id": "us_state_illinois",
+      "name": "Illinois",
+      "population_value": 4780390,
+      "endpoint_values": [
+        3826352,
+        4821550
+      ]
+    },
+    {
+      "unit_id": "us_state_indiana",
+      "name": "Indiana",
+      "population_value": 2503059,
+      "endpoint_values": [
+        2192404,
+        2516462
+      ]
+    },
+    {
+      "unit_id": "us_state_iowa",
+      "name": "Iowa",
+      "population_value": 2218637,
+      "endpoint_values": [
+        1912297,
+        2231853
+      ]
+    },
+    {
+      "unit_id": "us_state_kansas",
+      "name": "Kansas",
+      "population_value": 1468742,
+      "endpoint_values": [
+        1428108,
+        1470495
+      ]
+    },
+    {
+      "unit_id": "us_state_kentucky",
+      "name": "Kentucky",
+      "population_value": 2135240,
+      "endpoint_values": [
+        1858635,
+        2147174
+      ]
+    },
+    {
+      "unit_id": "us_state_louisiana",
+      "name": "Louisiana",
+      "population_value": 1370746,
+      "endpoint_values": [
+        1118588,
+        1381625
+      ]
+    },
+    {
+      "unit_id": "us_state_maine",
+      "name": "Maine",
+      "population_value": 693085,
+      "endpoint_values": [
+        661086,
+        694466
+      ]
+    },
+    {
+      "unit_id": "us_state_maryland",
+      "name": "Maryland",
+      "population_value": 1182020,
+      "endpoint_values": [
+        1042390,
+        1188044
+      ]
+    },
+    {
+      "unit_id": "us_state_massachusetts",
+      "name": "Massachusetts",
+      "population_value": 2781921,
+      "endpoint_values": [
+        2238947,
+        2805346
+      ]
+    },
+    {
+      "unit_id": "us_state_michigan",
+      "name": "Michigan",
+      "population_value": 2407454,
+      "endpoint_values": [
+        2093890,
+        2420982
+      ]
+    },
+    {
+      "unit_id": "us_state_minnesota",
+      "name": "Minnesota",
+      "population_value": 1733150,
+      "endpoint_values": [
+        1310283,
+        1751394
+      ]
+    },
+    {
+      "unit_id": "us_state_mississippi",
+      "name": "Mississippi",
+      "population_value": 1540448,
+      "endpoint_values": [
+        1289600,
+        1551270
+      ]
+    },
+    {
+      "unit_id": "us_state_missouri",
+      "name": "Missouri",
+      "population_value": 3088985,
+      "endpoint_values": [
+        2679185,
+        3106665
+      ]
+    },
+    {
+      "unit_id": "us_state_montana",
+      "name": "Montana",
+      "population_value": 239176,
+      "endpoint_values": [
+        142924,
+        243329
+      ]
+    },
+    {
+      "unit_id": "us_state_nebraska",
+      "name": "Nebraska",
+      "population_value": 1066149,
+      "endpoint_values": [
+        1062656,
+        1066300
+      ]
+    },
+    {
+      "unit_id": "us_state_nevada",
+      "name": "Nevada",
+      "population_value": 42543,
+      "endpoint_values": [
+        47355,
+        42335
+      ]
+    },
+    {
+      "unit_id": "us_state_new_hampshire",
+      "name": "New Hampshire",
+      "population_value": 410138,
+      "endpoint_values": [
+        376530,
+        411588
+      ]
+    },
+    {
+      "unit_id": "us_state_new_jersey",
+      "name": "New Jersey",
+      "population_value": 1865524,
+      "endpoint_values": [
+        1444933,
+        1883669
+      ]
+    },
+    {
+      "unit_id": "us_state_new_york",
+      "name": "New York",
+      "population_value": 7216546,
+      "endpoint_values": [
+        6003174,
+        7268894
+      ],
+      "place_ids": [
+        "place:new_york",
+        "place:port_new_york"
+      ]
+    },
+    {
+      "unit_id": "us_state_north_carolina",
+      "name": "North Carolina",
+      "population_value": 1882401,
+      "endpoint_values": [
+        1617949,
+        1893810
+      ]
+    },
+    {
+      "unit_id": "us_state_north_dakota",
+      "name": "North Dakota",
+      "population_value": 313845,
+      "endpoint_values": [
+        190983,
+        319146
+      ]
+    },
+    {
+      "unit_id": "us_state_ohio",
+      "name": "Ohio",
+      "population_value": 4137477,
+      "endpoint_values": [
+        3672329,
+        4157545
+      ]
+    },
+    {
+      "unit_id": "us_state_oregon",
+      "name": "Oregon",
+      "population_value": 409573,
+      "endpoint_values": [
+        317704,
+        413536
+      ]
+    },
+    {
+      "unit_id": "us_state_pennsylvania",
+      "name": "Pennsylvania",
+      "population_value": 6258937,
+      "endpoint_values": [
+        5258113,
+        6302115
+      ]
+    },
+    {
+      "unit_id": "us_state_rhode_island",
+      "name": "Rhode Island",
+      "population_value": 425121,
+      "endpoint_values": [
+        345506,
+        428556
+      ]
+    },
+    {
+      "unit_id": "us_state_south_carolina",
+      "name": "South Carolina",
+      "population_value": 1332492,
+      "endpoint_values": [
+        1151149,
+        1340316
+      ]
+    },
+    {
+      "unit_id": "us_state_south_dakota",
+      "name": "South Dakota",
+      "population_value": 399379,
+      "endpoint_values": [
+        348600,
+        401570
+      ]
+    },
+    {
+      "unit_id": "us_state_tennessee",
+      "name": "Tennessee",
+      "population_value": 2010148,
+      "endpoint_values": [
+        1767518,
+        2020616
+      ]
+    },
+    {
+      "unit_id": "us_state_texas",
+      "name": "Texas",
+      "population_value": 3015078,
+      "endpoint_values": [
+        2235527,
+        3048710
+      ]
+    },
+    {
+      "unit_id": "us_state_utah",
+      "name": "Utah",
+      "population_value": 274021,
+      "endpoint_values": [
+        210779,
+        276749
+      ]
+    },
+    {
+      "unit_id": "us_state_vermont",
+      "name": "Vermont",
+      "population_value": 343177,
+      "endpoint_values": [
+        332422,
+        343641
+      ]
+    },
+    {
+      "unit_id": "us_state_virginia",
+      "name": "Virginia",
+      "population_value": 1845987,
+      "endpoint_values": [
+        1655980,
+        1854184
+      ]
+    },
+    {
+      "unit_id": "us_state_washington",
+      "name": "Washington",
+      "population_value": 511450,
+      "endpoint_values": [
+        357232,
+        518103
+      ]
+    },
+    {
+      "unit_id": "us_state_west_virginia",
+      "name": "West Virginia",
+      "population_value": 950694,
+      "endpoint_values": [
+        762794,
+        958800
+      ]
+    },
+    {
+      "unit_id": "us_state_wisconsin",
+      "name": "Wisconsin",
+      "population_value": 2053503,
+      "endpoint_values": [
+        1693330,
+        2069042
+      ]
+    },
+    {
+      "unit_id": "us_state_wyoming",
+      "name": "Wyoming",
+      "population_value": 91291,
+      "endpoint_values": [
+        62555,
+        92531
+      ]
+    }
+  ]
+}

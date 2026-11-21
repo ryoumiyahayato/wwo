@@ -72,7 +72,7 @@ Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒�
 
 宏观贸易、实物货运、人物出行和背景迁移使用同一全球路网。地点卡显示可用连接或资料缺口，旅行页按地点查价，国际市场的运输记录显示货值、运费、停运与交割。参见[全球交通覆盖与实测](../../docs/RUST_GLOBAL_TRANSPORT.md)及[原有交通操作](../../docs/RUST_TRANSPORT_PHASE_2.md)。
 
-开局人口是 [1900 年经济聚合估计](../../data/alpha/historical_world_economy_1900/countries_compact.json)，共 50 个统计单元，估计总数 1,411,020,000。估计值带区间和共同来源方法。行政边界和城市地点没有随附互斥的历史人口分项。当前开局未加入合成的行政区人口、家庭和服役名单。岗位、企业配方、每人每日 1 千克主食阈值以及客运速度与名额均为显式模拟假设。
+新档从[历史人口开局表](../../data/historical_population_1900/opening.json)读取已核实的统计范围与互斥分区。部分总数仍沿用旧估计的国家，从旧人口余额划出有出处的分区人数。其余人数保留为未定位余额。城市观测保留原调查日期，作为所属地区的分项。`wwo-formal-state inspect-population` 可查询人口来源类型和分区。旧档按其原开局重放。资料覆盖、计算方法和缺口见[全球人口数据报告](../../data/historical_population_1900/README.md)。岗位、企业配方、每人每日 1 千克主食阈值以及客运速度与名额均为显式模拟假设。
 
 从本目录运行 `cargo test --locked --lib population_world_` 可重现动态人物、共同住户、服役夹具和存档场景。年度测量使用 `cargo test --locked --lib population_world_year_measurement -- --ignored --nocapture`，分别测正式开局和 5,000 个合成群体的存档与日结成本。生产历史数据缺口包括行政区分组、军队编制以及家庭、文化和宗教分布。
 

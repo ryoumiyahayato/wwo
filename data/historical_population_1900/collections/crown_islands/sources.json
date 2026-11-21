@@ -1,0 +1,18 @@
+[
+  {
+    "id": "jersey_census_1901",
+    "title": "Census, 1901 – Islands in the British Seas: Jersey",
+    "publisher": "Census Office, HMSO",
+    "url": "https://boleat.com/materials/1901.pdf",
+    "locator": "Printed p. 20, Jersey tables 1 and 2 and accompanying notes",
+    "rights": "Numeric facts transcribed from the original census page."
+  },
+  {
+    "id": "uk_preliminary_report_1911",
+    "title": "1911 Census of England and Wales, Preliminary Report",
+    "publisher": "Census Office, HMSO; transcription by University of Portsmouth",
+    "url": "https://www.visionofbritain.org.uk/census/EW1911PRE/2",
+    "locator": "Report section on Islands in the British Seas",
+    "rights": "Historical numeric facts from the report."
+  }
+]

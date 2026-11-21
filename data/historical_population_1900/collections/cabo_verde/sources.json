@@ -1,0 +1,33 @@
+[
+  {
+    "id": "cabo_verde_secretaria_1901",
+    "title": "1895 and 1900 island totals from the Secretaria Geral do Governo, Praia",
+    "publisher": "Secção de Estatística da Secretaria Geral do Governo, Praia, 28 August 1901 (AHU). Reproduced by Crisanto Avelino Sanches de Barros, Universidade de Cabo Verde and Université catholique de Louvain, 2012.",
+    "url": "https://dial.uclouvain.be/pr/boreal/object/boreal%3A116863/datastream/PDF_01/view",
+    "locator": "Barros, Génese e formação das elites político-administrativas cabo-verdianas, table 3, printed p. 86, columns 1895 and 1900.",
+    "definition": "Population attributed to each of the nine listed islands and the printed archipelago total. The 1901 date belongs to the government return. The two columns specify years only.",
+    "comparison": "The nine island rows sum to 138,706 in 1895 and 147,424 in 1900, matching both printed totals. Medina reports 90 more people in 1895. INE reports 3,495 fewer in 1900. The separate FT series has nominal midyear totals of 145,000 in 1899 and 147,000 in 1900 (Country series!H103:H104). Its 1 January interpolation is 146,008. The year-only government island numbers cannot fix that day's island shares.",
+    "method": "historical_government_return_reproduced_in_research",
+    "rights": "Factual numeric cells and source attribution only."
+  },
+  {
+    "id": "cabo_verde_medina_2009",
+    "title": "Evolução demográfica da ilha de São Vicente: do descobrimento a 1950",
+    "publisher": "Lia Medina, ISCTE – Instituto Universitário de Lisboa, 2009",
+    "url": "https://repositorio.iscte-iul.pt/bitstream/10071/2567/1/master_lia_medina.pdf",
+    "locator": "Quadro 2, pp. 15–16, archipelago population by year.",
+    "definition": "Historical annual total for the archipelago, with no month or day in the table. The series gives 143,929 in 1912 and the INE retrospective table separately labels that figure 1900.",
+    "method": "published_historical_compilation",
+    "rights": "Factual numeric cells and source attribution only."
+  },
+  {
+    "id": "cabo_verde_ine_1900_2010",
+    "title": "Evolução da população residente em Cabo Verde por Ilha Concelho (1900–2010)",
+    "publisher": "Instituto Nacional de Estatística, Cabo Verde",
+    "url": "https://ine.cv/wp-content/uploads/2016/11/evolucao-da-populacao-residente-em-cabo-verde-1900-2010.pdf",
+    "locator": "Single table, p. 1, first data row Cabo Verde, 1900 column.",
+    "definition": "Resident population in INE's retrospective census series. Island cells for 1900 are blank or dashed. The original reference day is unspecified.",
+    "method": "official_retrospective_census_series",
+    "rights": "Factual numeric cell and source attribution only."
+  }
+]

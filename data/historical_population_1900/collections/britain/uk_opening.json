@@ -1,0 +1,1448 @@
+{
+  "unit_id": "british_isles_1900",
+  "date": "1900-01-01",
+  "source_id": "uk_general_census_report_1901",
+  "source_ids": [
+    "uk_general_census_report_1901",
+    "england_wales_summary_tables_1901"
+  ],
+  "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901; Census Summary Tables III, p. 6, Ancient Counties, Persons.",
+  "endpoint_dates": [
+    "1891-04-05",
+    "1901-03-31"
+  ],
+  "country_endpoint_values": [
+    37732922,
+    41458721
+  ],
+  "population_value": 40994912,
+  "method": "Linear day interpolation at 3193/3647. Allocate integer people by largest remainders across the three UK census divisions, then within England and Wales across disjoint ancient county groups. The three London counties form one group. Yorkshire includes all three Ridings and the separately printed York parliamentary borough.",
+  "units": [
+    {
+      "unit_id": "administrative_region:gb_historic_bedfordshire",
+      "name": "Bedfordshire",
+      "endpoint_values": [
+        160704,
+        171240
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_bedfordshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_bedfordshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Bedfordshire",
+          "endpoint_values": [
+            160704,
+            171240
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Bedfordshire",
+      "population_value": 169928
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_berkshire",
+      "name": "Berkshire",
+      "endpoint_values": [
+        239138,
+        256509
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_berkshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_berkshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Berkshire",
+          "endpoint_values": [
+            239138,
+            256509
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Berkshire",
+      "population_value": 254347
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_buckinghamshire",
+      "name": "Buckinghamshire",
+      "endpoint_values": [
+        185284,
+        195764
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_buckinghamshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_buckinghamshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Buckinghamshire",
+          "endpoint_values": [
+            185284,
+            195764
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Buckinghamshire",
+      "population_value": 194459
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_cambridgeshire",
+      "name": "Cambridgeshire",
+      "endpoint_values": [
+        188961,
+        190682
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_cambridgeshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_cambridgeshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Cambridgeshire",
+          "endpoint_values": [
+            188961,
+            190682
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Cambridgeshire",
+      "population_value": 190468
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_cheshire",
+      "name": "Cheshire",
+      "endpoint_values": [
+        730058,
+        815099
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_cheshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_cheshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Cheshire",
+          "endpoint_values": [
+            730058,
+            815099
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Cheshire",
+      "population_value": 804513
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_cornwall",
+      "name": "Cornwall",
+      "endpoint_values": [
+        322571,
+        322334
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_cornwall"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_cornwall"
+      ],
+      "source_rows": [
+        {
+          "name": "Cornwall",
+          "endpoint_values": [
+            322571,
+            322334
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Cornwall",
+      "population_value": 322364
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_cumberland",
+      "name": "Cumberland",
+      "endpoint_values": [
+        266549,
+        266933
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_cumberland"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_cumberland"
+      ],
+      "source_rows": [
+        {
+          "name": "Cumberland",
+          "endpoint_values": [
+            266549,
+            266933
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Cumberland",
+      "population_value": 266885
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_derbyshire",
+      "name": "Derbyshire",
+      "endpoint_values": [
+        528033,
+        620322
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_derbyshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_derbyshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Derbyshire",
+          "endpoint_values": [
+            528033,
+            620322
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Derbyshire",
+      "population_value": 608833
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_devon",
+      "name": "Devon",
+      "endpoint_values": [
+        631808,
+        661314
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_devonshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_devon"
+      ],
+      "source_rows": [
+        {
+          "name": "Devonshire",
+          "endpoint_values": [
+            631808,
+            661314
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Devonshire",
+      "population_value": 657641
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_dorset",
+      "name": "Dorset",
+      "endpoint_values": [
+        194517,
+        202936
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_dorsetshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_dorset"
+      ],
+      "source_rows": [
+        {
+          "name": "Dorsetshire",
+          "endpoint_values": [
+            194517,
+            202936
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Dorsetshire",
+      "population_value": 201888
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_durham",
+      "name": "Durham",
+      "endpoint_values": [
+        1016454,
+        1187361
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_durham"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_durham"
+      ],
+      "source_rows": [
+        {
+          "name": "Durham",
+          "endpoint_values": [
+            1016454,
+            1187361
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Durham",
+      "population_value": 1166086
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_essex",
+      "name": "Essex",
+      "endpoint_values": [
+        785445,
+        1085771
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_essex"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_essex"
+      ],
+      "source_rows": [
+        {
+          "name": "Essex",
+          "endpoint_values": [
+            785445,
+            1085771
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Essex",
+      "population_value": 1048385
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_gloucestershire",
+      "name": "Gloucestershire",
+      "endpoint_values": [
+        599947,
+        634729
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_gloucestershire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_gloucestershire"
+      ],
+      "source_rows": [
+        {
+          "name": "Gloucestershire",
+          "endpoint_values": [
+            599947,
+            634729
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Gloucestershire",
+      "population_value": 630399
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_hampshire",
+      "name": "Hampshire",
+      "endpoint_values": [
+        690097,
+        797634
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_hampshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_hampshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Hampshire",
+          "endpoint_values": [
+            690097,
+            797634
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Hampshire",
+      "population_value": 784247
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_herefordshire",
+      "name": "Herefordshire",
+      "endpoint_values": [
+        115949,
+        114380
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_herefordshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_herefordshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Herefordshire",
+          "endpoint_values": [
+            115949,
+            114380
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Herefordshire",
+      "population_value": 114575
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_hertfordshire",
+      "name": "Hertfordshire",
+      "endpoint_values": [
+        220162,
+        250152
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_hertfordshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_hertfordshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Hertfordshire",
+          "endpoint_values": [
+            220162,
+            250152
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Hertfordshire",
+      "population_value": 246419
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_huntingdonshire",
+      "name": "Huntingdonshire",
+      "endpoint_values": [
+        57761,
+        57771
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_huntingdonshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_huntingdonshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Huntingdonshire",
+          "endpoint_values": [
+            57761,
+            57771
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Huntingdonshire",
+      "population_value": 57770
+    },
+    {
+      "unit_id": "uk_ancient_kent_middlesex_surrey",
+      "name": "Kent, Middlesex and Surrey (ancient counties)",
+      "endpoint_values": [
+        6125338,
+        6946908
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_kent",
+        "uk_ancient_area_middlesex",
+        "uk_ancient_area_surrey"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_kent",
+        "administrative_region:gb_historic_middlesex",
+        "administrative_region:gb_historic_surrey"
+      ],
+      "source_rows": [
+        {
+          "name": "Kent",
+          "endpoint_values": [
+            1142324,
+            1348841
+          ]
+        },
+        {
+          "name": "Middlesex",
+          "endpoint_values": [
+            3251671,
+            3585323
+          ]
+        },
+        {
+          "name": "Surrey",
+          "endpoint_values": [
+            1731343,
+            2012744
+          ]
+        }
+      ],
+      "place_ids": [
+        "place:london",
+        "place:dover",
+        "place:port_london"
+      ],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Kent + Middlesex + Surrey",
+      "population_value": 6844634
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_lancashire",
+      "name": "Lancashire",
+      "endpoint_values": [
+        3926760,
+        4406409
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_lancashire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_lancashire"
+      ],
+      "source_rows": [
+        {
+          "name": "Lancashire",
+          "endpoint_values": [
+            3926760,
+            4406409
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Lancashire",
+      "population_value": 4346700
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_leicestershire",
+      "name": "Leicestershire",
+      "endpoint_values": [
+        373584,
+        434019
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_leicestershire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_leicestershire"
+      ],
+      "source_rows": [
+        {
+          "name": "Leicestershire",
+          "endpoint_values": [
+            373584,
+            434019
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Leicestershire",
+      "population_value": 426496
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_lincolnshire",
+      "name": "Lincolnshire",
+      "endpoint_values": [
+        472878,
+        498858
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_lincolnshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_lincolnshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Lincolnshire",
+          "endpoint_values": [
+            472878,
+            498858
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Lincolnshire",
+      "population_value": 495624
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_monmouthshire",
+      "name": "Monmouthshire",
+      "endpoint_values": [
+        252416,
+        292317
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_monmouthshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_monmouthshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Monmouthshire",
+          "endpoint_values": [
+            252416,
+            292317
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Monmouthshire",
+      "population_value": 287350
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_norfolk",
+      "name": "Norfolk",
+      "endpoint_values": [
+        454516,
+        460120
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_norfolk"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_norfolk"
+      ],
+      "source_rows": [
+        {
+          "name": "Norfolk",
+          "endpoint_values": [
+            454516,
+            460120
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Norfolk",
+      "population_value": 459422
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_northamptonshire",
+      "name": "Northamptonshire",
+      "endpoint_values": [
+        302183,
+        338088
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_northamptonshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_northamptonshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Northamptonshire",
+          "endpoint_values": [
+            302183,
+            338088
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Northamptonshire",
+      "population_value": 333618
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_northumberland",
+      "name": "Northumberland",
+      "endpoint_values": [
+        506442,
+        603498
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_northumberland"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_northumberland"
+      ],
+      "source_rows": [
+        {
+          "name": "Northumberland",
+          "endpoint_values": [
+            506442,
+            603498
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Northumberland",
+      "population_value": 591416
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_nottinghamshire",
+      "name": "Nottinghamshire",
+      "endpoint_values": [
+        445823,
+        514578
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_nottinghamshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_nottinghamshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Nottinghamshire",
+          "endpoint_values": [
+            445823,
+            514578
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Nottinghamshire",
+      "population_value": 506019
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_oxfordshire",
+      "name": "Oxfordshire",
+      "endpoint_values": [
+        185240,
+        181120
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_oxfordshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_oxfordshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Oxfordshire",
+          "endpoint_values": [
+            185240,
+            181120
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Oxfordshire",
+      "population_value": 181633
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_rutland",
+      "name": "Rutland",
+      "endpoint_values": [
+        20659,
+        19709
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_rutlandshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_rutland"
+      ],
+      "source_rows": [
+        {
+          "name": "Rutlandshire",
+          "endpoint_values": [
+            20659,
+            19709
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Rutlandshire",
+      "population_value": 19827
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_shropshire",
+      "name": "Shropshire",
+      "endpoint_values": [
+        236339,
+        239324
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_shropshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_shropshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Shropshire",
+          "endpoint_values": [
+            236339,
+            239324
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Shropshire",
+      "population_value": 238952
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_somerset",
+      "name": "Somerset",
+      "endpoint_values": [
+        484337,
+        508256
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_somersetshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_somerset"
+      ],
+      "source_rows": [
+        {
+          "name": "Somersetshire",
+          "endpoint_values": [
+            484337,
+            508256
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Somersetshire",
+      "population_value": 505278
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_staffordshire",
+      "name": "Staffordshire",
+      "endpoint_values": [
+        1083424,
+        1234506
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_staffordshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_staffordshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Staffordshire",
+          "endpoint_values": [
+            1083424,
+            1234506
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Staffordshire",
+      "population_value": 1215698
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_suffolk",
+      "name": "Suffolk",
+      "endpoint_values": [
+        371235,
+        384293
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_suffolk"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_suffolk"
+      ],
+      "source_rows": [
+        {
+          "name": "Suffolk",
+          "endpoint_values": [
+            371235,
+            384293
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Suffolk",
+      "population_value": 382667
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_sussex",
+      "name": "Sussex",
+      "endpoint_values": [
+        550446,
+        605202
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_sussex"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_sussex"
+      ],
+      "source_rows": [
+        {
+          "name": "Sussex",
+          "endpoint_values": [
+            550446,
+            605202
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Sussex",
+      "population_value": 598386
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_warwickshire",
+      "name": "Warwickshire",
+      "endpoint_values": [
+        805072,
+        897835
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_warwickshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_warwickshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Warwickshire",
+          "endpoint_values": [
+            805072,
+            897835
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Warwickshire",
+      "population_value": 886287
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_westmorland",
+      "name": "Westmorland",
+      "endpoint_values": [
+        66098,
+        64303
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_westmorland"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_westmorland"
+      ],
+      "source_rows": [
+        {
+          "name": "Westmorland",
+          "endpoint_values": [
+            66098,
+            64303
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Westmorland",
+      "population_value": 64526
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_wiltshire",
+      "name": "Wiltshire",
+      "endpoint_values": [
+        264997,
+        273869
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_wiltshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_wiltshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Wiltshire",
+          "endpoint_values": [
+            264997,
+            273869
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Wiltshire",
+      "population_value": 272765
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_worcestershire",
+      "name": "Worcestershire",
+      "endpoint_values": [
+        413744,
+        488338
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_worcestershire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_worcestershire"
+      ],
+      "source_rows": [
+        {
+          "name": "Worcestershire",
+          "endpoint_values": [
+            413744,
+            488338
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Worcestershire",
+      "population_value": 479052
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_yorkshire",
+      "name": "Yorkshire",
+      "endpoint_values": [
+        3208521,
+        3584762
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_yorkshire_east_riding",
+        "uk_ancient_area_yorkshire_north_riding",
+        "uk_ancient_area_yorkshire_west_riding",
+        "uk_ancient_area_york_parliamentary_borough"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_yorkshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Yorkshire, East Riding",
+          "endpoint_values": [
+            341546,
+            384997
+          ]
+        },
+        {
+          "name": "Yorkshire, North Riding",
+          "endpoint_values": [
+            360076,
+            379396
+          ]
+        },
+        {
+          "name": "Yorkshire, West Riding",
+          "endpoint_values": [
+            2439895,
+            2744848
+          ]
+        },
+        {
+          "name": "York (Parliamentary Borough)",
+          "endpoint_values": [
+            67004,
+            75521
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Yorkshire, East Riding + Yorkshire, North Riding + Yorkshire, West Riding + York (Parliamentary Borough)",
+      "population_value": 3537925
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_anglesey",
+      "name": "Anglesey",
+      "endpoint_values": [
+        50098,
+        50606
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_anglesey"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_anglesey"
+      ],
+      "source_rows": [
+        {
+          "name": "Anglesey",
+          "endpoint_values": [
+            50098,
+            50606
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Anglesey",
+      "population_value": 50543
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_brecknockshire",
+      "name": "Brecknockshire",
+      "endpoint_values": [
+        57031,
+        59907
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_brecknockshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_brecknockshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Brecknockshire",
+          "endpoint_values": [
+            57031,
+            59907
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Brecknockshire",
+      "population_value": 59549
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_cardiganshire",
+      "name": "Cardiganshire",
+      "endpoint_values": [
+        62630,
+        60240
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_cardiganshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_cardiganshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Cardiganshire",
+          "endpoint_values": [
+            62630,
+            60240
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Cardiganshire",
+      "population_value": 60538
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_carmarthenshire",
+      "name": "Carmarthenshire",
+      "endpoint_values": [
+        130566,
+        135328
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_carmarthenshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_carmarthenshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Carmarthenshire",
+          "endpoint_values": [
+            130566,
+            135328
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Carmarthenshire",
+      "population_value": 134735
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_carnarvonshire",
+      "name": "Carnarvonshire",
+      "endpoint_values": [
+        118204,
+        126883
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_carnarvonshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_carnarvonshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Carnarvonshire",
+          "endpoint_values": [
+            118204,
+            126883
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Carnarvonshire",
+      "population_value": 125803
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_denbighshire",
+      "name": "Denbighshire",
+      "endpoint_values": [
+        117872,
+        129942
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_denbighshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_denbighshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Denbighshire",
+          "endpoint_values": [
+            117872,
+            129942
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Denbighshire",
+      "population_value": 128439
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_flintshire",
+      "name": "Flintshire",
+      "endpoint_values": [
+        77277,
+        81700
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_flintshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_flintshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Flintshire",
+          "endpoint_values": [
+            77277,
+            81700
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Flintshire",
+      "population_value": 81149
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_glamorgan",
+      "name": "Glamorgan",
+      "endpoint_values": [
+        687218,
+        859931
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_glamorganshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_glamorgan"
+      ],
+      "source_rows": [
+        {
+          "name": "Glamorganshire",
+          "endpoint_values": [
+            687218,
+            859931
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Glamorganshire",
+      "population_value": 838431
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_merionethshire",
+      "name": "Merionethshire",
+      "endpoint_values": [
+        49212,
+        49149
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_merionethshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_merionethshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Merionethshire",
+          "endpoint_values": [
+            49212,
+            49149
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Merionethshire",
+      "population_value": 49157
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_montgomeryshire",
+      "name": "Montgomeryshire",
+      "endpoint_values": [
+        58003,
+        54901
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_montgomeryshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_montgomeryshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Montgomeryshire",
+          "endpoint_values": [
+            58003,
+            54901
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Montgomeryshire",
+      "population_value": 55287
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_pembrokeshire",
+      "name": "Pembrokeshire",
+      "endpoint_values": [
+        89133,
+        88732
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_pembrokeshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_pembrokeshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Pembrokeshire",
+          "endpoint_values": [
+            89133,
+            88732
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Pembrokeshire",
+      "population_value": 88782
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_radnorshire",
+      "name": "Radnorshire",
+      "endpoint_values": [
+        21791,
+        23281
+      ],
+      "source_id": "england_wales_summary_tables_1901",
+      "source_unit_ids": [
+        "uk_ancient_area_radnorshire"
+      ],
+      "member_region_ids": [
+        "administrative_region:gb_historic_radnorshire"
+      ],
+      "source_rows": [
+        {
+          "name": "Radnorshire",
+          "endpoint_values": [
+            21791,
+            23281
+          ]
+        }
+      ],
+      "place_ids": [],
+      "locator": "Table III, p. 6, Persons, 1891 and 1901: Radnorshire",
+      "population_value": 23096
+    },
+    {
+      "unit_id": "administrative_region:uk_constituent_scotland",
+      "name": "Scotland",
+      "endpoint_values": [
+        4025647,
+        4472103
+      ],
+      "source_unit_ids": [
+        "uk_scotland"
+      ],
+      "source_id": "uk_general_census_report_1901",
+      "place_ids": [],
+      "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, Scotland",
+      "population_value": 4416526
+    },
+    {
+      "unit_id": "administrative_region:uk_constituent_ireland",
+      "name": "Ireland",
+      "endpoint_values": [
+        4704750,
+        4458775
+      ],
+      "source_unit_ids": [
+        "uk_ireland"
+      ],
+      "source_id": "uk_general_census_report_1901",
+      "place_ids": [],
+      "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, Ireland",
+      "population_value": 4489395
+    }
+  ]
+}
