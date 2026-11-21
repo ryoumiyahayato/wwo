@@ -803,7 +803,7 @@ impl TransportPage {
         let destinations: Vec<_> = remaining.by_ref().take(page_size)
             .map(|id| {
                 let name = world.place_name(id);
-                let label = if world.transport().node(id).is_some_and(|node| node.kind == crate::transport::NodeKind::Port) {
+                let label = if world.transport().node(id).is_some_and(|node| node.kind == wwo_map_lab::transport::NodeKind::Port) {
                     format!("{name} · 码头")
                 } else { name.to_owned() };
                 json!({"id":id,"label":label})
@@ -844,7 +844,10 @@ impl TransportPage {
         let mut freight_lines = Vec::new();
         let mut freight_actions = Vec::new();
         if let Some(lot) = self.lot.and_then(|id| world.freight_lots().find(|lot| lot.id == id)) {
-            freight_lines.push(format!("数量 {:.3} · 货款 {} · 已付运费 {}", lot.quantity_milli as f64/1000., lot.purchase_centimes, lot.freight_centimes));
+            let units = lot.quantity_milli as f64 / 1000.0;
+            let unit = world.macro_economy().commodity_info(&lot.good).map_or("", |term| term.2);
+            let tonnes = world.macro_economy().freight_tonnes(&lot.good, units).unwrap_or_default();
+            freight_lines.push(format!("{units:.3} {unit} · {tonnes:.3} 吨 · 货款 {} · 已付运费 {}", lot.purchase_centimes, lot.freight_centimes));
             match &lot.state {
                 FreightState::InTransit {reservation_id, destination} => {
                     let (at, plan) = world.freight_progress(*reservation_id);
@@ -866,6 +869,7 @@ impl TransportPage {
                         freight_actions.push(json!({"id":"freight_quote","label":"查询运费"}));
                     }
                     if let Some((_, plan)) = self.freight_quote.as_ref().filter(|(id, plan)| *id == lot.id && plan.departure_minute() >= now) {
+                        freight_lines.push(format!("本次预约 {} 货位 · 每货位上限 1 吨", plan.load_units()));
                         freight_lines.extend(describe_plan(world, plan));
                         freight_actions.push(json!({"id":"freight_dispatch","label":"确认发运"}));
                     }
@@ -1014,7 +1018,10 @@ impl MarketPage {
             };
             let unit = economy.commodity_info(&shipment.commodity).map_or("", |(_,_,unit)|unit);
             let mut details = format!("{:.3} {unit} · {timing}\n货值 {} 生丁", shipment.units, shipment.value_centimes);
-            if let Some(c) = &shipment.carriage { details.push_str(&format!(" · 本次预约运费 {} 生丁", c.fare_centimes)); }
+            if let Some(c) = &shipment.carriage {
+                if let Some(slots) = c.mass_slots { details.push_str(&format!(" · {slots} 货位")); }
+                details.push_str(&format!(" · 本次预约运费 {} 生丁", c.fare_centimes));
+            }
             json!({"name":format!("{} → {} · {}",label(&shipment.origin),label(&shipment.destination),
                 economy.commodity_info(&shipment.commodity).map_or(shipment.commodity.as_str(), |(name,_,_)| name)),
                 "details":details})

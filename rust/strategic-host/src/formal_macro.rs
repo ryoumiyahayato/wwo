@@ -31,11 +31,42 @@ struct Commodity {
     name_zh: String,
     category: String,
     unit_name_zh: String,
+    unit_mass_kg: u32,
     base_price_centimes: i64,
     base_daily_units_per_million: f64,
     income_elasticity_bp: i64,
     international_liquidity_units: u64,
     target_stock_days: f64,
+}
+
+/// One freight slot carries up to 1,000 kg. People use the separate seat allocation.
+#[derive(Clone, Copy)]
+pub(crate) struct FreightMass(u32);
+
+impl FreightMass {
+    pub(crate) fn tonnes(self, units: f64) -> f64 { units * f64::from(self.0) / 1000.0 }
+
+    pub(crate) fn slots(self, units: f64) -> io::Result<u32> {
+        let slots = self.tonnes(units).ceil();
+        if !(1.0..=f64::from(u32::MAX)).contains(&slots) { return Err(invalid("invalid freight mass")); }
+        Ok(slots as u32)
+    }
+
+    pub(crate) fn slots_milli(self, milli: i64) -> io::Result<u32> {
+        if !(1..=MAX_AMOUNT).contains(&milli) { return Err(invalid("invalid freight quantity")); }
+        let grams = i128::from(milli) * i128::from(self.0);
+        u32::try_from((grams + 999_999) / 1_000_000).map_err(|_| invalid("freight mass exceeds capacity bounds"))
+    }
+
+    fn units_fitting(self, slots: u32) -> f64 { f64::from(slots) * 1000.0 / f64::from(self.0) }
+
+    fn affordable_units(self, ceiling: u32, price: i64, slot_fare: i64, budget: i64) -> f64 {
+        let smooth_price = price as f64 + self.tonnes(1.0) * slot_fare as f64;
+        let full = self.tonnes(budget as f64 / smooth_price).floor().clamp(0.0, f64::from(ceiling)) as u32;
+        let next = full.saturating_add(1).min(ceiling);
+        let after_fare = budget.saturating_sub(slot_fare.saturating_mul(i64::from(next)));
+        self.units_fitting(full).max(self.units_fitting(next).min(after_fare as f64 / price as f64))
+    }
 }
 
 struct TradeRoute {
@@ -114,6 +145,8 @@ pub struct TradeCarriage {
     pub fare_centimes: i64,
     pub arrival_minute: i64,
     pub held: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mass_slots: Option<u32>,
 }
 
 impl MacroEconomy {
@@ -180,6 +213,15 @@ impl MacroEconomy {
 
     pub fn last_settlement_hour(&self) -> i64 {
         self.last_settlement_hour
+    }
+
+    pub(crate) fn freight_mass(&self, good: &str) -> io::Result<FreightMass> {
+        self.inputs.commodities.iter().find(|item| item.commodity_id == good && item.unit_mass_kg > 0)
+            .map(|item| FreightMass(item.unit_mass_kg)).ok_or_else(|| invalid("该商品没有可托运的实物质量。"))
+    }
+
+    pub fn freight_tonnes(&self, good: &str, units: f64) -> Option<f64> {
+        self.freight_mass(good).ok().filter(|_| units >= 0.0 && units.is_finite()).map(|mass| mass.tonnes(units))
     }
 
     pub fn commodity_info(&self, good: &str) -> Option<(&str, &str, &str)> {
@@ -457,6 +499,7 @@ impl MacroEconomy {
             if !ledger.has_payment(&format!("goods:{}", shipment.id), &buyer, &seller, shipment.value_centimes, "goods", &shipment.id)
                 || !ledger.has_payment(&format!("carriage:{}", c.reservation), &buyer, TRANSPORT_ACCOUNT, c.fare_centimes, "freight", &shipment.id)
                 || transport.network().segment(&shipment.route_id).is_none()
+                || c.mass_slots.is_some_and(|slots| self.freight_mass(&shipment.commodity).and_then(|m| m.slots(shipment.units)).ok() != Some(slots))
                 || c.arrival_minute.checked_add(59).map(|m| m / 60) != Some(shipment.arrival_hour)
             { return Err(invalid("macro shipment conflicts with recorded goods or freight payment")); }
         }
@@ -468,7 +511,7 @@ impl MacroEconomy {
             if transport.traffic(c.reservation) != Some(Traffic::Trade)
                 || carriage_corridor(plan) != shipment.route_id || plan.route().from != c.from
                 || transport.network().area_node(&shipment.destination) != Some(plan.route().to.as_str())
-                || plan.load_units() != shipment.units.ceil() as u32 || c.fare_centimes != plan.fare_centimes()
+                || plan.load_units() != c.mass_slots.unwrap_or_else(|| shipment.units.ceil() as u32) || c.fare_centimes != plan.fare_centimes()
                 || plan.arrival_minute() != c.arrival_minute || c.held != transport.held(c.reservation).is_some()
                 || refund > 0 && !ledger.has_payment(&format!("held-refund:{}", c.reservation), TRANSPORT_ACCOUNT, &buyer, refund, "cargo_refund", &shipment.id)
             { return Err(invalid("macro shipment conflicts with reservation or payment")); }
@@ -508,7 +551,10 @@ impl MacroEconomy {
             let Some(c) = row.carriage.as_mut().filter(|c| c.held) else { continue };
             let from = transport.held(c.reservation).expect("held cargo station").to_owned();
             let to = transport.network().area_node(&row.destination).expect("scheduled destination").to_owned();
-            let Ok(plan) = transport.quote_service(&from, &to, ModeSet::ALL, row.units.ceil() as u32, now, Traffic::Trade) else { continue };
+            let item = self.inputs.commodities.iter().find(|item| item.commodity_id == row.commodity)
+                .ok_or_else(|| invalid("unknown held cargo"))?;
+            let slots = FreightMass(item.unit_mass_kg).slots(row.units)?;
+            let Ok(plan) = transport.quote_service(&from, &to, ModeSet::ALL, slots, now, Traffic::Trade) else { continue };
             let buyer = &self.markets[&row.destination].id;
             let fare = plan.fare_centimes();
             if self.markets[&row.destination].trade_budget(ledger) < fare { continue; }
@@ -525,7 +571,7 @@ impl MacroEconomy {
                 return Err(error);
             }
             transport.finish(c.reservation);
-            *c = TradeCarriage { reservation: id, from, fare_centimes: fare, arrival_minute: arrival, held: false };
+            *c = TradeCarriage { reservation: id, from, fare_centimes: fare, arrival_minute: arrival, held: false, mass_slots: Some(slots) };
             row.route_id = route_id;
             row.arrival_hour = (arrival + 59) / 60;
         }
@@ -543,22 +589,22 @@ impl MacroEconomy {
             let Some(to) = transport.network().area_node(receiver).map(str::to_owned) else { continue };
             let buyer = self.markets[receiver].id.clone();
             let mut shortages: Vec<_> = self.inputs.commodities.iter()
-                .filter(|commodity| commodity.international_liquidity_units > 0)
+                .filter(|commodity| commodity.international_liquidity_units > 0 && commodity.unit_mass_kg > 0)
                 .filter_map(|commodity| {
                     let id = &commodity.commodity_id;
                     let due = inbound.get(receiver).and_then(|market| market.get(id)).copied().unwrap_or(0.0);
                     let local = self.markets[receiver].commodities[id];
                     // Buy for the next two settlements when local output cannot replenish the stock.
                     let unmet = local.unmet + (2.0 * (local.demanded - local.produced) - local.inventory).max(0.0) - due;
-                    (unmet > QUANTITY_EPSILON).then_some((id, unmet))
+                    (unmet > QUANTITY_EPSILON).then_some((id, unmet, FreightMass(commodity.unit_mass_kg)))
                 }).collect();
             if shortages.is_empty() || self.markets[receiver].trade_budget(ledger) == 0 { continue; }
             let rates = transport.supplier_rates(&to);
             shortages.sort_by(|a, b| b.1.total_cmp(&a.1));
-            for (commodity, mut remaining) in shortages.into_iter().take(MAX_SHORTAGES) {
+            for (commodity, mut remaining, mass) in shortages.into_iter().take(MAX_SHORTAGES) {
                 let mut suppliers: Vec<_> = rates.iter().filter_map(|(origin, &rate)| {
                     let good = self.markets.get(origin)?.commodities[commodity];
-                    (good.surplus() > QUANTITY_EPSILON).then_some((good.price_centimes as u64 + rate, origin))
+                    (good.surplus() > QUANTITY_EPSILON).then_some((u128::from(good.price_centimes as u64) * 1000 + u128::from(rate) * u128::from(mass.0), origin))
                 }).collect();
                 suppliers.sort_unstable();
                 for (_, origin) in suppliers.into_iter().take(MAX_SUPPLIERS) {
@@ -569,10 +615,11 @@ impl MacroEconomy {
                         .map(|cap| cap.line_limit.min(cap.cargo_limit)).min().unwrap_or(0);
                     let budget = self.markets[receiver].trade_budget(ledger);
                     let good = self.markets[origin].commodities[commodity];
-                    let units = remaining.min(good.surplus()).min(f64::from(ceiling))
-                        .min((budget / (good.price_centimes + sample.fare_centimes()).max(1)) as f64);
+                    let units = remaining.min(good.surplus())
+                        .min(mass.affordable_units(ceiling, good.price_centimes, sample.fare_centimes(), budget));
                     if units <= QUANTITY_EPSILON { continue; }
-                    let Ok(plan) = transport.quote_service(&from, &to, ModeSet::ALL, units.ceil() as u32, now, Traffic::Trade) else { continue };
+                    let slots = mass.slots(units)?;
+                    let Ok(plan) = transport.quote_service(&from, &to, ModeSet::ALL, slots, now, Traffic::Trade) else { continue };
                     if plan.first_departure_minute() >= now + MINUTES_PER_DAY { continue; }
                     let fare = plan.fare_centimes();
                     let value = ((units * good.price_centimes as f64).ceil() as i64).max(1);
@@ -606,7 +653,7 @@ impl MacroEconomy {
                         id, origin: origin.clone(), destination: receiver.clone(), commodity: commodity.clone(),
                         units, value_centimes: value, dispatch_hour: hour, arrival_hour: (arrival + 59) / 60,
                         route_id,
-                        carriage: Some(TradeCarriage { reservation, from, fare_centimes: fare, arrival_minute: arrival, held: false }),
+                        carriage: Some(TradeCarriage { reservation, from, fare_centimes: fare, arrival_minute: arrival, held: false, mass_slots: Some(slots) }),
                     });
                     self.next_shipment += 1;
                     remaining -= units;
@@ -741,6 +788,7 @@ impl Shipment {
                 let fields = map(value)?;
                 Ok(TradeCarriage {
                     reservation: u64::try_from(integer(field(fields, "reservation")?)?).map_err(|_| invalid("invalid carriage ID"))?,
+                    mass_slots: lookup(fields, "mass_slots").map(|v| u32::try_from(integer(v)?).map_err(|_| invalid("invalid signed cargo load"))).transpose()?,
                     from: text(fields, "from")?.to_owned(),
                     fare_centimes: integer(field(fields, "fare")?)?,
                     arrival_minute: integer(field(fields, "arrival")?)?,
@@ -764,8 +812,10 @@ impl Shipment {
             ("status", json!("in_transit")),
         ];
         if let Some(c) = &self.carriage {
-            fields.push(("carriage", typed_map([("reservation", typed_int(c.reservation as i64)), ("from", json!(c.from)),
-                ("fare", typed_int(c.fare_centimes)), ("arrival", typed_int(c.arrival_minute)), ("held", json!(c.held))])));
+            let mut carriage = vec![("reservation", typed_int(c.reservation as i64)), ("from", json!(c.from)),
+                ("fare", typed_int(c.fare_centimes)), ("arrival", typed_int(c.arrival_minute)), ("held", json!(c.held))];
+            if let Some(slots) = c.mass_slots { carriage.push(("mass_slots", typed_int(i64::from(slots)))); }
+            fields.push(("carriage", typed_map(carriage)));
         }
         typed_map(fields)
     }

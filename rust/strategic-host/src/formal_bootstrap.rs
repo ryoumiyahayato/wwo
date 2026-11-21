@@ -2004,6 +2004,7 @@ mod tests {
         assert!(france.macro_economy().markets()["qing_empire"].commodities["potatoes"].inventory < grain_before);
         let mut flows = BTreeMap::<String, (f64, f64, f64, i64)>::new();
         let mut received_units = BTreeMap::<String, BTreeMap<String, f64>>::new();
+        let mut tonnes = BTreeMap::<String, (f64, f64)>::new();
         for day in 1..=90 {
             if day > 1 { france.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap(); }
             for s in france.macro_economy.shipments().iter().filter(|s| s.dispatch_hour == day * 24) {
@@ -2011,9 +2012,11 @@ mod tests {
                 let buyer = flows.entry(s.destination.clone()).or_default();
                 buyer.1 += s.units;
                 buyer.3 += s.carriage.as_ref().unwrap().fare_centimes;
+                tonnes.entry(s.destination.clone()).or_default().0 += france.macro_economy.freight_mass(&s.commodity).unwrap().tonnes(s.units);
             }
             for s in france.macro_economy.last_arrivals() {
                 flows.entry(s.destination.clone()).or_default().2 += s.units;
+                tonnes.entry(s.destination.clone()).or_default().1 += france.macro_economy.freight_mass(&s.commodity).unwrap().tonnes(s.units);
                 let scale = france.macro_economy.commodity_info(&s.commodity).unwrap().2;
                 *received_units.entry(s.destination.clone()).or_default().entry(scale.into()).or_default() += s.units;
             }
@@ -2022,7 +2025,8 @@ mod tests {
             let (sold, bought, arrived, freight) = flows.get(unit).copied().unwrap_or_default();
             let unmet: f64 = market.commodities.values().map(|c| c.unmet).sum();
             let received = received_units.get(unit);
-            println!("{unit}: shipped={sold:.3} ordered={bought:.3} received={arrived:.3} freight={freight} unmet_d90={unmet:.3} received_units={received:?}");
+            let (ordered_t, arrived_t) = tonnes.get(unit).copied().unwrap_or_default();
+            println!("{unit}: shipped={sold:.3} ordered={bought:.3} received={arrived:.3} freight={freight} unmet_d90={unmet:.3} ordered_t={ordered_t:.6} arrived_t={arrived_t:.6} received_units={received:?}");
         }
         batch.advance_migrated_domains(MINUTES_PER_DAY * 90, &managed).unwrap();
         assert_eq!(batch.character.day, 90);

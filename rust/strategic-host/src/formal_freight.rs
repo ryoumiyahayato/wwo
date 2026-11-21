@@ -39,6 +39,8 @@ pub struct FreightLot {
 #[serde(deny_unknown_fields)]
 struct Dispatch {
     reservation_id: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    mass_slots: Option<u32>,
     from: String,
     to: String,
     fare_centimes: i64,
@@ -92,14 +94,6 @@ impl FreightLot {
     }
 }
 
-// One full catalogue unit uses one shared load slot. A fractional final unit occupies a full slot.
-fn load(quantity_milli: i64) -> io::Result<u32> {
-    if !(1..=MAX_AMOUNT).contains(&quantity_milli) {
-        return Err(invalid("托运数量须大于零且在正式数量范围内。"));
-    }
-    u32::try_from((quantity_milli + 999) / 1000).map_err(|_| invalid("货量超出可预约载荷。"))
-}
-
 impl InitialWorld {
     pub fn freight_lots(&self) -> impl DoubleEndedIterator<Item = &FreightLot> {
         self.freight.lots.values()
@@ -122,7 +116,7 @@ impl InitialWorld {
         if !self.player_alive() || self.passenger_in_transit() {
             return Err(invalid("人物当前无法在场办理购货。"));
         }
-        load(quantity_milli)?;
+        self.macro_economy.freight_mass(good)?.slots_milli(quantity_milli)?;
         let origin = self.last_station().to_owned();
         let unit = self.population_unit_at(&origin)
             .ok_or_else(|| invalid("当前地点没有正式统计市场。"))?.to_owned();
@@ -196,7 +190,7 @@ impl InitialWorld {
         {
             return Err(invalid("首次发运须在购货地交货。"));
         }
-        Ok((from, load(lot.quantity_milli)?))
+        Ok((from, self.macro_economy.freight_mass(&lot.good)?.slots_milli(lot.quantity_milli)?))
     }
 
     pub fn quote_freight(&mut self, id: u64, to: &str, modes: ModeSet) -> io::Result<Plan> {
@@ -235,6 +229,7 @@ impl InitialWorld {
         let lot = self.freight.lots.get_mut(&id).expect("quoted owned lot");
         lot.dispatches.push(Dispatch {
             reservation_id,
+            mass_slots: Some(units),
             from,
             to: to.clone(),
             fare_centimes: fare,
@@ -346,7 +341,8 @@ impl InitialWorld {
             .ok_or_else(|| invalid("货主账户缺失。"))?
             .account_id;
         for (index, (&id, lot)) in self.freight.lots.iter().enumerate() {
-            let units = load(lot.quantity_milli)?;
+            let mass = self.macro_economy.freight_mass(&lot.good)?;
+            if !(1..=MAX_AMOUNT).contains(&lot.quantity_milli) { return Err(invalid("invalid saved freight quantity")); }
             let unit = self.population_unit_at(&lot.origin)
                 .ok_or_else(|| invalid("存档购货地不存在。"))?;
             let market = self
@@ -380,7 +376,8 @@ impl InitialWorld {
             for dispatch in &lot.dispatches {
                 let reservation = dispatch.reservation_id;
                 let payment_ref = format!("transport:{reservation}");
-                if reservation == 0
+                if dispatch.mass_slots.is_some_and(|slots| mass.slots_milli(lot.quantity_milli).ok() != Some(slots))
+                    || reservation == 0
                     || !used.insert(reservation)
                     || place != Some(dispatch.from.as_str())
                     || dispatch.from == dispatch.to
@@ -437,7 +434,7 @@ impl InitialWorld {
                                 && plan.route().from == dispatch.from
                                 && plan.route().to == *destination
                                 && plan.fare_centimes() == dispatch.fare_centimes
-                                && plan.load_units() == units
+                                && i64::from(plan.load_units()) == dispatch.mass_slots.map_or((lot.quantity_milli + 999) / 1000, i64::from)
                         })
                 }
                 FreightState::Interrupted { place: held } => {
@@ -496,6 +493,43 @@ mod tests {
         bootstrap
             .restore_native(serde_json::from_value(world.snapshot()).unwrap())
             .unwrap()
+    }
+
+    #[test]
+    fn transport_freight_prices_light_and_heavy_cargo_by_mass_and_honors_a_signed_old_fare() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create(FRANCE).unwrap();
+        let rail = ModeSet::only(TransportMode::Rail);
+        let from = "place:paris";
+        let to = "place:rouen";
+        let quote = |world: &mut InitialWorld, good| {
+            let price = world.macro_economy.markets()[FRANCE].commodities[good].price_centimes;
+            let lot = world.buy_freight(good, 200, price).unwrap();
+            (lot, world.quote_freight(lot, to, rail).unwrap())
+        };
+        let (_, light) = quote(&mut world, "silk_goods");
+        let (heavy, plan) = quote(&mut world, "railway_equipment");
+        assert_eq!((light.load_units(), plan.load_units()), (1, 4));
+        assert_eq!(light.fare_centimes() * 4, plan.fare_centimes());
+        let mass = world.macro_economy.freight_mass("railway_equipment").unwrap();
+        assert_eq!(mass.slots(0.2).unwrap(), plan.load_units());
+        assert_eq!(mass.slots_milli(200).unwrap(), plan.load_units());
+
+        let old = world.transport.quote_service(from, to, rail, 1, 0, Traffic::PlayerFreight).unwrap();
+        let fare = old.fare_centimes();
+        let arrival = old.arrival_minute();
+        let reservation = world.transport.reserve_freight(old).unwrap();
+        world.pay_transport(fare, reservation).unwrap();
+        let lot = world.freight.lots.get_mut(&heavy).unwrap();
+        lot.dispatches.push(Dispatch { reservation_id: reservation, from: from.into(), to: to.into(),
+            fare_centimes: fare, refund_centimes: 0, landed: None, mass_slots: None });
+        lot.freight_centimes = fare;
+        lot.state = FreightState::InTransit { reservation_id: reservation, destination: to.into() };
+        let mut world = restore(&bootstrap, &world);
+        assert_eq!(world.transport.plan(reservation).unwrap().load_units(), 1);
+        world.advance_migrated_domains(arrival, &BTreeMap::new()).unwrap();
+        assert_eq!(world.freight.lots[&heavy].delivery().unwrap(), to);
+        assert_eq!(world.quote_freight(heavy, from, rail).unwrap().load_units(), 4);
     }
 
     #[test]
