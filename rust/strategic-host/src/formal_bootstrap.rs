@@ -399,16 +399,22 @@ impl InitialWorld {
     }
 
     pub fn population_unit_at(&self, place: &str) -> Option<&str> {
-        let unit = self.population.parent_unit(self.residence_unit_at(place)?)?;
-        self.macro_economy.markets().contains_key(unit).then_some(unit)
+        let network = self.transport.network();
+        let market = self.sources.population_unit_at(place)
+            .or_else(|| network.unit_at(place))
+            .or_else(|| self.population.parent_unit(self.population.partition_at(place)?))?;
+        self.macro_economy.markets().get_key_value(market).map(|(id, _)| id.as_str())
     }
 
-    /// Statistical residence uses confirmed place bindings in the active opening.
+    /// An administrative parent can record a residence when its opening has an exclusive pool.
     pub fn residence_unit_at(&self, place: &str) -> Option<&str> {
-        self.population.partition_at(place).or_else(|| self.sources.population_unit_at(place)).or_else(|| self.transport.network().unit_at(place)).or_else(|| {
-            let parent = self.sources.opening_parent_at(place)?;
-            self.population.standalone_totals().contains_key(parent).then_some(parent)
-        })
+        if let Some(partition) = self.population.partition_at(place) {
+            return Some(partition);
+        }
+        let parent = self.sources.population_unit_at(place)
+            .or_else(|| self.transport.network().unit_at(place))
+            .or_else(|| self.sources.opening_parent_at(place))?;
+        self.population.residence_parent(parent)
     }
 
     fn has_committed_player_day(&self) -> bool {
@@ -1997,6 +2003,7 @@ mod tests {
         assert!(france.macro_economy().markets().values().all(|market| market.commodities["potatoes"].demanded > 0.0));
         assert!(france.macro_economy().markets()["qing_empire"].commodities["potatoes"].inventory < grain_before);
         let mut flows = BTreeMap::<String, (f64, f64, f64, i64)>::new();
+        let mut received_units = BTreeMap::<String, BTreeMap<String, f64>>::new();
         for day in 1..=90 {
             if day > 1 { france.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap(); }
             for s in france.macro_economy.shipments().iter().filter(|s| s.dispatch_hour == day * 24) {
@@ -2007,12 +2014,15 @@ mod tests {
             }
             for s in france.macro_economy.last_arrivals() {
                 flows.entry(s.destination.clone()).or_default().2 += s.units;
+                let scale = france.macro_economy.commodity_info(&s.commodity).unwrap().2;
+                *received_units.entry(s.destination.clone()).or_default().entry(scale.into()).or_default() += s.units;
             }
         }
         for (unit, market) in france.macro_economy.markets() {
             let (sold, bought, arrived, freight) = flows.get(unit).copied().unwrap_or_default();
             let unmet: f64 = market.commodities.values().map(|c| c.unmet).sum();
-            println!("{unit}: shipped={sold:.3} ordered={bought:.3} received={arrived:.3} freight={freight} unmet_d90={unmet:.3}");
+            let received = received_units.get(unit);
+            println!("{unit}: shipped={sold:.3} ordered={bought:.3} received={arrived:.3} freight={freight} unmet_d90={unmet:.3} received_units={received:?}");
         }
         batch.advance_migrated_domains(MINUTES_PER_DAY * 90, &managed).unwrap();
         assert_eq!(batch.character.day, 90);
