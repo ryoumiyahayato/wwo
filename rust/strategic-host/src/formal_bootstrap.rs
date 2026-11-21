@@ -912,17 +912,28 @@ impl InitialWorld {
     ) -> io::Result<()> {
         let mut target = self.clock;
         target.advance_minutes(minutes)?;
+        self.advance_migrated_domains_to(target, managed_population)
+    }
+
+    fn advance_migrated_domains_to(
+        &mut self,
+        target: GameClock,
+        managed_population: &BTreeMap<String, u64>,
+    ) -> io::Result<()> {
         u32::try_from(target.current_day()).map_err(|_| invalid("unsupported formal character date"))?;
         if target.current_day() != self.clock.current_day() {
             self.macro_economy.check_responsibility(self.population.totals(), &self.managed_residents(managed_population)?)?;
         }
         let through = target.snapshot().total_minutes;
-        while self.clock != target {
+        while self.clock.snapshot().total_minutes != through {
             let day_boundary = next_day_boundary(self.clock);
             let minute = self.next_travel_event().into_iter().chain(day_boundary)
                 .min().map_or(through, |event| event.min(through));
             let mut boundary = self.clock;
             boundary.advance_minutes(minute - boundary.snapshot().total_minutes)?;
+            if minute != self.clock.snapshot().total_minutes {
+                boundary = boundary.minute_boundary();
+            }
             if Some(minute) != day_boundary {
                 self.clock = boundary;
                 self.advance_transport()?;
@@ -1003,6 +1014,7 @@ impl InitialWorld {
             self.plan_household_orders()?;
             self.settle_organization_employment()?;
         }
+        self.clock = target;
         Ok(())
     }
 

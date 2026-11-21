@@ -263,10 +263,13 @@ impl NativeSession {
         if self.departure.is_some() || self.slot_open || now < self.next_tick { return Ok(false); }
         let Some(minutes) = self.control.tick() else { return Ok(false); };
         let battle = world.land_battle_in_progress();
-        let minutes = if battle { land_battle::WORLD_MINUTES_PER_STEP * self.control.speed } else { minutes };
         let was_traveling = world.passenger_in_transit();
         let previous_day = world.clock().current_day();
-        let advanced = world.advance_live_minutes(minutes, terrain, controls);
+        let advanced = if battle {
+            world.advance_active_land_battle(self.control.speed as u64, terrain, controls)
+        } else {
+            world.advance_migrated_domains(minutes, &Default::default())
+        };
         self.next_tick = if battle && world.land_battle_in_progress() {
             (self.next_tick + land_battle::TICK_INTERVAL).max(now)
         } else {
@@ -651,6 +654,8 @@ impl NativeSession {
         let world = self.world.as_ref().unwrap();
         let clock = world.clock();
         if let Some(view) = state.session.as_mut() {
+            let minute = clock.snapshot().total_minutes as u64;
+            if view.total_minutes == minute { return Ok(()); }
             let transport = serde_json::from_value(self.transport.view(world))?;
             if view.total_minutes / MINUTES_PER_DAY as u64 == clock.current_day() as u64
                 && view.place == world.player_current_place().unwrap_or_default()
@@ -658,7 +663,7 @@ impl NativeSession {
                 let date = clock.current_date();
                 view.hour = date.hour as u32;
                 view.minute = date.minute as u32;
-                view.total_minutes = clock.snapshot().total_minutes as u64;
+                view.total_minutes = minute;
                 if let Some(activities) = &mut view.activities {
                     activities.lesson = world.can_schedule_personal_activity(PersonalActivity::Lesson);
                     activities.rest = world.can_schedule_personal_activity(PersonalActivity::Rest);
