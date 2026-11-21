@@ -2,13 +2,25 @@
 import csv
 import json
 import re
+from fractions import Fraction
 from pathlib import Path
+
+from opening import apportion
 
 HERE=Path(__file__).resolve().parent/"collections"
 AGE_SOURCES = HERE / "age_sex"
 OPENING_METHOD = (
     "Hold the census age-by-sex shares at 1900-01-01. Apply the source ratios to "
     "the anonymous opening balance using integer largest remainders."
+)
+SEX_COUNTS = ("male", "female")
+AGE_COUNTS = ("both", *SEX_COUNTS)
+RUSSIAN_CENSUS_REGIONS = (
+    ("1", "european_russia", 1, 50),
+    ("2", "vistula_provinces", 51, 60),
+    ("3", "caucasus", 61, 71),
+    ("4", "siberia", 72, 80),
+    ("5", "central_asia", 81, 89),
 )
 
 def read_csv(path):
@@ -20,10 +32,11 @@ def province_key(name):
 
 def dimensions(population):
     age_panels = age_sex_panels()
-    russian_panel, russian_rows = next(
-        (panel, rows) for panel, rows in age_panels if panel["id"] == "russia_empire_1897"
-    )
-    russian_ages = {row["label"]: row for row in russian_rows}
+    russian_ages = {
+        (panel.get("russian_region_parameter", "0"), row["label"]): (panel["id"], row)
+        for panel, rows in age_panels if panel["source_id"] == "rus_age_97"
+        for row in rows
+    }
     provinces={province_key(r["name"]): r for r in population if r.get("source_id")=="russia_first_census"
                and r.get("parent_id")=="ru_census_1897_ex_finland"}
     result=[]
@@ -41,10 +54,11 @@ def dimensions(population):
                         "rus_rel_97":"Religious denomination reported by the original census.",
                         "rus_sos_97":"Legal estate (soslovie) reported by the original census.",
                         "rus_age_97":"Age, sex and literacy. Printed subtotals overlap single-year ages."}[tab])
-        if tab == "rus_age_97" and param == "0":
-            row = russian_ages[raw["category"]]
+        age_row = russian_ages.get((param, raw["category"])) if tab == "rus_age_97" else None
+        if age_row is not None:
+            panel_id, row = age_row
             observation.update(
-                dimension="age_by_sex", panel_id=russian_panel["id"], row_role=row["role"],
+                dimension="age_by_sex", panel_id=panel_id, row_role=row["role"],
                 age_min=row["age_min"], age_max=row["age_max"],
             )
         result.append(observation)
@@ -74,11 +88,24 @@ def dimensions(population):
                 panel_id=panel["id"], row_role=row["role"],
                 age_min=row["age_min"], age_max=row["age_max"],
             ))
+    # The family register and the estimated present population have different
+    # denominators. Link the published panels for inspection only.
+    for collection, relation in (
+        ("japan_population_structure", "different_register_and_residence_universes"),
+        ("tokyo_occupation_1900", "local_subset_at_other_date_and_population_universe"),
+    ):
+        path = HERE / collection / "structure.jsonl"
+        for line in path.read_text(encoding="utf8").splitlines():
+            row = json.loads(line)
+            links = ["empire_of_japan"]
+            if row["unit_id"] == "tokyo_city_1900_occupational_persons":
+                links.append("place:tokyo")
+            row.update(opening_reference_ids=links, opening_scope_relation=relation)
+            result.append(row)
     return result
 
 
 def regroup_age_rows(rows, target):
-    counts = ("both", "male", "female")
     for band in target:
         selected = [
             row
@@ -91,7 +118,7 @@ def regroup_age_rows(rows, target):
                      or row["age_max"] is not None and row["age_max"] <= band["age_max"])
             )
         ]
-        yield band | {field: sum(row[field] for row in selected) for field in counts}
+        yield band | {field: sum(row[field] for row in selected) for field in AGE_COUNTS}
 
 
 def age_sex_panels():
@@ -100,20 +127,41 @@ def age_sex_panels():
     panels.extend(json.loads((AGE_SOURCES / "uk_county_age_panels.json").read_text(encoding="utf8")))
     panels.extend(json.loads((AGE_SOURCES / "france_census_1901_panels.json").read_text(encoding="utf8")))
     panels.extend(json.loads((AGE_SOURCES / "germany_census_1900_panels.json").read_text(encoding="utf8")))
+    panels.extend(json.loads((AGE_SOURCES / "india_census_1901_panels.json").read_text(encoding="utf8")))
+    panels.extend(json.loads((AGE_SOURCES / "india_census_1891_panels.json").read_text(encoding="utf8")))
+    panels.extend(json.loads((AGE_SOURCES / "cape_1904_panels.json").read_text(encoding="utf8")))
+    panels.extend(json.loads((AGE_SOURCES / "opening_1900_regional_panels.json").read_text(encoding="utf8")))
     by_panel = {panel["id"]: [] for panel in panels}
     for filename in (
         "age_sex.csv", "us_census_1900.csv", "uk_county_age.csv", "france_census_1901.csv",
-        "germany_census_1900.csv",
+        "germany_census_1900.csv", "india_census_1901.csv", "india_census_1891.csv", "cape_1904.csv",
+        "opening_1900_regional_ages.csv",
     ):
         for row in read_csv(AGE_SOURCES / filename):
             for key in ("age_min", "age_max", "both", "male", "female"):
                 row[key] = int(row[key]) if row[key] else None
             by_panel[row["panel"]].append(row)
 
-    russian = by_panel["russia_empire_1897"]
+    russian = {"0": by_panel["russia_empire_1897"]}
+    regional_panels = {}
+    for parameter, region, _, _ in RUSSIAN_CENSUS_REGIONS:
+        panel_id = f"russia_{region}_1897"
+        russian[parameter] = []
+        by_panel[panel_id] = russian[parameter]
+        regional_panels[parameter] = dict(
+            id=panel_id, observed_unit_id=f"rus_age_97:reg:{parameter}",
+            source_id="rus_age_97", observed_date="1897-02-09",
+            locator=f"rus_age_97.php?reg={parameter}, rows 3–126",
+            definition="De facto regional census population, single years, upper age interval and age not stated.",
+            russian_region_parameter=parameter, broad_observation=False,
+        )
+        panels.append(regional_panels[parameter])
     for row in read_csv(HERE / "russia" / "structure.csv"):
-        if row["source_table"] != "rus_age_97" or row["region_parameter"] != "0":
+        parameter = row["region_parameter"]
+        if row["source_table"] != "rus_age_97" or parameter not in russian:
             continue
+        if parameter in regional_panels:
+            regional_panels[parameter]["published_scope"] = row["published_scope"]
         label = row["category"]
         if label == "Дети моложе 1 года":
             age_min = age_max = 0
@@ -123,10 +171,10 @@ def age_sex_panels():
             age_min, age_max = 110, None
         else:
             age_min = age_max = None
-        russian.append(dict(
+        russian[parameter].append(dict(
             label=label, age_min=age_min, age_max=age_max,
             role="total" if label == "ИТОГО" else "subtotal" if "-" in label else "band",
-            **{key: int(row[key]) for key in ("both", "male", "female")},
+            **{key: int(row[key]) for key in AGE_COUNTS},
         ))
     for panel in panels:
         if "component_panels" not in panel:
@@ -148,44 +196,187 @@ def age_sex_panels():
                 for key in ("label", "role", "age_min", "age_max")
             ):
                 raise ValueError(f"{panel['id']}: component age groups do not match")
-            for key in ("both", "male", "female"):
+            for key in AGE_COUNTS:
                 row[key] = sum(component[key] for component in matched_rows)
             by_panel[panel["id"]].append(row)
     return [(panel, by_panel[panel["id"]]) for panel in panels]
 
 
-def opening_structure(opening_groups, observations):
-    opening_totals = {
-        unit["unit_id"]: unit["population_value"]
+def opening_age_group(panel, rows, unit_id, opening_total):
+    totals = [row for row in rows if row["role"] == "total"]
+    band_roles = panel.get("opening_band_roles", ["band"])
+    bands = [
+        {key: row[key] for key in ("label", "age_min", "age_max", "male", "female")}
+        for row in rows if row["role"] in band_roles
+    ]
+    if len(totals) != 1:
+        raise ValueError(f"{panel['id']}: expected one age table control")
+    total = totals[0]
+    for sex in SEX_COUNTS:
+        if any(band[sex] < 0 for band in bands) or sum(band[sex] for band in bands) != total[sex]:
+            raise ValueError(f"{panel['id']}: {sex} age rows do not sum to the table control")
+    if total["male"] + total["female"] != total["both"]:
+        raise ValueError(f"{panel['id']}: sex totals do not sum to the table population")
+    for band in bands:
+        low, high = band["age_min"], band["age_max"]
+        band["id"] = "unknown" if low is None else f"age_{low}_{high if high is not None else 'plus'}"
+    return dict(
+        unit_id=unit_id, opening_total=opening_total, observed_total=total["both"],
+        method=panel.get("opening_method", OPENING_METHOD), bands=bands,
+        **{key: panel[key] for key in ("source_id", "observed_unit_id", "observed_date", "locator", "uncertainty")},
+    )
+
+
+def regroup_single_years(rows):
+    target = [row for row in rows if row["role"] == "total"
+              or row["role"] == "band" and (row["age_min"] is None or row["age_min"] < 5
+                                            or row["age_max"] is None)]
+    first, *_, last = [row["age_min"] for row in rows
+                       if row["role"] == "band" and row["age_min"] is not None
+                       and row["age_max"] == row["age_min"] and row["age_min"] >= 5]
+    for low in range(first, last + 1, 5):
+        high = min(low + 4, last)
+        target.append(dict(label=f"Ages {low}–{high}", role="band", age_min=low, age_max=high))
+    target.sort(key=lambda row: (row["role"] != "total", row["age_min"] is None, row["age_min"]))
+    return list(regroup_age_rows(rows, target))
+
+
+def england_wales_remaining_ages(panels):
+    national_panel, national_rows = panels["england_wales_1901"]
+    target = [row for row in national_rows if row["role"] in {"total", "band"}]
+    excluded = (
+        "uk_county_age_anglesey_1901", "uk_county_age_carmarthenshire_1901",
+        "uk_county_age_glamorganshire_1901", "uk_county_age_montgomeryshire_1901",
+        "uk_county_age_radnorshire_1901",
+    )
+    counties = [regroup_age_rows(panels[key][1], target) for key in excluded]
+    rows = [national | {field: national[field] - sum(row[field] for row in deductions) for field in AGE_COUNTS}
+            for national, *deductions in zip(target, *counties, strict=True)]
+    panel = national_panel | dict(
+        id="england_wales_other_counties_1901",
+        observed_unit_id="uk_england_wales_excluding_five_tabulated_ancient_counties",
+        locator=national_panel["locator"] + "; Census of England and Wales, Table XXVI, pp. 156–159, "
+        "Anglesey, Carmarthenshire, Glamorganshire (with Cardiff and Swansea), Montgomeryshire and Radnorshire",
+        opening_method="Subtract the five separately modeled ancient counties from the England and Wales "
+        "census by age and sex. Use the remainder's shares in the other ancient county balances with integer largest remainders.",
+        uncertainty="The residual is calculated from census-night counts. Each other opening county "
+        "uses the same residual shares; actual differences between counties and from January 1900 are unquantified.",
+    )
+    return panel, rows
+
+
+def russian_regional_age_models(panels, observations):
+    provinces = [row for row in observations if row["source_id"] == "russia_first_census"
+                 and row.get("parent_id") == "ru_census_1897_ex_finland"]
+    result = {}
+    for _, region, first, last in RUSSIAN_CENSUS_REGIONS:
+        panel, rows = panels[f"russia_{region}_1897"]
+        control = next(row for row in rows if row["role"] == "total")
+        ids = {f"ru1897_{number}" for number in range(first, last + 1)}
+        subset = [row for row in provinces if row["unit_id"] in ids]
+        for sex in SEX_COUNTS:
+            if sum(row["sex"][sex] for row in subset) != control[sex]:
+                raise ValueError(f"{region}: province sex totals differ from the regional census")
+        model = panel | dict(
+            opening_method="Preserve each province's published 1897 male and female totals in its census-date age model. "
+            "Within each sex, distribute ages using the corresponding regional age shares and integer largest remainders. "
+            "Use the resulting shares in the separately reconstructed opening balance.",
+            uncertainty="The sex controls are observed at provincial scale in February 1897. Age within each sex "
+            "uses the containing census region's shares, with single ages combined from age five. "
+            "Provincial age differences, migration, enumeration error and changes to January 1900 are unquantified.",
+        )
+        bands = [row for row in regroup_single_years(rows) if row["role"] == "band"]
+        for row in subset:
+            sex_totals = row["sex"]
+            population = row["population_value"]
+            if sum(sex_totals[sex] for sex in SEX_COUNTS) != population:
+                raise ValueError(f"{row['unit_id']}: province sex totals differ from the published population")
+            by_sex = {
+                sex: apportion({i: Fraction(sex_totals[sex] * band[sex], control[sex])
+                                for i, band in enumerate(bands)}, sex_totals[sex])
+                for sex in SEX_COUNTS
+            }
+            province_bands = []
+            for i, band in enumerate(bands):
+                male, female = (by_sex[sex][i] for sex in SEX_COUNTS)
+                province_bands.append(band | dict(male=male, female=female, both=male + female))
+            province_total = control | sex_totals | dict(both=population)
+            province_model = model | dict(
+                observed_unit_id=row["unit_id"],
+                locator=f"{panel['locator']}; {row['source_id']}, {row['locator']} (province sex totals)",
+            )
+            result[row["wwo_id"] or row["unit_id"]] = (province_model, [province_total, *province_bands])
+    return result
+
+
+def opening_structure(opening_groups, observations, *, version=6):
+    opening_balances = {
+        unit["unit_id"]: unit
         for group in opening_groups
         for unit in (group["units"] or [group])
     }
+    opening_totals = {unit_id: unit["population_value"] for unit_id, unit in opening_balances.items()}
     groups = []
-    for panel, rows in age_sex_panels():
+    panels = {panel["id"]: (panel, rows) for panel, rows in age_sex_panels()}
+    for panel, rows in panels.values():
         unit_id = panel.get("opening_unit_id")
-        if unit_id is None:
+        if unit_id is None or not (
+            panel.get("opening_from_version", 1) <= version <= panel.get("opening_through_version", version)
+        ):
             continue
-        totals = [row for row in rows if row["role"] == "total"]
-        bands = [
-            {key: row[key] for key in ("label", "age_min", "age_max", "male", "female")}
-            for row in rows if row["role"] == "band"
-        ]
-        if len(totals) != 1:
-            raise ValueError(f"{panel['id']}: expected one printed age table control")
-        total = totals[0]
-        for sex in ("male", "female"):
-            if sum(band[sex] for band in bands) != total[sex]:
-                raise ValueError(f"{panel['id']}: {sex} age rows do not sum to the printed total")
-        if total["male"] + total["female"] != total["both"]:
-            raise ValueError(f"{panel['id']}: published sex totals do not sum to the population")
-        for band in bands:
-            low, high = band["age_min"], band["age_max"]
-            band["id"] = "unknown" if low is None else f"age_{low}_{high if high is not None else 'plus'}"
-        groups.append(dict(
-            unit_id=unit_id, opening_total=opening_totals[unit_id], observed_total=total["both"],
-            method=OPENING_METHOD, bands=bands,
-            **{key: panel[key] for key in ("source_id", "observed_unit_id", "observed_date", "locator", "uncertainty")},
-        ))
+        if version >= 10 and unit_id in (
+            "ft_russia_empire_ussr", "administrative_region:uk_constituent_scotland",
+            "administrative_region:uk_constituent_ireland",
+        ) and unit_id not in opening_totals:
+            continue
+        groups.append(opening_age_group(panel, rows, unit_id, opening_totals[unit_id]))
+    if version >= 10:
+        models = russian_regional_age_models(panels, observations)
+        remaining_uk = england_wales_remaining_ages(panels)
+        scotland_panel, scotland_rows = panels["scotland_1901"]
+        scotland = scotland_panel | dict(
+            opening_method="Hold Scotland's 1901 census age and sex shares in each civil county's "
+            "January 1900 balance, using integer largest remainders.",
+            uncertainty="The census shares are for Scotland as a whole. County differences, the "
+            "effect of civil versus other county boundaries, and change from January 1900 are unquantified.",
+        ), scotland_rows
+        ireland_panel, ireland_rows = panels["ireland_1901"]
+        ireland = ireland_panel | dict(
+            opening_method="Hold Ireland's 1901 census age and sex shares in each administrative "
+            "county and county borough balance at January 1900, using integer largest remainders.",
+            uncertainty="The age and sex shares are for Ireland as a whole. Regional differences, "
+            "the effect of administrative boundaries, and change from January 1900 are unquantified.",
+        ), ireland_rows
+        japan_panel, japan_rows = panels["japan_1899_resident_reconstruction"]
+        japan = japan_panel, regroup_single_years(japan_rows)
+        france_panel, france_rows = panels["france_1901"]
+        france = france_panel | dict(
+            opening_band_roles=["band", "mixed_age_band"],
+            opening_method="Hold the 1901 metropolitan present-population shares in the January 1900 "
+            "legal-population balance of each historical département and use integer largest remainders.",
+            uncertainty="The national table covers residents present with sex known. It excludes "
+            "16,136 residents whose sex was undetermined. The last published age band combines the "
+            "oldest residents and unreported ages, so it is assigned unknown age. Provincial differences, "
+            "the legal versus present population, and change between January 1900 and March 1901 are unquantified.",
+        ), france_rows
+        used = {group["unit_id"] for group in groups}
+        for unit_id, unit in opening_balances.items():
+            if unit_id in used:
+                continue
+            model = models.get(unit_id)
+            parent = unit.get("subdivision_of")
+            if unit_id.startswith("administrative_region:gb_historic_") or unit_id == "uk_ancient_kent_middlesex_surrey":
+                model = remaining_uk
+            elif parent == "administrative_region:uk_constituent_scotland":
+                model = scotland
+            elif parent == "administrative_region:uk_constituent_ireland":
+                model = ireland
+            elif unit_id.startswith("administrative_region:france_"):
+                model = france
+            elif unit_id == "empire_of_japan" or unit_id.startswith("jp_otsu_pref_"):
+                model = japan
+            if model is not None:
+                groups.append(opening_age_group(*model, unit_id, unit["population_value"]))
     unit = "statistical_area:bosnia_herzegovina_1900"
     if unit in opening_totals:
         row = next(r for r in observations if r["unit_id"] == unit and r["date"] == "1895-04-22"

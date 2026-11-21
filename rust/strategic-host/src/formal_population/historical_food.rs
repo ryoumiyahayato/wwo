@@ -164,6 +164,38 @@ pub const TOKYO_SHINAMI_HOUSEHOLD: HistoricalSpendingCase = HistoricalSpendingCa
     scope: "Reported daily budget of a performer, spouse and their child. Rice uses original volume units (1 shō equals 10 gō). Food preparation, edible yield and intake are unspecified. Leftovers and household side work are discussed separately without quantities.",
 };
 
+#[derive(Serialize)]
+pub struct HistoricalMerchantLedger {
+    pub id: &'static str,
+    pub locality: &'static str,
+    pub observation_month: &'static str,
+    pub reported_family_members: u8,
+    pub covered_boarders: u8,
+    pub wage_income_us_cents: u16,
+    pub expenses_us_cents: &'static [(&'static str, u16)],
+    pub recorded_total_expenses_us_cents: u16,
+    pub source_url: &'static str,
+    pub printed_pages: [u8; 2],
+    pub scope: &'static str,
+}
+
+pub const SANDY_SPRING_HOUSEHOLD: HistoricalMerchantLedger = HistoricalMerchantLedger {
+    id: "sandy_spring_merchant_ledger_1899_01",
+    locality: "Sandy Spring, Montgomery County, Maryland, United States",
+    observation_month: "1899-01",
+    reported_family_members: 9,
+    covered_boarders: 7,
+    wage_income_us_cents: 2_500,
+    expenses_us_cents: &[
+        ("food", 506), ("wood", 250), ("lighting_oil", 28), ("clothing_and_footwear", 230),
+        ("rent", 250), ("pitcher", 50), ("soap", 10), ("matches", 2),
+    ],
+    recorded_total_expenses_us_cents: 1_326,
+    source_url: "https://tile.loc.gov/storage-services/service/rbc/lcrbmrp/t8050/t8050.pdf#page=60",
+    printed_pages: [94, 95],
+    scope: "US Department of Labor Bulletin 32. Transcript of one household's monthly employer-store account. Two sons lived and worked away, with unknown remittances. Fuel quantity, use for cooking or heat, medical spending, and actual intake are unknown. The report's annual extrapolation is excluded.",
+};
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PotatoMassBasis {

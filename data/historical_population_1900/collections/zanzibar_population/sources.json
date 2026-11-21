@@ -12,7 +12,7 @@
       "source_date": "1899",
       "population_value": 200000,
       "basis": "Contemporary two-island estimate published in 1899 used as a near-opening proxy. No interpolation, reference date, error interval or separate foreign-resident adjustment.",
-      "scope": "Unguja and Pemba and their administratively dependent islets. Excludes Mafia, mainland coastal leases and the East Africa Protectorate. Tumbatu belongs to Unguja administratively but has no separate polygon in the WWO snapshot. The approximate 150,000 and 50,000 source figures describe a dated observation only; retain no 1900 island-level partition.",
+      "scope": "Unguja and Pemba and their administratively dependent islets. Excludes Mafia, mainland coastal leases and the East Africa Protectorate. Tumbatu belongs to Unguja administratively. Version 10 uses the published 150,000 and 50,000 as statistical opening components of the existing two-island estimate.",
       "research_comparator": {
         "unit_id": "ft_zanzibar_island",
         "source_id": "ft_world_v5",

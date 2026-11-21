@@ -20,6 +20,28 @@ germany_1900_mecklenburg_strelitz,70 und mehr,band,70,,4679,2055,2624
 germany_1900_bayern,Bevölkerung überhaupt,total,,,6176057,3028100,3147957
 germany_1900_bayern,Alter der Minderjährigkeit,band,0,20,2764611,1373751,1390860
 germany_1900_bayern,Alter der Großjährigkeit,band,21,,3411446,1654349,1757097
+germany_1900_bayern_five_year,1–101,total,,,6176057,3028100,3147957
+germany_1900_bayern_five_year,1–5,band,0,4,781496,389546,391950
+germany_1900_bayern_five_year,6–10,band,5,9,679289,338070,341219
+germany_1900_bayern_five_year,11–15,band,10,14,612690,303666,309024
+germany_1900_bayern_five_year,16–20,band,15,19,579382,286995,292387
+germany_1900_bayern_five_year,21–25,band,20,24,560191,277355,282836
+germany_1900_bayern_five_year,26–30,band,25,29,496187,245679,250508
+germany_1900_bayern_five_year,31–35,band,30,34,433649,215055,218594
+germany_1900_bayern_five_year,36–40,band,35,39,359523,177042,182481
+germany_1900_bayern_five_year,41–45,band,40,44,333119,162401,170718
+germany_1900_bayern_five_year,46–50,band,45,49,291673,141709,149964
+germany_1900_bayern_five_year,51–55,band,50,54,272789,129456,143333
+germany_1900_bayern_five_year,56–60,band,55,59,243813,114936,128877
+germany_1900_bayern_five_year,61–65,band,60,64,198208,93026,105182
+germany_1900_bayern_five_year,66–70,band,65,69,148797,69446,79351
+germany_1900_bayern_five_year,71–75,band,70,74,98186,45157,53029
+germany_1900_bayern_five_year,76–80,band,75,79,57055,25345,31710
+germany_1900_bayern_five_year,81–85,band,80,84,23511,10500,13011
+germany_1900_bayern_five_year,86–90,band,85,89,5547,2342,3205
+germany_1900_bayern_five_year,91–95,band,90,94,875,352,523
+germany_1900_bayern_five_year,96–100,band,95,99,76,21,55
+germany_1900_bayern_five_year,101,band,100,100,1,1,0
 germany_1900_preussen_age,Ortsanwesende Bevölkerung,total,,,34472509,,
 germany_1900_preussen_age,Über 0 bis 1,band,0,0,1023220,,
 germany_1900_preussen_age,1 bis 2,band,1,1,912404,,

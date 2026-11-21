@@ -40,6 +40,49 @@
     "collection": "african_returns"
   },
   {
+    "id": "cape_census_1904_age_hmso_1906",
+    "title": "Census of the British Empire, 1901: Report with Summary and Detailed Tables. Cape of Good Hope (1904)",
+    "publisher": "General Register Office, His Majesty’s Stationery Office, London, 1906",
+    "url": "https://archive.org/details/cu31924030396067",
+    "locator": "Section 20, Table 5, printed pp. 148–149, All Races, As enumerated. Table 2, p. 147, note c, documents the territorial additions since 1891",
+    "rights": "Historical published census facts transcribed from the 1906 government report",
+    "raw_path": "cape_1904.csv",
+    "table_urls": [
+      "https://archive.org/download/cu31924030396067/page/n215/mode/1up",
+      "https://archive.org/download/cu31924030396067/page/n216/mode/1up",
+      "https://archive.org/download/cu31924030396067/page/n214/mode/1up",
+      "https://digitalcollections.crl.edu/record/819601/files/0589.pdf"
+    ],
+    "collection": "age_sex"
+  },
+  {
+    "id": "jp_ltes_1899_resident_ages",
+    "title": "Estimates of Long-Term Economic Statistics of Japan, Manpower, Population by Sex and Age in Single Years (Japanese only, at the End of the Year)",
+    "publisher": "Institute of Economic Research, Hitotsubashi University, Research Data Repository",
+    "url": "https://d-repo.ier.hit-u.ac.jp/records/2035738",
+    "locator": "Manpower Tables 3-1 (Male) and 3-2 (Female), the 1899 columns",
+    "rights": "Numeric facts for one reference year are extracted. The original workbooks remain available from the repository.",
+    "raw_path": "opening_1900_regional_ages.csv",
+    "table_urls": [
+      "https://d-repo.ier.hit-u.ac.jp/record/2035738/files/LTES_J02-03-01.xlsx",
+      "https://d-repo.ier.hit-u.ac.jp/record/2035739/files/LTES_J02-03-02.xlsx"
+    ],
+    "collection": "age_sex"
+  },
+  {
+    "id": "fi_yearbook_1910_population_ages",
+    "title": "Suomen tilastollinen vuosikirja 1910 / Annuaire statistique de Finlande 1910",
+    "publisher": "Central Statistical Office of Finland, Helsinki, 1910",
+    "url": "https://otos.stat.fi/items/a9fed6cb-73eb-4099-81e7-dee4c47236df",
+    "locator": "Table 12a, printed p. 27, totals by age and sex. Table 4, historical population at year-end.",
+    "rights": "Historical published numeric facts.",
+    "raw_path": "opening_1900_regional_ages.csv",
+    "table_urls": [
+      "https://www.doria.fi/bitstream/handle/10024/67181/stv_1910.pdf?sequence=1"
+    ],
+    "collection": "age_sex"
+  },
+  {
     "id": "nz_census_1901_ages",
     "title": "Report on the Results of the Census of the Colony of New Zealand, Taken for the Night of the 31st March, 1901",
     "publisher": "Registrar-General of New Zealand",
@@ -139,6 +182,21 @@
     "collection": "age_sex"
   },
   {
+    "id": "de_bavaria_yearbook_1903_five_year_ages",
+    "title": "Statistisches Jahrbuch für das Königreich Bayern, 1903",
+    "publisher": "Königlich Bayerisches Statistisches Bureau, Munich, 1903",
+    "url": "https://www.statistischebibliothek.de/mir/receive/BYHeft_mods_00012794",
+    "locator": "II.A.2.g.2, printed p. 27. The single-year table II.A.2.g.1, printed pp. 25–26, specifies birth cohorts and the oldest single year.",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf#page=37",
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf#page=35",
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf#page=36"
+    ],
+    "collection": "age_sex"
+  },
+  {
     "id": "de_prussia_yearbook_1904_ages",
     "title": "Statistisches Jahrbuch für den Preussischen Staat, 1904",
     "publisher": "Königliches Statistisches Bureau, Berlin, 1905",
@@ -148,6 +206,70 @@
     "raw_path": "germany_census_1900.csv",
     "table_urls": [
       "https://webapp.sbc.org.pl/Content/323213/PDF/ii149234-1904-00-0001.pdf?handler=pdf"
+    ],
+    "collection": "age_sex"
+  },
+  {
+    "id": "india_census_1901_original_age",
+    "title": "Census of India, 1901, Vol. I-A, India, Part II: Tables",
+    "publisher": "Census Commissioner for India, Calcutta, 1903; Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924",
+    "locator": "Table VII, Age, Sex and Civil Condition by Religions. Introduction and national table, printed pp. 63–64; all-religions provincial tables, printed pp. 69–101. Comparable population control, Table II-A, pp. 9–10.",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "india_census_1901.csv",
+    "table_urls": [
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n13/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n14/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n67/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n68/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n77/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n101/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n73/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n79/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n85/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n93/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n95/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n97/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n103/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n87/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n75/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n81/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n91/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n83/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n89/mode/1up"
+    ],
+    "collection": "age_sex"
+  },
+  {
+    "id": "india_census_1891_original_age",
+    "title": "Census of India, 1891. General Tables for British Provinces and Feudatory States, Vol. I",
+    "publisher": "Census Commissioner for India, London, 1892; printed for the Indian Government by Eyre and Spottiswoode",
+    "url": "https://archive.org/details/wbsl.4778",
+    "locator": "Table VII-A, Summary, Part 1, Age by Provinces and States, printed pp. 98–103. Explanatory note, printed p. 97.",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "india_census_1891.csv",
+    "table_urls": [
+      "https://censusindia.gov.in/nada/index.php/catalog/30662/",
+      "https://archive.org/details/wbsl.4778/page/n110/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n111/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n112/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n113/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n114/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n115/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n116/mode/1up"
+    ],
+    "collection": "age_sex"
+  },
+  {
+    "id": "india_census_1901_coorg_age",
+    "title": "Census of India, 1901. Volume XIV. Coorg. Report and Tables",
+    "publisher": "Superintendent of Census Operations, Madras and Coorg; Government of India",
+    "url": "https://ignca.gov.in/Asi_data/31012.pdf#page=53",
+    "locator": "Table VII, Age, Sex and Civil Condition, printed p. 44, all religions, columns 2–5.",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "india_census_1901.csv",
+    "table_urls": [
+      "https://ignca.gov.in/Asi_data/31012.pdf#page=53"
     ],
     "collection": "age_sex"
   },
@@ -562,6 +684,24 @@
     "method": "official_retrospective_census_series",
     "rights": "Factual numeric cell and source attribution only.",
     "collection": "cabo_verde"
+  },
+  {
+    "id": "ca_fourth_census_table_iv_residence",
+    "title": "Fourth Census of Canada, 1901, Volume I: Population, Table IV",
+    "publisher": "Census Office, Department of Agriculture, Dominion of Canada",
+    "url": "https://publications.gc.ca/collections/collection_2018/parl/x12-3/X12-3-A-1903-eng.pdf",
+    "locator": "Printed pp. 18–21, rural and urban population for 1901",
+    "rights": "Historical Government of Canada publication, public domain in Canada",
+    "collection": "canada_social_1901"
+  },
+  {
+    "id": "ca_fourth_census_table_viii_religion",
+    "title": "Fourth Census of Canada, 1901, Volume I: Population, Table VIII",
+    "publisher": "Census Office, Department of Agriculture, Dominion of Canada",
+    "url": "https://publications.gc.ca/collections/collection_2016/statcan/CS98-1901-1.pdf",
+    "locator": "Printed pp. 144–145, five principal denominations; Tables IX and X corroborate the New Brunswick Anglican count",
+    "rights": "Historical Government of Canada publication, public domain in Canada",
+    "collection": "canada_social_1901"
   },
   {
     "id": "cape_colony_1899_imperial_conference",
@@ -1086,6 +1226,110 @@
     "collection": "french_indochina_population"
   },
   {
+    "id": "british_empire_census_1901_gold_coast_scope",
+    "title": "Census of the British Empire, 1901. Gold Coast Colony and adjoining census districts",
+    "publisher": "General Register Office / HMSO, 1906. Wellcome Collection digital copy.",
+    "url": "https://wellcomecollection.org/works/mbq6vgjb",
+    "locator": "Printed p. 71, Gold Coast census date. Printed p. 144, section 17, tables 1–2 and notes to table 1.",
+    "rights": "Wellcome Collection marks this copy Public Domain Mark 1.0. Historical population facts and bibliographic references only.",
+    "date_note": "The empire volume lists 1 April 1901 for the Gold Coast. The opening map snapshot is dated 12 March 1900.",
+    "boundary_note": "Table 2 excludes Ashanti and the Northern Territories. It gives a Gold Coast Colony subtotal of 895,350, consisting of 412,729 males and 482,621 females across twelve census districts. Table 1 adds Ashanti 335,651 and Northern Territories 107,432 to reach an enumerated subtotal of 1,338,433, then adds an unallocated estimated omission of 148,000 to reach 1,486,433. The three-part subtotal, the two outlying counts and the adjusted total already appear in collections/eastern. The Gold Coast annual report gives the same adjusted total while expressly excluding the Northern Territories. The WWO CShapes unit cshapes_gw_452 contains Accra, Kumasi and Tamale, without separate opening polity units for the Colony, Ashanti and Northern Territories. It cannot represent the Colony-only count as a whole-polity control. The 1900 FT Ghana-Gold Coast reconstruction of 2,701,470 is a research-only account, and the 1901 census sources supply no exact opening crosswalk.",
+    "references": [
+      {
+        "url": "https://iiif.wellcomecollection.org/presentation/b32183173/canvases/b32183173_0139.jp2",
+        "locator": "Original volume, printed p. 71, Gold Coast census date."
+      },
+      {
+        "url": "https://iiif.wellcomecollection.org/presentation/b32183173/canvases/b32183173_0212.jp2",
+        "locator": "Original volume, printed p. 144, both Gold Coast tables and the omission note."
+      },
+      {
+        "url": "https://icr.ethz.ch/data/cshapes/",
+        "locator": "WWO uses cshapes_gw_452 from data/world_map/historical/cshapes_1900_snapshot.json."
+      }
+    ],
+    "collection": "gold_coast_population"
+  },
+  {
+    "id": "gold_coast_1901_colonial_annual_return",
+    "title": "Gold Coast. Report for 1901. Colonial Reports—Annual No. 375",
+    "publisher": "Colonial Office / HMSO, 1902. University of Illinois Library digital copy.",
+    "url": "https://libsysdigi.library.illinois.edu/ilharvest/Africana/Books2011-05/5530214/5530214_1901/5530214_1901_opt.pdf#page=31",
+    "locator": "Printed p. 31, Vital Statistics, paragraph 90.",
+    "rights": "Historical population facts and bibliographic references only.",
+    "date_note": "Paragraph 90 places the count during 1901 and gives no separate reference day for its total.",
+    "boundary_note": "The annual return attributes 1,486,433 to the Colony and Ashanti and explicitly excludes the Northern Territories. It gives no component counts or omission adjustment to support that scope. The empire census table reaches the same number by including the Northern Territories and adding 148,000 for estimated omissions. These are conflicting scope statements for the same number. No independent estimate of the difference between the two stated scopes is available in these sources.",
+    "collection": "gold_coast_population"
+  },
+  {
+    "id": "honduras_ine_historical_censuses",
+    "title": "Población de la República de Honduras, según censos levantados",
+    "publisher": "Honduran statistical office. Instituto Nacional de Estadística repository.",
+    "url": "https://repositorio.ine.gob.hn/bitstreams/8cbc5115-3872-4356-a790-0f8b3616495d/download",
+    "locator": "Printed p. 13, Población de la República de Honduras, según censos levantados, 1895, 1901 and 1905 columns. The indexed table was checked against another official edition. The 1901 enumerators' original volume is identified in the census bibliography.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "references": [
+      {
+        "url": "https://repositorio.ine.gob.hn/bitstreams/90c5ac4d-c43e-4533-b304-99de34639b6f/download",
+        "locator": "Statistical yearbook, printed p. 43, table 2.1.1, 1901 national and department figures."
+      },
+      {
+        "url": "https://studylib.es/doc/6416605/recuento-de-poblaci%C3%B3n-1971",
+        "locator": "Dirección General de Estadística y Censos, Síntesis de los censos de población y vivienda de Honduras, Notas y Fuentes for the 1895, 1901 and 1905 censuses. Includes the contemporary directors' accounts of collection and adjustment."
+      },
+      {
+        "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/35966/GIPE-020490.pdf?isAllowed=y&sequence=3",
+        "locator": "Library of Congress, International Population Census Bibliography, Honduras. La población de Honduras en 1901, Dirección General de Estadística, Tipografía Nacional, 1902, 71 pp., HA821.A5 1902."
+      },
+      {
+        "url": "https://users.pop.umn.edu/~rmccaa/IPUMSI/taller_lima_2014/11-honduras_marquina_ipums-al_taller_2014.pdf",
+        "locator": "INE Honduras, censuses 1791–2013 presentation, Lima, 2014. National headline and sex counts."
+      },
+      {
+        "url": "https://icj-web.leman.un-icc.cloud/sites/default/files/case-related/39/039-19601118-JUD-01-00-EN.pdf#page=14",
+        "locator": "ICJ, Arbitral Award Made by the King of Spain on 23 December 1906, Judgment of 18 November 1960, printed pp. 202–203. On 4 July 1901 the joint commission recorded its disagreement on the Atlantic section beyond Portillo de Teotecacinte. That section went to arbitration."
+      },
+      {
+        "url": "https://fdh.unah.edu.hn/dmsdocument/15148-indice-de-gacetas-pdf",
+        "locator": "UNAH, Índice de Gacetas, no. 2106, 19 September 1901. Indexes an enumeration request for La Mosquitia, Montaña de la Flor and Indigenous settlements of Yoro. This entry gives no returns."
+      },
+      {
+        "url": "https://e-archivo.uc3m.es/rest/api/core/bitstreams/34ce9182-38c7-40ac-85ff-9d6e2a769caa/content",
+        "locator": "Federico–Tena 2025, Appendix I, printed p. 58, Honduras. The authors use the 1895 and 1905 official censuses and omit 1901 in the series used to construct the 498,932 opening benchmark. They rescale the historical series to the UN 1950 estimate."
+      }
+    ],
+    "boundary_note": "The official retrospective 1901 tabulation has 16 positive department entries and sums to the national figure. It reallocates 1901 settlements to Atlántida, created in 1902 from parts of Colón and Yoro, and uses later names such as Francisco Morazán and Lempira. Dashes for Gracias a Dios and Ocotepeque do not identify zero-population territory. The 1901 returns in the contested Mosquitia and exact correspondence with the opening map remain unresolved.",
+    "date_note": "The 1895 census was taken in December. The 1901 and 1905 censuses were taken on 31 December. The 1901 census director reports incomplete enumeration and municipal adjustments derived from military and road-service rolls. The official historical totals do not identify a separate unadjusted national population.",
+    "collection": "honduras_population"
+  },
+  {
+    "id": "honduras_atlantida_census_transcription",
+    "title": "Fernando David Velásquez Recarte, Bananeros italoamericanos en La Ceiba. Reconfiguración económica y territorial de Atlántida, Honduras, 1903-1923",
+    "publisher": "El Colegio de Michoacán, Centro de Estudios de Geografía Humana, 2023.",
+    "url": "https://colmich.repositorioinstitucional.mx/jspui/bitstream/1016/1407/1/Vel%C3%A1squezRecarteFernandoDavid2023TesisCEGH.pdf",
+    "locator": "Printed pp. 17–19, creation of Atlántida. Printed p. 61, Cuadro 4, 1901 column, based on La población de Honduras en 1901, printed p. 21, Archivo Nacional de Honduras.",
+    "rights": "Individual historical population facts and bibliographic references only. No table image or prose reproduced.",
+    "boundary_note": "Decree 51 created Atlántida in 1902 from parts of Colón and Yoro. The 1901 returns for Tela, El Porvenir and La Ceiba sum to the later department's retrospective 8,797. The prose gives 2,706 for Tela. Cuadro 4 gives 2,076, which equals its sex counts and is the value transcribed here. The places are census units and have no opening map binding.",
+    "collection": "honduras_population"
+  },
+  {
+    "id": "honduras_somoza_1905",
+    "title": "T. R. Somoza Vivas, Guía de Honduras",
+    "publisher": "Tipografía Nacional, Tegucigalpa, 1905.",
+    "url": "https://archive.org/details/guiadehonduras00somo",
+    "locator": "Printed p. 135, Distrito de la Mosquitia. Printed p. 145, Departamento de las Islas de la Bahía, Población.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "references": [
+      {
+        "url": "https://es.scribd.com/document/852873292/Guia-de-Honduras-00-So-Mo",
+        "locator": "Searchable reproduction of the same edition. See the two chapter headings and their Población paragraphs."
+      }
+    ],
+    "boundary_note": "The Bay Islands department includes Roatán, Barbareta, Elena, Morat, Guanaja, Utila, Cayos Cochinos and smaller islands. The Mosquitia district is listed under Colón and comprises Aguán and Iriona. The district count cannot be added to Colón or used as an independent estimate of the disputed cross-border population.",
+    "date_note": "The Bay Islands chapter separately gives its 1901 census figure and a current estimate. The Mosquitia paragraph gives neither a reference date nor an enumeration method. The latter two rows use the 1905 publication year as a proxy.",
+    "collection": "honduras_population"
+  },
+  {
     "id": "india_census_1901_comparable_area",
     "title": "Census of India, 1901, Vol. I-A, India, Part II, Tables. Government of India, 1903.",
     "publisher": "Government of India, 1903",
@@ -1111,6 +1355,51 @@
       }
     ],
     "collection": "india_comparable"
+  },
+  {
+    "id": "india_1901_abstract_religion",
+    "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39, Table 7",
+    "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/1894.007.XLS",
+    "locator": "1901 census religion; see workbook rows in census.json",
+    "rights": "Numeric facts from the 1905 statistical publication.",
+    "collection": "india_social_1901"
+  },
+  {
+    "id": "india_1901_abstract_civil_condition",
+    "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39, Table 11",
+    "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/1894.011.XLS",
+    "locator": "1901 census civil condition by sex; add the cited rows in census.json",
+    "rights": "Numeric facts from the 1905 statistical publication.",
+    "collection": "india_social_1901"
+  },
+  {
+    "id": "india_1901_abstract_literacy",
+    "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39, Table 16",
+    "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/1894.016.XLS",
+    "locator": "1901 census literacy by sex; add the cited rows in census.json",
+    "rights": "Numeric facts from the 1905 statistical publication.",
+    "collection": "india_social_1901"
+  },
+  {
+    "id": "jp_cabinet_population_1898_original",
+    "title": "日本帝國人口統計 明治三十一年",
+    "publisher": "Bureau of Statistics, Imperial Cabinet of Japan, March 1901",
+    "url": "https://doi.org/10.11501/805976",
+    "locator": "Table 1, printed p. 335. Table 3, pp. 338–339. Table 4, pp. 340–343",
+    "rights": "The National Diet Library catalog marks this edition Public Domain Mark. Historical published facts transcribed from the original government statistical tables.",
+    "raw_path": "structure.jsonl",
+    "catalog_url": "https://ndlsearch.ndl.go.jp/books/R100000002-I000000454655",
+    "table_urls": [
+      "https://dl.ndl.go.jp/api/iiif/805976/R0000174/full/3000,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/805976/R0000176/full/1900,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/805976/R0000177/full/1500,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/805976/R0000178/full/3000,/0/default.jpg"
+    ],
+    "interpretation_url": "https://www.stat.go.jp/museum/toukei150/shiryo/shiryo29.html",
+    "collection": "japan_population_structure"
   },
   {
     "id": "jp_cabinet_1909_resident_prefectures",
@@ -1324,6 +1613,124 @@
     "collection": "morocco_population"
   },
   {
+    "id": "lagos_blue_book_1900_1901",
+    "title": "Lagos. Report for 1900–1901. Colonial Reports—Annual No. 348",
+    "publisher": "Colonial Office / HMSO, 1902. University of Illinois Library digital copy.",
+    "url": "https://libsysdigi.library.illinois.edu/ilharvest/Africana/Books2011-05/3064634/3064634_1900_1901_lagos/3064634_1900_1901_lagos_opt.pdf",
+    "locator": "Printed pp. 3–4, Blue Book transmittal and Revenue and Expenditure. The population denominator is printed on p. 4.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "date_note": "The report names financial year 1900–1901. The Colonial Secretary signed the report on 5 November 1901. The population paragraph gives no reference day or calculation method.",
+    "boundary_note": "The denominator covers the combined Colony and Protectorate of Lagos. The Lagos administration remained separate at the Royal Niger Company handover. The Southern Nigeria Order identifies Akure as belonging to Lagos and Ikaha and its dependencies as belonging to Southern Nigeria. The CShapes Lagos geometry includes Abeokuta, where Britain signed the 1893 treaty conditionally recognizing Egba independence. The contemporary population sources do not state whether Abeokuta or the rest of Egba country was included in the whole-jurisdiction estimate or the 1901 Western District estimate. Neither return supplies a district population crosswalk for the opening-date polygon.",
+    "references": [
+      {
+        "url": "https://wasc.org.uk/Nigeria%20history%20docs/Annual%20reports%20Lagos/3064634_1899_lagos_opt.pdf",
+        "locator": "Colonial Reports—Annual No. 321, Lagos, 1899, printed p. 21, section VII, paragraph 49. The report gives no population estimate because the last census was in 1891."
+      },
+      {
+        "url": "https://api.parliament.uk/historic-hansard/commons/1899/jul/03/royal-niger-company-consolidated-fund",
+        "locator": "House of Commons, 3 July 1899, cols. 1298–1299. The proposed company-territory division preserves the existing Lagos administration."
+      },
+      {
+        "url": "https://kingdomsofnigeria.com/wp-content/uploads/2020/05/paynes-table-of-principal-events-in-yoruba-history.pdf",
+        "locator": "J. A. O. Payne, Table of Principal Events in Yoruba History, printed p. 107, text of the Treaty of Friendship and Commerce made at Abeokuta on 18 January 1893, article 5."
+      },
+      {
+        "url": "https://api.parliament.uk/historic-hansard/commons/1908/mar/16/treaty-with-the-egba-chiefs",
+        "locator": "House of Commons, 16 March 1908, Treaty with the Egba Chiefs. The Colonial Under-Secretary confirmed recognition of conditional Egba independence."
+      }
+    ],
+    "collection": "nigeria_lagos_population"
+  },
+  {
+    "id": "british_empire_census_1901_nigeria_notes",
+    "title": "Census of the British Empire, 1901. Lagos and Nigeria entries and explanatory notes",
+    "publisher": "General Register Office / HMSO, 1906. Wellcome Collection digital copy.",
+    "url": "https://wellcomecollection.org/works/mbq6vgjb",
+    "locator": "Printed pp. 4–5, Summary Table 2, Lagos and Nigeria entries and note (b); p. 145, section 18, table 1 and its footnote; p. 146, section 19, Nigeria.",
+    "rights": "Wellcome Collection marks its digital copy Public Domain Mark 1.0. Historical population facts and bibliographic references only.",
+    "date_note": "The Lagos section refers to 1901. The superintendent's rounded whole-territory alternative has no separate reference day. The northern and southern estimates supply no common census day. The p. 4 summary's 20,000,000 for Northern Nigeria is the upper endpoint of the range stated on p. 146.",
+    "boundary_note": "Lagos Colony and Protectorate total 1,388,847, comprising 39,354 enumerated in Lagos Island and Harbour, 2,493 enumerated in Ebute Metta, and 1,347,000 estimated in seven inland or coastal districts and provinces. The superintendent considered overestimation more likely and gave 1,250,000 as an alternative for the whole jurisdiction. The published table, its seven district estimates and the northern and southern estimates already appear in collections/eastern. The empire table reports approximate areas of 26,700 square miles for combined Lagos, 49,704 for Southern Nigeria and 323,000 for Northern Nigeria. Those convert to approximately 69,153, 128,733 and 836,566 square kilometres. The WWO CShapes snapshot of 1900-03-12 reports respectively 71,584.9, 130,337 and 727,266 square kilometres for cshapes_gw_4781, cshapes_gw_4783 and cshapes_gw_4784. The northern difference is about 109,300 square kilometres. The difference does not identify which people or localities would be removed by a boundary adjustment.",
+    "references": [
+      {
+        "url": "https://iiif.wellcomecollection.org/presentation/v2/b32183173",
+        "locator": "Wellcome IIIF manifest for the original volume. Use the canvases for printed pp. 4, 5, 145 and 146."
+      },
+      {
+        "url": "https://libsysdigi.library.illinois.edu/ilharvest/Africana/Books2011-05/3064634/3064634_1902_lagos/3064634_1902_lagos_opt.pdf",
+        "locator": "Colonial Reports—Annual No. 400, Lagos, 1902, printed pp. 29–30, Population. The official annual return reproduces the 1901 split between 41,847 enumerated and 1,347,000 estimated."
+      },
+      {
+        "url": "https://icr.ethz.ch/data/cshapes/",
+        "locator": "CShapes dataset. WWO uses the 1900-03-12 extract in data/world_map/historical/cshapes_1900_snapshot.json. The source geometries label both protectorates as starting 1899-01-01. The Orders took effect a year later."
+      }
+    ],
+    "collection": "nigeria_lagos_population"
+  },
+  {
+    "id": "lagos_annual_report_1903",
+    "title": "Lagos. Report for 1903. Colonial Reports—Annual",
+    "publisher": "Colonial Office / HMSO. University of Illinois Library digital copy.",
+    "url": "https://libsysdigi.library.illinois.edu/ilharvest/Africana/Books2011-05/3064634/3064634_1903_lagos/3064634_1903_lagos_opt.pdf",
+    "locator": "Printed p. 36, paragraph 37, Liquor Traffic.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "date_note": "1903 is the report year. The denominator has no separate population reference day. The five-year period in the paragraph refers to liquor imports, with one population estimate used for comparison.",
+    "boundary_note": "The denominator is expressly for the Lagos territory. The text gives no territorial components or population estimation method.",
+    "collection": "nigeria_lagos_population"
+  },
+  {
+    "id": "nigeria_transfer_and_protectorate_returns",
+    "title": "Southern Nigeria Order in Council, 1899, and the first annual returns for the protectorates",
+    "publisher": "Privy Council and Colonial Office / HMSO.",
+    "url": "https://www.thegazette.co.uk/Edinburgh/issue/11161/page/25/data.pdf",
+    "locator": "Edinburgh Gazette, 9 January 1900, printed p. 25, preamble and article II. See the annual reports for the effective date and statistical coverage.",
+    "rights": "Historical and bibliographic facts only. No scans or prose reproduced.",
+    "date_note": "The transfer took effect on 1 January 1900. On that date the original Niger Coast Protectorate and the southern part of Royal Niger Company territory became Southern Nigeria. The northern company territories became Northern Nigeria. The Niger Coast Protectorate's transfer to the Colonial Office on 1 April 1899 was a separate administrative change.",
+    "boundary_note": "Article II of the Southern Nigeria Order traces the Río del Rey, Cross River rapids, a line towards Yola, and the northern boundary to Idda and Owo. It places Idda and Ikaha in Southern Nigeria, Takum north of the line, and Akure in Lagos. The southwestern boundary continues through the Lagos Creek and Arogbo to the coast, leaving the King of Mahin's territory west of the line. The Northern and Southern reports do not supply matching all-resident totals for these administrative extents at the handover. The source texts distinguish nominal protected territory from areas directly administered.",
+    "references": [
+      {
+        "url": "https://libsysdigi.library.illinois.edu/ilharvest/Africana/Books2011-05/3064634/3064634_1899_1900_southern_nigeria/3064634_1899_1900_southern_nigeria_opt.pdf",
+        "locator": "Southern Nigeria annual report for 1899–1900, printed pp. 4 and 24, Royal Niger Company transfer and Order promulgation on 1 January 1900. Printed p. 17, section VII(A), gives average European presence of 270 over the reporting year and says the Indigenous population cannot be estimated."
+      },
+      {
+        "url": "https://wasc.org.uk/Colonial%20reports/Niger%20Coast%20Protectorate%20colonial%20report%201898-99.pdf",
+        "locator": "Colonial Reports—Annual No. 289, Niger Coast Protectorate, 1898–99, printed p. 10. The predecessor return covers an average of 227 Europeans, 204 male and 23 female. The reporting areas changed at the transfer."
+      },
+      {
+        "url": "https://libsysdigi.library.illinois.edu/ilharvest/Africana/Books2011-05/3064634/3064634_1900_1901_northern_nigeria/3064634_1900_1901_northern_nigeria_opt.pdf",
+        "locator": "Colonial Reports—Annual No. 346, Northern Nigeria, report for 1 January 1900 to 31 March 1901. The first report contains no whole-protectorate population count."
+      },
+      {
+        "url": "https://wasc.org.uk/Nigeria%20history%20docs/Annual%20Reports%20Nigeria/Nigeria%20colonial%20report%201926.pdf#page=4",
+        "locator": "Colonial Reports—Annual No. 1335, Nigeria, 1926, printed p. 4, paragraphs 5–7, and p. 5, paragraphs 8–9. The official retrospective distinguishes legal succession from the reach of effective administration."
+      },
+      {
+        "url": "https://api.icj-cij.org/sites/default/files/case-related/94/8602.pdf",
+        "locator": "Nigeria's written submissions in Land and Maritime Boundary between Cameroon and Nigeria, paragraph 6.68(5)–(7). Identifies both 1899 Orders and the 1 January 1900 effective date, citing London Gazette, 5 January 1900, pp. 69–73."
+      }
+    ],
+    "collection": "nigeria_lagos_population"
+  },
+  {
+    "id": "ft_nigeria_scope_review",
+    "title": "Federico–Tena World Population Historical Database: Nigeria reconstruction and colonial territorial coverage",
+    "publisher": "e-cienciaDatos / Universidad Carlos III de Madrid.",
+    "url": "https://doi.org/10.21950/3SK54X",
+    "locator": "V5 List of Polities, Country series!AG103 and AG104. Methods working paper, printed pp. 9–11, and Appendix I, p. 52, Nigeria.",
+    "rights": "CC BY 4.0, Giovanni Federico and Antonio Tena-Junguito. WWO extracts and interpolates historical population facts.",
+    "boundary_note": "The historical-border workbook supplies one Nigeria series. The methods project sub-Saharan colonial series backward and give a single Nigeria entry without a three-way allocation. The WWO reconstruction is 19,081,911 at 1900-01-01. Subtracting the Lagos 1,500,000 fiscal estimate gives 17,581,911; also subtracting the Southern 5,000,000 estimate gives 12,581,911. Those arithmetic differences mix periods and estimation methods, with no verified match between the later colonial Nigerian territory and the 1900 statutory areas. They cannot serve as separate Northern Nigeria population observations. The WWO v7 opening has none of these three jurisdictions or an opening aggregate for Nigeria.",
+    "references": [
+      {
+        "url": "https://hdl.handle.net/10016/45843",
+        "locator": "2025 methods working paper, section 4.1 and Appendix I, p. 52. The report identifies the use of area growth rates and later Frankema–Jerven polity-specific rates."
+      },
+      {
+        "url": "https://edatos.consorciomadrono.es/api/access/datafile/51075?format=original",
+        "locator": "V5 workbook. Both nominal July values used in the opening interpolation refer to the same undivided Nigeria series."
+      }
+    ],
+    "collection": "nigeria_lagos_population"
+  },
+  {
     "id": "ph_census_1903_vol2",
     "title": "Census of the Philippine Islands, taken under the direction of the Philippine Commission in the year 1903. Volume II: Population",
     "publisher": "U.S. Bureau of the Census / Government Printing Office (1905)",
@@ -1370,6 +1777,41 @@
       "https://nzaht.org/conserve/explorer-bases/borchgrevinks-hut-cape-adare/history-of-borchgrevinks-expedition/"
     ],
     "collection": "polar_presence"
+  },
+  {
+    "id": "yokoyama_japan_lower_classes_1899",
+    "title": "日本之下層社会",
+    "publisher": "横山源之助, 教文館. First edition, 1899. National Diet Library Digital Collections.",
+    "publication_year": 1899,
+    "url": "https://dl.ndl.go.jp/pid/798849/1/30",
+    "locator": "Printed pp. 32–33, Shin’ami household daily expenditure account.",
+    "rights": "Public-domain original. The collection transcribes account quantities and amounts.",
+    "note": "Publication is dated. The household account has no stated observation date.",
+    "collection": "pop_traits"
+  },
+  {
+    "id": "rutten_borinage_miner_monograph_95",
+    "title": "Mineur du bassin houiller du Couchant de Mons (Borinage - Belgique)",
+    "publisher": "Ceslas Rutten, Les Ouvriers des Deux Mondes, monograph 95. 1901 fascicle, 1904 collected volume. Digital edition by Jean-Damien Généro, TIME-US and Centre de recherches historiques (CNRS-EHESS), updated 2025-04-02.",
+    "publication_year": 1901,
+    "url": "https://ouvriersdeuxmondes.huma-num.fr/monographie/mineur-bassin-houiller-couchant-mons-95#part_02_05_15",
+    "locator": "Printed p. 234, §15, household annual food account, Poids consommé column. §§8–9 describe the household’s potato production. Printed pp. 216–217, §§2–3, household membership and religious practice.",
+    "rights": "Etalab Open Licence 2.0. Archive record and licence at https://nakala.fr/10.34847/nkl.bb6dd9wa.",
+    "monograph_pdf_url": "https://ouvriersdeuxmondes.huma-num.fr/monographie/mineur-bassin-houiller-couchant-mons-95/download/pdf",
+    "note": "The town is anonymised as Commune D. A fifth household member, their older daughter aged 17, is outside the four-person food account.",
+    "collection": "pop_traits"
+  },
+  {
+    "id": "quran_al_maidah_5_3",
+    "title": "Qur’an, al-Māʾidah 5:3",
+    "publisher": "Arabic text and verse locator, Quranic Arabic Corpus, University of Leeds. Historical English cross-reference in George Sale’s translation, first published in 1734.",
+    "publication_year": null,
+    "url": "https://corpus.quran.com/wordmorphology.jsp?location=%285%3A3%3A1%29",
+    "locator": "Sura 5, verse 3, opening food restrictions and closing necessity clause.",
+    "rights": "Ancient source text. The collection paraphrases the passage and reproduces no editorial text or translation.",
+    "historical_edition_url": "https://religion.antropo.es/_libros/biblioteca/Coran.Ingles.1734.George.Sale.pdf",
+    "note": "The norm is attested before 1900. The source has no local practice survey or dated population observation.",
+    "collection": "pop_traits"
   },
   {
     "id": "ro_colescu_1899_census_report",
@@ -1469,6 +1911,65 @@
     "collection": "saint_helena_population"
   },
   {
+    "id": "scotland_civil_counties_census_1901",
+    "title": "Eleventh Decennial Census of the Population of Scotland taken 31st March 1901, with Report",
+    "publisher": "Registrar-General for Scotland",
+    "url": "https://www.visionofbritain.org.uk/census/table/S1901GEN1_M1_1",
+    "locator": "Vol. 1, Table 1_1, civil county totals, both sexes, 1891 and 1901. Numeric facts transcribed from the contemporary reproduction, Table I in Encyclopaedia Britannica, 11th ed., vol. 24. The 1901 Elgin total uses the census figure of 44,800.",
+    "digitized_copy_url": "https://en.wikisource.org/wiki/Page:EB1911_-_Volume_24.djvu/439",
+    "comparison_url": "https://www.visionofbritain.org.uk/census/S1911PRE/4",
+    "rights": "Transcribed counts from public-domain reports. No images reproduced.",
+    "raw_paths": [
+      "raw/civil_counties.tsv"
+    ],
+    "collection": "scotland_civil_counties"
+  },
+  {
+    "id": "british_empire_census_1901_sierra_leone_scope",
+    "title": "Census of the British Empire, 1901. Sierra Leone returns and explanatory notes",
+    "publisher": "General Register Office / HMSO, 1906. Wellcome Collection digital copy.",
+    "url": "https://wellcomecollection.org/works/mbq6vgjb",
+    "locator": "Printed p. 71, census dates and coverage, Sierra Leone; printed p. 142, section 15, tables 1–3 and note to table 1.",
+    "rights": "Wellcome Collection marks this copy Public Domain Mark 1.0. Historical population facts and bibliographic references only.",
+    "date_note": "The source identifies the Colony census only by year. It explicitly gives no census for the Protectorate. The Protectorate figure has no separate headcount date. The note on p. 142 states that the 1891 Colony total of 74,835 covers a different geographical area from the 1901 total.",
+    "boundary_note": "The Colony return of 76,655 includes the Sierra Leone Peninsula subtotal of 67,782, Sherbro 5,490, Isles de Los 1,422, Tassoh 1,079 and Kikonkeh 882. Freetown district's 34,463 is included in the Peninsula subtotal. The separate Protectorate estimate of 949,827 includes Ronietta 400,000, Karene 200,000, Bandajuma 109,584, Panguma 183,857 and Koinadugu 56,386. The separate Colony and Protectorate totals and their district detail are already in collections/eastern. The roster reflects administrative reporting boundaries. For example, the 1896 delimitation ordinance treated some still legally colonial areas as part of the Protectorate for administration. The combined statistical scope has no exact opening-map crosswalk. The WWO CShapes Sierra Leone polygon ends at longitude 13.2932 degrees west and therefore excludes Isles de Los. Its eastern extent includes Kailahun, which the 1911 treaty returned to the British side in exchange for other territory after the 1903 demarcation. Removing only Isles de Los does not establish a boundary match.",
+    "references": [
+      {
+        "url": "https://iiif.wellcomecollection.org/presentation/v2/b32183173",
+        "locator": "Wellcome IIIF manifest. Use the original image canvases for printed pp. 71 and 142."
+      },
+      {
+        "url": "https://www.sierra-leone.org/Books/Report_by_Her_Majesty_s_Commissioner_and.pdf",
+        "locator": "Report by Her Majesty's Commissioner on the Insurrection in the Sierra Leone Protectorate, C. 9388, paragraphs 26–27. Gives the 31 August 1896 proclamation and the Protectorate's five administrative districts."
+      },
+      {
+        "url": "https://wacapc-africa.com/rex-v-dixon/",
+        "locator": "Rex v Dixon, West African Court of Appeal, 1939. Discusses Port Loko and the administrative treatment of colonial areas under the Protectorate Delimitation Ordinance, 1896."
+      },
+      {
+        "url": "https://www.legislation.gov.uk/ukpga/Edw7/4/33/pdfs/ukpga_19040033_en.pdf",
+        "locator": "Anglo-French Convention of 8 April 1904, Schedule, Article VI. The United Kingdom ceded its rights over Isles de Los to France."
+      },
+      {
+        "url": "https://treaties.fcdo.gov.uk/data/Library2/pdf/1911-TS0016.pdf",
+        "locator": "Convention between the United Kingdom and Liberia, signed 21 January 1911, preamble and Article I. Gives the boundary replacing the 1903 demarcation."
+      },
+      {
+        "url": "https://history.state.gov/historicaldocuments/frus1911/d436",
+        "locator": "Foreign Relations of the United States, 1911, document 436, 12 December 1910. Quotes Liberia's account of the agreement exchanging Kanre-Lahun for the Morro-Mano tract."
+      },
+      {
+        "url": "https://library.law.fsu.edu/Digital-Collections/LimitsinSeas/pdf/ibs129.pdf",
+        "locator": "U.S. Department of State, International Boundary Study No. 129, printed pp. 4–5. Describes the 1903 line and 1911 exchange."
+      },
+      {
+        "url": "https://icr.ethz.ch/data/cshapes/",
+        "locator": "WWO uses cshapes_gw_451 from data/world_map/historical/cshapes_1900_snapshot.json, dated 12 March 1900. The formal map has a combined Sierra Leone polity, without separate Colony and Protectorate polygons."
+      }
+    ],
+    "collection": "sierra_leone_population"
+  },
+  {
     "id": "swiss_federal_census_comparison_1911",
     "title": "Vorläufige Resultate der eidgenössischen Volkszählung vom 1. Dezember 1910, verglichen mit früheren Volkszählungen",
     "publisher": "Federal census returns published in Zeitschrift für schweizerische Statistik (1911), pp. 101–143",
@@ -1477,6 +1978,58 @@
     "rights": "Numeric facts transcribed from 1911 publication; no reproduction of its layout. Canton totals cross-checked against Statistisches Jahrbuch der Schweiz 1919, III.a.3.",
     "independent_url": "https://istmat.org/files/uploads/53038/statistisches_jahrbuch_der_schweiz_1919.pdf",
     "collection": "swiss"
+  },
+  {
+    "id": "jp_tokyo_prefecture_statistics_1900",
+    "title": "東京府統計書 明治三十三年",
+    "publisher": "Tokyo Prefecture",
+    "url": "https://doi.org/10.11501/806580",
+    "locator": "Table 26, 現住者庶業一 (市部), printed pp. 63–75. Table 27, 現住者庶業二 (郡部), pp. 75–80. Table-end notes on pp. 75 and 80 explain the distinct counts.",
+    "rights": "The National Diet Library catalog marks the edition Public Domain Mark. Historical factual counts transcribed from the original tables.",
+    "raw_path": "structure.jsonl",
+    "catalog_url": "https://ndlsearch.ndl.go.jp/books/R100000039-I806580",
+    "table_urls": [
+      "https://dl.ndl.go.jp/api/iiif/806580/R0000042/full/3200,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/806580/R0000048/full/3200,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/806580/R0000050/full/3200,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/806580/R0000051/full/3200,/0/default.jpg"
+    ],
+    "collection": "tokyo_occupation_1900"
+  },
+  {
+    "id": "jp_cabinet_local_occupations_1913_tokyo",
+    "title": "現住人口静態ニ關スル統計材料",
+    "publisher": "Bureau of Statistics, Imperial Cabinet of Japan, February 1913",
+    "url": "https://www.niph.go.jp/toshokan/koten/Statistics/PDF/000183550005.pdf#page=6",
+    "locator": "Part II, 地方職業別現住人口及戶數, printed p. 2. Meiji 33 matrix and its footnotes. PDF page 6.",
+    "rights": "Historical factual counts transcribed from the 1913 government publication. The National Institute of Public Health scan is linked.",
+    "raw_path": "structure.jsonl",
+    "catalog_url": "https://www.niph.go.jp/toshokan/koten/Statistics/index_k1.html",
+    "interpretation_url": "https://www.stat.go.jp/museum/toukei150/shiryo/shiryo38.html",
+    "collection": "tokyo_occupation_1900"
+  },
+  {
+    "id": "us_twelfth_census_table_31_occupations",
+    "publisher": "United States Census Office",
+    "title": "Occupation statistics at the Twelfth Census",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/occupations/1900-census-occupations-8.pdf",
+    "locator": "Table 31, printed pp. 92–93, state and territory rows 3–52; five occupation classes.",
+    "references": [
+      "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p2.pdf"
+    ],
+    "rights": "United States government publication. Public domain.",
+    "date_note": "June 1, 1900. The companion Vol. II Table LXXVII corroborates OCR corrections for California professional service, New Hampshire trade and transportation, and Tennessee total gainful workers. The fifty retained rows close to the continental class controls; for the professional control use 827,941 male plus 430,597 female.",
+    "collection": "us_social"
+  },
+  {
+    "id": "us_thirteenth_census_table_36_residence",
+    "publisher": "United States Bureau of the Census",
+    "title": "Thirteenth Census of the United States Taken in the Year 1910, Vol. I, Population",
+    "url": "https://www2.census.gov/prod2/decennial/documents/36894832v1ch02.pdf",
+    "locator": "Table 36, printed p. 56, rows 11–59, compare 1900 columns.",
+    "rights": "United States government publication. Public domain.",
+    "date_note": "June 1, 1900 counts republished under the Bureau's comparative urban/rural definitions. The Oklahoma row combines Oklahoma and Indian Territory. The District of Columbia is classified entirely urban in this series.",
+    "collection": "us_social"
   },
   {
     "id": "venezuela_1904_pan_american_handbook",
@@ -1604,7 +2157,7 @@
       "source_date": "1899",
       "population_value": 200000,
       "basis": "Contemporary two-island estimate published in 1899 used as a near-opening proxy. No interpolation, reference date, error interval or separate foreign-resident adjustment.",
-      "scope": "Unguja and Pemba and their administratively dependent islets. Excludes Mafia, mainland coastal leases and the East Africa Protectorate. Tumbatu belongs to Unguja administratively but has no separate polygon in the WWO snapshot. The approximate 150,000 and 50,000 source figures describe a dated observation only; retain no 1900 island-level partition.",
+      "scope": "Unguja and Pemba and their administratively dependent islets. Excludes Mafia, mainland coastal leases and the East Africa Protectorate. Tumbatu belongs to Unguja administratively. Version 10 uses the published 150,000 and 50,000 as statistical opening components of the existing two-island estimate.",
       "research_comparator": {
         "unit_id": "ft_zanzibar_island",
         "source_id": "ft_world_v5",

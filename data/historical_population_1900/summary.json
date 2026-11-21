@@ -10,7 +10,7 @@
     "britain": 206,
     "cabo_verde": 25,
     "cape_population": 2,
-    "cities_europe": 1742,
+    "cities_europe": 2063,
     "colombia_panama_population": 2,
     "crown_islands": 29,
     "danish": 56,
@@ -18,48 +18,57 @@
     "ecuador_population": 35,
     "el_salvador_population": 19,
     "french_indochina_population": 14,
+    "gold_coast_population": 2,
+    "honduras_population": 25,
     "india_comparable": 87,
     "japan_taiwan": 232,
     "java_madoera": 2,
     "liechtenstein": 25,
     "madagascar_population": 6,
     "morocco_population": 5,
+    "nigeria_lagos_population": 3,
     "philippines": 51,
     "polar_presence": 1,
     "romania": 6,
     "russia": 1721,
     "saint_helena_population": 1,
+    "scotland_civil_counties": 66,
+    "sierra_leone_population": 3,
     "swiss": 57,
     "venezuela_population": 23,
     "world": 499,
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 127,
+  "cited_sources": 159,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
   "production_roots": 54,
   "partially_located_legacy_roots": 3,
-  "documented_people_under_legacy_controls": 377952285,
+  "documented_people_under_legacy_controls": 562106935,
   "replaced_legacy_roots": 30,
   "new_roots": 24,
-  "production_people": 1037464475,
-  "production_people_pct_world_estimate": 65.042,
-  "population_outside_evidence_opening_estimate": 557609773,
-  "legacy_only_people": 427927715,
+  "production_people": 1221619125,
+  "production_people_pct_world_estimate": 76.587,
+  "population_outside_evidence_opening_estimate": 373455123,
+  "legacy_only_people": 243773065,
   "authoritative_total_for_new_game": 1465392190,
-  "roots_with_partitions": 18,
-  "disjoint_leaves": 360,
-  "people_in_partitions": 854178808,
+  "roots_with_partitions": 21,
+  "disjoint_leaves": 584,
+  "people_in_partitions": 1086262267,
   "unlocated_balances_under_research_controls": [
+    {
+      "unit_id": "australia_colonies_1900",
+      "people": 121455
+    },
     {
       "unit_id": "cshapes_gw_850",
       "people": 16271347
     }
   ],
-  "partitions_with_explicit_places": 20,
-  "people_in_partitions_with_explicit_places": 272587476,
+  "partitions_with_explicit_places": 23,
+  "people_in_partitions_with_explicit_places": 147466448,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
   "political_catalogue_members_of_production_groups": 63,
@@ -67,7 +76,7 @@
     "britain_historic_counties_identity.json": {
       "units": 414,
       "with_linked_observation": 88,
-      "with_opening_partition": 51
+      "with_opening_partition": 49
     },
     "france_administrative_identity_1900.json": {
       "units": 87,
@@ -87,7 +96,7 @@
     "russian_empire_1897_identity.json": {
       "units": 930,
       "with_linked_observation": 785,
-      "with_opening_partition": 0
+      "with_opening_partition": 86
     }
   },
   "city_observation_count": 2269,
@@ -269,7 +278,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2252,
+  "source_statistical_units": 2311,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 24,
@@ -281,7 +290,7 @@
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 3,
-      "people": 377952285
+      "people": 562106935
     }
   },
   "city_index_representative_bands": {
@@ -291,6 +300,36 @@
     "500k+": 42
   },
   "city_index_unresolved": 31,
+  "opening_social_coverage": {
+    "language": {
+      "assigned_people": 132730938,
+      "unknown_people": 1332661252
+    },
+    "legal_estate": {
+      "assigned_people": 132020769,
+      "unknown_people": 1333371421
+    },
+    "literacy": {
+      "assigned_people": 86951727,
+      "unknown_people": 1378440463
+    },
+    "marital_status": {
+      "assigned_people": 95776561,
+      "unknown_people": 1369615629
+    },
+    "occupation": {
+      "assigned_people": 28866450,
+      "unknown_people": 1436525740
+    },
+    "religion": {
+      "assigned_people": 233441467,
+      "unknown_people": 1231950723
+    },
+    "residence": {
+      "assigned_people": 309242508,
+      "unknown_people": 1156149682
+    }
+  },
   "structural_observations_by_source": {
     "rus_rel_97": 1743,
     "rus_sos_97": 1755,
@@ -306,18 +345,679 @@
     "france_census_1901_age_summary": 8,
     "de_reich_census_1900_state_ages": 18,
     "de_bavaria_yearbook_1903_ages": 3,
+    "de_bavaria_yearbook_1903_five_year_ages": 22,
     "de_prussia_yearbook_1904_ages": 37,
+    "india_census_1901_original_age": 311,
+    "india_census_1901_coorg_age": 19,
+    "india_census_1891_original_age": 19,
+    "cape_census_1904_age_hmso_1906": 20,
+    "jp_ltes_1899_resident_ages": 82,
+    "fi_yearbook_1910_population_ages": 22,
+    "jp_cabinet_population_1898_original": 23,
+    "jp_cabinet_local_occupations_1913_tokyo": 8,
+    "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 236614965,
-  "structure_opening_pool_count": 72,
-  "structure_opening_residents_outside_modeled_pools": 1228777225,
+  "structure_opening_pool_controls": 621620283,
+  "structure_opening_pool_count": 426,
+  "structure_opening_residents_outside_modeled_pools": 843771907,
   "structure_opening_scopes": [
+    {
+      "unit_id": "administrative_region:france_ain",
+      "opening_total": 350699,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_aisne",
+      "opening_total": 537039,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_allier",
+      "opening_total": 422602,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_alpes_maritimes",
+      "opening_total": 286322,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_ardeche",
+      "opening_total": 355929,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_ardennes",
+      "opening_total": 316394,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_ariege",
+      "opening_total": 212765,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_aube",
+      "opening_total": 247458,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_aude",
+      "opening_total": 312790,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_aveyron",
+      "opening_total": 383889,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_basses_alpes",
+      "opening_total": 115788,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_basses_pyrenees",
+      "opening_total": 425665,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_bouches_du_rhone",
+      "opening_total": 719481,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_calvados",
+      "opening_total": 411897,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_cantal",
+      "opening_total": 231462,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_charente",
+      "opening_total": 351762,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_charente_inferieure",
+      "opening_total": 452470,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_cher",
+      "opening_total": 346079,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_correze",
+      "opening_total": 319397,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_corse",
+      "opening_total": 294258,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_cote_d_or",
+      "opening_total": 363233,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_cotes_du_nord",
+      "opening_total": 611001,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_creuse",
+      "opening_total": 278208,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_deux_sevres",
+      "opening_total": 343510,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_dordogne",
+      "opening_total": 455867,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_doubs",
+      "opening_total": 299646,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_drome",
+      "opening_total": 298836,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_eure",
+      "opening_total": 336223,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_eure_et_loir",
+      "opening_total": 276670,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_finistere",
+      "opening_total": 764819,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_gard",
+      "opening_total": 419657,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_gers",
+      "opening_total": 241401,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_gironde",
+      "opening_total": 818373,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_haute_garonne",
+      "opening_total": 451157,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_haute_loire",
+      "opening_total": 314707,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_haute_marne",
+      "opening_total": 227899,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_haute_saone",
+      "opening_total": 268149,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_haute_savoie",
+      "opening_total": 264311,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_haute_vienne",
+      "opening_total": 380272,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_hautes_alpes",
+      "opening_total": 110423,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_hautes_pyrenees",
+      "opening_total": 216388,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_herault",
+      "opening_total": 484574,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_ille_et_vilaine",
+      "opening_total": 615648,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_indre",
+      "opening_total": 288891,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_indre_et_loire",
+      "opening_total": 335915,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_isere",
+      "opening_total": 568752,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_jura",
+      "opening_total": 262480,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_landes",
+      "opening_total": 291905,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_loir_et_cher",
+      "opening_total": 276180,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_loire",
+      "opening_total": 642157,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_loire_inferieure",
+      "opening_total": 660354,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_loiret",
+      "opening_total": 367731,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_lot",
+      "opening_total": 230081,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_lot_et_garonne",
+      "opening_total": 280616,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_lozere",
+      "opening_total": 129673,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_maine_et_loire",
+      "opening_total": 514710,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_manche",
+      "opening_total": 493504,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_marne",
+      "opening_total": 434526,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_mayenne",
+      "opening_total": 315088,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_meurthe_et_moselle",
+      "opening_total": 480226,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_meuse",
+      "opening_total": 285176,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_morbihan",
+      "opening_total": 560658,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_nievre",
+      "opening_total": 326268,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_nord",
+      "opening_total": 1853446,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_oise",
+      "opening_total": 406998,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_orne",
+      "opening_total": 329951,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_pas_de_calais",
+      "opening_total": 943322,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_puy_de_dome",
+      "opening_total": 546867,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_pyrenees_orientales",
+      "opening_total": 211194,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_rhone",
+      "opening_total": 842233,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_saone_et_loire",
+      "opening_total": 620575,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_sarthe",
+      "opening_total": 423283,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_savoie",
+      "opening_total": 256011,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_seine",
+      "opening_total": 3589024,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_seine_et_marne",
+      "opening_total": 358502,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_seine_et_oise",
+      "opening_total": 697936,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_seine_inferieure",
+      "opening_total": 849939,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_somme",
+      "opening_total": 539182,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_tarn",
+      "opening_total": 333880,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_tarn_et_garonne",
+      "opening_total": 196828,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_territoire_de_belfort",
+      "opening_total": 91258,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_var",
+      "opening_total": 322158,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_vaucluse",
+      "opening_total": 236793,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_vendee",
+      "opening_total": 441427,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_vienne",
+      "opening_total": 336778,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_vosges",
+      "opening_total": 421180,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
+    {
+      "unit_id": "administrative_region:france_yonne",
+      "opening_total": 323910,
+      "observed_unit_id": "country_fra",
+      "observed_total": 38450788,
+      "observed_date": "1901-03-24"
+    },
     {
       "unit_id": "administrative_region:gb_historic_anglesey",
       "opening_total": 50543,
       "observed_unit_id": "uk_ancient_area_anglesey",
       "observed_total": 50606,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_bedfordshire",
+      "opening_total": 169928,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_berkshire",
+      "opening_total": 254347,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_brecknockshire",
+      "opening_total": 59549,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_buckinghamshire",
+      "opening_total": 194459,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_cambridgeshire",
+      "opening_total": 190468,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_cardiganshire",
+      "opening_total": 60538,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
       "observed_date": "1901-03-31"
     },
     {
@@ -328,10 +1028,157 @@
       "observed_date": "1901-03-31"
     },
     {
+      "unit_id": "administrative_region:gb_historic_carnarvonshire",
+      "opening_total": 125803,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_cheshire",
+      "opening_total": 804513,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_cornwall",
+      "opening_total": 322364,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_cumberland",
+      "opening_total": 266885,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_denbighshire",
+      "opening_total": 128439,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_derbyshire",
+      "opening_total": 608833,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_devon",
+      "opening_total": 657641,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_dorset",
+      "opening_total": 201888,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_durham",
+      "opening_total": 1166086,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_essex",
+      "opening_total": 1048385,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_flintshire",
+      "opening_total": 81149,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
       "unit_id": "administrative_region:gb_historic_glamorgan",
       "opening_total": 838431,
       "observed_unit_id": "uk_ancient_area_glamorganshire",
       "observed_total": 859931,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_gloucestershire",
+      "opening_total": 630399,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_hampshire",
+      "opening_total": 784247,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_herefordshire",
+      "opening_total": 114575,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_hertfordshire",
+      "opening_total": 246419,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_huntingdonshire",
+      "opening_total": 57770,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_lancashire",
+      "opening_total": 4346700,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_leicestershire",
+      "opening_total": 426496,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_lincolnshire",
+      "opening_total": 495624,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_merionethshire",
+      "opening_total": 49157,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_monmouthshire",
+      "opening_total": 287350,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
       "observed_date": "1901-03-31"
     },
     {
@@ -342,10 +1189,129 @@
       "observed_date": "1901-03-31"
     },
     {
+      "unit_id": "administrative_region:gb_historic_norfolk",
+      "opening_total": 459422,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_northamptonshire",
+      "opening_total": 333618,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_northumberland",
+      "opening_total": 591416,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_nottinghamshire",
+      "opening_total": 506019,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_oxfordshire",
+      "opening_total": 181633,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_pembrokeshire",
+      "opening_total": 88782,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
       "unit_id": "administrative_region:gb_historic_radnorshire",
       "opening_total": 23096,
       "observed_unit_id": "uk_ancient_area_radnorshire",
       "observed_total": 23281,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_rutland",
+      "opening_total": 19827,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_shropshire",
+      "opening_total": 238952,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_somerset",
+      "opening_total": 505278,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_staffordshire",
+      "opening_total": 1215698,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_suffolk",
+      "opening_total": 382667,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_sussex",
+      "opening_total": 598386,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_warwickshire",
+      "opening_total": 886287,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_westmorland",
+      "opening_total": 64526,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_wiltshire",
+      "opening_total": 272765,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_worcestershire",
+      "opening_total": 479052,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_yorkshire",
+      "opening_total": 3537925,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
       "observed_date": "1901-03-31"
     },
     {
@@ -377,18 +1343,606 @@
       "observed_date": "1900-12-01"
     },
     {
-      "unit_id": "administrative_region:uk_constituent_ireland",
-      "opening_total": 4489395,
-      "observed_unit_id": "uk_ireland",
-      "observed_total": 4458775,
-      "observed_date": "1901-03-31"
+      "unit_id": "administrative_region:ristat_province_100",
+      "opening_total": 1043659,
+      "observed_unit_id": "ru1897_85",
+      "observed_total": 987863,
+      "observed_date": "1897-02-09"
     },
     {
-      "unit_id": "administrative_region:uk_constituent_scotland",
-      "opening_total": 4416526,
-      "observed_unit_id": "uk_scotland",
-      "observed_total": 4472103,
-      "observed_date": "1901-03-31"
+      "unit_id": "administrative_region:ristat_province_101",
+      "opening_total": 1561900,
+      "observed_unit_id": "ru1897_86",
+      "observed_total": 1478398,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_102",
+      "opening_total": 404090,
+      "observed_unit_id": "ru1897_82",
+      "observed_total": 382487,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_104",
+      "opening_total": 908596,
+      "observed_unit_id": "ru1897_83",
+      "observed_total": 860021,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_106",
+      "opening_total": 1661015,
+      "observed_unit_id": "ru1897_89",
+      "observed_total": 1572214,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_107",
+      "opening_total": 815758,
+      "observed_unit_id": "ru1897_60",
+      "observed_total": 772146,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_11",
+      "opening_total": 384724,
+      "observed_unit_id": "ru1897_27",
+      "observed_total": 364156,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_12",
+      "opening_total": 366109,
+      "observed_unit_id": "ru1897_1",
+      "observed_total": 346536,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_13",
+      "opening_total": 1869058,
+      "observed_unit_id": "ru1897_43",
+      "observed_total": 1769135,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_14",
+      "opening_total": 1131867,
+      "observed_unit_id": "ru1897_50",
+      "observed_total": 1071355,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_15",
+      "opening_total": 1417571,
+      "observed_unit_id": "ru1897_7",
+      "observed_total": 1341785,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_16",
+      "opening_total": 1465356,
+      "observed_unit_id": "ru1897_18",
+      "observed_total": 1387015,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_17",
+      "opening_total": 1601299,
+      "observed_unit_id": "ru1897_6",
+      "observed_total": 1515691,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_18",
+      "opening_total": 1185707,
+      "observed_unit_id": "ru1897_34",
+      "observed_total": 1122317,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_19",
+      "opening_total": 436027,
+      "observed_unit_id": "ru1897_49",
+      "observed_total": 412716,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_2",
+      "opening_total": 2231324,
+      "observed_unit_id": "ru1897_37",
+      "observed_total": 2112033,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_20",
+      "opening_total": 1372755,
+      "observed_unit_id": "ru1897_21",
+      "observed_total": 1299365,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_21",
+      "opening_total": 712104,
+      "observed_unit_id": "ru1897_19",
+      "observed_total": 674034,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_22",
+      "opening_total": 1631803,
+      "observed_unit_id": "ru1897_17",
+      "observed_total": 1544564,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_23",
+      "opening_total": 1573361,
+      "observed_unit_id": "ru1897_5",
+      "observed_total": 1489246,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_24",
+      "opening_total": 3202017,
+      "observed_unit_id": "ru1897_10",
+      "observed_total": 3030831,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_25",
+      "opening_total": 615837,
+      "observed_unit_id": "ru1897_59",
+      "observed_total": 582913,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_26",
+      "opening_total": 1681081,
+      "observed_unit_id": "ru1897_4",
+      "observed_total": 1591207,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_27",
+      "opening_total": 612328,
+      "observed_unit_id": "ru1897_54",
+      "observed_total": 579592,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_28",
+      "opening_total": 584903,
+      "observed_unit_id": "ru1897_57",
+      "observed_total": 553633,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_29",
+      "opening_total": 2040982,
+      "observed_unit_id": "ru1897_51",
+      "observed_total": 1931867,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_3",
+      "opening_total": 1444233,
+      "observed_unit_id": "ru1897_26",
+      "observed_total": 1367022,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_30",
+      "opening_total": 888075,
+      "observed_unit_id": "ru1897_52",
+      "observed_total": 840597,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_31",
+      "opening_total": 1483195,
+      "observed_unit_id": "ru1897_56",
+      "observed_total": 1403901,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_32",
+      "opening_total": 805034,
+      "observed_unit_id": "ru1897_53",
+      "observed_total": 761995,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_33",
+      "opening_total": 860976,
+      "observed_unit_id": "ru1897_58",
+      "observed_total": 814947,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_34",
+      "opening_total": 1226218,
+      "observed_unit_id": "ru1897_55",
+      "observed_total": 1160662,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_36",
+      "opening_total": 1693972,
+      "observed_unit_id": "ru1897_11",
+      "observed_total": 1603409,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_37",
+      "opening_total": 2268922,
+      "observed_unit_id": "ru1897_22",
+      "observed_total": 2147621,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_38",
+      "opening_total": 3158332,
+      "observed_unit_id": "ru1897_8",
+      "observed_total": 2989482,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_39",
+      "opening_total": 3188777,
+      "observed_unit_id": "ru1897_32",
+      "observed_total": 3018299,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_40",
+      "opening_total": 3760260,
+      "observed_unit_id": "ru1897_16",
+      "observed_total": 3559229,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_41",
+      "opening_total": 2044727,
+      "observed_unit_id": "ru1897_3",
+      "observed_total": 1935412,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_42",
+      "opening_total": 2888011,
+      "observed_unit_id": "ru1897_47",
+      "observed_total": 2733612,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_43",
+      "opening_total": 2935065,
+      "observed_unit_id": "ru1897_33",
+      "observed_total": 2778151,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_44",
+      "opening_total": 2427640,
+      "observed_unit_id": "ru1897_48",
+      "observed_total": 2297854,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_45",
+      "opening_total": 1782035,
+      "observed_unit_id": "ru1897_23",
+      "observed_total": 1686764,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_46",
+      "opening_total": 1611429,
+      "observed_unit_id": "ru1897_40",
+      "observed_total": 1525279,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_47",
+      "opening_total": 1196828,
+      "observed_unit_id": "ru1897_15",
+      "observed_total": 1132843,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_48",
+      "opening_total": 2567864,
+      "observed_unit_id": "ru1897_24",
+      "observed_total": 2430581,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_49",
+      "opening_total": 1499629,
+      "observed_unit_id": "ru1897_44",
+      "observed_total": 1419456,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_50",
+      "opening_total": 2148670,
+      "observed_unit_id": "ru1897_29",
+      "observed_total": 2033798,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_51",
+      "opening_total": 2504930,
+      "observed_unit_id": "ru1897_20",
+      "observed_total": 2371012,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_52",
+      "opening_total": 2633086,
+      "observed_unit_id": "ru1897_46",
+      "observed_total": 2492316,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_53",
+      "opening_total": 1529563,
+      "observed_unit_id": "ru1897_41",
+      "observed_total": 1447790,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_54",
+      "opening_total": 2233057,
+      "observed_unit_id": "ru1897_13",
+      "observed_total": 2113674,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_55",
+      "opening_total": 1903987,
+      "observed_unit_id": "ru1897_35",
+      "observed_total": 1802196,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_56",
+      "opening_total": 2835628,
+      "observed_unit_id": "ru1897_42",
+      "observed_total": 2684030,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_57",
+      "opening_total": 2674222,
+      "observed_unit_id": "ru1897_9",
+      "observed_total": 2531253,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_58",
+      "opening_total": 2709070,
+      "observed_unit_id": "ru1897_12",
+      "observed_total": 2564238,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_59",
+      "opening_total": 2027262,
+      "observed_unit_id": "ru1897_65",
+      "observed_total": 1918881,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_60",
+      "opening_total": 60724,
+      "observed_unit_id": "ru1897_70",
+      "observed_total": 57478,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_65",
+      "opening_total": 876411,
+      "observed_unit_id": "ru1897_71",
+      "observed_total": 829556,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_66",
+      "opening_total": 928029,
+      "observed_unit_id": "ru1897_63",
+      "observed_total": 878415,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_67",
+      "opening_total": 873410,
+      "observed_unit_id": "ru1897_61",
+      "observed_total": 826716,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_69",
+      "opening_total": 603414,
+      "observed_unit_id": "ru1897_62",
+      "observed_total": 571154,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_71",
+      "opening_total": 986686,
+      "observed_unit_id": "ru1897_68",
+      "observed_total": 933936,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_72",
+      "opening_total": 922626,
+      "observed_unit_id": "ru1897_67",
+      "observed_total": 873301,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_73",
+      "opening_total": 1553529,
+      "observed_unit_id": "ru1897_30",
+      "observed_total": 1470474,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_74",
+      "opening_total": 1674284,
+      "observed_unit_id": "ru1897_25",
+      "observed_total": 1584774,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_75",
+      "opening_total": 2293267,
+      "observed_unit_id": "ru1897_14",
+      "observed_total": 2170665,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_76",
+      "opening_total": 1614143,
+      "observed_unit_id": "ru1897_39",
+      "observed_total": 1527848,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_77",
+      "opening_total": 2541714,
+      "observed_unit_id": "ru1897_38",
+      "observed_total": 2405829,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_78",
+      "opening_total": 1060224,
+      "observed_unit_id": "ru1897_2",
+      "observed_total": 1003542,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_79",
+      "opening_total": 2906736,
+      "observed_unit_id": "ru1897_36",
+      "observed_total": 2751336,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_81",
+      "opening_total": 681558,
+      "observed_unit_id": "ru1897_88",
+      "observed_total": 645121,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_82",
+      "opening_total": 2320712,
+      "observed_unit_id": "ru1897_45",
+      "observed_total": 2196642,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_83",
+      "opening_total": 1690524,
+      "observed_unit_id": "ru1897_28",
+      "observed_total": 1600145,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_84",
+      "opening_total": 3163425,
+      "observed_unit_id": "ru1897_31",
+      "observed_total": 2994302,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_85",
+      "opening_total": 1513983,
+      "observed_unit_id": "ru1897_78",
+      "observed_total": 1433043,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_86",
+      "opening_total": 602365,
+      "observed_unit_id": "ru1897_73",
+      "observed_total": 570161,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_87",
+      "opening_total": 2036557,
+      "observed_unit_id": "ru1897_79",
+      "observed_total": 1927679,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_88",
+      "opening_total": 235950,
+      "observed_unit_id": "ru1897_76",
+      "observed_total": 223336,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_89",
+      "opening_total": 127101,
+      "observed_unit_id": "ru1897_72",
+      "observed_total": 120306,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_90",
+      "opening_total": 709995,
+      "observed_unit_id": "ru1897_74",
+      "observed_total": 672037,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_91",
+      "opening_total": 543314,
+      "observed_unit_id": "ru1897_75",
+      "observed_total": 514267,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_95",
+      "opening_total": 29701,
+      "observed_unit_id": "ru1897_77",
+      "observed_total": 28113,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_96",
+      "opening_total": 285123,
+      "observed_unit_id": "ru1897_80",
+      "observed_total": 269880,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_97",
+      "opening_total": 479026,
+      "observed_unit_id": "ru1897_87",
+      "observed_total": 453416,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_98",
+      "opening_total": 721163,
+      "observed_unit_id": "ru1897_81",
+      "observed_total": 682608,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_province_99",
+      "opening_total": 723257,
+      "observed_unit_id": "ru1897_84",
+      "observed_total": 684590,
+      "observed_date": "1897-02-09"
     },
     {
       "unit_id": "ca_british_columbia",
@@ -447,6 +2001,13 @@
       "observed_date": "1901-03-31"
     },
     {
+      "unit_id": "cshapes_gw_561",
+      "opening_total": 2265556,
+      "observed_unit_id": "cape_colony",
+      "observed_total": 2409804,
+      "observed_date": "1904-04-18"
+    },
+    {
       "unit_id": "cshapes_gw_780",
       "opening_total": 3469224,
       "observed_unit_id": "cshapes_gw_780",
@@ -461,11 +2022,970 @@
       "observed_date": "1901-03-31"
     },
     {
-      "unit_id": "ft_russia_empire_ussr",
-      "opening_total": 132736358,
-      "observed_unit_id": "ru_census_1897_ex_finland",
-      "observed_total": 125640021,
+      "unit_id": "ft_finland",
+      "opening_total": 2645685,
+      "observed_unit_id": "ft_finland",
+      "observed_total": 2712562,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "irish_county_antrim",
+      "opening_total": 196661,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_armagh",
+      "opening_total": 125757,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_borough_belfast",
+      "opening_total": 350196,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_borough_cork",
+      "opening_total": 76969,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_borough_dublin",
+      "opening_total": 291734,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_borough_limerick",
+      "opening_total": 38576,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_borough_londonderry",
+      "opening_total": 40008,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_borough_waterford",
+      "opening_total": 27067,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_carlow",
+      "opening_total": 37890,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_cavan",
+      "opening_total": 97825,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_clare",
+      "opening_total": 113584,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_cork",
+      "opening_total": 332145,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_donegal",
+      "opening_total": 174227,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_down",
+      "opening_total": 206488,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_dublin",
+      "opening_total": 158162,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_fermanagh",
+      "opening_total": 65620,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_galway",
+      "opening_total": 195433,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_kerry",
+      "opening_total": 167570,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_kildare",
+      "opening_total": 63806,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_kilkenny",
+      "opening_total": 79458,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_king_s",
+      "opening_total": 60414,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_leitrim",
+      "opening_total": 70382,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_limerick",
+      "opening_total": 109148,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_londonderry",
+      "opening_total": 104816,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_longford",
+      "opening_total": 46848,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_louth",
+      "opening_total": 66068,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_mayo",
+      "opening_total": 202149,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_meath",
+      "opening_total": 67752,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_monaghan",
+      "opening_total": 74828,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_queen_s",
+      "opening_total": 57634,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_roscommon",
+      "opening_total": 103316,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_sligo",
+      "opening_total": 85342,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_tipperary_north_and_south_ridings",
+      "opening_total": 162015,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_tyrone",
+      "opening_total": 151005,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_waterford",
+      "opening_total": 61091,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_westmeath",
+      "opening_total": 61861,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_wexford",
+      "opening_total": 104497,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "irish_county_wicklow",
+      "opening_total": 61053,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_aichi",
+      "opening_total": 1566346,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_akita",
+      "opening_total": 769801,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_aomori",
+      "opening_total": 609240,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_chiba",
+      "opening_total": 1239357,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_ehime",
+      "opening_total": 969534,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_fukui",
+      "opening_total": 605362,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_fukuoka",
+      "opening_total": 1395345,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_fukushima",
+      "opening_total": 1068655,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_gifu",
+      "opening_total": 952235,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_gunma",
+      "opening_total": 793165,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_hiroshima",
+      "opening_total": 1407475,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_hokkaido",
+      "opening_total": 803007,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_hyogo",
+      "opening_total": 1669742,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_ibaraki",
+      "opening_total": 1118861,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_ishikawa",
+      "opening_total": 730431,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_iwate",
+      "opening_total": 709653,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_kagawa",
+      "opening_total": 674956,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_kagoshima",
+      "opening_total": 1095697,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_kanagawa",
+      "opening_total": 880156,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_kochi",
+      "opening_total": 605163,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_kumamoto",
+      "opening_total": 1132382,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_kyoto",
+      "opening_total": 961382,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_mie",
+      "opening_total": 964364,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_miyagi",
+      "opening_total": 835716,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_miyazaki",
+      "opening_total": 458520,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_nagano",
+      "opening_total": 1227526,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_nagasaki",
+      "opening_total": 881449,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_nara",
+      "opening_total": 519961,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_niigata",
+      "opening_total": 1702451,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_oita",
+      "opening_total": 815037,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_okayama",
+      "opening_total": 1101165,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_okinawa",
+      "opening_total": 455438,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_osaka",
+      "opening_total": 1512859,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_saga",
+      "opening_total": 609935,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_saitama",
+      "opening_total": 1137552,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_shiga",
+      "opening_total": 665610,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_shimane",
+      "opening_total": 702793,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_shizuoka",
+      "opening_total": 1169764,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_tochigi",
+      "opening_total": 803504,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_tokushima",
+      "opening_total": 670283,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_tokyo",
+      "opening_total": 1935986,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_tottori",
+      "opening_total": 408711,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_toyama",
+      "opening_total": 752403,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_wakayama",
+      "opening_total": 656861,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_yamagata",
+      "opening_total": 819014,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_yamaguchi",
+      "opening_total": 954522,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "jp_otsu_pref_yamanashi",
+      "opening_total": 493317,
+      "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "observed_total": 43520895,
+      "observed_date": "1899-12-31"
+    },
+    {
+      "unit_id": "raj_agra_oudh",
+      "opening_total": 47600781,
+      "observed_unit_id": "raj_agra_oudh_1901_census",
+      "observed_total": 47691782,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_ajmer_merwara",
+      "opening_total": 484504,
+      "observed_unit_id": "raj_ajmer_merwara_1901_census",
+      "observed_total": 476912,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_assam_comparable",
+      "opening_total": 5721183,
+      "observed_unit_id": "raj_assam_1901_census",
+      "observed_total": 6126343,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_baroda_state",
+      "opening_total": 2006368,
+      "observed_unit_id": "raj_baroda_state_1901_census",
+      "observed_total": 1952692,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bengal_province",
+      "opening_total": 74350716,
+      "observed_unit_id": "raj_bengal_province_1901_census",
+      "observed_total": 74744866,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_berar",
+      "opening_total": 2770660,
+      "observed_unit_id": "raj_berar_1901_census",
+      "observed_total": 2754016,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_bombay_presidency",
+      "opening_total": 18575361,
+      "observed_unit_id": "raj_bombay_with_aden_1901_census",
+      "observed_total": 18559561,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_burma_comparable",
+      "opening_total": 8958798,
+      "observed_unit_id": "raj_burma_1901_census_age_tabulation",
+      "observed_total": 10363613,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_central_india_agency",
+      "opening_total": 8824834,
+      "observed_unit_id": "raj_central_india_agency_1901_census",
+      "observed_total": 8628781,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_central_provinces",
+      "opening_total": 9981938,
+      "observed_unit_id": "raj_central_provinces_1901_census",
+      "observed_total": 9876646,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_coorg",
+      "opening_total": 179731,
+      "observed_unit_id": "raj_coorg_1901_census",
+      "observed_total": 180607,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_hyderabad_state",
+      "opening_total": 11187068,
+      "observed_unit_id": "raj_hyderabad_state_1901_census",
+      "observed_total": 11141142,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_madras_presidency",
+      "opening_total": 37910258,
+      "observed_unit_id": "raj_madras_presidency_1901_census",
+      "observed_total": 38209436,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_mysore_state",
+      "opening_total": 5470284,
+      "observed_unit_id": "raj_mysore_state_1901_census",
+      "observed_total": 5539399,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_punjab_comparable",
+      "opening_total": 22206352,
+      "observed_unit_id": "raj_punjab_frontier_1901_census",
+      "observed_total": 22418213,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_rajputana_agency",
+      "opening_total": 10012972,
+      "observed_unit_id": "raj_rajputana_agency_1901_census",
+      "observed_total": 9723301,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "ru1897_64",
+      "opening_total": 307071,
+      "observed_unit_id": "ru1897_64",
+      "observed_total": 290654,
       "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "ru1897_66",
+      "opening_total": 1118012,
+      "observed_unit_id": "ru1897_66",
+      "observed_total": 1058241,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "ru1897_69",
+      "opening_total": 1110396,
+      "observed_unit_id": "ru1897_69",
+      "observed_total": 1051032,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "scottish_civil_aberdeen",
+      "opening_total": 301899,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_argyll",
+      "opening_total": 73697,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_ayr",
+      "opening_total": 250972,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_banff",
+      "opening_total": 61512,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_berwick",
+      "opening_total": 31007,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_bute",
+      "opening_total": 18739,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_caithness",
+      "opening_total": 34282,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_clackmannan",
+      "opening_total": 32167,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_dumbarton",
+      "opening_total": 111892,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_dumfries",
+      "opening_total": 72779,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_edinburgh",
+      "opening_total": 482009,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_elgin",
+      "opening_total": 44635,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_fife",
+      "opening_total": 215295,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_forfar",
+      "opening_total": 283292,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_haddington",
+      "opening_total": 38505,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_inverness",
+      "opening_total": 90106,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_kincardine",
+      "opening_total": 40247,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_kinross",
+      "opening_total": 6943,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_kirkcudbright",
+      "opening_total": 39458,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_lanark",
+      "opening_total": 1310269,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_linlithgow",
+      "opening_total": 64102,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_nairn",
+      "opening_total": 9274,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_orkney",
+      "opening_total": 28917,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_peebles",
+      "opening_total": 15027,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_perth",
+      "opening_total": 123146,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_renfrew",
+      "opening_total": 264229,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_ross_and_cromarty",
+      "opening_total": 76733,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_roxburgh",
+      "opening_total": 49389,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_selkirk",
+      "opening_total": 23898,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_shetland",
+      "opening_total": 28234,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_stirling",
+      "opening_total": 139270,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_sutherland",
+      "opening_total": 21497,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "scottish_civil_wigtown",
+      "opening_total": 33105,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
     },
     {
       "unit_id": "statistical_area:bosnia_herzegovina_1900",
@@ -473,6 +2993,13 @@
       "observed_unit_id": "statistical_area:bosnia_herzegovina_1900",
       "observed_total": 1568092,
       "observed_date": "1895-04-22"
+    },
+    {
+      "unit_id": "uk_ancient_kent_middlesex_surrey",
+      "opening_total": 6844634,
+      "observed_unit_id": "uk_england_wales_excluding_five_tabulated_ancient_counties",
+      "observed_total": 31403796,
+      "observed_date": "1901-03-31"
     },
     {
       "unit_id": "us_arizona",
@@ -906,11 +3433,35 @@
       "population": 38450788,
       "age_not_stated": null,
       "combined_open_age_and_unreported": 118796
+    },
+    {
+      "panel_id": "cape_1904",
+      "unit_id": "cape_colony",
+      "date": "1904-04-18",
+      "population": 2409804,
+      "age_not_stated": 979,
+      "combined_open_age_and_unreported": null
+    },
+    {
+      "panel_id": "japan_1899_resident_reconstruction",
+      "unit_id": "japan_proper_japanese_residents_1899_ltes",
+      "date": "1899-12-31",
+      "population": 43520895,
+      "age_not_stated": 0,
+      "combined_open_age_and_unreported": null
+    },
+    {
+      "panel_id": "finland_1900_population_by_age",
+      "unit_id": "ft_finland",
+      "date": "1900-12-31",
+      "population": 2712562,
+      "age_not_stated": 0,
+      "combined_open_age_and_unreported": null
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 433,
-  "dated_parent_controls_arithmetic_closure": 392,
+  "dated_parent_controls": 511,
+  "dated_parent_controls_arithmetic_closure": 470,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -938,7 +3489,7 @@
       ],
       "production_people": 9666781,
       "production_pct_of_regional_research_estimate": 7.437,
-      "people_with_opening_subdivision": 1289105,
+      "people_with_opening_subdivision": 1489105,
       "research_only_units": 37,
       "research_only_people": 109428497
     },
@@ -1000,9 +3551,9 @@
         "korean_empire",
         "qing_empire"
       ],
-      "production_people": 485960798,
-      "production_pct_of_regional_research_estimate": 54.335,
-      "people_with_opening_subdivision": 405129508,
+      "production_people": 670115448,
+      "production_pct_of_regional_research_estimate": 74.925,
+      "people_with_opening_subdivision": 633296844,
       "research_only_units": 27,
       "research_only_people": 89458537
     },
@@ -1063,7 +3614,7 @@
       ],
       "production_people": 4905385,
       "production_pct_of_regional_research_estimate": 74.997,
-      "people_with_opening_subdivision": 0,
+      "people_with_opening_subdivision": 3716123,
       "research_only_units": 2,
       "research_only_people": 214004
     }
@@ -1129,9 +3680,9 @@
         "opening_unit_id": "british_isles_1900",
         "research_region": "Europe",
         "opening_control": 40994912,
-        "in_model_pools": 10008013,
-        "outside_model_pools": 30986899,
-        "modeled_age_and_sex": 10008013,
+        "in_model_pools": 40994912,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 40994912,
         "modeled_sex_age_unknown": 0
       },
       {
@@ -1165,10 +3716,10 @@
         "opening_unit_id": "country_fra",
         "research_region": "Europe",
         "opening_control": 38852684,
-        "in_model_pools": 0,
-        "outside_model_pools": 38852684,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 38852684,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 38732650,
+        "modeled_sex_age_unknown": 120034
       },
       {
         "opening_unit_id": "cshapes_gw_3",
@@ -1246,10 +3797,10 @@
         "opening_unit_id": "cshapes_gw_561",
         "research_region": "Africa",
         "opening_control": 2265556,
-        "in_model_pools": 0,
-        "outside_model_pools": 2265556,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 2265556,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 2264636,
+        "modeled_sex_age_unknown": 920
       },
       {
         "opening_unit_id": "cshapes_gw_562",
@@ -1318,10 +3869,10 @@
         "opening_unit_id": "cshapes_gw_750",
         "research_region": "Asia",
         "opening_control": 294000000,
-        "in_model_pools": 0,
-        "outside_model_pools": 294000000,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 266241808,
+        "outside_model_pools": 27758192,
+        "modeled_age_and_sex": 266197215,
+        "modeled_sex_age_unknown": 44593
       },
       {
         "opening_unit_id": "cshapes_gw_780",
@@ -1399,9 +3950,9 @@
         "opening_unit_id": "empire_of_japan",
         "research_region": "Asia",
         "opening_control": 44012686,
-        "in_model_pools": 0,
-        "outside_model_pools": 44012686,
-        "modeled_age_and_sex": 0,
+        "in_model_pools": 44012686,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 44012686,
         "modeled_sex_age_unknown": 0
       },
       {
@@ -1660,9 +4211,9 @@
         "opening_unit_id": "russian_empire",
         "research_region": "Europe",
         "opening_control": 135382043,
-        "in_model_pools": 132736358,
-        "outside_model_pools": 2645685,
-        "modeled_age_and_sex": 132683067,
+        "in_model_pools": 135382043,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 135328752,
         "modeled_sex_age_unknown": 53291
       },
       {
@@ -1755,17 +4306,17 @@
       },
       "Europe": {
         "opening_control": 408822583,
-        "in_model_pools": 151590092,
-        "outside_model_pools": 257232491,
-        "modeled_age_and_sex": 149868538,
-        "modeled_sex_age_unknown": 1721554
+        "in_model_pools": 224075360,
+        "outside_model_pools": 184747223,
+        "modeled_age_and_sex": 222233772,
+        "modeled_sex_age_unknown": 1841588
       },
       "Africa": {
         "opening_control": 18751672,
-        "in_model_pools": 0,
-        "outside_model_pools": 18751672,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 2265556,
+        "outside_model_pools": 16486116,
+        "modeled_age_and_sex": 2264636,
+        "modeled_sex_age_unknown": 920
       },
       "no_reviewed_research_region": {
         "opening_control": 101880000,
@@ -1776,18 +4327,18 @@
       },
       "Asia": {
         "opening_control": 802923622,
-        "in_model_pools": 3469224,
-        "outside_model_pools": 799454398,
-        "modeled_age_and_sex": 3468898,
-        "modeled_sex_age_unknown": 326
+        "in_model_pools": 313723718,
+        "outside_model_pools": 489199904,
+        "modeled_age_and_sex": 313678799,
+        "modeled_sex_age_unknown": 44919
       }
     },
     "world": {
       "opening_control": 1465392190,
-      "in_model_pools": 236614965,
-      "outside_model_pools": 1228777225,
-      "modeled_age_and_sex": 234642149,
-      "modeled_sex_age_unknown": 1972816
+      "in_model_pools": 621620283,
+      "outside_model_pools": 843771907,
+      "modeled_age_and_sex": 619481920,
+      "modeled_sex_age_unknown": 2138363
     }
   },
   "opening_count_basis": {
@@ -1797,19 +4348,67 @@
         "pct_of_research_reference": 0.0
       },
       "published_historical_estimates": {
-        "people": 455270211,
-        "pct_of_research_reference": 28.542
+        "people": 598806224,
+        "pct_of_research_reference": 37.541
       },
       "date_models_from_territorial_returns": {
-        "people": 582194264,
-        "pct_of_research_reference": 36.5
+        "people": 622812901,
+        "pct_of_research_reference": 39.046
       },
       "retained_legacy_estimates": {
-        "people": 427927715,
-        "pct_of_research_reference": 26.828
+        "people": 243773065,
+        "pct_of_research_reference": 15.283
       }
     },
     "scopes": [
+      {
+        "unit_id": "abs_new_south_wales",
+        "source_id": "abs_historical_population_2021",
+        "sourced_people": 1339272,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "australia_colonies_1900"
+      },
+      {
+        "unit_id": "abs_queensland",
+        "source_id": "abs_historical_population_2021",
+        "sourced_people": 486336,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "australia_colonies_1900"
+      },
+      {
+        "unit_id": "abs_south_australia",
+        "source_id": "abs_historical_population_2021",
+        "sourced_people": 359306,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "australia_colonies_1900"
+      },
+      {
+        "unit_id": "abs_tasmania",
+        "source_id": "abs_historical_population_2021",
+        "sourced_people": 172363,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "australia_colonies_1900"
+      },
+      {
+        "unit_id": "abs_victoria",
+        "source_id": "abs_historical_population_2021",
+        "sourced_people": 1188562,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "australia_colonies_1900"
+      },
+      {
+        "unit_id": "abs_western_australia",
+        "source_id": "abs_historical_population_2021",
+        "sourced_people": 170284,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "australia_colonies_1900"
+      },
       {
         "unit_id": "argentina_1900",
         "source_id": "ft_world_v5",
@@ -1820,7 +4419,7 @@
       {
         "unit_id": "australia_colonies_1900",
         "source_id": "ft_world_v5",
-        "sourced_people": 3837578,
+        "sourced_people": 121455,
         "sourced_basis": "published_historical_estimates",
         "retained_legacy_people": 0
       },
@@ -2002,9 +4601,9 @@
       {
         "unit_id": "cshapes_gw_750",
         "source_id": "india_census_1901_comparable_area",
-        "sourced_people": 243325386,
+        "sourced_people": 280227900,
         "sourced_basis": "date_models_from_territorial_returns",
-        "retained_legacy_people": 50674614
+        "retained_legacy_people": 13772100
       },
       {
         "unit_id": "cshapes_gw_780",
@@ -2255,9 +4854,9 @@
       {
         "unit_id": "qing_empire",
         "source_id": "cao_qing_provincial_reconstruction",
-        "sourced_people": 133711790,
+        "sourced_people": 280963926,
         "sourced_basis": "published_historical_estimates",
-        "retained_legacy_people": 266288210
+        "retained_legacy_people": 119036074
       },
       {
         "unit_id": "republic_of_colombia_1900",

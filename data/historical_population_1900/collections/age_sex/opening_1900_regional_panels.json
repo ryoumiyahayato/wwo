@@ -1,0 +1,27 @@
+[
+  {
+    "id": "japan_1899_resident_reconstruction",
+    "source_id": "jp_ltes_1899_resident_ages",
+    "locator": "Manpower Tables 3-1 and 3-2, the 1899 column (F), rows 8–89",
+    "published_scope": "Japanese residents in Japan proper, year-end estimate",
+    "observed_unit_id": "japan_proper_japanese_residents_1899_ltes",
+    "observed_date": "1899-12-31",
+    "definition": "Published reconstruction, 21,779,426 male and 21,741,469 female Japanese residents. The source reports single years 0–79 and an open 80+ interval. The family-register observation has a different denominator.",
+    "opening_method": "Combine the reconstructed single years from age 5 into five-year age bands. Use these national resident shares in each opening prefecture with integer largest remainders.",
+    "uncertainty": "The year-end reconstruction covers Japanese residents in Japan proper. It excludes foreign residents and Taiwan. The opening controls use a separate total and prefectural resident weights. Prefectural age shares and error intervals are unavailable for this model.",
+    "broad_observation": true
+  },
+  {
+    "id": "finland_1900_population_by_age",
+    "source_id": "fi_yearbook_1910_population_ages",
+    "locator": "Annuaire statistique de Finlande 1910, Table 12a, printed p. 27, Total columns by sex. Table 4 gives the year-end control.",
+    "published_scope": "Grand Duchy of Finland, year-end population as tabulated by the Central Statistical Office",
+    "observed_unit_id": "ft_finland",
+    "observed_date": "1900-12-31",
+    "definition": "Counts from the totals columns of the age, sex and civil-status table. Half-open source intervals correspond to completed age bands.",
+    "opening_unit_id": "ft_finland",
+    "opening_from_version": 10,
+    "uncertainty": "The December 1900 statistical total is from a historical series with a different level from the January 1900 reconstruction. Changes in age and sex shares and differences in enumeration coverage are unquantified.",
+    "broad_observation": true
+  }
+]

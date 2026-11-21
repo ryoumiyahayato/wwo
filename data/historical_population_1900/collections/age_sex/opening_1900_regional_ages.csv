@@ -1,0 +1,105 @@
+panel,label,role,age_min,age_max,both,male,female
+japan_1899_resident_reconstruction,Total,total,,,43520895,21779426,21741469
+japan_1899_resident_reconstruction,Age 0,band,0,0,1248533,626090,622443
+japan_1899_resident_reconstruction,Age 1,band,1,1,1213125,602327,610798
+japan_1899_resident_reconstruction,Age 2,band,2,2,1106474,553616,552858
+japan_1899_resident_reconstruction,Age 3,band,3,3,1067260,532136,535124
+japan_1899_resident_reconstruction,Age 4,band,4,4,1046947,527423,519524
+japan_1899_resident_reconstruction,Age 5,band,5,5,1003762,506335,497427
+japan_1899_resident_reconstruction,Age 6,band,6,6,959742,483913,475829
+japan_1899_resident_reconstruction,Age 7,band,7,7,959792,483953,475839
+japan_1899_resident_reconstruction,Age 8,band,8,8,872974,439422,433552
+japan_1899_resident_reconstruction,Age 9,band,9,9,920973,466416,454557
+japan_1899_resident_reconstruction,Age 10,band,10,10,969098,488472,480626
+japan_1899_resident_reconstruction,Age 11,band,11,11,929524,469425,460099
+japan_1899_resident_reconstruction,Age 12,band,12,12,888504,447134,441370
+japan_1899_resident_reconstruction,Age 13,band,13,13,822369,414014,408355
+japan_1899_resident_reconstruction,Age 14,band,14,14,850841,429027,421814
+japan_1899_resident_reconstruction,Age 15,band,15,15,867126,438277,428849
+japan_1899_resident_reconstruction,Age 16,band,16,16,873499,441954,431545
+japan_1899_resident_reconstruction,Age 17,band,17,17,861349,437495,423854
+japan_1899_resident_reconstruction,Age 18,band,18,18,873815,439620,434195
+japan_1899_resident_reconstruction,Age 19,band,19,19,814510,412434,402076
+japan_1899_resident_reconstruction,Age 20,band,20,20,839355,424521,414834
+japan_1899_resident_reconstruction,Age 21,band,21,21,813661,413361,400300
+japan_1899_resident_reconstruction,Age 22,band,22,22,784894,395107,389787
+japan_1899_resident_reconstruction,Age 23,band,23,23,808701,404975,403726
+japan_1899_resident_reconstruction,Age 24,band,24,24,728256,364147,364109
+japan_1899_resident_reconstruction,Age 25,band,25,25,704662,350977,353685
+japan_1899_resident_reconstruction,Age 26,band,26,26,688541,343584,344957
+japan_1899_resident_reconstruction,Age 27,band,27,27,630036,316536,313500
+japan_1899_resident_reconstruction,Age 28,band,28,28,572128,287437,284691
+japan_1899_resident_reconstruction,Age 29,band,29,29,534768,268643,266125
+japan_1899_resident_reconstruction,Age 30,band,30,30,565992,283597,282395
+japan_1899_resident_reconstruction,Age 31,band,31,31,647514,324988,322526
+japan_1899_resident_reconstruction,Age 32,band,32,32,561262,284672,276590
+japan_1899_resident_reconstruction,Age 33,band,33,33,557813,281912,275901
+japan_1899_resident_reconstruction,Age 34,band,34,34,608533,307338,301195
+japan_1899_resident_reconstruction,Age 35,band,35,35,571733,290737,280996
+japan_1899_resident_reconstruction,Age 36,band,36,36,464058,235697,228361
+japan_1899_resident_reconstruction,Age 37,band,37,37,446142,225818,220324
+japan_1899_resident_reconstruction,Age 38,band,38,38,421494,212809,208685
+japan_1899_resident_reconstruction,Age 39,band,39,39,481518,245765,235753
+japan_1899_resident_reconstruction,Age 40,band,40,40,484935,246002,238933
+japan_1899_resident_reconstruction,Age 41,band,41,41,509202,261156,248046
+japan_1899_resident_reconstruction,Age 42,band,42,42,521118,266332,254786
+japan_1899_resident_reconstruction,Age 43,band,43,43,498994,253786,245208
+japan_1899_resident_reconstruction,Age 44,band,44,44,490049,250653,239396
+japan_1899_resident_reconstruction,Age 45,band,45,45,496537,254061,242476
+japan_1899_resident_reconstruction,Age 46,band,46,46,475565,243326,232239
+japan_1899_resident_reconstruction,Age 47,band,47,47,475954,245061,230893
+japan_1899_resident_reconstruction,Age 48,band,48,48,413836,210129,203707
+japan_1899_resident_reconstruction,Age 49,band,49,49,432704,220024,212680
+japan_1899_resident_reconstruction,Age 50,band,50,50,465388,236035,229353
+japan_1899_resident_reconstruction,Age 51,band,51,51,434239,220414,213825
+japan_1899_resident_reconstruction,Age 52,band,52,52,404261,203257,201004
+japan_1899_resident_reconstruction,Age 53,band,53,53,364817,192554,172263
+japan_1899_resident_reconstruction,Age 54,band,54,54,395734,195989,199745
+japan_1899_resident_reconstruction,Age 55,band,55,55,361391,180240,181151
+japan_1899_resident_reconstruction,Age 56,band,56,56,361239,180875,180364
+japan_1899_resident_reconstruction,Age 57,band,57,57,306383,152719,153664
+japan_1899_resident_reconstruction,Age 58,band,58,58,316281,157388,158893
+japan_1899_resident_reconstruction,Age 59,band,59,59,294392,145452,148940
+japan_1899_resident_reconstruction,Age 60,band,60,60,264818,130818,134000
+japan_1899_resident_reconstruction,Age 61,band,61,61,240038,117353,122685
+japan_1899_resident_reconstruction,Age 62,band,62,62,195905,92935,102970
+japan_1899_resident_reconstruction,Age 63,band,63,63,231192,110683,120509
+japan_1899_resident_reconstruction,Age 64,band,64,64,228301,108097,120204
+japan_1899_resident_reconstruction,Age 65,band,65,65,204084,96325,107759
+japan_1899_resident_reconstruction,Age 66,band,66,66,203408,93559,109849
+japan_1899_resident_reconstruction,Age 67,band,67,67,215271,99573,115698
+japan_1899_resident_reconstruction,Age 68,band,68,68,185986,85074,100912
+japan_1899_resident_reconstruction,Age 69,band,69,69,190754,88243,102511
+japan_1899_resident_reconstruction,Age 70,band,70,70,153713,69336,84377
+japan_1899_resident_reconstruction,Age 71,band,71,71,153327,68068,85259
+japan_1899_resident_reconstruction,Age 72,band,72,72,140084,62215,77869
+japan_1899_resident_reconstruction,Age 73,band,73,73,117704,51350,66354
+japan_1899_resident_reconstruction,Age 74,band,74,74,116281,50040,66241
+japan_1899_resident_reconstruction,Age 75,band,75,75,100483,43087,57396
+japan_1899_resident_reconstruction,Age 76,band,76,76,84255,35316,48939
+japan_1899_resident_reconstruction,Age 77,band,77,77,79384,33543,45841
+japan_1899_resident_reconstruction,Age 78,band,78,78,59679,24016,35663
+japan_1899_resident_reconstruction,Age 79,band,79,79,53641,21660,31981
+japan_1899_resident_reconstruction,Age 80 and over,band,80,,218290,80578,137712
+finland_1900_population_by_age,Yhteensä,total,,,2712562,1342082,1370480
+finland_1900_population_by_age,0–5,band,0,4,352357,178005,174352
+finland_1900_population_by_age,5–10,band,5,9,298593,150212,148381
+finland_1900_population_by_age,10–15,band,10,14,285986,143920,142066
+finland_1900_population_by_age,15–20,band,15,19,263232,132874,130358
+finland_1900_population_by_age,20–25,band,20,24,237398,119559,117839
+finland_1900_population_by_age,25–30,band,25,29,214582,107656,106926
+finland_1900_population_by_age,30–35,band,30,34,163937,81968,81969
+finland_1900_population_by_age,35–40,band,35,39,166967,82963,84004
+finland_1900_population_by_age,40–45,band,40,44,146277,72316,73961
+finland_1900_population_by_age,45–50,band,45,49,136381,66756,69625
+finland_1900_population_by_age,50–55,band,50,54,118736,56981,61755
+finland_1900_population_by_age,55–60,band,55,59,105461,49779,55682
+finland_1900_population_by_age,60–65,band,60,64,80644,37427,43217
+finland_1900_population_by_age,65–70,band,65,69,59357,26828,32529
+finland_1900_population_by_age,70–75,band,70,74,44006,19233,24773
+finland_1900_population_by_age,75–80,band,75,79,25346,10638,14708
+finland_1900_population_by_age,80–85,band,80,84,10173,3916,6257
+finland_1900_population_by_age,85–90,band,85,89,2675,915,1760
+finland_1900_population_by_age,90–95,band,90,94,392,124,268
+finland_1900_population_by_age,95–100,band,95,99,57,12,45
+finland_1900_population_by_age,100–,band,100,,5,0,5

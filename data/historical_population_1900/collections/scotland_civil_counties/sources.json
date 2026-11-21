@@ -1,0 +1,13 @@
+[
+  {
+    "id": "scotland_civil_counties_census_1901",
+    "title": "Eleventh Decennial Census of the Population of Scotland taken 31st March 1901, with Report",
+    "publisher": "Registrar-General for Scotland",
+    "url": "https://www.visionofbritain.org.uk/census/table/S1901GEN1_M1_1",
+    "locator": "Vol. 1, Table 1_1, civil county totals, both sexes, 1891 and 1901. Numeric facts transcribed from the contemporary reproduction, Table I in Encyclopaedia Britannica, 11th ed., vol. 24. The 1901 Elgin total uses the census figure of 44,800.",
+    "digitized_copy_url": "https://en.wikisource.org/wiki/Page:EB1911_-_Volume_24.djvu/439",
+    "comparison_url": "https://www.visionofbritain.org.uk/census/S1911PRE/4",
+    "rights": "Transcribed counts from public-domain reports. No images reproduced.",
+    "raw_paths": ["raw/civil_counties.tsv"]
+  }
+]

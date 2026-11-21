@@ -7,7 +7,9 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from geography import catalogue, legacy_audit
 from opening import groups, located_people, sourced_people
+from social import opening_social
 from structure import age_sex_panels, dimensions, opening_structure
+from structural_coverage import structural_coverage
 from reconciliation import comparisons, asian_estimates, world_accounts
 from cities import city_index
 from us_municipalities import us_residuals
@@ -15,7 +17,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 6
+OPENING_VERSION = 10
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -141,12 +143,17 @@ def england_wales_habitations():
     path = COL / "england_wales_habitations" / "habitations.json"
     census = json.loads(path.read_text(encoding="utf8"))
     district_returns = census["districts"].values()
-    rooms = census["by_rooms_in_overcrowded_tenement"].values()
+    all_rooms = census["by_rooms_in_tenement"]
+    crowded_rooms = census["by_rooms_in_overcrowded_tenement"]
     if (sum(row["population"] for row in district_returns) != census["total_population"]
         or sum(row["overcrowded_tenements_1_to_4_rooms"] for row in district_returns) != census["overcrowded_tenements_1_to_4_rooms"]
         or sum(row["occupants_of_these_tenements"] for row in district_returns) != census["occupants_of_these_tenements"]
-        or sum(row["tenements"] for row in rooms) != census["overcrowded_tenements_1_to_4_rooms"]
-        or sum(row["occupants"] for row in rooms) != census["occupants_of_these_tenements"]):
+        or sum(row["tenements"] for row in all_rooms.values()) != census["separate_occupations"]
+        or sum(row["occupants"] for row in all_rooms.values()) != census["total_population"]
+        or sum(row["tenements"] for row in crowded_rooms.values()) != census["overcrowded_tenements_1_to_4_rooms"]
+        or sum(row["occupants"] for row in crowded_rooms.values()) != census["occupants_of_these_tenements"]
+        or any(count > all_rooms[rooms][unit]
+               for rooms, metrics in crowded_rooms.items() for unit, count in metrics.items())):
         raise ValueError("England and Wales housing census breakdowns do not close")
     metadata = {key: census.pop(key) for key in ("unit_id", "date", "source_id")}
     return dict(**metadata, dimension="housing_and_urban_rural", category="published census observation",
@@ -162,7 +169,7 @@ def main():
     with (COL/"cities_europe"/"city_equivalences.csv").open(encoding="utf8") as f:
         for row in csv.DictReader(f):
             city_keys[row["member_unit_id"]]=row["city_key"]
-    for f in sorted(COL.glob("*/sources.json")):
+    for f in sorted([*COL.glob("*/sources.json"), *COL.glob("age_sex/*_sources.json")]):
         for s in json.loads(f.read_text(encoding="utf8")):
             if s["id"] in manifest and manifest[s["id"]]["url"]!=s["url"]:
                 raise ValueError("source ID collision: "+s["id"])
@@ -264,7 +271,18 @@ def main():
     records("cities_1900.jsonl.gz",city_catalog)
     structural=dimensions(observations)
     structural.append(england_wales_habitations())
-    structure_opening=opening_structure(selection, observations)
+    structure_opening=opening_structure(selection, observations, version=OPENING_VERSION)
+    social_opening=opening_social(selection)
+    social_coverage=Counter()
+    for region in social_opening["regions"]:
+        for dimension, allocation in region["marginal_distributions"].items():
+            if any(source not in manifest for source in allocation["source_ids"]):
+                raise ValueError((region["unit_id"], dimension, allocation["source_ids"]))
+            social_coverage[dimension] += region["opening_total"] - allocation["unknown"]
+    summary["opening_social_coverage"] = {
+        dimension: dict(assigned_people=known, unknown_people=total+legacy_only-known)
+        for dimension, known in sorted(social_coverage.items())
+    }
     summary["structural_observations_by_source"]=dict(Counter(r["source_id"] for r in structural))
     summary["structure_opening_pool_controls"]=sum(g["opening_total"] for g in structure_opening["groups"])
     summary["structure_opening_pool_count"]=len(structure_opening["groups"])
@@ -289,12 +307,14 @@ def main():
     summary["research_regions"]=ledger["research_regions"]
     summary["opening_age_sex_by_scope"]=opening_age_coverage(selection, legacy, structure_opening, ledger["opening_comparisons"])
     summary["opening_count_basis"]=opening_count_basis(selection, legacy, target)
+    json_file("structure_coverage_1900.json", structural_coverage(observations, structural, geography, selection, legacy=legacy))
     json_file("world_accounts.json",ledger)
     records("demography_1900.jsonl.gz",structural)
     records("parent_reconciliation.jsonl.gz",audit)
     json_file("opening.json",dict(version=1,groups=groups(observations, version=1)))
     json_file(f"opening_v{OPENING_VERSION}.json", dict(version=OPENING_VERSION, groups=selection))
     json_file(f"opening_structure_v{OPENING_VERSION}.json", structure_opening)
+    json_file(f"opening_social_v{OPENING_VERSION}.json", social_opening)
     json_file("sources.json",list(manifest.values()))
     json_file("summary.json",summary)
     json_file("legacy_audit.json",legacy)

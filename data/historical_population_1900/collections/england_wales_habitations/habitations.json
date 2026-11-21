@@ -4,6 +4,13 @@
   "source_id": "england_wales_census_1901_general_report",
   "total_population": 32527843,
   "separate_occupations": 7036868,
+  "by_rooms_in_tenement": {
+    "1": {"tenements": 251667, "occupants": 507763},
+    "2": {"tenements": 658203, "occupants": 2158644},
+    "3": {"tenements": 779992, "occupants": 3186640},
+    "4": {"tenements": 1596664, "occupants": 7130062},
+    "5_or_more": {"tenements": 3750342, "occupants": 19544734}
+  },
   "districts": {
     "urban": {
       "population": 25058355,

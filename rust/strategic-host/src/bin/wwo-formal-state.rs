@@ -1,8 +1,8 @@
 use serde_json::json;
 use std::{error::Error, io, path::Path};
 use wwo_map_lab::battlefield_terrain::{BattlefieldTerrain, REGION_ID};
-use wwo_map_lab::formal_population::historical_food::{historical_food_case, HISTORICAL_FOOD_CASES, TOKYO_SHINAMI_HOUSEHOLD};
-use wwo_map_lab::{formal_bootstrap::WorldBootstrap, formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_population::{city_population_reference, population_archive}, formal_save::{read_native_slot, SavedWorld}};
+use wwo_map_lab::formal_population::historical_food::{historical_food_case, HISTORICAL_FOOD_CASES, SANDY_SPRING_HOUSEHOLD, TOKYO_SHINAMI_HOUSEHOLD};
+use wwo_map_lab::{formal_bootstrap::WorldBootstrap, formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_population::{city_population_reference, population_archive, structural_coverage_reference}, formal_save::{read_native_slot, SavedWorld}};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = std::env::args_os().skip(1);
@@ -66,6 +66,26 @@ fn main() -> Result<(), Box<dyn Error>> {
             if args.next().is_some() { return Err(usage().into()); }
             let saved = SavedWorld::read(Path::new(&input))?;
             println!("{}", serde_json::to_string(&saved.restore_character()?)?);
+        }
+        Some("inspect-population-structure") => {
+            let unit = args.next().ok_or_else(usage)?;
+            let unit = unit.to_str().ok_or_else(usage)?;
+            if args.next().is_some() { return Err(usage().into()); }
+            let coverage = structural_coverage_reference(unit)?
+                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown structural coverage scope"))?;
+            println!("{}", coverage);
+        }
+        Some("inspect-pop") => {
+            let query = args.next().ok_or_else(usage)?;
+            let query = query.to_str().ok_or_else(usage)?;
+            let input = args.next();
+            if args.next().is_some() { return Err(usage().into()); }
+            let bootstrap = WorldBootstrap::load()?;
+            let world = match input {
+                Some(path) => read_native_slot(Path::new(&path), &bootstrap)?,
+                None => bootstrap.create("country_fra")?,
+            };
+            println!("{}", serde_json::to_string(&world.inspect_population(query)?)?);
         }
         Some("inspect-population") => {
             let unit = args.next().ok_or_else(usage)?;
@@ -214,6 +234,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let id = id.to_str().ok_or_else(usage)?;
                 if id == TOKYO_SHINAMI_HOUSEHOLD.id {
                     println!("{}", serde_json::to_string(&TOKYO_SHINAMI_HOUSEHOLD)?);
+                } else if id == SANDY_SPRING_HOUSEHOLD.id {
+                    println!("{}", serde_json::to_string(&SANDY_SPRING_HOUSEHOLD)?);
                 } else {
                     let case = historical_food_case(id)
                         .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown historical food account"))?;
@@ -223,6 +245,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let mut cases = HISTORICAL_FOOD_CASES.iter().map(serde_json::to_value)
                     .collect::<Result<Vec<_>, _>>()?;
                 cases.push(serde_json::to_value(&TOKYO_SHINAMI_HOUSEHOLD)?);
+                cases.push(serde_json::to_value(&SANDY_SPRING_HOUSEHOLD)?);
                 println!("{}", serde_json::to_string(&cases)?);
             }
         }
@@ -277,5 +300,5 @@ fn show(saved: &SavedWorld) {
 
 fn usage() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput,
-        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <world|unit-id|city:city-key|history:unit-id> [<native-save>], inspect-age-range <world|unit-id> <youngest> <oldest> [<native-save>], inspect-market-livelihood <unit-id> [<native-save>], inspect-intake <native-save> <person-id>, inspect-food-history [<case-id>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
+        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-pop <id> [<native-save>], inspect-population <world|unit-id|city:city-key|history:unit-id> [<native-save>], inspect-population-structure <world|region:Asia|unit-id>, inspect-age-range <world|unit-id> <youngest> <oldest> [<native-save>], inspect-market-livelihood <unit-id> [<native-save>], inspect-intake <native-save> <person-id>, inspect-food-history [<case-id>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
 }

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "cape_1904",
+    "source_id": "cape_census_1904_age_hmso_1906",
+    "locator": "Section 20, Table 5, printed pp. 148–149, All Races, As enumerated. Territorial control in Table 2, p. 147, note c",
+    "published_scope": "Cape of Good Hope Colony, all persons enumerated",
+    "observed_unit_id": "cape_colony",
+    "observed_date": "1904-04-18",
+    "definition": "The 19 published groups consist of five-year bands through ages 80–84, a band aged 85 and over, and ages unspecified. The all-age count is 2,409,804 and includes 979 people of unspecified age. The colonial report describes the night of 17 April 1904. The British Empire report dates the same census to 18 April 1904. The census and the 1899 opening control cover the historical Cape Colony including Pondoland, annexed British Bechuanaland, Mafeking and Walfish Bay. The Bechuanaland Protectorate, Basutoland, Natal, the Orange Free State and the South African Republic lie outside that scope.",
+    "opening_unit_id": "cshapes_gw_561",
+    "opening_from_version": 9,
+    "uncertainty": "Apply the postwar 1904 enumeration shares to the 2,265,556 opening residents, whose total is based on a prewar 1899 estimate with unknown month and day. The census exceeds that estimate by 144,248. Changes in age and sex shares due to wartime displacement and other demographic change, and differences between estimation and enumeration, are unquantified.",
+    "broad_observation": true
+  }
+]

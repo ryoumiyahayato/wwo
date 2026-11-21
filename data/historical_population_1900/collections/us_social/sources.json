@@ -1,0 +1,23 @@
+[
+  {
+    "id": "us_twelfth_census_table_31_occupations",
+    "publisher": "United States Census Office",
+    "title": "Occupation statistics at the Twelfth Census",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/occupations/1900-census-occupations-8.pdf",
+    "locator": "Table 31, printed pp. 92–93, state and territory rows 3–52; five occupation classes.",
+    "references": [
+      "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p2.pdf"
+    ],
+    "rights": "United States government publication. Public domain.",
+    "date_note": "June 1, 1900. The companion Vol. II Table LXXVII corroborates OCR corrections for California professional service, New Hampshire trade and transportation, and Tennessee total gainful workers. The fifty retained rows close to the continental class controls; for the professional control use 827,941 male plus 430,597 female."
+  },
+  {
+    "id": "us_thirteenth_census_table_36_residence",
+    "publisher": "United States Bureau of the Census",
+    "title": "Thirteenth Census of the United States Taken in the Year 1910, Vol. I, Population",
+    "url": "https://www2.census.gov/prod2/decennial/documents/36894832v1ch02.pdf",
+    "locator": "Table 36, printed p. 56, rows 11–59, compare 1900 columns.",
+    "rights": "United States government publication. Public domain.",
+    "date_note": "June 1, 1900 counts republished under the Bureau's comparative urban/rural definitions. The Oklahoma row combines Oklahoma and Indian Territory. The District of Columbia is classified entirely urban in this series."
+  }
+]

@@ -92,6 +92,20 @@
     ]
   },
   {
+    "id": "de_bavaria_yearbook_1903_five_year_ages",
+    "title": "Statistisches Jahrbuch für das Königreich Bayern, 1903",
+    "publisher": "Königlich Bayerisches Statistisches Bureau, Munich, 1903",
+    "url": "https://www.statistischebibliothek.de/mir/receive/BYHeft_mods_00012794",
+    "locator": "II.A.2.g.2, printed p. 27. The single-year table II.A.2.g.1, printed pp. 25–26, specifies birth cohorts and the oldest single year.",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf#page=37",
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf#page=35",
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf#page=36"
+    ]
+  },
+  {
     "id": "de_prussia_yearbook_1904_ages",
     "title": "Statistisches Jahrbuch für den Preussischen Staat, 1904",
     "publisher": "Königliches Statistisches Bureau, Berlin, 1905",
@@ -101,6 +115,67 @@
     "raw_path": "germany_census_1900.csv",
     "table_urls": [
       "https://webapp.sbc.org.pl/Content/323213/PDF/ii149234-1904-00-0001.pdf?handler=pdf"
+    ]
+  },
+  {
+    "id": "india_census_1901_original_age",
+    "title": "Census of India, 1901, Vol. I-A, India, Part II: Tables",
+    "publisher": "Census Commissioner for India, Calcutta, 1903; Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924",
+    "locator": "Table VII, Age, Sex and Civil Condition by Religions. Introduction and national table, printed pp. 63–64; all-religions provincial tables, printed pp. 69–101. Comparable population control, Table II-A, pp. 9–10.",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "india_census_1901.csv",
+    "table_urls": [
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n13/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n14/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n67/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n68/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n77/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n101/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n73/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n79/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n85/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n93/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n95/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n97/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n103/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n87/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n75/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n81/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n91/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n83/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n89/mode/1up"
+    ]
+  },
+  {
+    "id": "india_census_1891_original_age",
+    "title": "Census of India, 1891. General Tables for British Provinces and Feudatory States, Vol. I",
+    "publisher": "Census Commissioner for India, London, 1892; printed for the Indian Government by Eyre and Spottiswoode",
+    "url": "https://archive.org/details/wbsl.4778",
+    "locator": "Table VII-A, Summary, Part 1, Age by Provinces and States, printed pp. 98–103. Explanatory note, printed p. 97.",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "india_census_1891.csv",
+    "table_urls": [
+      "https://censusindia.gov.in/nada/index.php/catalog/30662/",
+      "https://archive.org/details/wbsl.4778/page/n110/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n111/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n112/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n113/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n114/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n115/mode/1up",
+      "https://archive.org/details/wbsl.4778/page/n116/mode/1up"
+    ]
+  },
+  {
+    "id": "india_census_1901_coorg_age",
+    "title": "Census of India, 1901. Volume XIV. Coorg. Report and Tables",
+    "publisher": "Superintendent of Census Operations, Madras and Coorg; Government of India",
+    "url": "https://ignca.gov.in/Asi_data/31012.pdf#page=53",
+    "locator": "Table VII, Age, Sex and Civil Condition, printed p. 44, all religions, columns 2–5.",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "india_census_1901.csv",
+    "table_urls": [
+      "https://ignca.gov.in/Asi_data/31012.pdf#page=53"
     ]
   }
 ]

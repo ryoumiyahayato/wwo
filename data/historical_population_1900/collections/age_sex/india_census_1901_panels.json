@@ -1,0 +1,284 @@
+[
+  {
+    "id": "india_census_1901_table_vii_national",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part I, A, printed p. 64, columns 1–4. Age definition and excluded areas, printed p. 63",
+    "published_scope": "India, all religions, population tabulated for age and civil condition",
+    "observed_unit_id": "british_india_empire_1901_age_tabulation",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The original unknown-age row contains 50,017 people. A further 983,756 people in tracts without age or civil condition statistics were left outside this table. The male 10–15 cell reads 18,880,653 and misses both the row and male column controls by five. The separate imperial compendium prints 18,880,658. This panel retains the original cell and overlaps the imperial compendium panel.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_bengal",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, Bengal, all religions, printed p. 73, columns 1–4. Tables I and II-A, printed pp. 2 and 9–10",
+    "published_scope": "Bengal province, all religions, contemporary census return",
+    "observed_unit_id": "raj_bengal_province_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The reported 74,744,866 persons close to Table I without a separate unknown-age row. Table II-A has 74,744,892 persons on the 1891 comparison basis. Its introduction establishes that its divisions use 1891 jurisdictions. The 26-person difference has no separate age or sex breakdown in these tables.",
+    "opening_unit_id": "raj_bengal_province",
+    "opening_from_version": 10,
+    "uncertainty": "The 1901 contemporary Bengal age return is 26 people smaller than the comparison control at the same date. The sources cover directly administered Bengal before the 1905 partition. This model uses the available age and sex shares. Change by January 1900, age reporting error and the effect of the 26-person discrepancy are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_mysore",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, Mysore State, all religions, printed p. 97, columns 1–4. Tables I and II-A, printed pp. 2 and 9–10",
+    "published_scope": "Mysore State including Bangalore Civil and Military Station, all religions",
+    "observed_unit_id": "raj_mysore_state_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The 17 age bins close to the printed total and the same census's 1901 Table II-A endpoint. The all-religions table prints no separate unknown-age row.",
+    "opening_unit_id": "raj_mysore_state",
+    "opening_from_version": 7,
+    "uncertainty": "The opening control interpolates the Mysore census totals including Bangalore Civil and Military Station. Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_ajmer_merwara",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 69, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "Ajmer-Merwara, separately returned from the Rajputana Agency, all religions",
+    "observed_unit_id": "raj_ajmer_merwara_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The original age rows close to the printed total and the same census’s 1901 Table II-A endpoint. The published unspecified-age row is retained.",
+    "opening_unit_id": "raj_ajmer_merwara",
+    "opening_from_version": 7,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_berar",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 75, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "Berar, separately returned from Hyderabad and the Central Provinces, all religions",
+    "observed_unit_id": "raj_berar_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The original age rows close to the printed total and the same census’s 1901 Table II-A endpoint. The table prints no separate unknown-age row.",
+    "opening_unit_id": "raj_berar",
+    "opening_from_version": 7,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_central_provinces",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 81, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "British Central Provinces, excluding the separately returned States and Berar, all religions",
+    "observed_unit_id": "raj_central_provinces_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The original age rows close to the printed total and the same census’s 1901 Table II-A endpoint. The table prints no separate unknown-age row.",
+    "opening_unit_id": "raj_central_provinces",
+    "opening_from_version": 7,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_baroda",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 89, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "Baroda State, separately returned from Bombay Presidency, all religions",
+    "observed_unit_id": "raj_baroda_state_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The original age rows close to the printed total and the same census’s 1901 Table II-A endpoint. The table prints no separate unknown-age row.",
+    "opening_unit_id": "raj_baroda_state",
+    "opening_from_version": 7,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_central_india",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 91, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "Central India Agency including Gwalior, all religions",
+    "observed_unit_id": "raj_central_india_agency_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The original age rows close to the printed total and the same census’s 1901 Table II-A endpoint. The published unspecified-age row is retained.",
+    "opening_unit_id": "raj_central_india_agency",
+    "opening_from_version": 7,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_hyderabad",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 93, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "Hyderabad State, excluding separately returned Berar, all religions",
+    "observed_unit_id": "raj_hyderabad_state_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The original age rows close to the printed total and the same census’s 1901 Table II-A endpoint. The published unspecified-age row is retained.",
+    "opening_unit_id": "raj_hyderabad_state",
+    "opening_from_version": 7,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_rajputana",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 99, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "Rajputana Agency, excluding separately returned Ajmer-Merwara, all religions",
+    "observed_unit_id": "raj_rajputana_agency_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The original age rows close to the printed total and the same census’s 1901 Table II-A endpoint. The published unspecified-age row is retained.",
+    "opening_unit_id": "raj_rajputana_agency",
+    "opening_from_version": 7,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_madras",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 83, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "British Madras Presidency, all religions, excluding separately returned Madras States",
+    "observed_unit_id": "raj_madras_presidency_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The printed 25–30 female headcount is 1,595,213. The three printed female civil condition cells, 37,046, 1,379,491 and 178,706, add to 1,595,243. The latter figure also closes the printed 25–30 persons control and the all-age female total. This observation keeps the original printed cell.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_madras_opening",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 83, columns 1–4, 7, 10 and 13. Table II-A, printed pp. 9–10",
+    "published_scope": "British Madras Presidency, all religions, excluding separately returned Madras States",
+    "observed_unit_id": "raj_madras_presidency_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Uses the census bands with the 25–30 female cell derived from the three printed female civil-condition components. The original observation retains the conflicting published cell.",
+    "broad_observation": false,
+    "component_panels": [
+      "india_census_1901_table_vii_madras"
+    ],
+    "component_count_corrections": {
+      "india_census_1901_table_vii_madras": {
+        "25–30": {
+          "female": 1595243
+        }
+      }
+    },
+    "opening_unit_id": "raj_madras_presidency",
+    "opening_from_version": 8,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified."
+  },
+  {
+    "id": "india_census_1901_table_vii_coorg",
+    "source_id": "india_census_1901_coorg_age",
+    "locator": "Vol. XIV, Table VII, all religions, printed p. 44, columns 2–5. Vol. I-A, Table II-A, printed pp. 9–10",
+    "published_scope": "Coorg province, all religions",
+    "observed_unit_id": "raj_coorg_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The original age rows close to the printed total and the 1901 Table II-A endpoint. The table prints no separate unknown-age row.",
+    "opening_unit_id": "raj_coorg",
+    "opening_from_version": 8,
+    "uncertainty": "Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_assam",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 71, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "Census of Assam, all religions, contemporary census return",
+    "observed_unit_id": "raj_assam_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. Published age and sex cells sum to 6,126,343 and there is no separate unknown-age row. The comparable-area Table II-A gives 5,758,975 persons on the smaller 1891 enumeration extent.",
+    "broad_observation": false,
+    "opening_unit_id": "raj_assam_comparable",
+    "opening_from_version": 10,
+    "uncertainty": "The 1901 Assam age schedule covers a wider area than the common-area opening balance. Manipur and newly enumerated Lushai Hills were outside the opening comparison. Age and sex effects of the extent difference and the shift to January 1900 are unquantified."
+  },
+  {
+    "id": "india_census_1901_table_vii_punjab",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 87, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "Punjab including the North-West Frontier Province, all religions, contemporary census return",
+    "observed_unit_id": "raj_punjab_frontier_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. Published age and sex cells sum to 22,418,213 and there is no separate unknown-age row. Table II-A gives 22,382,133 on the 1891 comparison extent.",
+    "broad_observation": false,
+    "opening_unit_id": "raj_punjab_comparable",
+    "opening_from_version": 10,
+    "uncertainty": "The 1901 age return is 36,080 persons larger than the 1901 comparison control. Changes in enumeration extent, age reporting and age and sex shares from January 1900 are unquantified."
+  },
+  {
+    "id": "india_census_1901_table_vii_bombay",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 77, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "British Bombay Presidency including Aden, excluding the separately returned Bombay States",
+    "observed_unit_id": "raj_bombay_with_aden_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The printed female cell for unspecified age is 3,163. The three printed female civil-condition cells are 1,543, 1,290 and 630. They sum to 3,463, which also closes both the unspecified-age persons control and the female column control. This observation retains the printed value.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_bombay_opening",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 77, columns 1–4, 7, 10 and 13. Table II-A, printed pp. 9–10",
+    "published_scope": "British Bombay Presidency including Aden, excluding the separately returned Bombay States",
+    "observed_unit_id": "raj_bombay_with_aden_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Uses the published census age and sex bands with the female unspecified-age count reconstructed from the three printed female civil-condition counts.",
+    "broad_observation": false,
+    "component_panels": [
+      "india_census_1901_table_vii_bombay"
+    ],
+    "component_count_corrections": {
+      "india_census_1901_table_vii_bombay": {
+        "Unspecified": {
+          "female": 3463
+        }
+      }
+    },
+    "opening_unit_id": "raj_bombay_presidency",
+    "opening_from_version": 10,
+    "uncertainty": "The 1901 schedule includes Aden and totals 18,559,561. The 1901 comparison control excludes Aden and totals 18,538,396. Ages and sexes of the excluded contingent are undetermined in this table. Differences in extent, date and census age reporting are unquantified."
+  },
+  {
+    "id": "india_census_1901_table_vii_agra_oudh",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 85, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "United Provinces of Agra and Oudh, all religions, excluding the separately returned States",
+    "observed_unit_id": "raj_agra_oudh_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. The 45 to 49 female cell reads 821,568. The published female civil-condition counts, 10,253, 477,060 and 337,255, sum to 824,568 and close the persons row. Once that cell is corrected, 300 women from the published total still have no reconciled age row. The observation retains the printed cells.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_census_1901_table_vii_agra_oudh_opening",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 85, columns 1–4, 7, 10 and 13. Table II-A, printed pp. 9–10",
+    "published_scope": "United Provinces of Agra and Oudh, all religions, excluding the separately returned States",
+    "observed_unit_id": "raj_agra_oudh_1901_census",
+    "observed_date": "1901-03-01",
+    "definition": "Uses the published age bands. The reconstructed 45 to 49 female cell comes from the printed female civil-condition counts. The remaining 300 women needed to close the all-age female count are added to unspecified age.",
+    "broad_observation": false,
+    "component_panels": [
+      "india_census_1901_table_vii_agra_oudh"
+    ],
+    "component_count_corrections": {
+      "india_census_1901_table_vii_agra_oudh": {
+        "45–50": {
+          "female": 824568
+        },
+        "Unspecified": {
+          "both": 36436,
+          "female": 20324
+        }
+      }
+    },
+    "opening_unit_id": "raj_agra_oudh",
+    "opening_from_version": 10,
+    "uncertainty": "The contemporary age table total is 47,691,782. The 1901 common-area count is 47,692,076. The implications of the 294-person extent difference, reconciliation of the female age count, and the shift to January 1900 are unquantified."
+  },
+  {
+    "id": "india_census_1901_table_vii_burma",
+    "source_id": "india_census_1901_original_age",
+    "locator": "Vol. I-A, Table VII, Part II, all religions, printed p. 79, columns 1–4. Table II-A, printed pp. 9–10",
+    "published_scope": "Burma, all religions, population tabulated for age",
+    "observed_unit_id": "raj_burma_1901_census_age_tabulation",
+    "observed_date": "1901-03-01",
+    "definition": "Age in completed years. Published age and sex cells sum to 10,363,613 and there is no separate unknown-age row. The comparable Table II-A has 9,136,382 persons on the smaller 1891 comparison extent.",
+    "broad_observation": false,
+    "opening_unit_id": "raj_burma_comparable",
+    "opening_from_version": 10,
+    "uncertainty": "The published age schedule covers a wider population than the common-area opening balance. The opening comparison omits Shan States, Chin Hills and other areas enumerated since 1891. Age and sex effects of the extent difference and of the shift to January 1900 are unquantified."
+  }
+]

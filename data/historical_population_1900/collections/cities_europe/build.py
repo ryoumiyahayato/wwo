@@ -1,5 +1,6 @@
 """Build the source observations and mutually exclusive national opening groups."""
 import csv
+from collections import defaultdict
 from datetime import date
 import json
 from pathlib import Path
@@ -137,6 +138,53 @@ def french():
                   {deps[code]["id"]: places for code, places in FR_PLACES.items()}, "france_opening.json")
     return out + estimates
 
+
+def french_arrondissement_references(records):
+    controls = {}
+    departments = defaultdict(lambda: defaultdict(dict))
+    for row in records:
+        if row["source_id"] != FR_SOURCE:
+            continue
+        if row["administrative_level"] == 1:
+            controls[row["unit_id"], row["date"]] = row["population_value"]
+        if row["administrative_level"] == 2:
+            departments[row["parent_id"]][row["unit_id"]][row["date"]] = row
+
+    first, last = map(date.fromisoformat, FR_DATES)
+    elapsed, span = (OPENING - first).days, (last - first).days
+    references = []
+    for department, series in departments.items():
+        if any(set(pair) != set(FR_DATES) or any(row.get("wwo_id") != unit for row in pair.values())
+               for unit, pair in series.items()):
+            continue
+        if any(sum(pair[d]["population_value"] for pair in series.values()) != controls[department, d]
+               for d in FR_DATES):
+            continue
+        floor = {}
+        remainders = {}
+        for unit, pair in series.items():
+            a, b = (pair[d]["population_value"] for d in FR_DATES)
+            floor[unit], remainders[unit] = divmod(a * (span - elapsed) + b * elapsed, span)
+        control = controls[department, OPENING.isoformat()]
+        extra = control - sum(floor.values())
+        if not 0 <= extra <= len(floor):
+            raise ValueError(f"Arrondissement estimates do not reconcile to {department}")
+        for unit in sorted(remainders, key=lambda unit: (-remainders[unit], unit))[:extra]:
+            floor[unit] += 1
+        for unit, pair in series.items():
+            row = estimate(pair.values())
+            row.update(
+                population_value=floor[unit], method="linear_daily_interpolation_within_department",
+                control_unit_id=department, control_population_value=control,
+                aggregation="contained_arrondissement_reference_never_add",
+                quality_note=("The two source partitions close to the published department totals. "
+                              "Largest remainders reconcile to the department opening estimate. "
+                              "Timing of boundary changes and interpolation error have no quantified interval."),
+            )
+            references.append(row)
+    return references
+
+
 CONTINENTS = {
     "Africa": "Algeria|Algiers|Egypt|Madagascar|Mauritius|Morocco|Nigeria|South Africa|Sudan|Tunisia",
     "North America":"Canada|Cuba|El Salvador|Guatemala|Haiti|Mexico|Trinidad and Tobago|United States of America",
@@ -232,6 +280,7 @@ def german():
 
 if __name__ == "__main__":
     records = french() + german() + cities()
+    records.extend(french_arrondissement_references(records))
     with (ROOT / "observations.jsonl").open("w", encoding="utf-8", newline="\n") as stream:
         for record in records:
             stream.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")

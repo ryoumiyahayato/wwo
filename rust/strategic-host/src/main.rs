@@ -15,6 +15,7 @@ mod map_release;
 mod migration_status;
 mod interface;
 mod overlay;
+mod pop_debug_ui;
 mod politics;
 mod render;
 mod state;
@@ -223,6 +224,7 @@ struct Host {
     bridge_wait:Instant,seen_lobby_busy:bool,departure_requested:bool,
     loading_fade:Option<Instant>,loading_status:String,
     debug:bool,perf_at:Instant,perf_frames:u32,perf:Diagnostics,
+    population_debug:Option<pop_debug_ui::Panel>,
     screenshot:Option<PathBuf>,screenshot_status:Option<(Instant,String)>,
     grid_step:f32,last_present:Instant,employment:state::EmploymentReference,market_focus_serial:u64,
     military_cell:Option<SelectedMilitaryCell>,
@@ -318,7 +320,7 @@ impl Host {
             prologue: None,
             lobby_page:lobby::Page::Home,lobby_country,lobby_request:false,country_directory:lobby::Directory::default(),
             bridge_wait:Instant::now(),seen_lobby_busy:false,departure_requested:false,
-            loading_fade:None,loading_status:String::new(),debug:false,perf_at:Instant::now(),perf_frames:0,
+            loading_fade:None,loading_status:String::new(),debug:false,perf_at:Instant::now(),perf_frames:0,population_debug:None,
             perf:Diagnostics{rate:0.,cpu_ms:0.,tiles:0,visible:0,mib:0.,streaming:false},
             screenshot:None,screenshot_status:None,grid_step:50000.,last_present:started,employment,market_focus_serial:0,
             military_cell:None,battle_terrain:None,battle_view:None})
@@ -1028,6 +1030,26 @@ impl Host {
         None
     }
 
+    fn inspect_population(&mut self, query: String) {
+        let Some(mut panel)=self.population_debug.take() else{return;};
+        match self.written_world().map(|world|world.inspect_population(&query)) {
+            Some(Ok(report))=>panel.set_report(&report),
+            Some(Err(error))=>panel.set_error(error.to_string()),
+            None=>panel.set_error("No active formal world"),
+        }
+        panel.query=query;
+        panel.input.clear();
+        self.population_debug=Some(panel);
+        self.dirty=true;
+    }
+
+    fn scroll_population_debug(&mut self, point:[f64;2], steps:f64)->bool {
+        let Some(panel)=self.population_debug.as_mut().filter(|panel|panel.contains(self.size,point)) else{return false;};
+        panel.scroll_by(-(steps.signum() as isize)*3);
+        self.dirty=true;
+        true
+    }
+
     fn battle_root(&self) -> PathBuf {
         self.config.battlefield_data.clone().unwrap_or_else(|| self.config.root.join("battlefield"))
     }
@@ -1223,6 +1245,30 @@ impl Host {
             return;
         }
         if self.loading(){return;}
+        if let Some(panel)=&self.population_debug {
+            if panel.contains(self.size,p) {return;}
+            let [x,y]=p.map(|v|v as f32);
+            let object=self.hits.iter().rev().find_map(|hit| {
+                let [left,top,width,height]=hit.area;
+                match hit.action {
+                    Action::Select(object @ Object::Place(_)) if x>=left&&x<=left+width&&y>=top&&y<=top+height => Some(object),
+                    _ => None,
+                }
+            }).or_else(|| {
+                let q=camera::geographic(self.camera.vector(p,self.size)?);
+                let [polity,admin]=self.object_at(q);
+                admin.checked_sub(1).map(|i|Object::Administration(usize::from(i)))
+                    .filter(|&object|self.available(object))
+                    .or_else(||polity.checked_sub(1).map(|i|Object::Polity(usize::from(i))).filter(|&object|self.available(object)))
+            });
+            if let Some(object)=object {
+                let id=self.id(object);
+                self.inspect_population(id.strip_prefix("state:").unwrap_or(&id).to_owned());
+            } else {
+                self.inspect_population("unmapped".into());
+            }
+            return;
+        }
         let [x,y]=p.map(|v|v as f32);
         let contains=|[a,b,w,h]:[f32;4]| x>=a&&x<=a+w&&y>=b&&y<=b+h;
         if self.hud.menu==HudMenu::MapModes&&contains(formal_ui::map_modes_rect(self.size)) {
@@ -1369,6 +1415,41 @@ impl Host {
             self.dirty=true;return;
         }
         if self.loading(){return;}
+        if key==Key::Named(NamedKey::F7) && !self.in_lobby() && self.written_world().is_some() && !self.hud.menu.modal() {
+            if self.population_debug.take().is_none() {
+                self.population_debug=Some(pop_debug_ui::Panel::default());
+                let id=self.selected.map_or_else(||"world".into(), |object|self.id(object));
+                self.inspect_population(id.strip_prefix("state:").unwrap_or(&id).to_owned());
+            }
+            self.dirty=true;
+            return;
+        }
+        if let Some(panel)=&mut self.population_debug {
+            match key {
+                Key::Named(NamedKey::Escape)=>self.population_debug=None,
+                Key::Named(NamedKey::Enter)=>{
+                    let query=if panel.input.trim().is_empty() {panel.query.clone()} else {panel.input.trim().to_owned()};
+                    self.inspect_population(query);
+                }
+                Key::Named(NamedKey::Backspace)=>{panel.input.pop();}
+                Key::Named(NamedKey::Delete)=>panel.input.clear(),
+                Key::Named(NamedKey::ArrowUp)=>panel.scroll_by(-1),
+                Key::Named(NamedKey::ArrowDown)=>panel.scroll_by(1),
+                Key::Named(NamedKey::ArrowLeft)=>panel.jump_section(-1),
+                Key::Named(NamedKey::ArrowRight)=>panel.jump_section(1),
+                Key::Named(NamedKey::PageUp)=>panel.scroll_by(-12),
+                Key::Named(NamedKey::PageDown)=>panel.scroll_by(12),
+                Key::Named(NamedKey::Home)=>panel.scroll=0,
+                Key::Character(value)=>{
+                    for ch in value.chars().filter(|ch|ch.is_ascii_alphanumeric()||matches!(ch,'_'|':'|'-'|'.')) {
+                        if panel.input.len()<160 {panel.input.push(ch);}
+                    }
+                }
+                _=>{}
+            }
+            self.dirty=true;
+            return;
+        }
         if self.in_lobby(){
             if self.country_directory.search_active {
                 match key {
@@ -1638,6 +1719,10 @@ impl Host {
             mouse:&mouse,labels:self.labels,formal,
             transport_detail:self.transport_detail.as_ref().filter(|_|show_transport_detail).map(|(_, detail)|detail),
         },&mut self.shown_markers)};
+        if let Some(panel)=self.population_debug.as_ref().filter(|_|!loading&&!self.in_lobby()) {
+            let (layers,text)=meshes.split_at_mut(12);
+            panel.draw(self.size,&self.skin,&mut layers[11].0,&mut text[0].0);
+        }
         if let Some((_,status))=&self.screenshot_status {
             let [w,h]=self.size.map(|n|n as f32);let width=(w-48.).min(940.);let x=(w-width)*0.5;
             let y=if loading||self.in_lobby(){h-98.}else{h-159.};
@@ -1827,6 +1912,7 @@ impl Host {
             "model_instances":self.renderer.as_ref().map(Renderer::model_instances),
             "selection":self.selected.map_or(String::new(),|o|self.id(o)),"date":self.state.date.to_string(),
             "transport_selection":self.transport_selection,
+            "population_debug":self.population_debug.as_ref().map(pop_debug_ui::Panel::status),
             "cache_bytes":self.cached.values().map(|p|p.page.bytes).sum::<usize>(),
             "base_bytes":self.base.as_ref().map_or(0,|p|p.bytes),"resident":self.cached.len(),
             "wanted":self.visible.len(),"ready":self.visible.iter().filter(|i|self.cached.contains_key(i)).count(),
@@ -1883,13 +1969,13 @@ impl Host {
             "click"=>self.click([input.x,input.y]),
             "wheel"=>{
                 let point=[input.x,input.y];
-                if !self.scroll_countries(point,input.steps){self.zoom(point,input.steps);}
+                if !self.scroll_population_debug(point,input.steps)&&!self.scroll_countries(point,input.steps){self.zoom(point,input.steps);}
             }
             "drag"=>{
                 self.velocity=[0.;2];
                 self.trial.movement=Some(([input.x,input.y],[input.to_x,input.to_y],input.frames.clamp(1,180),0));
             }
-            "key"=>self.key(match input.value.as_str() {"Escape"=>Key::Named(NamedKey::Escape),"Space"|"space"=>Key::Named(NamedKey::Space),"Enter"=>Key::Named(NamedKey::Enter),"Home"=>Key::Named(NamedKey::Home),"F1"=>Key::Named(NamedKey::F1),"F2"=>Key::Named(NamedKey::F2),"F3"=>Key::Named(NamedKey::F3),"F4"=>Key::Named(NamedKey::F4),"F5"=>Key::Named(NamedKey::F5),"F6"=>Key::Named(NamedKey::F6),"F7"=>Key::Named(NamedKey::F7),"F8"=>Key::Named(NamedKey::F8),"F9"=>Key::Named(NamedKey::F9),"F10"=>Key::Named(NamedKey::F10),"Tab"=>Key::Named(NamedKey::Tab),_=>Key::Character(input.value.into())}),
+            "key"=>self.key(match input.value.as_str() {"Escape"=>Key::Named(NamedKey::Escape),"Space"|"space"=>Key::Named(NamedKey::Space),"Enter"=>Key::Named(NamedKey::Enter),"Home"=>Key::Named(NamedKey::Home),"Delete"=>Key::Named(NamedKey::Delete),"Backspace"=>Key::Named(NamedKey::Backspace),"ArrowUp"=>Key::Named(NamedKey::ArrowUp),"ArrowDown"=>Key::Named(NamedKey::ArrowDown),"ArrowLeft"=>Key::Named(NamedKey::ArrowLeft),"ArrowRight"=>Key::Named(NamedKey::ArrowRight),"PageUp"=>Key::Named(NamedKey::PageUp),"PageDown"=>Key::Named(NamedKey::PageDown),"F1"=>Key::Named(NamedKey::F1),"F2"=>Key::Named(NamedKey::F2),"F3"=>Key::Named(NamedKey::F3),"F4"=>Key::Named(NamedKey::F4),"F5"=>Key::Named(NamedKey::F5),"F6"=>Key::Named(NamedKey::F6),"F7"=>Key::Named(NamedKey::F7),"F8"=>Key::Named(NamedKey::F8),"F9"=>Key::Named(NamedKey::F9),"F10"=>Key::Named(NamedKey::F10),"Tab"=>Key::Named(NamedKey::Tab),_=>Key::Character(input.value.into())}),
             "home"=>self.action(Action::Home),
             "north"=>{self.camera.north_up();self.dirty=true;}
             "capture" if !input.label.is_empty() && input.label.bytes().all(|b|b.is_ascii_alphanumeric()||b==b'-')=>{
@@ -1952,6 +2038,7 @@ impl Host {
         let connected=self.state.session.is_some();
         if self.config.managed&&(had_session!=connected||loaded){
             self.battle_view = None;
+            self.population_debug=None;
             self.transport_scene = None;
             self.select_transport(None);
             self.military_cell=None;
@@ -2307,6 +2394,7 @@ impl ApplicationHandler<HostEvent> for Host {
                     return;
                 }
                 if state==ElementState::Pressed {
+                    if self.population_debug.is_some() {return;}
                     self.focus=None;self.velocity=[0.;2];
                     if button==MouseButton::Left&&self.in_lobby()&&self.lobby_page==lobby::Page::Selection
                         &&!self.loading()&&self.country_directory.grab(self.size,self.cursor)
@@ -2322,6 +2410,8 @@ impl ApplicationHandler<HostEvent> for Host {
                     let clock_surface=formal_ui::clock_hit(self.cursor,self.size[0],self.state.session.as_ref(),self.hud.mechanical.angle);
                     self.drag=(!clock_surface&&!self.is_panel(self.cursor)).then(||Drag{
                         at:self.cursor,origin:self.cursor,last:Instant::now(),bearing:button==MouseButton::Right,moved:false});
+                } else if self.population_debug.is_some() {
+                    if button==MouseButton::Left {self.click(self.cursor);}
                 } else if button==MouseButton::Left&&self.country_directory.drag.take().is_some() {
                     self.dirty=true;
                 } else if button==MouseButton::Left&&self.hud.volume_drag {
@@ -2342,6 +2432,7 @@ impl ApplicationHandler<HostEvent> for Host {
                 self.country_click=None;
                 let steps=match delta {MouseScrollDelta::LineDelta(_,y)=>f64::from(y),MouseScrollDelta::PixelDelta(p)=>p.y/96.};
                 if let Some(view) = &mut self.battle_view { view.zoom(steps); self.dirty = true; return; }
+                if self.scroll_population_debug(self.cursor,steps) {return;}
                 if self.scroll_countries(self.cursor,steps) {return;}
                 let [w,h]=self.size.map(|n|n as f32);
                 let [x,y,width,height]=formal_ui::message_rect([w,h],((h+16.)*0.5).max(190.));

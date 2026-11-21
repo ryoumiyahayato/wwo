@@ -1,0 +1,17 @@
+[
+  {
+    "id": "cape_census_1904_age_hmso_1906",
+    "title": "Census of the British Empire, 1901: Report with Summary and Detailed Tables. Cape of Good Hope (1904)",
+    "publisher": "General Register Office, His Majesty’s Stationery Office, London, 1906",
+    "url": "https://archive.org/details/cu31924030396067",
+    "locator": "Section 20, Table 5, printed pp. 148–149, All Races, As enumerated. Table 2, p. 147, note c, documents the territorial additions since 1891",
+    "rights": "Historical published census facts transcribed from the 1906 government report",
+    "raw_path": "cape_1904.csv",
+    "table_urls": [
+      "https://archive.org/download/cu31924030396067/page/n215/mode/1up",
+      "https://archive.org/download/cu31924030396067/page/n216/mode/1up",
+      "https://archive.org/download/cu31924030396067/page/n214/mode/1up",
+      "https://digitalcollections.crl.edu/record/819601/files/0589.pdf"
+    ]
+  }
+]

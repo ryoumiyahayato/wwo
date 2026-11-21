@@ -1,0 +1,20 @@
+panel,label,role,age_min,age_max,both,male,female
+india_census_1891_table_vii_a_national,Under one year,band,0,0,,4772871,4868171
+india_census_1891_table_vii_a_national,One year,band,1,1,,2536430,2633714
+india_census_1891_table_vii_a_national,Two years,band,2,2,,4203315,4468349
+india_census_1891_table_vii_a_national,Three years,band,3,3,,4650886,4968439
+india_census_1891_table_vii_a_national,Four years,band,4,4,,4467878,4471446
+india_census_1891_table_vii_a_national,Total under five,subtotal,0,4,,20631380,21410119
+india_census_1891_table_vii_a_national,5–9,band,5,9,,20908467,19578667
+india_census_1891_table_vii_a_national,10–14,band,10,14,,16680438,13265378
+india_census_1891_table_vii_a_national,15–19,band,15,19,,12229892,11376709
+india_census_1891_table_vii_a_national,20–24,band,20,24,,11743796,12577424
+india_census_1891_table_vii_a_national,25–29,band,25,29,,12828365,12680985
+india_census_1891_table_vii_a_national,30–34,band,30,34,,12319747,11855489
+india_census_1891_table_vii_a_national,35–39,band,35,39,,8980902,7783755
+india_census_1891_table_vii_a_national,40–44,band,40,44,,9338636,8782207
+india_census_1891_table_vii_a_national,45–49,band,45,49,,5355522,4527071
+india_census_1891_table_vii_a_national,50–54,band,50,54,,6015467,5970618
+india_census_1891_table_vii_a_national,55–59,band,55,59,,2618702,2378652
+india_census_1891_table_vii_a_national,60 and over,band,60,,,6769435,8032448
+india_census_1891_table_vii_a_national,Total population,total,,,,146420749,140219522

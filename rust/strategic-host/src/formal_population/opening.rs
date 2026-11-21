@@ -1,9 +1,9 @@
-use super::{demography::OpeningDemography, MAX_POPULATION};
+use super::{demography::OpeningDemography, social::OpeningSocial, MAX_POPULATION};
 use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io, sync::OnceLock};
 
-pub(crate) const CURRENT_VERSION: u32 = 6;
+pub(crate) const CURRENT_VERSION: u32 = 10;
 
 #[derive(Debug, Serialize)]
 pub struct OpeningPopulationEstimate {
@@ -29,6 +29,7 @@ struct EstimateContext {
 pub(crate) struct HistoricalOpening {
     version: u32,
     pub(super) demography: OpeningDemography,
+    pub(super) social: OpeningSocial,
     estimates: BTreeMap<String, OpeningPopulationEstimate>,
     pub(super) partitions: BTreeMap<String, Partition>,
     pub(super) standalone: BTreeMap<String, u64>,
@@ -96,7 +97,11 @@ impl HistoricalOpening {
             3 => include_bytes!("../../../../data/historical_population_1900/opening_v3.json"),
             4 => include_bytes!("../../../../data/historical_population_1900/opening_v4.json"),
             5 => include_bytes!("../../../../data/historical_population_1900/opening_v5.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v6.json"),
+            6 => include_bytes!("../../../../data/historical_population_1900/opening_v6.json"),
+            7 => include_bytes!("../../../../data/historical_population_1900/opening_v7.json"),
+            8 => include_bytes!("../../../../data/historical_population_1900/opening_v8.json"),
+            9 => include_bytes!("../../../../data/historical_population_1900/opening_v9.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v10.json"),
             _ => return Err(invalid("unsupported historical population opening version")),
         };
         let manifest: Manifest = serde_json::from_slice(bytes)?;
@@ -104,7 +109,7 @@ impl HistoricalOpening {
             return Err(invalid("unsupported historical population opening"));
         }
         let mut opening = Self {
-            version, demography: OpeningDemography::default(),
+            version, demography: OpeningDemography::default(), social: OpeningSocial::default(),
             estimates: BTreeMap::new(), partitions: BTreeMap::new(), standalone: BTreeMap::new(),
             collective_scopes: BTreeMap::new(), declared_places: BTreeMap::new(), places: OnceLock::new(),
         };
@@ -197,10 +202,17 @@ impl HistoricalOpening {
             3 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v3.json"),
             4 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v4.json"),
             5 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v5.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v6.json"),
+            6 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v6.json"),
+            7 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v7.json"),
+            8 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v8.json"),
+            9 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v9.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v10.json"),
             _ => return Ok(opening),
         };
         opening.demography = OpeningDemography::load(&opening, demography)?;
+        if version == 10 {
+            opening.social = OpeningSocial::load(&opening, include_bytes!("../../../../data/historical_population_1900/opening_social_v10.json"))?;
+        }
         Ok(opening)
     }
 

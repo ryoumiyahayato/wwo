@@ -43,6 +43,18 @@ fn native_population_replays_sparse_cohorts_and_resident_changes() {
     assert_eq!(restored.unclassified("b"), Some(5));
     assert_eq!(restored.unit_for_person("person:materialized"), Some("b"));
     assert_eq!(restored.death_minute(OPENING), Some(8));
+    let mut clock = GameClock::default();
+    clock.advance_minutes(8).unwrap();
+    let source_report = restored.inspect("a", clock).unwrap();
+    let destination_report = restored.inspect("b", clock).unwrap();
+    assert_eq!(source_report.population_total, Some(4));
+    for report in [&source_report, &destination_report] {
+        let movement = report.recent_changes.iter().find(|event| event.kind == "move").unwrap();
+        assert_eq!((movement.unit_id, movement.destination, movement.members), (Some("a"), Some("b"), Some(1)));
+    }
+    let death = source_report.recent_changes.first().unwrap();
+    assert_eq!((death.kind, death.unit_id, death.minute), ("death", Some("a"), 8));
+    assert_eq!(serde_json::to_value(restored.snapshot()).unwrap(), saved);
     assert!(restored.known_dead(OPENING));
     restored.check_identities([
         (OPENING, false), ("person:materialized", true), ("person:arrival", true), ("person:child", true),
@@ -79,6 +91,7 @@ fn native_population_migrates_flat_totals_and_known_deaths() {
     let restored = opening().restore_native(migrated.snapshot(), 6).unwrap();
     assert_eq!(restored.background("a"), Some(4));
     assert_eq!(restored.background("b"), Some(6));
+    assert!(restored.inspect("a", GameClock::default()).unwrap().archived_change_details_unknown);
     assert!(restored.known_dead(OPENING));
     assert!(restored.check_identities([]).is_err());
     restored.check_identities([(OPENING, false)]).unwrap();
