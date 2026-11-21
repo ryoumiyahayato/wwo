@@ -1,2 +1,6 @@
 unit_id,source_id,locator,population_male,population_female,literate_male,literate_female
 ru1897_13,ru_1897_census_vol13_reading,"Vol. XIII, table IIIb, pp. 12–13, province total, columns 2–5",1091715,1021959,344147,110137
+ru1897_16,ru_1897_census_vol16_reading,"Vol. XVI, table IIIb, pp. 12–13, scan pp. 32–33, province total, columns 2–5",1767288,1791941,486105,159166
+ru1897_24,ru_1897_census_vol24_reading,"Vol. XXIV, table IIIb, pp. 12–13, scan pp. 51–52, province total, columns 2–5",1219267,1211314,668298,308875
+ru1897_41,ru_1897_census_vol41_reading,"Vol. XLI, table IIIb, pp. 12–13, scan pp. 43–44, province total, columns 2–5",762804,684986,281576,122266
+ru1897_46,ru_1897_census_vol46_reading,"Vol. XLVI, table IIIb, pp. 12–13, scan pp. 40–41, province total, columns 2–5",1253759,1238557,325460,94404

@@ -1,0 +1,31 @@
+[
+  {
+    "id": "india_travancore_census_1911_age_comparison",
+    "title": "Census of India, 1911, Vol. XXIII. Travancore, Part I: Report",
+    "publisher": "Census of India, Travancore State",
+    "url": "https://storage.lib.uchicago.edu/pres/2014/pres2014-0779-1911-23-01.pdf",
+    "locator": "Chapter IV, Subsidiary Table II, printed p. 126, State rows and 1891/1901 columns.",
+    "rights": "Numeric facts transcribed from the publication.",
+    "raw_path": "age_sex.csv"
+  },
+  {
+    "id": "india_census_1941_princely_sex_comparison",
+    "title": "Census of India, 1941. Imperial Tables, Part I, Vol. I: India",
+    "publisher": "Census of India",
+    "url": "https://censusindia.gov.in/nada/index.php/catalog/32422/download/35603/21325_1941_TAB.pdf",
+    "locator": "Table II, Variation in population during fifty years, Cochin and Travancore States, total persons and sex columns in 1891 and 1901.",
+    "rights": "Numeric facts transcribed from the publication.",
+    "raw_path": "panels.json"
+  },
+  {
+    "id": "india_cochin_census_1901_age_comparison",
+    "title": "Census of India, 1901, Vol. XX. Cochin, Part I: Report",
+    "publisher": "Census of India, Cochin State",
+    "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18845/GIPE-017286.pdf?isAllowed=y&sequence=3",
+    "locator": "Chapter IV, Subsidiary Table II, printed p. 84. Statewide age distributions from the 1891 and 1901 censuses. The introduction, paragraph 24, identifies the 1901 local census morning.",
+    "rights": "Numeric facts transcribed from the publications.",
+    "raw_path": "age_sex.csv",
+    "independent_url": "https://censusindia.gov.in/nada/index.php/catalog/28352/download/31534/20246_1911_IMP.pdf",
+    "extract": "The 1911 reprint, Chapter V, Subsidiary Table II, printed p. 31, and the original 1901 subtotals resolve conflicting digit readings for 1901. The unclear female rate for ages 40–59 is the difference between the female rate control and the other published bands. Unknown ages remain a separate band."
+  }
+]

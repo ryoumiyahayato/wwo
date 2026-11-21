@@ -11,6 +11,7 @@ const DIMENSIONS: &[&str] = &[
 #[derive(Default)]
 pub(super) struct OpeningSocial {
     pub(super) regions: BTreeMap<String, OpeningSocialRegion>,
+    pub(super) aggregate_members: BTreeSet<String>,
 }
 
 #[derive(Deserialize)]
@@ -83,7 +84,19 @@ impl OpeningSocial {
                 return Err(invalid("repeated historical social resident pool"));
             }
         }
-        Ok(Self { regions })
+        let mut aggregate_members = BTreeSet::new();
+        for (id, region) in &regions {
+            let Some(scope) = opening.statistical_aggregates.get(id) else { continue };
+            for member in &scope.members {
+                if regions.get(member).is_some_and(|leaf| {
+                    leaf.marginal_distributions.keys().any(|key| region.marginal_distributions.contains_key(key))
+                }) {
+                    return Err(invalid(format!("overlapping historical social distributions for {member}")));
+                }
+                aggregate_members.insert(member.clone());
+            }
+        }
+        Ok(Self { regions, aggregate_members })
     }
 }
 
@@ -117,16 +130,27 @@ impl Population {
         let mut dimensions: BTreeMap<_, SocialDimension<'_>> = DIMENSIONS.iter().map(|&key| {
             (key, SocialDimension { unknown_residents: population_total, ..SocialDimension::default() })
         }).collect();
-        let mut minimum = 0;
-        let mut maximum = 0;
-        let mut affected_resident_pools = 0;
-        for (id, region) in self.opening.iter().flat_map(|opening| &opening.social.regions) {
+        let mut coverage = BTreeMap::<&str, (u64, u64, u64)>::new();
+        let mut affected_resident_pools = BTreeSet::new();
+        for (opening, id, region) in self.opening.iter().flat_map(|opening| {
+            opening.social.regions.iter().map(move |(id, region)| (opening, id, region))
+        }) {
             if unit.is_some_and(|unit| !self.pool_in_scope(id, unit)) {
                 continue;
             }
-            let outflow = self.history.social_outflow.get(id).copied().unwrap_or(0);
-            let current = self.pools[id];
-            affected_resident_pools += u64::from(outflow != 0 || current != region.opening_total);
+            let scope = opening.statistical_aggregates.get(id);
+            let members = scope.map(|scope| scope.members.as_slice()).unwrap_or(std::slice::from_ref(id));
+            let mut current = 0;
+            let mut outflow = 0u64;
+            for member in members {
+                let departing = self.history.social_outflow.get(member).copied().unwrap_or(0);
+                let residents = self.pools[member];
+                if departing != 0 || residents != opening.estimate(member).expect("validated pool").population_value {
+                    affected_resident_pools.insert(member);
+                }
+                current += residents;
+                outflow = outflow.saturating_add(departing);
+            }
             let mut pool_minimum = 0;
             let mut pool_maximum = 0;
             for (key, distribution) in &region.marginal_distributions {
@@ -149,12 +173,24 @@ impl Population {
                 pool_minimum = pool_minimum.max(assigned);
                 pool_maximum += region.opening_total - distribution.unknown;
             }
-            minimum += pool_minimum;
-            maximum += pool_maximum.min(current);
+            let coverage_id = opening.partitions.get(id).and_then(|part| part.statistical_parent.as_deref())
+                .unwrap_or(id);
+            let (leaf_minimum, aggregate_minimum, scope_maximum) = coverage.entry(coverage_id).or_default();
+            if scope.is_some() {
+                *aggregate_minimum = pool_minimum;
+            } else {
+                *leaf_minimum += pool_minimum;
+            }
+            *scope_maximum += pool_maximum.min(current);
         }
+        let (minimum, maximum) = coverage.into_iter().fold((0, 0), |(minimum, maximum), (id, bounds)| {
+            let (leaf_minimum, aggregate_minimum, scope_maximum) = bounds;
+            (minimum + leaf_minimum.max(aggregate_minimum),
+             maximum + scope_maximum.min(self.population_total(id).expect("validated scope")))
+        });
         Some(SocialDistribution {
             population_total, dimensions, residents_with_any_attribute_minimum: minimum,
-            residents_with_any_attribute_maximum: maximum, affected_resident_pools,
+            residents_with_any_attribute_maximum: maximum, affected_resident_pools: affected_resident_pools.len() as u64,
         })
     }
 }

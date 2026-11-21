@@ -83,7 +83,8 @@ def dimensions(population):
                 unit_id=panel["observed_unit_id"], published_scope=panel["published_scope"],
                 date=panel["observed_date"], source_id=panel["source_id"],
                 locator=f"{panel['locator']}, {row['label']}", category=row["label"],
-                measure="published persons", values={key: row[key] for key in ("both", "male", "female")},
+                measure=panel.get("measure", "published persons"),
+                values={key: row[key] for key in ("both", "male", "female")},
                 definition=panel["definition"], dimension=panel.get("dimension", "age_by_sex"),
                 panel_id=panel["id"], row_role=row["role"],
                 age_min=row["age_min"], age_max=row["age_max"],
@@ -133,6 +134,7 @@ def age_sex_panels():
     panels.extend(json.loads((AGE_SOURCES / "opening_1900_regional_panels.json").read_text(encoding="utf8")))
     regional_sources = (
         HERE / "netherlands_census_1899", HERE / "nordic_population_1900", HERE / "swiss_census_ages",
+        HERE / "andaman_census_demography", HERE / "india_princely_age",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
@@ -356,6 +358,68 @@ def swiss_opening_age_model(panels, group):
     return model, [control, *bands]
 
 
+def port_blair_opening_sex_model(panels, unit):
+    earlier_panel, (earlier,) = panels["port_blair_1891_sex"]
+    later_panel, (later,) = panels["port_blair_1901_sex"]
+    dates = [earlier_panel["observed_date"], later_panel["observed_date"]]
+    if dates != unit["source_dates"] or [earlier["both"], later["both"]] != unit["endpoint_values"]:
+        raise ValueError("Port Blair sex tables and opening controls use different census populations")
+    for row in (earlier, later):
+        if row["male"] + row["female"] != row["both"]:
+            raise ValueError("Port Blair sex totals do not sum to the census population")
+    fraction = opening_fraction(dates)
+    total = unit["population_value"]
+    allocated = apportion({sex: earlier[sex] * (1 - fraction) + later[sex] * fraction for sex in SEX_COUNTS}, total)
+    return dict(
+        unit_id=unit["unit_id"], opening_total=total, observed_total=total,
+        source_id=later_panel["source_id"], observed_unit_id=later_panel["observed_unit_id"], observed_date=DATE,
+        locator=f"{later_panel['locator']} Census columns {dates[0]} and {dates[1]}.",
+        method="Interpolate both published sex counts to 1900-01-01 and reconcile integer people to the opening control.",
+        uncertainty="The common census extent is the Port Blair Penal Settlement. It excludes the separate Indigenous "
+        "Andamanese and Nicobars returns. No interval is known for the timing of population change. Ages are unknown.",
+        sex_only=True,
+        bands=[dict(id="unknown", label="Modeled sex totals; age unknown", age_min=None, age_max=None, **allocated)],
+    )
+
+
+def princely_state_opening_age_model(panels, unit, state):
+    earlier, earlier_rows = panels[f"{state}_1891_age_rates"]
+    later, later_rows = panels[f"{state}_1901_age_rates"]
+    dates = [earlier["observed_date"], later["observed_date"]]
+    endpoints = [sum(panel["population_by_sex"].values()) for panel in (earlier, later)]
+    if dates != unit["source_dates"] or endpoints != unit["endpoint_values"]:
+        raise ValueError(f"{state}: age tables and opening controls use different census populations")
+    bands = [[row for row in rows if row["role"] == "band"] for rows in (earlier_rows, later_rows)]
+    rate_sums = [{sex: sum(row[sex] for row in rows) for sex in SEX_COUNTS} for rows in bands]
+    for panel, rows, rates in zip((earlier, later), bands, rate_sums, strict=True):
+        for sex in SEX_COUNTS:
+            if 2 * abs(rates[sex] - panel["rate_denominator"]) > len(rows):
+                raise ValueError(f"{panel['id']}: {sex} age rates do not reconcile with the published denominator")
+    fraction = opening_fraction(dates)
+    quotas = {}
+    for index, (early, late) in enumerate(zip(*bands, strict=True)):
+        if (early["age_min"], early["age_max"]) != (late["age_min"], late["age_max"]):
+            raise ValueError(f"{state}: age boundaries differ by census year")
+        for sex in SEX_COUNTS:
+            old = Fraction(early[sex] * earlier["population_by_sex"][sex], rate_sums[0][sex])
+            new = Fraction(late[sex] * later["population_by_sex"][sex], rate_sums[1][sex])
+            quotas[index, sex] = old * (1 - fraction) + new * fraction
+    total = unit["population_value"]
+    allocated = apportion(quotas, total)
+    rows = [row | {sex: allocated[index, sex] for sex in SEX_COUNTS}
+            for index, row in enumerate(bands[1])]
+    control = dict(role="total", both=total, **{sex: sum(row[sex] for row in rows) for sex in SEX_COUNTS})
+    model = later | dict(
+        id=f"{state}_opening_age_model", observed_date=DATE,
+        locator=f"{later['locator']}. Sex totals: {later['sex_control_locator']}.",
+        opening_method="Reconstruct both census age tables from the published age rates and sex totals. "
+        "Interpolate counts to 1900-01-01 on the national comparable census dates and reconcile integer people to the opening control.",
+        uncertainty="The age rates are rounded in print. Enumeration quality and intercensal population change "
+        "have no quantified error interval." + later.get("opening_source_uncertainty", ""),
+    )
+    return opening_age_group(model, [control, *rows], unit["unit_id"], total)
+
+
 def opening_structure(opening_groups, observations, *, version=6):
     statistical_aggregates = {
         unit["unit_id"]: unit
@@ -391,6 +455,16 @@ def opening_structure(opening_groups, observations, *, version=6):
                     opening_age_group(*swiss, unit["unit_id"], unit["population_value"])
                     for unit in group["units"]
                 )
+    port_blair = "raj_andaman_nicobar_comparable"
+    if version >= 14 and port_blair in opening_balances:
+        groups.append(port_blair_opening_sex_model(panels, opening_balances[port_blair]))
+    if version >= 14:
+        princely_states = {"raj_travancore_state": "travancore", "raj_cochin_state": "cochin"}
+        for group in opening_groups:
+            for unit in group["units"]:
+                state = princely_states.get(unit["unit_id"])
+                if state is not None:
+                    groups.append(princely_state_opening_age_model(panels, unit, state))
     if version >= 10:
         models = russian_regional_age_models(panels, observations)
         remaining_uk = england_wales_remaining_ages(panels)

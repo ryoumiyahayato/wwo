@@ -235,7 +235,9 @@ impl Population {
         } else {
             *total -= members;
             *count -= members;
-            if self.opening.as_ref().is_some_and(|opening| opening.social.regions.contains_key(pool)) {
+            if self.opening.as_ref().is_some_and(|opening| {
+                opening.social.regions.contains_key(pool) || opening.social.aggregate_members.contains(pool)
+            }) {
                 let outflow = self.history.social_outflow.entry(pool.to_owned()).or_default();
                 *outflow = outflow.saturating_add(members);
             }

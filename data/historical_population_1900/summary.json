@@ -22,6 +22,7 @@
     "gold_coast_population": 2,
     "honduras_population": 25,
     "india_comparable": 87,
+    "india_princely_1901": 10,
     "japan_taiwan": 232,
     "java_madoera": 2,
     "liechtenstein": 25,
@@ -44,7 +45,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 173,
+  "cited_sources": 189,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -59,7 +60,7 @@
   "legacy_only_people": 135984208,
   "authoritative_total_for_new_game": 1465272180,
   "roots_with_partitions": 23,
-  "disjoint_leaves": 860,
+  "disjoint_leaves": 863,
   "people_in_partitions": 1205786006,
   "unlocated_balances_under_research_controls": [
     {
@@ -286,7 +287,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2344,
+  "source_statistical_units": 2346,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 26,
@@ -313,21 +314,25 @@
       "assigned_people": 72890961,
       "unknown_people": 1392381219
     },
+    "housing": {
+      "assigned_people": 1655881,
+      "unknown_people": 1463616299
+    },
     "language": {
-      "assigned_people": 132730938,
-      "unknown_people": 1332541242
+      "assigned_people": 135637315,
+      "unknown_people": 1329634865
     },
     "legal_estate": {
       "assigned_people": 132020769,
       "unknown_people": 1333251411
     },
     "literacy": {
-      "assigned_people": 146724652,
-      "unknown_people": 1318547528
+      "assigned_people": 157215425,
+      "unknown_people": 1308056755
     },
     "marital_status": {
-      "assigned_people": 100880474,
-      "unknown_people": 1364391706
+      "assigned_people": 109434659,
+      "unknown_people": 1355837521
     },
     "occupation": {
       "assigned_people": 35190008,
@@ -370,14 +375,17 @@
     "se_scb_population_tab5890": 184,
     "no_ssb_population_10211": 214,
     "ch_bfs_census_age_1888_1900": 38,
+    "india_andaman_nicobar_census_1911_demography": 10,
+    "india_travancore_census_1911_age_comparison": 38,
+    "india_cochin_census_1901_age_comparison": 16,
     "jp_cabinet_population_1898_original": 23,
     "jp_cabinet_local_occupations_1913_tokyo": 8,
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 671318258,
-  "structure_opening_pool_count": 465,
-  "structure_opening_residents_outside_modeled_pools": 793953922,
+  "structure_opening_pool_controls": 675042528,
+  "structure_opening_pool_count": 468,
+  "structure_opening_residents_outside_modeled_pools": 790229652,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -2928,6 +2936,13 @@
       "observed_date": "1901-03-01"
     },
     {
+      "unit_id": "raj_andaman_nicobar_comparable",
+      "opening_total": 16181,
+      "observed_unit_id": "raj_andaman_nicobar_comparable",
+      "observed_total": 16181,
+      "observed_date": "1900-01-01"
+    },
+    {
       "unit_id": "raj_assam_comparable",
       "opening_total": 5721183,
       "observed_unit_id": "raj_assam_1901_census",
@@ -2984,6 +2999,13 @@
       "observed_date": "1901-03-01"
     },
     {
+      "unit_id": "raj_cochin_state",
+      "opening_total": 801687,
+      "observed_unit_id": "raj_cochin_state",
+      "observed_total": 801687,
+      "observed_date": "1900-01-01"
+    },
+    {
       "unit_id": "raj_coorg",
       "opening_total": 179731,
       "observed_unit_id": "raj_coorg_1901_census",
@@ -3024,6 +3046,13 @@
       "observed_unit_id": "raj_rajputana_agency_1901_census",
       "observed_total": 9723301,
       "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_travancore_state",
+      "opening_total": 2906402,
+      "observed_unit_id": "raj_travancore_state",
+      "observed_total": 2906402,
+      "observed_date": "1900-01-01"
     },
     {
       "unit_id": "ru1897_64",
@@ -4183,10 +4212,10 @@
         "opening_unit_id": "cshapes_gw_750",
         "research_region": "Asia",
         "opening_control": 294000000,
-        "in_model_pools": 266241808,
-        "outside_model_pools": 27758192,
-        "modeled_age_and_sex": 266197215,
-        "modeled_sex_age_unknown": 44593
+        "in_model_pools": 269966078,
+        "outside_model_pools": 24033922,
+        "modeled_age_and_sex": 269905201,
+        "modeled_sex_age_unknown": 60877
       },
       {
         "opening_unit_id": "cshapes_gw_780",
@@ -4641,18 +4670,18 @@
       },
       "Asia": {
         "opening_control": 802923622,
-        "in_model_pools": 313723718,
-        "outside_model_pools": 489199904,
-        "modeled_age_and_sex": 313678799,
-        "modeled_sex_age_unknown": 44919
+        "in_model_pools": 317447988,
+        "outside_model_pools": 485475634,
+        "modeled_age_and_sex": 317386785,
+        "modeled_sex_age_unknown": 61203
       }
     },
     "world": {
       "opening_control": 1465272180,
-      "in_model_pools": 671318258,
-      "outside_model_pools": 793953922,
-      "modeled_age_and_sex": 647273572,
-      "modeled_sex_age_unknown": 24044686
+      "in_model_pools": 675042528,
+      "outside_model_pools": 790229652,
+      "modeled_age_and_sex": 650981558,
+      "modeled_sex_age_unknown": 24060970
     }
   },
   "opening_count_basis": {

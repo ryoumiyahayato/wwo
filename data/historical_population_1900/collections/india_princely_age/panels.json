@@ -1,0 +1,63 @@
+[
+  {
+    "id": "travancore_1891_age_rates",
+    "observed_unit_id": "raj_travancore_state",
+    "published_scope": "Travancore State",
+    "observed_date": "1891-02-26",
+    "source_id": "india_travancore_census_1911_age_comparison",
+    "locator": "Chapter IV, Subsidiary Table II, printed p. 126, State, 1891 columns 6–7",
+    "definition": "Statewide rates by completed age, separately for males and females. The date follows the national comparative return used for the opening balance.",
+    "dimension": "age_rates_by_sex",
+    "measure": "published persons per 10,000 of each sex",
+    "rate_denominator": 10000,
+    "population_by_sex": {"male": 1290415, "female": 1267321},
+    "sex_control_locator": "Census of India 1941, Table II, Travancore, 1891",
+    "broad_observation": false
+  },
+  {
+    "id": "travancore_1901_age_rates",
+    "observed_unit_id": "raj_travancore_state",
+    "published_scope": "Travancore State",
+    "observed_date": "1901-03-01",
+    "source_id": "india_travancore_census_1911_age_comparison",
+    "locator": "Chapter IV, Subsidiary Table II, printed p. 126, State, 1901 columns 4–5",
+    "definition": "Statewide rates by completed age, separately for males and females. The date follows the national comparative return used for the opening balance.",
+    "dimension": "age_rates_by_sex",
+    "measure": "published persons per 10,000 of each sex",
+    "rate_denominator": 10000,
+    "population_by_sex": {"male": 1490165, "female": 1461992},
+    "sex_control_locator": "Census of India 1941, Table II, Travancore, 1901",
+    "broad_observation": false
+  },
+  {
+    "id": "cochin_1891_age_rates",
+    "observed_unit_id": "raj_cochin_state",
+    "published_scope": "Cochin State",
+    "observed_date": "1891-02-26",
+    "source_id": "india_cochin_census_1901_age_comparison",
+    "locator": "Chapter IV, Subsidiary Table II, printed p. 84, 1891 columns 6–7",
+    "definition": "Statewide rates by completed age, separately for males and females. Published tenths of persons per 10,000 are retained as integer rates per 100,000. The date follows the national comparison used for the opening balance.",
+    "dimension": "age_rates_by_sex",
+    "measure": "persons per 100,000 of each sex",
+    "rate_denominator": 100000,
+    "population_by_sex": {"male": 361904, "female": 361002},
+    "sex_control_locator": "Census of India 1941, Table II, Cochin, 1891",
+    "broad_observation": false
+  },
+  {
+    "id": "cochin_1901_age_rates",
+    "observed_unit_id": "raj_cochin_state",
+    "published_scope": "Cochin State",
+    "observed_date": "1901-03-01",
+    "source_id": "india_cochin_census_1901_age_comparison",
+    "locator": "Chapter IV, Subsidiary Table II, printed p. 84, 1901 columns 3–4; checked against the 1911 reprint, Chapter V, Subsidiary Table II, printed p. 31",
+    "definition": "Statewide rates by completed age, separately for males and females. Published tenths per 10,000 are retained as integer rates per 100,000. The female 40–59 rate is the published female total minus the other age rates, after checking the other bands against subtotals and the contemporary reprint. The national comparison uses the reference date 1901-03-01. Cochin's final count was on the morning of 1901-03-02.",
+    "dimension": "age_rates_by_sex",
+    "measure": "persons per 100,000 of each sex",
+    "rate_denominator": 100000,
+    "population_by_sex": {"male": 405200, "female": 406825},
+    "sex_control_locator": "Census of India 1941, Table II, Cochin, 1901",
+    "opening_source_uncertainty": " One female age rate is derived by subtraction. Ages not stated in the source remain unknown.",
+    "broad_observation": false
+  }
+]

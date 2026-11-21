@@ -1,0 +1,21 @@
+{
+  "date": "1901-03-01",
+  "columns": ["Hindus", "Sikhs", "Jains", "Buddhists", "Parsis", "Muhammadans", "Christians", "Jews", "Animistic"],
+  "rows": {
+    "raj_madras_states": {
+      "total": 4188086,
+      "counts": [2978374, 15, 6, 227, 7, 265580, 910409, 1288, 32175],
+      "unknown": 5
+    },
+    "raj_travancore_state": {
+      "total": 2952157,
+      "counts": [2035615, 15, 1, 227, 7, 190566, 697387, 151, 28183],
+      "unknown": 5
+    },
+    "raj_cochin_state": {
+      "total": 812025,
+      "counts": [554255, 0, 5, 0, 0, 54492, 198239, 1137, 3897],
+      "unknown": 0
+    }
+  }
+}

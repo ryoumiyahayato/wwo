@@ -1,0 +1,34 @@
+[
+  {
+    "id": "port_blair_1891_sex",
+    "observed_unit_id": "raj_andaman_nicobar_comparable",
+    "published_scope": "Port Blair Penal Settlement",
+    "observed_date": "1891-02-26",
+    "source_id": "india_andaman_nicobar_census_1911_demography",
+    "locator": "Census of India 1911, Volume II, Part II, Table II, printed p. 128, Port Blair Penal Settlement",
+    "definition": "1891 census population by sex, as reprinted in 1911. The account includes convicts and other settlement inhabitants. The Indigenous Andamanese and Nicobars returns are outside the settlement scope.",
+    "dimension": "sex",
+    "broad_observation": false
+  },
+  {
+    "id": "port_blair_1901_sex",
+    "observed_unit_id": "raj_andaman_nicobar_comparable",
+    "published_scope": "Port Blair Penal Settlement",
+    "observed_date": "1901-03-01",
+    "source_id": "india_andaman_nicobar_census_1911_demography",
+    "locator": "Census of India 1911, Volume II, Part II, Table II, printed p. 128, Port Blair Penal Settlement",
+    "definition": "1901 census population by sex, as reprinted in 1911. The account includes convicts and other settlement inhabitants. The Indigenous Andamanese and Nicobars returns are outside the settlement scope.",
+    "dimension": "sex",
+    "broad_observation": false
+  },
+  {
+    "id": "port_blair_1911_age",
+    "observed_unit_id": "raj_andaman_nicobar_comparable",
+    "published_scope": "Port Blair Penal Settlement, all religions",
+    "observed_date": "1911-03-10",
+    "source_id": "india_andaman_nicobar_census_1911_demography",
+    "locator": "Census of India 1911, Volume II, Part II, Table VII, printed p. 135, Port Blair Penal Settlement",
+    "definition": "1911 census population by age and sex within the settlement. Ages use published intervals. The Indigenous Andamanese and Nicobars returns are outside the settlement scope.",
+    "broad_observation": false
+  }
+]
