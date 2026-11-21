@@ -1690,9 +1690,11 @@ impl Host {
         Ok(())
     }
     fn status(&self)->serde_json::Value {
+        let world = self.written_world();
         let session=self.state.session.as_ref().map(|s|{
             let market=s.market.as_ref().map(market_ui::Market::status);
             serde_json::json!({"player":s.player,"time":[s.hour,s.minute],"total_minutes":s.total_minutes,"paused":s.paused,"speed":s.speed,
+                "subminute_millis":world.map(|world|world.clock().snapshot().subminute_millis),
                 "finance":s.finance.summary,"message_count":s.messages.len(),"slots":s.slots.len(),"market":market,"training":s.training,
                 "character":s.character,
                 "property":s.property.iter().map(|r|(&r.id,r.quantity)).collect::<Vec<_>>(),"departure":s.departure })
@@ -1700,7 +1702,7 @@ impl Host {
         let lobby=self.state.lobby.as_ref().map(|s|serde_json::json!({"page":format!("{:?}",self.lobby_page),"ready":s.ready,
             "selection_ready":s.selection_ready,"busy":s.busy,"status":s.status,
             "slots":s.slots.iter().map(|s|(s.slot,s.can_read)).collect::<Vec<_>>()}));
-        let land_battle=self.written_world().and_then(|world|{
+        let land_battle=world.and_then(|world|{
             use wwo_map_lab::land_battle::LandTeam;
             let fixture=world.land_battle_record()?;
             let battle=&fixture.battle;
@@ -1709,11 +1711,12 @@ impl Host {
                 serde_json::json!({"operational":r.operational,"destroyed":r.destroyed,"ammunition":r.ammunition,"shots":r.shots,"hits":r.hits})
             };
             let history=world.land_battle_history().iter().map(|row|serde_json::json!({
-                "id":row.id,"cell":row.cell(),"outcome":row.battle.outcome,"ended_minute":row.ended_minute
+                "id":row.id,"cell":row.cell(),"outcome":row.battle.outcome,"ended_minute":row.ended_minute,
+                "ended_subminute_millis":row.ended_subminute_millis
             })).collect::<Vec<_>>();
             Some(serde_json::json!({"kind":"training_fixture","id":fixture.id,"cell":fixture.cell(),"region":fixture.region,
                 "steps":battle.elapsed_steps(),"seconds":battle.elapsed_seconds(),"started_minute":fixture.started_minute,
-                "ended_minute":fixture.ended_minute,"history":history,
+                "ended_minute":fixture.ended_minute,"ended_subminute_millis":fixture.ended_subminute_millis,"history":history,
                 "outcome":battle.outcome,"selected_unit":battle.selected_unit(),"friendly":report(LandTeam::Friendly),"opposing":report(LandTeam::Opposing),
                 "view":self.battle_view.as_ref().map(|view|view.camera.span),"fps":self.debug.then_some(self.perf.rate)}))
         });
