@@ -469,10 +469,12 @@ impl Host {
                 if self.hud.page==HudPage::Market{self.market_command("close",0);}
                 if mode==Mode::Military && self.mode!=Mode::Military && self.written_world().is_some(){self.hud.military_grid=true;}
                 if self.mode!=mode {
-                    self.hud.transport_detail_page=0;
+                    self.hud.transport_detail_expanded=false;
                     self.transport_detail=None;
                 }
-                self.mode=mode;self.hud.page=HudPage::Map;self.hud.menu=HudMenu::None;
+                self.mode=mode;
+                if self.hud.page!=HudPage::Travel {self.hud.page=HudPage::Map;}
+                self.hud.menu=HudMenu::None;
                 self.emit(Request::SetMapMode{mode:mode.key()});
             }
             Action::Home=>{
@@ -533,6 +535,9 @@ impl Host {
     fn hud_action(&mut self,command:HudCommand) {
         match command {
             HudCommand::Page(page)=>{
+                if let (true,Some(window))=(self.hud.market_search.is_some() || self.hud.transport_directory.is_some(),&self.window) {
+                    window.set_ime_allowed(false);
+                }
                 if self.hud.page==HudPage::Market&&page!=HudPage::Market{self.market_command("close",0);}
                 if self.hud.page==HudPage::Relations&&page!=HudPage::Relations{
                     self.emit(Request::Relations{verb:"close",id:""});
@@ -540,6 +545,11 @@ impl Host {
                     self.emit(Request::Relations{verb:"open",id:""});
                 }
                 self.hud.page=page;self.hud.menu=HudMenu::None;
+                self.hud.market_map=false;
+                self.hud.market_search=None;
+                self.hud.transport_pick=false;
+                self.hud.transport_directory=None;
+                self.hud.transport_lots_open=false;
                 self.hud.market_offset=0;
                 self.details=false;self.country=None;self.search=None;
             }
@@ -597,7 +607,7 @@ impl Host {
                 if menu==HudMenu::MapModes {
                     if self.hud.page==HudPage::Market{self.market_command("close",0);}
                     if self.hud.page==HudPage::Relations{self.emit(Request::Relations{verb:"close",id:""});}
-                    self.hud.page=HudPage::Map;
+                    if self.hud.page!=HudPage::Travel {self.hud.page=HudPage::Map;}
                 }
                 self.hud.messages=false;
                 if matches!(self.hud.menu,HudMenu::Save|HudMenu::Load){
@@ -701,16 +711,44 @@ impl Host {
             HudCommand::Market(verb,index)=>self.market_command(verb,index),
             HudCommand::Transport(verb,index)=>self.transport_command(verb,index),
             HudCommand::TransportDetail(index)=>self.transport_detail_action(index),
-            HudCommand::TransportDetailPage(page)=>self.hud.transport_detail_page=page,
+            HudCommand::ToggleTransportDetail=>self.hud.transport_detail_expanded^=true,
+            HudCommand::TransportSteps=>self.hud.transport_steps^=true,
+            HudCommand::TransportLots=>{
+                self.hud.transport_lots_open^=true;
+                self.hud.lot_offset=0;
+            }
+            HudCommand::PickTransportDestination=>{
+                self.hud_action(HudCommand::Page(HudPage::Map));
+                self.select_transport(None);
+                self.hud.transport_pick=true;
+            }
+            HudCommand::TransportDirectory=>{
+                self.hud_action(HudCommand::Page(HudPage::Travel));
+                self.hud.transport_directory=Some(String::new());
+                if let Some(window)=&self.window {window.set_ime_allowed(true);}
+                self.hud.transport_category=0;
+                self.transport_search();
+            }
+            HudCommand::TransportCategory(category)=>{
+                self.hud.transport_category=category;
+                self.transport_search();
+            }
             HudCommand::CloseTransportDetail=>self.select_transport(None),
             HudCommand::MarketScroll(delta)=>{
                 let count=self.state.session.as_ref().map_or(0,|s| {
+                    if self.hud.page==HudPage::Travel || self.hud.market_chooser==Some("transport_lots")
+                        || s.market.as_ref().is_some_and(|v|v.content=="freight") {
+                        return s.transport.as_ref().map_or(0,|v|v.lots.len());
+                    }
                     if self.hud.page==HudPage::Property{return s.property.len();}
                     if self.hud.page==HudPage::Character{return s.character.as_ref().map_or(0,|c|c.oral_contacts.len());}
                     if self.hud.page==HudPage::Relations{return s.relations.as_ref().map_or(0,|view|{
                         if view.drawer=="work" || !view.selected.is_empty(){view.work.len()}else{view.rows.len()}
                     });}
                     let Some(v)=&s.market else{return 0;};
+                    if let Some(query)=self.hud.market_search.as_deref() {
+                        return v.matching_sites(query).count();
+                    }
                     match self.hud.market_chooser.unwrap_or(&v.content){
                         "places"=>v.places.len(),"countries"=>v.countries.len(),
                         "good"=>v.offers.iter().filter(|o|o.good==v.good).count(),
@@ -719,7 +757,11 @@ impl Host {
                         _=>v.book.len(),
                     }
                 });
-                self.hud.market_offset=self.hud.market_offset.saturating_add_signed(delta as isize).min(count.saturating_sub(1));
+                if self.hud.transport_lots_open {
+                    self.hud.lot_offset=self.hud.lot_offset.saturating_add_signed(delta as isize).min(count.saturating_sub(1));
+                } else {
+                    self.hud.market_offset=self.hud.market_offset.saturating_add_signed(delta as isize).min(count.saturating_sub(1));
+                }
             },
         }
     }
@@ -843,6 +885,7 @@ impl Host {
         }
         if verb=="close"{
             self.hud.page=HudPage::Map;self.hud.market_chooser=None;self.hud.quantity=None;
+            self.hud.market_map=false;self.hud.market_search=None;
             self.focus=None;self.velocity=[0.;2];
             self.emit(Request::Market{verb,id:"",site:"",quantity:0,token:0,viewport:self.size});return;
         }
@@ -850,8 +893,38 @@ impl Host {
         let Some(v)=session.market.as_ref() else{return;};
         let mut id=String::new();let mut site=String::new();let mut quantity=0;let mut token=0;
         let actual=match verb {
+            "map_locations" => {
+                self.hud.page=HudPage::Map;
+                self.hud.market_map=true;
+                self.hud.market_search=None;
+                self.select_transport(None);
+                self.selected=None;self.country=None;self.details=false;self.search=None;
+                return;
+            }
+            "market_back"|"search_locations" => {
+                self.hud.page=HudPage::Market;
+                self.hud.market_map=false;
+                self.hud.market_offset=0;
+                self.hud.market_search=(verb=="search_locations").then(String::new);
+                if let Some(window)=&self.window {window.set_ime_allowed(self.hud.market_search.is_some());}
+                return;
+            }
+            "location" => {
+                let Some(row)=v.sites.get(index) else{return;};
+                id=row.unit.clone();site=row.place.clone();
+                self.hud.page=HudPage::Market;
+                self.hud.market_map=false;
+                verb
+            }
+            "carrier" => {
+                let Some(place)=v.sites.get(index).map(|row|row.place.clone()) else{return;};
+                self.choose_transport_destination(&place);
+                return;
+            }
+            "local_bread"|"trend"|"back_good" => verb,
             "places"|"countries"=>{
                 self.hud.market_chooser=if self.hud.market_chooser==Some(verb){None}else{Some(verb)};
+                self.hud.market_search=None;
                 self.hud.market_offset=0;return;
             }
             "regional" if v.region.is_empty()||!v.places.iter().any(|row|row.id==v.region)=>{
@@ -859,7 +932,13 @@ impl Host {
                 id=row.id.clone();"region"
             }
             "international"|"domestic"|"regional"=>{id=verb.into();"scope"}
-            "quotes"|"goods"|"transport"|"activity"|"freight"=>{id=verb.into();"view"}
+            "freight"=>{
+                self.emit(Request::Transport{verb:"cargo",id:""});
+                self.hud.page=HudPage::Travel;
+                self.hud.market_search=None;
+                return;
+            }
+            "quotes"|"goods"|"transport"|"activity"=>{id=verb.into();"view"}
             "goods_group"=>{
                 let Some((group,_))=market_ui::GOODS_GROUPS.get(index) else{return;};
                 id=(*group).into();
@@ -907,8 +986,18 @@ impl Host {
             }
             _=>return,
         };
-        self.hud.quantity=None;self.hud.market_offset=0;self.hud.market_chooser=None;
+        self.hud.quantity=None;self.hud.market_offset=0;self.hud.market_chooser=None;self.hud.market_search=None;
         self.emit(Request::Market{verb:actual,id:&id,site:&site,quantity,token,viewport:self.size});
+    }
+
+    fn type_market_search(&mut self, text: &str) {
+        if let Some(query)=self.hud.market_search.as_mut() {
+            if query.len()+text.len()<=80 {
+                query.push_str(text);
+                self.hud.market_offset=0;
+                self.dirty=true;
+            }
+        }
     }
 
     fn open_market(&mut self, id: &str) {
@@ -920,6 +1009,7 @@ impl Host {
     fn transport_detail_visible(&self) -> bool {
         self.transport_selection.is_some() && self.hud.page==HudPage::Map
             && self.hud.menu==HudMenu::None && self.country.is_none() && self.search.is_none() && !self.details
+            && !self.hud.market_map && !self.hud.transport_pick
     }
 
     fn select_transport(&mut self, selection: Option<transport_ui::ObjectId>) {
@@ -933,15 +1023,18 @@ impl Host {
         }
         self.transport_selection=selection;
         self.transport_detail=None;
-        self.hud.transport_detail_page=0;
+        self.hud.transport_detail_expanded=false;
         self.dirty=true;
     }
 
     fn pick_transport(&mut self, point: [f64; 2]) -> bool {
         if self.hud.page!=HudPage::Map || self.hud.menu!=HudMenu::None
-            || self.search.is_some() || self.details || self.in_lobby() {return false;}
+            || self.search.is_some() || self.details || self.in_lobby() || self.hud.market_map {return false;}
         let selection=self.transport_scene.as_ref().and_then(|scene|scene.pick(point));
-        if selection.is_none() {return false;}
+        if let Some(transport_ui::ObjectId::Node(id)) = selection.as_ref().filter(|_|self.hud.transport_pick) {
+            if self.choose_transport_destination(id) { return true; }
+        }
+        if selection.is_none() || self.hud.transport_pick {return false;}
         self.select_transport(selection);
         true
     }
@@ -949,33 +1042,46 @@ impl Host {
     fn transport_detail_action(&mut self, index: usize) {
         use transport_ui::Link;
         if !self.transport_detail_visible() {return;}
-        let Some(link)=self.transport_detail.as_ref().and_then(|(_, detail)|detail.links.get(index)).cloned() else{return;};
+        let Some(link)=self.transport_detail.as_ref().and_then(|(_, detail)|detail.links.get(index)).map(|(_,link)|link.clone()) else{return;};
         match link {
             Link::Object(id)=>self.select_transport(Some(id)),
-            Link::Travel(id)=>{
+            Link::Travel(id)=>{self.choose_transport_destination(&id);}
+            Link::CurrentTravel=>{
                 self.hud_action(HudCommand::Page(HudPage::Travel));
-                self.emit(Request::Transport{verb:"city",id:&id});
+                self.emit(Request::Transport{verb:"passenger",id:""});
             }
-            Link::CurrentTravel=>self.hud_action(HudCommand::Page(HudPage::Travel)),
             Link::Market(unit)=>self.open_market(&format!("state:{unit}")),
-            Link::Firm{id,drawer}=>{
-                self.hud_action(HudCommand::Page(HudPage::Relations));
-                self.emit(Request::Relations{verb:"drawer",id:drawer});
-                self.emit(Request::Relations{verb:"select",id:&id});
-            }
             Link::Freight(id)=>{
-                self.open_market("");
-                self.market_command("freight",0);
+                self.hud_action(HudCommand::Page(HudPage::Travel));
                 self.emit(Request::Transport{verb:"lot",id:&id.to_string()});
-            }
-            Link::Battle(cell)=>{
-                if self.mode==Mode::Military && self.written_world().and_then(|world|world.land_battle_region())==Some(cell.region()) {
-                    self.military_cell=Some(SelectedMilitaryCell{cell,coordinates:cell.center_lon_lat()});
-                    self.enter_selected_battle();
-                }
             }
         }
     }
+
+    fn choose_transport_destination(&mut self, id: &str) -> bool {
+        if !self.written_world().is_some_and(|world|world.can_select_transport_destination(id)
+            && world.can_read_place_record(id)) {
+            return false;
+        }
+        self.hud_action(HudCommand::Page(HudPage::Travel));
+        self.emit(Request::Transport{verb:"destination",id});
+        true
+    }
+
+    fn transport_search(&mut self) {
+        let query=format!("{}|{}",self.hud.transport_category,self.hud.transport_directory.as_deref().unwrap_or(""));
+        self.emit(Request::Transport{verb:"search",id:&query});
+    }
+
+    fn type_transport_search(&mut self, text: &str) {
+        if let Some(query)=self.hud.transport_directory.as_mut() {
+            if query.len()+text.len() <= 96 {
+                query.push_str(text);
+                self.transport_search();
+            }
+        }
+    }
+
     fn transport_command(&mut self, verb: &'static str, index: usize) {
         let id = match verb {
             "city" => {
@@ -994,9 +1100,13 @@ impl Host {
                     .and_then(|transport| transport.lots.get(index)) else { return };
                 lot.id.to_string()
             }
-            "mode" => ["all", "rail", "road", "shipping", "inland", "domestic"].get(index).copied().unwrap_or("all").into(),
             _ => String::new(),
         };
+        if verb=="destination" {
+            self.hud.transport_directory=None;
+            if let Some(window)=&self.window {window.set_ime_allowed(false);}
+        }
+        if verb=="lot" {self.hud.transport_lots_open=false;}
         self.emit(Request::Transport { verb, id: &id });
     }
     fn apply_market_focus(&mut self,target:market_ui::MarketFocus) {
@@ -1250,8 +1360,14 @@ impl Host {
                     && p[0]<=104. && p[1]<=76.=>{
                     if let Some(i)=self.player_polity(){self.click_country(i,p);}
                 }
+                Action::Select(Object::Polity(_)|Object::Administration(_)) if self.hud.transport_pick=>{self.pick_transport(p);}
+                Action::Select(_) if self.hud.market_map=>{},
                 Action::Select(Object::Polity(i)) if self.search.is_none()&&self.hud.menu==HudMenu::None&&self.hud.page==HudPage::Map=>{
                     self.click_country(i,p);
+                }
+                Action::Select(Object::Place(i)) if self.hud.transport_pick=>{
+                    let id=self.world.places[i].id.clone();
+                    if !self.pick_transport(p) { self.choose_transport_destination(&id); }
                 }
                 Action::Select(Object::Place(_)) if !in_country && self.pick_transport(p)=>{},
                 _=>self.action(action),
@@ -1259,7 +1375,7 @@ impl Host {
             return;
         }
         if self.is_panel(p){return;}
-        if self.pick_transport(p){return;}
+        if self.pick_transport(p)||self.hud.transport_pick||self.hud.market_map{return;}
         let coordinates=self.camera.vector(p,self.size).map(camera::geographic);
         let hit=coordinates.map(|q|self.object_at(q)[0]);
         if self.in_lobby(){
@@ -1290,7 +1406,7 @@ impl Host {
 
     fn transport_panel_at(&self, p: [f64; 2]) -> bool {
         let Some((_, detail))=self.transport_detail.as_ref().filter(|_|self.transport_detail_visible()) else{return false;};
-        let [x,y,w,h]=detail.rect(self.size).map(f64::from);
+        let [x,y,w,h]=detail.rect(self.size,self.hud.transport_detail_expanded).map(f64::from);
         p[0]>=x && p[0]<=x+w && p[1]>=y && p[1]<=y+h
     }
     fn is_panel(&self,p:[f64;2])->bool {
@@ -1420,6 +1536,48 @@ impl Host {
                 _=>(),
             }
             self.dirty=true;return;
+        }
+        if let Some(query)=self.hud.market_search.as_mut() {
+            match key {
+                Key::Named(NamedKey::Escape)=>{
+                    self.hud.market_search=None;
+                    if let Some(window)=&self.window {window.set_ime_allowed(false);}
+                },
+                Key::Named(NamedKey::Backspace)=>{query.pop();self.hud.market_offset=0;}
+                Key::Named(NamedKey::Space)=>self.type_market_search(" "),
+                Key::Character(value)=>self.type_market_search(&value),
+                _=>(),
+            }
+            self.dirty=true;
+            return;
+        }
+        if self.hud.market_map && key==Key::Named(NamedKey::Escape) {
+            self.market_command("market_back",0);
+            self.dirty=true;
+            return;
+        }
+        if self.hud.transport_directory.is_some() && !self.hud.menu.modal() {
+            match key {
+                Key::Named(NamedKey::Escape)=>{
+                    self.hud.transport_directory=None;
+                    if let Some(window)=&self.window {window.set_ime_allowed(false);}
+                },
+                Key::Named(NamedKey::Backspace)=>{
+                    self.hud.transport_directory.as_mut().unwrap().pop();
+                    self.transport_search();
+                }
+                Key::Named(NamedKey::Enter)=>self.transport_command("destination",0),
+                Key::Named(NamedKey::Space)=>self.type_transport_search(" "),
+                Key::Character(value)=>self.type_transport_search(&value),
+                _=>(),
+            }
+            self.dirty=true;
+            return;
+        }
+        if self.hud.transport_pick && key==Key::Named(NamedKey::Escape) {
+            self.hud_action(HudCommand::Page(HudPage::Travel));
+            self.dirty=true;
+            return;
         }
         if self.search.is_some() {
             match key {
@@ -1608,7 +1766,7 @@ impl Host {
                 self.transport_scene=Some(transport_scene::TransportScene::new(world.transport())?);
             }
             self.transport_scene.as_mut().unwrap().update_map(&self.camera,self.size,&date,self.mode,world,
-                self.transport_selection.as_ref())?;
+                self.transport_selection.as_ref(), self.hud.transport_pick)?;
         }
         let show_transport_detail=self.transport_detail_visible();
         if let (Some(world),Some(scene),Some(selected))=(transport_world,self.transport_scene.as_ref(),
@@ -1616,7 +1774,7 @@ impl Host {
         {
             let minute=world.clock().snapshot().total_minutes;
             if self.transport_detail.as_ref().is_none_or(|(previous,_)|*previous!=minute) {
-                let context=transport_ui::Context{skin:&self.skin,world,map:&self.world,mode:self.mode,date:&date,scene};
+                let context=transport_ui::Context{skin:&self.skin,world,map:&self.world,mode:self.mode,date:&date,scene,debug:self.debug};
                 self.transport_detail=transport_ui::Detail::build(&context,selected).map(|detail|(minute,detail));
             }
         }
@@ -2347,11 +2505,13 @@ impl ApplicationHandler<HostEvent> for Host {
                 let [x,y,width,height]=formal_ui::message_rect([w,h],((h+16.)*0.5).max(190.));
                 if self.hud.messages && (f64::from(x)..=f64::from(x+width)).contains(&self.cursor[0]) && (f64::from(y)..=f64::from(y+height)).contains(&self.cursor[1]){
                     self.action(Action::Hud(HudCommand::MessageScroll(-(steps.signum() as i32))));
-                }else if matches!(self.hud.page,HudPage::Market|HudPage::Property|HudPage::Relations) &&
+                }else if (self.hud.transport_lots_open || matches!(self.hud.page,HudPage::Market|HudPage::Property|HudPage::Relations)) &&
                     formal_ui::page_rect(&self.hud,self.size).is_some_and(|[x,y,w,h]| (f64::from(x)..=f64::from(x+w)).contains(&self.cursor[0])&&(f64::from(y)..=f64::from(y+h)).contains(&self.cursor[1])) {
                     self.action(Action::Hud(HudCommand::MarketScroll(-(steps.signum() as i32)*3)));
                 }else if !self.is_panel(self.cursor) {self.zoom(self.cursor,steps);}
             }
+            WindowEvent::Ime(winit::event::Ime::Commit(text)) if self.hud.market_search.is_some()=>self.type_market_search(&text),
+            WindowEvent::Ime(winit::event::Ime::Commit(text)) if self.hud.transport_directory.is_some()=>self.type_transport_search(&text),
             WindowEvent::Ime(winit::event::Ime::Commit(text)) if self.country_directory.search_active=>self.type_country_search(&text),
             WindowEvent::KeyboardInput {event, ..} if self.battle_view.is_some() => {
                 if matches!(event.logical_key, Key::Named(NamedKey::F5 | NamedKey::F10 | NamedKey::F12)) {

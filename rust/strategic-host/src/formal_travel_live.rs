@@ -128,11 +128,10 @@ impl InitialWorld {
     }
 
     pub fn selected_transport_route(&self) -> Option<&Route> {
-        let now = self.clock.snapshot().total_minutes;
-        self.travel_plan()
+        self.freight_preview.as_ref()
             .or_else(|| self.selected_freight.and_then(|id| self.transport.plan(id)))
-            .or_else(|| self.travel_preview.as_ref().filter(|plan| plan.departure_minute() >= now))
-            .or_else(|| self.freight_preview.as_ref().filter(|plan| plan.departure_minute() >= now))
+            .or_else(|| self.travel_plan())
+            .or(self.travel_preview.as_ref())
             .map(Plan::route)
     }
 

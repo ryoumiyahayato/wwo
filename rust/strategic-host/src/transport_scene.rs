@@ -18,7 +18,6 @@ use std::{
 use wwo_map_lab::{
     formal_bootstrap::InitialWorld,
     transport::{
-        map_data::load_prototype_geometry,
         models::{ModelLod, TransportModel, TRACK_RAILHEAD_M},
         NetworkLayer, NodeKind, TransportMode, TransportNetwork,
     },
@@ -129,6 +128,7 @@ struct MapView {
     mpp: f64,
     pitch: f64,
     mode: Mode,
+    picking: bool,
     date: String,
     availability: u64,
     vehicle_segment: Option<String>,
@@ -415,17 +415,7 @@ fn slice_reference(
 
 impl TransportScene {
     pub fn new(network: &TransportNetwork) -> io::Result<Self> {
-        let catalogue = load_prototype_geometry()?;
-        let mut schematic: BTreeMap<_, _> = catalogue
-            .shipping_waypoints
-            .into_iter()
-            .filter_map(|(id, points)| {
-                let edge = network.segment(&id)?;
-                let start = network.node_coordinates(&edge.from)?;
-                let end = network.node_coordinates(&edge.to)?;
-                Some((id, Path::new([start].into_iter().chain(points).chain([end]))))
-            })
-            .collect();
+        let mut schematic = BTreeMap::new();
         let mut incident: BTreeMap<String, Vec<String>> = BTreeMap::new();
         let mut rail_pairs: BTreeMap<_, Vec<_>> = BTreeMap::new();
         for edge in network.segments() {
@@ -507,6 +497,7 @@ impl TransportScene {
         mode: Mode,
         world: &InitialWorld,
         selection: Option<&ObjectId>,
+        picking: bool,
     ) -> io::Result<()> {
         let network = world.transport();
         let selected_leg_ids = || {
@@ -523,6 +514,7 @@ impl TransportScene {
             mpp: camera.mpp,
             pitch: camera.pitch(),
             mode,
+            picking,
             date: date.to_owned(),
             availability: network.availability_revision(),
             vehicle_segment: vehicle.as_ref().map(|vehicle| vehicle.segment_id.to_owned()),
@@ -593,7 +585,7 @@ impl TransportScene {
             let restricted = availability.capacity_units < edge.profile.capacity_units;
             let highlight = highlighted(id);
             if mode != Mode::Military && camera.mpp <= 1200.
-                && (!schematic || edge.mode == TransportMode::Shipping && camera.mpp >= 100.)
+                && !schematic
             {
                 self.vehicle_segments.push(id.clone());
             }
@@ -603,7 +595,6 @@ impl TransportScene {
             let military_schematic = schematic && match edge.mode {
                 TransportMode::Rail => (highlight || status.is_some())
                     && endpoints_cross_jurisdiction(world, &edge.from, &edge.to, date),
-                TransportMode::Shipping => highlight,
                 _ => false,
             };
             if named_rail && camera.mpp > 1200. {
@@ -695,7 +686,10 @@ impl TransportScene {
                             continue;
                         }
                         let port = terminal.kind == NodeKind::Port;
-                        let context = match mode {
+                        let destination = picking && (port || camera.mpp <= camera::ENTER)
+                            && world.can_select_transport_destination(&terminal.id)
+                            && world.can_read_place_record(&terminal.id);
+                        let context = destination || match mode {
                             Mode::Geographic => water || camera.mpp <= camera::ENTER,
                             Mode::Political => international || status.is_some(),
                             Mode::Economic => water || camera.mpp <= camera::ENTER,
@@ -774,10 +768,8 @@ impl TransportScene {
             .find(|site| site.id == id && site.period.contains(date))?;
         Some(MappedSite {
             name: &site.name,
-            kind: &site.kind,
             source: &site.source,
             note: &site.note,
-            coordinates: site.coordinates,
         })
     }
 
@@ -1091,7 +1083,8 @@ impl TransportScene {
                 continue;
             }
             let reference = self.reference_path(vehicle.segment_id, &view.date);
-            let Some(path) = reference.or_else(|| self.schematic.get(vehicle.segment_id)) else {
+            // Service estimates cannot place a vessel. Use only a reference track at sea.
+            let Some(path) = reference else {
                 continue;
             };
             let progress = f64::from(vehicle.progress.clamp(0.0, 1.0));
@@ -1109,10 +1102,8 @@ impl TransportScene {
             };
             let tangent = tangent * direction;
             let heading = marker_heading(camera, size, point, tangent, position);
-            // A schematic sea waypoint gives a regional symbol, never a local ship pose.
-            let family = reference
-                .filter(|_| camera.mpp <= 40.)
-                .and_then(|_| VehicleGeometry::for_vehicle(vehicle.mode, vehicle.freight));
+            let family = (camera.mpp <= 40.)
+                .then(|| VehicleGeometry::for_vehicle(vehicle.mode, vehicle.freight)).flatten();
             let before = models.len();
             let parts_added =
                 if let Some(family) = family.filter(|family| family.parts.len() <= models_left) {

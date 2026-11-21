@@ -57,52 +57,39 @@ struct Port {
 struct ShippingCatalogue {
     #[serde(flatten)]
     source: Source,
-    routes: Vec<ShippingGeometry>,
+    routes: Vec<ShippingEstimate>,
 }
 
 #[derive(Deserialize)]
-struct ShippingGeometry {
+struct ShippingEstimate {
     id: String,
-    waypoints_lon_lat: Vec<[f64; 2]>,
+    estimated_distance_km: f64,
+    former_estimated_distance_km: Option<f64>,
+    #[serde(default)]
+    uncertain_delay_minutes: u32,
 }
 
-/// Prototype port links and shipping display geometry. IDs use the formal place namespace.
-pub struct PrototypeGeometry {
-    pub port_connections: Vec<(String, String)>,
-    pub shipping_waypoints: BTreeMap<String, Vec<[f64; 2]>>,
-}
-
-pub fn load_prototype_geometry() -> io::Result<PrototypeGeometry> {
-    let ports: PortCatalogue = serde_json::from_slice(PORTS)?;
-    ports.source.require_prototype(2, "ports.json")?;
-    let shipping: ShippingCatalogue = serde_json::from_slice(SHIPPING)?;
-    shipping
-        .source
-        .require_prototype(2, "shipping_routes.json")?;
-    let mut shipping_waypoints = BTreeMap::new();
-    for route in shipping.routes {
-        if route.waypoints_lon_lat.len() < 2
-            || !route.waypoints_lon_lat.iter().copied().all(valid_point)
-            || shipping_waypoints
-                .insert(route.id.clone(), route.waypoints_lon_lat)
-                .is_some()
-        {
-            return Err(invalid(format!("invalid shipping geometry: {}", route.id)));
+// These are service estimates. None provides a charted course or a ship pose.
+fn shipping_estimates() -> io::Result<BTreeMap<String, ShippingEstimate>> {
+    let catalogue: ShippingCatalogue = serde_json::from_slice(SHIPPING)?;
+    catalogue.source.require_prototype(2, "shipping_routes.json")?;
+    let mut estimates = BTreeMap::new();
+    for route in catalogue.routes {
+        if !route.estimated_distance_km.is_finite() || route.estimated_distance_km <= 0. {
+            return Err(invalid(format!("invalid shipping estimate: {}", route.id)));
+        }
+        if estimates.insert(route.id.clone(), route).is_some() {
+            return Err(invalid("duplicate shipping estimate"));
         }
     }
-    Ok(PrototypeGeometry {
-        port_connections: ports
-            .ports
-            .into_iter()
-            .map(|port| {
-                (
-                    format!("place:{}", port.id),
-                    format!("place:{}", port.city_id),
-                )
-            })
-            .collect(),
-        shipping_waypoints,
-    })
+    Ok(estimates)
+}
+
+pub fn shipping_delay_minutes(id: &str) -> u32 {
+    use std::sync::OnceLock;
+    static DELAYS: OnceLock<BTreeMap<String, ShippingEstimate>> = OnceLock::new();
+    DELAYS.get_or_init(|| shipping_estimates().expect("embedded shipping estimates"))
+        .get(id).map_or(0, |row| row.uncertain_delay_minutes)
 }
 
 /// Builds a routing index over formal `place:*` and map route IDs. Each leg is
@@ -117,18 +104,26 @@ pub fn load_prototype_map_network(
 
 pub fn load_world_network(sources: &WorldSources, cache_limit: usize) -> io::Result<TransportNetwork> {
     let (nodes, segments) = detailed_map(sources)?;
-    super::historical::load(sources, nodes, segments, cache_limit)
+    let mut network = super::historical::load(sources, nodes, segments, cache_limit)?;
+    for (id, row) in shipping_estimates()? {
+        if let Some(distance) = row.former_estimated_distance_km {
+            network.catalogue.former_profiles.insert(id, (prototype_profile(TransportMode::Shipping, distance), true));
+        }
+    }
+    Ok(network)
 }
 
 fn detailed_map(sources: &WorldSources) -> io::Result<(Vec<TransportNode>, Vec<TransportSegment>)> {
     let cities: CityCatalogue = serde_json::from_slice(CITIES)?;
-    let geometry = load_prototype_geometry()?;
+    let ports: PortCatalogue = serde_json::from_slice(PORTS)?;
+    ports.source.require_prototype(2, "ports.json")?;
+    let shipping = shipping_estimates()?;
     cities.source.require_prototype(3, "cities.json")?;
     serde_json::from_slice::<Source>(ROAD)?.require_prototype(2, "road_segments.json")?;
     serde_json::from_slice::<Source>(RAIL)?.require_prototype(2, "rail_segments.json")?;
 
-    let mut nodes = Vec::with_capacity(cities.cities.len() + geometry.port_connections.len());
-    let mut segments = Vec::with_capacity(sources.routes().len() + geometry.port_connections.len());
+    let mut nodes = Vec::with_capacity(cities.cities.len() + shipping.len());
+    let mut segments = Vec::with_capacity(sources.routes().len() + shipping.len());
     for city in cities.cities {
         let id = format!("place:{}", city.id);
         require_point(sources, &id)?;
@@ -137,7 +132,9 @@ fn detailed_map(sources: &WorldSources) -> io::Result<(Vec<TransportNode>, Vec<T
             kind: NodeKind::City,
         });
     }
-    for (id, city) in geometry.port_connections {
+    for port in ports.ports {
+        let id = format!("place:{}", port.id);
+        let city = format!("place:{}", port.city_id);
         let distance = distance_km(require_point(sources, &city)?, require_point(sources, &id)?);
         segments.push(TransportSegment {
             id: format!("transfer:{}", id.trim_start_matches("place:")),
@@ -160,18 +157,9 @@ fn detailed_map(sources: &WorldSources) -> io::Result<(Vec<TransportNode>, Vec<T
             RouteMode::Road => (TransportMode::Road, distance_km(from, to)),
             RouteMode::Rail => (TransportMode::Rail, distance_km(from, to)),
             RouteMode::Shipping => {
-                let points = geometry
-                    .shipping_waypoints
-                    .get(&route.id)
-                    .map(Vec::as_slice)
-                    .ok_or_else(|| invalid(format!("invalid shipping geometry: {}", route.id)))?;
-                let distance = distance_km(from, points[0])
-                    + distance_km(points[points.len() - 1], to)
-                    + points
-                        .windows(2)
-                        .map(|pair| distance_km(pair[0], pair[1]))
-                        .sum::<f64>();
-                (TransportMode::Shipping, distance)
+                let estimate = shipping.get(&route.id)
+                    .ok_or_else(|| invalid(format!("missing shipping estimate: {}", route.id)))?;
+                (TransportMode::Shipping, estimate.estimated_distance_km)
             }
         };
         segments.push(TransportSegment {
