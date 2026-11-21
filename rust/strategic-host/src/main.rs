@@ -1323,6 +1323,12 @@ impl Host {
         if key==Key::Named(NamedKey::Enter) && self.military_grid_active() && self.military_cell.is_some(){
             self.enter_selected_battle();return;
         }
+        if matches!(&key, Key::Character(value) if value == "]")
+            && self.hud.page == HudPage::Map && self.hud.menu == HudMenu::None && self.country.is_none()
+            && self.transport_scene.as_mut().is_some_and(|scene| scene.next_corridors(self.cursor)) {
+            self.dirty = true;
+            return;
+        }
         if let Some(s)=self.state.session.as_ref(){
             let speed=match &key {
                 Key::Character(v)=>match v.as_str(){
@@ -1744,7 +1750,7 @@ impl Host {
                 self.velocity=[0.;2];
                 self.trial.movement=Some(([input.x,input.y],[input.to_x,input.to_y],input.frames.clamp(1,180),0));
             }
-            "key"=>self.key(match input.value.as_str() {"Escape"=>Key::Named(NamedKey::Escape),"Space"|"space"=>Key::Named(NamedKey::Space),"Enter"=>Key::Named(NamedKey::Enter),"Home"=>Key::Named(NamedKey::Home),"F1"=>Key::Named(NamedKey::F1),"F2"=>Key::Named(NamedKey::F2),"F3"=>Key::Named(NamedKey::F3),"F4"=>Key::Named(NamedKey::F4),"F5"=>Key::Named(NamedKey::F5),"F6"=>Key::Named(NamedKey::F6),"F7"=>Key::Named(NamedKey::F7),"F8"=>Key::Named(NamedKey::F8),"F10"=>Key::Named(NamedKey::F10),"Tab"=>Key::Named(NamedKey::Tab),_=>Key::Character(input.value.into())}),
+            "key"=>self.key(match input.value.as_str() {"Escape"=>Key::Named(NamedKey::Escape),"Space"|"space"=>Key::Named(NamedKey::Space),"Enter"=>Key::Named(NamedKey::Enter),"Home"=>Key::Named(NamedKey::Home),"F1"=>Key::Named(NamedKey::F1),"F2"=>Key::Named(NamedKey::F2),"F3"=>Key::Named(NamedKey::F3),"F4"=>Key::Named(NamedKey::F4),"F5"=>Key::Named(NamedKey::F5),"F6"=>Key::Named(NamedKey::F6),"F7"=>Key::Named(NamedKey::F7),"F8"=>Key::Named(NamedKey::F8),"F9"=>Key::Named(NamedKey::F9),"F10"=>Key::Named(NamedKey::F10),"Tab"=>Key::Named(NamedKey::Tab),_=>Key::Character(input.value.into())}),
             "home"=>self.action(Action::Home),
             "north"=>{self.camera.north_up();self.dirty=true;}
             "capture" if !input.label.is_empty() && input.label.bytes().all(|b|b.is_ascii_alphanumeric()||b==b'-')=>{

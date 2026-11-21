@@ -35,6 +35,7 @@ pub struct TransportScene {
     overlay: Mesh,
     revision: u64,
     visible: Vec<(Vec2, usize)>,
+    corridor_page: Option<(usize, usize)>,
 }
 
 struct Terminal {
@@ -350,6 +351,7 @@ impl TransportScene {
             overlay: Mesh::default(),
             revision: 0,
             visible: Vec::new(),
+            corridor_page: None,
         })
     }
 
@@ -519,6 +521,26 @@ impl TransportScene {
         Ok(())
     }
 
+    fn nearest_terminal(&self, cursor: [f64; 2]) -> Option<usize> {
+        let pointer = Vec2::new(cursor[0] as f32, cursor[1] as f32);
+        self
+            .visible
+            .iter()
+            .filter(|(p, _)| p.distance_squared(pointer) < 100.)
+            .min_by(|(a, ia), (b, ib)| {
+                a.distance_squared(pointer)
+                    .total_cmp(&b.distance_squared(pointer))
+                    .then_with(|| self.terminals[*ib].port.cmp(&self.terminals[*ia].port))
+            }).map(|(_, index)| *index)
+    }
+
+    pub fn next_corridors(&mut self, cursor: [f64; 2]) -> bool {
+        let Some(index) = self.nearest_terminal(cursor) else { return false; };
+        let page = self.corridor_page.filter(|(i, _)| *i == index).map_or(0, |(_, p)| p);
+        self.corridor_page = Some((index, page.wrapping_add(1)));
+        true
+    }
+
     pub fn caption(
         &self,
         skin: &Skin,
@@ -531,25 +553,23 @@ impl TransportScene {
         if self.visible.is_empty() {
             return;
         }
-        let pointer = Vec2::new(cursor[0] as f32, cursor[1] as f32);
-        let nearest = self
-            .visible
-            .iter()
-            .filter(|(p, _)| p.distance_squared(pointer) < 100.)
-            .min_by(|(a, ia), (b, ib)| {
-                a.distance_squared(pointer)
-                    .total_cmp(&b.distance_squared(pointer))
-                    .then_with(|| self.terminals[*ib].port.cmp(&self.terminals[*ia].port))
-            });
         let mut lines = Vec::new();
-        if let Some((_, idx)) = nearest {
-            let terminal = &self.terminals[*idx];
+        if let Some(idx) = self.nearest_terminal(cursor) {
+            let terminal = &self.terminals[idx];
             lines.push(format!(
                 "{} · {}",
                 network.node_label(&terminal.id).unwrap_or(&terminal.id),
                 skin.choose("占用 / 可用上限", "occupied / operating limit")
             ));
-            for id in terminal.corridors.iter().take(3) {
+            let date = &self.previous_view.as_ref().expect("visible map").date;
+            let corridors: Vec<_> = terminal.corridors.iter().filter(|id|
+                network.evidence(id).is_some_and(|e| e.applies_on(date))).collect();
+            let pages = corridors.len().div_ceil(3).max(1);
+            let page = self.corridor_page.filter(|(i, _)| *i == idx).map_or(0, |(_, p)| p % pages);
+            if pages > 1 {
+                lines.push(format!("{}/{}   ] {}", page + 1, pages, skin.choose("下页", "Next")));
+            }
+            for &id in corridors.iter().skip(page * 3).take(3) {
                 let edge = network.segment(id).unwrap();
                 let a = network.availability(id).unwrap();
                 let other = if terminal.id == edge.from {
@@ -585,7 +605,10 @@ impl TransportScene {
                     _ => skin.choose("地区", "Regional"),
                 };
                 if let Some(c) = world.transport_service_capacity(id, &terminal.id) {
-                    lines.push(format!("{} · {} · {} {}/{}", mode, network.node_label(other).unwrap_or(other),
+                    let status = if !a.open || a.capacity_units == 0 { skin.choose(" 停运", " closed") }
+                        else if a.capacity_units < edge.profile.capacity_units { skin.choose(" 减容", " restricted") }
+                        else { "" };
+                    lines.push(format!("{}{} · {} · {} {}/{}", mode, status, network.node_label(other).unwrap_or(other),
                         skin.choose("线路","line"), c.line_used, c.line_limit));
                     lines.push(format!("  {} {}/{} · {} {}/{} · {} {}/{}",
                         skin.choose("班次","service"), c.service_used, c.service_limit,
