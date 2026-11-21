@@ -1,0 +1,48 @@
+{
+  "unit_id": "cshapes_gw_750",
+  "population_value": 294000000,
+  "date": "1900-01-01",
+  "units": [
+    {
+      "unit_id": "raj_hyderabad_state",
+      "source_unit_ids": [
+        "raj_comparable_row_18"
+      ],
+      "name": "Hyderabad States",
+      "endpoint_values": [
+        11537040,
+        11141142
+      ],
+      "population_value": 11187068,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 18: Hyderabad States.",
+      "scope": "Hyderabad State excludes Berar (a separate province in table II-A row 5). French Yanam lies in the Madras Godavari district. Imperial Gazetteer of India vol. IV, Native States appendix I, Hyderabad footnote; vol. XXIV p. 413.",
+      "place_ids": []
+    },
+    {
+      "unit_id": "raj_mysore_state",
+      "source_unit_ids": [
+        "raj_comparable_row_21"
+      ],
+      "name": "Mysore State",
+      "endpoint_values": [
+        4943604,
+        5539399
+      ],
+      "population_value": 5470284,
+      "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6. Row 21: Mysore State.",
+      "scope": "Mysore includes Bangalore Civil and Military Station. Census of India 1901, Mysore report, p. 19. The station and city populations are already contained here.",
+      "place_ids": []
+    }
+  ],
+  "source_id": "india_census_1901_comparable_area",
+  "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6.",
+  "endpoint_dates": [
+    "1891-02-26",
+    "1901-03-01"
+  ],
+  "method": "Day-weighted linear interpolation between comparable enumeration endpoints, rounded to the nearest person. Each area is rounded independently. The census supplies no 1900 count or uncertainty interval. Famine and migration could change the timing of intercensal growth or decline.",
+  "scope": "Only documented interior subdivisions. The parent retains the prior 50-unit opening estimate.",
+  "legacy_unlocated_balance": 277342648,
+  "legacy_control_source": "data/alpha/historical_world_economy_1900/countries_compact.json: cshapes_gw_750 population_value",
+  "uncertainty_kind": "The unlocated remainder is an accounting residual with unknown geographic distribution and census error."
+}

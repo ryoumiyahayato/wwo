@@ -21,12 +21,14 @@ def link_dated_identities(rows):
         if r["unit_id"] == "somaliland_protectorate":
             r.update(wwo_id="cshapes_gw_521", mapping_status="protectorate_identity_only_no_census_boundary")
             continue
+        if r.get("wwo_id"):
+            continue
         name = r["name"].casefold()
         if r["source_id"] == "england_wales_summary_tables_1901" and r["parent_id"] in {"uk_ancient_area_england","uk_ancient_area_wales"}:
             # These are ancient counties, including the county shares of London.
             variants = {"devonshire":"devon","dorsetshire":"dorset","somersetshire":"somerset","rutlandshire":"rutland",
                         "carnarvonshire":"caernarvonshire","glamorganshire":"glamorgan"}
-            unit = index.get(("historic_county_reference", variants.get(name,name)))
+            unit = index.get(("historic_county_reference", name)) or index.get(("historic_county_reference", variants.get(name,name)))
         elif r["source_id"] == "ireland_general_census_1911" and r["unit_id"].startswith("irish_county_"):
             borough = r["unit_id"].startswith("irish_county_borough_")
             unit = index.get(("irish_county_borough" if borough else "irish_administrative_county",
@@ -43,12 +45,24 @@ def catalogue(rows, groups):
     local = defaultdict(set)
     polity_studies = defaultdict(list)
     group_at = defaultdict(list)
+    shared_openings = defaultdict(set)
+    source_openings = defaultdict(set)
+    label_openings = {}
+    partial_roots = {g["unit_id"] for g in groups if "legacy_unlocated_balance" in g}
     dates = {}
     for group in groups:
         for link in aliases().get(group["unit_id"], [group["unit_id"]]):
             group_at[link].append(group["unit_id"])
         for leaf in group["units"]:
-            group_at[leaf["unit_id"]].append(leaf["unit_id"])
+            key = leaf["unit_id"]
+            group_at[key].append(key)
+            if leaf.get("wwo_admin_label"):
+                label_openings[leaf["wwo_admin_label"]] = key
+            for member in leaf.get("member_region_ids", []):
+                if member != key:
+                    shared_openings[member].add(key)
+            for source_unit in leaf.get("source_unit_ids", []):
+                source_openings[source_unit].add(key)
     for r in rows:
         if r.get("wwo_id"):
             local[r["wwo_id"].removeprefix("state:")].add(r["unit_id"])
@@ -64,7 +78,7 @@ def catalogue(rows, groups):
         out.append(dict(catalogue="political_unit",id=key,name=p["source_name"],controller=p["controller_id"] or None,
             valid_from=p["valid_from"],valid_to=p["valid_to"],active=active,study_candidates=polity_studies[key],
             historical_observation_ids=sorted(local[key]),opening_ids=group_at[key],
-            status=("catalogue_version_after_opening" if not active else "opening_group_or_collective_member" if group_at[key]
+            status=("catalogue_version_after_opening" if not active else "legacy_control_with_verified_subdivisions" if key in partial_roots else "opening_group_or_collective_member" if group_at[key]
                     else "candidate_statistics_only" if polity_studies[key] or local[key] else "population_identity_unresolved")))
     for f in sorted(MAP.glob("*identity*.json")):
         for u in read(f)["units"]:
@@ -73,11 +87,14 @@ def catalogue(rows, groups):
             out.append(dict(catalogue="administrative_identity",file=f.name,id=key,name=u.get("historical_name"),kind=u.get("unit_type"),
                 polity=u.get("polity_id"),parent=u.get("parent_region_id"),valid_from=u.get("valid_from"),valid_to=u.get("valid_to"),
                 geometry_status=u.get("boundary_reference_status"),historical_observation_ids=sorted(local[key]),opening_ids=group_at[key],
-                status="opening_partition" if group_at[key] else "dated_population_evidence" if local[key] else "population_unknown"))
+                shared_opening_ids=sorted(shared_openings[key]),
+                status="opening_partition" if group_at[key] else "member_of_shared_partition" if shared_openings[key] else "dated_population_evidence" if local[key] else "population_unknown"))
     for p in read(MAP/"historical_admin1_1900.json")["countries"]:
         for i,name in enumerate(p["units"],1):
-            out.append(dict(catalogue="historical_admin1_label",id=f"{p['entity_id']}:label:{i}",name=name,polity=p["entity_id"],
-                 geometry_status=p["geometry_status"],status="name_reference_only",source=p["source_basis"]))
+            key = f"{p['entity_id']}:label:{i}"
+            out.append(dict(catalogue="historical_admin1_label",id=key,name=name,polity=p["entity_id"],
+                 geometry_status=p["geometry_status"],status="linked_statistical_identity_no_polygon" if key in label_openings else "name_reference_only",
+                 opening_id=label_openings.get(key),source=p["source_basis"]))
     for u in read(MAP/"island_political_references_1900.json")["annotations"]:
         out.append(dict(catalogue="physical_island_reference",id=u["id"],name=u["name"],parent=u["political_source_id"] or None,
             valid_from=u.get("valid_from"),valid_to=u.get("valid_to"),study_candidates=polity_studies[u["political_source_id"]],
@@ -102,11 +119,13 @@ def catalogue(rows, groups):
             source_ids=sorted({r["source_id"] for r in observed}),observation_dates=sorted({r["date"] for r in observed}),
             parent_ids=sorted({r["parent_id"] for r in observed if r["parent_id"]}),
             wwo_identity_links=sorted({r["wwo_id"] for r in observed if r.get("wwo_id")}),
-            status="opening_unit" if key in opening_ids else "dated_evidence_only",
+            opening_partition_links=sorted(source_openings[key]),
+            status="opening_unit" if key in opening_ids else "linked_to_opening_partition" if source_openings[key] else "dated_evidence_only",
             observation_ids=[r["record_id"] for r in observed]))
     blockers={
         "ft_china":"Alternative Qing household, Customs and reconstructed province totals differ. Taiwan, concessions, frontier populations and retrospective province boundaries require explicit remapping.",
         "ft_mongolia":"Outside the Cao provincial return but inside the Qing political unit. Outer Mongolia and Tannu Uriankhai require a separate population and boundary reconciliation.",
+        "ft_philippines":"The March 1903 census and later study footprint include islands named in the November 1900 treaty effective March 1901. Census Bulletin 1 tables 2 pp. 15,18 give Cagayan de Jolo 2,000 and Sibutu 280 in 1903. No opening-day count for these islands and associated dependencies. See the Philippines source record.",
         "ft_india":"Census enumeration expanded in the Burma and frontier areas. The imperial return also includes Aden outside the WWO India boundary. See eastern/reconciliation.json.",
         "ft_egypt":"Nomad corrections and western oases in the WWO footprint do not have an established census allocation. See eastern/reconciliation.json.",
         "ft_formosa_taiwan":"The Governor-General registers separately list island residents and foreigners. The garrison and Orchid Island lack a comparable complete return.",
@@ -125,14 +144,18 @@ def catalogue(rows, groups):
             why=blockers.get(r["unit_id"]) or r.get("scope_note") or (
                  "No matching political unit in the opening catalogue." if not r["candidate_polity_ids"] else
                  "A candidate political identity is known. Its source coverage and excluded territories have not been verified for the opening.")
-            if links:
+            if links and all(link in partial_roots for link in links):
+                why += " Only specified interior statistical subdivisions enter the existing legacy control; the remainder is unlocated."
+            elif links and r["unit_id"] == "ft_austria_hungary":
+                why = "The study total includes occupied Bosnia and Herzegovina. The Austrian and Hungarian census total covers the two halves of the monarchy only. The two occupied territories remain unresolved."
+            elif links:
                 why="Matched to opening scopes listed here; the source value is retained as a comparator. Opening totals and any finer divisions use their cited sources."
 
             out.append(dict(catalogue="research_territory",id=r["unit_id"],name=r["name"],region=r["region"],
                 population_value=r["population_value"],population_lower=r["population_lower"],population_upper=r["population_upper"],
                 quality=r["quality"],source_id=r["source_id"],locator=r["locator"],candidate_polity_ids=r["candidate_polity_ids"],
                 scope_note=r["scope_note"],status=r["mapping_status"],opening_candidates=links,
-                opening_disposition="comparison_with_opening_scopes" if links else "research_only",accounting_note=why))
+                opening_disposition="partially_located_legacy_control" if links and all(link in partial_roots for link in links) else "comparison_with_opening_scopes" if links else "research_only",accounting_note=why))
     for key,note in [
         ("antarctica","Contemporaneous expedition parties and temporary bases require dated personnel records; no permanent household census adopted."),
         ("liechtenstein","Official 1891/1901 returns for all 11 municipalities and 1900 mean of 7,520 are in the Liechtenstein collection. No separate WWO or study unit; inclusion in adjacent research totals unresolved."),
@@ -156,13 +179,15 @@ def legacy_audit(study, groups):
         links=aliases().get(key,[key])
         refs=[r for r in study if set(links).intersection(r["candidate_polity_ids"])]
         root=g.get(key)
+        partial=root is not None and "legacy_unlocated_balance" in root
         out.append(dict(unit_id=key,role="economic_statistical_unit",candidate_polities=links,
              population_value=old["population_value"],population_lower=old["population_lower"],population_upper=old["population_upper"],
              source_year_or_day=None,original_table=None,per_unit_citation=None,legacy_method=raw["common_methods"].get("population",raw["common_methods"].get("population_method")),
              published_confidence_bp=old["population_confidence_bp"],research_candidates=[r["unit_id"] for r in refs],
-             opening_replacement=root["population_value"] if root else None,
+             opening_replacement=root["population_value"] if root and not partial else None,
+             legacy_unlocated_balance=root["legacy_unlocated_balance"] if partial else None,
              replacement_minus_legacy=root["population_value"]-old["population_value"] if root else None,
-             status="replaced_for_new_games" if root else "legacy_only",
+             status="legacy_control_with_verified_subdivisions" if partial else "replaced_for_new_games" if root else "legacy_only",
              comparison="Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."))
     residual_names={"residual:dutch_east_indies":["ft_dutch_east_indies_indonesia"],"residual:philippines":["ft_philippines"],
                     "residual:french_indochina":["ft_french_indochina"]}

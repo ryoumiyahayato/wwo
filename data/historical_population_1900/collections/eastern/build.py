@@ -700,7 +700,7 @@ imperial(
 )
 facts(
     asi,
-    "Summary table 2 p. 3",
+    "Straits Settlements, detailed table 1 p. 121",
     straits,
     "admin",
     ["1891", mar],
@@ -709,7 +709,7 @@ facts(
     """Penang Island|123886|128830
 Province Wellesley|108117|115264
 Dindings|3615|4113
-Malacca|92170|93487
+Malacca|92170|95487
 Singapore|184554|228555
 Christmas Island|9|704
 Cocos Islands|554|645""",
@@ -1351,6 +1351,8 @@ ss[cq]["publisher"] = (
     "Ni Yuping, Tsinghua University Press (2023). Table credits Cao Shuji, Population History, vol. 4 pp. 451–452 and vol. 5 pp. 703–704."
 )
 for r in obs:
+    if r["unit_id"] == "straits_settlements_malacca":
+        r["locator"] = "Straits Settlements, detailed table 1 p. 121 and table 6 p. 123, Malacca, persons"
     if r["unit_id"] == "sierra_leone_protectorate":
         r["locator"] = "Sierra Leone table 2, p. 142, total"
     if r["unit_id"] == "orange_river_colony" and r["date"] == "1891":

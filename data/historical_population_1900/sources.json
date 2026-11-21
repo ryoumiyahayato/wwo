@@ -262,6 +262,36 @@
     "collection": "americas"
   },
   {
+    "id": "ah_galician_statistical_bureau_1913",
+    "title": "Podręcznik Statystyki Galicyi, tom IX, część pierwsza",
+    "publisher": "Krajowe Biuro Statystyczne, edited by Tadeusz Piłat, Lwów, 1913",
+    "url": "https://mbc.cyfrowemazowsze.pl/Content/20886/PDF/20886.pdf",
+    "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "census_time_source": "https://csu.gov.cz/population-census-in-austria-hungary-1868-1910",
+    "collection": "austria_hungary"
+  },
+  {
+    "id": "ah_hungarian_statistical_yearbook_1901",
+    "title": "Magyar statisztikai évkönyv 1901, új folyam IX",
+    "publisher": "Magyar Királyi Központi Statisztikai Hivatal, Budapest",
+    "url": "https://www.kshkonyvtar.hu/file-download/L2hvbWUvc2lsaW5mby9hcHBsaWNhdGlvbi93b3JrZGlyL2NrZWRpdG9yQ3VzdG9tRmlsZXMvRsOpbnllcyBFbGVrIGRpZ2l0w6FsaXMgc3RhdGlzenRpa2FpIGvDtm55dnTDoXIvTWFneWFyIFN0YXRpc3p0aWthaSDDiXZrw7ZueXYg4oCTIMOaaiBmb2x5YW0vTVNFMl8xOTAxLnBkZg%3D%3D",
+    "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "census_time_source": "https://www.ksh.hu/docs/hun/xftp/idoszaki/pdf/nepcsoport.pdf",
+    "collection": "austria_hungary"
+  },
+  {
+    "id": "ah_census_fassmann_table7",
+    "title": "Die Bevölkerungsentwicklung 1850–1910",
+    "publisher": "Heinz Fassmann, Österreichische Akademie der Wissenschaften",
+    "url": "https://www.austriaca.at/0xc1aa5576%200x0025215d.pdf",
+    "locator": "Table 7, p. 160, Austria, Hungary and the two territories combined. Source credited to Österreichisches Statistisches Zentralamt, Beiträge zur Österreichischen Statistik 550 A (1979), tables A 1.1–1.2.",
+    "rights": "Numeric facts and attribution only.",
+    "scope_note": "The table identifies both totals as people present, including military personnel, and excludes Bosnia-Herzegovina in both 1890 and 1900.",
+    "collection": "austria_hungary"
+  },
+  {
     "id": "uk_general_census_report_1901",
     "title": "Census of England and Wales, 1901. General Report with Appendices",
     "publisher": "General Register Office / HMSO (London, 1904)",
@@ -291,6 +321,40 @@
     "manifest_url": "https://iiif.wellcomecollection.org/presentation/v2/b32183161_0006",
     "page_image": "https://iiif.wellcomecollection.org/image/b32183161_0006_0016.jp2/full/2100,/0/default.jpg",
     "collection": "britain"
+  },
+  {
+    "id": "cabo_verde_secretaria_1901",
+    "title": "1895 and 1900 island totals from the Secretaria Geral do Governo, Praia",
+    "publisher": "Secção de Estatística da Secretaria Geral do Governo, Praia, 28 August 1901 (AHU). Reproduced by Crisanto Avelino Sanches de Barros, Universidade de Cabo Verde and Université catholique de Louvain, 2012.",
+    "url": "https://dial.uclouvain.be/pr/boreal/object/boreal%3A116863/datastream/PDF_01/view",
+    "locator": "Barros, Génese e formação das elites político-administrativas cabo-verdianas, table 3, printed p. 86, columns 1895 and 1900.",
+    "definition": "Population attributed to each of the nine listed islands and the printed archipelago total. The 1901 date belongs to the government return. The two columns specify years only.",
+    "comparison": "The nine island rows sum to 138,706 in 1895 and 147,424 in 1900, matching both printed totals. Medina reports 90 more people in 1895. INE reports 3,495 fewer in 1900. The separate FT series has nominal midyear totals of 145,000 in 1899 and 147,000 in 1900 (Country series!H103:H104). Its 1 January interpolation is 146,008. The year-only government island numbers cannot fix that day's island shares.",
+    "method": "historical_government_return_reproduced_in_research",
+    "rights": "Factual numeric cells and source attribution only.",
+    "collection": "cabo_verde"
+  },
+  {
+    "id": "cabo_verde_medina_2009",
+    "title": "Evolução demográfica da ilha de São Vicente: do descobrimento a 1950",
+    "publisher": "Lia Medina, ISCTE – Instituto Universitário de Lisboa, 2009",
+    "url": "https://repositorio.iscte-iul.pt/bitstream/10071/2567/1/master_lia_medina.pdf",
+    "locator": "Quadro 2, pp. 15–16, archipelago population by year.",
+    "definition": "Historical annual total for the archipelago, with no month or day in the table. The series gives 143,929 in 1912 and the INE retrospective table separately labels that figure 1900.",
+    "method": "published_historical_compilation",
+    "rights": "Factual numeric cells and source attribution only.",
+    "collection": "cabo_verde"
+  },
+  {
+    "id": "cabo_verde_ine_1900_2010",
+    "title": "Evolução da população residente em Cabo Verde por Ilha Concelho (1900–2010)",
+    "publisher": "Instituto Nacional de Estatística, Cabo Verde",
+    "url": "https://ine.cv/wp-content/uploads/2016/11/evolucao-da-populacao-residente-em-cabo-verde-1900-2010.pdf",
+    "locator": "Single table, p. 1, first data row Cabo Verde, 1900 column.",
+    "definition": "Resident population in INE's retrospective census series. Island cells for 1900 are blank or dashed. The original reference day is unspecified.",
+    "method": "official_retrospective_census_series",
+    "rights": "Factual numeric cell and source attribution only.",
+    "collection": "cabo_verde"
   },
   {
     "id": "insee_sgf_censuses",
@@ -525,6 +589,25 @@
     "collection": "eastern"
   },
   {
+    "id": "india_census_1901_comparable_area",
+    "title": "Census of India, 1901, Vol. I-A, India, Part II, Tables. Government of India, 1903.",
+    "publisher": "Government of India, 1903",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924/page/n14/mode/1up",
+    "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6.",
+    "rights": "Historical government publication. Numeric transcription and derived counts. Original scans linked.",
+    "boundary_references": [
+      {
+        "title": "Mysore census 1901, report p. 19",
+        "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18854/GIPE-017294.pdf?isAllowed=y&sequence=3"
+      },
+      {
+        "title": "Imperial Gazetteer of India, vol. IV, Native States, appendix I, Hyderabad footnote",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/3/31/Imperial_gazetteer_of_India_.._%28IA_imperialgazettee04grea%29.pdf"
+      }
+    ],
+    "collection": "india_comparable"
+  },
+  {
     "id": "jp_cabinet_1909_resident_prefectures",
     "title": "道府縣現住人口 自明治十七年至同四十年",
     "publisher": "内閣統計局, 1909",
@@ -564,6 +647,72 @@
     "url": "https://www.statistikportal.li/statistikportal/publications/101-statistisches-jahrbuch/1960/01/1/101.1960.01_01_statistisches-tabellenwerk-heft1-1960.pdf",
     "rights": "Numerical facts only; reference to digitized official statistical tables.",
     "collection": "liechtenstein"
+  },
+  {
+    "id": "ph_census_1903_vol2",
+    "title": "Census of the Philippine Islands, taken under the direction of the Philippine Commission in the year 1903. Volume II: Population",
+    "publisher": "U.S. Bureau of the Census / Government Printing Office (1905)",
+    "url": "https://www2.census.gov/library/publications/decennial/island-areas/1903/1903-census-phillipine-islands-vol2.pdf",
+    "locator": "pp. 9, 15–16 and 123, General Table 1",
+    "rights": "U.S. federal public domain",
+    "raw_paths": [
+      "table_1.csv",
+      "volume_2_p123.jpg"
+    ],
+    "scan_url": "https://commons.wikimedia.org/w/index.php?title=File:Census_of_the_Philippine_Islands,_-_taken_under_the_direction_of_the_Philippine_commission_in_the_year_1903,_in_four_volumes_..._(IA_ajb5834.0002.001.umich.edu).pdf&page=149",
+    "corroboration": {
+      "title": "1903 Census of the Philippine Islands, Bulletin 1: Population of the Philippines, by islands, provinces, municipalities, and barrios",
+      "publisher": "U.S. Bureau of the Census / Government Printing Office (1904)",
+      "url": "https://www.loc.gov/item/14008739/",
+      "locator": "p. 14, Table 1"
+    },
+    "boundary_comparison": {
+      "treaty_url": "https://fam.state.gov/fam/08FAM/08FAM010205.html",
+      "signed": "1900-11-07",
+      "effective": "1901-03-23",
+      "island_census_date": "1903-03-02",
+      "source_url": "https://www2.census.gov/library/publications/decennial/island-areas/1903/philippine-bulletin-1-population.pdf",
+      "locator": "Bulletin 1 table 2, pp. 15 and 18",
+      "islands": {
+        "Cagayán de Jolo (Mapun)": 2000,
+        "Sibutu": 280
+      },
+      "opening_population_of_these_islands_and_dependencies": null
+    },
+    "collection": "philippines"
+  },
+  {
+    "id": "ro_colescu_1899_census_report",
+    "title": "Recensământul general al populațiunei României din decembrie 1899: rezultate definitive",
+    "publisher": "Serviciul Statisticei Generale, Ministerul Domeniilor (1905)",
+    "url": "https://bibgtkneamt.ebibliophil.ro/mon/recensamantul-general-al-populatiunei-romaniei-din-decembrie-1899-pcx9fwwk",
+    "locator": "Biblioteca Județeană G. T. Kirileanu Neamț, catalogue of the definitive census report",
+    "rights": "Catalogue reference only",
+    "collection": "romania"
+  },
+  {
+    "id": "ro_huber_1913_census_comparison",
+    "title": "Chronique de démographie: Recensement de la Roumanie en 1912",
+    "publisher": "Michel Huber, Journal de la Société de statistique de Paris, vol. 54 (1913), reproducing Colescu's official Bulletin statistique de Roumanie, nos. 28–29",
+    "url": "https://www.numdam.org/item/JSFS_1913__54__342_1.pdf",
+    "locator": "Printed p. 345 (PDF page 5), comparative table, Population de droit, 1899 column",
+    "rights": "Numeric facts transcribed from a publicly accessible scan; scan redistribution rights not asserted",
+    "raw_paths": [
+      "raw/1899_census_comparison.csv"
+    ],
+    "collection": "romania"
+  },
+  {
+    "id": "ro_transilvania_1900_provisional_returns",
+    "title": "Recensemêntul general al populațiunii Regatului Român din Decembre 1899",
+    "publisher": "Transilvania, vol. 31, no. VII (July 1900), reproducing the census office report and summarizing its provisional returns",
+    "url": "https://www.bcucluj.ro/synfilebibdigit/periodice/transilvania/1900/BCUCLUJ_FP_279996_1900_031_007.pdf",
+    "locator": "Printed pp. 186–190 (PDF pages 2–6), enumeration procedure and provisional stable residents",
+    "rights": "Numeric facts transcribed from a publicly accessible scan; scan redistribution rights not asserted",
+    "raw_paths": [
+      "raw/1899_provisional_residents.csv"
+    ],
+    "collection": "romania"
   },
   {
     "id": "russia_first_census",

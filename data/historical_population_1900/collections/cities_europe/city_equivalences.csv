@@ -371,6 +371,8 @@ reba:chandler:848,reba:chandler:848,compilation_reference,Madurai,Madurai,reba_c
 reba:chandler:848,raj_city_madras_madura,same_city_distinct_observation,Madura,Madurai,india_statistical_abstract_1905,"Table 6, workbook row 34, Madras, Madura, Madura, total 1901"
 reba:chandler:867,reba:chandler:867,compilation_reference,Mandalay,Mandalay,reba_chandler_1900,"chandlerV2.csv data record 867, Mandalay (Myanmar), AD_1900"
 reba:chandler:867,raj_city_burma_mandalay_and_cantonment,includes_cantonment,Mandalay and Cantonment,Mandalay,india_statistical_abstract_1905,"Table 6, workbook row 21, Burma, Mandalay, Mandalay and Cantonment, total 1901"
+reba:chandler:872,reba:chandler:872,compilation_reference,Manila,Manila,reba_chandler_1900,"chandlerV2.csv data record 872, Manila (Philippines), AD_1900"
+reba:chandler:872,ph_1903_manila_city,same_city_distinct_observation,Manila city,Manila,ph_census_1903_vol2,"Vol. II, p. 123, General Table 1, Manila city"
 reba:chandler:88,reba:chandler:88,compilation_reference,Astrakhan,Astrakhan,reba_chandler_1900,"chandlerV2.csv data record 88, Astrakhan (Russian Federation), AD_1900"
 reba:chandler:88,ru1897_2_city_r9,same_city_distinct_observation,Астрахань,Astrakhan,russia_first_census,"rus_gub_97.php?reg=2, row 9: Астраханский уезд - г. Астрахань"
 reba:chandler:884,reba:chandler:884,compilation_reference,Mariupol,Mariupol,reba_chandler_1900,"chandlerV2.csv data record 884, Mariupol (Ukraine), AD_1900"

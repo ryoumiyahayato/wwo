@@ -1,0 +1,34 @@
+[
+  {
+    "id": "ph_census_1903_vol2",
+    "title": "Census of the Philippine Islands, taken under the direction of the Philippine Commission in the year 1903. Volume II: Population",
+    "publisher": "U.S. Bureau of the Census / Government Printing Office (1905)",
+    "url": "https://www2.census.gov/library/publications/decennial/island-areas/1903/1903-census-phillipine-islands-vol2.pdf",
+    "locator": "pp. 9, 15–16 and 123, General Table 1",
+    "rights": "U.S. federal public domain",
+    "raw_paths": [
+      "table_1.csv",
+      "volume_2_p123.jpg"
+    ],
+    "scan_url": "https://commons.wikimedia.org/w/index.php?title=File:Census_of_the_Philippine_Islands,_-_taken_under_the_direction_of_the_Philippine_commission_in_the_year_1903,_in_four_volumes_..._(IA_ajb5834.0002.001.umich.edu).pdf&page=149",
+    "corroboration": {
+      "title": "1903 Census of the Philippine Islands, Bulletin 1: Population of the Philippines, by islands, provinces, municipalities, and barrios",
+      "publisher": "U.S. Bureau of the Census / Government Printing Office (1904)",
+      "url": "https://www.loc.gov/item/14008739/",
+      "locator": "p. 14, Table 1"
+    },
+    "boundary_comparison": {
+      "treaty_url": "https://fam.state.gov/fam/08FAM/08FAM010205.html",
+      "signed": "1900-11-07",
+      "effective": "1901-03-23",
+      "island_census_date": "1903-03-02",
+      "source_url": "https://www2.census.gov/library/publications/decennial/island-areas/1903/philippine-bulletin-1-population.pdf",
+      "locator": "Bulletin 1 table 2, pp. 15 and 18",
+      "islands": {
+        "Cagayán de Jolo (Mapun)": 2000,
+        "Sibutu": 280
+      },
+      "opening_population_of_these_islands_and_dependencies": null
+    }
+  }
+]

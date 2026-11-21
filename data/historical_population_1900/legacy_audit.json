@@ -17,6 +17,7 @@
       "ft_united_states"
     ],
     "opening_replacement": 75454976,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -845024,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -39,6 +40,7 @@
       "ft_united_kingdom"
     ],
     "opening_replacement": 40994912,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -505088,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -61,6 +63,7 @@
       "ft_germany"
     ],
     "opening_replacement": 55619152,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -780848,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -84,6 +87,7 @@
       "ft_russia_empire_ussr"
     ],
     "opening_replacement": 135382043,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -617957,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -107,8 +111,9 @@
       "ft_mongolia"
     ],
     "opening_replacement": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "legacy_unlocated_balance": 345628683,
+    "replacement_minus_legacy": 0,
+    "status": "legacy_control_with_verified_subdivisions",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {
@@ -129,6 +134,7 @@
       "ft_france"
     ],
     "opening_replacement": 38852684,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -1847316,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -150,9 +156,10 @@
     "research_candidates": [
       "ft_austria_hungary"
     ],
-    "opening_replacement": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "opening_replacement": 45000882,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -1699118,
+    "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {
@@ -173,6 +180,7 @@
       "ft_japan"
     ],
     "opening_replacement": 44012686,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": 212686,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -195,6 +203,7 @@
       "ft_italy"
     ],
     "opening_replacement": 32296914,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -103086,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -219,6 +228,7 @@
       "ft_ottoman_balkans"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -241,6 +251,7 @@
       "ft_spain"
     ],
     "opening_replacement": 18511807,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -88193,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -263,6 +274,7 @@
       "ft_canada"
     ],
     "opening_replacement": 5304314,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -95686,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -285,8 +297,9 @@
       "ft_india"
     ],
     "opening_replacement": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "legacy_unlocated_balance": 277342648,
+    "replacement_minus_legacy": 0,
+    "status": "legacy_control_with_verified_subdivisions",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {
@@ -307,6 +320,7 @@
       "ft_brasil"
     ],
     "opening_replacement": 17021073,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -378927,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -329,6 +343,7 @@
       "ft_mexico"
     ],
     "opening_replacement": 13447810,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -152190,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -351,6 +366,7 @@
       "ft_netherlands"
     ],
     "opening_replacement": 5141915,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": 41915,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -373,6 +389,7 @@
       "ft_belgium"
     ],
     "opening_replacement": 6713135,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": 13135,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -396,6 +413,7 @@
       "ft_sweden"
     ],
     "opening_replacement": 7315799,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -84201,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -418,6 +436,7 @@
       "ft_portugal"
     ],
     "opening_replacement": 5404156,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": 4156,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -445,6 +464,7 @@
       "ft_australia"
     ],
     "opening_replacement": 3837578,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": 67578,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -466,9 +486,10 @@
     "research_candidates": [
       "ft_romania"
     ],
-    "opening_replacement": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "opening_replacement": 5956690,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": 56690,
+    "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {
@@ -489,6 +510,7 @@
       "ft_greece"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -511,6 +533,7 @@
       "ft_serbia_yugoslavia"
     ],
     "opening_replacement": 2471816,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -28184,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -533,6 +556,7 @@
       "ft_bulgaria"
     ],
     "opening_replacement": 3715205,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": 15205,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -555,6 +579,7 @@
       "ft_denmark"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -577,6 +602,7 @@
       "ft_switzerland"
     ],
     "opening_replacement": 3285131,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -14869,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -599,6 +625,7 @@
       "ft_persia_iran"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -621,6 +648,7 @@
       "ft_korea"
     ],
     "opening_replacement": 17078033,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": 78033,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -643,6 +671,7 @@
       "ft_siam"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -665,6 +694,7 @@
       "ft_argentina"
     ],
     "opening_replacement": 4624686,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -75314,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -687,6 +717,7 @@
       "ft_chile"
     ],
     "opening_replacement": 2890099,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -209901,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -709,6 +740,7 @@
       "ft_south_africa"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -731,6 +763,7 @@
       "ft_south_africa"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -753,6 +786,7 @@
       "ft_ethiopia"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -775,6 +809,7 @@
       "ft_morocco"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -797,6 +832,7 @@
       "ft_egypt"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -819,6 +855,7 @@
       "ft_belgium_congo"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -842,6 +879,7 @@
       "ft_panama"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -864,6 +902,7 @@
       "ft_venezuela"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -886,6 +925,7 @@
       "ft_peru"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -908,6 +948,7 @@
       "ft_bolivia"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -930,6 +971,7 @@
       "ft_afghanistan"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -952,6 +994,7 @@
       "ft_nepal"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -974,6 +1017,7 @@
       "ft_zanzibar_island"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -996,6 +1040,7 @@
       "ft_liberia"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -1018,6 +1063,7 @@
       "ft_paraguay"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -1040,6 +1086,7 @@
       "ft_uruguay"
     ],
     "opening_replacement": null,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": null,
     "status": "legacy_only",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -1062,6 +1109,7 @@
       "ft_new_zeland"
     ],
     "opening_replacement": 796359,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -23641,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -1084,6 +1132,7 @@
       "ft_cuba"
     ],
     "opening_replacement": 1585419,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": 15419,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -1106,6 +1155,7 @@
       "ft_luxembourg"
     ],
     "opening_replacement": 231321,
+    "legacy_unlocated_balance": null,
     "replacement_minus_legacy": -8679,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."

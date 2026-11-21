@@ -6,7 +6,7 @@ from collections import Counter, defaultdict
 
 from pathlib import Path
 from geography import catalogue, legacy_audit
-from opening import groups
+from opening import groups, sourced_people
 from structure import dimensions
 from reconciliation import comparisons, asian_estimates
 from cities import city_index
@@ -116,8 +116,11 @@ def main():
     target=controls[DATE]
     legacy=legacy_audit(study,selection)
     replaced=sum(r["role"]=="economic_statistical_unit" and r["opening_replacement"] is not None for r in legacy)
-    total=sum(g["population_value"] for g in selection)
+    partial=[g for g in selection if "legacy_unlocated_balance" in g]
+    full=[g for g in selection if "legacy_unlocated_balance" not in g]
+    total=sum(sourced_people(g) for g in selection)
     legacy_only=sum(r["population_value"] for r in legacy if r["status"]=="legacy_only")
+    legacy_only += sum(g["legacy_unlocated_balance"] for g in partial)
     parts=[g for g in selection if g["units"]]
     areas=[r for r in geography if r["catalogue"]=="political_unit" and r["active"]]
     admin=[r for r in geography if r["catalogue"]=="administrative_identity"]
@@ -134,12 +137,14 @@ def main():
              units_with_polity_candidates=sum(bool(r["candidate_polity_ids"]) for r in v),
              people_without_polity_candidate=sum(r["population_value"] for r in v if not r["candidate_polity_ids"]),
              grades=dict(Counter(r["quality"] for r in v))) for k,v in by_area.items()},
-        production_roots=len(selection),replaced_legacy_roots=replaced,new_roots=len(selection)-replaced,
+        production_roots=len(full),partially_located_legacy_roots=len(partial),
+        documented_people_under_legacy_controls=sum(sourced_people(g) for g in partial),
+        replaced_legacy_roots=replaced,new_roots=len(full)-replaced,
         production_people=total,production_people_pct_world_estimate=round(100*total/target,3),
         population_outside_evidence_opening_estimate=target-total,legacy_only_people=legacy_only,
         authoritative_total_for_new_game=total+legacy_only,
         roots_with_partitions=len(parts),disjoint_leaves=sum(len(g["units"]) for g in parts),
-        people_in_partitions=sum(g["population_value"] for g in parts),
+        people_in_partitions=sum(sourced_people(g) for g in parts),
         political_catalogue_at_opening=len(areas),political_catalogue_with_research_candidate=sum(bool(r["study_candidates"]) for r in areas),
         political_catalogue_members_of_production_groups=sum(bool(r["opening_ids"]) for r in areas),
         dated_admin_catalogues={file:dict(units=len(sub),with_linked_observation=sum(bool(r["historical_observation_ids"]) for r in sub),
@@ -151,9 +156,10 @@ def main():
     summary["political_catalogue_with_any_statistical_candidate"]=sum(bool(r["study_candidates"] or r["historical_observation_ids"]) for r in areas)
     summary["source_statistical_units"]=sum(r["catalogue"]=="source_statistical_unit" for r in geography)
     summary["opening_by_source_type"]={}
-    for label,subset in [("territorial_returns",[g for g in selection if "partition_source" in g]),
-                         ("historical_world_reconstruction",[g for g in selection if "partition_source" not in g])]:
+    for label,subset in [("territorial_returns",[g for g in full if "partition_source" in g]),
+                         ("historical_world_reconstruction",[g for g in full if "partition_source" not in g])]:
         summary["opening_by_source_type"][label]={"roots":len(subset),"people":sum(g["population_value"] for g in subset)}
+    summary["opening_by_source_type"]["documented_subdivisions_of_legacy_control"]={"roots":len(partial),"people":sum(sourced_people(g) for g in partial)}
     city_catalog=city_index(observations,bucket)
     summary["city_index_representative_bands"]=dict(Counter(r["tier"] for r in city_catalog if r["tier"]))
     summary["city_index_unresolved"]=sum(r["representative_record"] is None for r in city_catalog)
@@ -171,10 +177,10 @@ def main():
     for area,metrics in summary["research_regions"].items():
         match={p for r in by_area[area] for p in r["candidate_polity_ids"]}
         assigned=[g for g in selection if set(aliases().get(g["unit_id"],[g["unit_id"]])) & match]
-        opening_people=sum(g["population_value"] for g in assigned)
+        opening_people=sum(sourced_people(g) for g in assigned)
         metrics.update(production_root_ids=[g["unit_id"] for g in assigned],production_people=opening_people,
                        production_pct_of_regional_research_estimate=round(100*opening_people/metrics["opening_research_estimate"],3),
-                       people_with_opening_subdivision=sum(g["population_value"] for g in assigned if g["units"]))
+                       people_with_opening_subdivision=sum(sourced_people(g) for g in assigned if g["units"]))
     records("demography_1900.jsonl.gz",structural)
     records("parent_reconciliation.jsonl.gz",audit)
     json_file("opening.json",dict(version=1,groups=selection))

@@ -39,6 +39,7 @@ struct Group {
     locator: String,
     method: String,
     units: Vec<Unit>,
+    legacy_unlocated_balance: Option<u64>,
 }
 
 #[derive(Deserialize)]
@@ -46,6 +47,7 @@ struct Unit {
     unit_id: String,
     name: String,
     population_value: u64,
+    source_id: Option<String>,
     locator: Option<String>,
     #[serde(default)]
     place_ids: Vec<String>,
@@ -97,10 +99,18 @@ impl HistoricalOpening {
                     }
                 }
                 opening.estimates.insert(id.clone(), OpeningPopulationEstimate {
-                    population_value: leaf.population_value, source_id: group.source_id.clone(),
+                    population_value: leaf.population_value, source_id: leaf.source_id.unwrap_or_else(|| group.source_id.clone()),
                     locator: leaf.locator.unwrap_or_else(|| group.locator.clone()), method: group.method.clone(),
                 });
                 opening.partitions.insert(id, Partition { parent: root.clone(), name: leaf.name });
+            }
+            if let Some(residual) = group.legacy_unlocated_balance {
+                if !partitioned || remaining != residual || legacy.get(&root) != Some(&group.population_value) {
+                    return Err(invalid(format!("unlocated balance differs from the legacy control for {root}")));
+                }
+                // The verified leaves already debit this pool. Its control retains its
+                // original provenance and must not be exposed as a historical observation.
+                continue;
             }
             if partitioned && remaining != 0 {
                 return Err(invalid(format!("historical population partitions do not sum to {root}")));

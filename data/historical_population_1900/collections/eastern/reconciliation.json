@@ -29,7 +29,238 @@
         }
       ],
       "coverage": "1901 coverage expanded by about 2.5 million persons. Changes include Shan States, Chin Hills and Karenni in Burma, Manipur, additional frontier enumeration and new Baluchistan returns. Subtracting Aden cannot correct these changes.",
-      "spatial_check": "In data/world_map/historical/cshapes_1900_snapshot.json Yangon, Mandalay, Kolkata, Hyderabad, Quetta and Gilgit lie in gw_750. The Aden town point (45.03 E, 12.80 N) is outside the snapshot polygons. These interior points do not certify full boundary equivalence."
+      "spatial_check": "In data/world_map/historical/cshapes_1900_snapshot.json Yangon, Mandalay, Kolkata, Hyderabad, Quetta and Gilgit lie in gw_750. The Aden town point (45.03 E, 12.80 N) is outside the snapshot polygons. These interior points do not certify full boundary equivalence.",
+      "common_area": {
+        "source_title": "Census of India, 1901, Vol. I-A, India, Part II, Tables. Government of India, 1903.",
+        "source_url": "https://archive.org/details/in.ernet.dli.2015.55924/page/n14/mode/1up",
+        "locator": "Table II-A, p. 9 explanatory notes and p. 10, persons, columns 2 (1901) and 3 (1891). Rows 1-12 comprise provinces and rows 13-24 states and agencies. Aden is already included in row 6.",
+        "boundary_basis": "The comparison follows the area enumerated in 1891 and the administrative divisions of that census. The compilers exclude first enumerations and make additional comparability adjustments. Both endpoints omit Baluchistan, including its Agency. British Burma omits newly enumerated areas including the Shan States and Chin Hills. Other changes concern the Andamans and Nicobars, Assam, Bombay, Punjab and Sikkim. The 1891 Rajputana figure includes an estimate of Bhils.",
+        "census_dates": [
+          "1891-02-26",
+          "1901-03-01"
+        ],
+        "method": "Day-weighted linear interpolation between comparable enumeration endpoints, rounded to the nearest person. Each area is rounded independently. The census supplies no 1900 count or uncertainty interval. Famine and migration could change the timing of intercensal growth or decline.",
+        "interpolation_elapsed_days": [
+          3231,
+          3655
+        ],
+        "empire": {
+          "1891": 287353776,
+          "1901": 291686857,
+          "estimate_1900_01_01": 291184196
+        },
+        "provinces_including_aden": {
+          "1891": 221102048,
+          "1901": 229810701,
+          "estimate_1900_01_01": 228800450
+        },
+        "states_and_agencies": {
+          "1891": 66251728,
+          "1901": 61876156,
+          "estimate_1900_01_01": 62383746
+        },
+        "aden_within_bombay_presidency": {
+          "1891": 44079,
+          "1901": 43974,
+          "estimate_1900_01_01": 43986
+        },
+        "bombay_presidency_excluding_aden": {
+          "1891": 18857044,
+          "1901": 18538396,
+          "estimate_1900_01_01": 18575361
+        },
+        "empire_excluding_aden": {
+          "1891": 287309697,
+          "1901": 291642883,
+          "estimate_1900_01_01": 291140210
+        },
+        "provincial_and_state_rows": [
+          {
+            "row_number": 1,
+            "name": "Ajmer-Merwara",
+            "1891": 542358,
+            "1901": 476912,
+            "estimate_1900_01_01": 484504
+          },
+          {
+            "row_number": 2,
+            "name": "Andamans and Nicobars",
+            "1891": 15609,
+            "1901": 16256,
+            "estimate_1900_01_01": 16181
+          },
+          {
+            "row_number": 3,
+            "name": "Assam",
+            "1891": 5433199,
+            "1901": 5758975,
+            "estimate_1900_01_01": 5721183
+          },
+          {
+            "row_number": 4,
+            "name": "Bengal",
+            "1891": 71346987,
+            "1901": 74744892,
+            "estimate_1900_01_01": 74350716
+          },
+          {
+            "row_number": 5,
+            "name": "Berar",
+            "1891": 2897491,
+            "1901": 2754016,
+            "estimate_1900_01_01": 2770660
+          },
+          {
+            "row_number": 6,
+            "name": "Bombay Presidency including Aden",
+            "1891": 18901123,
+            "1901": 18582370,
+            "estimate_1900_01_01": 18619347
+          },
+          {
+            "row_number": 7,
+            "name": "Burma",
+            "1891": 7605560,
+            "1901": 9136382,
+            "estimate_1900_01_01": 8958798
+          },
+          {
+            "row_number": 8,
+            "name": "Central Provinces",
+            "1891": 10784294,
+            "1901": 9876646,
+            "estimate_1900_01_01": 9981938
+          },
+          {
+            "row_number": 9,
+            "name": "Coorg",
+            "1891": 173055,
+            "1901": 180607,
+            "estimate_1900_01_01": 179731
+          },
+          {
+            "row_number": 10,
+            "name": "Madras",
+            "1891": 35630440,
+            "1901": 38209436,
+            "estimate_1900_01_01": 37910258
+          },
+          {
+            "row_number": 11,
+            "name": "Punjab including North-West Frontier Province",
+            "1891": 20866847,
+            "1901": 22382133,
+            "estimate_1900_01_01": 22206352
+          },
+          {
+            "row_number": 12,
+            "name": "United Provinces of Agra and Oudh",
+            "1891": 46905085,
+            "1901": 47692076,
+            "estimate_1900_01_01": 47600781
+          },
+          {
+            "row_number": 13,
+            "name": "Baroda State",
+            "1891": 2415396,
+            "1901": 1952692,
+            "estimate_1900_01_01": 2006368
+          },
+          {
+            "row_number": 14,
+            "name": "Bengal States",
+            "1891": 3296379,
+            "1901": 3689530,
+            "estimate_1900_01_01": 3643922
+          },
+          {
+            "row_number": 15,
+            "name": "Bombay States",
+            "1891": 8059298,
+            "1901": 6885839,
+            "estimate_1900_01_01": 7021967
+          },
+          {
+            "row_number": 16,
+            "name": "Central India Agency",
+            "1891": 10318812,
+            "1901": 8628781,
+            "estimate_1900_01_01": 8824834
+          },
+          {
+            "row_number": 17,
+            "name": "Central Provinces States",
+            "1891": 2160511,
+            "1901": 1996383,
+            "estimate_1900_01_01": 2015423
+          },
+          {
+            "row_number": 18,
+            "name": "Hyderabad States",
+            "1891": 11537040,
+            "1901": 11141142,
+            "estimate_1900_01_01": 11187068
+          },
+          {
+            "row_number": 19,
+            "name": "Kashmir State",
+            "1891": 2543952,
+            "1901": 2905578,
+            "estimate_1900_01_01": 2863627
+          },
+          {
+            "row_number": 20,
+            "name": "Madras States",
+            "1891": 3700622,
+            "1901": 4188086,
+            "estimate_1900_01_01": 4131538
+          },
+          {
+            "row_number": 21,
+            "name": "Mysore State",
+            "1891": 4943604,
+            "1901": 5539399,
+            "estimate_1900_01_01": 5470284
+          },
+          {
+            "row_number": 22,
+            "name": "Punjab States",
+            "1891": 4263280,
+            "1901": 4423328,
+            "estimate_1900_01_01": 4404762
+          },
+          {
+            "row_number": 23,
+            "name": "Rajputana Agency",
+            "1891": 12220343,
+            "1901": 9723301,
+            "estimate_1900_01_01": 10012972
+          },
+          {
+            "row_number": 24,
+            "name": "United Provinces States",
+            "1891": 792491,
+            "1901": 802097,
+            "estimate_1900_01_01": 800983
+          }
+        ],
+        "coverage_comparison": {
+          "all_area_minus_common_1891": -39105,
+          "all_area_minus_common_1901": 2674199,
+          "all_provinces_minus_common_1901": 2088806,
+          "all_states_minus_common_1901": 585393,
+          "government_gazetteer": "The Imperial Gazetteer of India, Vol. I, The Indian Empire, Descriptive, 1909, chapter IX, Population, p. 489, table II, new areas.",
+          "gazetteer_url": "https://drpathan.com/wp-content/uploads/2025/03/Imperial_Gazetteer_of_India-Vol_01-1909-ia-tpo.pdf#page=518",
+          "enumerated_for_first_time_in_1901": {
+            "empire": 2416109,
+            "british_territory": 1913609,
+            "states": 502500
+          },
+          "difference_between_1901_coverage_gap_and_gazetteer_new_areas": 258090,
+          "interpretation": "The Gazetteer classifies areas by first enumeration, with a footnote on Manipur. Table II-A applies additional exclusions and comparability adjustments. The difference between the series does not identify a specific group of uncounted residents."
+        },
+        "release_condition": "The common-area estimate excluding Aden counts only the specified historical territory. A complete WWO total would require matching the remaining 1900 map territory to disjoint historical areas and estimating their opening populations. The 1901 coverage difference cannot stand in for the missing 1900 values. Individual rows are candidates only on their own historical boundaries; no contemporary polygon or whole province is implied by partial returns."
+      }
     },
     {
       "territory": "Ceylon",

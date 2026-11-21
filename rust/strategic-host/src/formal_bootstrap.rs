@@ -1056,7 +1056,8 @@ impl WorldSources {
     fn opening_parent_at(&self, place_id: &str) -> Option<&str> {
         let place = self.places.get(place_id)?;
         self.population_unit_at(place_id).or_else(|| match (place.id.as_str(), place.parent_country_id.as_str()) {
-            ("dover", "british_empire") => Some("british_isles_1900"),
+            ("dover" | "port_london", "british_empire") => Some("british_isles_1900"),
+            ("vienna", "austro_hungarian_empire") => Some("austria_hungary"),
             (_, "united_states") => Some("united_states_1900"),
             (_, id) => self.polities.contains_key(id).then_some(id),
         })
@@ -1758,6 +1759,15 @@ mod tests {
         assert!(world.population_units().keys().eq(bootstrap.populations.keys()));
         assert!(world.macro_economy().markets().keys().eq(bootstrap.populations.keys()));
         assert!(!population.standalone_totals().is_empty());
+        let london = "uk_ancient_kent_middlesex_surrey";
+        assert_eq!(world.residence_unit_at("place:london"), Some(london));
+        assert_eq!(world.residence_unit_at("place:port_london"), Some(london));
+        assert_eq!(population.admitted_opening(london).unwrap().source_id, "england_wales_summary_tables_1901");
+        let india = "cshapes_gw_750";
+        assert!(population.admitted_opening(india).is_none());
+        assert_eq!(population.population_total(india), Some(294_000_000));
+        assert_eq!(population.population_total("raj_mysore_state"), Some(5_470_284));
+        assert!(population.resident_pool(india).is_some_and(|n| n > 0 && n < 294_000_000));
         let mut admitted = 0;
         let mut baseline_only = 0;
         let mut whole_roots = 0;
@@ -1775,8 +1785,9 @@ mod tests {
                 assert_eq!(population.resident_pool(root), Some(value));
                 whole_roots += 1;
             } else {
-                assert_eq!(population.resident_pool(root), Some(0));
-                assert_eq!(partitions.map(|(_, _, count)| count).sum::<u64>(), value);
+                let unassigned = population.resident_pool(root).unwrap();
+                assert_eq!(unassigned + partitions.map(|(_, _, count)| count).sum::<u64>(), value);
+                if population.admitted_opening(root).is_some() { assert_eq!(unassigned, 0); }
                 partitioned_roots += 1;
             }
         }

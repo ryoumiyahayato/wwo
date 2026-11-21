@@ -84,7 +84,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }).collect::<Vec<_>>();
             let admitted = population.admitted_opening(unit);
             let scope = if !partitions.is_empty() {
-                "partitioned_aggregate"
+                if admitted.is_some() { "partitioned_aggregate" } else { "partially_located_legacy_aggregate" }
             } else if population.totals().contains_key(unit) {
                 "national_market"
             } else if population.standalone_totals().contains_key(unit) {

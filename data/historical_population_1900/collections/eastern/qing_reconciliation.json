@@ -954,5 +954,19 @@
     "Trace the 18 provinces, Manchurian general commands, frontier and Qinghai definitions between source dates; use explicitly merged areas where source boundaries changed. The named CHGIS 1911 rows alone do not establish 1900 identity.",
     "Reconcile Taiwan/Penghu, Outer Mongolia with Uriankhai, and each concession/colony counted by the target. Preserve treaty-port settlements inside inclusive province totals.",
     "Document source-date conventions and domain coverage for an opening-day estimate. Calculate residuals from compatible components; proportional rescaling of Cao to the independent FT total would impose unobserved provincial corrections."
-  ]
+  ],
+  "partial_opening": {
+    "scope": "Henan and Hunan as statistical units inside the existing Qing control. No claim to a new empire-wide total.",
+    "units": {
+      "qing_hist_henan": 29383561,
+      "qing_hist_hunan": 24987756
+    },
+    "alternative_same_date_compound": {
+      "qing_hist_henan": 29288483,
+      "qing_hist_hunan": 24919577
+    },
+    "basis": "Nominal July 1 endpoints in 1880 and 1910. Day fraction 7123/10956. See the matching records in population_1900.jsonl.gz. The year-coordinate sensitivities elsewhere in this file use a different timing convention.",
+    "identity": "qing_interior_crosswalk.tsv",
+    "unlocated_legacy_balance": 345628683
+  }
 }

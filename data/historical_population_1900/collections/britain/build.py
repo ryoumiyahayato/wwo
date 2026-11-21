@@ -56,6 +56,19 @@ def observed(uid, name, parent, kind, val, dt, source_id, locator, definition):
     )
 
 
+def apportion(units, target):
+    """Round interpolated leaves to their independently established parent count."""
+    remainders = []
+    for unit in units:
+        old, new = unit["endpoint_values"]
+        exact = old + (new - old) * fraction
+        unit["population_value"] = int(exact)
+        remainders.append((exact - int(exact), unit))
+    extra = target - sum(u["population_value"] for u in units)
+    for _, unit in sorted(remainders, key=lambda pair: pair[0], reverse=True)[:extra]:
+        unit["population_value"] += 1
+
+
 definition = "Persons enumerated in the named division on census night. Ireland includes the whole island. Overseas forces, the Channel Islands and the Isle of Man are outside the United Kingdom total in this table."
 totals = [37732922, 41458721]
 obs = [
@@ -78,8 +91,7 @@ fraction = Fraction(
     (OPEN - date.fromisoformat(DATES[0])).days,
     (date.fromisoformat(DATES[1]) - date.fromisoformat(DATES[0])).days,
 )
-units = []
-expected = {}
+division_units = []
 for uid, name, a, b in divisions:
     for dt, v in zip(DATES, [a, b]):
         obs.append(
@@ -95,38 +107,21 @@ for uid, name, a, b in divisions:
                 definition,
             )
         )
-    expected[uid] = a + (b - a) * fraction
-    units.append(
+        if uid != "uk_england_wales":
+            obs[-1]["wwo_id"] = "administrative_region:uk_constituent_" + name.lower()
+    division_units.append(
         dict(
-            unit_id=uid,
+            unit_id=uid if uid == "uk_england_wales" else obs[-1]["wwo_id"],
             name=name,
             endpoint_values=[a, b],
-            population_value=int(expected[uid]),
-            place_ids=["place:london", "place:dover"]
-            if uid == "uk_england_wales"
-            else [],
+            source_unit_ids=[uid],
+            source_id=SRC,
+            place_ids=[],
             locator=loc + ", " + name,
         )
     )
 target = round(totals[0] + (totals[1] - totals[0]) * fraction)
-for u in sorted(
-    units, key=lambda u: expected[u["unit_id"]] - u["population_value"], reverse=True
-)[: target - sum(u["population_value"] for u in units)]:
-    u["population_value"] += 1
-emit(
-    "uk_opening.json",
-    dict(
-        unit_id=PARENT,
-        date=OPEN.isoformat(),
-        source_id=SRC,
-        locator=loc,
-        endpoint_dates=DATES,
-        country_endpoint_values=totals,
-        method=f"Linear interpolation over {fraction.numerator}/{fraction.denominator} elapsed days in the three census divisions. Integer counts apportioned by largest remainders to the interpolated United Kingdom total.",
-        population_value=target,
-        units=units,
-    ),
-)
+apportion(division_units, target)
 sources = [source]
 
 sid = "ireland_general_census_1911"
@@ -239,7 +234,14 @@ sources.append(
 )
 table3 = (HERE / "ancient_counties_1901.txt").read_text(encoding="utf-8").splitlines()
 part = "England"
-for i, line in enumerate(table3):
+identity_path = HERE.parents[2] / "world_map/historical/britain_historic_counties_identity.json"
+identities = json.loads(identity_path.read_text(encoding="utf-8"))["units"]
+historic_counties = {u["historical_name"]: u["id"] for u in identities if u["unit_type"] == "historic_county_reference"}
+county_alias = {"Devonshire": "Devon", "Dorsetshire": "Dorset", "Somersetshire": "Somerset",
+                "Rutlandshire": "Rutland", "Glamorganshire": "Glamorgan"}
+london_counties = {"Kent", "Middlesex", "Surrey"}
+county_units = {}
+for line in table3:
     name, old, new = line.split("|")
     if name == "Anglesey":
         part = "Wales"
@@ -247,6 +249,25 @@ for i, line in enumerate(table3):
     parent = "uk_england_wales" if is_total else "uk_ancient_area_" + key(part)
     k = "benchmark" if is_total else "admin"
     de = "Persons in the ancient county geography as presented in the 1901 summary. Its England column includes Monmouthshire. London is distributed among Middlesex, Kent and Surrey. The parliamentary borough of York is reported separately from the three Ridings."
+    york_row = name.startswith("Yorkshire, ") or name == "York (Parliamentary Borough)"
+    if not is_total:
+        canonical = "Yorkshire" if york_row else county_alias.get(name, name)
+        historical_id = historic_counties[canonical]
+        if name in london_counties:
+            unit_id = "uk_ancient_kent_middlesex_surrey"
+            group_name = "Kent, Middlesex and Surrey (ancient counties)"
+        else:
+            unit_id, group_name = historical_id, canonical
+        unit = county_units.setdefault(unit_id, dict(
+            unit_id=unit_id, name=group_name, endpoint_values=[0, 0], source_id=county_sid,
+            source_unit_ids=[], member_region_ids=[], source_rows=[],
+            place_ids=["place:london", "place:dover", "place:port_london"] if name in london_counties else []))
+        unit["source_unit_ids"].append("uk_ancient_area_" + key(name))
+        if historical_id not in unit["member_region_ids"]:
+            unit["member_region_ids"].append(historical_id)
+        pair = [int(old), int(new)]
+        unit["source_rows"].append(dict(name=name, endpoint_values=pair))
+        unit["endpoint_values"] = [a+b for a,b in zip(unit["endpoint_values"], pair)]
     for dt, n in zip(DATES, [old, new]):
         obs.append(
             observed(
@@ -261,6 +282,20 @@ for i, line in enumerate(table3):
                 de,
             )
         )
+        if not is_total and not york_row:
+            obs[-1].update(wwo_id=historical_id, mapping_status="dated_statistical_identity_boundary_not_certified")
+
+england_wales, scotland, ireland = division_units
+for unit in county_units.values():
+    unit["locator"] = "Table III, p. 6, Persons, 1891 and 1901: " + " + ".join(row["name"] for row in unit["source_rows"])
+leaves = list(county_units.values())
+apportion(leaves, england_wales["population_value"])
+emit("uk_opening.json", dict(
+    unit_id=PARENT, date=OPEN.isoformat(), source_id=SRC, source_ids=[SRC, county_sid],
+    locator=loc + "; Census Summary Tables III, p. 6, Ancient Counties, Persons.",
+    endpoint_dates=DATES, country_endpoint_values=totals, population_value=target,
+    method=f"Linear day interpolation at {fraction.numerator}/{fraction.denominator}. Allocate integer people by largest remainders across the three UK census divisions, then within England and Wales across disjoint ancient county groups. The three London counties form one group. Yorkshire includes all three Ridings and the separately printed York parliamentary borough.",
+    units=leaves + [scotland, ireland]))
 
 emit("sources.json", sources)
 (HERE / "observations.jsonl").write_text(
