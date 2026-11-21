@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::{fs, io::{self, Read}, path::Path};
 
 pub const REGION_ID: &str = "training:cedar-rivergate-ridgevale:50km";
-const REGION_BOUNDS: [f64; 4] = [-22_500., -22_500., 27_500., 27_500.];
-const RIDGEVALE_BOUNDS: [f64; 4] = [-2_500., -2_500., 2_500., 2_500.];
+pub const REGION_BOUNDS: [f64; 4] = [-22_500., -22_500., 27_500., 27_500.];
+pub const RIDGEVALE_BOUNDS: [f64; 4] = [-2_500., -2_500., 2_500., 2_500.];
 
 #[derive(Deserialize)]
 struct RegionManifest {
@@ -16,6 +16,7 @@ struct RegionManifest {
 pub struct BattlefieldTerrain {
     region: HeightGrid,
     ridgevale: Option<HeightGrid>,
+    geographic_cover: Option<Vec<u8>>,
 }
 
 struct HeightGrid {
@@ -47,12 +48,45 @@ impl BattlefieldTerrain {
             Err(error) if error.kind() == io::ErrorKind::NotFound => None,
             Err(error) => return Err(error),
         };
-        Ok(Self { region, ridgevale })
+        Ok(Self { region, ridgevale, geographic_cover: None })
+    }
+
+    pub fn from_geographic_heights(spacing_m: u32, heights: Vec<f32>, cover: Vec<u8>) -> io::Result<Self> {
+        let span = (REGION_BOUNDS[2] - REGION_BOUNDS[0]) as u32;
+        if spacing_m == 0 || span % spacing_m != 0 {
+            return Err(io::Error::new(io::ErrorKind::InvalidData, "invalid geographic battlefield spacing"));
+        }
+        let width = (span / spacing_m + 1) as usize;
+        if heights.len() != width * width || heights.len() != cover.len() || heights.iter().any(|h| !h.is_finite()) {
+            return Err(io::Error::new(io::ErrorKind::InvalidData, "invalid geographic battlefield samples"));
+        }
+        Ok(Self {
+            region: HeightGrid { width, origin_m: REGION_BOUNDS[0], spacing_m, heights },
+            ridgevale: None,
+            geographic_cover: Some(cover),
+        })
+    }
+
+    /// WorldCover classes on the projected height grid, with rows increasing southward.
+    pub fn geographic_cover(&self) -> Option<(u32, &[u8])> {
+        self.geographic_cover.as_deref().map(|cover| (self.region.width as u32, cover))
+    }
+
+    pub fn ground_is_land(&self, x_m: f64, z_m: f64) -> bool {
+        let Some(sample) = self.sample_region(x_m, z_m) else { return false; };
+        let Some(cover) = &self.geographic_cover else { return true; };
+        let grid_index = |m: f64| ((m - self.region.origin_m) / f64::from(self.region.spacing_m)).round() as usize;
+        let class = cover[grid_index(z_m) * self.region.width + grid_index(x_m)];
+        class != 8 && (class != 0 || sample.height_m >= 0.)
     }
 
     pub fn sample(&self, x_m: f64, z_m: f64) -> Option<HeightSample> {
         self.ridgevale.as_ref().and_then(|grid| grid.sample(x_m, z_m))
             .or_else(|| self.region.sample(x_m, z_m))
+    }
+
+    pub fn sample_region(&self, x_m: f64, z_m: f64) -> Option<HeightSample> {
+        self.region.sample(x_m, z_m)
     }
 }
 

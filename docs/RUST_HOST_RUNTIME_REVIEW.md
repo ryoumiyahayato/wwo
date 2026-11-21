@@ -1,52 +1,49 @@
-# WWO Rust 游戏宿主运行核实 · 2026-11-15
+# WWO Rust 正式游戏与迁移状态 · 2026-11-21
 
-## 结论
-
-当前 Windows 正式游戏可以由 WWO 自研 Rust 宿主独立运行。宿主拥有应用循环、输入分派、地图和 UI、权威世界状态、模拟调度和持久化。winit 提供窗口及事件，wgpu 提供图形接口。当前 Windows 实测后端为 Vulkan。系统安装的 Vulkan 驱动和 VC++ 运行库也是实测依赖。
+Windows 正式入口 `wwo-map-lab --play` 使用 Rust 的 `NativeSession`、`InitialWorld`、时钟、地图、UI 和存档。winit 提供窗口和输入，wgpu 提供图形接口。已归档的 Windows 实跑使用 Vulkan 驱动和 VC++ 运行库。R68 工程供对照及原始资产复用。Godot/R68 旧存档兼容已取消要求，工期从迁移清单移除。
 
 ## Windows 实跑范围
 
 以下记录对应 2026-11-15 的 Windows 实跑。阶段源码、运行附件和云端回读状态见 [Rust Windows 阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)。主线后续修改以 `main` 的提交为准。
 
-- 当前桌面运行的是 "WWO-Country-Records.exe"。从当前发布目录逐字节核对副本，在同一台 Windows 11 的 AppContainer 中以 "--play --observe … --background" 运行该 EXE。文档中列出的 "WWO-Mechanical-Preview.exe" 用自己的数据另测至法国开局。
+- 当日的 `WWO-Country-Records.exe` 在 Windows 11 AppContainer 内以 `--play --observe … --background` 运行。`WWO-Mechanical-Preview.exe` 用自己的数据另测至法国开局。
 - 两个隔离包只有 EXE 和运行数据。启动环境未提供 Godot 或 R68 路径。进程令牌能读随包数据，读取现有 Godot EXE、R68 项目和旧主项目均返回 Windows 错误 5。监视了从创建到退出的进程和动态模块事件。三次正式运行各只有自身 EXE，未观察到 Godot 子进程、Godot DLL 或旧脚本宿主。
-- 当前 EXE 实测法国新开局、地理／政治／经济／军事图层切换和区域缩放、打开 65 项报价的法国市场、买入 1.000 面包、巴黎工坊签约及登记工作。市场成交扣除 265，工坊两小时工资入账 6，现金从 2,500 变为 2,241。存档中的市场结算进度是第 51 小时。
+- 当日 EXE 实测法国新开局、地理／政治／经济／军事图层切换和区域缩放、打开 65 项报价的法国市场、买入 1.000 面包、巴黎工坊签约及登记工作。市场成交扣除 265，工坊两小时工资入账 6，现金从 2,500 变为 2,241。存档中的市场结算进度是第 51 小时。
 - 原生手动档第 1 槽在 1900-01-03 03:00 保存。退出后以同一 AppContainer 身份重启，从大厅恢复人物 ID、现金、库存、合同和行动记录一致。恢复后时钟从第 3,060 分钟推进到第 3,090 分钟。测试使用独立档案。
 - 测试使用现有 Windows 的系统和 GPU 驱动。未在从未安装过 Godot 的第二台 Windows、全新虚拟机或 Android 设备运行。
 
+已有后续正式运行记录包括法国序章、识字和重启恢复，以及 Z6–Z7 地面材质、景观和水域接替。水文记录列出了实际分片、回退、残余岸线问题和海面动态样本。各记录对应其当时的 EXE 和运行数据。 [人生序章](../rust/strategic-host/README.md#人生序章与人物存档) · [Z6–Z7 实跑](../rust/strategic-host/Z6_Z7_SURFACE.md) · [水文实跑](../rust/strategic-host/WATER_HANDOFF.md)
+
+2026-11-21 的 #192 已进入主线。Windows 法国开局在巴黎买 1 千克面包后，现金从 2500 降到 2498。完成班次后，6 点工资到账。巴黎至里尔的途中存档在重启后继续计时，抵达后可登记迁居。 [正式人口与生计](https://github.com/ryoumiyahayato/wwo/pull/192)
+
+同日合入的 #193 在 Windows 正式入口验证了巴黎至鲁昂途中存档恢复、经勒阿弗尔赴伦敦的路线查询、实物货批交割与销售、鲁昂至巴黎往返通勤及到岗登记。法国各站使用同一个统计市场，路网仍使用原型资料。 [正式交通](RUST_TRANSPORT_PHASE_2.md) · [PR #193](https://github.com/ryoumiyahayato/wwo/pull/193)
+
+同日用后台正式入口在特鲁瓦点选 50 km 格 `(2, -2)` 和 25 km 格 `(5, -3)`。从 25 km 格进入，正式 Z7 高程上出现 20 辆车。手动开火使所选车辆弹药从 12 减至 11。RTX 3050 Laptop GPU、Vulkan、1280×720，20 辆车在场时车辆视角观测到约 58 FPS。交战推进 39.75 模拟秒后红方胜出。蓝方损失 10 辆，红方损失 8 辆、余 6 发。返回世界后保存手动档和退出自动档。重启从自动档恢复，再进入原 50 km 格，记录的战果、命中、弹药和格号一致。其他地区及更高负载仍待核验。
+
 ## 运行链和模块归属
 
-| 环节 | 当前源码 | 归属 |
+| 环节 | 当前源码 | 正式游戏状态 |
 | --- | --- | --- |
-| 启动、主循环、键鼠 | strategic-host/src/main.rs 的入口、Config、Host 和 ApplicationHandler；native_start.rs 的 NativeSession | WWO 宿主。winit 负责窗口和系统事件 |
-| 地图和渲染 | render.rs、globe.wgsl、camera.rs、world.rs、map_release.rs、terrain.rs | WWO 地图投影、相机、专题图层、分片加载、GPU 驻留和 LOD。wgpu 提供表面、缓冲和渲染提交 |
-| UI 与资源 | lobby.rs、formal_ui.rs、market_ui.rs、ui.rs、overlay.rs、hud.wgsl | 原生大厅、地图、存档、人物、财务及市场界面。Rust 读取随包地图、图集、PNG、JSON 和压缩数据 |
-| 世界与人物 | native_start.rs → formal_bootstrap.rs 的 InitialWorld 和 advance_migrated_domains → formal_clock.rs、formal_character.rs、formal_work.rs、character-core | 一个正式时钟，人口与具名人物、履历、巴黎开局劳动合同与班次。地点目录和线路资料可以为后续接入复用 |
-| 经济 | formal_macro.rs、formal_ledger.rs、formal_stock.rs、formal_wages.rs | Rust 权威市场结算、统计供需与货运、现场支付与库存、有限工资结算 |
-| 存读档 | native_start.rs → formal_save.rs 的 write_native_slot、read_native_slot → WorldBootstrap::restore_native | 原生格式 wwo_rust_formal_world_v1，写临时文件并替换，恢复校验时钟、开局与领域状态 |
-| R68 对照 | "--r68" → desktop_start.rs 的 DesktopSession → Godot 4.6.3 和 tools/formal_host_bridge.gd | 显式旧对照入口。旧场景、旧存档及 3D 训练继续走该路径 |
-| 构建和旧数据 | build_hud.py、package_map_release.py、legacy_variant.rs、wwo-formal-state | 图集及地图打包使用已有素材和导出数据。Rust 可读取部分旧存档。素材来源和旧格式兼容属于数据依赖 |
+| 宿主 | `main.rs` → `native_start.rs` | Rust 应用循环、窗口、输入、正式世界和存档 |
+| 地图和渲染 | `render.rs`、`globe.wgsl`、`terrain.rs`、`hydrology.rs`、`landscape.rs` | 地图投影、专题图层、地貌和水域按视野加载、景观 GPU 实例和 LOD |
+| 静态 3D | `landmarks.rs`、`landmark.wgsl` | 七个地标，巴黎和伦敦共三个局部街区。内嵌 GLB、按视野解码及上传、深度和两档网格 |
+| 装甲陆战 | `land_battle.rs`、`battlefield_terrain.rs`、`battle_view.rs`、`battle_render.rs` | 正式法国 Lambert-93 网格已实测选格、入场和手动开火。采用 Z7 QPK 粗高程及通用车辆。源码已有 20 辆车、四个编队、近景操控、20 Hz 模拟、地面碰撞、AI、战果及原生持久化。法国 4 米高程未覆盖 |
+| UI 与人物 | `lobby.rs`、`prologue_ui.rs`、`formal_ui.rs`、`formal_character.rs`、`formal_work.rs` | 六国序章、履历、识字、休息和有限病伤处理、死亡与人口归属更新、巴黎合同与工资 |
+| 世界与生计 | `formal_bootstrap.rs`、`formal_livelihood.rs`、`formal_enterprise.rs`、`formal_household.rs` | 同一时钟处理统计供需与货运、现货与货批、班次与工资、巴黎有限原料生产与口粮、共同住户和迁居 |
+| 交通 | `formal_travel_live.rs`、`formal_freight.rs`、`transport/operations.rs`、`transport_scene.rs` | 逐段旅行、通勤和实物货运使用同一套线路预约。支持中途下车与退款、货批交割和市场回购。地图车辆由正式运输事件驱动。原生档恢复在途状态和预约 |
+| 原生存档 | `native_start.rs` → `formal_save.rs` → `WorldBootstrap::restore_native` | `wwo_rust_formal_world_v1` 槽位。手动保存、保存并退出、重新启动后恢复 |
+| R68 对照与维护 | `--r68` → `desktop_start.rs` → Godot 4.6.3。独立 `wwo-formal-state` 含旧格式维护命令 | 对照及离线维护。正式入口使用 Rust 世界和原生槽位 |
 
-## 内容兼容缺口
+## 施工顺序和依赖
 
-| 内容 | 可复用 | 待补 |
-| --- | --- | --- |
-| GLB／glTF、场景 | 现有窗口、渲染设备、图像解码、缓存、地图相机与本地项目的 GLB 原件 | 用 gltf 读取 mesh、节点、材质、skin 和动画通道。添加局部米制坐标、场景实例、资源异步加载及卸载。另行转换 Godot 的 .tscn、.tres、自定义着色器和粒子配置 |
-| 3D 与 2D | 现有战略地球、HUD 图集、界面命中和输入分派 | 局部 3D 渲染通道、深度、相机、最小 PBR 和对象拾取。按局部 3D、特效、HUD 顺序合成 |
-| 骨骼、材质、特效 | 资产原件及现有 wgpu 管线管理 | 蒙皮、动画采样与混合、材质贴图和透明排序。烟尘和粒子由模拟事件驱动，效果生命周期由渲染负责 |
-| 物理、音频 | winit 事件与宿主调度 | 评估 Rapier 的固定步进、碰撞与控制器。评估 Kira/CPAL 的混音、空间音频和设备生命周期。音量配置已有，游戏音频运行链待接入 |
-| Windows | 已验证 Windows x64 本地发布 EXE 和 Vulkan | 固定正式发布入口与数据清单。在干净 Windows 上复验 GPU 驱动和 VC++ 运行库条件 |
-| Android | Rust 领域代码、WGSL 和数据协议可复用 | 平台层需接 Activity、触控、暂停恢复、应用目录和 APK/AAB 打包。当前原生会话和档案路径走 Windows 分支，当前地貌路径要求 BC。移动端需检验 ASTC／ETC2 或备用纹理方案，首先做 arm64 实机最小包 |
+下表以已核对的正式入口和可复用代码估算工程量。资源来源核对、目标机性能和历史资料缺口会影响工期。空战沿既有 Rust 工作线推进。 [经济和军事历史实现](RUST_SANDBOX_MIGRATION_BASELINE.md) · [交通基础](RUST_TRANSPORT_PHASE_1.md)
 
-## 按依赖推进迁移
-
-已核对的历史实现和第一批迁移范围见 [Rust 沙盒迁移基线](RUST_SANDBOX_MIGRATION_BASELINE.md)。
-
-1. **冻结共用入口。** 两个沙盒继续有测试入口，共用正式领域模块和同样的命令接口。正式游戏给两个领域注入现有世界、人物和地点 ID。只有 GameClock 持有正式日期。局部物理可以细分固定步长，结果在已有世界推进边界提交。保存世界使用同一原生档案，载入时重建渲染、物理句柄和缓存。
-2. **经济先做最短完整链。** 以巴黎工坊、面包坊和一个已有品类验证企业投入、工时、生产、卖方订单、发货、交割、入账、跨日和读档。复用现有账本、库存货批、需求、市场和工资。下一步移入企业权限及账户、配方／产能／损耗、报价与锁价、货运预留和分段交付、经营与人物决策。法国开局统计消费在企业接管范围内显式交接，避免重复扣库存或重复支付。经济库的 20 家企业研究用于核对行为，保留其历史校准和完整净利润的缺口。
-3. **军事先接一段陆地训练。** 复用 R68 训练场、坦克和步兵资产与已有游戏规则。用一个米制场景验证地形碰撞、乘员上下车的同一人物 ID、虚构弹道与接触事件、命中后裁决、动画和特效。裁决经领域命令更新弹药、伤员和单位状态，渲染读取事件。同一条链再接正式编制、授权、部署和存档。舰船、飞机在资产和旧规则逐项确认后接入，共用渲染、事件和资源设施，分别添加水面与飞行行为。军事工作线的主机适配器、M v9/runtime v8 档案和 3D 训练仍需保留。
-4. **平台与内容验证。** Windows 先证明上述两条局部流程与正式档案互通。Android 在资源体量扩大前验证窗口、触控、进出后台和存档，以及设备可用纹理格式。现有地图、窗口和 UI 继续作为宿主基础。
-
-原 R68、Godot 工程、独立沙盒源码、模型和历史资产继续保留。本次只核实和记录，未迁入新玩法或更改发布 EXE。
-
-[Microsoft AppContainer](https://learn.microsoft.com/en-us/windows/win32/secauthz/implementing-an-appcontainer) · [glTF 2.0](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html) · [gltf crate](https://docs.rs/gltf/latest/gltf/) · [Rapier](https://rapier.rs/docs/user_guides/rust/getting_started/) · [Kira](https://docs.rs/kira/latest/kira/) · [wgpu 24 纹理能力](https://docs.rs/wgpu/24.0.5/wgpu/struct.Features.html) · [Android NDK Vulkan](https://developer.android.com/ndk/guides/graphics/getting-started)
+| 顺序 | 剩余能力与当前实现 | 首个可验范围及依赖 | 估算 |
+| --- | --- | --- | --- |
+| 1 | 正式网格陆战。特鲁瓦 20 车入场、开火、AI 结算与原生重启恢复已实测 | 在 `--play` 复验持续驾驶、跨格入场边界、资源分发和恢复 | 2–4 人日复核其他格并修正发现的问题 |
+| 2 | 扩大陆战。现有同一世界内的通用装甲编队。R68 有战略编组、部署、补给和训练步兵 | 先以实际目标机约 30 FPS 为目标调地形加载、实例绘制和模拟步进。再把网格战场接入正式军队编制、部署、补给和世界结算，随后接独立火炮与步兵 | 4–8 人日到装甲负载复验。战略接入、火炮和步兵另估 10–20 人日 |
+| 3 | 空战和海战。空战已有独立 Rust 工作线 | 正式世界接入依赖共享单位身份、状态、弹药和结算接口。空战沿用现有成果。海战需水面行为、载具和地图数据 | 空战接入和海战原型分别在确认接口及资源后估算 |
+| 并行 | 全球水域、海洋和 Z5–Z7 陆地。已有 QWG、共用海面材质、农田地表及实例 | 按原区段覆盖收敛余项。先查水域分类与回退，后验海面动态，再查材质和近景接替。依赖统一水陆边界、共用材质和高程。农田覆盖全球适用区域 | 4–8 人日复查水文和动态。陆地按跨级实拍分批估算 |
+| 随后 | 约 1900 年人口达到 10 万的城市。已有地标及巴黎、伦敦局部街区 | 先整理年份、统计范围、来源和地理边界。按道路和城市范围部署可复用住宅、公共、工商业、铁路和外围模型 | 城市名单与可用几何明确后按批估算 |
+| 随后 | 交通、企业和人口。已有客货预约、通勤、实物货批交割、巴黎生产和消费、住户与迁居 | 扩展企业跨区采购、城市市场及地区人口。路网与班表待历史资料，跨境交易待签证、关税和兑换规则 | 首条企业跨区采购及交付链 8–15 人日。跨区域覆盖按来源另估 |
+| 随后 | 人物、组织、政治和设置。已有序章事件、人口归属、国家和部分行政资料、音量与语言设置 | 完善医疗、继承、地区工作、组织权限和动态权属。音频需原生播放及混音。依赖人口、经济、角色和制度数据 | 各能力验明范围后分批估算 |

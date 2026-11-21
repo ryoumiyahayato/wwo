@@ -203,6 +203,13 @@ pub struct InitialWorld {
     freight_preview: Option<Plan>,
     selected_freight: Option<u64>,
     freight: freight::FreightBook,
+    land_battle: Option<WorldLandBattle>,
+}
+
+#[derive(Deserialize, Serialize)]
+struct WorldLandBattle {
+    region: crate::military_grid::MilitaryCell,
+    battle: crate::land_battle::LandBattle,
 }
 
 #[derive(Deserialize)]
@@ -243,6 +250,8 @@ pub(crate) struct WorldSnapshot {
     transport: OperationsState,
     #[serde(default)]
     freight: freight::FreightBook,
+    #[serde(default)]
+    land_battle: Option<WorldLandBattle>,
 }
 
 #[derive(Deserialize)]
@@ -290,7 +299,26 @@ impl InitialWorld {
             "transport": self.transport.state(),
             "travel": self.travel,
             "freight": self.freight,
+            "land_battle": self.land_battle,
         })
+    }
+
+    pub fn land_battle(&self) -> Option<&crate::land_battle::LandBattle> {
+        self.land_battle.as_ref().map(|state| &state.battle)
+    }
+
+    pub fn land_battle_mut(&mut self) -> Option<&mut crate::land_battle::LandBattle> {
+        self.land_battle.as_mut().map(|state| &mut state.battle)
+    }
+
+    pub fn land_battle_region(&self) -> Option<crate::military_grid::MilitaryCell> {
+        self.land_battle.as_ref().map(|state| state.region)
+    }
+
+    pub fn start_land_battle(
+        &mut self, cell: crate::military_grid::MilitaryCell, battle: crate::land_battle::LandBattle,
+    ) {
+        self.land_battle.get_or_insert(WorldLandBattle { region: cell.region(), battle });
     }
 
     pub fn goods_held(&self) -> impl Iterator<Item = (&str, i64, bool)> {
@@ -1159,6 +1187,7 @@ impl WorldBootstrap {
                 written_job_notice: prologue.is_some() && self.activities.written_job_notices.contains_key(source_id),
                 ..PlayerDay::default()
             },
+            land_battle: None,
         })
     }
 
@@ -1264,6 +1293,12 @@ impl WorldBootstrap {
         {
             return Err(invalid("invalid residence, travel, livelihood or enterprise state"));
         }
+        if saved.land_battle.as_ref().is_some_and(|state| {
+            !state.region.is_valid() || state.region != state.region.region() || !state.battle.validate()
+        }) {
+            return Err(invalid("invalid saved land battle"));
+        }
+        world.land_battle = saved.land_battle;
         let invalid_booking = world.player_day.booking.is_some_and(|booking| {
             !world.player_alive() || world.work.booking(&world.player).is_some()
                 || !(clock.current_day() * MINUTES_PER_DAY..=minute).contains(&booking.minute)
