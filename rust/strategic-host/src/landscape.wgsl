@@ -111,6 +111,43 @@ fn landscape_survey_mask(ll: vec2f, mpp: f32) -> f32 {
     return clamp(1. + survey.a, 0., 1.);
 }
 
+fn field_parcels(base: vec3f, metres: vec2f, mpp: f32) -> vec3f {
+    let spacing = vec2f(430.,310.);
+    let grid = metres/spacing;
+    let bent = grid + .085*sin(grid.yx*vec2f(.63,.38));
+    let row = bitcast<u32>(i32(floor(bent.y)))*24571u;
+    let parcels = bent + vec2f(landscape_random(row),0.);
+    let column = bitcast<u32>(i32(floor(parcels.x)));
+    let plant = landscape_random(column*116831u + row);
+    let tint = mix(vec3f(.55,.46,.32),vec3f(.46,.54,.30),plant);
+    let surface = mix(base,tint,.24)*(1.+(plant-.5)*.14);
+
+    let phase = fract(parcels);
+    let sides = min(phase,1.-phase)*spacing;
+    let boundary = 1.-smoothstep(4.,max(12.,mpp*.64),min(sides.x,sides.y));
+    return mix(surface,vec3f(.39,.44,.28),boundary*min(1.,17./mpp)*.23);
+}
+
+fn cultivated_fields(base: vec3f, world: vec3f, mpp: f32, cover: f32) -> vec3f {
+    let visible = smoothstep(.12,.72,cover)*(1. - smoothstep(64.,180.,mpp));
+    if visible <= .001 { return base; }
+
+    // Project WGS84 directions onto a rotated set of Earth-centred planes.
+    // Usually only one plane contributes. Blend where the planes meet so
+    // fields stay fixed across camera movement, map pages and the dateline.
+    let rotated = vec3f(dot(world,vec3f(.80,.60,0.)),
+        dot(world,vec3f(-.36,.48,.80)),dot(world,vec3f(.48,-.64,.60)));
+    let metres = rotated*EARTH;
+    let facing = abs(rotated);
+    let strongest = max(facing.x,max(facing.y,facing.z));
+    let weights = smoothstep(vec3f(strongest-.006),vec3f(strongest),facing);
+    var ink = vec3f(0.);
+    if weights.x > 0. { ink += field_parcels(base,metres.yz,mpp)*weights.x; }
+    if weights.y > 0. { ink += field_parcels(base,metres.zx,mpp)*weights.y; }
+    if weights.z > 0. { ink += field_parcels(base,metres.xy,mpp)*weights.z; }
+    return mix(base,ink/dot(weights,vec3f(1.)),visible);
+}
+
 fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level: u32, mpp: f32) -> vec3f {
     let near = 1. - smoothstep(90., 430., mpp);
     let slope = landscape_slope(page,ll.y,mix(1.18,.49,near),level);
@@ -170,6 +207,7 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
         + (moss-base)*land.damp
         + (tilled-base)*land.crop + (earth-base)*land.bare + (snow-base)*land.snow
         + base*((sediment.x*.085+sediment.y*.05)*neutral+motif.a*land.urban*.19);
+    color = cultivated_fields(color,world,mpp,land.crop*(1.-steep));
     color = mix(color,mix(base,mineral,near*.87),exposed);
     if near > .001 {
         let relief_world = world*(1.+height/EARTH)+vec3f(motif.a,motif.g,motif.b)*.00027;

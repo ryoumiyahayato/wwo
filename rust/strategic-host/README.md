@@ -84,6 +84,8 @@ LOD 使用视口中心的投影比例。将当前纬度的东西、南北采样�
 
 将 `landscape-cover-v2.qsc` 放在 `worldcrs84quad-15s-v2` 的 QPK 和 `index.json` 同目录。正式入口 `wwo-map-lab --play` 按视野载入 Z6、Z7 的覆盖和高程。复验可用 `--terrain-candidate <QPK库目录>`。按 `G` 进入地理模式，按 `V` 可切换垂直俯视和斜视。已有 `landscape-cover-v1.qsc` 继续支持 Z7 覆盖。覆盖包缺失时，兼容的显卡仍可使用 QPK 高程增强地势。[Z6/Z7 地表归档](https://github.com/ryoumiyahayato/wwo/releases/tag/z6-z7-surface-20261119) · [上一阶段记录](Z7_LANDSCAPE.md)
 
+近景农田按耕地覆盖显示田块、田埂和作物色差。田块用随地图缩放淡出的地表材质表达。历史调查 QDT 有覆盖时沿用调查中的耕地范围，其余区域用现代 WorldCover 分类作参照。田块布局和作物变化是程序化视觉推定。
+
 覆盖包由现有 ESA WorldCover 2021 v200 分类缓存生成。运行 `python tools/build_landscape_cover.py <worldcover缓存目录> <输出目录>/landscape-cover-v2.qsc`，需 NumPy、Pillow 和 zstandard。树冠和岩块按固定 WGS84 区块缓存，实例精度由投影大小控制。树种、林隙和地表纹理为视觉推定。山脊、坡面光照和实例接地使用 QPK 的高程。Z6 色调可用 `python tools/build_natural_terrain.py --z6-from-z7 <原Z6.qpk> <配色Z7.qpk> <输出Z6.qpk>` 重建，并保留原 Z6 高程和水域覆盖。[覆盖来源和许可](https://doi.org/10.5281/zenodo.7254221) · [正式游戏实测及资源恢复](Z6_Z7_SURFACE.md)
 
 ### 近景地表候选
