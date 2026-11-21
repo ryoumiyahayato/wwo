@@ -55,28 +55,6 @@ fn landscape_grove(world: vec3f) -> f32 {
     return mix(groves, clearings, .30);
 }
 
-fn ground_gradient(key: u32, offset: vec3f) -> f32 {
-    let code = u32(landscape_random(key)*16.);
-    let u = select(offset.y,offset.x,code<8u);
-    let v = select(select(offset.z,offset.x,code==12u || code==14u),offset.y,code<4u);
-    return select(-u,u,(code&1u)==0u) + select(-v,v,(code&2u)==0u);
-}
-
-fn ground_field(point: vec3f) -> f32 {
-    let cell = bitcast<vec3u>(vec3i(floor(point)));
-    let f = fract(point);
-    let t = f*f*f*(f*(6.*f-15.)+10.);
-    let dx = 116831u;
-    let dy = 24571u;
-    let dz = 141937u;
-    let key = cell.x*dx + cell.y*dy + cell.z*dz;
-    let a = mix(ground_gradient(key,f),ground_gradient(key+dx,f-vec3f(1.,0.,0.)),t.x);
-    let b = mix(ground_gradient(key+dy,f-vec3f(0.,1.,0.)),ground_gradient(key+dx+dy,f-vec3f(1.,1.,0.)),t.x);
-    let c = mix(ground_gradient(key+dz,f-vec3f(0.,0.,1.)),ground_gradient(key+dx+dz,f-vec3f(1.,0.,1.)),t.x);
-    let d = mix(ground_gradient(key+dy+dz,f-vec3f(0.,1.,1.)),ground_gradient(key+dx+dy+dz,f-vec3f(1.,1.,1.)),t.x);
-    return mix(mix(a,b,t.y),mix(c,d,t.y),t.z);
-}
-
 struct LandCover {
     forest: f32,
     shrub: f32,
@@ -166,16 +144,20 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
         sediment=sediment_structure(world,mpp);
     }
     let curvature = clamp((2.*height-shoulder-ridge)/160.,-.17,.19);
-    let drainage = .16*(sunlight-.48)+.12*steep+curvature;
-    let sward = .5+sediment.x*.58+sediment.y*.18;
-    let dry = clamp(.51+(sward-.5)*.54+drainage,0.,1.);
-    let meadow = .10*(1.-smoothstep(700.,1280.,mpp))+.38*near;
-    let grass = mix(base,mix(vec3f(.423,.479,.294),vec3f(.575,.536,.355),dry),meadow);
-    let shrub = mix(base,mix(vec3f(.397,.442,.287),vec3f(.531,.488,.328),dry),meadow*.9);
+    let drainage = .21*(sunlight-.48)+.13*steep+curvature;
+    let sward = .5+sediment.x*.55+sediment.y*.14;
+    let dry = smoothstep(.17,.87,sward+drainage);
+    let meadow = .21*(1.-smoothstep(650.,1570.,mpp))+.39*near;
+    let grass = mix(base,mix(vec3f(.411,.481,.308),vec3f(.577,.539,.355),dry),meadow)
+        * (1. + sediment.x*.075 + sediment.y*mix(.035,.105,dry));
+    let shrub = mix(base,mix(vec3f(.397,.442,.287),vec3f(.531,.488,.328),dry),meadow*.9)
+        * (1. + sediment.x*.065);
     let moss = mix(base,vec3f(.376,.435,.313),near*.38) * (1. + motif.g*.076);
     let sandy = land_palette_weight(land_chroma(base),vec3f(.775,.632,.433),.082);
-    let earth = mix(base,mix(vec3f(.55,.455,.325),vec3f(.70,.56,.37),sandy),near*.22)
-        * (1. + sediment.x*.085 + sediment.y*.025);
+    let deposits = clamp(sandy+sediment.x*.19+curvature,0.,1.);
+    let earth = mix(base,mix(vec3f(.54,.468,.355),vec3f(.71,.573,.388),deposits),near*.29)
+        * (1. + sediment.x*mix(.13,.17,sandy)
+            + sediment.y*mix(.105,.065,sandy)*mix(.46,1.,deposits));
     let tilled = mix(base,mix(vec3f(.49,.41,.30),vec3f(.52,.52,.32),smoothstep(.21,.72,sward)),near*.42)
         * (1. + motif.a*.24 + motif.g*.12);
     let snow = mix(base,mix(vec3f(.72,.79,.82),vec3f(.82,.87,.88),.5+motif.a),near*.73);
@@ -193,12 +175,10 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
         let relief_world = world*(1.+height/EARTH)+vec3f(motif.a,motif.g,motif.b)*.00027;
         let grains = land_material_band(relief_world,planes,mpp,2630.) - .5;
         let grit = mix(grains.g,grains.a,.5+sediment.x*.45);
-        let texture = grains.r*(land.forest*.40+land.shrub*.25)
-            + grains.g*(land.grass*.17+land.damp*.31+land.crop*.23)
+        let texture = grains.r*(land.forest*.40+land.shrub*.19)
+            + grains.g*(land.grass*.10+land.damp*.31+land.crop*.19)
             + grains.a*(land.crop*.38+scree*.25)
-            + grit*(land.bare*.17+neutral*.16+land.grass*.04)
-            + (sediment.x*.055+sediment.y*.065)*land.grass
-            + sediment.y*land.bare*mix(.035,.065,sandy)
+            + grit*(land.bare*.09+neutral*.13+land.grass*.04)
             + grains.b*(exposed*.91+scree*.37+land.urban*.20)
             + grains.a*(land.snow*.11+land.urban*.24)
             + motif.b*exposed*.17;
@@ -210,10 +190,11 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
 
 fn landscape_relief(base: vec3f, ll: vec2f, world: vec3f, water: f32, mpp: f32) -> vec3f {
     if water > .65 || mpp >= LAND_MATERIAL_MPP || view.settings.y >= .5
-        || view.map_style.z < 6. || all(base==vec3f(1.,0.,1.)) { return base; }
-    let modern = 1. - landscape_survey_mask(ll,mpp);
-    let strength = (1.-smoothstep(880.,LAND_MATERIAL_MPP,mpp)) * (1.-smoothstep(.04,.65,water));
+        || view.map_style.z < 5. || all(base==vec3f(1.,0.,1.)) { return base; }
+    let strength = ground_material_weight(water,mpp);
     if strength <= .001 { return base; }
+    if view.map_style.z < 6. { return mix(base,natural_land_material(vec4f(base,water),world,mpp),strength); }
+    let modern = 1. - landscape_survey_mask(ll,mpp);
     if modern <= .001 { return mix(base,natural_land_material(vec4f(base,water),world,mpp),strength); }
     let child = landscape_page(ll,7u,true);
     let fine = landscape_surface_weight(7u)*child.fade;
@@ -254,12 +235,6 @@ struct LandscapeDraw {
 @group(1) @binding(6) var<storage, read_write> landscape_instances: array<LandscapeInstance>;
 @group(1) @binding(7) var<storage, read_write> landscape_draws: array<LandscapeDraw, 5>;
 @group(1) @binding(8) var<storage, read_write> landscape_cache: array<LandscapeInstance>;
-
-fn landscape_random(seed: u32) -> f32 {
-    let state = seed * 747796405u + 2891336453u;
-    let word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
-    return f32(((word >> 22u) ^ word) >> 8u) / 16777216.;
-}
 
 fn landscape_seed(cell: vec2u) -> u32 {
     return cell.x * 116831u + cell.y * 24571u;

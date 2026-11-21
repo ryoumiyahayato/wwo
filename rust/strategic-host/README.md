@@ -14,9 +14,23 @@
 
 `river-centrelines.qhl` 按 HydroRIVERS v1.0 河段编号绘制屏幕线符号。线符号没有水域面积或通航宽度。旧版地貌包可用 `tools/build_natural_terrain.py --hydrology-candidate <现有QPK库> <地貌来源> <Natural Earth目录> <输出目录>` 生成修正后的 `hydrology-color.qhw` 和 `river-centrelines.qhl`。修复按 Natural Earth 陆地和水域移除旧版河宽像素。WorldCover 用于恢复陆地色调。颜色补页复用原 QPK 页表和高程。
 
+`tools/build_natural_terrain.py --river-ice-candidate <现有QHL> <WorldCover类别缓存> <Natural Earth目录> <输出QHL>` 用 Natural Earth 1:10m 冰川轮廓和 ESA WorldCover 2021 v200 第 70 类移除永久冰雪上的推算河线。只有整条线段位于冰川轮廓内，且沿线样点均为雪或冰时才剔除。沿用现有 `river-topology.u32` 和 QWG 水面。两个资料源均为现代参考。
+
 `tools/build_natural_terrain.py --water-geometry <GSHHG全精度压缩包> <候选库>/water-geometry.qwg --measured-river-mask <GRWL_mask_V01.01.zip>` 生成独立 WGS84 页。岸线支持 GSHHG Shapefile 压缩包或 Basemap 的全精度数据 wheel。加入 Landsat 水域需 `pyproj` 和 `tifffile`。GSHHG 提供海岸、湖泊及嵌套岛屿。GRWL 的正值水面提供干流、潮汐水道和连通湖库，零值保留已有水域。已知河岸范围优先。`--documented-river-widths <GeoJSON>` 仅在无观测水面覆盖的河段按米制构造水面。输入中心线需包含 `half_width_metres`、`width_source` 和 `width_epoch`，归档时保留原始 GeoJSON。其余河段使用线符号。局部重算使用 `--water-pages-from <现有QWG>` 和一个或多个 `--water-page X Y`，其余页面从现有包复制。
 
 候选使用 Basemap 2.0.0 随包的 GSHHG 2.3.6 全精度几何和 GRWL v01.01 的 30 米 Landsat 平均流量水域掩膜。岸线和卫星观测均为现代参照。1900 年精确河岸及航道宽度仍待对应历史资料。GRWL 掩膜是中间产品，细小水道和潮滩边界精度取决于资料。[GSHHG](https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html) · [Basemap 数据及 LGPL-3.0-or-later](https://pypi.org/project/basemap-data-hires/) · [Allen 与 Pavelsky 2018](https://doi.org/10.1126/science.aat0636) · [GRWL v01.01，CC BY 4.0](https://doi.org/10.5281/zenodo.1297434)
+
+全局核查时为生成命令传入完整来源，再加 `--water-pages-from <现有QWG> --audit-water-pages <变更记录.jsonl>`。工具逐页计算当前水陆分类输入，保留等价的旧页。记录列出变化的小格和整格水陆类别变更。Basemap 2.0.0 的全精度包缺少湖中岛内池塘。使用该 wheel 时加 `--shoreline-ponds <GSHHG Shapefile 压缩包>` 补充官方第 4 层。主数据已有第 4 层时沿用主数据。
+
+`tools/patrol_water_geometry.py index <岸线压缩包> <QWG> <巡视索引.json>` 将 GSHHG 岸段和 QWG 内陆水面编入 Z4–Z7 视图。复杂岸段使用更近的取景。若构建时补充了第 4 层，索引使用同一份 `--shoreline-ponds`。`tools/patrol_water_geometry.py capture <wwo-map-lab.exe> <巡视索引.json> <输出目录>` 从正式游戏逐个取景，可用 `--z` 和 `--limit` 分批运行，用 `--key` 补拍具体视图。记录包含相机、地貌实际层级、QWG 驻留和颜色探查。QWG 驻留记录按渲染器的视口安全边缘计算，区分缩放混合、远景 QPK 和待载或超出容量的页。`report <巡视索引.json> <输出目录> --report-file <记录.json>` 按层汇总实拍与缺失，并列出出现资源回退或疑似反色的取景。巡视状态还需依据海陆边缘、过渡画面和来源精度核查。
+
+`batch-near <巡视索引.json> <Z7巡视索引.json>` 将同一纬带相邻的近景区段放入一个安全视野。每组保持原取景的最细米／像素，记录组内所有区段的编号。Z4–Z6 继续用原索引。
+
+将同一索引分批运行时，汇总命令可重复传入 `--include <其他批次输出目录>`。有补拍时，保留确认了视野和地貌层级的画面。
+
+`report --inspect-seams` 对已拍画面沿 QWG 网格查找连续的水陆反色。格线两侧在 QWG 中为同类、画面有持续色差时记录位置和像素范围。结果用于回看可疑接缝。低饱和度的水面、冰雪和未与格线对齐的异常仍需结合画面检查。
+
+南极冰缘多边形为了闭合含有连接南极点的经线及极点边。这些线段留在水陆几何中，巡视索引仅纳入实际冰缘。
 
 ## 人生序章与人物存档
 
@@ -34,6 +48,8 @@ Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒�
 
 局部检查使用 `cargo test --locked --manifest-path rust/character-core/Cargo.toml --lib player::tests` 和 `cargo test --release --locked --manifest-path rust/strategic-host/Cargo.toml --lib player_prologue_tests`，从仓库根目录执行。
 
+国家简介在正式 HUD 字图缺字时使用内嵌的思源宋体字形。修改简介后，从仓库根目录运行 `python rust/strategic-host/tools/extend_country_profile_glyphs.py <正式游戏数据目录>/hud-type.json`，再构建 EXE。字形许可证见 [Source Han Serif OFL](../../data/character/SourceHan-LICENSE.txt)。
+
 ## 正式水文资源
 
 正式入口优先读取 `data/worldcrs84quad-15s-v2-hydrology/`，否则读取可用的旧库。在水文目录内恢复下列文件。QHW 按各层 QPK 大小核对配套版本。完整恢复后用 `wwo-map-lab --play` 启动。显式 `--terrain-candidate <候选库>` 仍可指定对照版本。
@@ -41,14 +57,14 @@ Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒�
 - `0.qpk` 至 `5.qpk` 和 `river-topology.u32` 取自 [Rust Windows 阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115)。
 - `6.qpk`、`index.json` 和 `landscape-cover-v2.qsc` 取自 [Z6/Z7 地表阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/z6-z7-surface-20261119)。将 `z6-land-material-6.qpk` 命名为 `6.qpk`。
 - `7.qpk` 使用 [Z7 地表归档](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115) 的 `z7-land-material-7.qpk`。
-- 从 [水域接替阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/water-page-handoff-20261120) 下载 `water-geometry-norway.qwg.zst`，解压后命名为 `water-geometry.qwg`。配套 `hydrology-color.qhw` 取自 [水域几何阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/global-water-geometry-20261120)。
-- `river-centrelines.qhl` 取自 [河网阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/global-hydrology-20261119)。
+- 从 [全球海岸巡视归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-shoreline-audit-20261120) 下载 `water-geometry.qwg.zst` 和 `river-centrelines.qhl.zst`。分别解压为 `water-geometry.qwg` 和 `river-centrelines.qhl`。同一归档包含 Z4–Z7 巡视索引、实拍机位记录和汇总。
+- `hydrology-color.qhw` 取自 [水域几何阶段](https://github.com/ryoumiyahayato/wwo/releases/tag/global-water-geometry-20261120)。
 
 Z4 至 Z7 共享水陆位置。复杂几何按视野和移动方向预取。缺页和远景使用 QPK。地表、城市和景观共用水陆状态和接替权重。已有明确边界的历史调查图层优先。实测水域覆盖对应河段时抑制重复的中心线符号。水面轮廓与原河段拓扑可分别追溯。
 
 [水域接替阶段的正式游戏画面与遗留缺陷](WATER_HANDOFF.md)
 
-Z6 和 Z7 的地面材质独立于实例模型。用地分片可用时按地类及坡面混合材质。未知地类用中性土壤，待载地类页使用 QPK 色调和共用材质。观察模式可用 `{"id":"ground","action":"landscape-models","value":"hide"}` 只隐藏景观实例，`show` 恢复。
+Z6 和 Z7 的地面材质独立于实例模型，部分共用材质延伸到 Z5。用地分片可用时按地类及坡面混合材质。未知地类用中性土壤，待载地类页使用 QPK 色调和共用材质。观察模式可用 `{"id":"ground","action":"landscape-models","value":"hide"}` 只隐藏景观实例，`show` 恢复。
 
 © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium.
 
