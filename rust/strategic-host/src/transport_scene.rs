@@ -32,18 +32,77 @@ const RESTRICTED: [u8; 4] = [249, 171, 102, 244];
 const RIVER: [u8; 4] = [76, 191, 155, 230];
 const SELECTED: [u8; 4] = [255, 219, 131, 252];
 const FLOW: [u8; 4] = [255, 191, 88, 254];
+pub(crate) const SEA_RELATION_INK: [u8; 4] = [156, 176, 181, 158];
+const SEA_GEOMETRY: &[u8] = include_bytes!("../../../data/world_map/shipping_geometry.json");
 const CELL_COUNT: usize = 12;
 static DRAW_REVISION: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum GeometryEvidence {
     HistoricalCorridor,
+    EstimatedSeaTrack,
+    SeaRelation,
     Schematic,
     Unmapped,
 }
 
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+enum SeaGeometryKind {
+    EstimatedTrack,
+    ServiceRelation,
+}
+
+#[derive(Deserialize)]
+struct SeaGeometryRecord {
+    service: String,
+    from_port: String,
+    to_port: String,
+    kind: SeaGeometryKind,
+    max_mpp: f64,
+    points: Vec<[f64; 2]>,
+}
+
+struct SeaGeometry {
+    kind: SeaGeometryKind,
+    max_mpp: f64,
+    path: Path,
+}
+
+impl SeaGeometry {
+    fn load(network: &TransportNetwork) -> io::Result<BTreeMap<String, Self>> {
+        let records: Vec<SeaGeometryRecord> = serde_json::from_slice(SEA_GEOMETRY)?;
+        let mut corridors = BTreeMap::new();
+        for record in records {
+            let invalid = || io::Error::new(io::ErrorKind::InvalidData,
+                format!("invalid sea geometry for {}", record.service));
+            let Some(edge) = network.segment(&record.service) else { continue; };
+            if edge.mode != TransportMode::Shipping || edge.from != record.from_port || edge.to != record.to_port
+                || !record.max_mpp.is_finite() || record.max_mpp <= 0.
+                || record.points.len() < 2
+                || record.points.iter().any(|&[lon, lat]| {
+                    !(-180. ..=180.).contains(&lon) || !(-90. ..=90.).contains(&lat)
+                })
+            {
+                return Err(invalid());
+            }
+            let path = Path::new(record.points.iter().copied());
+            if path.spans.len() + 1 != record.points.len() || corridors.contains_key(&record.service) {
+                return Err(invalid());
+            }
+            corridors.insert(record.service, Self { kind: record.kind, max_mpp: record.max_mpp, path });
+        }
+        Ok(corridors)
+    }
+
+    fn navigation_path(&self) -> Option<&Path> {
+        (self.kind == SeaGeometryKind::EstimatedTrack).then_some(&self.path)
+    }
+}
+
 pub struct TransportScene {
     schematic: BTreeMap<String, Path>,
+    sea: BTreeMap<String, SeaGeometry>,
     regions: Vec<Region>,
     rail_pairs: BTreeMap<(String, String), Vec<String>>,
     incident: BTreeMap<String, Vec<String>>,
@@ -460,6 +519,7 @@ impl TransportScene {
         }
         Ok(Self {
             schematic,
+            sea: SeaGeometry::load(network)?,
             terminals,
             terminal_cells,
             incident,
@@ -577,7 +637,9 @@ impl TransportScene {
                 continue;
             }
             let Some(edge) = network.segment(id) else { continue; };
-            if !network.evidence(id).is_some_and(|e| e.applies_on(date)) || !drawn.insert(id) {
+            if edge.mode == TransportMode::Shipping
+                || !network.evidence(id).is_some_and(|e| e.applies_on(date)) || !drawn.insert(id)
+            {
                 continue;
             }
             let availability = network.availability(id).expect("segment has availability");
@@ -635,6 +697,27 @@ impl TransportScene {
             }
         }
 
+        for (id, geometry) in &self.sea {
+            let path = &geometry.path;
+            let highlight = highlighted(id);
+            if (!highlight && camera.mpp > geometry.max_mpp)
+                || !view_reach.intersects(path.center, path.radius)
+                || !network.evidence(id).is_some_and(|e| e.applies_on(date))
+            {
+                continue;
+            }
+            let mut path_hits = VisiblePath { id: id.clone(), fragments: Vec::new(), dash_strokes: Some(Vec::new()) };
+            let (width, ink) = if highlight { (1.5, with_alpha(SEA_RELATION_INK, 198)) }
+                else { (1.1, SEA_RELATION_INK) };
+            draw_path(&mut self.overlay, camera, size, &view_reach, path, width, ink, &mut path_hits);
+            if camera.mpp <= 1200. && mode != Mode::Military && geometry.navigation_path().is_some() {
+                self.vehicle_segments.push(id.clone());
+            }
+            if !path_hits.strokes().is_empty() {
+                self.paths.push(path_hits);
+            }
+        }
+
         let chord = 2. * (reach.min(std::f64::consts::PI * EARTH) / (2. * EARTH)).sin();
         let low = (center - DVec3::splat(chord)).to_array().map(cell_axis);
         let high = (center + DVec3::splat(chord)).to_array().map(cell_axis);
@@ -686,7 +769,7 @@ impl TransportScene {
                             continue;
                         }
                         let port = terminal.kind == NodeKind::Port;
-                        let destination = picking && (port || camera.mpp <= camera::ENTER)
+                        let destination = picking && (port || terminal.kind == NodeKind::City && camera.mpp <= camera::ENTER)
                             && world.can_book_transport_to(&terminal.id);
                         let context = destination || match mode {
                             Mode::Geographic => water || camera.mpp <= camera::ENTER,
@@ -750,13 +833,20 @@ impl TransportScene {
     }
 
     pub fn segment_geometry(&self, id: &str) -> GeometryEvidence {
-        if self.previous_view.as_ref().is_some_and(|view| self.reference_path(id, &view.date).is_some()) {
+        if let Some(geometry) = self.sea.get(id) {
+            if geometry.navigation_path().is_some() { GeometryEvidence::EstimatedSeaTrack }
+            else { GeometryEvidence::SeaRelation }
+        } else if self.previous_view.as_ref().is_some_and(|view| self.reference_path(id, &view.date).is_some()) {
             GeometryEvidence::HistoricalCorridor
         } else if self.schematic.contains_key(id) {
             GeometryEvidence::Schematic
         } else {
             GeometryEvidence::Unmapped
         }
+    }
+
+    pub fn sea_relation_visible(&self) -> bool {
+        self.paths.iter().any(|path| self.sea.contains_key(&path.id))
     }
 
     pub fn reference_site(&self, id: &str) -> Option<MappedSite<'_>> {
@@ -802,10 +892,23 @@ impl TransportScene {
         }).min_by(|(a, _), (b, _)| a.total_cmp(b)).map(|(_, id)| ObjectId::Segment(id.clone()))
     }
 
+    pub fn pick_destination(&self, cursor: [f64; 2], world: &InitialWorld) -> Option<&str> {
+        let pointer = Vec2::new(cursor[0] as f32, cursor[1] as f32);
+        self.nearest_node_where(pointer, |node| {
+            node.terminal.is_some_and(|index| matches!(self.terminals[index].kind, NodeKind::City | NodeKind::Port))
+                && world.can_book_transport_to(&node.id)
+        }).map(|node| node.id.as_str())
+    }
+
     fn nearest_node(&self, pointer: Vec2) -> Option<&VisibleNode> {
+        self.nearest_node_where(pointer, |_| true)
+    }
+
+    fn nearest_node_where(&self, pointer: Vec2, eligible: impl Fn(&VisibleNode) -> bool) -> Option<&VisibleNode> {
         self.visible.iter().filter(|node| {
             (node.drawn || self.flow_nodes.contains(&node.id))
                 && node.position.distance_squared(pointer) <= node.radius.powi(2)
+                && eligible(node)
         }).min_by(|a, b| {
             a.position.distance_squared(pointer).total_cmp(&b.position.distance_squared(pointer))
                 .then_with(|| b.port.cmp(&a.port))
@@ -836,6 +939,7 @@ impl TransportScene {
             return;
         }
         for path in &self.paths {
+            if self.sea.contains_key(&path.id) { continue; }
             if let Some(&directed) = self.flow_by_segment.get(&path.id) {
                 draw_flow(&mut self.flow_overlay, &path.fragments, directed);
             }
@@ -1081,9 +1185,12 @@ impl TransportScene {
                 }
                 continue;
             }
-            let reference = self.reference_path(vehicle.segment_id, &view.date);
-            // Service estimates cannot place a vessel. Use only a reference track at sea.
-            let Some(path) = reference else {
+            let path = if edge.mode == TransportMode::Shipping {
+                self.sea.get(vehicle.segment_id).and_then(SeaGeometry::navigation_path)
+            } else {
+                self.reference_path(vehicle.segment_id, &view.date)
+            };
+            let Some(path) = path else {
                 continue;
             };
             let progress = f64::from(vehicle.progress.clamp(0.0, 1.0));

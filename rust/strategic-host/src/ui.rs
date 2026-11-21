@@ -58,6 +58,7 @@ pub struct Ui<'a> {
     pub mouse:&'a str,
     pub labels:bool,
     pub transport_detail:Option<&'a crate::transport_ui::Detail>,
+    pub sea_relation_visible: bool,
     pub formal:crate::formal_ui::Display<'a>,
 }
 
@@ -165,6 +166,9 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
             skin.text(text,name,0,[x+dx,y+dy],width+1.,[41,48,43,230]);
         }
         skin.text(text,name,0,[x,y],width+1.,IVORY);
+        if place.selectable {
+            hits.push(Hit { area, action: Action::Select(Object::Place(i)) });
+        }
     }
     if let Some([lon,lat])=ui.formal.session.map(|s|s.coordinates.as_slice()) {
         if let Some([x,y])=ui.camera.project([*lon,*lat],ui.size).map(|p|p.map(|n|n as f32)) {
@@ -273,7 +277,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         let x=17.;let y=73.;let width=300.;
         let transport = match object {
             Object::Place(i) => ui.formal.written_world.and_then(|host|
-                host.can_select_transport_destination(&world.places[i].id).then_some(i)),
+                (host.player_alive() && host.can_book_transport_to(&world.places[i].id)).then_some(i)),
             _ => None,
         };
         let has_debug=ui.formal.debug.is_some();
@@ -303,7 +307,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,y+103.,123.,28.],skin.choose("定位地点","Focus location"),Some(Action::Locate),false);
         if let Some(i) = transport {
             ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+147.,y+103.,135.,28.],
-                skin.choose("设为运输目的地","Transport here"),
+                skin.choose("运往此处","Transport here"),
                 Some(Action::Hud(crate::formal_ui::Command::Transport("city",i))),false);
         } else {
             ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+147.,y+103.,135.,28.],skin.choose("完整资料","Full record"),Some(Action::Details),false);
@@ -361,7 +365,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     }
     let mut debug_right=145.;
     if ui.mode==Mode::Economic && ui.formal.hud.page==crate::formal_ui::Page::Map
-        && ui.transport_detail.is_none() && !ui.formal.hud.transport_pick && !ui.formal.hud.market_map
+        && ui.transport_detail.is_none() && !ui.formal.hud.market_map
         && ui.formal.hud.menu==crate::formal_ui::Menu::None {
         let width=(measure(a,0,ui.econ_label)+25.).clamp(219.,374.);
         let x=w-width-17.;
@@ -412,20 +416,24 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             }
         }
     }
-    if ui.formal.hud.transport_pick {
-        let x=(w-420.)/2.;
-        panel(&mut panels,x,64.,420.,40.);
-        skin.text(&mut hud_type,"点击地点作为运输目的地",1,[x+12.,72.],277.,LIGHT);
-        ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+303.,70.,105.,27.],"返回运输",
-            Some(Action::Hud(crate::formal_ui::Command::Page(crate::formal_ui::Page::Travel))),false);
-    }
     if ui.formal.hud.page==crate::formal_ui::Page::Map {
         let y=h-45.;
-        let transport=ui.formal.session.is_some_and(|s|s.transport.is_some())&&!ui.formal.hud.market_map&&!ui.formal.hud.transport_pick;
+        if ui.sea_relation_visible && !ui.formal.hud.market_map && ui.formal.hud.menu==crate::formal_ui::Menu::None {
+            let x = w - 249.;
+            let legend_y = h - 136.;
+            panels.rect(x, legend_y, 223., 21., [15, 25, 34, 220]);
+            for offset in [9., 18.] {
+                panels.line([x+offset, legend_y+11.], [x+offset+5., legend_y+11.], 1.1,
+                    crate::transport_scene::SEA_RELATION_INK);
+            }
+            skin.text(&mut hud_type, skin.choose("海运联系 · 航迹待核实","Sea link · Track unconfirmed"),
+                0, [x+29.,legend_y+3.], 191., SUBTLE);
+        }
+        let transport=ui.formal.session.is_some_and(|s|s.transport.is_some())&&!ui.formal.hud.market_map;
         let mut x=if transport {w-306.} else {w-233.};
         if transport {
             ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x,y-35.,69.,25.],"运输",
-                Some(Action::Hud(crate::formal_ui::Command::PickTransportDestination)),false);
+                Some(Action::Hud(crate::formal_ui::Command::Page(crate::formal_ui::Page::Travel))),false);
             x+=73.;
         }
         for (label,action,width) in [(skin.choose("搜索","Search"),Action::Search,74.),(skin.choose("返回","Back"),Action::Back,62.),(skin.choose("全球","Globe"),Action::Home,62.)]{

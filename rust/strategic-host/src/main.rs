@@ -549,7 +549,6 @@ impl Host {
                 self.hud.page=page;self.hud.menu=HudMenu::None;
                 self.hud.market_map=false;
                 self.hud.market_search=None;
-                self.hud.transport_pick=false;
                 self.hud.transport_directory=None;
                 self.hud.transport_lots_open=false;
                 self.hud.market_offset=0;
@@ -718,11 +717,6 @@ impl Host {
             HudCommand::TransportLots=>{
                 self.hud.transport_lots_open^=true;
                 self.hud.lot_offset=0;
-            }
-            HudCommand::PickTransportDestination=>{
-                self.hud_action(HudCommand::Page(HudPage::Map));
-                self.select_transport(None);
-                self.hud.transport_pick=true;
             }
             HudCommand::TransportDirectory=>{
                 self.hud_action(HudCommand::Page(HudPage::Travel));
@@ -1011,7 +1005,7 @@ impl Host {
     fn transport_detail_visible(&self) -> bool {
         self.transport_selection.is_some() && self.hud.page==HudPage::Map
             && self.hud.menu==HudMenu::None && self.country.is_none() && self.search.is_none() && !self.details
-            && !self.hud.market_map && !self.hud.transport_pick
+            && !self.hud.market_map
     }
 
     fn select_transport(&mut self, selection: Option<transport_ui::ObjectId>) {
@@ -1033,12 +1027,28 @@ impl Host {
         if self.hud.page!=HudPage::Map || self.hud.menu!=HudMenu::None
             || self.search.is_some() || self.details || self.in_lobby() || self.hud.market_map {return false;}
         let selection=self.transport_scene.as_ref().and_then(|scene|scene.pick(point));
-        if let Some(transport_ui::ObjectId::Node(id)) = selection.as_ref().filter(|_|self.hud.transport_pick) {
-            if self.choose_transport_destination(id) { return true; }
-        }
-        if selection.is_none() || self.hud.transport_pick {return false;}
+        if selection.is_none() {return false;}
         self.select_transport(selection);
         true
+    }
+
+    fn planning_transport(&self) -> bool {
+        self.hud.page == HudPage::Travel && self.hud.menu == HudMenu::None
+            && self.hud.transport_directory.is_none() && self.search.is_none() && !self.details
+            && self.state.session.as_ref().and_then(|s| s.transport.as_ref())
+                .is_some_and(transport_ui::TransportView::planning)
+    }
+
+    fn pick_transport_destination(&mut self, point: [f64; 2], place: Option<usize>) -> bool {
+        if !self.planning_transport() || self.is_panel(point) { return false; }
+        if let Some(index) = place {
+            let id = self.world.places[index].id.clone();
+            if self.choose_transport_destination(&id) { return true; }
+        }
+        let Some(world) = self.written_world() else { return false; };
+        let destination = self.transport_scene.as_ref()
+            .and_then(|scene| scene.pick_destination(point, world)).map(str::to_owned);
+        destination.is_some_and(|id| self.choose_transport_destination(&id))
     }
 
     fn transport_detail_action(&mut self, index: usize) {
@@ -1064,7 +1074,9 @@ impl Host {
         if !self.written_world().is_some_and(|world|world.can_book_transport_to(id)) {
             return false;
         }
-        self.hud_action(HudCommand::Page(HudPage::Travel));
+        if self.hud.page != HudPage::Travel {
+            self.hud_action(HudCommand::Page(HudPage::Travel));
+        }
         self.emit(Request::Transport{verb:"destination",id});
         true
     }
@@ -1088,8 +1100,8 @@ impl Host {
             "city" => {
                 let Some(place) = self.world.places.get(index) else { return };
                 let id = place.id.clone();
-                self.hud_action(HudCommand::Page(HudPage::Travel));
-                id
+                self.choose_transport_destination(&id);
+                return;
             }
             "destination" => {
                 let Some(place) = self.state.session.as_ref().and_then(|s| s.transport.as_ref())
@@ -1405,14 +1417,13 @@ impl Host {
                     && p[0]<=104. && p[1]<=76.=>{
                     if let Some(i)=self.player_polity(){self.click_country(i,p);}
                 }
-                Action::Select(Object::Polity(_)|Object::Administration(_)) if self.hud.transport_pick=>{self.pick_transport(p);}
                 Action::Select(_) if self.hud.market_map=>{},
+                Action::Select(object) if self.hud.page == HudPage::Travel && self.search.is_none() => {
+                    let place = match object { Object::Place(index) => Some(index), _ => None };
+                    self.pick_transport_destination(p, place);
+                }
                 Action::Select(Object::Polity(i)) if self.search.is_none()&&self.hud.menu==HudMenu::None&&self.hud.page==HudPage::Map=>{
                     self.click_country(i,p);
-                }
-                Action::Select(Object::Place(i)) if self.hud.transport_pick=>{
-                    let id=self.world.places[i].id.clone();
-                    if !self.pick_transport(p) { self.choose_transport_destination(&id); }
                 }
                 Action::Select(Object::Place(_)) if !in_country && self.pick_transport(p)=>{},
                 _=>self.action(action),
@@ -1420,7 +1431,7 @@ impl Host {
             return;
         }
         if self.is_panel(p){return;}
-        if self.pick_transport(p)||self.hud.transport_pick||self.hud.market_map{return;}
+        if self.pick_transport_destination(p,None)||self.pick_transport(p)||self.hud.market_map{return;}
         let coordinates=self.camera.vector(p,self.size).map(camera::geographic);
         let hit=coordinates.map(|q|self.object_at(q)[0]);
         if self.in_lobby(){
@@ -1654,11 +1665,6 @@ impl Host {
             self.dirty=true;
             return;
         }
-        if self.hud.transport_pick && key==Key::Named(NamedKey::Escape) {
-            self.hud_action(HudCommand::Page(HudPage::Travel));
-            self.dirty=true;
-            return;
-        }
         if self.search.is_some() {
             match key {
                 Key::Named(NamedKey::Escape)=>self.search=None,
@@ -1841,12 +1847,13 @@ impl Host {
         let written_world = None;
         let loading=self.loading();
         let transport_world=written_world.filter(|_|!loading&&!self.in_lobby()&&!self.hud.menu.modal());
+        let planning_transport = self.planning_transport();
         if let Some(world)=transport_world {
             if self.transport_scene.is_none() {
                 self.transport_scene=Some(transport_scene::TransportScene::new(world.transport())?);
             }
             self.transport_scene.as_mut().unwrap().update_map(&self.camera,self.size,&date,self.mode,world,
-                self.transport_selection.as_ref(), self.hud.transport_pick)?;
+                self.transport_selection.as_ref(), planning_transport)?;
         }
         let show_transport_detail=self.transport_detail_visible();
         if let (Some(world),Some(scene),Some(selected))=(transport_world,self.transport_scene.as_ref(),
@@ -1875,6 +1882,8 @@ impl Host {
             search:self.search.as_deref(),search_results:&search,econ_label:&econ_label,econ_legend:&econ_legend,
             mouse:&mouse,labels:self.labels,formal,
             transport_detail:self.transport_detail.as_ref().filter(|_|show_transport_detail).map(|(_, detail)|detail),
+            sea_relation_visible: transport_world.is_some() && self.transport_scene.as_ref()
+                .is_some_and(transport_scene::TransportScene::sea_relation_visible),
         },&mut self.shown_markers)};
         if let Some(panel)=self.population_debug.as_ref().filter(|_|!loading&&!self.in_lobby()) {
             let (layers,text)=meshes.split_at_mut(12);
@@ -1919,7 +1928,7 @@ impl Host {
         let vehicle_markers;
         let transport=if let (Some(world),Some(scene))=(transport_world,self.transport_scene.as_mut()) {
             if self.debug && !show_transport_detail && self.hud.page==HudPage::Map && self.hud.menu==HudMenu::None
-                && !self.hud.market_map && !self.hud.transport_pick && self.country.is_none() && self.search.is_none() {
+                && !self.hud.market_map && self.country.is_none() && self.search.is_none() {
                 scene.caption(&self.skin,self.cursor,self.size,world,&mut meshes);
             }
             vehicle_markers=scene.draw_vehicles(&self.camera,self.size,world,
