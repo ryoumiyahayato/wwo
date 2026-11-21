@@ -1,0 +1,4151 @@
+{
+  "reference_date": "1900-01-01",
+  "accounting_note": "Research is a benchmark at published statistical extents. Opening is an independent authority with retained legacy accounts. Differences involving unmatched extents, dates or sources are arithmetic and cannot locate people.",
+  "research_regions": {
+    "Africa": {
+      "statistical_units": 46,
+      "opening_research_estimate": 129975605,
+      "units_with_polity_candidates": 41,
+      "people_without_polity_candidate": 193635,
+      "grades": {
+        "C": 2,
+        "not_assessed_for_this_revision": 37,
+        "D": 4,
+        "E": 2,
+        "B": 1
+      },
+      "production_root_ids": [
+        "beylicate_of_tunis",
+        "cshapes_gw_402",
+        "cshapes_gw_570",
+        "cshapes_gw_585",
+        "cshapes_gw_590"
+      ],
+      "production_people": 2711526,
+      "production_pct_of_regional_research_estimate": 2.086,
+      "people_with_opening_subdivision": 373996,
+      "research_only_units": 41,
+      "research_only_people": 127350566
+    },
+    "America": {
+      "statistical_units": 46,
+      "opening_research_estimate": 145035775,
+      "units_with_polity_candidates": 34,
+      "people_without_polity_candidate": 399117,
+      "grades": {
+        "C": 32,
+        "D": 10,
+        "B": 3,
+        "not_assessed_for_this_revision": 1
+      },
+      "production_root_ids": [
+        "argentina_1900",
+        "brazil_1900",
+        "chile_1900",
+        "colony_of_newfoundland",
+        "cshapes_gw_3",
+        "cshapes_gw_31",
+        "cshapes_gw_51",
+        "cshapes_gw_52",
+        "cshapes_gw_53",
+        "cshapes_gw_6",
+        "cshapes_gw_66",
+        "cshapes_gw_80",
+        "cuba_occupation_1900",
+        "dominion_of_canada",
+        "mexican_republic",
+        "united_states_1900",
+        "uruguay_1900"
+      ],
+      "production_people": 123984199,
+      "production_pct_of_regional_research_estimate": 85.485,
+      "people_with_opening_subdivision": 111228173,
+      "research_only_units": 30,
+      "research_only_people": 19765044
+    },
+    "Asia": {
+      "statistical_units": 33,
+      "opening_research_estimate": 894378060,
+      "units_with_polity_candidates": 25,
+      "people_without_polity_candidate": 1424075,
+      "grades": {
+        "D": 10,
+        "E": 17,
+        "C": 3,
+        "B": 1,
+        "A": 1,
+        "not_assessed_for_this_revision": 1
+      },
+      "production_root_ids": [
+        "cshapes_gw_750",
+        "cshapes_gw_780",
+        "cshapes_gw_850",
+        "empire_of_japan",
+        "korean_empire",
+        "qing_empire"
+      ],
+      "production_people": 485960798,
+      "production_pct_of_regional_research_estimate": 54.335,
+      "people_with_opening_subdivision": 377037176,
+      "research_only_units": 27,
+      "research_only_people": 89458537
+    },
+    "Europe": {
+      "statistical_units": 29,
+      "opening_research_estimate": 419144007,
+      "units_with_polity_candidates": 24,
+      "people_without_polity_candidate": 571017,
+      "grades": {
+        "D": 6,
+        "A": 14,
+        "B": 6,
+        "C": 2,
+        "E": 1
+      },
+      "production_root_ids": [
+        "austria_hungary",
+        "british_isles_1900",
+        "country_fra",
+        "cshapes_gw_338",
+        "german_empire",
+        "iceland_under_denmark",
+        "kingdom_of_belgium",
+        "kingdom_of_italy",
+        "kingdom_of_luxembourg",
+        "kingdom_of_netherlands",
+        "kingdom_of_portugal",
+        "kingdom_of_romania",
+        "kingdom_of_serbia",
+        "kingdom_of_spain",
+        "principality_of_bulgaria",
+        "russian_empire",
+        "sweden_norway_union",
+        "swiss_confederation"
+      ],
+      "production_people": 407154320,
+      "production_pct_of_regional_research_estimate": 97.139,
+      "people_with_opening_subdivision": 332407293,
+      "research_only_units": 9,
+      "research_only_people": 10103353
+    },
+    "Oceania": {
+      "statistical_units": 6,
+      "opening_research_estimate": 6540799,
+      "units_with_polity_candidates": 4,
+      "people_without_polity_candidate": 214004,
+      "grades": {
+        "B": 1,
+        "C": 2,
+        "E": 3
+      },
+      "production_root_ids": [
+        "australia_colonies_1900",
+        "cshapes_gw_4",
+        "cshapes_gw_920",
+        "cshapes_gw_950"
+      ],
+      "production_people": 4905385,
+      "production_pct_of_regional_research_estimate": 74.997,
+      "people_with_opening_subdivision": 0,
+      "research_only_units": 2,
+      "research_only_people": 214004
+    }
+  },
+  "research_units": [
+    {
+      "unit_id": "ft_algeria",
+      "name": "Algeria",
+      "region": "Africa",
+      "population_value": 4882736,
+      "population_lower": 4455496,
+      "population_upper": 5309977,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!B103 and Country series!B104",
+      "method_locator": "Appendix I, printed pp. 46",
+      "candidate_polity_ids": [
+        "cshapes_gw_615"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Appendix I uses Maravall-Buckwalter's corrected population, anchored on the 1906 return including the Territories of the South. Their opening-day extent remains unresolved. Metropolitan France excludes Algeria."
+    },
+    {
+      "unit_id": "ft_angola",
+      "name": "Angola",
+      "region": "Africa",
+      "population_value": 3226044,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!C103 and Country series!C104",
+      "method_locator": "Appendix I, printed pp. 46",
+      "candidate_polity_ids": [
+        "cshapes_gw_540"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_basutoland",
+      "name": "Basutoland",
+      "region": "Africa",
+      "population_value": 219865,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!D103 and Country series!D104",
+      "method_locator": "Appendix I, printed pp. 46-47",
+      "candidate_polity_ids": [
+        "cshapes_gw_570"
+      ],
+      "comparison_id": "basutoland",
+      "opening_disposition": "comparable_extent",
+      "note": "Both refer to Basutoland outside the four South African polities. The opening interpolates the 1891 and 1904 returns after the 1901 census was suspended."
+    },
+    {
+      "unit_id": "ft_bechuanaland",
+      "name": "Bechuanaland",
+      "region": "Africa",
+      "population_value": 156945,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!E103 and Country series!E104",
+      "method_locator": "Appendix I, printed pp. 47",
+      "candidate_polity_ids": [
+        "cshapes_gw_571"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_belgium_congo",
+      "name": "Belgium Congo",
+      "region": "Africa",
+      "population_value": 9473612,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!F103 and Country series!F104",
+      "method_locator": "Appendix I, printed pp. 47",
+      "candidate_polity_ids": [
+        "congo_free_state"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The retrospective Congo population uses later enumeration anchors. The Congo Free State's opening boundary and actual geographic coverage require review before replacing the legacy account."
+    },
+    {
+      "unit_id": "ft_british_east_africa",
+      "name": "British East Africa",
+      "region": "Africa",
+      "population_value": 7845422,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!G103 and Country series!G104",
+      "method_locator": "Appendix I, printed pp. 47",
+      "candidate_polity_ids": [
+        "cshapes_gw_500",
+        "cshapes_gw_501"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Kenya and Uganda combined."
+    },
+    {
+      "unit_id": "ft_cape_verde_portuguese_africa",
+      "name": "Cape Verde (Portuguese Africa)",
+      "region": "Africa",
+      "population_value": 146008,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!H103 and Country series!H104",
+      "method_locator": "Appendix I, printed pp. 47",
+      "candidate_polity_ids": [
+        "cshapes_gw_402"
+      ],
+      "comparison_id": "cshapes_gw_402",
+      "opening_disposition": "adopted_research_series",
+      "note": "Cape Verde archipelago, separate from Portuguese Guinea, São Tomé and metropolitan Portugal. Appendix I p. 47 uses Carreira p. 42 and adjusts interpolations for famines. The 1895 and 1900 government island series and retrospective INE total provide separate comparators."
+    },
+    {
+      "unit_id": "ft_cameroon",
+      "name": "Cameroon",
+      "region": "Africa",
+      "population_value": 3218312,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!I103 and Country series!I104",
+      "method_locator": "Appendix I, printed pp. 47",
+      "candidate_polity_ids": [
+        "cshapes_gw_470"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_ceuta_y_melilla",
+      "name": "Ceuta y Melilla",
+      "region": "Africa",
+      "population_value": 23868,
+      "population_lower": 20897,
+      "population_upper": 26840,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!J103 and Country series!J104",
+      "method_locator": "Appendix I, printed pp. 48",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Spanish enclaves recorded separately from Morocco."
+    },
+    {
+      "unit_id": "ft_comoros_and_mayote_french",
+      "name": "Comoros and Mayote (French)",
+      "region": "Africa",
+      "population_value": 92843,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!K103 and Country series!K104",
+      "method_locator": "Appendix I, printed pp. 48",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_egypt",
+      "name": "Egypt",
+      "region": "Africa",
+      "population_value": 10110129,
+      "population_lower": 9225492,
+      "population_upper": 10994766,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!L103 and Country series!L104",
+      "method_locator": "Appendix I, printed pp. 48",
+      "candidate_polity_ids": [
+        "khedivate_of_egypt"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Nomad corrections and western oases in the WWO footprint lack a reconciled census allocation. See collections/eastern/reconciliation.json."
+    },
+    {
+      "unit_id": "ft_equatorial_guinea",
+      "name": "Equatorial Guinea",
+      "region": "Africa",
+      "population_value": 176698,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!M103 and Country series!M104",
+      "method_locator": "Appendix I, printed pp. 49",
+      "candidate_polity_ids": [
+        "cshapes_gw_411"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_eritrea",
+      "name": "Eritrea",
+      "region": "Africa",
+      "population_value": 534731,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!N103 and Country series!N104",
+      "method_locator": "Appendix I, printed pp. 49",
+      "candidate_polity_ids": [
+        "cshapes_gw_531"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_ethiopia",
+      "name": "Ethiopia",
+      "region": "Africa",
+      "population_value": 11175771,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!O103 and Country series!O104",
+      "method_locator": "Appendix I, printed pp. 49",
+      "candidate_polity_ids": [
+        "ethiopian_empire"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The historical reconstruction covers areas whose political administration and census coverage changed. V5 revises the older estimates using Frankema and Jerven and supplies no opening subdivision."
+    },
+    {
+      "unit_id": "ft_french_equatorial_africa_congo_final",
+      "name": "French Equatorial Africa-Congo-Final",
+      "region": "Africa",
+      "population_value": 3881188,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!P103 and Country series!P104",
+      "method_locator": "Appendix I, printed pp. 49",
+      "candidate_polity_ids": [
+        "cshapes_gw_481",
+        "cshapes_gw_484"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "French equatorial territories combined."
+    },
+    {
+      "unit_id": "ft_french_somalia",
+      "name": "French Somalia",
+      "region": "Africa",
+      "population_value": 42647,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!Q103 and Country series!Q104",
+      "method_locator": "Appendix I, printed pp. 49",
+      "candidate_polity_ids": [
+        "cshapes_gw_522"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_french_west_africa",
+      "name": "French West Africa",
+      "region": "Africa",
+      "population_value": 12313283,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!R103 and Country series!R104",
+      "method_locator": "Appendix I, printed pp. 49",
+      "candidate_polity_ids": [
+        "cshapes_gw_430",
+        "cshapes_gw_433",
+        "cshapes_gw_434",
+        "cshapes_gw_437",
+        "cshapes_gw_438"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The reconstructed regional control spans several 1900 administrations. Component boundaries and counts need reconciliation before allocation."
+    },
+    {
+      "unit_id": "ft_gambia",
+      "name": "Gambia",
+      "region": "Africa",
+      "population_value": 168451,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!S103 and Country series!S104",
+      "method_locator": "Appendix I, printed pp. 50",
+      "candidate_polity_ids": [
+        "cshapes_gw_420"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_german_east_africa",
+      "name": "German East Africa",
+      "region": "Africa",
+      "population_value": 4998859,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!T103 and Country series!T104",
+      "method_locator": "Appendix I, printed pp. 50",
+      "candidate_polity_ids": [
+        "cshapes_gw_510"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The reconstructed Tanganyika and Rwanda/Burundi series share a political map identifier. Their study units have separate values."
+    },
+    {
+      "unit_id": "ft_german_south_west_africa",
+      "name": "German South West Africa",
+      "region": "Africa",
+      "population_value": 195140,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!U103 and Country series!U104",
+      "method_locator": "Appendix I, printed pp. 50",
+      "candidate_polity_ids": [
+        "cshapes_gw_565"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_german_west_africa",
+      "name": "German West Africa",
+      "region": "Africa",
+      "population_value": 746934,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!V103 and Country series!V104",
+      "method_locator": "Appendix I, printed pp. 50",
+      "candidate_polity_ids": [
+        "cshapes_gw_460"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_ghana_gold_coast",
+      "name": "Ghana-Gold Coast",
+      "region": "Africa",
+      "population_value": 2701470,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!W103 and Country series!W104",
+      "method_locator": "Appendix I, printed pp. 50",
+      "candidate_polity_ids": [
+        "cshapes_gw_452"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_guinea_bissau_portuguese_africa",
+      "name": "Guinea Bissau (Portuguese Africa)",
+      "region": "Africa",
+      "population_value": 298545,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!X103 and Country series!X104",
+      "method_locator": "Appendix I, printed pp. 50",
+      "candidate_polity_ids": [
+        "cshapes_gw_404"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_italian_libia_cyrenaica",
+      "name": "Italian Libia Cyrenaica",
+      "region": "Africa",
+      "population_value": 766146,
+      "population_lower": 574609,
+      "population_upper": 957683,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!Y103 and Country series!Y104",
+      "method_locator": "Appendix I, printed pp. 50-51",
+      "candidate_polity_ids": [
+        "ottoman_empire"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Tripolitania/Cyrenaica under Ottoman authority; only a part of map empire."
+    },
+    {
+      "unit_id": "ft_italian_somaliland",
+      "name": "Italian Somaliland",
+      "region": "Africa",
+      "population_value": 834501,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!Z103 and Country series!Z104",
+      "method_locator": "Appendix I, printed pp. 51",
+      "candidate_polity_ids": [
+        "cshapes_gw_5200"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "V5 cites Frankema and Jerven for Somalia. Inclusion of British Somaliland must be established before using it alongside separate protectorate returns."
+    },
+    {
+      "unit_id": "ft_liberia",
+      "name": "Liberia",
+      "region": "Africa",
+      "population_value": 504635,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AA103 and Country series!AA104",
+      "method_locator": "Appendix I, printed pp. 51",
+      "candidate_polity_ids": [
+        "republic_of_liberia"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The Frankema–Jerven projection uses later national boundaries and population anchors. The 1900 inland scope and the widely varying contemporary estimates are unresolved."
+    },
+    {
+      "unit_id": "ft_madagascar",
+      "name": "Madagascar",
+      "region": "Africa",
+      "population_value": 2644620,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AB103 and Country series!AB104",
+      "method_locator": "Appendix I, printed pp. 51",
+      "candidate_polity_ids": [
+        "cshapes_gw_580"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_malawi",
+      "name": "Malawi",
+      "region": "Africa",
+      "population_value": 2091714,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AC103 and Country series!AC104",
+      "method_locator": "Appendix I, printed pp. 51",
+      "candidate_polity_ids": [
+        "cshapes_gw_553"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_mauritius",
+      "name": "Mauritius",
+      "region": "Africa",
+      "population_value": 369153,
+      "population_lower": 355309,
+      "population_upper": 382997,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AD103 and Country series!AD104",
+      "method_locator": "Appendix I, printed pp. 51",
+      "candidate_polity_ids": [
+        "cshapes_gw_590"
+      ],
+      "comparison_id": "mauritius",
+      "opening_disposition": "scope_unconfirmed",
+      "note": "The opening explicitly covers Mauritius and Rodrigues. The study refers to the Kuczynski series for Mauritius; the inclusion of Rodrigues in its control has not been established from the cited study text. The Seychelles have a separate research series."
+    },
+    {
+      "unit_id": "ft_morocco",
+      "name": "Morocco",
+      "region": "Africa",
+      "population_value": 4723473,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AE103 and Country series!AE104",
+      "method_locator": "Appendix I, printed pp. 51-52",
+      "candidate_polity_ids": [
+        "moroccan_sultanate"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Appendix I projects backwards from separate French and northern Spanish protectorate counts plus Tangier. Adequacy of the southern frontier coverage for the 1900 Sultanate remains unresolved. Spanish Sahara, Ceuta and Melilla have separate study series."
+    },
+    {
+      "unit_id": "ft_mozambique_portuguese_africa",
+      "name": "Mozambique (Portuguese Africa)",
+      "region": "Africa",
+      "population_value": 4190253,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AF103 and Country series!AF104",
+      "method_locator": "Appendix I, printed pp. 52",
+      "candidate_polity_ids": [
+        "cshapes_gw_541"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_nigeria",
+      "name": "Nigeria",
+      "region": "Africa",
+      "population_value": 19081911,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AG103 and Country series!AG104",
+      "method_locator": "Appendix I, printed pp. 52",
+      "candidate_polity_ids": [
+        "cshapes_gw_4781",
+        "cshapes_gw_4783",
+        "cshapes_gw_4784"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The reconstruction covers the later Nigeria territory. Lagos and the Northern and Southern protectorates require separate territorial controls; the Lagos return covers Lagos alone."
+    },
+    {
+      "unit_id": "ft_northern_rhodesia",
+      "name": "Northern Rhodesia",
+      "region": "Africa",
+      "population_value": 1610542,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AH103 and Country series!AH104",
+      "method_locator": "Appendix I, printed pp. 52",
+      "candidate_polity_ids": [
+        "cshapes_gw_5518",
+        "cshapes_gw_5519"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Northern Rhodesian territories split in map."
+    },
+    {
+      "unit_id": "ft_reunion",
+      "name": "Réunion",
+      "region": "Africa",
+      "population_value": 177000,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AI103 and Country series!AI104",
+      "method_locator": "Appendix I, printed pp. 52",
+      "candidate_polity_ids": [
+        "cshapes_gw_585"
+      ],
+      "comparison_id": "reunion",
+      "opening_disposition": "comparable_extent",
+      "note": "La Réunion island, separate from France, Madagascar and Mauritius. Historical publications give different estimates around 1900."
+    },
+    {
+      "unit_id": "ft_rwanda_and_burundi",
+      "name": "Rwanda and Burundi",
+      "region": "Africa",
+      "population_value": 3130388,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AJ103 and Country series!AJ104",
+      "method_locator": "Appendix I, printed pp. 52",
+      "candidate_polity_ids": [
+        "cshapes_gw_510"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "This unit and Tanganyika have separate research series. A separate Rwanda/Burundi opening boundary is unavailable."
+    },
+    {
+      "unit_id": "ft_st_helena",
+      "name": "St. Helena",
+      "region": "Africa",
+      "population_value": 3380,
+      "population_lower": 2829,
+      "population_upper": 3929,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AK103 and Country series!AK104",
+      "method_locator": "Appendix I, printed pp. 52",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_sao_tome_and_principe_portuguese_africa",
+      "name": "Sao Tome and Principe (Portuguese Africa)",
+      "region": "Africa",
+      "population_value": 54810,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AL103 and Country series!AL104",
+      "method_locator": "Appendix I, printed pp. 53",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_seychelles",
+      "name": "Seychelles",
+      "region": "Africa",
+      "population_value": 18734,
+      "population_lower": 15689,
+      "population_upper": 21779,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AM103 and Country series!AM104",
+      "method_locator": "Appendix I, printed pp. 53",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_sierra_leone",
+      "name": "Sierra Leone",
+      "region": "Africa",
+      "population_value": 1098136,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AN103 and Country series!AN104",
+      "method_locator": "Appendix I, printed pp. 53",
+      "candidate_polity_ids": [
+        "cshapes_gw_451"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_south_africa",
+      "name": "South Africa",
+      "region": "Africa",
+      "population_value": 4968516,
+      "population_lower": 4161131,
+      "population_upper": 5775901,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AO103 and Country series!AO104",
+      "method_locator": "Appendix I, printed pp. 53",
+      "candidate_polity_ids": [
+        "cshapes_gw_561",
+        "cshapes_gw_562",
+        "south_african_republic",
+        "orange_free_state"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "1904 was a postwar census. The 1903 Natal boundary change and other territorial and enumeration changes require separate reconciliation for the four opening polities."
+    },
+    {
+      "unit_id": "ft_southern_rhodesia",
+      "name": "Southern Rhodesia",
+      "region": "Africa",
+      "population_value": 1058790,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AP103 and Country series!AP104",
+      "method_locator": "Appendix I, printed pp. 53",
+      "candidate_polity_ids": [
+        "cshapes_gw_552"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_spanish_sahara",
+      "name": "Spanish Sahara",
+      "region": "Africa",
+      "population_value": 7342,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AQ103 and Country series!AQ104",
+      "method_locator": "Appendix I, printed pp. 54",
+      "candidate_polity_ids": [
+        "cshapes_gw_610"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_sudan_anglo_egyptian_sudan",
+      "name": "Sudan (Anglo-Egyptian Sudan)",
+      "region": "Africa",
+      "population_value": 3997185,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AR103 and Country series!AR104",
+      "method_locator": "Appendix I, printed pp. 54",
+      "candidate_polity_ids": [
+        "cshapes_gw_625"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The V5 revision changes the reconstructed national trajectory. Condominium control, Darfur and retrospective series boundaries require a dated crosswalk."
+    },
+    {
+      "unit_id": "ft_swaziland",
+      "name": "Swaziland",
+      "region": "Africa",
+      "population_value": 103058,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AS103 and Country series!AS104",
+      "method_locator": "Appendix I, printed pp. 54",
+      "candidate_polity_ids": [
+        "cshapes_gw_572"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_tunisia",
+      "name": "Tunisia",
+      "region": "Africa",
+      "population_value": 1713013,
+      "population_lower": 1284759,
+      "population_upper": 2141268,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AT103 and Country series!AT104",
+      "method_locator": "Appendix I, printed pp. 54",
+      "candidate_polity_ids": [
+        "beylicate_of_tunis"
+      ],
+      "comparison_id": "beylicate_of_tunis",
+      "opening_disposition": "adopted_research_series",
+      "note": "The Regency of Tunis under the French protectorate. Separate from metropolitan France, Algeria and the retained Ottoman economy. Appendix I uses a modeled growth rate before 1906 because early enumerations covered the French population only. Adopt the territorial reconstruction without assigning provincial populations."
+    },
+    {
+      "unit_id": "ft_zanzibar_island",
+      "name": "Zanzibar Island",
+      "region": "Africa",
+      "population_value": 198804,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AU103 and Country series!AU104",
+      "method_locator": "Appendix I, printed pp. 54",
+      "candidate_polity_ids": [
+        "sultanate_of_zanzibar"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The study interpolates from British estimates and omits the 1901 estimate. The source description does not establish the inclusion of Pemba in the Zanzibar Islands opening control."
+    },
+    {
+      "unit_id": "ft_argentina",
+      "name": "Argentina",
+      "region": "America",
+      "population_value": 4624686,
+      "population_lower": 4338314,
+      "population_upper": 4911058,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AW103 and Country series!AW104",
+      "method_locator": "Appendix I, printed pp. 55",
+      "candidate_polity_ids": [
+        "argentina_1900"
+      ],
+      "comparison_id": "argentina_1900",
+      "opening_disposition": "adopted_research_series",
+      "note": "Argentina only. Pérez-Brignoli national reconstruction, independently compared with Ferreres in Appendix I p. 55. The 1895 census in the Americas collection distinguishes directly enumerated residents and official estimates for omissions."
+    },
+    {
+      "unit_id": "ft_bahamas",
+      "name": "Bahamas",
+      "region": "America",
+      "population_value": 54404,
+      "population_lower": 51008,
+      "population_upper": 57799,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AX103 and Country series!AX104",
+      "method_locator": "Appendix I, printed pp. 55",
+      "candidate_polity_ids": [
+        "cshapes_gw_31"
+      ],
+      "comparison_id": "cshapes_gw_31",
+      "opening_disposition": "adopted_research_series",
+      "note": "Bahamas colony. Turks and Caicos form a separate research series. Bulmer-Thomas Tables A.1 and C.1."
+    },
+    {
+      "unit_id": "ft_barbados",
+      "name": "Barbados",
+      "region": "America",
+      "population_value": 193861,
+      "population_lower": 181800,
+      "population_upper": 205922,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AY103 and Country series!AY104",
+      "method_locator": "Appendix I, printed pp. 55",
+      "candidate_polity_ids": [
+        "cshapes_gw_53"
+      ],
+      "comparison_id": "cshapes_gw_53",
+      "opening_disposition": "adopted_research_series",
+      "note": "Barbados island, independent of the Windward Islands statistical series. Bulmer-Thomas Tables A.1 and C.1."
+    },
+    {
+      "unit_id": "ft_bermuda",
+      "name": "Bermuda",
+      "region": "America",
+      "population_value": 17084,
+      "population_lower": 15588,
+      "population_upper": 18581,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!AZ103 and Country series!AZ104",
+      "method_locator": "Appendix I, printed pp. 55",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_bolivia",
+      "name": "Bolivia",
+      "region": "America",
+      "population_value": 1692478,
+      "population_lower": 1481573,
+      "population_upper": 1903384,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BA103 and Country series!BA104",
+      "method_locator": "Appendix I, printed pp. 55",
+      "candidate_polity_ids": [
+        "bolivia_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_brasil",
+      "name": "Brasil",
+      "region": "America",
+      "population_value": 17157332,
+      "population_lower": 16513931,
+      "population_upper": 17800732,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BB103 and Country series!BB104",
+      "method_locator": "Appendix I, printed pp. 56",
+      "candidate_polity_ids": [
+        "brazil_1900"
+      ],
+      "comparison_id": "brazil",
+      "opening_disposition": "comparable_extent",
+      "note": "National territory before the 1903 transfer of Acre. Opening state estimates use IBGE data and are rounded independently."
+    },
+    {
+      "unit_id": "ft_british_guiana",
+      "name": "British Guiana",
+      "region": "America",
+      "population_value": 294027,
+      "population_lower": 275733,
+      "population_upper": 312321,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BC103 and Country series!BC104",
+      "method_locator": "Appendix I, printed pp. 56",
+      "candidate_polity_ids": [
+        "cshapes_gw_110"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_british_honduras_belize",
+      "name": "British Honduras (Belize)",
+      "region": "America",
+      "population_value": 36671,
+      "population_lower": 34394,
+      "population_upper": 38948,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BD103 and Country series!BD104",
+      "method_locator": "Appendix I, printed pp. 56",
+      "candidate_polity_ids": [
+        "cshapes_gw_80"
+      ],
+      "comparison_id": "cshapes_gw_80",
+      "opening_disposition": "adopted_research_series",
+      "note": "British Honduras within colonial boundaries, separate from Honduras, Guatemala and Mexico. Appendix I uses Bulmer-Thomas Tables A.1 and C.1 and compares with Kuczynski vol. III p. 4 and the 1901 colonial census."
+    },
+    {
+      "unit_id": "ft_canada",
+      "name": "Canada",
+      "region": "America",
+      "population_value": 5268271,
+      "population_lower": 4807297,
+      "population_upper": 5729246,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BE103 and Country series!BE104",
+      "method_locator": "Appendix I, printed pp. 56",
+      "candidate_polity_ids": [
+        "dominion_of_canada"
+      ],
+      "comparison_id": "canada",
+      "opening_disposition": "comparable_extent",
+      "note": "Canada before Newfoundland joined it. Compare the national series to census areas reconciled across the 1898 administrative changes."
+    },
+    {
+      "unit_id": "ft_cayman",
+      "name": "Cayman",
+      "region": "America",
+      "population_value": 4962,
+      "population_lower": 4653,
+      "population_upper": 5271,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BF103 and Country series!BF104",
+      "method_locator": "Appendix I, printed pp. 56",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_chile",
+      "name": "Chile",
+      "region": "America",
+      "population_value": 2890099,
+      "population_lower": 2781720,
+      "population_upper": 2998479,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BG103 and Country series!BG104",
+      "method_locator": "Appendix I, printed pp. 56",
+      "candidate_polity_ids": [
+        "chile_1900"
+      ],
+      "comparison_id": "chile_1900",
+      "opening_disposition": "adopted_research_series",
+      "note": "Perez-Brignoli uses the Chilean 1895 and 1907 benchmarks; the interpolated country figure is a reconstruction."
+    },
+    {
+      "unit_id": "ft_colombia",
+      "name": "Colombia",
+      "region": "America",
+      "population_value": 3803231,
+      "population_lower": 3470447,
+      "population_upper": 4136015,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BH103 and Country series!BH104",
+      "method_locator": "Appendix I, printed pp. 57",
+      "candidate_polity_ids": [
+        "republic_of_colombia_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Source series separates Panama before independence."
+    },
+    {
+      "unit_id": "ft_costa_rica",
+      "name": "Costa Rica",
+      "region": "America",
+      "population_value": 288686,
+      "population_lower": 263426,
+      "population_upper": 313947,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BI103 and Country series!BI104",
+      "method_locator": "Appendix I, printed pp. 57",
+      "candidate_polity_ids": [
+        "costa_rica_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_cuba",
+      "name": "Cuba",
+      "region": "America",
+      "population_value": 1604255,
+      "population_lower": 1505092,
+      "population_upper": 1703417,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BJ103 and Country series!BJ104",
+      "method_locator": "Appendix I, printed pp. 57",
+      "candidate_polity_ids": [
+        "cuba_occupation_1900"
+      ],
+      "comparison_id": "cuba",
+      "opening_disposition": "comparable_extent",
+      "note": "The census territory is Cuba. The opening uses the 1899 and 1907 War Department enumerations; wartime and postwar population movements affect interpolation."
+    },
+    {
+      "unit_id": "ft_danish_virgin_island",
+      "name": "Danish Virgin Island",
+      "region": "America",
+      "population_value": 30825,
+      "population_lower": 28901,
+      "population_upper": 32749,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BK103 and Country series!BK104",
+      "method_locator": "Appendix I, printed pp. 57",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_dominican_republic",
+      "name": "Dominican Republic",
+      "region": "America",
+      "population_value": 449537,
+      "population_lower": 421721,
+      "population_upper": 477354,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BL103 and Country series!BL104",
+      "method_locator": "Appendix I, printed pp. 57",
+      "candidate_polity_ids": [
+        "dominican_republic_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_duch_antilles",
+      "name": "Duch Antilles",
+      "region": "America",
+      "population_value": 46668,
+      "population_lower": 43769,
+      "population_upper": 49567,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BM103 and Country series!BM104",
+      "method_locator": "Appendix I, printed pp. 57",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_ecuador",
+      "name": "Ecuador",
+      "region": "America",
+      "population_value": 1100787,
+      "population_lower": 1004467,
+      "population_upper": 1197106,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BN103 and Country series!BN104",
+      "method_locator": "Appendix I, printed pp. 58",
+      "candidate_polity_ids": [
+        "ecuador_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_el_salvador",
+      "name": "El Salvador",
+      "region": "America",
+      "population_value": 799415,
+      "population_lower": 699793,
+      "population_upper": 899036,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BO103 and Country series!BO104",
+      "method_locator": "Appendix I, printed pp. 58",
+      "candidate_polity_ids": [
+        "el_salvador_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_falkland_islands",
+      "name": "Falkland Islands",
+      "region": "America",
+      "population_value": 1968,
+      "population_lower": 1794,
+      "population_upper": 2141,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BP103 and Country series!BP104",
+      "method_locator": "Appendix I, printed pp. 58",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_french_guiana_french_colonies",
+      "name": "French Guiana (French Colonies)",
+      "region": "America",
+      "population_value": 32254,
+      "population_lower": 29431,
+      "population_upper": 35077,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BQ103 and Country series!BQ104",
+      "method_locator": "Appendix I, printed pp. 58",
+      "candidate_polity_ids": [
+        "cshapes_gw_120"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_granada_winward_island",
+      "name": "Granada (Winward Island)",
+      "region": "America",
+      "population_value": 62570,
+      "population_lower": 58685,
+      "population_upper": 66455,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BR103 and Country series!BR104",
+      "method_locator": "Appendix I, printed pp. 58",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_guadalupe_french_colonies",
+      "name": "Guadalupe (French Colonies)",
+      "region": "America",
+      "population_value": 177672,
+      "population_lower": 166664,
+      "population_upper": 188681,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BS103 and Country series!BS104",
+      "method_locator": "Appendix I, printed pp. 58",
+      "candidate_polity_ids": [
+        "cshapes_gw_65"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_guatemala",
+      "name": "Guatemala",
+      "region": "America",
+      "population_value": 1794023,
+      "population_lower": 1502493,
+      "population_upper": 2085552,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BT103 and Country series!BT104",
+      "method_locator": "Appendix I, printed pp. 59",
+      "candidate_polity_ids": [
+        "guatemala_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_haiti",
+      "name": "Haiti",
+      "region": "America",
+      "population_value": 1420323,
+      "population_lower": 1332195,
+      "population_upper": 1508451,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BU103 and Country series!BU104",
+      "method_locator": "Appendix I, printed pp. 59",
+      "candidate_polity_ids": [
+        "haiti_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_honduras",
+      "name": "Honduras",
+      "region": "America",
+      "population_value": 498932,
+      "population_lower": 455275,
+      "population_upper": 542590,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BV103 and Country series!BV104",
+      "method_locator": "Appendix I, printed pp. 59",
+      "candidate_polity_ids": [
+        "honduras_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_jamaica",
+      "name": "Jamaica",
+      "region": "America",
+      "population_value": 742520,
+      "population_lower": 696416,
+      "population_upper": 788624,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BW103 and Country series!BW104",
+      "method_locator": "Appendix I, printed pp. 59",
+      "candidate_polity_ids": [
+        "cshapes_gw_51"
+      ],
+      "comparison_id": "cshapes_gw_51",
+      "opening_disposition": "adopted_research_series",
+      "note": "Jamaica island. Cayman and Turks and Caicos are separate study series. Appendix I uses Bulmer-Thomas Tables A.1 and C.1. Jamaica did not take the 1901 imperial census, so the opening uses the historical reconstruction."
+    },
+    {
+      "unit_id": "ft_leeward_islads_anguilla_antigua_barbuda_dominica_montserrat_st_kitts_nevis_and_the_british_virgin_islands",
+      "name": "Leeward Islads (Anguilla, Antigua & Barbuda, Dominica, Montserrat, St. Kitts & Nevis, and the British Virgin Islands)",
+      "region": "America",
+      "population_value": 127607,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BX103 and Country series!BX104",
+      "method_locator": "Appendix I, printed pp. 59-60",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Combined Leeward Islands."
+    },
+    {
+      "unit_id": "ft_martinique_french_colonies",
+      "name": "Martinique (French Colonies)",
+      "region": "America",
+      "population_value": 212734,
+      "population_lower": 199538,
+      "population_upper": 225930,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BY103 and Country series!BY104",
+      "method_locator": "Appendix I, printed pp. 60",
+      "candidate_polity_ids": [
+        "cshapes_gw_66"
+      ],
+      "comparison_id": "cshapes_gw_66",
+      "opening_disposition": "adopted_research_series",
+      "note": "Martinique island. Separate from the metropolitan France opening and from Guadeloupe. Bulmer-Thomas series includes 1894 and 1900, before the 1902 eruption."
+    },
+    {
+      "unit_id": "ft_mexico",
+      "name": "Mexico",
+      "region": "America",
+      "population_value": 14636116,
+      "population_lower": 13355455,
+      "population_upper": 15916777,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!BZ103 and Country series!BZ104",
+      "method_locator": "Appendix I, printed pp. 60",
+      "candidate_polity_ids": [
+        "mexican_republic"
+      ],
+      "comparison_id": "mexico",
+      "opening_disposition": "comparable_extent",
+      "note": "National census footprint. The opening preserves the combined Census Yucatán and Baja California areas where later divisions would break comparability."
+    },
+    {
+      "unit_id": "ft_new_foundland",
+      "name": "New Foundland",
+      "region": "America",
+      "population_value": 217969,
+      "population_lower": 182549,
+      "population_upper": 253390,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CA103 and Country series!CA104",
+      "method_locator": "Appendix I, printed pp. 61",
+      "candidate_polity_ids": [
+        "colony_of_newfoundland"
+      ],
+      "comparison_id": "newfoundland",
+      "opening_disposition": "comparable_extent",
+      "note": "Newfoundland colony, independent of the Canadian series. Its coastal and Labrador coverage follows the source census definitions."
+    },
+    {
+      "unit_id": "ft_nicaragua",
+      "name": "Nicaragua",
+      "region": "America",
+      "population_value": 557666,
+      "population_lower": 467044,
+      "population_upper": 648288,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CB103 and Country series!CB104",
+      "method_locator": "Appendix I, printed pp. 61",
+      "candidate_polity_ids": [
+        "nicaragua_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_panama",
+      "name": "Panama",
+      "region": "America",
+      "population_value": 321498,
+      "population_lower": 289607,
+      "population_upper": 353390,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CC103 and Country series!CC104",
+      "method_locator": "Appendix I, printed pp. 61",
+      "candidate_polity_ids": [
+        "republic_of_colombia_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Part of Colombia on opening date; separately estimated."
+    },
+    {
+      "unit_id": "ft_paraguay",
+      "name": "Paraguay",
+      "region": "America",
+      "population_value": 495903,
+      "population_lower": 415318,
+      "population_upper": 576489,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CD103 and Country series!CD104",
+      "method_locator": "Appendix I, printed pp. 61",
+      "candidate_polity_ids": [
+        "paraguay_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Appendix I uses the Pérez-Brignoli reconstruction. The contemporary Argentine consular table separately estimates the western Chaco. Boundaries and Indigenous coverage need reconciliation with the legacy geography."
+    },
+    {
+      "unit_id": "ft_peru",
+      "name": "Peru",
+      "region": "America",
+      "population_value": 3596660,
+      "population_lower": 3281952,
+      "population_upper": 3911369,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CE103 and Country series!CE104",
+      "method_locator": "Appendix I, printed pp. 61",
+      "candidate_polity_ids": [
+        "peru_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_puerto_rico",
+      "name": "Puerto Rico",
+      "region": "America",
+      "population_value": 960208,
+      "population_lower": 924200,
+      "population_upper": 996217,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CF103 and Country series!CF104",
+      "method_locator": "Appendix I, printed pp. 61",
+      "candidate_polity_ids": [
+        "cshapes_gw_6"
+      ],
+      "comparison_id": "cshapes_gw_6",
+      "opening_disposition": "adopted_research_series",
+      "note": "Puerto Rico separately enumerated under US administration; independent 1899 War Department census. Continental US opening excludes it."
+    },
+    {
+      "unit_id": "ft_st_barthelemy_norvegian_colonies",
+      "name": "St. Barthelemy (Norvegian Colonies)",
+      "region": "America",
+      "population_value": 2602,
+      "population_lower": 2374,
+      "population_upper": 2831,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CG103 and Country series!CG104",
+      "method_locator": "Appendix I, printed pp. 62",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Workbook flags former colonial identity; verify inclusion in Guadeloupe."
+    },
+    {
+      "unit_id": "ft_st_lucia_winward_island",
+      "name": "St.Lucia (Winward Island)",
+      "region": "America",
+      "population_value": 49152,
+      "population_lower": 46100,
+      "population_upper": 52205,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CH103 and Country series!CH104",
+      "method_locator": "Appendix I, printed pp. 62",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_st_pierre_e_michelon",
+      "name": "St.Pierre e Michelon",
+      "region": "America",
+      "population_value": 6287,
+      "population_lower": 5894,
+      "population_upper": 6679,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CI103 and Country series!CI104",
+      "method_locator": "Appendix I, printed pp. 62",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_st_vicente_winward_island",
+      "name": "St. Vicente (Winward Island)",
+      "region": "America",
+      "population_value": 45291,
+      "population_lower": 41327,
+      "population_upper": 49255,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CJ103 and Country series!CJ104",
+      "method_locator": "Appendix I, printed pp. 62",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_surinam_duch_guayana",
+      "name": "Surinam (Duch Guayana)",
+      "region": "America",
+      "population_value": 92224,
+      "population_lower": 86496,
+      "population_upper": 97951,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CK103 and Country series!CK104",
+      "method_locator": "Appendix I, printed pp. 62",
+      "candidate_polity_ids": [
+        "cshapes_gw_115"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_trinidad_tobago_winward_island",
+      "name": "Trinidad & Tobago (Winward Island)",
+      "region": "America",
+      "population_value": 266739,
+      "population_lower": 250165,
+      "population_upper": 283313,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CL103 and Country series!CL104",
+      "method_locator": "Appendix I, printed pp. 62",
+      "candidate_polity_ids": [
+        "cshapes_gw_52"
+      ],
+      "comparison_id": "cshapes_gw_52",
+      "opening_disposition": "adopted_research_series",
+      "note": "The two islands were administered together at opening. Bulmer-Thomas tabulates both separately before 1900 and jointly thereafter."
+    },
+    {
+      "unit_id": "ft_turk_caicos_island",
+      "name": "Turk&Caicos Island",
+      "region": "America",
+      "population_value": 4101,
+      "population_lower": 3845,
+      "population_upper": 4356,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CM103 and Country series!CM104",
+      "method_locator": "Appendix I, printed pp. 62",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_united_states",
+      "name": "United states",
+      "region": "America",
+      "population_value": 75496776,
+      "population_lower": 66107933,
+      "population_upper": 84885620,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CN103 and Country series!CN104",
+      "method_locator": "Appendix I, printed pp. 63",
+      "candidate_polity_ids": [
+        "united_states_1900",
+        "cshapes_gw_3"
+      ],
+      "comparison_id": "alaska_and_mainland_us",
+      "opening_disposition": "comparable_extent",
+      "note": "Federico–Tena's United States chapter adds Alaska to the mainland trajectory; Hawaii is a separate series in Oceania and Puerto Rico is separately tabulated. The opening reproduces mainland states and Alaska in two disjoint accounts."
+    },
+    {
+      "unit_id": "ft_uruguay",
+      "name": "Uruguay",
+      "region": "America",
+      "population_value": 908090,
+      "population_lower": 760525,
+      "population_upper": 1055656,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CO103 and Country series!CO104",
+      "method_locator": "Appendix I, printed pp. 63",
+      "candidate_polity_ids": [
+        "uruguay_1900"
+      ],
+      "comparison_id": "uruguay_1900",
+      "opening_disposition": "adopted_research_series",
+      "note": "The independent republic, separate from Argentina and Brazil. Appendix I uses the national estimate from Bulmer-Thomas Table 3.1. Uruguay's statistical office records no general census between 1860 and 1908."
+    },
+    {
+      "unit_id": "ft_venezuela",
+      "name": "Venezuela",
+      "region": "America",
+      "population_value": 1950611,
+      "population_lower": 1633636,
+      "population_upper": 2267586,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CP103 and Country series!CP104",
+      "method_locator": "Appendix I, printed pp. 63",
+      "candidate_polity_ids": [
+        "venezuela_1900"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_aden_and_socotra",
+      "name": "Aden and Socotra",
+      "region": "Asia",
+      "population_value": 56085,
+      "population_lower": 46971,
+      "population_upper": 65200,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CR103 and Country series!CR104",
+      "method_locator": "Appendix I, printed pp. 64",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_afghanistan",
+      "name": "Afghanistan",
+      "region": "Asia",
+      "population_value": 4455815,
+      "population_lower": 3341860,
+      "population_upper": 5569770,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CS103 and Country series!CS104",
+      "method_locator": "Appendix I, printed pp. 64",
+      "candidate_polity_ids": [
+        "emirate_of_afghanistan"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_bahrein_ottoman_empire",
+      "name": "Bahrein (Ottoman Empire)",
+      "region": "Asia",
+      "population_value": 66589,
+      "population_lower": 49941,
+      "population_upper": 83238,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CU103 and Country series!CU104",
+      "method_locator": "Appendix I, printed pp. 64 81-88",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_bhutan",
+      "name": "Bhutan",
+      "region": "Asia",
+      "population_value": 98729,
+      "population_lower": 74046,
+      "population_upper": 123413,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CV103 and Country series!CV104",
+      "method_locator": "Appendix I, printed pp. 64",
+      "candidate_polity_ids": [
+        "kingdom_of_bhutan"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_british_malaya",
+      "name": "British Malaya",
+      "region": "Asia",
+      "population_value": 1872786,
+      "population_lower": 1640030,
+      "population_upper": 2105541,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CW103 and Country series!CW104",
+      "method_locator": "Appendix I, printed pp. 65",
+      "candidate_polity_ids": [
+        "cshapes_gw_821",
+        "cshapes_gw_822",
+        "cshapes_gw_827"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Combined Malayan territories and Singapore."
+    },
+    {
+      "unit_id": "ft_brunei",
+      "name": "Brunei",
+      "region": "Asia",
+      "population_value": 17873,
+      "population_lower": 14968,
+      "population_upper": 20778,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CX103 and Country series!CX104",
+      "method_locator": "Appendix I, printed pp. 66",
+      "candidate_polity_ids": [
+        "sultanate_of_brunei"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_ceylon",
+      "name": "Ceylon",
+      "region": "Asia",
+      "population_value": 4078392,
+      "population_lower": 3721531,
+      "population_upper": 4435252,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CY103 and Country series!CY104",
+      "method_locator": "Appendix I, printed pp. 66",
+      "candidate_polity_ids": [
+        "cshapes_gw_780"
+      ],
+      "comparison_id": "ceylon",
+      "opening_disposition": "comparable_extent",
+      "note": "The island-wide controls use different enumeration corrections. The revised official opening includes migration; its smaller nine-province subtotal was not allocated."
+    },
+    {
+      "unit_id": "ft_china",
+      "name": "China",
+      "region": "Asia",
+      "population_value": 400038694,
+      "population_lower": 335032405,
+      "population_upper": 465044982,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!CZ103 and Country series!CZ104",
+      "method_locator": "Appendix I, printed pp. 66-73",
+      "candidate_polity_ids": [
+        "qing_empire"
+      ],
+      "comparison_id": "qing",
+      "opening_disposition": "partial_extent",
+      "note": "Only reviewed interior statistical subdivisions enter the opening from Cao; the balance uses the legacy control. The Federico–Tena China series uses a different reconstruction. Outer Mongolia, Taiwan, Hong Kong and Macao stand separately in the research book."
+    },
+    {
+      "unit_id": "ft_dutch_east_indies_indonesia",
+      "name": "Dutch East Indies (Indonesia)",
+      "region": "Asia",
+      "population_value": 44363679,
+      "population_lower": 40481856,
+      "population_upper": 48245501,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DA103 and Country series!DA104",
+      "method_locator": "Appendix I, printed pp. 73-74",
+      "candidate_polity_ids": [
+        "cshapes_gw_850"
+      ],
+      "comparison_id": "cshapes_gw_850",
+      "opening_disposition": "adopted_research_series",
+      "note": "Java, the Outer Islands and western New Guinea. Excludes East Timor, the British Borneo territories and Brunei. Separate from the Netherlands. Country study pp. 3–4 and workbook rows 101–102 (https://doi.org/10.21950/E09BKS); Appendix I pp. 73–75."
+    },
+    {
+      "unit_id": "ft_formosa_taiwan",
+      "name": "Formosa (Taiwan)",
+      "region": "Asia",
+      "population_value": 2796343,
+      "population_lower": 2551662,
+      "population_upper": 3041024,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DB103 and Country series!DB104",
+      "method_locator": "Appendix I, printed pp. 91",
+      "candidate_polity_ids": [
+        "taiwan_under_japan"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Residents and foreigners are separately registered. The garrison and Orchid Island lack a comparable complete return."
+    },
+    {
+      "unit_id": "ft_french_india",
+      "name": "French India",
+      "region": "Asia",
+      "population_value": 276999,
+      "population_lower": 207748,
+      "population_upper": 346249,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DC103 and Country series!DC104",
+      "method_locator": "Appendix I, printed pp. 75",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_french_indochina",
+      "name": "French Indochina",
+      "region": "Asia",
+      "population_value": 19950357,
+      "population_lower": 14962767,
+      "population_upper": 24937947,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DD103 and Country series!DD104",
+      "method_locator": "Appendix I, printed pp. 75-76",
+      "candidate_polity_ids": [
+        "cshapes_gw_811",
+        "cshapes_gw_812",
+        "cshapes_gw_815"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Indochinese possessions combined."
+    },
+    {
+      "unit_id": "ft_hong_kong",
+      "name": "Hong-Kong",
+      "region": "Asia",
+      "population_value": 350735,
+      "population_lower": 337582,
+      "population_upper": 363889,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DE103 and Country series!DE104",
+      "method_locator": "Appendix I, printed pp. 76",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_india",
+      "name": "India",
+      "region": "Asia",
+      "population_value": 295348039,
+      "population_lower": 247353981,
+      "population_upper": 343342096,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DF103 and Country series!DF104",
+      "method_locator": "Appendix I, printed pp. 76-79",
+      "candidate_polity_ids": [
+        "cshapes_gw_750"
+      ],
+      "comparison_id": "india",
+      "opening_disposition": "partial_extent",
+      "note": "The adopted statistical subdivisions lie within the older India account. Their common-area census basis omits Aden and leaves incompletely mapped frontier areas in the legacy balance. The population of the full research area and the opening subdivisions cannot yield a geographic residual."
+    },
+    {
+      "unit_id": "ft_japan",
+      "name": "Japan",
+      "region": "Asia",
+      "population_value": 44012686,
+      "population_lower": 43462527,
+      "population_upper": 44562846,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DH103 and Country series!DH104",
+      "method_locator": "Appendix I, printed pp. 79",
+      "candidate_polity_ids": [
+        "empire_of_japan"
+      ],
+      "comparison_id": "empire_of_japan",
+      "opening_disposition": "adopted_research_series",
+      "note": "Home islands. Table 2.1 of Historical Statistics of Japan and the 1920 census anchor. Taiwan is a separate study series and WWO dependency."
+    },
+    {
+      "unit_id": "ft_khiva_and_bukhara_russian_empire",
+      "name": "Khiva and Bukhara (Russian Empire)",
+      "region": "Asia",
+      "population_value": 1778282,
+      "population_lower": null,
+      "population_upper": null,
+      "quality": "not_assessed_for_this_revision",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DI103 and Country series!DI104",
+      "method_locator": "Appendix I, printed pp. 79 105-107",
+      "candidate_polity_ids": [
+        "emirate_of_bukhara",
+        "khanate_of_khiva"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Two protected khanates, separate from Russian series."
+    },
+    {
+      "unit_id": "ft_korea",
+      "name": "Korea",
+      "region": "Asia",
+      "population_value": 17078033,
+      "population_lower": 14302852,
+      "population_upper": 19853214,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DJ103 and Country series!DJ104",
+      "method_locator": "Appendix I, printed pp. 79-80",
+      "candidate_polity_ids": [
+        "korean_empire"
+      ],
+      "comparison_id": "korean_empire",
+      "opening_disposition": "adopted_research_series",
+      "note": "Korean peninsula before annexation, separate from the Japanese home islands and Taiwan. Kwon and Shin reconstruct the population using revised 1910 benchmarks and earlier population registers. Under-registration is material."
+    },
+    {
+      "unit_id": "ft_kuwait_ottoman_empire",
+      "name": "Kuwait (Ottoman Empire)",
+      "region": "Asia",
+      "population_value": 88183,
+      "population_lower": 66136,
+      "population_upper": 110230,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DK103 and Country series!DK104",
+      "method_locator": "Appendix I, printed pp. 80-88",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_macau",
+      "name": "Macau",
+      "region": "Asia",
+      "population_value": 63842,
+      "population_lower": 57500,
+      "population_upper": 70185,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DL103 and Country series!DL104",
+      "method_locator": "Appendix I, printed pp. 80",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_maldive_india",
+      "name": "Maldive (India)",
+      "region": "Asia",
+      "population_value": 68446,
+      "population_lower": 51334,
+      "population_upper": 85558,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DM103 and Country series!DM104",
+      "method_locator": "Appendix I, printed pp. 80",
+      "candidate_polity_ids": [
+        "cshapes_gw_781"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_mongolia",
+      "name": "Mongolia",
+      "region": "Asia",
+      "population_value": 590443,
+      "population_lower": 442831,
+      "population_upper": 738054,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DN103 and Country series!DN104",
+      "method_locator": "Appendix I, printed pp. 80",
+      "candidate_polity_ids": [
+        "qing_empire"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Outer Mongolia and Tannu Uriankhai require independent statistical and boundary reconciliation. The selected Cao provincial returns contain neither."
+    },
+    {
+      "unit_id": "ft_nepal",
+      "name": "Nepal",
+      "region": "Asia",
+      "population_value": 5218337,
+      "population_lower": 3913752,
+      "population_upper": 6522922,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DO103 and Country series!DO104",
+      "method_locator": "Appendix I, printed pp. 80-81",
+      "candidate_polity_ids": [
+        "kingdom_of_nepal"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_oman_ottoman_empire",
+      "name": "Oman (Ottoman Empire",
+      "region": "Asia",
+      "population_value": 262880,
+      "population_lower": 197159,
+      "population_upper": 328600,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DQ103 and Country series!DQ104",
+      "method_locator": "Appendix I, printed pp. 81-88",
+      "candidate_polity_ids": [
+        "sultanate_of_muscat_oman"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_ottoman_empire_asia_turkey",
+      "name": "Ottoman empire(Asia)/Turkey",
+      "region": "Asia",
+      "population_value": 25646777,
+      "population_lower": 21479175,
+      "population_upper": 29814380,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DR103 and Country series!DR104",
+      "method_locator": "Appendix I, printed pp. 81-88",
+      "candidate_polity_ids": [
+        "ottoman_empire"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Asian Ottoman series, separately tabulated Balkan lands."
+    },
+    {
+      "unit_id": "ft_persia_iran",
+      "name": "Persia (Iran)",
+      "region": "Asia",
+      "population_value": 9594439,
+      "population_lower": 7195828,
+      "population_upper": 11993049,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DT103 and Country series!DT104",
+      "method_locator": "Appendix I, printed pp. 88-89",
+      "candidate_polity_ids": [
+        "persia_qajar"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_philippines",
+      "name": "Philippines",
+      "region": "Asia",
+      "population_value": 7486031,
+      "population_lower": 6269549,
+      "population_upper": 8702512,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DU103 and Country series!DU104",
+      "method_locator": "Appendix I, printed pp. 89-90",
+      "candidate_polity_ids": [
+        "cshapes_gw_840"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The March 1903 census includes Cagayan de Jolo and Sibutu, named in the November 1900 treaty effective March 1901. Bulletin 1 tables 2 pp. 15, 18 count 2,000 and 280 respectively. Opening-date counts for those islands and dependencies are unresolved."
+    },
+    {
+      "unit_id": "ft_portuguese_india",
+      "name": "Portuguese India",
+      "region": "Asia",
+      "population_value": 507239,
+      "population_lower": 402814,
+      "population_upper": 611662,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DV103 and Country series!DV104",
+      "method_locator": "Appendix I, printed pp. 90",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_qatar_ottoman_empire",
+      "name": "Qatar (Ottoman Empire)",
+      "region": "Asia",
+      "population_value": 14403,
+      "population_lower": 10801,
+      "population_upper": 18004,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DW103 and Country series!DW104",
+      "method_locator": "Appendix I, printed pp. 90",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_sabath",
+      "name": "Sabath",
+      "region": "Asia",
+      "population_value": 196783,
+      "population_lower": 147586,
+      "population_upper": 245980,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DX103 and Country series!DX104",
+      "method_locator": "Appendix I, printed pp. 65",
+      "candidate_polity_ids": [
+        "cshapes_gw_823"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "British North Borneo."
+    },
+    {
+      "unit_id": "ft_sarawak",
+      "name": "Sarawak",
+      "region": "Asia",
+      "population_value": 328534,
+      "population_lower": 246399,
+      "population_upper": 410668,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DY103 and Country series!DY104",
+      "method_locator": "Appendix I, printed pp. 90",
+      "candidate_polity_ids": [
+        "cshapes_gw_824"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_siam",
+      "name": "Siam",
+      "region": "Asia",
+      "population_value": 7285011,
+      "population_lower": 5786640,
+      "population_upper": 8783382,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!DZ103 and Country series!DZ104",
+      "method_locator": "Appendix I, printed pp. 90",
+      "candidate_polity_ids": [
+        "kingdom_of_siam"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_timor_east_timor",
+      "name": "Timor (East Timor)",
+      "region": "Asia",
+      "population_value": 346512,
+      "population_lower": 290203,
+      "population_upper": 402822,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EB103 and Country series!EB104",
+      "method_locator": "Appendix I, printed pp. 75",
+      "candidate_polity_ids": [
+        "cshapes_gw_860"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_andorra",
+      "name": "Andorra",
+      "region": "Europe",
+      "population_value": 4252,
+      "population_lower": 3560,
+      "population_upper": 4944,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EE103 and Country series!EE104",
+      "method_locator": "Appendix I, printed pp. 92",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_austria_hungary",
+      "name": "Austria-Hungary",
+      "region": "Europe",
+      "population_value": 46762027,
+      "population_lower": 46177501,
+      "population_upper": 47346553,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EG103 and Country series!EG104",
+      "method_locator": "Appendix I, printed pp. 92-96",
+      "candidate_polity_ids": [
+        "austria_hungary",
+        "cshapes_gw_3461",
+        "cshapes_gw_3462"
+      ],
+      "comparison_id": "austria_hungary",
+      "opening_disposition": "different_extent",
+      "note": "The opening covers the Austrian and Hungarian halves. The research column includes Bosnia and Herzegovina; the difference also reflects different sources and timing. No occupied-territory population is inferred by subtraction."
+    },
+    {
+      "unit_id": "ft_belgium",
+      "name": "Belgium",
+      "region": "Europe",
+      "population_value": 6713135,
+      "population_lower": 6629220,
+      "population_upper": 6797050,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EH103 and Country series!EH104",
+      "method_locator": "Appendix I, printed pp. 96-97",
+      "candidate_polity_ids": [
+        "kingdom_of_belgium"
+      ],
+      "comparison_id": "kingdom_of_belgium",
+      "opening_disposition": "adopted_research_series",
+      "note": "Post-1839 Belgium, separate from Luxembourg, Netherlands and Congo Free State."
+    },
+    {
+      "unit_id": "ft_bulgaria",
+      "name": "Bulgaria",
+      "region": "Europe",
+      "population_value": 3715205,
+      "population_lower": 3623019,
+      "population_upper": 3807392,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EI103 and Country series!EI104",
+      "method_locator": "Appendix I, printed pp. 97-98",
+      "candidate_polity_ids": [
+        "principality_of_bulgaria"
+      ],
+      "comparison_id": "principality_of_bulgaria",
+      "opening_disposition": "adopted_research_series",
+      "note": "Bulgaria with Eastern Rumelia after 1885; historical statistics and census, before the Balkan Wars."
+    },
+    {
+      "unit_id": "ft_crete_aegean_islands",
+      "name": "Crete (Aegean Islands)",
+      "region": "Europe",
+      "population_value": 301354,
+      "population_lower": 252383,
+      "population_upper": 350325,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EJ103 and Country series!EJ104",
+      "method_locator": "Appendix I, printed pp. 91-92",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_cyprus_aegean_islands",
+      "name": "Cyprus(Aegean Islands)",
+      "region": "Europe",
+      "population_value": 232434,
+      "population_lower": 194662,
+      "population_upper": 270205,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EK103 and Country series!EK104",
+      "method_locator": "Appendix I, printed pp. 91-92",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_denmark",
+      "name": "Denmark",
+      "region": "Europe",
+      "population_value": 2444423,
+      "population_lower": 2413867,
+      "population_upper": 2474980,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EM103 and Country series!EM104",
+      "method_locator": "Appendix I, printed pp. 98",
+      "candidate_polity_ids": [
+        "kingdom_of_denmark"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The study discusses Greenland and Faroese series jointly with Denmark. Their individual series and the metropole require separate coverage checks."
+    },
+    {
+      "unit_id": "ft_finland",
+      "name": "Finland",
+      "region": "Europe",
+      "population_value": 2645685,
+      "population_lower": 2612613,
+      "population_upper": 2678757,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EP103 and Country series!EP104",
+      "method_locator": "Appendix I, printed pp. 98-99",
+      "candidate_polity_ids": [
+        "russian_empire"
+      ],
+      "comparison_id": "russian_empire",
+      "opening_disposition": "adopted_research_series",
+      "note": "Empire excluding Finland. 1897 census extrapolated by Sifman's correction for duplicated movers; Khiva and Bukhara have a separate source series. / Grand Duchy of Finland under Russian crown. Separate study unit and excluded from Russian census total."
+    },
+    {
+      "unit_id": "ft_france",
+      "name": "France",
+      "region": "Europe",
+      "population_value": 38915205,
+      "population_lower": 38428765,
+      "population_upper": 39401646,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EQ103 and Country series!EQ104",
+      "method_locator": "Appendix I, printed pp. 99",
+      "candidate_polity_ids": [
+        "country_fra"
+      ],
+      "comparison_id": "france",
+      "opening_disposition": "comparable_extent",
+      "note": "Metropolitan departments on the 1900 boundary. Alsace–Lorraine belongs to the German return. Colonies are outside both metropolitan controls."
+    },
+    {
+      "unit_id": "ft_germany",
+      "name": "Germany",
+      "region": "Europe",
+      "population_value": 55650279,
+      "population_lower": 54954650,
+      "population_upper": 56345908,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!ER103 and Country series!ER104",
+      "method_locator": "Appendix I, printed pp. 100",
+      "candidate_polity_ids": [
+        "german_empire"
+      ],
+      "comparison_id": "germany",
+      "opening_disposition": "comparable_extent",
+      "note": "European German Empire including Alsace–Lorraine. Overseas colonies stand outside both estimates."
+    },
+    {
+      "unit_id": "ft_gibraltar",
+      "name": "Gibraltar",
+      "region": "Europe",
+      "population_value": 20159,
+      "population_lower": 18393,
+      "population_upper": 21924,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!ES103 and Country series!ES104",
+      "method_locator": "Appendix I, printed pp. 100",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_greece",
+      "name": "Greece",
+      "region": "Europe",
+      "population_value": 2495266,
+      "population_lower": 2089784,
+      "population_upper": 2900748,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!ET103 and Country series!ET104",
+      "method_locator": "Appendix I, printed pp. 100-101",
+      "candidate_polity_ids": [
+        "kingdom_of_greece"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_iceland",
+      "name": "Iceland",
+      "region": "Europe",
+      "population_value": 78086,
+      "population_lower": 77109,
+      "population_upper": 79063,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EV103 and Country series!EV104",
+      "method_locator": "Appendix I, printed pp. 101",
+      "candidate_polity_ids": [
+        "iceland_under_denmark"
+      ],
+      "comparison_id": "iceland_under_denmark",
+      "opening_disposition": "adopted_research_series",
+      "note": "Iceland, enumerated separately from the Danish metropole. Danish yearbook provides independent 1901 territorial control."
+    },
+    {
+      "unit_id": "ft_italy",
+      "name": "Italy",
+      "region": "Europe",
+      "population_value": 32296914,
+      "population_lower": 31085778,
+      "population_upper": 33508049,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!EY103 and Country series!EY104",
+      "method_locator": "Appendix I, printed pp. 102",
+      "candidate_polity_ids": [
+        "kingdom_of_italy"
+      ],
+      "comparison_id": "kingdom_of_italy",
+      "opening_disposition": "adopted_research_series",
+      "note": "Kingdom after annexation of Rome and Veneto, before acquisition of Austrian territories. Colonies separate."
+    },
+    {
+      "unit_id": "ft_luxembourg",
+      "name": "Luxembourg",
+      "region": "Europe",
+      "population_value": 231321,
+      "population_lower": 228428,
+      "population_upper": 234214,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FB103 and Country series!FB104",
+      "method_locator": "Appendix I, printed pp. 96-97 103",
+      "candidate_polity_ids": [
+        "grand_duchy_of_luxembourg"
+      ],
+      "comparison_id": "kingdom_of_luxembourg",
+      "opening_disposition": "adopted_research_series",
+      "note": "Grand Duchy after the 1839 partition. Use the established WWO economic alias for the same political unit."
+    },
+    {
+      "unit_id": "ft_malta",
+      "name": "Malta",
+      "region": "Europe",
+      "population_value": 182672,
+      "population_lower": 175821,
+      "population_upper": 189523,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FC103 and Country series!FC104",
+      "method_locator": "Appendix I, printed pp. 103",
+      "candidate_polity_ids": [
+        "cshapes_gw_338"
+      ],
+      "comparison_id": "cshapes_gw_338",
+      "opening_disposition": "adopted_research_series",
+      "note": "Maltese islands series from Statistical Yearbook Malta; separate from United Kingdom."
+    },
+    {
+      "unit_id": "ft_monaco",
+      "name": "Monaco",
+      "region": "Europe",
+      "population_value": 12818,
+      "population_lower": 10734,
+      "population_upper": 14902,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FD103 and Country series!FD104",
+      "method_locator": "Appendix I, printed pp. 99 103",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "No matching political unit in the opening catalogue."
+    },
+    {
+      "unit_id": "ft_montenegro",
+      "name": "Montenegro",
+      "region": "Europe",
+      "population_value": 184964,
+      "population_lower": 146927,
+      "population_upper": 223002,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FE103 and Country series!FE104",
+      "method_locator": "Appendix I, printed pp. 108",
+      "candidate_polity_ids": [
+        "principality_of_montenegro"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The political candidates require a review of source coverage and territorial exclusions."
+    },
+    {
+      "unit_id": "ft_netherlands",
+      "name": "Netherlands",
+      "region": "Europe",
+      "population_value": 5141915,
+      "population_lower": 5014365,
+      "population_upper": 5269466,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FF103 and Country series!FF104",
+      "method_locator": "Appendix I, printed pp. 103-104",
+      "candidate_polity_ids": [
+        "kingdom_of_netherlands"
+      ],
+      "comparison_id": "kingdom_of_netherlands",
+      "opening_disposition": "adopted_research_series",
+      "note": "European territory after the 1839 settlement including Eastern Limburg. Overseas colonies separate."
+    },
+    {
+      "unit_id": "ft_norway",
+      "name": "Norway",
+      "region": "Europe",
+      "population_value": 2217107,
+      "population_lower": 2189393,
+      "population_upper": 2244821,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FG103 and Country series!FG104",
+      "method_locator": "Appendix I, printed pp. 104",
+      "candidate_polity_ids": [
+        "sweden_norway_union"
+      ],
+      "comparison_id": "sweden_norway_union",
+      "opening_disposition": "adopted_research_series",
+      "note": "Norway, under the Swedish crown; Statistics Norway 1968 table 20. / Sweden alone; Lund historical series explicitly excludes both Norway and Finland."
+    },
+    {
+      "unit_id": "ft_ottoman_balkans",
+      "name": "Ottoman (Balkans)",
+      "region": "Europe",
+      "population_value": 4407683,
+      "population_lower": 3691433,
+      "population_upper": 5123933,
+      "quality": "D",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FH103 and Country series!FH104",
+      "method_locator": "Appendix I, printed pp. 81-88",
+      "candidate_polity_ids": [
+        "ottoman_empire"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Ottoman European provinces."
+    },
+    {
+      "unit_id": "ft_portugal",
+      "name": "Portugal",
+      "region": "Europe",
+      "population_value": 5404156,
+      "population_lower": 5336603,
+      "population_upper": 5471709,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FJ103 and Country series!FJ104",
+      "method_locator": "Appendix I, printed pp. 104-105",
+      "candidate_polity_ids": [
+        "kingdom_of_portugal"
+      ],
+      "comparison_id": "kingdom_of_portugal",
+      "opening_disposition": "adopted_research_series",
+      "note": "Metropole plus Madeira and Azores as specified in Appendix I. Overseas possessions separately enumerated."
+    },
+    {
+      "unit_id": "ft_romania",
+      "name": "Romania",
+      "region": "Europe",
+      "population_value": 6001362,
+      "population_lower": 5476242,
+      "population_upper": 6526482,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FK103 and Country series!FK104",
+      "method_locator": "Appendix I, printed pp. 105",
+      "candidate_polity_ids": [
+        "kingdom_of_romania"
+      ],
+      "comparison_id": "romania",
+      "opening_disposition": "comparable_extent",
+      "note": "The Romanian Old Kingdom, before the territorial gains of 1913 and 1918. Its adopted count is the 1899 census of legal residents."
+    },
+    {
+      "unit_id": "ft_russia_empire_ussr",
+      "name": "Russia Empire/USSR",
+      "region": "Europe",
+      "population_value": 132736358,
+      "population_lower": 127758744,
+      "population_upper": 137713972,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FL103 and Country series!FL104",
+      "method_locator": "Appendix I, printed pp. 105-107",
+      "candidate_polity_ids": [
+        "russian_empire"
+      ],
+      "comparison_id": "russian_empire",
+      "opening_disposition": "adopted_research_series",
+      "note": "Empire excluding Finland. 1897 census extrapolated by Sifman's correction for duplicated movers; Khiva and Bukhara have a separate source series. / Grand Duchy of Finland under Russian crown. Separate study unit and excluded from Russian census total."
+    },
+    {
+      "unit_id": "ft_serbia_yugoslavia",
+      "name": "Serbia/Yugoslavia",
+      "region": "Europe",
+      "population_value": 2471816,
+      "population_lower": 2410539,
+      "population_upper": 2533093,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FM103 and Country series!FM104",
+      "method_locator": "Appendix I, printed pp. 107-108",
+      "candidate_polity_ids": [
+        "kingdom_of_serbia"
+      ],
+      "comparison_id": "kingdom_of_serbia",
+      "opening_disposition": "adopted_research_series",
+      "note": "1900 Kingdom of Serbia. Historical Statistics Serbia from 1879 to 1910; Montenegro remains separate."
+    },
+    {
+      "unit_id": "ft_spain",
+      "name": "Spain",
+      "region": "Europe",
+      "population_value": 18511807,
+      "population_lower": 18280408,
+      "population_upper": 18743205,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FN103 and Country series!FN104",
+      "method_locator": "Appendix I, printed pp. 108",
+      "candidate_polity_ids": [
+        "kingdom_of_spain"
+      ],
+      "comparison_id": "kingdom_of_spain",
+      "opening_disposition": "adopted_research_series",
+      "note": "Spain including Canary and Balearic Islands (Appendix I note 129). Overseas possessions excluded."
+    },
+    {
+      "unit_id": "ft_sweden",
+      "name": "Sweden",
+      "region": "Europe",
+      "population_value": 5098692,
+      "population_lower": 5034958,
+      "population_upper": 5162426,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FO103 and Country series!FO104",
+      "method_locator": "Appendix I, printed pp. 108",
+      "candidate_polity_ids": [
+        "sweden_norway_union"
+      ],
+      "comparison_id": "sweden_norway_union",
+      "opening_disposition": "adopted_research_series",
+      "note": "Norway, under the Swedish crown; Statistics Norway 1968 table 20. / Sweden alone; Lund historical series explicitly excludes both Norway and Finland."
+    },
+    {
+      "unit_id": "ft_switzerland",
+      "name": "Switzerland",
+      "region": "Europe",
+      "population_value": 3300846,
+      "population_lower": 3259584,
+      "population_upper": 3342108,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FP103 and Country series!FP104",
+      "method_locator": "Appendix I, printed pp. 109",
+      "candidate_polity_ids": [
+        "swiss_confederation"
+      ],
+      "comparison_id": "switzerland",
+      "opening_disposition": "comparable_extent",
+      "note": "The historical cantons and half cantons; the opening uses the federal resident-population comparison of 1888 and 1900."
+    },
+    {
+      "unit_id": "ft_united_kingdom",
+      "name": "United Kingdom",
+      "region": "Europe",
+      "population_value": 40966066,
+      "population_lower": 40453989,
+      "population_upper": 41478142,
+      "quality": "A",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FQ103 and Country series!FQ104",
+      "method_locator": "Appendix I, printed pp. 109",
+      "candidate_polity_ids": [
+        "british_isles_1900"
+      ],
+      "comparison_id": "british_isles",
+      "opening_disposition": "comparable_extent",
+      "note": "Great Britain and all Ireland. Crown Dependencies and overseas possessions are outside both controls."
+    },
+    {
+      "unit_id": "ft_australia",
+      "name": "Australia",
+      "region": "Oceania",
+      "population_value": 3837578,
+      "population_lower": 3693667,
+      "population_upper": 3981487,
+      "quality": "B",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FS103 and Country series!FS104",
+      "method_locator": "Appendix I, printed pp. 109-110",
+      "candidate_polity_ids": [
+        "cshapes_gw_901",
+        "cshapes_gw_902",
+        "cshapes_gw_903",
+        "cshapes_gw_904",
+        "cshapes_gw_905",
+        "cshapes_gw_906"
+      ],
+      "comparison_id": "australia_colonies_1900",
+      "opening_disposition": "adopted_research_series",
+      "note": "Six pre-federation colonies combined under WWO economic alias. Study explicitly adds the Smith Aboriginal reconstruction; state-level ABS figures have narrower enumeration."
+    },
+    {
+      "unit_id": "ft_hawai",
+      "name": "Hawai",
+      "region": "Oceania",
+      "population_value": 145819,
+      "population_lower": 138889,
+      "population_upper": 152750,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FT103 and Country series!FT104",
+      "method_locator": "Appendix I, printed pp. 110",
+      "candidate_polity_ids": [
+        "cshapes_gw_4"
+      ],
+      "comparison_id": "hawaii",
+      "opening_disposition": "comparable_extent",
+      "note": "The Hawaiian Islands remain a separate Oceania series. The opening uses actual census reference dates."
+    },
+    {
+      "unit_id": "ft_new_zeland",
+      "name": "New Zeland",
+      "region": "Oceania",
+      "population_value": 806326,
+      "population_lower": 735771,
+      "population_upper": 876880,
+      "quality": "C",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FU103 and Country series!FU104",
+      "method_locator": "Appendix I, printed pp. 110-111",
+      "candidate_polity_ids": [
+        "cshapes_gw_920"
+      ],
+      "comparison_id": "new_zealand",
+      "opening_disposition": "comparable_extent",
+      "note": "The opening includes the contemporary official carry-forward of Māori population. Its non-Māori district estimates do not cover the whole group. Both figures are estimates."
+    },
+    {
+      "unit_id": "ft_melanesia",
+      "name": "Melanesia",
+      "region": "Oceania",
+      "population_value": 1537072,
+      "population_lower": 1220597,
+      "population_upper": 1853546,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FV103 and Country series!FV104",
+      "method_locator": "Appendix I, printed pp. 111-113",
+      "candidate_polity_ids": [
+        "cshapes_gw_911",
+        "cshapes_gw_912",
+        "cshapes_gw_930",
+        "cshapes_gw_940",
+        "cshapes_gw_950"
+      ],
+      "comparison_id": "fiji_rotuma",
+      "opening_disposition": "partial_extent",
+      "note": "The independent colony return covers Fiji and Rotuma. Federico–Tena also includes New Caledonia, New Hebrides, eastern New Guinea and Solomon Islands in Melanesia. Subtracting the opening figure cannot identify any of those populations."
+    },
+    {
+      "unit_id": "ft_micronesia",
+      "name": "Micronesia",
+      "region": "Oceania",
+      "population_value": 108638,
+      "population_lower": 86288,
+      "population_upper": 130988,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FW103 and Country series!FW104",
+      "method_locator": "Appendix I, printed pp. 113-114",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "The regional total includes Guam and other archipelagos. A mutually exclusive island allocation is unavailable."
+    },
+    {
+      "unit_id": "ft_polynesia",
+      "name": "Polynesia",
+      "region": "Oceania",
+      "population_value": 105366,
+      "population_lower": 83686,
+      "population_upper": 127046,
+      "quality": "E",
+      "source_id": "ft_world_v5",
+      "locator": "Country series!FX103 and Country series!FX104",
+      "method_locator": "Appendix I, printed pp. 114-115",
+      "candidate_polity_ids": [],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "Archipelago-level allocation and islands outside the map catalogue require separate controls."
+    },
+    {
+      "unit_id": "ft_united_arab_emirates",
+      "name": "United Arab Emirates",
+      "region": "Asia",
+      "population_value": 40084,
+      "population_lower": 30062,
+      "population_upper": 50106,
+      "quality": "E",
+      "source_id": "ft_world_v4",
+      "locator": "Country series!EC103 and Country series!EC104",
+      "method_locator": "Appendix I, printed pp. 81-88 91",
+      "candidate_polity_ids": [
+        "trucial_states"
+      ],
+      "comparison_id": null,
+      "opening_disposition": "research_only",
+      "note": "V4 Trucial coast series. V5 summary includes an equivalent residual but V5 country column is absent."
+    }
+  ],
+  "opening_comparisons": [
+    {
+      "comparison_id": "alaska_and_mainland_us",
+      "opening_root_ids": [
+        "cshapes_gw_3",
+        "united_states_1900"
+      ],
+      "research_unit_ids": [
+        "ft_united_states"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "Federico–Tena's United States chapter adds Alaska to the mainland trajectory; Hawaii is a separate series in Oceania and Puerto Rico is separately tabulated. The opening reproduces mainland states and Alaska in two disjoint accounts.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 75496776,
+      "documented_opening_people": 75517264,
+      "opening_people_including_retained_balances": 75517264,
+      "research_minus_documented": -20488
+    },
+    {
+      "comparison_id": "austria_hungary",
+      "opening_root_ids": [
+        "austria_hungary"
+      ],
+      "research_unit_ids": [
+        "ft_austria_hungary"
+      ],
+      "scope_relation": "different_extent",
+      "note": "The opening covers the Austrian and Hungarian halves. The research column includes Bosnia and Herzegovina; the difference also reflects different sources and timing. No occupied-territory population is inferred by subtraction.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 46762027,
+      "documented_opening_people": 45000882,
+      "opening_people_including_retained_balances": 45000882,
+      "research_minus_documented": 1761145
+    },
+    {
+      "comparison_id": "basutoland",
+      "opening_root_ids": [
+        "cshapes_gw_570"
+      ],
+      "research_unit_ids": [
+        "ft_basutoland"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "Both refer to Basutoland outside the four South African polities. The opening interpolates the 1891 and 1904 returns after the 1901 census was suspended.",
+      "research_regions": [
+        "Africa"
+      ],
+      "research_people": 219865,
+      "documented_opening_people": 305255,
+      "opening_people_including_retained_balances": 305255,
+      "research_minus_documented": -85390
+    },
+    {
+      "comparison_id": "brazil",
+      "opening_root_ids": [
+        "brazil_1900"
+      ],
+      "research_unit_ids": [
+        "ft_brasil"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "National territory before the 1903 transfer of Acre. Opening state estimates use IBGE data and are rounded independently.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 17157332,
+      "documented_opening_people": 17021073,
+      "opening_people_including_retained_balances": 17021073,
+      "research_minus_documented": 136259
+    },
+    {
+      "comparison_id": "british_isles",
+      "opening_root_ids": [
+        "british_isles_1900"
+      ],
+      "research_unit_ids": [
+        "ft_united_kingdom"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "Great Britain and all Ireland. Crown Dependencies and overseas possessions are outside both controls.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 40966066,
+      "documented_opening_people": 40994912,
+      "opening_people_including_retained_balances": 40994912,
+      "research_minus_documented": -28846
+    },
+    {
+      "comparison_id": "canada",
+      "opening_root_ids": [
+        "dominion_of_canada"
+      ],
+      "research_unit_ids": [
+        "ft_canada"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "Canada before Newfoundland joined it. Compare the national series to census areas reconciled across the 1898 administrative changes.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 5268271,
+      "documented_opening_people": 5304314,
+      "opening_people_including_retained_balances": 5304314,
+      "research_minus_documented": -36043
+    },
+    {
+      "comparison_id": "ceylon",
+      "opening_root_ids": [
+        "cshapes_gw_780"
+      ],
+      "research_unit_ids": [
+        "ft_ceylon"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "The island-wide controls use different enumeration corrections. The revised official opening includes migration; its smaller nine-province subtotal was not allocated.",
+      "research_regions": [
+        "Asia"
+      ],
+      "research_people": 4078392,
+      "documented_opening_people": 3469224,
+      "opening_people_including_retained_balances": 3469224,
+      "research_minus_documented": 609168
+    },
+    {
+      "comparison_id": "cuba",
+      "opening_root_ids": [
+        "cuba_occupation_1900"
+      ],
+      "research_unit_ids": [
+        "ft_cuba"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "The census territory is Cuba. The opening uses the 1899 and 1907 War Department enumerations; wartime and postwar population movements affect interpolation.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 1604255,
+      "documented_opening_people": 1585419,
+      "opening_people_including_retained_balances": 1585419,
+      "research_minus_documented": 18836
+    },
+    {
+      "comparison_id": "france",
+      "opening_root_ids": [
+        "country_fra"
+      ],
+      "research_unit_ids": [
+        "ft_france"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "Metropolitan departments on the 1900 boundary. Alsace–Lorraine belongs to the German return. Colonies are outside both metropolitan controls.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 38915205,
+      "documented_opening_people": 38852684,
+      "opening_people_including_retained_balances": 38852684,
+      "research_minus_documented": 62521
+    },
+    {
+      "comparison_id": "germany",
+      "opening_root_ids": [
+        "german_empire"
+      ],
+      "research_unit_ids": [
+        "ft_germany"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "European German Empire including Alsace–Lorraine. Overseas colonies stand outside both estimates.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 55650279,
+      "documented_opening_people": 55619152,
+      "opening_people_including_retained_balances": 55619152,
+      "research_minus_documented": 31127
+    },
+    {
+      "comparison_id": "hawaii",
+      "opening_root_ids": [
+        "cshapes_gw_4"
+      ],
+      "research_unit_ids": [
+        "ft_hawai"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "The Hawaiian Islands remain a separate Oceania series. The opening uses actual census reference dates.",
+      "research_regions": [
+        "Oceania"
+      ],
+      "research_people": 145819,
+      "documented_opening_people": 151193,
+      "opening_people_including_retained_balances": 151193,
+      "research_minus_documented": -5374
+    },
+    {
+      "comparison_id": "fiji_rotuma",
+      "opening_root_ids": [
+        "cshapes_gw_950"
+      ],
+      "research_unit_ids": [
+        "ft_melanesia"
+      ],
+      "scope_relation": "partial_extent",
+      "note": "The independent colony return covers Fiji and Rotuma. Federico–Tena also includes New Caledonia, New Hebrides, eastern New Guinea and Solomon Islands in Melanesia. Subtracting the opening figure cannot identify any of those populations.",
+      "research_regions": [
+        "Oceania"
+      ],
+      "research_people": 1537072,
+      "documented_opening_people": 120255,
+      "opening_people_including_retained_balances": 120255,
+      "research_minus_documented": 1416817
+    },
+    {
+      "comparison_id": "india",
+      "opening_root_ids": [
+        "cshapes_gw_750"
+      ],
+      "research_unit_ids": [
+        "ft_india"
+      ],
+      "scope_relation": "partial_extent",
+      "note": "The adopted statistical subdivisions lie within the older India account. Their common-area census basis omits Aden and leaves incompletely mapped frontier areas in the legacy balance. The population of the full research area and the opening subdivisions cannot yield a geographic residual.",
+      "research_regions": [
+        "Asia"
+      ],
+      "research_people": 295348039,
+      "documented_opening_people": 243325386,
+      "opening_people_including_retained_balances": 294000000,
+      "research_minus_documented": 52022653
+    },
+    {
+      "comparison_id": "mauritius",
+      "opening_root_ids": [
+        "cshapes_gw_590"
+      ],
+      "research_unit_ids": [
+        "ft_mauritius"
+      ],
+      "scope_relation": "scope_unconfirmed",
+      "note": "The opening explicitly covers Mauritius and Rodrigues. The study refers to the Kuczynski series for Mauritius; the inclusion of Rodrigues in its control has not been established from the cited study text. The Seychelles have a separate research series.",
+      "research_regions": [
+        "Africa"
+      ],
+      "research_people": 369153,
+      "documented_opening_people": 373996,
+      "opening_people_including_retained_balances": 373996,
+      "research_minus_documented": -4843
+    },
+    {
+      "comparison_id": "mexico",
+      "opening_root_ids": [
+        "mexican_republic"
+      ],
+      "research_unit_ids": [
+        "ft_mexico"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "National census footprint. The opening preserves the combined Census Yucatán and Baja California areas where later divisions would break comparability.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 14636116,
+      "documented_opening_people": 13447810,
+      "opening_people_including_retained_balances": 13447810,
+      "research_minus_documented": 1188306
+    },
+    {
+      "comparison_id": "new_zealand",
+      "opening_root_ids": [
+        "cshapes_gw_920"
+      ],
+      "research_unit_ids": [
+        "ft_new_zeland"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "The opening includes the contemporary official carry-forward of Māori population. Its non-Māori district estimates do not cover the whole group. Both figures are estimates.",
+      "research_regions": [
+        "Oceania"
+      ],
+      "research_people": 806326,
+      "documented_opening_people": 796359,
+      "opening_people_including_retained_balances": 796359,
+      "research_minus_documented": 9967
+    },
+    {
+      "comparison_id": "newfoundland",
+      "opening_root_ids": [
+        "colony_of_newfoundland"
+      ],
+      "research_unit_ids": [
+        "ft_new_foundland"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "Newfoundland colony, independent of the Canadian series. Its coastal and Labrador coverage follows the source census definitions.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 217969,
+      "documented_opening_people": 218307,
+      "opening_people_including_retained_balances": 218307,
+      "research_minus_documented": -338
+    },
+    {
+      "comparison_id": "qing",
+      "opening_root_ids": [
+        "qing_empire"
+      ],
+      "research_unit_ids": [
+        "ft_china"
+      ],
+      "scope_relation": "partial_extent",
+      "note": "Only reviewed interior statistical subdivisions enter the opening from Cao; the balance uses the legacy control. The Federico–Tena China series uses a different reconstruction. Outer Mongolia, Taiwan, Hong Kong and Macao stand separately in the research book.",
+      "research_regions": [
+        "Asia"
+      ],
+      "research_people": 400038694,
+      "documented_opening_people": 133711790,
+      "opening_people_including_retained_balances": 400000000,
+      "research_minus_documented": 266326904
+    },
+    {
+      "comparison_id": "reunion",
+      "opening_root_ids": [
+        "cshapes_gw_585"
+      ],
+      "research_unit_ids": [
+        "ft_reunion"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "La Réunion island, separate from France, Madagascar and Mauritius. Historical publications give different estimates around 1900.",
+      "research_regions": [
+        "Africa"
+      ],
+      "research_people": 177000,
+      "documented_opening_people": 173254,
+      "opening_people_including_retained_balances": 173254,
+      "research_minus_documented": 3746
+    },
+    {
+      "comparison_id": "romania",
+      "opening_root_ids": [
+        "kingdom_of_romania"
+      ],
+      "research_unit_ids": [
+        "ft_romania"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "The Romanian Old Kingdom, before the territorial gains of 1913 and 1918. Its adopted count is the 1899 census of legal residents.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 6001362,
+      "documented_opening_people": 5956690,
+      "opening_people_including_retained_balances": 5956690,
+      "research_minus_documented": 44672
+    },
+    {
+      "comparison_id": "switzerland",
+      "opening_root_ids": [
+        "swiss_confederation"
+      ],
+      "research_unit_ids": [
+        "ft_switzerland"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "The historical cantons and half cantons; the opening uses the federal resident-population comparison of 1888 and 1900.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 3300846,
+      "documented_opening_people": 3285131,
+      "opening_people_including_retained_balances": 3285131,
+      "research_minus_documented": 15715
+    },
+    {
+      "comparison_id": "argentina_1900",
+      "opening_root_ids": [
+        "argentina_1900"
+      ],
+      "research_unit_ids": [
+        "ft_argentina"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Argentina only. Pérez-Brignoli national reconstruction, independently compared with Ferreres in Appendix I p. 55. The 1895 census in the Americas collection distinguishes directly enumerated residents and official estimates for omissions.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 4624686,
+      "documented_opening_people": 4624686,
+      "opening_people_including_retained_balances": 4624686,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "australia_colonies_1900",
+      "opening_root_ids": [
+        "australia_colonies_1900"
+      ],
+      "research_unit_ids": [
+        "ft_australia"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Six pre-federation colonies combined under WWO economic alias. Study explicitly adds the Smith Aboriginal reconstruction; state-level ABS figures have narrower enumeration.",
+      "research_regions": [
+        "Oceania"
+      ],
+      "research_people": 3837578,
+      "documented_opening_people": 3837578,
+      "opening_people_including_retained_balances": 3837578,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "beylicate_of_tunis",
+      "opening_root_ids": [
+        "beylicate_of_tunis"
+      ],
+      "research_unit_ids": [
+        "ft_tunisia"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "The Regency of Tunis under the French protectorate. Separate from metropolitan France, Algeria and the retained Ottoman economy. Appendix I uses a modeled growth rate before 1906 because early enumerations covered the French population only. Adopt the territorial reconstruction without assigning provincial populations.",
+      "research_regions": [
+        "Africa"
+      ],
+      "research_people": 1713013,
+      "documented_opening_people": 1713013,
+      "opening_people_including_retained_balances": 1713013,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "chile_1900",
+      "opening_root_ids": [
+        "chile_1900"
+      ],
+      "research_unit_ids": [
+        "ft_chile"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Perez-Brignoli uses the Chilean 1895 and 1907 benchmarks; the interpolated country figure is a reconstruction.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 2890099,
+      "documented_opening_people": 2890099,
+      "opening_people_including_retained_balances": 2890099,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_31",
+      "opening_root_ids": [
+        "cshapes_gw_31"
+      ],
+      "research_unit_ids": [
+        "ft_bahamas"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Bahamas colony. Turks and Caicos form a separate research series. Bulmer-Thomas Tables A.1 and C.1.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 54404,
+      "documented_opening_people": 54404,
+      "opening_people_including_retained_balances": 54404,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_338",
+      "opening_root_ids": [
+        "cshapes_gw_338"
+      ],
+      "research_unit_ids": [
+        "ft_malta"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Maltese islands series from Statistical Yearbook Malta; separate from United Kingdom.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 182672,
+      "documented_opening_people": 182672,
+      "opening_people_including_retained_balances": 182672,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_402",
+      "opening_root_ids": [
+        "cshapes_gw_402"
+      ],
+      "research_unit_ids": [
+        "ft_cape_verde_portuguese_africa"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Cape Verde archipelago, separate from Portuguese Guinea, São Tomé and metropolitan Portugal. Appendix I p. 47 uses Carreira p. 42 and adjusts interpolations for famines. The 1895 and 1900 government island series and retrospective INE total provide separate comparators.",
+      "research_regions": [
+        "Africa"
+      ],
+      "research_people": 146008,
+      "documented_opening_people": 146008,
+      "opening_people_including_retained_balances": 146008,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_51",
+      "opening_root_ids": [
+        "cshapes_gw_51"
+      ],
+      "research_unit_ids": [
+        "ft_jamaica"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Jamaica island. Cayman and Turks and Caicos are separate study series. Appendix I uses Bulmer-Thomas Tables A.1 and C.1. Jamaica did not take the 1901 imperial census, so the opening uses the historical reconstruction.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 742520,
+      "documented_opening_people": 742520,
+      "opening_people_including_retained_balances": 742520,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_52",
+      "opening_root_ids": [
+        "cshapes_gw_52"
+      ],
+      "research_unit_ids": [
+        "ft_trinidad_tobago_winward_island"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "The two islands were administered together at opening. Bulmer-Thomas tabulates both separately before 1900 and jointly thereafter.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 266739,
+      "documented_opening_people": 266739,
+      "opening_people_including_retained_balances": 266739,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_53",
+      "opening_root_ids": [
+        "cshapes_gw_53"
+      ],
+      "research_unit_ids": [
+        "ft_barbados"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Barbados island, independent of the Windward Islands statistical series. Bulmer-Thomas Tables A.1 and C.1.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 193861,
+      "documented_opening_people": 193861,
+      "opening_people_including_retained_balances": 193861,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_6",
+      "opening_root_ids": [
+        "cshapes_gw_6"
+      ],
+      "research_unit_ids": [
+        "ft_puerto_rico"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Puerto Rico separately enumerated under US administration; independent 1899 War Department census. Continental US opening excludes it.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 960208,
+      "documented_opening_people": 960208,
+      "opening_people_including_retained_balances": 960208,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_66",
+      "opening_root_ids": [
+        "cshapes_gw_66"
+      ],
+      "research_unit_ids": [
+        "ft_martinique_french_colonies"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Martinique island. Separate from the metropolitan France opening and from Guadeloupe. Bulmer-Thomas series includes 1894 and 1900, before the 1902 eruption.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 212734,
+      "documented_opening_people": 212734,
+      "opening_people_including_retained_balances": 212734,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_80",
+      "opening_root_ids": [
+        "cshapes_gw_80"
+      ],
+      "research_unit_ids": [
+        "ft_british_honduras_belize"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "British Honduras within colonial boundaries, separate from Honduras, Guatemala and Mexico. Appendix I uses Bulmer-Thomas Tables A.1 and C.1 and compares with Kuczynski vol. III p. 4 and the 1901 colonial census.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 36671,
+      "documented_opening_people": 36671,
+      "opening_people_including_retained_balances": 36671,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_850",
+      "opening_root_ids": [
+        "cshapes_gw_850"
+      ],
+      "research_unit_ids": [
+        "ft_dutch_east_indies_indonesia"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Java, the Outer Islands and western New Guinea. Excludes East Timor, the British Borneo territories and Brunei. Separate from the Netherlands. Country study pp. 3–4 and workbook rows 101–102 (https://doi.org/10.21950/E09BKS); Appendix I pp. 73–75.",
+      "research_regions": [
+        "Asia"
+      ],
+      "research_people": 44363679,
+      "documented_opening_people": 44363679,
+      "opening_people_including_retained_balances": 44363679,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "empire_of_japan",
+      "opening_root_ids": [
+        "empire_of_japan"
+      ],
+      "research_unit_ids": [
+        "ft_japan"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Home islands. Table 2.1 of Historical Statistics of Japan and the 1920 census anchor. Taiwan is a separate study series and WWO dependency.",
+      "research_regions": [
+        "Asia"
+      ],
+      "research_people": 44012686,
+      "documented_opening_people": 44012686,
+      "opening_people_including_retained_balances": 44012686,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "iceland_under_denmark",
+      "opening_root_ids": [
+        "iceland_under_denmark"
+      ],
+      "research_unit_ids": [
+        "ft_iceland"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Iceland, enumerated separately from the Danish metropole. Danish yearbook provides independent 1901 territorial control.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 78086,
+      "documented_opening_people": 78086,
+      "opening_people_including_retained_balances": 78086,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "kingdom_of_belgium",
+      "opening_root_ids": [
+        "kingdom_of_belgium"
+      ],
+      "research_unit_ids": [
+        "ft_belgium"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Post-1839 Belgium, separate from Luxembourg, Netherlands and Congo Free State.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 6713135,
+      "documented_opening_people": 6713135,
+      "opening_people_including_retained_balances": 6713135,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "kingdom_of_italy",
+      "opening_root_ids": [
+        "kingdom_of_italy"
+      ],
+      "research_unit_ids": [
+        "ft_italy"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Kingdom after annexation of Rome and Veneto, before acquisition of Austrian territories. Colonies separate.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 32296914,
+      "documented_opening_people": 32296914,
+      "opening_people_including_retained_balances": 32296914,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "kingdom_of_luxembourg",
+      "opening_root_ids": [
+        "kingdom_of_luxembourg"
+      ],
+      "research_unit_ids": [
+        "ft_luxembourg"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Grand Duchy after the 1839 partition. Use the established WWO economic alias for the same political unit.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 231321,
+      "documented_opening_people": 231321,
+      "opening_people_including_retained_balances": 231321,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "kingdom_of_netherlands",
+      "opening_root_ids": [
+        "kingdom_of_netherlands"
+      ],
+      "research_unit_ids": [
+        "ft_netherlands"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "European territory after the 1839 settlement including Eastern Limburg. Overseas colonies separate.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 5141915,
+      "documented_opening_people": 5141915,
+      "opening_people_including_retained_balances": 5141915,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "kingdom_of_portugal",
+      "opening_root_ids": [
+        "kingdom_of_portugal"
+      ],
+      "research_unit_ids": [
+        "ft_portugal"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Metropole plus Madeira and Azores as specified in Appendix I. Overseas possessions separately enumerated.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 5404156,
+      "documented_opening_people": 5404156,
+      "opening_people_including_retained_balances": 5404156,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "kingdom_of_serbia",
+      "opening_root_ids": [
+        "kingdom_of_serbia"
+      ],
+      "research_unit_ids": [
+        "ft_serbia_yugoslavia"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "1900 Kingdom of Serbia. Historical Statistics Serbia from 1879 to 1910; Montenegro remains separate.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 2471816,
+      "documented_opening_people": 2471816,
+      "opening_people_including_retained_balances": 2471816,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "kingdom_of_spain",
+      "opening_root_ids": [
+        "kingdom_of_spain"
+      ],
+      "research_unit_ids": [
+        "ft_spain"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Spain including Canary and Balearic Islands (Appendix I note 129). Overseas possessions excluded.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 18511807,
+      "documented_opening_people": 18511807,
+      "opening_people_including_retained_balances": 18511807,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "korean_empire",
+      "opening_root_ids": [
+        "korean_empire"
+      ],
+      "research_unit_ids": [
+        "ft_korea"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Korean peninsula before annexation, separate from the Japanese home islands and Taiwan. Kwon and Shin reconstruct the population using revised 1910 benchmarks and earlier population registers. Under-registration is material.",
+      "research_regions": [
+        "Asia"
+      ],
+      "research_people": 17078033,
+      "documented_opening_people": 17078033,
+      "opening_people_including_retained_balances": 17078033,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "principality_of_bulgaria",
+      "opening_root_ids": [
+        "principality_of_bulgaria"
+      ],
+      "research_unit_ids": [
+        "ft_bulgaria"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Bulgaria with Eastern Rumelia after 1885; historical statistics and census, before the Balkan Wars.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 3715205,
+      "documented_opening_people": 3715205,
+      "opening_people_including_retained_balances": 3715205,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "russian_empire",
+      "opening_root_ids": [
+        "russian_empire"
+      ],
+      "research_unit_ids": [
+        "ft_russia_empire_ussr",
+        "ft_finland"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Empire excluding Finland. 1897 census extrapolated by Sifman's correction for duplicated movers; Khiva and Bukhara have a separate source series. / Grand Duchy of Finland under Russian crown. Separate study unit and excluded from Russian census total.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 135382043,
+      "documented_opening_people": 135382043,
+      "opening_people_including_retained_balances": 135382043,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "sweden_norway_union",
+      "opening_root_ids": [
+        "sweden_norway_union"
+      ],
+      "research_unit_ids": [
+        "ft_norway",
+        "ft_sweden"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Norway, under the Swedish crown; Statistics Norway 1968 table 20. / Sweden alone; Lund historical series explicitly excludes both Norway and Finland.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 7315799,
+      "documented_opening_people": 7315799,
+      "opening_people_including_retained_balances": 7315799,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "uruguay_1900",
+      "opening_root_ids": [
+        "uruguay_1900"
+      ],
+      "research_unit_ids": [
+        "ft_uruguay"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "The independent republic, separate from Argentina and Brazil. Appendix I uses the national estimate from Bulmer-Thomas Table 3.1. Uruguay's statistical office records no general census between 1860 and 1908.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 908090,
+      "documented_opening_people": 908090,
+      "opening_people_including_retained_balances": 908090,
+      "research_minus_documented": 0
+    }
+  ],
+  "opening_comparisons_without_single_region": [],
+  "legacy_to_opening": {
+    "legacy_economic_accounts": 50,
+    "legacy_economic_population": 1411020000,
+    "changes_to_existing_accounts": [
+      {
+        "unit_id": "united_states_1900",
+        "people": -845024
+      },
+      {
+        "unit_id": "british_isles_1900",
+        "people": -505088
+      },
+      {
+        "unit_id": "german_empire",
+        "people": -780848
+      },
+      {
+        "unit_id": "russian_empire",
+        "people": -617957
+      },
+      {
+        "unit_id": "country_fra",
+        "people": -1847316
+      },
+      {
+        "unit_id": "austria_hungary",
+        "people": -1699118
+      },
+      {
+        "unit_id": "empire_of_japan",
+        "people": 212686
+      },
+      {
+        "unit_id": "kingdom_of_italy",
+        "people": -103086
+      },
+      {
+        "unit_id": "kingdom_of_spain",
+        "people": -88193
+      },
+      {
+        "unit_id": "dominion_of_canada",
+        "people": -95686
+      },
+      {
+        "unit_id": "brazil_1900",
+        "people": -378927
+      },
+      {
+        "unit_id": "mexican_republic",
+        "people": -152190
+      },
+      {
+        "unit_id": "kingdom_of_netherlands",
+        "people": 41915
+      },
+      {
+        "unit_id": "kingdom_of_belgium",
+        "people": 13135
+      },
+      {
+        "unit_id": "sweden_norway_union",
+        "people": -84201
+      },
+      {
+        "unit_id": "kingdom_of_portugal",
+        "people": 4156
+      },
+      {
+        "unit_id": "australia_colonies_1900",
+        "people": 67578
+      },
+      {
+        "unit_id": "kingdom_of_romania",
+        "people": 56690
+      },
+      {
+        "unit_id": "kingdom_of_serbia",
+        "people": -28184
+      },
+      {
+        "unit_id": "principality_of_bulgaria",
+        "people": 15205
+      },
+      {
+        "unit_id": "swiss_confederation",
+        "people": -14869
+      },
+      {
+        "unit_id": "korean_empire",
+        "people": 78033
+      },
+      {
+        "unit_id": "argentina_1900",
+        "people": -75314
+      },
+      {
+        "unit_id": "chile_1900",
+        "people": -209901
+      },
+      {
+        "unit_id": "uruguay_1900",
+        "people": -31910
+      },
+      {
+        "unit_id": "cshapes_gw_920",
+        "people": -23641
+      },
+      {
+        "unit_id": "cuba_occupation_1900",
+        "people": 15419
+      },
+      {
+        "unit_id": "kingdom_of_luxembourg",
+        "people": -8679
+      }
+    ],
+    "net_replacements": -7085315,
+    "added_opening_accounts": [
+      {
+        "unit_id": "beylicate_of_tunis",
+        "people": 1713013
+      },
+      {
+        "unit_id": "colony_of_newfoundland",
+        "people": 218307
+      },
+      {
+        "unit_id": "cshapes_gw_3",
+        "people": 62288
+      },
+      {
+        "unit_id": "cshapes_gw_31",
+        "people": 54404
+      },
+      {
+        "unit_id": "cshapes_gw_338",
+        "people": 182672
+      },
+      {
+        "unit_id": "cshapes_gw_4",
+        "people": 151193
+      },
+      {
+        "unit_id": "cshapes_gw_402",
+        "people": 146008
+      },
+      {
+        "unit_id": "cshapes_gw_51",
+        "people": 742520
+      },
+      {
+        "unit_id": "cshapes_gw_52",
+        "people": 266739
+      },
+      {
+        "unit_id": "cshapes_gw_53",
+        "people": 193861
+      },
+      {
+        "unit_id": "cshapes_gw_570",
+        "people": 305255
+      },
+      {
+        "unit_id": "cshapes_gw_585",
+        "people": 173254
+      },
+      {
+        "unit_id": "cshapes_gw_590",
+        "people": 373996
+      },
+      {
+        "unit_id": "cshapes_gw_6",
+        "people": 960208
+      },
+      {
+        "unit_id": "cshapes_gw_66",
+        "people": 212734
+      },
+      {
+        "unit_id": "cshapes_gw_780",
+        "people": 3469224
+      },
+      {
+        "unit_id": "cshapes_gw_80",
+        "people": 36671
+      },
+      {
+        "unit_id": "cshapes_gw_850",
+        "people": 44363679
+      },
+      {
+        "unit_id": "cshapes_gw_950",
+        "people": 120255
+      },
+      {
+        "unit_id": "iceland_under_denmark",
+        "people": 78086
+      }
+    ],
+    "net_additions": 53824367,
+    "authoritative_opening_population": 1457759052,
+    "excluded_economic_residuals": [
+      {
+        "unit_id": "residual:dutch_east_indies",
+        "people": 38000000
+      },
+      {
+        "unit_id": "residual:philippines",
+        "people": 7600000
+      },
+      {
+        "unit_id": "residual:french_indochina",
+        "people": 17000000
+      },
+      {
+        "unit_id": "residual:british_africa_malaya",
+        "people": 40000000
+      },
+      {
+        "unit_id": "residual:french_colonial_residual",
+        "people": 25000000
+      },
+      {
+        "unit_id": "residual:other_colonial_africa",
+        "people": 65000000
+      },
+      {
+        "unit_id": "residual:central_america_caribbean",
+        "people": 10000000
+      },
+      {
+        "unit_id": "residual:minor_europe_middle_east_pacific",
+        "people": 35000000
+      }
+    ],
+    "excluded_residual_sum_nonexclusive": 237600000
+  },
+  "research_to_opening": {
+    "published_research_estimate": 1595074248,
+    "research_component_sum": 1595074246,
+    "documented_opening_population": 1024716228,
+    "untouched_legacy_population": 116080000,
+    "retained_unlocated_population": 316962824,
+    "authoritative_opening_population": 1457759052,
+    "published_minus_documented_opening": 570358020,
+    "signed_components_of_difference": {
+      "published_minus_component_sum": 2,
+      "research_only_component_people": 246891504,
+      "comparisons_by_scope": {
+        "comparable_extent": 1943838,
+        "different_extent": 1761145,
+        "partial_extent": 319766374,
+        "scope_unconfirmed": -4843,
+        "adopted_research_series": 0
+      },
+      "opening_without_benchmark_link": 0,
+      "untouched_legacy_controls": -116080000,
+      "unlocated_balances_under_retained_controls": -316962824
+    },
+    "published_minus_authoritative_opening": 137315196
+  }
+}

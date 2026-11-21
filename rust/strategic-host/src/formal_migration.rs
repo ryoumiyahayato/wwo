@@ -17,6 +17,8 @@ pub(super) struct MigrationState {
 struct Migration {
     destination: String,
     members: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    cohort: Option<CohortId>,
     reservation: u64,
     from: String,
     traversed: Vec<String>,
@@ -50,7 +52,20 @@ impl InitialWorld {
     }
 
     pub(super) fn migration_reserved_at(&self, unit: &str) -> u64 {
-        self.migration.pending.get(unit).map_or(0, |row| u64::from(row.members))
+        self.migration_reserved_cohort(unit, None)
+    }
+
+    pub(super) fn migration_reserved_cohort(&self, unit: &str, cohort: Option<&CohortId>) -> u64 {
+        self.migration.pending.get(unit).filter(|row| row.cohort.as_ref() == cohort)
+            .map_or(0, |row| u64::from(row.members))
+    }
+
+    fn migration_available(&self, source: &str, cohort: Option<&CohortId>) -> u64 {
+        match cohort {
+            Some(id) => self.population.cohort_members(source, id).unwrap_or(0)
+                .saturating_sub(self.service.cohort_serving(source, id)),
+            None => self.population.unclassified(source).unwrap_or(0),
+        }
     }
 
     fn migration_node(&self, unit: &str) -> Option<&str> {
@@ -76,9 +91,24 @@ impl InitialWorld {
     pub fn dispatch_background_migration(
         &mut self, source: &str, destination: &str, members: u32, source_managed_background: u64,
     ) -> io::Result<()> {
+        self.dispatch_migration(source, destination, None, members, source_managed_background)
+    }
+
+    /// Reserve a known group on existing passenger services. Civilian assignments
+    /// at the origin must be supplied by the requesting domain.
+    pub(crate) fn dispatch_cohort_migration(
+        &mut self, source: &str, destination: &str, cohort: &CohortId, members: u32,
+        civilian_committed: u64,
+    ) -> io::Result<()> {
+        self.dispatch_migration(source, destination, Some(cohort), members, civilian_committed)
+    }
+
+    fn dispatch_migration(
+        &mut self, source: &str, destination: &str, cohort: Option<&CohortId>, members: u32,
+        protected: u64,
+    ) -> io::Result<()> {
         if source == destination || self.migration.pending.contains_key(source) || members == 0
-            || self.population.unclassified(source).and_then(|count| count.checked_sub(source_managed_background))
-                .is_none_or(|free| free < u64::from(members))
+            || self.migration_available(source, cohort).saturating_sub(protected) < u64::from(members)
         {
             return Err(invalid("迁移批次超出可用背景人口，或该地区已有在途批次。"));
         }
@@ -90,7 +120,7 @@ impl InitialWorld {
             self.clock.snapshot().total_minutes, Traffic::Migration)?;
         let reservation = self.transport.reserve_migration(plan)?;
         self.migration.pending.insert(source.to_owned(), Migration {
-            destination: destination.to_owned(), members, reservation, from, traversed: Vec::new(),
+            destination: destination.to_owned(), members, cohort: cohort.cloned(), reservation, from, traversed: Vec::new(),
         });
         Ok(())
     }
@@ -101,7 +131,14 @@ impl InitialWorld {
         }).collect();
         for source in completed {
             let row = &self.migration.pending[&source];
-            self.population.transfer_unmanaged(&source, &row.destination, u64::from(row.members), 0, minute)?;
+            if let Some(cohort) = &row.cohort {
+                if self.migration_available(&source, Some(cohort)) < u64::from(row.members) {
+                    return Err(invalid("在途人口分组超过原居地可用人口。"));
+                }
+                self.population.transfer_cohort(&source, &row.destination, cohort, u64::from(row.members), minute)?;
+            } else {
+                self.population.transfer_unmanaged(&source, &row.destination, u64::from(row.members), 0, minute)?;
+            }
             self.transport.finish(row.reservation);
             self.migration.pending.remove(&source);
         }
@@ -160,8 +197,25 @@ impl InitialWorld {
                 // each candidate pool so a dispatch cannot draw residents assigned to it.
                 let managed = externally_managed.get(&source_root).copied().unwrap_or(0)
                     .max(externally_managed.get(source).copied().unwrap_or(0));
-                let available = self.population.unclassified(source).unwrap_or(0).saturating_sub(managed);
+                let available = self.migration_available(source, None).saturating_sub(managed);
                 let members = available.min(u64::from(MAX_BATCH_MEMBERS)) as u32;
+                if members == 0 && managed == 0 {
+                    let now = self.clock;
+                    let candidates: Vec<_> = self.population.cohorts_in(source).filter_map(|(id, definition, _)| {
+                        let available = self.migration_available(source, Some(id));
+                        (definition.provenance == crate::formal_population::CohortProvenance::ModelAllocation
+                            && definition.age_bounds(now).is_some_and(|(min, _)| min >= 18)
+                            && available > 0).then_some((id.clone(), available))
+                    }).collect();
+                    if let Some(index) = (self.clock.current_day() / REVIEW_DAYS).checked_rem(candidates.len() as i64) {
+                        let (cohort, available) = &candidates[index as usize];
+                        let members = (*available).min(u64::from(MAX_BATCH_MEMBERS)) as u32;
+                        for target in &targets {
+                            if self.dispatch_cohort_migration(source, target, cohort, members, 0).is_ok() { break; }
+                        }
+                    }
+                    continue;
+                }
                 if members == 0 { continue; }
                 for target in &targets {
                     if self.dispatch_background_migration(source, target, members, managed).is_ok() { break; }
@@ -182,8 +236,7 @@ impl InitialWorld {
                 })
             });
             source != &row.destination && traversed == Some(row.from.as_str())
-                && row.members > 0 && self.population.unclassified(source)
-                    .is_some_and(|pop| pop >= u64::from(row.members))
+                && row.members > 0 && self.migration_available(source, row.cohort.as_ref()) >= u64::from(row.members)
                 && reservations.insert(row.reservation)
                 && self.transport.traffic(row.reservation) == Some(Traffic::Migration)
                 && self.transport.completed(row.reservation).is_none()

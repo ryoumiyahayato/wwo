@@ -1,0 +1,550 @@
+panel,label,role,age_min,age_max,both,male,female
+england_wales_1901,All Ages,total,,,32527843,15728613,16799230
+england_wales_1901,Under 1 year,band,0,0,796807,399875,396932
+england_wales_1901,1—,band,1,1,727795,363424,364371
+england_wales_1901,2—,band,2,2,735410,366824,368586
+england_wales_1901,3—,band,3,3,730127,363161,366966
+england_wales_1901,4—,band,4,4,726569,362077,364492
+england_wales_1901,Under 5 years,subtotal,0,4,3716708,1855361,1861347
+england_wales_1901,5—,band,5,9,3487291,1738993,1748298
+england_wales_1901,10—,band,10,12,2011094,1003539,1007555
+england_wales_1901,13—,band,13,13,662873,331149,331724
+england_wales_1901,14—,band,14,14,667773,336282,331491
+england_wales_1901,15—,band,15,15,655886,329581,326305
+england_wales_1901,16—,band,16,16,663293,331617,331676
+england_wales_1901,17—,band,17,17,637608,313794,323814
+england_wales_1901,18—,band,18,18,652974,320465,332509
+england_wales_1901,19—,band,19,19,636382,312065,324317
+england_wales_1901,20—,band,20,20,635896,303331,332565
+england_wales_1901,21—,band,21,24,2485026,1169313,1315713
+england_wales_1901,25—,band,25,29,2824509,1328288,1496221
+england_wales_1901,30—,band,30,34,2431331,1157666,1273665
+england_wales_1901,35—,band,35,39,2145383,1034459,1110924
+england_wales_1901,40—,band,40,44,1850622,897484,953138
+england_wales_1901,45—,band,45,49,1573188,759955,813233
+england_wales_1901,50—,band,50,54,1329003,636254,692749
+england_wales_1901,55—,band,55,59,1052577,497498,555079
+england_wales_1901,60—,band,60,64,890673,410447,480226
+england_wales_1901,65—,band,65,69,629673,282403,347270
+england_wales_1901,70—,band,70,74,446333,195465,250868
+england_wales_1901,75—,band,75,79,264480,113096,151384
+england_wales_1901,80—,band,80,84,128768,52137,76631
+england_wales_1901,85—,band,85,89,38961,14915,24046
+england_wales_1901,90—,band,90,94,8202,2687,5515
+england_wales_1901,95—,band,95,99,1190,322,868
+england_wales_1901,100 years and upwards,band,100,,146,47,99
+england_wales_1901,Not stated,band,,,0,0,0
+scotland_1901,All Ages,total,,,4472103,2173755,2298348
+scotland_1901,Under 1 year,band,0,0,114685,58018,56667
+scotland_1901,1—,band,1,1,104573,52771,51802
+scotland_1901,2—,band,2,2,106112,53294,52818
+scotland_1901,3—,band,3,3,104634,52293,52341
+scotland_1901,4—,band,4,4,103029,51986,51043
+scotland_1901,Under 5 years,subtotal,0,4,533033,268362,264671
+scotland_1901,5—,band,5,9,492747,249312,243435
+scotland_1901,10—,band,10,12,282385,143242,139143
+scotland_1901,13—,band,13,13,91776,46402,45374
+scotland_1901,14—,band,14,14,95161,48644,46517
+scotland_1901,15–19,band,15,19,456035,230353,225682
+scotland_1901,20–24,band,20,24,433288,210392,222896
+scotland_1901,25—,band,25,29,378971,181340,197631
+scotland_1901,30—,band,30,34,315211,150927,164284
+scotland_1901,35—,band,35,39,277911,132638,145273
+scotland_1901,40—,band,40,44,245418,118701,126717
+scotland_1901,45—,band,45,49,208818,100480,108338
+scotland_1901,50—,band,50,54,176521,83679,92842
+scotland_1901,55—,band,55,59,142762,65608,77154
+scotland_1901,60—,band,60,64,125609,55564,70045
+scotland_1901,65—,band,65,69,86783,36978,49805
+scotland_1901,70—,band,70,74,64139,26312,37827
+scotland_1901,75—,band,75,79,37259,14760,22499
+scotland_1901,80—,band,80,84,19881,7263,12618
+scotland_1901,85—,band,85,89,6437,2213,4224
+scotland_1901,90—,band,90,94,1584,484,1100
+scotland_1901,95—,band,95,99,333,94,239
+scotland_1901,100 years and upwards,band,100,,41,7,34
+scotland_1901,Not stated,band,,,0,0,0
+ireland_1901,All Ages,total,,,4458775,2200040,2258735
+ireland_1901,Under 1 year,band,0,0,86261,43996,42265
+ireland_1901,1—,band,1,1,80774,41170,39604
+ireland_1901,2—,band,2,2,90105,45522,44583
+ireland_1901,3—,band,3,3,91828,46424,45404
+ireland_1901,4—,band,4,4,93744,47718,46026
+ireland_1901,Under 5 years,subtotal,0,4,442712,224830,217882
+ireland_1901,5—,band,5,9,450880,228430,222450
+ireland_1901,10–14,band,10,14,459610,234232,225378
+ireland_1901,15–19,band,15,19,472787,235000,237787
+ireland_1901,20–24,band,20,24,444204,217297,226907
+ireland_1901,25—,band,25,29,362597,174787,187810
+ireland_1901,30—,band,30,34,294036,146103,147933
+ireland_1901,35—,band,35,39,239352,116657,122695
+ireland_1901,40—,band,40,44,243423,117142,126281
+ireland_1901,45—,band,45,49,188261,90049,98212
+ireland_1901,50—,band,50,54,225200,104425,120775
+ireland_1901,55—,band,55,59,147637,70887,76750
+ireland_1901,60—,band,60,64,203570,98305,105265
+ireland_1901,65—,band,65,69,97191,50028,47163
+ireland_1901,70—,band,70,74,93747,46273,47474
+ireland_1901,75—,band,75,79,41168,21021,20147
+ireland_1901,80—,band,80,84,36645,17053,19592
+ireland_1901,85—,band,85,89,9441,4771,4670
+ireland_1901,90—,band,90,94,4447,2003,2444
+ireland_1901,95—,band,95,99,1370,553,817
+ireland_1901,100 years and upwards,band,100,,497,194,303
+ireland_1901,Not stated,band,,,0,0,0
+india_1901,All Ages,total,,,294361056,149951824,144409232
+india_1901,Under 1 year,band,0,0,7950536,3980086,3970450
+india_1901,1—,band,1,1,4943707,2428882,2514825
+india_1901,2—,band,2,2,8375234,4101367,4273867
+india_1901,3—,band,3,3,8485852,4120574,4365278
+india_1901,4—,band,4,4,8249442,4104865,4144577
+india_1901,Under 5 years,subtotal,0,4,38004771,18735774,19268997
+india_1901,5—,band,5,9,40726547,20831085,19895462
+india_1901,10–14,band,10,14,34447376,18880658,15566718
+india_1901,15–19,band,15,19,24960155,12942322,12017833
+india_1901,20–24,band,20,24,24592500,11757643,12834857
+india_1901,25—,band,25,29,26008461,13133437,12875024
+india_1901,30—,band,30,34,24921571,12672440,12249131
+india_1901,35—,band,35,39,17116957,9093537,8023420
+india_1901,40—,band,40,44,19070557,9686923,9383634
+india_1901,45—,band,45,49,10411514,5532217,4879297
+india_1901,50—,band,50,54,13041180,6530923,6510257
+india_1901,55—,band,55,59,5074433,2644466,2429967
+india_1901,60 years and upwards,band,60,,14951261,6956311,7994950
+india_1901,Not stated,band,,,1033773,554088,479685
+ceylon_1901,All Ages,total,,,3573419,1903359,1670060
+ceylon_1901,Under 1 year,band,0,0,192965,98957,94008
+ceylon_1901,1—,band,1,1,119518,61184,58334
+ceylon_1901,2—,band,2,2,120837,61957,58880
+ceylon_1901,3—,band,3,3,107469,55706,51763
+ceylon_1901,4—,band,4,4,98121,50953,47168
+ceylon_1901,Under 5 years,subtotal,0,4,638910,328757,310153
+ceylon_1901,5—,band,5,9,504186,264009,240177
+ceylon_1901,10–14,band,10,14,363369,201893,161476
+ceylon_1901,15–19,band,15,19,386880,180669,206211
+ceylon_1901,20–24,band,20,24,358733,184966,173767
+ceylon_1901,25—,band,25,29,367650,196406,171244
+ceylon_1901,30—,band,30,34,204022,121818,82204
+ceylon_1901,35—,band,35,39,227810,126602,101208
+ceylon_1901,40—,band,40,44,116868,68311,48557
+ceylon_1901,45—,band,45,49,138677,68697,69980
+ceylon_1901,50—,band,50,54,69436,41993,27443
+ceylon_1901,55—,band,55,59,100064,61055,39009
+ceylon_1901,60 years and upwards,band,60,,96478,57982,38496
+ceylon_1901,Not stated,band,,,336,201,135
+seychelles_1901,All Ages,total,,,19258,9825,9433
+seychelles_1901,Under 1 year,band,0,0,527,253,274
+seychelles_1901,1—,band,1,4,1880,961,919
+seychelles_1901,Under 5 years,subtotal,0,4,2407,1214,1193
+seychelles_1901,5—,band,5,9,2452,1223,1229
+seychelles_1901,10—,band,10,14,2239,1195,1044
+seychelles_1901,15—,band,15,19,1673,782,891
+seychelles_1901,20—,band,20,24,1738,897,841
+seychelles_1901,25—,band,25,29,1784,903,881
+seychelles_1901,30—,band,30,34,1397,735,662
+seychelles_1901,35—,band,35,39,1214,632,582
+seychelles_1901,40—,band,40,44,974,522,452
+seychelles_1901,45—,band,45,49,956,481,475
+seychelles_1901,50—,band,50,54,835,450,385
+seychelles_1901,55—,band,55,59,571,315,256
+seychelles_1901,60—,band,60,64,376,194,182
+seychelles_1901,65—,band,65,69,229,106,123
+seychelles_1901,70—,band,70,74,176,83,93
+seychelles_1901,75—,band,75,79,97,41,56
+seychelles_1901,80—,band,80,84,64,23,41
+seychelles_1901,85—,band,85,89,16,7,9
+seychelles_1901,90—,band,90,94,16,4,12
+seychelles_1901,95—,band,95,99,10,3,7
+seychelles_1901,100 years and upwards,band,100,,5,2,3
+seychelles_1901,Not stated,band,,,29,13,16
+us_mainland_1900,All ages,total,,,75994575,38816448,37178127
+us_mainland_1900,Age known,subtotal,,,75793991,38689025,37104966
+us_mainland_1900,Under 1 year,band,0,0,1916892,969257,947635
+us_mainland_1900,1 to 4 years,band,1,4,7253736,3664355,3589381
+us_mainland_1900,Under 5 years,subtotal,0,4,9170628,4633612,4537016
+us_mainland_1900,5 to 9 years,band,5,9,8874123,4479396,4394727
+us_mainland_1900,10 to 14 years,band,10,14,8080234,4083041,3997193
+us_mainland_1900,15 to 19 years,band,15,19,7556089,3750451,3805638
+us_mainland_1900,20 to 24 years,band,20,24,7335016,3624580,3710436
+us_mainland_1900,25 to 29 years,band,25,29,6529441,3323543,3205898
+us_mainland_1900,30 to 34 years,band,30,34,5556039,2901321,2654718
+us_mainland_1900,35 to 39 years,band,35,39,4964781,2616865,2347916
+us_mainland_1900,40 to 44 years,band,40,44,4247166,2255916,1991250
+us_mainland_1900,45 to 49 years,band,45,49,3454612,1837836,1616776
+us_mainland_1900,50 to 54 years,band,50,54,2942829,1564622,1378207
+us_mainland_1900,55 to 59 years,band,55,59,2211172,1145257,1065915
+us_mainland_1900,60 to 64 years,band,60,64,1791363,917167,874196
+us_mainland_1900,65 to 69 years,band,65,69,1302926,667669,635257
+us_mainland_1900,70 to 74 years,band,70,74,883841,449609,434232
+us_mainland_1900,75 to 79 years,band,75,79,519857,261579,258278
+us_mainland_1900,80 to 84 years,band,80,84,251512,122273,129239
+us_mainland_1900,85 to 89 years,band,85,89,88600,40742,47858
+us_mainland_1900,90 to 94 years,band,90,94,23992,9858,14134
+us_mainland_1900,95 to 99 years,band,95,99,6266,2417,3849
+us_mainland_1900,100 years and over,band,100,,3504,1271,2233
+us_mainland_1900,Age unknown,band,,,200584,127423,73161
+new_zealand_1901,Total population,total,,,772719,405992,366727
+new_zealand_1901,Total specified ages,subtotal,,,772079,405560,366519
+new_zealand_1901,Under 1 year,band,0,0,18381,9612,8769
+new_zealand_1901,1 year,band,1,1,15982,8149,7833
+new_zealand_1901,2 years,band,2,2,17379,8843,8536
+new_zealand_1901,3 years,band,3,3,17409,8733,8671
+new_zealand_1901,4 years,band,4,4,17655,8982,8673
+new_zealand_1901,5 years,band,5,5,17278,8709,8569
+new_zealand_1901,6 years,band,6,6,17132,8629,8503
+new_zealand_1901,7 years,band,7,7,17155,8676,8479
+new_zealand_1901,8 years,band,8,8,16986,8596,8390
+new_zealand_1901,9 years,band,9,9,17185,8704,8481
+new_zealand_1901,10 years,band,10,10,16890,8512,8378
+new_zealand_1901,11 years,band,11,11,16662,8465,8197
+new_zealand_1901,12 years,band,12,12,17435,8822,8613
+new_zealand_1901,13 years,band,13,13,17131,8552,8579
+new_zealand_1901,14 years,band,14,14,17107,8749,8358
+new_zealand_1901,15 years,band,15,15,16832,8456,8376
+new_zealand_1901,16 years,band,16,16,17258,8569,8689
+new_zealand_1901,17 years,band,17,17,16883,8453,8430
+new_zealand_1901,18 years,band,18,18,16961,8536,8425
+new_zealand_1901,19 years,band,19,19,16880,8442,8438
+new_zealand_1901,20 years,band,20,20,17142,8559,8583
+new_zealand_1901,21 years,band,21,21,16915,8356,8559
+new_zealand_1901,22 years,band,22,22,16698,8222,8476
+new_zealand_1901,23 years,band,23,23,16492,8176,8316
+new_zealand_1901,24 years,band,24,24,15909,7883,8026
+new_zealand_1901,25 years,band,25,25,15266,7875,7391
+new_zealand_1901,26 years,band,26,26,14406,7399,7007
+new_zealand_1901,27 years,band,27,27,12935,6637,6298
+new_zealand_1901,28 years,band,28,28,13674,7009,6665
+new_zealand_1901,29 years,band,29,29,12259,6387,5872
+new_zealand_1901,30 years,band,30,30,14682,7507,7175
+new_zealand_1901,31 years,band,31,31,10415,5532,4883
+new_zealand_1901,32 years,band,32,32,11616,6154,5462
+new_zealand_1901,33 years,band,33,33,10107,5250,4857
+new_zealand_1901,34 years,band,34,34,10146,5251,4895
+new_zealand_1901,35 years,band,35,35,10287,5597,4690
+new_zealand_1901,36 years,band,36,36,9534,5027,4507
+new_zealand_1901,37 years,band,37,37,8571,4551,4020
+new_zealand_1901,38 years,band,38,38,9170,4891,4279
+new_zealand_1901,39 years,band,39,39,7956,4235,3721
+new_zealand_1901,40 years,band,40,40,10735,5971,4764
+new_zealand_1901,41 years,band,41,41,6675,3691,2984
+new_zealand_1901,42 years,band,42,42,8037,4569,3468
+new_zealand_1901,43 years,band,43,43,6827,3695,3132
+new_zealand_1901,44 years,band,44,44,6662,3663,2999
+new_zealand_1901,45 years,band,45,45,8044,4708,3336
+new_zealand_1901,46 years,band,46,46,6571,3777,2794
+new_zealand_1901,47 years,band,47,47,5975,3479,2496
+new_zealand_1901,48 years,band,48,48,6652,3809,2843
+new_zealand_1901,49 years,band,49,49,5889,3361,2528
+new_zealand_1901,50 years,band,50,50,8134,4576,3558
+new_zealand_1901,51 years,band,51,51,4377,2528,1849
+new_zealand_1901,52 years,band,52,52,5521,3123,2398
+new_zealand_1901,53 years,band,53,53,4619,2578,2041
+new_zealand_1901,54 years,band,54,54,4753,2608,2145
+new_zealand_1901,55 years,band,55,55,4949,2840,2109
+new_zealand_1901,56 years,band,56,56,5283,3006,2277
+new_zealand_1901,57 years,band,57,57,4384,2525,1859
+new_zealand_1901,58 years,band,58,58,4725,2776,1949
+new_zealand_1901,59 years,band,59,59,4333,2564,1769
+new_zealand_1901,60 years,band,60,60,5965,3588,2377
+new_zealand_1901,61 years,band,61,61,3432,2141,1291
+new_zealand_1901,62 years,band,62,62,3888,2453,1435
+new_zealand_1901,63 years,band,63,63,3806,2300,1506
+new_zealand_1901,64 years,band,64,64,3729,2321,1408
+new_zealand_1901,65 years,band,65,65,4095,2563,1532
+new_zealand_1901,66 years,band,66,66,3431,2089,1342
+new_zealand_1901,67 years,band,67,67,3432,2178,1254
+new_zealand_1901,68 years,band,68,68,3015,1923,1092
+new_zealand_1901,69 years,band,69,69,2215,1407,808
+new_zealand_1901,70 years,band,70,70,2662,1620,1042
+new_zealand_1901,71 years,band,71,71,1577,1011,566
+new_zealand_1901,72 years,band,72,72,1655,1047,608
+new_zealand_1901,73 years,band,73,73,1406,885,521
+new_zealand_1901,74 years,band,74,74,1284,785,499
+new_zealand_1901,75 years,band,75,75,1157,674,483
+new_zealand_1901,76 years,band,76,76,916,524,392
+new_zealand_1901,77 years,band,77,77,698,388,310
+new_zealand_1901,78 years,band,78,78,689,407,282
+new_zealand_1901,79 years,band,79,79,504,292,212
+new_zealand_1901,80 years,band,80,80,550,301,249
+new_zealand_1901,81 years,band,81,81,428,253,175
+new_zealand_1901,82 years,band,82,82,435,231,204
+new_zealand_1901,83 years,band,83,83,259,135,124
+new_zealand_1901,84 years,band,84,84,230,130,100
+new_zealand_1901,85 years,band,85,85,166,87,79
+new_zealand_1901,86 years,band,86,86,139,77,62
+new_zealand_1901,87 years,band,87,87,116,61,55
+new_zealand_1901,88 years,band,88,88,76,40,36
+new_zealand_1901,89 years,band,89,89,59,32,27
+new_zealand_1901,90 years,band,90,90,56,31,25
+new_zealand_1901,91 years,band,91,91,30,14,16
+new_zealand_1901,92 years,band,92,92,22,11,11
+new_zealand_1901,93 years,band,93,93,13,7,6
+new_zealand_1901,94 years,band,94,94,7,1,6
+new_zealand_1901,95 years,band,95,95,7,3,4
+new_zealand_1901,96 years,band,96,96,9,3,6
+new_zealand_1901,97 years,band,97,97,4,2,2
+new_zealand_1901,98 years,band,98,98,8,5,3
+new_zealand_1901,99 years,band,99,99,3,1,2
+new_zealand_1901,100 years,band,100,100,0,0,0
+new_zealand_1901,"Unspecified, under 21",band,,,39,24,15
+new_zealand_1901,"Unspecified, over 21",band,,,601,408,193
+canada_1901,All Ages,total,,,5371315,2751708,2619607
+canada_1901,Under 1 year,band,0,0,131580,66464,65116
+canada_1901,1,band,1,1,123587,62384,61203
+canada_1901,2,band,2,2,129427,65245,64182
+canada_1901,3,band,3,3,128906,64748,64158
+canada_1901,4,band,4,4,129485,65455,64030
+canada_1901,5—,band,5,9,615899,311136,304763
+canada_1901,10—,band,10,14,580339,295674,284665
+canada_1901,15—,band,15,19,552503,280275,272228
+canada_1901,20—,band,20,24,508804,256981,251823
+canada_1901,25—,band,25,29,423385,216334,207051
+canada_1901,30—,band,30,34,363067,188125,174942
+canada_1901,35—,band,35,39,331226,172551,158675
+canada_1901,40—,band,40,44,289858,152036,137822
+canada_1901,45—,band,45,49,239186,125636,113550
+canada_1901,50—,band,50,54,203964,106107,97857
+canada_1901,55—,band,55,59,160671,82136,78535
+canada_1901,60—,band,60,64,140963,72807,68156
+canada_1901,65—,band,65,69,105673,54497,51176
+canada_1901,70—,band,70,74,76380,39086,37294
+canada_1901,75—,band,75,79,47796,24548,23248
+canada_1901,80—,band,80,84,25830,13090,12740
+canada_1901,85—,band,85,89,9838,4848,4990
+canada_1901,90—,band,90,94,2910,1356,1554
+canada_1901,95 and over,band,95,,961,423,538
+canada_1901,Not stated,band,,,49077,29766,19311
+ca_british_columbia_1901,All Ages,total,,,178657,114160,64497
+ca_british_columbia_1901,Under 1 year,band,0,0,2564,1274,1290
+ca_british_columbia_1901,1,band,1,1,3317,1700,1617
+ca_british_columbia_1901,2,band,2,2,3163,1596,1567
+ca_british_columbia_1901,3,band,3,3,3066,1521,1545
+ca_british_columbia_1901,4,band,4,4,3211,1670,1541
+ca_british_columbia_1901,5—,band,5,9,14939,7680,7259
+ca_british_columbia_1901,10—,band,10,14,11956,6242,5714
+ca_british_columbia_1901,15—,band,15,19,11862,6830,5032
+ca_british_columbia_1901,20—,band,20,24,16618,11084,5534
+ca_british_columbia_1901,25—,band,25,29,19103,13478,5625
+ca_british_columbia_1901,30—,band,30,34,18730,13357,5373
+ca_british_columbia_1901,35—,band,35,39,16586,11897,4689
+ca_british_columbia_1901,40—,band,40,44,12690,9329,3361
+ca_british_columbia_1901,45—,band,45,49,8241,6029,2212
+ca_british_columbia_1901,50—,band,50,54,6278,4558,1720
+ca_british_columbia_1901,55—,band,55,59,3847,2653,1194
+ca_british_columbia_1901,60—,band,60,64,3266,2208,1058
+ca_british_columbia_1901,65—,band,65,69,1909,1275,634
+ca_british_columbia_1901,70—,band,70,74,1177,751,426
+ca_british_columbia_1901,75—,band,75,79,563,367,196
+ca_british_columbia_1901,80—,band,80,84,270,162,108
+ca_british_columbia_1901,85—,band,85,89,61,35,26
+ca_british_columbia_1901,90—,band,90,94,19,10,9
+ca_british_columbia_1901,95 and over,band,95,,18,7,11
+ca_british_columbia_1901,Not stated,band,,,15203,8447,6756
+ca_manitoba_1901,All Ages,total,,,255211,138504,116707
+ca_manitoba_1901,Under 1 year,band,0,0,7249,3674,3575
+ca_manitoba_1901,1,band,1,1,7185,3580,3605
+ca_manitoba_1901,2,band,2,2,7157,3639,3518
+ca_manitoba_1901,3,band,3,3,7135,3609,3526
+ca_manitoba_1901,4,band,4,4,7195,3626,3569
+ca_manitoba_1901,5—,band,5,9,33010,16596,16414
+ca_manitoba_1901,10—,band,10,14,28846,14888,13958
+ca_manitoba_1901,15—,band,15,19,26071,13498,12573
+ca_manitoba_1901,20—,band,20,24,24780,13840,10940
+ca_manitoba_1901,25—,band,25,29,22033,12766,9267
+ca_manitoba_1901,30—,band,30,34,19196,11070,8126
+ca_manitoba_1901,35—,band,35,39,16688,9604,7084
+ca_manitoba_1901,40—,band,40,44,14224,8150,6074
+ca_manitoba_1901,45—,band,45,49,10587,6196,4391
+ca_manitoba_1901,50—,band,50,54,7910,4746,3164
+ca_manitoba_1901,55—,band,55,59,5420,3079,2341
+ca_manitoba_1901,60—,band,60,64,4093,2346,1747
+ca_manitoba_1901,65—,band,65,69,2772,1553,1219
+ca_manitoba_1901,70—,band,70,74,1744,964,780
+ca_manitoba_1901,75—,band,75,79,921,510,411
+ca_manitoba_1901,80—,band,80,84,450,235,215
+ca_manitoba_1901,85—,band,85,89,145,87,58
+ca_manitoba_1901,90—,band,90,94,48,16,32
+ca_manitoba_1901,95 and over,band,95,,15,4,11
+ca_manitoba_1901,Not stated,band,,,337,228,109
+ca_new_brunswick_1901,All Ages,total,,,331120,168639,162481
+ca_new_brunswick_1901,Under 1 year,band,0,0,7994,4092,3902
+ca_new_brunswick_1901,1,band,1,1,8125,4111,4014
+ca_new_brunswick_1901,2,band,2,2,8144,4190,3954
+ca_new_brunswick_1901,3,band,3,3,8017,3987,4030
+ca_new_brunswick_1901,4,band,4,4,8108,4156,3952
+ca_new_brunswick_1901,5—,band,5,9,39615,20235,19380
+ca_new_brunswick_1901,10—,band,10,14,37937,19572,18365
+ca_new_brunswick_1901,15—,band,15,19,36690,18966,17724
+ca_new_brunswick_1901,20—,band,20,24,30723,15316,15407
+ca_new_brunswick_1901,25—,band,25,29,23933,11905,12028
+ca_new_brunswick_1901,30—,band,30,34,20037,10087,9950
+ca_new_brunswick_1901,35—,band,35,39,18173,9181,8992
+ca_new_brunswick_1901,40—,band,40,44,16192,8200,7992
+ca_new_brunswick_1901,45—,band,45,49,14564,7444,7120
+ca_new_brunswick_1901,50—,band,50,54,13023,6669,6354
+ca_new_brunswick_1901,55—,band,55,59,10496,5236,5260
+ca_new_brunswick_1901,60—,band,60,64,9963,5332,4631
+ca_new_brunswick_1901,65—,band,65,69,7427,3874,3553
+ca_new_brunswick_1901,70—,band,70,74,5360,2760,2600
+ca_new_brunswick_1901,75—,band,75,79,3452,1752,1700
+ca_new_brunswick_1901,80—,band,80,84,1851,912,939
+ca_new_brunswick_1901,85—,band,85,89,740,369,371
+ca_new_brunswick_1901,90—,band,90,94,211,106,105
+ca_new_brunswick_1901,95 and over,band,95,,90,38,52
+ca_new_brunswick_1901,Not stated,band,,,255,149,106
+ca_nova_scotia_1901,All Ages,total,,,459574,233642,225932
+ca_nova_scotia_1901,Under 1 year,band,0,0,10099,5108,4991
+ca_nova_scotia_1901,1,band,1,1,10287,5211,5076
+ca_nova_scotia_1901,2,band,2,2,10448,5269,5179
+ca_nova_scotia_1901,3,band,3,3,10698,5408,5290
+ca_nova_scotia_1901,4,band,4,4,10890,5523,5367
+ca_nova_scotia_1901,5—,band,5,9,52662,26682,25980
+ca_nova_scotia_1901,10—,band,10,14,50255,25714,24541
+ca_nova_scotia_1901,15—,band,15,19,49617,25461,24156
+ca_nova_scotia_1901,20—,band,20,24,43788,22871,20917
+ca_nova_scotia_1901,25—,band,25,29,34443,17785,16658
+ca_nova_scotia_1901,30—,band,30,34,27441,14027,13414
+ca_nova_scotia_1901,35—,band,35,39,24947,12595,12352
+ca_nova_scotia_1901,40—,band,40,44,22514,11412,11102
+ca_nova_scotia_1901,45—,band,45,49,20211,10215,9996
+ca_nova_scotia_1901,50—,band,50,54,18550,9218,9332
+ca_nova_scotia_1901,55—,band,55,59,15574,7643,7931
+ca_nova_scotia_1901,60—,band,60,64,15794,8275,7519
+ca_nova_scotia_1901,65—,band,65,69,11334,5754,5580
+ca_nova_scotia_1901,70—,band,70,74,8369,4134,4235
+ca_nova_scotia_1901,75—,band,75,79,5663,2663,3000
+ca_nova_scotia_1901,80—,band,80,84,3330,1478,1852
+ca_nova_scotia_1901,85—,band,85,89,1509,670,839
+ca_nova_scotia_1901,90—,band,90,94,416,156,260
+ca_nova_scotia_1901,95 and over,band,95,,150,54,96
+ca_nova_scotia_1901,Not stated,band,,,585,316,269
+ca_ontario_1901,All Ages,total,,,2182947,1096640,1086307
+ca_ontario_1901,Under 1 year,band,0,0,46413,23600,22813
+ca_ontario_1901,1,band,1,1,40208,20537,19671
+ca_ontario_1901,2,band,2,2,45044,22710,22334
+ca_ontario_1901,3,band,3,3,45682,22972,22710
+ca_ontario_1901,4,band,4,4,47235,23993,23242
+ca_ontario_1901,5—,band,5,9,230329,116680,113649
+ca_ontario_1901,10—,band,10,14,229612,116588,113024
+ca_ontario_1901,15—,band,15,19,229129,114848,114281
+ca_ontario_1901,20—,band,20,24,215468,104322,111146
+ca_ontario_1901,25—,band,25,29,178128,86588,91540
+ca_ontario_1901,30—,band,30,34,154464,76099,78365
+ca_ontario_1901,35—,band,35,39,143597,71836,71761
+ca_ontario_1901,40—,band,40,44,126713,64243,62470
+ca_ontario_1901,45—,band,45,49,104155,53474,50681
+ca_ontario_1901,50—,band,50,54,88891,45134,43757
+ca_ontario_1901,55—,band,55,59,70425,35645,34780
+ca_ontario_1901,60—,band,60,64,62498,31824,30674
+ca_ontario_1901,65—,band,65,69,47135,24519,22616
+ca_ontario_1901,70—,band,70,74,34582,17897,16685
+ca_ontario_1901,75—,band,75,79,21255,11146,10109
+ca_ontario_1901,80—,band,80,84,11564,6103,5461
+ca_ontario_1901,85—,band,85,89,4118,2132,1986
+ca_ontario_1901,90—,band,90,94,1211,599,612
+ca_ontario_1901,95 and over,band,95,,372,186,186
+ca_ontario_1901,Not stated,band,,,4719,2965,1754
+ca_prince_edward_island_1901,All Ages,total,,,103259,51959,51300
+ca_prince_edward_island_1901,Under 1 year,band,0,0,2064,1058,1006
+ca_prince_edward_island_1901,1,band,1,1,2349,1195,1154
+ca_prince_edward_island_1901,2,band,2,2,2294,1160,1134
+ca_prince_edward_island_1901,3,band,3,3,2327,1190,1137
+ca_prince_edward_island_1901,4,band,4,4,2365,1258,1107
+ca_prince_edward_island_1901,5—,band,5,9,12566,6415,6151
+ca_prince_edward_island_1901,10—,band,10,14,12494,6488,6006
+ca_prince_edward_island_1901,15—,band,15,19,12246,6225,6021
+ca_prince_edward_island_1901,20—,band,20,24,9331,4678,4653
+ca_prince_edward_island_1901,25—,band,25,29,6533,3202,3331
+ca_prince_edward_island_1901,30—,band,30,34,5467,2653,2814
+ca_prince_edward_island_1901,35—,band,35,39,5220,2579,2641
+ca_prince_edward_island_1901,40—,band,40,44,4899,2351,2548
+ca_prince_edward_island_1901,45—,band,45,49,4768,2371,2397
+ca_prince_edward_island_1901,50—,band,50,54,4288,2181,2107
+ca_prince_edward_island_1901,55—,band,55,59,3527,1711,1816
+ca_prince_edward_island_1901,60—,band,60,64,3449,1753,1696
+ca_prince_edward_island_1901,65—,band,65,69,2530,1266,1264
+ca_prince_edward_island_1901,70—,band,70,74,1855,918,937
+ca_prince_edward_island_1901,75—,band,75,79,1349,661,688
+ca_prince_edward_island_1901,80—,band,80,84,786,375,411
+ca_prince_edward_island_1901,85—,band,85,89,311,152,159
+ca_prince_edward_island_1901,90—,band,90,94,110,53,57
+ca_prince_edward_island_1901,95 and over,band,95,,33,14,19
+ca_prince_edward_island_1901,Not stated,band,,,98,52,46
+ca_quebec_1901,All Ages,total,,,1648898,824454,824444
+ca_quebec_1901,Under 1 year,band,0,0,50342,25242,25100
+ca_quebec_1901,1,band,1,1,46967,23480,23487
+ca_quebec_1901,2,band,2,2,48022,24045,23977
+ca_quebec_1901,3,band,3,3,46921,23540,23381
+ca_quebec_1901,4,band,4,4,45351,22613,22738
+ca_quebec_1901,5—,band,5,9,210000,105334,104666
+ca_quebec_1901,10—,band,10,14,190403,96515,93888
+ca_quebec_1901,15—,band,15,19,170435,85689,84746
+ca_quebec_1901,20—,band,20,24,150967,74512,76455
+ca_quebec_1901,25—,band,25,29,121778,59634,62144
+ca_quebec_1901,30—,band,30,34,101260,50122,51138
+ca_quebec_1901,35—,band,35,39,91528,45457,46071
+ca_quebec_1901,40—,band,40,44,80886,40593,40293
+ca_quebec_1901,45—,band,45,49,68819,34793,34026
+ca_quebec_1901,50—,band,50,54,59229,29949,29280
+ca_quebec_1901,55—,band,55,59,47722,23900,23822
+ca_quebec_1901,60—,band,60,64,39010,19379,19631
+ca_quebec_1901,65—,band,65,69,30864,15275,15589
+ca_quebec_1901,70—,band,70,74,22182,11041,11141
+ca_quebec_1901,75—,band,75,79,14080,7165,6915
+ca_quebec_1901,80—,band,80,84,7281,3677,3604
+ca_quebec_1901,85—,band,85,89,2856,1361,1495
+ca_quebec_1901,90—,band,90,94,839,393,446
+ca_quebec_1901,95 and over,band,95,,257,109,148
+ca_quebec_1901,Not stated,band,,,899,636,263
+ca_organized_territories_1901,All Ages,total,,,158940,87438,71502
+ca_organized_territories_1901,Under 1 year,band,0,0,4689,2333,2356
+ca_organized_territories_1901,1,band,1,1,4656,2313,2343
+ca_organized_territories_1901,2,band,2,2,4687,2396,2291
+ca_organized_territories_1901,3,band,3,3,4569,2283,2286
+ca_organized_territories_1901,4,band,4,4,4581,2327,2254
+ca_organized_territories_1901,5—,band,5,9,20724,10474,10250
+ca_organized_territories_1901,10—,band,10,14,17191,8776,8415
+ca_organized_territories_1901,15—,band,15,19,14973,7939,7034
+ca_organized_territories_1901,20—,band,20,24,14211,8372,5839
+ca_organized_territories_1901,25—,band,25,29,13139,7734,5405
+ca_organized_territories_1901,30—,band,30,34,11805,6916,4889
+ca_organized_territories_1901,35—,band,35,39,10526,6100,4426
+ca_organized_territories_1901,40—,band,40,44,8840,5320,3520
+ca_organized_territories_1901,45—,band,45,49,6235,3812,2423
+ca_organized_territories_1901,50—,band,50,54,4686,2771,1915
+ca_organized_territories_1901,55—,band,55,59,3115,1866,1249
+ca_organized_territories_1901,60—,band,60,64,2490,1420,1070
+ca_organized_territories_1901,65—,band,65,69,1534,883,651
+ca_organized_territories_1901,70—,band,70,74,1005,553,452
+ca_organized_territories_1901,75—,band,75,79,470,256,214
+ca_organized_territories_1901,80—,band,80,84,277,138,139
+ca_organized_territories_1901,85—,band,85,89,89,40,49
+ca_organized_territories_1901,90—,band,90,94,53,21,32
+ca_organized_territories_1901,95 and over,band,95,,25,10,15
+ca_organized_territories_1901,Not stated,band,,,4370,2385,1985
+ca_unorganized_territories_1901,All Ages,total,,,52709,36272,16437
+ca_unorganized_territories_1901,Under 1 year,band,0,0,166,83,83
+ca_unorganized_territories_1901,1,band,1,1,493,257,236
+ca_unorganized_territories_1901,2,band,2,2,468,240,228
+ca_unorganized_territories_1901,3,band,3,3,491,238,253
+ca_unorganized_territories_1901,4,band,4,4,549,289,260
+ca_unorganized_territories_1901,5—,band,5,9,2054,1040,1014
+ca_unorganized_territories_1901,10—,band,10,14,1645,891,754
+ca_unorganized_territories_1901,15—,band,15,19,1480,819,661
+ca_unorganized_territories_1901,20—,band,20,24,2918,1986,932
+ca_unorganized_territories_1901,25—,band,25,29,4295,3242,1053
+ca_unorganized_territories_1901,30—,band,30,34,4667,3794,873
+ca_unorganized_territories_1901,35—,band,35,39,3961,3302,659
+ca_unorganized_territories_1901,40—,band,40,44,2900,2438,462
+ca_unorganized_territories_1901,45—,band,45,49,1606,1302,304
+ca_unorganized_territories_1901,50—,band,50,54,1109,881,228
+ca_unorganized_territories_1901,55—,band,55,59,545,403,142
+ca_unorganized_territories_1901,60—,band,60,64,400,270,130
+ca_unorganized_territories_1901,65—,band,65,69,168,98,70
+ca_unorganized_territories_1901,70—,band,70,74,106,68,38
+ca_unorganized_territories_1901,75—,band,75,79,43,28,15
+ca_unorganized_territories_1901,80—,band,80,84,21,10,11
+ca_unorganized_territories_1901,85—,band,85,89,9,2,7
+ca_unorganized_territories_1901,90—,band,90,94,3,2,1
+ca_unorganized_territories_1901,95 and over,band,95,,1,1,0
+ca_unorganized_territories_1901,Not stated,band,,,22611,14588,8023

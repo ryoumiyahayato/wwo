@@ -36,6 +36,21 @@ SOURCE = [
          rights="Factual numeric extract from US federal table; underlying researchers credited by the publisher.")
 ]
 SENSITIVITY = dict(A=.0125,B=.0375,C=.0875,D=.1625,E=.25)
+REGIONS = ["Africa", "America", "Asia", "Europe", "Oceania", "World"]
+OPENING_WEIGHT = 184 / 365
+V4_AFRICAN_COLUMNS = {
+    "british east africa": "british east africa (kenia & uganda)",
+    "cape verde (portuguese africa)": "cabo verde (portuguese africa)",
+    "comoros and mayote (french)": "comoros",
+    "german east africa": "tanganyka (german east africa)",
+    "german west africa": "togo (german west africa)",
+    "italian somaliland": "italia somalia",
+    "morocco": "marocco",
+    "réunion": "reunion",
+    "sao tome and principe (portuguese africa)": "s.tome e principe (portuguess africa)",
+    "southern rhodesia": "zimbabwe (southern rhodesia)",
+    "zanzibar island": "zanzibar isl.",
+}
 
 def key(name):
     return " ".join(str(name or "").casefold().split())
@@ -59,6 +74,42 @@ def colmap(table):
 
 def write_json(name, value):
     (HERE/name).write_text(json.dumps(value,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+
+def opening_value(first, second):
+    return round((first * (1 - OPENING_WEIGHT) + second * OPENING_WEIGHT) * 1000)
+
+
+def version_comparisons(series, prior, summary, prior_summary):
+    """Keep published revisions distinct from account changes and independent rounding."""
+    for col, region in enumerate(REGIONS, 8):
+        references = []
+        for table in (prior_summary, summary):
+            first, second = [next(i for i, row in enumerate(table) if row[0] == year) for year in (1899, 1900)]
+            letter = get_column_letter(col + 1)
+            references.append((opening_value(table[first][col], table[second][col]),
+                f"Summary data!{letter}{first+1}:{letter}{second+1}"))
+        (v4, v4_locator), (v5, v5_locator) = references
+        yield dict(comparison="published_research_revision", region=region, date="1900-01-01",
+            v4=v4, v4_locator=v4_locator, v5=v5, v5_locator=v5_locator, v5_minus_v4=v5-v4)
+
+    old_columns = colmap(prior)
+    for col, name in enumerate(series[1]):
+        if key(series[0][col]) != "africa" or not name:
+            continue
+        old_col = old_columns[V4_AFRICAN_COLUMNS.get(key(name), key(name))]
+        first, second = prior[102][old_col], prior[103][old_col]
+        next_first, next_second = series[102][col], series[103][col]
+        if not all(isinstance(value, (int, float)) for value in (first, second, next_first, next_second)):
+            continue
+        if (first, second) == (next_first, next_second):
+            continue
+        v4, v5 = opening_value(first, second), opening_value(next_first, next_second)
+        old_letter, new_letter = get_column_letter(old_col+1), get_column_letter(col+1)
+        yield dict(comparison="matched_african_research_series_revision", region="Africa", date="1900-01-01",
+            unit_id="ft_"+slug(name), v4_name=prior[1][old_col].strip(), v5_name=name.strip(), v4=v4,
+            v4_locator=f"Country series!{old_letter}103:{old_letter}104", v5=v5,
+            v5_locator=f"Country series!{new_letter}103:{new_letter}104", v5_minus_v4=v5-v4)
+
 
 def build():
     series=rows("world_2026.xlsx","Country series")
@@ -117,8 +168,8 @@ def build():
             endpoints.append(row)
             observations.append(row)
         a,b=endpoints
-        w=184/365
-        val=round((a["reported_thousands"]*(1-w)+b["reported_thousands"]*w)*1000)
+        w=OPENING_WEIGHT
+        val=opening_value(a["reported_thousands"], b["reported_thousands"])
         row=dict(common,date="1900-01-01",population_value=val,method="linear between nominal July 1 midyear values in thousands, multiply by 1000 then round once",
                  locator=a["locator"]+" and "+b["locator"],source_dates=[a["date"],b["date"]],fraction="184/365",
                  quality=max(a["quality"],b["quality"]),uncertainty_kind="linear interpolation of endpoint sensitivity envelopes; between-date deviation is unquantified")
@@ -133,7 +184,7 @@ def build():
         for row in observations:
             if row["date"]==f"{year}-07-01": total[row["region"]]+=row["population_value"]
         idx=next(i for i,r in enumerate(summary) if r[0]==year)
-        for j,region in enumerate(["Africa","America","Asia","Europe","Oceania","World"],8):
+        for j,region in enumerate(REGIONS,8):
             pub=people(summary[idx][j]); parts=sum(total.values()) if region=="World" else total[region]
             v5only=sum(r["population_value"] for r in observations if r["date"]==f"{year}-07-01" and r["source_id"]==SERIES and r["kind"]=="territory" and (region=="World" or r["region"]==region))
             comparisons.append(dict(region=region,year=year,published=pub,v5_components=v5only,v5_difference=v5only-pub,
@@ -142,12 +193,11 @@ def build():
                 kind="benchmark",population_value=pub,population_lower=None,population_upper=None,date=f"{year}-07-01",source_id=SERIES,
                 locator=f"Summary data!{get_column_letter(j+1)}{idx+1}",definition="Published summary, thousand persons at midyear.",
                 method="research estimate",mapping_status="statistical_control",quality="published_aggregate",region=region))
-    for region in ["Africa","America","Asia","Europe","Oceania","World"]:
+    for j,region in enumerate(REGIONS,8):
         controls=[r for r in observations if r["kind"]=="benchmark" and r["region"]==region]
         a,b=controls
-        j=["Africa","America","Asia","Europe","Oceania","World"].index(region)+8
         ix=[next(i for i,t in enumerate(summary) if t[0]==yr) for yr in (1899,1900)]
-        value=round((summary[ix[0]][j]*(1-w)+summary[ix[1]][j]*w)*1000)
+        value=opening_value(summary[ix[0]][j], summary[ix[1]][j])
         parts=sum(r["population_value"] for r in observations if r["kind"]=="territory" and r["date"]=="1900-01-01" and (region=="World" or r["region"]==region))
         observations.append(dict(a,date="1900-01-01",population_value=value,locator=a["locator"]+" and "+b["locator"],
                                  definition="Interpolation of published midyear aggregate in thousands.",source_dates=[a["date"],b["date"]],
@@ -159,6 +209,7 @@ def build():
         definition="World, persons. Year only.",method="UN 1999 Table 1 p.5; bounds are summary spread across published estimates, not a confidence interval.",
         mapping_status="statistical_control",quality="independent_comparison",region="World"))
     write_json("sources.json",SOURCE)
+    comparisons.extend(version_comparisons(series, prior, summary, rows("world_2025.xlsx", "Summary data")))
     write_json("reconciliation.json",comparisons)
     with (HERE/"observations.jsonl").open("w",encoding="utf-8",newline="\n") as out:
         for r in observations: out.write(json.dumps(r,ensure_ascii=False)+"\n")

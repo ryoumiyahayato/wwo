@@ -11,7 +11,7 @@
     "crown_islands": 29,
     "danish": 56,
     "eastern": 1105,
-    "india_comparable": 84,
+    "india_comparable": 87,
     "japan_taiwan": 232,
     "liechtenstein": 25,
     "philippines": 51,
@@ -21,161 +21,28 @@
     "world": 499,
     "asian_interpolation": 62
   },
-  "cited_sources": 79,
+  "cited_sources": 80,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
-  "research_regions": {
-    "Africa": {
-      "statistical_units": 46,
-      "opening_research_estimate": 129975605,
-      "units_with_polity_candidates": 41,
-      "people_without_polity_candidate": 193635,
-      "grades": {
-        "C": 2,
-        "not_assessed_for_this_revision": 37,
-        "D": 4,
-        "E": 2,
-        "B": 1
-      },
-      "production_root_ids": [
-        "cshapes_gw_402",
-        "cshapes_gw_570",
-        "cshapes_gw_585",
-        "cshapes_gw_590"
-      ],
-      "production_people": 998513,
-      "production_pct_of_regional_research_estimate": 0.768,
-      "people_with_opening_subdivision": 373996
-    },
-    "America": {
-      "statistical_units": 46,
-      "opening_research_estimate": 145035775,
-      "units_with_polity_candidates": 34,
-      "people_without_polity_candidate": 399117,
-      "grades": {
-        "C": 32,
-        "D": 10,
-        "B": 3,
-        "not_assessed_for_this_revision": 1
-      },
-      "production_root_ids": [
-        "argentina_1900",
-        "brazil_1900",
-        "chile_1900",
-        "colony_of_newfoundland",
-        "cshapes_gw_3",
-        "cshapes_gw_31",
-        "cshapes_gw_52",
-        "cshapes_gw_53",
-        "cshapes_gw_6",
-        "cshapes_gw_66",
-        "cuba_occupation_1900",
-        "dominion_of_canada",
-        "mexican_republic",
-        "united_states_1900"
-      ],
-      "production_people": 122296918,
-      "production_pct_of_regional_research_estimate": 84.322,
-      "people_with_opening_subdivision": 111228173
-    },
-    "Asia": {
-      "statistical_units": 33,
-      "opening_research_estimate": 894378060,
-      "units_with_polity_candidates": 25,
-      "people_without_polity_candidate": 1424075,
-      "grades": {
-        "D": 10,
-        "E": 17,
-        "C": 3,
-        "B": 1,
-        "A": 1,
-        "not_assessed_for_this_revision": 1
-      },
-      "production_root_ids": [
-        "cshapes_gw_750",
-        "cshapes_gw_780",
-        "cshapes_gw_850",
-        "empire_of_japan",
-        "korean_empire",
-        "qing_empire"
-      ],
-      "production_people": 179952291,
-      "production_pct_of_regional_research_estimate": 20.12,
-      "people_with_opening_subdivision": 71028669
-    },
-    "Europe": {
-      "statistical_units": 29,
-      "opening_research_estimate": 419144007,
-      "units_with_polity_candidates": 24,
-      "people_without_polity_candidate": 571017,
-      "grades": {
-        "D": 6,
-        "A": 14,
-        "B": 6,
-        "C": 2,
-        "E": 1
-      },
-      "production_root_ids": [
-        "austria_hungary",
-        "british_isles_1900",
-        "country_fra",
-        "cshapes_gw_338",
-        "german_empire",
-        "iceland_under_denmark",
-        "kingdom_of_belgium",
-        "kingdom_of_italy",
-        "kingdom_of_luxembourg",
-        "kingdom_of_netherlands",
-        "kingdom_of_portugal",
-        "kingdom_of_romania",
-        "kingdom_of_serbia",
-        "kingdom_of_spain",
-        "principality_of_bulgaria",
-        "russian_empire",
-        "sweden_norway_union",
-        "swiss_confederation"
-      ],
-      "production_people": 407154320,
-      "production_pct_of_regional_research_estimate": 97.139,
-      "people_with_opening_subdivision": 332407293
-    },
-    "Oceania": {
-      "statistical_units": 6,
-      "opening_research_estimate": 6540799,
-      "units_with_polity_candidates": 4,
-      "people_without_polity_candidate": 214004,
-      "grades": {
-        "B": 1,
-        "C": 2,
-        "E": 3
-      },
-      "production_root_ids": [
-        "australia_colonies_1900",
-        "cshapes_gw_4",
-        "cshapes_gw_920"
-      ],
-      "production_people": 4785130,
-      "production_pct_of_regional_research_estimate": 73.158,
-      "people_with_opening_subdivision": 0
-    }
-  },
-  "production_roots": 43,
+  "production_roots": 48,
   "partially_located_legacy_roots": 2,
-  "documented_people_under_legacy_controls": 71028669,
-  "replaced_legacy_roots": 27,
-  "new_roots": 16,
-  "production_people": 715187172,
-  "production_people_pct_world_estimate": 44.837,
-  "population_outside_evidence_opening_estimate": 879887076,
-  "legacy_only_people": 739991331,
-  "authoritative_total_for_new_game": 1455178503,
+  "documented_people_under_legacy_controls": 377037176,
+  "replaced_legacy_roots": 28,
+  "new_roots": 20,
+  "production_people": 1024716228,
+  "production_people_pct_world_estimate": 64.243,
+  "population_outside_evidence_opening_estimate": 570358020,
+  "legacy_only_people": 433042824,
+  "authoritative_total_for_new_game": 1457759052,
   "roots_with_partitions": 15,
-  "disjoint_leaves": 335,
-  "people_in_partitions": 515038131,
+  "disjoint_leaves": 355,
+  "people_in_partitions": 821046638,
+  "partitions_with_explicit_places": 18,
+  "people_in_partitions_with_explicit_places": 271672367,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
-  "political_catalogue_members_of_production_groups": 50,
+  "political_catalogue_members_of_production_groups": 55,
   "dated_admin_catalogues": {
     "britain_historic_counties_identity.json": {
       "units": 414,
@@ -382,19 +249,19 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2176,
+  "source_statistical_units": 2177,
   "opening_by_source_type": {
     "territorial_returns": {
-      "roots": 19,
-      "people": 308072919
+      "roots": 20,
+      "people": 308193174
     },
     "historical_world_reconstruction": {
-      "roots": 24,
-      "people": 336085584
+      "roots": 28,
+      "people": 339485878
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 2,
-      "people": 71028669
+      "people": 377037176
     }
   },
   "city_index_representative_bands": {
@@ -410,9 +277,323 @@
     "rus_lan_97": 12636,
     "rus_age_97": 2356,
     "us_occupation_special_report": 7,
-    "swiss_federal_census_comparison_1911": 2
+    "swiss_federal_census_comparison_1911": 2,
+    "british_empire_census_1901": 418,
+    "us_twelfth_census_abstract": 26,
+    "nz_census_1901_ages": 105
   },
-  "structure_unknown_policy": "No group fractions assigned outside the original source scope. Household observations embedded in other tables remain in population records.",
+  "structure_opening_pool_controls": 150415817,
+  "structure_opening_pool_count": 12,
+  "structure_opening_residents_outside_modeled_pools": 1307343235,
+  "structure_opening_scopes": [
+    {
+      "unit_id": "administrative_region:uk_constituent_ireland",
+      "opening_total": 4489395,
+      "observed_unit_id": "uk_ireland",
+      "observed_total": 4458775,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:uk_constituent_scotland",
+      "opening_total": 4416526,
+      "observed_unit_id": "uk_scotland",
+      "observed_total": 4472103,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "ca_british_columbia",
+      "opening_total": 168635,
+      "observed_unit_id": "ca_british_columbia",
+      "observed_total": 178657,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "ca_manitoba",
+      "opening_total": 242422,
+      "observed_unit_id": "ca_manitoba",
+      "observed_total": 255211,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "ca_new_brunswick",
+      "opening_total": 329893,
+      "observed_unit_id": "ca_new_brunswick",
+      "observed_total": 331120,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "ca_nova_scotia",
+      "opening_total": 458431,
+      "observed_unit_id": "ca_nova_scotia",
+      "observed_total": 459574,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "ca_ontario",
+      "opening_total": 2174402,
+      "observed_unit_id": "ca_ontario",
+      "observed_total": 2182947,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "ca_organized_territories",
+      "opening_total": 147467,
+      "observed_unit_id": "ca_organized_territories",
+      "observed_total": 158940,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "ca_prince_edward_island",
+      "opening_total": 103983,
+      "observed_unit_id": "ca_prince_edward_island",
+      "observed_total": 103259,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "ca_quebec_and_unorganized_territories",
+      "opening_total": 1679081,
+      "observed_unit_id": "ca_quebec_and_unorganized_territories",
+      "observed_total": 1701607,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "cshapes_gw_780",
+      "opening_total": 3469224,
+      "observed_unit_id": "cshapes_gw_780",
+      "observed_total": 3573419,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "ft_russia_empire_ussr",
+      "opening_total": 132736358,
+      "observed_unit_id": "ru_census_1897_ex_finland",
+      "observed_total": 125640021,
+      "observed_date": "1897-02-09"
+    }
+  ],
+  "structure_broad_observations": [
+    {
+      "panel_id": "russia_empire_1897",
+      "unit_id": "ru_census_1897_ex_finland",
+      "date": "1897-02-09",
+      "population": 125640021,
+      "age_not_stated": 50442
+    },
+    {
+      "panel_id": "england_wales_1901",
+      "unit_id": "uk_england_wales",
+      "date": "1901-03-31",
+      "population": 32527843,
+      "age_not_stated": 0
+    },
+    {
+      "panel_id": "scotland_1901",
+      "unit_id": "uk_scotland",
+      "date": "1901-03-31",
+      "population": 4472103,
+      "age_not_stated": 0
+    },
+    {
+      "panel_id": "ireland_1901",
+      "unit_id": "uk_ireland",
+      "date": "1901-03-31",
+      "population": 4458775,
+      "age_not_stated": 0
+    },
+    {
+      "panel_id": "india_1901",
+      "unit_id": "british_india_empire_1901",
+      "date": "1901-03-01",
+      "population": 294361056,
+      "age_not_stated": 1033773
+    },
+    {
+      "panel_id": "ceylon_1901",
+      "unit_id": "cshapes_gw_780",
+      "date": "1901-03-01",
+      "population": 3573419,
+      "age_not_stated": 336
+    },
+    {
+      "panel_id": "seychelles_1901",
+      "unit_id": "seychelles_islands_1901",
+      "date": "1901-05-31",
+      "population": 19258,
+      "age_not_stated": 29
+    },
+    {
+      "panel_id": "us_mainland_1900",
+      "unit_id": "united_states_1900",
+      "date": "1900-06-01",
+      "population": 75994575,
+      "age_not_stated": 200584
+    },
+    {
+      "panel_id": "new_zealand_1901",
+      "unit_id": "nz_colony_non_maori_1901",
+      "date": "1901-03-31",
+      "population": 772719,
+      "age_not_stated": 640
+    },
+    {
+      "panel_id": "canada_1901",
+      "unit_id": "dominion_of_canada",
+      "date": "1901-03-31",
+      "population": 5371315,
+      "age_not_stated": 49077
+    }
+  ],
+  "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
   "dated_parent_controls": 430,
-  "dated_parent_controls_arithmetic_closure": 390
+  "dated_parent_controls_arithmetic_closure": 390,
+  "research_regions": {
+    "Africa": {
+      "statistical_units": 46,
+      "opening_research_estimate": 129975605,
+      "units_with_polity_candidates": 41,
+      "people_without_polity_candidate": 193635,
+      "grades": {
+        "C": 2,
+        "not_assessed_for_this_revision": 37,
+        "D": 4,
+        "E": 2,
+        "B": 1
+      },
+      "production_root_ids": [
+        "beylicate_of_tunis",
+        "cshapes_gw_402",
+        "cshapes_gw_570",
+        "cshapes_gw_585",
+        "cshapes_gw_590"
+      ],
+      "production_people": 2711526,
+      "production_pct_of_regional_research_estimate": 2.086,
+      "people_with_opening_subdivision": 373996,
+      "research_only_units": 41,
+      "research_only_people": 127350566
+    },
+    "America": {
+      "statistical_units": 46,
+      "opening_research_estimate": 145035775,
+      "units_with_polity_candidates": 34,
+      "people_without_polity_candidate": 399117,
+      "grades": {
+        "C": 32,
+        "D": 10,
+        "B": 3,
+        "not_assessed_for_this_revision": 1
+      },
+      "production_root_ids": [
+        "argentina_1900",
+        "brazil_1900",
+        "chile_1900",
+        "colony_of_newfoundland",
+        "cshapes_gw_3",
+        "cshapes_gw_31",
+        "cshapes_gw_51",
+        "cshapes_gw_52",
+        "cshapes_gw_53",
+        "cshapes_gw_6",
+        "cshapes_gw_66",
+        "cshapes_gw_80",
+        "cuba_occupation_1900",
+        "dominion_of_canada",
+        "mexican_republic",
+        "united_states_1900",
+        "uruguay_1900"
+      ],
+      "production_people": 123984199,
+      "production_pct_of_regional_research_estimate": 85.485,
+      "people_with_opening_subdivision": 111228173,
+      "research_only_units": 30,
+      "research_only_people": 19765044
+    },
+    "Asia": {
+      "statistical_units": 33,
+      "opening_research_estimate": 894378060,
+      "units_with_polity_candidates": 25,
+      "people_without_polity_candidate": 1424075,
+      "grades": {
+        "D": 10,
+        "E": 17,
+        "C": 3,
+        "B": 1,
+        "A": 1,
+        "not_assessed_for_this_revision": 1
+      },
+      "production_root_ids": [
+        "cshapes_gw_750",
+        "cshapes_gw_780",
+        "cshapes_gw_850",
+        "empire_of_japan",
+        "korean_empire",
+        "qing_empire"
+      ],
+      "production_people": 485960798,
+      "production_pct_of_regional_research_estimate": 54.335,
+      "people_with_opening_subdivision": 377037176,
+      "research_only_units": 27,
+      "research_only_people": 89458537
+    },
+    "Europe": {
+      "statistical_units": 29,
+      "opening_research_estimate": 419144007,
+      "units_with_polity_candidates": 24,
+      "people_without_polity_candidate": 571017,
+      "grades": {
+        "D": 6,
+        "A": 14,
+        "B": 6,
+        "C": 2,
+        "E": 1
+      },
+      "production_root_ids": [
+        "austria_hungary",
+        "british_isles_1900",
+        "country_fra",
+        "cshapes_gw_338",
+        "german_empire",
+        "iceland_under_denmark",
+        "kingdom_of_belgium",
+        "kingdom_of_italy",
+        "kingdom_of_luxembourg",
+        "kingdom_of_netherlands",
+        "kingdom_of_portugal",
+        "kingdom_of_romania",
+        "kingdom_of_serbia",
+        "kingdom_of_spain",
+        "principality_of_bulgaria",
+        "russian_empire",
+        "sweden_norway_union",
+        "swiss_confederation"
+      ],
+      "production_people": 407154320,
+      "production_pct_of_regional_research_estimate": 97.139,
+      "people_with_opening_subdivision": 332407293,
+      "research_only_units": 9,
+      "research_only_people": 10103353
+    },
+    "Oceania": {
+      "statistical_units": 6,
+      "opening_research_estimate": 6540799,
+      "units_with_polity_candidates": 4,
+      "people_without_polity_candidate": 214004,
+      "grades": {
+        "B": 1,
+        "C": 2,
+        "E": 3
+      },
+      "production_root_ids": [
+        "australia_colonies_1900",
+        "cshapes_gw_4",
+        "cshapes_gw_920",
+        "cshapes_gw_950"
+      ],
+      "production_people": 4905385,
+      "production_pct_of_regional_research_estimate": 74.997,
+      "people_with_opening_subdivision": 0,
+      "research_only_units": 2,
+      "research_only_people": 214004
+    }
+  }
 }

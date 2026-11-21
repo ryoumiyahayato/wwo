@@ -137,8 +137,7 @@ impl InitialWorld {
         let residents: Vec<_> = directory.at(place).flat_map(|org| std::iter::once(&org.officer)
             .chain(org.opening_member.as_ref()).map(move |officer| (org, officer))).collect();
         let Some(unit) = self.residence_unit_at(place) else { return Ok(()); };
-        if self.population.unclassified(unit).unwrap_or(0) < residents.len() as u64
-            || residents.iter().any(|(_, officer)| self.person(&officer.person).is_some()
+        if residents.iter().any(|(_, officer)| self.person(&officer.person).is_some()
                 || self.ledger.default_account(&officer.person).is_some()) { return Ok(()); }
 
         // Stage the claims, character roster and job. Publishing the accounts is the last fallible operation.
@@ -149,12 +148,13 @@ impl InitialWorld {
         let mut character: Option<super::CharacterOutput> = None;
         for (_, resident) in &residents {
             let id = &resident.person;
+            let Some(cohort) = self.materialization_cohort(&population, unit, birth_year) else { return Ok(()); };
             let row = super::RuntimePerson::at(id, resident.name.clone(), place, unit, birth_year, None);
             identities.insert(id.clone(), row.identity()?);
             let prior = character.as_ref().unwrap_or(&self.character);
             character = Some(super::formal_character::register_native_person(&self.player, &identities, id, prior.day, &prior.state)
                 .map_err(io::Error::other)?);
-            population.materialize_person(id, unit, None, self.clock.snapshot().total_minutes)?;
+            population.materialize_person(id, unit, cohort.as_ref(), self.clock.snapshot().total_minutes)?;
             people.push((id.clone(), row));
         }
         let mut work = Arc::clone(&self.work_opening);
@@ -188,9 +188,8 @@ impl InitialWorld {
         for org in organizations {
             for resident in std::iter::once(&org.officer).chain(org.opening_member.as_ref()) {
                 // A previous slot may already use this identity or have no unassigned residents.
-                if self.person(&resident.person).is_some()
-                    || self.residence_unit_at(&org.place).and_then(|unit| self.population.unclassified(unit)).unwrap_or(0) == 0
-                {
+                if self.person(&resident.person).is_some() || self.residence_unit_at(&org.place)
+                    .and_then(|unit| self.materialization_cohort(&self.population, unit, birth_year)).is_none() {
                     continue;
                 }
                 self.materialize_resident(&resident.person, resident.name.clone(), &org.place, birth_year, None)?;

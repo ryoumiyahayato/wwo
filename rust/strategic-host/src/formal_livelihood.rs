@@ -1,6 +1,7 @@
 use crate::{
     formal_bootstrap::{Consumption, InitialWorld},
     formal_ledger::{Balance, MAX_AMOUNT},
+    formal_population::needs::{recorded_food_energy, FoodEnergyEstimate, QuantityRange},
     formal_stock::ConsumptionAllocation,
 };
 use serde::{Deserialize, Serialize};
@@ -77,6 +78,37 @@ pub struct FoodPortion {
 pub struct FoodIntake {
     pub day: u32,
     pub portions: Vec<FoodPortion>,
+}
+
+#[derive(Serialize)]
+pub struct RecordedIntakeEnergy {
+    pub converted_kg: i64,
+    pub unconverted_kg: i64,
+    pub energy: Option<FoodEnergyEstimate>,
+}
+
+impl FoodIntake {
+    /// Estimate energy only for consumed portions with a documented conversion.
+    /// The original stock allocations remain the intake authority.
+    pub fn recorded_energy(&self) -> RecordedIntakeEnergy {
+        let mut result = RecordedIntakeEnergy { converted_kg: 0, unconverted_kg: 0, energy: None };
+        for portion in &self.portions {
+            let mass_kg: i64 = portion.allocations.iter().map(|lot| lot.quantity_milli).sum();
+            match recorded_food_energy(&portion.commodity, mass_kg as f64) {
+                Some(estimate) => {
+                    result.converted_kg += mass_kg;
+                    let total = result.energy.get_or_insert(FoodEnergyEstimate {
+                        kcal: QuantityRange { lower: 0.0, upper: 0.0 },
+                        source: estimate.source,
+                    });
+                    total.kcal.lower += estimate.kcal.lower;
+                    total.kcal.upper += estimate.kcal.upper;
+                }
+                None => result.unconverted_kg += mass_kg,
+            }
+        }
+        result
+    }
 }
 
 pub struct PersonLivelihood<'a> {

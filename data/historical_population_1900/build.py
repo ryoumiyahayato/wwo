@@ -7,8 +7,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from geography import catalogue, legacy_audit
 from opening import groups, sourced_people
-from structure import dimensions
-from reconciliation import comparisons, asian_estimates
+from structure import age_sex_panels, dimensions, opening_structure
+from reconciliation import comparisons, asian_estimates, world_accounts
 from cities import city_index
 from us_municipalities import us_residuals
 
@@ -102,16 +102,20 @@ def main():
                    accounting_role="alternative_reconstruction_nonadditive")
     observations.extend(derived)
     regional_counts["asian_interpolation"]=len(derived)
-    selection=groups(observations)
+    selection=groups(observations, version=2)
+    bengal=next(u for g in selection for u in g["units"] if u["unit_id"]=="raj_bengal_province")
+    bengal["place_ids"].append("place:kolkata")
+    bengal["place_evidence"]={"place:kolkata": {
+        "locator": "Imperial Gazetteer of India, vol. IX, p. 260, Calcutta (Kalikata)",
+        "url": "https://dsal.uchicago.edu/cgi-bin/reference/gazetteer/query.py?bookid=DS405.1.I34_V09&display_type=page_display&object=266",
+        "scope": "Siting of Calcutta in Bengal; one residence location, no city population or polygon inferred.",
+    }}
     geography,dates=catalogue(observations,selection)
     for r in observations:
         # The observation date and the validity window of a WWO geography are separate.
         if r.get("wwo_id") in dates:
             r["map_reference_from"],r["map_reference_to"]=dates[r["wwo_id"]]
     study=[r for r in observations if r["source_id"].startswith("ft_world_") and r["date"]==DATE and r["kind"]=="territory"]
-    by_area=defaultdict(list)
-    for r in study:
-        by_area[r["region"]].append(r)
     controls={r["date"]:r["population_value"] for r in observations if r["unit_id"]=="ft_region_world"}
     target=controls[DATE]
     legacy=legacy_audit(study,selection)
@@ -133,10 +137,6 @@ def main():
     summary=dict(reference_date=DATE,release_status="PARTIAL",research_observations_by_collection=regional_counts,
         cited_sources=len(manifest),world_midyear=controls["1900-07-01"],world_jan1_interpolated=target,
         research_component_sum_jan1=sum(r["population_value"] for r in study),
-        research_regions={k:dict(statistical_units=len(v),opening_research_estimate=sum(r["population_value"] for r in v),
-             units_with_polity_candidates=sum(bool(r["candidate_polity_ids"]) for r in v),
-             people_without_polity_candidate=sum(r["population_value"] for r in v if not r["candidate_polity_ids"]),
-             grades=dict(Counter(r["quality"] for r in v))) for k,v in by_area.items()},
         production_roots=len(full),partially_located_legacy_roots=len(partial),
         documented_people_under_legacy_controls=sum(sourced_people(g) for g in partial),
         replaced_legacy_roots=replaced,new_roots=len(full)-replaced,
@@ -145,6 +145,8 @@ def main():
         authoritative_total_for_new_game=total+legacy_only,
         roots_with_partitions=len(parts),disjoint_leaves=sum(len(g["units"]) for g in parts),
         people_in_partitions=sum(sourced_people(g) for g in parts),
+        partitions_with_explicit_places=sum(bool(u.get("place_ids")) for g in parts for u in g["units"]),
+        people_in_partitions_with_explicit_places=sum(u["population_value"] for g in parts for u in g["units"] if u.get("place_ids")),
         political_catalogue_at_opening=len(areas),political_catalogue_with_research_candidate=sum(bool(r["study_candidates"]) for r in areas),
         political_catalogue_members_of_production_groups=sum(bool(r["opening_ids"]) for r in areas),
         dated_admin_catalogues={file:dict(units=len(sub),with_linked_observation=sum(bool(r["historical_observation_ids"]) for r in sub),
@@ -165,25 +167,33 @@ def main():
     summary["city_index_unresolved"]=sum(r["representative_record"] is None for r in city_catalog)
     records("cities_1900.jsonl.gz",city_catalog)
     structural=dimensions(observations)
+    structure_opening=opening_structure(selection)
     summary["structural_observations_by_source"]=dict(Counter(r["source_id"] for r in structural))
-    summary["structure_unknown_policy"]="No group fractions assigned outside the original source scope. Household observations embedded in other tables remain in population records."
+    summary["structure_opening_pool_controls"]=sum(g["opening_total"] for g in structure_opening["groups"])
+    summary["structure_opening_pool_count"]=len(structure_opening["groups"])
+    summary["structure_opening_residents_outside_modeled_pools"]=total+legacy_only-summary["structure_opening_pool_controls"]
+    summary["structure_opening_scopes"]=[
+        {key: group[key] for key in ("unit_id", "opening_total", "observed_unit_id", "observed_total", "observed_date")}
+        for group in structure_opening["groups"]
+    ]
+    summary["structure_broad_observations"]=[
+        dict(panel_id=panel["id"], unit_id=panel["observed_unit_id"], date=panel["observed_date"],
+             population=next(row["both"] for row in rows if row["role"]=="total"),
+             age_not_stated=sum(row["both"] for row in rows if row["role"]=="band" and row["age_min"] is None))
+        for panel,rows in age_sex_panels() if panel["broad_observation"]
+    ]
+    summary["structure_unknown_policy"]="Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex."
     audit=comparisons(observations)
     summary["dated_parent_controls"]=len(audit)
     summary["dated_parent_controls_arithmetic_closure"]=sum(r["children_minus_parent"]==0 for r in audit)
-    # Coverage uses the paper's partition of the world, which places the entire
-    # Russian study entry in Europe. It is not the population within continent polygons.
-    from geography import aliases
-
-    for area,metrics in summary["research_regions"].items():
-        match={p for r in by_area[area] for p in r["candidate_polity_ids"]}
-        assigned=[g for g in selection if set(aliases().get(g["unit_id"],[g["unit_id"]])) & match]
-        opening_people=sum(sourced_people(g) for g in assigned)
-        metrics.update(production_root_ids=[g["unit_id"] for g in assigned],production_people=opening_people,
-                       production_pct_of_regional_research_estimate=round(100*opening_people/metrics["opening_research_estimate"],3),
-                       people_with_opening_subdivision=sum(sourced_people(g) for g in assigned if g["units"]))
+    ledger=world_accounts(study, selection, legacy, target)
+    summary["research_regions"]=ledger["research_regions"]
+    json_file("world_accounts.json",ledger)
     records("demography_1900.jsonl.gz",structural)
     records("parent_reconciliation.jsonl.gz",audit)
-    json_file("opening.json",dict(version=1,groups=selection))
+    json_file("opening.json",dict(version=1,groups=groups(observations, version=1)))
+    json_file("opening_v2.json",dict(version=2,groups=selection))
+    json_file("opening_structure.json",structure_opening)
     json_file("sources.json",list(manifest.values()))
     json_file("summary.json",summary)
     json_file("legacy_audit.json",legacy)

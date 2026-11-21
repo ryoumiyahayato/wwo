@@ -72,9 +72,9 @@ Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒�
 
 宏观贸易、实物货运、人物出行和背景迁移使用同一全球路网。地点卡显示可用连接或资料缺口，旅行页按地点查价，国际市场的运输记录显示货值、运费、停运与交割。参见[全球交通覆盖与实测](../../docs/RUST_GLOBAL_TRANSPORT.md)及[原有交通操作](../../docs/RUST_TRANSPORT_PHASE_2.md)。
 
-新档从[历史人口开局表](../../data/historical_population_1900/opening.json)读取已核实的统计范围与互斥分区。部分总数仍沿用旧估计的国家，从旧人口余额划出有出处的分区人数。其余人数保留为未定位余额。城市观测保留原调查日期，作为所属地区的分项。`wwo-formal-state inspect-population` 可查询人口来源类型和分区。旧档按其原开局重放。资料覆盖、计算方法和缺口见[全球人口数据报告](../../data/historical_population_1900/README.md)。岗位、企业配方、每人每日 1 千克主食阈值以及客运速度与名额均为显式模拟假设。
+`--play` 新档读取 v2 历史开局与稀疏年龄和性别模型。部分国家仍沿用旧估计总数，已定位的分区从相同控制数扣除。城市参考保留原调查日期。`wwo-formal-state inspect-population <world|unit-id|city:city-key> [<native-save>]` 可查询当前人口、统计范围和开局依据。人口群体报告包括已知年龄的膳食能量参考。`inspect-intake <native-save> <person-id>` 查询实际从库存消费的重量和有单位资料的能量。原生旧档按对应版本重放。岗位、企业配方、现有生计系统的每日 1 千克主食阈值、客运速度及名额属于模拟假设。[历史人口开局](../../data/historical_population_1900/opening_v2.json) · [全球覆盖与缺口](../../data/historical_population_1900/README.md) · [能量参数](../../data/historical_population_1900/PHYSIOLOGICAL_NEEDS.md)
 
-从本目录运行 `cargo test --locked --lib population_world_` 可重现动态人物、共同住户、服役夹具和存档场景。年度测量使用 `cargo test --locked --lib population_world_year_measurement -- --ignored --nocapture`，分别测正式开局和 5,000 个合成群体的存档与日结成本。生产历史数据缺口包括行政区分组、军队编制以及家庭、文化和宗教分布。
+从本目录运行 `cargo test --locked --lib population_world_` 可重现动态人物、共同住户、服役夹具和存档场景。年度测量用 `cargo test --locked --lib population_world_year_measurement -- --ignored --nocapture`，分别测正式开局及加入合成群体后的存档与跨日推进。测试只在有足够未分类人口的市场配置规模群体。具体规模见输出的 `fixture_groups`。历史资料仍缺下级行政分布、劳动力、适役制度、家庭和社会身份资料。
 
 Windows 法国开局从巴黎商店买 1 千克面包，现金从 2500 降到 2498。已完成岗位班次的 6 点工资随后到账。巴黎到里尔的途中手动存档在重启后继续计时，抵达后可把常住地迁到里尔。这个场景只验证人物玩法，全球地图验收未运行。
 

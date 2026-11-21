@@ -1,4 +1,5 @@
 """Reconcile statistical scopes with dated WWO catalogues without spatial allocations."""
+import csv
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -13,6 +14,72 @@ def read(path):
 
 def aliases():
     return {r["economy_entity_id"]:r["polity_ids"] for r in read(MAP / "major_economy_polity_crosswalk_1900.json")["records"]}
+
+def opening_scope_links(groups, study):
+    """Join reviewed statistical extents, independently of political map aliases."""
+    roots = {group["unit_id"] for group in groups}
+    units = {row["unit_id"]: row for row in study}
+    used_roots, used_units, comparisons = set(), set(), []
+    with (HERE / "opening_geography.tsv").open(encoding="utf8") as source:
+        for row in csv.DictReader(source, delimiter="\t"):
+            opening_ids = row["opening_roots"].split()
+            research_ids = row["research_units"].split()
+            if roots.isdisjoint(opening_ids):
+                continue
+            if (not roots.issuperset(opening_ids) or not units.keys() >= set(research_ids)
+                    or not used_roots.isdisjoint(opening_ids) or not used_units.isdisjoint(research_ids)):
+                raise ValueError(f"Invalid opening scope comparison: {row['comparison_id']}")
+            comparisons.append(dict(comparison_id=row["comparison_id"], opening_root_ids=opening_ids,
+                research_unit_ids=research_ids, scope_relation=row["scope_relation"], note=row["note"]))
+            used_roots.update(opening_ids)
+            used_units.update(research_ids)
+    for group in groups:
+        root = group["unit_id"]
+        if root in used_roots:
+            continue
+        ids = group.get("research_unit_ids", [])
+        if not units.keys() >= set(ids) or not used_units.isdisjoint(ids):
+            raise ValueError(f"Invalid opening series link: {root}")
+        comparisons.append(dict(comparison_id=root, opening_root_ids=[root], research_unit_ids=ids,
+            scope_relation="adopted_research_series" if ids else "opening_without_benchmark_link",
+            note=group["scope"]))
+        used_units.update(ids)
+    return comparisons
+
+
+_RESEARCH_SCOPE_NOTES = {
+    "ft_algeria": "Appendix I uses Maravall-Buckwalter's corrected population, anchored on the 1906 return including the Territories of the South. Their opening-day extent remains unresolved. Metropolitan France excludes Algeria.",
+    "ft_morocco": "Appendix I projects backwards from separate French and northern Spanish protectorate counts plus Tangier. Adequacy of the southern frontier coverage for the 1900 Sultanate remains unresolved. Spanish Sahara, Ceuta and Melilla have separate study series.",
+    "ft_paraguay": "Appendix I uses the Pérez-Brignoli reconstruction. The contemporary Argentine consular table separately estimates the western Chaco. Boundaries and Indigenous coverage need reconciliation with the legacy geography.",
+    "ft_liberia": "The Frankema–Jerven projection uses later national boundaries and population anchors. The 1900 inland scope and the widely varying contemporary estimates are unresolved.",
+    "ft_belgium_congo": "The retrospective Congo population uses later enumeration anchors. The Congo Free State's opening boundary and actual geographic coverage require review before replacing the legacy account.",
+    "ft_zanzibar_island": "The study interpolates from British estimates and omits the 1901 estimate. The source description does not establish the inclusion of Pemba in the Zanzibar Islands opening control.",
+    "ft_china": "Alternative Qing household, Customs and reconstructed province totals differ. Taiwan, concessions, frontier populations and retrospective province boundaries require explicit remapping.",
+    "ft_mongolia": "Outer Mongolia and Tannu Uriankhai require independent statistical and boundary reconciliation. The selected Cao provincial returns contain neither.",
+    "ft_philippines": "The March 1903 census includes Cagayan de Jolo and Sibutu, named in the November 1900 treaty effective March 1901. Bulletin 1 tables 2 pp. 15, 18 count 2,000 and 280 respectively. Opening-date counts for those islands and dependencies are unresolved.",
+    "ft_india": "The imperial census includes Aden. Enumeration expanded in Burma and other frontier areas. See collections/india_comparable for the comparable reporting units and retained balance.",
+    "ft_egypt": "Nomad corrections and western oases in the WWO footprint lack a reconciled census allocation. See collections/eastern/reconciliation.json.",
+    "ft_formosa_taiwan": "Residents and foreigners are separately registered. The garrison and Orchid Island lack a comparable complete return.",
+    "ft_south_africa": "1904 was a postwar census. The 1903 Natal boundary change and other territorial and enumeration changes require separate reconciliation for the four opening polities.",
+    "ft_german_east_africa": "The reconstructed Tanganyika and Rwanda/Burundi series share a political map identifier. Their study units have separate values.",
+    "ft_rwanda_and_burundi": "This unit and Tanganyika have separate research series. A separate Rwanda/Burundi opening boundary is unavailable.",
+    "ft_nigeria": "The reconstruction covers the later Nigeria territory. Lagos and the Northern and Southern protectorates require separate territorial controls; the Lagos return covers Lagos alone.",
+    "ft_french_west_africa": "The reconstructed regional control spans several 1900 administrations. Component boundaries and counts need reconciliation before allocation.",
+    "ft_ethiopia": "The historical reconstruction covers areas whose political administration and census coverage changed. V5 revises the older estimates using Frankema and Jerven and supplies no opening subdivision.",
+    "ft_sudan_anglo_egyptian_sudan": "The V5 revision changes the reconstructed national trajectory. Condominium control, Darfur and retrospective series boundaries require a dated crosswalk.",
+    "ft_italian_somaliland": "V5 cites Frankema and Jerven for Somalia. Inclusion of British Somaliland must be established before using it alongside separate protectorate returns.",
+    "ft_denmark": "The study discusses Greenland and Faroese series jointly with Denmark. Their individual series and the metropole require separate coverage checks.",
+    "ft_melanesia": "The study includes eastern New Guinea here and western New Guinea in Dutch East Indies. Other islands span several colonial administrations and unmapped coastal and interior census scopes.",
+    "ft_micronesia": "The regional total includes Guam and other archipelagos. A mutually exclusive island allocation is unavailable.",
+    "ft_polynesia": "Archipelago-level allocation and islands outside the map catalogue require separate controls.",
+}
+
+
+def research_scope_note(row):
+    return _RESEARCH_SCOPE_NOTES.get(row["unit_id"]) or row.get("scope_note") or (
+        "No matching political unit in the opening catalogue." if not row["candidate_polity_ids"] else
+        "The political candidates require a review of source coverage and territorial exclusions.")
+
 
 def link_dated_identities(rows):
     britain = read(MAP / "britain_historic_counties_identity.json")["units"]
@@ -122,40 +189,20 @@ def catalogue(rows, groups):
             opening_partition_links=sorted(source_openings[key]),
             status="opening_unit" if key in opening_ids else "linked_to_opening_partition" if source_openings[key] else "dated_evidence_only",
             observation_ids=[r["record_id"] for r in observed]))
-    blockers={
-        "ft_china":"Alternative Qing household, Customs and reconstructed province totals differ. Taiwan, concessions, frontier populations and retrospective province boundaries require explicit remapping.",
-        "ft_mongolia":"Outside the Cao provincial return but inside the Qing political unit. Outer Mongolia and Tannu Uriankhai require a separate population and boundary reconciliation.",
-        "ft_philippines":"The March 1903 census and later study footprint include islands named in the November 1900 treaty effective March 1901. Census Bulletin 1 tables 2 pp. 15,18 give Cagayan de Jolo 2,000 and Sibutu 280 in 1903. No opening-day count for these islands and associated dependencies. See the Philippines source record.",
-        "ft_india":"Census enumeration expanded in the Burma and frontier areas. The imperial return also includes Aden outside the WWO India boundary. See eastern/reconciliation.json.",
-        "ft_egypt":"Nomad corrections and western oases in the WWO footprint do not have an established census allocation. See eastern/reconciliation.json.",
-        "ft_formosa_taiwan":"The Governor-General registers separately list island residents and foreigners. The garrison and Orchid Island lack a comparable complete return.",
-        "ft_south_africa":"The 1904 post-war population includes personnel and territory transfers. A single retrospective Union total cannot replace four separate opening polities.",
-        "ft_german_east_africa":"Separate Rwanda/Burundi series and the Tanganyika series share one political map identifier.",
-        "ft_rwanda_and_burundi":"German East Africa includes this study unit; a separate Rwanda/Burundi opening boundary is unavailable.",
-        "ft_austria_hungary":"The historical research total includes the administered provinces of Bosnia and Herzegovina, which also have separate WWO political identities.",
-        "ft_denmark":"The study discusses Greenland and Faroese series jointly with Denmark. Their share and coverage cannot be inferred from the Denmark column.",
-        "ft_melanesia":"Regional group spans several colonial administrations and smaller islands outside those WWO polygons.",
-        "ft_micronesia":"Regional group includes Guam and other archipelagos; no mutually exclusive per-island opening allocation.",
-        "ft_polynesia":"Archipelago-level allocation and islands outside the map catalogue require separate controls."
-    }
-    for r in rows:
-        if r["date"]==DATE and r.get("source_id","").startswith("ft_world_") and r["kind"]=="territory":
-            links=sorted({g for key in r["candidate_polity_ids"] for g in group_at[key]})
-            why=blockers.get(r["unit_id"]) or r.get("scope_note") or (
-                 "No matching political unit in the opening catalogue." if not r["candidate_polity_ids"] else
-                 "A candidate political identity is known. Its source coverage and excluded territories have not been verified for the opening.")
-            if links and all(link in partial_roots for link in links):
-                why += " Only specified interior statistical subdivisions enter the existing legacy control; the remainder is unlocated."
-            elif links and r["unit_id"] == "ft_austria_hungary":
-                why = "The study total includes occupied Bosnia and Herzegovina. The Austrian and Hungarian census total covers the two halves of the monarchy only. The two occupied territories remain unresolved."
-            elif links:
-                why="Matched to opening scopes listed here; the source value is retained as a comparator. Opening totals and any finer divisions use their cited sources."
-
-            out.append(dict(catalogue="research_territory",id=r["unit_id"],name=r["name"],region=r["region"],
-                population_value=r["population_value"],population_lower=r["population_lower"],population_upper=r["population_upper"],
-                quality=r["quality"],source_id=r["source_id"],locator=r["locator"],candidate_polity_ids=r["candidate_polity_ids"],
-                scope_note=r["scope_note"],status=r["mapping_status"],opening_candidates=links,
-                opening_disposition="partially_located_legacy_control" if links and all(link in partial_roots for link in links) else "comparison_with_opening_scopes" if links else "research_only",accounting_note=why))
+    study = [r for r in rows if r["date"] == DATE and r["source_id"].startswith("ft_world_") and r["kind"] == "territory"]
+    scope_links = {k: link for link in opening_scope_links(groups, study) for k in link["research_unit_ids"]}
+    for r in study:
+        link = scope_links.get(r["unit_id"])
+        links = link["opening_root_ids"] if link else []
+        disposition = "research_only"
+        if link:
+            disposition = "partially_located_legacy_control" if all(key in partial_roots for key in links) else "comparison_with_opening_scopes"
+        out.append(dict(catalogue="research_territory",id=r["unit_id"],name=r["name"],region=r["region"],
+            population_value=r["population_value"],population_lower=r["population_lower"],population_upper=r["population_upper"],
+            quality=r["quality"],source_id=r["source_id"],locator=r["locator"],candidate_polity_ids=r["candidate_polity_ids"],
+            scope_note=r["scope_note"],status=r["mapping_status"],opening_candidates=links,
+            comparison_id=link["comparison_id"] if link else None, opening_disposition=disposition,
+            accounting_note=link["note"] if link else research_scope_note(r)))
     for key,note in [
         ("antarctica","Contemporaneous expedition parties and temporary bases require dated personnel records; no permanent household census adopted."),
         ("liechtenstein","Official 1891/1901 returns for all 11 municipalities and 1900 mean of 7,520 are in the Liechtenstein collection. No separate WWO or study unit; inclusion in adjacent research totals unresolved."),

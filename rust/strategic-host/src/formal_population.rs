@@ -1,12 +1,15 @@
+mod demography;
 mod historical;
 mod native;
 mod opening;
+pub mod needs;
 #[cfg(test)]
 mod tests;
 
-pub use historical::HistoricalPopulationEstimate;
+pub use demography::{AgeRangeCoverage, EnergyReferenceCoverage, PopulationStructure, ResidentCohort};
+pub use historical::{city_population_reference, HistoricalPopulationEstimate};
 pub(crate) use native::PopulationSnapshot;
-pub(crate) use opening::HistoricalOpening;
+pub(crate) use opening::{HistoricalOpening, CURRENT_VERSION};
 pub use opening::OpeningPopulationEstimate;
 
 use crate::formal_clock::GameClock;
@@ -30,10 +33,12 @@ pub struct Population {
     global_total: u64,
     opening: Option<Arc<HistoricalOpening>>,
     named: BTreeMap<String, String>,
+    named_cohorts: BTreeMap<String, CohortId>,
     named_counts: BTreeMap<String, u64>,
     pool_named_counts: BTreeMap<String, u64>,
     deceased: BTreeMap<String, Option<i64>>,
     cohort_definitions: BTreeMap<CohortId, CohortDefinition>,
+    cohort_sources: BTreeMap<CohortId, demography::SourceCell>,
     cohorts: BTreeMap<String, BTreeMap<CohortId, u64>>,
     history: native::History,
 }
@@ -67,6 +72,8 @@ impl CohortId {
 #[serde(rename_all = "snake_case")]
 pub enum CohortProvenance {
     Observed,
+    ModelAllocation,
+    Simulation,
     Fixture,
 }
 
@@ -115,10 +122,12 @@ impl Population {
             standalone: BTreeMap::new(),
             opening: None,
             named: BTreeMap::new(),
+            named_cohorts: BTreeMap::new(),
             named_counts: BTreeMap::new(),
             pool_named_counts: BTreeMap::new(),
             deceased: BTreeMap::new(),
             cohort_definitions: BTreeMap::new(),
+            cohort_sources: BTreeMap::new(),
             cohorts: BTreeMap::new(),
             history: native::History::default(),
         }
@@ -208,6 +217,10 @@ impl Population {
 
     pub fn unit_for_person(&self, person: &str) -> Option<&str> {
         self.named.get(person).map(String::as_str)
+    }
+
+    pub fn sex_for_person(&self, person: &str) -> Option<CohortSex> {
+        self.cohort_definitions.get(self.named_cohorts.get(person)?)?.sex
     }
 
     pub fn known_dead(&self, person: &str) -> bool {
@@ -365,6 +378,7 @@ impl Population {
             .ok_or_else(|| invalid("deceased person has no active population claim"))?;
         self.change_total(&unit, 1, false);
         self.subtract_named(&unit);
+        self.named_cohorts.remove(&person);
         self.global_total -= 1;
         self.deceased.insert(person, minute);
         Ok(())

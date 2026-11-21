@@ -2,6 +2,8 @@
 import csv
 import json
 from collections import defaultdict
+from datetime import date
+from fractions import Fraction
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -10,12 +12,33 @@ DATE = "1900-01-01"
 def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
 
-def qing_interior(observations):
+
+def fiji_and_rotuma(observations):
+    source = "british_empire_census_1901"
+    returns = {r["date"]: r for r in observations if r["source_id"] == source and r["unit_id"] == "fiji_rotuma"}
+    before, after = returns["1891"], returns["1901-04-01"]
+    first, last = date(1891, 4, 5), date(1901, 3, 31)
+    fraction = Fraction((date.fromisoformat(DATE) - first).days, (last - first).days)
+    initial, final = before["population_value"], after["population_value"]
+    return dict(unit_id="cshapes_gw_950", date=DATE, population_value=round(initial+(final-initial)*fraction),
+        source_id=source, locator=after["locator"], endpoint_dates=[first.isoformat(), last.isoformat()],
+        country_endpoint_values=[initial, final], source_observations=[before["record_id"], after["record_id"]],
+        date_source="https://www.statsfiji.gov.fj/statistics/social-statistics/population-and-demographic-indicators/",
+        method=f"Linear interpolation of comparable colony census totals using the Fiji Bureau of Statistics reference nights, elapsed fraction {fraction}.",
+        scope="Fiji Islands and Rotuma, after Rotuma joined the colony in 1881. The 1901 return separately tabulates the two components. Their 1900 values are unavailable.",
+        partition_source="collections/eastern/observations.jsonl", units=[])
+
+
+def qing_interior(observations, version):
     path = HERE / "collections/eastern/qing_interior_crosswalk.tsv"
     by_id = {r["unit_id"]: r for r in observations
              if r["source_id"] == "cao_qing_provincial_reconstruction" and r["date"] == DATE}
     with path.open(encoding="utf8") as f:
         links = list(csv.DictReader(f, delimiter="\t"))
+    if version == 2:
+        additional = path.with_name("qing_interior_v2_crosswalk.tsv")
+        with additional.open(encoding="utf8") as f:
+            links.extend(csv.DictReader(f, delimiter="\t"))
     leaves = []
     for link in links:
         row = by_id[link["unit_id"]]
@@ -29,7 +52,7 @@ def qing_interior(observations):
     controls = (dict(zip(legacy["field_order"], data)) for data in legacy["rows"])
     control = next(r["population_value"] for r in controls if r["entity_id"] == "qing_empire")
     example = by_id[links[0]["unit_id"]]
-    return dict(unit_id="qing_empire", date=DATE, population_value=control, source_id=example["source_id"],
+    group = dict(unit_id="qing_empire", date=DATE, population_value=control, source_id=example["source_id"],
         method=example["method"] + ". Nominal July endpoints for the two source years. Fraction " + example["fraction"],
         locator="Ni Yuping reproducing Cao, Table 1.1, p. 17 (PDF p. 31), rows 6 and 9.",
         partition_source=path.relative_to(HERE).as_posix(), endpoint_dates=example["source_dates"],
@@ -38,16 +61,26 @@ def qing_interior(observations):
         legacy_control_source="data/alpha/historical_world_economy_1900/countries_compact.json: qing_empire population_value",
         legacy_unlocated_balance=control-sum(leaf["population_value"] for leaf in leaves),
         uncertainty_kind="Model sensitivity scenarios in collections/eastern/qing_reconciliation.json. No calibrated interval.")
+    if version == 2:
+        group.update(
+            locator="Ni Yuping reproducing Cao, Table 1.1, pp. 17–18 (PDF pp. 31–32). See the individual province locators.",
+            scope="Disjoint provincial returns within the legacy Qing control. The province links establish historical statistical identities. No separate city, concession or frontier population is added.",
+            additional_partition_source=additional.relative_to(HERE).as_posix())
+    return group
 
 
-def groups(observations):
+def groups(observations, version=1):
     study = {r["unit_id"]: r for r in observations if r["kind"] == "territory" and r["date"] == DATE and r["source_id"].startswith("ft_world_")}
     endpoints = {(r["unit_id"], r["date"]): r["population_value"] for r in observations if r["source_id"].startswith("ft_world_")}
     selected = defaultdict(list)
-    with (HERE / "opening_series.tsv").open(encoding="utf8") as f:
-        for decision in csv.DictReader(f, delimiter="\t"):
-            row = study[decision["research_id"]]
-            selected[decision["root_id"]].append((row, decision["scope"]))
+    series_files = ["opening_series.tsv"]
+    if version == 2:
+        series_files.append("opening_series_v2.tsv")
+    for file in series_files:
+        with (HERE / file).open(encoding="utf8") as f:
+            for decision in csv.DictReader(f, delimiter="\t"):
+                row = study[decision["research_id"]]
+                selected[decision["root_id"]].append((row, decision["scope"]))
     result = {}
     for root, pairs in selected.items():
         leaves = []
@@ -72,6 +105,8 @@ def groups(observations):
                      uncertainty_kind=first["uncertainty_kind"] if all(v is not None for v in bounds.values()) else "No sensitivity interval is available for this version of the study series.", units=leaves if len(leaves)>1 else [])
         result[root] = group
     files = sorted(HERE.glob("collections/*/*_opening.json"))
+    if version == 2:
+        files = [path.with_name("india_opening_v2.json") if path.name == "india_opening.json" else path for path in files]
     territorial_roots = set()
     for path in files:
         group = json.loads(path.read_text(encoding="utf8"))
@@ -86,7 +121,10 @@ def groups(observations):
         result[root] = group
     if "qing_empire" in result:
         raise ValueError("duplicate Qing population control")
-    result["qing_empire"] = qing_interior(observations)
+    result["qing_empire"] = qing_interior(observations, version)
+    if version == 2:
+        fiji = fiji_and_rotuma(observations)
+        result[fiji["unit_id"]] = fiji
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

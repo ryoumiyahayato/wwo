@@ -1,4 +1,4 @@
-use super::{CohortDefinition, CohortId, CohortProvenance, Population, MAX_POPULATION};
+use super::{CohortBirthYears, CohortDefinition, CohortId, CohortProvenance, Population, CURRENT_VERSION, MAX_POPULATION};
 use crate::{formal_clock::{GameClock, MINUTES_PER_DAY}, formal_save::invalid};
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io};
@@ -145,8 +145,7 @@ impl Population {
             let event_year = clock.current_date().year;
             if unit.as_str() != origin_unit || born_day != birth_day.map(i64::from) || !(1..=event_year).contains(&birth_year)
                 || (born_day.is_some() && birth_year != event_year)
-                || cohort.and_then(|key| self.cohort_definitions[key].birth_years)
-                    .is_some_and(|years| !(years.earliest..=years.latest).contains(&birth_year))
+                || cohort.is_some_and(|key| !self.cohort_describes_birth_year(key, birth_year))
             {
                 return Err(invalid("runtime identity origin disagrees with its population entry"));
             }
@@ -251,8 +250,8 @@ impl Population {
                 if !id.valid() || self.cohort_definitions.contains_key(id) {
                     return Err(invalid("invalid or repeated population cohort source"));
                 }
-                // The shipped sources have no admitted subpopulation records.
-                // A save's observed label cannot establish the admission on its own.
+                // Production opening cohorts come from the versioned input.
+                // A save journal cannot admit its own source records.
                 if !cfg!(test) || definition.provenance != CohortProvenance::Fixture {
                     return Err(invalid("population cohort has no admitted source record"));
                 }
@@ -279,7 +278,10 @@ impl Population {
             Change::Materialize { person, unit, cohort } => {
                 self.check_new_claim(person)?;
                 self.check_background(unit, cohort.as_ref(), 1)?;
-                if let Some(id) = cohort { self.remove_cohort_members(unit, id, 1); }
+                if let Some(id) = cohort {
+                    self.remove_cohort_members(unit, id, 1);
+                    self.named_cohorts.insert(person.clone(), id.clone());
+                }
                 self.insert_claim(person, unit);
             }
             Change::Move { person, destination } => {
@@ -295,7 +297,23 @@ impl Population {
                 self.add_population(unit, 1)?;
                 self.insert_claim(person, unit);
             }
-            Change::AnonymousBirths { unit, members } => self.add_population(unit, *members)?,
+            Change::AnonymousBirths { unit, members } => {
+                if self.opening_version() == Some(CURRENT_VERSION) {
+                    let mut clock = GameClock::default();
+                    clock.advance_minutes(event.minute)?;
+                    let year = clock.current_date().year;
+                    let id = CohortId::new("simulation_births", year.to_string())?;
+                    self.add_population(unit, *members)?;
+                    self.cohort_definitions.entry(id.clone()).or_insert(CohortDefinition {
+                        provenance: CohortProvenance::Simulation,
+                        sex: None,
+                        birth_years: Some(CohortBirthYears { earliest: year, latest: year }),
+                    });
+                    self.add_cohort_members(unit, &id, *members);
+                } else {
+                    self.add_population(unit, *members)?;
+                }
+            }
             Change::NamedDeath { person } => self.retire_claim(person, Some(event.minute))?,
             Change::AnonymousDeaths { unit, cohort, members } => {
                 self.check_background(unit, cohort.as_ref(), *members)?;
@@ -341,7 +359,7 @@ impl Population {
         Ok(())
     }
 
-    fn add_cohort_members(&mut self, unit: &str, id: &CohortId, members: u64) {
+    pub(super) fn add_cohort_members(&mut self, unit: &str, id: &CohortId, members: u64) {
         *self.cohorts.entry(unit.to_owned()).or_default().entry(id.clone()).or_default() += members;
     }
 
