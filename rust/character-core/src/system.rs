@@ -64,6 +64,9 @@ impl CharacterSystem {
         let health = &self.record(id)?.health;
         Ok(health.death.is_none() && health.current >= 250)
     }
+    pub fn death(&self, id: &str) -> Option<&DeathRecord> {
+        self.people.get(id)?.health.death.as_ref()
+    }
     pub fn person_count(&self) -> usize {
         self.people.len()
     }
@@ -88,10 +91,90 @@ impl CharacterSystem {
             health: Health::default(),
             experiences: BTreeMap::new(),
             event_sequence: 0,
+            player: None,
         };
         person.health.recovery_ceiling = self.rules.ceiling(&person, self.day);
         person.health.current = person.health.recovery_ceiling;
         self.people.insert(person.identity.id.clone(), person);
+        Ok(())
+    }
+
+    pub fn create_player(&mut self, id: &str, player: PlayerDevelopment) -> Result<()> {
+        require(self.day == 0 && self.people.values().all(|record| record.player.is_none()),
+            "player prologue must be applied once at opening")?;
+        let mut person = self.record(id)?.clone();
+        require(person.identity.birth_day == player.birth_day(), "prologue birth date differs from identity")?;
+        let opening = player.opening();
+        if opening.education == Education::ReadingLessons {
+            person.identity.capabilities.insert("literacy".into(), Capability {
+                knowledge: 500, practice: 250, ..Capability::default()
+            });
+        }
+        let (domain, knowledge, practice) = match opening.youth {
+            Youth::Labor => ("employment", 0, 80),
+            Youth::Apprentice => ("employment", 35, 125),
+            Youth::CommercialAssistant => ("market_purchase", 75, 90),
+            Youth::AdvancedStudy => ("study", 150, 30),
+        };
+        person.identity.capabilities.insert(domain.into(), Capability { knowledge, practice, ..Capability::default() });
+        let permanent_loss = player.opening_injury();
+        if permanent_loss > 0 {
+            person.health.injuries.push("少年时的旧伤".into());
+            person.health.permanent_loss = permanent_loss;
+            person.health.recovery_ceiling = self.rules.ceiling(&person, self.day);
+        }
+        person.health.current = person.health.recovery_ceiling.saturating_sub(player.initial_fatigue());
+        person.player = Some(player);
+        person.validate(self.day)?;
+        self.people.insert(id.into(), person);
+        Ok(())
+    }
+
+    pub fn player_development(&self, id: &str) -> Option<&PlayerDevelopment> {
+        self.people.get(id)?.player.as_ref()
+    }
+
+    pub fn completed_player_work(&mut self, id: &str, source: &str, manual_trade: bool) -> Result<()> {
+        let mut person = self.record(id)?.clone();
+        require(person.health.death.is_none(), "work requires a living person")?;
+        let player = person.player.as_mut().ok_or_else(|| Error("missing player development".into()))?;
+        player.record_source(source)?;
+        let capability = person.identity.capabilities.entry("employment".into()).or_default();
+        capability.practice = learn_with_rate(capability.practice, 35, capability.learning, player.work_rate(manual_trade));
+        player.grow(6, 1);
+        person.experiences.entry("learning:employment".into()).or_insert_with(|| Experience {
+            id: "learning:employment".into(), label: "完成正式工作".into(), domain: "employment".into(),
+            efficiency_delta: 0, expires_day: None,
+        });
+        person.validate(self.day)?;
+        self.people.insert(id.into(), person);
+        Ok(())
+    }
+
+    pub fn completed_reading_lesson(&mut self, id: &str, language: Language, effort: u16, source: &str) -> Result<()> {
+        let mut person = self.record(id)?.clone();
+        require(person.health.death.is_none() && (1..=SCALE).contains(&effort), "invalid reading lesson")?;
+        let player = person.player.as_mut().ok_or_else(|| Error("missing player development".into()))?;
+        let rate = player.study_rate();
+        player.reading_lesson(language, effort, source)?;
+        let capability = person.identity.capabilities.entry("literacy".into()).or_default();
+        capability.knowledge = learn_with_rate(capability.knowledge, effort, capability.learning, rate);
+        person.experiences.entry("learning:literacy".into()).or_insert_with(|| Experience {
+            id: "learning:literacy".into(), label: "学习读写".into(), domain: "literacy".into(),
+            efficiency_delta: 0, expires_day: None,
+        });
+        person.validate(self.day)?;
+        self.people.insert(id.into(), person);
+        Ok(())
+    }
+
+    pub fn completed_service(&mut self, id: &str, entry: ServiceRecord) -> Result<()> {
+        let mut person = self.record(id)?.clone();
+        require(person.health.death.is_none(), "service requires a living person")?;
+        person.player.as_mut().ok_or_else(|| Error("missing player development".into()))?
+            .record_service(entry, self.day)?;
+        person.validate(self.day)?;
+        self.people.insert(id.into(), person);
         Ok(())
     }
 
@@ -202,6 +285,9 @@ impl CharacterSystem {
                 }
                 // Constitution reduces the response to the incident, not the
                 // host's asset/money/opportunity requirements.
+                let permanent_loss = person.player.as_ref().map_or(permanent_loss, |player| {
+                    (f64::from(permanent_loss) * player.injury_rate()).round().min(f64::from(SCALE)) as u16
+                });
                 let resistance = 500 + u32::from(person.identity.constitution);
                 let effective_damage = (u32::from(damage) * 1000 / resistance).min(1000) as u16;
                 person.health.permanent_loss = person
@@ -268,15 +354,16 @@ impl CharacterSystem {
     /// Returns deaths exactly once. Host must adopt them with population/identity
     /// changes in the same candidate-world transaction (see README).
     pub fn advance_to(&mut self, day: u32, host: &impl CharacterHost) -> Result<Vec<DeathNotice>> {
-        self.advance(day, host, true)
+        self.advance(day, host, true, None)
     }
 
-    /// For a host that can settle health and ageing but cannot commit a death.
-    pub fn advance_without_mortality(&mut self, day: u32, host: &impl CharacterHost) -> Result<()> {
-        self.advance(day, host, false).map(|_| ())
+    /// Native host provides observed conditions and adopts every returned death.
+    pub fn advance_observed(&mut self, day: u32, host: &impl CharacterHost,
+        mortality_person: Option<&str>) -> Result<Vec<DeathNotice>> {
+        self.advance(day, host, false, mortality_person)
     }
 
-    fn advance(&mut self, day: u32, host: &impl CharacterHost, mortality: bool) -> Result<Vec<DeathNotice>> {
+    fn advance(&mut self, day: u32, host: &impl CharacterHost, mortality: bool, mortality_person: Option<&str>) -> Result<Vec<DeathNotice>> {
         require(
             day >= self.day && day - self.day <= MAX_ADVANCE_DAYS,
             "backwards or oversized time advance",
@@ -309,7 +396,7 @@ impl CharacterSystem {
                         person,
                         current_day,
                         &conditions,
-                        mortality.then(|| mortality_roll(self.seed, &person.identity.id, current_day)),
+                        (mortality || mortality_person == Some(person.identity.id.as_str())).then(|| mortality_roll(self.seed, &person.identity.id, current_day)),
                     );
                     person.validate(current_day)?;
                 } else if person.health.disease.as_ref().is_some_and(|d| d.until_day <= current_day) {
@@ -340,6 +427,9 @@ impl CharacterSystem {
             .collect();
         if person.identity.constitution >= 800 {
             traits.push("体质强健".into());
+        }
+        if let Some(player) = &person.player {
+            traits.extend(player.trait_labels().map(str::to_owned));
         }
         traits.extend(person.health.injuries.clone());
         if let Some(disease) = &person.health.disease {
@@ -430,11 +520,14 @@ impl CharacterSystem {
 }
 
 fn learn(current: u16, effort: u16, learning: u16) -> u16 {
+    learn_with_rate(current, effort, learning, 1.0)
+}
+
+fn learn_with_rate(current: u16, effort: u16, learning: u16, rate: f64) -> u16 {
     if effort == 0 || current == SCALE {
         return current;
     }
-    let gain = (u64::from(effort) * u64::from(250 + learning) * u64::from(SCALE - current)
-        / 1_000_000)
-        .max(1);
+    let gain = (f64::from(effort) * f64::from(250 + learning) * f64::from(SCALE - current)
+        * rate / 1_000_000.0).floor().max(1.0) as u64;
     (u64::from(current) + gain).min(u64::from(SCALE)) as u16
 }

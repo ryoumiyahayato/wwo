@@ -1,6 +1,6 @@
 use crate::{
-    formal_character::{self, CharacterOutput},
-    formal_clock::{ClockSnapshot, GameClock},
+    formal_character::{self, CharacterOutput, DayActivity},
+    formal_clock::{ClockSnapshot, GameClock, MINUTES_PER_DAY, MINUTES_PER_HOUR},
     formal_ledger::{Balance, Ledger, CURRENCY, MAX_AMOUNT},
     formal_macro::{CountryInputs, MacroEconomy, MarketInputs, Shipment},
     formal_population::{Population, MAX_POPULATION},
@@ -14,6 +14,35 @@ pub use crate::formal_stock::ConsumptionAllocation;
 pub use crate::formal_wages::CompletedFirmWork;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
+use wwo_character_core::{Language, Prologue, ASSUMPTION};
+
+#[derive(Deserialize)]
+struct OpeningActivities {
+    basis: String,
+    lesson_effort: u16,
+    lesson_start_hour: i64,
+    lesson_hours: i64,
+    meal_milli_for_recovery: i64,
+    work_injury_interval: u32,
+    work_injury_damage: u16,
+    work_injury_permanent_loss: u16,
+    openings: BTreeMap<String, Language>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub enum PersonalActivity { Lesson, Rest, ReadNotice }
+
+#[derive(Clone, Copy, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct ActivityBooking { kind: PersonalActivity, minute: i64 }
+
+#[derive(Default, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+struct PlayerDay {
+    booking: Option<ActivityBooking>,
+    food_milli: i64,
+    last_read_notice: Option<i64>,
+}
 use std::{
     collections::{BTreeMap, BTreeSet},
     io,
@@ -90,7 +119,7 @@ pub struct OpeningPerson {
     pub opening_source_id: String,
     pub polity_id: String,
     pub place_id: String,
-    pub birth_year: u16,
+    birth_year: u16,
 }
 
 pub struct WorldBootstrap {
@@ -99,6 +128,7 @@ pub struct WorldBootstrap {
     markets: Arc<MarketInputs>,
     residents: BTreeMap<String, i64>,
     work: Arc<WorkOpening>,
+    activities: Arc<OpeningActivities>,
 }
 
 pub struct WorldSources {
@@ -124,6 +154,8 @@ pub struct InitialWorld {
     work_opening: Arc<WorkOpening>,
     work: WorkState,
     wages: WageClaims,
+    activities: Arc<OpeningActivities>,
+    player_day: PlayerDay,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -142,6 +174,8 @@ pub(crate) struct WorldSnapshot {
     settled_purchase_requests: BTreeMap<String, BTreeSet<String>>,
     work: WorkState,
     wages: BTreeMap<String, Claim>,
+    #[serde(default)]
+    player_day: PlayerDay,
 }
 
 pub struct Consumption {
@@ -165,6 +199,7 @@ impl InitialWorld {
             "settled_purchase_requests": self.settled_purchase_requests,
             "work": self.work,
             "wages": self.wages.claims(),
+            "player_day": self.player_day,
         })
     }
 
@@ -180,7 +215,7 @@ impl InitialWorld {
     }
 
     pub fn jobs(&self) -> impl Iterator<Item = (&Job, usize)> {
-        self.work_opening.jobs(&self.player, self.clock.current_day()).map(|job| (job, self.work.vacancies(job)))
+        self.work_opening.jobs(&self.player, self.clock.current_day()).filter(|_| self.player_alive()).map(|job| (job, self.work.vacancies(job)))
     }
 
     pub fn employment(&self) -> Option<(&Job, bool, &str)> {
@@ -202,7 +237,81 @@ impl InitialWorld {
 
     pub fn book_work(&mut self) -> io::Result<()> {
         if !self.character.able_to_work { return Err(invalid("当前人物健康状况不适合工作。")); }
+        if self.player_day.booking.is_some() { return Err(invalid("今日已有个人安排。")); }
         self.work.book(&self.work_opening, &self.player, self.clock)
+    }
+
+    pub fn player_birth_year(&self) -> u16 {
+        self.character.development.as_ref().map_or(self.player().birth_year, |player| player.birth_year())
+    }
+
+    pub fn player_alive(&self) -> bool { self.population.unit_for_person(&self.player).is_some() }
+
+    pub fn can_read_opening_language(&self) -> bool {
+        self.character.development.as_ref().is_none_or(|player| player.can_read(player.language()))
+    }
+
+    pub fn can_read_polity_record(&self, id: &str) -> bool {
+        self.character.development.as_ref().is_none_or(|player| {
+            self.activities.openings.get(id).is_some_and(|&language| player.can_read(language))
+        })
+    }
+
+    pub fn can_read_place_record(&self, id: &str) -> bool {
+        self.character.development.as_ref().is_none_or(|_| {
+            self.sources.places.get(id).is_some_and(|place| {
+                let polity = match (place.id.as_str(), place.parent_country_id.as_str()) {
+                    ("london", "british_empire") => "british_isles_1900",
+                    ("tokyo", "japanese_empire") => "empire_of_japan",
+                    (_, polity) => polity,
+                };
+                self.can_read_polity_record(polity)
+            })
+        })
+    }
+
+    pub fn opening_language(&self) -> Option<Language> {
+        self.character.development.as_ref().map(|player| player.language())
+    }
+
+    pub fn scheduled_activity(&self) -> Option<PersonalActivity> {
+        self.player_day.booking.map(|booking| booking.kind)
+    }
+
+    pub fn last_read_notice(&self) -> Option<i64> { self.player_day.last_read_notice }
+
+    pub fn schedule_personal_activity(&mut self, kind: PersonalActivity) -> io::Result<()> {
+        let minute = self.clock.snapshot().total_minutes;
+        if !self.can_schedule_personal_activity(kind) {
+            return Err(invalid("当前无法安排这项活动。"));
+        }
+        self.player_day.booking = Some(ActivityBooking { kind, minute });
+        Ok(())
+    }
+
+    pub fn can_schedule_personal_activity(&self, kind: PersonalActivity) -> bool {
+        self.opening_language().is_some() && self.player_alive() && self.player_day.booking.is_none()
+            && self.work.booking(&self.player).is_none()
+            && self.activity_available(kind, self.clock.snapshot().total_minutes)
+    }
+
+    pub fn lesson_notice(&self) -> String {
+        let start = self.activities.lesson_start_hour;
+        let end = start + self.activities.lesson_hours;
+        format!("本地识字课堂每日 {start:02}:00 至 {end:02}:00。")
+    }
+
+    fn activity_available(&self, kind: PersonalActivity, minute: i64) -> bool {
+        let today = minute.rem_euclid(MINUTES_PER_DAY);
+        match kind {
+            PersonalActivity::Lesson | PersonalActivity::ReadNotice => {
+                let reachable = self.activities.openings.contains_key(&self.player().opening_source_id)
+                    && today <= self.activities.lesson_start_hour * MINUTES_PER_HOUR;
+                reachable && !self.can_read_opening_language()
+                    && (kind != PersonalActivity::ReadNotice || self.player_day.last_read_notice.is_none())
+            }
+            PersonalActivity::Rest => today <= 16 * MINUTES_PER_HOUR,
+        }
     }
 
     pub fn sources(&self) -> &WorldSources {
@@ -312,11 +421,16 @@ impl InitialWorld {
         if !self.macro_economy.is_consumable(good) || self.population.unit_for_person(person).is_none() {
             return Err(invalid("person or commodity is not eligible for consumption"));
         }
+        let food = person == self.player && self.opening_language().is_some() && self.macro_economy.is_food(good);
         let allocations = self.holdings.get_mut(person).and_then(|goods| goods.get_mut(good))
             .ok_or_else(|| invalid("person has no stock of this commodity"))?
             .consume(quantity_milli)?;
         let record_id = format!("personal_life:{}", self.next_living_record);
         self.next_living_record += 1;
+        if food {
+            self.player_day.food_milli = self.player_day.food_milli.saturating_add(quantity_milli)
+                .min(self.activities.meal_milli_for_recovery);
+        }
         Ok(Consumption { record_id, effective_minute: self.clock.snapshot().total_minutes, allocations })
     }
 
@@ -338,19 +452,55 @@ impl InitialWorld {
             let mut boundary = self.clock;
             boundary.advance_minutes(minute - boundary.snapshot().total_minutes)?;
             let day = u32::try_from(boundary.current_day()).map_err(|_| invalid("unsupported formal character date"))?;
+            let work = self.work.booked_workers().map(|person| {
+                let job = self.work.contract(&self.work_opening, person).expect("booking has a live contract");
+                (person.clone(), job.id.clone())
+            }).collect::<BTreeMap<_, _>>();
+            let period = self.activities.work_injury_interval;
+            let injury = (self.opening_language().is_some() && work.contains_key(&self.player)
+                && day.wrapping_mul(17).wrapping_add(9) % period == 0)
+                .then_some((self.activities.work_injury_damage, self.activities.work_injury_permanent_loss));
+            let booking = self.scheduled_activity();
+            let lesson = if booking == Some(PersonalActivity::Lesson) {
+                self.opening_language().map(|language| (language, self.activities.lesson_effort,
+                    format!("reading-room:{}:{day}", self.player().place_id)))
+            } else { None };
+            let activity = DayActivity {
+                work, lesson, injury,
+                rest: booking == Some(PersonalActivity::Rest),
+                nutrition: (self.player_day.food_milli >= self.activities.meal_milli_for_recovery).then_some(1000),
+            };
             let character = formal_character::advance_opening_day(
-                &self.player, &self.identities, day, &self.character.state, self.work.booked_workers().cloned().collect(),
+                &self.player, &self.identities, day, &self.character.state, activity,
             ).map_err(io::Error::other)?;
+            let mut population_after_deaths = None;
+            if !character.deaths.is_empty() {
+                let mut population = self.population.clone();
+                for death in &character.deaths { population.record_death(&death.person_id)?; }
+                self.macro_economy.check_responsibility(population.totals(), managed_population)?;
+                population_after_deaths = Some(population);
+            }
             for worker in self.work.booked_workers() {
                 let job = self.work.contract(&self.work_opening, worker).expect("booking has a live contract");
                 self.wages.record_shift(worker, job, i64::from(day), &self.ledger)?;
             }
             self.wages.settle_due(&mut self.ledger, boundary, |_| false)?;
-            self.macro_economy.settle(boundary, self.population.totals(), managed_population)?;
+            let population = population_after_deaths.as_ref().unwrap_or(&self.population);
+            self.macro_economy.settle(boundary, population.totals(), managed_population)?;
+            if let Some(population) = population_after_deaths { self.population = population; }
+            for death in &character.deaths {
+                self.identities.get_mut(&death.person_id).expect("known person").record_death();
+                self.work.record_death(&death.person_id);
+            }
             self.work.complete();
             self.character = character;
+            if booking == Some(PersonalActivity::ReadNotice) && self.player_alive() {
+                self.player_day.last_read_notice = Some(minute);
+            }
+            self.player_day.booking = None;
+            self.player_day.food_milli = 0;
             self.clock = boundary;
-            self.work.book_automatic(&self.work_opening, self.clock);
+            self.work.book_automatic(&self.work_opening, self.clock, |person| self.population.unit_for_person(person).is_some());
         }
         self.clock = target;
         Ok(())
@@ -464,26 +614,53 @@ impl WorldBootstrap {
             markets: Arc::new(markets),
             residents,
             work: Arc::new(WorkOpening::load()?),
+            activities: Arc::new(load_opening_activities()?),
         })
     }
 
+    pub fn opening_language(&self, source: &str) -> Option<Language> {
+        self.activities.openings.get(source).copied()
+    }
+
+    pub fn opening_cash(&self, source: &str, family: wwo_character_core::Family) -> Option<i64> {
+        self.residents.get(&format!("person:formal_generated_{source}_0001")).map(|&cash| family.opening_cash(cash))
+    }
+
     pub fn create(&self, source_id: &str) -> io::Result<InitialWorld> {
+        self.create_opening(source_id, None)
+    }
+
+    pub fn create_with_prologue(&self, source_id: &str, prologue: Prologue) -> io::Result<InitialWorld> {
+        self.create_opening(source_id, Some(prologue))
+    }
+
+    fn create_opening(&self, source_id: &str, prologue: Option<Prologue>) -> io::Result<InitialWorld> {
         if !OPENINGS.iter().any(|(source, _)| *source == source_id) {
             return Err(io::Error::new(io::ErrorKind::InvalidInput, "unknown formal opening"));
         }
         let player = format!("person:formal_generated_{source_id}_0001");
-        let mut ledger = Ledger::initialize_people(self.residents.iter().map(|(person, cash)| (person.as_str(), *cash)))?;
+        let development = prologue.map(|opening| {
+            opening.build(self.opening_language(source_id).expect("configured opening"))
+        }).transpose().map_err(io::Error::other)?;
+        let mut ledger = Ledger::initialize_people(self.residents.iter().map(|(person, cash)| {
+            let cash = prologue.filter(|_| person == &player).map_or(*cash, |opening| opening.family.opening_cash(*cash));
+            (person.as_str(), cash)
+        }))?;
         self.work.open_accounts(&mut ledger)?;
         let mut population = Population::initialize(self.populations.clone());
         let mut identities = BTreeMap::new();
         for person in self.world.people.values() {
             population.claim(&person.id, &person.opening_source_id)?;
-            let identity = formal_character::opening_identity(person.birth_year).map_err(io::Error::other)?;
+            let year = development.as_ref().filter(|_| person.id == player).map_or(person.birth_year, |player| player.birth_year());
+            let identity = formal_character::opening_identity(year).map_err(io::Error::other)?;
             identities.insert(person.id.clone(), identity);
         }
-        let character = formal_character::opening_profile(&player, &identities, 0, "").map_err(io::Error::other)?;
+        let character = match development {
+            Some(development) => formal_character::opening_with_prologue(&player, &identities, development),
+            None => formal_character::opening_profile(&player, &identities, 0, ""),
+        }.map_err(io::Error::other)?;
         let mut work = WorkState::default();
-        work.book_automatic(&self.work, GameClock::default());
+        work.book_automatic(&self.work, GameClock::default(), |_| true);
         Ok(InitialWorld {
             sources: Arc::clone(&self.world),
             clock: GameClock::default(),
@@ -499,6 +676,8 @@ impl WorldBootstrap {
             work_opening: Arc::clone(&self.work),
             work,
             wages: WageClaims::initialize(),
+            activities: Arc::clone(&self.activities),
+            player_day: PlayerDay::default(),
         })
     }
 
@@ -510,10 +689,18 @@ impl WorldBootstrap {
             || saved.population.values().any(|&total| total > MAX_POPULATION)
             || !saved.work.validate(&self.work, clock)
         { return Err(invalid("invalid formal save state")); }
-        world.macro_economy = self.restore_markets(&saved.markets, clock, &saved.population)?;
+        let deaths = formal_character::restore_native_identities(&world.player, &mut world.identities, day, &saved.character)
+            .map_err(io::Error::other)?;
+        let dead = deaths.iter().map(|notice| notice.person_id.as_str()).collect::<BTreeSet<_>>();
+        if saved.population.keys().ne(self.populations.keys())
+            || saved.population.values().sum::<u64>().checked_add(deaths.len() as u64)
+                != Some(self.populations.values().sum::<u64>())
+            || dead.iter().any(|id| saved.work.has_contract(id))
+        { return Err(invalid("formal population or employment disagrees with mortality")); }
+        world.macro_economy = MacroEconomy::restore(Arc::clone(&self.markets), &saved.population, &saved.markets, clock)?;
         world.macro_economy.restore_arrivals(saved.last_arrivals)?;
         world.population = Population::initialize(saved.population);
-        for person in world.sources.people.values() {
+        for person in world.sources.people.values().filter(|person| !dead.contains(person.id.as_str())) {
             world.population.claim(&person.id, &person.opening_source_id)?;
         }
         let ledger = Ledger::restore(&saved.ledger, true)?;
@@ -542,6 +729,22 @@ impl WorldBootstrap {
         world.next_living_record = saved.next_living_record;
         world.settled_purchase_requests = saved.settled_purchase_requests;
         world.work = saved.work;
+        world.player_day = saved.player_day;
+        let minute = clock.snapshot().total_minutes;
+        let invalid_booking = world.player_day.booking.is_some_and(|booking| {
+            !world.player_alive() || world.work.booking(&world.player).is_some()
+                || !(clock.current_day() * MINUTES_PER_DAY..=minute).contains(&booking.minute)
+                || !world.activity_available(booking.kind, booking.minute)
+        });
+        if world.opening_language().is_some_and(|language| self.opening_language(&saved.opening) != Some(language))
+            || !(0..=world.activities.meal_milli_for_recovery).contains(&world.player_day.food_milli)
+            || invalid_booking
+            || world.player_day.last_read_notice.is_some_and(|notice| {
+                !(MINUTES_PER_DAY..=minute).contains(&notice) || notice % MINUTES_PER_DAY != 0
+            })
+            || world.opening_language().is_none() && (world.player_day.booking.is_some()
+                || world.player_day.food_milli > 0 || world.player_day.last_read_notice.is_some())
+        { return Err(invalid("invalid saved personal activity")); }
         Ok(world)
     }
 }
@@ -573,6 +776,17 @@ struct RegionalResident {
 
 fn load_regional_residents() -> io::Result<Vec<RegionalResident>> {
     read_list(include_bytes!("../../../data/formal/paris_employment_opening_r1.json"), "opening_residents")
+}
+
+fn load_opening_activities() -> io::Result<OpeningActivities> {
+    let rules: OpeningActivities = serde_json::from_str(include_str!("../../../data/character/opening_activities.json"))?;
+    if rules.basis != ASSUMPTION || !(1..=1000).contains(&rules.lesson_effort)
+        || !(0..24).contains(&rules.lesson_start_hour) || !(1..=24 - rules.lesson_start_hour).contains(&rules.lesson_hours)
+        || rules.work_injury_interval < 2 || rules.work_injury_damage > 1000 || rules.work_injury_permanent_loss > 1000
+        || !(1..=MAX_AMOUNT).contains(&rules.meal_milli_for_recovery)
+        || rules.openings.len() != OPENINGS.len() || OPENINGS.iter().any(|(id, _)| !rules.openings.contains_key(*id))
+    { return Err(invalid("invalid opening personal activity configuration")); }
+    Ok(rules)
 }
 
 fn load_opening_cash() -> io::Result<i64> {
@@ -1087,3 +1301,7 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "player_prologue_tests.rs"]
+mod player_prologue_tests;

@@ -8,7 +8,7 @@ use crate::{
 use serde_json::{json, Value};
 use std::{collections::BTreeMap, fs::{self, File}, io, path::PathBuf, time::Instant};
 use wwo_map_lab::{
-    formal_bootstrap::{InitialWorld, WorldBootstrap, OPENINGS},
+    formal_bootstrap::{InitialWorld, PersonalActivity, WorldBootstrap, OPENINGS},
     formal_clock::{GameClock, TimeControl, MINUTES_PER_DAY},
     formal_save::{native_slot_summary, read_native_slot, write_native_slot},
 };
@@ -58,6 +58,10 @@ struct Quote {
 }
 
 impl NativeSession {
+    pub fn active_world(&self) -> Option<&InitialWorld> {
+        self.world.as_ref()
+    }
+
     pub fn start() -> io::Result<Self> {
         let (profile, lock) = lock_profile()?;
         let preferences = profile.join("WWO_R68_Candidate/interface_settings.cfg");
@@ -103,7 +107,12 @@ impl NativeSession {
                 Ok(row) => {
                     let date = GameClock::restore(row.clock).expect("slot header was validated").current_date();
                     let country = &self.bootstrap.sources().polities()[&row.opening].name_zh;
-                    (false, true, format!("{country} · {}-{:02}-{:02} {:02}:{:02}", date.year, date.month, date.day, date.hour, date.minute))
+                    let preview = if row.written_access == Some(false) {
+                        "已保存".into()
+                    } else {
+                        format!("{country} · {}-{:02}-{:02} {:02}:{:02}", date.year, date.month, date.day, date.hour, date.minute)
+                    };
+                    (false, true, preview)
                 }
                 Err(error) if error.kind() == io::ErrorKind::NotFound => (true, false, "空".into()),
                 Err(_) => (false, false, "存档文件不可读取".into()),
@@ -133,15 +142,23 @@ impl NativeSession {
 
     pub fn dispatch(&mut self, request: Request<'_>) -> io::Result<()> {
         match request {
-            Request::Lobby { verb, polity, slot } if self.world.is_none() => {
+            Request::Lobby { verb, slot, .. } if self.world.is_none() => {
                 self.lobby_status.clear();
                 let result = match verb {
-                    "new" => self.bootstrap.create(polity.strip_prefix("state:").unwrap_or(polity)).map(|world| self.install(world)),
                     "load" if slot <= 4 => self.load(slot),
                     "slots" => { self.refresh_slots(); Ok(()) },
                     _ => Ok(()),
                 };
                 if let Err(error) = result { self.lobby_status = format!("无法进入世界：{error}"); }
+            }
+            Request::NewPlayer { polity, prologue } if self.world.is_none() => {
+                match self.bootstrap.create_with_prologue(polity.strip_prefix("state:").unwrap_or(polity), prologue) {
+                    Ok(world) => self.install(world),
+                    Err(error) => self.lobby_status = format!("无法进入世界：{error}"),
+                }
+            }
+            Request::PersonalActivity { activity } => {
+                if let Some(world) = &mut self.world { world.schedule_personal_activity(activity)?; }
             }
             Request::Clock { speed, serial } if self.world.is_some() => {
                 if speed == 0 { self.control.paused = true; }
@@ -318,7 +335,9 @@ impl NativeSession {
             let choices: Vec<_> = OPENINGS.iter().map(|&(id, place)| {
                 let label = &self.bootstrap.sources().polities()[id].name_zh;
                 let location = &self.bootstrap.sources().places()[&format!("place:{place}")].name;
-                json!({"id":format!("state:{id}"),"label":label,"place":location})
+                json!({"id":format!("state:{id}"),"label":label,"place":location,
+                    "language":self.bootstrap.opening_language(id),
+                    "cash":self.bootstrap.opening_cash(id, wwo_character_core::Family::Ordinary)})
             }).collect();
             state.lobby = Some(serde_json::from_value::<Lobby>(json!({
                 "ready":true,"selection_ready":true,"busy":false,"native":true,"status":self.lobby_status,
@@ -345,6 +364,16 @@ impl NativeSession {
         }).collect();
         let mut character = serde_json::to_value(world.character_for_player())?;
         character["settled_day"] = json!(clock.current_day());
+        let activities = world.opening_language().map(|language| json!({
+            "language": language, "scheduled": world.scheduled_activity(),
+            "lesson":world.can_schedule_personal_activity(PersonalActivity::Lesson),
+            "rest":world.can_schedule_personal_activity(PersonalActivity::Rest),
+            "read_notice":world.can_schedule_personal_activity(PersonalActivity::ReadNotice),
+            "oral_notice":world.last_read_notice().map(|_| format!("课堂教师口述 · {}", world.lesson_notice())),
+        }));
+        let messages = world.opening_language().map(|_| json!([{
+            "source":"本地识字课堂", "received_at":"", "text":world.lesson_notice(), "action":""
+        }])).unwrap_or_else(|| json!([]));
         let session: Session = serde_json::from_value(json!({
             "player":player.id,"polity":player.polity_id,
             "coordinates":place.lon_lat.map(Vec::from).unwrap_or_default(),"place":player.place_id,
@@ -354,7 +383,8 @@ impl NativeSession {
                        "page":self.finance_page,"more":receipts.next().is_some(),"rows":rows},
             "technology":{"country":country,"public_country":"","foundation":[],
                           "public_foundation":[],"project_active":false,"milestones":[]},
-            "messages":[], "slots":self.slots,"slot_open":self.slot_open,"slot_error":self.slot_error,
+            "messages":messages, "written_access":world.can_read_opening_language(), "activities":activities,
+            "slots":self.slots,"slot_open":self.slot_open,"slot_error":self.slot_error,
             "property":property,"property_feedback":self.property_feedback,
             "market":self.market.as_ref().map(|page| page.view(world)),
             "relations":self.relations.as_ref().map(|drawer| self.work_view(world, drawer)),
@@ -375,6 +405,11 @@ impl NativeSession {
                 view.hour = date.hour as u32;
                 view.minute = date.minute as u32;
                 view.total_minutes = clock.snapshot().total_minutes as u64;
+                if let (Some(world), Some(activities)) = (&self.world, &mut view.activities) {
+                    activities.lesson = world.can_schedule_personal_activity(PersonalActivity::Lesson);
+                    activities.rest = world.can_schedule_personal_activity(PersonalActivity::Rest);
+                    activities.read_notice = world.can_schedule_personal_activity(PersonalActivity::ReadNotice);
+                }
                 if let Some(market) = view.market.as_mut() {
                     market.minute = view.total_minutes;
                 }
