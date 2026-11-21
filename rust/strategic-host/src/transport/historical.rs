@@ -149,7 +149,7 @@ pub(super) struct Catalogue {
     capitals: BTreeMap<String, String>,
     domestic: BTreeMap<String, DomesticStatistics>,
     evidence: BTreeMap<String, SegmentEvidence>,
-    pub(super) former_profiles: BTreeMap<String, SegmentProfile>,
+    pub(super) former_profiles: BTreeMap<String, (SegmentProfile, bool)>,
 }
 struct NodeRecord {
     label: String,
@@ -625,6 +625,7 @@ pub(super) fn load(
         };
         b.attach_domestic(&unit, &hub, true);
     }
+    b.allocate_national_capacity();
     b.import_map_identities(sources)?;
     b.bind_population(sources)?;
     let nodes = b
@@ -799,6 +800,43 @@ impl Builder {
         }
         opening.bind_operating_places(&self.catalogue.population_at);
         Ok(())
+    }
+
+    /// The domestic table supplies one estimate per country, with no port-by-port shares.
+    fn allocate_national_capacity(&mut self) {
+        #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+        enum Pool { Access, Port }
+        let mut pools = BTreeMap::<(String, Pool), Vec<usize>>::new();
+        for (index, segment) in self.segments.iter().enumerate() {
+            let (unit, pool) = match segment.mode {
+                TransportMode::Domestic => (segment.from.strip_prefix("area:"), Pool::Access),
+                TransportMode::PortTransfer if segment.to.starts_with("water:") || segment.prototype_only => {
+                    (self.catalogue.nodes.get(&segment.from).and_then(|n| n.unit.as_deref()), Pool::Port)
+                }
+                _ => continue,
+            };
+            if let Some(unit) = unit.filter(|u| self.catalogue.domestic.contains_key(*u)) {
+                pools.entry((unit.to_owned(), pool)).or_default().push(index);
+            }
+        }
+        for ((unit, pool), mut indices) in pools {
+            indices.sort_unstable_by(|&a, &b| self.segments[a].id.cmp(&self.segments[b].id));
+            let total = match pool {
+                Pool::Access => self.segments[indices[0]].profile.capacity_units,
+                Pool::Port => self.catalogue.domestic[&unit].port_capacity_index,
+            };
+            let count = indices.len() as u32;
+            for (rank, index) in indices.into_iter().enumerate() {
+                let segment = &mut self.segments[index];
+                let share = total / count + u32::from((rank as u32) < total % count);
+                if share != segment.profile.capacity_units {
+                    self.catalogue.former_profiles.insert(segment.id.clone(), (segment.profile, segment.prototype_only));
+                    segment.profile.capacity_units = share;
+                }
+                let note = self.catalogue.evidence.get_mut(&segment.id).expect("catalogued capacity source");
+                note.source.push_str(&format!("; domestic_rows/{unit}: national estimate {total} shared by {count} links, this link {share} (equal shares; remainders by segment ID)"));
+            }
+        }
     }
 
     fn import_map_identities(&mut self, sources: &WorldSources) -> io::Result<()> {
@@ -999,7 +1037,7 @@ impl Builder {
             // Keep pre-existing committed plan profiles and one physical capacity ledger.
             self.catalogue
                 .former_profiles
-                .insert(existing.id.clone(), existing.profile);
+                .insert(existing.id.clone(), (existing.profile, existing.prototype_only));
             existing.profile = profile;
             existing.prototype_only = false;
             self.aliases.insert(sea.corridor_id, existing.id.clone());
@@ -1419,6 +1457,56 @@ mod tests {
         let access = "access:congo_free_state:hub:congo_free_state:stanley_pool";
         net.set_availability(access, false, 0).unwrap();
         assert_eq!(net.coverage(&congo.from), NodeCoverage::Impassable);
+    }
+
+    #[test]
+    fn national_estimates_are_divided_between_gateways_and_existing_bookings_keep_their_slot() {
+        use super::super::operations::Operations;
+        let world = WorldBootstrap::load().unwrap();
+        let mut net = super::super::map_data::load_world_network(world.sources(), 0).unwrap();
+        let areas = &net.catalogue.areas;
+        for (unit, area) in areas {
+            let stats = &net.catalogue.domestic[unit];
+            let mut access = Vec::new();
+            let mut port = Vec::new();
+            for s in net.segments() {
+                if s.mode == TransportMode::Domestic && s.from == *area { access.push(s.profile.capacity_units); }
+                if s.mode == TransportMode::PortTransfer && (s.to.starts_with("water:") || s.prototype_only)
+                    && net.unit_at(&s.from) == Some(unit.as_str()) { port.push(s.profile.capacity_units); }
+            }
+            let land = match stats.network_class.as_str() {
+                "continental_dense" => 120, "national_dense" => 90, "developing_trunk" => 60, _ => 24,
+            };
+            for (shares, total) in [(access, (land + stats.port_capacity_index)/2), (port, stats.port_capacity_index)] {
+                if shares.is_empty() { continue; }
+                assert_eq!(shares.iter().sum::<u32>(), total, "{unit}");
+                assert!(shares.iter().max().unwrap() - shares.iter().min().unwrap() <= 1);
+            }
+        }
+        let japan = "empire_of_japan";
+        let area = net.area_node(japan).unwrap().to_owned();
+        let city = net.routing_node("place:yokohama").unwrap().to_owned();
+        let mut old = net.route(&query(&area, &city, ModeSet::only(TransportMode::Domestic))).unwrap();
+        let leg = &mut old.legs[0];
+        let segment = leg.segment_id.clone();
+        let current = leg.profile.capacity_units;
+        let old_cap = net.catalogue.former_profiles[&segment].0.capacity_units;
+        assert!(current < old_cap);
+        leg.profile.capacity_units = old_cap;
+        old.capacity_units = Some(old_cap);
+        let ends = old.travel_minutes as i64;
+        let saved = serde_json::json!({
+            "next_id":2,"closed":[],"restrictions":{(segment.clone()):{"open":true,"capacity_units":old_cap}},
+            "reservations":{"1":{"freight":true,"leg":0,"status":"Moving","stop_at_next":false,
+                "plan":{"route":old,"load":old_cap,"departure":0,"windows":[{"starts":0,"ends":ends}]}}}
+        });
+        let mut ops = Operations::restore(world.sources(), 1, serde_json::from_value(saved).unwrap()).unwrap();
+        assert_eq!(ops.plan(1).unwrap().load_units(), old_cap);
+        assert_eq!(ops.network().availability(&segment).unwrap().capacity_units, current);
+        let next = ops.quote(&area, &city, ModeSet::only(TransportMode::Domestic), 1, 1).unwrap();
+        assert_eq!(next.first_departure_minute(), ends);
+        ops.advance(ends);
+        assert_eq!(ops.completed(1), Some(city.as_str()));
     }
 
     #[test]

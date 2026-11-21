@@ -186,8 +186,8 @@ impl Operations {
             operations.network.set_availability(segment, false, capacity).map_err(io::Error::other)?;
         }
         for (id, access) in &mut operations.state.restrictions {
-            // A restriction from the prototype may exceed the newly sourced nominal ceiling.
-            if let Some(former) = operations.network.catalogue.former_profiles.get(id) {
+            // Preserve a former restriction up to the revised nominal limit.
+            if let Some((former, _)) = operations.network.catalogue.former_profiles.get(id) {
                 if access.capacity_units <= former.capacity_units {
                     access.capacity_units = access.capacity_units.min(operations.network.segment(id).unwrap().profile.capacity_units);
                 }
@@ -626,8 +626,8 @@ impl Operations {
             let direction = segment.from == leg.from && segment.to == leg.to
                 || segment.bidirectional && segment.to == leg.from && segment.from == leg.to;
             let current = leg.profile == segment.profile && leg.prototype_only == segment.prototype_only;
-            let former = restoring && leg.prototype_only
-                && self.network.catalogue.former_profiles.get(&segment.id) == Some(&leg.profile);
+            let former = restoring && self.network.catalogue.former_profiles.get(&segment.id)
+                == Some(&(leg.profile, leg.prototype_only));
             if !direction || leg.from != from || leg.mode != segment.mode || !(current || former) || window.starts < at
                 || window.ends.checked_sub(window.starts) != Some(i64::from(leg.profile.travel_minutes))
                 || plan.load > leg.profile.capacity_units

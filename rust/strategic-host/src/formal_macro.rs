@@ -14,8 +14,8 @@ const HOURS_PER_DAY: i64 = MINUTES_PER_DAY / MINUTES_PER_HOUR;
 const BASIS_POINTS: i64 = 10_000;
 const QUANTITY_EPSILON: f64 = 0.0001;
 const MAX_DAILY_SHIPMENTS: usize = 96;
-const MAX_SUPPLIERS: usize = 4;
-const MAX_SHORTAGES: usize = 10;
+const MAX_SUPPLIERS_PER_GOOD: usize = 4;
+const MAX_GOODS_PER_BUYER: usize = 10;
 
 pub(crate) struct CountryInputs {
     pub income: u64,
@@ -585,6 +585,16 @@ impl MacroEconomy {
         for s in &self.shipments {
             *inbound.entry(s.destination.clone()).or_default().entry(s.commodity.clone()).or_default() += s.units;
         }
+        // Stocks can only be sold down during this matching pass. Recheck each seller
+        // against its remaining inventory before committing an order.
+        let mut surplus_markets = BTreeMap::<String, Vec<String>>::new();
+        for (unit, market) in &self.markets {
+            for (id, stock) in &market.commodities {
+                if stock.surplus() > QUANTITY_EPSILON {
+                    surplus_markets.entry(id.clone()).or_default().push(unit.clone());
+                }
+            }
+        }
         for receiver in self.inputs.countries.keys() {
             let Some(to) = transport.network().area_node(receiver).map(str::to_owned) else { continue };
             let buyer = self.markets[receiver].id.clone();
@@ -600,23 +610,36 @@ impl MacroEconomy {
                 }).collect();
             if shortages.is_empty() || self.markets[receiver].trade_budget(ledger) == 0 { continue; }
             let rates = transport.supplier_rates(&to);
+            // Route ceilings and base fares are shared by all goods on a market pair.
+            // Occupied windows and congestion supplements are quoted anew for each lot.
+            let mut route_limits = BTreeMap::new();
             shortages.sort_by(|a, b| b.1.total_cmp(&a.1));
-            for (commodity, mut remaining, mass) in shortages.into_iter().take(MAX_SHORTAGES) {
-                let mut suppliers: Vec<_> = rates.iter().filter_map(|(origin, &rate)| {
-                    let good = self.markets.get(origin)?.commodities[commodity];
-                    (good.surplus() > QUANTITY_EPSILON).then_some((u128::from(good.price_centimes as u64) * 1000 + u128::from(rate) * u128::from(mass.0), origin))
+            let mut filled_goods = 0;
+            for (commodity, mut remaining, mass) in shortages {
+                let Some(origins) = surplus_markets.get(commodity) else { continue };
+                let bid = self.markets[receiver].commodities[commodity].price_centimes as u128 * 1000;
+                let mut suppliers: Vec<_> = origins.iter().filter_map(|origin| {
+                    let rate = *rates.get(origin)?;
+                    let good = self.markets[origin].commodities[commodity];
+                    let landed = good.price_centimes as u128 * 1000 + u128::from(rate) * u128::from(mass.0);
+                    (landed <= bid && good.surplus() > QUANTITY_EPSILON).then_some((landed, origin))
                 }).collect();
                 suppliers.sort_unstable();
-                for (_, origin) in suppliers.into_iter().take(MAX_SUPPLIERS) {
+                let mut filled_suppliers = 0;
+                for (_, origin) in suppliers {
                     if remaining <= QUANTITY_EPSILON || self.markets[receiver].trade_budget(ledger) <= 0 { break; }
                     let Some(from) = transport.network().area_node(origin).map(str::to_owned) else { continue };
-                    let Ok(sample) = transport.quote_service(&from, &to, ModeSet::ALL, 1, now, Traffic::Trade) else { continue };
-                    let ceiling = sample.route().legs.iter().filter_map(|leg| transport.service_capacity(&leg.segment_id, &leg.from))
-                        .map(|cap| cap.line_limit.min(cap.cargo_limit)).min().unwrap_or(0);
+                    let limit = route_limits.entry(origin).or_insert_with(|| {
+                        let sample = transport.quote_service(&from, &to, ModeSet::ALL, 1, now, Traffic::Trade).ok()?;
+                        let ceiling = sample.route().legs.iter().filter_map(|leg| transport.service_capacity(&leg.segment_id, &leg.from))
+                            .map(|cap| cap.line_limit.min(cap.cargo_limit)).min()?;
+                        Some((ceiling, sample.route().cost_units as i64))
+                    });
+                    let Some((ceiling, base_fare)) = *limit else { continue };
                     let budget = self.markets[receiver].trade_budget(ledger);
                     let good = self.markets[origin].commodities[commodity];
                     let units = remaining.min(good.surplus())
-                        .min(mass.affordable_units(ceiling, good.price_centimes, sample.fare_centimes(), budget));
+                        .min(mass.affordable_units(ceiling, good.price_centimes, base_fare, budget));
                     if units <= QUANTITY_EPSILON { continue; }
                     let slots = mass.slots(units)?;
                     let Ok(plan) = transport.quote_service(&from, &to, ModeSet::ALL, slots, now, Traffic::Trade) else { continue };
@@ -659,6 +682,12 @@ impl MacroEconomy {
                     remaining -= units;
                     dispatched += 1;
                     if dispatched == MAX_DAILY_SHIPMENTS { return Ok(()); }
+                    filled_suppliers += 1;
+                    if filled_suppliers == MAX_SUPPLIERS_PER_GOOD { break; }
+                }
+                if filled_suppliers > 0 {
+                    filled_goods += 1;
+                    if filled_goods == MAX_GOODS_PER_BUYER { break; }
                 }
             }
         }

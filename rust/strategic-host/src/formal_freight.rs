@@ -687,6 +687,36 @@ mod tests {
     }
 
     #[test]
+    fn transport_freight_australian_wool_reaches_a_british_buyer_at_the_arrival_bid() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("cshapes_gw_901").unwrap();
+        let managed = BTreeMap::new();
+        let source = "australia_colonies_1900";
+        let target = "british_isles_1900";
+        let good = "wool";
+        let origin = world.macro_economy.markets()[source].commodities[good];
+        let lot = world.buy_freight(good, 1000, origin.price_centimes).unwrap();
+        assert_eq!(world.macro_economy.markets()[source].commodities[good].inventory, origin.inventory - 1.0);
+        let plan = world.quote_freight(lot, "place:london", ModeSet::ALL).unwrap();
+        assert!(plan.route().legs.iter().any(|leg| leg.segment_id == "sea:011"));
+        let journey = plan.arrival_minute();
+        let fare = plan.fare_centimes();
+        world.dispatch_quoted_freight(lot, plan).unwrap();
+        let mut world = restore(&bootstrap, &world);
+        world.advance_migrated_domains(journey, &managed).unwrap();
+        let destination = world.macro_economy.markets()[target].commodities[good].inventory;
+        let cash = world.balance().unwrap().cash;
+        let (bid, sale) = world.freight_sale_quote(lot).unwrap();
+        let net = world.sell_freight(lot, bid).unwrap();
+        assert_eq!(world.macro_economy.markets()[target].commodities[good].inventory, destination + 1.0);
+        assert_eq!(world.balance().unwrap().cash, cash + sale);
+        assert_eq!(net, sale - origin.price_centimes - fare);
+        println!("Australian wool 1 t: source {:.3} -> {:.3}; London {:.3} -> {:.3}; buy {} sale {sale} fare {fare} net {net} arrival minute {journey}",
+            origin.inventory, origin.inventory - 1.0, destination, destination + 1.0, origin.price_centimes);
+        assert!(restore(&bootstrap, &world).sell_freight(lot, bid).is_err());
+    }
+
+    #[test]
     fn transport_freight_unfunded_destination_preserves_ownership_and_can_forward_the_lot() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create(FRANCE).unwrap();
