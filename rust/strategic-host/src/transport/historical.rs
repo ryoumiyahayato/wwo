@@ -26,6 +26,31 @@ const RAIL: &[u8] = include_bytes!(
     "../../../../data/alpha/historical_transport_network_1900/international_rail.json"
 );
 
+type PlaceRow = (
+    String,
+    String,
+    String,
+    [f64; 2],
+    MapIdentityKind,
+    String,
+    String,
+    Option<String>,
+);
+
+#[derive(Deserialize)]
+struct MapRows {
+    places: Vec<PlaceRow>,
+    polities: Vec<(String, String, MapIdentityKind, String, String)>,
+}
+
+pub(crate) fn opening_place_jurisdictions() -> io::Result<BTreeMap<String, String>> {
+    let rows: MapRows = serde_json::from_slice(MAP_IDENTITIES)?;
+    Ok(rows.places.into_iter().filter_map(|(id, _, _, _, kind, from, to, polity)| {
+        (kind == MapIdentityKind::Place && from.as_str() <= BASELINE && BASELINE < to.as_str())
+            .then_some(polity).flatten().map(|polity| (id, polity))
+    }).collect())
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NetworkLayer {
     Detailed,
@@ -840,22 +865,6 @@ impl Builder {
     }
 
     fn import_map_identities(&mut self, sources: &WorldSources) -> io::Result<()> {
-        type PlaceRow = (
-            String,
-            String,
-            String,
-            [f64; 2],
-            MapIdentityKind,
-            String,
-            String,
-            Option<String>,
-        );
-        type PolityRow = (String, String, MapIdentityKind, String, String);
-        #[derive(Deserialize)]
-        struct MapRows {
-            places: Vec<PlaceRow>,
-            polities: Vec<PolityRow>,
-        }
         let rows: MapRows = serde_json::from_slice(MAP_IDENTITIES)?;
         for (id, name, label, point, kind, from_date, to_date_exclusive, polity) in rows.places {
             if !self.kinds.contains_key(&id) {

@@ -6,5 +6,30 @@
     "url": "https://www3.stats.govt.nz/historic_publications/1901-census/1901-report-on-results-census/1901-report-results-census.html",
     "locator": "Part IV, Ages of the People, detailed enumeration including Chinese residents",
     "rights": "Historical published facts only"
+  },
+  {
+    "id": "nz_census_1901_combined_ages",
+    "title": "New Zealand 1901 local census population, combined age and sex tabulation",
+    "publisher": "Registrar-General of New Zealand and General Register Office, United Kingdom (underlying reports)",
+    "url": "https://www3.stats.govt.nz/historic_publications/1901-census/1901-report-on-results-census/1901-report-results-census.html",
+    "locator": "New Zealand census report, Part I ch. 1 and Part IV ch. 18; Census of the British Empire, Table 4, printed pp. 23–24",
+    "rights": "Historical published facts only",
+    "table_urls": [
+      "https://iiif.wellcomecollection.org/image/b32183173_0091.jp2/full/2100,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183173_0092.jp2/full/2100,/0/default.jpg"
+    ]
+  },
+  {
+    "id": "us_twelfth_census_vol2_state_ages",
+    "title": "Twelfth Census of the United States, Volume II, Population Part II, Age, Sex, and Conjugal Condition",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p5.pdf",
+    "locator": "Table 3, printed pp. 110–111; Abstract Table 38, p. 39, and Table 50, pp. 64–65, for controls",
+    "rights": "U.S. federal public domain",
+    "raw_path": "us_census_1900.csv",
+    "table_urls": [
+      "https://usa.ipums.org/usa/resources/voliii/pubdocs/1900/Vol2/33405927v2ch04.pdf",
+      "https://www2.census.gov/library/publications/decennial/1900/abstract/1900-census-1902-abstract.pdf"
+    ]
   }
 ]

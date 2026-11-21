@@ -6,6 +6,7 @@ use std::io;
 
 pub mod map_data;
 mod historical;
+pub(crate) use historical::opening_place_jurisdictions;
 pub use historical::{DomesticStatistics, MapIdentity, MapIdentityKind, NetworkLayer, NodeCoverage, SegmentEvidence};
 pub mod models;
 pub mod operations;

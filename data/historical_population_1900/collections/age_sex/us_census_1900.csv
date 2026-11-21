@@ -1,0 +1,651 @@
+panel,label,role,age_min,age_max,both,male,female
+us_state_alabama_1900,All ages,total,,,1828697,916764,911933
+us_state_alabama_1900,Under 5 years,band,0,4,267300,135145,132155
+us_state_alabama_1900,5 to 9 years,band,5,9,256694,130096,126598
+us_state_alabama_1900,10 to 14 years,band,10,14,228685,116236,112449
+us_state_alabama_1900,15 to 19 years,band,15,19,204822,101647,103175
+us_state_alabama_1900,20 to 24 years,band,20,24,189636,91861,97775
+us_state_alabama_1900,25 to 29 years,band,25,29,142670,70838,71832
+us_state_alabama_1900,30 to 34 years,band,30,34,101945,50992,50953
+us_state_alabama_1900,35 to 44 years,band,35,44,161536,76467,85069
+us_state_alabama_1900,45 to 54 years,band,45,54,142510,78291,64219
+us_state_alabama_1900,55 to 64 years,band,55,64,71876,35255,36621
+us_state_alabama_1900,65 years and over,band,65,,54306,26431,27875
+us_state_alabama_1900,Age unknown,band,,,6717,3505,3212
+us_arizona_1900,All ages,total,,,122931,71795,51136
+us_arizona_1900,Under 5 years,band,0,4,14785,7615,7170
+us_arizona_1900,5 to 9 years,band,5,9,13999,7153,6846
+us_arizona_1900,10 to 14 years,band,10,14,11671,6013,5658
+us_arizona_1900,15 to 19 years,band,15,19,10412,5447,4965
+us_arizona_1900,20 to 24 years,band,20,24,11781,6758,5023
+us_arizona_1900,25 to 29 years,band,25,29,11699,7120,4579
+us_arizona_1900,30 to 34 years,band,30,34,10452,6589,3863
+us_arizona_1900,35 to 44 years,band,35,44,17186,11387,5799
+us_arizona_1900,45 to 54 years,band,45,54,10810,7211,3599
+us_arizona_1900,55 to 64 years,band,55,64,5519,3602,1917
+us_arizona_1900,65 years and over,band,65,,3328,2050,1278
+us_arizona_1900,Age unknown,band,,,1289,850,439
+us_state_arkansas_1900,All ages,total,,,1311564,675312,636252
+us_state_arkansas_1900,Under 5 years,band,0,4,189811,95935,93876
+us_state_arkansas_1900,5 to 9 years,band,5,9,187421,94776,92645
+us_state_arkansas_1900,10 to 14 years,band,10,14,166481,84334,82147
+us_state_arkansas_1900,15 to 19 years,band,15,19,146913,72904,74009
+us_state_arkansas_1900,20 to 24 years,band,20,24,131667,65210,66457
+us_state_arkansas_1900,25 to 29 years,band,25,29,104810,53668,51142
+us_state_arkansas_1900,30 to 34 years,band,30,34,76920,40508,36412
+us_state_arkansas_1900,35 to 44 years,band,35,44,119821,62896,56925
+us_state_arkansas_1900,45 to 54 years,band,45,54,100284,57684,42600
+us_state_arkansas_1900,55 to 64 years,band,55,64,50918,27591,23327
+us_state_arkansas_1900,65 years and over,band,65,,31344,16810,14534
+us_state_arkansas_1900,Age unknown,band,,,5174,2996,2178
+us_state_california_1900,All ages,total,,,1485053,820531,664522
+us_state_california_1900,Under 5 years,band,0,4,125937,63721,62216
+us_state_california_1900,5 to 9 years,band,5,9,137005,69017,67988
+us_state_california_1900,10 to 14 years,band,10,14,126889,64085,62804
+us_state_california_1900,15 to 19 years,band,15,19,128084,65207,62877
+us_state_california_1900,20 to 24 years,band,20,24,136549,70039,66510
+us_state_california_1900,25 to 29 years,band,25,29,134269,71739,62530
+us_state_california_1900,30 to 34 years,band,30,34,129103,73248,55855
+us_state_california_1900,35 to 44 years,band,35,44,227336,136535,90801
+us_state_california_1900,45 to 54 years,band,45,54,151469,91074,60395
+us_state_california_1900,55 to 64 years,band,55,64,101392,60539,40853
+us_state_california_1900,65 years and over,band,65,,76846,47913,28933
+us_state_california_1900,Age unknown,band,,,10174,7414,2760
+us_state_colorado_1900,All ages,total,,,539700,295332,244368
+us_state_colorado_1900,Under 5 years,band,0,4,56999,28895,28104
+us_state_colorado_1900,5 to 9 years,band,5,9,57277,28772,28505
+us_state_colorado_1900,10 to 14 years,band,10,14,48871,24508,24363
+us_state_colorado_1900,15 to 19 years,band,15,19,45014,22639,22375
+us_state_colorado_1900,20 to 24 years,band,20,24,49600,26214,23386
+us_state_colorado_1900,25 to 29 years,band,25,29,51335,27924,23411
+us_state_colorado_1900,30 to 34 years,band,30,34,49938,28115,21823
+us_state_colorado_1900,35 to 44 years,band,35,44,85691,50820,34871
+us_state_colorado_1900,45 to 54 years,band,45,54,50889,30859,20030
+us_state_colorado_1900,55 to 64 years,band,55,64,25890,15291,10599
+us_state_colorado_1900,65 years and over,band,65,,13646,7744,5902
+us_state_colorado_1900,Age unknown,band,,,4550,3551,999
+us_state_connecticut_1900,All ages,total,,,908420,454294,454126
+us_state_connecticut_1900,Under 5 years,band,0,4,91792,45992,45800
+us_state_connecticut_1900,5 to 9 years,band,5,9,86174,43172,43002
+us_state_connecticut_1900,10 to 14 years,band,10,14,76355,38321,38034
+us_state_connecticut_1900,15 to 19 years,band,15,19,77337,38119,39218
+us_state_connecticut_1900,20 to 24 years,band,20,24,88036,43321,44715
+us_state_connecticut_1900,25 to 29 years,band,25,29,87591,44297,43294
+us_state_connecticut_1900,30 to 34 years,band,30,34,76781,39654,37127
+us_state_connecticut_1900,35 to 44 years,band,35,44,125530,64848,60682
+us_state_connecticut_1900,45 to 54 years,band,45,54,87485,44208,43277
+us_state_connecticut_1900,55 to 64 years,band,55,64,59324,28301,31023
+us_state_connecticut_1900,65 years and over,band,65,,50850,23333,27517
+us_state_connecticut_1900,Age unknown,band,,,1165,728,437
+us_state_delaware_1900,All ages,total,,,184735,94158,90577
+us_state_delaware_1900,Under 5 years,band,0,4,19796,9889,9907
+us_state_delaware_1900,5 to 9 years,band,5,9,19439,9874,9565
+us_state_delaware_1900,10 to 14 years,band,10,14,18746,9538,9208
+us_state_delaware_1900,15 to 19 years,band,15,19,17873,9053,8820
+us_state_delaware_1900,20 to 24 years,band,20,24,17570,8865,8705
+us_state_delaware_1900,25 to 29 years,band,25,29,15587,7979,7608
+us_state_delaware_1900,30 to 34 years,band,30,34,13384,6810,6574
+us_state_delaware_1900,35 to 44 years,band,35,44,24566,12787,11779
+us_state_delaware_1900,45 to 54 years,band,45,54,17460,9212,8248
+us_state_delaware_1900,55 to 64 years,band,55,64,11337,5724,5613
+us_state_delaware_1900,65 years and over,band,65,,8468,4140,4328
+us_state_delaware_1900,Age unknown,band,,,509,287,222
+us_district_of_columbia_1900,All ages,total,,,278718,132004,146714
+us_district_of_columbia_1900,Under 5 years,band,0,4,23150,11683,11467
+us_district_of_columbia_1900,5 to 9 years,band,5,9,23731,11708,12023
+us_district_of_columbia_1900,10 to 14 years,band,10,14,22734,10953,11781
+us_district_of_columbia_1900,15 to 19 years,band,15,19,24814,11362,13452
+us_district_of_columbia_1900,20 to 24 years,band,20,24,31510,13774,17736
+us_district_of_columbia_1900,25 to 29 years,band,25,29,29755,13345,16410
+us_district_of_columbia_1900,30 to 34 years,band,30,34,24768,11911,12857
+us_district_of_columbia_1900,35 to 44 years,band,35,44,39815,19088,20727
+us_district_of_columbia_1900,45 to 54 years,band,45,54,27925,13247,14678
+us_district_of_columbia_1900,55 to 64 years,band,55,64,18487,9408,9079
+us_district_of_columbia_1900,65 years and over,band,65,,11734,5363,6371
+us_district_of_columbia_1900,Age unknown,band,,,295,162,133
+us_state_florida_1900,All ages,total,,,528542,275246,253296
+us_state_florida_1900,Under 5 years,band,0,4,72693,36825,35868
+us_state_florida_1900,5 to 9 years,band,5,9,70359,35231,35128
+us_state_florida_1900,10 to 14 years,band,10,14,60975,30999,29976
+us_state_florida_1900,15 to 19 years,band,15,19,54253,26752,27501
+us_state_florida_1900,20 to 24 years,band,20,24,57028,29659,27369
+us_state_florida_1900,25 to 29 years,band,25,29,45898,24627,21271
+us_state_florida_1900,30 to 34 years,band,30,34,34805,18984,15821
+us_state_florida_1900,35 to 44 years,band,35,44,55430,30285,25145
+us_state_florida_1900,45 to 54 years,band,45,54,39289,21544,17745
+us_state_florida_1900,55 to 64 years,band,55,64,21158,11389,9769
+us_state_florida_1900,65 years and over,band,65,,13941,7289,6652
+us_state_florida_1900,Age unknown,band,,,2713,1662,1051
+us_state_georgia_1900,All ages,total,,,2216331,1103201,1113130
+us_state_georgia_1900,Under 5 years,band,0,4,325473,162999,162474
+us_state_georgia_1900,5 to 9 years,band,5,9,313524,157573,155951
+us_state_georgia_1900,10 to 14 years,band,10,14,277865,141202,136663
+us_state_georgia_1900,15 to 19 years,band,15,19,241478,116602,124876
+us_state_georgia_1900,20 to 24 years,band,20,24,229199,110546,118653
+us_state_georgia_1900,25 to 29 years,band,25,29,172819,85330,87489
+us_state_georgia_1900,30 to 34 years,band,30,34,127782,64285,63497
+us_state_georgia_1900,35 to 44 years,band,35,44,208967,104297,104670
+us_state_georgia_1900,45 to 54 years,band,45,54,156872,80294,76578
+us_state_georgia_1900,55 to 64 years,band,55,64,89619,44320,45299
+us_state_georgia_1900,65 years and over,band,65,,66376,32432,33944
+us_state_georgia_1900,Age unknown,band,,,6357,3321,3036
+us_state_idaho_1900,All ages,total,,,161772,93367,68405
+us_state_idaho_1900,Under 5 years,band,0,4,21560,11035,10525
+us_state_idaho_1900,5 to 9 years,band,5,9,20375,10332,10043
+us_state_idaho_1900,10 to 14 years,band,10,14,16982,8599,8383
+us_state_idaho_1900,15 to 19 years,band,15,19,14665,7848,6817
+us_state_idaho_1900,20 to 24 years,band,20,24,14268,8136,6132
+us_state_idaho_1900,25 to 29 years,band,25,29,13493,7987,5506
+us_state_idaho_1900,30 to 34 years,band,30,34,13147,8091,5056
+us_state_idaho_1900,35 to 44 years,band,35,44,21965,14446,7519
+us_state_idaho_1900,45 to 54 years,band,45,54,12990,8667,4323
+us_state_idaho_1900,55 to 64 years,band,55,64,7312,4902,2410
+us_state_idaho_1900,65 years and over,band,65,,4425,2936,1489
+us_state_idaho_1900,Age unknown,band,,,590,388,202
+us_state_illinois_1900,All ages,total,,,4821550,2472782,2348768
+us_state_illinois_1900,Under 5 years,band,0,4,550035,277251,272784
+us_state_illinois_1900,5 to 9 years,band,5,9,543770,272728,271042
+us_state_illinois_1900,10 to 14 years,band,10,14,494880,248639,246241
+us_state_illinois_1900,15 to 19 years,band,15,19,460168,228377,231791
+us_state_illinois_1900,20 to 24 years,band,20,24,454982,226294,228688
+us_state_illinois_1900,25 to 29 years,band,25,29,436481,222735,213746
+us_state_illinois_1900,30 to 34 years,band,30,34,396896,208831,188065
+us_state_illinois_1900,35 to 44 years,band,35,44,641275,345778,295497
+us_state_illinois_1900,45 to 54 years,band,45,54,395012,210432,184580
+us_state_illinois_1900,55 to 64 years,band,55,64,246118,127389,118729
+us_state_illinois_1900,65 years and over,band,65,,190639,97151,93488
+us_state_illinois_1900,Age unknown,band,,,11294,7177,4117
+us_state_indiana_1900,All ages,total,,,2516462,1285404,1231058
+us_state_indiana_1900,Under 5 years,band,0,4,274799,139532,135267
+us_state_indiana_1900,5 to 9 years,band,5,9,273448,139117,134331
+us_state_indiana_1900,10 to 14 years,band,10,14,264822,133640,131182
+us_state_indiana_1900,15 to 19 years,band,15,19,257410,129171,128239
+us_state_indiana_1900,20 to 24 years,band,20,24,231635,115676,115959
+us_state_indiana_1900,25 to 29 years,band,25,29,209506,106305,103201
+us_state_indiana_1900,30 to 34 years,band,30,34,187658,96208,91450
+us_state_indiana_1900,35 to 44 years,band,35,44,315312,163104,152208
+us_state_indiana_1900,45 to 54 years,band,45,54,227601,119763,107838
+us_state_indiana_1900,55 to 64 years,band,55,64,151112,78616,72496
+us_state_indiana_1900,65 years and over,band,65,,117861,60766,57095
+us_state_indiana_1900,Age unknown,band,,,5298,3506,1792
+us_indian_territory_1900,All ages,total,,,392060,208952,183108
+us_indian_territory_1900,Under 5 years,band,0,4,59985,30256,29729
+us_indian_territory_1900,5 to 9 years,band,5,9,57751,29378,28373
+us_indian_territory_1900,10 to 14 years,band,10,14,49906,25695,24211
+us_indian_territory_1900,15 to 19 years,band,15,19,43143,22068,21075
+us_indian_territory_1900,20 to 24 years,band,20,24,38181,20015,18166
+us_indian_territory_1900,25 to 29 years,band,25,29,32361,17517,14844
+us_indian_territory_1900,30 to 34 years,band,30,34,24291,13673,10618
+us_indian_territory_1900,35 to 44 years,band,35,44,38500,22388,16112
+us_indian_territory_1900,45 to 54 years,band,45,54,26794,16005,10789
+us_indian_territory_1900,55 to 64 years,band,55,64,12229,7017,5212
+us_indian_territory_1900,65 years and over,band,65,,6211,3453,2758
+us_indian_territory_1900,Age unknown,band,,,2708,1487,1221
+us_state_iowa_1900,All ages,total,,,2231853,1156849,1075004
+us_state_iowa_1900,Under 5 years,band,0,4,263422,133621,129801
+us_state_iowa_1900,5 to 9 years,band,5,9,256642,129316,127326
+us_state_iowa_1900,10 to 14 years,band,10,14,239549,121662,117887
+us_state_iowa_1900,15 to 19 years,band,15,19,227787,114876,112911
+us_state_iowa_1900,20 to 24 years,band,20,24,211516,107564,103952
+us_state_iowa_1900,25 to 29 years,band,25,29,185775,96550,89225
+us_state_iowa_1900,30 to 34 years,band,30,34,162536,85993,76543
+us_state_iowa_1900,35 to 44 years,band,35,44,265672,141555,124117
+us_state_iowa_1900,45 to 54 years,band,45,54,183871,99999,83872
+us_state_iowa_1900,55 to 64 years,band,55,64,123946,65535,58411
+us_state_iowa_1900,65 years and over,band,65,,105916,56825,49091
+us_state_iowa_1900,Age unknown,band,,,5221,3353,1868
+us_state_kansas_1900,All ages,total,,,1470495,768716,701779
+us_state_kansas_1900,Under 5 years,band,0,4,172122,87251,84871
+us_state_kansas_1900,5 to 9 years,band,5,9,172340,87500,84840
+us_state_kansas_1900,10 to 14 years,band,10,14,168277,85413,82864
+us_state_kansas_1900,15 to 19 years,band,15,19,157579,79951,77628
+us_state_kansas_1900,20 to 24 years,band,20,24,140110,71823,68287
+us_state_kansas_1900,25 to 29 years,band,25,29,117860,60947,56913
+us_state_kansas_1900,30 to 34 years,band,30,34,98811,51756,47055
+us_state_kansas_1900,35 to 44 years,band,35,44,166103,88986,77117
+us_state_kansas_1900,45 to 54 years,band,45,54,126695,69707,56988
+us_state_kansas_1900,55 to 64 years,band,55,64,87170,48825,38345
+us_state_kansas_1900,65 years and over,band,65,,60373,34508,25865
+us_state_kansas_1900,Age unknown,band,,,3055,2049,1006
+us_state_kentucky_1900,All ages,total,,,2147174,1090227,1056947
+us_state_kentucky_1900,Under 5 years,band,0,4,284230,144349,139881
+us_state_kentucky_1900,5 to 9 years,band,5,9,273259,138722,134537
+us_state_kentucky_1900,10 to 14 years,band,10,14,251653,127657,123996
+us_state_kentucky_1900,15 to 19 years,band,15,19,228767,114145,114622
+us_state_kentucky_1900,20 to 24 years,band,20,24,210248,103492,106756
+us_state_kentucky_1900,25 to 29 years,band,25,29,174939,87732,87207
+us_state_kentucky_1900,30 to 34 years,band,30,34,141572,72269,69303
+us_state_kentucky_1900,35 to 44 years,band,35,44,233140,121153,111987
+us_state_kentucky_1900,45 to 54 years,band,45,54,163714,85485,78229
+us_state_kentucky_1900,55 to 64 years,band,55,64,101751,52284,49467
+us_state_kentucky_1900,65 years and over,band,65,,77127,39235,37892
+us_state_kentucky_1900,Age unknown,band,,,6774,3704,3070
+us_state_louisiana_1900,All ages,total,,,1381625,694733,686892
+us_state_louisiana_1900,Under 5 years,band,0,4,199406,100666,98740
+us_state_louisiana_1900,5 to 9 years,band,5,9,191855,97188,94667
+us_state_louisiana_1900,10 to 14 years,band,10,14,169385,85573,83812
+us_state_louisiana_1900,15 to 19 years,band,15,19,145734,71176,74558
+us_state_louisiana_1900,20 to 24 years,band,20,24,139081,66600,72481
+us_state_louisiana_1900,25 to 29 years,band,25,29,117286,58785,58501
+us_state_louisiana_1900,30 to 34 years,band,30,34,85722,44228,41494
+us_state_louisiana_1900,35 to 44 years,band,35,44,137336,71168,66168
+us_state_louisiana_1900,45 to 54 years,band,45,54,97397,50813,46584
+us_state_louisiana_1900,55 to 64 years,band,55,64,54994,27732,27262
+us_state_louisiana_1900,65 years and over,band,65,,40223,19140,21083
+us_state_louisiana_1900,Age unknown,band,,,3206,1664,1542
+us_state_maine_1900,All ages,total,,,694466,350995,343471
+us_state_maine_1900,Under 5 years,band,0,4,65690,32947,32743
+us_state_maine_1900,5 to 9 years,band,5,9,63336,31934,31402
+us_state_maine_1900,10 to 14 years,band,10,14,60307,30782,29525
+us_state_maine_1900,15 to 19 years,band,15,19,62475,31274,31201
+us_state_maine_1900,20 to 24 years,band,20,24,61493,30580,30913
+us_state_maine_1900,25 to 29 years,band,25,29,55561,27859,27702
+us_state_maine_1900,30 to 34 years,band,30,34,49647,25308,24339
+us_state_maine_1900,35 to 44 years,band,35,44,89809,45757,44052
+us_state_maine_1900,45 to 54 years,band,45,54,72770,37543,35227
+us_state_maine_1900,55 to 64 years,band,55,64,56614,28539,28075
+us_state_maine_1900,65 years and over,band,65,,55122,27376,27746
+us_state_maine_1900,Age unknown,band,,,1642,1096,546
+us_state_maryland_1900,All ages,total,,,1188044,589275,598769
+us_state_maryland_1900,Under 5 years,band,0,4,134584,67553,67031
+us_state_maryland_1900,5 to 9 years,band,5,9,132745,66437,66308
+us_state_maryland_1900,10 to 14 years,band,10,14,126217,63526,62691
+us_state_maryland_1900,15 to 19 years,band,15,19,119964,58693,61271
+us_state_maryland_1900,20 to 24 years,band,20,24,114964,55583,59381
+us_state_maryland_1900,25 to 29 years,band,25,29,101573,49917,51656
+us_state_maryland_1900,30 to 34 years,band,30,34,84748,41848,42900
+us_state_maryland_1900,35 to 44 years,band,35,44,147799,73864,73935
+us_state_maryland_1900,45 to 54 years,band,45,54,104250,52361,51889
+us_state_maryland_1900,55 to 64 years,band,55,64,67123,33458,33665
+us_state_maryland_1900,65 years and over,band,65,,49983,23850,26133
+us_state_maryland_1900,Age unknown,band,,,4094,2185,1909
+us_state_massachusetts_1900,All ages,total,,,2805346,1367474,1437872
+us_state_massachusetts_1900,Under 5 years,band,0,4,282237,141773,140464
+us_state_massachusetts_1900,5 to 9 years,band,5,9,256061,128120,127941
+us_state_massachusetts_1900,10 to 14 years,band,10,14,229330,114122,115208
+us_state_massachusetts_1900,15 to 19 years,band,15,19,237867,115258,122609
+us_state_massachusetts_1900,20 to 24 years,band,20,24,279306,129363,149943
+us_state_massachusetts_1900,25 to 29 years,band,25,29,282486,136438,146048
+us_state_massachusetts_1900,30 to 34 years,band,30,34,243730,121794,121936
+us_state_massachusetts_1900,35 to 44 years,band,35,44,395948,197342,198606
+us_state_massachusetts_1900,45 to 54 years,band,45,54,270110,131916,138194
+us_state_massachusetts_1900,55 to 64 years,band,55,64,175636,81944,93692
+us_state_massachusetts_1900,65 years and over,band,65,,143107,62979,80128
+us_state_massachusetts_1900,Age unknown,band,,,9528,6425,3103
+us_state_michigan_1900,All ages,total,,,2420982,1248905,1172077
+us_state_michigan_1900,Under 5 years,band,0,4,260658,131917,128741
+us_state_michigan_1900,5 to 9 years,band,5,9,264059,133899,130160
+us_state_michigan_1900,10 to 14 years,band,10,14,247617,124919,122698
+us_state_michigan_1900,15 to 19 years,band,15,19,233141,116393,116748
+us_state_michigan_1900,20 to 24 years,band,20,24,222412,111649,110763
+us_state_michigan_1900,25 to 29 years,band,25,29,198186,101450,96736
+us_state_michigan_1900,30 to 34 years,band,30,34,178410,92666,85744
+us_state_michigan_1900,35 to 44 years,band,35,44,312790,166330,146460
+us_state_michigan_1900,45 to 54 years,band,45,54,226458,122212,104246
+us_state_michigan_1900,55 to 64 years,band,55,64,152565,80467,72098
+us_state_michigan_1900,65 years and over,band,65,,121160,64540,56620
+us_state_michigan_1900,Age unknown,band,,,3526,2463,1063
+us_state_minnesota_1900,All ages,total,,,1751394,932490,818904
+us_state_minnesota_1900,Under 5 years,band,0,4,228290,116076,112214
+us_state_minnesota_1900,5 to 9 years,band,5,9,217447,110013,107434
+us_state_minnesota_1900,10 to 14 years,band,10,14,192064,97205,94859
+us_state_minnesota_1900,15 to 19 years,band,15,19,170177,85510,84667
+us_state_minnesota_1900,20 to 24 years,band,20,24,160674,83257,77417
+us_state_minnesota_1900,25 to 29 years,band,25,29,148607,81464,67143
+us_state_minnesota_1900,30 to 34 years,band,30,34,131055,73859,57196
+us_state_minnesota_1900,35 to 44 years,band,35,44,221839,128282,93557
+us_state_minnesota_1900,45 to 54 years,band,45,54,129938,74025,55913
+us_state_minnesota_1900,55 to 64 years,band,55,64,80430,43886,36544
+us_state_minnesota_1900,65 years and over,band,65,,66771,35831,30940
+us_state_minnesota_1900,Age unknown,band,,,4102,3082,1020
+us_state_mississippi_1900,All ages,total,,,1551270,781451,769819
+us_state_mississippi_1900,Under 5 years,band,0,4,229451,115786,113665
+us_state_mississippi_1900,5 to 9 years,band,5,9,222928,112989,109939
+us_state_mississippi_1900,10 to 14 years,band,10,14,198065,100970,97095
+us_state_mississippi_1900,15 to 19 years,band,15,19,174841,85960,88881
+us_state_mississippi_1900,20 to 24 years,band,20,24,162315,78366,83949
+us_state_mississippi_1900,25 to 29 years,band,25,29,123324,61620,61704
+us_state_mississippi_1900,30 to 34 years,band,30,34,87679,44717,42962
+us_state_mississippi_1900,35 to 44 years,band,35,44,141560,72055,69505
+us_state_mississippi_1900,45 to 54 years,band,45,54,102692,52748,49944
+us_state_mississippi_1900,55 to 64 years,band,55,64,60147,31119,29028
+us_state_mississippi_1900,65 years and over,band,65,,45029,23550,21479
+us_state_mississippi_1900,Age unknown,band,,,3239,1571,1668
+us_state_missouri_1900,All ages,total,,,3106665,1595710,1510955
+us_state_missouri_1900,Under 5 years,band,0,4,364036,184578,179458
+us_state_missouri_1900,5 to 9 years,band,5,9,370764,187964,182800
+us_state_missouri_1900,10 to 14 years,band,10,14,347265,175600,171665
+us_state_missouri_1900,15 to 19 years,band,15,19,324379,160730,163649
+us_state_missouri_1900,20 to 24 years,band,20,24,299266,146875,152391
+us_state_missouri_1900,25 to 29 years,band,25,29,267346,135851,131495
+us_state_missouri_1900,30 to 34 years,band,30,34,228602,119260,109342
+us_state_missouri_1900,35 to 44 years,band,35,44,371049,198936,172113
+us_state_missouri_1900,45 to 54 years,band,45,54,251698,135232,116466
+us_state_missouri_1900,55 to 64 years,band,55,64,161172,85725,75447
+us_state_missouri_1900,65 years and over,band,65,,112682,59627,53055
+us_state_missouri_1900,Age unknown,band,,,8406,5332,3074
+us_state_montana_1900,All ages,total,,,243329,149842,93487
+us_state_montana_1900,Under 5 years,band,0,4,26979,13648,13331
+us_state_montana_1900,5 to 9 years,band,5,9,24754,12470,12284
+us_state_montana_1900,10 to 14 years,band,10,14,19397,9754,9643
+us_state_montana_1900,15 to 19 years,band,15,19,17360,9434,7926
+us_state_montana_1900,20 to 24 years,band,20,24,24009,14896,9113
+us_state_montana_1900,25 to 29 years,band,25,29,26945,17473,9472
+us_state_montana_1900,30 to 34 years,band,30,34,26466,17798,8668
+us_state_montana_1900,35 to 44 years,band,35,44,41689,29202,12487
+us_state_montana_1900,45 to 54 years,band,45,54,19998,14265,5733
+us_state_montana_1900,55 to 64 years,band,55,64,9642,6719,2923
+us_state_montana_1900,65 years and over,band,65,,4845,3102,1743
+us_state_montana_1900,Age unknown,band,,,1245,1081,164
+us_state_nebraska_1900,All ages,total,,,1066300,564592,501708
+us_state_nebraska_1900,Under 5 years,band,0,4,133747,67836,65911
+us_state_nebraska_1900,5 to 9 years,band,5,9,132798,67291,65507
+us_state_nebraska_1900,10 to 14 years,band,10,14,121743,61690,60053
+us_state_nebraska_1900,15 to 19 years,band,15,19,110277,55742,54535
+us_state_nebraska_1900,20 to 24 years,band,20,24,102253,53374,48879
+us_state_nebraska_1900,25 to 29 years,band,25,29,88154,47657,40497
+us_state_nebraska_1900,30 to 34 years,band,30,34,75115,40930,34185
+us_state_nebraska_1900,35 to 44 years,band,35,44,127914,71968,55946
+us_state_nebraska_1900,45 to 54 years,band,45,54,85217,47871,37346
+us_state_nebraska_1900,55 to 64 years,band,55,64,52666,29564,23102
+us_state_nebraska_1900,65 years and over,band,65,,34754,19509,15245
+us_state_nebraska_1900,Age unknown,band,,,1662,1160,502
+us_state_nevada_1900,All ages,total,,,42335,25603,16732
+us_state_nevada_1900,Under 5 years,band,0,4,3754,1928,1826
+us_state_nevada_1900,5 to 9 years,band,5,9,3622,1853,1769
+us_state_nevada_1900,10 to 14 years,band,10,14,3388,1737,1651
+us_state_nevada_1900,15 to 19 years,band,15,19,3479,1865,1614
+us_state_nevada_1900,20 to 24 years,band,20,24,4111,2432,1679
+us_state_nevada_1900,25 to 29 years,band,25,29,3782,2300,1482
+us_state_nevada_1900,30 to 34 years,band,30,34,3372,2130,1242
+us_state_nevada_1900,35 to 44 years,band,35,44,5948,3919,2029
+us_state_nevada_1900,45 to 54 years,band,45,54,4878,3344,1534
+us_state_nevada_1900,55 to 64 years,band,55,64,3283,2237,1046
+us_state_nevada_1900,65 years and over,band,65,,2268,1613,655
+us_state_nevada_1900,Age unknown,band,,,450,245,205
+us_state_new_hampshire_1900,All ages,total,,,411588,205379,206209
+us_state_new_hampshire_1900,Under 5 years,band,0,4,38231,19078,19153
+us_state_new_hampshire_1900,5 to 9 years,band,5,9,35464,17818,17646
+us_state_new_hampshire_1900,10 to 14 years,band,10,14,32897,16350,16547
+us_state_new_hampshire_1900,15 to 19 years,band,15,19,34720,17097,17623
+us_state_new_hampshire_1900,20 to 24 years,band,20,24,38148,19038,19110
+us_state_new_hampshire_1900,25 to 29 years,band,25,29,35844,18017,17827
+us_state_new_hampshire_1900,30 to 34 years,band,30,34,31790,16209,15581
+us_state_new_hampshire_1900,35 to 44 years,band,35,44,54991,27922,27069
+us_state_new_hampshire_1900,45 to 54 years,band,45,54,43661,22209,21452
+us_state_new_hampshire_1900,55 to 64 years,band,55,64,32370,15601,16769
+us_state_new_hampshire_1900,65 years and over,band,65,,32344,15303,17041
+us_state_new_hampshire_1900,Age unknown,band,,,1128,737,391
+us_state_new_jersey_1900,All ages,total,,,1883669,941760,941909
+us_state_new_jersey_1900,Under 5 years,band,0,4,206446,103966,102480
+us_state_new_jersey_1900,5 to 9 years,band,5,9,196725,98570,98155
+us_state_new_jersey_1900,10 to 14 years,band,10,14,174347,86789,87558
+us_state_new_jersey_1900,15 to 19 years,band,15,19,166746,80650,86096
+us_state_new_jersey_1900,20 to 24 years,band,20,24,178228,85518,92710
+us_state_new_jersey_1900,25 to 29 years,band,25,29,176408,87504,88904
+us_state_new_jersey_1900,30 to 34 years,band,30,34,158858,81535,77323
+us_state_new_jersey_1900,35 to 44 years,band,35,44,262011,136335,125676
+us_state_new_jersey_1900,45 to 54 years,band,45,54,171030,87097,83933
+us_state_new_jersey_1900,55 to 64 years,band,55,64,109474,54069,55405
+us_state_new_jersey_1900,65 years and over,band,65,,79617,37233,42384
+us_state_new_jersey_1900,Age unknown,band,,,3779,2494,1285
+us_new_mexico_1900,All ages,total,,,195310,104228,91082
+us_new_mexico_1900,Under 5 years,band,0,4,27227,13785,13442
+us_new_mexico_1900,5 to 9 years,band,5,9,26801,13624,13177
+us_new_mexico_1900,10 to 14 years,band,10,14,21849,11164,10685
+us_new_mexico_1900,15 to 19 years,band,15,19,17474,8808,8666
+us_new_mexico_1900,20 to 24 years,band,20,24,16588,8730,7858
+us_new_mexico_1900,25 to 29 years,band,25,29,16057,8448,7609
+us_new_mexico_1900,30 to 34 years,band,30,34,13627,7436,6191
+us_new_mexico_1900,35 to 44 years,band,35,44,24197,13702,10495
+us_new_mexico_1900,45 to 54 years,band,45,54,15793,9164,6629
+us_new_mexico_1900,55 to 64 years,band,55,64,9121,5412,3709
+us_new_mexico_1900,65 years and over,band,65,,5846,3516,2330
+us_new_mexico_1900,Age unknown,band,,,730,439,291
+us_state_new_york_1900,All ages,total,,,7268894,3614780,3654114
+us_state_new_york_1900,Under 5 years,band,0,4,753490,379124,374366
+us_state_new_york_1900,5 to 9 years,band,5,9,713722,357834,355888
+us_state_new_york_1900,10 to 14 years,band,10,14,643788,322541,321247
+us_state_new_york_1900,15 to 19 years,band,15,19,640682,307220,333462
+us_state_new_york_1900,20 to 24 years,band,20,24,702732,331260,371472
+us_state_new_york_1900,25 to 29 years,band,25,29,695069,342170,352899
+us_state_new_york_1900,30 to 34 years,band,30,34,617324,315586,301738
+us_state_new_york_1900,35 to 44 years,band,35,44,1023566,528961,494605
+us_state_new_york_1900,45 to 54 years,band,45,54,681267,344073,337194
+us_state_new_york_1900,55 to 64 years,band,55,64,438344,213832,224512
+us_state_new_york_1900,65 years and over,band,65,,347905,165042,182863
+us_state_new_york_1900,Age unknown,band,,,11005,7137,3868
+us_state_north_carolina_1900,All ages,total,,,1893810,938677,955133
+us_state_north_carolina_1900,Under 5 years,band,0,4,283712,143488,140224
+us_state_north_carolina_1900,5 to 9 years,band,5,9,263364,133458,129906
+us_state_north_carolina_1900,10 to 14 years,band,10,14,235325,119436,115889
+us_state_north_carolina_1900,15 to 19 years,band,15,19,213897,105565,108332
+us_state_north_carolina_1900,20 to 24 years,band,20,24,185951,87901,98050
+us_state_north_carolina_1900,25 to 29 years,band,25,29,135510,65226,70284
+us_state_north_carolina_1900,30 to 34 years,band,30,34,102329,49750,52579
+us_state_north_carolina_1900,35 to 44 years,band,35,44,173773,83422,90351
+us_state_north_carolina_1900,45 to 54 years,band,45,54,145130,75466,69664
+us_state_north_carolina_1900,55 to 64 years,band,55,64,83805,40891,42914
+us_state_north_carolina_1900,65 years and over,band,65,,66148,31511,34637
+us_state_north_carolina_1900,Age unknown,band,,,4866,2563,2303
+us_state_north_dakota_1900,All ages,total,,,319146,177493,141653
+us_state_north_dakota_1900,Under 5 years,band,0,4,47783,24238,23545
+us_state_north_dakota_1900,5 to 9 years,band,5,9,42202,21362,20840
+us_state_north_dakota_1900,10 to 14 years,band,10,14,35507,18193,17314
+us_state_north_dakota_1900,15 to 19 years,band,15,19,29228,15304,13924
+us_state_north_dakota_1900,20 to 24 years,band,20,24,30558,17580,12978
+us_state_north_dakota_1900,25 to 29 years,band,25,29,28047,16944,11103
+us_state_north_dakota_1900,30 to 34 years,band,30,34,24232,14738,9494
+us_state_north_dakota_1900,35 to 44 years,band,35,44,40758,24901,15857
+us_state_north_dakota_1900,45 to 54 years,band,45,54,22047,13460,8587
+us_state_north_dakota_1900,55 to 64 years,band,55,64,10686,6239,4447
+us_state_north_dakota_1900,65 years and over,band,65,,7357,3966,3391
+us_state_north_dakota_1900,Age unknown,band,,,741,568,173
+us_state_ohio_1900,All ages,total,,,4157545,2102655,2054890
+us_state_ohio_1900,Under 5 years,band,0,4,431810,218396,213414
+us_state_ohio_1900,5 to 9 years,band,5,9,435814,220664,215150
+us_state_ohio_1900,10 to 14 years,band,10,14,414847,209149,205698
+us_state_ohio_1900,15 to 19 years,band,15,19,407819,203825,203994
+us_state_ohio_1900,20 to 24 years,band,20,24,393377,194881,198496
+us_state_ohio_1900,25 to 29 years,band,25,29,359783,180188,179595
+us_state_ohio_1900,30 to 34 years,band,30,34,318870,162612,156258
+us_state_ohio_1900,35 to 44 years,band,35,44,537793,277201,260592
+us_state_ohio_1900,45 to 54 years,band,45,54,383345,197494,185851
+us_state_ohio_1900,55 to 64 years,band,55,64,257553,129361,128192
+us_state_ohio_1900,65 years and over,band,65,,209563,104082,105481
+us_state_ohio_1900,Age unknown,band,,,6971,4802,2169
+us_oklahoma_territory_1900,All ages,total,,,398331,214359,183972
+us_oklahoma_territory_1900,Under 5 years,band,0,4,58530,29630,28900
+us_oklahoma_territory_1900,5 to 9 years,band,5,9,52746,26819,25927
+us_oklahoma_territory_1900,10 to 14 years,band,10,14,47262,24246,23016
+us_oklahoma_territory_1900,15 to 19 years,band,15,19,40304,20716,19588
+us_oklahoma_territory_1900,20 to 24 years,band,20,24,35463,18504,16959
+us_oklahoma_territory_1900,25 to 29 years,band,25,29,32339,17357,14982
+us_oklahoma_territory_1900,30 to 34 years,band,30,34,28248,15940,12308
+us_oklahoma_territory_1900,35 to 44 years,band,35,44,44826,26075,18751
+us_oklahoma_territory_1900,45 to 54 years,band,45,54,30202,17898,12304
+us_oklahoma_territory_1900,55 to 64 years,band,55,64,17706,10663,7043
+us_oklahoma_territory_1900,65 years and over,band,65,,9168,5529,3639
+us_oklahoma_territory_1900,Age unknown,band,,,1537,982,555
+us_state_oregon_1900,All ages,total,,,413536,232985,180551
+us_state_oregon_1900,Under 5 years,band,0,4,41141,20870,20271
+us_state_oregon_1900,5 to 9 years,band,5,9,43596,22078,21518
+us_state_oregon_1900,10 to 14 years,band,10,14,41398,21119,20279
+us_state_oregon_1900,15 to 19 years,band,15,19,39806,20357,19449
+us_state_oregon_1900,20 to 24 years,band,20,24,37969,20066,17903
+us_state_oregon_1900,25 to 29 years,band,25,29,34880,19661,15219
+us_state_oregon_1900,30 to 34 years,band,30,34,33456,19678,13778
+us_state_oregon_1900,35 to 44 years,band,35,44,60589,38026,22563
+us_state_oregon_1900,45 to 54 years,band,45,54,39929,25510,14419
+us_state_oregon_1900,55 to 64 years,band,55,64,23365,14457,8908
+us_state_oregon_1900,65 years and over,band,65,,16475,10397,6078
+us_state_oregon_1900,Age unknown,band,,,932,766,166
+us_state_pennsylvania_1900,All ages,total,,,6302115,3204541,3097574
+us_state_pennsylvania_1900,Under 5 years,band,0,4,730131,367816,362315
+us_state_pennsylvania_1900,5 to 9 years,band,5,9,686605,345718,340887
+us_state_pennsylvania_1900,10 to 14 years,band,10,14,624241,314966,309275
+us_state_pennsylvania_1900,15 to 19 years,band,15,19,599083,299530,299553
+us_state_pennsylvania_1900,20 to 24 years,band,20,24,604096,300469,303627
+us_state_pennsylvania_1900,25 to 29 years,band,25,29,574963,295786,279177
+us_state_pennsylvania_1900,30 to 34 years,band,30,34,499363,262310,237053
+us_state_pennsylvania_1900,35 to 44 years,band,35,44,813407,428888,384519
+us_state_pennsylvania_1900,45 to 54 years,band,45,54,549532,284700,264832
+us_state_pennsylvania_1900,55 to 64 years,band,55,64,346930,172429,174501
+us_state_pennsylvania_1900,65 years and over,band,65,,261817,124135,137682
+us_state_pennsylvania_1900,Age unknown,band,,,11947,7794,4153
+us_state_rhode_island_1900,All ages,total,,,428556,210516,218040
+us_state_rhode_island_1900,Under 5 years,band,0,4,43452,21774,21678
+us_state_rhode_island_1900,5 to 9 years,band,5,9,40280,20038,20242
+us_state_rhode_island_1900,10 to 14 years,band,10,14,36739,18212,18527
+us_state_rhode_island_1900,15 to 19 years,band,15,19,39292,19505,19787
+us_state_rhode_island_1900,20 to 24 years,band,20,24,42818,20419,22399
+us_state_rhode_island_1900,25 to 29 years,band,25,29,41712,20261,21451
+us_state_rhode_island_1900,30 to 34 years,band,30,34,36007,18127,17880
+us_state_rhode_island_1900,35 to 44 years,band,35,44,59100,29341,29759
+us_state_rhode_island_1900,45 to 54 years,band,45,54,41847,20728,21119
+us_state_rhode_island_1900,55 to 64 years,band,55,64,26597,12614,13983
+us_state_rhode_island_1900,65 years and over,band,65,,19798,8893,10905
+us_state_rhode_island_1900,Age unknown,band,,,914,604,310
+us_state_south_carolina_1900,All ages,total,,,1340316,664895,675421
+us_state_south_carolina_1900,Under 5 years,band,0,4,203651,102024,101627
+us_state_south_carolina_1900,5 to 9 years,band,5,9,194263,97849,96414
+us_state_south_carolina_1900,10 to 14 years,band,10,14,174363,88697,85666
+us_state_south_carolina_1900,15 to 19 years,band,15,19,157420,76992,80428
+us_state_south_carolina_1900,20 to 24 years,band,20,24,138747,66311,72436
+us_state_south_carolina_1900,25 to 29 years,band,25,29,96614,46137,50477
+us_state_south_carolina_1900,30 to 34 years,band,30,34,71455,35046,36409
+us_state_south_carolina_1900,35 to 44 years,band,35,44,119997,59365,60632
+us_state_south_carolina_1900,45 to 54 years,band,45,54,88427,44639,43788
+us_state_south_carolina_1900,55 to 64 years,band,55,64,53952,27491,26461
+us_state_south_carolina_1900,65 years and over,band,65,,39623,19388,20235
+us_state_south_carolina_1900,Age unknown,band,,,1804,956,848
+us_state_south_dakota_1900,All ages,total,,,401570,216164,185406
+us_state_south_dakota_1900,Under 5 years,band,0,4,55217,28072,27145
+us_state_south_dakota_1900,5 to 9 years,band,5,9,52049,26346,25703
+us_state_south_dakota_1900,10 to 14 years,band,10,14,47299,24396,22903
+us_state_south_dakota_1900,15 to 19 years,band,15,19,40361,20718,19643
+us_state_south_dakota_1900,20 to 24 years,band,20,24,35980,19555,16425
+us_state_south_dakota_1900,25 to 29 years,band,25,29,30764,17049,13715
+us_state_south_dakota_1900,30 to 34 years,band,30,34,27003,15073,11930
+us_state_south_dakota_1900,35 to 44 years,band,35,44,48458,27851,20607
+us_state_south_dakota_1900,45 to 54 years,band,45,54,32101,18743,13358
+us_state_south_dakota_1900,55 to 64 years,band,55,64,18765,10724,8041
+us_state_south_dakota_1900,65 years and over,band,65,,12836,7084,5752
+us_state_south_dakota_1900,Age unknown,band,,,737,553,184
+us_state_tennessee_1900,All ages,total,,,2020616,1021224,999392
+us_state_tennessee_1900,Under 5 years,band,0,4,274923,139915,135008
+us_state_tennessee_1900,5 to 9 years,band,5,9,264745,134516,130229
+us_state_tennessee_1900,10 to 14 years,band,10,14,243773,124492,119281
+us_state_tennessee_1900,15 to 19 years,band,15,19,226580,113167,113413
+us_state_tennessee_1900,20 to 24 years,band,20,24,204405,99544,104861
+us_state_tennessee_1900,25 to 29 years,band,25,29,161898,80157,81741
+us_state_tennessee_1900,30 to 34 years,band,30,34,124690,62834,61856
+us_state_tennessee_1900,35 to 44 years,band,35,44,196897,98388,98509
+us_state_tennessee_1900,45 to 54 years,band,45,54,155647,82273,73374
+us_state_tennessee_1900,55 to 64 years,band,55,64,92845,48019,44826
+us_state_tennessee_1900,65 years and over,band,65,,66441,33564,32877
+us_state_tennessee_1900,Age unknown,band,,,7772,4355,3417
+us_state_texas_1900,All ages,total,,,3048710,1578900,1469810
+us_state_texas_1900,Under 5 years,band,0,4,452442,229831,222611
+us_state_texas_1900,5 to 9 years,band,5,9,432355,219170,213185
+us_state_texas_1900,10 to 14 years,band,10,14,383177,194483,188694
+us_state_texas_1900,15 to 19 years,band,15,19,334047,166042,168005
+us_state_texas_1900,20 to 24 years,band,20,24,304747,152315,152432
+us_state_texas_1900,25 to 29 years,band,25,29,244602,127360,117242
+us_state_texas_1900,30 to 34 years,band,30,34,183656,97984,85672
+us_state_texas_1900,35 to 44 years,band,35,44,294056,157610,136446
+us_state_texas_1900,45 to 54 years,band,45,54,220803,126550,94253
+us_state_texas_1900,55 to 64 years,band,55,64,112662,61049,51613
+us_state_texas_1900,65 years and over,band,65,,74037,39654,34383
+us_state_texas_1900,Age unknown,band,,,12126,6852,5274
+us_state_utah_1900,All ages,total,,,276749,141687,135062
+us_state_utah_1900,Under 5 years,band,0,4,41852,21377,20475
+us_state_utah_1900,5 to 9 years,band,5,9,38128,19311,18817
+us_state_utah_1900,10 to 14 years,band,10,14,33370,16639,16731
+us_state_utah_1900,15 to 19 years,band,15,19,29640,14566,15074
+us_state_utah_1900,20 to 24 years,band,20,24,24634,12090,12544
+us_state_utah_1900,25 to 29 years,band,25,29,20444,10545,9899
+us_state_utah_1900,30 to 34 years,band,30,34,18219,9665,8554
+us_state_utah_1900,35 to 44 years,band,35,44,29803,16016,13787
+us_state_utah_1900,45 to 54 years,band,45,54,18249,10015,8234
+us_state_utah_1900,55 to 64 years,band,55,64,11523,5900,5623
+us_state_utah_1900,65 years and over,band,65,,10055,4982,5073
+us_state_utah_1900,Age unknown,band,,,832,581,251
+us_state_vermont_1900,All ages,total,,,343641,175138,168503
+us_state_vermont_1900,Under 5 years,band,0,4,32852,16536,16316
+us_state_vermont_1900,5 to 9 years,band,5,9,31846,16074,15772
+us_state_vermont_1900,10 to 14 years,band,10,14,30179,15331,14848
+us_state_vermont_1900,15 to 19 years,band,15,19,30466,15735,14731
+us_state_vermont_1900,20 to 24 years,band,20,24,29461,14962,14499
+us_state_vermont_1900,25 to 29 years,band,25,29,27708,14188,13520
+us_state_vermont_1900,30 to 34 years,band,30,34,25077,12961,12116
+us_state_vermont_1900,35 to 44 years,band,35,44,43705,22468,21237
+us_state_vermont_1900,45 to 54 years,band,45,54,35990,18568,17422
+us_state_vermont_1900,55 to 64 years,band,55,64,27723,13929,13794
+us_state_vermont_1900,65 years and over,band,65,,27771,13765,14006
+us_state_vermont_1900,Age unknown,band,,,863,621,242
+us_state_virginia_1900,All ages,total,,,1854184,925897,928287
+us_state_virginia_1900,Under 5 years,band,0,4,249055,125147,123908
+us_state_virginia_1900,5 to 9 years,band,5,9,240628,121310,119318
+us_state_virginia_1900,10 to 14 years,band,10,14,220837,111517,109320
+us_state_virginia_1900,15 to 19 years,band,15,19,203502,101156,102346
+us_state_virginia_1900,20 to 24 years,band,20,24,182059,87803,94256
+us_state_virginia_1900,25 to 29 years,band,25,29,140300,68373,71927
+us_state_virginia_1900,30 to 34 years,band,30,34,111542,55117,56425
+us_state_virginia_1900,35 to 44 years,band,35,44,191703,95868,95835
+us_state_virginia_1900,45 to 54 years,band,45,54,146690,75030,71660
+us_state_virginia_1900,55 to 64 years,band,55,64,91134,45719,45415
+us_state_virginia_1900,65 years and over,band,65,,72846,36674,36172
+us_state_virginia_1900,Age unknown,band,,,3888,2183,1705
+us_state_washington_1900,All ages,total,,,518103,304178,213925
+us_state_washington_1900,Under 5 years,band,0,4,53243,27095,26148
+us_state_washington_1900,5 to 9 years,band,5,9,56423,28801,27622
+us_state_washington_1900,10 to 14 years,band,10,14,48233,24175,24058
+us_state_washington_1900,15 to 19 years,band,15,19,44104,23203,20901
+us_state_washington_1900,20 to 24 years,band,20,24,46403,27082,19321
+us_state_washington_1900,25 to 29 years,band,25,29,46093,28332,17761
+us_state_washington_1900,30 to 34 years,band,30,34,47118,29449,17669
+us_state_washington_1900,35 to 44 years,band,35,44,84231,55103,29128
+us_state_washington_1900,45 to 54 years,band,45,54,46781,31081,15700
+us_state_washington_1900,55 to 64 years,band,55,64,24534,15507,9027
+us_state_washington_1900,65 years and over,band,65,,14681,9025,5656
+us_state_washington_1900,Age unknown,band,,,6259,5325,934
+us_state_west_virginia_1900,All ages,total,,,958800,499242,459558
+us_state_west_virginia_1900,Under 5 years,band,0,4,135465,69423,66042
+us_state_west_virginia_1900,5 to 9 years,band,5,9,121689,61846,59843
+us_state_west_virginia_1900,10 to 14 years,band,10,14,110729,56708,54021
+us_state_west_virginia_1900,15 to 19 years,band,15,19,103994,53073,50921
+us_state_west_virginia_1900,20 to 24 years,band,20,24,96672,50232,46440
+us_state_west_virginia_1900,25 to 29 years,band,25,29,79904,42419,37485
+us_state_west_virginia_1900,30 to 34 years,band,30,34,64043,34172,29871
+us_state_west_virginia_1900,35 to 44 years,band,35,44,98705,52847,45858
+us_state_west_virginia_1900,45 to 54 years,band,45,54,69273,37106,32167
+us_state_west_virginia_1900,55 to 64 years,band,55,64,42303,22083,20220
+us_state_west_virginia_1900,65 years and over,band,65,,32236,16670,15566
+us_state_west_virginia_1900,Age unknown,band,,,3787,2663,1124
+us_state_wisconsin_1900,All ages,total,,,2069042,1067562,1001480
+us_state_wisconsin_1900,Under 5 years,band,0,4,256734,129974,126760
+us_state_wisconsin_1900,5 to 9 years,band,5,9,251152,126465,124687
+us_state_wisconsin_1900,10 to 14 years,band,10,14,232112,116963,115149
+us_state_wisconsin_1900,15 to 19 years,band,15,19,208938,104519,104419
+us_state_wisconsin_1900,20 to 24 years,band,20,24,182253,91204,91049
+us_state_wisconsin_1900,25 to 29 years,band,25,29,159833,82594,77239
+us_state_wisconsin_1900,30 to 34 years,band,30,34,144803,76358,68445
+us_state_wisconsin_1900,35 to 44 years,band,35,44,253424,136548,116876
+us_state_wisconsin_1900,45 to 54 years,band,45,54,165353,89539,75814
+us_state_wisconsin_1900,55 to 64 years,band,55,64,108492,56920,51572
+us_state_wisconsin_1900,65 years and over,band,65,,103192,54644,48548
+us_state_wisconsin_1900,Age unknown,band,,,2756,1834,922
+us_state_wyoming_1900,All ages,total,,,92531,58184,34347
+us_state_wyoming_1900,Under 5 years,band,0,4,10520,5351,5169
+us_state_wyoming_1900,5 to 9 years,band,5,9,9949,5102,4847
+us_state_wyoming_1900,10 to 14 years,band,10,14,7843,4103,3740
+us_state_wyoming_1900,15 to 19 years,band,15,19,7773,4500,3273
+us_state_wyoming_1900,20 to 24 years,band,20,24,10327,6894,3433
+us_state_wyoming_1900,25 to 29 years,band,25,29,10571,7373,3198
+us_state_wyoming_1900,30 to 34 years,band,30,34,8994,6286,2708
+us_state_wyoming_1900,35 to 44 years,band,35,44,14431,10300,4131
+us_state_wyoming_1900,45 to 54 years,band,45,54,7268,5103,2165
+us_state_wyoming_1900,55 to 64 years,band,55,64,3221,2137,1084
+us_state_wyoming_1900,65 years and over,band,65,,1407,865,542
+us_state_wyoming_1900,Age unknown,band,,,227,170,57

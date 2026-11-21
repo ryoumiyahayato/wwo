@@ -77,6 +77,7 @@ impl SourceCell {
     fn evidence(&self) -> CohortEvidence<'_> {
         CohortEvidence {
             opening_unit: &self.group.unit_id,
+            source_id: &self.group.source_id,
             observed_unit: &self.group.observed_unit_id,
             observed_date: &self.group.observed_date,
             locator: &self.group.locator,
@@ -91,10 +92,8 @@ impl SourceCell {
 }
 
 impl OpeningDemography {
-    pub(super) fn load(opening: &super::HistoricalOpening) -> io::Result<Self> {
-        let manifest: Manifest = serde_json::from_slice(include_bytes!(
-            "../../../../data/historical_population_1900/opening_structure.json"
-        ))?;
+    pub(super) fn load(opening: &super::HistoricalOpening, bytes: &[u8]) -> io::Result<Self> {
+        let manifest: Manifest = serde_json::from_slice(bytes)?;
         if manifest.version != 1 {
             return Err(invalid("unsupported historical opening demography"));
         }
@@ -149,6 +148,7 @@ fn validate_bands(group: &SourceGroup) -> io::Result<()> {
 #[derive(Serialize)]
 pub struct CohortEvidence<'a> {
     pub opening_unit: &'a str,
+    pub source_id: &'a str,
     pub observed_unit: &'a str,
     pub observed_date: &'a str,
     pub locator: &'a str,
