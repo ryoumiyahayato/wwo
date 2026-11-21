@@ -1674,7 +1674,7 @@ impl Host {
             self.enter_selected_battle();return;
         }
         if matches!(&key, Key::Character(value) if value == "]")
-            && self.hud.page == HudPage::Map && self.hud.menu == HudMenu::None && self.country.is_none()
+            && self.debug && self.hud.page == HudPage::Map && self.hud.menu == HudMenu::None && self.country.is_none()
             && self.transport_scene.as_mut().is_some_and(|scene| scene.next_corridors(self.cursor)) {
             self.dirty = true;
             return;
@@ -1918,8 +1918,8 @@ impl Host {
         }).chain(hits).collect();
         let vehicle_markers;
         let transport=if let (Some(world),Some(scene))=(transport_world,self.transport_scene.as_mut()) {
-            if !show_transport_detail && self.hud.page==HudPage::Map && self.hud.menu==HudMenu::None
-                && self.country.is_none() && self.search.is_none() {
+            if self.debug && !show_transport_detail && self.hud.page==HudPage::Map && self.hud.menu==HudMenu::None
+                && !self.hud.market_map && !self.hud.transport_pick && self.country.is_none() && self.search.is_none() {
                 scene.caption(&self.skin,self.cursor,self.size,world,&mut meshes);
             }
             vehicle_markers=scene.draw_vehicles(&self.camera,self.size,world,
