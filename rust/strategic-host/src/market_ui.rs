@@ -176,7 +176,7 @@ impl Display<'_> {
         let top=y+145.;let floor=y+h-49.;
         let first=self.hud.market_offset;
         if let Some(query)=self.hud.market_search.as_deref() {
-            self.skin.text(t,&format!("搜索地点或国家  {query}▏"),1,[bx,top],bw-82.,IVORY);
+            self.skin.text(t,&format!("搜索地点或国家  {query}_"),1,[bx,top],bw-82.,IVORY);
             self.row(m,t,hits,[bx+bw-76.,top,76.,27.],"地图",command("map_locations",0),false);
             let start=top+39.;
             let count=v.matching_sites(query).count();
@@ -185,7 +185,7 @@ impl Display<'_> {
                 let yy=start+row as f32*38.;
                 let label=if site.name==site.country {site.name.clone()} else {format!("{} · {}",site.name,site.country)};
                 self.row(m,t,hits,[bx,yy,bw*0.51,31.],&label,command("location",index),false);
-                self.skin.text(t,&location_prices(site),0,[bx+bw*0.54,yy+6.],bw*0.46,IVORY);
+                self.skin.text(t,&location_prices(site,&v.good_unit),0,[bx+bw*0.54,yy+6.],bw*0.46,IVORY);
             }
             return;
         }
@@ -272,11 +272,11 @@ impl Display<'_> {
         let site=v.sites.iter().enumerate().find(|(_,r)|v.selected_site.as_deref()==Some(r.place.as_str()));
         if let Some((index,site))=site {
             self.skin.text(t,&format!("{} · {}",site.country,site.name),0,[x,y+85.],w-125.,IVORY);
-            self.skin.text(t,&location_prices(site),0,[x,y+111.],w,IVORY);
+            self.skin.text(t,&location_prices(site,&v.good_unit),0,[x,y+111.],w,IVORY);
             if site.pending_order==0 {
-                self.skin.text(t,&format!("库存 {} {}  ·  日产 {}  ·  日需 {}",
-                    format_quantity(site.stock,1000),v.good_unit,compact_amount(site.production),compact_amount(site.demand)),
-                    0,[x,y+135.],w,MUTED);
+                self.skin.text(t,&format!("库存 {} {}",format_quantity(site.stock,1000),v.good_unit),0,[x,y+135.],w,MUTED);
+                self.skin.text(t,&format!("日产 {} {} · 日需 {} {}",
+                    compact_amount(site.production),v.good_unit,compact_amount(site.demand),v.good_unit),0,[x,y+158.],w,MUTED);
             }
             if site.carrier && self.session.is_some_and(|s| s.place != site.place) {
                 self.row(m,t,hits,[x+w-120.,y+81.,120.,28.],"查询运输",command("carrier",index),false);
@@ -335,7 +335,7 @@ impl Display<'_> {
         let ready=q.accepted&&self.hud.quantity.is_none()&&self.hud.purchase_token!=Some(q.token);
         self.row(m,t,hits,[left,y+236.,130.,31.],"购买",if ready{command("buy",0)}else{None},ready);
         if self.session.is_some_and(|s| s.transport.is_some()) {
-            self.row(m,t,hits,[left,y+320.,130.,30.],"采购货批",if ready{command("freight_buy",0)}else{None},false);
+            self.row(m,t,hits,[left,y+342.,130.,30.],"采购货批",if ready{command("freight_buy",0)}else{None},false);
         }
         if let Some(amount)=q.amount {
             self.skin.text(t,&format!("应付 {amount} {}",q.currency_name),1,[left+150.,y+238.],width-150.,IVORY);
@@ -352,12 +352,12 @@ fn compact_amount(amount:f64)->String {
     format!("{amount:.2}").trim_end_matches('0').trim_end_matches('.').to_owned()
 }
 
-fn location_prices(site:&MarketSite)->String {
+fn location_prices(site:&MarketSite,unit:&str)->String {
     if site.pending_order > 0 { return format!("企业待交 {} 千克",site.pending_order); }
     match (site.ask,site.bid) {
-        (Some(ask),Some(bid))=>format!("卖 {ask} · 收 {bid} 生丁 / 单位"),
-        (Some(ask),None)=>format!("卖 {ask} 生丁 / 单位"),
-        (None,Some(bid))=>format!("收 {bid} 生丁 / 单位"),
+        (Some(ask),Some(bid))=>format!("卖 {ask} · 收 {bid} 生丁 / {unit}"),
+        (Some(ask),None)=>format!("卖 {ask} 生丁 / {unit}"),
+        (None,Some(bid))=>format!("收 {bid} 生丁 / {unit}"),
         _=>String::new(),
     }
 }
