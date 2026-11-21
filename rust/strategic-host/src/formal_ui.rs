@@ -585,7 +585,7 @@ impl Display<'_> {
                 self.row(panels,text,hits,[cx-radius-152.,h-40.,128.,28.],label,Some(Action::Hud(command)),active);
             }
         }
-        if let Some(s)=self.session.filter(|_|self.debug.is_some()&&self.hud.page==Page::Map&&self.hud.menu==Menu::None){
+        if let Some(s)=self.session.filter(|_|self.written_world.is_none()&&self.debug.is_some()&&self.hud.page==Page::Map&&self.hud.menu==Menu::None){
             let caption=match s.training.as_str(){
                 "paused"=>"恢复隔离训练（R68）",
                 "active"|"preparing"=>"训练在 R68 窗口",

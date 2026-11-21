@@ -27,6 +27,7 @@ pub struct View {
     pub natural_lod:[[f32;4];2],
     pub close_sample:[f32;3],
     water_clock:u32,
+    pub military_cell:[f32;4],
 }
 impl View {
     pub fn new(camera:&Camera,size:[u32;2])->Self {
@@ -130,6 +131,7 @@ pub struct Renderer {
     models: ModelLayer,
     transport_network: Option<(u64, MeshBuffers)>,
     transport_vehicles: Option<MeshBuffers>,
+    battle: Option<crate::battle_render::Scene>,
     landscape: Option<Landscape>,
     landscape_pipeline: Option<(wgpu::TextureFormat,wgpu::BindGroupLayout,wgpu::ShaderModule)>,
     surface: GroundSurface,
@@ -164,6 +166,12 @@ pub struct Renderer {
     screen:wgpu::BindGroup,
     screen_size:wgpu::Buffer,
     meshes:[MeshBuffers;26],
+}
+
+pub struct BattleFrame<'a> {
+    pub view: &'a crate::battle_view::Camera,
+    pub state: &'a wwo_map_lab::land_battle::LandBattle,
+    pub terrain: &'a wwo_map_lab::battlefield_terrain::BattlefieldTerrain,
 }
 
 struct GroundSurface {
@@ -783,7 +791,26 @@ impl Renderer {
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
                 globe,terrain,rivers,water_pages,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
                 solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models,
-                landscape:None,landscape_pipeline,surface,transport_network:None,transport_vehicles:None})
+                battle:None,landscape:None,landscape_pipeline,surface,transport_network:None,transport_vehicles:None})
+    }
+
+    pub fn prepare_battle(&mut self, terrain: &wwo_map_lab::battlefield_terrain::BattlefieldTerrain, root: &Path) -> io::Result<()> {
+        if self.battle.is_none() {
+            let format = match &self.target {
+                RenderTarget::Window(_, config) => config.format,
+                RenderTarget::Offscreen(texture) => texture.format(),
+            };
+            self.battle = Some(crate::battle_render::Scene::new(&self.device, &self.queue, format, terrain, root)?);
+        }
+        Ok(())
+    }
+
+    pub fn battle_uses_original_model(&self) -> bool {
+        self.battle.as_ref().is_some_and(crate::battle_render::Scene::uses_original_model)
+    }
+
+    pub fn clear_battle(&mut self) {
+        self.battle = None;
     }
 
     pub fn update_close_terrain(&mut self,camera:&Camera,size:[u32;2],enabled:bool,now:Instant)->[f32;3] {
@@ -1019,7 +1046,8 @@ impl Renderer {
     pub fn render(&mut self, view:&View,base:&Page,pages:&[(&Page,&Tile,[u32;4],f32)],
                   meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel],
                   transport:Option<TransportOverlay<'_>>,
-                  (camera,landscape_enabled,now):(&Camera,bool,Instant))->io::Result<Option<io::Result<()>>> {
+                  (camera,landscape_enabled,now):(&Camera,bool,Instant),
+                  battle:Option<BattleFrame<'_>>)->io::Result<Option<io::Result<()>>> {
         let frame=if let RenderTarget::Window(surface,config)=&self.target {
             match surface.get_current_texture() {
                 Ok(frame)=>Some(frame),
@@ -1034,21 +1062,23 @@ impl Renderer {
             RenderTarget::Window(_,config)=>[config.width,config.height],
             RenderTarget::Offscreen(texture)=>[texture.width(),texture.height()],
         };
-        self.prepare_landscape(camera,size,landscape_enabled,now);
-        self.prepare_transport(transport.filter(|_|show_map));
+        if battle.is_none() {self.prepare_landscape(camera,size,landscape_enabled,now);}
+        self.prepare_transport(transport.filter(|_|show_map && battle.is_none()));
         let (texture,copy_src)=match &self.target {
             RenderTarget::Window(_,config)=>(&frame.as_ref().unwrap().texture,config.usage.contains(wgpu::TextureUsages::COPY_SRC)),
             RenderTarget::Offscreen(texture)=>(texture,true),
         };
         let [w,h]=[texture.width(),texture.height()];
         let format=texture.format();
-        self.models.prepare(&self.device,&self.queue,[w,h],models);
-        let mut frame_view=*view;
-        frame_view.projection_axes[0][3]=seconds;
-        if let Some(water)=&self.water_pages {
-            frame_view.water_clock=water.shader_clock(now);
+        if battle.is_none() {
+            self.models.prepare(&self.device,&self.queue,[w,h],models);
+            let mut frame_view=*view;
+            frame_view.projection_axes[0][3]=seconds;
+            if let Some(water)=&self.water_pages {
+                frame_view.water_clock=water.shader_clock(now);
+            }
+            self.queue.write_buffer(&self.view,0,bytemuck::bytes_of(&frame_view));
         }
-        self.queue.write_buffer(&self.view,0,bytemuck::bytes_of(&frame_view));
         self.queue.write_buffer(&self.screen_size,0,bytemuck::cast_slice(&[w as f32,h as f32,0.,0.,1.,seconds,0.,0.]));
         for (page,tile,_,opacity) in pages {
             let edges=if tile.city {
@@ -1086,7 +1116,10 @@ impl Renderer {
                 self.surface.project_water(&self.device,&mut encoder,[w,h],view,water.revision());
             }
         }
-        {
+        if let Some(battle) = battle {
+            let scene = self.battle.as_mut().ok_or_else(|| io::Error::other("battle renderer not initialized"))?;
+            scene.draw(&self.device, &self.queue, &mut encoder, &image, size, battle.view, battle.state, battle.terrain);
+        } else {
             let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label:Some("WWO map"),color_attachments:&[Some(wgpu::RenderPassColorAttachment{
                     view:&image,resolve_target:None,ops:wgpu::Operations {load:wgpu::LoadOp::Clear(wgpu::Color::BLACK),store:wgpu::StoreOp::Store}
@@ -1110,25 +1143,26 @@ impl Renderer {
                     pass.draw(0..3,0..1);
                 }
             }
+            drop(pass);
+            if let Some(layer)=&mut self.landscape {
+                layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group,&self.surface.group],[w,h]);
+            }
+            if self.transport_network.is_some()||self.transport_vehicles.is_some() {
+                let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                    label:Some("WWO transport map"),
+                    color_attachments:&[Some(wgpu::RenderPassColorAttachment {
+                        view:&image,resolve_target:None,
+                        ops:wgpu::Operations{load:wgpu::LoadOp::Load,store:wgpu::StoreOp::Store},
+                    })],
+                    depth_stencil_attachment:None,occlusion_query_set:None,timestamp_writes:None,
+                });
+                pass.set_pipeline(&self.solid);
+                pass.set_bind_group(0,&self.screen,&[]);
+                if let Some((_,network))=&self.transport_network {network.draw(&mut pass);}
+                if let Some(vehicles)=&self.transport_vehicles {vehicles.draw(&mut pass);}
+            }
+            self.models.draw(&mut encoder, &image);
         }
-        if let Some(layer)=&mut self.landscape {
-            layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group,&self.surface.group],[w,h]);
-        }
-        if self.transport_network.is_some()||self.transport_vehicles.is_some() {
-            let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label:Some("WWO transport map"),
-                color_attachments:&[Some(wgpu::RenderPassColorAttachment {
-                    view:&image,resolve_target:None,
-                    ops:wgpu::Operations{load:wgpu::LoadOp::Load,store:wgpu::StoreOp::Store},
-                })],
-                depth_stencil_attachment:None,occlusion_query_set:None,timestamp_writes:None,
-            });
-            pass.set_pipeline(&self.solid);
-            pass.set_bind_group(0,&self.screen,&[]);
-            if let Some((_,network))=&self.transport_network {network.draw(&mut pass);}
-            if let Some(vehicles)=&self.transport_vehicles {vehicles.draw(&mut pass);}
-        }
-        self.models.draw(&mut encoder, &image);
         {
             let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label:Some("WWO HUD"),color_attachments:&[Some(wgpu::RenderPassColorAttachment{
