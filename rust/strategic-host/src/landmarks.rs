@@ -3,6 +3,7 @@ use bytemuck::{Pod, Zeroable};
 use glam::{Mat3, Mat4, Vec3};
 use serde::Deserialize;
 use std::{collections::BTreeMap, io};
+use wwo_map_lab::transport::models::{self as transport_models, ModelLod, TransportModel};
 
 const R40_MODELS: &[u8] = include_bytes!("../../../assets/settlements/urban_landscape_r40.glb");
 const R40_MODULES: &[&str] = &[
@@ -10,8 +11,10 @@ const R40_MODULES: &[&str] = &[
     "quay_platform", "sawtooth_workshop", "warehouse",
 ];
 
+pub(crate) const PARIS_SHARD: &[u8] = include_bytes!("../../../data/local/paris_northern_france_1900.json");
+
 const SHARDS: &[&[u8]] = &[
-    include_bytes!("../../../data/local/paris_northern_france_1900.json"),
+    PARIS_SHARD,
     include_bytes!("../../../data/local/london_westminster_1900.json"),
     include_bytes!("../../../data/local/berlin_transport_1900.json"),
     include_bytes!("../../../data/local/giza_pyramids_1900.json"),
@@ -129,26 +132,41 @@ pub struct Landmarks {
     city_bounds: Vec<[ModelBounds; 2]>,
 }
 
-type ModelBounds = ([f64; 3], [f64; 3]);
+pub(crate) type ModelBounds = ([f64; 3], [f64; 3]);
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum Lod { Single, Far, Near }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-enum ModelAsset { Landmark(usize), City(usize) }
+enum ModelAsset { Landmark(usize), City(usize), Transport(TransportModel, ModelLod) }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct ModelKey { asset: ModelAsset, lod: Lod }
 
 impl ModelKey {
+    pub fn transport(model: TransportModel, lod: ModelLod) -> Self {
+        Self { asset: ModelAsset::Transport(model, lod), lod: match lod {
+            ModelLod::Near => Lod::Near,
+            ModelLod::Far => Lod::Far,
+        }}
+    }
+
     pub fn model(self) -> &'static str {
         match self.asset {
             ModelAsset::Landmark(asset) => ASSETS[asset].name,
             ModelAsset::City(module) => R40_MODULES[module],
+            ModelAsset::Transport(model, _) => model.id(),
         }
     }
 
     pub fn is_city(self) -> bool { matches!(self.asset, ModelAsset::City(_)) }
+    pub fn is_transport(self) -> bool { matches!(self.asset, ModelAsset::Transport(..)) }
+    pub fn clips_at_waterline(self) -> bool {
+        matches!(self.asset, ModelAsset::Transport(
+            TransportModel::PassengerSteamship | TransportModel::CargoSteamship
+            | TransportModel::CoastalPaddleSteamer, _
+        ))
+    }
 
     pub fn lod(self) -> &'static str {
         match self.lod { Lod::Single => "Single", Lod::Far => "Far", Lod::Near => "Near" }
@@ -157,7 +175,7 @@ impl ModelKey {
 
 pub struct VisibleModel {
     pub key: ModelKey,
-    pub place: usize,
+    pub place: Option<usize>,
     pub screen_bounds: [f32; 4],
     pub clip_from_model: [[f32; 4]; 4],
     pub lod_range: [f32; 2],
@@ -251,7 +269,7 @@ impl Landmarks {
                 let Some(mut high)= (ModelPose {
                     key:key(Lod::Near),anchor:model.anchor,heading:model.heading,
                     datum:bounds.0[1]*model.scale[1],dimensions:model.scale,bounds,
-                }).project(place,camera,pitch,size) else {continue;};
+                }).project(Some(place),camera,pitch,size) else {continue;};
                 let low=VisibleModel{key:key(Lod::Far),lod_range:[crossover,opacity],
                     alternate:Some((high.key,opacity)),..high};
                 high.lod_range=[0.,crossover];
@@ -340,21 +358,21 @@ impl Landmark {
             anchor: self.anchor(), heading: self.model_heading_degrees, datum: self.model_ground_datum_m,
             dimensions: [1.; 3],
             bounds: ([-width * 0.5, 0., -depth * 0.5], [width * 0.5, self.model_height_m, depth * 0.5]),
-        }.project(place, camera, pitch, size)
+        }.project(Some(place), camera, pitch, size)
     }
 }
 
-struct ModelPose {
-    key: ModelKey,
-    anchor: [f64; 2],
-    heading: f64,
-    datum: f64,
-    dimensions: [f64; 3],
-    bounds: ModelBounds,
+pub(crate) struct ModelPose {
+    pub key: ModelKey,
+    pub anchor: [f64; 2],
+    pub heading: f64,
+    pub datum: f64,
+    pub dimensions: [f64; 3],
+    pub bounds: ModelBounds,
 }
 
 impl ModelPose {
-    fn project(&self, place: usize, camera: &Camera, pitch: f64, size: [u32; 2]) -> Option<VisibleModel> {
+    pub(crate) fn project(&self, place: Option<usize>, camera: &Camera, pitch: f64, size: [u32; 2]) -> Option<VisibleModel> {
         let [x, y] = camera.project(self.anchor, size)?;
         let (min, max) = self.bounds;
         let margin = (0..3).map(|i| max[i].abs().max(min[i].abs()) * self.dimensions[i]).sum::<f64>() / camera.mpp;
@@ -420,6 +438,15 @@ pub fn decode(key: ModelKey) -> io::Result<ModelMesh> {
     let bytes = match key.asset {
         ModelAsset::Landmark(asset) => ASSETS[asset].bytes,
         ModelAsset::City(_) => R40_MODELS,
+        ModelAsset::Transport(model, lod) => {
+            let mesh = transport_models::decode(model, lod)?;
+            return Ok(ModelMesh {
+                vertices: mesh.vertices.into_iter().map(|vertex| ModelVertex {
+                    position: vertex.position, normal: vertex.normal, color: vertex.color,
+                }).collect(),
+                indices: mesh.indices,
+            });
+        }
     };
     let glb = gltf::Gltf::from_slice(bytes).map_err(io::Error::other)?;
     let blob = glb.blob.as_deref().ok_or_else(|| io::Error::other("GLB has no mesh buffer"))?;
@@ -435,6 +462,7 @@ pub fn decode(key: ModelKey) -> io::Result<ModelMesh> {
         ModelAsset::City(module) => {
             append(city_node(&glb, module, key.lod)?, Mat4::IDENTITY, blob, key.lod, &mut model)?;
         }
+        ModelAsset::Transport(..) => unreachable!(),
     }
     if model.indices.is_empty() {
         return Err(io::Error::other(format!("{} has no static triangles", key.model())));

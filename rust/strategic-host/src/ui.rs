@@ -263,7 +263,12 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     let skin=ui.formal.skin;
     if let Some(object)=ui.selected.filter(|o|ui.formal.hud.page==crate::formal_ui::Page::Map&&!matches!(o,Object::Polity(_))) {
         let x=17.;let y=73.;let width=300.;
-        panel(&mut panels,x,y,width,213.);
+        let transport = match object {
+            Object::Place(i) => ui.formal.written_world.and_then(|host|
+                host.transport_connections(&world.places[i].id).map(|links| (i, links))),
+            _ => None,
+        };
+        panel(&mut panels,x,y,width,if transport.is_some(){254.}else{213.});
         let (label,id,desc,extra)=match object {
             Object::Polity(_)=>unreachable!(),
             Object::Place(i)=>{
@@ -288,6 +293,12 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         }
         ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,y+174.,123.,28.],skin.choose("定位地点","Focus location"),Some(Action::Locate),false);
         ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+147.,y+174.,135.,28.],skin.choose("完整资料","Full record"),Some(Action::Details),false);
+        if let Some((i, links)) = transport {
+            skin.text(&mut hud_type,&links,0,[x+16.,y+125.],width-32.,SUBTLE);
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,y+212.,267.,28.],
+                skin.choose("查询前往此地的路线","Plan travel to this location"),
+                Some(Action::Hud(crate::formal_ui::Command::Transport("city",i))),false);
+        }
     }
     if ui.details {
         if let Some(object)=ui.selected {

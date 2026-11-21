@@ -20,6 +20,8 @@ mod render;
 mod state;
 mod terrain;
 mod terrain_detail;
+mod transport_scene;
+mod transport_ui;
 mod hydrology;
 mod landscape;
 mod landscape_cover;
@@ -194,6 +196,7 @@ struct Host {
     natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<HostEvent>)>,
     events:winit::event_loop::EventLoopProxy<HostEvent>,
     landmarks:Option<landmarks::Landmarks>,
+    transport_scene:Option<transport_scene::TransportScene>,
     config:Config,window:Option<Arc<Window>>,renderer:Option<Renderer>,
     map_root:PathBuf,map_signature:Option<&'static [u8;8]>,fatal_error:Option<String>,
     world:World,visuals:PoliticalVisuals,index:Index,base:Option<Page>,reader:Reader,cached:HashMap<usize,Resident>,
@@ -294,7 +297,7 @@ impl Host {
         let reader=Reader::new(map_root.clone(),map_signature,legacy_cover,events.create_proxy());
         let observation_id=config.observe.as_ref().filter(|_|!config.terrain_review).and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
             .map(|input|input.id).unwrap_or_default();
-        Ok(Self {natural,events:events.create_proxy(),landmarks,config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
+        Ok(Self {natural,events:events.create_proxy(),landmarks,transport_scene:None,config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
             cached:HashMap::new(),failed:HashSet::new(),candidate:Vec::new(),visible:Vec::new(),
             size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,country:None,country_click:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
@@ -662,6 +665,7 @@ impl Host {
                 if self.state.session.is_some(){self.emit(Request::Training{verb});}
             }
             HudCommand::Market(verb,index)=>self.market_command(verb,index),
+            HudCommand::Transport(verb,index)=>self.transport_command(verb,index),
             HudCommand::MarketScroll(delta)=>{
                 let count=self.state.session.as_ref().map_or(0,|s| {
                     if self.hud.page==HudPage::Property{return s.property.len();}
@@ -818,7 +822,7 @@ impl Host {
                 id=row.id.clone();"region"
             }
             "international"|"domestic"|"regional"=>{id=verb.into();"scope"}
-            "quotes"|"goods"|"transport"|"activity"=>{id=verb.into();"view"}
+            "quotes"|"goods"|"transport"|"activity"|"freight"=>{id=verb.into();"view"}
             "goods_group"=>{
                 let Some((group,_))=market_ui::GOODS_GROUPS.get(index) else{return;};
                 id=(*group).into();
@@ -854,7 +858,7 @@ impl Host {
                 };
                 quantity=value;"quantity"
             }
-            "buy"=>{
+            "buy"|"freight_buy"=>{
                 let Some(quote)=v.quote.as_ref().filter(|q|q.accepted) else{return;};
                 if self.hud.purchase_token==Some(quote.token)||self.hud.quantity.is_some(){return;}
                 token=quote.token;self.hud.purchase_token=Some(token);verb
@@ -868,6 +872,29 @@ impl Host {
         };
         self.hud.quantity=None;self.hud.market_offset=0;self.hud.market_chooser=None;
         self.emit(Request::Market{verb:actual,id:&id,site:&site,quantity,token,viewport:self.size});
+    }
+    fn transport_command(&mut self, verb: &'static str, index: usize) {
+        let id = match verb {
+            "city" => {
+                let Some(place) = self.world.places.get(index) else { return };
+                let id = place.id.clone();
+                self.hud_action(HudCommand::Page(HudPage::Travel));
+                id
+            }
+            "destination" => {
+                let Some(place) = self.state.session.as_ref().and_then(|s| s.transport.as_ref())
+                    .and_then(|transport| transport.destinations.get(index)) else { return };
+                place.id.clone()
+            }
+            "lot" => {
+                let Some(lot) = self.state.session.as_ref().and_then(|s| s.transport.as_ref())
+                    .and_then(|transport| transport.lots.get(index)) else { return };
+                lot.id.to_string()
+            }
+            "mode" => ["all", "rail", "road"].get(index).copied().unwrap_or("all").into(),
+            _ => String::new(),
+        };
+        self.emit(Request::Transport { verb, id: &id });
     }
     fn apply_market_focus(&mut self,target:market_ui::MarketFocus) {
         if target.serial==self.market_focus_serial || !target.point.into_iter().all(f64::is_finite)
@@ -1325,13 +1352,29 @@ impl Host {
             let scissor=self.index.scissor(id,&self.camera,self.size)?;
             (opacity>0.).then_some((&p.page,tile,scissor,opacity))
         }).collect();
-        let models=if loading||self.in_lobby() {Vec::new()} else {
+        let transport_world=written_world.filter(|_|!loading&&!self.in_lobby()&&!self.hud.menu.modal());
+        let mut models=if loading||self.in_lobby() {Vec::new()} else {
             self.landmarks.as_ref().map_or_else(Vec::new,|catalogue|catalogue.visible(&date,&self.camera,self.size))
         };
         let renderer=self.renderer.as_mut().unwrap();
-        self.hits=models.iter().filter(|model|renderer.has_model(model)).map(|model|Hit {
-            area:model.screen_bounds,action:Action::Select(Object::Place(model.place)),
+        self.hits=models.iter().filter_map(|model| {
+            let place=model.place?;
+            renderer.has_model(model).then_some(Hit {
+                area:model.screen_bounds,action:Action::Select(Object::Place(place)),
+            })
         }).chain(hits).collect();
+        let vehicle_markers;
+        let transport=if let Some(world)=transport_world {
+            if self.transport_scene.is_none() {
+                self.transport_scene=Some(transport_scene::TransportScene::new(world.sources())?);
+            }
+            let scene=self.transport_scene.as_mut().unwrap();
+            scene.update_map(&self.camera,self.size,&date,matches!(self.mode,Mode::Geographic|Mode::Economic),
+                world.selected_transport_route());
+            vehicle_markers=scene.draw_vehicles(&self.camera,self.size,world.transport_vehicles(),
+                &mut models,|model|renderer.has_model(model));
+            Some(render::TransportOverlay{network:scene.map_overlay(),vehicles:&vehicle_markers})
+        } else {None};
         renderer.update_terrain(&self.camera,self.size,now)?;
         view.map_style[2]=renderer.terrain_view_level() as f32;
         view.natural_lod=renderer.terrain_viewport_mix();
@@ -1345,7 +1388,7 @@ impl Host {
         let capture=self.screenshot.as_ref().or_else(||self.trial.captures.first())
             .or_else(||self.trial.terrain_capture.as_ref().map(|(_,path)|path)).map(PathBuf::as_path);
         let mut redraw=false;
-        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,
+        if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,transport,
             (&self.camera,landscape_enabled&&!self.trial.hide_landscape_models,now))? {
             let presented=Instant::now();
             self.last_present=presented;
@@ -1732,7 +1775,8 @@ impl ApplicationHandler<HostEvent> for Host {
             HostEvent::Model(key,mesh)=>{
                 if let Some(renderer)=&mut self.renderer {
                     if let Err(error)=renderer.model_ready(key,mesh) {
-                        self.feedback=format!("R68 GLB · {error}");
+                        let source=if key.is_transport() {"交通 GLB"}else{"R68 GLB"};
+                        self.feedback=format!("{source} · {error}");
                     }
                     self.dirty=true;
                 }

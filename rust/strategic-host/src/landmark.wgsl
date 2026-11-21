@@ -3,6 +3,8 @@ struct Output {
     @location(0) normal: vec3f,
     @location(1) color: vec4f,
     @location(2) @interpolate(flat) lod_range:vec2f,
+    @location(3) model_height: f32,
+    @location(4) @interpolate(flat) waterline: f32,
 };
 
 @vertex fn model_vertex(
@@ -13,13 +15,14 @@ struct Output {
     @location(4) column_y: vec4f,
     @location(5) column_z: vec4f,
     @location(6) origin: vec4f,
-    @location(7) lod_range:vec2f,
+    @location(7) style:vec3f,
 ) -> Output {
     let clip_from_model = mat4x4f(column_x, column_y, column_z, origin);
-    return Output(clip_from_model * vec4f(position, 1.), normal, color,lod_range);
+    return Output(clip_from_model * vec4f(position, 1.), normal, color, style.xy, position.y, style.z);
 }
 
 @fragment fn model_fragment(input: Output) -> @location(0) vec4f {
+    if input.waterline > 0.5 && input.model_height < 0.0 { discard; }
     if input.lod_range.x>0. || input.lod_range.y<1. {
         // Complementary coverage lets both opaque LODs share the depth buffer.
         let p=vec2u(input.position.xy)%4u;

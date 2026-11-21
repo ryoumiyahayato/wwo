@@ -40,7 +40,7 @@ pub struct Choice {pub id:String,label:String}
 pub struct Quote {
     pub token:u64,pub accepted:bool,pub commodity:String,pub site:String,pub name:String,pub quantity:u64,
     pub scale:u64,quoted_quantity:u64,amount:Option<i64>,goods_amount:Option<i64>,freight_amount:Option<i64>,
-    currency:String,currency_name:String,error:String,onsite:bool,
+    currency_name:String,error:String,onsite:bool,
 }
 #[derive(Deserialize)]
 pub struct Order {
@@ -145,9 +145,12 @@ impl Display<'_> {
             self.row(m,t,hits,[bx+(i+3) as f32*scope_width,y+62.,scope_width-5.,27.],label,
                 if enabled{command(id,0)}else{None},self.hud.market_chooser==Some(id));
         }
-        for (i,(id,label)) in [("quotes","报价簿"),("trends","行情趋势"),("goods","商品目录"),("transport","仓储与运输"),("activity","活动记录")].into_iter().enumerate(){
+        let mut tabs = vec![("quotes","报价簿"),("trends","行情趋势"),("goods","商品目录"),("transport","仓储与运输"),("activity","活动记录")];
+        if self.session.is_some_and(|s| s.transport.is_some()) { tabs.push(("freight","实物货运")); }
+        let tab_width = bw / tabs.len() as f32;
+        for (i,(id,label)) in tabs.into_iter().enumerate(){
             let selected=match id{"trends"=>v.content=="good",_=>v.content==id};
-            self.row(m,t,hits,[bx+i as f32*scope_width,y+100.,scope_width-5.,28.],label,
+            self.row(m,t,hits,[bx+i as f32*tab_width,y+100.,tab_width-5.,28.],label,
                 if id=="trends"&&v.book.is_empty(){None}else{command(id,0)},selected&&self.hud.market_chooser.is_none());
         }
         let footer=if v.result.is_empty(){&v.market_id}else{&v.result};
@@ -163,6 +166,7 @@ impl Display<'_> {
             return;
         }
         match v.content.as_str() {
+            "freight"=>self.freight_page(m,t,hits,[bx,top,bw,floor-top]),
             "good"=>self.good_panel(m,t,hits,v,[bx,top,bw,floor-top]),
             "activity"=>{
                 if v.orders.is_empty(){self.skin.text(t,"此范围暂无本人或获准企业的订单记录",0,[bx,top],bw,MUTED);}
@@ -266,11 +270,13 @@ impl Display<'_> {
         self.row(m,t,hits,[left+184.,y+176.,97.,28.],"更新报价",command("requote",0),false);
         let ready=q.accepted&&self.hud.quantity.is_none()&&self.hud.purchase_token!=Some(q.token);
         self.row(m,t,hits,[left,y+236.,130.,31.],"购买",if ready{command("buy",0)}else{None},ready);
+        if self.session.is_some_and(|s| s.transport.is_some()) {
+            self.row(m,t,hits,[left,y+320.,130.,30.],"采购货批",if ready{command("freight_buy",0)}else{None},false);
+        }
         if let Some(amount)=q.amount {
             self.skin.text(t,&format!("应付 {amount} {}",q.currency_name),1,[left+150.,y+238.],width-150.,IVORY);
             self.skin.text(t,&format!("货款 {} · 运费 {} · 当前可接 {}",q.goods_amount.unwrap_or(0),q.freight_amount.unwrap_or(0),q.quoted_quantity),0,[left,y+280.],width,IVORY);
             self.skin.text(t,if q.onsite{"现场交付后取得。"}else{"接受后预留资金；实际到货后取得物品。"},0,[left,y+307.],width,MUTED);
-            self.skin.text(t,&q.currency,0,[left,y+331.],width,MUTED);
         }else{self.skin.text(t,&q.error,0,[left,y+280.],width,MUTED);}
         if let Some(v)=self.session.and_then(|s|s.market.as_ref()){
             self.skin.text(t,&v.result,0,[left,y+h-40.],width,MUTED);

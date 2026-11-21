@@ -6,6 +6,7 @@ use std::io;
 
 pub mod map_data;
 pub mod models;
+pub mod operations;
 mod routing;
 #[cfg(test)]
 mod tests;
@@ -23,7 +24,7 @@ pub struct TransportNode {
     pub kind: NodeKind,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[non_exhaustive]
 pub enum TransportMode {
     Road,
@@ -55,7 +56,7 @@ impl ModeSet {
 }
 
 /// Minutes and cost per traversal, shared carrying capacity, and additive risk points.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 pub struct SegmentProfile {
     pub travel_minutes: u32,
     pub cost_units: u32,
@@ -83,7 +84,7 @@ pub struct TransportRequest {
     pub capacity_units: u32,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 pub struct RouteLeg {
     pub segment_id: String,
     pub from: String,
@@ -94,7 +95,7 @@ pub struct RouteLeg {
     pub prototype_only: bool,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 pub struct Route {
     pub from: String,
     pub to: String,

@@ -11,11 +11,16 @@ use crate::{
     formal_service::{ServiceRoster, ServiceSnapshot, ServiceTarget},
     formal_step::next_day_boundary,
     formal_stock::PersonalHolding,
-    formal_travel::{Journey, TravelOption, TravelState},
+    formal_travel::LegacyTravel,
     formal_wages::{Claim, WageClaims},
     formal_work::{Job, WorkOpening, WorkState},
-    transport::{map_data::load_prototype_map_network, SegmentAvailability, TransportNetwork},
+    transport::{operations::{Operations, OperationsState, Plan}, SegmentAvailability, TransportNetwork},
 };
+#[path = "formal_travel_live.rs"]
+mod travel_live;
+#[path = "formal_freight.rs"]
+pub mod freight;
+pub use travel_live::{mode_name, mode_set};
 pub use crate::formal_stock::ConsumptionAllocation;
 pub use crate::formal_wages::CompletedFirmWork;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -188,12 +193,16 @@ pub struct InitialWorld {
     enterprises: Enterprises,
     pub(crate) livelihood: Livelihood,
     pub(crate) households: Households,
-    travel: TravelState,
-    transport: TransportNetwork,
     homes: BTreeMap<String, String>,
     service: ServiceRoster,
     activities: Arc<OpeningActivities>,
     player_day: PlayerDay,
+    transport: Operations,
+    travel: travel_live::TravelState,
+    travel_preview: Option<Plan>,
+    freight_preview: Option<Plan>,
+    selected_freight: Option<u64>,
+    freight: freight::FreightBook,
 }
 
 #[derive(Deserialize)]
@@ -221,7 +230,7 @@ pub(crate) struct WorldSnapshot {
     #[serde(default)]
     households: Households,
     #[serde(default)]
-    travel: TravelState,
+    travel: Option<TravelSnapshot>,
     #[serde(default)]
     transport_restrictions: BTreeMap<String, SegmentAvailability>,
     #[serde(default)]
@@ -230,6 +239,17 @@ pub(crate) struct WorldSnapshot {
     service: ServiceSnapshot,
     #[serde(default)]
     player_day: PlayerDay,
+    #[serde(default)]
+    transport: OperationsState,
+    #[serde(default)]
+    freight: freight::FreightBook,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum TravelSnapshot {
+    Current(travel_live::TravelState),
+    Legacy(LegacyTravel),
 }
 
 #[derive(Deserialize)]
@@ -264,11 +284,12 @@ impl InitialWorld {
             "enterprises": self.enterprises,
             "livelihood": self.livelihood,
             "households": self.households,
-            "travel": self.travel,
-            "transport_restrictions": self.transport.restrictions().collect::<BTreeMap<_, _>>(),
             "homes": self.homes,
             "service": self.service.snapshot(),
             "player_day": self.player_day,
+            "transport": self.transport.state(),
+            "travel": self.travel,
+            "freight": self.freight,
         })
     }
 
@@ -289,7 +310,7 @@ impl InitialWorld {
 
     pub fn current_place(&self, person: &str) -> Option<&str> {
         self.population.unit_for_person(person)?;
-        self.travel.current_place(person, &self.person(person)?.place_id)
+        self.present_at(person, &self.person(person)?.place_id)
     }
 
     pub fn player_current_place(&self) -> Option<&str> { self.current_place(&self.player) }
@@ -302,22 +323,15 @@ impl InitialWorld {
         self.homes.get(person).map(String::as_str).or_else(|| self.person(person).map(|row| row.place_id.as_str()))
     }
 
-    pub fn player_journey(&self) -> Option<&Journey> { self.travel.journey(&self.player) }
-
-    pub fn transport(&self) -> &TransportNetwork { &self.transport }
+    pub fn transport(&self) -> &TransportNetwork { self.transport.network() }
 
     /// Apply a route-availability event from the world. In-progress trips retain their committed arrival.
     pub fn set_segment_access(&mut self, route: &str, open: bool, capacity: u32) -> io::Result<()> {
-        self.transport.set_availability(route, open, capacity).map_err(invalid)
+        self.transport.set_access(route, open, capacity)
     }
 
     pub fn market_unit_for_person(&self, person: &str) -> Option<&str> {
         self.sources.population_unit_at(self.current_place(person)?)
-    }
-
-    pub fn player_travel_options(&self) -> Vec<TravelOption<'_>> {
-        if self.has_committed_player_day() { return Vec::new(); }
-        self.player_current_place().map_or_else(Vec::new, |place| self.travel.options(&self.sources, &self.transport, place, self.clock))
     }
 
     fn has_committed_player_day(&self) -> bool {
@@ -326,17 +340,6 @@ impl InitialWorld {
 
     pub fn travel_player(&mut self, route: &str, destination: &str) -> io::Result<()> {
         self.travel_person(&self.player.clone(), route, destination)
-    }
-
-    /// Execute the resident's chosen itinerary. Residence is updated separately.
-    pub fn travel_person(&mut self, person: &str, route: &str, destination: &str) -> io::Result<()> {
-        if self.population.unit_for_person(person).is_none() || self.service.named_target(person).is_some()
-            || self.work.booking(person).is_some() || (person == self.player && self.player_day.booking.is_some())
-        {
-            return Err(invalid("当前健康或日程不允许旅行。"));
-        }
-        let opening_place = self.person(person).ok_or_else(|| invalid("missing traveller identity"))?.place_id.clone();
-        self.travel.depart(&self.sources, &self.transport, person, &opening_place, route, destination, self.clock)
     }
 
     pub fn can_move_player_home(&self) -> bool {
@@ -507,7 +510,11 @@ impl InitialWorld {
         self.work.book(&self.work_opening, person, place.as_deref(), self.clock)
     }
 
-    pub fn leave_employment(&mut self) -> io::Result<()> { self.work.release(&self.player) }
+    pub fn leave_employment(&mut self) -> io::Result<()> {
+        self.work.release(&self.player)?;
+        self.travel.disable_commute();
+        Ok(())
+    }
 
     pub fn player_birth_year(&self) -> u16 {
         self.character.development.as_ref().map_or(self.player().birth_year, |player| player.birth_year())
@@ -549,6 +556,7 @@ impl InitialWorld {
     pub fn last_read_notice(&self) -> Option<i64> { self.player_day.last_read_notice }
 
     pub fn schedule_personal_activity(&mut self, kind: PersonalActivity) -> io::Result<()> {
+        self.check_leisure()?;
         let minute = self.clock.snapshot().total_minutes;
         if !self.can_schedule_personal_activity(kind) {
             return Err(invalid("当前无法安排这项活动。"));
@@ -558,6 +566,7 @@ impl InitialWorld {
     }
 
     pub fn can_schedule_personal_activity(&self, kind: PersonalActivity) -> bool {
+        if self.passenger_in_transit() { return false; }
         self.opening_language().is_some() && self.player_alive() && self.player_day.booking.is_none()
             && self.work.booking(&self.player).is_none()
             && self.activity_available(kind, self.clock.snapshot().total_minutes)
@@ -762,19 +771,19 @@ impl InitialWorld {
         let mut target = self.clock;
         target.advance_minutes(minutes)?;
         u32::try_from(target.current_day()).map_err(|_| invalid("unsupported formal character date"))?;
-        let through = target.snapshot().total_minutes;
         if target.current_day() != self.clock.current_day() {
             self.macro_economy.check_responsibility(self.population.totals(), &self.managed_residents(managed_population)?)?;
         }
-        while let Some(minute) = [next_day_boundary(self.clock), self.travel.next_arrival()]
-            .into_iter().flatten().min().filter(|&minute| minute <= through)
-        {
-            let day_changed = Some(minute) == next_day_boundary(self.clock);
+        let through = target.snapshot().total_minutes;
+        while self.clock != target {
+            let day_boundary = next_day_boundary(self.clock);
+            let minute = self.next_travel_event().into_iter().chain(day_boundary)
+                .min().map_or(through, |event| event.min(through));
             let mut boundary = self.clock;
             boundary.advance_minutes(minute - boundary.snapshot().total_minutes)?;
-            self.travel.arrive(boundary);
-            if !day_changed {
+            if Some(minute) != day_boundary {
                 self.clock = boundary;
+                self.advance_transport()?;
                 continue;
             }
             let day = u32::try_from(boundary.current_day()).map_err(|_| invalid("unsupported formal character date"))?;
@@ -824,7 +833,7 @@ impl InitialWorld {
                 self.population.record_death(&death.person_id, minute)?;
                 self.identities.get_mut(&death.person_id).expect("known person").record_death();
                 self.work.forget_actor(&death.person_id);
-                self.travel.record_death(&death.person_id);
+                self.stop_transport_on_death(&death.person_id);
                 self.homes.remove(&death.person_id);
                 self.households.leave(&death.person_id);
                 self.service.release_named(&death.person_id);
@@ -843,16 +852,16 @@ impl InitialWorld {
             self.player_day.booking = None;
             self.player_day.food_milli = 0;
             self.clock = boundary;
+            self.advance_transport()?;
             let work_eligible = &self.character.work_eligible;
             let travel = &self.travel;
             let people = &self.sources.people;
             let service = &self.service;
             self.work.book_automatic(&self.work_opening, self.clock, |person| {
                 if !work_eligible.contains(person) || service.named_target(person).is_some() { return None; }
-                travel.current_place(person, &people.get(person)?.place_id)
+                travel.present_at(person, &self.player, &people.get(person)?.place_id)
             });
         }
-        self.clock = target;
         Ok(())
     }
 
@@ -1100,6 +1109,7 @@ impl WorldBootstrap {
             (person.as_str(), cash)
         }))?;
         self.work.open_accounts(&mut ledger)?;
+        ledger.ensure_transport_account()?;
         let mut population = Population::initialize(self.populations.clone());
         let mut identities = BTreeMap::new();
         for person in self.world.people.values() {
@@ -1136,8 +1146,12 @@ impl WorldBootstrap {
             enterprises: Enterprises::initialize(&self.enterprise_opening, 0),
             livelihood: Livelihood::default(),
             households: Households::default(),
-            travel: TravelState::default(),
-            transport: load_prototype_map_network(&self.world, 32)?,
+            travel: travel_live::TravelState::default(),
+            transport: Operations::restore(&self.world, 0, OperationsState::default())?,
+            travel_preview: None,
+            freight_preview: None,
+            selected_freight: None,
+            freight: freight::FreightBook::default(),
             homes: BTreeMap::new(),
             service: ServiceRoster::default(),
             activities: Arc::clone(&self.activities),
@@ -1187,7 +1201,8 @@ impl WorldBootstrap {
         }
         world.macro_economy = MacroEconomy::restore(Arc::clone(&self.markets), world.population.totals(), &saved.markets, clock)?;
         world.macro_economy.restore_arrivals(saved.last_arrivals)?;
-        let ledger = Ledger::restore(&saved.ledger, true)?;
+        let mut ledger = Ledger::restore(&saved.ledger, true)?;
+        ledger.ensure_transport_account()?;
         if ledger.last_minute() > saved.clock.total_minutes || world.identities.keys().any(|id| ledger.default_account(id).is_none()) {
             return Err(invalid("ledger and world timelines differ or personal accounts are missing"));
         }
@@ -1217,10 +1232,19 @@ impl WorldBootstrap {
         world.enterprises = saved.enterprises.unwrap_or_else(|| Enterprises::initialize(&self.enterprise_opening, i64::from(day)));
         world.livelihood = saved.livelihood;
         world.households = saved.households;
-        world.travel = saved.travel;
+        let minute = clock.snapshot().total_minutes;
+        world.transport = Operations::restore(&world.sources, minute, saved.transport)?;
         for (route, availability) in saved.transport_restrictions {
             world.set_segment_access(&route, availability.open, availability.capacity_units)?;
         }
+        match saved.travel {
+            Some(TravelSnapshot::Current(travel)) => world.travel = travel,
+            Some(TravelSnapshot::Legacy(travel)) => world.import_legacy_travel(travel)?,
+            None => (),
+        }
+        world.freight = saved.freight;
+        world.validate_freight()?;
+        world.validate_travel()?;
         world.homes = saved.homes;
         // Main has no admitted strategic or tactical unit roster. Scenario tests may
         // bind a unit to this domain without adding an order to a historical opening.
@@ -1230,10 +1254,6 @@ impl WorldBootstrap {
             || !world.households.validate(clock.snapshot().total_minutes,
                 |person| world.population.unit_for_person(person).is_some(),
                 |place| world.sources.places.contains_key(place))
-            || !world.travel.validate(&world.sources, &world.transport, clock, |person| {
-                world.population.unit_for_person(person)?;
-                world.person(person).map(|row| row.place_id.as_str())
-            })
             || !world.work.validate(&self.work, clock, |person| {
                 if world.service.named_target(person).is_some() { return None; }
                 world.current_place(person)
@@ -1244,7 +1264,6 @@ impl WorldBootstrap {
         {
             return Err(invalid("invalid residence, travel, livelihood or enterprise state"));
         }
-        let minute = clock.snapshot().total_minutes;
         let invalid_booking = world.player_day.booking.is_some_and(|booking| {
             !world.player_alive() || world.work.booking(&world.player).is_some()
                 || !(clock.current_day() * MINUTES_PER_DAY..=minute).contains(&booking.minute)
@@ -1877,7 +1896,13 @@ mod tests {
         assert_eq!(wages[0].worker, worker);
         assert_eq!(wages[0].paid_wages, 6);
         let route = "rail_paris_lille";
-        let duration = i64::from(world.transport.segment(route).unwrap().profile.travel_minutes);
+        let duration = i64::from(world.transport().segment(route).unwrap().profile.travel_minutes);
+        let fare = i64::from(world.transport().segment(route).unwrap().profile.cost_units);
+        for _ in 0..30 {
+            if world.ledger.default_account(worker).unwrap().available >= fare { break; }
+            world.book_work_as(worker).unwrap();
+            world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+        }
         world.travel_person(worker, route, "place:lille").unwrap();
         assert_eq!(world.person_home(worker), Some("place:paris"));
         world.advance_migrated_domains(duration, &BTreeMap::new()).unwrap();
@@ -1896,15 +1921,16 @@ mod tests {
         let mut world = bootstrap.create("country_fra").unwrap();
         let mut batch = bootstrap.create("country_fra").unwrap();
         let totals = world.population_units().clone();
-        let option = world.player_travel_options().into_iter().next().unwrap();
-        let (route, destination, arrival) = (option.route.id.clone(), option.destination.to_owned(), option.arrival_minute);
+        let route = "rail_paris_rouen";
+        let destination = "place:rouen";
+        let arrival = i64::from(world.transport().segment(route).unwrap().profile.travel_minutes);
         for world in [&mut world, &mut batch] {
-            let nominal = world.transport.segment(&route).unwrap().profile.capacity_units;
-            world.set_segment_access(&route, false, 0).unwrap();
-            assert!(world.travel_player(&route, &destination).is_err());
-            world.set_segment_access(&route, true, nominal).unwrap();
-            world.travel_player(&route, &destination).unwrap();
-            world.set_segment_access(&route, false, 0).unwrap();
+            let nominal = world.transport().segment(route).unwrap().profile.capacity_units;
+            world.set_segment_access(route, false, 0).unwrap();
+            assert!(world.travel_player(route, destination).is_err());
+            world.set_segment_access(route, true, nominal).unwrap();
+            world.travel_player(route, destination).unwrap();
+            world.set_segment_access(route, false, 0).unwrap();
             assert_eq!(world.player_current_place(), None);
             assert!(!world.can_book_work());
             assert!(world.local_bread_offer().is_none());
@@ -1913,9 +1939,9 @@ mod tests {
         world.advance_migrated_domains(arrival - 1, &managed).unwrap();
         assert_eq!(world.player_home(), "place:paris");
         let mut world = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
-        assert!(!world.transport.availability(&route).unwrap().open);
+        assert!(!world.transport.network().availability(route).unwrap().open);
         world.advance_migrated_domains(1, &managed).unwrap();
-        assert_eq!(world.player_current_place(), Some(destination.as_str()));
+        assert_eq!(world.player_current_place(), Some(destination));
         assert_eq!(world.player_home(), "place:paris");
         batch.advance_migrated_domains(arrival, &managed).unwrap();
         world.move_player_home().unwrap();

@@ -93,6 +93,7 @@ pub enum Request<'a> {
     Market {verb:&'a str,id:&'a str,site:&'a str,quantity:u64,token:u64,viewport:[u32;2]},
     Training {verb:&'a str},
     Relations {verb:&'a str,id:&'a str},
+    Transport {verb:&'a str,id:&'a str},
     Consume { id: &'a str, quantity: i64 },
     NewPlayer { polity: &'a str, prologue: wwo_character_core::Prologue },
     PersonalActivity { activity: wwo_map_lab::formal_bootstrap::PersonalActivity },
