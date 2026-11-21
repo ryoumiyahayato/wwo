@@ -1434,8 +1434,8 @@ impl WorldBootstrap {
     fn base_opening_version(&self, source_id: &str, prologue: Option<Prologue>, version: Option<u32>) -> io::Result<InitialWorld> {
         let sources = match version {
             Some(version) if version == self.historical_population.version() => &self.world,
-            Some(1..=5) | None => {
-                let archived_version = version.unwrap_or(1);
+            archived if archived.is_none_or(|value| (1..self.historical_population.version()).contains(&value)) => {
+                let archived_version = archived.unwrap_or(1);
                 self.archived_population_worlds[(archived_version - 1) as usize].get_or_init(|| {
                     let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
                     let opening = HistoricalOpening::load(archived_version, &self.populations,
@@ -1445,7 +1445,7 @@ impl WorldBootstrap {
                     Ok(Arc::new(WorldSources { historical_population: Some(Arc::new(opening)), ..self.world.as_ref().clone() }))
                 }).as_ref().map_err(|error| invalid(error.to_string()))?
             }
-            Some(_) => return Err(invalid("unsupported historical population opening version")),
+            _ => return Err(invalid("unsupported historical population opening version")),
         };
         let transport = Operations::restore(sources, 0, OperationsState::default())?;
         let player_origin = Arc::clone(self.opening_people.get(source_id)
