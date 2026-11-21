@@ -1741,6 +1741,7 @@ impl Host {
                 self.country_click=None;
                 self.locate([input.lon,input.lat],input.mpp); if input.value=="north" {self.camera.north_up();}
             }
+            "hover"=>{self.cursor=[input.x,input.y];self.dirty=true;}
             "click"=>self.click([input.x,input.y]),
             "wheel"=>{
                 let point=[input.x,input.y];
