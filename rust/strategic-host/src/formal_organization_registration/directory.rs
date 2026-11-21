@@ -3,6 +3,8 @@ use crate::formal_ledger::MAX_AMOUNT;
 
 pub(crate) struct OrganizationDirectory {
     pub(super) rows: BTreeMap<String, Organization>,
+    opening_ids: BTreeSet<String>,
+    candidates: BTreeMap<String, Vec<String>>,
 }
 
 #[derive(Deserialize)]
@@ -46,11 +48,11 @@ struct LocalSite { id: String, place_id: String, prices: BTreeMap<String, i64> }
 struct LocalJob { id: String, employer: String, place: String, site_id: String }
 
 impl OrganizationDirectory {
-    pub(crate) fn load(world: &WorldSources, populations: &BTreeMap<String, u64>, markets: &MarketInputs) -> io::Result<Self> {
+    pub(crate) fn load(world: &WorldSources, cities: &BTreeSet<String>, populations: &BTreeMap<String, u64>, markets: &MarketInputs) -> io::Result<Self> {
         let templates: Templates = serde_json::from_slice(include_bytes!("../../../../data/formal/regional_organizations_1900.json"))?;
         templates.validate()?;
         let paris: ParisOpening = serde_json::from_slice(include_bytes!("../../../../data/formal/paris_employment_opening_r1.json"))?;
-        let mut directory = Self { rows: BTreeMap::new() };
+        let mut directory = Self { rows: BTreeMap::new(), opening_ids: BTreeSet::new(), candidates: BTreeMap::new() };
         let mut existing = BTreeSet::new();
         for firm in &paris.firms {
             let [site] = firm.sites.as_slice() else { return Err(invalid("formal enterprise requires a registered site")); };
@@ -69,11 +71,11 @@ impl OrganizationDirectory {
             })?;
             existing.insert(site.place_id.as_str());
         }
-        for &(source, city) in OPENINGS {
+        let opening_places: BTreeSet<_> = OPENINGS.iter().map(|(_, city)| format!("place:{city}")).collect();
+        for city in cities {
             let place = format!("place:{city}");
             let Some(city_row) = world.places().get(&place) else { continue };
-            let Some(unit) = world.population_unit_at(&place) else { continue };
-            if unit != source { continue; }
+            let Some(unit) = world.opening_parent_at(&place) else { continue };
             let population = populations.get(unit).copied().unwrap_or_default();
             if population == 0 { continue; }
             let preference = templates.local_preferences.get(city);
@@ -96,6 +98,7 @@ impl OrganizationDirectory {
             }
             let key = format!("opening_{city}_association");
             let has_employer = directory.rows.values().any(|org| org.place == place && org.kind == OrganizationKind::Enterprise);
+            if !has_employer && !opening_places.contains(&place) { continue; }
             directory.insert(Organization {
                 id: format!("organization:{key}"), name: format!("{}居民互助会", city_row.name),
                 place, unit: unit.into(), kind: OrganizationKind::MutualAid, basis: "依据正式居民与城市设立的模拟互助会",
@@ -112,11 +115,26 @@ impl OrganizationDirectory {
                 },
             })?;
         }
+        for org in directory.rows.values() {
+            if opening_places.contains(&org.place) {
+                directory.opening_ids.insert(org.id.clone());
+            } else {
+                directory.candidates.entry(org.place.clone()).or_default().push(org.id.clone());
+            }
+        }
         Ok(directory)
     }
 
-    pub(crate) fn regional_jobs(&self) -> impl Iterator<Item = (&Organization, &RegionalJobTerms)> {
-        self.rows.values().filter_map(|org| Some((org, org.terms.as_ref()?)))
+    pub(crate) fn opening(&self) -> impl Iterator<Item = &Organization> {
+        self.opening_ids.iter().map(|id| &self.rows[id])
+    }
+
+    pub(super) fn at(&self, place: &str) -> impl Iterator<Item = &Organization> {
+        self.candidates.get(place).into_iter().flatten().map(|id| &self.rows[id])
+    }
+
+    pub(super) fn is_opening(&self, id: &str) -> bool {
+        self.opening_ids.contains(id)
     }
 
     fn insert(&mut self, org: Organization) -> io::Result<()> {

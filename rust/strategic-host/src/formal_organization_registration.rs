@@ -1,7 +1,7 @@
 use super::{InitialWorld, MarketInputs, WorldSources, OPENINGS};
 use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
-use std::{collections::{BTreeMap, BTreeSet}, io};
+use std::{collections::{BTreeMap, BTreeSet}, io, sync::Arc};
 
 #[path = "formal_organization_registration/directory.rs"]
 mod directory;
@@ -47,7 +47,7 @@ pub struct Organization {
     pub jobs: Vec<String>,
     officer: Officer,
     opening_member: Option<Officer>,
-    terms: Option<RegionalJobTerms>,
+    pub(crate) terms: Option<RegionalJobTerms>,
 }
 
 struct Officer {
@@ -75,15 +75,29 @@ impl Organization {
 pub(crate) struct OrganizationMembers {
     appointments: BTreeSet<String>,
     volunteers: BTreeMap<String, BTreeSet<String>>,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    visited_cities: BTreeSet<String>,
+}
+
+impl OrganizationMembers {
+    fn appoint(&mut self, org: &Organization, resident: &Officer) {
+        if resident.role == OrganizationRole::Member {
+            self.volunteers.entry(org.id.clone()).or_default().insert(resident.person.clone());
+        } else {
+            self.appointments.insert(org.id.clone());
+        }
+    }
 }
 
 impl InitialWorld {
     pub fn organizations(&self) -> impl Iterator<Item = &Organization> {
-        self.organization_directory.rows.values()
+        self.organization_directory.opening().chain(self.organization_members.visited_cities.iter()
+            .flat_map(|place| self.organization_directory.at(place)))
     }
 
     pub fn organization(&self, id: &str) -> Option<&Organization> {
-        self.organization_directory.rows.get(id)
+        self.organization_directory.rows.get(id).filter(|org| self.organization_directory.is_opening(id)
+            || self.organization_members.visited_cities.contains(&org.place))
     }
 
     pub(crate) fn appointed_officers(&self) -> impl Iterator<Item = &str> {
@@ -112,8 +126,66 @@ impl InitialWorld {
 
     pub(crate) fn initialize_organization_members(&mut self) -> io::Result<()> {
         let directory = self.organization_directory.clone();
+        self.materialize_organization_members(directory.opening())
+    }
+
+    pub(super) fn register_arrival_organizations(&mut self, place: &str) -> io::Result<()> {
+        if self.organization_members.visited_cities.contains(place) { return Ok(()); }
+        let directory = Arc::clone(&self.organization_directory);
+        let Some(shop) = directory.at(place).find(|org| org.is_merchant()) else { return Ok(()) };
+        if self.market_unit_at(place) != Some(&shop.unit) { return Ok(()); }
+        let residents: Vec<_> = directory.at(place).flat_map(|org| std::iter::once(&org.officer)
+            .chain(org.opening_member.as_ref()).map(move |officer| (org, officer))).collect();
+        let unit = self.residence_unit_at(place).expect("merchant market has a residence unit");
+        if self.population.unclassified(unit).unwrap_or(0) < residents.len() as u64
+            || residents.iter().any(|(_, officer)| self.person(&officer.person).is_some()
+                || self.ledger.default_account(&officer.person).is_some()) { return Ok(()); }
+
+        // Stage the claims, character roster and job. Publishing the accounts is the last fallible operation.
         let birth_year = u16::try_from(self.clock.current_date().year - 30).map_err(io::Error::other)?;
-        for org in directory.rows.values() {
+        let mut population = self.population.clone();
+        let mut identities = self.identities.clone();
+        let mut people = Vec::new();
+        let mut character: Option<super::CharacterOutput> = None;
+        for (_, resident) in &residents {
+            let id = &resident.person;
+            let row = super::RuntimePerson::at(id, resident.name.clone(), place, unit, birth_year, None);
+            identities.insert(id.clone(), row.identity()?);
+            let prior = character.as_ref().unwrap_or(&self.character);
+            character = Some(super::formal_character::register_native_person(&self.player, &identities, id, prior.day, &prior.state)
+                .map_err(io::Error::other)?);
+            population.materialize_person(id, unit, None, self.clock.snapshot().total_minutes)?;
+            people.push((id.clone(), row));
+        }
+        let mut work = Arc::clone(&self.work_opening);
+        Arc::make_mut(&mut work).register_regional(directory.at(place))?;
+        self.ledger.open_merchant_accounts(shop.firm.as_deref().unwrap(), shop.account.as_deref().unwrap(),
+            residents.iter().map(|(_, officer)| officer.person.as_str()))?;
+        self.population = population;
+        self.identities = identities;
+        self.character = character.expect("merchant has a founder");
+        self.runtime_people.extend(people);
+        self.work_opening = work;
+        for (org, resident) in residents { self.organization_members.appoint(org, resident); }
+        self.organization_members.visited_cities.insert(place.to_owned());
+        Ok(())
+    }
+
+    pub(super) fn restore_organization_jobs(&mut self, members: &OrganizationMembers) -> io::Result<()> {
+        for place in &members.visited_cities {
+            let directory = &self.organization_directory;
+            let shop = directory.at(place).find(|org| org.is_merchant()).ok_or_else(|| invalid("unknown visited merchant city"))?;
+            if self.market_unit_at(place) != Some(&shop.unit) {
+                return Err(invalid("visited merchant city has no statistical market"));
+            }
+            Arc::make_mut(&mut self.work_opening).register_regional(directory.at(place))?;
+        }
+        Ok(())
+    }
+
+    fn materialize_organization_members<'a>(&mut self, organizations: impl Iterator<Item = &'a Organization>) -> io::Result<()> {
+        let birth_year = u16::try_from(self.clock.current_date().year - 30).map_err(io::Error::other)?;
+        for org in organizations {
             for resident in std::iter::once(&org.officer).chain(org.opening_member.as_ref()) {
                 // A previous slot may already use this identity or have no unassigned residents.
                 if self.person(&resident.person).is_some()
@@ -122,17 +194,18 @@ impl InitialWorld {
                     continue;
                 }
                 self.materialize_resident(&resident.person, resident.name.clone(), &org.place, birth_year, None)?;
-                if resident.role == OrganizationRole::Member {
-                    self.organization_members.volunteers.entry(org.id.clone()).or_default().insert(resident.person.clone());
-                } else {
-                    self.organization_members.appointments.insert(org.id.clone());
-                }
+                self.organization_members.appoint(org, resident);
             }
         }
         Ok(())
     }
 
     pub(crate) fn validate_organization_members(&self) -> io::Result<()> {
+        for place in &self.organization_members.visited_cities {
+            if self.organization_directory.at(place).any(|org| !self.organization_members.appointments.contains(&org.id)) {
+                return Err(invalid("visited city lacks its founding appointments"));
+            }
+        }
         for id in &self.organization_members.appointments {
             let org = self.organization(id).ok_or_else(|| invalid("unknown organization appointment"))?;
             let officer = &org.officer;
@@ -303,6 +376,58 @@ mod tests {
     use crate::formal_ledger::Ledger;
     use crate::formal_save::{field, map, read_native_slot, NativeSlotSummary};
     use crate::formal_work::WorkOpening;
+
+    #[test]
+    fn merchant_registration_follows_an_actual_arrival_and_survives_a_slot() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("country_fra").unwrap();
+        let route = "rail_paris_rouen";
+        let place = "place:rouen";
+        let shop = "organization:opening_rouen_merchant";
+        let firm = "firm:opening_rouen_merchant";
+        let job = "job:opening_rouen_merchant";
+        let pool = world.residence_unit_at(place).unwrap().to_owned();
+        let anonymous = world.population.unclassified(&pool).unwrap();
+        let national = world.population.totals()["country_fra"];
+        let named = world.named_people().count();
+        let duration = i64::from(world.transport().segment(route).unwrap().profile.travel_minutes);
+        world.travel_player(route, place).unwrap();
+        assert!(world.organization(shop).is_none());
+        assert!(world.work_opening.job(job).is_none());
+        assert!(world.ledger.default_account(firm).is_none());
+        let underway = world.snapshot();
+        let mut world = bootstrap.restore_native(serde_json::from_value(underway).unwrap()).unwrap();
+        world.advance_migrated_domains(duration, &BTreeMap::new()).unwrap();
+        assert_eq!(world.player_current_place(), Some(place));
+        assert_eq!(world.organization(shop).unwrap().unit, "country_fra");
+        assert_eq!(world.work_opening.job(job).unwrap().place, place);
+        assert_eq!(world.organization_members("organization:opening_rouen_association").len(), 2);
+        assert_eq!(world.ledger.default_account(firm).unwrap().cash, 0);
+        assert_eq!(world.population.totals()["country_fra"], national);
+        assert_eq!(world.population.unclassified(&pool), Some(anonymous - 3));
+        assert_eq!(world.named_people().count(), named + 3);
+        assert!(world.organization("organization:opening_lyon_merchant").is_none());
+        let capital = world.organization_partnership_offer(shop).unwrap();
+        world.accept_organization_partnership(shop).unwrap();
+        let saved = world.snapshot();
+        let mut restored = bootstrap.restore_native(serde_json::from_value(saved.clone()).unwrap()).unwrap();
+        assert!(restored.snapshot() == saved);
+        assert_eq!(restored.ledger.default_account(firm).unwrap().cash, capital);
+        restored.travel_player(route, "place:paris").unwrap();
+        restored.advance_migrated_domains(duration, &BTreeMap::new()).unwrap();
+        restored.travel_player(route, place).unwrap();
+        restored.advance_migrated_domains(duration, &BTreeMap::new()).unwrap();
+        assert_eq!(restored.named_people().count(), named + 3);
+        assert_eq!(restored.population.unclassified(&pool), Some(anonymous - 3));
+
+        let mut other = bootstrap.create("german_empire").unwrap();
+        let traveler = "person:formal_generated_country_fra_0001";
+        other.travel_person(traveler, route, place).unwrap();
+        other.advance_migrated_domains(duration, &BTreeMap::new()).unwrap();
+        assert_eq!(other.current_place(traveler), Some(place));
+        assert!(other.organization(shop).is_some());
+        assert_eq!(other.player_current_place(), Some("place:berlin"));
+    }
 
     #[test]
     fn old_native_slot_registers_residents_and_zero_accounts_once() {

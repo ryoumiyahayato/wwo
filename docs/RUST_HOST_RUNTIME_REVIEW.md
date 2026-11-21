@@ -20,7 +20,7 @@ Windows 正式入口 `wwo-map-lab --play` 使用 Rust 的 `NativeSession`、`Ini
 
 同日用后台正式入口在特鲁瓦点选 50 km 格 `(2, -2)` 和 25 km 格 `(5, -3)`。从 25 km 格进入，正式 Z7 高程上出现 20 辆车。手动开火使所选车辆弹药从 12 减至 11。RTX 3050 Laptop GPU、Vulkan、1280×720，20 辆车在场时车辆视角观测到约 58 FPS。交战推进 39.75 模拟秒后红方胜出。蓝方损失 10 辆，红方损失 8 辆、余 6 发。返回世界后保存手动档和退出自动档。重启从自动档恢复，再进入原 50 km 格，记录的战果、命中、弹药和格号一致。其他地区及更高负载仍待核验。
 
-组织经营阶段的正式窗口记录了玩家向伦敦燃料商行追加 1,000 生丁，以及该商行的 1 吨煤运抵巴黎。货款 85 生丁，运费 144 生丁。巴黎市场实收资金不足，货批留在巴黎。[操作入口、六城范围与窗口截图](organization-life/README.md)
+组织经营阶段的正式窗口记录了玩家向伦敦燃料商行追加 1,000 生丁，以及该商行的 1 吨煤运抵巴黎。货款 85 生丁，运费 144 生丁。巴黎市场实收资金不足，货批留在巴黎。另一次开局中，互助会介绍的柜台雇员完成一小时工作，次日收到 3 生丁工资。[组织操作与窗口截图](organization-life/README.md)
 
 ## 运行链和模块归属
 
@@ -31,7 +31,7 @@ Windows 正式入口 `wwo-map-lab --play` 使用 Rust 的 `NativeSession`、`Ini
 | 静态 3D | `landmarks.rs`、`landmark.wgsl` | 七个地标，巴黎和伦敦共三个局部街区。内嵌 GLB、按视野解码及上传、深度和两档网格 |
 | 装甲陆战 | `land_battle.rs`、`battlefield_terrain.rs`、`battle_view.rs`、`battle_render.rs` | 正式法国 Lambert-93 网格已实测选格、入场和手动开火。采用 Z7 QPK 粗高程及通用车辆。源码已有 20 辆车、四个编队、近景操控、20 Hz 模拟、地面碰撞、AI、战果及原生持久化。法国 4 米高程未覆盖 |
 | UI 与人物 | `lobby.rs`、`prologue_ui.rs`、`formal_ui.rs`、`formal_character.rs`、`formal_work.rs` | 六国序章、履历、识字、休息和有限病伤处理、死亡与人口归属更新。玩家可查询在地组织、接受岗位介绍、应聘并登记班次 |
-| 组织与经营 | `formal_organization_registration.rs`、`formal_organization_activity.rs`、`formal_counter.rs` | 六城共七家模拟企业、六个互助会。巴黎两家企业按缺料和授权采购。其他五城的商号按客户预留的货款、代办费和实际班次交货。企业账户可承担采购与运费 |
+| 组织与经营 | `formal_organization_registration.rs`、`formal_organization_activity.rs`、`formal_counter.rs` | 六城开局共七家模拟企业、六个互助会。其他符合人口、市场及需求条件的城市在具名乘客到达后登记。巴黎按缺料和授权采购，商号按客户准备金和实际班次交货。企业账户承担购货与运费 |
 | 世界与生计 | `formal_bootstrap.rs`、`formal_livelihood.rs`、`formal_enterprise.rs`、`formal_household.rs` | 同一时钟处理统计供需与货运、现货与货批、班次与工资、巴黎有限原料生产与口粮、共同住户和迁居 |
 | 交通 | `formal_travel_live.rs`、`formal_freight.rs`、`transport/operations.rs`、`transport_scene.rs` | 逐段旅行、通勤和实物货运使用同一套线路预约。支持中途下车与退款、货批交割和市场回购。地图车辆由正式运输事件驱动。原生档恢复在途状态和预约 |
 | 原生存档 | `native_start.rs` → `formal_save.rs` → `WorldBootstrap::restore_native` | `wwo_rust_formal_world_v1` 槽位。手动保存、保存并退出、重新启动后恢复 |

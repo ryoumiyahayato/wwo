@@ -135,11 +135,12 @@ impl InitialWorld {
             || self.player_current_place()? != org.place || !org.goods.iter().any(|id| id == good) {
             return None;
         }
-        let price = self.macro_economy.markets().get(&org.unit)?.commodities.get(good)?.price_centimes;
+        let unit = self.market_unit_at(&org.place)?;
+        let price = self.macro_economy.markets().get(unit)?.commodities.get(good)?.price_centimes;
         if price <= 0 { return None; }
         let qty = quantity_milli.unwrap_or_else(|| (1000 + price - 1) / price);
         load(qty).ok()?;
-        let amount = self.macro_economy.quote(&org.unit, good, qty).ok()?;
+        let amount = self.macro_economy.quote(unit, good, qty).ok()?;
         (self.ledger.default_account(org.firm.as_deref()?)?.available >= amount).then_some((qty, price, amount))
     }
 
@@ -157,13 +158,12 @@ impl InitialWorld {
         load(quantity_milli)?;
         let origin = self.last_station().to_owned();
         let unit = self
-            .sources
-            .population_unit_at(&origin)
-            .ok_or_else(|| invalid("当前地点没有正式统计市场。"))?;
+            .market_unit_at(&origin)
+            .ok_or_else(|| invalid("当前地点没有正式统计市场。"))?.to_owned();
         let market = self
             .macro_economy
             .markets()
-            .get(unit)
+            .get(&unit)
             .ok_or_else(|| invalid("当前统计市场不存在。"))?
             .id
             .clone();
@@ -195,7 +195,7 @@ impl InitialWorld {
             u32::try_from(self.clock.current_day()).map_err(|_| invalid("正式日期超出范围。"))?;
         let minute = self.clock.snapshot().total_minutes;
         let (paid, character) = self.macro_economy.sell_existing_stock(
-            unit,
+            &unit,
             &market,
             good,
             quantity_milli,
@@ -335,8 +335,7 @@ impl InitialWorld {
     pub fn freight_sale_quote(&self, id: u64) -> io::Result<(i64, i64)> {
         let lot = self.owned_lot(id)?;
         let unit = self
-            .sources
-            .population_unit_at(lot.delivery()?)
+            .market_unit_at(lot.delivery()?)
             .ok_or_else(|| invalid("交割地没有统计市场。"))?;
         let bid = self
             .macro_economy
@@ -357,12 +356,11 @@ impl InitialWorld {
         let lot = &self.freight.lots[&id];
         let destination = lot.delivery()?.to_owned();
         let unit = self
-            .sources
-            .population_unit_at(&destination)
-            .expect("quoted destination market");
+            .market_unit_at(&destination)
+            .expect("quoted destination market").to_owned();
         let reference = format!("freight-lot:{id}:{destination}");
         let revenue = self.macro_economy.receive_player_freight(
-            unit,
+            &unit,
             &lot.good,
             lot.quantity_milli,
             quoted_unit_price,
@@ -398,8 +396,7 @@ impl InitialWorld {
             let company = self.work_opening.organization(&lot.owner).and_then(|id| self.organization(id));
             let units = load(lot.quantity_milli)?;
             let unit = self
-                .sources
-                .population_unit_at(&lot.origin)
+                .market_unit_at(&lot.origin)
                 .ok_or_else(|| invalid("存档购货地不存在。"))?;
             let market = self
                 .macro_economy
@@ -507,8 +504,7 @@ impl InitialWorld {
                 } => {
                     sales += 1;
                     let buyer = self
-                        .sources
-                        .population_unit_at(destination)
+                        .market_unit_at(destination)
                         .and_then(|unit| self.macro_economy.markets().get(unit));
                     let sale_ref = format!("freight-lot:{id}:{destination}");
                     place == Some(destination.as_str())

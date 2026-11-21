@@ -6,7 +6,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io};
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub(crate) struct WorkOpening {
     jobs: Vec<Job>,
     firms: Vec<Firm>,
@@ -15,7 +15,7 @@ pub(crate) struct WorkOpening {
     labor_response_policies: Vec<LaborResponse>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct Job {
     pub id: String,
     pub employer: String,
@@ -28,7 +28,7 @@ pub struct Job {
     notice_delay: i64,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 struct Firm {
     id: String,
     account_id: String,
@@ -38,13 +38,13 @@ struct Firm {
     regional: bool,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 struct Actor { id: String, skill: u64, control: String }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 struct Notice { actor: String, kind: String, candidate: String, delivery_day: i64 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 struct LaborResponse { actor: String, arrears_days: i64 }
 
 #[derive(Default, Deserialize, Serialize)]
@@ -82,8 +82,9 @@ impl WorkOpening {
         Ok(())
     }
 
-    pub(crate) fn register_regional(&mut self, directory: &crate::formal_bootstrap::organization_registration::OrganizationDirectory) -> io::Result<()> {
-        for (organization, terms) in directory.regional_jobs() {
+    pub(crate) fn register_regional<'a>(&mut self, organizations: impl Iterator<Item = &'a crate::formal_bootstrap::organization_registration::Organization>) -> io::Result<()> {
+        for organization in organizations {
+            let Some(terms) = organization.terms else { continue };
             let firm = organization.firm.as_ref().ok_or_else(|| invalid("营业岗位缺少雇主"))?;
             let id = organization.jobs.first().ok_or_else(|| invalid("营业组织缺少岗位"))?;
             let account = organization.account.as_ref().ok_or_else(|| invalid("营业组织缺少账户"))?;

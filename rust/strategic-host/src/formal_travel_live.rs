@@ -267,6 +267,9 @@ impl InitialWorld {
                 self.attend_commute();
             }
         }
+        if self.travel.passenger.is_none() {
+            if let Some(place) = self.travel.place.clone() { self.register_arrival_organizations(&place)?; }
+        }
         Ok(())
     }
 
@@ -280,7 +283,8 @@ impl InitialWorld {
             self.refund_passage(&person, refund, id)?;
             self.transport.finish(id);
             self.travel.named.remove(&person);
-            self.travel.stations.insert(person, station);
+            self.travel.stations.insert(person, station.clone());
+            self.register_arrival_organizations(&station)?;
         }
         Ok(())
     }

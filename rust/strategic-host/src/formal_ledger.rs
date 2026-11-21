@@ -84,15 +84,34 @@ struct Receipt<'a> {
 }
 
 impl Ledger {
+    /// Open related zero-balance accounts together after checking their identifiers.
+    pub(crate) fn open_merchant_accounts<'a>(
+        &mut self, firm: &str, account: &str, residents: impl Iterator<Item = &'a str>,
+    ) -> io::Result<()> {
+        let mut personal = BTreeMap::new();
+        for owner in residents {
+            let key = self.new_personal_account(owner)?;
+            if key == account || personal.insert(key, owner).is_some() { return Err(invalid("duplicate merchant account")); }
+        }
+        self.open_firm(firm, account, 0)?;
+        for (id, owner) in personal { self.accounts.insert(id, Account::new(owner, PERSONAL_ROLE, 0)); }
+        Ok(())
+    }
+
     pub(crate) fn open_person_cash(&mut self, owner: &str) -> io::Result<()> {
+        let account = self.new_personal_account(owner)?;
+        self.accounts.insert(account, Account::new(owner, PERSONAL_ROLE, 0));
+        Ok(())
+    }
+
+    fn new_personal_account(&self, owner: &str) -> io::Result<String> {
         let id = owner.strip_prefix("person:").filter(|id| !id.is_empty())
             .ok_or_else(|| invalid("invalid runtime personal account owner"))?;
         let account = format!("account:personal:{id}");
         if self.accounts.contains_key(&account) || self.default_account(owner).is_some() {
             return Err(invalid("personal account is already open"));
         }
-        self.accounts.insert(account, Account::new(owner, PERSONAL_ROLE, 0));
-        Ok(())
+        Ok(account)
     }
 
     pub(crate) fn open_firm(&mut self, owner: &str, account: &str, cash: i64) -> io::Result<()> {
