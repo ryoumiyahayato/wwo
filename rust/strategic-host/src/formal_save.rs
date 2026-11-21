@@ -386,6 +386,7 @@ impl SavedWorld {
         let clock = GameClock::restore(ClockSnapshot {
             total_minutes: integer(field(snapshot, "total_minutes")?)?,
             minute_remainder: integer(field(snapshot, "minute_remainder")?)?,
+            subminute_millis: 0,
         })?;
         for (domain, time_field, expected) in [
             ("economy", "total_hour", clock.current_hour()),

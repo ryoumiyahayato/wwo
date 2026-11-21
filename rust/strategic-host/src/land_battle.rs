@@ -3,10 +3,9 @@ use glam::{Vec2, Vec3};
 use serde::{Deserialize, Serialize};
 
 // Fictional training rules. Distances and rates tune the game scenario.
-const STEPS_PER_SECOND: u16 = 20;
+const STEPS_PER_SECOND: u16 = 1000 / crate::formal_clock::FIXED_STEP_MILLIS as u16;
 const STEP: f32 = 1.0 / STEPS_PER_SECOND as f32;
-pub const TICK_INTERVAL: std::time::Duration = std::time::Duration::from_millis(1000 / STEPS_PER_SECOND as u64);
-pub const WORLD_MINUTES_PER_STEP: i64 = 3;
+pub const TICK_INTERVAL: std::time::Duration = std::time::Duration::from_millis(crate::formal_clock::FIXED_STEP_MILLIS);
 const VEHICLES_PER_FORMATION: usize = 5;
 const FORMATION_COUNT: usize = 4;
 const UNIT_COUNT: usize = FORMATION_COUNT * VEHICLES_PER_FORMATION;
@@ -209,7 +208,9 @@ impl LandBattle {
         self.validate()
     }
 
-    pub(crate) fn advance_steps(&mut self, steps: u64, terrain: &BattlefieldTerrain, mut controls: LandBattleControls) {
+    pub(crate) fn advance_steps(
+        &mut self, steps: u64, terrain: &BattlefieldTerrain, mut controls: LandBattleControls,
+    ) -> LandBattleControls {
         let fire_source = controls.fire_once.then(|| self.selected_ammunition()).flatten();
         for _ in 0..steps {
             if self.outcome.is_some() { break; }
@@ -219,6 +220,7 @@ impl LandBattle {
                 controls.fire_once = false;
             }
         }
+        controls
     }
 
     pub fn conclude(&mut self) {
@@ -245,7 +247,6 @@ impl LandBattle {
     pub fn validate(&self) -> bool {
         self.units.len() == UNIT_COUNT
             && (1..=UNIT_COUNT as u32 / 2).contains(&self.selected.0)
-            && self.elapsed_steps <= (i64::MAX / WORLD_MINUTES_PER_STEP) as u64
             && self.idle_steps <= IDLE_DISENGAGEMENT_STEPS
             && (self.idle_steps < IDLE_DISENGAGEMENT_STEPS || self.outcome.is_some())
             && u64::from(self.idle_steps) <= self.elapsed_steps
