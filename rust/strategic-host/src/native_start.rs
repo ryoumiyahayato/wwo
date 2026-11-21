@@ -1,3 +1,5 @@
+mod organizations;
+
 use crate::{
     desktop_start::{lock_profile, TICK_INTERVAL},
     formal_ui::{OralWorkFeedback, Session, Slot},
@@ -270,14 +272,41 @@ impl NativeSession {
         let work_panel = self.relations.as_deref() == Some("work");
         let oral_panel = self.relations.is_none();
         match verb {
-            "open" => { self.relations = Some("relations".into()); self.pending_job = None; }
+            "open" => { self.relations = Some("relations".into()); self.pending_job = None; self.work_feedback.clear(); }
             "close" => { self.relations = None; self.pending_job = None; self.selected_organization.clear(); }
-            "drawer" if matches!(id, "relations" | "work") => {
+            "drawer" if matches!(id, "relations" | "local" | "work") => {
                 self.relations = Some(id.to_owned());
                 self.pending_job = None;
+                self.selected_organization.clear();
+                self.work_feedback.clear();
             }
-            "select" if world.employment().is_some_and(|(_, _, org)| org == id) => self.selected_organization = id.into(),
-            "back" => self.selected_organization.clear(),
+            "select" if world.organization(id).is_some_and(|org|
+                organizations::accessible(world, org, self.relations.as_deref().unwrap_or_default())) => {
+                self.selected_organization = id.into();
+                self.pending_job = None;
+                self.work_feedback.clear();
+            }
+            "back" => { self.selected_organization.clear(); self.pending_job = None; self.work_feedback.clear(); }
+            "oral_referral" if oral_panel && !world.can_read_opening_language() => {
+                self.oral_work_feedback = world.request_job_referral(id).err().map(|_| OralWorkFeedback::Unavailable);
+                self.pending_job = None;
+            }
+            "work_action" if !self.selected_organization.is_empty() => {
+                let Some(org) = world.organization(&self.selected_organization).filter(|org|
+                    organizations::accessible(world, org, self.relations.as_deref().unwrap_or_default())) else { return; };
+                let enabled = organizations::details(world,org).iter().filter_map(|row|row["actions"].as_array())
+                    .flatten().any(|action|action["enabled"]==true && action["id"]==id);
+                if !enabled {self.work_feedback="当前条件已改变。".into(); return;}
+                if let Some(job) = id.strip_prefix("person:job_request:") {
+                    self.pending_job=Some(job.into());
+                    self.work_feedback.clear();
+                } else {
+                    let result = if id.starts_with("organization:") {
+                        organizations::act(world,&self.selected_organization,id)
+                    } else {perform_work_action(world,id)};
+                    self.work_feedback=result.unwrap_or_else(|error|error.to_string());
+                }
+            }
             "work_action" if work_panel || oral_panel => {
                 if let Some(job) = id.strip_prefix("person:job_request:") {
                     let available = if oral_panel {
@@ -304,7 +333,7 @@ impl NativeSession {
                     };
                 }
             }
-            "work_confirm" if work_panel || oral_panel => {
+            "work_confirm" if work_panel || oral_panel || !self.selected_organization.is_empty() => {
                 if let Some(job) = self.pending_job.take() {
                     if oral_panel {
                         let available = world.oral_work_offer().is_some_and(|(row, spots)| row.id == job && spots > 0);
@@ -506,6 +535,7 @@ impl NativeSession {
             let kind = match receipt.kind {
                 "opening_cash" => "开局现金", "purchase" => "购买", "wage" => "工资",
                 "transport_fare" => "运输费用", "transport_refund" => "运输退款", "freight_sale" => "出售货批",
+                "equity_issue" => "企业出资", "service_fee" => "服务费",
                 kind => kind
             };
             json!({"description":format!("{} · {kind}", minute_text(receipt.minute)),
@@ -518,6 +548,12 @@ impl NativeSession {
         }).collect();
         let mut character = serde_json::to_value(world.character_for_player())?;
         character["settled_day"] = json!(clock.current_day());
+        if !world.can_read_opening_language() {
+            character["oral_contacts"] = json!(world.player_referral_contacts());
+            let office = world.organizations().find(|org| Some(org.place.as_str()) == place
+                && world.available_job_referral(&org.id).is_some());
+            character["oral_referral"] = json!(office.map(|org| json!({"id":org.id,"label":org.name})));
+        }
         let oral_work = world.oral_work_employment().map(|(job, booked)| {
             (job, "native:work".to_owned(), json!({
                 "kind":"contract", "booked":booked, "can_book":world.can_book_work(),
@@ -530,11 +566,12 @@ impl NativeSession {
             }))
         }));
         let oral_work = oral_work.map(|(job, action, state)| json!({
-            "employer":employer_label(&job.employer),
+            "employer":employer_label(world, &job.employer),
+            "referred":world.player_knows_job_by_referral(&job.id),
             "employer_english":match job.employer.as_str() {
                 "firm:opening_paris_workshop" => "Paris workshop",
                 "firm:opening_paris_bakery" => "Paris bakery",
-                id => employer_label(id),
+                id => employer_label(world,id),
             },
             "hours":job.hours,"wage_per_hour":job.wage_per_hour,"wage_delay":job.wage_delay,
             "action":action,"revision":self.work_revision,"state":state,
@@ -606,8 +643,15 @@ impl NativeSession {
     }
 
     fn work_view(&self, world: &InitialWorld, drawer: &str) -> Value {
+        let confirmation = self.pending_job.as_ref().map(|_| json!({"title":"确认就业","body":"接受该岗位的工时和工资条件。"}));
+        if drawer != "work" {
+            let rows = organizations::directory(world, drawer);
+            let selected = world.organization(&self.selected_organization).filter(|org|organizations::accessible(world,org,drawer));
+            return json!({"selected":selected.map_or("",|org|org.id.as_str()),"rows":rows,"drawer":drawer,
+                "has_work":true,"has_local":true,"work_revision":self.work_revision,"work_feedback":self.work_feedback,
+                "work":selected.map(|org|organizations::details(world,org)).unwrap_or_default(),"confirmation":confirmation});
+        }
         let mut work = Vec::new();
-        let mut organizations = Vec::new();
         let current = world.player_current_place();
         let home = place_label(world, world.player_home());
         let location = if let Some(plan) = world.travel_plan() {
@@ -640,7 +684,7 @@ impl NativeSession {
 
         if let Some(offer) = world.local_bread_offer() {
             let affordable = world.balance().is_some_and(|cash| cash.available >= offer.price);
-            let detail = format!("{} · 可交付 {} 千克 · {} / 千克", employer_label(offer.firm), offer.quantity, offer.price);
+            let detail = format!("{} · 可交付 {} 千克 · {} / 千克", employer_label(world, offer.firm), offer.quantity, offer.price);
             let label = if affordable { "买 1 千克" } else { "现金不足" };
             work.push(json!({"label":"本地面包", "details":[detail],
                 "actions":[work_action(label, &format!("native:buy_bread|{}|{}", offer.site, offer.price), affordable)]}));
@@ -648,15 +692,13 @@ impl NativeSession {
             work.push(json!({"label":"本地面包", "details":["当前没有可交付的本地报价"]}));
         }
 
-        if let Some((job, booked, organization)) = world.employment() {
-            organizations.push(json!({"id":organization,"label":employer_label(&job.employer),"role":"雇员",
-                "kind":"劳动关系","place":job.place,"basis":"开局配置"}));
+        if let Some((job, booked, _)) = world.employment() {
             let can_book = world.can_book_work();
             let status = if booked { "已登记本日工作" }
                 else if current != Some(job.place.as_str()) { "劳动合同有效 · 当前不在工作地点" }
                 else if can_book { "可登记本日工作" }
                 else { "劳动合同有效 · 本日无法登记" };
-            work.push(json!({"label":employer_label(&job.employer),
+            work.push(json!({"label":employer_label(world, &job.employer),
                 "details":[format!("每班 {} 小时 · 时薪 {} · {} 日后发薪",job.hours,job.wage_per_hour,job.wage_delay),
                            status],
                 "actions":[work_action("登记工作", "native:work", can_book),
@@ -667,14 +709,13 @@ impl NativeSession {
                 work.push(json!({"label":"工作", "details":["当前地点没有可申请的已知岗位"]}));
             }
             for (job, vacancies) in jobs {
-                work.push(json!({"label":employer_label(&job.employer),
+                work.push(json!({"label":employer_label(world, &job.employer),
                     "details":[format!("空缺 {vacancies} · 每班 {} 小时 · 时薪 {}",job.hours,job.wage_per_hour)],
                     "actions":[work_action("申请", &format!("person:job_request:{}",job.id), vacancies > 0)]}));
             }
         }
 
-        let confirmation = self.pending_job.as_ref().map(|_| json!({"title":"确认就业","body":"接受该岗位的工时和工资条件。"}));
-        json!({"selected":self.selected_organization,"rows":organizations,"drawer":drawer,"has_work":true,
+        json!({"selected":"","rows":[],"drawer":drawer,"has_work":true,"has_local":true,
             "work_title":"生计、工作与旅行","work_revision":self.work_revision,"work_feedback":self.work_feedback,
             "work":work,"confirmation":confirmation})
     }
@@ -716,12 +757,9 @@ fn place_label<'a>(world: &'a InitialWorld, place: &'a str) -> &'a str {
     world.sources().places().get(place).map_or(place, |entry| entry.name.as_str())
 }
 
-fn employer_label(id: &str) -> &str {
-    match id {
-        "firm:opening_paris_workshop" => "巴黎工坊",
-        "firm:opening_paris_bakery" => "巴黎面包坊",
-        _ => id,
-    }
+fn employer_label<'a>(world: &'a InitialWorld, id: &'a str) -> &'a str {
+    world.organizations().find(|org| org.firm.as_deref() == Some(id))
+        .map_or(id, |org| org.name.as_str())
 }
 
 fn minute_text(minute: i64) -> String {
@@ -794,7 +832,8 @@ impl TransportPage {
                 FreightState::Interrupted {..} => "中断", FreightState::Delivered {..} => "已交割",
                 FreightState::Sold {..} => "已出售",
             };
-            json!({"id":lot.id,"label":format!("#{} · {name} · {status}",lot.id),"selected":self.lot==Some(lot.id)})
+            let owner = if lot.owner() == world.player().id {"个人"} else {employer_label(world,lot.owner())};
+            json!({"id":lot.id,"label":format!("#{} · {owner} · {name} · {status}",lot.id),"selected":self.lot==Some(lot.id)})
         }).collect();
         let mut freight_lines = Vec::new();
         let mut freight_actions = Vec::new();

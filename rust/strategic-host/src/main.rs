@@ -546,12 +546,22 @@ impl Host {
                     .filter(|r|r.work_revision==revision)
                     .and_then(|r|r.work.get(row)).and_then(|r|r.actions.get(index))
                     .filter(|a|a.enabled).map(|a|a.id.clone());
-                if let Some(id)=id{self.emit(Request::Relations{verb:"work_action",id:&id});}
+                if id.as_deref()==Some("organization:freight_page"){
+                    self.hud_action(HudCommand::Page(HudPage::Map));
+                    self.action(Action::Mode(Mode::Economic));
+                    self.market_command("open",0);
+                    self.market_command("freight",0);
+                } else if let Some(id)=id{self.emit(Request::Relations{verb:"work_action",id:&id});}
             }
             HudCommand::OralWorkAction(revision)=>{
                 let id=self.state.session.as_ref().and_then(|s|s.activities.as_ref())
                     .and_then(|a|a.oral_work_action(revision)).map(str::to_owned);
                 if let Some(id)=id{self.emit(Request::Relations{verb:"work_action",id:&id});}
+            }
+            HudCommand::OralReferral=>{
+                let id=self.state.session.as_ref().and_then(|s|s.character.as_ref())
+                    .and_then(|c|c.oral_referral.as_ref()).map(|office|office.id.clone());
+                if let Some(id)=id {self.emit(Request::Relations{verb:"oral_referral",id:&id});}
             }
             HudCommand::WorkConfirm(confirmed)=>{
                 self.emit(Request::Relations{verb:if confirmed{"work_confirm"}else{"work_cancel"},id:""});
@@ -564,6 +574,7 @@ impl Host {
                 }
             }
             HudCommand::Relation(index)=>{
+                self.hud.market_offset=0;
                 let id=index.and_then(|i|self.state.session.as_ref()?.relations.as_ref()?.rows.get(i))
                     .map(|row|row.id.clone());
                 match (index,id) {
@@ -685,8 +696,9 @@ impl Host {
             HudCommand::MarketScroll(delta)=>{
                 let count=self.state.session.as_ref().map_or(0,|s| {
                     if self.hud.page==HudPage::Property{return s.property.len();}
+                    if self.hud.page==HudPage::Character{return s.character.as_ref().map_or(0,|c|c.oral_contacts.len());}
                     if self.hud.page==HudPage::Relations{return s.relations.as_ref().map_or(0,|view|{
-                        if view.drawer=="work"{view.work.len()}else{view.rows.len()}
+                        if view.drawer=="work" || !view.selected.is_empty(){view.work.len()}else{view.rows.len()}
                     });}
                     let Some(v)=&s.market else{return 0;};
                     match self.hud.market_chooser.unwrap_or(&v.content){
