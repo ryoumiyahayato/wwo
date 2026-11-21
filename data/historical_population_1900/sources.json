@@ -1307,6 +1307,24 @@
     "collection": "india_comparable"
   },
   {
+    "id": "jp_cabinet_population_1898_original",
+    "title": "日本帝國人口統計 明治三十一年",
+    "publisher": "Bureau of Statistics, Imperial Cabinet of Japan, March 1901",
+    "url": "https://doi.org/10.11501/805976",
+    "locator": "Table 1, printed p. 335. Table 3, pp. 338–339. Table 4, pp. 340–343",
+    "rights": "The National Diet Library catalog marks this edition Public Domain Mark. Historical published facts transcribed from the original government statistical tables.",
+    "raw_path": "structure.jsonl",
+    "catalog_url": "https://ndlsearch.ndl.go.jp/books/R100000002-I000000454655",
+    "table_urls": [
+      "https://dl.ndl.go.jp/api/iiif/805976/R0000174/full/3000,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/805976/R0000176/full/1900,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/805976/R0000177/full/1500,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/805976/R0000178/full/3000,/0/default.jpg"
+    ],
+    "interpretation_url": "https://www.stat.go.jp/museum/toukei150/shiryo/shiryo29.html",
+    "collection": "japan_population_structure"
+  },
+  {
     "id": "jp_cabinet_1909_resident_prefectures",
     "title": "道府縣現住人口 自明治十七年至同四十年",
     "publisher": "内閣統計局, 1909",
@@ -1684,6 +1702,41 @@
     "collection": "polar_presence"
   },
   {
+    "id": "yokoyama_japan_lower_classes_1899",
+    "title": "日本之下層社会",
+    "publisher": "横山源之助, 教文館. First edition, 1899. National Diet Library Digital Collections.",
+    "publication_year": 1899,
+    "url": "https://dl.ndl.go.jp/pid/798849/1/30",
+    "locator": "Printed pp. 32–33, Shin’ami household daily expenditure account.",
+    "rights": "Public-domain original. The collection transcribes account quantities and amounts.",
+    "note": "Publication is dated. The household account has no stated observation date.",
+    "collection": "pop_traits"
+  },
+  {
+    "id": "rutten_borinage_miner_monograph_95",
+    "title": "Mineur du bassin houiller du Couchant de Mons (Borinage - Belgique)",
+    "publisher": "Ceslas Rutten, Les Ouvriers des Deux Mondes, monograph 95. 1901 fascicle, 1904 collected volume. Digital edition by Jean-Damien Généro, TIME-US and Centre de recherches historiques (CNRS-EHESS), updated 2025-04-02.",
+    "publication_year": 1901,
+    "url": "https://ouvriersdeuxmondes.huma-num.fr/monographie/mineur-bassin-houiller-couchant-mons-95#part_02_05_15",
+    "locator": "Printed p. 234, §15, household annual food account, Poids consommé column. §§8–9 describe the household’s potato production. Printed pp. 216–217, §§2–3, household membership and religious practice.",
+    "rights": "Etalab Open Licence 2.0. Archive record and licence at https://nakala.fr/10.34847/nkl.bb6dd9wa.",
+    "monograph_pdf_url": "https://ouvriersdeuxmondes.huma-num.fr/monographie/mineur-bassin-houiller-couchant-mons-95/download/pdf",
+    "note": "The town is anonymised as Commune D. A fifth household member, their older daughter aged 17, is outside the four-person food account.",
+    "collection": "pop_traits"
+  },
+  {
+    "id": "quran_al_maidah_5_3",
+    "title": "Qur’an, al-Māʾidah 5:3",
+    "publisher": "Arabic text and verse locator, Quranic Arabic Corpus, University of Leeds. Historical English cross-reference in George Sale’s translation, first published in 1734.",
+    "publication_year": null,
+    "url": "https://corpus.quran.com/wordmorphology.jsp?location=%285%3A3%3A1%29",
+    "locator": "Sura 5, verse 3, opening food restrictions and closing necessity clause.",
+    "rights": "Ancient source text. The collection paraphrases the passage and reproduces no editorial text or translation.",
+    "historical_edition_url": "https://religion.antropo.es/_libros/biblioteca/Coran.Ingles.1734.George.Sale.pdf",
+    "note": "The norm is attested before 1900. The source has no local practice survey or dated population observation.",
+    "collection": "pop_traits"
+  },
+  {
     "id": "ro_colescu_1899_census_report",
     "title": "Recensământul general al populațiunei României din decembrie 1899: rezultate definitive",
     "publisher": "Serviciul Statisticei Generale, Ministerul Domeniilor (1905)",
@@ -1834,6 +1887,35 @@
     "rights": "Numeric facts transcribed from 1911 publication; no reproduction of its layout. Canton totals cross-checked against Statistisches Jahrbuch der Schweiz 1919, III.a.3.",
     "independent_url": "https://istmat.org/files/uploads/53038/statistisches_jahrbuch_der_schweiz_1919.pdf",
     "collection": "swiss"
+  },
+  {
+    "id": "jp_tokyo_prefecture_statistics_1900",
+    "title": "東京府統計書 明治三十三年",
+    "publisher": "Tokyo Prefecture",
+    "url": "https://doi.org/10.11501/806580",
+    "locator": "Table 26, 現住者庶業一 (市部), printed pp. 63–75. Table 27, 現住者庶業二 (郡部), pp. 75–80. Table-end notes on pp. 75 and 80 explain the distinct counts.",
+    "rights": "The National Diet Library catalog marks the edition Public Domain Mark. Historical factual counts transcribed from the original tables.",
+    "raw_path": "structure.jsonl",
+    "catalog_url": "https://ndlsearch.ndl.go.jp/books/R100000039-I806580",
+    "table_urls": [
+      "https://dl.ndl.go.jp/api/iiif/806580/R0000042/full/3200,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/806580/R0000048/full/3200,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/806580/R0000050/full/3200,/0/default.jpg",
+      "https://dl.ndl.go.jp/api/iiif/806580/R0000051/full/3200,/0/default.jpg"
+    ],
+    "collection": "tokyo_occupation_1900"
+  },
+  {
+    "id": "jp_cabinet_local_occupations_1913_tokyo",
+    "title": "現住人口静態ニ關スル統計材料",
+    "publisher": "Bureau of Statistics, Imperial Cabinet of Japan, February 1913",
+    "url": "https://www.niph.go.jp/toshokan/koten/Statistics/PDF/000183550005.pdf#page=6",
+    "locator": "Part II, 地方職業別現住人口及戶數, printed p. 2. Meiji 33 matrix and its footnotes. PDF page 6.",
+    "rights": "Historical factual counts transcribed from the 1913 government publication. The National Institute of Public Health scan is linked.",
+    "raw_path": "structure.jsonl",
+    "catalog_url": "https://www.niph.go.jp/toshokan/koten/Statistics/index_k1.html",
+    "interpretation_url": "https://www.stat.go.jp/museum/toukei150/shiryo/shiryo38.html",
+    "collection": "tokyo_occupation_1900"
   },
   {
     "id": "venezuela_1904_pan_american_handbook",

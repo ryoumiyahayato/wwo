@@ -56,9 +56,10 @@ pub fn city_population_reference(city_key: &str) -> io::Result<Option<Value>> {
     Ok(None)
 }
 
-#[derive(Serialize)]
+#[derive(Default, Serialize)]
 pub struct PopulationArchive {
     pub geographies: Vec<Value>,
+    pub geography_children: Vec<Value>,
     pub dated_population: Vec<Value>,
     pub dated_structure: Vec<Value>,
     /// Research candidates can differ from the catalogue unit in scope or date.
@@ -93,29 +94,48 @@ pub fn structural_coverage_reference(unit: &str) -> io::Result<Option<Value>> {
     })))
 }
 
+pub(super) fn historical_source(id: &str) -> io::Result<Option<Value>> {
+    Ok(sources()?.iter().find(|row| row["id"].as_str() == Some(id)).cloned())
+}
+
+fn sources() -> io::Result<&'static [Value]> {
+    static SOURCES: OnceLock<Result<Vec<Value>, serde_json::Error>> = OnceLock::new();
+    let bytes = include_bytes!("../../../../data/historical_population_1900/sources.json");
+    SOURCES.get_or_init(|| serde_json::from_slice(bytes)).as_ref().map(Vec::as_slice)
+        .map_err(|error| invalid(error.to_string()))
+}
+
 /// Historical evidence can be queried independently of whether a place has an
 /// account in the current game. Matching rows can use overlapping scopes and dates.
 pub fn population_archive(unit: &str) -> io::Result<Option<PopulationArchive>> {
+    Ok(population_archive_scope(unit)?.0)
+}
+
+pub(super) fn population_archive_scope(unit: &str) -> io::Result<(Option<PopulationArchive>, Option<Value>)> {
     let geography = include_bytes!("../../../../data/historical_population_1900/geography_1900.jsonl.gz");
     let population = include_bytes!("../../../../data/historical_population_1900/population_1900.jsonl.gz");
     let structure = include_bytes!("../../../../data/historical_population_1900/demography_1900.jsonl.gz");
-    let sources = include_bytes!("../../../../data/historical_population_1900/sources.json");
-    let mut archive = PopulationArchive {
-        geographies: Vec::new(), dated_population: Vec::new(), dated_structure: Vec::new(),
-        candidate_research_population: Vec::new(), sources: Vec::new(),
-    };
+    let mut archive = PopulationArchive::default();
     for row in catalogue_rows(geography) {
         let row = row?;
         if row["id"].as_str() == Some(unit) {
             archive.geographies.push(row);
+        } else if row["parent"].as_str() == Some(unit) || contains_text(&row["parent_ids"], unit) {
+            archive.geography_children.push(row);
         }
     }
     let dated_units = linked_units(&archive.geographies, "historical_observation_ids");
     let research_units = linked_units(&archive.geographies, "study_candidates");
+    let city_key = unit.strip_prefix("city:").or_else(|| {
+        if unit.starts_with("place:") && dated_units.len() == 1 { dated_units.first().copied() } else { None }
+    });
+    let city_reference = city_key.map(city_population_reference).transpose()?.flatten();
     for row in catalogue_rows(population) {
         let row = row?;
         let Some(source_unit) = row["unit_id"].as_str() else { continue; };
-        if source_unit == unit || row["wwo_id"].as_str() == Some(unit) || dated_units.contains(source_unit) {
+        if source_unit == unit || row["wwo_id"].as_str() == Some(unit) || dated_units.contains(source_unit)
+            || city_reference.as_ref().is_some_and(|city| row["city_key"] == city["city_key"])
+        {
             archive.dated_population.push(row);
         } else if research_units.contains(source_unit) {
             archive.candidate_research_population.push(row);
@@ -123,17 +143,40 @@ pub fn population_archive(unit: &str) -> io::Result<Option<PopulationArchive>> {
     }
     for row in catalogue_rows(structure) {
         let row = row?;
-        if row["unit_id"].as_str().is_some_and(|source_unit| source_unit == unit || dated_units.contains(source_unit)) {
+        if row["unit_id"].as_str().is_some_and(|source_unit| source_unit == unit || dated_units.contains(source_unit))
+            || contains_text(&row["opening_reference_ids"], unit)
+        {
             archive.dated_structure.push(row);
         }
     }
     let source_ids: BTreeSet<_> = archive.dated_population.iter()
         .chain(&archive.dated_structure).chain(&archive.candidate_research_population)
         .filter_map(|row| row["source_id"].as_str()).collect();
-    archive.sources = serde_json::from_slice::<Vec<Value>>(sources)?.into_iter()
-        .filter(|row| row["id"].as_str().is_some_and(|id| source_ids.contains(id))).collect();
-    Ok((!archive.geographies.is_empty() || !archive.dated_population.is_empty()
-        || !archive.dated_structure.is_empty()).then_some(archive))
+    archive.sources = sources()?.iter().filter(|row| row["id"].as_str().is_some_and(|id| source_ids.contains(id))).cloned().collect();
+    Ok(((!archive.geographies.is_empty() || !archive.geography_children.is_empty() || !archive.dated_population.is_empty()
+        || !archive.dated_structure.is_empty()).then_some(archive), city_reference))
+}
+
+pub(super) fn traits_for_scope(unit: &str) -> io::Result<(Vec<Value>, Vec<Value>)> {
+    static TRAITS: OnceLock<io::Result<(Vec<Value>, Vec<Value>)>> = OnceLock::new();
+    let (rows, sources) = TRAITS.get_or_init(|| {
+        let raw = include_str!("../../../../data/historical_population_1900/collections/pop_traits/traits.jsonl");
+        let sources = include_bytes!("../../../../data/historical_population_1900/collections/pop_traits/sources.json");
+        Ok((raw.lines().map(serde_json::from_str).collect::<Result<_, _>>()?, serde_json::from_slice(sources)?))
+    }).as_ref().map_err(|error| invalid(error.to_string()))?;
+    let matched: Vec<_> = rows.iter().filter(|row| {
+        unit == "world" || row["place_id"].as_str() == Some(unit) || row["observed_unit_id"].as_str() == Some(unit)
+            || unit.strip_prefix("trait:").is_some_and(|id| row["id"].as_str() == Some(id))
+            || unit.strip_prefix("region:").is_some_and(|region| row["region"].as_str() == Some(region))
+            || row["opening_links"].as_array().into_iter().flatten().any(|link| link["unit_id"].as_str() == Some(unit))
+    }).cloned().collect();
+    let ids: BTreeSet<_> = matched.iter().filter_map(|row| row["source_id"].as_str()).collect();
+    let matched_sources = sources.iter().filter(|row| row["id"].as_str().is_some_and(|id| ids.contains(id))).cloned().collect();
+    Ok((matched, matched_sources))
+}
+
+fn contains_text(items: &Value, text: &str) -> bool {
+    items.as_array().into_iter().flatten().any(|item| item.as_str() == Some(text))
 }
 
 fn linked_units<'a>(geographies: &'a [Value], field: &str) -> BTreeSet<&'a str> {

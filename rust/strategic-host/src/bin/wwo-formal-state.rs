@@ -75,6 +75,18 @@ fn main() -> Result<(), Box<dyn Error>> {
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown structural coverage scope"))?;
             println!("{}", coverage);
         }
+        Some("inspect-pop") => {
+            let query = args.next().ok_or_else(usage)?;
+            let query = query.to_str().ok_or_else(usage)?;
+            let input = args.next();
+            if args.next().is_some() { return Err(usage().into()); }
+            let bootstrap = WorldBootstrap::load()?;
+            let world = match input {
+                Some(path) => read_native_slot(Path::new(&path), &bootstrap)?,
+                None => bootstrap.create("country_fra")?,
+            };
+            println!("{}", serde_json::to_string(&world.inspect_population(query)?)?);
+        }
         Some("inspect-population") => {
             let unit = args.next().ok_or_else(usage)?;
             let unit = unit.to_str().ok_or_else(usage)?;
@@ -288,5 +300,5 @@ fn show(saved: &SavedWorld) {
 
 fn usage() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput,
-        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <world|unit-id|city:city-key|history:unit-id> [<native-save>], inspect-population-structure <world|region:Asia|unit-id>, inspect-age-range <world|unit-id> <youngest> <oldest> [<native-save>], inspect-market-livelihood <unit-id> [<native-save>], inspect-intake <native-save> <person-id>, inspect-food-history [<case-id>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
+        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-pop <id> [<native-save>], inspect-population <world|unit-id|city:city-key|history:unit-id> [<native-save>], inspect-population-structure <world|region:Asia|unit-id>, inspect-age-range <world|unit-id> <youngest> <oldest> [<native-save>], inspect-market-livelihood <unit-id> [<native-save>], inspect-intake <native-save> <person-id>, inspect-food-history [<case-id>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
 }

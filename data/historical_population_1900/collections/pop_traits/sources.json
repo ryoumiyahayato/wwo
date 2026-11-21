@@ -1,0 +1,34 @@
+[
+  {
+    "id": "yokoyama_japan_lower_classes_1899",
+    "title": "日本之下層社会",
+    "publisher": "横山源之助, 教文館. First edition, 1899. National Diet Library Digital Collections.",
+    "publication_year": 1899,
+    "url": "https://dl.ndl.go.jp/pid/798849/1/30",
+    "locator": "Printed pp. 32–33, Shin’ami household daily expenditure account.",
+    "rights": "Public-domain original. The collection transcribes account quantities and amounts.",
+    "note": "Publication is dated. The household account has no stated observation date."
+  },
+  {
+    "id": "rutten_borinage_miner_monograph_95",
+    "title": "Mineur du bassin houiller du Couchant de Mons (Borinage - Belgique)",
+    "publisher": "Ceslas Rutten, Les Ouvriers des Deux Mondes, monograph 95. 1901 fascicle, 1904 collected volume. Digital edition by Jean-Damien Généro, TIME-US and Centre de recherches historiques (CNRS-EHESS), updated 2025-04-02.",
+    "publication_year": 1901,
+    "url": "https://ouvriersdeuxmondes.huma-num.fr/monographie/mineur-bassin-houiller-couchant-mons-95#part_02_05_15",
+    "locator": "Printed p. 234, §15, household annual food account, Poids consommé column. §§8–9 describe the household’s potato production. Printed pp. 216–217, §§2–3, household membership and religious practice.",
+    "rights": "Etalab Open Licence 2.0. Archive record and licence at https://nakala.fr/10.34847/nkl.bb6dd9wa.",
+    "monograph_pdf_url": "https://ouvriersdeuxmondes.huma-num.fr/monographie/mineur-bassin-houiller-couchant-mons-95/download/pdf",
+    "note": "The town is anonymised as Commune D. A fifth household member, their older daughter aged 17, is outside the four-person food account."
+  },
+  {
+    "id": "quran_al_maidah_5_3",
+    "title": "Qur’an, al-Māʾidah 5:3",
+    "publisher": "Arabic text and verse locator, Quranic Arabic Corpus, University of Leeds. Historical English cross-reference in George Sale’s translation, first published in 1734.",
+    "publication_year": null,
+    "url": "https://corpus.quran.com/wordmorphology.jsp?location=%285%3A3%3A1%29",
+    "locator": "Sura 5, verse 3, opening food restrictions and closing necessity clause.",
+    "rights": "Ancient source text. The collection paraphrases the passage and reproduces no editorial text or translation.",
+    "historical_edition_url": "https://religion.antropo.es/_libros/biblioteca/Coran.Ingles.1734.George.Sale.pdf",
+    "note": "The norm is attested before 1900. The source has no local practice survey or dated population observation."
+  }
+]

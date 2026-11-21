@@ -1,6 +1,8 @@
 mod demography;
 mod historical;
 pub mod historical_food;
+mod inspection;
+pub mod living_conditions;
 mod native;
 mod opening;
 pub mod needs;
@@ -10,6 +12,7 @@ mod tests;
 
 pub use demography::{AgeRangeCoverage, EnergyReferenceCoverage, PopulationStructure, ResidentCohort};
 pub use historical::{city_population_reference, population_archive, structural_coverage_reference, HistoricalPopulationEstimate, PopulationArchive};
+pub use inspection::{PopulationChange, PopulationChild, PopulationInspection};
 pub(crate) use native::PopulationSnapshot;
 pub(crate) use opening::{HistoricalOpening, CURRENT_VERSION};
 pub use opening::OpeningPopulationEstimate;

@@ -74,6 +74,20 @@ def dimensions(population):
                 panel_id=panel["id"], row_role=row["role"],
                 age_min=row["age_min"], age_max=row["age_max"],
             ))
+    # The family register and the estimated present population have different
+    # denominators. Link the published panels for inspection only.
+    for collection, relation in (
+        ("japan_population_structure", "different_register_and_residence_universes"),
+        ("tokyo_occupation_1900", "local_subset_at_other_date_and_population_universe"),
+    ):
+        path = HERE / collection / "structure.jsonl"
+        for line in path.read_text(encoding="utf8").splitlines():
+            row = json.loads(line)
+            links = ["empire_of_japan"]
+            if row["unit_id"] == "tokyo_city_1900_occupational_persons":
+                links.append("place:tokyo")
+            row.update(opening_reference_ids=links, opening_scope_relation=relation)
+            result.append(row)
     return result
 
 

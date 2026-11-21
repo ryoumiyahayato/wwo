@@ -305,6 +305,53 @@
         "Asia"
       ]
     },
+    "japan_1898_register_legal_status": {
+      "panel_id": "japan_1898_register_legal_status",
+      "dimension": "social_status",
+      "status": "reviewed",
+      "observed_unit_id": "japan_proper_honseki_1898",
+      "observed_date": "1898-12-31",
+      "source_id": "jp_cabinet_population_1898_original",
+      "locator": "Table 3, printed pp. 338–339, national total row. Table 1, printed p. 335, for the all-status population control",
+      "classification_id": "japan_1898_registered_legal_status",
+      "eligible_universe": "Table 3 crosses official legal status with sex and position on the family register (head or other family member). The denominator is 43,758,415 registered persons. The table excludes abandoned children and unregistered people in confinement. Kazoku denotes the peerage, shizoku the former warrior estate and heimin commoners. These categories report legal status. They give no occupation, income or worker counts. Sex totals within each status are the sums of the printed head and family columns.",
+      "measure_unit": "persons",
+      "eligible_denominator": 43758415,
+      "directly_classified_count": 43758415,
+      "category_relationship": "complete_partition",
+      "categories": [
+        {
+          "label": "華族 / Kazoku (peerage)",
+          "count": 4551,
+          "locator": "Table 3, printed pp. 338–339, national total row. Table 1, printed p. 335, for the all-status population control",
+          "role": "category"
+        },
+        {
+          "label": "士族 / Shizoku (former warrior estate)",
+          "count": 2105698,
+          "locator": "Table 3, printed pp. 338–339, national total row. Table 1, printed p. 335, for the all-status population control",
+          "role": "category"
+        },
+        {
+          "label": "平民 / Heimin (commoners)",
+          "count": 41648166,
+          "locator": "Table 3, printed pp. 338–339, national total row. Table 1, printed p. 335, for the all-status population control",
+          "role": "category"
+        }
+      ],
+      "research_unit_ids": [
+        "ft_japan"
+      ],
+      "opening_links": [
+        {
+          "unit_id": "empire_of_japan",
+          "scope_relation": "different_population_universe"
+        }
+      ],
+      "research_regions": [
+        "Asia"
+      ]
+    },
     "puerto_rico_1887_literacy": {
       "panel_id": "puerto_rico_1887_literacy",
       "dimension": "literacy",
@@ -1359,6 +1406,53 @@
         "Asia"
       ]
     },
+    "tokyo_1900_city_occupation_summary": {
+      "panel_id": "tokyo_1900_city_occupation_summary",
+      "dimension": "occupation",
+      "status": "reviewed",
+      "observed_unit_id": "tokyo_city_1900_occupational_persons",
+      "observed_date": "1900-12-31",
+      "source_id": "jp_cabinet_local_occupations_1913_tokyo",
+      "locator": "Part II, printed p. 2, Meiji 33 table and notes",
+      "classification_id": "tokyo_1900_three_reported_occupations",
+      "eligible_universe": "The city section covers Tokyo City's 15 wards and counts occupational principals only. The three printed groups close to this subtotal. The publication gives separate agriculture and fishing surveys for the end of 1901. City and county columns use different person-counting rules.",
+      "measure_unit": "persons",
+      "eligible_denominator": 572411,
+      "directly_classified_count": 572411,
+      "category_relationship": "complete_partition",
+      "categories": [
+        {
+          "label": "庶業 / Miscellaneous occupations",
+          "count": 219920,
+          "locator": "Part II, printed p. 2, Meiji 33 table and notes",
+          "role": "category"
+        },
+        {
+          "label": "商業 / Commerce",
+          "count": 238893,
+          "locator": "Part II, printed p. 2, Meiji 33 table and notes",
+          "role": "category"
+        },
+        {
+          "label": "工業 / Industry",
+          "count": 113598,
+          "locator": "Part II, printed p. 2, Meiji 33 table and notes",
+          "role": "category"
+        }
+      ],
+      "research_unit_ids": [
+        "ft_japan"
+      ],
+      "opening_links": [
+        {
+          "unit_id": "empire_of_japan",
+          "scope_relation": "subset_with_distinct_definition"
+        }
+      ],
+      "research_regions": [
+        "Asia"
+      ]
+    },
     "us_1900_gainful_occupations": {
       "panel_id": "us_1900_gainful_occupations",
       "dimension": "occupation",
@@ -1485,6 +1579,7 @@
       },
       "occupation": {
         "reviewed_panels": [
+          "tokyo_1900_city_occupation_summary",
           "us_1900_gainful_occupations"
         ],
         "candidate_panels": [],
@@ -1547,6 +1642,7 @@
       },
       "social_status": {
         "reviewed_panels": [
+          "japan_1898_register_legal_status",
           "russia_1897_legal_estates"
         ],
         "candidate_panels": [],
@@ -1806,7 +1902,9 @@
           "opening_status": "unknown"
         },
         "occupation": {
-          "reviewed_panels": [],
+          "reviewed_panels": [
+            "tokyo_1900_city_occupation_summary"
+          ],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
@@ -1862,7 +1960,9 @@
           "opening_status": "unknown"
         },
         "social_status": {
-          "reviewed_panels": [],
+          "reviewed_panels": [
+            "japan_1898_register_legal_status"
+          ],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
@@ -5990,7 +6090,9 @@
           "opening_status": "unknown"
         },
         "occupation": {
-          "reviewed_panels": [],
+          "reviewed_panels": [
+            "tokyo_1900_city_occupation_summary"
+          ],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
@@ -6046,7 +6148,9 @@
           "opening_status": "unknown"
         },
         "social_status": {
-          "reviewed_panels": [],
+          "reviewed_panels": [
+            "japan_1898_register_legal_status"
+          ],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,

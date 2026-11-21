@@ -20,6 +20,8 @@ pub(crate) struct PopulationSnapshot {
 pub(super) struct History {
     migrated: Option<MigratedPopulation>,
     journal: Vec<PopulationEvent>,
+    // Derived during application and save replay. Old journals need no new fields.
+    named_event_origins: BTreeMap<usize, String>,
 }
 
 /// Flat native saves recorded final counts and character deaths. Transfers
@@ -53,6 +55,30 @@ enum Change {
 }
 
 impl Population {
+    pub(super) fn recent_changes<'a>(&'a self, unit: Option<&str>) -> Vec<super::PopulationChange<'a>> {
+        self.history.journal.iter().enumerate().rev().filter_map(|(index, event)| {
+            let origin = || self.history.named_event_origins.get(&index).map(String::as_str);
+            let (kind, source, destination, members, cohort_id) = match &event.change {
+                Change::AllocateCohort { unit, id, members, .. } => ("allocate_cohort", Some(unit.as_str()), None, *members, Some(id)),
+                Change::Transfer { source, destination, members, cohort } => ("transfer", Some(source.as_str()), Some(destination.as_str()), *members, cohort.as_ref()),
+                Change::Materialize { unit, cohort, .. } => ("materialize", Some(unit.as_str()), None, 1, cohort.as_ref()),
+                Change::Arrival { unit, .. } => ("arrival", Some(unit.as_str()), None, 1, None),
+                Change::Move { destination, .. } => ("move", origin(), Some(destination.as_str()), 1, None),
+                Change::NamedBirth { unit, .. } => ("birth", Some(unit.as_str()), None, 1, None),
+                Change::AnonymousBirths { unit, members } => ("birth", Some(unit.as_str()), None, *members, None),
+                Change::NamedDeath { .. } => ("death", origin(), None, 1, None),
+                Change::AnonymousDeaths { unit, cohort, members } => ("death", Some(unit.as_str()), None, *members, cohort.as_ref()),
+            };
+            unit.is_none_or(|scope| [source, destination].into_iter().flatten().any(|place| {
+                place == scope || self.parent_unit(place) == Some(scope)
+            })).then_some(super::PopulationChange {
+                minute: event.minute, kind, unit_id: source, destination, members: Some(members), cohort_id,
+            })
+        }).take(100).collect()
+    }
+
+    pub(super) fn has_migrated_population_baseline(&self) -> bool { self.history.migrated.is_some() }
+
     pub(crate) fn snapshot(&self) -> PopulationSnapshot {
         PopulationSnapshot {
             version: VERSION,
@@ -245,6 +271,7 @@ impl Population {
         if event.minute < 0 || self.history.journal.last().is_some_and(|last| last.minute > event.minute) {
             return Err(invalid("population event precedes the recorded timeline"));
         }
+        let mut named_origin = None;
         match &event.change {
             Change::AllocateCohort { unit, id, definition, members } => {
                 if !id.valid() || self.cohort_definitions.contains_key(id) {
@@ -291,6 +318,7 @@ impl Population {
                 self.shift_totals(&source, destination, 1);
                 self.subtract_named(&source);
                 self.add_named(destination);
+                named_origin = Some(source);
             }
             Change::Arrival { person, unit } | Change::NamedBirth { person, unit } => {
                 self.check_new_claim(person)?;
@@ -314,13 +342,19 @@ impl Population {
                     self.add_population(unit, *members)?;
                 }
             }
-            Change::NamedDeath { person } => self.retire_claim(person, Some(event.minute))?,
+            Change::NamedDeath { person } => {
+                named_origin = self.unit_for_person(person).map(str::to_owned);
+                self.retire_claim(person, Some(event.minute))?;
+            }
             Change::AnonymousDeaths { unit, cohort, members } => {
                 self.check_background(unit, cohort.as_ref(), *members)?;
                 if let Some(id) = cohort { self.remove_cohort_members(unit, id, *members); }
                 self.change_total(unit, *members, false);
                 self.global_total -= *members;
             }
+        }
+        if let Some(origin) = named_origin {
+            self.history.named_event_origins.insert(self.history.journal.len(), origin);
         }
         self.history.journal.push(event);
         Ok(())

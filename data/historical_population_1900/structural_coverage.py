@@ -109,6 +109,22 @@ def _reviewed_panels(population, structural):
             panel["foreign_subjects_outside_denominator"] = foreign_subjects
             panel["table_total_all_subjects"] = all_subjects
             yield panel
+    jp_legal = structural_by_source_unit["jp_cabinet_population_1898_original", "japan_proper_honseki_1898"]
+    jp_total = next((row for row in jp_legal if row["row_role"] == "total"), None)
+    if jp_total:
+        yield _panel("japan_1898_register_legal_status", "social_status", jp_total, ["ft_japan"],
+                     [("empire_of_japan", "different_population_universe")], "japan_1898_registered_legal_status",
+                     jp_total["definition"], denominator=jp_total["values"]["both"],
+                     categories=[_cell(row["category"], row["values"]["both"], row) for row in jp_legal
+                                 if row["row_role"] == "band"], closure="complete_partition")
+    tokyo = structural_by_source_unit["jp_cabinet_local_occupations_1913_tokyo", "tokyo_city_1900_occupational_persons"]
+    tokyo_total = next((row for row in tokyo if row["row_role"] == "total"), None)
+    if tokyo_total:
+        yield _panel(tokyo_total["panel_id"], "occupation", tokyo_total, ["ft_japan"],
+                     [("empire_of_japan", "subset_with_distinct_definition")], "tokyo_1900_three_reported_occupations",
+                     tokyo_total["definition"], denominator=tokyo_total["values"]["both"],
+                     categories=[_cell(row["category"], row["values"]["both"], row) for row in tokyo
+                                 if row["row_role"] == "band"], closure="complete_partition")
     literacy = next((row for row in structural_by_source_unit["rus_age_97", RUSSIA]
                      if row["row_role"] == "total"), None)
     if literacy:

@@ -215,6 +215,7 @@ pub struct WorldSources {
     routes: BTreeMap<String, Route>,
     place_population_units: BTreeMap<String, String>,
     polity_population_bindings: BTreeMap<String, String>,
+    population_name_aliases: BTreeMap<String, String>,
     population_income: BTreeMap<String, u64>,
     people: BTreeMap<String, OpeningPerson>,
     regimental_opening_stations: BTreeMap<String, Vec<RegimentalOpeningStation>>,
@@ -1063,6 +1064,15 @@ impl InitialWorld {
 
     pub fn population(&self) -> &Population { &self.population }
 
+    /// Resolve exact historical name aliases and the residence binding that a
+    /// settled move uses. A residence binding does not enumerate the site.
+    pub fn inspect_population<'a>(&'a self, query: &'a str) -> io::Result<crate::formal_population::PopulationInspection<'a>> {
+        let residence = query.starts_with("place:").then(|| self.residence_unit_at(query)).flatten();
+        let map_id = query.strip_prefix("state:").unwrap_or(query);
+        let alias = self.sources.population_name_aliases.get(map_id).map(String::as_str);
+        self.population.inspect_with_mapping(query, self.clock, alias, residence)
+    }
+
     pub fn person(&self, person: &str) -> Option<&OpeningPerson> {
         if person == self.player { return Some(self.player()); }
         self.sources.people.get(person).or_else(|| self.runtime_people.get(person).map(|row| &row.origin))
@@ -1301,7 +1311,7 @@ impl WorldBootstrap {
     pub fn load() -> io::Result<Self> {
         let polities = load_polities()?;
         let (populations, countries) = load_countries()?;
-        let polity_units = load_population_bindings(&polities, &populations)?;
+        let (polity_units, population_name_aliases) = load_population_bindings(&polities, &populations)?;
         let population_income = countries.iter().map(|(unit, inputs)| (unit.clone(), inputs.income)).collect();
         let markets = MarketInputs::load(countries)?;
         let opening_cash = load_opening_cash()?;
@@ -1313,6 +1323,7 @@ impl WorldBootstrap {
         }).collect();
         let mut world = WorldSources {
             polities, places, routes, place_population_units, polity_population_bindings: polity_units,
+            population_name_aliases,
             population_income, historical_population: None, people: BTreeMap::new(), regimental_opening_stations,
         };
         let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
@@ -1869,10 +1880,12 @@ fn unsigned_columns<const N: usize>(row: &[Value], fields: [usize; N]) -> io::Re
     Ok(values)
 }
 
+type PopulationBindings = BTreeMap<String, String>;
+
 fn load_population_bindings(
     polities: &BTreeMap<String, Polity>,
     populations: &BTreeMap<String, u64>,
-) -> io::Result<BTreeMap<String, String>> {
+) -> io::Result<(PopulationBindings, PopulationBindings)> {
     #[derive(Deserialize)]
     struct Crosswalk {
         schema_id: String,
@@ -1882,6 +1895,7 @@ fn load_population_bindings(
     struct Binding {
         economy_entity_id: String,
         polity_ids: Vec<String>,
+        mapping_mode: String,
     }
     let crosswalk: Crosswalk = serde_json::from_slice(include_bytes!(
         "../../../data/world_map/historical/major_economy_polity_crosswalk_1900.json"
@@ -1893,9 +1907,14 @@ fn load_population_bindings(
         .filter(|unit| polities.contains_key(*unit))
         .map(|unit| (unit.clone(), unit.clone()))
         .collect();
+    let mut name_aliases = BTreeMap::new();
     for binding in crosswalk.records {
         if !populations.contains_key(&binding.economy_entity_id) {
             return Err(invalid("population crosswalk references an unknown statistical unit"));
+        }
+        let exact_alias = binding.mapping_mode == "historical_name_alias";
+        if exact_alias && binding.polity_ids.len() != 1 {
+            return Err(invalid("population name alias must reference one historical polity"));
         }
         for polity in binding.polity_ids {
             if !polities.contains_key(&polity) {
@@ -1906,12 +1925,15 @@ fn load_population_bindings(
                     return Err(invalid(format!("ambiguous population crosswalk for {polity}")));
                 }
             }
+            if exact_alias {
+                name_aliases.insert(polity, binding.economy_entity_id.clone());
+            }
         }
     }
     if populations.keys().any(|unit| !result.values().any(|bound| bound == unit)) {
         return Err(invalid("formal statistical unit has no political binding"));
     }
-    Ok(result)
+    Ok((result, name_aliases))
 }
 
 fn load_map() -> io::Result<(BTreeMap<String, Place>, BTreeMap<String, Route>, BTreeSet<String>)> {
@@ -2423,6 +2445,19 @@ mod tests {
         assert_eq!(world.residence_unit_at("place:kolkata"), Some("raj_bengal_province"));
         assert_eq!(sources.places()["place:tokyo"].parent_country_id, "japanese_empire");
         assert_eq!(sources.population_unit_at("place:tokyo"), Some("empire_of_japan"));
+        let tokyo = world.inspect_population("place:tokyo").unwrap();
+        assert_eq!(tokyo.account_id, Some("empire_of_japan"));
+        assert_eq!(tokyo.population_total, None);
+        let tokyo_archive = tokyo.archive.unwrap();
+        assert!(tokyo_archive.dated_structure.iter().any(|row| row["unit_id"] == "tokyo_city_1900_occupational_persons"));
+        assert!(!tokyo_archive.dated_structure.iter().any(|row| row["unit_id"] == "japan_proper_honseki_1898"));
+        let luxembourg = world.inspect_population("state:grand_duchy_of_luxembourg").unwrap();
+        assert_eq!(luxembourg.account_id, Some("kingdom_of_luxembourg"));
+        assert_eq!(luxembourg.population_total, Some(231_321));
+        assert_eq!(luxembourg.scope_relation, "historical_name_alias_of_account");
+        assert!(world.sources.population_name_aliases.get("cshapes_gw_901").is_none());
+        let australian_colony = world.inspect_population("state:cshapes_gw_901").unwrap();
+        assert_ne!(australian_colony.account_id, Some("australia_colonies_1900"));
         for (id, mode) in [
             ("road_lyon_strasbourg", RouteMode::Road),
             ("rail_bordeaux_toulouse", RouteMode::Rail),

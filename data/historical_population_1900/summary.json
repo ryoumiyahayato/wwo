@@ -39,7 +39,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 143,
+  "cited_sources": 149,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -316,6 +316,9 @@
     "india_census_1901_coorg_age": 19,
     "india_census_1891_original_age": 19,
     "cape_census_1904_age_hmso_1906": 20,
+    "jp_cabinet_population_1898_original": 23,
+    "jp_cabinet_local_occupations_1913_tokyo": 8,
+    "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
   "structure_opening_pool_controls": 327709138,
