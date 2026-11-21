@@ -66,6 +66,33 @@ pub struct PopulationArchive {
     pub sources: Vec<Value>,
 }
 
+/// Coverage of dated historical panels. It does not allocate live residents.
+pub fn structural_coverage_reference(unit: &str) -> io::Result<Option<Value>> {
+    let bytes = include_bytes!("../../../../data/historical_population_1900/structure_coverage_1900.json");
+    let catalogue: Value = serde_json::from_slice(bytes)?;
+    let scope = if unit == "world" {
+        &catalogue["world"]
+    } else if unit == "region:unassigned" {
+        &catalogue["no_unique_research_region"]
+    } else if let Some(region) = unit.strip_prefix("region:") {
+        &catalogue["research_regions"][region]
+    } else {
+        &catalogue["opening_roots"][unit]
+    };
+    let Some(dimensions) = scope["dimensions"].as_object() else { return Ok(None); };
+    let panel_ids: BTreeSet<_> = dimensions.values().flat_map(|value| {
+        ["reviewed_panels", "candidate_panels"].into_iter()
+            .filter_map(|key| value[key].as_array()).flatten().filter_map(Value::as_str)
+    }).collect();
+    let panels: BTreeMap<_, _> = panel_ids.into_iter().map(|key| (key, &catalogue["panels"][key])).collect();
+    Ok(Some(serde_json::json!({
+        "scope": scope,
+        "panels": panels,
+        "opening_date": catalogue["opening_date"],
+        "accounting_note": catalogue["accounting_note"],
+    })))
+}
+
 /// Historical evidence can be queried independently of whether a place has an
 /// account in the current game. Matching rows can use overlapping scopes and dates.
 pub fn population_archive(unit: &str) -> io::Result<Option<PopulationArchive>> {

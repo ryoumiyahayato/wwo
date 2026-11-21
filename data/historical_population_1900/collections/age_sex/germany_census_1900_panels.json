@@ -44,7 +44,21 @@
     "observed_date": "1900-12-01",
     "definition": "The 1903 yearbook publishes the 1900 census. The original complementary minority and majority rows give ages below 21 and from the completed 21st year onward. Their counts sum to the census population present. The table does not give a separate unknown-age count for these rows.",
     "opening_unit_id": "administrative_region:germany_bayern",
+    "opening_through_version": 6,
     "uncertainty": "Changes in age and sex shares over the 334 days between opening and enumeration are unquantified. The two source age bands are retained without finer allocation.",
+    "broad_observation": false
+  },
+  {
+    "id": "germany_1900_bayern_five_year",
+    "source_id": "de_bavaria_yearbook_1903_five_year_ages",
+    "locator": "II.A.2.g.2, printed p. 27, sex and combined counts by year of life. Single-year table II.A.2.g.1, printed pp. 25–26",
+    "published_scope": "Kingdom of Bavaria including the Palatinate, population present",
+    "observed_unit_id": "administrative_region:germany_bayern",
+    "observed_date": "1900-12-01",
+    "definition": "The published five-year groups and the terminal 101st year of life cover the full 1900 census population. Ages are stored in completed years, so the original first through fifth years correspond to ages 0–4. The original terminal year is exact age 100, with one male and no females. No separate unknown-age row is printed. This panel overlaps the two special age groups on the same page.",
+    "opening_unit_id": "administrative_region:germany_bayern",
+    "opening_from_version": 7,
+    "uncertainty": "Changes in age and sex shares over the 334 days between opening and enumeration are unquantified.",
     "broad_observation": false
   },
   {

@@ -8,6 +8,7 @@ from pathlib import Path
 from geography import catalogue, legacy_audit
 from opening import groups, located_people, sourced_people
 from structure import age_sex_panels, dimensions, opening_structure
+from structural_coverage import structural_coverage
 from reconciliation import comparisons, asian_estimates, world_accounts
 from cities import city_index
 from us_municipalities import us_residuals
@@ -15,7 +16,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 6
+OPENING_VERSION = 7
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -264,7 +265,7 @@ def main():
     records("cities_1900.jsonl.gz",city_catalog)
     structural=dimensions(observations)
     structural.append(england_wales_habitations())
-    structure_opening=opening_structure(selection, observations)
+    structure_opening=opening_structure(selection, observations, version=OPENING_VERSION)
     summary["structural_observations_by_source"]=dict(Counter(r["source_id"] for r in structural))
     summary["structure_opening_pool_controls"]=sum(g["opening_total"] for g in structure_opening["groups"])
     summary["structure_opening_pool_count"]=len(structure_opening["groups"])
@@ -289,6 +290,7 @@ def main():
     summary["research_regions"]=ledger["research_regions"]
     summary["opening_age_sex_by_scope"]=opening_age_coverage(selection, legacy, structure_opening, ledger["opening_comparisons"])
     summary["opening_count_basis"]=opening_count_basis(selection, legacy, target)
+    json_file("structure_coverage_1900.json", structural_coverage(observations, structural, geography, selection, legacy=legacy))
     json_file("world_accounts.json",ledger)
     records("demography_1900.jsonl.gz",structural)
     records("parent_reconciliation.jsonl.gz",audit)

@@ -139,6 +139,21 @@
     "collection": "age_sex"
   },
   {
+    "id": "de_bavaria_yearbook_1903_five_year_ages",
+    "title": "Statistisches Jahrbuch für das Königreich Bayern, 1903",
+    "publisher": "Königlich Bayerisches Statistisches Bureau, Munich, 1903",
+    "url": "https://www.statistischebibliothek.de/mir/receive/BYHeft_mods_00012794",
+    "locator": "II.A.2.g.2, printed p. 27. The single-year table II.A.2.g.1, printed pp. 25–26, specifies birth cohorts and the oldest single year.",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf#page=37",
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf#page=35",
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf#page=36"
+    ],
+    "collection": "age_sex"
+  },
+  {
     "id": "de_prussia_yearbook_1904_ages",
     "title": "Statistisches Jahrbuch für den Preussischen Staat, 1904",
     "publisher": "Königliches Statistisches Bureau, Berlin, 1905",
@@ -148,6 +163,31 @@
     "raw_path": "germany_census_1900.csv",
     "table_urls": [
       "https://webapp.sbc.org.pl/Content/323213/PDF/ii149234-1904-00-0001.pdf?handler=pdf"
+    ],
+    "collection": "age_sex"
+  },
+  {
+    "id": "india_census_1901_original_age",
+    "title": "Census of India, 1901, Vol. I-A, India, Part II: Tables",
+    "publisher": "Census Commissioner for India, Calcutta, 1903; Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924",
+    "locator": "Table VII, Age, Sex and Civil Condition by Religions. Introduction and national table, printed pp. 63–64; all-religions provincial tables, printed pp. 69–101. Comparable population control, Table II-A, pp. 9–10.",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "india_census_1901.csv",
+    "table_urls": [
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n13/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n14/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n67/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n68/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n77/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n101/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n73/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n79/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n85/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n93/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n95/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n97/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n103/mode/1up"
     ],
     "collection": "age_sex"
   },
@@ -1084,6 +1124,74 @@
     "locator": "Printed p. 221, Population de la Cochinchine; 1899 estimate and first enumeration on 27 December 1901.",
     "rights": "Selected numerical facts and bibliographic references. No facsimile redistributed.",
     "collection": "french_indochina_population"
+  },
+  {
+    "id": "honduras_ine_historical_censuses",
+    "title": "Población de la República de Honduras, según censos levantados",
+    "publisher": "Honduran statistical office. Instituto Nacional de Estadística repository.",
+    "url": "https://repositorio.ine.gob.hn/bitstreams/8cbc5115-3872-4356-a790-0f8b3616495d/download",
+    "locator": "Printed p. 13, Población de la República de Honduras, según censos levantados, 1895, 1901 and 1905 columns. The indexed table was checked against another official edition. The 1901 enumerators' original volume is identified in the census bibliography.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "references": [
+      {
+        "url": "https://repositorio.ine.gob.hn/bitstreams/90c5ac4d-c43e-4533-b304-99de34639b6f/download",
+        "locator": "Statistical yearbook, printed p. 43, table 2.1.1, 1901 national and department figures."
+      },
+      {
+        "url": "https://studylib.es/doc/6416605/recuento-de-poblaci%C3%B3n-1971",
+        "locator": "Dirección General de Estadística y Censos, Síntesis de los censos de población y vivienda de Honduras, Notas y Fuentes for the 1895, 1901 and 1905 censuses. Includes the contemporary directors' accounts of collection and adjustment."
+      },
+      {
+        "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/35966/GIPE-020490.pdf?isAllowed=y&sequence=3",
+        "locator": "Library of Congress, International Population Census Bibliography, Honduras. La población de Honduras en 1901, Dirección General de Estadística, Tipografía Nacional, 1902, 71 pp., HA821.A5 1902."
+      },
+      {
+        "url": "https://users.pop.umn.edu/~rmccaa/IPUMSI/taller_lima_2014/11-honduras_marquina_ipums-al_taller_2014.pdf",
+        "locator": "INE Honduras, censuses 1791–2013 presentation, Lima, 2014. National headline and sex counts."
+      },
+      {
+        "url": "https://icj-web.leman.un-icc.cloud/sites/default/files/case-related/39/039-19601118-JUD-01-00-EN.pdf#page=14",
+        "locator": "ICJ, Arbitral Award Made by the King of Spain on 23 December 1906, Judgment of 18 November 1960, printed pp. 202–203. On 4 July 1901 the joint commission recorded its disagreement on the Atlantic section beyond Portillo de Teotecacinte. That section went to arbitration."
+      },
+      {
+        "url": "https://fdh.unah.edu.hn/dmsdocument/15148-indice-de-gacetas-pdf",
+        "locator": "UNAH, Índice de Gacetas, no. 2106, 19 September 1901. Indexes an enumeration request for La Mosquitia, Montaña de la Flor and Indigenous settlements of Yoro. This entry gives no returns."
+      },
+      {
+        "url": "https://e-archivo.uc3m.es/rest/api/core/bitstreams/34ce9182-38c7-40ac-85ff-9d6e2a769caa/content",
+        "locator": "Federico–Tena 2025, Appendix I, printed p. 58, Honduras. The authors use the 1895 and 1905 official censuses and omit 1901 in the series used to construct the 498,932 opening benchmark. They rescale the historical series to the UN 1950 estimate."
+      }
+    ],
+    "boundary_note": "The official retrospective 1901 tabulation has 16 positive department entries and sums to the national figure. It reallocates 1901 settlements to Atlántida, created in 1902 from parts of Colón and Yoro, and uses later names such as Francisco Morazán and Lempira. Dashes for Gracias a Dios and Ocotepeque do not identify zero-population territory. The 1901 returns in the contested Mosquitia and exact correspondence with the opening map remain unresolved.",
+    "date_note": "The 1895 census was taken in December. The 1901 and 1905 censuses were taken on 31 December. The 1901 census director reports incomplete enumeration and municipal adjustments derived from military and road-service rolls. The official historical totals do not identify a separate unadjusted national population.",
+    "collection": "honduras_population"
+  },
+  {
+    "id": "honduras_atlantida_census_transcription",
+    "title": "Fernando David Velásquez Recarte, Bananeros italoamericanos en La Ceiba. Reconfiguración económica y territorial de Atlántida, Honduras, 1903-1923",
+    "publisher": "El Colegio de Michoacán, Centro de Estudios de Geografía Humana, 2023.",
+    "url": "https://colmich.repositorioinstitucional.mx/jspui/bitstream/1016/1407/1/Vel%C3%A1squezRecarteFernandoDavid2023TesisCEGH.pdf",
+    "locator": "Printed pp. 17–19, creation of Atlántida. Printed p. 61, Cuadro 4, 1901 column, based on La población de Honduras en 1901, printed p. 21, Archivo Nacional de Honduras.",
+    "rights": "Individual historical population facts and bibliographic references only. No table image or prose reproduced.",
+    "boundary_note": "Decree 51 created Atlántida in 1902 from parts of Colón and Yoro. The 1901 returns for Tela, El Porvenir and La Ceiba sum to the later department's retrospective 8,797. The prose gives 2,706 for Tela. Cuadro 4 gives 2,076, which equals its sex counts and is the value transcribed here. The places are census units and have no opening map binding.",
+    "collection": "honduras_population"
+  },
+  {
+    "id": "honduras_somoza_1905",
+    "title": "T. R. Somoza Vivas, Guía de Honduras",
+    "publisher": "Tipografía Nacional, Tegucigalpa, 1905.",
+    "url": "https://archive.org/details/guiadehonduras00somo",
+    "locator": "Printed p. 135, Distrito de la Mosquitia. Printed p. 145, Departamento de las Islas de la Bahía, Población.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "references": [
+      {
+        "url": "https://es.scribd.com/document/852873292/Guia-de-Honduras-00-So-Mo",
+        "locator": "Searchable reproduction of the same edition. See the two chapter headings and their Población paragraphs."
+      }
+    ],
+    "boundary_note": "The Bay Islands department includes Roatán, Barbareta, Elena, Morat, Guanaja, Utila, Cayos Cochinos and smaller islands. The Mosquitia district is listed under Colón and comprises Aguán and Iriona. The district count cannot be added to Colón or used as an independent estimate of the disputed cross-border population.",
+    "date_note": "The Bay Islands chapter separately gives its 1901 census figure and a current estimate. The Mosquitia paragraph gives neither a reference date nor an enumeration method. The latter two rows use the 1905 publication year as a proxy.",
+    "collection": "honduras_population"
   },
   {
     "id": "india_census_1901_comparable_area",

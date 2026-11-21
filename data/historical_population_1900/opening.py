@@ -194,6 +194,12 @@ def qing_interior(observations, version):
         additional = path.with_name("qing_interior_v2_crosswalk.tsv")
         with additional.open(encoding="utf8") as f:
             links.extend(csv.DictReader(f, delimiter="\t"))
+    if version >= 7:
+        revised = path.with_name("qing_interior_v7_crosswalk.tsv")
+        by_unit = {link["unit_id"]: link for link in links}
+        with revised.open(encoding="utf8") as f:
+            by_unit.update((link["unit_id"], link) for link in csv.DictReader(f, delimiter="\t"))
+        links = list(by_unit.values())
     leaves = []
     for link in links:
         row = by_id[link["unit_id"]]
@@ -219,6 +225,8 @@ def qing_interior(observations, version):
             locator="Ni Yuping reproducing Cao, Table 1.1, pp. 17–18 (PDF pp. 31–32). See the individual province locators.",
             scope="Disjoint provincial returns within the legacy Qing control. The province links establish historical statistical identities. No separate city, concession or frontier population is added.",
             additional_partition_source=additional.relative_to(HERE).as_posix())
+    if version >= 7:
+        group["revised_partition_source"] = revised.relative_to(HERE).as_posix()
     return group
 
 

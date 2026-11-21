@@ -2229,6 +2229,23 @@ mod tests {
         let member_archive = crate::formal_population::population_archive("cshapes_gw_3461").unwrap().unwrap();
         assert!(member_archive.dated_population.iter().any(|row| row["unit_id"] == bosnia && row["population_value"] == 1_568_092));
         assert_eq!(world.population().population_total("ecuador_1900"), None);
+        let qing = world.population();
+        assert_eq!(qing.population_total("qing_empire"), Some(400_000_000));
+        for (label, unit) in [("qing_empire:label:7", "qing_hist_jiangxi"), ("qing_empire:label:8", "qing_hist_zhejiang"),
+            ("qing_empire:label:18", "qing_hist_guizhou"), ("qing_empire:label:5", "qing_hist_jiangsu")]
+        {
+            let archive = crate::formal_population::population_archive(label).unwrap().unwrap();
+            assert!(archive.geographies.iter().any(|row| row["opening_id"] == unit));
+            assert!(archive.dated_population.iter().any(|row| row["unit_id"] == unit && row["date"] == "1880"));
+            assert!(qing.population_total(unit).is_some());
+        }
+        let coverage = crate::formal_population::structural_coverage_reference("russian_empire").unwrap().unwrap();
+        assert_eq!(coverage["panels"]["russia_1897_religion"]["directly_classified_count"], 125_640_021);
+        assert!(coverage["scope"]["dimensions"]["religion"]["opening_known_people"].is_null());
+        assert_eq!(coverage["scope"]["dimensions"]["religion"]["opening_unknown_people"], 135_382_043);
+        let mysore = world.population().structure(Some("raj_mysore_state"), clock).unwrap();
+        assert_eq!(mysore.population_total, 5_470_284);
+        assert_eq!(mysore.residents_with_cohort_age_and_sex, 5_470_284);
         let ecuador = crate::formal_population::population_archive("ecuador_1900").unwrap().unwrap();
         assert!(ecuador.candidate_research_population.iter().any(|row| {
             row["unit_id"] == "ft_ecuador" && row["date"] == "1900-01-01" && row["population_value"] == 1_100_787
@@ -2311,6 +2328,13 @@ mod tests {
         let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
         assert_eq!(restored.population().global_total(), 1_463_599_198);
         assert_eq!(restored.population().population_total("ft_panama"), None);
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(6)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        assert_eq!(restored.population().global_total(), 1_465_392_190);
+        assert_eq!(restored.population().population_total("qing_hist_zhejiang"), None);
         assert_eq!(restored.snapshot(), old_saved);
     }
 

@@ -9,7 +9,7 @@ pub mod reproductive_needs;
 mod tests;
 
 pub use demography::{AgeRangeCoverage, EnergyReferenceCoverage, PopulationStructure, ResidentCohort};
-pub use historical::{city_population_reference, population_archive, HistoricalPopulationEstimate, PopulationArchive};
+pub use historical::{city_population_reference, population_archive, structural_coverage_reference, HistoricalPopulationEstimate, PopulationArchive};
 pub(crate) use native::PopulationSnapshot;
 pub(crate) use opening::{HistoricalOpening, CURRENT_VERSION};
 pub use opening::OpeningPopulationEstimate;

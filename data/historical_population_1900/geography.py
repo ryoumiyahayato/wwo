@@ -128,7 +128,10 @@ def catalogue(rows, groups):
             key = leaf["unit_id"]
             group_at[key].append(key)
             if leaf.get("wwo_admin_label"):
-                label_openings[leaf["wwo_admin_label"]] = key
+                label = leaf["wwo_admin_label"]
+                if label in label_openings:
+                    raise ValueError(f"repeated opening link for historical place label {label}")
+                label_openings[label] = key
             for member in leaf.get("member_region_ids", []):
                 if member != key:
                     shared_openings[member].add(key)
@@ -163,9 +166,10 @@ def catalogue(rows, groups):
     for p in read(MAP/"historical_admin1_1900.json")["countries"]:
         for i,name in enumerate(p["units"],1):
             key = f"{p['entity_id']}:label:{i}"
+            opening = label_openings.get(key)
             out.append(dict(catalogue="historical_admin1_label",id=key,name=name,polity=p["entity_id"],
                  geometry_status=p["geometry_status"],status="linked_statistical_identity_no_polygon" if key in label_openings else "name_reference_only",
-                 opening_id=label_openings.get(key),source=p["source_basis"]))
+                 opening_id=opening,historical_observation_ids=[opening] if opening else [],source=p["source_basis"]))
     for u in read(MAP/"island_political_references_1900.json")["annotations"]:
         out.append(dict(catalogue="physical_island_reference",id=u["id"],name=u["name"],parent=u["political_source_id"] or None,
             valid_from=u.get("valid_from"),valid_to=u.get("valid_to"),study_candidates=polity_studies[u["political_source_id"]],

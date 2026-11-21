@@ -18,6 +18,7 @@
     "ecuador_population": 35,
     "el_salvador_population": 19,
     "french_indochina_population": 14,
+    "honduras_population": 25,
     "india_comparable": 87,
     "japan_taiwan": 232,
     "java_madoera": 2,
@@ -35,23 +36,23 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 127,
+  "cited_sources": 132,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
   "production_roots": 54,
   "partially_located_legacy_roots": 3,
-  "documented_people_under_legacy_controls": 377952285,
+  "documented_people_under_legacy_controls": 426934312,
   "replaced_legacy_roots": 30,
   "new_roots": 24,
-  "production_people": 1037464475,
-  "production_people_pct_world_estimate": 65.042,
-  "population_outside_evidence_opening_estimate": 557609773,
-  "legacy_only_people": 427927715,
+  "production_people": 1086446502,
+  "production_people_pct_world_estimate": 68.113,
+  "population_outside_evidence_opening_estimate": 508627746,
+  "legacy_only_people": 378945688,
   "authoritative_total_for_new_game": 1465392190,
   "roots_with_partitions": 18,
-  "disjoint_leaves": 360,
-  "people_in_partitions": 854178808,
+  "disjoint_leaves": 362,
+  "people_in_partitions": 903160835,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "cshapes_gw_850",
@@ -269,7 +270,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2252,
+  "source_statistical_units": 2273,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 24,
@@ -281,7 +282,7 @@
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 3,
-      "people": 377952285
+      "people": 426934312
     }
   },
   "city_index_representative_bands": {
@@ -306,12 +307,14 @@
     "france_census_1901_age_summary": 8,
     "de_reich_census_1900_state_ages": 18,
     "de_bavaria_yearbook_1903_ages": 3,
+    "de_bavaria_yearbook_1903_five_year_ages": 22,
     "de_prussia_yearbook_1904_ages": 37,
+    "india_census_1901_original_age": 195,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 236614965,
-  "structure_opening_pool_count": 72,
-  "structure_opening_residents_outside_modeled_pools": 1228777225,
+  "structure_opening_pool_controls": 287353593,
+  "structure_opening_pool_count": 80,
+  "structure_opening_residents_outside_modeled_pools": 1178038597,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:gb_historic_anglesey",
@@ -466,6 +469,62 @@
       "observed_unit_id": "ru_census_1897_ex_finland",
       "observed_total": 125640021,
       "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "raj_ajmer_merwara",
+      "opening_total": 484504,
+      "observed_unit_id": "raj_ajmer_merwara_1901_census",
+      "observed_total": 476912,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_baroda_state",
+      "opening_total": 2006368,
+      "observed_unit_id": "raj_baroda_state_1901_census",
+      "observed_total": 1952692,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_berar",
+      "opening_total": 2770660,
+      "observed_unit_id": "raj_berar_1901_census",
+      "observed_total": 2754016,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_central_india_agency",
+      "opening_total": 8824834,
+      "observed_unit_id": "raj_central_india_agency_1901_census",
+      "observed_total": 8628781,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_central_provinces",
+      "opening_total": 9981938,
+      "observed_unit_id": "raj_central_provinces_1901_census",
+      "observed_total": 9876646,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_hyderabad_state",
+      "opening_total": 11187068,
+      "observed_unit_id": "raj_hyderabad_state_1901_census",
+      "observed_total": 11141142,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_mysore_state",
+      "opening_total": 5470284,
+      "observed_unit_id": "raj_mysore_state_1901_census",
+      "observed_total": 5539399,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_rajputana_agency",
+      "opening_total": 10012972,
+      "observed_unit_id": "raj_rajputana_agency_1901_census",
+      "observed_total": 9723301,
+      "observed_date": "1901-03-01"
     },
     {
       "unit_id": "statistical_area:bosnia_herzegovina_1900",
@@ -909,8 +968,8 @@
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 433,
-  "dated_parent_controls_arithmetic_closure": 392,
+  "dated_parent_controls": 434,
+  "dated_parent_controls_arithmetic_closure": 393,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -1000,9 +1059,9 @@
         "korean_empire",
         "qing_empire"
       ],
-      "production_people": 485960798,
-      "production_pct_of_regional_research_estimate": 54.335,
-      "people_with_opening_subdivision": 405129508,
+      "production_people": 534942825,
+      "production_pct_of_regional_research_estimate": 59.812,
+      "people_with_opening_subdivision": 454111535,
       "research_only_units": 27,
       "research_only_people": 89458537
     },
@@ -1318,10 +1377,10 @@
         "opening_unit_id": "cshapes_gw_750",
         "research_region": "Asia",
         "opening_control": 294000000,
-        "in_model_pools": 0,
-        "outside_model_pools": 294000000,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 50738628,
+        "outside_model_pools": 243261372,
+        "modeled_age_and_sex": 50737560,
+        "modeled_sex_age_unknown": 1068
       },
       {
         "opening_unit_id": "cshapes_gw_780",
@@ -1776,18 +1835,18 @@
       },
       "Asia": {
         "opening_control": 802923622,
-        "in_model_pools": 3469224,
-        "outside_model_pools": 799454398,
-        "modeled_age_and_sex": 3468898,
-        "modeled_sex_age_unknown": 326
+        "in_model_pools": 54207852,
+        "outside_model_pools": 748715770,
+        "modeled_age_and_sex": 54206458,
+        "modeled_sex_age_unknown": 1394
       }
     },
     "world": {
       "opening_control": 1465392190,
-      "in_model_pools": 236614965,
-      "outside_model_pools": 1228777225,
-      "modeled_age_and_sex": 234642149,
-      "modeled_sex_age_unknown": 1972816
+      "in_model_pools": 287353593,
+      "outside_model_pools": 1178038597,
+      "modeled_age_and_sex": 285379709,
+      "modeled_sex_age_unknown": 1973884
     }
   },
   "opening_count_basis": {
@@ -1797,16 +1856,16 @@
         "pct_of_research_reference": 0.0
       },
       "published_historical_estimates": {
-        "people": 455270211,
-        "pct_of_research_reference": 28.542
+        "people": 504252238,
+        "pct_of_research_reference": 31.613
       },
       "date_models_from_territorial_returns": {
         "people": 582194264,
         "pct_of_research_reference": 36.5
       },
       "retained_legacy_estimates": {
-        "people": 427927715,
-        "pct_of_research_reference": 26.828
+        "people": 378945688,
+        "pct_of_research_reference": 23.757
       }
     },
     "scopes": [
@@ -2255,9 +2314,9 @@
       {
         "unit_id": "qing_empire",
         "source_id": "cao_qing_provincial_reconstruction",
-        "sourced_people": 133711790,
+        "sourced_people": 182693817,
         "sourced_basis": "published_historical_estimates",
-        "retained_legacy_people": 266288210
+        "retained_legacy_people": 217306183
       },
       {
         "unit_id": "republic_of_colombia_1900",
