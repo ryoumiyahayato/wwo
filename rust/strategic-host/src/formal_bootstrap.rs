@@ -1872,8 +1872,12 @@ mod tests {
         assert_eq!(restored.snapshot(), saved);
         assert!(restored.population().standalone_totals().is_empty());
 
-        let mut flat = saved;
-        flat["population"] = serde_json::to_value(opening.population_units()).unwrap();
+        // The aggregate-only slot predates runtime residents and their population journal.
+        let mut old = bootstrap.base_opening("country_fra", None, false).unwrap();
+        old.transfer_unmanaged_population(national, "country_fra", 42, 0).unwrap();
+        let mut flat = old.snapshot();
+        flat.as_object_mut().unwrap().remove("organization_members");
+        flat["population"] = serde_json::to_value(old.population_units()).unwrap();
         let restored = bootstrap.restore_native(serde_json::from_value(flat).unwrap()).unwrap();
         assert_eq!(restored.population_units(), opening.population_units());
         assert!(restored.snapshot()["population"].get("opening_version").is_none());

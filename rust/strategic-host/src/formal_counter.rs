@@ -56,6 +56,40 @@ mod tests {
     }
 
     #[test]
+    fn counter_household_waits_for_catalogue_demand_and_restores_an_unfunded_shortfall() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("country_fra").unwrap();
+        let londoner = "person:formal_generated_british_isles_1900_0001";
+        assert!(world.ledger.default_account(londoner).unwrap().available > 0);
+        let kerosene_rate = world.macro_economy.resident_daily_milli(LONDON, "kerosene");
+        assert!(kerosene_rate > 0.0 && kerosene_rate < 1.0);
+        assert_eq!(world.person_holding_milli(londoner, "kerosene"), 0);
+        assert!(!world.counters.orders.values().any(|order| order.customer == londoner));
+
+        let person = world.active_coordinator("organization:opening_st_petersburg_association").unwrap().to_owned();
+        assert_eq!(world.ledger.default_account(&person).unwrap().cash, 0);
+        let shop = world.organization("organization:opening_st_petersburg_merchant").unwrap();
+        let good = "flour";
+        assert!(shop.goods.iter().any(|item| item == good));
+        let rate = world.macro_economy.resident_daily_milli(&shop.unit, good);
+        assert!(rate > 0.0 && rate < 1.0);
+        let first_due = (1.0 / rate).ceil() as i64;
+        assert!((2..=20).contains(&first_due));
+        world.advance_migrated_domains((first_due - 1) * MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+        assert_eq!(world.livelihood.retail_shortfall(&person, good), 0);
+        assert_eq!(world.ledger.default_account(&person).unwrap().cash, 0);
+        world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+        assert_eq!(world.livelihood.retail_shortfall(&person, good), 1);
+
+        let world = resume(&bootstrap, &world);
+        assert_eq!(world.livelihood.retail_shortfall(&person, good), 1);
+        assert_eq!(world.person_holding_milli(&person, good), 0);
+        let account = world.ledger.default_account(&person).unwrap();
+        assert_eq!((account.cash, account.reserved), (0, 0));
+        assert!(!world.counters.orders.values().any(|order| order.customer == person));
+    }
+
+    #[test]
     fn counter_order_after_shift_start_expires_without_borrowing_elapsed_work() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create(LONDON).unwrap();

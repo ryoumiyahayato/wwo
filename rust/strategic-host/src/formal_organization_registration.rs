@@ -116,7 +116,9 @@ impl InitialWorld {
         for org in directory.rows.values() {
             for resident in std::iter::once(&org.officer).chain(org.opening_member.as_ref()) {
                 // A previous slot may already use this identity or have no unassigned residents.
-                if self.person(&resident.person).is_some() || self.population.unclassified(&org.unit).unwrap_or(0) == 0 {
+                if self.person(&resident.person).is_some()
+                    || self.residence_unit_at(&org.place).and_then(|unit| self.population.unclassified(unit)).unwrap_or(0) == 0
+                {
                     continue;
                 }
                 self.materialize_resident(&resident.person, resident.name.clone(), &org.place, birth_year, None)?;
@@ -304,8 +306,19 @@ mod tests {
 
     #[test]
     fn old_native_slot_registers_residents_and_zero_accounts_once() {
+        for historical in [false, true] {
+            check_old_native_slot(historical);
+        }
+    }
+
+    fn check_old_native_slot(historical: bool) {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let mut old = bootstrap.base_opening("german_empire", None).unwrap();
+        let mut old = bootstrap.base_opening("german_empire", None, historical).unwrap();
+        if historical {
+            let seine = old.residence_unit_at("place:paris").unwrap().to_owned();
+            let anonymous = old.population.unclassified(&seine).unwrap();
+            old.transfer_unmanaged_population(&seine, "country_fra", anonymous, 0).unwrap();
+        }
         // Reproduce the preceding native account roster: named residents and the two Paris firms.
         old.ledger = Ledger::initialize_people(bootstrap.residents.iter().map(|(person, cash)| (person.as_str(), *cash))).unwrap();
         WorkOpening::load().unwrap().open_accounts(&mut old.ledger).unwrap();
@@ -339,6 +352,16 @@ mod tests {
             assert_eq!(field(map(&ledger).unwrap(), key).unwrap(), field(map(&old_snapshot["ledger"]).unwrap(), key).unwrap());
         }
         assert_eq!(world.organization_members("organization:opening_berlin_association").len(), 2);
+        let association = world.organization("organization:opening_berlin_association").unwrap();
+        let pool = if historical { "administrative_region:germany_preussen" } else { "german_empire" };
+        assert_eq!(world.population.unit_for_person(&association.officer.person), Some(pool));
+        assert_eq!(world.market_unit_for_person(&association.officer.person), Some("german_empire"));
+        assert_eq!(world.population.unclassified(pool), old.population.unclassified(pool).map(|count| count - 3));
+        if historical {
+            let paris = world.organization("organization:opening_paris_association").unwrap();
+            assert!(world.person(&paris.officer.person).is_none());
+            assert_eq!(world.population.unclassified("country_fra"), old.population.unclassified("country_fra"));
+        }
         let saved = world.snapshot();
         let resumed = bootstrap.restore_native(serde_json::from_value(saved.clone()).unwrap()).unwrap();
         assert!(resumed.snapshot() == saved, "second restore changed the migrated slot");
