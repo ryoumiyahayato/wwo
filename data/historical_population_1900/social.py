@@ -481,7 +481,79 @@ def england_wales_housing(pools):
             yield pool_id, "housing", margin
 
 
-def opening_social(opening_groups):
+AUSTRIAN_RELIGION_COLUMNS = {
+    "roman_catholic": "Roman Catholic", "greek_united": "Greek United Catholic",
+    "armenian_united": "Armenian United Catholic", "old_catholic": "Old Catholic",
+    "greek_orthodox": "Greek Orthodox", "armenian_oriental": "Armenian Oriental",
+    "evangelical_augsburg_confession": "Evangelical, Augsburg Confession",
+    "evangelical_helvetic_confession": "Evangelical, Helvetic Confession",
+    "moravian_brethren": "Moravian Brethren", "anglican": "Anglican", "mennonite": "Mennonite",
+    "unitarian": "Unitarian", "lipovan": "Lipovan", "jewish": "Jewish", "muslim": "Muslim",
+    "other_confession": "Other confession", "no_confession": "No confession",
+}
+AUSTRIAN_MARITAL_COLUMNS = {
+    "never_married": "Never married", "married": "Married", "widowed": "Widowed",
+    "divorced": "Divorced", "separated": "Separated",
+}
+AUSTRIAN_LANGUAGE_COLUMNS = {
+    "german": "German", "bohemian_moravian_slovak": "Bohemian–Moravian–Slovak", "polish": "Polish",
+    "ruthenian": "Ruthenian", "slovene": "Slovene", "serbo_croatian": "Serbo-Croatian",
+    "italian_ladin": "Italian–Ladin", "romanian": "Romanian", "hungarian": "Hungarian",
+}
+AUSTRIAN_LITERACY_COLUMNS = {"read_and_write": "Read and write", "read_only": "Read only", "illiterate": "Illiterate"}
+AUSTRIAN_LOCALITY_COLUMNS = {
+    "population_at_most_500": "500 or fewer", "population_501_to_2000": "501–2,000",
+    "population_2001_to_5000": "2,001–5,000", "population_5001_to_10000": "5,001–10,000",
+    "population_10001_to_20000": "10,001–20,000", "population_over_20000": "Over 20,000",
+}
+
+
+def austrian_social_distribution(pools, filename, dimension, columns, source, locator, definition,
+                                  *, unknown_column=None, classification=None):
+    pools_of_crown = {unit_id: unit for unit_id, unit in pools.items() if unit.get("control_unit_id") == "ah_cisleithania"}
+    counts, totals, unknowns = defaultdict(Counter), Counter(), Counter()
+    territories = defaultdict(list)
+    with (COLLECTIONS / "austrian_crown_1900" / filename).open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit_id = row["opening_unit_id"]
+            local = {label: int(row[column]) for column, label in columns.items()}
+            total = int(row["observed_total"])
+            unknown = int(row[unknown_column]) if unknown_column else 0
+            if sum(local.values()) + unknown != total:
+                raise ValueError(f"Austrian census {dimension} source row does not close: {row['source_name']}")
+            counts[unit_id].update(local)
+            totals[unit_id] += total
+            unknowns[unit_id] += unknown
+            territories[unit_id].append(row["source_name"])
+    if counts.keys() != pools_of_crown.keys():
+        raise ValueError(f"Austrian census {dimension} does not cover the opening crown lands")
+    for unit_id, unit in pools_of_crown.items():
+        if totals[unit_id] != unit["endpoint_values"][-1]:
+            raise ValueError(f"Austrian census {dimension} and population controls differ for {unit_id}")
+        scope = " + ".join(territories[unit_id])
+        yield unit_id, dimension, distribution(
+            unit["population_value"], classification=classification or f"austria_1900_reported_{dimension}", source=source,
+            date="1900-12-31", observed_unit=unit_id, scope=scope, locator=f"{locator}; {scope}",
+            total=totals[unit_id], observed_counts=counts[unit_id], unknown=unknowns[unit_id], definition=definition,
+        )
+
+
+def prussian_marital_status(pools):
+    unit_id = "administrative_region:germany_preussen"
+    unit = pools[unit_id]
+    path = COLLECTIONS / "prussia_census_1900" / "marital.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        counts = {row["status"]: int(row["male"]) + int(row["female"]) for row in csv.DictReader(stream)}
+    yield unit_id, "marital_status", distribution(
+        unit["population_value"], classification="prussia_1900_reported_marital_status",
+        source="de_prussia_handbook_1903_census_ages", date="1900-12-01", observed_unit=unit_id,
+        scope="Kingdom of Prussia, population present", locator="Part II.A, Table VIII, printed p. 99, Prussian state row",
+        total=unit["endpoint_values"][-1], observed_counts=counts, unknown=0,
+        definition="Census civil status of all persons present. Never married includes children.",
+    )
+
+
+def opening_social(opening_groups, *, version):
     """Return independent person distributions at each source's published scope."""
     pools = {
         unit["unit_id"]: unit
@@ -494,6 +566,39 @@ def opening_social(opening_groups):
                       madras_states_religion(pools, distribution, INDIA_TABLES["7"]), canada_structure(pools),
                       united_states_structure(pools, distribution), netherlands_structure(pools),
                       netherlands_occupation(pools), england_wales_housing(pools))
+    if version >= 16:
+        marginals = chain(
+            marginals,
+            prussian_marital_status(pools),
+            austrian_social_distribution(
+                pools, "religion.csv", "religion", AUSTRIAN_RELIGION_COLUMNS,
+                "ah_cisleithania_census_1900_religion", "Vol. 63, part 2, Table V, printed pp. 55–56",
+                "Reported religious confession, including separate categories for other and no confession. All persons present.",
+            ),
+            austrian_social_distribution(
+                pools, "marital.csv", "marital_status", AUSTRIAN_MARITAL_COLUMNS,
+                "ah_cisleithania_census_1900_marital", "Vol. 63, part 2, Table VIII, printed p. 150",
+                "Civil status of all persons present. The never-married category includes children.",
+            ),
+            austrian_social_distribution(
+                pools, "usual_language.csv", "language", AUSTRIAN_LANGUAGE_COLUMNS,
+                "ah_cisleithania_census_1900_language", "Vol. 63, part 2, Table VI, printed pp. 72–73",
+                "Usual language of persons covered by the census language classification. "
+                "Foreign subjects had no reported language. The classification does not establish cultural identity.",
+                unknown_column="foreign_subjects_language_unknown", classification="austria_1900_usual_language",
+            ),
+            austrian_social_distribution(
+                pools, "literacy.csv", "literacy", AUSTRIAN_LITERACY_COLUMNS,
+                "ah_cisleithania_census_1900_literacy_locality", "Vol. 63, part 2, Table VII, printed pp. 130–133",
+                "The original reading and writing categories cover all persons present, including children.",
+            ),
+            austrian_social_distribution(
+                pools, "locality_population_size.csv", "residence", AUSTRIAN_LOCALITY_COLUMNS,
+                "ah_cisleithania_census_1900_literacy_locality", "Vol. 63, part 2, Table VII, printed pp. 130–133",
+                "Persons present by population size of their census locality. The bins do not designate an urban or rural legal status.",
+                classification="austria_1900_locality_population_size",
+            ),
+        )
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

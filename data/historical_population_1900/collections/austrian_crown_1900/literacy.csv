@@ -1,0 +1,18 @@
+source_row,source_name,opening_unit_id,printed_pages,observed_total,read_and_write,read_only,illiterate
+1,Niederösterreich,ah_lower_austria,130-131,3100493,2543856,24514,532123
+2,Oberösterreich,ah_upper_austria,130-131,810246,660754,8805,140687
+3,Salzburg,ah_salzburg,130-131,192763,152800,3619,36344
+4,Steiermark,ah_styria,130-131,1356494,964471,43574,348449
+5,Kärnten,ah_carinthia,130-131,367324,240625,10743,115956
+6,Krain,ah_carniola,130-131,508150,292862,41497,173791
+7,Triest und Gebiet,ah_littoral,130-131,178599,131591,2536,44472
+8,Görz und Gradisca,ah_littoral,130-131,232897,136961,9894,86042
+9,Istrien,ah_littoral,130-131,345050,129427,5329,210294
+11,Tirol,ah_tyrol_vorarlberg,132-133,852712,681893,19997,150822
+12,Vorarlberg,ah_tyrol_vorarlberg,132-133,129237,109139,489,19609
+14,Böhmen,ah_bohemia,132-133,6318697,5093600,64439,1160658
+15,Mähren,ah_moravia,132-133,2437706,1899907,55598,482201
+16,Schlesien,ah_silesia,132-133,680422,504278,22799,153345
+17,Galizien,ah_galicia,132-133,7315939,2184780,453137,4678022
+18,Bukowina,ah_bukovina,132-133,730195,209434,7097,513664
+19,Dalmatien,ah_dalmatia,132-133,593784,131594,4715,457475

@@ -609,6 +609,77 @@
     "collection": "austria_hungary"
   },
   {
+    "id": "ah_cisleithania_census_1900_ages",
+    "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Alters- und Familienstandsgliederung",
+    "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
+    "url": "https://alex.onb.ac.at/cgi-content/alex?aid=ors&datum=0063&pos=475",
+    "locator": "Österreichische Statistik Band 63, Heft 3, Table II, printed pp. 16–33; Table III, printed p. 46; persons by age, land, and sex",
+    "table_urls": [
+      "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA2-PA16",
+      "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA2-PA33",
+      "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA2-PA46"
+    ],
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "age_sex.csv",
+    "collection": "austrian_crown_1900"
+  },
+  {
+    "id": "ah_cisleithania_census_1900_religion",
+    "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Bevölkerung nach den Grössenkategorien der Ortschaften ... nach der Confession und Umgangssprache",
+    "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
+    "url": "https://alex.onb.ac.at/cgi-content/alex?aid=ors&datum=0063&pos=259",
+    "locator": "Österreichische Statistik Band 63, Heft 2, Table V, printed pp. 55–56, all present by land and confession",
+    "table_urls": [
+      "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA55",
+      "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA56"
+    ],
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "religion.csv",
+    "collection": "austrian_crown_1900"
+  },
+  {
+    "id": "ah_cisleithania_census_1900_marital",
+    "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Bevölkerung nach den Grössenkategorien der Ortschaften ... und dem Familienstande",
+    "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
+    "url": "https://alex.onb.ac.at/cgi-content/alex?aid=ors&datum=0063&pos=259",
+    "locator": "Österreichische Statistik Band 63, Heft 2, Table VIII, printed p. 150, all persons present by marital status",
+    "table_urls": [
+      "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA150"
+    ],
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "marital.csv",
+    "collection": "austrian_crown_1900"
+  },
+  {
+    "id": "ah_cisleithania_census_1900_language",
+    "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Bevölkerung ... nach der Confession und Umgangssprache",
+    "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
+    "url": "https://alex.onb.ac.at/cgi-content/alex?aid=ors&datum=0063&pos=259",
+    "locator": "Österreichische Statistik Band 63, Heft 2, Table VI, printed pp. 72–73, usual language by land with a separate foreign-subject total",
+    "table_urls": [
+      "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA72",
+      "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA73"
+    ],
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "usual_language.csv",
+    "collection": "austrian_crown_1900"
+  },
+  {
+    "id": "ah_cisleithania_census_1900_literacy_locality",
+    "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Bevölkerung ... nach dem Bildungsgrade innerhalb der Grössenkategorien der Ortschaften",
+    "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
+    "url": "https://alex.onb.ac.at/cgi-content/alex?aid=ors&datum=0063&pos=259",
+    "locator": "Österreichische Statistik Band 63, Heft 2, Table VII, printed pp. 130–133, literacy and locality-size cross-tabulation",
+    "table_urls": [
+      "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA130",
+      "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA133"
+    ],
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "literacy.csv",
+    "related_raw_path": "locality_population_size.csv",
+    "collection": "austrian_crown_1900"
+  },
+  {
     "id": "belgium_census_provinces_1890_1900",
     "title": "Annuaire statistique de la Belgique et du Congo belge, 1912. Population par arrondissement administratif au 31 décembre.",
     "publisher": "Ministère de l’Intérieur de Belgique, Statistique générale",
@@ -1545,10 +1616,12 @@
     "title": "Statistical abstract relating to British India from 1885-86 to 1894-95. Thirtieth number.",
     "publisher": "Her Majesty’s Stationery Office, London, 1896",
     "url": "https://dsal.uchicago.edu/statistics/1885_excel/index.html",
-    "locator": "Table 18, worksheet 1885 table 18",
+    "locator": "Table 18, printed pp. 30–31 and worksheet 1885 table 18",
     "rights": "Historical government table, public domain. Numeric cells transcribed from University of Chicago Digital South Asia Library.",
     "table_urls": [
-      "https://dsal.uchicago.edu/statistics/1885_excel/1885.18.XLS"
+      "https://dsal.uchicago.edu/statistics/1885_excel/1885.18.XLS",
+      "https://dsal.uchicago.edu/digbooks/images/Statistics_1885/Statistics_1885_036.gif",
+      "https://dsal.uchicago.edu/digbooks/images/Statistics_1885/Statistics_1885_037.gif"
     ],
     "raw_path": "age_sex.csv",
     "extract": "Select the worksheet rows listed in panels.json and its male and female columns. Nonnumeric dashes in the selected unspecified-age cells are zero. The published sex totals are retained even where the workbook age bands do not reconcile.",
@@ -2144,6 +2217,21 @@
     "historical_edition_url": "https://religion.antropo.es/_libros/biblioteca/Coran.Ingles.1734.George.Sale.pdf",
     "note": "The norm is attested before 1900. The source has no local practice survey or dated population observation.",
     "collection": "pop_traits"
+  },
+  {
+    "id": "de_prussia_handbook_1903_census_ages",
+    "title": "Statistisches Handbuch für den Preußischen Staat, Band IV",
+    "publisher": "Königliches Statistisches Bureau, Berlin, 1903",
+    "url": "https://archive.org/details/statistischesha00landgoog",
+    "locator": "Part II.A, Tables VII–VIII, pp. 98–99, 1900 census, population present by age, sex and civil status",
+    "table_urls": [
+      "https://archive.org/details/statistischesha00landgoog/page/n122/mode/1up",
+      "https://archive.org/details/statistischesha00landgoog/page/n123/mode/1up"
+    ],
+    "rights": "Public-domain official historical census. Numeric cells transcribed from the scan.",
+    "raw_path": "age_sex.csv",
+    "related_raw_path": "marital.csv",
+    "collection": "prussia_census_1900"
   },
   {
     "id": "ro_colescu_1899_census_report",

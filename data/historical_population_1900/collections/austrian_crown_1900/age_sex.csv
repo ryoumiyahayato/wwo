@@ -1,0 +1,52 @@
+source_row,source_name,opening_unit_id,age_min,age_max,male,female
+1,Niederösterreich,ah_lower_austria,0,14,443188,446267
+1,Niederösterreich,ah_lower_austria,15,60,981062,1000892
+1,Niederösterreich,ah_lower_austria,61,,99890,129194
+2,Oberösterreich,ah_upper_austria,0,14,123546,125046
+2,Oberösterreich,ah_upper_austria,15,60,237882,240221
+2,Oberösterreich,ah_upper_austria,61,,39414,44137
+3,Salzburg,ah_salzburg,0,14,28577,28782
+3,Salzburg,ah_salzburg,15,60,60115,58548
+3,Salzburg,ah_salzburg,61,,7451,9290
+4,Steiermark,ah_styria,0,14,205912,206942
+4,Steiermark,ah_styria,15,60,409168,409034
+4,Steiermark,ah_styria,61,,60550,64888
+5,Kärnten,ah_carinthia,0,14,58869,58744
+5,Kärnten,ah_carinthia,15,60,107058,110022
+5,Kärnten,ah_carinthia,61,,14624,18007
+6,Krain,ah_carniola,0,14,90967,89726
+6,Krain,ah_carniola,15,60,128520,151166
+6,Krain,ah_carniola,61,,22240,25531
+7,Triest und Gebiet,ah_littoral,0,14,24812,24664
+7,Triest und Gebiet,ah_littoral,15,60,55960,59904
+7,Triest und Gebiet,ah_littoral,61,,5686,7573
+8,Görz und Gradisca,ah_littoral,0,14,41617,40471
+8,Görz und Gradisca,ah_littoral,15,60,64683,63987
+8,Görz und Gradisca,ah_littoral,61,,11214,10925
+9,Istrien,ah_littoral,0,14,60630,58417
+9,Istrien,ah_littoral,15,60,100947,93204
+9,Istrien,ah_littoral,61,,16399,15453
+10,Tirol,ah_tyrol_vorarlberg,0,14,130961,129050
+10,Tirol,ah_tyrol_vorarlberg,15,60,249675,258449
+10,Tirol,ah_tyrol_vorarlberg,61,,42090,42487
+11,Vorarlberg,ah_tyrol_vorarlberg,0,14,19719,19473
+11,Vorarlberg,ah_tyrol_vorarlberg,15,60,39126,40034
+11,Vorarlberg,ah_tyrol_vorarlberg,61,,5248,5637
+12,Böhmen,ah_bohemia,0,14,1062374,1058107
+12,Böhmen,ah_bohemia,15,60,1781137,1906892
+12,Böhmen,ah_bohemia,61,,229682,280505
+13,Mähren,ah_moravia,0,14,416785,418441
+13,Mähren,ah_moravia,15,60,675580,734744
+13,Mähren,ah_moravia,61,,81259,110897
+14,Schlesien,ah_silesia,0,14,122628,122533
+14,Schlesien,ah_silesia,15,60,189183,200633
+14,Schlesien,ah_silesia,61,,19017,26428
+15,Galizien,ah_galicia,0,14,1416890,1427183
+15,Galizien,ah_galicia,15,60,2018433,2101183
+15,Galizien,ah_galicia,61,,183610,168640
+16,Bukowina,ah_bukovina,0,14,140008,139178
+16,Bukowina,ah_bukovina,15,60,207433,207634
+16,Bukowina,ah_bukovina,61,,19216,16726
+17,Dalmatien,ah_dalmatia,0,14,112033,105621
+17,Dalmatien,ah_dalmatia,15,60,165454,162112
+17,Dalmatien,ah_dalmatia,61,,24171,24393

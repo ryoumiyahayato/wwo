@@ -124,6 +124,7 @@ impl Population {
             let matching = [
                 ("russia_1897_reported_confession", "Магометане"),
                 ("india_1901_reported_religion", "Muhammadans"),
+                ("austria_1900_reported_religion", "Muslim"),
             ].iter().filter_map(|(classification, category)| {
                 religion.by_classification.get(classification)?.get(category)
             }).sum();

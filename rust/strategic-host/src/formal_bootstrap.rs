@@ -2304,6 +2304,38 @@ mod tests {
     }
 
     #[test]
+    fn historical_austrian_census_uses_matching_territories_and_retains_language_unknowns() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let unit = "ah_lower_austria";
+        let report = world.inspect_population(unit).unwrap();
+        assert_eq!(report.population_total, Some(3_056_648));
+        let structure = report.structure.unwrap();
+        assert_eq!(structure.residents_with_cohort_age_and_sex, 3_056_648);
+        assert_eq!(structure.cohorts.len(), 22);
+        let social = report.social.unwrap();
+        let religion = &social.dimensions["religion"];
+        assert_eq!(religion.direct_opening_distribution.unwrap().observed_total, 3_100_493);
+        assert_eq!(religion.by_classification["austria_1900_reported_religion"]["Jewish"], 155_054);
+        assert_eq!(social.dimensions["marital_status"].unknown_residents, 0);
+        let language = &social.dimensions["language"];
+        assert_eq!(language.direct_opening_distribution.unwrap().observed_unknown, 243_792);
+        assert!(language.unknown_residents > 0);
+        assert_eq!(language.assigned_residents + language.unknown_residents, 3_056_648);
+        assert_eq!(social.dimensions["literacy"].assigned_residents, 3_056_648);
+        assert_eq!(social.dimensions["residence"].by_classification["austria_1900_locality_population_size"].len(), 6);
+        assert_eq!(social.dimensions["culture"].assigned_residents, 0);
+        assert_eq!(report.dietary_norms[0].residents_with_matching_religion, 878);
+        assert_eq!(report.dietary_norms[0].observed_adherents, None);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(15)).unwrap();
+        let previous = old.inspect_population(unit).unwrap();
+        assert_eq!(previous.population_total, report.population_total);
+        assert_eq!(previous.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        assert_eq!(previous.social.unwrap().dimensions["religion"].assigned_residents, 0);
+    }
+
+    #[test]
     fn historical_population_structure_and_old_openings_restore() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create("country_fra").unwrap();
@@ -2450,10 +2482,13 @@ mod tests {
         assert_eq!(us_social.dimensions["literacy"].assigned_residents, 57_539_868);
         assert_eq!(us_social.dimensions["household"].assigned_residents, 72_890_961);
         assert_eq!(us_social.dimensions["culture"].unknown_residents, us.population_total);
-        let prussia = world.population().structure(Some("administrative_region:germany_preussen"), clock).unwrap();
+        let prussia_id = "administrative_region:germany_preussen";
+        let prussia = world.population().structure(Some(prussia_id), clock).unwrap();
         assert_eq!(prussia.population_total, 33_993_492);
         assert_eq!(prussia.cohort_residents + prussia.named_residents, prussia.population_total);
-        assert_eq!(prussia.residents_with_cohort_age_and_sex, 12_087_276);
+        assert_eq!(prussia.residents_with_cohort_age_and_sex, 33_986_841);
+        let prussian_social = world.population().social_distribution(Some(prussia_id)).unwrap();
+        assert_eq!(prussian_social.dimensions["marital_status"].assigned_residents, 33_993_492);
         let port_louis = world.transport().capital_node("cshapes_gw_590").unwrap();
         assert_eq!(world.residence_unit_at(port_louis), Some("mu_district_port_louis"));
         assert_eq!(world.population().population_total("qing_hist_shandong"), Some(42_165_666));

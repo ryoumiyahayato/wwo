@@ -1,0 +1,10 @@
+panel,label,role,age_min,age_max,both,male,female
+germany_1900_preussen_full_age_sex,Staat,total,,,34472509,16971425,17501084
+germany_1900_preussen_full_age_sex,Über 0 bis 15,band,0,14,12257603,6157788,6099815
+germany_1900_preussen_full_age_sex,Über 15 bis 20,band,15,19,3250750,1637303,1613447
+germany_1900_preussen_full_age_sex,Über 20 bis 40,band,20,39,10269860,5084720,5185140
+germany_1900_preussen_full_age_sex,Über 40 bis 60,band,40,59,6078705,2914192,3164513
+germany_1900_preussen_full_age_sex,Über 60 bis 80,band,60,79,2443933,1103861,1340072
+germany_1900_preussen_full_age_sex,Über 80 bis 100,band,80,99,164882,69849,95033
+germany_1900_preussen_full_age_sex,Über 100,band,100,,35,5,30
+germany_1900_preussen_full_age_sex,Ohne Angabe,band,,,6741,3707,3034

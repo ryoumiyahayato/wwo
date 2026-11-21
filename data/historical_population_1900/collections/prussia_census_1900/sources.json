@@ -1,0 +1,13 @@
+[
+  {
+    "id": "de_prussia_handbook_1903_census_ages",
+    "title": "Statistisches Handbuch für den Preußischen Staat, Band IV",
+    "publisher": "Königliches Statistisches Bureau, Berlin, 1903",
+    "url": "https://archive.org/details/statistischesha00landgoog",
+    "locator": "Part II.A, Tables VII–VIII, pp. 98–99, 1900 census, population present by age, sex and civil status",
+    "table_urls": ["https://archive.org/details/statistischesha00landgoog/page/n122/mode/1up", "https://archive.org/details/statistischesha00landgoog/page/n123/mode/1up"],
+    "rights": "Public-domain official historical census. Numeric cells transcribed from the scan.",
+    "raw_path": "age_sex.csv",
+    "related_raw_path": "marital.csv"
+  }
+]

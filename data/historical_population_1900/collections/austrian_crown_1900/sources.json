@@ -1,0 +1,53 @@
+[
+  {
+    "id": "ah_cisleithania_census_1900_ages",
+    "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Alters- und Familienstandsgliederung",
+    "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
+    "url": "https://alex.onb.ac.at/cgi-content/alex?aid=ors&datum=0063&pos=475",
+    "locator": "Österreichische Statistik Band 63, Heft 3, Table II, printed pp. 16–33; Table III, printed p. 46; persons by age, land, and sex",
+    "table_urls": ["https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA2-PA16", "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA2-PA33", "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA2-PA46"],
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "age_sex.csv"
+  },
+  {
+    "id": "ah_cisleithania_census_1900_religion",
+    "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Bevölkerung nach den Grössenkategorien der Ortschaften ... nach der Confession und Umgangssprache",
+    "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
+    "url": "https://alex.onb.ac.at/cgi-content/alex?aid=ors&datum=0063&pos=259",
+    "locator": "Österreichische Statistik Band 63, Heft 2, Table V, printed pp. 55–56, all present by land and confession",
+    "table_urls": ["https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA55", "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA56"],
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "religion.csv"
+  },
+  {
+    "id": "ah_cisleithania_census_1900_marital",
+    "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Bevölkerung nach den Grössenkategorien der Ortschaften ... und dem Familienstande",
+    "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
+    "url": "https://alex.onb.ac.at/cgi-content/alex?aid=ors&datum=0063&pos=259",
+    "locator": "Österreichische Statistik Band 63, Heft 2, Table VIII, printed p. 150, all persons present by marital status",
+    "table_urls": ["https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA150"],
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "marital.csv"
+  },
+  {
+    "id": "ah_cisleithania_census_1900_language",
+    "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Bevölkerung ... nach der Confession und Umgangssprache",
+    "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
+    "url": "https://alex.onb.ac.at/cgi-content/alex?aid=ors&datum=0063&pos=259",
+    "locator": "Österreichische Statistik Band 63, Heft 2, Table VI, printed pp. 72–73, usual language by land with a separate foreign-subject total",
+    "table_urls": ["https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA72", "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA73"],
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "usual_language.csv"
+  },
+  {
+    "id": "ah_cisleithania_census_1900_literacy_locality",
+    "title": "Die Ergebnisse der Volkszählung vom 31. December 1900 in den im Reichsrathe vertretenen Königreichen und Ländern. Die Bevölkerung ... nach dem Bildungsgrade innerhalb der Grössenkategorien der Ortschaften",
+    "publisher": "K. K. Statistische Zentral-Commission, Wien, 1903",
+    "url": "https://alex.onb.ac.at/cgi-content/alex?aid=ors&datum=0063&pos=259",
+    "locator": "Österreichische Statistik Band 63, Heft 2, Table VII, printed pp. 130–133, literacy and locality-size cross-tabulation",
+    "table_urls": ["https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA130", "https://books.google.at/books?id=AUY6lAWvQbUC&pg=RA1-PA133"],
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "literacy.csv",
+    "related_raw_path": "locality_population_size.csv"
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "germany_1900_preussen_full_age_sex",
+    "source_id": "de_prussia_handbook_1903_census_ages",
+    "locator": "Part II.A, Tables VII–VIII, printed pp. 98–99, Kingdom of Prussia",
+    "published_scope": "Kingdom of Prussia, population present",
+    "observed_unit_id": "administrative_region:germany_preussen",
+    "observed_date": "1900-12-01",
+    "definition": "Persons present by sex and age group. Table VIII cells are combined across mutually exclusive civil statuses. The age-unknown row is explicit.",
+    "opening_unit_id": "administrative_region:germany_preussen",
+    "opening_from_version": 16,
+    "opening_match_population_endpoint": true,
+    "uncertainty": "The census classifies present residents 334 days after opening. Assume each sex and age share for the January opening control. The effects of migration, births, deaths and census age reporting on shares are unquantified.",
+    "broad_observation": false
+  }
+]
