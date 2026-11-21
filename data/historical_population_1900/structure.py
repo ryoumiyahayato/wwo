@@ -76,11 +76,11 @@ def dimensions(population):
     return result
 
 
-def regroup_age_rows(rows, target, corrections):
+def regroup_age_rows(rows, target):
     counts = ("both", "male", "female")
     for band in target:
         selected = [
-            row | corrections.get(row["label"], {})
+            row
             for row in rows
             if row["role"] == band["role"] and (
                 band["age_min"] is None and row["age_min"] is None
@@ -96,8 +96,9 @@ def regroup_age_rows(rows, target, corrections):
 def age_sex_panels():
     panels = json.loads((AGE_SOURCES / "panels.json").read_text(encoding="utf8"))
     panels.extend(json.loads((AGE_SOURCES / "us_census_1900_panels.json").read_text(encoding="utf8")))
+    panels.extend(json.loads((AGE_SOURCES / "uk_county_age_panels.json").read_text(encoding="utf8")))
     by_panel = {panel["id"]: [] for panel in panels}
-    for filename in ("age_sex.csv", "us_census_1900.csv"):
+    for filename in ("age_sex.csv", "us_census_1900.csv", "uk_county_age.csv"):
         for row in read_csv(AGE_SOURCES / filename):
             for key in ("age_min", "age_max", "both", "male", "female"):
                 row[key] = int(row[key]) if row[key] else None
@@ -127,9 +128,11 @@ def age_sex_panels():
         components = []
         for panel_id in panel["component_panels"]:
             rows = by_panel[panel_id]
+            adjustments = panel.get("component_count_corrections", {}).get(panel_id, {})
+            if adjustments:
+                rows = [row | adjustments.get(row["label"], {}) for row in rows]
             if "regroup_to" in panel and panel_id != panel["regroup_to"]:
-                adjustments = panel.get("component_count_corrections", {}).get(panel_id, {})
-                rows = regroup_age_rows(rows, by_panel[panel["regroup_to"]], adjustments)
+                rows = regroup_age_rows(rows, by_panel[panel["regroup_to"]])
             components.append(rows)
         for matched_rows in zip(*components, strict=True):
             row = matched_rows[0].copy()

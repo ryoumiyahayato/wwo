@@ -1,0 +1,52 @@
+[
+  {
+    "id": "cape_colony_1899_imperial_conference",
+    "title": "Conference between the Secretary of State for the Colonies and the Prime Ministers of Self-Governing Colonies, June to August 1902",
+    "publisher": "New Zealand House of Representatives, published as Appendix to the Journals of the House of Representatives, 1903, Session I, A-02a. Digitized by the National Library of New Zealand.",
+    "url": "https://paperspast.natlib.govt.nz/parliamentary/AJHR1903-I.2.1.2.9",
+    "locator": "Table of British military and naval expenditure by colony, Cape of Good Hope row, Population column.",
+    "rights": "Selected numerical facts from the printed official tables and statutes.",
+    "contemporary_cross_check": {
+      "url": "https://www66.statcan.gc.ca/eng/1902/190200710057_Area%2C%20Population.pdf",
+      "locator": "Statistical Year-Book of Canada, 1902, p. 57, Cape Colony row. The date column gives 1899 and the population column gives 2,265,556."
+    },
+    "boundary_sources": [
+      {
+        "url": "https://books.google.com/books?id=8XgKAAAAIAAJ&pg=PR3&vq=188%2C000",
+        "locator": "Statistical Register of the Colony of the Cape of Good Hope, 1899, p. iii. The 1891 census area has 2,004,821 residents. The introduction lists 188,000 for Pondoland and 72,736 for annexed British Bechuanaland. These three components sum to 2,265,557, one above the published conference total."
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Imperial_fiscal_reform_%28IA_imperialfiscalre00cail%29.pdf",
+        "locator": "Imperial Fiscal Reform, p. 39, Cape Colony row and note §. The 1899 figure includes Pondoland and British Bechuanaland."
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/5/51/Select_constitutional_documents_illustrating_South_African_history%2C_1795-1910_%28IA_cu31924030542165%29.pdf",
+        "locator": "Select Constitutional Documents Illustrating South African History, pp. 67–68, documents 40 and 41, Basutoland Disannexation Act, 1883, and Walfish Bay and St. John’s River Territories Annexation Act, 1884."
+      },
+      {
+        "url": "https://www2.lib.uct.ac.za/govpubs/legislation/index.php?cat=cape&id=1645&op=show",
+        "locator": "University of Cape Town Government Publications legislation catalogue, British Bechuanaland Annexation Act, 1895."
+      },
+      {
+        "url": "https://hansard.parliament.uk/Commons/1900-03-12/debates/099a27bf-2151-4723-a7cc-9cac166d14a4/Questions",
+        "locator": "Hansard, 12 March 1900, answer on martial law in Cape Colony, lists Mafeking as a Cape district."
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Magisterial_reports_having_reference_to_the_occupation_by_the_enemy_of%2C_and_the_attitude_of_the_population_in%2C_the_districts_now_or_recently_under_martial_law_%28IA_magisterialrepor00cape%29.pdf",
+        "locator": "Cape House of Assembly, Magisterial Reports, Mafeking, report 2/750 D. 1900. Transvaal forces occupied surrounding parts of the district while the town remained under siege."
+      }
+    ]
+  },
+  {
+    "id": "cape_colony_1900_statistical_register",
+    "title": "Statistical Register of the Colony of the Cape of Good Hope, 1900, with supplementary returns to 30 June 1901",
+    "publisher": "Colonial Secretary’s Office, Cape of Good Hope. W. A. Richards & Sons, Government Printers, Cape Town, 1901. Digitized by Google Books.",
+    "url": "https://books.google.com/books?id=63cKAAAAIAAJ&pg=PR3",
+    "locator": "Introductory review, p. iii, Area, Population and Electors. The reported estimate refers to December 1900.",
+    "rights": "Selected numerical facts from the printed official statistical register.",
+    "contemporary_cross_check": {
+      "url": "https://en.wikisource.org/wiki/Page:1902_Encyclop%C3%A6dia_Britannica_-_Volume_26_-_AUS-CHI.pdf/613",
+      "locator": "Encyclopædia Britannica, 10th edition, vol. 26, p. 565, Cape Colony, Area and Population. The 1900 table agrees with the register and describes the legal extent."
+    }
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "england_wales_census_1901_general_report",
+    "title": "Census of England and Wales, 1901. General Report with Appendices, Cd. 2174",
+    "publisher": "General Register Office and His Majesty's Stationery Office, London, 1904",
+    "url": "https://www.visionofbritain.org.uk/census/report_page.jsp?rpt_id=EW1901GEN",
+    "locator": "Sections II.1 and II.4, Population and Rates of Increase; section III, Habitations, printed pp. 39–41",
+    "rights": "1904 report. Numeric facts extracted from the published census tables.",
+    "tables": {
+      "population": "https://www.visionofbritain.org.uk/census/EW1901GEN/4",
+      "habitations": "https://visionofbritain.org.uk/census/EW1901GEN/5"
+    }
+  }
+]

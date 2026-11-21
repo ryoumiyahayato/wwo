@@ -1,0 +1,27 @@
+{
+  "unit_id": "uk_england_wales",
+  "date": "1901-03-31",
+  "source_id": "england_wales_census_1901_general_report",
+  "total_population": 32527843,
+  "separate_occupations": 7036868,
+  "districts": {
+    "urban": {
+      "population": 25058355,
+      "overcrowded_tenements_1_to_4_rooms": 335737,
+      "occupants_of_these_tenements": 2230999
+    },
+    "rural": {
+      "population": 7469488,
+      "overcrowded_tenements_1_to_4_rooms": 56677,
+      "occupants_of_these_tenements": 436507
+    }
+  },
+  "overcrowded_tenements_1_to_4_rooms": 392414,
+  "occupants_of_these_tenements": 2667506,
+  "by_rooms_in_overcrowded_tenement": {
+    "1": {"tenements": 66669, "occupants": 245586},
+    "2": {"tenements": 147527, "occupants": 884672},
+    "3": {"tenements": 102556, "occupants": 807596},
+    "4": {"tenements": 75662, "occupants": 729652}
+  }
+}
