@@ -1,0 +1,62 @@
+[
+  {
+    "id": "morocco_1899_statesmans_yearbook",
+    "title": "The Statesman's Year-Book 1899, American edition",
+    "publisher": "Macmillan, 1899. Edited by J. Scott Keltie. Printed-page scan and transcription hosted by Wikisource.",
+    "url": "https://en.wikisource.org/wiki/Page:Statesman%27s_Year-Book_1899_American_Edition.djvu/1155",
+    "locator": "Printed p. 799, Morocco, Area and Population.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://icj-web.leman.un-icc.cloud/sites/default/files/case-related/61/061-19751016-ADV-01-00-EN.pdf",
+        "locator": "International Court of Justice, Western Sahara advisory opinion (1975), printed pp. 49–51. Discusses the 1895 agreement and the disputed geographical interpretation of the land south of Wad Draa."
+      },
+      {
+        "url": "https://ciram.unimc.it/it/focus/diritto-geopolitica-mare/WesternSahara/EspFrTraite1912_fr.pdf",
+        "locator": "French and Spanish convention of 27 November 1912, arts. 2, 3 and 5. Later protectorate and concession lines do not supply an 1899 population partition."
+      }
+    ]
+  },
+  {
+    "id": "morocco_1900_escallier_via_hcp",
+    "title": "L’évolution de la population du Maroc",
+    "publisher": "Haut-Commissariat au Plan du Maroc. The estimate is attributed to Robert Escallier (1984).",
+    "url": "https://www.hcp.ma/file/231890/",
+    "locator": "Section 1, opening paragraph and reference 4. The author cites an estimate of about five million in 1900.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://rgph2014.hcp.ma/Apercu-sur-les-recensements-au-Maroc_a29.html",
+        "locator": "Haut-Commissariat au Plan, Aperçu sur les recensements au Maroc, sections 1–2. Describes partial protectorate population counts and the first full post-independence general census in 1960."
+      }
+    ]
+  },
+  {
+    "id": "ceuta_1900_ine_municipal_census",
+    "title": "Alteraciones de los municipios en los Censos de Población desde 1842: Ceuta",
+    "publisher": "Instituto Nacional de Estadística, Spain.",
+    "url": "https://www.ine.es/intercensal/intercensal.do?btnBuscarCod=Consultar+selecci%C3%B3n&codigoMunicipio=001&codigoProvincia=51&search=3",
+    "locator": "Municipality 51001, 1900 column, Población de Hecho and Población de Derecho.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://www.ine.es/censo2001/leyes_censales.pdf",
+        "locator": "Ley de 3 de abril de 1900, art. 1, fixes the census date at 31 December 1900."
+      }
+    ]
+  },
+  {
+    "id": "melilla_1900_ine_municipal_census",
+    "title": "Alteraciones de los municipios en los Censos de Población desde 1842: Melilla",
+    "publisher": "Instituto Nacional de Estadística, Spain.",
+    "url": "https://www.ine.es/intercensal/intercensal.do?btnBuscarCod=Consultar+selecci%C3%B3n&codigoMunicipio=001&codigoProvincia=52&search=3",
+    "locator": "Municipality 52001, 1900 column, Población de Hecho and Población de Derecho.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://www.ine.es/censo2001/leyes_censales.pdf",
+        "locator": "Ley de 3 de abril de 1900, art. 1, fixes the census date at 31 December 1900."
+      }
+    ]
+  }
+]

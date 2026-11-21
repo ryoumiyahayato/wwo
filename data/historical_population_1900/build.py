@@ -82,7 +82,7 @@ def opening_count_basis(selection, legacy, world_reference):
         source = group["source_id"]
         basis = ("published_historical_estimates" if source.startswith("ft_world_") or source in
                  {"cao_qing_provincial_reconstruction", "natal_statistical_yearbook_1909_macdonald",
-                  "cape_colony_1899_imperial_conference"}
+                  "cape_colony_1899_imperial_conference", "zanzibar_statesmans_year_book_1899"}
                  else "date_models_from_territorial_returns")
         sourced = group.get("research_unlocated_balance", sourced_people(group))
         retained = group.get("legacy_unlocated_balance", 0)
@@ -195,7 +195,7 @@ def main():
                    accounting_role="alternative_reconstruction_nonadditive")
     observations.extend(derived)
     regional_counts["asian_interpolation"]=len(derived)
-    selection=groups(observations, version=4)
+    selection=groups(observations, version=5)
     bengal=next(u for g in selection for u in g["units"] if u["unit_id"]=="raj_bengal_province")
     bengal["place_ids"].append("place:kolkata")
     bengal["place_evidence"]={"place:kolkata": {
@@ -275,7 +275,9 @@ def main():
     summary["structure_broad_observations"]=[
         dict(panel_id=panel["id"], unit_id=panel["observed_unit_id"], date=panel["observed_date"],
              population=next(row["both"] for row in rows if row["role"]=="total"),
-             age_not_stated=sum(row["both"] for row in rows if row["role"]=="band" and row["age_min"] is None))
+             age_not_stated=sum(row["both"] for row in rows if row["role"]=="band" and row["age_min"] is None)
+                 if panel.get("age_not_stated_separately", True) else None,
+             combined_open_age_and_unreported=sum(row["both"] for row in rows if row["role"]=="mixed_age_band") or None)
         for panel,rows in age_sex_panels() if panel["broad_observation"]
     ]
     summary["structure_unknown_policy"]="Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex."
@@ -290,8 +292,8 @@ def main():
     records("demography_1900.jsonl.gz",structural)
     records("parent_reconciliation.jsonl.gz",audit)
     json_file("opening.json",dict(version=1,groups=groups(observations, version=1)))
-    json_file("opening_v4.json",dict(version=4,groups=selection))
-    json_file("opening_structure_v4.json",structure_opening)
+    json_file("opening_v5.json",dict(version=5,groups=selection))
+    json_file("opening_structure_v5.json",structure_opening)
     json_file("sources.json",list(manifest.values()))
     json_file("summary.json",summary)
     json_file("legacy_audit.json",legacy)

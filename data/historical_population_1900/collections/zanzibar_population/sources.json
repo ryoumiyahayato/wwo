@@ -1,0 +1,58 @@
+[
+  {
+    "id": "zanzibar_statesmans_year_book_1899",
+    "title": "The Statesman's Year-Book, 1899 American Edition, Zanzibar Protectorate",
+    "publisher": "Macmillan, 1899. Printed scan and transcription at Wikisource.",
+    "url": "https://en.wikisource.org/wiki/Page:Statesman%27s_Year-Book_1899_American_Edition.djvu/541",
+    "locator": "Printed p. 197, Zanzibar Protectorate, Area, Population, Religion. Estimates of 150,000 and 50,000 for the two islands.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "opening_control_candidate": {
+      "wwo_id": "sultanate_of_zanzibar",
+      "date": "1900-01-01",
+      "source_date": "1899",
+      "population_value": 200000,
+      "basis": "Contemporary two-island estimate published in 1899 used as a near-opening proxy. No interpolation, reference date, error interval or separate foreign-resident adjustment.",
+      "scope": "Unguja and Pemba and their administratively dependent islets. Excludes Mafia, mainland coastal leases and the East Africa Protectorate. Tumbatu belongs to Unguja administratively but has no separate polygon in the WWO snapshot. The approximate 150,000 and 50,000 source figures describe a dated observation only; retain no 1900 island-level partition.",
+      "research_comparator": {
+        "unit_id": "ft_zanzibar_island",
+        "source_id": "ft_world_v5",
+        "url": "https://doi.org/10.21950/3SK54X",
+        "date": "1900-01-01",
+        "population_value": 198804,
+        "locator": "Country series!AU103 and AU104. Existing source label is Zanzibar Island; dual-island coverage not stated in the repository's methodology note.",
+        "candidate_minus_research": 1196
+      }
+    },
+    "boundary_sources": [
+      {
+        "url": "https://tile.loc.gov/storage-services/service/gdc/gdclccn/a2/20/00/95/3/a22000953/a22000953.pdf",
+        "locator": "British Foreign Office, British East Africa, printed pp. 25–28 and 48–49, the two islands, the coastal leases and Mafia."
+      },
+      {
+        "url": "https://digital.soas.ac.uk/content/AA/00/00/06/46/00001/AA00000646.pdf",
+        "locator": "Zanzibar (British colonial handbook), Geography, p. 1. Tumbatu is administratively included with Zanzibar island and Latham is stated to be uninhabited."
+      }
+    ]
+  },
+  {
+    "id": "zanzibar_1910_colonial_statistics",
+    "title": "Statistical Tables Relating to British Self-Governing Dominions, Crown Colonies, Possessions and Protectorates, vol. 35",
+    "publisher": "British government, HMSO. Digitized by Staats- und Universitätsbibliothek Hamburg.",
+    "url": "https://img.sub.uni-hamburg.de/kitodo/PPN863953719_0035/PDF/00000831.pdf",
+    "locator": "Printed p. 807, Table 1, area and population of Zanzibar and Pemba Islands, 19 August 1910.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "contemporary_cross_check": {
+      "url": "https://tile.loc.gov/storage-services/service/gdc/gdclccn/a2/20/00/95/3/a22000953/a22000953.pdf",
+      "locator": "British Foreign Office, British East Africa, printed p. 28. The same two-island count with adult men, adult women and children."
+    }
+  },
+  {
+    "id": "zanzibar_mathews_1895_via_ingrams",
+    "title": "Sir Lloyd Mathews estimate as reported in Consul-General Basil Cave's 1901 dispatch to Lord Lansdowne",
+    "publisher": "British Consul-General at Zanzibar. Quoted in W. H. Ingrams, Zanzibar: Its History and Its People (1931).",
+    "url": "https://api.pageplace.de/preview/DT0400.9781000101744_A40584960/preview-9781000101744_A40584960.pdf",
+    "locator": "Printed p. 27, Population, February 1895 estimate recapitulated in Cave's 1901 dispatch.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "source_directness": "Dispatch quoted by Ingrams; original dispatch not inspected."
+  }
+]

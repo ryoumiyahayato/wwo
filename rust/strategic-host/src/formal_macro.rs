@@ -2,6 +2,7 @@ use crate::{
     formal_bootstrap::{columns, local_id},
     formal_clock::{GameClock, MINUTES_PER_DAY, MINUTES_PER_HOUR},
     formal_ledger::{Ledger, PaymentLeg, TRANSPORT_ACCOUNT, MAX_AMOUNT},
+    formal_population::needs::{recorded_food_energy, FoodEnergyEstimate},
     transport::{operations::{Operations, Traffic}, ModeSet},
     formal_save::{field, lookup, integer, invalid, map, number, tagged, typed_int, typed_map},
     legacy_variant::encode_number,
@@ -98,6 +99,7 @@ pub struct Market {
     pub trade_balance_centimes: i64,
     pub tariff_revenue_centimes: i64,
     daily_totals: Option<DailyTotals>,
+    supply_baseline: Option<u64>,
 }
 
 #[derive(Default)]
@@ -119,6 +121,25 @@ pub struct CommodityState {
     pub unmet: f64,
     pub imports: f64,
     pub exports: f64,
+}
+
+#[derive(Serialize)]
+pub struct MarketFoodFlow<'a> {
+    pub commodity: &'a str,
+    pub market_unit_mass_kg: u32,
+    pub inventory_units: f64,
+    pub price_centimes_per_market_unit: i64,
+    pub last_settlement: Option<MarketFoodSettlement>,
+}
+
+#[derive(Serialize)]
+pub struct MarketFoodSettlement {
+    pub hour: i64,
+    pub modeled_demand_units: f64,
+    pub modeled_local_production_units: f64,
+    pub removed_from_macro_stock_units: f64,
+    pub unmet_modeled_demand_units: f64,
+    pub energy_in_removed_stock: Option<FoodEnergyEstimate>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -171,6 +192,7 @@ impl MacroEconomy {
                 trade_balance_centimes: 0,
                 tariff_revenue_centimes: 0,
                 daily_totals: None,
+                supply_baseline: None,
             });
         }
         Self { inputs, markets, shipments: Vec::new(), last_arrivals: Vec::new(), last_settlement_hour: 0, next_shipment: 1 }
@@ -178,6 +200,37 @@ impl MacroEconomy {
 
     pub fn markets(&self) -> &BTreeMap<String, Market> {
         &self.markets
+    }
+
+    pub fn food_flows(&self, unit: &str) -> Option<impl Iterator<Item = MarketFoodFlow<'_>>> {
+        let market = self.markets.get(unit)?;
+        let rows = self.inputs.commodities.iter().filter(|commodity| {
+            matches!(commodity.category.as_str(), "agricultural_food" | "processed_food")
+        });
+        Some(rows.map(move |commodity| {
+            let state = &market.commodities[&commodity.commodity_id];
+            MarketFoodFlow {
+                commodity: &commodity.commodity_id,
+                market_unit_mass_kg: commodity.unit_mass_kg,
+                inventory_units: state.inventory,
+                price_centimes_per_market_unit: state.price_centimes,
+                last_settlement: market.daily_totals.as_ref().map(|_| MarketFoodSettlement {
+                    hour: self.last_settlement_hour,
+                    modeled_demand_units: state.demanded,
+                    modeled_local_production_units: state.produced,
+                    removed_from_macro_stock_units: state.consumed,
+                    unmet_modeled_demand_units: state.unmet,
+                    energy_in_removed_stock: recorded_food_energy(&commodity.commodity_id,
+                        state.consumed * f64::from(commodity.unit_mass_kg)),
+                }),
+            }
+        }))
+    }
+
+    pub(crate) fn use_opening_supply(&mut self, baseline: &BTreeMap<String, u64>) {
+        for (unit, market) in &mut self.markets {
+            market.supply_baseline = Some(baseline[unit]);
+        }
     }
 
     pub(crate) fn resident_daily_milli(&self, unit: &str, good: &str) -> f64 {
@@ -442,12 +495,16 @@ impl MacroEconomy {
         self.retry_held(transport, ledger, minute)?;
         for (unit, market) in &mut self.markets {
             let country = &self.inputs.countries[unit];
-            let population = population[unit] - managed_population.get(unit).copied().unwrap_or(0);
+            let managed = managed_population.get(unit).copied().unwrap_or(0);
+            let population = population[unit] - managed;
             let mut totals = DailyTotals::default();
             for commodity in &self.inputs.commodities {
                 let state = market.commodities.get_mut(&commodity.commodity_id).unwrap();
                 let demand = commodity.daily_demand(population, country.income);
-                let produced = demand * country.production_factor(commodity);
+                let calibrated_supply = market.supply_baseline.map_or(demand, |baseline| {
+                    commodity.daily_demand(baseline.saturating_sub(managed), country.income)
+                });
+                let produced = calibrated_supply * country.production_factor(commodity);
                 let consumed = demand.min(state.inventory + produced);
                 let unmet = demand - consumed;
                 let shortage_bp = if demand > 0.0 { (unmet / demand * 5500.0).round() as i64 } else { 0 };

@@ -3,6 +3,7 @@
   "release_status": "PARTIAL",
   "research_observations_by_collection": {
     "african_returns": 12,
+    "algeria_population": 4,
     "americas": 657,
     "austria_hungary": 54,
     "britain": 206,
@@ -12,32 +13,37 @@
     "crown_islands": 29,
     "danish": 56,
     "eastern": 1105,
+    "french_indochina_population": 14,
     "india_comparable": 87,
     "japan_taiwan": 232,
     "java_madoera": 2,
     "liechtenstein": 25,
+    "madagascar_population": 6,
+    "morocco_population": 5,
     "philippines": 51,
     "polar_presence": 1,
     "romania": 6,
     "russia": 1721,
+    "saint_helena_population": 1,
     "swiss": 57,
     "world": 499,
+    "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 90,
+  "cited_sources": 110,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
-  "production_roots": 50,
+  "production_roots": 52,
   "partially_located_legacy_roots": 3,
   "documented_people_under_legacy_controls": 377952285,
-  "replaced_legacy_roots": 28,
-  "new_roots": 22,
-  "production_people": 1028826863,
-  "production_people_pct_world_estimate": 64.5,
-  "population_outside_evidence_opening_estimate": 566247385,
-  "legacy_only_people": 432127715,
-  "authoritative_total_for_new_game": 1460954578,
+  "replaced_legacy_roots": 29,
+  "new_roots": 23,
+  "production_people": 1031671483,
+  "production_people_pct_world_estimate": 64.679,
+  "population_outside_evidence_opening_estimate": 563402765,
+  "legacy_only_people": 431927715,
+  "authoritative_total_for_new_game": 1463599198,
   "roots_with_partitions": 17,
   "disjoint_leaves": 358,
   "people_in_partitions": 850054079,
@@ -51,7 +57,7 @@
   "people_in_partitions_with_explicit_places": 272587476,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
-  "political_catalogue_members_of_production_groups": 58,
+  "political_catalogue_members_of_production_groups": 60,
   "dated_admin_catalogues": {
     "britain_historic_counties_identity.json": {
       "units": 414,
@@ -79,8 +85,8 @@
       "with_opening_partition": 0
     }
   },
-  "city_observation_count": 2267,
-  "city_keys_after_reviewed_matches": 1694,
+  "city_observation_count": 2269,
+  "city_keys_after_reviewed_matches": 1696,
   "nonadditive_city_panels": [
     {
       "source_id": "ar_dge_bulletin_219",
@@ -258,15 +264,15 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2178,
+  "source_statistical_units": 2194,
   "opening_by_source_type": {
     "territorial_returns": {
-      "roots": 22,
-      "people": 311388700
+      "roots": 23,
+      "people": 311588700
     },
     "historical_world_reconstruction": {
-      "roots": 28,
-      "people": 339485878
+      "roots": 29,
+      "people": 342130498
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 3,
@@ -292,11 +298,12 @@
     "nz_census_1901_ages": 105,
     "us_twelfth_census_vol2_state_ages": 650,
     "uk_census_1901_county_ages": 238,
+    "france_census_1901_age_summary": 8,
     "england_wales_census_1901_general_report": 1
   },
   "structure_opening_pool_controls": 227769244,
   "structure_opening_pool_count": 67,
-  "structure_opening_residents_outside_modeled_pools": 1233185334,
+  "structure_opening_residents_outside_modeled_pools": 1235829954,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:gb_historic_anglesey",
@@ -774,70 +781,88 @@
       "unit_id": "ru_census_1897_ex_finland",
       "date": "1897-02-09",
       "population": 125640021,
-      "age_not_stated": 50442
+      "age_not_stated": 50442,
+      "combined_open_age_and_unreported": null
     },
     {
       "panel_id": "england_wales_1901",
       "unit_id": "uk_england_wales",
       "date": "1901-03-31",
       "population": 32527843,
-      "age_not_stated": 0
+      "age_not_stated": 0,
+      "combined_open_age_and_unreported": null
     },
     {
       "panel_id": "scotland_1901",
       "unit_id": "uk_scotland",
       "date": "1901-03-31",
       "population": 4472103,
-      "age_not_stated": 0
+      "age_not_stated": 0,
+      "combined_open_age_and_unreported": null
     },
     {
       "panel_id": "ireland_1901",
       "unit_id": "uk_ireland",
       "date": "1901-03-31",
       "population": 4458775,
-      "age_not_stated": 0
+      "age_not_stated": 0,
+      "combined_open_age_and_unreported": null
     },
     {
       "panel_id": "india_1901",
       "unit_id": "british_india_empire_1901",
       "date": "1901-03-01",
       "population": 294361056,
-      "age_not_stated": 1033773
+      "age_not_stated": 1033773,
+      "combined_open_age_and_unreported": null
     },
     {
       "panel_id": "ceylon_1901",
       "unit_id": "cshapes_gw_780",
       "date": "1901-03-01",
       "population": 3573419,
-      "age_not_stated": 336
+      "age_not_stated": 336,
+      "combined_open_age_and_unreported": null
     },
     {
       "panel_id": "seychelles_1901",
       "unit_id": "seychelles_islands_1901",
       "date": "1901-05-31",
       "population": 19258,
-      "age_not_stated": 29
+      "age_not_stated": 29,
+      "combined_open_age_and_unreported": null
     },
     {
       "panel_id": "us_mainland_1900",
       "unit_id": "united_states_1900",
       "date": "1900-06-01",
       "population": 75994575,
-      "age_not_stated": 200584
+      "age_not_stated": 200584,
+      "combined_open_age_and_unreported": null
     },
     {
       "panel_id": "new_zealand_colony_1901",
       "unit_id": "nz_colony",
       "date": "1901-03-31",
       "population": 815862,
-      "age_not_stated": 4453
+      "age_not_stated": 4453,
+      "combined_open_age_and_unreported": null
     },
     {
       "panel_id": "canada_1901",
       "unit_id": "dominion_of_canada",
       "date": "1901-03-31",
       "population": 5371315,
-      "age_not_stated": 49077
+      "age_not_stated": 49077,
+      "combined_open_age_and_unreported": null
+    },
+    {
+      "panel_id": "france_1901",
+      "unit_id": "country_fra",
+      "date": "1901-03-24",
+      "population": 38450788,
+      "age_not_stated": null,
+      "combined_open_age_and_unreported": 118796
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
@@ -862,15 +887,17 @@
         "cshapes_gw_561",
         "cshapes_gw_562",
         "cshapes_gw_570",
+        "cshapes_gw_580",
         "cshapes_gw_585",
         "cshapes_gw_590",
-        "khedivate_of_egypt"
+        "khedivate_of_egypt",
+        "sultanate_of_zanzibar"
       ],
-      "production_people": 6822161,
-      "production_pct_of_regional_research_estimate": 5.249,
+      "production_people": 9666781,
+      "production_pct_of_regional_research_estimate": 7.437,
       "people_with_opening_subdivision": 1289105,
-      "research_only_units": 39,
-      "research_only_people": 112271921
+      "research_only_units": 37,
+      "research_only_people": 109428497
     },
     "America": {
       "statistical_units": 46,
@@ -1194,6 +1221,15 @@
         "opening_control": 305255,
         "in_model_pools": 0,
         "outside_model_pools": 305255,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
+      },
+      {
+        "opening_unit_id": "cshapes_gw_580",
+        "research_region": "Africa",
+        "opening_control": 2644620,
+        "in_model_pools": 0,
+        "outside_model_pools": 2644620,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
       },
@@ -1595,7 +1631,7 @@
       },
       {
         "opening_unit_id": "sultanate_of_zanzibar",
-        "research_region": null,
+        "research_region": "Africa",
         "opening_control": 200000,
         "in_model_pools": 0,
         "outside_model_pools": 200000,
@@ -1671,16 +1707,16 @@
         "modeled_sex_age_unknown": 53291
       },
       "Africa": {
-        "opening_control": 15907052,
+        "opening_control": 18751672,
         "in_model_pools": 0,
-        "outside_model_pools": 15907052,
+        "outside_model_pools": 18751672,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
       },
       "no_reviewed_research_region": {
-        "opening_control": 106080000,
+        "opening_control": 105880000,
         "in_model_pools": 0,
-        "outside_model_pools": 106080000,
+        "outside_model_pools": 105880000,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
       },
@@ -1693,9 +1729,9 @@
       }
     },
     "world": {
-      "opening_control": 1460954578,
+      "opening_control": 1463599198,
       "in_model_pools": 227769244,
-      "outside_model_pools": 1233185334,
+      "outside_model_pools": 1235829954,
       "modeled_age_and_sex": 227464691,
       "modeled_sex_age_unknown": 304553
     }
@@ -1707,16 +1743,16 @@
         "pct_of_research_reference": 0.0
       },
       "published_historical_estimates": {
-        "people": 448300862,
-        "pct_of_research_reference": 28.105
+        "people": 451145482,
+        "pct_of_research_reference": 28.284
       },
       "date_models_from_territorial_returns": {
         "people": 580526001,
         "pct_of_research_reference": 36.395
       },
       "retained_legacy_estimates": {
-        "people": 432127715,
-        "pct_of_research_reference": 27.091
+        "people": 431927715,
+        "pct_of_research_reference": 27.079
       }
     },
     "scopes": [
@@ -1872,6 +1908,13 @@
         "source_id": "uk_colonial_tables_35",
         "sourced_people": 305255,
         "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0
+      },
+      {
+        "unit_id": "cshapes_gw_580",
+        "source_id": "ft_world_v5",
+        "sourced_people": 2644620,
+        "sourced_basis": "published_historical_estimates",
         "retained_legacy_people": 0
       },
       {
@@ -2192,10 +2235,10 @@
       },
       {
         "unit_id": "sultanate_of_zanzibar",
-        "source_id": null,
-        "sourced_people": 0,
-        "sourced_basis": null,
-        "retained_legacy_people": 200000
+        "source_id": "zanzibar_statesmans_year_book_1899",
+        "sourced_people": 200000,
+        "sourced_basis": "published_historical_estimates",
+        "retained_legacy_people": 0
       },
       {
         "unit_id": "sweden_norway_union",

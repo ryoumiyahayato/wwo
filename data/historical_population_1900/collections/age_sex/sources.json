@@ -52,5 +52,18 @@
       "https://iiif.wellcomecollection.org/image/b32183161_0006_0083.jp2/full/2900,/0/default.jpg"
     ],
     "scope_note_url": "https://www.visionofbritain.org.uk/census/EW1901GEN/4"
+  },
+  {
+    "id": "france_census_1901_age_summary",
+    "title": "Résultats statistiques du recensement de la population effectué le 24 mars 1901",
+    "publisher": "Statistique générale de la France, reproduced by Émile Levasseur in Journal de la Société de statistique de Paris",
+    "url": "https://www.numdam.org/item/JSFS_1906__47__368_0.pdf#page=5",
+    "locator": "1906, vol. 47, printed pp. 370–371, Population présente totale, Sexe and Âge",
+    "rights": "Historical published facts only",
+    "raw_path": "france_census_1901.csv",
+    "table_urls": [
+      "https://www.numdam.org/item/JSFS_1906__47__368_0.pdf#page=4",
+      "https://www.numdam.org/item/JSFS_1906__47__368_0.pdf#page=5"
+    ]
   }
 ]

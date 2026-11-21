@@ -1,0 +1,13 @@
+[
+  {
+    "id": "france_1901",
+    "published_scope": "Metropolitan France, population present",
+    "source_id": "france_census_1901_age_summary",
+    "observed_unit_id": "country_fra",
+    "observed_date": "1901-03-24",
+    "locator": "Printed pp. 370–371, Population présente totale, Sexe and Âge, 1901 columns",
+    "definition": "The age table covers 38,450,788 people present whose sex was determined. The census office verified 38,466,924 people present. The difference of 16,136 is the exact count of returns excluded because sex could not be determined. The 118,796 in the last band combine the oldest residents with people whose age was not recorded. The table does not give separate counts for those groups. The opening reconstruction uses the legal resident population and département geography. The 1901 national legal count was 38,961,945.",
+    "broad_observation": true,
+    "age_not_stated_separately": false
+  }
+]

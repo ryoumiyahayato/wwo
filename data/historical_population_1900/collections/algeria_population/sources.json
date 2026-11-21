@@ -1,0 +1,44 @@
+[
+  {
+    "id": "algeria_1901_zimmermann_preliminary",
+    "title": "Maurice Zimmermann, Afrique: Recensement de l’Algérie",
+    "publisher": "Annales de Géographie, vol. 11, no. 55 (1902). Digitized by Persée.",
+    "url": "https://www.persee.fr/doc/geo_0003-4010_1902_num_11_55_20494",
+    "locator": "Printed pp. 91–92, Recensement de l’Algérie. The first line of the notice gives the enumeration date and total.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "contemporary_cross_check": {
+      "url": "https://cnum.cnam.fr/pgi/redir.php?ident=8XAE581&onglet=d",
+      "locator": "Rapports du jury international, Groupe XVII, classe 113, Population, printed pp. 46–47. The government jury report gives the early returns for the three Algerian departments, divided between civil and military administration."
+    }
+  },
+  {
+    "id": "algeria_1896_1901_wahl_bernard",
+    "title": "Maurice Wahl, L’Algérie, 4th ed., revised by Augustin Bernard",
+    "publisher": "Félix Alcan, Paris, 1903. Digitized by the Internet Archive in 2009 with funding from the University of Ottawa.",
+    "url": "https://fr.scribd.com/document/934179829/lalgrie00wahluoft-1",
+    "catalogue_url": "https://catalogue.bnf.fr/ark:/12148/cb34135024x",
+    "locator": "Printed pp. 181–182, Les habitants. The consecutive paragraphs report the 1896 and 1901 census totals, municipal counts, military coverage and the civil and command territories.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://fr.scribd.com/document/723578464/Tableau-General-Des-Communes-de-Algerie-Periode-Bpt6k5695914m",
+        "locator": "Gouvernement général de l’Algérie, Tableau général des communes de l’Algérie, situation au 1er novembre 1902. Preface, p. 206 and pp. 208–213. The departmental recapitulation and six new Aïn-Sefra annexes are tabulated separately."
+      }
+    ]
+  },
+  {
+    "id": "algeria_1901_revised_bernard",
+    "title": "Augustin Bernard, Le recensement de 1906 en Algérie et en Tunisie",
+    "publisher": "Annales de Géographie, vol. 17, no. 91 (1908). Digitized by Persée.",
+    "url": "https://www.persee.fr/doc/geo_0003-4010_1908_num_17_91_18205",
+    "locator": "Printed p. 24, first section, notes 2–3. The 1901 comparison gives the revised total and municipal population and identifies the 1902 decree and the new annexes.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://fr.scribd.com/document/723578464/Tableau-General-Des-Communes-de-Algerie-Periode-Bpt6k5695914m",
+        "catalogue_url": "https://gallica.bnf.fr/ark:/12148/bpt6k5695914m",
+        "locator": "Gouvernement général de l’Algérie, Tableau général des communes de l’Algérie, situation au 1er novembre 1902. Preface identifies the decrees of 28 December 1901 and 6 September 1902 and gives 1 November 1902 as the date of the appended returns. Printed pp. 208–213 give the six annexes and their subtotal of 61,919."
+      }
+    ]
+  }
+]

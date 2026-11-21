@@ -20,15 +20,17 @@
         "cshapes_gw_561",
         "cshapes_gw_562",
         "cshapes_gw_570",
+        "cshapes_gw_580",
         "cshapes_gw_585",
         "cshapes_gw_590",
-        "khedivate_of_egypt"
+        "khedivate_of_egypt",
+        "sultanate_of_zanzibar"
       ],
-      "production_people": 6822161,
-      "production_pct_of_regional_research_estimate": 5.249,
+      "production_people": 9666781,
+      "production_pct_of_regional_research_estimate": 7.437,
       "people_with_opening_subdivision": 1289105,
-      "research_only_units": 39,
-      "research_only_people": 112271921
+      "research_only_units": 37,
+      "research_only_people": 109428497
     },
     "America": {
       "statistical_units": 46,
@@ -639,9 +641,9 @@
       "candidate_polity_ids": [
         "cshapes_gw_580"
       ],
-      "comparison_id": null,
-      "opening_disposition": "research_only",
-      "note": "The political candidates require a review of source coverage and territorial exclusions."
+      "comparison_id": "cshapes_gw_580",
+      "opening_disposition": "adopted_research_series",
+      "note": "Madagascar and near-shore dependencies in the 1900 colony. Nosy Be and Sainte-Marie are included and the latter is missing from the simplified map outline. Comoros, Mayotte and Reunion are separate research units. The reconstructed total uses the Frankema–Jerven series. The near-date administrative alternatives omit some regions or categories."
     },
     {
       "unit_id": "ft_malawi",
@@ -981,9 +983,9 @@
       "candidate_polity_ids": [
         "sultanate_of_zanzibar"
       ],
-      "comparison_id": null,
-      "opening_disposition": "research_only",
-      "note": "The study interpolates from British estimates and omits the 1901 estimate. The source description does not establish the inclusion of Pemba in the Zanzibar Islands opening control."
+      "comparison_id": "zanzibar",
+      "opening_disposition": "scope_unconfirmed",
+      "note": "The opening proxy sums Unguja and Pemba and excludes Mafia and mainland coastal leases. Inclusion of Pemba in the research series is unconfirmed. The numerical difference cannot be assigned to Pemba."
     },
     {
       "unit_id": "ft_argentina",
@@ -3419,6 +3421,24 @@
       "research_minus_documented": 15715
     },
     {
+      "comparison_id": "zanzibar",
+      "opening_root_ids": [
+        "sultanate_of_zanzibar"
+      ],
+      "research_unit_ids": [
+        "ft_zanzibar_island"
+      ],
+      "scope_relation": "scope_unconfirmed",
+      "note": "The opening proxy sums Unguja and Pemba and excludes Mafia and mainland coastal leases. Inclusion of Pemba in the research series is unconfirmed. The numerical difference cannot be assigned to Pemba.",
+      "research_regions": [
+        "Africa"
+      ],
+      "research_people": 198804,
+      "documented_opening_people": 200000,
+      "opening_people_including_retained_balances": 200000,
+      "research_minus_documented": -1196
+    },
+    {
       "comparison_id": "argentina_1900",
       "opening_root_ids": [
         "argentina_1900"
@@ -3596,6 +3616,24 @@
       "research_people": 193861,
       "documented_opening_people": 193861,
       "opening_people_including_retained_balances": 193861,
+      "research_minus_documented": 0
+    },
+    {
+      "comparison_id": "cshapes_gw_580",
+      "opening_root_ids": [
+        "cshapes_gw_580"
+      ],
+      "research_unit_ids": [
+        "ft_madagascar"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Madagascar and near-shore dependencies in the 1900 colony. Nosy Be and Sainte-Marie are included and the latter is missing from the simplified map outline. Comoros, Mayotte and Reunion are separate research units. The reconstructed total uses the Frankema–Jerven series. The near-date administrative alternatives omit some regions or categories.",
+      "research_regions": [
+        "Africa"
+      ],
+      "research_people": 2644620,
+      "documented_opening_people": 2644620,
+      "opening_people_including_retained_balances": 2644620,
       "research_minus_documented": 0
     },
     {
@@ -4027,6 +4065,10 @@
         "people": -209901
       },
       {
+        "unit_id": "sultanate_of_zanzibar",
+        "people": 0
+      },
+      {
         "unit_id": "uruguay_1900",
         "people": -31910
       },
@@ -4098,6 +4140,10 @@
         "people": 305255
       },
       {
+        "unit_id": "cshapes_gw_580",
+        "people": 2644620
+      },
+      {
         "unit_id": "cshapes_gw_585",
         "people": 173254
       },
@@ -4134,8 +4180,8 @@
         "people": 78086
       }
     ],
-    "net_additions": 57019893,
-    "authoritative_opening_population": 1460954578,
+    "net_additions": 59664513,
+    "authoritative_opening_population": 1463599198,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4175,25 +4221,25 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1028826863,
-    "untouched_legacy_population": 106080000,
+    "documented_opening_population": 1031671483,
+    "untouched_legacy_population": 105880000,
     "retained_unlocated_population": 326047715,
-    "authoritative_opening_population": 1460954578,
-    "published_minus_documented_opening": 566247385,
+    "authoritative_opening_population": 1463599198,
+    "published_minus_documented_opening": 563402765,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
-      "research_only_component_people": 231812859,
+      "research_only_component_people": 228969435,
       "comparisons_by_scope": {
         "comparable_extent": 1943838,
         "different_extent": 1761145,
         "partial_extent": 330734384,
-        "scope_unconfirmed": -4843,
+        "scope_unconfirmed": -6039,
         "adopted_research_series": 0
       },
       "opening_without_benchmark_link": 0,
-      "untouched_legacy_controls": -106080000,
+      "untouched_legacy_controls": -105880000,
       "unlocated_balances_under_retained_controls": -326047715
     },
-    "published_minus_authoritative_opening": 134119670
+    "published_minus_authoritative_opening": 131475050
   }
 }

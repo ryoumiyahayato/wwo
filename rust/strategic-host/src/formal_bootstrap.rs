@@ -193,8 +193,9 @@ impl RuntimePerson {
 pub struct WorldBootstrap {
     organization_directory: Arc<OrganizationDirectory>,
     world: Arc<WorldSources>,
-    archived_population_worlds: [std::sync::OnceLock<io::Result<Arc<WorldSources>>>; 3],
+    archived_population_worlds: [std::sync::OnceLock<io::Result<Arc<WorldSources>>>; 4],
     populations: BTreeMap<String, u64>,
+    market_opening_population: BTreeMap<String, u64>,
     historical_population: Arc<HistoricalOpening>,
     markets: Arc<MarketInputs>,
     residents: BTreeMap<String, i64>,
@@ -430,6 +431,11 @@ impl InitialWorld {
 
     pub fn market_unit_for_person(&self, person: &str) -> Option<&str> {
         self.population_unit_at(self.current_place(person)?)
+    }
+
+    pub fn market_unit_for_population(&self, unit: &str) -> Option<&str> {
+        let parent = self.population.parent_unit(unit)?;
+        self.macro_economy.markets().contains_key(parent).then_some(parent)
     }
 
     pub(crate) fn market_unit_at(&self, place: &str) -> Option<&str> {
@@ -1288,12 +1294,14 @@ impl WorldBootstrap {
             population_income, historical_population: None, people: BTreeMap::new(),
         };
         let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
-        let historical_population = Arc::new(HistoricalOpening::load(
-            crate::formal_population::CURRENT_VERSION,
-            &populations, |id| world.polities.contains_key(id), |place| {
+        let load_opening = |version| {
+            HistoricalOpening::load(version, &populations, |id| world.polities.contains_key(id), |place| {
                 world.opening_parent_at(place).or_else(|| dated_jurisdictions.get(place).map(String::as_str))
-            },
-        )?);
+            })
+        };
+        // Freeze the existing market asset calibration when the census ledger changes.
+        let market_opening_population = load_opening(4)?.totals(&populations);
+        let historical_population = Arc::new(load_opening(crate::formal_population::CURRENT_VERSION)?);
         world.historical_population = Some(Arc::clone(&historical_population));
         let mut residents = BTreeMap::new();
         let mut opening_people = BTreeMap::new();
@@ -1355,6 +1363,7 @@ impl WorldBootstrap {
             archived_population_worlds: Default::default(),
             organization_directory: Arc::new(organization_directory),
             populations,
+            market_opening_population,
             historical_population,
             markets: Arc::new(markets),
             residents,
@@ -1403,7 +1412,7 @@ impl WorldBootstrap {
     fn base_opening_version(&self, source_id: &str, prologue: Option<Prologue>, version: Option<u32>) -> io::Result<InitialWorld> {
         let sources = match version {
             Some(version) if version == self.historical_population.version() => &self.world,
-            Some(1 | 2 | 3) | None => {
+            Some(1..=4) | None => {
                 let archived_version = version.unwrap_or(1);
                 self.archived_population_worlds[(archived_version - 1) as usize].get_or_init(|| {
                     let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
@@ -1457,7 +1466,10 @@ impl WorldBootstrap {
         work.book_automatic(&self.work, GameClock::default(), |person| {
             self.world.people.get(person).map(|row| row.place_id.as_str())
         });
-        let macro_economy = MacroEconomy::initialize(Arc::clone(&self.markets), population.totals());
+        let fixed_market_supply = version.is_some_and(|version| version >= 5);
+        let market_seed = if fixed_market_supply { &self.market_opening_population } else { population.totals() };
+        let mut macro_economy = MacroEconomy::initialize(Arc::clone(&self.markets), market_seed);
+        if fixed_market_supply { macro_economy.use_opening_supply(market_seed); }
         Ok(InitialWorld {
             organization_directory: Arc::clone(&self.organization_directory),
             organization_members: OrganizationMembers::default(),
@@ -1551,6 +1563,9 @@ impl WorldBootstrap {
             return Err(invalid("population and character death dates differ"));
         }
         world.macro_economy = MacroEconomy::restore(Arc::clone(&self.markets), world.population.totals(), &saved.markets, clock)?;
+        if version.is_some_and(|version| version >= 5) {
+            world.macro_economy.use_opening_supply(&self.market_opening_population);
+        }
         world.macro_economy.restore_arrivals(saved.last_arrivals, clock.snapshot().total_minutes)?;
         let mut ledger = Ledger::restore(&saved.ledger, true)?;
         ledger.ensure_transport_account()?;
@@ -2152,6 +2167,11 @@ mod tests {
         assert_eq!(water.adults_with_reference + water.residents_outside_reference, initial.population_total);
         assert!(water.adults_with_reference > 0 && water.adults_with_reference < initial.residents_with_cohort_age_and_sex);
         assert!(water.temperate_sedentary_litres_per_day.unwrap().upper < water.warm_moderate_work_litres_per_day.unwrap().lower);
+        let efsa = &initial.published_efsa_water_reference;
+        assert_eq!(efsa.people_with_reference + efsa.people_without_reference, initial.population_total);
+        assert!(efsa.people_with_reference > water.adults_with_reference);
+        let moderate = efsa.moderate_environment_pal_1_6_total_ingested_litres_per_day.unwrap();
+        assert!(moderate.lower > 0.0 && moderate.upper >= moderate.lower);
         let (cohort, _, _) = world.population().cohorts_in(origin)
             .find(|(_, def, count)| def.sex.is_some() && *count >= 4)
             .unwrap();
@@ -2189,6 +2209,13 @@ mod tests {
         assert_eq!(restored.population().global_total(), 1_458_689_022);
         assert_eq!(restored.residence_unit_at("place:cairo"), Some("egy_madina_cairo"));
         assert_eq!(restored.population().population_total("java_madoera_colonial_population"), None);
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(4)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        assert_eq!(restored.population().global_total(), 1_460_954_578);
+        assert_eq!(restored.population().population_total("java_madoera_colonial_population"), Some(28_092_332));
         assert_eq!(restored.snapshot(), old_saved);
     }
 
@@ -2344,7 +2371,7 @@ mod tests {
     }
 
     #[test]
-    fn anonymous_transfer_preserves_named_claims_and_changes_both_markets() {
+    fn anonymous_transfer_changes_market_demand_without_changing_supply() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create("qing_empire").unwrap();
         let mut unchanged = bootstrap.create("qing_empire").unwrap();
@@ -2359,14 +2386,38 @@ mod tests {
         assert_eq!(world.background_population(source), Some(background - 10_000));
         assert_eq!(world.population.unit_for_person(&world.player().id), Some(source));
 
-        let demand = |world: &InitialWorld, country: &str| {
-            world.macro_economy().markets()[country].commodities["potatoes"].demanded
-        };
+        let staple = |world: &InitialWorld, country: &str| world.macro_economy().markets()[country].commodities["potatoes"];
+        let mut earlier = bootstrap.base_opening_version("qing_empire", None, Some(4)).unwrap();
+        earlier.initialize_organization_members().unwrap();
+        earlier.plan_household_orders().unwrap();
+        earlier.settle_organization_employment().unwrap();
+        for country in [source, destination] {
+            assert_eq!(staple(&world, country), staple(&earlier, country));
+            assert_eq!(world.macro_economy().markets()[country].gold_reserve_units,
+                earlier.macro_economy().markets()[country].gold_reserve_units);
+        }
         let managed = BTreeMap::new();
         world.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
         unchanged.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
-        assert!(demand(&world, source) < demand(&unchanged, source));
-        assert!(demand(&world, destination) > demand(&unchanged, destination));
+        earlier.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+        assert!(staple(&world, source).demanded < staple(&unchanged, source).demanded);
+        assert!(staple(&world, destination).demanded > staple(&unchanged, destination).demanded);
+        for country in [source, destination] {
+            assert_eq!(staple(&world, country).produced, staple(&unchanged, country).produced);
+            assert_eq!(staple(&unchanged, country).produced, staple(&earlier, country).produced);
+            let flows = world.macro_economy().food_flows(country).unwrap().collect::<Vec<_>>();
+            let potatoes = flows.iter().find(|row| row.commodity == "potatoes").unwrap();
+            let flow = potatoes.last_settlement.as_ref().unwrap();
+            assert_eq!(flow.removed_from_macro_stock_units, staple(&world, country).consumed);
+            assert!(flow.energy_in_removed_stock.is_none());
+        }
+        let mut restored = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+        for active in [&mut world, &mut restored] {
+            active.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
+        }
+        for country in [source, destination] {
+            assert_eq!(staple(&world, country), staple(&restored, country));
+        }
     }
 
     #[test]

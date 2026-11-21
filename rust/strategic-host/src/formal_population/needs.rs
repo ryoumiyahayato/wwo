@@ -79,6 +79,7 @@ pub enum NeedSource {
     FaoWhoUnuEnergyReference2004,
     WhoFaoUnuProtein2007,
     WhoWater2020,
+    EfsaWater2010,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
@@ -192,6 +193,43 @@ pub(super) fn adult_water_references(
         ..input
     }).ok()?;
     Some((temperate, warm_work))
+}
+
+/// EFSA adequate intake from food and beverages in a moderate environment
+/// and at PAL 1.6. The full age range must be supported.
+pub(super) fn published_efsa_water_reference(
+    age_years: Option<AgeYears>,
+    sex: Option<CohortSex>,
+) -> Requirement {
+    requirement(efsa_water(age_years, sex), NeedSource::EfsaWater2010)
+}
+
+fn efsa_water(
+    age_years: Option<AgeYears>,
+    sex: Option<CohortSex>,
+) -> Result<QuantityRange, UnknownNeed> {
+    let ages = age_classes(age_years, 14)?;
+    if *ages.start() == 0 {
+        return Err(UnknownNeed::InfantAgeInMonthsAndFeedingRequired);
+    }
+
+    // EFSA (2010), sections 6.5 and 6.6, litres per person per day.
+    let mut result: Option<QuantityRange> = None;
+    for &sex in sexes(sex) {
+        for age in ages.clone() {
+            let intake = match (age, sex) {
+                (1, _) => QuantityRange { lower: 1.1, upper: 1.2 },
+                (2..=3, _) => QuantityRange::point(1.3),
+                (4..=8, _) => QuantityRange::point(1.6),
+                (9..=13, CohortSex::Female) => QuantityRange::point(1.9),
+                (9..=13, CohortSex::Male) => QuantityRange::point(2.1),
+                (_, CohortSex::Female) => QuantityRange::point(2.0),
+                (_, CohortSex::Male) => QuantityRange::point(2.5),
+            };
+            result = Some(result.map_or(intake, |range| range.envelope(intake)));
+        }
+    }
+    Ok(result.expect("validated age range and sex profiles are nonempty"))
 }
 
 fn requirement(range: Result<QuantityRange, UnknownNeed>, source: NeedSource) -> Requirement {
