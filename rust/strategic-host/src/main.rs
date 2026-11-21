@@ -182,7 +182,7 @@ struct Focus {start:Instant, camera:Camera, target:[f64;2], mpp:f64}
 struct CountryClick {polity:usize,point:[f64;2],deadline:Instant}
 #[derive(Default)]
 struct Trial {
-    last:String,timing:bool,times:Vec<f64>,previous:Option<Instant>,captures:Vec<PathBuf>,first:Option<f64>,loads:Vec<(String,f64)>,
+    last:String,timing:bool,passive_timing:bool,times:Vec<f64>,previous:Option<Instant>,captures:Vec<PathBuf>,first:Option<f64>,loads:Vec<(String,f64)>,
     terrain_decodes:Vec<f64>,
     movement:Option<([f64;2],[f64;2],u32,u32)>,
     window_position:Option<winit::dpi::PhysicalPosition<i32>>,
@@ -750,10 +750,10 @@ impl Host {
             }
             Command::Enter=>{
                 if self.lobby_page!=Page::Selection || self.lobby_request {return;}
-                if let Some(id)=self.world.polities.get(self.lobby_country).and_then(|p|
+                if let Some((id, has_prologue))=self.world.polities.get(self.lobby_country).and_then(|p|
                     self.state.lobby.as_ref().filter(|s|s.selection_ready&&!s.busy).and_then(|s|s.opening(p))
-                ).map(|opening|opening.id.clone()){
-                    if self.state.lobby.as_ref().is_some_and(|lobby| lobby.native) {
+                ).map(|opening|(opening.id.clone(),opening.language.is_some())){
+                    if has_prologue && self.state.lobby.as_ref().is_some_and(|lobby| lobby.native) {
                         if self.prologue.as_ref().is_none_or(|draft| draft.country != self.lobby_country) {
                             self.prologue = Some(prologue_ui::Draft::new(self.lobby_country));
                         }
@@ -907,7 +907,7 @@ impl Host {
                     .and_then(|transport| transport.lots.get(index)) else { return };
                 lot.id.to_string()
             }
-            "mode" => ["all", "rail", "road"].get(index).copied().unwrap_or("all").into(),
+            "mode" => ["all", "rail", "road", "shipping", "inland", "domestic"].get(index).copied().unwrap_or("all").into(),
             _ => String::new(),
         };
         self.emit(Request::Transport { verb, id: &id });
@@ -1541,12 +1541,16 @@ impl Host {
         let vehicle_markers;
         let transport=if let Some(world)=transport_world {
             if self.transport_scene.is_none() {
-                self.transport_scene=Some(transport_scene::TransportScene::new(world.sources())?);
+                self.transport_scene=Some(transport_scene::TransportScene::new(world.transport())?);
             }
             let scene=self.transport_scene.as_mut().unwrap();
             scene.update_map(&self.camera,self.size,&date,matches!(self.mode,Mode::Geographic|Mode::Economic),
-                world.selected_transport_route());
-            vehicle_markers=scene.draw_vehicles(&self.camera,self.size,world.transport_vehicles(),
+                world.transport(),world.selected_transport_route())?;
+            if self.hud.page==HudPage::Map && self.hud.menu==HudMenu::None && self.country.is_none() && self.search.is_none() {
+                scene.caption(&self.skin,self.cursor,self.size,world,&mut meshes);
+            }
+            vehicle_markers=scene.draw_vehicles(&self.camera,self.size,world.transport(),
+                scene.vehicle_segments().flat_map(|id|world.transport_vehicles_on(id)),
                 &mut models,|model|renderer.has_model(model));
             Some(render::TransportOverlay{network:scene.map_overlay(),vehicles:&vehicle_markers})
         } else {None};
@@ -1778,6 +1782,7 @@ impl Host {
             "timing"=>{
                 self.trial.timing=!self.trial.timing;self.trial.previous=None;
                 if self.trial.timing{
+                    self.trial.passive_timing=input.value=="passive";
                     self.trial.times.clear();
                     self.trial.loads.clear();
                     self.trial.terrain_decodes.clear();
@@ -1802,6 +1807,7 @@ impl Host {
         let connected=self.state.session.is_some();
         if self.config.managed&&(had_session!=connected||loaded){
             self.battle_view = None;
+            self.transport_scene = None;
             self.military_cell=None;
             if let Some(region)=self.written_world().and_then(|world|world.land_battle_region()) {
                 if let Err(error)=self.load_battle_terrain(region){self.battle_terrain=None;self.feedback=error.to_string();}
@@ -2224,23 +2230,23 @@ impl ApplicationHandler<HostEvent> for Host {
             return;
         }
         let fading=self.renderer.as_ref().is_some_and(Renderer::terrain_fading)||self.cached.values().any(|p|now.saturating_duration_since(p.ready)<Duration::from_millis(180));
-        let expiry=self.cached.values().any(|p|now.saturating_duration_since(p.used)>CACHE_TTL);
-        let animated=self.loading()||self.state.session.is_some()
-            ||self.in_lobby()&&self.lobby_page==lobby::Page::Selection
-            || self.selected.is_some_and(|o|matches!(o,Object::Polity(_)));
+        let expiry=self.cached.iter().any(|(id,p)|now.saturating_duration_since(p.used)>CACHE_TTL && !self.candidate.contains(id));
+        let clock_animating=self.state.session.as_ref().is_some_and(|s|
+            !self.hud.mechanical.hidden && (!s.paused || self.hud.mechanical.moving()));
+        let animated=self.loading() || clock_animating;
         let transitioning=self.loading_fade.is_some_and(|t|t.elapsed()<Duration::from_millis(320));
         if let Some(window)=&self.window {
-            let periodic=(animated||transitioning||fading)&&now.saturating_duration_since(self.last_present)>=Duration::from_millis(if fading||transitioning{16}else{32});
-            if self.dirty||expiry||periodic||self.trial.timing||!self.trial.captures.is_empty()||self.screenshot.is_some(){window.request_redraw();}
+            let periodic=(animated||transitioning||fading)&&now.saturating_duration_since(self.last_present)>=Duration::from_millis(if fading||transitioning{16}else{100});
+            if self.dirty||expiry||periodic||(self.trial.timing&&!self.trial.passive_timing)||!self.trial.captures.is_empty()||self.screenshot.is_some(){window.request_redraw();}
         } else if self.config.terrain_review && self.renderer.is_some() {
-            let pending=self.dirty||fading||self.trial.timing;
+            let pending=self.dirty||fading||(self.trial.timing&&!self.trial.passive_timing);
             let due=now.saturating_duration_since(self.last_present)>=Duration::from_millis(33);
             if (pending&&due)||self.trial.terrain_capture.is_some() {
                 if let Err(error)=self.draw(){self.fatal_error=Some(error.to_string());event_loop.exit();}
             }
         }
-        let fast=self.focus.is_some()||self.animate||self.trial.timing||self.trial.movement.is_some()||self.velocity[0].hypot(self.velocity[1])>9.||fading;
-        let frame=now+Duration::from_millis(if fast||transitioning{16}else if animated{33}else{135});
+        let fast=self.focus.is_some()||self.animate||(self.trial.timing&&!self.trial.passive_timing)||self.trial.movement.is_some()||self.velocity[0].hypot(self.velocity[1])>9.||fading;
+        let frame=now+Duration::from_millis(if fast||transitioning{16}else if animated{50}else if self.state.session.as_ref().is_some_and(|s|!s.paused){50}else{120});
         let frame=if self.config.terrain_review && self.dirty {frame.min(self.last_present+Duration::from_millis(33))} else {frame};
         event_loop.set_control_flow(ControlFlow::WaitUntil(self.country_click.as_ref().map_or(frame,|click|frame.min(click.deadline))));
     }

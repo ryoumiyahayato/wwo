@@ -1,7 +1,9 @@
 use crate::{
     formal_bootstrap::{columns, local_id},
     formal_clock::{GameClock, MINUTES_PER_DAY, MINUTES_PER_HOUR},
-    formal_save::{field, integer, invalid, map, number, tagged, typed_int, typed_map},
+    formal_ledger::{Ledger, PaymentLeg, TRANSPORT_ACCOUNT, MAX_AMOUNT},
+    transport::{operations::{Operations, Traffic}, ModeSet},
+    formal_save::{field, lookup, integer, invalid, map, number, tagged, typed_int, typed_map},
     legacy_variant::encode_number,
 };
 use serde::{Deserialize, Serialize};
@@ -32,13 +34,14 @@ struct Commodity {
     base_price_centimes: i64,
     base_daily_units_per_million: f64,
     income_elasticity_bp: i64,
+    international_liquidity_units: u64,
+    target_stock_days: f64,
 }
 
 struct TradeRoute {
     id: String,
     origin: String,
     destination: String,
-    capacity_units: f64,
     duration_hours: i64,
 }
 
@@ -46,7 +49,6 @@ pub(crate) struct MarketInputs {
     countries: BTreeMap<String, CountryInputs>,
     commodities: Vec<Commodity>,
     routes: Vec<TradeRoute>,
-    connected_routes: BTreeMap<String, Vec<usize>>,
 }
 
 pub struct MacroEconomy {
@@ -100,6 +102,18 @@ pub struct Shipment {
     pub dispatch_hour: i64,
     pub arrival_hour: i64,
     pub route_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub carriage: Option<TradeCarriage>,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct TradeCarriage {
+    pub reservation: u64,
+    pub from: String,
+    pub fare_centimes: i64,
+    pub arrival_minute: i64,
+    pub held: bool,
 }
 
 impl MacroEconomy {
@@ -141,19 +155,21 @@ impl MacroEconomy {
         &self.last_arrivals
     }
 
-    pub(crate) fn restore_arrivals(&mut self, arrivals: Vec<Shipment>) -> io::Result<()> {
+    pub(crate) fn restore_arrivals(&mut self, arrivals: Vec<Shipment>, now: i64) -> io::Result<()> {
         let mut ids = self.shipments.iter().map(|row| &row.id).collect::<std::collections::BTreeSet<_>>();
         for row in &arrivals {
             let sequence = row.id.strip_prefix("formal_shipment:").and_then(|id| id.parse::<u64>().ok());
             let route = self.inputs.routes.iter().find(|route| route.id == row.route_id);
             if !ids.insert(&row.id) || !sequence.is_some_and(|id| (1..self.next_shipment).contains(&id))
                 || row.dispatch_hour < 0 || row.dispatch_hour >= row.arrival_hour
-                || !(self.last_settlement_hour - HOURS_PER_DAY + 1..=self.last_settlement_hour).contains(&row.arrival_hour)
+                || row.arrival_hour < self.last_settlement_hour - HOURS_PER_DAY + 1
+                || row.carriage.as_ref().map_or(row.arrival_hour > self.last_settlement_hour, |c| c.held || c.arrival_minute < 0 || c.arrival_minute > now || c.arrival_minute.checked_add(59).map(|n| n / 60) != Some(row.arrival_hour))
                 || !row.units.is_finite() || row.units <= 0.0 || row.value_centimes <= 0
-                || !route.is_some_and(|route| row.dispatch_hour.checked_add(route.duration_hours) == Some(row.arrival_hour)
+                || row.origin == row.destination || !self.markets.contains_key(&row.origin)
+                || !self.markets.get(&row.destination).is_some_and(|market| market.commodities.contains_key(&row.commodity))
+                || row.carriage.is_none() && !route.is_some_and(|route| row.dispatch_hour.checked_add(route.duration_hours) == Some(row.arrival_hour)
                     && ((route.origin == row.origin && route.destination == row.destination)
                         || (route.origin == row.destination && route.destination == row.origin)))
-                || !self.markets[&row.destination].commodities.contains_key(&row.commodity)
             {
                 return Err(invalid("invalid completed macro shipment"));
             }
@@ -233,22 +249,31 @@ impl MacroEconomy {
         Ok((state.price_centimes, amount))
     }
 
+    pub(crate) fn bid_budget(&self, unit: &str, good: &str, ledger: &Ledger) -> i64 {
+        let market = &self.markets[unit];
+        let state = market.commodities[good];
+        let restocking = self.inputs.commodities.iter().find(|c| c.commodity_id == good)
+            .is_some_and(|c| state.unmet > 0.0 || state.inventory < state.demanded * c.target_stock_days);
+        if restocking { market.trade_budget(ledger) } else { ledger.market_cash(&market.id) }
+    }
+
     pub(crate) fn receive_player_freight(
         &mut self, unit: &str, good: &str, quantity_milli: i64, expected_price: i64,
-        pay: impl FnOnce(&str, i64) -> io::Result<()>,
+        ledger: &mut Ledger, seller: &str, reference: &str, now: i64,
     ) -> io::Result<i64> {
         let (price, amount) = self.freight_bid(unit, good, quantity_milli)?;
         if expected_price != price {
             return Err(invalid("目的地收购报价已变动。"));
         }
         let market = self.markets.get_mut(unit).expect("quoted market");
-        let state = market.commodities.get_mut(good).expect("quoted commodity");
+        let state = market.commodities.get(good).expect("quoted commodity");
         let inventory = state.inventory + quantity_milli as f64 / 1000.0;
         if !inventory.is_finite() || inventory <= state.inventory {
             return Err(invalid("目的地无法登记这批库存。"));
         }
-        pay(&market.id, amount)?;
-        state.inventory = inventory;
+        market.fund_order(ledger, amount, reference, now)?;
+        ledger.pay_market_bid(&market.id, seller, reference, amount, now)?;
+        market.commodities.get_mut(good).unwrap().inventory = inventory;
         Ok(amount)
     }
 
@@ -298,9 +323,11 @@ impl MacroEconomy {
                 || (route.destination == shipment.origin && route.origin == shipment.destination)));
             if !sequence.is_some_and(|id| ids.insert(id))
                 || shipment.dispatch_hour < 0 || shipment.dispatch_hour > economy.last_settlement_hour
-                || shipment.arrival_hour <= economy.last_settlement_hour || shipment.arrival_hour <= shipment.dispatch_hour
+                || (shipment.carriage.is_none() && shipment.arrival_hour <= economy.last_settlement_hour) || shipment.arrival_hour <= shipment.dispatch_hour
                 || shipment.units <= 0.0 || shipment.value_centimes <= 0
-                || !valid_route || !economy.markets[&shipment.destination].commodities.contains_key(&shipment.commodity)
+                || shipment.origin == shipment.destination || !economy.markets.contains_key(&shipment.origin)
+                || shipment.carriage.is_none() && !valid_route
+                || !economy.markets.get(&shipment.destination).is_some_and(|m| m.commodities.contains_key(&shipment.commodity))
             {
                 return Err(invalid("invalid saved macro shipment"));
             }
@@ -345,6 +372,8 @@ impl MacroEconomy {
         clock: GameClock,
         population: &BTreeMap<String, u64>,
         managed_population: &BTreeMap<String, u64>,
+        transport: &mut Operations,
+        ledger: &mut Ledger,
     ) -> io::Result<()> {
         if self.last_settlement_hour.checked_add(HOURS_PER_DAY) != Some(clock.current_hour())
             || clock.snapshot().total_minutes % MINUTES_PER_DAY != 0
@@ -358,7 +387,11 @@ impl MacroEconomy {
                 state.imports = 0.0;
             }
         }
-        self.deliver_shipments(hour);
+        let minute = clock.snapshot().total_minutes;
+        self.last_arrivals.retain(|row| row.arrival_hour > hour - HOURS_PER_DAY);
+        self.deliver_legacy_shipments(hour);
+        self.settle_transport(transport, ledger, minute)?;
+        self.retry_held(transport, ledger, minute)?;
         for (unit, market) in &mut self.markets {
             let country = &self.inputs.countries[unit];
             let population = population[unit] - managed_population.get(unit).copied().unwrap_or(0);
@@ -370,12 +403,17 @@ impl MacroEconomy {
                 let consumed = demand.min(state.inventory + produced);
                 let unmet = demand - consumed;
                 let shortage_bp = if demand > 0.0 { (unmet / demand * 5500.0).round() as i64 } else { 0 };
-                let target = commodity.base_price_centimes * (BASIS_POINTS + shortage_bp) / BASIS_POINTS;
+                let stock = (state.inventory + produced - consumed).max(0.0);
+                let target_stock = demand * commodity.target_stock_days;
+                let pressure = if target_stock > 0.0 {
+                    ((1.0 - stock / target_stock).clamp(-1.0, 1.0) * 3500.0).round() as i64
+                } else { 0 };
+                let target = (commodity.base_price_centimes * (BASIS_POINTS + shortage_bp + pressure) / BASIS_POINTS).max(1);
                 let previous = state.price_centimes.max(1);
                 *state = CommodityState {
                     inventory: (state.inventory + produced - consumed).max(0.0),
-                    price_centimes: ((previous * 3 + target) / 4)
-                        .clamp(previous * 82 / 100, previous * 118 / 100),
+                    price_centimes: ((previous * 3 + target + 2) / 4)
+                        .clamp((previous * 82 / 100).max(1), (previous * 118 / 100).max(1)),
                     demanded: demand, produced, consumed, unmet, imports: state.imports, exports: 0.0,
                 };
                 totals.demanded += demand;
@@ -387,76 +425,203 @@ impl MacroEconomy {
                 else { (totals.consumed / totals.demanded * BASIS_POINTS as f64).round() as i64 };
             market.daily_totals = Some(totals);
         }
-        self.dispatch_shortages(hour);
+        self.dispatch_shortages(hour, transport, ledger)?;
         self.last_settlement_hour = hour;
         Ok(())
     }
 
-    fn deliver_shipments(&mut self, hour: i64) {
-        self.last_arrivals.clear();
-        self.last_arrivals.extend(self.shipments.extract_if(.., |row| row.arrival_hour <= hour));
-        for shipment in &self.last_arrivals {
-            let market = self.markets.get_mut(&shipment.destination).unwrap();
-            let good = market.commodities.get_mut(&shipment.commodity).unwrap();
-            good.inventory += shipment.units;
-            good.imports += shipment.units;
-            market.trade_balance_centimes -= shipment.value_centimes;
-            self.markets.get_mut(&shipment.origin).unwrap().trade_balance_centimes += shipment.value_centimes;
-        }
+    fn deliver_legacy_shipments(&mut self, hour: i64) {
+        let arrived: Vec<_> = self.shipments.extract_if(.., |row| row.carriage.is_none() && row.arrival_hour <= hour).collect();
+        for shipment in arrived { self.deliver(shipment); }
     }
 
-    fn dispatch_shortages(&mut self, hour: i64) {
+    fn deliver(&mut self, shipment: Shipment) {
+        let market = self.markets.get_mut(&shipment.destination).expect("known destination");
+        let good = market.commodities.get_mut(&shipment.commodity).expect("known good");
+        good.inventory += shipment.units;
+        good.imports += shipment.units;
+        market.trade_balance_centimes -= shipment.value_centimes;
+        self.markets.get_mut(&shipment.origin).unwrap().trade_balance_centimes += shipment.value_centimes;
+        self.last_arrivals.push(shipment);
+    }
+
+    pub(crate) fn reservation_ids(&self) -> impl Iterator<Item = u64> + '_ {
+        self.shipments.iter().filter_map(|s| s.carriage.as_ref().map(|c| c.reservation))
+    }
+
+    pub(crate) fn validate_transport(&self, transport: &Operations, ledger: &Ledger) -> io::Result<()> {
+        for shipment in self.shipments.iter().chain(&self.last_arrivals) {
+            let Some(c) = &shipment.carriage else { continue };
+            let buyer = format!("account:market_receipts:{}", self.markets[&shipment.destination].id);
+            let seller = format!("account:market_receipts:{}", self.markets[&shipment.origin].id);
+            if !ledger.has_payment(&format!("goods:{}", shipment.id), &buyer, &seller, shipment.value_centimes, "goods", &shipment.id)
+                || !ledger.has_payment(&format!("carriage:{}", c.reservation), &buyer, TRANSPORT_ACCOUNT, c.fare_centimes, "freight", &shipment.id)
+                || transport.network().segment(&shipment.route_id).is_none()
+                || c.arrival_minute.checked_add(59).map(|m| m / 60) != Some(shipment.arrival_hour)
+            { return Err(invalid("macro shipment conflicts with recorded goods or freight payment")); }
+        }
+        for shipment in &self.shipments {
+            let Some(c) = &shipment.carriage else { continue };
+            let plan = transport.plan(c.reservation).ok_or_else(|| invalid("macro freight reservation missing"))?;
+            let buyer = format!("account:market_receipts:{}", self.markets[&shipment.destination].id);
+            let refund = transport.unused_fare(c.reservation).unwrap_or(0);
+            if transport.traffic(c.reservation) != Some(Traffic::Trade)
+                || carriage_corridor(plan) != shipment.route_id || plan.route().from != c.from
+                || transport.network().area_node(&shipment.destination) != Some(plan.route().to.as_str())
+                || plan.load_units() != shipment.units.ceil() as u32 || c.fare_centimes != plan.fare_centimes()
+                || plan.arrival_minute() != c.arrival_minute || c.held != transport.held(c.reservation).is_some()
+                || refund > 0 && !ledger.has_payment(&format!("held-refund:{}", c.reservation), TRANSPORT_ACCOUNT, &buyer, refund, "cargo_refund", &shipment.id)
+            { return Err(invalid("macro shipment conflicts with reservation or payment")); }
+        }
+        Ok(())
+    }
+
+    pub(crate) fn settle_transport(&mut self, transport: &mut Operations, ledger: &mut Ledger, now: i64) -> io::Result<()> {
+        if !transport.trade_event_pending() { return Ok(()); }
+        let mut idx = 0;
+        while idx < self.shipments.len() {
+            let row = &mut self.shipments[idx];
+            let Some(c) = &mut row.carriage else { idx += 1; continue };
+            if transport.completed(c.reservation).is_some() {
+                transport.finish(c.reservation);
+                let row = self.shipments.remove(idx);
+                self.deliver(row);
+                continue;
+            }
+            if !c.held && transport.held(c.reservation).is_some() {
+                let refund = transport.unused_fare(c.reservation).unwrap_or(0);
+                if refund > 0 {
+                    let account = format!("account:market_receipts:{}", self.markets[&row.destination].id);
+                    ledger.transfer(&format!("held-refund:{}", c.reservation), TRANSPORT_ACCOUNT,
+                        &account, refund, now, "cargo_refund", &row.id)?;
+                }
+                c.held = true;
+            }
+            idx += 1;
+        }
+        transport.clear_trade_event();
+        Ok(())
+    }
+
+    fn retry_held(&mut self, transport: &mut Operations, ledger: &mut Ledger, now: i64) -> io::Result<()> {
+        for row in &mut self.shipments {
+            let Some(c) = row.carriage.as_mut().filter(|c| c.held) else { continue };
+            let from = transport.held(c.reservation).expect("held cargo station").to_owned();
+            let to = transport.network().area_node(&row.destination).expect("scheduled destination").to_owned();
+            let Ok(plan) = transport.quote_service(&from, &to, ModeSet::ALL, row.units.ceil() as u32, now, Traffic::Trade) else { continue };
+            let buyer = &self.markets[&row.destination].id;
+            let fare = plan.fare_centimes();
+            if self.markets[&row.destination].trade_budget(ledger) < fare { continue; }
+            let arrival = plan.arrival_minute();
+            let route_id = carriage_corridor(&plan).to_owned();
+            let id = transport.reserve_trade(plan)?;
+            let payer = format!("account:market_receipts:{buyer}");
+            if let Err(error) = self.markets.get_mut(&row.destination).unwrap().fund_order(ledger, fare, &format!("carriage:{id}"), now) {
+                transport.finish(id);
+                return Err(error);
+            }
+            if let Err(error) = ledger.transfer(&format!("carriage:{id}"), &payer, TRANSPORT_ACCOUNT, fare, now, "freight", &row.id) {
+                transport.finish(id);
+                return Err(error);
+            }
+            transport.finish(c.reservation);
+            *c = TradeCarriage { reservation: id, from, fare_centimes: fare, arrival_minute: arrival, held: false };
+            row.route_id = route_id;
+            row.arrival_hour = (arrival + 59) / 60;
+        }
+        Ok(())
+    }
+
+    fn dispatch_shortages(&mut self, hour: i64, transport: &mut Operations, ledger: &mut Ledger) -> io::Result<()> {
+        let now = hour * MINUTES_PER_HOUR;
         let mut dispatched = 0;
-        for (receiver, indexes) in &self.inputs.connected_routes {
-            let market = &self.markets[receiver];
+        let mut inbound = BTreeMap::<String, BTreeMap<String, f64>>::new();
+        for s in &self.shipments {
+            *inbound.entry(s.destination.clone()).or_default().entry(s.commodity.clone()).or_default() += s.units;
+        }
+        for receiver in self.inputs.countries.keys() {
+            let Some(to) = transport.network().area_node(receiver).map(str::to_owned) else { continue };
+            let buyer = self.markets[receiver].id.clone();
             let mut shortages: Vec<_> = self.inputs.commodities.iter()
+                .filter(|commodity| commodity.international_liquidity_units > 0)
                 .filter_map(|commodity| {
                     let id = &commodity.commodity_id;
-                    let unmet = market.commodities[id].unmet;
+                    let due = inbound.get(receiver).and_then(|market| market.get(id)).copied().unwrap_or(0.0);
+                    let local = self.markets[receiver].commodities[id];
+                    // Buy for the next two settlements when local output cannot replenish the stock.
+                    let unmet = local.unmet + (2.0 * (local.demanded - local.produced) - local.inventory).max(0.0) - due;
                     (unmet > QUANTITY_EPSILON).then_some((id, unmet))
                 }).collect();
+            if shortages.is_empty() || self.markets[receiver].trade_budget(ledger) == 0 { continue; }
+            let rates = transport.supplier_rates(&to);
             shortages.sort_by(|a, b| b.1.total_cmp(&a.1));
             for (commodity, mut remaining) in shortages.into_iter().take(MAX_SHORTAGES) {
-                let mut suppliers: Vec<_> = indexes.iter().filter_map(|&index| {
-                    let route = &self.inputs.routes[index];
-                    let origin = if &route.origin == receiver { &route.destination } else { &route.origin };
-                    let surplus = self.markets[origin].commodities[commodity].surplus();
-                    (surplus > QUANTITY_EPSILON).then_some((origin, route, surplus))
+                let mut suppliers: Vec<_> = rates.iter().filter_map(|(origin, &rate)| {
+                    let good = self.markets.get(origin)?.commodities[commodity];
+                    (good.surplus() > QUANTITY_EPSILON).then_some((good.price_centimes as u64 + rate, origin))
                 }).collect();
-                suppliers.sort_by(|a, b| b.2.total_cmp(&a.2));
-                for (origin, route, _) in suppliers.into_iter().take(MAX_SUPPLIERS) {
-                    if remaining <= QUANTITY_EPSILON {
-                        break;
+                suppliers.sort_unstable();
+                for (_, origin) in suppliers.into_iter().take(MAX_SUPPLIERS) {
+                    if remaining <= QUANTITY_EPSILON || self.markets[receiver].trade_budget(ledger) <= 0 { break; }
+                    let Some(from) = transport.network().area_node(origin).map(str::to_owned) else { continue };
+                    let Ok(sample) = transport.quote_service(&from, &to, ModeSet::ALL, 1, now, Traffic::Trade) else { continue };
+                    let ceiling = sample.route().legs.iter().filter_map(|leg| transport.service_capacity(&leg.segment_id, &leg.from))
+                        .map(|cap| cap.line_limit.min(cap.cargo_limit)).min().unwrap_or(0);
+                    let budget = self.markets[receiver].trade_budget(ledger);
+                    let good = self.markets[origin].commodities[commodity];
+                    let units = remaining.min(good.surplus()).min(f64::from(ceiling))
+                        .min((budget / (good.price_centimes + sample.fare_centimes()).max(1)) as f64);
+                    if units <= QUANTITY_EPSILON { continue; }
+                    let Ok(plan) = transport.quote_service(&from, &to, ModeSet::ALL, units.ceil() as u32, now, Traffic::Trade) else { continue };
+                    if plan.first_departure_minute() >= now + MINUTES_PER_DAY { continue; }
+                    let fare = plan.fare_centimes();
+                    let value = ((units * good.price_centimes as f64).ceil() as i64).max(1);
+                    let destination_value = (units * self.markets[receiver].commodities[commodity].price_centimes as f64).ceil() as i64;
+                    if value > budget - fare || value > MAX_AMOUNT || value + fare > destination_value { continue; }
+                    let arrival = plan.arrival_minute();
+                    let route_id = carriage_corridor(&plan).to_owned();
+                    let reservation = transport.reserve_trade(plan)?;
+                    let id = format!("formal_shipment:{}", self.next_shipment);
+                    let payer = format!("account:market_receipts:{buyer}");
+                    let seller = format!("account:market_receipts:{}", self.markets[origin].id);
+                    let goods_id = format!("goods:{id}");
+                    let fare_id = format!("carriage:{reservation}");
+                    ledger.ensure_market_seller(&self.markets[origin].id)?;
+                    if let Err(error) = self.markets.get_mut(receiver).unwrap().fund_order(ledger, value + fare, &id, now) {
+                        transport.finish(reservation);
+                        return Err(error);
                     }
-                    let market = self.markets.get_mut(origin).unwrap();
-                    let good = market.commodities.get_mut(commodity).unwrap();
-                    let units = remaining.min(good.surplus()).min(route.capacity_units);
-                    if units <= QUANTITY_EPSILON {
-                        continue;
+                    let legs = [
+                        PaymentLeg { id: &goods_id, from: &payer, to: &seller, amount: value, kind: "goods", reference: &id },
+                        PaymentLeg { id: &fare_id, from: &payer, to: TRANSPORT_ACCOUNT, amount: fare, kind: "freight", reference: &id },
+                    ];
+                    if let Err(error) = ledger.batch_payment(&id, &legs, now, &BTreeMap::new()) {
+                        transport.finish(reservation);
+                        return Err(error);
                     }
+                    let good = self.markets.get_mut(origin).unwrap().commodities.get_mut(commodity).unwrap();
                     good.inventory -= units;
                     good.exports += units;
                     self.shipments.push(Shipment {
-                        id: format!("formal_shipment:{}", self.next_shipment),
-                        origin: origin.clone(),
-                        destination: receiver.clone(),
-                        commodity: commodity.clone(),
-                        units,
-                        value_centimes: ((units * good.price_centimes as f64).round() as i64).max(1),
-                        dispatch_hour: hour,
-                        arrival_hour: hour + route.duration_hours,
-                        route_id: route.id.clone(),
+                        id, origin: origin.clone(), destination: receiver.clone(), commodity: commodity.clone(),
+                        units, value_centimes: value, dispatch_hour: hour, arrival_hour: (arrival + 59) / 60,
+                        route_id,
+                        carriage: Some(TradeCarriage { reservation, from, fare_centimes: fare, arrival_minute: arrival, held: false }),
                     });
                     self.next_shipment += 1;
                     remaining -= units;
                     dispatched += 1;
-                    if dispatched == MAX_DAILY_SHIPMENTS {
-                        return;
-                    }
+                    if dispatched == MAX_DAILY_SHIPMENTS { return Ok(()); }
                 }
             }
         }
+        Ok(())
     }
+}
+
+fn carriage_corridor(plan: &crate::transport::operations::Plan) -> &str {
+    let legs = &plan.route().legs;
+    &legs.iter().max_by_key(|leg| leg.profile.travel_minutes).expect("nonempty carriage").segment_id
 }
 
 impl CommodityState {
@@ -472,6 +637,19 @@ impl CommodityState {
 }
 
 impl Market {
+    fn trade_budget(&self, ledger: &Ledger) -> i64 {
+        ledger.market_cash(&self.id).saturating_add(self.gold_reserve_units.floor() as i64).min(MAX_AMOUNT)
+    }
+
+    fn fund_order(&mut self, ledger: &mut Ledger, amount: i64, reference: &str, now: i64) -> io::Result<()> {
+        let shortfall = (amount - ledger.market_cash(&self.id)).max(0);
+        if shortfall == 0 { return Ok(()); }
+        if shortfall > self.gold_reserve_units.floor() as i64 { return Err(invalid("market cannot fund the purchase")); }
+        let realized = ledger.realize_market_reserve(&self.id, shortfall, reference, now)?;
+        self.gold_reserve_units -= realized as f64;
+        Ok(())
+    }
+
     fn restore(&mut self, row: &[Value]) -> io::Result<()> {
         let inventory = map(field(row, "inventory")?)?;
         let prices = map(field(row, "prices")?)?;
@@ -559,11 +737,21 @@ impl Shipment {
             dispatch_hour: integer(field(row, "dispatch_hour")?)?,
             arrival_hour: integer(field(row, "arrival_hour")?)?,
             route_id: text(row, "route_id")?.to_owned(),
+            carriage: lookup(row, "carriage").map(|value| -> io::Result<_> {
+                let fields = map(value)?;
+                Ok(TradeCarriage {
+                    reservation: u64::try_from(integer(field(fields, "reservation")?)?).map_err(|_| invalid("invalid carriage ID"))?,
+                    from: text(fields, "from")?.to_owned(),
+                    fare_centimes: integer(field(fields, "fare")?)?,
+                    arrival_minute: integer(field(fields, "arrival")?)?,
+                    held: field(fields, "held")?.as_bool().ok_or_else(|| invalid("invalid cargo custody"))?,
+                })
+            }).transpose()?,
         })
     }
 
     fn snapshot(&self) -> Value {
-        typed_map([
+        let mut fields = vec![
             ("shipment_id", json!(self.id)),
             ("origin_entity_id", json!(self.origin)),
             ("destination_entity_id", json!(self.destination)),
@@ -574,7 +762,12 @@ impl Shipment {
             ("arrival_hour", typed_int(self.arrival_hour)),
             ("route_id", json!(self.route_id)),
             ("status", json!("in_transit")),
-        ])
+        ];
+        if let Some(c) = &self.carriage {
+            fields.push(("carriage", typed_map([("reservation", typed_int(c.reservation as i64)), ("from", json!(c.from)),
+                ("fare", typed_int(c.fare_centimes)), ("arrival", typed_int(c.arrival_minute)), ("held", json!(c.held))])));
+        }
+        typed_map(fields)
     }
 }
 
@@ -644,13 +837,7 @@ impl MarketInputs {
             }
         }
         let routes = load_routes(&countries)?;
-        let mut connected_routes: BTreeMap<String, Vec<usize>> = BTreeMap::new();
-        for (index, route) in routes.iter().enumerate() {
-            for unit in [&route.origin, &route.destination] {
-                connected_routes.entry(unit.clone()).or_default().push(index);
-            }
-        }
-        Ok(Self { countries, commodities: goods.commodities, routes, connected_routes })
+        Ok(Self { countries, commodities: goods.commodities, routes })
     }
 }
 
@@ -678,7 +865,7 @@ fn load_routes(countries: &BTreeMap<String, CountryInputs>) -> io::Result<Vec<Tr
             return Err(invalid("invalid maritime route row"));
         }
         let [id, origin, destination] = [id, origin, destination].map(|index| row[index].as_str());
-        let (Some(id), Some(origin), Some(destination), Some(days), Some(capacity)) =
+        let (Some(id), Some(origin), Some(destination), Some(days), Some(_capacity)) =
             (id, origin, destination, row[days].as_u64(), row[capacity].as_u64())
         else {
             return Err(invalid("invalid maritime route fields"));
@@ -689,14 +876,14 @@ fn load_routes(countries: &BTreeMap<String, CountryInputs>) -> io::Result<Vec<Tr
         let duration_hours = i64::try_from(days.max(1)).ok().and_then(|value| value.checked_mul(HOURS_PER_DAY))
             .ok_or_else(|| invalid("invalid maritime route duration"))?;
         routes.push(TradeRoute { id: id.to_owned(), origin: origin.to_owned(),
-            destination: destination.to_owned(), capacity_units: (capacity as f64 * 18.0).max(10.0), duration_hours });
+            destination: destination.to_owned(), duration_hours });
     }
     let [id, units, capacity] = columns(&table.river_field_order, ["corridor_id", "entity_ids", "capacity_index"])?;
     for row in table.river_rows {
         if row.len() != table.river_field_order.len() {
             return Err(invalid("invalid river route row"));
         }
-        let (Some(id), Some(units), Some(capacity)) = (row[id].as_str(), row[units].as_array(), row[capacity].as_u64())
+        let (Some(id), Some(units), Some(_capacity)) = (row[id].as_str(), row[units].as_array(), row[capacity].as_u64())
         else {
             return Err(invalid("invalid river route fields"));
         };
@@ -708,8 +895,7 @@ fn load_routes(countries: &BTreeMap<String, CountryInputs>) -> io::Result<Vec<Tr
                 continue;
             }
             routes.push(TradeRoute { id: format!("{id}:{index}"), origin: origin.to_owned(),
-                destination: destination.to_owned(), capacity_units: (capacity as f64 * 12.0).max(8.0),
-                duration_hours: 3 * HOURS_PER_DAY });
+                destination: destination.to_owned(), duration_hours: 3 * HOURS_PER_DAY });
         }
     }
     Ok(routes)

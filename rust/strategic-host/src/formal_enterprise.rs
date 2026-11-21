@@ -2,7 +2,7 @@ use crate::{formal_ledger::Ledger, formal_save::invalid, formal_wages::WageClaim
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, io};
 
-#[derive(Deserialize)]
+#[derive(Default, Deserialize)]
 pub(crate) struct EnterpriseOpening {
     production_enabled: bool,
     firms: Vec<Firm>,

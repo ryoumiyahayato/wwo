@@ -6,7 +6,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io};
 
-#[derive(Deserialize)]
+#[derive(Default, Deserialize)]
 pub(crate) struct WorkOpening {
     jobs: Vec<Job>,
     firms: Vec<Firm>,
@@ -98,6 +98,11 @@ impl WorkOpening {
 }
 
 impl WorkState {
+    pub(crate) fn has_unseen_entry_jobs(&self, opening: &WorkOpening, actor: &str, place: &str, day: i64) -> bool {
+        opening.jobs.iter().any(|job| job.place == place && job.skill <= 1
+            && self.vacancies(job) > 0 && !self.knows_job(opening, actor, job, day))
+    }
+
     pub(crate) fn consult_local_notices(&mut self, opening: &WorkOpening, actor: &str, place: &str) {
         let seen = opening.jobs.iter().filter(|job| job.place == place && job.skill <= 1)
             .map(|job| job.id.clone()).collect::<BTreeSet<_>>();

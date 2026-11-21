@@ -196,6 +196,42 @@ impl Ledger {
         result
     }
 
+    /// The caller retires the same number of statistical reserve units.
+    /// One simulated minor unit per reserve unit is a scenario convention.
+    pub(crate) fn realize_market_reserve(&mut self, market: &str, reserve: i64, reference: &str, minute: i64) -> io::Result<i64> {
+        let id = format!("reserve_conversion:{market}:{reference}");
+        if self.transaction_indexes.contains_key(&id) || reserve <= 0 { return Ok(0); }
+        if reserve > MAX_AMOUNT - self.budget { return Err(invalid("market reserve exceeds ledger bounds")); }
+        let account = format!("account:market_receipts:{market}");
+        let created = !self.accounts.contains_key(&account);
+        if created { self.accounts.insert(account.clone(), Account::new(market, MARKET_ROLE, 0)); }
+        if self.accounts[&account].owner != market || self.accounts[&account].role != MARKET_ROLE { return Err(invalid("invalid market reserve account")); }
+        self.accounts.get_mut(SOURCE).unwrap().balance += reserve;
+        self.budget += reserve;
+        if let Err(error) = self.transfer(&id, SOURCE, &account, reserve, minute, "reserve_conversion", market) {
+            self.accounts.get_mut(SOURCE).unwrap().balance -= reserve;
+            self.budget -= reserve;
+            if created { self.accounts.remove(&account); }
+            return Err(error);
+        }
+        Ok(reserve)
+    }
+
+    pub(crate) fn ensure_market_seller(&mut self, market: &str) -> io::Result<()> {
+        let id = format!("account:market_receipts:{market}");
+        let account = self.accounts.entry(id).or_insert_with(|| Account::new(market, MARKET_ROLE, 0));
+        if account.owner != market || account.role != MARKET_ROLE || account.denomination != CURRENCY {
+            return Err(invalid("invalid market receipt account"));
+        }
+        Ok(())
+    }
+
+    pub(crate) fn market_cash(&self, market: &str) -> i64 {
+        self.accounts.get(&format!("account:market_receipts:{market}"))
+            .filter(|a| a.owner == market && a.role == MARKET_ROLE)
+            .map_or(0, |a| a.balance - a.reserved)
+    }
+
     pub(crate) fn ensure_transport_account(&mut self) -> io::Result<()> {
         if let Some(account) = self.accounts.get(TRANSPORT_ACCOUNT) {
             return if account.owner == TRANSPORT_OWNER && account.role == TRANSPORT_ROLE && account.denomination == CURRENCY {
@@ -626,7 +662,7 @@ impl<'a> Receipt<'a> {
 }
 
 fn valid_kind(kind: &str, regional: bool) -> bool {
-    matches!(kind, "opening_cash" | "employer_reserve" | "wage" | "purchase" | "transport_fare" | "transport_refund" | "freight_sale")
+    matches!(kind, "reserve_conversion" | "opening_cash" | "employer_reserve" | "wage" | "purchase" | "transport_fare" | "transport_refund" | "freight_sale")
         || regional && matches!(kind, "goods" | "freight" | "cargo_refund" | "cargo_damages" | "cargo_extra_freight"
             | "loan_issue" | "loan_repayment" | "fx_principal" | "fx_target" | "fx_fee" | "asset_trade"
             | "dividend" | "equity_issue" | "person_travel" | "service_fee" | "lease_rent" | "capital_equipment")

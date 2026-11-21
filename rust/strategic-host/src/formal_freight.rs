@@ -4,7 +4,7 @@ use crate::{
     formal_character,
     formal_ledger::{MAX_AMOUNT, TRANSPORT_ACCOUNT},
     formal_save::invalid,
-    transport::{operations::Plan, ModeSet},
+    transport::{operations::{Plan, Traffic}, ModeSet},
 };
 use serde::{Deserialize, Serialize};
 use std::{
@@ -124,14 +124,12 @@ impl InitialWorld {
         }
         load(quantity_milli)?;
         let origin = self.last_station().to_owned();
-        let unit = self
-            .sources
-            .population_unit_at(&origin)
-            .ok_or_else(|| invalid("当前地点没有正式统计市场。"))?;
+        let unit = self.population_unit_at(&origin)
+            .ok_or_else(|| invalid("当前地点没有正式统计市场。"))?.to_owned();
         let market = self
             .macro_economy
             .markets()
-            .get(unit)
+            .get(&unit)
             .ok_or_else(|| invalid("当前统计市场不存在。"))?
             .id
             .clone();
@@ -163,7 +161,7 @@ impl InitialWorld {
             u32::try_from(self.clock.current_day()).map_err(|_| invalid("正式日期超出范围。"))?;
         let minute = self.clock.snapshot().total_minutes;
         let (paid, character) = self.macro_economy.sell_existing_stock(
-            unit,
+            &unit,
             &market,
             good,
             quantity_milli,
@@ -208,7 +206,7 @@ impl InitialWorld {
         }
         let from = from.to_owned();
         self.transport
-            .quote(&from, to, modes, units, self.clock.snapshot().total_minutes)
+            .quote_service(&from, to, modes, units, self.clock.snapshot().total_minutes, Traffic::PlayerFreight)
     }
 
     pub fn dispatch_freight(&mut self, id: u64, to: &str, modes: ModeSet) -> io::Result<u64> {
@@ -298,23 +296,16 @@ impl InitialWorld {
         Ok(())
     }
 
-    /// Consignment authorizes sale at the delivery place. The paying market must already have earned the cash.
+    /// A market can draw on its finite reserve for goods it needs to restock.
     pub fn freight_sale_quote(&self, id: u64) -> io::Result<(i64, i64)> {
         let lot = self.owned_lot(id)?;
-        let unit = self
-            .sources
-            .population_unit_at(lot.delivery()?)
+        let unit = self.population_unit_at(lot.delivery()?)
             .ok_or_else(|| invalid("交割地没有统计市场。"))?;
         let bid = self
             .macro_economy
             .freight_bid(unit, &lot.good, lot.quantity_milli)?;
-        let buyer = &self.macro_economy.markets()[unit].id;
-        if !self
-            .ledger
-            .default_account(buyer)
-            .is_some_and(|a| a.available >= bid.1)
-        {
-            return Err(invalid("交割地市场的实收资金不足以收购本批货物。"));
+        if self.macro_economy.bid_budget(unit, &lot.good, &self.ledger) < bid.1 {
+            return Err(invalid("交割市场的实收资金和可用补货预算不足。"));
         }
         Ok(bid)
     }
@@ -323,25 +314,15 @@ impl InitialWorld {
         self.freight_sale_quote(id)?;
         let lot = &self.freight.lots[&id];
         let destination = lot.delivery()?.to_owned();
-        let unit = self
-            .sources
-            .population_unit_at(&destination)
-            .expect("quoted destination market");
+        let unit = self.population_unit_at(&destination)
+            .expect("quoted destination market").to_owned();
         let reference = format!("freight-lot:{id}:{destination}");
         let revenue = self.macro_economy.receive_player_freight(
-            unit,
+            &unit,
             &lot.good,
             lot.quantity_milli,
             quoted_unit_price,
-            |market, amount| {
-                self.ledger.pay_market_bid(
-                    market,
-                    &self.player,
-                    &reference,
-                    amount,
-                    self.clock.snapshot().total_minutes,
-                )
-            },
+            &mut self.ledger, &self.player, &reference, self.clock.snapshot().total_minutes,
         )?;
         let net = revenue - lot.purchase_centimes - lot.freight_centimes;
         self.freight.lots.get_mut(&id).unwrap().state = FreightState::Sold {
@@ -366,9 +347,7 @@ impl InitialWorld {
             .account_id;
         for (index, (&id, lot)) in self.freight.lots.iter().enumerate() {
             let units = load(lot.quantity_milli)?;
-            let unit = self
-                .sources
-                .population_unit_at(&lot.origin)
+            let unit = self.population_unit_at(&lot.origin)
                 .ok_or_else(|| invalid("存档购货地不存在。"))?;
             let market = self
                 .macro_economy
@@ -451,7 +430,7 @@ impl InitialWorld {
                     let plan = self.transport.plan(*reservation_id);
                     moving.insert(*reservation_id, id);
                     place.is_none()
-                        && self.transport.is_freight(*reservation_id)
+                        && self.transport.traffic(*reservation_id) == Some(Traffic::PlayerFreight)
                         && last.zip(plan).is_some_and(|(dispatch, plan)| {
                             *reservation_id == dispatch.reservation_id
                                 && destination == &dispatch.to
@@ -474,9 +453,7 @@ impl InitialWorld {
                     net_centimes,
                 } => {
                     sales += 1;
-                    let buyer = self
-                        .sources
-                        .population_unit_at(destination)
+                    let buyer = self.population_unit_at(destination)
                         .and_then(|unit| self.macro_economy.markets().get(unit));
                     let sale_ref = format!("freight-lot:{id}:{destination}");
                     place == Some(destination.as_str())
@@ -630,6 +607,49 @@ mod tests {
             world.freight.lots[&id].freight_centimes,
             plan.fare_centimes()
         );
+    }
+
+    #[test]
+    fn transport_freight_japanese_tea_clears_at_the_qing_market_bid() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("empire_of_japan").unwrap();
+        let managed = BTreeMap::new();
+        world.advance_migrated_domains(2 * crate::formal_clock::MINUTES_PER_DAY, &managed).unwrap();
+        let good = "tea";
+        let source = "empire_of_japan";
+        let destination = "qing_empire";
+        let seller = world.macro_economy.markets()[source].id.clone();
+        let buyer = world.macro_economy.markets()[destination].id.clone();
+        let from_stock = world.macro_economy.markets()[source].commodities[good];
+        let seller_cash = world.ledger.market_cash(&seller);
+        let player_cash = world.balance().unwrap().cash;
+        let lot = world.buy_freight(good, 1000, from_stock.price_centimes).unwrap();
+        assert_eq!(world.macro_economy.markets()[source].commodities[good].inventory, from_stock.inventory - 1.0);
+        assert_eq!(world.ledger.market_cash(&seller), seller_cash + from_stock.price_centimes);
+        let plan = world.quote_freight(lot, "area:qing_empire", ModeSet::ALL).unwrap();
+        let arrival = plan.arrival_minute();
+        let fee = plan.fare_centimes();
+        assert!(plan.route().legs.iter().any(|leg| leg.mode == TransportMode::Shipping));
+        world.dispatch_quoted_freight(lot, plan).unwrap();
+        assert_eq!(world.balance().unwrap().cash, player_cash - from_stock.price_centimes - fee);
+        let mut world = restore(&bootstrap, &world);
+        world.advance_migrated_domains(arrival - world.clock.snapshot().total_minutes, &managed).unwrap();
+        let stock_at_delivery = world.macro_economy.markets()[destination].commodities[good].inventory;
+        let reserve = world.macro_economy.markets()[destination].gold_reserve_units;
+        let local_cash = world.ledger.market_cash(&buyer);
+        let cash_at_delivery = world.balance().unwrap().cash;
+        let (price, amount) = world.freight_sale_quote(lot).unwrap();
+        let net = world.sell_freight(lot, price).unwrap();
+        assert_eq!(world.balance().unwrap().cash, cash_at_delivery + amount);
+        assert_eq!(world.macro_economy.markets()[destination].commodities[good].inventory, stock_at_delivery + 1.0);
+        let redeemed = reserve - world.macro_economy.markets()[destination].gold_reserve_units;
+        assert_eq!(redeemed, (amount - local_cash).max(0) as f64);
+        assert_eq!(world.ledger.market_cash(&buyer), local_cash + redeemed as i64 - amount);
+        assert_eq!(net, amount - from_stock.price_centimes - fee);
+        let mut world = restore(&bootstrap, &world);
+        assert!(world.sell_freight(lot, price).is_err());
+        println!("Japanese tea: source {:.3} -> {:.3}; Qing {:.3} -> {:.3}; buy {}, sale {amount}, freight {fee}, net {net}, reserve redeemed {redeemed}",
+            from_stock.inventory, from_stock.inventory - 1.0, stock_at_delivery, stock_at_delivery + 1.0, from_stock.price_centimes);
     }
 
     #[test]
