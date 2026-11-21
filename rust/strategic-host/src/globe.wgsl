@@ -474,14 +474,14 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     // Broad forest and sand grain stays weaker than exposed rock. The baked
     // geographic albedo and shading remain legible on flat, uniform surfaces.
     let solid=mix(materials,vec4f(0.,0.,.12,.30),snow);
-    var relief=dot(broad,solid*vec4f(.19,.15,.28,0.))*(1.-smoothstep(210.,LAND_MATERIAL_MPP,footprint));
+    var relief=dot(broad,solid*vec4f(.19,.095,.28,0.))*(1.-smoothstep(210.,LAND_MATERIAL_MPP,footprint));
     if solid.w+solid.y>.01 {
         let sediment=sediment_structure(earth,footprint);
         relief+=dot(sediment,vec2f(.20,.13))*(solid.w+solid.y*.68);
     }
     if footprint<102. {
         let fine=land_material_band(earth,planes,footprint,2150.)-.5;
-        relief+=dot(fine,solid*vec4f(.18,.12,.28,.12))*(1.-smoothstep(38.,102.,footprint));
+        relief+=dot(fine,solid*vec4f(.18,.075,.28,.12))*(1.-smoothstep(38.,102.,footprint));
     }
     return clamp(base*(1.+relief*land),vec3f(0.),vec3f(1.));
 }
@@ -900,22 +900,31 @@ fn river_coordinates(xy:vec2f,r:f32) -> vec2f {
     return degrees(vec2f(atan2(v.x,v.z),atan2(v.y,length(v.xz))));
 }
 
+fn projected_water(pixel:vec2f) -> u32 {
+    let xy=(pixel-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1./view.chart_origin.z);
+    let r=length(xy);
+    if r<1.+view.viewport.w*(PI*.5-1.) {
+        return water_area(river_coordinates(xy,r));
+    }
+    return 0u;
+}
+
 @compute @workgroup_size(8,8)
 fn raster_water(@builtin(global_invocation_id) id:vec3u) {
     let size=vec2u(view.viewport.xy);
     if any(id.xy>=size) {return;}
-    let p=vec2f(id.xy)+.5;
-    let xy=(p-view.chart_origin.xy)*view.viewport.z*vec2f(1.,-1./view.chart_origin.z);
-    let r=length(xy);
-    var area=0u;
-    if r<1.+view.viewport.w*(PI*.5-1.) {
-        area=water_area(river_coordinates(xy,r));
-    }
-    water_output[id.y*size.x+id.x]=area;
+    water_output[id.y*size.x+id.x]=projected_water(vec2f(id.xy)+.5);
 }
 
 fn inland_water(pixel:vec2f) -> f32 {
-    let sample=screen_water(pixel);
+    var sample:u32;
+    if any(pixel<vec2f(0.)) || any(pixel>=view.viewport.xy) {
+        // Reach overlap already has a classified on-screen pixel. Look up
+        // off-screen neighbours in the same QWG table at their pixel centres.
+        sample=projected_water(floor(pixel)+.5);
+    } else {
+        sample=screen_water(pixel);
+    }
     if (sample&3u)!=3u {return 0.;}
     return water_weight(sample);
 }

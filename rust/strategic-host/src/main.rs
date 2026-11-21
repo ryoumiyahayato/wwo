@@ -1971,21 +1971,19 @@ impl Host {
         if let Some(native)=&mut self.config.native {
             let terrain=self.battle_terrain.as_ref().map(|(cell,terrain)|(*cell,terrain));
             let controls=self.battle_view.as_ref().map(battle_view::View::controls).unwrap_or_default();
-            let before=self.battle_view.as_ref().and_then(|_|native.active_world()?.land_battle()?.selected_unit())
-                .map(|unit| (unit.id,unit.ammo));
+            let before=self.battle_view.as_ref().and_then(|_|native.active_world()?.land_battle())
+                .map(|battle|(battle.elapsed_steps(),battle.selected_ammunition()));
             let result=native.tick(now,terrain,controls).and_then(|changed| {
                 if changed {native.update_after_tick(&mut self.state)?;}
                 Ok(changed)
             });
+            if let (Some((steps,ammunition)),Some(view),Some((_,terrain)),Some(battle))=(before,&mut self.battle_view,terrain,
+                native.active_world().and_then(|world|world.land_battle()))
+            {
+                if steps!=battle.elapsed_steps() {view.after_step(battle,terrain,ammunition);}
+            }
             match result {
-                Ok(changed)=>{
-                    if changed {
-                        if let (Some(view),Some((_,terrain)),Some(battle))=(&mut self.battle_view,terrain,
-                            native.active_world().and_then(|world|world.land_battle()))
-                        {view.after_step(battle,terrain,before);}
-                    }
-                    self.dirty|=changed;
-                }
+                Ok(changed)=>self.dirty|=changed,
                 Err(error)=>{
                     let _=native.update_view(&mut self.state);
                     self.feedback=format!("游戏时钟推进失败：{error}");self.dirty=true;

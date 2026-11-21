@@ -89,7 +89,8 @@ pub struct LandBattleControls {
     pub turn: f32,
     pub turret: f32,
     pub aim: Option<[f32; 2]>,
-    pub fire: bool,
+    pub fire_held: bool,
+    pub fire_once: bool,
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -168,6 +169,10 @@ impl LandBattle {
             .find(|unit| unit.id == self.selected && unit.health > 0)
     }
 
+    pub fn selected_ammunition(&self) -> Option<(UnitId, u8)> {
+        self.selected_unit().and_then(|unit| (unit.ammo > 0).then_some((unit.id, unit.ammo)))
+    }
+
     pub fn select_next(&mut self) {
         let available = |unit: &&LandUnit| unit.team == LandTeam::Friendly && unit.health > 0;
         let next = self
@@ -204,11 +209,15 @@ impl LandBattle {
         self.validate()
     }
 
-    pub(crate) fn advance_steps(&mut self, steps: u64, terrain: &BattlefieldTerrain, controls: LandBattleControls) {
+    pub(crate) fn advance_steps(&mut self, steps: u64, terrain: &BattlefieldTerrain, mut controls: LandBattleControls) {
+        let fire_source = controls.fire_once.then(|| self.selected_ammunition()).flatten();
         for _ in 0..steps {
             if self.outcome.is_some() { break; }
             self.elapsed_steps += 1;
             self.step(terrain, controls);
+            if controls.fire_once && (fire_source.is_none() || fire_source != self.selected_ammunition()) {
+                controls.fire_once = false;
+            }
         }
     }
 
@@ -377,7 +386,7 @@ impl LandBattle {
             };
             order.aim_heading = aim_heading;
             order.aim = aim;
-            order.fire = controls.fire;
+            order.fire = controls.fire_held || controls.fire_once;
             return order;
         }
 
@@ -638,4 +647,60 @@ fn axis(value: f32) -> f32 {
 
 fn approach(value: f32, target: f32, step: f32) -> f32 {
     value + (target - value).clamp(-step, step)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn single_fire_does_not_transfer_to_replacement_vehicle_in_a_batch() {
+        let terrain = BattlefieldTerrain::from_geographic_heights(50_000, vec![0.; 4], vec![4; 4]).unwrap();
+        let mut initial = LandBattle::new([0., 0.]);
+        initial.units[0].health = HIT_DAMAGE;
+        initial.units[1].reload = 0.;
+        let source = &mut initial.units[UNIT_COUNT / 2];
+        source.ammo -= 1;
+        let source = source.id;
+        let [x, z] = initial.units[0].position;
+        let position = [x + 4., AIM_HEIGHT, z];
+        initial.projectiles.push(LandProjectile {
+            position,
+            previous_position: position,
+            team: LandTeam::Opposing,
+            source,
+            velocity: [-SHOT_SPEED, 0., 0.],
+            remaining: SHOT_DURATION,
+        });
+        let idle = LandBattleControls { manual: true, ..Default::default() };
+        let pulse = LandBattleControls { fire_once: true, ..idle };
+        let snapshot = |battle: &LandBattle| serde_json::to_vec(battle).unwrap();
+        for (reload, fired) in [(0., 1), (STEP * 2., 0)] {
+            let mut batched = initial.clone();
+            batched.units[0].reload = reload;
+            let mut split = batched.clone();
+            batched.advance_steps(4, &terrain, pulse);
+            split.advance_steps(1, &terrain, pulse);
+            split.advance_steps(3, &terrain, idle);
+            assert_eq!(batched.units[0].health, 0);
+            assert_eq!(batched.units[0].ammo, AMMO - fired);
+            assert_eq!(batched.selected, batched.units[1].id);
+            assert_eq!(batched.units[1].ammo, AMMO);
+            assert_eq!(snapshot(&batched), snapshot(&split));
+        }
+
+        let mut reloading = LandBattle::new([0., 0.]);
+        reloading.units[0].reload = STEP * 2.5;
+        let mut split = reloading.clone();
+        reloading.advance_steps(4, &terrain, pulse);
+        split.advance_steps(2, &terrain, pulse);
+        assert_eq!(split.units[0].ammo, AMMO);
+        split.advance_steps(1, &terrain, pulse);
+        split.advance_steps(1, &terrain, idle);
+        assert_eq!(reloading.units[0].ammo, AMMO - 1);
+        assert_eq!(snapshot(&reloading), snapshot(&split));
+
+        initial.advance_steps(4, &terrain, LandBattleControls { fire_held: true, ..pulse });
+        assert_eq!(initial.units[1].ammo, AMMO - 1);
+    }
 }
