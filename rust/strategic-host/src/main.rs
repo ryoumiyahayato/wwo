@@ -9,6 +9,7 @@ mod compact;
 mod formal_ui;
 mod market_ui;
 mod lobby;
+mod prologue_ui;
 mod landmarks;
 mod map_release;
 mod migration_status;
@@ -205,6 +206,7 @@ struct Host {
     last_input_check:Instant,version:Option<SystemTime>,last_palette:Option<Date>,
     atlas:overlay::Atlas,started:Instant,trial:Trial,
     hud:Hud,skin:Skin,exit_requested:bool,
+    prologue: Option<prologue_ui::Draft>,
     lobby_page:lobby::Page,lobby_country:usize,lobby_request:bool,country_directory:lobby::Directory,
     bridge_wait:Instant,seen_lobby_busy:bool,departure_requested:bool,
     loading_fade:Option<Instant>,loading_status:String,
@@ -223,6 +225,20 @@ fn decode_rgba(source:impl Read)->io::Result<Raster> {
     pixels.truncate(info.buffer_size());
     Ok(Raster{size:[info.width,info.height],pixels})
 }
+fn hud_type_atlas(path: &Path) -> io::Result<Raster> {
+    use formal_ui::{HUD_TYPE_BASE_HEIGHT, HUD_TYPE_HEIGHT, HUD_TYPE_WIDTH};
+    let mut base = font(path)?;
+    let supplemental = decode_rgba(&include_bytes!("../../../data/character/hud-glyphs.png")[..])?;
+    if base.size != [HUD_TYPE_WIDTH, HUD_TYPE_BASE_HEIGHT]
+        || supplemental.size != [HUD_TYPE_WIDTH, HUD_TYPE_HEIGHT - HUD_TYPE_BASE_HEIGHT]
+    {
+        return Err(io::Error::other("invalid HUD glyph atlas dimensions"));
+    }
+    base.pixels.extend(supplemental.pixels);
+    base.size[1] = HUD_TYPE_HEIGHT;
+    Ok(base)
+}
+
 fn ms(t:Instant)->f64 {t.elapsed().as_secs_f64()*1000.}
 
 impl Host {
@@ -284,6 +300,7 @@ impl Host {
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
             animate:false,next_date:Instant::now(),feedback:String::new(),dirty:true,last_input_check:Instant::now(),
             version:None,last_palette:None,trial:Trial{last:observation_id,..Trial::default()},hud:Hud{fullscreen:preferences.fullscreen,volume:preferences.volume,english:preferences.english,..Hud::default()},skin,exit_requested:false,
+            prologue: None,
             lobby_page:lobby::Page::Home,lobby_country,lobby_request:false,country_directory:lobby::Directory::default(),
             bridge_wait:Instant::now(),seen_lobby_busy:false,departure_requested:false,
             loading_fade:None,loading_status:String::new(),debug:false,perf_at:Instant::now(),perf_frames:0,
@@ -634,6 +651,7 @@ impl Host {
                 if verb=="departure:cancel"{self.hud.menu=HudMenu::None;self.departure_requested=false;}
             }
             HudCommand::Lobby(command)=>self.lobby_action(command),
+            HudCommand::PersonalActivity(activity)=>self.emit(Request::PersonalActivity{activity}),
             HudCommand::Training(verb)=>{
                 if self.state.session.is_some(){self.emit(Request::Training{verb});}
             }
@@ -709,10 +727,38 @@ impl Host {
                 if let Some(id)=self.world.polities.get(self.lobby_country).and_then(|p|
                     self.state.lobby.as_ref().filter(|s|s.selection_ready&&!s.busy).and_then(|s|s.opening(p))
                 ).map(|opening|opening.id.clone()){
-                    self.lobby_request=true;self.bridge_wait=Instant::now();self.seen_lobby_busy=false;
-                    self.emit(Request::Lobby{verb:"new",polity:&id,slot:0});
+                    if self.state.lobby.as_ref().is_some_and(|lobby| lobby.native) {
+                        if self.prologue.as_ref().is_none_or(|draft| draft.country != self.lobby_country) {
+                            self.prologue = Some(prologue_ui::Draft::new(self.lobby_country));
+                        }
+                        self.lobby_page = Page::Prologue;
+                    } else {
+                        self.lobby_request=true;self.bridge_wait=Instant::now();self.seen_lobby_busy=false;
+                        self.emit(Request::Lobby{verb:"new",polity:&id,slot:0});
+                    }
                 }
             }
+            Command::PrologueChoice(index) if self.lobby_page == Page::Prologue => {
+                if let Some(draft) = &mut self.prologue { draft.choose(index); }
+            }
+            Command::PrologueBack if self.lobby_page == Page::Prologue => {
+                if let Some(draft) = &mut self.prologue {
+                    if draft.stage == 0 { self.lobby_page = Page::Selection; } else { draft.stage -= 1; }
+                }
+            }
+            Command::PrologueNext if self.lobby_page == Page::Prologue => {
+                if let Some(draft) = &mut self.prologue {
+                    if !draft.confirm() { draft.advance(); }
+                    else if let Some(opening) = self.world.polities.get(draft.country)
+                        .and_then(|polity| self.state.lobby.as_ref()?.opening(polity))
+                    {
+                        let polity = opening.id.clone();
+                        let prologue = draft.opening;
+                        self.emit(Request::NewPlayer { polity: &polity, prologue });
+                    }
+                }
+            }
+            Command::PrologueChoice(_) | Command::PrologueBack | Command::PrologueNext => {}
             Command::Load(slot)=>{
                 self.lobby_request=true;self.bridge_wait=Instant::now();self.seen_lobby_busy=false;
                 self.emit(Request::Lobby{verb:"load",polity:"",slot});
@@ -838,12 +884,20 @@ impl Host {
         let id=id.strip_prefix("state:").unwrap_or(id);
         self.world.polities.iter().position(|p|p.id==id)
     }
+    fn written_world(&self) -> Option<&wwo_map_lab::formal_bootstrap::InitialWorld> {
+        #[cfg(windows)]
+        if let Some(native) = &self.config.native {
+            return native.active_world();
+        }
+        None
+    }
     fn search_results(&self)->Vec<Object> {
         let q=self.search.as_deref().unwrap_or("").trim().to_ascii_lowercase();
         if q.is_empty(){return Vec::new();}
         let items=self.world.places.iter().enumerate().map(|(i,p)|(Object::Place(i),p.rank,&p.name,&p.id))
             .chain(self.world.polities.iter().enumerate().map(|(i,p)|(Object::Polity(i),p.rank,&p.name,&p.id)));
         let mut rows:Vec<_>=items.filter_map(|(o,rank,name,id)| {
+            if !ui::can_read_object(&self.world, self.written_world(), o) { return None; }
             let name=name.to_ascii_lowercase();
             let localized=ui::object_name(&self.world,&self.skin,o).to_ascii_lowercase();
             ((name.contains(&q)||localized.contains(&q)||id.contains(&q)||q.strip_prefix("state:")==Some(id))&&self.available(o))
@@ -1021,13 +1075,16 @@ impl Host {
                 return;
             }
             if matches!(key,Key::Named(NamedKey::Escape|NamedKey::Backspace))&&!self.lobby_request{
-                self.lobby_action(lobby::Command::Page(lobby::Page::Home));
+                let command = if self.lobby_page == lobby::Page::Prologue { lobby::Command::PrologueBack }
+                    else { lobby::Command::Page(lobby::Page::Home) };
+                self.lobby_action(command);
             } else if key==Key::Named(NamedKey::Enter)&&!self.lobby_request {
                 if let Some(state)=&self.state.lobby{
                     if !state.busy {
                         match self.lobby_page {
                             lobby::Page::Home if state.ready=>self.lobby_action(lobby::Command::Page(lobby::Page::Selection)),
                             lobby::Page::Selection=>self.lobby_action(lobby::Command::Enter),
+                            lobby::Page::Prologue=>self.lobby_action(lobby::Command::PrologueNext),
                             _=>(),
                         }
                     }
@@ -1214,9 +1271,13 @@ impl Host {
         self.perf.tiles=self.cached.len();self.perf.visible=self.visible.len();
         self.perf.mib=self.cached.values().map(|p|p.page.bytes).sum::<usize>() as f64 / 1048576.;
         self.perf.streaming=self.reader.inflight.is_some();
+        #[cfg(windows)]
+        let written_world = self.config.native.as_ref().and_then(native_start::NativeSession::active_world);
+        #[cfg(not(windows))]
+        let written_world = None;
         let formal=formal_ui::Display{skin:&self.skin,hud:&self.hud,session:self.state.session.as_ref(),date:self.state.date,country,
             camera:&self.camera,size:self.size,mode:self.mode,flags,cursor:self.cursor,source:&source,feedback:&self.feedback,labels:self.labels,managed:self.config.managed,
-            modern_terrain:view.map_style[1]>0.,
+            written_world, modern_terrain:view.map_style[1]>0.,
             surveyed_terrain:view.close_sample[0]>0. && view.close_sample[2]>0.5,
             debug:self.debug.then_some(&self.perf)};
         let seconds=self.started.elapsed().as_secs_f32();
@@ -1226,7 +1287,7 @@ impl Host {
                 .unwrap_or(if self.lobby_request{"正在进入世界"}else{"正在读取地图资料"});
             (formal.loading(status,seconds),Vec::new())
         }else if self.in_lobby(){
-            formal.lobby(&self.world,self.state.lobby.as_ref(),self.lobby_page,self.lobby_country,self.lobby_request,&self.country_directory)
+            formal.lobby(&self.world,self.state.lobby.as_ref(),self.lobby_page,self.lobby_country,self.lobby_request,&self.country_directory,self.prologue.as_ref())
         }else{ui::compose(&self.world,&self.atlas,Ui{
             mode:self.mode,date:&date,camera:&self.camera,size:self.size,selected:self.selected,admin:&admin,details:self.details,country:self.country,
             search:self.search.as_deref(),search_results:&search,econ_label:&econ_label,econ_legend:&econ_legend,
@@ -1586,7 +1647,7 @@ impl ApplicationHandler<HostEvent> for Host {
         if self.renderer.is_some(){return;}
         let result=(|| -> Result<_,Box<dyn std::error::Error>>{
             let window=if self.config.terrain_review {None} else {
-                let mut attributes=Window::default_attributes().with_title("WWO | 1900 - Rust strategic host")
+                let mut attributes=Window::default_attributes().with_title("WWO | Rust strategic host")
                     .with_inner_size(PhysicalSize::new(VIEW_SIZE[0],VIEW_SIZE[1])).with_min_inner_size(LogicalSize::new(800.,480.))
                     .with_fullscreen((self.hud.fullscreen&&!self.config.background).then_some(winit::window::Fullscreen::Borderless(None)));
                 if self.config.background {attributes=attributes.with_active(false).with_position(winit::dpi::PhysicalPosition::new(10000,10000));}
@@ -1601,7 +1662,7 @@ impl ApplicationHandler<HostEvent> for Host {
                 flate2::read::ZlibDecoder::new(file).take(524289).read_to_end(&mut layouts)?;
                 if layouts.len()!=524288{return Err(io::Error::other("invalid simulation layout").into());}
             }
-            let hud=[font(&self.config.root.join("hud-art.png"))?,font(&self.config.root.join("hud-type.png"))?,
+            let hud=[font(&self.config.root.join("hud-art.png"))?,hud_type_atlas(&self.config.root.join("hud-type.png"))?,
                 if self.config.managed{font(&self.config.root.join("menu-painting.png"))?}else{Raster{size:[1,1],pixels:vec![0;4]}}];
             let art=|name| {
                 if self.map_signature.is_some() {decode_rgba(map_release::open_art(&self.map_root,name)?)}
@@ -1821,7 +1882,7 @@ impl ApplicationHandler<HostEvent> for Host {
         if let Some(s)=self.state.session.as_ref(){self.hud.mechanical.update(now,formal_ui::clock_index(Some(s)),s.clock_ack,self.hud.clock_drag,if s.paused{0}else{s.speed});}
         if self.screenshot_status.as_ref().is_some_and(|(at,_)|at.elapsed()>Duration::from_secs(7)){
             self.screenshot_status=None;self.dirty=true;
-            if let Some(window)=&self.window{window.set_title("WWO | 1900 - Rust strategic host");}
+            if let Some(window)=&self.window{window.set_title("WWO | Rust strategic host");}
         }
         let fading=self.renderer.as_ref().is_some_and(Renderer::terrain_fading)||self.cached.values().any(|p|now.saturating_duration_since(p.ready)<Duration::from_millis(180));
         let expiry=self.cached.values().any(|p|now.saturating_duration_since(p.used)>CACHE_TTL);

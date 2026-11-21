@@ -28,6 +28,8 @@ const REQUIRED_DOMAINS: &[&str] = &[
 pub struct NativeSlotSummary {
     pub opening: String,
     pub clock: ClockSnapshot,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub written_access: Option<bool>,
 }
 
 impl NativeSlotSummary {
@@ -69,14 +71,19 @@ pub fn read_native_slot(path: &Path, bootstrap: &WorldBootstrap) -> io::Result<I
     let clock = summary.validate()?;
     let saved: WorldSnapshot = serde_json::from_reader(reader)?;
     let world = bootstrap.restore_native(saved)?;
-    if world.clock() != clock || world.player().opening_source_id != summary.opening {
+    if world.clock() != clock || world.player().opening_source_id != summary.opening
+        || summary.written_access.unwrap_or(true) != world.can_read_opening_language() {
         return Err(invalid("native slot header and world do not match"));
     }
     Ok(world)
 }
 
 pub fn write_native_slot(path: &Path, world: &InitialWorld) -> io::Result<()> {
-    let summary = NativeSlotSummary { opening: world.player().opening_source_id.clone(), clock: world.clock().snapshot() };
+    let summary = NativeSlotSummary {
+        opening: world.player().opening_source_id.clone(),
+        clock: world.clock().snapshot(),
+        written_access: Some(world.can_read_opening_language()),
+    };
     let temporary = path.with_extension("json.rust-tmp");
     let result = (|| {
         let mut output = io::BufWriter::new(fs::File::create(&temporary)?);

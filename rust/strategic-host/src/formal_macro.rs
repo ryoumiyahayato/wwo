@@ -181,6 +181,11 @@ impl MacroEconomy {
         state.quote(quantity_milli)
     }
 
+    pub(crate) fn is_food(&self, good: &str) -> bool {
+        self.inputs.commodities.iter().any(|commodity| commodity.commodity_id == good
+            && matches!(commodity.category.as_str(), "agricultural_food" | "processed_food"))
+    }
+
     pub(crate) fn is_consumable(&self, good: &str) -> bool {
         self.inputs.commodities.iter().any(|commodity| {
             commodity.commodity_id == good && matches!(commodity.category.as_str(),

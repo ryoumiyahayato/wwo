@@ -60,6 +60,14 @@ pub struct Ui<'a> {
     pub formal:crate::formal_ui::Display<'a>,
 }
 
+pub fn can_read_object(world: &World, written: Option<&wwo_map_lab::formal_bootstrap::InitialWorld>, object: Object) -> bool {
+    written.is_none_or(|written| match object {
+        Object::Place(index) => written.can_read_place_record(&world.places[index].id),
+        Object::Polity(index) => written.can_read_polity_record(&world.polities[index].id),
+        Object::Administration(_) => written.can_read_polity_record("country_fra"),
+    })
+}
+
 pub fn active(date:&str,from:&str,to:&str)->bool {(from.is_empty() || date>=from) && (to.is_empty() || date<to)}
 fn labels<'a>(world:&'a World,ui:&Ui<'a>)->Vec<Label<'a>> {
     let mut list=Vec::new();
@@ -139,14 +147,19 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
         if chosen {map.line([x+px/2.-4.,y+px+2.],[x+px/2.+4.,y+px+2.],1.5,GOLD);}
         if place.selectable {hits.push(Hit{area:pick,action:Action::Select(Object::Place(i))});}
         previous.insert(i);
-        placed.push((place,[x+px+4.,y+px*0.5-7.],chosen));
+        placed.push((i,place,[x+px+4.,y+px*0.5-7.],chosen));
     }
-    for (place,[x,y],chosen) in placed {
+    for (i,place,[x,y],chosen) in placed {
         let name=if skin.english()||place.name_zh.is_empty(){&place.name}else{&place.name_zh};
-        let width=skin.width(name,0);
+        let readable = can_read_object(world, ui.formal.written_world, Object::Place(i));
+        let width=if readable { skin.width(name,0) } else { 36. };
         let area=[x-2.,y-2.,width+4.,19.];
         if x+width>w||(!chosen&&occupied.iter().any(|&old|intersects(area,old))) {continue;}
         occupied.push(area);
+        if !readable {
+            ui.formal.ink_block(map,[x,y+6.,width,9.]);
+            continue;
+        }
         for [dx,dy] in [[-1.,0.],[1.,0.],[0.,-1.],[0.,1.]] {
             skin.text(text,name,0,[x+dx,y+dy],width+1.,[41,48,43,230]);
         }
@@ -221,11 +234,13 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             }
         }
     }
+    let readable = ui.formal.can_read_world();
     for label in labels(world,&ui).into_iter().filter(|_|ui.labels) {
+        let readable = can_read_object(world, ui.formal.written_world, label.object);
         if occupied.len()>95 {break;}
         let [x,y]=label.xy;
         let variant=usize::from(label.rank==0 && ui.camera.mpp<10000.);
-        let length=ui.formal.skin.width(label.name,variant);
+        let length=if readable { ui.formal.skin.width(label.name,variant) } else { 42. };
         let pad=-length*0.5;
         let area=[x+pad-4.,y-10.,length+10.,22.];
         if x<8. || x>w-8. || y<55. || y>h-51. || area[0]<4. || area[0]+area[2]>w-3.
@@ -233,6 +248,11 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         occupied.push(area);
         let selected=Some(label.object)==ui.selected;
         let top=y-13.;
+        if !readable {
+            ui.formal.ink_block(&mut map,[x+pad,y-3.,length,10.]);
+            hits.push(Hit{area,action:Action::Select(label.object)});
+            continue;
+        }
         for [dx,dy] in [[-1.,0.],[1.,0.],[0.,-1.],[0.,1.]] {
             ui.formal.skin.text(&mut marker_type,label.name,variant,[x+pad+dx,top+dy],length+1.,[16,28,30,230]);
         }
@@ -257,18 +277,25 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         };
         skin.text(&mut hud_type,label,0,[x+15.,y+9.],230.,GOLD);
         ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+width-40.,y+9.,27.,25.],"×",Some(Action::Close),false);
+        if can_read_object(world, ui.formal.written_world, object) {
         skin.text(&mut hud_type,object_name(world,skin,object),1,[x+15.,y+35.],270.,LIGHT);
         for (i,line) in [&id,&desc,&extra].into_iter().enumerate() {
             skin.text(&mut hud_type,line,0,[x+15.,y+67.+i as f32*26.],270.,SUBTLE);
+        }
+        } else {
+            ui.formal.ink_block(&mut panels,[x+15.,y+42.,123.,12.]);
+            ui.formal.ink_block(&mut panels,[x+15.,y+72.,217.,12.]);
         }
         ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,y+174.,123.,28.],skin.choose("定位地点","Focus location"),Some(Action::Locate),false);
         ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+147.,y+174.,135.,28.],skin.choose("完整资料","Full record"),Some(Action::Details),false);
     }
     if ui.details {
         if let Some(object)=ui.selected {
+            let readable = can_read_object(world, ui.formal.written_world, object);
             let x=w/2.-252.;let y=105.;
             panel(&mut panels,x,y,504.,294.);
-            skin.text(&mut hud_type,object_name(world,skin,object),1,[x+22.,y+16.],420.,LIGHT);
+            if readable { skin.text(&mut hud_type,object_name(world,skin,object),1,[x+22.,y+16.],420.,LIGHT); }
+            else { ui.formal.ink_block(&mut panels,[x+22.,y+23.,174.,11.]); }
             ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+454.,y+15.,29.,27.],"×",Some(Action::Details),false);
             let lines=match object {
                 Object::Polity(_)=>Vec::new(),
@@ -283,7 +310,8 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
                 }
             };
             for (i,line) in lines.iter().enumerate(){
-                skin.text(&mut hud_type,line,0,[x+22.,y+75.+i as f32*28.],460.,LIGHT);
+                if readable { skin.text(&mut hud_type,line,0,[x+22.,y+75.+i as f32*28.],460.,LIGHT); }
+                else { ui.formal.ink_block(&mut panels,[x+22.,y+82.+i as f32*28.,195.,11.]); }
             }
         }
     }
@@ -294,7 +322,8 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         skin.text(&mut hud_type,&format!("{query}_"),1,[x+15.,94.],420.,LIGHT);
         for (i,&object) in ui.search_results.iter().enumerate() {
             ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,132.+i as f32*30.,420.,27.],
-                object_name(world,skin,object),Some(Action::Select(object)),i==0);
+                if readable { object_name(world,skin,object) } else { "" },Some(Action::Select(object)),i==0);
+            if !readable { ui.formal.ink_block(&mut panels,[x+25.,140.+i as f32*30.,96.,11.]); }
         }
     }
     let mut debug_right=145.;
@@ -304,11 +333,13 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         let x=w-width-17.;
         let lines=ui.econ_legend.len();
         panel(&mut panels,x,121.,width,51.+lines as f32*20.);
-        text.text(a,0,ui.econ_label,[x+12.,130.],LIGHT);
+        if readable { text.text(a,0,ui.econ_label,[x+12.,130.],LIGHT); }
+        else { ui.formal.ink_block(&mut panels,[x+12.,136.,118.,11.]); }
         for (i,(value,color)) in ui.econ_legend.iter().enumerate() {
             let y=158.+i as f32*20.;
             panels.rect(x+12.,y+6.,13.,10.,*color);
-            text.text(a,0,value,[x+34.,y],SUBTLE);
+            if readable { text.text(a,0,value,[x+34.,y],SUBTLE); }
+            else { ui.formal.ink_block(&mut panels,[x+34.,y+6.,86.,11.]); }
         }
         debug_right=182.+lines as f32*20.;
     }
@@ -319,9 +350,11 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x,y-35.,width,25.],label,Some(action),false);
             x+=width+4.;
         }
-        skin.text(&mut hud_type,ui.mouse,0,[w-233.,h-49.],230.,SUBTLE);
+        if readable {
+            skin.text(&mut hud_type,ui.mouse,0,[w-233.,h-49.],230.,SUBTLE);
+        }
     }
-    if !ui.formal.hud.messages && ui.country.is_none() && ui.search.is_none() && !ui.details {
+    if readable && !ui.formal.hud.messages && ui.country.is_none() && ui.search.is_none() && !ui.details {
         let left=match ui.selected{Some(Object::Polity(_))=>359.,Some(_)=>293.,None=>145.};
         ui.formal.diagnostics(&mut panels,&mut hud_type,left,debug_right);
     }

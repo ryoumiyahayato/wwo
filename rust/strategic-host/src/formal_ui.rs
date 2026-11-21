@@ -1,6 +1,7 @@
 use crate::{overlay::Mesh, ui::{Action,CountryAction,CountryPanel,CountryView,Hit,Mode}, camera::Camera,
     world::{Admin,Polity,World}};
 use serde::Deserialize;
+use wwo_map_lab::formal_bootstrap::PersonalActivity;
 use std::{collections::HashMap, fs::File, io, path::Path};
 
 #[derive(Deserialize)]
@@ -11,6 +12,8 @@ pub struct Session {
     #[serde(default)] pub total_minutes:u64,
     #[serde(default)] pub rust_clock: Option<RustClock>,
     pub finance:Finance, pub technology:Technology, pub messages:Vec<Message>,
+    #[serde(default = "written_access_default")] pub written_access: bool,
+    #[serde(default)] pub activities: Option<Activities>,
     pub slots:Vec<Slot>, pub slot_open:bool, pub slot_error:String,
     #[serde(default)] pub market:Option<crate::market_ui::Market>,
     #[serde(default)] pub property:Vec<crate::market_ui::Holding>,
@@ -21,6 +24,18 @@ pub struct Session {
     #[serde(default)] pub departure:String,
     #[serde(default)] pub saving:bool,
 }
+fn written_access_default() -> bool { true }
+
+#[derive(Deserialize)]
+pub struct Activities {
+    language: wwo_character_core::Language,
+    scheduled: Option<PersonalActivity>,
+    pub lesson: bool,
+    pub rest: bool,
+    pub read_notice: bool,
+    oral_notice: Option<String>,
+}
+
 #[derive(Deserialize)]
 pub struct RustClock {
     pub world: String,
@@ -42,7 +57,14 @@ struct Milestone {title:String,kind:String,effect:String,date:String}
 #[derive(Deserialize)]
 pub struct Message {source:String,received_at:String,text:String,pub action:String}
 #[derive(Clone, Deserialize, serde::Serialize)]
-pub struct Slot {pub slot:u8,pub name:String,pub empty:bool,pub can_read:bool,pub description:String}
+pub struct Slot {
+    pub slot: u8,
+    pub name: String,
+    pub empty: bool,
+    #[serde(default = "written_access_default")]
+    pub can_read: bool,
+    pub description: String,
+}
 #[derive(Deserialize)]
 pub struct Relations {
     pub selected:String,pub rows:Vec<Relation>,
@@ -74,6 +96,10 @@ impl Session {
             && (self.coordinates.is_empty() || (self.coordinates.len()==2 && self.coordinates[0].abs()<=180. && self.coordinates[1].abs()<=90.))
     }
 }
+pub(crate) const HUD_TYPE_WIDTH: u32 = 2048;
+pub(crate) const HUD_TYPE_BASE_HEIGHT: u32 = 2048;
+pub(crate) const HUD_TYPE_HEIGHT: u32 = HUD_TYPE_BASE_HEIGHT + 112;
+
 pub struct Skin {
     art:HashMap<String,[f32;4]>,
     glyphs:HashMap<String,[f32;5]>,
@@ -109,8 +135,12 @@ impl Skin {
         let mut fragments:Vec<_>=messages.iter().filter(|(key,_)|key.trim().chars().count()>=2&&!key.contains('%'))
             .map(|(key,value)|(key.clone(),value.clone())).collect();
         fragments.sort_by(|a,b|b.0.len().cmp(&a.0.len()).then(a.0.cmp(&b.0)));
+        let mut glyphs: HashMap<String, [f32; 5]> = serde_json::from_reader(File::open(root.join("hud-type.json"))?)?;
+        let supplemental: HashMap<String, [f32; 5]> = serde_json::from_str(
+            include_str!("../../../data/character/hud-glyphs.json"))?;
+        for (key, glyph) in supplemental { glyphs.entry(key).or_insert(glyph); }
         Ok(Self{art:serde_json::from_reader(File::open(root.join("hud-art.json"))?)?,
-            glyphs:serde_json::from_reader(File::open(root.join("hud-type.json"))?)?,
+            glyphs,
             map_symbols:match File::open(root.join("map-symbols.json")){
                 Ok(file)=>serde_json::from_reader(file)?,
                 Err(error) if error.kind()==io::ErrorKind::NotFound=>HashMap::new(),
@@ -178,7 +208,8 @@ impl Skin {
         for ch in self.localized(s).chars() {
             let [u,v,w,h,advance]=self.glyph(font,ch);
             if x+advance>end {break;}
-            mesh.image([x-2.,y,w,h],[u/2048.,v/2048.,(u+w)/2048.,(v+h)/2048.],color);
+            mesh.image([x-2.,y,w,h],[u / HUD_TYPE_WIDTH as f32, v / HUD_TYPE_HEIGHT as f32,
+                (u+w) / HUD_TYPE_WIDTH as f32, (v+h) / HUD_TYPE_HEIGHT as f32],color);
             x+=advance;
         }
     }
@@ -204,7 +235,8 @@ impl Skin {
             if count < rest.len() && word_end > 0 { count = word_end; }
             let mut x = left;
             for (_,[u,v,w,h,advance]) in &rest[..count] {
-                mesh.image([x-2.*scale,y,w*scale,h*scale],[u/2048.,v/2048.,(u+w)/2048.,(v+h)/2048.],color);
+                mesh.image([x-2.*scale,y,w*scale,h*scale],[u / HUD_TYPE_WIDTH as f32, v / HUD_TYPE_HEIGHT as f32,
+                    (u+w) / HUD_TYPE_WIDTH as f32, (v+h) / HUD_TYPE_HEIGHT as f32],color);
                 x += advance * scale;
             }
             rest = &rest[count..];
@@ -243,6 +275,7 @@ pub enum Command {
     PortraitAction(usize,Page),Relation(Option<usize>),RelationDrawer(&'static str),
     WorkAction(usize,usize),WorkConfirm(bool),
     Consume(usize),
+    PersonalActivity(PersonalActivity),
     Lobby(crate::lobby::Command),Departure(&'static str),
 }
 pub const BRASS:[u8;4]=[167,137,81,255];
@@ -301,10 +334,19 @@ pub struct Display<'a> {
     pub source:&'a str,pub feedback:&'a str,pub labels:bool,pub modern_terrain:bool,
     pub surveyed_terrain:bool,
     pub country:Option<(&'a World,CountryPanel,Option<u8>)>,
+    pub written_world: Option<&'a wwo_map_lab::formal_bootstrap::InitialWorld>,
     pub managed:bool,
     pub debug:Option<&'a crate::Diagnostics>,
 }
 impl Display<'_> {
+    pub(crate) fn can_read_world(&self) -> bool {
+        self.session.is_none_or(|session| session.written_access)
+    }
+
+    pub(crate) fn ink_block(&self, mesh: &mut Mesh, [x,y,w,h]: [f32;4]) {
+        mesh.rect(x,y,w,h,[0,0,0,255]);
+    }
+
     fn history_rect(&self)->[f32;4] {
         let w=self.size[0] as f32;
         let left=148.;let right=(w-clock_radius(w)-36.).max(left+80.);
@@ -380,6 +422,7 @@ impl Display<'_> {
         circle(clock,pivot,gear_radius*0.26);
         for angle in [105.,135.,165.] {circle(clock,radial(angle,gear_radius*0.51,0.),gear_radius*0.055);}
         }
+        if self.can_read_world() {
         if let Some(session)=self.session {
             let x=w-72.*factor;
             let time=format!("{:02}:{:02}",session.hour,session.minute);
@@ -392,6 +435,11 @@ impl Display<'_> {
                     self.center(text,&value,font,[x+offset[0],y+offset[1]],radius,[5,8,8,230]);
                 }
                 self.center(text,&value,font,[x,y],radius,ivory);
+            }
+        }
+        } else {
+            for (offset, baseline, width) in [(26., 48., 50.), (23., 72., 45.), (21., 96., 42.)] {
+                self.ink_block(clock,[w-(72.+offset)*factor,(baseline-17.)*factor,width*factor,13.*factor]);
             }
         }
         Self::hit(hits,[w-gear_radius,0.,gear_radius,gear_radius],Command::Menu(Menu::System));
@@ -458,7 +506,9 @@ impl Display<'_> {
         panels.line([start,h-14.],[start+length,h-14.],1.,BRASS);
         for x in [start,start+length]{panels.line([x,h-18.],[x,h-11.],1.,BRASS);}
         let scale=if metres>=1000.{format!("{} km",metres/1000.)}else{format!("{metres} m")};
-        visual.text(text,&scale,0,[start+length+8.,h-25.],75.,MUTED);
+        if self.can_read_world() {
+            visual.text(text,&scale,0,[start+length+8.,h-25.],75.,MUTED);
+        } else { self.ink_block(panels,[start+length+8.,h-19.,40.,8.]); }
         if self.modern_terrain && self.hud.page==Page::Map {
             let label=if self.surveyed_terrain {
                 visual.choose("历史测绘与现代地表参照","Historical survey and modern terrain reference")
@@ -470,7 +520,7 @@ impl Display<'_> {
             panel(panels,[x,h-109.,width,23.],[8,14,21,214]);
             visual.text(text,label,0,[x+9.,h-108.],width-14.,MUTED);
         }
-        if !self.feedback.is_empty() && self.hud.menu==Menu::None {
+        if !self.feedback.is_empty() && self.hud.menu==Menu::None && self.can_read_world() {
             let width=(w-64.).min(680.);let x=(w-width)*0.5;
             panel(panels,[x,59.,width,32.],[8,13,20,249]);
             visual.text(text,self.feedback,0,[x+12.,66.],width-24.,IVORY);
@@ -498,6 +548,12 @@ impl Display<'_> {
                 self.row(panels,text,hits,[w-280.,h-114.,87.,25.],"结束训练",Some(Action::Hud(Command::Training("end"))),false);
             }
         }
+        if !self.can_read_world() && !matches!(self.hud.page, Page::Map | Page::Character) {
+            if let Some(area) = self.page_rect() {
+                self.folio(panels,art,text,hits,area,visual.choose("书面资料","Written record"));
+                self.mask_record(panels,text,area);
+            }
+        } else {
         match self.hud.page {
             Page::Map=>(),
             Page::Finance=>self.finance(panels,art,text,hits),
@@ -507,8 +563,17 @@ impl Display<'_> {
             Page::Relations=>self.relations(panels,text,hits),
             Page::Property=>self.property(panels,art,text,hits),
         }
+        }
         if let Some((world,country,flag))=self.country {
-            self.country(world,country,flag,panels,art,text,flags,hits);
+            if crate::ui::can_read_object(world, self.written_world, crate::ui::Object::Polity(country.polity)) {
+                self.country(world,country,flag,panels,art,text,flags,hits);
+            } else {
+                let [x,y,w,h] = country.rect(self.size);
+                panel(panels,[x,y,w,h],FACE);
+                if let Some(slot) = flag { flags.flag([x+18.,y+14.,44.,30.],slot); }
+                self.row(panels,text,hits,[x+w-45.,y+9.,28.,26.],"×",Some(Action::Country(CountryAction::Close)),false);
+                self.mask_record(panels,text,[x,y,w,h]);
+            }
         }
         if self.hud.messages {self.messages(panels,text,hits,center);}
         self.menu(panels,text,hits,radius);
@@ -580,7 +645,10 @@ impl Display<'_> {
                 if !summary {
                     rows.push(format!("{} · {} — {}",say("资料有效期","Record dates"),p.from_date,p.to_date));
                     if let Some(controller)=world.polities.iter().find(|state|state.id==p.controller_id) {
-                        rows.push(format!("{} · {}",say("历史管辖","Historical authority"),skin.country_name(controller)));
+                        let text = if self.written_world.is_none_or(|world| world.can_read_polity_record(&controller.id)) {
+                            skin.country_name(controller)
+                        } else { "■■■■" };
+                        rows.push(format!("{} · {text}",say("历史管辖","Historical authority")));
                     }
                     rows.push(format!("{} · {}",say("资料来源","Source"),if p.display_only && !p.authority_id.is_empty(){&p.authority_id}else{"WWO / CShapes 2.0"}));
                     if p.authority_note.is_empty(){
@@ -650,6 +718,14 @@ impl Display<'_> {
             }
         }
     }
+    fn mask_record(&self, m: &mut Mesh, t: &mut Mesh, [x,y,w,h]: [f32;4]) {
+        self.skin.text(t,self.skin.choose("无法阅读此语言。","You cannot read this language."),
+            0,[x+22.,y+58.],w-44.,MUTED);
+        for index in 0..((h-104.)/29.).clamp(0.,4.) as usize {
+            self.ink_block(m,[x+22.,y+90.+29.*index as f32,(w-44.)*(0.8-0.11*index as f32),13.]);
+        }
+    }
+
     fn center(&self,t:&mut Mesh,label:&str,font:usize,[x,y]:[f32;2],limit:f32,color:[u8;4]){
         self.skin.text(t,label,font,[x-self.skin.width(label,font).min(limit)*0.5,y],limit,color);
     }
@@ -788,6 +864,11 @@ impl Display<'_> {
         let say=|zh,en|skin.choose(zh,en);
         self.folio(m,art,t,hits,[x,y,w,h],say("人物资料","Character record"));
         let Some(character) = self.session.and_then(|s| s.character.as_ref()) else { return; };
+        if !self.can_read_world() {
+            self.mask_record(m,t,[x,y,w,157.]);
+            self.personal_activities(m,t,hits,[x,y+149.,w,h-149.]);
+            return;
+        }
         let profile = &character.profile;
         let social = &profile.social;
         let caption=if skin.english(){
@@ -802,19 +883,24 @@ impl Display<'_> {
             format!("{} · {}",say("工作","Work"),social.occupation.as_deref().unwrap_or(absent)),
             social.economic_situation.as_deref().unwrap_or(say("现金资料不可用","Cash record unavailable")).into(),
             format!("{} · {}",say("组织","Organisations"),social.relationships.as_deref().filter(|r|!r.is_empty()).map_or_else(||absent.into(),|r|r.join("、"))),
-            format!("{} · {}",say("职务","Positions"),social.positions.as_deref().filter(|r|!r.is_empty()).map_or_else(||absent.into(),|r|r.join("、"))),
-            format!("{} · {}",say("经历","History"),if profile.history.is_empty(){absent.into()}else{profile.history.join("、")}),
+            format!("{} · {}",social.family_background.as_deref().unwrap_or(absent),social.education.as_deref().unwrap_or(absent)),
         ];
         for (index, entry) in entries.iter().enumerate() {
-            self.skin.text(t, entry, 0, [x+22.,y+61.+index as f32*28.], w-44., IVORY);
+            skin.text(t, entry, 0, [x+22.,y+61.+index as f32*22.], w-44., IVORY);
         }
+        let history = if profile.history.is_empty() { absent.to_owned() } else { profile.history.join("、") };
+        skin.paragraph(t, &format!("{} · {history}", say("经历","History")),
+            0, [x+22.,y+193.,w-44.,(h-333.).clamp(24.,85.)], IVORY, 1.);
         let conditions = profile.traits.iter().filter(|value| !profile.history.contains(value)).map(String::as_str).collect::<Vec<_>>();
+        let traits_y = y + (h - 140.).clamp(221., 282.);
         if !conditions.is_empty() {
-            self.skin.text(t,&conditions.join("、"),0,[x+22.,y+254.],w-44.,IVORY);
+            skin.text(t,&conditions.join("、"),0,[x+22.,traits_y],w-44.,IVORY);
         }
-        if let Some(assessment) = &character.assessment {
+        if self.session.is_some_and(|session| session.activities.is_some()) {
+            self.personal_activities(m,t,hits,[x,y+h-151.,w,151.]);
+        } else if let Some(assessment) = &character.assessment {
             for (index, line) in assessment.explanation.iter().skip(1).take(2).enumerate() {
-                self.skin.text(t,line,0,[x+22.,y+279.+index as f32*24.],w-44.,MUTED);
+                skin.text(t,line,0,[x+22.,traits_y+25.+index as f32*22.],w-44.,MUTED);
             }
         }
         for (index, (label, action)) in [
@@ -825,6 +911,32 @@ impl Display<'_> {
             self.row(m,t,hits,[x+22.+index as f32*166.,y+h-45.,155.,26.],label,Some(Action::Hud(action)),false);
         }
     }
+    fn personal_activities(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,[x,y,w,h]:[f32;4]) {
+        let Some(activities) = self.session.and_then(|session| session.activities.as_ref()) else { return; };
+        let say = |zh,en| self.skin.choose(zh,en);
+        let rows = [
+            (PersonalActivity::Lesson, say("学习识字", "Attend reading lesson"), activities.lesson),
+            (PersonalActivity::ReadNotice, say("请教师代读", "Ask teacher to read the notice"), activities.read_notice),
+            (PersonalActivity::Rest, say("安排休息", "Schedule rest"), activities.rest),
+        ];
+        let label = match activities.scheduled {
+            Some(PersonalActivity::Lesson) => say("已安排课程，推进时间以完成。","Lesson scheduled. Advance time to attend.").to_owned(),
+            Some(PersonalActivity::ReadNotice) => say("已约教师，推进时间以听取公告。","Teacher arranged. Advance time to hear the notice.").to_owned(),
+            Some(PersonalActivity::Rest) => say("已安排休息。已食用的食物有助于恢复。","Rest scheduled. Food already eaten aids recovery.").to_owned(),
+            None => activities.oral_notice.clone().unwrap_or_else(|| {
+                if self.can_read_world() { say("休息与进食有助于恢复。","Rest and food aid recovery.").into() }
+                else { format!("{} · {}", say("本地语言","Local language"), activities.language.label()) }
+            }),
+        };
+        let offset = if self.can_read_world() { 48. } else { 0. };
+        self.skin.text(t,&label,0,[x+22.,y+h-86.-offset],w-44.,IVORY);
+        let button_width = (w-56.)/3.;
+        for (index,(kind,label,enabled)) in rows.into_iter().enumerate() {
+            self.row(m,t,hits,[x+22.+index as f32*(button_width+6.),y+h-52.-offset,button_width,29.],
+                label,enabled.then_some(Action::Hud(Command::PersonalActivity(kind))),activities.scheduled==Some(kind));
+        }
+    }
+
     fn finance(&self,m:&mut Mesh,art:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>){
         let Some([x,y,w,h])=self.page_rect() else{return;};
         self.folio(m,art,t,hits,[x,y,w,h],"财务");
@@ -911,6 +1023,10 @@ impl Display<'_> {
         self.skin.text(t,"当前会话 · 最近记录",0,[x+14.,y+43.],width-54.,MUTED);
         m.rect(x+14.,y+63.,width-47.,1.5,BRASS);
         let Some(s)=self.session else {self.skin.text(t,"正式世界未连接",0,[x+14.,y+69.],width-53.,MUTED);return;};
+        if !self.can_read_world() {
+            self.mask_record(m,t,[x,y+14.,width,height-14.]);
+            return;
+        }
         if s.messages.is_empty(){self.skin.text(t,"暂无消息。",0,[x+14.,y+69.],width-53.,MUTED);}
         let mut top=y+70.;
         for (i,msg) in s.messages.iter().enumerate().skip(self.hud.message_offset){
@@ -972,10 +1088,14 @@ impl Display<'_> {
                     for row in session.slots.iter().filter(|r|menu==Menu::Load||r.slot>0){
                         let enabled=!self.hud.waiting_slot&&(menu==Menu::Save||row.can_read);
                         self.row(m,t,hits,[x+14.,top,width-28.,28.],&row.name,enabled.then_some(Action::Hud(Command::Slot(row.slot))),false);
-                        self.skin.text(t,&row.description,0,[x+18.,top+27.],width-36.,MUTED);
+                        if self.can_read_world() || row.empty {
+                            self.skin.text(t,&row.description,0,[x+18.,top+27.],width-36.,MUTED);
+                        } else { self.ink_block(m,[x+18.,top+31.,88.,11.]); }
                         top+=55.;
                     }
-                    self.skin.text(t,&session.slot_error,0,[x+14.,y+height-50.],width-140.,IVORY);
+                    let error = if self.can_read_world() || session.slot_error.is_empty() { &session.slot_error }
+                        else { "存档操作失败" };
+                    self.skin.text(t,error,0,[x+14.,y+height-50.],width-140.,IVORY);
                 }else{self.skin.text(t,"正式世界未连接",0,[x+14.,y+46.],width-28.,MUTED);}
                 self.row(m,t,hits,[x+width-100.,y+height-42.,85.,27.],"返回",action(Command::Menu(Menu::None)),false);
             },
@@ -988,7 +1108,10 @@ impl Display<'_> {
                 for (i,(label,verb)) in [("取消","departure:cancel"),("不保存","departure:discard"),("保存并离开","departure:save")].into_iter().enumerate(){
                     self.row(m,t,hits,[x+14.+i as f32*137.,y+67.,128.,29.],label,(!pending).then_some(Action::Hud(Command::Departure(verb))),false);
                 }
-                if let Some(s)=self.session{self.skin.text(t,&s.slot_error,0,[x+16.,y+107.],width-32.,IVORY);}
+                if let Some(s)=self.session {
+                    let error = if self.can_read_world() || s.slot_error.is_empty() { &s.slot_error } else { "存档操作失败" };
+                    self.skin.text(t,error,0,[x+16.,y+107.],width-32.,IVORY);
+                }
             },
             Menu::None=>(),
         }

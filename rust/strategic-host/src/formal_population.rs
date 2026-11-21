@@ -6,6 +6,7 @@ pub(crate) const MAX_POPULATION: u64 = 9_007_199_254_740_991;
 
 /// Statistical residence and named population claims. Map control and physical
 /// travel have separate owners and do not change these totals.
+#[derive(Clone)]
 pub struct Population {
     totals: BTreeMap<String, u64>,
     named: BTreeMap<String, String>,
@@ -136,6 +137,13 @@ impl Population {
         }
         self.named.insert(person.to_owned(), unit.to_owned());
         *self.named_counts.entry(unit.to_owned()).or_default() += 1;
+        Ok(())
+    }
+
+    pub(crate) fn record_death(&mut self, person: &str) -> io::Result<()> {
+        let unit = self.named.remove(person).ok_or_else(|| invalid("deceased person has no active population claim"))?;
+        *self.totals.get_mut(&unit).expect("named population unit") -= 1;
+        *self.named_counts.get_mut(&unit).expect("named population count") -= 1;
         Ok(())
     }
 

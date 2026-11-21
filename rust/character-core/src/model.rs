@@ -106,6 +106,8 @@ pub struct PersonRecord {
     pub experiences: BTreeMap<String, Experience>,
     /// Consecutive event sequence prevents duplicate injury/training application.
     pub event_sequence: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub player: Option<crate::PlayerDevelopment>,
 }
 impl PersonRecord {
     pub fn age_days(&self, day: u32) -> u32 {
@@ -118,6 +120,9 @@ impl PersonRecord {
             "invalid person record",
         )?;
         self.health.validate(day, self.registered_day)?;
+        if let Some(player) = &self.player {
+            player.validate(self.identity.birth_day, day)?;
+        }
         for (id, experience) in &self.experiences {
             experience.validate()?;
             require(

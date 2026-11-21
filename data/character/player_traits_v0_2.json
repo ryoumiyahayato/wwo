@@ -1,0 +1,749 @@
+{
+  "schema": "wwo_player_traits_design_v0_2",
+  "status": "REVISED_DESIGN_ONLY_NOT_IMPLEMENTED",
+  "world_start": "1900-01-01",
+  "scope": "SANDBOX_PLAYER_ONLY",
+  "scenario_npc_exception": "explicit_scenario_only",
+  "numeric_convention": {
+    "backend_scale": 1000,
+    "ui_shows_values": false,
+    "ordinary_baseline": 500,
+    "creation_suggested_range": [
+      300,
+      700
+    ],
+    "advancement_range": [
+      0,
+      1000
+    ],
+    "absolute_probability_bounds_pp": [
+      0,
+      100
+    ],
+    "notes": "人物属性后台以1000计；创建界面以低/普通/较强/出众文字展示；数值为初版平衡假设。"
+  },
+  "attributes": [
+    {
+      "id": "wu_xing",
+      "label_zh": "悟性",
+      "domain_zh": "学习",
+      "baseline": 500,
+      "modifier": {
+        "trigger": "learning.any",
+        "operation": "relative_rate_per_10",
+        "value": 600
+      },
+      "description_zh": "学习进度每高于基准10点提高6%"
+    },
+    {
+      "id": "pan_duan",
+      "label_zh": "判断",
+      "domain_zh": "辨识",
+      "baseline": 500,
+      "modifier": {
+        "trigger": "information.assessment",
+        "operation": "percentage_points_tenths_per_10",
+        "value": 35
+      },
+      "description_zh": "证据判断相关判定每10点提高3.5个百分点"
+    },
+    {
+      "id": "mou_lue",
+      "label_zh": "谋略",
+      "domain_zh": "筹划",
+      "baseline": 500,
+      "modifier": {
+        "trigger": "plan.resolution",
+        "operation": "percentage_points_tenths_per_10",
+        "value": 35
+      },
+      "description_zh": "计划执行相关判定每10点提高3.5个百分点"
+    },
+    {
+      "id": "kou_cai",
+      "label_zh": "口才",
+      "domain_zh": "沟通",
+      "baseline": 500,
+      "modifier": {
+        "trigger": "social.persuasion",
+        "operation": "percentage_points_tenths_per_10",
+        "value": 35
+      },
+      "description_zh": "说服谈判相关判定每10点提高3.5个百分点"
+    },
+    {
+      "id": "qin_he",
+      "label_zh": "亲和",
+      "domain_zh": "关系",
+      "baseline": 500,
+      "modifier": {
+        "trigger": "relation.gain",
+        "operation": "relative_rate_per_10",
+        "value": 800
+      },
+      "description_zh": "正向关系积累每10点提高8%"
+    },
+    {
+      "id": "tong_yu",
+      "label_zh": "统御",
+      "domain_zh": "组织",
+      "baseline": 500,
+      "modifier": {
+        "trigger": "organization.coordination",
+        "operation": "percentage_points_tenths_per_10",
+        "value": 35
+      },
+      "description_zh": "协同行动相关判定每10点提高3.5个百分点"
+    },
+    {
+      "id": "yi_zhi",
+      "label_zh": "意志",
+      "domain_zh": "抗压",
+      "baseline": 500,
+      "modifier": {
+        "trigger": "stress.interruption",
+        "operation": "percentage_points_tenths_per_10",
+        "value": 35
+      },
+      "description_zh": "抵抗行动中断的判定每10点提高3.5个百分点"
+    },
+    {
+      "id": "ti_zhi",
+      "label_zh": "体质",
+      "domain_zh": "身体",
+      "baseline": 500,
+      "modifier": {
+        "trigger": "injury.permanent_loss",
+        "operation": "relative_loss_per_10",
+        "value": -1000
+      },
+      "description_zh": "同等损伤造成的永久健康上限损失每10点相对减少10%"
+    }
+  ],
+  "starting_ages": [
+    18,
+    20,
+    25
+  ],
+  "backgrounds": [
+    {
+      "id": "low_income",
+      "label_zh": "贫寒",
+      "basis": "GENERATED_SIMULATION_ASSUMPTION",
+      "requires": [
+        "local_starting_asset_policy",
+        "ledger_initial_endowment"
+      ],
+      "effect": "实际现金、家庭资产及引荐，由正式世界记录，不能以文本直接加成功率。",
+      "status": "NOT_WIRED"
+    },
+    {
+      "id": "ordinary",
+      "label_zh": "平民",
+      "basis": "GENERATED_SIMULATION_ASSUMPTION",
+      "requires": [
+        "local_starting_asset_policy",
+        "ledger_initial_endowment"
+      ],
+      "effect": "开局默认参照组；不代表已经核实的1900年家庭统计。",
+      "status": "NOT_WIRED"
+    },
+    {
+      "id": "affluent",
+      "label_zh": "富裕",
+      "basis": "GENERATED_SIMULATION_ASSUMPTION",
+      "requires": [
+        "local_starting_asset_policy",
+        "ledger_initial_endowment",
+        "family_asset_records"
+      ],
+      "effect": "真实持有现金、资产或可调用家庭资源，不给抽象财富加成。",
+      "status": "NOT_WIRED"
+    }
+  ],
+  "initial_profile_example": {
+    "opening": "country_fra",
+    "age": 20,
+    "background": "ordinary",
+    "attributes": {
+      "wu_xing": 600,
+      "pan_duan": 600,
+      "mou_lue": 500,
+      "kou_cai": 600,
+      "qin_he": 500,
+      "tong_yu": 500,
+      "yi_zhi": 500,
+      "ti_zhi": 600
+    },
+    "traits": [
+      {
+        "id": "quick_study",
+        "source": "creation:innate:quick_study"
+      },
+      {
+        "id": "robust",
+        "source": "creation:innate:robust"
+      },
+      {
+        "id": "literacy",
+        "source": "creation:education:literacy"
+      }
+    ],
+    "economic_state": "REQUIRES_AUTHORITATIVE_LEDGER; never created by this data file"
+  },
+  "rules": {
+    "stacking": "ALL_DISTINCT_APPLICABLE_EFFECTS",
+    "duplicate_source": "REJECT",
+    "single_trait_instance": "UNIQUE_ID",
+    "cross_trait_stacking": "ALLOW",
+    "incompatible_trait_groups": "MUTUALLY_EXCLUSIVE_ONLY",
+    "background_is_not_buff": true,
+    "death_if_current_zero": true,
+    "death_if_recovery_ceiling_zero": true,
+    "death_may_occur_before_zero": true,
+    "note": "事件必须来自正式世界；未接入事件不得在正式创建页伪装为可用特质。"
+  },
+  "traits": [
+    {
+      "id": "quick_study",
+      "label_zh": "敏学",
+      "kind": "天赋",
+      "polarity": "正面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": "learning_tempo",
+      "description_zh": "更容易掌握新知识，学习所得增加15%。",
+      "effects": [
+        {
+          "trigger": "learning.any",
+          "operation": "mul_bps",
+          "value": 11500
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "slow_study",
+      "label_zh": "迟学",
+      "kind": "天赋",
+      "polarity": "负面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": "learning_tempo",
+      "description_zh": "掌握新知识较慢，学习所得减少10%。",
+      "effects": [
+        {
+          "trigger": "learning.any",
+          "operation": "mul_bps",
+          "value": 9000
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "curious",
+      "label_zh": "好学",
+      "kind": "性情",
+      "polarity": "正面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "主动学习时额外获得10%进度。",
+      "effects": [
+        {
+          "trigger": "learning.study",
+          "operation": "mul_bps",
+          "value": 11000
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "focused",
+      "label_zh": "专注",
+      "kind": "性情",
+      "polarity": "正面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "完整完成学习安排时进度额外增加12%。",
+      "effects": [
+        {
+          "trigger": "learning.study",
+          "operation": "mul_bps",
+          "value": 11200
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "hardworking",
+      "label_zh": "勤奋",
+      "kind": "性情",
+      "polarity": "正面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": "work_temperament",
+      "description_zh": "完成真实工作后实践所得增加10%。",
+      "effects": [
+        {
+          "trigger": "learning.work",
+          "operation": "mul_bps",
+          "value": 11000
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "careless_work",
+      "label_zh": "散漫",
+      "kind": "性情",
+      "polarity": "负面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": "work_temperament",
+      "description_zh": "完成真实工作后实践所得减少10%。",
+      "effects": [
+        {
+          "trigger": "learning.work",
+          "operation": "mul_bps",
+          "value": 9000
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "robust",
+      "label_zh": "强健",
+      "kind": "体质",
+      "polarity": "正面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": "body_type",
+      "description_zh": "同等伤势的永久健康上限损失降低15%。",
+      "effects": [
+        {
+          "trigger": "injury.permanent_loss",
+          "operation": "mul_bps",
+          "value": 8500
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "frail",
+      "label_zh": "体弱",
+      "kind": "体质",
+      "polarity": "负面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": "body_type",
+      "description_zh": "同等伤势的永久健康上限损失增加20%。",
+      "effects": [
+        {
+          "trigger": "injury.permanent_loss",
+          "operation": "mul_bps",
+          "value": 12000
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "resilient",
+      "label_zh": "坚韧",
+      "kind": "体质",
+      "polarity": "正面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": "recovery_type",
+      "description_zh": "具备休息营养等条件时恢复量增加10%。",
+      "effects": [
+        {
+          "trigger": "health.daily_recovery",
+          "operation": "mul_bps",
+          "value": 11000
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "slow_healing",
+      "label_zh": "慢愈",
+      "kind": "体质",
+      "polarity": "负面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": "recovery_type",
+      "description_zh": "具备恢复条件时恢复量减少15%。",
+      "effects": [
+        {
+          "trigger": "health.daily_recovery",
+          "operation": "mul_bps",
+          "value": 8500
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "literacy",
+      "label_zh": "识字",
+      "kind": "经历",
+      "polarity": "中性",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "按具体语言掌握阅读；不识字时遮蔽世界内所有未经口述或替代感知获得的书面信息，包括在游戏内的时间和日期文字；系统菜单始终可用。",
+      "effects": [
+        {
+          "trigger": "information.reading",
+          "operation": "grant_flag",
+          "value": 1
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": true,
+      "available_in_ui": false,
+      "language_specific": true
+    },
+    {
+      "id": "apprentice",
+      "label_zh": "学徒",
+      "kind": "经历",
+      "polarity": "正面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "拥有真实学徒履历时，相关岗位实践所得额外增加10%。",
+      "effects": [
+        {
+          "trigger": "learning.work",
+          "operation": "mul_bps",
+          "value": 11000
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": true,
+      "available_in_ui": false
+    },
+    {
+      "id": "old_injury",
+      "label_zh": "旧伤",
+      "kind": "伤病",
+      "polarity": "负面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "开局健康上限降低2/100，并保留既往损伤来源记录。",
+      "effects": [
+        {
+          "trigger": "health.creation_ceiling",
+          "operation": "add_scale",
+          "value": -20
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": true,
+      "available_in_ui": false
+    },
+    {
+      "id": "chronic_illness",
+      "label_zh": "久病",
+      "kind": "伤病",
+      "polarity": "负面",
+      "phase": 1,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "生理恢复效率下降10%，不与当前疾病状态等同。",
+      "effects": [
+        {
+          "trigger": "health.daily_recovery",
+          "operation": "mul_bps",
+          "value": 9000
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": true,
+      "available_in_ui": false
+    },
+    {
+      "id": "eloquent",
+      "label_zh": "善辩",
+      "kind": "性情",
+      "polarity": "正面",
+      "phase": 2,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "具备谈判条件时相关说服判定增加6个百分点。",
+      "effects": [
+        {
+          "trigger": "social.persuasion",
+          "operation": "add_pp_tenths",
+          "value": 60
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "affable",
+      "label_zh": "亲善",
+      "kind": "性情",
+      "polarity": "正面",
+      "phase": 2,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "正常关系交往时正向关系积累增加12%。",
+      "effects": [
+        {
+          "trigger": "relation.gain",
+          "operation": "mul_bps",
+          "value": 11200
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false
+    },
+    {
+      "id": "suspicious",
+      "label_zh": "多疑",
+      "kind": "性情",
+      "polarity": "混合",
+      "phase": 2,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "识破欺骗的判定增加5个百分点；首次接触或缺少可信证据时，正向信任增长固定减少20%。不直接扣除已经形成的信任。",
+      "effects": [
+        {
+          "trigger": "information.fraud_detect",
+          "operation": "add_pp_tenths",
+          "value": 50
+        },
+        {
+          "trigger": "relation.new_contact_trust_gain",
+          "operation": "mul_bps",
+          "value": 8000
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false,
+      "requires_real_events": [
+        "information.fraud_detect",
+        "relation.new_contact_trust_gain"
+      ]
+    },
+    {
+      "id": "prudent",
+      "label_zh": "审慎",
+      "kind": "性情",
+      "polarity": "混合",
+      "phase": 2,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "风险辨识增加5个百分点；已有核查时间的决策额外耗时20%，向上取整到模拟时间单位。",
+      "effects": [
+        {
+          "trigger": "decision.risk_detect",
+          "operation": "add_pp_tenths",
+          "value": 50
+        },
+        {
+          "trigger": "decision.review_time",
+          "operation": "mul_bps_ceil",
+          "value": 12000
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false,
+      "requires_real_events": [
+        "decision.risk_detect",
+        "decision.review_time"
+      ]
+    },
+    {
+      "id": "decisive",
+      "label_zh": "果断",
+      "kind": "性情",
+      "polarity": "混合",
+      "phase": 2,
+      "min_age": 18,
+      "exclusive_group": null,
+      "description_zh": "时间紧迫的执行判定增加5个百分点；确实跳过复核的同类事件，其失误概率额外增加4个百分点。",
+      "effects": [
+        {
+          "trigger": "decision.deadline",
+          "operation": "add_pp_tenths",
+          "value": 50
+        },
+        {
+          "trigger": "decision.skipped_review_error_risk",
+          "operation": "add_pp_tenths",
+          "value": 40
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": false,
+      "available_in_ui": false,
+      "requires_real_events": [
+        "decision.deadline",
+        "decision.skipped_review_error_risk"
+      ]
+    },
+    {
+      "id": "merchant",
+      "label_zh": "商历",
+      "kind": "经历",
+      "polarity": "正面",
+      "phase": 2,
+      "min_age": 20,
+      "exclusive_group": null,
+      "description_zh": "有真实经商履历时商业谈判增加6个百分点。",
+      "effects": [
+        {
+          "trigger": "commerce.negotiation",
+          "operation": "add_pp_tenths",
+          "value": 60
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": true,
+      "available_in_ui": false
+    },
+    {
+      "id": "organizer",
+      "label_zh": "任职",
+      "kind": "经历",
+      "polarity": "正面",
+      "phase": 2,
+      "min_age": 25,
+      "exclusive_group": null,
+      "description_zh": "曾在组织任职，相关协作判定增加5个百分点。",
+      "effects": [
+        {
+          "trigger": "organization.coordination",
+          "operation": "add_pp_tenths",
+          "value": 50
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": true,
+      "available_in_ui": false
+    },
+    {
+      "id": "veteran",
+      "label_zh": "军旅",
+      "kind": "经历",
+      "polarity": "混合",
+      "phase": 2,
+      "min_age": 20,
+      "exclusive_group": null,
+      "description_zh": "确有服役记录时，相关军务计划执行增加4个百分点。必须记录服役起止、机构或部队、岗位、退役原因、来源事件；技能、伤病和人脉只由实际服役事件分别产生，不自动添加创伤。",
+      "effects": [
+        {
+          "trigger": "plan.military_relevant",
+          "operation": "add_pp_tenths",
+          "value": 40
+        }
+      ],
+      "integration_status": "DESIGN_NOT_WIRED",
+      "provenance_required": true,
+      "available_in_ui": false,
+      "required_provenance_fields": [
+        "start_day",
+        "end_day",
+        "unit_or_organization",
+        "role",
+        "end_reason",
+        "source_event_id"
+      ],
+      "requires_real_events": [
+        "plan.military_relevant"
+      ]
+    }
+  ],
+  "reference_urls": [
+    "https://www.paradoxinteractive.com/games/crusader-kings-iii/legends-of-crusader-kings-iii/ruler-designer",
+    "https://projectzomboid.com/blog/news/2015/01/human-resources/",
+    "https://www.rimworldwiki.com/wiki/Traits",
+    "https://www.ea.com/games/the-sims/the-sims-4/news/whims-aspirations-goals"
+  ],
+  "implementation_prompt": "WWO_人物系统_Agent施工提示词_20261120.md",
+  "opening_flow": [
+    "country_globe_selection",
+    "prologue_age_family_education_youth_temperament",
+    "character_review",
+    "native_world_create"
+  ],
+  "attribute_creation_policy": {
+    "method": "derived_from_character_background_events",
+    "direct_point_allocation": false,
+    "point_budget": null,
+    "negative_trait_for_positive_points": false,
+    "compulsory_balance": false,
+    "ui_show_exact_attributes": false
+  },
+  "no_literacy_presentation": {
+    "scope": "IN_WORLD_WRITTEN_CONTENT_ONLY",
+    "mask_on_no_reading_skill": [
+      "messages",
+      "newspapers",
+      "letters",
+      "written_map_labels",
+      "document_text",
+      "world_time_and_date_text_or_digits",
+      "economic_written_summaries",
+      "relation_written_descriptions",
+      "world_notification_text"
+    ],
+    "allowed_non_text_or_out_of_world": [
+      "globe_geometry",
+      "flags",
+      "icons",
+      "pause",
+      "settings",
+      "save",
+      "load",
+      "quit",
+      "back",
+      "accessibility"
+    ],
+    "learn_from_event": true,
+    "oral_reading_requires_social_event": true,
+    "language_specific": true,
+    "no_unearned_fact_reveal": true,
+    "only_recompute_on_change": true
+  },
+  "trigger_semantics": {
+    "relation.new_contact_trust_gain": "Only positive trust gains in a first contact or without established evidence of reliability; modifier affects the amount gained, not preexisting trust",
+    "decision.review_time": "Only decisions already requiring in-world review time; multiply duration and round up to world-time granularity",
+    "decision.skipped_review_error_risk": "Only time-pressured decisions with an explicit review-skipping failure path and a baseline probability; add probability points",
+    "plan.military_relevant": "Only plan execution relevant to documented service position and competence"
+  },
+  "status_markers": {
+    "not_wired": "DESIGN_NOT_WIRED",
+    "no_ui_fake_effect": true
+  }
+}
