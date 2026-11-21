@@ -47,12 +47,48 @@ struct WaterSelection {
     size: [u32; 2],
 }
 
+struct WaterViewport {
+    axis: V3,
+    axes: [V3; 3],
+    origin: [f64; 2],
+    size: [u32; 2],
+    radius: f64,
+    pixel_scale: f64,
+    pitch: f64,
+    regional: bool,
+}
+
+impl WaterViewport {
+    fn priority(&self, page: &WaterPage) -> u8 {
+        if dot(self.axis, page.axis) < (self.radius + page.radius).cos() {
+            return 0;
+        }
+        let [x, y, z] = self.axes.map(|direction| dot(direction, page.axis));
+        let radial = x.hypot(y);
+        let angle = radial.atan2(z);
+        let furthest = angle + page.radius;
+        if furthest >= FRAC_PI_2 {
+            return 2;
+        }
+        let factor = if self.regional && radial > 1e-12 { angle / radial } else { 1. };
+        let screen = [self.origin[0] + x * factor * self.pixel_scale,
+                      self.origin[1] - y * factor * self.pixel_scale * self.pitch];
+        // Bound the projected page by its angular cap, including regional stretch.
+        let stretch = if self.regional && furthest > 1e-12 { furthest / furthest.sin() } else { 1. };
+        let pad = page.radius * stretch * self.pixel_scale;
+        let outside_x = (-screen[0]).max(screen[0] - f64::from(self.size[0])) - pad;
+        let outside_y = (-screen[1]).max(screen[1] - f64::from(self.size[1])) - pad * self.pitch;
+        let outside = outside_x.max(outside_y);
+        if outside <= 0. { 2 } else if outside <= WATER_VIEW_MARGIN { 1 } else { 0 }
+    }
+}
+
 pub struct WaterPages {
     classes: Vec<u32>,
     table: Vec<u32>,
     pages: Vec<WaterPage>,
     desired: Vec<(usize, bool)>,
-    visible_outside_budget: Vec<usize>,
+    viewport: Option<WaterViewport>,
     resident: HashMap<usize, ResidentWaterPage>,
     used_words: usize,
     request: mpsc::Sender<Vec<(usize, std::ops::Range<u64>)>>,
@@ -191,7 +227,7 @@ impl WaterPages {
             classes,
             pages,
             desired: Vec::new(),
-            visible_outside_budget: Vec::new(),
+            viewport: None,
             resident: HashMap::new(),
             used_words: WATER_PAGES,
             request,
@@ -247,7 +283,7 @@ impl WaterPages {
             self.selection = None;
             self.previous_view = None;
             self.desired.clear();
-            self.visible_outside_budget.clear();
+            self.viewport = None;
         }
 
         if let Ok(results) = self.ready.try_recv() {
@@ -320,33 +356,16 @@ impl WaterPages {
         }
         let offset = (origin[0] - center[0]).hypot((origin[1] - center[1]) / camera.pitch().cos());
         // Include selection slack so prefetch-only uploads cannot alter the current raster.
-        let view_radius = camera.extent(size, offset + WATER_VIEW_MARGIN);
+        let viewport = WaterViewport {
+            axis, axes, origin, size,
+            radius: camera.extent(size, offset + WATER_VIEW_MARGIN),
+            pixel_scale: EARTH / camera.mpp,
+            pitch: camera.pitch().cos(),
+            regional: camera.blend() > 0.,
+        };
         let radius = camera.extent(size, offset + WATER_PREFETCH);
         let slack = (camera.mpp * 48. / EARTH).cos();
         let ahead_slack = (camera.mpp * 110. / EARTH).cos();
-        let pixel_scale = EARTH / camera.mpp;
-        let pitch = camera.pitch().cos();
-        let regional = camera.blend() > 0.;
-        let screen_priority = |page: &WaterPage| {
-            let [x, y, z] = axes.map(|direction| dot(direction, page.axis));
-            let radial = x.hypot(y);
-            let angle = radial.atan2(z);
-            let furthest = angle + page.radius;
-            if furthest >= FRAC_PI_2 {
-                return 2;
-            }
-            let factor = if regional && radial > 1e-12 { angle / radial } else { 1. };
-            let screen = [origin[0] + x * factor * pixel_scale,
-                          origin[1] - y * factor * pixel_scale * pitch];
-            // Bound the projected page by its angular cap. The regional projection
-            // stretches tangential distances by at most theta/sin(theta).
-            let stretch = if regional && furthest > 1e-12 { furthest / furthest.sin() } else { 1. };
-            let pad = page.radius * stretch * pixel_scale;
-            let outside_x = (-screen[0]).max(screen[0] - f64::from(size[0])) - pad;
-            let outside_y = (-screen[1]).max(screen[1] - f64::from(size[1])) - pad * pitch;
-            let outside = outside_x.max(outside_y);
-            if outside <= 0. { 2 } else if outside <= WATER_VIEW_MARGIN { 1 } else { 0 }
-        };
         let roll_slack = (48. / center[0].hypot(center[1]).max(48.)).cos();
         if self.selection.as_ref().is_some_and(|previous| {
             previous.size == size
@@ -359,10 +378,9 @@ impl WaterPages {
             // Camera movement inside the selection slack can still expose a
             // prefetched page. Refresh visibility without a global reselect.
             for (i, visible) in &mut self.desired {
-                let page = &self.pages[*i];
-                *visible = dot(axis, page.axis) >= (view_radius + page.radius).cos()
-                    && screen_priority(page) > 0;
+                *visible = viewport.priority(&self.pages[*i]) > 0;
             }
+            self.viewport = Some(viewport);
             return;
         }
         self.selection = Some(WaterSelection {
@@ -382,18 +400,13 @@ impl WaterPages {
                 let center = dot(axis, page.axis);
                 let lead = dot(ahead, page.axis);
                 (center.max(lead) >= (radius + page.radius).cos()).then(|| {
-                    let priority = if center >= (view_radius + page.radius).cos() {
-                        screen_priority(page)
-                    } else {
-                        0
-                    };
+                    let priority = viewport.priority(page);
                     (i, priority, if priority > 0 { center } else { lead.max(center) })
                 })
             })
             .collect();
         nearby.sort_unstable_by(|a, b| b.1.cmp(&a.1).then_with(|| b.2.total_cmp(&a.2)));
         self.desired.clear();
-        self.visible_outside_budget.clear();
         let mut budget = WATER_WORDS - WATER_PAGES;
         for (i, priority, _) in nearby {
             let visible = priority > 0;
@@ -405,10 +418,9 @@ impl WaterPages {
                 if let Some(resident) = self.resident.get_mut(&page.index) {
                     resident.last_needed = self.selection_number;
                 }
-            } else if priority == 2 {
-                self.visible_outside_budget.push(page.index);
             }
         }
+        self.viewport = Some(viewport);
     }
 
     fn publish(
@@ -514,14 +526,80 @@ impl WaterPages {
     }
 
     pub fn missing_view_pages_outside_budget(&self) -> usize {
-        self.visible_outside_budget
-            .iter()
-            .filter(|key| !self.resident.contains_key(*key))
+        let Some(viewport) = &self.viewport else { return 0; };
+        let desired: HashSet<_> = self.desired.iter().map(|&(index, _)| index).collect();
+        // Observation only. A reused selection keeps its admission order, while
+        // a rejected page can enter or leave the current screen.
+        self.pages.iter().enumerate()
+            .filter(|&(index, page)| !desired.contains(&index)
+                && !self.resident.contains_key(&page.index)
+                && viewport.priority(page) == 2)
             .count()
     }
 
     pub fn revision(&self) -> u64 {
         self.revision
+    }
+}
+
+#[cfg(test)]
+mod water_page_tests {
+    use super::*;
+
+    #[test]
+    fn rejected_water_page_is_counted_when_reused_view_reaches_it() {
+        let size = [640, 400];
+        let mut camera = Camera::new(size);
+        camera.axes = frame([0., 0.]);
+        camera.mpp = 1000.;
+        let pages = vec![
+            WaterPage {
+                index: 3,
+                axis: camera.vector([320., 200.], size).unwrap(),
+                radius: 1e-8,
+                range: 0..4 * (WATER_WORDS - WATER_PAGES - 1) as u64,
+            },
+            WaterPage {
+                index: 4,
+                axis: camera.vector([654., 200.], size).unwrap(),
+                radius: 1e-8,
+                range: 0..256,
+            },
+        ];
+        let now = Instant::now();
+        let mut water = WaterPages {
+            classes: Vec::new(),
+            table: Vec::new(),
+            pages,
+            desired: Vec::new(),
+            viewport: None,
+            resident: HashMap::new(),
+            used_words: WATER_PAGES,
+            request: mpsc::channel().0,
+            ready: mpsc::channel().1,
+            unavailable: HashSet::new(),
+            inflight: false,
+            selection: None,
+            previous_view: None,
+            selection_number: 0,
+            epoch: now,
+            handoff_until: now,
+            revision: 0,
+        };
+
+        water.select(&camera, size, now);
+        assert_eq!(water.missing_view_pages_outside_budget(), 0);
+        assert_eq!(water.status(), ([0, 0], [1, 1]));
+
+        camera.axes = frame([0.2, 0.]);
+        water.select(&camera, size, now);
+        assert_eq!(water.selection_number, 1);
+        assert_eq!(water.missing_view_pages_outside_budget(), 1);
+
+        camera.axes = frame([0., 0.]);
+        water.select(&camera, size, now);
+        assert_eq!(water.selection_number, 1);
+        assert_eq!(water.missing_view_pages_outside_budget(), 0);
     }
 }
 
