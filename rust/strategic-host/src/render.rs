@@ -129,6 +129,8 @@ pub struct Renderer {
     device:wgpu::Device,
     queue:wgpu::Queue,
     pub gpu:String,
+    frame_timer:Option<FrameTimer>,
+    pub frame_acquire_ms:f64,
     models: ModelLayer,
     transport_network: Option<(u64, MeshBuffers)>,
     transport_economy: Option<(u64, MeshBuffers)>,
@@ -248,18 +250,8 @@ impl GroundSurface {
     fn load(&mut self, device:&wgpu::Device, queue:&wgpu::Queue, height:Option<wgpu::TextureView>)->io::Result<()> {
         if self.loaded {return Ok(());}
         let art=crate::decode_rgba(&include_bytes!("land-material.png")[..])?;
-        let [width,height_px]=art.size;
-        let levels=width.ilog2()+1;
-        let texture=create_texture_mips(device,[width,height_px,1],wgpu::TextureFormat::Rgba8Unorm,levels);
-        let mut pixels=art.pixels;
-        for level in 0..levels {
-            let [w,h]=[width>>level,height_px>>level];
-            write_texture_mip(queue,&texture,[w,h,1],4,&pixels,level);
-            if w==1 {break;}
-            pixels=downsample_rgba(&pixels,w,h);
-        }
         if height.is_some() {self.height=height;}
-        self.art=texture.create_view(&Default::default());
+        self.art=material_texture(device,queue,art);
         self.group=Self::bind(device,&self.layout,&self.repeat,&self.art,self.height.as_ref(),
             &self.water,&self.water_pixels);
         self.loaded=true;
@@ -513,6 +505,18 @@ fn buffer(device:&wgpu::Device,size:usize)->wgpu::Buffer {
 fn create_texture(device:&wgpu::Device,size:[u32;3],format:wgpu::TextureFormat)->wgpu::Texture {
     create_texture_mips(device,size,format,1)
 }
+fn material_texture(device:&wgpu::Device,queue:&wgpu::Queue,art:Raster)->wgpu::TextureView {
+    let [width,height]=art.size;
+    let levels=width.min(height).ilog2()+1;
+    let texture=create_texture_mips(device,[width,height,1],wgpu::TextureFormat::Rgba8Unorm,levels);
+    let mut pixels=art.pixels;
+    for level in 0..levels {
+        let [w,h]=[width>>level,height>>level];
+        write_texture_mip(queue,&texture,[w,h,1],4,&pixels,level);
+        if level+1<levels {pixels=downsample_rgba(&pixels,w,h);}
+    }
+    texture.create_view(&Default::default())
+}
 fn create_texture_mips(device:&wgpu::Device,size:[u32;3],format:wgpu::TextureFormat,levels:u32)->wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label:Some("WWO map inputs"),size:extent(size),mip_level_count:levels,sample_count:1,dimension:wgpu::TextureDimension::D2,
@@ -603,7 +607,78 @@ pub(crate) fn write_texture_layer(queue:&wgpu::Queue,texture:&wgpu::Texture,leve
     extent([size,size,1]));
 }
 
+const FRAME_TIMESTAMP_FEATURES: wgpu::Features = wgpu::Features::TIMESTAMP_QUERY
+    .union(wgpu::Features::TIMESTAMP_QUERY_INSIDE_ENCODERS);
+
+struct TimestampSlot {
+    buffer: wgpu::Buffer,
+    pending: Option<(usize, std::sync::mpsc::Receiver<Result<(), wgpu::BufferAsyncError>>)>,
+}
+
+struct FrameTimer {
+    queries: wgpu::QuerySet,
+    resolved: wgpu::Buffer,
+    slots: Vec<TimestampSlot>,
+    samples: Vec<(usize, f64)>,
+}
+
+impl FrameTimer {
+    fn new(device: &wgpu::Device) -> Self {
+        let buffer = |usage| device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Game frame timestamps"), size: 16, usage, mapped_at_creation: false,
+        });
+        Self {
+            queries: device.create_query_set(&wgpu::QuerySetDescriptor {
+                label: Some("Game frame timestamps"), ty: wgpu::QueryType::Timestamp, count: 2,
+            }),
+            resolved: buffer(wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC),
+            slots: (0..8).map(|_| TimestampSlot {
+                buffer: buffer(wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST),
+                pending: None,
+            }).collect(),
+            samples: Vec::new(),
+        }
+    }
+
+    fn collect(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, final_read: bool) {
+        let _ = device.poll(if final_read { wgpu::Maintain::Wait } else { wgpu::Maintain::Poll });
+        for slot in &mut self.slots {
+            let Some((frame, ready)) = &slot.pending else { continue; };
+            match ready.try_recv() {
+                Ok(Ok(())) => {
+                    let values = slot.buffer.slice(..).get_mapped_range();
+                    let begin = u64::from_le_bytes(values[..8].try_into().unwrap());
+                    let end = u64::from_le_bytes(values[8..].try_into().unwrap());
+                    let gpu_ms = end.saturating_sub(begin) as f64
+                        * f64::from(queue.get_timestamp_period()) / 1_000_000.;
+                    self.samples.push((*frame, gpu_ms));
+                    drop(values);
+                    slot.buffer.unmap();
+                    slot.pending = None;
+                }
+                Err(std::sync::mpsc::TryRecvError::Empty) => {}
+                _ => slot.pending = None,
+            }
+        }
+    }
+}
+
 impl Renderer {
+    pub fn start_frame_timing(&mut self) {
+        self.frame_timer = self.device.features().contains(FRAME_TIMESTAMP_FEATURES)
+            .then(|| FrameTimer::new(&self.device));
+    }
+
+    pub fn finish_frame_timing(&mut self) -> Option<Vec<(usize, f64)>> {
+        let mut timer = self.frame_timer.take()?;
+        timer.collect(&self.device, &self.queue, true);
+        Some(timer.samples)
+    }
+
+    pub fn water_upload(&self) -> Option<crate::hydrology::WaterUpload> {
+        self.water_pages.as_ref().map(|pages| pages.upload)
+    }
+
     pub async fn new(window:Arc<Window>, atlas:Raster, flags:Raster, hud:[Raster;3], globe_art:[Raster;2], layout_bytes:&[u8], natural:Option<(terrain::Catalogue,winit::event_loop::EventLoopProxy<crate::HostEvent>)>, detail:Option<terrain_detail::Catalogue>, events:winit::event_loop::EventLoopProxy<crate::HostEvent>, observe:bool)->Result<Self,String> {
         let size=window.inner_size().into();
         Self::with_target(Some(window),size,atlas,flags,hud,globe_art,layout_bytes,natural,None,detail,events,observe).await
@@ -625,6 +700,9 @@ impl Renderer {
         if !adapter.features().contains(features) {return Err("自然地貌需要支持 BC7 纹理的 Vulkan 显卡。".into());}
         if observe && landscape_supported {
             features |= adapter.features() & (wgpu::Features::TIMESTAMP_QUERY|wgpu::Features::PIPELINE_STATISTICS_QUERY);
+        }
+        if observe && adapter.features().contains(FRAME_TIMESTAMP_FEATURES) {
+            features |= FRAME_TIMESTAMP_FEATURES;
         }
         let (device,queue)=adapter.request_device(&wgpu::DeviceDescriptor {
             label:Some("WWO strategic map host"),required_features:features,
@@ -691,12 +769,12 @@ impl Renderer {
         let flag_texture=create_texture(&device,[flags.size[0],flags.size[1],1],wgpu::TextureFormat::Rgba8Unorm);
         write_texture(&queue,&flag_texture,[flags.size[0],flags.size[1],1],4,&flags.pixels);
         let flags=flag_texture.create_view(&Default::default());
-        let [galactic_chart,ocean_material]=globe_art.map(|image|{
-            let [w,h]=image.size;
-            let texture=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
-            write_texture(&queue,&texture,[w,h,1],4,&image.pixels);
-            texture.create_view(&Default::default())
-        });
+        let [chart,ocean]=globe_art;
+        let [w,h]=chart.size;
+        let texture=create_texture(&device,[w,h,1],wgpu::TextureFormat::Rgba8Unorm);
+        write_texture(&queue,&texture,[w,h,1],4,&chart.pixels);
+        let galactic_chart=texture.create_view(&Default::default());
+        let ocean_material=material_texture(&device,&queue,ocean);
         let river_source=natural.as_ref().and_then(|(catalogue,_)|catalogue.river_lines()).map(Path::to_owned);
         let water_source=natural.as_ref().and_then(|(catalogue,_)|catalogue.water_geometry()).map(Path::to_owned);
         let terrain=natural.map(|(catalogue,proxy)|Terrain::new(&device,&queue,catalogue,proxy,landscape_supported))
@@ -790,7 +868,8 @@ impl Renderer {
         let meshes=std::array::from_fn(|_|MeshBuffers::new(&device,65536,32768));
         let models=ModelLayer::new(&device,format,events);
         let landscape_pipeline=landscape_supported.then_some((format,glob,globe_shader));
-        Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
+        Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),
+                frame_timer:None,frame_acquire_ms:0.,view,globals,pages,palette,flag_poses,fallback,
                 globe,terrain,rivers,water_pages,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
                 solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models,
                 battle:None,landscape:None,landscape_pipeline,surface,transport_network:None,
@@ -1050,7 +1129,8 @@ impl Renderer {
                   meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel],
                   transport:Option<TransportOverlay<'_>>,
                   (camera,landscape_enabled,now):(&Camera,bool,Instant),
-                  battle:Option<BattleFrame<'_>>)->io::Result<Option<io::Result<()>>> {
+                  battle:Option<BattleFrame<'_>>,timing_frame:Option<usize>)->io::Result<Option<io::Result<()>>> {
+        let acquire_start = timing_frame.map(|_| Instant::now());
         let frame=if let RenderTarget::Window(surface,config)=&self.target {
             match surface.get_current_texture() {
                 Ok(frame)=>Some(frame),
@@ -1061,6 +1141,9 @@ impl Renderer {
                 Err(e)=>return Err(io::Error::other(e))
             }
         }else{None};
+        if let Some(start) = acquire_start {
+            self.frame_acquire_ms = start.elapsed().as_secs_f64() * 1000.;
+        }
         let size=match &self.target {
             RenderTarget::Window(_,config)=>[config.width,config.height],
             RenderTarget::Offscreen(texture)=>[texture.width(),texture.height()],
@@ -1114,6 +1197,13 @@ impl Renderer {
         for ((mesh,_),draw) in layers().zip(self.meshes.iter_mut()) {draw.upload(&self.device,&self.queue,mesh);}
         let image=texture.create_view(&Default::default());
         let mut encoder=self.device.create_command_encoder(&Default::default());
+        let gpu_slot = timing_frame.and_then(|frame| {
+            let timer = self.frame_timer.as_mut()?;
+            timer.collect(&self.device, &self.queue, false);
+            let slot = timer.slots.iter().position(|slot| slot.pending.is_none())?;
+            encoder.write_timestamp(&timer.queries, 0);
+            Some((frame, slot))
+        });
         if show_map {
             if let Some(water)=&self.water_pages {
                 self.surface.project_water(&self.device,&mut encoder,[w,h],view,water.revision());
@@ -1195,6 +1285,12 @@ impl Renderer {
             }
         }
         let padded=(w*4).div_ceil(256)*256;
+        if let Some((_, slot)) = gpu_slot {
+            let timer = self.frame_timer.as_ref().unwrap();
+            encoder.write_timestamp(&timer.queries, 1);
+            encoder.resolve_query_set(&timer.queries, 0..2, &timer.resolved, 0);
+            encoder.copy_buffer_to_buffer(&timer.resolved, 0, &timer.slots[slot].buffer, 0, 16);
+        }
         let readback=capture.filter(|_|copy_src).map(|_|{
             let data=self.device.create_buffer(&wgpu::BufferDescriptor {label:Some("WWO capture"),size:u64::from(padded)*u64::from(h),
                 usage:wgpu::BufferUsages::COPY_DST|wgpu::BufferUsages::MAP_READ,mapped_at_creation:false});
@@ -1204,6 +1300,14 @@ impl Renderer {
             data
         });
         self.queue.submit([encoder.finish()]);
+        if let Some((frame, slot)) = gpu_slot {
+            let slot = &mut self.frame_timer.as_mut().unwrap().slots[slot];
+            let (send, ready) = std::sync::mpsc::channel();
+            slot.buffer.slice(..).map_async(wgpu::MapMode::Read, move |result| {
+                let _ = send.send(result);
+            });
+            slot.pending = Some((frame, ready));
+        }
         if let Some(frame)=frame {frame.present();}
         let saved=(|| -> io::Result<()> {
             let Some(path)=capture else{return Ok(());};

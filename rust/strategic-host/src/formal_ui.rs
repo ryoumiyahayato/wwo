@@ -317,7 +317,14 @@ pub struct Hud {
     pub mechanical:crate::mechanical::Mechanical,
     pub waiting_slot:bool,pub fullscreen:bool,pub clock_drag:Option<f32>,pub military_grid:bool,
     pub market_offset:usize,pub market_chooser:Option<&'static str>,pub quantity:Option<String>,pub purchase_token:Option<u64>,
-    pub transport_detail_page:usize,
+    pub transport_detail_expanded: bool,
+    pub transport_steps: bool,
+    pub market_map: bool,
+    pub market_search: Option<String>,
+    pub transport_directory: Option<String>,
+    pub transport_category: usize,
+    pub lot_offset: usize,
+    pub transport_lots_open: bool,
     pub volume:u8,pub english:bool,pub volume_drag:bool,
 }
 #[derive(Clone,Copy)]
@@ -327,7 +334,8 @@ pub enum Command {
     Labels,Fullscreen,MilitaryGrid,Quit,PlayerMarker,Volume(u8),Language(bool),
     Market(&'static str,usize),MarketScroll(i32),
     Transport(&'static str,usize),
-    TransportDetail(usize),TransportDetailPage(usize),CloseTransportDetail,
+    TransportDetail(usize),ToggleTransportDetail,CloseTransportDetail,
+    TransportDirectory,TransportCategory(usize),TransportSteps,TransportLots,
     Training(&'static str),
     PortraitAction(usize,Page),Relation(Option<usize>),RelationDrawer(&'static str),
     WorkAction(usize,usize,u64),OralWorkAction(u64),OralReferral,WorkConfirm(bool),
@@ -1321,7 +1329,11 @@ pub fn page_rect(hud:&Hud,size:[u32;2])->Option<[f32;4]>{
         Page::Map=>None,
         Page::Finance=>{let a=(w-155.).min(900.);Some([(w-a)*0.5,106.,a,(h-150.).min(420.)])}
         Page::Character=>{let a=(w-155.).min(820.);Some([(w-a)*0.5,106.,a,(h-142.).min(460.)])}
-        Page::Travel=>Some([18.,86.,(w-36.).min(650.),(h-106.).min(470.)]),
+        Page::Travel=>{
+            let height=if hud.transport_lots_open || hud.transport_directory.is_some() {462.}
+                else if hud.transport_steps {550.} else {367.};
+            Some([18.,86.,(w-36.).min(502.),(h-142.).min(height)])
+        },
         Page::Technology=>{
             let height=if hud.tech==Tech::Chronicle{318.}else{344.};
             Some([18.,((h-height)*0.48).min(h-168.-height-10.).max(84.),(w*0.58).min(615.),height])

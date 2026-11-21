@@ -128,11 +128,10 @@ impl InitialWorld {
     }
 
     pub fn selected_transport_route(&self) -> Option<&Route> {
-        let now = self.clock.snapshot().total_minutes;
-        self.travel_plan()
+        self.freight_preview.as_ref()
             .or_else(|| self.selected_freight.and_then(|id| self.transport.plan(id)))
-            .or_else(|| self.travel_preview.as_ref().filter(|plan| plan.departure_minute() >= now))
-            .or_else(|| self.freight_preview.as_ref().filter(|plan| plan.departure_minute() >= now))
+            .or_else(|| self.travel_plan())
+            .or(self.travel_preview.as_ref())
             .map(Plan::route)
     }
 
@@ -181,6 +180,13 @@ impl InitialWorld {
         let network = self.transport.network();
         network.routing_node(id).and_then(|key| network.node(key)).is_some_and(|node|
             matches!(node.kind, NodeKind::City | NodeKind::Area | NodeKind::Port))
+    }
+
+    pub fn can_book_transport_to(&self, place: &str) -> bool {
+        self.can_select_transport_destination(place) && (self.can_read_place_record(place)
+            || self.transport.connections(place).any(|(end, mode, open)| {
+                open && mode == TransportMode::Shipping && self.can_read_place_record(end)
+            }))
     }
 
     pub fn transport_connections(&self, place: &str) -> Option<String> {

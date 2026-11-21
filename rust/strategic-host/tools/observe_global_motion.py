@@ -73,7 +73,7 @@ def run(args, scratch):
             host.ask('drag',x=start,y=y,to_x=end,to_y=y,frames=frames)
 
         def timed(label, route):
-            host.ask('timing')
+            host.ask('timing', value='profile' if args.profile_frames else '')
             route()
             frame = host.ask('timing')
             timing = frame['extra']
@@ -115,6 +115,105 @@ def run(args, scratch):
             engine_gpu=cold_settled['state']['gpu'], viewport=extent,
             capture_process='fresh game process and independent profile, OS cache untouched',
         ))
+
+        if args.section == 'troyes':
+            x, y = (value/2 for value in extent)
+            radius = min(78, max(52, .056 * extent[0]))
+            host.ask('click', x=x, y=extent[1]-10)
+            host.ask('click', x=x, y=extent[1]-radius-202+114)
+            stable('troyes-military-grid', args.routes['troyes'])
+            host.ask('click', x=x, y=y)
+            selected = status()['military_grid']['selected']
+            if selected != args.routes['troyes_cell']:
+                raise RuntimeError(f'Unexpected Troyes military grid selection: {selected}')
+
+            def open_battle():
+                host.ask('key', value='Enter')
+                time.sleep(1.0)
+            timed('troyes-enter', open_battle)
+            battle = status()['land_battle']
+            if not battle or battle['cell'] != selected:
+                raise RuntimeError('Could not enter the Troyes exercise')
+            host.ask('key', value='3')
+            timed('troyes-vehicle-paused', lambda: time.sleep(1.1))
+
+            def view_roundtrip(shoot=False):
+                for key in ('1','2','3','Tab'):
+                    host.ask('key', value=key)
+                    time.sleep(.25)
+                if shoot:
+                    host.ask('key', value='Space')
+                    host.ask('key', value='p')
+                    time.sleep(.55)
+                    host.ask('key', value='p')
+            timed('troyes-scale-and-fire', lambda: view_roundtrip(shoot=True))
+            timed('troyes-scale-repeat', view_roundtrip)
+            after = status()['land_battle']
+            host.ask('key', value='Escape')
+            timed('troyes-reenter', open_battle)
+            resumed = status()['land_battle']
+            if not resumed or resumed['id'] != after['id']:
+                raise RuntimeError('Could not resume the same Troyes exercise')
+            write(args.output/'troyes.json', dict(before=battle, after=after, resumed=resumed))
+            return
+
+        if args.section == 'material':
+            x,y = (value/2 for value in extent)
+            for label,lon,lat,zoom_scale,near in args.routes['material']:
+                def zoom_to(mpp):
+                    current = status()['mpp']
+                    host.ask('wheel',x=x,y=y,steps=math.log(current/mpp,1.22))
+
+                levels = [('z5',5.), ('z5-z6',5.565), ('z6',6.),
+                          ('z6-z7',6.565), ('z7',7.12)]
+                stages = [(name,zoom_scale/2**lod) for name,lod in levels] + [('near',near)]
+                if args.material_transitions_only:
+                    stable(f'{label}-z7',(lon,lat,stages[-2][1]))
+                    for name,mpp in reversed(stages[:-2]):
+                        zoom_to(mpp)
+                        capture(f'{label}-{name}',settled=settle())
+                    continue
+
+                stable(f'{label}-z5',(lon,lat,stages[0][1]))
+                for name,mpp in stages[1:]:
+                    zoom_to(mpp)
+                    capture(f'{label}-in-{name}',settled=settle())
+
+                def roundtrip():
+                    pan(frames=20,offsets=(-180,180))
+                    time.sleep(.55)
+                    pan(True,frames=20,offsets=(-180,180))
+                    time.sleep(.55)
+
+                timed(f'{label}-near-pan',roundtrip)
+                capture(f'{label}-pan-return',settled=settle())
+
+                def retreat():
+                    for _,mpp in reversed(stages[:-1]):
+                        zoom_to(mpp)
+                        time.sleep(.38)
+
+                timed(f'{label}-zoom-return',retreat)
+                capture(f'{label}-zoom-return',settled=settle())
+
+                # With the finer level already selected, the outward wheel route
+                # visits both partially blended states inside the LOD hysteresis.
+                stable(f'{label}-z7',(lon,lat,stages[-2][1]))
+                for name,mpp in reversed(stages[:-2]):
+                    if name == 'z5':
+                        break
+                    zoom_to(mpp)
+                    capture(f'{label}-{name}',settled=settle())
+
+                if label in ('troyes','nearshore'):
+                    focus((lon,lat,stages[0][1]))
+                    settle()
+                    # Record actual game frames on a second, densely stepped route.
+                    for index in range(49):
+                        progress = 1.-abs(index/24.-1.)
+                        zoom_to(stages[0][1]*(near/stages[0][1])**progress)
+                        capture(f'{label}-motion-{index:02}')
+            return
 
         if args.section in ('all', 'edges'):
             edge = (179.88,-16.77,135)
@@ -221,8 +320,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ('exe','data','frozen','output'):
         parser.add_argument(key, type=lambda value: Path(value).resolve())
-    parser.add_argument('--section', choices=('all','views','nile','zoom','edges'), default='all')
+    parser.add_argument('--section', choices=('all','views','nile','zoom','edges','troyes','material'), default='all')
     parser.add_argument('--nile-drag-frames', type=int, choices=(18,24), default=24)
+    parser.add_argument('--profile-frames', action='store_true')
+    parser.add_argument('--material-transitions-only', action='store_true')
     args = parser.parse_args()
     args.routes = read(args.frozen)
     args.output.mkdir(parents=True)

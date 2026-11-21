@@ -74,7 +74,7 @@ fn landscape_material(page: LandscapePage) -> LandCover {
     // Interpolate category weights instead of category numbers.
     let uv = page.texel / 264.;
     let classes = vec4u(round(textureGather(3, landscape_data, linear, uv, page.slot) * 15.));
-    let f = smoothstep(vec2f(0.), vec2f(1.), fract(page.texel - .5));
+    let f = fract(page.texel - .5);
     let weights = vec4f((1.-f.x)*f.y, f.x*f.y, f.x*(1.-f.y), (1.-f.x)*(1.-f.y));
     return LandCover(
         class_fraction(classes,weights,1u)+class_fraction(classes,weights,10u),
@@ -252,13 +252,17 @@ fn cultivated_fields(base: vec3f, ll: vec2f, world: vec3f, mpp: f32, cover: f32)
 
 fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level: u32, water: f32, mpp: f32) -> vec3f {
     let near = 1. - smoothstep(90., 430., mpp);
-    let slope = landscape_slope(page,ll.y,mix(1.18,.49,near),level);
+    // Match the physical lighting footprint at both levels. Keep the coarse
+    // footprint wide enough to sample independent DEM texels in fallback.
+    let step = f32(1u << (7u-level));
+    let radius = max(.58,mix(1.70,.68,near)/step);
+    let slope = landscape_slope(page,ll.y,radius,level);
     let height = landscape_elevation(page, vec2f(0.));
     let latitude_scale = max(.025, cos(radians(ll.y)));
-    let toward_sun = vec2f(-1.26, -1.03 * latitude_scale);
+    let toward_sun = vec2f(-1.26, -1.03 * latitude_scale)/step;
     let shoulder = landscape_elevation(page, toward_sun);
     let ridge = landscape_elevation(page, toward_sun * 2.);
-    let horizon = max(shoulder-height,(ridge-height)*.5) / (f32(1u << (7u-level))*870.*latitude_scale);
+    let horizon = max(shoulder-height,(ridge-height)*.5) / (870.*latitude_scale);
     let gradient = length(slope);
     let normal = normalize(vec3f(-slope * 1.42, 1.));
     let sunlight = max(0., dot(normal, LANDSCAPE_SUN));

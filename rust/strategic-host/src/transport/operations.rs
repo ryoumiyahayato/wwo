@@ -255,6 +255,15 @@ impl Operations {
             })
     }
 
+    pub(crate) fn has_cargo_service(&self, place: &str) -> bool {
+        self.network.routing_node(place).and_then(|id| self.network.node_ids.get(id))
+            .is_some_and(|&index| self.network.outgoing[index].iter().any(|arc| {
+                let segment = &self.network.segments[arc.segment];
+                let place = self.network.nodes[index].id.as_str();
+                self.service_capacity(&segment.id, place).is_some_and(|capacity| capacity.admits(1, Traffic::PlayerFreight, true))
+            }))
+    }
+
     pub fn quote(&mut self, from: &str, to: &str, modes: ModeSet, load: u32, departure: i64) -> io::Result<Plan> {
         self.quote_service(from, to, modes, load, departure, Traffic::Passenger)
     }
