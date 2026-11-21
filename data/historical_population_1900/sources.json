@@ -1371,6 +1371,24 @@
     "collection": "india_comparable"
   },
   {
+    "id": "india_1901_occupation_table_xv_part_iii",
+    "title": "Census of India, 1901, Vol. I-A, India, Part II: Tables",
+    "publisher": "Office of the Superintendent of Government Printing, India, 1903",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924",
+    "locator": "Table XV, p. 367 notes and Part III, pp. 396–397 and 400–401, Actual Workers. Table II-A, p. 10 supplies the resident totals, cross-referenced to Table I.",
+    "rights": "Historical government publication. Numeric transcription and derived counts. Original scans linked.",
+    "raw_path": "occupation_orders.json",
+    "table_urls": [
+      "https://southasiacommons.net/artifacts/2336476/census-of-india-1901/3112330/",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n14/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n401/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n405/mode/1up",
+      "https://www.scribd.com/document/765937813/Census-India-1901-India-Tables"
+    ],
+    "notes": "Selected printed order totals from the national volume's public OCR, supported by the visible corresponding sub-order counts. The national Central India Agency aggregate includes Gwalior. Rajputana Agency excludes the separate Ajmer-Merwara row. The Part III column for subsidiary agriculture and the Part II count of dependents are outside the admitted partition.",
+    "collection": "india_occupation_1901"
+  },
+  {
     "id": "india_1901_abstract_religion",
     "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39, Table 7",
     "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
@@ -1649,6 +1667,60 @@
       }
     ],
     "collection": "morocco_population"
+  },
+  {
+    "id": "nl_cbs_census_1899_age_marital",
+    "title": "Volkstelling 1899; indeeling naar den leeftijd en den burgerlijken staat",
+    "publisher": "Statistics Netherlands (CBS) and NIWI",
+    "url": "https://www.cbs.nl/nl-nl/cijfers/detail/7379vt",
+    "locator": "Eighth census, fourth part, usual residents by age and marital status. National total RY117. Provincial totals GR145, FR225, DR 85, OV175, GE247, UT105, NH215, ZH261, ZE117, NB247 and LI169. The CBS Pagina_8 field preserves each record's printed page.",
+    "rights": "CC BY 4.0. Source CBS and NIWI. This extract limits geography to national and provincial records. age_sex.csv pivots sex codes and selects non-overlapping ages.",
+    "rights_url": "https://www.cbs.nl/en-gb/over-ons/website/copyright",
+    "raw_path": "cbs_7379vt.csv",
+    "table_urls": [
+      "https://opendata.cbs.nl/ODataApi/OData/7379vt/TypedDataSet",
+      "https://opendata.cbs.nl/ODataApi/OData/7379vt/Gebieden",
+      "https://opendata.cbs.nl/ODataApi/OData/7379vt/Leeftijden",
+      "https://opendata.cbs.nl/ODataApi/OData/7379vt/Geslacht",
+      "https://opendata.cbs.nl/ODataApi/OData/7379vt/TableInfos"
+    ],
+    "extract": "Select exact Gebieden keys NL1000, PV2000, PV2100, PV2200, PV2300, PV2500, PV2600, PV2700, PV2800, PV2900, PV3000 and PV3100. Query TypedDataSet separately for each Gebieden key. Keep the 4,212 records with the original age, sex, page and count fields. For the age panel use Totaal_1 for LFTOTL, LFJ000 through LFJ101, and LFONBK. LFM records give overlapping infant month intervals. CBS digitized ages 100 and 101 separately from the original upper age interval and its footnote. For marital margins, LFTOTL identifies the all-ages counts.",
+    "reference_date_evidence": {
+      "url": "https://www.dendrou.eu/gallery/CV1899.pdf",
+      "locator": "Staatsblad no. 113, Royal Decree of 2 May 1899, Article 1, printed p. 98. The census used midnight between 31 December 1899 and 1 January 1900."
+    },
+    "population_definition_evidence": {
+      "url": "https://www.cbs.nl/-/media/imported/documents/2006/13/2002-a310-pub.pdf?sc_lang=nl-nl",
+      "locator": "CBS, Algemene tellingen in de twintigste eeuw, section 2.2.2, printed pp. 21–22. The werkelijke bevolking comprises usual residents, including residents temporarily absent."
+    },
+    "geographic_residual_evidence": {
+      "url": "https://www.cbs.nl/nl-nl/cijfers/detail/7377vt?dl=AFBAF",
+      "locator": "CBS StatLine 7377vt table notes. The national population includes 131 males and 27 females whose Dutch municipality was not established. The 11 provinces total 5,103,979. Comparisons by single-year age include negative national-minus-province differences at male ages 62, 92 and 100, so the residual age distribution is unresolved."
+    },
+    "table_discrepancies": "Zeeland's published female age rows total 109,364 against the published female control of 109,366. The difference is in the widowed female column. Preserve the two unresolved ages in the opening balance. Gelderland's published all-ages married-and-living-together female count is 89,594. Its non-overlapping age rows sum to 89,593 and close to the female population together with the other published marital categories.",
+    "collection": "netherlands_census_1899"
+  },
+  {
+    "id": "nl_cbs_1899_religion",
+    "title": "Volkstelling; indeeling naar de kerkelijke gezindten en den leeftijd, 1899",
+    "publisher": "Statistics Netherlands (CBS) and Netherlands Institute for Scientific Information Services (NIWI)",
+    "url": "https://www.cbs.nl/nl-nl/cijfers/detail/7378vt",
+    "locator": "Eighth general census, Table 5. The original printed volume and page are recorded in Pagina_17.",
+    "rights": "CC BY 4.0. Source: CBS, NIWI.",
+    "rights_url": "https://data.overheid.nl/dataset/3871-volkstelling--indeeling-naar-de-kerkelijke-gezindten-en-den-leeftijd--1899",
+    "observed_date": "1899-12-31",
+    "reference_time": "Midnight at the start of 1900-01-01.",
+    "scope": "Usual residents (de jure) of European Netherlands, including people temporarily absent. The 11 provinces are mutually exclusive. The national totals also include 131 men and 27 women not assigned to a municipality.",
+    "scope_reference": "https://www.cbs.nl/nl-nl/cijfers/detail/7377vt",
+    "extraction": {
+      "file": "religion.csv",
+      "data_url": "https://opendata.cbs.nl/ODataApi/OData/7378vt/TypedDataSet",
+      "column_metadata_url": "https://opendata.cbs.nl/ODataApi/OData/7378vt/DataProperties",
+      "geography_metadata_url": "https://opendata.cbs.nl/ODataApi/OData/7378vt/Gebieden",
+      "filter": "Leeftijdsgroepen eq 'LSTOTL' and (Gebieden eq 'NL1000' or Gebieden eq 'PV2000' or Gebieden eq 'PV2100' or Gebieden eq 'PV2200' or Gebieden eq 'PV2300' or Gebieden eq 'PV2500' or Gebieden eq 'PV2600' or Gebieden eq 'PV2700' or Gebieden eq 'PV2800' or Gebieden eq 'PV2900' or Gebieden eq 'PV3000' or Gebieden eq 'PV3100')",
+      "method": "Export the 24 filtered rows in source order as UTF-8 CSV with original OData field names and values, omitting only the API row ID. GSLMAN and GSLVRW are men and women. Each row has 15 affiliation categories and a total population. GeenKerkelijkeGezindte_15 records no religious affiliation. KerkelijkeGezindteOnbekend_16 records unknown affiliation."
+    },
+    "collection": "netherlands_religion_1899"
   },
   {
     "id": "lagos_blue_book_1900_1901",

@@ -1,0 +1,33 @@
+[
+  {
+    "id": "nl_cbs_census_1899_age_marital",
+    "title": "Volkstelling 1899; indeeling naar den leeftijd en den burgerlijken staat",
+    "publisher": "Statistics Netherlands (CBS) and NIWI",
+    "url": "https://www.cbs.nl/nl-nl/cijfers/detail/7379vt",
+    "locator": "Eighth census, fourth part, usual residents by age and marital status. National total RY117. Provincial totals GR145, FR225, DR 85, OV175, GE247, UT105, NH215, ZH261, ZE117, NB247 and LI169. The CBS Pagina_8 field preserves each record's printed page.",
+    "rights": "CC BY 4.0. Source CBS and NIWI. This extract limits geography to national and provincial records. age_sex.csv pivots sex codes and selects non-overlapping ages.",
+    "rights_url": "https://www.cbs.nl/en-gb/over-ons/website/copyright",
+    "raw_path": "cbs_7379vt.csv",
+    "table_urls": [
+      "https://opendata.cbs.nl/ODataApi/OData/7379vt/TypedDataSet",
+      "https://opendata.cbs.nl/ODataApi/OData/7379vt/Gebieden",
+      "https://opendata.cbs.nl/ODataApi/OData/7379vt/Leeftijden",
+      "https://opendata.cbs.nl/ODataApi/OData/7379vt/Geslacht",
+      "https://opendata.cbs.nl/ODataApi/OData/7379vt/TableInfos"
+    ],
+    "extract": "Select exact Gebieden keys NL1000, PV2000, PV2100, PV2200, PV2300, PV2500, PV2600, PV2700, PV2800, PV2900, PV3000 and PV3100. Query TypedDataSet separately for each Gebieden key. Keep the 4,212 records with the original age, sex, page and count fields. For the age panel use Totaal_1 for LFTOTL, LFJ000 through LFJ101, and LFONBK. LFM records give overlapping infant month intervals. CBS digitized ages 100 and 101 separately from the original upper age interval and its footnote. For marital margins, LFTOTL identifies the all-ages counts.",
+    "reference_date_evidence": {
+      "url": "https://www.dendrou.eu/gallery/CV1899.pdf",
+      "locator": "Staatsblad no. 113, Royal Decree of 2 May 1899, Article 1, printed p. 98. The census used midnight between 31 December 1899 and 1 January 1900."
+    },
+    "population_definition_evidence": {
+      "url": "https://www.cbs.nl/-/media/imported/documents/2006/13/2002-a310-pub.pdf?sc_lang=nl-nl",
+      "locator": "CBS, Algemene tellingen in de twintigste eeuw, section 2.2.2, printed pp. 21–22. The werkelijke bevolking comprises usual residents, including residents temporarily absent."
+    },
+    "geographic_residual_evidence": {
+      "url": "https://www.cbs.nl/nl-nl/cijfers/detail/7377vt?dl=AFBAF",
+      "locator": "CBS StatLine 7377vt table notes. The national population includes 131 males and 27 females whose Dutch municipality was not established. The 11 provinces total 5,103,979. Comparisons by single-year age include negative national-minus-province differences at male ages 62, 92 and 100, so the residual age distribution is unresolved."
+    },
+    "table_discrepancies": "Zeeland's published female age rows total 109,364 against the published female control of 109,366. The difference is in the widowed female column. Preserve the two unresolved ages in the opening balance. Gelderland's published all-ages married-and-living-together female count is 89,594. Its non-overlapping age rows sum to 89,593 and close to the female population together with the other published marital categories."
+  }
+]

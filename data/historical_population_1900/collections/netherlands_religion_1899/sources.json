@@ -1,0 +1,23 @@
+[
+  {
+    "id": "nl_cbs_1899_religion",
+    "title": "Volkstelling; indeeling naar de kerkelijke gezindten en den leeftijd, 1899",
+    "publisher": "Statistics Netherlands (CBS) and Netherlands Institute for Scientific Information Services (NIWI)",
+    "url": "https://www.cbs.nl/nl-nl/cijfers/detail/7378vt",
+    "locator": "Eighth general census, Table 5. The original printed volume and page are recorded in Pagina_17.",
+    "rights": "CC BY 4.0. Source: CBS, NIWI.",
+    "rights_url": "https://data.overheid.nl/dataset/3871-volkstelling--indeeling-naar-de-kerkelijke-gezindten-en-den-leeftijd--1899",
+    "observed_date": "1899-12-31",
+    "reference_time": "Midnight at the start of 1900-01-01.",
+    "scope": "Usual residents (de jure) of European Netherlands, including people temporarily absent. The 11 provinces are mutually exclusive. The national totals also include 131 men and 27 women not assigned to a municipality.",
+    "scope_reference": "https://www.cbs.nl/nl-nl/cijfers/detail/7377vt",
+    "extraction": {
+      "file": "religion.csv",
+      "data_url": "https://opendata.cbs.nl/ODataApi/OData/7378vt/TypedDataSet",
+      "column_metadata_url": "https://opendata.cbs.nl/ODataApi/OData/7378vt/DataProperties",
+      "geography_metadata_url": "https://opendata.cbs.nl/ODataApi/OData/7378vt/Gebieden",
+      "filter": "Leeftijdsgroepen eq 'LSTOTL' and (Gebieden eq 'NL1000' or Gebieden eq 'PV2000' or Gebieden eq 'PV2100' or Gebieden eq 'PV2200' or Gebieden eq 'PV2300' or Gebieden eq 'PV2500' or Gebieden eq 'PV2600' or Gebieden eq 'PV2700' or Gebieden eq 'PV2800' or Gebieden eq 'PV2900' or Gebieden eq 'PV3000' or Gebieden eq 'PV3100')",
+      "method": "Export the 24 filtered rows in source order as UTF-8 CSV with original OData field names and values, omitting only the API row ID. GSLMAN and GSLVRW are men and women. Each row has 15 affiliation categories and a total population. GeenKerkelijkeGezindte_15 records no religious affiliation. KerkelijkeGezindteOnbekend_16 records unknown affiliation."
+    }
+  }
+]

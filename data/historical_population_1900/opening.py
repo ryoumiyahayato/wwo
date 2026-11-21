@@ -228,6 +228,33 @@ def add_japanese_prefectures(group, observations):
     )
 
 
+def netherlands_opening(previous, observations):
+    source = "nl_cbs_census_1899_age_marital"
+    national_id = "nl1899_nl1000"
+    returns = [row for row in observations if row["source_id"] == source and row["date"] == DATE]
+    national = next(row for row in returns if row["unit_id"] == national_id)
+    provinces = [row for row in returns if row["parent_id"] == national_id and row["kind"] == "admin"]
+    balance = national["population_value"] - sum(row["population_value"] for row in provinces)
+    if len(provinces) != 11 or balance != 158:
+        raise ValueError("The Dutch provinces and unassigned residents must match the national census")
+    method = "Use the published usual-residence census at the midnight opening, without extrapolation."
+    places = {"nl1899_pv2700": ["place:amsterdam"]}
+    return dict(
+        unit_id=previous["unit_id"], date=DATE, source_id=source,
+        population_value=national["population_value"], locator=national["locator"],
+        method=method, scope=national["definition"],
+        uncertainty_kind="Census coverage error has no published interval. The 158 residents outside municipal totals have no opening provincial allocation.",
+        research_unit_ids=previous["research_unit_ids"], alternative_research_value=previous["population_value"],
+        research_unlocated_balance=balance, source_observations=[national["record_id"]],
+        partition_source="collections/netherlands_census_1899/observations.jsonl",
+        units=[dict(
+            unit_id=row["unit_id"], name=row["name"], population_value=row["population_value"],
+            locator=row["locator"], source_id=source, method=method, scope=row["definition"],
+            source_dates=[DATE], source_observations=[row["record_id"]], place_ids=places.get(row["unit_id"], []),
+        ) for row in provinces],
+    )
+
+
 def add_india_comparable_areas(group, observations):
     areas = {
         2: ("raj_andaman_nicobar_comparable", "Andaman and Nicobar Islands", "The comparable return excludes Indigenous islanders first enumerated in 1901."),
@@ -608,6 +635,9 @@ def groups(observations, version=1):
         add_india_comparable_areas(result["cshapes_gw_750"], observations)
     if version >= 11:
         add_mauritius_districts(result["cshapes_gw_590"], observations)
+    if version >= 12:
+        root = "kingdom_of_netherlands"
+        result[root] = netherlands_opening(result[root], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

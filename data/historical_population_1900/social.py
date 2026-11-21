@@ -3,7 +3,7 @@
 import csv
 import json
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from itertools import chain
 from pathlib import Path
 
@@ -45,7 +45,7 @@ CANADA_TABLES = {
 
 
 def distribution(opening, *, classification, source, date, observed_unit, scope,
-                 locator, total, observed_counts, unknown, definition):
+                 locator, total, observed_counts, unknown, definition, method=SHARE_METHOD):
     if total <= 0 or unknown < 0 or any(count < 0 for count in observed_counts.values()):
         raise ValueError(f"{observed_unit}: invalid {classification} counts")
     if sum(observed_counts.values()) + unknown != total:
@@ -66,7 +66,7 @@ def distribution(opening, *, classification, source, date, observed_unit, scope,
     return dict(
         classification_id=classification, source_ids=[source], observed_date=date,
         observed_unit_id=observed_unit, observed_scope=scope, locator=locator,
-        observed_total=total, observed_unknown=unknown, method=SHARE_METHOD,
+        observed_total=total, observed_unknown=unknown, method=method,
         definition=definition,
         counts={name: count for (is_unknown, name), count in sorted(allocated.items())
                 if not is_unknown and count},
@@ -190,6 +190,23 @@ def india_structure(pools):
             )
 
 
+def india_occupation(pools):
+    path = COLLECTIONS / "india_occupation_1901" / "occupation_orders.json"
+    for row in json.loads(path.read_text(encoding="utf8")):
+        pool_id = row["unit_id"]
+        pool = pools[pool_id]
+        total = row["observed_total"]
+        if pool["endpoint_values"][-1] != total:
+            raise ValueError(f"{pool_id}: the occupation and opening population controls use different census scopes")
+        source, = row["source_ids"]
+        yield pool_id, "occupation", distribution(
+            pool["population_value"], classification=row["classification_id"], source=source,
+            date=row["observed_date"], observed_unit=row["observed_unit_id"], scope=row["observed_scope"],
+            locator=row["locator"], total=total, observed_counts=row["observed_counts"],
+            unknown=row["observed_unknown"], definition=row["definition"],
+        )
+
+
 def canada_structure(pools):
     tables = json.loads((COLLECTIONS / "canada_social_1901" / "census.json").read_text(encoding="utf8"))
     for dimension, rows in tables.items():
@@ -206,6 +223,103 @@ def canada_structure(pools):
             )
 
 
+def netherlands_structure(pools):
+    census_date = "1900-01-01"
+    method = "Use the census counts at the midnight opening without apportionment across territories."
+    marital_source = "nl_cbs_census_1899_age_marital"
+    marital_labels = {
+        "Ongehuwd_2": "Unmarried",
+        "TeZamenWonende_3": "Married and not legally separated",
+        "GescheidenVanTafelEnBed_4": "Legally separated",
+        "InWeduwenstaat_5": "Widowed",
+        "GescheidenVanEcht_6": "Divorced",
+    }
+    with (COLLECTIONS / "netherlands_census_1899" / "cbs_7379vt.csv").open(encoding="utf8", newline="") as source:
+        marital_rows = defaultdict(list)
+        gelderland_women = []
+        for row in csv.DictReader(source):
+            age = row["Leeftijden"]
+            if age == "LFTOTL" and row["Geslacht"] in {"GSLMAN", "GSLVRW"}:
+                marital_rows[row["Gebieden"]].append(row)
+            elif (row["Gebieden"] == "PV2500" and row["Geslacht"] == "GSLVRW"
+                  and (age.startswith("LFJ") or age == "LFONBK")):
+                gelderland_women.append(row)
+    religion_labels = {
+        "NederduitschHervormden_2": "Dutch Reformed",
+        "WaalschHervormden_3": "Walloon Reformed",
+        "Remonstranten_4": "Remonstrant",
+        "ChristelijkGereformeerdenAfgesch_5": "Christian Reformed (Seceded)",
+        "Doopsgezinden_6": "Mennonite",
+        "EvangelischLutherschen_7": "Evangelical Lutheran",
+        "HersteldLutherschen_8": "Restored Lutheran",
+        "BehoorendeTotDeGereformeerdeKerken_9": "Reformed Churches in the Netherlands",
+        "RoomschKatholieken_10": "Roman Catholic",
+        "OudRoomschen_11": "Old Catholic",
+        "NederlandscheIsraelieten_12": "Dutch Israelite",
+        "PortugeescheIsraelieten_13": "Portuguese Israelite",
+        "OverigeKerkelijkeGezindten_14": "Other denomination",
+        "GeenKerkelijkeGezindte_15": "No denomination",
+    }
+    with (COLLECTIONS / "netherlands_religion_1899" / "religion.csv").open(encoding="utf8", newline="") as source:
+        religion_rows = defaultdict(list)
+        for row in csv.DictReader(source):
+            religion_rows[row["Gebieden"]].append(row)
+
+    for pool_id, pool in pools.items():
+        if not pool_id.startswith("nl1899_pv"):
+            continue
+        area = pool_id.removeprefix("nl1899_").upper()
+        total = pool["population_value"]
+        civil = marital_rows[area]
+        religion = religion_rows[area]
+        if ({row["Geslacht"] for row in civil} != {"GSLMAN", "GSLVRW"}
+                or len(civil) != 2 or sum(int(row["Totaal_1"]) for row in civil) != total
+                or {row["Geslacht"] for row in religion} != {"GSLMAN", "GSLVRW"}
+                or len(religion) != 2
+                or sum(int(row["TotaleBevolking_1"]) for row in religion) != total):
+            raise ValueError(f"{pool_id}: Dutch social census returns do not match the opening province")
+        marital_counts = Counter()
+        marital_unknown = 0
+        civil_method = method
+        for row in civil:
+            counts = {label: int(row[key]) for key, label in marital_labels.items()}
+            unknown = int(row["BurgerlijkeStaatOnbekend_7"])
+            sex_total = int(row["Totaal_1"])
+            if area == "PV2500" and row["Geslacht"] == "GSLVRW":
+                keys = (*marital_labels, "BurgerlijkeStaatOnbekend_7")
+                detail = {key: sum(int(band[key]) for band in gelderland_women) for key in keys}
+                if (sum(detail.values()) != sex_total or int(row["TeZamenWonende_3"]) - detail["TeZamenWonende_3"] != 1
+                        or any(int(row[key]) != detail[key] for key in keys if key != "TeZamenWonende_3")):
+                    raise ValueError("Gelderland's civil condition discrepancy is not explained by the age detail")
+                counts = {label: detail[key] for key, label in marital_labels.items()}
+                civil_method += (" For Gelderland women, add the mutually exclusive single-year and unstated-age "
+                                 "married counts, which close to the female population. The published all-age cell is one higher.")
+            if sum(counts.values()) + unknown != sex_total:
+                raise ValueError(f"{pool_id}: unreconciled civil condition values")
+            marital_counts.update(counts)
+            marital_unknown += unknown
+        civil_pages = ", ".join(sorted({row["Pagina_8"] for row in civil}))
+        yield pool_id, "marital_status", distribution(
+            total, classification="netherlands_1899_civil_condition", source=marital_source, date=census_date,
+            observed_unit=pool_id, scope=pool["name"], locator=f"CBS Table 7379vt, printed page {civil_pages}",
+            total=total, observed_counts=marital_counts, unknown=marital_unknown,
+            definition="Civil condition of usual residents. Legal separation was counted separately from divorce.",
+            method=civil_method,
+        )
+        counts = Counter()
+        for row in religion:
+            counts.update({label: int(row[key]) for key, label in religion_labels.items()})
+        pages = ", ".join(sorted({row["Pagina_17"] for row in religion}))
+        yield pool_id, "religion", distribution(
+            total, classification="netherlands_1899_census_denomination", source="nl_cbs_1899_religion",
+            date=census_date, observed_unit=pool_id, scope=pool["name"], locator=f"CBS Table 7378vt, printed page {pages}",
+            total=total, observed_counts=counts,
+            unknown=sum(int(row["KerkelijkeGezindteOnbekend_16"]) for row in religion),
+            definition="Usual residents by reported denomination. No denomination is a reported category.",
+            method=method,
+        )
+
+
 def opening_social(opening_groups):
     """Return independent person distributions on the opening's nonoverlapping leaf accounts."""
     pools = {
@@ -213,8 +327,8 @@ def opening_social(opening_groups):
         for group in opening_groups for unit in (group["units"] or [group])
     }
     regions = {}
-    marginals = chain(russian_structure(pools), india_structure(pools), canada_structure(pools),
-                      united_states_structure(pools, distribution))
+    marginals = chain(russian_structure(pools), india_structure(pools), india_occupation(pools), canada_structure(pools),
+                      united_states_structure(pools, distribution), netherlands_structure(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

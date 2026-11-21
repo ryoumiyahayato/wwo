@@ -131,13 +131,16 @@ def age_sex_panels():
     panels.extend(json.loads((AGE_SOURCES / "india_census_1891_panels.json").read_text(encoding="utf8")))
     panels.extend(json.loads((AGE_SOURCES / "cape_1904_panels.json").read_text(encoding="utf8")))
     panels.extend(json.loads((AGE_SOURCES / "opening_1900_regional_panels.json").read_text(encoding="utf8")))
+    netherlands = HERE / "netherlands_census_1899"
+    panels.extend(json.loads((netherlands / "panels.json").read_text(encoding="utf8")))
     by_panel = {panel["id"]: [] for panel in panels}
-    for filename in (
+    filenames = (
         "age_sex.csv", "us_census_1900.csv", "uk_county_age.csv", "france_census_1901.csv",
         "germany_census_1900.csv", "india_census_1901.csv", "india_census_1891.csv", "cape_1904.csv",
         "opening_1900_regional_ages.csv",
-    ):
-        for row in read_csv(AGE_SOURCES / filename):
+    )
+    for path in [*(AGE_SOURCES / name for name in filenames), netherlands / "age_sex.csv"]:
+        for row in read_csv(path):
             for key in ("age_min", "age_max", "both", "male", "female"):
                 row[key] = int(row[key]) if row[key] else None
             by_panel[row["panel"]].append(row)

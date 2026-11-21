@@ -27,6 +27,7 @@
     "madagascar_population": 6,
     "mauritius_districts": 20,
     "morocco_population": 5,
+    "netherlands_census_1899": 12,
     "nigeria_lagos_population": 3,
     "philippines": 51,
     "polar_presence": 1,
@@ -41,7 +42,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 164,
+  "cited_sources": 167,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -50,14 +51,14 @@
   "documented_people_under_legacy_controls": 669895792,
   "replaced_legacy_roots": 30,
   "new_roots": 24,
-  "production_people": 1329407981,
-  "production_people_pct_world_estimate": 83.345,
-  "population_outside_evidence_opening_estimate": 265666267,
+  "production_people": 1329370203,
+  "production_people_pct_world_estimate": 83.342,
+  "population_outside_evidence_opening_estimate": 265704045,
   "legacy_only_people": 135984208,
-  "authoritative_total_for_new_game": 1465392189,
-  "roots_with_partitions": 21,
-  "disjoint_leaves": 596,
-  "people_in_partitions": 1194051123,
+  "authoritative_total_for_new_game": 1465354411,
+  "roots_with_partitions": 22,
+  "disjoint_leaves": 607,
+  "people_in_partitions": 1199155102,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -66,10 +67,14 @@
     {
       "unit_id": "cshapes_gw_850",
       "people": 16271347
+    },
+    {
+      "unit_id": "kingdom_of_netherlands",
+      "people": 158
     }
   ],
-  "partitions_with_explicit_places": 23,
-  "people_in_partitions_with_explicit_places": 147466448,
+  "partitions_with_explicit_places": 24,
+  "people_in_partitions_with_explicit_places": 148434579,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
   "political_catalogue_members_of_production_groups": 63,
@@ -279,15 +284,15 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2320,
+  "source_statistical_units": 2332,
   "opening_by_source_type": {
     "territorial_returns": {
-      "roots": 24,
-      "people": 313256962
+      "roots": 25,
+      "people": 318361099
     },
     "historical_world_reconstruction": {
-      "roots": 30,
-      "people": 346255227
+      "roots": 29,
+      "people": 341113312
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 3,
@@ -304,35 +309,35 @@
   "opening_social_coverage": {
     "household": {
       "assigned_people": 72890961,
-      "unknown_people": 1392501228
+      "unknown_people": 1392463450
     },
     "language": {
       "assigned_people": 132730938,
-      "unknown_people": 1332661251
+      "unknown_people": 1332623473
     },
     "legal_estate": {
       "assigned_people": 132020769,
-      "unknown_people": 1333371420
+      "unknown_people": 1333333642
     },
     "literacy": {
       "assigned_people": 144491595,
-      "unknown_people": 1320900594
+      "unknown_people": 1320862816
     },
     "marital_status": {
-      "assigned_people": 95776561,
-      "unknown_people": 1369615628
+      "assigned_people": 100880474,
+      "unknown_people": 1364473937
     },
     "occupation": {
-      "assigned_people": 28866450,
-      "unknown_people": 1436525739
+      "assigned_people": 33266431,
+      "unknown_people": 1432087980
     },
     "religion": {
-      "assigned_people": 233441467,
-      "unknown_people": 1231950722
+      "assigned_people": 238545354,
+      "unknown_people": 1226809057
     },
     "residence": {
       "assigned_people": 309242508,
-      "unknown_people": 1156149681
+      "unknown_people": 1156111903
     }
   },
   "structural_observations_by_source": {
@@ -359,14 +364,15 @@
     "cape_census_1904_age_hmso_1906": 20,
     "jp_ltes_1899_resident_ages": 82,
     "fi_yearbook_1910_population_ages": 22,
+    "nl_cbs_census_1899_age_marital": 1248,
     "jp_cabinet_population_1898_original": 23,
     "jp_cabinet_local_occupations_1913_tokyo": 8,
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 655613775,
-  "structure_opening_pool_count": 427,
-  "structure_opening_residents_outside_modeled_pools": 809778414,
+  "structure_opening_pool_controls": 660717754,
+  "structure_opening_pool_count": 438,
+  "structure_opening_residents_outside_modeled_pools": 804636657,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -2637,6 +2643,83 @@
       "observed_date": "1899-12-31"
     },
     {
+      "unit_id": "nl1899_pv2000",
+      "opening_total": 299602,
+      "observed_unit_id": "nl1899_pv2000",
+      "observed_total": 299602,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "nl1899_pv2100",
+      "opening_total": 340262,
+      "observed_unit_id": "nl1899_pv2100",
+      "observed_total": 340262,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "nl1899_pv2200",
+      "opening_total": 148544,
+      "observed_unit_id": "nl1899_pv2200",
+      "observed_total": 148544,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "nl1899_pv2300",
+      "opening_total": 333338,
+      "observed_unit_id": "nl1899_pv2300",
+      "observed_total": 333338,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "nl1899_pv2500",
+      "opening_total": 566549,
+      "observed_unit_id": "nl1899_pv2500",
+      "observed_total": 566549,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "nl1899_pv2600",
+      "opening_total": 251034,
+      "observed_unit_id": "nl1899_pv2600",
+      "observed_total": 251034,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "nl1899_pv2700",
+      "opening_total": 968131,
+      "observed_unit_id": "nl1899_pv2700",
+      "observed_total": 968131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "nl1899_pv2800",
+      "opening_total": 1144448,
+      "observed_unit_id": "nl1899_pv2800",
+      "observed_total": 1144448,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "nl1899_pv2900",
+      "opening_total": 216295,
+      "observed_unit_id": "nl1899_pv2900",
+      "observed_total": 216295,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "nl1899_pv3000",
+      "opening_total": 553842,
+      "observed_unit_id": "nl1899_pv3000",
+      "observed_total": 553842,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "nl1899_pv3100",
+      "opening_total": 281934,
+      "observed_unit_id": "nl1899_pv3100",
+      "observed_total": 281934,
+      "observed_date": "1900-01-01"
+    },
+    {
       "unit_id": "raj_agra_oudh",
       "opening_total": 47600781,
       "observed_unit_id": "raj_agra_oudh_1901_census",
@@ -3470,10 +3553,18 @@
       "population": 2712562,
       "age_not_stated": 0,
       "combined_open_age_and_unreported": null
+    },
+    {
+      "panel_id": "nl1899_nl1000",
+      "unit_id": "nl1899_nl1000",
+      "date": "1900-01-01",
+      "population": 5104137,
+      "age_not_stated": 0,
+      "combined_open_age_and_unreported": null
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 511,
+  "dated_parent_controls": 512,
   "dated_parent_controls_arithmetic_closure": 470,
   "research_regions": {
     "Africa": {
@@ -3603,9 +3694,9 @@
         "sweden_norway_union",
         "swiss_confederation"
       ],
-      "production_people": 408822583,
-      "production_pct_of_regional_research_estimate": 97.537,
-      "people_with_opening_subdivision": 332407293,
+      "production_people": 408784805,
+      "production_pct_of_regional_research_estimate": 97.528,
+      "people_with_opening_subdivision": 337511272,
       "research_only_units": 9,
       "research_only_people": 10103353
     },
@@ -4061,11 +4152,11 @@
       {
         "opening_unit_id": "kingdom_of_netherlands",
         "research_region": "Europe",
-        "opening_control": 5141915,
-        "in_model_pools": 0,
-        "outside_model_pools": 5141915,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "opening_control": 5104137,
+        "in_model_pools": 5103979,
+        "outside_model_pools": 158,
+        "modeled_age_and_sex": 5103872,
+        "modeled_sex_age_unknown": 107
       },
       {
         "opening_unit_id": "kingdom_of_portugal",
@@ -4318,11 +4409,11 @@
         "modeled_sex_age_unknown": 4346
       },
       "Europe": {
-        "opening_control": 408822583,
-        "in_model_pools": 258068852,
-        "outside_model_pools": 150753731,
-        "modeled_age_and_sex": 234321048,
-        "modeled_sex_age_unknown": 23747804
+        "opening_control": 408784805,
+        "in_model_pools": 263172831,
+        "outside_model_pools": 145611974,
+        "modeled_age_and_sex": 239424920,
+        "modeled_sex_age_unknown": 23747911
       },
       "Africa": {
         "opening_control": 18751671,
@@ -4347,22 +4438,22 @@
       }
     },
     "world": {
-      "opening_control": 1465392189,
-      "in_model_pools": 655613775,
-      "outside_model_pools": 809778414,
-      "modeled_age_and_sex": 631569196,
-      "modeled_sex_age_unknown": 24044579
+      "opening_control": 1465354411,
+      "in_model_pools": 660717754,
+      "outside_model_pools": 804636657,
+      "modeled_age_and_sex": 636673068,
+      "modeled_sex_age_unknown": 24044686
     }
   },
   "opening_count_basis": {
     "counts": {
       "direct_enumeration_on_opening_date": {
-        "people": 0,
-        "pct_of_research_reference": 0.0
+        "people": 5104137,
+        "pct_of_research_reference": 0.32
       },
       "published_historical_estimates": {
-        "people": 706595081,
-        "pct_of_research_reference": 44.299
+        "people": 701453166,
+        "pct_of_research_reference": 43.976
       },
       "date_models_from_territorial_returns": {
         "people": 622812900,
@@ -4761,9 +4852,9 @@
       },
       {
         "unit_id": "kingdom_of_netherlands",
-        "source_id": "ft_world_v5",
-        "sourced_people": 5141915,
-        "sourced_basis": "published_historical_estimates",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 158,
+        "sourced_basis": "direct_enumeration_on_opening_date",
         "retained_legacy_people": 0
       },
       {
@@ -4821,6 +4912,94 @@
         "sourced_people": 0,
         "sourced_basis": null,
         "retained_legacy_people": 5000000
+      },
+      {
+        "unit_id": "nl1899_pv2000",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 299602,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
+      },
+      {
+        "unit_id": "nl1899_pv2100",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 340262,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
+      },
+      {
+        "unit_id": "nl1899_pv2200",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 148544,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
+      },
+      {
+        "unit_id": "nl1899_pv2300",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 333338,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
+      },
+      {
+        "unit_id": "nl1899_pv2500",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 566549,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
+      },
+      {
+        "unit_id": "nl1899_pv2600",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 251034,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
+      },
+      {
+        "unit_id": "nl1899_pv2700",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 968131,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
+      },
+      {
+        "unit_id": "nl1899_pv2800",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 1144448,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
+      },
+      {
+        "unit_id": "nl1899_pv2900",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 216295,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
+      },
+      {
+        "unit_id": "nl1899_pv3000",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 553842,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
+      },
+      {
+        "unit_id": "nl1899_pv3100",
+        "source_id": "nl_cbs_census_1899_age_marital",
+        "sourced_people": 281934,
+        "sourced_basis": "direct_enumeration_on_opening_date",
+        "retained_legacy_people": 0,
+        "parent_id": "kingdom_of_netherlands"
       },
       {
         "unit_id": "orange_free_state",
@@ -4949,6 +5128,6 @@
         "retained_legacy_people": 2400000
       }
     ],
-    "note": "Published historical estimates include the normalized date of a research or contemporary estimate. Territorial models use census or official statistical returns at other dates. No census exactly matches the opening date and scope. Residents without an exclusive opening count remain in the geography and benchmark ledgers; the difference between authorities is not an observed count of missing residents."
+    "note": "Published historical estimates include the normalized date of a research or contemporary estimate. Territorial models use census or official statistical returns at other dates. The Dutch count enumerates usual residents at the opening midnight. The difference between authorities is not an observed count of missing residents."
   }
 }

@@ -1,0 +1,19 @@
+[
+  {
+    "id": "india_1901_occupation_table_xv_part_iii",
+    "title": "Census of India, 1901, Vol. I-A, India, Part II: Tables",
+    "publisher": "Office of the Superintendent of Government Printing, India, 1903",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924",
+    "locator": "Table XV, p. 367 notes and Part III, pp. 396–397 and 400–401, Actual Workers. Table II-A, p. 10 supplies the resident totals, cross-referenced to Table I.",
+    "rights": "Historical government publication. Numeric transcription and derived counts. Original scans linked.",
+    "raw_path": "occupation_orders.json",
+    "table_urls": [
+      "https://southasiacommons.net/artifacts/2336476/census-of-india-1901/3112330/",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n14/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n401/mode/1up",
+      "https://archive.org/details/in.ernet.dli.2015.55924/page/n405/mode/1up",
+      "https://www.scribd.com/document/765937813/Census-India-1901-India-Tables"
+    ],
+    "notes": "Selected printed order totals from the national volume's public OCR, supported by the visible corresponding sub-order counts. The national Central India Agency aggregate includes Gwalior. Rajputana Agency excludes the separate Ajmer-Merwara row. The Part III column for subsidiary agriculture and the Part II count of dependents are outside the admitted partition."
+  }
+]

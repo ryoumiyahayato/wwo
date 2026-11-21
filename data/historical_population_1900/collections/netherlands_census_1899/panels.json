@@ -1,0 +1,211 @@
+[
+  {
+    "id": "nl1899_nl1000",
+    "observed_unit_id": "nl1899_nl1000",
+    "published_scope": "Nederland",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed RY117 and following pages. CBS StatLine 7379vt NL1000.",
+    "definition": "Usual residents of European Netherlands, including 158 people whose municipality was not established. Overseas possessions are outside the census scope.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": true
+  },
+  {
+    "id": "nl1899_pv2000",
+    "observed_unit_id": "nl1899_pv2000",
+    "published_scope": "Groningen",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed GR145 and following pages. CBS StatLine 7379vt PV2000.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv2000",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year age and sex counts at midnight initiating 1900-01-01.",
+    "opening_band_roles": [
+      "band",
+      "unknown_age"
+    ]
+  },
+  {
+    "id": "nl1899_pv2100",
+    "observed_unit_id": "nl1899_pv2100",
+    "published_scope": "Friesland",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed FR225 and following pages. CBS StatLine 7379vt PV2100.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv2100",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year age and sex counts at midnight initiating 1900-01-01.",
+    "opening_band_roles": [
+      "band",
+      "unknown_age"
+    ]
+  },
+  {
+    "id": "nl1899_pv2200",
+    "observed_unit_id": "nl1899_pv2200",
+    "published_scope": "Drenthe",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed DR 85 and following pages. CBS StatLine 7379vt PV2200.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv2200",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year age and sex counts at midnight initiating 1900-01-01.",
+    "opening_band_roles": [
+      "band",
+      "unknown_age"
+    ]
+  },
+  {
+    "id": "nl1899_pv2300",
+    "observed_unit_id": "nl1899_pv2300",
+    "published_scope": "Overijssel",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed OV175 and following pages. CBS StatLine 7379vt PV2300.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv2300",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year age and sex counts at midnight initiating 1900-01-01.",
+    "opening_band_roles": [
+      "band",
+      "unknown_age"
+    ]
+  },
+  {
+    "id": "nl1899_pv2500",
+    "observed_unit_id": "nl1899_pv2500",
+    "published_scope": "Gelderland",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed GE247 and following pages. CBS StatLine 7379vt PV2500.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv2500",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year age and sex counts at midnight initiating 1900-01-01.",
+    "opening_band_roles": [
+      "band",
+      "unknown_age"
+    ]
+  },
+  {
+    "id": "nl1899_pv2600",
+    "observed_unit_id": "nl1899_pv2600",
+    "published_scope": "Utrecht",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed UT105 and following pages. CBS StatLine 7379vt PV2600.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv2600",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year age and sex counts at midnight initiating 1900-01-01.",
+    "opening_band_roles": [
+      "band",
+      "unknown_age"
+    ]
+  },
+  {
+    "id": "nl1899_pv2700",
+    "observed_unit_id": "nl1899_pv2700",
+    "published_scope": "Noordholland",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed NH215 and following pages. CBS StatLine 7379vt PV2700.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv2700",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year age and sex counts at midnight initiating 1900-01-01.",
+    "opening_band_roles": [
+      "band",
+      "unknown_age"
+    ]
+  },
+  {
+    "id": "nl1899_pv2800",
+    "observed_unit_id": "nl1899_pv2800",
+    "published_scope": "Zuidholland",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed ZH261 and following pages. CBS StatLine 7379vt PV2800.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv2800",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year age and sex counts at midnight initiating 1900-01-01.",
+    "opening_band_roles": [
+      "band",
+      "unknown_age"
+    ]
+  },
+  {
+    "id": "nl1899_pv2900",
+    "observed_unit_id": "nl1899_pv2900",
+    "published_scope": "Zeeland",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed ZE117 and following pages. CBS StatLine 7379vt PV2900.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "The published Zeeland female age rows and the age-not-stated row sum to 109,364, two below the published female control of 109,366. The opening remainder keeps those two women at unknown age.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv2900",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year ages and sex totals. Carry the unallocated female age balance without an age.",
+    "opening_band_roles": [
+      "band"
+    ],
+    "opening_residual_label": "Age unresolved in the published table"
+  },
+  {
+    "id": "nl1899_pv3000",
+    "observed_unit_id": "nl1899_pv3000",
+    "published_scope": "Noordbrabant",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed NB247 and following pages. CBS StatLine 7379vt PV3000.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv3000",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year age and sex counts at midnight initiating 1900-01-01.",
+    "opening_band_roles": [
+      "band",
+      "unknown_age"
+    ]
+  },
+  {
+    "id": "nl1899_pv3100",
+    "observed_unit_id": "nl1899_pv3100",
+    "published_scope": "Limburg",
+    "observed_date": "1900-01-01",
+    "source_id": "nl_cbs_census_1899_age_marital",
+    "locator": "Fourth part, printed LI169 and following pages. CBS StatLine 7379vt PV3100.",
+    "definition": "Usual residents of the historical province. Residents temporarily absent are included.",
+    "uncertainty": "Original census enumeration. CBS documents small transcription and printing discrepancies.",
+    "broad_observation": false,
+    "opening_unit_id": "nl1899_pv3100",
+    "opening_from_version": 12,
+    "opening_method": "Use the published single-year age and sex counts at midnight initiating 1900-01-01.",
+    "opening_band_roles": [
+      "band",
+      "unknown_age"
+    ]
+  }
+]
