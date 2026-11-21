@@ -2,8 +2,8 @@
   "as_of": "1900-01-01",
   "place_basis": "横滨开港后以水陆接驳办理进出口。1894年铁桟桥竣工，横滨港在1900年已有船货装卸作业。",
   "sources": [
-    {"publisher":"横浜市港湾局","title":"横浜港の歴史（開港から関東大震災まで）","url":"https://www.city.yokohama.lg.jp/kanko-bunka/minato/taikan/manabu/rekishi/history0.html"},
-    {"publisher":"横浜市港湾局","title":"横浜港の歴史（開港期）","url":"https://www.city.yokohama.lg.jp/kanko-bunka/minato/taikan/manabu/rekishi/history1.html"}
+    {"publisher":"横浜市港湾局","title":"横浜港の歴史（変遷図、年表）","url":"https://www.city.yokohama.lg.jp/kanko-bunka/minato/taikan/manabu/rekishi/history0.html"},
+    {"publisher":"横浜市港湾局","title":"みなとへＧＯ！ 横浜港の歴史（１）","url":"https://www.city.yokohama.lg.jp/kanko-bunka/minato/taikan/manabu/rekishi/history1.html"}
   ],
   "terms_basis": "理货须在横滨港的水运装卸节点出勤。雇主归入日本地区市场。两名空缺、每班4小时、时薪6个模拟货币最小单位、当日结算都是游戏估计。使用既有地区市场账户，新增岗位无开局现金，按可用余额支付，余款记欠薪。",
   "market_employers": {"market:legacy_aggregate:empire_of_japan":"organization:yokohama_port_handling"},

@@ -559,7 +559,16 @@ mod tests {
         let duration = i64::from(first.travel_minutes);
         world.depart_player().unwrap();
         world.stop_player().unwrap();
-        let mut world = resume(&bootstrap, &world);
+        // Earlier French slots had a contract and ticket but no Japanese payroll account.
+        let mut slot = world.snapshot();
+        let fields = slot["ledger"][1].as_array_mut().unwrap();
+        let accounts = &mut fields.iter_mut().find(|field| field[0] == "accounts").unwrap()[1][1];
+        let rows = accounts.as_array_mut().unwrap();
+        let count = rows.len();
+        rows.retain(|row| crate::formal_save::lookup(crate::formal_save::map(row).unwrap(), "owner_id")
+            .and_then(serde_json::Value::as_str) != Some("market:legacy_aggregate:empire_of_japan"));
+        assert_eq!(rows.len() + 1, count);
+        let mut world = bootstrap.restore_native(serde_json::from_value(slot).unwrap()).unwrap();
         world.advance_migrated_domains(duration, &BTreeMap::new()).unwrap();
         assert_eq!(world.player_current_place(), Some(ROUEN));
         assert_eq!(world.player_home(), PARIS);
@@ -626,6 +635,65 @@ mod tests {
         assert_eq!(restored.player().polity_id, "state:british_isles_1900");
         assert!(restored.completed_firm_work("firm:opening_paris_workshop", day).unwrap()
             .iter().any(|work| work.worker == player));
+    }
+
+    #[test]
+    fn yokohama_port_work_pays_a_visiting_worker_after_a_round_trip_and_restore() {
+        const JOB: &str = "job:yokohama_port_handling";
+        const PORT: &str = "water:empire_of_japan:yokohama";
+        const MARKET: &str = "market:legacy_aggregate:empire_of_japan";
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("qing_empire").unwrap();
+        let player = world.player().id.clone();
+        let origin = world.player_home().to_owned();
+        let city = world.transport().routing_node("place:yokohama").unwrap().to_owned();
+        let japan_only = crate::formal_work::WorkOpening::load(|unit, place| {
+            (unit == "empire_of_japan").then(|| world.transport().routing_node(place)).flatten().map(str::to_owned)
+        }).unwrap();
+        assert!(japan_only.entry_job(JOB).is_some());
+        assert!(japan_only.entry_job("job:opening_paris_workshop").is_none());
+        assert!(world.apply_for_work(JOB).is_err());
+        let travel_to = |world: &mut InitialWorld, to: &str| {
+            let arrival = world.preview_travel(to, ModeSet::ALL).unwrap().arrival_minute();
+            world.depart_player().unwrap();
+            world.advance_migrated_domains(arrival - world.clock.snapshot().total_minutes, &BTreeMap::new()).unwrap();
+        };
+        travel_to(&mut world, &city);
+        assert!(world.transport_destinations().any(|place| place == PORT));
+        assert!(world.apply_for_work(JOB).is_err());
+        travel_to(&mut world, PORT);
+        let price = world.macro_economy.markets()["empire_of_japan"].commodities["tea"].price_centimes;
+        let receipts = world.ledger.market_cash(MARKET);
+        world.buy_freight("tea", 100, price).unwrap();
+        assert_eq!(world.ledger.market_cash(MARKET), receipts + (price + 9) / 10);
+        world.consult_local_work(&player).unwrap();
+        assert!(world.jobs().any(|(job, free)| job.id == JOB && free == 2));
+        world.apply_for_work(JOB).unwrap();
+        travel_to(&mut world, &city);
+        assert!(world.book_work().is_err());
+        world.set_commute(true).unwrap();
+        let start = world.commute_departure().unwrap();
+        world.advance_migrated_domains(start - world.clock.snapshot().total_minutes, &BTreeMap::new()).unwrap();
+        let arrival = world.travel_plan().unwrap().arrival_minute();
+        let mut world = resume(&bootstrap, &world);
+        world.advance_migrated_domains(arrival - start, &BTreeMap::new()).unwrap();
+        assert_eq!(world.player_current_place(), Some(PORT));
+        assert!(world.employment().unwrap().1);
+        world.advance_migrated_domains(4 * MINUTES_PER_HOUR, &BTreeMap::new()).unwrap();
+        let back = world.travel_plan().unwrap().arrival_minute();
+        world.advance_migrated_domains(back - world.clock.snapshot().total_minutes, &BTreeMap::new()).unwrap();
+        assert_eq!(world.player_current_place(), Some(city.as_str()));
+        let day = world.clock.current_day() + 1;
+        let cash_before_wages = world.balance().unwrap().cash;
+        world.advance_migrated_domains(day * MINUTES_PER_DAY - back, &BTreeMap::new()).unwrap();
+        let restored = resume(&bootstrap, &world);
+        let shifts = restored.completed_firm_work(MARKET, day).unwrap();
+        let shift = shifts.iter().find(|record| record.worker == player).unwrap();
+        assert_eq!((shift.job, shift.hours, shift.accrued_wages, shift.paid_wages, shift.unpaid_wages), (JOB, 4, 24, 24, 0));
+        assert_eq!(restored.balance().unwrap().cash, cash_before_wages + 24);
+        assert_eq!(restored.player_home(), origin);
+        assert_eq!(restored.commute_base(), Some(city.as_str()));
+        assert_eq!(restored.employment().unwrap().0.place, PORT);
     }
 
     #[test]
