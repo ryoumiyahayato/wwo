@@ -297,7 +297,7 @@ for line in china.splitlines():
             dt,
             cq,
             f"Table 1.1, pp. 17–18, {n if not total else 'Total'}, {dt}",
-            "Retrospective estimate of persons in the research table geography. Later provincial labels can precede formal creation. Taiwan has no row; territorial equivalence to the opening map is unverified.",
+            "Retrospective regional estimate. Provincial labels can precede formal creation. Cao includes Taiwan in Fujian, includes Inner Mongolia and excludes Outer Mongolia (Federico–Tena, China workbook, Sources note 11).",
             "historical_demographic_reconstruction",
             "Asia",
             quality="rounded_reconstruction",
@@ -358,8 +358,8 @@ for dt, n, v, de in [
     (
         "1910",
         "Customs provincial subtotal",
-        438425000,
-        "Printed Customs total; includes combined 55 million for five provinces that lack individual estimates.",
+        428425000,
+        "Printed Customs total. The thirteen individual entries, five-province estimate of 55 million and Manchuria's 17 million sum to 438,425,000, exceeding the printed total by 10 million.",
     ),
 ]:
     add(
@@ -376,6 +376,64 @@ for dt, n, v, de in [
         "Asia",
         quality="historical_estimate_uncertain",
     )
+for name, value, column, explanation in [
+    ("Manchuria", 14917000, "minchengpu", "Shengking, Kirin and Heilungkiang combined. The Fengtien household multiplier differs from the national default."),
+    ("Manchuria", 17000000, "maritime_customs", "Shengking, Kirin and Heilungkiang combined."),
+    ("Henan, Gansu, Guizhou, Shanxi and Shaanxi", 55000000, "maritime_customs", "Joint estimate for the five dagger-marked provinces; no within-group breakdown."),
+    ("Manchu military organization", 1700000, "minchengpu", "Separate administrative category below provincial subtotal."),
+    ("Dependencies", 760000, "minchengpu", "Separate administrative category below provincial subtotal. Tibet is tabulated separately."),
+]:
+    add("qing_yearbook_" + slug(name), name, None, "benchmark", value, "1910", qy,
+        f"Chapter I, pp. 2–3, {name}, {column}", explanation, column, "Asia",
+        quality="historical_estimate_uncertain")
+xu = "xu_leeuwen_zanden_qing_1893"
+src(
+    xu, "Urbanization in China, ca. 1100–1900", "Yi Xu, Bas van Leeuwen and Jan Luiten van Zanden, Frontiers of Economics in China 13(3), 2018",
+    "https://pure.knaw.nl/ws/portalfiles/portal/8633887/Urbanization_in_China_ca._1100_C1900.pdf",
+    "Section 2.2 and Table 1, pp. 329–331. The 1893 column draws on Cao Shuji.",
+    "Numerical facts with attribution. No full table image or article text redistributed.",
+)
+for label, tens_of_thousands in {
+    "Hebei including Rehe, Beijing, Tianjin and Baoding": 3396, "Shaanxi": 806,
+    "Shanxi": 1004, "Shandong": 4100, "Henan": 2823, "Jiangsu including Shanghai": 3100,
+    "Zhejiang": 1705, "Fujian excluding Taiwan": 1190, "Jiangxi": 1400, "Huguang (Hunan and Hubei)": 4435,
+    "Guangdong": 2771, "Sichuan": 4018, "Anhui": 2297, "Guangxi": 1340, "Guizhou": 1100,
+    "Yunnan": 1240, "Gansu": 581, "Inner China": 37306, "Yangtze Delta": 1567,
+    "Xinjiang and Qinghai": 218, "Mongolia and northeast": 1847, "Tibet": 114,
+    "Taiwan": 282, "China in Qing territory": 39766,
+}.items():
+    add(
+        "qing_xu_1893_" + slug(label), label, None, "benchmark",
+        tens_of_thousands * 10000, "1893", xu, f"Table 1, pp. 330–331, {label}, 1893",
+        "Historical population reconstruction on the published table geography. Regional subtotals and the Yangtze Delta overlap provincial rows.",
+        "historical_demographic_reconstruction", "Asia", quality="rounded_reconstruction",
+    )
+ft_china = "federico_tena_china_country_workbook_v3"
+src(
+    ft_china, "Federico-Tena World Population Historical Database: China (V3)",
+    "Giovanni Federico and Antonio Tena-Junguito, e-cienciaDatos",
+    "https://doi.org/10.21950/K1SRL4",
+    "china_1800-1938_FTWPHD_2025_v01.xlsx, China and Sources; country readme, p. 1.",
+    "Numeric facts and short original descriptions with attribution.", workbook="https://edatos.consorciomadrono.es/api/access/datafile/33992",
+)
+for yr, val, loc in [(1880, 2664000, "Cao"), (1905, 3123000, "Ho"), (1910, 3253000, "Cao")]:
+    add("taiwan_ft_" + loc.lower(), "Taiwan", None, "benchmark", val, str(yr), ft_china,
+        f"Sources, note 12, {loc}, {yr}",
+        "Historical Taiwan population benchmark as cited. Exact observation day and offshore-island breakdown unspecified.",
+        "published_historical_benchmark", "Asia", quality="rounded_reconstruction")
+add("outer_mongolia_ft_1918", "Outer Mongolia", None, "benchmark", 648000, "1918", ft_china,
+    "Sources, note 12, first enumeration", "First enumeration as cited in the workbook; territorial scope within Outer Mongolia is unitemized.",
+    "reported_enumeration", "Asia", quality="rounded_historical_enumeration")
+mongolia = "shagdar_mongolia_nso_population"
+src(mongolia, "Mongolia's Pre-1990 Economy: An Extended Overview", "Enkhbayar Shagdar, ERINA Discussion Paper 2002 (2020)",
+    "https://www.unii.ac.jp/erina-unp/archive/en/wp-content/uploads/2020/03/DP2002.pdf",
+    "Pp. 4–5, Table 2.1.1, compiled from the Mongolian NSO.", "Numerical facts with attribution.")
+for yr, value in [(1900, 636700), (1918, 647500)]:
+    add("mongolia_nso_historical", "Mongolia", None, "benchmark", value, str(yr), mongolia,
+        f"Section 2.1, pp. 4–5, Table 2.1.1, {yr}",
+        "Population of Mongolia in the retrospective NSO series. The first historical enumeration is 1918. The paper gives no boundary crosswalk for Uriankhai.",
+        "historical_demographic_reconstruction" if yr == 1900 else "reported_enumeration",
+        "Asia", quality="historical_benchmark_uncertain_territory")
 nz = "nz_official_yearbook_1900"
 src(
     nz,

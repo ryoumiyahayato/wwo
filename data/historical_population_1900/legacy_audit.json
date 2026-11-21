@@ -620,9 +620,9 @@
     "research_candidates": [
       "ft_korea"
     ],
-    "opening_replacement": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "opening_replacement": 17078033,
+    "replacement_minus_legacy": 78033,
+    "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {
@@ -664,9 +664,9 @@
     "research_candidates": [
       "ft_argentina"
     ],
-    "opening_replacement": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "opening_replacement": 4624686,
+    "replacement_minus_legacy": -75314,
+    "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {

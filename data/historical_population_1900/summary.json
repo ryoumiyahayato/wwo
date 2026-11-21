@@ -2,20 +2,21 @@
   "reference_date": "1900-01-01",
   "release_status": "PARTIAL",
   "research_observations_by_collection": {
+    "african_returns": 11,
     "americas": 657,
     "britain": 206,
     "cities_europe": 1742,
     "crown_islands": 29,
     "danish": 56,
-    "eastern": 1070,
-    "japan_taiwan": 213,
+    "eastern": 1105,
+    "japan_taiwan": 232,
     "liechtenstein": 25,
     "russia": 1721,
     "swiss": 57,
     "world": 499,
     "asian_interpolation": 62
   },
-  "cited_sources": 61,
+  "cited_sources": 68,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -33,10 +34,12 @@
         "B": 1
       },
       "production_root_ids": [
+        "cshapes_gw_570",
+        "cshapes_gw_585",
         "cshapes_gw_590"
       ],
-      "production_people": 373996,
-      "production_pct_of_regional_research_estimate": 0.288,
+      "production_people": 852505,
+      "production_pct_of_regional_research_estimate": 0.656,
       "people_with_opening_subdivision": 373996
     },
     "America": {
@@ -51,18 +54,23 @@
         "not_assessed_for_this_revision": 1
       },
       "production_root_ids": [
+        "argentina_1900",
         "brazil_1900",
         "chile_1900",
         "colony_of_newfoundland",
         "cshapes_gw_3",
+        "cshapes_gw_31",
+        "cshapes_gw_52",
+        "cshapes_gw_53",
         "cshapes_gw_6",
+        "cshapes_gw_66",
         "cuba_occupation_1900",
         "dominion_of_canada",
         "mexican_republic",
         "united_states_1900"
       ],
-      "production_people": 116944494,
-      "production_pct_of_regional_research_estimate": 80.631,
+      "production_people": 122296918,
+      "production_pct_of_regional_research_estimate": 84.322,
       "people_with_opening_subdivision": 111228173
     },
     "Asia": {
@@ -80,10 +88,11 @@
       },
       "production_root_ids": [
         "cshapes_gw_780",
-        "empire_of_japan"
+        "empire_of_japan",
+        "korean_empire"
       ],
-      "production_people": 47481910,
-      "production_pct_of_regional_research_estimate": 5.309,
+      "production_people": 64559943,
+      "production_pct_of_regional_research_estimate": 7.218,
       "people_with_opening_subdivision": 0
     },
     "Europe": {
@@ -140,20 +149,20 @@
       "people_with_opening_subdivision": 0
     }
   },
-  "production_roots": 31,
-  "replaced_legacy_roots": 23,
-  "new_roots": 8,
-  "production_people": 525782278,
-  "production_people_pct_world_estimate": 32.963,
-  "population_outside_evidence_opening_estimate": 1069291970,
-  "legacy_only_people": 885320000,
-  "authoritative_total_for_new_game": 1411102278,
+  "production_roots": 39,
+  "replaced_legacy_roots": 25,
+  "new_roots": 14,
+  "production_people": 548691244,
+  "production_people_pct_world_estimate": 34.399,
+  "population_outside_evidence_opening_estimate": 1046383004,
+  "legacy_only_people": 863620000,
+  "authoritative_total_for_new_game": 1412311244,
   "roots_with_partitions": 11,
   "disjoint_leaves": 255,
   "people_in_partitions": 393051890,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
-  "political_catalogue_members_of_production_groups": 36,
+  "political_catalogue_members_of_production_groups": 44,
   "dated_admin_catalogues": {
     "britain_historic_counties_identity.json": {
       "units": 414,
@@ -181,8 +190,8 @@
       "with_opening_partition": 0
     }
   },
-  "city_observation_count": 2261,
-  "city_keys_after_reviewed_matches": 1693,
+  "city_observation_count": 2266,
+  "city_keys_after_reviewed_matches": 1694,
   "nonadditive_city_panels": [
     {
       "source_id": "ar_dge_bulletin_219",
@@ -303,6 +312,13 @@
       }
     },
     {
+      "source_id": "tw_governor_general_1900",
+      "date": "1900-12-31",
+      "bands": {
+        "50k–<100k": 1
+      }
+    },
+    {
       "source_id": "us_census_gibson_urban",
       "date": "1890-06-02",
       "bands": {
@@ -343,12 +359,24 @@
       }
     }
   ],
-  "dated_city_remainders": 727,
+  "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
+  "political_catalogue_with_any_statistical_candidate": 146,
+  "source_statistical_units": 2056,
+  "opening_by_source_type": {
+    "territorial_returns": {
+      "roots": 17,
+      "people": 257115347
+    },
+    "historical_world_reconstruction": {
+      "roots": 22,
+      "people": 291575897
+    }
+  },
   "city_index_representative_bands": {
-    "200k–<500k": 101,
-    "50k–<100k": 359,
     "100k–<200k": 144,
+    "50k–<100k": 358,
+    "200k–<500k": 99,
     "500k+": 42
   },
   "city_index_unresolved": 31,

@@ -6,7 +6,10 @@
     "url": "https://www2.census.gov/prod2/decennial/documents/33405927v1ch01.pdf",
     "locator": "pp. xix–xxii and lxviii–lxxxi, Tables III, V, XXII, XXIII and XXVII",
     "rights": "U.S. federal public domain",
-    "raw_path": "raw/us_states.csv"
+    "raw_path": "raw/us_states.csv",
+    "table_urls": [
+      "https://www2.census.gov/library/publications/decennial/1900/volume-1/volume-1-p2.pdf"
+    ]
   },
   {
     "id": "us_twelfth_census_vol2",

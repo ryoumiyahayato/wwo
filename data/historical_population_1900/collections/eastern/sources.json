@@ -38,6 +38,31 @@
     "rights": "Numeric facts with attribution; no publisher text, figures or scans redistributed."
   },
   {
+    "id": "xu_leeuwen_zanden_qing_1893",
+    "title": "Urbanization in China, ca. 1100–1900",
+    "publisher": "Yi Xu, Bas van Leeuwen and Jan Luiten van Zanden, Frontiers of Economics in China 13(3), 2018",
+    "url": "https://pure.knaw.nl/ws/portalfiles/portal/8633887/Urbanization_in_China_ca._1100_C1900.pdf",
+    "locator": "Section 2.2 and Table 1, pp. 329–331. The 1893 column draws on Cao Shuji.",
+    "rights": "Numerical facts with attribution. No full table image or article text redistributed."
+  },
+  {
+    "id": "federico_tena_china_country_workbook_v3",
+    "title": "Federico-Tena World Population Historical Database: China (V3)",
+    "publisher": "Giovanni Federico and Antonio Tena-Junguito, e-cienciaDatos",
+    "url": "https://doi.org/10.21950/K1SRL4",
+    "locator": "china_1800-1938_FTWPHD_2025_v01.xlsx, China and Sources; country readme, p. 1.",
+    "rights": "Numeric facts and short original descriptions with attribution.",
+    "workbook": "https://edatos.consorciomadrono.es/api/access/datafile/33992"
+  },
+  {
+    "id": "shagdar_mongolia_nso_population",
+    "title": "Mongolia's Pre-1990 Economy: An Extended Overview",
+    "publisher": "Enkhbayar Shagdar, ERINA Discussion Paper 2002 (2020)",
+    "url": "https://www.unii.ac.jp/erina-unp/archive/en/wp-content/uploads/2020/03/DP2002.pdf",
+    "locator": "Pp. 4–5, Table 2.1.1, compiled from the Mongolian NSO.",
+    "rights": "Numerical facts with attribution."
+  },
+  {
     "id": "nz_official_yearbook_1900",
     "title": "New Zealand Official Year-Book, 1900",
     "publisher": "Registrar-General of New Zealand; Government Printer",

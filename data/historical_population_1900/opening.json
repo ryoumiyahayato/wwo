@@ -2,6 +2,30 @@
   "version": 1,
   "groups": [
     {
+      "unit_id": "argentina_1900",
+      "date": "1900-01-01",
+      "source_id": "ft_world_v5",
+      "population_value": 4624686,
+      "method": "linear between nominal July 1 midyear values in thousands, multiply by 1000 then round once; elapsed fraction 184/365",
+      "locator": "Country series!AW103 and Country series!AW104; Appendix I, printed pp. 55",
+      "endpoint_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "country_endpoint_values": [
+        4555240,
+        4693000
+      ],
+      "scope": "Argentina only. Pérez-Brignoli national reconstruction, independently compared with Ferreres in Appendix I p. 55. The 1895 census in the Americas collection distinguishes directly enumerated residents and official estimates for omissions.",
+      "research_unit_ids": [
+        "ft_argentina"
+      ],
+      "population_lower": 4338314,
+      "population_upper": 4911058,
+      "uncertainty_kind": "linear interpolation of endpoint sensitivity envelopes; between-date deviation is unquantified",
+      "units": []
+    },
+    {
       "unit_id": "australia_colonies_1900",
       "date": "1900-01-01",
       "source_id": "ft_world_v5",
@@ -48,7 +72,9 @@
           "endpoint_values": [
             511440,
             649273
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_amazonas",
@@ -57,7 +83,9 @@
           "endpoint_values": [
             147915,
             249756
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_bahia",
@@ -66,7 +94,9 @@
           "endpoint_values": [
             1919802,
             2117956
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_ceara",
@@ -75,7 +105,9 @@
           "endpoint_values": [
             805687,
             849127
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_espirito_santo",
@@ -84,7 +116,9 @@
           "endpoint_values": [
             135997,
             209783
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_federal_district_1900",
@@ -93,7 +127,9 @@
           "endpoint_values": [
             522651,
             691565
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_goias",
@@ -102,7 +138,9 @@
           "endpoint_values": [
             227572,
             255284
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_maranhao",
@@ -111,7 +149,9 @@
           "endpoint_values": [
             430854,
             499308
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_mato_grosso",
@@ -120,7 +160,9 @@
           "endpoint_values": [
             92827,
             118025
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_minas_gerais",
@@ -129,7 +171,9 @@
           "endpoint_values": [
             3184099,
             3594471
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_para",
@@ -138,7 +182,9 @@
           "endpoint_values": [
             328455,
             445356
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_paraiba",
@@ -147,7 +193,9 @@
           "endpoint_values": [
             457232,
             490784
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_parana",
@@ -156,7 +204,9 @@
           "endpoint_values": [
             249491,
             327136
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_pernambuco",
@@ -165,7 +215,9 @@
           "endpoint_values": [
             1030224,
             1178150
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_piaui",
@@ -174,7 +226,9 @@
           "endpoint_values": [
             267609,
             334328
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_rio_de_janeiro",
@@ -183,7 +237,9 @@
           "endpoint_values": [
             876884,
             926035
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_rio_grande_do_norte",
@@ -192,7 +248,9 @@
           "endpoint_values": [
             268273,
             274317
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_rio_grande_do_sul",
@@ -201,7 +259,9 @@
           "endpoint_values": [
             897455,
             1149070
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_santa_catarina",
@@ -210,7 +270,9 @@
           "endpoint_values": [
             283769,
             320289
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_sao_paulo",
@@ -219,7 +281,9 @@
           "endpoint_values": [
             1384753,
             2282279
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "br_sergipe",
@@ -228,11 +292,16 @@
           "endpoint_values": [
             310926,
             356264
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         }
       ],
       "partition_source": "collections/americas/brazil_opening.json",
-      "alternative_research_value": 17157332
+      "alternative_research_value": 17157332,
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "british_isles_1900",
@@ -262,7 +331,9 @@
             "place:london",
             "place:dover"
           ],
-          "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, England and Wales"
+          "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, England and Wales",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "uk_scotland",
@@ -273,7 +344,9 @@
           ],
           "population_value": 4416526,
           "place_ids": [],
-          "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, Scotland"
+          "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, Scotland",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "uk_ireland",
@@ -284,11 +357,16 @@
           ],
           "population_value": 4489395,
           "place_ids": [],
-          "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, Ireland"
+          "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901, Ireland",
+          "population_lower": null,
+          "population_upper": null
         }
       ],
       "partition_source": "collections/britain/uk_opening.json",
-      "alternative_research_value": 40966066
+      "alternative_research_value": 40966066,
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "chile_1900",
@@ -334,7 +412,10 @@
         "June 1 by official retrospective convention",
         "June 1 by official retrospective convention"
       ],
-      "partition_source": "collections/americas/newfoundland_opening.json"
+      "partition_source": "collections/americas/newfoundland_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "country_fra",
@@ -363,7 +444,9 @@
           "endpoint_values": [
             351569,
             350416
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_aisne",
@@ -374,7 +457,9 @@
           "endpoint_values": [
             541513,
             535583
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_allier",
@@ -385,7 +470,9 @@
           "endpoint_values": [
             424378,
             422024
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_basses_alpes",
@@ -396,7 +483,9 @@
           "endpoint_values": [
             118142,
             115021
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_hautes_alpes",
@@ -407,7 +496,9 @@
           "endpoint_values": [
             113229,
             109510
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_alpes_maritimes",
@@ -418,7 +509,9 @@
           "endpoint_values": [
             265155,
             293213
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_ardeche",
@@ -429,7 +522,9 @@
           "endpoint_values": [
             363501,
             353464
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_ardennes",
@@ -440,7 +535,9 @@
           "endpoint_values": [
             318865,
             315589
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_ariege",
@@ -451,7 +548,9 @@
           "endpoint_values": [
             219641,
             210527
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_aube",
@@ -462,7 +561,9 @@
           "endpoint_values": [
             251435,
             246163
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_aude",
@@ -473,7 +574,9 @@
           "endpoint_values": [
             310513,
             313531
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_aveyron",
@@ -484,7 +587,9 @@
           "endpoint_values": [
             389464,
             382074
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_bouches_du_rhone",
@@ -498,7 +603,9 @@
           "endpoint_values": [
             673820,
             734347
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_calvados",
@@ -509,7 +616,9 @@
           "endpoint_values": [
             417176,
             410178
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_cantal",
@@ -520,7 +629,9 @@
           "endpoint_values": [
             234382,
             230511
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_charente",
@@ -531,7 +642,9 @@
           "endpoint_values": [
             356236,
             350305
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_charente_inferieure",
@@ -542,7 +655,9 @@
           "endpoint_values": [
             453455,
             452149
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_cher",
@@ -553,7 +668,9 @@
           "endpoint_values": [
             347725,
             345543
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_correze",
@@ -564,7 +681,9 @@
           "endpoint_values": [
             322393,
             318422
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_corse",
@@ -575,7 +694,9 @@
           "endpoint_values": [
             290168,
             295589
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_cote_d_or",
@@ -586,7 +707,9 @@
           "endpoint_values": [
             368168,
             361626
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_cotes_du_nord",
@@ -597,7 +720,9 @@
           "endpoint_values": [
             616074,
             609349
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_creuse",
@@ -608,7 +733,9 @@
           "endpoint_values": [
             279366,
             277831
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_dordogne",
@@ -619,7 +746,9 @@
           "endpoint_values": [
             464822,
             452951
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_doubs",
@@ -630,7 +759,9 @@
           "endpoint_values": [
             302046,
             298864
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_drome",
@@ -641,7 +772,9 @@
           "endpoint_values": [
             303491,
             297321
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_eure",
@@ -652,7 +785,9 @@
           "endpoint_values": [
             340652,
             334781
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_eure_et_loir",
@@ -663,7 +798,9 @@
           "endpoint_values": [
             280469,
             275433
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_finistere",
@@ -677,7 +814,9 @@
           "endpoint_values": [
             739648,
             773014
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_gard",
@@ -688,7 +827,9 @@
           "endpoint_values": [
             416036,
             420836
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_haute_garonne",
@@ -701,7 +842,9 @@
           "endpoint_values": [
             459377,
             448481
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_gers",
@@ -712,7 +855,9 @@
           "endpoint_values": [
             250472,
             238448
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_gironde",
@@ -726,7 +871,9 @@
           "endpoint_values": [
             809902,
             821131
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_herault",
@@ -737,7 +884,9 @@
           "endpoint_values": [
             469684,
             489421
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_ille_et_vilaine",
@@ -748,7 +897,9 @@
           "endpoint_values": [
             622039,
             613567
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_indre",
@@ -759,7 +910,9 @@
           "endpoint_values": [
             289206,
             288788
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_indre_et_loire",
@@ -770,7 +923,9 @@
           "endpoint_values": [
             337064,
             335541
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_isere",
@@ -781,7 +936,9 @@
           "endpoint_values": [
             568933,
             568693
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_jura",
@@ -792,7 +949,9 @@
           "endpoint_values": [
             266143,
             261288
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_landes",
@@ -803,7 +962,9 @@
           "endpoint_values": [
             292884,
             291586
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_loir_et_cher",
@@ -814,7 +975,9 @@
           "endpoint_values": [
             278153,
             275538
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_loire",
@@ -825,7 +988,9 @@
           "endpoint_values": [
             625336,
             647633
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_haute_loire",
@@ -836,7 +1001,9 @@
           "endpoint_values": [
             316699,
             314058
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_loire_inferieure",
@@ -849,7 +1016,9 @@
           "endpoint_values": [
             646172,
             664971
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_loiret",
@@ -860,7 +1029,9 @@
           "endpoint_values": [
             371019,
             366660
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_lot",
@@ -871,7 +1042,9 @@
           "endpoint_values": [
             240403,
             226720
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_lot_et_garonne",
@@ -882,7 +1055,9 @@
           "endpoint_values": [
             286377,
             278740
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_lozere",
@@ -893,7 +1068,9 @@
           "endpoint_values": [
             132151,
             128866
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_maine_et_loire",
@@ -904,7 +1081,9 @@
           "endpoint_values": [
             514870,
             514658
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_manche",
@@ -915,7 +1094,9 @@
           "endpoint_values": [
             500052,
             491372
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_marne",
@@ -926,7 +1107,9 @@
           "endpoint_values": [
             439577,
             432882
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_haute_marne",
@@ -937,7 +1120,9 @@
           "endpoint_values": [
             232057,
             226545
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_mayenne",
@@ -948,7 +1133,9 @@
           "endpoint_values": [
             321187,
             313103
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_meurthe_et_moselle",
@@ -959,7 +1146,9 @@
           "endpoint_values": [
             466417,
             484722
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_meuse",
@@ -970,7 +1159,9 @@
           "endpoint_values": [
             290384,
             283480
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_morbihan",
@@ -981,7 +1172,9 @@
           "endpoint_values": [
             552028,
             563468
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_nievre",
@@ -992,7 +1185,9 @@
           "endpoint_values": [
             333899,
             323783
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_nord",
@@ -1005,7 +1200,9 @@
           "endpoint_values": [
             1811834,
             1866994
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_oise",
@@ -1016,7 +1213,9 @@
           "endpoint_values": [
             404511,
             407808
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_orne",
@@ -1027,7 +1226,9 @@
           "endpoint_values": [
             339162,
             326952
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_pas_de_calais",
@@ -1041,7 +1242,9 @@
           "endpoint_values": [
             906249,
             955391
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_puy_de_dome",
@@ -1052,7 +1255,9 @@
           "endpoint_values": [
             555078,
             544194
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_basses_pyrenees",
@@ -1063,7 +1268,9 @@
           "endpoint_values": [
             423572,
             426347
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_hautes_pyrenees",
@@ -1074,7 +1281,9 @@
           "endpoint_values": [
             218973,
             215546
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_pyrenees_orientales",
@@ -1085,7 +1294,9 @@
           "endpoint_values": [
             208348,
             212121
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_rhone",
@@ -1098,7 +1309,9 @@
           "endpoint_values": [
             839329,
             843179
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_haute_saone",
@@ -1109,7 +1322,9 @@
           "endpoint_values": [
             272891,
             266605
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_saone_et_loire",
@@ -1120,7 +1335,9 @@
           "endpoint_values": [
             621237,
             620360
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_sarthe",
@@ -1131,7 +1348,9 @@
           "endpoint_values": [
             425077,
             422699
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_savoie",
@@ -1142,7 +1361,9 @@
           "endpoint_values": [
             259790,
             254781
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_haute_savoie",
@@ -1153,7 +1374,9 @@
           "endpoint_values": [
             265872,
             263803
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_seine",
@@ -1166,7 +1389,9 @@
           "endpoint_values": [
             3340514,
             3669930
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_seine_inferieure",
@@ -1181,7 +1406,9 @@
           "endpoint_values": [
             837824,
             853883
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_seine_et_marne",
@@ -1192,7 +1419,9 @@
           "endpoint_values": [
             359044,
             358325
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_seine_et_oise",
@@ -1203,7 +1432,9 @@
           "endpoint_values": [
             669098,
             707325
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_deux_sevres",
@@ -1214,7 +1445,9 @@
           "endpoint_values": [
             346694,
             342474
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_somme",
@@ -1225,7 +1458,9 @@
           "endpoint_values": [
             543279,
             537848
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_tarn",
@@ -1236,7 +1471,9 @@
           "endpoint_values": [
             339369,
             332093
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_tarn_et_garonne",
@@ -1247,7 +1484,9 @@
           "endpoint_values": [
             200390,
             195669
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_var",
@@ -1258,7 +1497,9 @@
           "endpoint_values": [
             309179,
             326384
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_vaucluse",
@@ -1269,7 +1510,9 @@
           "endpoint_values": [
             236313,
             236949
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_vendee",
@@ -1280,7 +1523,9 @@
           "endpoint_values": [
             441783,
             441311
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_vienne",
@@ -1291,7 +1536,9 @@
           "endpoint_values": [
             338114,
             336343
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_haute_vienne",
@@ -1302,7 +1549,9 @@
           "endpoint_values": [
             375724,
             381753
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_vosges",
@@ -1313,7 +1562,9 @@
           "endpoint_values": [
             421412,
             421104
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_yonne",
@@ -1324,7 +1575,9 @@
           "endpoint_values": [
             332656,
             321062
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:france_territoire_de_belfort",
@@ -1335,10 +1588,15 @@
           "endpoint_values": [
             88047,
             92304
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         }
       ],
-      "partition_source": "collections/cities_europe/france_opening.json"
+      "partition_source": "collections/cities_europe/france_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "cshapes_gw_3",
@@ -1360,7 +1618,34 @@
         "nominal national reference day",
         "nominal national reference day"
       ],
-      "partition_source": "collections/americas/alaska_opening.json"
+      "partition_source": "collections/americas/alaska_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
+    },
+    {
+      "unit_id": "cshapes_gw_31",
+      "date": "1900-01-01",
+      "source_id": "ft_world_v5",
+      "population_value": 54404,
+      "method": "linear between nominal July 1 midyear values in thousands, multiply by 1000 then round once; elapsed fraction 184/365",
+      "locator": "Country series!AX103 and Country series!AX104; Appendix I, printed pp. 55",
+      "endpoint_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "country_endpoint_values": [
+        54629,
+        54182
+      ],
+      "scope": "Bahamas colony. Turks and Caicos form a separate research series. Bulmer-Thomas Tables A.1 and C.1.",
+      "research_unit_ids": [
+        "ft_bahamas"
+      ],
+      "population_lower": 51008,
+      "population_upper": 57799,
+      "uncertainty_kind": "linear interpolation of endpoint sensitivity envelopes; between-date deviation is unquantified",
+      "units": []
     },
     {
       "unit_id": "cshapes_gw_338",
@@ -1402,7 +1687,118 @@
       ],
       "method": "Linear interpolation by elapsed days (3291/3442), rounded once. Includes the Hawaiian Islands as reported by both censuses. Hawaii is outside the mainland group.",
       "units": [],
-      "partition_source": "collections/americas/hawaii_opening.json"
+      "partition_source": "collections/americas/hawaii_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
+    },
+    {
+      "unit_id": "cshapes_gw_52",
+      "date": "1900-01-01",
+      "source_id": "ft_world_v5",
+      "population_value": 266739,
+      "method": "linear between nominal July 1 midyear values in thousands, multiply by 1000 then round once; elapsed fraction 184/365",
+      "locator": "Country series!CL103 and Country series!CL104; Appendix I, printed pp. 62",
+      "endpoint_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "country_endpoint_values": [
+        265000,
+        268449
+      ],
+      "scope": "The two islands were administered together at opening. Bulmer-Thomas tabulates both separately before 1900 and jointly thereafter.",
+      "research_unit_ids": [
+        "ft_trinidad_tobago_winward_island"
+      ],
+      "population_lower": 250165,
+      "population_upper": 283313,
+      "uncertainty_kind": "linear interpolation of endpoint sensitivity envelopes; between-date deviation is unquantified",
+      "units": []
+    },
+    {
+      "unit_id": "cshapes_gw_53",
+      "date": "1900-01-01",
+      "source_id": "ft_world_v5",
+      "population_value": 193861,
+      "method": "linear between nominal July 1 midyear values in thousands, multiply by 1000 then round once; elapsed fraction 184/365",
+      "locator": "Country series!AY103 and Country series!AY104; Appendix I, printed pp. 55",
+      "endpoint_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "country_endpoint_values": [
+        193211,
+        194500
+      ],
+      "scope": "Barbados island, independent of the Windward Islands statistical series. Bulmer-Thomas Tables A.1 and C.1.",
+      "research_unit_ids": [
+        "ft_barbados"
+      ],
+      "population_lower": 181800,
+      "population_upper": 205922,
+      "uncertainty_kind": "linear interpolation of endpoint sensitivity envelopes; between-date deviation is unquantified",
+      "units": []
+    },
+    {
+      "unit_id": "cshapes_gw_570",
+      "date": "1900-01-01",
+      "source_id": "uk_colonial_tables_35",
+      "endpoint_sources": [
+        "uk_colonial_tables_35",
+        "uk_colonial_tables_35"
+      ],
+      "locator": "Basutoland, p. 302, Table 1. 1891, 1904, 1911 census columns. Row 1891, Basutoland. / Basutoland, p. 302, Table 1. 1891, 1904, 1911 census columns. Row 1904-04-18, Basutoland.",
+      "endpoint_dates": [
+        "1891",
+        "1904-04-18"
+      ],
+      "interpolation_reference_dates": [
+        "1891-07-01",
+        "1904-04-18"
+      ],
+      "country_endpoint_values": [
+        218902,
+        348848
+      ],
+      "population_value": 305255,
+      "units": [],
+      "population_lower": null,
+      "population_upper": null,
+      "scope": "Basutoland excluding Cape, Natal and Orange Free State.",
+      "method": "Linear interpolation over 1553/2337. July 1 is a computational midpoint for year-only returns. 1904 Basutoland day follows the imperial census report p. 71.",
+      "uncertainty_kind": "No statistical interval. War interrupted the 1901 census in southern Africa; enumeration error and changes within the intercensal period are unquantified.",
+      "partition_source": "collections/african_returns/basutoland_opening.json"
+    },
+    {
+      "unit_id": "cshapes_gw_585",
+      "date": "1900-01-01",
+      "source_id": "league_africa_1932",
+      "endpoint_sources": [
+        "league_africa_1932",
+        "clairin_reunion_1979"
+      ],
+      "locator": "Section VI, Réunion and Mauritius, p. 182; Seychelles, p. 183. Row 1897, La Réunion. / Table 69, p. 254, history of enumerations and censuses on the island. Row 1902, La Réunion.",
+      "endpoint_dates": [
+        "1897",
+        "1902"
+      ],
+      "interpolation_reference_dates": [
+        "1897-07-01",
+        "1902-07-01"
+      ],
+      "country_endpoint_values": [
+        173192,
+        173315
+      ],
+      "population_value": 173254,
+      "units": [],
+      "population_lower": null,
+      "population_upper": null,
+      "scope": "Réunion island alone; outside metropolitan France, Mauritius and Madagascar.",
+      "method": "Linear interpolation over 914/1825. July 1 is a computational midpoint for year-only returns. 1904 Basutoland day follows the imperial census report p. 71.",
+      "uncertainty_kind": "No statistical interval. Enumeration-day and between-census variation are unquantified.",
+      "partition_source": "collections/african_returns/reunion_island_opening.json"
     },
     {
       "unit_id": "cshapes_gw_590",
@@ -1429,7 +1825,9 @@
           ],
           "population_value": 370969,
           "place_ids": [],
-          "locator": "Table 1.3, p. 22, 1891 and 1901 census rows, Mauritius island"
+          "locator": "Table 1.3, p. 22, 1891 and 1901 census rows, Mauritius island",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mu_rodrigues",
@@ -1440,10 +1838,15 @@
           ],
           "population_value": 3027,
           "place_ids": [],
-          "locator": "Table 1.3, p. 22, 1891 and 1901 census rows, Rodrigues island"
+          "locator": "Table 1.3, p. 22, 1891 and 1901 census rows, Rodrigues island",
+          "population_lower": null,
+          "population_upper": null
         }
       ],
-      "partition_source": "collections/eastern/mauritius_opening.json"
+      "partition_source": "collections/eastern/mauritius_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "cshapes_gw_6",
@@ -1470,6 +1873,30 @@
       "units": []
     },
     {
+      "unit_id": "cshapes_gw_66",
+      "date": "1900-01-01",
+      "source_id": "ft_world_v5",
+      "population_value": 212734,
+      "method": "linear between nominal July 1 midyear values in thousands, multiply by 1000 then round once; elapsed fraction 184/365",
+      "locator": "Country series!BY103 and Country series!BY104; Appendix I, printed pp. 60",
+      "endpoint_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "country_endpoint_values": [
+        210431,
+        215000
+      ],
+      "scope": "Martinique island. Separate from the metropolitan France opening and from Guadeloupe. Bulmer-Thomas series includes 1894 and 1900, before the 1902 eruption.",
+      "research_unit_ids": [
+        "ft_martinique_french_colonies"
+      ],
+      "population_lower": 199538,
+      "population_upper": 225930,
+      "uncertainty_kind": "linear interpolation of endpoint sensitivity envelopes; between-date deviation is unquantified",
+      "units": []
+    },
+    {
       "unit_id": "cshapes_gw_780",
       "date": "1900-01-01",
       "population_value": 3469224,
@@ -1484,7 +1911,10 @@
         3484035
       ],
       "quarter_reported_increase": 14811,
-      "partition_source": "collections/eastern/ceylon_opening.json"
+      "partition_source": "collections/eastern/ceylon_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "cshapes_gw_920",
@@ -1500,7 +1930,10 @@
       "country_endpoint_values": [
         796359
       ],
-      "partition_source": "collections/eastern/nz_opening.json"
+      "partition_source": "collections/eastern/nz_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "cuba_occupation_1900",
@@ -1518,7 +1951,10 @@
       ],
       "method": "Linear interpolation by elapsed days (11/415), rounded once. Uses the two census reference days. Includes the Isle of Pines and adjacent keys.",
       "units": [],
-      "partition_source": "collections/americas/cuba_opening.json"
+      "partition_source": "collections/americas/cuba_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "dominion_of_canada",
@@ -1543,7 +1979,9 @@
           "endpoint_values": [
             98173,
             178657
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ca_manitoba",
@@ -1552,7 +1990,9 @@
           "endpoint_values": [
             152506,
             255211
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ca_new_brunswick",
@@ -1561,7 +2001,9 @@
           "endpoint_values": [
             321263,
             331120
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ca_nova_scotia",
@@ -1570,7 +2012,9 @@
           "endpoint_values": [
             450396,
             459574
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ca_ontario",
@@ -1579,7 +2023,9 @@
           "endpoint_values": [
             2114321,
             2182947
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ca_organized_territories",
@@ -1588,7 +2034,9 @@
           "endpoint_values": [
             66799,
             158940
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ca_prince_edward_island",
@@ -1597,7 +2045,9 @@
           "endpoint_values": [
             109078,
             103259
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ca_quebec_and_unorganized_territories",
@@ -1606,10 +2056,15 @@
           "endpoint_values": [
             1520703,
             1701607
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         }
       ],
-      "partition_source": "collections/americas/canada_opening.json"
+      "partition_source": "collections/americas/canada_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "empire_of_japan",
@@ -1665,7 +2120,9 @@
           "endpoint_values": [
             31855123,
             34472509
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_bayern",
@@ -1676,7 +2133,9 @@
           "endpoint_values": [
             5818544,
             6176057
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_sachsen",
@@ -1687,7 +2146,9 @@
           "endpoint_values": [
             3787688,
             4202216
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_wuerttemberg",
@@ -1698,7 +2159,9 @@
           "endpoint_values": [
             2081151,
             2169480
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_baden",
@@ -1709,7 +2172,9 @@
           "endpoint_values": [
             1725464,
             1867944
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_hessen",
@@ -1720,7 +2185,9 @@
           "endpoint_values": [
             1039020,
             1119893
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_mecklenburg_schwerin",
@@ -1731,7 +2198,9 @@
           "endpoint_values": [
             597436,
             607770
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_sachsen_weimar",
@@ -1742,7 +2211,9 @@
           "endpoint_values": [
             339217,
             362873
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_mecklenburg_strelitz",
@@ -1753,7 +2224,9 @@
           "endpoint_values": [
             101540,
             102602
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_oldenburg",
@@ -1764,7 +2237,9 @@
           "endpoint_values": [
             373739,
             399180
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_braunschweig",
@@ -1775,7 +2250,9 @@
           "endpoint_values": [
             434213,
             464333
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_sachsen_meiningen",
@@ -1786,7 +2263,9 @@
           "endpoint_values": [
             234005,
             250731
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_sachsen_altenburg",
@@ -1797,7 +2276,9 @@
           "endpoint_values": [
             180313,
             194914
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_sachsen_coburg_gotha",
@@ -1808,7 +2289,9 @@
           "endpoint_values": [
             216603,
             229550
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_anhalt",
@@ -1819,7 +2302,9 @@
           "endpoint_values": [
             293298,
             316085
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_schwarzburg_sondershausen",
@@ -1830,7 +2315,9 @@
           "endpoint_values": [
             78074,
             80898
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_schwarzburg_rudolstadt",
@@ -1841,7 +2328,9 @@
           "endpoint_values": [
             88685,
             93059
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_waldeck",
@@ -1852,7 +2341,9 @@
           "endpoint_values": [
             57766,
             57918
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_reuss_aelter",
@@ -1863,7 +2354,9 @@
           "endpoint_values": [
             67468,
             68396
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_reuss_juenger",
@@ -1874,7 +2367,9 @@
           "endpoint_values": [
             132130,
             139210
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_schaumburg_lippe",
@@ -1885,7 +2380,9 @@
           "endpoint_values": [
             41224,
             43132
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_lippe",
@@ -1896,7 +2393,9 @@
           "endpoint_values": [
             134854,
             138952
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_luebeck",
@@ -1907,7 +2406,9 @@
           "endpoint_values": [
             83324,
             96775
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_bremen",
@@ -1918,7 +2419,9 @@
           "endpoint_values": [
             196404,
             224882
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_hamburg",
@@ -1929,7 +2432,9 @@
           "endpoint_values": [
             681632,
             768349
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "administrative_region:germany_elsass_lothringen",
@@ -1942,10 +2447,15 @@
           "endpoint_values": [
             1640986,
             1719470
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         }
       ],
-      "partition_source": "collections/cities_europe/germany_opening.json"
+      "partition_source": "collections/cities_europe/germany_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "iceland_under_denmark",
@@ -2140,6 +2650,30 @@
       "units": []
     },
     {
+      "unit_id": "korean_empire",
+      "date": "1900-01-01",
+      "source_id": "ft_world_v5",
+      "population_value": 17078033,
+      "method": "linear between nominal July 1 midyear values in thousands, multiply by 1000 then round once; elapsed fraction 184/365",
+      "locator": "Country series!DJ103 and Country series!DJ104; Appendix I, printed pp. 79-80",
+      "endpoint_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "country_endpoint_values": [
+        17074000,
+        17082000
+      ],
+      "scope": "Korean peninsula before annexation, separate from the Japanese home islands and Taiwan. Kwon and Shin reconstruct the population using revised 1910 benchmarks and earlier population registers. Under-registration is material.",
+      "research_unit_ids": [
+        "ft_korea"
+      ],
+      "population_lower": 14302852,
+      "population_upper": 19853214,
+      "uncertainty_kind": "linear interpolation of endpoint sensitivity envelopes; between-date deviation is unquantified",
+      "units": []
+    },
+    {
       "unit_id": "mexican_republic",
       "date": "1900-01-01",
       "population_value": 13447810,
@@ -2162,7 +2696,9 @@
           "endpoint_values": [
             104615,
             102416
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_baja_california",
@@ -2171,7 +2707,9 @@
           "endpoint_values": [
             42245,
             47624
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_campeche",
@@ -2180,7 +2718,9 @@
           "endpoint_values": [
             88121,
             86542
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_chiapas",
@@ -2189,7 +2729,9 @@
           "endpoint_values": [
             319599,
             360799
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_chihuahua",
@@ -2198,7 +2740,9 @@
           "endpoint_values": [
             262771,
             327784
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_coahuila",
@@ -2207,7 +2751,9 @@
           "endpoint_values": [
             241026,
             296938
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_colima",
@@ -2216,7 +2762,9 @@
           "endpoint_values": [
             55752,
             65115
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_distrito_federal",
@@ -2225,7 +2773,9 @@
           "endpoint_values": [
             476413,
             541516
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_durango",
@@ -2234,7 +2784,9 @@
           "endpoint_values": [
             295105,
             370307
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_guanajuato",
@@ -2243,7 +2795,9 @@
           "endpoint_values": [
             1062554,
             1061724
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_guerrero",
@@ -2252,7 +2806,9 @@
           "endpoint_values": [
             420339,
             479205
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_hidalgo",
@@ -2261,7 +2817,9 @@
           "endpoint_values": [
             558769,
             605051
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_jalisco",
@@ -2270,7 +2828,9 @@
           "endpoint_values": [
             1107227,
             1153891
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_mexico",
@@ -2279,7 +2839,9 @@
           "endpoint_values": [
             841618,
             934463
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_michoacan",
@@ -2288,7 +2850,9 @@
           "endpoint_values": [
             896495,
             935808
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_morelos",
@@ -2297,7 +2861,9 @@
           "endpoint_values": [
             159355,
             160115
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_nuevo_leon",
@@ -2306,7 +2872,9 @@
           "endpoint_values": [
             309252,
             327937
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_oaxaca",
@@ -2315,7 +2883,9 @@
           "endpoint_values": [
             884909,
             948633
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_puebla",
@@ -2324,7 +2894,9 @@
           "endpoint_values": [
             984413,
             1021133
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_queretaro",
@@ -2333,7 +2905,9 @@
           "endpoint_values": [
             228551,
             232389
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_san_luis_potosi",
@@ -2342,7 +2916,9 @@
           "endpoint_values": [
             568449,
             575432
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_sinaloa",
@@ -2351,7 +2927,9 @@
           "endpoint_values": [
             258865,
             296701
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_sonora",
@@ -2360,7 +2938,9 @@
           "endpoint_values": [
             191281,
             221682
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_tabasco",
@@ -2369,7 +2949,9 @@
           "endpoint_values": [
             134839,
             159834
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_tamaulipas",
@@ -2378,7 +2960,9 @@
           "endpoint_values": [
             206502,
             218948
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_tepic_later_nayarit",
@@ -2387,7 +2971,9 @@
           "endpoint_values": [
             148776,
             150098
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_tlaxcala",
@@ -2396,7 +2982,9 @@
           "endpoint_values": [
             166803,
             172315
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_veracruz",
@@ -2405,7 +2993,9 @@
           "endpoint_values": [
             866355,
             981030
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_yucatan",
@@ -2414,7 +3004,9 @@
           "endpoint_values": [
             298850,
             309652
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "mx_zacatecas",
@@ -2423,10 +3015,15 @@
           "endpoint_values": [
             452578,
             462190
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         }
       ],
-      "partition_source": "collections/americas/mexico_opening.json"
+      "partition_source": "collections/americas/mexico_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "principality_of_bulgaria",
@@ -2588,7 +3185,9 @@
             337183,
             431036
           ],
-          "locator": "Table I, p. 104, Zürich, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Zürich, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_be",
@@ -2598,7 +3197,9 @@
             536679,
             589433
           ],
-          "locator": "Table I, p. 104, Bern, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Bern, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_lu",
@@ -2608,7 +3209,9 @@
             135360,
             146519
           ],
-          "locator": "Table I, p. 104, Luzern, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Luzern, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_ur",
@@ -2618,7 +3221,9 @@
             17249,
             19700
           ],
-          "locator": "Table I, p. 104, Uri, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Uri, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_sz",
@@ -2628,7 +3233,9 @@
             50307,
             55385
           ],
-          "locator": "Table I, p. 104, Schwyz, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Schwyz, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_ow",
@@ -2638,7 +3245,9 @@
             15043,
             15260
           ],
-          "locator": "Table I, p. 104, Obwalden, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Obwalden, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_nw",
@@ -2648,7 +3257,9 @@
             12538,
             13070
           ],
-          "locator": "Table I, p. 104, Nidwalden, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Nidwalden, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_gl",
@@ -2658,7 +3269,9 @@
             33825,
             32349
           ],
-          "locator": "Table I, p. 104, Glarus, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Glarus, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_zg",
@@ -2668,7 +3281,9 @@
             23029,
             25093
           ],
-          "locator": "Table I, p. 104, Zug, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Zug, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_fr",
@@ -2678,7 +3293,9 @@
             119155,
             127951
           ],
-          "locator": "Table I, p. 104, Fribourg, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Fribourg, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_so",
@@ -2688,7 +3305,9 @@
             85621,
             100762
           ],
-          "locator": "Table I, p. 104, Solothurn, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Solothurn, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_bs",
@@ -2698,7 +3317,9 @@
             73749,
             112227
           ],
-          "locator": "Table I, p. 104, Baselstadt, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Baselstadt, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_bl",
@@ -2708,7 +3329,9 @@
             61941,
             68497
           ],
-          "locator": "Table I, p. 104, Baselland, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Baselland, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_sh",
@@ -2718,7 +3341,9 @@
             37783,
             41514
           ],
-          "locator": "Table I, p. 104, Schaffhausen, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Schaffhausen, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_ar",
@@ -2728,7 +3353,9 @@
             54109,
             55281
           ],
-          "locator": "Table I, p. 104, Appenzell A.-Rh., Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Appenzell A.-Rh., Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_ai",
@@ -2738,7 +3365,9 @@
             12888,
             13499
           ],
-          "locator": "Table I, p. 104, Appenzell I.-Rh., Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Appenzell I.-Rh., Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_sg",
@@ -2748,7 +3377,9 @@
             228174,
             250285
           ],
-          "locator": "Table I, p. 104, St. Gallen, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, St. Gallen, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_gr",
@@ -2758,7 +3389,9 @@
             94810,
             104520
           ],
-          "locator": "Table I, p. 104, Graubünden, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Graubünden, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_ag",
@@ -2768,7 +3401,9 @@
             193580,
             206498
           ],
-          "locator": "Table I, p. 104, Aargau, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Aargau, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_tg",
@@ -2778,7 +3413,9 @@
             104678,
             113221
           ],
-          "locator": "Table I, p. 104, Thurgau, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Thurgau, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_ti",
@@ -2788,7 +3425,9 @@
             126751,
             138638
           ],
-          "locator": "Table I, p. 104, Tessin, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Tessin, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_vd",
@@ -2798,7 +3437,9 @@
             247655,
             281379
           ],
-          "locator": "Table I, p. 104, Vaud, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Vaud, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_vs",
@@ -2808,7 +3449,9 @@
             101985,
             114438
           ],
-          "locator": "Table I, p. 104, Valais, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Valais, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_ne",
@@ -2818,7 +3461,9 @@
             108153,
             126279
           ],
-          "locator": "Table I, p. 104, Neuchâtel, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Neuchâtel, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "ch_canton_ge",
@@ -2828,10 +3473,15 @@
             105509,
             132609
           ],
-          "locator": "Table I, p. 104, Genève, Wohnbevölkerung, cols. 6–7"
+          "locator": "Table I, p. 104, Genève, Wohnbevölkerung, cols. 6–7",
+          "population_lower": null,
+          "population_upper": null
         }
       ],
-      "partition_source": "collections/swiss/swiss_opening.json"
+      "partition_source": "collections/swiss/swiss_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     },
     {
       "unit_id": "united_states_1900",
@@ -2856,7 +3506,9 @@
           "endpoint_values": [
             88243,
             122931
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_district_of_columbia",
@@ -2868,7 +3520,9 @@
           ],
           "place_ids": [
             "place:washington"
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_new_mexico",
@@ -2877,7 +3531,9 @@
           "endpoint_values": [
             160282,
             195310
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_oklahoma_and_indian_territories",
@@ -2886,7 +3542,9 @@
           "endpoint_values": [
             258657,
             790391
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_alabama",
@@ -2895,7 +3553,9 @@
           "endpoint_values": [
             1513401,
             1828697
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_arkansas",
@@ -2904,7 +3564,9 @@
           "endpoint_values": [
             1128211,
             1311564
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_california",
@@ -2913,7 +3575,9 @@
           "endpoint_values": [
             1213398,
             1485053
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_colorado",
@@ -2922,7 +3586,9 @@
           "endpoint_values": [
             413249,
             539700
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_connecticut",
@@ -2931,7 +3597,9 @@
           "endpoint_values": [
             746258,
             908420
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_delaware",
@@ -2940,7 +3608,9 @@
           "endpoint_values": [
             168493,
             184735
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_florida",
@@ -2949,7 +3619,9 @@
           "endpoint_values": [
             391422,
             528542
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_georgia",
@@ -2958,7 +3630,9 @@
           "endpoint_values": [
             1837353,
             2216331
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_idaho",
@@ -2967,7 +3641,9 @@
           "endpoint_values": [
             88548,
             161772
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_illinois",
@@ -2976,7 +3652,9 @@
           "endpoint_values": [
             3826352,
             4821550
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_indiana",
@@ -2985,7 +3663,9 @@
           "endpoint_values": [
             2192404,
             2516462
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_iowa",
@@ -2994,7 +3674,9 @@
           "endpoint_values": [
             1912297,
             2231853
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_kansas",
@@ -3003,7 +3685,9 @@
           "endpoint_values": [
             1428108,
             1470495
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_kentucky",
@@ -3012,7 +3696,9 @@
           "endpoint_values": [
             1858635,
             2147174
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_louisiana",
@@ -3021,7 +3707,9 @@
           "endpoint_values": [
             1118588,
             1381625
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_maine",
@@ -3030,7 +3718,9 @@
           "endpoint_values": [
             661086,
             694466
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_maryland",
@@ -3039,7 +3729,9 @@
           "endpoint_values": [
             1042390,
             1188044
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_massachusetts",
@@ -3048,7 +3740,9 @@
           "endpoint_values": [
             2238947,
             2805346
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_michigan",
@@ -3057,7 +3751,9 @@
           "endpoint_values": [
             2093890,
             2420982
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_minnesota",
@@ -3066,7 +3762,9 @@
           "endpoint_values": [
             1310283,
             1751394
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_mississippi",
@@ -3075,7 +3773,9 @@
           "endpoint_values": [
             1289600,
             1551270
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_missouri",
@@ -3084,7 +3784,9 @@
           "endpoint_values": [
             2679185,
             3106665
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_montana",
@@ -3093,7 +3795,9 @@
           "endpoint_values": [
             142924,
             243329
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_nebraska",
@@ -3102,7 +3806,9 @@
           "endpoint_values": [
             1062656,
             1066300
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_nevada",
@@ -3111,7 +3817,9 @@
           "endpoint_values": [
             47355,
             42335
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_new_hampshire",
@@ -3120,7 +3828,9 @@
           "endpoint_values": [
             376530,
             411588
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_new_jersey",
@@ -3129,7 +3839,9 @@
           "endpoint_values": [
             1444933,
             1883669
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_new_york",
@@ -3142,7 +3854,9 @@
           "place_ids": [
             "place:new_york",
             "place:port_new_york"
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_north_carolina",
@@ -3151,7 +3865,9 @@
           "endpoint_values": [
             1617949,
             1893810
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_north_dakota",
@@ -3160,7 +3876,9 @@
           "endpoint_values": [
             190983,
             319146
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_ohio",
@@ -3169,7 +3887,9 @@
           "endpoint_values": [
             3672329,
             4157545
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_oregon",
@@ -3178,7 +3898,9 @@
           "endpoint_values": [
             317704,
             413536
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_pennsylvania",
@@ -3187,7 +3909,9 @@
           "endpoint_values": [
             5258113,
             6302115
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_rhode_island",
@@ -3196,7 +3920,9 @@
           "endpoint_values": [
             345506,
             428556
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_south_carolina",
@@ -3205,7 +3931,9 @@
           "endpoint_values": [
             1151149,
             1340316
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_south_dakota",
@@ -3214,7 +3942,9 @@
           "endpoint_values": [
             348600,
             401570
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_tennessee",
@@ -3223,7 +3953,9 @@
           "endpoint_values": [
             1767518,
             2020616
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_texas",
@@ -3232,7 +3964,9 @@
           "endpoint_values": [
             2235527,
             3048710
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_utah",
@@ -3241,7 +3975,9 @@
           "endpoint_values": [
             210779,
             276749
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_vermont",
@@ -3250,7 +3986,9 @@
           "endpoint_values": [
             332422,
             343641
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_virginia",
@@ -3259,7 +3997,9 @@
           "endpoint_values": [
             1655980,
             1854184
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_washington",
@@ -3268,7 +4008,9 @@
           "endpoint_values": [
             357232,
             518103
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_west_virginia",
@@ -3277,7 +4019,9 @@
           "endpoint_values": [
             762794,
             958800
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_wisconsin",
@@ -3286,7 +4030,9 @@
           "endpoint_values": [
             1693330,
             2069042
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         },
         {
           "unit_id": "us_state_wyoming",
@@ -3295,10 +4041,15 @@
           "endpoint_values": [
             62555,
             92531
-          ]
+          ],
+          "population_lower": null,
+          "population_upper": null
         }
       ],
-      "partition_source": "collections/americas/us_opening.json"
+      "partition_source": "collections/americas/us_opening.json",
+      "population_lower": null,
+      "population_upper": null,
+      "uncertainty_kind": "Enumeration coverage and interpolation error have no quantified interval."
     }
   ]
 }

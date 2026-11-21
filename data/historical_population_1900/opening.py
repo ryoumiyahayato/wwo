@@ -49,7 +49,13 @@ def groups(observations):
         result[root] = group
     ids = set()
     for root, group in result.items():
+        group.setdefault("population_lower",None)
+        group.setdefault("population_upper",None)
+        group.setdefault("uncertainty_kind","Enumeration coverage and interpolation error have no quantified interval.")
         children = group["units"]
+        for child in children:
+            child.setdefault("population_lower",None)
+            child.setdefault("population_upper",None)
         if children and sum(x["population_value"] for x in children) != group["population_value"]:
             raise ValueError(f"non-closing opening partition {root}")
         for key in [root]+[x["unit_id"] for x in children]:

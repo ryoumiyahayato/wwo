@@ -1,5 +1,32 @@
 [
   {
+    "id": "uk_colonial_tables_35",
+    "title": "Statistical Tables Relating to British Self-Governing Dominions, Crown Colonies, Possessions and Protectorates, vol. 35",
+    "publisher": "British government, HMSO. Digitized by Staats- und Universitätsbibliothek Hamburg.",
+    "url": "https://img.sub.uni-hamburg.de/kitodo/PPN863953719_0035/PDF/00000326.pdf",
+    "locator": "Basutoland, p. 302, Table 1. 1891, 1904, 1911 census columns.",
+    "rights": "Numerical facts transcribed from the official printed table.",
+    "collection": "african_returns"
+  },
+  {
+    "id": "league_africa_1932",
+    "title": "Monthly Epidemiological Report, 11th Year (1932), African demography",
+    "publisher": "Health Section, Secretariat of the League of Nations. Digitized by National Library of Scotland.",
+    "url": "https://deriv.nls.uk/dcn23/1907/0881/190708818.23.pdf",
+    "locator": "Section VI, Réunion and Mauritius, p. 182; Seychelles, p. 183.",
+    "rights": "Numerical facts transcribed from the bilingual historical report.",
+    "collection": "african_returns"
+  },
+  {
+    "id": "clairin_reunion_1979",
+    "title": "Réunion (July 1979)",
+    "publisher": "Rémy Clairin. Historical demographic study hosted by IRD, Horizon.",
+    "url": "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers14-07/23268.pdf",
+    "locator": "Table 69, p. 254, history of enumerations and censuses on the island.",
+    "rights": "Selected numerical facts. The article and scans remain with the source archive.",
+    "collection": "african_returns"
+  },
+  {
     "id": "us_twelfth_census_vol1",
     "title": "Twelfth Census of the United States, Volume I, Population Part I",
     "publisher": "U.S. Census Office",
@@ -7,6 +34,9 @@
     "locator": "pp. xix–xxii and lxviii–lxxxi, Tables III, V, XXII, XXIII and XXVII",
     "rights": "U.S. federal public domain",
     "raw_path": "raw/us_states.csv",
+    "table_urls": [
+      "https://www2.census.gov/library/publications/decennial/1900/volume-1/volume-1-p2.pdf"
+    ],
     "collection": "americas"
   },
   {
@@ -394,6 +424,34 @@
     "collection": "eastern"
   },
   {
+    "id": "xu_leeuwen_zanden_qing_1893",
+    "title": "Urbanization in China, ca. 1100–1900",
+    "publisher": "Yi Xu, Bas van Leeuwen and Jan Luiten van Zanden, Frontiers of Economics in China 13(3), 2018",
+    "url": "https://pure.knaw.nl/ws/portalfiles/portal/8633887/Urbanization_in_China_ca._1100_C1900.pdf",
+    "locator": "Section 2.2 and Table 1, pp. 329–331. The 1893 column draws on Cao Shuji.",
+    "rights": "Numerical facts with attribution. No full table image or article text redistributed.",
+    "collection": "eastern"
+  },
+  {
+    "id": "federico_tena_china_country_workbook_v3",
+    "title": "Federico-Tena World Population Historical Database: China (V3)",
+    "publisher": "Giovanni Federico and Antonio Tena-Junguito, e-cienciaDatos",
+    "url": "https://doi.org/10.21950/K1SRL4",
+    "locator": "china_1800-1938_FTWPHD_2025_v01.xlsx, China and Sources; country readme, p. 1.",
+    "rights": "Numeric facts and short original descriptions with attribution.",
+    "workbook": "https://edatos.consorciomadrono.es/api/access/datafile/33992",
+    "collection": "eastern"
+  },
+  {
+    "id": "shagdar_mongolia_nso_population",
+    "title": "Mongolia's Pre-1990 Economy: An Extended Overview",
+    "publisher": "Enkhbayar Shagdar, ERINA Discussion Paper 2002 (2020)",
+    "url": "https://www.unii.ac.jp/erina-unp/archive/en/wp-content/uploads/2020/03/DP2002.pdf",
+    "locator": "Pp. 4–5, Table 2.1.1, compiled from the Mongolian NSO.",
+    "rights": "Numerical facts with attribution.",
+    "collection": "eastern"
+  },
+  {
     "id": "nz_official_yearbook_1900",
     "title": "New Zealand Official Year-Book, 1900",
     "publisher": "Registrar-General of New Zealand; Government Printer",
@@ -481,9 +539,21 @@
     "title": "臺灣總督府第四統計書（明治三十三年）",
     "publisher": "臺灣總督府, 1902. National Archives of Japan digital collection.",
     "url": "https://www.digital.archives.go.jp/item/750223",
-    "locator": "Tables XVII–XVIII, printed pp. 55–57, PDF images 40–41",
+    "locator": "Tables XVII–XVIII, pp. 55–57; table XXXIV, pp. 130, 132; table XL, pp. 144–145; PDF images 40–41, 78–79, 85.",
     "rights": "Historical government statistics. Selected numerical facts transcribed from the public archive.",
     "download_url": "https://www.digital.archives.go.jp/content/item/da12/C100048915200/raw/0710.pdf",
+    "urban_identity_url": "https://health.gov.taipei/cp.aspx?n=2C1C8F893C0E9275&s=6FECF69D6883EC90",
+    "collection": "japan_taiwan"
+  },
+  {
+    "id": "jp_cabinet_1900_yearbook_foreign",
+    "title": "日本帝國第十九統計年鑑, 本邦在留外國人",
+    "publisher": "内閣統計局, 1900. Facsimile at Hitotsubashi University, Institute of Economic Research.",
+    "url": "https://d-infra.ier.hit-u.ac.jp/Japanese/govstat-database/statistical-yb/1900/",
+    "locator": "Tables 28 and 29, printed pp. 79–81, with exclusion notes following table 28.",
+    "rights": "Numerical facts transcribed from the historical Japanese government yearbook. Digital facsimile linked.",
+    "table_start_url": "https://d-infra.ier.hit-u.ac.jp/Japanese/govstat-database/statistical-yb/1900/tab_jpeg/1900_051.jpg",
+    "totals_and_notes_url": "https://d-infra.ier.hit-u.ac.jp/Japanese/govstat-database/statistical-yb/1900/tab_jpeg/1900_052.jpg",
     "collection": "japan_taiwan"
   },
   {

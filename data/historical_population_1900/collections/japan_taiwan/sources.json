@@ -13,8 +13,19 @@
     "title": "臺灣總督府第四統計書（明治三十三年）",
     "publisher": "臺灣總督府, 1902. National Archives of Japan digital collection.",
     "url": "https://www.digital.archives.go.jp/item/750223",
-    "locator": "Tables XVII–XVIII, printed pp. 55–57, PDF images 40–41",
+    "locator": "Tables XVII–XVIII, pp. 55–57; table XXXIV, pp. 130, 132; table XL, pp. 144–145; PDF images 40–41, 78–79, 85.",
     "rights": "Historical government statistics. Selected numerical facts transcribed from the public archive.",
-    "download_url": "https://www.digital.archives.go.jp/content/item/da12/C100048915200/raw/0710.pdf"
+    "download_url": "https://www.digital.archives.go.jp/content/item/da12/C100048915200/raw/0710.pdf",
+    "urban_identity_url": "https://health.gov.taipei/cp.aspx?n=2C1C8F893C0E9275&s=6FECF69D6883EC90"
+  },
+  {
+    "id": "jp_cabinet_1900_yearbook_foreign",
+    "title": "日本帝國第十九統計年鑑, 本邦在留外國人",
+    "publisher": "内閣統計局, 1900. Facsimile at Hitotsubashi University, Institute of Economic Research.",
+    "url": "https://d-infra.ier.hit-u.ac.jp/Japanese/govstat-database/statistical-yb/1900/",
+    "locator": "Tables 28 and 29, printed pp. 79–81, with exclusion notes following table 28.",
+    "rights": "Numerical facts transcribed from the historical Japanese government yearbook. Digital facsimile linked.",
+    "table_start_url": "https://d-infra.ier.hit-u.ac.jp/Japanese/govstat-database/statistical-yb/1900/tab_jpeg/1900_051.jpg",
+    "totals_and_notes_url": "https://d-infra.ier.hit-u.ac.jp/Japanese/govstat-database/statistical-yb/1900/tab_jpeg/1900_052.jpg"
   }
 ]

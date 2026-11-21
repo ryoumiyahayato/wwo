@@ -89,7 +89,8 @@
           "persons": 45633000
         }
       ],
-      "coverage": "The household inquiry often converted households at 5.5 persons per household. Customs provided independently reported estimates and combined some provinces. Cao reconstructed residents on retrospective regional definitions. The series disagree on methods and territorial categories. Their spread is not a statistical confidence interval. No province-to-map crosswalk or forced national reconciliation."
+      "coverage": "Cao includes Taiwan in Fujian and excludes Outer Mongolia. The 25 printed provincial and frontier figures sum to both national endpoints. The 1893 Xu table explicitly removes Taiwan from Fujian. The 1910 Customs column components exceed its printed total by 10 million. See qing_reconciliation.json for the dated crosswalk, arithmetic and current boundary gaps.",
+      "detail": "qing_reconciliation.json"
     },
     {
       "territory": "New Zealand",

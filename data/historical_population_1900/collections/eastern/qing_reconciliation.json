@@ -1,0 +1,958 @@
+{
+  "target": "qing_empire / gw_710",
+  "target_date": "1900-01-01",
+  "status": "research_only",
+  "observed_opening_day_population": null,
+  "calculation": "All values are persons. Year-coordinate references use a + (b-a)*(1900-y)/(1910-y). Published dates are years; January 1 and July 1 are not observed in the Cao/Xu tables. Compound sensitivity uses a*(b/a)^((1900-y)/(1910-y)). Integer results round once. Comparison across series is descriptive.",
+  "sources": {
+    "cao": "cao_qing_provincial_reconstruction; Table 1.1, pp. 17–18, note 1",
+    "xu": "xu_leeuwen_zanden_qing_1893; Table 1, pp. 330–331",
+    "china_yearbook": "china_year_book_1919, Chapter I, pp. 1–3",
+    "ft_country": "federico_tena_china_country_workbook_v3, China!B101:B102 and Sources!A43, A55:A57; corresponding Appendix I, pp. 72–73, notes 53–55",
+    "ft_world": "../world/observations.jsonl; ft_world_v5, dates 1899-07-01, 1900-01-01 and 1900-07-01",
+    "mongolia_nso": "shagdar_mongolia_nso_population, pp. 4–5, Table 2.1.1. NSO series. The prose explicitly dates 636,700 to 1900.",
+    "chgis": "https://doi.org/10.7910/DVN/HHVVHX",
+    "chgis_file": "https://dataverse.harvard.edu/api/access/datafile/2966688",
+    "wwo_admin": "data/world_map/historical/historical_admin1_1900.json; qing_empire, 24 named units. Province geometry_status=historical_names_verified_geometry_digitization_required.",
+    "wwo_polygons": "data/world_map/historical/cshapes_1900_snapshot.json; geographical coordinates, feature IDs.",
+    "formosa_treaty": "https://history.state.gov/historicaldocuments/frus1895p1/d203",
+    "leases": "https://www.govinfo.gov/content/pkg/GPO-CRECB-1900-pt3-v33/pdf/GPO-CRECB-1900-pt3-v33-19-2.pdf",
+    "liaodong_kiaochow_weihai": "https://history.state.gov/historicaldocuments/frus1900/d508",
+    "macao": "https://www.camc.gov.mo/cam/download/reference/pdf_pt/reference_5.pdf",
+    "hk_census": "https://www.censtatd.gov.hk/en/data/stat_report/product/B1129015/att/B11290151971XXXXE0100.pdf",
+    "kiautschou": "https://www.bundesarchiv.de/themen-entdecken/online-entdecken/geschichtsgalerien/die-entstehung-der-musterkolonie-kiautschou/"
+  },
+  "cao_national": {
+    "printed": {
+      "1880": 364389000,
+      "1910": 436042000,
+      "linear_1900": 412157667,
+      "compound_1900": 410715067,
+      "linear_minus_compound": 1442600
+    },
+    "sum_25_rows_at_endpoints": [
+      364389000,
+      436042000
+    ],
+    "taiwan_component": {
+      "1880": 2664000,
+      "1910": 3253000,
+      "linear_1900": 3056667,
+      "compound_1900": 3043459,
+      "linear_minus_compound": 13208
+    },
+    "after_subtracting_taiwan": {
+      "1880": 361725000,
+      "1910": 432789000,
+      "linear_1900": 409101000,
+      "compound_1900": 407671468,
+      "linear_minus_compound": 1429532
+    },
+    "xu_1893_whole_minus_taiwan": 394840000,
+    "shorter_interval_national_sensitivity": 410466059,
+    "interpretation": "Cao minus Taiwan covers Inner Mongolia, Manchuria, Xinjiang and Tibet. Outer Mongolia is absent. Cao does not document Hong Kong, Macao and exact concession enumeration in the cited notes. No national addition or subtraction is inferred for them."
+  },
+  "other_benchmarks": {
+    "ft_china_midyear_1899": 398379454,
+    "ft_china_midyear_1900": 401670880,
+    "ft_world_china_opening_interpolation": 400038694,
+    "cao_after_taiwan_minus_ft_china_january_model": 9062306,
+    "outer_mongolia_ft_january_model": 590443,
+    "mongolia_nso_year_1900": 636700,
+    "nso_1900_minus_ft_january": 46257,
+    "hong_kong_ft_january_model": 350735,
+    "macau_ft_january_model": 63842,
+    "taiwan_ft_january_model": 2796343,
+    "interpretation": "FT uses the Wu trajectory after the Taiping period; it is an alternative historical reconstruction. The China workbook separately discusses source coverage assumptions for Wu and the explicit coverage of Cao. The FT China series and provincial Cao values are not independent components to add. NSO and FT Mongolia are alternatives; the unspecified date of the NSO estimate differs from the FT January convention."
+  },
+  "yearbook_totals": {
+    "1885_18_provinces_printed": 377636000,
+    "1885_18_individual_rounded_rows_sum": 377400000,
+    "1910_minchengpu_18_provinces_plus_manchuria": 331188000,
+    "1910_xinjiang": 2491000,
+    "military": 1700000,
+    "dependencies": 760000,
+    "tibet_chinese": 6500000,
+    "1910_composite": 342639000,
+    "1910_p2_alternative_excluding_tibet": 329542000,
+    "1910_p2_alternative_tibet": 1500000,
+    "1910_customs_printed_total": 428425000,
+    "1910_customs_13_individual_rows_sum": 366425000,
+    "1910_customs_5_province_group": 55000000,
+    "1910_customs_manchuria": 17000000,
+    "1910_customs_sum_of_rows": 438425000,
+    "customs_rows_minus_printed": 10000000,
+    "interpretation": "The 1885 return explicitly excludes Manchuria. The 1910 Minchengpu individual district/household arrangements differ; the table supplements Sichuan and Tibet. The Customs total covers eighteen provinces and Manchuria and has a printed arithmetic discrepancy. None supplies an independent matching 1900 nationwide constraint."
+  },
+  "boundary_issues": [
+    {
+      "area": "Taiwan and Penghu / Fujian coast",
+      "facts": "Article II(b,c) transferred Taiwan with associated islands and Penghu in 1895. Subtract the Cao Taiwan component once from Fujian and once from the national benchmark when displayed separately. Xu explicitly excludes Taiwan from Fujian. The two 1893 rows give 11,900,000 mainland Fujian and 2,820,000 Taiwan. The cited Cao components do not separately identify Penghu. The CHGIS 1911 polygon gives Magong to Taiwan and Kinmen to Fujian; WWO has a Taiwan feature for Taipei and omits Magong at the sample coordinate."
+    },
+    {
+      "area": "Inner Mongolia, Outer Mongolia, Tannu Uriankhai and Qinghai",
+      "facts": "Cao Mongolia covers Inner Mongolia only. In 1911 CHGIS, Ulaanbaatar and Kyzyl are in Wuliyasutai (195024); both fall inside gw_710. A check at Hohhot falls in CHGIS Shanxi (195011), illustrating the historical difference from modern Inner Mongolia. The Mongolian NSO estimate is 636,700 in 1900; the cited table does not establish coverage of Uriankhai. WWO groups Mongol leagues and banners and lacks a separate Qinghai first-level name. Historical group memberships and detached settlements need matching."
+    },
+    {
+      "area": "Liaodong/Kwantung lease",
+      "facts": "Russia leased Port Arthur, Dalny and adjacent territory in 1898. Dalian and Lüshun fall within gw_710 and CHGIS Fengtian. The 1910 yearbook gives only three-province Manchuria totals: 14,917,000 ministry and 17,000,000 Customs versus 17,836,000 in the three Cao rows. No lease split or 1900 general-command to 1907 provincial crosswalk is supplied."
+    },
+    {
+      "area": "Jiaozhou and Weihaiwei",
+      "facts": "Two separate 1898 leases in Shandong. Qingdao and Weihai lie inside gw_710 and the CHGIS Shandong polygon. Germany’s Federal Archives estimates about 70,000 in the leased base in 1898; the value is approximate, predates opening, and cannot identify inclusions in Cao. The source table has no separate row for either lease."
+    },
+    {
+      "area": "Guangzhouwan",
+      "facts": "French lease on the Leizhou peninsula; the Chikan site falls within gw_710 and CHGIS Guangdong. Exact census membership and the water/land coverage of both series are unknown."
+    },
+    {
+      "area": "Hong Kong, Kowloon and New Territories",
+      "facts": "Hong Kong administration included the New Territories leased in 1898. Hong Kong 1901 census retrospectively reports 368,987 including 102,254 in the New Territories. Hong Kong Island and Sha Tin fall inside gw_710; the old Kowloon sample is off the simplified coastline. FT separately tabulates Hong Kong. Its January figure is a whole-colony model, not a count of the particular polygon fragments."
+    },
+    {
+      "area": "Macao",
+      "facts": "Macao historical census series reports 78,627 in 1896 and 74,866 in 1910. FT separately estimates 63,842 on January 1. The Macao peninsula sample misses both generalized layers. No blanket adjustment to Guangdong is supported."
+    },
+    {
+      "area": "Treaty-port settlements",
+      "facts": "Shanghai and Tianjin samples lie in Jiangsu and Zhili on CHGIS and in gw_710. Xu’s 1893 Jiangsu explicitly includes Shanghai, and its Hebei definition includes Tianjin and Beijing. This does not prove whether returns counted residents of individual foreign settlements. Do not add the cities to inclusive provincial counts. FT gives about one million persons in Western concessions in 1913 and two million in 1938; its note groups the leased territories, not a 1900 province-level table of every urban concession."
+    }
+  ],
+  "point_method": "Point-in-polygon covers on the WWO WGS84 snapshot and on the original CHGIS 1911 province shapefile after transforming WGS84 points into its declared projection. Coordinates are representative locality points, not legal boundaries. Empty feature lists mean the sampled point misses all mapped land.",
+  "point_results": [
+    {
+      "site": "Taipei",
+      "lon_lat": [
+        121.51,
+        25.04
+      ],
+      "wwo_1900_features": [
+        "gw_713"
+      ],
+      "chgis_1911_sys_ids": [
+        "195014"
+      ]
+    },
+    {
+      "site": "Ulaanbaatar",
+      "lon_lat": [
+        106.906,
+        47.918
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195024"
+      ]
+    },
+    {
+      "site": "Kyzyl (Uriankhai)",
+      "lon_lat": [
+        94.44,
+        51.72
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195024"
+      ]
+    },
+    {
+      "site": "Lhasa",
+      "lon_lat": [
+        91.1,
+        29.65
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195027"
+      ]
+    },
+    {
+      "site": "Hohhot",
+      "lon_lat": [
+        111.68,
+        40.82
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195011"
+      ]
+    },
+    {
+      "site": "Kashgar",
+      "lon_lat": [
+        75.99,
+        39.48
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195026"
+      ]
+    },
+    {
+      "site": "Dalian",
+      "lon_lat": [
+        121.616,
+        38.92
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195021"
+      ]
+    },
+    {
+      "site": "Lushun",
+      "lon_lat": [
+        121.252,
+        38.85
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195021"
+      ]
+    },
+    {
+      "site": "Qingdao",
+      "lon_lat": [
+        120.38,
+        36.1
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195013"
+      ]
+    },
+    {
+      "site": "Weihai",
+      "lon_lat": [
+        122.11,
+        37.42
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195013"
+      ]
+    },
+    {
+      "site": "Chikan (Guangzhouwan)",
+      "lon_lat": [
+        110.365,
+        21.27
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195007"
+      ]
+    },
+    {
+      "site": "Hong Kong Island",
+      "lon_lat": [
+        114.16,
+        22.26
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195007"
+      ]
+    },
+    {
+      "site": "Kowloon",
+      "lon_lat": [
+        114.18,
+        22.32
+      ],
+      "wwo_1900_features": [],
+      "chgis_1911_sys_ids": [
+        "195007"
+      ]
+    },
+    {
+      "site": "Sha Tin",
+      "lon_lat": [
+        114.19,
+        22.38
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195007"
+      ]
+    },
+    {
+      "site": "Macao peninsula",
+      "lon_lat": [
+        113.55,
+        22.18
+      ],
+      "wwo_1900_features": [],
+      "chgis_1911_sys_ids": []
+    },
+    {
+      "site": "Shanghai",
+      "lon_lat": [
+        121.48,
+        31.24
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195001"
+      ]
+    },
+    {
+      "site": "Tianjin",
+      "lon_lat": [
+        117.21,
+        39.12
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195009"
+      ]
+    },
+    {
+      "site": "Magong (Penghu)",
+      "lon_lat": [
+        119.57,
+        23.56
+      ],
+      "wwo_1900_features": [],
+      "chgis_1911_sys_ids": [
+        "195014"
+      ]
+    },
+    {
+      "site": "Kinmen",
+      "lon_lat": [
+        118.33,
+        24.44
+      ],
+      "wwo_1900_features": [
+        "gw_710"
+      ],
+      "chgis_1911_sys_ids": [
+        "195005"
+      ]
+    }
+  ],
+  "source_rows": [
+    {
+      "name": "Anhui",
+      "cao_unit": "qing_hist_anhui",
+      "chgis_1911": {
+        "sys_id": "195004",
+        "chinese": "安徽"
+      },
+      "wwo_1900_name_candidate": "安徽省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 21392000,
+        "1910": 25197000,
+        "linear_1900": 23928667,
+        "compound_1900": 23858860,
+        "linear_minus_compound": 69807
+      },
+      "xu_1893_population": 22970000,
+      "linear_1893_1910_sensitivity": 23887000,
+      "yearbook_comparison": {
+        "census_1885": 20600000,
+        "maritime_customs": 36000000,
+        "minchengpu": 17300000
+      }
+    },
+    {
+      "name": "Fujian",
+      "cao_unit": "qing_hist_fujian",
+      "chgis_1911": {
+        "sys_id": "195005",
+        "chinese": "福建"
+      },
+      "wwo_1900_name_candidate": "福建省",
+      "scope": "explicit Taiwan subtraction; coastline and settlement coverage unresolved",
+      "cao_reference_persons": {
+        "1880": 11503000,
+        "1910": 12218000,
+        "linear_1900": 11979667,
+        "compound_1900": 11974860,
+        "linear_minus_compound": 4807
+      },
+      "xu_1893_population": 11900000,
+      "linear_1893_1910_sensitivity": 12030941,
+      "yearbook_comparison": {
+        "census_1885": 23500000,
+        "maritime_customs": 20000000,
+        "minchengpu": 13100000
+      }
+    },
+    {
+      "name": "Gansu",
+      "cao_unit": "qing_hist_gansu",
+      "chgis_1911": {
+        "sys_id": "195015",
+        "chinese": "甘肃"
+      },
+      "wwo_1900_name_candidate": "甘肃省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 4955000,
+        "1910": 7161000,
+        "linear_1900": 6425667,
+        "compound_1900": 6333790,
+        "linear_minus_compound": 91877
+      },
+      "xu_1893_population": 5810000,
+      "linear_1893_1910_sensitivity": 6366294,
+      "yearbook_comparison": {
+        "census_1885": 5400000,
+        "minchengpu": 5000000
+      }
+    },
+    {
+      "name": "Guangdong",
+      "cao_unit": "qing_hist_guangdong",
+      "chgis_1911": {
+        "sys_id": "195007",
+        "chinese": "广东"
+      },
+      "wwo_1900_name_candidate": "广东省",
+      "scope": "lease or settlement inclusion unresolved",
+      "cao_reference_persons": {
+        "1880": 26447000,
+        "1910": 29461000,
+        "linear_1900": 28456333,
+        "compound_1900": 28419982,
+        "linear_minus_compound": 36351
+      },
+      "xu_1893_population": 27710000,
+      "linear_1893_1910_sensitivity": 28431000,
+      "yearbook_comparison": {
+        "census_1885": 29700000,
+        "maritime_customs": 32000000,
+        "minchengpu": 27700000
+      }
+    },
+    {
+      "name": "Guangxi",
+      "cao_unit": "qing_hist_guangxi",
+      "chgis_1911": {
+        "sys_id": "195016",
+        "chinese": "广西"
+      },
+      "wwo_1900_name_candidate": "广西省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 12592000,
+        "1910": 14535000,
+        "linear_1900": 13887333,
+        "compound_1900": 13856119,
+        "linear_minus_compound": 31214
+      },
+      "xu_1893_population": 13400000,
+      "linear_1893_1910_sensitivity": 13867353,
+      "yearbook_comparison": {
+        "census_1885": 5100000,
+        "maritime_customs": 8000000,
+        "minchengpu": 6500000
+      }
+    },
+    {
+      "name": "Guizhou",
+      "cao_unit": "qing_hist_guizhou",
+      "chgis_1911": {
+        "sys_id": "195018",
+        "chinese": "贵州"
+      },
+      "wwo_1900_name_candidate": "贵州省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 10254000,
+        "1910": 12047000,
+        "linear_1900": 11449333,
+        "compound_1900": 11416957,
+        "linear_minus_compound": 32376
+      },
+      "xu_1893_population": 11000000,
+      "linear_1893_1910_sensitivity": 11431118,
+      "yearbook_comparison": {
+        "census_1885": 7700000,
+        "minchengpu": 11300000
+      }
+    },
+    {
+      "name": "Heilongjiang",
+      "cao_unit": "qing_hist_heilongjiang",
+      "chgis_1911": {
+        "sys_id": "195020",
+        "chinese": "黑龙江"
+      },
+      "wwo_1900_name_candidate": "黑龙江将军辖区",
+      "scope": "1907 provincial reorganization follows 1900 general commands",
+      "cao_reference_persons": {
+        "1880": 775000,
+        "1910": 1663000,
+        "linear_1900": 1367000,
+        "compound_1900": 1289324,
+        "linear_minus_compound": 77676
+      }
+    },
+    {
+      "name": "Henan",
+      "cao_unit": "qing_hist_henan",
+      "chgis_1911": {
+        "sys_id": "195012",
+        "chinese": "河南"
+      },
+      "wwo_1900_name_candidate": "河南省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 26218000,
+        "1910": 31087000,
+        "linear_1900": 29464000,
+        "compound_1900": 29371022,
+        "linear_minus_compound": 92978
+      },
+      "xu_1893_population": 28230000,
+      "linear_1893_1910_sensitivity": 29406412,
+      "yearbook_comparison": {
+        "census_1885": 22100000,
+        "minchengpu": 25600000
+      }
+    },
+    {
+      "name": "Hubei",
+      "cao_unit": "qing_hist_hubei",
+      "chgis_1911": {
+        "sys_id": "195002",
+        "chinese": "湖北"
+      },
+      "wwo_1900_name_candidate": "湖北省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 18966000,
+        "1910": 22077000,
+        "linear_1900": 21040000,
+        "compound_1900": 20987077,
+        "linear_minus_compound": 52923
+      },
+      "yearbook_comparison": {
+        "census_1885": 33600000,
+        "maritime_customs": 34000000,
+        "minchengpu": 24900000
+      }
+    },
+    {
+      "name": "Hunan",
+      "cao_unit": "qing_hist_hunan",
+      "chgis_1911": {
+        "sys_id": "195006",
+        "chinese": "湖南"
+      },
+      "wwo_1900_name_candidate": "湖南省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 22512000,
+        "1910": 26320000,
+        "linear_1900": 25050667,
+        "compound_1900": 24983999,
+        "linear_minus_compound": 66668
+      },
+      "yearbook_comparison": {
+        "census_1885": 21000000,
+        "maritime_customs": 22000000,
+        "minchengpu": 23600000
+      }
+    },
+    {
+      "name": "Jiangsu",
+      "cao_unit": "qing_hist_jiangsu",
+      "chgis_1911": {
+        "sys_id": "195001",
+        "chinese": "江苏"
+      },
+      "wwo_1900_name_candidate": "江苏省",
+      "scope": "lease or settlement inclusion unresolved",
+      "cao_reference_persons": {
+        "1880": 29491000,
+        "1910": 32355000,
+        "linear_1900": 31400333,
+        "compound_1900": 31370692,
+        "linear_minus_compound": 29641
+      },
+      "xu_1893_population": 31000000,
+      "linear_1893_1910_sensitivity": 31557941,
+      "yearbook_comparison": {
+        "census_1885": 21300000,
+        "maritime_customs": 23980000,
+        "minchengpu": 17300000
+      }
+    },
+    {
+      "name": "Jiangxi",
+      "cao_unit": "qing_hist_jiangxi",
+      "chgis_1911": {
+        "sys_id": "195010",
+        "chinese": "江西"
+      },
+      "wwo_1900_name_candidate": "江西省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 13316000,
+        "1910": 14961000,
+        "linear_1900": 14412667,
+        "compound_1900": 14391244,
+        "linear_minus_compound": 21423
+      },
+      "xu_1893_population": 14000000,
+      "linear_1893_1910_sensitivity": 14395706,
+      "yearbook_comparison": {
+        "census_1885": 24500000,
+        "maritime_customs": 24534000,
+        "minchengpu": 14500000
+      }
+    },
+    {
+      "name": "Jilin",
+      "cao_unit": "qing_hist_jilin",
+      "chgis_1911": {
+        "sys_id": "195022",
+        "chinese": "吉林"
+      },
+      "wwo_1900_name_candidate": "吉林将军辖区",
+      "scope": "1907 provincial reorganization follows 1900 general commands",
+      "cao_reference_persons": {
+        "1880": 2569000,
+        "1910": 5477000,
+        "linear_1900": 4507667,
+        "compound_1900": 4255493,
+        "linear_minus_compound": 252174
+      }
+    },
+    {
+      "name": "Liaoning",
+      "cao_unit": "qing_hist_liaoning",
+      "chgis_1911": {
+        "sys_id": "195021",
+        "chinese": "奉天"
+      },
+      "wwo_1900_name_candidate": "奉天将军辖区",
+      "scope": "lease or settlement inclusion unresolved; 1907 provincial reorganization follows Fengtian general command",
+      "cao_reference_persons": {
+        "1880": 4090000,
+        "1910": 10696000,
+        "linear_1900": 8494000,
+        "compound_1900": 7763461,
+        "linear_minus_compound": 730539
+      }
+    },
+    {
+      "name": "Mongolia",
+      "cao_unit": "qing_hist_mongolia",
+      "chgis_1911": {
+        "sys_id": "195023",
+        "chinese": "内蒙古"
+      },
+      "wwo_1900_name_candidate": "蒙古各盟旗",
+      "scope": "Cao Inner Mongolia subset of WWO Mongol category",
+      "cao_reference_persons": {
+        "1880": 3052000,
+        "1910": 3497000,
+        "linear_1900": 3348667,
+        "compound_1900": 3341888,
+        "linear_minus_compound": 6779
+      }
+    },
+    {
+      "name": "Qinghai",
+      "cao_unit": "qing_hist_qinghai",
+      "chgis_1911": {
+        "sys_id": "195025",
+        "chinese": "青海"
+      },
+      "wwo_1900_name_candidate": null,
+      "scope": "separate retrospective unit absent from WWO admin list",
+      "cao_reference_persons": {
+        "1880": 329000,
+        "1910": 344000,
+        "linear_1900": 339000,
+        "compound_1900": 338926,
+        "linear_minus_compound": 74
+      }
+    },
+    {
+      "name": "Shaanxi",
+      "cao_unit": "qing_hist_shaanxi",
+      "chgis_1911": {
+        "sys_id": "195003",
+        "chinese": "陕西"
+      },
+      "wwo_1900_name_candidate": "陕西省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 7075000,
+        "1910": 9545000,
+        "linear_1900": 8721667,
+        "compound_1900": 8638257,
+        "linear_minus_compound": 83410
+      },
+      "xu_1893_population": 8060000,
+      "linear_1893_1910_sensitivity": 8671471,
+      "yearbook_comparison": {
+        "census_1885": 3300000,
+        "minchengpu": 8800000
+      }
+    },
+    {
+      "name": "Shandong",
+      "cao_unit": "qing_hist_shandong",
+      "chgis_1911": {
+        "sys_id": "195013",
+        "chinese": "山东"
+      },
+      "wwo_1900_name_candidate": "山东省",
+      "scope": "lease or settlement inclusion unresolved",
+      "cao_reference_persons": {
+        "1880": 38978000,
+        "1910": 43881000,
+        "linear_1900": 42246667,
+        "compound_1900": 42181711,
+        "linear_minus_compound": 64956
+      },
+      "xu_1893_population": 41000000,
+      "linear_1893_1910_sensitivity": 42186294,
+      "yearbook_comparison": {
+        "census_1885": 36500000,
+        "maritime_customs": 38000000,
+        "minchengpu": 29600000
+      }
+    },
+    {
+      "name": "Shanxi",
+      "cao_unit": "qing_hist_shanxi",
+      "chgis_1911": {
+        "sys_id": "195011",
+        "chinese": "山西"
+      },
+      "wwo_1900_name_candidate": "山西省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 8827000,
+        "1910": 11867000,
+        "linear_1900": 10853667,
+        "compound_1900": 10752225,
+        "linear_minus_compound": 101442
+      },
+      "xu_1893_population": 10040000,
+      "linear_1893_1910_sensitivity": 10792294,
+      "yearbook_comparison": {
+        "census_1885": 10800000,
+        "minchengpu": 10000000
+      }
+    },
+    {
+      "name": "Sichuan",
+      "cao_unit": "qing_hist_sichuan",
+      "chgis_1911": {
+        "sys_id": "195019",
+        "chinese": "四川"
+      },
+      "wwo_1900_name_candidate": "四川省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 36461000,
+        "1910": 45633000,
+        "linear_1900": 42575667,
+        "compound_1900": 42344357,
+        "linear_minus_compound": 231310
+      },
+      "xu_1893_population": 40180000,
+      "linear_1893_1910_sensitivity": 42425353,
+      "yearbook_comparison": {
+        "census_1885": 71000000,
+        "maritime_customs": 78711000,
+        "minchengpu": 23000000
+      }
+    },
+    {
+      "name": "Tibet",
+      "cao_unit": "qing_hist_tibet",
+      "chgis_1911": {
+        "sys_id": "195027",
+        "chinese": "西藏"
+      },
+      "wwo_1900_name_candidate": "西藏地方",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 1270000,
+        "1910": 1312000,
+        "linear_1900": 1298000,
+        "compound_1900": 1297848,
+        "linear_minus_compound": 152
+      },
+      "xu_1893_population": 1140000,
+      "linear_1893_1910_sensitivity": 1210824,
+      "yearbook_comparison": {
+        "minchengpu": 6500000
+      }
+    },
+    {
+      "name": "Xinjiang",
+      "cao_unit": "qing_hist_xinjiang",
+      "chgis_1911": {
+        "sys_id": "195026",
+        "chinese": "新疆"
+      },
+      "wwo_1900_name_candidate": "新疆省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 1392000,
+        "1910": 2169000,
+        "linear_1900": 1910000,
+        "compound_1900": 1870909,
+        "linear_minus_compound": 39091
+      },
+      "yearbook_comparison": {
+        "minchengpu": 2491000
+      }
+    },
+    {
+      "name": "Yunnan",
+      "cao_unit": "qing_hist_yunnan",
+      "chgis_1911": {
+        "sys_id": "195017",
+        "chinese": "云南"
+      },
+      "wwo_1900_name_candidate": "云南省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 11645000,
+        "1910": 13468000,
+        "linear_1900": 12860333,
+        "compound_1900": 12830647,
+        "linear_minus_compound": 29686
+      },
+      "xu_1893_population": 12400000,
+      "linear_1893_1910_sensitivity": 12839765,
+      "yearbook_comparison": {
+        "census_1885": 11700000,
+        "maritime_customs": 8000000,
+        "minchengpu": 8500000
+      }
+    },
+    {
+      "name": "Zhejiang",
+      "cao_unit": "qing_hist_zhejiang",
+      "chgis_1911": {
+        "sys_id": "195008",
+        "chinese": "浙江"
+      },
+      "wwo_1900_name_candidate": "浙江省",
+      "scope": "named 1900 unit with 1911 GIS counterpart; boundary identity not established",
+      "cao_reference_persons": {
+        "1880": 16029000,
+        "1910": 18490000,
+        "linear_1900": 17669667,
+        "compound_1900": 17630315,
+        "linear_minus_compound": 39352
+      },
+      "xu_1893_population": 17050000,
+      "linear_1893_1910_sensitivity": 17642941,
+      "yearbook_comparison": {
+        "census_1885": 11700000,
+        "maritime_customs": 11800000,
+        "minchengpu": 17000000
+      }
+    },
+    {
+      "name": "Zhili",
+      "cao_unit": "qing_hist_zhili",
+      "chgis_1911": {
+        "sys_id": "195009",
+        "chinese": "直隶"
+      },
+      "wwo_1900_name_candidate": "直隶省",
+      "scope": "lease or settlement inclusion unresolved",
+      "cao_reference_persons": {
+        "1880": 31587000,
+        "1910": 37328000,
+        "linear_1900": 35414333,
+        "compound_1900": 35306875,
+        "linear_minus_compound": 107458
+      },
+      "xu_1893_population": 33960000,
+      "linear_1893_1910_sensitivity": 35346824,
+      "yearbook_comparison": {
+        "census_1885": 17900000,
+        "maritime_customs": 29400000,
+        "minchengpu": 32571000
+      }
+    }
+  ],
+  "combined_1893_comparators": {
+    "Huguang (Hunan and Hubei)": {
+      "xu_1893": 44350000,
+      "cao_1910_combined": 48397000,
+      "linear_1900_if_same_scope": 46016412,
+      "members": [
+        "Hunan",
+        "Hubei"
+      ]
+    },
+    "Xinjiang and Qinghai": {
+      "xu_1893": 2180000,
+      "cao_1910_combined": 2513000,
+      "linear_1900_if_same_scope": 2317118,
+      "members": [
+        "Xinjiang",
+        "Qinghai"
+      ]
+    },
+    "Mongolia and northeast": {
+      "xu_1893": 18470000,
+      "cao_1910_combined": 21333000,
+      "linear_1900_if_same_scope": 19648882,
+      "members": [
+        "Mongolia",
+        "Liaoning",
+        "Jilin",
+        "Heilongjiang"
+      ]
+    }
+  },
+  "uncertainty": {
+    "statistical_interval": null,
+    "method_sensitivity": "Per-row linear vs compound and 1893 vs 1880 starting points are sensitivity calculations; territorial definitions and rounding vary. No enumerated sampling frame, source error distribution or confidence coverage supplied.",
+    "sum_of_rounded_25_cao_1900_rows_minus_taiwan": 409101002,
+    "rounding": "Population inputs in Ni are in thousands and Xu prints 0.01 million. The output retains integer arithmetic for reproduction; precision to one person is computational."
+  },
+  "production_conditions": [
+    "A dated, exhaustive set of resident populations assigned to disjoint map units, or an independent total on exactly the same 1900 territory with a quantifiable residual for each missing piece.",
+    "Trace the 18 provinces, Manchurian general commands, frontier and Qinghai definitions between source dates; use explicitly merged areas where source boundaries changed. The named CHGIS 1911 rows alone do not establish 1900 identity.",
+    "Reconcile Taiwan/Penghu, Outer Mongolia with Uriankhai, and each concession/colony counted by the target. Preserve treaty-port settlements inside inclusive province totals.",
+    "Document source-date conventions and domain coverage for an opening-day estimate. Calculate residuals from compatible components; proportional rescaling of Cao to the independent FT total would impose unobserved provincial corrections."
+  ]
+}

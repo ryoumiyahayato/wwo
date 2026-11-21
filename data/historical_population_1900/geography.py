@@ -91,12 +91,48 @@ def catalogue(rows, groups):
         key="place:"+p["id"]
         out.append(dict(catalogue="prototype_place",id=key,name=p["name"],prototype_parent=p["parent_country_id"],
                      historical_observation_ids=sorted(local[key]),status="place_identity" if local[key] else "no_linked_city_observation"))
+    # Source-only statistical territories remain searchable when no dated WWO polygon exists.
+    identities=defaultdict(list)
+    for r in rows:
+        if r["kind"] in {"country","territory","admin"} and not r["source_id"].startswith("ft_world_"):
+            identities[r["unit_id"]].append(r)
+    opening_ids={g["unit_id"] for g in groups} | {u["unit_id"] for g in groups for u in g["units"]}
+    for key, observed in sorted(identities.items()):
+        out.append(dict(catalogue="source_statistical_unit",id=key,name=observed[0]["name"],
+            source_ids=sorted({r["source_id"] for r in observed}),observation_dates=sorted({r["date"] for r in observed}),
+            parent_ids=sorted({r["parent_id"] for r in observed if r["parent_id"]}),
+            wwo_identity_links=sorted({r["wwo_id"] for r in observed if r.get("wwo_id")}),
+            status="opening_unit" if key in opening_ids else "dated_evidence_only",
+            observation_ids=[r["record_id"] for r in observed]))
+    blockers={
+        "ft_china":"Alternative Qing household, Customs and reconstructed province totals differ. Taiwan, concessions, frontier populations and retrospective province boundaries require explicit remapping.",
+        "ft_mongolia":"Outside the Cao provincial return but inside the Qing political unit. Outer Mongolia and Tannu Uriankhai require a separate population and boundary reconciliation.",
+        "ft_india":"Census enumeration expanded in the Burma and frontier areas. The imperial return also includes Aden outside the WWO India boundary. See eastern/reconciliation.json.",
+        "ft_egypt":"Nomad corrections and western oases in the WWO footprint do not have an established census allocation. See eastern/reconciliation.json.",
+        "ft_formosa_taiwan":"The Governor-General registers separately list island residents and foreigners. The garrison and Orchid Island lack a comparable complete return.",
+        "ft_south_africa":"The 1904 post-war population includes personnel and territory transfers. A single retrospective Union total cannot replace four separate opening polities.",
+        "ft_german_east_africa":"Separate Rwanda/Burundi series and the Tanganyika series share one political map identifier.",
+        "ft_rwanda_and_burundi":"German East Africa includes this study unit; a separate Rwanda/Burundi opening boundary is unavailable.",
+        "ft_austria_hungary":"The historical research total includes the administered provinces of Bosnia and Herzegovina, which also have separate WWO political identities.",
+        "ft_denmark":"The study discusses Greenland and Faroese series jointly with Denmark. Their share and coverage cannot be inferred from the Denmark column.",
+        "ft_melanesia":"Regional group spans several colonial administrations and smaller islands outside those WWO polygons.",
+        "ft_micronesia":"Regional group includes Guam and other archipelagos; no mutually exclusive per-island opening allocation.",
+        "ft_polynesia":"Archipelago-level allocation and islands outside the map catalogue require separate controls."
+    }
     for r in rows:
         if r["date"]==DATE and r.get("source_id","").startswith("ft_world_") and r["kind"]=="territory":
+            links=sorted({g for key in r["candidate_polity_ids"] for g in group_at[key]})
+            why=blockers.get(r["unit_id"]) or r.get("scope_note") or (
+                 "No matching political unit in the opening catalogue." if not r["candidate_polity_ids"] else
+                 "A candidate political identity is known. Its source coverage and excluded territories have not been verified for the opening.")
+            if links:
+                why="Matched to opening scopes listed here; the source value is retained as a comparator. Opening totals and any finer divisions use their cited sources."
+
             out.append(dict(catalogue="research_territory",id=r["unit_id"],name=r["name"],region=r["region"],
                 population_value=r["population_value"],population_lower=r["population_lower"],population_upper=r["population_upper"],
                 quality=r["quality"],source_id=r["source_id"],locator=r["locator"],candidate_polity_ids=r["candidate_polity_ids"],
-                scope_note=r["scope_note"],status=r["mapping_status"]))
+                scope_note=r["scope_note"],status=r["mapping_status"],opening_candidates=links,
+                opening_disposition="comparison_with_opening_scopes" if links else "research_only",accounting_note=why))
     for key,note in [
         ("antarctica","Contemporaneous expedition parties and temporary bases require dated personnel records; no permanent household census adopted."),
         ("liechtenstein","Official 1891/1901 returns for all 11 municipalities and 1900 mean of 7,520 are in the Liechtenstein collection. No separate WWO or study unit; inclusion in adjacent research totals unresolved."),

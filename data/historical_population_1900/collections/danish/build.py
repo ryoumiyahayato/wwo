@@ -61,4 +61,3 @@ if __name__ == "__main__":
     with (ROOT / "observations.jsonl").open("w", encoding="utf-8", newline="\n") as out:
         for record in observations():
             out.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
-

@@ -10,6 +10,7 @@ from opening import groups
 from structure import dimensions
 from reconciliation import comparisons, asian_estimates
 from cities import city_index
+from us_municipalities import us_residuals
 
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
@@ -41,10 +42,8 @@ def residuals(rows):
     controls = {(r["source_id"],r["unit_id"],r["date"]):r for r in rows if r["kind"]=="admin"}
     members = defaultdict(list)
     for r in rows:
-        if r["kind"]!="city" or r["source_id"] not in {"us_twelfth_census_vol1","swiss_federal_census_comparison_1911","russia_first_census"}:
+        if r["kind"]!="city" or r["source_id"] not in {"swiss_federal_census_comparison_1911","russia_first_census"}:
             continue
-        if r["source_id"]=="us_twelfth_census_vol1" and r["date"]!="1900-06-01":
-            continue   # Table XXII also reports the annexed NYC area retrospectively.
         key=(r["source_id"],r["parent_id"],r["date"])
         if key in controls:
             if r["source_id"]=="russia_first_census" and "_r" not in r["parent_id"]:
@@ -60,7 +59,7 @@ def residuals(rows):
             remainder=difference if difference>=0 else None,arithmetic_difference=difference,
             meaning="Residents outside the listed cities; may include other towns and rural settlements.",
             status="disjoint_subtraction" if difference>=0 else "conflict_quarantined"))
-    return result
+    return sorted(result + us_residuals(rows), key=lambda r: (r["source_id"], r["parent_id"], r["date"]))
 
 def main():
     observations=[]
@@ -149,6 +148,12 @@ def main():
         city_observation_count=len(cities),city_keys_after_reviewed_matches=len({r["city_key"] for r in cities}),
         nonadditive_city_panels=[dict(source_id=k,date=d,bands=dict(v)) for (k,d),v in sorted(city_panels.items())],
         dated_city_remainders=len(rem),source_panels_are_nonadditive=True)
+    summary["political_catalogue_with_any_statistical_candidate"]=sum(bool(r["study_candidates"] or r["historical_observation_ids"]) for r in areas)
+    summary["source_statistical_units"]=sum(r["catalogue"]=="source_statistical_unit" for r in geography)
+    summary["opening_by_source_type"]={}
+    for label,subset in [("territorial_returns",[g for g in selection if "partition_source" in g]),
+                         ("historical_world_reconstruction",[g for g in selection if "partition_source" not in g])]:
+        summary["opening_by_source_type"][label]={"roots":len(subset),"people":sum(g["population_value"] for g in subset)}
     city_catalog=city_index(observations,bucket)
     summary["city_index_representative_bands"]=dict(Counter(r["tier"] for r in city_catalog if r["tier"]))
     summary["city_index_unresolved"]=sum(r["representative_record"] is None for r in city_catalog)

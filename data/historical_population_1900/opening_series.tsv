@@ -19,3 +19,9 @@ ft_australia	australia_colonies_1900	Six pre-federation colonies combined under 
 ft_united_kingdom	british_isles_1900	England and Wales, Scotland and the whole island of Ireland. Crown dependencies and colonies are outside these three series.
 ft_iceland	iceland_under_denmark	Iceland, enumerated separately from the Danish metropole. Danish yearbook provides independent 1901 territorial control.
 ft_brasil	brazil_1900	National official IBGE annual series to 1900, continued with CELADE. Acre transferred from Bolivia only in 1903.
+ft_korea	korean_empire	Korean peninsula before annexation, separate from the Japanese home islands and Taiwan. Kwon and Shin reconstruct the population using revised 1910 benchmarks and earlier population registers. Under-registration is material.
+ft_argentina	argentina_1900	Argentina only. Pérez-Brignoli national reconstruction, independently compared with Ferreres in Appendix I p. 55. The 1895 census in the Americas collection distinguishes directly enumerated residents and official estimates for omissions.
+ft_barbados	cshapes_gw_53	Barbados island, independent of the Windward Islands statistical series. Bulmer-Thomas Tables A.1 and C.1.
+ft_bahamas	cshapes_gw_31	Bahamas colony. Turks and Caicos form a separate research series. Bulmer-Thomas Tables A.1 and C.1.
+ft_trinidad_tobago_winward_island	cshapes_gw_52	The two islands were administered together at opening. Bulmer-Thomas tabulates both separately before 1900 and jointly thereafter.
+ft_martinique_french_colonies	cshapes_gw_66	Martinique island. Separate from the metropolitan France opening and from Guadeloupe. Bulmer-Thomas series includes 1894 and 1900, before the 1902 eruption.

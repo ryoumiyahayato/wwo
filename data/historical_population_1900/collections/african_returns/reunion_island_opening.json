@@ -1,0 +1,29 @@
+{
+  "unit_id": "cshapes_gw_585",
+  "date": "1900-01-01",
+  "source_id": "league_africa_1932",
+  "endpoint_sources": [
+    "league_africa_1932",
+    "clairin_reunion_1979"
+  ],
+  "locator": "Section VI, Réunion and Mauritius, p. 182; Seychelles, p. 183. Row 1897, La Réunion. / Table 69, p. 254, history of enumerations and censuses on the island. Row 1902, La Réunion.",
+  "endpoint_dates": [
+    "1897",
+    "1902"
+  ],
+  "interpolation_reference_dates": [
+    "1897-07-01",
+    "1902-07-01"
+  ],
+  "country_endpoint_values": [
+    173192,
+    173315
+  ],
+  "population_value": 173254,
+  "units": [],
+  "population_lower": null,
+  "population_upper": null,
+  "scope": "Réunion island alone; outside metropolitan France, Mauritius and Madagascar.",
+  "method": "Linear interpolation over 914/1825. July 1 is a computational midpoint for year-only returns. 1904 Basutoland day follows the imperial census report p. 71.",
+  "uncertainty_kind": "No statistical interval. Enumeration-day and between-census variation are unquantified."
+}
