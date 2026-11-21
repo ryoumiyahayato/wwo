@@ -1,0 +1,11 @@
+{
+  "unit_id": "raj_gwalior_state",
+  "date": "1901-03-01",
+  "source_id": "india_gwalior_1901_gazetteer_urban",
+  "locator": "Imperial Gazetteer of India, Vol. IX, printed p. 389, Table I, Gwalior row.",
+  "enumerated_residents": 2933001,
+  "towns": 25,
+  "urban": 325120,
+  "urban_male": 169874,
+  "urban_female": 155246
+}

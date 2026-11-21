@@ -1,0 +1,4 @@
+unit_id,source_id,locator,single_male,single_female,married_male,married_female,widowed_male,widowed_female,divorced_male,divorced_female,unknown_male,unknown_female
+ru1897_13,ru_1897_census_vol13_marital,"Vol. XIII, table V, p. 30, province total.",629705,557402,428803,405678,32049,57393,438,727,720,759
+ru1897_16,ru_1897_census_vol16_marital,"Vol. XVI, table V, p. 28, scan p. 48, province total.",1045871,989899,674508,675471,44689,122416,1116,2622,1104,1533
+ru1897_24,ru_1897_census_vol24_marital,"Vol. XXIV, table V, p. 32, scan p. 71, province total.",636561,594132,539065,450027,41353,164724,1064,1149,1224,1282

@@ -1,0 +1,11 @@
+panel,label,role,age_min,age_max,both,male,female
+port_blair_1891_sex,Total,total,,,15609,13375,2234
+port_blair_1901_sex,Total,total,,,16256,14122,2134
+port_blair_1911_age,Total,total,,,16324,14109,2215
+port_blair_1911_age,0–4,band,0,4,620,319,301
+port_blair_1911_age,5–9,band,5,9,483,251,232
+port_blair_1911_age,10–14,band,10,14,344,186,158
+port_blair_1911_age,15–19,band,15,19,349,220,129
+port_blair_1911_age,20–39,band,20,39,8184,7288,896
+port_blair_1911_age,40–59,band,40,59,5341,4951,390
+port_blair_1911_age,60 and over,band,60,,1003,894,109

@@ -1,0 +1,55 @@
+panel,label,role,age_min,age_max,both,male,female
+travancore_1891_age_rates,Total,total,,,,10000,10000
+travancore_1891_age_rates,0–1,band,0,0,,151,185
+travancore_1891_age_rates,1–2,band,1,1,,229,264
+travancore_1891_age_rates,2–3,band,2,2,,264,292
+travancore_1891_age_rates,3–4,band,3,3,,303,333
+travancore_1891_age_rates,4–5,band,4,4,,242,258
+travancore_1891_age_rates,Total 0–5,subtotal,0,4,,1189,1332
+travancore_1891_age_rates,5–10,band,5,9,,1231,1246
+travancore_1891_age_rates,10–15,band,10,14,,1162,1088
+travancore_1891_age_rates,15–20,band,15,19,,927,1000
+travancore_1891_age_rates,20–25,band,20,24,,832,930
+travancore_1891_age_rates,25–30,band,25,29,,917,966
+travancore_1891_age_rates,30–35,band,30,34,,776,758
+travancore_1891_age_rates,35–40,band,35,39,,775,645
+travancore_1891_age_rates,40–45,band,40,44,,619,543
+travancore_1891_age_rates,45–50,band,45,49,,457,379
+travancore_1891_age_rates,50–55,band,50,54,,396,374
+travancore_1891_age_rates,55–60,band,55,59,,251,235
+travancore_1891_age_rates,60 and over,band,60,,,468,504
+travancore_1901_age_rates,Total,total,,,,10000,10000
+travancore_1901_age_rates,0–1,band,0,0,,239,277
+travancore_1901_age_rates,1–2,band,1,1,,218,239
+travancore_1901_age_rates,2–3,band,2,2,,251,277
+travancore_1901_age_rates,3–4,band,3,3,,289,314
+travancore_1901_age_rates,4–5,band,4,4,,261,276
+travancore_1901_age_rates,Total 0–5,subtotal,0,4,,1258,1383
+travancore_1901_age_rates,5–10,band,5,9,,1300,1324
+travancore_1901_age_rates,10–15,band,10,14,,1227,1140
+travancore_1901_age_rates,15–20,band,15,19,,909,958
+travancore_1901_age_rates,20–25,band,20,24,,821,940
+travancore_1901_age_rates,25–30,band,25,29,,929,980
+travancore_1901_age_rates,30–35,band,30,34,,761,747
+travancore_1901_age_rates,35–40,band,35,39,,763,633
+travancore_1901_age_rates,40–45,band,40,44,,578,507
+travancore_1901_age_rates,45–50,band,45,49,,463,386
+travancore_1901_age_rates,50–55,band,50,54,,368,351
+travancore_1901_age_rates,55–60,band,55,59,,225,203
+travancore_1901_age_rates,60 and over,band,60,,,398,448
+cochin_1891_age_rates,Total,total,,,,100000,100000
+cochin_1891_age_rates,0–5,band,0,4,,13763,14769
+cochin_1891_age_rates,5–10,band,5,9,,13525,13112
+cochin_1891_age_rates,10–15,band,10,14,,12676,11475
+cochin_1891_age_rates,15–40,band,15,39,,41114,41842
+cochin_1891_age_rates,40–60,band,40,59,,14978,14085
+cochin_1891_age_rates,60 and over,band,60,,,3924,4698
+cochin_1891_age_rates,Not stated,band,,,,20,19
+cochin_1901_age_rates,Total,total,,,,100000,100000
+cochin_1901_age_rates,0–5,band,0,4,,13665,14031
+cochin_1901_age_rates,5–10,band,5,9,,13856,13397
+cochin_1901_age_rates,10–15,band,10,14,,13216,12259
+cochin_1901_age_rates,15–40,band,15,39,,41074,41382
+cochin_1901_age_rates,40–60,band,40,59,,14444,14309
+cochin_1901_age_rates,60 and over,band,60,,,3734,4609
+cochin_1901_age_rates,Not stated,band,,,,11,13

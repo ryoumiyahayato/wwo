@@ -1,0 +1,51 @@
+[
+  {
+    "id": "india_census_1901_comparable_princely_states",
+    "title": "Census of India, 1901, Vol. I-A, India, Part II, Tables",
+    "publisher": "Government of India, 1903",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924/page/n14/mode/1up",
+    "locator": "Table II-A, printed p. 10, persons columns 2 (1901) and 3 (1891). Gwalior subrow under line 16. Cochin and Travancore subrows under line 20. See the Table I coverage note and Table II-A explanatory notes on p. 9.",
+    "scope": "The 1891 comparable enumeration area used in Table II-A. Gwalior is included in the Central India Agency control. Cochin and Travancore are included in the Madras States control. The remaining Madras States are Banganapalle, Pudukkottai and Sandur.",
+    "rights": "Historical official government publication. Numerical transcription and subtraction of reported figures.",
+    "comparison_source": {
+      "url": "https://www.tradeshouselibrary.org/uploads/4/7/7/2/47723681/census_of_the_british_empire._1901.pdf",
+      "locator": "Census of the British Empire 1901, Indian Empire, Table 3, printed pp. 87–88. The three state subrows and their two parent rows agree with II-A in both comparison years."
+    },
+    "opening_model": "Use the existing Table II-A endpoints of February 26, 1891 and March 1, 1901, and day-weighted linear interpolation at elapsed fraction 3231/3655. Derive the two remainder endpoints by subtracting the printed children from their respective parent, then apportion by largest remainders to the existing rounded opening parent total. The estimates have no quantified interval for coverage, migration, or the effects of famine.",
+    "geographical_resolution": "Historical statistical identities for the three named princely states. Remainders retain their parent census scope after the listed deductions. No current province polygon or residence place is assigned."
+  },
+  {
+    "id": "india_gwalior_1901_gazetteer_urban",
+    "title": "Imperial Gazetteer of India, Vol. IX",
+    "publisher": "India Office, Oxford, Clarendon Press, 1908",
+    "url": "https://library.bjp.org/jspui/bitstream/123456789/1876/1/Imperial-Gazetteer-Of-India-Vol-9.pdf",
+    "locator": "Printed p. 389, Table I, Distribution of Population in Central India, 1901, Gwalior row.",
+    "scope": "All 2,933,001 enumerated residents of Gwalior State in the 1901 Census. The 25 towns agree with Vol. I-A, Table I. Urban males and females sum to the published urban persons total. Rural is total less urban.",
+    "rights": "Historical official government publication. Numerical transcription and subtraction of reported figures.",
+    "comparison_source": {
+      "url": "https://dspace.gipe.ac.in/xmlui/bitstream/handle/10973/18848/GIPE-017288.pdf?isAllowed=y&sequence=3",
+      "locator": "Census of India 1901, Vol. XXI, Gwalior, Part I, printed pp. 16–17, paragraphs 9–11. The report confirms the contemporary towns definition and reports 25 urban places with a rounded average of 13,005 residents."
+    },
+    "raw_path": "residence_1901.json"
+  },
+  {
+    "id": "india_travancore_1901_language",
+    "title": "Census of India 1901, Vol. I, Part II, Tables, India",
+    "publisher": "Government of India",
+    "url": "https://censusindia.gov.in/nada/index.php/catalog/31294/download/34475/IO076365_1901_IND-L.pdf",
+    "locator": "Table X, Part IV, printed pp. 144–145, Travancore State and continuation.",
+    "scope": "Language ordinarily used, reported for the 2,952,157 residents of Travancore State. The totals of 1,490,165 males and 1,461,992 females close independently, including 13 and 12 respectively whose languages were not returned.",
+    "rights": "Historical official government publication. Numerical transcription.",
+    "raw_path": "travancore_language_1901.json"
+  },
+  {
+    "id": "india_madras_states_1901_religion",
+    "title": "Census of the British Empire, 1901",
+    "publisher": "His Majesty's Stationery Office, 1906",
+    "url": "https://www.tradeshouselibrary.org/uploads/4/7/7/2/47723681/census_of_the_british_empire._1901.pdf",
+    "locator": "Indian Empire, Table 12, printed p. 107, Madras States, Cochin State and Travancore State.",
+    "scope": "The Madras States total contains the Cochin and Travancore rows. Deduct both states from every published religion column to retain the balance. The minor religions and religion not stated column stays unassigned. The census label Mohammedan is represented by the established Indian census category Muhammadans.",
+    "rights": "Historical official government publication. Numerical transcription and subtraction of reported figures.",
+    "raw_path": "religion_1901.json"
+  }
+]

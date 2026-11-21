@@ -7,7 +7,9 @@ from collections import Counter, defaultdict
 from itertools import chain
 from pathlib import Path
 
+from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
+from social_india_princely import india_princely_residence, madras_states_religion, travancore_language
 
 
 COLLECTIONS = Path(__file__).resolve().parent / "collections"
@@ -85,7 +87,9 @@ def russian_structure(pools):
         row = json.loads(line)
         if row["source_id"] == "russia_first_census" and row.get("parent_id") == "ru_census_1897_ex_finland":
             provinces[province_name(row["name"])] = row
-    yield from russian_literacy(pools, {row["unit_id"]: row for row in provinces.values()})
+    provinces_by_id = {row["unit_id"]: row for row in provinces.values()}
+    yield from russian_literacy(pools, provinces_by_id)
+    yield from russian_marital_status(pools, provinces_by_id, distribution)
     blocks = defaultdict(list)
     with (path / "structure.csv").open(encoding="utf8", newline="") as stream:
         for row in csv.DictReader(stream):
@@ -206,6 +210,10 @@ def india_structure(pools):
         dimension, classification, source, labels, definition = INDIA_TABLES[table]
         for row in rows:
             pool_id = row["unit_id"]
+            if table == "1" and pool_id == "raj_central_india_agency" and "raj_gwalior_state" in pools:
+                continue
+            if table == "7" and pool_id == "raj_madras_states" and "raj_travancore_state" in pools:
+                continue
             pool = pools.get(pool_id)
             if not pool or pool.get("endpoint_values", [None])[-1] != row["total"]:
                 continue
@@ -398,16 +406,44 @@ def netherlands_occupation(pools):
         yield pool_id, "occupation", marginal
 
 
+def england_wales_housing(pools):
+    with (COLLECTIONS / "england_wales_habitations" / "overcrowding.csv").open(encoding="utf8", newline="") as table:
+        for row in csv.DictReader(table):
+            pool_id = "administrative_region:gb_historic_" + row["county"]
+            pool = pools[pool_id]
+            total = int(row["residents"])
+            if row["administrative_acres"] != row["ancient_acres"] or pool["endpoint_values"][-1] != total:
+                raise ValueError(f"{pool_id}: the housing and opening population controls use different county scopes")
+            crowded = sum(int(row[column]) for column in ("crowded", "crowded_cardiff", "crowded_swansea"))
+            margin = distribution(
+                pool["population_value"], classification="england_wales_1901_small_tenement_overcrowding",
+                source="england_wales_1901_county_overcrowding", date="1901-03-31",
+                observed_unit=pool["source_unit_ids"][0], scope=pool["name"],
+                locator=f"General Report table 42, p. {row['housing_page']}; Summary Tables table II, p. {row['population_page']}",
+                total=total, observed_counts={"Over two persons per room in a one- to four-room tenement": crowded,
+                                              "Outside the published overcrowding count": total - crowded},
+                unknown=0,
+                definition=("The published count covers one- to four-room tenements. The complement is all other "
+                            "residents, including residents of larger dwellings with unknown crowding. For Glamorgan, "
+                            "the county count includes the separate Cardiff and Swansea county borough rows."),
+            )
+            margin["source_ids"].append("england_wales_summary_tables_1901")
+            yield pool_id, "housing", margin
+
+
 def opening_social(opening_groups):
-    """Return independent person distributions on the opening's nonoverlapping leaf accounts."""
+    """Return independent person distributions at each source's published scope."""
     pools = {
         unit["unit_id"]: unit
-        for group in opening_groups for unit in (group["units"] or [group])
+        for group in opening_groups
+        for unit in [*(group["units"] or [group]), *group.get("statistical_aggregates", [])]
     }
     regions = {}
-    marginals = chain(russian_structure(pools), india_structure(pools), india_occupation(pools), canada_structure(pools),
+    marginals = chain(russian_structure(pools), india_structure(pools), india_occupation(pools),
+                      india_princely_residence(pools, distribution), travancore_language(pools, distribution),
+                      madras_states_religion(pools, distribution, INDIA_TABLES["7"]), canada_structure(pools),
                       united_states_structure(pools, distribution), netherlands_structure(pools),
-                      netherlands_occupation(pools))
+                      netherlands_occupation(pools), england_wales_housing(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

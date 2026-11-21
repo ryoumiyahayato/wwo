@@ -407,6 +407,44 @@ def add_india_comparable_areas(group, observations):
     )
 
 
+def add_india_princely_states(group, observations):
+    dates = group["endpoint_dates"]
+    source = "india_census_1901_comparable_princely_states"
+    parents = {
+        "raj_central_india_agency": "raj_comparable_row_16",
+        "raj_madras_states": "raj_comparable_row_20",
+    }
+    endpoints = defaultdict(list)
+    for row in observations:
+        if row["source_id"] == source:
+            endpoints[row["parent_id"]].append(row)
+
+    units = []
+    aggregates = []
+    for parent in group["units"]:
+        parent_id = parent["unit_id"]
+        if parent_id not in parents:
+            units.append(parent)
+            continue
+        children = interpolate_partition(endpoints[parents[parent_id]], parent, dates)
+        for child in children:
+            child.update(
+                statistical_parent=parent_id,
+                date=DATE,
+                uncertainty_kind="Enumeration coverage, the effects of famine and migration, and interpolation error have no quantified interval.",
+            )
+        aggregates.append(parent | dict(
+            source_id=group["source_id"], endpoint_dates=dates, date=DATE,
+            method="Sum of the mutually exclusive state and remainder opening estimates, reconciled to the interpolated agency control.",
+            population_lower=None, population_upper=None,
+            uncertainty_kind="Enumeration coverage, the effects of famine and migration, and interpolation error have no quantified interval.",
+        ))
+        units.extend(children)
+
+    group["units"] = sorted(units, key=lambda row: row["unit_id"])
+    group["statistical_aggregates"] = aggregates
+
+
 def legacy_population_control(unit_id):
     legacy = json.loads((HERE.parent/"alpha/historical_world_economy_1900/countries_compact.json").read_text(encoding="utf8"))
     controls = (dict(zip(legacy["field_order"], data)) for data in legacy["rows"])
@@ -808,6 +846,8 @@ def groups(observations, version=1):
         add_nordic_population_controls(result["sweden_norway_union"], observations)
         root = "kingdom_of_belgium"
         result[root] = belgium_opening(result[root], observations)
+    if version >= 14:
+        add_india_princely_states(result["cshapes_gw_750"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

@@ -10,5 +10,18 @@
       "population": "https://www.visionofbritain.org.uk/census/EW1901GEN/4",
       "habitations": "https://visionofbritain.org.uk/census/EW1901GEN/5"
     }
+  },
+  {
+    "id": "england_wales_1901_county_overcrowding",
+    "title": "Census of England and Wales, 1901. Persons living more than two to a room",
+    "publisher": "General Register Office and His Majesty's Stationery Office, London, 1904",
+    "url": "https://iiif.wellcomecollection.org/presentation/v2/b32183161_0001",
+    "locator": "General Report, table 42, printed pp. 290, 292 and 293. County and corresponding county borough person counts. Summary Tables, table II, printed pp. 2, 3 and 5. Compare acreage, inhabited houses, and persons for administrative and ancient counties.",
+    "observed_date": "1901-03-31",
+    "original_tables": [
+      "https://iiif.wellcomecollection.org/image/b32183161_0001_0304.jp2/full/1600,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/presentation/v2/b32183161_0006"
+    ],
+    "rights": "Numeric facts transcribed from the published census."
   }
 ]

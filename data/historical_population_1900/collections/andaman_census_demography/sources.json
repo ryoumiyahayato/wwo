@@ -1,0 +1,12 @@
+[
+  {
+    "id": "india_andaman_nicobar_census_1911_demography",
+    "title": "Census of India, 1911, Volume II: Andaman and Nicobar Islands, Report and Tables",
+    "publisher": "Census of India",
+    "url": "https://censusindia.gov.in/nada/index.php/catalog/32395/download/35576/20797_1911_REP.pdf",
+    "locator": "Printed pp. 64 and 128, population by sex in 1891, 1901 and 1911. Part II, Table VII, printed p. 135, age by sex in 1911.",
+    "rights": "Numeric facts transcribed from the publication.",
+    "raw_path": "age_sex.csv",
+    "extract": "The Port Blair Penal Settlement is the comparable area in the 1901 India Table II-A, row 2. The 1901 report lists 16,256 in the settlement, 1,882 Indigenous Andamanese and 6,511 in the Nicobars, for 24,649 in the full island return. The 1911 book reprints the 1891 and 1901 sex counts for the settlement."
+  }
+]

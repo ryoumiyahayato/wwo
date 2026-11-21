@@ -2219,6 +2219,44 @@ mod tests {
     }
 
     #[test]
+    fn historical_social_scopes_preserve_parent_counts_and_unknown_leaves() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("country_fra").unwrap();
+        let central_india = "raj_central_india_agency";
+        let gwalior = "raj_gwalior_state";
+        let rest = "raj_central_india_ex_gwalior";
+        let before = world.population().social_distribution(Some(central_india)).unwrap();
+        assert_eq!(before.population_total, 8_824_834);
+        assert_eq!(before.dimensions["occupation"].assigned_residents, 173_036);
+        assert_eq!(before.dimensions["residence"].assigned_residents, before.population_total);
+        assert_eq!(before.residents_with_any_attribute_minimum, before.population_total);
+        assert_eq!(before.residents_with_any_attribute_maximum, before.population_total);
+        let gwalior_social = world.population().social_distribution(Some(gwalior)).unwrap();
+        assert_eq!(gwalior_social.population_total, 2_984_713);
+        assert_eq!(gwalior_social.dimensions["occupation"].unknown_residents, gwalior_social.population_total);
+        assert_eq!(gwalior_social.dimensions["residence"].by_classification["india_1901_census_towns_and_rural"]["Urban"], 330_852);
+        let glamorgan = world.population().social_distribution(Some("administrative_region:gb_historic_glamorgan")).unwrap();
+        let housing = &glamorgan.dimensions["housing"];
+        assert_eq!(housing.direct_opening_distribution.unwrap().observed_total, 859_931);
+        assert_eq!(housing.assigned_residents, 838_431);
+        assert_eq!(housing.unknown_residents, 0);
+
+        let (cohort, _, _) = world.population().cohorts_in(gwalior).next().unwrap();
+        let cohort = cohort.clone();
+        world.population.transfer_cohort(gwalior, rest, &cohort, 1, 0).unwrap();
+        let after = world.population().social_distribution(Some(central_india)).unwrap();
+        assert_eq!(after.population_total, 8_824_834);
+        assert_eq!(after.affected_resident_pools, 2);
+        assert!(after.dimensions["occupation"].assigned_residents < 173_036);
+        assert_eq!(after.dimensions["residence"].unknown_residents, 2);
+        assert!(after.residents_with_any_attribute_minimum <= after.residents_with_any_attribute_maximum);
+        assert_eq!(after.residents_with_any_attribute_maximum, after.population_total);
+        let restored = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+        let replayed = restored.population().social_distribution(Some(central_india)).unwrap();
+        assert_eq!(serde_json::to_value(replayed).unwrap(), serde_json::to_value(after).unwrap());
+    }
+
+    #[test]
     fn historical_population_structure_and_old_openings_restore() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create("country_fra").unwrap();
