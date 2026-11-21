@@ -1,4 +1,6 @@
 pub mod battlefield_terrain;
+pub mod land_battle;
+pub mod military_grid;
 pub mod calendar;
 pub mod formal_bootstrap;
 pub mod formal_character;
