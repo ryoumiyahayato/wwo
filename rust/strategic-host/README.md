@@ -48,6 +48,8 @@ Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒�
 
 局部检查使用 `cargo test --locked --manifest-path rust/character-core/Cargo.toml --lib player::tests` 和 `cargo test --release --locked --manifest-path rust/strategic-host/Cargo.toml --lib player_prologue_tests`，从仓库根目录执行。
 
+国家简介在正式 HUD 字图缺字时使用内嵌的思源宋体字形。修改简介后，从仓库根目录运行 `python rust/strategic-host/tools/extend_country_profile_glyphs.py <正式游戏数据目录>/hud-type.json`，再构建 EXE。字形许可证见 [Source Han Serif OFL](../../data/character/SourceHan-LICENSE.txt)。
+
 ## 正式水文资源
 
 正式入口优先读取 `data/worldcrs84quad-15s-v2-hydrology/`，否则读取可用的旧库。在水文目录内恢复下列文件。QHW 按各层 QPK 大小核对配套版本。完整恢复后用 `wwo-map-lab --play` 启动。显式 `--terrain-candidate <候选库>` 仍可指定对照版本。
