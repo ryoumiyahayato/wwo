@@ -201,7 +201,8 @@ impl WorkState {
             row.id == *job && self.knows_job(opening, actor, row, clock.current_day())
                 && self.contracts.values().filter(|id| *id == job).count() <= row.positions
         })) && self.bookings.iter().all(|(actor, &minute)| self.contract(opening, actor).is_some_and(|job| {
-            present_place(actor) == Some(job.place.as_str())
+            (present_place(actor) == Some(job.place.as_str())
+                || clock.snapshot().total_minutes >= minute + job.hours * MINUTES_PER_HOUR)
                 && (clock.current_day() * MINUTES_PER_DAY..=clock.snapshot().total_minutes).contains(&minute)
                 && shift_fits(job, minute)
         }))

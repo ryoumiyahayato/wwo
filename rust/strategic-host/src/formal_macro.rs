@@ -218,6 +218,40 @@ impl MacroEconomy {
         Ok((amount, paid))
     }
 
+    /// A consigned lot enters inventory at the destination's current statistical
+    /// price. Round buyer payouts down to a whole minor unit.
+    pub(crate) fn freight_bid(&self, unit: &str, good: &str, quantity_milli: i64) -> io::Result<(i64, i64)> {
+        let state = self.markets.get(unit).and_then(|market| market.commodities.get(good))
+            .filter(|_| self.purchasable(good))
+            .ok_or_else(|| invalid("目的地没有接收此货物的市场。"))?;
+        if quantity_milli <= 0 || state.price_centimes <= 0 {
+            return Err(invalid("货量或买价无效。"));
+        }
+        let value = i128::from(quantity_milli) * i128::from(state.price_centimes) / 1000;
+        let amount = i64::try_from(value).ok().filter(|amount| (1..=crate::formal_ledger::MAX_AMOUNT).contains(amount))
+            .ok_or_else(|| invalid("货批金额超出可结算范围。"))?;
+        Ok((state.price_centimes, amount))
+    }
+
+    pub(crate) fn receive_player_freight(
+        &mut self, unit: &str, good: &str, quantity_milli: i64, expected_price: i64,
+        pay: impl FnOnce(&str, i64) -> io::Result<()>,
+    ) -> io::Result<i64> {
+        let (price, amount) = self.freight_bid(unit, good, quantity_milli)?;
+        if expected_price != price {
+            return Err(invalid("目的地收购报价已变动。"));
+        }
+        let market = self.markets.get_mut(unit).expect("quoted market");
+        let state = market.commodities.get_mut(good).expect("quoted commodity");
+        let inventory = state.inventory + quantity_milli as f64 / 1000.0;
+        if !inventory.is_finite() || inventory <= state.inventory {
+            return Err(invalid("目的地无法登记这批库存。"));
+        }
+        pay(&market.id, amount)?;
+        state.inventory = inventory;
+        Ok(amount)
+    }
+
     pub(crate) fn restore(
         inputs: Arc<MarketInputs>,
         population: &BTreeMap<String, u64>,

@@ -19,6 +19,7 @@ pub struct Session {
     #[serde(default)] pub property:Vec<crate::market_ui::Holding>,
     #[serde(default)] pub property_feedback: String,
     #[serde(default)] pub relations:Option<Relations>,
+    #[serde(default)] pub transport:Option<crate::transport_ui::TransportView>,
     #[serde(default)] pub character:Option<Character>,
     #[serde(default)] pub training:String,
     #[serde(default)] pub departure:String,
@@ -295,7 +296,7 @@ impl Skin {
     }
 }
 #[derive(Clone,Copy,Debug,Default,PartialEq,Eq)]
-pub enum Page {#[default] Map,Finance,Technology,Market,Property,Relations,Character}
+pub enum Page {#[default] Map,Finance,Technology,Market,Property,Relations,Character,Travel}
 #[derive(Clone,Copy,Debug,Default,PartialEq,Eq)]
 pub enum Menu {#[default] None,MapModes,System,Settings,Save,Load,Overwrite(u8),Departure}
 impl Menu {
@@ -318,6 +319,7 @@ pub enum Command {
     FinancePage(usize),Clock(u32),Player,LocatePlayer,PlayerCountry,Slot(u8),ConfirmSlot(u8),MessageLink(usize),
     Labels,Fullscreen,MilitaryGrid,Quit,PlayerMarker,Volume(u8),Language(bool),
     Market(&'static str,usize),MarketScroll(i32),
+    Transport(&'static str,usize),
     Training(&'static str),
     PortraitAction(usize,Page),Relation(Option<usize>),RelationDrawer(&'static str),
     WorkAction(usize,usize,u64),OralWorkAction(u64),WorkConfirm(bool),
@@ -595,7 +597,7 @@ impl Display<'_> {
                 self.row(panels,text,hits,[w-280.,h-114.,87.,25.],"结束训练",Some(Action::Hud(Command::Training("end"))),false);
             }
         }
-        if !self.can_read_world() && !matches!(self.hud.page, Page::Map | Page::Character) {
+        if !self.can_read_world() && !matches!(self.hud.page, Page::Map | Page::Character | Page::Travel) {
             if let Some(area) = self.page_rect() {
                 self.folio(panels,art,text,hits,area,visual.choose("书面资料","Written record"));
                 self.mask_record(panels,text,area);
@@ -605,6 +607,7 @@ impl Display<'_> {
             Page::Map=>(),
             Page::Finance=>self.finance(panels,art,text,hits),
             Page::Character=>self.character(panels,art,text,hits),
+            Page::Travel=>self.travel_page(panels,art,text,hits),
             Page::Technology=>self.technology(panels,art,text,hits),
             Page::Market=>self.market(panels,art,text,hits),
             Page::Relations=>self.relations(panels,text,hits),
@@ -925,6 +928,10 @@ impl Display<'_> {
         let skin=self.skin;
         let say=|zh,en|skin.choose(zh,en);
         self.folio(m,art,t,hits,[x,y,w,h],say("人物资料","Character record"));
+        if self.session.is_some_and(|session| session.transport.is_some()) {
+            self.row(m,t,hits,[x+w-193.,y+16.,141.,27.],say("旅行与通勤","Travel & commute"),
+                Some(Action::Hud(Command::Page(Page::Travel))),false);
+        }
         let Some(character) = self.session.and_then(|s| s.character.as_ref()) else { return; };
         if !self.can_read_world() {
             self.mask_record(m,t,[x,y,w,157.]);
@@ -1277,6 +1284,7 @@ pub fn page_rect(hud:&Hud,size:[u32;2])->Option<[f32;4]>{
         Page::Map=>None,
         Page::Finance=>{let a=(w-155.).min(900.);Some([(w-a)*0.5,106.,a,(h-150.).min(420.)])}
         Page::Character=>{let a=(w-155.).min(820.);Some([(w-a)*0.5,106.,a,(h-142.).min(460.)])}
+        Page::Travel=>Some([18.,86.,(w-36.).min(650.),(h-106.).min(470.)]),
         Page::Technology=>{
             let height=if hud.tech==Tech::Chronicle{318.}else{344.};
             Some([18.,((h-height)*0.48).min(h-168.-height-10.).max(84.),(w*0.58).min(615.),height])

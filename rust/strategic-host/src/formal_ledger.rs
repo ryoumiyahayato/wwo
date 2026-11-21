@@ -9,6 +9,9 @@ const SOURCE_OWNER: &str = "scenario:livelihood_r1";
 pub(crate) const MAX_AMOUNT: i64 = 9_007_199_254_740_991;
 const PERSONAL_ROLE: &str = "personal_cash";
 const MARKET_ROLE: &str = "market_receipts";
+pub(crate) const TRANSPORT_ACCOUNT: &str = "account:transport_receipts";
+const TRANSPORT_OWNER: &str = "service:formal_transport";
+const TRANSPORT_ROLE: &str = "transport_receipts";
 
 struct Account {
     owner: String,
@@ -191,6 +194,49 @@ impl Ledger {
             self.accounts.remove(&to);
         }
         result
+    }
+
+    pub(crate) fn ensure_transport_account(&mut self) -> io::Result<()> {
+        if let Some(account) = self.accounts.get(TRANSPORT_ACCOUNT) {
+            return if account.owner == TRANSPORT_OWNER && account.role == TRANSPORT_ROLE && account.denomination == CURRENCY {
+                Ok(())
+            } else {
+                Err(invalid("运输收款账户身份不符。"))
+            };
+        }
+        if self.default_account(TRANSPORT_OWNER).is_some() {
+            return Err(invalid("运输收款方已绑定其他账户。"));
+        }
+        self.accounts.insert(TRANSPORT_ACCOUNT.to_owned(), Account::new(TRANSPORT_OWNER, TRANSPORT_ROLE, 0));
+        Ok(())
+    }
+
+    pub(crate) fn has_payment(&self, id: &str, from: &str, to: &str, amount: i64, kind: &str, reference: &str) -> bool {
+        let Some(row) = self.transaction_indexes.get(id).and_then(|&i| self.transactions.get(i)) else {
+            return false;
+        };
+        Receipt::read(row, self.regional.is_some()).is_ok_and(|r| r.from == from && r.to == to && r.amount == amount && r.currency == CURRENCY)
+            && map(row).is_ok_and(|fields| string(fields, "kind").ok() == Some(kind)
+                && string(fields, "reference_id").ok() == Some(reference))
+    }
+
+    pub(crate) fn freight_transaction_counts(&self) -> (usize, usize) {
+        let count = |prefix: &str| self.transaction_indexes.range(prefix.to_owned()..)
+            .take_while(|(id, _)| id.starts_with(prefix)).count();
+        (count("purchase:freight-lot:"), count("sale:freight-lot:"))
+    }
+
+    pub(crate) fn pay_market_bid(&mut self, market: &str, seller: &str, reference: &str, amount: i64, minute: i64) -> io::Result<()> {
+        let from = format!("account:market_receipts:{market}");
+        let market_account = self.accounts.get(&from).filter(|a| a.role == MARKET_ROLE && a.owner == market && a.denomination == CURRENCY)
+            .ok_or_else(|| invalid("目的地市场尚无实收资金。"))?;
+        if amount > market_account.balance - market_account.reserved {
+            return Err(invalid("目的地市场的可用实收资金不足。"));
+        }
+        let to = self.default_account(seller).map(|balance| balance.account_id.to_owned())
+            .filter(|id| self.accounts[id].role == PERSONAL_ROLE)
+            .ok_or_else(|| invalid("货主缺少个人现金账户。"))?;
+        self.transfer(&format!("sale:{reference}"), &from, &to, amount, minute, "freight_sale", reference)
     }
 
     fn post(&mut self, receipt: Receipt<'_>, kind: &str, reference: &str) -> io::Result<()> {
@@ -385,6 +431,7 @@ impl Ledger {
                 *budget
             } else {
                 if !(matches!(role, "personal_cash" | "background_payer" | "market_receipts")
+                    || role == TRANSPORT_ROLE && id == TRANSPORT_ACCOUNT && owner == TRANSPORT_OWNER && currency == CURRENCY
                     || native && matches!(role, "r1_firm" | "r1_cohort" | "r1_carrier"))
                 {
                     return Err(invalid("unknown ledger account role"));
@@ -579,7 +626,7 @@ impl<'a> Receipt<'a> {
 }
 
 fn valid_kind(kind: &str, regional: bool) -> bool {
-    matches!(kind, "opening_cash" | "employer_reserve" | "wage" | "purchase")
+    matches!(kind, "opening_cash" | "employer_reserve" | "wage" | "purchase" | "transport_fare" | "transport_refund" | "freight_sale")
         || regional && matches!(kind, "goods" | "freight" | "cargo_refund" | "cargo_damages" | "cargo_extra_freight"
             | "loan_issue" | "loan_repayment" | "fx_principal" | "fx_target" | "fx_fee" | "asset_trade"
             | "dividend" | "equity_issue" | "person_travel" | "service_fee" | "lease_rent" | "capital_equipment")

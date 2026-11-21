@@ -117,12 +117,19 @@ struct RiverLayer {
     mesh: MeshBuffers,
 }
 
+pub struct TransportOverlay<'a> {
+    pub network: Option<(u64, &'a Mesh)>,
+    pub vehicles: &'a Mesh,
+}
+
 pub struct Renderer {
     target:RenderTarget,
     device:wgpu::Device,
     queue:wgpu::Queue,
     pub gpu:String,
     models: ModelLayer,
+    transport_network: Option<(u64, MeshBuffers)>,
+    transport_vehicles: Option<MeshBuffers>,
     landscape: Option<Landscape>,
     landscape_pipeline: Option<(wgpu::TextureFormat,wgpu::BindGroupLayout,wgpu::ShaderModule)>,
     surface: GroundSurface,
@@ -295,7 +302,7 @@ impl GroundSurface {
 #[derive(Clone,Copy,Pod,Zeroable)]
 struct ModelInstance {
     clip_from_model:[[f32;4];4],
-    lod_range:[f32;2],
+    style:[f32;3],
 }
 
 struct ResidentModel {
@@ -342,7 +349,7 @@ impl ModelLayer {
                 }, wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<ModelInstance>() as u64,
                     step_mode: wgpu::VertexStepMode::Instance,
-                    attributes: &wgpu::vertex_attr_array![3=>Float32x4, 4=>Float32x4, 5=>Float32x4, 6=>Float32x4, 7=>Float32x2],
+                    attributes: &wgpu::vertex_attr_array![3=>Float32x4, 4=>Float32x4, 5=>Float32x4, 6=>Float32x4, 7=>Float32x3],
                 }],
             },
             fragment: Some(wgpu::FragmentState {
@@ -380,7 +387,9 @@ impl ModelLayer {
             let lod_range=self.lod_range(model);
             if let Some(resident) = self.residents.get_mut(&key) {
                 if lod_range[0]<lod_range[1] {
-                    resident.transforms.push(ModelInstance{clip_from_model:model.clip_from_model,lod_range});
+                    let [low,high]=lod_range;
+                    let waterline=f32::from(u8::from(key.clips_at_waterline()));
+                    resident.transforms.push(ModelInstance{clip_from_model:model.clip_from_model,style:[low,high,waterline]});
                     resident.last_drawn = now;
                 }
             } else if self.visible.contains(&key) && !self.failed.contains(&key) && self.pending.insert(key) {
@@ -774,7 +783,7 @@ impl Renderer {
         Ok(Self{target,device,queue,gpu:format!("{} {:?}",info.name,info.backend),view,globals,pages,palette,flag_poses,fallback,
                 globe,terrain,rivers,water_pages,close_extent,close_layout,close_group,detail:detail.map(terrain_detail::Stream::new),
                 solid,text,flag,loading,history_light,clock_gears,clock_face,font,flag_art,hud_art,hud_type,menu_art,instrument,instrument_view,screen,screen_size,meshes,models,
-                landscape:None,landscape_pipeline,surface})
+                landscape:None,landscape_pipeline,surface,transport_network:None,transport_vehicles:None})
     }
 
     pub fn update_close_terrain(&mut self,camera:&Camera,size:[u32;2],enabled:bool,now:Instant)->[f32;3] {
@@ -986,8 +995,30 @@ impl Renderer {
         let water=pixels.terrain.chunks_exact(4).map(|p|p[2]).collect();
         Page {group,uniform,ids:pixels.ids,water,bytes}
     }
+    fn prepare_transport(&mut self, overlay: Option<TransportOverlay<'_>>) {
+        let network=overlay.as_ref().and_then(|overlay|overlay.network);
+        if let Some((revision,mesh))=network {
+            if self.transport_network.as_ref().is_none_or(|(previous,_)|*previous!=revision) {
+                let (previous,buffers)=self.transport_network.get_or_insert_with(|| {
+                    (revision,MeshBuffers::new(&self.device,4096,2048))
+                });
+                buffers.upload(&self.device,&self.queue,mesh);
+                *previous=revision;
+            }
+        } else {
+            self.transport_network=None;
+        }
+        if let Some(mesh)=overlay.map(|overlay|overlay.vehicles).filter(|mesh|!mesh.indices.is_empty()) {
+            let buffers=self.transport_vehicles.get_or_insert_with(||MeshBuffers::new(&self.device,4096,2048));
+            buffers.upload(&self.device,&self.queue,mesh);
+        } else {
+            self.transport_vehicles=None;
+        }
+    }
+
     pub fn render(&mut self, view:&View,base:&Page,pages:&[(&Page,&Tile,[u32;4],f32)],
                   meshes:&crate::ui::Layers,fade:Option<&crate::ui::Layers>,seconds:f32,show_map:bool,capture:Option<&Path>,models:&[VisibleModel],
+                  transport:Option<TransportOverlay<'_>>,
                   (camera,landscape_enabled,now):(&Camera,bool,Instant))->io::Result<Option<io::Result<()>>> {
         let frame=if let RenderTarget::Window(surface,config)=&self.target {
             match surface.get_current_texture() {
@@ -1004,6 +1035,7 @@ impl Renderer {
             RenderTarget::Offscreen(texture)=>[texture.width(),texture.height()],
         };
         self.prepare_landscape(camera,size,landscape_enabled,now);
+        self.prepare_transport(transport.filter(|_|show_map));
         let (texture,copy_src)=match &self.target {
             RenderTarget::Window(_,config)=>(&frame.as_ref().unwrap().texture,config.usage.contains(wgpu::TextureUsages::COPY_SRC)),
             RenderTarget::Offscreen(texture)=>(texture,true),
@@ -1081,6 +1113,20 @@ impl Renderer {
         }
         if let Some(layer)=&mut self.landscape {
             layer.draw(&self.device,&mut encoder,&image,[&self.globals,&base.group,&self.close_group,&self.surface.group],[w,h]);
+        }
+        if self.transport_network.is_some()||self.transport_vehicles.is_some() {
+            let mut pass=encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label:Some("WWO transport map"),
+                color_attachments:&[Some(wgpu::RenderPassColorAttachment {
+                    view:&image,resolve_target:None,
+                    ops:wgpu::Operations{load:wgpu::LoadOp::Load,store:wgpu::StoreOp::Store},
+                })],
+                depth_stencil_attachment:None,occlusion_query_set:None,timestamp_writes:None,
+            });
+            pass.set_pipeline(&self.solid);
+            pass.set_bind_group(0,&self.screen,&[]);
+            if let Some((_,network))=&self.transport_network {network.draw(&mut pass);}
+            if let Some(vehicles)=&self.transport_vehicles {vehicles.draw(&mut pass);}
         }
         self.models.draw(&mut encoder, &image);
         {

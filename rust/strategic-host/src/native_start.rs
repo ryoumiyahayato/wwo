@@ -8,9 +8,10 @@ use crate::{
 use serde_json::{json, Value};
 use std::{collections::BTreeMap, fs::{self, File}, io, path::PathBuf, time::Instant};
 use wwo_map_lab::{
-    formal_bootstrap::{InitialWorld, PersonalActivity, RouteMode, WorldBootstrap, OPENINGS},
+    formal_bootstrap::{freight::FreightState, mode_name, mode_set, InitialWorld, PersonalActivity, WorldBootstrap, OPENINGS},
     formal_clock::{GameClock, TimeControl, MINUTES_PER_DAY},
     formal_save::{native_slot_summary, read_native_slot, write_native_slot},
+    transport::operations::Plan,
 };
 
 pub struct NativeSession {
@@ -36,9 +37,23 @@ pub struct NativeSession {
     pending_job: Option<String>,
     selected_organization: String,
     property_feedback: String,
+    transport: TransportPage,
     work_feedback: String,
     oral_work_feedback: Option<OralWorkFeedback>,
     work_revision: u64,
+}
+
+#[derive(Default)]
+struct TransportPage {
+    destination: String,
+    mode: String,
+    destination_page: usize,
+    passenger_feedback: String,
+    lot: Option<u64>,
+    lot_page: usize,
+    freight_quote: Option<(u64, Plan)>,
+    sale_quote: Option<(u64, i64, i64)>,
+    freight_feedback: String,
 }
 
 struct MarketPage {
@@ -76,6 +91,7 @@ impl NativeSession {
             clock_ack: 0, finance_page: 0, slot_open: false, slot_error: String::new(),
             lobby_status: String::new(), departure: None, exit: false, market: None, market_serial: 0,
             relations: None, pending_job: None, selected_organization: String::new(), property_feedback: String::new(),
+            transport: TransportPage::default(),
             work_feedback: String::new(),
             oral_work_feedback: None,
             work_revision: 0,
@@ -98,6 +114,7 @@ impl NativeSession {
         self.pending_job = None;
         self.selected_organization.clear();
         self.property_feedback.clear();
+        self.transport = TransportPage::default();
         self.work_feedback.clear();
         self.oral_work_feedback = None;
         self.work_revision += 1;
@@ -190,6 +207,7 @@ impl NativeSession {
             Request::Market { verb, id, site, quantity, token, .. } => self.market_action(verb, id, site, quantity, token)?,
             Request::SetMapMode { .. } => self.market = None,
             Request::Relations { verb, id } => self.relations_action(verb, id),
+            Request::Transport { verb, id } => self.transport_action(verb, id),
             Request::Training { .. } => return Err(io::Error::other("3D 训练仍需从 R68 对照入口启动。")),
             _ => (),
         }
@@ -227,7 +245,7 @@ impl NativeSession {
         if self.departure.is_some() || self.slot_open || now < self.next_tick { return Ok(false); }
         let Some(minutes) = self.control.tick() else { return Ok(false); };
         self.next_tick = now + TICK_INTERVAL;
-        let was_traveling = world.player_journey().is_some();
+        let was_traveling = world.passenger_in_transit();
         let previous_day = world.clock().current_day();
         if let Err(error) = world.advance_migrated_domains(minutes, &BTreeMap::new()) {
             self.control.paused = true;
@@ -236,7 +254,7 @@ impl NativeSession {
         if let Some(place) = world.player_current_place().filter(|_| was_traveling) {
             self.work_feedback = format!("已抵达{}。", place_label(world, place));
         }
-        if previous_day != world.clock().current_day() || was_traveling != world.player_journey().is_some() {
+        if previous_day != world.clock().current_day() || was_traveling != world.passenger_in_transit() {
             self.work_revision += 1;
         }
         Ok(true)
@@ -304,6 +322,64 @@ impl NativeSession {
         }
     }
 
+    fn transport_action(&mut self, verb: &str, id: &str) {
+        let Some(world) = &mut self.world else { return };
+        let page = &mut self.transport;
+        let result = match verb {
+            "city" | "destination" if world.transport_connections(id).is_some() => {
+                page.destination = id.into();
+                page.freight_quote = None;
+                page.passenger_feedback.clear();
+                world.clear_transport_preview();
+                if verb == "city" {
+                    page.passenger_feedback = world.preview_travel(id, mode_set(&page.mode))
+                        .err().map_or_else(String::new, |error| error.to_string());
+                }
+                return;
+            }
+            "cities_prev" => { page.destination_page = page.destination_page.saturating_sub(1); return; }
+            "cities_next" => {
+                if (page.destination_page + 1) * crate::transport_ui::PAGE_SIZE < world.transport_destinations().count() {
+                    page.destination_page += 1;
+                }
+                return;
+            }
+            "mode" => {
+                page.mode = id.into(); page.freight_quote = None; page.passenger_feedback.clear();
+                world.clear_transport_preview(); return;
+            }
+            "preview" => world.preview_travel(&page.destination, mode_set(&page.mode)).map(|_| ()),
+            "depart" => world.depart_player(),
+            "stop" => world.stop_player(),
+            "commute" => world.set_commute(world.commute_base().is_none()),
+            "lot" => {
+                page.lot = id.parse().ok(); page.freight_quote = None; page.sale_quote = None;
+                let shipment = page.lot.and_then(|id| world.freight_lots().find(|lot| lot.id == id))
+                    .and_then(|lot| match &lot.state {
+                        FreightState::InTransit { reservation_id, .. } => Some(*reservation_id),
+                        _ => None,
+                    });
+                world.select_freight_route(shipment);
+                page.freight_feedback.clear(); return;
+            }
+            "lots_prev" => { page.lot_page = page.lot_page.saturating_sub(1); return; }
+            "lots_next" => {
+                if (page.lot_page + 1) * crate::transport_ui::LOT_PAGE_SIZE < world.freight_lots().count() {
+                    page.lot_page += 1;
+                }
+                return;
+            }
+            "freight_quote" | "freight_dispatch" | "sale_quote" | "sale_confirm" => {
+                page.freight_feedback = match page.act_on_freight(world, verb) {
+                    Ok(text) => text, Err(error) => error.to_string(),
+                };
+                return;
+            }
+            _ => return,
+        };
+        page.passenger_feedback = result.err().map_or_else(String::new, |error| error.to_string());
+    }
+
     fn market_action(&mut self, verb: &str, id: &str, site: &str, quantity: u64, token: u64) -> io::Result<()> {
         let Some(world) = &mut self.world else { return Ok(()); };
         if verb == "close" { self.market = None; return Ok(()); }
@@ -324,7 +400,7 @@ impl NativeSession {
                 page.content = if page.scope == "international" { "transport" } else { "quotes" };
             }
             "view" => {
-                page.content = match id { "goods" => "goods", "transport" => "transport", "activity" => "activity", _ => "quotes" };
+                page.content = match id { "goods" => "goods", "transport" => "transport", "activity" => "activity", "freight" => "freight", _ => "quotes" };
                 page.quote = None;
             }
             "country" => {
@@ -374,6 +450,24 @@ impl NativeSession {
                     Err(error) => format!("下单失败：{error}"),
                 };
             }
+            "freight_buy" => {
+                if world.market_unit_for_person(&world.player().id) != Some(page.unit.as_str())
+                    || !page.quote.as_ref().is_some_and(|quote| quote.token == token && quote.amount.is_ok())
+                { return Ok(()); }
+                let quote = page.quote.take().unwrap();
+                match world.buy_freight(&page.good, quote.quantity, quote.price) {
+                    Ok(id) => {
+                        page.content = "freight";
+                        self.transport.lot = Some(id);
+                        self.transport.lot_page = 0;
+                        self.transport.freight_quote = None;
+                        self.transport.sale_quote = None;
+                        world.select_freight_route(None);
+                        self.transport.freight_feedback = "已从当地市场采购。货批已交付给你，可安排运输。".into();
+                    }
+                    Err(error) => page.result = format!("采购失败：{error}"),
+                }
+            }
             _ => (),
         }
         Ok(())
@@ -405,7 +499,11 @@ impl NativeSession {
         let cash = world.balance().ok_or_else(|| io::Error::other("正式人物账号缺失。"))?;
         let mut receipts = world.ledger().personal_receipts(&player.id).skip(self.finance_page * 6);
         let rows: Vec<_> = receipts.by_ref().take(6).map(|receipt| {
-            let kind = match receipt.kind { "opening_cash" => "开局现金", "purchase" => "购买", "wage" => "工资", kind => kind };
+            let kind = match receipt.kind {
+                "opening_cash" => "开局现金", "purchase" => "购买", "wage" => "工资",
+                "transport_fare" => "运输费用", "transport_refund" => "运输退款", "freight_sale" => "出售货批",
+                kind => kind
+            };
             json!({"description":format!("{} · {kind}", minute_text(receipt.minute)),
                    "amount":format!("{}{}", if receipt.incoming { "+" } else { "−" },receipt.amount)})
         }).collect();
@@ -463,6 +561,7 @@ impl NativeSession {
             "property":property,"property_feedback":self.property_feedback,
             "market":self.market.as_ref().map(|page| page.view(world)),
             "relations":self.relations.as_ref().map(|drawer| self.work_view(world, drawer)),
+            "transport":self.transport.view(world),
             "character":character,
             "departure":self.departure.map_or("", |quit| if quit {"quit"} else {"main_menu"})
         }))?;
@@ -476,9 +575,10 @@ impl NativeSession {
         let world = self.world.as_ref().unwrap();
         let clock = world.clock();
         if let Some(view) = state.session.as_mut() {
+            let transport = serde_json::from_value(self.transport.view(world))?;
             if view.total_minutes / MINUTES_PER_DAY as u64 == clock.current_day() as u64
                 && view.place == world.player_current_place().unwrap_or_default()
-            {
+                && view.transport == Some(transport) {
                 let date = clock.current_date();
                 view.hour = date.hour as u32;
                 view.minute = date.minute as u32;
@@ -506,9 +606,9 @@ impl NativeSession {
         let mut organizations = Vec::new();
         let current = world.player_current_place();
         let home = place_label(world, world.player_home());
-        let location = if let Some(leg) = world.player_journey() {
-            format!("在途 · {} → {} · 预计 {} 到达", place_label(world, &leg.origin),
-                place_label(world, &leg.destination), short_minute(leg.arrival_minute))
+        let location = if let Some(plan) = world.travel_plan() {
+            format!("在途 · {} → {} · 预计 {} 到达", place_label(world, &plan.route().from),
+                place_label(world, &plan.route().to), minute_text(plan.arrival_minute()))
         } else {
             current.map_or_else(|| "无活动地点".into(), |place| format!("当前 · {}", place_label(world, place)))
         };
@@ -569,24 +669,6 @@ impl NativeSession {
             }
         }
 
-        let options = world.player_travel_options();
-        if current.is_some() && options.is_empty() {
-            let reason = if world.scheduled_activity().is_some() || world.employment().is_some_and(|(_, booked, _)| booked) {
-                "今日已有安排"
-            } else { "此地没有可出发的模拟路线" };
-            work.push(json!({"label":"旅行", "details":[reason]}));
-        }
-        for option in options {
-            let destination = place_label(world, option.destination);
-            let mode = match option.route.mode { RouteMode::Road => "公路", RouteMode::Rail => "铁路", RouteMode::Shipping => "海运" };
-            let detail = if option.open {
-                format!("预计 {} 到达 · 今日名额 {}/{} · 票价未建模", short_minute(option.arrival_minute),
-                    option.remaining_departures, option.daily_capacity)
-            } else { "线路停运".into() };
-            work.push(json!({"label":format!("前往{destination} · {mode}模拟"), "details":[detail],
-                "actions":[work_action("立即出发", &format!("native:travel|{}|{}", option.route.id, option.destination),
-                    option.open && option.remaining_departures > 0)]}));
-        }
         let confirmation = self.pending_job.as_ref().map(|_| json!({"title":"确认就业","body":"接受该岗位的工时和工资条件。"}));
         json!({"selected":self.selected_organization,"rows":organizations,"drawer":drawer,"has_work":true,
             "work_title":"生计、工作与旅行","work_revision":self.work_revision,"work_feedback":self.work_feedback,
@@ -613,10 +695,6 @@ fn perform_work_action(world: &mut InitialWorld, action: &str) -> io::Result<Str
             let (subject, detail) = rest.split_once('|')?;
             Some((kind, subject, detail))
         }) {
-            Some(("native:travel", route, destination)) => {
-                world.travel_player(route, destination)?;
-                Ok(format!("已出发前往{}。", place_label(world, destination)))
-            }
             Some(("native:buy_bread", site, price)) => {
                 let price = price.parse::<i64>().ok();
                 if !world.local_bread_offer().is_some_and(|offer| offer.site == site && Some(offer.price) == price) {
@@ -649,11 +727,144 @@ fn minute_text(minute: i64) -> String {
     format!("{}-{:02}-{:02} {:02}:{:02}", date.year,date.month,date.day,date.hour,date.minute)
 }
 
-fn short_minute(minute: i64) -> String {
-    let mut clock = GameClock::default();
-    let _ = clock.advance_minutes(minute);
-    let date = clock.current_date();
-    format!("{:02}-{:02} {:02}:{:02}", date.month, date.day, date.hour, date.minute)
+impl TransportPage {
+    fn act_on_freight(&mut self, world: &mut InitialWorld, verb: &str) -> io::Result<String> {
+        let id = self.lot.ok_or_else(|| io::Error::other("请选择货批。"))?;
+        match verb {
+            "freight_quote" => {
+                self.freight_quote = None;
+                let plan = world.quote_freight(id, &self.destination, mode_set(&self.mode))?;
+                world.show_freight_route(&plan);
+                self.freight_quote = Some((id, plan));
+                Ok(String::new())
+            }
+            "freight_dispatch" => {
+                let (_, plan) = self.freight_quote.take().filter(|(lot, _)| *lot == id)
+                    .ok_or_else(|| io::Error::other("请查询运输报价。"))?;
+                world.select_freight_route(None);
+                let reservation = world.dispatch_quoted_freight(id, plan)?;
+                world.select_freight_route(Some(reservation));
+                Ok("运费已支付。货批保留原货权，按预约分段运输。".into())
+            }
+            "sale_quote" => {
+                self.sale_quote = None;
+                let (unit, total) = world.freight_sale_quote(id)?;
+                self.sale_quote = Some((id, unit, total));
+                Ok(format!("交割地市场从实收账户付款。全批收入 {total} 生丁。"))
+            }
+            "sale_confirm" => {
+                let (_, unit, _) = self.sale_quote.take().filter(|(lot, _, _)| *lot == id)
+                    .ok_or_else(|| io::Error::other("请获取交割地市场报价。"))?;
+                let net = world.sell_freight(id, unit)?;
+                Ok(format!("已委托出售，货款到账。净收益 {net:+} 生丁。"))
+            }
+            _ => Err(io::Error::other("未知货运操作。")),
+        }
+    }
+
+    fn view(&self, world: &InitialWorld) -> Value {
+        let now = world.clock().snapshot().total_minutes;
+        let places: Vec<_> = world.transport_destinations().collect();
+        let page_size = crate::transport_ui::PAGE_SIZE;
+        let mut ordered: Vec<_> = ["place:paris","place:rouen","place:le_havre","place:london","place:lille","place:brussels"]
+            .into_iter().filter(|id| places.contains(id)).collect();
+        ordered.extend(places.iter().copied().filter(|id|
+            !matches!(*id, "place:paris"|"place:rouen"|"place:le_havre"|"place:london"|"place:lille"|"place:brussels")));
+        let destinations: Vec<_> = ordered.into_iter().skip(self.destination_page*page_size).take(page_size)
+            .map(|id| json!({"id":id,"label":world.place_name(id)})).collect();
+        let preview = world.travel_preview().filter(|plan| plan.departure_minute() >= now);
+        let mut passenger_lines = Vec::new();
+        if let Some(plan) = world.travel_plan().or(preview) {
+            let status = if world.passenger_moving() { "在途" } else if world.passenger_in_transit() { "等候发车或换乘" } else { "报价" };
+            passenger_lines.push(format!("{status} · {}", world.place_name(&plan.route().to)));
+            passenger_lines.extend(describe_plan(world, plan));
+        }
+        let commute = world.commute_base().zip(world.commute_departure())
+            .map(|(base, at)| format!("通勤起点 {} · {} 发车", world.place_name(base), minute_text(at)))
+            .unwrap_or_else(|| "未启用通勤".into());
+        let lot_page_size = crate::transport_ui::LOT_PAGE_SIZE;
+        let lots: Vec<_> = world.freight_lots().rev().skip(self.lot_page*lot_page_size).take(lot_page_size).map(|lot| {
+            let name = world.macro_economy().commodity_info(&lot.good).map_or(lot.good.as_str(), |term| term.0);
+            let status = match lot.state {
+                FreightState::Purchased => "待发运", FreightState::InTransit {..} => "在途",
+                FreightState::Interrupted {..} => "中断", FreightState::Delivered {..} => "已交割",
+                FreightState::Sold {..} => "已出售",
+            };
+            json!({"id":lot.id,"label":format!("#{} · {name} · {status}",lot.id),"selected":self.lot==Some(lot.id)})
+        }).collect();
+        let mut freight_lines = Vec::new();
+        let mut freight_actions = Vec::new();
+        if let Some(lot) = self.lot.and_then(|id| world.freight_lots().find(|lot| lot.id == id)) {
+            freight_lines.push(format!("数量 {:.3} · 货款 {} · 已付运费 {}", lot.quantity_milli as f64/1000., lot.purchase_centimes, lot.freight_centimes));
+            match &lot.state {
+                FreightState::InTransit {reservation_id, destination} => {
+                    let (at, plan) = world.freight_progress(*reservation_id);
+                    freight_lines.push(format!("上一站 {} · 目的地 {}", world.place_name(at.unwrap_or(&lot.origin)), world.place_name(destination)));
+                    if let Some(plan) = plan { freight_lines.extend(describe_plan(world, plan)); }
+                }
+                FreightState::Sold { destination, revenue_centimes, net_centimes } => {
+                    freight_lines.push(format!("{} · 售价合计 {revenue_centimes} · 净收益 {net_centimes:+}",world.place_name(destination)));
+                }
+                state => {
+                    let (place, delivery) = match state {
+                        FreightState::Purchased => (lot.origin.as_str(), false),
+                        FreightState::Interrupted {place} => (place.as_str(), false),
+                        FreightState::Delivered {destination} => (destination.as_str(), true),
+                        _ => unreachable!(),
+                    };
+                    freight_lines.push(format!("货批存放于 {}", world.place_name(place)));
+                    if !self.destination.is_empty() && self.destination != place {
+                        freight_actions.push(json!({"id":"freight_quote","label":"查询运费"}));
+                    }
+                    if let Some((_, plan)) = self.freight_quote.as_ref().filter(|(id, plan)| *id == lot.id && plan.departure_minute() >= now) {
+                        freight_lines.extend(describe_plan(world, plan));
+                        freight_actions.push(json!({"id":"freight_dispatch","label":"确认发运"}));
+                    }
+                    if delivery {
+                        freight_actions.push(json!({"id":"sale_quote","label":"委托销售报价"}));
+                        if let Some((_, _, revenue)) = self.sale_quote.filter(|(id, _, _)| *id == lot.id) {
+                            freight_lines.push(format!("报价收入 {revenue} · 预计净收益 {:+}", revenue-lot.purchase_centimes-lot.freight_centimes));
+                            freight_actions.push(json!({"id":"sale_confirm","label":"确认出售"}));
+                        }
+                    }
+                }
+            }
+        }
+        json!({
+            "destinations":destinations, "destination_page":self.destination_page, "destination":self.destination,
+            "destinations_next":(self.destination_page+1)*page_size < places.len(),
+            "destination_is_current":self.destination == world.last_station(),
+            "location":world.place_name(world.last_station()), "moving":world.passenger_moving(),
+            "residence":world.place_name(world.residence()),
+            "workplace":world.employment().map_or("无合同", |(job, _, _)| world.place_name(&job.place)),
+            "commute":commute, "mode":if self.mode.is_empty() {"all"}else{&self.mode}, "active":world.passenger_in_transit(),
+            "passenger_lines":passenger_lines, "passenger_notice":if self.passenger_feedback.is_empty() {world.travel_notice()}else{&self.passenger_feedback},
+            "travel_confirm":preview.is_some() && !world.passenger_in_transit(),
+            "lots":lots, "lot_page":self.lot_page, "lots_next":(self.lot_page+1)*lot_page_size < world.freight_lots().count(),
+            "freight_lines":freight_lines, "freight_notice":self.freight_feedback,
+            "freight_actions":freight_actions
+        })
+    }
+}
+
+fn describe_plan(world: &InitialWorld, plan: &Plan) -> Vec<String> {
+    let route = plan.route();
+    let mut lines = vec![
+        format!("{} 生丁 · {} 分钟（含等候）· 风险 {} 点 · 名义运力 {}",
+            plan.fare_centimes(), plan.arrival_minute()-plan.departure_minute(), route.risk_points,
+            route.capacity_units.unwrap_or(0)),
+        format!("原型数据 · 预计 {} 抵达", minute_text(plan.arrival_minute())),
+    ];
+    if plan.first_departure_minute() > plan.departure_minute() {
+        lines.push(format!("预计 {} 发车", minute_text(plan.first_departure_minute())));
+    }
+    if world.sources().population_unit_at(&route.from) != world.sources().population_unit_at(&route.to) {
+        lines.push("跨境手续待接入。".into());
+    }
+    for leg in &route.legs {
+        lines.push(format!("{} · {} → {}",mode_name(leg.mode),world.place_name(&leg.from),world.place_name(&leg.to)));
+    }
+    lines
 }
 
 impl MarketPage {
