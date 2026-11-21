@@ -1541,6 +1541,50 @@
     "collection": "india_social_1901"
   },
   {
+    "id": "india_statistical_abstract_1896_age_sex",
+    "title": "Statistical abstract relating to British India from 1885-86 to 1894-95. Thirtieth number.",
+    "publisher": "Her Majesty’s Stationery Office, London, 1896",
+    "url": "https://dsal.uchicago.edu/statistics/1885_excel/index.html",
+    "locator": "Table 18, worksheet 1885 table 18",
+    "rights": "Historical government table, public domain. Numeric cells transcribed from University of Chicago Digital South Asia Library.",
+    "table_urls": [
+      "https://dsal.uchicago.edu/statistics/1885_excel/1885.18.XLS"
+    ],
+    "raw_path": "age_sex.csv",
+    "extract": "Select the worksheet rows listed in panels.json and its male and female columns. Nonnumeric dashes in the selected unspecified-age cells are zero. The published sex totals are retained even where the workbook age bands do not reconcile.",
+    "collection": "india_statistical_abstract_ages"
+  },
+  {
+    "id": "india_statistical_abstract_1905_age_sex",
+    "title": "Statistical abstract relating to British India from 1894-95 to 1903-04. Thirty-ninth number.",
+    "publisher": "His Majesty’s Stationery Office, London, 1905",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/index.html",
+    "locator": "Table 14, printed pp. 10–11 and worksheet 1894 table 14",
+    "rights": "Historical government table, public domain. Numeric cells transcribed from University of Chicago Digital South Asia Library.",
+    "table_urls": [
+      "https://dsal.uchicago.edu/statistics/1894_excel/1894.014.XLS",
+      "https://dsal.uchicago.edu/digbooks/images/statistical_1894/statistics_1894_020.gif",
+      "https://dsal.uchicago.edu/digbooks/images/statistical_1894/statistics_1894_021.gif"
+    ],
+    "raw_path": "age_sex.csv",
+    "extract": "Select the worksheet rows listed in panels.json and its male and female columns. Nonnumeric dashes in the selected unspecified-age cells are zero. The published sex totals are retained even where the workbook age bands do not reconcile.",
+    "collection": "india_statistical_abstract_ages"
+  },
+  {
+    "id": "india_census_cp_states_1901_table_vii",
+    "title": "Census of India, 1901, Volume XIII-A, Central Provinces, Part II, Tables",
+    "publisher": "R. V. Russell, Superintendent of Census Operations. Pioneer Press, Allahabad, 1902.",
+    "url": "https://archive.org/details/in.gov.ignca.31011",
+    "locator": "Table VII, Part A, All Religions, printed pp. 58–61, row 39, Feudatory States",
+    "rights": "Public domain government census. Digitized from the Archaeological Survey of India collection maintained by IGNCA.",
+    "table_urls": [
+      "https://archive.org/stream/in.gov.ignca.31011/31011_djvu.txt"
+    ],
+    "raw_path": "age_sex.csv",
+    "extract": "The male and female series are the Feudatory States row across all four pages of the age table. The 20–39 female cell can be checked by subtracting 317,894 males from 653,004 persons. The female age-60-and-over cell can be checked by subtracting 26,973 males from 66,719 persons.",
+    "collection": "india_statistical_abstract_ages"
+  },
+  {
     "id": "jp_cabinet_population_1898_original",
     "title": "日本帝國人口統計 明治三十一年",
     "publisher": "Bureau of Statistics, Imperial Cabinet of Japan, March 1901",
@@ -2188,6 +2232,53 @@
     "locator": "structure.csv retains table parameter reg, published scope, and original table row counting headers",
     "rights": "Numeric facts from historical census; original web layout and editorial text not redistributed.",
     "collection": "russia"
+  },
+  {
+    "id": "russia_1900_voronezh_governorate_districts",
+    "title": "Воронежская губерния. Административно-территориальное деление",
+    "publisher": "Архивная служба Воронежской области",
+    "url": "https://arsvo.ru/informacionnaya_deyatelnost/istoriya_admtert_deleniya_voronezhskoj_oblasti/voronezhskaya_guberniya/",
+    "locator": "Twelve districts after 1824; citations to the 1900 zemstvo and 1906 government publications",
+    "scope": "All twelve district names match the 1897 census. The source follows changes through 1918 and distinguishes changes below the district level. The full district census shares are used for the 1900 allocation.",
+    "comparison_url": "https://search.rsl.ru/ru/record/01003556662",
+    "rights": "Numerical transcriptions from historical government publications and administrative identities.",
+    "raw_path": "continuity.json",
+    "collection": "russia_1900_districts"
+  },
+  {
+    "id": "russia_1900_kiev_governorate_settlements",
+    "title": "Список населенных мест Киевской губернии",
+    "publisher": "Киевский губернский статистический комитет, Киев, 1900",
+    "url": "https://search.nbuv.gov.ua/cgi-bin/ua/elib.exe?C21COM=S&I21DBN=UKRLIB&P21DBN=UKRLIB&S21All=%3C.%3EID%3DUKR0000070%3C.%3E",
+    "locator": "District contents of the 1900 official settlement list",
+    "scope": "The twelve uezd names and their governorate membership agree with the 1897 enumeration. The official list is used for identity. The opening population uses the archived 1897 full-district census figures, including all cities in each district. District geometry uses the 1897 RiStat census crosswalk.",
+    "rights": "Historical official government publication. Index of administrative identities.",
+    "raw_path": "continuity.json",
+    "collection": "russia_1900_districts"
+  },
+  {
+    "id": "russia_1900_samara_governorate_settlements",
+    "title": "Список населенных мест Самарской губернии",
+    "publisher": "А. П. Протопопов, Самара, 1900",
+    "url": "https://rusneb.ru/catalog/000200_000018_v19_rc_1639056/",
+    "locator": "District contents of the 1900 official settlement list",
+    "scope": "The seven uezd identities and governorate membership are also tabulated in the Samara University archival comparison, table 2. The opening uses the 1897 census full-district counts within the same governorate opening control.",
+    "comparison_url": "https://repo.ssau.ru/bitstream/ISTORIChESKAYa-NAUKA-I-ARHIVY-V-XXI-VEKE/Spiski-naselennyh-mest-kak-istoricheskii-istochnik-po-istorii-predprinimatelstva-v-Samarskoi-gubernii-115004/1/978-5-6053708-3-3_2025-145-155.pdf#page=9",
+    "rights": "Historical official government publication. Index of administrative identities.",
+    "raw_path": "continuity.json",
+    "collection": "russia_1900_districts"
+  },
+  {
+    "id": "russia_1900_poltava_governorate_directory",
+    "title": "Справочная книжка и адрес-календарь Полтавской губернии на 1900 год",
+    "publisher": "Д. А. Иваненко, Полтава, 1900",
+    "url": "https://histpol.pl.ua/ru/spravochnye-knizhki-i-adres-kalendari-poltavskoj-gubernii?id=12579",
+    "locator": "Governorate directory county sections and police rosters",
+    "scope": "The 1900 directory confirms fifteen district identities. The contemporaneous district land maps supply independent geographic evidence. The full 1897 census district counts provide the opening shares. The land office publication counts a rural subset.",
+    "comparison_url": "https://rusneb.ru/catalog/000200_000018_v19_rc_2068751/",
+    "rights": "Historical official government publication. Index of administrative identities.",
+    "raw_path": "continuity.json",
+    "collection": "russia_1900_districts"
   },
   {
     "id": "ru_1897_census_vol13_reading",

@@ -45,7 +45,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 189,
+  "cited_sources": 196,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -60,7 +60,7 @@
   "legacy_only_people": 135984208,
   "authoritative_total_for_new_game": 1465272180,
   "roots_with_partitions": 23,
-  "disjoint_leaves": 863,
+  "disjoint_leaves": 905,
   "people_in_partitions": 1205786006,
   "unlocated_balances_under_research_controls": [
     {
@@ -105,7 +105,7 @@
     "russian_empire_1897_identity.json": {
       "units": 930,
       "with_linked_observation": 785,
-      "with_opening_partition": 86
+      "with_opening_partition": 132
     }
   },
   "city_observation_count": 2269,
@@ -378,14 +378,17 @@
     "india_andaman_nicobar_census_1911_demography": 10,
     "india_travancore_census_1911_age_comparison": 38,
     "india_cochin_census_1901_age_comparison": 16,
+    "india_statistical_abstract_1896_age_sex": 32,
+    "india_statistical_abstract_1905_age_sex": 48,
+    "india_census_cp_states_1901_table_vii": 8,
     "jp_cabinet_population_1898_original": 23,
     "jp_cabinet_local_occupations_1913_tokyo": 8,
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 675042528,
-  "structure_opening_pool_count": 468,
-  "structure_opening_residents_outside_modeled_pools": 790229652,
+  "structure_opening_pool_controls": 677858934,
+  "structure_opening_pool_count": 512,
+  "structure_opening_residents_outside_modeled_pools": 787413246,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -1375,6 +1378,328 @@
       "observed_date": "1900-12-01"
     },
     {
+      "unit_id": "administrative_region:ristat_district_336",
+      "opening_total": 333456,
+      "observed_unit_id": "ru1897_16_r24",
+      "observed_total": 315629,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_337",
+      "opening_total": 295493,
+      "observed_unit_id": "ru1897_16_r9",
+      "observed_total": 279695,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_338",
+      "opening_total": 265448,
+      "observed_unit_id": "ru1897_16_r27",
+      "observed_total": 251257,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_339",
+      "opening_total": 223789,
+      "observed_unit_id": "ru1897_16_r21",
+      "observed_total": 211825,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_340",
+      "opening_total": 338860,
+      "observed_unit_id": "ru1897_16_r33",
+      "observed_total": 320744,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_341",
+      "opening_total": 259633,
+      "observed_unit_id": "ru1897_16_r30",
+      "observed_total": 245752,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_342",
+      "opening_total": 290220,
+      "observed_unit_id": "ru1897_16_r15",
+      "observed_total": 274704,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_343",
+      "opening_total": 238675,
+      "observed_unit_id": "ru1897_16_r39",
+      "observed_total": 225915,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_344",
+      "opening_total": 572067,
+      "observed_unit_id": "ru1897_16_r6",
+      "observed_total": 541483,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_345",
+      "opening_total": 333661,
+      "observed_unit_id": "ru1897_16_r12",
+      "observed_total": 315823,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_346",
+      "opening_total": 284046,
+      "observed_unit_id": "ru1897_16_r18",
+      "observed_total": 268860,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_347",
+      "opening_total": 324912,
+      "observed_unit_id": "ru1897_16_r36",
+      "observed_total": 307542,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_362",
+      "opening_total": 195772,
+      "observed_unit_id": "ru1897_33_r37",
+      "observed_total": 185306,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_363",
+      "opening_total": 258726,
+      "observed_unit_id": "ru1897_33_r24",
+      "observed_total": 244894,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_364",
+      "opening_total": 230181,
+      "observed_unit_id": "ru1897_33_r18",
+      "observed_total": 217875,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_365",
+      "opening_total": 243318,
+      "observed_unit_id": "ru1897_33_r21",
+      "observed_total": 230310,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_366",
+      "opening_total": 240449,
+      "observed_unit_id": "ru1897_33_r15",
+      "observed_total": 227594,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_367",
+      "opening_total": 144329,
+      "observed_unit_id": "ru1897_33_r31",
+      "observed_total": 136613,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_368",
+      "opening_total": 183167,
+      "observed_unit_id": "ru1897_33_r50",
+      "observed_total": 173375,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_369",
+      "opening_total": 172740,
+      "observed_unit_id": "ru1897_33_r40",
+      "observed_total": 163505,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_370",
+      "opening_total": 203375,
+      "observed_unit_id": "ru1897_33_r43",
+      "observed_total": 192502,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_371",
+      "opening_total": 159513,
+      "observed_unit_id": "ru1897_33_r28",
+      "observed_total": 150985,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_372",
+      "opening_total": 197031,
+      "observed_unit_id": "ru1897_33_r46",
+      "observed_total": 186497,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_373",
+      "opening_total": 150872,
+      "observed_unit_id": "ru1897_33_r9",
+      "observed_total": 142806,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_374",
+      "opening_total": 166702,
+      "observed_unit_id": "ru1897_33_r34",
+      "observed_total": 157790,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_375",
+      "opening_total": 148229,
+      "observed_unit_id": "ru1897_33_r12",
+      "observed_total": 140304,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_376",
+      "opening_total": 240661,
+      "observed_unit_id": "ru1897_33_r6",
+      "observed_total": 227795,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_530",
+      "opening_total": 130142,
+      "observed_unit_id": "ru1897_9_r21",
+      "observed_total": 123184,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_531",
+      "opening_total": 212074,
+      "observed_unit_id": "ru1897_9_r24",
+      "observed_total": 200736,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_532",
+      "opening_total": 176626,
+      "observed_unit_id": "ru1897_9_r30",
+      "observed_total": 167183,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_533",
+      "opening_total": 289298,
+      "observed_unit_id": "ru1897_9_r6",
+      "observed_total": 273832,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_534",
+      "opening_total": 166067,
+      "observed_unit_id": "ru1897_9_r27",
+      "observed_total": 157189,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_535",
+      "opening_total": 302941,
+      "observed_unit_id": "ru1897_9_r12",
+      "observed_total": 286745,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_536",
+      "opening_total": 203305,
+      "observed_unit_id": "ru1897_9_r33",
+      "observed_total": 192436,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_537",
+      "opening_total": 166253,
+      "observed_unit_id": "ru1897_9_r39",
+      "observed_total": 157365,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_538",
+      "opening_total": 327472,
+      "observed_unit_id": "ru1897_9_r15",
+      "observed_total": 309965,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_539",
+      "opening_total": 198738,
+      "observed_unit_id": "ru1897_9_r18",
+      "observed_total": 188113,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_540",
+      "opening_total": 212002,
+      "observed_unit_id": "ru1897_9_r9",
+      "observed_total": 200668,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_541",
+      "opening_total": 289304,
+      "observed_unit_id": "ru1897_9_r36",
+      "observed_total": 273837,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_694",
+      "opening_total": 440950,
+      "observed_unit_id": "ru1897_36_r22",
+      "observed_total": 417376,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_695",
+      "opening_total": 522679,
+      "observed_unit_id": "ru1897_36_r19",
+      "observed_total": 494736,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_696",
+      "opening_total": 299382,
+      "observed_unit_id": "ru1897_36_r25",
+      "observed_total": 283376,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_697",
+      "opening_total": 377183,
+      "observed_unit_id": "ru1897_36_r6",
+      "observed_total": 357018,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_698",
+      "opening_total": 316822,
+      "observed_unit_id": "ru1897_36_r9",
+      "observed_total": 299884,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_699",
+      "opening_total": 520795,
+      "observed_unit_id": "ru1897_36_r16",
+      "observed_total": 492952,
+      "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "administrative_region:ristat_district_700",
+      "opening_total": 428925,
+      "observed_unit_id": "ru1897_36_r12",
+      "observed_total": 405994,
+      "observed_date": "1897-02-09"
+    },
+    {
       "unit_id": "administrative_region:ristat_province_100",
       "opening_total": 1043659,
       "observed_unit_id": "ru1897_85",
@@ -1627,13 +1952,6 @@
       "observed_date": "1897-02-09"
     },
     {
-      "unit_id": "administrative_region:ristat_province_40",
-      "opening_total": 3760260,
-      "observed_unit_id": "ru1897_16",
-      "observed_total": 3559229,
-      "observed_date": "1897-02-09"
-    },
-    {
       "unit_id": "administrative_region:ristat_province_41",
       "opening_total": 2044727,
       "observed_unit_id": "ru1897_3",
@@ -1645,13 +1963,6 @@
       "opening_total": 2888011,
       "observed_unit_id": "ru1897_47",
       "observed_total": 2733612,
-      "observed_date": "1897-02-09"
-    },
-    {
-      "unit_id": "administrative_region:ristat_province_43",
-      "opening_total": 2935065,
-      "observed_unit_id": "ru1897_33",
-      "observed_total": 2778151,
       "observed_date": "1897-02-09"
     },
     {
@@ -1743,13 +2054,6 @@
       "opening_total": 2835628,
       "observed_unit_id": "ru1897_42",
       "observed_total": 2684030,
-      "observed_date": "1897-02-09"
-    },
-    {
-      "unit_id": "administrative_region:ristat_province_57",
-      "opening_total": 2674222,
-      "observed_unit_id": "ru1897_9",
-      "observed_total": 2531253,
       "observed_date": "1897-02-09"
     },
     {
@@ -1855,13 +2159,6 @@
       "opening_total": 1060224,
       "observed_unit_id": "ru1897_2",
       "observed_total": 1003542,
-      "observed_date": "1897-02-09"
-    },
-    {
-      "unit_id": "administrative_region:ristat_province_79",
-      "opening_total": 2906736,
-      "observed_unit_id": "ru1897_36",
-      "observed_total": 2751336,
       "observed_date": "1897-02-09"
     },
     {
@@ -2999,6 +3296,13 @@
       "observed_date": "1901-03-01"
     },
     {
+      "unit_id": "raj_central_provinces_states",
+      "opening_total": 2015423,
+      "observed_unit_id": "raj_central_provinces_states",
+      "observed_total": 2015423,
+      "observed_date": "1900-01-01"
+    },
+    {
       "unit_id": "raj_cochin_state",
       "opening_total": 801687,
       "observed_unit_id": "raj_cochin_state",
@@ -3052,6 +3356,13 @@
       "opening_total": 2906402,
       "observed_unit_id": "raj_travancore_state",
       "observed_total": 2906402,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_united_provinces_states",
+      "opening_total": 800983,
+      "observed_unit_id": "raj_united_provinces_states",
+      "observed_total": 800983,
       "observed_date": "1900-01-01"
     },
     {
@@ -3800,6 +4111,38 @@
       "population": 3315443,
       "age_not_stated": 0,
       "combined_open_age_and_unreported": null
+    },
+    {
+      "panel_id": "india_abstract_bombay_states_1891",
+      "unit_id": "raj_bombay_states",
+      "date": "1891-02-26",
+      "population": 8059298,
+      "age_not_stated": 19236,
+      "combined_open_age_and_unreported": null
+    },
+    {
+      "panel_id": "india_abstract_central_provinces_states_1891",
+      "unit_id": "raj_central_provinces_states",
+      "date": "1891-02-26",
+      "population": 2160511,
+      "age_not_stated": 0,
+      "combined_open_age_and_unreported": null
+    },
+    {
+      "panel_id": "india_abstract_bombay_states_1901",
+      "unit_id": "raj_bombay_states_1901_full_census",
+      "date": "1901-03-01",
+      "population": 6908648,
+      "age_not_stated": 5245,
+      "combined_open_age_and_unreported": null
+    },
+    {
+      "panel_id": "india_abstract_central_provinces_states_1901",
+      "unit_id": "raj_central_provinces_states",
+      "date": "1901-03-01",
+      "population": 1996383,
+      "age_not_stated": 0,
+      "combined_open_age_and_unreported": null
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
@@ -4212,10 +4555,10 @@
         "opening_unit_id": "cshapes_gw_750",
         "research_region": "Asia",
         "opening_control": 294000000,
-        "in_model_pools": 269966078,
-        "outside_model_pools": 24033922,
-        "modeled_age_and_sex": 269905201,
-        "modeled_sex_age_unknown": 60877
+        "in_model_pools": 272782484,
+        "outside_model_pools": 21217516,
+        "modeled_age_and_sex": 272737490,
+        "modeled_sex_age_unknown": 44994
       },
       {
         "opening_unit_id": "cshapes_gw_780",
@@ -4556,8 +4899,8 @@
         "opening_control": 135382043,
         "in_model_pools": 135382043,
         "outside_model_pools": 0,
-        "modeled_age_and_sex": 135328752,
-        "modeled_sex_age_unknown": 53291
+        "modeled_age_and_sex": 135328749,
+        "modeled_sex_age_unknown": 53294
       },
       {
         "opening_unit_id": "south_african_republic",
@@ -4651,8 +4994,8 @@
         "opening_control": 408702574,
         "in_model_pools": 273773335,
         "outside_model_pools": 134929239,
-        "modeled_age_and_sex": 250025424,
-        "modeled_sex_age_unknown": 23747911
+        "modeled_age_and_sex": 250025421,
+        "modeled_sex_age_unknown": 23747914
       },
       "Africa": {
         "opening_control": 18751671,
@@ -4670,18 +5013,18 @@
       },
       "Asia": {
         "opening_control": 802923622,
-        "in_model_pools": 317447988,
-        "outside_model_pools": 485475634,
-        "modeled_age_and_sex": 317386785,
-        "modeled_sex_age_unknown": 61203
+        "in_model_pools": 320264394,
+        "outside_model_pools": 482659228,
+        "modeled_age_and_sex": 320219074,
+        "modeled_sex_age_unknown": 45320
       }
     },
     "world": {
       "opening_control": 1465272180,
-      "in_model_pools": 675042528,
-      "outside_model_pools": 790229652,
-      "modeled_age_and_sex": 650981558,
-      "modeled_sex_age_unknown": 24060970
+      "in_model_pools": 677858934,
+      "outside_model_pools": 787413246,
+      "modeled_age_and_sex": 653813844,
+      "modeled_sex_age_unknown": 24045090
     }
   },
   "opening_count_basis": {

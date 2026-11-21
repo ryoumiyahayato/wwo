@@ -2257,6 +2257,53 @@ mod tests {
     }
 
     #[test]
+    fn historical_russian_districts_keep_province_totals_and_census_residence() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        for (province, district, count, province_total, district_total, urban) in [
+            (40, 344, 12, 3_760_260, 572_067, 261_715),
+            (43, 363, 15, 2_935_065, 258_726, 76_588),
+            (57, 533, 12, 2_674_222, 289_298, 85_151),
+            (79, 700, 7, 2_906_736, 428_925, 16_023),
+        ] {
+            let province = format!("administrative_region:ristat_province_{province}");
+            let district = format!("administrative_region:ristat_district_{district}");
+            let parent = world.inspect_population(&province).unwrap();
+            assert_eq!(parent.children.len(), count);
+            assert_eq!(parent.population_total, Some(province_total));
+            assert_eq!(parent.children.iter().map(|child| child.population_total).sum::<u64>(), province_total);
+            let child = world.inspect_population(&district).unwrap();
+            assert_eq!(child.parent_id, Some(province.as_str()));
+            assert_eq!(child.population_total, Some(district_total));
+            let structure = child.structure.unwrap();
+            assert_eq!(structure.cohort_residents, district_total);
+            let social = child.social.unwrap();
+            let residence = &social.dimensions["residence"];
+            assert_eq!(residence.by_classification["russia_1897_administrative_residence"]["Census cities"], urban);
+            assert_eq!(residence.unknown_residents, 0);
+            assert_eq!(social.dimensions["religion"].unknown_residents, district_total);
+        }
+        let total = world.population().population_total("russian_empire");
+        assert_eq!(total, Some(135_382_043));
+    }
+
+    #[test]
+    fn historical_indian_age_tables_preserve_local_totals_and_unknown_ages() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        for (unit, total, unknown_age) in [
+            ("raj_andaman_nicobar_comparable", 16_181, 0),
+            ("raj_united_provinces_states", 800_983, 298),
+            ("raj_central_provinces_states", 2_015_423, 0),
+        ] {
+            let structure = world.population().structure(Some(unit), world.clock()).unwrap();
+            assert_eq!(structure.population_total, total);
+            assert_eq!(structure.cohort_residents, total);
+            assert_eq!(structure.residents_with_cohort_age_and_sex, total - unknown_age);
+        }
+    }
+
+    #[test]
     fn historical_population_structure_and_old_openings_restore() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create("country_fra").unwrap();

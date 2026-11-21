@@ -300,6 +300,46 @@ def add_russian_provinces(group, observations):
     ) + [finland]
 
 
+def add_russian_districts(group, observations):
+    continuity_path = HERE / "collections/russia_1900_districts/continuity.json"
+    districts = json.loads(continuity_path.read_text(encoding="utf8"))
+    source = "russia_first_census"
+    census = {row["unit_id"]: row for row in observations if row["source_id"] == source}
+    units = []
+    aggregates = []
+    for province in group["units"]:
+        parent = province["unit_id"]
+        observed = next(iter(province.get("source_unit_ids", ())), None)
+        if observed not in districts:
+            units.append(province)
+            continue
+        boundary = districts.pop(observed)
+        if province["place_ids"]:
+            raise ValueError(f"District split requires explicit placement for {parent}")
+        control = census[observed]
+        children = allocate_census_shares(
+            observations, source_id=source, observed_date=control["date"], observed_root=control,
+            control_source=province["source_id"], control_value=province["population_value"], places={},
+            scope="Full uezd census areas, including the cities enumerated within each uezd.",
+            uncertainty="District identities are attested in 1900. Within-province shares are from 1897. "
+                        "The effects of differential growth, migration and local boundary changes are unquantified.",
+        )
+        if len(children) != boundary["district_count"] or any(child["unit_id"] == child["source_unit_ids"][0] for child in children):
+            raise ValueError(f"District census identity coverage differs for {parent}")
+        for sex in ("male", "female"):
+            if sum(census[child["source_unit_ids"][0]]["sex"][sex] for child in children) != control["sex"][sex]:
+                raise ValueError(f"District census sex totals differ for {parent}")
+        for child in children:
+            child.update(statistical_parent=parent, date=DATE, district_boundary_source=boundary["source_id"],
+                         locator=f"{child['locator']}; 1900 identity: {boundary['locator']}")
+        aggregates.append(province | dict(date=DATE, method=(province["method"] + " Sum the resulting uezd opening balances.")))
+        units.extend(children)
+    if districts:
+        raise ValueError(f"Unmatched opening controls for Russian districts: {sorted(districts)}")
+    group["units"] = units
+    group["statistical_aggregates"] = aggregates
+
+
 def add_japanese_prefectures(group, observations):
     source_id = "jp_cabinet_1909_resident_prefectures"
     prior_night = "1899-12-31"
@@ -848,6 +888,8 @@ def groups(observations, version=1):
         result[root] = belgium_opening(result[root], observations)
     if version >= 14:
         add_india_princely_states(result["cshapes_gw_750"], observations)
+    if version >= 15:
+        add_russian_districts(result["russian_empire"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

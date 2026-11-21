@@ -1,0 +1,89 @@
+panel,label,role,age_min,age_max,both,male,female
+india_abstract_port_blair_1891,Total Population,total,,,15609,13375,2234
+india_abstract_port_blair_1891,Unspecified,band,,,0,0,0
+india_abstract_port_blair_1891,Under 5 years,band,0,4,755,378,377
+india_abstract_port_blair_1891,5 to 14,band,5,14,811,397,414
+india_abstract_port_blair_1891,15 to 24,band,15,24,1315,1056,259
+india_abstract_port_blair_1891,25 to 44,band,25,44,9800,8869,931
+india_abstract_port_blair_1891,45 to 49,band,45,49,2208,2037,171
+india_abstract_port_blair_1891,60 and Over,band,60,,720,638,82
+india_abstract_bombay_states_1891,Total Population,total,,,8059298,4120125,3939173
+india_abstract_bombay_states_1891,Unspecified,band,,,19236,10579,8657
+india_abstract_bombay_states_1891,Under 5 years,band,0,4,1201603,586944,614659
+india_abstract_bombay_states_1891,5 to 14,band,5,14,1966432,1045731,920701
+india_abstract_bombay_states_1891,15 to 24,band,15,24,1350274,693166,657108
+india_abstract_bombay_states_1891,25 to 44,band,25,44,2430820,1246877,1183943
+india_abstract_bombay_states_1891,45 to 49,band,45,49,710416,368260,342156
+india_abstract_bombay_states_1891,60 and Over,band,60,,380517,168568,211949
+india_abstract_central_provinces_states_1891,Total Population,total,,,2160511,1089011,1071500
+india_abstract_central_provinces_states_1891,Unspecified,band,,,0,0,0
+india_abstract_central_provinces_states_1891,Under 5 years,band,0,4,351696,167795,183901
+india_abstract_central_provinces_states_1891,5 to 14,band,5,14,527628,324388,203240
+india_abstract_central_provinces_states_1891,15 to 24,band,15,24,328169,157658,170511
+india_abstract_central_provinces_states_1891,25 to 44,band,25,44,625344,324418,300926
+india_abstract_central_provinces_states_1891,45 to 49,band,45,49,139316,72452,66864
+india_abstract_central_provinces_states_1891,60 and Over,band,60,,98358,42300,56058
+india_abstract_united_provinces_states_1891,Total Population,total,,,792491,409470,383021
+india_abstract_united_provinces_states_1891,Unspecified,band,,,0,0,0
+india_abstract_united_provinces_states_1891,Under 5 years,band,0,4,114266,57364,56902
+india_abstract_united_provinces_states_1891,5 to 14,band,5,14,173760,94768,78992
+india_abstract_united_provinces_states_1891,15 to 24,band,15,24,143703,74646,69057
+india_abstract_united_provinces_states_1891,25 to 44,band,25,44,227951,118747,109204
+india_abstract_united_provinces_states_1891,45 to 49,band,45,49,78905,39887,39018
+india_abstract_united_provinces_states_1891,60 and Over,band,60,,53906,24058,29848
+india_abstract_port_blair_1901,Total Population,total,,,16256,14122,2134
+india_abstract_port_blair_1901,0 to 5 years,band,0,4,565,297,268
+india_abstract_port_blair_1901,5 to 10 years,band,5,9,449,248,201
+india_abstract_port_blair_1901,10 to 15 years,band,10,14,364,191,173
+india_abstract_port_blair_1901,15 to 20 years,band,15,19,366,213,153
+india_abstract_port_blair_1901,20 to 25 years,band,20,24,1121,974,147
+india_abstract_port_blair_1901,25 to 30 years,band,25,29,1919,1721,198
+india_abstract_port_blair_1901,30 to 35 years,band,30,34,2911,2636,275
+india_abstract_port_blair_1901,35 to 45 years,band,35,44,4628,4237,391
+india_abstract_port_blair_1901,45 to 60 years,band,45,59,2885,2639,246
+india_abstract_port_blair_1901,60 years and over,band,60,,1048,966,82
+india_abstract_port_blair_1901,Unspecified,band,,,0,0,0
+india_abstract_bombay_states_1901,Total Population,total,,,6908648,3513003,3395645
+india_abstract_bombay_states_1901,0 to 5 years,band,0,4,753144,371920,381224
+india_abstract_bombay_states_1901,5 to 10 years,band,5,9,990903,503299,487604
+india_abstract_bombay_states_1901,10 to 15 years,band,10,14,914543,497153,417390
+india_abstract_bombay_states_1901,15 to 20 years,band,15,19,640426,341090,299336
+india_abstract_bombay_states_1901,20 to 25 years,band,20,24,617317,298598,318719
+india_abstract_bombay_states_1901,25 to 30 years,band,25,29,640127,326823,313304
+india_abstract_bombay_states_1901,30 to 35 years,band,30,34,595738,301999,293739
+india_abstract_bombay_states_1901,35 to 45 years,band,35,44,870347,438919,431428
+india_abstract_bombay_states_1901,45 to 60 years,band,45,59,627268,320155,307113
+india_abstract_bombay_states_1901,60 years and over,band,60,,253590,110332,143258
+india_abstract_bombay_states_1901,Unspecified,band,,,5245,2715,2530
+india_abstract_central_provinces_states_1901,Total Population,total,,,1996383,988830,1007553
+india_abstract_central_provinces_states_1901,0 to 5 years,band,0,4,275342,133165,142177
+india_abstract_central_provinces_states_1901,5 to 10 years,band,5,9,326372,162820,163552
+india_abstract_central_provinces_states_1901,10 to 15 years,band,10,14,244647,132643,112004
+india_abstract_central_provinces_states_1901,15 to 20 years,band,15,19,167834,84685,83149
+india_abstract_central_provinces_states_1901,20 to 25 years,band,20,24,172656,77991,94665
+india_abstract_central_provinces_states_1901,25 to 30 years,band,25,29,190321,93146,97175
+india_abstract_central_provinces_states_1901,30 to 35 years,band,30,34,177355,88780,88575
+india_abstract_central_provinces_states_1901,35 to 45 years,band,35,44,238342,122464,115878
+india_abstract_central_provinces_states_1901,45 to 60 years,band,45,59,134795,64163,70632
+india_abstract_central_provinces_states_1901,60 years and over,band,60,,66719,26973,39746
+india_abstract_central_provinces_states_1901,Unspecified,band,,,0,0,0
+india_abstract_united_provinces_states_1901,Total Population,total,,,802097,414414,387683
+india_abstract_united_provinces_states_1901,0 to 5 years,band,0,4,107808,53932,53876
+india_abstract_united_provinces_states_1901,5 to 10 years,band,5,9,93011,48752,44259
+india_abstract_united_provinces_states_1901,10 to 15 years,band,10,14,92411,50703,41708
+india_abstract_united_provinces_states_1901,15 to 20 years,band,15,19,69709,37343,32366
+india_abstract_united_provinces_states_1901,20 to 25 years,band,20,24,73891,36468,37423
+india_abstract_united_provinces_states_1901,25 to 30 years,band,25,29,75495,39296,36199
+india_abstract_united_provinces_states_1901,30 to 35 years,band,30,34,75097,39988,35109
+india_abstract_united_provinces_states_1901,35 to 45 years,band,35,44,98693,51416,47277
+india_abstract_united_provinces_states_1901,45 to 60 years,band,45,59,76301,38644,37657
+india_abstract_united_provinces_states_1901,60 years and over,band,60,,39344,17729,21615
+india_abstract_united_provinces_states_1901,Unspecified,band,,,337,143,194
+india_census_cp_states_1901,All ages,total,,,1996383,988830,1007553
+india_census_cp_states_1901,0–4,band,0,4,275342,133165,142177
+india_census_cp_states_1901,5–9,band,5,9,326372,162820,163552
+india_census_cp_states_1901,10–14,band,10,14,244647,132643,112004
+india_census_cp_states_1901,15–19,band,15,19,167834,84685,83149
+india_census_cp_states_1901,20–39,band,20,39,653004,317894,335110
+india_census_cp_states_1901,40–59,band,40,59,262465,130650,131815
+india_census_cp_states_1901,60 and over,band,60,,66719,26973,39746
