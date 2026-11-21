@@ -9,7 +9,7 @@ use crate::{
     formal_work::Job,
 };
 use serde::{Deserialize, Serialize};
-use std::{cmp::Reverse, collections::BTreeSet, io};
+use std::{cmp::Reverse, collections::{BTreeMap, BTreeSet}, io};
 
 #[derive(Default, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -55,6 +55,17 @@ impl OrganizationActivity {
 }
 
 impl InitialWorld {
+    pub fn player_referral_contacts(&self) -> Vec<String> {
+        let mut seen = BTreeSet::new();
+        self.activity.events.iter().rev().filter(|e| e.action == OrganizationAction::JobReferral && e.target == self.player)
+            .filter_map(|e| {
+                let office = self.organization(&e.organization)?;
+                if !seen.insert(&e.initiator) { return None; }
+                let person = self.runtime_people.get(&e.initiator)?;
+                Some(format!("{}的{}曾当面为我介绍工作。", office.name, person.name))
+            }).collect()
+    }
+
     pub fn organization_events<'a>(&'a self, organization: &'a str) -> impl DoubleEndedIterator<Item = &'a OrganizationEvent> {
         let manager = self.organization_can_manage(organization, &self.player);
         let firm = self.organization(organization).and_then(|org| org.firm.as_deref());
@@ -223,27 +234,57 @@ impl InitialWorld {
         let candidates: Vec<_> = jobseekers.into_iter().filter(|&person| person != self.player && !officers.contains(person)
             && self.eligible_for_civil_work(person) && self.work.booking(person).is_none() && self.population.unit_for_person(person).is_some())
             .map(str::to_owned).collect();
-        for person in candidates {
-            let Some(place) = self.current_place(&person).map(str::to_owned) else { continue };
+        let mut local_seekers = BTreeMap::<String, Vec<String>>::new();
+        for person in &candidates {
+            let Some(place) = self.current_place(person).map(str::to_owned) else { continue };
             if self.clock.current_day() == 0 && self.player_current_place() == Some(place.as_str()) { continue; }
-            if let Some(job) = self.work.contract(&self.work_opening, &person) {
-                if !self.employer_current(&person, job) { self.work.release(&person)?; }
+            if let Some(job) = self.work.contract(&self.work_opening, person) {
+                if !self.employer_current(person, job) { self.work.release(person)?; }
             }
-            if !self.work.has_contract(&person) {
-                if let Some((office, _)) = offices.iter().find(|(_, town)| *town == place) {
+            if !self.work.has_contract(person) { local_seekers.entry(place).or_default().push(person.clone()); }
+        }
+        for (place, seekers) in local_seekers {
+            let office = offices.iter().find(|(_, town)| *town == place).map(|(id, _)| id.as_str());
+            self.fill_local_vacancies(&place, office, seekers)?;
+        }
+        for person in candidates {
+            let Some(place) = self.current_place(&person) else { continue };
+            if self.clock.current_day() == 0 && self.player_current_place() == Some(place) { continue; }
+            if self.work.contract(&self.work_opening, &person).is_some_and(|job| self.can_take_organization_job(&person, job))
+                && self.work.can_book(&self.work_opening, &person, Some(place), self.clock) {
+                self.book_work_as(&person)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn fill_local_vacancies(&mut self, place: &str, office: Option<&str>, mut seekers: Vec<String>) -> io::Result<()> {
+        let day = self.clock.current_day();
+        while !seekers.is_empty() {
+            let mut applications = BTreeMap::<String, Vec<String>>::new();
+            for person in std::mem::take(&mut seekers) {
+                if let Some(office) = office {
                     if let Some((coordinator, job)) = self.referral_for(office, &person) {
                         self.record_referral(office, &person, coordinator, job);
                     }
                 }
-                let job = self.work.local_jobs(&self.work_opening, &person, Some(&place), self.clock.current_day())
+                let job = self.work.local_jobs(&self.work_opening, &person, Some(place), day)
                     .filter(|job| self.work.vacancies(job) > 0 && self.can_take_organization_job(&person, job)
-                        && self.work.ready_to_apply(&self.work_opening, &person, job, self.clock.current_day()))
-                    .max_by_key(|job| (job.wage_per_hour, Reverse(&job.id))).map(|job| job.id.clone());
-                if let Some(job) = job { self.apply_for_work_as(&person, &job)?; }
+                        && self.work.ready_to_apply(&self.work_opening, &person, job, day))
+                    .max_by_key(|job| (job.wage_per_hour, Reverse(&job.id)));
+                if let Some(job) = job { applications.entry(job.id.clone()).or_default().push(person); }
             }
-            if self.work.contract(&self.work_opening, &person).is_some_and(|job| self.can_take_organization_job(&person, job))
-                && self.work.can_book(&self.work_opening, &person, Some(&place), self.clock) {
-                self.book_work_as(&person)?;
+            for (id, mut applicants) in applications {
+                let job = self.work_opening.job(&id).expect("applicants know this vacancy");
+                let openings = self.work.vacancies(job);
+                if applicants.len() > openings {
+                    let recognized = if self.work_opening.regional_employer(&job.employer) {
+                        self.counter_handover_workers(&job.employer)
+                    } else { self.enterprises.successful_buyers(&job.employer).collect() };
+                    applicants.sort_by(|a, b| recognized.contains(b.as_str()).cmp(&recognized.contains(a.as_str())).then_with(|| a.cmp(b)));
+                    seekers.extend(applicants.split_off(openings));
+                }
+                for person in applicants { self.apply_for_work_as(&person, &id)?; }
             }
         }
         Ok(())
@@ -334,9 +375,16 @@ mod tests {
         let firm = "organization:opening_paris_workshop";
         let office = "organization:opening_paris_association";
         assert!(world.apply_for_work(job).is_err());
+        assert!(world.player_referral_contacts().is_empty());
+        assert!(world.oral_work_offer().is_none());
         assert_eq!(world.request_job_referral(office).unwrap(), job);
+        let name = world.person_profile(world.appointed_coordinator(office).unwrap()).unwrap().name;
+        assert_eq!(world.player_referral_contacts().len(), 1);
+        assert!(world.character_for_player().history[0].contains(&name));
+        assert_eq!(world.oral_work_offer().unwrap().0.id, job);
         assert!(!world.can_read_opening_language());
         world.apply_for_work(job).unwrap();
+        assert!(world.oral_work_employment().is_some_and(|(terms, booked)| terms.id == job && !booked));
         world.book_work().unwrap();
         world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
         assert_eq!(world.completed_firm_work("firm:opening_paris_workshop", 1).unwrap()[0].worker, world.player);
@@ -351,6 +399,34 @@ mod tests {
         assert!(handover.result.contains("已当场交粮"));
         assert!(world.organization_relations(firm).iter().any(|line| line.contains("当班见过")));
         assert!(world.organization_site_goods(firm).is_none());
+    }
+
+    #[test]
+    fn organization_activity_counter_rehires_the_worker_who_handed_over_the_order() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("british_isles_1900").unwrap();
+        let place = "place:london";
+        let shop = "organization:opening_london_merchant";
+        let firm = "firm:opening_london_merchant";
+        let job = world.organization(shop).unwrap().jobs[0].clone();
+        let worker = "person:opening_london_association_jobseeker";
+        let novice = "person:counter_applicant";
+        let offer = world.organization_counter_offer(shop, "coal").unwrap();
+        world.order_at_counter(shop, "coal", offer.goods_centimes + offer.service_centimes).unwrap();
+        world.consult_local_work(worker).unwrap();
+        world.apply_for_work_as(worker, &job).unwrap();
+        world.book_work_as(worker).unwrap();
+        world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+        let mut world = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+        assert_eq!(world.counter_handover_workers(firm), BTreeSet::from([worker]));
+        world.work.release(worker).unwrap();
+        world.materialize_resident(novice, "Applicant".into(), place, 1875, None).unwrap();
+        world.consult_local_work(novice).unwrap();
+        let offer = world.organization_counter_offer(shop, "coal").unwrap();
+        world.order_at_counter(shop, "coal", offer.goods_centimes + offer.service_centimes).unwrap();
+        world.fill_local_vacancies(place, None, vec![novice.into(), worker.into()]).unwrap();
+        assert_eq!(world.work.contract(&world.work_opening, worker).unwrap().id, job);
+        assert!(world.work.contract(&world.work_opening, novice).is_none());
     }
 
     #[test]
@@ -372,6 +448,7 @@ mod tests {
         world.advance_migrated_domains(2 * MINUTES_PER_DAY - hours * 60, &BTreeMap::new()).unwrap();
         let (terms, booked, _) = world.employment().unwrap();
         assert!(!booked);
+        assert!(!world.counter_handover_workers(&terms.employer).contains(world.player.as_str()));
         assert_eq!(world.wages.oldest_unpaid_day(&world.player, &terms.employer), Some(2));
         assert!(!world.employer_current(&world.player, terms));
         world.leave_employment().unwrap();

@@ -27,6 +27,27 @@ mod tests {
     }
 
     #[test]
+    fn paper_and_clothing_orders_use_the_local_market_and_counter_shift() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        for (unit, city, good) in [("german_empire", "berlin", "paper"), ("qing_empire", "beijing", "clothing")] {
+            let mut world = bootstrap.create(unit).unwrap();
+            let shop = format!("organization:opening_{city}_merchant");
+            let offer = world.organization_counter_offer(&shop, good).unwrap();
+            let total = offer.goods_centimes + offer.service_centimes;
+            let cash = world.balance().unwrap().cash;
+            world.order_at_counter(&shop, good, total).unwrap();
+            world.advance_migrated_domains(2 * MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+            let firm = world.organization(&shop).unwrap().firm.as_deref().unwrap();
+            assert_eq!(world.holding_milli(good), offer.quantity_milli);
+            assert_eq!(world.balance().unwrap().cash, cash - total);
+            assert!(world.ledger.personal_receipts(firm).any(|r| r.incoming && r.kind == "service_fee" && r.amount == offer.service_centimes));
+            assert!(world.ledger.personal_receipts(&world.macro_economy.markets()[unit].id)
+                .any(|r| r.incoming && r.kind == "purchase" && r.amount == offer.goods_centimes));
+            assert!(!world.wages.completed_firm_work(firm, 2).is_empty());
+        }
+    }
+
+    #[test]
     fn counter_order_survives_resume_then_customer_receives_goods_and_staff_earn_wages() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create(LONDON).unwrap();
@@ -240,6 +261,17 @@ impl InitialWorld {
         self.work_opening.organization(firm).is_some_and(|shop| self.counters.orders.values().any(|o| o.shop == shop))
     }
 
+    pub(crate) fn counter_handover_workers<'a>(&'a self, firm: &str) -> BTreeSet<&'a str> {
+        // Each commission shop has one service position. Attribute an actual fee only
+        // when its completed shift identifies the worker unambiguously.
+        self.ledger.personal_receipts(firm)
+            .filter(|r| r.incoming && r.kind == "service_fee" && r.id.starts_with("service:counter:"))
+            .map(|r| r.minute / MINUTES_PER_DAY).collect::<BTreeSet<_>>().into_iter()
+            .filter_map(|day| match self.wages.completed_firm_work(firm, day).as_slice() {
+                [worker] => Some(worker.worker), _ => None,
+            }).collect()
+    }
+
     fn counter_quote(&self, shop: &str, person: &str, good: &str) -> Option<CounterOffer> {
         let org = self.organization(shop)?;
         if !org.is_merchant() || !self.counter_open(shop) || self.current_place(person)? != org.place
@@ -392,13 +424,7 @@ impl InitialWorld {
                     let increment = if day == 0 { 0 } else {
                         ((day as f64 * rate).floor() - ((day - 1) as f64 * rate).floor()) as i64
                     };
-                    let due = self.livelihood.retail_shortfall(&person, good).saturating_add(increment);
-                    let used = self.person_holding_milli(&person, good).min(due);
-                    if used > 0 {
-                        self.holdings.get_mut(&person).unwrap().get_mut(good).unwrap().consume(used)?;
-                    }
-                    self.livelihood.set_retail_shortfall(&person, good, due - used);
-                    due - used
+                    self.settle_retail_need(&person, good, increment)?
                 };
                 if due <= 0 || meal_budget.is_none() { continue; }
                 let can_shop_direct = self.holdings.get(&person).is_some_and(|stock| stock.contains_key(good))
@@ -429,9 +455,7 @@ impl InitialWorld {
                     let unit_price = market.commodities[good].price_centimes;
                     let market = market.id.clone();
                     self.buy_livelihood_stock(&person, &market, good, 1, unit_price, minute, false)?;
-                    self.holdings.get_mut(&person).unwrap().get_mut(good).unwrap().consume(1)?;
-                    let remaining = self.livelihood.retail_shortfall(&person, good) - 1;
-                    self.livelihood.set_retail_shortfall(&person, good, remaining);
+                    self.settle_retail_need(&person, good, 0)?;
                 }
             }
         }

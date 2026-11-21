@@ -43,6 +43,7 @@ pub struct Activities {
 struct OralWork {
     employer: String,
     employer_english: String,
+    #[serde(default)] referred: bool,
     hours: i64,
     wage_per_hour: i64,
     wage_delay: i64,
@@ -135,7 +136,11 @@ pub struct Character {
     #[serde(flatten)] profile: wwo_character_core::PersonView,
     settled_day: u32,
     #[serde(default)] assessment: Option<Assessment>,
+    #[serde(default)] pub oral_contacts: Vec<String>,
+    #[serde(default)] pub oral_referral: Option<OralReferral>,
 }
+#[derive(Deserialize, serde::Serialize)]
+pub struct OralReferral { pub id: String, label: String }
 #[derive(Deserialize, serde::Serialize)]
 struct Assessment { explanation: Vec<String> }
 
@@ -323,7 +328,7 @@ pub enum Command {
     Transport(&'static str,usize),
     Training(&'static str),
     PortraitAction(usize,Page),Relation(Option<usize>),RelationDrawer(&'static str),
-    WorkAction(usize,usize,u64),OralWorkAction(u64),WorkConfirm(bool),
+    WorkAction(usize,usize,u64),OralWorkAction(u64),OralReferral,WorkConfirm(bool),
     Consume(usize),
     PersonalActivity(PersonalActivity),
     Lobby(crate::lobby::Command),Departure(&'static str),
@@ -943,7 +948,28 @@ impl Display<'_> {
         }
         let Some(character) = self.session.and_then(|s| s.character.as_ref()) else { return; };
         if !self.can_read_world() {
-            self.mask_record(m,t,[x,y,w,157.]);
+            let has_contacts=!character.oral_contacts.is_empty();
+            let has_referral=character.oral_referral.is_some();
+            self.mask_record(m,t,[x,y,w,if has_contacts || has_referral {90.} else {157.}]);
+            if has_contacts {
+                let offset=self.hud.market_offset.min(character.oral_contacts.len()-1);
+                self.skin.paragraph(t,&character.oral_contacts[offset],0,[x+22.,y+87.,w-44.,53.],IVORY,1.);
+                if character.oral_contacts.len()>1 {
+                    for (i,(label,step,enabled)) in [
+                        (say("向上","Up"),-1,offset>0),
+                        (say("向下","Down"),1,offset+1<character.oral_contacts.len()),
+                    ].into_iter().enumerate(){
+                        self.row(m,t,hits,[x+22.+i as f32*74.,y+142.,70.,24.],label,
+                            enabled.then_some(Action::Hud(Command::MarketScroll(step))),false);
+                    }
+                }
+            }
+            if let Some(office)=&character.oral_referral {
+                let label=format!("{} · {}",office.label,say("请人介绍工作","Ask for a referral"));
+                let top=if character.oral_contacts.len()>1 {174.} else if has_contacts {142.} else {92.};
+                self.row(m,t,hits,[x+22.,y+top,(w-44.).min(410.),27.],&label,
+                    Some(Action::Hud(Command::OralReferral)),false);
+            }
             self.personal_activities(m,t,hits,[x,y+149.,w,h-149.]);
             return;
         }
@@ -1027,7 +1053,7 @@ impl Display<'_> {
                     let title = if matches!(activities.oral_work_feedback, Some(OralWorkFeedback::Unavailable)) {
                         say("当前无法申请", "Application unavailable")
                     } else {
-                        say("教师口述", "Teacher's notice")
+                        if work.referred {say("联络员口述","Coordinator’s referral")} else {say("教师口述", "Teacher's notice")}
                     };
                     let details = format!("{} {vacancies} · {terms}", say("空缺", "Openings"));
                     let button = if vacancies > 0 { say("申请","Apply") } else { say("暂无空缺","No openings") };

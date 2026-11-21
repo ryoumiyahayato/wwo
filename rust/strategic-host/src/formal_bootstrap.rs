@@ -495,17 +495,22 @@ impl InitialWorld {
             || self.player_day.last_read_notice.is_some()
     }
 
+    pub fn player_knows_job_by_referral(&self, job: &str) -> bool { self.work.has_referral(&self.player, job) }
+
+    fn player_knows_job_orally(&self, job: &str) -> bool {
+        self.player_knows_job_by_referral(job)
+            || (self.player_day.last_read_notice.is_some() && self.player_written_job() == Some(job))
+    }
+
     pub fn oral_work_offer(&self) -> Option<(&Job, usize)> {
-        self.player_day.last_read_notice?;
-        let known = self.player_written_job()?;
         if self.work.has_contract(&self.player) || !self.eligible_for_civil_work(&self.player) { return None; }
-        self.jobs().find(|(job, _)| job.id == known)
+        self.jobs().filter(|(job, _)| self.player_knows_job_orally(&job.id))
+            .max_by_key(|(job, openings)| (*openings > 0, self.player_knows_job_by_referral(&job.id), job.wage_per_hour))
     }
 
     pub fn oral_work_employment(&self) -> Option<(&Job, bool)> {
-        self.player_day.last_read_notice?;
         let (job, booked, _) = self.employment()?;
-        (self.player_written_job() == Some(job.id.as_str())).then_some((job, booked))
+        self.player_knows_job_orally(&job.id).then_some((job, booked))
     }
 
     pub fn employment(&self) -> Option<(&Job, bool, &str)> {

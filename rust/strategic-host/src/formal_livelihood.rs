@@ -136,6 +136,22 @@ impl Livelihood {
 }
 
 impl InitialWorld {
+    pub(crate) fn settle_retail_need(&mut self, person: &str, good: &str, accrued: i64) -> std::io::Result<i64> {
+        let due = self.livelihood.retail_shortfall(person, good).checked_add(accrued)
+            .filter(|amount| (0..=MAX_AMOUNT).contains(amount))
+            .ok_or_else(|| crate::formal_save::invalid("累计家庭需求超出范围。"))?;
+        let mut remaining = due;
+        if let Some(holding) = self.holdings.get_mut(person).and_then(|stock| stock.get_mut(good)) {
+            let used = holding.available().min(due);
+            if used > 0 {
+                holding.consume(used)?;
+                remaining -= used;
+            }
+        }
+        self.livelihood.set_retail_shortfall(person, good, remaining);
+        Ok(remaining)
+    }
+
     pub fn person_livelihood(&self, person: &str) -> Option<PersonLivelihood<'_>> {
         self.person(person)?;
         let needs = self.livelihood.people.get(person);

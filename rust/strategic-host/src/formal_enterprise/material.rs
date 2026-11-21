@@ -95,11 +95,13 @@ impl Enterprises {
     }
 
     pub(crate) fn witnessed_delivery(&self, firm: &str, counterparty: &str, person: &str, wages: &WageClaims) -> bool {
-        self.deliveries.iter().any(|delivery| {
-            (delivery.order.buyer == firm && delivery.order.seller == counterparty && delivery.order.worker == person)
-                || (delivery.order.seller == firm && delivery.order.buyer == counterparty
-                    && wages.completed_firm_work(firm, delivery.delivered_day).iter().any(|work| work.worker == person))
-        })
+        self.deliveries.iter().any(|d| ((d.order.buyer == firm && d.order.seller == counterparty)
+            || (d.order.seller == firm && d.order.buyer == counterparty))
+            && wages.completed_firm_work(firm, d.delivered_day).iter().any(|work| work.worker == person))
+    }
+
+    pub(crate) fn successful_buyers<'a>(&'a self, firm: &'a str) -> impl Iterator<Item = &'a str> {
+        self.deliveries.iter().filter(move |d| d.order.buyer == firm).map(|d| d.order.worker.as_str())
     }
 
     pub(crate) fn delivered_grain(&self, buyer: &str, seller: &str) -> (usize, i64) {
@@ -225,7 +227,7 @@ mod tests {
     fn material_shortage_uses_paid_work_and_only_delivered_orders_change_stock_and_cash() {
         const BAKER: &str = "firm:opening_paris_bakery";
         const SUPPLIER: &str = "firm:opening_paris_workshop";
-        let workers = ["person:formal_generated_country_fra_0001", "person:formal_generated_country_fra_0002"];
+        let workers = ["person:formal_generated_country_fra_0001", "person:formal_generated_country_fra_0002", "person:replacement_baker"];
         let jobs = WorkOpening::load().unwrap();
         let opening = EnterpriseOpening::load().unwrap();
         let mut firms = Enterprises::initialize(&opening, 0);
@@ -236,7 +238,8 @@ mod tests {
         let mut pending = None;
         for day in 1..=26 {
             clock.advance_minutes(MINUTES_PER_DAY).unwrap();
-            wages.record_shift(workers[1], jobs.job("job:opening_paris_bakery").unwrap(), day, &ledger).unwrap();
+            let baker = if day == 25 { workers[2] } else { workers[1] };
+            wages.record_shift(baker, jobs.job("job:opening_paris_bakery").unwrap(), day, &ledger).unwrap();
             if day >= 25 {
                 wages.record_shift(workers[0], jobs.job("job:opening_paris_workshop").unwrap(), day, &ledger).unwrap();
             }
@@ -253,6 +256,11 @@ mod tests {
                     assert_eq!(ledger.default_account(BAKER).unwrap().cash, cash);
                 } else {
                     let (units, paid) = delivery.unwrap();
+                    if day == 25 {
+                        assert!(!firms.witnessed_delivery(BAKER, SUPPLIER, workers[1], &wages));
+                        assert!(firms.witnessed_delivery(BAKER, SUPPLIER, workers[2], &wages));
+                        assert!(firms.successful_buyers(BAKER).any(|worker| worker == workers[1]));
+                    }
                     assert_eq!(firms.site_goods(&opening, BAKER).unwrap().0, buyer + units);
                     assert_eq!(firms.site_goods(&opening, SUPPLIER).unwrap().0, seller - units);
                     assert_eq!(ledger.default_account(BAKER).unwrap().cash, cash - paid);

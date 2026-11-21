@@ -287,6 +287,10 @@ impl NativeSession {
                 self.work_feedback.clear();
             }
             "back" => { self.selected_organization.clear(); self.pending_job = None; self.work_feedback.clear(); }
+            "oral_referral" if oral_panel && !world.can_read_opening_language() => {
+                self.oral_work_feedback = world.request_job_referral(id).err().map(|_| OralWorkFeedback::Unavailable);
+                self.pending_job = None;
+            }
             "work_action" if !self.selected_organization.is_empty() => {
                 let Some(org) = world.organization(&self.selected_organization).filter(|org|
                     organizations::accessible(world, org, self.relations.as_deref().unwrap_or_default())) else { return; };
@@ -544,6 +548,12 @@ impl NativeSession {
         }).collect();
         let mut character = serde_json::to_value(world.character_for_player())?;
         character["settled_day"] = json!(clock.current_day());
+        if !world.can_read_opening_language() {
+            character["oral_contacts"] = json!(world.player_referral_contacts());
+            let office = world.organizations().find(|org| Some(org.place.as_str()) == place
+                && world.available_job_referral(&org.id).is_some());
+            character["oral_referral"] = json!(office.map(|org| json!({"id":org.id,"label":org.name})));
+        }
         let oral_work = world.oral_work_employment().map(|(job, booked)| {
             (job, "native:work".to_owned(), json!({
                 "kind":"contract", "booked":booked, "can_book":world.can_book_work(),
@@ -557,6 +567,7 @@ impl NativeSession {
         }));
         let oral_work = oral_work.map(|(job, action, state)| json!({
             "employer":employer_label(world, &job.employer),
+            "referred":world.player_knows_job_by_referral(&job.id),
             "employer_english":match job.employer.as_str() {
                 "firm:opening_paris_workshop" => "Paris workshop",
                 "firm:opening_paris_bakery" => "Paris bakery",
