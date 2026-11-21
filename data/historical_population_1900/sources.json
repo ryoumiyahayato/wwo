@@ -98,6 +98,65 @@
     "collection": "age_sex"
   },
   {
+    "id": "france_census_1901_age_summary",
+    "title": "Résultats statistiques du recensement de la population effectué le 24 mars 1901",
+    "publisher": "Statistique générale de la France, reproduced by Émile Levasseur in Journal de la Société de statistique de Paris",
+    "url": "https://www.numdam.org/item/JSFS_1906__47__368_0.pdf#page=5",
+    "locator": "1906, vol. 47, printed pp. 370–371, Population présente totale, Sexe and Âge",
+    "rights": "Historical published facts only",
+    "raw_path": "france_census_1901.csv",
+    "table_urls": [
+      "https://www.numdam.org/item/JSFS_1906__47__368_0.pdf#page=4",
+      "https://www.numdam.org/item/JSFS_1906__47__368_0.pdf#page=5"
+    ],
+    "collection": "age_sex"
+  },
+  {
+    "id": "algeria_1901_zimmermann_preliminary",
+    "title": "Maurice Zimmermann, Afrique: Recensement de l’Algérie",
+    "publisher": "Annales de Géographie, vol. 11, no. 55 (1902). Digitized by Persée.",
+    "url": "https://www.persee.fr/doc/geo_0003-4010_1902_num_11_55_20494",
+    "locator": "Printed pp. 91–92, Recensement de l’Algérie. The first line of the notice gives the enumeration date and total.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "contemporary_cross_check": {
+      "url": "https://cnum.cnam.fr/pgi/redir.php?ident=8XAE581&onglet=d",
+      "locator": "Rapports du jury international, Groupe XVII, classe 113, Population, printed pp. 46–47. The government jury report gives the early returns for the three Algerian departments, divided between civil and military administration."
+    },
+    "collection": "algeria_population"
+  },
+  {
+    "id": "algeria_1896_1901_wahl_bernard",
+    "title": "Maurice Wahl, L’Algérie, 4th ed., revised by Augustin Bernard",
+    "publisher": "Félix Alcan, Paris, 1903. Digitized by the Internet Archive in 2009 with funding from the University of Ottawa.",
+    "url": "https://fr.scribd.com/document/934179829/lalgrie00wahluoft-1",
+    "catalogue_url": "https://catalogue.bnf.fr/ark:/12148/cb34135024x",
+    "locator": "Printed pp. 181–182, Les habitants. The consecutive paragraphs report the 1896 and 1901 census totals, municipal counts, military coverage and the civil and command territories.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://fr.scribd.com/document/723578464/Tableau-General-Des-Communes-de-Algerie-Periode-Bpt6k5695914m",
+        "locator": "Gouvernement général de l’Algérie, Tableau général des communes de l’Algérie, situation au 1er novembre 1902. Preface, p. 206 and pp. 208–213. The departmental recapitulation and six new Aïn-Sefra annexes are tabulated separately."
+      }
+    ],
+    "collection": "algeria_population"
+  },
+  {
+    "id": "algeria_1901_revised_bernard",
+    "title": "Augustin Bernard, Le recensement de 1906 en Algérie et en Tunisie",
+    "publisher": "Annales de Géographie, vol. 17, no. 91 (1908). Digitized by Persée.",
+    "url": "https://www.persee.fr/doc/geo_0003-4010_1908_num_17_91_18205",
+    "locator": "Printed p. 24, first section, notes 2–3. The 1901 comparison gives the revised total and municipal population and identifies the 1902 decree and the new annexes.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://fr.scribd.com/document/723578464/Tableau-General-Des-Communes-de-Algerie-Periode-Bpt6k5695914m",
+        "catalogue_url": "https://gallica.bnf.fr/ark:/12148/bpt6k5695914m",
+        "locator": "Gouvernement général de l’Algérie, Tableau général des communes de l’Algérie, situation au 1er novembre 1902. Preface identifies the decrees of 28 December 1901 and 6 September 1902 and gives 1 November 1902 as the date of the appended returns. Printed pp. 208–213 give the six annexes and their subtotal of 61,919."
+      }
+    ],
+    "collection": "algeria_population"
+  },
+  {
     "id": "us_twelfth_census_vol1",
     "title": "Twelfth Census of the United States, Volume I, Population Part I",
     "publisher": "U.S. Census Office",
@@ -725,6 +784,56 @@
     "collection": "england_wales_habitations"
   },
   {
+    "id": "indochina_exposition_catalogue_1900",
+    "title": "Catalogue général officiel de l’Exposition universelle de 1900, tome XIX, Exposition coloniale française",
+    "publisher": "Exposition universelle de 1900, Paris",
+    "url": "https://archive.org/download/cataloguegeneral19expo/cataloguegeneral19expo.pdf#page=34",
+    "locator": "Printed p. 8, PDF p. 34, Population. The five Indochinese rows sum to 16,335,208. French India is listed separately. The printed Asia subtotal is 350 above the sum of the six rows.",
+    "rights": "Selected numerical facts and bibliographic references. No facsimile redistributed.",
+    "boundary_sources": [
+      {
+        "url": "https://history.state.gov/historicaldocuments/frus1893/d543",
+        "locator": "1893 treaty, French claim to left bank and islands of the Mekong."
+      },
+      {
+        "url": "https://history.state.gov/historicaldocuments/frus1905/d927",
+        "locator": "1904 treaty, concessions concerning territories on the right bank."
+      },
+      {
+        "url": "https://library.law.fsu.edu/Digital-Collections/LimitsinSeas/pdf/ibs155.pdf",
+        "locator": "Appendices 4–6, administrative transfers of Darlac and Stung Treng in 1904."
+      }
+    ],
+    "collection": "french_indochina_population"
+  },
+  {
+    "id": "indochina_favre_map_1900",
+    "title": "Carte de l’Indo-Chine française",
+    "publisher": "Albert Favre, 1900. Université Bordeaux Montaigne, collection 1886.",
+    "url": "https://1886.u-bordeaux-montaigne.fr/s/1886/item/218885",
+    "locator": "Population figures in the geographic legends; 10 October 1900 is the map date.",
+    "rights": "Selected numerical facts and bibliographic references. No facsimile redistributed.",
+    "collection": "french_indochina_population"
+  },
+  {
+    "id": "indochina_doumer_report_1902",
+    "title": "Situation de l’Indo-Chine de 1897 à 1901",
+    "publisher": "Gouvernement général de l’Indochine, Paul Doumer, Hanoi, 1902. Université Côte d’Azur, Humazur.",
+    "url": "https://humazur.univ-cotedazur.fr/s/humazur/item/1592",
+    "locator": "Printed pp. 449 and 459; Laos administrative report and Cochinchina annual statistical return.",
+    "rights": "Selected numerical facts and bibliographic references. No facsimile redistributed.",
+    "collection": "french_indochina_population"
+  },
+  {
+    "id": "cochinchina_comite_1902",
+    "title": "Bulletin du Comité de l’Asie française, no. 14, mai 1902",
+    "publisher": "Comité de l’Asie française, Paris",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/2/25/Bulletin_du_Comit%C3%A9_de_l%27Asie_fran%C3%A7aise%2C_num%C3%A9ro_14%2C_mai_1902.pdf",
+    "locator": "Printed p. 221, Population de la Cochinchine; 1899 estimate and first enumeration on 27 December 1901.",
+    "rights": "Selected numerical facts and bibliographic references. No facsimile redistributed.",
+    "collection": "french_indochina_population"
+  },
+  {
     "id": "india_census_1901_comparable_area",
     "title": "Census of India, 1901, Vol. I-A, India, Part II, Tables. Government of India, 1903.",
     "publisher": "Government of India, 1903",
@@ -816,6 +925,151 @@
     "url": "https://www.statistikportal.li/statistikportal/publications/101-statistisches-jahrbuch/1960/01/1/101.1960.01_01_statistisches-tabellenwerk-heft1-1960.pdf",
     "rights": "Numerical facts only; reference to digitized official statistical tables.",
     "collection": "liechtenstein"
+  },
+  {
+    "id": "madagascar_1900_colonial_gazette_via_paillard",
+    "title": "Journal officiel de Madagascar et dépendances, 20 March 1901, cited by Yvan-Georges Paillard",
+    "publisher": "Gouvernement général de Madagascar, Tananarive. Population stated in Paillard, Cahiers d'Études africaines 27 (1987).",
+    "url": "https://www.persee.fr/doc/cea_0008-0055_1987_num_27_105_3191",
+    "locator": "Printed p. 30 and note 43. Paillard cites Chevalier (1952), p. 33, following Félix Randriamanana.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "original_issue_catalogue": "https://gallica.bnf.fr/ark:/12148/cb34425284n/date1901",
+    "source_directness": "The cited original issue and page have not been inspected. Both Paillard and the 1940 Nature notice independently reproduce the same total, with Randriamanana in their source chains.",
+    "contemporary_cross_check": {
+      "url": "https://www.nature.com/articles/145098b0",
+      "locator": "Demography of Madagascar, 1940, p. 98, gives 2,244,876 for 1900 from Félix Randriamanana's 1939 Paris thesis (no. 657)."
+    },
+    "boundary_sources": [
+      {
+        "url": "https://mjp.univ-perp.fr/constit/mg1896.htm",
+        "locator": "28 January 1896 decree placing Diego-Suarez, Nosy Be, and Sainte-Marie under the resident-general; 6 August 1896 annexation law and 9 April 1908 decree attaching Mayotte and dependencies."
+      },
+      {
+        "url": "https://publications.mayotte.fr/publications/mahabari-17/texte",
+        "locator": "Archives départementales de Mayotte, Mahabari 17, chronology of administration before and after attachment in 1908."
+      },
+      {
+        "url": "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers19-04/34354.pdf",
+        "locator": "Hubert Deschamps, Histoire de Madagascar, compilation based on tax records and allowance for women and children. Non-occupied territories in the far south were excluded."
+      }
+    ],
+    "opening_control_candidate": {
+      "wwo_id": "cshapes_gw_580",
+      "existing_research_unit_id": "ft_madagascar",
+      "source_id": "ft_world_v5",
+      "url": "https://doi.org/10.21950/3SK54X",
+      "methods_reference": "https://www.uc3m.es/investigacion/federico-tena-population",
+      "locator": "Country series!AB103 and AB104. Opening row already filed in collections/world/observations.jsonl.",
+      "date": "1900-01-01",
+      "population_value": 2644620,
+      "source_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "published_thousands": [
+        2653.9852129387814,
+        2635.407316448209
+      ],
+      "elapsed_fraction": "184/365",
+      "basis": "January 1 interpolation of the revised Federico–Tena reconstruction using Frankema–Jerven. This is an alternative to the incomplete administrative counts. An uncertainty interval is unavailable.",
+      "scope": "Madagascar and near-shore dependencies in the 1900 colony, including the main island, Nosy Be and Sainte-Marie; treat the latter as territorially included despite the simplified island outline. The source publishes Comoros and Mayotte and Réunion as separate units. Metropolitan France and Mauritius are separate. No historical provincial or ethnic allocation."
+    },
+    "collection": "madagascar_population"
+  },
+  {
+    "id": "madagascar_early_government_returns_via_paillard",
+    "title": "Paillard, Les recherches démographiques sur Madagascar au début de l'époque coloniale et les documents de l'AMI",
+    "publisher": "Cahiers d'Études africaines 27(105–106), 1987. Primary reports from Archives nationales de la République démocratique de Madagascar transcribed and discussed by Paillard.",
+    "url": "https://www.persee.fr/doc/cea_0008-0055_1987_num_27_105_3191",
+    "locator": "Printed pp. 30–32, notes 43–44 and Table I. Government General's 1901 administrative statement and letters/estimates filed in ARDM.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "table_reproduction": {
+      "url": "https://leboucan.fr/images/confacademie/C.MignardMedecine1914.pdf",
+      "locator": "Slide headed La Population de Madagascar en 1901, administrative table reproduced from Paillard."
+    },
+    "collection": "madagascar_population"
+  },
+  {
+    "id": "madagascar_population_malagasy_gda",
+    "title": "Groupe de démographie africaine, Évaluation des effectifs de la population des pays africains, Madagascar",
+    "publisher": "GDA (1982), republished by IREDA / CEPED / AFRISTAT.",
+    "url": "https://ireda.afristat.org/ressources/mdg-gda-evaluation-des-effectifs.pdf",
+    "locator": "Tableau 41, printed p. 129, opening Malagasy population series as at 1 January of successive years.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "collection": "madagascar_population"
+  },
+  {
+    "id": "madagascar_gallieni_1905_via_uhry",
+    "title": "Gallieni, Rapport d'ensemble sur la situation générale de Madagascar, reported by Alfred Uhry",
+    "publisher": "Gouvernement général de Madagascar. Summarized in Annales de géographie 15(84), 1906.",
+    "url": "https://www.persee.fr/doc/geo_0003-4010_1906_num_15_84_3531?pageId=T1_475",
+    "locator": "Printed p. 475, population at 1 January 1905, military excluded.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "collection": "madagascar_population"
+  },
+  {
+    "id": "morocco_1899_statesmans_yearbook",
+    "title": "The Statesman's Year-Book 1899, American edition",
+    "publisher": "Macmillan, 1899. Edited by J. Scott Keltie. Printed-page scan and transcription hosted by Wikisource.",
+    "url": "https://en.wikisource.org/wiki/Page:Statesman%27s_Year-Book_1899_American_Edition.djvu/1155",
+    "locator": "Printed p. 799, Morocco, Area and Population.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://icj-web.leman.un-icc.cloud/sites/default/files/case-related/61/061-19751016-ADV-01-00-EN.pdf",
+        "locator": "International Court of Justice, Western Sahara advisory opinion (1975), printed pp. 49–51. Discusses the 1895 agreement and the disputed geographical interpretation of the land south of Wad Draa."
+      },
+      {
+        "url": "https://ciram.unimc.it/it/focus/diritto-geopolitica-mare/WesternSahara/EspFrTraite1912_fr.pdf",
+        "locator": "French and Spanish convention of 27 November 1912, arts. 2, 3 and 5. Later protectorate and concession lines do not supply an 1899 population partition."
+      }
+    ],
+    "collection": "morocco_population"
+  },
+  {
+    "id": "morocco_1900_escallier_via_hcp",
+    "title": "L’évolution de la population du Maroc",
+    "publisher": "Haut-Commissariat au Plan du Maroc. The estimate is attributed to Robert Escallier (1984).",
+    "url": "https://www.hcp.ma/file/231890/",
+    "locator": "Section 1, opening paragraph and reference 4. The author cites an estimate of about five million in 1900.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://rgph2014.hcp.ma/Apercu-sur-les-recensements-au-Maroc_a29.html",
+        "locator": "Haut-Commissariat au Plan, Aperçu sur les recensements au Maroc, sections 1–2. Describes partial protectorate population counts and the first full post-independence general census in 1960."
+      }
+    ],
+    "collection": "morocco_population"
+  },
+  {
+    "id": "ceuta_1900_ine_municipal_census",
+    "title": "Alteraciones de los municipios en los Censos de Población desde 1842: Ceuta",
+    "publisher": "Instituto Nacional de Estadística, Spain.",
+    "url": "https://www.ine.es/intercensal/intercensal.do?btnBuscarCod=Consultar+selecci%C3%B3n&codigoMunicipio=001&codigoProvincia=51&search=3",
+    "locator": "Municipality 51001, 1900 column, Población de Hecho and Población de Derecho.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://www.ine.es/censo2001/leyes_censales.pdf",
+        "locator": "Ley de 3 de abril de 1900, art. 1, fixes the census date at 31 December 1900."
+      }
+    ],
+    "collection": "morocco_population"
+  },
+  {
+    "id": "melilla_1900_ine_municipal_census",
+    "title": "Alteraciones de los municipios en los Censos de Población desde 1842: Melilla",
+    "publisher": "Instituto Nacional de Estadística, Spain.",
+    "url": "https://www.ine.es/intercensal/intercensal.do?btnBuscarCod=Consultar+selecci%C3%B3n&codigoMunicipio=001&codigoProvincia=52&search=3",
+    "locator": "Municipality 52001, 1900 column, Población de Hecho and Población de Derecho.",
+    "rights": "Selected historical numerical facts and bibliographic references.",
+    "boundary_sources": [
+      {
+        "url": "https://www.ine.es/censo2001/leyes_censales.pdf",
+        "locator": "Ley de 3 de abril de 1900, art. 1, fixes the census date at 31 December 1900."
+      }
+    ],
+    "collection": "morocco_population"
   },
   {
     "id": "ph_census_1903_vol2",
@@ -954,6 +1208,15 @@
     "collection": "russia"
   },
   {
+    "id": "saint_helena_colonial_annual_report_1899",
+    "title": "Colonial Reports—Annual no. 309, St. Helena, Report for 1899",
+    "publisher": "British Colonial Office, HMSO, December 1900.",
+    "url": "https://www.friendsofsthelena.com/upload/files/Colonial_Annual_Report_1899.pdf",
+    "locator": "Vital Statistics section, estimated population on 31 December 1899.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "collection": "saint_helena_population"
+  },
+  {
     "id": "swiss_federal_census_comparison_1911",
     "title": "Vorläufige Resultate der eidgenössischen Volkszählung vom 1. Dezember 1910, verglichen mit früheren Volkszählungen",
     "publisher": "Federal census returns published in Zeitschrift für schweizerische Statistik (1911), pp. 101–143",
@@ -1010,5 +1273,64 @@
     "locator": "1900 AD row; population in millions, lower/upper summary. Original references listed below the table.",
     "rights": "Factual numeric extract from US federal table; underlying researchers credited by the publisher.",
     "collection": "world"
+  },
+  {
+    "id": "zanzibar_statesmans_year_book_1899",
+    "title": "The Statesman's Year-Book, 1899 American Edition, Zanzibar Protectorate",
+    "publisher": "Macmillan, 1899. Printed scan and transcription at Wikisource.",
+    "url": "https://en.wikisource.org/wiki/Page:Statesman%27s_Year-Book_1899_American_Edition.djvu/541",
+    "locator": "Printed p. 197, Zanzibar Protectorate, Area, Population, Religion. Estimates of 150,000 and 50,000 for the two islands.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "opening_control_candidate": {
+      "wwo_id": "sultanate_of_zanzibar",
+      "date": "1900-01-01",
+      "source_date": "1899",
+      "population_value": 200000,
+      "basis": "Contemporary two-island estimate published in 1899 used as a near-opening proxy. No interpolation, reference date, error interval or separate foreign-resident adjustment.",
+      "scope": "Unguja and Pemba and their administratively dependent islets. Excludes Mafia, mainland coastal leases and the East Africa Protectorate. Tumbatu belongs to Unguja administratively but has no separate polygon in the WWO snapshot. The approximate 150,000 and 50,000 source figures describe a dated observation only; retain no 1900 island-level partition.",
+      "research_comparator": {
+        "unit_id": "ft_zanzibar_island",
+        "source_id": "ft_world_v5",
+        "url": "https://doi.org/10.21950/3SK54X",
+        "date": "1900-01-01",
+        "population_value": 198804,
+        "locator": "Country series!AU103 and AU104. Existing source label is Zanzibar Island; dual-island coverage not stated in the repository's methodology note.",
+        "candidate_minus_research": 1196
+      }
+    },
+    "boundary_sources": [
+      {
+        "url": "https://tile.loc.gov/storage-services/service/gdc/gdclccn/a2/20/00/95/3/a22000953/a22000953.pdf",
+        "locator": "British Foreign Office, British East Africa, printed pp. 25–28 and 48–49, the two islands, the coastal leases and Mafia."
+      },
+      {
+        "url": "https://digital.soas.ac.uk/content/AA/00/00/06/46/00001/AA00000646.pdf",
+        "locator": "Zanzibar (British colonial handbook), Geography, p. 1. Tumbatu is administratively included with Zanzibar island and Latham is stated to be uninhabited."
+      }
+    ],
+    "collection": "zanzibar_population"
+  },
+  {
+    "id": "zanzibar_1910_colonial_statistics",
+    "title": "Statistical Tables Relating to British Self-Governing Dominions, Crown Colonies, Possessions and Protectorates, vol. 35",
+    "publisher": "British government, HMSO. Digitized by Staats- und Universitätsbibliothek Hamburg.",
+    "url": "https://img.sub.uni-hamburg.de/kitodo/PPN863953719_0035/PDF/00000831.pdf",
+    "locator": "Printed p. 807, Table 1, area and population of Zanzibar and Pemba Islands, 19 August 1910.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "contemporary_cross_check": {
+      "url": "https://tile.loc.gov/storage-services/service/gdc/gdclccn/a2/20/00/95/3/a22000953/a22000953.pdf",
+      "locator": "British Foreign Office, British East Africa, printed p. 28. The same two-island count with adult men, adult women and children."
+    },
+    "collection": "zanzibar_population"
+  },
+  {
+    "id": "zanzibar_mathews_1895_via_ingrams",
+    "title": "Sir Lloyd Mathews estimate as reported in Consul-General Basil Cave's 1901 dispatch to Lord Lansdowne",
+    "publisher": "British Consul-General at Zanzibar. Quoted in W. H. Ingrams, Zanzibar: Its History and Its People (1931).",
+    "url": "https://api.pageplace.de/preview/DT0400.9781000101744_A40584960/preview-9781000101744_A40584960.pdf",
+    "locator": "Printed p. 27, Population, February 1895 estimate recapitulated in Cave's 1901 dispatch.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "source_directness": "Dispatch quoted by Ingrams; original dispatch not inspected.",
+    "collection": "zanzibar_population"
   }
 ]

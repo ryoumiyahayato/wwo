@@ -97,8 +97,9 @@ def age_sex_panels():
     panels = json.loads((AGE_SOURCES / "panels.json").read_text(encoding="utf8"))
     panels.extend(json.loads((AGE_SOURCES / "us_census_1900_panels.json").read_text(encoding="utf8")))
     panels.extend(json.loads((AGE_SOURCES / "uk_county_age_panels.json").read_text(encoding="utf8")))
+    panels.extend(json.loads((AGE_SOURCES / "france_census_1901_panels.json").read_text(encoding="utf8")))
     by_panel = {panel["id"]: [] for panel in panels}
-    for filename in ("age_sex.csv", "us_census_1900.csv", "uk_county_age.csv"):
+    for filename in ("age_sex.csv", "us_census_1900.csv", "uk_county_age.csv", "france_census_1901.csv"):
         for row in read_csv(AGE_SOURCES / filename):
             for key in ("age_min", "age_max", "both", "male", "female"):
                 row[key] = int(row[key]) if row[key] else None

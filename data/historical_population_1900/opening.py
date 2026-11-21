@@ -119,6 +119,25 @@ def cape_colony(observations):
     )
 
 
+def zanzibar_protectorate(observations):
+    returns = [r for r in observations if r["unit_id"] == "zanzibar_protectorate"]
+    estimate = next(row for row in returns if row["source_id"] == "zanzibar_statesmans_year_book_1899")
+    return dict(
+        unit_id=estimate["wwo_id"], date=DATE, population_value=estimate["population_value"],
+        source_id=estimate["source_id"], source_quality=estimate["quality"],
+        source_observations=[estimate["record_id"]], source_dates=[estimate["date"]],
+        locator=estimate["locator"], partition_source="collections/zanzibar_population/observations.jsonl",
+        method="Use the two island estimates published in 1899 as the opening proxy. Their reference date and estimation method are not stated.",
+        scope=estimate["definition"],
+        uncertainty_kind="No statistical interval. Later census and earlier estimates have different dates. No opening island or urban allocation is adopted.",
+        alternative_estimates=[
+            {key: row[key] for key in ("source_id", "date", "population_value", "locator", "record_id", "definition")}
+            for row in returns if row is not estimate
+        ],
+        units=[],
+    )
+
+
 def add_java_and_madura(group, observations):
     unit = "java_madoera_colonial_population"
     first, last = sorted((r for r in observations if r["unit_id"] == unit), key=lambda r: r["date"])
@@ -187,6 +206,8 @@ def groups(observations, version=1):
     series_files = ["opening_series.tsv"]
     if version >= 2:
         series_files.append("opening_series_v2.tsv")
+    if version >= 5:
+        series_files.append("opening_series_v5.tsv")
     for file in series_files:
         with (HERE / file).open(encoding="utf8") as f:
             for decision in csv.DictReader(f, delimiter="\t"):
@@ -248,6 +269,11 @@ def groups(observations, version=1):
             raise ValueError("duplicate Cape population control")
         result[cape["unit_id"]] = cape
         add_java_and_madura(result["cshapes_gw_850"], observations)
+    if version >= 5:
+        zanzibar = zanzibar_protectorate(observations)
+        if zanzibar["unit_id"] in result:
+            raise ValueError("duplicate Zanzibar population control")
+        result[zanzibar["unit_id"]] = zanzibar
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

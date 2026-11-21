@@ -163,6 +163,33 @@ fn main() -> Result<(), Box<dyn Error>> {
                 "availability": world.resident_age_availability(scope, youngest, oldest)?,
             }));
         }
+        Some("inspect-market-livelihood") => {
+            let unit = args.next().ok_or_else(usage)?;
+            let unit = unit.to_str().ok_or_else(usage)?;
+            let input = args.next();
+            if args.next().is_some() { return Err(usage().into()); }
+            let bootstrap = WorldBootstrap::load()?;
+            let world = match input {
+                Some(path) => read_native_slot(Path::new(&path), &bootstrap)?,
+                None => bootstrap.create("country_fra")?,
+            };
+            let structure = world.population().structure(Some(unit), world.clock())
+                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown statistical population unit"))?;
+            let flows = world.macro_economy().food_flows(unit).map(|rows| rows.collect::<Vec<_>>());
+            println!("{}", json!({
+                "date": world.clock().current_date(),
+                "unit_id": unit,
+                "population_total": structure.population_total,
+                "physiological_energy_reference": structure.published_energy_reference,
+                "physiological_adult_water_references": structure.published_adult_water_references,
+                "physiological_efsa_water_reference": structure.published_efsa_water_reference,
+                "parent_or_own_market_unit": world.market_unit_for_population(unit),
+                "macro_food_flows": flows,
+                "household_budget_coverage": "unknown_at_aggregate_scope",
+                "household_purchase_coverage": "unknown_at_aggregate_scope",
+                "household_intake_coverage": "unknown_at_aggregate_scope",
+            }));
+        }
         Some("inspect-intake") => {
             let path = args.next().ok_or_else(usage)?;
             let person = args.next().ok_or_else(usage)?;
@@ -248,5 +275,5 @@ fn show(saved: &SavedWorld) {
 
 fn usage() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput,
-        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <world|unit-id|city:city-key|history:unit-id> [<native-save>], inspect-age-range <world|unit-id> <youngest> <oldest> [<native-save>], inspect-intake <native-save> <person-id>, inspect-food-history [<case-id>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
+        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <world|unit-id|city:city-key|history:unit-id> [<native-save>], inspect-age-range <world|unit-id> <youngest> <oldest> [<native-save>], inspect-market-livelihood <unit-id> [<native-save>], inspect-intake <native-save> <person-id>, inspect-food-history [<case-id>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
 }

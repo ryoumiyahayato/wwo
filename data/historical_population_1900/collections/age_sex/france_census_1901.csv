@@ -1,0 +1,9 @@
+panel,label,role,age_min,age_max,both,male,female
+france_1901,Ensemble,total,,,38450788,18916889,19533899
+france_1901,Moins de 20 ans,band,0,19,13281855,6639510,6642345
+france_1901,De 20 à 59 ans,band,20,59,20283524,10009334,10274190
+france_1901,De 60 à 94 ans,band,60,94,4766613,2216194,2550419
+france_1901,Totaux,subtotal,0,94,38331992,18865038,19466954
+france_1901,Plus de 95 ans et âge non déclaré,mixed_age_band,,,118796,51851,66945
+france_1901,Population présente vérifiée,scope_control,,,38466924,,
+france_1901,Bulletins écartés faute de sexe déterminé,excluded_missing_sex,,,16136,,

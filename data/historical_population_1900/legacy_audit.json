@@ -1016,10 +1016,10 @@
     "research_candidates": [
       "ft_zanzibar_island"
     ],
-    "opening_replacement": null,
+    "opening_replacement": 200000,
     "legacy_unlocated_balance": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "replacement_minus_legacy": 0,
+    "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {

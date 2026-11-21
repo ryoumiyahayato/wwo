@@ -1,0 +1,79 @@
+[
+  {
+    "id": "madagascar_1900_colonial_gazette_via_paillard",
+    "title": "Journal officiel de Madagascar et dépendances, 20 March 1901, cited by Yvan-Georges Paillard",
+    "publisher": "Gouvernement général de Madagascar, Tananarive. Population stated in Paillard, Cahiers d'Études africaines 27 (1987).",
+    "url": "https://www.persee.fr/doc/cea_0008-0055_1987_num_27_105_3191",
+    "locator": "Printed p. 30 and note 43. Paillard cites Chevalier (1952), p. 33, following Félix Randriamanana.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "original_issue_catalogue": "https://gallica.bnf.fr/ark:/12148/cb34425284n/date1901",
+    "source_directness": "The cited original issue and page have not been inspected. Both Paillard and the 1940 Nature notice independently reproduce the same total, with Randriamanana in their source chains.",
+    "contemporary_cross_check": {
+      "url": "https://www.nature.com/articles/145098b0",
+      "locator": "Demography of Madagascar, 1940, p. 98, gives 2,244,876 for 1900 from Félix Randriamanana's 1939 Paris thesis (no. 657)."
+    },
+    "boundary_sources": [
+      {
+        "url": "https://mjp.univ-perp.fr/constit/mg1896.htm",
+        "locator": "28 January 1896 decree placing Diego-Suarez, Nosy Be, and Sainte-Marie under the resident-general; 6 August 1896 annexation law and 9 April 1908 decree attaching Mayotte and dependencies."
+      },
+      {
+        "url": "https://publications.mayotte.fr/publications/mahabari-17/texte",
+        "locator": "Archives départementales de Mayotte, Mahabari 17, chronology of administration before and after attachment in 1908."
+      },
+      {
+        "url": "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers19-04/34354.pdf",
+        "locator": "Hubert Deschamps, Histoire de Madagascar, compilation based on tax records and allowance for women and children. Non-occupied territories in the far south were excluded."
+      }
+    ],
+    "opening_control_candidate": {
+      "wwo_id": "cshapes_gw_580",
+      "existing_research_unit_id": "ft_madagascar",
+      "source_id": "ft_world_v5",
+      "url": "https://doi.org/10.21950/3SK54X",
+      "methods_reference": "https://www.uc3m.es/investigacion/federico-tena-population",
+      "locator": "Country series!AB103 and AB104. Opening row already filed in collections/world/observations.jsonl.",
+      "date": "1900-01-01",
+      "population_value": 2644620,
+      "source_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "published_thousands": [
+        2653.9852129387814,
+        2635.407316448209
+      ],
+      "elapsed_fraction": "184/365",
+      "basis": "January 1 interpolation of the revised Federico–Tena reconstruction using Frankema–Jerven. This is an alternative to the incomplete administrative counts. An uncertainty interval is unavailable.",
+      "scope": "Madagascar and near-shore dependencies in the 1900 colony, including the main island, Nosy Be and Sainte-Marie; treat the latter as territorially included despite the simplified island outline. The source publishes Comoros and Mayotte and Réunion as separate units. Metropolitan France and Mauritius are separate. No historical provincial or ethnic allocation."
+    }
+  },
+  {
+    "id": "madagascar_early_government_returns_via_paillard",
+    "title": "Paillard, Les recherches démographiques sur Madagascar au début de l'époque coloniale et les documents de l'AMI",
+    "publisher": "Cahiers d'Études africaines 27(105–106), 1987. Primary reports from Archives nationales de la République démocratique de Madagascar transcribed and discussed by Paillard.",
+    "url": "https://www.persee.fr/doc/cea_0008-0055_1987_num_27_105_3191",
+    "locator": "Printed pp. 30–32, notes 43–44 and Table I. Government General's 1901 administrative statement and letters/estimates filed in ARDM.",
+    "rights": "Selected numerical facts and bibliographic references.",
+    "table_reproduction": {
+      "url": "https://leboucan.fr/images/confacademie/C.MignardMedecine1914.pdf",
+      "locator": "Slide headed La Population de Madagascar en 1901, administrative table reproduced from Paillard."
+    }
+  },
+  {
+    "id": "madagascar_population_malagasy_gda",
+    "title": "Groupe de démographie africaine, Évaluation des effectifs de la population des pays africains, Madagascar",
+    "publisher": "GDA (1982), republished by IREDA / CEPED / AFRISTAT.",
+    "url": "https://ireda.afristat.org/ressources/mdg-gda-evaluation-des-effectifs.pdf",
+    "locator": "Tableau 41, printed p. 129, opening Malagasy population series as at 1 January of successive years.",
+    "rights": "Selected numerical facts and bibliographic references."
+  },
+  {
+    "id": "madagascar_gallieni_1905_via_uhry",
+    "title": "Gallieni, Rapport d'ensemble sur la situation générale de Madagascar, reported by Alfred Uhry",
+    "publisher": "Gouvernement général de Madagascar. Summarized in Annales de géographie 15(84), 1906.",
+    "url": "https://www.persee.fr/doc/geo_0003-4010_1906_num_15_84_3531?pageId=T1_475",
+    "locator": "Printed p. 475, population at 1 January 1905, military excluded.",
+    "rights": "Selected numerical facts and bibliographic references."
+  }
+]

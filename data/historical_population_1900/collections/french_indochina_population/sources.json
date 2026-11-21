@@ -1,0 +1,48 @@
+[
+  {
+    "id": "indochina_exposition_catalogue_1900",
+    "title": "Catalogue général officiel de l’Exposition universelle de 1900, tome XIX, Exposition coloniale française",
+    "publisher": "Exposition universelle de 1900, Paris",
+    "url": "https://archive.org/download/cataloguegeneral19expo/cataloguegeneral19expo.pdf#page=34",
+    "locator": "Printed p. 8, PDF p. 34, Population. The five Indochinese rows sum to 16,335,208. French India is listed separately. The printed Asia subtotal is 350 above the sum of the six rows.",
+    "rights": "Selected numerical facts and bibliographic references. No facsimile redistributed.",
+    "boundary_sources": [
+      {
+        "url": "https://history.state.gov/historicaldocuments/frus1893/d543",
+        "locator": "1893 treaty, French claim to left bank and islands of the Mekong."
+      },
+      {
+        "url": "https://history.state.gov/historicaldocuments/frus1905/d927",
+        "locator": "1904 treaty, concessions concerning territories on the right bank."
+      },
+      {
+        "url": "https://library.law.fsu.edu/Digital-Collections/LimitsinSeas/pdf/ibs155.pdf",
+        "locator": "Appendices 4–6, administrative transfers of Darlac and Stung Treng in 1904."
+      }
+    ]
+  },
+  {
+    "id": "indochina_favre_map_1900",
+    "title": "Carte de l’Indo-Chine française",
+    "publisher": "Albert Favre, 1900. Université Bordeaux Montaigne, collection 1886.",
+    "url": "https://1886.u-bordeaux-montaigne.fr/s/1886/item/218885",
+    "locator": "Population figures in the geographic legends; 10 October 1900 is the map date.",
+    "rights": "Selected numerical facts and bibliographic references. No facsimile redistributed."
+  },
+  {
+    "id": "indochina_doumer_report_1902",
+    "title": "Situation de l’Indo-Chine de 1897 à 1901",
+    "publisher": "Gouvernement général de l’Indochine, Paul Doumer, Hanoi, 1902. Université Côte d’Azur, Humazur.",
+    "url": "https://humazur.univ-cotedazur.fr/s/humazur/item/1592",
+    "locator": "Printed pp. 449 and 459; Laos administrative report and Cochinchina annual statistical return.",
+    "rights": "Selected numerical facts and bibliographic references. No facsimile redistributed."
+  },
+  {
+    "id": "cochinchina_comite_1902",
+    "title": "Bulletin du Comité de l’Asie française, no. 14, mai 1902",
+    "publisher": "Comité de l’Asie française, Paris",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/2/25/Bulletin_du_Comit%C3%A9_de_l%27Asie_fran%C3%A7aise%2C_num%C3%A9ro_14%2C_mai_1902.pdf",
+    "locator": "Printed p. 221, Population de la Cochinchine; 1899 estimate and first enumeration on 27 December 1901.",
+    "rights": "Selected numerical facts and bibliographic references. No facsimile redistributed."
+  }
+]

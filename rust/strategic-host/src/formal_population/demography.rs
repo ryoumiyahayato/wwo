@@ -1,5 +1,8 @@
 use super::{
-    needs::{adult_water_references, published_energy_reference, AgeYears, QuantityRange, Requirement},
+    needs::{
+        adult_water_references, published_efsa_water_reference, published_energy_reference, AgeYears,
+        NeedSource, QuantityRange, Requirement,
+    },
     CohortBirthYears, CohortDefinition, CohortId, CohortProvenance, CohortSex, Population,
 };
 use crate::{formal_clock::GameClock, formal_save::invalid};
@@ -182,6 +185,7 @@ pub struct PopulationStructure<'a> {
     pub cohorts: Vec<ResidentCohort<'a>>,
     pub published_energy_reference: EnergyReferenceCoverage,
     pub published_adult_water_references: AdultWaterReferenceCoverage,
+    pub published_efsa_water_reference: EfsaWaterReferenceCoverage,
 }
 
 #[derive(Default, Serialize)]
@@ -197,6 +201,14 @@ pub struct AdultWaterReferenceCoverage {
     pub residents_outside_reference: u64,
     pub temperate_sedentary_litres_per_day: Option<QuantityRange>,
     pub warm_moderate_work_litres_per_day: Option<QuantityRange>,
+}
+
+#[derive(Serialize)]
+pub struct EfsaWaterReferenceCoverage {
+    pub source: NeedSource,
+    pub people_with_reference: u64,
+    pub people_without_reference: u64,
+    pub moderate_environment_pal_1_6_total_ingested_litres_per_day: Option<QuantityRange>,
 }
 
 fn add_group_requirement(total: &mut Option<QuantityRange>, range: QuantityRange, members: u64) {
@@ -317,6 +329,12 @@ impl Population {
             cohorts: Vec::new(),
             published_energy_reference: EnergyReferenceCoverage::default(),
             published_adult_water_references: AdultWaterReferenceCoverage::default(),
+            published_efsa_water_reference: EfsaWaterReferenceCoverage {
+                source: NeedSource::EfsaWater2010,
+                people_with_reference: 0,
+                people_without_reference: 0,
+                moderate_environment_pal_1_6_total_ingested_litres_per_day: None,
+            },
         };
         for id in self.pools.keys().filter(|id| {
             unit.is_none_or(|unit| id.as_str() == unit || self.parent_unit(id) == Some(unit))
@@ -347,6 +365,17 @@ impl Population {
                     add_group_requirement(&mut water.warm_moderate_work_litres_per_day, warm_work, members);
                     water.adults_with_reference += members;
                 }
+                if let Requirement::Known { range, .. } =
+                    published_efsa_water_reference(age_years, definition.sex)
+                {
+                    let water = &mut summary.published_efsa_water_reference;
+                    add_group_requirement(
+                        &mut water.moderate_environment_pal_1_6_total_ingested_litres_per_day,
+                        range,
+                        members,
+                    );
+                    water.people_with_reference += members;
+                }
                 summary.cohorts.push(ResidentCohort {
                     unit_id: id,
                     id: cohort,
@@ -362,6 +391,8 @@ impl Population {
             population_total - summary.published_energy_reference.people_with_reference;
         summary.published_adult_water_references.residents_outside_reference =
             population_total - summary.published_adult_water_references.adults_with_reference;
+        summary.published_efsa_water_reference.people_without_reference =
+            population_total - summary.published_efsa_water_reference.people_with_reference;
         Some(summary)
     }
 }
