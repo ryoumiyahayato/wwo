@@ -448,7 +448,14 @@ impl Context<'_> {
         }).take(4) {
             let name = self.world.macro_economy().commodity_info(&lot.good)
                 .map_or(lot.good.as_str(), |(name, _, _)| name);
-            detail.link(format!("{} #{} · {name}", self.say("货批", "Freight lot"), lot.id),
+            let state = match &lot.state {
+                FreightState::Purchased => self.say("待发运", "Awaiting dispatch"),
+                FreightState::InTransit { .. } => self.say("在途", "In transit"),
+                FreightState::Interrupted { .. } => self.say("中断", "Interrupted"),
+                FreightState::Delivered { .. } => self.say("已到达", "Delivered"),
+                FreightState::Sold { .. } => self.say("已售出", "Sold"),
+            };
+            detail.link(format!("{} #{} · {name} · {state}", self.say("货批", "Freight lot"), lot.id),
                 Link::Freight(lot.id));
         }
     }

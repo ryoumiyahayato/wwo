@@ -606,7 +606,7 @@ impl TransportScene {
                 TransportMode::Shipping => highlight,
                 _ => false,
             };
-            if named_rail && ((!highlight && status.is_none()) || camera.mpp > 1200.) {
+            if named_rail && camera.mpp > 1200. {
                 continue;
             }
             let (mut width, mut ink) = match mode {
@@ -614,7 +614,7 @@ impl TransportScene {
                 Mode::Political => (1.1, status.map_or([177, 202, 204, 140], |c| with_alpha(c, 180))),
                 Mode::Economic => (1.3, status.map_or([161, 179, 175, 130], |c| with_alpha(c, 175))),
                 Mode::Military => {
-                    if schematic && !military_schematic || !schematic && edge.prototype_only && !highlight { continue; }
+                    if schematic && !military_schematic { continue; }
                     let width = if military_schematic { 1.35 } else { capacity_radius(availability.capacity_units) * 0.52 };
                     (width, status.unwrap_or([181, 196, 143, 218]))
                 }
@@ -672,7 +672,8 @@ impl TransportScene {
                             highlighted_terminal |= highlighted(id);
                             let physical_relation = evidence.layer != NetworkLayer::Domestic;
                             has_direct_link |= physical_relation;
-                            if !physical_relation || mode == Mode::Military && edge.prototype_only {
+                            if !physical_relation || mode == Mode::Military && edge.prototype_only
+                                && !current.clone().any(|region| region.routes.contains_key(id)) {
                                 continue;
                             }
                             water |= matches!(edge.mode, TransportMode::Shipping | TransportMode::InlandWaterway);
@@ -688,7 +689,7 @@ impl TransportScene {
                                     status = Some(RESTRICTED);
                                 }
                             }
-                            has_civil_capacity |= !edge.prototype_only;
+                            has_civil_capacity = true;
                         }
                         if !connected && !highlighted_terminal {
                             continue;
