@@ -103,10 +103,12 @@ impl OpeningDemography {
         if manifest.version != 1 {
             return Err(invalid("unsupported historical opening demography"));
         }
-        let mut units = BTreeSet::new();
+        let mut pools = BTreeSet::new();
         for group in &manifest.groups {
             let unit = &group.unit_id;
-            if !units.insert(unit)
+            let covered = opening.statistical_aggregates.get(unit)
+                .map_or(std::slice::from_ref(unit), |scope| scope.members.as_slice());
+            if covered.iter().any(|pool| !pools.insert(pool))
                 || opening.estimate(unit).map(|row| row.population_value) != Some(group.opening_total)
                 || opening.partitions.values().any(|part| part.parent == *unit)
                 || [&group.source_id, &group.observed_unit_id, &group.observed_date,
@@ -278,7 +280,13 @@ impl Population {
     pub(crate) fn seed_opening_demography(&mut self) -> io::Result<()> {
         let Some(opening) = self.opening.clone() else { return Ok(()); };
         for group in &opening.demography.groups {
-            let available = self.unclassified(&group.unit_id).ok_or_else(|| invalid("missing demographic resident pool"))?;
+            let pools = opening.statistical_aggregates.get(&group.unit_id)
+                .map_or(std::slice::from_ref(&group.unit_id), |scope| scope.members.as_slice());
+            let mut pool_capacity = pools.iter().map(|unit| {
+                let capacity = self.unclassified(unit).ok_or_else(|| invalid("missing demographic resident pool"))?;
+                Ok((unit.as_str(), capacity))
+            }).collect::<io::Result<Vec<_>>>()?;
+            let available = pool_capacity.iter().map(|(_, count)| count).sum::<u64>();
             let denominator = u128::from(group.observed_total);
             let mut cells = Vec::new();
             for (index, band) in group.bands.iter().enumerate() {
@@ -291,6 +299,7 @@ impl Population {
             }
             let remaining = available - cells.iter().map(|cell| cell.5).sum::<u64>();
             cells.sort_unstable_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.cmp(&b.1)));
+            let mut capacity = available;
             for (rank, (_, id, index, sex, observed, rounded)) in cells.into_iter().enumerate() {
                 let members = rounded + u64::from((rank as u64) < remaining);
                 if members == 0 { continue; }
@@ -302,7 +311,21 @@ impl Population {
                 let definition = CohortDefinition { provenance: CohortProvenance::ModelAllocation, sex: Some(sex), birth_years };
                 self.cohort_definitions.insert(id.clone(), definition);
                 self.cohort_sources.insert(id.clone(), SourceCell { group: Arc::clone(group), band_index: index, observed_members: observed });
-                self.add_cohort_members(&group.unit_id, &id, members);
+                // Allocate each already-rounded cell across its remaining pool capacity.
+                // Rounding cumulative shares preserves both cell totals and pool totals.
+                let mut prefix = 0;
+                let mut allocated = 0;
+                for (unit, room) in &mut pool_capacity {
+                    prefix += u128::from(*room);
+                    let through = (prefix * u128::from(members) / u128::from(capacity)) as u64;
+                    let assigned = through - allocated;
+                    if assigned > 0 {
+                        self.add_cohort_members(unit, &id, assigned);
+                        *room -= assigned;
+                    }
+                    allocated = through;
+                }
+                capacity -= members;
             }
         }
         Ok(())
@@ -338,7 +361,7 @@ impl Population {
             residents_with_cohort_age_and_sex: 0,
             named_residents_with_cohort_sex: self.named_cohorts.keys().filter(|person| {
                 self.sex_for_person(person).is_some() && self.unit_for_person(person).is_some_and(|pool| {
-                    unit.is_none_or(|unit| pool == unit || self.parent_unit(pool) == Some(unit))
+                    unit.is_none_or(|unit| self.pool_in_scope(pool, unit))
                 })
             }).count() as u64,
             cohorts: Vec::new(),
@@ -362,7 +385,7 @@ impl Population {
             ),
         };
         for id in self.pools.keys().filter(|id| {
-            unit.is_none_or(|unit| id.as_str() == unit || self.parent_unit(id) == Some(unit))
+            unit.is_none_or(|unit| self.pool_in_scope(id, unit))
         }) {
             summary.named_residents += self.pool_named_counts.get(id).copied().unwrap_or(0);
             summary.unclassified_residents += self.unclassified(id).expect("known residence pool");

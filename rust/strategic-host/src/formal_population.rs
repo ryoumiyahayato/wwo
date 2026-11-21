@@ -162,12 +162,35 @@ impl Population {
 
     pub fn population_total(&self, unit: &str) -> Option<u64> {
         self.totals.get(unit).or_else(|| self.standalone.get(unit)).or_else(|| self.pools.get(unit)).copied()
+            .or_else(|| Some(self.opening.as_ref()?.statistical_aggregates.get(unit)?.members.iter()
+                .map(|member| self.pools[member]).sum()))
     }
 
     pub fn partitions<'a>(&'a self, parent: &'a str) -> impl Iterator<Item = (&'a str, &'a str, u64)> + 'a {
         self.opening.iter().flat_map(|opening| &opening.partitions).filter_map(move |(id, partition)| {
             (partition.parent == parent).then(|| (id.as_str(), partition.name.as_str(), self.pools[id]))
         })
+    }
+
+    /// Immediate geographical components, including nonexclusive subtotals.
+    pub fn statistical_children<'a>(&'a self, parent: &'a str) -> impl Iterator<Item = (&'a str, &'a str, u64)> + 'a {
+        let aggregates = self.opening.iter().flat_map(|opening| &opening.statistical_aggregates)
+            .filter(move |(_, scope)| scope.parent == parent)
+            .map(|(id, scope)| (id.as_str(), scope.name.as_str(), scope.members.iter().map(|member| self.pools[member]).sum()));
+        let leaves = self.opening.iter().flat_map(|opening| &opening.partitions)
+            .filter(move |(_, part)| part.statistical_parent.as_deref().unwrap_or(&part.parent) == parent)
+            .map(|(id, part)| (id.as_str(), part.name.as_str(), self.pools[id]));
+        aggregates.chain(leaves)
+    }
+
+    fn statistical_parent(&self, unit: &str) -> Option<&str> {
+        let opening = self.opening.as_ref()?;
+        opening.partitions.get(unit).and_then(|part| part.statistical_parent.as_deref())
+            .or_else(|| opening.statistical_aggregates.get(unit).map(|scope| scope.parent.as_str()))
+    }
+
+    pub(crate) fn pool_in_scope(&self, pool: &str, scope: &str) -> bool {
+        pool == scope || self.parent_unit(pool) == Some(scope) || self.statistical_parent(pool) == Some(scope)
     }
 
     /// Residents directly assigned to this unit, excluding all nested shares.
@@ -249,8 +272,13 @@ impl Population {
     /// All residents without a named claim, including separately evidenced cohorts.
     pub fn background(&self, unit: &str) -> Option<u64> {
         self.population_total(unit).map(|total| {
-            let counts = if self.parent_unit(unit) == Some(unit) { &self.named_counts } else { &self.pool_named_counts };
-            total - counts.get(unit).copied().unwrap_or(0)
+            let named = if let Some(scope) = self.opening.as_ref().and_then(|opening| opening.statistical_aggregates.get(unit)) {
+                scope.members.iter().map(|member| self.pool_named_counts.get(member).copied().unwrap_or(0)).sum()
+            } else {
+                let counts = if self.parent_unit(unit) == Some(unit) { &self.named_counts } else { &self.pool_named_counts };
+                counts.get(unit).copied().unwrap_or(0)
+            };
+            total - named
         })
     }
 

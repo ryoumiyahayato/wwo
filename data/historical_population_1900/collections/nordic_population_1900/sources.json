@@ -1,0 +1,33 @@
+[
+  {
+    "id": "se_scb_population_tab5890",
+    "title": "Population by age and sex. Year 1860–",
+    "publisher": "Statistics Sweden (SCB)",
+    "url": "https://www.statistikdatabasen.scb.se/pxweb/sv/ssd/START_BE_BE0101_BE0101A/BefolkningR1860N/",
+    "locator": "PxWeb v2 TAB5890, population, 1899 and 1900, males and females, all age codes.",
+    "rights": "CC0. Source Statistics Sweden. age_sex.csv selects the populated historic age brackets and sums the two published sexes.",
+    "rights_url": "https://www.scb.se/en/services/open-data-api/",
+    "raw_path": "scb_tab5890.json",
+    "table_urls": [
+      "https://statistikdatabasen.scb.se/api/v2/tables/TAB5890",
+      "https://statistikdatabasen.scb.se/api/v2/tables/TAB5890/data?lang=en&valueCodes%5BTid%5D=1899,1900&valueCodes%5BAlder%5D=*&valueCodes%5BKon%5D=1,2&valueCodes%5BContentsCode%5D=0000053A&outputFormat=json-stat2"
+    ],
+    "extract": "Use age codes 0–89 as single years, historical code 90 as 90 or older per the table note, and tot for the sex totals. Codes above 90 are not published separate ages for 1899 and 1900. The reported dates are December 31."
+  },
+  {
+    "id": "no_ssb_population_10211",
+    "title": "Population, by sex and age (1735–)",
+    "publisher": "Statistics Norway (SSB)",
+    "url": "https://www.ssb.no/en/statbank1/table/10211",
+    "locator": "StatBank 10211, Population 1 January, 1900 and 1901. Statistical Yearbook of Norway 2010, table 48, gives the totals by sex.",
+    "rights": "CC BY 4.0. Source Statistics Norway. age_sex.csv pivots the three published sex codes.",
+    "rights_url": "https://www.ssb.no/en/api",
+    "raw_path": "ssb_10211.json",
+    "table_urls": [
+      "https://data.ssb.no/api/v0/en/table/10211",
+      "https://www.ssb.no/a/histstat/in/in_7906.pdf",
+      "https://www.ssb.no/historisk-statistikk/_/attachment/inline/3fbeb79f-7cc7-48ae-adaa-eae2f031a9b7%3A88604a4c72785c93d6b08f5d20966e1d63a99640/2010.pdf"
+    ],
+    "extract": "POST a JSON query selecting (item filter) Alder codes 000–104 and 105+, Kjonn codes 0, 1 and 2, ContentsCode Personer, and Tid 1900 and 1901. Response format json. Published ages sum to the independent January 1 sex totals. Statistics Norway reconstructed the 1846–1900 age and sex series from census and demographic reports."
+  }
+]

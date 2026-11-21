@@ -388,9 +388,9 @@
     "research_candidates": [
       "ft_belgium"
     ],
-    "opening_replacement": 6713135,
+    "opening_replacement": 6631330,
     "legacy_unlocated_balance": null,
-    "replacement_minus_legacy": 13135,
+    "replacement_minus_legacy": -68670,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
@@ -412,9 +412,9 @@
       "ft_norway",
       "ft_sweden"
     ],
-    "opening_replacement": 7315799,
+    "opening_replacement": 7315373,
     "legacy_unlocated_balance": null,
-    "replacement_minus_legacy": -84201,
+    "replacement_minus_legacy": -84627,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },

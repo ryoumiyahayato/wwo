@@ -1,0 +1,21 @@
+[
+  {
+    "id": "nl_cbs_1899_occupation",
+    "title": "Beroepstelling 1899",
+    "publisher": "Statistics Netherlands (CBS) and Netherlands Institute for Scientific Information Services (NIWI)",
+    "url": "https://www.cbs.nl/nl-nl/cijfers/detail/7381bt",
+    "rights": "CC BY 4.0. Source: CBS, NIWI.",
+    "rights_url": "https://data.overheid.nl/dataset/3873-beroepstelling-1899",
+    "observed_date": "1899-12-31",
+    "reference_time": "Midnight at the start of 1900-01-01.",
+    "scope": "National and provincial 1899 census tabulations. Provincial totals cover all municipalities, including those with 5,000 or fewer inhabitants represented only by a provincial aggregate. Each observation is the sex-specific or combined all-age count.",
+    "extraction": {
+      "file": "occupation.csv",
+      "data_url": "https://opendata.cbs.nl/ODataApi/OData/7381bt/TypedDataSet",
+      "occupation_metadata_url": "https://opendata.cbs.nl/ODataApi/OData/7381bt/Beroepen",
+      "geography_metadata_url": "https://opendata.cbs.nl/ODataApi/OData/7381bt/Gebieden",
+      "filter": "Gebieden NL1000 and the 11 PVxx00 province totals. Beroepen 49990000S, 50980000S, 39980000S, 40980000S, 41980000S, 42980000S, 43980000S, 44980000S, 46980000S, 47980000S and 48980000S. All three Geslacht keys.",
+      "method": "Export the 396 filtered rows in source order as UTF-8 CSV. Ongehuwd_1 and Gehuwd_2 are the two all-age cells used for a count. OnbekendeBurgerlijkeStaat_3 is a footnote subset already included in Ongehuwd_1. Pagina_33 records the original volume and page. Retain population and principal occupation controls, pensioners, unknown occupation and without-occupation rows as observation context. Groningen and North Holland have inconsistent printed combined population controls. The runtime uses the independent matched general-census population and the six occupational group counts reproduced by the separate-sex series. Use the separate-sex sum for South Holland trade and transport, where the published combined count is one higher. The inconsistent national-minus-province remainder is unassigned."
+    }
+  }
+]

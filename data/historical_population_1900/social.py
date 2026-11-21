@@ -85,6 +85,7 @@ def russian_structure(pools):
         row = json.loads(line)
         if row["source_id"] == "russia_first_census" and row.get("parent_id") == "ru_census_1897_ex_finland":
             provinces[province_name(row["name"])] = row
+    yield from russian_literacy(pools, {row["unit_id"]: row for row in provinces.values()})
     blocks = defaultdict(list)
     with (path / "structure.csv").open(encoding="utf8", newline="") as stream:
         for row in csv.DictReader(stream):
@@ -140,6 +141,33 @@ def russian_structure(pools):
             observed_counts={"Census cities": city_count, "Outside census cities": other_count},
             definition="Persons in census cities and persons outside those cities, under the 1897 administrative classification.",
         )
+
+
+def russian_literacy(pools, provinces):
+    path = COLLECTIONS / "russia_literacy_1897" / "literacy.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            province = provinces[row["unit_id"]]
+            pool_id = province.get("wwo_id") or province["unit_id"]
+            if pool_id not in pools:
+                continue
+            total_by_sex = {sex: int(row[f"population_{sex}"]) for sex in ("male", "female")}
+            if total_by_sex != province["sex"]:
+                raise ValueError(f"{pool_id}: the literacy and provincial census totals differ")
+            literate_by_sex = {sex: int(row[f"literate_{sex}"]) for sex in total_by_sex}
+            if any(not 0 <= literate_by_sex[sex] <= total_by_sex[sex] for sex in total_by_sex):
+                raise ValueError(f"{pool_id}: a literacy count is outside its census total")
+            total = sum(total_by_sex.values())
+            literate = sum(literate_by_sex.values())
+            yield pool_id, "literacy", distribution(
+                pools[pool_id]["population_value"], classification="russia_1897_reported_reading",
+                source=row["source_id"], date=RUSSIA_DATE, observed_unit=province["unit_id"],
+                scope=province["name"], locator=row["locator"], total=total,
+                observed_counts={"Able to read": literate, "Not recorded as able to read": total - literate},
+                unknown=0,
+                definition=("All-age reading ability in the 1897 census, including children and persons of unknown age. "
+                            "The table enumerates readers within the population and gives no separate count of unanswered literacy questions."),
+            )
 
 
 def russian_cells(table, rows):
@@ -320,6 +348,56 @@ def netherlands_structure(pools):
         )
 
 
+def netherlands_occupation(pools):
+    labels = {
+        "39980000S": "Industrial occupations",
+        "40980000S": "Agriculture",
+        "41980000S": "Fishing and hunting",
+        "42980000S": "Trade and transport",
+        "43980000S": "Other occupations",
+        "44980000S": "Casual labourers",
+    }
+    rows = defaultdict(dict)
+    with (COLLECTIONS / "netherlands_occupation_1899" / "occupation.csv").open(encoding="utf8", newline="") as source:
+        for row in csv.DictReader(source):
+            code = row["Beroepen"]
+            if code in labels:
+                rows[row["Gebieden"], code][row["Geslacht"]] = row
+
+    for pool_id, pool in pools.items():
+        if not pool_id.startswith("nl1899_pv"):
+            continue
+        area = pool_id.removeprefix("nl1899_").upper()
+        counts = {}
+        pages = set()
+        for code, label in labels.items():
+            entries = rows[area, code]
+            observed = {
+                sex: int(entry["Ongehuwd_1"] or 0) + int(entry["Gehuwd_2"] or 0)
+                for sex, entry in entries.items()
+            }
+            both = observed["GSLTOT"]
+            sex_sum = observed["GSLMAN"] + observed["GSLVRW"]
+            if both != sex_sum and (area, code, both - sex_sum) != ("PV2800", "42980000S", 1):
+                raise ValueError(f"{pool_id}: inconsistent CBS occupation counts for {code}")
+            counts[label] = sex_sum
+            pages.update(entry["Pagina_33"] for entry in entries.values())
+        total = pool["population_value"]
+        marginal = distribution(
+            total, classification="netherlands_1899_principal_occupation_groups", source="nl_cbs_1899_occupation",
+            date="1900-01-01", observed_unit=pool_id, scope=pool["name"],
+            locator=f"CBS Table 7381bt, printed pages {', '.join(sorted(pages))}",
+            total=total, observed_counts=counts, unknown=total - sum(counts.values()),
+            definition=("People reported under the six mutually exclusive occupation groups covering 1899 classes 1–33. "
+                        "Pensioners, people without an occupation, and occupation not reported are in the unassigned remainder."),
+            method=("Use each province's published occupation counts at the midnight opening. The denominator is the "
+                    "matching general census province. Use the sum of the separately reported sexes for South Holland "
+                    "trade and transport, where the combined cell is one higher. That person remains unassigned."),
+        )
+        marginal["source_ids"].append("nl_cbs_census_1899_age_marital")
+        yield pool_id, "occupation", marginal
+
+
 def opening_social(opening_groups):
     """Return independent person distributions on the opening's nonoverlapping leaf accounts."""
     pools = {
@@ -328,7 +406,8 @@ def opening_social(opening_groups):
     }
     regions = {}
     marginals = chain(russian_structure(pools), india_structure(pools), india_occupation(pools), canada_structure(pools),
-                      united_states_structure(pools, distribution), netherlands_structure(pools))
+                      united_states_structure(pools, distribution), netherlands_structure(pools),
+                      netherlands_occupation(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

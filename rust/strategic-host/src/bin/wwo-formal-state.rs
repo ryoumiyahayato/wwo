@@ -133,7 +133,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }));
                 return Ok(());
             };
-            let partitions = population.partitions(unit).map(|(id, name, count)| {
+            let partitions = population.statistical_children(unit).map(|(id, name, count)| {
                 json!({"unit_id": id, "name": name, "population_total": count})
             }).collect::<Vec<_>>();
             let admitted = population.admitted_opening(unit);

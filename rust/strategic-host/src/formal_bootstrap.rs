@@ -1182,7 +1182,7 @@ impl InitialWorld {
         let range = u32::from(youngest)..=u32::from(oldest);
         for person in self.identities.keys() {
             let Some(pool) = self.population.unit_for_person(person) else { continue; };
-            if unit.is_some_and(|unit| pool != unit && self.population.parent_unit(pool) != Some(unit)) {
+            if unit.is_some_and(|unit| !self.population.pool_in_scope(pool, unit)) {
                 continue;
             }
             let serving = self.service.named_target(person).is_some();
@@ -2226,6 +2226,42 @@ mod tests {
         let origin = origin.as_str();
         let destination = "country_fra";
         let clock = world.clock();
+        let orne = "administrative_region:france_orne";
+        let argentan = "administrative_region:france_arrondissement_612";
+        let domfront = "administrative_region:france_arrondissement_613";
+        assert_eq!(world.population().resident_pool(orne), None);
+        assert_eq!(world.population().population_total(destination), Some(38_852_684));
+        let division = world.inspect_population(orne).unwrap();
+        assert_eq!(division.population_total, Some(329_951));
+        assert_eq!(division.children.len(), 4);
+        assert_eq!(division.children.iter().map(|child| child.population_total).sum::<u64>(), 329_951);
+        let county = world.inspect_population(argentan).unwrap();
+        assert_eq!(county.population_total, Some(76_124));
+        assert_eq!(county.parent_id, Some(orne));
+        assert_eq!(world.residence_unit_at("place:rouen"), Some("administrative_region:france_arrondissement_763"));
+        assert_eq!(world.market_unit_for_population(argentan), Some(destination));
+        let (french_cohort, _, _) = world.population().cohorts_in(argentan).next().unwrap();
+        let french_cohort = french_cohort.clone();
+        world.population.transfer_cohort(argentan, domfront, &french_cohort, 1, 0).unwrap();
+        let division = world.inspect_population(orne).unwrap();
+        assert_eq!(division.population_total, Some(329_951));
+        assert_eq!(division.recent_changes[0].unit_id, Some(argentan));
+        let france_structure = division.structure.unwrap();
+        assert_eq!(france_structure.cohort_residents, 329_951);
+        let orne_with_age_and_sex = france_structure.residents_with_cohort_age_and_sex;
+        for (unit, total) in [("ft_sweden", 5_097_402), ("ft_norway", 2_217_971)] {
+            let structure = world.population().structure(Some(unit), clock).unwrap();
+            assert_eq!(structure.population_total, total);
+            assert_eq!(structure.residents_with_cohort_age_and_sex + structure.named_residents, total);
+        }
+        let belgium = world.inspect_population("kingdom_of_belgium").unwrap();
+        assert_eq!(belgium.population_total, Some(6_631_330));
+        assert_eq!(belgium.children.len(), 9);
+        assert_eq!(belgium.children.iter().map(|child| child.population_total).sum::<u64>(), 6_631_330);
+
+        let swiss = world.population().structure(Some("swiss_confederation"), clock).unwrap();
+        assert_eq!(swiss.population_total, 3_285_131);
+        assert_eq!(swiss.residents_with_cohort_age_and_sex + swiss.named_residents, 3_285_131);
         let netherlands = "kingdom_of_netherlands";
         assert_eq!(world.population().population_total(netherlands), Some(5_104_137));
         assert_eq!(world.population().resident_pool(netherlands), Some(158));
@@ -2235,6 +2271,7 @@ mod tests {
         assert_eq!(dutch_structure.residents_with_cohort_age_and_sex, 5_103_872);
         let dutch_social = world.population().social_distribution(Some(netherlands)).unwrap();
         assert_eq!(dutch_social.dimensions["religion"].assigned_residents, 5_103_887);
+        assert_eq!(dutch_social.dimensions["occupation"].assigned_residents, 1_923_577);
         assert_eq!(dutch_social.dimensions["marital_status"].assigned_residents, 5_103_913);
         for (unit, assigned) in [
             ("raj_central_india_agency", 173_036),
@@ -2471,6 +2508,17 @@ mod tests {
         assert_eq!(restored.population().global_total(), 1_465_392_189);
         assert_eq!(restored.population().population_total(netherlands), Some(5_141_915));
         assert_eq!(restored.population().population_total("nl1899_pv2700"), None);
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(12)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        assert_eq!(restored.population().global_total(), 1_465_354_411);
+        assert_eq!(restored.population().resident_pool(orne), Some(329_951));
+        assert_eq!(restored.population().population_total(argentan), None);
+        assert_eq!(restored.residence_unit_at("place:rouen"), Some("administrative_region:france_seine_inferieure"));
+        let old_ages = restored.population().structure(Some(orne), clock).unwrap();
+        assert_eq!(old_ages.residents_with_cohort_age_and_sex, orne_with_age_and_sex);
         assert_eq!(restored.snapshot(), old_saved);
     }
 

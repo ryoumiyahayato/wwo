@@ -129,9 +129,9 @@
         "sweden_norway_union",
         "swiss_confederation"
       ],
-      "production_people": 408784805,
-      "production_pct_of_regional_research_estimate": 97.528,
-      "people_with_opening_subdivision": 337511272,
+      "production_people": 408702574,
+      "production_pct_of_regional_research_estimate": 97.509,
+      "people_with_opening_subdivision": 344142176,
       "research_only_units": 9,
       "research_only_people": 10103353
     },
@@ -2409,9 +2409,9 @@
       "candidate_polity_ids": [
         "kingdom_of_belgium"
       ],
-      "comparison_id": "kingdom_of_belgium",
-      "opening_disposition": "adopted_research_series",
-      "note": "Post-1839 Belgium, separate from Luxembourg, Netherlands and Congo Free State."
+      "comparison_id": "belgium",
+      "opening_disposition": "comparable_extent",
+      "note": "Both cover Belgium on its 1900 boundary, separate from the Netherlands, the Grand Duchy of Luxembourg and Congo Free State. The nine-province census series counts usual residents. The research series aims at present population."
     },
     {
       "unit_id": "ft_bulgaria",
@@ -2709,7 +2709,7 @@
       ],
       "comparison_id": "sweden_norway_union",
       "opening_disposition": "adopted_research_series",
-      "note": "Norway, under the Swedish crown; Statistics Norway 1968 table 20. / Sweden alone; Lund historical series explicitly excludes both Norway and Finland."
+      "note": "Sweden and Norway, separately tabulated within their political union."
     },
     {
       "unit_id": "ft_ottoman_balkans",
@@ -2835,7 +2835,7 @@
       ],
       "comparison_id": "sweden_norway_union",
       "opening_disposition": "adopted_research_series",
-      "note": "Norway, under the Swedish crown; Statistics Norway 1968 table 20. / Sweden alone; Lund historical series explicitly excludes both Norway and Finland."
+      "note": "Sweden and Norway, separately tabulated within their political union."
     },
     {
       "unit_id": "ft_switzerland",
@@ -3061,6 +3061,24 @@
       "documented_opening_people": 305255,
       "opening_people_including_retained_balances": 305255,
       "research_minus_documented": -85390
+    },
+    {
+      "comparison_id": "belgium",
+      "opening_root_ids": [
+        "kingdom_of_belgium"
+      ],
+      "research_unit_ids": [
+        "ft_belgium"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "Both cover Belgium on its 1900 boundary, separate from the Netherlands, the Grand Duchy of Luxembourg and Congo Free State. The nine-province census series counts usual residents. The research series aims at present population.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 6713135,
+      "documented_opening_people": 6631330,
+      "opening_people_including_retained_balances": 6631330,
+      "research_minus_documented": 81805
     },
     {
       "comparison_id": "brazil",
@@ -3785,24 +3803,6 @@
       "research_minus_documented": 0
     },
     {
-      "comparison_id": "kingdom_of_belgium",
-      "opening_root_ids": [
-        "kingdom_of_belgium"
-      ],
-      "research_unit_ids": [
-        "ft_belgium"
-      ],
-      "scope_relation": "adopted_research_series",
-      "note": "Post-1839 Belgium, separate from Luxembourg, Netherlands and Congo Free State.",
-      "research_regions": [
-        "Europe"
-      ],
-      "research_people": 6713135,
-      "documented_opening_people": 6713135,
-      "opening_people_including_retained_balances": 6713135,
-      "research_minus_documented": 0
-    },
-    {
       "comparison_id": "kingdom_of_italy",
       "opening_root_ids": [
         "kingdom_of_italy"
@@ -3957,14 +3957,14 @@
         "ft_sweden"
       ],
       "scope_relation": "adopted_research_series",
-      "note": "Norway, under the Swedish crown; Statistics Norway 1968 table 20. / Sweden alone; Lund historical series explicitly excludes both Norway and Finland.",
+      "note": "Sweden and Norway, separately tabulated within their political union.",
       "research_regions": [
         "Europe"
       ],
       "research_people": 7315799,
-      "documented_opening_people": 7315799,
-      "opening_people_including_retained_balances": 7315799,
-      "research_minus_documented": 0
+      "documented_opening_people": 7315373,
+      "opening_people_including_retained_balances": 7315373,
+      "research_minus_documented": 426
     },
     {
       "comparison_id": "uruguay_1900",
@@ -4044,11 +4044,11 @@
       },
       {
         "unit_id": "kingdom_of_belgium",
-        "people": 13135
+        "people": -68670
       },
       {
         "unit_id": "sweden_norway_union",
-        "people": -84201
+        "people": -84627
       },
       {
         "unit_id": "kingdom_of_portugal",
@@ -4111,7 +4111,7 @@
         "people": -8679
       }
     ],
-    "net_replacements": -6998364,
+    "net_replacements": -7080595,
     "added_opening_accounts": [
       {
         "unit_id": "beylicate_of_tunis",
@@ -4211,7 +4211,7 @@
       }
     ],
     "net_additions": 61332775,
-    "authoritative_opening_population": 1465354411,
+    "authoritative_opening_population": 1465272180,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4251,24 +4251,24 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1329370203,
+    "documented_opening_population": 1329287972,
     "untouched_legacy_population": 101880000,
     "retained_unlocated_population": 34104208,
-    "authoritative_opening_population": 1465354411,
-    "published_minus_documented_opening": 265704045,
+    "authoritative_opening_population": 1465272180,
+    "published_minus_documented_opening": 265786276,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 224844706,
       "comparisons_by_scope": {
-        "comparable_extent": 1981616,
+        "comparable_extent": 2063421,
         "scope_unconfirmed": 86844,
         "partial_extent": 38790877,
-        "adopted_research_series": 0
+        "adopted_research_series": 426
       },
       "opening_without_benchmark_link": 0,
       "untouched_legacy_controls": -101880000,
       "unlocated_balances_under_retained_controls": -34104208
     },
-    "published_minus_authoritative_opening": 129719837
+    "published_minus_authoritative_opening": 129802068
   }
 }

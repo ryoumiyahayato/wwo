@@ -6,6 +6,7 @@
     "algeria_population": 4,
     "americas": 657,
     "austria_hungary": 54,
+    "belgium_provinces_1900": 20,
     "bosnia_herzegovina_population": 4,
     "britain": 206,
     "cabo_verde": 25,
@@ -29,6 +30,7 @@
     "morocco_population": 5,
     "netherlands_census_1899": 12,
     "nigeria_lagos_population": 3,
+    "nordic_population_1900": 4,
     "philippines": 51,
     "polar_presence": 1,
     "romania": 6,
@@ -42,7 +44,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 167,
+  "cited_sources": 173,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -51,14 +53,14 @@
   "documented_people_under_legacy_controls": 669895792,
   "replaced_legacy_roots": 30,
   "new_roots": 24,
-  "production_people": 1329370203,
-  "production_people_pct_world_estimate": 83.342,
-  "population_outside_evidence_opening_estimate": 265704045,
+  "production_people": 1329287972,
+  "production_people_pct_world_estimate": 83.337,
+  "population_outside_evidence_opening_estimate": 265786276,
   "legacy_only_people": 135984208,
-  "authoritative_total_for_new_game": 1465354411,
-  "roots_with_partitions": 22,
-  "disjoint_leaves": 607,
-  "people_in_partitions": 1199155102,
+  "authoritative_total_for_new_game": 1465272180,
+  "roots_with_partitions": 23,
+  "disjoint_leaves": 860,
+  "people_in_partitions": 1205786006,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -73,8 +75,8 @@
       "people": 158
     }
   ],
-  "partitions_with_explicit_places": 24,
-  "people_in_partitions_with_explicit_places": 148434579,
+  "partitions_with_explicit_places": 30,
+  "people_in_partitions_with_explicit_places": 149701927,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
   "political_catalogue_members_of_production_groups": 63,
@@ -92,7 +94,7 @@
     "france_lower_1900_identity.json": {
       "units": 3374,
       "with_linked_observation": 362,
-      "with_opening_partition": 0
+      "with_opening_partition": 321
     },
     "german_administration_1900_identity.json": {
       "units": 230,
@@ -284,15 +286,15 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2332,
+  "source_statistical_units": 2344,
   "opening_by_source_type": {
     "territorial_returns": {
-      "roots": 25,
-      "people": 318361099
+      "roots": 26,
+      "people": 324992429
     },
     "historical_world_reconstruction": {
-      "roots": 29,
-      "people": 341113312
+      "roots": 28,
+      "people": 334399751
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 3,
@@ -309,35 +311,35 @@
   "opening_social_coverage": {
     "household": {
       "assigned_people": 72890961,
-      "unknown_people": 1392463450
+      "unknown_people": 1392381219
     },
     "language": {
       "assigned_people": 132730938,
-      "unknown_people": 1332623473
+      "unknown_people": 1332541242
     },
     "legal_estate": {
       "assigned_people": 132020769,
-      "unknown_people": 1333333642
+      "unknown_people": 1333251411
     },
     "literacy": {
-      "assigned_people": 144491595,
-      "unknown_people": 1320862816
+      "assigned_people": 146724652,
+      "unknown_people": 1318547528
     },
     "marital_status": {
       "assigned_people": 100880474,
-      "unknown_people": 1364473937
+      "unknown_people": 1364391706
     },
     "occupation": {
-      "assigned_people": 33266431,
-      "unknown_people": 1432087980
+      "assigned_people": 35190008,
+      "unknown_people": 1430082172
     },
     "religion": {
       "assigned_people": 238545354,
-      "unknown_people": 1226809057
+      "unknown_people": 1226726826
     },
     "residence": {
       "assigned_people": 309242508,
-      "unknown_people": 1156111903
+      "unknown_people": 1156029672
     }
   },
   "structural_observations_by_source": {
@@ -365,14 +367,17 @@
     "jp_ltes_1899_resident_ages": 82,
     "fi_yearbook_1910_population_ages": 22,
     "nl_cbs_census_1899_age_marital": 1248,
+    "se_scb_population_tab5890": 184,
+    "no_ssb_population_10211": 214,
+    "ch_bfs_census_age_1888_1900": 38,
     "jp_cabinet_population_1898_original": 23,
     "jp_cabinet_local_occupations_1913_tokyo": 8,
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 660717754,
-  "structure_opening_pool_count": 438,
-  "structure_opening_residents_outside_modeled_pools": 804636657,
+  "structure_opening_pool_controls": 671318258,
+  "structure_opening_pool_count": 465,
+  "structure_opening_residents_outside_modeled_pools": 793953922,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -2020,6 +2025,181 @@
       "observed_date": "1901-03-31"
     },
     {
+      "unit_id": "ch_canton_ag",
+      "opening_total": 205513,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_ai",
+      "opening_total": 13452,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_ar",
+      "opening_total": 55192,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_be",
+      "opening_total": 585412,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_bl",
+      "opening_total": 67997,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_bs",
+      "opening_total": 109294,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_fr",
+      "opening_total": 127281,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_ge",
+      "opening_total": 130543,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_gl",
+      "opening_total": 32462,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_gr",
+      "opening_total": 103780,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_lu",
+      "opening_total": 145668,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_ne",
+      "opening_total": 124897,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_nw",
+      "opening_total": 13029,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_ow",
+      "opening_total": 15244,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_sg",
+      "opening_total": 248600,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_sh",
+      "opening_total": 41230,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_so",
+      "opening_total": 99608,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_sz",
+      "opening_total": 54998,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_tg",
+      "opening_total": 112570,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_ti",
+      "opening_total": 137732,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_ur",
+      "opening_total": 19513,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_vd",
+      "opening_total": 278809,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_vs",
+      "opening_total": 113489,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_zg",
+      "opening_total": 24936,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ch_canton_zh",
+      "opening_total": 423882,
+      "observed_unit_id": "swiss_confederation",
+      "observed_total": 3285131,
+      "observed_date": "1900-01-01"
+    },
+    {
       "unit_id": "cshapes_gw_561",
       "opening_total": 2265556,
       "observed_unit_id": "cape_colony",
@@ -2046,6 +2226,20 @@
       "observed_unit_id": "ft_finland",
       "observed_total": 2712562,
       "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "ft_norway",
+      "opening_total": 2217971,
+      "observed_unit_id": "ft_norway",
+      "observed_total": 2217971,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "ft_sweden",
+      "opening_total": 5097402,
+      "observed_unit_id": "ft_sweden",
+      "observed_total": 5097402,
+      "observed_date": "1899-12-31"
     },
     {
       "unit_id": "irish_county_antrim",
@@ -3561,11 +3755,27 @@
       "population": 5104137,
       "age_not_stated": 0,
       "combined_open_age_and_unreported": null
+    },
+    {
+      "panel_id": "switzerland_1888",
+      "unit_id": "swiss_confederation",
+      "date": "1888-12-01",
+      "population": 2917754,
+      "age_not_stated": 0,
+      "combined_open_age_and_unreported": null
+    },
+    {
+      "panel_id": "switzerland_1900",
+      "unit_id": "swiss_confederation",
+      "date": "1900-12-01",
+      "population": 3315443,
+      "age_not_stated": 0,
+      "combined_open_age_and_unreported": null
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 512,
-  "dated_parent_controls_arithmetic_closure": 470,
+  "dated_parent_controls": 514,
+  "dated_parent_controls_arithmetic_closure": 472,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -3694,9 +3904,9 @@
         "sweden_norway_union",
         "swiss_confederation"
       ],
-      "production_people": 408784805,
-      "production_pct_of_regional_research_estimate": 97.528,
-      "people_with_opening_subdivision": 337511272,
+      "production_people": 408702574,
+      "production_pct_of_regional_research_estimate": 97.509,
+      "people_with_opening_subdivision": 344142176,
       "research_only_units": 9,
       "research_only_people": 10103353
     },
@@ -4098,9 +4308,9 @@
       {
         "opening_unit_id": "kingdom_of_belgium",
         "research_region": "Europe",
-        "opening_control": 6713135,
+        "opening_control": 6631330,
         "in_model_pools": 0,
-        "outside_model_pools": 6713135,
+        "outside_model_pools": 6631330,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
       },
@@ -4350,19 +4560,19 @@
       {
         "opening_unit_id": "sweden_norway_union",
         "research_region": "Europe",
-        "opening_control": 7315799,
-        "in_model_pools": 0,
-        "outside_model_pools": 7315799,
-        "modeled_age_and_sex": 0,
+        "opening_control": 7315373,
+        "in_model_pools": 7315373,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 7315373,
         "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "swiss_confederation",
         "research_region": "Europe",
         "opening_control": 3285131,
-        "in_model_pools": 0,
-        "outside_model_pools": 3285131,
-        "modeled_age_and_sex": 0,
+        "in_model_pools": 3285131,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 3285131,
         "modeled_sex_age_unknown": 0
       },
       {
@@ -4409,10 +4619,10 @@
         "modeled_sex_age_unknown": 4346
       },
       "Europe": {
-        "opening_control": 408784805,
-        "in_model_pools": 263172831,
-        "outside_model_pools": 145611974,
-        "modeled_age_and_sex": 239424920,
+        "opening_control": 408702574,
+        "in_model_pools": 273773335,
+        "outside_model_pools": 134929239,
+        "modeled_age_and_sex": 250025424,
         "modeled_sex_age_unknown": 23747911
       },
       "Africa": {
@@ -4438,10 +4648,10 @@
       }
     },
     "world": {
-      "opening_control": 1465354411,
-      "in_model_pools": 660717754,
-      "outside_model_pools": 804636657,
-      "modeled_age_and_sex": 636673068,
+      "opening_control": 1465272180,
+      "in_model_pools": 671318258,
+      "outside_model_pools": 793953922,
+      "modeled_age_and_sex": 647273572,
       "modeled_sex_age_unknown": 24044686
     }
   },
@@ -4452,12 +4662,12 @@
         "pct_of_research_reference": 0.32
       },
       "published_historical_estimates": {
-        "people": 701453166,
-        "pct_of_research_reference": 43.976
+        "people": 694739605,
+        "pct_of_research_reference": 43.555
       },
       "date_models_from_territorial_returns": {
-        "people": 622812900,
-        "pct_of_research_reference": 39.046
+        "people": 629444230,
+        "pct_of_research_reference": 39.462
       },
       "retained_legacy_estimates": {
         "people": 135984208,
@@ -4810,9 +5020,9 @@
       },
       {
         "unit_id": "kingdom_of_belgium",
-        "source_id": "ft_world_v5",
-        "sourced_people": 6713135,
-        "sourced_basis": "published_historical_estimates",
+        "source_id": "belgium_census_provinces_1890_1900",
+        "sourced_people": 6631330,
+        "sourced_basis": "date_models_from_territorial_returns",
         "retained_legacy_people": 0
       },
       {
@@ -5094,8 +5304,8 @@
       },
       {
         "unit_id": "sweden_norway_union",
-        "source_id": "ft_world_v5",
-        "sourced_people": 7315799,
+        "source_id": "se_scb_population_tab5890",
+        "sourced_people": 7315373,
         "sourced_basis": "published_historical_estimates",
         "retained_legacy_people": 0
       },

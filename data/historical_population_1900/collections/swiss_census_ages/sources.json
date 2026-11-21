@@ -1,0 +1,13 @@
+[
+  {
+    "id": "ch_bfs_census_age_1888_1900",
+    "title": "Statistisches Jahrbuch der Schweiz 1950 — Wohnbevölkerung der Schweiz nach Alter und Geschlecht seit 1860",
+    "publisher": "Swiss Federal Statistical Office",
+    "url": "https://dam-api.bfs.admin.ch/hub/api/dam/assets/346171/master",
+    "locator": "Printed pp. 22–23: both-sex age totals and age by sex. Census columns 1888 and 1900. Unknown age is shown by dashes in both columns.",
+    "rights": "Numeric facts transcribed from the publication.",
+    "raw_path": "age_sex.csv",
+    "extract": "The absolute figures in the 1888 and 1900 columns are retained. The male 1888 count age 30–34 is 90,918 in the 1950 yearbook and the contemporary 1898 yearbook. The census dates and total usual residents match the 1911 comparison reprinted in the swiss collection, printed p. 104.",
+    "independent_url": "https://istmat.org/files/uploads/53017/statistisches_jahrbuch_der_schweiz_1898.pdf"
+  }
+]

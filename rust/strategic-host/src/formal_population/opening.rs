@@ -3,9 +3,9 @@ use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io, sync::OnceLock};
 
-pub(crate) const CURRENT_VERSION: u32 = 12;
+pub(crate) const CURRENT_VERSION: u32 = 13;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct OpeningPopulationEstimate {
     pub population_value: u64,
     pub source_id: String,
@@ -32,6 +32,7 @@ pub(crate) struct HistoricalOpening {
     pub(super) social: OpeningSocial,
     estimates: BTreeMap<String, OpeningPopulationEstimate>,
     pub(super) partitions: BTreeMap<String, Partition>,
+    pub(super) statistical_aggregates: BTreeMap<String, StatisticalAggregate>,
     pub(super) standalone: BTreeMap<String, u64>,
     collective_scopes: BTreeMap<String, String>,
     declared_places: BTreeMap<String, String>,
@@ -41,6 +42,13 @@ pub(crate) struct HistoricalOpening {
 pub(super) struct Partition {
     pub(super) parent: String,
     pub(super) name: String,
+    pub(super) statistical_parent: Option<String>,
+}
+
+pub(super) struct StatisticalAggregate {
+    pub(super) parent: String,
+    pub(super) name: String,
+    pub(super) members: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -59,6 +67,8 @@ struct Group {
     #[serde(flatten)]
     context: EstimateContext,
     units: Vec<Unit>,
+    #[serde(default)]
+    statistical_aggregates: Vec<AggregateInput>,
     legacy_unlocated_balance: Option<u64>,
     research_unlocated_balance: Option<u64>,
     collective_scope: Option<CollectiveScope>,
@@ -68,6 +78,14 @@ struct Group {
 struct CollectiveScope {
     name: String,
     polity_ids: Vec<String>,
+}
+
+#[derive(Deserialize)]
+struct AggregateInput {
+    unit_id: String,
+    name: String,
+    #[serde(flatten)]
+    estimate: OpeningPopulationEstimate,
 }
 
 #[derive(Deserialize)]
@@ -82,6 +100,7 @@ struct Unit {
     context: EstimateContext,
     #[serde(default)]
     place_ids: Vec<String>,
+    statistical_parent: Option<String>,
 }
 
 impl HistoricalOpening {
@@ -103,7 +122,8 @@ impl HistoricalOpening {
             9 => include_bytes!("../../../../data/historical_population_1900/opening_v9.json"),
             10 => include_bytes!("../../../../data/historical_population_1900/opening_v10.json"),
             11 => include_bytes!("../../../../data/historical_population_1900/opening_v11.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v12.json"),
+            12 => include_bytes!("../../../../data/historical_population_1900/opening_v12.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v13.json"),
             _ => return Err(invalid("unsupported historical population opening version")),
         };
         let manifest: Manifest = serde_json::from_slice(bytes)?;
@@ -112,7 +132,8 @@ impl HistoricalOpening {
         }
         let mut opening = Self {
             version, demography: OpeningDemography::default(), social: OpeningSocial::default(),
-            estimates: BTreeMap::new(), partitions: BTreeMap::new(), standalone: BTreeMap::new(),
+            estimates: BTreeMap::new(), partitions: BTreeMap::new(), statistical_aggregates: BTreeMap::new(),
+            standalone: BTreeMap::new(),
             collective_scopes: BTreeMap::new(), declared_places: BTreeMap::new(), places: OnceLock::new(),
         };
         let mut occupied_scopes: BTreeSet<String> = manifest.groups.iter().map(|group| group.unit_id.clone()).collect();
@@ -139,10 +160,11 @@ impl HistoricalOpening {
             }
             let mut remaining = group.population_value;
             let partitioned = !group.units.is_empty();
+            let mut aggregate_members = BTreeMap::<String, Vec<String>>::new();
             for leaf in group.units {
                 let id = leaf.unit_id;
-                if id.trim().is_empty() || leaf.name.trim().is_empty() || legacy.contains_key(&id) || known_polity(&id)
-                    || opening.partitions.contains_key(&id) || leaf.population_value == 0
+                if id.trim().is_empty() || leaf.name.trim().is_empty() || known_polity(&id)
+                    || !occupied_scopes.insert(id.clone()) || leaf.population_value == 0
                 {
                     return Err(invalid(format!("invalid historical population partition {id}")));
                 }
@@ -170,7 +192,32 @@ impl HistoricalOpening {
                         }),
                     },
                 });
-                opening.partitions.insert(id, Partition { parent: root.clone(), name: leaf.name });
+                if let Some(parent) = &leaf.statistical_parent {
+                    aggregate_members.entry(parent.clone()).or_default().push(id.clone());
+                }
+                opening.partitions.insert(id, Partition {
+                    parent: root.clone(), name: leaf.name, statistical_parent: leaf.statistical_parent,
+                });
+            }
+            for aggregate in group.statistical_aggregates {
+                let id = aggregate.unit_id;
+                let estimate = aggregate.estimate;
+                let members = aggregate_members.remove(&id)
+                    .ok_or_else(|| invalid(format!("no members for statistical population scope {id}")))?;
+                if id.trim().is_empty() || aggregate.name.trim().is_empty() || known_polity(&id)
+                    || !occupied_scopes.insert(id.clone()) || estimate.research_unlocated_balance.is_some()
+                    || [&estimate.source_id, &estimate.locator, &estimate.method].iter().any(|text| text.trim().is_empty())
+                    || estimate.population_value != members.iter().map(|member| opening.estimates[member].population_value).sum::<u64>()
+                {
+                    return Err(invalid(format!("invalid statistical population scope {id}")));
+                }
+                opening.estimates.insert(id.clone(), estimate);
+                opening.statistical_aggregates.insert(id, StatisticalAggregate {
+                    parent: root.clone(), name: aggregate.name, members,
+                });
+            }
+            if !aggregate_members.is_empty() {
+                return Err(invalid(format!("missing statistical population scopes in {root}")));
             }
             if let Some(residual) = group.legacy_unlocated_balance {
                 if !partitioned || remaining != residual || legacy.get(&root) != Some(&group.population_value)
@@ -210,14 +257,16 @@ impl HistoricalOpening {
             9 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v9.json"),
             10 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v10.json"),
             11 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v11.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v12.json"),
+            12 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v12.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v13.json"),
             _ => return Ok(opening),
         };
         opening.demography = OpeningDemography::load(&opening, demography)?;
         let social: &[u8] = match version {
             10 => include_bytes!("../../../../data/historical_population_1900/opening_social_v10.json"),
             11 => include_bytes!("../../../../data/historical_population_1900/opening_social_v11.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_social_v12.json"),
+            12 => include_bytes!("../../../../data/historical_population_1900/opening_social_v12.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_social_v13.json"),
             _ => return Ok(opening),
         };
         opening.social = OpeningSocial::load(&opening, social)?;
@@ -226,6 +275,10 @@ impl HistoricalOpening {
 
     pub(crate) fn partition_identities(&self) -> impl Iterator<Item = (&str, &str, &str)> {
         self.partitions.iter().map(|(id, part)| (id.as_str(), part.parent.as_str(), part.name.as_str()))
+    }
+    pub(crate) fn statistical_scopes(&self) -> impl Iterator<Item = (&str, &str, &str, &[String])> {
+        self.statistical_aggregates.iter().map(|(id, scope)|
+            (id.as_str(), scope.parent.as_str(), scope.name.as_str(), scope.members.as_slice()))
     }
     pub(crate) fn residence_places(&self) -> impl Iterator<Item = (&str, &str)> {
         self.declared_places.iter().map(|(place, id)| (place.as_str(), id.as_str()))

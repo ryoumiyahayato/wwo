@@ -1,0 +1,16 @@
+[
+  {
+    "id": "belgium_census_provinces_1890_1900",
+    "title": "Annuaire statistique de la Belgique et du Congo belge, 1912. Population par arrondissement administratif au 31 décembre.",
+    "publisher": "Ministère de l’Intérieur de Belgique, Statistique générale",
+    "url": "https://doc.statbel.fgov.be/publications/S000.A4/S000.A4F_Ann_stat_1912_043.pdf",
+    "locator": "Printed p. 42. The 1890 and 1900 general census columns, province subtotals and kingdom total, men, women and both sexes.",
+    "scope": "Usual residents (population de droit) of the nine provinces of the Kingdom of Belgium under the 1890 and 1900 census boundaries, including people temporarily absent. Congo Free State, the Grand Duchy of Luxembourg, and the later eastern cantons are outside the scope. Brabant is the historical undivided province.",
+    "rights": "Historical official statistical publication digitized by Statbel. Numerical transcription.",
+    "extract": "Transcribe the nine La province subtotals and the Le Royaume control for each census. The arrondissement rows are already included in the province subtotals. Both census controls close in total and separately by sex.",
+    "original_census": {
+      "url": "https://doc.statbel.fgov.be/publications/S210.B4/S210.B4F_Recensement_1900_Tome_1-a.pdf",
+      "locator": "1900 general census, vol. I, introduction printed p. XI, Table IV. Population par province."
+    }
+  }
+]
