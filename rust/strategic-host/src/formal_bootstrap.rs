@@ -217,6 +217,20 @@ pub struct WorldSources {
     polity_population_bindings: BTreeMap<String, String>,
     population_income: BTreeMap<String, u64>,
     people: BTreeMap<String, OpeningPerson>,
+    regimental_opening_stations: BTreeMap<String, Vec<RegimentalOpeningStation>>,
+}
+
+/// The regiment's central station at the 1900 opening. Detached units can be elsewhere.
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RegimentalOpeningStation {
+    pub regiment_id: String,
+    pub name: String,
+    pub name_zh: String,
+    pub polity_id: String,
+    pub place_id: String,
+    pub source: String,
+    pub source_url: String,
 }
 
 pub struct InitialWorld {
@@ -689,6 +703,13 @@ impl InitialWorld {
             self.sources.places.get(id).is_some_and(|place| self.can_read_polity_record(historical_place_polity(place)))
                 || self.population_unit_at(id).is_some_and(|unit| self.can_read_polity_record(unit))
         })
+    }
+
+    pub fn regimental_opening_stations(&self, place_id: &str) -> &[RegimentalOpeningStation] {
+        if !self.can_read_place_record(place_id) {
+            return &[];
+        }
+        self.sources.regimental_opening_stations.get(place_id).map_or(&[], Vec::as_slice)
     }
 
     pub fn opening_language(&self) -> Option<Language> {
@@ -1285,13 +1306,14 @@ impl WorldBootstrap {
         let markets = MarketInputs::load(countries)?;
         let opening_cash = load_opening_cash()?;
         let (places, routes, cities) = load_map()?;
+        let regimental_opening_stations = load_regimental_opening_stations(&places, &polities)?;
         let place_population_units = places.iter().filter_map(|(id, place)| {
             let source = historical_place_polity(place);
             polity_units.get(source).map(|unit| (id.clone(), unit.clone()))
         }).collect();
         let mut world = WorldSources {
             polities, places, routes, place_population_units, polity_population_bindings: polity_units,
-            population_income, historical_population: None, people: BTreeMap::new(),
+            population_income, historical_population: None, people: BTreeMap::new(), regimental_opening_stations,
         };
         let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
         let load_opening = |version| {
@@ -1937,6 +1959,28 @@ fn load_map() -> io::Result<(BTreeMap<String, Place>, BTreeMap<String, Route>, B
     Ok((places, routes, city_keys))
 }
 
+fn load_regimental_opening_stations(
+    places: &BTreeMap<String, Place>,
+    polities: &BTreeMap<String, Polity>,
+) -> io::Result<BTreeMap<String, Vec<RegimentalOpeningStation>>> {
+    let stations = read_list::<RegimentalOpeningStation>(
+        include_bytes!("../../../data/formal/regimental_opening_stations_1900.json"), "stations",
+    )?;
+    let mut regiments = BTreeSet::new();
+    let mut by_place: BTreeMap<String, Vec<_>> = BTreeMap::new();
+    for station in stations {
+        if !local_id(&station.regiment_id) || !regiments.insert(station.regiment_id.clone())
+            || !places.contains_key(&station.place_id) || !polities.contains_key(&station.polity_id)
+            || station.name.trim().is_empty() || station.name_zh.trim().is_empty()
+            || station.source.trim().is_empty() || !station.source_url.starts_with("https://")
+        {
+            return Err(invalid(format!("invalid regimental opening station {}", station.regiment_id)));
+        }
+        by_place.entry(station.place_id.clone()).or_default().push(station);
+    }
+    Ok(by_place)
+}
+
 fn load_routes(
     routes: &mut BTreeMap<String, Route>,
     mode: RouteMode,
@@ -1999,6 +2043,18 @@ fn date(value: &str) -> bool {
 mod tests {
     use super::*;
     use crate::formal_clock::MINUTES_PER_DAY;
+
+    #[test]
+    fn opening_regimental_station_uses_formal_lyon_place() {
+        let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+        let stations = world.regimental_opening_stations("place:lyon");
+        let [station] = stations else { panic!("expected the Lyon opening station") };
+        assert_eq!(station.regiment_id, "fra_157th_infantry");
+        assert_eq!(station.polity_id, "country_fra");
+        assert_eq!(station.place_id, "place:lyon");
+        assert!(world.regimental_opening_stations("place:paris").is_empty());
+        assert!(world.land_battle_record().is_none());
+    }
 
     #[test]
     fn all_six_openings_select_a_person_in_the_same_world_sources() {
