@@ -1,7 +1,8 @@
 use super::{
     needs::{
-        adult_water_references, published_efsa_water_reference, published_energy_reference, AgeYears,
-        NeedSource, QuantityRange, Requirement,
+        adult_water_references, published_domestic_water_service_reference,
+        published_efsa_water_reference, published_energy_reference, published_protein_reference,
+        AgeYears, DomesticWaterServiceReference, NeedSource, QuantityRange, Requirement,
     },
     CohortBirthYears, CohortDefinition, CohortId, CohortProvenance, CohortSex, Population,
 };
@@ -35,6 +36,8 @@ struct SourceGroup {
     opening_total: u64,
     method: String,
     uncertainty: String,
+    #[serde(default)]
+    sex_only: bool,
     bands: Vec<Band>,
 }
 
@@ -142,7 +145,8 @@ fn validate_bands(group: &SourceGroup) -> io::Result<()> {
         source_total = source_total.checked_add(band.male)
             .and_then(|total| total.checked_add(band.female)).ok_or_else(error)?;
     }
-    if source_total == 0 || source_total != group.observed_total || !known_ages[0] {
+    let valid_age_basis = if group.sex_only { unknown_age && group.bands.len() == 1 } else { known_ages[0] };
+    if source_total == 0 || source_total != group.observed_total || !valid_age_basis {
         return Err(error());
     }
     Ok(())
@@ -184,8 +188,10 @@ pub struct PopulationStructure<'a> {
     pub named_residents_with_cohort_sex: u64,
     pub cohorts: Vec<ResidentCohort<'a>>,
     pub published_energy_reference: EnergyReferenceCoverage,
+    pub published_protein_reference: ProteinReferenceCoverage,
     pub published_adult_water_references: AdultWaterReferenceCoverage,
     pub published_efsa_water_reference: EfsaWaterReferenceCoverage,
+    pub published_domestic_water_service_reference: DomesticWaterServiceReference,
 }
 
 #[derive(Default, Serialize)]
@@ -193,6 +199,15 @@ pub struct EnergyReferenceCoverage {
     pub people_with_reference: u64,
     pub people_without_reference: u64,
     pub conditional_kcal_per_day: Option<QuantityRange>,
+}
+
+#[derive(Serialize)]
+pub struct ProteinReferenceCoverage {
+    pub rate_source: NeedSource,
+    pub weight_source: NeedSource,
+    pub people_with_reference: u64,
+    pub people_without_reference: u64,
+    pub conditional_grams_per_day: Option<QuantityRange>,
 }
 
 #[derive(Default, Serialize)]
@@ -328,6 +343,13 @@ impl Population {
             }).count() as u64,
             cohorts: Vec::new(),
             published_energy_reference: EnergyReferenceCoverage::default(),
+            published_protein_reference: ProteinReferenceCoverage {
+                rate_source: NeedSource::WhoFaoUnuProtein2007,
+                weight_source: NeedSource::FaoWhoUnuReferenceBodyWeight2004,
+                people_with_reference: 0,
+                people_without_reference: 0,
+                conditional_grams_per_day: None,
+            },
             published_adult_water_references: AdultWaterReferenceCoverage::default(),
             published_efsa_water_reference: EfsaWaterReferenceCoverage {
                 source: NeedSource::EfsaWater2010,
@@ -335,6 +357,9 @@ impl Population {
                 people_without_reference: 0,
                 moderate_environment_pal_1_6_total_ingested_litres_per_day: None,
             },
+            published_domestic_water_service_reference: published_domestic_water_service_reference(
+                population_total,
+            ),
         };
         for id in self.pools.keys().filter(|id| {
             unit.is_none_or(|unit| id.as_str() == unit || self.parent_unit(id) == Some(unit))
@@ -358,6 +383,13 @@ impl Population {
                     let energy = &mut summary.published_energy_reference;
                     add_group_requirement(&mut energy.conditional_kcal_per_day, range, members);
                     energy.people_with_reference += members;
+                }
+                if let Requirement::Known { range, .. } =
+                    published_protein_reference(age_years, definition.sex)
+                {
+                    let protein = &mut summary.published_protein_reference;
+                    add_group_requirement(&mut protein.conditional_grams_per_day, range, members);
+                    protein.people_with_reference += members;
                 }
                 if let Some((temperate, warm_work)) = adult_water_references(age_years, definition.sex) {
                     let water = &mut summary.published_adult_water_references;
@@ -389,6 +421,8 @@ impl Population {
         }
         summary.published_energy_reference.people_without_reference =
             population_total - summary.published_energy_reference.people_with_reference;
+        summary.published_protein_reference.people_without_reference =
+            population_total - summary.published_protein_reference.people_with_reference;
         summary.published_adult_water_references.residents_outside_reference =
             population_total - summary.published_adult_water_references.adults_with_reference;
         summary.published_efsa_water_reference.people_without_reference =

@@ -6,13 +6,17 @@
     "algeria_population": 4,
     "americas": 657,
     "austria_hungary": 54,
+    "bosnia_herzegovina_population": 4,
     "britain": 206,
     "cabo_verde": 25,
     "cape_population": 2,
     "cities_europe": 1742,
+    "colombia_panama_population": 2,
     "crown_islands": 29,
     "danish": 56,
     "eastern": 1105,
+    "ecuador_population": 35,
+    "el_salvador_population": 19,
     "french_indochina_population": 14,
     "india_comparable": 87,
     "japan_taiwan": 232,
@@ -26,27 +30,28 @@
     "russia": 1721,
     "saint_helena_population": 1,
     "swiss": 57,
+    "venezuela_population": 23,
     "world": 499,
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 110,
+  "cited_sources": 127,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
-  "production_roots": 52,
+  "production_roots": 54,
   "partially_located_legacy_roots": 3,
   "documented_people_under_legacy_controls": 377952285,
-  "replaced_legacy_roots": 29,
-  "new_roots": 23,
-  "production_people": 1031671483,
-  "production_people_pct_world_estimate": 64.679,
-  "population_outside_evidence_opening_estimate": 563402765,
-  "legacy_only_people": 431927715,
-  "authoritative_total_for_new_game": 1463599198,
-  "roots_with_partitions": 17,
-  "disjoint_leaves": 358,
-  "people_in_partitions": 850054079,
+  "replaced_legacy_roots": 30,
+  "new_roots": 24,
+  "production_people": 1037464475,
+  "production_people_pct_world_estimate": 65.042,
+  "population_outside_evidence_opening_estimate": 557609773,
+  "legacy_only_people": 427927715,
+  "authoritative_total_for_new_game": 1465392190,
+  "roots_with_partitions": 18,
+  "disjoint_leaves": 360,
+  "people_in_partitions": 854178808,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "cshapes_gw_850",
@@ -57,7 +62,7 @@
   "people_in_partitions_with_explicit_places": 272587476,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
-  "political_catalogue_members_of_production_groups": 60,
+  "political_catalogue_members_of_production_groups": 63,
   "dated_admin_catalogues": {
     "britain_historic_counties_identity.json": {
       "units": 414,
@@ -264,15 +269,15 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2194,
+  "source_statistical_units": 2252,
   "opening_by_source_type": {
     "territorial_returns": {
-      "roots": 23,
-      "people": 311588700
+      "roots": 24,
+      "people": 313256963
     },
     "historical_world_reconstruction": {
-      "roots": 29,
-      "people": 342130498
+      "roots": 30,
+      "people": 346255227
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 3,
@@ -299,11 +304,14 @@
     "us_twelfth_census_vol2_state_ages": 650,
     "uk_census_1901_county_ages": 238,
     "france_census_1901_age_summary": 8,
+    "de_reich_census_1900_state_ages": 18,
+    "de_bavaria_yearbook_1903_ages": 3,
+    "de_prussia_yearbook_1904_ages": 37,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 227769244,
-  "structure_opening_pool_count": 67,
-  "structure_opening_residents_outside_modeled_pools": 1235829954,
+  "structure_opening_pool_controls": 236614965,
+  "structure_opening_pool_count": 72,
+  "structure_opening_residents_outside_modeled_pools": 1228777225,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:gb_historic_anglesey",
@@ -339,6 +347,34 @@
       "observed_unit_id": "uk_ancient_area_radnorshire",
       "observed_total": 23281,
       "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:germany_bayern",
+      "opening_total": 6110627,
+      "observed_unit_id": "administrative_region:germany_bayern",
+      "observed_total": 6176057,
+      "observed_date": "1900-12-01"
+    },
+    {
+      "unit_id": "administrative_region:germany_mecklenburg_schwerin",
+      "opening_total": 605879,
+      "observed_unit_id": "administrative_region:germany_mecklenburg_schwerin",
+      "observed_total": 607770,
+      "observed_date": "1900-12-01"
+    },
+    {
+      "unit_id": "administrative_region:germany_mecklenburg_strelitz",
+      "opening_total": 102408,
+      "observed_unit_id": "administrative_region:germany_mecklenburg_strelitz",
+      "observed_total": 102602,
+      "observed_date": "1900-12-01"
+    },
+    {
+      "unit_id": "administrative_region:germany_sachsen_weimar",
+      "opening_total": 358544,
+      "observed_unit_id": "administrative_region:germany_sachsen_weimar",
+      "observed_total": 362873,
+      "observed_date": "1900-12-01"
     },
     {
       "unit_id": "administrative_region:uk_constituent_ireland",
@@ -430,6 +466,13 @@
       "observed_unit_id": "ru_census_1897_ex_finland",
       "observed_total": 125640021,
       "observed_date": "1897-02-09"
+    },
+    {
+      "unit_id": "statistical_area:bosnia_herzegovina_1900",
+      "opening_total": 1668263,
+      "observed_unit_id": "statistical_area:bosnia_herzegovina_1900",
+      "observed_total": 1568092,
+      "observed_date": "1895-04-22"
     },
     {
       "unit_id": "us_arizona",
@@ -866,8 +909,8 @@
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 430,
-  "dated_parent_controls_arithmetic_closure": 390,
+  "dated_parent_controls": 433,
+  "dated_parent_controls_arithmetic_closure": 392,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -926,14 +969,15 @@
         "cuba_occupation_1900",
         "dominion_of_canada",
         "mexican_republic",
+        "republic_of_colombia_1900",
         "united_states_1900",
         "uruguay_1900"
       ],
-      "production_people": 123984199,
-      "production_pct_of_regional_research_estimate": 85.485,
-      "people_with_opening_subdivision": 111228173,
-      "research_only_units": 30,
-      "research_only_people": 19765044
+      "production_people": 128108928,
+      "production_pct_of_regional_research_estimate": 88.329,
+      "people_with_opening_subdivision": 115352902,
+      "research_only_units": 28,
+      "research_only_people": 15640315
     },
     "Asia": {
       "statistical_units": 33,
@@ -991,11 +1035,12 @@
         "kingdom_of_spain",
         "principality_of_bulgaria",
         "russian_empire",
+        "statistical_area:bosnia_herzegovina_1900",
         "sweden_norway_union",
         "swiss_confederation"
       ],
-      "production_people": 407154320,
-      "production_pct_of_regional_research_estimate": 97.139,
+      "production_people": 408822583,
+      "production_pct_of_regional_research_estimate": 97.537,
       "people_with_opening_subdivision": 332407293,
       "research_only_units": 9,
       "research_only_people": 10103353
@@ -1372,9 +1417,9 @@
         "opening_unit_id": "german_empire",
         "research_region": "Europe",
         "opening_control": 55619152,
-        "in_model_pools": 0,
-        "outside_model_pools": 55619152,
-        "modeled_age_and_sex": 0,
+        "in_model_pools": 7177458,
+        "outside_model_pools": 48441694,
+        "modeled_age_and_sex": 7177458,
         "modeled_sex_age_unknown": 0
       },
       {
@@ -1595,10 +1640,10 @@
       },
       {
         "opening_unit_id": "republic_of_colombia_1900",
-        "research_region": null,
-        "opening_control": 4000000,
+        "research_region": "America",
+        "opening_control": 4124729,
         "in_model_pools": 0,
-        "outside_model_pools": 4000000,
+        "outside_model_pools": 4124729,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
       },
@@ -1628,6 +1673,15 @@
         "outside_model_pools": 1400000,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
+      },
+      {
+        "opening_unit_id": "statistical_area:bosnia_herzegovina_1900",
+        "research_region": "Europe",
+        "opening_control": 1668263,
+        "in_model_pools": 1668263,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 1668263
       },
       {
         "opening_unit_id": "sultanate_of_zanzibar",
@@ -1686,9 +1740,9 @@
     ],
     "by_research_region": {
       "America": {
-        "opening_control": 123984199,
+        "opening_control": 128108928,
         "in_model_pools": 80759290,
-        "outside_model_pools": 43224909,
+        "outside_model_pools": 47349638,
         "modeled_age_and_sex": 80512700,
         "modeled_sex_age_unknown": 246590
       },
@@ -1700,11 +1754,11 @@
         "modeled_sex_age_unknown": 4346
       },
       "Europe": {
-        "opening_control": 407154320,
-        "in_model_pools": 142744371,
-        "outside_model_pools": 264409949,
-        "modeled_age_and_sex": 142691080,
-        "modeled_sex_age_unknown": 53291
+        "opening_control": 408822583,
+        "in_model_pools": 151590092,
+        "outside_model_pools": 257232491,
+        "modeled_age_and_sex": 149868538,
+        "modeled_sex_age_unknown": 1721554
       },
       "Africa": {
         "opening_control": 18751672,
@@ -1714,9 +1768,9 @@
         "modeled_sex_age_unknown": 0
       },
       "no_reviewed_research_region": {
-        "opening_control": 105880000,
+        "opening_control": 101880000,
         "in_model_pools": 0,
-        "outside_model_pools": 105880000,
+        "outside_model_pools": 101880000,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
       },
@@ -1729,11 +1783,11 @@
       }
     },
     "world": {
-      "opening_control": 1463599198,
-      "in_model_pools": 227769244,
-      "outside_model_pools": 1235829954,
-      "modeled_age_and_sex": 227464691,
-      "modeled_sex_age_unknown": 304553
+      "opening_control": 1465392190,
+      "in_model_pools": 236614965,
+      "outside_model_pools": 1228777225,
+      "modeled_age_and_sex": 234642149,
+      "modeled_sex_age_unknown": 1972816
     }
   },
   "opening_count_basis": {
@@ -1743,16 +1797,16 @@
         "pct_of_research_reference": 0.0
       },
       "published_historical_estimates": {
-        "people": 451145482,
-        "pct_of_research_reference": 28.284
+        "people": 455270211,
+        "pct_of_research_reference": 28.542
       },
       "date_models_from_territorial_returns": {
-        "people": 580526001,
-        "pct_of_research_reference": 36.395
+        "people": 582194264,
+        "pct_of_research_reference": 36.5
       },
       "retained_legacy_estimates": {
-        "people": 431927715,
-        "pct_of_research_reference": 27.079
+        "people": 427927715,
+        "pct_of_research_reference": 26.828
       }
     },
     "scopes": [
@@ -2207,10 +2261,10 @@
       },
       {
         "unit_id": "republic_of_colombia_1900",
-        "source_id": null,
-        "sourced_people": 0,
-        "sourced_basis": null,
-        "retained_legacy_people": 4000000
+        "source_id": "ft_world_v5",
+        "sourced_people": 4124729,
+        "sourced_basis": "published_historical_estimates",
+        "retained_legacy_people": 0
       },
       {
         "unit_id": "republic_of_liberia",
@@ -2232,6 +2286,13 @@
         "sourced_people": 0,
         "sourced_basis": null,
         "retained_legacy_people": 1400000
+      },
+      {
+        "unit_id": "statistical_area:bosnia_herzegovina_1900",
+        "source_id": "bosnia_herzegovina_admin_population_1910",
+        "sourced_people": 1668263,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0
       },
       {
         "unit_id": "sultanate_of_zanzibar",

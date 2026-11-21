@@ -70,7 +70,8 @@ def dimensions(population):
                 date=panel["observed_date"], source_id=panel["source_id"],
                 locator=f"{panel['locator']}, {row['label']}", category=row["label"],
                 measure="published persons", values={key: row[key] for key in ("both", "male", "female")},
-                definition=panel["definition"], dimension="age_by_sex", panel_id=panel["id"], row_role=row["role"],
+                definition=panel["definition"], dimension=panel.get("dimension", "age_by_sex"),
+                panel_id=panel["id"], row_role=row["role"],
                 age_min=row["age_min"], age_max=row["age_max"],
             ))
     return result
@@ -98,8 +99,12 @@ def age_sex_panels():
     panels.extend(json.loads((AGE_SOURCES / "us_census_1900_panels.json").read_text(encoding="utf8")))
     panels.extend(json.loads((AGE_SOURCES / "uk_county_age_panels.json").read_text(encoding="utf8")))
     panels.extend(json.loads((AGE_SOURCES / "france_census_1901_panels.json").read_text(encoding="utf8")))
+    panels.extend(json.loads((AGE_SOURCES / "germany_census_1900_panels.json").read_text(encoding="utf8")))
     by_panel = {panel["id"]: [] for panel in panels}
-    for filename in ("age_sex.csv", "us_census_1900.csv", "uk_county_age.csv", "france_census_1901.csv"):
+    for filename in (
+        "age_sex.csv", "us_census_1900.csv", "uk_county_age.csv", "france_census_1901.csv",
+        "germany_census_1900.csv",
+    ):
         for row in read_csv(AGE_SOURCES / filename):
             for key in ("age_min", "age_max", "both", "male", "female"):
                 row[key] = int(row[key]) if row[key] else None
@@ -149,7 +154,7 @@ def age_sex_panels():
     return [(panel, by_panel[panel["id"]]) for panel in panels]
 
 
-def opening_structure(opening_groups):
+def opening_structure(opening_groups, observations):
     opening_totals = {
         unit["unit_id"]: unit["population_value"]
         for group in opening_groups
@@ -180,5 +185,19 @@ def opening_structure(opening_groups):
             unit_id=unit_id, opening_total=opening_totals[unit_id], observed_total=total["both"],
             method=OPENING_METHOD, bands=bands,
             **{key: panel[key] for key in ("source_id", "observed_unit_id", "observed_date", "locator", "uncertainty")},
+        ))
+    unit = "statistical_area:bosnia_herzegovina_1900"
+    if unit in opening_totals:
+        row = next(r for r in observations if r["unit_id"] == unit and r["date"] == "1895-04-22"
+                   and r["source_id"] == "bosnia_herzegovina_demography_2024")
+        if sum(row["sex"].values()) != row["population_value"]:
+            raise ValueError(f"{unit}: published sex totals do not sum to the population")
+        groups.append(dict(
+            unit_id=unit, opening_total=opening_totals[unit], observed_total=row["population_value"],
+            source_id=row["source_id"], observed_unit_id=unit, observed_date=row["date"], locator=row["locator"],
+            method="Hold the nearer 1895 civilian census sex shares at opening and use integer largest remainders. Ages are unknown.",
+            uncertainty="The sex ratio may have changed. Both dated census controls remain available. No opening error interval is known.",
+            sex_only=True,
+            bands=[dict(id="unknown", label="Published sex totals; ages unavailable", age_min=None, age_max=None, **row["sex"])],
         ))
     return dict(version=1, groups=sorted(groups, key=lambda group: group["unit_id"]))

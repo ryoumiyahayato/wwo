@@ -878,10 +878,10 @@
       "ft_colombia",
       "ft_panama"
     ],
-    "opening_replacement": null,
+    "opening_replacement": 4124729,
     "legacy_unlocated_balance": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "replacement_minus_legacy": 124729,
+    "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {

@@ -77,8 +77,10 @@ pub struct PhysiologicalInputs {
 pub enum NeedSource {
     FaoWhoUnuEnergy2004,
     FaoWhoUnuEnergyReference2004,
+    FaoWhoUnuReferenceBodyWeight2004,
     WhoFaoUnuProtein2007,
     WhoWater2020,
+    WhoDomesticWaterService2020,
     EfsaWater2010,
 }
 
@@ -120,6 +122,27 @@ pub struct PhysiologicalRequirements {
 /// WHO (2020) safe drinking-water access target in litres per person per day.
 pub const WHO_SAFE_WATER_ACCESS_LITRES_PER_DAY: f64 = 5.3;
 
+#[derive(Serialize)]
+pub struct DomesticWaterServiceReference {
+    pub source: NeedSource,
+    pub scenario_population: u64,
+    pub basic_access_litres_per_day: f64,
+    pub intermediate_access_litres_per_day: f64,
+}
+
+/// Alternative household water-use volumes at two hypothetical access levels.
+pub(super) fn published_domestic_water_service_reference(
+    population: u64,
+) -> DomesticWaterServiceReference {
+    // WHO (2020), tables S1 and 11, typical use in litres per person per day.
+    DomesticWaterServiceReference {
+        source: NeedSource::WhoDomesticWaterService2020,
+        scenario_population: population,
+        basic_access_litres_per_day: 20.0 * population as f64,
+        intermediate_access_litres_per_day: 50.0 * population as f64,
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FoodEnergySource {
@@ -156,7 +179,7 @@ pub fn recorded_food_energy(good: &str, consumed_kg: f64) -> Option<FoodEnergyEs
 pub fn physiological_requirements(input: PhysiologicalInputs) -> PhysiologicalRequirements {
     PhysiologicalRequirements {
         energy_kcal_per_day: requirement(energy(input, false), NeedSource::FaoWhoUnuEnergy2004),
-        protein_grams_per_day: requirement(protein(input), NeedSource::WhoFaoUnuProtein2007),
+        protein_grams_per_day: requirement(protein(input, false), NeedSource::WhoFaoUnuProtein2007),
         total_ingested_water_litres_per_day: requirement(water(input), NeedSource::WhoWater2020),
     }
 }
@@ -176,6 +199,19 @@ pub fn published_energy_reference(
         energy(input, true),
         NeedSource::FaoWhoUnuEnergyReference2004,
     )
+}
+
+/// Average dietary protein requirements under the energy reference weights.
+pub(super) fn published_protein_reference(
+    age_years: Option<AgeYears>,
+    sex: Option<CohortSex>,
+) -> Requirement {
+    let input = PhysiologicalInputs {
+        age_years,
+        sex,
+        ..PhysiologicalInputs::default()
+    };
+    requirement(protein(input, true), NeedSource::WhoFaoUnuProtein2007)
 }
 
 pub(super) fn adult_water_references(
@@ -267,6 +303,25 @@ fn sexes(sex: Option<CohortSex>) -> &'static [CohortSex] {
     }
 }
 
+fn reference_body_weight(age: u16, sex: CohortSex) -> QuantityRange {
+    // FAO (2004): midpoint weights in tables 4.2 and 4.3, and the selected
+    // adult scenario weights from tables 5.4–5.9.
+    let girls = [
+        10.8, 13.0, 15.1, 16.8, 18.6, 20.6, 23.3, 26.6, 30.5, 34.7, 39.2, 43.8, 48.3, 52.1,
+        55.0, 56.4, 56.7,
+    ];
+    let boys = [
+        11.5, 13.5, 15.7, 17.7, 19.7, 21.7, 24.0, 26.7, 29.7, 33.3, 37.5, 42.3, 47.8, 53.8,
+        59.5, 64.4, 67.8,
+    ];
+    QuantityRange::point(match (age, sex) {
+        (1..=17, CohortSex::Female) => girls[usize::from(age - 1)],
+        (1..=17, CohortSex::Male) => boys[usize::from(age - 1)],
+        (_, CohortSex::Female) => 55.0,
+        (_, CohortSex::Male) => 60.0,
+    })
+}
+
 fn energy(
     input: PhysiologicalInputs,
     published_reference: bool,
@@ -286,12 +341,7 @@ fn energy(
             let estimate = if age < 18 {
                 child_energy(age, sex, input.activity, supplied_weight)?
             } else {
-                let body_weight = supplied_weight.unwrap_or_else(|| {
-                    QuantityRange::point(match sex {
-                        CohortSex::Female => 55.0,
-                        CohortSex::Male => 60.0,
-                    })
-                });
+                let body_weight = supplied_weight.unwrap_or_else(|| reference_body_weight(age, sex));
                 adult_energy(age, sex, body_weight, input.activity, published_reference)?
             };
             if !estimate.is_valid() {
@@ -408,22 +458,26 @@ fn adult_energy(
     Ok(bmr.scaled(activity))
 }
 
-fn protein(input: PhysiologicalInputs) -> Result<QuantityRange, UnknownNeed> {
+fn protein(
+    input: PhysiologicalInputs,
+    published_reference: bool,
+) -> Result<QuantityRange, UnknownNeed> {
     let ages = age_classes(input.age_years, 19)?;
     if *ages.start() == 0 {
         return Err(UnknownNeed::InfantAgeInMonthsAndFeedingRequired);
     }
-    let body_weight = weight(input)?;
+    let supplied_weight = if published_reference {
+        None
+    } else {
+        Some(weight(input)?)
+    };
     // Mean grams per kilogram per day, WHO TRS 935, section 7 and tables 33a–b.
     let children = [
         0.95_f64, 0.79, 0.73, 0.69, 0.69, 0.72, 0.74, 0.75, 0.75, 0.75,
     ];
     let girls = [0.73_f64, 0.72, 0.71, 0.70, 0.69, 0.68, 0.67, 0.66];
     let boys = [0.75_f64, 0.74, 0.73, 0.72, 0.72, 0.71, 0.70, 0.69];
-    let mut rate = QuantityRange {
-        lower: f64::INFINITY,
-        upper: 0.0,
-    };
+    let mut result: Option<QuantityRange> = None;
     for &sex in sexes(input.sex) {
         for age in ages.clone() {
             let value = match (sex, age) {
@@ -434,13 +488,16 @@ fn protein(input: PhysiologicalInputs) -> Result<QuantityRange, UnknownNeed> {
             };
             // The 1.5-year reference is between the age 1 and age 2 values.
             let lower = if age == 1 { 0.79 } else { value };
-            rate = rate.envelope(QuantityRange {
+            let rate = QuantityRange {
                 lower,
                 upper: value,
-            });
+            };
+            let body_weight = supplied_weight.unwrap_or_else(|| reference_body_weight(age, sex));
+            let estimate = body_weight.scaled(rate);
+            result = Some(result.map_or(estimate, |range| range.envelope(estimate)));
         }
     }
-    let estimate = body_weight.scaled(rate);
+    let estimate = result.expect("validated age range and sex profiles are nonempty");
     if !estimate.is_valid() {
         return Err(UnknownNeed::WeightOutsideModel);
     }

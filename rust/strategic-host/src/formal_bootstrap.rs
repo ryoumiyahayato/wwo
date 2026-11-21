@@ -193,7 +193,7 @@ impl RuntimePerson {
 pub struct WorldBootstrap {
     organization_directory: Arc<OrganizationDirectory>,
     world: Arc<WorldSources>,
-    archived_population_worlds: [std::sync::OnceLock<io::Result<Arc<WorldSources>>>; 4],
+    archived_population_worlds: [std::sync::OnceLock<io::Result<Arc<WorldSources>>>; crate::formal_population::CURRENT_VERSION as usize - 1],
     populations: BTreeMap<String, u64>,
     market_opening_population: BTreeMap<String, u64>,
     historical_population: Arc<HistoricalOpening>,
@@ -1434,7 +1434,7 @@ impl WorldBootstrap {
     fn base_opening_version(&self, source_id: &str, prologue: Option<Prologue>, version: Option<u32>) -> io::Result<InitialWorld> {
         let sources = match version {
             Some(version) if version == self.historical_population.version() => &self.world,
-            Some(1..=4) | None => {
+            Some(1..=5) | None => {
                 let archived_version = version.unwrap_or(1);
                 self.archived_population_worlds[(archived_version - 1) as usize].get_or_init(|| {
                     let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
@@ -2211,6 +2211,29 @@ mod tests {
         assert_eq!(world.population().population_total("cshapes_gw_850"), Some(44_363_679));
         assert_eq!(world.population().population_total("java_madoera_colonial_population"), Some(28_092_332));
         assert_eq!(world.population().resident_pool("cshapes_gw_850"), Some(16_271_347));
+        assert_eq!(world.population().population_total("republic_of_colombia_1900"), Some(4_124_729));
+        assert_eq!(world.population().population_total("ft_colombia"), Some(3_803_231));
+        assert_eq!(world.population().population_total("ft_panama"), Some(321_498));
+        assert_eq!(world.market_unit_for_population("ft_panama"), Some("republic_of_colombia_1900"));
+        let bosnia = "statistical_area:bosnia_herzegovina_1900";
+        assert_eq!(world.population().population_total(bosnia), Some(1_668_263));
+        assert_eq!(world.population().population_total("austria_hungary"), Some(45_000_882));
+        assert_eq!(world.population().population_total("cshapes_gw_3461"), None);
+        assert_eq!(world.population().population_total("cshapes_gw_3462"), None);
+        assert_eq!(world.market_unit_for_population(bosnia), None);
+        let bosnia_structure = world.population().structure(Some(bosnia), clock).unwrap();
+        assert_eq!(bosnia_structure.cohort_residents, 1_668_263);
+        assert_eq!(bosnia_structure.residents_with_cohort_age_and_sex, 0);
+        assert_eq!(bosnia_structure.cohorts.iter().map(|row| row.members).sum::<u64>(), 1_668_263);
+        assert!(bosnia_structure.cohorts.iter().all(|row| row.sex.is_some() && row.age_years.is_none()));
+        let member_archive = crate::formal_population::population_archive("cshapes_gw_3461").unwrap().unwrap();
+        assert!(member_archive.dated_population.iter().any(|row| row["unit_id"] == bosnia && row["population_value"] == 1_568_092));
+        assert_eq!(world.population().population_total("ecuador_1900"), None);
+        let ecuador = crate::formal_population::population_archive("ecuador_1900").unwrap().unwrap();
+        assert!(ecuador.candidate_research_population.iter().any(|row| {
+            row["unit_id"] == "ft_ecuador" && row["date"] == "1900-01-01" && row["population_value"] == 1_100_787
+        }));
+        assert!(ecuador.sources.iter().any(|row| row["id"] == "ft_world_v5"));
         let us = world.population().structure(Some("united_states_1900"), clock).unwrap();
         assert_eq!(us.population_total, 75_454_976);
         assert_eq!(us.cohort_residents + us.named_residents, us.population_total);
@@ -2228,6 +2251,15 @@ mod tests {
         assert!(efsa.people_with_reference > water.adults_with_reference);
         let moderate = efsa.moderate_environment_pal_1_6_total_ingested_litres_per_day.unwrap();
         assert!(moderate.lower > 0.0 && moderate.upper >= moderate.lower);
+        let protein = &initial.published_protein_reference;
+        assert_eq!(protein.people_with_reference + protein.people_without_reference, initial.population_total);
+        assert_eq!(protein.people_with_reference, initial.published_energy_reference.people_with_reference);
+        let grams = protein.conditional_grams_per_day.unwrap();
+        assert!(grams.lower > 0.0 && grams.upper >= grams.lower);
+        let service_water = &initial.published_domestic_water_service_reference;
+        assert_eq!(service_water.scenario_population, initial.population_total);
+        assert_eq!(service_water.basic_access_litres_per_day, initial.population_total as f64 * 20.0);
+        assert_eq!(service_water.intermediate_access_litres_per_day, initial.population_total as f64 * 50.0);
         let (cohort, _, _) = world.population().cohorts_in(origin)
             .find(|(_, def, count)| def.sex.is_some() && *count >= 4)
             .unwrap();
@@ -2272,6 +2304,13 @@ mod tests {
         let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
         assert_eq!(restored.population().global_total(), 1_460_954_578);
         assert_eq!(restored.population().population_total("java_madoera_colonial_population"), Some(28_092_332));
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(5)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        assert_eq!(restored.population().global_total(), 1_463_599_198);
+        assert_eq!(restored.population().population_total("ft_panama"), None);
         assert_eq!(restored.snapshot(), old_saved);
     }
 

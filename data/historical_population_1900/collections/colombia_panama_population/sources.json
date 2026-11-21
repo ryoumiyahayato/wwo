@@ -1,0 +1,74 @@
+[
+  {
+    "id": "colombia_panama_1900_celade_miro",
+    "title": "Carmen A. Miró, La población de América Latina en el siglo XX",
+    "publisher": "Centro Latinoamericano de Demografía (CELADE), Serie A, no. 48, September 1968. Digitized by the ECLAC Digital Repository.",
+    "url": "https://repositorio.cepal.org/server/api/core/bitstreams/9d481d76-8488-41d5-822e-7cb64dd1b85f/content",
+    "locator": "Printed p. 2, Cuadro 1, América Latina: población total, 1900–1980, 1900 column, Colombia and Panamá rows. The source note identifies both as CELADE estimates and the heading gives the unit as thousands.",
+    "rights": "Two historical numerical facts and bibliographic references. No scan, full table or original prose reproduced.",
+    "edition_note": "The checked copy is dated 1968. Federico and Tena-Junguito cite the 1971 issue of the same Serie A no. 48. Both transcribed values match the two 1900 workbook cells."
+  },
+  {
+    "id": "colombia_panama_ft_scope",
+    "title": "Giovanni Federico and Antonio Tena-Junguito, World Population 1800–1938",
+    "publisher": "Instituto Figuerola, Universidad Carlos III de Madrid, Working Papers in Economic History 2025-1.",
+    "url": "https://hdl.handle.net/10016/45843",
+    "locator": "Appendix I, Americas, Colombia and Panama paragraphs. The former cites CELADE for the separate 1900 figures. The latter says the Colombia series excludes Panama from 1800 and cites CELADE for the 1900 Panama estimate.",
+    "rights": "Original methodological statement paraphrased. The cited workbook is CC BY 4.0. Attribution: Giovanni Federico and Antonio Tena-Junguito, Federico-Tena World Population Historical Database, e-cienciaDatos, V5.",
+    "workbook_url": "https://doi.org/10.21950/3SK54X",
+    "boundary_sources": [
+      {
+        "url": "https://history.state.gov/historicaldocuments/frus1906p1/d368",
+        "locator": "United States correspondence, enclosure of 4 November 1903. Identifies the former Colombian Department of Panama as forming the new republic."
+      },
+      {
+        "url": "https://history.state.gov/historicaldocuments/frus1910/d856",
+        "locator": "Text of the Loubet award of 11 September 1900. The award postdates the opening and addresses the Costa Rica frontier and island claims."
+      },
+      {
+        "url": "https://biblioteca.dane.gov.co/media/libros/BOL_89-90_1935-32.PDF",
+        "locator": "Contraloría General de la República, Boletín de Estadística no. 89–90, printed p. VIII. Its national population table begins in 1905 and excludes Panama. Notes flag later boundary changes with Brazil and Peru without population counts for the affected areas."
+      }
+    ],
+    "reconstruction_candidate": {
+      "root_id": "republic_of_colombia_1900",
+      "date": "1900-01-01",
+      "nominal_endpoint_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "fraction": "184/365",
+      "units": [
+        {
+          "research_id": "ft_colombia",
+          "locator": "Country series!BH103 and BH104",
+          "reported_thousands": [
+            3781.100578559543,
+            3825
+          ],
+          "opening_population": 3803231,
+          "quality": "C"
+        },
+        {
+          "research_id": "ft_panama",
+          "locator": "Country series!CC103 and CC104",
+          "reported_thousands": [
+            319.97151670670337,
+            323
+          ],
+          "opening_population": 321498,
+          "quality": "D"
+        }
+      ],
+      "method": "Interpolate each source series in thousands then convert to persons and round once per series. Sum the rounded parts.",
+      "population_value": 4124729,
+      "population_lower": 3760054,
+      "population_upper": 4489405,
+      "uncertainty_kind": "Sum of the source-series sensitivity limits. No coverage interval calibrated for the combined opening geography.",
+      "legacy_value": 4000000,
+      "replacement_minus_legacy": 124729,
+      "opening_status": "selected_as_v6_polity_level_proxy",
+      "scope": "The two source series are mutually exclusive at country-series level. Recombine under one political root. Panama and the later Canal Zone must not be standalone opening populations. The CELADE table has no frontier or island breakdown. Territorial exactness is unverified for the western Panama frontier and offshore islands, and the Putumayo/Leticia frontier. No map cell allocations follow from these totals."
+    }
+  }
+]

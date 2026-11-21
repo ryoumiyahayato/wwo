@@ -1,9 +1,9 @@
 use super::{demography::OpeningDemography, MAX_POPULATION};
 use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, io, sync::OnceLock};
+use std::{collections::{BTreeMap, BTreeSet}, io, sync::OnceLock};
 
-pub(crate) const CURRENT_VERSION: u32 = 5;
+pub(crate) const CURRENT_VERSION: u32 = 6;
 
 #[derive(Debug, Serialize)]
 pub struct OpeningPopulationEstimate {
@@ -32,6 +32,7 @@ pub(crate) struct HistoricalOpening {
     estimates: BTreeMap<String, OpeningPopulationEstimate>,
     pub(super) partitions: BTreeMap<String, Partition>,
     pub(super) standalone: BTreeMap<String, u64>,
+    collective_scopes: BTreeMap<String, String>,
     declared_places: BTreeMap<String, String>,
     places: OnceLock<BTreeMap<String, String>>,
 }
@@ -59,6 +60,13 @@ struct Group {
     units: Vec<Unit>,
     legacy_unlocated_balance: Option<u64>,
     research_unlocated_balance: Option<u64>,
+    collective_scope: Option<CollectiveScope>,
+}
+
+#[derive(Deserialize)]
+struct CollectiveScope {
+    name: String,
+    polity_ids: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -87,7 +95,8 @@ impl HistoricalOpening {
             2 => include_bytes!("../../../../data/historical_population_1900/opening_v2.json"),
             3 => include_bytes!("../../../../data/historical_population_1900/opening_v3.json"),
             4 => include_bytes!("../../../../data/historical_population_1900/opening_v4.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v5.json"),
+            5 => include_bytes!("../../../../data/historical_population_1900/opening_v5.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v6.json"),
             _ => return Err(invalid("unsupported historical population opening version")),
         };
         let manifest: Manifest = serde_json::from_slice(bytes)?;
@@ -97,11 +106,22 @@ impl HistoricalOpening {
         let mut opening = Self {
             version, demography: OpeningDemography::default(),
             estimates: BTreeMap::new(), partitions: BTreeMap::new(), standalone: BTreeMap::new(),
-            declared_places: BTreeMap::new(), places: OnceLock::new(),
+            collective_scopes: BTreeMap::new(), declared_places: BTreeMap::new(), places: OnceLock::new(),
         };
+        let mut occupied_scopes: BTreeSet<String> = manifest.groups.iter().map(|group| group.unit_id.clone()).collect();
+        occupied_scopes.extend(legacy.keys().cloned());
         for group in manifest.groups {
             let root = group.unit_id;
-            if (!legacy.contains_key(&root) && !known_polity(&root))
+            if let Some(scope) = group.collective_scope {
+                if !root.starts_with("statistical_area:") || known_polity(&root) || legacy.contains_key(&root)
+                    || scope.name.trim().is_empty() || scope.polity_ids.len() < 2 || !group.units.is_empty()
+                    || scope.polity_ids.iter().any(|id| !known_polity(id) || !occupied_scopes.insert(id.clone()))
+                {
+                    return Err(invalid(format!("invalid collective historical population group {root}")));
+                }
+                opening.collective_scopes.insert(root.clone(), scope.name);
+            }
+            if (!legacy.contains_key(&root) && !known_polity(&root) && !opening.collective_scopes.contains_key(&root))
                 || group.population_value == 0 || group.population_value > MAX_POPULATION
                 || [&group.source_id, &group.locator, &group.method].iter().any(|text| text.trim().is_empty())
             {
@@ -176,7 +196,8 @@ impl HistoricalOpening {
             2 => include_bytes!("../../../../data/historical_population_1900/opening_structure.json"),
             3 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v3.json"),
             4 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v4.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v5.json"),
+            5 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v5.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v6.json"),
             _ => return Ok(opening),
         };
         opening.demography = OpeningDemography::load(&opening, demography)?;
@@ -191,6 +212,10 @@ impl HistoricalOpening {
     }
     pub(crate) fn standalone_ids(&self) -> impl Iterator<Item = &str> {
         self.standalone.keys().map(String::as_str)
+    }
+
+    pub(crate) fn collective_scope_name(&self, unit: &str) -> Option<&str> {
+        self.collective_scopes.get(unit).map(String::as_str)
     }
 
     pub(crate) fn version(&self) -> u32 { self.version }

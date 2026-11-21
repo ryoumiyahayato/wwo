@@ -65,5 +65,42 @@
       "https://www.numdam.org/item/JSFS_1906__47__368_0.pdf#page=4",
       "https://www.numdam.org/item/JSFS_1906__47__368_0.pdf#page=5"
     ]
+  },
+  {
+    "id": "de_reich_census_1900_state_ages",
+    "title": "Die Volkszählung am 1. Dezember 1900 im Deutschen Reich",
+    "publisher": "Kaiserliches Statistisches Amt, Berlin, 1903",
+    "url": "https://catalogue.bnf.fr/ark:/12148/cb336479522",
+    "locator": "Statistik des Deutschen Reichs 151, Table XVIII, printed pp. 270–271, column 138, Gesammtbevölkerung",
+    "rights": "Historical published facts transcribed. Universitätsbibliothek Mannheim marks the digitized collection Public Domain Mark 1.0.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://digi.bib.uni-mannheim.de/fileadmin/gv/364900261_19000151/pdf/364900261_0278.pdf",
+      "https://digi.bib.uni-mannheim.de/fileadmin/gv/364900261_19000151/pdf/364900261_0279.pdf"
+    ]
+  },
+  {
+    "id": "de_bavaria_yearbook_1903_ages",
+    "title": "Statistisches Jahrbuch für das Königreich Bayern, 1903",
+    "publisher": "Königlich Bayerisches Statistisches Bureau, Munich, 1903",
+    "url": "https://www.statistischebibliothek.de/mir/receive/BYHeft_mods_00012794",
+    "locator": "II.A.2.g.3, printed p. 27, Minderjährigkeit and Großjährigkeit. All-age control II.A.2.b, printed p. 14",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf"
+    ]
+  },
+  {
+    "id": "de_prussia_yearbook_1904_ages",
+    "title": "Statistisches Jahrbuch für den Preussischen Staat, 1904",
+    "publisher": "Königliches Statistisches Bureau, Berlin, 1905",
+    "url": "https://sbc.org.pl/de/dlibra/publication/342107/edition/323213",
+    "locator": "I.B.8, printed p. 7, column 2, Ortsanwesende überhaupt",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://webapp.sbc.org.pl/Content/323213/PDF/ii149234-1904-00-0001.pdf?handler=pdf"
+    ]
   }
 ]

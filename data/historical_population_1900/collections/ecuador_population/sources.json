@@ -1,0 +1,49 @@
+[
+  {
+    "id": "ecuador_cevallos_1889",
+    "title": "Pedro Fermín Cevallos, Resumen de la historia del Ecuador desde su origen hasta 1845, vol. VI, Geografía del Ecuador",
+    "publisher": "Imprenta de la Nación, Guayaquil, 1889. Biblioteca Nacional del Ecuador Eugenio Espejo digitization.",
+    "url": "https://es.scribd.com/document/456165498/FR1-L-000137-Cevallos-Historia-V3-1-pdf",
+    "locator": "Printed pp. 31–33, Población, including the total and 16 printed component rows on p. 32. Printed p. 229, legislative assignment of the Galápagos Islands to Guayas.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "references": [
+      {
+        "url": "https://books.google.com.ec/books?id=S9aEBKcx5R4C",
+        "locator": "Digitization and bibliographic record for vol. VI, published 1889."
+      },
+      {
+        "url": "https://archive.org/details/cu31924021200054",
+        "locator": "International Bureau of the American Republics, Ecuador, printed pp. 2–3 and 16. Attributes the estimate to Cevallos and dates it to 1889."
+      },
+      {
+        "url": "https://www.ecuadorencifras.gob.ec/documentos/web-inec/Bibliotecas/Libros/INEC_Historia_Censos.pdf#page=123",
+        "locator": "INEC, Una mirada histórica a la estadística del Ecuador, printed p. 123, Linda Alexander Rodríguez table. Labels the estimate 1887 and gives Chimborazo as 122,200 and the total as 1,271,761. Cevallos's original p. 32 gives 122,300 and 1,271,861."
+      }
+    ],
+    "boundary_note": "The author describes Galápagos as a dependency of Guayas under the law of 20 August 1885, but the population table has no separate island row or island-scope footnote. Oriente is a broad historical territory. Its estimated residents cannot be split along the opening polygon from this table."
+  },
+  {
+    "id": "ecuador_chicago_1894",
+    "title": "Luis Felipe Carbo, ed., El Ecuador en Chicago",
+    "publisher": "Diario de Avisos, Guayaquil. A. E. Chasmar y Cía., New York, 1894. Biblioteca Nacional del Ecuador Eugenio Espejo digitization.",
+    "url": "https://es.scribd.com/document/506504830/Ecuador-en-Chicago",
+    "locator": "Printed p. 367, Área and Población, 16 population entries and national estimate.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "boundary_note": "The geographical section reports 714,860 km² including the Galápagos. Population is expressly approximate and compiled from official documents. Galápagos residents are grouped with Guayas. The 85,000 for the eastern territories cannot be divided by the opening boundary."
+  },
+  {
+    "id": "ecuador_paris_1900_britannica",
+    "title": "La République de l’Équateur et sa participation à l’Exposition Universelle de 1900, reported in Encyclopædia Britannica, 11th ed., vol. VIII, Ecuador",
+    "publisher": "Imprimerie du Correo de Paris, Paris, 1900 exhibition publication. Extracted here from the 1911 Encyclopædia Britannica transcription.",
+    "url": "https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Ecuador",
+    "locator": "Ecuador, Population and Territorial Divisions and Towns, national figure and provincial Population column. The 1911 article attributes both to the official 1900 publication.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "references": [
+      {
+        "url": "https://archives.seine-et-marne.fr/sites/archives.seine-et-marne.fr/files/media/downloads/242j_ballen_inventaire.pdf#page=16",
+        "locator": "Archives départementales de Seine-et-Marne, Fonds Ballèn de Guzman, 242 J 6, printed p. 16. Catalogue entry for the 78-page Paris booklet."
+      }
+    ],
+    "boundary_note": "The original booklet is located in the archive catalogue. The numbers are from the 1911 transcription. Its table leaves the Oriente population blank and lists the Galápagos separately. The article describes the claimed Oriente as larger than the region then occupied by Ecuador. It does not define the population perimeter of the 1,500,000 headline. The 1894 Chicago estimate gives the same headline but a different breakdown and does not validate this estimate."
+  }
+]

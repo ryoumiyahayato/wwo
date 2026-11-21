@@ -15,6 +15,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
+OPENING_VERSION = 6
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -195,7 +196,7 @@ def main():
                    accounting_role="alternative_reconstruction_nonadditive")
     observations.extend(derived)
     regional_counts["asian_interpolation"]=len(derived)
-    selection=groups(observations, version=5)
+    selection=groups(observations, version=OPENING_VERSION)
     bengal=next(u for g in selection for u in g["units"] if u["unit_id"]=="raj_bengal_province")
     bengal["place_ids"].append("place:kolkata")
     bengal["place_evidence"]={"place:kolkata": {
@@ -263,7 +264,7 @@ def main():
     records("cities_1900.jsonl.gz",city_catalog)
     structural=dimensions(observations)
     structural.append(england_wales_habitations())
-    structure_opening=opening_structure(selection)
+    structure_opening=opening_structure(selection, observations)
     summary["structural_observations_by_source"]=dict(Counter(r["source_id"] for r in structural))
     summary["structure_opening_pool_controls"]=sum(g["opening_total"] for g in structure_opening["groups"])
     summary["structure_opening_pool_count"]=len(structure_opening["groups"])
@@ -292,8 +293,8 @@ def main():
     records("demography_1900.jsonl.gz",structural)
     records("parent_reconciliation.jsonl.gz",audit)
     json_file("opening.json",dict(version=1,groups=groups(observations, version=1)))
-    json_file("opening_v5.json",dict(version=5,groups=selection))
-    json_file("opening_structure_v5.json",structure_opening)
+    json_file(f"opening_v{OPENING_VERSION}.json", dict(version=OPENING_VERSION, groups=selection))
+    json_file(f"opening_structure_v{OPENING_VERSION}.json", structure_opening)
     json_file("sources.json",list(manifest.values()))
     json_file("summary.json",summary)
     json_file("legacy_audit.json",legacy)

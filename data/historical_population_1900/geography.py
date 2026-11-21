@@ -118,8 +118,12 @@ def catalogue(rows, groups):
     partial_roots = {g["unit_id"] for g in groups if "legacy_unlocated_balance" in g}
     dates = {}
     for group in groups:
-        for link in aliases().get(group["unit_id"], [group["unit_id"]]):
+        scope = group.get("collective_scope")
+        links = scope["polity_ids"] if scope else aliases().get(group["unit_id"], [group["unit_id"]])
+        for link in links:
             group_at[link].append(group["unit_id"])
+            if scope:
+                local[link].add(group["unit_id"])
         for leaf in group["units"]:
             key = leaf["unit_id"]
             group_at[key].append(key)
@@ -178,7 +182,7 @@ def catalogue(rows, groups):
     # Source-only statistical territories remain searchable when no dated WWO polygon exists.
     identities=defaultdict(list)
     for r in rows:
-        if r["kind"] in {"country","territory","admin"} and not r["source_id"].startswith("ft_world_"):
+        if r["kind"] in {"country","territory","historical_territory","admin"} and not r["source_id"].startswith("ft_world_"):
             identities[r["unit_id"]].append(r)
     opening_ids={g["unit_id"] for g in groups} | {u["unit_id"] for g in groups for u in g["units"]}
     for key, observed in sorted(identities.items()):
