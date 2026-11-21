@@ -106,7 +106,7 @@ impl InitialWorld {
         economy.markets().iter().filter_map(|(unit, market)| {
             if !self.can_read_polity_record(unit) { return None; }
             let local = self.market_unit_for_person(&self.player().id) == Some(unit.as_str());
-            let place = if local { self.player_current_place() } else { network.capital_node(unit) }?;
+            let place = if local { self.player_current_place() } else { network.area_node(unit) }?;
             let point = self.place_coordinates(place)?;
             let row = market.commodities.get(good)?;
             let stock = (row.inventory * 1000.).floor() as i64;

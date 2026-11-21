@@ -507,7 +507,6 @@ impl NativeSession {
                     page.result.clear();
                 }
             }
-            "region" => page.result = "地区商户和个人配送仍在 R68。".into(),
             "good" if market.commodities.contains_key(id)
                 || (id == "grain" && world.firm_material_orders(None).any(|order| order.pending > 0)) => {
                 page.good = id.into();
