@@ -1084,10 +1084,13 @@ impl Host {
     }
 
     fn planning_transport(&self) -> bool {
-        self.hud.page == HudPage::Travel && self.hud.menu == HudMenu::None
+        let Some(session) = self.state.session.as_ref() else { return false; };
+        let form_visible = self.hud.page == HudPage::Travel
+            || (self.hud.page == HudPage::Market
+                && session.market.as_ref().is_some_and(|market| market.content == "freight"));
+        form_visible && self.hud.menu == HudMenu::None
             && self.hud.transport_directory.is_none() && self.search.is_none() && !self.details
-            && self.state.session.as_ref().and_then(|s| s.transport.as_ref())
-                .is_some_and(transport_ui::TransportView::planning)
+            && session.transport.as_ref().is_some_and(transport_ui::TransportView::planning)
     }
 
     fn pick_transport_destination(&mut self, point: [f64; 2], place: Option<usize>) -> bool {
@@ -1484,7 +1487,8 @@ impl Host {
                     if let Some(i)=self.player_polity(){self.click_country(i,p);}
                 }
                 Action::Select(_) if self.hud.market_map=>{},
-                Action::Select(object) if self.hud.page == HudPage::Travel && self.search.is_none() => {
+                Action::Select(object) if self.search.is_none()
+                    && (self.hud.page == HudPage::Travel || self.planning_transport()) => {
                     let place = match object { Object::Place(index) => Some(index), _ => None };
                     self.pick_transport_destination(p, place);
                 }
