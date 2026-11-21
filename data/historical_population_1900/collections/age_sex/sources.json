@@ -31,5 +31,26 @@
       "https://usa.ipums.org/usa/resources/voliii/pubdocs/1900/Vol2/33405927v2ch04.pdf",
       "https://www2.census.gov/library/publications/decennial/1900/abstract/1900-census-1902-abstract.pdf"
     ]
+  },
+  {
+    "id": "uk_census_1901_county_ages",
+    "title": "Census of England and Wales, 1901. Summary Tables",
+    "publisher": "General Register Office / HMSO, London; Wellcome Collection",
+    "url": "https://wellcomecollection.org/works/ka7g6w5z/items?manifest=6&canvas=166",
+    "locator": "Cd. 1523, Table XXVI, printed pp. 156–159; ancient county and component controls, Tables II, III, IX and XI, pp. 5, 6, 43, 50 and 73",
+    "rights": "Historical census facts transcribed. Wellcome Collection marks the digitized volume Public Domain Mark.",
+    "raw_path": "uk_county_age.csv",
+    "table_urls": [
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0166.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0167.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0168.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0169.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0015.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0016.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0053.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0060.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0083.jp2/full/2900,/0/default.jpg"
+    ],
+    "scope_note_url": "https://www.visionofbritain.org.uk/census/EW1901GEN/4"
   }
 ]

@@ -1,7 +1,7 @@
 use serde_json::json;
 use std::{error::Error, io, path::Path};
 use wwo_map_lab::battlefield_terrain::{BattlefieldTerrain, REGION_ID};
-use wwo_map_lab::formal_population::historical_food::{historical_food_case, HISTORICAL_FOOD_CASES};
+use wwo_map_lab::formal_population::historical_food::{historical_food_case, HISTORICAL_FOOD_CASES, TOKYO_SHINAMI_HOUSEHOLD};
 use wwo_map_lab::{formal_bootstrap::WorldBootstrap, formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_population::{city_population_reference, population_archive}, formal_save::{read_native_slot, SavedWorld}};
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -118,7 +118,11 @@ fn main() -> Result<(), Box<dyn Error>> {
             }).collect::<Vec<_>>();
             let admitted = population.admitted_opening(unit);
             let scope = if !partitions.is_empty() {
-                if admitted.is_some() { "partitioned_aggregate" } else { "partially_located_legacy_aggregate" }
+                match admitted {
+                    Some(estimate) if estimate.research_unlocated_balance.is_some() => "partially_located_historical_aggregate",
+                    Some(_) => "partitioned_aggregate",
+                    None => "partially_located_legacy_aggregate",
+                }
             } else if population.totals().contains_key(unit) {
                 "national_market"
             } else if population.standalone_totals().contains_key(unit) {
@@ -138,6 +142,25 @@ fn main() -> Result<(), Box<dyn Error>> {
                 "legacy_estimate": population.opening_estimate(unit)?,
                 "partitions": partitions,
                 "structure": population.structure(Some(unit), world.clock()),
+            }));
+        }
+        Some("inspect-age-range") => {
+            let unit = args.next().ok_or_else(usage)?;
+            let unit = unit.to_str().ok_or_else(usage)?;
+            let youngest = args.next().ok_or_else(usage)?.to_str().ok_or_else(usage)?.parse()?;
+            let oldest = args.next().ok_or_else(usage)?.to_str().ok_or_else(usage)?.parse()?;
+            let input = args.next();
+            if args.next().is_some() { return Err(usage().into()); }
+            let bootstrap = WorldBootstrap::load()?;
+            let world = match input {
+                Some(path) => read_native_slot(Path::new(&path), &bootstrap)?,
+                None => bootstrap.create("country_fra")?,
+            };
+            let scope = (unit != "world").then_some(unit);
+            println!("{}", json!({
+                "date": world.clock().current_date(),
+                "unit_id": unit,
+                "availability": world.resident_age_availability(scope, youngest, oldest)?,
             }));
         }
         Some("inspect-intake") => {
@@ -160,11 +183,18 @@ fn main() -> Result<(), Box<dyn Error>> {
             if args.next().is_some() { return Err(usage().into()); }
             if let Some(id) = input.as_deref() {
                 let id = id.to_str().ok_or_else(usage)?;
-                let case = historical_food_case(id)
-                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown historical food account"))?;
-                println!("{}", serde_json::to_string(case)?);
+                if id == TOKYO_SHINAMI_HOUSEHOLD.id {
+                    println!("{}", serde_json::to_string(&TOKYO_SHINAMI_HOUSEHOLD)?);
+                } else {
+                    let case = historical_food_case(id)
+                        .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown historical food account"))?;
+                    println!("{}", serde_json::to_string(case)?);
+                }
             } else {
-                println!("{}", serde_json::to_string(HISTORICAL_FOOD_CASES)?);
+                let mut cases = HISTORICAL_FOOD_CASES.iter().map(serde_json::to_value)
+                    .collect::<Result<Vec<_>, _>>()?;
+                cases.push(serde_json::to_value(&TOKYO_SHINAMI_HOUSEHOLD)?);
+                println!("{}", serde_json::to_string(&cases)?);
             }
         }
         Some("inspect-wages") => {
@@ -218,5 +248,5 @@ fn show(saved: &SavedWorld) {
 
 fn usage() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput,
-        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <world|unit-id|city:city-key|history:unit-id> [<native-save>], inspect-intake <native-save> <person-id>, inspect-food-history [<case-id>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
+        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <world|unit-id|city:city-key|history:unit-id> [<native-save>], inspect-age-range <world|unit-id> <youngest> <oldest> [<native-save>], inspect-intake <native-save> <person-id>, inspect-food-history [<case-id>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
 }

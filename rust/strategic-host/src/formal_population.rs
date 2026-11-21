@@ -182,7 +182,7 @@ impl Population {
 
     pub(crate) fn residence_parent(&self, unit: &str) -> Option<&str> {
         let (id, _) = self.totals.get_key_value(unit).or_else(|| self.standalone.get_key_value(unit))?;
-        if self.opening.as_ref().is_some_and(|opening| opening.estimate(unit).is_some()
+        if self.opening.as_ref().is_some_and(|opening| opening.estimate(unit).is_some_and(|estimate| estimate.research_unlocated_balance.is_none())
             && opening.partitions.values().any(|part| part.parent == unit)) {
             return None;
         }

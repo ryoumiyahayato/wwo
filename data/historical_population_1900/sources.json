@@ -76,6 +76,28 @@
     "collection": "age_sex"
   },
   {
+    "id": "uk_census_1901_county_ages",
+    "title": "Census of England and Wales, 1901. Summary Tables",
+    "publisher": "General Register Office / HMSO, London; Wellcome Collection",
+    "url": "https://wellcomecollection.org/works/ka7g6w5z/items?manifest=6&canvas=166",
+    "locator": "Cd. 1523, Table XXVI, printed pp. 156–159; ancient county and component controls, Tables II, III, IX and XI, pp. 5, 6, 43, 50 and 73",
+    "rights": "Historical census facts transcribed. Wellcome Collection marks the digitized volume Public Domain Mark.",
+    "raw_path": "uk_county_age.csv",
+    "table_urls": [
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0166.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0167.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0168.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0169.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0015.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0016.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0053.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0060.jp2/full/2900,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0083.jp2/full/2900,/0/default.jpg"
+    ],
+    "scope_note_url": "https://www.visionofbritain.org.uk/census/EW1901GEN/4",
+    "collection": "age_sex"
+  },
+  {
     "id": "us_twelfth_census_vol1",
     "title": "Twelfth Census of the United States, Volume I, Population Part I",
     "publisher": "U.S. Census Office",
@@ -406,6 +428,58 @@
     "collection": "cabo_verde"
   },
   {
+    "id": "cape_colony_1899_imperial_conference",
+    "title": "Conference between the Secretary of State for the Colonies and the Prime Ministers of Self-Governing Colonies, June to August 1902",
+    "publisher": "New Zealand House of Representatives, published as Appendix to the Journals of the House of Representatives, 1903, Session I, A-02a. Digitized by the National Library of New Zealand.",
+    "url": "https://paperspast.natlib.govt.nz/parliamentary/AJHR1903-I.2.1.2.9",
+    "locator": "Table of British military and naval expenditure by colony, Cape of Good Hope row, Population column.",
+    "rights": "Selected numerical facts from the printed official tables and statutes.",
+    "contemporary_cross_check": {
+      "url": "https://www66.statcan.gc.ca/eng/1902/190200710057_Area%2C%20Population.pdf",
+      "locator": "Statistical Year-Book of Canada, 1902, p. 57, Cape Colony row. The date column gives 1899 and the population column gives 2,265,556."
+    },
+    "boundary_sources": [
+      {
+        "url": "https://books.google.com/books?id=8XgKAAAAIAAJ&pg=PR3&vq=188%2C000",
+        "locator": "Statistical Register of the Colony of the Cape of Good Hope, 1899, p. iii. The 1891 census area has 2,004,821 residents. The introduction lists 188,000 for Pondoland and 72,736 for annexed British Bechuanaland. These three components sum to 2,265,557, one above the published conference total."
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Imperial_fiscal_reform_%28IA_imperialfiscalre00cail%29.pdf",
+        "locator": "Imperial Fiscal Reform, p. 39, Cape Colony row and note §. The 1899 figure includes Pondoland and British Bechuanaland."
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/5/51/Select_constitutional_documents_illustrating_South_African_history%2C_1795-1910_%28IA_cu31924030542165%29.pdf",
+        "locator": "Select Constitutional Documents Illustrating South African History, pp. 67–68, documents 40 and 41, Basutoland Disannexation Act, 1883, and Walfish Bay and St. John’s River Territories Annexation Act, 1884."
+      },
+      {
+        "url": "https://www2.lib.uct.ac.za/govpubs/legislation/index.php?cat=cape&id=1645&op=show",
+        "locator": "University of Cape Town Government Publications legislation catalogue, British Bechuanaland Annexation Act, 1895."
+      },
+      {
+        "url": "https://hansard.parliament.uk/Commons/1900-03-12/debates/099a27bf-2151-4723-a7cc-9cac166d14a4/Questions",
+        "locator": "Hansard, 12 March 1900, answer on martial law in Cape Colony, lists Mafeking as a Cape district."
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Magisterial_reports_having_reference_to_the_occupation_by_the_enemy_of%2C_and_the_attitude_of_the_population_in%2C_the_districts_now_or_recently_under_martial_law_%28IA_magisterialrepor00cape%29.pdf",
+        "locator": "Cape House of Assembly, Magisterial Reports, Mafeking, report 2/750 D. 1900. Transvaal forces occupied surrounding parts of the district while the town remained under siege."
+      }
+    ],
+    "collection": "cape_population"
+  },
+  {
+    "id": "cape_colony_1900_statistical_register",
+    "title": "Statistical Register of the Colony of the Cape of Good Hope, 1900, with supplementary returns to 30 June 1901",
+    "publisher": "Colonial Secretary’s Office, Cape of Good Hope. W. A. Richards & Sons, Government Printers, Cape Town, 1901. Digitized by Google Books.",
+    "url": "https://books.google.com/books?id=63cKAAAAIAAJ&pg=PR3",
+    "locator": "Introductory review, p. iii, Area, Population and Electors. The reported estimate refers to December 1900.",
+    "rights": "Selected numerical facts from the printed official statistical register.",
+    "contemporary_cross_check": {
+      "url": "https://en.wikisource.org/wiki/Page:1902_Encyclop%C3%A6dia_Britannica_-_Volume_26_-_AUS-CHI.pdf/613",
+      "locator": "Encyclopædia Britannica, 10th edition, vol. 26, p. 565, Cape Colony, Area and Population. The 1900 table agrees with the register and describes the legal extent."
+    },
+    "collection": "cape_population"
+  },
+  {
     "id": "insee_sgf_censuses",
     "title": "Données historiques de la Statistique générale de France — Recensements de 1851 à 1921",
     "publisher": "Statistique générale de la France; ICPSR transcription; Insee electronic tables (12 January 2010)",
@@ -638,6 +712,19 @@
     "collection": "eastern"
   },
   {
+    "id": "england_wales_census_1901_general_report",
+    "title": "Census of England and Wales, 1901. General Report with Appendices, Cd. 2174",
+    "publisher": "General Register Office and His Majesty's Stationery Office, London, 1904",
+    "url": "https://www.visionofbritain.org.uk/census/report_page.jsp?rpt_id=EW1901GEN",
+    "locator": "Sections II.1 and II.4, Population and Rates of Increase; section III, Habitations, printed pp. 39–41",
+    "rights": "1904 report. Numeric facts extracted from the published census tables.",
+    "tables": {
+      "population": "https://www.visionofbritain.org.uk/census/EW1901GEN/4",
+      "habitations": "https://visionofbritain.org.uk/census/EW1901GEN/5"
+    },
+    "collection": "england_wales_habitations"
+  },
+  {
     "id": "india_census_1901_comparable_area",
     "title": "Census of India, 1901, Vol. I-A, India, Part II, Tables. Government of India, 1903.",
     "publisher": "Government of India, 1903",
@@ -697,6 +784,31 @@
     "collection": "japan_taiwan"
   },
   {
+    "id": "dutch_jaarcijfers_colonien_1899",
+    "title": "Jaarcijfers voor het Koninkrijk der Nederlanden: Koloniën, 1899",
+    "publisher": "Centraal Bureau voor de Statistiek, Gebr. Belinfante, The Hague, 1901. Scan hosted by SEADELT.",
+    "url": "https://seadelt.net/Asset/Source/Document_ID-112_No-01.pdf#page=23",
+    "locator": "Oost-Indië, printed p. 2 (PDF p. 23), II.I.A, Java en Madoera, 31 Dec. 1896, aggregate row and notes 1–2.",
+    "rights": "Numerical facts transcribed from the official printed table. Source scans remain with their archives.",
+    "note": "The edition year is 1899. The population table explicitly dates its latest figures to 31 December 1896 and calls them provisional. The underlying source is the Regeerings-Almanak voor Nederlandsch-Indië for 1898.",
+    "collection": "java_madoera"
+  },
+  {
+    "id": "dutch_jaarcijfers_colonien_1900",
+    "title": "Jaarcijfers voor het Koninkrijk der Nederlanden: Koloniën, 1900",
+    "publisher": "Centraal Bureau voor de Statistiek, Gebr. Belinfante, The Hague, 1902. Scan hosted by SEADELT.",
+    "url": "https://seadelt.net/Asset/Source/Document_ID-111_No-01.pdf#page=23",
+    "locator": "Oost-Indië, printed pp. 2–3 (PDF pp. 23–24), II.I.A–B. A is Java en Madoera, 31 Dec. 1900. B covers the Outer Possessions separately.",
+    "rights": "Numerical facts transcribed from the official printed table. Source scans remain with their archives.",
+    "note": "The aggregate row is a five-year colonial enumeration with incomplete returns for private estates and excludes army and navy personnel. The 1901 consolidation of five residencies changes the table's internal areas. It leaves the Java and Madura aggregate intact.",
+    "contemporary_cross_check": {
+      "url": "https://seadelt.net/Asset/Source/Document_ID-122_No-01.pdf#page=24",
+      "locator": "CBS Koloniën 1904 edition (1906), printed p. 2 (PDF p. 24), III.I.A and the same 1900 row.",
+      "note": "The later edition prints 28,746,638. Its printed component counts sum to 28,747,028, a difference of 390. The 1900 edition supplies the explicit date and a consistent aggregate row."
+    },
+    "collection": "java_madoera"
+  },
+  {
     "id": "li_statistisches_tabellenwerk_1960",
     "title": "Statistisches Tabellenwerk Liechtenstein, Heft 1 (1960)",
     "publisher": "Amt für Statistik des Fürstentums Liechtenstein, Vaduz",
@@ -737,6 +849,21 @@
       "opening_population_of_these_islands_and_dependencies": null
     },
     "collection": "philippines"
+  },
+  {
+    "id": "borchgrevink_southern_cross_expedition",
+    "title": "First on the Antarctic Continent: Being an Account of the British Antarctic Expedition, 1898–1900",
+    "publisher": "Carsten E. Borchgrevink, George Newnes, London, 1901",
+    "url": "https://www.biodiversitylibrary.org/bibliography/98387",
+    "locator": "Chapters IV and VIII, pp. 100–124 and 250–253, Camp Ridley shore party, death and relief; Borchgrevink's 1900 address independently reported in the New Zealand Herald",
+    "rights": "1901 book and 1900 newspaper. Numeric facts only.",
+    "corroboration": [
+      "https://www.jstor.org/stable/j.ctt1w1vmgp.12",
+      "https://paperspast.natlib.govt.nz/newspapers/NZH19001027.2.72.46",
+      "https://www.freezeframe.ac.uk/resources/expeditions/antarctic/british-antarctic-expedition-1898-1900/british-antarctic-expedition-1898-1900",
+      "https://nzaht.org/conserve/explorer-bases/borchgrevinks-hut-cape-adare/history-of-borchgrevinks-expedition/"
+    ],
+    "collection": "polar_presence"
   },
   {
     "id": "ro_colescu_1899_census_report",

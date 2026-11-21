@@ -1,0 +1,104 @@
+[
+  {
+    "id": "uk_county_age_anglesey_1901",
+    "source_id": "uk_census_1901_county_ages",
+    "locator": "Table XXVI, printed pp. 156–157, Anglesey; area and population, Tables II, III and IX, printed pp. 5, 6 and 43",
+    "published_scope": "Administrative County of Anglesey",
+    "observed_unit_id": "uk_ancient_area_anglesey",
+    "observed_date": "1901-03-31",
+    "definition": "Age at last birthday. Ancient and administrative county returns agree at 176,630 statute acres, with the same 1891 persons count and 1901 persons, male and female counts. Under 5 years is a published subtotal. Printed dashes indicate zero counts.",
+    "opening_unit_id": "administrative_region:gb_historic_anglesey",
+    "uncertainty": "Changes in age and sex shares between January 1900 and March 1901 are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "uk_county_age_carmarthenshire_1901",
+    "source_id": "uk_census_1901_county_ages",
+    "locator": "Table XXVI, printed pp. 156–157, Carmarthenshire; area and population, Tables II, III and IX, printed pp. 5, 6 and 43",
+    "published_scope": "Administrative County of Carmarthenshire",
+    "observed_unit_id": "uk_ancient_area_carmarthenshire",
+    "observed_date": "1901-03-31",
+    "definition": "Age at last birthday. Ancient and administrative county returns agree at 587,816 statute acres, with the same 1891 persons count and 1901 persons, male and female counts. Under 5 years is a published subtotal. Printed dashes indicate zero counts.",
+    "opening_unit_id": "administrative_region:gb_historic_carmarthenshire",
+    "uncertainty": "Changes in age and sex shares between January 1900 and March 1901 are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "uk_county_age_montgomeryshire_1901",
+    "source_id": "uk_census_1901_county_ages",
+    "locator": "Table XXVI, printed pp. 158–159, Montgomeryshire; area and population, Tables II, III and IX, printed pp. 5, 6 and 43",
+    "published_scope": "Administrative County of Montgomeryshire",
+    "observed_unit_id": "uk_ancient_area_montgomeryshire",
+    "observed_date": "1901-03-31",
+    "definition": "Age at last birthday. Ancient and administrative county returns agree at 510,111 statute acres, with the same 1891 persons count and 1901 persons, male and female counts. Under 5 years is a published subtotal. Printed dashes indicate zero counts.",
+    "opening_unit_id": "administrative_region:gb_historic_montgomeryshire",
+    "uncertainty": "Changes in age and sex shares between January 1900 and March 1901 are unquantified.",
+    "broad_observation": false
+  },
+  {
+    "id": "uk_county_age_radnorshire_1901",
+    "source_id": "uk_census_1901_county_ages",
+    "locator": "Table XXVI, printed pp. 158–159, Radnorshire; area and population, Tables II, III and IX, printed pp. 5, 6 and 43",
+    "published_scope": "Administrative County of Radnorshire",
+    "observed_unit_id": "uk_ancient_area_radnorshire",
+    "observed_date": "1901-03-31",
+    "definition": "Age at last birthday. Ancient and administrative county returns agree at 301,164 statute acres, with the same 1891 persons count and 1901 persons, male and female counts. Under 5 years is a published subtotal. Printed dashes indicate zero counts.",
+    "opening_unit_id": "administrative_region:gb_historic_radnorshire",
+    "uncertainty": "Changes in age and sex shares between January 1900 and March 1901 are unquantified. The General Report records a temporary Birmingham waterworks construction workforce during the census.",
+    "broad_observation": false
+  },
+  {
+    "id": "uk_county_age_glamorganshire_administrative_county_1901",
+    "source_id": "uk_census_1901_county_ages",
+    "locator": "Table XXVI, printed pp. 158–159, Administrative County of Glamorganshire excluding county boroughs; area and population, Table IX, printed p. 43",
+    "published_scope": "Administrative County of Glamorganshire excluding county boroughs",
+    "observed_unit_id": "uk_1901_glamorganshire_administrative_county",
+    "observed_date": "1901-03-31",
+    "definition": "Age at last birthday. The published area is 507,296 statute acres. Under 5 years is a published subtotal. Printed dashes indicate zero counts.",
+    "broad_observation": false
+  },
+  {
+    "id": "uk_county_age_cardiff_county_borough_1901",
+    "source_id": "uk_census_1901_county_ages",
+    "locator": "Table XXVI, printed pp. 158–159, County Borough of Cardiff; area and population, Table XI, printed p. 50",
+    "published_scope": "County Borough of Cardiff",
+    "observed_unit_id": "uk_1901_cardiff_county_borough",
+    "observed_date": "1901-03-31",
+    "definition": "Age at last birthday. The published area is 6,373 statute acres. Under 5 years is a published subtotal. Printed dashes indicate zero counts.",
+    "broad_observation": false
+  },
+  {
+    "id": "uk_county_age_swansea_county_borough_1901",
+    "source_id": "uk_census_1901_county_ages",
+    "locator": "Table XXVI, printed pp. 158–159, County Borough of Swansea; area and population, Table XI, printed p. 73",
+    "published_scope": "County Borough of Swansea",
+    "observed_unit_id": "uk_1901_swansea_county_borough",
+    "observed_date": "1901-03-31",
+    "definition": "Age at last birthday. The published area is 5,194 statute acres. Under 5 years is a published subtotal. Printed dashes indicate zero counts. The printed male count at age two, 1,032, is 50 short of the difference between the printed persons and female counts. The printed count is retained here.",
+    "broad_observation": false
+  },
+  {
+    "id": "uk_county_age_glamorganshire_1901",
+    "source_id": "uk_census_1901_county_ages",
+    "locator": "Table XXVI, printed pp. 158–159, Glamorganshire, Cardiff and Swansea; area and population, Tables II, III, IX and XI, pp. 5, 6, 43, 50 and 73",
+    "published_scope": "Ancient County of Glamorganshire",
+    "observed_unit_id": "uk_ancient_area_glamorganshire",
+    "observed_date": "1901-03-31",
+    "definition": "Sum of the administrative county and the separately published Cardiff and Swansea county boroughs across identical age and sex groups. The components match the ancient county's 518,863 statute acres, 157,514 inhabited houses in 1901, 687,218 people in 1891 and 859,931 people in 1901 (443,762 male and 416,169 female). Swansea has 2,188 persons and 1,106 females at age two. The residual 1,082 males also closes the published male under-five subtotal and all-ages total. The derived aggregate uses 1,082 in place of the component observation's printed 1,032.",
+    "component_panels": [
+      "uk_county_age_glamorganshire_administrative_county_1901",
+      "uk_county_age_cardiff_county_borough_1901",
+      "uk_county_age_swansea_county_borough_1901"
+    ],
+    "component_count_corrections": {
+      "uk_county_age_swansea_county_borough_1901": {
+        "2—": {
+          "male": 1082
+        }
+      }
+    },
+    "opening_unit_id": "administrative_region:gb_historic_glamorgan",
+    "uncertainty": "The source counts 1901 administrative Glamorganshire, Cardiff and Swansea separately. The combined age shares use 1,082 as the residual male count at age two in Swansea. Changes in age and sex shares between January 1900 and March 1901 are unquantified.",
+    "broad_observation": false
+  }
+]

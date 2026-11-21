@@ -177,6 +177,23 @@ pub fn published_energy_reference(
     )
 }
 
+pub(super) fn adult_water_references(
+    age_years: Option<AgeYears>, sex: Option<CohortSex>,
+) -> Option<(QuantityRange, QuantityRange)> {
+    let input = PhysiologicalInputs {
+        age_years,
+        sex,
+        water_conditions: Some(WaterConditions::Temperate),
+        ..PhysiologicalInputs::default()
+    };
+    let temperate = water(input).ok()?;
+    let warm_work = water(PhysiologicalInputs {
+        water_conditions: Some(WaterConditions::ModerateWorkInWarmClimate),
+        ..input
+    }).ok()?;
+    Some((temperate, warm_work))
+}
+
 fn requirement(range: Result<QuantityRange, UnknownNeed>, source: NeedSource) -> Requirement {
     match range {
         Ok(range) => Requirement::Known { range, source },

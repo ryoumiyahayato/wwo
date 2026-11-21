@@ -3,7 +3,7 @@ use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, io, sync::OnceLock};
 
-pub(crate) const CURRENT_VERSION: u32 = 3;
+pub(crate) const CURRENT_VERSION: u32 = 4;
 
 #[derive(Debug, Serialize)]
 pub struct OpeningPopulationEstimate {
@@ -11,6 +11,8 @@ pub struct OpeningPopulationEstimate {
     pub source_id: String,
     pub locator: String,
     pub method: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub research_unlocated_balance: Option<u64>,
     #[serde(flatten)]
     context: EstimateContext,
 }
@@ -56,6 +58,7 @@ struct Group {
     context: EstimateContext,
     units: Vec<Unit>,
     legacy_unlocated_balance: Option<u64>,
+    research_unlocated_balance: Option<u64>,
 }
 
 #[derive(Deserialize)]
@@ -82,7 +85,8 @@ impl HistoricalOpening {
         let bytes: &[u8] = match version {
             1 => include_bytes!("../../../../data/historical_population_1900/opening.json"),
             2 => include_bytes!("../../../../data/historical_population_1900/opening_v2.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v3.json"),
+            3 => include_bytes!("../../../../data/historical_population_1900/opening_v3.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v4.json"),
             _ => return Err(invalid("unsupported historical population opening version")),
         };
         let manifest: Manifest = serde_json::from_slice(bytes)?;
@@ -127,6 +131,7 @@ impl HistoricalOpening {
                     population_value: leaf.population_value, source_id: leaf.source_id.unwrap_or_else(|| group.source_id.clone()),
                     locator: leaf.locator.unwrap_or_else(|| group.locator.clone()),
                     method: leaf.method.unwrap_or_else(|| group.method.clone()),
+                    research_unlocated_balance: None,
                     context: EstimateContext {
                         date: leaf.context.date.or_else(|| group.context.date.clone()),
                         scope: leaf.context.scope,
@@ -140,19 +145,22 @@ impl HistoricalOpening {
                 opening.partitions.insert(id, Partition { parent: root.clone(), name: leaf.name });
             }
             if let Some(residual) = group.legacy_unlocated_balance {
-                if !partitioned || remaining != residual || legacy.get(&root) != Some(&group.population_value) {
+                if !partitioned || remaining != residual || legacy.get(&root) != Some(&group.population_value)
+                    || group.research_unlocated_balance.is_some() {
                     return Err(invalid(format!("unlocated balance differs from the legacy control for {root}")));
                 }
                 // The verified leaves already debit this pool. Its control retains its
                 // original provenance and must not be exposed as a historical observation.
                 continue;
             }
-            if partitioned && remaining != 0 {
+            if partitioned && remaining != group.research_unlocated_balance.unwrap_or(0)
+                || !partitioned && group.research_unlocated_balance.is_some() {
                 return Err(invalid(format!("historical population partitions do not sum to {root}")));
             }
             if opening.estimates.insert(root.clone(), OpeningPopulationEstimate {
                 population_value: group.population_value, source_id: group.source_id,
                 locator: group.locator, method: group.method, context: group.context,
+                research_unlocated_balance: group.research_unlocated_balance,
             }).is_some() {
                 return Err(invalid(format!("repeated historical population group {root}")));
             }
@@ -165,7 +173,8 @@ impl HistoricalOpening {
         }
         let demography: &[u8] = match version {
             2 => include_bytes!("../../../../data/historical_population_1900/opening_structure.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v3.json"),
+            3 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v3.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v4.json"),
             _ => return Ok(opening),
         };
         opening.demography = OpeningDemography::load(&opening, demography)?;

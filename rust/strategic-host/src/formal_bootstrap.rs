@@ -6,7 +6,7 @@ use crate::{
     formal_ledger::{Balance, Ledger, CURRENCY, MAX_AMOUNT},
     formal_livelihood::{self, Livelihood},
     formal_macro::{CountryInputs, MacroEconomy, MarketInputs, Shipment},
-    formal_population::{CohortId, HistoricalOpening, Population, PopulationSnapshot, MAX_POPULATION},
+    formal_population::{AgeRangeCoverage, CohortId, HistoricalOpening, Population, PopulationSnapshot, MAX_POPULATION},
     formal_save::{invalid, typed_map},
     formal_service::{ServiceRoster, ServiceSnapshot, ServiceTarget},
     formal_step::next_day_boundary,
@@ -193,7 +193,7 @@ impl RuntimePerson {
 pub struct WorldBootstrap {
     organization_directory: Arc<OrganizationDirectory>,
     world: Arc<WorldSources>,
-    archived_population_worlds: [std::sync::OnceLock<io::Result<Arc<WorldSources>>>; 2],
+    archived_population_worlds: [std::sync::OnceLock<io::Result<Arc<WorldSources>>>; 3],
     populations: BTreeMap<String, u64>,
     historical_population: Arc<HistoricalOpening>,
     markets: Arc<MarketInputs>,
@@ -256,6 +256,20 @@ pub struct InitialWorld {
     freight: freight::FreightBook,
     land_battle: Option<WorldLandBattle>,
     land_battle_history: Vec<WorldLandBattle>,
+}
+
+#[derive(Serialize)]
+pub struct ResidentAgeAvailability {
+    pub population_total: u64,
+    pub youngest: u16,
+    pub oldest: u16,
+    pub anonymous: AgeRangeCoverage,
+    pub anonymous_outside_active_service: AgeRangeCoverage,
+    pub named_in_age_range: u64,
+    pub named_in_age_range_eligible_for_civilian_work: u64,
+    pub named_in_age_range_in_active_service: u64,
+    pub named_in_active_service_all_ages: u64,
+    pub anonymous_in_active_service_all_ages: u64,
 }
 
 #[derive(Deserialize)]
@@ -1097,6 +1111,43 @@ impl InitialWorld {
             .map(|character| character.profile).map_err(io::Error::other)
     }
 
+    /// Age-range bounds and actual service assignments for statistical residents.
+    /// Eligibility for named civilian work is taken from the existing character state.
+    pub fn resident_age_availability(
+        &self, unit: Option<&str>, youngest: u16, oldest: u16,
+    ) -> io::Result<ResidentAgeAvailability> {
+        let structure = self.population.structure(unit, self.clock)
+            .ok_or_else(|| invalid("unknown statistical population unit"))?;
+        let anonymous = structure.count_ages(youngest, oldest)
+            .ok_or_else(|| invalid("age range endpoints are inverted"))?;
+        let anonymous_outside_active_service = structure.count_cohort_ages(youngest, oldest, |cohort| {
+            cohort.members - self.service.cohort_serving(cohort.unit_id, cohort.id)
+        }).expect("age range was validated");
+        let mut result = ResidentAgeAvailability {
+            population_total: structure.population_total, youngest, oldest,
+            anonymous_in_active_service_all_ages: anonymous.population_total - anonymous_outside_active_service.population_total,
+            anonymous, anonymous_outside_active_service, named_in_age_range: 0,
+            named_in_age_range_eligible_for_civilian_work: 0, named_in_age_range_in_active_service: 0,
+            named_in_active_service_all_ages: 0,
+        };
+        let range = u32::from(youngest)..=u32::from(oldest);
+        for person in self.identities.keys() {
+            let Some(pool) = self.population.unit_for_person(person) else { continue; };
+            if unit.is_some_and(|unit| pool != unit && self.population.parent_unit(pool) != Some(unit)) {
+                continue;
+            }
+            let serving = self.service.named_target(person).is_some();
+            result.named_in_active_service_all_ages += u64::from(serving);
+            if range.contains(&self.person_profile(person)?.age_years) {
+                result.named_in_age_range += 1;
+                result.named_in_age_range_in_active_service += u64::from(serving);
+                result.named_in_age_range_eligible_for_civilian_work +=
+                    u64::from(self.eligible_for_civil_work(person));
+            }
+        }
+        Ok(result)
+    }
+
     pub fn background_population(&self, unit: &str) -> Option<u64> {
         self.population.background(unit)
     }
@@ -1340,11 +1391,14 @@ impl WorldBootstrap {
     fn base_opening_version(&self, source_id: &str, prologue: Option<Prologue>, version: Option<u32>) -> io::Result<InitialWorld> {
         let sources = match version {
             Some(version) if version == self.historical_population.version() => &self.world,
-            Some(1 | 2) | None => {
+            Some(1 | 2 | 3) | None => {
                 let archived_version = version.unwrap_or(1);
                 self.archived_population_worlds[(archived_version - 1) as usize].get_or_init(|| {
+                    let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
                     let opening = HistoricalOpening::load(archived_version, &self.populations,
-                        |id| self.world.polities.contains_key(id), |place| self.world.opening_parent_at(place))?;
+                        |id| self.world.polities.contains_key(id), |place| {
+                            self.world.opening_parent_at(place).or_else(|| dated_jurisdictions.get(place).map(String::as_str))
+                        })?;
                     Ok(Arc::new(WorldSources { historical_population: Some(Arc::new(opening)), ..self.world.as_ref().clone() }))
                 }).as_ref().map_err(|error| invalid(error.to_string()))?
             }
@@ -2045,7 +2099,9 @@ mod tests {
             } else {
                 let unassigned = population.resident_pool(root).unwrap();
                 assert_eq!(unassigned + partitions.map(|(_, _, count)| count).sum::<u64>(), value);
-                if population.admitted_opening(root).is_some() { assert_eq!(unassigned, 0); }
+                if let Some(estimate) = population.admitted_opening(root) {
+                    assert_eq!(unassigned, estimate.research_unlocated_balance.unwrap_or(0));
+                }
                 partitioned_roots += 1;
             }
         }
@@ -2068,6 +2124,10 @@ mod tests {
         assert_eq!(world.residence_unit_at("place:alexandria"), Some("egy_madina_alexandria"));
         assert_eq!(world.population().population_total("egy_madina_cairo"), Some(592_087));
         assert_eq!(world.population().population_total("khedivate_of_egypt"), Some(10_000_000));
+        assert_eq!(world.population().population_total("cshapes_gw_561"), Some(2_265_556));
+        assert_eq!(world.population().population_total("cshapes_gw_850"), Some(44_363_679));
+        assert_eq!(world.population().population_total("java_madoera_colonial_population"), Some(28_092_332));
+        assert_eq!(world.population().resident_pool("cshapes_gw_850"), Some(16_271_347));
         let us = world.population().structure(Some("united_states_1900"), clock).unwrap();
         assert_eq!(us.population_total, 75_454_976);
         assert_eq!(us.cohort_residents + us.named_residents, us.population_total);
@@ -2076,6 +2136,10 @@ mod tests {
         assert_eq!(initial.population_total,
             initial.named_residents + initial.unclassified_residents + initial.cohort_residents);
         assert!(initial.residents_with_cohort_age_and_sex > 0);
+        let water = &initial.published_adult_water_references;
+        assert_eq!(water.adults_with_reference + water.residents_outside_reference, initial.population_total);
+        assert!(water.adults_with_reference > 0 && water.adults_with_reference < initial.residents_with_cohort_age_and_sex);
+        assert!(water.temperate_sedentary_litres_per_day.unwrap().upper < water.warm_moderate_work_litres_per_day.unwrap().lower);
         let (cohort, _, _) = world.population().cohorts_in(origin)
             .find(|(_, def, count)| def.sex.is_some() && *count >= 4)
             .unwrap();
@@ -2105,6 +2169,14 @@ mod tests {
         let structure = restored.population().structure(None, clock).unwrap();
         assert_eq!(structure.population_total, 1_457_759_052);
         assert_eq!(structure.residents_with_cohort_age_and_sex, 150_314_640);
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(3)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        assert_eq!(restored.population().global_total(), 1_458_689_022);
+        assert_eq!(restored.residence_unit_at("place:cairo"), Some("egy_madina_cairo"));
+        assert_eq!(restored.population().population_total("java_madoera_colonial_population"), None);
         assert_eq!(restored.snapshot(), old_saved);
     }
 
@@ -2388,6 +2460,22 @@ mod tests {
         let population = world.population_units().clone();
         assert!(world.enlist_named_service(worker, service.clone(), false).is_err());
         world.enlist_named_service(worker, service.clone(), true).unwrap();
+        let mobilized = world.resident_age_availability(Some("country_fra"), 18, 80).unwrap();
+        let available = civilian.resident_age_availability(Some("country_fra"), 18, 80).unwrap();
+        assert_eq!(mobilized.population_total, available.population_total);
+        assert_eq!(mobilized.named_in_age_range, available.named_in_age_range);
+        assert_eq!(mobilized.named_in_age_range_in_active_service, 1);
+        assert_eq!(mobilized.named_in_age_range_eligible_for_civilian_work + 1,
+            available.named_in_age_range_eligible_for_civilian_work);
+        let unit = "ft_russia_empire_ussr";
+        let origin = world.population.structure(Some(unit), world.clock()).unwrap();
+        let cohort = origin.cohorts.iter()
+            .find(|cohort| cohort.members >= 4 && cohort.age_years.is_some_and(|age| age.youngest == 25))
+            .unwrap().id.clone();
+        world.service.enlist_cohort(&world.population, unit, &cohort, service.clone(), 4, 0, true).unwrap();
+        let availability = world.resident_age_availability(Some("russian_empire"), 25, 25).unwrap();
+        assert_eq!(availability.anonymous_in_active_service_all_ages, 4);
+        assert_eq!(availability.anonymous.definitely_in_range - availability.anonymous_outside_active_service.definitely_in_range, 4);
         let managed = BTreeMap::new();
         world.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
         civilian.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap();
@@ -2398,6 +2486,7 @@ mod tests {
         assert_eq!(world.population_units(), &population);
         let mut world = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
         assert_eq!(world.service.named_target(worker), Some(&service));
+        assert_eq!(world.resident_age_availability(Some(unit), 25, 25).unwrap().anonymous_in_active_service_all_ages, 4);
         world.discharge_named_service(worker).unwrap();
         world.advance_migrated_domains(MINUTES_PER_DAY * 2, &managed).unwrap();
         assert_eq!(world.completed_firm_work(firm, 3).unwrap().len(), 1);

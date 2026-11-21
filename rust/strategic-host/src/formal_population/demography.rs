@@ -1,5 +1,5 @@
 use super::{
-    needs::{published_energy_reference, AgeYears, QuantityRange, Requirement},
+    needs::{adult_water_references, published_energy_reference, AgeYears, QuantityRange, Requirement},
     CohortBirthYears, CohortDefinition, CohortId, CohortProvenance, CohortSex, Population,
 };
 use crate::{formal_clock::GameClock, formal_save::invalid};
@@ -181,6 +181,7 @@ pub struct PopulationStructure<'a> {
     pub named_residents_with_cohort_sex: u64,
     pub cohorts: Vec<ResidentCohort<'a>>,
     pub published_energy_reference: EnergyReferenceCoverage,
+    pub published_adult_water_references: AdultWaterReferenceCoverage,
 }
 
 #[derive(Default, Serialize)]
@@ -188,6 +189,20 @@ pub struct EnergyReferenceCoverage {
     pub people_with_reference: u64,
     pub people_without_reference: u64,
     pub conditional_kcal_per_day: Option<QuantityRange>,
+}
+
+#[derive(Default, Serialize)]
+pub struct AdultWaterReferenceCoverage {
+    pub adults_with_reference: u64,
+    pub residents_outside_reference: u64,
+    pub temperate_sedentary_litres_per_day: Option<QuantityRange>,
+    pub warm_moderate_work_litres_per_day: Option<QuantityRange>,
+}
+
+fn add_group_requirement(total: &mut Option<QuantityRange>, range: QuantityRange, members: u64) {
+    let total = total.get_or_insert(QuantityRange { lower: 0.0, upper: 0.0 });
+    total.lower += range.lower * members as f64;
+    total.upper += range.upper * members as f64;
 }
 
 #[derive(Default, Serialize)]
@@ -202,21 +217,29 @@ impl PopulationStructure<'_> {
     /// Anonymous residents with age ranges. Named residents are reported
     /// separately and require the character roster for individual eligibility.
     pub fn count_ages(&self, youngest: u16, oldest: u16) -> Option<AgeRangeCoverage> {
+        self.count_cohort_ages(youngest, oldest, |cohort| cohort.members)
+    }
+
+    pub(crate) fn count_cohort_ages(
+        &self, youngest: u16, oldest: u16, members: impl Fn(&ResidentCohort<'_>) -> u64,
+    ) -> Option<AgeRangeCoverage> {
         if youngest > oldest { return None; }
         let mut coverage = AgeRangeCoverage {
-            population_total: self.population_total - self.named_residents,
+            population_total: self.unclassified_residents,
             age_unknown: self.unclassified_residents,
             ..AgeRangeCoverage::default()
         };
         for cohort in &self.cohorts {
+            let count = members(cohort);
+            coverage.population_total += count;
             let Some(ages) = cohort.age_years else {
-                coverage.age_unknown += cohort.members;
+                coverage.age_unknown += count;
                 continue;
             };
             if ages.youngest <= oldest && ages.oldest.is_none_or(|max| max >= youngest) {
-                coverage.possibly_in_range_with_known_age += cohort.members;
+                coverage.possibly_in_range_with_known_age += count;
                 if ages.youngest >= youngest && ages.oldest.is_some_and(|max| max <= oldest) {
-                    coverage.definitely_in_range += cohort.members;
+                    coverage.definitely_in_range += count;
                 }
             }
         }
@@ -293,6 +316,7 @@ impl Population {
             }).count() as u64,
             cohorts: Vec::new(),
             published_energy_reference: EnergyReferenceCoverage::default(),
+            published_adult_water_references: AdultWaterReferenceCoverage::default(),
         };
         for id in self.pools.keys().filter(|id| {
             unit.is_none_or(|unit| id.as_str() == unit || self.parent_unit(id) == Some(unit))
@@ -314,10 +338,14 @@ impl Population {
                 }
                 if let Requirement::Known { range, .. } = published_energy_reference(age_years, definition.sex) {
                     let energy = &mut summary.published_energy_reference;
-                    let total = energy.conditional_kcal_per_day.get_or_insert(QuantityRange { lower: 0.0, upper: 0.0 });
-                    total.lower += range.lower * members as f64;
-                    total.upper += range.upper * members as f64;
+                    add_group_requirement(&mut energy.conditional_kcal_per_day, range, members);
                     energy.people_with_reference += members;
+                }
+                if let Some((temperate, warm_work)) = adult_water_references(age_years, definition.sex) {
+                    let water = &mut summary.published_adult_water_references;
+                    add_group_requirement(&mut water.temperate_sedentary_litres_per_day, temperate, members);
+                    add_group_requirement(&mut water.warm_moderate_work_litres_per_day, warm_work, members);
+                    water.adults_with_reference += members;
                 }
                 summary.cohorts.push(ResidentCohort {
                     unit_id: id,
@@ -332,6 +360,8 @@ impl Population {
         }
         summary.published_energy_reference.people_without_reference =
             population_total - summary.published_energy_reference.people_with_reference;
+        summary.published_adult_water_references.residents_outside_reference =
+            population_total - summary.published_adult_water_references.adults_with_reference;
         Some(summary)
     }
 }

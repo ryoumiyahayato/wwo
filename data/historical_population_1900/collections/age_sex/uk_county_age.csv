@@ -1,0 +1,239 @@
+panel,label,role,age_min,age_max,both,male,female
+uk_county_age_anglesey_1901,All Ages,total,,,50606,24487,26119
+uk_county_age_anglesey_1901,Under 1 year,band,0,0,1070,515,555
+uk_county_age_anglesey_1901,1—,band,1,1,973,525,448
+uk_county_age_anglesey_1901,2—,band,2,2,1059,563,496
+uk_county_age_anglesey_1901,3—,band,3,3,1088,556,532
+uk_county_age_anglesey_1901,4—,band,4,4,1025,484,541
+uk_county_age_anglesey_1901,Under 5 years,subtotal,0,4,5215,2643,2572
+uk_county_age_anglesey_1901,5—,band,5,9,5160,2603,2557
+uk_county_age_anglesey_1901,10—,band,10,12,2953,1553,1400
+uk_county_age_anglesey_1901,13—,band,13,13,1037,559,478
+uk_county_age_anglesey_1901,14—,band,14,14,1061,586,475
+uk_county_age_anglesey_1901,15—,band,15,15,1086,566,520
+uk_county_age_anglesey_1901,16—,band,16,16,993,488,505
+uk_county_age_anglesey_1901,17—,band,17,17,909,469,440
+uk_county_age_anglesey_1901,18—,band,18,18,930,457,473
+uk_county_age_anglesey_1901,19—,band,19,19,890,443,447
+uk_county_age_anglesey_1901,20—,band,20,20,795,386,409
+uk_county_age_anglesey_1901,21—,band,21,24,3357,1535,1822
+uk_county_age_anglesey_1901,25—,band,25,29,3830,1796,2034
+uk_county_age_anglesey_1901,30—,band,30,34,3547,1675,1872
+uk_county_age_anglesey_1901,35—,band,35,39,3255,1543,1712
+uk_county_age_anglesey_1901,40—,band,40,44,2872,1346,1526
+uk_county_age_anglesey_1901,45—,band,45,49,2656,1299,1357
+uk_county_age_anglesey_1901,50—,band,50,54,2338,1057,1281
+uk_county_age_anglesey_1901,55—,band,55,59,2026,917,1109
+uk_county_age_anglesey_1901,60—,band,60,64,1853,866,987
+uk_county_age_anglesey_1901,65—,band,65,69,1343,595,748
+uk_county_age_anglesey_1901,70—,band,70,74,1091,491,600
+uk_county_age_anglesey_1901,75—,band,75,79,769,345,424
+uk_county_age_anglesey_1901,80—,band,80,84,435,182,253
+uk_county_age_anglesey_1901,85—,band,85,89,167,73,94
+uk_county_age_anglesey_1901,90—,band,90,94,34,13,21
+uk_county_age_anglesey_1901,95—,band,95,99,4,1,3
+uk_county_age_anglesey_1901,100 years and upwards,band,100,,0,0,0
+uk_county_age_carmarthenshire_1901,All Ages,total,,,135328,64627,70701
+uk_county_age_carmarthenshire_1901,Under 1 year,band,0,0,3227,1628,1599
+uk_county_age_carmarthenshire_1901,1—,band,1,1,2840,1420,1420
+uk_county_age_carmarthenshire_1901,2—,band,2,2,3095,1477,1618
+uk_county_age_carmarthenshire_1901,3—,band,3,3,3018,1490,1528
+uk_county_age_carmarthenshire_1901,4—,band,4,4,3075,1533,1542
+uk_county_age_carmarthenshire_1901,Under 5 years,subtotal,0,4,15255,7548,7707
+uk_county_age_carmarthenshire_1901,5—,band,5,9,15369,7677,7692
+uk_county_age_carmarthenshire_1901,10—,band,10,12,8939,4366,4573
+uk_county_age_carmarthenshire_1901,13—,band,13,13,2917,1443,1474
+uk_county_age_carmarthenshire_1901,14—,band,14,14,2935,1514,1421
+uk_county_age_carmarthenshire_1901,15—,band,15,15,2954,1439,1515
+uk_county_age_carmarthenshire_1901,16—,band,16,16,2921,1522,1399
+uk_county_age_carmarthenshire_1901,17—,band,17,17,2715,1349,1366
+uk_county_age_carmarthenshire_1901,18—,band,18,18,2863,1383,1480
+uk_county_age_carmarthenshire_1901,19—,band,19,19,2651,1240,1411
+uk_county_age_carmarthenshire_1901,20—,band,20,20,2505,1178,1327
+uk_county_age_carmarthenshire_1901,21—,band,21,24,9561,4358,5203
+uk_county_age_carmarthenshire_1901,25—,band,25,29,10725,5028,5697
+uk_county_age_carmarthenshire_1901,30—,band,30,34,9193,4320,4873
+uk_county_age_carmarthenshire_1901,35—,band,35,39,8268,3976,4292
+uk_county_age_carmarthenshire_1901,40—,band,40,44,7140,3361,3779
+uk_county_age_carmarthenshire_1901,45—,band,45,49,6391,3031,3360
+uk_county_age_carmarthenshire_1901,50—,band,50,54,5584,2618,2966
+uk_county_age_carmarthenshire_1901,55—,band,55,59,4596,2102,2494
+uk_county_age_carmarthenshire_1901,60—,band,60,64,4076,1813,2263
+uk_county_age_carmarthenshire_1901,65—,band,65,69,3078,1411,1667
+uk_county_age_carmarthenshire_1901,70—,band,70,74,2227,946,1281
+uk_county_age_carmarthenshire_1901,75—,band,75,79,1396,588,808
+uk_county_age_carmarthenshire_1901,80—,band,80,84,716,295,421
+uk_county_age_carmarthenshire_1901,85—,band,85,89,265,93,172
+uk_county_age_carmarthenshire_1901,90—,band,90,94,75,23,52
+uk_county_age_carmarthenshire_1901,95—,band,95,99,12,5,7
+uk_county_age_carmarthenshire_1901,100 years and upwards,band,100,,1,0,1
+uk_county_age_montgomeryshire_1901,All Ages,total,,,54901,26790,28111
+uk_county_age_montgomeryshire_1901,Under 1 year,band,0,0,1256,631,625
+uk_county_age_montgomeryshire_1901,1—,band,1,1,1098,552,546
+uk_county_age_montgomeryshire_1901,2—,band,2,2,1237,622,615
+uk_county_age_montgomeryshire_1901,3—,band,3,3,1218,589,629
+uk_county_age_montgomeryshire_1901,4—,band,4,4,1167,589,578
+uk_county_age_montgomeryshire_1901,Under 5 years,subtotal,0,4,5976,2983,2993
+uk_county_age_montgomeryshire_1901,5—,band,5,9,5964,2980,2984
+uk_county_age_montgomeryshire_1901,10—,band,10,12,3509,1767,1742
+uk_county_age_montgomeryshire_1901,13—,band,13,13,1149,556,593
+uk_county_age_montgomeryshire_1901,14—,band,14,14,1148,569,579
+uk_county_age_montgomeryshire_1901,15—,band,15,15,1138,566,572
+uk_county_age_montgomeryshire_1901,16—,band,16,16,1147,588,559
+uk_county_age_montgomeryshire_1901,17—,band,17,17,1032,535,497
+uk_county_age_montgomeryshire_1901,18—,band,18,18,1070,529,541
+uk_county_age_montgomeryshire_1901,19—,band,19,19,967,446,521
+uk_county_age_montgomeryshire_1901,20—,band,20,20,947,445,502
+uk_county_age_montgomeryshire_1901,21—,band,21,24,3493,1572,1921
+uk_county_age_montgomeryshire_1901,25—,band,25,29,4047,1848,2199
+uk_county_age_montgomeryshire_1901,30—,band,30,34,3522,1658,1864
+uk_county_age_montgomeryshire_1901,35—,band,35,39,3295,1600,1695
+uk_county_age_montgomeryshire_1901,40—,band,40,44,2992,1477,1515
+uk_county_age_montgomeryshire_1901,45—,band,45,49,2614,1313,1301
+uk_county_age_montgomeryshire_1901,50—,band,50,54,2392,1186,1206
+uk_county_age_montgomeryshire_1901,55—,band,55,59,2141,1066,1075
+uk_county_age_montgomeryshire_1901,60—,band,60,64,2051,1002,1049
+uk_county_age_montgomeryshire_1901,65—,band,65,69,1627,817,810
+uk_county_age_montgomeryshire_1901,70—,band,70,74,1230,621,609
+uk_county_age_montgomeryshire_1901,75—,band,75,79,836,400,436
+uk_county_age_montgomeryshire_1901,80—,band,80,84,419,176,243
+uk_county_age_montgomeryshire_1901,85—,band,85,89,160,79,81
+uk_county_age_montgomeryshire_1901,90—,band,90,94,29,10,19
+uk_county_age_montgomeryshire_1901,95—,band,95,99,5,1,4
+uk_county_age_montgomeryshire_1901,100 years and upwards,band,100,,1,0,1
+uk_county_age_radnorshire_1901,All Ages,total,,,23281,11860,11421
+uk_county_age_radnorshire_1901,Under 1 year,band,0,0,507,260,247
+uk_county_age_radnorshire_1901,1—,band,1,1,501,264,237
+uk_county_age_radnorshire_1901,2—,band,2,2,519,277,242
+uk_county_age_radnorshire_1901,3—,band,3,3,521,244,277
+uk_county_age_radnorshire_1901,4—,band,4,4,515,273,242
+uk_county_age_radnorshire_1901,Under 5 years,subtotal,0,4,2563,1318,1245
+uk_county_age_radnorshire_1901,5—,band,5,9,2308,1099,1209
+uk_county_age_radnorshire_1901,10—,band,10,12,1343,646,697
+uk_county_age_radnorshire_1901,13—,band,13,13,459,214,245
+uk_county_age_radnorshire_1901,14—,band,14,14,501,242,259
+uk_county_age_radnorshire_1901,15—,band,15,15,483,244,239
+uk_county_age_radnorshire_1901,16—,band,16,16,497,255,242
+uk_county_age_radnorshire_1901,17—,band,17,17,451,199,252
+uk_county_age_radnorshire_1901,18—,band,18,18,469,254,215
+uk_county_age_radnorshire_1901,19—,band,19,19,445,211,234
+uk_county_age_radnorshire_1901,20—,band,20,20,417,207,210
+uk_county_age_radnorshire_1901,21—,band,21,24,1644,841,803
+uk_county_age_radnorshire_1901,25—,band,25,29,1929,990,939
+uk_county_age_radnorshire_1901,30—,band,30,34,1656,878,778
+uk_county_age_radnorshire_1901,35—,band,35,39,1381,714,667
+uk_county_age_radnorshire_1901,40—,band,40,44,1290,686,604
+uk_county_age_radnorshire_1901,45—,band,45,49,1167,606,561
+uk_county_age_radnorshire_1901,50—,band,50,54,1048,562,486
+uk_county_age_radnorshire_1901,55—,band,55,59,881,466,415
+uk_county_age_radnorshire_1901,60—,band,60,64,740,401,339
+uk_county_age_radnorshire_1901,65—,band,65,69,601,319,282
+uk_county_age_radnorshire_1901,70—,band,70,74,474,252,222
+uk_county_age_radnorshire_1901,75—,band,75,79,300,135,165
+uk_county_age_radnorshire_1901,80—,band,80,84,155,77,78
+uk_county_age_radnorshire_1901,85—,band,85,89,63,35,28
+uk_county_age_radnorshire_1901,90—,band,90,94,13,7,6
+uk_county_age_radnorshire_1901,95—,band,95,99,3,2,1
+uk_county_age_radnorshire_1901,100 years and upwards,band,100,,0,0,0
+uk_county_age_glamorganshire_administrative_county_1901,All Ages,total,,,601061,316001,285060
+uk_county_age_glamorganshire_administrative_county_1901,Under 1 year,band,0,0,18335,9189,9146
+uk_county_age_glamorganshire_administrative_county_1901,1—,band,1,1,15158,7517,7641
+uk_county_age_glamorganshire_administrative_county_1901,2—,band,2,2,15531,7814,7717
+uk_county_age_glamorganshire_administrative_county_1901,3—,band,3,3,16100,7972,8128
+uk_county_age_glamorganshire_administrative_county_1901,4—,band,4,4,15605,7771,7834
+uk_county_age_glamorganshire_administrative_county_1901,Under 5 years,subtotal,0,4,80729,40263,40466
+uk_county_age_glamorganshire_administrative_county_1901,5—,band,5,9,72418,36124,36294
+uk_county_age_glamorganshire_administrative_county_1901,10—,band,10,12,38775,19347,19428
+uk_county_age_glamorganshire_administrative_county_1901,13—,band,13,13,11897,5982,5915
+uk_county_age_glamorganshire_administrative_county_1901,14—,band,14,14,11947,6020,5927
+uk_county_age_glamorganshire_administrative_county_1901,15—,band,15,15,11553,5996,5557
+uk_county_age_glamorganshire_administrative_county_1901,16—,band,16,16,11925,6391,5534
+uk_county_age_glamorganshire_administrative_county_1901,17—,band,17,17,11285,6057,5228
+uk_county_age_glamorganshire_administrative_county_1901,18—,band,18,18,11856,6528,5328
+uk_county_age_glamorganshire_administrative_county_1901,19—,band,19,19,11844,6560,5284
+uk_county_age_glamorganshire_administrative_county_1901,20—,band,20,20,11913,6553,5360
+uk_county_age_glamorganshire_administrative_county_1901,21—,band,21,24,47290,25726,21564
+uk_county_age_glamorganshire_administrative_county_1901,25—,band,25,29,56152,30596,25556
+uk_county_age_glamorganshire_administrative_county_1901,30—,band,30,34,47847,26395,21452
+uk_county_age_glamorganshire_administrative_county_1901,35—,band,35,39,39327,21925,17402
+uk_county_age_glamorganshire_administrative_county_1901,40—,band,40,44,30975,17126,13849
+uk_county_age_glamorganshire_administrative_county_1901,45—,band,45,49,25690,14063,11627
+uk_county_age_glamorganshire_administrative_county_1901,50—,band,50,54,21096,11349,9747
+uk_county_age_glamorganshire_administrative_county_1901,55—,band,55,59,15923,8305,7618
+uk_county_age_glamorganshire_administrative_county_1901,60—,band,60,64,12452,6257,6195
+uk_county_age_glamorganshire_administrative_county_1901,65—,band,65,69,8196,4004,4192
+uk_county_age_glamorganshire_administrative_county_1901,70—,band,70,74,5326,2448,2878
+uk_county_age_glamorganshire_administrative_county_1901,75—,band,75,79,2929,1269,1660
+uk_county_age_glamorganshire_administrative_county_1901,80—,band,80,84,1238,544,694
+uk_county_age_glamorganshire_administrative_county_1901,85—,band,85,89,384,146,238
+uk_county_age_glamorganshire_administrative_county_1901,90—,band,90,94,76,20,56
+uk_county_age_glamorganshire_administrative_county_1901,95—,band,95,99,14,6,8
+uk_county_age_glamorganshire_administrative_county_1901,100 years and upwards,band,100,,4,1,3
+uk_county_age_cardiff_county_borough_1901,All Ages,total,,,164333,81605,82728
+uk_county_age_cardiff_county_borough_1901,Under 1 year,band,0,0,4427,2149,2278
+uk_county_age_cardiff_county_borough_1901,1—,band,1,1,3931,1982,1949
+uk_county_age_cardiff_county_borough_1901,2—,band,2,2,4050,1978,2072
+uk_county_age_cardiff_county_borough_1901,3—,band,3,3,4150,2058,2092
+uk_county_age_cardiff_county_borough_1901,4—,band,4,4,4150,2040,2110
+uk_county_age_cardiff_county_borough_1901,Under 5 years,subtotal,0,4,20708,10207,10501
+uk_county_age_cardiff_county_borough_1901,5—,band,5,9,18935,9474,9461
+uk_county_age_cardiff_county_borough_1901,10—,band,10,12,10365,5214,5151
+uk_county_age_cardiff_county_borough_1901,13—,band,13,13,3285,1604,1681
+uk_county_age_cardiff_county_borough_1901,14—,band,14,14,3363,1665,1698
+uk_county_age_cardiff_county_borough_1901,15—,band,15,15,3231,1554,1677
+uk_county_age_cardiff_county_borough_1901,16—,band,16,16,3276,1617,1659
+uk_county_age_cardiff_county_borough_1901,17—,band,17,17,3163,1531,1632
+uk_county_age_cardiff_county_borough_1901,18—,band,18,18,3310,1593,1717
+uk_county_age_cardiff_county_borough_1901,19—,band,19,19,3245,1551,1694
+uk_county_age_cardiff_county_borough_1901,20—,band,20,20,3179,1520,1659
+uk_county_age_cardiff_county_borough_1901,21—,band,21,24,13085,6123,6962
+uk_county_age_cardiff_county_borough_1901,25—,band,25,29,15039,7410,7629
+uk_county_age_cardiff_county_borough_1901,30—,band,30,34,13110,6627,6483
+uk_county_age_cardiff_county_borough_1901,35—,band,35,39,11688,5975,5713
+uk_county_age_cardiff_county_borough_1901,40—,band,40,44,9545,5036,4509
+uk_county_age_cardiff_county_borough_1901,45—,band,45,49,7366,3866,3500
+uk_county_age_cardiff_county_borough_1901,50—,band,50,54,5950,3051,2899
+uk_county_age_cardiff_county_borough_1901,55—,band,55,59,4336,2197,2139
+uk_county_age_cardiff_county_borough_1901,60—,band,60,64,3305,1617,1688
+uk_county_age_cardiff_county_borough_1901,65—,band,65,69,2225,1010,1215
+uk_county_age_cardiff_county_borough_1901,70—,band,70,74,1432,658,774
+uk_county_age_cardiff_county_borough_1901,75—,band,75,79,755,328,427
+uk_county_age_cardiff_county_borough_1901,80—,band,80,84,318,128,190
+uk_county_age_cardiff_county_borough_1901,85—,band,85,89,92,38,54
+uk_county_age_cardiff_county_borough_1901,90—,band,90,94,22,7,15
+uk_county_age_cardiff_county_borough_1901,95—,band,95,99,2,1,1
+uk_county_age_cardiff_county_borough_1901,100 years and upwards,band,100,,3,3,0
+uk_county_age_swansea_county_borough_1901,All Ages,total,,,94537,46156,48381
+uk_county_age_swansea_county_borough_1901,Under 1 year,band,0,0,2346,1198,1148
+uk_county_age_swansea_county_borough_1901,1—,band,1,1,2118,1084,1034
+uk_county_age_swansea_county_borough_1901,2—,band,2,2,2188,1032,1106
+uk_county_age_swansea_county_borough_1901,3—,band,3,3,2124,1054,1070
+uk_county_age_swansea_county_borough_1901,4—,band,4,4,2127,1071,1056
+uk_county_age_swansea_county_borough_1901,Under 5 years,subtotal,0,4,10903,5489,5414
+uk_county_age_swansea_county_borough_1901,5—,band,5,9,10702,5227,5475
+uk_county_age_swansea_county_borough_1901,10—,band,10,12,6182,3111,3071
+uk_county_age_swansea_county_borough_1901,13—,band,13,13,2022,1006,1016
+uk_county_age_swansea_county_borough_1901,14—,band,14,14,1979,1008,971
+uk_county_age_swansea_county_borough_1901,15—,band,15,15,2001,1019,982
+uk_county_age_swansea_county_borough_1901,16—,band,16,16,1971,974,997
+uk_county_age_swansea_county_borough_1901,17—,band,17,17,1920,954,966
+uk_county_age_swansea_county_borough_1901,18—,band,18,18,1969,914,1055
+uk_county_age_swansea_county_borough_1901,19—,band,19,19,1954,921,1033
+uk_county_age_swansea_county_borough_1901,20—,band,20,20,1996,892,1104
+uk_county_age_swansea_county_borough_1901,21—,band,21,24,7466,3402,4064
+uk_county_age_swansea_county_borough_1901,25—,band,25,29,8299,4041,4258
+uk_county_age_swansea_county_borough_1901,30—,band,30,34,7010,3477,3533
+uk_county_age_swansea_county_borough_1901,35—,band,35,39,6215,3102,3113
+uk_county_age_swansea_county_borough_1901,40—,band,40,44,5043,2582,2461
+uk_county_age_swansea_county_borough_1901,45—,band,45,49,4555,2319,2236
+uk_county_age_swansea_county_borough_1901,50—,band,50,54,3686,1882,1804
+uk_county_age_swansea_county_borough_1901,55—,band,55,59,2791,1301,1490
+uk_county_age_swansea_county_borough_1901,60—,band,60,64,2437,1113,1324
+uk_county_age_swansea_county_borough_1901,65—,band,65,69,1553,684,869
+uk_county_age_swansea_county_borough_1901,70—,band,70,74,1010,415,595
+uk_county_age_swansea_county_borough_1901,75—,band,75,79,529,215,314
+uk_county_age_swansea_county_borough_1901,80—,band,80,84,245,73,172
+uk_county_age_swansea_county_borough_1901,85—,band,85,89,74,28,46
+uk_county_age_swansea_county_borough_1901,90—,band,90,94,22,7,15
+uk_county_age_swansea_county_borough_1901,95—,band,95,99,3,0,3
+uk_county_age_swansea_county_borough_1901,100 years and upwards,band,100,,0,0,0
