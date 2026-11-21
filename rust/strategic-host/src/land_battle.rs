@@ -518,11 +518,13 @@ impl LandBattle {
                 .min_by(|left, right| left.1.total_cmp(&right.1));
             if let Some((index, _)) = target {
                 let target = &mut units[index];
-                target.health = target.health.saturating_sub(HIT_DAMAGE);
-                if target.health == 0 {
-                    target.speed = 0.0;
+                if target.team != shot.team {
+                    target.health = target.health.saturating_sub(HIT_DAMAGE);
+                    if target.health == 0 {
+                        target.speed = 0.0;
+                    }
+                    units[shot.source.0 as usize - 1].hits += 1;
                 }
-                units[shot.source.0 as usize - 1].hits += 1;
                 return false;
             }
             shot.previous_position = shot.position;
@@ -652,6 +654,54 @@ fn approach(value: f32, target: f32, step: f32) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn battle_with_projectile() -> (LandBattle, BattlefieldTerrain) {
+        let terrain =
+            BattlefieldTerrain::from_geographic_heights(50_000, vec![0.; 4], vec![4; 4]).unwrap();
+        let mut battle = LandBattle::new([0., 0.]);
+        battle.units[0].position = [0., 0.];
+        battle.fire(0, UnitOrder { fire: true, ..Default::default() }, &terrain);
+        assert_eq!(battle.projectiles.len(), 1);
+        (battle, terrain)
+    }
+
+    #[test]
+    fn projectile_hits_friendly_without_damage() {
+        let (mut battle, terrain) = battle_with_projectile();
+        battle.units[1].position = [0., 3.];
+
+        battle.update_projectiles(&terrain);
+
+        assert_eq!(battle.units[1].health, HEALTH);
+        assert_eq!(battle.units[0].hits, 0);
+        assert!(battle.projectiles.is_empty());
+    }
+
+    #[test]
+    fn friendly_vehicle_shields_enemy_from_projectile() {
+        let (mut battle, terrain) = battle_with_projectile();
+        battle.units[1].position = [0., 3.];
+        battle.units[UNIT_COUNT / 2].position = [0., 8.];
+
+        battle.update_projectiles(&terrain);
+
+        assert_eq!(battle.units[1].health, HEALTH);
+        assert_eq!(battle.units[UNIT_COUNT / 2].health, HEALTH);
+        assert_eq!(battle.units[0].hits, 0);
+        assert!(battle.projectiles.is_empty());
+    }
+
+    #[test]
+    fn projectile_damages_unshielded_enemy() {
+        let (mut battle, terrain) = battle_with_projectile();
+        battle.units[UNIT_COUNT / 2].position = [0., 8.];
+
+        battle.update_projectiles(&terrain);
+
+        assert_eq!(battle.units[UNIT_COUNT / 2].health, HEALTH - HIT_DAMAGE);
+        assert_eq!(battle.units[0].hits, 1);
+        assert!(battle.projectiles.is_empty());
+    }
 
     #[test]
     fn single_fire_does_not_transfer_to_replacement_vehicle_in_a_batch() {
