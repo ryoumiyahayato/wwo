@@ -142,6 +142,9 @@ pub(super) struct Catalogue {
     no_transport_evidence: BTreeSet<String>,
     notes: BTreeMap<String, Vec<String>>,
     river_gaps: BTreeMap<(String, String), (NodeCoverage, String)>,
+    population_nodes: BTreeSet<String>,
+    population_parents: BTreeMap<String, String>,
+    population_at: BTreeMap<String, String>,
     areas: BTreeMap<String, String>,
     capitals: BTreeMap<String, String>,
     domestic: BTreeMap<String, DomesticStatistics>,
@@ -162,6 +165,37 @@ impl Catalogue {
 impl TransportNetwork {
     pub fn area_node(&self, unit: &str) -> Option<&str> {
         self.catalogue.areas.get(unit).map(String::as_str)
+    }
+    /// Stable identity for a formal root or partition. Coverage reports whether it can be routed.
+    pub fn population_node(&self, unit: &str) -> Option<&str> {
+        self.catalogue
+            .population_nodes
+            .get(unit)
+            .map(String::as_str)
+            .or_else(|| self.area_node(unit))
+    }
+    pub fn population_parent<'a>(&'a self, unit: &str) -> Option<&'a str> {
+        self.catalogue
+            .population_parents
+            .get(unit)
+            .map(String::as_str)
+            .or_else(|| {
+                self.catalogue
+                    .areas
+                    .get_key_value(unit)
+                    .map(|(key, _)| key.as_str())
+            })
+    }
+    pub fn population_at(&self, id: &str) -> Option<&str> {
+        self.catalogue
+            .population_at
+            .get(id)
+            .or_else(|| {
+                self.routing_node(id)
+                    .and_then(|key| self.catalogue.population_at.get(key))
+            })
+            .map(String::as_str)
+            .or_else(|| self.unit_at(id))
     }
     pub fn capital_node(&self, polity: &str) -> Option<&str> {
         self.catalogue.capitals.get(polity).map(String::as_str)
@@ -592,6 +626,7 @@ pub(super) fn load(
         b.attach_domestic(&unit, &hub, true);
     }
     b.import_map_identities(sources)?;
+    b.bind_population(sources)?;
     let nodes = b
         .kinds
         .into_iter()
@@ -613,6 +648,117 @@ pub(super) fn load(
     Ok(network)
 }
 impl Builder {
+    fn bind_population(&mut self, sources: &WorldSources) -> io::Result<()> {
+        let opening = sources
+            .historical_population
+            .as_deref()
+            .ok_or_else(|| invalid("missing historical population opening"))?;
+        let mut places_by_leaf: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+        for (place, leaf) in opening.residence_places() {
+            let physical = self
+                .catalogue
+                .map_targets
+                .get(place)
+                .map_or(place, String::as_str);
+            if !self.kinds.contains_key(physical) {
+                return Err(invalid(format!(
+                    "unknown population residence point {place}"
+                )));
+            }
+            self.catalogue
+                .population_at
+                .insert(physical.to_owned(), leaf.to_owned());
+            places_by_leaf.entry(leaf).or_default().push(place);
+        }
+        for root in opening.standalone_ids() {
+            let label = &sources.polities()[root].name_zh;
+            self.register(root, NodeKind::Identity, label, None, None);
+            self.catalogue.population_nodes.insert(root.into());
+            self.catalogue
+                .population_parents
+                .insert(root.into(), root.into());
+            self.catalogue
+                .population_at
+                .insert(root.into(), root.into());
+            if let Some(capital) = self.catalogue.capitals.get(root) {
+                self.catalogue
+                    .map_targets
+                    .insert(root.into(), capital.clone());
+                self.catalogue
+                    .population_at
+                    .entry(capital.clone())
+                    .or_insert_with(|| root.into());
+            }
+            self.catalogue
+                .notes
+                .entry(root.into())
+                .or_default()
+                .push("独立人口统计组。开局资料没有为这组人口设置市场。".into());
+        }
+        // A handling segment joins the city to its own terminal. It cannot establish
+        // residence across a shipping, rail or river corridor.
+        for seg in self
+            .segments
+            .iter()
+            .filter(|s| s.mode == TransportMode::PortTransfer)
+        {
+            let from = self.catalogue.population_at.get(&seg.from);
+            let to = self.catalogue.population_at.get(&seg.to);
+            let missing = match (from, to) {
+                (Some(a), Some(b)) if a != b => {
+                    return Err(invalid("contradictory port residence binding"))
+                }
+                (Some(leaf), None) => Some((&seg.to, leaf.clone())),
+                (None, Some(leaf)) => Some((&seg.from, leaf.clone())),
+                _ => None,
+            };
+            if let Some((id, leaf)) = missing {
+                self.catalogue.population_at.insert(id.clone(), leaf);
+            }
+        }
+        let operational: BTreeSet<_> = self
+            .segments
+            .iter()
+            .flat_map(|s| [s.from.clone(), s.to.clone()])
+            .collect();
+        for (id, parent, label) in opening.partition_identities() {
+            let market = self.catalogue.areas.contains_key(parent).then_some(parent);
+            self.register(id, NodeKind::Identity, label, market, None);
+            self.catalogue.population_nodes.insert(id.into());
+            self.catalogue
+                .population_parents
+                .insert(id.into(), parent.into());
+            self.catalogue.population_at.insert(id.into(), id.into());
+            // Several independently documented places can belong to one census division.
+            // Resolve its default stop to one existing city; retain each physical place's account.
+            let target = places_by_leaf
+                .get(id)
+                .into_iter()
+                .flatten()
+                .map(|&p| self.catalogue.map_targets.get(p).map_or(p, String::as_str))
+                .min_by_key(|p| {
+                    (
+                        !operational.contains(*p),
+                        self.kinds[*p] != NodeKind::City,
+                        *p,
+                    )
+                })
+                .map(str::to_owned);
+            if let Some(place) = target {
+                self.catalogue.map_targets.insert(id.into(), place);
+            } else {
+                self.catalogue
+                    .notes
+                    .entry(id.into())
+                    .or_default()
+                    .push(format!(
+                        "开局人口分区，归属 {parent}。现有资料未绑定具体运营接入点。"
+                    ));
+            }
+        }
+        Ok(())
+    }
+
     fn import_map_identities(&mut self, sources: &WorldSources) -> io::Result<()> {
         type PlaceRow = (
             String,
@@ -1125,6 +1271,40 @@ mod tests {
             .collect();
         assert_eq!(counts(&net, markets.iter().map(String::as_str)), c);
         assert_eq!(c.iter().sum::<usize>(), 50);
+        let opening = sources.historical_population.as_ref().unwrap();
+        let leaf_counts = counts(&net, opening.partition_identities().map(|(id, _, _)| id));
+        let root_counts = counts(&net, opening.standalone_ids());
+        assert_eq!(leaf_counts.iter().sum::<usize>(), 335);
+        let attached = opening.residence_places().count();
+        for (place, leaf) in opening.residence_places() {
+            assert_eq!(net.population_at(place), Some(leaf));
+        }
+        for (id, parent, _) in opening.partition_identities() {
+            assert_eq!(net.population_node(id), Some(id));
+            assert_eq!(net.population_parent(id), Some(parent));
+            assert_eq!(net.population_at(id), Some(id));
+            assert_eq!(net.unit_at(id), net.area_node(parent).map(|_| parent));
+        }
+        for root in opening.standalone_ids() {
+            assert_eq!(net.population_parent(root), Some(root));
+            assert_eq!(net.unit_at(root), None);
+            assert!(net.area_node(root).is_none());
+        }
+        println!("population partitions {leaf_counts:?}; standalone {root_counts:?}; explicit places {attached}");
+        let leaf = "administrative_region:france_seine";
+        let dest = "us_state_new_york";
+        let to = net.routing_node(dest).unwrap().to_owned();
+        let physical = net.route(&query("place:paris", &to, ModeSet::ALL)).unwrap();
+        assert_eq!(
+            net.route(&query(leaf, dest, ModeSet::ALL)).unwrap(),
+            physical
+        );
+        assert!(net
+            .segments()
+            .all(|s| !net.catalogue.population_nodes.contains(&s.from)
+                && !net.catalogue.population_nodes.contains(&s.to)));
+        assert_eq!(net.coverage("ch_canton_zh"), NodeCoverage::Unrefined);
+        assert_eq!(net.population_at("place:port_new_york"), Some(dest));
         let formal: Vec<_> = sources
             .polities()
             .values()

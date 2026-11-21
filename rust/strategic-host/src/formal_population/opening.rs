@@ -131,6 +131,16 @@ impl HistoricalOpening {
         Ok(opening)
     }
 
+    pub(crate) fn partition_identities(&self) -> impl Iterator<Item = (&str, &str, &str)> {
+        self.partitions.iter().map(|(id, part)| (id.as_str(), part.parent.as_str(), part.name.as_str()))
+    }
+    pub(crate) fn residence_places(&self) -> impl Iterator<Item = (&str, &str)> {
+        self.places.iter().map(|(place, id)| (place.as_str(), id.as_str()))
+    }
+    pub(crate) fn standalone_ids(&self) -> impl Iterator<Item = &str> {
+        self.standalone.keys().map(String::as_str)
+    }
+
     pub(crate) fn version(&self) -> u32 { VERSION }
 
     pub(super) fn estimate(&self, unit: &str) -> Option<&OpeningPopulationEstimate> {
