@@ -16,7 +16,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 8
+OPENING_VERSION = 9
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -142,12 +142,17 @@ def england_wales_habitations():
     path = COL / "england_wales_habitations" / "habitations.json"
     census = json.loads(path.read_text(encoding="utf8"))
     district_returns = census["districts"].values()
-    rooms = census["by_rooms_in_overcrowded_tenement"].values()
+    all_rooms = census["by_rooms_in_tenement"]
+    crowded_rooms = census["by_rooms_in_overcrowded_tenement"]
     if (sum(row["population"] for row in district_returns) != census["total_population"]
         or sum(row["overcrowded_tenements_1_to_4_rooms"] for row in district_returns) != census["overcrowded_tenements_1_to_4_rooms"]
         or sum(row["occupants_of_these_tenements"] for row in district_returns) != census["occupants_of_these_tenements"]
-        or sum(row["tenements"] for row in rooms) != census["overcrowded_tenements_1_to_4_rooms"]
-        or sum(row["occupants"] for row in rooms) != census["occupants_of_these_tenements"]):
+        or sum(row["tenements"] for row in all_rooms.values()) != census["separate_occupations"]
+        or sum(row["occupants"] for row in all_rooms.values()) != census["total_population"]
+        or sum(row["tenements"] for row in crowded_rooms.values()) != census["overcrowded_tenements_1_to_4_rooms"]
+        or sum(row["occupants"] for row in crowded_rooms.values()) != census["occupants_of_these_tenements"]
+        or any(count > all_rooms[rooms][unit]
+               for rooms, metrics in crowded_rooms.items() for unit, count in metrics.items())):
         raise ValueError("England and Wales housing census breakdowns do not close")
     metadata = {key: census.pop(key) for key in ("unit_id", "date", "source_id")}
     return dict(**metadata, dimension="housing_and_urban_rural", category="published census observation",
@@ -163,7 +168,7 @@ def main():
     with (COL/"cities_europe"/"city_equivalences.csv").open(encoding="utf8") as f:
         for row in csv.DictReader(f):
             city_keys[row["member_unit_id"]]=row["city_key"]
-    for f in sorted(COL.glob("*/sources.json")):
+    for f in sorted([*COL.glob("*/sources.json"), *COL.glob("age_sex/*_sources.json")]):
         for s in json.loads(f.read_text(encoding="utf8")):
             if s["id"] in manifest and manifest[s["id"]]["url"]!=s["url"]:
                 raise ValueError("source ID collision: "+s["id"])

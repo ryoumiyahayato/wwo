@@ -99,6 +99,67 @@
           "occupants": 729652
         }
       },
+      "subset_of_panel_id": "england_wales_1901_occupants_by_tenement_rooms",
+      "tenement_subset_of_panel_id": "england_wales_1901_tenements_by_rooms",
+      "research_regions": [
+        "Europe"
+      ]
+    },
+    "england_wales_1901_occupants_by_tenement_rooms": {
+      "panel_id": "england_wales_1901_occupants_by_tenement_rooms",
+      "dimension": "housing",
+      "status": "reviewed",
+      "observed_unit_id": "uk_england_wales",
+      "observed_date": "1901-03-31",
+      "source_id": "england_wales_census_1901_general_report",
+      "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+      "classification_id": "england_wales_1901_rooms_per_tenement",
+      "eligible_universe": "Census-night persons classified by rooms in their tenement in England and Wales.",
+      "measure_unit": "persons",
+      "eligible_denominator": 32527843,
+      "directly_classified_count": 32527843,
+      "category_relationship": "complete_partition",
+      "categories": [
+        {
+          "label": "1",
+          "count": 507763,
+          "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+          "role": "category"
+        },
+        {
+          "label": "2",
+          "count": 2158644,
+          "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+          "role": "category"
+        },
+        {
+          "label": "3",
+          "count": 3186640,
+          "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+          "role": "category"
+        },
+        {
+          "label": "4",
+          "count": 7130062,
+          "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+          "role": "category"
+        },
+        {
+          "label": "5_or_more",
+          "count": 19544734,
+          "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+          "role": "category"
+        }
+      ],
+      "research_unit_ids": [
+        "ft_united_kingdom"
+      ],
+      "opening_links": [
+        {
+          "unit_id": "british_isles_1900",
+          "scope_relation": "subset"
+        }
+      ],
       "research_regions": [
         "Europe"
       ]
@@ -128,6 +189,65 @@
           "label": "rural",
           "count": 7469488,
           "locator": "General Report, sections II.1 and II.4 population controls; section III, pp. 39–41, tenements and overcrowding.",
+          "role": "category"
+        }
+      ],
+      "research_unit_ids": [
+        "ft_united_kingdom"
+      ],
+      "opening_links": [
+        {
+          "unit_id": "british_isles_1900",
+          "scope_relation": "subset"
+        }
+      ],
+      "research_regions": [
+        "Europe"
+      ]
+    },
+    "england_wales_1901_tenements_by_rooms": {
+      "panel_id": "england_wales_1901_tenements_by_rooms",
+      "dimension": "housing",
+      "status": "reviewed",
+      "observed_unit_id": "uk_england_wales",
+      "observed_date": "1901-03-31",
+      "source_id": "england_wales_census_1901_general_report",
+      "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+      "classification_id": "england_wales_1901_rooms_per_tenement",
+      "eligible_universe": "Tenements or separate occupations in England and Wales, classified by rooms.",
+      "measure_unit": "tenements",
+      "eligible_denominator": 7036868,
+      "directly_classified_count": 7036868,
+      "category_relationship": "complete_partition",
+      "categories": [
+        {
+          "label": "1",
+          "count": 251667,
+          "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+          "role": "category"
+        },
+        {
+          "label": "2",
+          "count": 658203,
+          "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+          "role": "category"
+        },
+        {
+          "label": "3",
+          "count": 779992,
+          "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+          "role": "category"
+        },
+        {
+          "label": "4",
+          "count": 1596664,
+          "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
+          "role": "category"
+        },
+        {
+          "label": "5_or_more",
+          "count": 3750342,
+          "locator": "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901.",
           "role": "category"
         }
       ],
@@ -211,6 +331,104 @@
       ],
       "research_regions": [
         "America"
+      ]
+    },
+    "russia_1897_legal_estates": {
+      "panel_id": "russia_1897_legal_estates",
+      "dimension": "social_status",
+      "status": "reviewed",
+      "observed_unit_id": "ru_census_1897_ex_finland",
+      "observed_date": "1897-02-09",
+      "source_id": "rus_sos_97",
+      "locator": "Table VIII; rus_sos_97.php?reg=0, rows 2–16",
+      "classification_id": "russian_1897_reported_legal_estate",
+      "eligible_universe": "Russian subjects in the empire-wide Table VIII return. Published residual categories include Finnish natives without estate distinction and persons outside the listed estates. Foreign subjects are outside this denominator.",
+      "measure_unit": "persons",
+      "eligible_denominator": 125034521,
+      "directly_classified_count": 124962686,
+      "category_relationship": "reported_subset",
+      "categories": [
+        {
+          "label": "Дворяне потомственные и их семьи",
+          "count": 1220169,
+          "locator": "rus_sos_97.php?reg=0, row 2",
+          "role": "category"
+        },
+        {
+          "label": "Дворяне личные, чиновники не из дворян и их семьи",
+          "count": 630119,
+          "locator": "rus_sos_97.php?reg=0, row 3",
+          "role": "category"
+        },
+        {
+          "label": "Лица духовного звания всех христианских вероисповеданий и их семей",
+          "count": 588947,
+          "locator": "rus_sos_97.php?reg=0, row 4",
+          "role": "category"
+        },
+        {
+          "label": "Потомственные и личные почетные граждане и их семьи",
+          "count": 342927,
+          "locator": "rus_sos_97.php?reg=0, row 5",
+          "role": "category"
+        },
+        {
+          "label": "Купцы и их семьи",
+          "count": 281179,
+          "locator": "rus_sos_97.php?reg=0, row 6",
+          "role": "category"
+        },
+        {
+          "label": "Мещане",
+          "count": 13386392,
+          "locator": "rus_sos_97.php?reg=0, row 7",
+          "role": "category"
+        },
+        {
+          "label": "Крестьяне",
+          "count": 96896648,
+          "locator": "rus_sos_97.php?reg=0, row 8",
+          "role": "category"
+        },
+        {
+          "label": "Войсковые казаки",
+          "count": 2928842,
+          "locator": "rus_sos_97.php?reg=0, row 9",
+          "role": "category"
+        },
+        {
+          "label": "Инородцы",
+          "count": 8297965,
+          "locator": "rus_sos_97.php?reg=0, row 10",
+          "role": "category"
+        },
+        {
+          "label": "Финляндские уроженцы без различия сословий",
+          "count": 35585,
+          "locator": "rus_sos_97.php?reg=0, row 11",
+          "role": "published_residual"
+        },
+        {
+          "label": "Лица, не принадлежавшие к этим сословиям",
+          "count": 353913,
+          "locator": "rus_sos_97.php?reg=0, row 12",
+          "role": "published_residual"
+        }
+      ],
+      "research_unit_ids": [
+        "ft_russia_empire_ussr"
+      ],
+      "opening_links": [
+        {
+          "unit_id": "russian_empire",
+          "scope_relation": "subset"
+        }
+      ],
+      "unreported_count": 71835,
+      "foreign_subjects_outside_denominator": 605500,
+      "table_total_all_subjects": 125640021,
+      "research_regions": [
+        "Europe"
       ]
     },
     "russia_1897_literacy": {
@@ -1243,7 +1461,9 @@
       },
       "housing": {
         "reviewed_panels": [
-          "england_wales_1901_crowded_small_tenements"
+          "england_wales_1901_crowded_small_tenements",
+          "england_wales_1901_occupants_by_tenement_rooms",
+          "england_wales_1901_tenements_by_rooms"
         ],
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
@@ -1326,7 +1546,9 @@
         "opening_status": "unknown"
       },
       "social_status": {
-        "reviewed_panels": [],
+        "reviewed_panels": [
+          "russia_1897_legal_estates"
+        ],
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
@@ -1677,7 +1899,9 @@
         },
         "housing": {
           "reviewed_panels": [
-            "england_wales_1901_crowded_small_tenements"
+            "england_wales_1901_crowded_small_tenements",
+            "england_wales_1901_occupants_by_tenement_rooms",
+            "england_wales_1901_tenements_by_rooms"
           ],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -1756,7 +1980,9 @@
           "opening_status": "unknown"
         },
         "social_status": {
-          "reviewed_panels": [],
+          "reviewed_panels": [
+            "russia_1897_legal_estates"
+          ],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
@@ -2619,7 +2845,9 @@
         },
         "housing": {
           "reviewed_panels": [
-            "england_wales_1901_crowded_small_tenements"
+            "england_wales_1901_crowded_small_tenements",
+            "england_wales_1901_occupants_by_tenement_rooms",
+            "england_wales_1901_tenements_by_rooms"
           ],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
@@ -8818,7 +9046,9 @@
           "opening_status": "unknown"
         },
         "social_status": {
-          "reviewed_panels": [],
+          "reviewed_panels": [
+            "russia_1897_legal_estates"
+          ],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,

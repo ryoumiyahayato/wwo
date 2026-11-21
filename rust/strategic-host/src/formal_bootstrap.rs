@@ -2208,6 +2208,12 @@ mod tests {
         assert_eq!(world.population().population_total("egy_madina_cairo"), Some(592_087));
         assert_eq!(world.population().population_total("khedivate_of_egypt"), Some(10_000_000));
         assert_eq!(world.population().population_total("cshapes_gw_561"), Some(2_265_556));
+        let cape = world.population().structure(Some("cshapes_gw_561"), clock).unwrap();
+        assert_eq!(cape.cohort_residents, 2_265_556);
+        assert_eq!(cape.residents_with_cohort_age_and_sex, 2_264_636);
+        assert_eq!(cape.cohorts.iter().filter(|row| row.age_years.is_none()).map(|row| row.members).sum::<u64>(), 920);
+        let cape_archive = crate::formal_population::population_archive("cape_colony").unwrap().unwrap();
+        assert!(cape_archive.dated_structure.iter().any(|row| row["panel_id"] == "cape_1904" && row["values"]["both"] == 2_409_804));
         assert_eq!(world.population().population_total("cshapes_gw_850"), Some(44_363_679));
         assert_eq!(world.population().population_total("java_madoera_colonial_population"), Some(28_092_332));
         assert_eq!(world.population().resident_pool("cshapes_gw_850"), Some(16_271_347));
@@ -2255,10 +2261,18 @@ mod tests {
         let crowded = &coverage["panels"]["england_wales_1901_crowded_small_tenements"];
         assert_eq!(crowded["directly_classified_count"], 2_667_506);
         assert_eq!(crowded["count_of_reported_tenements"], 392_414);
+        let occupants = &coverage["panels"]["england_wales_1901_occupants_by_tenement_rooms"];
+        let tenements = &coverage["panels"]["england_wales_1901_tenements_by_rooms"];
+        assert_eq!(occupants["directly_classified_count"], 32_527_843);
+        assert_eq!(tenements["directly_classified_count"], 7_036_868);
+        assert_eq!(tenements["measure_unit"], "tenements");
         let coverage = crate::formal_population::structural_coverage_reference("russian_empire").unwrap().unwrap();
         let language = &coverage["panels"]["russia_1897_mother_tongue"];
         assert_eq!(language["directly_classified_count"], 125_634_894);
         assert_eq!(language["unreported_count"], 5_127);
+        let estates = &coverage["panels"]["russia_1897_legal_estates"];
+        assert_eq!(estates["directly_classified_count"], 124_962_686);
+        assert_eq!(estates["foreign_subjects_outside_denominator"], 605_500);
         let ecuador = crate::formal_population::population_archive("ecuador_1900").unwrap().unwrap();
         assert!(ecuador.candidate_research_population.iter().any(|row| {
             row["unit_id"] == "ft_ecuador" && row["date"] == "1900-01-01" && row["population_value"] == 1_100_787
@@ -2355,6 +2369,14 @@ mod tests {
         let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
         assert_eq!(restored.population().global_total(), 1_465_392_190);
         assert_eq!(restored.population().population_total("qing_hist_guangxi"), None);
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(8)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        let cape = restored.population().structure(Some("cshapes_gw_561"), restored.clock()).unwrap();
+        assert_eq!(cape.population_total, 2_265_556);
+        assert_eq!(cape.cohort_residents, 0);
         assert_eq!(restored.snapshot(), old_saved);
     }
 

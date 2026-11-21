@@ -40,6 +40,22 @@
     "collection": "african_returns"
   },
   {
+    "id": "cape_census_1904_age_hmso_1906",
+    "title": "Census of the British Empire, 1901: Report with Summary and Detailed Tables. Cape of Good Hope (1904)",
+    "publisher": "General Register Office, His Majesty’s Stationery Office, London, 1906",
+    "url": "https://archive.org/details/cu31924030396067",
+    "locator": "Section 20, Table 5, printed pp. 148–149, All Races, As enumerated. Table 2, p. 147, note c, documents the territorial additions since 1891",
+    "rights": "Historical published census facts transcribed from the 1906 government report",
+    "raw_path": "cape_1904.csv",
+    "table_urls": [
+      "https://archive.org/download/cu31924030396067/page/n215/mode/1up",
+      "https://archive.org/download/cu31924030396067/page/n216/mode/1up",
+      "https://archive.org/download/cu31924030396067/page/n214/mode/1up",
+      "https://digitalcollections.crl.edu/record/819601/files/0589.pdf"
+    ],
+    "collection": "age_sex"
+  },
+  {
     "id": "nz_census_1901_ages",
     "title": "Report on the Results of the Census of the Colony of New Zealand, Taken for the Night of the 31st March, 1901",
     "publisher": "Registrar-General of New Zealand",
@@ -1158,6 +1174,42 @@
     "locator": "Printed p. 221, Population de la Cochinchine; 1899 estimate and first enumeration on 27 December 1901.",
     "rights": "Selected numerical facts and bibliographic references. No facsimile redistributed.",
     "collection": "french_indochina_population"
+  },
+  {
+    "id": "british_empire_census_1901_gold_coast_scope",
+    "title": "Census of the British Empire, 1901. Gold Coast Colony and adjoining census districts",
+    "publisher": "General Register Office / HMSO, 1906. Wellcome Collection digital copy.",
+    "url": "https://wellcomecollection.org/works/mbq6vgjb",
+    "locator": "Printed p. 71, Gold Coast census date. Printed p. 144, section 17, tables 1–2 and notes to table 1.",
+    "rights": "Wellcome Collection marks this copy Public Domain Mark 1.0. Historical population facts and bibliographic references only.",
+    "date_note": "The empire volume lists 1 April 1901 for the Gold Coast. The opening map snapshot is dated 12 March 1900.",
+    "boundary_note": "Table 2 excludes Ashanti and the Northern Territories. It gives a Gold Coast Colony subtotal of 895,350, consisting of 412,729 males and 482,621 females across twelve census districts. Table 1 adds Ashanti 335,651 and Northern Territories 107,432 to reach an enumerated subtotal of 1,338,433, then adds an unallocated estimated omission of 148,000 to reach 1,486,433. The three-part subtotal, the two outlying counts and the adjusted total already appear in collections/eastern. The Gold Coast annual report gives the same adjusted total while expressly excluding the Northern Territories. The WWO CShapes unit cshapes_gw_452 contains Accra, Kumasi and Tamale, without separate opening polity units for the Colony, Ashanti and Northern Territories. It cannot represent the Colony-only count as a whole-polity control. The 1900 FT Ghana-Gold Coast reconstruction of 2,701,470 is a research-only account, and the 1901 census sources supply no exact opening crosswalk.",
+    "references": [
+      {
+        "url": "https://iiif.wellcomecollection.org/presentation/b32183173/canvases/b32183173_0139.jp2",
+        "locator": "Original volume, printed p. 71, Gold Coast census date."
+      },
+      {
+        "url": "https://iiif.wellcomecollection.org/presentation/b32183173/canvases/b32183173_0212.jp2",
+        "locator": "Original volume, printed p. 144, both Gold Coast tables and the omission note."
+      },
+      {
+        "url": "https://icr.ethz.ch/data/cshapes/",
+        "locator": "WWO uses cshapes_gw_452 from data/world_map/historical/cshapes_1900_snapshot.json."
+      }
+    ],
+    "collection": "gold_coast_population"
+  },
+  {
+    "id": "gold_coast_1901_colonial_annual_return",
+    "title": "Gold Coast. Report for 1901. Colonial Reports—Annual No. 375",
+    "publisher": "Colonial Office / HMSO, 1902. University of Illinois Library digital copy.",
+    "url": "https://libsysdigi.library.illinois.edu/ilharvest/Africana/Books2011-05/5530214/5530214_1901/5530214_1901_opt.pdf#page=31",
+    "locator": "Printed p. 31, Vital Statistics, paragraph 90.",
+    "rights": "Historical population facts and bibliographic references only.",
+    "date_note": "Paragraph 90 places the count during 1901 and gives no separate reference day for its total.",
+    "boundary_note": "The annual return attributes 1,486,433 to the Colony and Ashanti and explicitly excludes the Northern Territories. It gives no component counts or omission adjustment to support that scope. The empire census table reaches the same number by including the Northern Territories and adding 148,000 for estimated omissions. These are conflicting scope statements for the same number. No independent estimate of the difference between the two stated scopes is available in these sources.",
+    "collection": "gold_coast_population"
   },
   {
     "id": "honduras_ine_historical_censuses",

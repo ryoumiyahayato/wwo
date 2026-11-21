@@ -84,6 +84,31 @@ def _reviewed_panels(population, structural):
                            locator="Table XIII; rus_lan_97.php?reg=0, rows 2–109")
             panel["unreported_count"] = unreported
             yield panel
+    legal_estates = {int(row["locator"].rsplit(" ", 1)[-1]): row
+                     for row in structural_by_source_unit["rus_sos_97", RUSSIA]
+                     if row["locator"].startswith("rus_sos_97.php?reg=0, row ")}
+    if all(index in legal_estates for index in range(2, 17)):
+        russian_subjects = legal_estates[14]["values"]["both"]
+        foreign_subjects = legal_estates[15]["values"]["both"]
+        all_subjects = legal_estates[16]["values"]["both"]
+        unreported = legal_estates[13]["values"]["both"]
+        cells = [_cell(legal_estates[index]["category"], legal_estates[index]["values"]["both"],
+                       legal_estates[index], "published_residual" if index in (11, 12) else "category")
+                 for index in range(2, 13)]
+        if sum(cell["count"] for cell in cells) + unreported == russian_subjects and (
+            russian_subjects + foreign_subjects == all_subjects
+        ):
+            panel = _panel("russia_1897_legal_estates", "social_status", legal_estates[14],
+                           russia_research, russia_opening, "russian_1897_reported_legal_estate",
+                           "Russian subjects in the empire-wide Table VIII return. Published residual "
+                           "categories include Finnish natives without estate distinction and persons "
+                           "outside the listed estates. Foreign subjects are outside this denominator.",
+                           denominator=russian_subjects, categories=cells, closure="reported_subset",
+                           locator="Table VIII; rus_sos_97.php?reg=0, rows 2–16")
+            panel["unreported_count"] = unreported
+            panel["foreign_subjects_outside_denominator"] = foreign_subjects
+            panel["table_total_all_subjects"] = all_subjects
+            yield panel
     literacy = next((row for row in structural_by_source_unit["rus_age_97", RUSSIA]
                      if row["row_role"] == "total"), None)
     if literacy:
@@ -108,20 +133,40 @@ def _reviewed_panels(population, structural):
         if row["date"] != "1901-03-31" or row["dimension"] != "housing_and_urban_rural":
             continue
         values = row["values"]
-        yield _panel("england_wales_1901_residence", "residence", row, ["ft_united_kingdom"],
-                     [("british_isles_1900", "subset")], "england_wales_1901_statutory_district",
+        research_units = ["ft_united_kingdom"]
+        opening_links = [("british_isles_1900", "subset")]
+        yield _panel("england_wales_1901_residence", "residence", row, research_units,
+                     opening_links, "england_wales_1901_statutory_district",
                      "Census-night persons in statutory districts of England and Wales. Separate housing "
                      "occupations, room categories and overcrowding observations are outside this partition.",
                      denominator=values["total_population"], closure="complete_partition",
                      categories=[_cell(label, values["districts"][label]["population"], row)
                                  for label in ("urban", "rural")])
-        housing = _panel("england_wales_1901_crowded_small_tenements", "housing", row, ["ft_united_kingdom"],
-                         [("british_isles_1900", "subset")], "england_wales_1901_more_than_two_occupants_per_room",
+        occupants_panel_id = "england_wales_1901_occupants_by_tenement_rooms"
+        tenements_panel_id = "england_wales_1901_tenements_by_rooms"
+        by_rooms = values["by_rooms_in_tenement"]
+        room_locator = "General Report, section III, Tenement Statistics (England and Wales) in 1891 and 1901."
+        room_row = {**row, "locator": room_locator}
+        yield _panel(occupants_panel_id, "housing", room_row, research_units, opening_links,
+                     "england_wales_1901_rooms_per_tenement",
+                     "Census-night persons classified by rooms in their tenement in England and Wales.",
+                     denominator=values["total_population"], closure="complete_partition",
+                     categories=[_cell(label, counts["occupants"], room_row) for label, counts in by_rooms.items()])
+        yield _panel(tenements_panel_id, "housing", room_row, research_units, opening_links,
+                     "england_wales_1901_rooms_per_tenement",
+                     "Tenements or separate occupations in England and Wales, classified by rooms.",
+                     measure_unit="tenements", denominator=values["separate_occupations"],
+                     closure="complete_partition",
+                     categories=[_cell(label, counts["tenements"], room_row) for label, counts in by_rooms.items()])
+        housing = _panel("england_wales_1901_crowded_small_tenements", "housing", row, research_units,
+                         opening_links, "england_wales_1901_more_than_two_occupants_per_room",
                          row["definition"], denominator=values["total_population"], closure="reported_subset",
                          categories=[_cell(label, values["districts"][label]["occupants_of_these_tenements"], row)
                                      for label in ("urban", "rural")])
         housing["count_of_reported_tenements"] = values["overcrowded_tenements_1_to_4_rooms"]
         housing["by_rooms_in_reported_tenement"] = values["by_rooms_in_overcrowded_tenement"]
+        housing["subset_of_panel_id"] = occupants_panel_id
+        housing["tenement_subset_of_panel_id"] = tenements_panel_id
         yield housing
 
     for panel_id, source, unit, date, research, root, universe in (
