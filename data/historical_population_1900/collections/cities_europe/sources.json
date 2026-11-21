@@ -4,7 +4,7 @@
     "title": "Données historiques de la Statistique générale de France — Recensements de 1851 à 1921",
     "publisher": "Statistique générale de la France; ICPSR transcription; Insee electronic tables (12 January 2010)",
     "url": "https://www.insee.fr/fr/statistiques/2653233",
-    "locator": "REC_T256.dbf V21 (1896), V22 (1901); REC_T24.dbf V132 (1896); REC_T214.dbf V89 (1901). libelles_var_rec.dbf specifies the variables.",
+    "locator": "REC_T256.dbf V21/V114 (1896), V22/V120 (1901); REC_T24.dbf V132 (1896); REC_T214.dbf V89/V78 (1901). libelles_var_rec.dbf specifies the variables.",
     "rights": "Source: Insee, 2010-01-12. Licence Ouverte / Open Licence 2.0 (Etalab); field extraction, identity mapping and interpolations by WWO.",
     "rights_url": "https://www.insee.fr/fr/information/2008466",
     "dates_url": "https://www.bnsp.insee.fr/ark:/12148/bc6p06z2rd0.pdf",

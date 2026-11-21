@@ -1,0 +1,25 @@
+order_id,order_label,england_wales,anglesey
+I,General or Local Government of the Country,198187,264
+II,Defence of the Country,168238,174
+III,Professional Occupations and their Subordinate Services,606260,747
+IV,Domestic Offices or Services,1994917,3523
+V,Commercial Occupations,590629,192
+VI,"Conveyance of Men, Goods, and Messages",1267825,2591
+VII,Agriculture,1128604,6877
+VIII,Fishing,23891,48
+IX,"In and About, and Dealing in the Products of, Mines and Quarries",805185,843
+X,"Metals, Machines, Implements, and Conveyances",1237196,685
+XI,"Precious Metals, Jewels, Watches, Instruments, and Games",149438,52
+XII,Building and Works of Construction,1043566,1404
+XIII,"Wood, Furniture, Fittings, and Decorations",257592,78
+XIV,"Brick, Cement, Pottery, and Glass",175513,27
+XV,"Chemicals, Oil, Grease, Soap, Resin, &c.",128640,57
+XVI,"Skins, Leather, Hair, and Feathers",105341,48
+XVII,"Paper, Prints, Books, and Stationery",278957,43
+XVIII,Textile Fabrics,1155397,285
+XIX,Dress,1125598,1365
+XX,"Food, Tobacco, Drink, and Lodging",1073809,1293
+XXI,"Gas, Water, and Electricity Supply, and Sanitary Service",71425,25
+XXII,"Other, General, and Undefined Workers and Dealers",742519,985
+XXIII,Without Specified Occupations or Unoccupied,10995117,18625
+UNKNOWN,Under age 10 (outside occupation tabulation),7203999,10375

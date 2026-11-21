@@ -8,6 +8,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 DATE = "1900-01-01"
+ENGLAND_WALES_OCCUPATION_REMAINDER = "uk_england_wales_except_anglesey"
 
 def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
@@ -211,6 +212,39 @@ def add_british_county_partitions(group, observations):
     group["method"] += (" Scottish civil counties use both census endpoints. The Irish administrative "
                         "counties and county boroughs use their 1901 shares within the interpolated provinces.")
     group["source_ids"] = [*group["source_ids"], "scotland_civil_counties_census_1901", source]
+
+
+def add_england_wales_statistical_scope(group, observations):
+    unit_id = "uk_england_wales"
+    population_source = "uk_general_census_report_1901"
+    county_source = "england_wales_summary_tables_1901"
+    dates = group["endpoint_dates"]
+    controls = {
+        row["date"]: row for row in observations
+        if row["unit_id"] == unit_id and row["source_id"] == population_source
+        and row["date"] in dates
+    }
+    counties = [unit for unit in group["units"] if unit.get("source_id") == county_source]
+    endpoints = [controls[census_date]["population_value"] for census_date in dates]
+    if not counties or any(unit.get("statistical_parent") for unit in counties):
+        raise ValueError("Invalid statistical members for England and Wales")
+    county_totals = [sum(unit["endpoint_values"][i] for unit in counties) for i in range(len(dates))]
+    if county_totals != endpoints:
+        raise ValueError("England and Wales county returns do not close to the census division")
+    anglesey = next(unit for unit in counties if unit["unit_id"] == "administrative_region:gb_historic_anglesey")
+    rest = [unit for unit in counties if unit is not anglesey]
+    for unit in rest:
+        unit["statistical_parent"] = ENGLAND_WALES_OCCUPATION_REMAINDER
+    group.setdefault("statistical_aggregates", []).append(dict(
+        unit_id=ENGLAND_WALES_OCCUPATION_REMAINDER, name="England and Wales except Anglesey",
+        population_value=sum(unit["population_value"] for unit in rest),
+        source_id=population_source, locator=controls[dates[-1]]["locator"],
+        method="Sum of the mutually exclusive opening balances of the ancient-county groups excluding Anglesey.",
+        date=DATE, scope=controls[dates[-1]]["definition"] + " Excludes Anglesey, a separately assigned ancient county.",
+        endpoint_dates=dates, endpoint_values=[total - local for total, local in zip(endpoints, anglesey["endpoint_values"])],
+        population_lower=None, population_upper=None,
+        uncertainty_kind="Census coverage and the opening date interpolation have no quantified interval.",
+    ))
 
 
 def add_mauritius_districts(group, observations):
@@ -890,6 +924,8 @@ def groups(observations, version=1):
         add_india_princely_states(result["cshapes_gw_750"], observations)
     if version >= 15:
         add_russian_districts(result["russian_empire"], observations)
+    if version >= 17:
+        add_england_wales_statistical_scope(result["british_isles_1900"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

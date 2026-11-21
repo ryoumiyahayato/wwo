@@ -871,7 +871,7 @@
     "title": "Données historiques de la Statistique générale de France — Recensements de 1851 à 1921",
     "publisher": "Statistique générale de la France; ICPSR transcription; Insee electronic tables (12 January 2010)",
     "url": "https://www.insee.fr/fr/statistiques/2653233",
-    "locator": "REC_T256.dbf V21 (1896), V22 (1901); REC_T24.dbf V132 (1896); REC_T214.dbf V89 (1901). libelles_var_rec.dbf specifies the variables.",
+    "locator": "REC_T256.dbf V21/V114 (1896), V22/V120 (1901); REC_T24.dbf V132 (1896); REC_T214.dbf V89/V78 (1901). libelles_var_rec.dbf specifies the variables.",
     "rights": "Source: Insee, 2010-01-12. Licence Ouverte / Open Licence 2.0 (Etalab); field extraction, identity mapping and interpolations by WWO.",
     "rights_url": "https://www.insee.fr/fr/information/2008466",
     "dates_url": "https://www.bnsp.insee.fr/ark:/12148/bc6p06z2rd0.pdf",
@@ -1299,6 +1299,37 @@
     ],
     "rights": "Numeric facts transcribed from the published census.",
     "collection": "england_wales_habitations"
+  },
+  {
+    "id": "england_wales_1901_occupation_orders",
+    "title": "Census of England and Wales, 1901. Summary Tables, Cd. 1523",
+    "publisher": "General Register Office and His Majesty's Stationery Office, London, 1903",
+    "url": "https://iiif.wellcomecollection.org/presentation/v2/b32183161_0006",
+    "locator": "Table XXXV, printed pp. 186–201, persons aged ten years and upwards.",
+    "table_urls": [
+      "https://iiif.wellcomecollection.org/image/b32183161_0006_0196.jp2/full/1600,/0/default.jpg"
+    ],
+    "observed_date": "1901-03-31",
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "occupation.csv",
+    "collection": "england_wales_occupation_1901"
+  },
+  {
+    "id": "anglesey_1901_occupation_orders",
+    "title": "Census of England and Wales, 1901. County of Anglesey",
+    "publisher": "General Register Office and His Majesty's Stationery Office, London",
+    "url": "https://iiif.wellcomecollection.org/presentation/v2/b32183161_0002",
+    "locator": "Table XXXII, printed pp. 23–26, County of Anglesey, occupations of persons aged ten years and upwards.",
+    "table_urls": [
+      "https://iiif.wellcomecollection.org/image/b32183161_0002_0037.jp2/full/1600,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0002_0038.jp2/full/1600,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0002_0039.jp2/full/1600,/0/default.jpg",
+      "https://iiif.wellcomecollection.org/image/b32183161_0002_0040.jp2/full/1600,/0/default.jpg"
+    ],
+    "observed_date": "1901-03-31",
+    "rights": "Public-domain official historical census. Numeric cells transcribed.",
+    "raw_path": "occupation.csv",
+    "collection": "england_wales_occupation_1901"
   },
   {
     "id": "indochina_exposition_catalogue_1900",

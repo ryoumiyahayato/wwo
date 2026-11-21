@@ -17,7 +17,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 16
+OPENING_VERSION = 17
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -319,7 +319,6 @@ def main():
     json_file("world_accounts.json",ledger)
     records("demography_1900.jsonl.gz",structural)
     records("parent_reconciliation.jsonl.gz",audit)
-    json_file("opening.json",dict(version=1,groups=groups(observations, version=1)))
     json_file(f"opening_v{OPENING_VERSION}.json", dict(version=OPENING_VERSION, groups=selection))
     json_file(f"opening_structure_v{OPENING_VERSION}.json", structure_opening)
     json_file(f"opening_social_v{OPENING_VERSION}.json", social_opening)

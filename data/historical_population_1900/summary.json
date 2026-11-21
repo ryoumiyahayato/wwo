@@ -11,7 +11,7 @@
     "britain": 206,
     "cabo_verde": 25,
     "cape_population": 2,
-    "cities_europe": 2063,
+    "cities_europe": 2077,
     "colombia_panama_population": 2,
     "crown_islands": 29,
     "danish": 56,
@@ -45,7 +45,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 202,
+  "cited_sources": 204,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -54,14 +54,14 @@
   "documented_people_under_legacy_controls": 669895792,
   "replaced_legacy_roots": 30,
   "new_roots": 24,
-  "production_people": 1329287972,
+  "production_people": 1329288036,
   "production_people_pct_world_estimate": 83.337,
-  "population_outside_evidence_opening_estimate": 265786276,
+  "population_outside_evidence_opening_estimate": 265786212,
   "legacy_only_people": 135984208,
-  "authoritative_total_for_new_game": 1465272180,
+  "authoritative_total_for_new_game": 1465272244,
   "roots_with_partitions": 23,
-  "disjoint_leaves": 905,
-  "people_in_partitions": 1205786006,
+  "disjoint_leaves": 915,
+  "people_in_partitions": 1205786070,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -95,7 +95,7 @@
     "france_lower_1900_identity.json": {
       "units": 3374,
       "with_linked_observation": 362,
-      "with_opening_partition": 321
+      "with_opening_partition": 335
     },
     "german_administration_1900_identity.json": {
       "units": 230,
@@ -291,7 +291,7 @@
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 26,
-      "people": 324992429
+      "people": 324992493
     },
     "historical_world_reconstruction": {
       "roots": 28,
@@ -312,39 +312,39 @@
   "opening_social_coverage": {
     "household": {
       "assigned_people": 72890961,
-      "unknown_people": 1392381219
+      "unknown_people": 1392381283
     },
     "housing": {
       "assigned_people": 1655881,
-      "unknown_people": 1463616299
+      "unknown_people": 1463616363
     },
     "language": {
       "assigned_people": 161050169,
-      "unknown_people": 1304222011
+      "unknown_people": 1304222075
     },
     "legal_estate": {
       "assigned_people": 132020769,
-      "unknown_people": 1333251411
+      "unknown_people": 1333251475
     },
     "literacy": {
       "assigned_people": 183140727,
-      "unknown_people": 1282131453
+      "unknown_people": 1282131517
     },
     "marital_status": {
       "assigned_people": 169353453,
-      "unknown_people": 1295918727
+      "unknown_people": 1295918791
     },
     "occupation": {
-      "assigned_people": 35190008,
-      "unknown_people": 1430082172
+      "assigned_people": 49325409,
+      "unknown_people": 1415946835
     },
     "religion": {
       "assigned_people": 264470656,
-      "unknown_people": 1200801524
+      "unknown_people": 1200801588
     },
     "residence": {
       "assigned_people": 335167810,
-      "unknown_people": 1130104370
+      "unknown_people": 1130104434
     }
   },
   "structural_observations_by_source": {
@@ -388,7 +388,7 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 703784236,
+  "structure_opening_pool_controls": 703784300,
   "structure_opening_pool_count": 526,
   "structure_opening_residents_outside_modeled_pools": 761487944,
   "structure_opening_scopes": [
@@ -422,7 +422,7 @@
     },
     {
       "unit_id": "administrative_region:france_ardeche",
-      "opening_total": 355929,
+      "opening_total": 356005,
       "observed_unit_id": "country_fra",
       "observed_total": 38450788,
       "observed_date": "1901-03-24"
@@ -975,7 +975,7 @@
     },
     {
       "unit_id": "administrative_region:france_vendee",
-      "opening_total": 441427,
+      "opening_total": 441415,
       "observed_unit_id": "country_fra",
       "observed_total": 38450788,
       "observed_date": "1901-03-24"
@@ -4238,8 +4238,8 @@
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 514,
-  "dated_parent_controls_arithmetic_closure": 472,
+  "dated_parent_controls": 518,
+  "dated_parent_controls_arithmetic_closure": 482,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -4368,9 +4368,9 @@
         "sweden_norway_union",
         "swiss_confederation"
       ],
-      "production_people": 408702574,
+      "production_people": 408702638,
       "production_pct_of_regional_research_estimate": 97.509,
-      "people_with_opening_subdivision": 344142176,
+      "people_with_opening_subdivision": 344142240,
       "research_only_units": 9,
       "research_only_people": 10103353
     },
@@ -4493,10 +4493,10 @@
       {
         "opening_unit_id": "country_fra",
         "research_region": "Europe",
-        "opening_control": 38852684,
-        "in_model_pools": 38852684,
+        "opening_control": 38852748,
+        "in_model_pools": 38852748,
         "outside_model_pools": 0,
-        "modeled_age_and_sex": 38732650,
+        "modeled_age_and_sex": 38732714,
         "modeled_sex_age_unknown": 120034
       },
       {
@@ -5083,10 +5083,10 @@
         "modeled_sex_age_unknown": 4346
       },
       "Europe": {
-        "opening_control": 408702574,
-        "in_model_pools": 299698637,
+        "opening_control": 408702638,
+        "in_model_pools": 299698701,
         "outside_model_pools": 109003937,
-        "modeled_age_and_sex": 297850291,
+        "modeled_age_and_sex": 297850355,
         "modeled_sex_age_unknown": 1848346
       },
       "Africa": {
@@ -5112,10 +5112,10 @@
       }
     },
     "world": {
-      "opening_control": 1465272180,
-      "in_model_pools": 703784236,
+      "opening_control": 1465272244,
+      "in_model_pools": 703784300,
       "outside_model_pools": 761487944,
-      "modeled_age_and_sex": 701638714,
+      "modeled_age_and_sex": 701638778,
       "modeled_sex_age_unknown": 2145522
     }
   },
@@ -5130,7 +5130,7 @@
         "pct_of_research_reference": 43.555
       },
       "date_models_from_territorial_returns": {
-        "people": 629444230,
+        "people": 629444294,
         "pct_of_research_reference": 39.462
       },
       "retained_legacy_estimates": {
@@ -5260,7 +5260,7 @@
       {
         "unit_id": "country_fra",
         "source_id": "insee_sgf_censuses",
-        "sourced_people": 38852684,
+        "sourced_people": 38852748,
         "sourced_basis": "date_models_from_territorial_returns",
         "retained_legacy_people": 0
       },

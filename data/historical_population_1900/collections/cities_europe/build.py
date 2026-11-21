@@ -121,7 +121,7 @@ def french():
             unit = found["id"] if found else f"sgf:arr:{raw['V3']}:{raw['V4']}"
             name = found["historical_name"] if found else raw["V6"]
             wwo, parent, kind = (unit if found else None), dep["id"], "admin"
-        year = FR_DATES[0] if raw["field"] in ("V132", "V21") else FR_DATES[1]
+        year = FR_DATES[0] if raw["field"] in ("V132", "V21", "V114") else FR_DATES[1]
         locator = f"REC_T{raw['table']}.dbf record {raw['record']}, V3={raw['V3']} V4={raw['V4']} V6={raw['V6']}, {raw['field']}"
         definition = "SGF census: legal population within contemporaneous metropolitan enumeration units, including persons counted separately."
         row = observation(unit, name, parent, kind, int(raw["value"]), year, FR_SOURCE, locator, definition,

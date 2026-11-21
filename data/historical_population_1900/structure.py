@@ -5,7 +5,7 @@ import re
 from fractions import Fraction
 from pathlib import Path
 
-from opening import DATE, apportion, opening_fraction
+from opening import DATE, ENGLAND_WALES_OCCUPATION_REMAINDER, apportion, opening_fraction
 
 HERE=Path(__file__).resolve().parent/"collections"
 AGE_SOURCES = HERE / "age_sex"
@@ -573,7 +573,7 @@ def princely_state_opening_age_model(panels, unit, state):
 def opening_structure(opening_groups, observations, *, version=6):
     district_pools = {unit["unit_id"]: unit for group in opening_groups for unit in group["units"]
                       if "district_boundary_source" in unit}
-    district_parents = {unit["statistical_parent"] for unit in district_pools.values()}
+    leaf_age_scopes = {unit["statistical_parent"] for unit in district_pools.values()} | {ENGLAND_WALES_OCCUPATION_REMAINDER}
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
@@ -583,8 +583,8 @@ def opening_structure(opening_groups, observations, *, version=6):
         unit["unit_id"]: unit
         for group in opening_groups
         for unit in (group["units"] or [group])
-        if "statistical_parent" not in unit
-    } | {key: unit for key, unit in statistical_aggregates.items() if key not in district_parents} | district_pools
+        if "statistical_parent" not in unit or unit["statistical_parent"] in leaf_age_scopes
+    } | {key: unit for key, unit in statistical_aggregates.items() if key not in leaf_age_scopes}
     opening_totals = {unit_id: unit["population_value"] for unit_id, unit in opening_balances.items()}
     groups = []
     panels = {panel["id"]: (panel, rows) for panel, rows in age_sex_panels()}
