@@ -653,7 +653,7 @@ impl Builder {
             .historical_population
             .as_deref()
             .ok_or_else(|| invalid("missing historical population opening"))?;
-        let mut places_by_leaf: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+        let mut places_by_leaf: BTreeMap<&str, Vec<String>> = BTreeMap::new();
         for (place, leaf) in opening.residence_places() {
             let physical = self
                 .catalogue
@@ -668,7 +668,40 @@ impl Builder {
             self.catalogue
                 .population_at
                 .insert(physical.to_owned(), leaf.to_owned());
-            places_by_leaf.entry(leaf).or_default().push(place);
+            places_by_leaf.entry(leaf).or_default().push(place.into());
+        }
+        #[derive(Deserialize)]
+        struct SiteList {
+            sites: Vec<(String, String, String)>,
+        }
+        let sites: SiteList = serde_json::from_slice(include_bytes!(
+            "../../../../data/alpha/historical_transport_network_1900/residence_sites.json"
+        ))?;
+        let parents: BTreeMap<_, _> = opening
+            .partition_identities()
+            .map(|(leaf, parent, _)| (leaf, parent))
+            .collect();
+        for (leaf, city, source) in &sites.sites {
+            let parent = parents
+                .get(leaf.as_str())
+                .ok_or_else(|| invalid(format!("unknown census partition {leaf}")))?;
+            let hub = self
+                .cities
+                .get(&(parent.to_string(), key(city)))
+                .ok_or_else(|| {
+                    invalid(format!(
+                        "unknown historical settlement {city} ({parent}, {source})"
+                    ))
+                })?;
+            if self
+                .catalogue
+                .population_at
+                .insert(hub.clone(), leaf.clone())
+                .is_some_and(|before| before != *leaf)
+            {
+                return Err(invalid(format!("conflicting census partition for {hub}")));
+            }
+            places_by_leaf.entry(leaf).or_default().push(hub.clone());
         }
         for root in opening.standalone_ids() {
             let label = &sources.polities()[root].name_zh;
@@ -735,7 +768,7 @@ impl Builder {
                 .get(id)
                 .into_iter()
                 .flatten()
-                .map(|&p| self.catalogue.map_targets.get(p).map_or(p, String::as_str))
+                .map(|p| self.catalogue.map_targets.get(p).unwrap_or(p).as_str())
                 .min_by_key(|p| {
                     (
                         !operational.contains(*p),
@@ -756,6 +789,15 @@ impl Builder {
                     ));
             }
         }
+        for (alias, target) in &self.catalogue.map_targets {
+            if let Some(leaf) = self.catalogue.population_at.get(target).cloned() {
+                self.catalogue
+                    .population_at
+                    .entry(alias.clone())
+                    .or_insert(leaf);
+            }
+        }
+        opening.bind_operating_places(&self.catalogue.population_at);
         Ok(())
     }
 
@@ -1304,6 +1346,26 @@ mod tests {
             .all(|s| !net.catalogue.population_nodes.contains(&s.from)
                 && !net.catalogue.population_nodes.contains(&s.to)));
         assert_eq!(net.coverage("ch_canton_zh"), NodeCoverage::Unrefined);
+        for (root, leaf) in [
+            ("mexican_republic", "mx_distrito_federal"),
+            ("brazil_1900", "br_federal_district_1900"),
+            ("dominion_of_canada", "ca_ontario"),
+            ("kingdom_of_romania", "ro_1899_muntenia"),
+            ("sweden_norway_union", "ft_sweden"),
+            ("swiss_confederation", "ch_canton_be"),
+            ("cshapes_gw_590", "mu_main_island"),
+        ] {
+            let actual = net.capital_node(root).unwrap();
+            assert_eq!(opening.unit_at(actual), Some(leaf), "{root}/{actual}");
+            assert_eq!(net.population_at(actual), Some(leaf));
+        }
+        for (id, leaf) in [
+            ("water:mexican_republic:veracruz", "mx_veracruz"),
+            ("place:st_louis", "us_state_missouri"),
+            ("landing:united_states_1900:st_louis", "us_state_missouri"),
+        ] {
+            assert_eq!(opening.unit_at(id), Some(leaf), "{id}");
+        }
         assert_eq!(net.population_at("place:port_new_york"), Some(dest));
         let formal: Vec<_> = sources
             .polities()

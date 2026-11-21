@@ -1,7 +1,7 @@
 use super::MAX_POPULATION;
 use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, io};
+use std::{collections::BTreeMap, io, sync::OnceLock};
 
 const VERSION: u32 = 1;
 
@@ -17,7 +17,8 @@ pub(crate) struct HistoricalOpening {
     estimates: BTreeMap<String, OpeningPopulationEstimate>,
     pub(super) partitions: BTreeMap<String, Partition>,
     pub(super) standalone: BTreeMap<String, u64>,
-    places: BTreeMap<String, String>,
+    declared_places: BTreeMap<String, String>,
+    places: OnceLock<BTreeMap<String, String>>,
 }
 
 pub(super) struct Partition {
@@ -67,7 +68,7 @@ impl HistoricalOpening {
         }
         let mut opening = Self {
             estimates: BTreeMap::new(), partitions: BTreeMap::new(), standalone: BTreeMap::new(),
-            places: BTreeMap::new(),
+            declared_places: BTreeMap::new(), places: OnceLock::new(),
         };
         for group in manifest.groups {
             let root = group.unit_id;
@@ -93,7 +94,7 @@ impl HistoricalOpening {
                     .ok_or_else(|| invalid(format!("historical population partitions exceed {root}")))?;
                 for place in leaf.place_ids {
                     if market_at(&place) != Some(root.as_str())
-                        || opening.places.insert(place.clone(), id.clone()).is_some()
+                        || opening.declared_places.insert(place.clone(), id.clone()).is_some()
                     {
                         return Err(invalid(format!("invalid or repeated historical residence binding {place} in {id}")));
                     }
@@ -135,7 +136,7 @@ impl HistoricalOpening {
         self.partitions.iter().map(|(id, part)| (id.as_str(), part.parent.as_str(), part.name.as_str()))
     }
     pub(crate) fn residence_places(&self) -> impl Iterator<Item = (&str, &str)> {
-        self.places.iter().map(|(place, id)| (place.as_str(), id.as_str()))
+        self.declared_places.iter().map(|(place, id)| (place.as_str(), id.as_str()))
     }
     pub(crate) fn standalone_ids(&self) -> impl Iterator<Item = &str> {
         self.standalone.keys().map(String::as_str)
@@ -147,8 +148,17 @@ impl HistoricalOpening {
         self.estimates.get(unit)
     }
 
+    pub(crate) fn bind_operating_places(&self, sites: &BTreeMap<String, String>) {
+        self.places.get_or_init(|| {
+            let mut places = self.declared_places.clone();
+            places.extend(sites.iter().filter(|(_,unit)| self.partitions.contains_key(unit.as_str()))
+                .map(|(place,unit)|(place.clone(),unit.clone())));
+            places
+        });
+    }
+
     pub(crate) fn unit_at(&self, place: &str) -> Option<&str> {
-        self.places.get(place).map(String::as_str)
+        self.places.get().unwrap_or(&self.declared_places).get(place).map(String::as_str)
     }
 
     pub(crate) fn totals(&self, legacy: &BTreeMap<String, u64>) -> BTreeMap<String, u64> {
