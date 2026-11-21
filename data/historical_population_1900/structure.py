@@ -27,6 +27,71 @@ def read_csv(path):
     with path.open(encoding="utf8",newline="") as f:
         return list(csv.DictReader(f))
 
+def austrian_age_panels():
+    directory = HERE / "austrian_crown_1900"
+    broad_bands = ((0, 14), (15, 60), (61, None))
+    original_bands = ((0, 10), (11, 20), (21, 30), (31, 40), (41, 50), (51, 60),
+                      (61, 70), (71, 80), (81, 90), (91, None))
+    opening_bands = ((0, 10), (11, 14), (15, 20), *original_bands[2:])
+    tables = []
+    pages = {}
+    for filename, expected_bands in (("age_sex.csv", broad_bands), ("age_sex_detail.csv", original_bands)):
+        territories = {}
+        for row in read_csv(directory / filename):
+            place = (row["opening_unit_id"], row["source_row"], row["source_name"])
+            bands = territories.setdefault(place, {})
+            band = (int(row["age_min"]), int(row["age_max"]) if row["age_max"] else None)
+            if band in bands:
+                raise ValueError(f"Duplicate Austrian census age band: {place} {band}")
+            bands[band] = {sex: int(row[sex]) for sex in SEX_COUNTS}
+            if row.get("printed_page"):
+                pages[place] = row["printed_page"]
+        if any(set(bands) != set(expected_bands) for bands in territories.values()):
+            raise ValueError(f"Missing Austrian census age band in {filename}")
+        tables.append(territories)
+
+    broad, detail = tables
+    if len(broad) != 17 or broad.keys() != detail.keys():
+        raise ValueError("Austrian age tables describe different territories")
+    opening = {}
+    for place, bands in detail.items():
+        split = {band: bands[band] for band in opening_bands if band in bands}
+        split[11, 14] = {}
+        split[15, 20] = {}
+        for sex in SEX_COUNTS:
+            young = broad[place][0, 14][sex] - bands[0, 10][sex]
+            older = bands[11, 20][sex] - young
+            if young < 0 or older < 0:
+                raise ValueError(f"Inconsistent Austrian ages below 21: {place} {sex}")
+            split[11, 14][sex] = young
+            split[15, 20][sex] = older
+            for low, high in broad_bands:
+                subtotal = sum(counts[sex] for (start, end), counts in split.items()
+                               if start >= low and (high is None or end is not None and end <= high))
+                if subtotal != broad[place][low, high][sex]:
+                    raise ValueError(f"Austrian age tables do not close: {place} {sex} {(low, high)}")
+        opening.setdefault(place[0], {})[place] = split
+
+    for unit_id, territories in opening.items():
+        rows = []
+        for low, high in opening_bands:
+            sex_counts = {sex: sum(counts[low, high][sex] for counts in territories.values()) for sex in SEX_COUNTS}
+            label = f"Ages {low}–{high}" if high is not None else f"Ages {low} and over"
+            rows.append(dict(label=label, role="band", age_min=low, age_max=high, both=sum(sex_counts.values()), **sex_counts))
+        total = dict(label="Population present", role="total", age_min=None, age_max=None,
+                     **{key: sum(row[key] for row in rows) for key in AGE_COUNTS})
+        names = " + ".join(place[2] for place in territories)
+        printed_pages = ", ".join(pages[place] for place in territories)
+        yield dict(
+            id=f"{unit_id}_1900_age_sex", observed_unit_id=unit_id, opening_unit_id=unit_id, opening_from_version=16,
+            broad_observation=False, opening_match_population_endpoint=True,
+            observed_date="1900-12-31", source_id="ah_cisleithania_census_1900_ages", published_scope=names,
+            locator=f"Vol. 63, part 3, Table II pp. {printed_pages} and Table III p. 46; {names}",
+            definition="Persons present. Table II age rows split at age 15 using the same territory and sex in Table III.",
+            uncertainty="Year-end census age and sex shares are held on the opening date. Within-year demographic "
+                        "change and reporting error are unquantified. The source rows used do not establish single ages.",
+        ), [total, *rows]
+
 def province_key(name):
     return re.sub(r"\s+(губерния|область|обл\.?)$","",name.strip().casefold())
 
@@ -135,6 +200,7 @@ def age_sex_panels():
     regional_sources = (
         HERE / "netherlands_census_1899", HERE / "nordic_population_1900", HERE / "swiss_census_ages",
         HERE / "andaman_census_demography", HERE / "india_princely_age", HERE / "india_statistical_abstract_ages",
+        HERE / "prussia_census_1900",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
@@ -207,7 +273,7 @@ def age_sex_panels():
             for key in AGE_COUNTS:
                 row[key] = sum(component[key] for component in matched_rows)
             by_panel[panel["id"]].append(row)
-    return [(panel, by_panel[panel["id"]]) for panel in panels]
+    return [(panel, by_panel[panel["id"]]) for panel in panels] + list(austrian_age_panels())
 
 
 def opening_age_group(panel, rows, unit_id, opening_total):
@@ -533,7 +599,11 @@ def opening_structure(opening_groups, observations, *, version=6):
             "administrative_region:uk_constituent_ireland",
         ) and unit_id not in opening_totals:
             continue
-        groups.append(opening_age_group(panel, rows, unit_id, opening_totals[unit_id]))
+        model = opening_age_group(panel, rows, unit_id, opening_totals[unit_id])
+        if (panel.get("opening_match_population_endpoint")
+                and opening_balances[unit_id]["endpoint_values"][-1] != model["observed_total"]):
+            raise ValueError(f"Census age and population controls differ for {unit_id}")
+        groups.append(model)
     if version >= 13:
         for group in opening_groups:
             if group["unit_id"] == "swiss_confederation":

@@ -256,7 +256,7 @@ impl Panel {
                 "culture" => ("文化", "Culture"),
                 "religion" => ("宗教", "Religion"),
                 "literacy" => ("识字", "Literacy"),
-                "residence" => ("城乡居住", "Urban and rural residence"),
+                "residence" => ("城乡居住与聚落规模", "Residence and locality size"),
                 "marital_status" => ("婚姻状态", "Marital status"),
                 "household" => ("家庭居住类型", "Household type"),
                 "housing" => ("住房", "Housing"),

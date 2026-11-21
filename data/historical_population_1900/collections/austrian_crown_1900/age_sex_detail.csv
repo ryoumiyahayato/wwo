@@ -1,0 +1,171 @@
+source_row,source_name,opening_unit_id,printed_page,age_min,age_max,male,female
+1,Niederösterreich,ah_lower_austria,16,0,10,334835,337447
+1,Niederösterreich,ah_lower_austria,16,11,20,290663,289175
+1,Niederösterreich,ah_lower_austria,16,21,30,294668,292698
+1,Niederösterreich,ah_lower_austria,16,31,40,212383,217447
+1,Niederösterreich,ah_lower_austria,16,41,50,170222,177208
+1,Niederösterreich,ah_lower_austria,16,51,60,121479,133184
+1,Niederösterreich,ah_lower_austria,16,61,70,67936,84247
+1,Niederösterreich,ah_lower_austria,16,71,80,26801,37374
+1,Niederösterreich,ah_lower_austria,16,81,90,4981,7259
+1,Niederösterreich,ah_lower_austria,16,91,,172,314
+2,Oberösterreich,ah_upper_austria,17,0,10,94443,94383
+2,Oberösterreich,ah_upper_austria,17,11,20,71233,72714
+2,Oberösterreich,ah_upper_austria,17,21,30,59984,59950
+2,Oberösterreich,ah_upper_austria,17,31,40,51332,51791
+2,Oberösterreich,ah_upper_austria,17,41,50,45489,45577
+2,Oberösterreich,ah_upper_austria,17,51,60,38947,40852
+2,Oberösterreich,ah_upper_austria,17,61,70,25905,28173
+2,Oberösterreich,ah_upper_austria,17,71,80,11306,13359
+2,Oberösterreich,ah_upper_austria,17,81,90,2143,2515
+2,Oberösterreich,ah_upper_austria,17,91,,60,90
+3,Salzburg,ah_salzburg,18,0,10,21702,21886
+3,Salzburg,ah_salzburg,18,11,20,16889,17044
+3,Salzburg,ah_salzburg,18,21,30,16720,15894
+3,Salzburg,ah_salzburg,18,31,40,13451,13046
+3,Salzburg,ah_salzburg,18,41,50,11126,10468
+3,Salzburg,ah_salzburg,18,51,60,8804,8992
+3,Salzburg,ah_salzburg,18,61,70,5133,6130
+3,Salzburg,ah_salzburg,18,71,80,1970,2685
+3,Salzburg,ah_salzburg,18,81,90,334,457
+3,Salzburg,ah_salzburg,18,91,,14,18
+4,Steiermark,ah_styria,19,0,10,154121,154842
+4,Steiermark,ah_styria,19,11,20,126215,124372
+4,Steiermark,ah_styria,19,21,30,106134,104642
+4,Steiermark,ah_styria,19,31,40,88923,89961
+4,Steiermark,ah_styria,19,41,50,75825,76512
+4,Steiermark,ah_styria,19,51,60,63862,65647
+4,Steiermark,ah_styria,19,61,70,42134,44694
+4,Steiermark,ah_styria,19,71,80,15871,17378
+4,Steiermark,ah_styria,19,81,90,2484,2699
+4,Steiermark,ah_styria,19,91,,61,117
+5,Kärnten,ah_carinthia,20,0,10,44027,44031
+5,Kärnten,ah_carinthia,20,11,20,35579,34539
+5,Kärnten,ah_carinthia,20,21,30,27706,26720
+5,Kärnten,ah_carinthia,20,31,40,22483,23975
+5,Kärnten,ah_carinthia,20,41,50,19838,21247
+5,Kärnten,ah_carinthia,20,51,60,16294,18254
+5,Kärnten,ah_carinthia,20,61,70,10172,12277
+5,Kärnten,ah_carinthia,20,71,80,3798,4905
+5,Kärnten,ah_carinthia,20,81,90,629,769
+5,Kärnten,ah_carinthia,20,91,,25,56
+6,Krain,ah_carniola,21,0,10,68300,67790
+6,Krain,ah_carniola,21,11,20,51120,51893
+6,Krain,ah_carniola,21,21,30,29981,36518
+6,Krain,ah_carniola,21,31,40,25481,31108
+6,Krain,ah_carniola,21,41,50,23086,28171
+6,Krain,ah_carniola,21,51,60,21519,25412
+6,Krain,ah_carniola,21,61,70,14482,16922
+6,Krain,ah_carniola,21,71,80,6547,7356
+6,Krain,ah_carniola,21,81,90,1176,1205
+6,Krain,ah_carniola,21,91,,35,48
+7,Triest und Gebiet,ah_littoral,22,0,10,18495,18488
+7,Triest und Gebiet,ah_littoral,22,11,20,16129,16939
+7,Triest und Gebiet,ah_littoral,22,21,30,16422,17037
+7,Triest und Gebiet,ah_littoral,22,31,40,12503,13425
+7,Triest und Gebiet,ah_littoral,22,41,50,10157,10721
+7,Triest und Gebiet,ah_littoral,22,51,60,7066,7958
+7,Triest und Gebiet,ah_littoral,22,61,70,3906,5052
+7,Triest und Gebiet,ah_littoral,22,71,80,1103,2114
+7,Triest und Gebiet,ah_littoral,22,81,90,669,393
+7,Triest und Gebiet,ah_littoral,22,91,,8,14
+8,Görz und Gradisca,ah_littoral,23,0,10,31170,30376
+8,Görz und Gradisca,ah_littoral,23,11,20,23661,23158
+8,Görz und Gradisca,ah_littoral,23,21,30,16596,16634
+8,Görz und Gradisca,ah_littoral,23,31,40,13025,12891
+8,Görz und Gradisca,ah_littoral,23,41,50,11916,11663
+8,Görz und Gradisca,ah_littoral,23,51,60,9932,9736
+8,Görz und Gradisca,ah_littoral,23,61,70,7137,7041
+8,Görz und Gradisca,ah_littoral,23,71,80,3480,3310
+8,Görz und Gradisca,ah_littoral,23,81,90,565,536
+8,Görz und Gradisca,ah_littoral,23,91,,32,38
+9,Istrien,ah_littoral,24,0,10,46230,44901
+9,Istrien,ah_littoral,24,11,20,33577,32184
+9,Istrien,ah_littoral,24,21,30,30108,25778
+9,Istrien,ah_littoral,24,31,40,19452,19123
+9,Istrien,ah_littoral,24,41,50,17591,15980
+9,Istrien,ah_littoral,24,51,60,14619,13655
+9,Istrien,ah_littoral,24,61,70,10532,9796
+9,Istrien,ah_littoral,24,71,80,4957,4834
+9,Istrien,ah_littoral,24,81,90,878,775
+9,Istrien,ah_littoral,24,91,,32,48
+10,Tirol,ah_tyrol_vorarlberg,25,0,10,98731,96646
+10,Tirol,ah_tyrol_vorarlberg,25,11,20,77756,78473
+10,Tirol,ah_tyrol_vorarlberg,25,21,30,69180,68553
+10,Tirol,ah_tyrol_vorarlberg,25,31,40,51221,54545
+10,Tirol,ah_tyrol_vorarlberg,25,41,50,44710,47643
+10,Tirol,ah_tyrol_vorarlberg,25,51,60,39038,41639
+10,Tirol,ah_tyrol_vorarlberg,25,61,70,26448,27480
+10,Tirol,ah_tyrol_vorarlberg,25,71,80,13159,12673
+10,Tirol,ah_tyrol_vorarlberg,25,81,90,2401,2249
+10,Tirol,ah_tyrol_vorarlberg,25,91,,82,85
+11,Vorarlberg,ah_tyrol_vorarlberg,26,0,10,14624,14490
+11,Vorarlberg,ah_tyrol_vorarlberg,26,11,20,12478,12431
+11,Vorarlberg,ah_tyrol_vorarlberg,26,21,30,10970,10948
+11,Vorarlberg,ah_tyrol_vorarlberg,26,31,40,8442,8572
+11,Vorarlberg,ah_tyrol_vorarlberg,26,41,50,6895,7091
+11,Vorarlberg,ah_tyrol_vorarlberg,26,51,60,5436,5975
+11,Vorarlberg,ah_tyrol_vorarlberg,26,61,70,3508,3746
+11,Vorarlberg,ah_tyrol_vorarlberg,26,71,80,1517,1659
+11,Vorarlberg,ah_tyrol_vorarlberg,26,81,90,213,223
+11,Vorarlberg,ah_tyrol_vorarlberg,26,91,,10,9
+12,Böhmen,ah_bohemia,27,0,10,807029,809091
+12,Böhmen,ah_bohemia,27,11,20,596741,617855
+12,Böhmen,ah_bohemia,27,21,30,486020,510249
+12,Böhmen,ah_bohemia,27,31,40,385510,404085
+12,Böhmen,ah_bohemia,27,41,50,326365,348780
+12,Böhmen,ah_bohemia,27,51,60,241846,274939
+12,Böhmen,ah_bohemia,27,61,70,152438,183767
+12,Böhmen,ah_bohemia,27,71,80,64385,80797
+12,Böhmen,ah_bohemia,27,81,90,12402,15180
+12,Böhmen,ah_bohemia,27,91,,457,761
+13,Mähren,ah_moravia,28,0,10,319545,318319
+13,Mähren,ah_moravia,28,11,20,228952,237925
+13,Mähren,ah_moravia,28,21,30,189425,195871
+13,Mähren,ah_moravia,28,31,40,148366,156847
+13,Mähren,ah_moravia,28,41,50,118473,135026
+13,Mähren,ah_moravia,28,51,60,87604,109197
+13,Mähren,ah_moravia,28,61,70,53696,71787
+13,Mähren,ah_moravia,28,71,80,22931,32301
+13,Mähren,ah_moravia,28,81,90,4471,6492
+13,Mähren,ah_moravia,28,91,,161,317
+14,Schlesien,ah_silesia,29,0,10,94506,94276
+14,Schlesien,ah_silesia,29,11,20,66586,65631
+14,Schlesien,ah_silesia,29,21,30,56439,56902
+14,Schlesien,ah_silesia,29,31,40,43784,45275
+14,Schlesien,ah_silesia,29,41,50,30128,34716
+14,Schlesien,ah_silesia,29,51,60,20368,26366
+14,Schlesien,ah_silesia,29,61,70,13159,18158
+14,Schlesien,ah_silesia,29,71,80,4973,7081
+14,Schlesien,ah_silesia,29,81,90,849,1142
+14,Schlesien,ah_silesia,29,91,,36,47
+15,Galizien,ah_galicia,30,0,10,1096844,1094770
+15,Galizien,ah_galicia,30,11,20,725808,786981
+15,Galizien,ah_galicia,30,21,30,569336,591064
+15,Galizien,ah_galicia,30,31,40,452156,468973
+15,Galizien,ah_galicia,30,41,50,339881,337576
+15,Galizien,ah_galicia,30,51,60,251298,249002
+15,Galizien,ah_galicia,30,61,70,137917,127679
+15,Galizien,ah_galicia,30,71,80,39411,35040
+15,Galizien,ah_galicia,30,81,90,5900,5419
+15,Galizien,ah_galicia,30,91,,382,502
+16,Bukowina,ah_bukovina,31,0,10,108114,107270
+16,Bukowina,ah_bukovina,31,11,20,75645,79473
+16,Bukowina,ah_bukovina,31,21,30,51516,52343
+16,Bukowina,ah_bukovina,31,31,40,45985,45423
+16,Bukowina,ah_bukovina,31,41,50,38902,36942
+16,Bukowina,ah_bukovina,31,51,60,27279,25361
+16,Bukowina,ah_bukovina,31,61,70,14318,12552
+16,Bukowina,ah_bukovina,31,71,80,4269,3597
+16,Bukowina,ah_bukovina,31,81,90,585,535
+16,Bukowina,ah_bukovina,31,91,,44,42
+17,Dalmatien,ah_dalmatia,32,0,10,86611,80918
+17,Dalmatien,ah_dalmatia,32,11,20,60011,60280
+17,Dalmatien,ah_dalmatia,32,21,30,46500,42921
+17,Dalmatien,ah_dalmatia,32,31,40,35009,34483
+17,Dalmatien,ah_dalmatia,32,41,50,29157,27956
+17,Dalmatien,ah_dalmatia,32,51,60,20199,21175
+17,Dalmatien,ah_dalmatia,32,61,70,15023,15757
+17,Dalmatien,ah_dalmatia,32,71,80,7566,7084
+17,Dalmatien,ah_dalmatia,32,81,90,1466,1411
+17,Dalmatien,ah_dalmatia,32,91,,116,141
