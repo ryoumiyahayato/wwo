@@ -8,11 +8,14 @@ use crate::{
     timeline::Date,
 };
 use serde_json::{json, Value};
-use std::{collections::BTreeMap, fs::{self, File}, io, path::PathBuf, time::Instant};
+use std::{fs::{self, File}, io, path::PathBuf, time::Instant};
 use wwo_map_lab::{
+    battlefield_terrain::BattlefieldTerrain,
     formal_bootstrap::{freight::FreightState, mode_name, mode_set, InitialWorld, PersonalActivity, WorldBootstrap, OPENINGS},
     formal_clock::{GameClock, TimeControl, MINUTES_PER_DAY},
     formal_save::{native_slot_summary, read_native_slot, write_native_slot},
+    land_battle::{self, LandBattleControls},
+    military_grid::MilitaryCell,
     transport::operations::Plan,
 };
 
@@ -196,7 +199,7 @@ impl NativeSession {
                 if speed == 0 { self.control.paused = true; }
                 else { self.control.set_speed(i64::from(speed)); }
                 self.clock_ack = serial;
-                self.next_tick = Instant::now() + TICK_INTERVAL;
+                self.reset_world_tick();
             }
             Request::HostAction { action } if self.world.is_some() => self.host_action(action),
             Request::OpenSlots { .. } => { self.refresh_slots(); self.slot_open = true; self.slot_error.clear(); }
@@ -246,14 +249,28 @@ impl NativeSession {
         }
     }
 
-    pub fn tick(&mut self, now: Instant) -> io::Result<bool> {
+    pub fn reset_world_tick(&mut self) {
+        let battle = self.world.as_ref().is_some_and(InitialWorld::land_battle_in_progress);
+        self.next_tick = Instant::now() + if battle { land_battle::TICK_INTERVAL } else { TICK_INTERVAL };
+    }
+
+    pub fn tick(
+        &mut self, now: Instant, terrain: Option<(MilitaryCell, &BattlefieldTerrain)>, controls: LandBattleControls,
+    ) -> io::Result<bool> {
         let Some(world) = self.world.as_mut() else { return Ok(false); };
         if self.departure.is_some() || self.slot_open || now < self.next_tick { return Ok(false); }
         let Some(minutes) = self.control.tick() else { return Ok(false); };
-        self.next_tick = now + TICK_INTERVAL;
+        let battle = world.land_battle_in_progress();
+        let minutes = if battle { land_battle::WORLD_MINUTES_PER_STEP * self.control.speed } else { minutes };
         let was_traveling = world.passenger_in_transit();
         let previous_day = world.clock().current_day();
-        if let Err(error) = world.advance_migrated_domains(minutes, &BTreeMap::new()) {
+        let advanced = world.advance_live_minutes(minutes, terrain, controls);
+        self.next_tick = if battle && world.land_battle_in_progress() {
+            (self.next_tick + land_battle::TICK_INTERVAL).max(now)
+        } else {
+            now + TICK_INTERVAL
+        };
+        if let Err(error) = advanced {
             self.control.paused = true;
             return Err(error);
         }
