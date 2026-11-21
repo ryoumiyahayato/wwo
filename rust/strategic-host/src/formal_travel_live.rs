@@ -285,7 +285,7 @@ impl InitialWorld {
         self.pay_passage(&self.player.clone(), amount, id)
     }
 
-    fn pay_passage(&mut self, person: &str, amount: i64, id: u64) -> io::Result<()> {
+    pub(super) fn pay_passage(&mut self, person: &str, amount: i64, id: u64) -> io::Result<()> {
         let payer = self.ledger.default_account(person).ok_or_else(|| invalid("人物账户缺失。"))?.account_id.to_owned();
         self.ledger.transfer(&format!("transport:fare:{id}"), &payer, TRANSPORT_ACCOUNT, amount,
             self.clock.snapshot().total_minutes, "transport_fare", &format!("transport:{id}"))
@@ -295,7 +295,7 @@ impl InitialWorld {
         self.refund_passage(&self.player.clone(), amount, id)
     }
 
-    fn refund_passage(&mut self, person: &str, amount: i64, id: u64) -> io::Result<()> {
+    pub(super) fn refund_passage(&mut self, person: &str, amount: i64, id: u64) -> io::Result<()> {
         if amount == 0 { return Ok(()); }
         let payer = self.ledger.default_account(person).ok_or_else(|| invalid("人物账户缺失。"))?.account_id.to_owned();
         self.ledger.transfer(&format!("transport:refund:{id}"), TRANSPORT_ACCOUNT, &payer, amount,
@@ -319,6 +319,9 @@ impl InitialWorld {
             if purpose == Purpose::Workbound && self.travel.commute.is_some() {
                 self.attend_commute();
             }
+        }
+        if self.travel.passenger.is_none() {
+            if let Some(place) = self.travel.place.clone() { self.register_arrival_organizations(&place)?; }
         }
         Ok(())
     }
@@ -344,7 +347,8 @@ impl InitialWorld {
             self.refund_passage(&person, refund, id)?;
             self.transport.finish(id);
             self.travel.named.remove(&person);
-            self.travel.stations.insert(person, station);
+            self.travel.stations.insert(person, station.clone());
+            self.register_arrival_organizations(&station)?;
         }
         Ok(())
     }
@@ -703,6 +707,8 @@ mod tests {
         let mut failures = Vec::new();
         let mut reachable_openings = 0;
         let mut reachable_units = BTreeSet::new();
+        let mut restored_openings = 0;
+        let mut registered_members = 0;
         for polity in bootstrap.opening_people.keys() {
             let world = match bootstrap.create(polity) {
                 Ok(world) => world,
@@ -714,14 +720,35 @@ mod tests {
             assert!(world.place_coordinates(world.player_home()).is_some());
             assert!(world.macro_economy().markets().contains_key(world.player_market_unit()));
             assert_eq!(&world.player().opening_source_id, polity);
+            let restored = resume(&bootstrap, &world);
+            assert_eq!(restored.population.totals(), world.population.totals(), "{polity}");
+            assert_eq!(restored.player().id, world.player().id, "{polity}");
+            assert_eq!(restored.player_home(), world.player_home(), "{polity}");
+            for org in world.organizations() {
+                let before = world.organization_members(&org.id);
+                let after = restored.organization_members(&org.id);
+                assert_eq!(after.len(), before.len(), "{polity}: {}", org.id);
+                for member in before {
+                    assert!(after.iter().any(|row| row.person == member.person && row.role == member.role));
+                    assert_eq!(restored.current_place(member.person), Some(org.place.as_str()));
+                    let pool = restored.residence_unit_at(&org.place).unwrap();
+                    assert_eq!(restored.population.unit_for_person(member.person), Some(pool));
+                    assert_eq!(restored.market_unit_for_person(member.person), Some(org.unit.as_str()));
+                    assert!(restored.ledger.default_account(member.person).is_some());
+                    registered_members += 1;
+                }
+            }
+            restored_openings += 1;
             if world.transport().coverage(world.player_home()) == crate::transport::NodeCoverage::Connected {
                 reachable_openings += 1;
                 reachable_units.insert(world.player_market_unit().to_owned());
             }
         }
-        println!("formal_openings={} connected_openings={reachable_openings} connected_opening_regions={}",
+        println!("formal_openings={} connected_openings={reachable_openings} connected_opening_regions={} restored_openings={restored_openings} organization_members_verified={registered_members}",
             bootstrap.opening_people.len() - failures.len(), reachable_units.len());
         assert!(failures.is_empty(), "{}", failures.join("\n"));
+        assert_eq!(restored_openings, bootstrap.opening_people.len());
+        assert!(registered_members > 0);
     }
 
     #[test]

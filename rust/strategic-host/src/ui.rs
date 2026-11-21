@@ -338,7 +338,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         }
     }
     let mut debug_right=145.;
-    if ui.mode==Mode::Economic && ui.formal.hud.page!=crate::formal_ui::Page::Market
+    if ui.mode==Mode::Economic && !matches!(ui.formal.hud.page,crate::formal_ui::Page::Market|crate::formal_ui::Page::Relations)
         && ui.formal.hud.menu==crate::formal_ui::Menu::None {
         let width=(measure(a,0,ui.econ_label)+25.).clamp(219.,374.);
         let x=w-width-17.;

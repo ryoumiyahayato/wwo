@@ -22,6 +22,15 @@ mod travel_live;
 pub mod freight;
 #[path = "formal_migration.rs"]
 mod migration;
+#[path = "formal_organization_registration.rs"]
+pub mod organization_registration;
+#[path = "formal_organization_activity.rs"]
+pub mod organization_activity;
+#[path = "formal_counter.rs"]
+pub mod counter;
+use organization_registration::{OrganizationDirectory, OrganizationMembers};
+use organization_activity::OrganizationActivity;
+use counter::CounterBook;
 pub use travel_live::{mode_name, mode_set};
 pub use crate::formal_stock::ConsumptionAllocation;
 pub use crate::formal_wages::CompletedFirmWork;
@@ -156,6 +165,16 @@ struct RuntimePerson {
 }
 
 impl RuntimePerson {
+    fn at(id: &str, name: String, place: &str, unit: &str, birth_year: u16, born_day: Option<u32>) -> Self {
+        Self {
+            origin: OpeningPerson {
+                id: id.into(), claim_id: format!("formal_population_claim:{id}"),
+                opening_source_id: unit.into(), polity_id: String::new(), place_id: place.into(), birth_year,
+            },
+            name, born_day,
+        }
+    }
+
     fn identity(&self) -> io::Result<formal_character::Identity> {
         match self.born_day {
             Some(day) => Ok(formal_character::Identity::native_birth(day, self.name.clone())),
@@ -167,6 +186,7 @@ impl RuntimePerson {
 }
 
 pub struct WorldBootstrap {
+    organization_directory: Arc<OrganizationDirectory>,
     world: Arc<WorldSources>,
     populations: BTreeMap<String, u64>,
     historical_population: Arc<HistoricalOpening>,
@@ -192,6 +212,10 @@ pub struct WorldSources {
 }
 
 pub struct InitialWorld {
+    organization_directory: Arc<OrganizationDirectory>,
+    organization_members: OrganizationMembers,
+    activity: OrganizationActivity,
+    counters: CounterBook,
     sources: Arc<WorldSources>,
     pub(crate) player: String,
     player_origin: Arc<OpeningPerson>,
@@ -235,6 +259,12 @@ struct WorldLandBattle {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct WorldSnapshot {
+    #[serde(default)]
+    organization_members: Option<OrganizationMembers>,
+    #[serde(default)]
+    activity: OrganizationActivity,
+    #[serde(default)]
+    counters: CounterBook,
     opening: String,
     #[serde(default)]
     opening_place: Option<String>,
@@ -303,6 +333,9 @@ impl InitialWorld {
         serde_json::json!({
             "opening": self.player().opening_source_id,
             "opening_place": self.player().place_id,
+            "organization_members": self.organization_members,
+            "activity": self.activity,
+            "counters": self.counters,
             "clock": self.clock.snapshot(),
             "population": self.population.snapshot(),
             "markets": typed_map(self.macro_economy.persistent_fields(self.clock)),
@@ -396,6 +429,10 @@ impl InitialWorld {
 
     pub fn market_unit_for_person(&self, person: &str) -> Option<&str> {
         self.population_unit_at(self.current_place(person)?)
+    }
+
+    pub(crate) fn market_unit_at(&self, place: &str) -> Option<&str> {
+        self.population_unit_at(place)
     }
 
     pub fn population_unit_at(&self, place: &str) -> Option<&str> {
@@ -496,7 +533,7 @@ impl InitialWorld {
     pub fn jobs(&self) -> impl Iterator<Item = (&Job, usize)> {
         self.work.local_jobs(&self.work_opening, &self.player, self.player_current_place(), self.clock.current_day())
             .filter(|job| self.can_access_player_job(&job.id))
-            .map(|job| (job, self.work.vacancies(job)))
+            .map(|job| (job, if self.can_take_organization_job(&self.player, job) { self.work.vacancies(job) } else { 0 }))
     }
 
     fn player_written_job(&self) -> Option<&str> {
@@ -506,20 +543,26 @@ impl InitialWorld {
 
     fn can_access_player_job(&self, job: &str) -> bool {
         self.player_written_job() != Some(job) || self.can_read_opening_language()
+            || self.work.has_referral(&self.player, job)
             || self.player_day.last_read_notice.is_some()
     }
 
+    pub fn player_knows_job_by_referral(&self, job: &str) -> bool { self.work.has_referral(&self.player, job) }
+
+    fn player_knows_job_orally(&self, job: &str) -> bool {
+        self.player_knows_job_by_referral(job)
+            || (self.player_day.last_read_notice.is_some() && self.player_written_job() == Some(job))
+    }
+
     pub fn oral_work_offer(&self) -> Option<(&Job, usize)> {
-        self.player_day.last_read_notice?;
-        let known = self.player_written_job()?;
         if self.work.has_contract(&self.player) || !self.eligible_for_civil_work(&self.player) { return None; }
-        self.jobs().find(|(job, _)| job.id == known)
+        self.jobs().filter(|(job, _)| self.player_knows_job_orally(&job.id))
+            .max_by_key(|(job, openings)| (*openings > 0, self.player_knows_job_by_referral(&job.id), job.wage_per_hour))
     }
 
     pub fn oral_work_employment(&self) -> Option<(&Job, bool)> {
-        self.player_day.last_read_notice?;
         let (job, booked, _) = self.employment()?;
-        (self.player_written_job() == Some(job.id.as_str())).then_some((job, booked))
+        self.player_knows_job_orally(&job.id).then_some((job, booked))
     }
 
     pub fn employment(&self) -> Option<(&Job, bool, &str)> {
@@ -582,6 +625,9 @@ impl InitialWorld {
 
     pub fn apply_for_work_as(&mut self, person: &str, job: &str) -> io::Result<()> {
         if !self.eligible_for_civil_work(person) { return Err(invalid("当前健康或服役状态不允许民间就业。")); }
+        if !self.work_opening.job(job).is_some_and(|job| self.can_take_organization_job(person, job)) {
+            return Err(invalid("这份工作当前没有可承办的业务。"));
+        }
         if person == self.player && !self.can_access_player_job(job) {
             return Err(invalid("人物还未能读懂或听取这份招聘公告。"));
         }
@@ -591,6 +637,7 @@ impl InitialWorld {
 
     pub fn can_book_work(&self) -> bool {
         self.eligible_for_civil_work(&self.player) && self.player_day.booking.is_none()
+            && self.work.contract(&self.work_opening, &self.player).is_some_and(|job| self.can_take_organization_job(&self.player, job))
             && self.work.can_book(&self.work_opening, &self.player, self.player_current_place(), self.clock)
     }
 
@@ -599,6 +646,9 @@ impl InitialWorld {
     }
 
     pub fn book_work_as(&mut self, person: &str) -> io::Result<()> {
+        if !self.work.contract(&self.work_opening, person).is_some_and(|job| self.can_take_organization_job(person, job)) {
+            return Err(invalid("当前没有可登记的经营班次。"));
+        }
         if !self.eligible_for_civil_work(person) { return Err(invalid("当前健康或服役状态不允许民间就业。")); }
         if person == self.player && self.player_day.booking.is_some() { return Err(invalid("今日已有个人安排。")); }
         let place = self.current_place(person).map(str::to_owned);
@@ -704,10 +754,8 @@ impl InitialWorld {
     pub fn character_for_player(&self) -> wwo_character_core::PersonView {
         let mut profile = self.character.profile.clone();
         profile.social.nationality = self.sources.polities.get(&self.player().opening_source_id).map(|row| row.name_zh.clone());
-        if let Some((job, _, organization)) = self.employment() {
-            profile.social.occupation = Some(job.employer.clone());
-            profile.social.relationships = Some(vec![organization.into()]);
-        }
+        self.apply_organization_profile(&mut profile);
+        profile.history.splice(..0, self.player_referral_contacts());
         profile.social.economic_situation = self.balance().map(|account| format!("现金 {}", account.cash));
         profile
     }
@@ -899,6 +947,8 @@ impl InitialWorld {
             #[cfg(test)]
             day_measurement::mark(&mut measure, 0);
             self.enterprises.settle(&self.enterprise_opening, &self.wages, i64::from(day));
+            self.settle_counter_orders(boundary)?;
+            self.settle_organization_activity(boundary)?;
             #[cfg(test)]
             day_measurement::mark(&mut measure, 1);
             let (mut nutrition_by_person, settled_meal_purchases) =
@@ -945,14 +995,8 @@ impl InitialWorld {
             self.clock = boundary;
             self.advance_transport()?;
             self.review_background_migration(managed_population);
-            let work_eligible = &self.character.work_eligible;
-            let travel = &self.travel;
-            let people = &self.sources.people;
-            let service = &self.service;
-            self.work.book_automatic(&self.work_opening, self.clock, |person| {
-                if !work_eligible.contains(person) || service.named_target(person).is_some() { return None; }
-                travel.present_at(person, &self.player, &people.get(person)?.place_id)
-            });
+            self.plan_household_orders()?;
+            self.settle_organization_employment()?;
         }
         Ok(())
     }
@@ -1015,13 +1059,7 @@ impl InitialWorld {
         } else if born_day.is_none() && self.population.unclassified(&unit).unwrap_or(0) <= self.migration_reserved_at(&unit) {
             return Err(invalid("没有可具名的未预约背景居民。"));
         }
-        let row = RuntimePerson {
-            origin: OpeningPerson {
-                id: id.to_owned(), claim_id: format!("formal_population_claim:{id}"),
-                opening_source_id: unit.clone(), polity_id: String::new(), place_id: place.to_owned(), birth_year,
-            },
-            name, born_day,
-        };
+        let row = RuntimePerson::at(id, name, place, &unit, birth_year, born_day);
         let mut people = self.identities.clone();
         people.insert(id.to_owned(), row.identity()?);
         let character = formal_character::register_native_person(&self.player, &people, id, self.character.day, &self.character.state)
@@ -1158,7 +1196,7 @@ impl WorldBootstrap {
         let population_income = countries.iter().map(|(unit, inputs)| (unit.clone(), inputs.income)).collect();
         let markets = MarketInputs::load(countries)?;
         let opening_cash = load_opening_cash()?;
-        let (places, routes) = load_map()?;
+        let (places, routes, cities) = load_map()?;
         let place_population_units = places.iter().filter_map(|(id, place)| {
             let source = historical_place_polity(place);
             polity_units.get(source).map(|unit| (id.clone(), unit.clone()))
@@ -1193,7 +1231,7 @@ impl WorldBootstrap {
             EnterpriseOpening::default()
         };
         let network = crate::transport::map_data::load_world_network(&world, 0)?;
-        let work = WorkOpening::load(|unit, place| {
+        let mut work = WorkOpening::load(|unit, place| {
             let node = network.routing_node(place)?;
             (network.unit_at(node) == Some(unit)).then(|| node.to_owned())
         })?;
@@ -1216,6 +1254,8 @@ impl WorldBootstrap {
                 .or_else(|| network.node_label(id)).unwrap_or(id);
             (person.opening_source_id.clone(), label.to_owned())
         }).collect();
+        let organization_directory = OrganizationDirectory::load(&world, &cities, &populations, &markets)?;
+        work.register_regional(organization_directory.opening())?;
         let mut activities = load_opening_activities()?;
         activities.written_job_notices.retain(|source, job| opening_people.contains_key(source) && work.entry_job(job).is_some());
         for (source, job) in &activities.written_job_notices {
@@ -1226,6 +1266,7 @@ impl WorldBootstrap {
         }
         Ok(Self {
             world: Arc::new(world),
+            organization_directory: Arc::new(organization_directory),
             populations,
             historical_population,
             markets: Arc::new(markets),
@@ -1260,6 +1301,14 @@ impl WorldBootstrap {
     }
 
     fn create_opening(&self, source_id: &str, prologue: Option<Prologue>, historical: bool) -> io::Result<InitialWorld> {
+        let mut world = self.base_opening(source_id, prologue, historical)?;
+        world.initialize_organization_members()?;
+        world.plan_household_orders()?;
+        world.settle_organization_employment()?;
+        Ok(world)
+    }
+
+    fn base_opening(&self, source_id: &str, prologue: Option<Prologue>, historical: bool) -> io::Result<InitialWorld> {
         let player_origin = Arc::clone(self.opening_people.get(source_id)
             .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "unknown formal opening"))?);
         let player = player_origin.id.clone();
@@ -1299,6 +1348,10 @@ impl WorldBootstrap {
         });
         let macro_economy = MacroEconomy::initialize(Arc::clone(&self.markets), population.totals());
         Ok(InitialWorld {
+            organization_directory: Arc::clone(&self.organization_directory),
+            organization_members: OrganizationMembers::default(),
+            activity: OrganizationActivity::default(),
+            counters: CounterBook::default(),
             sources: Arc::clone(&self.world),
             clock: GameClock::default(),
             player,
@@ -1346,9 +1399,12 @@ impl WorldBootstrap {
             },
             NativePopulation::Legacy(_) => false,
         };
-        let mut world = self.create_opening(&saved.opening, None, historical)?;
+        let mut world = self.base_opening(&saved.opening, None, historical)?;
         if saved.opening_place.as_deref().is_some_and(|place| place != world.player().place_id) {
             return Err(invalid("saved opening place differs from the formal opening"));
+        }
+        if let Some(members) = &saved.organization_members {
+            world.restore_organization_jobs(members)?;
         }
         let clock = GameClock::restore(saved.clock)?;
         let day = u32::try_from(clock.current_day()).map_err(|_| invalid("unsupported formal date"))?;
@@ -1391,6 +1447,7 @@ impl WorldBootstrap {
         let mut ledger = Ledger::restore(&saved.ledger, true)?;
         ledger.ensure_transport_account()?;
         self.work.ensure_market_accounts(&mut ledger)?;
+        if saved.organization_members.is_none() { self.work.ensure_regional_accounts(&mut ledger)?; }
         if ledger.last_minute() > saved.clock.total_minutes || world.identities.keys().any(|id| ledger.default_account(id).is_none()) {
             return Err(invalid("ledger and world timelines differ or personal accounts are missing"));
         }
@@ -1410,7 +1467,7 @@ impl WorldBootstrap {
         world.clock = clock;
         world.character = formal_character::opening_profile(&world.player, &world.identities, day, &saved.character)
             .map_err(io::Error::other)?;
-        world.wages = WageClaims::restore_shifts(saved.wages, &self.work, &ledger, clock, |actor| world.identities.contains_key(actor))?;
+        world.wages = WageClaims::restore_shifts(saved.wages, &world.work_opening, &ledger, clock, |actor| world.identities.contains_key(actor))?;
         world.ledger = ledger;
         world.holdings = saved.holdings;
         world.next_living_record = saved.next_living_record;
@@ -1432,6 +1489,8 @@ impl WorldBootstrap {
         }
         world.freight = saved.freight;
         world.migration = saved.migration;
+        let migrate_organizations = saved.organization_members.is_none();
+        world.organization_members = saved.organization_members.unwrap_or_default();
         world.homes = saved.homes;
         world.validate_freight()?;
         world.macro_economy.validate_transport(&world.transport, &world.ledger)?;
@@ -1444,7 +1503,7 @@ impl WorldBootstrap {
             || !world.households.validate(clock.snapshot().total_minutes,
                 |person| world.population.unit_for_person(person).is_some(),
                 |place| world.can_reside_at(place))
-            || !world.work.validate(&self.work, clock, |person| {
+            || !world.work.validate(&world.work_opening, clock, |person| {
                 if world.service.named_target(person).is_some() { return None; }
                 world.current_place(person)
             }, |person| world.population.unit_for_person(person).is_some())
@@ -1480,6 +1539,12 @@ impl WorldBootstrap {
             || world.opening_language().is_none() && (world.player_day.booking.is_some()
                 || world.player_day.food_milli > 0 || world.player_day.last_read_notice.is_some())
         { return Err(invalid("invalid saved personal activity")); }
+        world.activity = saved.activity;
+        world.counters = saved.counters;
+        if migrate_organizations { world.initialize_organization_members()?; }
+        world.validate_organization_members()?;
+        world.validate_organization_activity()?;
+        world.validate_counters()?;
         Ok(world)
     }
 }
@@ -1709,7 +1774,7 @@ fn load_population_bindings(
     Ok(result)
 }
 
-fn load_map() -> io::Result<(BTreeMap<String, Place>, BTreeMap<String, Route>)> {
+fn load_map() -> io::Result<(BTreeMap<String, Place>, BTreeMap<String, Route>, BTreeSet<String>)> {
     #[derive(Deserialize)]
     struct Country { id: String }
     #[derive(Deserialize)]
@@ -1737,6 +1802,7 @@ fn load_map() -> io::Result<(BTreeMap<String, Place>, BTreeMap<String, Route>)> 
     ] {
         load_routes(&mut routes, mode, bytes, list, endpoints)?;
     }
+    let city_keys = city_ids.into_iter().map(str::to_owned).collect();
     let mut places = BTreeMap::new();
     for place in regions.into_iter().chain(cities).chain(ports.into_iter().map(|port| port.place)) {
         if !local_id(&place.id) || !countries.contains(&place.parent_country_id)
@@ -1750,7 +1816,7 @@ fn load_map() -> io::Result<(BTreeMap<String, Place>, BTreeMap<String, Route>)> 
             return Err(invalid(format!("duplicate formal place {id}")));
         }
     }
-    Ok((places, routes))
+    Ok((places, routes, city_keys))
 }
 
 fn load_routes(
@@ -1843,9 +1909,19 @@ mod tests {
             assert_eq!(world.character().age_years, 30);
             assert!(world.sources.places()[&place].lon_lat.is_some());
             assert_eq!(world.sources.polities()[id].flag_id, flag);
+            let named = if id == "country_fra" { 6 } else { 4 };
+            assert_eq!(world.population.named_counts()[id], named);
             let estimate = world.population.admitted_opening(id).map_or(population, |row| row.population_value);
-            assert_eq!(world.background_population(id), Some(estimate - 1 - u64::from(id == "country_fra")));
-            assert_eq!(world.ledger().snapshot(), france.ledger().snapshot());
+            assert_eq!(world.background_population(id), Some(estimate - named));
+            assert_eq!(world.population.named_counts(), france.population.named_counts());
+            let opening_ledger = world.ledger().snapshot();
+            let french_ledger = france.ledger().snapshot();
+            for key in ["accounts", "transactions", "scenario_budget", "denomination"] {
+                let field = |value| crate::formal_save::field(crate::formal_save::map(value).unwrap(), key).unwrap();
+                assert_eq!(field(&opening_ledger), field(&french_ledger));
+            }
+            world.validate_counters().unwrap();
+            assert_eq!(world.balance().unwrap().reserved, 0);
             let resident = "person:formal_generated_country_fra_0002";
             assert_eq!(world.person(resident).unwrap().place_id, "place:paris");
             assert_eq!(world.ledger().default_account(resident).unwrap().cash, 0);
@@ -1952,8 +2028,12 @@ mod tests {
         assert_eq!(restored.snapshot(), saved);
         assert!(restored.population().standalone_totals().is_empty());
 
-        let mut flat = saved;
-        flat["population"] = serde_json::to_value(opening.population_units()).unwrap();
+        // The aggregate-only slot predates runtime residents and their population journal.
+        let mut old = bootstrap.base_opening("country_fra", None, false).unwrap();
+        old.transfer_unmanaged_population(national, "country_fra", 42, 0).unwrap();
+        let mut flat = old.snapshot();
+        flat.as_object_mut().unwrap().remove("organization_members");
+        flat["population"] = serde_json::to_value(old.population_units()).unwrap();
         let restored = bootstrap.restore_native(serde_json::from_value(flat).unwrap()).unwrap();
         assert_eq!(restored.population_units(), opening.population_units());
         assert!(restored.snapshot()["population"].get("opening_version").is_none());

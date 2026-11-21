@@ -180,6 +180,12 @@ impl MacroEconomy {
         &self.markets
     }
 
+    pub(crate) fn resident_daily_milli(&self, unit: &str, good: &str) -> f64 {
+        self.inputs.commodities.iter().find(|c| c.commodity_id == good)
+            .zip(self.inputs.countries.get(unit))
+            .map_or(0.0, |(commodity, country)| commodity.daily_demand(1, country.income) * 1000.0)
+    }
+
     pub fn shipments(&self) -> &[Shipment] {
         &self.shipments
     }
@@ -895,6 +901,11 @@ impl Commodity {
 }
 
 impl MarketInputs {
+    pub(crate) fn opening_demand_value(&self, unit: &str, good: &str, population: u64) -> Option<f64> {
+        let item = self.commodities.iter().find(|item| item.commodity_id == good && item.category != "local_service")?;
+        Some(item.daily_demand(population, self.countries.get(unit)?.income) * item.base_price_centimes as f64)
+    }
+
     pub(crate) fn load(countries: BTreeMap<String, CountryInputs>) -> io::Result<Self> {
         #[derive(Deserialize)]
         struct Goods {

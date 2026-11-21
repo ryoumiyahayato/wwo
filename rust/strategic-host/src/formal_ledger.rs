@@ -60,6 +60,8 @@ pub struct PaymentLeg<'a> {
 }
 
 pub struct PersonalReceipt<'a> {
+    pub id: &'a str,
+    pub reference: &'a str,
     pub incoming: bool,
     pub kind: &'a str,
     pub minute: i64,
@@ -82,21 +84,40 @@ struct Receipt<'a> {
 }
 
 impl Ledger {
+    /// Open related zero-balance accounts together after checking their identifiers.
+    pub(crate) fn open_merchant_accounts<'a>(
+        &mut self, firm: &str, account: &str, residents: impl Iterator<Item = &'a str>,
+    ) -> io::Result<()> {
+        let mut personal = BTreeMap::new();
+        for owner in residents {
+            let key = self.new_personal_account(owner)?;
+            if key == account || personal.insert(key, owner).is_some() { return Err(invalid("duplicate merchant account")); }
+        }
+        self.open_firm(firm, account, 0)?;
+        for (id, owner) in personal { self.accounts.insert(id, Account::new(owner, PERSONAL_ROLE, 0)); }
+        Ok(())
+    }
+
     pub(crate) fn open_person_cash(&mut self, owner: &str) -> io::Result<()> {
+        let account = self.new_personal_account(owner)?;
+        self.accounts.insert(account, Account::new(owner, PERSONAL_ROLE, 0));
+        Ok(())
+    }
+
+    fn new_personal_account(&self, owner: &str) -> io::Result<String> {
         let id = owner.strip_prefix("person:").filter(|id| !id.is_empty())
             .ok_or_else(|| invalid("invalid runtime personal account owner"))?;
         let account = format!("account:personal:{id}");
         if self.accounts.contains_key(&account) || self.default_account(owner).is_some() {
             return Err(invalid("personal account is already open"));
         }
-        self.accounts.insert(account, Account::new(owner, PERSONAL_ROLE, 0));
-        Ok(())
+        Ok(account)
     }
 
     pub(crate) fn open_firm(&mut self, owner: &str, account: &str, cash: i64) -> io::Result<()> {
         if !owner.starts_with("firm:") || !account.starts_with("account:")
             || self.accounts.contains_key(account) || self.default_account(owner).is_some()
-            || !(0..=MAX_AMOUNT - self.budget).contains(&cash) || self.last_minute != 0
+            || !(0..=MAX_AMOUNT - self.budget).contains(&cash) || (cash != 0 && self.last_minute != 0)
         {
             return Err(invalid("invalid opening firm account"));
         }
@@ -119,6 +140,7 @@ impl Ledger {
             let incoming = Some(receipt.to) == account;
             if !incoming && Some(receipt.from) != account { return None; }
             Some(PersonalReceipt {
+                id: receipt.id, reference: string(map(row).ok()?, "reference_id").ok()?,
                 incoming, kind: string(map(row).ok()?, "kind").ok()?, minute: receipt.minute, amount: receipt.amount,
             })
         })
@@ -172,9 +194,19 @@ impl Ledger {
     ) -> io::Result<()> {
         let account = self.default_account(buyer).ok_or_else(|| invalid("missing personal cash account"))?;
         let from = account.account_id.to_owned();
-        if self.accounts[&from].role != PERSONAL_ROLE {
-            return Err(invalid("buyer account is not personal cash"));
+        if !matches!(self.accounts[&from].role.as_str(), PERSONAL_ROLE | "r1_firm") {
+            return Err(invalid("buyer lacks a spending account"));
         }
+        let (to, created) = self.market_receipts_account(market)?;
+        let id = format!("purchase:{reference}");
+        let result = self.transfer(&id, &from, &to, amount, minute, "purchase", reference);
+        if result.is_err() && created {
+            self.accounts.remove(&to);
+        }
+        result
+    }
+
+    fn market_receipts_account(&mut self, market: &str) -> io::Result<(String, bool)> {
         let to = format!("account:market_receipts:{market}");
         let created = !self.accounts.contains_key(&to);
         if created {
@@ -188,11 +220,31 @@ impl Ledger {
                 return Err(invalid("invalid market receipt account"));
             }
         }
-        let id = format!("purchase:{reference}");
-        let result = self.transfer(&id, &from, &to, amount, minute, "purchase", reference);
-        if result.is_err() && created {
-            self.accounts.remove(&to);
-        }
+        Ok((to, created))
+    }
+
+    pub(crate) fn counter_holds(&self) -> impl Iterator<Item = (&str, &str, i64)> {
+        self.regional.iter().flat_map(|r| r.reservations.range("counter:".to_owned()..))
+            .take_while(|(id, _)| id.starts_with("counter:"))
+            .map(|(id, row)| (id.as_str(), row.account_id.as_str(), row.amount))
+    }
+
+    /// Release the entire order hold and settle both the market's goods and the shop's labor.
+    pub(crate) fn settle_counter_purchase(
+        &mut self, person: &str, market: &str, firm: &str, hold: &str, reference: &str,
+        goods: i64, fee: i64, minute: i64,
+    ) -> io::Result<()> {
+        let payer = self.default_account(person).ok_or_else(|| invalid("缺少订货人账户。"))?.account_id.to_owned();
+        let merchant = self.default_account(firm).ok_or_else(|| invalid("缺少商号账户。"))?.account_id.to_owned();
+        let reserved = self.regional.as_ref().and_then(|r| r.reservations.get(hold))
+            .filter(|r| r.account_id == payer && goods.checked_add(fee).is_some_and(|cost| cost <= r.amount))
+            .ok_or_else(|| invalid("订货准备金不足。"))?.amount;
+        let (seller, created) = self.market_receipts_account(market)?;
+        let result = self.batch_payment(hold, &[
+            PaymentLeg { id: &format!("purchase:{reference}"), from: &payer, to: &seller, amount: goods, kind: "purchase", reference },
+            PaymentLeg { id: &format!("service:{hold}"), from: &payer, to: &merchant, amount: fee, kind: "service_fee", reference: hold },
+        ], minute, &BTreeMap::from([(hold, reserved)]));
+        if result.is_err() && created { self.accounts.remove(&seller); }
         result
     }
 
@@ -256,6 +308,16 @@ impl Ledger {
                 && string(fields, "reference_id").ok() == Some(reference))
     }
 
+    pub(crate) fn material_receipt_count(&self) -> usize {
+        self.transaction_indexes.range("material:".to_owned()..)
+            .take_while(|(id, _)| id.starts_with("material:")).count()
+    }
+
+    pub(crate) fn payment_minute(&self, id: &str) -> Option<i64> {
+        let row = &self.transactions[*self.transaction_indexes.get(id)?];
+        Receipt::read(row, self.regional.is_some()).ok().map(|r| r.minute)
+    }
+
     pub(crate) fn freight_transaction_counts(&self) -> (usize, usize) {
         let count = |prefix: &str| self.transaction_indexes.range(prefix.to_owned()..)
             .take_while(|(id, _)| id.starts_with(prefix)).count();
@@ -270,7 +332,7 @@ impl Ledger {
             return Err(invalid("目的地市场的可用实收资金不足。"));
         }
         let to = self.default_account(seller).map(|balance| balance.account_id.to_owned())
-            .filter(|id| self.accounts[id].role == PERSONAL_ROLE)
+            .filter(|id| matches!(self.accounts[id].role.as_str(), PERSONAL_ROLE | "r1_firm"))
             .ok_or_else(|| invalid("货主缺少个人现金账户。"))?;
         self.transfer(&format!("sale:{reference}"), &from, &to, amount, minute, "freight_sale", reference)
     }

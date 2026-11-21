@@ -93,7 +93,12 @@ impl Display<'_> {
 
     pub(crate) fn freight_page(&self, panels: &mut Mesh, text: &mut Mesh, hits: &mut Vec<Hit>, [x,y,w,h]: [f32;4]) {
         let Some(v) = self.session.and_then(|s| s.transport.as_ref()) else { return };
-        self.skin.text(text, "从报价簿选择商品，报价后选择采购货批。", 0, [x,y], w, MUTED);
+        let caption = if v.lots.is_empty() {
+            "个人从报价簿采购，企业从商号采购货批。"
+        } else {
+            "选择货批和目的地，再查询运费。"
+        };
+        self.skin.text(text, caption, 0, [x,y], w, MUTED);
         for (i, lot) in v.lots.iter().enumerate() {
             self.row(panels,text,hits,[x,y+24.+i as f32*25.,w-92.,23.], &lot.label, command("lot",i), lot.selected);
         }
@@ -103,6 +108,7 @@ impl Display<'_> {
                 enabled.then(|| Action::Hud(Command::Transport(if i == 0 {"lots_prev"} else {"lots_next"},0))),false);
         }
         self.destinations(panels, text, hits, [x,y+105.,w], v);
+        self.skin.text(text, &v.destination_detail, 0, [x,y+186.], w, MUTED);
         let row = y+220.;
         let cell = w / v.freight_actions.len().max(1) as f32;
         for (index, action) in v.freight_actions.iter().enumerate() {

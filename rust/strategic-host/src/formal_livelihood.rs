@@ -8,7 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 // The catalogue uses tonnes. A milli-unit of these staples is one kilogram.
 // Staple weight is a provisional need measure used by the opening simulation.
-const STAPLES: [&str; 7] = [
+pub(crate) const STAPLES: [&str; 7] = [
     "bread",
     "potatoes",
     "rice",
@@ -99,9 +99,23 @@ struct PersonNeeds {
     today: Vec<FoodPortion>,
     last_day: Option<DailyLivelihood>,
     last_intake: Option<FoodIntake>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    retail_shortfalls: BTreeMap<String, i64>,
 }
 
 impl Livelihood {
+    pub(crate) fn retail_shortfall(&self, person: &str, good: &str) -> i64 {
+        self.people.get(person).and_then(|needs| needs.retail_shortfalls.get(good)).copied().unwrap_or(0)
+    }
+
+    pub(crate) fn set_retail_shortfall(&mut self, person: &str, good: &str, amount: i64) {
+        if amount > 0 {
+            self.people.entry(person.into()).or_default().retail_shortfalls.insert(good.into(), amount);
+        } else if let Some(needs) = self.people.get_mut(person) {
+            needs.retail_shortfalls.remove(good);
+        }
+    }
+
     pub(crate) fn record_food(
         &mut self,
         person: &str,
@@ -122,6 +136,22 @@ impl Livelihood {
 }
 
 impl InitialWorld {
+    pub(crate) fn settle_retail_need(&mut self, person: &str, good: &str, accrued: i64) -> std::io::Result<i64> {
+        let due = self.livelihood.retail_shortfall(person, good).checked_add(accrued)
+            .filter(|amount| (0..=MAX_AMOUNT).contains(amount))
+            .ok_or_else(|| crate::formal_save::invalid("累计家庭需求超出范围。"))?;
+        let mut remaining = due;
+        if let Some(holding) = self.holdings.get_mut(person).and_then(|stock| stock.get_mut(good)) {
+            let used = holding.available().min(due);
+            if used > 0 {
+                holding.consume(used)?;
+                remaining -= used;
+            }
+        }
+        self.livelihood.set_retail_shortfall(person, good, remaining);
+        Ok(remaining)
+    }
+
     pub fn person_livelihood(&self, person: &str) -> Option<PersonLivelihood<'_>> {
         self.person(person)?;
         let needs = self.livelihood.people.get(person);
@@ -155,6 +185,8 @@ impl InitialWorld {
                     })
             };
             self.person(person).is_some()
+                && needs.retail_shortfalls.iter().all(|(good, amount)| !counts_as_food(good)
+                    && self.macro_economy().purchasable(good) && (1..=MAX_AMOUNT).contains(amount))
                 && valid_portions(&needs.today)
                 && (needs.today.is_empty() || self.population.unit_for_person(person).is_some())
                 && needs.last_day.as_ref().is_none_or(|last_day| {

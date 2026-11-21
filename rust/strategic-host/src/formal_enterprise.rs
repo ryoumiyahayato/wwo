@@ -1,12 +1,17 @@
 use crate::{formal_ledger::Ledger, formal_save::invalid, formal_wages::WageClaims};
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, io};
+mod material;
+pub(crate) use material::MaterialOrder;
 
 #[derive(Default, Deserialize)]
 pub(crate) struct EnterpriseOpening {
     production_enabled: bool,
     firms: Vec<Firm>,
     retail_sites: Vec<Retail>,
+    opening_organizations: Vec<material::Mandate>,
+    information: Vec<material::SupplierNotice>,
+    stock_horizon: i64,
 }
 
 #[derive(Deserialize)]
@@ -22,6 +27,7 @@ struct Site {
     prices: BTreeMap<String, i64>,
     capacity: i64,
     activities: Vec<Recipe>,
+    suppliers: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -47,6 +53,21 @@ struct Retail {
 pub(crate) struct Enterprises {
     settled_day: i64,
     sites: BTreeMap<String, SiteStock>,
+    #[serde(default)]
+    deliveries: Vec<material::Delivery>,
+    #[serde(default)]
+    interrupted_supply: BTreeMap<String, i64>,
+    #[serde(default)]
+    contested_sales: BTreeMap<String, BTreeMap<String, ContestedSale>>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct ContestedSale {
+    buyer_account: String,
+    pub record: String,
+    pub amount: i64,
+    pub minute: i64,
 }
 
 #[derive(Default, Deserialize, Serialize)]
@@ -62,6 +83,7 @@ pub struct BreadOffer<'a> {
     pub firm: &'a str,
     pub quantity: i64,
     pub price: i64,
+    rival_firms: Vec<&'a str>,
 }
 
 impl EnterpriseOpening {
@@ -101,6 +123,8 @@ impl EnterpriseOpening {
         self.firms.iter().flat_map(|firm| firm.sites.iter().map(move |site| (firm, site)))
     }
 
+    pub(crate) fn has_firm(&self, firm: &str) -> bool { self.firms.iter().any(|row| row.id == firm) }
+
     fn retail(&self, firm: &str, site: &str) -> Option<&Retail> {
         self.retail_sites.iter().find(|row| row.firm_id == firm && row.site_id == site)
     }
@@ -108,17 +132,20 @@ impl EnterpriseOpening {
 
 impl Enterprises {
     pub(crate) fn initialize(opening: &EnterpriseOpening, day: i64) -> Self {
-        Self { settled_day: day, sites: opening.sites().map(|(_, site)| (site.id.clone(), SiteStock::default())).collect() }
+        Self { settled_day: day, sites: opening.sites().map(|(_, site)| (site.id.clone(), SiteStock::default())).collect(),
+            ..Self::default() }
     }
 
     pub(crate) fn validate(&self, opening: &EnterpriseOpening, day: i64) -> bool {
         self.settled_day == day
+            && self.valid_delivery_bounds(opening)
             && self.sites.len() == opening.sites().count()
             && opening.sites().all(|(firm, site)| {
                 let recipe = &site.activities[0];
                 let retail = opening.retail(&firm.id, &site.id).expect("validated retail site");
                 self.sites.get(&site.id).is_some_and(|stock| {
-                    let max_batches = quantity(&site.stock, "grain") / quantity(&recipe.materials, "grain");
+                    let total_grain = quantity(&site.stock, "grain") + self.received_grain(&firm.id) - self.shipped_grain(&firm.id);
+                    let max_batches = total_grain / quantity(&recipe.materials, "grain");
                     (0..=max_batches.min(day.saturating_mul(recipe.capacity_units))).contains(&stock.batches)
                         && (0..=quantity(&site.stock, "bread") + stock.batches * quantity(&recipe.outputs, "bread")).contains(&stock.sold)
                         && (0..=if day == 0 { 0 } else { retail.daily_limit }).contains(&stock.retail_remaining)
@@ -130,6 +157,7 @@ impl Enterprises {
         debug_assert_eq!(self.settled_day + 1, day);
         self.settled_day = day;
         for (firm, site) in opening.sites() {
+            let grain = self.site_goods(opening, &firm.id).expect("registered site").0;
             let stock = self.sites.get_mut(&site.id).expect("registered site");
             let recipe = &site.activities[0];
             let retail = opening.retail(&firm.id, &site.id).expect("validated retail site");
@@ -138,21 +166,25 @@ impl Enterprises {
             stock.retail_remaining = (sales_hours * retail.units_per_hour).min(retail.daily_limit);
             if opening.production_enabled && site.enabled && site.production_enabled && recipe.enabled {
                 let material_per_batch = quantity(&recipe.materials, "grain");
-                let grain = quantity(&site.stock, "grain") - stock.batches * material_per_batch;
                 stock.batches += ((hours - sales_hours) / recipe.hours).min(recipe.capacity_units).min(grain / material_per_batch);
             }
         }
     }
 
     pub(crate) fn bread_offer<'a>(&self, opening: &'a EnterpriseOpening, place: &str, amount: i64) -> Option<BreadOffer<'a>> {
-        opening.sites().filter(|(_, site)| site.place_id == place).filter_map(|(firm, site)| {
+        let mut offers = opening.sites().filter(|(_, site)| site.place_id == place).filter_map(|(firm, site)| {
             let stock = self.sites.get(&site.id)?;
             let available = (quantity(&site.stock, "bread") + stock.batches * quantity(&site.activities[0].outputs, "bread") - stock.sold)
                 .min(stock.retail_remaining);
             (available >= amount).then(|| BreadOffer {
-                site: &site.id, firm: &firm.id, quantity: available, price: site.prices["bread"],
+                site: &site.id, firm: &firm.id, quantity: available, price: site.prices["bread"], rival_firms: Vec::new(),
             })
-        }).min_by_key(|offer| (offer.price, offer.site))
+        }).collect::<Vec<_>>();
+        offers.sort_unstable_by_key(|offer| (offer.price, offer.site));
+        let mut contenders = offers.into_iter();
+        let mut chosen = contenders.next()?;
+        chosen.rival_firms = contenders.map(|offer| offer.firm).collect();
+        Some(chosen)
     }
 
     pub(crate) fn sell_bread(
@@ -169,7 +201,31 @@ impl Enterprises {
         let stock = self.sites.get_mut(offer.site).expect("quoted registered site");
         stock.sold += requested;
         stock.retail_remaining -= requested;
+        for rival in offer.rival_firms {
+            self.contested_sales.entry(offer.firm.into()).or_default().insert(rival.into(), ContestedSale {
+                buyer_account: from.clone(), record: record.into(), amount: price, minute,
+            });
+        }
         Ok(price)
+    }
+
+    pub(crate) fn contested_sale(&self, winner: &str, rival: &str) -> Option<&ContestedSale> {
+        self.contested_sales.get(winner)?.get(rival)
+    }
+
+    pub(crate) fn validate_sales(&self, opening: &EnterpriseOpening, ledger: &Ledger, minute: i64) -> bool {
+        self.contested_sales.iter().all(|(winner, rivals)| {
+            let Some(winning_site) = opening.sites().find_map(|(f,s)| (f.id == *winner).then_some(s)) else { return false };
+            let Some(account) = ledger.default_account(winner) else { return false };
+            !rivals.is_empty() && rivals.iter().all(|(rival, sale)| {
+                rival != winner && opening.sites().any(|(f, s)| f.id == *rival && s.place_id == winning_site.place_id)
+                    && (0..=minute).contains(&sale.minute) && sale.amount > 0
+                    && sale.record.starts_with("personal_life:")
+                    && ledger.payment_minute(&format!("purchase:{}", sale.record)) == Some(sale.minute)
+                    && ledger.has_payment(&format!("purchase:{}", sale.record), &sale.buyer_account, account.account_id,
+                        sale.amount, "purchase", &sale.record)
+            })
+        })
     }
 }
 
