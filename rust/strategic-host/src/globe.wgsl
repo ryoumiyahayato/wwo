@@ -474,14 +474,14 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     // Broad forest and sand grain stays weaker than exposed rock. The baked
     // geographic albedo and shading remain legible on flat, uniform surfaces.
     let solid=mix(materials,vec4f(0.,0.,.12,.30),snow);
-    var relief=dot(broad,solid*vec4f(.19,.15,.28,0.))*(1.-smoothstep(210.,LAND_MATERIAL_MPP,footprint));
+    var relief=dot(broad,solid*vec4f(.19,.095,.28,0.))*(1.-smoothstep(210.,LAND_MATERIAL_MPP,footprint));
     if solid.w+solid.y>.01 {
         let sediment=sediment_structure(earth,footprint);
         relief+=dot(sediment,vec2f(.20,.13))*(solid.w+solid.y*.68);
     }
     if footprint<102. {
         let fine=land_material_band(earth,planes,footprint,2150.)-.5;
-        relief+=dot(fine,solid*vec4f(.18,.12,.28,.12))*(1.-smoothstep(38.,102.,footprint));
+        relief+=dot(fine,solid*vec4f(.18,.075,.28,.12))*(1.-smoothstep(38.,102.,footprint));
     }
     return clamp(base*(1.+relief*land),vec3f(0.),vec3f(1.));
 }

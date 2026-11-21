@@ -117,28 +117,72 @@ struct FieldPattern {
     curvature: f32,
 };
 
-fn field_parcels(base: vec3f, metres: vec2f, mpp: f32, pattern: FieldPattern) -> vec3f {
-    let spacing = pattern.spacing;
-    let grid = metres/spacing;
-    let rows = grid.y + pattern.curvature*sin(grid.x*.38);
-    let row_index = floor(rows);
-    let row = bitcast<u32>(i32(row_index))*24571u;
-    let parcels = vec2f(grid.x + pattern.stagger*landscape_random(row) + pattern.curvature*sin(rows*.63), rows);
-    let column = floor(parcels.x);
-    let plant = landscape_random(bitcast<u32>(i32(column))*116831u + row);
+fn parcel_ink(base: vec3f, mpp: f32, cell: vec2f, phase: vec2f, spacing: vec2f) -> vec3f {
+    let row = bitcast<u32>(i32(cell.y))*24571u;
+    let plant = landscape_random(bitcast<u32>(i32(cell.x))*116831u + row);
     // A second slower variation groups crop colours without repeating an image.
-    let group = bitcast<u32>(i32(floor(column*.25)))*1069u
-        + bitcast<u32>(i32(floor(row_index/3.)))*5233u;
+    let group = bitcast<u32>(i32(floor(cell.x*.25)))*1069u
+        + bitcast<u32>(i32(floor(cell.y/3.)))*5233u;
     let growth = plant*.76 + landscape_random(group)*.24;
     let tint = mix(vec3f(.57,.49,.34),vec3f(.43,.54,.30),growth);
-    let surface = mix(base,tint,.32)*(1.+(growth-.5)*.21);
+    let surface = mix(base,tint,.22)*(1.+(growth-.5)*.14);
 
-    let phase = fract(parcels);
     let sides = min(phase,1.-phase)*spacing;
-    let boundary = 1.-smoothstep(3.,max(8.,mpp*.64),min(sides.x,sides.y));
-    let headland = mix(surface,base*vec3f(.91,.94,.87),.56);
+    let boundary = 1.-smoothstep(2.,max(8.,mpp*.64),min(sides.x,sides.y));
+    let headland = mix(surface,base*vec3f(.91,.94,.87),.44);
     let resolved = 1.-smoothstep(min(spacing.x,spacing.y)*.27,min(spacing.x,spacing.y)*.82,mpp);
     return mix(base,mix(surface,headland,boundary*min(1.,18./mpp)),resolved);
+}
+
+fn field_parcels(base: vec3f, metres: vec2f, mpp: f32, pattern: FieldPattern) -> vec3f {
+    let grid = metres/pattern.spacing;
+    let rows = grid.y + pattern.curvature*sin(grid.x*.38);
+    let row = bitcast<u32>(i32(floor(rows)))*24571u;
+    let parcels = vec2f(grid.x + pattern.stagger*landscape_random(row) + pattern.curvature*sin(rows*.63), rows);
+    return parcel_ink(base,mpp,floor(parcels),fract(parcels),pattern.spacing);
+}
+
+struct FieldInterval {
+    index: f32,
+    phase: f32,
+    width: f32,
+};
+
+fn field_interval(position: f32, variation: f32, seed: u32) -> FieldInterval {
+    let nominal = floor(position);
+    let stride = 116831u;
+    let key = bitcast<u32>(i32(nominal))*stride + seed;
+    // Each shared boundary stays inside its nominal interval, so neighbours meet in order.
+    let split = nominal + landscape_random(key)*variation;
+    if position < split {
+        let start = nominal-1. + landscape_random(key-stride)*variation;
+        let width = split-start;
+        return FieldInterval(nominal-1.,(position-start)/width,width);
+    }
+    let end = nominal+1. + landscape_random(key+stride)*variation;
+    let width = end-split;
+    return FieldInterval(nominal,(position-split)/width,width);
+}
+
+fn variable_field_parcels(base: vec3f, metres: vec2f, mpp: f32, seed: u32) -> vec3f {
+    let spacing = vec2f(345.,245.);
+    let grid = metres/spacing;
+    let rows = field_interval(grid.y+.085*sin(grid.x*.38),.46,seed);
+    let row_seed = bitcast<u32>(i32(rows.index))*24571u + seed;
+    let columns = field_interval(grid.x+.62*landscape_random(row_seed)+.085*sin(grid.y*.63),.54,row_seed);
+    return parcel_ink(base,mpp,vec2f(columns.index,rows.index),vec2f(columns.phase,rows.phase),
+                      spacing*vec2f(columns.width,rows.width));
+}
+
+fn nile_field_parcels(base: vec3f, fan: vec2f, mpp: f32) -> vec3f {
+    let spacing = vec2f(112.,520.);
+    let grid = fan/spacing;
+    let strips = field_interval(grid.x+.025*sin(grid.y*.63),.24,7211u);
+    // Each strip places its own cross boundaries along the fan.
+    let strip_seed = bitcast<u32>(i32(strips.index))*24571u + 5563u;
+    let lengths = field_interval(grid.y+.82*landscape_random(strip_seed),.67,strip_seed+1181u);
+    return parcel_ink(base,mpp,vec2f(strips.index,lengths.index),vec2f(strips.phase,lengths.phase),
+                      spacing*vec2f(strips.width,lengths.width));
 }
 
 fn field_region(ll: vec2f, centre: vec2f, half_extent: vec2f) -> f32 {
@@ -158,11 +202,10 @@ fn world_field_parcels(base: vec3f, world: vec3f, mpp: f32) -> vec3f {
     let facing = abs(rotated);
     let strongest = max(facing.x,max(facing.y,facing.z));
     let weights = smoothstep(vec3f(strongest-.006),vec3f(strongest),facing);
-    let pattern = FieldPattern(vec2f(430.,310.),.82,.085);
     var ink = vec3f(0.);
-    if weights.x > 0. { ink += field_parcels(base,metres.yz,mpp,pattern)*weights.x; }
-    if weights.y > 0. { ink += field_parcels(base,metres.zx,mpp,pattern)*weights.y; }
-    if weights.z > 0. { ink += field_parcels(base,metres.xy,mpp,pattern)*weights.z; }
+    if weights.x > 0. { ink += variable_field_parcels(base,metres.yz,mpp,1013u)*weights.x; }
+    if weights.y > 0. { ink += variable_field_parcels(base,metres.zx,mpp,4793u)*weights.y; }
+    if weights.z > 0. { ink += variable_field_parcels(base,metres.xy,mpp,8779u)*weights.z; }
     return ink/dot(weights,vec3f(1.));
 }
 
@@ -183,7 +226,7 @@ fn cultivated_fields(base: vec3f, ll: vec2f, world: vec3f, mpp: f32, cover: f32)
             let rosetta = 30.79347 - (ll.y-30.69444)*(.01620/.24463);
             let damietta = 31.24814 + (ll.y-30.85041)*(.11686/.20325);
             let fan = vec2f((ll.x-rosetta)*45500./max(.32,damietta-rosetta),(ll.y-30.87)*111195.);
-            ink = field_parcels(base,fan,mpp,FieldPattern(vec2f(112.,520.),.45,.025));
+            ink = nile_field_parcels(base,fan,mpp);
         } else {
             region = field_region(ll,vec2f(10.97,44.99),vec2f(3.3,1.08));
             if region > 0. {
@@ -255,7 +298,7 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
         * (1. + sediment.x*mix(.13,.17,sandy)
             + sediment.y*mix(.105,.065,sandy)*mix(.46,1.,deposits));
     let tilled = mix(base,mix(vec3f(.49,.41,.30),vec3f(.52,.52,.32),smoothstep(.21,.72,sward)),near*.42)
-        * (1. + motif.a*.24 + motif.g*.12);
+        * (1. + motif.a*.10 + motif.g*.055);
     let snow = mix(base,mix(vec3f(.72,.79,.82),vec3f(.82,.87,.88),.5+motif.a),near*.73);
     let stone = max(steep*.88,land.bare*alpine*smoothstep(.07,.39,gradient)*.86);
     let exposed = (1.-land.forest*.89)*(1.-land.snow)*(1.-land.urban) * stone;
@@ -270,12 +313,12 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
     color = cultivated_fields(color,ll,world,mpp,dry_crop);
     color = mix(color,mix(base,mineral,near*.87),exposed);
     if near > .001 {
-        let relief_world = world*(1.+height/EARTH)+vec3f(motif.a,motif.g,motif.b)*.00027;
-        let grains = land_material_band(relief_world,planes,mpp,2630.) - .5;
+        // A shared geographic coordinate keeps the grain phase stable across DEM levels.
+        let grains = land_material_band(world,planes,mpp,2630.) - .5;
         let grit = mix(grains.g,grains.a,.5+sediment.x*.45);
         let texture = grains.r*(land.forest*.40+land.shrub*.19)
-            + grains.g*(land.grass*.10+land.damp*.31+land.crop*.19)
-            + grains.a*(land.crop*.38+scree*.25)
+            + grains.g*(land.grass*.10+land.damp*.31+land.crop*.08)
+            + grains.a*(land.crop*.10+scree*.25)
             + grit*(land.bare*.09+neutral*.13+land.grass*.04)
             + grains.b*(exposed*.91+scree*.37+land.urban*.20)
             + grains.a*(land.snow*.11+land.urban*.24)
