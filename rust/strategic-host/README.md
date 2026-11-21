@@ -180,6 +180,22 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 每轮另列 180° 经线、南北两极、同级瓦片边界和不同精度交界的固定专项检查。专项结果单列，七大洲随机样本仍须齐全。
 
+### 全球数据层对照
+
+在 `rust/strategic-host` 运行 `python tools/compare_map_geography.py <正式地貌库目录> <Natural Earth 矢量目录> <GSHHG 压缩包> <WorldCover 分类缓存> <NOAA 全球高程> <输出.json> --shoreline-ponds <GSHHG 第4层压缩包> --antarctic-coast <SCAR ADD EPSG:3031 压缩包>`。脚本逐页读取 QWG、QPK、QHW、QSC，并遍历 QHL 河段。报告按 Z0–Z7 记录适用的海陆、水体、地类和高程对照，列出较大的差异和对应分片。需要 NumPy、Pillow、rasterio、SciPy、Shapely 2 和 zstandard。
+
+Natural Earth 1:10m 参照陆地、岛屿、湖泊、河线和冰川，GSHHG 参照 QPK/QHW 的水陆边界，SCAR ADD 区分南极接地陆地、浮冰架和冰舌。ESA WorldCover 2021 交叉检查 QWG 的常年水和冰雪，同时验证同源 QSC 的投影与分类。参考文件及采样尺度随输出保存。全球比对网格为 8192×4096，等经纬采样。NOAA 高程和河线距离只用于发现异常范围。河线与面状水域分别统计，河线距离无河宽含义。资料定义、年代及精度造成的差异应与正式游戏已复现的缺陷分别记录。
+
+### 正式游戏动态路线
+
+在 `rust/strategic-host` 运行 `python tools/observe_global_motion.py <wwo-map-lab.exe> <运行数据目录> <已冻结的路线.json> <新输出目录>`。脚本启动 `--play --background --observe`，以独立档案进入正常游戏。进程为冷启动，系统文件缓存照常。输出保留正式渲染 PNG、游戏日志和 `frames.json`。`frames.json` 记录九个画面位置实际使用的分片和混合权重。`settled: false` 表示在等待上限内仍有资源尚未就绪。
+
+路线 JSON 中 `random_draws` 沿用冻结抽样名单。每项包含 `continent`、`lon`、`lat`、`regional_mpp` 和 `near_mpp`。`fixed` 为 `[标签, 经度, 纬度, 米/像素]` 列表，动态平移使用 `dateline-west`、`south-pole`、`z6-capacity` 和 `seine`。`nile` 和 `zoom` 分别为尼罗河和连续缩放的 `[经度, 纬度, 米/像素]` 相机元组。标签采用英文字母、数字和连字符。此次尼罗河用 `[30.98,30.87,25]`；连续缩放用 `[89.2,21.85,85]`。
+
+默认运行七洲取景、固定专项、连续滚轮缩放、快速拖动与返回原镜头。可用 `--section views`、`--section edges`、`--section zoom` 或 `--section nile` 重跑专项。日期变更线记录跨线及返回时的中心页。滚轮到达常规最远镜头后再回缩。Z0 过远全景用正式观察接口单独取景，报告中注明其进入方式。尼罗河路线用 22 格出缩、24 帧横拖 110 像素、反向拖回、22 格回缩。每轮单列帧数和 P50、P95、最长帧。`timings.json` 保留帧间隔、地貌解码和读取耗时原值。
+
+检查期间同时看三项水域状态。`water_geometry_view_wanted` 与 `water_geometry_view_resident` 是已准入页的需求与驻留，含 96 像素边界。`water_geometry_view_missing_outside_budget` 是当前视野覆盖、未准入且未驻留的 QWG 页，使用现有保守页投影边界。它随镜头更新，即使加载队列仍复用上次选择。将容量回退、尚在读取的已准入页和屏外预取分别记录。水域在 2,600 到 4,200 米/像素之间混合 QWG 与 QPK，达到 4,200 米/像素由 QPK 表达。页数表示容量和加载状态，视觉结果再按取帧判断。
+
 ## 本地构建目录
 
 以下目录相对于 `D:/programs/WWO`。
