@@ -699,6 +699,8 @@ impl Builder {
         #[derive(Deserialize)]
         struct SiteList {
             sites: Vec<(String, String, String)>,
+            #[serde(default)]
+            partition_successors: BTreeMap<String, String>,
         }
         let sites: SiteList = serde_json::from_slice(include_bytes!(
             "../../../../data/alpha/historical_transport_network_1900/residence_sites.json"
@@ -707,7 +709,12 @@ impl Builder {
             .partition_identities()
             .map(|(leaf, parent, _)| (leaf, parent))
             .collect();
-        for (leaf, city, source) in &sites.sites {
+        for (archived_leaf, city, source) in &sites.sites {
+            let leaf = if parents.contains_key(archived_leaf.as_str()) {
+                archived_leaf
+            } else {
+                sites.partition_successors.get(archived_leaf).unwrap_or(archived_leaf)
+            };
             let parent = parents
                 .get(leaf.as_str())
                 .ok_or_else(|| invalid(format!("unknown census partition {leaf}")))?;
@@ -1363,7 +1370,7 @@ mod tests {
         let opening = sources.historical_population.as_ref().unwrap();
         let leaf_counts = counts(&net, opening.partition_identities().map(|(id, _, _)| id));
         let root_counts = counts(&net, opening.standalone_ids());
-        assert_eq!(leaf_counts.iter().sum::<usize>(), 365);
+        assert_eq!(leaf_counts.iter().sum::<usize>(), opening.partition_identities().count());
         let attached = opening.residence_places().count();
         for (place, leaf) in opening.residence_places() {
             assert_eq!(net.population_at(place), Some(leaf));
@@ -1400,7 +1407,7 @@ mod tests {
             ("kingdom_of_romania", "ro_1899_muntenia"),
             ("sweden_norway_union", "ft_sweden"),
             ("swiss_confederation", "ch_canton_be"),
-            ("cshapes_gw_590", "mu_main_island"),
+            ("cshapes_gw_590", "mu_district_port_louis"),
         ] {
             let actual = net.capital_node(root).unwrap();
             assert_eq!(opening.unit_at(actual), Some(leaf), "{root}/{actual}");

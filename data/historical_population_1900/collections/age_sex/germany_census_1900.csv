@@ -79,3 +79,5 @@ germany_1900_preussen_age,90 bis 95,band,90,94,5721,,
 germany_1900_preussen_age,95 bis 100,band,95,99,829,,
 germany_1900_preussen_age,Über 100 Jahre,band,100,,35,,
 germany_1900_preussen_age,Unbekannt,band,,,6741,,
+germany_1900_preussen_age_sex_controls,Di qualunque età,total,,,34472509,16971425,17501084
+germany_1900_preussen_age_sex_controls,Fino a 15 anni,band,0,14,12257603,6157788,6099815

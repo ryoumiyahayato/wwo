@@ -118,6 +118,19 @@
     ]
   },
   {
+    "id": "de_prussia_1900_age_sex_controls",
+    "title": "Censimento della popolazione del Regno d’Italia al 10 febbraio 1901, Vol. V",
+    "publisher": "Direzione Generale della Statistica, Rome, 1904",
+    "url": "https://ebiblio.istat.it/SebinaOpac/resource/IST00011513",
+    "locator": "Table XXIV, printed p. 114, Prussia row. Cross-check: Statistisches Jahrbuch für den Preussischen Staat, 1904, I.B.3 and I.B.8, printed pp. 3 and 7",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7957cp1901_v5_Relazione_sul_metodo_di_esecuzione_e_sui_risultati_del_censimento%2BOCR_ottimizzato.pdf",
+      "https://webapp.sbc.org.pl/Content/323213/PDF/ii149234-1904-00-0001.pdf?handler=pdf"
+    ]
+  },
+  {
     "id": "india_census_1901_original_age",
     "title": "Census of India, 1901, Vol. I-A, India, Part II: Tables",
     "publisher": "Census Commissioner for India, Calcutta, 1903; Government of India",

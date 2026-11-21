@@ -72,5 +72,20 @@
     "dimension": "age",
     "opening_unit_id": null,
     "broad_observation": false
+  },
+  {
+    "id": "germany_1900_preussen_age_sex_controls",
+    "source_id": "de_prussia_1900_age_sex_controls",
+    "locator": "Table XXIV, printed p. 114, Prussia row. Cross-check: Prussian yearbook I.B.3 and I.B.8, printed pp. 3 and 7",
+    "published_scope": "Kingdom of Prussia, population present",
+    "observed_unit_id": "administrative_region:germany_preussen",
+    "observed_date": "1900-12-01",
+    "definition": "This partial table transcribes the all-age totals and the published male and female counts below age 15. The all-age totals agree with Prussian yearbook I.B.3. The combined count below age 15 agrees with the sum of completed ages 0 through 14 in I.B.8. The remaining age-by-sex cells in the Italian digitization differ from the Prussian age and sex totals, so this panel retains only the corroborated counts.",
+    "opening_unit_id": "administrative_region:germany_preussen",
+    "opening_from_version": 11,
+    "opening_residual_label": "Age 15 or older or age not reported",
+    "opening_method": "Subtract the published ages 0–14 from the published all-age count for each sex. Keep this remainder as unknown age. Hold the four census shares in the January 1900 opening balance and use integer largest remainders.",
+    "uncertainty": "Sex totals and the child counts are observed at the December 1900 census. Ages 15 and above and unreported ages remain combined within each sex. The effect of 334 days between opening and enumeration on the four shares is unquantified.",
+    "broad_observation": false
   }
 ]

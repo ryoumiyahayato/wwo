@@ -26,9 +26,9 @@
         "khedivate_of_egypt",
         "sultanate_of_zanzibar"
       ],
-      "production_people": 9666781,
+      "production_people": 9666780,
       "production_pct_of_regional_research_estimate": 7.437,
-      "people_with_opening_subdivision": 1489105,
+      "people_with_opening_subdivision": 1489104,
       "research_only_units": 37,
       "research_only_people": 109428497
     },
@@ -90,9 +90,9 @@
         "korean_empire",
         "qing_empire"
       ],
-      "production_people": 670115448,
-      "production_pct_of_regional_research_estimate": 74.925,
-      "people_with_opening_subdivision": 633296844,
+      "production_people": 777904305,
+      "production_pct_of_regional_research_estimate": 86.977,
+      "people_with_opening_subdivision": 741085701,
       "research_only_units": 27,
       "research_only_people": 89458537
     },
@@ -3274,9 +3274,9 @@
         "Africa"
       ],
       "research_people": 369153,
-      "documented_opening_people": 373996,
-      "opening_people_including_retained_balances": 373996,
-      "research_minus_documented": -4843
+      "documented_opening_people": 373995,
+      "opening_people_including_retained_balances": 373995,
+      "research_minus_documented": -4842
     },
     {
       "comparison_id": "mexico",
@@ -3365,9 +3365,9 @@
         "Asia"
       ],
       "research_people": 400038694,
-      "documented_opening_people": 280963926,
+      "documented_opening_people": 388752783,
       "opening_people_including_retained_balances": 400000000,
-      "research_minus_documented": 119074768
+      "research_minus_documented": 11285911
     },
     {
       "comparison_id": "reunion",
@@ -4175,7 +4175,7 @@
       },
       {
         "unit_id": "cshapes_gw_590",
-        "people": 373996
+        "people": 373995
       },
       {
         "unit_id": "cshapes_gw_6",
@@ -4210,8 +4210,8 @@
         "people": 1668263
       }
     ],
-    "net_additions": 61332776,
-    "authoritative_opening_population": 1465392190,
+    "net_additions": 61332775,
+    "authoritative_opening_population": 1465392189,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4251,24 +4251,24 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1221619125,
+    "documented_opening_population": 1329407981,
     "untouched_legacy_population": 101880000,
-    "retained_unlocated_population": 141893065,
-    "authoritative_opening_population": 1465392190,
-    "published_minus_documented_opening": 373455123,
+    "retained_unlocated_population": 34104208,
+    "authoritative_opening_population": 1465392189,
+    "published_minus_documented_opening": 265666267,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 224844706,
       "comparisons_by_scope": {
         "comparable_extent": 1943838,
-        "scope_unconfirmed": 86843,
-        "partial_extent": 146579734,
+        "scope_unconfirmed": 86844,
+        "partial_extent": 38790877,
         "adopted_research_series": 0
       },
       "opening_without_benchmark_link": 0,
       "untouched_legacy_controls": -101880000,
-      "unlocated_balances_under_retained_controls": -141893065
+      "unlocated_balances_under_retained_controls": -34104208
     },
-    "published_minus_authoritative_opening": 129682058
+    "published_minus_authoritative_opening": 129682059
   }
 }
