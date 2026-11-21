@@ -55,6 +55,7 @@ enum HostEvent {
     TerrainDetail(usize,io::Result<Vec<u8>>),
     Rivers(io::Result<hydrology::Rivers>),
     Model(landmarks::ModelKey, io::Result<landmarks::ModelMesh>),
+    BattleTerrain(MilitaryCell, io::Result<PreparedBattleTerrain>),
 }
 
 const CACHE_BUDGET:usize=112*1024*1024;
@@ -179,6 +180,11 @@ struct Drag {at:[f64;2],origin:[f64;2],last:Instant,bearing:bool,moved:bool}
 struct Pose {camera:Camera,object:Option<Object>}
 #[derive(Clone, Copy)]
 struct SelectedMilitaryCell { cell: MilitaryCell, coordinates: [f64; 2] }
+struct PreparedBattleTerrain {
+    terrain: BattlefieldTerrain,
+    pages: Vec<[u32; 3]>,
+    worker_ms: f64,
+}
 struct Focus {start:Instant, camera:Camera, target:[f64;2], mpp:f64}
 struct CountryClick {polity:usize,point:[f64;2],deadline:Instant}
 #[derive(Default)]
@@ -200,6 +206,8 @@ struct BattleOpeningTiming {
     frame:usize,
     terrain_cpu_ms:f64,
     terrain_pages:Vec<[u32;3]>,
+    terrain_worker_ms:Option<f64>,
+    terrain_wait_ms:f64,
     scene_cpu_ms:f64,
     original_vehicle_model:bool,
     deployment_cpu_ms:f64,
@@ -280,6 +288,10 @@ struct Host {
     grid_step:f32,last_present:Instant,employment:state::EmploymentReference,market_focus_serial:u64,
     military_cell:Option<SelectedMilitaryCell>,
     battle_terrain:Option<(MilitaryCell,BattlefieldTerrain)>,
+    battle_terrain_timing:Option<(Vec<[u32;3]>,f64)>,
+    battle_terrain_wanted:Option<MilitaryCell>,
+    battle_terrain_loading:Option<MilitaryCell>,
+    battle_enter_requested:Option<Instant>,
     battle_view:Option<battle_view::View>,
 }
 fn font(path:&Path)->io::Result<Raster> {
@@ -374,7 +386,8 @@ impl Host {
             loading_fade:None,loading_status:String::new(),debug:false,perf_at:Instant::now(),perf_frames:0,population_debug:None,
             perf:Diagnostics{rate:0.,cpu_ms:0.,tiles:0,visible:0,mib:0.,streaming:false},
             screenshot:None,screenshot_status:None,grid_step:50000.,last_present:started,employment,market_focus_serial:0,
-            military_cell:None,battle_terrain:None,battle_view:None})
+            military_cell:None,battle_terrain:None,battle_terrain_timing:None,battle_view:None,
+            battle_terrain_wanted:None,battle_terrain_loading:None,battle_enter_requested:None})
     }
     fn available(&self,object:Object)->bool {
         let day=self.state.date.to_string();
@@ -1229,27 +1242,68 @@ impl Host {
         self.config.battlefield_data.clone().unwrap_or_else(|| self.config.root.join("battlefield"))
     }
 
-    fn load_battle_terrain(&mut self, cell:MilitaryCell) -> io::Result<Vec<[u32;3]>> {
-        let region=cell.region();
-        if self.battle_terrain.as_ref().is_some_and(|(loaded,_)|*loaded==region){return Ok(Vec::new());}
-        let (root,packed)=self.config.terrain_root();
-        if !packed {return Err(io::Error::other("Compact terrain data is required"));}
-        let (terrain,pages)=terrain::battlefield(&root,region)?;
-        if let Some(renderer)=&mut self.renderer {renderer.clear_battle();}
-        self.battle_terrain=Some((region,terrain));
-        Ok(pages)
+    fn request_battle_terrain(&mut self, region:MilitaryCell) -> io::Result<bool> {
+        self.battle_terrain_wanted = Some(region);
+        if self.battle_terrain.as_ref().is_some_and(|(loaded,_)| *loaded == region) {
+            return Ok(true);
+        }
+        if self.battle_terrain_loading.is_none() {
+            let (root,packed) = self.config.terrain_root();
+            if !packed {return Err(io::Error::other("Compact terrain data is required"));}
+            let events = self.events.clone();
+            std::thread::Builder::new().name("battle-terrain".into()).spawn(move || {
+                let started = Instant::now();
+                let result = terrain::battlefield(&root,region).map(|(terrain,pages)| PreparedBattleTerrain {
+                    terrain, pages, worker_ms:ms(started),
+                });
+                let _ = events.send_event(HostEvent::BattleTerrain(region,result));
+            })?;
+            self.battle_terrain_loading = Some(region);
+        }
+        Ok(false)
     }
 
-    fn open_battle(&mut self, selection:SelectedMilitaryCell) -> io::Result<()> {
+    fn battle_terrain_ready(&mut self, region:MilitaryCell, result:io::Result<PreparedBattleTerrain>) {
+        self.battle_terrain_loading = None;
+        let Some(wanted) = self.battle_terrain_wanted else {return;};
+        if wanted != region {
+            if let Err(error) = self.request_battle_terrain(wanted) {
+                self.battle_enter_requested = None;
+                self.feedback = error.to_string();
+                self.dirty = true;
+            }
+            return;
+        }
+        let entry = self.battle_enter_requested.take().zip(self.military_cell)
+            .filter(|(_,selection)| self.military_grid_active() && selection.cell.region() == region);
+        match result {
+            Ok(prepared) => {
+                if let Some(renderer) = &mut self.renderer {renderer.clear_battle();}
+                self.battle_terrain = Some((region,prepared.terrain));
+                self.battle_terrain_timing = Some((prepared.pages,prepared.worker_ms));
+                if let Some((requested,selection)) = entry {
+                    if let Err(error) = self.open_battle(selection,ms(requested)) {
+                        self.feedback = error.to_string();
+                    }
+                }
+            }
+            Err(error) if entry.is_some() => self.feedback = error.to_string(),
+            Err(_) => {}
+        }
+        self.dirty = true;
+    }
+
+    fn open_battle(&mut self, selection:SelectedMilitaryCell, terrain_wait_ms:f64) -> io::Result<()> {
         let Some(world)=self.written_world() else{return Ok(());};
         let timing=self.trial.timing_frame(false).map(|frame|(frame,Instant::now()));
         let region=selection.cell.region();
         let create=world.needs_land_deployment(selection.cell);
         if let Some(message)=self.battle_location_message(region){return Err(io::Error::other(message));}
-        let terrain_pages=self.load_battle_terrain(region)?;
+        let Some((_,terrain))=self.battle_terrain.as_ref().filter(|(loaded,_)|*loaded==region) else {
+            return Err(io::Error::other("Battlefield terrain is not ready"));
+        };
         let terrain_done=timing.map(|_|Instant::now());
         let root = self.battle_root();
-        let (_,terrain)=self.battle_terrain.as_ref().unwrap();
         let center=region.local_at(selection.coordinates).ok_or_else(||io::Error::other("Position outside battlefield"))?;
         let deployment=create.then(||wwo_map_lab::land_battle::LandBattle::new(center));
         if deployment.as_ref().is_some_and(|battle|battle.units.iter().any(|unit|{
@@ -1277,12 +1331,15 @@ impl Host {
             self.last_present = Instant::now();
             self.reset_battle_fps();
         }
+        let terrain_timing=self.battle_terrain_timing.take();
         if let (Some((frame,started)),Some(terrain_done),Some(scene_started),Some(scene_done))=
             (timing,terrain_done,scene_started,scene_done) {
             let millis=|start:Instant,end:Instant| end.duration_since(start).as_secs_f64()*1000.;
             let done=Instant::now();
+            let (terrain_pages,terrain_worker_ms)=terrain_timing
+                .map(|(pages,worker_ms)|(pages,Some(worker_ms))).unwrap_or_default();
             self.trial.battle_openings.push(BattleOpeningTiming {
-                frame, terrain_cpu_ms:millis(started,terrain_done), terrain_pages,
+                frame, terrain_cpu_ms:millis(started,terrain_done), terrain_pages, terrain_worker_ms, terrain_wait_ms,
                 scene_cpu_ms:millis(scene_started,scene_done), original_vehicle_model,
                 deployment_cpu_ms:millis(scene_done,done), total_cpu_ms:millis(started,done),
             });
@@ -1307,6 +1364,8 @@ impl Host {
             self.country_click=None;
             if already_selected {self.enter_selected_battle();}
             else {
+                self.battle_enter_requested=None;
+                self.battle_terrain_wanted=None;
                 if let Some(message)=self.battle_location_message(cell.region()) {
                     self.feedback=message;
                 } else {
@@ -1317,18 +1376,41 @@ impl Host {
                         self.skin.choose("回车返回战场", "Enter to resume battle")
                     } else { self.skin.choose("回车查看战果", "Enter for battle results") };
                     self.feedback=format!("{}  {}",cell.id(),instruction);
+                    if let Err(error)=self.request_battle_terrain(cell.region()) {
+                        self.feedback=error.to_string();
+                    }
                 }
             }
             self.dirty=true;
             return true;
         }
-        if self.military_cell.take().is_some(){self.feedback.clear();self.dirty=true;}
+        if self.military_cell.take().is_some(){
+            self.battle_enter_requested=None;
+            self.battle_terrain_wanted=None;
+            self.feedback.clear();
+            self.dirty=true;
+        }
         false
     }
 
     fn enter_selected_battle(&mut self) {
         if let Some(selection)=self.military_cell {
-            if let Err(error)=self.open_battle(selection){self.feedback=error.to_string();}
+            let region=selection.cell.region();
+            if let Some(message)=self.battle_location_message(region) {
+                self.feedback=message;
+            } else {
+                match self.request_battle_terrain(region) {
+                    Ok(true) => {
+                        self.battle_enter_requested=None;
+                        if let Err(error)=self.open_battle(selection,0.){self.feedback=error.to_string();}
+                    }
+                    Ok(false) => {
+                        self.battle_enter_requested.get_or_insert_with(Instant::now);
+                        self.feedback=self.skin.choose("正在加载战场地貌", "Loading battlefield terrain").into();
+                    }
+                    Err(error) => self.feedback=error.to_string(),
+                }
+            }
             self.dirty=true;
         }
     }
@@ -1749,6 +1831,11 @@ impl Host {
         if key==Key::Named(NamedKey::Enter) && self.military_grid_active() && self.military_cell.is_some(){
             self.enter_selected_battle();return;
         }
+        if key==Key::Named(NamedKey::Escape) && self.battle_enter_requested.take().is_some(){
+            self.feedback.clear();
+            self.dirty=true;
+            return;
+        }
         if matches!(&key, Key::Character(value) if value == "]")
             && self.debug && self.hud.page == HudPage::Map && self.hud.menu == HudMenu::None && self.country.is_none()
             && self.transport_scene.as_mut().is_some_and(|scene| scene.next_corridors(self.cursor)) {
@@ -2158,7 +2245,9 @@ impl Host {
             "terrain_detail":self.renderer.as_ref().and_then(Renderer::close_terrain_status),
             "workspace":format!("{:?}",self.hud.page),"menu":format!("{:?}",self.hud.menu),"messages":self.hud.messages,
             "session":session,"lobby":lobby,
-            "military_grid":{"active":self.military_grid_active(),"step_m":self.grid_step,"selected":self.military_cell.map(|selection|selection.cell)},
+            "military_grid":{"active":self.military_grid_active(),"step_m":self.grid_step,"selected":self.military_cell.map(|selection|selection.cell),
+                "terrain_ready":self.military_cell.zip(self.battle_terrain.as_ref()).is_some_and(|(selected,(loaded,_))|selected.cell.region()==*loaded),
+                "enter_pending":self.battle_enter_requested.is_some()},
             "land_battle":land_battle,
             "window":{"background":self.config.background,"offscreen":self.config.terrain_review,"focused":self.window.as_ref().is_some_and(|w|w.has_focus()),"visible":self.window.as_ref().and_then(|w|w.is_visible())}
         })
@@ -2288,10 +2377,13 @@ impl Host {
             self.transport_scene = None;
             self.select_transport(None);
             self.military_cell=None;
+            self.battle_enter_requested=None;
+            self.battle_terrain_wanted=None;
             if let Some(region)=self.written_world().filter(|world|world.land_battle_in_progress()).and_then(|world|world.land_battle_region()) {
-                if let Err(error)=self.load_battle_terrain(region){self.battle_terrain=None;self.feedback=error.to_string();}
+                if let Err(error)=self.request_battle_terrain(region){self.feedback=error.to_string();}
             } else {
                 self.battle_terrain = None;
+                self.battle_terrain_timing = None;
                 if let Some(renderer) = &mut self.renderer { renderer.clear_battle(); }
             }
             if connected {self.loading_fade=Some(now);self.loading_status="正在安装地图".into();}
@@ -2516,6 +2608,10 @@ impl ApplicationHandler<HostEvent> for Host {
     fn user_event(&mut self,event_loop:&ActiveEventLoop,event:HostEvent) {
         let event=match event {
             HostEvent::Map(event)=>event,
+            HostEvent::BattleTerrain(region,result)=>{
+                self.battle_terrain_ready(region,result);
+                return;
+            }
             HostEvent::Model(key,mesh)=>{
                 if let Some(renderer)=&mut self.renderer {
                     if let Err(error)=renderer.model_ready(key,mesh) {

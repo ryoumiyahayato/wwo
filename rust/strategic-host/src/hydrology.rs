@@ -15,9 +15,9 @@ use std::{
 const WATER_COLUMNS: usize = 256;
 const WATER_ROWS: usize = 128;
 const WATER_PAGES: usize = WATER_COLUMNS * WATER_ROWS;
-// The surveyed Z6 wide view used over 30 MiB of on-screen QWG payloads.
-// Keep one bounded store. Z4/Z5 can still use QPK outside the admitted area.
-const WATER_WORDS: usize = 9 * 1024 * 1024;
+// Detailed water stays in a single bounded store. Backends with a smaller
+// storage binding limit retain the same page selection and fallback.
+const WATER_BUFFER_BYTES: u32 = 64 * 1024 * 1024;
 const MAX_PAGE_BYTES: u64 = 3 * 1024 * 1024;
 pub const WATER_MPP: f64 = 4200.;
 const WATER_PREFETCH_MPP: f64 = 5000.;
@@ -31,6 +31,7 @@ struct WaterPage {
     index: usize,
     axis: V3,
     radius: f64,
+    latitude_bands: Option<[(V3, f64); 4]>,
     range: std::ops::Range<u64>,
 }
 
@@ -62,13 +63,22 @@ struct WaterViewport {
 
 impl WaterViewport {
     fn priority(&self, page: &WaterPage) -> u8 {
-        if dot(self.axis, page.axis) < (self.radius + page.radius).cos() {
+        let coarse = self.cap_priority(page.axis, page.radius);
+        if coarse == 0 { return 0; }
+        page.latitude_bands.as_ref().map_or(coarse, |bands| {
+            bands.iter().map(|&(axis, radius)| self.cap_priority(axis, radius))
+                .max().unwrap_or(0)
+        })
+    }
+
+    fn cap_priority(&self, axis: V3, radius: f64) -> u8 {
+        if dot(self.axis, axis) < (self.radius + radius).cos() {
             return 0;
         }
-        let [x, y, z] = self.axes.map(|direction| dot(direction, page.axis));
+        let [x, y, z] = self.axes.map(|direction| dot(direction, axis));
         let radial = x.hypot(y);
         let angle = radial.atan2(z);
-        let furthest = angle + page.radius;
+        let furthest = angle + radius;
         if furthest >= FRAC_PI_2 {
             return 2;
         }
@@ -77,7 +87,7 @@ impl WaterViewport {
                       self.origin[1] - y * factor * self.pixel_scale * self.pitch];
         // Bound the projected page by its angular cap, including regional stretch.
         let stretch = if self.regional && furthest > 1e-12 { furthest / furthest.sin() } else { 1. };
-        let pad = page.radius * stretch * self.pixel_scale;
+        let pad = radius * stretch * self.pixel_scale;
         let outside_x = (-screen[0]).max(screen[0] - f64::from(self.size[0])) - pad;
         let outside_y = (-screen[1]).max(screen[1] - f64::from(self.size[1])) - pad * self.pitch;
         let outside = outside_x.max(outside_y);
@@ -93,6 +103,7 @@ pub struct WaterPages {
     viewport: Option<WaterViewport>,
     resident: HashMap<usize, ResidentWaterPage>,
     used_words: usize,
+    capacity_words: usize,
     request: mpsc::Sender<Vec<(usize, std::ops::Range<u64>)>>,
     ready: mpsc::Receiver<WaterBatch>,
     unavailable: HashSet<usize>,
@@ -114,13 +125,22 @@ pub struct WaterUpload {
 }
 
 pub fn water_buffer(device: &wgpu::Device, enabled: bool) -> wgpu::Buffer {
-    let words = if enabled { WATER_WORDS } else { 1 };
+    let limits = device.limits();
+    let capacity = limits.max_storage_buffer_binding_size.min(WATER_BUFFER_BYTES);
     device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("Viewport water geometry"),
-        size: (words * 4) as u64,
+        size: if enabled { u64::from(capacity) } else { 4 },
         usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     })
+}
+
+fn water_cap(lon: f64, lat: f64, half_width: f64, half_height: f64) -> (V3, f64) {
+    let axis = frame([lon, lat])[2];
+    let radius = [-half_height, half_height].into_iter()
+        .map(|dy| dot(axis, frame([lon + half_width, lat + dy])[2]).clamp(-1., 1.).acos())
+        .fold(0., f64::max);
+    (axis, radius)
 }
 
 fn valid_water_page(words: &[u32]) -> bool {
@@ -181,20 +201,18 @@ impl WaterPages {
                 }
                 let lon = (index % WATER_COLUMNS) as f64 * step - 180. + step * 0.5;
                 let lat = 90. - ((index / WATER_COLUMNS) as f64 + 0.5) * step;
-                let axis = frame([lon, lat])[2];
                 let half = step * 0.5;
-                let radius = [[-half, -half], [-half, half], [half, -half], [half, half]]
-                    .into_iter()
-                    .map(|[x, y]| {
-                        dot(axis, frame([lon + x, lat + y])[2])
-                            .clamp(-1., 1.)
-                            .acos()
-                    })
-                    .fold(0., f64::max);
+                let (axis, radius) = water_cap(lon, lat, half, half);
+                // At high latitudes a page is much narrower east-west.
+                // One spherical cap overestimates visibility around its sides.
+                let latitude_bands = (lat.abs() > 60.).then(|| {
+                    std::array::from_fn(|i| water_cap(lon, lat + (i as f64 - 1.5) * step / 4., half, half / 4.))
+                });
                 Some(WaterPage {
                     index,
                     axis,
                     radius,
+                    latitude_bands,
                     range: offsets[index]..offsets[index + 1],
                 })
             })
@@ -240,6 +258,7 @@ impl WaterPages {
             viewport: None,
             resident: HashMap::new(),
             used_words: WATER_PAGES,
+            capacity_words: (buffer.size() / 4) as usize,
             request,
             ready,
             unavailable: HashSet::new(),
@@ -420,7 +439,7 @@ impl WaterPages {
             .collect();
         nearby.sort_unstable_by(|a, b| b.1.cmp(&a.1).then_with(|| b.2.total_cmp(&a.2)));
         self.desired.clear();
-        let mut budget = WATER_WORDS - WATER_PAGES;
+        let mut budget = self.capacity_words - WATER_PAGES;
         for (i, priority, _) in nearby {
             let visible = priority > 0;
             let page = &self.pages[i];
@@ -440,7 +459,7 @@ impl WaterPages {
         mut arrivals: Vec<(usize, Vec<u32>)>,
     ) {
         let added: usize = arrivals.iter().map(|(_, words)| words.len()).sum();
-        if self.used_words + added <= WATER_WORDS {
+        if self.used_words + added <= self.capacity_words {
             for (key, words) in arrivals {
                 self.write_page(queue, buffer, key, self.used_words, words);
             }
@@ -468,7 +487,7 @@ impl WaterPages {
                 if start > end { free.push(end..start); }
                 end = next;
             }
-            free.push(end..WATER_WORDS);
+            free.push(end..self.capacity_words);
             self.used_words = end;
             arrivals.sort_unstable_by_key(|(key, words)| (std::cmp::Reverse(words.len()), *key));
             let offsets: Option<Vec<_>> = arrivals.iter()
@@ -578,6 +597,7 @@ mod water_page_tests {
 
     #[test]
     fn rejected_water_page_is_counted_when_reused_view_reaches_it() {
+        let capacity_words = 9 * 1024 * 1024;
         let size = [640, 400];
         let mut camera = Camera::new(size);
         camera.axes = frame([0., 0.]);
@@ -587,12 +607,14 @@ mod water_page_tests {
                 index: 3,
                 axis: camera.vector([320., 200.], size).unwrap(),
                 radius: 1e-8,
-                range: 0..4 * (WATER_WORDS - WATER_PAGES - 1) as u64,
+                latitude_bands: None,
+                range: 0..4 * (capacity_words - WATER_PAGES - 1) as u64,
             },
             WaterPage {
                 index: 4,
                 axis: camera.vector([654., 200.], size).unwrap(),
                 radius: 1e-8,
+                latitude_bands: None,
                 range: 0..256,
             },
         ];
@@ -605,6 +627,7 @@ mod water_page_tests {
             viewport: None,
             resident: HashMap::new(),
             used_words: WATER_PAGES,
+            capacity_words,
             request: mpsc::channel().0,
             ready: mpsc::channel().1,
             unavailable: HashSet::new(),
