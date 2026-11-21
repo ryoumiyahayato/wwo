@@ -1,0 +1,3 @@
+unit_id	wwo_admin_label	chgis_territory	valid_from_year	valid_to_year	gazetteer	study_scope
+qing_hist_henan	qing_empire:label:4	hvd_112094	1644	1911	https://tgaz.fudan.edu.cn/tgaz/placename/hvd_112094	Henan historical province. The dated gazetteer record is the seat and its subordinate prefectures, not a province polygon. The separate 1911 polygon has ID 195012. Ni Table 1.1 p. 17 row 6.
+qing_hist_hunan	qing_empire:label:11	hvd_98241	1726	1911	https://tgaz.fudan.edu.cn/tgaz/placename/hvd_98241	Hunan historical province. The dated gazetteer cites provincial boundaries and changes in subordinate units. The 1911 polygon has ID 195006. Ni Table 1.1 p. 17 row 9.

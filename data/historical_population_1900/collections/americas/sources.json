@@ -1,0 +1,210 @@
+[
+  {
+    "id": "us_twelfth_census_vol1",
+    "title": "Twelfth Census of the United States, Volume I, Population Part I",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/prod2/decennial/documents/33405927v1ch01.pdf",
+    "locator": "pp. xix–xxii and lxviii–lxxxi, Tables III, V, XXII, XXIII and XXVII",
+    "rights": "U.S. federal public domain",
+    "raw_path": "raw/us_states.csv",
+    "table_urls": [
+      "https://www2.census.gov/library/publications/decennial/1900/volume-1/volume-1-p2.pdf"
+    ]
+  },
+  {
+    "id": "us_twelfth_census_vol2",
+    "title": "Twelfth Census of the United States, Volume II, Population Part II",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p2.pdf",
+    "locator": "Table I, total population, mainland of the United States",
+    "rights": "U.S. federal public domain"
+  },
+  {
+    "id": "us_twelfth_census_places",
+    "title": "Twelfth Census of the United States, Volume I, Cities, Towns and Boroughs",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/prod2/decennial/documents/33405927v1ch08.pdf",
+    "locator": "Table 8, pp. 438 onward",
+    "rights": "U.S. federal public domain"
+  },
+  {
+    "id": "us_twelfth_census_abstract",
+    "title": "Abstract of the Twelfth Census of the United States: 1900",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/abstract/1900-census-1902-abstract.pdf",
+    "locator": "Tables 1 and 35; county table for Oklahoma and footnote on Greer",
+    "rights": "U.S. federal public domain"
+  },
+  {
+    "id": "us_census_gibson_urban",
+    "title": "Population of the 100 Largest Cities and Other Urban Places in the United States, 1790 to 1990",
+    "publisher": "U.S. Census Bureau, Population Division",
+    "url": "https://www.census.gov/library/working-papers/1998/demo/POP-twps0027.html",
+    "locator": "Campbell Gibson, Working Paper 27, Tables 12 and 13, 1890 and 1900",
+    "rights": "U.S. federal public domain",
+    "raw_paths": ["raw/us_urban_tab12.txt", "raw/us_urban_tab13.txt"],
+    "table_urls": [
+      "https://www2.census.gov/library/working-papers/1998/demographics/pop-twps0027/tab12.txt",
+      "https://www2.census.gov/library/working-papers/1998/demographics/pop-twps0027/tab13.txt"
+    ]
+  },
+  {
+    "id": "us_census_alaska_enumeration",
+    "title": "Getting to Hard-to-Reach Villages Before Spring Thaw and Start of Hunting Season",
+    "publisher": "U.S. Census Bureau",
+    "url": "https://www.census.gov/library/stories/2019/07/alaska-remote-areas-always-first-counted-decennial-census.html",
+    "locator": "1890 and 1900 sections, fieldwork chronology and final counts",
+    "rights": "U.S. federal text and published statistical values"
+  },
+  {
+    "id": "us_census_cuba_pr_1899",
+    "title": "Population of States and Territories, comparison of federal and War Department censuses",
+    "publisher": "U.S. Census Office",
+    "url": "https://www2.census.gov/prod2/decennial/documents/33405927v1ch01.pdf",
+    "locator": "p. xix, separate 1899 censuses of Cuba and Puerto Rico",
+    "rights": "U.S. federal public domain"
+  },
+  {
+    "id": "us_census_puerto_rico_1899",
+    "title": "Report on the Census of Porto Rico, 1899",
+    "publisher": "U.S. War Department",
+    "url": "https://www2.census.gov/library/publications/decennial/island-areas/1899/1899-census-porto-rico.pdf",
+    "locator": "Total population; Population at each census; Population by departments",
+    "rights": "U.S. federal public domain"
+  },
+  {
+    "id": "cu_census_1907_ch4",
+    "title": "Census of the Republic of Cuba, 1907",
+    "publisher": "U.S. Government Printing Office, for the Provisional Administration of Cuba",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/cuba-1907/04771803ch4.pdf",
+    "locator": "Population Tables, No. 1 and No. 2, 1899 and 1907 rows or columns",
+    "rights": "U.S. federal public domain",
+    "reference_day_source": "https://www.govinfo.gov/content/pkg/SERIALSET-05239_00_00-006-0155-0000/pdf/SERIALSET-05239_00_00-006-0155-0000.pdf"
+  },
+  {
+    "id": "ca_yearbook_1901_p80",
+    "title": "Statistical Year-Book, Census of 1901",
+    "publisher": "Department of Agriculture, Dominion of Canada",
+    "url": "https://www66.statcan.gc.ca/eng/1901/190100960080_Census%2C%201901.pdf",
+    "locator": "p. 80, population of Canada by census years",
+    "rights": "Historical Government of Canada publication, public domain in Canada",
+    "raw_path": "raw/canada_yearbook_1901_p80.pdf"
+  },
+  {
+    "id": "ca_census_1901_vol1_table1",
+    "title": "Fourth Census of Canada, 1901, Volume I: Population",
+    "publisher": "Census Office, Department of Agriculture, Dominion of Canada",
+    "url": "https://publications.gc.ca/collections/collection_2018/parl/x12-3/X12-3-A-1903-eng.pdf",
+    "locator": "pp. 2–3, Table I, Population by provinces and districts, 1891 and 1901",
+    "rights": "Historical Government of Canada publication, public domain in Canada",
+    "raw_path": "raw/censuses.csv"
+  },
+  {
+    "id": "ca_yearbook_1901_p603",
+    "title": "Statistical Year-Book, Indigenous Population",
+    "publisher": "Department of Agriculture, Dominion of Canada",
+    "url": "https://www66.statcan.gc.ca/eng/1901/190106240608_Indian.pdf",
+    "locator": "p. 603, Census of 1901 and distinct Department of Indian Affairs table",
+    "rights": "Historical Government of Canada publication, public domain in Canada",
+    "raw_path": "raw/canada_yearbook_1901_p603.pdf"
+  },
+  {
+    "id": "ca_yearbook_2012_table241",
+    "title": "Canada Year Book 2012, Population by province and territory",
+    "publisher": "Statistics Canada",
+    "url": "https://www150.statcan.gc.ca/n1/pub/11-402-x/2012000/chap/pop/tbl/tbl01-eng.htm",
+    "locator": "Table 24.1, 1891 and 1901 columns, note 1",
+    "rights": "Statistics Canada Open Licence; table values with attribution"
+  },
+  {
+    "id": "ca_yearbook_1950_newfoundland",
+    "title": "Canada Year Book 1950, Population Statistics for Newfoundland",
+    "publisher": "Dominion Bureau of Statistics",
+    "url": "https://www66.statcan.gc.ca/eng/1950/195002270173_p.%20173.pdf",
+    "locator": "p. 173, Table 23 and note 1",
+    "rights": "Historical Government of Canada publication; table values"
+  },
+  {
+    "id": "nf_census_1901_table1",
+    "title": "Census of Newfoundland and Labrador, 1901, Volume I",
+    "publisher": "Colonial Secretary's Office, Newfoundland",
+    "url": "https://collections.mun.ca/digital/collection/cns_tools/id/158303/",
+    "locator": "p. viii, Table I, Newfoundland, Labrador, and grand total, 1891 and 1901 columns",
+    "rights": "Historical colonial government publication, public domain in Canada",
+    "reference_day_source": "https://www.stats.gov.nl.ca/publications/Historical/PDF/Historical_Statistics_of_Newfoundland_and_Labrador_V2_N7_1994.pdf"
+  },
+  {
+    "id": "mx_yearbook_1941_table11",
+    "title": "Anuario Estadístico de los Estados Unidos Mexicanos, 1941",
+    "publisher": "Dirección General de Estadística, digitized by INEGI",
+    "url": "https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/historicos/1334/702825140410/702825140410_1.pdf",
+    "locator": "pp. 24–25, Table 11; dates from INEGI 1895 and 1900 census program metadata",
+    "rights": "Historical public-sector statistical values; transcription with attribution"
+  },
+  {
+    "id": "mx_inegi_census_centennial",
+    "title": "Estados Unidos Mexicanos: Cien años de censos de población",
+    "publisher": "Instituto Nacional de Estadística, Geografía e Informática",
+    "url": "https://internet.contenidos.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/historicos/2104/702825491406/702825491406_1.pdf",
+    "locator": "p. 68, Población por entidad federativa, 1895–1990",
+    "rights": "Official statistical values; transcription with attribution"
+  },
+  {
+    "id": "mx_census_1930_baja_norte",
+    "title": "Quinto Censo de Población, Baja California (Distrito Norte)",
+    "publisher": "Dirección General de Estadística, digitized by INEGI",
+    "url": "https://www.inegi.org.mx/contenido/productos/prod_serv/contenidos/espanol/bvinegi/productos/censos/poblacion/1930/bc/QCPBCDN30I.pdf",
+    "locator": "Gráfica de población del Distrito Norte de Baja California, censos de 1900, 1910, 1921 y 1930, 1900 row",
+    "rights": "Historical public-sector statistical values; transcription with attribution"
+  },
+  {
+    "id": "br_dge_1908_state_table",
+    "title": "Boletim Commemorativo da Exposição Nacional de 1908",
+    "publisher": "Directoria Geral de Estatistica, Brazil; digitized by the Federal Senate",
+    "url": "https://www2.senado.leg.br/bdsf/bitstream/handle/id/863203/000036005_Boletim_commemorativo_exposicao_nacional_1908.pdf?isAllowed=y&sequence=1",
+    "locator": "pp. 73–74, População do Brazil por Estados (1872–1908), 1890 and 1900 columns and footnotes",
+    "rights": "Historical Brazilian government publication; transcription of statistical values with attribution",
+    "raw_path": "raw/censuses.csv"
+  },
+  {
+    "id": "br_ibge_sinopse_2000_table14",
+    "title": "Sinopse preliminar do Censo Demográfico 2000",
+    "publisher": "Instituto Brasileiro de Geografia e Estatística",
+    "url": "https://biblioteca.ibge.gov.br/visualizacao/periodicos/308/cd_2000_v7.pdf",
+    "locator": "PDF p. 44, Table 1.4, 31.12.1890 and 31.12.1900 columns",
+    "rights": "IBGE historical statistical values; transcription with attribution",
+    "raw_path": "raw/brazil_ibge_2000_table14.pdf"
+  },
+  {
+    "id": "br_ibge_census_history",
+    "title": "História das Estatísticas Brasileiras",
+    "publisher": "Instituto Brasileiro de Geografia e Estatística",
+    "url": "https://www.ibge.gov.br/biblioteca/visualizacao/livros/liv42899.pdf",
+    "locator": "1900 census discussion and original synopsis versus later volume",
+    "rights": "IBGE historical statistical values; transcription with attribution"
+  },
+  {
+    "id": "ar_dge_bulletin_219",
+    "title": "El comercio exterior argentino en 1936 y 1935 y estadísticas económicas retrospectivas",
+    "publisher": "Dirección General de Estadística de la Nación, digitized by INDEC",
+    "url": "https://biblioteca.indec.gob.ar/bases/minde/17_1937_219.pdf",
+    "locator": "p. 98, Table XLIII(a), Capital Federal y Provincias",
+    "rights": "Historical public-sector statistical values; transcription with attribution"
+  },
+  {
+    "id": "ar_indec_historical_census",
+    "title": "Historia estadística argentina: Segundo Censo Nacional",
+    "publisher": "Instituto Nacional de Estadística y Censos",
+    "url": "https://www.indec.gob.ar/indec/web/Institucional-Indec-Historia-2",
+    "locator": "1895 section; directly enumerated and two omitted categories",
+    "rights": "INDEC statistical values; transcription with attribution"
+  },
+  {
+    "id": "ar_censo_1947_retrospective",
+    "title": "IV Censo General de la Nación, Tomo I",
+    "publisher": "Dirección Nacional del Servicio Estadístico, digitized by INDEC",
+    "url": "https://biblioteca.indec.gob.ar/bases/minde/1c1947t1master.pdf",
+    "locator": "p. XXVIII, Censos Nacionales, 1895 and 1914 rows",
+    "rights": "Historical public-sector statistical values; transcription with attribution"
+  }
+]

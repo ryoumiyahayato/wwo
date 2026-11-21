@@ -1,0 +1,131 @@
+[
+  {
+    "id": "india_statistical_abstract_1905",
+    "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39",
+    "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/index.html",
+    "locator": "Tables 1, 2 and 6; separate table workbooks",
+    "rights": "1905 statistical publication. Numeric facts transcribed; the digital workbooks are linked.",
+    "files": {
+      "1": "https://dsal.uchicago.edu/statistics/1894_excel/1894.001.XLS",
+      "2": "https://dsal.uchicago.edu/statistics/1894_excel/1894.002.XLS",
+      "6": "https://dsal.uchicago.edu/statistics/1894_excel/1894.006.XLS"
+    }
+  },
+  {
+    "id": "british_empire_census_1901",
+    "title": "Census of the British Empire, 1901",
+    "publisher": "General Register Office / HMSO (London, 1906)",
+    "url": "https://wellcomecollection.org/works/mbq6vgjb",
+    "locator": "Summary table 2 (pp. 2–6); census dates p. 71; individual colony tables as cited",
+    "rights": "Wellcome Collection marks its digital copy Public Domain Mark 1.0.",
+    "manifest_url": "https://iiif.wellcomecollection.org/presentation/v2/b32183173"
+  },
+  {
+    "id": "china_year_book_1919",
+    "title": "The China Year Book, 1919–20",
+    "publisher": "H. T. Montague Bell and H. G. W. Woodhead; George Routledge & Sons (London), E. P. Dutton & Co. (New York)",
+    "url": "https://www.bnasie.eu/Asset/Source/bnBook_ID-2751_No-01.pdf",
+    "locator": "Chapter I, pp. 1–3; PDF leaves 27–29. Population table p. 3 is printed sideways.",
+    "rights": "1919 publication. Numeric facts transcribed directly from the scan."
+  },
+  {
+    "id": "cao_qing_provincial_reconstruction",
+    "title": "Population Expansion and Demographic Pressure in Qing China (1644–1911)",
+    "publisher": "Ni Yuping, Tsinghua University Press (2023). Table credits Cao Shuji, Population History, vol. 4 pp. 451–452 and vol. 5 pp. 703–704.",
+    "url": "https://www.tup.tsinghua.edu.cn/upload/books/yz/096340-01.pdf",
+    "locator": "Chapter 1, Table 1.1, printed pp. 17–18 (PDF pp. 31–32), 1880 and 1910 columns.",
+    "rights": "Numeric facts with attribution; no publisher text, figures or scans redistributed."
+  },
+  {
+    "id": "xu_leeuwen_zanden_qing_1893",
+    "title": "Urbanization in China, ca. 1100–1900",
+    "publisher": "Yi Xu, Bas van Leeuwen and Jan Luiten van Zanden, Frontiers of Economics in China 13(3), 2018",
+    "url": "https://pure.knaw.nl/ws/portalfiles/portal/8633887/Urbanization_in_China_ca._1100_C1900.pdf",
+    "locator": "Section 2.2 and Table 1, pp. 329–331. The 1893 column draws on Cao Shuji.",
+    "rights": "Numerical facts with attribution. No full table image or article text redistributed."
+  },
+  {
+    "id": "federico_tena_china_country_workbook_v3",
+    "title": "Federico-Tena World Population Historical Database: China (V3)",
+    "publisher": "Giovanni Federico and Antonio Tena-Junguito, e-cienciaDatos",
+    "url": "https://doi.org/10.21950/K1SRL4",
+    "locator": "china_1800-1938_FTWPHD_2025_v01.xlsx, China and Sources; country readme, p. 1.",
+    "rights": "Numeric facts and short original descriptions with attribution.",
+    "workbook": "https://edatos.consorciomadrono.es/api/access/datafile/33992"
+  },
+  {
+    "id": "shagdar_mongolia_nso_population",
+    "title": "Mongolia's Pre-1990 Economy: An Extended Overview",
+    "publisher": "Enkhbayar Shagdar, ERINA Discussion Paper 2002 (2020)",
+    "url": "https://www.unii.ac.jp/erina-unp/archive/en/wp-content/uploads/2020/03/DP2002.pdf",
+    "locator": "Pp. 4–5, Table 2.1.1, compiled from the Mongolian NSO.",
+    "rights": "Numerical facts with attribution."
+  },
+  {
+    "id": "nz_official_yearbook_1900",
+    "title": "New Zealand Official Year-Book, 1900",
+    "publisher": "Registrar-General of New Zealand; Government Printer",
+    "url": "https://www3.stats.govt.nz/New_Zealand_Official_Yearbooks/1900/NZOYB_1900.html",
+    "locator": "Section I: Population; opening table and Estimated Populations of Provincial Districts.",
+    "rights": "1900 official statistical publication; numeric facts transcribed."
+  },
+  {
+    "id": "abs_historical_population_2021",
+    "title": "Historical population, 2021: Population size and growth",
+    "publisher": "Australian Bureau of Statistics, released 16 July 2024",
+    "url": "https://www.abs.gov.au/statistics/people/population/historical-population/2021/HPDC1.xlsx",
+    "locator": "Table 1, persons rows 24–32, dated 31 December; footnotes (a) and (b).",
+    "rights": "Australian Bureau of Statistics, numeric facts attributed; workbook linked."
+  },
+  {
+    "id": "japan_statistical_yearbook_72",
+    "title": "Japan Statistical Yearbook, 72nd edition",
+    "publisher": "Statistics Bureau, Ministry of Internal Affairs and Communications",
+    "url": "https://www.stat.go.jp/data/nenkan/72nenkan/zenbun/jp72/book/book.pdf",
+    "locator": "Chapter 2, table 2-1, Total Population, pre-census series and footnote.",
+    "rights": "Statistical facts attributed to the Statistics Bureau; original linked."
+  },
+  {
+    "id": "egypt_historical_census_primary_tables",
+    "title": "Demographic Change in Rural Egypt, 1882–1917: Primary census data",
+    "publisher": "Hirofumi Tanada, Waseda University; Hitotsubashi University Institute of Economic Research. Based on Gouvernement Égyptien (1898), Recensement général de l’Égypte, vols. I–III, and Ministry of Finance (1909), The Census of Egypt taken in 1907.",
+    "url": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/97_22.html",
+    "locator": "Appendices 2-1 and 3-1, Markaz and Madina tables; table 2 for census dates; table 4 for cities outside the markaz series.",
+    "rights": "Factual values from the historical censuses via attributed research transcription; source HTML and study are linked.",
+    "files": {
+      "ap2-1.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap2-1.htm",
+      "ap2-1-2.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap2-1-2.htm",
+      "ap3-1.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap3-1.htm",
+      "ap3-1-2.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap3-1-2.htm",
+      "table2.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/table2.htm",
+      "table4.htm": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/table4.htm"
+    },
+    "original_1907_scan": "https://sites.dlib.nyu.edu/viewer/books/princeton_aco003741/display"
+  },
+  {
+    "id": "ceylon_gazette_5741_q1_1900",
+    "title": "Supplement to the Ceylon Government Gazette, no. 5,741: Report on the Vital Statistics of the Colony during the First Quarter of 1900",
+    "publisher": "Ceylon Registrar-General, Government Printer (Colombo); digitized by Noolaham",
+    "url": "https://noolaham.net/project/1023/102287/102287.pdf",
+    "locator": "Section I, p. 1, and Table I, p. 9, first-quarter opening estimate by province and district",
+    "rights": "Factual values transcribed from a 1900 official publication; the digitized original is linked."
+  },
+  {
+    "id": "mauritius_demographic_digest",
+    "title": "Digest of Demographic Statistics 2016",
+    "publisher": "Statistics Mauritius, Ministry of Finance and Economic Development",
+    "url": "https://statsmauritius.govmu.org/Documents/Statistics/Digests/Demography/Digest_Demo_Yr16.pdf",
+    "locator": "Table 1.3, Population growth in intercensal periods, rows 6 March 1891 and 1 April 1901. Columns for Mauritius, Rodrigues and two-island total.",
+    "rights": "Statistical facts transcribed and attributed to Statistics Mauritius.",
+    "companion_table": "https://statsmauritius.govmu.org/Documents/Statistics/Digests/Annual_Digest/Annual_Digest_Statistics_Yr08.pdf"
+  },
+  {
+    "id": "egypt_world_population_conference_1954",
+    "title": "Contributions to demography through new census enquiries (E/CONF.13/230)",
+    "publisher": "Hasan M. Husein, World Population Conference, United Nations (1954)",
+    "url": "https://digitallibrary.un.org/record/4028612/files/E_CONF.13_230-EN.pdf",
+    "locator": "Table I, p. 1, census years 1897 and 1907.",
+    "rights": "Census facts transcribed with attribution; original paper linked."
+  }
+]

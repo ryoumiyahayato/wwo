@@ -1,0 +1,152 @@
+[
+  {
+    "region": "Africa",
+    "year": 1899,
+    "published": 129812912,
+    "v5_components": 129812910,
+    "v5_difference": -2,
+    "components_including_v4_trucial_coast": 129812910,
+    "difference": -2
+  },
+  {
+    "region": "America",
+    "year": 1899,
+    "published": 143783654,
+    "v5_components": 143783656,
+    "v5_difference": 2,
+    "components_including_v4_trucial_coast": 143783656,
+    "difference": 2
+  },
+  {
+    "region": "Asia",
+    "year": 1899,
+    "published": 891534868,
+    "v5_components": 891494901,
+    "v5_difference": -39967,
+    "components_including_v4_trucial_coast": 891534864,
+    "difference": -4
+  },
+  {
+    "region": "Europe",
+    "year": 1899,
+    "published": 416730581,
+    "v5_components": 416730580,
+    "v5_difference": -1,
+    "components_including_v4_trucial_coast": 416730580,
+    "difference": -1
+  },
+  {
+    "region": "Oceania",
+    "year": 1899,
+    "published": 6501371,
+    "v5_components": 6501370,
+    "v5_difference": -1,
+    "components_including_v4_trucial_coast": 6501370,
+    "difference": -1
+  },
+  {
+    "region": "World",
+    "year": 1899,
+    "published": 1588363387,
+    "v5_components": 1588323417,
+    "v5_difference": -39970,
+    "components_including_v4_trucial_coast": 1588363380,
+    "difference": -7
+  },
+  {
+    "region": "Africa",
+    "year": 1900,
+    "published": 130135647,
+    "v5_components": 130135647,
+    "v5_difference": 0,
+    "components_including_v4_trucial_coast": 130135647,
+    "difference": 0
+  },
+  {
+    "region": "America",
+    "year": 1900,
+    "published": 146267487,
+    "v5_components": 146267486,
+    "v5_difference": -1,
+    "components_including_v4_trucial_coast": 146267486,
+    "difference": -1
+  },
+  {
+    "region": "Asia",
+    "year": 1900,
+    "published": 897174895,
+    "v5_components": 897134690,
+    "v5_difference": -40205,
+    "components_including_v4_trucial_coast": 897174893,
+    "difference": -2
+  },
+  {
+    "region": "Europe",
+    "year": 1900,
+    "published": 421518081,
+    "v5_components": 421518082,
+    "v5_difference": 1,
+    "components_including_v4_trucial_coast": 421518082,
+    "difference": 1
+  },
+  {
+    "region": "Oceania",
+    "year": 1900,
+    "published": 6579584,
+    "v5_components": 6579583,
+    "v5_difference": -1,
+    "components_including_v4_trucial_coast": 6579583,
+    "difference": -1
+  },
+  {
+    "region": "World",
+    "year": 1900,
+    "published": 1601675694,
+    "v5_components": 1601635488,
+    "v5_difference": -40206,
+    "components_including_v4_trucial_coast": 1601675691,
+    "difference": -3
+  },
+  {
+    "region": "Africa",
+    "date": "1900-01-01",
+    "interpolated_control": 129975606,
+    "components_including_v4_trucial_coast": 129975605,
+    "difference": -1
+  },
+  {
+    "region": "America",
+    "date": "1900-01-01",
+    "interpolated_control": 145035778,
+    "components_including_v4_trucial_coast": 145035775,
+    "difference": -3
+  },
+  {
+    "region": "Asia",
+    "date": "1900-01-01",
+    "interpolated_control": 894378060,
+    "components_including_v4_trucial_coast": 894378060,
+    "difference": 0
+  },
+  {
+    "region": "Europe",
+    "date": "1900-01-01",
+    "interpolated_control": 419144006,
+    "components_including_v4_trucial_coast": 419144007,
+    "difference": 1
+  },
+  {
+    "region": "Oceania",
+    "date": "1900-01-01",
+    "interpolated_control": 6540799,
+    "components_including_v4_trucial_coast": 6540799,
+    "difference": 0
+  },
+  {
+    "region": "World",
+    "date": "1900-01-01",
+    "interpolated_control": 1595074248,
+    "components_including_v4_trucial_coast": 1595074246,
+    "difference": -2
+  }
+]

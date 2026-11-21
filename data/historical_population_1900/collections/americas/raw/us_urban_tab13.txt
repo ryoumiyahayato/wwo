@@ -1,0 +1,60 @@
+Table 13.  Population of the 100 Largest Urban Places:  1900
+
+Source:  U.S. Bureau of the Census
+Internet Release date:  June 15, 1998
+---------------------------------------------------------------------------------------------------------------
+Rank | Place 1/                          | Population || Rank | Place                             | Population
+---------------------------------------------------------------------------------------------------------------
+   1   New York city, NY *................  3,437,202      51   Wilmington city, DE................     76,508
+   2   Chicago city, IL...................  1,698,575      52   Camden city, NJ....................     75,935
+   3   Philadelphia city, PA..............  1,293,697      53   Trenton city, NJ...................     73,307
+   4   St. Louis city, MO.................    575,238      54   Bridgeport city, CT................     70,996
+   5   Boston city, MA....................    560,892      55   Lynn city, MA......................     68,513
+   6   Baltimore city, MD.................    508,957      56   Oakland city, CA...................     66,960
+   7   Cleveland city, OH.................    381,768      57   Lawrence city, MA..................     62,559
+   8   Buffalo city, NY...................    352,387      58   New Bedford city, MA...............     62,442
+   9   San Francisco city, CA.............    342,782      59   Des Moines city, IA................     62,139
+  10   Cincinnati city, OH................    325,902      60   Springfield city, MA...............     62,059
+  11   Pittsburgh city, PA *..............    321,616      61   Somerville city, MA................     61,643
+  12   New Orleans city, LA...............    287,104      62   Troy city, NY......................     60,651
+  13   Detroit city, MI...................    285,704      63   Hoboken city, NJ...................     59,364
+  14   Milwaukee city, WI.................    285,315      64   Evansville city, IN................     59,007
+  15   Washington city, DC................    278,718      65   Manchester city, NH................     56,987
+  16   Newark city, NJ....................    246,070      66   Utica city, NY.....................     56,383
+  17   Jersey City city, NJ...............    206,433      67   Peoria city, IL....................     56,100
+  18   Louisville city, KY................    204,731      68   Charleston city, SC................     55,807
+  19   Minneapolis city, MN...............    202,718      69   Savannah city GA...................     54,244
+  20   Providence city, RI................    175,597      70   Salt Lake City city, UT............     53,531
+  21   Indianapolis city, IN..............    169,164      71   San Antonio city, TX...............     53,321
+  22   Kansas City city, MO...............    163,752      72   Duluth city, MN....................     52,969
+  23   St. Paul city, MN..................    163,065      73   Erie city, PA......................     52,733
+  24   Rochester city, NY.................    162,608      74   Elizabeth city, NJ.................     52,130
+  25   Denver city, CO....................    133,859      75   Wilkes-Barre city, PA..............     51,721
+  26   Toledo city, OH....................    131,822      76   Kansas City city, KS...............     51,418
+  27   Allegheny city, PA *...............    129,896      77   Harrisburg city, PA................     50,167
+  28   Columbus city, OH..................    125,560      78   Portland city, ME..................     50,145
+  29   Worcester city, MA.................    118,421      79   Yonkers city, NY...................     47,931
+  30   Syracuse city, NY..................    108,374      80   Norfolk city, VA...................     46,624
+  31   New Haven city, CT.................    108,027      81   Waterbury city, CT.................     45,859
+  32   Paterson city, NJ..................    105,171      82   Holyoke city, MA...................     45,712
+  33   Fall River city, MA................    104,863      83   Fort Wayne city, IN................     45,115
+  34   St. Joseph city, MO................    102,979      84   Youngstown city, OH................     44,885
+  35   Omaha city, NE.....................    102,555      85   Houston city, TX...................     44,633
+  36   Los Angeles city, CA...............    102,479      86   Covington city, KY.................     42,938
+  37   Memphis city, TN...................    102,320      87   Akron city, OH.....................     42,728
+  38   Scranton city, PA..................    102,026      88   Dallas city, TX....................     42,638
+  39   Lowell city, MA....................     94,969      89   Saginaw city, MI...................     42,345
+  40   Albany city, NY....................     94,151      90   Lancaster city, PA.................     41,459
+  41   Cambridge city, MA.................     91,886      91   Lincoln city, NE...................     40,169
+  42   Portland city, OR..................     90,426      92   Brockton city, MA..................     40,063
+  43   Atlanta city, GA...................     89,872      93   Binghamton city, NY................     39,647
+  44   Grand Rapids city, MI..............     87,565      94   Augusta city, GA...................     39,441
+  45   Dayton city, OH....................     85,333      95   Pawtucket city, RI.................     39,231
+  46   Richmond city, VA..................     85,050      96   Altoona city, PA...................     38,973
+  47   Nashville city, TN.................     80,865      97   Wheeling city, WV..................     38,878
+  48   Seattle city, WA...................     80,671      98   Mobile city, AL....................     38,469
+  49   Hartford city, CT..................     79,850      99   Birmingham city, AL................     38,415
+  50   Reading city, PA...................     78,961     100   Little Rock city, AR...............     38,307
+---------------------------------------------------------------------------------------------------------------
+* See Notes for Individual Places.
+1/ Excludes Honolulu CDP (population 39,306) before Hawaii became a state.

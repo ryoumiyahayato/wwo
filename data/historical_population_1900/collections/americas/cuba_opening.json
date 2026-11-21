@@ -1,0 +1,17 @@
+{
+  "unit_id": "cuba_occupation_1900",
+  "date": "1900-01-01",
+  "population_value": 1585419,
+  "source_id": "cu_census_1907_ch4",
+  "locator": "1907 census, Population Tables, No. 1 and No. 2, total Cuba",
+  "endpoint_dates": [
+    "1899-10-16",
+    "1907-09-30"
+  ],
+  "country_endpoint_values": [
+    1572797,
+    2048980
+  ],
+  "method": "Linear interpolation by elapsed days (11/415), rounded once. Uses the two census reference days. Includes the Isle of Pines and adjacent keys.",
+  "units": []
+}

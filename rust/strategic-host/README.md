@@ -72,7 +72,7 @@ Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒�
 
 人物出行和实物货运共用线路的实际预约区间。人物页、城市和市场都能进入交通操作，详见 [正式交通操作与资料边界](../../docs/RUST_TRANSPORT_PHASE_2.md)。闭塞限制后续出发。在途人物抵达后可参与当地交易、工作和迁居。正式游戏时钟处理到达、日结工资、企业、口粮、健康及市场。原生存档重放带版本的人口转移，并恢复具名身份、住户、预约、通勤和货批。
 
-开局人口是 [1900 年经济聚合估计](../../data/alpha/historical_world_economy_1900/countries_compact.json)，共 50 个统计单元，估计总数 1,411,020,000。估计值带区间和共同来源方法。行政边界和城市地点没有随附互斥的历史人口分项。当前开局未加入合成的行政区人口、家庭和服役名单。岗位、企业配方、每人每日 1 千克主食阈值以及客运速度与名额均为显式模拟假设。
+新档从[历史人口开局表](../../data/historical_population_1900/opening.json)读取已核实的统计范围与互斥分区。部分总数仍沿用旧估计的国家，从旧人口余额划出有出处的分区人数。其余人数保留为未定位余额。城市观测保留原调查日期，作为所属地区的分项。`wwo-formal-state inspect-population` 可查询人口来源类型和分区。旧档按其原开局重放。资料覆盖、计算方法和缺口见[全球人口数据报告](../../data/historical_population_1900/README.md)。岗位、企业配方、每人每日 1 千克主食阈值以及客运速度与名额均为显式模拟假设。
 
 从本目录运行 `cargo test --locked --lib population_world_` 可重现动态人物、共同住户、服役夹具和存档场景。年度测量使用 `cargo test --locked --lib population_world_year_measurement -- --ignored --nocapture`，分别测正式开局和 5,000 个合成群体的存档与日结成本。生产历史数据缺口包括行政区分组、军队编制以及家庭、文化和宗教分布。
 
@@ -114,7 +114,7 @@ LOD 使用视口中心的投影比例。将当前纬度的东西、南北采样�
 
 将 `landscape-cover-v2.qsc` 放在 `worldcrs84quad-15s-v2` 的 QPK 和 `index.json` 同目录。正式入口 `wwo-map-lab --play` 按视野载入 Z6、Z7 的覆盖和高程。复验可用 `--terrain-candidate <QPK库目录>`。按 `G` 进入地理模式，按 `V` 可切换垂直俯视和斜视。已有 `landscape-cover-v1.qsc` 继续支持 Z7 覆盖。覆盖包缺失时，兼容的显卡仍可使用 QPK 高程增强地势。[Z6/Z7 地表归档](https://github.com/ryoumiyahayato/wwo/releases/tag/z6-z7-surface-20261119) · [上一阶段记录](Z7_LANDSCAPE.md)
 
-近景农田按耕地覆盖显示田块、田埂和作物色差。田块用随地图缩放淡出的地表材质表达。历史调查 QDT 有覆盖时沿用调查中的耕地范围，其余区域用现代 WorldCover 分类作参照。田块布局和作物变化是程序化视觉推定。
+近景田块按经纬度生成。美国中西部参考约 400 米的测量方格，尼罗河三角洲沿 Rosetta、Damietta 两支分流展开狭长田块，波河平原参考下 Reno 河走向。其余区域沿用全球地理坐标采样。现有 QSC 或历史 QDT 决定耕地覆盖，湿地和水面压低田块材质权重。分流和河段用于确定方向。各田块形状、颜色和作物变化属于视觉推定。缩小时，窄田块先淡出，QDT 在地理模式随距离淡入淡出。[测量规格](https://www.blm.gov/sites/default/files/SpecificationsForDescriptionsOfLand.pdf) · [Natural Earth 河流](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/) · [HydroRIVERS](https://www.hydrosheds.org/products/hydrorivers)
 
 覆盖包由现有 ESA WorldCover 2021 v200 分类缓存生成。运行 `python tools/build_landscape_cover.py <worldcover缓存目录> <输出目录>/landscape-cover-v2.qsc`，需 NumPy、Pillow 和 zstandard。树冠和岩块按固定 WGS84 区块缓存，实例精度由投影大小控制。树种、林隙和地表纹理为视觉推定。山脊、坡面光照和实例接地使用 QPK 的高程。Z6 色调可用 `python tools/build_natural_terrain.py --z6-from-z7 <原Z6.qpk> <配色Z7.qpk> <输出Z6.qpk>` 重建，并保留原 Z6 高程和水域覆盖。[覆盖来源和许可](https://doi.org/10.5281/zenodo.7254221) · [正式游戏实测及资源恢复](Z6_Z7_SURFACE.md)
 

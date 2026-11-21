@@ -1,0 +1,15 @@
+{
+  "unit_id": "cshapes_gw_920",
+  "date": "1900-01-01",
+  "population_value": 796359,
+  "source_id": "nz_official_yearbook_1900",
+  "locator": "Section I, Population, 31 December 1899, total estimated population of colony",
+  "method": "Carry the official 1899-12-31 year-end estimate across midnight. Includes 756,505 updated non-Māori residents and 39,854 Māori from the 1896 census.",
+  "units": [],
+  "endpoint_dates": [
+    "1899-12-31"
+  ],
+  "country_endpoint_values": [
+    796359
+  ]
+}

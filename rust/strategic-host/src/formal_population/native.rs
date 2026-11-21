@@ -10,6 +10,8 @@ const VERSION: u32 = 1;
 pub(crate) struct PopulationSnapshot {
     version: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) opening_version: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     migrated: Option<MigratedPopulation>,
     journal: Vec<PopulationEvent>,
 }
@@ -54,6 +56,7 @@ impl Population {
     pub(crate) fn snapshot(&self) -> PopulationSnapshot {
         PopulationSnapshot {
             version: VERSION,
+            opening_version: self.opening_version(),
             migrated: self.history.migrated.clone(),
             journal: self.history.journal.clone(),
         }
@@ -62,7 +65,7 @@ impl Population {
     pub(crate) fn migrate_native<'a>(
         mut self, totals: BTreeMap<String, u64>, dead: impl Iterator<Item = &'a str>,
     ) -> io::Result<Self> {
-        if self.history.migrated.is_some() || !self.history.journal.is_empty() {
+        if self.opening.is_some() || self.history.migrated.is_some() || !self.history.journal.is_empty() {
             return Err(invalid("population migration requires an unmodified opening"));
         }
         for person in dead { self.retire_claim(person, None)?; }
@@ -80,12 +83,13 @@ impl Population {
                 deceased: self.deceased.keys().cloned().collect(),
             });
         }
+        self.pools = totals.clone();
         self.totals = totals;
         Ok(self)
     }
 
     pub(crate) fn restore_native(mut self, snapshot: PopulationSnapshot, minute: i64) -> io::Result<Self> {
-        if snapshot.version != VERSION || minute < 0 {
+        if snapshot.version != VERSION || snapshot.opening_version != self.opening_version() || minute < 0 {
             return Err(invalid("unsupported native population version or clock"));
         }
         if self.history.migrated.is_some() || !self.history.journal.is_empty() {
@@ -284,7 +288,7 @@ impl Population {
                 let source = self.named.insert(person.clone(), destination.clone()).expect("active claim");
                 self.shift_totals(&source, destination, 1);
                 self.subtract_named(&source);
-                *self.named_counts.entry(destination.clone()).or_default() += 1;
+                self.add_named(destination);
             }
             Change::Arrival { person, unit } | Change::NamedBirth { person, unit } => {
                 self.check_new_claim(person)?;
@@ -296,7 +300,7 @@ impl Population {
             Change::AnonymousDeaths { unit, cohort, members } => {
                 self.check_background(unit, cohort.as_ref(), *members)?;
                 if let Some(id) = cohort { self.remove_cohort_members(unit, id, *members); }
-                *self.totals.get_mut(unit).expect("background population unit") -= *members;
+                self.change_total(unit, *members, false);
                 self.global_total -= *members;
             }
         }
@@ -316,23 +320,23 @@ impl Population {
     }
 
     fn check_destination(&self, source: &str, destination: &str) -> io::Result<()> {
-        if source == destination || !self.totals.contains_key(destination) {
+        if source == destination || !self.pools.contains_key(destination) {
             return Err(invalid("population transfer requires a distinct known destination"));
         }
         Ok(())
     }
 
     fn shift_totals(&mut self, source: &str, destination: &str, members: u64) {
-        *self.totals.get_mut(source).expect("validated source population") -= members;
-        *self.totals.get_mut(destination).expect("validated destination population") += members;
+        self.change_total(source, members, false);
+        self.change_total(destination, members, true);
     }
 
     fn add_population(&mut self, unit: &str, members: u64) -> io::Result<()> {
         if members == 0 || members > MAX_POPULATION - self.global_total {
             return Err(invalid("population increase exceeds the supported range"));
         }
-        let total = self.totals.get_mut(unit).ok_or_else(|| invalid("unknown population unit"))?;
-        *total += members;
+        if !self.pools.contains_key(unit) { return Err(invalid("unknown population unit")); }
+        self.change_total(unit, members, true);
         self.global_total += members;
         Ok(())
     }

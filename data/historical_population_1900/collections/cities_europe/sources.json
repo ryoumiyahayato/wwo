@@ -1,0 +1,50 @@
+[
+  {
+    "id": "insee_sgf_censuses",
+    "title": "Données historiques de la Statistique générale de France — Recensements de 1851 à 1921",
+    "publisher": "Statistique générale de la France; ICPSR transcription; Insee electronic tables (12 January 2010)",
+    "url": "https://www.insee.fr/fr/statistiques/2653233",
+    "locator": "REC_T256.dbf V21 (1896), V22 (1901); REC_T24.dbf V132 (1896); REC_T214.dbf V89 (1901). libelles_var_rec.dbf specifies the variables.",
+    "rights": "Source: Insee, 2010-01-12. Licence Ouverte / Open Licence 2.0 (Etalab); field extraction, identity mapping and interpolations by WWO.",
+    "rights_url": "https://www.insee.fr/fr/information/2008466",
+    "dates_url": "https://www.bnsp.insee.fr/ark:/12148/bc6p06z2rd0.pdf",
+    "coverage": "Contemporary metropolitan départements, Territoire de Belfort and arrondissements. Overseas populations excluded."
+  },
+  {
+    "id": "de_jahrbuch_1902_census",
+    "title": "Statistisches Jahrbuch für das Deutsche Reich 1902, I.1 Die Bundesstaaten nach Fläche und Bevölkerung",
+    "publisher": "Kaiserliches Statistisches Amt; digital copy, Universitätsbibliothek Mannheim",
+    "url": "https://digi.bib.uni-mannheim.de/fileadmin/statjahrb/514401303_1902/pdf/514401303_0010.pdf",
+    "locator": "Printed p. 1, section I, table 1, Ortsanwesende Bevölkerung; 2 December 1895 and 1 December 1900, zusammen.",
+    "rights": "Factual population counts transcribed from the 1902 German imperial statistical yearbook. No scanned image is redistributed.",
+    "coverage": "German Empire within its European census territory; 25 constituent states and Reichsland Elsaß-Lothringen; 14 Prussian subdivisions. Overseas possessions excluded."
+  },
+  {
+    "id": "reba_chandler_1900",
+    "title": "Chandler Population Data, version 3, chandlerV2.csv (AD_1900)",
+    "publisher": "Meredith Reba, Femke Reitsma and Karen C. Seto; figshare (2016), after Tertius Chandler, Four Thousand Years of Urban Growth (1987)",
+    "url": "https://doi.org/10.6084/m9.figshare.2059494.v3",
+    "locator": "chandlerV2.csv, Figshare file 5407640. One-based data records after the header. AD_1900 >= 50,000.",
+    "rights": "CC BY 4.0. Reba, Reitsma & Seto (2016), after Chandler (1987). WWO selected and normalized the AD_1900 column and added geography/quality labels.",
+    "rights_url": "https://creativecommons.org/licenses/by/4.0/",
+    "download_url": "https://ndownloader.figstatic.com/files/5407640",
+    "methodology": "https://doi.org/10.1038/sdata.2016.34",
+    "coverage": "Urban population estimates compiled for AD 1900. Settlement footprints vary, and geocoding certainty describes location alone. No uniform municipal-boundary or exact census-day interpretation."
+  },
+  {
+    "id": "mcgd_v22",
+    "title": "Modern China Geospatial Database – Main Dataset, version 2.2",
+    "publisher": "Christian Henriot, Aix-Marseille Université / ENP China, Zenodo",
+    "url": "https://doi.org/10.5281/zenodo.8063584",
+    "locator": "MCGD_Data_V2.2.csv, LocID and NameID. city_chinese_names.csv lists both the Chinese and linked romanization identifiers.",
+    "rights": "CC BY 4.0. WWO links selected name variants to Reba city records by reported locality and the gazetteer LocID."
+  },
+  {
+    "id": "us_gazetteer_places_2024",
+    "title": "2024 Gazetteer Files, national places",
+    "publisher": "U.S. Census Bureau",
+    "url": "https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.2024.html",
+    "locator": "2024_Gaz_place_national.zip, GEOID, INTPTLAT, INTPTLONG. Place codes are cited in the individual quality notes.",
+    "rights": "US federal government geographic data. Used for coordinate comparisons only."
+  }
+]

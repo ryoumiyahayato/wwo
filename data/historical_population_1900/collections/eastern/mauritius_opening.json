@@ -1,0 +1,40 @@
+{
+  "unit_id": "cshapes_gw_590",
+  "date": "1900-01-01",
+  "source_id": "mauritius_demographic_digest",
+  "locator": "Table 1.3, p. 22, 1891 and 1901 census rows",
+  "endpoint_dates": [
+    "1891-03-06",
+    "1901-04-01"
+  ],
+  "country_endpoint_values": [
+    372656,
+    374185
+  ],
+  "method": "Linear interpolation over 3223/3678 elapsed days in the two islands represented by gw_590. Each island rounded to a whole person.",
+  "population_value": 373996,
+  "units": [
+    {
+      "unit_id": "mu_main_island",
+      "name": "Mauritius island",
+      "endpoint_values": [
+        370588,
+        371023
+      ],
+      "population_value": 370969,
+      "place_ids": [],
+      "locator": "Table 1.3, p. 22, 1891 and 1901 census rows, Mauritius island"
+    },
+    {
+      "unit_id": "mu_rodrigues",
+      "name": "Rodrigues island",
+      "endpoint_values": [
+        2068,
+        3162
+      ],
+      "population_value": 3027,
+      "place_ids": [],
+      "locator": "Table 1.3, p. 22, 1891 and 1901 census rows, Rodrigues island"
+    }
+  ]
+}
