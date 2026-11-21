@@ -232,3 +232,100 @@ india_census_1901_table_vii_coorg,50–55,band,50,54,5978,3169,2809
 india_census_1901_table_vii_coorg,55–60,band,55,59,2349,1307,1042
 india_census_1901_table_vii_coorg,60 and over,band,60,,5057,2427,2630
 india_census_1901_table_vii_coorg,Total,total,,,180607,100258,80349
+india_census_1901_table_vii_assam,0–1,band,0,0,220799,109545,111254
+india_census_1901_table_vii_assam,1–2,band,1,1,111617,54732,56885
+india_census_1901_table_vii_assam,2–3,band,2,2,194988,94562,100426
+india_census_1901_table_vii_assam,3–4,band,3,3,196638,95381,101257
+india_census_1901_table_vii_assam,4–5,band,4,4,193220,95196,98024
+india_census_1901_table_vii_assam,Total 0–5,subtotal,0,4,917262,449416,467846
+india_census_1901_table_vii_assam,5–10,band,5,9,943096,476710,466386
+india_census_1901_table_vii_assam,10–15,band,10,14,642447,354678,287769
+india_census_1901_table_vii_assam,15–20,band,15,19,498937,236074,262863
+india_census_1901_table_vii_assam,20–25,band,20,24,529719,238423,291296
+india_census_1901_table_vii_assam,25–30,band,25,29,597740,300915,296825
+india_census_1901_table_vii_assam,30–35,band,30,34,530211,281643,248568
+india_census_1901_table_vii_assam,35–40,band,35,39,379728,222479,157249
+india_census_1901_table_vii_assam,40–45,band,40,44,358229,195170,163059
+india_census_1901_table_vii_assam,45–50,band,45,49,184371,105998,78373
+india_census_1901_table_vii_assam,50–55,band,50,54,221410,116655,104755
+india_census_1901_table_vii_assam,55–60,band,55,59,80939,44862,36077
+india_census_1901_table_vii_assam,60 and over,band,60,,242254,120669,121585
+india_census_1901_table_vii_assam,Total,total,,,6126343,3143692,2982651
+india_census_1901_table_vii_punjab,0–1,band,0,0,732080,379031,353049
+india_census_1901_table_vii_punjab,1–2,band,1,1,393013,201971,191042
+india_census_1901_table_vii_punjab,2–3,band,2,2,608085,317450,290635
+india_census_1901_table_vii_punjab,3–4,band,3,3,619578,317099,302479
+india_census_1901_table_vii_punjab,4–5,band,4,4,650888,339833,311055
+india_census_1901_table_vii_punjab,Total 0–5,subtotal,0,4,3003644,1555384,1448260
+india_census_1901_table_vii_punjab,5–10,band,5,9,3100642,1667589,1433053
+india_census_1901_table_vii_punjab,10–15,band,10,14,2597467,1484687,1112780
+india_census_1901_table_vii_punjab,15–20,band,15,19,1950314,1088408,861906
+india_census_1901_table_vii_punjab,20–25,band,20,24,1824629,951206,873423
+india_census_1901_table_vii_punjab,25–30,band,25,29,1916461,1014277,902184
+india_census_1901_table_vii_punjab,30–35,band,30,34,1893777,999585,894192
+india_census_1901_table_vii_punjab,35–40,band,35,39,1215520,661783,553737
+india_census_1901_table_vii_punjab,40–45,band,40,44,1440410,756462,683948
+india_census_1901_table_vii_punjab,45–50,band,45,49,763795,419006,344789
+india_census_1901_table_vii_punjab,50–55,band,50,54,1010254,544696,465558
+india_census_1901_table_vii_punjab,55–60,band,55,59,376985,215634,161351
+india_census_1901_table_vii_punjab,60 and over,band,60,,1324315,722041,602274
+india_census_1901_table_vii_punjab,Total,total,,,22418213,12080758,10337455
+india_census_1901_table_vii_bombay,0–1,band,0,0,410551,207993,202558
+india_census_1901_table_vii_bombay,1–2,band,1,1,294432,144704,149728
+india_census_1901_table_vii_bombay,2–3,band,2,2,508991,249933,259058
+india_census_1901_table_vii_bombay,3–4,band,3,3,504811,248129,256682
+india_census_1901_table_vii_bombay,4–5,band,4,4,555452,279255,276197
+india_census_1901_table_vii_bombay,Total 0–5,subtotal,0,4,2274237,1130014,1144223
+india_census_1901_table_vii_bombay,5–10,band,5,9,2634496,1346423,1288073
+india_census_1901_table_vii_bombay,10–15,band,10,14,2240530,1237773,1002757
+india_census_1901_table_vii_bombay,15–20,band,15,19,1480812,782593,698219
+india_census_1901_table_vii_bombay,20–25,band,20,24,1543221,757060,786161
+india_census_1901_table_vii_bombay,25–30,band,25,29,1742390,910665,831725
+india_census_1901_table_vii_bombay,30–35,band,30,34,1655829,860175,795654
+india_census_1901_table_vii_bombay,35–40,band,35,39,1165108,631597,533511
+india_census_1901_table_vii_bombay,40–45,band,40,44,1189505,606653,582852
+india_census_1901_table_vii_bombay,45–50,band,45,49,690230,367057,323173
+india_census_1901_table_vii_bombay,50–55,band,50,54,791802,397196,394606
+india_census_1901_table_vii_bombay,55–60,band,55,59,323903,173943,149960
+india_census_1901_table_vii_bombay,60 and over,band,60,,820345,378570,441775
+india_census_1901_table_vii_bombay,Unspecified,band,,,7153,3690,3163
+india_census_1901_table_vii_bombay,Total,total,,,18559561,9583409,8976152
+india_census_1901_table_vii_agra_oudh,0–1,band,0,0,1471576,748179,723397
+india_census_1901_table_vii_agra_oudh,1–2,band,1,1,858271,423808,434463
+india_census_1901_table_vii_agra_oudh,2–3,band,2,2,1363106,676887,686219
+india_census_1901_table_vii_agra_oudh,3–4,band,3,3,1213240,599740,613500
+india_census_1901_table_vii_agra_oudh,4–5,band,4,4,1139660,573626,566034
+india_census_1901_table_vii_agra_oudh,Total 0–5,subtotal,0,4,6045853,3022240,3023613
+india_census_1901_table_vii_agra_oudh,5–10,band,5,9,6109831,3195199,2914632
+india_census_1901_table_vii_agra_oudh,10–15,band,10,14,5566417,3091210,2475207
+india_census_1901_table_vii_agra_oudh,15–20,band,15,19,3886195,2125069,1761126
+india_census_1901_table_vii_agra_oudh,20–25,band,20,24,4082203,2040342,2041861
+india_census_1901_table_vii_agra_oudh,25–30,band,25,29,4245892,2179107,2066785
+india_census_1901_table_vii_agra_oudh,30–35,band,30,34,4172017,2139360,2032657
+india_census_1901_table_vii_agra_oudh,35–40,band,35,39,2683404,1384399,1299005
+india_census_1901_table_vii_agra_oudh,40–45,band,40,44,3357086,1698255,1658831
+india_census_1901_table_vii_agra_oudh,45–50,band,45,49,1742124,917556,821568
+india_census_1901_table_vii_agra_oudh,50–55,band,50,54,2373226,1196357,1176869
+india_census_1901_table_vii_agra_oudh,55–60,band,55,59,825609,426527,399082
+india_census_1901_table_vii_agra_oudh,60 and over,band,60,,2565489,1185209,1380280
+india_census_1901_table_vii_agra_oudh,Unspecified,band,,,36136,16112,20024
+india_census_1901_table_vii_agra_oudh,Total,total,,,47691782,24616942,23074840
+india_census_1901_table_vii_burma,0–1,band,0,0,248380,120295,128085
+india_census_1901_table_vii_burma,1–2,band,1,1,266471,131128,135343
+india_census_1901_table_vii_burma,2–3,band,2,2,315151,154816,160335
+india_census_1901_table_vii_burma,3–4,band,3,3,328580,163210,165370
+india_census_1901_table_vii_burma,4–5,band,4,4,289592,143815,145777
+india_census_1901_table_vii_burma,Total 0–5,subtotal,0,4,1448174,713264,734910
+india_census_1901_table_vii_burma,5–10,band,5,9,1301950,650710,651240
+india_census_1901_table_vii_burma,10–15,band,10,14,1104513,574861,529652
+india_census_1901_table_vii_burma,15–20,band,15,19,950423,461910,488513
+india_census_1901_table_vii_burma,20–25,band,20,24,941287,469307,471980
+india_census_1901_table_vii_burma,25–30,band,25,29,915508,480164,435344
+india_census_1901_table_vii_burma,30–35,band,30,34,852195,463070,389125
+india_census_1901_table_vii_burma,35–40,band,35,39,620300,342138,278162
+india_census_1901_table_vii_burma,40–45,band,40,44,565125,299292,265833
+india_census_1901_table_vii_burma,45–50,band,45,49,392428,209246,183182
+india_census_1901_table_vii_burma,50–55,band,50,54,400950,201242,199708
+india_census_1901_table_vii_burma,55–60,band,55,59,241597,121893,119704
+india_census_1901_table_vii_burma,60 and over,band,60,,629163,295311,333852
+india_census_1901_table_vii_burma,Total,total,,,10363613,5282408,5081205

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "india_1901_abstract_religion",
+    "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39, Table 7",
+    "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/1894.007.XLS",
+    "locator": "1901 census religion; see workbook rows in census.json",
+    "rights": "Numeric facts from the 1905 statistical publication."
+  },
+  {
+    "id": "india_1901_abstract_civil_condition",
+    "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39, Table 11",
+    "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/1894.011.XLS",
+    "locator": "1901 census civil condition by sex; add the cited rows in census.json",
+    "rights": "Numeric facts from the 1905 statistical publication."
+  },
+  {
+    "id": "india_1901_abstract_literacy",
+    "title": "Statistical Abstract Relating to British India, 1894–95 to 1903–04, no. 39, Table 16",
+    "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/1894.016.XLS",
+    "locator": "1901 census literacy by sex; add the cited rows in census.json",
+    "rights": "Numeric facts from the 1905 statistical publication."
+  }
+]

@@ -7,6 +7,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from geography import catalogue, legacy_audit
 from opening import groups, located_people, sourced_people
+from social import opening_social
 from structure import age_sex_panels, dimensions, opening_structure
 from structural_coverage import structural_coverage
 from reconciliation import comparisons, asian_estimates, world_accounts
@@ -16,7 +17,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 9
+OPENING_VERSION = 10
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -271,6 +272,17 @@ def main():
     structural=dimensions(observations)
     structural.append(england_wales_habitations())
     structure_opening=opening_structure(selection, observations, version=OPENING_VERSION)
+    social_opening=opening_social(selection)
+    social_coverage=Counter()
+    for region in social_opening["regions"]:
+        for dimension, allocation in region["marginal_distributions"].items():
+            if any(source not in manifest for source in allocation["source_ids"]):
+                raise ValueError((region["unit_id"], dimension, allocation["source_ids"]))
+            social_coverage[dimension] += region["opening_total"] - allocation["unknown"]
+    summary["opening_social_coverage"] = {
+        dimension: dict(assigned_people=known, unknown_people=total+legacy_only-known)
+        for dimension, known in sorted(social_coverage.items())
+    }
     summary["structural_observations_by_source"]=dict(Counter(r["source_id"] for r in structural))
     summary["structure_opening_pool_controls"]=sum(g["opening_total"] for g in structure_opening["groups"])
     summary["structure_opening_pool_count"]=len(structure_opening["groups"])
@@ -302,6 +314,7 @@ def main():
     json_file("opening.json",dict(version=1,groups=groups(observations, version=1)))
     json_file(f"opening_v{OPENING_VERSION}.json", dict(version=OPENING_VERSION, groups=selection))
     json_file(f"opening_structure_v{OPENING_VERSION}.json", structure_opening)
+    json_file(f"opening_social_v{OPENING_VERSION}.json", social_opening)
     json_file("sources.json",list(manifest.values()))
     json_file("summary.json",summary)
     json_file("legacy_audit.json",legacy)

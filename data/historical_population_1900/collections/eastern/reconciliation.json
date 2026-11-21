@@ -279,14 +279,18 @@
     },
     {
       "territory": "Australian colonies",
-      "disposition": "research_only",
+      "disposition": "v10_partial_colony_opening_with_unlocated_research_balance",
       "source_ids": [
         "abs_historical_population_2021",
         "nz_official_yearbook_1900"
       ],
       "locator": "ABS table 1, persons on 31 December, footnotes (a) and (b).",
       "reported_1899_12_31": 3715988,
-      "coverage": "Historical figures for NSW, Victoria, Queensland, South Australia, Western Australia and Tasmania exclude part of the Aboriginal and Torres Strait Islander population. Complete inclusion in this ABS retrospective series begins in 1961. No all-resident opening or unobserved Indigenous count is inferred."
+      "reported_1900_12_31": 3765339,
+      "interpolated_opening_abs_coverage": 3716123,
+      "unlocated_balance_to_research_control": 121455,
+      "coverage": "Historical figures for NSW, Victoria, Queensland, South Australia, Western Australia and Tasmania exclude part of the Aboriginal and Torres Strait Islander population. Complete inclusion in this ABS retrospective series begins in 1961. The ABS methodology keeps the Northern Territory within South Australia and the later Australian Capital Territory within New South Wales at the opening date. The arithmetic difference from the separate all-resident research control has no known geographic or population-group composition.",
+      "geography_source": "https://www.abs.gov.au/methodologies/historical-population-methodology/2021"
     },
     {
       "territory": "Qing China",

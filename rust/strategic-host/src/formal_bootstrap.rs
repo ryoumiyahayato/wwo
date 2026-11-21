@@ -2222,7 +2222,8 @@ mod tests {
     fn historical_population_structure_and_old_openings_restore() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create("country_fra").unwrap();
-        let origin = "ft_russia_empire_ussr";
+        let origin = world.residence_unit_at("place:moscow").unwrap().to_owned();
+        let origin = origin.as_str();
         let destination = "country_fra";
         let clock = world.clock();
         assert_eq!(world.residence_unit_at("place:cairo"), Some("egy_madina_cairo"));
@@ -2304,6 +2305,10 @@ mod tests {
         assert_eq!(us.population_total, 75_454_976);
         assert_eq!(us.cohort_residents + us.named_residents, us.population_total);
         assert!(us.residents_with_cohort_age_and_sex > 75_000_000);
+        let us_social = world.population().social_distribution(Some("united_states_1900")).unwrap();
+        assert_eq!(us_social.dimensions["occupation"].assigned_residents, 28_866_450);
+        assert_eq!(us_social.dimensions["residence"].unknown_residents, 0);
+        assert_eq!(us_social.dimensions["culture"].unknown_residents, us.population_total);
         let initial = world.population().structure(None, clock).unwrap();
         assert_eq!(initial.population_total,
             initial.named_residents + initial.unclassified_residents + initial.cohort_residents);
@@ -2332,6 +2337,15 @@ mod tests {
         let cohort = cohort.clone();
         let members = world.population().cohort_members(origin, &cohort).unwrap();
         let global_total = world.population().global_total();
+        let moscow_religion = world.population().social_distribution(Some(origin)).unwrap();
+        let confession = &moscow_religion.dimensions["religion"];
+        assert!(confession.direct_opening_distribution.is_some());
+        assert_eq!(confession.assigned_residents, moscow_religion.population_total);
+        assert_eq!(confession.unknown_residents, 0);
+        let norm = &world.inspect_population(origin).unwrap().dietary_norms[0];
+        assert_eq!(norm.residents_with_matching_religion,
+            confession.by_classification["russia_1897_reported_confession"]["Магометане"]);
+        assert!(norm.observed_adherents.is_none());
         world.population.transfer_cohort(origin, destination, &cohort, 2, 0).unwrap();
         world.population.record_cohort_deaths(destination, &cohort, 1, 0).unwrap();
         world.population.record_anonymous_births(destination, 3, 0).unwrap();
@@ -2341,6 +2355,11 @@ mod tests {
         assert_eq!(restored.population().cohort_members(destination, &cohort), Some(1));
         assert_eq!(restored.population().global_total(), global_total + 2);
         assert_eq!(restored.snapshot(), saved);
+        let after = restored.population().social_distribution(Some(origin)).unwrap();
+        assert_eq!(after.affected_resident_pools, 1);
+        assert!(after.dimensions["religion"].unknown_residents > 0);
+        assert_eq!(after.dimensions["religion"].assigned_residents + after.dimensions["religion"].unknown_residents, after.population_total);
+        assert_eq!(serde_json::to_value(after).unwrap(), serde_json::to_value(world.population().social_distribution(Some(origin))).unwrap());
 
         let old = bootstrap.base_opening_version("country_fra", None, Some(1)).unwrap();
         let old_saved = old.snapshot();
@@ -2399,6 +2418,15 @@ mod tests {
         let cape = restored.population().structure(Some("cshapes_gw_561"), restored.clock()).unwrap();
         assert_eq!(cape.population_total, 2_265_556);
         assert_eq!(cape.cohort_residents, 0);
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(9)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        assert_eq!(restored.population().global_total(), 1_465_392_190);
+        assert_eq!(restored.residence_unit_at("place:moscow"), Some("ft_russia_empire_ussr"));
+        assert_eq!(restored.population().structure(None, clock).unwrap().residents_with_cohort_age_and_sex, 325_734_333);
+        assert_eq!(restored.population().social_distribution(None).unwrap().residents_with_any_attribute_minimum, 0);
         assert_eq!(restored.snapshot(), old_saved);
     }
 
@@ -2735,13 +2763,14 @@ mod tests {
         assert_eq!(mobilized.named_in_age_range_in_active_service, 1);
         assert_eq!(mobilized.named_in_age_range_eligible_for_civilian_work + 1,
             available.named_in_age_range_eligible_for_civilian_work);
-        let unit = "ft_russia_empire_ussr";
+        let unit = world.residence_unit_at("place:moscow").unwrap().to_owned();
+        let unit = unit.as_str();
         let origin = world.population.structure(Some(unit), world.clock()).unwrap();
         let cohort = origin.cohorts.iter()
             .find(|cohort| cohort.members >= 4 && cohort.age_years.is_some_and(|age| age.youngest == 25))
             .unwrap().id.clone();
         world.service.enlist_cohort(&world.population, unit, &cohort, service.clone(), 4, 0, true).unwrap();
-        let availability = world.resident_age_availability(Some("russian_empire"), 25, 25).unwrap();
+        let availability = world.resident_age_availability(Some("russian_empire"), 25, 29).unwrap();
         assert_eq!(availability.anonymous_in_active_service_all_ages, 4);
         assert_eq!(availability.anonymous.definitely_in_range - availability.anonymous_outside_active_service.definitely_in_range, 4);
         let managed = BTreeMap::new();
@@ -2754,7 +2783,7 @@ mod tests {
         assert_eq!(world.population_units(), &population);
         let mut world = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
         assert_eq!(world.service.named_target(worker), Some(&service));
-        assert_eq!(world.resident_age_availability(Some(unit), 25, 25).unwrap().anonymous_in_active_service_all_ages, 4);
+        assert_eq!(world.resident_age_availability(Some(unit), 25, 29).unwrap().anonymous_in_active_service_all_ages, 4);
         world.discharge_named_service(worker).unwrap();
         world.advance_migrated_domains(MINUTES_PER_DAY * 2, &managed).unwrap();
         assert_eq!(world.completed_firm_work(firm, 3).unwrap().len(), 1);

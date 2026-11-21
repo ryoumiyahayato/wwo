@@ -7,6 +7,7 @@ mod native;
 mod opening;
 pub mod needs;
 pub mod reproductive_needs;
+mod social;
 #[cfg(test)]
 mod tests;
 
@@ -16,6 +17,7 @@ pub use inspection::{PopulationChange, PopulationChild, PopulationInspection};
 pub(crate) use native::PopulationSnapshot;
 pub(crate) use opening::{HistoricalOpening, CURRENT_VERSION};
 pub use opening::OpeningPopulationEstimate;
+pub use social::{OpeningSocialDistribution, SocialDimension, SocialDistribution};
 
 use crate::formal_clock::GameClock;
 use crate::formal_save::{field, integer, invalid, lookup, map, tagged};
@@ -210,6 +212,10 @@ impl Population {
         } else {
             *total -= members;
             *count -= members;
+            if self.opening.as_ref().is_some_and(|opening| opening.social.regions.contains_key(pool)) {
+                let outflow = self.history.social_outflow.entry(pool.to_owned()).or_default();
+                *outflow = outflow.saturating_add(members);
+            }
         }
     }
 

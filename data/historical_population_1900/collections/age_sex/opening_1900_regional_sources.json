@@ -1,0 +1,27 @@
+[
+  {
+    "id": "jp_ltes_1899_resident_ages",
+    "title": "Estimates of Long-Term Economic Statistics of Japan, Manpower, Population by Sex and Age in Single Years (Japanese only, at the End of the Year)",
+    "publisher": "Institute of Economic Research, Hitotsubashi University, Research Data Repository",
+    "url": "https://d-repo.ier.hit-u.ac.jp/records/2035738",
+    "locator": "Manpower Tables 3-1 (Male) and 3-2 (Female), the 1899 columns",
+    "rights": "Numeric facts for one reference year are extracted. The original workbooks remain available from the repository.",
+    "raw_path": "opening_1900_regional_ages.csv",
+    "table_urls": [
+      "https://d-repo.ier.hit-u.ac.jp/record/2035738/files/LTES_J02-03-01.xlsx",
+      "https://d-repo.ier.hit-u.ac.jp/record/2035739/files/LTES_J02-03-02.xlsx"
+    ]
+  },
+  {
+    "id": "fi_yearbook_1910_population_ages",
+    "title": "Suomen tilastollinen vuosikirja 1910 / Annuaire statistique de Finlande 1910",
+    "publisher": "Central Statistical Office of Finland, Helsinki, 1910",
+    "url": "https://otos.stat.fi/items/a9fed6cb-73eb-4099-81e7-dee4c47236df",
+    "locator": "Table 12a, printed p. 27, totals by age and sex. Table 4, historical population at year-end.",
+    "rights": "Historical published numeric facts.",
+    "raw_path": "opening_1900_regional_ages.csv",
+    "table_urls": [
+      "https://www.doria.fi/bitstream/handle/10024/67181/stv_1910.pdf?sequence=1"
+    ]
+  }
+]
