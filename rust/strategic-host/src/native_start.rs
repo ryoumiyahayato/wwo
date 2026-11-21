@@ -530,11 +530,13 @@ impl NativeSession {
         for option in options {
             let destination = place_label(world, option.destination);
             let mode = match option.route.mode { RouteMode::Road => "公路", RouteMode::Rail => "铁路", RouteMode::Shipping => "海运" };
-            let detail = format!("预计 {} 到达 · 今日名额 {}/{} · 票价未建模", short_minute(option.arrival_minute),
-                option.remaining_departures, option.daily_capacity);
+            let detail = if option.open {
+                format!("预计 {} 到达 · 今日名额 {}/{} · 票价未建模", short_minute(option.arrival_minute),
+                    option.remaining_departures, option.daily_capacity)
+            } else { "线路停运".into() };
             work.push(json!({"label":format!("前往{destination} · {mode}模拟"), "details":[detail],
                 "actions":[work_action("立即出发", &format!("native:travel|{}|{}", option.route.id, option.destination),
-                    option.remaining_departures > 0)]}));
+                    option.open && option.remaining_departures > 0)]}));
         }
         let confirmation = self.pending_job.as_ref().map(|_| json!({"title":"确认就业","body":"接受该岗位的工时和工资条件。"}));
         json!({"selected":self.selected_organization,"rows":organizations,"drawer":drawer,"has_work":true,

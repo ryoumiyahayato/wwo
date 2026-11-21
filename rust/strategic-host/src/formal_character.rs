@@ -157,6 +157,7 @@ pub(crate) struct DayActivity {
     pub rest: bool,
     pub nutrition: Option<u16>,
     pub nutrition_by_person: BTreeMap<String, u16>,
+    pub settled_meal_purchases: BTreeSet<String>,
     pub injury: Option<(u16, u16)>,
 }
 
@@ -357,6 +358,11 @@ fn run(input: Request) -> Result<CharacterOutput> {
         "register" if input.day == system.day() => {}
         "day" if system.day().checked_add(1) == Some(input.day) => {
             let active = system.player_development(&input.player).is_some();
+            if let Some(activity) = &input.activity {
+                for person in &activity.settled_meal_purchases {
+                    learning(&mut system, person, "market_purchase", "完成正式市场下单", 40)?;
+                }
+            }
             deaths = system.advance_observed(input.day, &input, active.then_some(input.player.as_str()))?;
             let survived = |person: &str| !deaths.iter().any(|death| death.person_id == person);
             if let Some(activity) = &input.activity {

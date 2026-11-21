@@ -82,10 +82,13 @@ impl WageClaims {
 
     pub(crate) fn restore_shifts(
         claims: BTreeMap<String, Claim>, opening: &crate::formal_work::WorkOpening, ledger: &Ledger, clock: GameClock,
+        runtime_actor: impl Fn(&str) -> bool,
     ) -> io::Result<Self> {
         let mut worker_days = std::collections::BTreeSet::new();
         for (id, claim) in &claims {
-            let job = opening.find(&claim.worker, &claim.job).ok_or_else(|| invalid("unknown work terms"))?;
+            let job = opening.find(&claim.worker, &claim.job)
+                .or_else(|| runtime_actor(&claim.worker).then(|| opening.entry_job(&claim.job)).flatten())
+                .ok_or_else(|| invalid("unknown work terms"))?;
             if id != &format!("work:{}:{}:{}", claim.work_day, claim.worker, claim.job)
                 || !worker_days.insert((&claim.worker, claim.work_day))
                 || !(1..=clock.current_day()).contains(&claim.work_day)

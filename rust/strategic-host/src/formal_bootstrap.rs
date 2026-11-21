@@ -14,6 +14,7 @@ use crate::{
     formal_travel::{Journey, TravelOption, TravelState},
     formal_wages::{Claim, WageClaims},
     formal_work::{Job, WorkOpening, WorkState},
+    transport::{map_data::load_prototype_map_network, SegmentAvailability, TransportNetwork},
 };
 pub use crate::formal_stock::ConsumptionAllocation;
 pub use crate::formal_wages::CompletedFirmWork;
@@ -186,6 +187,7 @@ pub struct InitialWorld {
     pub(crate) livelihood: Livelihood,
     pub(crate) households: Households,
     travel: TravelState,
+    transport: TransportNetwork,
     homes: BTreeMap<String, String>,
     service: ServiceRoster,
     activities: Arc<OpeningActivities>,
@@ -218,6 +220,8 @@ pub(crate) struct WorldSnapshot {
     households: Households,
     #[serde(default)]
     travel: TravelState,
+    #[serde(default)]
+    transport_restrictions: BTreeMap<String, SegmentAvailability>,
     #[serde(default)]
     homes: BTreeMap<String, String>,
     #[serde(default)]
@@ -259,6 +263,7 @@ impl InitialWorld {
             "livelihood": self.livelihood,
             "households": self.households,
             "travel": self.travel,
+            "transport_restrictions": self.transport.restrictions().collect::<BTreeMap<_, _>>(),
             "homes": self.homes,
             "service": self.service.snapshot(),
             "player_day": self.player_day,
@@ -288,10 +293,21 @@ impl InitialWorld {
     pub fn player_current_place(&self) -> Option<&str> { self.current_place(&self.player) }
 
     pub fn player_home(&self) -> &str {
-        self.homes.get(&self.player).unwrap_or(&self.player().place_id)
+        self.person_home(&self.player).expect("player has an opening residence")
+    }
+
+    pub fn person_home(&self, person: &str) -> Option<&str> {
+        self.homes.get(person).map(String::as_str).or_else(|| self.person(person).map(|row| row.place_id.as_str()))
     }
 
     pub fn player_journey(&self) -> Option<&Journey> { self.travel.journey(&self.player) }
+
+    pub fn transport(&self) -> &TransportNetwork { &self.transport }
+
+    /// Apply a route-availability event from the world. In-progress trips retain their committed arrival.
+    pub fn set_segment_access(&mut self, route: &str, open: bool, capacity: u32) -> io::Result<()> {
+        self.transport.set_availability(route, open, capacity).map_err(invalid)
+    }
 
     pub fn market_unit_for_person(&self, person: &str) -> Option<&str> {
         self.sources.population_unit_at(self.current_place(person)?)
@@ -299,7 +315,7 @@ impl InitialWorld {
 
     pub fn player_travel_options(&self) -> Vec<TravelOption<'_>> {
         if self.has_committed_player_day() { return Vec::new(); }
-        self.player_current_place().map_or_else(Vec::new, |place| self.travel.options(&self.sources, place, self.clock))
+        self.player_current_place().map_or_else(Vec::new, |place| self.travel.options(&self.sources, &self.transport, place, self.clock))
     }
 
     fn has_committed_player_day(&self) -> bool {
@@ -307,11 +323,18 @@ impl InitialWorld {
     }
 
     pub fn travel_player(&mut self, route: &str, destination: &str) -> io::Result<()> {
-        if !self.player_alive() || self.has_committed_player_day() {
+        self.travel_person(&self.player.clone(), route, destination)
+    }
+
+    /// Execute the resident's chosen itinerary. Residence is updated separately.
+    pub fn travel_person(&mut self, person: &str, route: &str, destination: &str) -> io::Result<()> {
+        if self.population.unit_for_person(person).is_none() || self.service.named_target(person).is_some()
+            || self.work.booking(person).is_some() || (person == self.player && self.player_day.booking.is_some())
+        {
             return Err(invalid("当前健康或日程不允许旅行。"));
         }
-        let opening_place = &self.sources.people[&self.player].place_id;
-        self.travel.depart(&self.sources, &self.player, opening_place, route, destination, self.clock)
+        let opening_place = self.person(person).ok_or_else(|| invalid("missing traveller identity"))?.place_id.clone();
+        self.travel.depart(&self.sources, &self.transport, person, &opening_place, route, destination, self.clock)
     }
 
     pub fn can_move_player_home(&self) -> bool {
@@ -321,14 +344,18 @@ impl InitialWorld {
     }
 
     pub fn move_player_home(&mut self) -> io::Result<()> {
-        if !self.can_move_player_home() { return Err(invalid("当前位置无法登记迁居。")); }
-        let place = self.player_current_place().expect("checked presence").to_owned();
-        let unit = self.sources.population_unit_at(&place).expect("checked residence unit");
-        if self.population.unit_for_person(&self.player) != Some(unit) {
-            self.population.move_person(&self.player, unit, self.clock.snapshot().total_minutes)?;
+        self.move_person_home(&self.player.clone())
+    }
+
+    pub fn move_person_home(&mut self, person: &str) -> io::Result<()> {
+        let place = self.current_place(person).filter(|&place| self.person_home(person) != Some(place))
+            .ok_or_else(|| invalid("当前位置无法登记迁居。"))?.to_owned();
+        let unit = self.sources.population_unit_at(&place).ok_or_else(|| invalid("地点没有正式人口归属。"))?;
+        if self.population.unit_for_person(person) != Some(unit) {
+            self.population.move_person(person, unit, self.clock.snapshot().total_minutes)?;
         }
-        self.households.leave(&self.player);
-        self.homes.insert(self.player.clone(), place);
+        self.households.leave(person);
+        self.homes.insert(person.to_owned(), place);
         Ok(())
     }
 
@@ -361,7 +388,7 @@ impl InitialWorld {
     }
 
     fn household_meeting_place(&self, host: &str, guest: &str) -> io::Result<String> {
-        let host_home = self.homes.get(host).map(String::as_str).or_else(|| self.person(host).map(|row| row.place_id.as_str()));
+        let host_home = self.person_home(host);
         let place = self.current_place(host)
             .filter(|&place| Some(place) == host_home && self.current_place(guest) == Some(place))
             .ok_or_else(|| invalid("共同生活的申请需要双方到场。"))?;
@@ -372,7 +399,7 @@ impl InitialWorld {
     }
 
     pub fn jobs(&self) -> impl Iterator<Item = (&Job, usize)> {
-        self.work_opening.jobs(&self.player, self.player_current_place(), self.clock.current_day())
+        self.work.local_jobs(&self.work_opening, &self.player, self.player_current_place(), self.clock.current_day())
             .map(|job| (job, self.work.vacancies(job)))
     }
 
@@ -414,9 +441,25 @@ impl InitialWorld {
     }
 
     pub fn apply_for_work(&mut self, job: &str) -> io::Result<()> {
-        if !self.eligible_for_civil_work(&self.player) { return Err(invalid("当前健康或服役状态不允许民间就业。")); }
-        let place = self.player_current_place().map(str::to_owned);
-        self.work.apply(&self.work_opening, &self.player, job, place.as_deref(), self.clock.current_day())
+        self.apply_for_work_as(&self.player.clone(), job)
+    }
+
+    /// A newly named adult can discover entry-level jobs by visiting the employer's town.
+    pub fn consult_local_work(&mut self, person: &str) -> io::Result<()> {
+        if !self.runtime_people.contains_key(person) || !self.eligible_for_civil_work(person)
+            || self.person_profile(person)?.age_years < 18
+        {
+            return Err(invalid("当前人物无法咨询当地入门岗位。"));
+        }
+        let place = self.current_place(person).ok_or_else(|| invalid("人物不在当地。"))?.to_owned();
+        self.work.consult_local_notices(&self.work_opening, person, &place);
+        Ok(())
+    }
+
+    pub fn apply_for_work_as(&mut self, person: &str, job: &str) -> io::Result<()> {
+        if !self.eligible_for_civil_work(person) { return Err(invalid("当前健康或服役状态不允许民间就业。")); }
+        let place = self.current_place(person).map(str::to_owned);
+        self.work.apply(&self.work_opening, person, job, place.as_deref(), self.clock.current_day())
     }
 
     pub fn can_book_work(&self) -> bool {
@@ -425,10 +468,14 @@ impl InitialWorld {
     }
 
     pub fn book_work(&mut self) -> io::Result<()> {
-        if !self.eligible_for_civil_work(&self.player) { return Err(invalid("当前健康或服役状态不允许民间就业。")); }
-        if self.player_day.booking.is_some() { return Err(invalid("今日已有个人安排。")); }
-        let place = self.player_current_place().map(str::to_owned);
-        self.work.book(&self.work_opening, &self.player, place.as_deref(), self.clock)
+        self.book_work_as(&self.player.clone())
+    }
+
+    pub fn book_work_as(&mut self, person: &str) -> io::Result<()> {
+        if !self.eligible_for_civil_work(person) { return Err(invalid("当前健康或服役状态不允许民间就业。")); }
+        if person == self.player && self.player_day.booking.is_some() { return Err(invalid("今日已有个人安排。")); }
+        let place = self.current_place(person).map(str::to_owned);
+        self.work.book(&self.work_opening, person, place.as_deref(), self.clock)
     }
 
     pub fn leave_employment(&mut self) -> io::Result<()> { self.work.release(&self.player) }
@@ -574,13 +621,14 @@ impl InitialWorld {
         if self.settled_purchase_requests.get(person).is_some_and(|requests| requests.contains(request)) {
             return Err(invalid("purchase request was already settled"));
         }
-        let amount = self.buy_livelihood_stock(person, market, good, quantity_milli, quoted_unit_price, self.clock.snapshot().total_minutes)?;
+        let amount = self.buy_livelihood_stock(person, market, good, quantity_milli, quoted_unit_price, self.clock.snapshot().total_minutes, true)?;
         self.settled_purchase_requests.entry(person.to_owned()).or_default().insert(request.to_owned());
         Ok(amount)
     }
 
     pub(crate) fn buy_livelihood_stock(
         &mut self, person: &str, market: &str, good: &str, quantity_milli: i64, quoted_unit_price: i64, minute: i64,
+        explicit_action: bool,
     ) -> io::Result<i64> {
         if let Some(holding) = self.holdings.get(person).and_then(|goods| goods.get(good)) {
             holding.check_purchase(quantity_milli)?;
@@ -592,18 +640,20 @@ impl InitialWorld {
         let record_id = format!("personal_life:{}", self.next_living_record);
         let (amount, viewed_character) = self.macro_economy.sell_existing_stock(
             &local_unit, market, good, quantity_milli, quoted_unit_price, |amount| {
-                let character = formal_character::assess_purchase(
-                    person, &self.identities, day, &self.character.state, market, amount as u64, available as u64,
-                ).map_err(io::Error::other)?;
-                let player_view = if person == self.player { character } else {
-                    formal_character::opening_profile(&self.player, &self.identities, day, &character.state)
-                        .map_err(io::Error::other)?
-                };
+                let player_view = if explicit_action {
+                    let character = formal_character::assess_purchase(
+                        person, &self.identities, day, &self.character.state, market, amount as u64, available as u64,
+                    ).map_err(io::Error::other)?;
+                    Some(if person == self.player { character } else {
+                        formal_character::opening_profile(&self.player, &self.identities, day, &character.state)
+                            .map_err(io::Error::other)?
+                    })
+                } else { None };
                 self.ledger.buy_from_market(person, market, &record_id, amount, minute)?;
                 Ok(player_view)
             },
         )?;
-        self.character = viewed_character;
+        if let Some(view) = viewed_character { self.character = view; }
         self.holdings.entry(person.to_owned()).or_default().entry(good.to_owned()).or_default()
             .record_purchase(record_id, quantity_milli);
         self.next_living_record += 1;
@@ -635,14 +685,13 @@ impl InitialWorld {
         let price = offer.price * qty;
         if available < price { return Ok(None); }
         let day = self.character.day;
-        let changed = formal_character::assess_purchase(
-            person, &self.identities, day, &self.character.state, offer.site, price as u64, available as u64,
-        ).map_err(io::Error::other)?;
-        let viewed = if person == self.player { changed } else {
-            formal_character::opening_profile(&self.player, &self.identities, day, &changed.state).map_err(io::Error::other)?
-        };
+        let viewed = if person == self.player {
+            Some(formal_character::assess_purchase(
+                person, &self.identities, day, &self.character.state, offer.site, price as u64, available as u64,
+            ).map_err(io::Error::other)?)
+        } else { None };
         let paid = self.enterprises.sell_bread(offer, &mut self.ledger, person, qty, &record, minute)?;
-        self.character = viewed;
+        if let Some(view) = viewed { self.character = view; }
         self.holdings.entry(person.to_owned()).or_default().entry("bread".into()).or_default().record_purchase(record, qty);
         self.next_living_record += 1;
         Ok(Some(paid))
@@ -700,6 +749,8 @@ impl InitialWorld {
                 continue;
             }
             let day = u32::try_from(boundary.current_day()).map_err(|_| invalid("unsupported formal character date"))?;
+            #[cfg(test)]
+            let mut measure = day_measurement::start();
             let work = self.work.booked_workers().map(|person| {
                 let job = self.work.contract(&self.work_opening, person).expect("booking has a live contract");
                 (person.clone(), job.id.clone())
@@ -718,8 +769,15 @@ impl InitialWorld {
                 self.wages.record_shift(worker, job, i64::from(day), &self.ledger)?;
             }
             self.wages.settle_due(&mut self.ledger, boundary, |_| false)?;
+            #[cfg(test)]
+            day_measurement::mark(&mut measure, 0);
             self.enterprises.settle(&self.enterprise_opening, &self.wages, i64::from(day));
-            let mut nutrition_by_person = self.settle_named_livelihood(day, minute, self.activities.meal_milli_for_recovery);
+            #[cfg(test)]
+            day_measurement::mark(&mut measure, 1);
+            let (mut nutrition_by_person, settled_meal_purchases) =
+                self.settle_named_livelihood(day, minute, self.activities.meal_milli_for_recovery);
+            #[cfg(test)]
+            day_measurement::mark(&mut measure, 2);
             if self.player_day.food_milli > 0 {
                 nutrition_by_person.insert(self.player.clone(), 1000);
             }
@@ -728,6 +786,7 @@ impl InitialWorld {
                 rest: booking == Some(PersonalActivity::Rest),
                 nutrition: None,
                 nutrition_by_person,
+                settled_meal_purchases,
             };
             let character = formal_character::advance_opening_day(
                 &self.player, &self.identities, day, &self.character.state, activity,
@@ -735,14 +794,18 @@ impl InitialWorld {
             for death in &character.deaths {
                 self.population.record_death(&death.person_id, minute)?;
                 self.identities.get_mut(&death.person_id).expect("known person").record_death();
-                self.work.remove_actor(&death.person_id);
+                self.work.forget_actor(&death.person_id);
                 self.travel.record_death(&death.person_id);
                 self.homes.remove(&death.person_id);
                 self.households.leave(&death.person_id);
                 self.service.release_named(&death.person_id);
             }
+            #[cfg(test)]
+            day_measurement::mark(&mut measure, 3);
             let managed = self.managed_residents(managed_population)?;
             self.macro_economy.settle(boundary, self.population.totals(), &managed)?;
+            #[cfg(test)]
+            day_measurement::mark(&mut measure, 4);
             self.work.complete();
             self.character = character;
             if booking == Some(PersonalActivity::ReadNotice) && self.player_alive() {
@@ -853,6 +916,33 @@ impl InitialWorld {
     ) -> io::Result<()> {
         self.population.transfer_unmanaged(source, destination, amount, source_managed_background, self.clock.snapshot().total_minutes)
     }
+}
+
+#[cfg(test)]
+mod day_measurement {
+    use std::{cell::Cell, time::Instant};
+
+    thread_local! {
+        static TOTALS: Cell<Option<[u128; 5]>> = const { Cell::new(None) };
+    }
+
+    pub(super) fn enable() { TOTALS.set(Some([0; 5])); }
+
+    pub(super) fn start() -> Option<Instant> {
+        TOTALS.get().map(|_| Instant::now())
+    }
+
+    pub(super) fn mark(measure: &mut Option<Instant>, stage: usize) {
+        if let Some(previous) = measure {
+            let now = Instant::now();
+            let mut totals = TOTALS.get().expect("measurement is active");
+            totals[stage] += now.duration_since(*previous).as_micros();
+            TOTALS.set(Some(totals));
+            *previous = now;
+        }
+    }
+
+    pub(super) fn take() -> [u128; 5] { TOTALS.take().expect("measurement is active") }
 }
 
 impl WorldSources {
@@ -1010,6 +1100,7 @@ impl WorldBootstrap {
             livelihood: Livelihood::default(),
             households: Households::default(),
             travel: TravelState::default(),
+            transport: load_prototype_map_network(&self.world, 32)?,
             homes: BTreeMap::new(),
             service: ServiceRoster::default(),
             activities: Arc::clone(&self.activities),
@@ -1076,7 +1167,7 @@ impl WorldBootstrap {
         world.clock = clock;
         world.character = formal_character::opening_profile(&world.player, &world.identities, day, &saved.character)
             .map_err(io::Error::other)?;
-        world.wages = WageClaims::restore_shifts(saved.wages, &self.work, &ledger, clock)?;
+        world.wages = WageClaims::restore_shifts(saved.wages, &self.work, &ledger, clock, |actor| world.runtime_people.contains_key(actor))?;
         world.ledger = ledger;
         world.holdings = saved.holdings;
         world.next_living_record = saved.next_living_record;
@@ -1087,6 +1178,9 @@ impl WorldBootstrap {
         world.livelihood = saved.livelihood;
         world.households = saved.households;
         world.travel = saved.travel;
+        for (route, availability) in saved.transport_restrictions {
+            world.set_segment_access(&route, availability.open, availability.capacity_units)?;
+        }
         world.homes = saved.homes;
         // Main has no admitted strategic or tactical unit roster. Scenario tests may
         // bind a unit to this domain without adding an order to a historical opening.
@@ -1096,14 +1190,14 @@ impl WorldBootstrap {
             || !world.households.validate(clock.snapshot().total_minutes,
                 |person| world.population.unit_for_person(person).is_some(),
                 |place| world.sources.places.contains_key(place))
-            || !world.travel.validate(&world.sources, clock, |person| {
+            || !world.travel.validate(&world.sources, &world.transport, clock, |person| {
                 world.population.unit_for_person(person)?;
                 world.person(person).map(|row| row.place_id.as_str())
             })
             || !world.work.validate(&self.work, clock, |person| {
                 if world.service.named_target(person).is_some() { return None; }
                 world.current_place(person)
-            })
+            }, |person| world.population.unit_for_person(person).is_some())
             || world.homes.iter().any(|(person, home)| {
                 world.population.unit_for_person(person).is_none_or(|unit| world.sources.population_unit_at(home) != Some(unit))
             })
@@ -1732,10 +1826,27 @@ mod tests {
         world.register_birth("person:fixture_child", "Fixture child".into(), "place:paris").unwrap();
         assert_eq!(world.population_units()[unit], total_before + 1);
         assert_eq!(world.background_population(unit), Some(1_999));
+        let job = "job:opening_paris_workshop";
+        assert!(world.apply_for_work_as(worker, job).is_err());
+        world.consult_local_work(worker).unwrap();
+        world.apply_for_work_as(worker, job).unwrap();
+        world.book_work_as(worker).unwrap();
+        world.advance_migrated_domains(MINUTES_PER_DAY * 2, &BTreeMap::new()).unwrap();
+        let wages = world.completed_firm_work("firm:opening_paris_workshop", 1).unwrap();
+        assert_eq!(wages[0].worker, worker);
+        assert_eq!(wages[0].paid_wages, 6);
+        let route = "rail_paris_lille";
+        let duration = i64::from(world.transport.segment(route).unwrap().profile.travel_minutes);
+        world.travel_person(worker, route, "place:lille").unwrap();
+        assert_eq!(world.person_home(worker), Some("place:paris"));
+        world.advance_migrated_domains(duration, &BTreeMap::new()).unwrap();
+        world.move_person_home(worker).unwrap();
+        assert!(world.book_work_as(worker).is_err());
         let saved = world.snapshot();
         let restored = bootstrap.restore_native(serde_json::from_value(saved.clone()).unwrap()).unwrap();
         assert!(restored.snapshot() == saved, "restoring duplicated or changed a resident");
-        assert_eq!(restored.person(worker).unwrap().place_id, "place:paris");
+        assert_eq!(restored.person_home(worker), Some("place:lille"));
+        assert_eq!(restored.current_place(worker), Some("place:lille"));
     }
 
     #[test]
@@ -1747,7 +1858,12 @@ mod tests {
         let option = world.player_travel_options().into_iter().next().unwrap();
         let (route, destination, arrival) = (option.route.id.clone(), option.destination.to_owned(), option.arrival_minute);
         for world in [&mut world, &mut batch] {
+            let nominal = world.transport.segment(&route).unwrap().profile.capacity_units;
+            world.set_segment_access(&route, false, 0).unwrap();
+            assert!(world.travel_player(&route, &destination).is_err());
+            world.set_segment_access(&route, true, nominal).unwrap();
             world.travel_player(&route, &destination).unwrap();
+            world.set_segment_access(&route, false, 0).unwrap();
             assert_eq!(world.player_current_place(), None);
             assert!(!world.can_book_work());
             assert!(world.local_bread_offer().is_none());
@@ -1756,6 +1872,7 @@ mod tests {
         world.advance_migrated_domains(arrival - 1, &managed).unwrap();
         assert_eq!(world.player_home(), "place:paris");
         let mut world = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+        assert!(!world.transport.availability(&route).unwrap().open);
         world.advance_migrated_domains(1, &managed).unwrap();
         assert_eq!(world.player_current_place(), Some(destination.as_str()));
         assert_eq!(world.player_home(), "place:paris");
@@ -1782,9 +1899,11 @@ mod tests {
         let start = Instant::now();
         let mut world = bootstrap.create("country_fra").unwrap();
         let opening = start.elapsed();
+        day_measurement::enable();
         let start = Instant::now();
         world.advance_migrated_domains(365 * MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
         let year = start.elapsed();
+        let [work, enterprise, livelihood, health, market] = day_measurement::take().map(|sum| sum / 365);
         let suffix = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
         let path = std::env::temp_dir().join(format!("wwo-population-year-{}-{suffix}.json", std::process::id()));
         let measurement = (|| -> io::Result<_> {
@@ -1804,6 +1923,7 @@ mod tests {
         println!("units={} residents={} named={} inputs_ms={} opening_ms={} year_ms={} save_bytes={} save_ms={} restore_ms={}",
             world.population_units().len(), world.population_units().values().sum::<u64>(), world.identities.len(),
             inputs.as_millis(), opening.as_millis(), year.as_millis(), bytes, save.as_millis(), restore.as_millis());
+        println!("average_day_us work_and_wages={work} enterprise={enterprise} livelihood={livelihood} character_and_population={health} market={market}");
     }
 
     #[test]

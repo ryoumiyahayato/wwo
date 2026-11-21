@@ -4,7 +4,7 @@ use crate::{
     formal_stock::ConsumptionAllocation,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 // The catalogue uses tonnes. A milli-unit of these staples is one kilogram.
 // Staple weight is a provisional need measure used by the opening simulation.
@@ -190,9 +190,10 @@ impl InitialWorld {
         day: u32,
         minute: i64,
         target: i64,
-    ) -> BTreeMap<String, u16> {
+    ) -> (BTreeMap<String, u16>, BTreeSet<String>) {
         let people = self.named_people().map(str::to_owned).collect::<Vec<_>>();
         let mut nutrition = BTreeMap::new();
+        let mut paid = BTreeSet::new();
         for person in people {
             let mut needs = self.livelihood.people.remove(&person).unwrap_or_default();
             if let Some(last_day) = needs.last_day.as_ref().filter(|record| record.day == day) {
@@ -233,13 +234,14 @@ impl InitialWorld {
                 consecutive_shortfall_days,
             };
             nutrition.insert(person.clone(), outcome.nutrition());
+            if expense > 0 { paid.insert(person.clone()); }
             if !portions.is_empty() {
                 needs.last_intake = Some(FoodIntake { day, portions });
             }
             needs.last_day = Some(outcome);
             self.livelihood.people.insert(person, needs);
         }
-        nutrition
+        (nutrition, paid)
     }
 
     fn eat_held_staples(
@@ -357,7 +359,7 @@ impl InitialWorld {
             if quantity == 0 {
                 continue;
             }
-            match self.buy_livelihood_stock(person, &market_id, good, quantity, price, minute) {
+            match self.buy_livelihood_stock(person, &market_id, good, quantity, price, minute, false) {
                 Ok(amount) => {
                     available -= amount;
                     *expense += amount;

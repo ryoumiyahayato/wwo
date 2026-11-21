@@ -40,6 +40,8 @@ struct Notice { actor: String, kind: String, candidate: String, delivery_day: i6
 pub(crate) struct WorkState {
     contracts: BTreeMap<String, String>,
     bookings: BTreeMap<String, i64>,
+    #[serde(default)]
+    local_notices: BTreeMap<String, BTreeSet<String>>,
 }
 
 impl WorkOpening {
@@ -82,6 +84,10 @@ impl WorkOpening {
         self.known_jobs(&actor.id, i64::MAX).find(|row| row.id == job)
     }
 
+    pub(crate) fn entry_job(&self, id: &str) -> Option<&Job> {
+        self.jobs.iter().find(|job| job.id == id && job.skill <= 1)
+    }
+
     pub(crate) fn organization(&self, employer: &str) -> Option<&str> {
         self.firms.iter().find(|firm| firm.id == employer).map(|firm| firm.host_organization_id.as_str())
     }
@@ -92,8 +98,28 @@ impl WorkOpening {
 }
 
 impl WorkState {
+    pub(crate) fn consult_local_notices(&mut self, opening: &WorkOpening, actor: &str, place: &str) {
+        let seen = opening.jobs.iter().filter(|job| job.place == place && job.skill <= 1)
+            .map(|job| job.id.clone()).collect::<BTreeSet<_>>();
+        if !seen.is_empty() {
+            self.local_notices.entry(actor.to_owned()).or_default().extend(seen);
+        }
+    }
+
+    pub(crate) fn local_jobs<'a>(&'a self, opening: &'a WorkOpening, actor: &'a str, place: Option<&'a str>, day: i64) -> impl Iterator<Item = &'a Job> {
+        opening.jobs.iter().filter(move |job| {
+            place == Some(job.place.as_str()) && self.knows_job(opening, actor, job, day)
+        })
+    }
+
+    fn knows_job(&self, opening: &WorkOpening, actor: &str, job: &Job, day: i64) -> bool {
+        opening.known_jobs(actor, day).any(|row| row.id == job.id)
+            || self.local_notices.get(actor).is_some_and(|seen| seen.contains(&job.id))
+    }
+
     pub(crate) fn contract<'a>(&self, opening: &'a WorkOpening, actor: &str) -> Option<&'a Job> {
-        opening.find(actor, self.contracts.get(actor)?)
+        let id = self.contracts.get(actor)?;
+        opening.jobs.iter().find(|job| &job.id == id)
     }
 
     pub(crate) fn booking(&self, actor: &str) -> Option<i64> {
@@ -105,7 +131,7 @@ impl WorkState {
     }
 
     pub(crate) fn apply(&mut self, opening: &WorkOpening, actor: &str, job_id: &str, current_place: Option<&str>, day: i64) -> io::Result<()> {
-        let job = opening.jobs(actor, current_place, day).find(|job| job.id == job_id)
+        let job = self.local_jobs(opening, actor, current_place, day).find(|job| job.id == job_id)
             .ok_or_else(|| invalid("该地点没有可以申请的这份工作。"))?;
         if self.contracts.contains_key(actor) || self.vacancies(job) == 0 {
             return Err(invalid("已有劳动合同，或该岗位已满。"));
@@ -161,11 +187,19 @@ impl WorkState {
 
     pub(crate) fn has_contract(&self, actor: &str) -> bool { self.contracts.contains_key(actor) }
 
+    pub(crate) fn forget_actor(&mut self, actor: &str) {
+        self.remove_actor(actor);
+        self.local_notices.remove(actor);
+    }
+
     pub(crate) fn complete(&mut self) { self.bookings.clear(); }
 
-    pub(crate) fn validate<'a>(&self, opening: &WorkOpening, clock: GameClock, present_place: impl Fn(&str) -> Option<&'a str>) -> bool {
-        self.contracts.iter().all(|(actor, job)| opening.known_jobs(actor, clock.current_day()).any(|row| {
-            row.id == *job && self.contracts.values().filter(|id| *id == job).count() <= row.positions
+    pub(crate) fn validate<'a>(&self, opening: &WorkOpening, clock: GameClock, present_place: impl Fn(&str) -> Option<&'a str>, alive: impl Fn(&str) -> bool) -> bool {
+        self.local_notices.iter().all(|(actor, seen)| alive(actor) && !seen.is_empty() && seen.iter().all(|id| {
+            opening.jobs.iter().any(|job| &job.id == id && job.skill <= 1)
+        })) && self.contracts.iter().all(|(actor, job)| alive(actor) && opening.jobs.iter().any(|row| {
+            row.id == *job && self.knows_job(opening, actor, row, clock.current_day())
+                && self.contracts.values().filter(|id| *id == job).count() <= row.positions
         })) && self.bookings.iter().all(|(actor, &minute)| self.contract(opening, actor).is_some_and(|job| {
             present_place(actor) == Some(job.place.as_str())
                 && (clock.current_day() * MINUTES_PER_DAY..=clock.snapshot().total_minutes).contains(&minute)
@@ -198,7 +232,7 @@ mod tests {
         let job = work.contract(&opening, person).unwrap();
         assert_eq!(job.id, work_id);
         assert_eq!(work.vacancies(job), 0);
-        assert!(work.validate(&opening, clock, |_| away));
+        assert!(work.validate(&opening, clock, |_| away, |_| true));
         assert!(work.book(&opening, person, None, clock).is_err());
         assert!(work.book(&opening, person, away, clock).is_err());
 
@@ -207,7 +241,7 @@ mod tests {
         clock.advance_minutes(MINUTES_PER_DAY - clock.snapshot().total_minutes).unwrap();
         work.book(&opening, person, workplace, clock).unwrap();
         assert!(work.release(person).is_err());
-        assert!(!work.validate(&opening, clock, |_| away));
+        assert!(!work.validate(&opening, clock, |_| away, |_| true));
         work.complete();
         work.release(person).unwrap();
         assert_eq!(work.vacancies(job), 1);
