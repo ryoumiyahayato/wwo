@@ -90,4 +90,4 @@
 
 ## Windows Release 与恢复
 
-基线为合入 #198 的 `2a017d686f`。基线加入被动采样开关，保留原来的重绘策略。两版都用 Vulkan、同一 RTX 3050 Laptop GPU、1280×720 视口及同一份战略地图。以法国开局在巴黎附近取相同机位，分别采样暂停、平移缩放及运行中的货批。CPU 百分比以一个逻辑核为 100%，GPU 记录 Windows 进程 3D 引擎，内存取进程工作集。实测帧间隔、两版在途数量、运行附件和读档恢复记录见[本次私有阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-transport-1900-20261121)。
+基线为合入 #199 的 `fd56bb7382`。基线加入被动采样开关，保留原来的重绘策略。两版都用 Vulkan、同一 RTX 3050 Laptop GPU、1280×720 视口及同一份战略地图。以法国开局在巴黎附近取相同机位，分别采样暂停、平移缩放及运行中的货批。CPU 百分比以一个逻辑核为 100%，GPU 记录 Windows 进程 3D 引擎，内存取进程工作集。实测帧间隔、两版在途数量、运行附件和读档恢复记录见[本次私有阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-transport-1900-20261121)。

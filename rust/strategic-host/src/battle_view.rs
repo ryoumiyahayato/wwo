@@ -111,7 +111,7 @@ fn ground(terrain: &BattlefieldTerrain, point: Vec2) -> Option<f32> {
 }
 
 #[derive(Clone, Copy)]
-pub enum Command { View(Scale), Back, End, Next }
+pub enum Command { View(Scale), Back, End, Next, Pause, SpeedUp, SpeedDown }
 
 #[derive(Default)]
 struct Held {
@@ -126,7 +126,6 @@ struct Held {
 
 pub struct View {
     pub camera: Camera,
-    region: MilitaryCell,
     held: Held,
     aim: Option<[f32; 2]>,
     pointer_fire: bool,
@@ -135,7 +134,7 @@ pub struct View {
 
 impl View {
     pub fn new(terrain: &BattlefieldTerrain, cell: MilitaryCell, center: [f32; 2]) -> Self {
-        Self { camera: Camera::new(cell, center, terrain), region: cell.region(), held: Held::default(), aim: None, pointer_fire: false, queued_fire: false }
+        Self { camera: Camera::new(cell, center, terrain), held: Held::default(), aim: None, pointer_fire: false, queued_fire: false }
     }
 
     pub fn clear_controls(&mut self) {
@@ -145,7 +144,7 @@ impl View {
         self.aim = None;
     }
 
-    fn controls(&self) -> LandBattleControls {
+    pub fn controls(&self) -> LandBattleControls {
         let axis = |positive, negative| f32::from(u8::from(positive)) - f32::from(u8::from(negative));
         LandBattleControls {
             manual: true,
@@ -157,9 +156,9 @@ impl View {
         }
     }
 
-    pub fn advance(&mut self, battle: &mut LandBattle, elapsed: f32, terrain: &BattlefieldTerrain) {
-        let before = battle.selected_unit().map(|unit| (unit.id, unit.ammo));
-        battle.advance(elapsed, terrain, self.controls());
+    pub fn after_step(&mut self, battle: &LandBattle, terrain: &BattlefieldTerrain,
+        before: Option<(wwo_map_lab::land_battle::UnitId, u8)>)
+    {
         let after = battle.selected_unit().map(|unit| (unit.id, unit.ammo));
         if before != after || after.is_none_or(|(_, ammo)| ammo == 0) {
             self.queued_fire = false;
@@ -205,6 +204,9 @@ impl View {
             _ if !down || repeat => (),
             Key::Named(NamedKey::Escape) => return Some(Command::Back),
             Key::Named(NamedKey::Tab) => return Some(Command::Next),
+            Key::Character("p" | "P") => return Some(Command::Pause),
+            Key::Character("+" | "=") => return Some(Command::SpeedUp),
+            Key::Character("-") => return Some(Command::SpeedDown),
             Key::Character("1") => return Some(Command::View(Scale::Region)),
             Key::Character("2") => return Some(Command::View(Scale::Sector)),
             Key::Character("3") => return Some(Command::View(Scale::Vehicle)),
@@ -216,14 +218,13 @@ impl View {
     pub fn command(&mut self, command: Command, battle: &mut LandBattle, terrain: &BattlefieldTerrain) {
         match command {
             Command::View(scale) => self.camera.set_scale(scale, battle, terrain),
-            Command::Next => {
+            Command::Next if battle.outcome.is_none() => {
                 battle.select_next();
                 self.aim = None;
                 self.queued_fire = false;
                 self.follow(battle, terrain);
             }
-            Command::End => battle.conclude(),
-            Command::Back => (),
+            _ => (),
         }
     }
 
@@ -261,21 +262,23 @@ impl View {
     }
 }
 
-fn buttons([width, _]: [u32; 2]) -> [([f32; 4], &'static str, Command); 6] {
+fn buttons([width, _]: [u32; 2]) -> [([f32; 4], &'static str, Command); 7] {
     [
         ([16., 47., 102., 30.], "1  50 km", Command::View(Scale::Region)),
         ([124., 47., 102., 30.], "2  25 km", Command::View(Scale::Sector)),
         ([232., 47., 110., 30.], "3  Vehicle", Command::View(Scale::Vehicle)),
         ([348., 47., 114., 30.], "Tab  Next", Command::Next),
+        ([468., 47., 87., 30.], "P  Time", Command::Pause),
         ([width as f32 - 239., 47., 98., 30.], "End battle", Command::End),
         ([width as f32 - 135., 47., 119., 30.], "Esc  World", Command::Back),
     ]
 }
 
 pub fn hud(
-    size: [u32; 2], skin: &Skin, view: &View, battle: &LandBattle, terrain: &BattlefieldTerrain,
-    original_model: bool, fps: Option<f64>,
+    size: [u32; 2], skin: &Skin, view: &View, fixture: &wwo_map_lab::formal_bootstrap::WorldLandBattle,
+    terrain: &BattlefieldTerrain, original_model: bool, fps: Option<f64>, clock: Option<&crate::formal_ui::Session>,
 ) -> Layers {
+    let battle = &fixture.battle;
     let [width, height] = size.map(|value| value as f32);
     let mut layers = std::array::from_fn(|_| (Mesh::default(), Ink::Solid));
     layers[12].1 = Ink::HudText;
@@ -287,9 +290,13 @@ pub fn hud(
     solid.rect(0., height - 74., width, 74., panel);
     let blue = battle.report(LandTeam::Friendly);
     let red = battle.report(LandTeam::Opposing);
-    let headline = format!("{}   {:02}:{:02}   Blue {}   Red {}", view.region.id(),
-        battle.elapsed_seconds as u32 / 60, battle.elapsed_seconds as u32 % 60,
-        blue.operational, red.operational);
+    let tactical = battle.elapsed_seconds() as u64;
+    let time = clock.map_or_else(String::new, |clock| {
+        let speed = if clock.paused { skin.choose("暂停", "Paused").to_owned() } else { format!("{}×", clock.speed) };
+        format!("   {:02}:{:02} {speed}", clock.hour, clock.minute)
+    });
+    let headline = format!("{} #{}    {:02}:{:02}{time}    Blue {}   Red {}", skin.choose("测试编组", "Training fixture"),
+        fixture.id, tactical / 60, tactical % 60, blue.operational, red.operational);
     let heading = if let Some(fps) = fps { format!("{headline}   {fps:.1} FPS") } else { headline };
     skin.text(text, &heading, 0, [16., 13.], width - 32., IVORY);
     for ([x, y, w, h], label, command) in buttons(size) {
@@ -315,7 +322,7 @@ pub fn hud(
         format!("Blue lost {} / ammo {} / hits {}   Red lost {} / ammo {} / hits {}",
             blue.destroyed, blue.ammunition, blue.hits, red.destroyed, red.ammunition, red.hits)
     } else {
-        "WASD drive   Q/E turret   Space/left fire   Right order   Wheel zoom   Arrows pan 25 km".into()
+        "WASD drive   Q/E turret   Space/left fire   Right order   +/- clock speed   Wheel zoom   Arrows pan".into()
     };
     skin.text(text, &detail, 0, [16., height - 44.], width - 32., MUTED);
     if !original_model {

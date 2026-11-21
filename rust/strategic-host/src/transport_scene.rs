@@ -616,7 +616,7 @@ impl TransportScene {
                         skin.choose("线路","line"), c.line_used, c.line_limit));
                     lines.push(format!("  {} {}/{} · {} {}/{} · {} {}/{}",
                         skin.choose("班次","service"), c.service_used, c.service_limit,
-                        skin.choose("货舱","cargo"), c.cargo_used, c.cargo_limit,
+                        skin.choose("货位","cargo"), c.cargo_used, c.cargo_limit,
                         skin.choose("客座","seats"), c.seats_used, c.seat_limit));
                 }
             }

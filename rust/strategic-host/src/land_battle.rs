@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 // Fictional training rules. Distances and rates tune the game scenario.
 const STEPS_PER_SECOND: u16 = 20;
 const STEP: f32 = 1.0 / STEPS_PER_SECOND as f32;
+pub const TICK_INTERVAL: std::time::Duration = std::time::Duration::from_millis(1000 / STEPS_PER_SECOND as u64);
+pub const WORLD_MINUTES_PER_STEP: i64 = 3;
 const VEHICLES_PER_FORMATION: usize = 5;
 const FORMATION_COUNT: usize = 4;
 const UNIT_COUNT: usize = FORMATION_COUNT * VEHICLES_PER_FORMATION;
@@ -69,11 +71,13 @@ pub enum LandBattleOutcome {
 pub struct LandBattle {
     pub units: Vec<LandUnit>,
     pub projectiles: Vec<LandProjectile>,
-    pub elapsed_seconds: f32,
+    #[serde(default)]
+    elapsed_steps: u64,
+    #[serde(default, rename = "elapsed_seconds", skip_serializing_if = "Option::is_none")]
+    legacy_elapsed_seconds: Option<f32>,
     pub outcome: Option<LandBattleOutcome>,
     selected: UnitId,
     destinations: [Option<[f32; 2]>; FORMATION_COUNT],
-    accumulated: f32,
     #[serde(default)]
     idle_steps: u16,
 }
@@ -149,11 +153,11 @@ impl LandBattle {
         Self {
             units,
             projectiles: Vec::new(),
-            elapsed_seconds: 0.0,
+            elapsed_steps: 0,
+            legacy_elapsed_seconds: None,
             outcome: None,
             selected: UnitId(1),
             destinations: [None; FORMATION_COUNT],
-            accumulated: 0.0,
             idle_steps: 0,
         }
     }
@@ -186,24 +190,25 @@ impl LandBattle {
         }
     }
 
-    pub fn advance(
-        &mut self,
-        real_seconds: f32,
-        terrain: &BattlefieldTerrain,
-        controls: LandBattleControls,
-    ) {
-        if self.outcome.is_some() || !real_seconds.is_finite() || real_seconds <= 0.0 {
-            return;
+    pub fn elapsed_steps(&self) -> u64 { self.elapsed_steps }
+
+    pub fn elapsed_seconds(&self) -> f64 { self.elapsed_steps as f64 / f64::from(STEPS_PER_SECOND) }
+
+    pub(crate) fn restore_elapsed_steps(&mut self) -> bool {
+        if let Some(seconds) = self.legacy_elapsed_seconds.take() {
+            if !seconds.is_finite() || seconds < 0.0 || self.elapsed_steps != 0 { return false; }
+            // Early native saves used a float timer. Keep at least the known idle steps.
+            self.elapsed_steps = (f64::from(seconds) * f64::from(STEPS_PER_SECOND)).round() as u64;
+            self.elapsed_steps = self.elapsed_steps.max(u64::from(self.idle_steps));
         }
-        self.accumulated += real_seconds.min(0.25);
-        while self.accumulated >= STEP {
-            self.accumulated -= STEP;
-            self.elapsed_seconds += STEP;
+        self.validate()
+    }
+
+    pub(crate) fn advance_steps(&mut self, steps: u64, terrain: &BattlefieldTerrain, controls: LandBattleControls) {
+        for _ in 0..steps {
+            if self.outcome.is_some() { break; }
+            self.elapsed_steps += 1;
             self.step(terrain, controls);
-            if self.outcome.is_some() {
-                self.accumulated = 0.0;
-                break;
-            }
         }
     }
 
@@ -231,12 +236,10 @@ impl LandBattle {
     pub fn validate(&self) -> bool {
         self.units.len() == UNIT_COUNT
             && (1..=UNIT_COUNT as u32 / 2).contains(&self.selected.0)
-            && self.elapsed_seconds.is_finite()
-            && self.elapsed_seconds >= 0.0
-            && (0.0..STEP).contains(&self.accumulated)
+            && self.elapsed_steps <= (i64::MAX / WORLD_MINUTES_PER_STEP) as u64
             && self.idle_steps <= IDLE_DISENGAGEMENT_STEPS
             && (self.idle_steps < IDLE_DISENGAGEMENT_STEPS || self.outcome.is_some())
-            && f32::from(self.idle_steps) * STEP <= self.elapsed_seconds + STEP
+            && u64::from(self.idle_steps) <= self.elapsed_steps
             && self.destinations.iter().flatten().copied().all(in_region)
             && self.units.iter().enumerate().all(|(index, unit)| {
                 let formation = index / VEHICLES_PER_FORMATION;
@@ -269,9 +272,7 @@ impl LandBattle {
             && self.outcome.is_none_or(|outcome| {
                 let friendly = self.report(LandTeam::Friendly);
                 let opposing = self.report(LandTeam::Opposing);
-                self.projectiles.is_empty()
-                    && self.accumulated == 0.0
-                    && match outcome {
+                self.projectiles.is_empty() && match outcome {
                         LandBattleOutcome::FriendlyVictory => {
                             friendly.operational > 0 && opposing.operational == 0
                         }
@@ -289,7 +290,6 @@ impl LandBattle {
 
     fn finish(&mut self, outcome: LandBattleOutcome) {
         self.outcome = Some(outcome);
-        self.accumulated = 0.0;
         self.projectiles.clear();
         for unit in &mut self.units {
             unit.speed = 0.0;
