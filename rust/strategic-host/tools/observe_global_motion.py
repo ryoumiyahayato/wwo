@@ -127,6 +127,20 @@ def run(args, scratch):
             if selected != args.routes['troyes_cell']:
                 raise RuntimeError(f'Unexpected Troyes military grid selection: {selected}')
 
+            cross_cell = args.routes.get('troyes_cross_cell')
+            if cross_cell:
+                focus(cross_cell)
+                host.ask('click', x=x, y=y)
+                other = status()['military_grid']['selected']
+                if not other or other == selected:
+                    raise RuntimeError(f'Cross-cell route did not select another military grid: {other}')
+                selected = other
+            if args.routes.get('wait_for_battle_terrain'):
+                deadline = time.monotonic()+6
+                while not status()['military_grid'].get('terrain_ready'):
+                    if time.monotonic() >= deadline:
+                        raise RuntimeError('The selected battlefield did not preload')
+
             def open_battle():
                 host.ask('key', value='Enter')
                 time.sleep(1.0)
@@ -154,7 +168,7 @@ def run(args, scratch):
             resumed = status()['land_battle']
             if not resumed or resumed['id'] != after['id']:
                 raise RuntimeError('Could not resume the same Troyes exercise')
-            write(args.output/'troyes.json', dict(before=battle, after=after, resumed=resumed))
+            write(args.output/'troyes.json', dict(before=battle, after=after, resumed=resumed, selected=selected))
             return
 
         if args.section == 'material':
@@ -166,18 +180,25 @@ def run(args, scratch):
 
                 levels = [('z5',5.), ('z5-z6',5.565), ('z6',6.),
                           ('z6-z7',6.565), ('z7',7.12)]
-                stages = [(name,zoom_scale/2**lod) for name,lod in levels] + [('near',near)]
+                stages = [(name,zoom_scale/2**lod) for name,lod in levels]
                 if args.material_transitions_only:
-                    stable(f'{label}-z7',(lon,lat,stages[-2][1]))
-                    for name,mpp in reversed(stages[:-2]):
+                    stable(f'{label}-z7',(lon,lat,stages[-1][1]))
+                    for name,mpp in reversed(stages[:-1]):
                         zoom_to(mpp)
                         capture(f'{label}-{name}',settled=settle())
                     continue
 
                 stable(f'{label}-z5',(lon,lat,stages[0][1]))
-                for name,mpp in stages[1:]:
+                close = args.routes.get('material_near_mpp')
+                near_stages = [(f'{mpp:g}mpp',mpp) for mpp in sorted(close,reverse=True)] if close else [('near',near)]
+                for name,mpp in stages[1:]+near_stages:
                     zoom_to(mpp)
                     capture(f'{label}-in-{name}',settled=settle())
+                if close:
+                    # Scroll through the user camera so per-location precision limits still apply.
+                    host.ask('wheel',x=x,y=y,steps=30)
+                    time.sleep(.55)
+                    capture(f'{label}-max-zoom',settled=settle())
 
                 def roundtrip():
                     pan(frames=20,offsets=(-180,180))
@@ -189,7 +210,7 @@ def run(args, scratch):
                 capture(f'{label}-pan-return',settled=settle())
 
                 def retreat():
-                    for _,mpp in reversed(stages[:-1]):
+                    for _,mpp in reversed(stages):
                         zoom_to(mpp)
                         time.sleep(.38)
 
@@ -198,14 +219,14 @@ def run(args, scratch):
 
                 # With the finer level already selected, the outward wheel route
                 # visits both partially blended states inside the LOD hysteresis.
-                stable(f'{label}-z7',(lon,lat,stages[-2][1]))
-                for name,mpp in reversed(stages[:-2]):
+                stable(f'{label}-z7',(lon,lat,stages[-1][1]))
+                for name,mpp in reversed(stages[:-1]):
                     if name == 'z5':
                         break
                     zoom_to(mpp)
                     capture(f'{label}-{name}',settled=settle())
 
-                if label in ('troyes','nearshore'):
+                if label in ('troyes','nearshore') and not close:
                     focus((lon,lat,stages[0][1]))
                     settle()
                     # Record actual game frames on a second, densely stepped route.

@@ -37,13 +37,18 @@ fn landscape_surface_weight(level: u32) -> f32 {
 }
 
 fn landscape_slope(page: LandscapePage, latitude: f32, radius: f32, level: u32) -> vec2f {
-    // Samples on both sides of the center use the shared QPK gutter.
-    let east = landscape_elevation(page, vec2f(radius,0.));
-    let west = landscape_elevation(page, vec2f(-radius,0.));
+    let longitude_scale = max(.025, cos(radians(latitude)));
+    let polar = 1.-smoothstep(.12,.37,longitude_scale);
+    // Narrow longitude texels magnify column-to-column DEM errors near the
+    // poles. Expand the physical footprint within the shared QPK gutter.
+    let east_radius = mix(radius,min(3.5,radius/longitude_scale),polar);
+    let east = landscape_elevation(page, vec2f(east_radius,0.));
+    let west = landscape_elevation(page, vec2f(-east_radius,0.));
     let north = landscape_elevation(page, vec2f(0.,-radius));
     let south = landscape_elevation(page, vec2f(0.,radius));
     let metres = (PI * EARTH) / f32(256u << level);
-    return vec2f(east-west, north-south) / (2. * radius * metres * vec2f(max(.025, cos(radians(latitude))), 1.));
+    let east_span = mix(east_radius*longitude_scale,radius,polar);
+    return vec2f(east-west, north-south) / (2. * metres * vec2f(east_span,radius));
 }
 
 const LANDSCAPE_SUN: vec3f = vec3f(-.59, .54, .60);
@@ -259,10 +264,13 @@ fn ground_motif(base: vec3f, ll: vec2f, world: vec3f, page: LandscapePage, level
     let slope = landscape_slope(page,ll.y,radius,level);
     let height = landscape_elevation(page, vec2f(0.));
     let latitude_scale = max(.025, cos(radians(ll.y)));
-    let toward_sun = vec2f(-1.26, -1.03 * latitude_scale)/step;
+    // Once the gutter limits the longitudinal reach, give the horizon
+    // estimate more north-south support instead of dividing by a tiny span.
+    let horizon_scale = max(.32,latitude_scale);
+    let toward_sun = vec2f(-1.26, -1.03 * horizon_scale)/step;
     let shoulder = landscape_elevation(page, toward_sun);
     let ridge = landscape_elevation(page, toward_sun * 2.);
-    let horizon = max(shoulder-height,(ridge-height)*.5) / (870.*latitude_scale);
+    let horizon = max(shoulder-height,(ridge-height)*.5) / (870.*horizon_scale);
     let gradient = length(slope);
     let normal = normalize(vec3f(-slope * 1.42, 1.));
     let sunlight = max(0., dot(normal, LANDSCAPE_SUN));
