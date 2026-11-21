@@ -1,7 +1,8 @@
 use serde_json::json;
 use std::{error::Error, io, path::Path};
 use wwo_map_lab::battlefield_terrain::{BattlefieldTerrain, REGION_ID};
-use wwo_map_lab::{formal_bootstrap::WorldBootstrap, formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_save::{read_native_slot, SavedWorld}};
+use wwo_map_lab::formal_population::historical_food::{historical_food_case, HISTORICAL_FOOD_CASES};
+use wwo_map_lab::{formal_bootstrap::WorldBootstrap, formal_clock::{ClockSnapshot, GameClock, TimeControl}, formal_population::{city_population_reference, population_archive}, formal_save::{read_native_slot, SavedWorld}};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut args = std::env::args_os().skip(1);
@@ -71,6 +72,22 @@ fn main() -> Result<(), Box<dyn Error>> {
             let unit = unit.to_str().ok_or_else(usage)?;
             let input = args.next();
             if args.next().is_some() { return Err(usage().into()); }
+            if let Some(city) = unit.strip_prefix("city:") {
+                let reference = city_population_reference(city)?
+                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown historical city key"))?;
+                println!("{}", json!({
+                    "unit_id": unit,
+                    "statistical_scope": "dated_city_reference",
+                    "reference": reference,
+                }));
+                return Ok(());
+            }
+            if let Some(key) = unit.strip_prefix("history:") {
+                let archive = population_archive(key)?
+                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown historical statistical unit"))?;
+                println!("{}", json!({"unit_id": key, "statistical_scope": "dated_references", "references": archive}));
+                return Ok(());
+            }
             let bootstrap = WorldBootstrap::load()?;
             let world = match input {
                 Some(path) => read_native_slot(Path::new(&path), &bootstrap)?,
@@ -86,18 +103,16 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }));
                 return Ok(());
             }
-            if let Some(city) = unit.strip_prefix("city:") {
-                let reference = wwo_map_lab::formal_population::city_population_reference(city)?
-                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown historical city key"))?;
+            let Some(total) = population.population_total(unit) else {
+                let archive = population_archive(unit)?
+                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown statistical population unit"))?;
                 println!("{}", json!({
-                    "unit_id": unit,
-                    "statistical_scope": "dated_city_reference",
-                    "reference": reference,
+                    "date": world.clock().current_date(), "unit_id": unit,
+                    "statistical_scope": "no_standalone_opening_account", "population_total": null,
+                    "references": archive,
                 }));
                 return Ok(());
-            }
-            let total = population.population_total(unit)
-                .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown statistical population unit"))?;
+            };
             let partitions = population.partitions(unit).map(|(id, name, count)| {
                 json!({"unit_id": id, "name": name, "population_total": count})
             }).collect::<Vec<_>>();
@@ -139,6 +154,18 @@ fn main() -> Result<(), Box<dyn Error>> {
                 "last_recorded_intake": livelihood.last_food_intake,
                 "last_recorded_energy": livelihood.last_food_intake.map(|intake| intake.recorded_energy()),
             }));
+        }
+        Some("inspect-food-history") => {
+            let input = args.next();
+            if args.next().is_some() { return Err(usage().into()); }
+            if let Some(id) = input.as_deref() {
+                let id = id.to_str().ok_or_else(usage)?;
+                let case = historical_food_case(id)
+                    .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "unknown historical food account"))?;
+                println!("{}", serde_json::to_string(case)?);
+            } else {
+                println!("{}", serde_json::to_string(HISTORICAL_FOOD_CASES)?);
+            }
         }
         Some("inspect-wages") => {
             let input = args.next().ok_or_else(usage)?;
@@ -191,5 +218,5 @@ fn show(saved: &SavedWorld) {
 
 fn usage() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput,
-        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <world|unit-id|city:city-key> [<native-save>], inspect-intake <native-save> <person-id>, inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
+        "use new-france, buy-rouen-grain <input> <quantity> <request-id> <output>, inspect, inspect-markets, inspect-character, inspect-population <world|unit-id|city:city-key|history:unit-id> [<native-save>], inspect-intake <native-save> <person-id>, inspect-food-history [<case-id>], inspect-wages, inspect-firm-work <native-save> <firm-id> <day>, copy, clock, clock-control, or military-terrain <region-root> [<x-m> <z-m> ...]")
 }

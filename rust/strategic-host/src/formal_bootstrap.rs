@@ -191,8 +191,7 @@ impl RuntimePerson {
 pub struct WorldBootstrap {
     organization_directory: Arc<OrganizationDirectory>,
     world: Arc<WorldSources>,
-    prior_population: Arc<HistoricalOpening>,
-    prior_population_world: std::sync::OnceLock<Arc<WorldSources>>,
+    archived_population_worlds: [std::sync::OnceLock<io::Result<Arc<WorldSources>>>; 2],
     populations: BTreeMap<String, u64>,
     historical_population: Arc<HistoricalOpening>,
     markets: Arc<MarketInputs>,
@@ -864,10 +863,16 @@ impl InitialWorld {
         self.consume_statistical_stock(&self.player.clone(), good, quantity_milli)
     }
 
+    pub(crate) fn staple_weight_target(&self) -> i64 { self.activities.meal_milli_for_recovery }
+
     pub fn consume_statistical_stock(&mut self, person: &str, good: &str, quantity_milli: i64) -> io::Result<Consumption> {
+        let food = formal_livelihood::counts_as_food(good);
+        if food && !self.livelihood.can_record_today(person, quantity_milli) {
+            return Err(invalid("daily food deductions exceed supported quantity"));
+        }
         let result = self.consume_livelihood_stock(person, good, quantity_milli, self.clock.snapshot().total_minutes)?;
-        if formal_livelihood::counts_as_food(good) {
-            self.livelihood.record_food(person, good, &result, self.activities.meal_milli_for_recovery);
+        if food {
+            self.livelihood.record_food(person, good, &result);
         }
         Ok(result)
     }
@@ -1213,12 +1218,12 @@ impl WorldBootstrap {
             polities, places, routes, place_population_units, polity_population_bindings: polity_units,
             population_income, historical_population: None, people: BTreeMap::new(),
         };
+        let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
         let historical_population = Arc::new(HistoricalOpening::load(
             crate::formal_population::CURRENT_VERSION,
-            &populations, |id| world.polities.contains_key(id), |place| world.opening_parent_at(place),
-        )?);
-        let prior_population = Arc::new(HistoricalOpening::load(
-            1, &populations, |id| world.polities.contains_key(id), |place| world.opening_parent_at(place),
+            &populations, |id| world.polities.contains_key(id), |place| {
+                world.opening_parent_at(place).or_else(|| dated_jurisdictions.get(place).map(String::as_str))
+            },
         )?);
         world.historical_population = Some(Arc::clone(&historical_population));
         let mut residents = BTreeMap::new();
@@ -1278,8 +1283,7 @@ impl WorldBootstrap {
         }
         Ok(Self {
             world: Arc::new(world),
-            prior_population,
-            prior_population_world: std::sync::OnceLock::new(),
+            archived_population_worlds: Default::default(),
             organization_directory: Arc::new(organization_directory),
             populations,
             historical_population,
@@ -1330,10 +1334,14 @@ impl WorldBootstrap {
     fn base_opening_version(&self, source_id: &str, prologue: Option<Prologue>, version: Option<u32>) -> io::Result<InitialWorld> {
         let sources = match version {
             Some(version) if version == self.historical_population.version() => &self.world,
-            Some(1) | None => self.prior_population_world.get_or_init(|| Arc::new(WorldSources {
-                historical_population: Some(Arc::clone(&self.prior_population)),
-                ..self.world.as_ref().clone()
-            })),
+            Some(1 | 2) | None => {
+                let archived_version = version.unwrap_or(1);
+                self.archived_population_worlds[(archived_version - 1) as usize].get_or_init(|| {
+                    let opening = HistoricalOpening::load(archived_version, &self.populations,
+                        |id| self.world.polities.contains_key(id), |place| self.world.opening_parent_at(place))?;
+                    Ok(Arc::new(WorldSources { historical_population: Some(Arc::new(opening)), ..self.world.as_ref().clone() }))
+                }).as_ref().map_err(|error| invalid(error.to_string()))?
+            }
             Some(_) => return Err(invalid("unsupported historical population opening version")),
         };
         let transport = Operations::restore(sources, 0, OperationsState::default())?;
@@ -1970,12 +1978,18 @@ mod tests {
         assert_eq!(world.population().resident_pool(national), Some(0));
         assert!(!world.macro_economy().markets().contains_key(dc));
         assert!(world.transfer_unmanaged_population(national, ny, 1, 0).is_err());
-        world.transfer_unmanaged_population(dc, ny, 10, 0).unwrap();
+        let (cohort, _, members) = world.population().cohorts_in(dc)
+            .find(|(id, _, count)| *count > 10 && world.population().cohort_can_materialize(id, 1875))
+            .unwrap();
+        let cohort = cohort.clone();
+        world.population.transfer_cohort(dc, ny, &cohort, 10, 0).unwrap();
+        assert_eq!(world.population().cohort_members(ny, &cohort), Some(10));
         assert_eq!(world.population().population_total(dc), Some(276_709));
         assert_eq!(world.population().population_total(ny), Some(7_216_556));
         assert_eq!(world.population().admitted_opening(dc).unwrap().population_value, 276_719);
         assert_eq!(world.population_units()[national], 75_454_976);
-        world.materialize_resident(resident, "Resident".into(), "place:washington", 1875, None).unwrap();
+        world.materialize_resident(resident, "Resident".into(), "place:washington", 1875, Some(&cohort)).unwrap();
+        assert_eq!(world.population().cohort_members(dc, &cohort), Some(members - 11));
         assert_eq!(world.population().unit_for_person(resident), Some(dc));
         assert_eq!(world.market_unit_for_person(resident), Some(national));
         assert_eq!(world.population().background(dc), Some(276_708));
@@ -2044,6 +2058,14 @@ mod tests {
         let origin = "ft_russia_empire_ussr";
         let destination = "country_fra";
         let clock = world.clock();
+        assert_eq!(world.residence_unit_at("place:cairo"), Some("egy_madina_cairo"));
+        assert_eq!(world.residence_unit_at("place:alexandria"), Some("egy_madina_alexandria"));
+        assert_eq!(world.population().population_total("egy_madina_cairo"), Some(592_087));
+        assert_eq!(world.population().population_total("khedivate_of_egypt"), Some(10_000_000));
+        let us = world.population().structure(Some("united_states_1900"), clock).unwrap();
+        assert_eq!(us.population_total, 75_454_976);
+        assert_eq!(us.cohort_residents + us.named_residents, us.population_total);
+        assert!(us.residents_with_cohort_age_and_sex > 75_000_000);
         let initial = world.population().structure(None, clock).unwrap();
         assert_eq!(initial.population_total,
             initial.named_residents + initial.unclassified_residents + initial.cohort_residents);
@@ -2069,6 +2091,14 @@ mod tests {
         let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
         assert_eq!(restored.population().global_total(), 1_455_178_503);
         assert_eq!(restored.population().structure(None, clock).unwrap().cohort_residents, 0);
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(2)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        let structure = restored.population().structure(None, clock).unwrap();
+        assert_eq!(structure.population_total, 1_457_759_052);
+        assert_eq!(structure.residents_with_cohort_age_and_sex, 150_314_640);
         assert_eq!(restored.snapshot(), old_saved);
     }
 

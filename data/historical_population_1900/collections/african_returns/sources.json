@@ -22,5 +22,17 @@
     "url": "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/divers14-07/23268.pdf",
     "locator": "Table 69, p. 254, history of enumerations and censuses on the island.",
     "rights": "Selected numerical facts. The article and scans remain with the source archive."
+  },
+  {
+    "id": "natal_statistical_yearbook_1909_macdonald",
+    "title": "Colony of Natal, Statistical Yearbook (1909), transcribed in Strangers in a Strange Land",
+    "publisher": "Colony of Natal, P. Davis and Sons, Pietermaritzburg. Historical population table transcribed by Andrew MacDonald, University of KwaZulu-Natal, 2007.",
+    "url": "https://researchspace.ukzn.ac.za/server/api/core/bitstreams/9e56076c-6b4c-4be4-8a23-153d03c0a032/content",
+    "locator": "MacDonald, p. 27, Figure 1, Population Statistics, Colony of Natal, 1852–1909.",
+    "rights": "Selected factual totals from the historical table.",
+    "contemporary_cross_check": {
+      "url": "https://www66.statcan.gc.ca/eng/1904/190400780060_p.%2060.pdf",
+      "locator": "Statistical Year-Book of Canada, p. 60, Natal; the table labels 929,970 as a 1901 census or estimate. The Natal series transcription places it in 1900."
+    }
   }
 ]

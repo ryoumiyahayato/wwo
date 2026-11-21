@@ -36,6 +36,57 @@ def bucket(n):
         return "200k–<500k"
     return "500k+"
 
+def opening_age_coverage(selection, legacy, structure_opening, comparison_rows):
+    modeled = {g["unit_id"]: g["opening_total"] for g in structure_opening["groups"]}
+    parents = {u["unit_id"]: g["unit_id"] for g in selection for u in g["units"]}
+    controls = {g["unit_id"]: g["population_value"] for g in selection}
+    controls.update({r["unit_id"]: r["population_value"] for r in legacy if r["status"]=="legacy_only"})
+    supported = defaultdict(int)
+    for unit, count in modeled.items():
+        supported[parents.get(unit, unit)] += count
+    regions = {key: row["research_regions"][0] for row in comparison_rows if len(row["research_regions"])==1
+               for key in row["opening_root_ids"]}
+    totals_by_region = defaultdict(lambda: dict(opening_control=0, in_model_pools=0, outside_model_pools=0))
+    roots = []
+    for key, count in sorted(controls.items()):
+        coverage = dict(opening_control=count, in_model_pools=supported[key], outside_model_pools=count-supported[key])
+        region = regions.get(key)
+        totals = totals_by_region[region or "no_reviewed_research_region"]
+        for field, people in coverage.items():
+            totals[field] += people
+        roots.append(dict(opening_unit_id=key, research_region=region, **coverage))
+    return dict(note="Opening controls before named-resident deductions or source-age-unknown allocations. Dated census populations are separate figures. Totals use historical research regions where a reviewed comparison exists.",
+                opening_roots=roots, by_research_region=dict(totals_by_region))
+
+
+def opening_count_basis(selection, legacy, world_reference):
+    counts = dict(direct_enumeration_on_opening_date=0, published_historical_estimates=0,
+                  date_models_from_territorial_returns=0, retained_legacy_estimates=0)
+    accounts = []
+    for group in selection:
+        source = group["source_id"]
+        basis = ("published_historical_estimates" if source.startswith("ft_world_") or source in
+                 {"cao_qing_provincial_reconstruction", "natal_statistical_yearbook_1909_macdonald"}
+                 else "date_models_from_territorial_returns")
+        sourced = sourced_people(group)
+        retained = group.get("legacy_unlocated_balance", 0)
+        counts[basis] += sourced
+        counts["retained_legacy_estimates"] += retained
+        accounts.append(dict(unit_id=group["unit_id"], source_id=source,
+                             sourced_people=sourced, sourced_basis=basis, retained_legacy_people=retained))
+    for row in legacy:
+        if row["status"] == "legacy_only":
+            retained = row["population_value"]
+            counts["retained_legacy_estimates"] += retained
+            accounts.append(dict(unit_id=row["unit_id"], source_id=None,
+                                 sourced_people=0, sourced_basis=None, retained_legacy_people=retained))
+    return dict(
+        counts={key: dict(people=count, pct_of_research_reference=round(100*count/world_reference, 3))
+                for key, count in counts.items()},
+        scopes=sorted(accounts, key=lambda row: row["unit_id"]),
+        note="Published historical estimates include the normalized date of a research or contemporary estimate. Territorial models use census or official statistical returns at other dates. No census exactly matches the opening date and scope. Residents without an exclusive opening count remain in the geography and benchmark ledgers; the difference between authorities is not an observed count of missing residents.",
+    )
+
 def residuals(rows):
     # Restrict subtraction to reviewed sets of disjoint municipalities and a
     # same-date parent. Other city populations remain views of their parent.
@@ -102,7 +153,7 @@ def main():
                    accounting_role="alternative_reconstruction_nonadditive")
     observations.extend(derived)
     regional_counts["asian_interpolation"]=len(derived)
-    selection=groups(observations, version=2)
+    selection=groups(observations, version=3)
     bengal=next(u for g in selection for u in g["units"] if u["unit_id"]=="raj_bengal_province")
     bengal["place_ids"].append("place:kolkata")
     bengal["place_evidence"]={"place:kolkata": {
@@ -188,12 +239,14 @@ def main():
     summary["dated_parent_controls_arithmetic_closure"]=sum(r["children_minus_parent"]==0 for r in audit)
     ledger=world_accounts(study, selection, legacy, target)
     summary["research_regions"]=ledger["research_regions"]
+    summary["opening_age_sex_by_scope"]=opening_age_coverage(selection, legacy, structure_opening, ledger["opening_comparisons"])
+    summary["opening_count_basis"]=opening_count_basis(selection, legacy, target)
     json_file("world_accounts.json",ledger)
     records("demography_1900.jsonl.gz",structural)
     records("parent_reconciliation.jsonl.gz",audit)
     json_file("opening.json",dict(version=1,groups=groups(observations, version=1)))
-    json_file("opening_v2.json",dict(version=2,groups=selection))
-    json_file("opening_structure.json",structure_opening)
+    json_file("opening_v3.json",dict(version=3,groups=selection))
+    json_file("opening_structure_v3.json",structure_opening)
     json_file("sources.json",list(manifest.values()))
     json_file("summary.json",summary)
     json_file("legacy_audit.json",legacy)

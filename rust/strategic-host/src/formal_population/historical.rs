@@ -47,14 +47,56 @@ pub(super) fn opening_estimate(unit: &str) -> io::Result<Option<HistoricalPopula
 /// ledger. A city is already part of its parent population.
 pub fn city_population_reference(city_key: &str) -> io::Result<Option<Value>> {
     let bytes = include_bytes!("../../../../data/historical_population_1900/cities_1900.jsonl.gz");
-    let rows = BufReader::new(flate2::read::GzDecoder::new(bytes.as_slice()));
-    for line in rows.lines() {
-        let row: Value = serde_json::from_str(&line?)?;
+    for row in catalogue_rows(bytes) {
+        let row = row?;
         if row["city_key"].as_str() == Some(city_key) {
             return Ok(Some(row));
         }
     }
     Ok(None)
+}
+
+#[derive(Serialize)]
+pub struct PopulationArchive {
+    pub geographies: Vec<Value>,
+    pub dated_population: Vec<Value>,
+    pub dated_structure: Vec<Value>,
+}
+
+/// Historical evidence can be queried independently of whether a place has an
+/// account in the current game. Matching rows can use overlapping scopes and dates.
+pub fn population_archive(unit: &str) -> io::Result<Option<PopulationArchive>> {
+    let geography = include_bytes!("../../../../data/historical_population_1900/geography_1900.jsonl.gz");
+    let population = include_bytes!("../../../../data/historical_population_1900/population_1900.jsonl.gz");
+    let structure = include_bytes!("../../../../data/historical_population_1900/demography_1900.jsonl.gz");
+    let mut archive = PopulationArchive {
+        geographies: Vec::new(), dated_population: Vec::new(), dated_structure: Vec::new(),
+    };
+    for row in catalogue_rows(geography) {
+        let row = row?;
+        if row["id"].as_str() == Some(unit) {
+            archive.geographies.push(row);
+        }
+    }
+    for row in catalogue_rows(population) {
+        let row = row?;
+        if row["unit_id"].as_str() == Some(unit) || row["wwo_id"].as_str() == Some(unit) {
+            archive.dated_population.push(row);
+        }
+    }
+    for row in catalogue_rows(structure) {
+        let row = row?;
+        if row["unit_id"].as_str() == Some(unit) {
+            archive.dated_structure.push(row);
+        }
+    }
+    Ok((!archive.geographies.is_empty() || !archive.dated_population.is_empty()
+        || !archive.dated_structure.is_empty()).then_some(archive))
+}
+
+fn catalogue_rows(bytes: &[u8]) -> impl Iterator<Item = io::Result<Value>> + '_ {
+    BufReader::new(flate2::read::GzDecoder::new(bytes)).lines()
+        .map(|line| Ok(serde_json::from_str(&line?)?))
 }
 
 fn read_estimates() -> io::Result<Estimates> {

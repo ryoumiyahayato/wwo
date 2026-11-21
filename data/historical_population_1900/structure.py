@@ -76,13 +76,32 @@ def dimensions(population):
     return result
 
 
+def regroup_age_rows(rows, target, corrections):
+    counts = ("both", "male", "female")
+    for band in target:
+        selected = [
+            row | corrections.get(row["label"], {})
+            for row in rows
+            if row["role"] == band["role"] and (
+                band["age_min"] is None and row["age_min"] is None
+                or band["age_min"] is not None and row["age_min"] is not None
+                and row["age_min"] >= band["age_min"]
+                and (band["age_max"] is None
+                     or row["age_max"] is not None and row["age_max"] <= band["age_max"])
+            )
+        ]
+        yield band | {field: sum(row[field] for row in selected) for field in counts}
+
+
 def age_sex_panels():
     panels = json.loads((AGE_SOURCES / "panels.json").read_text(encoding="utf8"))
+    panels.extend(json.loads((AGE_SOURCES / "us_census_1900_panels.json").read_text(encoding="utf8")))
     by_panel = {panel["id"]: [] for panel in panels}
-    for row in read_csv(AGE_SOURCES / "age_sex.csv"):
-        for key in ("age_min", "age_max", "both", "male", "female"):
-            row[key] = int(row[key]) if row[key] else None
-        by_panel[row["panel"]].append(row)
+    for filename in ("age_sex.csv", "us_census_1900.csv"):
+        for row in read_csv(AGE_SOURCES / filename):
+            for key in ("age_min", "age_max", "both", "male", "female"):
+                row[key] = int(row[key]) if row[key] else None
+            by_panel[row["panel"]].append(row)
 
     russian = by_panel["russia_empire_1897"]
     for row in read_csv(HERE / "russia" / "structure.csv"):
@@ -105,7 +124,13 @@ def age_sex_panels():
     for panel in panels:
         if "component_panels" not in panel:
             continue
-        components = [by_panel[panel_id] for panel_id in panel["component_panels"]]
+        components = []
+        for panel_id in panel["component_panels"]:
+            rows = by_panel[panel_id]
+            if "regroup_to" in panel and panel_id != panel["regroup_to"]:
+                adjustments = panel.get("component_count_corrections", {}).get(panel_id, {})
+                rows = regroup_age_rows(rows, by_panel[panel["regroup_to"]], adjustments)
+            components.append(rows)
         for matched_rows in zip(*components, strict=True):
             row = matched_rows[0].copy()
             if any(

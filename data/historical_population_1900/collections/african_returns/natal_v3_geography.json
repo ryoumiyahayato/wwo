@@ -1,0 +1,22 @@
+{
+  "scope": "Natal and incorporated Zululand before the 1903 transfer from Transvaal. The estimate excludes the Cape Colony, Basutoland, Orange Free State and the Transvaal districts of Vryheid, Utrecht and the transferred part of Wakkerstroom later returned as Paulpietersburg.",
+  "geography_note": "The opening polity cshapes_gw_562 represents the historical colony. The map places all three transferred district seats in the South African Republic at opening. The Cape division of Umzimkulu is outside the statistical scope although the modern town centre lies on the Natal polygon. Natal's Lower Umzimkulu was a separate district. No new district boundary is inferred.",
+  "boundary_sources": [
+    {
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/ef/South_African_Native_Affairs_Commission%2C_1903-1905_-_report_with_annexures_nos._1_to_9_%28IA_southafricannati00sout%29.pdf",
+      "locator": "South African Native Affairs Commission, report pp. 4–5, paragraphs 16 and 19–20."
+    },
+    {
+      "url": "https://www.cdbooks-r-us.com/freebies/CensusCapeColony1891.pdf",
+      "locator": "Cape census of 1891, general report, East Griqualand and Umzimkulu."
+    }
+  ],
+  "comparison_source_id": "british_empire_census_1901",
+  "comparison_locator": "Natal and Zululand, Table 4, pp. 162–163, County and District Distributions. Three transferred district totals include all geographical entries listed for each district.",
+  "comparison_scope": "A 1904 comparison after removing the three districts transferred in 1903. The calculation retains the printed census coverage, including separately returned people. The comparison does not estimate January 1900 or verify identical census coverage.",
+  "transferred_districts": [
+    {"name": "Utrecht", "population_value": 19229},
+    {"name": "Vryheid", "population_value": 67038},
+    {"name": "Paulpietersburg", "population_value": 13699}
+  ]
+}

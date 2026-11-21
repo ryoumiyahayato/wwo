@@ -13,6 +13,12 @@ def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
 
 
+def legacy_population_control(unit_id):
+    legacy = json.loads((HERE.parent/"alpha/historical_world_economy_1900/countries_compact.json").read_text(encoding="utf8"))
+    controls = (dict(zip(legacy["field_order"], data)) for data in legacy["rows"])
+    return next(r["population_value"] for r in controls if r["entity_id"] == unit_id)
+
+
 def fiji_and_rotuma(observations):
     source = "british_empire_census_1901"
     returns = {r["date"]: r for r in observations if r["source_id"] == source and r["unit_id"] == "fiji_rotuma"}
@@ -29,13 +35,76 @@ def fiji_and_rotuma(observations):
         partition_source="collections/eastern/observations.jsonl", units=[])
 
 
+def egypt_two_cities(observations):
+    root = "khedivate_of_egypt"
+    source = "egypt_historical_census_primary_tables"
+    dates = ["1897-06-01", "1907-04-29"]
+    start, end = map(date.fromisoformat, dates)
+    fraction = Fraction((date.fromisoformat(DATE) - start).days, (end - start).days)
+    returns = {(r["unit_id"], r["date"]): r for r in observations if r["source_id"] == source and r["kind"] == "city"}
+    leaves = []
+    for city, scope in [
+        ("cairo", "Cairo town in the separate governorate return. Giza is a separate entry under Giza province."),
+        ("alexandria", "Alexandria town in the separate governorate return. Ramleh is separately listed under Buheira."),
+    ]:
+        unit = "egy_madina_" + city
+        before, after = [returns[(unit, d)] for d in dates]
+        initial, final = [r["population_value"] for r in (before, after)]
+        leaves.append(dict(
+            unit_id=unit, name=before["name"], population_value=round(initial+(final-initial)*fraction),
+            source_unit_ids=[unit], source_id=source, source_quality=before["quality"],
+            source_observations=[before["record_id"], after["record_id"]],
+            endpoint_values=[initial, final], locator=before["locator"]+" / "+after["locator"],
+            scope=scope, place_ids=["place:"+city],
+            uncertainty_kind="No statistical interval. Enumeration coverage, changes to the reported urban extent and interpolation error are unquantified.",
+        ))
+    control = legacy_population_control(root)
+    return dict(
+        unit_id=root, date=DATE, population_value=control, source_id=source,
+        legacy_control_source="data/alpha/historical_world_economy_1900/countries_compact.json: khedivate_of_egypt population_value",
+        legacy_unlocated_balance=control-sum(leaf["population_value"] for leaf in leaves),
+        partition_source="collections/eastern/observations.jsonl",
+        locator="Tanada, Table 4, Cairo and Alexandria; census dates in Table 2.",
+        endpoint_dates=dates, interpolation_reference_dates=dates,
+        method=f"Linear daily interpolation of the two separate town returns, elapsed fraction {fraction}.",
+        scope="The two towns are disjoint subdivisions of the retained Egypt control. The balance has no geographic allocation. The census and map extents differ for western oases and the southern frontier.",
+        uncertainty_kind="The national control retains its inherited source basis. The interpolated town estimates have no statistical interval.",
+        units=leaves,
+    )
+
+
+def natal_and_zululand(observations):
+    partition = "collections/african_returns/natal_v3_geography.json"
+    basis = json.loads((HERE / partition).read_text(encoding="utf8"))
+    estimate = next(r for r in observations if r["unit_id"] == "natal_zululand_pre_transfer" and r["date"] == "1900")
+    comparison = next(r for r in observations if r["unit_id"] == "natal_zululand" and r["date"] == "1904-04-18"
+                      and r["source_id"] == basis["comparison_source_id"])
+    districts = basis["transferred_districts"]
+    return dict(
+        unit_id=estimate["wwo_id"], date=DATE, population_value=estimate["population_value"],
+        source_id=estimate["source_id"], source_quality=estimate["quality"], source_observations=[estimate["record_id"]],
+        locator=estimate["locator"], source_dates=[estimate["date"]], partition_source=partition,
+        method="Use the published annual colonial estimate as a proxy for 1 January 1900. The underlying table supplies a year and no reference day.",
+        scope=basis["scope"], geography_note=basis["geography_note"],
+        uncertainty_kind="No statistical interval. The estimate's date and method are incompletely documented. Wartime migration and enumeration differences are unquantified.",
+        census_comparison=dict(
+            source_id=comparison["source_id"], source_observation=comparison["record_id"],
+            date=comparison["date"], locator=basis["comparison_locator"],
+            published_population=comparison["population_value"], excluded_districts=districts,
+            population_on_pre_transfer_definition=comparison["population_value"]-sum(d["population_value"] for d in districts),
+            scope=basis["comparison_scope"],
+        ),
+        units=[],
+    )
+
+
 def qing_interior(observations, version):
     path = HERE / "collections/eastern/qing_interior_crosswalk.tsv"
     by_id = {r["unit_id"]: r for r in observations
              if r["source_id"] == "cao_qing_provincial_reconstruction" and r["date"] == DATE}
     with path.open(encoding="utf8") as f:
         links = list(csv.DictReader(f, delimiter="\t"))
-    if version == 2:
+    if version >= 2:
         additional = path.with_name("qing_interior_v2_crosswalk.tsv")
         with additional.open(encoding="utf8") as f:
             links.extend(csv.DictReader(f, delimiter="\t"))
@@ -48,9 +117,7 @@ def qing_interior(observations, version):
             wwo_admin_label=link["wwo_admin_label"], chgis_id=link["chgis_territory"], chgis_url=link["gazetteer"],
             geography_valid_years=[int(link["valid_from_year"]), int(link["valid_to_year"])],
             scope=link["study_scope"], place_ids=[]))
-    legacy = json.loads((HERE.parent/"alpha/historical_world_economy_1900/countries_compact.json").read_text(encoding="utf8"))
-    controls = (dict(zip(legacy["field_order"], data)) for data in legacy["rows"])
-    control = next(r["population_value"] for r in controls if r["entity_id"] == "qing_empire")
+    control = legacy_population_control("qing_empire")
     example = by_id[links[0]["unit_id"]]
     group = dict(unit_id="qing_empire", date=DATE, population_value=control, source_id=example["source_id"],
         method=example["method"] + ". Nominal July endpoints for the two source years. Fraction " + example["fraction"],
@@ -61,7 +128,7 @@ def qing_interior(observations, version):
         legacy_control_source="data/alpha/historical_world_economy_1900/countries_compact.json: qing_empire population_value",
         legacy_unlocated_balance=control-sum(leaf["population_value"] for leaf in leaves),
         uncertainty_kind="Model sensitivity scenarios in collections/eastern/qing_reconciliation.json. No calibrated interval.")
-    if version == 2:
+    if version >= 2:
         group.update(
             locator="Ni Yuping reproducing Cao, Table 1.1, pp. 17–18 (PDF pp. 31–32). See the individual province locators.",
             scope="Disjoint provincial returns within the legacy Qing control. The province links establish historical statistical identities. No separate city, concession or frontier population is added.",
@@ -74,7 +141,7 @@ def groups(observations, version=1):
     endpoints = {(r["unit_id"], r["date"]): r["population_value"] for r in observations if r["source_id"].startswith("ft_world_")}
     selected = defaultdict(list)
     series_files = ["opening_series.tsv"]
-    if version == 2:
+    if version >= 2:
         series_files.append("opening_series_v2.tsv")
     for file in series_files:
         with (HERE / file).open(encoding="utf8") as f:
@@ -105,7 +172,7 @@ def groups(observations, version=1):
                      uncertainty_kind=first["uncertainty_kind"] if all(v is not None for v in bounds.values()) else "No sensitivity interval is available for this version of the study series.", units=leaves if len(leaves)>1 else [])
         result[root] = group
     files = sorted(HERE.glob("collections/*/*_opening.json"))
-    if version == 2:
+    if version >= 2:
         files = [path.with_name("india_opening_v2.json") if path.name == "india_opening.json" else path for path in files]
     territorial_roots = set()
     for path in files:
@@ -122,9 +189,15 @@ def groups(observations, version=1):
     if "qing_empire" in result:
         raise ValueError("duplicate Qing population control")
     result["qing_empire"] = qing_interior(observations, version)
-    if version == 2:
+    if version >= 2:
         fiji = fiji_and_rotuma(observations)
         result[fiji["unit_id"]] = fiji
+    if version >= 3:
+        for group in (egypt_two_cities(observations), natal_and_zululand(observations)):
+            root = group["unit_id"]
+            if root in result:
+                raise ValueError(f"two production partitions for {root}")
+            result[root] = group
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

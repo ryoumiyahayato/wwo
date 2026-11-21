@@ -3,7 +3,7 @@ use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, io, sync::OnceLock};
 
-pub(crate) const CURRENT_VERSION: u32 = 2;
+pub(crate) const CURRENT_VERSION: u32 = 3;
 
 #[derive(Debug, Serialize)]
 pub struct OpeningPopulationEstimate {
@@ -81,7 +81,8 @@ impl HistoricalOpening {
     ) -> io::Result<Self> {
         let bytes: &[u8] = match version {
             1 => include_bytes!("../../../../data/historical_population_1900/opening.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v2.json"),
+            2 => include_bytes!("../../../../data/historical_population_1900/opening_v2.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v3.json"),
             _ => return Err(invalid("unsupported historical population opening version")),
         };
         let manifest: Manifest = serde_json::from_slice(bytes)?;
@@ -162,9 +163,12 @@ impl HistoricalOpening {
         }).is_none() {
             return Err(invalid("historical opening exceeds the supported population"));
         }
-        if version == CURRENT_VERSION {
-            opening.demography = OpeningDemography::load(&opening)?;
-        }
+        let demography: &[u8] = match version {
+            2 => include_bytes!("../../../../data/historical_population_1900/opening_structure.json"),
+            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v3.json"),
+            _ => return Ok(opening),
+        };
+        opening.demography = OpeningDemography::load(&opening, demography)?;
         Ok(opening)
     }
 

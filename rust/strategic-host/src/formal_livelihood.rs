@@ -56,11 +56,43 @@ pub struct DailyLivelihood {
     pub automatic_food_expense: i64,
     pub food_shortfall: Option<FoodShortfall>,
     pub consecutive_shortfall_days: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub automatic_food_offers: Option<Vec<FoodOfferAttempt>>,
 }
 
 impl DailyLivelihood {
     fn nutrition(&self) -> u16 {
         (i128::from(self.food_received_milli) * 1000 / i128::from(self.food_required_milli)) as u16
+    }
+}
+
+#[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct FoodOfferAttempt {
+    pub seller_or_market: String,
+    pub commodity: String,
+    pub price_centimes: i64,
+    pub price_basis_kg: i64,
+    pub desired_kg: i64,
+    pub offered_kg: i64,
+    pub affordable_kg_at_quote: i64,
+    pub purchased_kg: i64,
+    pub paid_centimes: i64,
+}
+
+impl FoodOfferAttempt {
+    fn valid(&self) -> bool {
+        !self.seller_or_market.is_empty()
+            && counts_as_food(&self.commodity)
+            && self.price_centimes > 0
+            && matches!(self.price_basis_kg, 1 | 1000)
+            && self.desired_kg > 0
+            && self.offered_kg > 0
+            && self.affordable_kg_at_quote >= 0
+            && (0..=self.desired_kg.min(self.offered_kg).min(self.affordable_kg_at_quote))
+                .contains(&self.purchased_kg)
+            && (0..=MAX_AMOUNT).contains(&self.paid_centimes)
+            && (self.purchased_kg == 0) == (self.paid_centimes == 0)
     }
 }
 
@@ -78,6 +110,8 @@ pub struct FoodPortion {
 pub struct FoodIntake {
     pub day: u32,
     pub portions: Vec<FoodPortion>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub full_stock_deductions: bool,
 }
 
 #[derive(Serialize)]
@@ -129,6 +163,8 @@ pub(crate) struct Livelihood {
 #[serde(deny_unknown_fields)]
 struct PersonNeeds {
     today: Vec<FoodPortion>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    today_full_stock_deductions: bool,
     last_day: Option<DailyLivelihood>,
     last_intake: Option<FoodIntake>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
@@ -148,22 +184,18 @@ impl Livelihood {
         }
     }
 
-    pub(crate) fn record_food(
-        &mut self,
-        person: &str,
-        good: &str,
-        consumption: &Consumption,
-        cap: i64,
-    ) {
-        if counts_as_food(good) {
-            let today = &mut self.people.entry(person.to_owned()).or_default().today;
-            record_food(
-                today,
-                good,
-                consumption,
-                cap - food_quantity(today).unwrap(),
-            );
+    pub(crate) fn can_record_today(&self, person: &str, quantity: i64) -> bool {
+        self.people.get(person).is_none_or(|needs| {
+            food_quantity(&needs.today).and_then(|total| total.checked_add(quantity)).is_some()
+        })
+    }
+
+    pub(crate) fn record_food(&mut self, person: &str, good: &str, consumption: &Consumption) {
+        let needs = self.people.entry(person.to_owned()).or_default();
+        if needs.today.is_empty() {
+            needs.today_full_stock_deductions = true;
         }
+        record_food(&mut needs.today, good, consumption);
     }
 }
 
@@ -194,7 +226,7 @@ impl InitialWorld {
             }),
             food_received_today_milli: needs
                 .and_then(|needs| food_quantity(&needs.today))
-                .unwrap_or(0),
+                .unwrap_or(0).min(self.staple_weight_target()),
             last_day: needs.and_then(|needs| needs.last_day.as_ref()),
             last_food_intake: needs.and_then(|needs| needs.last_intake.as_ref()),
         })
@@ -203,7 +235,7 @@ impl InitialWorld {
     pub(crate) fn validate_livelihood(&self, current_day: u32, target: i64) -> bool {
         self.livelihood.people.iter().all(|(person, needs)| {
             let valid_portions = |portions: &[FoodPortion]| {
-                food_quantity(portions).is_some_and(|amount| amount <= target)
+                food_quantity(portions).is_some()
                     && portions.iter().all(|portion| {
                         counts_as_food(&portion.commodity)
                             && !portion.allocations.is_empty()
@@ -226,6 +258,11 @@ impl InitialWorld {
                         && last_day.food_required_milli == target
                         && (0..=target).contains(&last_day.food_received_milli)
                         && (0..=MAX_AMOUNT).contains(&last_day.automatic_food_expense)
+                        && last_day.automatic_food_offers.as_ref().is_none_or(|offers| {
+                            offers.iter().all(FoodOfferAttempt::valid)
+                                && offers.iter().try_fold(0i64, |paid, offer| paid.checked_add(offer.paid_centimes))
+                                    == Some(last_day.automatic_food_expense)
+                        })
                         && (last_day.food_received_milli < target)
                             == last_day.food_shortfall.is_some()
                         && (last_day.consecutive_shortfall_days > 0)
@@ -235,7 +272,7 @@ impl InitialWorld {
                             .last_intake
                             .as_ref()
                             .filter(|intake| intake.day == last_day.day)
-                            .map_or(Some(0), |intake| food_quantity(&intake.portions))
+                            .map_or(Some(0), |intake| food_quantity(&intake.portions).map(|actual| actual.min(target)))
                             == Some(last_day.food_received_milli)
                 })
                 && needs.last_intake.as_ref().is_none_or(|intake| {
@@ -266,11 +303,12 @@ impl InitialWorld {
                 continue;
             }
             let mut portions = std::mem::take(&mut needs.today);
-            let mut remaining = target - food_quantity(&portions).unwrap();
+            let full_stock_deductions = std::mem::take(&mut needs.today_full_stock_deductions) || portions.is_empty();
+            let mut remaining = (target - food_quantity(&portions).unwrap()).max(0);
             let holdings_result =
                 self.eat_held_staples(&person, minute, &mut remaining, &mut portions)
                     .and_then(|_| self.eat_shared_staples(&person, day, minute, &mut remaining, &mut portions));
-            let mut expense = 0;
+            let mut offers = Vec::new();
             let failure = if remaining == 0 {
                 None
             } else if holdings_result.is_err() {
@@ -278,8 +316,9 @@ impl InitialWorld {
             } else if person == self.player {
                 Some(FoodShortfall::PlayerChoice)
             } else {
-                self.obtain_staples(&person, minute, &mut remaining, &mut expense, &mut portions)
+                self.obtain_staples(&person, minute, &mut remaining, &mut offers, &mut portions)
             };
+            let expense = offers.iter().map(|offer| offer.paid_centimes).sum();
             let consecutive_shortfall_days = failure.map_or(0, |_| {
                 needs.last_day.as_ref().map_or(1, |last| {
                     if last.day.checked_add(1) == Some(day) {
@@ -296,11 +335,12 @@ impl InitialWorld {
                 automatic_food_expense: expense,
                 food_shortfall: failure,
                 consecutive_shortfall_days,
+                automatic_food_offers: Some(offers),
             };
             nutrition.insert(person.clone(), outcome.nutrition());
             if expense > 0 { paid.insert(person.clone()); }
             if !portions.is_empty() {
-                needs.last_intake = Some(FoodIntake { day, portions });
+                needs.last_intake = Some(FoodIntake { day, portions, full_stock_deductions });
             }
             needs.last_day = Some(outcome);
             self.livelihood.people.insert(person, needs);
@@ -346,7 +386,7 @@ impl InitialWorld {
                 let quantity = (*remaining).min(excess).min(self.person_holding_milli(&donor, good));
                 if quantity <= 0 { continue; }
                 let shared = self.consume_livelihood_stock(&donor, good, quantity, minute)?;
-                record_food(portions, good, &shared, quantity);
+                record_food(portions, good, &shared);
                 portions.last_mut().expect("recorded positive intake").donor = Some(donor.clone());
                 *remaining -= quantity;
                 excess -= quantity;
@@ -361,23 +401,31 @@ impl InitialWorld {
         person: &str,
         minute: i64,
         remaining: &mut i64,
-        expense: &mut i64,
+        attempts: &mut Vec<FoodOfferAttempt>,
         portions: &mut Vec<FoodPortion>,
     ) -> Option<FoodShortfall> {
         let Some(account) = self.ledger().default_account(person) else {
             return Some(FoodShortfall::NoCashAccount);
         };
         let mut available = account.available;
-        let mut cash_short = self
-            .local_bread_offer_for(person, *remaining)
-            .is_some_and(|offer| {
-                i128::from(offer.price) * i128::from(*remaining) > i128::from(available)
+        let mut cash_short = false;
+        if let Some(offer) = self.local_bread_offer_for(person, *remaining) {
+            let affordable = available / offer.price;
+            cash_short = affordable < *remaining;
+            attempts.push(FoodOfferAttempt {
+                seller_or_market: offer.site.to_owned(), commodity: "bread".to_owned(),
+                price_centimes: offer.price, price_basis_kg: 1, desired_kg: *remaining,
+                offered_kg: offer.quantity, affordable_kg_at_quote: affordable,
+                purchased_kg: 0, paid_centimes: 0,
             });
+        }
 
         let firm_unavailable = match self.buy_local_firm_meal(person, *remaining, minute) {
             Ok(Some(amount)) => {
-                *expense += amount;
                 let quantity = *remaining;
+                let attempt = attempts.last_mut().expect("firm meal has a matching offer");
+                attempt.purchased_kg = quantity;
+                attempt.paid_centimes = amount;
                 return self
                     .eat_staple(person, minute, "bread", quantity, remaining, portions)
                     .err()
@@ -420,13 +468,21 @@ impl InitialWorld {
                 .min(i128::from(MAX_AMOUNT)) as i64;
             let quantity = needed_stock.min(affordable);
             cash_short |= quantity < needed_stock;
+            attempts.push(FoodOfferAttempt {
+                seller_or_market: market_id.clone(), commodity: good.to_owned(),
+                price_centimes: price, price_basis_kg: 1000, desired_kg: *remaining,
+                offered_kg: stock, affordable_kg_at_quote: affordable,
+                purchased_kg: 0, paid_centimes: 0,
+            });
             if quantity == 0 {
                 continue;
             }
             match self.buy_livelihood_stock(person, &market_id, good, quantity, price, minute, false) {
                 Ok(amount) => {
                     available -= amount;
-                    *expense += amount;
+                    let attempt = attempts.last_mut().expect("purchase has a matching offer");
+                    attempt.purchased_kg = quantity;
+                    attempt.paid_centimes = amount;
                     if self
                         .eat_staple(person, minute, good, quantity, remaining, portions)
                         .is_err()
@@ -459,7 +515,7 @@ impl InitialWorld {
         portions: &mut Vec<FoodPortion>,
     ) -> std::io::Result<()> {
         let meal = self.consume_livelihood_stock(person, good, quantity, minute)?;
-        record_food(portions, good, &meal, quantity);
+        record_food(portions, good, &meal);
         *remaining -= quantity;
         Ok(())
     }
@@ -474,27 +530,12 @@ fn food_quantity(portions: &[FoodPortion]) -> Option<i64> {
         })
 }
 
-fn record_food(portions: &mut Vec<FoodPortion>, good: &str, consumption: &Consumption, cap: i64) {
-    let mut remaining = cap;
-    let mut allocations = Vec::new();
-    for allocation in &consumption.allocations {
-        if remaining <= 0 {
-            break;
-        }
-        let quantity_milli = allocation.quantity_milli.min(remaining);
-        remaining -= quantity_milli;
-        allocations.push(ConsumptionAllocation {
-            purchase_record_id: allocation.purchase_record_id.clone(),
-            quantity_milli,
-        });
-    }
-    if !allocations.is_empty() {
-        portions.push(FoodPortion {
-            commodity: good.to_owned(),
-            donor: None,
-            allocations,
-        });
-    }
+fn record_food(portions: &mut Vec<FoodPortion>, good: &str, consumption: &Consumption) {
+    portions.push(FoodPortion {
+        commodity: good.to_owned(),
+        donor: None,
+        allocations: consumption.allocations.clone(),
+    });
 }
 
 #[cfg(test)]
@@ -539,6 +580,9 @@ mod tests {
         assert_eq!(npc.last_day.unwrap().food_received_milli, 1);
         let paid = npc.last_day.unwrap().automatic_food_expense;
         assert!(paid > 0);
+        let attempts = npc.last_day.unwrap().automatic_food_offers.as_ref().unwrap();
+        assert_eq!(attempts.iter().map(|offer| offer.purchased_kg).sum::<i64>(), 1);
+        assert_eq!(attempts.iter().map(|offer| offer.paid_centimes).sum::<i64>(), paid);
         assert_eq!(npc.budget.unwrap().cash, npc_cash_before - paid);
         let intake = npc.last_food_intake.unwrap();
         let allocation = &intake.portions[0].allocations[0];
@@ -553,6 +597,9 @@ mod tests {
             Some(FoodShortfall::InsufficientCash)
         );
         assert_eq!(poor_npc.last_day.unwrap().consecutive_shortfall_days, 1);
+        let attempts = poor_npc.last_day.unwrap().automatic_food_offers.as_ref().unwrap();
+        assert!(attempts.iter().any(|offer| offer.offered_kg > 0 && offer.affordable_kg_at_quote == 0));
+        assert!(attempts.iter().all(|offer| offer.purchased_kg == 0));
         assert!(poor_npc.last_food_intake.is_none());
         let snapshot = world.snapshot();
         let health: serde_json::Value =
@@ -585,5 +632,32 @@ mod tests {
             worker.budget.unwrap().cash,
             wage.amount - worker_day.automatic_food_expense
         );
+    }
+
+    #[test]
+    fn records_all_manual_stock_deductions_and_loads_earlier_unsettled_meals() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("country_fra").unwrap();
+        let market = &world.macro_economy().markets()["country_fra"];
+        let price = market.commodities["potatoes"].price_centimes;
+        let market_id = market.id.clone();
+        world.buy_local_stock(&market_id, "potatoes", 3, price, "pantry").unwrap();
+        world.consume_purchased_stock("potatoes", 1).unwrap();
+        let mut old = world.snapshot();
+        old["livelihood"]["people"][PLAYER].as_object_mut().unwrap().remove("today_full_stock_deductions");
+        let mut restored = bootstrap.restore_native(serde_json::from_value(old).unwrap()).unwrap();
+
+        for (active, all_stock_deductions) in [(&mut world, true), (&mut restored, false)] {
+            active.consume_purchased_stock("potatoes", 2).unwrap();
+            active.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+            let livelihood = active.person_livelihood(PLAYER).unwrap();
+            assert_eq!(livelihood.last_day.unwrap().food_received_milli, 1);
+            let intake = livelihood.last_food_intake.unwrap();
+            assert_eq!(food_quantity(&intake.portions), Some(3));
+            assert_eq!(intake.full_stock_deductions, all_stock_deductions);
+            assert_eq!(intake.recorded_energy().unconverted_kg, 3);
+            let snapshot = active.snapshot();
+            assert_eq!(bootstrap.restore_native(serde_json::from_value(snapshot.clone()).unwrap()).unwrap().snapshot(), snapshot);
+        }
     }
 }

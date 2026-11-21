@@ -1,4 +1,4 @@
-use super::{CohortBirthYears, CohortDefinition, CohortId, CohortProvenance, Population, CURRENT_VERSION, MAX_POPULATION};
+use super::{CohortBirthYears, CohortDefinition, CohortId, CohortProvenance, Population, MAX_POPULATION};
 use crate::{formal_clock::{GameClock, MINUTES_PER_DAY}, formal_save::invalid};
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io};
@@ -298,7 +298,7 @@ impl Population {
                 self.insert_claim(person, unit);
             }
             Change::AnonymousBirths { unit, members } => {
-                if self.opening_version() == Some(CURRENT_VERSION) {
+                if self.opening_version().is_some_and(|version| version >= 2) {
                     let mut clock = GameClock::default();
                     clock.advance_minutes(event.minute)?;
                     let year = clock.current_date().year;

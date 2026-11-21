@@ -1,4 +1,4 @@
-"""Reconcile the two territorial census series with different date precision."""
+"""Transcribe African territorial returns and reconcile comparable census series."""
 import csv
 import json
 from datetime import date
@@ -21,6 +21,10 @@ for fact in facts:
                method="published historical count", quality="official_or_research_republication",
                definition="Reported population on the island or in the territory. Subordinate institutions included where enumerated.",
                mapping_status="island_part_of_group" if unit=="mu_main_island" else "territory_identity" if fact["wwo_id"] else "statistical_only")
+    if unit == "natal_zululand_pre_transfer":
+        row.update(method="published colonial annual estimate", quality="historical_estimate_transcription",
+                   definition="Natal and annexed Zululand before the 1903 transfer from Transvaal. The annual estimate has no published reference day in the available transcription.",
+                   mapping_status="dated_statistical_identity_boundary_not_certified")
     if fact["male"]:
         row["breakdowns"] = {"sex": {k:int(fact[k]) for k in ("male","female")}}
         if fact["printed_white_male"]:

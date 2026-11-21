@@ -17,15 +17,17 @@
       "production_root_ids": [
         "beylicate_of_tunis",
         "cshapes_gw_402",
+        "cshapes_gw_562",
         "cshapes_gw_570",
         "cshapes_gw_585",
-        "cshapes_gw_590"
+        "cshapes_gw_590",
+        "khedivate_of_egypt"
       ],
-      "production_people": 2711526,
-      "production_pct_of_regional_research_estimate": 2.086,
-      "people_with_opening_subdivision": 373996,
-      "research_only_units": 41,
-      "research_only_people": 127350566
+      "production_people": 4556605,
+      "production_pct_of_regional_research_estimate": 3.506,
+      "people_with_opening_subdivision": 1289105,
+      "research_only_units": 39,
+      "research_only_people": 112271921
     },
     "America": {
       "statistical_units": 46,
@@ -343,9 +345,9 @@
       "candidate_polity_ids": [
         "khedivate_of_egypt"
       ],
-      "comparison_id": null,
-      "opening_disposition": "research_only",
-      "note": "Nomad corrections and western oases in the WWO footprint lack a reconciled census allocation. See collections/eastern/reconciliation.json."
+      "comparison_id": "egypt_two_cities",
+      "opening_disposition": "partial_extent",
+      "note": "The opening locates the Cairo and Alexandria town estimates within the retained Egypt control. The research series is national. Nomad coverage, the western oases and the southern frontier require separate reconciliation."
     },
     {
       "unit_id": "ft_equatorial_guinea",
@@ -870,9 +872,9 @@
         "south_african_republic",
         "orange_free_state"
       ],
-      "comparison_id": null,
-      "opening_disposition": "research_only",
-      "note": "1904 was a postwar census. The 1903 Natal boundary change and other territorial and enumeration changes require separate reconciliation for the four opening polities."
+      "comparison_id": "natal_zululand",
+      "opening_disposition": "partial_extent",
+      "note": "The opening adds the annual estimate for Natal and Zululand before the 1903 transfer from Transvaal. The South Africa series also covers the Cape, Orange Free State and South African Republic. The difference cannot be assigned to those polities."
     },
     {
       "unit_id": "ft_southern_rhodesia",
@@ -3145,6 +3147,24 @@
       "research_minus_documented": 18836
     },
     {
+      "comparison_id": "egypt_two_cities",
+      "opening_root_ids": [
+        "khedivate_of_egypt"
+      ],
+      "research_unit_ids": [
+        "ft_egypt"
+      ],
+      "scope_relation": "partial_extent",
+      "note": "The opening locates the Cairo and Alexandria town estimates within the retained Egypt control. The research series is national. Nomad coverage, the western oases and the southern frontier require separate reconciliation.",
+      "research_regions": [
+        "Africa"
+      ],
+      "research_people": 10110129,
+      "documented_opening_people": 915109,
+      "opening_people_including_retained_balances": 10000000,
+      "research_minus_documented": 9195020
+    },
+    {
       "comparison_id": "france",
       "opening_root_ids": [
         "country_fra"
@@ -3269,6 +3289,24 @@
       "documented_opening_people": 13447810,
       "opening_people_including_retained_balances": 13447810,
       "research_minus_documented": 1188306
+    },
+    {
+      "comparison_id": "natal_zululand",
+      "opening_root_ids": [
+        "cshapes_gw_562"
+      ],
+      "research_unit_ids": [
+        "ft_south_africa"
+      ],
+      "scope_relation": "partial_extent",
+      "note": "The opening adds the annual estimate for Natal and Zululand before the 1903 transfer from Transvaal. The South Africa series also covers the Cape, Orange Free State and South African Republic. The difference cannot be assigned to those polities.",
+      "research_regions": [
+        "Africa"
+      ],
+      "research_people": 4968516,
+      "documented_opening_people": 929970,
+      "opening_people_including_retained_balances": 929970,
+      "research_minus_documented": 4038546
     },
     {
       "comparison_id": "new_zealand",
@@ -4046,6 +4084,10 @@
         "people": 193861
       },
       {
+        "unit_id": "cshapes_gw_562",
+        "people": 929970
+      },
+      {
         "unit_id": "cshapes_gw_570",
         "people": 305255
       },
@@ -4086,8 +4128,8 @@
         "people": 78086
       }
     ],
-    "net_additions": 53824367,
-    "authoritative_opening_population": 1457759052,
+    "net_additions": 54754337,
+    "authoritative_opening_population": 1458689022,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4127,25 +4169,25 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1024716228,
-    "untouched_legacy_population": 116080000,
-    "retained_unlocated_population": 316962824,
-    "authoritative_opening_population": 1457759052,
-    "published_minus_documented_opening": 570358020,
+    "documented_opening_population": 1026561307,
+    "untouched_legacy_population": 106080000,
+    "retained_unlocated_population": 326047715,
+    "authoritative_opening_population": 1458689022,
+    "published_minus_documented_opening": 568512941,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
-      "research_only_component_people": 246891504,
+      "research_only_component_people": 231812859,
       "comparisons_by_scope": {
         "comparable_extent": 1943838,
         "different_extent": 1761145,
-        "partial_extent": 319766374,
+        "partial_extent": 332999940,
         "scope_unconfirmed": -4843,
         "adopted_research_series": 0
       },
       "opening_without_benchmark_link": 0,
-      "untouched_legacy_controls": -116080000,
-      "unlocated_balances_under_retained_controls": -316962824
+      "untouched_legacy_controls": -106080000,
+      "unlocated_balances_under_retained_controls": -326047715
     },
-    "published_minus_authoritative_opening": 137315196
+    "published_minus_authoritative_opening": 136385226
   }
 }

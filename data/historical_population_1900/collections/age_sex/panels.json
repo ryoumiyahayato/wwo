@@ -95,6 +95,33 @@
     "observed_date": "1901-03-31",
     "locator": "Part IV, Ages of the People; detailed table, Including Chinese columns",
     "definition": "Includes Chinese residents and excludes Māori; the source enumerates Māori separately. The table preserves two unknown-age categories. The published persons figure for age 3 differs by 5 from the printed male and female sum.",
+    "broad_observation": false
+  },
+  {
+    "id": "new_zealand_maori_1901",
+    "published_scope": "Colony of New Zealand Māori census population",
+    "source_id": "british_empire_census_1901",
+    "observed_unit_id": "nz_colony_maori_1901",
+    "observed_date": "1901-03-31",
+    "locator": "Table 4, printed p. 24, New Zealand—Maori Population, including footnote (a)",
+    "definition": "Separate Māori census population, including the separately counted Moriori. The printed brackets group ages from 20 to 69 in ten-year bands. Footnote (a) gives partial breakdowns within ages not stated: under 15, 684 males and 634 females; above that age, 1,146 males and 1,225 females.",
+    "broad_observation": false
+  },
+  {
+    "id": "new_zealand_colony_1901",
+    "published_scope": "Colony of New Zealand, local census total",
+    "source_id": "nz_census_1901_combined_ages",
+    "observed_unit_id": "nz_colony",
+    "observed_date": "1901-03-31",
+    "locator": "New Zealand census report, Part I ch. 1 and Part IV ch. 18; Census of the British Empire, Table 4, printed pp. 23–24",
+    "definition": "Sum of the two disjoint local census populations using the Māori table's published age brackets. For age three the Empire table prints 8,738 males, consistent with 17,409 persons and 8,671 females. The local digital copy reads 8,733, which is preserved in the underlying observation. The 352 Royal Navy officers and men counted only in the Empire's non-Māori total are excluded.",
+    "component_panels": ["new_zealand_maori_1901", "new_zealand_1901"],
+    "regroup_to": "new_zealand_maori_1901",
+    "component_count_corrections": {
+      "new_zealand_1901": {"3 years": {"male": 8738}}
+    },
+    "opening_unit_id": "cshapes_gw_920",
+    "uncertainty": "The 1901 local census counts 43,143 Māori and Moriori and 772,719 other residents. The January 1900 control combines 39,854 Māori and Moriori carried from 1896 with 756,505 other residents estimated at year-end 1899. The opening holds the combined 1901 age-sex distribution; changes in population composition, age reporting and enumeration coverage are unquantified. The opening cohorts carry age bands and sex.",
     "broad_observation": true
   },
   {

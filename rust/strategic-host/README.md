@@ -72,7 +72,7 @@ Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒�
 
 宏观贸易、实物货运、人物出行和背景迁移使用同一全球路网。地点卡显示可用连接或资料缺口，旅行页按地点查价，国际市场的运输记录显示货值、运费、停运与交割。参见[全球交通覆盖与实测](../../docs/RUST_GLOBAL_TRANSPORT.md)及[原有交通操作](../../docs/RUST_TRANSPORT_PHASE_2.md)。
 
-`--play` 新档读取 v2 历史开局与稀疏年龄和性别模型。部分国家仍沿用旧估计总数，已定位的分区从相同控制数扣除。城市参考保留原调查日期。`wwo-formal-state inspect-population <world|unit-id|city:city-key> [<native-save>]` 可查询当前人口、统计范围和开局依据。人口群体报告包括已知年龄的膳食能量参考。`inspect-intake <native-save> <person-id>` 查询实际从库存消费的重量和有单位资料的能量。原生旧档按对应版本重放。岗位、企业配方、现有生计系统的每日 1 千克主食阈值、客运速度及名额属于模拟假设。[历史人口开局](../../data/historical_population_1900/opening_v2.json) · [全球覆盖与缺口](../../data/historical_population_1900/README.md) · [能量参数](../../data/historical_population_1900/PHYSIOLOGICAL_NEEDS.md)
+`--play` 新档读取 v3 历史开局与稀疏年龄和性别模型。部分国家仍沿用旧估计总数，已定位的分区从相同控制数扣除。`wwo-formal-state inspect-population <world|unit-id|city:city-key|history:unit-id> [<native-save>]` 可查当前人口、开局依据与原调查日期的资料。人口群体报告包括膳食能量参考。`inspect-intake <native-save> <person-id>` 查询自动购粮的报价与成交、实际扣库和可换算的能量。`inspect-food-history [<case-id>]` 查询历史住户食品账本。原生旧档按对应版本恢复。岗位、企业配方、现有生计系统的每日 1 千克主食阈值、客运速度及名额属于模拟假设。[历史人口开局](../../data/historical_population_1900/opening_v3.json) · [全球覆盖与缺口](../../data/historical_population_1900/README.md) · [能量参数](../../data/historical_population_1900/PHYSIOLOGICAL_NEEDS.md)
 
 从本目录运行 `cargo test --locked --lib population_world_` 可重现动态人物、共同住户、服役夹具和存档场景。年度测量用 `cargo test --locked --lib population_world_year_measurement -- --ignored --nocapture`，分别测正式开局及加入合成群体后的存档与跨日推进。测试只在有足够未分类人口的市场配置规模群体。具体规模见输出的 `fixture_groups`。历史资料仍缺下级行政分布、劳动力、适役制度、家庭和社会身份资料。
 
