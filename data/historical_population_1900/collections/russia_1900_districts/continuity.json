@@ -1,0 +1,22 @@
+{
+  "ru1897_9": {
+    "source_id": "russia_1900_voronezh_governorate_districts",
+    "district_count": 12,
+    "locator": "Voronezh State Archives administrative territorial history, 1824–1918 district list"
+  },
+  "ru1897_16": {
+    "source_id": "russia_1900_kiev_governorate_settlements",
+    "district_count": 12,
+    "locator": "Kiev Governorate Statistical Committee, 1900 list of settlements, district contents"
+  },
+  "ru1897_36": {
+    "source_id": "russia_1900_samara_governorate_settlements",
+    "district_count": 7,
+    "locator": "Samara Governorate 1900 settlement list, district contents"
+  },
+  "ru1897_33": {
+    "source_id": "russia_1900_poltava_governorate_directory",
+    "district_count": 15,
+    "locator": "Poltava Governorate 1900 directory, county administrative and police sections"
+  }
+}

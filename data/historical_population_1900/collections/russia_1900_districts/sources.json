@@ -1,0 +1,45 @@
+[
+  {
+    "id": "russia_1900_voronezh_governorate_districts",
+    "title": "Воронежская губерния. Административно-территориальное деление",
+    "publisher": "Архивная служба Воронежской области",
+    "url": "https://arsvo.ru/informacionnaya_deyatelnost/istoriya_admtert_deleniya_voronezhskoj_oblasti/voronezhskaya_guberniya/",
+    "locator": "Twelve districts after 1824; citations to the 1900 zemstvo and 1906 government publications",
+    "scope": "All twelve district names match the 1897 census. The source follows changes through 1918 and distinguishes changes below the district level. The full district census shares are used for the 1900 allocation.",
+    "comparison_url": "https://search.rsl.ru/ru/record/01003556662",
+    "rights": "Numerical transcriptions from historical government publications and administrative identities.",
+    "raw_path": "continuity.json"
+  },
+  {
+    "id": "russia_1900_kiev_governorate_settlements",
+    "title": "Список населенных мест Киевской губернии",
+    "publisher": "Киевский губернский статистический комитет, Киев, 1900",
+    "url": "https://search.nbuv.gov.ua/cgi-bin/ua/elib.exe?C21COM=S&I21DBN=UKRLIB&P21DBN=UKRLIB&S21All=%3C.%3EID%3DUKR0000070%3C.%3E",
+    "locator": "District contents of the 1900 official settlement list",
+    "scope": "The twelve uezd names and their governorate membership agree with the 1897 enumeration. The official list is used for identity. The opening population uses the archived 1897 full-district census figures, including all cities in each district. District geometry uses the 1897 RiStat census crosswalk.",
+    "rights": "Historical official government publication. Index of administrative identities.",
+    "raw_path": "continuity.json"
+  },
+  {
+    "id": "russia_1900_samara_governorate_settlements",
+    "title": "Список населенных мест Самарской губернии",
+    "publisher": "А. П. Протопопов, Самара, 1900",
+    "url": "https://rusneb.ru/catalog/000200_000018_v19_rc_1639056/",
+    "locator": "District contents of the 1900 official settlement list",
+    "scope": "The seven uezd identities and governorate membership are also tabulated in the Samara University archival comparison, table 2. The opening uses the 1897 census full-district counts within the same governorate opening control.",
+    "comparison_url": "https://repo.ssau.ru/bitstream/ISTORIChESKAYa-NAUKA-I-ARHIVY-V-XXI-VEKE/Spiski-naselennyh-mest-kak-istoricheskii-istochnik-po-istorii-predprinimatelstva-v-Samarskoi-gubernii-115004/1/978-5-6053708-3-3_2025-145-155.pdf#page=9",
+    "rights": "Historical official government publication. Index of administrative identities.",
+    "raw_path": "continuity.json"
+  },
+  {
+    "id": "russia_1900_poltava_governorate_directory",
+    "title": "Справочная книжка и адрес-календарь Полтавской губернии на 1900 год",
+    "publisher": "Д. А. Иваненко, Полтава, 1900",
+    "url": "https://histpol.pl.ua/ru/spravochnye-knizhki-i-adres-kalendari-poltavskoj-gubernii?id=12579",
+    "locator": "Governorate directory county sections and police rosters",
+    "scope": "The 1900 directory confirms fifteen district identities. The contemporaneous district land maps supply independent geographic evidence. The full 1897 census district counts provide the opening shares. The land office publication counts a rural subset.",
+    "comparison_url": "https://rusneb.ru/catalog/000200_000018_v19_rc_2068751/",
+    "rights": "Historical official government publication. Index of administrative identities.",
+    "raw_path": "continuity.json"
+  }
+]

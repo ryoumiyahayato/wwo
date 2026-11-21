@@ -80,6 +80,53 @@ def province_name(value):
     return re.sub(r"\s+(губерния|область|обл\.?)$", "", value.casefold().strip())
 
 
+def russian_district_residence(path, districts, provinces):
+    if not districts:
+        return
+    tables = defaultdict(list)
+    for unit in districts:
+        _, table, row = unit["source_unit_ids"][0].split("_")
+        tables[table].append((int(row[1:]), unit))
+    facts = defaultdict(dict)
+    with (path / "census_facts.csv").open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            if row["table"] in tables:
+                facts[row["table"]][int(row["row"])] = row
+    columns = ("both", "male", "female")
+    for table, units in tables.items():
+        rows = facts[table]
+        ordered = sorted(units)
+        next_rows = [number for number, _ in ordered[1:]] + [max(rows) + 1]
+        sums = {name: Counter() for name in ("city", "outside")}
+        for (start, unit), end in zip(ordered, next_rows, strict=True):
+            total, outside = rows[start], rows[end - 1]
+            cities = [rows[number] for number in range(start + 1, end - 1)]
+            if (not outside["label"].endswith(("без города", "без городов")) or not cities
+                    or any(" - г." not in city["label"] for city in cities)):
+                raise ValueError(f"Unexpected census residence rows for {unit['unit_id']}")
+            for key in columns:
+                urban = sum(int(city[key]) for city in cities)
+                rural = int(outside[key])
+                if urban + rural != int(total[key]) or (key == "both" and int(total[key]) != unit["observed_value"]):
+                    raise ValueError(f"Non-closing census residence rows for {unit['unit_id']}")
+                sums["city"][key] += urban
+                sums["outside"][key] += rural
+            province = provinces[f"ru1897_{table}"]
+            yield unit["unit_id"], "residence", distribution(
+                unit["population_value"], classification="russia_1897_administrative_residence",
+                source="russia_first_census", date=RUSSIA_DATE, observed_unit=unit["source_unit_ids"][0],
+                scope=f"{province['name']}, {unit['name']}",
+                locator=f"rus_gub_97.php?reg={table}, rows {start}–{end - 1}",
+                total=int(total["both"]), unknown=0,
+                observed_counts={"Census cities": int(total["both"]) - int(outside["both"]),
+                                 "Outside census cities": int(outside["both"])},
+                definition="Persons in census cities and persons outside those cities, under the 1897 administrative classification.",
+            )
+        if any(sums[name][key] != int(rows[number][key]) for name, number in (("city", 4), ("outside", 5))
+               for key in columns):
+            raise ValueError(f"Russian district residence totals differ from province table {table}")
+
+
 def russian_structure(pools):
     path = COLLECTIONS / "russia"
     provinces = {}
@@ -90,6 +137,9 @@ def russian_structure(pools):
     provinces_by_id = {row["unit_id"]: row for row in provinces.values()}
     yield from russian_literacy(pools, provinces_by_id)
     yield from russian_marital_status(pools, provinces_by_id, distribution)
+    districts = [unit for unit in pools.values() if "district_boundary_source" in unit]
+    district_parents = {unit["statistical_parent"] for unit in districts}
+    yield from russian_district_residence(path, districts, provinces_by_id)
     blocks = defaultdict(list)
     with (path / "structure.csv").open(encoding="utf8", newline="") as stream:
         for row in csv.DictReader(stream):
@@ -119,7 +169,7 @@ def russian_structure(pools):
 
     for province in provinces.values():
         pool_id = province.get("wwo_id") or province["unit_id"]
-        if pool_id not in pools:
+        if pool_id not in pools or pool_id in district_parents:
             continue
         (city_label, city_count), (other_label, other_count) = province["published_components"]
         if province["unit_id"] == "ru1897_77":

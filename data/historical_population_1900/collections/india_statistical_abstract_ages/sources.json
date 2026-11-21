@@ -1,0 +1,43 @@
+[
+  {
+    "id": "india_statistical_abstract_1896_age_sex",
+    "title": "Statistical abstract relating to British India from 1885-86 to 1894-95. Thirtieth number.",
+    "publisher": "Her Majesty’s Stationery Office, London, 1896",
+    "url": "https://dsal.uchicago.edu/statistics/1885_excel/index.html",
+    "locator": "Table 18, printed pp. 30–31 and worksheet 1885 table 18",
+    "rights": "Historical government table, public domain. Numeric cells transcribed from University of Chicago Digital South Asia Library.",
+    "table_urls": [
+      "https://dsal.uchicago.edu/statistics/1885_excel/1885.18.XLS",
+      "https://dsal.uchicago.edu/digbooks/images/Statistics_1885/Statistics_1885_036.gif",
+      "https://dsal.uchicago.edu/digbooks/images/Statistics_1885/Statistics_1885_037.gif"
+    ],
+    "raw_path": "age_sex.csv",
+    "extract": "Select the worksheet rows listed in panels.json and its male and female columns. Nonnumeric dashes in the selected unspecified-age cells are zero. The published sex totals are retained even where the workbook age bands do not reconcile."
+  },
+  {
+    "id": "india_statistical_abstract_1905_age_sex",
+    "title": "Statistical abstract relating to British India from 1894-95 to 1903-04. Thirty-ninth number.",
+    "publisher": "His Majesty’s Stationery Office, London, 1905",
+    "url": "https://dsal.uchicago.edu/statistics/1894_excel/index.html",
+    "locator": "Table 14, printed pp. 10–11 and worksheet 1894 table 14",
+    "rights": "Historical government table, public domain. Numeric cells transcribed from University of Chicago Digital South Asia Library.",
+    "table_urls": [
+      "https://dsal.uchicago.edu/statistics/1894_excel/1894.014.XLS",
+      "https://dsal.uchicago.edu/digbooks/images/statistical_1894/statistics_1894_020.gif",
+      "https://dsal.uchicago.edu/digbooks/images/statistical_1894/statistics_1894_021.gif"
+    ],
+    "raw_path": "age_sex.csv",
+    "extract": "Select the worksheet rows listed in panels.json and its male and female columns. Nonnumeric dashes in the selected unspecified-age cells are zero. The published sex totals are retained even where the workbook age bands do not reconcile."
+  },
+  {
+    "id": "india_census_cp_states_1901_table_vii",
+    "title": "Census of India, 1901, Volume XIII-A, Central Provinces, Part II, Tables",
+    "publisher": "R. V. Russell, Superintendent of Census Operations. Pioneer Press, Allahabad, 1902.",
+    "url": "https://archive.org/details/in.gov.ignca.31011",
+    "locator": "Table VII, Part A, All Religions, printed pp. 58–61, row 39, Feudatory States",
+    "rights": "Public domain government census. Digitized from the Archaeological Survey of India collection maintained by IGNCA.",
+    "table_urls": ["https://archive.org/stream/in.gov.ignca.31011/31011_djvu.txt"],
+    "raw_path": "age_sex.csv",
+    "extract": "The male and female series are the Feudatory States row across all four pages of the age table. The 20–39 female cell can be checked by subtracting 317,894 males from 653,004 persons. The female age-60-and-over cell can be checked by subtracting 26,973 males from 66,719 persons."
+  }
+]

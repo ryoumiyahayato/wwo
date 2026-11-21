@@ -134,7 +134,7 @@ def age_sex_panels():
     panels.extend(json.loads((AGE_SOURCES / "opening_1900_regional_panels.json").read_text(encoding="utf8")))
     regional_sources = (
         HERE / "netherlands_census_1899", HERE / "nordic_population_1900", HERE / "swiss_census_ages",
-        HERE / "andaman_census_demography", HERE / "india_princely_age",
+        HERE / "andaman_census_demography", HERE / "india_princely_age", HERE / "india_statistical_abstract_ages",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
@@ -278,7 +278,7 @@ def england_wales_remaining_ages(panels):
     return panel, rows
 
 
-def russian_regional_age_models(panels, observations):
+def russian_regional_age_models(panels, observations, district_pools):
     provinces = [row for row in observations if row["source_id"] == "russia_first_census"
                  and row.get("parent_id") == "ru_census_1897_ex_finland"]
     result = {}
@@ -299,7 +299,9 @@ def russian_regional_age_models(panels, observations):
             "Provincial age differences, migration, enumeration error and changes to January 1900 are unquantified.",
         )
         bands = [row for row in regroup_single_years(rows) if row["role"] == "band"]
-        for row in subset:
+        districts = (row for row in observations if row.get("wwo_id") in district_pools
+                     and row["source_id"] == "russia_first_census" and row["parent_id"] in ids)
+        for row in [*subset, *districts]:
             sex_totals = row["sex"]
             population = row["population_value"]
             if sum(sex_totals[sex] for sex in SEX_COUNTS) != population:
@@ -314,11 +316,16 @@ def russian_regional_age_models(panels, observations):
                 male, female = (by_sex[sex][i] for sex in SEX_COUNTS)
                 province_bands.append(band | dict(male=male, female=female, both=male + female))
             province_total = control | sex_totals | dict(both=population)
-            province_model = model | dict(
+            is_district = row["wwo_id"] in district_pools
+            level = "district" if is_district else "province"
+            local_model = model | dict(
                 observed_unit_id=row["unit_id"],
-                locator=f"{panel['locator']}; {row['source_id']}, {row['locator']} (province sex totals)",
+                locator=f"{panel['locator']}; {row['source_id']}, {row['locator']} ({level} sex totals)",
             )
-            result[row["wwo_id"] or row["unit_id"]] = (province_model, [province_total, *province_bands])
+            if is_district:
+                local_model["opening_method"] = model["opening_method"].replace("province's", "district's")
+                local_model["uncertainty"] = model["uncertainty"].replace("provincial", "district").replace("Provincial", "District")
+            result[row["wwo_id"] or row["unit_id"]] = (local_model, [province_total, *province_bands])
     return result
 
 
@@ -382,6 +389,83 @@ def port_blair_opening_sex_model(panels, unit):
     )
 
 
+def indian_abstract_opening_age_model(panels, unit, dates, area):
+    first_panel, first_rows = panels[f"india_abstract_{area}_1891"]
+    last_panel, last_rows = panels[f"india_abstract_{area}_1901"]
+    if [first_panel["observed_date"], last_panel["observed_date"]] != dates:
+        raise ValueError(f"{area}: abstract age tables and opening controls use different dates")
+    target = [dict(label="Total Population", role="total", age_min=None, age_max=None)]
+    target.extend(dict(label=label, role="band", age_min=low, age_max=high) for label, low, high in (
+        ("Ages 0–4", 0, 4), ("Ages 5–14", 5, 14), ("Ages 15–24", 15, 24),
+        ("Ages 25–44", 25, 44), ("Ages 45 and over", 45, None), ("Unspecified", None, None),
+    ))
+    first, last = [
+        opening_age_group(panel, list(regroup_age_rows(rows, target)), unit["unit_id"], endpoint)
+        for panel, rows, endpoint in zip(
+            (first_panel, last_panel), (first_rows, last_rows), unit["endpoint_values"], strict=True,
+        )
+    ]
+    if [first["observed_total"], last["observed_total"]] != unit["endpoint_values"]:
+        raise ValueError(f"{area}: abstract age tables and opening controls use different census populations")
+
+    fraction = opening_fraction(dates)
+    quotas = {
+        sex: {early["id"]: early[sex] * (1 - fraction) + late[sex] * fraction
+              for early, late in zip(first["bands"], last["bands"], strict=True)}
+        for sex in SEX_COUNTS
+    }
+    total = unit["population_value"]
+    sex_totals = apportion({sex: sum(quotas[sex].values()) for sex in SEX_COUNTS}, total)
+    allocations = {sex: apportion(quotas[sex], sex_totals[sex]) for sex in SEX_COUNTS}
+    rows = [dict(role="total", both=total, **sex_totals)]
+    rows.extend(band | dict(role="band", **{sex: allocations[sex][band["id"]] for sex in SEX_COUNTS})
+                for band in last["bands"])
+    model = last_panel | dict(
+        id=f"{area}_opening_age_model", observed_date=DATE,
+        locator=f"{first_panel['locator']}; {last_panel['locator']}; {last_panel['population_control_locator']}.",
+        opening_method="Interpolate both censuses on a shared set of age bands to 1900-01-01. "
+        "Reconcile integer ages within each modeled sex total. Keep unspecified ages unknown.",
+        uncertainty="The 1891 abstract has inconsistent labels above age 44. Both censuses are grouped to 45 and over. "
+        "Census age reporting and intercensal change have no quantified error interval.",
+    )
+    return opening_age_group(model, rows, unit["unit_id"], total)
+
+
+def central_provinces_states_opening_age_model(panels, unit, dates):
+    early_panel, early_rows = panels["india_abstract_central_provinces_states_1891"]
+    late_panel, late_rows = panels["india_census_cp_states_1901"]
+    early_total, = (row for row in early_rows if row["role"] == "total")
+    late_total, = (row for row in late_rows if row["role"] == "total")
+    total = unit["population_value"]
+    observed = opening_age_group(late_panel, late_rows, unit["unit_id"], total)
+    if [early_panel["observed_date"], late_panel["observed_date"]] != dates or (
+        [early_total["both"], observed["observed_total"]] != unit["endpoint_values"]
+        or early_total["male"] + early_total["female"] != early_total["both"]
+    ):
+        raise ValueError("Central Provinces States age and sex tables use different census controls")
+
+    fraction = opening_fraction(dates)
+    sex_totals = apportion({sex: early_total[sex] * (1 - fraction) + late_total[sex] * fraction
+                            for sex in SEX_COUNTS}, total)
+    allocations = {
+        sex: apportion({band["id"]: Fraction(band[sex] * sex_totals[sex], late_total[sex])
+                        for band in observed["bands"]}, sex_totals[sex])
+        for sex in SEX_COUNTS
+    }
+    rows = [dict(role="total", both=total, **sex_totals)]
+    rows.extend(band | dict(role="band", **{sex: allocations[sex][band["id"]] for sex in SEX_COUNTS})
+                for band in observed["bands"])
+    model = late_panel | dict(
+        id="central_provinces_states_opening_age_model", observed_date=DATE,
+        locator=f"{late_panel['locator']}; {late_panel['population_control_locator']} for both sex totals.",
+        opening_method="Interpolate the comparable 1891 and 1901 sex counts to 1900-01-01. "
+        "Hold the 1901 provincial census age distribution within each modeled sex total.",
+        uncertainty="The provincial tables supply seven age bands. Age changes before 1901 "
+        "and census reporting errors have no quantified interval.",
+    )
+    return opening_age_group(model, rows, unit["unit_id"], total)
+
+
 def princely_state_opening_age_model(panels, unit, state):
     earlier, earlier_rows = panels[f"{state}_1891_age_rates"]
     later, later_rows = panels[f"{state}_1901_age_rates"]
@@ -421,6 +505,9 @@ def princely_state_opening_age_model(panels, unit, state):
 
 
 def opening_structure(opening_groups, observations, *, version=6):
+    district_pools = {unit["unit_id"]: unit for group in opening_groups for unit in group["units"]
+                      if "district_boundary_source" in unit}
+    district_parents = {unit["statistical_parent"] for unit in district_pools.values()}
     statistical_aggregates = {
         unit["unit_id"]: unit
         for group in opening_groups
@@ -431,7 +518,7 @@ def opening_structure(opening_groups, observations, *, version=6):
         for group in opening_groups
         for unit in (group["units"] or [group])
         if "statistical_parent" not in unit
-    } | statistical_aggregates
+    } | {key: unit for key, unit in statistical_aggregates.items() if key not in district_parents} | district_pools
     opening_totals = {unit_id: unit["population_value"] for unit_id, unit in opening_balances.items()}
     groups = []
     panels = {panel["id"]: (panel, rows) for panel, rows in age_sex_panels()}
@@ -456,8 +543,18 @@ def opening_structure(opening_groups, observations, *, version=6):
                     for unit in group["units"]
                 )
     port_blair = "raj_andaman_nicobar_comparable"
-    if version >= 14 and port_blair in opening_balances:
+    if version == 14 and port_blair in opening_balances:
         groups.append(port_blair_opening_sex_model(panels, opening_balances[port_blair]))
+    if version >= 15:
+        abstract_areas = {port_blair: "port_blair", "raj_united_provinces_states": "united_provinces_states"}
+        for group in opening_groups:
+            for unit in group["units"]:
+                unit_id = unit["unit_id"]
+                if area := abstract_areas.get(unit_id):
+                    dates = unit.get("source_dates") or group["endpoint_dates"]
+                    groups.append(indian_abstract_opening_age_model(panels, unit, dates, area))
+                elif unit_id == "raj_central_provinces_states":
+                    groups.append(central_provinces_states_opening_age_model(panels, unit, group["endpoint_dates"]))
     if version >= 14:
         princely_states = {"raj_travancore_state": "travancore", "raj_cochin_state": "cochin"}
         for group in opening_groups:
@@ -466,7 +563,7 @@ def opening_structure(opening_groups, observations, *, version=6):
                 if state is not None:
                     groups.append(princely_state_opening_age_model(panels, unit, state))
     if version >= 10:
-        models = russian_regional_age_models(panels, observations)
+        models = russian_regional_age_models(panels, observations, district_pools)
         remaining_uk = england_wales_remaining_ages(panels)
         scotland_panel, scotland_rows = panels["scotland_1901"]
         scotland = scotland_panel | dict(

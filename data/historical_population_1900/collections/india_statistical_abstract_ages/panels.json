@@ -1,0 +1,107 @@
+[
+  {
+    "id": "india_abstract_port_blair_1891",
+    "observed_unit_id": "raj_andaman_nicobar_comparable",
+    "published_scope": "Port Blair Penal Settlement",
+    "observed_date": "1891-02-26",
+    "source_id": "india_statistical_abstract_1896_age_sex",
+    "locator": "Table 18, printed pp. 30–31, 1885 table 18, A16:Q16, Andamans",
+    "definition": "Census population by age and sex. The both-sex column sums the two published sex counts. Published under an island heading. The sex counts identify the penal settlement return, excluding independently enumerated Indigenous Andamanese and Nicobars.",
+    "uncertainty": "Census age reporting and intercensal change have no quantified error interval. The printed abstract labels the last two reported age groups 45 to 49 and 60 and Over. The intermediate boundary is unresolved.",
+    "broad_observation": false,
+    "population_control_locator": "Census of India 1911, Volume II, Part II, Table II, p. 128"
+  },
+  {
+    "id": "india_abstract_bombay_states_1891",
+    "observed_unit_id": "raj_bombay_states",
+    "published_scope": "Bombay States",
+    "observed_date": "1891-02-26",
+    "source_id": "india_statistical_abstract_1896_age_sex",
+    "locator": "Table 18, printed pp. 30–31, 1885 table 18, A25:Q25, Bombay States",
+    "definition": "1891 age and sex counts for the Bombay States. They reconcile to the 1891 sex counts in Census of India 1901, Table II-A. The both-sex column sums the two published sex counts.",
+    "uncertainty": "The printed abstract labels the last two reported age groups 45 to 49 and 60 and Over. The intermediate boundary is unresolved.",
+    "broad_observation": false
+  },
+  {
+    "id": "india_abstract_central_provinces_states_1891",
+    "observed_unit_id": "raj_central_provinces_states",
+    "published_scope": "Central Provinces States",
+    "observed_date": "1891-02-26",
+    "source_id": "india_statistical_abstract_1896_age_sex",
+    "locator": "Table 18, printed pp. 30–31, 1885 table 18, A27:Q27, Central Provinces States",
+    "definition": "Census population by age and sex. The both-sex column sums the two published sex counts. The printed age groups sum to 90,000 fewer females than the table's all-age count. The two all-age sex counts agree with the 1901 census comparison table.",
+    "uncertainty": "The cause of the shortfall in the female age bands is unresolved.",
+    "broad_observation": true,
+    "population_control_locator": "Census of India 1901, India, Table II-A, p. 10, row 17"
+  },
+  {
+    "id": "india_abstract_united_provinces_states_1891",
+    "observed_unit_id": "raj_united_provinces_states",
+    "published_scope": "United Provinces States (Rampur and Tehri)",
+    "observed_date": "1891-02-26",
+    "source_id": "india_statistical_abstract_1896_age_sex",
+    "locator": "Table 18, printed pp. 30–31, 1885 table 18, A29:Q29, N.W. Provinces States",
+    "definition": "Census population by age and sex. The both-sex column sums the two published sex counts. The combined return of Rampur and Tehri. The directly administered Agra and Oudh are outside the scope.",
+    "uncertainty": "Census age reporting and intercensal change have no quantified error interval. The printed abstract labels the last two reported age groups 45 to 49 and 60 and Over. The intermediate boundary is unresolved.",
+    "broad_observation": false,
+    "population_control_locator": "Census of India 1901, India, Table II-A, p. 10, row 24"
+  },
+  {
+    "id": "india_abstract_port_blair_1901",
+    "observed_unit_id": "raj_andaman_nicobar_comparable",
+    "published_scope": "Port Blair Penal Settlement",
+    "observed_date": "1901-03-01",
+    "source_id": "india_statistical_abstract_1905_age_sex",
+    "locator": "Table 14, printed pp. 10–11, 1894 table 14, A6:Z6, Andamans and Nicobars",
+    "definition": "Census population by age and sex. The both-sex column sums the two published sex counts. Published under an island heading. The sex counts identify the penal settlement return, excluding independently enumerated Indigenous Andamanese and Nicobars.",
+    "uncertainty": "Census age reporting and intercensal change have no quantified error interval.",
+    "broad_observation": false,
+    "population_control_locator": "Census of India 1911, Volume II, Part II, Table II, p. 128"
+  },
+  {
+    "id": "india_abstract_bombay_states_1901",
+    "observed_unit_id": "raj_bombay_states_1901_full_census",
+    "published_scope": "Bombay States",
+    "observed_date": "1901-03-01",
+    "source_id": "india_statistical_abstract_1905_age_sex",
+    "locator": "Table 14, printed pp. 10–11, 1894 table 14, A21:Z21, Bombay States",
+    "definition": "Census population by age and sex. The both-sex column sums the two published sex counts. The 1901 age return uses the population before the adjustments to the 1891 enumeration geography in Census of India Table II-A. The full 1901 age return is 22,809 persons larger than the comparable opening endpoint.",
+    "uncertainty": "The full 1901 age return is 22,809 persons larger than the comparable opening endpoint.",
+    "broad_observation": true
+  },
+  {
+    "id": "india_abstract_central_provinces_states_1901",
+    "observed_unit_id": "raj_central_provinces_states",
+    "published_scope": "Central Provinces States",
+    "observed_date": "1901-03-01",
+    "source_id": "india_statistical_abstract_1905_age_sex",
+    "locator": "Table 14, printed pp. 10–11, 1894 table 14, A23:Z23, Central Provinces States",
+    "definition": "Census population by age and sex. The both-sex column sums the two published sex counts. The male bands in the printed abstract leave 2,000 males unreconciled. The provincial census publishes coarser bands that close by sex.",
+    "uncertainty": "The abstract's printed male age bands fall 2,000 below the census control. The affected fine band is unresolved.",
+    "broad_observation": true
+  },
+  {
+    "id": "india_abstract_united_provinces_states_1901",
+    "observed_unit_id": "raj_united_provinces_states",
+    "published_scope": "United Provinces States (Rampur and Tehri)",
+    "observed_date": "1901-03-01",
+    "source_id": "india_statistical_abstract_1905_age_sex",
+    "locator": "Table 14, printed pp. 10–11, 1894 table 14, A30:Z30, United Provinces States",
+    "definition": "Census population by age and sex. The both-sex column sums the two published sex counts. The combined return of Rampur and Tehri. The directly administered Agra and Oudh are outside the scope.",
+    "uncertainty": "Census age reporting and intercensal change have no quantified error interval.",
+    "broad_observation": false,
+    "population_control_locator": "Census of India 1901, India, Table II-A, p. 10, row 24"
+  },
+  {
+    "id": "india_census_cp_states_1901",
+    "observed_unit_id": "raj_central_provinces_states",
+    "published_scope": "Central Provinces Feudatory States",
+    "observed_date": "1901-03-01",
+    "source_id": "india_census_cp_states_1901_table_vii",
+    "locator": "Table VII, Part A, All Religions, printed pp. 58–61, row 39",
+    "definition": "The combined Feudatory States return, separately from the directly administered Central Provinces. Seven age bands reconcile to the published totals for both sexes.",
+    "uncertainty": "Census age reporting and intercensal change have no quantified error interval.",
+    "broad_observation": false,
+    "population_control_locator": "Census of India 1901, India, Table II-A, p. 10, row 17"
+  }
+]
