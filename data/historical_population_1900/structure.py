@@ -212,6 +212,11 @@ def opening_age_group(panel, rows, unit_id, opening_total):
     if len(totals) != 1:
         raise ValueError(f"{panel['id']}: expected one age table control")
     total = totals[0]
+    if "opening_residual_label" in panel:
+        bands.append(dict(
+            label=panel["opening_residual_label"], age_min=None, age_max=None,
+            **{sex: total[sex] - sum(band[sex] for band in bands) for sex in SEX_COUNTS},
+        ))
     for sex in SEX_COUNTS:
         if any(band[sex] < 0 for band in bands) or sum(band[sex] for band in bands) != total[sex]:
             raise ValueError(f"{panel['id']}: {sex} age rows do not sum to the table control")

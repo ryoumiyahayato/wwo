@@ -5,7 +5,7 @@ use std::{collections::{BTreeMap, BTreeSet}, io};
 
 const DIMENSIONS: &[&str] = &[
     "occupation", "class", "legal_estate", "language", "culture", "religion", "literacy",
-    "residence", "marital_status", "housing",
+    "residence", "marital_status", "household", "housing",
 ];
 
 #[derive(Default)]

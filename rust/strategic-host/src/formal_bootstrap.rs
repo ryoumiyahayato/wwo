@@ -2308,7 +2308,16 @@ mod tests {
         let us_social = world.population().social_distribution(Some("united_states_1900")).unwrap();
         assert_eq!(us_social.dimensions["occupation"].assigned_residents, 28_866_450);
         assert_eq!(us_social.dimensions["residence"].unknown_residents, 0);
+        assert_eq!(us_social.dimensions["literacy"].assigned_residents, 57_539_868);
+        assert_eq!(us_social.dimensions["household"].assigned_residents, 72_890_961);
         assert_eq!(us_social.dimensions["culture"].unknown_residents, us.population_total);
+        let prussia = world.population().structure(Some("administrative_region:germany_preussen"), clock).unwrap();
+        assert_eq!(prussia.population_total, 33_993_492);
+        assert_eq!(prussia.cohort_residents + prussia.named_residents, prussia.population_total);
+        assert_eq!(prussia.residents_with_cohort_age_and_sex, 12_087_276);
+        let port_louis = world.transport().capital_node("cshapes_gw_590").unwrap();
+        assert_eq!(world.residence_unit_at(port_louis), Some("mu_district_port_louis"));
+        assert_eq!(world.population().population_total("qing_hist_shandong"), Some(42_165_666));
         let initial = world.population().structure(None, clock).unwrap();
         assert_eq!(initial.population_total,
             initial.named_residents + initial.unclassified_residents + initial.cohort_residents);
@@ -2427,6 +2436,16 @@ mod tests {
         assert_eq!(restored.residence_unit_at("place:moscow"), Some("ft_russia_empire_ussr"));
         assert_eq!(restored.population().structure(None, clock).unwrap().residents_with_cohort_age_and_sex, 325_734_333);
         assert_eq!(restored.population().social_distribution(None).unwrap().residents_with_any_attribute_minimum, 0);
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(10)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        let port_louis = restored.transport().capital_node("cshapes_gw_590").unwrap();
+        assert_eq!(restored.residence_unit_at(port_louis), Some("mu_main_island"));
+        assert_eq!(restored.population().global_total(), 1_465_392_190);
+        assert_eq!(restored.population().population_total("qing_hist_shandong"), None);
+        assert_eq!(restored.population().social_distribution(None).unwrap().residents_with_any_attribute_minimum, 309_272_209);
         assert_eq!(restored.snapshot(), old_saved);
     }
 

@@ -258,6 +258,7 @@ impl Panel {
                 "literacy" => ("识字", "Literacy"),
                 "residence" => ("城乡居住", "Urban and rural residence"),
                 "marital_status" => ("婚姻状态", "Marital status"),
+                "household" => ("家庭居住类型", "Household type"),
                 "housing" => ("住房", "Housing"),
                 _ => continue,
             };

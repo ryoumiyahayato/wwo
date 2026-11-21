@@ -1,0 +1,20 @@
+[
+  {
+    "id": "mauritius_census_1891",
+    "title": "Census of Mauritius and its Dependencies taken on the 6th April 1891",
+    "publisher": "Mauritius Census Office",
+    "url": "https://statsmauritius.govmu.org/Documents/Census_and_Surveys/Archive%20Census/1POPULATION%20CENSUS/REPT_0394_0001.pdf",
+    "locator": "Title page and paragraph 1 for the enumeration date and all nine district counts. Paragraph 50, Population of Rodrigues.",
+    "rights": "Transcribed counts from a public-domain report. No images reproduced.",
+    "raw_paths": ["raw/mauritius_and_rodrigues.tsv"]
+  },
+  {
+    "id": "mauritius_census_1911_district_comparison",
+    "title": "Census of Mauritius and its Dependencies, 1911",
+    "publisher": "Mauritius Census Office",
+    "url": "https://statsmauritius.govmu.org/Documents/Census_and_Surveys/Archive%20Census/1POPULATION%20CENSUS/REPT_0396_0001.pdf",
+    "locator": "Statistical Abstracts, Table I, Total Population, 1901 column. The report's section II shows the 1901 barracks and dependency populations separately, including Rodrigues. Paragraph 1 gives the 1901 enumeration date.",
+    "rights": "Transcribed counts from a public-domain report. No images reproduced.",
+    "raw_paths": ["raw/mauritius_and_rodrigues.tsv"]
+  }
+]

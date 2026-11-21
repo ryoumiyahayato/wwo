@@ -48,6 +48,11 @@ def allocate_census_shares(observations, *, source_id, observed_date, observed_r
     ) for row in rows]
 
 
+def opening_fraction(dates):
+    first, last = map(date.fromisoformat, dates)
+    return Fraction((date.fromisoformat(DATE) - first).days, (last - first).days)
+
+
 def interpolate_partition(rows, parent, dates):
     partition = defaultdict(dict)
     for row in rows:
@@ -59,8 +64,7 @@ def interpolate_partition(rows, parent, dates):
     for census_date, control in zip(dates, parent["endpoint_values"]):
         if sum(series[census_date]["population_value"] for series in partition.values()) != control:
             raise ValueError(f"Non-closing source partition for {parent['unit_id']} on {census_date}")
-    first, last = map(date.fromisoformat, dates)
-    fraction = Fraction((date.fromisoformat(DATE) - first).days, (last - first).days)
+    fraction = opening_fraction(dates)
     observed = {unit: [series[d] for d in dates] for unit, series in partition.items()}
     values = {unit: [row["population_value"] for row in rows] for unit, rows in observed.items()}
     allocations = apportion(
@@ -117,6 +121,46 @@ def add_british_county_partitions(group, observations):
     group["method"] += (" Scottish civil counties use both census endpoints. The Irish administrative "
                         "counties and county boroughs use their 1901 shares within the interpolated provinces.")
     group["source_ids"] = [*group["source_ids"], "scotland_civil_counties_census_1901", source]
+
+
+def add_mauritius_districts(group, observations):
+    islands = {row["unit_id"]: row for row in group["units"]}
+    island = islands["mu_main_island"]
+    rodrigues = islands["mu_rodrigues"]
+    dates = ["1891-04-06", "1901-04-01"]
+    sources = ["mauritius_census_1891", "mauritius_census_1911_district_comparison"]
+    returns = [row for row in observations if row["source_id"] in sources]
+    district_returns = [row for row in returns if row["parent_id"] == island["unit_id"]]
+    fraction = opening_fraction(dates)
+    island_first, island_last = island["endpoint_values"]
+    island["population_value"] = round(island_first + (island_last - island_first) * fraction)
+    districts = interpolate_partition(district_returns, island, dates)
+    for district in districts:
+        district["source_ids"] = sources
+    rodrigues_returns = {row["date"]: row for row in returns if row["unit_id"] == rodrigues["unit_id"]}
+    rodrigues_first, rodrigues_last = (rodrigues_returns[day]["population_value"] for day in dates)
+    method = (f"Linear daily interpolation over elapsed fraction {fraction} between the original census "
+              "enumeration dates. Each island rounded to a whole person.")
+    rodrigues.update(
+        population_value=round(rodrigues_first + (rodrigues_last - rodrigues_first) * fraction),
+        endpoint_values=[rodrigues_first, rodrigues_last], source_id=sources[0], source_ids=sources, source_dates=dates,
+        source_observations=[rodrigues_returns[day]["record_id"] for day in dates],
+        locator="1891 census, paragraph 50; 1911 census, section II, Rodrigues row for 1901.",
+        method=method, scope=rodrigues_returns[dates[0]]["definition"],
+    )
+    island_locator = "1891 census, paragraph 1; 1911 census, Statistical Abstracts, Table I."
+    group["units"] = districts + [rodrigues]
+    group["subdivision_control"] = dict(island, source_ids=sources, source_dates=dates, locator=island_locator)
+    group["subdivision_source"] = "collections/mauritius_districts/observations.jsonl"
+    group["source_id"] = sources[0]
+    group["source_ids"] = sources
+    group["endpoint_dates"] = dates
+    group["country_endpoint_values"] = [island_first + rodrigues_first, island_last + rodrigues_last]
+    group["population_value"] = island["population_value"] + rodrigues["population_value"]
+    group["locator"] = island_locator + " Rodrigues is reported separately in paragraph 50 and section II."
+    group["method"] = method + " Districts use largest remainders to match the opening count of the main island."
+    group["scope"] = ("Mauritius and its nearby census islets, plus Rodrigues. The district totals exclude "
+                      "barracks, shipping and other separately reported dependencies.")
 
 
 def add_australian_colonies(group, observations):
@@ -423,6 +467,10 @@ def qing_interior(observations, version):
         additions = path.with_name("qing_interior_v10_crosswalk.tsv")
         with additions.open(encoding="utf8") as f:
             links.extend(csv.DictReader(f, delimiter="\t"))
+    if version >= 11:
+        coastal_and_frontier = path.with_name("qing_interior_v11_crosswalk.tsv")
+        with coastal_and_frontier.open(encoding="utf8") as f:
+            links.extend(csv.DictReader(f, delimiter="	"))
     leaves = []
     for link in links:
         row = by_id[link["unit_id"]]
@@ -467,6 +515,8 @@ def qing_interior(observations, version):
         group["expanded_partition_source"] = expanded.relative_to(HERE).as_posix()
     if version >= 10:
         group["additional_territorial_source"] = additions.relative_to(HERE).as_posix()
+    if version >= 11:
+        group["v11_territorial_source"] = coastal_and_frontier.relative_to(HERE).as_posix()
     return group
 
 
@@ -556,6 +606,8 @@ def groups(observations, version=1):
         add_russian_provinces(result["russian_empire"], observations)
         add_japanese_prefectures(result["empire_of_japan"], observations)
         add_india_comparable_areas(result["cshapes_gw_750"], observations)
+    if version >= 11:
+        add_mauritius_districts(result["cshapes_gw_590"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

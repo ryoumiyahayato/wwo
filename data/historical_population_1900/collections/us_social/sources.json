@@ -19,5 +19,32 @@
     "locator": "Table 36, printed p. 56, rows 11–59, compare 1900 columns.",
     "rights": "United States government publication. Public domain.",
     "date_note": "June 1, 1900 counts republished under the Bureau's comparative urban/rural definitions. The Oklahoma row combines Oklahoma and Indian Territory. The District of Columbia is classified entirely urban in this series."
+  },
+  {
+    "id": "us_twelfth_census_table_liv_literacy",
+    "publisher": "United States Census Office",
+    "title": "Twelfth Census of the United States, Volume II, Population, Part II",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p2.pdf",
+    "locator": "Table LIV, printed p. c, 1900 columns for total and illiterate population aged 10 or older.",
+    "references": [
+      "https://ftp.cdc.gov/pub/Health_Statistics/NCHS/Publications/DVD/DVD_1/VSUS_1890-1974/1890-1974/1900_VSUS_2.pdf",
+      "https://www2.census.gov/library/publications/1904/compendia/statab/26ed/1903-05.pdf"
+    ],
+    "rights": "United States government publication. Public domain.",
+    "date_note": "June 1, 1900. Fifty mainland state and territory rows sum to the published mainland controls on p. xcix. Tables LV and LVI and Statistical Abstract Table 182 corroborate the Massachusetts and Arizona illiteracy counts. The denominator outside the literacy age universe is retained as unassigned."
+  },
+  {
+    "id": "us_twelfth_census_table_95_household",
+    "publisher": "United States Census Office",
+    "title": "Twelfth Census of the United States, Volume II, Population, Part II",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p12.pdf",
+    "locator": "Table 95, printed p. 605, Total Population and Private Families Population.",
+    "references": [
+      "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p2.pdf",
+      "https://www2.census.gov/library/publications/decennial/1900/abstract/1900-census-1904-abstract.pdf",
+      "https://ftp.cdc.gov/pub/Health_Statistics/NCHS/Publications/DVD/DVD_1/VSUS_1890-1974/1890-1974/1900_VSUS_2.pdf"
+    ],
+    "rights": "United States government publication. Public domain.",
+    "date_note": "June 1, 1900. The mainland counts close to the private-family and all-resident population controls on p. clviii. Table LXXXVIII and Abstract Table 67 corroborate the Nevada, North Dakota and Oregon private-family population counts. Table 95 reports the other family categories as numbers of groups. Their residents are retained as unassigned."
   }
 ]

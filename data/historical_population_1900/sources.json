@@ -210,6 +210,20 @@
     "collection": "age_sex"
   },
   {
+    "id": "de_prussia_1900_age_sex_controls",
+    "title": "Censimento della popolazione del Regno d’Italia al 10 febbraio 1901, Vol. V",
+    "publisher": "Direzione Generale della Statistica, Rome, 1904",
+    "url": "https://ebiblio.istat.it/SebinaOpac/resource/IST00011513",
+    "locator": "Table XXIV, printed p. 114, Prussia row. Cross-check: Statistisches Jahrbuch für den Preussischen Staat, 1904, I.B.3 and I.B.8, printed pp. 3 and 7",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7957cp1901_v5_Relazione_sul_metodo_di_esecuzione_e_sui_risultati_del_censimento%2BOCR_ottimizzato.pdf",
+      "https://webapp.sbc.org.pl/Content/323213/PDF/ii149234-1904-00-0001.pdf?handler=pdf"
+    ],
+    "collection": "age_sex"
+  },
+  {
     "id": "india_census_1901_original_age",
     "title": "Census of India, 1901, Vol. I-A, India, Part II: Tables",
     "publisher": "Census Commissioner for India, Calcutta, 1903; Government of India",
@@ -1549,6 +1563,30 @@
     "collection": "madagascar_population"
   },
   {
+    "id": "mauritius_census_1891",
+    "title": "Census of Mauritius and its Dependencies taken on the 6th April 1891",
+    "publisher": "Mauritius Census Office",
+    "url": "https://statsmauritius.govmu.org/Documents/Census_and_Surveys/Archive%20Census/1POPULATION%20CENSUS/REPT_0394_0001.pdf",
+    "locator": "Title page and paragraph 1 for the enumeration date and all nine district counts. Paragraph 50, Population of Rodrigues.",
+    "rights": "Transcribed counts from a public-domain report. No images reproduced.",
+    "raw_paths": [
+      "raw/mauritius_and_rodrigues.tsv"
+    ],
+    "collection": "mauritius_districts"
+  },
+  {
+    "id": "mauritius_census_1911_district_comparison",
+    "title": "Census of Mauritius and its Dependencies, 1911",
+    "publisher": "Mauritius Census Office",
+    "url": "https://statsmauritius.govmu.org/Documents/Census_and_Surveys/Archive%20Census/1POPULATION%20CENSUS/REPT_0396_0001.pdf",
+    "locator": "Statistical Abstracts, Table I, Total Population, 1901 column. The report's section II shows the 1901 barracks and dependency populations separately, including Rodrigues. Paragraph 1 gives the 1901 enumeration date.",
+    "rights": "Transcribed counts from a public-domain report. No images reproduced.",
+    "raw_paths": [
+      "raw/mauritius_and_rodrigues.tsv"
+    ],
+    "collection": "mauritius_districts"
+  },
+  {
     "id": "morocco_1899_statesmans_yearbook",
     "title": "The Statesman's Year-Book 1899, American edition",
     "publisher": "Macmillan, 1899. Edited by J. Scott Keltie. Printed-page scan and transcription hosted by Wikisource.",
@@ -2029,6 +2067,35 @@
     "locator": "Table 36, printed p. 56, rows 11–59, compare 1900 columns.",
     "rights": "United States government publication. Public domain.",
     "date_note": "June 1, 1900 counts republished under the Bureau's comparative urban/rural definitions. The Oklahoma row combines Oklahoma and Indian Territory. The District of Columbia is classified entirely urban in this series.",
+    "collection": "us_social"
+  },
+  {
+    "id": "us_twelfth_census_table_liv_literacy",
+    "publisher": "United States Census Office",
+    "title": "Twelfth Census of the United States, Volume II, Population, Part II",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p2.pdf",
+    "locator": "Table LIV, printed p. c, 1900 columns for total and illiterate population aged 10 or older.",
+    "references": [
+      "https://ftp.cdc.gov/pub/Health_Statistics/NCHS/Publications/DVD/DVD_1/VSUS_1890-1974/1890-1974/1900_VSUS_2.pdf",
+      "https://www2.census.gov/library/publications/1904/compendia/statab/26ed/1903-05.pdf"
+    ],
+    "rights": "United States government publication. Public domain.",
+    "date_note": "June 1, 1900. Fifty mainland state and territory rows sum to the published mainland controls on p. xcix. Tables LV and LVI and Statistical Abstract Table 182 corroborate the Massachusetts and Arizona illiteracy counts. The denominator outside the literacy age universe is retained as unassigned.",
+    "collection": "us_social"
+  },
+  {
+    "id": "us_twelfth_census_table_95_household",
+    "publisher": "United States Census Office",
+    "title": "Twelfth Census of the United States, Volume II, Population, Part II",
+    "url": "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p12.pdf",
+    "locator": "Table 95, printed p. 605, Total Population and Private Families Population.",
+    "references": [
+      "https://www2.census.gov/library/publications/decennial/1900/volume-2/volume-2-p2.pdf",
+      "https://www2.census.gov/library/publications/decennial/1900/abstract/1900-census-1904-abstract.pdf",
+      "https://ftp.cdc.gov/pub/Health_Statistics/NCHS/Publications/DVD/DVD_1/VSUS_1890-1974/1890-1974/1900_VSUS_2.pdf"
+    ],
+    "rights": "United States government publication. Public domain.",
+    "date_note": "June 1, 1900. The mainland counts close to the private-family and all-resident population controls on p. clviii. Table LXXXVIII and Abstract Table 67 corroborate the Nevada, North Dakota and Oregon private-family population counts. Table 95 reports the other family categories as numbers of groups. Their residents are retained as unassigned.",
     "collection": "us_social"
   },
   {
