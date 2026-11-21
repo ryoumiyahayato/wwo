@@ -17,7 +17,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 11
+OPENING_VERSION = 12
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -83,10 +83,15 @@ def opening_count_basis(selection, legacy, world_reference):
     accounts = []
     for group in selection:
         source = group["source_id"]
-        basis = ("published_historical_estimates" if source.startswith("ft_world_") or source in
-                 {"cao_qing_provincial_reconstruction", "natal_statistical_yearbook_1909_macdonald",
-                  "cape_colony_1899_imperial_conference", "zanzibar_statesmans_year_book_1899"}
-                 else "date_models_from_territorial_returns")
+        if source == "nl_cbs_census_1899_age_marital":
+            basis = "direct_enumeration_on_opening_date"
+        elif source.startswith("ft_world_") or source in {
+            "cao_qing_provincial_reconstruction", "natal_statistical_yearbook_1909_macdonald",
+            "cape_colony_1899_imperial_conference", "zanzibar_statesmans_year_book_1899",
+        }:
+            basis = "published_historical_estimates"
+        else:
+            basis = "date_models_from_territorial_returns"
         sourced = group.get("research_unlocated_balance", sourced_people(group))
         retained = group.get("legacy_unlocated_balance", 0)
         counts[basis] += sourced
@@ -95,7 +100,8 @@ def opening_count_basis(selection, legacy, world_reference):
                              sourced_people=sourced, sourced_basis=basis, retained_legacy_people=retained))
         if "research_unlocated_balance" in group:
             for leaf in group["units"]:
-                leaf_basis = "date_models_from_territorial_returns"
+                leaf_basis = (basis if basis == "direct_enumeration_on_opening_date"
+                              else "date_models_from_territorial_returns")
                 counts[leaf_basis] += leaf["population_value"]
                 accounts.append(dict(unit_id=leaf["unit_id"], source_id=leaf["source_id"],
                                      sourced_people=leaf["population_value"], sourced_basis=leaf_basis,
@@ -110,7 +116,7 @@ def opening_count_basis(selection, legacy, world_reference):
         counts={key: dict(people=count, pct_of_research_reference=round(100*count/world_reference, 3))
                 for key, count in counts.items()},
         scopes=sorted(accounts, key=lambda row: row["unit_id"]),
-        note="Published historical estimates include the normalized date of a research or contemporary estimate. Territorial models use census or official statistical returns at other dates. No census exactly matches the opening date and scope. Residents without an exclusive opening count remain in the geography and benchmark ledgers; the difference between authorities is not an observed count of missing residents.",
+        note="Published historical estimates include the normalized date of a research or contemporary estimate. Territorial models use census or official statistical returns at other dates. The Dutch count enumerates usual residents at the opening midnight. The difference between authorities is not an observed count of missing residents.",
     )
 
 def residuals(rows):

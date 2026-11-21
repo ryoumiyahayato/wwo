@@ -129,9 +129,9 @@
         "sweden_norway_union",
         "swiss_confederation"
       ],
-      "production_people": 408822583,
-      "production_pct_of_regional_research_estimate": 97.537,
-      "people_with_opening_subdivision": 332407293,
+      "production_people": 408784805,
+      "production_pct_of_regional_research_estimate": 97.528,
+      "people_with_opening_subdivision": 337511272,
       "research_only_units": 9,
       "research_only_people": 10103353
     },
@@ -2689,9 +2689,9 @@
       "candidate_polity_ids": [
         "kingdom_of_netherlands"
       ],
-      "comparison_id": "kingdom_of_netherlands",
-      "opening_disposition": "adopted_research_series",
-      "note": "European territory after the 1839 settlement including Eastern Limburg. Overseas colonies separate."
+      "comparison_id": "netherlands",
+      "opening_disposition": "comparable_extent",
+      "note": "Both controls cover the European Netherlands, including Eastern Limburg and excluding all colonies. The opening uses usual residence at the census midnight. The research estimate aims at present population."
     },
     {
       "unit_id": "ft_norway",
@@ -3223,6 +3223,24 @@
       "documented_opening_people": 151193,
       "opening_people_including_retained_balances": 151193,
       "research_minus_documented": -5374
+    },
+    {
+      "comparison_id": "netherlands",
+      "opening_root_ids": [
+        "kingdom_of_netherlands"
+      ],
+      "research_unit_ids": [
+        "ft_netherlands"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "Both controls cover the European Netherlands, including Eastern Limburg and excluding all colonies. The opening uses usual residence at the census midnight. The research estimate aims at present population.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 5141915,
+      "documented_opening_people": 5104137,
+      "opening_people_including_retained_balances": 5104137,
+      "research_minus_documented": 37778
     },
     {
       "comparison_id": "fiji_rotuma",
@@ -3821,24 +3839,6 @@
       "research_minus_documented": 0
     },
     {
-      "comparison_id": "kingdom_of_netherlands",
-      "opening_root_ids": [
-        "kingdom_of_netherlands"
-      ],
-      "research_unit_ids": [
-        "ft_netherlands"
-      ],
-      "scope_relation": "adopted_research_series",
-      "note": "European territory after the 1839 settlement including Eastern Limburg. Overseas colonies separate.",
-      "research_regions": [
-        "Europe"
-      ],
-      "research_people": 5141915,
-      "documented_opening_people": 5141915,
-      "opening_people_including_retained_balances": 5141915,
-      "research_minus_documented": 0
-    },
-    {
       "comparison_id": "kingdom_of_portugal",
       "opening_root_ids": [
         "kingdom_of_portugal"
@@ -4040,7 +4040,7 @@
       },
       {
         "unit_id": "kingdom_of_netherlands",
-        "people": 41915
+        "people": 4137
       },
       {
         "unit_id": "kingdom_of_belgium",
@@ -4111,7 +4111,7 @@
         "people": -8679
       }
     ],
-    "net_replacements": -6960586,
+    "net_replacements": -6998364,
     "added_opening_accounts": [
       {
         "unit_id": "beylicate_of_tunis",
@@ -4211,7 +4211,7 @@
       }
     ],
     "net_additions": 61332775,
-    "authoritative_opening_population": 1465392189,
+    "authoritative_opening_population": 1465354411,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4251,16 +4251,16 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1329407981,
+    "documented_opening_population": 1329370203,
     "untouched_legacy_population": 101880000,
     "retained_unlocated_population": 34104208,
-    "authoritative_opening_population": 1465392189,
-    "published_minus_documented_opening": 265666267,
+    "authoritative_opening_population": 1465354411,
+    "published_minus_documented_opening": 265704045,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 224844706,
       "comparisons_by_scope": {
-        "comparable_extent": 1943838,
+        "comparable_extent": 1981616,
         "scope_unconfirmed": 86844,
         "partial_extent": 38790877,
         "adopted_research_series": 0
@@ -4269,6 +4269,6 @@
       "untouched_legacy_controls": -101880000,
       "unlocated_balances_under_retained_controls": -34104208
     },
-    "published_minus_authoritative_opening": 129682059
+    "published_minus_authoritative_opening": 129719837
   }
 }

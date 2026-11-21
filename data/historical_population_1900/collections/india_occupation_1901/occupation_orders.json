@@ -1,0 +1,52 @@
+[
+  {
+    "unit_id": "raj_central_india_agency",
+    "observed_unit_id": "raj_comparable_row_16",
+    "dimension": "occupation",
+    "classification_id": "india_1901_principal_occupation_orders",
+    "source_ids": ["india_1901_occupation_table_xv_part_iii"],
+    "observed_date": "1901-03-01",
+    "observed_scope": "Central India Agency including Gwalior, enumerated residents of both sexes and all ages.",
+    "locator": "Vol. I-A, Table XV Part III, pp. 396–397, region 19, Actual Workers column 37, orders I and III. Resident denominator: Table II-A, p. 10, row 16.",
+    "definition": "Selected principal occupation orders for persons the 1901 census classified as actual workers. Dependent residents, occupations outside the excerpt and occupations not returned remain unassigned. Subsidiary agriculture is outside the partition.",
+    "observed_total": 8628781,
+    "observed_unknown": 8459589,
+    "observed_counts": {
+      "Administration": 12986,
+      "Service of Native and Foreign States": 156206
+    },
+    "excerpt": [
+      {"order": "I", "suborders": {"1": 2945, "2": 447, "3": 9594}},
+      {"order": "III", "suborders": {"6": 123109, "7": 33097}}
+    ]
+  },
+  {
+    "unit_id": "raj_rajputana_agency",
+    "observed_unit_id": "raj_comparable_row_23",
+    "dimension": "occupation",
+    "classification_id": "india_1901_principal_occupation_orders",
+    "source_ids": ["india_1901_occupation_table_xv_part_iii"],
+    "observed_date": "1901-03-01",
+    "observed_scope": "Rajputana Agency excluding the separately tabulated Ajmer-Merwara, enumerated residents of both sexes and all ages.",
+    "locator": "Vol. I-A, Table XV Part III, pp. 400–401, region 26, Actual Workers column 55, orders I–VI. Resident denominator: Table II-A, p. 10, row 23.",
+    "definition": "Selected principal occupation orders for persons the 1901 census classified as actual workers. Dependent residents, occupations outside the excerpt and occupations not returned remain unassigned. Subsidiary agriculture is outside the partition.",
+    "observed_total": 9723301,
+    "observed_unknown": 5618640,
+    "observed_counts": {
+      "Administration": 58010,
+      "Defence": 2187,
+      "Service of Native and Foreign States": 138387,
+      "Provision and Care of Animals": 100947,
+      "Agriculture": 3508925,
+      "Personal, Household and Sanitary Services": 296205
+    },
+    "excerpt": [
+      {"order": "I", "suborders": {"1": 223, "2": 5745, "3": 52042}},
+      {"order": "II", "suborders": {"4": 2186, "5": 1}},
+      {"order": "III", "suborders": {"6": 70356, "7": 68031}},
+      {"order": "IV", "suborders": {"8": 99930, "9": 1017}},
+      {"order": "V", "suborders": {"10": 3149790, "11": 348964, "12": 8352, "13": 1819}},
+      {"order": "VI", "suborders": {"14": 244879, "15": 584, "16": 50742}}
+    ]
+  }
+]

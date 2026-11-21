@@ -2226,6 +2226,23 @@ mod tests {
         let origin = origin.as_str();
         let destination = "country_fra";
         let clock = world.clock();
+        let netherlands = "kingdom_of_netherlands";
+        assert_eq!(world.population().population_total(netherlands), Some(5_104_137));
+        assert_eq!(world.population().resident_pool(netherlands), Some(158));
+        assert_eq!(world.residence_unit_at("place:amsterdam"), Some("nl1899_pv2700"));
+        let dutch_structure = world.population().structure(Some(netherlands), clock).unwrap();
+        assert_eq!(dutch_structure.cohort_residents, 5_103_979);
+        assert_eq!(dutch_structure.residents_with_cohort_age_and_sex, 5_103_872);
+        let dutch_social = world.population().social_distribution(Some(netherlands)).unwrap();
+        assert_eq!(dutch_social.dimensions["religion"].assigned_residents, 5_103_887);
+        assert_eq!(dutch_social.dimensions["marital_status"].assigned_residents, 5_103_913);
+        for (unit, assigned) in [
+            ("raj_central_india_agency", 173_036),
+            ("raj_rajputana_agency", 4_226_945),
+        ] {
+            let social = world.population().social_distribution(Some(unit)).unwrap();
+            assert_eq!(social.dimensions["occupation"].assigned_residents, assigned);
+        }
         assert_eq!(world.residence_unit_at("place:cairo"), Some("egy_madina_cairo"));
         assert_eq!(world.residence_unit_at("place:alexandria"), Some("egy_madina_alexandria"));
         assert_eq!(world.population().population_total("egy_madina_cairo"), Some(592_087));
@@ -2446,6 +2463,14 @@ mod tests {
         assert_eq!(restored.population().global_total(), 1_465_392_190);
         assert_eq!(restored.population().population_total("qing_hist_shandong"), None);
         assert_eq!(restored.population().social_distribution(None).unwrap().residents_with_any_attribute_minimum, 309_272_209);
+        assert_eq!(restored.snapshot(), old_saved);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(11)).unwrap();
+        let old_saved = old.snapshot();
+        let restored = bootstrap.restore_native(serde_json::from_value(old_saved.clone()).unwrap()).unwrap();
+        assert_eq!(restored.population().global_total(), 1_465_392_189);
+        assert_eq!(restored.population().population_total(netherlands), Some(5_141_915));
+        assert_eq!(restored.population().population_total("nl1899_pv2700"), None);
         assert_eq!(restored.snapshot(), old_saved);
     }
 
