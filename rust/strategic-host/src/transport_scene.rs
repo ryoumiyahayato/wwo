@@ -634,7 +634,7 @@ impl TransportScene {
         let width = 350_f32.min(size[0] as f32 - 24.);
         let height = lines.len() as f32 * 19. + 8.;
         let x = 12.;
-        let y = size[1] as f32 - height - 100.;
+        let y = (size[1] as f32 - height - 180.).max(4.);
         panel.rect(x, y, width, height, [14, 24, 30, 222]);
         for (i, line) in lines.iter().enumerate() {
             skin.text(
