@@ -226,7 +226,6 @@ struct Host {
     military_cell:Option<SelectedMilitaryCell>,
     battle_terrain:Option<(MilitaryCell,BattlefieldTerrain)>,
     battle_view:Option<battle_view::View>,
-    battle_last:Instant,
 }
 fn font(path:&Path)->io::Result<Raster> {
     decode_rgba(File::open(path)?)
@@ -320,7 +319,7 @@ impl Host {
             loading_fade:None,loading_status:String::new(),debug:false,perf_at:Instant::now(),perf_frames:0,
             perf:Diagnostics{rate:0.,cpu_ms:0.,tiles:0,visible:0,mib:0.,streaming:false},
             screenshot:None,screenshot_status:None,grid_step:50000.,last_present:started,employment,market_focus_serial:0,
-            military_cell:None,battle_terrain:None,battle_view:None,battle_last:started})
+            military_cell:None,battle_terrain:None,battle_view:None})
     }
     fn available(&self,object:Object)->bool {
         let day=self.state.date.to_string();
@@ -953,14 +952,13 @@ impl Host {
         let terrain=terrain::battlefield(&root,region)?;
         if let Some(renderer)=&mut self.renderer {renderer.clear_battle();}
         self.battle_terrain=Some((region,terrain));
-        self.battle_last=Instant::now();
         Ok(())
     }
 
     fn open_battle(&mut self, selection:SelectedMilitaryCell) -> io::Result<()> {
         let Some(world)=self.written_world() else{return Ok(());};
         let region=selection.cell.region();
-        let create=world.land_battle().is_none();
+        let create=world.needs_land_deployment(selection.cell);
         if let Some(message)=self.battle_location_message(region){return Err(io::Error::other(message));}
         self.load_battle_terrain(region)?;
         let root = self.battle_root();
@@ -976,8 +974,11 @@ impl Host {
         self.renderer.as_mut().ok_or_else(|| io::Error::other("Vulkan surface is not ready"))?
             .prepare_battle(terrain, &root)?;
         #[cfg(windows)]
-        if let Some(world)=self.config.native.as_mut().and_then(native_start::NativeSession::active_world_mut) {
-            if let Some(battle)=deployment {world.start_land_battle(region,battle);}
+        if let Some(native)=&mut self.config.native {
+            if let (Some(world), Some(battle))=(native.active_world_mut(), deployment) {
+                world.start_land_battle(selection.cell,battle)?;
+                native.reset_world_tick();
+            }
             self.battle_view=Some(battle_view::View::new(terrain,selection.cell,center));
             self.drag = None;
             self.focus = None;
@@ -1009,12 +1010,12 @@ impl Host {
                 if let Some(message)=self.battle_location_message(cell.region()) {
                     self.feedback=message;
                 } else {
-                    let status=self.written_world().and_then(|world|world.land_battle());
-                    let instruction=match status {
-                        Some(battle) if battle.outcome.is_some()=>self.skin.choose("回车查看战果", "Enter for battle results"),
-                        Some(_)=>self.skin.choose("回车返回战场", "Enter to resume battle"),
-                        None=>self.skin.choose("回车进入战场", "Enter battlefield"),
-                    };
+                    let world=self.written_world().unwrap();
+                    let instruction=if world.needs_land_deployment(cell) {
+                        self.skin.choose("回车开始测试交战", "Enter to start training exercise")
+                    } else if world.land_battle_in_progress() {
+                        self.skin.choose("回车返回战场", "Enter to resume battle")
+                    } else { self.skin.choose("回车查看战果", "Enter for battle results") };
                     self.feedback=format!("{}  {}",cell.id(),instruction);
                 }
             }
@@ -1033,7 +1034,9 @@ impl Host {
     }
 
     fn battle_location_message(&self,region:MilitaryCell)->Option<String> {
-        let saved=self.written_world()?.land_battle_region().filter(|saved|*saved!=region)?;
+        let world=self.written_world()?;
+        if !world.land_battle_in_progress() {return None;}
+        let saved=world.land_battle_region().filter(|saved|*saved!=region)?;
         Some(format!("{} {}",self.skin.choose("此存档中的陆战位于", "This world's battle is in"),saved.id()))
     }
 
@@ -1045,38 +1048,43 @@ impl Host {
 
     fn battle_command(&mut self, command: battle_view::Command) {
         use battle_view::Command;
-        if matches!(command, Command::Back) {
-            self.battle_view = None;
-            self.hits.clear();
-        } else {
-            #[cfg(windows)]
-            if let (Some(view), Some(terrain), Some(battle)) = (
-                self.battle_view.as_mut(), self.battle_terrain.as_ref().map(|(_,terrain)|terrain),
-                self.config.native.as_mut().and_then(native_start::NativeSession::active_world_mut)
-                    .and_then(|world| world.land_battle_mut()),
-            ) {
-                view.command(command, battle, terrain);
+        match command {
+            Command::Back => {
+                self.battle_view = None;
+                self.hits.clear();
+            }
+            Command::Pause | Command::SpeedUp | Command::SpeedDown => {
+                if let Some(clock)=self.state.session.as_ref() {
+                    let speed=match command {
+                        Command::Pause => if clock.paused { clock.speed } else { 0 },
+                        Command::SpeedUp => if clock.paused { 1 } else { (clock.speed * 2).min(4) },
+                        _ => if clock.paused { 0 } else { clock.speed / 2 },
+                    };
+                    if speed==0 {if let Some(view)=&mut self.battle_view {view.clear_controls();}}
+                    self.hud_action(HudCommand::Clock(speed));
+                }
+            }
+            Command::End => {
+                #[cfg(windows)]
+                if let Some(native)=&mut self.config.native {
+                    if let Some(world)=native.active_world_mut().filter(|world|world.land_battle_in_progress()) {
+                        world.finish_land_battle();
+                        native.reset_world_tick();
+                    }
+                }
+            }
+            _ => {
+                #[cfg(windows)]
+                if let (Some(view), Some(terrain), Some(battle)) = (
+                    self.battle_view.as_mut(), self.battle_terrain.as_ref().map(|(_,terrain)|terrain),
+                    self.config.native.as_mut().and_then(native_start::NativeSession::active_world_mut)
+                        .and_then(|world| world.land_battle_mut()),
+                ) {
+                    view.command(command, battle, terrain);
+                }
             }
         }
         self.dirty = true;
-    }
-
-    fn tick_battle(&mut self, now: Instant) {
-        let elapsed = now.saturating_duration_since(self.battle_last).as_secs_f32();
-        self.battle_last = now;
-        let Some((_,terrain)) = self.battle_terrain.as_ref() else { return; };
-        #[cfg(windows)]
-        if let Some(battle) = self.config.native.as_mut()
-            .and_then(native_start::NativeSession::active_world_mut).and_then(|world| world.land_battle_mut())
-        {
-            if let Some(view) = &mut self.battle_view {
-                view.advance(battle, elapsed, terrain);
-            } else {
-                battle.advance(elapsed, terrain, Default::default());
-            }
-        }
-        #[cfg(not(windows))]
-        let _ = (terrain, elapsed);
     }
     fn search_results(&self)->Vec<Object> {
         let q=self.search.as_deref().unwrap_or("").trim().to_ascii_lowercase();
@@ -1244,6 +1252,12 @@ impl Host {
         if key==Key::Named(NamedKey::F12){self.queue_screenshot();return;}
         if key==Key::Named(NamedKey::F10){
             self.debug=!self.debug;self.perf_at=Instant::now();self.perf_frames=0;self.perf.rate=0.;self.dirty=true;return;
+        }
+        if self.battle_view.is_some() && key==Key::Named(NamedKey::F5) {
+            self.hud_action(HudCommand::Clock(0));
+            self.battle_command(battle_view::Command::Back);
+            self.hud_action(HudCommand::Menu(HudMenu::Save));
+            return;
         }
         if let (Some(view),Some((_,terrain)))=(&mut self.battle_view,&self.battle_terrain){
             let command=view.key(key.clone(),ElementState::Pressed,false,terrain);
@@ -1601,21 +1615,21 @@ impl Host {
 
     fn draw_battle(&mut self, now: Instant) -> io::Result<()> {
         #[cfg(windows)]
-        let battle = self.config.native.as_ref().and_then(native_start::NativeSession::active_world)
-            .and_then(|world| world.land_battle());
+        let fixture = self.config.native.as_ref().and_then(native_start::NativeSession::active_world)
+            .and_then(|world| world.land_battle_record());
         #[cfg(not(windows))]
-        let battle: Option<&wwo_map_lab::land_battle::LandBattle> = None;
-        let (Some(view), Some(terrain), Some(battle)) = (
-            self.battle_view.as_ref(), self.battle_terrain.as_ref().map(|(_,terrain)|terrain), battle,
+        let fixture: Option<&wwo_map_lab::formal_bootstrap::WorldLandBattle> = None;
+        let (Some(view), Some(terrain), Some(fixture)) = (
+            self.battle_view.as_ref(), self.battle_terrain.as_ref().map(|(_,terrain)|terrain), fixture,
         ) else {
             self.battle_view = None;
             return Ok(());
         };
         let renderer = self.renderer.as_mut().unwrap();
-        let meshes = battle_view::hud(self.size, &self.skin, view, battle, terrain, renderer.battle_uses_original_model(),
-            self.debug.then_some(self.perf.rate));
+        let meshes = battle_view::hud(self.size, &self.skin, view, fixture, terrain, renderer.battle_uses_original_model(),
+            self.debug.then_some(self.perf.rate), self.state.session.as_ref());
         let map_view = View::new(&self.camera, self.size);
-        let battle_frame = render::BattleFrame { view: &view.camera, state: battle, terrain };
+        let battle_frame = render::BattleFrame { view: &view.camera, state: &fixture.battle, terrain };
         let capture=self.screenshot.as_ref().or_else(||self.trial.captures.first()).map(PathBuf::as_path);
         let has_capture=capture.is_some();
         if let Some(result) = renderer.render(&map_view, self.base.as_ref().unwrap(), &[], &meshes, None,
@@ -1624,6 +1638,10 @@ impl Host {
         {
             let presented = Instant::now();
             self.last_present = presented;
+            if self.trial.timing {
+                if let Some(previous)=self.trial.previous {self.trial.times.push(presented.duration_since(previous).as_secs_f64()*1000.);}
+                self.trial.previous=Some(presented);
+            }
             if let Some(path) = self.screenshot.take() {
                 let status = match result {
                     Ok(()) => format!("F12  Saved: {}", path.display()),
@@ -1662,12 +1680,18 @@ impl Host {
             "slots":s.slots.iter().map(|s|(s.slot,s.can_read)).collect::<Vec<_>>()}));
         let land_battle=self.written_world().and_then(|world|{
             use wwo_map_lab::land_battle::LandTeam;
-            let battle=world.land_battle()?;
+            let fixture=world.land_battle_record()?;
+            let battle=&fixture.battle;
             let report=|team| {
                 let r=battle.report(team);
                 serde_json::json!({"operational":r.operational,"destroyed":r.destroyed,"ammunition":r.ammunition,"shots":r.shots,"hits":r.hits})
             };
-            Some(serde_json::json!({"region":world.land_battle_region(),"seconds":battle.elapsed_seconds,
+            let history=world.land_battle_history().iter().map(|row|serde_json::json!({
+                "id":row.id,"cell":row.cell(),"outcome":row.battle.outcome,"ended_minute":row.ended_minute
+            })).collect::<Vec<_>>();
+            Some(serde_json::json!({"kind":"training_fixture","id":fixture.id,"cell":fixture.cell(),"region":fixture.region,
+                "steps":battle.elapsed_steps(),"seconds":battle.elapsed_seconds(),"started_minute":fixture.started_minute,
+                "ended_minute":fixture.ended_minute,"history":history,
                 "outcome":battle.outcome,"selected_unit":battle.selected_unit(),"friendly":report(LandTeam::Friendly),"opposing":report(LandTeam::Opposing),
                 "view":self.battle_view.as_ref().map(|view|view.camera.span),"fps":self.debug.then_some(self.perf.rate)}))
         });
@@ -1803,13 +1827,12 @@ impl Host {
         if self.config.managed&&(had_session!=connected||loaded){
             self.battle_view = None;
             self.military_cell=None;
-            if let Some(region)=self.written_world().and_then(|world|world.land_battle_region()) {
+            if let Some(region)=self.written_world().filter(|world|world.land_battle_in_progress()).and_then(|world|world.land_battle_region()) {
                 if let Err(error)=self.load_battle_terrain(region){self.battle_terrain=None;self.feedback=error.to_string();}
             } else {
                 self.battle_terrain = None;
                 if let Some(renderer) = &mut self.renderer { renderer.clear_battle(); }
             }
-            self.battle_last = now;
             if connected {self.loading_fade=Some(now);self.loading_status="正在安装地图".into();}
             self.hud=Hud{fullscreen:self.hud.fullscreen,volume:self.hud.volume,english:self.hud.english,..Hud::default()};
             self.selected=None;self.details=false;self.country=None;self.country_click=None;
@@ -1852,7 +1875,6 @@ impl Host {
         #[cfg(windows)]
         if let Some(desktop)=&mut self.config.desktop {desktop.poll();}
         if self.exit_requested {event_loop.exit();return;}
-        self.tick_battle(now);
         if self.country_click.as_ref().is_some_and(|click|now>=click.deadline) {
             let click=self.country_click.take().unwrap();
             self.open_country(click.polity);
@@ -1922,13 +1944,27 @@ impl Host {
         }
         #[cfg(windows)]
         if let Some(native)=&mut self.config.native {
-            let result=native.tick(now).and_then(|changed| {
+            let terrain=self.battle_terrain.as_ref().map(|(cell,terrain)|(*cell,terrain));
+            let controls=self.battle_view.as_ref().map(battle_view::View::controls).unwrap_or_default();
+            let before=self.battle_view.as_ref().and_then(|_|native.active_world()?.land_battle()?.selected_unit())
+                .map(|unit| (unit.id,unit.ammo));
+            let result=native.tick(now,terrain,controls).and_then(|changed| {
                 if changed {native.update_after_tick(&mut self.state)?;}
                 Ok(changed)
             });
             match result {
-                Ok(changed)=>self.dirty|=changed,
-                Err(error)=>{self.feedback=format!("游戏时钟推进失败：{error}");self.dirty=true;}
+                Ok(changed)=>{
+                    if changed {
+                        if let (Some(view),Some((_,terrain)),Some(battle))=(&mut self.battle_view,terrain,
+                            native.active_world().and_then(|world|world.land_battle()))
+                        {view.after_step(battle,terrain,before);}
+                    }
+                    self.dirty|=changed;
+                }
+                Err(error)=>{
+                    let _=native.update_view(&mut self.state);
+                    self.feedback=format!("游戏时钟推进失败：{error}");self.dirty=true;
+                }
             }
         }
         #[cfg(windows)]
@@ -2192,7 +2228,7 @@ impl ApplicationHandler<HostEvent> for Host {
             }
             WindowEvent::Ime(winit::event::Ime::Commit(text)) if self.country_directory.search_active=>self.type_country_search(&text),
             WindowEvent::KeyboardInput {event, ..} if self.battle_view.is_some() => {
-                if matches!(event.logical_key, Key::Named(NamedKey::F10 | NamedKey::F12)) {
+                if matches!(event.logical_key, Key::Named(NamedKey::F5 | NamedKey::F10 | NamedKey::F12)) {
                     if event.state == ElementState::Pressed && !event.repeat { self.key(event.logical_key); }
                 } else if let (Some(view), Some((_,terrain))) = (&mut self.battle_view, &self.battle_terrain) {
                     if let Some(command) = view.key(event.logical_key, event.state, event.repeat, terrain) {
