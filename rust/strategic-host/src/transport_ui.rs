@@ -89,7 +89,7 @@ impl Context<'_> {
     }
 
     fn destination(&self, id: &str, label: String, d: &mut Detail) {
-        if self.world.player_alive() && self.world.can_select_transport_destination(id) {
+        if self.world.player_alive() && self.world.can_book_transport_to(id) {
             d.links.push((label, Link::Travel(id.into())));
         }
     }
@@ -125,7 +125,13 @@ impl Context<'_> {
             return Some(());
         }
         d.title = "交通地点".into();
-        if !self.world.can_read_place_record(id) { return Some(()); }
+        if !self.world.can_read_place_record(id) {
+            if self.world.can_book_transport_to(id) {
+                d.title = self.place(id).into();
+                self.destination(id, "设为运输目的地".into(), d);
+            }
+            return Some(());
+        }
         d.title = self.place(id).into();
         d.summary.push(match network.coverage(id) {
             NodeCoverage::Connected => "可办理运输",
@@ -178,9 +184,7 @@ impl Context<'_> {
             if load > 0 { d.summary.push(format!("在途货位 {load}")); }
         }
         for endpoint in [&edge.from, &edge.to] {
-            if self.world.can_read_place_record(endpoint) {
-                self.destination(endpoint, format!("运往 {}", self.place(endpoint)), d);
-            }
+            self.destination(endpoint, format!("运往 {}", self.place(endpoint)), d);
         }
         let geometry = self.scene.segment_geometry(id);
         if edge.mode == TransportMode::Shipping && geometry == GeometryEvidence::Unmapped {

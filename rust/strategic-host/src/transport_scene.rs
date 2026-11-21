@@ -687,8 +687,7 @@ impl TransportScene {
                         }
                         let port = terminal.kind == NodeKind::Port;
                         let destination = picking && (port || camera.mpp <= camera::ENTER)
-                            && world.can_select_transport_destination(&terminal.id)
-                            && world.can_read_place_record(&terminal.id);
+                            && world.can_book_transport_to(&terminal.id);
                         let context = destination || match mode {
                             Mode::Geographic => water || camera.mpp <= camera::ENTER,
                             Mode::Political => international || status.is_some(),

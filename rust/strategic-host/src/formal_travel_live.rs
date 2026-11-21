@@ -182,6 +182,13 @@ impl InitialWorld {
             matches!(node.kind, NodeKind::City | NodeKind::Area | NodeKind::Port))
     }
 
+    pub fn can_book_transport_to(&self, place: &str) -> bool {
+        self.can_select_transport_destination(place) && (self.can_read_place_record(place)
+            || self.transport.connections(place).any(|(end, mode, open)| {
+                open && mode == TransportMode::Shipping && self.can_read_place_record(end)
+            }))
+    }
+
     pub fn transport_connections(&self, place: &str) -> Option<String> {
         let links: Vec<_> = self.transport.connections(place).take(4).map(|(to, mode, open)| {
             format!("{} {}{}", mode_name(mode), self.place_name(to), if open { "" } else { "（停运）" })
