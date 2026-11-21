@@ -7,7 +7,7 @@ use glam::{Mat4, Vec2, Vec3};
 use winit::{event::ElementState, keyboard::{Key, NamedKey}};
 use wwo_map_lab::{
     battlefield_terrain::{BattlefieldTerrain, REGION_BOUNDS},
-    land_battle::{LandBattle, LandBattleControls, LandBattleOutcome, LandTeam},
+    land_battle::{LandBattle, LandBattleControls, LandBattleOutcome, LandTeam, UnitId},
     military_grid::MilitaryCell,
 };
 
@@ -152,15 +152,13 @@ impl View {
             turn: axis(self.held.right, self.held.left),
             turret: axis(self.held.gun_right, self.held.gun_left),
             aim: self.aim,
-            fire: self.pointer_fire || self.held.fire || self.queued_fire,
+            fire_held: self.pointer_fire || self.held.fire,
+            fire_once: self.queued_fire,
         }
     }
 
-    pub fn after_step(&mut self, battle: &LandBattle, terrain: &BattlefieldTerrain,
-        before: Option<(wwo_map_lab::land_battle::UnitId, u8)>)
-    {
-        let after = battle.selected_unit().map(|unit| (unit.id, unit.ammo));
-        if before != after || after.is_none_or(|(_, ammo)| ammo == 0) {
+    pub fn after_step(&mut self, battle: &LandBattle, terrain: &BattlefieldTerrain, before: Option<(UnitId, u8)>) {
+        if before.is_none() || before != battle.selected_ammunition() {
             self.queued_fire = false;
         }
         self.follow(battle, terrain);
@@ -189,7 +187,7 @@ impl View {
             Key::Character("d" | "D") => self.held.right = down,
             Key::Character("q" | "Q") => { self.aim = None; self.held.gun_left = down; }
             Key::Character("e" | "E") => { self.aim = None; self.held.gun_right = down; }
-            Key::Named(NamedKey::Space) => { self.held.fire = down; self.queued_fire |= down; }
+            Key::Named(NamedKey::Space) => { self.held.fire = down; self.queued_fire |= down && !repeat; }
             Key::Named(NamedKey::ArrowLeft | NamedKey::ArrowRight | NamedKey::ArrowUp | NamedKey::ArrowDown) if down => {
                 let direction = match key {
                     Key::Named(NamedKey::ArrowLeft) => Vec2::NEG_X,
