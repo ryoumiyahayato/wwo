@@ -215,9 +215,13 @@ GLB 与原有摆放资料随 Rust 源码从 Git 恢复，并编入 EXE。近景�
 
 Natural Earth 1:10m 参照陆地、岛屿、湖泊、河线和冰川，GSHHG 参照 QPK/QHW 的水陆边界，SCAR ADD 区分南极接地陆地、浮冰架和冰舌。ESA WorldCover 2021 交叉检查 QWG 的常年水和冰雪，同时验证同源 QSC 的投影与分类。参考文件及采样尺度随输出保存。全球比对网格为 8192×4096，等经纬采样。NOAA 高程和河线距离只用于发现异常范围。河线与面状水域分别统计，河线距离无河宽含义。资料定义、年代及精度造成的差异应与正式游戏已复现的缺陷分别记录。
 
+Z7 水文按复杂度加密。QWG 含边界的单元、Natural Earth 的岸线和河网、QHL 河段及 WorldCover 的常年水、湿地和红树林都可触发细查。单元每轴使用 8、16 或 32 个采样点，南北间距约 2.44、1.22 或 0.61 km。东西间距随纬度缩小。平稳区域沿用全球网格。`--adaptive-only` 只重跑此部分。`independent_screening` 记录 ESA 和不同来源的水面几何差异。`layer_conflicts` 记录同位置的 QWG、QPK、QHW、QHL 和 QSC 差异。键 `qsc_vs_same_source_worldcover` 专用于同源对照。单个 QHL 中点在陆地上可能是示意河线。重叠候选需从正式游戏复核。现用 ESA 缓存每 3° 只有 562 个点。潮时、冰川接地和历史河岸需额外资料。
+
 ### 正式游戏动态路线
 
 在 `rust/strategic-host` 运行 `python tools/observe_global_motion.py <wwo-map-lab.exe> <运行数据目录> <已冻结的路线.json> <新输出目录>`。脚本启动 `--play --background --observe`，以独立档案进入正常游戏。进程为冷启动，系统文件缓存照常。输出保留正式渲染 PNG、游戏日志和 `frames.json`。`frames.json` 记录九个画面位置实际使用的分片和混合权重。`settled: false` 表示在等待上限内仍有资源尚未就绪。
+
+`--profile-frames` 在计时段记录帧间隔、CPU 绘制、交换链等待、GPU 命令、地貌与近景地类读取和 QWG 上传。GPU 时间需要设备支持时间戳查询。`--section troyes` 从正常军事方格进入陆战，分别记录进入、暂停、切换视角和恢复。特鲁瓦路线需在冻结文件中提供 `troyes` 机位和 `troyes_cell` 方格。
 
 路线 JSON 中 `random_draws` 沿用冻结抽样名单。每项包含 `continent`、`lon`、`lat`、`regional_mpp` 和 `near_mpp`。`fixed` 为 `[标签, 经度, 纬度, 米/像素]` 列表，动态平移使用 `dateline-west`、`south-pole`、`z6-capacity` 和 `seine`。`nile` 和 `zoom` 分别为尼罗河和连续缩放的 `[经度, 纬度, 米/像素]` 相机元组。标签采用英文字母、数字和连字符。此次尼罗河用 `[30.98,30.87,25]`；连续缩放用 `[89.2,21.85,85]`。
 

@@ -73,7 +73,7 @@ def run(args, scratch):
             host.ask('drag',x=start,y=y,to_x=end,to_y=y,frames=frames)
 
         def timed(label, route):
-            host.ask('timing')
+            host.ask('timing', value='profile' if args.profile_frames else '')
             route()
             frame = host.ask('timing')
             timing = frame['extra']
@@ -115,6 +115,41 @@ def run(args, scratch):
             engine_gpu=cold_settled['state']['gpu'], viewport=extent,
             capture_process='fresh game process and independent profile, OS cache untouched',
         ))
+
+        if args.section == 'troyes':
+            x, y = (value/2 for value in extent)
+            radius = min(78, max(52, .056 * extent[0]))
+            host.ask('click', x=x, y=extent[1]-10)
+            host.ask('click', x=x, y=extent[1]-radius-202+114)
+            stable('troyes-military-grid', args.routes['troyes'])
+            host.ask('click', x=x, y=y)
+            selected = status()['military_grid']['selected']
+            if selected != args.routes['troyes_cell']:
+                raise RuntimeError(f'Unexpected Troyes military grid selection: {selected}')
+
+            def open_battle():
+                host.ask('key', value='Enter')
+                time.sleep(1.0)
+            timed('troyes-enter', open_battle)
+            battle = status()['land_battle']
+            if not battle or battle['cell'] != selected:
+                raise RuntimeError('Could not enter the Troyes exercise')
+            host.ask('key', value='3')
+            timed('troyes-vehicle-paused', lambda: time.sleep(1.1))
+
+            def view_roundtrip(shoot=False):
+                for key in ('1','2','3','Tab'):
+                    host.ask('key', value=key)
+                    time.sleep(.25)
+                if shoot:
+                    host.ask('key', value='Space')
+                    host.ask('key', value='p')
+                    time.sleep(.55)
+                    host.ask('key', value='p')
+            timed('troyes-scale-and-fire', lambda: view_roundtrip(shoot=True))
+            timed('troyes-scale-repeat', view_roundtrip)
+            write(args.output/'troyes.json', dict(before=battle, after=status()['land_battle']))
+            return
 
         if args.section in ('all', 'edges'):
             edge = (179.88,-16.77,135)
@@ -221,8 +256,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ('exe','data','frozen','output'):
         parser.add_argument(key, type=lambda value: Path(value).resolve())
-    parser.add_argument('--section', choices=('all','views','nile','zoom','edges'), default='all')
+    parser.add_argument('--section', choices=('all','views','nile','zoom','edges','troyes'), default='all')
     parser.add_argument('--nile-drag-frames', type=int, choices=(18,24), default=24)
+    parser.add_argument('--profile-frames', action='store_true')
     args = parser.parse_args()
     args.routes = read(args.frozen)
     args.output.mkdir(parents=True)
