@@ -72,6 +72,7 @@ fn player_prologue_age_cash_npc_and_native_slots() {
         advance(&mut restored, 1);
         assert_eq!(restored.last_read_notice(), Some(MINUTES_PER_DAY));
         assert!(!restored.can_read_opening_language());
+        assert_eq!(restored.oral_work_offer().is_some(), country == "country_fra");
     }
     assert!(
         bootstrap
@@ -106,6 +107,11 @@ fn player_prologue_age_cash_npc_and_native_slots() {
     assert!(restored.can_read_opening_language());
     assert_eq!(restored.character().age_years, 30);
     assert_eq!(restored.balance().unwrap().cash, 2500);
+
+    let mut prior_opening = bootstrap.create_with_prologue("country_fra", prologue()).unwrap().snapshot();
+    prior_opening["player_day"].as_object_mut().unwrap().remove("written_job_notice");
+    let old = bootstrap.restore_native(serde_json::from_value(prior_opening).unwrap()).unwrap();
+    assert!(old.jobs().any(|(job, _)| job.id == "job:opening_paris_workshop"));
 }
 
 #[test]
@@ -137,11 +143,13 @@ fn player_prologue_learning_and_work_apply_combined_modifiers() {
         }
     }
     assert!(reader.can_read_opening_language());
+    assert!(reader.jobs().any(|(job, _)| job.id == "job:opening_paris_workshop"));
     assert!(reader.can_read_polity_record("country_fra"));
     assert!(reader.can_read_place_record("place:paris"));
     assert!(!reader.can_read_polity_record("empire_of_japan"));
     assert!(!reader.can_read_place_record("place:tokyo"));
     assert!(!slower.can_read_opening_language());
+    assert!(!slower.jobs().any(|(job, _)| job.id == "job:opening_paris_workshop"));
     assert!(
         person_state(&reader)["capabilities"]["literacy"]["knowledge"].as_u64()
             > person_state(&slower)["capabilities"]["literacy"]["knowledge"].as_u64()
@@ -175,9 +183,16 @@ fn player_prologue_learning_and_work_apply_combined_modifiers() {
                 },
             )
             .unwrap();
-        let job = world.jobs().next().unwrap().0.id.clone();
-        world.apply_for_work(&job).unwrap();
+        let job = "job:opening_paris_workshop";
+        assert!(world.oral_work_offer().is_none());
+        assert!(world.apply_for_work(job).is_err());
+        world.schedule_personal_activity(PersonalActivity::ReadNotice).unwrap();
+        advance(&mut world, 1);
+        assert_eq!(world.oral_work_offer().map(|(offer, _)| offer.id.as_str()), Some(job));
+        world.apply_for_work(job).unwrap();
+        assert!(world.oral_work_offer().is_none());
         world.book_work().unwrap();
+        assert_eq!(world.oral_work_employment().map(|(row, booked)| (row.id.as_str(), booked)), Some((job, true)));
         assert!(world.book_work().is_err());
         advance(&mut world, 1);
         let record = person_state(&world);

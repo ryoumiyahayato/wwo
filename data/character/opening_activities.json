@@ -3,10 +3,11 @@
   "lesson_effort": 340,
   "lesson_start_hour": 16,
   "lesson_hours": 2,
-  "meal_milli_for_recovery": 1000,
+  "meal_milli_for_recovery": 1,
   "work_injury_interval": 32,
   "work_injury_damage": 90,
   "work_injury_permanent_loss": 40,
+  "written_job_notices": {"country_fra": "job:opening_paris_workshop"},
   "openings": {
     "country_fra": "French",
     "british_isles_1900": "English",

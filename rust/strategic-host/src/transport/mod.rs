@@ -1,5 +1,6 @@
 //! On-demand transport queries. The caller owns the source IDs and supplies segment profiles.
 use crate::formal_clock::GameClock;
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use std::io;
 
@@ -132,7 +133,8 @@ pub enum RouteError {
     },
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct SegmentAvailability {
     pub open: bool,
     pub capacity_units: u32,
@@ -268,6 +270,13 @@ impl TransportNetwork {
         self.segment_ids
             .get(id)
             .map(|&index| self.availability[index])
+    }
+
+    pub fn restrictions(&self) -> impl Iterator<Item = (&str, SegmentAvailability)> {
+        self.segments.iter().zip(&self.availability).filter_map(|(segment, &available)| {
+            (!available.open || available.capacity_units != segment.profile.capacity_units)
+                .then_some((segment.id.as_str(), available))
+        })
     }
 
     /// The availability belongs to one physical segment, including both travel directions.

@@ -525,10 +525,16 @@ impl Host {
                 self.hud.market_offset=0;
                 self.emit(Request::Relations{verb:"drawer",id});
             }
-            HudCommand::WorkAction(row,index)=>{
+            HudCommand::WorkAction(row,index,revision)=>{
                 let id=self.state.session.as_ref().and_then(|s|s.relations.as_ref())
+                    .filter(|r|r.work_revision==revision)
                     .and_then(|r|r.work.get(row)).and_then(|r|r.actions.get(index))
                     .filter(|a|a.enabled).map(|a|a.id.clone());
+                if let Some(id)=id{self.emit(Request::Relations{verb:"work_action",id:&id});}
+            }
+            HudCommand::OralWorkAction(revision)=>{
+                let id=self.state.session.as_ref().and_then(|s|s.activities.as_ref())
+                    .and_then(|a|a.oral_work_action(revision)).map(str::to_owned);
                 if let Some(id)=id{self.emit(Request::Relations{verb:"work_action",id:&id});}
             }
             HudCommand::WorkConfirm(confirmed)=>{
