@@ -111,6 +111,10 @@ impl InitialWorld {
         Ok(())
     }
     pub fn passenger_in_transit(&self) -> bool { self.travel.passenger.is_some() }
+
+    pub fn is_player_transport_reservation(&self, reservation: u64) -> bool {
+        self.travel.passenger.as_ref().is_some_and(|passenger| passenger.id == reservation)
+    }
     pub fn travel_notice(&self) -> &str { &self.travel.notice }
     pub fn commute_base(&self) -> Option<&str> { self.travel.commute.as_ref().map(|c| c.base.as_str()) }
     pub fn commute_departure(&self) -> Option<i64> { self.travel.commute.as_ref().map(|c| c.next_departure) }

@@ -109,6 +109,10 @@ impl Enterprises {
             .fold((0, 0), |(count, units), delivery| (count + 1, units + delivery.quantity))
     }
 
+    pub(crate) fn material_deliveries(&self) -> impl DoubleEndedIterator<Item = (&MaterialOrder, i64, i64)> {
+        self.deliveries.iter().map(|delivery| (&delivery.order, delivery.quantity, delivery.delivered_day))
+    }
+
     pub(super) fn received_grain(&self, firm: &str) -> i64 {
         self.deliveries.iter().filter(|d| d.order.buyer == firm).map(|d| d.quantity).sum()
     }
@@ -213,7 +217,7 @@ impl Enterprises {
 }
 
 impl MaterialOrder {
-    fn reference(&self) -> String {
+    pub(crate) fn reference(&self) -> String {
         format!("material:{}:{}:{}", self.day, self.buyer, self.seller)
     }
 }

@@ -54,6 +54,16 @@ impl Plan {
 #[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 enum Status { Scheduled, Moving, Held, Arrived }
 
+pub(crate) struct ReservedLeg<'a> {
+    pub id: u64,
+    pub leg: &'a RouteLeg,
+    pub load_units: u32,
+    pub starts: i64,
+    pub ends: i64,
+    pub moving: bool,
+    pub traffic: Traffic,
+}
+
 /// One physical limit covers both directions. A directional mixed service
 /// provides seats for half its nominal slots (development assumption).
 #[derive(Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -149,6 +159,7 @@ impl Default for OperationsState {
 }
 
 pub struct ActiveVehicle<'a> {
+    pub reservation_id: u64,
     /// Port handling immediately before or after a booked sea leg.
     pub alongside_seaport: Option<&'a str>,
     pub segment_id: &'a str,
@@ -500,6 +511,37 @@ impl Operations {
         }).sum()
     }
 
+    pub(crate) fn moving_segments(&self) -> impl Iterator<Item = &str> {
+        self.occupied.iter().filter_map(|(segment, entries)| {
+            entries.iter().any(|&(id, index)| {
+                let reservation = &self.state.reservations[&id];
+                reservation.leg == index && reservation.status == Status::Moving
+            }).then_some(segment.as_str())
+        })
+    }
+
+    pub(crate) fn reserved_legs(&self, segment: &str) -> impl Iterator<Item = ReservedLeg<'_>> {
+        self.occupied.get(segment).into_iter().flatten().map(|&(id, index)| {
+            let reservation = &self.state.reservations[&id];
+            let window = reservation.plan.windows[index];
+            ReservedLeg {
+                id,
+                leg: &reservation.plan.route.legs[index],
+                load_units: reservation.plan.load_units(),
+                starts: window.starts,
+                ends: window.ends,
+                moving: reservation.leg == index && reservation.status == Status::Moving,
+                traffic: reservation.traffic,
+            }
+        })
+    }
+
+    pub(crate) fn held_leg(&self, id: u64) -> Option<&RouteLeg> {
+        let reservation = self.state.reservations.get(&id)?;
+        if reservation.status != Status::Held { return None; }
+        reservation.plan.route.legs.get(reservation.leg)
+    }
+
     pub fn service_capacity(&self, segment: &str, from: &str) -> Option<ServiceCapacity> {
         let segment = self.network.segment(segment)?;
         if segment.from != from && !(segment.bidirectional && segment.to == from) { return None; }
@@ -529,6 +571,10 @@ impl Operations {
         self.visible.iter().filter_map(|id| self.active_vehicle(*id))
     }
 
+    pub(crate) fn visible_vehicle(&self, id: u64) -> Option<ActiveVehicle<'_>> {
+        self.visible.contains(&id).then(|| self.active_vehicle(id)).flatten()
+    }
+
     pub fn active_vehicles_on<'a>(&'a self, segment: &str) -> impl Iterator<Item = ActiveVehicle<'a>> + 'a {
         self.occupied.get(segment).into_iter().flatten().filter_map(|&(id, index)| {
             let r = &self.state.reservations[&id];
@@ -547,6 +593,7 @@ impl Operations {
             else if reservation.leg.checked_sub(1).and_then(|i| legs.get(i)).is_some_and(|previous| previous.mode == TransportMode::Shipping) { Some(leg.from.as_str()) }
             else { None };
         Some(ActiveVehicle {
+            reservation_id: id,
             alongside_seaport,
             segment_id: &leg.segment_id, from: &leg.from, to: &leg.to, mode: leg.mode,
             progress: (self.now - window.starts) as f32 / (window.ends - window.starts) as f32,

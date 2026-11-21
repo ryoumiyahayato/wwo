@@ -1,4 +1,5 @@
 use super::{
+    economy_read::FirmMaterialOrder,
     organization_registration::OrganizationKind,
     InitialWorld,
 };
@@ -72,6 +73,39 @@ impl InitialWorld {
         self.activity.events.iter().filter(move |event| (event.organization == organization || event.target == organization)
             && (manager || event.initiator == self.player || event.target == self.player
                 || (event.action == OrganizationAction::MaterialDelivery && firm.is_some_and(|firm| self.worked_at(firm, event.end_minute)))))
+    }
+
+    pub fn firm_material_orders<'a>(&'a self, unit: Option<&'a str>) -> impl Iterator<Item = FirmMaterialOrder<'a>> + 'a {
+        let pending = self.activity.pending.iter().map(|order| (order, 0, None));
+        let delivered = self.enterprises.material_deliveries().rev()
+            .map(|(order, units, day)| (order, units, Some(day)));
+        pending.chain(delivered).filter_map(move |(order, delivered, delivery_day)| {
+            let buyer = self.organization(self.work_opening.organization(&order.buyer)?)?;
+            let seller = self.organization(self.work_opening.organization(&order.seller)?)?;
+            if unit.is_some_and(|unit| self.population_unit_at(&buyer.place) != Some(unit)
+                && self.population_unit_at(&seller.place) != Some(unit)) {
+                return None;
+            }
+            let can_manage = self.organization_can_manage(&buyer.id, &self.player)
+                || self.organization_can_manage(&seller.id, &self.player);
+            if !can_manage && !(self.player_alive() && order.worker == self.player) { return None; }
+            let reference = order.reference();
+            let goods_payment = (can_manage && delivery_day.is_some())
+                .then(|| self.ledger.payment(&reference)).flatten();
+            Some(FirmMaterialOrder {
+                reference,
+                buyer: &buyer.id,
+                seller: &seller.id,
+                from: &seller.place,
+                to: &buyer.place,
+                requested: order.quantity,
+                pending: delivery_day.is_none().then_some(order.quantity).unwrap_or(0),
+                delivered,
+                order_day: order.day,
+                delivery_day,
+                goods_payment,
+            })
+        })
     }
 
     pub fn organization_site_goods(&self, organization: &str) -> Option<(i64, i64)> {

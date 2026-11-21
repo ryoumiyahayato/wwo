@@ -68,6 +68,13 @@ pub struct PersonalReceipt<'a> {
     pub amount: i64,
 }
 
+pub struct LedgerPayment<'a> {
+    pub id: &'a str,
+    pub denomination: &'a str,
+    pub minute: i64,
+    pub amount: i64,
+}
+
 struct Batch<'a> {
     ids: Vec<&'a str>,
     minute: i64,
@@ -314,8 +321,18 @@ impl Ledger {
     }
 
     pub(crate) fn payment_minute(&self, id: &str) -> Option<i64> {
+        self.payment(id).map(|payment| payment.minute)
+    }
+
+    pub(crate) fn payment(&self, id: &str) -> Option<LedgerPayment<'_>> {
         let row = &self.transactions[*self.transaction_indexes.get(id)?];
-        Receipt::read(row, self.regional.is_some()).ok().map(|r| r.minute)
+        let receipt = Receipt::read(row, self.regional.is_some()).ok()?;
+        Some(LedgerPayment {
+            id: receipt.id,
+            denomination: receipt.currency,
+            minute: receipt.minute,
+            amount: receipt.amount,
+        })
     }
 
     pub(crate) fn freight_transaction_counts(&self) -> (usize, usize) {

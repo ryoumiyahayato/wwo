@@ -20,6 +20,8 @@ use crate::{
 mod travel_live;
 #[path = "formal_freight.rs"]
 pub mod freight;
+#[path = "formal_economy_read.rs"]
+pub mod economy_read;
 #[path = "formal_migration.rs"]
 mod migration;
 #[path = "formal_battle.rs"]
@@ -1154,6 +1156,10 @@ impl WorldSources {
 
     pub fn places(&self) -> &BTreeMap<String, Place> {
         &self.places
+    }
+
+    pub fn place_polity(&self, place: &str) -> Option<&Polity> {
+        self.polities.get(historical_place_polity(self.places.get(place)?))
     }
 
     pub fn routes(&self) -> &BTreeMap<String, Route> {

@@ -208,7 +208,7 @@ impl Skin {
     pub fn set_english(&mut self,value:bool){self.english=value;}
     pub fn english(&self)->bool {self.english}
     pub fn choose<'a>(&self,zh:&'a str,en:&'a str)->&'a str {if self.english {en}else{zh}}
-    fn geographic_name<'a>(&'a self,id:&str)->Option<&'a str>{
+    pub(crate) fn geographic_name<'a>(&'a self,id:&str)->Option<&'a str>{
         let record=self.geography.names.get(id)?;
         Some(self.choose(&record.zh,&record.en)).filter(|name|!name.is_empty())
     }
@@ -317,6 +317,7 @@ pub struct Hud {
     pub mechanical:crate::mechanical::Mechanical,
     pub waiting_slot:bool,pub fullscreen:bool,pub clock_drag:Option<f32>,pub military_grid:bool,
     pub market_offset:usize,pub market_chooser:Option<&'static str>,pub quantity:Option<String>,pub purchase_token:Option<u64>,
+    pub transport_detail_page:usize,
     pub volume:u8,pub english:bool,pub volume_drag:bool,
 }
 #[derive(Clone,Copy)]
@@ -326,6 +327,7 @@ pub enum Command {
     Labels,Fullscreen,MilitaryGrid,Quit,PlayerMarker,Volume(u8),Language(bool),
     Market(&'static str,usize),MarketScroll(i32),
     Transport(&'static str,usize),
+    TransportDetail(usize),TransportDetailPage(usize),CloseTransportDetail,
     Training(&'static str),
     PortraitAction(usize,Page),Relation(Option<usize>),RelationDrawer(&'static str),
     WorkAction(usize,usize,u64),OralWorkAction(u64),OralReferral,WorkConfirm(bool),

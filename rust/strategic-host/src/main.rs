@@ -204,6 +204,8 @@ struct Host {
     events:winit::event_loop::EventLoopProxy<HostEvent>,
     landmarks:Option<landmarks::Landmarks>,
     transport_scene:Option<transport_scene::TransportScene>,
+    transport_selection:Option<transport_ui::ObjectId>,
+    transport_detail:Option<(i64, transport_ui::Detail)>,
     config:Config,window:Option<Arc<Window>>,renderer:Option<Renderer>,
     map_root:PathBuf,map_signature:Option<&'static [u8;8]>,fatal_error:Option<String>,
     world:World,visuals:PoliticalVisuals,index:Index,base:Option<Page>,reader:Reader,cached:HashMap<usize,Resident>,
@@ -307,7 +309,7 @@ impl Host {
         let reader=Reader::new(map_root.clone(),map_signature,legacy_cover,events.create_proxy());
         let observation_id=config.observe.as_ref().filter(|_|!config.terrain_review).and_then(|path|timeline::read::<Observation>(path,128*1024).ok())
             .map(|input|input.id).unwrap_or_default();
-        Ok(Self {natural,events:events.create_proxy(),landmarks,transport_scene:None,config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
+        Ok(Self {natural,events:events.create_proxy(),landmarks,transport_scene:None,transport_selection:None,transport_detail:None,config,map_root,map_signature,fatal_error:None,world,visuals,index,reader,state,camera,atlas,started,base:None,window:None,renderer:None,
             cached:HashMap::new(),failed:HashSet::new(),candidate:Vec::new(),visible:Vec::new(),
             size:VIEW_SIZE,mode,theme:false,labels,selected:None,details:false,country:None,country_click:None,search:None,history:Vec::new(),focus:None,site:0,
             hits:Vec::new(),shown_markers:HashSet::new(),cursor:[640.,360.],drag:None,velocity:[0.;2],moved_at:Instant::now(),
@@ -335,6 +337,7 @@ impl Host {
     fn emit(&mut self,request:Request<'_>) {
         #[cfg(windows)]
         if let Some(native)=&mut self.config.native {
+            self.transport_detail=None;
             let had_session=self.state.session.is_some();
             let revision=native.revision;
             self.feedback.clear();
@@ -353,6 +356,7 @@ impl Host {
         if let Err(e)=request.output(self.config.requests.as_deref()) {self.feedback=format!("Host request: {e}");}
     }
     fn select(&mut self,object:Option<Object>) {
+        self.select_transport(None);
         self.country=None;
         self.details=false;
         self.selected=object.filter(|o|self.available(*o));
@@ -464,6 +468,10 @@ impl Host {
             Action::Mode(mode)=>{
                 if self.hud.page==HudPage::Market{self.market_command("close",0);}
                 if mode==Mode::Military && self.mode!=Mode::Military && self.written_world().is_some(){self.hud.military_grid=true;}
+                if self.mode!=mode {
+                    self.hud.transport_detail_page=0;
+                    self.transport_detail=None;
+                }
                 self.mode=mode;self.hud.page=HudPage::Map;self.hud.menu=HudMenu::None;
                 self.emit(Request::SetMapMode{mode:mode.key()});
             }
@@ -692,6 +700,9 @@ impl Host {
             }
             HudCommand::Market(verb,index)=>self.market_command(verb,index),
             HudCommand::Transport(verb,index)=>self.transport_command(verb,index),
+            HudCommand::TransportDetail(index)=>self.transport_detail_action(index),
+            HudCommand::TransportDetailPage(page)=>self.hud.transport_detail_page=page,
+            HudCommand::CloseTransportDetail=>self.select_transport(None),
             HudCommand::MarketScroll(delta)=>{
                 let count=self.state.session.as_ref().map_or(0,|s| {
                     if self.hud.page==HudPage::Property{return s.property.len();}
@@ -827,9 +838,8 @@ impl Host {
             if self.mode!=Mode::Economic || self.hud.page==HudPage::Market{return;}
             let selected=self.selected.filter(|o|matches!(o,Object::Polity(i) if !self.world.polities[*i].display_only));
             let id=selected.map(|o|self.id(o)).unwrap_or_default();
-            self.hud.page=HudPage::Market;self.hud.menu=HudMenu::None;self.hud.market_chooser=None;
-            self.hud.market_offset=0;self.details=false;self.country=None;self.search=None;
-            self.emit(Request::Market{verb,id:&id,site:"",quantity:0,token:0,viewport:self.size});return;
+            self.open_market(&id);
+            return;
         }
         if verb=="close"{
             self.hud.page=HudPage::Map;self.hud.market_chooser=None;self.hud.quantity=None;
@@ -899,6 +909,72 @@ impl Host {
         };
         self.hud.quantity=None;self.hud.market_offset=0;self.hud.market_chooser=None;
         self.emit(Request::Market{verb:actual,id:&id,site:&site,quantity,token,viewport:self.size});
+    }
+
+    fn open_market(&mut self, id: &str) {
+        self.hud_action(HudCommand::Page(HudPage::Market));
+        self.hud.market_chooser=None;
+        self.emit(Request::Market{verb:"open",id,site:"",quantity:0,token:0,viewport:self.size});
+    }
+
+    fn transport_detail_visible(&self) -> bool {
+        self.transport_selection.is_some() && self.hud.page==HudPage::Map
+            && self.hud.menu==HudMenu::None && self.country.is_none() && self.search.is_none() && !self.details
+    }
+
+    fn select_transport(&mut self, selection: Option<transport_ui::ObjectId>) {
+        if self.transport_selection==selection {return;}
+        if selection.is_some() {
+            self.selected=None;
+            self.details=false;
+            self.country=None;
+            self.country_click=None;
+            self.feedback.clear();
+        }
+        self.transport_selection=selection;
+        self.transport_detail=None;
+        self.hud.transport_detail_page=0;
+        self.dirty=true;
+    }
+
+    fn pick_transport(&mut self, point: [f64; 2]) -> bool {
+        if self.hud.page!=HudPage::Map || self.hud.menu!=HudMenu::None
+            || self.search.is_some() || self.details || self.in_lobby() {return false;}
+        let selection=self.transport_scene.as_ref().and_then(|scene|scene.pick(point));
+        if selection.is_none() {return false;}
+        self.select_transport(selection);
+        true
+    }
+
+    fn transport_detail_action(&mut self, index: usize) {
+        use transport_ui::Link;
+        if !self.transport_detail_visible() {return;}
+        let Some(link)=self.transport_detail.as_ref().and_then(|(_, detail)|detail.links.get(index)).cloned() else{return;};
+        match link {
+            Link::Object(id)=>self.select_transport(Some(id)),
+            Link::Travel(id)=>{
+                self.hud_action(HudCommand::Page(HudPage::Travel));
+                self.emit(Request::Transport{verb:"city",id:&id});
+            }
+            Link::CurrentTravel=>self.hud_action(HudCommand::Page(HudPage::Travel)),
+            Link::Market(unit)=>self.open_market(&format!("state:{unit}")),
+            Link::Firm{id,drawer}=>{
+                self.hud_action(HudCommand::Page(HudPage::Relations));
+                self.emit(Request::Relations{verb:"drawer",id:drawer});
+                self.emit(Request::Relations{verb:"select",id:&id});
+            }
+            Link::Freight(id)=>{
+                self.open_market("");
+                self.market_command("freight",0);
+                self.emit(Request::Transport{verb:"lot",id:&id.to_string()});
+            }
+            Link::Battle(cell)=>{
+                if self.mode==Mode::Military && self.written_world().and_then(|world|world.land_battle_region())==Some(cell.region()) {
+                    self.military_cell=Some(SelectedMilitaryCell{cell,coordinates:cell.center_lon_lat()});
+                    self.enter_selected_battle();
+                }
+            }
+        }
     }
     fn transport_command(&mut self, verb: &'static str, index: usize) {
         let id = match verb {
@@ -1164,6 +1240,7 @@ impl Host {
             contains(h.area)&&(!gear||formal_ui::gear_hit(p,self.size[0]))
                 &&portrait
                 &&(!in_menu||!matches!(h.action,Action::Country(_)|Action::Select(_)))
+                &&(!self.transport_panel_at(p)||!matches!(h.action,Action::Select(_)))
                 &&(!in_country||in_menu||matches!(h.action,Action::Country(_)))
                 &&(!self.details||!matches!(h.action,Action::Select(_))||self.search.is_some())
         }) {
@@ -1176,11 +1253,13 @@ impl Host {
                 Action::Select(Object::Polity(i)) if self.search.is_none()&&self.hud.menu==HudMenu::None&&self.hud.page==HudPage::Map=>{
                     self.click_country(i,p);
                 }
+                Action::Select(Object::Place(_)) if !in_country && self.pick_transport(p)=>{},
                 _=>self.action(action),
             }
             return;
         }
         if self.is_panel(p){return;}
+        if self.pick_transport(p){return;}
         let coordinates=self.camera.vector(p,self.size).map(camera::geographic);
         let hit=coordinates.map(|q|self.object_at(q)[0]);
         if self.in_lobby(){
@@ -1200,12 +1279,19 @@ impl Host {
             return;
         }
         let polity=hit.and_then(|v|v.checked_sub(1)).map(usize::from);
+        self.select_transport(None);
         if coordinates.is_some_and(|q|self.click_military_cell(q,polity)){return;}
         if self.hud.page==HudPage::Map {
             if let Some(i)=polity.filter(|_|self.hud.menu==HudMenu::None){self.click_country(i,p);return;}
         }
         self.country_click=None;
         self.select(polity.map(Object::Polity));
+    }
+
+    fn transport_panel_at(&self, p: [f64; 2]) -> bool {
+        let Some((_, detail))=self.transport_detail.as_ref().filter(|_|self.transport_detail_visible()) else{return false;};
+        let [x,y,w,h]=detail.rect(self.size).map(f64::from);
+        p[0]>=x && p[0]<=x+w && p[1]>=y && p[1]<=y+h
     }
     fn is_panel(&self,p:[f64;2])->bool {
         if self.loading(){return true;}
@@ -1220,7 +1306,7 @@ impl Host {
         }
         let radius=(w*0.056).clamp(52.,78.);
         let modal=self.hud.menu.modal();
-        modal||self.search.is_some()||self.details||
+        modal||self.search.is_some()||self.details||self.transport_panel_at(p)||
             self.country.is_some_and(|country|contains(country.rect(self.size)))||
             formal_ui::page_rect(&self.hud,self.size).is_some_and(contains)||
             (self.hud.menu!=HudMenu::None&&contains(formal_ui::menu_rect(self.hud.menu,self.size,radius)))||
@@ -1374,7 +1460,7 @@ impl Host {
         let year=self.state.date.year;
         match key {
             Key::Named(NamedKey::Home)=>self.action(Action::Home),
-            Key::Named(NamedKey::Escape)=>if self.hud.clock_drag.take().is_some(){}else if self.hud.menu!=HudMenu::None{self.hud_action(HudCommand::Menu(HudMenu::None));}else if self.country.is_some(){self.country_action(CountryAction::Close);}else if self.hud.messages{self.hud.messages=false;}else if self.hud.page!=HudPage::Map{self.hud_action(HudCommand::Page(HudPage::Map));}else if self.details{self.details=false;}else{self.hud.menu=HudMenu::System;},
+            Key::Named(NamedKey::Escape)=>if self.hud.clock_drag.take().is_some(){}else if self.hud.menu!=HudMenu::None{self.hud_action(HudCommand::Menu(HudMenu::None));}else if self.country.is_some(){self.country_action(CountryAction::Close);}else if self.hud.messages{self.hud.messages=false;}else if self.hud.page!=HudPage::Map{self.hud_action(HudCommand::Page(HudPage::Map));}else if self.details{self.details=false;}else if self.transport_selection.is_some(){self.select_transport(None);}else{self.hud.menu=HudMenu::System;},
             Key::Named(NamedKey::Backspace) if self.country.is_some()=>self.country_action(CountryAction::Back),
             Key::Named(NamedKey::Backspace) if self.hud.page==HudPage::Relations=>{
                 let has_detail=self.state.session.as_ref().and_then(|s|s.relations.as_ref())
@@ -1515,13 +1601,31 @@ impl Host {
         let written_world = self.config.native.as_ref().and_then(native_start::NativeSession::active_world);
         #[cfg(not(windows))]
         let written_world = None;
+        let loading=self.loading();
+        let transport_world=written_world.filter(|_|!loading&&!self.in_lobby()&&!self.hud.menu.modal());
+        if let Some(world)=transport_world {
+            if self.transport_scene.is_none() {
+                self.transport_scene=Some(transport_scene::TransportScene::new(world.transport())?);
+            }
+            self.transport_scene.as_mut().unwrap().update_map(&self.camera,self.size,&date,self.mode,world,
+                self.transport_selection.as_ref())?;
+        }
+        let show_transport_detail=self.transport_detail_visible();
+        if let (Some(world),Some(scene),Some(selected))=(transport_world,self.transport_scene.as_ref(),
+            self.transport_selection.as_ref().filter(|_|show_transport_detail))
+        {
+            let minute=world.clock().snapshot().total_minutes;
+            if self.transport_detail.as_ref().is_none_or(|(previous,_)|*previous!=minute) {
+                let context=transport_ui::Context{skin:&self.skin,world,map:&self.world,mode:self.mode,date:&date,scene};
+                self.transport_detail=transport_ui::Detail::build(&context,selected).map(|detail|(minute,detail));
+            }
+        }
         let formal=formal_ui::Display{skin:&self.skin,hud:&self.hud,session:self.state.session.as_ref(),date:self.state.date,country,
             camera:&self.camera,size:self.size,mode:self.mode,flags,cursor:self.cursor,source:&source,feedback:&self.feedback,labels:self.labels,managed:self.config.managed,
             written_world, modern_terrain:view.map_style[1]>0.,
             surveyed_terrain:view.close_sample[0]>0. && view.close_sample[2]>0.5,
             debug:self.debug.then_some(&self.perf)};
         let seconds=self.started.elapsed().as_secs_f32();
-        let loading=self.loading();
         let (mut meshes,hits)=if loading {
             let status=self.state.lobby.as_ref().map(|s|s.status.as_str()).filter(|s|!s.is_empty())
                 .unwrap_or(if self.lobby_request{"正在进入世界"}else{"正在读取地图资料"});
@@ -1532,6 +1636,7 @@ impl Host {
             mode:self.mode,date:&date,camera:&self.camera,size:self.size,selected:self.selected,admin:&admin,details:self.details,country:self.country,
             search:self.search.as_deref(),search_results:&search,econ_label:&econ_label,econ_legend:&econ_legend,
             mouse:&mouse,labels:self.labels,formal,
+            transport_detail:self.transport_detail.as_ref().filter(|_|show_transport_detail).map(|(_, detail)|detail),
         },&mut self.shown_markers)};
         if let Some((_,status))=&self.screenshot_status {
             let [w,h]=self.size.map(|n|n as f32);let width=(w-48.).min(940.);let x=(w-width)*0.5;
@@ -1559,7 +1664,6 @@ impl Host {
             let scissor=self.index.scissor(id,&self.camera,self.size)?;
             (opacity>0.).then_some((&p.page,tile,scissor,opacity))
         }).collect();
-        let transport_world=written_world.filter(|_|!loading&&!self.in_lobby()&&!self.hud.menu.modal());
         let mut models=if loading||self.in_lobby() {Vec::new()} else {
             self.landmarks.as_ref().map_or_else(Vec::new,|catalogue|catalogue.visible(&date,&self.camera,self.size))
         };
@@ -1571,20 +1675,14 @@ impl Host {
             })
         }).chain(hits).collect();
         let vehicle_markers;
-        let transport=if let Some(world)=transport_world {
-            if self.transport_scene.is_none() {
-                self.transport_scene=Some(transport_scene::TransportScene::new(world.transport())?);
-            }
-            let scene=self.transport_scene.as_mut().unwrap();
-            scene.update_map(&self.camera,self.size,&date,matches!(self.mode,Mode::Geographic|Mode::Economic),
-                world.transport(),world.selected_transport_route())?;
-            if self.hud.page==HudPage::Map && self.hud.menu==HudMenu::None && self.country.is_none() && self.search.is_none() {
+        let transport=if let (Some(world),Some(scene))=(transport_world,self.transport_scene.as_mut()) {
+            if !show_transport_detail && self.hud.page==HudPage::Map && self.hud.menu==HudMenu::None
+                && self.country.is_none() && self.search.is_none() {
                 scene.caption(&self.skin,self.cursor,self.size,world,&mut meshes);
             }
-            vehicle_markers=scene.draw_vehicles(&self.camera,self.size,world.transport(),
-                scene.vehicle_segments().flat_map(|id|world.transport_vehicles_on(id)),
+            vehicle_markers=scene.draw_vehicles(&self.camera,self.size,world,
                 &mut models,|model|renderer.has_model(model));
-            Some(render::TransportOverlay{network:scene.map_overlay(),vehicles:&vehicle_markers})
+            Some(render::TransportOverlay{network:scene.map_overlay(),economy:scene.economic_overlay(),vehicles:&vehicle_markers})
         } else {None};
         renderer.update_terrain(&self.camera,self.size,now)?;
         view.map_style[2]=renderer.terrain_view_level() as f32;
@@ -1725,6 +1823,7 @@ impl Host {
             "landmarks":self.renderer.as_ref().map(Renderer::resident_models),
             "model_instances":self.renderer.as_ref().map(Renderer::model_instances),
             "selection":self.selected.map_or(String::new(),|o|self.id(o)),"date":self.state.date.to_string(),
+            "transport_selection":self.transport_selection,
             "cache_bytes":self.cached.values().map(|p|p.page.bytes).sum::<usize>(),
             "base_bytes":self.base.as_ref().map_or(0,|p|p.bytes),"resident":self.cached.len(),
             "wanted":self.visible.len(),"ready":self.visible.iter().filter(|i|self.cached.contains_key(i)).count(),
@@ -1851,6 +1950,7 @@ impl Host {
         if self.config.managed&&(had_session!=connected||loaded){
             self.battle_view = None;
             self.transport_scene = None;
+            self.select_transport(None);
             self.military_cell=None;
             if let Some(region)=self.written_world().filter(|world|world.land_battle_in_progress()).and_then(|world|world.land_battle_region()) {
                 if let Err(error)=self.load_battle_terrain(region){self.battle_terrain=None;self.feedback=error.to_string();}

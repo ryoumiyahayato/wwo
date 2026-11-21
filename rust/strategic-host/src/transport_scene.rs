@@ -5,16 +5,23 @@ use crate::{
         ModelBounds, ModelKey, ModelPose, RegionalSource, VisibleModel, MISSISSIPPI, SHARDS,
     },
     overlay::Mesh,
-    ui::Layers,
+    transport_ui::{MappedSite, ObjectId},
+    ui::{Layers, Mode},
 };
 use glam::{DVec3, Vec2};
 use serde::Deserialize;
-use std::{collections::BTreeMap, io};
-use wwo_map_lab::transport::{
-    map_data::load_prototype_geometry,
-    models::{ModelLod, TransportModel, TRACK_RAILHEAD_M},
-    operations::ActiveVehicle,
-    NodeKind, Route, TransportMode, TransportNetwork,
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    io,
+    sync::atomic::{AtomicU64, Ordering},
+};
+use wwo_map_lab::{
+    formal_bootstrap::InitialWorld,
+    transport::{
+        map_data::load_prototype_geometry,
+        models::{ModelLod, TransportModel, TRACK_RAILHEAD_M},
+        NetworkLayer, NodeKind, TransportMode, TransportNetwork,
+    },
 };
 
 const MODEL_BUDGET: usize = 48;
@@ -22,27 +29,68 @@ const MARKER_BUDGET: usize = 48;
 const PORT_INK: [u8; 4] = [138, 213, 222, 255];
 const DARK: [u8; 4] = [23, 32, 39, 244];
 const BLOCKED: [u8; 4] = [245, 110, 81, 250];
+const RESTRICTED: [u8; 4] = [249, 171, 102, 244];
 const RIVER: [u8; 4] = [76, 191, 155, 230];
+const SELECTED: [u8; 4] = [255, 219, 131, 252];
+const FLOW: [u8; 4] = [255, 191, 88, 254];
+const CELL_COUNT: usize = 12;
+static DRAW_REVISION: AtomicU64 = AtomicU64::new(0);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum GeometryEvidence {
+    HistoricalCorridor,
+    Schematic,
+    Unmapped,
+}
 
 pub struct TransportScene {
-    /// Only the three schematic sea ways in the opening catalogue have waypoints.
     schematic: BTreeMap<String, Path>,
     regions: Vec<Region>,
+    rail_pairs: BTreeMap<(String, String), Vec<String>>,
+    incident: BTreeMap<String, Vec<String>>,
     terminals: Vec<Terminal>,
+    terminal_cells: Vec<Vec<usize>>,
     previous_view: Option<MapView>,
     previous_legs: Vec<String>,
+    previous_selection: Option<ObjectId>,
     vehicle_segments: Vec<String>,
+    vehicle_hits: Vec<VehicleHit>,
     overlay: Mesh,
     revision: u64,
-    visible: Vec<(Vec2, usize)>,
+    visible: Vec<VisibleNode>,
+    paths: Vec<VisiblePath>,
+    flow_segments: BTreeSet<String>,
+    flow_nodes: BTreeSet<String>,
+    flow_overlay: Mesh,
+    flow_minute: Option<i64>,
+    flow_revision: u64,
     corridor_page: Option<(usize, usize)>,
 }
 
 struct Terminal {
     id: String,
     point: DVec3,
-    corridors: Vec<String>,
+    kind: NodeKind,
+}
+
+struct VisibleNode {
+    position: Vec2,
+    id: String,
+    terminal: Option<usize>,
+    radius: f32,
     port: bool,
+    drawn: bool,
+}
+
+struct VisiblePath {
+    id: String,
+    strokes: Vec<(Vec2, Vec2)>,
+    fragments: Vec<(Vec2, Vec2)>,
+}
+
+struct VehicleHit {
+    area: [f32; 4],
+    id: ObjectId,
 }
 
 struct Region {
@@ -53,7 +101,17 @@ struct Region {
 struct RegionalGeometry {
     period: Period,
     routes: BTreeMap<String, Path>,
-    stations: Vec<(DVec3, Period)>,
+    references: Vec<RegionalPoint>,
+}
+
+struct RegionalPoint {
+    id: String,
+    name: String,
+    kind: String,
+    source: String,
+    note: String,
+    coordinates: [f64; 2],
+    period: Period,
 }
 
 #[derive(PartialEq)]
@@ -62,9 +120,10 @@ struct MapView {
     size: [u32; 2],
     mpp: f64,
     pitch: f64,
-    network: bool,
+    mode: Mode,
     date: String,
     availability: u64,
+    vehicle_segment: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -107,8 +166,16 @@ enum Reference {
     },
     #[serde(rename = "geographic_region")]
     Place {
+        id: String,
+        display_name: String,
         #[serde(default)]
         display_kind: String,
+        #[serde(default)]
+        transport_symbol: String,
+        #[serde(default)]
+        source_reference: String,
+        #[serde(default)]
+        note_zh: String,
         #[serde(default)]
         geometry: Option<serde_json::Value>,
         #[serde(flatten)]
@@ -123,12 +190,16 @@ struct Line {
 }
 
 impl Region {
-    fn load(&self, network: &TransportNetwork) -> io::Result<RegionalGeometry> {
+    fn load(
+        &self,
+        network: &TransportNetwork,
+        rail_pairs: &BTreeMap<(String, String), Vec<String>>,
+    ) -> io::Result<RegionalGeometry> {
         let shard: Shard = serde_json::from_slice(self.source.bytes)?;
         let mut geometry = RegionalGeometry {
             period: shard.metadata,
             routes: BTreeMap::new(),
-            stations: Vec::new(),
+            references: Vec::new(),
         };
         for fact in shard.evidence_catalog.facts {
             match fact.value {
@@ -137,20 +208,26 @@ impl Region {
                     geometry: line,
                     geometry_status,
                 } if geometry_status == "BOUNDED_HISTORICAL_CORRIDOR_REFERENCE" => {
-                    for edge in network.segments().filter(|e| e.mode == TransportMode::Rail) {
-                        let (Some(a), Some(b)) = (
-                            network.node_coordinates(&edge.from),
-                            network.node_coordinates(&edge.to),
-                        ) else {
-                            continue;
-                        };
-                        if let Some(path) = slice_reference(
-                            &places,
-                            &line.coordinates,
-                            [&edge.from, &edge.to],
-                            [a, b],
-                        ) {
-                            geometry.routes.entry(edge.id.clone()).or_insert(path);
+                    for (i, first) in places.iter().enumerate() {
+                        for second in places.iter().skip(i + 1) {
+                            let pair = (first.min(second).clone(), first.max(second).clone());
+                            for id in rail_pairs.get(&pair).into_iter().flatten() {
+                                let edge = network.segment(id).expect("indexed rail segment");
+                                let (Some(a), Some(b)) = (
+                                    network.node_coordinates(&edge.from),
+                                    network.node_coordinates(&edge.to),
+                                ) else {
+                                    continue;
+                                };
+                                if let Some(path) = slice_reference(
+                                    &places,
+                                    &line.coordinates,
+                                    [&edge.from, &edge.to],
+                                    [a, b],
+                                ) {
+                                    geometry.routes.entry(edge.id.clone()).or_insert(path);
+                                }
+                            }
                         }
                     }
                 }
@@ -169,7 +246,12 @@ impl Region {
                         .insert(segment_id, Path::new(line.coordinates));
                 }
                 Reference::Place {
+                    id,
+                    display_name,
                     display_kind,
+                    transport_symbol,
+                    source_reference,
+                    note_zh,
                     geometry: Some(point),
                     period,
                 } if display_kind == "transport_node" => {
@@ -177,7 +259,15 @@ impl Region {
                         .get("coordinates")
                         .and_then(|xy| serde_json::from_value::<[f64; 2]>(xy.clone()).ok())
                     {
-                        geometry.stations.push((radial(coords), period));
+                        geometry.references.push(RegionalPoint {
+                            id,
+                            name: display_name,
+                            kind: transport_symbol,
+                            source: source_reference,
+                            note: note_zh,
+                            coordinates: coords,
+                            period,
+                        });
                     }
                 }
                 _ => {}
@@ -293,64 +383,81 @@ fn slice_reference(
 impl TransportScene {
     pub fn new(network: &TransportNetwork) -> io::Result<Self> {
         let catalogue = load_prototype_geometry()?;
-        let schematic = catalogue
+        let mut schematic: BTreeMap<_, _> = catalogue
             .shipping_waypoints
             .into_iter()
             .filter_map(|(id, points)| {
                 let edge = network.segment(&id)?;
                 let start = network.node_coordinates(&edge.from)?;
                 let end = network.node_coordinates(&edge.to)?;
-                Some((
-                    id,
-                    Path::new([start].into_iter().chain(points).chain([end])),
-                ))
+                Some((id, Path::new([start].into_iter().chain(points).chain([end]))))
             })
             .collect();
-        let mut incident = BTreeMap::new();
+        let mut incident: BTreeMap<String, Vec<String>> = BTreeMap::new();
+        let mut rail_pairs: BTreeMap<_, Vec<_>> = BTreeMap::new();
         for edge in network.segments() {
             for id in [&edge.from, &edge.to] {
-                incident
-                    .entry(id.as_str())
-                    .or_insert_with(Vec::new)
-                    .push(edge.id.clone());
+                incident.entry(id.clone()).or_default().push(edge.id.clone());
+            }
+            if edge.mode == TransportMode::Rail {
+                let pair = (edge.from.clone().min(edge.to.clone()), edge.from.clone().max(edge.to.clone()));
+                rail_pairs.entry(pair).or_default().push(edge.id.clone());
+            }
+            if edge.mode == TransportMode::Road && edge.prototype_only {
+                if let (Some(from), Some(to)) = (
+                    network.node_coordinates(&edge.from),
+                    network.node_coordinates(&edge.to),
+                ) {
+                    schematic.insert(edge.id.clone(), Path::new([from, to]));
+                }
             }
         }
-        let terminals = network
-            .nodes()
-            .filter_map(|node| {
-                let point = radial(network.node_coordinates(&node.id)?);
-                let mut corridors = incident.remove(node.id.as_str()).unwrap_or_default();
-                corridors.sort_by_key(|id| match network.segment(id).map(|s| s.mode) {
-                    Some(TransportMode::Shipping | TransportMode::InlandWaterway) => 0,
-                    Some(TransportMode::Rail | TransportMode::Road) => 1,
-                    Some(TransportMode::PortTransfer) => 2,
-                    _ => 3,
-                });
-                Some(Terminal {
-                    id: node.id.clone(),
-                    point,
-                    corridors,
-                    port: node.kind == NodeKind::Port,
-                })
-            })
-            .collect();
+        for edges in incident.values_mut() {
+            edges.sort_by_key(|id| match network.segment(id).map(|s| s.mode) {
+                Some(TransportMode::Shipping | TransportMode::InlandWaterway) => 0,
+                Some(TransportMode::Rail | TransportMode::Road) => 1,
+                Some(TransportMode::PortTransfer) => 2,
+                _ => 3,
+            });
+        }
+        let mut terminals = Vec::new();
+        let mut terminal_cells = vec![Vec::new(); CELL_COUNT.pow(3)];
+        for node in network.nodes() {
+            if !incident.contains_key(&node.id) {
+                continue;
+            }
+            let Some(coords) = network.node_coordinates(&node.id) else {
+                continue;
+            };
+            let point = radial(coords);
+            terminal_cells[cell_index(point.to_array().map(cell_axis))].push(terminals.len());
+            terminals.push(Terminal { id: node.id.clone(), point, kind: node.kind });
+        }
         Ok(Self {
             schematic,
             terminals,
+            terminal_cells,
+            incident,
+            rail_pairs,
             regions: SHARDS
                 .iter()
                 .chain([&MISSISSIPPI])
-                .map(|source| Region {
-                    source,
-                    loaded: None,
-                })
+                .map(|source| Region { source, loaded: None })
                 .collect(),
             previous_view: None,
             previous_legs: Vec::new(),
+            previous_selection: None,
             vehicle_segments: Vec::new(),
+            vehicle_hits: Vec::new(),
             overlay: Mesh::default(),
             revision: 0,
             visible: Vec::new(),
+            paths: Vec::new(),
+            flow_segments: BTreeSet::new(),
+            flow_nodes: BTreeSet::new(),
+            flow_overlay: Mesh::default(),
+            flow_minute: None,
+            flow_revision: 0,
             corridor_page: None,
         })
     }
@@ -360,178 +467,370 @@ impl TransportScene {
         camera: &Camera,
         size: [u32; 2],
         date: &str,
-        show_network: bool,
-        network: &TransportNetwork,
-        itinerary: Option<&Route>,
+        mode: Mode,
+        world: &InitialWorld,
+        selection: Option<&ObjectId>,
     ) -> io::Result<()> {
-        let selected = || {
-            itinerary
-                .into_iter()
-                .flat_map(|r| r.legs.iter().map(|l| l.segment_id.as_str()))
+        let network = world.transport();
+        let selected_leg_ids = || {
+            world.selected_transport_route().into_iter()
+                .flat_map(|route| route.legs.iter().map(|leg| leg.segment_id.as_str()))
+        };
+        let vehicle = match selection {
+            Some(ObjectId::Vehicle { reservation, .. }) => world.transport_vehicle(*reservation),
+            _ => None,
         };
         let view = MapView {
             projection: camera.projection(size),
             size,
             mpp: camera.mpp,
             pitch: camera.pitch(),
-            network: show_network,
+            mode,
             date: date.to_owned(),
             availability: network.availability_revision(),
+            vehicle_segment: vehicle.as_ref().map(|vehicle| vehicle.segment_id.to_owned()),
         };
         if self.previous_view.as_ref() == Some(&view)
-            && self.previous_legs.iter().map(String::as_str).eq(selected())
+            && self.previous_selection.as_ref() == selection
+            && self.previous_legs.iter().map(String::as_str).eq(selected_leg_ids())
         {
+            self.update_flows(world, mode);
             return Ok(());
         }
+
+        let selected_segment = match selection {
+            Some(ObjectId::Segment(id)) => Some(id.as_str()),
+            Some(ObjectId::Vehicle { segment, .. }) =>
+                Some(vehicle.as_ref().map_or(segment.as_str(), |vehicle| vehicle.segment_id)),
+            _ => None,
+        };
+        let selected_node = match selection {
+            Some(ObjectId::Node(id)) => Some(id.as_str()),
+            _ => None,
+        };
+        let highlighted = |id: &str| selected_segment == Some(id) || selected_leg_ids().any(|leg| leg == id);
+        let midpoint = size.map(|dimension| f64::from(dimension) * 0.5);
+        let center = DVec3::from_array(camera.vector(midpoint, size).unwrap_or(view.projection.0[2]));
+        let metres = camera.mpp * (f64::from(size[0])).hypot(f64::from(size[1]) / view.pitch.cos()) * 0.5;
+        let reach = if camera.blend() > 0. {
+            metres
+        } else {
+            (metres / EARTH).min(1.).asin() * EARTH
+        } + camera.mpp * 24.;
+        for region in &mut self.regions {
+            let distance = center.angle_between(radial(region.source.center)) * EARTH;
+            let in_view = camera.mpp <= camera::ENTER && distance <= reach + region.source.radius_km * 1000.;
+            if in_view && region.loaded.is_none() {
+                region.loaded = Some(region.load(network, &self.rail_pairs)?);
+            } else if !in_view && region.loaded.as_ref().is_some_and(|geometry| {
+                !selected_segment.is_some_and(|id| geometry.routes.contains_key(id))
+                    && !selected_node.is_some_and(|id| geometry.references.iter().any(|site| site.id == id))
+            }) {
+                region.loaded = None;
+            }
+        }
+
         self.overlay.vertices.clear();
         self.overlay.indices.clear();
         self.visible.clear();
+        self.paths.clear();
         self.vehicle_segments.clear();
-        let center = radial(camera.coordinates());
-        let reach = camera.mpp * f64::from(size[0]).hypot(f64::from(size[1]));
-        for region in &mut self.regions {
-            let distance = center.angle_between(radial(region.source.center)) * EARTH;
-            if camera.mpp > 5500. || distance > reach + region.source.radius_km * 1000. {
-                region.loaded = None;
-            } else if region.loaded.is_none() {
-                region.loaded = Some(region.load(network)?);
-            }
-        }
-        let current = self
-            .regions
-            .iter()
+        self.flow_segments.clear();
+        let current = self.regions.iter()
             .filter_map(|r| r.loaded.as_ref())
             .filter(|r| r.period.contains(date));
-        for (id, path) in self
-            .schematic
-            .iter()
-            .chain(current.clone().flat_map(|r| &r.routes))
+        let mut drawn = BTreeSet::new();
+        for (id, path, schematic) in current.clone().flat_map(|r| r.routes.iter())
+            .map(|(id, path)| (id, path, false))
+            .chain(self.schematic.iter().map(|(id, path)| (id, path, true)))
         {
-            let Some(edge) = network.segment(id) else {
-                continue;
-            };
-            if !network.evidence(id).is_some_and(|e| e.applies_on(date)) {
+            if center.angle_between(path.center) * EARTH > reach + path.radius {
                 continue;
             }
-            if camera.mpp <= 1200. && center.angle_between(path.center) * EARTH <= reach + path.radius {
-                self.vehicle_segments.push(edge.id.clone());
-            }
-            let highlight = selected().any(|s| s == id);
-            if !(view.network || highlight) {
+            let Some(edge) = network.segment(id) else { continue; };
+            if !network.evidence(id).is_some_and(|e| e.applies_on(date)) || !drawn.insert(id) {
                 continue;
             }
-            let generalized = self.schematic.contains_key(id);
-            if generalized && camera.mpp < 100. {
-                continue;
+            let availability = network.availability(id).expect("segment has availability");
+            let closed = !availability.open || availability.capacity_units == 0;
+            let restricted = availability.capacity_units < edge.profile.capacity_units;
+            let highlight = highlighted(id);
+            if mode != Mode::Military && camera.mpp <= 1200.
+                && (!schematic || edge.mode == TransportMode::Shipping && camera.mpp >= 100.)
+            {
+                self.vehicle_segments.push(id.clone());
             }
-            let available = network.availability(id).unwrap();
-            let ink = if !available.open || available.capacity_units == 0 {
-                BLOCKED
-            } else if highlight {
-                [249, 205, 125, 254]
-            } else {
-                match edge.mode {
-                    TransportMode::Shipping => PORT_INK,
-                    TransportMode::InlandWaterway => RIVER,
-                    _ => [179, 138, 95, 222],
+            let status = if closed { Some(BLOCKED) } else if restricted { Some(RESTRICTED) } else { None };
+            let color = if highlight { SELECTED } else { mode_ink(edge.mode) };
+            let (mut width, mut ink) = match mode {
+                Mode::Geographic => (if edge.mode == TransportMode::Rail { 2.3 } else { 1.7 }, status.unwrap_or(color)),
+                Mode::Political => (1.1, status.map_or([177, 202, 204, 140], |c| with_alpha(c, 180))),
+                Mode::Economic => (1.3, status.map_or([161, 179, 175, 130], |c| with_alpha(c, 175))),
+                Mode::Military => {
+                    if schematic || edge.prototype_only && !highlight { continue; }
+                    let width = capacity_radius(availability.capacity_units) * 0.52;
+                    (width, status.unwrap_or([181, 196, 143, 218]))
                 }
             };
-            draw_path(
-                &mut self.overlay,
-                camera,
-                size,
-                path,
-                if highlight { 3.8 } else { 1.6 },
-                ink,
-                generalized,
-            );
+            if schematic && (camera.mpp < 100. || (edge.mode == TransportMode::Road
+                && (camera.mpp < 1000. || camera.mpp > 5500.)))
+            {
+                continue;
+            }
+            if mode == Mode::Political && !highlight && status.is_none() {
+                let different = endpoint_polity(world, &edge.from, date).zip(endpoint_polity(world, &edge.to, date))
+                    .is_some_and(|(from, to)| from != to);
+                if !different {
+                    continue;
+                }
+            }
+            if highlight {
+                width += if mode == Mode::Political { 0.7 } else { 1.5 };
+                ink = status.unwrap_or(SELECTED);
+            }
+            let mut path_hits = VisiblePath { id: id.clone(), strokes: Vec::new(), fragments: Vec::new() };
+            draw_path(&mut self.overlay, camera, size, path, width, ink, schematic, &mut path_hits);
+            if !path_hits.strokes.is_empty() {
+                if mode == Mode::Economic {
+                    self.flow_segments.insert(id.clone());
+                }
+                self.paths.push(path_hits);
+            }
         }
-        if camera.mpp <= 40. {
+
+        let chord = 2. * (reach.min(std::f64::consts::PI * EARTH) / (2. * EARTH)).sin();
+        let low = (center - DVec3::splat(chord)).to_array().map(cell_axis);
+        let high = (center + DVec3::splat(chord)).to_array().map(cell_axis);
+        for x in low[0]..=high[0] {
+            for y in low[1]..=high[1] {
+                for z in low[2]..=high[2] {
+                    for &index in &self.terminal_cells[cell_index([x, y, z])] {
+                        let terminal = &self.terminals[index];
+                        let Some(position) = project(camera, size, terminal.point).filter(|p| visible(*p, size, 12.))
+                            else { continue; };
+                        let mut open_capacity = 0;
+                        let mut status = None;
+                        let mut international = false;
+                        let mut water = false;
+                        let mut has_civil_capacity = false;
+                        let mut has_direct_link = false;
+                        let mut connected = false;
+                        let mut highlighted_terminal = selected_node == Some(terminal.id.as_str());
+                        for id in self.incident[&terminal.id].iter() {
+                            let edge = network.segment(id).expect("indexed segment");
+                            let evidence = network.evidence(id).filter(|e| e.applies_on(date));
+                            let Some(evidence) = evidence else { continue; };
+                            let access = network.availability(id).expect("segment has availability");
+                            let other = if edge.from == terminal.id { &edge.to } else { &edge.from };
+                            if mode == Mode::Economic {
+                                self.flow_segments.insert(id.clone());
+                            }
+                            connected = true;
+                            highlighted_terminal |= highlighted(id);
+                            let physical_relation = evidence.layer != NetworkLayer::Domestic;
+                            has_direct_link |= physical_relation;
+                            if !physical_relation || mode == Mode::Military && edge.prototype_only {
+                                continue;
+                            }
+                            water |= matches!(edge.mode, TransportMode::Shipping | TransportMode::InlandWaterway);
+                            if mode == Mode::Political {
+                                international |= endpoint_polity(world, &terminal.id, date)
+                                    .zip(endpoint_polity(world, other, date)).is_some_and(|(a, b)| a != b);
+                            }
+                            let closed = !access.open || access.capacity_units == 0;
+                            if closed {
+                                status = Some(BLOCKED);
+                            } else {
+                                open_capacity = open_capacity.max(access.capacity_units);
+                                if status.is_none() && access.capacity_units < edge.profile.capacity_units {
+                                    status = Some(RESTRICTED);
+                                }
+                            }
+                            has_civil_capacity |= !edge.prototype_only;
+                        }
+                        if !connected && !highlighted_terminal {
+                            continue;
+                        }
+                        let port = terminal.kind == NodeKind::Port;
+                        let context = match mode {
+                            Mode::Geographic => water || camera.mpp <= camera::ENTER,
+                            Mode::Political => international || status.is_some(),
+                            Mode::Economic => water || camera.mpp <= camera::ENTER,
+                            Mode::Military => has_civil_capacity && (water || camera.mpp <= camera::ENTER),
+                        };
+                        let radius = if mode == Mode::Military { capacity_radius(open_capacity) } else if port { 4. } else { 3. };
+                        if context || highlighted_terminal {
+                            let ink = status.unwrap_or_else(|| {
+                                if highlighted_terminal { SELECTED } else if !has_direct_link { [170, 164, 147, 190] }
+                                else if mode == Mode::Political { [202, 205, 187, 204] }
+                                else if mode == Mode::Military { [181, 196, 143, 233] }
+                                else if port { PORT_INK } else { [218, 185, 130, 240] }
+                            });
+                            if !has_direct_link {
+                                hollow_marker(&mut self.overlay, position, radius, ink, false);
+                            } else {
+                                terminal_marker(&mut self.overlay, position, radius, ink, port);
+                            }
+                        }
+                        if context || highlighted_terminal || mode == Mode::Economic {
+                            self.visible.push(VisibleNode {
+                                position, id: terminal.id.clone(), terminal: Some(index), radius: radius + 1., port,
+                                drawn: context || highlighted_terminal,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        if mode == Mode::Geographic && camera.mpp <= 1200. {
+            for site in current.flat_map(|r| &r.references).filter(|site| site.period.contains(date)) {
+                let Some(position) = project(camera, size, radial(site.coordinates)).filter(|p| visible(*p, size, 8.))
+                    else { continue; };
+                let ink = if selected_node == Some(&site.id) { SELECTED } else { [239, 211, 158, 232] };
+                hollow_marker(&mut self.overlay, position, 4., ink, site.kind == "bridge");
+                self.visible.push(VisibleNode {
+                    position, id: site.id.clone(), terminal: None, radius: 5., port: false, drawn: true,
+                });
+            }
+        }
+
+        if mode != Mode::Military && camera.mpp <= 40. {
             for &(port, basin) in DOCK_BASINS {
                 if center.angle_between(radial(basin)) * EARTH <= reach {
-                    if let Some(terminal) = self.terminals.iter().find(|t| t.id == port) {
-                        self.vehicle_segments.extend(terminal.corridors.iter().filter(|id|
-                            network.segment(id).is_some_and(|s| s.mode == TransportMode::PortTransfer)).cloned());
-                    }
+                    self.vehicle_segments.extend(self.incident.get(port).into_iter().flatten().filter(|id|
+                        network.segment(id).is_some_and(|s| s.mode == TransportMode::PortTransfer)).cloned());
                 }
             }
         }
         self.vehicle_segments.sort_unstable();
         self.vehicle_segments.dedup();
-        if view.network {
-            for (idx, terminal) in self.terminals.iter().enumerate() {
-                let mut major = false;
-                let mut blocked = false;
-                let mut capacity = 0;
-                let mut highlighted = false;
-                for id in &terminal.corridors {
-                    if !network.evidence(id).is_some_and(|e| e.applies_on(date)) {
-                        continue;
-                    }
-                    let edge = network.segment(id).unwrap();
-                    let access = network.availability(id).unwrap();
-                    major |= matches!(
-                        edge.mode,
-                        TransportMode::Shipping | TransportMode::InlandWaterway
-                    );
-                    blocked |= !access.open || access.capacity_units < edge.profile.capacity_units;
-                    if access.open {
-                        capacity = capacity.max(access.capacity_units);
-                    }
-                    highlighted |= selected().any(|s| s == id);
-                }
-                if !major && !highlighted && (camera.mpp > 5500. || terminal.corridors.is_empty()) {
-                    continue;
-                }
-                let Some(xy) =
-                    project(camera, size, terminal.point).filter(|p| visible(*p, size, 8.))
-                else {
-                    continue;
-                };
-                self.visible.push((xy, idx));
-                let tint = if blocked {
-                    BLOCKED
-                } else if highlighted {
-                    [250, 210, 125, 255]
-                } else if major {
-                    PORT_INK
-                } else {
-                    [203, 174, 122, 240]
-                };
-                let radius = if major {
-                    (2.5 + (capacity as f32 + 1.).log10() * 0.65).clamp(3., 7.)
-                } else {
-                    3.
-                };
-                terminal_marker(&mut self.overlay, xy, radius, tint, terminal.port);
-            }
-            if camera.mpp <= 1200. {
-                for (station, period) in current.flat_map(|r| &r.stations) {
-                    if let Some(xy) = project(camera, size, *station)
-                        .filter(|p| period.contains(date) && visible(*p, size, 6.))
-                    {
-                        terminal_marker(&mut self.overlay, xy, 3., [228, 200, 141, 245], false);
-                    }
-                }
-            }
-        }
         self.previous_view = Some(view);
-        self.previous_legs = selected().map(str::to_owned).collect();
-        self.revision = self.revision.wrapping_add(1);
+        self.previous_legs = selected_leg_ids().map(str::to_owned).collect();
+        self.previous_selection = selection.cloned();
+        self.revision = next_revision();
+        self.flow_minute = None;
+        self.update_flows(world, mode);
         Ok(())
     }
 
+    pub fn segment_geometry(&self, id: &str) -> GeometryEvidence {
+        if self.previous_view.as_ref().is_some_and(|view| self.reference_path(id, &view.date).is_some()) {
+            GeometryEvidence::HistoricalCorridor
+        } else if self.schematic.contains_key(id) {
+            GeometryEvidence::Schematic
+        } else {
+            GeometryEvidence::Unmapped
+        }
+    }
+
+    pub fn reference_site(&self, id: &str) -> Option<MappedSite<'_>> {
+        let date = &self.previous_view.as_ref()?.date;
+        let site = self.regions.iter().filter_map(|r| r.loaded.as_ref())
+            .filter(|r| r.period.contains(date))
+            .flat_map(|r| &r.references)
+            .find(|site| site.id == id && site.period.contains(date))?;
+        Some(MappedSite {
+            name: &site.name,
+            kind: &site.kind,
+            source: &site.source,
+            note: &site.note,
+            coordinates: site.coordinates,
+        })
+    }
+
+    pub fn node_corridors(&self, id: &str) -> &[String] {
+        self.incident.get(id).map_or(&[], Vec::as_slice)
+    }
+
+    fn reference_path(&self, id: &str, date: &str) -> Option<&Path> {
+        self.regions.iter().filter_map(|r| r.loaded.as_ref()).filter(|r| r.period.contains(date))
+            .find_map(|r| r.routes.get(id))
+    }
+
+    pub fn pick(&self, cursor: [f64; 2]) -> Option<ObjectId> {
+        let [x, y] = cursor.map(|coordinate| coordinate as f32);
+        if let Some(hit) = self.vehicle_hits.iter().rev().find(|hit| {
+            let [left, top, w, h] = hit.area;
+            x >= left && x <= left + w && y >= top && y <= top + h
+        }) {
+            return Some(hit.id.clone());
+        }
+        let pointer = Vec2::new(x, y);
+        if let Some(node) = self.nearest_node(pointer) {
+            return Some(ObjectId::Node(node.id.clone()));
+        }
+        let subtle = self.previous_view.as_ref().is_some_and(|view| matches!(view.mode, Mode::Political | Mode::Military));
+        let hit_radius: f32 = if subtle { 2.4 } else { 4. };
+        self.paths.iter().filter_map(|path| {
+            let distance = path.strokes.iter().map(|&(a, b)| distance_to_stroke(pointer, a, b))
+                .min_by(f32::total_cmp)?;
+            (distance <= hit_radius.powi(2)).then_some((distance, &path.id))
+        }).min_by(|(a, _), (b, _)| a.total_cmp(b)).map(|(_, id)| ObjectId::Segment(id.clone()))
+    }
+
+    fn nearest_node(&self, pointer: Vec2) -> Option<&VisibleNode> {
+        self.visible.iter().filter(|node| {
+            (node.drawn || self.flow_nodes.contains(&node.id))
+                && node.position.distance_squared(pointer) <= node.radius.powi(2)
+        }).min_by(|a, b| {
+            a.position.distance_squared(pointer).total_cmp(&b.position.distance_squared(pointer))
+                .then_with(|| b.port.cmp(&a.port))
+        })
+    }
+
     fn nearest_terminal(&self, cursor: [f64; 2]) -> Option<usize> {
-        let pointer = Vec2::new(cursor[0] as f32, cursor[1] as f32);
-        self
-            .visible
-            .iter()
-            .filter(|(p, _)| p.distance_squared(pointer) < 100.)
-            .min_by(|(a, ia), (b, ib)| {
-                a.distance_squared(pointer)
-                    .total_cmp(&b.distance_squared(pointer))
-                    .then_with(|| self.terminals[*ib].port.cmp(&self.terminals[*ia].port))
-            }).map(|(_, index)| *index)
+        self.nearest_node(Vec2::new(cursor[0] as f32, cursor[1] as f32))?.terminal
+    }
+
+    fn update_flows(&mut self, world: &InitialWorld, mode: Mode) {
+        if mode != Mode::Economic {
+            self.flow_nodes.clear();
+            self.flow_overlay.vertices.clear();
+            self.flow_overlay.indices.clear();
+            return;
+        }
+        let minute = world.clock().snapshot().total_minutes;
+        if self.flow_minute == Some(minute) {
+            return;
+        }
+        self.flow_minute = Some(minute);
+        self.flow_nodes.clear();
+        self.flow_overlay.vertices.clear();
+        self.flow_overlay.indices.clear();
+        let mut endpoint_flows = BTreeMap::<&str, [u32; 2]>::new();
+        let paths: BTreeMap<_, _> = self.paths.iter().map(|path| (path.id.as_str(), &path.fragments)).collect();
+        for id in &self.flow_segments {
+            let Some(edge) = world.transport().segment(id) else { continue; };
+            let mut directed = [0_u32; 2];
+            for flow in world.economic_transport_on(id) {
+                let direction = usize::from(edge.from != flow.from);
+                directed[direction] = directed[direction].saturating_add(flow.load_units);
+                let out = &mut endpoint_flows.entry(flow.from).or_default()[0];
+                *out = out.saturating_add(flow.load_units);
+                let incoming = &mut endpoint_flows.entry(flow.to).or_default()[1];
+                *incoming = incoming.saturating_add(flow.load_units);
+            }
+            if let Some(fragments) = paths.get(id.as_str()) {
+                draw_flow(&mut self.flow_overlay, fragments, directed);
+            }
+        }
+        for node in &self.visible {
+            if let Some(&[out, incoming]) = endpoint_flows.get(node.id.as_str()) {
+                self.flow_nodes.insert(node.id.clone());
+                if !node.drawn {
+                    hollow_marker(&mut self.flow_overlay, node.position, node.radius - 1., FLOW, false);
+                }
+                let r = 4.5 + node.radius;
+                if out > 0 {
+                    arrow(&mut self.flow_overlay, node.position + Vec2::new(r, -r), Vec2::X, flow_radius(out));
+                }
+                if incoming > 0 {
+                    arrow(&mut self.flow_overlay, node.position + Vec2::new(-r, -r), Vec2::X, flow_radius(incoming));
+                }
+            }
+        }
+        self.flow_revision = next_revision();
     }
 
     pub fn next_corridors(&mut self, cursor: [f64; 2]) -> bool {
@@ -566,7 +865,7 @@ impl TransportScene {
                 skin.choose("占用 / 可用上限", "occupied / operating limit")
             ));
             let date = &self.previous_view.as_ref().expect("visible map").date;
-            let corridors: Vec<_> = terminal.corridors.iter().filter(|id|
+            let corridors: Vec<_> = self.node_corridors(&terminal.id).iter().filter(|id|
                 network.evidence(id).is_some_and(|e| e.applies_on(date))).collect();
             let pages = corridors.len().div_ceil(3).max(1);
             let page = self.corridor_page.filter(|(i, _)| *i == idx).map_or(0, |(_, p)| p % pages);
@@ -583,11 +882,12 @@ impl TransportScene {
                 };
                 // Highlight the counterpart of a documented relationship. Its course
                 // can be unknown even when both terminals are located.
-                if let Some((xy, _)) = self
+                if let Some(node) = self
                     .visible
                     .iter()
-                    .find(|(_, idx)| &self.terminals[*idx].id == other)
+                    .find(|node| &node.id == other && node.drawn)
                 {
+                    let xy = node.position;
                     let r = 9.;
                     let c = if a.open && a.capacity_units > 0 {
                         [251, 214, 129, 245]
@@ -623,13 +923,7 @@ impl TransportScene {
         } else if nearby.is_some() {
             lines.push(skin.choose("尚不能阅读当地交通记录", "Cannot read the local transport record").to_owned());
         } else {
-            lines.push(
-                skin.choose(
-                    "交通节点 · 大小表示运力，红色表示受限",
-                    "Transport nodes · size shows capacity, red shows restrictions",
-                )
-                .to_owned(),
-            );
+            return;
         }
         let width = 350_f32.min(size[0] as f32 - 24.);
         let height = lines.len() as f32 * 19. + 8.;
@@ -651,19 +945,21 @@ impl TransportScene {
         (!self.overlay.indices.is_empty()).then_some((self.revision, &self.overlay))
     }
 
-    pub fn vehicle_segments(&self) -> impl Iterator<Item = &str> {
-        self.vehicle_segments.iter().map(String::as_str)
+    pub fn economic_overlay(&self) -> Option<(u64, &Mesh)> {
+        (!self.flow_overlay.indices.is_empty()).then_some((self.flow_revision, &self.flow_overlay))
     }
 
-    pub fn draw_vehicles<'a>(
-        &self,
+    pub fn draw_vehicles(
+        &mut self,
         camera: &Camera,
         size: [u32; 2],
-        network: &TransportNetwork,
-        vehicles: impl IntoIterator<Item = ActiveVehicle<'a>>,
+        world: &InitialWorld,
         models: &mut Vec<VisibleModel>,
         ready: impl Fn(&VisibleModel) -> bool,
     ) -> Mesh {
+        self.vehicle_hits.clear();
+        let mut hits = Vec::new();
+        let network = world.transport();
         let mut markers = Mesh::default();
         let mut models_left = MODEL_BUDGET;
         let mut markers_left = MARKER_BUDGET;
@@ -673,10 +969,22 @@ impl TransportScene {
         let Some(view) = &self.previous_view else {
             return markers;
         };
+        let vehicles = self.vehicle_segments.iter().flat_map(|id| world.transport_vehicles_on(id));
         for vehicle in vehicles {
             if models_left == 0 && markers_left == 0 {
                 break;
             }
+            let selected = matches!(&self.previous_selection,
+                Some(ObjectId::Vehicle { reservation, .. }) if *reservation == vehicle.reservation_id);
+            if (view.mode == Mode::Political && !selected)
+                || (view.mode == Mode::Economic && !vehicle.freight && !selected)
+            {
+                continue;
+            }
+            let object = || ObjectId::Vehicle {
+                segment: vehicle.segment_id.to_owned(),
+                reservation: vehicle.reservation_id,
+            };
             let Some(edge) = network.segment(vehicle.segment_id) else {
                 continue;
             };
@@ -700,9 +1008,15 @@ impl TransportScene {
                             let scale = (40. * camera.mpp / part.length()).clamp(1., 4.);
                             if let Some(model) = ModelLod::for_screen_extent((part.length() * scale / camera.mpp) as f32)
                                 .and_then(|lod| part.project(camera, size, lod, scale, point, east, 0.)) {
-                                if !ready(&model) && markers_left > 0 {
+                                if ready(&model) {
+                                    hits.push(VehicleHit { area: model.screen_bounds, id: object() });
+                                } else if markers_left > 0 {
                                     vehicle_marker(&mut markers, position, Vec2::X, TransportMode::Shipping, vehicle.freight);
+                                    hits.push(VehicleHit { area: marker_bounds(position), id: object() });
                                     markers_left -= 1;
+                                }
+                                if selected {
+                                    selection_corners(&mut markers, position, 12.);
                                 }
                                 models.push(model);
                                 models_left -= 1;
@@ -712,12 +1026,7 @@ impl TransportScene {
                 }
                 continue;
             }
-            let reference = self
-                .regions
-                .iter()
-                .filter_map(|r| r.loaded.as_ref())
-                .filter(|r| r.period.contains(&view.date))
-                .find_map(|r| r.routes.get(vehicle.segment_id));
+            let reference = self.reference_path(vehicle.segment_id, &view.date);
             let Some(path) = reference.or_else(|| self.schematic.get(vehicle.segment_id)) else {
                 continue;
             };
@@ -748,20 +1057,71 @@ impl TransportScene {
                     0
                 };
             models_left -= models.len() - before;
-            if markers_left > 0 && !models[before..before + parts_added].iter().any(&ready) {
-                if visible(position, size, 10.0) {
-                    vehicle_marker(
-                        &mut markers,
-                        position,
-                        heading,
-                        vehicle.mode,
-                        vehicle.freight,
-                    );
-                    markers_left -= 1;
-                }
+            let first_hit = hits.len();
+            for model in models[before..before + parts_added].iter().filter(|model| ready(model)) {
+                hits.push(VehicleHit { area: model.screen_bounds, id: object() });
+            }
+            if first_hit == hits.len() && markers_left > 0 && visible(position, size, 10.) {
+                vehicle_marker(&mut markers, position, heading, vehicle.mode, vehicle.freight);
+                hits.push(VehicleHit { area: marker_bounds(position), id: object() });
+                markers_left -= 1;
+            }
+            if selected && first_hit != hits.len() {
+                selection_corners(&mut markers, position, 12.);
             }
         }
+        self.vehicle_hits = hits;
         markers
+    }
+}
+
+fn next_revision() -> u64 {
+    DRAW_REVISION.fetch_add(1, Ordering::Relaxed).wrapping_add(1)
+}
+
+fn cell_axis(axis: f64) -> usize {
+    (((axis + 1.) * (CELL_COUNT as f64 / 2.)) as usize).min(CELL_COUNT - 1)
+}
+
+fn cell_index([x, y, z]: [usize; 3]) -> usize {
+    (x * CELL_COUNT + y) * CELL_COUNT + z
+}
+
+fn endpoint_polity<'a>(world: &'a InitialWorld, id: &str, date: &str) -> Option<&'a str> {
+    let sources = world.sources();
+    let polity = sources.place_polity(id).or_else(|| {
+        let unit = world.transport().unit_at(id)?;
+        sources.polities().get(unit)
+    })?;
+    (polity.valid_from.as_str() <= date && date < polity.valid_to.as_str()).then_some(polity.id.as_str())
+}
+
+fn distance_to_stroke(pointer: Vec2, start: Vec2, end: Vec2) -> f32 {
+    let span = end - start;
+    let t = ((pointer - start).dot(span) / span.length_squared()).clamp(0., 1.);
+    (start + span * t).distance_squared(pointer)
+}
+
+fn capacity_radius(units: u32) -> f32 {
+    (2.8 + (units as f32 + 1.).log10() * 0.8).min(6.2)
+}
+
+fn flow_radius(units: u32) -> f32 {
+    (3. + (units as f32 + 1.).log10()).min(7.)
+}
+
+fn with_alpha(mut color: [u8; 4], alpha: u8) -> [u8; 4] {
+    color[3] = alpha;
+    color
+}
+
+fn mode_ink(mode: TransportMode) -> [u8; 4] {
+    match mode {
+        TransportMode::Shipping => PORT_INK,
+        TransportMode::InlandWaterway => RIVER,
+        TransportMode::Rail => [229, 183, 120, 242],
+        TransportMode::Road => [196, 179, 149, 194],
+        _ => [200, 188, 151, 208],
     }
 }
 
@@ -805,6 +1165,7 @@ fn draw_path(
     width: f32,
     ink: [u8; 4],
     dashed: bool,
+    projected: &mut VisiblePath,
 ) {
     let mut phase: f32 = 0.0;
     for span in &path.spans {
@@ -818,8 +1179,10 @@ fn draw_path(
             if let (Some(start), Some(end)) = (previous, next) {
                 let delta = end - start;
                 let length = delta.length();
-                if let Some((first, last)) = clip_line(start, end, size) {
-                    if length > 0.02 && dashed {
+                if let Some((first, last)) = clip_line(start, end, size).filter(|_| length > 0.02) {
+                    let fragment = (start + delta * first, start + delta * last);
+                    projected.fragments.push(fragment);
+                    if dashed {
                         let start = start + delta * first;
                         let end_m = (last - first) * length;
                         let unit = delta / length;
@@ -828,28 +1191,94 @@ fn draw_path(
                             let begin = at.max(0.0);
                             let stop = (at + 8.0).min(end_m);
                             if begin < stop {
-                                mesh.line(
-                                    (start + unit * begin).to_array(),
-                                    (start + unit * stop).to_array(),
-                                    width,
-                                    ink,
-                                );
+                                let first = start + unit * begin;
+                                let last = start + unit * stop;
+                                mesh.line(first.to_array(), last.to_array(), width, ink);
+                                projected.strokes.push((first, last));
                             }
                             at += 14.0;
                         }
                     } else {
-                        mesh.line(
-                            (start + delta * first).to_array(),
-                            (start + delta * last).to_array(),
-                            width,
-                            ink,
-                        );
+                        mesh.line(fragment.0.to_array(), fragment.1.to_array(), width, ink);
+                        projected.strokes.push(fragment);
                     }
                 }
                 phase = (phase + length).rem_euclid(14.0);
             }
             previous = next;
         }
+    }
+}
+
+fn draw_flow(mesh: &mut Mesh, fragments: &[(Vec2, Vec2)], directed: [u32; 2]) {
+    if directed == [0; 2] {
+        return;
+    }
+    let spacing = 86.;
+    let length: f32 = fragments.iter().map(|(a, b)| a.distance(*b)).sum();
+    if length < 12. {
+        return;
+    }
+    let mut remaining = length.min(spacing) * 0.5;
+    for &(a, b) in fragments {
+        let delta = b - a;
+        let length = delta.length();
+        if length < 0.02 {
+            continue;
+        }
+        let direction = delta / length;
+        while remaining < length {
+            let at = a + delta * (remaining / length);
+            let sidestep = if directed.iter().all(|&load| load > 0) { 4. } else { 0. };
+            for (sign, load) in [1., -1.].into_iter().zip(directed) {
+                if load > 0 {
+                    let forward = direction * sign;
+                    arrow(mesh, at + forward.perp() * sidestep, forward, flow_radius(load));
+                }
+            }
+            remaining += spacing;
+        }
+        remaining -= length;
+    }
+}
+
+fn arrow(mesh: &mut Mesh, at: Vec2, direction: Vec2, radius: f32) {
+    let side = direction.perp();
+    let tip = at + direction * radius;
+    let tail = at - direction * radius;
+    mesh.line(tail.to_array(), tip.to_array(), 2.8, DARK);
+    mesh.line(tail.to_array(), tip.to_array(), 1.3, FLOW);
+    mesh.shape(&[
+        tip.to_array(),
+        (at + side * (radius * 0.58)).to_array(),
+        (at - side * (radius * 0.58)).to_array(),
+    ], FLOW);
+}
+
+fn marker_bounds(position: Vec2) -> [f32; 4] {
+    [position.x - 8., position.y - 6., 16., 12.]
+}
+
+fn selection_corners(mesh: &mut Mesh, at: Vec2, r: f32) {
+    for [dx, dy] in [[-1., -1.], [-1., 1.], [1., -1.], [1., 1.]] {
+        let corner = [at.x + dx * r, at.y + dy * r];
+        mesh.line(corner, [corner[0] - dx * 4., corner[1]], 1.4, SELECTED);
+        mesh.line(corner, [corner[0], corner[1] - dy * 4.], 1.4, SELECTED);
+    }
+}
+
+fn hollow_marker(mesh: &mut Mesh, point: Vec2, r: f32, ink: [u8; 4], bridge: bool) {
+    let [x, y] = point.to_array();
+    if bridge {
+        mesh.line([x - r, y], [x + r, y], 3.5, DARK);
+        mesh.line([x - r, y], [x + r, y], 1.7, ink);
+        for dx in [-r, r] {
+            mesh.line([x + dx, y - 2.5], [x + dx, y + 2.5], 1.6, ink);
+        }
+    } else {
+        mesh.rect(x - r - 1., y - r - 1., 2. * r + 2., 2. * r + 2., DARK);
+        mesh.rect(x - r, y - r, 2. * r, 2. * r, ink);
+        mesh.rect(x - r + 1.4, y - r + 1.4, 2. * r - 2.8, 2. * r - 2.8, DARK);
     }
 }
 

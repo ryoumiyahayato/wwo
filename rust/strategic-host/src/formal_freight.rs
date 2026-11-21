@@ -101,6 +101,11 @@ impl InitialWorld {
         self.freight.lots.values().filter(|lot| self.can_manage_lot(lot))
     }
 
+    pub fn freight_for_reservation(&self, reservation: u64) -> Option<&FreightLot> {
+        let lot = self.freight.lots.get(self.freight.moving.get(&reservation)?)?;
+        self.can_manage_lot(lot).then_some(lot)
+    }
+
     fn can_manage_lot(&self, lot: &FreightLot) -> bool {
         self.player_alive() && (lot.owner == self.player || self.work_opening.organization(&lot.owner)
             .is_some_and(|org| self.organization_can_manage(org, &self.player)))
