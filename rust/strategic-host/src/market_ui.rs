@@ -11,14 +11,33 @@ pub(crate) const GOODS_GROUPS: [(&str, &str); 4] = [
 #[derive(Deserialize)]
 pub struct Market {
     pub scope:String,pub content:String,pub polity:String,pub country:String,pub market_id:String,
-    pub region:String,pub good:String,pub site:String,pub window_days:u32,pub chart_kind:String,pub minute:u64,
+    pub region:String,pub good:String,pub window_days:u32,pub chart_kind:String,pub minute:u64,
     pub book:Vec<Book>,pub offers:Vec<Offer>,pub places:Vec<Choice>,pub countries:Vec<Choice>,
     pub quote:Option<Quote>,pub orders:Vec<Order>,logistics:Vec<Logistics>,chart:Vec<Sample>,pub result:String,
     pub collections:Vec<Collection>,
     pub focus:Option<MarketFocus>,
     #[serde(default)] pub catalog:Vec<Book>,
     #[serde(default)] goods_group:String,
-    #[serde(default)] good_label:String,
+    #[serde(default)] pub good_label:String,
+    #[serde(default)] good_unit:String,
+    #[serde(default)] pub sites:Vec<MarketSite>,
+    #[serde(default)] enterprise_offer:Option<EnterpriseOffer>,
+    #[serde(default)] selected_site:Option<String>,
+}
+#[derive(Deserialize)]
+pub struct MarketSite {
+    pub unit:String,pub place:String,pub point:[f64;2],pub name:String,pub country:String,
+    pub ask:Option<i64>,pub bid:Option<i64>,pub carrier:bool,stock:i64,production:f64,demand:f64,
+    #[serde(default)] pending_order:i64,
+}
+#[derive(Deserialize)]
+struct EnterpriseOffer {name:String,price:i64,stock:i64,affordable:bool}
+impl Market {
+    pub fn matching_sites<'a>(&'a self, query:&str) -> impl Iterator<Item=(usize,&'a MarketSite)> + 'a {
+        let query=query.trim().to_lowercase();
+        self.sites.iter().enumerate().filter(move |(_,r)|
+            query.is_empty() || r.name.to_lowercase().contains(&query) || r.country.to_lowercase().contains(&query))
+    }
 }
 #[derive(Clone, Copy, Deserialize)]
 pub struct MarketFocus {
@@ -28,19 +47,20 @@ pub struct MarketFocus {
     pub shift:f64,
 }
 #[derive(Deserialize)]
-pub struct Book {pub id:String,pub label:String,price:String,supply:String,quantity:String}
+pub struct Book {pub id:String,pub label:String,price:String,quantity:String}
 #[derive(Deserialize)]
 pub struct Offer {
-    pub good:String,pub commodity:String,pub site:String,place:String,seller:String,location:String,
-    price:String,currency:String,unit:String,available:i64,
+    pub good:String,pub commodity:String,pub site:String,place:String,seller:String,
+    currency:String,available:i64,
 }
 #[derive(Deserialize)]
 pub struct Choice {pub id:String,label:String}
 #[derive(Deserialize)]
 pub struct Quote {
-    pub token:u64,pub accepted:bool,pub commodity:String,pub site:String,pub name:String,pub quantity:u64,
-    pub scale:u64,quoted_quantity:u64,amount:Option<i64>,goods_amount:Option<i64>,freight_amount:Option<i64>,
+    pub token:u64,pub accepted:bool,pub commodity:String,pub name:String,pub quantity:u64,
+    pub scale:u64,quoted_quantity:u64,amount:Option<i64>,
     currency_name:String,error:String,onsite:bool,
+    #[serde(default)] unit:String,
 }
 #[derive(Deserialize)]
 pub struct Order {
@@ -83,7 +103,7 @@ impl Market {
 
 pub fn format_quantity(value:i64,scale:i64)->String {
     if scale<=1 {return value.to_string();}
-    format!("{:.3}",value as f64/scale as f64)
+    format!("{:.3}", value as f64/scale as f64).trim_end_matches('0').trim_end_matches('.').to_owned()
 }
 
 pub fn parse_quantity(input:&str,scale:u64)->Option<u64>{
@@ -137,16 +157,13 @@ impl Display<'_> {
         if let Some(q)=&v.quote {self.quote_panel(m,t,hits,[x,y,w,h],q);return;}
         let bx=x+20.;let bw=w-40.;
         let scope_width=bw/5.;
-        for (i,(id,label)) in [("international","国际市场"),("domestic","国内市场"),("regional","区域市场")].into_iter().enumerate(){
-            let enabled=id!="regional"||!v.places.is_empty();
+        for (i,(id,label)) in [("international","国际市场"),("domestic","国内市场")].into_iter().enumerate(){
             self.row(m,t,hits,[bx+i as f32*scope_width,y+62.,scope_width-5.,27.],label,
-                if enabled{command(id,0)}else{None},v.scope==id);
+                command(id,0),v.scope==id);
         }
-        for (i,(id,label,enabled)) in [("countries","选择国家",!v.countries.is_empty()),("places","选择地区",!v.places.is_empty())].into_iter().enumerate(){
-            self.row(m,t,hits,[bx+(i+3) as f32*scope_width,y+62.,scope_width-5.,27.],label,
-                if enabled{command(id,0)}else{None},self.hud.market_chooser==Some(id));
-        }
-        let mut tabs = vec![("quotes","报价簿"),("trends","行情趋势"),("goods","商品目录"),("transport","仓储与运输"),("activity","活动记录")];
+        self.row(m,t,hits,[bx+4.*scope_width,y+62.,scope_width-5.,27.],"选择国家",
+            (!v.countries.is_empty()).then(|| command("countries",0)).flatten(),self.hud.market_chooser==Some("countries"));
+        let mut tabs = vec![("quotes","报价簿"),("trends","商品地点"),("goods","商品目录"),("transport","仓储与运输"),("activity","活动记录")];
         if self.session.is_some_and(|s| s.transport.is_some()) { tabs.push(("freight","实物货运")); }
         let tab_width = bw / tabs.len() as f32;
         for (i,(id,label)) in tabs.into_iter().enumerate(){
@@ -154,10 +171,24 @@ impl Display<'_> {
             self.row(m,t,hits,[bx+i as f32*tab_width,y+100.,tab_width-5.,28.],label,
                 if id=="trends"&&v.book.is_empty(){None}else{command(id,0)},selected&&self.hud.market_chooser.is_none());
         }
-        let footer=if v.result.is_empty(){&v.market_id}else{&v.result};
+        let footer=&v.result;
         self.skin.text(t,footer,0,[bx,y+h-34.],bw,MUTED);
         let top=y+145.;let floor=y+h-49.;
         let first=self.hud.market_offset;
+        if let Some(query)=self.hud.market_search.as_deref() {
+            self.skin.text(t,&format!("搜索地点或国家  {query}_"),1,[bx,top],bw-82.,IVORY);
+            self.row(m,t,hits,[bx+bw-76.,top,76.,27.],"地图",command("map_locations",0),false);
+            let start=top+39.;
+            let count=v.matching_sites(query).count();
+            if count==0 { self.skin.text(t,"暂无符合条件的交易地点",0,[bx,start],bw,MUTED); }
+            for (row,(index,site)) in v.matching_sites(query).skip(first).take(((floor-start)/38.) as usize).enumerate() {
+                let yy=start+row as f32*38.;
+                let label=if site.name==site.country {site.name.clone()} else {format!("{} · {}",site.name,site.country)};
+                self.row(m,t,hits,[bx,yy,bw*0.51,31.],&label,command("location",index),false);
+                self.skin.text(t,&location_prices(site,&v.good_unit),0,[bx+bw*0.54,yy+6.],bw*0.46,IVORY);
+            }
+            return;
+        }
         if let Some(which)=self.hud.market_chooser {
             let list=if which=="places"{&v.places}else{&v.countries};
             let rows=((floor-top)/30.) as usize;
@@ -169,11 +200,12 @@ impl Display<'_> {
         match v.content.as_str() {
             "freight"=>self.freight_page(m,t,hits,[bx,top,bw,floor-top]),
             "good"=>self.good_panel(m,t,hits,v,[bx,top,bw,floor-top]),
+            "trend"=>self.trend_panel(m,t,hits,v,[bx,top,bw,floor-top]),
             "activity"=>{
                 if v.orders.is_empty(){self.skin.text(t,"此范围暂无本人或获准企业的订单记录",0,[bx,top],bw,MUTED);}
                 for (i,row) in v.orders.iter().skip(first).take(((floor-top)/64.) as usize).enumerate(){
                     let yy=top+i as f32*64.;
-                    self.skin.text(t,&format!("{} · {} · {} — {}",row.id,row.good,row.from,row.to),0,[bx,yy],bw,IVORY);
+                    self.skin.text(t,&format!("{} · {} → {}",row.good,row.from,row.to),0,[bx,yy],bw,IVORY);
                     self.skin.text(t,&format!("待发 {} · 在途 {} · 待领 {} · 已交付 {} · 已取消 {}",row.pending,row.transit,row.arrived,row.delivered,row.cancelled),0,[bx,yy+19.],bw,MUTED);
                     let paid=row.goods_amount.map_or_else(|| "货款未公开或未结算".into(),|amount|format!("已付货款 {amount} {}",row.currency));
                     let delivery=if row.onsite {"现场交割".into()}else{format!("运费 {}",row.freight_amount)};
@@ -208,7 +240,7 @@ impl Display<'_> {
                     self.skin.text(t,&format!("{} 种报价商品 · {} 笔可见订单",list.len(),v.orders.len()),0,[bx,top],bw,IVORY);
                     top + 23.
                 };
-                for (i,label) in ["商品","已知报价","单笔可购上限"].into_iter().enumerate(){
+                for (i,label) in ["商品","生丁 / 单位","现有库存"].into_iter().enumerate(){
                     self.skin.text(t,label,0,[bx+bw*[0.,0.41,0.73][i],header],bw*0.27,MUTED);
                 }
                 let start = header + 24.;
@@ -221,18 +253,55 @@ impl Display<'_> {
                     let yy=start+(i-first) as f32*33.;
                     self.row(m,t,hits,[bx,yy,bw*0.39,28.],&row.label,command(if catalog {"catalog_good"} else {"good"},i),false);
                     self.skin.text(t,&row.price,0,[bx+bw*0.41,yy+4.],bw*0.31,IVORY);
-                    self.skin.text(t,&format!("{} · {}",row.quantity,row.supply),0,[bx+bw*0.73,yy+4.],bw*0.27,MUTED);
+                    self.skin.text(t,&row.quantity,0,[bx+bw*0.73,yy+4.],bw*0.27,MUTED);
                 }
             }
         }
     }
 
-    fn good_panel(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,v:&Market,[x,y,w,h]:[f32;4]){
+    fn good_panel(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,v:&Market,[x,y,w,_]:[f32;4]){
         let name=if v.good_label.is_empty() {
             v.book.iter().find(|row|row.id==v.good).map_or(v.good.as_str(),|row|row.label.as_str())
         } else {&v.good_label};
         self.skin.text(t,name,1,[x,y],w-128.,IVORY);
         self.row(m,t,hits,[x+w-118.,y,118.,27.],"返回报价簿",command("quotes",0),false);
+        self.row(m,t,hits,[x,y+36.,129.,28.],"地图选点",command("map_locations",0),false);
+        self.row(m,t,hits,[x+139.,y+36.,136.,28.],"搜索交易地点",command("search_locations",0),false);
+        self.skin.text(t,&format!("{} 个已知交易地点",v.sites.len()),0,[x+287.,y+41.],w-378.,MUTED);
+        self.row(m,t,hits,[x+w-82.,y+36.,82.,28.],"趋势",command("trend",0),false);
+        let site=v.sites.iter().enumerate().find(|(_,r)|v.selected_site.as_deref()==Some(r.place.as_str()));
+        if let Some((index,site))=site {
+            self.skin.text(t,&format!("{} · {}",site.country,site.name),0,[x,y+85.],w-125.,IVORY);
+            self.skin.text(t,&location_prices(site,&v.good_unit),0,[x,y+111.],w,IVORY);
+            if site.pending_order==0 {
+                self.skin.text(t,&format!("库存 {} {}",format_quantity(site.stock,1000),v.good_unit),0,[x,y+135.],w,MUTED);
+                self.skin.text(t,&format!("日产 {} {} · 日需 {} {}",
+                    compact_amount(site.production),v.good_unit,compact_amount(site.demand),v.good_unit),0,[x,y+158.],w,MUTED);
+            }
+            if site.carrier && self.session.is_some_and(|s| s.place != site.place) {
+                self.row(m,t,hits,[x+w-120.,y+81.,120.,28.],"查询运输",command("carrier",index),false);
+            }
+        } else {
+            self.skin.text(t,"此市场暂无可办理的交易",0,[x,y+86.],w,MUTED);
+        }
+        let mut yy=y+190.;
+        for (i,offer) in v.offers.iter().enumerate() {
+            self.skin.text(t,&format!("{}库存可现场交付",offer.seller),0,[x,yy+4.],w-124.,IVORY);
+            if offer.available>0 {
+                self.row(m,t,hits,[x+w-114.,yy,114.,29.],"查看报价",command("offer",i),false);
+            }
+            yy+=36.;
+        }
+        if let Some(offer)=&v.enterprise_offer {
+            self.skin.text(t,&format!("{} · {} 千克 · {} 生丁 / 千克",offer.name,offer.stock,offer.price),
+                0,[x,yy+4.],w-124.,IVORY);
+            self.row(m,t,hits,[x+w-114.,yy,114.,29.],"购买 1 千克",
+                offer.affordable.then(||command("local_bread",0)).flatten(),false);
+        }
+    }
+
+    fn trend_panel(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,v:&Market,[x,y,w,_]:[f32;4]){
+        self.row(m,t,hits,[x,y,115.,27.],"返回商品",command("back_good",0),false);
         for (i,(id,label)) in [("price","产地价格"),("supply","可见供给")].into_iter().enumerate(){
             self.row(m,t,hits,[x+i as f32*95.,y+34.,88.,25.],label,command(id,0),v.chart_kind==id);
         }
@@ -252,37 +321,43 @@ impl Display<'_> {
                 }
             }else{self.skin.text(t,"只有一个记录时点",0,[x,y+72.],w,MUTED);}
         }else{self.skin.text(t,"该期间暂无可见记录",0,[x,y+72.],w,MUTED);}
-        self.skin.text(t,"实际卖家",0,[x,bottom],w,MUTED);
-        let rows=((h-148.)/31.).max(1.) as usize;
-        for (i,(index,offer)) in v.offers.iter().enumerate().filter(|(_,r)|r.good==v.good).skip(self.hud.market_offset).take(rows).enumerate(){
-            let yy=bottom+21.+i as f32*31.;
-            self.row(m,t,hits,[x,yy,w-192.,27.],&format!("{} · {}",offer.location,offer.seller),command("seller",index),v.site==offer.site);
-            self.skin.text(t,&format!("{} {}",offer.price,offer.unit),0,[x+w-183.,yy+4.],104.,IVORY);
-            self.row(m,t,hits,[x+w-76.,yy,76.,27.],if offer.available>0{"购买"}else{"查看"},command("offer",index),false);
-        }
     }
 
     fn quote_panel(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,[x,y,w,h]:[f32;4],q:&Quote){
         let left=x+23.;let width=w-46.;
         self.row(m,t,hits,[left,y+132.,105.,27.],"返回行情",command("quote_back",0),false);
         self.skin.text(t,&q.name,1,[left,y+110.],width,IVORY);
-        self.skin.text(t,&format!("{} · {}",q.commodity,q.site),0,[left+120.,y+137.],width-120.,MUTED);
+        self.skin.text(t,&q.unit,0,[left+187.,y+181.],width-190.,MUTED);
         let quantity=self.hud.quantity.clone().unwrap_or_else(||format_quantity(q.quantity as i64,q.scale as i64));
         self.skin.text(t,"数量",0,[left,y+181.],75.,IVORY);
         self.row(m,t,hits,[left+58.,y+176.,116.,28.],&quantity,command("edit",0),self.hud.quantity.is_some());
-        self.row(m,t,hits,[left+184.,y+176.,97.,28.],"更新报价",command("requote",0),false);
+        self.row(m,t,hits,[left+275.,y+176.,97.,28.],"更新报价",command("requote",0),false);
         let ready=q.accepted&&self.hud.quantity.is_none()&&self.hud.purchase_token!=Some(q.token);
         self.row(m,t,hits,[left,y+236.,130.,31.],"购买",if ready{command("buy",0)}else{None},ready);
         if self.session.is_some_and(|s| s.transport.is_some()) {
-            self.row(m,t,hits,[left,y+320.,130.,30.],"采购货批",if ready{command("freight_buy",0)}else{None},false);
+            self.row(m,t,hits,[left,y+342.,130.,30.],"采购货批",if ready{command("freight_buy",0)}else{None},false);
         }
         if let Some(amount)=q.amount {
             self.skin.text(t,&format!("应付 {amount} {}",q.currency_name),1,[left+150.,y+238.],width-150.,IVORY);
-            self.skin.text(t,&format!("货款 {} · 运费 {} · 当前可接 {}",q.goods_amount.unwrap_or(0),q.freight_amount.unwrap_or(0),q.quoted_quantity),0,[left,y+280.],width,IVORY);
+            self.skin.text(t,&format!("交付 {} {}",format_quantity(q.quoted_quantity as i64,q.scale as i64),q.unit),0,[left,y+280.],width,IVORY);
             self.skin.text(t,if q.onsite{"现场交付后取得。"}else{"接受后预留资金；实际到货后取得物品。"},0,[left,y+307.],width,MUTED);
         }else{self.skin.text(t,&q.error,0,[left,y+280.],width,MUTED);}
         if let Some(v)=self.session.and_then(|s|s.market.as_ref()){
             self.skin.text(t,&v.result,0,[left,y+h-40.],width,MUTED);
         }
+    }
+}
+
+fn compact_amount(amount:f64)->String {
+    format!("{amount:.2}").trim_end_matches('0').trim_end_matches('.').to_owned()
+}
+
+fn location_prices(site:&MarketSite,unit:&str)->String {
+    if site.pending_order > 0 { return format!("企业待交 {} 千克",site.pending_order); }
+    match (site.ask,site.bid) {
+        (Some(ask),Some(bid))=>format!("卖 {ask} · 收 {bid} 生丁 / {unit}"),
+        (Some(ask),None)=>format!("卖 {ask} 生丁 / {unit}"),
+        (None,Some(bid))=>format!("收 {bid} 生丁 / {unit}"),
+        _=>String::new(),
     }
 }

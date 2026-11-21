@@ -24,6 +24,7 @@ const MAX_PAGES: u32 = 160;
 const MAX_PACK_PAGES: u32 = 256;
 const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bc7RgbaUnorm;
 const LOD_HYSTERESIS: f64 = 0.12;
+const PAGE_BLEND_COLLAR: f64 = 0.04;
 const PAGE_FADE_SECONDS: f32 = 0.22;
 const GROUPED_LOD_START: u32 = 1;
 const GROUPED_LOD_COUNT: usize = (MAX_LEVEL-GROUPED_LOD_START+1) as usize;
@@ -74,6 +75,32 @@ impl Key {
         [west,north-step,west+step,north]
     }
 
+    fn intersects_viewport_cap(self, longitude: f64, [sin_lat, cos_lat]: [f64; 2], min_dot: f64) -> bool {
+        let [west, south, east, north] = self.bounds();
+        let half_span = (east - west) * 0.5;
+        // Include pages needed by the four-percent blend in page_coverage.
+        let padding = 2. * half_span * PAGE_BLEND_COLLAR;
+        let longitude_offset = (longitude - (west + half_span) + 180.).rem_euclid(360.) - 180.;
+        let delta = (longitude_offset.abs() - half_span - padding).max(0.).to_radians();
+        let along_longitude = cos_lat * delta.cos();
+        let south = (south - padding).max(-90.).to_radians();
+        let north = (north + padding).min(90.).to_radians();
+
+        // The nearest longitude maximizes the dot product at every latitude.
+        // Its latitude maximum is either stationary or at an endpoint.
+        let closest_latitude = sin_lat.atan2(along_longitude);
+        let closest = if (south..=north).contains(&closest_latitude) {
+            along_longitude.hypot(sin_lat)
+        } else {
+            let at = |latitude: f64| {
+                let (sin, cos) = latitude.sin_cos();
+                along_longitude * cos + sin_lat * sin
+            };
+            at(south).max(at(north))
+        };
+        closest >= min_dot - 1e-12
+    }
+
     fn texel(self) -> wgpu::Origin3d {
         wgpu::Origin3d {
             x:self.1,
@@ -108,7 +135,7 @@ struct RiverTopology {file:String,reaches:u64,unresolved_downstream_ids:u64}
 /// Read the actual map elevations for the selected cell's 50 km parent and project
 /// them into the shared battlefield coordinate system. The lattice interpolates Z7
 /// samples, whose latitude spacing is about 610 m.
-pub fn battlefield(root: &Path, cell: MilitaryCell) -> io::Result<BattlefieldTerrain> {
+pub fn battlefield(root: &Path, cell: MilitaryCell) -> io::Result<(BattlefieldTerrain, Vec<[u32; 3]>)> {
     const SPACING_M: u32 = 250;
     let manifest: Manifest = serde_json::from_reader(fs::File::open(root.join("index.json"))?)?;
     let width = 2 << MAX_LEVEL;
@@ -170,7 +197,9 @@ pub fn battlefield(root: &Path, cell: MilitaryCell) -> io::Result<BattlefieldTer
             cover.push(class);
         }
     }
-    BattlefieldTerrain::from_geographic_heights(SPACING_M, heights, cover)
+    let mut keys: Vec<_> = pages.keys().map(|key| [key.0, key.1, key.2]).collect();
+    keys.sort_unstable();
+    Ok((BattlefieldTerrain::from_geographic_heights(SPACING_M, heights, cover)?, keys))
 }
 
 impl Catalogue {
@@ -784,7 +813,7 @@ impl Terrain {
             let row=(row as i32+dy).clamp(0,rows-1) as u32;
             self.pages.get(&Key(z,column,row)).map_or(0.,|p|f32::from(p.fade)/255.)
         };
-        let collar=0.04;
+        let collar=PAGE_BLEND_COLLAR as f32;
         let [edge_x,edge_y]=[
             if rim[0]<collar {fade.min(readiness(x,0))} else {fade},
             if rim[1]<collar {fade.min(readiness(0,y))} else {fade},
@@ -879,6 +908,13 @@ impl Terrain {
             if needed[index] {inspected=inspected.max(level);}
             transition.visible.clear();
         }
+        // Near the poles a page is much narrower than its bounding cap.
+        // Count the padded geographic bounds before applying the atlas budget.
+        let polar_view = (!exact && inspected >= 5 && center[1].abs() >= 80_f64.to_radians().sin()).then(|| {
+            let longitude = center[0].atan2(center[2]).to_degrees();
+            let latitude = [center[1], center[0].hypot(center[2])];
+            (longitude, latitude, viewport.cos())
+        });
         let mut near=Vec::new();
         self.viewport_pages=0;
         for tile in self.keys.iter().take_while(|tile|tile.key.0<=inspected) {
@@ -889,8 +925,17 @@ impl Terrain {
                     && proximity>=(parent_prefetch+tile.radius).min(std::f64::consts::PI).cos());
             let retreat_detail=retreat_prefetch>0. && tile.key.0==MAX_LEVEL
                 && proximity>=(retreat_prefetch+tile.radius).min(std::f64::consts::PI).cos();
-            if near_view || reserved || retreat_detail {
-                let in_view=proximity>=(viewport+tile.radius).min(std::f64::consts::PI).cos();
+            let prefetch_page = near_view || reserved || retreat_detail;
+            let in_view = if let Some((longitude, latitude, min_dot)) = polar_view {
+                // A geographic collar adds at most this angular distance to the tile cap.
+                let padding = std::f64::consts::PI / f64::from(1 << tile.key.0)
+                    * PAGE_BLEND_COLLAR * std::f64::consts::SQRT_2;
+                proximity >= (viewport + tile.radius + padding).min(std::f64::consts::PI).cos()
+                    && tile.key.intersects_viewport_cap(longitude, latitude, min_dot)
+            } else {
+                prefetch_page && proximity >= (viewport + tile.radius).min(std::f64::consts::PI).cos()
+            };
+            if prefetch_page || in_view {
                 if in_view {
                     if let Some(index)=grouped_lod(tile.key.0).filter(|&index|needed[index]) {
                         self.transitions[index].visible.push(tile.key);

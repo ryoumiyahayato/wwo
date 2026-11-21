@@ -58,6 +58,7 @@ pub struct Ui<'a> {
     pub mouse:&'a str,
     pub labels:bool,
     pub transport_detail:Option<&'a crate::transport_ui::Detail>,
+    pub sea_relation_visible: bool,
     pub formal:crate::formal_ui::Display<'a>,
 }
 
@@ -165,6 +166,9 @@ fn place_symbols(world:&World,ui:&Ui<'_>,occupied:&mut Vec<[f32;4]>,previous:&mu
             skin.text(text,name,0,[x+dx,y+dy],width+1.,[41,48,43,230]);
         }
         skin.text(text,name,0,[x,y],width+1.,IVORY);
+        if place.selectable {
+            hits.push(Hit { area, action: Action::Select(Object::Place(i)) });
+        }
     }
     if let Some([lon,lat])=ui.formal.session.map(|s|s.coordinates.as_slice()) {
         if let Some([x,y])=ui.camera.project([*lon,*lat],ui.size).map(|p|p.map(|n|n as f32)) {
@@ -223,7 +227,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     let detail_height = 294. + 56. * opening_stations.len().saturating_sub(1) as f32;
     if ui.details {occupied.push([w/2.-252.,105.,504.,detail_height]);}
     if let Some(country)=ui.country {occupied.push(country.rect(ui.size));}
-    if let Some(detail)=ui.transport_detail {occupied.push(detail.rect(ui.size));}
+    if let Some(detail)=ui.transport_detail {occupied.push(detail.rect(ui.size,ui.formal.hud.transport_detail_expanded));}
     let region=ui.country.and_then(|country|match country.view {
         CountryView::Region{index,..}=>ui.formal.skin.admin_record(world,&world.polities[country.polity],index).and_then(|record|record.boundary),
         _=>None,
@@ -273,10 +277,11 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         let x=17.;let y=73.;let width=300.;
         let transport = match object {
             Object::Place(i) => ui.formal.written_world.and_then(|host|
-                host.transport_connections(&world.places[i].id).map(|links| (i, links, host.can_select_transport_destination(&world.places[i].id)))),
+                (host.player_alive() && host.can_book_transport_to(&world.places[i].id)).then_some(i)),
             _ => None,
         };
-        panel(&mut panels,x,y,width,if transport.is_some(){254.}else{213.});
+        let has_debug=ui.formal.debug.is_some();
+        panel(&mut panels,x,y,width,if has_debug {200.} else {148.});
         let (label,id,desc,extra)=match object {
             Object::Polity(_)=>unreachable!(),
             Object::Place(i)=>{
@@ -292,20 +297,20 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+width-40.,y+9.,27.,25.],"×",Some(Action::Close),false);
         if can_read_object(world, ui.formal.written_world, object) {
         skin.text(&mut hud_type,object_name(world,skin,object),1,[x+15.,y+35.],270.,LIGHT);
-        for (i,line) in [&id,&desc,&extra].into_iter().enumerate() {
-            skin.text(&mut hud_type,line,0,[x+15.,y+67.+i as f32*26.],270.,SUBTLE);
-        }
+        let context=if ui.mode==Mode::Political { &extra } else { &desc };
+        skin.text(&mut hud_type,context,0,[x+15.,y+68.],270.,SUBTLE);
+        if has_debug { skin.text(&mut hud_type,&id,0,[x+15.,y+151.],270.,SUBTLE); }
         } else {
             ui.formal.ink_block(&mut panels,[x+15.,y+42.,123.,12.]);
             ui.formal.ink_block(&mut panels,[x+15.,y+72.,217.,12.]);
         }
-        ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,y+174.,123.,28.],skin.choose("定位地点","Focus location"),Some(Action::Locate),false);
-        ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+147.,y+174.,135.,28.],skin.choose("完整资料","Full record"),Some(Action::Details),false);
-        if let Some((i, links, selectable)) = transport {
-            skin.text(&mut hud_type,&links,0,[x+16.,y+125.],width-32.,SUBTLE);
-            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,y+212.,267.,28.],
-                skin.choose("查询前往此地的路线","Plan travel to this location"),
-                selectable.then_some(Action::Hud(crate::formal_ui::Command::Transport("city",i))),false);
+        ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+15.,y+103.,123.,28.],skin.choose("定位地点","Focus location"),Some(Action::Locate),false);
+        if let Some(i) = transport {
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+147.,y+103.,135.,28.],
+                skin.choose("运往此处","Transport here"),
+                Some(Action::Hud(crate::formal_ui::Command::Transport("city",i))),false);
+        } else {
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x+147.,y+103.,135.,28.],skin.choose("完整资料","Full record"),Some(Action::Details),false);
         }
     }
     if ui.details {
@@ -320,12 +325,18 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
                 Object::Polity(_)=>Vec::new(),
                 Object::Place(i)=>{
                     let p=&world.places[i];
-                    vec![p.id.clone(),format!("{}  {:.6}",skin.choose("经度","Longitude"),p.coordinates[0]),
-                        format!("{}  {:.6}",skin.choose("纬度","Latitude"),p.coordinates[1]),
-                        format!("{}  {}",skin.choose("地图标注等级","Map label rank"),p.rank)]
+                    let mut details=vec![format!("{}  {:.6}",skin.choose("经度","Longitude"),p.coordinates[0]),
+                        format!("{}  {:.6}",skin.choose("纬度","Latitude"),p.coordinates[1])];
+                    if ui.formal.debug.is_some() {
+                        details.push(p.id.clone());
+                        details.push(format!("{}  {}",skin.choose("地图标注等级","Map label rank"),p.rank));
+                    }
+                    details
                 }
                 Object::Administration(i)=>{
-                    vec![world.admin[i].id.clone(),skin.choose("法国 · 1900 年 · TRF-GIS","France · 1900 · TRF-GIS").into()]
+                    let mut details=vec![skin.choose("法国 · 1900 年 · TRF-GIS","France · 1900 · TRF-GIS").into()];
+                    if ui.formal.debug.is_some() { details.push(world.admin[i].id.clone()); }
+                    details
                 }
             };
             if !opening_stations.is_empty() {
@@ -353,7 +364,8 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         }
     }
     let mut debug_right=145.;
-    if ui.mode==Mode::Economic && !matches!(ui.formal.hud.page,crate::formal_ui::Page::Market|crate::formal_ui::Page::Relations)
+    if ui.mode==Mode::Economic && ui.formal.hud.page==crate::formal_ui::Page::Map
+        && ui.transport_detail.is_none() && !ui.formal.hud.market_map
         && ui.formal.hud.menu==crate::formal_ui::Menu::None {
         let width=(measure(a,0,ui.econ_label)+25.).clamp(219.,374.);
         let x=w-width-17.;
@@ -369,9 +381,61 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
         }
         debug_right=182.+lines as f32*20.;
     }
+    if ui.formal.hud.market_map && ui.formal.hud.menu==crate::formal_ui::Menu::None {
+        if let Some(market)=ui.formal.session.and_then(|s|s.market.as_ref()) {
+            use crate::formal_ui::Command::Market;
+            let left=(w-506.)/2.;
+            panel(&mut panels,left,64.,506.,44.);
+            skin.text(&mut hud_type,&format!("{} · 点击交易地点",market.good_label),1,[left+12.,74.],273.,LIGHT);
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[left+290.,72.,91.,27.],"搜索地点",
+                Some(Action::Hud(Market("search_locations",0))),false);
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[left+389.,72.,105.,27.],"返回商品",
+                Some(Action::Hud(Market("market_back",0))),false);
+            let mut placed=Vec::new();
+            for (index,site) in market.sites.iter().enumerate() {
+                let Some([x,y])=ui.camera.project(site.point,ui.size).map(|p|p.map(|n|n as f32)) else{continue;};
+                if x<16.||x>w-16.||y<113.||y>h-80. {continue;}
+                let area=[x-12.,y-12.,24.,24.];
+                if placed.iter().any(|old|intersects(area,*old)) {continue;}
+                placed.push(area);
+                map.shape(&[[x,y-9.],[x+9.,y],[x,y+9.],[x-9.,y]],[28,44,40,255]);
+                let ink=if site.ask.is_some(){[242,206,115,255]}else{[126,214,183,255]};
+                map.shape(&[[x,y-6.],[x+6.,y],[x,y+6.],[x-6.,y]],ink);
+                let span=skin.width(&site.name,0).min(148.);
+                let label=[x+12.,y-9.,span+4.,20.];
+                if x+span+16.<w && !occupied.iter().any(|old|intersects(label,*old)) {
+                    occupied.push(label);
+                    map.rect(label[0],label[1],label[2],label[3],[27,42,39,225]);
+                    skin.text(&mut marker_type,&site.name,0,[label[0]+2.,label[1]],span,LIGHT);
+                    hits.push(Hit{area:label,action:Action::Hud(Market("location",index))});
+                }
+                hits.push(Hit{area,action:Action::Hud(Market("location",index))});
+            }
+            if market.sites.is_empty() {
+                skin.text(&mut hud_type,"暂无已知交易地点",0,[left+12.,113.],260.,LIGHT);
+            }
+        }
+    }
     if ui.formal.hud.page==crate::formal_ui::Page::Map {
         let y=h-45.;
-        let mut x=w-233.;
+        if ui.sea_relation_visible && !ui.formal.hud.market_map && ui.formal.hud.menu==crate::formal_ui::Menu::None {
+            let x = w - 249.;
+            let legend_y = h - 136.;
+            panels.rect(x, legend_y, 223., 21., [15, 25, 34, 220]);
+            for offset in [9., 18.] {
+                panels.line([x+offset, legend_y+11.], [x+offset+5., legend_y+11.], 1.1,
+                    crate::transport_scene::SEA_RELATION_INK);
+            }
+            skin.text(&mut hud_type, skin.choose("海运联系 · 航迹待核实","Sea link · Track unconfirmed"),
+                0, [x+29.,legend_y+3.], 191., SUBTLE);
+        }
+        let transport=ui.formal.session.is_some_and(|s|s.transport.is_some())&&!ui.formal.hud.market_map;
+        let mut x=if transport {w-306.} else {w-233.};
+        if transport {
+            ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x,y-35.,69.,25.],"运输",
+                Some(Action::Hud(crate::formal_ui::Command::Page(crate::formal_ui::Page::Travel))),false);
+            x+=73.;
+        }
         for (label,action,width) in [(skin.choose("搜索","Search"),Action::Search,74.),(skin.choose("返回","Back"),Action::Back,62.),(skin.choose("全球","Globe"),Action::Home,62.)]{
             ui.formal.row(&mut panels,&mut hud_type,&mut hits,[x,y-35.,width,25.],label,Some(action),false);
             x+=width+4.;

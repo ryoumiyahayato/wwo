@@ -41,6 +41,241 @@ CLASS_NAMES = {LAND: "land", OCEAN: "ocean", INLAND: "inland"}
 EARTH_KM = 6371.0088
 CONTINENT_INTERIORS = [Point(lon, lat) for lon, lat in
                        ((20, 5), (0, -85), (135, -25), (90, 45), (-105, 40), (-65, -15))]
+CELL_DEGREES = WATER_STEP / WATER_GRID
+CELL_SHAPE = (WATER_ROWS * WATER_GRID, WATER_COLUMNS * WATER_GRID)
+COAST, LAKE, RIVER, WETLAND, MEASURED_WATER, QHL_RIVER = (1 << i for i in range(6))
+
+
+def refinement_inputs(land, lakes, rivers, worldcover):
+    transform = from_origin(-180, 90, CELL_DEGREES, CELL_DEGREES)
+    flags = np.zeros(CELL_SHAPE, dtype=np.uint8)
+    for geometries, kind in (([g.boundary for g in land], COAST),
+                             ([g.boundary for g in lakes], LAKE), (rivers, RIVER)):
+        hit = rasterize(geometries, out_shape=CELL_SHAPE, transform=transform,
+                        all_touched=True, dtype="uint8")
+        flags[hit > 0] |= kind
+    # Index native cache postings directly. A narrow observed river or wetland
+    # can fall between all of the coarse grid centres and the game geometry.
+    centres = (np.arange(worldcover.span) + .5) * 3 / worldcover.span
+    for (south, west), path in worldcover.tiles.items():
+        native = worldcover.codes(path)
+        y = ((87 - south + centres) / CELL_DEGREES).astype(int)
+        x = ((west + 180 + centres) / CELL_DEGREES).astype(int)
+        for codes, kind in (((90, 95), WETLAND), ((80,), MEASURED_WATER)):
+            rows, cols = np.nonzero(np.isin(native, codes))
+            flags[y[rows], x[cols]] |= kind
+    return flags
+
+
+def cover_at(worldcover, lon, lat):
+    rows = ((90 - lat) * (worldcover.span / 3)).astype(int)
+    cols = ((lon + 180) * (worldcover.span / 3)).astype(int)
+    tile_rows, local_rows = np.divmod(rows, worldcover.span)
+    tile_cols, local_cols = np.divmod(cols, worldcover.span)
+    result = np.zeros((len(lat), len(lon)), dtype=np.uint8)
+    for y in np.unique(tile_rows):
+        iy = np.flatnonzero(tile_rows == y)
+        for x in np.unique(tile_cols):
+            path = worldcover.tiles.get((87 - 3 * y, -180 + 3 * x))
+            if path:
+                ix = np.flatnonzero(tile_cols == x)
+                result[np.ix_(iy, ix)] = worldcover.codes(path)[np.ix_(local_rows[iy], local_cols[ix])]
+    return result
+
+
+def sampled_qwg_cell(cell, texel_x, texel_y, paired=False):
+    shape = (len(texel_y),) if paired else (len(texel_y), len(texel_x))
+    if isinstance(cell, int):
+        return np.full(shape, cell, dtype=np.uint8)
+    seed, bands = cell
+    px = (texel_x + .5) * (WATER_QUANTIZATION / TILE)
+    py = (TILE - texel_y - .5) * (WATER_QUANTIZATION / TILE)
+    bit_values = np.full(shape, seed, dtype=np.uint32)
+    for band, edges in enumerate(bands):
+        indices = np.flatnonzero(((py * (WATER_GRID * WATER_BANDS) / WATER_QUANTIZATION)
+                                 .astype(int) % WATER_BANDS) == band)
+        if not len(indices) or not len(edges):
+            continue
+        a, b, flags = edges.T
+        lo, hi = a >> 16, b >> 16
+        y = py[indices, None]
+        active = (lo <= y) & (y < hi)
+        ax, bx = (a & 65535).astype(float), (b & 65535).astype(float)
+        crossing = ax + (bx - ax) * (y - lo) / (hi - lo)
+        if paired:
+            crosses = active & (px[indices, None] < crossing)
+        else:
+            crosses = active[:, None, :] & (px[None, :, None] < crossing[:, None, :])
+        bit_values[indices] ^= np.bitwise_xor.reduce(np.where(crosses, flags, 0), axis=-1)
+    return np.select(
+        (bit_values >> 4 != 0, bit_values & 8 != 0, bit_values & 4 != 0,
+         bit_values & 2 != 0, bit_values & 1 != 0),
+        (np.where(bit_values & 1, INLAND, OCEAN), INLAND, LAND, INLAND, LAND),
+        default=OCEAN,
+    ).astype(np.uint8)
+
+
+def refinement_side(cell, flag, neighbour_count):
+    # The least complex selected cell still doubles the coarse posting rate.
+    # Use native Z7 texel centres at intersecting features and dense water edges.
+    if flag & WETLAND or (flag & (COAST | LAKE) and flag & (RIVER | QHL_RIVER | MEASURED_WATER)):
+        return 32
+    if not isinstance(cell, int):
+        edge_counts = sum(len(band) for band in cell[1])
+        return 32 if edge_counts >= 32 or neighbour_count >= 24 else 16
+    return 16 if flag & (RIVER | QHL_RIVER) and neighbour_count >= 12 else 8 if flag else 0
+
+
+def qhl_midpoints(path, flags):
+    records = qhl_records(path)
+    end_points = records["coordinates"]
+    if not np.isfinite(end_points).all() or (np.abs(end_points) > [180, 90]).any():
+        raise ValueError("Invalid QHL coordinates")
+    lon = end_points[:, :, 0].astype(float)
+    lat = end_points[:, :, 1].mean(axis=1, dtype=float)
+    lon = (lon[:, 0] + ((lon[:, 1] - lon[:, 0] + 180) % 360 - 180) / 2 + 180) % 360 - 180
+    x = (lon + 180) / WATER_STEP
+    y = np.minimum((90 - lat) / WATER_STEP, np.nextafter(float(WATER_ROWS), 0))
+    col, row = (x * WATER_GRID).astype(int), (y * WATER_GRID).astype(int)
+    flags[row, col] |= QHL_RIVER
+    page = (row // WATER_GRID) * WATER_COLUMNS + col // WATER_GRID
+    cell = (row % WATER_GRID) * WATER_GRID + col % WATER_GRID
+    key = page * WATER_GRID**2 + cell
+    order = np.argsort(key, kind="stable")
+    offsets = np.searchsorted(key[order], np.arange(WATER_COLUMNS * WATER_ROWS * WATER_GRID**2 + 1))
+    return (x[order] % 1) * TILE - .5, (y[order] % 1) * TILE - .5, offsets
+
+
+def compare_adaptive(args, worldcover, land, lakes, rivers):
+    flags = refinement_inputs(land, lakes, rivers, worldcover)
+    river_x, river_y, river_offsets = qhl_midpoints(args.terrain / "river-centrelines.qhl", flags)
+    paths = [args.terrain / f"{z}.qpk" for z in range(PACK_MAX_LEVEL + 1)]
+    dim = TILE + 2 * GUTTER
+    dims = (dim, dim)
+    cover_codes = np.asarray(LAND_COVER_CODES, dtype=np.uint8)
+    decoder = ZstdDecompressor()
+    cell_width = TILE // WATER_GRID
+    prior_pages = sum(2 << (2 * z) for z in range(7))
+    prior_cover_pages = 2 << 12
+    pages = []
+    with (args.terrain / "water-geometry.qwg").open("rb") as qwg, \
+            (args.terrain / "hydrology-color.qhw").open("rb") as qhw, \
+            (args.terrain / "landscape-cover-v2.qsc").open("rb") as qsc, paths[7].open("rb") as qpk:
+        offsets, kinds = water_pack_index(qwg)
+        overrides = read_color_overrides(qhw, paths)
+        if qsc.read(20) != Struct("<8sIII").pack(b"WWOZ7LC2", WATER_COLUMNS, WATER_ROWS, dim):
+            raise ValueError("Expected the installed Z6–Z7 QSC")
+        covers = page_offsets(qsc, prior_cover_pages + len(kinds), dim ** 2 + 256)
+        pack = LevelPack(qpk, 7, COMPACT_VERSION)
+        for page, kind in enumerate(kinds):
+            kind = int(kind)
+            y, x = divmod(page, WATER_COLUMNS)
+            region = flags[y * WATER_GRID:(y + 1) * WATER_GRID, x * WATER_GRID:(x + 1) * WATER_GRID]
+            if kind in CLASS_NAMES and not region.any():
+                pages.append({"tile": [7, x, y], "sampling": "global_grid", "data": "unverified",
+                              "reference": "limited", "game": "unverified", "dynamic": "unverified"})
+                continue
+            start, end = map(int, offsets[page:page + 2])
+            qwg.seek(start)
+            cells = water_payload_cells(kind, qwg.read(end - start))
+            mixed = sum(not isinstance(cell, int) for cell in cells)
+            color, _ = pack.at(x, y)
+            base = np.asarray(Image.frombytes("RGBA", dims, color.tobytes(), "bcn", (7, "BC7")))
+            start, end = map(int, overrides[prior_pages + page:prior_pages + page + 2])
+            surface = base
+            if start != end:
+                qhw.seek(start)
+                raw = decoder.decompress(qhw.read(end - start), max_output_size=dim ** 2)
+                surface = np.asarray(Image.frombytes("RGBA", dims, raw, "bcn", (7, "BC7")))
+            start, end = map(int, covers[prior_cover_pages + page:prior_cover_pages + page + 2])
+            cover = np.zeros(dims, dtype=np.uint8)
+            if start != end:
+                qsc.seek(start)
+                raw = decoder.decompress(qsc.read(end - start), max_output_size=dim ** 2)
+                cover = cover_codes[np.frombuffer(raw, dtype=np.uint8)].reshape(dims)
+            strata = Counter()
+            evidence = Counter()
+            layers = Counter()
+            examples = {}
+            for (row, col), flag in np.ndenumerate(region):
+                cell = cells[(WATER_GRID - 1 - row) * WATER_GRID + col]
+                side = refinement_side(cell, flag, mixed)
+                if not side:
+                    continue
+                stride = cell_width // side
+                axis = np.arange(side) * stride + stride // 2
+                tx, ty = col * cell_width + axis, row * cell_width + axis
+                lon = -180 + (x + (tx + .5) / TILE) * WATER_STEP
+                lat = 90 - (y + (ty + .5) / TILE) * WATER_STEP
+                geom = sampled_qwg_cell(cell, tx, ty)
+                known = cover_at(worldcover, lon, lat)
+                texels = np.ix_(ty + GUTTER, tx + GUTTER)
+                qpk_wet = base[texels][..., 3] >= 128
+                qhw_wet = surface[texels][..., 3] >= 128
+                qwg_wet = geom != LAND
+                packed = cover[texels]
+                strata[f"{side * side}_samples_per_cell"] += 1
+                strata["coast_cells"] += bool(flag & COAST)
+                strata["lake_shore_cells"] += bool(flag & LAKE)
+                strata["river_cells"] += bool(flag & RIVER)
+                strata["qhl_cells"] += bool(flag & QHL_RIVER)
+                strata["wetland_or_mangrove_cells"] += bool(flag & WETLAND)
+                strata["estuary_or_delta_candidates"] += bool(flag & COAST and flag & (RIVER | WETLAND))
+                evidence["worldcover_observed_samples"] += int((known != 0).sum())
+                evidence["worldcover_water_samples"] += int((known == 80).sum())
+                evidence["worldcover_snow_ice_samples"] += int((known == 70).sum())
+                comparisons = (
+                    (evidence, "worldcover_water_qwg_land", (known == 80) & ~qwg_wet),
+                    (evidence, "worldcover_snow_ice_qwg_water", (known == 70) & qwg_wet),
+                    (evidence, "worldcover_water_rendered_fallback_land", (known == 80) & ~qhw_wet),
+                    (layers, "qpk_vs_qhw_alpha", qpk_wet != qhw_wet),
+                    (layers, "qwg_water_qhw_or_qpk_fallback_land", qwg_wet & ~qhw_wet),
+                    (layers, "qwg_land_qhw_or_qpk_fallback_water", ~qwg_wet & qhw_wet),
+                    (layers, "qsc_water_qwg_land", (packed == 80) & ~qwg_wet),
+                    (layers, "qsc_snow_ice_qwg_water", (packed == 70) & qwg_wet),
+                    (layers, "qsc_vs_same_source_worldcover", (known != 0) & (packed != known)),
+                )
+                for counts, name, clash in comparisons:
+                    count = int(clash.sum())
+                    if count:
+                        counts[name] += count
+                        if name not in examples:
+                            iy, ix = np.unravel_index(clash.argmax(), clash.shape)
+                            examples[name] = [round(float(lon[ix]), 7), round(float(lat[iy]), 7)]
+                if flag & QHL_RIVER:
+                    first = page * WATER_GRID**2 + row * WATER_GRID + col
+                    start, end = river_offsets[first:first + 2]
+                    x_at, y_at = river_x[start:end], river_y[start:end]
+                    qhl_area = sampled_qwg_cell(cell, x_at, y_at, paired=True)
+                    x_at = (x_at + .5).astype(int) + GUTTER
+                    y_at = (y_at + .5).astype(int) + GUTTER
+                    layers["qhl_midpoints"] += len(qhl_area)
+                    layers["qhl_on_qwg_inland"] += int((qhl_area == INLAND).sum())
+                    layers["qhl_on_qwg_ocean"] += int((qhl_area == OCEAN).sum())
+                    layers["qhl_on_qwg_land_qsc_water"] += int(((qhl_area == LAND) &
+                                                               (cover[y_at, x_at] == 80)).sum())
+                    layers["qhl_on_qwg_land_qhw_or_qpk_water"] += int(((qhl_area == LAND) &
+                                                                     (surface[y_at, x_at, 3] >= 128)).sum())
+            pages.append({"tile": [7, x, y], "sampling": "adaptive", "data": "pass",
+                          "reference": "limited", "game": "unverified", "dynamic": "unverified",
+                          "strata": dict(+strata), "independent_screening": dict(+evidence),
+                          "layer_conflicts": dict(layers), "examples": examples})
+            if x == WATER_COLUMNS - 1 and (y + 1) % 16 == 0:
+                print(f"Adaptive rows {y + 1}/{WATER_ROWS}", flush=True)
+    return {
+        "scope": "Z7 cells at 8, 16 or 32 postings per axis; nominal N–S intervals 2443, 1222 or 611 m",
+        "coarse_scope": "Stable cells use the separate global grid; no adaptive claim for those cells",
+        "references": {
+            "independent_screening": "ESA WorldCover 2021 against QWG; Natural Earth routes refinement",
+            "same_source": "QSC compared to its ESA classification cache",
+            "layer_conflicts": "Asset differences at the same positions; not a geography verdict",
+            "qhl": "All reach midpoints classified against exact QWG and co-located QPK/QHW and QSC. Wet midpoints require a game check for duplicate strokes; a dry midpoint can be an intended schematic river.",
+            "limits": "562 postings per 3 degrees in this cache; land-cover classes do not resolve tidal stage, historic banks, or glacier grounding",
+        },
+        "summary": {key: dict(sum((Counter(p.get(key, {})) for p in pages), Counter()))
+                    for key in ("strata", "independent_screening", "layer_conflicts")},
+        "pages": pages,
+    }
 
 
 def mask(shapes):
@@ -294,14 +529,18 @@ def sphere_xy(coordinates):
     return np.column_stack((np.cos(lat) * np.cos(lon), np.cos(lat) * np.sin(lon), np.sin(lat)))
 
 
-def qhl_support(path, ice):
+def qhl_records(path):
     with path.open("rb") as file:
         if file.read(len(RIVER_MAGIC)) != RIVER_MAGIC:
             raise ValueError("Invalid QHL magic")
     size = path.stat().st_size - len(RIVER_MAGIC)
     if size < 0 or size % RIVER_SEGMENT.itemsize:
         raise ValueError("Invalid QHL record length")
-    records = np.memmap(path, mode="r", offset=len(RIVER_MAGIC), dtype=RIVER_SEGMENT)
+    return np.memmap(path, mode="r", offset=len(RIVER_MAGIC), dtype=RIVER_SEGMENT)
+
+
+def qhl_support(path, ice):
+    records = qhl_records(path)
     support = []
     ice_segments = 0
     ice_examples = []
@@ -550,13 +789,34 @@ def main():
         parser.add_argument(name, type=Path)
     parser.add_argument("--shoreline-ponds", type=Path)
     parser.add_argument("--antarctic-coast", type=Path, help="SCAR ADD EPSG:3031 polygon ZIP")
+    parser.add_argument("--adaptive-only", action="store_true",
+                        help="Repeat the detailed water checks without the coarse global comparison")
     args = parser.parse_args()
-    relief, relief_resolution = relief_grid(args.relief)
     ne_land = physical_shapes(args.natural_earth, "land")
     ne_lakes = physical_shapes(args.natural_earth, "lakes")
-    glaciers = physical_shapes(args.natural_earth, "glaciated_areas")
     rivers = physical_shapes(args.natural_earth, "rivers_lake_centerlines")
     worldcover = LandCover(args.worldcover, native=True)
+    result = {
+        "terrain": str(args.terrain.resolve()),
+        "references": {name: str(getattr(args, name).resolve()) if getattr(args, name) else None
+                       for name in ("natural_earth", "shoreline", "shoreline_ponds", "worldcover",
+                                    "relief", "antarctic_coast")},
+        "adaptive_hydrology": compare_adaptive(args, worldcover, ne_land, ne_lakes, rivers),
+    }
+    if not args.adaptive_only:
+        result.update(compare_global(args, worldcover, ne_land, ne_lakes, rivers))
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix="geography-", dir=args.output.parent) as scratch:
+        report = Path(scratch) / args.output.name
+        with report.open("w", encoding="utf-8") as file:
+            json.dump(result, file, indent=2, allow_nan=False)
+            file.write("\n")
+        report.replace(args.output)
+
+
+def compare_global(args, worldcover, ne_land, ne_lakes, rivers):
+    relief, relief_resolution = relief_grid(args.relief)
+    glaciers = physical_shapes(args.natural_earth, "glaciated_areas")
     codes = worldcover_mask(worldcover)
     if not np.any(codes == 80) or not np.any(codes == 70):
         raise ValueError("WorldCover raster comparison expects water and snow/ice observations")
@@ -580,21 +840,11 @@ def main():
         qpk = {z: compare_qpk(path, z, coast, relief, qwg_surface, qhw, color_offsets)
                for z, path in enumerate(paths)}
     qsc = compare_qsc(args.terrain / "landscape-cover-v2.qsc", worldcover, qwg_surface)
-    result = {
-        "terrain": str(args.terrain.resolve()),
-        "references": {name: str(getattr(args, name).resolve()) if getattr(args, name) else None
-                       for name in ("natural_earth", "shoreline", "shoreline_ponds", "worldcover", "relief")},
+    return {
         "global_grid": {"width": WIDTH, "height": HEIGHT, "posting_degrees": DEGREES,
                         "relief_reference_arcminutes": relief_resolution},
         "qwg": qwg_result, "qhl_and_river_surfaces": river_result, "qpk_with_qhw": qpk, "qsc": qsc,
     }
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    with TemporaryDirectory(prefix="geography-", dir=args.output.parent) as scratch:
-        report = Path(scratch) / args.output.name
-        with report.open("w", encoding="utf-8") as file:
-            json.dump(result, file, indent=2, allow_nan=False)
-            file.write("\n")
-        report.replace(args.output)
 
 
 if __name__ == "__main__":
