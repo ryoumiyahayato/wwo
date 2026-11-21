@@ -32,6 +32,25 @@
 
 `tools/build_natural_terrain.py --water-geometry <GSHHG全精度压缩包> <候选库>/water-geometry.qwg --measured-river-mask <GRWL_mask_V01.01.zip>` 生成独立 WGS84 页。岸线支持 GSHHG Shapefile 压缩包或 Basemap 的全精度数据 wheel。加入 Landsat 水域需 `pyproj` 和 `tifffile`。GSHHG 提供海岸、湖泊及嵌套岛屿。GRWL 的正值水面提供干流、潮汐水道和连通湖库，零值保留已有水域。已知河岸范围优先。`--documented-river-widths <GeoJSON>` 仅在无观测水面覆盖的河段按米制构造水面。输入中心线需包含 `half_width_metres`、`width_source` 和 `width_epoch`，归档时保留原始 GeoJSON。其余河段使用线符号。局部重算使用 `--water-pages-from <现有QWG>` 和一个或多个 `--water-page X Y`，其余页面从现有包复制。
 
+`--confirmed-grounded-ice <GeoJSON>` 从 GRWL 水域叠加中扣除已确认接地的冰川轮廓。GSHHG 各层继续按原水陆嵌套计算。`--measured-land-islands <GeoJSON>` 将海岸测绘中位于原 GSHHG 第一层之外的岛屿部分加入陆地层。两个输入均使用 WGS84 FeatureCollection，每个 Polygon 或 MultiPolygon 要素包含 `properties.sources`。
+
+本次修正使用 GLIMS 冰川 `G089717E35617N` 在 2002-07-10 和 2006-09-14 两期观测轮廓的交集，以及英国南极调查局地图组 Gerrish 2020 的 Lynn Ø 海岸记录 148。GLIMS 分析编号为 912784 和 252610。岛西侧 GSHHG 已有误判陆地仍待基于岸线位置修正。[GLIMS 冰川数据库](https://doi.org/10.7265/N5V98602) · [GLIMS 引用与使用条款](https://nsidc.org/data/nsidc-0272/versions/1) · [Gerrish 2020，开放政府许可 3.0](https://doi.org/10.5285/8cecde06-8474-4b58-a9cb-b820fa4c9429)
+
+从[全球岸线阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-shoreline-audit-20261120)恢复 `water-geometry.qwg`。准备 [Basemap 2.0.0 全精度数据 wheel](https://pypi.org/project/basemap-data-hires/2.0.0/)、[GRWL v01.01](https://doi.org/10.5281/zenodo.1297434)及 [GSHHG 2.3.7 Shapefile 压缩包](https://www.soest.hawaii.edu/pwessel/gshhg/)。在 `rust/strategic-host` 下用 PowerShell 重算 4 页。`$baseline`、`$sources`、`$candidate` 分别指向恢复的库、源压缩包目录和独立候选数据根下的 `worldcrs84quad-15s-v2-hydrology` 目录。
+
+```powershell
+python tools/build_natural_terrain.py --water-geometry `
+  "$sources/basemap_data_hires-2.0.0-py3-none-any.whl" "$candidate/water-geometry.qwg" `
+  --water-pages-from "$baseline/water-geometry.qwg" `
+  --measured-river-mask "$sources/GRWL_mask_V01.01.zip" `
+  --shoreline-ponds "$sources/gshhg-shp-2.3.7.zip" `
+  --confirmed-grounded-ice ../../docs/terrain-z7-visual/glims-G089717E35617N-2002-2006-common.geojson `
+  --measured-land-islands ../../docs/terrain-z7-visual/bas-gerrish-2020-lynn-island-record-148.geojson `
+  --water-page 191 38 --water-page 113 7 --water-page 114 6 --water-page 114 7
+```
+
+候选数据根使用同一恢复批次的其余地图资源。用 `wwo-map-lab --play --background --data <候选数据根> --observe <请求路径>` 复核。取景中心为青藏冰川 `(89.74677, 35.61502)` 和 Lynn Ø `(-19.17091, 80.11888)`，两处使用 48 米/像素。
+
 候选使用 Basemap 2.0.0 随包的 GSHHG 2.3.6 全精度几何和 GRWL v01.01 的 30 米 Landsat 平均流量水域掩膜。岸线和卫星观测均为现代参照。1900 年精确河岸及航道宽度仍待对应历史资料。GRWL 掩膜是中间产品，细小水道和潮滩边界精度取决于资料。[GSHHG](https://www.ngdc.noaa.gov/mgg/shorelines/shorelines.html) · [Basemap 数据及 LGPL-3.0-or-later](https://pypi.org/project/basemap-data-hires/) · [Allen 与 Pavelsky 2018](https://doi.org/10.1126/science.aat0636) · [GRWL v01.01，CC BY 4.0](https://doi.org/10.5281/zenodo.1297434)
 
 全局核查时为生成命令传入完整来源，再加 `--water-pages-from <现有QWG> --audit-water-pages <变更记录.jsonl>`。工具逐页计算当前水陆分类输入，保留等价的旧页。记录列出变化的小格和整格水陆类别变更。Basemap 2.0.0 的全精度包缺少湖中岛内池塘。使用该 wheel 时加 `--shoreline-ponds <GSHHG Shapefile 压缩包>` 补充官方第 4 层。主数据已有第 4 层时沿用主数据。
