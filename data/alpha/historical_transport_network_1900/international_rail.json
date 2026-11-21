@@ -1,0 +1,14 @@
+[
+  {
+    "id": "rail:chiasso_como_san_giovanni",
+    "origin_entity_id": "swiss_confederation",
+    "origin_city": "Chiasso",
+    "destination_entity_id": "kingdom_of_italy",
+    "destination_city": "Como",
+    "opened_on": "1876-09-28",
+    "station_pair": "Chiasso – Como San Giovanni",
+    "source": "Regio Ispettorato Generale delle Strade Ferrate, Relazione sull'esercizio delle strade ferrate (1899), prospetto 1 bis, Como–Chiasso entry of 28 September 1876 and Milano–Como S.G.–Chiasso line in operation on 31 December 1899. https://www.trenidicarta.it/archivi/assets/pdf/4/1899_Relazione_sull_esercizio_delle_strade_ferrate.pdf ; SBB Historic, station operating contracts VGB_GB_SBBGB03_066_05 (1882–1915). https://www.sbbarchiv.ch/archivplansuche.aspx?ID=190798",
+    "profile_basis": "Scenario allowance per crossing for running and border handling. Source confirms operation and station identities. Train numbers, exact departure times, tariffs and vehicle load are unknown. Coordinates locate settlements only.",
+    "profile": {"travel_minutes": 30, "cost_units": 4, "capacity_units": 80, "risk_points": 2}
+  }
+]

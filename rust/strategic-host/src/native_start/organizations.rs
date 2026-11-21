@@ -332,20 +332,6 @@ pub(super) fn act(world: &mut InitialWorld, id: &str, action: &str) -> io::Resul
                 world.contribute_to_business(id, amount)?;
                 return Ok(format!("已从本人账户向企业追加 {amount} 生丁。"));
             }
-            if let Some((item, price)) = action
-                .strip_prefix("organization:freight|")
-                .and_then(|value| value.rsplit_once('|'))
-            {
-                let (good, amount) = item
-                    .rsplit_once('|')
-                    .ok_or_else(|| io::Error::other("货批数量无效。"))?;
-                let amount = amount
-                    .parse()
-                    .map_err(|_| io::Error::other("货批数量无效。"))?;
-                let price = price.parse().map_err(|_| io::Error::other("报价无效。"))?;
-                let lot = world.buy_organization_freight(id, good, amount, price)?;
-                return Ok(format!("已购入企业货批 #{lot}。可从企业账户进入实物货运。"));
-            }
             let (good, total) = action
                 .strip_prefix("organization:order|")
                 .and_then(|value| value.rsplit_once('|'))
@@ -355,4 +341,16 @@ pub(super) fn act(world: &mut InitialWorld, id: &str, action: &str) -> io::Resul
             Ok(format!("已预约代购，预留 {reserved} 生丁。"))
         }
     }
+}
+
+pub(super) fn buy_freight(world: &mut InitialWorld, id: &str, quote: &str) -> io::Result<u64> {
+    let (item, price) = quote
+        .rsplit_once('|')
+        .ok_or_else(|| io::Error::other("报价无效。"))?;
+    let (good, amount) = item
+        .rsplit_once('|')
+        .ok_or_else(|| io::Error::other("货批数量无效。"))?;
+    let amount = amount.parse().map_err(|_| io::Error::other("货批数量无效。"))?;
+    let price = price.parse().map_err(|_| io::Error::other("报价无效。"))?;
+    world.buy_organization_freight(id, good, amount, price)
 }

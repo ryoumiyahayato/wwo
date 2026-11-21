@@ -169,6 +169,15 @@ impl Population {
         self.opening.as_ref()?.unit_at(place)
     }
 
+    pub(crate) fn residence_parent(&self, unit: &str) -> Option<&str> {
+        let (id, _) = self.totals.get_key_value(unit).or_else(|| self.standalone.get_key_value(unit))?;
+        if self.opening.as_ref().is_some_and(|opening| opening.estimate(unit).is_some()
+            && opening.partitions.values().any(|part| part.parent == unit)) {
+            return None;
+        }
+        Some(id)
+    }
+
     pub(crate) fn parent_unit(&self, unit: &str) -> Option<&str> {
         if let Some(partition) = self.opening.as_ref().and_then(|opening| opening.partitions.get(unit)) {
             return Some(&partition.parent);

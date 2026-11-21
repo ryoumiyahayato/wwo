@@ -20,6 +20,8 @@ use crate::{
 mod travel_live;
 #[path = "formal_freight.rs"]
 pub mod freight;
+#[path = "formal_migration.rs"]
+mod migration;
 #[path = "formal_battle.rs"]
 mod battle;
 pub use battle::WorldLandBattle;
@@ -96,6 +98,15 @@ pub struct Polity {
     pub valid_to: String,
     pub controller_id: String,
     pub relationship: String,
+    #[serde(default)]
+    pub capital: Option<PolityCapital>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PolityCapital {
+    pub name: String,
+    pub lon: f64,
+    pub lat: f64,
 }
 
 impl Polity {
@@ -137,7 +148,7 @@ pub struct Route {
     pub to_place_id: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct OpeningPerson {
     pub id: String,
@@ -184,16 +195,22 @@ pub struct WorldBootstrap {
     historical_population: Arc<HistoricalOpening>,
     markets: Arc<MarketInputs>,
     residents: BTreeMap<String, i64>,
+    opening_people: BTreeMap<String, Arc<OpeningPerson>>,
+    opening_place_names: BTreeMap<String, String>,
+    opening_cash: i64,
     work: Arc<WorkOpening>,
     enterprise_opening: Arc<EnterpriseOpening>,
     activities: Arc<OpeningActivities>,
 }
 
 pub struct WorldSources {
+    pub(crate) historical_population: Option<Arc<HistoricalOpening>>,
     polities: BTreeMap<String, Polity>,
     places: BTreeMap<String, Place>,
     routes: BTreeMap<String, Route>,
     place_population_units: BTreeMap<String, String>,
+    polity_population_bindings: BTreeMap<String, String>,
+    population_income: BTreeMap<String, u64>,
     people: BTreeMap<String, OpeningPerson>,
 }
 
@@ -204,6 +221,7 @@ pub struct InitialWorld {
     counters: CounterBook,
     sources: Arc<WorldSources>,
     pub(crate) player: String,
+    player_origin: Arc<OpeningPerson>,
     identities: BTreeMap<String, formal_character::Identity>,
     runtime_people: BTreeMap<String, RuntimePerson>,
     clock: GameClock,
@@ -227,6 +245,7 @@ pub struct InitialWorld {
     player_day: PlayerDay,
     transport: Operations,
     travel: travel_live::TravelState,
+    migration: migration::MigrationState,
     travel_preview: Option<Plan>,
     freight_preview: Option<Plan>,
     selected_freight: Option<u64>,
@@ -245,6 +264,8 @@ pub(crate) struct WorldSnapshot {
     #[serde(default)]
     counters: CounterBook,
     opening: String,
+    #[serde(default)]
+    opening_place: Option<String>,
     clock: ClockSnapshot,
     population: NativePopulation,
     markets: Value,
@@ -267,6 +288,8 @@ pub(crate) struct WorldSnapshot {
     households: Households,
     #[serde(default)]
     travel: Option<TravelSnapshot>,
+    #[serde(default)]
+    migration: migration::MigrationState,
     #[serde(default)]
     transport_restrictions: BTreeMap<String, SegmentAvailability>,
     #[serde(default)]
@@ -309,6 +332,7 @@ impl InitialWorld {
     pub(crate) fn snapshot(&self) -> Value {
         serde_json::json!({
             "opening": self.player().opening_source_id,
+            "opening_place": self.player().place_id,
             "organization_members": self.organization_members,
             "activity": self.activity,
             "counters": self.counters,
@@ -332,6 +356,7 @@ impl InitialWorld {
             "player_day": self.player_day,
             "transport": self.transport.state(),
             "travel": self.travel,
+            "migration": self.migration,
             "freight": self.freight,
             "land_battle": self.land_battle,
             "land_battle_history": self.land_battle_history,
@@ -346,7 +371,9 @@ impl InitialWorld {
     }
 
     pub fn player_market_unit(&self) -> &str {
-        self.market_unit_for_person(&self.player).unwrap_or(&self.player().opening_source_id)
+        self.market_unit_for_person(&self.player).unwrap_or_else(|| {
+            self.population_unit_at(&self.player().place_id).expect("opening has a formal market")
+        })
     }
 
     pub(crate) fn named_people(&self) -> impl Iterator<Item = &str> {
@@ -361,14 +388,22 @@ impl InitialWorld {
     pub fn player_current_place(&self) -> Option<&str> { self.current_place(&self.player) }
 
     pub fn player_home(&self) -> &str {
-        self.person_home(&self.player).expect("player has an opening residence")
+        self.person_home(&self.player).unwrap_or(&self.player().place_id)
     }
 
     pub fn person_home(&self, person: &str) -> Option<&str> {
+        self.population.unit_for_person(person)?;
         self.homes.get(person).map(String::as_str).or_else(|| self.person(person).map(|row| row.place_id.as_str()))
     }
 
     pub fn transport(&self) -> &TransportNetwork { self.transport.network() }
+
+    pub fn transport_stop_for_reservation(&self, reservation: u64) -> Option<&str> { self.transport.held(reservation) }
+    pub fn occupied_transport_units(&self, segment: &str) -> u32 { self.transport.occupied_units(segment) }
+
+    pub fn transport_service_capacity(&self, segment: &str, from: &str) -> Option<crate::transport::operations::ServiceCapacity> {
+        self.transport.service_capacity(segment, from)
+    }
 
     /// Apply a route-availability event from the world. In-progress trips retain their committed arrival.
     pub fn set_segment_access(&mut self, route: &str, open: bool, capacity: u32) -> io::Result<()> {
@@ -376,20 +411,30 @@ impl InitialWorld {
     }
 
     pub fn market_unit_for_person(&self, person: &str) -> Option<&str> {
-        self.market_unit_at(self.current_place(person)?)
+        self.population_unit_at(self.current_place(person)?)
     }
 
     pub(crate) fn market_unit_at(&self, place: &str) -> Option<&str> {
-        let unit = self.population.parent_unit(self.residence_unit_at(place)?)?;
-        self.population.totals().contains_key(unit).then_some(unit)
+        self.population_unit_at(place)
     }
 
-    /// Statistical residence uses confirmed place bindings in the active opening.
+    pub fn population_unit_at(&self, place: &str) -> Option<&str> {
+        let network = self.transport.network();
+        let market = self.sources.population_unit_at(place)
+            .or_else(|| network.unit_at(place))
+            .or_else(|| self.population.parent_unit(self.population.partition_at(place)?))?;
+        self.macro_economy.markets().get_key_value(market).map(|(id, _)| id.as_str())
+    }
+
+    /// An administrative parent can record a residence when its opening has an exclusive pool.
     pub fn residence_unit_at(&self, place: &str) -> Option<&str> {
-        self.population.partition_at(place).or_else(|| self.sources.population_unit_at(place)).or_else(|| {
-            let parent = self.sources.opening_parent_at(place)?;
-            self.population.standalone_totals().contains_key(parent).then_some(parent)
-        })
+        if let Some(partition) = self.population.partition_at(place) {
+            return Some(partition);
+        }
+        let parent = self.sources.population_unit_at(place)
+            .or_else(|| self.transport.network().unit_at(place))
+            .or_else(|| self.sources.opening_parent_at(place))?;
+        self.population.residence_parent(parent)
     }
 
     fn has_committed_player_day(&self) -> bool {
@@ -402,7 +447,7 @@ impl InitialWorld {
 
     pub fn can_move_player_home(&self) -> bool {
         self.player_current_place().is_some_and(|place| {
-            place != self.player_home() && self.residence_unit_at(place).is_some()
+            place != self.player_home() && self.can_reside_at(place)
         })
     }
 
@@ -411,7 +456,7 @@ impl InitialWorld {
     }
 
     pub fn move_person_home(&mut self, person: &str) -> io::Result<()> {
-        let place = self.current_place(person).filter(|&place| self.person_home(person) != Some(place))
+        let place = self.current_place(person).filter(|&place| self.person_home(person) != Some(place) && self.can_reside_at(place))
             .ok_or_else(|| invalid("当前位置无法登记迁居。"))?.to_owned();
         let unit = self.residence_unit_at(&place).ok_or_else(|| invalid("地点没有正式人口归属。"))?.to_owned();
         if self.population.unit_for_person(person) != Some(unit.as_str()) {
@@ -419,7 +464,14 @@ impl InitialWorld {
         }
         self.households.leave(person);
         self.homes.insert(person.to_owned(), place);
+        if person == self.player { self.travel.disable_commute(); }
         Ok(())
+    }
+
+    fn can_reside_at(&self, place: &str) -> bool {
+        self.residence_unit_at(place).is_some() && !place.starts_with("area:")
+            && (self.sources.places.contains_key(place)
+                || self.transport.network().node(place).is_some_and(|node| node.kind == crate::transport::NodeKind::City))
     }
 
     pub fn household_of(&self, person: &str) -> Option<(&str, &Household)> {
@@ -537,11 +589,16 @@ impl InitialWorld {
         self.apply_for_work_as(&self.player.clone(), job)
     }
 
-    /// A newly named adult can discover entry-level jobs by visiting the employer's town.
+    pub fn can_consult_player_work(&self) -> bool {
+        self.eligible_for_civil_work(&self.player) && self.character().age_years >= 18
+            && !self.work.has_contract(&self.player) && self.player_current_place().is_some_and(|place| {
+                self.work.has_unseen_entry_jobs(&self.work_opening, &self.player, place, self.clock.current_day())
+            })
+    }
+
+    /// An adult can discover existing entry-level jobs by visiting the employer's town.
     pub fn consult_local_work(&mut self, person: &str) -> io::Result<()> {
-        if !self.runtime_people.contains_key(person) || !self.eligible_for_civil_work(person)
-            || self.person_profile(person)?.age_years < 18
-        {
+        if !self.eligible_for_civil_work(person) || self.person_profile(person)?.age_years < 18 {
             return Err(invalid("当前人物无法咨询当地入门岗位。"));
         }
         let place = self.current_place(person).ok_or_else(|| invalid("人物不在当地。"))?.to_owned();
@@ -605,14 +662,8 @@ impl InitialWorld {
 
     pub fn can_read_place_record(&self, id: &str) -> bool {
         self.character.development.as_ref().is_none_or(|_| {
-            self.sources.places.get(id).is_some_and(|place| {
-                let polity = match (place.id.as_str(), place.parent_country_id.as_str()) {
-                    ("london", "british_empire") => "british_isles_1900",
-                    ("tokyo", "japanese_empire") => "empire_of_japan",
-                    (_, polity) => polity,
-                };
-                self.can_read_polity_record(polity)
-            })
+            self.sources.places.get(id).is_some_and(|place| self.can_read_polity_record(historical_place_polity(place)))
+                || self.population_unit_at(id).is_some_and(|unit| self.can_read_polity_record(unit))
         })
     }
 
@@ -668,7 +719,7 @@ impl InitialWorld {
     }
 
     pub fn player(&self) -> &OpeningPerson {
-        &self.sources.people[&self.player]
+        &self.player_origin
     }
 
     pub fn clock(&self) -> GameClock {
@@ -911,8 +962,10 @@ impl InitialWorld {
             }
             #[cfg(test)]
             day_measurement::mark(&mut measure, 3);
+            self.transport.advance(minute);
+            self.settle_background_migrations(minute)?;
             let managed = self.managed_residents(managed_population)?;
-            self.macro_economy.settle(boundary, self.population.totals(), &managed)?;
+            self.macro_economy.settle(boundary, self.population.totals(), &managed, &mut self.transport, &mut self.ledger)?;
             #[cfg(test)]
             day_measurement::mark(&mut measure, 4);
             self.work.complete();
@@ -924,6 +977,7 @@ impl InitialWorld {
             self.player_day.food_milli = 0;
             self.clock = boundary;
             self.advance_transport()?;
+            self.review_background_migration(managed_population);
             self.plan_household_orders()?;
             self.settle_organization_employment()?;
         }
@@ -947,6 +1001,7 @@ impl InitialWorld {
     pub fn population(&self) -> &Population { &self.population }
 
     pub fn person(&self, person: &str) -> Option<&OpeningPerson> {
+        if person == self.player { return Some(self.player()); }
         self.sources.people.get(person).or_else(|| self.runtime_people.get(person).map(|row| &row.origin))
     }
 
@@ -967,7 +1022,8 @@ impl InitialWorld {
     fn register_resident(
         &mut self, id: &str, name: String, place: &str, birth_year: u16, born_day: Option<u32>, cohort: Option<&CohortId>,
     ) -> io::Result<()> {
-        let unit = self.residence_unit_at(place).ok_or_else(|| invalid("unknown residence population binding"))?.to_owned();
+        let unit = self.residence_unit_at(place).filter(|_| self.can_reside_at(place))
+            .ok_or_else(|| invalid("unknown residence population binding"))?.to_owned();
         if !id.strip_prefix("person:").is_some_and(local_id) || name.trim().is_empty()
             || name.len() > 240 || self.identities.contains_key(id) || self.ledger.default_account(id).is_some()
             || i64::from(birth_year) > self.clock.current_date().year
@@ -983,6 +1039,8 @@ impl InitialWorld {
             if self.service.cohort_serving(&unit, cohort) != 0 {
                 return Err(invalid("materialization requires identifying the resident's service status"));
             }
+        } else if born_day.is_none() && self.population.unclassified(&unit).unwrap_or(0) <= self.migration_reserved_at(&unit) {
+            return Err(invalid("没有可具名的未预约背景居民。"));
         }
         let row = RuntimePerson::at(id, name, place, &unit, birth_year, born_day);
         let mut people = self.identities.clone();
@@ -1014,7 +1072,9 @@ impl InitialWorld {
     pub fn transfer_unmanaged_population(
         &mut self, source: &str, destination: &str, amount: u64, source_managed_background: u64,
     ) -> io::Result<()> {
-        self.population.transfer_unmanaged(source, destination, amount, source_managed_background, self.clock.snapshot().total_minutes)
+        let protected = source_managed_background.checked_add(self.migration_reserved_at(source))
+            .ok_or_else(|| invalid("invalid managed population"))?;
+        self.population.transfer_unmanaged(source, destination, amount, protected, self.clock.snapshot().total_minutes)
     }
 }
 
@@ -1074,6 +1134,14 @@ impl WorldSources {
         self.place_population_units.get(place_id).map(String::as_str)
     }
 
+    pub fn polity_population_bindings(&self) -> &BTreeMap<String, String> {
+        &self.polity_population_bindings
+    }
+
+    pub fn population_units(&self) -> impl Iterator<Item = &str> {
+        self.population_income.keys().map(String::as_str)
+    }
+
     fn opening_parent_at(&self, place_id: &str) -> Option<&str> {
         let place = self.places.get(place_id)?;
         self.population_unit_at(place_id).or_else(|| match (place.id.as_str(), place.parent_country_id.as_str()) {
@@ -1108,38 +1176,71 @@ impl WorldBootstrap {
         let polities = load_polities()?;
         let (populations, countries) = load_countries()?;
         let polity_units = load_population_bindings(&polities, &populations)?;
+        let population_income = countries.iter().map(|(unit, inputs)| (unit.clone(), inputs.income)).collect();
         let markets = MarketInputs::load(countries)?;
         let opening_cash = load_opening_cash()?;
         let (places, routes, cities) = load_map()?;
         let place_population_units = places.iter().filter_map(|(id, place)| {
-            // Legacy catalogue parents describe map ownership. Only these
-            // explicit capital bindings differ for population accounting.
-            let source = match (place.id.as_str(), place.parent_country_id.as_str()) {
-                ("london", "british_empire") => "british_isles_1900",
-                ("tokyo", "japanese_empire") => "empire_of_japan",
-                _ => &place.parent_country_id,
-            };
+            let source = historical_place_polity(place);
             polity_units.get(source).map(|unit| (id.clone(), unit.clone()))
         }).collect();
-        let mut world = WorldSources { polities, places, routes, place_population_units, people: BTreeMap::new() };
+        let mut world = WorldSources {
+            polities, places, routes, place_population_units, polity_population_bindings: polity_units,
+            population_income, historical_population: None, people: BTreeMap::new(),
+        };
         let historical_population = Arc::new(HistoricalOpening::load(
             &populations, |id| world.polities.contains_key(id), |place| world.opening_parent_at(place),
         )?);
+        world.historical_population = Some(Arc::clone(&historical_population));
         let mut residents = BTreeMap::new();
+        let mut opening_people = BTreeMap::new();
         for &(source, place) in OPENINGS {
+            let place = format!("place:{place}");
+            if world.population_unit_at(&place).is_none() { continue; }
             let id = format!("person:formal_generated_{source}_0001");
             let claim = format!("formal_population_claim:{source}:0001");
-            world.add_opening_person(source, format!("place:{place}"), id.clone(), claim)?;
+            world.add_opening_person(source, place, id.clone(), claim)?;
+            opening_people.insert(source.to_owned(), Arc::new(world.people[&id].clone()));
             residents.insert(id, opening_cash);
         }
-        for resident in load_regional_residents()? {
-            world.add_opening_person("country_fra", resident.place_id, resident.person_id.clone(), resident.claim_id)?;
-            residents.insert(resident.person_id, resident.opening_cash);
+        let has_paris = world.population_unit_at("place:paris") == Some("country_fra");
+        let enterprise_opening = if has_paris {
+            for resident in load_regional_residents()? {
+                world.add_opening_person("country_fra", resident.place_id, resident.person_id.clone(), resident.claim_id)?;
+                residents.insert(resident.person_id, resident.opening_cash);
+            }
+            EnterpriseOpening::load()?
+        } else {
+            EnterpriseOpening::default()
+        };
+        let network = crate::transport::map_data::load_world_network(&world, 0)?;
+        let mut work = WorkOpening::load(|unit, place| {
+            let node = network.routing_node(place)?;
+            (network.unit_at(node) == Some(unit)).then(|| node.to_owned())
+        })?;
+        for (polity_id, unit) in &world.polity_population_bindings {
+            if opening_people.contains_key(polity_id) || populations[unit] == 0 { continue; }
+            let Some(place) = network.capital_node(polity_id) else { continue; };
+            if network.node_coordinates(place).is_none() || network.unit_at(place) != Some(unit) { continue; }
+            opening_people.insert(polity_id.clone(), Arc::new(OpeningPerson {
+                id: format!("person:formal_generated_{polity_id}_0001"),
+                claim_id: format!("formal_population_claim:{polity_id}:0001"),
+                opening_source_id: polity_id.clone(),
+                polity_id: world.polities[polity_id].runtime_id(),
+                place_id: place.to_owned(),
+                birth_year: 1870,
+            }));
         }
+        let opening_place_names = opening_people.values().map(|person| {
+            let id = &person.place_id;
+            let label = world.places.get(id).map(|place| place.name.as_str())
+                .or_else(|| network.node_label(id)).unwrap_or(id);
+            (person.opening_source_id.clone(), label.to_owned())
+        }).collect();
         let organization_directory = OrganizationDirectory::load(&world, &cities, &populations, &markets)?;
-        let mut work = WorkOpening::load()?;
         work.register_regional(organization_directory.opening())?;
-        let activities = load_opening_activities()?;
+        let mut activities = load_opening_activities()?;
+        activities.written_job_notices.retain(|source, job| opening_people.contains_key(source) && work.entry_job(job).is_some());
         for (source, job) in &activities.written_job_notices {
             let actor = format!("person:formal_generated_{source}_0001");
             if !world.people.get(&actor).is_some_and(|person| {
@@ -1153,8 +1254,11 @@ impl WorldBootstrap {
             historical_population,
             markets: Arc::new(markets),
             residents,
+            opening_people,
+            opening_place_names,
+            opening_cash,
             work: Arc::new(work),
-            enterprise_opening: Arc::new(EnterpriseOpening::load()?),
+            enterprise_opening: Arc::new(enterprise_opening),
             activities: Arc::new(activities),
         })
     }
@@ -1164,7 +1268,11 @@ impl WorldBootstrap {
     }
 
     pub fn opening_cash(&self, source: &str, family: wwo_character_core::Family) -> Option<i64> {
-        self.residents.get(&format!("person:formal_generated_{source}_0001")).map(|&cash| family.opening_cash(cash))
+        self.opening_people.contains_key(source).then(|| family.opening_cash(self.opening_cash))
+    }
+
+    pub fn openings(&self) -> impl Iterator<Item = (&str, &str)> {
+        self.opening_place_names.iter().map(|(source, place)| (source.as_str(), place.as_str()))
     }
 
     pub fn create(&self, source_id: &str) -> io::Result<InitialWorld> {
@@ -1184,16 +1292,18 @@ impl WorldBootstrap {
     }
 
     fn base_opening(&self, source_id: &str, prologue: Option<Prologue>, historical: bool) -> io::Result<InitialWorld> {
-        if !OPENINGS.iter().any(|(source, _)| *source == source_id) {
-            return Err(io::Error::new(io::ErrorKind::InvalidInput, "unknown formal opening"));
-        }
-        let player = format!("person:formal_generated_{source_id}_0001");
+        let player_origin = Arc::clone(self.opening_people.get(source_id)
+            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "unknown formal opening"))?);
+        let player = player_origin.id.clone();
         let development = prologue.map(|opening| {
-            opening.build(self.opening_language(source_id).expect("configured opening"))
-        }).transpose().map_err(io::Error::other)?;
-        let mut ledger = Ledger::initialize_people(self.residents.iter().map(|(person, cash)| {
-            let cash = prologue.filter(|_| person == &player).map_or(*cash, |opening| opening.family.opening_cash(*cash));
-            (person.as_str(), cash)
+            let language = self.opening_language(source_id).ok_or_else(|| invalid("opening has no configured prologue language"))?;
+            opening.build(language).map_err(io::Error::other)
+        }).transpose()?;
+        let extra = (!self.world.people.contains_key(&player)).then_some(player_origin.as_ref());
+        let mut ledger = Ledger::initialize_people(self.residents.iter().map(|(person, &cash)| (person.as_str(), cash))
+            .chain(extra.into_iter().map(|person| (person.id.as_str(), self.opening_cash))).map(|(person, cash)| {
+            let cash = prologue.filter(|_| person == player).map_or(cash, |opening| opening.family.opening_cash(cash));
+            (person, cash)
         }))?;
         self.work.open_accounts(&mut ledger)?;
         ledger.ensure_transport_account()?;
@@ -1203,8 +1313,9 @@ impl WorldBootstrap {
             Population::initialize(self.populations.clone())
         };
         let mut identities = BTreeMap::new();
-        for person in self.world.people.values() {
-            let unit = population.partition_at(&person.place_id).unwrap_or(&person.opening_source_id).to_owned();
+        for person in self.world.people.values().chain(extra) {
+            let parent = &self.world.polity_population_bindings[&person.opening_source_id];
+            let unit = population.partition_at(&person.place_id).unwrap_or(parent.as_str()).to_owned();
             population.claim(&person.id, &unit)?;
             let year = development.as_ref().filter(|_| person.id == player).map_or(person.birth_year, |player| player.birth_year());
             let identity = formal_character::opening_identity(year).map_err(io::Error::other)?;
@@ -1227,6 +1338,7 @@ impl WorldBootstrap {
             sources: Arc::clone(&self.world),
             clock: GameClock::default(),
             player,
+            player_origin,
             identities,
             runtime_people: BTreeMap::new(),
             population,
@@ -1244,6 +1356,7 @@ impl WorldBootstrap {
             livelihood: Livelihood::default(),
             households: Households::default(),
             travel: travel_live::TravelState::default(),
+            migration: migration::MigrationState::default(),
             transport: Operations::restore(&self.world, 0, OperationsState::default())?,
             travel_preview: None,
             freight_preview: None,
@@ -1271,6 +1384,9 @@ impl WorldBootstrap {
             NativePopulation::Legacy(_) => false,
         };
         let mut world = self.base_opening(&saved.opening, None, historical)?;
+        if saved.opening_place.as_deref().is_some_and(|place| place != world.player().place_id) {
+            return Err(invalid("saved opening place differs from the formal opening"));
+        }
         if let Some(members) = &saved.organization_members {
             world.restore_organization_jobs(members)?;
         }
@@ -1284,6 +1400,7 @@ impl WorldBootstrap {
                 || row.origin.claim_id != format!("formal_population_claim:{id}")
                 || !row.origin.polity_id.is_empty()
                 || world.residence_unit_at(&row.origin.place_id) != Some(row.origin.opening_source_id.as_str())
+                || !world.can_reside_at(&row.origin.place_id)
                 || row.born_day.is_some_and(|birth| birth > day)
                 || world.identities.insert(id.clone(), row.identity()?).is_some()
             {
@@ -1310,9 +1427,10 @@ impl WorldBootstrap {
             return Err(invalid("population and character death dates differ"));
         }
         world.macro_economy = MacroEconomy::restore(Arc::clone(&self.markets), world.population.totals(), &saved.markets, clock)?;
-        world.macro_economy.restore_arrivals(saved.last_arrivals)?;
+        world.macro_economy.restore_arrivals(saved.last_arrivals, clock.snapshot().total_minutes)?;
         let mut ledger = Ledger::restore(&saved.ledger, true)?;
         ledger.ensure_transport_account()?;
+        self.work.ensure_market_accounts(&mut ledger)?;
         if saved.organization_members.is_none() { self.work.ensure_regional_accounts(&mut ledger)?; }
         if ledger.last_minute() > saved.clock.total_minutes || world.identities.keys().any(|id| ledger.default_account(id).is_none()) {
             return Err(invalid("ledger and world timelines differ or personal accounts are missing"));
@@ -1354,11 +1472,13 @@ impl WorldBootstrap {
             None => (),
         }
         world.freight = saved.freight;
+        world.migration = saved.migration;
         let migrate_organizations = saved.organization_members.is_none();
         world.organization_members = saved.organization_members.unwrap_or_default();
-        world.validate_freight()?;
-        world.validate_travel()?;
         world.homes = saved.homes;
+        world.validate_freight()?;
+        world.macro_economy.validate_transport(&world.transport, &world.ledger)?;
+        world.validate_travel()?;
         // Main has no admitted strategic or tactical unit roster. Scenario tests may
         // bind a unit to this domain without adding an order to a historical opening.
         world.service = ServiceRoster::restore(saved.service, &world.population, known_service_target)?;
@@ -1366,13 +1486,18 @@ impl WorldBootstrap {
             || !world.validate_livelihood(day, world.activities.meal_milli_for_recovery)
             || !world.households.validate(clock.snapshot().total_minutes,
                 |person| world.population.unit_for_person(person).is_some(),
-                |place| world.sources.places.contains_key(place))
+                |place| world.can_reside_at(place))
             || !world.work.validate(&world.work_opening, clock, |person| {
                 if world.service.named_target(person).is_some() { return None; }
                 world.current_place(person)
             }, |person| world.population.unit_for_person(person).is_some())
             || world.homes.iter().any(|(person, home)| {
-                world.population.unit_for_person(person).is_none_or(|unit| world.residence_unit_at(home) != Some(unit))
+                !world.can_reside_at(home) || world.population.unit_for_person(person)
+                    .is_none_or(|unit| world.residence_unit_at(home) != Some(unit))
+            })
+            || world.named_people().any(|person| {
+                world.person_home(person).and_then(|home| world.residence_unit_at(home))
+                    != world.population.unit_for_person(person)
             })
         {
             return Err(invalid("invalid residence, travel, livelihood or enterprise state"));
@@ -1499,6 +1624,20 @@ fn load_polities() -> io::Result<BTreeMap<String, Polity>> {
 
 type PopulationTotals = BTreeMap<String, u64>;
 type CountryCatalog = BTreeMap<String, CountryInputs>;
+
+fn historical_place_polity(place: &Place) -> &str {
+    match (place.id.as_str(), place.parent_country_id.as_str()) {
+        ("kolkata", "british_empire") => "cshapes_gw_750",
+        ("alexandria" | "port_alexandria", "ottoman_empire") => "khedivate_of_egypt",
+        (_, "british_empire") => "british_isles_1900",
+        (_, "japanese_empire") => "empire_of_japan",
+        (_, "united_states") => "united_states_1900",
+        (_, "argentine_republic") => "argentina_1900",
+        (_, "country_bel") => "kingdom_of_belgium",
+        (_, "austro_hungarian_empire") => "austria_hungary",
+        (_, parent) => parent,
+    }
+}
 
 fn load_countries() -> io::Result<(PopulationTotals, CountryCatalog)> {
     #[derive(Deserialize)]
@@ -1893,7 +2032,7 @@ mod tests {
         assert_eq!(controller.id, "empire_of_japan");
         assert_eq!(sources.places()["place:london"].parent_country_id, "british_empire");
         assert_eq!(sources.population_unit_at("place:london"), Some("british_isles_1900"));
-        assert_eq!(sources.population_unit_at("place:kolkata"), None);
+        assert_eq!(sources.population_unit_at("place:kolkata"), Some("cshapes_gw_750"));
         assert_eq!(sources.places()["place:tokyo"].parent_country_id, "japanese_empire");
         assert_eq!(sources.population_unit_at("place:tokyo"), Some("empire_of_japan"));
         for (id, mode) in [
@@ -1922,7 +2061,42 @@ mod tests {
         assert_eq!(france.macro_economy().markets().len(), 50);
         assert!(france.macro_economy().markets().values().all(|market| market.commodities["potatoes"].demanded > 0.0));
         assert!(france.macro_economy().markets()["qing_empire"].commodities["potatoes"].inventory < grain_before);
-        france.advance_migrated_domains(MINUTES_PER_DAY * 89, &managed).unwrap();
+        let mut flows = BTreeMap::<String, (f64, f64, f64, i64)>::new();
+        let mut received_units = BTreeMap::<String, BTreeMap<String, f64>>::new();
+        let mut tonnes = BTreeMap::<String, (f64, f64, f64)>::new();
+        let mut first_dispatch = None;
+        let mut first_australian_delivery = None;
+        for day in 1..=90 {
+            if day > 1 { france.advance_migrated_domains(MINUTES_PER_DAY, &managed).unwrap(); }
+            for s in france.macro_economy.shipments().iter().filter(|s| s.dispatch_hour == day * 24) {
+                first_dispatch.get_or_insert_with(|| (day, s.origin.clone(), s.destination.clone(), s.arrival_hour));
+                flows.entry(s.origin.clone()).or_default().0 += s.units;
+                let buyer = flows.entry(s.destination.clone()).or_default();
+                buyer.1 += s.units;
+                buyer.3 += s.carriage.as_ref().unwrap().fare_centimes;
+                let mass = france.macro_economy.freight_mass(&s.commodity).unwrap().tonnes(s.units);
+                tonnes.entry(s.destination.clone()).or_default().0 += mass;
+                tonnes.entry(s.origin.clone()).or_default().2 += mass;
+            }
+            for s in france.macro_economy.last_arrivals() {
+                if s.destination == "australia_colonies_1900" {
+                    first_australian_delivery.get_or_insert_with(|| (s.id.clone(), s.origin.clone(), s.commodity.clone(), s.units, s.dispatch_hour, s.arrival_hour));
+                }
+                flows.entry(s.destination.clone()).or_default().2 += s.units;
+                tonnes.entry(s.destination.clone()).or_default().1 += france.macro_economy.freight_mass(&s.commodity).unwrap().tonnes(s.units);
+                let scale = france.macro_economy.commodity_info(&s.commodity).unwrap().2;
+                *received_units.entry(s.destination.clone()).or_default().entry(scale.into()).or_default() += s.units;
+            }
+        }
+        assert!(first_australian_delivery.is_some(), "Australia must receive a natural overseas market delivery");
+        println!("First natural shipment (day, seller, buyer, arrival hour): {first_dispatch:?}; first Australian receipt: {first_australian_delivery:?}");
+        for (unit, market) in france.macro_economy.markets() {
+            let (sold, bought, arrived, freight) = flows.get(unit).copied().unwrap_or_default();
+            let unmet: f64 = market.commodities.values().map(|c| c.unmet).sum();
+            let received = received_units.get(unit);
+            let (ordered_t, arrived_t, sent_t) = tonnes.get(unit).copied().unwrap_or_default();
+            println!("{unit}: shipped={sold:.3} ordered={bought:.3} received={arrived:.3} freight={freight} unmet_d90={unmet:.3} ordered_t={ordered_t:.6} arrived_t={arrived_t:.6} sent_t={sent_t:.6} received_units={received:?}");
+        }
         batch.advance_migrated_domains(MINUTES_PER_DAY * 90, &managed).unwrap();
         assert_eq!(batch.character.day, 90);
         assert_eq!(france.character.state, batch.character.state);
@@ -2261,6 +2435,53 @@ mod tests {
             units.len() as u64 * groups_per_unit, inputs.as_millis(), opening.as_millis(),
             cohort_setup.as_millis(), year.as_millis(), bytes, save.as_millis(), restore.as_millis());
         println!("average_day_us work_and_wages={work} enterprise={enterprise} livelihood={livelihood} character_and_population={health} market={market}");
+    }
+
+    #[test]
+    fn macro_transport_cross_day_interruption_refunds_and_rebooks_one_paid_lot() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("country_fra").unwrap();
+        let responsibility = BTreeMap::new();
+        let mut active = None;
+        for _ in 0..90 {
+            world.advance_migrated_domains(MINUTES_PER_DAY, &responsibility).unwrap();
+            active = world.macro_economy.shipments().iter().find_map(|row| {
+                let c = row.carriage.as_ref()?;
+                let plan = world.transport.plan(c.reservation)?;
+                let second = plan.route().legs.get(1)?;
+                (world.transport.moving(c.reservation) && plan.departure_minute() == world.clock.snapshot().total_minutes)
+                    .then(|| (row.id.clone(), row.origin.clone(), row.destination.clone(), row.commodity.clone(),
+                        row.units, c.reservation, second.segment_id.clone(), plan.route().legs[0].profile.travel_minutes))
+            });
+            if active.is_some() { break; }
+        }
+        let (id, origin, destination, commodity, units, reservation, segment, first_minutes) = active.unwrap();
+        println!("paid shipment {id}: {origin} -> {destination}, {commodity}, {units}");
+        let nominal = world.transport.network().segment(&segment).unwrap().profile.capacity_units;
+        world.set_segment_access(&segment, false, 0).unwrap();
+        world.advance_migrated_domains(i64::from(first_minutes), &responsibility).unwrap();
+        let row = world.macro_economy.shipments().iter().find(|r| r.id == id).unwrap();
+        assert!(row.carriage.as_ref().unwrap().held);
+        let station = world.transport.held(reservation).unwrap().to_owned();
+        let refund = world.transport.unused_fare(reservation).unwrap();
+        let buyer = format!("account:market_receipts:{}", world.macro_economy.markets()[&destination].id);
+        assert!(world.ledger.has_payment(&format!("held-refund:{reservation}"), crate::formal_ledger::TRANSPORT_ACCOUNT,
+            &buyer, refund, "cargo_refund", &id));
+        let mut world = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
+        world.set_segment_access(&segment, true, nominal).unwrap();
+        let next_day = MINUTES_PER_DAY - world.clock.snapshot().total_minutes % MINUTES_PER_DAY;
+        world.advance_migrated_domains(next_day, &responsibility).unwrap();
+        let c = world.macro_economy.shipments().iter().find(|r| r.id == id).unwrap().carriage.as_ref().unwrap();
+        assert_ne!(c.reservation, reservation);
+        assert_eq!(c.from, station);
+        assert!(world.transport.plan(reservation).is_none());
+        let arrival = c.arrival_minute;
+        world.advance_migrated_domains(arrival - world.clock.snapshot().total_minutes - 1, &responsibility).unwrap();
+        assert!(world.macro_economy.shipments().iter().any(|r| r.id == id));
+        world.advance_migrated_domains(1, &responsibility).unwrap();
+        assert!(world.macro_economy.shipments().iter().all(|r| r.id != id));
+        assert_eq!(world.macro_economy.last_arrivals().iter().find(|r| r.id == id).unwrap().units, units);
+        bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
     }
 
     #[test]

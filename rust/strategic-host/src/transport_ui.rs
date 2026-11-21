@@ -12,11 +12,21 @@ pub struct TransportView {
     pub destinations_next: bool,
     pub destination: String,
     pub destination_is_current: bool,
+    #[serde(default)]
+    pub destination_detail: String,
     pub location: String,
     pub moving: bool,
     pub residence: String,
     pub workplace: String,
     pub commute: String,
+    #[serde(default)]
+    pub can_plan_work_trip: bool,
+    #[serde(default)]
+    pub can_move_home: bool,
+    #[serde(default)]
+    pub can_commute: bool,
+    #[serde(default)]
+    pub migration: Option<String>,
     pub mode: String,
     pub active: bool,
     pub passenger_lines: Vec<String>,
@@ -57,24 +67,37 @@ impl Display<'_> {
         self.skin.text(text, &format!("{location} {} · 常住地 {}", v.location, v.residence), 0, [left,y+58.], width, IVORY);
         self.skin.text(text, &format!("工作地点 {} · {}", v.workplace, v.commute), 0, [left,y+80.], width, MUTED);
         self.destinations(panels, text, hits, [left,y+104.,width], v);
-        let row = y + 222.;
+        self.skin.text(text, &v.destination_detail, 0, [left,y+185.], width, MUTED);
+        let row = y + 207.;
         let actions = [
-            ("查询路线", (!v.active && !v.destination.is_empty() && !v.destination_is_current).then(|| Action::Hud(Command::Transport("preview",0)))),
-            ("购票出发", v.travel_confirm.then(|| Action::Hud(Command::Transport("depart",0)))),
-            ("取消或下一站下车", v.active.then(|| Action::Hud(Command::Transport("stop",0)))),
-            ("设／停通勤", Some(Action::Hud(Command::Transport("commute",0)))),
+            ("查询路线", (!v.active && !v.destination.is_empty() && !v.destination_is_current).then(|| Action::Hud(Command::Transport("preview", 0)))),
+            ("购票出发", v.travel_confirm.then(|| Action::Hud(Command::Transport("depart", 0)))),
+            ("取消或到站下车", v.active.then(|| Action::Hud(Command::Transport("stop", 0)))),
+            ("设／停通勤", v.can_commute.then(|| Action::Hud(Command::Transport("commute", 0)))),
+            ("前往工作地", v.can_plan_work_trip.then(|| Action::Hud(Command::Transport("work_trip", 0)))),
+            ("登记迁居", v.can_move_home.then(|| Action::Hud(Command::Transport("move_home", 0)))),
             ("工作", Some(Action::Hud(Command::Page(Page::Relations)))),
         ];
-        let cell = width / actions.len() as f32;
+        let cell = width / 4.;
         for (i, (label, action)) in actions.into_iter().enumerate() {
-            self.row(panels, text, hits, [left+i as f32*cell,row,cell-4.,28.], label, action, false);
+            self.row(panels, text, hits, [left+(i%4) as f32*cell,row+(i/4) as f32*31.,cell-4.,28.], label, action, false);
         }
-        self.describe_transport(text, [left,row+36.,width], &v.passenger_lines, &v.passenger_notice, h-260.);
+        let start = if let Some(migration) = &v.migration {
+            self.skin.text(text, migration, 0, [left,row+64.], width, MUTED);
+            row + 83.
+        } else {
+            row + 65.
+        };
+        self.describe_transport(text, [left,start,width], &v.passenger_lines, &v.passenger_notice, y+h-start-8.);
     }
 
     pub(crate) fn freight_page(&self, panels: &mut Mesh, text: &mut Mesh, hits: &mut Vec<Hit>, [x,y,w,h]: [f32;4]) {
         let Some(v) = self.session.and_then(|s| s.transport.as_ref()) else { return };
-        let caption=if v.lots.is_empty() {"个人可从报价簿采购，企业可从商号采购货批。"}else{"选择货批和目的地，再查询运费。"};
+        let caption = if v.lots.is_empty() {
+            "个人从报价簿采购，企业从商号采购货批。"
+        } else {
+            "选择货批和目的地，再查询运费。"
+        };
         self.skin.text(text, caption, 0, [x,y], w, MUTED);
         for (i, lot) in v.lots.iter().enumerate() {
             self.row(panels,text,hits,[x,y+24.+i as f32*25.,w-92.,23.], &lot.label, command("lot",i), lot.selected);
@@ -85,6 +108,7 @@ impl Display<'_> {
                 enabled.then(|| Action::Hud(Command::Transport(if i == 0 {"lots_prev"} else {"lots_next"},0))),false);
         }
         self.destinations(panels, text, hits, [x,y+105.,w], v);
+        self.skin.text(text, &v.destination_detail, 0, [x,y+186.], w, MUTED);
         let row = y+220.;
         let cell = w / v.freight_actions.len().max(1) as f32;
         for (index, action) in v.freight_actions.iter().enumerate() {
@@ -112,8 +136,10 @@ impl Display<'_> {
 
     fn destinations(&self, panels: &mut Mesh, text: &mut Mesh, hits: &mut Vec<Hit>, [x,y,w]:[f32;3], v:&TransportView) {
         self.skin.text(text, "目的地", 0, [x,y+5.], w, MUTED);
-        for (i, (id, label)) in [("all","全部"),("rail","铁路"),("road","道路")].into_iter().enumerate() {
-            self.row(panels,text,hits,[x+71.+i as f32*59.,y,54.,24.],label,command("mode",i),v.mode==id);
+        let mode_width = ((w - 160.) / 6.).clamp(29., 59.);
+        for (i, (id, label)) in [("all","全部"),("rail","铁路"),("road","道路"),
+            ("shipping","海运"),("inland","内河"),("domestic","集散")].into_iter().enumerate() {
+            self.row(panels,text,hits,[x+68.+i as f32*mode_width,y,mode_width-3.,24.],label,command("mode",i),v.mode==id);
         }
         for (i, label) in ["<",">"].into_iter().enumerate() {
             let enabled = if i == 0 { v.destination_page > 0 } else { v.destinations_next };

@@ -11,14 +11,21 @@ const R40_MODULES: &[&str] = &[
     "quay_platform", "sawtooth_workshop", "warehouse",
 ];
 
-pub(crate) const PARIS_SHARD: &[u8] = include_bytes!("../../../data/local/paris_northern_france_1900.json");
+pub(crate) struct RegionalSource {
+    pub center: [f64; 2],
+    pub radius_km: f64,
+    pub bytes: &'static [u8],
+}
 
-const SHARDS: &[&[u8]] = &[
-    PARIS_SHARD,
-    include_bytes!("../../../data/local/london_westminster_1900.json"),
-    include_bytes!("../../../data/local/berlin_transport_1900.json"),
-    include_bytes!("../../../data/local/giza_pyramids_1900.json"),
+pub(crate) const SHARDS: &[RegionalSource] = &[
+    RegionalSource { center: [2.3522, 48.8566], radius_km: 550., bytes: include_bytes!("../../../data/local/paris_northern_france_1900.json") },
+    RegionalSource { center: [-0.1246, 51.5007], radius_km: 15., bytes: include_bytes!("../../../data/local/london_westminster_1900.json") },
+    RegionalSource { center: [13.388, 52.5219], radius_km: 20., bytes: include_bytes!("../../../data/local/berlin_transport_1900.json") },
+    RegionalSource { center: [31.1316, 29.9761], radius_km: 20., bytes: include_bytes!("../../../data/local/giza_pyramids_1900.json") },
 ];
+pub(crate) const MISSISSIPPI: RegionalSource = RegionalSource {
+    center: [-90., 34.4], radius_km: 550., bytes: include_bytes!("../../../data/local/mississippi_steamboat_1900.json")
+};
 
 macro_rules! model {
     ($name:literal, $file:literal, $symbol:literal) => {
@@ -187,7 +194,7 @@ impl Landmarks {
         let mut models = Vec::new();
         let mut cities = BTreeMap::new();
         for source in SHARDS {
-            let shard: Shard = serde_json::from_slice(source)?;
+            let shard: Shard = serde_json::from_slice(source.bytes)?;
             for fact in shard.evidence_catalog.facts {
                 let Some(layout) = fact.value.get("miniature_layout") else { continue; };
                 if layout.get("model_path").and_then(serde_json::Value::as_str)

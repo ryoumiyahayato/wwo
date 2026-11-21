@@ -5,6 +5,8 @@ use std::collections::{HashMap, VecDeque};
 use std::io;
 
 pub mod map_data;
+mod historical;
+pub use historical::{DomesticStatistics, MapIdentity, MapIdentityKind, NetworkLayer, NodeCoverage, SegmentEvidence};
 pub mod models;
 pub mod operations;
 mod routing;
@@ -16,6 +18,8 @@ pub enum NodeKind {
     City,
     Port,
     Junction,
+    Area,
+    Identity,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -31,6 +35,8 @@ pub enum TransportMode {
     Rail,
     Shipping,
     PortTransfer,
+    InlandWaterway,
+    Domestic,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -40,7 +46,9 @@ impl ModeSet {
     pub const ALL: Self = Self::only(TransportMode::Road)
         .with(TransportMode::Rail)
         .with(TransportMode::Shipping)
-        .with(TransportMode::PortTransfer);
+        .with(TransportMode::PortTransfer)
+        .with(TransportMode::InlandWaterway)
+        .with(TransportMode::Domestic);
 
     pub const fn only(mode: TransportMode) -> Self {
         Self(1 << mode as u8)
@@ -123,6 +131,9 @@ impl Route {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RouteError {
     UnknownEndpoint(String),
+    /// A dated identity is registered, but has no evidenced operational link.
+    UnrefinedEndpoint(String),
+    RiverGap(NodeCoverage, String),
     InvalidDemand,
     /// No directed path exists using the requested modes.
     Unreachable,
@@ -154,6 +165,8 @@ struct Arc {
 }
 
 pub struct TransportNetwork {
+    catalogue: historical::Catalogue,
+    availability_revision: u64,
     nodes: Vec<TransportNode>,
     node_ids: HashMap<String, usize>,
     segments: Vec<TransportSegment>,
@@ -213,7 +226,10 @@ impl TransportNetwork {
                     kinds,
                     (NodeKind::City, NodeKind::Port) | (NodeKind::Port, NodeKind::City)
                 ),
-                TransportMode::Shipping => kinds.0 != NodeKind::City && kinds.1 != NodeKind::City,
+                TransportMode::Shipping | TransportMode::InlandWaterway =>
+                    [kinds.0, kinds.1].iter().all(|k| matches!(k, NodeKind::Port | NodeKind::Junction)),
+                TransportMode::Domestic => matches!(kinds,
+                    (NodeKind::Area, NodeKind::City) | (NodeKind::City, NodeKind::Area)),
                 TransportMode::Road | TransportMode::Rail => {
                     kinds.0 != NodeKind::Port && kinds.1 != NodeKind::Port
                 }
@@ -248,6 +264,8 @@ impl TransportNetwork {
             });
         }
         Ok(Self {
+            catalogue: historical::Catalogue::default(),
+            availability_revision: 0,
             nodes,
             node_ids,
             segments,
@@ -262,6 +280,10 @@ impl TransportNetwork {
     pub fn node(&self, id: &str) -> Option<&TransportNode> {
         self.node_ids.get(id).map(|&index| &self.nodes[index])
     }
+
+    pub fn nodes(&self) -> impl Iterator<Item = &TransportNode> { self.nodes.iter() }
+    pub fn segments(&self) -> impl Iterator<Item = &TransportSegment> { self.segments.iter() }
+    pub fn availability_revision(&self) -> u64 { self.availability_revision }
 
     pub fn segment(&self, id: &str) -> Option<&TransportSegment> {
         self.segment_ids.get(id).map(|&index| &self.segments[index])
@@ -300,6 +322,7 @@ impl TransportNetwork {
             capacity_units,
         };
         if previous != current {
+            self.availability_revision = self.availability_revision.wrapping_add(1);
             self.availability[index] = current;
             self.cache
                 .retain(|entry| !entry.affected(index, previous, current));

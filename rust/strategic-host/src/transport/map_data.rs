@@ -111,6 +111,16 @@ pub fn load_prototype_map_network(
     sources: &WorldSources,
     cache_limit: usize,
 ) -> io::Result<TransportNetwork> {
+    let (nodes, segments) = detailed_map(sources)?;
+    TransportNetwork::new(nodes, segments, cache_limit).map_err(invalid)
+}
+
+pub fn load_world_network(sources: &WorldSources, cache_limit: usize) -> io::Result<TransportNetwork> {
+    let (nodes, segments) = detailed_map(sources)?;
+    super::historical::load(sources, nodes, segments, cache_limit)
+}
+
+fn detailed_map(sources: &WorldSources) -> io::Result<(Vec<TransportNode>, Vec<TransportSegment>)> {
     let cities: CityCatalogue = serde_json::from_slice(CITIES)?;
     let geometry = load_prototype_geometry()?;
     cities.source.require_prototype(3, "cities.json")?;
@@ -174,7 +184,7 @@ pub fn load_prototype_map_network(
             prototype_only: true,
         });
     }
-    TransportNetwork::new(nodes, segments, cache_limit).map_err(invalid)
+    Ok((nodes, segments))
 }
 
 fn require_point(sources: &WorldSources, id: &str) -> io::Result<[f64; 2]> {
@@ -190,7 +200,7 @@ fn valid_point([lon, lat]: [f64; 2]) -> bool {
     (-180.0..=180.0).contains(&lon) && (-90.0..=90.0).contains(&lat)
 }
 
-fn distance_km([lon_a, lat_a]: [f64; 2], [lon_b, lat_b]: [f64; 2]) -> f64 {
+pub(super) fn distance_km([lon_a, lat_a]: [f64; 2], [lon_b, lat_b]: [f64; 2]) -> f64 {
     let half_latitude = (lat_b - lat_a).to_radians() * 0.5;
     let half_longitude = (lon_b - lon_a).to_radians() * 0.5;
     let haversine = half_latitude.sin().powi(2)
@@ -235,6 +245,7 @@ fn prototype_profile(mode: TransportMode, distance_km: f64) -> SegmentProfile {
             capacity_units: 300,
             risk_points: 5,
         },
+        TransportMode::Domestic | TransportMode::InlandWaterway => unreachable!("aggregate profiles come from the historical catalogue"),
         TransportMode::PortTransfer => Assumptions {
             speed_km_per_hour: 6.0,
             handling_minutes: 45,

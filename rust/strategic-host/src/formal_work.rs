@@ -6,18 +6,23 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::{collections::{BTreeMap, BTreeSet}, io};
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Default, Deserialize)]
 pub(crate) struct WorkOpening {
     jobs: Vec<Job>,
     firms: Vec<Firm>,
+    #[serde(default)]
+    market_employers: BTreeMap<String, String>,
     actors: Vec<Actor>,
     information: Vec<Notice>,
+    #[serde(default)]
     labor_response_policies: Vec<LaborResponse>,
 }
 
 #[derive(Clone, Deserialize)]
 pub struct Job {
     pub id: String,
+    #[serde(default)]
+    pub label: Option<String>,
     pub employer: String,
     pub place: String,
     pub positions: usize,
@@ -25,6 +30,7 @@ pub struct Job {
     pub wage_per_hour: i64,
     pub wage_delay: i64,
     skill: u64,
+    #[serde(default)]
     notice_delay: i64,
 }
 
@@ -59,15 +65,37 @@ pub(crate) struct WorkState {
 }
 
 impl WorkOpening {
-    pub(crate) fn load() -> io::Result<Self> {
-        let opening: Self = serde_json::from_slice(include_bytes!("../../../data/formal/paris_employment_opening_r1.json"))?;
+    pub(crate) fn load(resolve: impl Fn(&str, &str) -> Option<String>) -> io::Result<Self> {
+        let regions: &[(&str, &str, &[u8])] = &[
+            ("country_fra", "place:paris", include_bytes!("../../../data/formal/paris_employment_opening_r1.json")),
+            ("empire_of_japan", "place:yokohama", include_bytes!("../../../data/formal/yokohama_employment_1900.json")),
+        ];
+        let mut opening = Self::default();
+        for &(unit, anchor, bytes) in regions {
+            if resolve(unit, anchor).is_none() { continue; }
+            let mut region: Self = serde_json::from_slice(bytes)?;
+            for job in &mut region.jobs {
+                job.place = resolve(unit, &job.place).ok_or_else(|| invalid("unknown regional workplace"))?;
+            }
+            for (owner, organization) in region.market_employers {
+                if owner != format!("market:legacy_aggregate:{unit}") || organization.is_empty()
+                    || opening.market_employers.insert(owner, organization).is_some() {
+                    return Err(invalid("invalid regional market employer"));
+                }
+            }
+            opening.jobs.extend(region.jobs);
+            opening.firms.extend(region.firms);
+            opening.actors.extend(region.actors);
+            opening.information.extend(region.information);
+            opening.labor_response_policies.extend(region.labor_response_policies);
+        }
         let mut ids = BTreeSet::new();
         for job in &opening.jobs {
             if !ids.insert(&job.id) || !(1..=24).contains(&job.hours) || job.positions == 0
                 || !(0..=MAX_AMOUNT / job.hours.max(1)).contains(&job.wage_per_hour)
                 || !(0..=365).contains(&job.wage_delay)
                 || !(0..=365).contains(&job.notice_delay)
-                || !opening.firms.iter().any(|firm| firm.id == job.employer)
+                || opening.organization(&job.employer).is_none()
             {
                 return Err(invalid("invalid formal opening employment terms"));
             }
@@ -78,6 +106,13 @@ impl WorkOpening {
     pub(crate) fn open_accounts(&self, ledger: &mut Ledger) -> io::Result<()> {
         for firm in &self.firms {
             ledger.open_firm(&firm.id, &firm.account_id, firm.cash)?;
+        }
+        self.ensure_market_accounts(ledger)
+    }
+
+    pub(crate) fn ensure_market_accounts(&self, ledger: &mut Ledger) -> io::Result<()> {
+        for market in self.market_employers.keys() {
+            ledger.ensure_market_seller(market)?;
         }
         Ok(())
     }
@@ -96,7 +131,7 @@ impl WorkOpening {
             }
             self.firms.push(Firm { id: firm.clone(), account_id: account.clone(), cash: 0,
                 host_organization_id: organization.id.clone(), regional: true });
-            self.jobs.push(Job { id: id.clone(), employer: firm.clone(), place: organization.place.clone(),
+            self.jobs.push(Job { id: id.clone(), label: None, employer: firm.clone(), place: organization.place.clone(),
                 positions: terms.positions, hours: terms.hours, wage_per_hour: terms.wage_per_hour,
                 wage_delay: terms.wage_delay, skill: terms.skill, notice_delay: 0 });
         }
@@ -150,6 +185,11 @@ impl WorkOpening {
 
     pub(crate) fn organization(&self, employer: &str) -> Option<&str> {
         self.firms.iter().find(|firm| firm.id == employer).map(|firm| firm.host_organization_id.as_str())
+            .or_else(|| self.market_employers.get(employer).map(String::as_str))
+    }
+
+    pub(crate) fn market_employer(&self, employer: &str) -> bool {
+        self.market_employers.contains_key(employer)
     }
 
     pub(crate) fn regional_employer(&self, employer: &str) -> bool {
@@ -162,6 +202,11 @@ impl WorkOpening {
 }
 
 impl WorkState {
+    pub(crate) fn has_unseen_entry_jobs(&self, opening: &WorkOpening, actor: &str, place: &str, day: i64) -> bool {
+        opening.jobs.iter().any(|job| job.place == place && job.skill <= 1
+            && self.vacancies(job) > 0 && !self.knows_job(opening, actor, job, day))
+    }
+
     pub(crate) fn learn_referral(&mut self, actor: &str, job: &str, day: i64) {
         self.referrals.entry(actor.to_owned()).or_default().entry(job.to_owned()).or_insert(day);
     }
@@ -306,7 +351,7 @@ mod tests {
 
     #[test]
     fn employment_persists_during_absence_but_work_requires_presence_and_time() {
-        let opening = WorkOpening::load().unwrap();
+        let opening = WorkOpening::load(|unit, place| (unit == "country_fra").then(|| place.to_owned())).unwrap();
         let person = "person:formal_generated_country_fra_0001";
         let workplace = Some("place:paris");
         let away = Some("place:rouen");

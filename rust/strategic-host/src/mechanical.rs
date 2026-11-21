@@ -7,6 +7,7 @@ pub struct Mechanical {
  pending:Option<(u64,f32)>, target:f32, from:f32, elapsed:f32, last:Option<Instant>,
 }
 impl Mechanical {
+ pub fn moving(&self)->bool {self.elapsed<0.09 && self.from!=self.target || self.pending.is_some()}
  pub fn selected(&self,confirmed:usize)->usize {if self.pending.is_some(){ANGLES.iter().position(|a|*a==self.target).unwrap_or(confirmed)}else{confirmed}}
  pub fn request(&mut self,index:usize,drag:Option<f32>)->u64 {
   if let Some(a)=drag {self.angle=Some(a);}
