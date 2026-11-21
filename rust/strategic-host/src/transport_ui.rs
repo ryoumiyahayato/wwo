@@ -165,8 +165,8 @@ impl Context<'_> {
             return Some(());
         }
         let network = self.world.transport();
-        let arrow = if edge.bidirectional { "↔" } else { "→" };
-        d.title = format!("{} {arrow} {}", self.place(&edge.from), self.place(&edge.to));
+        let direction = if edge.bidirectional { "往返" } else { "至" };
+        d.title = format!("{} {direction} {}", self.place(&edge.from), self.place(&edge.to));
         if let Some(access) = network.availability(id) {
             let status = if !access.open || access.capacity_units == 0 { "停运" }
                 else if access.capacity_units < edge.profile.capacity_units { "减运" }
@@ -198,9 +198,11 @@ impl Context<'_> {
         }.into());
         d.details.push(format!("基准运行 {} 分钟", edge.profile.travel_minutes));
         if id == "shipping_channel" {
-            d.details.push("泰晤士河口受潮流和浅滩限制。船期为估计。".into());
+            d.details.push("泰晤士河口受潮流和水深限制。航时为估计。".into());
         }
-        if let Some(evidence) = network.evidence(id) { d.details.push(evidence.source.clone()); }
+        if self.debug {
+            if let Some(evidence) = network.evidence(id) { d.details.push(evidence.source.clone()); }
+        }
         Some(())
     }
 }
@@ -280,7 +282,10 @@ fn transport(verb: &'static str, index: usize) -> Option<Action> {
 
 impl Display<'_> {
     pub(crate) fn travel_page(&self, panels: &mut Mesh, art: &mut Mesh, text: &mut Mesh, hits: &mut Vec<Hit>) {
-        let Some([x, y, w, h]) = self.page_rect() else { return };
+        let Some([x, y, w, mut h]) = self.page_rect() else { return };
+        if self.hud.transport_steps && self.hud.transport_directory.is_none() {
+            h = (h + 96.).min(self.size[1] as f32 - y - 34.);
+        }
         self.folio(panels, art, text, hits, [x, y, w, h], "运输");
         self.transport_form(panels, text, hits, [x + 17., y + 55., w - 34., h - 65.], false);
     }
@@ -374,7 +379,7 @@ impl Display<'_> {
                 buttons.push((if self.hud.transport_steps { "收起" } else { "行程详情" },action(Command::TransportSteps)));
             }
             top = self.transport_buttons(m,t,hits,[x,top,w],&buttons);
-            if self.hud.transport_steps {
+            if self.hud.transport_steps && !v.travel_confirm {
                 let mut options = Vec::new();
                 if v.can_commute { options.push(("设／停通勤",transport("commute",0))); }
                 if v.can_move_home { options.push(("登记迁居",transport("move_home",0))); }

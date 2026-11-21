@@ -157,15 +157,12 @@ impl Display<'_> {
         if let Some(q)=&v.quote {self.quote_panel(m,t,hits,[x,y,w,h],q);return;}
         let bx=x+20.;let bw=w-40.;
         let scope_width=bw/5.;
-        for (i,(id,label)) in [("international","国际市场"),("domestic","国内市场"),("regional","区域市场")].into_iter().enumerate(){
-            let enabled=id!="regional"||!v.places.is_empty();
+        for (i,(id,label)) in [("international","国际市场"),("domestic","国内市场")].into_iter().enumerate(){
             self.row(m,t,hits,[bx+i as f32*scope_width,y+62.,scope_width-5.,27.],label,
-                if enabled{command(id,0)}else{None},v.scope==id);
+                command(id,0),v.scope==id);
         }
-        for (i,(id,label,enabled)) in [("countries","选择国家",!v.countries.is_empty()),("places","选择地区",!v.places.is_empty())].into_iter().enumerate(){
-            self.row(m,t,hits,[bx+(i+3) as f32*scope_width,y+62.,scope_width-5.,27.],label,
-                if enabled{command(id,0)}else{None},self.hud.market_chooser==Some(id));
-        }
+        self.row(m,t,hits,[bx+4.*scope_width,y+62.,scope_width-5.,27.],"选择国家",
+            (!v.countries.is_empty()).then(|| command("countries",0)).flatten(),self.hud.market_chooser==Some("countries"));
         let mut tabs = vec![("quotes","报价簿"),("trends","商品地点"),("goods","商品目录"),("transport","仓储与运输"),("activity","活动记录")];
         if self.session.is_some_and(|s| s.transport.is_some()) { tabs.push(("freight","实物货运")); }
         let tab_width = bw / tabs.len() as f32;
