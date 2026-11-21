@@ -553,8 +553,12 @@ impl TransportScene {
         if self.visible.is_empty() {
             return;
         }
+        // Map panels use a solid surface; text uses the HUD glyph atlas.
+        let [_, _, _, _, _, _, (panel, crate::ui::Ink::Solid), _, _, _, _, _, (text, crate::ui::Ink::HudText)] = meshes
+            else { return; };
         let mut lines = Vec::new();
-        if let Some(idx) = self.nearest_terminal(cursor) {
+        let nearby = self.nearest_terminal(cursor);
+        if let Some(idx) = nearby.filter(|&i| world.can_read_place_record(&self.terminals[i].id)) {
             let terminal = &self.terminals[idx];
             lines.push(format!(
                 "{} · {}",
@@ -592,8 +596,8 @@ impl TransportScene {
                     };
                     for (dx, dy) in [(-1., -1.), (-1., 1.), (1., -1.), (1., 1.)] {
                         let at = [xy.x + dx * r, xy.y + dy * r];
-                        meshes[4].0.line(at, [at[0] - dx * 4., at[1]], 1.4, c);
-                        meshes[4].0.line(at, [at[0], at[1] - dy * 4.], 1.4, c);
+                        panel.line(at, [at[0] - dx * 4., at[1]], 1.4, c);
+                        panel.line(at, [at[0], at[1] - dy * 4.], 1.4, c);
                     }
                 }
                 let mode = match edge.mode {
@@ -616,6 +620,8 @@ impl TransportScene {
                         skin.choose("客座","seats"), c.seats_used, c.seat_limit));
                 }
             }
+        } else if nearby.is_some() {
+            lines.push(skin.choose("尚不能阅读当地交通记录", "Cannot read the local transport record").to_owned());
         } else {
             lines.push(
                 skin.choose(
@@ -629,10 +635,10 @@ impl TransportScene {
         let height = lines.len() as f32 * 19. + 8.;
         let x = 12.;
         let y = size[1] as f32 - height - 100.;
-        meshes[4].0.rect(x, y, width, height, [14, 24, 30, 222]);
+        panel.rect(x, y, width, height, [14, 24, 30, 222]);
         for (i, line) in lines.iter().enumerate() {
             skin.text(
-                &mut meshes[9].0,
+                text,
                 line,
                 0,
                 [x + 7., y + 3. + i as f32 * 19.],
