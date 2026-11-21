@@ -184,10 +184,49 @@ struct CountryClick {polity:usize,point:[f64;2],deadline:Instant}
 struct Trial {
     last:String,timing:bool,passive_timing:bool,times:Vec<f64>,previous:Option<Instant>,captures:Vec<PathBuf>,first:Option<f64>,loads:Vec<(String,f64)>,
     terrain_decodes:Vec<f64>,
+    profile_frames:bool,
+    frames:Vec<FrameTiming>,
+    load_frames:Vec<usize>,
     movement:Option<([f64;2],[f64;2],u32,u32)>,
     window_position:Option<winit::dpi::PhysicalPosition<i32>>,
     terrain_capture:Option<(String,PathBuf)>,
     hide_landscape_models:bool,
+}
+
+#[derive(serde::Serialize)]
+struct FrameTiming {
+    interval_ms:Option<f64>,
+    draw_wall_ms:f64,
+    surface_acquire_ms:f64,
+    center:[f64;2],
+    mpp:f64,
+    terrain_view_level:u32,
+    qwg_upload:Option<hydrology::WaterUpload>,
+    battle:bool,
+}
+
+impl Trial {
+    fn timing_frame(&self, capture:bool)->Option<usize> {
+        (self.timing && self.profile_frames && !capture).then_some(self.frames.len())
+    }
+
+    fn record_frame(&mut self, started:Instant, presented:Instant, camera:&Camera, renderer:&Renderer, battle:bool) {
+        let interval = self.previous.map(|previous| presented.duration_since(previous).as_secs_f64()*1000.);
+        if let Some(interval) = interval { self.times.push(interval); }
+        self.previous = Some(presented);
+        if self.profile_frames {
+            self.frames.push(FrameTiming {
+                interval_ms:interval,
+                draw_wall_ms:presented.duration_since(started).as_secs_f64()*1000.,
+                surface_acquire_ms:renderer.frame_acquire_ms,
+                center:camera.coordinates(),
+                mpp:camera.mpp,
+                terrain_view_level:renderer.terrain_view_level(),
+                qwg_upload:if battle {None} else {renderer.water_upload()},
+                battle,
+            });
+        }
+    }
 }
 #[derive(Deserialize)]
 struct Observation {
@@ -1697,8 +1736,9 @@ impl Host {
         let capture=self.screenshot.as_ref().or_else(||self.trial.captures.first())
             .or_else(||self.trial.terrain_capture.as_ref().map(|(_,path)|path)).map(PathBuf::as_path);
         let mut redraw=false;
+        let timing_frame=self.trial.timing_frame(capture.is_some());
         if let Some(result)=renderer.render(&view,self.base.as_ref().unwrap(),&pages,&meshes,fade.as_ref(),seconds,!loading,capture,&models,transport,
-            (&self.camera,landscape_enabled&&!self.trial.hide_landscape_models,now),None)? {
+            (&self.camera,landscape_enabled&&!self.trial.hide_landscape_models,now),None,timing_frame)? {
             let presented=Instant::now();
             self.last_present=presented;
             if self.trial.first.is_none(){self.trial.first=Some(ms(self.started));}
@@ -1719,8 +1759,7 @@ impl Host {
                 } else {self.trial.captures.remove(0);}
             }
             else if self.trial.timing {
-                if let Some(prev)=self.trial.previous {self.trial.times.push(presented.duration_since(prev).as_secs_f64()*1000.);}
-                self.trial.previous=Some(presented);
+                self.trial.record_frame(now,presented,&self.camera,renderer,false);
             }
             if self.debug {
                 self.perf.cpu_ms=ms(now);
@@ -1752,15 +1791,15 @@ impl Host {
         let battle_frame = render::BattleFrame { view: &view.camera, state: &fixture.battle, terrain };
         let capture=self.screenshot.as_ref().or_else(||self.trial.captures.first()).map(PathBuf::as_path);
         let has_capture=capture.is_some();
+        let timing_frame=self.trial.timing_frame(has_capture);
         if let Some(result) = renderer.render(&map_view, self.base.as_ref().unwrap(), &[], &meshes, None,
             self.started.elapsed().as_secs_f32(), false, capture, &[], None,
-            (&self.camera, false, now), Some(battle_frame))?
+            (&self.camera, false, now), Some(battle_frame),timing_frame)?
         {
             let presented = Instant::now();
             self.last_present = presented;
-            if self.trial.timing {
-                if let Some(previous)=self.trial.previous {self.trial.times.push(presented.duration_since(previous).as_secs_f64()*1000.);}
-                self.trial.previous=Some(presented);
+            if self.trial.timing && !has_capture {
+                self.trial.record_frame(now,presented,&self.camera,renderer,true);
             }
             if let Some(path) = self.screenshot.take() {
                 let status = match result {
@@ -1928,12 +1967,20 @@ impl Host {
                 self.trial.timing=!self.trial.timing;self.trial.previous=None;
                 if self.trial.timing{
                     self.trial.passive_timing=input.value=="passive";
+                    self.trial.profile_frames=input.value=="profile";
+                    self.trial.frames.clear();
+                    self.trial.load_frames.clear();
+                    if self.trial.profile_frames {
+                        if let Some(renderer)=&mut self.renderer {renderer.start_frame_timing();}
+                    }
                     self.trial.times.clear();
                     self.trial.loads.clear();
                     self.trial.terrain_decodes.clear();
                 } else {
+                    let gpu=self.renderer.as_mut().and_then(Renderer::finish_frame_timing);
                     extra=serde_json::json!({"interval_ms":self.trial.times,"tile_load_ms":self.trial.loads,
-                        "terrain_decode_ms":self.trial.terrain_decodes});
+                        "terrain_decode_ms":self.trial.terrain_decodes,"frames":self.trial.frames,
+                        "gpu_frame_ms":gpu,"load_frame_indices":self.trial.load_frames});
                 }
             }
             "quit"=>event_loop.exit(),
@@ -2200,6 +2247,7 @@ impl ApplicationHandler<HostEvent> for Host {
                             let terrain::Key(z,x,y)=event.key;
                             self.trial.loads.push((format!("terrain/{z}/{x}/{y}"),ms(event.requested)));
                             self.trial.terrain_decodes.push(tile.decode_time.as_secs_f64()*1000.);
+                            if self.trial.profile_frames {self.trial.load_frames.push(self.trial.frames.len());}
                         }
                     }
                     if let Err(error)=renderer.terrain_ready(event) {
@@ -2232,7 +2280,10 @@ impl ApplicationHandler<HostEvent> for Host {
                     let page=self.renderer.as_ref().unwrap().upload(tile,pixels);
                     let now=Instant::now();
                     self.cached.insert(event.id,Resident{page,ready:now,used:now});
-                    if self.trial.timing {self.trial.loads.push((tile.path.clone(),ms(event.requested)));}
+                    if self.trial.timing {
+                        self.trial.loads.push((tile.path.clone(),ms(event.requested)));
+                        if self.trial.profile_frames {self.trial.load_frames.push(self.trial.frames.len());}
+                    }
                 }
             }
             Err(e) if self.map_signature.is_some()=>{

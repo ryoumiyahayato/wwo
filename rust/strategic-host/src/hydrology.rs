@@ -15,7 +15,10 @@ use std::{
 const WATER_COLUMNS: usize = 256;
 const WATER_ROWS: usize = 128;
 const WATER_PAGES: usize = WATER_COLUMNS * WATER_ROWS;
-const WATER_WORDS: usize = 3 * 1024 * 1024;
+// The surveyed Z6 wide view used over 30 MiB of on-screen QWG payloads.
+// Keep one bounded store. Z4/Z5 can still use QPK outside the admitted area.
+const WATER_WORDS: usize = 9 * 1024 * 1024;
+const MAX_PAGE_BYTES: u64 = 3 * 1024 * 1024;
 pub const WATER_MPP: f64 = 4200.;
 const WATER_PREFETCH_MPP: f64 = 5000.;
 const WATER_PREFETCH: f64 = 320.;
@@ -35,7 +38,6 @@ type WaterBatch = Vec<(usize, io::Result<Vec<u32>>)>;
 
 struct ResidentWaterPage {
     words: Vec<u32>,
-    last_needed: u64,
 }
 
 struct WaterSelection {
@@ -97,10 +99,18 @@ pub struct WaterPages {
     inflight: bool,
     selection: Option<WaterSelection>,
     previous_view: Option<(V3, Instant)>,
-    selection_number: u64,
     epoch: Instant,
     handoff_until: Instant,
     revision: u64,
+    pub upload: WaterUpload,
+}
+
+#[derive(Clone, Copy, Default, serde::Serialize)]
+pub struct WaterUpload {
+    pages: usize,
+    bytes: usize,
+    repacked: bool,
+    evicted: usize,
 }
 
 pub fn water_buffer(device: &wgpu::Device, enabled: bool) -> wgpu::Buffer {
@@ -155,7 +165,7 @@ impl WaterPages {
                 !matches!((class, size), (1..=3, Some(0)))
                     && !(class == 0
                         && size.is_some_and(|bytes| {
-                            (256..=WATER_WORDS as u64).contains(&bytes) && bytes % 4 == 0
+                            (256..=MAX_PAGE_BYTES).contains(&bytes) && bytes % 4 == 0
                         }))
             })
         {
@@ -236,10 +246,10 @@ impl WaterPages {
             inflight: false,
             selection: None,
             previous_view: None,
-            selection_number: 0,
             epoch,
             handoff_until: epoch,
             revision: 0,
+            upload: WaterUpload::default(),
         })
     }
 
@@ -251,6 +261,7 @@ impl WaterPages {
         size: [u32; 2],
         now: Instant,
     ) {
+        self.upload = WaterUpload::default();
         if camera.mpp < WATER_PREFETCH_MPP {
             self.select(camera, size, now);
             // A page prefetched outside the viewport has stamp 0. Start its
@@ -316,6 +327,9 @@ impl WaterPages {
                 if touches_view {
                     self.revision += 1;
                     self.handoff_until = now + HANDOFF;
+                } else if self.upload.evicted != 0 {
+                    // A rejected page may still have been sampled by this view.
+                    self.revision += 1;
                 }
             }
         }
@@ -391,7 +405,6 @@ impl WaterPages {
             mpp: camera.mpp,
             size,
         });
-        self.selection_number += 1;
         let mut nearby: Vec<_> = self
             .pages
             .iter()
@@ -415,9 +428,6 @@ impl WaterPages {
             if words <= budget {
                 budget -= words;
                 self.desired.push((i, visible));
-                if let Some(resident) = self.resident.get_mut(&page.index) {
-                    resident.last_needed = self.selection_number;
-                }
             }
         }
         self.viewport = Some(viewport);
@@ -427,65 +437,78 @@ impl WaterPages {
         &mut self,
         queue: &wgpu::Queue,
         buffer: &wgpu::Buffer,
-        arrivals: Vec<(usize, Vec<u32>)>,
+        mut arrivals: Vec<(usize, Vec<u32>)>,
     ) {
         let added: usize = arrivals.iter().map(|(_, words)| words.len()).sum();
         if self.used_words + added <= WATER_WORDS {
             for (key, words) in arrivals {
-                let offset = self.used_words;
-                self.table[key] = offset as u32;
-                queue.write_buffer(buffer, (offset * 4) as u64, bytemuck::cast_slice(&words));
-                self.used_words += words.len();
-                self.resident.insert(
-                    key,
-                    ResidentWaterPage {
-                        words,
-                        last_needed: self.selection_number,
-                    },
-                );
+                self.write_page(queue, buffer, key, self.used_words, words);
             }
-            queue.write_buffer(buffer, 0, bytemuck::cast_slice(&self.table));
         } else {
-            // Compact only under pressure. Keep the selected footprint first,
-            // then recently used pages for reversals and zooming back in.
-            for (key, words) in arrivals {
-                self.resident.insert(
-                    key,
-                    ResidentWaterPage {
-                        words,
-                        last_needed: self.selection_number,
-                    },
-                );
+            let wanted: HashSet<_> = self.desired.iter().map(|&(i, _)| self.pages[i].index).collect();
+            // A rapid pan can finish reads queued for the previous view. Keep
+            // them until capacity is needed for a page still selected.
+            arrivals.retain(|(key, _)| wanted.contains(key));
+            if arrivals.is_empty() { return; }
+            let before = self.resident.len();
+            self.resident.retain(|key, _| {
+                if wanted.contains(key) { return true; }
+                self.table[*key] = self.classes[*key];
+                false
+            });
+            self.upload.evicted = before - self.resident.len();
+            let mut spans: Vec<_> = self.resident.iter().map(|(&key, page)| {
+                let offset = self.table[key] as usize;
+                (offset, offset + page.words.len(), key)
+            }).collect();
+            spans.sort_unstable();
+            let mut end = WATER_PAGES;
+            let mut free = Vec::new();
+            for &(start, next, _) in &spans {
+                if start > end { free.push(end..start); }
+                end = next;
             }
-            self.table.copy_from_slice(&self.classes);
-            let mut order: Vec<_> = self
-                .desired
-                .iter()
-                .map(|&(i, _)| self.pages[i].index)
+            free.push(end..WATER_WORDS);
+            self.used_words = end;
+            arrivals.sort_unstable_by_key(|(key, words)| (std::cmp::Reverse(words.len()), *key));
+            let offsets: Option<Vec<_>> = arrivals.iter()
+                .map(|(_, words)| allocate_span(&mut free, words.len()))
                 .collect();
-            let selected: HashSet<_> = order.iter().copied().collect();
-            let mut previous: Vec<_> = self
-                .resident
-                .iter()
-                .filter(|(key, _)| !selected.contains(key))
-                .map(|(&key, page)| (key, page.last_needed))
-                .collect();
-            previous.sort_unstable_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
-            order.extend(previous.into_iter().map(|(key, _)| key));
-            let mut words = self.classes.clone();
-            for key in order {
-                if let Some(page) = self.resident.get(&key) {
-                    if words.len() + page.words.len() <= WATER_WORDS {
-                        self.table[key] = words.len() as u32;
-                        words.extend_from_slice(&page.words);
+            if let Some(offsets) = offsets {
+                for ((key, words), offset) in arrivals.into_iter().zip(offsets) {
+                    self.write_page(queue, buffer, key, offset, words);
+                }
+            } else {
+                // Only fragmentation requires moving selected pages. Preserve
+                // their address order and upload only the ones that move.
+                self.upload.repacked = true;
+                self.used_words = WATER_PAGES;
+                for (offset, _, key) in spans {
+                    let page = &self.resident[&key];
+                    if self.used_words != offset {
+                        self.table[key] = self.used_words as u32;
+                        queue.write_buffer(buffer, (self.used_words * 4) as u64, bytemuck::cast_slice(&page.words));
+                        self.upload.bytes += page.words.len() * 4;
                     }
+                    self.used_words += page.words.len();
+                }
+                for (key, words) in arrivals {
+                    self.write_page(queue, buffer, key, self.used_words, words);
                 }
             }
-            self.resident.retain(|&key, _| self.table[key] != 0);
-            self.used_words = words.len();
-            words[..WATER_PAGES].copy_from_slice(&self.table);
-            queue.write_buffer(buffer, 0, bytemuck::cast_slice(&words));
         }
+        self.upload.bytes += WATER_PAGES * 4;
+        queue.write_buffer(buffer, 0, bytemuck::cast_slice(&self.table));
+    }
+
+    fn write_page(&mut self, queue: &wgpu::Queue, buffer: &wgpu::Buffer,
+                  key: usize, offset: usize, words: Vec<u32>) {
+        self.table[key] = offset as u32;
+        queue.write_buffer(buffer, (offset * 4) as u64, bytemuck::cast_slice(&words));
+        self.used_words = self.used_words.max(offset + words.len());
+        self.upload.bytes += words.len() * 4;
+        self.upload.pages += 1;
+        self.resident.insert(key, ResidentWaterPage { words });
     }
 
     fn tick(&self, now: Instant) -> u32 {
@@ -542,6 +565,13 @@ impl WaterPages {
     }
 }
 
+fn allocate_span(free: &mut [std::ops::Range<usize>], words: usize) -> Option<usize> {
+    let span = free.iter_mut().filter(|span| span.len() >= words).min_by_key(|span| span.len())?;
+    let offset = span.start;
+    span.start += words;
+    Some(offset)
+}
+
 #[cfg(test)]
 mod water_page_tests {
     use super::*;
@@ -581,24 +611,25 @@ mod water_page_tests {
             inflight: false,
             selection: None,
             previous_view: None,
-            selection_number: 0,
             epoch: now,
             handoff_until: now,
             revision: 0,
+            upload: WaterUpload::default(),
         };
 
         water.select(&camera, size, now);
+        let selection_center = water.selection.as_ref().unwrap().center;
         assert_eq!(water.missing_view_pages_outside_budget(), 0);
         assert_eq!(water.status(), ([0, 0], [1, 1]));
 
         camera.axes = frame([0.2, 0.]);
         water.select(&camera, size, now);
-        assert_eq!(water.selection_number, 1);
+        assert_eq!(water.selection.as_ref().unwrap().center, selection_center);
         assert_eq!(water.missing_view_pages_outside_budget(), 1);
 
         camera.axes = frame([0., 0.]);
         water.select(&camera, size, now);
-        assert_eq!(water.selection_number, 1);
+        assert_eq!(water.selection.as_ref().unwrap().center, selection_center);
         assert_eq!(water.missing_view_pages_outside_budget(), 0);
     }
 }
