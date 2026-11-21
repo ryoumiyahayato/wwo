@@ -509,10 +509,15 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
         let fractions=clamp(sample.rgb/max(sample.a,.02),vec3f(0.),vec3f(1.));
         let occupied=fractions/max(1.,dot(fractions,vec3f(1.)));
         let other=max(0.,1.-dot(occupied,vec3f(1.)));
+        let crop_ink=vec3f(.57,.54,.36);
+        var crop_surface=crop_ink;
+        if base.a>=0. && occupied.b>.12 && footprint<180. {
+            crop_surface=cultivated_fields(crop_ink,landscape_world(ll),footprint,occupied.b);
+        }
         let surface=other*vec3f(.43,.51,.33)
             +occupied.r*vec3f(.20,.38,.45)
             +occupied.g*vec3f(.255,.41,.31)
-            +occupied.b*vec3f(.57,.54,.36);
+            +occupied.b*crop_surface;
         // Give explicitly cropped packages a short edge fade too. The survey
         // raster already feathers the actual mapped boundary in metres.
         let edge=distance*span_metres;
