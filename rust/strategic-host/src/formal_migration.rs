@@ -1,5 +1,5 @@
 use super::*;
-use crate::transport::{ModeSet, operations::Traffic};
+use crate::transport::{ModeSet, NodeCoverage, operations::Traffic};
 
 // Generated simulation assumption. Historical population inputs do not include
 // migration rates. Income per head selects candidates, not individual decisions.
@@ -32,6 +32,10 @@ pub struct BackgroundMigration<'a> {
 }
 
 impl InitialWorld {
+    pub fn background_migrations(&self) -> impl Iterator<Item = BackgroundMigration<'_>> {
+        self.migration.pending.keys().filter_map(|source| self.background_migration(source))
+    }
+
     pub fn background_migration(&self, source: &str) -> Option<BackgroundMigration<'_>> {
         let (source, row) = self.migration.pending.get_key_value(source)?;
         let reservation = row.reservation;
@@ -49,6 +53,25 @@ impl InitialWorld {
         self.migration.pending.get(unit).map_or(0, |row| u64::from(row.members))
     }
 
+    fn migration_node(&self, unit: &str) -> Option<&str> {
+        let network = self.transport.network();
+        let parent = self.population.parent_unit(unit)?;
+        if unit == parent && self.population.partitions(parent).next().is_some() { return None; }
+        let node = if self.population.totals().contains_key(unit) {
+            network.area_node(unit)?
+        } else {
+            network.population_node(unit)?
+        };
+        network.routing_node(node)
+    }
+
+    fn connected_migration_units(&self, root: &str) -> Vec<String> {
+        std::iter::once(root).chain(self.population.partitions(root).map(|(unit, _, _)| unit))
+            .filter(|unit| self.migration_node(unit).is_some_and(|node| {
+                self.transport.network().coverage(node) == NodeCoverage::Connected
+            })).map(str::to_owned).collect()
+    }
+
     /// Reserve one group of unclassified residents on the world's passenger services.
     pub fn dispatch_background_migration(
         &mut self, source: &str, destination: &str, members: u32, source_managed_background: u64,
@@ -59,10 +82,10 @@ impl InitialWorld {
         {
             return Err(invalid("迁移批次超出可用背景人口，或该地区已有在途批次。"));
         }
-        let from = self.transport.network().area_node(source)
-            .ok_or_else(|| invalid("出发区没有正式交通节点。"))?.to_owned();
-        let to = self.transport.network().area_node(destination)
-            .ok_or_else(|| invalid("到达区没有正式交通节点。"))?.to_owned();
+        let from = self.migration_node(source)
+            .ok_or_else(|| invalid("出发人口分区未绑定可用交通端点。"))?.to_owned();
+        let to = self.migration_node(destination)
+            .ok_or_else(|| invalid("到达人口分区未绑定可用交通端点。"))?.to_owned();
         let plan = self.transport.quote_service(&from, &to, ModeSet::ALL, members,
             self.clock.snapshot().total_minutes, Traffic::Migration)?;
         let reservation = self.transport.reserve_migration(plan)?;
@@ -87,12 +110,13 @@ impl InitialWorld {
 
     pub(super) fn review_background_migration(&mut self, externally_managed: &BTreeMap<String, u64>) {
         let now = self.clock.snapshot().total_minutes;
-        let held: Vec<_> = self.migration.pending.values_mut().filter_map(|row| {
+        let held: Vec<_> = self.migration.pending.iter().filter_map(|(source, row)| {
             let from = self.transport.held(row.reservation)?.to_owned();
-            let to = self.transport.network().area_node(&row.destination)?.to_owned();
-            Some((row, from, to))
+            let to = self.migration_node(&row.destination)?.to_owned();
+            Some((source.clone(), from, to))
         }).collect();
-        for (row, from, to) in held {
+        for (source, from, to) in held {
+            let row = self.migration.pending.get_mut(&source).expect("held migration exists");
             let passed: Vec<_> = self.transport.plan(row.reservation).expect("held reservation has a plan")
                 .route().legs.iter().take_while(|leg| leg.from != from).map(|leg| leg.segment_id.clone()).collect();
             let plan = self.transport.quote_service(&from, &to, ModeSet::ALL, row.members, now, Traffic::Migration);
@@ -116,13 +140,12 @@ impl InitialWorld {
                 destinations.entry(to.to_owned()).or_default().insert(from.to_owned());
             }
         }
-        for (source, targets) in destinations {
-            if self.migration.pending.contains_key(&source) { continue; }
-            let Some(&income) = self.sources.population_income.get(&source) else { continue; };
-            let managed = externally_managed.get(&source).copied().unwrap_or(0);
-            let available = self.population.unclassified(&source).unwrap_or(0).saturating_sub(managed);
-            let members = available.min(u64::from(MAX_BATCH_MEMBERS)) as u32;
-            if members == 0 || income == 0 { continue; }
+        let units: BTreeMap<_, _> = self.population.totals().keys().map(|root| {
+            (root.clone(), self.connected_migration_units(root))
+        }).collect();
+        for (source_root, targets) in destinations {
+            let Some(&income) = self.sources.population_income.get(&source_root).filter(|&&income| income > 0) else { continue; };
+            let Some(sources) = units.get(&source_root) else { continue; };
             let mut candidates: Vec<_> = targets.into_iter().filter_map(|target| {
                 let &income_to = self.sources.population_income.get(&target)?;
                 // A 25% income gap is the minimum threshold for this review.
@@ -130,8 +153,19 @@ impl InitialWorld {
                     .then_some((std::cmp::Reverse(income_to), target))
             }).collect();
             candidates.sort_unstable();
-            for (_, target) in candidates {
-                if self.dispatch_background_migration(&source, &target, members, managed).is_ok() { break; }
+            let targets: Vec<_> = candidates.iter().filter_map(|(_, root)| units.get(root)).flatten().collect();
+            for source in sources {
+                if self.migration.pending.contains_key(source) { continue; }
+                // A root-level external responsibility has no leaf breakdown. Preserve it in
+                // each candidate pool so a dispatch cannot draw residents assigned to it.
+                let managed = externally_managed.get(&source_root).copied().unwrap_or(0)
+                    .max(externally_managed.get(source).copied().unwrap_or(0));
+                let available = self.population.unclassified(source).unwrap_or(0).saturating_sub(managed);
+                let members = available.min(u64::from(MAX_BATCH_MEMBERS)) as u32;
+                if members == 0 { continue; }
+                for target in &targets {
+                    if self.dispatch_background_migration(source, target, members, managed).is_ok() { break; }
+                }
             }
         }
     }
@@ -139,7 +173,7 @@ impl InitialWorld {
     pub(super) fn validate_migrations(&self, reservations: &mut BTreeSet<u64>) -> bool {
         let network = self.transport.network();
         self.migration.pending.iter().all(|(source, row)| {
-            let traversed = network.area_node(source).and_then(|origin| {
+            let traversed = self.migration_node(source).and_then(|origin| {
                 row.traversed.iter().try_fold(origin, |station, id| {
                     let segment = network.segment(id)?;
                     if segment.from == station { Some(segment.to.as_str()) }
@@ -155,7 +189,7 @@ impl InitialWorld {
                 && self.transport.completed(row.reservation).is_none()
                 && self.transport.plan(row.reservation).is_some_and(|plan| {
                     plan.load_units() == row.members && plan.route().from == row.from
-                        && Some(plan.route().to.as_str()) == network.area_node(&row.destination)
+                        && Some(plan.route().to.as_str()) == self.migration_node(&row.destination)
                 })
         })
     }

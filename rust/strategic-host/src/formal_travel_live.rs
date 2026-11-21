@@ -603,7 +603,7 @@ mod tests {
         world.advance_migrated_domains(visit, &BTreeMap::new()).unwrap();
         assert_eq!(world.player_current_place(), Some(PARIS));
         assert_eq!(world.market_unit_for_person(&player), Some("country_fra"));
-        assert_eq!(world.population.unit_for_person(&player), Some("british_isles_1900"));
+        assert_eq!(world.population.unit_for_person(&player), Some("uk_ancient_kent_middlesex_surrey"));
         world.consult_local_work(&player).unwrap();
         world.apply_for_work("job:opening_paris_workshop").unwrap();
 
@@ -630,7 +630,8 @@ mod tests {
         world.advance_migrated_domains(day * MINUTES_PER_DAY - return_arrival, &BTreeMap::new()).unwrap();
         let restored = resume(&bootstrap, &world);
         assert_eq!(restored.player_home(), ROUEN);
-        assert_eq!(restored.population.unit_for_person(&player), Some("country_fra"));
+        assert_eq!(restored.population.unit_for_person(&player), Some("administrative_region:france_seine_inferieure"));
+        assert_eq!(restored.market_unit_for_person(&player), Some("country_fra"));
         assert_eq!(restored.employment().unwrap().0.place, PARIS);
         assert_eq!(restored.player().polity_id, "state:british_isles_1900");
         assert!(restored.completed_firm_work("firm:opening_paris_workshop", day).unwrap()
@@ -697,44 +698,66 @@ mod tests {
     }
 
     #[test]
+    fn global_population_transport_admits_each_supported_opening() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut failures = Vec::new();
+        let mut reachable_openings = 0;
+        let mut reachable_units = BTreeSet::new();
+        for polity in bootstrap.opening_people.keys() {
+            let world = match bootstrap.create(polity) {
+                Ok(world) => world,
+                Err(error) => {
+                    failures.push(format!("{polity}: {error}"));
+                    continue;
+                }
+            };
+            assert!(world.place_coordinates(world.player_home()).is_some());
+            assert!(world.macro_economy().markets().contains_key(world.player_market_unit()));
+            assert_eq!(&world.player().opening_source_id, polity);
+            if world.transport().coverage(world.player_home()) == crate::transport::NodeCoverage::Connected {
+                reachable_openings += 1;
+                reachable_units.insert(world.player_market_unit().to_owned());
+            }
+        }
+        println!("formal_openings={} connected_openings={reachable_openings} connected_opening_regions={}",
+            bootstrap.opening_people.len() - failures.len(), reachable_units.len());
+        assert!(failures.is_empty(), "{}", failures.join("\n"));
+    }
+
+    #[test]
     fn global_population_transport_background_flow_survives_native_slot_and_lands_once() {
         use crate::formal_save::{native_slot_summary, read_native_slot, write_native_slot};
         let bootstrap = WorldBootstrap::load().unwrap();
-        for polity in ["cshapes_gw_901", "khedivate_of_egypt", "argentina_1900", "united_states_1900"] {
-            let world = bootstrap.create(polity).unwrap();
-            assert!(world.opening_language().is_none());
-            assert!(world.place_coordinates(world.player_home()).is_some());
-            assert!(world.macro_economy().markets().contains_key(world.player_market_unit()));
-            assert_eq!(world.player().opening_source_id, polity);
-        }
         let mut world = bootstrap.create("cshapes_gw_901").unwrap();
-        let mut reachable_openings = 0;
-        let mut reachable_units = BTreeSet::new();
-        for opening in bootstrap.opening_people.values() {
-            if world.transport().coverage(&opening.place_id) == crate::transport::NodeCoverage::Connected {
-                reachable_openings += 1;
-                reachable_units.extend(world.population_unit_at(&opening.place_id));
-            }
-        }
-        println!("formal_openings={} connected_openings={reachable_openings} connected_opening_regions={} population_regions={}",
-            bootstrap.opening_people.len(), reachable_units.len(), world.population_units().len());
-        let source = "mexican_republic";
-        let destination = "united_states_1900";
-        let initial_source = world.population_units()[source];
-        let initial_destination = world.population_units()[destination];
+        let source = "administrative_region:france_seine";
+        let destination = "us_state_new_york";
+        let source_root = "country_fra";
+        let destination_root = "united_states_1900";
+        let initial_source = world.population().population_total(source).unwrap();
+        let initial_destination = world.population().population_total(destination).unwrap();
+        let initial_roots = world.population_units().clone();
+        let total = |world: &InitialWorld| world.population_units().values()
+            .chain(world.population().standalone_totals().values()).sum::<u64>();
+        let initial_total = total(&world);
         let members = 3;
-        let origin_node = world.transport().area_node(source).unwrap();
+        assert!(!world.macro_economy().markets().contains_key(destination));
+        assert_eq!(world.population().resident_pool(destination_root), Some(0));
+        assert!(world.dispatch_background_migration(source, destination_root, members, 0).is_err());
+        assert!(world.dispatch_background_migration(destination_root, source, members, 0).is_err());
+        assert!(world.dispatch_background_migration("ch_canton_zh", destination, members, 0).is_err());
+        let origin_node = world.transport().routing_node(world.transport().population_node(source).unwrap()).unwrap();
         let access: Vec<_> = world.transport().segments().filter(|segment| segment.from == origin_node || segment.to == origin_node)
             .map(|segment| segment.id.clone()).collect();
         assert!(!access.is_empty());
         for segment in &access { world.close_transport_segment(segment, true).unwrap(); }
         let blocked = world.dispatch_background_migration(source, destination, members, 0).unwrap_err();
         println!("blocked_migration {source} -> {destination}: {blocked}");
-        assert_eq!(world.population_units()[source], initial_source);
+        assert_eq!(world.population().population_total(source), Some(initial_source));
         for segment in &access { world.close_transport_segment(segment, false).unwrap(); }
         world.dispatch_background_migration(source, destination, members, 0).unwrap();
         assert!(world.dispatch_background_migration(source, destination, members, 0).is_err());
-        assert_eq!(world.population_units()[source], initial_source);
+        assert_eq!(world.population().population_total(source), Some(initial_source));
+        assert_eq!(world.population().population_total(destination), Some(initial_destination));
         let arrival = world.background_migration(source).unwrap().arrival_minute;
         assert!(arrival > MINUTES_PER_DAY);
         world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
@@ -747,37 +770,49 @@ mod tests {
         assert_eq!(summary.unwrap().opening, "cshapes_gw_901");
         let mut world = restored.unwrap();
         assert_eq!(world.background_migration(source).unwrap().members, members);
+        assert_eq!(world.background_migration(source).unwrap().destination, destination);
+        assert_eq!(total(&world), initial_total);
         world.advance_migrated_domains(arrival - MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
         assert!(world.background_migration(source).is_none());
-        assert_eq!(world.population_units()[source], initial_source - u64::from(members));
-        assert_eq!(world.population_units()[destination], initial_destination + u64::from(members));
+        assert_eq!(world.population().population_total(source), Some(initial_source - u64::from(members)));
+        assert_eq!(world.population().population_total(destination), Some(initial_destination + u64::from(members)));
+        assert_eq!(world.population_units()[source_root], initial_roots[source_root] - u64::from(members));
+        assert_eq!(world.population_units()[destination_root], initial_roots[destination_root] + u64::from(members));
+        println!("partition_migration {source} {initial_source} -> {}, {destination} {initial_destination} -> {}, total={initial_total}",
+            world.population().population_total(source).unwrap(), world.population().population_total(destination).unwrap());
         world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
-        assert_eq!(world.population_units()[source], initial_source - u64::from(members));
+        assert_eq!(world.population().population_total(source), Some(initial_source - u64::from(members)));
 
         let before = 29 * MINUTES_PER_DAY;
         world.advance_migrated_domains(before - world.clock().snapshot().total_minutes, &BTreeMap::new()).unwrap();
-        assert!(world.population_units().keys().all(|unit| world.background_migration(unit).is_none()));
+        assert_eq!(world.background_migrations().count(), 0);
         let totals_before = world.population_units().clone();
         world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
-        let batches = world.population_units().keys().filter(|unit| world.background_migration(unit).is_some()).count();
+        let batches = world.background_migrations().count();
         assert!(batches > 0);
+        let partition_batches = world.background_migrations().filter(|batch| {
+            world.population().parent_unit(batch.source) != Some(batch.source)
+                || world.population().parent_unit(batch.destination) != Some(batch.destination)
+        }).count();
+        assert!(partition_batches > 0);
         assert_eq!(world.population_units(), &totals_before);
-        let first = world.population_units().keys().filter_map(|unit| world.background_migration(unit))
-            .min_by_key(|batch| batch.arrival_minute).unwrap();
-        println!("monthly_migration day=30 batches={batches} first={} -> {} members={} arrival_minute={}",
+        let first = world.background_migrations().min_by_key(|batch| batch.arrival_minute).unwrap();
+        println!("monthly_migration day=30 batches={batches} partition_batches={partition_batches} first={} -> {} members={} arrival_minute={}",
             first.source, first.destination, first.members, first.arrival_minute);
         let arrived_origin = first.source.to_owned();
         let arrival_minute = first.arrival_minute;
         world.advance_migrated_domains(arrival_minute - 30 * MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
         assert!(world.background_migration(&arrived_origin).is_none());
-        assert_eq!(world.population_units().values().sum::<u64>(), totals_before.values().sum::<u64>());
+        assert_eq!(total(&world), initial_total);
     }
 
     #[test]
     fn global_population_transport_named_opening_travels_across_north_america() {
+        use crate::formal_save::{read_native_slot, write_native_slot};
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create("united_states_1900").unwrap();
         let traveler = world.player().id.clone();
+        let home = world.player_home().to_owned();
         let destination = world.transport().capital_node("mexican_republic").unwrap().to_owned();
         let plan = world.preview_travel(&destination, ModeSet::ALL).unwrap();
         let arrival = plan.arrival_minute();
@@ -788,16 +823,24 @@ mod tests {
         world.advance_migrated_domains(first_stop_minute, &BTreeMap::new()).unwrap();
         assert_eq!(world.last_station(), first_stop);
         assert_eq!(world.current_place(&traveler), None);
-        let mut world = resume(&bootstrap, &world);
+
+        let slot = std::env::temp_dir().join(format!("wwo-global-named-travel-{}.json", std::process::id()));
+        write_native_slot(&slot, &world).unwrap();
+        let restored = read_native_slot(&slot, &bootstrap);
+        std::fs::remove_file(&slot).unwrap();
+        let mut world = restored.unwrap();
         assert_eq!(world.last_station(), first_stop);
         world.advance_migrated_domains(arrival - first_stop_minute, &BTreeMap::new()).unwrap();
         assert_eq!(world.current_place(&traveler), Some(destination.as_str()));
         assert_eq!(world.market_unit_for_person(&traveler), Some("mexican_republic"));
-        assert_eq!(world.population.unit_for_person(&traveler), Some("united_states_1900"));
+        assert_eq!(world.person_home(&traveler), Some(home.as_str()));
+        assert_eq!(world.population.unit_for_person(&traveler), Some("us_district_of_columbia"));
+        assert_eq!(world.residence_unit_at(&destination), Some("mx_distrito_federal"));
         world.move_player_home().unwrap();
         let world = resume(&bootstrap, &world);
         assert_eq!(world.person_home(&traveler), Some(destination.as_str()));
-        assert_eq!(world.population.unit_for_person(&traveler), Some("mexican_republic"));
+        assert_eq!(world.current_place(&traveler), Some(destination.as_str()));
+        assert_eq!(world.population.unit_for_person(&traveler), Some("mx_distrito_federal"));
     }
 
     #[test]

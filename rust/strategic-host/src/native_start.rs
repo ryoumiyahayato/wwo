@@ -822,14 +822,17 @@ impl TransportPage {
         let destination_detail = if self.destination.is_empty() { String::new() } else {
             describe_destination(world, &self.destination)
         };
-        let migration = world.population_unit_at(world.last_station()).and_then(|unit| world.background_migration(unit))
+        let migration = world.residence_unit_at(world.last_station()).and_then(|unit| {
+            world.background_migration(unit).or_else(|| world.background_migrations().find(|row| row.destination == unit))
+        })
             .map(|row| {
-                let origin = format!("area:{}", row.source);
-                let target = format!("area:{}", row.destination);
+                let net = world.transport();
+                let label = |unit: &str| net.population_node(unit).or_else(|| net.area_node(unit))
+                    .map_or_else(|| unit.to_owned(), |node| world.place_name(node).to_owned());
                 let status = if row.blocked {format!("停留于 {}", world.place_name(row.station))}
                     else {format!("预计 {} 抵达", minute_text(row.arrival_minute))};
                 format!("人口迁移 · {} → {} · {} 人 · {status}",
-                    world.place_name(&origin), world.place_name(&target), row.members)
+                    label(row.source), label(row.destination), row.members)
             });
         let lot_page_size = crate::transport_ui::LOT_PAGE_SIZE;
         let lots: Vec<_> = world.freight_lots().rev().skip(self.lot_page*lot_page_size).take(lot_page_size).map(|lot| {
