@@ -46,7 +46,8 @@ pub struct Quote {
 pub struct Order {
     pub id:String,good:String,buyer:String,seller:String,from:String,to:String,
     pub pending:i64,pub transit:i64,pub arrived:i64,pub delivered:i64,pub cancelled:i64,
-    pub goods_amount:i64,pub freight_amount:i64,currency:String,
+    pub goods_amount:Option<i64>,pub freight_amount:i64,currency:String,
+    #[serde(default)] onsite:bool,
 }
 #[derive(Deserialize)]
 pub struct Collection {pub order:String,pub shipment:String,pub quantity:u64}
@@ -174,7 +175,9 @@ impl Display<'_> {
                     let yy=top+i as f32*64.;
                     self.skin.text(t,&format!("{} · {} · {} — {}",row.id,row.good,row.from,row.to),0,[bx,yy],bw,IVORY);
                     self.skin.text(t,&format!("待发 {} · 在途 {} · 待领 {} · 已交付 {} · 已取消 {}",row.pending,row.transit,row.arrived,row.delivered,row.cancelled),0,[bx,yy+19.],bw,MUTED);
-                    self.skin.text(t,&format!("已付货款 {} · 运费 {} · {}",row.goods_amount,row.freight_amount,row.currency),0,[bx,yy+37.],bw-96.,MUTED);
+                    let paid=row.goods_amount.map_or_else(|| "货款未公开或未结算".into(),|amount|format!("已付货款 {amount} {}",row.currency));
+                    let delivery=if row.onsite {"现场交割".into()}else{format!("运费 {}",row.freight_amount)};
+                    self.skin.text(t,&format!("{paid} · {delivery}"),0,[bx,yy+37.],bw-96.,MUTED);
                     if let Some((index,collection))=v.collections.iter().enumerate().find(|(_,c)|c.order==row.id){
                         self.row(m,t,hits,[bx+bw-93.,yy+30.,93.,24.],&format!("提货 {}",collection.quantity),command("collect",index),false);
                     }

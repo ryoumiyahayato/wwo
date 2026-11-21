@@ -57,6 +57,7 @@ pub struct Ui<'a> {
     pub econ_legend:&'a [(String,[u8;4])],
     pub mouse:&'a str,
     pub labels:bool,
+    pub transport_detail:Option<&'a crate::transport_ui::Detail>,
     pub formal:crate::formal_ui::Display<'a>,
 }
 
@@ -216,6 +217,7 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
     if let Some(rect)=ui.formal.page_rect(){occupied.push(rect);}
     if ui.details {occupied.push([w/2.-252.,105.,504.,294.]);}
     if let Some(country)=ui.country {occupied.push(country.rect(ui.size));}
+    if let Some(detail)=ui.transport_detail {occupied.push(detail.rect(ui.size));}
     let region=ui.country.and_then(|country|match country.view {
         CountryView::Region{index,..}=>ui.formal.skin.admin_record(world,&world.polities[country.polity],index).and_then(|record|record.boundary),
         _=>None,
@@ -365,7 +367,10 @@ pub fn compose(world:&World,a:&Atlas,ui:Ui<'_>,markers:&mut HashSet<usize>)->(La
             skin.text(&mut hud_type,ui.mouse,0,[w-233.,h-49.],230.,SUBTLE);
         }
     }
-    if readable && !ui.formal.hud.messages && ui.country.is_none() && ui.search.is_none() && !ui.details {
+    if let Some(detail)=ui.transport_detail {
+        ui.formal.transport_detail(detail,&mut panels,&mut hud_type,&mut hits);
+    }
+    if readable && !ui.formal.hud.messages && ui.country.is_none() && ui.search.is_none() && !ui.details && ui.transport_detail.is_none() {
         let left=match ui.selected{Some(Object::Polity(_))=>359.,Some(_)=>293.,None=>145.};
         ui.formal.diagnostics(&mut panels,&mut hud_type,left,debug_right);
     }

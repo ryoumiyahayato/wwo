@@ -430,7 +430,12 @@ impl NativeSession {
             "stop" => world.stop_player(),
             "commute" => world.set_commute(world.commute_base().is_none()),
             "lot" => {
-                page.select_lot(world, id.parse().ok());
+                let selection = id.parse().ok().and_then(|id| world.freight_lots().rev()
+                    .position(|lot| lot.id == id).map(|index| (id, index)));
+                if let Some((id, index)) = selection {
+                    page.lot_page = index / crate::transport_ui::LOT_PAGE_SIZE;
+                    page.select_lot(world, Some(id));
+                }
                 return;
             }
             "lots_prev" => { page.lot_page = page.lot_page.saturating_sub(1); return; }
@@ -1112,10 +1117,19 @@ impl MarketPage {
         }).collect();
         let chart = market.commodities.get(&self.good).map(|row| json!([{"minute":minute,
             "value":if self.chart == "supply" {row.inventory} else {row.price_centimes as f64}}])).unwrap_or_else(|| json!([]));
+        let orders: Vec<_> = world.firm_material_orders((self.scope != "international").then_some(self.unit.as_str()))
+            .map(|row| {
+                let paid = row.goods_payment.as_ref();
+                json!({"id":row.reference,"good":"谷物原料","buyer":row.buyer,"seller":row.seller,
+                    "from":world.place_name(row.from),"to":world.place_name(row.to),
+                    "pending":row.pending,"transit":0,"arrived":0,"delivered":row.delivered,"cancelled":0,
+                    "goods_amount":paid.map(|payment| payment.amount),"freight_amount":0,
+                    "currency":paid.map_or("", |_| "模拟货币最小单位"),"onsite":true})
+            }).collect();
         json!({"scope":self.scope,"content":self.content,"polity":format!("state:{}",self.unit),"country":country,
             "market_id":market.id,"region":"","good":self.good,"site":market.id,"window_days":self.window,
             "chart_kind":self.chart,"minute":minute,"book":book,"offers":offers,"places":[],"countries":countries,
-            "quote":quote,"orders":[],"logistics":logistics,"chart":chart,"result":self.result,"collections":[],"focus":null,
+            "quote":quote,"orders":orders,"logistics":logistics,"chart":chart,"result":self.result,"collections":[],"focus":null,
             "catalog":catalog,"goods_group":self.group,"good_label":info.map_or("", |(name,_,_)| name)})
     }
 }
