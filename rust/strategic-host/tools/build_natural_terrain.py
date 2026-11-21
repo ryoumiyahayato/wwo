@@ -1542,6 +1542,25 @@ def measured_river_polygons(path, regions=()):
                         print(f"Landsat river mask tiles {index}/{len(names)}",flush=True)
 
 
+def sourced_water_polygons(path, description):
+    with path.open(encoding="utf-8-sig") as source:
+        data = json.load(source)
+    if data.get("type") != "FeatureCollection" or not data.get("features"):
+        raise ValueError(f"{description} requires a GeoJSON FeatureCollection")
+    world = box(-180,-90,180,90)
+    polygons = []
+    for feature in data["features"]:
+        geometry = feature.get("geometry") or {}
+        if (feature.get("type") != "Feature" or geometry.get("type") not in ("Polygon", "MultiPolygon")
+                or not (feature.get("properties") or {}).get("sources")):
+            raise ValueError(f"{description} features require polygon geometry and properties.sources")
+        polygon = shape(geometry)
+        if polygon.is_empty or not polygon.is_valid or not world.covers(polygon):
+            raise ValueError(f"{description} requires valid WGS84 polygon geometry")
+        polygons.extend(polygon_parts(polygon))
+    return polygons
+
+
 def project_river_mask(polygon, geographic):
     projected = transform(polygon,geographic.transform,interleaved=False)
     if not projected.is_valid:
@@ -1728,7 +1747,8 @@ def audit_water_page(before, after):
 
 
 def write_water_geometry(shoreline, destination, *, measured_rivers=None, documented_widths=None,
-                         scratch=None, original=None, replace_pages=(), audit=None, shoreline_ponds=None):
+                         scratch=None, original=None, replace_pages=(), audit=None, shoreline_ponds=None,
+                         confirmed_grounded_ice=None, measured_land_islands=None):
     """Use nested water/land polygons; centreline strokes have a separate pack."""
     if destination.exists():
         raise ValueError(f"Output already exists: {destination}")
@@ -1737,6 +1757,10 @@ def write_water_geometry(shoreline, destination, *, measured_rivers=None, docume
     domain = union_all([box(*rect) for rect in rectangles]) if selected else None
     bounds = domain.bounds if domain is not None else None
     pieces,flags = [],[]
+    ice = (STRtree(sourced_water_polygons(confirmed_grounded_ice, "Confirmed grounded ice"))
+           if confirmed_grounded_ice is not None else None)
+    islands = (sourced_water_polygons(measured_land_islands, "Measured land islands")
+               if measured_land_islands is not None else [])
 
     def add(geometry, flag):
         if domain is not None:
@@ -1756,11 +1780,32 @@ def write_water_geometry(shoreline, destination, *, measured_rivers=None, docume
         if not geometry.is_valid:
             geometry = make_valid(geometry)
         add(geometry,1 << (0 if level==5 else level-1))
+    if islands:
+        existing_land = STRtree([part for part,flag in zip(pieces,flags) if flag == 1])
+        if domain is not None:
+            islands = [island.intersection(domain) for island in islands if island.intersects(domain)]
+        # The base layer uses parity. Union overlapping surveys and retain only
+        # the footprint not already covered by a polygon using the same bit.
+        for island in polygon_parts(union_all(islands)):
+            covered = existing_land.query(island,predicate="intersects")
+            if covered.size:
+                island = island.difference(union_all(existing_land.geometries.take(covered)))
+            add(island,1)
+    original_measurements = []
     if measured_rivers is not None:
         for source,polygon in measured_river_polygons(measured_rivers,rectangles):
+            if ice is not None:
+                if domain is not None and not polygon.intersects(domain):
+                    continue
+                overlapping = ice.query(polygon, predicate="intersects")
+                if overlapping.size:
+                    # Preserve mapped reach ownership for any width-only inputs.
+                    if documented_widths is not None:
+                        original_measurements.append(polygon.intersection(domain) if domain is not None else polygon)
+                    polygon = polygon.difference(union_all(ice.geometries.take(overlapping)))
             add(polygon,16+source)
     if documented_widths is not None:
-        measured = STRtree([part for flag,part in zip(flags,pieces) if flag != 1])
+        measured = STRtree([part for flag,part in zip(flags,pieces) if flag != 1]+original_measurements)
         next_source = max(flags,default=16)+1
         # An observed channel or lake owns its reach. Width-only inputs can
         # fill unserved reaches, without widening an already mapped bank.
@@ -2391,6 +2436,10 @@ def main():
                         help="Build a viewport-streamed WGS84 water pack from full GSHHG polygons")
     parser.add_argument("--measured-river-mask",type=Path,metavar="GRWL_MASK_ZIP",
                         help="Add WGS84 Landsat GRWL water polygons and tidal channels to --water-geometry")
+    parser.add_argument("--confirmed-grounded-ice",type=Path,metavar="ICE_GEOJSON",
+                        help="Subtract sourced WGS84 grounded-ice polygons from the measured GRWL overlay")
+    parser.add_argument("--measured-land-islands",type=Path,metavar="ISLAND_GEOJSON",
+                        help="Add sourced WGS84 island footprints not already covered by GSHHG land")
     parser.add_argument("--shoreline-ponds",type=Path,metavar="GSHHG_ZIP",
                         help="Add official GSHHG level 4 ponds when the primary archive lacks them")
     parser.add_argument("--water-pages-from",type=Path,metavar="EXISTING_QWG",
@@ -2438,6 +2487,10 @@ def main():
         parser.error("--shoreline-ponds requires --water-geometry")
     if args.measured_river_mask is not None and args.water_geometry is None:
         parser.error("--measured-river-mask requires --water-geometry")
+    if args.confirmed_grounded_ice is not None and (args.water_geometry is None or args.measured_river_mask is None):
+        parser.error("--confirmed-grounded-ice requires --water-geometry and --measured-river-mask")
+    if args.measured_land_islands is not None and args.water_geometry is None:
+        parser.error("--measured-land-islands requires --water-geometry")
     if args.documented_river_widths is not None and args.water_geometry is None:
         parser.error("--documented-river-widths requires --water-geometry")
     if args.audit_water_pages is not None:
@@ -2455,7 +2508,9 @@ def main():
             write_water_geometry(*args.water_geometry, measured_rivers=args.measured_river_mask,
                                  documented_widths=args.documented_river_widths,scratch=scratch,
                                  original=args.water_pages_from,replace_pages=args.water_page or (),
-                                 audit=args.audit_water_pages,shoreline_ponds=args.shoreline_ponds)
+                                 audit=args.audit_water_pages,shoreline_ponds=args.shoreline_ponds,
+                                 confirmed_grounded_ice=args.confirmed_grounded_ice,
+                                 measured_land_islands=args.measured_land_islands)
         return
     if args.layer is not None and args.verify is None:
         parser.error("--layer requires --verify")
