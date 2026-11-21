@@ -1,0 +1,63 @@
+Table 12.  Population of the 100 Largest Urban Places:  1890
+
+Source:  U.S. Bureau of the Census
+Internet Release date:  June 15, 1998
+---------------------------------------------------------------------------------------------------------------
+Rank | Place                             | Population || Rank | Place                             | Population
+---------------------------------------------------------------------------------------------------------------
+   1   New York city, NY *................  1,515,301      51   Lynn city, MA......................     55,727
+   2   Chicago city, IL...................  1,099,850      52   Lincoln city, NE...................     55,154
+   3   Philadelphia city, PA..............  1,046,964      53   Charleston city, SC................     54,955
+   4   Brooklyn city, NY *................    806,343      54   Hartford city, CT..................     53,230
+   5   St. Louis city, MO.................    451,770      55   St. Joseph city, MO................     52,324
+   6   Boston city, MA....................    448,477      56   Evansville city, IN................     50,756
+   7   Baltimore city, MD.................    434,439      57   Los Angeles city, CA...............     50,395
+   8   San Francisco city, CA.............    298,997      58   Des Moines city, IA................     50,093
+   9   Cincinnati city, OH................    296,908      59   Bridgeport city, CT................     48,866
+  10   Cleveland city, OH.................    261,353      60   Oakland city, CA...................     48,682
+
+  11   Buffalo city, NY...................    255,664      61   Portland city, OR..................     46,385
+  12   New Orleans city, LA...............    242,039      62   Saginaw city, MI...................     46,322
+  13   Pittsburgh city, PA *..............    238,617      63   Salt Lake City city, UT............     44,843
+  14   Washington city, DC *..............    230,392      64   Lawrence city, MA..................     44,654
+  15   Detroit city, MI...................    205,876      65   Springfield city, MA...............     44,179
+  16   Milwaukee city, WI.................    204,468      66   Manchester city, NH................     44,126
+  17   Newark city, NJ....................    181,830      67   Utica city, NY.....................     44,007
+  18   Minneapolis city, MN...............    164,738      68   Hoboken city, NJ...................     43,648
+  19   Jersey City city, NJ...............    163,003      69   Savannah city, GA..................     43,189
+  20   Louisville city, KY................    161,129      70   Seattle city, WA...................     42,837
+
+  21   Omaha city, NE.....................    140,452      71   Peoria city, IL....................     41,024
+  22   Rochester city, NY.................    133,896      72   New Bedford city, MA...............     40,733
+  23   St. Paul city, MN..................    133,156      73   Erie city, PA......................     40,634
+  24   Kansas City city, MO...............    132,716      74   Somerville city, MA................     40,152
+  25   Providence city, RI................    132,146      75   Harrisburg city, PA................     39,385
+  26   Denver city, CO....................    106,713      76   Kansas City city, KS...............     38,316
+  27   Indianapolis city, IN..............    105,436      77   Dallas city, TX....................     38,067
+  28   Allegheny city, PA *...............    105,287      78   Sioux City city, IA................     37,806
+  29   Albany city, NY....................     94,923      79   Elizabeth city, NJ.................     37,764
+  30   Columbus city, OH..................     88,150      80   Wilkes-Barre city, PA..............     37,718
+
+  31   Syracuse city, NY..................     88,143      81   San Antonio city, TX...............     37,673
+  32   New Haven city, CT.................     86,045      82   Covington city, KY.................     37,371
+  33   Worcester city, MA.................     84,655      83   Portland city, ME..................     36,425
+  34   Toledo city, OH....................     81,434      84   Tacoma city, WA....................     36,006
+  35   Richmond city, VA..................     81,388      85   Holyoke city, MA...................     35,637
+  36   Paterson city, NJ..................     78,347      86   Fort Wayne city, IN................     35,393
+  37   Lowell city, MA....................     77,696      87   Binghamton city, NY................     35,005
+  38   Nashville city, TN.................     76,168      88   Norfolk city, VA...................     34,871
+  39   Scranton city, PA..................     75,215      89   Wheeling city, WV..................     34,522
+  40   Fall River city, MA................     74,398      90   Augusta city, GA...................     33,300
+
+  41   Cambridge city, MA.................     70,028      91   Youngstown city, OH................     33,220
+  42   Atlanta city, GA...................     65,533      92   Duluth city, MN....................     33,115
+  43   Memphis city, TN...................     64,495      93   Yonkers city, NY...................     32,033
+  44   Wilmington city, DE................     61,431      94   Lancaster city, PA.................     32,011
+  45   Dayton city, OH....................     61,220      95   Springfield city, OH...............     31,895
+  46   Troy city, NY......................     60,956      96   Quincy city, IL....................     31,494
+  47   Grand Rapids city, MI..............     60,278      97   Mobile city, AL....................     31,076
+  48   Reading city, PA...................     58,661      98   Topeka city, KS....................     31,007
+  49   Camden city, NJ....................     58,313      99   Elmira city, NY....................     30,893
+  50   Trenton city, NJ...................     57,458     100   Salem city, MA.....................     30,801
+---------------------------------------------------------------------------------------------------------------
+* See Notes for Individual Places.

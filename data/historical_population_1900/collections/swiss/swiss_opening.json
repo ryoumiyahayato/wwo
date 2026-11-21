@@ -1,0 +1,268 @@
+{
+  "unit_id": "swiss_confederation",
+  "date": "1900-01-01",
+  "population_value": 3285131,
+  "source_id": "swiss_federal_census_comparison_1911",
+  "locator": "Table I, printed p. 104, Switzerland and 25 cantons/half-cantons",
+  "endpoint_dates": [
+    "1888-12-01",
+    "1900-12-01"
+  ],
+  "country_endpoint_values": [
+    2917754,
+    3315443
+  ],
+  "method": "Linear interpolation of residents over 4048/4382 elapsed days. Whole persons by largest remainder. Intercensal model error unknown.",
+  "units": [
+    {
+      "unit_id": "ch_canton_zh",
+      "name": "Zürich",
+      "population_value": 423882,
+      "endpoint_values": [
+        337183,
+        431036
+      ],
+      "locator": "Table I, p. 104, Zürich, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_be",
+      "name": "Bern",
+      "population_value": 585412,
+      "endpoint_values": [
+        536679,
+        589433
+      ],
+      "locator": "Table I, p. 104, Bern, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_lu",
+      "name": "Luzern",
+      "population_value": 145668,
+      "endpoint_values": [
+        135360,
+        146519
+      ],
+      "locator": "Table I, p. 104, Luzern, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_ur",
+      "name": "Uri",
+      "population_value": 19513,
+      "endpoint_values": [
+        17249,
+        19700
+      ],
+      "locator": "Table I, p. 104, Uri, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_sz",
+      "name": "Schwyz",
+      "population_value": 54998,
+      "endpoint_values": [
+        50307,
+        55385
+      ],
+      "locator": "Table I, p. 104, Schwyz, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_ow",
+      "name": "Obwalden",
+      "population_value": 15244,
+      "endpoint_values": [
+        15043,
+        15260
+      ],
+      "locator": "Table I, p. 104, Obwalden, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_nw",
+      "name": "Nidwalden",
+      "population_value": 13029,
+      "endpoint_values": [
+        12538,
+        13070
+      ],
+      "locator": "Table I, p. 104, Nidwalden, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_gl",
+      "name": "Glarus",
+      "population_value": 32462,
+      "endpoint_values": [
+        33825,
+        32349
+      ],
+      "locator": "Table I, p. 104, Glarus, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_zg",
+      "name": "Zug",
+      "population_value": 24936,
+      "endpoint_values": [
+        23029,
+        25093
+      ],
+      "locator": "Table I, p. 104, Zug, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_fr",
+      "name": "Fribourg",
+      "population_value": 127281,
+      "endpoint_values": [
+        119155,
+        127951
+      ],
+      "locator": "Table I, p. 104, Fribourg, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_so",
+      "name": "Solothurn",
+      "population_value": 99608,
+      "endpoint_values": [
+        85621,
+        100762
+      ],
+      "locator": "Table I, p. 104, Solothurn, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_bs",
+      "name": "Baselstadt",
+      "population_value": 109294,
+      "endpoint_values": [
+        73749,
+        112227
+      ],
+      "locator": "Table I, p. 104, Baselstadt, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_bl",
+      "name": "Baselland",
+      "population_value": 67997,
+      "endpoint_values": [
+        61941,
+        68497
+      ],
+      "locator": "Table I, p. 104, Baselland, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_sh",
+      "name": "Schaffhausen",
+      "population_value": 41230,
+      "endpoint_values": [
+        37783,
+        41514
+      ],
+      "locator": "Table I, p. 104, Schaffhausen, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_ar",
+      "name": "Appenzell A.-Rh.",
+      "population_value": 55192,
+      "endpoint_values": [
+        54109,
+        55281
+      ],
+      "locator": "Table I, p. 104, Appenzell A.-Rh., Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_ai",
+      "name": "Appenzell I.-Rh.",
+      "population_value": 13452,
+      "endpoint_values": [
+        12888,
+        13499
+      ],
+      "locator": "Table I, p. 104, Appenzell I.-Rh., Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_sg",
+      "name": "St. Gallen",
+      "population_value": 248600,
+      "endpoint_values": [
+        228174,
+        250285
+      ],
+      "locator": "Table I, p. 104, St. Gallen, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_gr",
+      "name": "Graubünden",
+      "population_value": 103780,
+      "endpoint_values": [
+        94810,
+        104520
+      ],
+      "locator": "Table I, p. 104, Graubünden, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_ag",
+      "name": "Aargau",
+      "population_value": 205513,
+      "endpoint_values": [
+        193580,
+        206498
+      ],
+      "locator": "Table I, p. 104, Aargau, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_tg",
+      "name": "Thurgau",
+      "population_value": 112570,
+      "endpoint_values": [
+        104678,
+        113221
+      ],
+      "locator": "Table I, p. 104, Thurgau, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_ti",
+      "name": "Tessin",
+      "population_value": 137732,
+      "endpoint_values": [
+        126751,
+        138638
+      ],
+      "locator": "Table I, p. 104, Tessin, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_vd",
+      "name": "Vaud",
+      "population_value": 278809,
+      "endpoint_values": [
+        247655,
+        281379
+      ],
+      "locator": "Table I, p. 104, Vaud, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_vs",
+      "name": "Valais",
+      "population_value": 113489,
+      "endpoint_values": [
+        101985,
+        114438
+      ],
+      "locator": "Table I, p. 104, Valais, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_ne",
+      "name": "Neuchâtel",
+      "population_value": 124897,
+      "endpoint_values": [
+        108153,
+        126279
+      ],
+      "locator": "Table I, p. 104, Neuchâtel, Wohnbevölkerung, cols. 6–7"
+    },
+    {
+      "unit_id": "ch_canton_ge",
+      "name": "Genève",
+      "population_value": 130543,
+      "endpoint_values": [
+        105509,
+        132609
+      ],
+      "locator": "Table I, p. 104, Genève, Wohnbevölkerung, cols. 6–7"
+    }
+  ]
+}

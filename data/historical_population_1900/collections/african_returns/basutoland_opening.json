@@ -1,0 +1,29 @@
+{
+  "unit_id": "cshapes_gw_570",
+  "date": "1900-01-01",
+  "source_id": "uk_colonial_tables_35",
+  "endpoint_sources": [
+    "uk_colonial_tables_35",
+    "uk_colonial_tables_35"
+  ],
+  "locator": "Basutoland, p. 302, Table 1. 1891, 1904, 1911 census columns. Row 1891, Basutoland. / Basutoland, p. 302, Table 1. 1891, 1904, 1911 census columns. Row 1904-04-18, Basutoland.",
+  "endpoint_dates": [
+    "1891",
+    "1904-04-18"
+  ],
+  "interpolation_reference_dates": [
+    "1891-07-01",
+    "1904-04-18"
+  ],
+  "country_endpoint_values": [
+    218902,
+    348848
+  ],
+  "population_value": 305255,
+  "units": [],
+  "population_lower": null,
+  "population_upper": null,
+  "scope": "Basutoland excluding Cape, Natal and Orange Free State.",
+  "method": "Linear interpolation over 1553/2337. July 1 is a computational midpoint for year-only returns. 1904 Basutoland day follows the imperial census report p. 71.",
+  "uncertainty_kind": "No statistical interval. War interrupted the 1901 census in southern Africa; enumeration error and changes within the intercensal period are unquantified."
+}

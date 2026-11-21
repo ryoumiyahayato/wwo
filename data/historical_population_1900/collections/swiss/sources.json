@@ -1,0 +1,11 @@
+[
+  {
+    "id": "swiss_federal_census_comparison_1911",
+    "title": "Vorläufige Resultate der eidgenössischen Volkszählung vom 1. Dezember 1910, verglichen mit früheren Volkszählungen",
+    "publisher": "Federal census returns published in Zeitschrift für schweizerische Statistik (1911), pp. 101–143",
+    "url": "https://www.sses.swiss/journal/archive/pdf/1911/1911-I-8.pdf",
+    "locator": "Definitions p. 101; Table I p. 104; Table IV pp. 142–143, retrospective 1888 and 1900 census columns",
+    "rights": "Numeric facts transcribed from 1911 publication; no reproduction of its layout. Canton totals cross-checked against Statistisches Jahrbuch der Schweiz 1919, III.a.3.",
+    "independent_url": "https://istmat.org/files/uploads/53038/statistisches_jahrbuch_der_schweiz_1919.pdf"
+  }
+]

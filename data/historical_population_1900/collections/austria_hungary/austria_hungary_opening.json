@@ -1,0 +1,444 @@
+{
+  "unit_id": "austria_hungary",
+  "date": "1900-01-01",
+  "source_id": "ah_census_fassmann_table7",
+  "source_ids": [
+    "ah_galician_statistical_bureau_1913",
+    "ah_hungarian_statistical_yearbook_1901",
+    "ah_census_fassmann_table7"
+  ],
+  "source_unit_ids": [
+    "ah_dual_monarchy_excluding_bosnia"
+  ],
+  "locator": "Table 7, p. 160, Austria, Hungary and the two territories combined. Source credited to Österreichisches Statistisches Zentralamt, Beiträge zur Österreichischen Statistik 550 A (1979), tables A 1.1–1.2.",
+  "census_date_labels": [
+    "1890-12-31",
+    "1900-12-31"
+  ],
+  "endpoint_dates": [
+    "1891-01-01",
+    "1901-01-01"
+  ],
+  "country_endpoint_values": [
+    41359204,
+    45405267
+  ],
+  "population_value": 45000882,
+  "method": "Linear interpolation across 3,287 of 3,652 elapsed days from the midnight ending each census date. The equivalent opening instants are 1 January 1891 and 1901. Round each half to whole persons and apportion its total among its census divisions by largest remainder, with unit ID breaking ties. Both halves exclude separately administered Bosnia-Herzegovina.",
+  "division_controls": [
+    {
+      "unit_id": "ah_cisleithania",
+      "name": "Cisleithania",
+      "endpoint_values": [
+        23895413,
+        26150708
+      ],
+      "population_value": 25925302
+    },
+    {
+      "unit_id": "ah_lands_of_st_stephen",
+      "name": "Lands of the Hungarian Crown",
+      "endpoint_values": [
+        17463791,
+        19254559
+      ],
+      "population_value": 19075580
+    }
+  ],
+  "units": [
+    {
+      "unit_id": "ah_galicia",
+      "name": "Galicia",
+      "source_unit_ids": [
+        "ah_galicia"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        6607816,
+        7315939
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 7245165,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_bukovina",
+      "name": "Bukovina",
+      "source_unit_ids": [
+        "ah_bukovina"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        646591,
+        730195
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 721839,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_silesia",
+      "name": "Austrian Silesia",
+      "source_unit_ids": [
+        "ah_silesia"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        605649,
+        680422
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 672949,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_moravia",
+      "name": "Moravia",
+      "source_unit_ids": [
+        "ah_moravia"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        2276870,
+        2437706
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 2421631,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_bohemia",
+      "name": "Bohemia",
+      "source_unit_ids": [
+        "ah_bohemia"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        5843094,
+        6318697
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 6271163,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_lower_austria",
+      "name": "Lower Austria",
+      "source_unit_ids": [
+        "ah_lower_austria"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        2661799,
+        3100493
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 3056648,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": [
+        "place:vienna"
+      ],
+      "place_membership_source": "https://www.wien.gv.at/en/education/history-capital"
+    },
+    {
+      "unit_id": "ah_upper_austria",
+      "name": "Upper Austria",
+      "source_unit_ids": [
+        "ah_upper_austria"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        785831,
+        810246
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 807806,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_salzburg",
+      "name": "Salzburg",
+      "source_unit_ids": [
+        "ah_salzburg"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        173510,
+        192763
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 190839,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_tyrol_vorarlberg",
+      "name": "Tyrol and Vorarlberg",
+      "source_unit_ids": [
+        "ah_tyrol_vorarlberg"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        928769,
+        981949
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 976634,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_styria",
+      "name": "Styria",
+      "source_unit_ids": [
+        "ah_styria"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        1282708,
+        1356494
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 1349119,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_carinthia",
+      "name": "Carinthia",
+      "source_unit_ids": [
+        "ah_carinthia"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        361008,
+        367324
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 366693,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_carniola",
+      "name": "Carniola",
+      "source_unit_ids": [
+        "ah_carniola"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        498958,
+        508150
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 507231,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_littoral",
+      "name": "Austrian Littoral",
+      "source_unit_ids": [
+        "ah_littoral"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        695384,
+        756546
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 750433,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_dalmatia",
+      "name": "Dalmatia",
+      "source_unit_ids": [
+        "ah_dalmatia"
+      ],
+      "source_id": "ah_galician_statistical_bureau_1913",
+      "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+      "endpoint_values": [
+        527426,
+        593784
+      ],
+      "control_unit_id": "ah_cisleithania",
+      "population_value": 587152,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_danube_left",
+      "name": "Left bank of the Danube",
+      "source_unit_ids": [
+        "ah_danube_left"
+      ],
+      "source_id": "ah_hungarian_statistical_yearbook_1901",
+      "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+      "endpoint_values": [
+        1889099,
+        2049611
+      ],
+      "control_unit_id": "ah_lands_of_st_stephen",
+      "population_value": 2033568,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_danube_right",
+      "name": "Right bank of the Danube",
+      "source_unit_ids": [
+        "ah_danube_right"
+      ],
+      "source_id": "ah_hungarian_statistical_yearbook_1901",
+      "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+      "endpoint_values": [
+        2771294,
+        2923401
+      ],
+      "control_unit_id": "ah_lands_of_st_stephen",
+      "population_value": 2908199,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_danube_tisza",
+      "name": "Between the Danube and Tisza",
+      "source_unit_ids": [
+        "ah_danube_tisza"
+      ],
+      "source_id": "ah_hungarian_statistical_yearbook_1901",
+      "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+      "endpoint_values": [
+        2778514,
+        3284233
+      ],
+      "control_unit_id": "ah_lands_of_st_stephen",
+      "population_value": 3233689,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_tisza_right",
+      "name": "Right bank of the Tisza",
+      "source_unit_ids": [
+        "ah_tisza_right"
+      ],
+      "source_id": "ah_hungarian_statistical_yearbook_1901",
+      "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+      "endpoint_values": [
+        1529259,
+        1674241
+      ],
+      "control_unit_id": "ah_lands_of_st_stephen",
+      "population_value": 1659751,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_tisza_left",
+      "name": "Left bank of the Tisza",
+      "source_unit_ids": [
+        "ah_tisza_left"
+      ],
+      "source_id": "ah_hungarian_statistical_yearbook_1901",
+      "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+      "endpoint_values": [
+        2076803,
+        2336104
+      ],
+      "control_unit_id": "ah_lands_of_st_stephen",
+      "population_value": 2310188,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_tisza_maros",
+      "name": "Tisza–Maros angle",
+      "source_unit_ids": [
+        "ah_tisza_maros"
+      ],
+      "source_id": "ah_hungarian_statistical_yearbook_1901",
+      "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+      "endpoint_values": [
+        1918623,
+        2054712
+      ],
+      "control_unit_id": "ah_lands_of_st_stephen",
+      "population_value": 2041110,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_transylvania",
+      "name": "Beyond the Királyhágó (Transylvania)",
+      "source_unit_ids": [
+        "ah_transylvania"
+      ],
+      "source_id": "ah_hungarian_statistical_yearbook_1901",
+      "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+      "endpoint_values": [
+        2267935,
+        2476998
+      ],
+      "control_unit_id": "ah_lands_of_st_stephen",
+      "population_value": 2456103,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_fiume",
+      "name": "Fiume town and district",
+      "source_unit_ids": [
+        "ah_fiume"
+      ],
+      "source_id": "ah_hungarian_statistical_yearbook_1901",
+      "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+      "endpoint_values": [
+        30337,
+        38955
+      ],
+      "control_unit_id": "ah_lands_of_st_stephen",
+      "population_value": 38094,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    },
+    {
+      "unit_id": "ah_croatia_slavonia",
+      "name": "Croatia-Slavonia",
+      "source_unit_ids": [
+        "ah_croatia_slavonia"
+      ],
+      "source_id": "ah_hungarian_statistical_yearbook_1901",
+      "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+      "endpoint_values": [
+        2201927,
+        2416304
+      ],
+      "control_unit_id": "ah_lands_of_st_stephen",
+      "population_value": 2394878,
+      "geometry_status": "no_base_map_geometry",
+      "place_ids": []
+    }
+  ]
+}

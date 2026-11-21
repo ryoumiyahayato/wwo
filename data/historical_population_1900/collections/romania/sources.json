@@ -1,0 +1,28 @@
+[
+  {
+    "id": "ro_colescu_1899_census_report",
+    "title": "Recensământul general al populațiunei României din decembrie 1899: rezultate definitive",
+    "publisher": "Serviciul Statisticei Generale, Ministerul Domeniilor (1905)",
+    "url": "https://bibgtkneamt.ebibliophil.ro/mon/recensamantul-general-al-populatiunei-romaniei-din-decembrie-1899-pcx9fwwk",
+    "locator": "Biblioteca Județeană G. T. Kirileanu Neamț, catalogue of the definitive census report",
+    "rights": "Catalogue reference only"
+  },
+  {
+    "id": "ro_huber_1913_census_comparison",
+    "title": "Chronique de démographie: Recensement de la Roumanie en 1912",
+    "publisher": "Michel Huber, Journal de la Société de statistique de Paris, vol. 54 (1913), reproducing Colescu's official Bulletin statistique de Roumanie, nos. 28–29",
+    "url": "https://www.numdam.org/item/JSFS_1913__54__342_1.pdf",
+    "locator": "Printed p. 345 (PDF page 5), comparative table, Population de droit, 1899 column",
+    "rights": "Numeric facts transcribed from a publicly accessible scan; scan redistribution rights not asserted",
+    "raw_paths": ["raw/1899_census_comparison.csv"]
+  },
+  {
+    "id": "ro_transilvania_1900_provisional_returns",
+    "title": "Recensemêntul general al populațiunii Regatului Român din Decembre 1899",
+    "publisher": "Transilvania, vol. 31, no. VII (July 1900), reproducing the census office report and summarizing its provisional returns",
+    "url": "https://www.bcucluj.ro/synfilebibdigit/periodice/transilvania/1900/BCUCLUJ_FP_279996_1900_031_007.pdf",
+    "locator": "Printed pp. 186–190 (PDF pages 2–6), enumeration procedure and provisional stable residents",
+    "rights": "Numeric facts transcribed from a publicly accessible scan; scan redistribution rights not asserted",
+    "raw_paths": ["raw/1899_provisional_residents.csv"]
+  }
+]

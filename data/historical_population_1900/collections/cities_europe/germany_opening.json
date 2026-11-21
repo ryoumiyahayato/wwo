@@ -1,0 +1,311 @@
+{
+  "unit_id": "german_empire",
+  "date": "1900-01-01",
+  "population_value": 55619152,
+  "source_id": "de_jahrbuch_1902_census",
+  "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Deutsches Reich, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Deutsches Reich, 1900-12-01",
+  "method": "sum_of_linearly_interpolated_first_level_census_units",
+  "endpoint_dates": [
+    "1895-12-02",
+    "1900-12-01"
+  ],
+  "country_endpoint_values": [
+    52279901,
+    56367178
+  ],
+  "country_interpolated_value": 55619150,
+  "difference_from_country_interpolation": 2,
+  "units": [
+    {
+      "unit_id": "administrative_region:germany_preussen",
+      "name": "Königreich Preußen",
+      "population_value": 33993492,
+      "place_ids": [
+        "place:berlin",
+        "place:cologne"
+      ],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Königreich Preußen, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Königreich Preußen, 1900-12-01",
+      "endpoint_values": [
+        31855123,
+        34472509
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_bayern",
+      "name": "Königreich Bayern",
+      "population_value": 6110627,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Königreich Bayern, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Königreich Bayern, 1900-12-01",
+      "endpoint_values": [
+        5818544,
+        6176057
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_sachsen",
+      "name": "Königreich Sachsen",
+      "population_value": 4126352,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Königreich Sachsen, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Königreich Sachsen, 1900-12-01",
+      "endpoint_values": [
+        3787688,
+        4202216
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_wuerttemberg",
+      "name": "Königreich Württemberg",
+      "population_value": 2153315,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Königreich Württemberg, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Königreich Württemberg, 1900-12-01",
+      "endpoint_values": [
+        2081151,
+        2169480
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_baden",
+      "name": "Großherzogtum Baden",
+      "population_value": 1841868,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Baden, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Baden, 1900-12-01",
+      "endpoint_values": [
+        1725464,
+        1867944
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_hessen",
+      "name": "Großherzogtum Hessen",
+      "population_value": 1105092,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Hessen, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Hessen, 1900-12-01",
+      "endpoint_values": [
+        1039020,
+        1119893
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_mecklenburg_schwerin",
+      "name": "Großherzogtum Mecklenburg-Schwerin",
+      "population_value": 605879,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Mecklenburg-Schwerin, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Mecklenburg-Schwerin, 1900-12-01",
+      "endpoint_values": [
+        597436,
+        607770
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_sachsen_weimar",
+      "name": "Großherzogtum Sachsen-Weimar-Eisenach",
+      "population_value": 358544,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Sachsen-Weimar, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Sachsen-Weimar, 1900-12-01",
+      "endpoint_values": [
+        339217,
+        362873
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_mecklenburg_strelitz",
+      "name": "Großherzogtum Mecklenburg-Strelitz",
+      "population_value": 102408,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Mecklenburg-Strelitz, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Mecklenburg-Strelitz, 1900-12-01",
+      "endpoint_values": [
+        101540,
+        102602
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_oldenburg",
+      "name": "Großherzogtum Oldenburg",
+      "population_value": 394524,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Oldenburg, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Großherzogthum Oldenburg, 1900-12-01",
+      "endpoint_values": [
+        373739,
+        399180
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_braunschweig",
+      "name": "Herzogtum Braunschweig",
+      "population_value": 458821,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Herzogthum Braunschweig, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Herzogthum Braunschweig, 1900-12-01",
+      "endpoint_values": [
+        434213,
+        464333
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_sachsen_meiningen",
+      "name": "Herzogtum Sachsen-Meiningen",
+      "population_value": 247670,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Herzogthum Sachsen-Meiningen, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Herzogthum Sachsen-Meiningen, 1900-12-01",
+      "endpoint_values": [
+        234005,
+        250731
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_sachsen_altenburg",
+      "name": "Herzogtum Sachsen-Altenburg",
+      "population_value": 192242,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Herzogthum Sachsen-Altenburg, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Herzogthum Sachsen-Altenburg, 1900-12-01",
+      "endpoint_values": [
+        180313,
+        194914
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_sachsen_coburg_gotha",
+      "name": "Herzogtum Sachsen-Coburg und Gotha",
+      "population_value": 227181,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Herzogthum Sachsen-Coburg-Gotha, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Herzogthum Sachsen-Coburg-Gotha, 1900-12-01",
+      "endpoint_values": [
+        216603,
+        229550
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_anhalt",
+      "name": "Herzogtum Anhalt",
+      "population_value": 311915,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Herzogthum Anhalt, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Herzogthum Anhalt, 1900-12-01",
+      "endpoint_values": [
+        293298,
+        316085
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_schwarzburg_sondershausen",
+      "name": "Fürstentum Schwarzburg-Sondershausen",
+      "population_value": 80381,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Schwarzburg-Sondershausen, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Schwarzburg-Sondershausen, 1900-12-01",
+      "endpoint_values": [
+        78074,
+        80898
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_schwarzburg_rudolstadt",
+      "name": "Fürstentum Schwarzburg-Rudolstadt",
+      "population_value": 92258,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Schwarzburg-Rudolstadt, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Schwarzburg-Rudolstadt, 1900-12-01",
+      "endpoint_values": [
+        88685,
+        93059
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_waldeck",
+      "name": "Fürstentum Waldeck und Pyrmont",
+      "population_value": 57890,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Waldeck, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Waldeck, 1900-12-01",
+      "endpoint_values": [
+        57766,
+        57918
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_reuss_aelter",
+      "name": "Fürstentum Reuß ältere Linie",
+      "population_value": 68226,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Reuß älterer Linie, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Reuß älterer Linie, 1900-12-01",
+      "endpoint_values": [
+        67468,
+        68396
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_reuss_juenger",
+      "name": "Fürstentum Reuß jüngere Linie",
+      "population_value": 137914,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Reuß jüngerer Linie, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Reuß jüngerer Linie, 1900-12-01",
+      "endpoint_values": [
+        132130,
+        139210
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_schaumburg_lippe",
+      "name": "Fürstentum Schaumburg-Lippe",
+      "population_value": 42783,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Schaumburg-Lippe, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Schaumburg-Lippe, 1900-12-01",
+      "endpoint_values": [
+        41224,
+        43132
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_lippe",
+      "name": "Fürstentum Lippe",
+      "population_value": 138202,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Lippe, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Fürstenthum Lippe, 1900-12-01",
+      "endpoint_values": [
+        134854,
+        138952
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_luebeck",
+      "name": "Freie und Hansestadt Lübeck",
+      "population_value": 94313,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Freie und Hansestadt Lübeck, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Freie und Hansestadt Lübeck, 1900-12-01",
+      "endpoint_values": [
+        83324,
+        96775
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_bremen",
+      "name": "Freie Hansestadt Bremen",
+      "population_value": 219670,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Freie Hansestadt Bremen, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Freie Hansestadt Bremen, 1900-12-01",
+      "endpoint_values": [
+        196404,
+        224882
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_hamburg",
+      "name": "Freie und Hansestadt Hamburg",
+      "population_value": 752479,
+      "place_ids": [],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Freie und Hansestadt Hamburg, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Freie und Hansestadt Hamburg, 1900-12-01",
+      "endpoint_values": [
+        681632,
+        768349
+      ]
+    },
+    {
+      "unit_id": "administrative_region:germany_elsass_lothringen",
+      "name": "Reichsland Elsaß-Lothringen",
+      "population_value": 1705106,
+      "place_ids": [
+        "place:strasbourg"
+      ],
+      "locator": "Statistisches Jahrbuch 1902, printed p. 1, I.1, row Reichsland Elsaß-Lothringen, 1895-12-02 + Statistisches Jahrbuch 1902, printed p. 1, I.1, row Reichsland Elsaß-Lothringen, 1900-12-01",
+      "endpoint_values": [
+        1640986,
+        1719470
+      ]
+    }
+  ]
+}

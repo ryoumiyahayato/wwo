@@ -1,0 +1,288 @@
+{
+  "unit_id": "mexican_republic",
+  "date": "1900-01-01",
+  "population_value": 13447810,
+  "source_id": "mx_yearbook_1941_table11",
+  "locator": "pp. 24-25, Table 11, 1895 and 1900 columns; INEGI 1996, p. 68",
+  "endpoint_dates": [
+    "1895-10-20",
+    "1900-10-28"
+  ],
+  "country_endpoint_values": [
+    12632427,
+    13607272
+  ],
+  "method": "Linear interpolation by elapsed days (767/917), followed by largest-remainder rounding to the national total. Baja California is combined across both districts. Yucatán includes the later Quintana Roo.",
+  "units": [
+    {
+      "unit_id": "mx_aguascalientes",
+      "name": "Aguascalientes",
+      "population_value": 102776,
+      "endpoint_values": [
+        104615,
+        102416
+      ]
+    },
+    {
+      "unit_id": "mx_baja_california",
+      "name": "Baja California",
+      "population_value": 46744,
+      "endpoint_values": [
+        42245,
+        47624
+      ]
+    },
+    {
+      "unit_id": "mx_campeche",
+      "name": "Campeche",
+      "population_value": 86800,
+      "endpoint_values": [
+        88121,
+        86542
+      ]
+    },
+    {
+      "unit_id": "mx_chiapas",
+      "name": "Chiapas",
+      "population_value": 354060,
+      "endpoint_values": [
+        319599,
+        360799
+      ]
+    },
+    {
+      "unit_id": "mx_chihuahua",
+      "name": "Chihuahua",
+      "population_value": 317149,
+      "endpoint_values": [
+        262771,
+        327784
+      ]
+    },
+    {
+      "unit_id": "mx_coahuila",
+      "name": "Coahuila",
+      "population_value": 287792,
+      "endpoint_values": [
+        241026,
+        296938
+      ]
+    },
+    {
+      "unit_id": "mx_colima",
+      "name": "Colima",
+      "population_value": 63583,
+      "endpoint_values": [
+        55752,
+        65115
+      ]
+    },
+    {
+      "unit_id": "mx_distrito_federal",
+      "name": "Distrito Federal",
+      "population_value": 530867,
+      "endpoint_values": [
+        476413,
+        541516
+      ]
+    },
+    {
+      "unit_id": "mx_durango",
+      "name": "Durango",
+      "population_value": 358006,
+      "endpoint_values": [
+        295105,
+        370307
+      ]
+    },
+    {
+      "unit_id": "mx_guanajuato",
+      "name": "Guanajuato",
+      "population_value": 1061860,
+      "endpoint_values": [
+        1062554,
+        1061724
+      ]
+    },
+    {
+      "unit_id": "mx_guerrero",
+      "name": "Guerrero",
+      "population_value": 469576,
+      "endpoint_values": [
+        420339,
+        479205
+      ]
+    },
+    {
+      "unit_id": "mx_hidalgo",
+      "name": "Hidalgo",
+      "population_value": 597480,
+      "endpoint_values": [
+        558769,
+        605051
+      ]
+    },
+    {
+      "unit_id": "mx_jalisco",
+      "name": "Jalisco",
+      "population_value": 1146258,
+      "endpoint_values": [
+        1107227,
+        1153891
+      ]
+    },
+    {
+      "unit_id": "mx_mexico",
+      "name": "México",
+      "population_value": 919276,
+      "endpoint_values": [
+        841618,
+        934463
+      ]
+    },
+    {
+      "unit_id": "mx_michoacan",
+      "name": "Michoacán",
+      "population_value": 929377,
+      "endpoint_values": [
+        896495,
+        935808
+      ]
+    },
+    {
+      "unit_id": "mx_morelos",
+      "name": "Morelos",
+      "population_value": 159991,
+      "endpoint_values": [
+        159355,
+        160115
+      ]
+    },
+    {
+      "unit_id": "mx_nuevo_leon",
+      "name": "Nuevo León",
+      "population_value": 324881,
+      "endpoint_values": [
+        309252,
+        327937
+      ]
+    },
+    {
+      "unit_id": "mx_oaxaca",
+      "name": "Oaxaca",
+      "population_value": 938209,
+      "endpoint_values": [
+        884909,
+        948633
+      ]
+    },
+    {
+      "unit_id": "mx_puebla",
+      "name": "Puebla",
+      "population_value": 1015126,
+      "endpoint_values": [
+        984413,
+        1021133
+      ]
+    },
+    {
+      "unit_id": "mx_queretaro",
+      "name": "Querétaro",
+      "population_value": 231761,
+      "endpoint_values": [
+        228551,
+        232389
+      ]
+    },
+    {
+      "unit_id": "mx_san_luis_potosi",
+      "name": "San Luis Potosí",
+      "population_value": 574290,
+      "endpoint_values": [
+        568449,
+        575432
+      ]
+    },
+    {
+      "unit_id": "mx_sinaloa",
+      "name": "Sinaloa",
+      "population_value": 290512,
+      "endpoint_values": [
+        258865,
+        296701
+      ]
+    },
+    {
+      "unit_id": "mx_sonora",
+      "name": "Sonora",
+      "population_value": 216709,
+      "endpoint_values": [
+        191281,
+        221682
+      ]
+    },
+    {
+      "unit_id": "mx_tabasco",
+      "name": "Tabasco",
+      "population_value": 155745,
+      "endpoint_values": [
+        134839,
+        159834
+      ]
+    },
+    {
+      "unit_id": "mx_tamaulipas",
+      "name": "Tamaulipas",
+      "population_value": 216912,
+      "endpoint_values": [
+        206502,
+        218948
+      ]
+    },
+    {
+      "unit_id": "mx_tepic_later_nayarit",
+      "name": "Tepic (later Nayarit)",
+      "population_value": 149882,
+      "endpoint_values": [
+        148776,
+        150098
+      ]
+    },
+    {
+      "unit_id": "mx_tlaxcala",
+      "name": "Tlaxcala",
+      "population_value": 171413,
+      "endpoint_values": [
+        166803,
+        172315
+      ]
+    },
+    {
+      "unit_id": "mx_veracruz",
+      "name": "Veracruz",
+      "population_value": 962272,
+      "endpoint_values": [
+        866355,
+        981030
+      ]
+    },
+    {
+      "unit_id": "mx_yucatan",
+      "name": "Yucatán",
+      "population_value": 307885,
+      "endpoint_values": [
+        298850,
+        309652
+      ]
+    },
+    {
+      "unit_id": "mx_zacatecas",
+      "name": "Zacatecas",
+      "population_value": 460618,
+      "endpoint_values": [
+        452578,
+        462190
+      ]
+    }
+  ]
+}

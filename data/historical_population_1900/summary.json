@@ -1,0 +1,418 @@
+{
+  "reference_date": "1900-01-01",
+  "release_status": "PARTIAL",
+  "research_observations_by_collection": {
+    "african_returns": 11,
+    "americas": 657,
+    "austria_hungary": 54,
+    "britain": 206,
+    "cabo_verde": 25,
+    "cities_europe": 1742,
+    "crown_islands": 29,
+    "danish": 56,
+    "eastern": 1105,
+    "india_comparable": 84,
+    "japan_taiwan": 232,
+    "liechtenstein": 25,
+    "philippines": 51,
+    "romania": 6,
+    "russia": 1721,
+    "swiss": 57,
+    "world": 499,
+    "asian_interpolation": 62
+  },
+  "cited_sources": 79,
+  "world_midyear": 1601675694,
+  "world_jan1_interpolated": 1595074248,
+  "research_component_sum_jan1": 1595074246,
+  "research_regions": {
+    "Africa": {
+      "statistical_units": 46,
+      "opening_research_estimate": 129975605,
+      "units_with_polity_candidates": 41,
+      "people_without_polity_candidate": 193635,
+      "grades": {
+        "C": 2,
+        "not_assessed_for_this_revision": 37,
+        "D": 4,
+        "E": 2,
+        "B": 1
+      },
+      "production_root_ids": [
+        "cshapes_gw_402",
+        "cshapes_gw_570",
+        "cshapes_gw_585",
+        "cshapes_gw_590"
+      ],
+      "production_people": 998513,
+      "production_pct_of_regional_research_estimate": 0.768,
+      "people_with_opening_subdivision": 373996
+    },
+    "America": {
+      "statistical_units": 46,
+      "opening_research_estimate": 145035775,
+      "units_with_polity_candidates": 34,
+      "people_without_polity_candidate": 399117,
+      "grades": {
+        "C": 32,
+        "D": 10,
+        "B": 3,
+        "not_assessed_for_this_revision": 1
+      },
+      "production_root_ids": [
+        "argentina_1900",
+        "brazil_1900",
+        "chile_1900",
+        "colony_of_newfoundland",
+        "cshapes_gw_3",
+        "cshapes_gw_31",
+        "cshapes_gw_52",
+        "cshapes_gw_53",
+        "cshapes_gw_6",
+        "cshapes_gw_66",
+        "cuba_occupation_1900",
+        "dominion_of_canada",
+        "mexican_republic",
+        "united_states_1900"
+      ],
+      "production_people": 122296918,
+      "production_pct_of_regional_research_estimate": 84.322,
+      "people_with_opening_subdivision": 111228173
+    },
+    "Asia": {
+      "statistical_units": 33,
+      "opening_research_estimate": 894378060,
+      "units_with_polity_candidates": 25,
+      "people_without_polity_candidate": 1424075,
+      "grades": {
+        "D": 10,
+        "E": 17,
+        "C": 3,
+        "B": 1,
+        "A": 1,
+        "not_assessed_for_this_revision": 1
+      },
+      "production_root_ids": [
+        "cshapes_gw_750",
+        "cshapes_gw_780",
+        "cshapes_gw_850",
+        "empire_of_japan",
+        "korean_empire",
+        "qing_empire"
+      ],
+      "production_people": 179952291,
+      "production_pct_of_regional_research_estimate": 20.12,
+      "people_with_opening_subdivision": 71028669
+    },
+    "Europe": {
+      "statistical_units": 29,
+      "opening_research_estimate": 419144007,
+      "units_with_polity_candidates": 24,
+      "people_without_polity_candidate": 571017,
+      "grades": {
+        "D": 6,
+        "A": 14,
+        "B": 6,
+        "C": 2,
+        "E": 1
+      },
+      "production_root_ids": [
+        "austria_hungary",
+        "british_isles_1900",
+        "country_fra",
+        "cshapes_gw_338",
+        "german_empire",
+        "iceland_under_denmark",
+        "kingdom_of_belgium",
+        "kingdom_of_italy",
+        "kingdom_of_luxembourg",
+        "kingdom_of_netherlands",
+        "kingdom_of_portugal",
+        "kingdom_of_romania",
+        "kingdom_of_serbia",
+        "kingdom_of_spain",
+        "principality_of_bulgaria",
+        "russian_empire",
+        "sweden_norway_union",
+        "swiss_confederation"
+      ],
+      "production_people": 407154320,
+      "production_pct_of_regional_research_estimate": 97.139,
+      "people_with_opening_subdivision": 332407293
+    },
+    "Oceania": {
+      "statistical_units": 6,
+      "opening_research_estimate": 6540799,
+      "units_with_polity_candidates": 4,
+      "people_without_polity_candidate": 214004,
+      "grades": {
+        "B": 1,
+        "C": 2,
+        "E": 3
+      },
+      "production_root_ids": [
+        "australia_colonies_1900",
+        "cshapes_gw_4",
+        "cshapes_gw_920"
+      ],
+      "production_people": 4785130,
+      "production_pct_of_regional_research_estimate": 73.158,
+      "people_with_opening_subdivision": 0
+    }
+  },
+  "production_roots": 43,
+  "partially_located_legacy_roots": 2,
+  "documented_people_under_legacy_controls": 71028669,
+  "replaced_legacy_roots": 27,
+  "new_roots": 16,
+  "production_people": 715187172,
+  "production_people_pct_world_estimate": 44.837,
+  "population_outside_evidence_opening_estimate": 879887076,
+  "legacy_only_people": 739991331,
+  "authoritative_total_for_new_game": 1455178503,
+  "roots_with_partitions": 15,
+  "disjoint_leaves": 335,
+  "people_in_partitions": 515038131,
+  "political_catalogue_at_opening": 146,
+  "political_catalogue_with_research_candidate": 145,
+  "political_catalogue_members_of_production_groups": 50,
+  "dated_admin_catalogues": {
+    "britain_historic_counties_identity.json": {
+      "units": 414,
+      "with_linked_observation": 88,
+      "with_opening_partition": 51
+    },
+    "france_administrative_identity_1900.json": {
+      "units": 87,
+      "with_linked_observation": 87,
+      "with_opening_partition": 87
+    },
+    "france_lower_1900_identity.json": {
+      "units": 3374,
+      "with_linked_observation": 362,
+      "with_opening_partition": 0
+    },
+    "german_administration_1900_identity.json": {
+      "units": 230,
+      "with_linked_observation": 40,
+      "with_opening_partition": 26
+    },
+    "russian_empire_1897_identity.json": {
+      "units": 930,
+      "with_linked_observation": 785,
+      "with_opening_partition": 0
+    }
+  },
+  "city_observation_count": 2267,
+  "city_keys_after_reviewed_matches": 1694,
+  "nonadditive_city_panels": [
+    {
+      "source_id": "ar_dge_bulletin_219",
+      "date": "1895-05-10",
+      "bands": {
+        "500k+": 1
+      }
+    },
+    {
+      "source_id": "ar_dge_bulletin_219",
+      "date": "1914-06-01",
+      "bands": {
+        "500k+": 1
+      }
+    },
+    {
+      "source_id": "british_empire_census_1901",
+      "date": "1891",
+      "bands": {
+        "50k–<100k": 2
+      }
+    },
+    {
+      "source_id": "british_empire_census_1901",
+      "date": "1901-03-01",
+      "bands": {
+        "100k–<200k": 1
+      }
+    },
+    {
+      "source_id": "british_empire_census_1901",
+      "date": "1904-04-18",
+      "bands": {
+        "50k–<100k": 1,
+        "100k–<200k": 1
+      }
+    },
+    {
+      "source_id": "egypt_historical_census_primary_tables",
+      "date": "1897-06-01",
+      "bands": {
+        "200k–<500k": 1,
+        "500k+": 1,
+        "50k–<100k": 1
+      }
+    },
+    {
+      "source_id": "egypt_historical_census_primary_tables",
+      "date": "1907-04-29",
+      "bands": {
+        "200k–<500k": 1,
+        "500k+": 1,
+        "50k–<100k": 1
+      }
+    },
+    {
+      "source_id": "india_statistical_abstract_1905",
+      "date": "1891",
+      "bands": {
+        "50k–<100k": 43,
+        "100k–<200k": 22,
+        "500k+": 3,
+        "200k–<500k": 4
+      }
+    },
+    {
+      "source_id": "india_statistical_abstract_1905",
+      "date": "1901-03-01",
+      "bands": {
+        "50k–<100k": 49,
+        "100k–<200k": 20,
+        "500k+": 4,
+        "200k–<500k": 6
+      }
+    },
+    {
+      "source_id": "ireland_general_census_1911",
+      "date": "1901-03-31",
+      "bands": {
+        "200k–<500k": 2,
+        "50k–<100k": 1
+      }
+    },
+    {
+      "source_id": "ireland_general_census_1911",
+      "date": "1911-04-02",
+      "bands": {
+        "200k–<500k": 2,
+        "50k–<100k": 1
+      }
+    },
+    {
+      "source_id": "ph_census_1903_vol2",
+      "date": "1903-03-02",
+      "bands": {
+        "200k–<500k": 1
+      }
+    },
+    {
+      "source_id": "reba_chandler_1900",
+      "date": "1900",
+      "bands": {
+        "100k–<200k": 140,
+        "50k–<100k": 350,
+        "200k–<500k": 98,
+        "500k+": 43
+      }
+    },
+    {
+      "source_id": "russia_first_census",
+      "date": "1897-02-09",
+      "bands": {
+        "100k–<200k": 12,
+        "50k–<100k": 36,
+        "200k–<500k": 4,
+        "500k+": 3
+      }
+    },
+    {
+      "source_id": "swiss_federal_census_comparison_1911",
+      "date": "1900-12-01",
+      "bands": {
+        "100k–<200k": 2,
+        "50k–<100k": 2
+      }
+    },
+    {
+      "source_id": "tw_governor_general_1900",
+      "date": "1900-12-31",
+      "bands": {
+        "50k–<100k": 1
+      }
+    },
+    {
+      "source_id": "us_census_gibson_urban",
+      "date": "1890-06-02",
+      "bands": {
+        "500k+": 4,
+        "200k–<500k": 12,
+        "100k–<200k": 12,
+        "50k–<100k": 30
+      }
+    },
+    {
+      "source_id": "us_census_gibson_urban",
+      "date": "1900-06-01",
+      "bands": {
+        "500k+": 6,
+        "200k–<500k": 13,
+        "100k–<200k": 19,
+        "50k–<100k": 40
+      }
+    },
+    {
+      "source_id": "us_twelfth_census_vol1",
+      "date": "1890-06-02",
+      "bands": {
+        "500k+": 4,
+        "200k–<500k": 6,
+        "100k–<200k": 8,
+        "50k–<100k": 6
+      }
+    },
+    {
+      "source_id": "us_twelfth_census_vol1",
+      "date": "1900-06-01",
+      "bands": {
+        "500k+": 6,
+        "200k–<500k": 7,
+        "100k–<200k": 8,
+        "50k–<100k": 9
+      }
+    }
+  ],
+  "dated_city_remainders": 751,
+  "source_panels_are_nonadditive": true,
+  "political_catalogue_with_any_statistical_candidate": 146,
+  "source_statistical_units": 2176,
+  "opening_by_source_type": {
+    "territorial_returns": {
+      "roots": 19,
+      "people": 308072919
+    },
+    "historical_world_reconstruction": {
+      "roots": 24,
+      "people": 336085584
+    },
+    "documented_subdivisions_of_legacy_control": {
+      "roots": 2,
+      "people": 71028669
+    }
+  },
+  "city_index_representative_bands": {
+    "100k–<200k": 143,
+    "50k–<100k": 358,
+    "200k–<500k": 100,
+    "500k+": 42
+  },
+  "city_index_unresolved": 31,
+  "structural_observations_by_source": {
+    "rus_rel_97": 1743,
+    "rus_sos_97": 1755,
+    "rus_lan_97": 12636,
+    "rus_age_97": 2356,
+    "us_occupation_special_report": 7,
+    "swiss_federal_census_comparison_1911": 2
+  },
+  "structure_unknown_policy": "No group fractions assigned outside the original source scope. Household observations embedded in other tables remain in population records.",
+  "dated_parent_controls": 430,
+  "dated_parent_controls_arithmetic_closure": 390
+}

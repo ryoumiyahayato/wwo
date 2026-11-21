@@ -1,0 +1,16 @@
+{
+  "unit_id": "cshapes_gw_780",
+  "date": "1900-01-01",
+  "population_value": 3469224,
+  "source_id": "ceylon_gazette_5741_q1_1900",
+  "locator": "Section I, p. 1, island population at 31 March and increase during quarter",
+  "method": "Carry the 1899-12-31 close across midnight. Recover the previous quarter end by subtracting the published quarterly increase of 14,811 (9,484 natural increase plus 5,327 net immigrant Indian labourers) from the 31 March estimate of 3,484,035.",
+  "units": [],
+  "endpoint_dates": [
+    "1900-03-31"
+  ],
+  "country_endpoint_values": [
+    3484035
+  ],
+  "quarter_reported_increase": 14811
+}

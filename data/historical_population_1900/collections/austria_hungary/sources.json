@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ah_galician_statistical_bureau_1913",
+    "title": "Podręcznik Statystyki Galicyi, tom IX, część pierwsza",
+    "publisher": "Krajowe Biuro Statystyczne, edited by Tadeusz Piłat, Lwów, 1913",
+    "url": "https://mbc.cyfrowemazowsze.pl/Content/20886/PDF/20886.pdf",
+    "locator": "Part I, printed p. 1. Table 2 lists population present by Austrian land in 1890 and 1900. Table 1 distinguishes the Reichsrat lands, the Crown of St Stephen and Bosnia-Herzegovina.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "census_time_source": "https://csu.gov.cz/population-census-in-austria-hungary-1868-1910"
+  },
+  {
+    "id": "ah_hungarian_statistical_yearbook_1901",
+    "title": "Magyar statisztikai évkönyv 1901, új folyam IX",
+    "publisher": "Magyar Királyi Központi Statisztikai Hivatal, Budapest",
+    "url": "https://www.kshkonyvtar.hu/file-download/L2hvbWUvc2lsaW5mby9hcHBsaWNhdGlvbi93b3JrZGlyL2NrZWRpdG9yQ3VzdG9tRmlsZXMvRsOpbnllcyBFbGVrIGRpZ2l0w6FsaXMgc3RhdGlzenRpa2FpIGvDtm55dnTDoXIvTWFneWFyIFN0YXRpc3p0aWthaSDDiXZrw7ZueXYg4oCTIMOaaiBmb2x5YW0vTVNFMl8xOTAxLnBkZg%3D%3D",
+    "locator": "Population table 1, pp. 10–12, constitutional and statistical divisions. Population table 4, section III, total civil and military population at the four latest censuses.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "census_time_source": "https://www.ksh.hu/docs/hun/xftp/idoszaki/pdf/nepcsoport.pdf"
+  },
+  {
+    "id": "ah_census_fassmann_table7",
+    "title": "Die Bevölkerungsentwicklung 1850–1910",
+    "publisher": "Heinz Fassmann, Österreichische Akademie der Wissenschaften",
+    "url": "https://www.austriaca.at/0xc1aa5576%200x0025215d.pdf",
+    "locator": "Table 7, p. 160, Austria, Hungary and the two territories combined. Source credited to Österreichisches Statistisches Zentralamt, Beiträge zur Österreichischen Statistik 550 A (1979), tables A 1.1–1.2.",
+    "rights": "Numeric facts and attribution only.",
+    "scope_note": "The table identifies both totals as people present, including military personnel, and excludes Bosnia-Herzegovina in both 1890 and 1900."
+  }
+]

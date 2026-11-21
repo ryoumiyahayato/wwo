@@ -1,0 +1,30 @@
+[
+  {
+    "id": "uk_general_census_report_1901",
+    "title": "Census of England and Wales, 1901. General Report with Appendices",
+    "publisher": "General Register Office / HMSO (London, 1904)",
+    "url": "https://www.visionofbritain.org.uk/census/EW1901GEN/14",
+    "locator": "General Report, section The United Kingdom, population table by division, 1891 and 1901",
+    "rights": "Historical census numbers transcribed; digital report is linked.",
+    "companion_table": "https://wellcomecollection.org/works/mbq6vgjb",
+    "dates_reference": "https://www.nationalarchives.gov.uk/help-with-your-research/research-guides/census-records/"
+  },
+  {
+    "id": "ireland_general_census_1911",
+    "title": "Census of Ireland, 1911. General Report, with Tables and Appendix",
+    "publisher": "Census of Ireland; HMSO (Dublin, 1913); digitized by Central Statistics Office",
+    "url": "https://www.cso.ie/en/media/csoie/releasespublications/documents/ep/storiesfromcensus1911/census1911originalreports/459-General_report%2C_Ireland%2C_1911.pdf",
+    "locator": "Tables 43 (p. 62), 48 and 48A (p. 65), PDF leaves 128 and 131.",
+    "rights": "Historical census counts transcribed; the digitized original is linked."
+  },
+  {
+    "id": "england_wales_summary_tables_1901",
+    "title": "Census of England and Wales, 1901. Summary Tables",
+    "publisher": "General Register Office / HMSO, London; Wellcome Collection",
+    "url": "https://wellcomecollection.org/works/ka7g6w5z/items?manifest=6&canvas=16",
+    "locator": "Table III, printed p. 6, Ancient Counties, Persons 1891 and 1901.",
+    "rights": "Historical census facts transcribed. Wellcome Collection marks the digitized volume Public Domain Mark.",
+    "manifest_url": "https://iiif.wellcomecollection.org/presentation/v2/b32183161_0006",
+    "page_image": "https://iiif.wellcomecollection.org/image/b32183161_0006_0016.jp2/full/2100,/0/default.jpg"
+  }
+]

@@ -1,0 +1,16 @@
+city_key,city_name,chinese_name,gazetteer_loc_id,chinese_name_id,matched_names,matched_name_ids,gazetteer_source_id
+reba:chandler:143,Beijing,北京,D3068537,H0009750,Beijing|Peking,H0008555|H0009250,mcgd_v22
+reba:chandler:307,Chongqing,重慶,D3297454,H0428742,Chungking,H0427498,mcgd_v22
+reba:chandler:361,Datong,大同,DH018769-1,H0132243,Tatung,H0466294|H0466448,mcgd_v22
+reba:chandler:516,Guangzhou,廣州,D3074743,H0161298,Canton,H0136143,mcgd_v22
+reba:chandler:548,Hangzhou,杭州,D3380663,H0286639,Hangzhou|Hangchow,H0268000|H0267985,mcgd_v22
+reba:chandler:585,Hong Kong,香港,D3674929,H0171482,Hong Kong,H0140873,mcgd_v22
+reba:chandler:650,Jinan,濟南,D3283779,H0120088,Tsinan,H0118928,mcgd_v22
+reba:chandler:981,Nanchang,南昌,D3052316,H0231817,Nanchang,H0220908,mcgd_v22
+reba:chandler:984,Nanjing,南京,D3301275,H0202050,Nanjing|Nanking,H0191689|H0191707,mcgd_v22
+reba:chandler:1376,Taiyuan,太原,D2868760,H0132367,Taiyuan,H0128385,mcgd_v22
+reba:chandler:1418,Tianjin,天津,D3060441,H0094313,Tianjin|Tientsin,H0094029|H0094038,mcgd_v22
+reba:chandler:1419,Tianshui,天水,D3059397,H0353705,Tianshui|Tsinchow,H0349597|H0349695,mcgd_v22
+reba:chandler:1550,Wuzhou,梧州,D3333570,H0178195,Wuchow,H0177390,mcgd_v22
+reba:chandler:1551,Xiamen,廈門,D3319408,H0375398,Amoy,H0358956,mcgd_v22
+reba:chandler:1552,Xian,西安,D3045629,H0448127,Sian|Xi'an,H0437961|H0439694,mcgd_v22

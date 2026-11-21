@@ -1,0 +1,32 @@
+table,unit_id,parent_id,kind,name,source_row,earlier_total,later_male,later_female,later_total
+A,dk_faroe,kingdom_of_denmark,territory,Færøerne,Tilsammen,12955,7377,7853,15230
+A,dk_faroe_thorshavn,dk_faroe,city,Thorshavn,Thorshavn By,1303,767,889,1656
+A,dk_faroe_rural,dk_faroe,admin,Færøerne rural districts,Landdistr.,11652,6610,6964,13574
+B,iceland_under_denmark,kingdom_of_denmark,territory,Island,Island / Tilsammen,70927,37583,40887,78470
+B,dk_island_south,iceland_under_denmark,admin,Sønder Amt,Sønder Amt / Tilsammen,27671,13662,15356,29018
+B,dk_island_reykjavik,dk_island_south,city,Reykjavik,Reykjavik Kbst.,3886,3101,3581,6682
+B,dk_island_south_rural,dk_island_south,admin,Sønder Amt rural districts,Sønder Amt / Landdistr.,23785,10561,11775,22336
+B,dk_island_west,iceland_under_denmark,admin,Vester Amt,Vester Amt / Tilsammen,17110,9371,10360,19731
+B,dk_island_isafjordur,dk_island_west,city,Isafjörður,Isafjörður Kbst.,839,608,612,1220
+B,dk_island_west_rural,dk_island_west,admin,Vester Amt rural districts,Vester Amt / Landdistr.,16271,8763,9748,18511
+B,dk_island_northeast,iceland_under_denmark,admin,Nord- og Øster Amt,Nord- og Øster A. / Tilsammen,26146,14550,15171,29721
+B,dk_island_akureyri,dk_island_northeast,city,Akureyri,Akureyri Købst.,602,661,709,1370
+B,dk_island_seydisfjordur,dk_island_northeast,city,Seyðisfjörður,Seydisfjörður Købst. (fra 1894),,371,470,841
+B,dk_island_ne_rural,dk_island_northeast,admin,Nord- og Øster Amt rural districts,Nord- og Øster A. / Landdistr.,,13518,13992,27510
+B,dk_island_ne_1890_residual,dk_island_northeast,admin,Nord- og Øster Amt excluding Akureyri,Landdistr. incl. future Seydisfjörður,25544,,,
+C,dk_greenland,kingdom_of_denmark,territory,Grønland,Grønland / Tilsammen,10516,5612,6281,11893
+C,dk_greenland_north,dk_greenland,admin,Nordgrønland,Nordgrønland / Tilsammen,4684,2474,2743,5217
+C,dk_greenland_south,dk_greenland,admin,Sydgrønland,Syd- og Østgrønland / 1890 column,5832,,,
+C,dk_greenland_se,dk_greenland,admin,Syd- og Østgrønland,Syd- og Østgrønland / Tilsammen,,3138,3538,6676
+C,dk_greenland_east,dk_greenland_se,admin,Østgrønland,Syd- og Østgrønland / footnote 1,,,,441
+D,dk_west_indies,kingdom_of_denmark,territory,De dansk-vestindiske Øer,De dansk-vestind. Øer / Tilsammen,32786,14043,16484,30527
+D,dk_st_croix,dk_west_indies,admin,St. Croix,Øen St. Croix / Tilsammen,19783,9257,9333,18590
+D,dk_christiansted,dk_st_croix,city,Kristianssted,Byen Kristianssted,5499,2388,3095,5483
+D,dk_frederiksted,dk_st_croix,city,Frederikssted,Frederikssted,3683,1519,2226,3745
+D,dk_st_croix_rural,dk_st_croix,admin,St. Croix rural districts,Øen St. Croix / Landdistr.,10601,5350,4012,9362
+D,dk_st_thomas,dk_west_indies,admin,St. Thomas,Øen St. Thomas / Tilsammen,12019,4341,6671,11012
+D,dk_charlotte_amalie,dk_st_thomas,city,Charlotte Amalie,Byen Charlotte Amalie,9455,3189,5351,8540
+D,dk_st_thomas_rural,dk_st_thomas,admin,St. Thomas rural districts,Øen St. Thomas / Landdistr.,2564,1152,1320,2472
+D,dk_st_jan,dk_west_indies,admin,St. Jan,Øen St. Jan / Tilsammen,984,445,480,925
+D,dk_cruxbay,dk_st_jan,city,Cruxbay,Byen Cruxbay,74,22,36,58
+D,dk_st_jan_rural,dk_st_jan,admin,St. Jan rural districts,Øen St. Jan / Landdistr.,910,423,444,867

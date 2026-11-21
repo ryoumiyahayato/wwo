@@ -1,0 +1,51 @@
+[
+  {
+    "id": "russia_first_census",
+    "title": "First General Census of the Russian Empire 1897, provincial returns, volumes I–LXXXIX",
+    "publisher": "Central Statistical Committee, Ministry of the Interior, St Petersburg 1903–1905; Demoscope Weekly numerical transcription",
+    "url": "https://www.demoscope.ru/weekly/ssp/rus_gub_97.php",
+    "locator": "Наличное население в губерниях, уездах, городах Российской Империи (без Финляндии); table parameter reg=1…89, row numbers include two header rows",
+    "rights": "Historical numerical facts only. No republication licence for Demoscope page layout or editorial text asserted.",
+    "geometry": "Kessler/Markevich, RISTAT https://doi.org/10.34894/NQOASN; exact parent/name match only. No assumption of unchanged 1900 boundaries."
+  },
+  {
+    "id": "ru_presidential_library",
+    "title": "Проведена Первая всеобщая перепись населения Российской империи",
+    "publisher": "Presidential Library of the Russian Federation",
+    "url": "https://www.prlib.ru/history/619019",
+    "locator": "28 January (9 February) 1897, empire population of both sexes",
+    "rights": "Factual extract and citation only."
+  },
+  {
+    "id": "rus_rel_97",
+    "title": "First General Census of the Russian Empire, 1897, Table XII: religious denomination",
+    "publisher": "Central Statistical Committee; Demoscope Weekly numeric transcription",
+    "url": "https://www.demoscope.ru/weekly/ssp/rus_rel_97.php",
+    "locator": "structure.csv retains table parameter reg, published scope, and original table row counting headers",
+    "rights": "Numeric facts from historical census; original web layout and editorial text not redistributed."
+  },
+  {
+    "id": "rus_sos_97",
+    "title": "First General Census of the Russian Empire, 1897, Table VIII: legal estates",
+    "publisher": "Central Statistical Committee; Demoscope Weekly numeric transcription",
+    "url": "https://www.demoscope.ru/weekly/ssp/rus_sos_97.php",
+    "locator": "structure.csv retains table parameter reg, published scope, and original table row counting headers",
+    "rights": "Numeric facts from historical census; original web layout and editorial text not redistributed."
+  },
+  {
+    "id": "rus_lan_97",
+    "title": "First General Census of the Russian Empire, 1897, Table XIII: mother tongue",
+    "publisher": "Central Statistical Committee; Demoscope Weekly numeric transcription",
+    "url": "https://www.demoscope.ru/weekly/ssp/rus_lan_97.php",
+    "locator": "structure.csv retains table parameter reg, published scope, and original table row counting headers",
+    "rights": "Numeric facts from historical census; original web layout and editorial text not redistributed."
+  },
+  {
+    "id": "rus_age_97",
+    "title": "First General Census of the Russian Empire, 1897, Age, sex and literacy",
+    "publisher": "Central Statistical Committee; Demoscope Weekly numeric transcription",
+    "url": "https://www.demoscope.ru/weekly/ssp/rus_age_97.php",
+    "locator": "structure.csv retains table parameter reg, published scope, and original table row counting headers",
+    "rights": "Numeric facts from historical census; original web layout and editorial text not redistributed."
+  }
+]

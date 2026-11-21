@@ -1,0 +1,161 @@
+column	ww_gwcodes	paper_pages	scope_note
+B	615	46	""
+C	540	46	""
+D	570	46-47	""
+E	571	47	""
+F	490	47	Congo Free State at opening; later name in research workbook.
+G	500 501	47	Kenya and Uganda combined.
+H	402	47	""
+I	470	47	""
+J		48	Spanish enclaves recorded separately from Morocco.
+K		48	""
+L	651	48	""
+M	411	49	""
+N	531	49	""
+O	530	49	""
+P	481 484	49	French equatorial territories combined.
+Q	522	49	""
+R	430 433 434 437 438	49	French West Africa statistical aggregate; includes multiple map entities.
+S	420	50	""
+T	510	50	Check Rwanda/Burundi against separate series before using polygon.
+U	565	50	""
+V	460	50	""
+W	452	50	""
+X	404	50	""
+Y	640	50-51	Tripolitania/Cyrenaica under Ottoman authority; only a part of map empire.
+Z	5200	51	Check British Somaliland omission.
+AA	450	51	""
+AB	580	51	""
+AC	553	51	""
+AD	590	51	""
+AE	600	51-52	""
+AF	541	52	""
+AG	4781 4783 4784	52	Nigerian territories split in map.
+AH	5518 5519	52	Northern Rhodesian territories split in map.
+AI	585	52	""
+AJ	510	52	Historical German East Africa contains territories split in source.
+AK		52	""
+AL		53	""
+AM		53	""
+AN	451	53	""
+AO	561 562 563 564	53	South African states and colonies combined before union.
+AP	552	53	""
+AQ	610	54	""
+AR	625	54	""
+AS	572	54	""
+AT	616	54	""
+AU	511	54	""
+AW	160	55	""
+AX	31	55	""
+AY	53	55	""
+AZ		55	""
+BA	145	55	""
+BB	140	56	""
+BC	110	56	""
+BD	80	56	""
+BE	20	56	Separate Newfoundland series.
+BF		56	""
+BG	155	56	""
+BH	100	57	Source series separates Panama before independence.
+BI	94	57	""
+BJ	40	57	""
+BK		57	""
+BL	42	57	""
+BM		57	""
+BN	130	58	""
+BO	92	58	""
+BP		58	""
+BQ	120	58	""
+BR		58	""
+BS	65	58	""
+BT	90	59	""
+BU	41	59	""
+BV	91	59	""
+BW	51	59	""
+BX		59-60	Combined Leeward Islands.
+BY	66	60	""
+BZ	70	60	""
+CA	21	61	""
+CB	93	61	""
+CC	100	61	Part of Colombia on opening date; separately estimated.
+CD	150	61	""
+CE	135	61	""
+CF	6	61	""
+CG		62	Workbook flags former colonial identity; verify inclusion in Guadeloupe.
+CH		62	""
+CI		62	""
+CJ		62	""
+CK	115	62	""
+CL	52	62	""
+CM		62	""
+CN	2 3	63	Research US scope requires Alaska review; Hawaii separate.
+CO	165	63	""
+CP	101	63	""
+CR		64	""
+CS	700	64	""
+CU		64 81-88	""
+CV	760	64	""
+CW	821 822 827	65	Combined Malayan territories and Singapore.
+CX	835	66	""
+CY	780	66	""
+CZ	710	66-73	Mongolia and Taiwan treated separately in series.
+DA	850	73-74	""
+DB	713	91	""
+DC		75	""
+DD	811 812 815	75-76	Indochinese possessions combined.
+DE		76	""
+DF	750	76-79	Study discusses Burma and princely states; verify source-specific limits.
+DH	740	79	""
+DI	7020 7030	79 105-107	Two protected khanates, separate from Russian series.
+DJ	730	79-80	""
+DK		80-88	""
+DL		80	""
+DM	781	80	""
+DN	710	80	Part of Qing political territory.
+DO	790	80-81	""
+DQ	698	81-88	""
+DR	640	81-88	Asian Ottoman series, separately tabulated Balkan lands.
+DT	630	88-89	""
+DU	840	89-90	""
+DV		90	""
+DW		90	""
+DX	823	65	British North Borneo.
+DY	824	90	""
+DZ	800	90	""
+EB	860	75	""
+EE		92	""
+EG	300 3461 3462	92-96	Study includes Bosnia-Herzegovina.
+EH	211	96-97	""
+EI	355	97-98	""
+EJ		91-92	""
+EK		91-92	""
+EM	390	98	""
+EP	365	98-99	Finland has a separate estimate within the Russian political realm.
+EQ	220	99	""
+ER	255	100	""
+ES		100	""
+ET	350	100-101	""
+EV	395	101	""
+EY	325	102	""
+FB	212	96-97 103	""
+FC	338	103	""
+FD		99 103	""
+FE	341	108	""
+FF	210	103-104	""
+FG	380	104	Personal union with Sweden.
+FH	640	81-88	Ottoman European provinces.
+FJ	235	104-105	""
+FK	360	105	""
+FL	365	105-107	Separate Finland and Khiva/Bukhara estimates.
+FM	340	107-108	""
+FN	230	108	""
+FO	380	108	Personal union with Norway.
+FP	225	109	""
+FQ	200	109	United Kingdom including Ireland at this date.
+FS	901 902 903 904 905 906	109-110	Six colonies before federation.
+FT	4	110	""
+FU	920	110-111	""
+FV	911 912 930 940 950	111-113	Melanesian group extends beyond mapped units.
+FW		113-114	Guam and multiple island groups.
+FX		114-115	Multiple archipelagos.
+EC	696	81-88 91	V4 Trucial coast series. V5 summary includes an equivalent residual but V5 country column is absent.

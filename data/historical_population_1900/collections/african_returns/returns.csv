@@ -1,0 +1,12 @@
+unit_id,name,wwo_id,date,population,male,female,printed_white_male,printed_white_female,printed_coloured_male,printed_coloured_female,source_id
+basutoland,Basutoland,cshapes_gw_570,1891,218902,105548,113354,343,235,105205,113119,uk_colonial_tables_35
+basutoland,Basutoland,cshapes_gw_570,1904-04-18,348848,163873,184975,520,375,163353,184600,uk_colonial_tables_35
+basutoland,Basutoland,cshapes_gw_570,1911,404507,184102,220405,,,,,uk_colonial_tables_35
+reunion_island,La Réunion,cshapes_gw_585,1897,173192,,,,,,,league_africa_1932
+reunion_island,La Réunion,cshapes_gw_585,1902,173315,,,,,,,clairin_reunion_1979
+reunion_island,La Réunion,cshapes_gw_585,1907,177677,,,,,,,clairin_reunion_1979
+reunion_island,La Réunion,cshapes_gw_585,1911,173822,,,,,,,clairin_reunion_1979
+reunion_island,La Réunion,cshapes_gw_585,1911,174000,,,,,,,league_africa_1932
+mu_main_island,Mauritius,cshapes_gw_590,1891,370388,,,,,,,league_africa_1932
+mu_main_island,Mauritius,cshapes_gw_590,1901,371023,,,,,,,league_africa_1932
+seychelles,Seychelles,,1901,19237,,,,,,,league_africa_1932

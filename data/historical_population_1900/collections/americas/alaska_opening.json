@@ -1,0 +1,21 @@
+{
+  "unit_id": "cshapes_gw_3",
+  "date": "1900-01-01",
+  "population_value": 62288,
+  "source_id": "us_twelfth_census_vol1",
+  "locator": "p. xx, Table III, Alaska; Census Bureau Alaska fieldwork chronology",
+  "endpoint_dates": [
+    "1890-06-02",
+    "1900-06-01"
+  ],
+  "country_endpoint_values": [
+    32052,
+    63592
+  ],
+  "method": "Linear interpolation by elapsed days (3500/3651), rounded once. Federal Census Days serve as nominal interpolation anchors. Alaska's 1890 enumeration ran from February 1890 into 1891, and 1900 fieldwork ran from July 1899 through October 1900.",
+  "units": [],
+  "endpoint_date_precision": [
+    "nominal national reference day",
+    "nominal national reference day"
+  ]
+}

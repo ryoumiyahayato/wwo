@@ -1,0 +1,1273 @@
+[
+  {
+    "unit_id": "united_states_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "united_states_1900"
+    ],
+    "population_value": 76300000,
+    "population_lower": 71722000,
+    "population_upper": 80878000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_united_states"
+    ],
+    "opening_replacement": 75454976,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -845024,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "british_isles_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "british_isles_1900"
+    ],
+    "population_value": 41500000,
+    "population_lower": 39010000,
+    "population_upper": 43990000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_united_kingdom"
+    ],
+    "opening_replacement": 40994912,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -505088,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "german_empire",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "german_empire"
+    ],
+    "population_value": 56400000,
+    "population_lower": 53016000,
+    "population_upper": 59784000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_germany"
+    ],
+    "opening_replacement": 55619152,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -780848,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "russian_empire",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "russian_empire"
+    ],
+    "population_value": 136000000,
+    "population_lower": 127840000,
+    "population_upper": 144160000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_finland",
+      "ft_russia_empire_ussr"
+    ],
+    "opening_replacement": 135382043,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -617957,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "qing_empire",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "qing_empire"
+    ],
+    "population_value": 400000000,
+    "population_lower": 376000000,
+    "population_upper": 424000000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_china",
+      "ft_mongolia"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": 345628683,
+    "replacement_minus_legacy": 0,
+    "status": "legacy_control_with_verified_subdivisions",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "country_fra",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "country_fra"
+    ],
+    "population_value": 40700000,
+    "population_lower": 38258000,
+    "population_upper": 43142000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_france"
+    ],
+    "opening_replacement": 38852684,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -1847316,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "austria_hungary",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "austria_hungary"
+    ],
+    "population_value": 46700000,
+    "population_lower": 43898000,
+    "population_upper": 49502000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_austria_hungary"
+    ],
+    "opening_replacement": 45000882,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -1699118,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "empire_of_japan",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "empire_of_japan"
+    ],
+    "population_value": 43800000,
+    "population_lower": 41172000,
+    "population_upper": 46428000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_japan"
+    ],
+    "opening_replacement": 44012686,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": 212686,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_italy",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_italy"
+    ],
+    "population_value": 32400000,
+    "population_lower": 30456000,
+    "population_upper": 34344000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_italy"
+    ],
+    "opening_replacement": 32296914,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -103086,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "ottoman_empire",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "ottoman_empire"
+    ],
+    "population_value": 24000000,
+    "population_lower": 22560000,
+    "population_upper": 25440000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_italian_libia_cyrenaica",
+      "ft_ottoman_empire_asia_turkey",
+      "ft_ottoman_balkans"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_spain",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_spain"
+    ],
+    "population_value": 18600000,
+    "population_lower": 17484000,
+    "population_upper": 19716000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_spain"
+    ],
+    "opening_replacement": 18511807,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -88193,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "dominion_of_canada",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "dominion_of_canada"
+    ],
+    "population_value": 5400000,
+    "population_lower": 5076000,
+    "population_upper": 5724000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_canada"
+    ],
+    "opening_replacement": 5304314,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -95686,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "cshapes_gw_750",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "cshapes_gw_750"
+    ],
+    "population_value": 294000000,
+    "population_lower": 276360000,
+    "population_upper": 311640000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_india"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": 277342648,
+    "replacement_minus_legacy": 0,
+    "status": "legacy_control_with_verified_subdivisions",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "brazil_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "brazil_1900"
+    ],
+    "population_value": 17400000,
+    "population_lower": 16356000,
+    "population_upper": 18444000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_brasil"
+    ],
+    "opening_replacement": 17021073,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -378927,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "mexican_republic",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "mexican_republic"
+    ],
+    "population_value": 13600000,
+    "population_lower": 12784000,
+    "population_upper": 14416000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_mexico"
+    ],
+    "opening_replacement": 13447810,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -152190,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_netherlands",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_netherlands"
+    ],
+    "population_value": 5100000,
+    "population_lower": 4794000,
+    "population_upper": 5406000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_netherlands"
+    ],
+    "opening_replacement": 5141915,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": 41915,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_belgium",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_belgium"
+    ],
+    "population_value": 6700000,
+    "population_lower": 6298000,
+    "population_upper": 7102000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_belgium"
+    ],
+    "opening_replacement": 6713135,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": 13135,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "sweden_norway_union",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "sweden_norway_union"
+    ],
+    "population_value": 7400000,
+    "population_lower": 6956000,
+    "population_upper": 7844000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_norway",
+      "ft_sweden"
+    ],
+    "opening_replacement": 7315799,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -84201,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_portugal",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_portugal"
+    ],
+    "population_value": 5400000,
+    "population_lower": 5076000,
+    "population_upper": 5724000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_portugal"
+    ],
+    "opening_replacement": 5404156,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": 4156,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "australia_colonies_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "cshapes_gw_901",
+      "cshapes_gw_902",
+      "cshapes_gw_903",
+      "cshapes_gw_904",
+      "cshapes_gw_905",
+      "cshapes_gw_906"
+    ],
+    "population_value": 3770000,
+    "population_lower": 3543800,
+    "population_upper": 3996200,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_australia"
+    ],
+    "opening_replacement": 3837578,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": 67578,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_romania",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_romania"
+    ],
+    "population_value": 5900000,
+    "population_lower": 5546000,
+    "population_upper": 6254000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_romania"
+    ],
+    "opening_replacement": 5956690,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": 56690,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_greece",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_greece"
+    ],
+    "population_value": 2500000,
+    "population_lower": 2350000,
+    "population_upper": 2650000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_greece"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_serbia",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_serbia"
+    ],
+    "population_value": 2500000,
+    "population_lower": 2350000,
+    "population_upper": 2650000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_serbia_yugoslavia"
+    ],
+    "opening_replacement": 2471816,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -28184,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "principality_of_bulgaria",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "principality_of_bulgaria"
+    ],
+    "population_value": 3700000,
+    "population_lower": 3478000,
+    "population_upper": 3922000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_bulgaria"
+    ],
+    "opening_replacement": 3715205,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": 15205,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_denmark",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_denmark"
+    ],
+    "population_value": 2450000,
+    "population_lower": 2303000,
+    "population_upper": 2597000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_denmark"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "swiss_confederation",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "swiss_confederation"
+    ],
+    "population_value": 3300000,
+    "population_lower": 3102000,
+    "population_upper": 3498000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_switzerland"
+    ],
+    "opening_replacement": 3285131,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -14869,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "persia_qajar",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "persia_qajar"
+    ],
+    "population_value": 10000000,
+    "population_lower": 9400000,
+    "population_upper": 10600000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_persia_iran"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "korean_empire",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "korean_empire"
+    ],
+    "population_value": 17000000,
+    "population_lower": 15980000,
+    "population_upper": 18020000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_korea"
+    ],
+    "opening_replacement": 17078033,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": 78033,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_siam",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_siam"
+    ],
+    "population_value": 10000000,
+    "population_lower": 9400000,
+    "population_upper": 10600000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_siam"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "argentina_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "argentina_1900"
+    ],
+    "population_value": 4700000,
+    "population_lower": 4418000,
+    "population_upper": 4982000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_argentina"
+    ],
+    "opening_replacement": 4624686,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -75314,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "chile_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "chile_1900"
+    ],
+    "population_value": 3100000,
+    "population_lower": 2914000,
+    "population_upper": 3286000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_chile"
+    ],
+    "opening_replacement": 2890099,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -209901,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "south_african_republic",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "south_african_republic"
+    ],
+    "population_value": 1400000,
+    "population_lower": 1190000,
+    "population_upper": 1610000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 5000,
+    "research_candidates": [
+      "ft_south_africa"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "orange_free_state",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "orange_free_state"
+    ],
+    "population_value": 390000,
+    "population_lower": 331500,
+    "population_upper": 448500,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 5000,
+    "research_candidates": [
+      "ft_south_africa"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "ethiopian_empire",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "ethiopian_empire"
+    ],
+    "population_value": 11000000,
+    "population_lower": 10340000,
+    "population_upper": 11660000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_ethiopia"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "moroccan_sultanate",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "moroccan_sultanate"
+    ],
+    "population_value": 5000000,
+    "population_lower": 4700000,
+    "population_upper": 5300000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_morocco"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "khedivate_of_egypt",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "khedivate_of_egypt"
+    ],
+    "population_value": 10000000,
+    "population_lower": 9400000,
+    "population_upper": 10600000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_egypt"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "congo_free_state",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "congo_free_state"
+    ],
+    "population_value": 15000000,
+    "population_lower": 12750000,
+    "population_upper": 17250000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 5000,
+    "research_candidates": [
+      "ft_belgium_congo"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "republic_of_colombia_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "republic_of_colombia_1900"
+    ],
+    "population_value": 4000000,
+    "population_lower": 3760000,
+    "population_upper": 4240000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_colombia",
+      "ft_panama"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "venezuela_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "venezuela_1900"
+    ],
+    "population_value": 2400000,
+    "population_lower": 2256000,
+    "population_upper": 2544000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_venezuela"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "peru_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "peru_1900"
+    ],
+    "population_value": 3800000,
+    "population_lower": 3572000,
+    "population_upper": 4028000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_peru"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "bolivia_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "bolivia_1900"
+    ],
+    "population_value": 1700000,
+    "population_lower": 1598000,
+    "population_upper": 1802000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_bolivia"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "emirate_of_afghanistan",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "emirate_of_afghanistan"
+    ],
+    "population_value": 5000000,
+    "population_lower": 4700000,
+    "population_upper": 5300000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_afghanistan"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_nepal",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "kingdom_of_nepal"
+    ],
+    "population_value": 5600000,
+    "population_lower": 5264000,
+    "population_upper": 5936000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_nepal"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "sultanate_of_zanzibar",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "sultanate_of_zanzibar"
+    ],
+    "population_value": 200000,
+    "population_lower": 170000,
+    "population_upper": 230000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 5000,
+    "research_candidates": [
+      "ft_zanzibar_island"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "republic_of_liberia",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "republic_of_liberia"
+    ],
+    "population_value": 1000000,
+    "population_lower": 940000,
+    "population_upper": 1060000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_liberia"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "paraguay_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "paraguay_1900"
+    ],
+    "population_value": 640000,
+    "population_lower": 601600,
+    "population_upper": 678400,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_paraguay"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "uruguay_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "uruguay_1900"
+    ],
+    "population_value": 940000,
+    "population_lower": 883600,
+    "population_upper": 996400,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_uruguay"
+    ],
+    "opening_replacement": null,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": null,
+    "status": "legacy_only",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "cshapes_gw_920",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "cshapes_gw_920"
+    ],
+    "population_value": 820000,
+    "population_lower": 770800,
+    "population_upper": 869200,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_new_zeland"
+    ],
+    "opening_replacement": 796359,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -23641,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "cuba_occupation_1900",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "cuba_occupation_1900"
+    ],
+    "population_value": 1570000,
+    "population_lower": 1475800,
+    "population_upper": 1664200,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_cuba"
+    ],
+    "opening_replacement": 1585419,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": 15419,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "kingdom_of_luxembourg",
+    "role": "economic_statistical_unit",
+    "candidate_polities": [
+      "grand_duchy_of_luxembourg"
+    ],
+    "population_value": 240000,
+    "population_lower": 225600,
+    "population_upper": 254400,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "legacy_method": "historical_series_or_census_anchor_with_border_crosswalk",
+    "published_confidence_bp": 7500,
+    "research_candidates": [
+      "ft_luxembourg"
+    ],
+    "opening_replacement": 231321,
+    "legacy_unlocated_balance": null,
+    "replacement_minus_legacy": -8679,
+    "status": "replaced_for_new_games",
+    "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
+  },
+  {
+    "unit_id": "residual:dutch_east_indies",
+    "role": "excluded_economic_residual",
+    "population_value": 38000000,
+    "controller": "kingdom_of_netherlands",
+    "published_confidence_bp": 5500,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "research_candidates": [
+      "ft_dutch_east_indies_indonesia"
+    ],
+    "status": "not_a_population_partition",
+    "comparison": "No exclusive list of component territories in legacy source; never allocate by controller."
+  },
+  {
+    "unit_id": "residual:philippines",
+    "role": "excluded_economic_residual",
+    "population_value": 7600000,
+    "controller": "united_states_1900",
+    "published_confidence_bp": 6000,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "research_candidates": [
+      "ft_philippines"
+    ],
+    "status": "not_a_population_partition",
+    "comparison": "No exclusive list of component territories in legacy source; never allocate by controller."
+  },
+  {
+    "unit_id": "residual:french_indochina",
+    "role": "excluded_economic_residual",
+    "population_value": 17000000,
+    "controller": "country_fra",
+    "published_confidence_bp": 5200,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "research_candidates": [
+      "ft_french_indochina"
+    ],
+    "status": "not_a_population_partition",
+    "comparison": "No exclusive list of component territories in legacy source; never allocate by controller."
+  },
+  {
+    "unit_id": "residual:british_africa_malaya",
+    "role": "excluded_economic_residual",
+    "population_value": 40000000,
+    "controller": "british_isles_1900",
+    "published_confidence_bp": 3500,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "research_candidates": [],
+    "status": "not_a_population_partition",
+    "comparison": "No exclusive list of component territories in legacy source; never allocate by controller."
+  },
+  {
+    "unit_id": "residual:french_colonial_residual",
+    "role": "excluded_economic_residual",
+    "population_value": 25000000,
+    "controller": "country_fra",
+    "published_confidence_bp": 3300,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "research_candidates": [],
+    "status": "not_a_population_partition",
+    "comparison": "No exclusive list of component territories in legacy source; never allocate by controller."
+  },
+  {
+    "unit_id": "residual:other_colonial_africa",
+    "role": "excluded_economic_residual",
+    "population_value": 65000000,
+    "controller": null,
+    "published_confidence_bp": 2800,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "research_candidates": [],
+    "status": "not_a_population_partition",
+    "comparison": "No exclusive list of component territories in legacy source; never allocate by controller."
+  },
+  {
+    "unit_id": "residual:central_america_caribbean",
+    "role": "excluded_economic_residual",
+    "population_value": 10000000,
+    "controller": null,
+    "published_confidence_bp": 3200,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "research_candidates": [],
+    "status": "not_a_population_partition",
+    "comparison": "No exclusive list of component territories in legacy source; never allocate by controller."
+  },
+  {
+    "unit_id": "residual:minor_europe_middle_east_pacific",
+    "role": "excluded_economic_residual",
+    "population_value": 35000000,
+    "controller": null,
+    "published_confidence_bp": 2500,
+    "source_year_or_day": null,
+    "original_table": null,
+    "per_unit_citation": null,
+    "research_candidates": [],
+    "status": "not_a_population_partition",
+    "comparison": "No exclusive list of component territories in legacy source; never allocate by controller."
+  }
+]

@@ -1,0 +1,1003 @@
+{
+  "unit_id": "country_fra",
+  "date": "1900-01-01",
+  "population_value": 38852684,
+  "source_id": "insee_sgf_censuses",
+  "locator": "REC_T256.dbf record 1, V3=00 V4=00 V6=FRANCE, V21 + REC_T256.dbf record 1, V3=00 V4=00 V6=FRANCE, V22",
+  "method": "sum_of_linearly_interpolated_first_level_census_units",
+  "endpoint_dates": [
+    "1896-03-29",
+    "1901-03-24"
+  ],
+  "country_endpoint_values": [
+    38517332,
+    38961945
+  ],
+  "country_interpolated_value": 38852746,
+  "difference_from_country_interpolation": -62,
+  "units": [
+    {
+      "unit_id": "administrative_region:france_ain",
+      "name": "Ain",
+      "population_value": 350699,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 2, V3=01 V4=00 V6=AIN, V21 + REC_T256.dbf record 2, V3=01 V4=00 V6=AIN, V22",
+      "endpoint_values": [
+        351569,
+        350416
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_aisne",
+      "name": "Aisne",
+      "population_value": 537039,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 3, V3=02 V4=00 V6=AISNE, V21 + REC_T256.dbf record 3, V3=02 V4=00 V6=AISNE, V22",
+      "endpoint_values": [
+        541513,
+        535583
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_allier",
+      "name": "Allier",
+      "population_value": 422602,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 4, V3=03 V4=00 V6=ALLIER, V21 + REC_T256.dbf record 4, V3=03 V4=00 V6=ALLIER, V22",
+      "endpoint_values": [
+        424378,
+        422024
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_basses_alpes",
+      "name": "Basses-Alpes",
+      "population_value": 115788,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 5, V3=04 V4=00 V6=ALPES(BASSES-), V21 + REC_T256.dbf record 5, V3=04 V4=00 V6=ALPES(BASSES-), V22",
+      "endpoint_values": [
+        118142,
+        115021
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_hautes_alpes",
+      "name": "Hautes-Alpes",
+      "population_value": 110423,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 6, V3=05 V4=00 V6=ALPES(HAUTES-), V21 + REC_T256.dbf record 6, V3=05 V4=00 V6=ALPES(HAUTES-), V22",
+      "endpoint_values": [
+        113229,
+        109510
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_alpes_maritimes",
+      "name": "Alpes-Maritimes",
+      "population_value": 286322,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 7, V3=06 V4=00 V6=ALPES-MARITIMES, V21 + REC_T256.dbf record 7, V3=06 V4=00 V6=ALPES-MARITIMES, V22",
+      "endpoint_values": [
+        265155,
+        293213
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_ardeche",
+      "name": "Ardèche",
+      "population_value": 355929,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 8, V3=07 V4=00 V6=ARDECHE, V21 + REC_T256.dbf record 8, V3=07 V4=00 V6=ARDECHE, V22",
+      "endpoint_values": [
+        363501,
+        353464
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_ardennes",
+      "name": "Ardennes",
+      "population_value": 316394,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 9, V3=08 V4=00 V6=ARDENNES, V21 + REC_T256.dbf record 9, V3=08 V4=00 V6=ARDENNES, V22",
+      "endpoint_values": [
+        318865,
+        315589
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_ariege",
+      "name": "Ariège",
+      "population_value": 212765,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 10, V3=09 V4=00 V6=ARIEGE, V21 + REC_T256.dbf record 10, V3=09 V4=00 V6=ARIEGE, V22",
+      "endpoint_values": [
+        219641,
+        210527
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_aube",
+      "name": "Aube",
+      "population_value": 247458,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 11, V3=10 V4=00 V6=AUBE, V21 + REC_T256.dbf record 11, V3=10 V4=00 V6=AUBE, V22",
+      "endpoint_values": [
+        251435,
+        246163
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_aude",
+      "name": "Aude",
+      "population_value": 312790,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 12, V3=11 V4=00 V6=AUDE, V21 + REC_T256.dbf record 12, V3=11 V4=00 V6=AUDE, V22",
+      "endpoint_values": [
+        310513,
+        313531
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_aveyron",
+      "name": "Aveyron",
+      "population_value": 383889,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 13, V3=12 V4=00 V6=AVEYRON, V21 + REC_T256.dbf record 13, V3=12 V4=00 V6=AVEYRON, V22",
+      "endpoint_values": [
+        389464,
+        382074
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_bouches_du_rhone",
+      "name": "Bouches-du-Rhône",
+      "population_value": 719481,
+      "place_ids": [
+        "place:marseille",
+        "place:port_marseille"
+      ],
+      "locator": "REC_T256.dbf record 14, V3=13 V4=00 V6=BOUCHES-DU-RHONE, V21 + REC_T256.dbf record 14, V3=13 V4=00 V6=BOUCHES-DU-RHONE, V22",
+      "endpoint_values": [
+        673820,
+        734347
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_calvados",
+      "name": "Calvados",
+      "population_value": 411897,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 15, V3=14 V4=00 V6=CALVADOS, V21 + REC_T256.dbf record 15, V3=14 V4=00 V6=CALVADOS, V22",
+      "endpoint_values": [
+        417176,
+        410178
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_cantal",
+      "name": "Cantal",
+      "population_value": 231462,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 16, V3=15 V4=00 V6=CANTAL, V21 + REC_T256.dbf record 16, V3=15 V4=00 V6=CANTAL, V22",
+      "endpoint_values": [
+        234382,
+        230511
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_charente",
+      "name": "Charente",
+      "population_value": 351762,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 17, V3=16 V4=00 V6=CHARENTE, V21 + REC_T256.dbf record 17, V3=16 V4=00 V6=CHARENTE, V22",
+      "endpoint_values": [
+        356236,
+        350305
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_charente_inferieure",
+      "name": "Charente-Inférieure",
+      "population_value": 452470,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 18, V3=17 V4=00 V6=CHARENTE-INFERIEURE, V21 + REC_T256.dbf record 18, V3=17 V4=00 V6=CHARENTE-INFERIEURE, V22",
+      "endpoint_values": [
+        453455,
+        452149
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_cher",
+      "name": "Cher",
+      "population_value": 346079,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 19, V3=18 V4=00 V6=CHER, V21 + REC_T256.dbf record 19, V3=18 V4=00 V6=CHER, V22",
+      "endpoint_values": [
+        347725,
+        345543
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_correze",
+      "name": "Corrèze",
+      "population_value": 319397,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 20, V3=19 V4=00 V6=CORREZE, V21 + REC_T256.dbf record 20, V3=19 V4=00 V6=CORREZE, V22",
+      "endpoint_values": [
+        322393,
+        318422
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_corse",
+      "name": "Corse",
+      "population_value": 294258,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 21, V3=20 V4=00 V6=CORSE, V21 + REC_T256.dbf record 21, V3=20 V4=00 V6=CORSE, V22",
+      "endpoint_values": [
+        290168,
+        295589
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_cote_d_or",
+      "name": "Côte-d'Or",
+      "population_value": 363233,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 22, V3=21 V4=00 V6=COTE-D'OR, V21 + REC_T256.dbf record 22, V3=21 V4=00 V6=COTE-D'OR, V22",
+      "endpoint_values": [
+        368168,
+        361626
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_cotes_du_nord",
+      "name": "Côtes-du-Nord",
+      "population_value": 611001,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 23, V3=22 V4=00 V6=COTES-DU-NORD, V21 + REC_T256.dbf record 23, V3=22 V4=00 V6=COTES-DU-NORD, V22",
+      "endpoint_values": [
+        616074,
+        609349
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_creuse",
+      "name": "Creuse",
+      "population_value": 278208,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 24, V3=23 V4=00 V6=CREUSE, V21 + REC_T256.dbf record 24, V3=23 V4=00 V6=CREUSE, V22",
+      "endpoint_values": [
+        279366,
+        277831
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_dordogne",
+      "name": "Dordogne",
+      "population_value": 455867,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 25, V3=24 V4=00 V6=DORDOGNE, V21 + REC_T256.dbf record 25, V3=24 V4=00 V6=DORDOGNE, V22",
+      "endpoint_values": [
+        464822,
+        452951
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_doubs",
+      "name": "Doubs",
+      "population_value": 299646,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 26, V3=25 V4=00 V6=DOUBS, V21 + REC_T256.dbf record 26, V3=25 V4=00 V6=DOUBS, V22",
+      "endpoint_values": [
+        302046,
+        298864
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_drome",
+      "name": "Drôme",
+      "population_value": 298836,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 27, V3=26 V4=00 V6=DROME, V21 + REC_T256.dbf record 27, V3=26 V4=00 V6=DROME, V22",
+      "endpoint_values": [
+        303491,
+        297321
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_eure",
+      "name": "Eure",
+      "population_value": 336223,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 28, V3=27 V4=00 V6=EURE, V21 + REC_T256.dbf record 28, V3=27 V4=00 V6=EURE, V22",
+      "endpoint_values": [
+        340652,
+        334781
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_eure_et_loir",
+      "name": "Eure-et-Loir",
+      "population_value": 276670,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 29, V3=28 V4=00 V6=EURE-ET-LOIR, V21 + REC_T256.dbf record 29, V3=28 V4=00 V6=EURE-ET-LOIR, V22",
+      "endpoint_values": [
+        280469,
+        275433
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_finistere",
+      "name": "Finistère",
+      "population_value": 764819,
+      "place_ids": [
+        "place:brest",
+        "place:port_brest"
+      ],
+      "locator": "REC_T256.dbf record 30, V3=29 V4=00 V6=FINISTERE, V21 + REC_T256.dbf record 30, V3=29 V4=00 V6=FINISTERE, V22",
+      "endpoint_values": [
+        739648,
+        773014
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_gard",
+      "name": "Gard",
+      "population_value": 419657,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 31, V3=30 V4=00 V6=GARD, V21 + REC_T256.dbf record 31, V3=30 V4=00 V6=GARD, V22",
+      "endpoint_values": [
+        416036,
+        420836
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_haute_garonne",
+      "name": "Haute-Garonne",
+      "population_value": 451157,
+      "place_ids": [
+        "place:toulouse"
+      ],
+      "locator": "REC_T256.dbf record 32, V3=31 V4=00 V6=GARONNE(HAUTE-), V21 + REC_T256.dbf record 32, V3=31 V4=00 V6=GARONNE(HAUTE-), V22",
+      "endpoint_values": [
+        459377,
+        448481
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_gers",
+      "name": "Gers",
+      "population_value": 241401,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 33, V3=32 V4=00 V6=GERS, V21 + REC_T256.dbf record 33, V3=32 V4=00 V6=GERS, V22",
+      "endpoint_values": [
+        250472,
+        238448
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_gironde",
+      "name": "Gironde",
+      "population_value": 818373,
+      "place_ids": [
+        "place:bordeaux",
+        "place:port_bordeaux"
+      ],
+      "locator": "REC_T256.dbf record 34, V3=33 V4=00 V6=GIRONDE, V21 + REC_T256.dbf record 34, V3=33 V4=00 V6=GIRONDE, V22",
+      "endpoint_values": [
+        809902,
+        821131
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_herault",
+      "name": "Hérault",
+      "population_value": 484574,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 35, V3=34 V4=00 V6=HERAULT, V21 + REC_T256.dbf record 35, V3=34 V4=00 V6=HERAULT, V22",
+      "endpoint_values": [
+        469684,
+        489421
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_ille_et_vilaine",
+      "name": "Ille-et-Vilaine",
+      "population_value": 615648,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 36, V3=35 V4=00 V6=ILLE-ET-VILAINE, V21 + REC_T256.dbf record 36, V3=35 V4=00 V6=ILLE-ET-VILAINE, V22",
+      "endpoint_values": [
+        622039,
+        613567
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_indre",
+      "name": "Indre",
+      "population_value": 288891,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 37, V3=36 V4=00 V6=INDRE, V21 + REC_T256.dbf record 37, V3=36 V4=00 V6=INDRE, V22",
+      "endpoint_values": [
+        289206,
+        288788
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_indre_et_loire",
+      "name": "Indre-et-Loire",
+      "population_value": 335915,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 38, V3=37 V4=00 V6=INDRE-ET-LOIRE, V21 + REC_T256.dbf record 38, V3=37 V4=00 V6=INDRE-ET-LOIRE, V22",
+      "endpoint_values": [
+        337064,
+        335541
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_isere",
+      "name": "Isère",
+      "population_value": 568752,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 39, V3=38 V4=00 V6=ISERE, V21 + REC_T256.dbf record 39, V3=38 V4=00 V6=ISERE, V22",
+      "endpoint_values": [
+        568933,
+        568693
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_jura",
+      "name": "Jura",
+      "population_value": 262480,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 40, V3=39 V4=00 V6=JURA, V21 + REC_T256.dbf record 40, V3=39 V4=00 V6=JURA, V22",
+      "endpoint_values": [
+        266143,
+        261288
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_landes",
+      "name": "Landes",
+      "population_value": 291905,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 41, V3=40 V4=00 V6=LANDES, V21 + REC_T256.dbf record 41, V3=40 V4=00 V6=LANDES, V22",
+      "endpoint_values": [
+        292884,
+        291586
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_loir_et_cher",
+      "name": "Loir-et-Cher",
+      "population_value": 276180,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 42, V3=41 V4=00 V6=LOIR-ET-CHER, V21 + REC_T256.dbf record 42, V3=41 V4=00 V6=LOIR-ET-CHER, V22",
+      "endpoint_values": [
+        278153,
+        275538
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_loire",
+      "name": "Loire",
+      "population_value": 642157,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 43, V3=42 V4=00 V6=LOIRE, V21 + REC_T256.dbf record 43, V3=42 V4=00 V6=LOIRE, V22",
+      "endpoint_values": [
+        625336,
+        647633
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_haute_loire",
+      "name": "Haute-Loire",
+      "population_value": 314707,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 44, V3=43 V4=00 V6=LOIRE(HAUTE-), V21 + REC_T256.dbf record 44, V3=43 V4=00 V6=LOIRE(HAUTE-), V22",
+      "endpoint_values": [
+        316699,
+        314058
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_loire_inferieure",
+      "name": "Loire-Inférieure",
+      "population_value": 660354,
+      "place_ids": [
+        "place:nantes"
+      ],
+      "locator": "REC_T256.dbf record 45, V3=44 V4=00 V6=LOIRE-INFERIEURE, V21 + REC_T256.dbf record 45, V3=44 V4=00 V6=LOIRE-INFERIEURE, V22",
+      "endpoint_values": [
+        646172,
+        664971
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_loiret",
+      "name": "Loiret",
+      "population_value": 367731,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 46, V3=45 V4=00 V6=LOIRET, V21 + REC_T256.dbf record 46, V3=45 V4=00 V6=LOIRET, V22",
+      "endpoint_values": [
+        371019,
+        366660
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_lot",
+      "name": "Lot",
+      "population_value": 230081,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 47, V3=46 V4=00 V6=LOT, V21 + REC_T256.dbf record 47, V3=46 V4=00 V6=LOT, V22",
+      "endpoint_values": [
+        240403,
+        226720
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_lot_et_garonne",
+      "name": "Lot-et-Garonne",
+      "population_value": 280616,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 48, V3=47 V4=00 V6=LOT-ET-GARONNE, V21 + REC_T256.dbf record 48, V3=47 V4=00 V6=LOT-ET-GARONNE, V22",
+      "endpoint_values": [
+        286377,
+        278740
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_lozere",
+      "name": "Lozère",
+      "population_value": 129673,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 49, V3=48 V4=00 V6=LOZERE, V21 + REC_T256.dbf record 49, V3=48 V4=00 V6=LOZERE, V22",
+      "endpoint_values": [
+        132151,
+        128866
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_maine_et_loire",
+      "name": "Maine-et-Loire",
+      "population_value": 514710,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 50, V3=49 V4=00 V6=MAINE-ET-LOIRE, V21 + REC_T256.dbf record 50, V3=49 V4=00 V6=MAINE-ET-LOIRE, V22",
+      "endpoint_values": [
+        514870,
+        514658
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_manche",
+      "name": "Manche",
+      "population_value": 493504,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 51, V3=50 V4=00 V6=MANCHE, V21 + REC_T256.dbf record 51, V3=50 V4=00 V6=MANCHE, V22",
+      "endpoint_values": [
+        500052,
+        491372
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_marne",
+      "name": "Marne",
+      "population_value": 434526,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 52, V3=51 V4=00 V6=MARNE, V21 + REC_T256.dbf record 52, V3=51 V4=00 V6=MARNE, V22",
+      "endpoint_values": [
+        439577,
+        432882
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_haute_marne",
+      "name": "Haute-Marne",
+      "population_value": 227899,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 53, V3=52 V4=00 V6=MARNE(HAUTE-), V21 + REC_T256.dbf record 53, V3=52 V4=00 V6=MARNE(HAUTE-), V22",
+      "endpoint_values": [
+        232057,
+        226545
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_mayenne",
+      "name": "Mayenne",
+      "population_value": 315088,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 54, V3=53 V4=00 V6=MAYENNE, V21 + REC_T256.dbf record 54, V3=53 V4=00 V6=MAYENNE, V22",
+      "endpoint_values": [
+        321187,
+        313103
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_meurthe_et_moselle",
+      "name": "Meurthe-et-Moselle",
+      "population_value": 480226,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 55, V3=54 V4=00 V6=MEURTHE-ET-MOSELLE, V21 + REC_T256.dbf record 55, V3=54 V4=00 V6=MEURTHE-ET-MOSELLE, V22",
+      "endpoint_values": [
+        466417,
+        484722
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_meuse",
+      "name": "Meuse",
+      "population_value": 285176,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 56, V3=55 V4=00 V6=MEUSE, V21 + REC_T256.dbf record 56, V3=55 V4=00 V6=MEUSE, V22",
+      "endpoint_values": [
+        290384,
+        283480
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_morbihan",
+      "name": "Morbihan",
+      "population_value": 560658,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 57, V3=56 V4=00 V6=MORBIHAN, V21 + REC_T256.dbf record 57, V3=56 V4=00 V6=MORBIHAN, V22",
+      "endpoint_values": [
+        552028,
+        563468
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_nievre",
+      "name": "Nièvre",
+      "population_value": 326268,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 59, V3=58 V4=00 V6=NIEVRE, V21 + REC_T256.dbf record 59, V3=58 V4=00 V6=NIEVRE, V22",
+      "endpoint_values": [
+        333899,
+        323783
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_nord",
+      "name": "Nord",
+      "population_value": 1853446,
+      "place_ids": [
+        "place:lille"
+      ],
+      "locator": "REC_T256.dbf record 60, V3=59 V4=00 V6=NORD, V21 + REC_T256.dbf record 60, V3=59 V4=00 V6=NORD, V22",
+      "endpoint_values": [
+        1811834,
+        1866994
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_oise",
+      "name": "Oise",
+      "population_value": 406998,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 61, V3=60 V4=00 V6=OISE, V21 + REC_T256.dbf record 61, V3=60 V4=00 V6=OISE, V22",
+      "endpoint_values": [
+        404511,
+        407808
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_orne",
+      "name": "Orne",
+      "population_value": 329951,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 62, V3=61 V4=00 V6=ORNE, V21 + REC_T256.dbf record 62, V3=61 V4=00 V6=ORNE, V22",
+      "endpoint_values": [
+        339162,
+        326952
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_pas_de_calais",
+      "name": "Pas-de-Calais",
+      "population_value": 943322,
+      "place_ids": [
+        "place:calais",
+        "place:port_calais"
+      ],
+      "locator": "REC_T256.dbf record 63, V3=62 V4=00 V6=PAS-DE-CALAIS, V21 + REC_T256.dbf record 63, V3=62 V4=00 V6=PAS-DE-CALAIS, V22",
+      "endpoint_values": [
+        906249,
+        955391
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_puy_de_dome",
+      "name": "Puy-de-Dôme",
+      "population_value": 546867,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 64, V3=63 V4=00 V6=PUY-DE-DOME, V21 + REC_T256.dbf record 64, V3=63 V4=00 V6=PUY-DE-DOME, V22",
+      "endpoint_values": [
+        555078,
+        544194
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_basses_pyrenees",
+      "name": "Basses-Pyrénées",
+      "population_value": 425665,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 65, V3=64 V4=00 V6=PYRENEES(BASSES-), V21 + REC_T256.dbf record 65, V3=64 V4=00 V6=PYRENEES(BASSES-), V22",
+      "endpoint_values": [
+        423572,
+        426347
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_hautes_pyrenees",
+      "name": "Hautes-Pyrénées",
+      "population_value": 216388,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 66, V3=65 V4=00 V6=PYRENEES(HAUTES-), V21 + REC_T256.dbf record 66, V3=65 V4=00 V6=PYRENEES(HAUTES-), V22",
+      "endpoint_values": [
+        218973,
+        215546
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_pyrenees_orientales",
+      "name": "Pyrénées-Orientales",
+      "population_value": 211194,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 67, V3=66 V4=00 V6=PYRENEES-ORIENTALES, V21 + REC_T256.dbf record 67, V3=66 V4=00 V6=PYRENEES-ORIENTALES, V22",
+      "endpoint_values": [
+        208348,
+        212121
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_rhone",
+      "name": "Rhône",
+      "population_value": 842233,
+      "place_ids": [
+        "place:lyon"
+      ],
+      "locator": "REC_T256.dbf record 70, V3=69 V4=00 V6=RHONE, V21 + REC_T256.dbf record 70, V3=69 V4=00 V6=RHONE, V22",
+      "endpoint_values": [
+        839329,
+        843179
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_haute_saone",
+      "name": "Haute-Saône",
+      "population_value": 268149,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 71, V3=70 V4=00 V6=SAONE(HAUTE-), V21 + REC_T256.dbf record 71, V3=70 V4=00 V6=SAONE(HAUTE-), V22",
+      "endpoint_values": [
+        272891,
+        266605
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_saone_et_loire",
+      "name": "Saône-et-Loire",
+      "population_value": 620575,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 72, V3=71 V4=00 V6=SAONE-ET-LOIRE, V21 + REC_T256.dbf record 72, V3=71 V4=00 V6=SAONE-ET-LOIRE, V22",
+      "endpoint_values": [
+        621237,
+        620360
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_sarthe",
+      "name": "Sarthe",
+      "population_value": 423283,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 73, V3=72 V4=00 V6=SARTHE, V21 + REC_T256.dbf record 73, V3=72 V4=00 V6=SARTHE, V22",
+      "endpoint_values": [
+        425077,
+        422699
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_savoie",
+      "name": "Savoie",
+      "population_value": 256011,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 74, V3=73 V4=00 V6=SAVOIE, V21 + REC_T256.dbf record 74, V3=73 V4=00 V6=SAVOIE, V22",
+      "endpoint_values": [
+        259790,
+        254781
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_haute_savoie",
+      "name": "Haute-Savoie",
+      "population_value": 264311,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 75, V3=74 V4=00 V6=SAVOIE(HAUTE-), V21 + REC_T256.dbf record 75, V3=74 V4=00 V6=SAVOIE(HAUTE-), V22",
+      "endpoint_values": [
+        265872,
+        263803
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_seine",
+      "name": "Seine",
+      "population_value": 3589024,
+      "place_ids": [
+        "place:paris"
+      ],
+      "locator": "REC_T256.dbf record 76, V3=75 V4=00 V6=SEINE, V21 + REC_T256.dbf record 76, V3=75 V4=00 V6=SEINE, V22",
+      "endpoint_values": [
+        3340514,
+        3669930
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_seine_inferieure",
+      "name": "Seine-Inférieure",
+      "population_value": 849939,
+      "place_ids": [
+        "place:rouen",
+        "place:le_havre",
+        "place:port_le_havre"
+      ],
+      "locator": "REC_T256.dbf record 77, V3=76 V4=00 V6=SEINE-INFERIEURE, V21 + REC_T256.dbf record 77, V3=76 V4=00 V6=SEINE-INFERIEURE, V22",
+      "endpoint_values": [
+        837824,
+        853883
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_seine_et_marne",
+      "name": "Seine-et-Marne",
+      "population_value": 358502,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 78, V3=77 V4=00 V6=SEINE-ET-MARNE, V21 + REC_T256.dbf record 78, V3=77 V4=00 V6=SEINE-ET-MARNE, V22",
+      "endpoint_values": [
+        359044,
+        358325
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_seine_et_oise",
+      "name": "Seine-et-Oise",
+      "population_value": 697936,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 79, V3=78 V4=00 V6=SEINE-ET-OISE, V21 + REC_T256.dbf record 79, V3=78 V4=00 V6=SEINE-ET-OISE, V22",
+      "endpoint_values": [
+        669098,
+        707325
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_deux_sevres",
+      "name": "Deux-Sèvres",
+      "population_value": 343510,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 80, V3=79 V4=00 V6=SEVRES(DEUX-), V21 + REC_T256.dbf record 80, V3=79 V4=00 V6=SEVRES(DEUX-), V22",
+      "endpoint_values": [
+        346694,
+        342474
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_somme",
+      "name": "Somme",
+      "population_value": 539182,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 81, V3=80 V4=00 V6=SOMME, V21 + REC_T256.dbf record 81, V3=80 V4=00 V6=SOMME, V22",
+      "endpoint_values": [
+        543279,
+        537848
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_tarn",
+      "name": "Tarn",
+      "population_value": 333880,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 82, V3=81 V4=00 V6=TARN, V21 + REC_T256.dbf record 82, V3=81 V4=00 V6=TARN, V22",
+      "endpoint_values": [
+        339369,
+        332093
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_tarn_et_garonne",
+      "name": "Tarn-et-Garonne",
+      "population_value": 196828,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 83, V3=82 V4=00 V6=TARN-ET-GARONNE, V21 + REC_T256.dbf record 83, V3=82 V4=00 V6=TARN-ET-GARONNE, V22",
+      "endpoint_values": [
+        200390,
+        195669
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_var",
+      "name": "Var",
+      "population_value": 322158,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 84, V3=83 V4=00 V6=VAR, V21 + REC_T256.dbf record 84, V3=83 V4=00 V6=VAR, V22",
+      "endpoint_values": [
+        309179,
+        326384
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_vaucluse",
+      "name": "Vaucluse",
+      "population_value": 236793,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 85, V3=84 V4=00 V6=VANCLUSE, V21 + REC_T256.dbf record 85, V3=84 V4=00 V6=VANCLUSE, V22",
+      "endpoint_values": [
+        236313,
+        236949
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_vendee",
+      "name": "Vendée",
+      "population_value": 441427,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 86, V3=85 V4=00 V6=VENDEE, V21 + REC_T256.dbf record 86, V3=85 V4=00 V6=VENDEE, V22",
+      "endpoint_values": [
+        441783,
+        441311
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_vienne",
+      "name": "Vienne",
+      "population_value": 336778,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 87, V3=86 V4=00 V6=VIENNE, V21 + REC_T256.dbf record 87, V3=86 V4=00 V6=VIENNE, V22",
+      "endpoint_values": [
+        338114,
+        336343
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_haute_vienne",
+      "name": "Haute-Vienne",
+      "population_value": 380272,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 88, V3=87 V4=00 V6=VIENNE(HAUTE-), V21 + REC_T256.dbf record 88, V3=87 V4=00 V6=VIENNE(HAUTE-), V22",
+      "endpoint_values": [
+        375724,
+        381753
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_vosges",
+      "name": "Vosges",
+      "population_value": 421180,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 89, V3=88 V4=00 V6=VOSGES, V21 + REC_T256.dbf record 89, V3=88 V4=00 V6=VOSGES, V22",
+      "endpoint_values": [
+        421412,
+        421104
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_yonne",
+      "name": "Yonne",
+      "population_value": 323910,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 90, V3=89 V4=00 V6=YONNE, V21 + REC_T256.dbf record 90, V3=89 V4=00 V6=YONNE, V22",
+      "endpoint_values": [
+        332656,
+        321062
+      ]
+    },
+    {
+      "unit_id": "administrative_region:france_territoire_de_belfort",
+      "name": "Territoire-de-Belfort",
+      "population_value": 91258,
+      "place_ids": [],
+      "locator": "REC_T256.dbf record 91, V3=90 V4=00 V6=BELFORT, V21 + REC_T256.dbf record 91, V3=90 V4=00 V6=BELFORT, V22",
+      "endpoint_values": [
+        88047,
+        92304
+      ]
+    }
+  ]
+}
