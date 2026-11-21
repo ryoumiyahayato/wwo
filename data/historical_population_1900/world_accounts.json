@@ -28,7 +28,7 @@
       ],
       "production_people": 9666781,
       "production_pct_of_regional_research_estimate": 7.437,
-      "people_with_opening_subdivision": 1289105,
+      "people_with_opening_subdivision": 1489105,
       "research_only_units": 37,
       "research_only_people": 109428497
     },
@@ -90,9 +90,9 @@
         "korean_empire",
         "qing_empire"
       ],
-      "production_people": 572431719,
-      "production_pct_of_regional_research_estimate": 64.003,
-      "people_with_opening_subdivision": 491600429,
+      "production_people": 670115448,
+      "production_pct_of_regional_research_estimate": 74.925,
+      "people_with_opening_subdivision": 633296844,
       "research_only_units": 27,
       "research_only_people": 89458537
     },
@@ -153,7 +153,7 @@
       ],
       "production_people": 4905385,
       "production_pct_of_regional_research_estimate": 74.997,
-      "people_with_opening_subdivision": 0,
+      "people_with_opening_subdivision": 3716123,
       "research_only_units": 2,
       "research_only_people": 214004
     }
@@ -2894,7 +2894,7 @@
       ],
       "comparison_id": "australia_colonies_1900",
       "opening_disposition": "adopted_research_series",
-      "note": "Six pre-federation colonies combined under WWO economic alias. Study explicitly adds the Smith Aboriginal reconstruction; state-level ABS figures have narrower enumeration."
+      "note": "Six pre-federation colonies combined under WWO economic alias. Study explicitly adds the Smith Aboriginal reconstruction; state-level ABS figures have narrower enumeration. The ABS-counted population is separated by colony. The arithmetic balance between the two historical series remains geographically unallocated. It cannot identify the size or distribution of Aboriginal and Torres Strait Islander populations."
     },
     {
       "unit_id": "ft_hawai",
@@ -3256,9 +3256,9 @@
         "Asia"
       ],
       "research_people": 295348039,
-      "documented_opening_people": 243325386,
+      "documented_opening_people": 280227900,
       "opening_people_including_retained_balances": 294000000,
-      "research_minus_documented": 52022653
+      "research_minus_documented": 15120139
     },
     {
       "comparison_id": "mauritius",
@@ -3365,9 +3365,9 @@
         "Asia"
       ],
       "research_people": 400038694,
-      "documented_opening_people": 220182711,
+      "documented_opening_people": 280963926,
       "opening_people_including_retained_balances": 400000000,
-      "research_minus_documented": 179855983
+      "research_minus_documented": 119074768
     },
     {
       "comparison_id": "reunion",
@@ -3487,7 +3487,7 @@
         "ft_australia"
       ],
       "scope_relation": "adopted_research_series",
-      "note": "Six pre-federation colonies combined under WWO economic alias. Study explicitly adds the Smith Aboriginal reconstruction; state-level ABS figures have narrower enumeration.",
+      "note": "Six pre-federation colonies combined under WWO economic alias. Study explicitly adds the Smith Aboriginal reconstruction; state-level ABS figures have narrower enumeration. The ABS-counted population is separated by colony. The arithmetic balance between the two historical series remains geographically unallocated. It cannot identify the size or distribution of Aboriginal and Torres Strait Islander populations.",
       "research_regions": [
         "Oceania"
       ],
@@ -4251,23 +4251,23 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1123935396,
+    "documented_opening_population": 1221619125,
     "untouched_legacy_population": 101880000,
-    "retained_unlocated_population": 239576794,
+    "retained_unlocated_population": 141893065,
     "authoritative_opening_population": 1465392190,
-    "published_minus_documented_opening": 471138852,
+    "published_minus_documented_opening": 373455123,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 224844706,
       "comparisons_by_scope": {
         "comparable_extent": 1943838,
         "scope_unconfirmed": 86843,
-        "partial_extent": 244263463,
+        "partial_extent": 146579734,
         "adopted_research_series": 0
       },
       "opening_without_benchmark_link": 0,
       "untouched_legacy_controls": -101880000,
-      "unlocated_balances_under_retained_controls": -239576794
+      "unlocated_balances_under_retained_controls": -141893065
     },
     "published_minus_authoritative_opening": 129682058
   }

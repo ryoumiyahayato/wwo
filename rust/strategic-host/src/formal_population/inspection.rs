@@ -5,12 +5,12 @@ use super::{
     },
     living_conditions::{living_conditions_references, LivingConditionsReferences},
     CohortId, HistoricalPopulationEstimate, OpeningPopulationEstimate, Population,
-    PopulationArchive, PopulationStructure,
+    PopulationArchive, PopulationStructure, SocialDistribution,
 };
 use crate::formal_clock::{CalendarTime, GameClock};
 use serde::Serialize;
 use serde_json::Value;
-use std::io;
+use std::{collections::BTreeSet, io};
 
 #[derive(Serialize)]
 pub struct PopulationChild<'a> {
@@ -27,6 +27,14 @@ pub struct PopulationChange<'a> {
     pub destination: Option<&'a str>,
     pub members: Option<u64>,
     pub cohort_id: Option<&'a CohortId>,
+}
+
+#[derive(Serialize)]
+pub struct DietaryNormApplicability {
+    pub trait_id: &'static str,
+    pub residents_with_matching_religion: u64,
+    pub residents_with_unassigned_religion: u64,
+    pub observed_adherents: Option<u64>,
 }
 
 /// A captured view of this world. Dated references retain their own dates and
@@ -48,6 +56,8 @@ pub struct PopulationInspection<'a> {
     pub opening: Option<&'a OpeningPopulationEstimate>,
     pub legacy_estimate: Option<HistoricalPopulationEstimate>,
     pub structure: Option<PopulationStructure<'a>>,
+    pub social: Option<SocialDistribution<'a>>,
+    pub dietary_norms: Vec<DietaryNormApplicability>,
     pub archive: Option<PopulationArchive>,
     pub structural_coverage: Option<Value>,
     pub city_reference: Option<Value>,
@@ -104,11 +114,43 @@ impl Population {
         } else {
             population_archive_scope(map_id)?
         };
-        let (traits, trait_sources) = traits_for_scope(unit)?;
+        let (mut traits, mut trait_sources) = traits_for_scope(unit)?;
         let opening = self.admitted_opening(unit);
+        let scope = (!world).then_some(unit);
+        let structure = (world || live).then(|| self.structure(scope, clock)).flatten();
+        let social = (world || live).then(|| self.social_distribution(scope)).flatten();
+        let mut dietary_norms = Vec::new();
+        if let Some(religion) = social.as_ref().and_then(|report| report.dimensions.get("religion")) {
+            let matching = [
+                ("russia_1897_reported_confession", "Магометане"),
+                ("india_1901_reported_religion", "Muhammadans"),
+            ].iter().filter_map(|(classification, category)| {
+                religion.by_classification.get(classification)?.get(category)
+            }).sum();
+            if matching > 0 {
+                const TRAIT_ID: &str = "quran_al_maidah_5_3_food_restrictions";
+                dietary_norms.push(DietaryNormApplicability {
+                    trait_id: TRAIT_ID,
+                    residents_with_matching_religion: matching,
+                    residents_with_unassigned_religion: religion.unknown_residents,
+                    observed_adherents: None,
+                });
+                if !traits.iter().any(|row| row["id"] == TRAIT_ID) {
+                    let (rows, sources) = traits_for_scope("trait:quran_al_maidah_5_3_food_restrictions")?;
+                    traits.extend(rows);
+                    trait_sources.extend(sources);
+                }
+            }
+        }
         let mut extra_sources = trait_sources;
-        if let Some(opening) = opening {
-            extra_sources.extend(historical_source(&opening.source_id)?);
+        let source_ids: BTreeSet<_> = opening.into_iter().map(|row| row.source_id.as_str())
+            .chain(structure.iter().flat_map(|report| &report.cohorts)
+                .filter_map(|row| row.evidence.as_ref().map(|evidence| evidence.source_id)))
+            .chain(social.iter().flat_map(|report| report.dimensions.values())
+                .flat_map(|dimension| dimension.source_ids.iter().copied()))
+            .collect();
+        for source in source_ids {
+            extra_sources.extend(historical_source(source)?);
         }
         if !extra_sources.is_empty() {
             let sources = &mut archive
@@ -197,11 +239,9 @@ impl Population {
             opening_version: self.opening_version(),
             opening,
             legacy_estimate: self.opening_estimate(unit)?,
-            structure: if world || live {
-                self.structure((!world).then_some(unit), clock)
-            } else {
-                None
-            },
+            structure,
+            social,
+            dietary_norms,
             archive,
             structural_coverage: structural_coverage_reference(unit)?,
             city_reference,

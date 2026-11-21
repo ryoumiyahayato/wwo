@@ -22,6 +22,7 @@ pub(super) struct History {
     journal: Vec<PopulationEvent>,
     // Derived during application and save replay. Old journals need no new fields.
     named_event_origins: BTreeMap<usize, String>,
+    pub(super) social_outflow: BTreeMap<String, u64>,
 }
 
 /// Flat native saves recorded final counts and character deaths. Transfers

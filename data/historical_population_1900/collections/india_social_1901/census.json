@@ -1,0 +1,61 @@
+{
+  "1": [
+    {"unit_id": "raj_ajmer_merwara", "scope": "1. Ajmer-Merwara", "sheet_rows": [5], "total": 476912, "counts": [125314, 351598], "unknown": 0},
+    {"unit_id": "raj_baroda_state", "scope": "16. Baroda State", "sheet_rows": [27], "total": 1952692, "counts": [468850, 1483842], "unknown": 0},
+    {"unit_id": "raj_berar", "scope": "6. Berar §", "sheet_rows": [10], "total": 2754016, "counts": [419451, 2334565], "unknown": 0},
+    {"unit_id": "raj_central_india_agency", "scope": "19. Central India Agency", "sheet_rows": [30], "total": 8628781, "counts": [981318, 7647463], "unknown": 0},
+    {"unit_id": "raj_central_provinces", "scope": "9. Central Provinces", "sheet_rows": [16], "total": 9876646, "counts": [820818, 9055828], "unknown": 0},
+    {"unit_id": "raj_central_provinces_states", "scope": "20. Central Provinces States", "sheet_rows": [31], "total": 1996383, "counts": [76264, 1920119], "unknown": 0},
+    {"unit_id": "raj_coorg", "scope": "10. Coorg", "sheet_rows": [17], "total": 180607, "counts": [15249, 165358], "unknown": 0},
+    {"unit_id": "raj_hyderabad_state", "scope": "21. Hyderabad State", "sheet_rows": [32], "total": 11141142, "counts": [1126948, 10014194], "unknown": 0},
+    {"unit_id": "raj_madras_presidency", "scope": "11. Madras", "sheet_rows": [18], "total": 38209436, "counts": [4275178, 33934258], "unknown": 0},
+    {"unit_id": "raj_madras_states", "scope": "23. Madras States", "sheet_rows": [34], "total": 4188086, "counts": [291660, 3896426], "unknown": 0},
+    {"unit_id": "raj_mysore_state", "scope": "24. Mysore State", "sheet_rows": [35], "total": 5539399, "counts": [722103, 4817296], "unknown": 0},
+    {"unit_id": "raj_rajputana_agency", "scope": "26. Rajputana Agency", "sheet_rows": [37], "total": 9723301, "counts": [1410192, 8313109], "unknown": 0},
+    {"unit_id": "raj_united_provinces_states", "scope": "27. United Provinces States", "sheet_rows": [38], "total": 802097, "counts": [103880, 698217], "unknown": 0}
+  ],
+  "7": [
+    {"unit_id": "raj_ajmer_merwara", "scope": "Ajmer-Merwara", "sheet_rows": [4], "total": 476912, "counts": [380819, 264, 19922, 0, 164, 72031, 3712, 0, 0], "unknown": 0},
+    {"unit_id": "raj_baroda_state", "scope": "Baroda", "sheet_rows": [21], "total": 1952692, "counts": [1546992, 38, 48290, 0, 8409, 165014, 7691, 8, 176250], "unknown": 0},
+    {"unit_id": "raj_berar", "scope": "Berar", "sheet_rows": [9], "total": 2754016, "counts": [2388016, 1449, 19639, 0, 530, 212040, 2375, 3, 129964], "unknown": 0},
+    {"unit_id": "raj_central_india_agency", "scope": "Central India Agency", "sheet_rows": [24], "total": 8628781, "counts": [6983348, 2004, 112998, 0, 1002, 528833, 8114, 24, 992458], "unknown": 0},
+    {"unit_id": "raj_central_provinces", "scope": "Central Provinces", "sheet_rows": [12], "total": 9876646, "counts": [8171925, 477, 47306, 169, 969, 295291, 24809, 127, 1335573], "unknown": 0},
+    {"unit_id": "raj_central_provinces_states", "scope": "Central Provinces States", "sheet_rows": [26], "total": 1996383, "counts": [1573634, 95, 877, 0, 11, 12011, 782, 0, 408973], "unknown": 0},
+    {"unit_id": "raj_coorg", "scope": "Coorg", "sheet_rows": [13], "total": 180607, "counts": [159817, 0, 107, 0, 41, 13654, 3683, 0, 3305], "unknown": 0},
+    {"unit_id": "raj_hyderabad_state", "scope": "Hyderabad", "sheet_rows": [27], "total": 11141142, "counts": [9870839, 4335, 20345, 3, 1463, 1155750, 22996, 13, 65315], "unknown": 83},
+    {"unit_id": "raj_madras_presidency", "scope": "Madras", "sheet_rows": [14], "total": 38209436, "counts": [34048097, 92, 27431, 243, 356, 2467351, 1024071, 45, 641730], "unknown": 20},
+    {"unit_id": "raj_madras_states", "scope": "Madras States", "sheet_rows": [29], "total": 4188086, "counts": [2978374, 15, 6, 227, 7, 265580, 910409, 1288, 32175], "unknown": 5},
+    {"unit_id": "raj_mysore_state", "scope": "Mysore", "sheet_rows": [32], "total": 5539399, "counts": [5099177, 12, 13682, 10, 101, 289697, 50059, 34, 86627], "unknown": 0},
+    {"unit_id": "raj_rajputana_agency", "scope": "Rajputana Agency", "sheet_rows": [34], "total": 9723301, "counts": [8090269, 2054, 342595, 0, 339, 924656, 2840, 5, 360543], "unknown": 0},
+    {"unit_id": "raj_united_provinces_states", "scope": "United Provinces States", "sheet_rows": [35], "total": 802097, "counts": [558727, 14, 181, 0, 1, 242688, 486, 0, 0], "unknown": 0}
+  ],
+  "11": [
+    {"unit_id": "raj_ajmer_merwara", "scope": "Ajmer-Merwara", "sheet_rows": [5, 6], "total": 476912, "counts": [176338, 232920, 67654], "unknown": 0},
+    {"unit_id": "raj_baroda_state", "scope": "Baroda", "sheet_rows": [32, 33], "total": 1952692, "counts": [687211, 978626, 286855], "unknown": 0},
+    {"unit_id": "raj_berar", "scope": "Berar", "sheet_rows": [13, 14], "total": 2754016, "counts": [897929, 1508454, 347633], "unknown": 0},
+    {"unit_id": "raj_central_india_agency", "scope": "Central India Agency", "sheet_rows": [38, 39], "total": 8628781, "counts": [3251778, 4147279, 1229724], "unknown": 0},
+    {"unit_id": "raj_central_provinces", "scope": "Central Provinces", "sheet_rows": [19, 20], "total": 9876646, "counts": [3919882, 4751856, 1204908], "unknown": 0},
+    {"unit_id": "raj_central_provinces_states", "scope": "Central Provinces States", "sheet_rows": [40, 41], "total": 1996383, "counts": [915675, 873964, 206744], "unknown": 0},
+    {"unit_id": "raj_coorg", "scope": "Coorg", "sheet_rows": [21, 22], "total": 180607, "counts": [91478, 70063, 19066], "unknown": 0},
+    {"unit_id": "raj_hyderabad_state", "scope": "Hyderabad", "sheet_rows": [42, 43], "total": 11141142, "counts": [4311525, 5502367, 1327250], "unknown": 0},
+    {"unit_id": "raj_madras_presidency", "scope": "Madras", "sheet_rows": [23, 24], "total": 38209436, "counts": [17953437, 15829992, 4426007], "unknown": 0},
+    {"unit_id": "raj_madras_states", "scope": "Madras States", "sheet_rows": [46, 47], "total": 4188086, "counts": [2040262, 1742615, 405209], "unknown": 0},
+    {"unit_id": "raj_mysore_state", "scope": "Mysore", "sheet_rows": [48, 49], "total": 5539399, "counts": [2628851, 2234503, 676045], "unknown": 0},
+    {"unit_id": "raj_rajputana_agency", "scope": "Rajputana", "sheet_rows": [52, 53], "total": 9723301, "counts": [3845312, 4510932, 1367057], "unknown": 0},
+    {"unit_id": "raj_united_provinces_states", "scope": "United Provinces States", "sheet_rows": [54, 55], "total": 802097, "counts": [317781, 401014, 83302], "unknown": 0}
+  ],
+  "16": [
+    {"unit_id": "raj_ajmer_merwara", "scope": "Ajmer-Merwara", "sheet_rows": [5, 33], "total": 476912, "counts": [444824, 32088], "unknown": 0},
+    {"unit_id": "raj_baroda_state", "scope": "Baroda", "sheet_rows": [18, 46], "total": 1952692, "counts": [1781421, 171271], "unknown": 0},
+    {"unit_id": "raj_berar", "scope": "Berar", "sheet_rows": [9, 37], "total": 2754016, "counts": [2630700, 123316], "unknown": 0},
+    {"unit_id": "raj_central_provinces", "scope": "Central Provinces", "sheet_rows": [12, 40], "total": 9876646, "counts": [9582098, 294548], "unknown": 0},
+    {"unit_id": "raj_central_provinces_states", "scope": "Central Provinces States", "sheet_rows": [22, 50], "total": 1996383, "counts": [1963445, 32938], "unknown": 0},
+    {"unit_id": "raj_coorg", "scope": "Coorg", "sheet_rows": [13, 41], "total": 180607, "counts": [166540, 14067], "unknown": 0},
+    {"unit_id": "raj_hyderabad_state", "scope": "Hyderabad", "sheet_rows": [23, 51], "total": 11141142, "counts": [10811973, 329169], "unknown": 0},
+    {"unit_id": "raj_madras_presidency", "scope": "Madras", "sheet_rows": [14, 42], "total": 38209436, "counts": [35803347, 2406089], "unknown": 0},
+    {"unit_id": "raj_madras_states", "scope": "Madras States", "sheet_rows": [25, 53], "total": 4188086, "counts": [3683182, 504904], "unknown": 0},
+    {"unit_id": "raj_mysore_state", "scope": "Mysore", "sheet_rows": [26, 54], "total": 5539399, "counts": [5259052, 280347], "unknown": 0},
+    {"unit_id": "raj_rajputana_agency", "scope": "Rajputana", "sheet_rows": [28, 56], "total": 9723301, "counts": [9398600, 324701], "unknown": 0},
+    {"unit_id": "raj_united_provinces_states", "scope": "United Provinces States", "sheet_rows": [29, 57], "total": 802097, "counts": [788705, 13392], "unknown": 0}
+  ]
+}

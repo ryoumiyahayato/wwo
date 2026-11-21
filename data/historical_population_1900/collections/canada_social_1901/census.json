@@ -1,0 +1,22 @@
+{
+  "residence": [
+    {"unit_id": "ca_british_columbia", "scope": "British Columbia", "total": 178657, "locator": "Volume I, Table IV, p. 18", "counts": {"Rural": 88478, "Urban": 90179}, "unknown": 0},
+    {"unit_id": "ca_manitoba", "scope": "Manitoba", "total": 255211, "locator": "Volume I, Table IV, p. 18", "counts": {"Rural": 184738, "Urban": 70473}, "unknown": 0},
+    {"unit_id": "ca_new_brunswick", "scope": "New Brunswick", "total": 331120, "locator": "Volume I, Table IV, p. 18", "counts": {"Rural": 253835, "Urban": 77285}, "unknown": 0},
+    {"unit_id": "ca_nova_scotia", "scope": "Nova Scotia", "total": 459574, "locator": "Volume I, Table IV, p. 18", "counts": {"Rural": 330191, "Urban": 129383}, "unknown": 0},
+    {"unit_id": "ca_ontario", "scope": "Ontario", "total": 2182947, "locator": "Volume I, Table IV, p. 18", "counts": {"Rural": 1246969, "Urban": 935978}, "unknown": 0},
+    {"unit_id": "ca_organized_territories", "scope": "Organized Territories", "total": 158940, "locator": "Volume I, Table IV, p. 21, Northwest Territories subtotal", "counts": {"Rural": 120767, "Urban": 38173}, "unknown": 0},
+    {"unit_id": "ca_prince_edward_island", "scope": "Prince Edward Island", "total": 103259, "locator": "Volume I, Table IV, p. 20", "counts": {"Rural": 88304, "Urban": 14955}, "unknown": 0},
+    {"unit_id": "ca_quebec_and_unorganized_territories", "scope": "Quebec and Unorganized Territories", "total": 1701607, "locator": "Volume I, Table IV, pp. 20–21, Quebec and Unorganized Territories subtotals", "counts": {"Rural": 1036234, "Urban": 665373}, "unknown": 0}
+  ],
+  "religion": [
+    {"unit_id": "ca_british_columbia", "scope": "British Columbia", "total": 178657, "locator": "Volume I, Table VIII, pp. 144–145", "counts": {"Anglicans": 40689, "Baptists (including Free Baptists)": 6500, "Methodists": 25047, "Presbyterians": 34081, "Roman Catholics": 33639}, "unknown": 38701},
+    {"unit_id": "ca_manitoba", "scope": "Manitoba", "total": 255211, "locator": "Volume I, Table VIII, pp. 144–145", "counts": {"Anglicans": 44922, "Baptists (including Free Baptists)": 9166, "Methodists": 49936, "Presbyterians": 65348, "Roman Catholics": 35672}, "unknown": 50167},
+    {"unit_id": "ca_new_brunswick", "scope": "New Brunswick", "total": 331120, "locator": "Volume I, Table VIII, pp. 144–145; Anglican count also checked in Tables IX and X", "counts": {"Anglicans": 41767, "Baptists (including Free Baptists)": 80874, "Methodists": 35973, "Presbyterians": 39496, "Roman Catholics": 125698}, "unknown": 7312},
+    {"unit_id": "ca_nova_scotia", "scope": "Nova Scotia", "total": 459574, "locator": "Volume I, Table VIII, pp. 144–145", "counts": {"Anglicans": 66107, "Baptists (including Free Baptists)": 83233, "Methodists": 57490, "Presbyterians": 106381, "Roman Catholics": 129578}, "unknown": 16785},
+    {"unit_id": "ca_ontario", "scope": "Ontario", "total": 2182947, "locator": "Volume I, Table VIII, pp. 144–145", "counts": {"Anglicans": 367937, "Baptists (including Free Baptists)": 116320, "Methodists": 666388, "Presbyterians": 477386, "Roman Catholics": 390304}, "unknown": 164612},
+    {"unit_id": "ca_organized_territories", "scope": "Organized Territories", "total": 158940, "locator": "Volume I, Table VIII, pp. 144–145", "counts": {"Anglicans": 25366, "Baptists (including Free Baptists)": 5416, "Methodists": 22151, "Presbyterians": 27806, "Roman Catholics": 30073}, "unknown": 48128},
+    {"unit_id": "ca_prince_edward_island", "scope": "Prince Edward Island", "total": 103259, "locator": "Volume I, Table VIII, pp. 144–145", "counts": {"Anglicans": 5976, "Baptists (including Free Baptists)": 5905, "Methodists": 13402, "Presbyterians": 30750, "Roman Catholics": 45796}, "unknown": 1430},
+    {"unit_id": "ca_quebec_and_unorganized_territories", "scope": "Quebec and Unorganized Territories", "total": 1701607, "locator": "Volume I, Table VIII, pp. 144–145", "counts": {"Anglicans": 87856, "Baptists (including Free Baptists)": 9063, "Methodists": 46499, "Presbyterians": 61194, "Roman Catholics": 1438840}, "unknown": 58155}
+  ]
+}

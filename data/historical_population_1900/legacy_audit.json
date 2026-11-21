@@ -111,7 +111,7 @@
       "ft_mongolia"
     ],
     "opening_replacement": null,
-    "legacy_unlocated_balance": 179817289,
+    "legacy_unlocated_balance": 119036074,
     "replacement_minus_legacy": 0,
     "status": "legacy_control_with_verified_subdivisions",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
@@ -297,7 +297,7 @@
       "ft_india"
     ],
     "opening_replacement": null,
-    "legacy_unlocated_balance": 50674614,
+    "legacy_unlocated_balance": 13772100,
     "replacement_minus_legacy": 0,
     "status": "legacy_control_with_verified_subdivisions",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."

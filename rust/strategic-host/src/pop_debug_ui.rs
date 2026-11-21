@@ -1,7 +1,9 @@
 use crate::{formal_ui::Skin, overlay::Mesh};
 use serde_json::Value;
 use std::cell::{Cell, RefCell};
-use wwo_map_lab::formal_population::{CohortSex, PopulationInspection, PopulationStructure};
+use wwo_map_lab::formal_population::{
+    needs::QuantityRange, CohortSex, PopulationInspection, PopulationStructure, SocialDistribution,
+};
 
 const INK: [u8; 4] = [243, 236, 221, 255];
 const MUTED: [u8; 4] = [183, 193, 195, 255];
@@ -108,6 +110,8 @@ impl Panel {
             joined(&inspection.map_place_ids),
         );
         self.show_structure(inspection.structure.as_ref());
+        self.show_cohorts(inspection.structure.as_ref());
+        self.show_social(inspection.social.as_ref());
         self.show_living(inspection);
         self.show_coverage(inspection.structural_coverage.as_ref());
         self.show_opening(inspection);
@@ -125,7 +129,6 @@ impl Panel {
                 ));
             }
         }
-        self.show_cohorts(inspection.structure.as_ref());
     }
 
     fn show_opening(&mut self, inspection: &PopulationInspection<'_>) {
@@ -201,6 +204,11 @@ impl Panel {
                 Some(structure.residents_with_cohort_age_and_sex),
             );
             self.number(
+                "匿名居民未分配年龄或性别",
+                "Anonymous residents with age or sex unassigned",
+                Some(structure.population_total - structure.named_residents - structure.residents_with_cohort_age_and_sex),
+            );
+            self.number(
                 "分组人口",
                 "Cohort residents",
                 Some(structure.cohort_residents),
@@ -210,8 +218,74 @@ impl Panel {
                 "Unclassified residents",
                 Some(structure.unclassified_residents),
             );
+            if let Some(ages) = structure.count_ages(15, 64) {
+                self.heading("潜在劳动年龄（匿名居民 15–64 岁）", "Potential working age (anonymous residents aged 15–64)");
+                self.number("确定在范围内", "Within range", Some(ages.definitely_in_range));
+                self.number("年龄段与范围相交", "Age band overlaps range", Some(ages.possibly_in_range_with_known_age));
+                self.number("年龄未知", "Age unknown", Some(ages.age_unknown));
+            }
         } else {
             self.field("结构覆盖", "Structure coverage", None::<String>);
+        }
+    }
+
+    fn show_social(&mut self, social: Option<&SocialDistribution<'_>>) {
+        self.heading("社会属性分配", "Social attributes");
+        let Some(social) = social else {
+            self.field("分配状态", "Allocation status", Some("未分配 / Unassigned"));
+            return;
+        };
+        if social.affected_resident_pools > 0 {
+            self.field(
+                "人口变动后保守下界",
+                "Conservative counts after population changes",
+                Some(""),
+            );
+        }
+        self.field(
+            "各维度分别计数，交叉属性人数未知",
+            "Counts are independent by dimension. Intersections are unknown.",
+            Some(""),
+        );
+        for (key, dimension) in &social.dimensions {
+            let (zh, en) = match *key {
+                "class" => ("社会阶层", "Social class"),
+                "legal_estate" => ("法定身份等级", "Legal estate"),
+                "occupation" => ("职业", "Occupation"),
+                "language" => ("语言", "Language"),
+                "culture" => ("文化", "Culture"),
+                "religion" => ("宗教", "Religion"),
+                "literacy" => ("识字", "Literacy"),
+                "residence" => ("城乡居住", "Urban and rural residence"),
+                "marital_status" => ("婚姻状态", "Marital status"),
+                "housing" => ("住房", "Housing"),
+                _ => continue,
+            };
+            self.heading(zh, en);
+            if dimension.assigned_residents == 0 {
+                self.field("未分配", "Unassigned", Some(""));
+            }
+            self.number("已分配人数", "Assigned residents", Some(dimension.assigned_residents));
+            self.number("未知人数", "Unknown residents", Some(dimension.unknown_residents));
+            for (classification, categories) in &dimension.by_classification {
+                if !categories.is_empty() {
+                    self.field("原表分类", "Census classification", Some(*classification));
+                    for (category, count) in categories {
+                        self.line(format!("{category}  |  {}", number(*count)));
+                    }
+                }
+            }
+            if !dimension.source_ids.is_empty() {
+                self.field("资料", "Sources", Some(dimension.source_ids.iter().copied().collect::<Vec<_>>().join("  |  ")));
+            }
+            if let Some(source) = dimension.direct_opening_distribution {
+                self.field("观测日期", "Observation date", Some(source.observed_date.as_str()));
+                self.field("观测范围", "Observed scope", Some(source.observed_scope.as_str()));
+                self.number("原表统计适用人数", "Census denominator", Some(source.observed_total));
+                self.field("原表位置", "Locator", Some(source.locator.as_str()));
+                self.field("分配方法", "Allocation method", Some(source.method.as_str()));
+                self.field("原表定义", "Source definition", Some(source.definition.as_str()));
+            }
         }
     }
 
@@ -245,11 +319,44 @@ impl Panel {
             }
             self.field(zh, en, Some(value));
             self.field("年龄", "Age", age);
+            if let Some(evidence) = &cohort.evidence {
+                self.field("原表位置", "Locator", Some(evidence.locator));
+                self.field("分配方法", "Allocation method", Some(evidence.method));
+                self.field("不确定性", "Uncertainty", Some(evidence.uncertainty));
+            }
         }
     }
 
     fn show_living(&mut self, inspection: &PopulationInspection<'_>) {
         self.heading("生活条件与需要", "Living conditions and needs");
+        if let Some(structure) = &inspection.structure {
+            let energy = &structure.published_energy_reference;
+            let protein = &structure.published_protein_reference;
+            let water = &structure.published_efsa_water_reference;
+            self.heading("按人口属性计算的条件需求", "Conditional needs by population attributes");
+            for ((zh, en), known, unknown, quantity, unit) in [
+                (("膳食能量", "Food energy"), energy.people_with_reference, energy.people_without_reference,
+                    energy.conditional_kcal_per_day, "kcal/day"),
+                (("蛋白质", "Protein"), protein.people_with_reference, protein.people_without_reference,
+                    protein.conditional_grams_per_day, "g/day"),
+                (("食物及饮品水量", "Water from food and beverages"), water.people_with_reference, water.people_without_reference,
+                    water.moderate_environment_pal_1_6_total_ingested_litres_per_day, "L/day"),
+            ] {
+                self.field(zh, en, quantity.map(|range| daily_quantity(range, unit)));
+                self.number("可计算人数", "Residents with a reference", Some(known));
+                self.number("未知人数", "Unknown residents", Some(unknown));
+            }
+        }
+        self.heading("历史饮食习惯及禁忌", "Historical dietary customs and restrictions");
+        if inspection.dietary_norms.is_empty() {
+            self.field("适用人群未分配", "Applicable population unassigned", Some(""));
+        }
+        for norm in &inspection.dietary_norms {
+            self.field("饮食规范", "Dietary norm", Some(norm.trait_id));
+            self.number("登记宗教可能适用人数", "Residents with matching recorded religion", Some(norm.residents_with_matching_religion));
+            self.number("宗教未分配人数", "Residents with religion unassigned", Some(norm.residents_with_unassigned_religion));
+            self.number("实际遵行人数", "Observed adherents", norm.observed_adherents);
+        }
         let Ok(living) = serde_json::to_value(&inspection.living_conditions) else {
             return;
         };
@@ -502,16 +609,6 @@ impl Panel {
         if let Some(dimensions) = coverage["scope"]["dimensions"].as_object() {
             for (dimension, row) in dimensions {
                 self.line(dimension.replace('_', " "));
-                self.number(
-                    "同口径开局已知人数",
-                    "Opening population with same-scope coverage",
-                    row["opening_known_people"].as_u64(),
-                );
-                self.number(
-                    "开局未覆盖人数",
-                    "Opening population without coverage",
-                    row["opening_unknown_people"].as_u64(),
-                );
                 self.number(
                     "已复核资料表",
                     "Reviewed panels",
@@ -795,6 +892,7 @@ impl Panel {
             } else {
                 INK
             };
+            let text = romanize_russian(&text);
             wrap(skin, &text, width, &mut lines, color);
         }
         Layout {
@@ -804,6 +902,36 @@ impl Panel {
             sections,
         }
     }
+}
+
+// The HUD atlas has Latin glyphs. Source records still retain the census spelling.
+fn romanize_russian(text: &str) -> std::borrow::Cow<'_, str> {
+    const LETTERS: [&str; 32] = [
+        "a", "b", "v", "g", "d", "e", "zh", "z", "i", "y", "k", "l", "m", "n", "o", "p",
+        "r", "s", "t", "u", "f", "kh", "ts", "ch", "sh", "shch", "\"", "y", "'", "e", "yu", "ya",
+    ];
+    if !text.chars().any(|ch| matches!(ch, 'А'..='я' | 'Ё' | 'ё')) {
+        return text.into();
+    }
+    let mut result = String::with_capacity(text.len());
+    for ch in text.chars() {
+        let romanized = match ch {
+            'А'..='Я' => LETTERS[(ch as u32 - 'А' as u32) as usize],
+            'а'..='я' => LETTERS[(ch as u32 - 'а' as u32) as usize],
+            'Ё' | 'ё' => "yo",
+            _ => {
+                result.push(ch);
+                continue;
+            }
+        };
+        if ch.is_uppercase() {
+            result.push((romanized.as_bytes()[0] as char).to_ascii_uppercase());
+            result.push_str(&romanized[1..]);
+        } else {
+            result.push_str(romanized);
+        }
+    }
+    result.into()
 }
 
 fn bounds([width, height]: [u32; 2]) -> [f32; 4] {
@@ -819,6 +947,10 @@ fn bounds([width, height]: [u32; 2]) -> [f32; 4] {
 
 fn joined(ids: &[&str]) -> Option<String> {
     (!ids.is_empty()).then(|| ids.join("  |  "))
+}
+
+fn daily_quantity(range: QuantityRange, unit: &str) -> String {
+    format!("{}–{} {unit}", number(range.lower.round() as u64), number(range.upper.round() as u64))
 }
 
 fn interval(value: &Value) -> Option<String> {
