@@ -178,6 +178,7 @@ pub struct Operations {
     trade_event: bool,
     visible: BTreeSet<u64>,
     events: BTreeSet<(i64, u64)>,
+    freight_movement_revision: u64,
     now: i64,
 }
 
@@ -188,7 +189,7 @@ impl Operations {
         for (from, arcs) in network.outgoing.iter().enumerate() {
             for arc in arcs { incoming[arc.to].push((from, arc.segment)); }
         }
-        let mut operations = Self { network, state, incoming, trade_event: false, occupied: BTreeMap::new(), visible: BTreeSet::new(), events: BTreeSet::new(), now };
+        let mut operations = Self { network, state, incoming, trade_event: false, occupied: BTreeMap::new(), visible: BTreeSet::new(), events: BTreeSet::new(), freight_movement_revision: 0, now };
         if operations.state.next_id == 0 {
             return Err(invalid("运输预约编号无效。"));
         }
@@ -366,6 +367,9 @@ impl Operations {
         }
         if traffic.visible() { self.visible.insert(id); }
         let reservation = Reservation { plan, freight: !traffic.seats(), traffic, leg: 0, status, stop_at_next: false };
+        if reservation.freight && status == Status::Moving {
+            self.freight_movement_revision = self.freight_movement_revision.wrapping_add(1);
+        }
         if let Some(event) = reservation.next_event() { self.events.insert((event, id)); }
         self.state.reservations.insert(id, reservation);
         Ok(id)
@@ -410,6 +414,9 @@ impl Operations {
     pub fn finish(&mut self, id: u64) {
         self.visible.remove(&id);
         if let Some(reservation) = self.state.reservations.remove(&id) {
+            if reservation.freight && reservation.status == Status::Moving {
+                self.freight_movement_revision = self.freight_movement_revision.wrapping_add(1);
+            }
             if let Some(event) = reservation.next_event() { self.events.remove(&(event, id)); }
             for leg in reservation.plan.route.legs { self.release_edge(&leg.segment_id, id, None); }
         }
@@ -441,6 +448,7 @@ impl Operations {
                 self.events.pop_first();
                 let r = self.state.reservations.get_mut(&id).expect("indexed trip");
                 if r.status == Status::Moving {
+                    if r.freight { self.freight_movement_revision = self.freight_movement_revision.wrapping_add(1); }
                     r.leg += 1;
                     r.status = if r.leg == r.plan.windows.len() { Status::Arrived }
                         else if r.stop_at_next { Status::Held } else { Status::Scheduled };
@@ -460,6 +468,7 @@ impl Operations {
                 if self.can_start(id) {
                     let r = self.state.reservations.get_mut(&id).unwrap();
                     r.status = Status::Moving;
+                    if r.freight { self.freight_movement_revision = self.freight_movement_revision.wrapping_add(1); }
                     self.events.insert((r.next_event().expect("arrival event"), id));
                 } else {
                     let r = self.state.reservations.get_mut(&id).unwrap();
@@ -519,6 +528,8 @@ impl Operations {
             }).then_some(segment.as_str())
         })
     }
+
+    pub(crate) fn freight_movement_revision(&self) -> u64 { self.freight_movement_revision }
 
     pub(crate) fn reserved_legs(&self, segment: &str) -> impl Iterator<Item = ReservedLeg<'_>> {
         self.occupied.get(segment).into_iter().flatten().map(|&(id, index)| {

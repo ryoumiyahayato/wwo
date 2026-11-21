@@ -59,10 +59,12 @@ pub struct TransportScene {
     revision: u64,
     visible: Vec<VisibleNode>,
     paths: Vec<VisiblePath>,
-    flow_segments: BTreeSet<String>,
+    flow_by_segment: BTreeMap<String, [u32; 2]>,
+    flow_by_terminal: BTreeMap<String, [u32; 2]>,
     flow_nodes: BTreeSet<String>,
     flow_overlay: Mesh,
-    flow_minute: Option<i64>,
+    flow_movement_revision: Option<u64>,
+    flow_view: Option<u64>,
     flow_revision: u64,
     corridor_page: Option<(usize, usize)>,
 }
@@ -84,8 +86,14 @@ struct VisibleNode {
 
 struct VisiblePath {
     id: String,
-    strokes: Vec<(Vec2, Vec2)>,
     fragments: Vec<(Vec2, Vec2)>,
+    dash_strokes: Option<Vec<(Vec2, Vec2)>>,
+}
+
+impl VisiblePath {
+    fn strokes(&self) -> &[(Vec2, Vec2)] {
+        self.dash_strokes.as_deref().unwrap_or(&self.fragments)
+    }
 }
 
 struct VehicleHit {
@@ -279,21 +287,40 @@ impl Region {
 
 struct Path {
     spans: Vec<Span>,
+    chunks: Vec<PathChunk>,
     length: f64,
     center: DVec3,
     radius: f64,
 }
 
+const SPANS_PER_CHUNK: usize = 32;
+
+struct PathChunk {
+    center: DVec3,
+    radius: f64,
+}
+
+struct ViewReach {
+    center: DVec3,
+    radius: f64,
+}
+
+impl ViewReach {
+    fn intersects(&self, center: DVec3, radius: f64) -> bool {
+        let angle = (self.radius + radius) / EARTH;
+        angle >= std::f64::consts::PI || self.center.dot(center) >= angle.cos()
+    }
+}
+
 struct Span {
     start: DVec3,
+    end: DVec3,
     forward: DVec3,
     start_m: f64,
     end_m: f64,
 }
 
 impl Span {
-    fn end(&self) -> DVec3 { self.at(self.end_m).0 }
-
     fn at(&self, distance: f64) -> (DVec3, DVec3) {
         let (sin, cos) = ((distance - self.start_m) / EARTH).sin_cos();
         (
@@ -320,6 +347,7 @@ impl Path {
                     let end_m = length + angle * EARTH;
                     spans.push(Span {
                         start,
+                        end,
                         forward: normal.cross(start).normalize(),
                         start_m: length,
                         end_m,
@@ -329,12 +357,17 @@ impl Path {
                 start = end;
             }
         }
-        let center = spans.iter().map(|s| s.start + s.end()).sum::<DVec3>().try_normalize().unwrap_or(DVec3::X);
-        let radius = spans.iter().map(|s| {
+        let extent = |spans: &[Span], center: DVec3| spans.iter().map(|s| {
             let middle = s.at((s.start_m + s.end_m) * 0.5).0;
             center.angle_between(middle) * EARTH + (s.end_m - s.start_m) * 0.5
         }).fold(0., f64::max);
-        Self { spans, length, center, radius }
+        let center = spans.iter().map(|s| s.start + s.end).sum::<DVec3>().try_normalize().unwrap_or(DVec3::X);
+        let radius = extent(&spans, center);
+        let chunks = spans.chunks(SPANS_PER_CHUNK).map(|spans| {
+            let center = spans[0].start;
+            PathChunk { center, radius: extent(spans, center) }
+        }).collect();
+        Self { spans, chunks, length, center, radius }
     }
 
     fn at(&self, distance: f64) -> Option<(DVec3, DVec3)> {
@@ -403,7 +436,9 @@ impl TransportScene {
                 let pair = (edge.from.clone().min(edge.to.clone()), edge.from.clone().max(edge.to.clone()));
                 rail_pairs.entry(pair).or_default().push(edge.id.clone());
             }
-            if edge.mode == TransportMode::Road && edge.prototype_only {
+            let named_rail = edge.mode == TransportMode::Rail && !edge.prototype_only
+                && network.evidence(&edge.id).is_some_and(|e| e.layer == NetworkLayer::Detailed && e.opened_on.is_some());
+            if named_rail || edge.mode == TransportMode::Road && edge.prototype_only {
                 if let (Some(from), Some(to)) = (
                     network.node_coordinates(&edge.from),
                     network.node_coordinates(&edge.to),
@@ -453,10 +488,12 @@ impl TransportScene {
             revision: 0,
             visible: Vec::new(),
             paths: Vec::new(),
-            flow_segments: BTreeSet::new(),
+            flow_by_segment: BTreeMap::new(),
+            flow_by_terminal: BTreeMap::new(),
             flow_nodes: BTreeSet::new(),
             flow_overlay: Mesh::default(),
-            flow_minute: None,
+            flow_movement_revision: None,
+            flow_view: None,
             flow_revision: 0,
             corridor_page: None,
         })
@@ -517,6 +554,7 @@ impl TransportScene {
         } else {
             (metres / EARTH).min(1.).asin() * EARTH
         } + camera.mpp * 24.;
+        let view_reach = ViewReach { center, radius: reach };
         for region in &mut self.regions {
             let distance = center.angle_between(radial(region.source.center)) * EARTH;
             let in_view = camera.mpp <= camera::ENTER && distance <= reach + region.source.radius_km * 1000.;
@@ -535,7 +573,6 @@ impl TransportScene {
         self.visible.clear();
         self.paths.clear();
         self.vehicle_segments.clear();
-        self.flow_segments.clear();
         let current = self.regions.iter()
             .filter_map(|r| r.loaded.as_ref())
             .filter(|r| r.period.contains(date));
@@ -544,7 +581,7 @@ impl TransportScene {
             .map(|(id, path)| (id, path, false))
             .chain(self.schematic.iter().map(|(id, path)| (id, path, true)))
         {
-            if center.angle_between(path.center) * EARTH > reach + path.radius {
+            if !view_reach.intersects(path.center, path.radius) {
                 continue;
             }
             let Some(edge) = network.segment(id) else { continue; };
@@ -562,38 +599,47 @@ impl TransportScene {
             }
             let status = if closed { Some(BLOCKED) } else if restricted { Some(RESTRICTED) } else { None };
             let color = if highlight { SELECTED } else { mode_ink(edge.mode) };
+            let named_rail = schematic && edge.mode == TransportMode::Rail;
+            let military_schematic = schematic && match edge.mode {
+                TransportMode::Rail => (highlight || status.is_some())
+                    && endpoints_cross_jurisdiction(world, &edge.from, &edge.to, date),
+                TransportMode::Shipping => highlight,
+                _ => false,
+            };
+            if named_rail && ((!highlight && status.is_none()) || camera.mpp > 1200.) {
+                continue;
+            }
             let (mut width, mut ink) = match mode {
                 Mode::Geographic => (if edge.mode == TransportMode::Rail { 2.3 } else { 1.7 }, status.unwrap_or(color)),
                 Mode::Political => (1.1, status.map_or([177, 202, 204, 140], |c| with_alpha(c, 180))),
                 Mode::Economic => (1.3, status.map_or([161, 179, 175, 130], |c| with_alpha(c, 175))),
                 Mode::Military => {
-                    if schematic || edge.prototype_only && !highlight { continue; }
-                    let width = capacity_radius(availability.capacity_units) * 0.52;
+                    if schematic && !military_schematic || !schematic && edge.prototype_only && !highlight { continue; }
+                    let width = if military_schematic { 1.35 } else { capacity_radius(availability.capacity_units) * 0.52 };
                     (width, status.unwrap_or([181, 196, 143, 218]))
                 }
             };
-            if schematic && (camera.mpp < 100. || (edge.mode == TransportMode::Road
+            if schematic && !named_rail && (camera.mpp < 100. || (edge.mode == TransportMode::Road
                 && (camera.mpp < 1000. || camera.mpp > 5500.)))
             {
                 continue;
             }
             if mode == Mode::Political && !highlight && status.is_none() {
-                let different = endpoint_polity(world, &edge.from, date).zip(endpoint_polity(world, &edge.to, date))
-                    .is_some_and(|(from, to)| from != to);
-                if !different {
+                if !endpoints_cross_jurisdiction(world, &edge.from, &edge.to, date) {
                     continue;
                 }
             }
             if highlight {
-                width += if mode == Mode::Political { 0.7 } else { 1.5 };
+                width += if mode == Mode::Military && military_schematic { 0. }
+                    else if mode == Mode::Political { 0.7 } else { 1.5 };
                 ink = status.unwrap_or(SELECTED);
             }
-            let mut path_hits = VisiblePath { id: id.clone(), strokes: Vec::new(), fragments: Vec::new() };
-            draw_path(&mut self.overlay, camera, size, path, width, ink, schematic, &mut path_hits);
-            if !path_hits.strokes.is_empty() {
-                if mode == Mode::Economic {
-                    self.flow_segments.insert(id.clone());
-                }
+            if mode == Mode::Military && military_schematic {
+                ink = with_alpha(ink, 192);
+            }
+            let mut path_hits = VisiblePath { id: id.clone(), fragments: Vec::new(), dash_strokes: schematic.then(Vec::new) };
+            draw_path(&mut self.overlay, camera, size, &view_reach, path, width, ink, &mut path_hits);
+            if !path_hits.strokes().is_empty() {
                 self.paths.push(path_hits);
             }
         }
@@ -622,9 +668,6 @@ impl TransportScene {
                             let Some(evidence) = evidence else { continue; };
                             let access = network.availability(id).expect("segment has availability");
                             let other = if edge.from == terminal.id { &edge.to } else { &edge.from };
-                            if mode == Mode::Economic {
-                                self.flow_segments.insert(id.clone());
-                            }
                             connected = true;
                             highlighted_terminal |= highlighted(id);
                             let physical_relation = evidence.layer != NetworkLayer::Domestic;
@@ -634,8 +677,7 @@ impl TransportScene {
                             }
                             water |= matches!(edge.mode, TransportMode::Shipping | TransportMode::InlandWaterway);
                             if mode == Mode::Political {
-                                international |= endpoint_polity(world, &terminal.id, date)
-                                    .zip(endpoint_polity(world, other, date)).is_some_and(|(a, b)| a != b);
+                                international |= endpoints_cross_jurisdiction(world, &terminal.id, other, date);
                             }
                             let closed = !access.open || access.capacity_units == 0;
                             if closed {
@@ -709,7 +751,6 @@ impl TransportScene {
         self.previous_legs = selected_leg_ids().map(str::to_owned).collect();
         self.previous_selection = selection.cloned();
         self.revision = next_revision();
-        self.flow_minute = None;
         self.update_flows(world, mode);
         Ok(())
     }
@@ -763,7 +804,7 @@ impl TransportScene {
         let subtle = self.previous_view.as_ref().is_some_and(|view| matches!(view.mode, Mode::Political | Mode::Military));
         let hit_radius: f32 = if subtle { 2.4 } else { 4. };
         self.paths.iter().filter_map(|path| {
-            let distance = path.strokes.iter().map(|&(a, b)| distance_to_stroke(pointer, a, b))
+            let distance = path.strokes().iter().map(|&(a, b)| distance_to_stroke(pointer, a, b))
                 .min_by(f32::total_cmp)?;
             (distance <= hit_radius.powi(2)).then_some((distance, &path.id))
         }).min_by(|(a, _), (b, _)| a.total_cmp(b)).map(|(_, id)| ObjectId::Segment(id.clone()))
@@ -790,33 +831,25 @@ impl TransportScene {
             self.flow_overlay.indices.clear();
             return;
         }
-        let minute = world.clock().snapshot().total_minutes;
-        if self.flow_minute == Some(minute) {
+        let movement = world.freight_movement_revision();
+        let changed = self.flow_movement_revision != Some(movement) && self.update_freight(world, movement);
+        if !changed && self.flow_view == Some(self.revision) {
             return;
         }
-        self.flow_minute = Some(minute);
+        self.flow_view = Some(self.revision);
         self.flow_nodes.clear();
         self.flow_overlay.vertices.clear();
         self.flow_overlay.indices.clear();
-        let mut endpoint_flows = BTreeMap::<&str, [u32; 2]>::new();
-        let paths: BTreeMap<_, _> = self.paths.iter().map(|path| (path.id.as_str(), &path.fragments)).collect();
-        for id in &self.flow_segments {
-            let Some(edge) = world.transport().segment(id) else { continue; };
-            let mut directed = [0_u32; 2];
-            for flow in world.economic_transport_on(id) {
-                let direction = usize::from(edge.from != flow.from);
-                directed[direction] = directed[direction].saturating_add(flow.load_units);
-                let out = &mut endpoint_flows.entry(flow.from).or_default()[0];
-                *out = out.saturating_add(flow.load_units);
-                let incoming = &mut endpoint_flows.entry(flow.to).or_default()[1];
-                *incoming = incoming.saturating_add(flow.load_units);
-            }
-            if let Some(fragments) = paths.get(id.as_str()) {
-                draw_flow(&mut self.flow_overlay, fragments, directed);
+        if self.flow_by_segment.is_empty() {
+            return;
+        }
+        for path in &self.paths {
+            if let Some(&directed) = self.flow_by_segment.get(&path.id) {
+                draw_flow(&mut self.flow_overlay, &path.fragments, directed);
             }
         }
         for node in &self.visible {
-            if let Some(&[out, incoming]) = endpoint_flows.get(node.id.as_str()) {
+            if let Some(&[out, incoming]) = self.flow_by_terminal.get(&node.id) {
                 self.flow_nodes.insert(node.id.clone());
                 if !node.drawn {
                     hollow_marker(&mut self.flow_overlay, node.position, node.radius - 1., FLOW, false);
@@ -830,7 +863,37 @@ impl TransportScene {
                 }
             }
         }
-        self.flow_revision = next_revision();
+        if !self.flow_overlay.indices.is_empty() {
+            self.flow_revision = next_revision();
+        }
+    }
+
+    fn update_freight(&mut self, world: &InitialWorld, revision: u64) -> bool {
+        self.flow_movement_revision = Some(revision);
+        let mut segments = BTreeMap::new();
+        let mut terminals = BTreeMap::<String, [u32; 2]>::new();
+        for id in world.moving_transport_segments() {
+            let Some(edge) = world.transport().segment(id) else { continue; };
+            let mut directed = [0_u32; 2];
+            for flow in world.economic_transport_on(id) {
+                let direction = usize::from(edge.from != flow.from);
+                directed[direction] = directed[direction].saturating_add(flow.load_units);
+            }
+            if directed != [0; 2] {
+                segments.insert(id.to_owned(), directed);
+                for (node, [out, incoming]) in [(&edge.from, directed), (&edge.to, [directed[1], directed[0]])] {
+                    let totals = terminals.entry(node.clone()).or_default();
+                    totals[0] = totals[0].saturating_add(out);
+                    totals[1] = totals[1].saturating_add(incoming);
+                }
+            }
+        }
+        if self.flow_by_segment == segments {
+            return false;
+        }
+        self.flow_by_segment = segments;
+        self.flow_by_terminal = terminals;
+        true
     }
 
     pub fn next_corridors(&mut self, cursor: [f64; 2]) -> bool {
@@ -1096,6 +1159,10 @@ fn endpoint_polity<'a>(world: &'a InitialWorld, id: &str, date: &str) -> Option<
     (polity.valid_from.as_str() <= date && date < polity.valid_to.as_str()).then_some(polity.id.as_str())
 }
 
+fn endpoints_cross_jurisdiction(world: &InitialWorld, from: &str, to: &str, date: &str) -> bool {
+    endpoint_polity(world, from, date).zip(endpoint_polity(world, to, date)).is_some_and(|(a, b)| a != b)
+}
+
 fn distance_to_stroke(pointer: Vec2, start: Vec2, end: Vec2) -> f32 {
     let span = end - start;
     let t = ((pointer - start).dot(span) / span.length_squared()).clamp(0., 1.);
@@ -1161,20 +1228,28 @@ fn draw_path(
     mesh: &mut Mesh,
     camera: &Camera,
     size: [u32; 2],
+    reach: &ViewReach,
     path: &Path,
     width: f32,
     ink: [u8; 4],
-    dashed: bool,
     projected: &mut VisiblePath,
 ) {
+    let dashed = projected.dash_strokes.is_some();
     let mut phase: f32 = 0.0;
-    for span in &path.spans {
+    let spans = path.chunks.iter().zip(path.spans.chunks(SPANS_PER_CHUNK))
+        .filter(|(chunk, _)| dashed || reach.intersects(chunk.center, chunk.radius))
+        .flat_map(|(_, spans)| spans);
+    for span in spans {
         // Bounded angular interpolation keeps long shipping legs on the globe.
         let steps = ((span.end_m - span.start_m) / 240_000.0).ceil() as u32;
         let mut previous = project(camera, size, span.start);
         for step in 1..=steps {
-            let fraction = f64::from(step) / f64::from(steps);
-            let (point, _) = span.at(span.start_m + (span.end_m - span.start_m) * fraction);
+            let point = if step == steps {
+                span.end
+            } else {
+                let fraction = f64::from(step) / f64::from(steps);
+                span.at(span.start_m + (span.end_m - span.start_m) * fraction).0
+            };
             let next = project(camera, size, point);
             if let (Some(start), Some(end)) = (previous, next) {
                 let delta = end - start;
@@ -1182,7 +1257,7 @@ fn draw_path(
                 if let Some((first, last)) = clip_line(start, end, size).filter(|_| length > 0.02) {
                     let fragment = (start + delta * first, start + delta * last);
                     projected.fragments.push(fragment);
-                    if dashed {
+                    if let Some(strokes) = projected.dash_strokes.as_mut() {
                         let start = start + delta * first;
                         let end_m = (last - first) * length;
                         let unit = delta / length;
@@ -1194,16 +1269,17 @@ fn draw_path(
                                 let first = start + unit * begin;
                                 let last = start + unit * stop;
                                 mesh.line(first.to_array(), last.to_array(), width, ink);
-                                projected.strokes.push((first, last));
+                                strokes.push((first, last));
                             }
                             at += 14.0;
                         }
                     } else {
                         mesh.line(fragment.0.to_array(), fragment.1.to_array(), width, ink);
-                        projected.strokes.push(fragment);
                     }
                 }
-                phase = (phase + length).rem_euclid(14.0);
+                if dashed {
+                    phase = (phase + length).rem_euclid(14.0);
+                }
             }
             previous = next;
         }

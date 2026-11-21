@@ -289,6 +289,14 @@ impl Context<'_> {
             }
             Mode::Economic => self.segment_economy(edge, detail),
             Mode::Military => {
+                if self.scene.segment_geometry(id) == GeometryEvidence::Schematic {
+                    detail.line(match edge.mode {
+                        TransportMode::Shipping => self.say("虚线示意航路。实际航迹待核。",
+                            "Dashed schematic sea lane. Exact course unconfirmed."),
+                        _ => self.say("虚线连接代表地点。实际线路走向待核。",
+                            "Dashes connect representative locations. Exact alignment unconfirmed."),
+                    });
+                }
                 self.line_capacity(edge, detail);
                 self.military_context([self.world.place_coordinates(&edge.from),
                     self.world.place_coordinates(&edge.to)], detail);

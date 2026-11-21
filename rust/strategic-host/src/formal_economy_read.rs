@@ -80,6 +80,10 @@ impl InitialWorld {
         self.transport.moving_segments()
     }
 
+    pub fn freight_movement_revision(&self) -> u64 {
+        self.transport.freight_movement_revision()
+    }
+
     pub fn economic_transport_on(&self, segment: &str) -> impl Iterator<Item = EconomicTransportFlow<'_>> {
         self.transport.reserved_legs(segment)
             .filter(|row| row.moving && carries_freight(row.traffic))
