@@ -148,7 +148,13 @@ def run(args, scratch):
                     host.ask('key', value='p')
             timed('troyes-scale-and-fire', lambda: view_roundtrip(shoot=True))
             timed('troyes-scale-repeat', view_roundtrip)
-            write(args.output/'troyes.json', dict(before=battle, after=status()['land_battle']))
+            after = status()['land_battle']
+            host.ask('key', value='Escape')
+            timed('troyes-reenter', open_battle)
+            resumed = status()['land_battle']
+            if not resumed or resumed['id'] != after['id']:
+                raise RuntimeError('Could not resume the same Troyes exercise')
+            write(args.output/'troyes.json', dict(before=battle, after=after, resumed=resumed))
             return
 
         if args.section in ('all', 'edges'):
