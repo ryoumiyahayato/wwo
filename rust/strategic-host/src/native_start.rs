@@ -11,12 +11,12 @@ use serde_json::{json, Value};
 use std::{fs::{self, File}, io, path::PathBuf, time::Instant};
 use wwo_map_lab::{
     battlefield_terrain::BattlefieldTerrain,
-    formal_bootstrap::{freight::FreightState, mode_name, mode_set, InitialWorld, PersonalActivity, WorldBootstrap},
+    formal_bootstrap::{freight::FreightState, mode_name, InitialWorld, PersonalActivity, WorldBootstrap},
     formal_clock::{GameClock, TimeControl, MINUTES_PER_DAY},
     formal_save::{native_slot_summary, read_native_slot, write_native_slot},
     land_battle::{self, LandBattleControls},
     military_grid::MilitaryCell,
-    transport::{NodeCoverage, NetworkLayer, operations::Plan},
+    transport::{ModeSet, NodeCoverage, operations::Plan},
 };
 
 pub struct NativeSession {
@@ -51,11 +51,12 @@ pub struct NativeSession {
 #[derive(Default)]
 struct TransportPage {
     destination: String,
-    mode: String,
-    destination_page: usize,
+    cargo: bool,
+    query: String,
+    category: usize,
+    destinations: Vec<(String, String)>,
     passenger_feedback: String,
     lot: Option<u64>,
-    lot_page: usize,
     freight_quote: Option<(u64, Plan)>,
     sale_quote: Option<(u64, i64, i64)>,
     freight_feedback: String,
@@ -66,6 +67,7 @@ struct MarketPage {
     content: &'static str,
     unit: String,
     good: String,
+    location: String,
     group: String,
     window: u64,
     chart: &'static str,
@@ -326,7 +328,8 @@ impl NativeSession {
                     let result = if let Some(quote) = id.strip_prefix("organization:freight|") {
                         organizations::buy_freight(world, &self.selected_organization, quote).map(|lot| {
                             self.transport.select_lot(world, Some(lot));
-                            self.transport.lot_page = 0;
+                            self.transport.cargo = true;
+                        self.transport.refresh_quote(world);
                             format!("已购入企业货批 #{lot}。从企业账户打开实物货运。")
                         })
                     } else if id.starts_with("organization:") {
@@ -387,33 +390,32 @@ impl NativeSession {
         let Some(world) = &mut self.world else { return };
         let page = &mut self.transport;
         let result = match verb {
-            "city" | "destination" if world.can_select_transport_destination(id) => {
+            "city" | "destination" if world.can_select_transport_destination(id)
+                && world.can_read_place_record(id) => {
                 page.destination = id.into();
-                page.freight_quote = None;
-                page.passenger_feedback.clear();
-                world.clear_transport_preview();
-                if verb == "city" {
-                    page.passenger_feedback = world.preview_travel(id, mode_set(&page.mode))
-                        .err().map_or_else(String::new, |error| error.to_string());
-                }
+                page.refresh_quote(world);
                 return;
             }
-            "cities_prev" => { page.destination_page = page.destination_page.saturating_sub(1); return; }
-            "cities_next" => {
-                if world.transport_destinations().nth((page.destination_page + 1) * crate::transport_ui::PAGE_SIZE).is_some() {
-                    page.destination_page += 1;
-                }
+            "search" => {
+                let (category, query) = id.split_once('|').unwrap_or(("0", id));
+                page.category = category.parse().unwrap_or(0);
+                page.query = query.trim().to_lowercase();
+                page.search(world);
                 return;
             }
-            "mode" => {
-                page.mode = id.into(); page.freight_quote = None; page.passenger_feedback.clear();
-                world.clear_transport_preview(); return;
+            "passenger" | "cargo" | "preview" => {
+                if verb != "preview" { page.cargo = verb == "cargo"; }
+                if page.cargo && page.lot.is_none() {
+                    let id = world.freight_lots().rev().next().map(|lot| lot.id);
+                    page.select_lot(world, id);
+                }
+                page.refresh_quote(world);
+                return;
             }
-            "preview" => world.preview_travel(&page.destination, mode_set(&page.mode)).map(|_| ()),
             "work_trip" => {
                 if let Some((job, _, _)) = world.employment() {
                     page.destination = job.place.clone();
-                    page.mode = "all".into();
+                    page.cargo = false;
                 }
                 world.preview_work_trip().map(|_| ())
             }
@@ -426,34 +428,47 @@ impl NativeSession {
                 }
                 result
             }
-            "depart" => world.depart_player(),
+            "depart" => {
+                if let Some(quote) = world.travel_preview().filter(|plan| plan.departure_minute() < world.clock().snapshot().total_minutes).cloned() {
+                    match world.preview_travel(&page.destination, ModeSet::ALL) {
+                        Ok(plan) if same_service(&quote, plan) => {},
+                        Ok(_) => {
+                            page.passenger_feedback = "费用或线路有变动，请确认新报价。".into();
+                            return;
+                        }
+                        Err(error) => { page.passenger_feedback = error.to_string(); return; }
+                    }
+                }
+                world.depart_player()
+            }
             "stop" => world.stop_player(),
             "commute" => world.set_commute(world.commute_base().is_none()),
             "lot" => {
-                let selection = id.parse().ok().and_then(|id| world.freight_lots().rev()
-                    .position(|lot| lot.id == id).map(|index| (id, index)));
-                if let Some((id, index)) = selection {
-                    page.lot_page = index / crate::transport_ui::LOT_PAGE_SIZE;
+                if let Some(id) = id.parse().ok().filter(|id| world.freight_lots().any(|lot| lot.id == *id)) {
+                    page.cargo = true;
                     page.select_lot(world, Some(id));
-                }
-                return;
-            }
-            "lots_prev" => { page.lot_page = page.lot_page.saturating_sub(1); return; }
-            "lots_next" => {
-                if (page.lot_page + 1) * crate::transport_ui::LOT_PAGE_SIZE < world.freight_lots().count() {
-                    page.lot_page += 1;
+                    page.refresh_quote(world);
                 }
                 return;
             }
             "freight_quote" | "freight_dispatch" | "sale_quote" | "sale_confirm" => {
-                page.freight_feedback = match page.act_on_freight(world, verb) {
-                    Ok(text) => text, Err(error) => error.to_string(),
-                };
+                let result = page.act_on_freight(world, verb);
+                let started = result.is_ok() && verb == "freight_dispatch";
+                page.freight_feedback = result.unwrap_or_else(|error| error.to_string());
+                if started && self.control.paused {
+                    self.control.set_speed(1);
+                    self.reset_world_tick();
+                }
                 return;
             }
             _ => return,
         };
+        let started = result.is_ok() && verb == "depart";
         page.passenger_feedback = result.err().map_or_else(String::new, |error| error.to_string());
+        if started && self.control.paused {
+            self.control.set_speed(1);
+            self.reset_world_tick();
+        }
     }
 
     fn market_action(&mut self, verb: &str, id: &str, site: &str, quantity: u64, token: u64) -> io::Result<()> {
@@ -466,7 +481,7 @@ impl NativeSession {
                 "所选地区暂无正式市场。当前显示人物可查询的市场。".into()
             } else { String::new() };
             self.market = Some(MarketPage {
-                scope: "domestic", content: "quotes", unit: unit.into(), good: String::new(),
+                scope: "domestic", content: "quotes", unit: unit.into(), good: String::new(), location: String::new(),
                 group: "all".into(), window: 7, chart: "price", quote: None, result,
             });
         }
@@ -487,17 +502,36 @@ impl NativeSession {
                     page.unit = unit.into();
                     page.quote = None;
                     page.good.clear();
+                    page.location.clear();
                     page.content = "quotes";
                     page.scope = "domestic";
                     page.result.clear();
                 }
             }
             "region" => page.result = "地区商户和个人配送仍在 R68。".into(),
-            "good" if market.commodities.contains_key(id) => {
+            "good" if market.commodities.contains_key(id)
+                || (id == "grain" && world.firm_material_orders(None).any(|order| order.pending > 0)) => {
                 page.good = id.into();
+                page.location.clear();
                 page.content = "good";
                 page.quote = None;
             }
+            "location" => {
+                if world.market_opportunities(&page.good).iter().any(|row| row.unit == id && row.place == site) {
+                    page.unit = id.into();
+                    page.location = site.into();
+                    page.quote = None;
+                    page.result.clear();
+                }
+            }
+            "local_bread" if page.good == "bread" && world.local_bread_offer().is_some() => {
+                page.result = match world.buy_local_bread(1) {
+                    Ok(amount) => format!("已支付 {amount} 生丁 · 面包已交付"),
+                    Err(error) => error.to_string(),
+                };
+            }
+            "trend" if !page.good.is_empty() => page.content = "trend",
+            "back_good" if !page.good.is_empty() => page.content = "good",
             "goods_group" => page.group = id.into(),
             "chart" => page.chart = if id == "supply" { "supply" } else { "price" },
             "window" => page.window = id.parse().ok().filter(|days| [7, 30, 90].contains(days)).unwrap_or(7),
@@ -506,7 +540,8 @@ impl NativeSession {
                 if is_offer && (id != page.good || site != market.id) { return Ok(()); }
                 if !is_offer && page.quote.is_none() { return Ok(()); }
                 let Some(row) = market.commodities.get(&page.good) else { return Ok(()); };
-                let quantity = if is_offer { 1000 } else { i64::try_from(quantity).unwrap_or(0) };
+                let quantity = if is_offer { ((row.inventory * 1000.).floor() as i64).clamp(1, 1000) }
+                    else { i64::try_from(quantity).unwrap_or(0) };
                 let amount = if world.market_unit_for_person(&world.player().id) == Some(page.unit.as_str()) {
                     world.macro_economy().quote(&page.unit, &page.good, quantity).map_err(|error| error.to_string())
                         .and_then(|amount| {
@@ -539,7 +574,8 @@ impl NativeSession {
                     Ok(id) => {
                         page.content = "freight";
                         self.transport.select_lot(world, Some(id));
-                        self.transport.lot_page = 0;
+                        self.transport.cargo = true;
+                        self.transport.refresh_quote(world);
                         self.transport.freight_feedback = "已从当地市场采购。货批已交付给你，可安排运输。".into();
                     }
                     Err(error) => page.result = format!("采购失败：{error}"),
@@ -835,6 +871,25 @@ fn minute_text(minute: i64) -> String {
 }
 
 impl TransportPage {
+    fn search(&mut self, world: &InitialWorld) {
+        let net = world.transport();
+        self.destinations = (!self.query.is_empty() || self.category != 0).then(|| {
+            net.nodes().filter(|node| {
+                use wwo_map_lab::transport::NodeKind;
+                let category = match self.category {
+                    1 => node.kind == NodeKind::City,
+                    2 => node.kind == NodeKind::Port,
+                    3 => node.kind == NodeKind::Area,
+                    _ => matches!(node.kind, NodeKind::City | NodeKind::Port | NodeKind::Area),
+                };
+                category && node.id != world.last_station() && world.can_read_place_record(&node.id)
+                    && net.coverage(&node.id) == NodeCoverage::Connected
+                    && (self.query.is_empty() || world.place_name(&node.id).to_lowercase().contains(&self.query)
+                        || node.id.to_lowercase().contains(&self.query))
+            }).take(8).map(|node| (node.id.clone(),world.place_name(&node.id).to_owned())).collect()
+        }).unwrap_or_default();
+    }
+
     fn select_lot(&mut self, world: &mut InitialWorld, id: Option<u64>) {
         self.lot = id;
         self.freight_quote = None;
@@ -848,19 +903,51 @@ impl TransportPage {
         world.select_freight_route(shipment);
     }
 
+    fn refresh_quote(&mut self, world: &mut InitialWorld) {
+        world.clear_transport_preview();
+        self.freight_quote = None;
+        self.passenger_feedback.clear();
+        self.freight_feedback.clear();
+        if self.cargo {
+            let reservation = self.lot.and_then(|id| world.freight_lots().find(|lot| lot.id == id))
+                .and_then(|lot| match lot.state {
+                    FreightState::InTransit { reservation_id, .. } => Some(reservation_id),
+                    _ => None,
+                });
+            world.select_freight_route(reservation);
+            if reservation.is_none() && self.lot.is_some() && !self.destination.is_empty() {
+                self.freight_feedback = self.act_on_freight(world, "freight_quote")
+                    .err().map_or_else(String::new, |error| error.to_string());
+            }
+        } else if !self.destination.is_empty() && !world.passenger_in_transit()
+            && self.destination != world.last_station() {
+            self.passenger_feedback = world.preview_travel(&self.destination, ModeSet::ALL)
+                .err().map_or_else(String::new, |error| error.to_string());
+        }
+    }
+
     fn act_on_freight(&mut self, world: &mut InitialWorld, verb: &str) -> io::Result<String> {
         let id = self.lot.ok_or_else(|| io::Error::other("请选择货批。"))?;
         match verb {
             "freight_quote" => {
                 self.freight_quote = None;
-                let plan = world.quote_freight(id, &self.destination, mode_set(&self.mode))?;
+                let plan = world.quote_freight(id, &self.destination, ModeSet::ALL)?;
                 world.show_freight_route(&plan);
                 self.freight_quote = Some((id, plan));
                 Ok(String::new())
             }
             "freight_dispatch" => {
-                let (_, plan) = self.freight_quote.take().filter(|(lot, _)| *lot == id)
+                let (_, mut plan) = self.freight_quote.take().filter(|(lot, _)| *lot == id)
                     .ok_or_else(|| io::Error::other("请查询运输报价。"))?;
+                if plan.departure_minute() < world.clock().snapshot().total_minutes {
+                    let updated = world.quote_freight(id, &self.destination, ModeSet::ALL)?;
+                    world.show_freight_route(&updated);
+                    if !same_service(&plan, &updated) {
+                        self.freight_quote = Some((id, updated));
+                        return Err(io::Error::other("费用或线路有变动，请确认新报价。"));
+                    }
+                    plan = updated;
+                }
                 world.select_freight_route(None);
                 let reservation = world.dispatch_quoted_freight(id, plan)?;
                 world.select_freight_route(Some(reservation));
@@ -883,45 +970,16 @@ impl TransportPage {
     }
 
     fn view(&self, world: &InitialWorld) -> Value {
-        let now = world.clock().snapshot().total_minutes;
-        let page_size = crate::transport_ui::PAGE_SIZE;
-        let mut remaining = world.transport_destinations().skip(self.destination_page * page_size);
-        let destinations: Vec<_> = remaining.by_ref().take(page_size)
-            .map(|id| {
-                let name = world.place_name(id);
-                let label = if world.transport().node(id).is_some_and(|node| node.kind == wwo_map_lab::transport::NodeKind::Port) {
-                    format!("{name} · 码头")
-                } else { name.to_owned() };
-                json!({"id":id,"label":label})
-            }).collect();
-        let destinations_next = remaining.next().is_some();
-        let preview = world.travel_preview().filter(|plan| plan.departure_minute() >= now);
+        let destinations: Vec<_> = self.destinations.iter()
+            .map(|(id, label)| json!({"id":id,"label":label})).collect();
+        let preview = world.travel_preview();
         let mut passenger_lines = Vec::new();
         if let Some(plan) = world.travel_plan().or(preview) {
             let status = if world.passenger_moving() { "在途" } else if world.passenger_in_transit() { "等候发车或换乘" } else { "报价" };
             passenger_lines.push(format!("{status} · {}", world.place_name(&plan.route().to)));
             passenger_lines.extend(describe_plan(world, plan));
         }
-        let commute = world.commute_base().zip(world.commute_departure())
-            .map(|(base, at)| format!("通勤起点 {} · {} 发车", world.place_name(base), minute_text(at)))
-            .unwrap_or_else(|| "未启用通勤".into());
-        let destination_detail = if self.destination.is_empty() { String::new() } else {
-            describe_destination(world, &self.destination)
-        };
-        let migration = world.residence_unit_at(world.last_station()).and_then(|unit| {
-            world.background_migration(unit).or_else(|| world.background_migrations().find(|row| row.destination == unit))
-        })
-            .map(|row| {
-                let net = world.transport();
-                let label = |unit: &str| net.population_node(unit).or_else(|| net.area_node(unit))
-                    .map_or_else(|| unit.to_owned(), |node| world.place_name(node).to_owned());
-                let status = if row.blocked {format!("停留于 {}", world.place_name(row.station))}
-                    else {format!("预计 {} 抵达", minute_text(row.arrival_minute))};
-                format!("人口迁移 · {} → {} · {} 人 · {status}",
-                    label(row.source), label(row.destination), row.members)
-            });
-        let lot_page_size = crate::transport_ui::LOT_PAGE_SIZE;
-        let lots: Vec<_> = world.freight_lots().rev().skip(self.lot_page*lot_page_size).take(lot_page_size).map(|lot| {
+        let lots: Vec<_> = world.freight_lots().rev().map(|lot| {
             let name = world.macro_economy().commodity_info(&lot.good).map_or(lot.good.as_str(), |term| term.0);
             let status = match lot.state {
                 FreightState::Purchased => "待发运", FreightState::InTransit {..} => "在途",
@@ -929,7 +987,14 @@ impl TransportPage {
                 FreightState::Sold {..} => "已出售",
             };
             let owner = if lot.owner() == world.player().id {"个人"} else {employer_label(world,lot.owner())};
-            json!({"id":lot.id,"label":format!("#{} · {owner} · {name} · {status}",lot.id),"selected":self.lot==Some(lot.id)})
+            let place = match &lot.state {
+                FreightState::Purchased => &lot.origin,
+                FreightState::Interrupted { place } => place,
+                FreightState::InTransit { destination, .. } | FreightState::Delivered { destination }
+                    | FreightState::Sold { destination, .. } => destination,
+            };
+            json!({"id":lot.id,"label":format!("{name} · {} · {status} · {owner}",world.place_name(place)),
+                "selected":self.lot==Some(lot.id)})
         }).collect();
         let mut freight_lines = Vec::new();
         let mut freight_actions = Vec::new();
@@ -937,7 +1002,11 @@ impl TransportPage {
             let units = lot.quantity_milli as f64 / 1000.0;
             let unit = world.macro_economy().commodity_info(&lot.good).map_or("", |term| term.2);
             let tonnes = world.macro_economy().freight_tonnes(&lot.good, units).unwrap_or_default();
-            freight_lines.push(format!("{units:.3} {unit} · {tonnes:.3} 吨 · 货款 {} · 已付运费 {}", lot.purchase_centimes, lot.freight_centimes));
+            let name = world.macro_economy().commodity_info(&lot.good).map_or("", |term| term.0);
+            let amount = crate::market_ui::format_quantity(lot.quantity_milli, 1000);
+            let mut quantity = format!("{name} · {amount} {unit}");
+            if unit != "吨" { quantity.push_str(&format!(" · {tonnes:.3} 吨")); }
+            freight_lines.push(quantity);
             match &lot.state {
                 FreightState::InTransit {reservation_id, destination} => {
                     let (at, plan) = world.freight_progress(*reservation_id);
@@ -956,10 +1025,11 @@ impl TransportPage {
                     };
                     freight_lines.push(format!("货批存放于 {}", world.place_name(place)));
                     if !self.destination.is_empty() && self.destination != place {
-                        freight_actions.push(json!({"id":"freight_quote","label":"查询运费"}));
+                        if self.freight_quote.is_none() {
+                            freight_actions.push(json!({"id":"freight_quote","label":"更新报价"}));
+                        }
                     }
-                    if let Some((_, plan)) = self.freight_quote.as_ref().filter(|(id, plan)| *id == lot.id && plan.departure_minute() >= now) {
-                        freight_lines.push(format!("本次预约 {} 货位 · 每货位上限 1 吨", plan.load_units()));
+                    if let Some((_, plan)) = self.freight_quote.as_ref().filter(|(id, _)| *id == lot.id) {
                         freight_lines.extend(describe_plan(world, plan));
                         freight_actions.push(json!({"id":"freight_dispatch","label":"确认发运"}));
                     }
@@ -974,80 +1044,48 @@ impl TransportPage {
             }
         }
         json!({
-            "destinations":destinations, "destination_page":self.destination_page, "destination":self.destination,
-            "destinations_next":destinations_next,
-            "destination_is_current":self.destination == world.last_station(),
-            "destination_detail":destination_detail,
-            "location":world.place_name(world.last_station()), "moving":world.passenger_moving(),
-            "residence":world.place_name(world.residence()),
-            "workplace":world.employment().map_or("无合同", |(job, _, _)| world.place_name(&job.place)),
+            "destinations":destinations, "destination":self.destination,
+            "destination_label": if self.destination.is_empty() { "" } else { world.place_name(&self.destination) },
+            "cargo": self.cargo, "location":world.place_name(world.last_station()),
             "can_plan_work_trip":world.employment().is_some_and(|(job, _, _)| world.player_current_place()
                 .is_some_and(|place| place != job.place)),
             "can_move_home":world.can_move_player_home(),
             "can_commute":world.commute_base().is_some() || (world.employment().is_some() && world.player_current_place().is_some()),
-            "migration":migration,
-            "commute":commute, "mode":if self.mode.is_empty() {"all"}else{&self.mode}, "active":world.passenger_in_transit(),
-            "passenger_lines":passenger_lines, "passenger_notice":if self.passenger_feedback.is_empty() {world.travel_notice()}else{&self.passenger_feedback},
+            "active":world.passenger_in_transit(), "passenger_lines":passenger_lines,
+            "passenger_notice":if self.passenger_feedback.is_empty() {world.travel_notice()}else{&self.passenger_feedback},
             "travel_confirm":preview.is_some() && !world.passenger_in_transit(),
-            "lots":lots, "lot_page":self.lot_page, "lots_next":(self.lot_page+1)*lot_page_size < world.freight_lots().count(),
-            "freight_lines":freight_lines, "freight_notice":self.freight_feedback,
+            "lots":lots, "freight_lines":freight_lines, "freight_notice":self.freight_feedback,
             "freight_actions":freight_actions
         })
     }
 }
 
-fn describe_destination(world: &InitialWorld, destination: &str) -> String {
-    let network = world.transport();
-    let coverage = match network.coverage(destination) {
-        NodeCoverage::Connected => "有交通节点",
-        NodeCoverage::Impassable => "连接停运",
-        NodeCoverage::Unrefined => "未细化线路",
-        NodeCoverage::Unknown => "暂无交通资料",
-    };
-    let unit = world.population_unit_at(destination);
-    let market = if world.market_unit_for_person(&world.player().id).is_some_and(|local| Some(local) == unit) {
-        "当地统计市场可交易"
-    } else if unit.is_some_and(|unit| world.macro_economy().markets().contains_key(unit)) {
-        "有统计市场，须到当地交易"
-    } else {
-        "暂无正式市场"
-    };
-    let statistics = unit.and_then(|unit| network.domestic_statistics(unit));
-    let name = world.place_name(destination);
-    let mut detail = format!("{name} · {coverage} · {market}");
-    if let Some(note) = network.notes_at(destination).next() {
-        detail.push_str(&format!(" · {note}"));
-    } else if let Some(stats) = statistics {
-        detail.push_str(&format!(" · 区域铁路 {} 公里，水道 {} 公里 · 资料置信度 {}%",
-            stats.rail_route_km, stats.waterway_km, stats.confidence_bp / 100));
-    }
-    detail
+fn same_service(previous: &Plan, current: &Plan) -> bool {
+    previous.fare_centimes() == current.fare_centimes()
+        && previous.route().legs.iter().map(|leg| &leg.segment_id)
+            .eq(current.route().legs.iter().map(|leg| &leg.segment_id))
 }
 
 fn describe_plan(world: &InitialWorld, plan: &Plan) -> Vec<String> {
     let route = plan.route();
     let mut lines = vec![
-        format!("{} 生丁 · {} 分钟（含等候）· 风险 {} 点 · 名义运力 {}",
-            plan.fare_centimes(), plan.arrival_minute()-plan.departure_minute(), route.risk_points,
-            route.capacity_units.unwrap_or(0)),
-        format!("预计 {} 抵达", minute_text(plan.arrival_minute())),
+        format!("{} 生丁 · 预计 {} 到达", plan.fare_centimes(), minute_text(plan.arrival_minute())),
     ];
-    if plan.first_departure_minute() > plan.departure_minute() {
-        lines.push(format!("预计 {} 发车", minute_text(plan.first_departure_minute())));
-    }
-    if let (Some(origin), Some(destination)) = (world.population_unit_at(&route.from), world.population_unit_at(&route.to)) {
-        if origin != destination { lines.push("跨市场运输".into()); }
-    }
+    let mut modes = Vec::new();
     for leg in &route.legs {
-        let layer = world.transport().evidence(&leg.segment_id).map_or("", |evidence| match evidence.layer {
-            NetworkLayer::Detailed if leg.prototype_only => " · 原型路段",
-            NetworkLayer::Detailed => " · 细化路段",
-            NetworkLayer::Domestic => " · 区域统计",
-            NetworkLayer::Maritime => " · 海运资料",
-            NetworkLayer::River => " · 内河资料",
-            NetworkLayer::Transfer => " · 站港接驳",
-        });
-        lines.push(format!("{} · {} → {}{layer}",mode_name(leg.mode),world.place_name(&leg.from),world.place_name(&leg.to)));
+        let mode = mode_name(leg.mode);
+        if modes.last().copied() != Some(mode) { modes.push(mode); }
+    }
+    let tide_allowance: i64 = route.legs.iter().map(|leg|
+        i64::from(wwo_map_lab::transport::map_data::shipping_delay_minutes(&leg.segment_id))).sum();
+    if tide_allowance > 0 {
+        lines.push(format!("潮汐可延后 {} 小时", tide_allowance / 60));
+    } else {
+        lines.push(format!("{} · {} 段", modes.join(" / "), route.legs.len()));
+    }
+    lines.push(format!("{} 出发 · 预约 {} 位", minute_text(plan.first_departure_minute()), plan.load_units()));
+    for leg in &route.legs {
+        lines.push(format!("{} · {} → {}", mode_name(leg.mode), world.place_name(&leg.from), world.place_name(&leg.to)));
     }
     lines
 }
@@ -1064,7 +1102,7 @@ impl MarketPage {
         for (id, goods) in &market.commodities {
             let (name, category, unit) = economy.commodity_info(id).unwrap();
             let item = json!({"id":id,"label":name,"price":goods.price_centimes.to_string(),
-                              "supply":format!("{:.3}",goods.inventory),"quantity":format!("{:.3} {unit}",goods.inventory)});
+                              "quantity":format!("{} {unit}",crate::market_ui::format_quantity((goods.inventory * 1000.).floor() as i64,1000))});
             if economy.purchasable(id) && goods.inventory > 0.0 { book.push(item.clone()); }
             let matches_group = match self.group.as_str() {
                 "谷物、薯类与干豆" => category == "agricultural_food",
@@ -1074,20 +1112,41 @@ impl MarketPage {
             };
             if matches_group { catalog.push(item); }
         }
-        let info = economy.commodity_info(&self.good);
+        if matches!(self.group.as_str(),"all" | "谷物、薯类与干豆")
+            && economy.commodity_info("grain").is_none() && world.firm_material_orders(None).any(|order| order.pending > 0)
+        {
+            catalog.push(json!({"id":"grain","label":"企业谷物原料","price":"按企业订单","quantity":"—"}));
+        }
+        let info = economy.commodity_info(&self.good).or_else(||
+            (self.good == "grain").then_some(("企业谷物原料","agricultural_food","千克")));
         let local = world.market_unit_for_person(&world.player().id) == Some(self.unit.as_str());
         let place = world.player_current_place().filter(|_| local).unwrap_or_default();
-        let offers = market.commodities.get(&self.good).filter(|_| economy.purchasable(&self.good)).map(|row| {
+        let opportunities = world.market_opportunities(&self.good);
+        let shown = opportunities.iter().find(|row| row.unit == self.unit && row.place == self.location)
+            .or_else(|| opportunities.iter().find(|row| row.unit == self.unit));
+        let sites: Vec<_> = opportunities.iter().map(|row| json!({
+            "unit":row.unit,"place":row.place,"point":row.point,
+            "name":world.place_name(row.place),"country":label(row.unit),
+            "ask":row.ask,"bid":row.bid,"carrier":row.carrier,"stock":row.stock,
+            "production":row.production,"demand":row.demand,"pending_order":row.pending_order
+        })).collect();
+        let bread = (local && self.good == "bread").then(|| world.local_bread_offer()).flatten()
+            .map(|offer| json!({
+                "name":employer_label(world, offer.firm),"price":offer.price,"stock":offer.quantity,
+                "affordable":world.balance().is_some_and(|cash| cash.available >= offer.price)
+            }));
+        let offers = market.commodities.get(&self.good).filter(|_| local && shown.is_some_and(|r| r.ask.is_some())).map(|row| {
             let (_, _, unit) = info.unwrap();
             json!([{"good":self.good,"commodity":self.good,"site":market.id,"place":place,
-                    "seller":"统计市场","location":country,"price":row.price_centimes.to_string(),
+                    "seller":"当地市场","price":row.price_centimes.to_string(),
                     "currency":"模拟货币","unit":unit,"available":(row.inventory*1000.).floor() as i64}])
         }).unwrap_or_else(|| json!([]));
         let quote = self.quote.as_ref().map(|row| json!({
             "token":row.token,"accepted":row.amount.is_ok(),"commodity":self.good,"site":market.id,
             "name":info.map_or("", |(name, _, _)| name),"quantity":row.quantity,"scale":1000,"quoted_quantity":row.quantity,
-            "amount":row.amount.as_ref().ok(),"goods_amount":row.amount.as_ref().ok(),"freight_amount":0,
-            "currency":"formal_simulation_minor_v1","currency_name":"模拟货币",
+            "amount":row.amount.as_ref().ok(),
+            "currency":"formal_simulation_minor_v1","currency_name":"生丁",
+            "unit":info.map_or("", |(_,_,unit)|unit),
             "error":row.amount.as_ref().err().map(String::as_str).unwrap_or(""),"onsite":true
         }));
         let countries: Vec<_> = economy.markets().keys().map(|unit| json!({"id":format!("state:{unit}"),"label":label(unit)})).collect();
@@ -1130,6 +1189,8 @@ impl MarketPage {
             "market_id":market.id,"region":"","good":self.good,"site":market.id,"window_days":self.window,
             "chart_kind":self.chart,"minute":minute,"book":book,"offers":offers,"places":[],"countries":countries,
             "quote":quote,"orders":orders,"logistics":logistics,"chart":chart,"result":self.result,"collections":[],"focus":null,
-            "catalog":catalog,"goods_group":self.group,"good_label":info.map_or("", |(name,_,_)| name)})
+            "catalog":catalog,"goods_group":self.group,"good_label":info.map_or("", |(name,_,_)| name),
+            "good_unit":info.map_or("", |(_,_,unit)| unit),"sites":sites,"enterprise_offer":bread,
+            "selected_site":shown.map(|site|site.place)})
     }
 }
