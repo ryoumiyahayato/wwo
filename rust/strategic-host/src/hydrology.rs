@@ -4,6 +4,7 @@ use crate::{
 };
 use std::{
     collections::{HashMap, HashSet},
+    f64::consts::FRAC_PI_2,
     fs,
     io::{self, Read, Seek, SeekFrom},
     path::Path,
@@ -18,6 +19,7 @@ const WATER_WORDS: usize = 3 * 1024 * 1024;
 pub const WATER_MPP: f64 = 4200.;
 const WATER_PREFETCH_MPP: f64 = 5000.;
 const WATER_PREFETCH: f64 = 320.;
+const WATER_VIEW_MARGIN: f64 = 96.;
 const HANDOFF: Duration = Duration::from_millis(80);
 const HANDOFF_TICK_LIMIT: u32 = 1 << 30;
 const WATER_BATCH: usize = 32;
@@ -36,18 +38,28 @@ struct ResidentWaterPage {
     last_needed: u64,
 }
 
+struct WaterSelection {
+    center: V3,
+    ahead: V3,
+    east: V3,
+    radius: f64,
+    mpp: f64,
+    size: [u32; 2],
+}
+
 pub struct WaterPages {
     classes: Vec<u32>,
     table: Vec<u32>,
     pages: Vec<WaterPage>,
     desired: Vec<(usize, bool)>,
+    visible_outside_budget: Vec<usize>,
     resident: HashMap<usize, ResidentWaterPage>,
     used_words: usize,
     request: mpsc::Sender<Vec<(usize, std::ops::Range<u64>)>>,
     ready: mpsc::Receiver<WaterBatch>,
     unavailable: HashSet<usize>,
     inflight: bool,
-    selection: Option<(V3, V3, f64, f64)>,
+    selection: Option<WaterSelection>,
     previous_view: Option<(V3, Instant)>,
     selection_number: u64,
     epoch: Instant,
@@ -179,6 +191,7 @@ impl WaterPages {
             classes,
             pages,
             desired: Vec::new(),
+            visible_outside_budget: Vec::new(),
             resident: HashMap::new(),
             used_words: WATER_PAGES,
             request,
@@ -204,10 +217,37 @@ impl WaterPages {
     ) {
         if camera.mpp < WATER_PREFETCH_MPP {
             self.select(camera, size, now);
+            // A page prefetched outside the viewport has stamp 0. Start its
+            // normal handoff when it first enters the visible footprint,
+            // rather than exposing a hard rectangular water/land transition.
+            let stamp = self.tick(now);
+            let mut activated = false;
+            for &(i, visible) in &self.desired {
+                if !visible {
+                    continue;
+                }
+                let key = self.pages[i].index;
+                if let Some(page) = self.resident.get_mut(&key) {
+                    if page.words[0] == 0 && stamp != 0 {
+                        page.words[0] = stamp;
+                        queue.write_buffer(
+                            buffer,
+                            u64::from(self.table[key]) * 4,
+                            bytemuck::bytes_of(&stamp),
+                        );
+                        activated = true;
+                    }
+                }
+            }
+            if activated {
+                self.revision += 1;
+                self.handoff_until = now + HANDOFF;
+            }
         } else {
             self.selection = None;
             self.previous_view = None;
             self.desired.clear();
+            self.visible_outside_budget.clear();
         }
 
         if let Ok(results) = self.ready.try_recv() {
@@ -223,8 +263,8 @@ impl WaterPages {
                             .iter()
                             .any(|&(i, visible)| visible && self.pages[i].index == key);
                         touches_view |= visible;
-                        // A page prefetched off screen is authoritative on its first appearance.
-                        // Keep completed reads even if the player reversed direction meanwhile.
+                        // Keep off-screen prefetches resident after a reversal.
+                        // Their handoff stamp starts when the page first becomes visible.
                         words[0] = if visible { stamp } else { 0 };
                         Some((key, words))
                     }
@@ -280,19 +320,59 @@ impl WaterPages {
         }
         let offset = (origin[0] - center[0]).hypot((origin[1] - center[1]) / camera.pitch().cos());
         // Include selection slack so prefetch-only uploads cannot alter the current raster.
-        let view_radius = camera.extent(size, offset + 96.);
+        let view_radius = camera.extent(size, offset + WATER_VIEW_MARGIN);
         let radius = camera.extent(size, offset + WATER_PREFETCH);
         let slack = (camera.mpp * 48. / EARTH).cos();
         let ahead_slack = (camera.mpp * 110. / EARTH).cos();
-        if self.selection.is_some_and(|(previous, lead, reach, mpp)| {
-            dot(previous, axis) >= slack
-                && dot(lead, ahead) >= ahead_slack
-                && (radius - reach).abs() <= camera.mpp * 40. / EARTH
-                && (mpp / camera.mpp - 1.).abs() <= 0.10
+        let pixel_scale = EARTH / camera.mpp;
+        let pitch = camera.pitch().cos();
+        let regional = camera.blend() > 0.;
+        let screen_priority = |page: &WaterPage| {
+            let [x, y, z] = axes.map(|direction| dot(direction, page.axis));
+            let radial = x.hypot(y);
+            let angle = radial.atan2(z);
+            let furthest = angle + page.radius;
+            if furthest >= FRAC_PI_2 {
+                return 2;
+            }
+            let factor = if regional && radial > 1e-12 { angle / radial } else { 1. };
+            let screen = [origin[0] + x * factor * pixel_scale,
+                          origin[1] - y * factor * pixel_scale * pitch];
+            // Bound the projected page by its angular cap. The regional projection
+            // stretches tangential distances by at most theta/sin(theta).
+            let stretch = if regional && furthest > 1e-12 { furthest / furthest.sin() } else { 1. };
+            let pad = page.radius * stretch * pixel_scale;
+            let outside_x = (-screen[0]).max(screen[0] - f64::from(size[0])) - pad;
+            let outside_y = (-screen[1]).max(screen[1] - f64::from(size[1])) - pad * pitch;
+            let outside = outside_x.max(outside_y);
+            if outside <= 0. { 2 } else if outside <= WATER_VIEW_MARGIN { 1 } else { 0 }
+        };
+        let roll_slack = (48. / center[0].hypot(center[1]).max(48.)).cos();
+        if self.selection.as_ref().is_some_and(|previous| {
+            previous.size == size
+                && dot(previous.center, axis) >= slack
+                && dot(previous.ahead, ahead) >= ahead_slack
+                && dot(previous.east, axes[0]) >= roll_slack
+                && (radius - previous.radius).abs() <= camera.mpp * 40. / EARTH
+                && (previous.mpp / camera.mpp - 1.).abs() <= 0.10
         }) {
+            // Camera movement inside the selection slack can still expose a
+            // prefetched page. Refresh visibility without a global reselect.
+            for (i, visible) in &mut self.desired {
+                let page = &self.pages[*i];
+                *visible = dot(axis, page.axis) >= (view_radius + page.radius).cos()
+                    && screen_priority(page) > 0;
+            }
             return;
         }
-        self.selection = Some((axis, ahead, radius, camera.mpp));
+        self.selection = Some(WaterSelection {
+            center: axis,
+            ahead,
+            east: axes[0],
+            radius,
+            mpp: camera.mpp,
+            size,
+        });
         self.selection_number += 1;
         let mut nearby: Vec<_> = self
             .pages
@@ -302,15 +382,21 @@ impl WaterPages {
                 let center = dot(axis, page.axis);
                 let lead = dot(ahead, page.axis);
                 (center.max(lead) >= (radius + page.radius).cos()).then(|| {
-                    let visible = center >= (view_radius + page.radius).cos();
-                    (i, visible, if visible { center } else { lead.max(center) })
+                    let priority = if center >= (view_radius + page.radius).cos() {
+                        screen_priority(page)
+                    } else {
+                        0
+                    };
+                    (i, priority, if priority > 0 { center } else { lead.max(center) })
                 })
             })
             .collect();
         nearby.sort_unstable_by(|a, b| b.1.cmp(&a.1).then_with(|| b.2.total_cmp(&a.2)));
         self.desired.clear();
+        self.visible_outside_budget.clear();
         let mut budget = WATER_WORDS - WATER_PAGES;
-        for (i, visible, _) in nearby {
+        for (i, priority, _) in nearby {
+            let visible = priority > 0;
             let page = &self.pages[i];
             let words = 1 + ((page.range.end - page.range.start) / 4) as usize;
             if words <= budget {
@@ -319,6 +405,8 @@ impl WaterPages {
                 if let Some(resident) = self.resident.get_mut(&page.index) {
                     resident.last_needed = self.selection_number;
                 }
+            } else if priority == 2 {
+                self.visible_outside_budget.push(page.index);
             }
         }
     }
@@ -403,7 +491,11 @@ impl WaterPages {
     }
 
     pub fn pending(&self) -> bool {
-        self.inflight || Instant::now() < self.handoff_until
+        self.inflight || self.handoff_active()
+    }
+
+    pub fn handoff_active(&self) -> bool {
+        Instant::now() < self.handoff_until
     }
 
     pub fn status(&self) -> ([usize; 2], [usize; 2]) {
@@ -419,6 +511,13 @@ impl WaterPages {
             }
         }
         (loaded, wanted)
+    }
+
+    pub fn missing_view_pages_outside_budget(&self) -> usize {
+        self.visible_outside_budget
+            .iter()
+            .filter(|key| !self.resident.contains_key(*key))
+            .count()
     }
 
     pub fn revision(&self) -> u64 {

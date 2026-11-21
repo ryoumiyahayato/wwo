@@ -18,3 +18,4 @@ mod formal_stock;
 pub mod formal_wages;
 pub mod formal_work;
 mod legacy_variant;
+pub mod transport;

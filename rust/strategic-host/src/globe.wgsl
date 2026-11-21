@@ -3,7 +3,7 @@ struct View {
     north: vec4f,
     forward: vec4f,
     viewport: vec4f, // dimensions, radians / pixel, regional chart flag
-    chart_east: vec4f,
+    chart_east: vec4f, // axis and elapsed real seconds
     chart_north: vec4f,
     chart_forward: vec4f,
     chart_origin: vec4f,
@@ -53,7 +53,7 @@ struct Tile {
 const PI: f32 = 3.14159265358979;
 const EARTH: f32 = 6371008.8;
 const LAND_DETAIL_MPP: f32 = 760.;
-const LAND_MATERIAL_MPP: f32 = 1720.;
+const LAND_MATERIAL_MPP: f32 = 2220.;
 const CHART_SUN_VIEW: vec3f = vec3f(.100,.970,.222);
 @vertex fn triangle(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
     let p = array<vec2f,3>(vec2f(-1.,-1.),vec2f(3.,-1.),vec2f(-1.,3.));
@@ -396,23 +396,55 @@ fn land_material_band(earth:vec3f, planes:vec3f, footprint:f32, period:f32) -> v
         +textureSampleLevel(land_surface,land_repeat,turn*p.xz+vec2f(.21,.43),mip)*planes.y
         +textureSampleLevel(land_surface,land_repeat,p.yx*turn+vec2f(.67,.29),mip)*planes.z;
 }
+
+fn landscape_random(seed: u32) -> f32 {
+    let state = seed * 747796405u + 2891336453u;
+    let word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+    return f32(((word >> 22u) ^ word) >> 8u) / 16777216.;
+}
+
+fn ground_gradient(key: u32, offset: vec3f) -> f32 {
+    let code = u32(landscape_random(key)*16.);
+    let u = select(offset.y,offset.x,code<8u);
+    let v = select(select(offset.z,offset.x,code==12u || code==14u),offset.y,code<4u);
+    return select(-u,u,(code&1u)==0u) + select(-v,v,(code&2u)==0u);
+}
+
+fn ground_field(point: vec3f) -> f32 {
+    let cell = bitcast<vec3u>(vec3i(floor(point)));
+    let f = fract(point);
+    let t = f*f*f*(f*(6.*f-15.)+10.);
+    let dx = 116831u;
+    let dy = 24571u;
+    let dz = 141937u;
+    let key = cell.x*dx + cell.y*dy + cell.z*dz;
+    let a = mix(ground_gradient(key,f),ground_gradient(key+dx,f-vec3f(1.,0.,0.)),t.x);
+    let b = mix(ground_gradient(key+dy,f-vec3f(0.,1.,0.)),ground_gradient(key+dx+dy,f-vec3f(1.,1.,0.)),t.x);
+    let c = mix(ground_gradient(key+dz,f-vec3f(0.,0.,1.)),ground_gradient(key+dx+dz,f-vec3f(1.,0.,1.)),t.x);
+    let d = mix(ground_gradient(key+dy+dz,f-vec3f(0.,1.,1.)),ground_gradient(key+dx+dy+dz,f-vec3f(1.,1.,1.)),t.x);
+    return mix(mix(a,b,t.y),mix(c,d,t.y),t.z);
+}
+
 fn sediment_structure(earth:vec3f, footprint:f32) -> vec2f {
-    // Sample the continental variation and the grain at different scales.
-    // Gradient noise avoids the isolated dark and light cells of value noise.
-    let p=earth*(EARTH/5200.);
-    let drift=ground_field(p);
+    // Broad soil and vegetation patches remain visible at Z5. The finer
+    // deposits use the same world coordinates and fade before they alias.
+    let p=earth*(EARTH/11600.);
+    let drift=ground_field(p*vec3f(.94,1.25,.80));
     var grain=0.;
-    if footprint<106. {
-        let local=p*vec3f(9.,15.,19.)+vec3f(3.7,12.1,6.3)+drift*1.26;
-        grain=ground_field(local)*(1.-smoothstep(38.,106.,footprint));
+    if footprint<130. {
+        let local=p*vec3f(36.,46.,17.)+vec3f(3.7,12.1,6.3)+drift*.91;
+        grain=ground_field(local)*(1.-smoothstep(44.,130.,footprint));
     }
-    return vec2f(drift*(1.-smoothstep(410.,1550.,footprint)),grain);
+    return vec2f(drift*(1.-smoothstep(1250.,LAND_MATERIAL_MPP,footprint)),grain);
 }
 fn land_chroma(rgb:vec3f) -> vec2f {
     return vec2f(rgb.g-rgb.r,rgb.r+rgb.g-2.*rgb.b)/max(.001,rgb.r+rgb.g+rgb.b);
 }
 fn land_palette_weight(chroma:vec2f, reference:vec3f, radius:f32) -> f32 {
     return 1.-smoothstep(.008,radius,distance(chroma,land_chroma(reference)));
+}
+fn ground_material_weight(water: f32, mpp: f32) -> f32 {
+    return (1.-smoothstep(880.,LAND_MATERIAL_MPP,mpp)) * (1.-smoothstep(.04,.65,water));
 }
 fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     let base=terrain.rgb;
@@ -427,8 +459,8 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     let chroma=land_chroma(base);
     let woods=max(land_palette_weight(chroma,vec3f(.255,.41,.31),.106),
                   land_palette_weight(chroma,vec3f(.25,.41,.33),.106));
-    let soil=max(land_palette_weight(chroma,vec3f(.61,.57,.36),.060),
-                 .60*land_palette_weight(chroma,vec3f(.47,.53,.33),.100));
+    let sward=land_palette_weight(chroma,vec3f(.47,.53,.33),.078)*(1.-woods*.75);
+    let soil=max(land_palette_weight(chroma,vec3f(.61,.57,.36),.060),sward);
     let rock=land_palette_weight(chroma,vec3f(.51,.47,.41),.105);
     let sand=land_palette_weight(chroma,vec3f(.775,.632,.433),.051);
     let motifs=vec4f(woods,soil,rock,sand);
@@ -444,7 +476,7 @@ fn natural_land_material(terrain:vec4f, earth:vec3f, footprint:f32) -> vec3f {
     var relief=dot(broad,solid*vec4f(.19,.15,.28,0.))*(1.-smoothstep(210.,LAND_MATERIAL_MPP,footprint));
     if solid.w+solid.y>.01 {
         let sediment=sediment_structure(earth,footprint);
-        relief+=dot(sediment,vec2f(.16,.12))*(solid.w+solid.y*.55);
+        relief+=dot(sediment,vec2f(.20,.13))*(solid.w+solid.y*.68);
     }
     if footprint<102. {
         let fine=land_material_band(earth,planes,footprint,2150.)-.5;
@@ -477,10 +509,15 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
         let fractions=clamp(sample.rgb/max(sample.a,.02),vec3f(0.),vec3f(1.));
         let occupied=fractions/max(1.,dot(fractions,vec3f(1.)));
         let other=max(0.,1.-dot(occupied,vec3f(1.)));
+        let crop_ink=vec3f(.57,.54,.36);
+        var crop_surface=crop_ink;
+        if base.a>=0. && occupied.b>.12 && footprint<180. {
+            crop_surface=cultivated_fields(crop_ink,landscape_world(ll),footprint,occupied.b);
+        }
         let surface=other*vec3f(.43,.51,.33)
             +occupied.r*vec3f(.20,.38,.45)
             +occupied.g*vec3f(.255,.41,.31)
-            +occupied.b*vec3f(.57,.54,.36);
+            +occupied.b*crop_surface;
         // Give explicitly cropped packages a short edge fade too. The survey
         // raster already feathers the actual mapped boundary in metres.
         let edge=distance*span_metres;
@@ -499,21 +536,30 @@ fn close_terrain(ll:vec2f,footprint:f32,base:vec4f) -> vec4f {
     return mix(base,sample,weight);
 }
 
-fn natural_water_color(color:vec3f, world:vec3f, depth:f32, coverage:f32, mpp:f32) -> vec3f {
+fn natural_water_color(color:vec3f, world:vec3f, depth:f32, coverage:f32, mpp:f32, area:u32) -> vec3f {
     if coverage <= .04 || mpp > 18000. { return color; }
     let ice = smoothstep(.47,.68,min(color.r,color.g));
     let surface = smoothstep(.28,.88,coverage)*(1.-ice)*(1.-smoothstep(6400.,18000.,mpp));
     let shelf = smoothstep(2.,22.,depth)*(1.-smoothstep(80.,640.,depth));
     let off_shore = smoothstep(105.,2400.,depth);
-    // Relief controls the marine shelf. Inland water retains the mapped basin color.
-    let p = world*(EARTH/530.);
-    let bend = sin(dot(p,vec3f(.13,-.41,.25))) + sin(dot(p,vec3f(-.32,.12,.17)));
-    let swell = sin(dot(p,vec3f(.91,.61,-.73))+3.6*bend)*.33
-        + sin(dot(p,vec3f(-.18,.67,.48))-3.1*bend)*.27;
-    let wave = swell*(1.-smoothstep(160.,630.,mpp));
-    let inland = vec3f(.010,.019,.023)*wave;
-    let marine = vec3f(.018,.062,.059)*shelf+vec3f(.010,.019,.026)*wave;
-    return clamp(color+mix(inland,marine,max(shelf,off_shore))*surface,vec3f(0.),vec3f(1.));
+    let open = max(shelf,off_shore);
+    var wave = 0.;
+    let basin=area&3u;
+    let marine=mix(open,select(0.,1.,basin==2u),water_weight(area));
+    if mpp < 630. && marine>.01 {
+        // Counter-propagating phases and moving bends prevent a shared cycle.
+        // Fallback depth can be zero in mapped fjords. Use QWG where available.
+        let time = view.chart_east.w;
+        let p = world*(EARTH/530.);
+        let bend = sin(dot(p,vec3f(.13,-.41,.25))+.025*time)
+            + sin(dot(p,vec3f(-.32,.12,.17))-.01768*time);
+        let swell = sin(dot(p,vec3f(.91,.61,-.73))+3.6*bend+.06124*time)*.39
+            + sin(dot(p,vec3f(-.18,.67,.48))-3.1*bend-.047*time)*.31;
+        wave = swell*marine*smoothstep(.82,1.,coverage)*(1.-smoothstep(160.,630.,mpp));
+    }
+    let pigment = vec3f(.018,.062,.059)*shelf*open
+        + mix(vec3f(.010,.019,.023),vec3f(.009,.017,.024),open)*wave;
+    return clamp(color+pigment*surface,vec3f(0.),vec3f(1.));
 }
 
 fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32) -> vec3f {
@@ -595,7 +641,7 @@ fn shade_map(ll:vec2f, uv:vec2f, normal_world:vec3f, normal_view:vec3f, area:u32
         }
         color=landscape_relief(color,ll,normal_world,terrain.a,base_mpp);
         if view.chart_origin.w <= .5 {
-            color=natural_water_color(color,normal_world,max(0.,-z)*data.a,terrain.a,base_mpp);
+            color=natural_water_color(color,normal_world,max(0.,-z)*data.a,terrain.a,base_mpp,area);
         }
         relief_light=clamp(.57+dot(terrain.rgb,vec3f(.30,.55,.15))*.68,.70,1.19);
     } else if tile.options.y>=5. {
