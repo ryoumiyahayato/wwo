@@ -175,7 +175,14 @@ impl Stream {
     }
 
     pub fn update(&mut self, camera: &Camera, size: [u32; 2], enabled: bool, now: Instant) -> Option<usize> {
-        let corners = (enabled && camera.mpp < MAX_MPP).then(|| viewport(camera, size)).flatten();
+        if !enabled {
+            self.wanted = None;
+            self.time = None;
+            self.weight = 0.;
+            self.target_weight = 0.;
+            return None;
+        }
+        let corners = (camera.mpp < MAX_MPP).then(|| viewport(camera, size)).flatten();
         self.wanted = corners.and_then(|corners| {
             let center = camera.coordinates()[0];
             let view = view_extent(corners, center);
@@ -188,28 +195,29 @@ impl Stream {
         });
         let scale = 1. - smooth(75., MAX_MPP, camera.mpp) as f32;
         self.target_weight = self.wanted.filter(|&index| self.resident == Some(index)).map_or(0., |_| scale);
-        let step = self.time.replace(now).map_or(0., |previous| (now - previous).as_secs_f32().min(1./30.) / 0.18);
-        // Coverage fades in the shader. A newly decoded region ramps up
-        // together so rendering never exposes a half-uploaded detail layer.
-        self.weight = (self.weight + step).min(self.target_weight);
-        self.wanted.filter(|&id| self.resident != Some(id) && self.inflight.is_none())
+        let step = self.time.replace(now).map_or(0., |previous| {
+            now.saturating_duration_since(previous).as_secs_f32().min(1./30.) / 0.18
+        });
+        self.weight = self.target_weight.clamp(self.weight - step, self.weight + step);
+        // Keep the outgoing region bound until its contribution reaches zero.
+        self.wanted.filter(|&id| self.resident != Some(id) && self.inflight.is_none() && self.weight == 0.)
     }
 
     pub fn requested(&mut self, id: usize) { self.inflight = Some(id); }
 
     pub fn completed(&mut self, id: usize, success: bool) -> bool {
+        if self.inflight != Some(id) { return false; }
         self.inflight = None;
         if !success {
             self.failed.insert(id);
             return false;
         }
-        if self.wanted != Some(id) { return false; }
+        if self.wanted != Some(id) || self.weight != 0. { return false; }
         self.resident = Some(id);
-        self.weight = 0.;
         true
     }
 
-    pub fn fading(&self) -> bool { self.weight < self.target_weight }
+    pub fn fading(&self) -> bool { self.weight != self.target_weight }
 
     pub fn status(&self) -> serde_json::Value {
         serde_json::json!({

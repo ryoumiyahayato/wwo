@@ -35,6 +35,16 @@ RTX 3050 Laptop GPU、Core i7-13700H、Vulkan、1280×720 前台窗口、144 Hz 
 
 有景观时单帧 5 次间接绘制。工作集峰值 350.4 MiB。静止视野区块重建为零。亚马孙移动到相邻视野更新 14 块，返回原机位更新 0 块，并恢复原来的 15,565 个实例。阿尔卑斯大范围平移累计更新 3,680 块。滚轮跨档更新 1,651 块，GPU 活动引擎峰值 77.3%。屏幕外后台运行曾出现 0.52–0.54 秒的长帧，前台复测最慢为 10.73 ms。高纬 QPK 页数是地理精度限制，高程网格和覆盖分辨率仍限制近景边缘。未测 4K 或其他显卡，未分解 GPU 各 pass 的耗时。
 
+## 区域农田 · 2026-11-21
+
+同机位对照沿用正式 `--play` 地理模式。1280×720，北向俯视，25 米/像素。爱荷华州（−93.39, 42.11）呈近正交田块。尼罗河三角洲（30.98, 30.87）呈顺分流方向的窄条田。波河平原（11.307, 44.693）呈沿下 Reno 河方向的田块。密西西比 Pool 13（−90.242, 42.084）沿用 1890 年代调查耕地范围，河道和湿地未见田块覆盖。流域方向用作视觉参照，现有资料未提供历史道路、水渠和地籍边界。
+
+尼罗河用滚轮跨 Z7、Z6 和 Z5 并返回 Z7。实际中心用过 7/150/42、6/75/21 和 5/37/10。平移后中心为 7/149/42，返回后恢复 7/150/42。另核对波河平原 QDT 渐出和 Pool 13 QDT 渐入，各阶段只绑定一个样区。法加拉什和阿尔卑斯检查到当前入口的 25 米/像素；树冠可辨，裸地和山脊底色仍受 QPK 分辨率限制。
+
+RTX 3050 Laptop GPU，Vulkan，后台正式游戏。尼罗河静止前后各约 600 帧。P95 为 8.28→8.35 ms。25→760→25 米/像素滚轮和拖动的 P95 为 8.45→8.41 ms，最长帧为 11.29→17.49 ms，各解码 251 页。静止工作集 384.4→411.3 MiB，进程私有内存 794.3→783.4 MiB。QPK 纹理有效载荷 17.40 MiB，景观纹理 68.06 MiB，QWG 缓冲 12 MiB，前后相同。该计时单独采集，跨 Z5 的缩放不在这组帧时间内。
+
+本次不生成新 QPK、QSC、QWG 或 QDT。对照画面在私有归档 `regional-fields-20261121`。运行数据沿用既有 [全球岸线归档](https://github.com/ryoumiyahayato/wwo/releases/tag/global-shoreline-audit-20261120) 和 [历史测绘地表归档](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115)。
+
 ## 恢复
 
 先按 [Windows 运行归档](https://github.com/ryoumiyahayato/wwo/releases/tag/rust-native-windows-20261115) 恢复原有 `data/`、Z0–Z5 和 `river-topology.u32`。从 [配色 Z7 归档](https://github.com/ryoumiyahayato/wwo/releases/tag/terrain-surface-20261115) 取 `z7-land-material-7.qpk` 作为库中的 `7.qpk`。从 [本阶段归档](https://github.com/ryoumiyahayato/wwo/releases/tag/z6-z7-surface-20261119) 取 `z6-land-material-6.qpk` 作为 `6.qpk`，在库中放入同一归档的 `index.json` 与 `landscape-cover-v2.qsc`。由归档对应提交构建 `wwo-map-lab`，以 `--play --data <运行数据目录> --terrain-candidate <QPK库目录>` 启动。
