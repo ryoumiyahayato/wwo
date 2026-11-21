@@ -7,42 +7,51 @@
     "austria_hungary": 54,
     "britain": 206,
     "cabo_verde": 25,
+    "cape_population": 2,
     "cities_europe": 1742,
     "crown_islands": 29,
     "danish": 56,
     "eastern": 1105,
     "india_comparable": 87,
     "japan_taiwan": 232,
+    "java_madoera": 2,
     "liechtenstein": 25,
     "philippines": 51,
+    "polar_presence": 1,
     "romania": 6,
     "russia": 1721,
     "swiss": 57,
     "world": 499,
     "asian_interpolation": 62
   },
-  "cited_sources": 83,
+  "cited_sources": 90,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
-  "production_roots": 49,
+  "production_roots": 50,
   "partially_located_legacy_roots": 3,
   "documented_people_under_legacy_controls": 377952285,
   "replaced_legacy_roots": 28,
-  "new_roots": 21,
-  "production_people": 1026561307,
-  "production_people_pct_world_estimate": 64.358,
-  "population_outside_evidence_opening_estimate": 568512941,
+  "new_roots": 22,
+  "production_people": 1028826863,
+  "production_people_pct_world_estimate": 64.5,
+  "population_outside_evidence_opening_estimate": 566247385,
   "legacy_only_people": 432127715,
-  "authoritative_total_for_new_game": 1458689022,
-  "roots_with_partitions": 16,
-  "disjoint_leaves": 357,
-  "people_in_partitions": 821961747,
+  "authoritative_total_for_new_game": 1460954578,
+  "roots_with_partitions": 17,
+  "disjoint_leaves": 358,
+  "people_in_partitions": 850054079,
+  "unlocated_balances_under_research_controls": [
+    {
+      "unit_id": "cshapes_gw_850",
+      "people": 16271347
+    }
+  ],
   "partitions_with_explicit_places": 20,
   "people_in_partitions_with_explicit_places": 272587476,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
-  "political_catalogue_members_of_production_groups": 57,
+  "political_catalogue_members_of_production_groups": 58,
   "dated_admin_catalogues": {
     "britain_historic_counties_identity.json": {
       "units": 414,
@@ -252,8 +261,8 @@
   "source_statistical_units": 2178,
   "opening_by_source_type": {
     "territorial_returns": {
-      "roots": 21,
-      "people": 309123144
+      "roots": 22,
+      "people": 311388700
     },
     "historical_world_reconstruction": {
       "roots": 28,
@@ -281,12 +290,49 @@
     "british_empire_census_1901": 430,
     "us_twelfth_census_abstract": 26,
     "nz_census_1901_ages": 105,
-    "us_twelfth_census_vol2_state_ages": 650
+    "us_twelfth_census_vol2_state_ages": 650,
+    "uk_census_1901_county_ages": 238,
+    "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 226667152,
-  "structure_opening_pool_count": 62,
-  "structure_opening_residents_outside_modeled_pools": 1232021870,
+  "structure_opening_pool_controls": 227769244,
+  "structure_opening_pool_count": 67,
+  "structure_opening_residents_outside_modeled_pools": 1233185334,
   "structure_opening_scopes": [
+    {
+      "unit_id": "administrative_region:gb_historic_anglesey",
+      "opening_total": 50543,
+      "observed_unit_id": "uk_ancient_area_anglesey",
+      "observed_total": 50606,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_carmarthenshire",
+      "opening_total": 134735,
+      "observed_unit_id": "uk_ancient_area_carmarthenshire",
+      "observed_total": 135328,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_glamorgan",
+      "opening_total": 838431,
+      "observed_unit_id": "uk_ancient_area_glamorganshire",
+      "observed_total": 859931,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_montgomeryshire",
+      "opening_total": 55287,
+      "observed_unit_id": "uk_ancient_area_montgomeryshire",
+      "observed_total": 54901,
+      "observed_date": "1901-03-31"
+    },
+    {
+      "unit_id": "administrative_region:gb_historic_radnorshire",
+      "opening_total": 23096,
+      "observed_unit_id": "uk_ancient_area_radnorshire",
+      "observed_total": 23281,
+      "observed_date": "1901-03-31"
+    },
     {
       "unit_id": "administrative_region:uk_constituent_ireland",
       "opening_total": 4489395,
@@ -813,14 +859,15 @@
       "production_root_ids": [
         "beylicate_of_tunis",
         "cshapes_gw_402",
+        "cshapes_gw_561",
         "cshapes_gw_562",
         "cshapes_gw_570",
         "cshapes_gw_585",
         "cshapes_gw_590",
         "khedivate_of_egypt"
       ],
-      "production_people": 4556605,
-      "production_pct_of_regional_research_estimate": 3.506,
+      "production_people": 6822161,
+      "production_pct_of_regional_research_estimate": 5.249,
       "people_with_opening_subdivision": 1289105,
       "research_only_units": 39,
       "research_only_people": 112271921
@@ -884,7 +931,7 @@
       ],
       "production_people": 485960798,
       "production_pct_of_regional_research_estimate": 54.335,
-      "people_with_opening_subdivision": 377037176,
+      "people_with_opening_subdivision": 405129508,
       "research_only_units": 27,
       "research_only_people": 89458537
     },
@@ -950,537 +997,707 @@
     }
   },
   "opening_age_sex_by_scope": {
-    "note": "Opening controls before named-resident deductions or source-age-unknown allocations. Dated census populations are separate figures. Totals use historical research regions where a reviewed comparison exists.",
+    "note": "Opening controls before named-resident deductions. Source-age-unknown cells remain unknown after integer apportionment. Dated census populations are separate. Unknown research regions do not inherit a continent from political control.",
     "opening_roots": [
       {
         "opening_unit_id": "argentina_1900",
         "research_region": "America",
         "opening_control": 4624686,
         "in_model_pools": 0,
-        "outside_model_pools": 4624686
+        "outside_model_pools": 4624686,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "australia_colonies_1900",
         "research_region": "Oceania",
         "opening_control": 3837578,
         "in_model_pools": 0,
-        "outside_model_pools": 3837578
+        "outside_model_pools": 3837578,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "austria_hungary",
         "research_region": "Europe",
         "opening_control": 45000882,
         "in_model_pools": 0,
-        "outside_model_pools": 45000882
+        "outside_model_pools": 45000882,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "beylicate_of_tunis",
         "research_region": "Africa",
         "opening_control": 1713013,
         "in_model_pools": 0,
-        "outside_model_pools": 1713013
+        "outside_model_pools": 1713013,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "bolivia_1900",
         "research_region": null,
         "opening_control": 1700000,
         "in_model_pools": 0,
-        "outside_model_pools": 1700000
+        "outside_model_pools": 1700000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "brazil_1900",
         "research_region": "America",
         "opening_control": 17021073,
         "in_model_pools": 0,
-        "outside_model_pools": 17021073
+        "outside_model_pools": 17021073,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "british_isles_1900",
         "research_region": "Europe",
         "opening_control": 40994912,
-        "in_model_pools": 8905921,
-        "outside_model_pools": 32088991
+        "in_model_pools": 10008013,
+        "outside_model_pools": 30986899,
+        "modeled_age_and_sex": 10008013,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "chile_1900",
         "research_region": "America",
         "opening_control": 2890099,
         "in_model_pools": 0,
-        "outside_model_pools": 2890099
+        "outside_model_pools": 2890099,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "colony_of_newfoundland",
         "research_region": "America",
         "opening_control": 218307,
         "in_model_pools": 0,
-        "outside_model_pools": 218307
+        "outside_model_pools": 218307,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "congo_free_state",
         "research_region": null,
         "opening_control": 15000000,
         "in_model_pools": 0,
-        "outside_model_pools": 15000000
+        "outside_model_pools": 15000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "country_fra",
         "research_region": "Europe",
         "opening_control": 38852684,
         "in_model_pools": 0,
-        "outside_model_pools": 38852684
+        "outside_model_pools": 38852684,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_3",
         "research_region": "America",
         "opening_control": 62288,
         "in_model_pools": 0,
-        "outside_model_pools": 62288
+        "outside_model_pools": 62288,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_31",
         "research_region": "America",
         "opening_control": 54404,
         "in_model_pools": 0,
-        "outside_model_pools": 54404
+        "outside_model_pools": 54404,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_338",
         "research_region": "Europe",
         "opening_control": 182672,
         "in_model_pools": 0,
-        "outside_model_pools": 182672
+        "outside_model_pools": 182672,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_4",
         "research_region": "Oceania",
         "opening_control": 151193,
         "in_model_pools": 0,
-        "outside_model_pools": 151193
+        "outside_model_pools": 151193,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_402",
         "research_region": "Africa",
         "opening_control": 146008,
         "in_model_pools": 0,
-        "outside_model_pools": 146008
+        "outside_model_pools": 146008,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_51",
         "research_region": "America",
         "opening_control": 742520,
         "in_model_pools": 0,
-        "outside_model_pools": 742520
+        "outside_model_pools": 742520,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_52",
         "research_region": "America",
         "opening_control": 266739,
         "in_model_pools": 0,
-        "outside_model_pools": 266739
+        "outside_model_pools": 266739,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_53",
         "research_region": "America",
         "opening_control": 193861,
         "in_model_pools": 0,
-        "outside_model_pools": 193861
+        "outside_model_pools": 193861,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
+      },
+      {
+        "opening_unit_id": "cshapes_gw_561",
+        "research_region": "Africa",
+        "opening_control": 2265556,
+        "in_model_pools": 0,
+        "outside_model_pools": 2265556,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_562",
         "research_region": "Africa",
         "opening_control": 929970,
         "in_model_pools": 0,
-        "outside_model_pools": 929970
+        "outside_model_pools": 929970,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_570",
         "research_region": "Africa",
         "opening_control": 305255,
         "in_model_pools": 0,
-        "outside_model_pools": 305255
+        "outside_model_pools": 305255,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_585",
         "research_region": "Africa",
         "opening_control": 173254,
         "in_model_pools": 0,
-        "outside_model_pools": 173254
+        "outside_model_pools": 173254,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_590",
         "research_region": "Africa",
         "opening_control": 373996,
         "in_model_pools": 0,
-        "outside_model_pools": 373996
+        "outside_model_pools": 373996,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_6",
         "research_region": "America",
         "opening_control": 960208,
         "in_model_pools": 0,
-        "outside_model_pools": 960208
+        "outside_model_pools": 960208,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_66",
         "research_region": "America",
         "opening_control": 212734,
         "in_model_pools": 0,
-        "outside_model_pools": 212734
+        "outside_model_pools": 212734,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_750",
         "research_region": "Asia",
         "opening_control": 294000000,
         "in_model_pools": 0,
-        "outside_model_pools": 294000000
+        "outside_model_pools": 294000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_780",
         "research_region": "Asia",
         "opening_control": 3469224,
         "in_model_pools": 3469224,
-        "outside_model_pools": 0
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 3468898,
+        "modeled_sex_age_unknown": 326
       },
       {
         "opening_unit_id": "cshapes_gw_80",
         "research_region": "America",
         "opening_control": 36671,
         "in_model_pools": 0,
-        "outside_model_pools": 36671
+        "outside_model_pools": 36671,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_850",
         "research_region": "Asia",
         "opening_control": 44363679,
         "in_model_pools": 0,
-        "outside_model_pools": 44363679
+        "outside_model_pools": 44363679,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cshapes_gw_920",
         "research_region": "Oceania",
         "opening_control": 796359,
         "in_model_pools": 796359,
-        "outside_model_pools": 0
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 792013,
+        "modeled_sex_age_unknown": 4346
       },
       {
         "opening_unit_id": "cshapes_gw_950",
         "research_region": "Oceania",
         "opening_control": 120255,
         "in_model_pools": 0,
-        "outside_model_pools": 120255
+        "outside_model_pools": 120255,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "cuba_occupation_1900",
         "research_region": "America",
         "opening_control": 1585419,
         "in_model_pools": 0,
-        "outside_model_pools": 1585419
+        "outside_model_pools": 1585419,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "dominion_of_canada",
         "research_region": "America",
         "opening_control": 5304314,
         "in_model_pools": 5304314,
-        "outside_model_pools": 0
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 5256755,
+        "modeled_sex_age_unknown": 47559
       },
       {
         "opening_unit_id": "emirate_of_afghanistan",
         "research_region": null,
         "opening_control": 5000000,
         "in_model_pools": 0,
-        "outside_model_pools": 5000000
+        "outside_model_pools": 5000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "empire_of_japan",
         "research_region": "Asia",
         "opening_control": 44012686,
         "in_model_pools": 0,
-        "outside_model_pools": 44012686
+        "outside_model_pools": 44012686,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "ethiopian_empire",
         "research_region": null,
         "opening_control": 11000000,
         "in_model_pools": 0,
-        "outside_model_pools": 11000000
+        "outside_model_pools": 11000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "german_empire",
         "research_region": "Europe",
         "opening_control": 55619152,
         "in_model_pools": 0,
-        "outside_model_pools": 55619152
+        "outside_model_pools": 55619152,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "iceland_under_denmark",
         "research_region": "Europe",
         "opening_control": 78086,
         "in_model_pools": 0,
-        "outside_model_pools": 78086
+        "outside_model_pools": 78086,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "khedivate_of_egypt",
         "research_region": "Africa",
         "opening_control": 10000000,
         "in_model_pools": 0,
-        "outside_model_pools": 10000000
+        "outside_model_pools": 10000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_belgium",
         "research_region": "Europe",
         "opening_control": 6713135,
         "in_model_pools": 0,
-        "outside_model_pools": 6713135
+        "outside_model_pools": 6713135,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_denmark",
         "research_region": null,
         "opening_control": 2450000,
         "in_model_pools": 0,
-        "outside_model_pools": 2450000
+        "outside_model_pools": 2450000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_greece",
         "research_region": null,
         "opening_control": 2500000,
         "in_model_pools": 0,
-        "outside_model_pools": 2500000
+        "outside_model_pools": 2500000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_italy",
         "research_region": "Europe",
         "opening_control": 32296914,
         "in_model_pools": 0,
-        "outside_model_pools": 32296914
+        "outside_model_pools": 32296914,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_luxembourg",
         "research_region": "Europe",
         "opening_control": 231321,
         "in_model_pools": 0,
-        "outside_model_pools": 231321
+        "outside_model_pools": 231321,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_nepal",
         "research_region": null,
         "opening_control": 5600000,
         "in_model_pools": 0,
-        "outside_model_pools": 5600000
+        "outside_model_pools": 5600000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_netherlands",
         "research_region": "Europe",
         "opening_control": 5141915,
         "in_model_pools": 0,
-        "outside_model_pools": 5141915
+        "outside_model_pools": 5141915,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_portugal",
         "research_region": "Europe",
         "opening_control": 5404156,
         "in_model_pools": 0,
-        "outside_model_pools": 5404156
+        "outside_model_pools": 5404156,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_romania",
         "research_region": "Europe",
         "opening_control": 5956690,
         "in_model_pools": 0,
-        "outside_model_pools": 5956690
+        "outside_model_pools": 5956690,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_serbia",
         "research_region": "Europe",
         "opening_control": 2471816,
         "in_model_pools": 0,
-        "outside_model_pools": 2471816
+        "outside_model_pools": 2471816,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_siam",
         "research_region": null,
         "opening_control": 10000000,
         "in_model_pools": 0,
-        "outside_model_pools": 10000000
+        "outside_model_pools": 10000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "kingdom_of_spain",
         "research_region": "Europe",
         "opening_control": 18511807,
         "in_model_pools": 0,
-        "outside_model_pools": 18511807
+        "outside_model_pools": 18511807,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "korean_empire",
         "research_region": "Asia",
         "opening_control": 17078033,
         "in_model_pools": 0,
-        "outside_model_pools": 17078033
+        "outside_model_pools": 17078033,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "mexican_republic",
         "research_region": "America",
         "opening_control": 13447810,
         "in_model_pools": 0,
-        "outside_model_pools": 13447810
+        "outside_model_pools": 13447810,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "moroccan_sultanate",
         "research_region": null,
         "opening_control": 5000000,
         "in_model_pools": 0,
-        "outside_model_pools": 5000000
+        "outside_model_pools": 5000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "orange_free_state",
         "research_region": null,
         "opening_control": 390000,
         "in_model_pools": 0,
-        "outside_model_pools": 390000
+        "outside_model_pools": 390000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "ottoman_empire",
         "research_region": null,
         "opening_control": 24000000,
         "in_model_pools": 0,
-        "outside_model_pools": 24000000
+        "outside_model_pools": 24000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "paraguay_1900",
         "research_region": null,
         "opening_control": 640000,
         "in_model_pools": 0,
-        "outside_model_pools": 640000
+        "outside_model_pools": 640000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "persia_qajar",
         "research_region": null,
         "opening_control": 10000000,
         "in_model_pools": 0,
-        "outside_model_pools": 10000000
+        "outside_model_pools": 10000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "peru_1900",
         "research_region": null,
         "opening_control": 3800000,
         "in_model_pools": 0,
-        "outside_model_pools": 3800000
+        "outside_model_pools": 3800000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "principality_of_bulgaria",
         "research_region": "Europe",
         "opening_control": 3715205,
         "in_model_pools": 0,
-        "outside_model_pools": 3715205
+        "outside_model_pools": 3715205,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "qing_empire",
         "research_region": "Asia",
         "opening_control": 400000000,
         "in_model_pools": 0,
-        "outside_model_pools": 400000000
+        "outside_model_pools": 400000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "republic_of_colombia_1900",
         "research_region": null,
         "opening_control": 4000000,
         "in_model_pools": 0,
-        "outside_model_pools": 4000000
+        "outside_model_pools": 4000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "republic_of_liberia",
         "research_region": null,
         "opening_control": 1000000,
         "in_model_pools": 0,
-        "outside_model_pools": 1000000
+        "outside_model_pools": 1000000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "russian_empire",
         "research_region": "Europe",
         "opening_control": 135382043,
         "in_model_pools": 132736358,
-        "outside_model_pools": 2645685
+        "outside_model_pools": 2645685,
+        "modeled_age_and_sex": 132683067,
+        "modeled_sex_age_unknown": 53291
       },
       {
         "opening_unit_id": "south_african_republic",
         "research_region": null,
         "opening_control": 1400000,
         "in_model_pools": 0,
-        "outside_model_pools": 1400000
+        "outside_model_pools": 1400000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "sultanate_of_zanzibar",
         "research_region": null,
         "opening_control": 200000,
         "in_model_pools": 0,
-        "outside_model_pools": 200000
+        "outside_model_pools": 200000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "sweden_norway_union",
         "research_region": "Europe",
         "opening_control": 7315799,
         "in_model_pools": 0,
-        "outside_model_pools": 7315799
+        "outside_model_pools": 7315799,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "swiss_confederation",
         "research_region": "Europe",
         "opening_control": 3285131,
         "in_model_pools": 0,
-        "outside_model_pools": 3285131
+        "outside_model_pools": 3285131,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "united_states_1900",
         "research_region": "America",
         "opening_control": 75454976,
         "in_model_pools": 75454976,
-        "outside_model_pools": 0
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 75255945,
+        "modeled_sex_age_unknown": 199031
       },
       {
         "opening_unit_id": "uruguay_1900",
         "research_region": "America",
         "opening_control": 908090,
         "in_model_pools": 0,
-        "outside_model_pools": 908090
+        "outside_model_pools": 908090,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       {
         "opening_unit_id": "venezuela_1900",
         "research_region": null,
         "opening_control": 2400000,
         "in_model_pools": 0,
-        "outside_model_pools": 2400000
+        "outside_model_pools": 2400000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       }
     ],
     "by_research_region": {
       "America": {
         "opening_control": 123984199,
         "in_model_pools": 80759290,
-        "outside_model_pools": 43224909
+        "outside_model_pools": 43224909,
+        "modeled_age_and_sex": 80512700,
+        "modeled_sex_age_unknown": 246590
       },
       "Oceania": {
         "opening_control": 4905385,
         "in_model_pools": 796359,
-        "outside_model_pools": 4109026
+        "outside_model_pools": 4109026,
+        "modeled_age_and_sex": 792013,
+        "modeled_sex_age_unknown": 4346
       },
       "Europe": {
         "opening_control": 407154320,
-        "in_model_pools": 141642279,
-        "outside_model_pools": 265512041
+        "in_model_pools": 142744371,
+        "outside_model_pools": 264409949,
+        "modeled_age_and_sex": 142691080,
+        "modeled_sex_age_unknown": 53291
       },
       "Africa": {
-        "opening_control": 13641496,
+        "opening_control": 15907052,
         "in_model_pools": 0,
-        "outside_model_pools": 13641496
+        "outside_model_pools": 15907052,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       "no_reviewed_research_region": {
         "opening_control": 106080000,
         "in_model_pools": 0,
-        "outside_model_pools": 106080000
+        "outside_model_pools": 106080000,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
       },
       "Asia": {
         "opening_control": 802923622,
         "in_model_pools": 3469224,
-        "outside_model_pools": 799454398
+        "outside_model_pools": 799454398,
+        "modeled_age_and_sex": 3468898,
+        "modeled_sex_age_unknown": 326
       }
+    },
+    "world": {
+      "opening_control": 1460954578,
+      "in_model_pools": 227769244,
+      "outside_model_pools": 1233185334,
+      "modeled_age_and_sex": 227464691,
+      "modeled_sex_age_unknown": 304553
     }
   },
   "opening_count_basis": {
@@ -1490,12 +1707,12 @@
         "pct_of_research_reference": 0.0
       },
       "published_historical_estimates": {
-        "people": 474127638,
-        "pct_of_research_reference": 29.724
+        "people": 448300862,
+        "pct_of_research_reference": 28.105
       },
       "date_models_from_territorial_returns": {
-        "people": 552433669,
-        "pct_of_research_reference": 34.634
+        "people": 580526001,
+        "pct_of_research_reference": 36.395
       },
       "retained_legacy_estimates": {
         "people": 432127715,
@@ -1637,6 +1854,13 @@
         "retained_legacy_people": 0
       },
       {
+        "unit_id": "cshapes_gw_561",
+        "source_id": "cape_colony_1899_imperial_conference",
+        "sourced_people": 2265556,
+        "sourced_basis": "published_historical_estimates",
+        "retained_legacy_people": 0
+      },
+      {
         "unit_id": "cshapes_gw_562",
         "source_id": "natal_statistical_yearbook_1909_macdonald",
         "sourced_people": 929970,
@@ -1702,7 +1926,7 @@
       {
         "unit_id": "cshapes_gw_850",
         "source_id": "ft_world_v5",
-        "sourced_people": 44363679,
+        "sourced_people": 16271347,
         "sourced_basis": "published_historical_estimates",
         "retained_legacy_people": 0
       },
@@ -1768,6 +1992,14 @@
         "sourced_people": 78086,
         "sourced_basis": "published_historical_estimates",
         "retained_legacy_people": 0
+      },
+      {
+        "unit_id": "java_madoera_colonial_population",
+        "source_id": "dutch_jaarcijfers_colonien_1900",
+        "sourced_people": 28092332,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "cshapes_gw_850"
       },
       {
         "unit_id": "khedivate_of_egypt",

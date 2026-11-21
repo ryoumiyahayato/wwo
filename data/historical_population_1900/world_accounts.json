@@ -17,14 +17,15 @@
       "production_root_ids": [
         "beylicate_of_tunis",
         "cshapes_gw_402",
+        "cshapes_gw_561",
         "cshapes_gw_562",
         "cshapes_gw_570",
         "cshapes_gw_585",
         "cshapes_gw_590",
         "khedivate_of_egypt"
       ],
-      "production_people": 4556605,
-      "production_pct_of_regional_research_estimate": 3.506,
+      "production_people": 6822161,
+      "production_pct_of_regional_research_estimate": 5.249,
       "people_with_opening_subdivision": 1289105,
       "research_only_units": 39,
       "research_only_people": 112271921
@@ -88,7 +89,7 @@
       ],
       "production_people": 485960798,
       "production_pct_of_regional_research_estimate": 54.335,
-      "people_with_opening_subdivision": 377037176,
+      "people_with_opening_subdivision": 405129508,
       "research_only_units": 27,
       "research_only_people": 89458537
     },
@@ -872,9 +873,9 @@
         "south_african_republic",
         "orange_free_state"
       ],
-      "comparison_id": "natal_zululand",
+      "comparison_id": "cape_natal_zululand",
       "opening_disposition": "partial_extent",
-      "note": "The opening adds the annual estimate for Natal and Zululand before the 1903 transfer from Transvaal. The South Africa series also covers the Cape, Orange Free State and South African Republic. The difference cannot be assigned to those polities."
+      "note": "The opening uses separate annual estimates for the Cape and for Natal and Zululand before the 1903 transfer from Transvaal. The Cape source includes Walfish Bay and Mafeking in its legal territory while their map points fall under different jurisdictions. The research series also includes the Orange Free State and South African Republic. The difference cannot be assigned to them."
     },
     {
       "unit_id": "ft_southern_rhodesia",
@@ -1947,7 +1948,7 @@
       ],
       "comparison_id": "cshapes_gw_850",
       "opening_disposition": "adopted_research_series",
-      "note": "Java, the Outer Islands and western New Guinea. Excludes East Timor, the British Borneo territories and Brunei. Separate from the Netherlands. Country study pp. 3–4 and workbook rows 101–102 (https://doi.org/10.21950/E09BKS); Appendix I pp. 73–75."
+      "note": "Java, the Outer Islands and western New Guinea. Excludes East Timor, the British Borneo territories and Brunei. Separate from the Netherlands. Country study pp. 3–4 and workbook rows 101–102 (https://doi.org/10.21950/E09BKS); Appendix I pp. 73–75. Java and Madura are a distinct civilian statistical subdivision. The research account balance remains an arithmetic unlocated pool including any date, coverage or definition differences. It does not establish the total of the Outer Islands."
     },
     {
       "unit_id": "ft_formosa_taiwan",
@@ -3291,22 +3292,23 @@
       "research_minus_documented": 1188306
     },
     {
-      "comparison_id": "natal_zululand",
+      "comparison_id": "cape_natal_zululand",
       "opening_root_ids": [
+        "cshapes_gw_561",
         "cshapes_gw_562"
       ],
       "research_unit_ids": [
         "ft_south_africa"
       ],
       "scope_relation": "partial_extent",
-      "note": "The opening adds the annual estimate for Natal and Zululand before the 1903 transfer from Transvaal. The South Africa series also covers the Cape, Orange Free State and South African Republic. The difference cannot be assigned to those polities.",
+      "note": "The opening uses separate annual estimates for the Cape and for Natal and Zululand before the 1903 transfer from Transvaal. The Cape source includes Walfish Bay and Mafeking in its legal territory while their map points fall under different jurisdictions. The research series also includes the Orange Free State and South African Republic. The difference cannot be assigned to them.",
       "research_regions": [
         "Africa"
       ],
       "research_people": 4968516,
-      "documented_opening_people": 929970,
-      "opening_people_including_retained_balances": 929970,
-      "research_minus_documented": 4038546
+      "documented_opening_people": 3195526,
+      "opening_people_including_retained_balances": 3195526,
+      "research_minus_documented": 1772990
     },
     {
       "comparison_id": "new_zealand",
@@ -3659,7 +3661,7 @@
         "ft_dutch_east_indies_indonesia"
       ],
       "scope_relation": "adopted_research_series",
-      "note": "Java, the Outer Islands and western New Guinea. Excludes East Timor, the British Borneo territories and Brunei. Separate from the Netherlands. Country study pp. 3–4 and workbook rows 101–102 (https://doi.org/10.21950/E09BKS); Appendix I pp. 73–75.",
+      "note": "Java, the Outer Islands and western New Guinea. Excludes East Timor, the British Borneo territories and Brunei. Separate from the Netherlands. Country study pp. 3–4 and workbook rows 101–102 (https://doi.org/10.21950/E09BKS); Appendix I pp. 73–75. Java and Madura are a distinct civilian statistical subdivision. The research account balance remains an arithmetic unlocated pool including any date, coverage or definition differences. It does not establish the total of the Outer Islands.",
       "research_regions": [
         "Asia"
       ],
@@ -4084,6 +4086,10 @@
         "people": 193861
       },
       {
+        "unit_id": "cshapes_gw_561",
+        "people": 2265556
+      },
+      {
         "unit_id": "cshapes_gw_562",
         "people": 929970
       },
@@ -4128,8 +4134,8 @@
         "people": 78086
       }
     ],
-    "net_additions": 54754337,
-    "authoritative_opening_population": 1458689022,
+    "net_additions": 57019893,
+    "authoritative_opening_population": 1460954578,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4169,18 +4175,18 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1026561307,
+    "documented_opening_population": 1028826863,
     "untouched_legacy_population": 106080000,
     "retained_unlocated_population": 326047715,
-    "authoritative_opening_population": 1458689022,
-    "published_minus_documented_opening": 568512941,
+    "authoritative_opening_population": 1460954578,
+    "published_minus_documented_opening": 566247385,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
       "research_only_component_people": 231812859,
       "comparisons_by_scope": {
         "comparable_extent": 1943838,
         "different_extent": 1761145,
-        "partial_extent": 332999940,
+        "partial_extent": 330734384,
         "scope_unconfirmed": -4843,
         "adopted_research_series": 0
       },
@@ -4188,6 +4194,6 @@
       "untouched_legacy_controls": -106080000,
       "unlocated_balances_under_retained_controls": -326047715
     },
-    "published_minus_authoritative_opening": 136385226
+    "published_minus_authoritative_opening": 134119670
   }
 }

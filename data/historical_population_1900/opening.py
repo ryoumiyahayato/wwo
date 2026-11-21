@@ -12,6 +12,9 @@ DATE = "1900-01-01"
 def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
 
+def located_people(group):
+    return sourced_people(group) - group.get("research_unlocated_balance", 0)
+
 
 def legacy_population_control(unit_id):
     legacy = json.loads((HERE.parent/"alpha/historical_world_economy_1900/countries_compact.json").read_text(encoding="utf8"))
@@ -96,6 +99,47 @@ def natal_and_zululand(observations):
         ),
         units=[],
     )
+
+def cape_colony(observations):
+    estimate = next(r for r in observations if r["source_id"] == "cape_colony_1899_imperial_conference")
+    alternatives = [r for r in observations if r["unit_id"] == estimate["unit_id"] and r is not estimate]
+    return dict(
+        unit_id=estimate["wwo_id"], date=DATE, population_value=estimate["population_value"],
+        source_id=estimate["source_id"], source_quality=estimate["quality"],
+        source_observations=[estimate["record_id"]], source_dates=[estimate["date"]],
+        locator=estimate["locator"], partition_source="collections/cape_population/observations.jsonl",
+        method="Use the 1899 official annual estimate as the closest published pre-opening proxy. Its reference month and day are unknown.",
+        scope=estimate["definition"],
+        uncertainty_kind="No statistical interval. Enumeration coverage, the estimate date, and wartime displacement are unquantified. Dated alternatives remain separate.",
+        alternative_estimates=[
+            {key: row[key] for key in ("source_id", "date", "population_value", "locator", "record_id", "definition")}
+            for row in alternatives
+        ],
+        units=[],
+    )
+
+
+def add_java_and_madura(group, observations):
+    unit = "java_madoera_colonial_population"
+    first, last = sorted((r for r in observations if r["unit_id"] == unit), key=lambda r: r["date"])
+    start, end = (date.fromisoformat(row["date"]) for row in (first, last))
+    fraction = Fraction((date.fromisoformat(DATE) - start).days, (end - start).days)
+    opening = round(first["population_value"] + (last["population_value"] - first["population_value"]) * fraction)
+    group["subdivision_source"] = "collections/java_madoera/observations.jsonl"
+    group["research_unlocated_balance"] = group["population_value"] - opening
+    group["scope"] += (" Java and Madura are a distinct civilian statistical subdivision. The research account balance remains "
+                       "an arithmetic unlocated pool including any date, coverage or definition differences. It does not establish the total of the Outer Islands.")
+    group["units"] = [dict(
+        unit_id=unit, name=first["name"], date=DATE, population_value=opening,
+        source_id=last["source_id"], source_unit_ids=[unit],
+        source_observations=[first["record_id"], last["record_id"]], source_dates=[first["date"], last["date"]],
+        endpoint_values=[first["population_value"], last["population_value"]],
+        locator=first["locator"]+" / "+last["locator"],
+        method=f"Linear daily interpolation of the two civilian administrative totals, elapsed fraction {fraction}.",
+        scope=last["definition"],
+        uncertainty_kind="The first return is provisional. Private-estate coverage and interpolation error have no quantified interval. No opening polygon or residence point is assigned.",
+        place_ids=[],
+    )]
 
 
 def qing_interior(observations, version):
@@ -198,6 +242,12 @@ def groups(observations, version=1):
             if root in result:
                 raise ValueError(f"two production partitions for {root}")
             result[root] = group
+    if version >= 4:
+        cape = cape_colony(observations)
+        if cape["unit_id"] in result:
+            raise ValueError("duplicate Cape population control")
+        result[cape["unit_id"]] = cape
+        add_java_and_madura(result["cshapes_gw_850"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)
@@ -207,7 +257,7 @@ def groups(observations, version=1):
         for child in children:
             child.setdefault("population_lower",None)
             child.setdefault("population_upper",None)
-        if children and sum(x["population_value"] for x in children) != sourced_people(group):
+        if children and sum(x["population_value"] for x in children) != located_people(group):
             raise ValueError(f"non-closing opening partition {root}")
         for key in [root]+[x["unit_id"] for x in children]:
             if key in ids:

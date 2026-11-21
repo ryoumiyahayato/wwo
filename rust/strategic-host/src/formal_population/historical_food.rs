@@ -130,6 +130,40 @@ pub fn historical_food_case(id: &str) -> Option<&'static HistoricalFoodCase> {
     HISTORICAL_FOOD_CASES.iter().find(|case| case.id == id)
 }
 
+#[derive(Serialize)]
+pub struct HistoricalSpendingCase {
+    pub id: &'static str,
+    pub locality: &'static str,
+    pub publication_year: u16,
+    pub observation_date: Option<&'static str>,
+    pub covered_people: u8,
+    pub period_days: u8,
+    pub source_url: &'static str,
+    pub printed_pages: [u8; 2],
+    pub rice_volume_go: u8,
+    pub expenditure_rin: &'static [(&'static str, u16)],
+    pub total_expenditure_rin: u16,
+    pub scope: &'static str,
+}
+
+pub const TOKYO_SHINAMI_HOUSEHOLD: HistoricalSpendingCase = HistoricalSpendingCase {
+    id: "tokyo_shinami_household_1899_publication",
+    locality: "Shin'ami, Tokyo, Japan",
+    publication_year: 1899,
+    observation_date: None,
+    covered_people: 3,
+    period_days: 1,
+    source_url: "https://dl.ndl.go.jp/pid/798849/1/30",
+    printed_pages: [32, 33],
+    rice_volume_go: 12,
+    expenditure_rin: &[
+        ("rice", 170), ("unspecified_side_dish", 40), ("sake", 30), ("wood_and_charcoal", 20),
+        ("kerosene", 5), ("tobacco", 7), ("child_allowance", 10), ("bedding_rent", 26), ("room_rent", 25),
+    ],
+    total_expenditure_rin: 333,
+    scope: "Reported daily budget of a performer, spouse and their child. Rice uses original volume units (1 shō equals 10 gō). Food preparation, edible yield and intake are unspecified. Leftovers and household side work are discussed separately without quantities.",
+};
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PotatoMassBasis {
