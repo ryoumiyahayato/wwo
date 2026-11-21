@@ -74,7 +74,8 @@ impl Display<'_> {
 
     pub(crate) fn freight_page(&self, panels: &mut Mesh, text: &mut Mesh, hits: &mut Vec<Hit>, [x,y,w,h]: [f32;4]) {
         let Some(v) = self.session.and_then(|s| s.transport.as_ref()) else { return };
-        self.skin.text(text, "从报价簿选择商品，报价后选择采购货批。", 0, [x,y], w, MUTED);
+        let caption=if v.lots.is_empty() {"个人可从报价簿采购，企业可从商号采购货批。"}else{"选择货批和目的地，再查询运费。"};
+        self.skin.text(text, caption, 0, [x,y], w, MUTED);
         for (i, lot) in v.lots.iter().enumerate() {
             self.row(panels,text,hits,[x,y+24.+i as f32*25.,w-92.,23.], &lot.label, command("lot",i), lot.selected);
         }

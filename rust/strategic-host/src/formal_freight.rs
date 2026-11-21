@@ -129,7 +129,7 @@ impl InitialWorld {
         self.buy_owned_freight(self.player.clone(), good, quantity_milli, quoted_unit_price)
     }
 
-    pub fn organization_freight_offer(&self, shop: &str, good: &str) -> Option<(i64, i64, i64)> {
+    pub fn organization_freight_offer(&self, shop: &str, good: &str, quantity_milli: Option<i64>) -> Option<(i64, i64, i64)> {
         let org = self.organization(shop)?;
         if !org.is_merchant() || !self.organization_can_manage(shop, &self.player)
             || self.player_current_place()? != org.place || !org.goods.iter().any(|id| id == good) {
@@ -137,13 +137,14 @@ impl InitialWorld {
         }
         let price = self.macro_economy.markets().get(&org.unit)?.commodities.get(good)?.price_centimes;
         if price <= 0 { return None; }
-        let qty = (1000 + price - 1) / price;
+        let qty = quantity_milli.unwrap_or_else(|| (1000 + price - 1) / price);
+        load(qty).ok()?;
         let amount = self.macro_economy.quote(&org.unit, good, qty).ok()?;
         (self.ledger.default_account(org.firm.as_deref()?)?.available >= amount).then_some((qty, price, amount))
     }
 
-    pub fn buy_organization_freight(&mut self, shop: &str, good: &str, price: i64) -> io::Result<u64> {
-        let (qty, current, _) = self.organization_freight_offer(shop, good).ok_or_else(|| invalid("企业当前无法现场购货。"))?;
+    pub fn buy_organization_freight(&mut self, shop: &str, good: &str, quantity_milli: i64, price: i64) -> io::Result<u64> {
+        let (qty, current, _) = self.organization_freight_offer(shop, good, Some(quantity_milli)).ok_or_else(|| invalid("企业当前无法现场购货。"))?;
         if current != price { return Err(invalid("购货报价已变动。")); }
         let firm = self.organization(shop).and_then(|org| org.firm.clone()).expect("quoted enterprise");
         self.buy_owned_freight(firm, good, qty, price)

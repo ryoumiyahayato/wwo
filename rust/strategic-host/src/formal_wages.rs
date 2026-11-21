@@ -72,7 +72,9 @@ impl WageClaims {
     pub(crate) fn completed_firm_work<'a>(
         &'a self, firm: &str, day: i64,
     ) -> Vec<CompletedFirmWork<'a>> {
-        self.claims.iter().filter(|(_, claim)| claim.employer == firm && claim.work_day == day)
+        let prefix = format!("work:{day}:");
+        self.claims.range(prefix.clone()..).take_while(|(id, _)| id.starts_with(&prefix))
+            .filter(|(_, claim)| claim.employer == firm && claim.work_day == day)
             .map(|(id, claim)| CompletedFirmWork {
                 work_id: id,
                 worker: &claim.worker,

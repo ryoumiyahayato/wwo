@@ -32,6 +32,9 @@ fn section(title: &str, details: Vec<String>, actions: Vec<Value>) -> Value {
 }
 
 fn person_name(world: &InitialWorld, person: &str) -> String {
+    if person == world.player().id {
+        return "本人".into();
+    }
     if let Some(org) = world.organization(person) {
         return org.name.clone();
     }
@@ -178,26 +181,35 @@ pub(super) fn details(world: &InitialWorld, org: &Organization) -> Vec<Value> {
     }
     if manager {
         for good in &org.goods {
-            if let Some((amount, price, total)) = world.organization_freight_offer(&org.id, good) {
-                let (name, _, unit) = world
-                    .macro_economy()
-                    .commodity_info(good)
-                    .unwrap_or((good, "", ""));
-                rows.push(section(
-                    "企业货批",
-                    vec![
-                        format!(
-                            "{name} · {} {unit} · 货款 {total} 生丁",
-                            amount as f64 / 1000.
-                        ),
-                        "购入后从企业账户进入实物货运，查询运费并发运。".into(),
-                    ],
-                    vec![work_action(
-                        "企业付款购入",
-                        &format!("organization:freight|{good}|{price}"),
-                        true,
-                    )],
+            let (name, _, unit) = world
+                .macro_economy()
+                .commodity_info(good)
+                .unwrap_or((good, "", ""));
+            let mut terms = Vec::new();
+            let mut actions = Vec::new();
+            let mut previous = None;
+            for (label, requested) in [("小批", None), ("整批", Some(1000))] {
+                let Some((amount, price, total)) =
+                    world.organization_freight_offer(&org.id, good, requested)
+                else {
+                    continue;
+                };
+                if previous == Some(amount) {
+                    continue;
+                }
+                previous = Some(amount);
+                terms.push(format!(
+                    "{label} · {} {unit} · {total} 生丁",
+                    amount as f64 / 1000.
                 ));
+                actions.push(work_action(
+                    &format!("购入{label}"),
+                    &format!("organization:freight|{good}|{amount}|{price}"),
+                    true,
+                ));
+            }
+            if !actions.is_empty() {
+                rows.push(section(&format!("企业货批 · {name}"), terms, actions));
             }
         }
     }
@@ -256,7 +268,7 @@ pub(super) fn details(world: &InitialWorld, org: &Organization) -> Vec<Value> {
 
     for event in world.organization_events(&org.id).rev().take(12) {
         rows.push(section(
-            &event.action,
+            event.action.label(),
             vec![
                 format!(
                     "{} 至 {}",
@@ -320,12 +332,18 @@ pub(super) fn act(world: &mut InitialWorld, id: &str, action: &str) -> io::Resul
                 world.contribute_to_business(id, amount)?;
                 return Ok(format!("已从本人账户向企业追加 {amount} 生丁。"));
             }
-            if let Some((good, price)) = action
+            if let Some((item, price)) = action
                 .strip_prefix("organization:freight|")
                 .and_then(|value| value.rsplit_once('|'))
             {
+                let (good, amount) = item
+                    .rsplit_once('|')
+                    .ok_or_else(|| io::Error::other("货批数量无效。"))?;
+                let amount = amount
+                    .parse()
+                    .map_err(|_| io::Error::other("货批数量无效。"))?;
                 let price = price.parse().map_err(|_| io::Error::other("报价无效。"))?;
-                let lot = world.buy_organization_freight(id, good, price)?;
+                let lot = world.buy_organization_freight(id, good, amount, price)?;
                 return Ok(format!("已购入企业货批 #{lot}。可从企业账户进入实物货运。"));
             }
             let (good, total) = action

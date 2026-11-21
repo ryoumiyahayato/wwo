@@ -45,6 +45,9 @@ pub(super) struct Delivery {
 }
 
 impl EnterpriseOpening {
+    pub(crate) fn authorized_material_pair(&self, buyer: &str, seller: &str, day: i64) -> bool {
+        self.supplier(buyer, day).is_some_and(|(terms, _, _, _)| terms.counterparty == seller)
+    }
     fn site(&self, firm_id: &str) -> Option<&Site> {
         self.sites().find(|(firm, _)| firm.id == firm_id).map(|(_, site)| site)
     }
@@ -147,6 +150,9 @@ impl Enterprises {
 
     pub(crate) fn deliver_material(&mut self, opening: &EnterpriseOpening, ledger: &mut Ledger,
         order: &MaterialOrder, day: i64) -> io::Result<(i64, i64)> {
+        if self.deliveries.iter().any(|d| d.order.day == order.day && d.order.buyer == order.buyer && d.order.seller == order.seller) {
+            return Err(invalid("这笔原料订单已经交割"));
+        }
         let (buy, buyer_site, sell, seller_site) = opening.supplier(&order.buyer, day)
             .filter(|(buy, _, _, _)| buy.counterparty == order.seller && (order.day + 1 == day
                 || (order.day == day && self.established_supplier(opening, &order.buyer, &order.seller, day))))
@@ -175,7 +181,7 @@ impl Enterprises {
     pub(crate) fn validate_orders(&self, opening: &EnterpriseOpening, ledger: &Ledger, wages: &WageClaims, day: i64) -> bool {
         let mut references = std::collections::BTreeSet::new();
         let mut prior = BTreeMap::new();
-        self.deliveries.iter().all(|delivery| {
+        self.deliveries.len() == ledger.material_receipt_count() && self.deliveries.iter().all(|delivery| {
             let order = &delivery.order;
             if !(1..=day).contains(&order.day) { return false; }
             let Some((buy, _, sell, _)) = opening.supplier(&order.buyer, order.day) else { return false };
@@ -192,6 +198,7 @@ impl Enterprises {
                 && (1..=buy.quantity_limit.min(sell.quantity_limit)).contains(&order.quantity)
                 && (1..=order.quantity).contains(&delivery.quantity)
                 && wages.completed_firm_work(&order.buyer, order.day).iter().any(|w| w.worker == order.worker)
+                && ledger.payment_minute(&reference) == Some(delivery.delivered_day * MINUTES_PER_DAY)
                 && ledger.has_payment(&reference, from.account_id, to.account_id, delivery.quantity * sell.price, "goods", &reference)
         }) && self.interrupted_supply.iter().all(|(buyer, failed)| (1..=day).contains(failed)
             && self.deliveries.iter().any(|d| d.order.buyer == *buyer && d.delivered_day <= *failed)
@@ -249,6 +256,8 @@ mod tests {
                     assert_eq!(firms.site_goods(&opening, BAKER).unwrap().0, buyer + units);
                     assert_eq!(firms.site_goods(&opening, SUPPLIER).unwrap().0, seller - units);
                     assert_eq!(ledger.default_account(BAKER).unwrap().cash, cash - paid);
+                    assert!(firms.deliver_material(&opening, &mut ledger, &order, day).is_err());
+                    assert_eq!(firms.site_goods(&opening, BAKER).unwrap().0, buyer + units);
                 }
             }
             let requests = firms.material_requests(&opening, &wages, day);

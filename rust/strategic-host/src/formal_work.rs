@@ -151,6 +151,10 @@ impl WorkOpening {
         self.firms.iter().find(|firm| firm.id == employer).map(|firm| firm.host_organization_id.as_str())
     }
 
+    pub(crate) fn regional_employer(&self, employer: &str) -> bool {
+        self.firms.iter().any(|firm| firm.regional && firm.id == employer)
+    }
+
     pub(crate) fn automatic(&self) -> impl Iterator<Item = &str> {
         self.actors.iter().filter(|actor| actor.control == "automatic").map(|actor| actor.id.as_str())
     }
@@ -163,6 +167,10 @@ impl WorkState {
 
     pub(crate) fn has_referral(&self, actor: &str, job: &str) -> bool {
         self.referrals.get(actor).is_some_and(|jobs| jobs.contains_key(job))
+    }
+
+    pub(crate) fn referrals(&self) -> impl Iterator<Item = (&str, &str, i64)> {
+        self.referrals.iter().flat_map(|(person, jobs)| jobs.iter().map(move |(job, &day)| (person.as_str(), job.as_str(), day)))
     }
 
     pub(crate) fn ready_to_apply(&self, opening: &WorkOpening, actor: &str, job: &Job, day: i64) -> bool {

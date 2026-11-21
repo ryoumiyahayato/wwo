@@ -221,6 +221,7 @@ impl Enterprises {
                 rival != winner && opening.sites().any(|(f, s)| f.id == *rival && s.place_id == winning_site.place_id)
                     && (0..=minute).contains(&sale.minute) && sale.amount > 0
                     && sale.record.starts_with("personal_life:")
+                    && ledger.payment_minute(&format!("purchase:{}", sale.record)) == Some(sale.minute)
                     && ledger.has_payment(&format!("purchase:{}", sale.record), &sale.buyer_account, account.account_id,
                         sale.amount, "purchase", &sale.record)
             })

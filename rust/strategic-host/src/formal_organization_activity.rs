@@ -18,6 +18,16 @@ pub(crate) struct OrganizationActivity {
     events: Vec<OrganizationEvent>,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OrganizationAction { MaterialRequest, MaterialDelivery, JobReferral }
+
+impl OrganizationAction {
+    pub fn label(self) -> &'static str {
+        match self { Self::MaterialRequest => "原料采购申请", Self::MaterialDelivery => "原料交割", Self::JobReferral => "介绍就业" }
+    }
+}
+
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct OrganizationEvent {
@@ -25,7 +35,7 @@ pub struct OrganizationEvent {
     pub initiator: String,
     pub target: String,
     pub reason: String,
-    pub action: String,
+    pub action: OrganizationAction,
     pub resources: String,
     pub result: String,
     pub consequence: String,
@@ -39,7 +49,7 @@ impl OrganizationActivity {
         // deliveries retain their authoritative histories in their respective components.
         self.events.retain(|old| !(old.organization == event.organization && old.initiator == event.initiator
             && old.action == event.action && old.target == event.target
-            && (event.action != "介绍就业" || old.resources == event.resources)));
+            && (event.action != OrganizationAction::JobReferral || old.resources == event.resources)));
         self.events.push(event);
     }
 }
@@ -50,7 +60,7 @@ impl InitialWorld {
         let firm = self.organization(organization).and_then(|org| org.firm.as_deref());
         self.activity.events.iter().filter(move |event| (event.organization == organization || event.target == organization)
             && (manager || event.initiator == self.player || event.target == self.player
-                || (event.action == "原料交割" && firm.is_some_and(|firm| self.worked_at(firm, event.end_minute)))))
+                || (event.action == OrganizationAction::MaterialDelivery && firm.is_some_and(|firm| self.worked_at(firm, event.end_minute)))))
     }
 
     pub fn organization_site_goods(&self, organization: &str) -> Option<(i64, i64)> {
@@ -67,7 +77,7 @@ impl InitialWorld {
         for other in self.organizations() {
             if other.id == org.id { continue; }
             let (office, employer) = if org.kind == OrganizationKind::MutualAid { (org, other) } else { (other, org) };
-            if office.kind == OrganizationKind::MutualAid && self.activity.events.iter().any(|e| e.action == "介绍就业"
+            if office.kind == OrganizationKind::MutualAid && self.activity.events.iter().any(|e| e.action == OrganizationAction::JobReferral
                 && e.organization == office.id && employer.jobs.contains(&e.resources)
                 && (manager || local || e.target == self.player)) {
                 relations.push(format!("{}与{}有实际岗位介绍记录。相同工资条件下优先介绍已联系的岗位。", office.name, employer.name));
@@ -117,7 +127,7 @@ impl InitialWorld {
             let established = self.enterprises.established_supplier(&self.enterprise_opening, &order.buyer, &order.seller, day);
             self.activity.record(OrganizationEvent {
                 organization: buyer.into(), initiator: order.worker.clone(), target: seller.into(),
-                reason: "本站余粮低于实际在岗班次在计划期内的用量，已知供货消息到达".into(), action: "原料采购申请".into(),
+                reason: "本站余粮低于实际在岗班次在计划期内的用量，已知供货消息到达".into(), action: OrganizationAction::MaterialRequest,
                 resources: format!("粮食 {}；企业原有采购授权", order.quantity),
                 start_minute: start, end_minute: end, result: "采购方已向获授权的当地供方下单".into(),
                 consequence: if established { "已有现场交割记录，可在本班向同一供应商续订" }
@@ -143,7 +153,7 @@ impl InitialWorld {
         };
         self.activity.record(OrganizationEvent {
             organization: buyer.into(), initiator: order.worker.clone(), target: seller.into(),
-            reason: "生产岗位报告实际原料缺口，企业执行既有采购授权".into(), action: "原料交割".into(),
+            reason: "生产岗位报告实际原料缺口，企业执行既有采购授权".into(), action: OrganizationAction::MaterialDelivery,
             resources: format!("申请粮食 {}；双方须有在岗交接能力，采购方须能支付", order.quantity),
             start_minute: order.day * MINUTES_PER_DAY, end_minute: boundary.snapshot().total_minutes,
             result, consequence,
@@ -155,10 +165,16 @@ impl InitialWorld {
         let Some(id) = self.work_opening.organization(&job.employer) else { return false };
         !self.organization_can_manage(id, person)
             && (self.enterprise_opening.has_firm(&job.employer) || self.merchant_needs_worker(&job.employer))
+            && self.employer_current(person, job)
     }
 
     fn employer_current(&self, person: &str, job: &Job) -> bool {
-        !self.work_opening.refuses_arrears(person, || self.wages.oldest_unpaid_day(person, &job.employer), self.clock.current_day())
+        let day = self.clock.current_day();
+        let unpaid = || self.wages.oldest_unpaid_day(person, &job.employer);
+        if self.work_opening.regional_employer(&job.employer) {
+            return unpaid().is_none_or(|due| due > day);
+        }
+        !self.work_opening.refuses_arrears(person, unpaid, day)
     }
 
     fn referral_for(&self, organization: &str, person: &str) -> Option<(String, String)> {
@@ -167,20 +183,21 @@ impl InitialWorld {
             || self.work.has_contract(person) || !self.eligible_for_civil_work(person) { return None; }
         let coordinator = self.active_coordinator(organization).filter(|id| *id != person)?;
         let job = self.work_opening.entry_jobs_at(&association.place).filter(|job| {
-            self.work.vacancies(job) > 0 && self.can_take_organization_job(person, job) && self.employer_current(person, job)
+            self.work.vacancies(job) > 0 && !self.work.has_referral(person, &job.id)
+                && self.can_take_organization_job(person, job)
         }).max_by_key(|job| (job.wage_per_hour, self.previously_referred(organization, &job.id), Reverse(&job.id)))?;
         (self.person_profile(person).ok()?.age_years >= 18).then(|| (coordinator.into(), job.id.clone()))
     }
 
     fn previously_referred(&self, organization: &str, job: &str) -> bool {
-        self.activity.events.iter().any(|e| e.action == "介绍就业" && e.organization == organization && e.resources == job)
+        self.activity.events.iter().any(|e| e.action == OrganizationAction::JobReferral && e.organization == organization && e.resources == job)
     }
 
     fn record_referral(&mut self, organization: &str, person: &str, coordinator: String, job: String) -> String {
         let minute = self.clock.snapshot().total_minutes;
         self.work.learn_referral(person, &job, self.clock.current_day());
         self.activity.record(OrganizationEvent {
-            organization: organization.into(), initiator: coordinator, target: person.into(), action: "介绍就业".into(),
+            organization: organization.into(), initiator: coordinator, target: person.into(), action: OrganizationAction::JobReferral,
             reason: "用人组织有当地入门空缺，求职者可以在场申请".into(), resources: job.clone(),
             start_minute: minute, end_minute: minute, result: "求职者已获知岗位与合同条件".into(),
             consequence: "求职者可向用人组织应聘；获聘后按实际班次结算工资".into(),
@@ -215,12 +232,12 @@ impl InitialWorld {
             if !self.work.has_contract(&person) {
                 if let Some((office, _)) = offices.iter().find(|(_, town)| *town == place) {
                     if let Some((coordinator, job)) = self.referral_for(office, &person) {
-                        if !self.work.has_referral(&person, &job) { self.record_referral(office, &person, coordinator, job); }
+                        self.record_referral(office, &person, coordinator, job);
                     }
                 }
                 let job = self.work.local_jobs(&self.work_opening, &person, Some(&place), self.clock.current_day())
                     .filter(|job| self.work.vacancies(job) > 0 && self.can_take_organization_job(&person, job)
-                        && self.employer_current(&person, job) && self.work.ready_to_apply(&self.work_opening, &person, job, self.clock.current_day()))
+                        && self.work.ready_to_apply(&self.work_opening, &person, job, self.clock.current_day()))
                     .max_by_key(|job| (job.wage_per_hour, Reverse(&job.id))).map(|job| job.id.clone());
                 if let Some(job) = job { self.apply_for_work_as(&person, &job)?; }
             }
@@ -242,13 +259,31 @@ impl InitialWorld {
             || !self.activity.pending.iter().all(|order| pending_buyers.insert(&order.buyer)
                 && expected.iter().any(|candidate| candidate == order))
             || !self.activity.events.iter().all(|e| (0..=minute).contains(&e.start_minute)
-                && (e.start_minute..=minute).contains(&e.end_minute) && self.organization(&e.organization).is_some()
-                && self.person(&e.initiator).is_some() && (self.person(&e.target).is_some() || self.organization(&e.target).is_some())
-                && [&e.reason, &e.resources, &e.result, &e.consequence].iter().all(|s| !s.is_empty() && s.len() <= 1024)
-                && matches!(e.action.as_str(), "原料采购申请" | "原料交割" | "介绍就业")) {
+                && (e.start_minute..=minute).contains(&e.end_minute) && self.valid_event_parties(e)
+                && [&e.reason, &e.resources, &e.result, &e.consequence].iter().all(|s| !s.is_empty() && s.len() <= 1024))
+            || !self.work.referrals().all(|(person, job, learned)| self.activity.events.iter().any(|event|
+                event.action == OrganizationAction::JobReferral && event.target == person && event.resources == job
+                    && event.start_minute / MINUTES_PER_DAY == learned)) {
             return Err(invalid("组织活动、原料交割或招聘消息与正式记录不符。"));
         }
         Ok(())
+    }
+
+    fn valid_event_parties(&self, event: &OrganizationEvent) -> bool {
+        let Some(org) = self.organization(&event.organization) else { return false };
+        match event.action {
+            OrganizationAction::JobReferral => self.appointed_coordinator(&org.id) == Some(&event.initiator)
+                && self.person(&event.target).is_some() && event.target != event.initiator
+                && self.work_opening.entry_job(&event.resources).is_some_and(|job| job.place == org.place)
+                && (self.population.unit_for_person(&event.target).is_none() || self.work.has_referral(&event.target, &event.resources)),
+            OrganizationAction::MaterialRequest | OrganizationAction::MaterialDelivery => {
+                let Some(buyer) = org.firm.as_deref() else { return false };
+                let Some(seller) = self.organization(&event.target).and_then(|o| o.firm.as_deref()) else { return false };
+                let work_day = event.start_minute / MINUTES_PER_DAY + i64::from(event.action == OrganizationAction::MaterialRequest);
+                self.enterprise_opening.authorized_material_pair(buyer, seller, work_day)
+                    && self.wages.completed_firm_work(buyer, work_day).iter().any(|w| w.worker == event.initiator)
+            }
+        }
     }
 }
 
@@ -283,6 +318,9 @@ mod tests {
         assert!(world.organization_site_goods(org).is_none());
         let restored = bootstrap.restore_native(serde_json::from_value(world.snapshot()).unwrap()).unwrap();
         assert_eq!(restored.organization_relations(org), relations);
+        let mut missing_delivery = world.snapshot();
+        missing_delivery["enterprises"]["deliveries"].as_array_mut().unwrap().pop();
+        assert!(bootstrap.restore_native(serde_json::from_value(missing_delivery).unwrap()).is_err());
     }
 
     #[test]
@@ -306,12 +344,37 @@ mod tests {
         assert!(world.organization_site_goods(firm).is_none());
         assert!(!world.organization_can_manage(firm, &world.player));
         world.advance_migrated_domains(22 * MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
-        assert!(world.organization_events(firm).all(|e| e.action != "原料交割"));
+        assert!(world.organization_events(firm).all(|e| e.action != OrganizationAction::MaterialDelivery));
         world.book_work().unwrap();
         world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
-        let handover = world.organization_events(firm).find(|e| e.action == "原料交割").unwrap();
+        let handover = world.organization_events(firm).find(|e| e.action == OrganizationAction::MaterialDelivery).unwrap();
         assert!(handover.result.contains("已当场交粮"));
         assert!(world.organization_relations(firm).iter().any(|line| line.contains("当班见过")));
         assert!(world.organization_site_goods(firm).is_none());
+    }
+
+    #[test]
+    fn organization_activity_unpaid_counter_worker_can_leave_after_a_failed_handover() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create("british_isles_1900").unwrap();
+        let shop = "organization:opening_london_merchant";
+        let office = "organization:opening_london_association";
+        let good = world.organization(shop).unwrap().goods[0].clone();
+        let offer = world.organization_counter_offer(shop, &good).unwrap();
+        world.order_at_counter(shop, &good, offer.goods_centimes + offer.service_centimes).unwrap();
+        let job = world.request_job_referral(office).unwrap();
+        world.apply_for_work(&job).unwrap();
+        world.book_work().unwrap();
+        let hours = world.employment().unwrap().0.hours;
+        world.advance_migrated_domains(hours * 60, &BTreeMap::new()).unwrap();
+        world.preview_travel("place:paris", ModeSet::ALL).unwrap();
+        world.depart_player().unwrap();
+        world.advance_migrated_domains(2 * MINUTES_PER_DAY - hours * 60, &BTreeMap::new()).unwrap();
+        let (terms, booked, _) = world.employment().unwrap();
+        assert!(!booked);
+        assert_eq!(world.wages.oldest_unpaid_day(&world.player, &terms.employer), Some(2));
+        assert!(!world.employer_current(&world.player, terms));
+        world.leave_employment().unwrap();
+        assert!(world.employment().is_none());
     }
 }

@@ -97,11 +97,16 @@ impl InitialWorld {
         self.organization_members.volunteers.values().flatten().map(String::as_str)
     }
 
+    pub(crate) fn appointed_coordinator(&self, id: &str) -> Option<&str> {
+        let org = self.organization(id)?;
+        (org.officer.role == OrganizationRole::Coordinator && self.organization_members.appointments.contains(id)
+        ).then_some(org.officer.person.as_str())
+    }
+
     pub(crate) fn active_coordinator(&self, id: &str) -> Option<&str> {
         let org = self.organization(id)?;
-        let person = org.officer.person.as_str();
-        (org.officer.role == OrganizationRole::Coordinator && self.organization_members.appointments.contains(id)
-            && self.current_place(person) == Some(&org.place) && self.eligible_for_civil_work(person)
+        let person = self.appointed_coordinator(id)?;
+        (self.current_place(person) == Some(&org.place) && self.eligible_for_civil_work(person)
             && self.work.booking(person).is_none()).then_some(person)
     }
 

@@ -56,18 +56,65 @@ mod tests {
     }
 
     #[test]
+    fn counter_order_after_shift_start_expires_without_borrowing_elapsed_work() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let mut world = bootstrap.create(LONDON).unwrap();
+        let offer = world.organization_counter_offer(SHOP, "coal").unwrap();
+        world.order_at_counter(SHOP, "coal", offer.goods_centimes + offer.service_centimes).unwrap();
+        let job = world.request_job_referral("organization:opening_london_association").unwrap();
+        world.apply_for_work(&job).unwrap();
+        world.book_work().unwrap();
+        world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+        let quantity = world.holding_milli("coal");
+        assert_eq!(quantity, offer.quantity_milli);
+
+        // Isolate handover from demand-based scheduling: place the existing worker on
+        // a one-hour shift with no queued orders, then take the only new order halfway through.
+        assert!(world.counters.orders.values().all(|order| order.shop != SHOP));
+        let worker = world.player.clone();
+        let place = world.current_place(&worker).unwrap().to_owned();
+        world.work.book(&world.work_opening, &worker, Some(&place), world.clock()).unwrap();
+        world.advance_migrated_domains(30, &BTreeMap::new()).unwrap();
+        let late = world.organization_counter_offer(SHOP, "coal").unwrap();
+        let total = late.goods_centimes + late.service_centimes;
+        let id = world.next_living_record;
+        world.order_at_counter(SHOP, "coal", total).unwrap();
+        world.advance_migrated_domains(MINUTES_PER_DAY - 30, &BTreeMap::new()).unwrap();
+        assert_eq!(world.completed_firm_work(FIRM, 2).unwrap()[0].hours, 1);
+        assert!(world.counters.orders.contains_key(&id));
+        assert_eq!(world.holding_milli("coal"), quantity);
+        let cash = world.balance().unwrap().cash;
+        assert_eq!(world.balance().unwrap().reserved, total);
+
+        // The employee keeps the contract but does not book the following day.
+        world.advance_migrated_domains(MINUTES_PER_DAY, &BTreeMap::new()).unwrap();
+        assert!(world.completed_firm_work(FIRM, 3).unwrap().is_empty());
+        let world = resume(&bootstrap, &world);
+        assert!(!world.counters.orders.contains_key(&id));
+        let failed = &world.counters.recent[SHOP][&worker];
+        assert_eq!(failed.order_id, id);
+        assert_eq!(failed.placed, MINUTES_PER_DAY + 30);
+        assert_eq!(failed.minute, 3 * MINUTES_PER_DAY);
+        assert!(matches!(&failed.settlement, CounterSettlement::Released { reason } if reason.contains("工时")));
+        assert_eq!(world.holding_milli("coal"), quantity);
+        assert_eq!((world.balance().unwrap().reserved, world.balance().unwrap().available), (0, cash));
+        assert!(world.ledger.payment_minute(&format!("purchase:personal_life:{id}")).is_none());
+        assert!(world.ledger.payment_minute(&format!("service:counter:{id}")).is_none());
+    }
+
+    #[test]
     fn counter_manager_freight_debits_the_business_and_resumes_the_same_lot() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let mut world = bootstrap.create(LONDON).unwrap();
-        assert!(world.organization_freight_offer(SHOP, "coal").is_none());
+        assert!(world.organization_freight_offer(SHOP, "coal", None).is_none());
         world.accept_organization_partnership(SHOP).unwrap();
         let cash = world.balance().unwrap().cash;
         world.set_counter_open(SHOP, false).unwrap();
         assert!(world.organization_counter_offer(SHOP, "coal").is_none());
-        let (qty, price, cost) = world.organization_freight_offer(SHOP, "kerosene").unwrap();
+        let (qty, price, cost) = world.organization_freight_offer(SHOP, "kerosene", None).unwrap();
         let company_cash = world.ledger.default_account(FIRM).unwrap().cash;
         let before = world.macro_economy.markets()[LONDON].commodities["kerosene"].inventory;
-        let lot = world.buy_organization_freight(SHOP, "kerosene", price).unwrap();
+        let lot = world.buy_organization_freight(SHOP, "kerosene", qty, price).unwrap();
         assert_eq!(world.ledger.default_account(FIRM).unwrap().cash, company_cash - cost);
         assert_eq!(world.macro_economy.markets()[LONDON].commodities["kerosene"].inventory, before - qty as f64 / 1000.0);
         assert_eq!(world.balance().unwrap().cash, cash);
@@ -116,7 +163,22 @@ struct Order {
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-struct Outcome { minute: i64, good: String, result: String }
+struct Outcome {
+    order_id: u64,
+    placed: i64,
+    minute: i64,
+    good: String,
+    maximum_goods: i64,
+    service_fee: i64,
+    settlement: CounterSettlement,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(tag = "status", rename_all = "snake_case", deny_unknown_fields)]
+enum CounterSettlement {
+    Delivered { goods_paid: i64 },
+    Released { reason: String },
+}
 
 pub struct CounterOffer {
     pub good: String,
@@ -197,7 +259,11 @@ impl InitialWorld {
         let last = recent.and_then(|outcomes| if insider { outcomes.values().max_by_key(|r| r.minute) } else { outcomes.get(&self.player) });
         if let Some(last) = last {
             let good = self.macro_economy.commodity_info(&last.good).map_or(last.good.as_str(), |g| g.0);
-            status.push_str(&format!(" · 第 {} 天 {good}：{}", last.minute / MINUTES_PER_DAY, last.result));
+            let result = match &last.settlement {
+                CounterSettlement::Delivered { goods_paid } => format!("已交货，货款 {goods_paid}，代办费 {}", last.service_fee),
+                CounterSettlement::Released { reason } => format!("未交货，已解除 {} 准备金。{reason}", last.maximum_goods + last.service_fee),
+            };
+            status.push_str(&format!(" · 第 {} 天，订单 {}，{good}。{result}", last.minute / MINUTES_PER_DAY, last.order_id));
         }
         Some(status)
     }
@@ -230,61 +296,108 @@ impl InitialWorld {
         let minute = boundary.snapshot().total_minutes;
         let mut hours = BTreeMap::new();
         for (id, order) in std::mem::take(&mut self.counters.orders) {
-            let left = hours.entry(order.shop.clone()).or_insert_with(|| {
+            let shifts = hours.entry(order.shop.clone()).or_insert_with(|| {
                 let firm = self.organization(&order.shop).and_then(|org| org.firm.as_deref()).expect("registered merchant");
-                self.wages.completed_firm_work(firm, day).iter().map(|w| w.hours).sum::<i64>()
+                let mut shifts: Vec<_> = self.wages.completed_firm_work(firm, day).into_iter().filter_map(|work| {
+                    let start = self.work.booking(work.worker)?;
+                    Some((start, start + work.hours * 60))
+                }).collect();
+                shifts.sort_by_key(|&(_, end)| end);
+                shifts
             });
-            if *left == 0 && day <= order.placed / MINUTES_PER_DAY + 1 {
+            let available = shifts.iter_mut().find(|(start, end)| order.placed.max(*start) + 60 <= *end);
+            if available.is_none() && day <= order.placed / MINUTES_PER_DAY + 1 {
                 self.counters.orders.insert(id, order);
                 continue;
             }
-            let result = if *left == 0 { Err(invalid("两日内缺少交付工时。")) } else {
-                *left -= 1;
+            let result = if let Some((start, _)) = available {
+                *start = order.placed.max(*start) + 60;
                 self.hand_over(id, &order, minute)
-            };
-            let result = match result {
-                Ok(goods) => format!("已交货，货款 {goods}，代办费 {}", order.service_fee),
+            } else { Err(invalid("两日内缺少交付工时。")) };
+            let settlement = match result {
+                Ok(goods_paid) => CounterSettlement::Delivered { goods_paid },
                 Err(err) => {
                     self.ledger.release(&format!("counter:{id}"), order.maximum_goods + order.service_fee)?;
-                    format!("未交货，准备金已退回。{err}")
+                    CounterSettlement::Released { reason: err.to_string() }
                 }
             };
-            self.counters.recent.entry(order.shop).or_default().insert(order.customer, Outcome { minute, good: order.good, result });
+            self.counters.recent.entry(order.shop).or_default().insert(order.customer, Outcome {
+                order_id: id, placed: order.placed, minute, good: order.good,
+                maximum_goods: order.maximum_goods, service_fee: order.service_fee, settlement,
+            });
         }
         Ok(())
     }
 
     pub(crate) fn plan_household_orders(&mut self) -> io::Result<()> {
         let day = self.clock.current_day();
+        let minute = self.clock.snapshot().total_minutes;
         let mut local = BTreeMap::new();
         for shop in self.organizations().filter(|org| org.is_merchant()) {
-            local.entry(shop.place.clone()).or_insert_with(Vec::new).push((shop.id.clone(), shop.goods.clone(), shop.unit.clone()));
+            let (_, goods) = local.entry(shop.place.clone())
+                .or_insert_with(|| (shop.unit.clone(), BTreeMap::<String, Vec<String>>::new()));
+            for good in &shop.goods {
+                goods.entry(good.clone()).or_default().push(shop.id.clone());
+            }
         }
         let customers = self.named_people().filter(|&id| id != self.player).map(str::to_owned).collect::<Vec<_>>();
         for person in customers {
-            let Some(shops) = self.current_place(&person).and_then(|p| local.get(p)) else { continue };
-            for (shop, goods, unit) in shops {
-                let mut offers = Vec::new();
-                for good in goods {
+            let Some((unit, goods)) = self.current_place(&person).and_then(|p| local.get(p)) else { continue };
+            let needs = self.person_livelihood(&person).expect("named resident");
+            let available = needs.budget.map_or(0, |account| account.available);
+            let meal = (self.activities.meal_milli_for_recovery - needs.food_held_milli - needs.food_received_today_milli).max(0);
+            // A delivery can take two days. Preserve the budget for the next immediate meal.
+            let meal_budget = if meal == 0 { Some(0) } else {
+                crate::formal_livelihood::STAPLES.iter().filter_map(|good| self.macro_economy.quote(unit, good, meal).ok()).min()
+            };
+            let mut choices = Vec::new();
+            for (good, shops) in goods {
+                let food = counts_as_food(good);
+                let due = if food { meal } else {
                     let rate = self.macro_economy.resident_daily_milli(unit, good);
-                    if rate <= 0.0 { continue; }
-                    let stock = self.person_holding_milli(&person, good);
-                    // A tiny individual rate only uses a whole lot when accumulated catalogue demand crosses that unit.
-                    if !counts_as_food(good) && stock > 0 && day > 0 {
-                        let used = (((day as f64 * rate).floor() - ((day - 1) as f64 * rate).floor()) as i64).min(stock);
-                        if used > 0 {
-                            self.holdings.get_mut(&person).unwrap().get_mut(good).unwrap().consume(used)?;
+                    let increment = if day == 0 { 0 } else {
+                        ((day as f64 * rate).floor() - ((day - 1) as f64 * rate).floor()) as i64
+                    };
+                    let due = self.livelihood.retail_shortfall(&person, good).saturating_add(increment);
+                    let used = self.person_holding_milli(&person, good).min(due);
+                    if used > 0 {
+                        self.holdings.get_mut(&person).unwrap().get_mut(good).unwrap().consume(used)?;
+                    }
+                    self.livelihood.set_retail_shortfall(&person, good, due - used);
+                    due - used
+                };
+                if due <= 0 || meal_budget.is_none() { continue; }
+                let can_shop_direct = self.holdings.get(&person).is_some_and(|stock| stock.contains_key(good))
+                    && self.work.booking(&person).is_none();
+                if can_shop_direct {
+                    // The livelihood settlement already buys and consumes familiar staples.
+                    if !food {
+                        if let Ok(price) = self.macro_economy.quote(unit, good, 1) {
+                            choices.push((!food, price, good.as_str(), None));
                         }
                     }
-                    if self.person_holding_milli(&person, good) != 0 { continue; }
-                    if let Some(offer) = self.counter_quote(shop, &person, good) {
-                        offers.push((offer.goods_centimes + offer.service_centimes, good));
+                } else {
+                    for shop in shops {
+                        if let Some(offer) = self.counter_quote(shop, &person, good) {
+                            choices.push((!food, offer.goods_centimes + offer.service_centimes, good, Some(shop)));
+                        }
                     }
                 }
-                if let Some((total, good)) = offers.into_iter().min_by_key(|(price, good)| (*price, *good)) {
-                    if self.ledger.default_account(&person).is_some_and(|account| account.available >= total) {
-                        self.place_counter_order(shop, &person, good, total)?;
-                    }
+            }
+            if self.counters.orders.values().any(|o| o.customer == person) { continue; }
+            choices.sort_unstable();
+            if let Some((_, price, good, shop)) = choices.into_iter()
+                .find(|(_, price, _, _)| meal_budget.is_some_and(|meal| *price <= available - meal)) {
+                if let Some(shop) = shop {
+                    self.place_counter_order(shop, &person, good, price)?;
+                } else {
+                    let market = &self.macro_economy.markets()[unit];
+                    let unit_price = market.commodities[good].price_centimes;
+                    let market = market.id.clone();
+                    self.buy_livelihood_stock(&person, &market, good, 1, unit_price, minute, false)?;
+                    self.holdings.get_mut(&person).unwrap().get_mut(good).unwrap().consume(1)?;
+                    let remaining = self.livelihood.retail_shortfall(&person, good) - 1;
+                    self.livelihood.set_retail_shortfall(&person, good, remaining);
                 }
             }
         }
@@ -309,11 +422,53 @@ impl InitialWorld {
                 return Err(invalid("柜台订单与客户准备金或授权不符。"));
             }
         }
-        if !holds.is_empty() || self.counters.closed.iter().any(|id| !self.organization(id).is_some_and(|org| org.is_merchant()))
-            || self.counters.recent.iter().any(|(id, outcomes)| !self.organization(id).is_some_and(|org| org.is_merchant()
-                && !outcomes.is_empty() && outcomes.iter().all(|(customer, r)| org.goods.contains(&r.good)
-                    && self.person(customer).is_some() && (0..=minute).contains(&r.minute) && r.result.len() <= 512))) {
+        if !holds.is_empty() || self.counters.closed.iter().any(|id| !self.organization(id).is_some_and(|org| org.is_merchant())) {
             return Err(invalid("柜台接单状态、结果与账本不符。"));
+        }
+        let mut settled_ids = BTreeSet::new();
+        for (shop, outcomes) in &self.counters.recent {
+            let org = self.organization(shop).filter(|org| org.is_merchant() && !outcomes.is_empty())
+                .ok_or_else(|| invalid("柜台结果缺少经营主体或客户。"))?;
+            let terms = self.work_opening.entry_job(&org.jobs[0]).ok_or_else(|| invalid("柜台结果缺少服务岗位。"))?;
+            let merchant = self.ledger.default_account(&terms.employer).ok_or_else(|| invalid("柜台结果缺少商号账户。"))?;
+            let market = self.macro_economy.markets().get(&org.unit).ok_or_else(|| invalid("柜台结果缺少市场。"))?;
+            for (customer, result) in outcomes {
+                let id = result.order_id;
+                let held = result.maximum_goods.checked_add(result.service_fee);
+                if id == 0 || id >= self.next_living_record || self.counters.orders.contains_key(&id) || !settled_ids.insert(id)
+                    || !org.goods.contains(&result.good) || self.person(customer).is_none()
+                    || !(0..=minute).contains(&result.minute) || result.minute % MINUTES_PER_DAY != 0
+                    || !(0..result.minute).contains(&result.placed)
+                    || !(1..=2).contains(&(result.minute / MINUTES_PER_DAY - result.placed / MINUTES_PER_DAY))
+                    || result.maximum_goods <= 0 || result.service_fee != terms.wage_per_hour
+                    || !held.is_some_and(|n| n <= crate::formal_ledger::MAX_AMOUNT) {
+                    return Err(invalid("已结柜台订单的编号、条款或日期不符。"));
+                }
+                let hold = format!("counter:{id}");
+                let record = format!("personal_life:{id}");
+                let purchase = format!("purchase:{record}");
+                let service = format!("service:{hold}");
+                let goods_minute = self.ledger.payment_minute(&purchase);
+                let fee_minute = self.ledger.payment_minute(&service);
+                match &result.settlement {
+                    CounterSettlement::Delivered { goods_paid } => {
+                        let payer = self.ledger.default_account(customer).ok_or_else(|| invalid("交货记录缺少客户账户。"))?;
+                        let seller = self.ledger.default_account(&market.id).ok_or_else(|| invalid("交货记录缺少市场实收账户。"))?;
+                        if !(1..=result.maximum_goods).contains(goods_paid) || goods_minute != Some(result.minute)
+                            || fee_minute != Some(result.minute)
+                            || !self.ledger.has_payment(&purchase, payer.account_id, seller.account_id, *goods_paid, "purchase", &record)
+                            || !self.ledger.has_payment(&service, payer.account_id, merchant.account_id, result.service_fee, "service_fee", &hold)
+                            || self.wages.completed_firm_work(&terms.employer, result.minute / MINUTES_PER_DAY).is_empty() {
+                            return Err(invalid("柜台交货与已完成班次、货款或代办费收据不符。"));
+                        }
+                    }
+                    CounterSettlement::Released { reason } => {
+                        if goods_minute.is_some() || fee_minute.is_some() || reason.trim().is_empty() || reason.len() > 512 {
+                            return Err(invalid("未交货订单存在扣款或缺少失败原因。"));
+                        }
+                    }
+                }
+            }
         }
         Ok(())
     }

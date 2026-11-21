@@ -253,6 +253,16 @@ impl Ledger {
                 && string(fields, "reference_id").ok() == Some(reference))
     }
 
+    pub(crate) fn material_receipt_count(&self) -> usize {
+        self.transaction_indexes.range("material:".to_owned()..)
+            .take_while(|(id, _)| id.starts_with("material:")).count()
+    }
+
+    pub(crate) fn payment_minute(&self, id: &str) -> Option<i64> {
+        let row = &self.transactions[*self.transaction_indexes.get(id)?];
+        Receipt::read(row, self.regional.is_some()).ok().map(|r| r.minute)
+    }
+
     pub(crate) fn freight_transaction_counts(&self) -> (usize, usize) {
         let count = |prefix: &str| self.transaction_indexes.range(prefix.to_owned()..)
             .take_while(|(id, _)| id.starts_with(prefix)).count();
