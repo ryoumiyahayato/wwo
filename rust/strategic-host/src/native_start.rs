@@ -949,8 +949,8 @@ fn describe_plan(world: &InitialWorld, plan: &Plan) -> Vec<String> {
     if plan.first_departure_minute() > plan.departure_minute() {
         lines.push(format!("预计 {} 发车", minute_text(plan.first_departure_minute())));
     }
-    if world.population_unit_at(&route.from) != world.population_unit_at(&route.to) {
-        lines.push("跨境手续待接入。".into());
+    if let (Some(origin), Some(destination)) = (world.population_unit_at(&route.from), world.population_unit_at(&route.to)) {
+        if origin != destination { lines.push("跨市场运输".into()); }
     }
     for leg in &route.legs {
         let layer = world.transport().evidence(&leg.segment_id).map_or("", |evidence| match evidence.layer {
