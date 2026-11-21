@@ -730,7 +730,7 @@ impl Builder {
             places_by_leaf.entry(leaf).or_default().push(hub.clone());
         }
         for root in opening.standalone_ids() {
-            let label = &sources.polities()[root].name_zh;
+            let label = opening.collective_scope_name(root).unwrap_or_else(|| &sources.polities()[root].name_zh);
             self.register(root, NodeKind::Identity, label, None, None);
             self.catalogue.population_nodes.insert(root.into());
             self.catalogue
@@ -1363,7 +1363,7 @@ mod tests {
         let opening = sources.historical_population.as_ref().unwrap();
         let leaf_counts = counts(&net, opening.partition_identities().map(|(id, _, _)| id));
         let root_counts = counts(&net, opening.standalone_ids());
-        assert_eq!(leaf_counts.iter().sum::<usize>(), 335);
+        assert_eq!(leaf_counts.iter().sum::<usize>(), 360);
         let attached = opening.residence_places().count();
         for (place, leaf) in opening.residence_places() {
             assert_eq!(net.population_at(place), Some(leaf));

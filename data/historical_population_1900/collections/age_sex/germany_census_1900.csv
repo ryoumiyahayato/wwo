@@ -1,0 +1,59 @@
+panel,label,role,age_min,age_max,both,male,female
+germany_1900_mecklenburg_schwerin,Einwohner überhaupt,total,,,607770,300320,307450
+germany_1900_mecklenburg_schwerin,unter 16,band,0,15,210831,107086,103745
+germany_1900_mecklenburg_schwerin,16 bis unter 30,band,16,29,135167,66447,68720
+germany_1900_mecklenburg_schwerin,30 bis unter 50,band,30,49,143300,70951,72349
+germany_1900_mecklenburg_schwerin,50 bis unter 70,band,50,69,94350,45006,49344
+germany_1900_mecklenburg_schwerin,70 und mehr,band,70,,24122,10830,13292
+germany_1900_sachsen_weimar,Einwohner überhaupt,total,,,362873,177065,185808
+germany_1900_sachsen_weimar,unter 16,band,0,15,130960,65662,65298
+germany_1900_sachsen_weimar,16 bis unter 30,band,16,29,83785,40667,43118
+germany_1900_sachsen_weimar,30 bis unter 50,band,30,49,84331,41070,43261
+germany_1900_sachsen_weimar,50 bis unter 70,band,50,69,51617,24023,27594
+germany_1900_sachsen_weimar,70 und mehr,band,70,,12180,5643,6537
+germany_1900_mecklenburg_strelitz,Einwohner überhaupt,total,,,102602,50852,51750
+germany_1900_mecklenburg_strelitz,unter 16,band,0,15,35666,18093,17573
+germany_1900_mecklenburg_strelitz,16 bis unter 30,band,16,29,22241,11243,10998
+germany_1900_mecklenburg_strelitz,30 bis unter 50,band,30,49,23614,11781,11833
+germany_1900_mecklenburg_strelitz,50 bis unter 70,band,50,69,16402,7680,8722
+germany_1900_mecklenburg_strelitz,70 und mehr,band,70,,4679,2055,2624
+germany_1900_bayern,Bevölkerung überhaupt,total,,,6176057,3028100,3147957
+germany_1900_bayern,Alter der Minderjährigkeit,band,0,20,2764611,1373751,1390860
+germany_1900_bayern,Alter der Großjährigkeit,band,21,,3411446,1654349,1757097
+germany_1900_preussen_age,Ortsanwesende Bevölkerung,total,,,34472509,,
+germany_1900_preussen_age,Über 0 bis 1,band,0,0,1023220,,
+germany_1900_preussen_age,1 bis 2,band,1,1,912404,,
+germany_1900_preussen_age,2 bis 3,band,2,2,917120,,
+germany_1900_preussen_age,3 bis 4,band,3,3,888682,,
+germany_1900_preussen_age,4 bis 5,band,4,4,872026,,
+germany_1900_preussen_age,5 bis 6,band,5,5,840221,,
+germany_1900_preussen_age,6 bis 7,band,6,6,820027,,
+germany_1900_preussen_age,7 bis 8,band,7,7,799602,,
+germany_1900_preussen_age,8 bis 9,band,8,8,770862,,
+germany_1900_preussen_age,9 bis 10,band,9,9,771723,,
+germany_1900_preussen_age,10 bis 11,band,10,10,746345,,
+germany_1900_preussen_age,11 bis 12,band,11,11,729818,,
+germany_1900_preussen_age,12 bis 13,band,12,12,743067,,
+germany_1900_preussen_age,13 bis 14,band,13,13,722301,,
+germany_1900_preussen_age,14 bis 15,band,14,14,700185,,
+germany_1900_preussen_age,15 bis 18,band,15,17,1990884,,
+germany_1900_preussen_age,18 bis 20,band,18,19,1259866,,
+germany_1900_preussen_age,20 bis 21,band,20,20,616626,,
+germany_1900_preussen_age,21 bis 25,band,21,24,2440676,,
+germany_1900_preussen_age,25 bis 30,band,25,29,2694058,,
+germany_1900_preussen_age,30 bis 35,band,30,34,2397447,,
+germany_1900_preussen_age,35 bis 40,band,35,39,2121053,,
+germany_1900_preussen_age,40 bis 45,band,40,44,1896104,,
+germany_1900_preussen_age,45 bis 50,band,45,49,1590272,,
+germany_1900_preussen_age,50 bis 55,band,50,54,1396769,,
+germany_1900_preussen_age,55 bis 60,band,55,59,1195560,,
+germany_1900_preussen_age,60 bis 65,band,60,64,970660,,
+germany_1900_preussen_age,65 bis 70,band,65,69,708526,,
+germany_1900_preussen_age,70 bis 75,band,70,74,476416,,
+germany_1900_preussen_age,75 bis 80,band,75,79,288331,,
+germany_1900_preussen_age,80 bis 85,band,80,84,124077,,
+germany_1900_preussen_age,85 bis 90,band,85,89,34255,,
+germany_1900_preussen_age,90 bis 95,band,90,94,5721,,
+germany_1900_preussen_age,95 bis 100,band,95,99,829,,
+germany_1900_preussen_age,Über 100 Jahre,band,100,,35,,
+germany_1900_preussen_age,Unbekannt,band,,,6741,,

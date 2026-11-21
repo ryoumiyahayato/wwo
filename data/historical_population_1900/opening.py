@@ -138,6 +138,29 @@ def zanzibar_protectorate(observations):
     )
 
 
+def bosnia_herzegovina(observations):
+    unit = "statistical_area:bosnia_herzegovina_1900"
+    before = next(row for row in observations if row["unit_id"] == unit and row["date"] == "1895-04-22"
+                  and row["source_id"] == "bosnia_herzegovina_demography_2024")
+    after = next(row for row in observations if row["unit_id"] == unit and row["date"] == "1910-10-10"
+                 and row["source_id"] == "bosnia_herzegovina_admin_population_1910")
+    start, end = (date.fromisoformat(row["date"]) for row in (before, after))
+    fraction = Fraction((date.fromisoformat(DATE) - start).days, (end - start).days)
+    initial, final = (row["population_value"] for row in (before, after))
+    return dict(
+        unit_id=unit, date=DATE, population_value=round(initial + (final - initial) * fraction),
+        source_id=after["source_id"], source_observations=[before["record_id"], after["record_id"]],
+        locator=before["locator"] + " / " + after["locator"],
+        endpoint_dates=[before["date"], after["date"]], country_endpoint_values=[initial, final],
+        partition_source="collections/bosnia_herzegovina_population/observations.jsonl",
+        method=f"Linear daily interpolation between civilian present-population census controls, elapsed fraction {fraction}.",
+        scope="Common province total for occupied Bosnia and Herzegovina. The censuses exclude active military from this civilian series. Novi Pazar is outside the civil administration. The map displays two units; no separate population is assigned to either one.",
+        uncertainty_kind="No statistical interval. Reported province area changes from 51,246 to 51,200 square kilometres. Enumeration and temporal model error are unquantified. No district or map-boundary equivalence is assumed.",
+        collective_scope=dict(name="波斯尼亚和黑塞哥维那占领区合计", polity_ids=["cshapes_gw_3461", "cshapes_gw_3462"]),
+        units=[],
+    )
+
+
 def add_java_and_madura(group, observations):
     unit = "java_madoera_colonial_population"
     first, last = sorted((r for r in observations if r["unit_id"] == unit), key=lambda r: r["date"])
@@ -208,6 +231,8 @@ def groups(observations, version=1):
         series_files.append("opening_series_v2.tsv")
     if version >= 5:
         series_files.append("opening_series_v5.tsv")
+    if version >= 6:
+        series_files.append("opening_series_v6.tsv")
     for file in series_files:
         with (HERE / file).open(encoding="utf8") as f:
             for decision in csv.DictReader(f, delimiter="\t"):
@@ -274,6 +299,9 @@ def groups(observations, version=1):
         if zanzibar["unit_id"] in result:
             raise ValueError("duplicate Zanzibar population control")
         result[zanzibar["unit_id"]] = zanzibar
+    if version >= 6:
+        bosnia = bosnia_herzegovina(observations)
+        result[bosnia["unit_id"]] = bosnia
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

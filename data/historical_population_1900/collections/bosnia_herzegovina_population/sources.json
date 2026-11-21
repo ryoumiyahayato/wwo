@@ -1,0 +1,36 @@
+[
+  {
+    "id": "bosnia_herzegovina_demography_2024",
+    "title": "Demography 2024",
+    "publisher": "Agency for Statistics of Bosnia and Herzegovina, Sarajevo, 2025.",
+    "url": "https://bhas.gov.ba/data/Publikacije/Bilteni/2025/DEM_00_2024_TB_1_BS.pdf#page=10",
+    "locator": "Printed p. 17 (PDF p. 10), Table 1, Population of Bosnia and Herzegovina according to Censuses, 1895 and 1910 rows.",
+    "rights": "Population counts and area figures transcribed as numerical facts. The bulletin and scans remain with their publishers or archives.",
+    "note": "The agency groups the 1895 and 1910 civilian counts in one state census series. The census area is 51,246 km² in 1895 and 51,200 km² in 1910. The 1896 census volume is catalogued by the Austrian National Library. The official 1912 census report introduction, printed pp. iv–v, confirms that the 1895 census used presence in the locality and a common household list including non-locals.",
+    "original_census_catalogue": "https://viewer.onb.ac.at/131FD8C8",
+    "original_method_cross_check": "https://archive.org/download/popis-stanovnistva-bih-1910/Popis-Stanovnistva-Bih-1910kn_text.pdf#page=5",
+    "boundary_locator": "Treaty of Berlin (1878), Article XXV. Bosnia and Herzegovina formed the administered territory. Novi-Pazar remained under Ottoman administration with a separate right to station Austro-Hungarian troops.",
+    "boundary_url": "https://sourcebooks.fordham.edu/mod/1878berlin.asp",
+    "map_scope": "The opening CShapes Bosnia and Herzegovina polygons together cover 51,534.6 km² as reported by the map catalog. Their joint association approximates the reported census territory. The reasons for the small differences between the two published census areas and map area are unresolved."
+  },
+  {
+    "id": "bosnia_herzegovina_admin_population_1910",
+    "title": "Verzeichnis der Verwaltungsbezirke, Flächeninhalt und Bevölkerung 1910",
+    "publisher": "Austrian Academy of Sciences Press, statistical appendix to Die Habsburgermonarchie 1848–1918.",
+    "url": "https://austriaca.at/0xc1aa5572%200x002301e7.pdf#page=64",
+    "locator": "PDF p. 64, BOSNA I HERCEGOVINA main row. The 1910 Bosnian census is the underlying source. The Academy reprints the territory total in the summary on PDF p. 5.",
+    "rights": "Population counts and area figures transcribed as numerical facts. The table and the original scan remain with their publishers or archives.",
+    "note": "The separate locally present population, civilian and active military columns give 1,931,802 = 1,898,044 + 33,758. The row also lists 6,581 locally present foreign-state nationals as a cross-classification. The source reports a territory area of 51,199 km². The Agency for Statistics of Bosnia and Herzegovina, Demography 2024, printed p. 17, independently republishes the same civilian total and sex split.",
+    "original_census": "https://archive.org/details/popis-stanovnistva-bih-1910"
+  },
+  {
+    "id": "bosnia_herzegovina_bosanska_vila_1896",
+    "title": "Bosanska vila, no. 13, review of the 1895 census",
+    "publisher": "Bosanska vila, Sarajevo, 1896.",
+    "url": "https://www.scribd.com/document/737258974/BVV-13",
+    "locator": "Printed p. 214, Stanovništvo Bosne i Hercegovine notice on the 1896 published census results.",
+    "rights": "Two numerical facts transcribed from the contemporary notice. The scan remains with its host.",
+    "note": "The notice reports 1,591,036 total and 22,944 active military. Their difference agrees with the modern national statistical agency’s civilian count. The original census edition is catalogued by the Austrian National Library. Its national aggregate page has not been verified directly for these two military-inclusive control values.",
+    "original_census_catalogue": "https://viewer.onb.ac.at/131FD8C8"
+  }
+]

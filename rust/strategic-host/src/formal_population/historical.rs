@@ -2,7 +2,7 @@ use super::MAX_POPULATION;
 use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{collections::BTreeMap, io::{self, BufRead, BufReader}, sync::OnceLock};
+use std::{collections::{BTreeMap, BTreeSet}, io::{self, BufRead, BufReader}, sync::OnceLock};
 
 const SOURCE: &[u8] = include_bytes!("../../../../data/alpha/historical_world_economy_1900/countries_compact.json");
 const SCHEMA: &str = "historical_world_economy_1900_compact_country_table_v1";
@@ -61,6 +61,9 @@ pub struct PopulationArchive {
     pub geographies: Vec<Value>,
     pub dated_population: Vec<Value>,
     pub dated_structure: Vec<Value>,
+    /// Research candidates can differ from the catalogue unit in scope or date.
+    pub candidate_research_population: Vec<Value>,
+    pub sources: Vec<Value>,
 }
 
 /// Historical evidence can be queried independently of whether a place has an
@@ -69,8 +72,10 @@ pub fn population_archive(unit: &str) -> io::Result<Option<PopulationArchive>> {
     let geography = include_bytes!("../../../../data/historical_population_1900/geography_1900.jsonl.gz");
     let population = include_bytes!("../../../../data/historical_population_1900/population_1900.jsonl.gz");
     let structure = include_bytes!("../../../../data/historical_population_1900/demography_1900.jsonl.gz");
+    let sources = include_bytes!("../../../../data/historical_population_1900/sources.json");
     let mut archive = PopulationArchive {
         geographies: Vec::new(), dated_population: Vec::new(), dated_structure: Vec::new(),
+        candidate_research_population: Vec::new(), sources: Vec::new(),
     };
     for row in catalogue_rows(geography) {
         let row = row?;
@@ -78,20 +83,35 @@ pub fn population_archive(unit: &str) -> io::Result<Option<PopulationArchive>> {
             archive.geographies.push(row);
         }
     }
+    let dated_units = linked_units(&archive.geographies, "historical_observation_ids");
+    let research_units = linked_units(&archive.geographies, "study_candidates");
     for row in catalogue_rows(population) {
         let row = row?;
-        if row["unit_id"].as_str() == Some(unit) || row["wwo_id"].as_str() == Some(unit) {
+        let Some(source_unit) = row["unit_id"].as_str() else { continue; };
+        if source_unit == unit || row["wwo_id"].as_str() == Some(unit) || dated_units.contains(source_unit) {
             archive.dated_population.push(row);
+        } else if research_units.contains(source_unit) {
+            archive.candidate_research_population.push(row);
         }
     }
     for row in catalogue_rows(structure) {
         let row = row?;
-        if row["unit_id"].as_str() == Some(unit) {
+        if row["unit_id"].as_str().is_some_and(|source_unit| source_unit == unit || dated_units.contains(source_unit)) {
             archive.dated_structure.push(row);
         }
     }
+    let source_ids: BTreeSet<_> = archive.dated_population.iter()
+        .chain(&archive.dated_structure).chain(&archive.candidate_research_population)
+        .filter_map(|row| row["source_id"].as_str()).collect();
+    archive.sources = serde_json::from_slice::<Vec<Value>>(sources)?.into_iter()
+        .filter(|row| row["id"].as_str().is_some_and(|id| source_ids.contains(id))).collect();
     Ok((!archive.geographies.is_empty() || !archive.dated_population.is_empty()
         || !archive.dated_structure.is_empty()).then_some(archive))
+}
+
+fn linked_units<'a>(geographies: &'a [Value], field: &str) -> BTreeSet<&'a str> {
+    geographies.iter().filter_map(|row| row[field].as_array()).flatten()
+        .filter_map(Value::as_str).collect()
 }
 
 fn catalogue_rows(bytes: &[u8]) -> impl Iterator<Item = io::Result<Value>> + '_ {

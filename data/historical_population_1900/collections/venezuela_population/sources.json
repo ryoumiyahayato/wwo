@@ -1,0 +1,64 @@
+[
+  {
+    "id": "venezuela_1904_pan_american_handbook",
+    "title": "N. Veloz Goiticoa, Venezuela: Geographical Sketch, Natural Resources, Laws, Economic Conditions, Actual Development, Prospects of Future Growth",
+    "publisher": "International Bureau of the American Republics. Government Printing Office, Washington, 1904.",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/8/88/Venezuela._Geographical_sketch%2C_natural_resources%2C_laws%2C_economic_conditions%2C_actual_development%2C_prospects_of_future_growth_%28IA_venezuelageograp00inte%29.pdf",
+    "locator": "Printed p. 14, Population from 1810 to 1904, rows 1891–1904. Printed pp. 7–10, frontier awards. Printed pp. 11 and 15, territorial area and population comparison.",
+    "rights": "Selected historical numerical facts and bibliographic references from the 1904 publication.",
+    "boundary_sources": [
+      {
+        "url": "https://legal.un.org/riaa/cases/vol_XXVIII/331-340.pdf",
+        "locator": "Reports of International Arbitral Awards, volume XXVIII, Award regarding the Boundary between the Colony of British Guiana and the United States of Venezuela, 3 October 1899, pp. 331–340."
+      }
+    ],
+    "boundary_note": "The handbook reproduces the 1899 British Guiana award and the 1891 Colombia award. Its area comparison still takes 1,552,741 km² from the 1896 Venezuelan yearbook. The opening geometry gw_101 records 910,834 km². The population table does not say whether its scope follows the awards or provide affected-area counts. The area figures cannot be used to adjust population."
+  },
+  {
+    "id": "venezuela_1968_celade_miro",
+    "title": "Carmen A. Miró, La población de América Latina en el siglo XX",
+    "publisher": "Centro Latinoamericano de Demografía (CELADE), Serie A, no. 48, September 1968. Digitized by the ECLAC Digital Repository.",
+    "url": "https://repositorio.cepal.org/server/api/core/bitstreams/9d481d76-8488-41d5-822e-7cb64dd1b85f/content",
+    "locator": "Printed p. 2, Cuadro 1, América Latina: población total, 1900–1980, Venezuela row and source note. The note attributes the 1900 figure to CELADE and the later figures to the United Nations 1963 assessment.",
+    "rights": "Selected historical numerical facts and bibliographic references. No scan, full table or original prose reproduced."
+  },
+  {
+    "id": "venezuela_ft_scope",
+    "title": "Giovanni Federico and Antonio Tena-Junguito, World Population 1800–1938",
+    "publisher": "Instituto Figuerola, Universidad Carlos III de Madrid, Working Papers in Economic History 2025-1.",
+    "url": "https://hdl.handle.net/10016/45843",
+    "locator": "Appendix I, Americas, Venezuela. For 1820–1913 the authors select Bulmer-Thomas's lower annual estimates rather than adopting the historical census levels as given in Baptista.",
+    "rights": "Methodology paraphrased. The workbook is CC BY 4.0. Attribution: Giovanni Federico and Antonio Tena-Junguito, Federico-Tena World Population Historical Database, e-cienciaDatos, V5.",
+    "existing_observations": {
+      "collection": "world",
+      "source_id": "ft_world_v5",
+      "unit_id": "ft_venezuela",
+      "workbook_url": "https://doi.org/10.21950/3SK54X",
+      "workbook_locator": "Country series!CP103 and CP104",
+      "source_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "source_values": [
+        1937000,
+        1964000
+      ],
+      "fraction": "184/365",
+      "opening_date": "1900-01-01",
+      "opening_value": 1950611,
+      "population_lower": 1633636,
+      "population_upper": 2267586,
+      "quality": "D",
+      "uncertainty_kind": "Interpolated sensitivity limits from the FT series."
+    },
+    "opening_comparison": {
+      "root_id": "venezuela_1900",
+      "status": "legacy_only",
+      "legacy_value": 2400000,
+      "pan_american_1900_minus_celade_1900": 213671,
+      "pan_american_1900_minus_ft_1900_midyear": 593671,
+      "celade_1900_minus_ft_1900_midyear": 380000,
+      "decision": "Retain the legacy value as the opening control. The publication date and original geographic scope of that value are undocumented. The three source series are alternative national totals and overlap. The handbook series omits immigration in 1899–1904 and has no verified match to the opening perimeter. CELADE reports a year-only estimate with no frontier or resident-category detail. FT follows a different reconstruction with a lower starting level. No overlap counts allow a territorial subtraction, and none of the sources supplies a verified 1900-01-01 control."
+    }
+  }
+]

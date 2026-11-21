@@ -59,14 +59,15 @@
         "cuba_occupation_1900",
         "dominion_of_canada",
         "mexican_republic",
+        "republic_of_colombia_1900",
         "united_states_1900",
         "uruguay_1900"
       ],
-      "production_people": 123984199,
-      "production_pct_of_regional_research_estimate": 85.485,
-      "people_with_opening_subdivision": 111228173,
-      "research_only_units": 30,
-      "research_only_people": 19765044
+      "production_people": 128108928,
+      "production_pct_of_regional_research_estimate": 88.329,
+      "people_with_opening_subdivision": 115352902,
+      "research_only_units": 28,
+      "research_only_people": 15640315
     },
     "Asia": {
       "statistical_units": 33,
@@ -124,11 +125,12 @@
         "kingdom_of_spain",
         "principality_of_bulgaria",
         "russian_empire",
+        "statistical_area:bosnia_herzegovina_1900",
         "sweden_norway_union",
         "swiss_confederation"
       ],
-      "production_people": 407154320,
-      "production_pct_of_regional_research_estimate": 97.139,
+      "production_people": 408822583,
+      "production_pct_of_regional_research_estimate": 97.537,
       "people_with_opening_subdivision": 332407293,
       "research_only_units": 9,
       "research_only_people": 10103353
@@ -1195,9 +1197,9 @@
       "candidate_polity_ids": [
         "republic_of_colombia_1900"
       ],
-      "comparison_id": null,
-      "opening_disposition": "research_only",
-      "note": "Source series separates Panama before independence."
+      "comparison_id": "colombia_with_panama",
+      "opening_disposition": "scope_unconfirmed",
+      "note": "Sum the nonoverlapping Federico–Tena Colombia and Panama series under the 1900 Republic of Colombia. The intergovernmental border and island details cannot be reconciled to the later statistical estimates. No population is assigned to a disputed section or to a separate Canal Zone."
     },
     {
       "unit_id": "ft_costa_rica",
@@ -1563,9 +1565,9 @@
       "candidate_polity_ids": [
         "republic_of_colombia_1900"
       ],
-      "comparison_id": null,
-      "opening_disposition": "research_only",
-      "note": "Part of Colombia on opening date; separately estimated."
+      "comparison_id": "colombia_with_panama",
+      "opening_disposition": "scope_unconfirmed",
+      "note": "Sum the nonoverlapping Federico–Tena Colombia and Panama series under the 1900 Republic of Colombia. The intergovernmental border and island details cannot be reconciled to the later statistical estimates. No population is assigned to a disputed section or to a separate Canal Zone."
     },
     {
       "unit_id": "ft_paraguay",
@@ -2390,8 +2392,8 @@
         "cshapes_gw_3462"
       ],
       "comparison_id": "austria_hungary",
-      "opening_disposition": "different_extent",
-      "note": "The opening covers the Austrian and Hungarian halves. The research column includes Bosnia and Herzegovina; the difference also reflects different sources and timing. No occupied-territory population is inferred by subtraction."
+      "opening_disposition": "scope_unconfirmed",
+      "note": "The opening combines the Austrian and Hungarian halves with a separate civilian control for occupied Bosnia and Herzegovina. The research column covers all three areas. Census military coverage, interpolation dates and exact boundaries differ across the sources. No occupied-territory population is inferred by subtraction."
     },
     {
       "unit_id": "ft_belgium",
@@ -3026,20 +3028,21 @@
     {
       "comparison_id": "austria_hungary",
       "opening_root_ids": [
-        "austria_hungary"
+        "austria_hungary",
+        "statistical_area:bosnia_herzegovina_1900"
       ],
       "research_unit_ids": [
         "ft_austria_hungary"
       ],
-      "scope_relation": "different_extent",
-      "note": "The opening covers the Austrian and Hungarian halves. The research column includes Bosnia and Herzegovina; the difference also reflects different sources and timing. No occupied-territory population is inferred by subtraction.",
+      "scope_relation": "scope_unconfirmed",
+      "note": "The opening combines the Austrian and Hungarian halves with a separate civilian control for occupied Bosnia and Herzegovina. The research column covers all three areas. Census military coverage, interpolation dates and exact boundaries differ across the sources. No occupied-territory population is inferred by subtraction.",
       "research_regions": [
         "Europe"
       ],
       "research_people": 46762027,
-      "documented_opening_people": 45000882,
-      "opening_people_including_retained_balances": 45000882,
-      "research_minus_documented": 1761145
+      "documented_opening_people": 46669145,
+      "opening_people_including_retained_balances": 46669145,
+      "research_minus_documented": 92882
     },
     {
       "comparison_id": "basutoland",
@@ -3437,6 +3440,25 @@
       "documented_opening_people": 200000,
       "opening_people_including_retained_balances": 200000,
       "research_minus_documented": -1196
+    },
+    {
+      "comparison_id": "colombia_with_panama",
+      "opening_root_ids": [
+        "republic_of_colombia_1900"
+      ],
+      "research_unit_ids": [
+        "ft_colombia",
+        "ft_panama"
+      ],
+      "scope_relation": "scope_unconfirmed",
+      "note": "Sum the nonoverlapping Federico–Tena Colombia and Panama series under the 1900 Republic of Colombia. The intergovernmental border and island details cannot be reconciled to the later statistical estimates. No population is assigned to a disputed section or to a separate Canal Zone.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 4124729,
+      "documented_opening_people": 4124729,
+      "opening_people_including_retained_balances": 4124729,
+      "research_minus_documented": 0
     },
     {
       "comparison_id": "argentina_1900",
@@ -4065,6 +4087,10 @@
         "people": -209901
       },
       {
+        "unit_id": "republic_of_colombia_1900",
+        "people": 124729
+      },
+      {
         "unit_id": "sultanate_of_zanzibar",
         "people": 0
       },
@@ -4085,7 +4111,7 @@
         "people": -8679
       }
     ],
-    "net_replacements": -7085315,
+    "net_replacements": -6960586,
     "added_opening_accounts": [
       {
         "unit_id": "beylicate_of_tunis",
@@ -4178,10 +4204,14 @@
       {
         "unit_id": "iceland_under_denmark",
         "people": 78086
+      },
+      {
+        "unit_id": "statistical_area:bosnia_herzegovina_1900",
+        "people": 1668263
       }
     ],
-    "net_additions": 59664513,
-    "authoritative_opening_population": 1463599198,
+    "net_additions": 61332776,
+    "authoritative_opening_population": 1465392190,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4221,25 +4251,24 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1031671483,
-    "untouched_legacy_population": 105880000,
+    "documented_opening_population": 1037464475,
+    "untouched_legacy_population": 101880000,
     "retained_unlocated_population": 326047715,
-    "authoritative_opening_population": 1463599198,
-    "published_minus_documented_opening": 563402765,
+    "authoritative_opening_population": 1465392190,
+    "published_minus_documented_opening": 557609773,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
-      "research_only_component_people": 228969435,
+      "research_only_component_people": 224844706,
       "comparisons_by_scope": {
         "comparable_extent": 1943838,
-        "different_extent": 1761145,
+        "scope_unconfirmed": 86843,
         "partial_extent": 330734384,
-        "scope_unconfirmed": -6039,
         "adopted_research_series": 0
       },
       "opening_without_benchmark_link": 0,
-      "untouched_legacy_controls": -105880000,
+      "untouched_legacy_controls": -101880000,
       "unlocated_balances_under_retained_controls": -326047715
     },
-    "published_minus_authoritative_opening": 131475050
+    "published_minus_authoritative_opening": 129682058
   }
 }

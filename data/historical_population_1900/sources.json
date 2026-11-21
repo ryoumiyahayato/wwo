@@ -112,6 +112,46 @@
     "collection": "age_sex"
   },
   {
+    "id": "de_reich_census_1900_state_ages",
+    "title": "Die Volkszählung am 1. Dezember 1900 im Deutschen Reich",
+    "publisher": "Kaiserliches Statistisches Amt, Berlin, 1903",
+    "url": "https://catalogue.bnf.fr/ark:/12148/cb336479522",
+    "locator": "Statistik des Deutschen Reichs 151, Table XVIII, printed pp. 270–271, column 138, Gesammtbevölkerung",
+    "rights": "Historical published facts transcribed. Universitätsbibliothek Mannheim marks the digitized collection Public Domain Mark 1.0.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://digi.bib.uni-mannheim.de/fileadmin/gv/364900261_19000151/pdf/364900261_0278.pdf",
+      "https://digi.bib.uni-mannheim.de/fileadmin/gv/364900261_19000151/pdf/364900261_0279.pdf"
+    ],
+    "collection": "age_sex"
+  },
+  {
+    "id": "de_bavaria_yearbook_1903_ages",
+    "title": "Statistisches Jahrbuch für das Königreich Bayern, 1903",
+    "publisher": "Königlich Bayerisches Statistisches Bureau, Munich, 1903",
+    "url": "https://www.statistischebibliothek.de/mir/receive/BYHeft_mods_00012794",
+    "locator": "II.A.2.g.3, printed p. 27, Minderjährigkeit and Großjährigkeit. All-age control II.A.2.b, printed p. 14",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BYHeft_derivate_00007257/Statistisches%20Jahrbuch%201903.pdf"
+    ],
+    "collection": "age_sex"
+  },
+  {
+    "id": "de_prussia_yearbook_1904_ages",
+    "title": "Statistisches Jahrbuch für den Preussischen Staat, 1904",
+    "publisher": "Königliches Statistisches Bureau, Berlin, 1905",
+    "url": "https://sbc.org.pl/de/dlibra/publication/342107/edition/323213",
+    "locator": "I.B.8, printed p. 7, column 2, Ortsanwesende überhaupt",
+    "rights": "Historical published facts transcribed. Source page links only.",
+    "raw_path": "germany_census_1900.csv",
+    "table_urls": [
+      "https://webapp.sbc.org.pl/Content/323213/PDF/ii149234-1904-00-0001.pdf?handler=pdf"
+    ],
+    "collection": "age_sex"
+  },
+  {
     "id": "algeria_1901_zimmermann_preliminary",
     "title": "Maurice Zimmermann, Afrique: Recensement de l’Algérie",
     "publisher": "Annales de Géographie, vol. 11, no. 55 (1902). Digitized by Persée.",
@@ -422,6 +462,43 @@
     "collection": "austria_hungary"
   },
   {
+    "id": "bosnia_herzegovina_demography_2024",
+    "title": "Demography 2024",
+    "publisher": "Agency for Statistics of Bosnia and Herzegovina, Sarajevo, 2025.",
+    "url": "https://bhas.gov.ba/data/Publikacije/Bilteni/2025/DEM_00_2024_TB_1_BS.pdf#page=10",
+    "locator": "Printed p. 17 (PDF p. 10), Table 1, Population of Bosnia and Herzegovina according to Censuses, 1895 and 1910 rows.",
+    "rights": "Population counts and area figures transcribed as numerical facts. The bulletin and scans remain with their publishers or archives.",
+    "note": "The agency groups the 1895 and 1910 civilian counts in one state census series. The census area is 51,246 km² in 1895 and 51,200 km² in 1910. The 1896 census volume is catalogued by the Austrian National Library. The official 1912 census report introduction, printed pp. iv–v, confirms that the 1895 census used presence in the locality and a common household list including non-locals.",
+    "original_census_catalogue": "https://viewer.onb.ac.at/131FD8C8",
+    "original_method_cross_check": "https://archive.org/download/popis-stanovnistva-bih-1910/Popis-Stanovnistva-Bih-1910kn_text.pdf#page=5",
+    "boundary_locator": "Treaty of Berlin (1878), Article XXV. Bosnia and Herzegovina formed the administered territory. Novi-Pazar remained under Ottoman administration with a separate right to station Austro-Hungarian troops.",
+    "boundary_url": "https://sourcebooks.fordham.edu/mod/1878berlin.asp",
+    "map_scope": "The opening CShapes Bosnia and Herzegovina polygons together cover 51,534.6 km² as reported by the map catalog. Their joint association approximates the reported census territory. The reasons for the small differences between the two published census areas and map area are unresolved.",
+    "collection": "bosnia_herzegovina_population"
+  },
+  {
+    "id": "bosnia_herzegovina_admin_population_1910",
+    "title": "Verzeichnis der Verwaltungsbezirke, Flächeninhalt und Bevölkerung 1910",
+    "publisher": "Austrian Academy of Sciences Press, statistical appendix to Die Habsburgermonarchie 1848–1918.",
+    "url": "https://austriaca.at/0xc1aa5572%200x002301e7.pdf#page=64",
+    "locator": "PDF p. 64, BOSNA I HERCEGOVINA main row. The 1910 Bosnian census is the underlying source. The Academy reprints the territory total in the summary on PDF p. 5.",
+    "rights": "Population counts and area figures transcribed as numerical facts. The table and the original scan remain with their publishers or archives.",
+    "note": "The separate locally present population, civilian and active military columns give 1,931,802 = 1,898,044 + 33,758. The row also lists 6,581 locally present foreign-state nationals as a cross-classification. The source reports a territory area of 51,199 km². The Agency for Statistics of Bosnia and Herzegovina, Demography 2024, printed p. 17, independently republishes the same civilian total and sex split.",
+    "original_census": "https://archive.org/details/popis-stanovnistva-bih-1910",
+    "collection": "bosnia_herzegovina_population"
+  },
+  {
+    "id": "bosnia_herzegovina_bosanska_vila_1896",
+    "title": "Bosanska vila, no. 13, review of the 1895 census",
+    "publisher": "Bosanska vila, Sarajevo, 1896.",
+    "url": "https://www.scribd.com/document/737258974/BVV-13",
+    "locator": "Printed p. 214, Stanovništvo Bosne i Hercegovine notice on the 1896 published census results.",
+    "rights": "Two numerical facts transcribed from the contemporary notice. The scan remains with its host.",
+    "note": "The notice reports 1,591,036 total and 22,944 active military. Their difference agrees with the modern national statistical agency’s civilian count. The original census edition is catalogued by the Austrian National Library. Its national aggregate page has not been verified directly for these two military-inclusive control values.",
+    "original_census_catalogue": "https://viewer.onb.ac.at/131FD8C8",
+    "collection": "bosnia_herzegovina_population"
+  },
+  {
     "id": "uk_general_census_report_1901",
     "title": "Census of England and Wales, 1901. General Report with Appendices",
     "publisher": "General Register Office / HMSO (London, 1904)",
@@ -590,6 +667,80 @@
     "locator": "2024_Gaz_place_national.zip, GEOID, INTPTLAT, INTPTLONG. Place codes are cited in the individual quality notes.",
     "rights": "US federal government geographic data. Used for coordinate comparisons only.",
     "collection": "cities_europe"
+  },
+  {
+    "id": "colombia_panama_1900_celade_miro",
+    "title": "Carmen A. Miró, La población de América Latina en el siglo XX",
+    "publisher": "Centro Latinoamericano de Demografía (CELADE), Serie A, no. 48, September 1968. Digitized by the ECLAC Digital Repository.",
+    "url": "https://repositorio.cepal.org/server/api/core/bitstreams/9d481d76-8488-41d5-822e-7cb64dd1b85f/content",
+    "locator": "Printed p. 2, Cuadro 1, América Latina: población total, 1900–1980, 1900 column, Colombia and Panamá rows. The source note identifies both as CELADE estimates and the heading gives the unit as thousands.",
+    "rights": "Two historical numerical facts and bibliographic references. No scan, full table or original prose reproduced.",
+    "edition_note": "The checked copy is dated 1968. Federico and Tena-Junguito cite the 1971 issue of the same Serie A no. 48. Both transcribed values match the two 1900 workbook cells.",
+    "collection": "colombia_panama_population"
+  },
+  {
+    "id": "colombia_panama_ft_scope",
+    "title": "Giovanni Federico and Antonio Tena-Junguito, World Population 1800–1938",
+    "publisher": "Instituto Figuerola, Universidad Carlos III de Madrid, Working Papers in Economic History 2025-1.",
+    "url": "https://hdl.handle.net/10016/45843",
+    "locator": "Appendix I, Americas, Colombia and Panama paragraphs. The former cites CELADE for the separate 1900 figures. The latter says the Colombia series excludes Panama from 1800 and cites CELADE for the 1900 Panama estimate.",
+    "rights": "Original methodological statement paraphrased. The cited workbook is CC BY 4.0. Attribution: Giovanni Federico and Antonio Tena-Junguito, Federico-Tena World Population Historical Database, e-cienciaDatos, V5.",
+    "workbook_url": "https://doi.org/10.21950/3SK54X",
+    "boundary_sources": [
+      {
+        "url": "https://history.state.gov/historicaldocuments/frus1906p1/d368",
+        "locator": "United States correspondence, enclosure of 4 November 1903. Identifies the former Colombian Department of Panama as forming the new republic."
+      },
+      {
+        "url": "https://history.state.gov/historicaldocuments/frus1910/d856",
+        "locator": "Text of the Loubet award of 11 September 1900. The award postdates the opening and addresses the Costa Rica frontier and island claims."
+      },
+      {
+        "url": "https://biblioteca.dane.gov.co/media/libros/BOL_89-90_1935-32.PDF",
+        "locator": "Contraloría General de la República, Boletín de Estadística no. 89–90, printed p. VIII. Its national population table begins in 1905 and excludes Panama. Notes flag later boundary changes with Brazil and Peru without population counts for the affected areas."
+      }
+    ],
+    "reconstruction_candidate": {
+      "root_id": "republic_of_colombia_1900",
+      "date": "1900-01-01",
+      "nominal_endpoint_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "fraction": "184/365",
+      "units": [
+        {
+          "research_id": "ft_colombia",
+          "locator": "Country series!BH103 and BH104",
+          "reported_thousands": [
+            3781.100578559543,
+            3825
+          ],
+          "opening_population": 3803231,
+          "quality": "C"
+        },
+        {
+          "research_id": "ft_panama",
+          "locator": "Country series!CC103 and CC104",
+          "reported_thousands": [
+            319.97151670670337,
+            323
+          ],
+          "opening_population": 321498,
+          "quality": "D"
+        }
+      ],
+      "method": "Interpolate each source series in thousands then convert to persons and round once per series. Sum the rounded parts.",
+      "population_value": 4124729,
+      "population_lower": 3760054,
+      "population_upper": 4489405,
+      "uncertainty_kind": "Sum of the source-series sensitivity limits. No coverage interval calibrated for the combined opening geography.",
+      "legacy_value": 4000000,
+      "replacement_minus_legacy": 124729,
+      "opening_status": "selected_as_v6_polity_level_proxy",
+      "scope": "The two source series are mutually exclusive at country-series level. Recombine under one political root. Panama and the later Canal Zone must not be standalone opening populations. The CELADE table has no frontier or island breakdown. Territorial exactness is unverified for the western Panama frontier and offshore islands, and the Putumayo/Leticia frontier. No map cell allocations follow from these totals."
+    },
+    "collection": "colombia_panama_population"
   },
   {
     "id": "jersey_census_1901",
@@ -769,6 +920,107 @@
     "locator": "Table I, p. 1, census years 1897 and 1907.",
     "rights": "Census facts transcribed with attribution; original paper linked.",
     "collection": "eastern"
+  },
+  {
+    "id": "ecuador_cevallos_1889",
+    "title": "Pedro Fermín Cevallos, Resumen de la historia del Ecuador desde su origen hasta 1845, vol. VI, Geografía del Ecuador",
+    "publisher": "Imprenta de la Nación, Guayaquil, 1889. Biblioteca Nacional del Ecuador Eugenio Espejo digitization.",
+    "url": "https://es.scribd.com/document/456165498/FR1-L-000137-Cevallos-Historia-V3-1-pdf",
+    "locator": "Printed pp. 31–33, Población, including the total and 16 printed component rows on p. 32. Printed p. 229, legislative assignment of the Galápagos Islands to Guayas.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "references": [
+      {
+        "url": "https://books.google.com.ec/books?id=S9aEBKcx5R4C",
+        "locator": "Digitization and bibliographic record for vol. VI, published 1889."
+      },
+      {
+        "url": "https://archive.org/details/cu31924021200054",
+        "locator": "International Bureau of the American Republics, Ecuador, printed pp. 2–3 and 16. Attributes the estimate to Cevallos and dates it to 1889."
+      },
+      {
+        "url": "https://www.ecuadorencifras.gob.ec/documentos/web-inec/Bibliotecas/Libros/INEC_Historia_Censos.pdf#page=123",
+        "locator": "INEC, Una mirada histórica a la estadística del Ecuador, printed p. 123, Linda Alexander Rodríguez table. Labels the estimate 1887 and gives Chimborazo as 122,200 and the total as 1,271,761. Cevallos's original p. 32 gives 122,300 and 1,271,861."
+      }
+    ],
+    "boundary_note": "The author describes Galápagos as a dependency of Guayas under the law of 20 August 1885, but the population table has no separate island row or island-scope footnote. Oriente is a broad historical territory. Its estimated residents cannot be split along the opening polygon from this table.",
+    "collection": "ecuador_population"
+  },
+  {
+    "id": "ecuador_chicago_1894",
+    "title": "Luis Felipe Carbo, ed., El Ecuador en Chicago",
+    "publisher": "Diario de Avisos, Guayaquil. A. E. Chasmar y Cía., New York, 1894. Biblioteca Nacional del Ecuador Eugenio Espejo digitization.",
+    "url": "https://es.scribd.com/document/506504830/Ecuador-en-Chicago",
+    "locator": "Printed p. 367, Área and Población, 16 population entries and national estimate.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "boundary_note": "The geographical section reports 714,860 km² including the Galápagos. Population is expressly approximate and compiled from official documents. Galápagos residents are grouped with Guayas. The 85,000 for the eastern territories cannot be divided by the opening boundary.",
+    "collection": "ecuador_population"
+  },
+  {
+    "id": "ecuador_paris_1900_britannica",
+    "title": "La République de l’Équateur et sa participation à l’Exposition Universelle de 1900, reported in Encyclopædia Britannica, 11th ed., vol. VIII, Ecuador",
+    "publisher": "Imprimerie du Correo de Paris, Paris, 1900 exhibition publication. Extracted here from the 1911 Encyclopædia Britannica transcription.",
+    "url": "https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Ecuador",
+    "locator": "Ecuador, Population and Territorial Divisions and Towns, national figure and provincial Population column. The 1911 article attributes both to the official 1900 publication.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "references": [
+      {
+        "url": "https://archives.seine-et-marne.fr/sites/archives.seine-et-marne.fr/files/media/downloads/242j_ballen_inventaire.pdf#page=16",
+        "locator": "Archives départementales de Seine-et-Marne, Fonds Ballèn de Guzman, 242 J 6, printed p. 16. Catalogue entry for the 78-page Paris booklet."
+      }
+    ],
+    "boundary_note": "The original booklet is located in the archive catalogue. The numbers are from the 1911 transcription. Its table leaves the Oriente population blank and lists the Galápagos separately. The article describes the claimed Oriente as larger than the region then occupied by Ecuador. It does not define the population perimeter of the 1,500,000 headline. The 1894 Chicago estimate gives the same headline but a different breakdown and does not validate this estimate.",
+    "collection": "ecuador_population"
+  },
+  {
+    "id": "el_salvador_1901_diario_oficial",
+    "title": "Dirección General de Estadística, Resumen del censo de 1901",
+    "publisher": "Diario Oficial, San Salvador, 13 July 1901. Universidad Centroamericana José Simeón Cañas digitization.",
+    "url": "https://sistemabibliotecas.uca.edu.sv/diario/1901%20falta%20oct%20nov%20dic/1901-07.pdf#page=91",
+    "locator": "Diario Oficial, vol. 51, no. 164, 13 July 1901, printed p. 1314 (PDF p. 91), Resumen del censo de 1901. National and 14 department rows, introductory paragraph and notes.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "references": [
+      {
+        "url": "https://archive.org/details/sim_bulletin-of-the-pan-american-union_1901-11_11_5",
+        "locator": "Bulletin of the International Bureau of the American Republics, vol. XI, no. 5, November 1901, printed p. 917, Salvador, Statistical Data. Reprints the population rows effective 1 January 1901."
+      },
+      {
+        "url": "https://digitallibrary.un.org/record/3891965/files/1952_DYB.pdf",
+        "locator": "United Nations Demographic Yearbook 1952, table 2, Enumerated population, El Salvador. Indexes the adjusted total under its 1 March 1901 enumeration date."
+      }
+    ],
+    "boundary_note": "The national table covers the 14 historical departments. It reports 34,126 square kilometres. The international reprint gives 7,225 square miles. Neither area establishes a match to the opening map perimeter. The gazette's third note refers to recent annexations to the cities of San Salvador and Sonsonate. Department boundaries are not resolved.",
+    "collection": "el_salvador_population"
+  },
+  {
+    "id": "el_salvador_perez_brignoli_2015",
+    "title": "Héctor Pérez Brignoli, La población de Centroamérica en el siglo XX: series vitales anuales y estimaciones de la población total",
+    "publisher": "Diálogos Revista Electrónica de Historia, Universidad de Costa Rica, 2015.",
+    "url": "https://doi.org/10.15517/dre.v0i0.22036",
+    "locator": "Methods and El Salvador section. Tables 2, 8 and 9. Table 9, 1899–1901 rows, Población total.",
+    "rights": "Individual published estimates and bibliographic references only. No bulk data or prose reproduced.",
+    "references": [
+      {
+        "url": "https://dialnet.unirioja.es/descarga/articulo/5602871.pdf",
+        "locator": "Published article PDF. Table 9 and its headings give the year and national population without specifying the day or statistical perimeter."
+      },
+      {
+        "url": "https://e-archivo.uc3m.es/rest/api/core/bitstreams/34ce9182-38c7-40ac-85ff-9d6e2a769caa/content",
+        "locator": "Federico–Tena 2025, Appendix I, El Salvador. The opening benchmark of 799,415 interpolates across the 1899 Yáñez et al. series based on Barón Castro's corrections and the 1900 International Historical Statistics: Americas series."
+      }
+    ],
+    "boundary_note": "Annual national demographic reconstruction using later censuses and adjusted vital statistics. The 1901 adjusted census total is absent from the study's benchmarks. The study applies a factor of 1.20 to registered deaths for 1899–1929 and models zero net migration for the three listed years. The study provides no historical boundary crosswalk or department allocation.",
+    "date_note": "The prior year's births less adjusted deaths account for the full change to the next row in 1899–1901. This is consistent with a stock at the start of each annual accounting interval. The methods and table do not establish an exact reference day. Preserve the published year labels.",
+    "collection": "el_salvador_population"
+  },
+  {
+    "id": "el_salvador_benito_1910",
+    "title": "Pablo de Benito, La República de El Salvador",
+    "publisher": "Boletín de la Real Sociedad Geográfica, vol. LII, April 1910.",
+    "url": "https://realsociedadgeografica.com/boletines/Tomo%20LII%20-%201910%20Abril.pdf",
+    "locator": "Printed pp. 239–241, census history and 14 department table from the February 1910 administrative division published by the Dirección General de Estadística.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "boundary_note": "The author notes the 1901 enumeration date and reports temporary departures at the Guatemalan border without quantifying them. Earlier enumeration attempts are described as defective. The 1910 table reports the same 14 department names and 34,126 square kilometres as the 1901 gazette. This does not resolve historical boundary or enumeration-method equivalence.",
+    "collection": "el_salvador_population"
   },
   {
     "id": "england_wales_census_1901_general_report",
@@ -1225,6 +1477,71 @@
     "rights": "Numeric facts transcribed from 1911 publication; no reproduction of its layout. Canton totals cross-checked against Statistisches Jahrbuch der Schweiz 1919, III.a.3.",
     "independent_url": "https://istmat.org/files/uploads/53038/statistisches_jahrbuch_der_schweiz_1919.pdf",
     "collection": "swiss"
+  },
+  {
+    "id": "venezuela_1904_pan_american_handbook",
+    "title": "N. Veloz Goiticoa, Venezuela: Geographical Sketch, Natural Resources, Laws, Economic Conditions, Actual Development, Prospects of Future Growth",
+    "publisher": "International Bureau of the American Republics. Government Printing Office, Washington, 1904.",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/8/88/Venezuela._Geographical_sketch%2C_natural_resources%2C_laws%2C_economic_conditions%2C_actual_development%2C_prospects_of_future_growth_%28IA_venezuelageograp00inte%29.pdf",
+    "locator": "Printed p. 14, Population from 1810 to 1904, rows 1891–1904. Printed pp. 7–10, frontier awards. Printed pp. 11 and 15, territorial area and population comparison.",
+    "rights": "Selected historical numerical facts and bibliographic references from the 1904 publication.",
+    "boundary_sources": [
+      {
+        "url": "https://legal.un.org/riaa/cases/vol_XXVIII/331-340.pdf",
+        "locator": "Reports of International Arbitral Awards, volume XXVIII, Award regarding the Boundary between the Colony of British Guiana and the United States of Venezuela, 3 October 1899, pp. 331–340."
+      }
+    ],
+    "boundary_note": "The handbook reproduces the 1899 British Guiana award and the 1891 Colombia award. Its area comparison still takes 1,552,741 km² from the 1896 Venezuelan yearbook. The opening geometry gw_101 records 910,834 km². The population table does not say whether its scope follows the awards or provide affected-area counts. The area figures cannot be used to adjust population.",
+    "collection": "venezuela_population"
+  },
+  {
+    "id": "venezuela_1968_celade_miro",
+    "title": "Carmen A. Miró, La población de América Latina en el siglo XX",
+    "publisher": "Centro Latinoamericano de Demografía (CELADE), Serie A, no. 48, September 1968. Digitized by the ECLAC Digital Repository.",
+    "url": "https://repositorio.cepal.org/server/api/core/bitstreams/9d481d76-8488-41d5-822e-7cb64dd1b85f/content",
+    "locator": "Printed p. 2, Cuadro 1, América Latina: población total, 1900–1980, Venezuela row and source note. The note attributes the 1900 figure to CELADE and the later figures to the United Nations 1963 assessment.",
+    "rights": "Selected historical numerical facts and bibliographic references. No scan, full table or original prose reproduced.",
+    "collection": "venezuela_population"
+  },
+  {
+    "id": "venezuela_ft_scope",
+    "title": "Giovanni Federico and Antonio Tena-Junguito, World Population 1800–1938",
+    "publisher": "Instituto Figuerola, Universidad Carlos III de Madrid, Working Papers in Economic History 2025-1.",
+    "url": "https://hdl.handle.net/10016/45843",
+    "locator": "Appendix I, Americas, Venezuela. For 1820–1913 the authors select Bulmer-Thomas's lower annual estimates rather than adopting the historical census levels as given in Baptista.",
+    "rights": "Methodology paraphrased. The workbook is CC BY 4.0. Attribution: Giovanni Federico and Antonio Tena-Junguito, Federico-Tena World Population Historical Database, e-cienciaDatos, V5.",
+    "existing_observations": {
+      "collection": "world",
+      "source_id": "ft_world_v5",
+      "unit_id": "ft_venezuela",
+      "workbook_url": "https://doi.org/10.21950/3SK54X",
+      "workbook_locator": "Country series!CP103 and CP104",
+      "source_dates": [
+        "1899-07-01",
+        "1900-07-01"
+      ],
+      "source_values": [
+        1937000,
+        1964000
+      ],
+      "fraction": "184/365",
+      "opening_date": "1900-01-01",
+      "opening_value": 1950611,
+      "population_lower": 1633636,
+      "population_upper": 2267586,
+      "quality": "D",
+      "uncertainty_kind": "Interpolated sensitivity limits from the FT series."
+    },
+    "opening_comparison": {
+      "root_id": "venezuela_1900",
+      "status": "legacy_only",
+      "legacy_value": 2400000,
+      "pan_american_1900_minus_celade_1900": 213671,
+      "pan_american_1900_minus_ft_1900_midyear": 593671,
+      "celade_1900_minus_ft_1900_midyear": 380000,
+      "decision": "Retain the legacy value as the opening control. The publication date and original geographic scope of that value are undocumented. The three source series are alternative national totals and overlap. The handbook series omits immigration in 1899–1904 and has no verified match to the opening perimeter. CELADE reports a year-only estimate with no frontier or resident-category detail. FT follows a different reconstruction with a lower starting level. No overlap counts allow a territorial subtraction, and none of the sources supplies a verified 1900-01-01 control."
+    },
+    "collection": "venezuela_population"
   },
   {
     "id": "ft_world_v5",

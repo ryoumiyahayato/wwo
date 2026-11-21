@@ -1,0 +1,50 @@
+[
+  {
+    "id": "el_salvador_1901_diario_oficial",
+    "title": "Dirección General de Estadística, Resumen del censo de 1901",
+    "publisher": "Diario Oficial, San Salvador, 13 July 1901. Universidad Centroamericana José Simeón Cañas digitization.",
+    "url": "https://sistemabibliotecas.uca.edu.sv/diario/1901%20falta%20oct%20nov%20dic/1901-07.pdf#page=91",
+    "locator": "Diario Oficial, vol. 51, no. 164, 13 July 1901, printed p. 1314 (PDF p. 91), Resumen del censo de 1901. National and 14 department rows, introductory paragraph and notes.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "references": [
+      {
+        "url": "https://archive.org/details/sim_bulletin-of-the-pan-american-union_1901-11_11_5",
+        "locator": "Bulletin of the International Bureau of the American Republics, vol. XI, no. 5, November 1901, printed p. 917, Salvador, Statistical Data. Reprints the population rows effective 1 January 1901."
+      },
+      {
+        "url": "https://digitallibrary.un.org/record/3891965/files/1952_DYB.pdf",
+        "locator": "United Nations Demographic Yearbook 1952, table 2, Enumerated population, El Salvador. Indexes the adjusted total under its 1 March 1901 enumeration date."
+      }
+    ],
+    "boundary_note": "The national table covers the 14 historical departments. It reports 34,126 square kilometres. The international reprint gives 7,225 square miles. Neither area establishes a match to the opening map perimeter. The gazette's third note refers to recent annexations to the cities of San Salvador and Sonsonate. Department boundaries are not resolved."
+  },
+  {
+    "id": "el_salvador_perez_brignoli_2015",
+    "title": "Héctor Pérez Brignoli, La población de Centroamérica en el siglo XX: series vitales anuales y estimaciones de la población total",
+    "publisher": "Diálogos Revista Electrónica de Historia, Universidad de Costa Rica, 2015.",
+    "url": "https://doi.org/10.15517/dre.v0i0.22036",
+    "locator": "Methods and El Salvador section. Tables 2, 8 and 9. Table 9, 1899–1901 rows, Población total.",
+    "rights": "Individual published estimates and bibliographic references only. No bulk data or prose reproduced.",
+    "references": [
+      {
+        "url": "https://dialnet.unirioja.es/descarga/articulo/5602871.pdf",
+        "locator": "Published article PDF. Table 9 and its headings give the year and national population without specifying the day or statistical perimeter."
+      },
+      {
+        "url": "https://e-archivo.uc3m.es/rest/api/core/bitstreams/34ce9182-38c7-40ac-85ff-9d6e2a769caa/content",
+        "locator": "Federico–Tena 2025, Appendix I, El Salvador. The opening benchmark of 799,415 interpolates across the 1899 Yáñez et al. series based on Barón Castro's corrections and the 1900 International Historical Statistics: Americas series."
+      }
+    ],
+    "boundary_note": "Annual national demographic reconstruction using later censuses and adjusted vital statistics. The 1901 adjusted census total is absent from the study's benchmarks. The study applies a factor of 1.20 to registered deaths for 1899–1929 and models zero net migration for the three listed years. The study provides no historical boundary crosswalk or department allocation.",
+    "date_note": "The prior year's births less adjusted deaths account for the full change to the next row in 1899–1901. This is consistent with a stock at the start of each annual accounting interval. The methods and table do not establish an exact reference day. Preserve the published year labels."
+  },
+  {
+    "id": "el_salvador_benito_1910",
+    "title": "Pablo de Benito, La República de El Salvador",
+    "publisher": "Boletín de la Real Sociedad Geográfica, vol. LII, April 1910.",
+    "url": "https://realsociedadgeografica.com/boletines/Tomo%20LII%20-%201910%20Abril.pdf",
+    "locator": "Printed pp. 239–241, census history and 14 department table from the February 1910 administrative division published by the Dirección General de Estadística.",
+    "rights": "Historical population facts and bibliographic references only. No scans or prose reproduced.",
+    "boundary_note": "The author notes the 1901 enumeration date and reports temporary departures at the Guatemalan border without quantifying them. Earlier enumeration attempts are described as defective. The 1910 table reports the same 14 department names and 34,126 square kilometres as the 1901 gazette. This does not resolve historical boundary or enumeration-method equivalence."
+  }
+]
