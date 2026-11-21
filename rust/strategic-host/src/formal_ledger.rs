@@ -79,6 +79,17 @@ struct Receipt<'a> {
 }
 
 impl Ledger {
+    pub(crate) fn open_person_cash(&mut self, owner: &str) -> io::Result<()> {
+        let id = owner.strip_prefix("person:").filter(|id| !id.is_empty())
+            .ok_or_else(|| invalid("invalid runtime personal account owner"))?;
+        let account = format!("account:personal:{id}");
+        if self.accounts.contains_key(&account) || self.default_account(owner).is_some() {
+            return Err(invalid("personal account is already open"));
+        }
+        self.accounts.insert(account, Account::new(owner, PERSONAL_ROLE, 0));
+        Ok(())
+    }
+
     pub(crate) fn open_firm(&mut self, owner: &str, account: &str, cash: i64) -> io::Result<()> {
         if !owner.starts_with("firm:") || !account.starts_with("account:")
             || self.accounts.contains_key(account) || self.default_account(owner).is_some()

@@ -20,7 +20,8 @@ struct PurchaseLot {
     remaining_milli: i64,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct ConsumptionAllocation {
     pub purchase_record_id: String,
     pub quantity_milli: i64,

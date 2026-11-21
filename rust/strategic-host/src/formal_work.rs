@@ -30,7 +30,7 @@ pub struct Job {
 struct Firm { id: String, account_id: String, cash: i64, host_organization_id: String }
 
 #[derive(Deserialize)]
-struct Actor { id: String, place_id: String, skill: u64, control: String }
+struct Actor { id: String, skill: u64, control: String }
 
 #[derive(Deserialize)]
 struct Notice { actor: String, kind: String, candidate: String, delivery_day: i64 }
@@ -65,17 +65,21 @@ impl WorkOpening {
         Ok(())
     }
 
-    pub(crate) fn jobs<'a>(&'a self, actor_id: &'a str, day: i64) -> impl Iterator<Item = &'a Job> {
+    fn known_jobs<'a>(&'a self, actor_id: &'a str, day: i64) -> impl Iterator<Item = &'a Job> {
         self.jobs.iter().filter(move |job| {
-            self.actors.iter().any(|actor| actor.id == actor_id && actor.place_id == job.place && actor.skill >= job.skill)
+            self.actors.iter().any(|actor| actor.id == actor_id && actor.skill >= job.skill)
                 && self.information.iter().any(|notice| notice.actor == actor_id && notice.kind == "job"
                     && notice.candidate == job.id && notice.delivery_day <= day)
         })
     }
 
+    pub(crate) fn jobs<'a>(&'a self, actor: &'a str, current_place: Option<&'a str>, day: i64) -> impl Iterator<Item = &'a Job> {
+        self.known_jobs(actor, day).filter(move |job| current_place == Some(job.place.as_str()))
+    }
+
     pub(crate) fn find<'a>(&'a self, actor: &str, job: &str) -> Option<&'a Job> {
         let actor = self.actors.iter().find(|row| row.id == actor)?;
-        self.jobs(&actor.id, i64::MAX).find(|row| row.id == job)
+        self.known_jobs(&actor.id, i64::MAX).find(|row| row.id == job)
     }
 
     pub(crate) fn organization(&self, employer: &str) -> Option<&str> {
@@ -100,8 +104,8 @@ impl WorkState {
         job.positions.saturating_sub(self.contracts.values().filter(|id| **id == job.id).count())
     }
 
-    pub(crate) fn apply(&mut self, opening: &WorkOpening, actor: &str, job_id: &str, day: i64) -> io::Result<()> {
-        let job = opening.jobs(actor, day).find(|job| job.id == job_id)
+    pub(crate) fn apply(&mut self, opening: &WorkOpening, actor: &str, job_id: &str, current_place: Option<&str>, day: i64) -> io::Result<()> {
+        let job = opening.jobs(actor, current_place, day).find(|job| job.id == job_id)
             .ok_or_else(|| invalid("该地点没有可以申请的这份工作。"))?;
         if self.contracts.contains_key(actor) || self.vacancies(job) == 0 {
             return Err(invalid("已有劳动合同，或该岗位已满。"));
@@ -110,31 +114,47 @@ impl WorkState {
         Ok(())
     }
 
-    pub(crate) fn book(&mut self, opening: &WorkOpening, actor: &str, clock: GameClock) -> io::Result<()> {
-        let job = self.contract(opening, actor).ok_or_else(|| invalid("人物没有劳动合同。"))?;
-        let minute = clock.snapshot().total_minutes;
-        if self.bookings.contains_key(actor) || MINUTES_PER_DAY - minute % MINUTES_PER_DAY < job.hours * MINUTES_PER_HOUR {
-            return Err(invalid("今日已登记工作，或剩余时间不足。"));
+    pub(crate) fn release(&mut self, actor: &str) -> io::Result<()> {
+        if self.booking(actor).is_some() {
+            return Err(invalid("工作已登记，须等班次结算后离职。"));
         }
-        self.bookings.insert(actor.into(), minute);
+        self.contracts.remove(actor).ok_or_else(|| invalid("人物没有劳动合同。"))?;
         Ok(())
     }
 
-    pub(crate) fn book_automatic(&mut self, opening: &WorkOpening, clock: GameClock, alive: impl Fn(&str) -> bool) {
-        for actor in opening.automatic().filter(|actor| alive(actor)) {
+    pub(crate) fn can_book(&self, opening: &WorkOpening, actor: &str, current_place: Option<&str>, clock: GameClock) -> bool {
+        self.contract(opening, actor).is_some_and(|job| current_place == Some(job.place.as_str())
+            && self.booking(actor).is_none() && shift_fits(job, clock.snapshot().total_minutes))
+    }
+
+    pub(crate) fn book(&mut self, opening: &WorkOpening, actor: &str, current_place: Option<&str>, clock: GameClock) -> io::Result<()> {
+        let job = self.contract(opening, actor).ok_or_else(|| invalid("人物没有劳动合同。"))?;
+        if current_place != Some(job.place.as_str()) {
+            return Err(invalid("人物目前不在工作地点。"));
+        }
+        if !self.can_book(opening, actor, current_place, clock) {
+            return Err(invalid("今日已登记工作，或剩余时间不足。"));
+        }
+        self.bookings.insert(actor.into(), clock.snapshot().total_minutes);
+        Ok(())
+    }
+
+    pub(crate) fn book_automatic<'a>(&mut self, opening: &WorkOpening, clock: GameClock, present_place: impl Fn(&str) -> Option<&'a str>) {
+        for (actor, place) in opening.automatic().filter_map(|actor| Some((actor, present_place(actor)?))) {
+            let current_place = Some(place);
             if !self.contracts.contains_key(actor) {
-                let jobs = opening.jobs(actor, clock.current_day()).filter(|job| self.vacancies(job) > 0);
+                let jobs = opening.jobs(actor, current_place, clock.current_day()).filter(|job| self.vacancies(job) > 0);
                 if let Some(job) = jobs.max_by_key(|job| (job.wage_per_hour, std::cmp::Reverse(&job.id))) {
-                    let _ = self.apply(opening, actor, &job.id, clock.current_day());
+                    let _ = self.apply(opening, actor, &job.id, current_place, clock.current_day());
                 }
             }
-            let _ = self.book(opening, actor, clock);
+            let _ = self.book(opening, actor, current_place, clock);
         }
     }
 
     pub(crate) fn booked_workers(&self) -> impl Iterator<Item = &String> { self.bookings.keys() }
 
-    pub(crate) fn record_death(&mut self, actor: &str) {
+    pub(crate) fn remove_actor(&mut self, actor: &str) {
         self.bookings.remove(actor);
         self.contracts.remove(actor);
     }
@@ -143,12 +163,53 @@ impl WorkState {
 
     pub(crate) fn complete(&mut self) { self.bookings.clear(); }
 
-    pub(crate) fn validate(&self, opening: &WorkOpening, clock: GameClock) -> bool {
-        self.contracts.iter().all(|(actor, job)| opening.jobs(actor, clock.current_day()).any(|row| {
+    pub(crate) fn validate<'a>(&self, opening: &WorkOpening, clock: GameClock, present_place: impl Fn(&str) -> Option<&'a str>) -> bool {
+        self.contracts.iter().all(|(actor, job)| opening.known_jobs(actor, clock.current_day()).any(|row| {
             row.id == *job && self.contracts.values().filter(|id| *id == job).count() <= row.positions
         })) && self.bookings.iter().all(|(actor, &minute)| self.contract(opening, actor).is_some_and(|job| {
-            (clock.current_day() * MINUTES_PER_DAY..=clock.snapshot().total_minutes).contains(&minute)
-                && MINUTES_PER_DAY - minute % MINUTES_PER_DAY >= job.hours * MINUTES_PER_HOUR
+            present_place(actor) == Some(job.place.as_str())
+                && (clock.current_day() * MINUTES_PER_DAY..=clock.snapshot().total_minutes).contains(&minute)
+                && shift_fits(job, minute)
         }))
+    }
+}
+
+fn shift_fits(job: &Job, minute: i64) -> bool {
+    MINUTES_PER_DAY - minute % MINUTES_PER_DAY >= job.hours * MINUTES_PER_HOUR
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn employment_persists_during_absence_but_work_requires_presence_and_time() {
+        let opening = WorkOpening::load().unwrap();
+        let person = "person:formal_generated_country_fra_0001";
+        let workplace = Some("place:paris");
+        let away = Some("place:rouen");
+        let work_id = "job:opening_paris_workshop";
+        let mut work = WorkState::default();
+        let mut clock = GameClock::default();
+
+        assert!(opening.jobs(person, None, 0).next().is_none());
+        assert!(work.apply(&opening, person, work_id, away, 0).is_err());
+        work.apply(&opening, person, work_id, workplace, 0).unwrap();
+        let job = work.contract(&opening, person).unwrap();
+        assert_eq!(job.id, work_id);
+        assert_eq!(work.vacancies(job), 0);
+        assert!(work.validate(&opening, clock, |_| away));
+        assert!(work.book(&opening, person, None, clock).is_err());
+        assert!(work.book(&opening, person, away, clock).is_err());
+
+        clock.advance_minutes(MINUTES_PER_DAY - job.hours * MINUTES_PER_HOUR + 1).unwrap();
+        assert!(!work.can_book(&opening, person, workplace, clock));
+        clock.advance_minutes(MINUTES_PER_DAY - clock.snapshot().total_minutes).unwrap();
+        work.book(&opening, person, workplace, clock).unwrap();
+        assert!(work.release(person).is_err());
+        assert!(!work.validate(&opening, clock, |_| away));
+        work.complete();
+        work.release(person).unwrap();
+        assert_eq!(work.vacancies(job), 1);
     }
 }

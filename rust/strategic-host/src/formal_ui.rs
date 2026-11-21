@@ -70,6 +70,9 @@ pub struct Relations {
     pub selected:String,pub rows:Vec<Relation>,
     #[serde(default)] pub drawer:String,
     #[serde(default)] has_work:bool,
+    #[serde(default)] work_title:String,
+    #[serde(default)] work_feedback:String,
+    #[serde(default)] pub work_revision:u64,
     #[serde(default)] pub work:Vec<WorkSummary>,
     #[serde(default)] pub confirmation:Option<WorkConfirmation>,
 }
@@ -273,7 +276,7 @@ pub enum Command {
     Market(&'static str,usize),MarketScroll(i32),
     Training(&'static str),
     PortraitAction(usize,Page),Relation(Option<usize>),RelationDrawer(&'static str),
-    WorkAction(usize,usize),WorkConfirm(bool),
+    WorkAction(usize,usize,u64),WorkConfirm(bool),
     Consume(usize),
     PersonalActivity(PersonalActivity),
     Lobby(crate::lobby::Command),Departure(&'static str),
@@ -807,13 +810,18 @@ impl Display<'_> {
             }
             return;
         }
+        if view.drawer=="work" && !view.work_feedback.is_empty() {
+            self.skin.text(t,&view.work_feedback,0,[x+20.,y+48.],w-40.,IVORY);
+        }
+        let work_title=if view.work_title.is_empty(){say("工作与经营","Work and business")}
+            else{say(view.work_title.as_str(),"Livelihood, work and travel")};
         for (index,(drawer,label)) in [
             ("relations",format!("{} · {}",say("组织关系","Organisational ties"),view.rows.len())),
-            ("work",say("工作与经营","Work and business").into())
+            ("work",work_title.into())
         ].into_iter().enumerate() {
             if index==1 && !view.has_work {continue;}
             let expanded=view.drawer==drawer;
-            let top=y+96.+index as f32*36.;
+            let top=y+77.+index as f32*36.;
             self.row(m,t,hits,[x+20.,top,w-40.,28.],"",Some(Action::Hud(Command::RelationDrawer(drawer))),expanded);
             let cx=x+34.;
             let cy=top+14.;
@@ -824,28 +832,38 @@ impl Display<'_> {
         }
         if view.drawer=="work" {
             if let Some(confirmation)=&view.confirmation {
-                self.skin.text(t,&confirmation.title,1,[x+20.,y+186.],w-40.,IVORY);
-                self.skin.text(t,&confirmation.body,0,[x+20.,y+225.],w-40.,MUTED);
+                self.skin.text(t,&confirmation.title,1,[x+20.,y+160.],w-40.,IVORY);
+                self.skin.text(t,&confirmation.body,0,[x+20.,y+195.],w-40.,MUTED);
                 for (index,(label, confirmed)) in [(say("确认","Confirm"),true),(say("取消","Cancel"),false)].into_iter().enumerate() {
-                    self.row(m,t,hits,[x+20.+index as f32*120.,y+260.,110.,26.],label,Some(Action::Hud(Command::WorkConfirm(confirmed))),false);
+                    self.row(m,t,hits,[x+20.+index as f32*120.,y+231.,110.,26.],label,Some(Action::Hud(Command::WorkConfirm(confirmed))),false);
                 }
                 return;
             }
-            let mut top=y+176.;
-            for (index,row) in view.work.iter().enumerate().skip(self.hud.market_offset) {
+            let offset=self.hud.market_offset.min(view.work.len().saturating_sub(1));
+            let mut next=offset;
+            let mut top=y+158.;
+            for (index,row) in view.work.iter().enumerate().skip(offset) {
                 let action_height=if row.actions.is_empty(){0.}else{29.};
-                let detail_height=27.+row.details.len() as f32*18.;
+                let detail_height=22.+row.details.len() as f32*18.;
                 let row_height=detail_height+action_height;
-                if top+row_height>y+height-12. {break;}
+                if top+row_height>y+height-41. {break;}
                 self.skin.text(t,&row.label,1,[x+20.,top],w-40.,IVORY);
                 for (i,line) in row.details.iter().enumerate() {
-                    self.skin.text(t,line,0,[x+20.,top+27.+i as f32*18.],w-40.,MUTED);
+                    self.skin.text(t,line,0,[x+20.,top+22.+i as f32*18.],w-40.,MUTED);
                 }
                 for (action_index, action) in row.actions.iter().enumerate() {
                     self.row(m,t,hits,[x+20.+action_index as f32*166.,top+detail_height,156.,25.],&action.label,
-                        action.enabled.then_some(Action::Hud(Command::WorkAction(index,action_index))),false);
+                        action.enabled.then_some(Action::Hud(Command::WorkAction(index,action_index,view.work_revision))),false);
                 }
-                top+=row_height+8.;
+                top+=row_height+7.;
+                next=index+1;
+            }
+            if offset>0 || next<view.work.len() {
+                for (index,(label, step, enabled)) in [(say("向上","Up"),-1,offset>0),
+                    (say("向下","Down"),1,next<view.work.len())].into_iter().enumerate() {
+                    self.row(m,t,hits,[x+w-164.+index as f32*74.,y+height-34.,70.,24.],label,
+                        enabled.then_some(Action::Hud(Command::MarketScroll(step))),false);
+                }
             }
             return;
         }
@@ -908,7 +926,8 @@ impl Display<'_> {
             (say("关系与工作","Work & relations"), Command::Page(Page::Relations)),
             (say("持有物","Inventory"), Command::Page(Page::Property)),
         ].into_iter().enumerate() {
-            self.row(m,t,hits,[x+22.+index as f32*166.,y+h-45.,155.,26.],label,Some(Action::Hud(action)),false);
+            let enabled=!matches!(action,Command::LocatePlayer) || self.session.is_some_and(|session|!session.coordinates.is_empty());
+            self.row(m,t,hits,[x+22.+index as f32*166.,y+h-45.,155.,26.],label,enabled.then_some(Action::Hud(action)),false);
         }
     }
     fn personal_activities(&self,m:&mut Mesh,t:&mut Mesh,hits:&mut Vec<Hit>,[x,y,w,h]:[f32;4]) {

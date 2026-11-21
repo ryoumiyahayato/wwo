@@ -43,6 +43,15 @@ pub(crate) struct Identity {
 }
 
 impl Identity {
+    pub(crate) fn native_birth(birth_day: u32, name: String) -> Self {
+        Self {
+            birth_day: i64::from(birth_day),
+            name,
+            basis: "runtime_simulation".into(),
+            alive: true,
+        }
+    }
+
     pub(crate) fn new(birth_year: i64, name: String, basis: String, alive: bool) -> Result<Self> {
         if !(1700..=9999).contains(&birth_year) {
             return Err(Error("formal person has no supported birth year".into()));
@@ -80,6 +89,8 @@ pub(crate) struct CharacterOutput {
     pub development: Option<PlayerDevelopment>,
     #[serde(skip)]
     pub deaths: Vec<DeathNotice>,
+    #[serde(skip)]
+    pub work_eligible: BTreeSet<String>,
 }
 
 pub(crate) fn restore(
@@ -145,6 +156,7 @@ pub(crate) struct DayActivity {
     pub lesson: Option<(Language, u16, String)>,
     pub rest: bool,
     pub nutrition: Option<u16>,
+    pub nutrition_by_person: BTreeMap<String, u16>,
     pub injury: Option<(u16, u16)>,
 }
 
@@ -162,6 +174,15 @@ pub(crate) fn opening_profile(
     player: &str, people: &BTreeMap<String, Identity>, day: u32, state: &str,
 ) -> Result<CharacterOutput> {
     run(Request::initialize(SHARED_WORLD.to_owned(), player, people.clone(), day, state))
+}
+
+pub(crate) fn register_native_person(
+    player: &str, people: &BTreeMap<String, Identity>, person: &str, day: u32, previous_state: &str,
+) -> Result<CharacterOutput> {
+    let mut request = Request::initialize(SHARED_WORLD.to_owned(), player, people.clone(), day, previous_state);
+    request.operation = "register".into();
+    request.newcomer = Some(person.to_owned());
+    run(request)
 }
 
 impl Request {
@@ -186,6 +207,7 @@ impl Request {
             activity: None,
             prologue: None,
             quote: None,
+            newcomer: None,
         }
     }
 }
@@ -210,6 +232,8 @@ struct Request {
     activity: Option<DayActivity>,
     #[serde(skip)]
     prologue: Option<PlayerDevelopment>,
+    #[serde(skip)]
+    newcomer: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -232,8 +256,11 @@ impl CharacterHost for Request {
 
     fn observed_conditions(&self, id: &str, day: u32) -> Option<ObservedConditions> {
         (day == self.day && self.people.contains_key(id)).then(|| ObservedConditions {
-            nutrition: self.activity.as_ref().filter(|_| id == self.player)
-                .and_then(|activity| activity.nutrition).or_else(|| self.nutrition.get(id).copied()),
+            nutrition: self.activity.as_ref().and_then(|activity| {
+                activity.nutrition_by_person.get(id).copied().or_else(|| {
+                    if id == self.player { activity.nutrition } else { None }
+                })
+            }).or_else(|| self.nutrition.get(id).copied()),
             rest: self.activity.as_ref().filter(|activity| id == self.player && activity.rest).map(|_| 1000),
             // A rest day records no treatment. Absence of a treatment is distinct from unknown care.
             medical_care: self.activity.as_ref().filter(|activity| id == self.player && activity.rest).map(|_| 0),
@@ -272,6 +299,12 @@ fn run(input: Request) -> Result<CharacterOutput> {
     if !input.people.contains_key(&input.player) {
         return Err(Error("selected player is missing from the formal world".into()));
     }
+    let newcomer = input.newcomer.as_deref();
+    if input.operation == "register" && !newcomer.is_some_and(|id| {
+        id != input.player.as_str() && input.people.get(id).is_some_and(|identity| identity.alive)
+    }) {
+        return Err(Error("registration requires one new living formal person".into()));
+    }
     let mut system = if input.state.is_empty() {
         if input.operation != "restore" || input.day != input.settled_day {
             return Err(Error("missing formal character state".into()));
@@ -279,7 +312,10 @@ fn run(input: Request) -> Result<CharacterOutput> {
         CharacterSystem::new(input.world.clone(), input.day, 0, LifeRules::default())?
     } else {
         let save: Save = serde_json::from_str(&input.state).map_err(|e| Error(e.to_string()))?;
-        if save.schema != SAVE_SCHEMA || save.people.len() != input.people.len() {
+        if save.schema != SAVE_SCHEMA
+            || save.people.len().checked_add(newcomer.is_some() as usize) != Some(input.people.len())
+            || newcomer.is_some_and(|id| save.people.contains_key(id))
+        {
             return Err(Error("invalid schema or formal person coverage".into()));
         }
         let people = save.people.into_iter().map(|(id, saved)| {
@@ -305,7 +341,7 @@ fn run(input: Request) -> Result<CharacterOutput> {
     }
     for (id, identity) in &input.people {
         if ids.contains(id) { continue; }
-        if !input.state.is_empty() || !identity.alive {
+        if (!input.state.is_empty() && newcomer != Some(id.as_str())) || !identity.alive {
             return Err(Error(format!("formal person coverage mismatch for {id}")));
         }
         system.register(identity.seed(id, BTreeMap::new()), &input)?;
@@ -318,6 +354,7 @@ fn run(input: Request) -> Result<CharacterOutput> {
                 system.create_player(&input.player, development)?;
             }
         }
+        "register" if input.day == system.day() => {}
         "day" if system.day().checked_add(1) == Some(input.day) => {
             let active = system.player_development(&input.player).is_some();
             deaths = system.advance_observed(input.day, &input, active.then_some(input.player.as_str()))?;
@@ -369,7 +406,13 @@ fn run(input: Request) -> Result<CharacterOutput> {
         }
         _ => return Err(Error("invalid operation or formal day mismatch".into())),
     }
-    let able_to_work = system.can_do_physical_work(&input.player)?;
+    let mut work_eligible = BTreeSet::new();
+    for person in input.people.keys() {
+        if system.can_do_physical_work(person)? {
+            work_eligible.insert(person.clone());
+        }
+    }
+    let able_to_work = work_eligible.contains(&input.player);
     let development = system.player_development(&input.player).cloned();
     let mut profile = system.view(&input.player, input.social)?;
     if let Some(player) = &development {
@@ -392,7 +435,9 @@ fn run(input: Request) -> Result<CharacterOutput> {
             event_sequence: record.event_sequence, player: record.player,
         })).collect(),
     }).map_err(|e| Error(e.to_string()))?;
-    Ok(CharacterOutput { state, profile, day: input.day, assessment, able_to_work, development, deaths })
+    Ok(CharacterOutput {
+        state, profile, day: input.day, assessment, able_to_work, development, deaths, work_eligible,
+    })
 }
 
 fn formal_age(birth_year: u16, day: u32, system: &CharacterSystem, id: &str) -> u32 {

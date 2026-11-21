@@ -1,4 +1,14 @@
+mod historical;
+mod native;
+#[cfg(test)]
+mod tests;
+
+pub use historical::HistoricalPopulationEstimate;
+pub(crate) use native::PopulationSnapshot;
+
+use crate::formal_clock::GameClock;
 use crate::formal_save::{field, integer, invalid, lookup, map, tagged};
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{collections::BTreeMap, io};
 
@@ -9,42 +19,145 @@ pub(crate) const MAX_POPULATION: u64 = 9_007_199_254_740_991;
 #[derive(Clone)]
 pub struct Population {
     totals: BTreeMap<String, u64>,
+    global_total: u64,
     named: BTreeMap<String, String>,
     named_counts: BTreeMap<String, u64>,
+    deceased: BTreeMap<String, Option<i64>>,
+    cohort_definitions: BTreeMap<CohortId, CohortDefinition>,
+    cohorts: BTreeMap<String, BTreeMap<CohortId, u64>>,
+    history: native::History,
+}
+
+/// Identifies a source record independently of where its residents now live.
+#[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct CohortId {
+    source: String,
+    record: String,
+}
+
+impl CohortId {
+    pub fn new(source: impl Into<String>, record: impl Into<String>) -> io::Result<Self> {
+        let id = Self { source: source.into(), record: record.into() };
+        if !id.valid() { return Err(invalid("invalid population cohort source or record")); }
+        Ok(id)
+    }
+
+    pub fn source(&self) -> &str { &self.source }
+    pub fn record(&self) -> &str { &self.record }
+
+    fn valid(&self) -> bool {
+        [&self.source, &self.record].into_iter().all(|value| {
+            !value.is_empty() && value.trim() == value && !value.chars().any(char::is_control)
+        })
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CohortProvenance {
+    Observed,
+    Fixture,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CohortSex {
+    Female,
+    Male,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct CohortBirthYears {
+    pub earliest: i64,
+    pub latest: i64,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct CohortDefinition {
+    pub provenance: CohortProvenance,
+    pub sex: Option<CohortSex>,
+    pub birth_years: Option<CohortBirthYears>,
+}
+
+impl CohortDefinition {
+    /// Inclusive bounds in complete years. Birth dates within a year are unknown.
+    pub fn age_bounds(&self, clock: GameClock) -> Option<(i64, i64)> {
+        let years = self.birth_years?;
+        let date = clock.current_date();
+        if years.earliest <= 0 || years.earliest > years.latest || years.latest > date.year {
+            return None;
+        }
+        let birthday_uncertain = i64::from(date.month != 12 || date.day != 31);
+        let youngest = (date.year - years.latest - birthday_uncertain).max(0);
+        Some((youngest, date.year - years.earliest))
+    }
 }
 
 impl Population {
     pub(crate) fn initialize(totals: BTreeMap<String, u64>) -> Self {
-        Self { totals, named: BTreeMap::new(), named_counts: BTreeMap::new() }
+        Self {
+            global_total: totals.values().sum(),
+            totals,
+            named: BTreeMap::new(),
+            named_counts: BTreeMap::new(),
+            deceased: BTreeMap::new(),
+            cohort_definitions: BTreeMap::new(),
+            cohorts: BTreeMap::new(),
+            history: native::History::default(),
+        }
     }
 
     pub fn totals(&self) -> &BTreeMap<String, u64> {
         &self.totals
     }
 
+    /// Historical opening estimate for this economic unit. Movement and vital
+    /// events update current residents independently of the source estimates.
+    pub fn opening_estimate(&self, unit: &str) -> io::Result<Option<HistoricalPopulationEstimate>> {
+        if !self.totals.contains_key(unit) { return Ok(None); }
+        historical::opening_estimate(unit)
+    }
+
     pub fn unit_for_person(&self, person: &str) -> Option<&str> {
         self.named.get(person).map(String::as_str)
     }
 
+    pub fn known_dead(&self, person: &str) -> bool {
+        self.deceased.contains_key(person)
+    }
+
+    pub(crate) fn death_minute(&self, person: &str) -> Option<i64> {
+        self.deceased.get(person).copied().flatten()
+    }
+
+    pub fn named_counts(&self) -> &BTreeMap<String, u64> {
+        &self.named_counts
+    }
+
+    /// All residents without a named claim, including separately evidenced cohorts.
     pub fn background(&self, unit: &str) -> Option<u64> {
         self.totals.get(unit).map(|total| total - self.named_count(unit))
     }
 
-    /// Transfers anonymous residents. Cohorts with an assigned economic owner
-    /// must first go through that owner's responsibility handover.
-    pub(crate) fn transfer_unmanaged(
-        &mut self, source: &str, destination: &str, amount: u64, source_managed_background: u64,
-    ) -> io::Result<()> {
-        let available = self.background(source).and_then(|total| total.checked_sub(source_managed_background))
-            .ok_or_else(|| invalid("invalid anonymous source population"))?;
-        let target = self.totals.get(destination).copied()
-            .ok_or_else(|| invalid("unknown population destination"))?;
-        if source == destination || amount == 0 || amount > available || amount > MAX_POPULATION - target {
-            return Err(invalid("population transfer exceeds the available anonymous residents"));
-        }
-        *self.totals.get_mut(source).unwrap() -= amount;
-        *self.totals.get_mut(destination).unwrap() += amount;
-        Ok(())
+    /// Remainder of the aggregate estimate without a demographic breakdown.
+    pub fn unclassified(&self, unit: &str) -> Option<u64> {
+        self.background(unit).map(|background| {
+            let classified: u64 = self.cohorts.get(unit).into_iter().flat_map(|rows| rows.values()).sum();
+            background - classified
+        })
+    }
+
+    pub fn cohort_members(&self, unit: &str, id: &CohortId) -> Option<u64> {
+        self.cohorts.get(unit)?.get(id).copied()
+    }
+
+    pub fn cohorts_in(&self, unit: &str) -> impl Iterator<Item = (&CohortId, &CohortDefinition, u64)> {
+        self.cohorts.get(unit).into_iter().flatten().map(|(id, &members)| {
+            (id, &self.cohort_definitions[id], members)
+        })
     }
 
     pub(crate) fn named_len(&self) -> usize {
@@ -128,23 +241,44 @@ impl Population {
         Ok(counts)
     }
 
+    /// Register a claim from the opening data or legacy overlay.
     pub(crate) fn claim(&mut self, person: &str, unit: &str) -> io::Result<()> {
-        if !person.strip_prefix("person:").is_some_and(|id| !id.is_empty())
-            || self.named.contains_key(person)
-            || self.background(unit).unwrap_or(0) == 0
-        {
+        self.check_new_claim(person)?;
+        if self.unclassified(unit).unwrap_or(0) == 0 {
             return Err(invalid("named claim is repeated or exceeds its population unit"));
         }
-        self.named.insert(person.to_owned(), unit.to_owned());
-        *self.named_counts.entry(unit.to_owned()).or_default() += 1;
+        self.insert_claim(person, unit);
         Ok(())
     }
 
-    pub(crate) fn record_death(&mut self, person: &str) -> io::Result<()> {
-        let unit = self.named.remove(person).ok_or_else(|| invalid("deceased person has no active population claim"))?;
-        *self.totals.get_mut(&unit).expect("named population unit") -= 1;
-        *self.named_counts.get_mut(&unit).expect("named population count") -= 1;
+    fn check_new_claim(&self, person: &str) -> io::Result<()> {
+        if !person.strip_prefix("person:").is_some_and(|id| !id.is_empty())
+            || self.named.contains_key(person) || self.known_dead(person)
+        {
+            return Err(invalid("invalid or already known named population claim"));
+        }
         Ok(())
+    }
+
+    fn insert_claim(&mut self, person: &str, unit: &str) {
+        self.named.insert(person.to_owned(), unit.to_owned());
+        *self.named_counts.entry(unit.to_owned()).or_default() += 1;
+    }
+
+    fn retire_claim(&mut self, person: &str, minute: Option<i64>) -> io::Result<()> {
+        let (person, unit) = self.named.remove_entry(person)
+            .ok_or_else(|| invalid("deceased person has no active population claim"))?;
+        *self.totals.get_mut(&unit).expect("named population unit") -= 1;
+        self.subtract_named(&unit);
+        self.global_total -= 1;
+        self.deceased.insert(person, minute);
+        Ok(())
+    }
+
+    fn subtract_named(&mut self, unit: &str) {
+        let count = self.named_counts.get_mut(unit).expect("named population count");
+        *count -= 1;
+        if *count == 0 { self.named_counts.remove(unit); }
     }
 
     fn named_count(&self, unit: &str) -> u64 {

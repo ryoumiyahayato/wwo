@@ -34,6 +34,16 @@ Windows 游玩验证使用法国开局。选择不识字的 25 岁贫寒学徒�
 
 局部检查使用 `cargo test --locked --manifest-path rust/character-core/Cargo.toml --lib player::tests` 和 `cargo test --release --locked --manifest-path rust/strategic-host/Cargo.toml --lib player_prologue_tests`，从仓库根目录执行。
 
+## 正式人口与生计
+
+法国开局进入人物关系，展开「生计、工作与旅行」。可申请、确认和登记巴黎岗位。完成班次生成应付工资，到账使用正式账本。巴黎两家开局企业按已完成工时分配生产和销售，面包受有限粮食库存约束。购买现场报价会扣个人现金、增加商户现金并登记个人货批。结算时从货批取得口粮。缺粮影响健康和劳动。NPC 会使用现有现金购买可交付的主食。共同住户由双方同意建立。同住成员可以调剂已有余粮，个人保有各自账户。
+
+有限法国公路、铁路按路线、预计时间和每日模拟客运名额出发，途中暂停本地交易和工作。抵达后仍保留原常住地，玩家可在当地另行登记迁居。运行时按同一个游戏时钟处理到达、日结工资、企业、口粮、健康及市场。旧原生存档沿用原格式，人口从旧平面总量迁移。新档重放带版本的人口转移，校验具名身份并保留货批、住户和旅程。
+
+开局人口是 [1900 年经济聚合估计](../../data/alpha/historical_world_economy_1900/countries_compact.json)，共 50 个统计单元，估计总数 1,411,020,000。估计值带区间和共同来源方法。行政边界和城市地点没有随附互斥的历史人口分项。当前开局未加入合成的行政区人口、家庭和服役名单。岗位、企业配方、每人每日 1 千克主食阈值以及客运速度与名额均为显式模拟假设。
+
+从本目录运行 `cargo test --locked --lib population_world_` 可重现动态人物、共同住户、服役夹具和存档场景。人口年度测量使用 `cargo test --locked --lib population_world_year_measurement -- --ignored --nocapture`。原生运行仍使用本页的 `wwo-map-lab --play`。现阶段跨区货运与客运使用不同的容量结算，生产历史数据缺口包括行政区分组、军队编制以及家庭、文化和宗教分布。
+
 ## 正式水文资源
 
 正式入口优先读取 `data/worldcrs84quad-15s-v2-hydrology/`，否则读取可用的旧库。在水文目录内恢复下列文件。QHW 按各层 QPK 大小核对配套版本。完整恢复后用 `wwo-map-lab --play` 启动。显式 `--terrain-candidate <候选库>` 仍可指定对照版本。
