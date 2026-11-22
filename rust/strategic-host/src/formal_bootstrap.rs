@@ -6,7 +6,7 @@ use crate::{
     formal_ledger::{Balance, Ledger, CURRENCY, MAX_AMOUNT},
     formal_livelihood::{self, Livelihood},
     formal_macro::{CountryInputs, MacroEconomy, MarketInputs, Shipment},
-    formal_population::{AgeRangeCoverage, CohortId, HistoricalOpening, Population, PopulationSnapshot, MAX_POPULATION},
+    formal_population::{AgeRangeCoverage, CohortId, HistoricalOpening, OpeningAssets, Population, PopulationSnapshot, MAX_POPULATION},
     formal_save::{invalid, typed_map},
     formal_service::{ServiceRoster, ServiceSnapshot, ServiceTarget},
     formal_step::next_day_boundary,
@@ -193,7 +193,8 @@ impl RuntimePerson {
 pub struct WorldBootstrap {
     organization_directory: Arc<OrganizationDirectory>,
     world: Arc<WorldSources>,
-    archived_population_worlds: [std::sync::OnceLock<io::Result<Arc<WorldSources>>>; crate::formal_population::CURRENT_VERSION as usize - 1],
+    population_assets: OpeningAssets,
+    archived_population_worlds: BTreeMap<u32, std::sync::OnceLock<Arc<WorldSources>>>,
     populations: BTreeMap<String, u64>,
     market_opening_population: BTreeMap<String, u64>,
     historical_population: Arc<HistoricalOpening>,
@@ -1309,6 +1310,18 @@ impl WorldBootstrap {
     }
 
     pub fn load() -> io::Result<Self> {
+        if let Some(data) = std::env::var_os("WWO_DATA_DIR") {
+            return Self::load_from(std::path::Path::new(&data));
+        }
+        #[cfg(test)]
+        let data = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data");
+        #[cfg(not(test))]
+        let data = std::env::current_exe()?.with_file_name("data");
+        Self::load_from(&data)
+    }
+
+    pub fn load_from(data: &std::path::Path) -> io::Result<Self> {
+        let population_assets = OpeningAssets::open(data)?;
         let polities = load_polities()?;
         let (populations, countries) = load_countries()?;
         let (polity_units, population_name_aliases) = load_population_bindings(&polities, &populations)?;
@@ -1328,13 +1341,18 @@ impl WorldBootstrap {
         };
         let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
         let load_opening = |version| {
-            HistoricalOpening::load(version, &populations, |id| world.polities.contains_key(id), |place| {
+            HistoricalOpening::load(&population_assets, version, &populations, |id| world.polities.contains_key(id), |place| {
                 world.opening_parent_at(place).or_else(|| dated_jurisdictions.get(place).map(String::as_str))
             })
         };
         // Freeze the existing market asset calibration when the census ledger changes.
-        let market_opening_population = load_opening(4)?.totals(&populations);
-        let historical_population = Arc::new(load_opening(crate::formal_population::CURRENT_VERSION)?);
+        let calibration_version = population_assets.market_calibration_version();
+        let historical_population = Arc::new(load_opening(population_assets.current_version())?);
+        let market_opening_population = if calibration_version == historical_population.version() {
+            historical_population.totals(&populations)
+        } else {
+            load_opening(calibration_version)?.totals(&populations)
+        };
         world.historical_population = Some(Arc::clone(&historical_population));
         let mut residents = BTreeMap::new();
         let mut opening_people = BTreeMap::new();
@@ -1391,9 +1409,14 @@ impl WorldBootstrap {
                 work.jobs(&actor, Some(&person.place_id), 0).any(|row| row.id == *job)
             }) { return Err(invalid("written employment notice has no accessible opening job")); }
         }
+        let archived_population_worlds = population_assets.versions()
+            .filter(|&version| version != historical_population.version())
+            .map(|version| (version, std::sync::OnceLock::new()))
+            .collect();
         Ok(Self {
             world: Arc::new(world),
-            archived_population_worlds: Default::default(),
+            population_assets,
+            archived_population_worlds,
             organization_directory: Arc::new(organization_directory),
             populations,
             market_opening_population,
@@ -1443,20 +1466,26 @@ impl WorldBootstrap {
     }
 
     fn base_opening_version(&self, source_id: &str, prologue: Option<Prologue>, version: Option<u32>) -> io::Result<InitialWorld> {
-        let sources = match version {
-            Some(version) if version == self.historical_population.version() => &self.world,
-            archived if archived.is_none_or(|value| (1..self.historical_population.version()).contains(&value)) => {
-                let archived_version = archived.unwrap_or(1);
-                self.archived_population_worlds[(archived_version - 1) as usize].get_or_init(|| {
-                    let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
-                    let opening = HistoricalOpening::load(archived_version, &self.populations,
-                        |id| self.world.polities.contains_key(id), |place| {
-                            self.world.opening_parent_at(place).or_else(|| dated_jurisdictions.get(place).map(String::as_str))
-                        })?;
-                    Ok(Arc::new(WorldSources { historical_population: Some(Arc::new(opening)), ..self.world.as_ref().clone() }))
-                }).as_ref().map_err(|error| invalid(error.to_string()))?
+        let requested = version.unwrap_or(1);
+        let sources = if requested == self.historical_population.version() {
+            &self.world
+        } else {
+            let archived = self.archived_population_worlds.get(&requested).ok_or_else(|| io::Error::new(
+                io::ErrorKind::NotFound, format!("historical population version {requested} is absent from the runtime catalogue"),
+            ))?;
+            if let Some(sources) = archived.get() {
+                sources
+            } else {
+                let dated_jurisdictions = crate::transport::opening_place_jurisdictions()?;
+                let opening = HistoricalOpening::load(&self.population_assets, requested, &self.populations,
+                    |id| self.world.polities.contains_key(id), |place| {
+                        self.world.opening_parent_at(place).or_else(|| dated_jurisdictions.get(place).map(String::as_str))
+                    })?;
+                archived.get_or_init(|| Arc::new(WorldSources {
+                    historical_population: Some(Arc::new(opening)),
+                    ..self.world.as_ref().clone()
+                }))
             }
-            _ => return Err(invalid("unsupported historical population opening version")),
         };
         let transport = Operations::restore(sources, 0, OperationsState::default())?;
         let player_origin = Arc::clone(self.opening_people.get(source_id)
@@ -2162,7 +2191,7 @@ mod tests {
         world.enlist_named_service(resident, target.clone(), true).unwrap();
         assert!(world.enlist_named_service(resident, target.clone(), true).is_err());
         let saved = world.snapshot();
-        assert_eq!(saved["population"]["opening_version"], crate::formal_population::CURRENT_VERSION);
+        assert_eq!(saved["population"]["opening_version"], bootstrap.population_assets.current_version());
         let restored = bootstrap.restore_native(serde_json::from_value(saved.clone()).unwrap()).unwrap();
         assert_eq!(restored.service.named_target(resident), Some(&target));
         assert_eq!(restored.snapshot(), saved);
@@ -3068,6 +3097,38 @@ mod tests {
         let previous_structure = previous.inspect_population(county).unwrap().structure.unwrap();
         assert_eq!(county_structure.residents_with_cohort_age_and_sex, previous_structure.residents_with_cohort_age_and_sex);
         assert_eq!(previous.population().population_total(scope), None);
+    }
+
+    #[test]
+    fn runtime_population_assets_keep_disk_save_versions() -> io::Result<()> {
+        use crate::formal_save::{read_native_slot, write_native_slot};
+        use std::time::{SystemTime, UNIX_EPOCH};
+
+        let bootstrap = WorldBootstrap::load()?;
+        let current = bootstrap.population_assets.current_version();
+        let suffix = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let slot = std::env::temp_dir().join(format!("wwo-opening-{}-{suffix}.json", std::process::id()));
+        for version in [1, 10, 17, 31, current] {
+            let world = if version == current {
+                bootstrap.create("country_fra")?
+            } else {
+                bootstrap.base_opening_version("country_fra", None, Some(version))?
+            };
+            write_native_slot(&slot, &world)?;
+            let read = read_native_slot(&slot, &bootstrap);
+            std::fs::remove_file(&slot)?;
+            let restored = read?;
+            let snapshot = restored.snapshot();
+            assert_eq!(snapshot["population"]["opening_version"], version);
+            assert!(snapshot == world.snapshot(), "population v{version} changed after save and restore");
+        }
+
+        let mut snapshot = bootstrap.create("country_fra")?.snapshot();
+        snapshot["population"]["opening_version"] = serde_json::json!(u32::MAX);
+        let error = bootstrap.restore_native(serde_json::from_value(snapshot)?).err().unwrap();
+        assert_eq!(error.kind(), io::ErrorKind::NotFound);
+        assert!(error.to_string().contains("historical population version 4294967295"));
+        Ok(())
     }
 
     #[test]

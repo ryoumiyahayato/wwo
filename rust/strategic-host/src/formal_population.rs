@@ -15,7 +15,7 @@ pub use demography::{AgeRangeCoverage, EnergyReferenceCoverage, PopulationStruct
 pub use historical::{city_population_reference, population_archive, structural_coverage_reference, HistoricalPopulationEstimate, PopulationArchive};
 pub use inspection::{PopulationChange, PopulationChild, PopulationInspection};
 pub(crate) use native::PopulationSnapshot;
-pub(crate) use opening::{HistoricalOpening, CURRENT_VERSION};
+pub(crate) use opening::{HistoricalOpening, OpeningAssets};
 pub use opening::OpeningPopulationEstimate;
 pub use social::{OpeningSocialDistribution, SocialDimension, SocialDistribution};
 

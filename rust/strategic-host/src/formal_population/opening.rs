@@ -1,9 +1,80 @@
 use super::{demography::OpeningDemography, social::OpeningSocial, MAX_POPULATION};
 use crate::formal_save::invalid;
 use serde::{Deserialize, Serialize};
-use std::{collections::{BTreeMap, BTreeSet}, io, sync::OnceLock};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fs, io,
+    path::{Component, Path, PathBuf},
+    sync::OnceLock,
+};
 
-pub(crate) const CURRENT_VERSION: u32 = 32;
+pub(crate) struct OpeningAssets {
+    root: PathBuf,
+    catalogue: Catalogue,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Catalogue {
+    format_version: u32,
+    current_version: u32,
+    market_calibration_version: u32,
+    versions: BTreeMap<u32, OpeningFiles>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct OpeningFiles {
+    opening: PathBuf,
+    demography: Option<PathBuf>,
+    social: Option<PathBuf>,
+}
+
+impl OpeningAssets {
+    pub(crate) fn open(data_root: &Path) -> io::Result<Self> {
+        let root = data_root.join("historical_population_1900");
+        let path = root.join("runtime-manifest.json");
+        let bytes = fs::read(&path).map_err(|error| io::Error::new(
+            error.kind(), format!("historical population catalogue {}: {error}", path.display()),
+        ))?;
+        let catalogue: Catalogue = serde_json::from_slice(&bytes).map_err(|error| {
+            invalid(format!("invalid historical population catalogue {}: {error}", path.display()))
+        })?;
+        if catalogue.format_version != 1
+            || catalogue.versions.contains_key(&0)
+            || !catalogue.versions.contains_key(&catalogue.current_version)
+            || !catalogue.versions.contains_key(&catalogue.market_calibration_version)
+        {
+            return Err(invalid(format!("unsupported historical population catalogue {}", path.display())));
+        }
+        Ok(Self { root, catalogue })
+    }
+
+    pub(crate) fn current_version(&self) -> u32 {
+        self.catalogue.current_version
+    }
+
+    pub(crate) fn market_calibration_version(&self) -> u32 {
+        self.catalogue.market_calibration_version
+    }
+
+    pub(crate) fn versions(&self) -> impl Iterator<Item = u32> + '_ {
+        self.catalogue.versions.keys().copied()
+    }
+
+    fn read(&self, version: u32, kind: &str, file: &Path) -> io::Result<Vec<u8>> {
+        let mut components = file.components();
+        if !matches!(components.next(), Some(Component::Normal(_))) || components.next().is_some()
+            || file.extension().and_then(|ext| ext.to_str()) != Some("json")
+        {
+            return Err(invalid(format!("invalid historical population version {version} {kind} asset path")));
+        }
+        let path = self.root.join(file);
+        fs::read(&path).map_err(|error| io::Error::new(error.kind(), format!(
+            "historical population version {version} {kind} asset {}: {error}", path.display(),
+        )))
+    }
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct OpeningPopulationEstimate {
@@ -108,47 +179,18 @@ struct Unit {
 
 impl HistoricalOpening {
     pub(crate) fn load<'a>(
+        assets: &OpeningAssets,
         version: u32,
         legacy: &BTreeMap<String, u64>,
         known_polity: impl Fn(&str) -> bool,
         market_at: impl Fn(&str) -> Option<&'a str>,
     ) -> io::Result<Self> {
-        let bytes: &[u8] = match version {
-            1 => include_bytes!("../../../../data/historical_population_1900/opening.json"),
-            2 => include_bytes!("../../../../data/historical_population_1900/opening_v2.json"),
-            3 => include_bytes!("../../../../data/historical_population_1900/opening_v3.json"),
-            4 => include_bytes!("../../../../data/historical_population_1900/opening_v4.json"),
-            5 => include_bytes!("../../../../data/historical_population_1900/opening_v5.json"),
-            6 => include_bytes!("../../../../data/historical_population_1900/opening_v6.json"),
-            7 => include_bytes!("../../../../data/historical_population_1900/opening_v7.json"),
-            8 => include_bytes!("../../../../data/historical_population_1900/opening_v8.json"),
-            9 => include_bytes!("../../../../data/historical_population_1900/opening_v9.json"),
-            10 => include_bytes!("../../../../data/historical_population_1900/opening_v10.json"),
-            11 => include_bytes!("../../../../data/historical_population_1900/opening_v11.json"),
-            12 => include_bytes!("../../../../data/historical_population_1900/opening_v12.json"),
-            13 => include_bytes!("../../../../data/historical_population_1900/opening_v13.json"),
-            14 => include_bytes!("../../../../data/historical_population_1900/opening_v14.json"),
-            15 => include_bytes!("../../../../data/historical_population_1900/opening_v15.json"),
-            16 => include_bytes!("../../../../data/historical_population_1900/opening_v16.json"),
-            17 => include_bytes!("../../../../data/historical_population_1900/opening_v17.json"),
-            18 => include_bytes!("../../../../data/historical_population_1900/opening_v18.json"),
-            19 => include_bytes!("../../../../data/historical_population_1900/opening_v19.json"),
-            20 => include_bytes!("../../../../data/historical_population_1900/opening_v20.json"),
-            21 => include_bytes!("../../../../data/historical_population_1900/opening_v21.json"),
-            22 => include_bytes!("../../../../data/historical_population_1900/opening_v22.json"),
-            23 => include_bytes!("../../../../data/historical_population_1900/opening_v23.json"),
-            24 => include_bytes!("../../../../data/historical_population_1900/opening_v24.json"),
-            25 => include_bytes!("../../../../data/historical_population_1900/opening_v25.json"),
-            26 => include_bytes!("../../../../data/historical_population_1900/opening_v26.json"),
-            27 => include_bytes!("../../../../data/historical_population_1900/opening_v27.json"),
-            28 => include_bytes!("../../../../data/historical_population_1900/opening_v28.json"),
-            29 => include_bytes!("../../../../data/historical_population_1900/opening_v29.json"),
-            30 => include_bytes!("../../../../data/historical_population_1900/opening_v30.json"),
-            31 => include_bytes!("../../../../data/historical_population_1900/opening_v31.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_v32.json"),
-            _ => return Err(invalid("unsupported historical population opening version")),
-        };
-        let manifest: Manifest = serde_json::from_slice(bytes)?;
+        let files = assets.catalogue.versions.get(&version).ok_or_else(|| io::Error::new(
+            io::ErrorKind::NotFound,
+            format!("historical population version {version} is absent from {}", assets.root.display()),
+        ))?;
+        let bytes = assets.read(version, "opening", &files.opening)?;
+        let manifest: Manifest = serde_json::from_slice(&bytes)?;
         if manifest.version != version || manifest.groups.is_empty() {
             return Err(invalid("unsupported historical population opening"));
         }
@@ -270,68 +312,14 @@ impl HistoricalOpening {
         }).is_none() {
             return Err(invalid("historical opening exceeds the supported population"));
         }
-        let demography: &[u8] = match version {
-            2 => include_bytes!("../../../../data/historical_population_1900/opening_structure.json"),
-            3 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v3.json"),
-            4 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v4.json"),
-            5 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v5.json"),
-            6 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v6.json"),
-            7 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v7.json"),
-            8 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v8.json"),
-            9 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v9.json"),
-            10 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v10.json"),
-            11 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v11.json"),
-            12 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v12.json"),
-            13 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v13.json"),
-            14 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v14.json"),
-            15 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v15.json"),
-            16 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v16.json"),
-            17 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v17.json"),
-            18 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v18.json"),
-            19 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v19.json"),
-            20 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v20.json"),
-            21 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v21.json"),
-            22 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v22.json"),
-            23 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v23.json"),
-            24 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v24.json"),
-            25 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v25.json"),
-            26 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v26.json"),
-            27 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v27.json"),
-            28 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v28.json"),
-            29 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v29.json"),
-            30 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v30.json"),
-            31 => include_bytes!("../../../../data/historical_population_1900/opening_structure_v31.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_structure_v32.json"),
-            _ => return Ok(opening),
-        };
-        opening.demography = OpeningDemography::load(&opening, demography)?;
-        let social: &[u8] = match version {
-            10 => include_bytes!("../../../../data/historical_population_1900/opening_social_v10.json"),
-            11 => include_bytes!("../../../../data/historical_population_1900/opening_social_v11.json"),
-            12 => include_bytes!("../../../../data/historical_population_1900/opening_social_v12.json"),
-            13 => include_bytes!("../../../../data/historical_population_1900/opening_social_v13.json"),
-            14 => include_bytes!("../../../../data/historical_population_1900/opening_social_v14.json"),
-            15 => include_bytes!("../../../../data/historical_population_1900/opening_social_v15.json"),
-            16 => include_bytes!("../../../../data/historical_population_1900/opening_social_v16.json"),
-            17 => include_bytes!("../../../../data/historical_population_1900/opening_social_v17.json"),
-            18 => include_bytes!("../../../../data/historical_population_1900/opening_social_v18.json"),
-            19 => include_bytes!("../../../../data/historical_population_1900/opening_social_v19.json"),
-            20 => include_bytes!("../../../../data/historical_population_1900/opening_social_v20.json"),
-            21 => include_bytes!("../../../../data/historical_population_1900/opening_social_v21.json"),
-            22 => include_bytes!("../../../../data/historical_population_1900/opening_social_v22.json"),
-            23 => include_bytes!("../../../../data/historical_population_1900/opening_social_v23.json"),
-            24 => include_bytes!("../../../../data/historical_population_1900/opening_social_v24.json"),
-            25 => include_bytes!("../../../../data/historical_population_1900/opening_social_v25.json"),
-            26 => include_bytes!("../../../../data/historical_population_1900/opening_social_v26.json"),
-            27 => include_bytes!("../../../../data/historical_population_1900/opening_social_v27.json"),
-            28 => include_bytes!("../../../../data/historical_population_1900/opening_social_v28.json"),
-            29 => include_bytes!("../../../../data/historical_population_1900/opening_social_v29.json"),
-            30 => include_bytes!("../../../../data/historical_population_1900/opening_social_v30.json"),
-            31 => include_bytes!("../../../../data/historical_population_1900/opening_social_v31.json"),
-            CURRENT_VERSION => include_bytes!("../../../../data/historical_population_1900/opening_social_v32.json"),
-            _ => return Ok(opening),
-        };
-        opening.social = OpeningSocial::load(&opening, social)?;
+        if let Some(file) = &files.demography {
+            let bytes = assets.read(version, "demography", file)?;
+            opening.demography = OpeningDemography::load(&opening, &bytes)?;
+        }
+        if let Some(file) = &files.social {
+            let bytes = assets.read(version, "social", file)?;
+            opening.social = OpeningSocial::load(&opening, &bytes)?;
+        }
         Ok(opening)
     }
 

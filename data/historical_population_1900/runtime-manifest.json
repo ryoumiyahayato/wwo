@@ -1,0 +1,157 @@
+{
+  "format_version": 1,
+  "current_version": 32,
+  "market_calibration_version": 4,
+  "versions": {
+    "1": {
+      "opening": "opening.json"
+    },
+    "2": {
+      "opening": "opening_v2.json",
+      "demography": "opening_structure.json"
+    },
+    "3": {
+      "opening": "opening_v3.json",
+      "demography": "opening_structure_v3.json"
+    },
+    "4": {
+      "opening": "opening_v4.json",
+      "demography": "opening_structure_v4.json"
+    },
+    "5": {
+      "opening": "opening_v5.json",
+      "demography": "opening_structure_v5.json"
+    },
+    "6": {
+      "opening": "opening_v6.json",
+      "demography": "opening_structure_v6.json"
+    },
+    "7": {
+      "opening": "opening_v7.json",
+      "demography": "opening_structure_v7.json"
+    },
+    "8": {
+      "opening": "opening_v8.json",
+      "demography": "opening_structure_v8.json"
+    },
+    "9": {
+      "opening": "opening_v9.json",
+      "demography": "opening_structure_v9.json"
+    },
+    "10": {
+      "opening": "opening_v10.json",
+      "demography": "opening_structure_v10.json",
+      "social": "opening_social_v10.json"
+    },
+    "11": {
+      "opening": "opening_v11.json",
+      "demography": "opening_structure_v11.json",
+      "social": "opening_social_v11.json"
+    },
+    "12": {
+      "opening": "opening_v12.json",
+      "demography": "opening_structure_v12.json",
+      "social": "opening_social_v12.json"
+    },
+    "13": {
+      "opening": "opening_v13.json",
+      "demography": "opening_structure_v13.json",
+      "social": "opening_social_v13.json"
+    },
+    "14": {
+      "opening": "opening_v14.json",
+      "demography": "opening_structure_v14.json",
+      "social": "opening_social_v14.json"
+    },
+    "15": {
+      "opening": "opening_v15.json",
+      "demography": "opening_structure_v15.json",
+      "social": "opening_social_v15.json"
+    },
+    "16": {
+      "opening": "opening_v16.json",
+      "demography": "opening_structure_v16.json",
+      "social": "opening_social_v16.json"
+    },
+    "17": {
+      "opening": "opening_v17.json",
+      "demography": "opening_structure_v17.json",
+      "social": "opening_social_v17.json"
+    },
+    "18": {
+      "opening": "opening_v18.json",
+      "demography": "opening_structure_v18.json",
+      "social": "opening_social_v18.json"
+    },
+    "19": {
+      "opening": "opening_v19.json",
+      "demography": "opening_structure_v19.json",
+      "social": "opening_social_v19.json"
+    },
+    "20": {
+      "opening": "opening_v20.json",
+      "demography": "opening_structure_v20.json",
+      "social": "opening_social_v20.json"
+    },
+    "21": {
+      "opening": "opening_v21.json",
+      "demography": "opening_structure_v21.json",
+      "social": "opening_social_v21.json"
+    },
+    "22": {
+      "opening": "opening_v22.json",
+      "demography": "opening_structure_v22.json",
+      "social": "opening_social_v22.json"
+    },
+    "23": {
+      "opening": "opening_v23.json",
+      "demography": "opening_structure_v23.json",
+      "social": "opening_social_v23.json"
+    },
+    "24": {
+      "opening": "opening_v24.json",
+      "demography": "opening_structure_v24.json",
+      "social": "opening_social_v24.json"
+    },
+    "25": {
+      "opening": "opening_v25.json",
+      "demography": "opening_structure_v25.json",
+      "social": "opening_social_v25.json"
+    },
+    "26": {
+      "opening": "opening_v26.json",
+      "demography": "opening_structure_v26.json",
+      "social": "opening_social_v26.json"
+    },
+    "27": {
+      "opening": "opening_v27.json",
+      "demography": "opening_structure_v27.json",
+      "social": "opening_social_v27.json"
+    },
+    "28": {
+      "opening": "opening_v28.json",
+      "demography": "opening_structure_v28.json",
+      "social": "opening_social_v28.json"
+    },
+    "29": {
+      "opening": "opening_v29.json",
+      "demography": "opening_structure_v29.json",
+      "social": "opening_social_v29.json"
+    },
+    "30": {
+      "opening": "opening_v30.json",
+      "demography": "opening_structure_v30.json",
+      "social": "opening_social_v30.json"
+    },
+    "31": {
+      "opening": "opening_v31.json",
+      "demography": "opening_structure_v31.json",
+      "social": "opening_social_v31.json"
+    },
+    "32": {
+      "opening": "opening_v32.json",
+      "demography": "opening_structure_v32.json",
+      "social": "opening_social_v32.json"
+    }
+  }
+}
