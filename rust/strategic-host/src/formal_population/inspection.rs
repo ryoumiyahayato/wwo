@@ -56,6 +56,7 @@ const DIETARY_NORMS: &[(u32, &str, &[(&str, &str)])] = &[
         ("mexico_1900_reported_religion", "Israelitas"),
         ("egypt_1897_reported_religion", "Jewish"),
         ("portugal_1900_reported_religion", "Jewish"),
+        ("argentina_1895_reported_religion", "Israelitas"),
     ]),
 ];
 

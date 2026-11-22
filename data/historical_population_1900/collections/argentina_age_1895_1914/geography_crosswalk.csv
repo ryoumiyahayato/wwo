@@ -1,0 +1,24 @@
+unit_id,name,geographic_role,members,counted_1895_05_10,estimated_1901_12_31,opening_population_1900_01_01,opening_coverage_reserve,place_ids,scope_note
+ar_capital_federal,Capital Federal,capital,ar_capital_federal,663854,846701,772173,0,place:buenos_aires,Federal district including Flores and Belgrano after the 1888 incorporation. Buenos Aires Province is separate.
+ar_buenos_aires_province,Buenos Aires Province,province,ar_buenos_aires_province,921168,1176864,1072742,0,,Province outside Capital Federal. Patagones followed the provincial limits of 1886.
+ar_catamarca,Catamarca,province,ar_catamarca,90161,100672,95671,0,,Named jurisdiction in both published tables. Historical surveyed boundaries are approximate.
+ar_corrientes,Corrientes,province,ar_corrientes,239618,282731,264014,0,,Named jurisdiction in both published tables. Historical surveyed boundaries are approximate.
+ar_entre_rios,Entre Ríos,province,ar_entre_rios,292019,349862,325156,0,,Named jurisdiction in both published tables. Historical surveyed boundaries are approximate.
+ar_jujuy,Jujuy,province,ar_jujuy,49713,54756,52268,0,,Named jurisdiction in both published tables. Historical surveyed boundaries are approximate.
+ar_la_rioja,La Rioja,province,ar_la_rioja,69502,78994,74642,0,,Named jurisdiction in both published tables. Historical surveyed boundaries are approximate.
+ar_mendoza,Mendoza,province,ar_mendoza,116136,148021,135020,0,,1895 and 1901 both publish 146378 km2. Law 5217 later adopted the boundary marked in 1881.
+ar_salta,Salta,province,ar_salta,118015,134025,126674,0,,Both endpoints precede the 1902 cession of San Antonio de los Cobres to Los Andes.
+ar_san_juan,San Juan,province,ar_san_juan,84251,96667,91067,0,,Named jurisdiction in both published tables. Historical surveyed boundaries are approximate.
+ar_san_luis,San Luis,province,ar_san_luis,81450,92711,87562,0,,Named jurisdiction in both published tables. Historical surveyed boundaries are approximate.
+ar_tucuman,Tucumán,province,ar_tucuman,215742,251527,235759,0,,Named jurisdiction in both published tables. Historical surveyed boundaries are approximate.
+ar_chubut,Chubut,territory,ar_chubut,3748,4536,4203,0,,Argentine-administered statistical area before the 1902 international award. Historical reach of enumeration is approximate.
+ar_formosa,Formosa,territory,ar_formosa,4829,5752,5355,0,,Argentine territory south of Pilcomayo. No remote-area or grouped Indigenous adjustments allocated.
+ar_la_pampa,La Pampa,territory,ar_la_pampa,25914,47490,39418,0,,Historic Pampa Central. Both endpoints publish 145907 km2 and predate the 1907 Mendoza boundary law.
+ar_misiones,Misiones,territory,ar_misiones,33163,34714,33703,0,,Territorial scope is after the February 1895 Cleveland award. Estimate uses Argentine Misiones.
+ar_neuquen,Neuquén,territory,ar_neuquen,14517,16354,15497,0,,Argentine-administered statistical area before the 1902 international award. Historical reach of enumeration is approximate.
+ar_rio_negro,Río Negro,territory,ar_rio_negro,9241,14459,12466,0,,Argentine-administered statistical area before the 1902 international award. Historical reach of enumeration is approximate.
+ar_santa_cruz,Santa Cruz,territory,ar_santa_cruz,1058,1536,1350,0,,Argentine-administered statistical area before the 1902 international award. Historical reach of enumeration is approximate.
+ar_tierra_del_fuego,Tierra del Fuego,territory,ar_tierra_del_fuego,477,1037,830,0,,Historic Argentine eastern island territory and Isla de los Estados. Antarctic observatories are outside the series.
+ar_central_chaco_comparable,"Cordoba, Santa Fe, Santiago del Estero and Chaco",combined_statistical_area,ar_cordoba|ar_santa_fe|ar_santiago_del_estero|ar_chaco,920335,1186338,1078542,0,place:cordoba|place:rosario,Combined historical census areas conserve internal transfers and jurisdiction disputes. No separate province or territory count assigned.
+ar_puna_1899_geography_unlocated,Newly incorporated Puna de Atacama,census_geography_unlocated,ar_los_andes,,1166,749,0,,No 1895 Argentine count. 1901 Los Andes only supplies its contribution to the opening geography balance. The administration was created after the opening.
+ar_opening_coverage_unlocated,Residents outside individual enumeration,coverage_unlocated,,,,99825,99825,,"National opening reserve modeled from 1895 and 1914 omissions, Indigenous aggregate figures and remote residents."
