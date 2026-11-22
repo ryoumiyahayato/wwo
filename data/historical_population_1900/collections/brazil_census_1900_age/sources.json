@@ -6,5 +6,21 @@
     "locator": "Printed pp. 270–291, População por idades",
     "url": "https://biblioteca.ibge.gov.br/visualizacao/periodicos/20/aeb_1908_1912_v1.pdf",
     "rights": "Historic public statistical return. Numeric facts transcribed."
+  },
+  {
+    "id": "br_dge_1916_1900_marital",
+    "title": "Annuario Estatistico do Brazil 1908–1912, vol. I",
+    "publisher": "Directoria Geral de Estatistica",
+    "locator": "Printed pp. 262–269, População segundo sexo, estado civil e nacionalidade",
+    "url": "https://biblioteca.ibge.gov.br/visualizacao/periodicos/20/aeb_1908_1912_v1.pdf#page=297",
+    "rights": "Historic public statistical return. Numeric facts transcribed."
+  },
+  {
+    "id": "br_dge_1929_1900_literacy",
+    "title": "Recenseamento do Brazil de 1920, vol. IV, 4ª parte (1929)",
+    "publisher": "Directoria Geral de Estatistica",
+    "locator": "Printed pp. XIII–XVI, historical 1900 return by state, sex and literacy",
+    "url": "https://biblioteca.ibge.gov.br/visualizacao/livros/liv31687.pdf#page=15",
+    "rights": "Historic public statistical return. Numeric facts transcribed."
   }
 ]

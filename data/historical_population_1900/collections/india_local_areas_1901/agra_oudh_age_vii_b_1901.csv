@@ -1,0 +1,28 @@
+panel,label,role,age_min,age_max,both,male,female
+raj_agra_oudh,0–5,band,0,4,6045853,3022240,3023613
+raj_agra_oudh,5–10,band,5,9,6109831,3195199,2914632
+raj_agra_oudh,10–15,band,10,14,5566417,3091210,2475207
+raj_agra_oudh,15–20,band,15,19,3886495,2125069,1761426
+raj_agra_oudh,20–40,band,20,39,15183516,7743208,7440308
+raj_agra_oudh,40–60,band,40,59,8298045,4238695,4059350
+raj_agra_oudh,60 and over,band,60,,2565489,1185209,1380280
+raj_agra_oudh,Unspecified,band,,,36136,16112,20024
+raj_agra_oudh,Total,total,,,47691782,24616942,23074840
+raj_agra_oudh_agra_remainder,0–5,band,0,4,4444903,2226387,2218516
+raj_agra_oudh_agra_remainder,5–10,band,5,9,4486872,2343809,2143063
+raj_agra_oudh_agra_remainder,10–15,band,10,14,4084342,2274935,1809407
+raj_agra_oudh_agra_remainder,15–20,band,15,19,2856917,1562317,1294600
+raj_agra_oudh_agra_remainder,20–40,band,20,39,11146816,5720388,5426428
+raj_agra_oudh_agra_remainder,40–60,band,40,59,6021927,3081583,2940344
+raj_agra_oudh_agra_remainder,60 and over,band,60,,1786190,825533,960657
+raj_agra_oudh_agra_remainder,Unspecified,band,,,30738,13833,16905
+raj_agra_oudh_agra_remainder,Total,total,,,34858705,18048785,16809920
+raj_agra_oudh_oudh,0–5,band,0,4,1600950,795853,805097
+raj_agra_oudh_oudh,5–10,band,5,9,1622959,851390,771569
+raj_agra_oudh_oudh,10–15,band,10,14,1482075,816275,665800
+raj_agra_oudh_oudh,15–20,band,15,19,1029578,562752,466826
+raj_agra_oudh_oudh,20–40,band,20,39,4036700,2022820,2013880
+raj_agra_oudh_oudh,40–60,band,40,59,2276118,1157112,1119006
+raj_agra_oudh_oudh,60 and over,band,60,,779299,359676,419623
+raj_agra_oudh_oudh,Unspecified,band,,,5398,2279,3119
+raj_agra_oudh_oudh,Total,total,,,12833077,6568157,6264920

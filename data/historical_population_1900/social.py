@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from itertools import chain
 from pathlib import Path
 
-from opening import ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE
+from opening import ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, SPANISH_CIVIL_STATUS_SCOPE
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
 from social_india_princely import india_princely_residence, madras_states_religion, travancore_language
@@ -773,7 +773,7 @@ def italy_marital_status(pool):
     )
 
 
-def spain_marital_status(pool):
+def spain_marital_status(pools, observations, version):
     panel = "es_census_1900_peninsula_islas"
     collection = COLLECTIONS / "spain_census_1900"
     with (collection / "marital_status.csv").open(encoding="utf8", newline="") as stream:
@@ -783,16 +783,43 @@ def spain_marital_status(pool):
     if (any(sum(int(row[sex]) for row in rows) != int(control[sex]) for sex in ("male", "female"))
             or any(int(row["male"]) + int(row["female"]) != int(row["both"]) for row in [*rows, control])):
         raise ValueError("Spanish census civil status does not close by sex")
-    counts = {row["label"]: int(row["both"]) for row in rows if row["category"] != "unknown"}
-    unknown, = (int(row["both"]) for row in rows if row["category"] == "unknown")
-    yield pool["unit_id"], "marital_status", distribution(
-        pool["population_value"], classification="spain_1900_reported_marital_status",
-        source="es_census_1900_age_marital", date=control["date"], observed_unit=panel,
-        scope="Population present in the peninsula, the Balearic Islands and the Canary Islands",
-        locator=control["printed_pages"], total=int(control["both"]), observed_counts=counts, unknown=unknown,
-        definition="The census reports civil status for people of all ages. African possessions are removed by category.",
-        method=f"{SHARE_METHOD} The year-end shares are used for January 1; intervening change is unquantified.",
-    )
+    remaining = {row["category"]: int(row["both"]) for row in rows}
+    labels = {row["category"]: row["label"] for row in rows}
+    national_scope = "Population present in the peninsula, the Balearic Islands and the Canary Islands"
+    allocations = []
+    if version >= 25:
+        local = defaultdict(list)
+        with (collection / "provincial_marital_status_1900.csv").open(encoding="utf8", newline="") as stream:
+            for row in csv.DictReader(stream):
+                local[row["panel"]].append(row)
+        with (collection / "provincial_age_sources_1900.csv").open(encoding="utf8", newline="") as stream:
+            sources = {row["panel"]: row for row in csv.DictReader(stream)}
+        sex_controls = {row["unit_id"]: row["sex"] for row in observations
+                        if row["source_id"] == "es_census_1900_provincial_population" and row["unit_id"] in local}
+        for unit, provincial_rows in local.items():
+            source = sources[unit]
+            if (any(sum(int(row[sex]) for row in provincial_rows) != sex_controls[unit][sex]
+                    for sex in ("male", "female"))
+                    or any(int(row["male"]) + int(row["female"]) != int(row["both"]) for row in provincial_rows)):
+                raise ValueError(f"{unit}: civil status does not close to the provincial sex counts")
+            counts = {row["category"]: int(row["both"]) for row in provincial_rows}
+            for key, count in counts.items():
+                remaining[key] -= count
+            locator = f"Vol. III, printed pp. {source['printed_pages']}; {source['method']}"
+            allocations.append((unit, unit, source["province"], locator, counts))
+        allocations.append((SPANISH_CIVIL_STATUS_SCOPE, panel, f"{national_scope}, less the nine assigned provinces",
+                            f"{control['printed_pages']}; subtract nine separately reported provinces", remaining))
+    else:
+        allocations.append(("kingdom_of_spain", panel, national_scope, control["printed_pages"], remaining))
+    for unit, observed, scope, locator, counts in allocations:
+        yield unit, "marital_status", distribution(
+            pools[unit]["population_value"], classification="spain_1900_reported_marital_status",
+            source="es_census_1900_age_marital", date=control["date"], observed_unit=observed,
+            scope=scope, locator=locator, total=sum(counts.values()), unknown=counts["unknown"],
+            observed_counts={labels[key]: value for key, value in counts.items() if key != "unknown"},
+            definition="The census reports civil status for all ages. African possessions are removed by category.",
+            method=f"{SHARE_METHOD} The year-end shares are used for January 1; intervening change is unquantified.",
+        )
 
 
 def agra_oudh_religion(pools, observations):
@@ -1009,7 +1036,7 @@ def italian_industrial_position(pools):
                 observed_counts={category: int(row[f"{category}_male"]) + int(row[f"{category}_female"])
                                  for category in categories},
                 definition="Census position within the person's declared industrial occupation. Other occupations, "
-                           "people outside the occupation table and three compartments with conflicting counts remain unknown.",
+                           "people outside the occupation table and compartments with conflicting counts remain unknown.",
             )
 
 
@@ -1019,6 +1046,8 @@ def egyptian_provincial_religion(pools, observations):
         if row["source_id"] != source:
             continue
         unit = row["unit_id"]
+        if unit == "egy_mudiriya_faiyum" and "egy_markaz_itsa" in pools:
+            continue
         pool = pools[unit]
         total = row["population_value"]
         if pool["endpoint_values"][0] != total:
@@ -1030,6 +1059,93 @@ def egyptian_provincial_religion(pools, observations):
             definition="Published province subtotals by religion, including all reported Christian denominations together.",
             method=f"{SHARE_METHOD} Religious composition changes between June 1897 and January 1900 are unquantified.",
         )
+
+
+def egyptian_faiyum_social(pools, observations):
+    source = "egypt_faiyum_census_1897"
+    for row in observations:
+        if row["source_id"] != source:
+            continue
+        unit = row["unit_id"]
+        pool = pools[unit]
+        total = row["population_value"]
+        if pool["endpoint_values"][0] != total:
+            raise ValueError(f"{unit}: social and population census controls differ")
+        breakdowns = row["breakdowns"]
+        classifications = [
+            ("religion", "egypt_1897_reported_religion", breakdowns["religion"],
+             "Census religion. Christian denominations are combined."),
+        ]
+        for field, dimension, classification, labels, definition in [
+            ("work", "occupation", "egypt_1897_reported_occupation_status", ("With occupation", "Without occupation"),
+             "Census reports the presence of an occupation. Exact occupation, employment or wage status is unknown."),
+            ("reading", "literacy", "egypt_1897_reported_instruction", ("Read and write", "Illiterate"),
+             "Census instruction categories for the entire district population."),
+        ]:
+            male_yes, male_no, female_yes, female_no = breakdowns[field]
+            sex = breakdowns["sex"]
+            if male_yes + male_no != sex["male"] or female_yes + female_no != sex["female"]:
+                continue
+            counts = dict(zip(labels, (male_yes + female_yes, male_no + female_no), strict=True))
+            classifications.append((dimension, classification, counts, definition))
+        for dimension, classification, counts, definition in classifications:
+            yield unit, dimension, distribution(
+                pool["population_value"], classification=classification, source=source, date=row["date"],
+                observed_unit=unit, scope=row["definition"], locator=row["locator"], total=total,
+                observed_counts=counts, unknown=0, definition=definition,
+            )
+
+
+def brazilian_state_distribution(pools, filename, dimension, classification, source, columns, definition):
+    path = COLLECTIONS / "brazil_census_1900_age" / filename
+    with path.open(encoding="utf8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    if sum(int(row["observed_total"]) for row in rows) != 16_626_991:
+        raise ValueError(f"Brazilian {dimension} does not close to the non-federal census total")
+    for row in rows:
+        unit = row["unit_id"]
+        pool = pools[unit]
+        total = int(row["observed_total"])
+        if (pool["endpoint_values"][-1] != total
+                or any(sum(int(row[f"{category}_{sex}"]) for category in columns) != int(row[f"observed_{sex}"])
+                       for sex in ("male", "female"))):
+            raise ValueError(f"{unit}: {dimension} and state population counts do not close")
+        yield unit, dimension, distribution(
+            pool["population_value"], classification=classification,
+            source=source, date=row["observed_date"], observed_unit=unit,
+            scope=f"{row['source_label']}, census state population", locator=row["locator"],
+            total=total, unknown=int(row["unknown"]),
+            observed_counts={label: int(row[f"{key}_male"]) + int(row[f"{key}_female"])
+                             for key, label in columns.items()},
+            definition=definition,
+        )
+
+
+def belgian_provincial_distribution(pools, filename, dimension, classification, source, locator, definition):
+    collection = COLLECTIONS / "belgium_provinces_1900"
+    with (collection / filename).open(encoding="utf8", newline="") as stream:
+        provincial = defaultdict(list)
+        for row in csv.DictReader(stream):
+            provincial[row["panel"]].append(row)
+    national = {row["category"]: int(row["both"]) for row in provincial.pop("be_census_kingdom")}
+    combined = Counter()
+    with (collection / "provincial_sex_1890_1900.csv").open(encoding="utf8", newline="") as stream:
+        controls = {row["unit_id"]: row for row in csv.DictReader(stream) if row["date"] == "1900-12-31"}
+    for unit, rows in provincial.items():
+        pool = pools[unit]
+        total = pool["endpoint_values"][-1]
+        if any(sum(int(row[sex]) for row in rows) != int(controls[unit][sex]) for sex in ("male", "female")):
+            raise ValueError(f"{unit}: {dimension} counts do not match the resident sex controls")
+        combined.update({row["category"]: int(row["both"]) for row in rows})
+        yield unit, dimension, distribution(
+            pool["population_value"], classification=classification,
+            source=source, date="1900-12-31", observed_unit=unit,
+            scope=f"{pool['name']}, usual residents", locator=locator, total=total,
+            observed_counts={row["label"]: int(row["both"]) for row in rows}, unknown=0,
+            definition=definition,
+        )
+    if dict(combined) != national:
+        raise ValueError(f"Belgian provincial {dimension} categories do not close to the national totals")
 
 
 CANADA_ORIGIN_COLUMNS = {
@@ -1153,7 +1269,29 @@ def opening_social(opening_groups, observations, *, version):
         marginals = chain(marginals, italian_occupation(pools), italian_literacy(pools),
                           italian_registered_property(pools), italian_industrial_position(pools),
                           egyptian_provincial_religion(pools, observations),
-                          spain_marital_status(pools["kingdom_of_spain"]), agra_oudh_religion(pools, observations))
+                          spain_marital_status(pools, observations, version), agra_oudh_religion(pools, observations))
+    if version >= 25:
+        marginals = chain(
+            marginals, egyptian_faiyum_social(pools, observations),
+            belgian_provincial_distribution(
+                pools, "spoken_languages.csv", "language", "belgium_1900_reported_spoken_national_languages",
+                "be_census_1900_age_and_spoken_languages", "Tome I(c), printed p. 629",
+                "Eight mutually exclusive combinations of three national languages reported as spoken. "
+                "The explicit none category does not establish mother tongue, other languages or nationality.",
+            ), belgian_provincial_distribution(
+                pools, "marital_status.csv", "marital_status", "belgium_1900_reported_marital_status",
+                "be_census_1900_marital_and_citizenship", "Tome I(b), printed pp. 370–371",
+                "All ages, with four separately reported civil status categories.",
+            ), brazilian_state_distribution(
+                pools, "marital_status.csv", "marital_status", "brazil_1900_reported_marital_status",
+                "br_dge_1916_1900_marital", {"single": "Solteiros", "married": "Casados", "widowed": "Viuvos"},
+                "Reported civil status. The Federal District is outside this allocation.",
+            ), brazilian_state_distribution(
+                pools, "literacy.csv", "literacy", "brazil_1900_reported_literacy",
+                "br_dge_1929_1900_literacy", {"literate": "Sabem ler e escrever", "illiterate": "Não sabem ler nem escrever"},
+                "All ages. The Federal District return in this publication is from 1906 and is outside this allocation.",
+            ),
+        )
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

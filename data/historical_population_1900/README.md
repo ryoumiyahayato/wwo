@@ -1,6 +1,14 @@
 # 1900 年全球人口数据综合报告
 
-**v24 状态为 PARTIAL。** 1900-01-01 游戏人口为 **1,468,068,587 人**。其中 **1,336,973,880 人**有可追溯历史来源，**131,094,707 人**沿用旧估计。**1,245,730,646 人**进入 **999 个互斥历史分区**。全球研究基准为 **1,595,074,248 人**。两套总数的差额包含统计范围差异。[发布统计](summary.json) · [新游戏开局](opening_v24.json) · [逐研究区与游戏账户的差额](world_accounts.json)
+**v25 状态为 PARTIAL。** 1900-01-01 游戏人口为 **1,468,068,587 人**。其中 **1,336,973,880 人**有可追溯历史来源，**131,094,707 人**沿用旧估计。**1,264,242,453 人**进入 **1,050 个互斥历史分区**。全球研究基准为 **1,595,074,248 人**。两套总数的差额包含统计范围差异。[发布统计](summary.json) · [新游戏开局](opening_v25.json) · [逐研究区与游戏账户的差额](world_accounts.json)
+
+西班牙 49 省人口按两期同范围普查内插并校准到原全国控制 18,511,807 人。九省使用当地年龄及婚姻表。其余 40 省使用本省性别和剔除九省后的分性别年龄分布。40 省婚姻只在合计范围分配，各省该项显示未分配。加的斯两期均扣休达。新省账户通过 F7 地域 ID 查询。[西班牙原表](collections/spain_census_1900/provincial_population_README.md)
+
+比利时九省 6,631,330 人用当地年龄、性别、所讲语言和婚姻原表分配。法尤姆三个县级地区共 389,421 人有本地性别、宗教和是否有职业。两县共 257,046 人有识字分组。法尤姆县的识字行与当地人口差 36 人，全县该项保留未分配。巴西 20 邦 16,346,344 人按当地表分配婚姻及识字，联邦区该两项留空。意大利罗马涅的工业从业身份进入开局。[比利时原表](collections/belgium_provinces_1900) · [法尤姆原表](collections/egypt_faiyum_1900) · [巴西原表](collections/brazil_census_1900_age) · [意大利原表](collections/italy_census_1901)
+
+阿格拉和奥德的分性别年龄模型先分配到各自普查的八个宽档，再按同一性别、同一档的联合表细分。县级使用县性别资料和所属省份的年龄分布，县龄原数尚未确认。具名人口入账前，全球有 816,767,024 人同时具备年龄和性别，7,226,307 人有性别且年龄未知，644,075,256 人在年龄性别模型范围之外。[阿格拉与奥德原表](collections/india_local_areas_1901/agra_oudh_age_vii_b_1901.csv) · [年龄开局输入](opening_structure_v25.json) · [社会属性开局输入](opening_social_v25.json)
+
+## v24 与之前的开局变化
 
 奥德 12 县 12,811,936 人由两期同范围县普查插值。各县及阿格拉本部采用当地调查的性别比例、联合省各性别的年龄分布。联合省宗教已分配 47,600,488 人，另有 293 人未分配。英国直辖地区与两个土邦分别入账。[奥德和阿格拉原表](collections/india_local_areas_1901)
 
@@ -201,7 +209,7 @@ cargo run --locked --manifest-path rust/strategic-host/Cargo.toml --bin wwo-form
 cargo run --locked --manifest-path rust/strategic-host/Cargo.toml --bin wwo-formal-state -- inspect-market-livelihood russian_empire
 ```
 
-`population_1900.jsonl.gz` 每行含单位、父级、日期、数值、来源、页表、口径、方法、质量和地域状态。地理有效期与调查日期分别保存。用 `record_id` 从城市和地域索引回查原行，用 `source_id` 查出版资料。研究观测、母项、子项和不同史料可指向同一批人。正式新游戏读取 `opening_v24.json`、`opening_structure_v24.json` 和 `opening_social_v24.json`。完整分区之和等于父级。部分分区之和加未定位余额等于相应开局控制。v1 至 v23 存档继续读取冻结的对应输入。
+`population_1900.jsonl.gz` 每行含单位、父级、日期、数值、来源、页表、口径、方法、质量和地域状态。地理有效期与调查日期分别保存。用 `record_id` 从城市和地域索引回查原行，用 `source_id` 查出版资料。研究观测、母项、子项和不同史料可指向同一批人。正式新游戏读取 `opening_v25.json`、`opening_structure_v25.json` 和 `opening_social_v25.json`。完整分区之和等于父级。部分分区之和加未定位余额等于相应开局控制。v1 至 v24 存档继续读取冻结的对应输入。
 
 正式游戏沿用 Rust `Population`。迁移、具名化和征召共用人口余额。模拟出生及死亡进入同一人口日志，旧原生存档和旧平面快照按原开局恢复。`inspect-population city:<key>` 返回原日期城市参考，`inspect-population history:<unit-id>` 查询同一历史单位的地理、人数和人口结构原表。`inspect-food-history` 查询已录的住户账本。`inspect-age-range <world|unit-id> <min> <max> [<native-save>]` 返回年龄区间确定人数和可能人数，并单列已服役者。年龄区间是人口统计量，职业资格和各地征兵制度仍缺地区参数。全球历史年龄分层、消费篮子、城乡与地图边界仍待核。[Rust 入口和存档说明](../../rust/strategic-host/README.md) · [正式人口读取器](../../rust/strategic-host/src/formal_population/opening.rs)
 

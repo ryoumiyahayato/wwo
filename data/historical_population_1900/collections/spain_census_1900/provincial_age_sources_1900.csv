@@ -1,0 +1,10 @@
+panel,province,date,printed_pages,source_url,method
+es_census_1900_province_08,Barcelona,1900-12-31,54–55,https://ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=61980,Province summary
+es_census_1900_province_11,Cádiz,1900-12-31,76–77,https://www.ign.es/web/BibliotecaIGN/Biblioteca/312-C-1900%283%29.pdf,"Province summary less Ceuta, cell by cell (pp. 64–65)"
+es_census_1900_province_16,La Coruña,1900-12-31,116–117,https://ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=61988,Province summary
+es_census_1900_province_29,Madrid,1900-12-31,174–175,https://ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=62001,Province summary
+es_census_1900_province_30,Málaga,1900-12-31,182–183,https://ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=64166,Province summary
+es_census_1900_province_31,Murcia,1900-12-31,198–199,https://ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=64167,Province summary
+es_census_1900_province_34,Oviedo,1900-12-31,220–221,https://ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=64170,Province summary
+es_census_1900_province_40,Sevilla,1900-12-31,252–253,https://ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=77856,Province summary
+es_census_1900_province_45,Valencia,1900-12-31,278–279,https://ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=77862,Province summary

@@ -1,0 +1,37 @@
+panel,label,category,both,male,female
+es_census_1900_province_08,Solteros,single,574604,286959,287645
+es_census_1900_province_08,Casados,married,409892,204642,205250
+es_census_1900_province_08,Viudos,widowed,69609,20262,49347
+es_census_1900_province_08,No consta,unknown,436,226,210
+es_census_1900_province_11,Solteros,single,249232,129480,119752
+es_census_1900_province_11,Casados,married,156108,78779,77329
+es_census_1900_province_11,Viudos,widowed,33788,8863,24925
+es_census_1900_province_11,No consta,unknown,262,226,36
+es_census_1900_province_16,Solteros,single,397607,176421,221186
+es_census_1900_province_16,Casados,married,210330,100441,109889
+es_census_1900_province_16,Viudos,widowed,45522,12226,33296
+es_census_1900_province_16,No consta,unknown,97,31,66
+es_census_1900_province_29,Solteros,single,440418,218326,222092
+es_census_1900_province_29,Casados,married,265131,133285,131846
+es_census_1900_province_29,Viudos,widowed,68389,17149,51240
+es_census_1900_province_29,No consta,unknown,1096,801,295
+es_census_1900_province_30,Solteros,single,273303,142676,130627
+es_census_1900_province_30,Casados,married,200500,99719,100781
+es_census_1900_province_30,Viudos,widowed,37211,8963,28248
+es_census_1900_province_30,No consta,unknown,975,693,282
+es_census_1900_province_31,Solteros,single,320009,169180,150829
+es_census_1900_province_31,Casados,married,221625,110152,111473
+es_census_1900_province_31,Viudos,widowed,36353,8529,27824
+es_census_1900_province_31,No consta,unknown,0,0,0
+es_census_1900_province_34,Solteros,single,379011,171907,207104
+es_census_1900_province_34,Casados,married,205488,102989,102499
+es_census_1900_province_34,Viudos,widowed,42294,14894,27400
+es_census_1900_province_34,No consta,unknown,276,119,157
+es_census_1900_province_40,Solteros,single,300125,156607,143518
+es_census_1900_province_40,Casados,married,210529,105390,105139
+es_census_1900_province_40,Viudos,widowed,44534,13610,30924
+es_census_1900_province_40,No consta,unknown,68,40,28
+es_census_1900_province_45,Solteros,single,447138,231189,215949
+es_census_1900_province_45,Casados,married,310916,155368,155548
+es_census_1900_province_45,Viudos,widowed,48502,14858,33644
+es_census_1900_province_45,No consta,unknown,0,0,0

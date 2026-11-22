@@ -2512,7 +2512,7 @@ mod tests {
     #[test]
     fn historical_oudh_italy_egypt_and_spain_opening_counts_close() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(24)).unwrap();
         let agra_oudh = world.inspect_population("raj_agra_oudh").unwrap();
         assert_eq!(agra_oudh.children.len(), 13);
         assert_eq!(agra_oudh.children.iter().map(|child| child.population_total).sum::<u64>(), 47_600_781);
@@ -2569,6 +2569,56 @@ mod tests {
     }
 
     #[test]
+    fn historical_spanish_belgian_faiyum_and_brazilian_opening_counts_close() {
+        let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+        let spain = world.inspect_population("kingdom_of_spain").unwrap();
+        assert_eq!(spain.children.len(), 10);
+        assert_eq!(spain.children.iter().map(|child| child.population_total).sum::<u64>(), 18_511_807);
+        let barcelona = world.inspect_population("es_census_1900_province_08").unwrap();
+        assert_eq!(barcelona.population_total, Some(1_052_534));
+        assert!(barcelona.structure.unwrap().cohorts.iter().all(|cohort| {
+            cohort.evidence.as_ref().is_some_and(|evidence| evidence.source_id == "es_census_1900_age_marital")
+        }));
+        let marriage = &barcelona.social.unwrap().dimensions["marital_status"];
+        assert_eq!(marriage.direct_opening_distribution.as_ref().unwrap().observed_total, 1_054_541);
+        assert_eq!(marriage.assigned_residents + marriage.unknown_residents, 1_052_534);
+        let alava = world.inspect_population("es_census_1900_province_01").unwrap();
+        assert_eq!(alava.population_total, Some(96_213));
+        assert_eq!(alava.social.unwrap().dimensions["marital_status"].assigned_residents, 0);
+
+        let belgium = world.inspect_population("kingdom_of_belgium").unwrap();
+        assert_eq!(belgium.structure.unwrap().residents_with_cohort_age_and_sex, 6_631_330);
+        let belgian_social = belgium.social.unwrap();
+        assert_eq!(belgian_social.dimensions["language"].assigned_residents, 6_631_330);
+        assert_eq!(belgian_social.dimensions["marital_status"].assigned_residents, 6_631_330);
+        let antwerp = world.inspect_population("be_census_antwerp").unwrap().structure.unwrap();
+        assert_eq!(antwerp.cohorts.len(), 6);
+        assert_eq!(antwerp.residents_with_cohort_age_and_sex, 807_274);
+
+        let faiyum = world.inspect_population("egy_mudiriya_faiyum").unwrap();
+        assert_eq!(faiyum.children.len(), 3);
+        assert_eq!(faiyum.children.iter().map(|child| child.population_total).sum::<u64>(), 389_421);
+        let itsa = world.inspect_population("egy_markaz_itsa").unwrap();
+        let structure = itsa.structure.unwrap();
+        assert_eq!(structure.cohort_residents, 124_623);
+        assert_eq!(structure.residents_with_cohort_age_and_sex, 0);
+        let itsa_social = itsa.social.unwrap();
+        assert_eq!(itsa_social.dimensions["religion"].assigned_residents, 124_623);
+        assert_eq!(itsa_social.dimensions["literacy"].assigned_residents, 124_623);
+        let district = world.inspect_population("egy_markaz_faiyum").unwrap().social.unwrap();
+        assert_eq!(district.dimensions["occupation"].assigned_residents, 132_375);
+        assert_eq!(district.dimensions["literacy"].unknown_residents, 132_375);
+
+        let sao_paulo = world.inspect_population("br_sao_paulo").unwrap().social.unwrap();
+        assert_eq!(sao_paulo.dimensions["marital_status"].assigned_residents, 2_192_821);
+        assert_eq!(sao_paulo.dimensions["literacy"].assigned_residents, 2_192_821);
+        let lucknow = world.inspect_population("raj_oudh_lucknow").unwrap().structure.unwrap();
+        assert!(lucknow.cohorts.iter().all(|cohort| {
+            cohort.evidence.as_ref().is_some_and(|evidence| evidence.locator.contains("Table VII(B)"))
+        }));
+    }
+
+    #[test]
     fn historical_baden_survey_adds_age_and_civil_status_without_changing_the_balance() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let unit = "administrative_region:germany_baden";
@@ -2600,7 +2650,7 @@ mod tests {
     #[test]
     fn historical_egypt_provinces_partition_the_control_with_known_sex_only() {
         let bootstrap = WorldBootstrap::load().unwrap();
-        let world = bootstrap.create("country_fra").unwrap();
+        let world = bootstrap.base_opening_version("country_fra", None, Some(24)).unwrap();
         let egypt = world.inspect_population("khedivate_of_egypt").unwrap();
         assert_eq!(egypt.population_total, Some(10_000_000));
         assert_eq!(egypt.direct_residents, Some(4_195_390));

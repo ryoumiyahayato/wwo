@@ -10,7 +10,9 @@ HERE = Path(__file__).resolve().parent
 DATE = "1900-01-01"
 ENGLAND_WALES_OCCUPATION_REMAINDER = "uk_england_wales_except_anglesey"
 EGYPT_COMPARABLE_PROVINCES = "egypt_census_1907_comparable_provinces"
+EGYPT_FAIYUM_SOURCES = {"egypt_faiyum_census_1897", "egypt_faiyum_census_1907"}
 ITALIAN_CIVIL_STATUS_SCOPE = "it_1901_civil_status_scope"
+SPANISH_CIVIL_STATUS_SCOPE = "es_1900_civil_status_scope"
 
 def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
@@ -625,6 +627,36 @@ def add_italian_regions(group, observations):
     )]
 
 
+def add_spanish_provinces(group, observations):
+    sources = {"es_census_1897_provincial_population", "es_census_1900_provincial_population"}
+    root = group["unit_id"]
+    dates = ["1897-12-31", "1900-12-31"]
+    rows = [row for row in observations if row["source_id"] in sources]
+    totals = {row["date"]: row["population_value"] for row in rows if row["unit_id"] == root}
+    parent = group | dict(endpoint_values=[totals[day] for day in dates], name="Kingdom of Spain")
+    leaves = interpolate_partition([row for row in rows if row["parent_id"] == root], parent, dates, normalize=True)
+    civil_sources = HERE / "collections/spain_census_1900/provincial_age_sources_1900.csv"
+    with civil_sources.open(encoding="utf8", newline="") as stream:
+        separately_reported = {row["panel"] for row in csv.DictReader(stream)}
+    uncertainty = ("Provincial change within the census interval and the rescaling to the national "
+                   "opening estimate have no quantified regional error interval.")
+    for leaf in leaves:
+        leaf.update(date=DATE, uncertainty_kind=uncertainty)
+        if leaf["unit_id"] not in separately_reported:
+            leaf["statistical_parent"] = SPANISH_CIVIL_STATUS_SCOPE
+        leaf["locator"] = f"{leaf['locator']}; 1900 census, Vol. I, p. 323"
+    group["units"] = sorted(leaves, key=lambda row: row["unit_id"])
+    group["statistical_aggregates"] = [dict(
+        unit_id=SPANISH_CIVIL_STATUS_SCOPE, name="Spain (remaining census civil status scope)",
+        population_value=sum(leaf["population_value"] for leaf in leaves if "statistical_parent" in leaf),
+        date=DATE, source_id="es_census_1900_age_marital",
+        locator="Vol. III, pp. 64–65, 292–293 and 296–297",
+        method="Sum of the provinces outside the independently assigned provincial civil status tables.",
+        scope="Mainland and adjacent islands, excluding the nine provinces independently assigned civil status.",
+        uncertainty_kind=uncertainty,
+    )]
+
+
 def add_indian_local_areas(group, observations, *, version):
     sources = {
         "raj_united_provinces_states": {"india_up_states_census_1901_table_2"},
@@ -749,6 +781,17 @@ def egypt_opening(observations, version):
             uncertainty_kind="The national control retains its inherited source basis. The interpolated "
                              "local estimates have no statistical interval.",
         )
+    if version >= 25:
+        parent = next(leaf for leaf in leaves if leaf["unit_id"] == "egy_mudiriya_faiyum")
+        local = [row for row in observations if row["source_id"] in EGYPT_FAIYUM_SOURCES]
+        districts = interpolate_partition(local, parent, dates)
+        for district in districts:
+            district.update(statistical_parent=parent["unit_id"], date=DATE,
+                            locator=f"{district['locator']}; 1907 census, Table 5 p. 32")
+        opening["units"] = [leaf for leaf in leaves if leaf is not parent] + districts
+        opening["statistical_aggregates"] = [parent | dict(
+            date=DATE, method="Sum of the Itsa, Faiyum and Sinuris districts on their comparable census extent.",
+        )]
     return opening
 
 
@@ -1147,6 +1190,8 @@ def groups(observations, version=1):
     if version >= 22:
         add_italian_regions(result["kingdom_of_italy"], observations)
         add_indian_local_areas(result["cshapes_gw_750"], observations, version=version)
+    if version >= 25:
+        add_spanish_provinces(result["kingdom_of_spain"], observations)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

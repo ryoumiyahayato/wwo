@@ -758,6 +758,24 @@
     "collection": "belgium_provinces_1900"
   },
   {
+    "id": "be_census_1900_age_and_spoken_languages",
+    "title": "Recensement général de la population du 31 décembre 1900, Tome I, part c",
+    "publisher": "Ministère de l’Intérieur de Belgique, Statistique générale",
+    "url": "https://doc.statbel.fgov.be/publications/S210.B4/S210.B4F_Recensement_1900_Tome_1-c.pdf#page=262",
+    "locator": "Printed pp. 628–629, ages and reported national languages by sex and province",
+    "rights": "Historical official statistical publication digitized by Statbel. Numerical transcription.",
+    "collection": "belgium_provinces_1900"
+  },
+  {
+    "id": "be_census_1900_marital_and_citizenship",
+    "title": "Recensement général de la population du 31 décembre 1900, Tome I, part b",
+    "publisher": "Ministère de l’Intérieur de Belgique, Statistique générale",
+    "url": "https://doc.statbel.fgov.be/publications/S210.B4/S210.B4F_Recensement_1900_Tome_1-b.pdf#page=188",
+    "locator": "Section II C, printed pp. 370–371, marital status and citizenship by birthplace by province and sex",
+    "rights": "Historical official statistical publication digitized by Statbel. Numerical transcription.",
+    "collection": "belgium_provinces_1900"
+  },
+  {
     "id": "bosnia_herzegovina_demography_2024",
     "title": "Demography 2024",
     "publisher": "Agency for Statistics of Bosnia and Herzegovina, Sarajevo, 2025.",
@@ -800,6 +818,24 @@
     "publisher": "Directoria Geral de Estatistica",
     "locator": "Printed pp. 270–291, População por idades",
     "url": "https://biblioteca.ibge.gov.br/visualizacao/periodicos/20/aeb_1908_1912_v1.pdf",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "brazil_census_1900_age"
+  },
+  {
+    "id": "br_dge_1916_1900_marital",
+    "title": "Annuario Estatistico do Brazil 1908–1912, vol. I",
+    "publisher": "Directoria Geral de Estatistica",
+    "locator": "Printed pp. 262–269, População segundo sexo, estado civil e nacionalidade",
+    "url": "https://biblioteca.ibge.gov.br/visualizacao/periodicos/20/aeb_1908_1912_v1.pdf#page=297",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "brazil_census_1900_age"
+  },
+  {
+    "id": "br_dge_1929_1900_literacy",
+    "title": "Recenseamento do Brazil de 1920, vol. IV, 4ª parte (1929)",
+    "publisher": "Directoria Geral de Estatistica",
+    "locator": "Printed pp. XIII–XVI, historical 1900 return by state, sex and literacy",
+    "url": "https://biblioteca.ibge.gov.br/visualizacao/livros/liv31687.pdf#page=15",
     "rights": "Historic public statistical return. Numeric facts transcribed.",
     "collection": "brazil_census_1900_age"
   },
@@ -1332,6 +1368,24 @@
     "collection": "egypt_comparable_provinces"
   },
   {
+    "id": "egypt_faiyum_census_1897",
+    "title": "Census of Egypt 1897, Faiyum districts, transcribed in Demographic Change in Rural Egypt, 1882–1917",
+    "publisher": "Hirofumi Tanada, Institute of Economic Research, Hitotsubashi University",
+    "url": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap2-1.htm",
+    "locator": "Appendix 2-1 (MARKAZ), Faiyum province",
+    "rights": "Historical census counts. Numeric facts transcribed.",
+    "collection": "egypt_faiyum_1900"
+  },
+  {
+    "id": "egypt_faiyum_census_1907",
+    "title": "Census of Egypt 1907, Faiyum districts, transcribed in Demographic Change in Rural Egypt, 1882–1917",
+    "publisher": "Hirofumi Tanada, Institute of Economic Research, Hitotsubashi University",
+    "url": "https://www.ier.hit-u.ac.jp/COE/Japanese/discussionpapers/DP97.22/ap3-1.htm",
+    "locator": "Appendix 3-1 (MARKAZ), Faiyum province",
+    "rights": "Historical census counts. Numeric facts transcribed.",
+    "collection": "egypt_faiyum_1900"
+  },
+  {
     "id": "egypt_1897_markaz_religion",
     "title": "Census of Egypt 1897, provincial subtotals transcribed in Demographic Change in Rural Egypt, 1882–1917",
     "publisher": "Hirofumi Tanada, Institute of Economic Research, Hitotsubashi University",
@@ -1664,7 +1718,7 @@
     "title": "Census of India 1901, Vol. XVI-A, North-Western Provinces and Oudh, Imperial Tables",
     "publisher": "Census of India",
     "url": "https://censusindia.gov.in/nada/index.php/catalog/31349/download/34530/140099_1901.pdf#page=10",
-    "locator": "Table II pp. 5–6, comparable-boundary district populations; Table I pp. 2–3, sex counts; Table VI pp. 38–40, district religion",
+    "locator": "Table II pp. 5–6, comparable-boundary district populations; Table I pp. 2–3, sex counts; Table VI pp. 38–40, district religion; Table VII(B) pp. 50–51, age by sex",
     "rights": "Historic public census. Numeric facts transcribed.",
     "collection": "india_local_areas_1901"
   },
@@ -2820,6 +2874,24 @@
       }
     ],
     "collection": "sierra_leone_population"
+  },
+  {
+    "id": "es_census_1897_provincial_population",
+    "title": "Censo de la población de España en 1897, tomo I",
+    "publisher": "Instituto Geográfico y Estadístico, archived by Instituto Nacional de Estadística",
+    "url": "https://ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=69536",
+    "locator": "Printed pp. XX–XXI, población de hecho",
+    "rights": "Historical census counts. Numeric facts transcribed.",
+    "collection": "spain_census_1900"
+  },
+  {
+    "id": "es_census_1900_provincial_population",
+    "title": "Censo de la población de España en 1900, tomo I",
+    "publisher": "Instituto Geográfico y Estadístico, archived by Instituto Nacional de Estadística",
+    "url": "https://www.ine.es/inebaseweb/pdfDispacher.do?ext=.pdf&td=69538",
+    "locator": "Printed p. 323; resident population present plus temporary visitors by sex",
+    "rights": "Historical census counts. Numeric facts transcribed.",
+    "collection": "spain_census_1900"
   },
   {
     "id": "es_census_1900_age_marital",

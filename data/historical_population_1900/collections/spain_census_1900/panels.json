@@ -50,6 +50,7 @@
     "broad_observation": false,
     "opening_unit_id": "kingdom_of_spain",
     "opening_from_version": 24,
+    "opening_through_version": 24,
     "opening_band_roles": [
       "band",
       "unknown"

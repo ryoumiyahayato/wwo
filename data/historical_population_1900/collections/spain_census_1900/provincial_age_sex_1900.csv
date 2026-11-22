@@ -1,0 +1,208 @@
+panel,label,role,age_min,age_max,both,male,female
+es_census_1900_province_08,Habitantes según su edad,total,,,1054541,512089,542452
+es_census_1900_province_08,Menos de 5 años,band,0,4,95778,48171,47607
+es_census_1900_province_08,5 años,band,5,5,21319,10672,10647
+es_census_1900_province_08,6 años,band,6,6,20838,10386,10452
+es_census_1900_province_08,7 años,band,7,7,21114,10542,10572
+es_census_1900_province_08,8 años,band,8,8,20877,10374,10503
+es_census_1900_province_08,9 años,band,9,9,19922,9883,10039
+es_census_1900_province_08,10 años,band,10,10,21888,10845,11043
+es_census_1900_province_08,De 11 a 15 años,band,11,15,101612,50244,51368
+es_census_1900_province_08,De 16 a 20 años,band,16,20,94015,43144,50871
+es_census_1900_province_08,De 21 a 25 años,band,21,25,94091,43688,50403
+es_census_1900_province_08,De 26 a 30 años,band,26,30,92926,43108,49818
+es_census_1900_province_08,De 31 a 35 años,band,31,35,75276,37050,38226
+es_census_1900_province_08,De 36 a 40 años,band,36,40,84338,40738,43600
+es_census_1900_province_08,De 41 a 45 años,band,41,45,64714,31658,33056
+es_census_1900_province_08,De 46 a 50 años,band,46,50,65781,31663,34118
+es_census_1900_province_08,De 51 a 60 años,band,51,60,86115,42408,43707
+es_census_1900_province_08,De 61 a 70 años,band,61,70,45906,23641,22265
+es_census_1900_province_08,De 71 a 80 años,band,71,80,16175,8531,7644
+es_census_1900_province_08,De 81 a 90 años,band,81,90,2384,1120,1264
+es_census_1900_province_08,De 91 a 100 años,band,91,100,147,57,90
+es_census_1900_province_08,Más de 100 años,band,101,,9,2,7
+es_census_1900_province_08,No consta la edad,unknown,,,9316,4164,5152
+es_census_1900_province_11,Habitantes según su edad,total,,,439390,217348,222042
+es_census_1900_province_11,Menos de 5 años,band,0,4,48034,24423,23611
+es_census_1900_province_11,5 años,band,5,5,9494,4881,4613
+es_census_1900_province_11,6 años,band,6,6,8657,4324,4333
+es_census_1900_province_11,7 años,band,7,7,9152,4529,4623
+es_census_1900_province_11,8 años,band,8,8,9116,4597,4519
+es_census_1900_province_11,9 años,band,9,9,8614,4347,4267
+es_census_1900_province_11,10 años,band,10,10,9292,4628,4664
+es_census_1900_province_11,De 11 a 15 años,band,11,15,42194,21048,21146
+es_census_1900_province_11,De 16 a 20 años,band,16,20,38296,17939,20357
+es_census_1900_province_11,De 21 a 25 años,band,21,25,42794,21754,21040
+es_census_1900_province_11,De 26 a 30 años,band,26,30,42339,21048,21291
+es_census_1900_province_11,De 31 a 35 años,band,31,35,27444,13649,13795
+es_census_1900_province_11,De 36 a 40 años,band,36,40,34894,17389,17505
+es_census_1900_province_11,De 41 a 45 años,band,41,45,21468,10772,10696
+es_census_1900_province_11,De 46 a 50 años,band,46,50,26276,12957,13319
+es_census_1900_province_11,De 51 a 60 años,band,51,60,34221,16650,17571
+es_census_1900_province_11,De 61 a 70 años,band,61,70,17983,8516,9467
+es_census_1900_province_11,De 71 a 80 años,band,71,80,7146,3066,4080
+es_census_1900_province_11,De 81 a 90 años,band,81,90,1578,617,961
+es_census_1900_province_11,De 91 a 100 años,band,91,100,123,26,97
+es_census_1900_province_11,Más de 100 años,band,101,,4,0,4
+es_census_1900_province_11,No consta la edad,unknown,,,271,188,83
+es_census_1900_province_16,Habitantes según su edad,total,,,653556,289119,364437
+es_census_1900_province_16,Menos de 5 años,band,0,4,83434,42319,41115
+es_census_1900_province_16,5 años,band,5,5,16628,8459,8169
+es_census_1900_province_16,6 años,band,6,6,17753,8969,8784
+es_census_1900_province_16,7 años,band,7,7,15889,7929,7960
+es_census_1900_province_16,8 años,band,8,8,16682,8430,8252
+es_census_1900_province_16,9 años,band,9,9,13902,7193,6709
+es_census_1900_province_16,10 años,band,10,10,17428,8532,8896
+es_census_1900_province_16,De 11 a 15 años,band,11,15,62096,30612,31484
+es_census_1900_province_16,De 16 a 20 años,band,16,20,49693,21376,28317
+es_census_1900_province_16,De 21 a 25 años,band,21,25,49848,21413,28435
+es_census_1900_province_16,De 26 a 30 años,band,26,30,53260,20919,32341
+es_census_1900_province_16,De 31 a 35 años,band,31,35,37017,15642,21375
+es_census_1900_province_16,De 36 a 40 años,band,36,40,46716,18484,28232
+es_census_1900_province_16,De 41 a 45 años,band,41,45,26849,11120,15729
+es_census_1900_province_16,De 46 a 50 años,band,46,50,35662,12936,22726
+es_census_1900_province_16,De 51 a 60 años,band,51,60,54841,21454,33387
+es_census_1900_province_16,De 61 a 70 años,band,61,70,39692,16539,23153
+es_census_1900_province_16,De 71 a 80 años,band,71,80,13029,5597,7432
+es_census_1900_province_16,De 81 a 90 años,band,81,90,2647,1007,1640
+es_census_1900_province_16,De 91 a 100 años,band,91,100,300,84,216
+es_census_1900_province_16,Más de 100 años,band,101,,15,2,13
+es_census_1900_province_16,No consta la edad,unknown,,,175,103,72
+es_census_1900_province_29,Habitantes según su edad,total,,,775034,369561,405473
+es_census_1900_province_29,Menos de 5 años,band,0,4,71954,36124,35830
+es_census_1900_province_29,5 años,band,5,5,14006,7033,6973
+es_census_1900_province_29,6 años,band,6,6,13644,6703,6941
+es_census_1900_province_29,7 años,band,7,7,14200,7078,7122
+es_census_1900_province_29,8 años,band,8,8,14467,7217,7250
+es_census_1900_province_29,9 años,band,9,9,13786,6776,7010
+es_census_1900_province_29,10 años,band,10,10,14219,6978,7241
+es_census_1900_province_29,De 11 a 15 años,band,11,15,68342,34146,34196
+es_census_1900_province_29,De 16 a 20 años,band,16,20,69562,32711,36851
+es_census_1900_province_29,De 21 a 25 años,band,21,25,80296,40570,39726
+es_census_1900_province_29,De 26 a 30 años,band,26,30,69395,31784,37611
+es_census_1900_province_29,De 31 a 35 años,band,31,35,55003,26130,28873
+es_census_1900_province_29,De 36 a 40 años,band,36,40,61972,28757,33215
+es_census_1900_province_29,De 41 a 45 años,band,41,45,47238,22592,24646
+es_census_1900_province_29,De 46 a 50 años,band,46,50,48909,21613,27296
+es_census_1900_province_29,De 51 a 60 años,band,51,60,65289,29765,35524
+es_census_1900_province_29,De 61 a 70 años,band,61,70,34900,15549,19351
+es_census_1900_province_29,De 71 a 80 años,band,71,80,13229,5535,7694
+es_census_1900_province_29,De 81 a 90 años,band,81,90,2299,811,1488
+es_census_1900_province_29,De 91 a 100 años,band,91,100,166,41,125
+es_census_1900_province_29,Más de 100 años,band,101,,9,2,7
+es_census_1900_province_29,No consta la edad,unknown,,,2149,1646,503
+es_census_1900_province_30,Habitantes según su edad,total,,,511989,252051,259938
+es_census_1900_province_30,Menos de 5 años,band,0,4,60505,30902,29603
+es_census_1900_province_30,5 años,band,5,5,12093,6328,5765
+es_census_1900_province_30,6 años,band,6,6,10977,5510,5467
+es_census_1900_province_30,7 años,band,7,7,11082,5725,5357
+es_census_1900_province_30,8 años,band,8,8,11275,5652,5623
+es_census_1900_province_30,9 años,band,9,9,10328,5282,5046
+es_census_1900_province_30,10 años,band,10,10,11955,6026,5929
+es_census_1900_province_30,De 11 a 15 años,band,11,15,52243,26301,25942
+es_census_1900_province_30,De 16 a 20 años,band,16,20,45843,20907,24936
+es_census_1900_province_30,De 21 a 25 años,band,21,25,42851,20886,21965
+es_census_1900_province_30,De 26 a 30 años,band,26,30,45238,22452,22786
+es_census_1900_province_30,De 31 a 35 años,band,31,35,28847,14830,14017
+es_census_1900_province_30,De 36 a 40 años,band,36,40,37713,18457,19256
+es_census_1900_province_30,De 41 a 45 años,band,41,45,22052,11105,10947
+es_census_1900_province_30,De 46 a 50 años,band,46,50,30713,14812,15901
+es_census_1900_province_30,De 51 a 60 años,band,51,60,42379,19776,22603
+es_census_1900_province_30,De 61 a 70 años,band,61,70,23405,11349,12056
+es_census_1900_province_30,De 71 a 80 años,band,71,80,8958,3952,5006
+es_census_1900_province_30,De 81 a 90 años,band,81,90,1737,711,1026
+es_census_1900_province_30,De 91 a 100 años,band,91,100,187,53,134
+es_census_1900_province_30,Más de 100 años,band,101,,16,4,12
+es_census_1900_province_30,No consta la edad,unknown,,,1592,1031,561
+es_census_1900_province_31,Habitantes según su edad,total,,,577987,287861,290126
+es_census_1900_province_31,Menos de 5 años,band,0,4,73182,36923,36259
+es_census_1900_province_31,5 años,band,5,5,15682,8229,7453
+es_census_1900_province_31,6 años,band,6,6,15089,7605,7484
+es_census_1900_province_31,7 años,band,7,7,15085,7780,7305
+es_census_1900_province_31,8 años,band,8,8,15354,7903,7451
+es_census_1900_province_31,9 años,band,9,9,13516,6899,6617
+es_census_1900_province_31,10 años,band,10,10,14329,7582,6747
+es_census_1900_province_31,De 11 a 15 años,band,11,15,59113,30280,28833
+es_census_1900_province_31,De 16 a 20 años,band,16,20,50808,23766,27042
+es_census_1900_province_31,De 21 a 25 años,band,21,25,47953,24424,23529
+es_census_1900_province_31,De 26 a 30 años,band,26,30,50472,24787,25685
+es_census_1900_province_31,De 31 a 35 años,band,31,35,35335,18020,17315
+es_census_1900_province_31,De 36 a 40 años,band,36,40,42114,20310,21804
+es_census_1900_province_31,De 41 a 45 años,band,41,45,26571,13358,13213
+es_census_1900_province_31,De 46 a 50 años,band,46,50,29963,14579,15384
+es_census_1900_province_31,De 51 a 60 años,band,51,60,40223,19385,20838
+es_census_1900_province_31,De 61 a 70 años,band,61,70,23139,11394,11745
+es_census_1900_province_31,De 71 a 80 años,band,71,80,7954,3744,4210
+es_census_1900_province_31,De 81 a 90 años,band,81,90,1897,824,1073
+es_census_1900_province_31,De 91 a 100 años,band,91,100,191,63,128
+es_census_1900_province_31,Más de 100 años,band,101,,17,6,11
+es_census_1900_province_31,No consta la edad,unknown,,,0,0,0
+es_census_1900_province_34,Habitantes según su edad,total,,,627069,289909,337160
+es_census_1900_province_34,Menos de 5 años,band,0,4,73304,35753,37551
+es_census_1900_province_34,5 años,band,5,5,17254,8347,8907
+es_census_1900_province_34,6 años,band,6,6,17059,8230,8829
+es_census_1900_province_34,7 años,band,7,7,17167,8264,8903
+es_census_1900_province_34,8 años,band,8,8,17376,8613,8763
+es_census_1900_province_34,9 años,band,9,9,15877,7732,8145
+es_census_1900_province_34,10 años,band,10,10,16701,8271,8430
+es_census_1900_province_34,De 11 a 15 años,band,11,15,65601,31694,33907
+es_census_1900_province_34,De 16 a 20 años,band,16,20,48449,21336,27113
+es_census_1900_province_34,De 21 a 25 años,band,21,25,45999,20014,25985
+es_census_1900_province_34,De 26 a 30 años,band,26,30,46463,19833,26630
+es_census_1900_province_34,De 31 a 35 años,band,31,35,35887,16223,19664
+es_census_1900_province_34,De 36 a 40 años,band,36,40,40539,17453,23086
+es_census_1900_province_34,De 41 a 45 años,band,41,45,28990,12892,16098
+es_census_1900_province_34,De 46 a 50 años,band,46,50,34111,14566,19545
+es_census_1900_province_34,De 51 a 60 años,band,51,60,51110,23357,27753
+es_census_1900_province_34,De 61 a 70 años,band,61,70,36621,17873,18748
+es_census_1900_province_34,De 71 a 80 años,band,71,80,14752,7606,7146
+es_census_1900_province_34,De 81 a 90 años,band,81,90,3426,1681,1745
+es_census_1900_province_34,De 91 a 100 años,band,91,100,364,159,205
+es_census_1900_province_34,Más de 100 años,band,101,,0,0,0
+es_census_1900_province_34,No consta la edad,unknown,,,19,12,7
+es_census_1900_province_40,Habitantes según su edad,total,,,555256,275647,279609
+es_census_1900_province_40,Menos de 5 años,band,0,4,61650,31285,30365
+es_census_1900_province_40,5 años,band,5,5,11064,5596,5468
+es_census_1900_province_40,6 años,band,6,6,11037,5536,5501
+es_census_1900_province_40,7 años,band,7,7,11351,5695,5656
+es_census_1900_province_40,8 años,band,8,8,11128,5636,5492
+es_census_1900_province_40,9 años,band,9,9,10554,5257,5297
+es_census_1900_province_40,10 años,band,10,10,11219,5545,5674
+es_census_1900_province_40,De 11 a 15 años,band,11,15,53085,26733,26352
+es_census_1900_province_40,De 16 a 20 años,band,16,20,47636,22619,25017
+es_census_1900_province_40,De 21 a 25 años,band,21,25,47833,23941,23892
+es_census_1900_province_40,De 26 a 30 años,band,26,30,48200,24433,23767
+es_census_1900_province_40,De 31 a 35 años,band,31,35,34026,17493,16533
+es_census_1900_province_40,De 36 a 40 años,band,36,40,42823,21263,21560
+es_census_1900_province_40,De 41 a 45 años,band,41,45,27720,13839,13881
+es_census_1900_province_40,De 46 a 50 años,band,46,50,34738,16656,18082
+es_census_1900_province_40,De 51 a 60 años,band,51,60,49920,24271,25649
+es_census_1900_province_40,De 61 a 70 años,band,61,70,27743,13578,14165
+es_census_1900_province_40,De 71 a 80 años,band,71,80,10833,5133,5700
+es_census_1900_province_40,De 81 a 90 años,band,81,90,2302,970,1332
+es_census_1900_province_40,De 91 a 100 años,band,91,100,156,52,104
+es_census_1900_province_40,Más de 100 años,band,101,,9,4,5
+es_census_1900_province_40,No consta la edad,unknown,,,229,112,117
+es_census_1900_province_45,Habitantes según su edad,total,,,806556,401415,405141
+es_census_1900_province_45,Menos de 5 años,band,0,4,94050,47858,46192
+es_census_1900_province_45,5 años,band,5,5,19373,9939,9434
+es_census_1900_province_45,6 años,band,6,6,19191,9587,9604
+es_census_1900_province_45,7 años,band,7,7,19335,9699,9636
+es_census_1900_province_45,8 años,band,8,8,18925,9585,9340
+es_census_1900_province_45,9 años,band,9,9,17497,8794,8703
+es_census_1900_province_45,10 años,band,10,10,19080,9670,9410
+es_census_1900_province_45,De 11 a 15 años,band,11,15,78404,39806,38598
+es_census_1900_province_45,De 16 a 20 años,band,16,20,63735,30046,33689
+es_census_1900_province_45,De 21 a 25 años,band,21,25,70310,35465,34845
+es_census_1900_province_45,De 26 a 30 años,band,26,30,70015,34465,35550
+es_census_1900_province_45,De 31 a 35 años,band,31,35,52713,26968,25745
+es_census_1900_province_45,De 36 a 40 años,band,36,40,56239,27988,28251
+es_census_1900_province_45,De 41 a 45 años,band,41,45,42517,21132,21385
+es_census_1900_province_45,De 46 a 50 años,band,46,50,45087,21759,23328
+es_census_1900_province_45,De 51 a 60 años,band,51,60,65323,31813,33510
+es_census_1900_province_45,De 61 a 70 años,band,61,70,38408,19084,19324
+es_census_1900_province_45,De 71 a 80 años,band,71,80,13758,6677,7081
+es_census_1900_province_45,De 81 a 90 años,band,81,90,2408,1014,1394
+es_census_1900_province_45,De 91 a 100 años,band,91,100,187,66,121
+es_census_1900_province_45,Más de 100 años,band,101,,1,0,1
+es_census_1900_province_45,No consta la edad,unknown,,,0,0,0
