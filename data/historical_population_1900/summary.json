@@ -43,9 +43,11 @@
     "nordic_population_1900": 4,
     "peru_1900_reconstruction": 3,
     "philippines": 51,
+    "philippines_opening_1900": 81,
     "polar_presence": 1,
     "portugal_census_1900": 44,
     "qing_shaangan_prefectures": 42,
+    "qing_sichuan_prefectures": 38,
     "romania": 6,
     "russia": 1721,
     "saint_helena_population": 1,
@@ -58,23 +60,23 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 257,
+  "cited_sources": 263,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
-  "production_roots": 56,
+  "production_roots": 57,
   "partially_located_legacy_roots": 3,
   "documented_people_under_legacy_controls": 674785293,
   "replaced_legacy_roots": 31,
-  "new_roots": 25,
-  "production_people": 1340341706,
-  "production_people_pct_world_estimate": 84.03,
-  "population_outside_evidence_opening_estimate": 254732542,
+  "new_roots": 26,
+  "production_people": 1347303045,
+  "production_people_pct_world_estimate": 84.466,
+  "population_outside_evidence_opening_estimate": 247771203,
   "legacy_only_people": 127294707,
-  "authoritative_total_for_new_game": 1467636413,
+  "authoritative_total_for_new_game": 1474597752,
   "roots_with_partitions": 27,
-  "disjoint_leaves": 1178,
-  "people_in_partitions": 1269631115,
+  "disjoint_leaves": 1195,
+  "people_in_partitions": 1266839704,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -99,13 +101,17 @@
     {
       "unit_id": "raj_bengal_unlocated_comparison",
       "people": 26
+    },
+    {
+      "unit_id": "qing_hist_sichuan_unlocated",
+      "people": 2791411
     }
   ],
   "partitions_with_explicit_places": 39,
   "people_in_partitions_with_explicit_places": 90538252,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
-  "political_catalogue_members_of_production_groups": 65,
+  "political_catalogue_members_of_production_groups": 66,
   "dated_admin_catalogues": {
     "britain_historic_counties_identity.json": {
       "units": 414,
@@ -340,15 +346,15 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2614,
+  "source_statistical_units": 2714,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 29,
       "people": 336560818
     },
     "historical_world_reconstruction": {
-      "roots": 27,
-      "people": 328995595
+      "roots": 28,
+      "people": 335956934
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 3,
@@ -365,51 +371,51 @@
   "opening_social_coverage": {
     "class": {
       "assigned_people": 11197505,
-      "unknown_people": 1456438908
+      "unknown_people": 1463400247
     },
     "culture": {
       "assigned_people": 5273225,
-      "unknown_people": 1462363188
+      "unknown_people": 1469324527
     },
     "household": {
       "assigned_people": 72890961,
-      "unknown_people": 1394745452
+      "unknown_people": 1401706791
     },
     "housing": {
       "assigned_people": 1655881,
-      "unknown_people": 1465980532
+      "unknown_people": 1472941871
     },
     "language": {
-      "assigned_people": 200073927,
-      "unknown_people": 1267562486
+      "assigned_people": 420706069,
+      "unknown_people": 1053891683
     },
     "legal_estate": {
       "assigned_people": 132020769,
-      "unknown_people": 1335615644
+      "unknown_people": 1342576983
     },
     "literacy": {
       "assigned_people": 312169329,
-      "unknown_people": 1155467084
+      "unknown_people": 1162428423
     },
     "marital_status": {
       "assigned_people": 339717927,
-      "unknown_people": 1127918486
+      "unknown_people": 1134879825
     },
     "occupation": {
       "assigned_people": 104206586,
-      "unknown_people": 1363429827
+      "unknown_people": 1370391166
     },
     "property_declaration": {
       "assigned_people": 32296914,
-      "unknown_people": 1435339499
+      "unknown_people": 1442300838
     },
     "religion": {
       "assigned_people": 442155512,
-      "unknown_people": 1025480901
+      "unknown_people": 1032442240
     },
     "residence": {
       "assigned_people": 367464724,
-      "unknown_people": 1100171689
+      "unknown_people": 1107133028
     }
   },
   "structural_observations_by_source": {
@@ -470,7 +476,7 @@
   },
   "structure_opening_pool_controls": 839583189,
   "structure_opening_pool_count": 827,
-  "structure_opening_residents_outside_modeled_pools": 628053224,
+  "structure_opening_residents_outside_modeled_pools": 635014563,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -6433,8 +6439,8 @@
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 525,
-  "dated_parent_controls_arithmetic_closure": 489,
+  "dated_parent_controls": 526,
+  "dated_parent_controls_arithmetic_closure": 490,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -6520,17 +6526,18 @@
       "production_root_ids": [
         "cshapes_gw_750",
         "cshapes_gw_780",
+        "cshapes_gw_840",
         "cshapes_gw_850",
         "empire_of_japan",
         "korean_empire",
         "qing_empire",
         "taiwan_under_japan"
       ],
-      "production_people": 780700648,
-      "production_pct_of_regional_research_estimate": 87.29,
-      "people_with_opening_subdivision": 743843542,
-      "research_only_units": 26,
-      "research_only_people": 86662194
+      "production_people": 787661987,
+      "production_pct_of_regional_research_estimate": 88.068,
+      "people_with_opening_subdivision": 741052131,
+      "research_only_units": 25,
+      "research_only_people": 79176163
     },
     "Europe": {
       "statistical_units": 29,
@@ -6864,6 +6871,15 @@
         "opening_control": 36671,
         "in_model_pools": 0,
         "outside_model_pools": 36671,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
+      },
+      {
+        "opening_unit_id": "cshapes_gw_840",
+        "research_region": "Asia",
+        "opening_control": 6961339,
+        "in_model_pools": 0,
+        "outside_model_pools": 6961339,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
       },
@@ -7310,17 +7326,17 @@
         "modeled_sex_age_unknown": 0
       },
       "Asia": {
-        "opening_control": 805719965,
+        "opening_control": 812681304,
         "in_model_pools": 330465270,
-        "outside_model_pools": 475254695,
+        "outside_model_pools": 482216034,
         "modeled_age_and_sex": 330222276,
         "modeled_sex_age_unknown": 242994
       }
     },
     "world": {
-      "opening_control": 1467636413,
+      "opening_control": 1474597752,
       "in_model_pools": 839583189,
-      "outside_model_pools": 628053224,
+      "outside_model_pools": 635014563,
       "modeled_age_and_sex": 832146148,
       "modeled_sex_age_unknown": 7437041
     }
@@ -7332,8 +7348,8 @@
         "pct_of_research_reference": 0.32
       },
       "published_historical_estimates": {
-        "people": 692756631,
-        "pct_of_research_reference": 43.431
+        "people": 699717970,
+        "pct_of_research_reference": 43.867
       },
       "date_models_from_territorial_returns": {
         "people": 642480938,
@@ -7600,6 +7616,13 @@
         "unit_id": "cshapes_gw_80",
         "source_id": "ft_world_v5",
         "sourced_people": 36671,
+        "sourced_basis": "published_historical_estimates",
+        "retained_legacy_people": 0
+      },
+      {
+        "unit_id": "cshapes_gw_840",
+        "source_id": "ph_us_census_1900_plehn",
+        "sourced_people": 6961339,
         "sourced_basis": "published_historical_estimates",
         "retained_legacy_people": 0
       },

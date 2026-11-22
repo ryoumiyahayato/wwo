@@ -17,7 +17,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 28
+OPENING_VERSION = 29
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -89,7 +89,7 @@ def opening_count_basis(selection, legacy, world_reference):
         elif source.startswith("ft_world_") or source in {
             "cao_qing_provincial_reconstruction", "natal_statistical_yearbook_1909_macdonald",
             "cape_colony_1899_imperial_conference", "zanzibar_statesmans_year_book_1899",
-            "se_scb_population_tab5890", "pe_inei_historical_population_1900",
+            "se_scb_population_tab5890", "pe_inei_historical_population_1900", "ph_us_census_1900_plehn",
         }:
             basis = "published_historical_estimates"
         else:

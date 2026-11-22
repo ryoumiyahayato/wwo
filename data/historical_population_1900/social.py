@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 from itertools import chain
 from pathlib import Path
 
-from opening import AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, SPANISH_CIVIL_STATUS_SCOPE
+from opening import AGRA_DISTRICT_BALANCE, AGRA_DISTRICT_SOURCE, BENGAL_DISTRICT_SOURCE, ENGLAND_WALES_OCCUPATION_REMAINDER, ITALIAN_CIVIL_STATUS_SCOPE, SPANISH_CIVIL_STATUS_SCOPE
 from social_russia_marital import russian_marital_status
 from social_us import united_states_structure
 from social_india_princely import india_princely_residence, madras_states_religion, travancore_language
@@ -277,6 +277,42 @@ def india_structure(pools, version):
                 total=row["total"], observed_counts=dict(zip(labels, row["counts"], strict=True)),
                 unknown=row["unknown"], definition=definition,
             )
+
+
+def india_language(pools):
+    rows_by_pool = defaultdict(list)
+    path = COLLECTIONS / "india_social_1901" / "india_province_language_1901.csv"
+    with path.open(encoding="utf8", newline="") as source:
+        for row in csv.DictReader(source):
+            rows_by_pool[row["unit_id"]].append(row)
+    for pool_id, rows in rows_by_pool.items():
+        pool = pools[pool_id]
+        row = rows[0]
+        observed = int(row["observed_total"])
+        endpoint = int(row["opening_endpoint_total"])
+        mismatch = int(row["opening_endpoint_scope_unknown"])
+        counts = {entry["language"]: int(entry["count"]) for entry in rows}
+        if (len(counts) != len(rows) or sum(counts.values()) != int(row["returned_total"])
+                or row["observed_date"] != INDIA_DATE or observed + mismatch != endpoint
+                or endpoint != pool["endpoint_values"][-1]):
+            raise ValueError(f"{pool_id}: language observations do not match the census scope")
+        balance = 0
+        method = SHARE_METHOD
+        if mismatch:
+            discrepancy = pools[AGRA_DISTRICT_BALANCE]
+            if discrepancy["statistical_parent"] != pool_id or discrepancy["endpoint_values"][-1] != mismatch:
+                raise ValueError(f"{pool_id}: unmatched geography in the language denominator")
+            balance = discrepancy["population_value"]
+            method += f" Keep the {balance} people of the separate boundary comparison unassigned."
+        result = distribution(
+            pool["population_value"] - balance, classification="india_1901_reported_usual_language",
+            source="india_1901_abstract_language", date=INDIA_DATE, observed_unit=pool_id,
+            scope=row["observed_scope"], locator=row["locator"], total=observed,
+            observed_counts=counts, unknown=int(row["observed_unknown"]), method=method,
+            definition="Language ordinarily used. The source's pooled Other category varies by territory.",
+        )
+        result["unknown"] += balance
+        yield pool_id, "language", result
 
 
 def india_occupation(pools):
@@ -1498,6 +1534,8 @@ def opening_social(opening_groups, observations, *, version):
         marginals = chain(marginals, uk_constituent_occupation(pools),
                           egyptian_provincial_work_and_instruction(pools, observations),
                           bengal_district_literacy(pools, observations, version))
+    if version >= 29:
+        marginals = chain(marginals, india_language(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

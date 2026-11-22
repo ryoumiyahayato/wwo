@@ -1192,17 +1192,21 @@ def qing_interior(observations, version):
     if version >= 11:
         group["v11_territorial_source"] = coastal_and_frontier.relative_to(HERE).as_posix()
     if version >= 19:
-        add_shaangan_prefectures(group, observations)
+        add_qing_prefectures(group, observations, version)
     return group
 
 
-def add_shaangan_prefectures(group, observations):
-    source = "lu_qing_shaangan_prefecture_reconstruction"
+def add_qing_prefectures(group, observations, version):
+    sources = {"lu_qing_shaangan_prefecture_reconstruction"}
+    parents = {"qing_hist_shaanxi", "qing_hist_gansu"}
+    if version >= 29:
+        sources.add("cao_qing_sichuan_prefecture_reconstruction")
+        parents.add("qing_hist_sichuan")
     dates = group["interpolation_reference_dates"]
     year_to_anchor = dict(zip(group["endpoint_dates"], dates, strict=True))
     prefectures = defaultdict(list)
     for row in observations:
-        if row["source_id"] == source:
+        if row["source_id"] in sources:
             prefectures[row["parent_id"]].append(row | dict(date=year_to_anchor[row["date"]]))
     units, aggregates = [], []
     for parent in group["units"]:
@@ -1212,7 +1216,9 @@ def add_shaangan_prefectures(group, observations):
             continue
         if parent["place_ids"]:
             raise ValueError(f"Assign the existing places to prefectures before splitting {parent_id}")
-        children = interpolate_partition(prefectures.pop(parent_id), parent, dates)
+        rows = prefectures.pop(parent_id)
+        children = interpolate_partition(rows, parent, dates)
+        unlocated = {row["unit_id"] for row in rows if row.get("geographically_unlocated")}
         for child in children:
             child.update(
                 statistical_parent=parent_id, date=DATE,
@@ -1221,14 +1227,16 @@ def add_shaangan_prefectures(group, observations):
                 uncertainty_kind=("The source estimates are rounded to thousands. Local boundary differences and "
                                   "interpolation errors have no calibrated interval."),
             )
+            if child["unit_id"] in unlocated:
+                child["geographically_unlocated"] = True
         units.extend(children)
         aggregates.append(parent | dict(
             date=DATE, endpoint_dates=group["endpoint_dates"],
             interpolation_reference_dates=dates,
             method="Sum the non-overlapping historical prefectural statistical areas using the provincial controls.",
         ))
-    if prefectures or {parent["unit_id"] for parent in aggregates} != {"qing_hist_shaanxi", "qing_hist_gansu"}:
-        raise ValueError("The prefectural data must close to both existing Shaanxi and Gansu controls")
+    if prefectures or {parent["unit_id"] for parent in aggregates} != parents:
+        raise ValueError("The prefectural data must close to the selected provincial controls")
     group.update(units=units, statistical_aggregates=aggregates)
 
 
@@ -1368,6 +1376,20 @@ def groups(observations, version=1):
         for unit in india["units"]:
             if unit["unit_id"] in {"raj_bengal_calcutta", "raj_bombay_bombay_city"}:
                 unit["coextensive_place"] = True
+    if version >= 29:
+        philippines, = (row for row in observations if row["unit_id"] == "ph1900_plehn_archipelago"
+                         and row["source_id"] == "ph_us_census_1900_plehn")
+        result["cshapes_gw_840"] = dict(
+            unit_id="cshapes_gw_840", date=DATE, population_value=philippines["population_value"],
+            source_id=philippines["source_id"], source_quality=philippines["quality"],
+            source_observations=[philippines["record_id"]], source_dates=[philippines["date"]],
+            locator=philippines["locator"], scope=philippines["definition"],
+            method=("Carry the contemporary archipelago estimate to opening. It extrapolates 1896 partial returns "
+                    "and adds an allowance for omitted populations. June 1900 is the table date."),
+            uncertainty_kind=("Intervening deaths and migration, military coverage and remote island scope are "
+                              "unquantified. The source reports no Philippines-specific uncertainty interval."),
+            units=[],
+        )
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

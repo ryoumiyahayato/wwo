@@ -1,0 +1,9 @@
+source_name,unit_id,spanish_census_1887_as_printed,estimated_population_not_counted_as_printed,published_total,towns,note
+Luzon,ph_gazetteer_1900_luzon,3679219,48269,3727488,570,
+Marinduque,ph_gazetteer_1900_marinduque,48000,,48000,6,
+Mindanao,ph_gazetteer_1900_mindanao,138924,356735,495659,130,
+Mindoro,ph_gazetteer_1900_mindoro,67656,38544,106200,19,
+Palawan (Paragua),ph_gazetteer_1900_palawan,2100,50250,52350,14,
+Sulu Archipelago,ph_gazetteer_1900_sulu,22630,,22630,14,
+Visayan Islands,ph_gazetteer_1900_visayan_islands,2486205,10000,2497908,381,"The published total exceeds the two printed components by 1,703. This is also the size of the separate entry before the 21,366 subtotal in the Masbate cluster."
+Unaligned,ph_gazetteer_1900_unaligned,16338,8500,24838,3,Publication's residual geographic grouping

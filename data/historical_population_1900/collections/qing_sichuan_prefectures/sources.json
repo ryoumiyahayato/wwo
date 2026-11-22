@@ -1,0 +1,11 @@
+[
+  {
+    "id": "cao_qing_sichuan_prefecture_reconstruction",
+    "title": "The Population History of China (1368–1953), Appendix 7",
+    "publisher": "Cao Shuji, Brill, 2024",
+    "url": "https://doi.org/10.1163/9789004688933_025",
+    "locator": "Printed p. 560, Sichuan rows, 1880 and 1910 columns. See p. 219 on incomplete western coverage.",
+    "rights": "Published numeric facts",
+    "raw_paths": ["cao_sichuan_appendix_7.csv", "sichuan_opening_groups.csv", "README.md"]
+  }
+]
