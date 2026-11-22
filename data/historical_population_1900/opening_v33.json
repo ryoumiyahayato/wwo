@@ -27191,6 +27191,7 @@
             "1907-04-29"
           ],
           "method": "Interpolate the same-city population reported by the census at both dates.",
+          "coextensive_place": true,
           "population_lower": null,
           "population_upper": null
         },
@@ -27219,6 +27220,7 @@
             "1907-04-29"
           ],
           "method": "Interpolate the same-city population reported by the census at both dates.",
+          "coextensive_place": true,
           "population_lower": null,
           "population_upper": null
         },

@@ -936,6 +936,7 @@ def egypt_opening(observations, version):
                 source_observations=[], endpoint_values=[initial, final],
                 locator=f"1907 Census, Table V p. 30, row {control['table_5_rows']} (both dates).",
                 method="Interpolate the same-city population reported by the census at both dates.",
+                coextensive_place=True,
             )
         ramleh = urban["egy_markaz_ramleh"]
         initial, final = int(ramleh["table_5_person_count_1897"]), int(ramleh["table_5_person_count"])

@@ -13,6 +13,7 @@ mod tests;
 
 pub use demography::{AgeRangeCoverage, EnergyReferenceCoverage, PopulationStructure, ResidentCohort};
 pub use historical::{city_population_reference, population_archive, structural_coverage_reference, HistoricalPopulationEstimate, PopulationArchive};
+pub(crate) use historical::default_data_directory;
 pub use inspection::{PopulationChange, PopulationChild, PopulationInspection};
 pub(crate) use native::PopulationSnapshot;
 pub(crate) use opening::{HistoricalOpening, OpeningAssets};

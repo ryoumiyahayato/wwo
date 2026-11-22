@@ -1310,14 +1310,7 @@ impl WorldBootstrap {
     }
 
     pub fn load() -> io::Result<Self> {
-        if let Some(data) = std::env::var_os("WWO_DATA_DIR") {
-            return Self::load_from(std::path::Path::new(&data));
-        }
-        #[cfg(test)]
-        let data = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../data");
-        #[cfg(not(test))]
-        let data = std::env::current_exe()?.with_file_name("data");
-        Self::load_from(&data)
+        Self::load_from(&crate::formal_population::default_data_directory()?)
     }
 
     pub fn load_from(data: &std::path::Path) -> io::Result<Self> {
@@ -2781,7 +2774,7 @@ mod tests {
         let itsa = world.inspect_population("egy_markaz_itsa").unwrap();
         let structure = itsa.structure.unwrap();
         assert_eq!(structure.cohort_residents, 124_623);
-        assert_eq!(structure.residents_with_cohort_age_and_sex, 0);
+        assert_eq!(structure.residents_with_cohort_age_and_sex, 124_623);
         let itsa_social = itsa.social.unwrap();
         assert_eq!(itsa_social.dimensions["religion"].assigned_residents, 124_623);
         assert_eq!(itsa_social.dimensions["literacy"].assigned_residents, 124_623);

@@ -22,8 +22,12 @@ OPENING_VERSION = 33
 
 def write_changed(name, data):
     path = HERE / name
-    if path.is_file() and path.read_bytes() == data:
-        return
+    if path.is_file():
+        existing = path.read_bytes()
+        if path.suffix == ".json":
+            existing = existing.replace(b"\r\n", b"\n")
+        if existing == data:
+            return
     pending = path.with_suffix(path.suffix + ".pending")
     pending.write_bytes(data)
     pending.replace(path)
@@ -31,6 +35,18 @@ def write_changed(name, data):
 
 def json_file(name, value):
     write_changed(name, (json.dumps(value, indent=2, ensure_ascii=False) + "\n").encode("utf8"))
+
+def publish_opening_manifest():
+    name = "runtime-manifest.json"
+    manifest = json.loads((HERE / name).read_text(encoding="utf8"))
+    manifest["current_version"] = OPENING_VERSION
+    manifest["versions"][str(OPENING_VERSION)] = {
+        "opening": f"opening_v{OPENING_VERSION}.json",
+        "demography": f"opening_structure_v{OPENING_VERSION}.json",
+        "social": f"opening_social_v{OPENING_VERSION}.json",
+    }
+    json_file(name, manifest)
+
 
 def records(name, rows):
     # No timestamp or platform-specific filename in the portable compressed records.
@@ -344,6 +360,7 @@ def main():
     records("population_1900.jsonl.gz",observations)
     records("geography_1900.jsonl.gz",geography)
     records("city_remainders.jsonl.gz",rem)
+    publish_opening_manifest()
 
 if __name__=="__main__":
     import argparse

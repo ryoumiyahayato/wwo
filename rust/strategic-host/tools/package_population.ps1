@@ -33,4 +33,19 @@ New-Item -ItemType Directory -Path $destination -Force | Out-Null
 foreach ($asset in ($assets | Sort-Object Name -Unique)) {
     Copy-Item -LiteralPath $asset.FullName -Destination $destination
 }
+$referenceAssets = @(
+    'cities_1900.jsonl.gz',
+    'geography_1900.jsonl.gz',
+    'population_1900.jsonl.gz',
+    'demography_1900.jsonl.gz',
+    'structure_coverage_1900.json',
+    'sources.json',
+    'collections/pop_traits/traits.jsonl',
+    'collections/pop_traits/sources.json'
+)
+foreach ($name in $referenceAssets) {
+    $path = Join-Path $destination $name
+    New-Item -ItemType Directory -Path (Split-Path -Parent $path) -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $source $name) -Destination $path
+}
 Copy-Item -LiteralPath $manifestPath -Destination $destination

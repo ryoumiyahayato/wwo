@@ -54,6 +54,7 @@ function Get-OutputBytes([string] $Path) {
 
 $profileDirectory = Join-Path $target.FullName $output
 $previousTarget = $env:CARGO_TARGET_DIR
+$previousData = $env:WWO_DATA_DIR
 $lock = [Threading.Mutex]::new($false, 'Local\WWO-Shared-Cargo-v31')
 $held = $false
 try {
@@ -63,6 +64,9 @@ try {
         $held = $true
     }
     $env:CARGO_TARGET_DIR = $target.FullName
+    if (!$env:WWO_DATA_DIR) {
+        $env:WWO_DATA_DIR = Join-Path $worktree 'data'
+    }
     $bytes = Get-OutputBytes $profileDirectory
     if ($bytes -gt $budget) {
         $directory = Get-Item -LiteralPath $profileDirectory
@@ -96,6 +100,7 @@ try {
     exit $code
 } finally {
     $env:CARGO_TARGET_DIR = $previousTarget
+    $env:WWO_DATA_DIR = $previousData
     if ($held) { $lock.ReleaseMutex() }
     $lock.Dispose()
 }

@@ -92,7 +92,11 @@ impl NativeSession {
     }
 
     pub fn start(data: &Path) -> io::Result<Self> {
-        let bootstrap = WorldBootstrap::load_from(data)?;
+        let bootstrap = if let Some(population_data) = std::env::var_os("WWO_DATA_DIR") {
+            WorldBootstrap::load_from(Path::new(&population_data))?
+        } else {
+            WorldBootstrap::load_from(data)?
+        };
         let (profile, lock) = lock_profile()?;
         let preferences = profile.join("WWO_R68_Candidate/interface_settings.cfg");
         let save_dir = profile.join("formal-world");
