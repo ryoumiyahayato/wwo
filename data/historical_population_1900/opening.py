@@ -427,6 +427,47 @@ def add_japanese_prefectures(group, observations):
     )
 
 
+def taiwan_opening(study, observations, endpoints):
+    root = "taiwan_under_japan"
+    source = "tw_governor_general_1900"
+    date_of_return = "1899-12-31"
+    rows = {row["unit_id"]: row for row in observations
+            if row["source_id"] == source and row["date"] == date_of_return}
+    official = rows["tw_register_total"]
+    foreign = rows["tw_foreign_taiwan"]
+    places = [row for row in rows.values() if row["parent_id"] == official["unit_id"] and row["kind"] == "admin"]
+    registered = sum(row["population_value"] for row in places)
+    if len(places) != 6 or registered != official["population_value"]:
+        raise ValueError("Taiwan's six official administrations do not close to the register")
+    total = study["population_value"]
+    balance = total - registered
+    if balance < foreign["population_value"]:
+        raise ValueError("Taiwan's opening balance cannot accommodate the separate foreign register")
+    method = "Carry the separate December 31 register count straight to the midnight opening."
+    return dict(
+        unit_id=root, date=DATE, source_id=study["source_id"], population_value=total,
+        population_lower=study["population_lower"], population_upper=study["population_upper"],
+        research_unlocated_balance=balance, research_unit_ids=[study["unit_id"]],
+        source_observations=[study["record_id"], official["record_id"], foreign["record_id"]],
+        locator=study["locator"] + "; " + study["method_locator"] + "; Taiwan registers, Tables XVII and XL",
+        endpoint_dates=study["source_dates"],
+        country_endpoint_values=[endpoints[(study["unit_id"], date)] for date in study["source_dates"]],
+        method=study["method"] + ". Six administrative balances use the contemporary register; other residents remain unlocated.",
+        scope="Taiwan and Penghu under Japanese administration. Separate from the Japanese home islands and the Qing control.",
+        uncertainty_kind=study["uncertainty_kind"] + ". The unlocated balance includes "
+                         f"{foreign['population_value']:,} separately registered foreign residents without a same-date locality split. "
+                         "The remaining difference is between independent sources. The administrative register excludes troops and unsurveyed places.",
+        partition_source="collections/japan_taiwan/observations.jsonl",
+        units=[dict(
+            unit_id=row["unit_id"], name=row["name"], population_value=row["population_value"],
+            source_id=source, date=date_of_return, source_dates=[date_of_return],
+            source_observations=[row["record_id"], official["record_id"]], source_unit_ids=[row["unit_id"]],
+            locator=row["locator"], scope=row["definition"], method=method, place_ids=[],
+            uncertainty_kind="No margin of error is published for the people covered by the register.",
+        ) for row in places],
+    )
+
+
 def netherlands_opening(previous, observations):
     source = "nl_cbs_census_1899_age_marital"
     national_id = "nl1899_nl1000"
@@ -1032,6 +1073,11 @@ def groups(observations, version=1):
         add_england_wales_statistical_scope(result["british_isles_1900"], observations)
     if version >= 18:
         add_hungarian_crown_counties(result["austria_hungary"], observations)
+    if version >= 21:
+        taiwan = taiwan_opening(study["ft_formosa_taiwan"], observations, endpoints)
+        if taiwan["unit_id"] in result:
+            raise ValueError("Duplicate Taiwan opening control")
+        result[taiwan["unit_id"]] = taiwan
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

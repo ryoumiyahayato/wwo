@@ -2380,10 +2380,59 @@ mod tests {
         assert_eq!((source.observed_total, source.observed_unknown), (1_701_607, 1_173_802));
         let canada = ledger.social_distribution(Some("dominion_of_canada")).unwrap();
         assert_eq!(canada.dimensions["occupation"].assigned_residents, 1_774_092);
-        assert_eq!(ledger.social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 59_646_786);
+        let v19 = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();
+        assert_eq!(v19.population().social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 59_646_786);
         let previous = bootstrap.base_opening_version("country_fra", None, Some(18)).unwrap();
         assert_eq!(previous.inspect_population(unit).unwrap().structure.unwrap().residents_with_cohort_age_and_sex, 0);
         assert_eq!(previous.population().social_distribution(Some("dominion_of_canada")).unwrap().dimensions["occupation"].assigned_residents, 0);
+    }
+
+    #[test]
+    fn historical_taiwan_register_has_a_separate_control_and_unlocated_residents() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let report = world.inspect_population("taiwan_under_japan").unwrap();
+        assert_eq!(report.population_total, Some(2_796_343));
+        assert_eq!(report.direct_residents, Some(38_182));
+        assert_eq!(report.children.len(), 6);
+        assert_eq!(report.children.iter().map(|child| child.population_total).sum::<u64>(), 2_758_161);
+        let tainan = world.inspect_population("tw_register_tainan").unwrap();
+        assert_eq!(tainan.parent_id, Some("taiwan_under_japan"));
+        assert_eq!(tainan.population_total, Some(1_005_179));
+        assert_eq!(tainan.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        let old = bootstrap.base_opening_version("country_fra", None, Some(20)).unwrap();
+        assert_eq!(old.population().population_total("taiwan_under_japan"), None);
+        for scope in ["qing_empire", "empire_of_japan"] {
+            assert_eq!(world.population().population_total(scope), old.population().population_total(scope));
+        }
+    }
+
+    #[test]
+    fn historical_italian_and_mexican_age_and_social_tables_preserve_census_scope() {
+        let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+        for (scope, total, known_age) in [
+            ("kingdom_of_italy", 32_296_914, 32_295_479),
+            ("mexican_republic", 13_447_810, 13_423_676),
+        ] {
+            let report = world.inspect_population(scope).unwrap();
+            assert_eq!(report.population_total, Some(total));
+            let structure = report.structure.unwrap();
+            assert_eq!(structure.cohort_residents, total);
+            assert_eq!(structure.residents_with_cohort_age_and_sex, known_age);
+        }
+        let italy = world.inspect_population("kingdom_of_italy").unwrap().social.unwrap();
+        let marriage = &italy.dimensions["marital_status"];
+        assert_eq!(marriage.assigned_residents, 32_296_914);
+        assert_eq!(marriage.direct_opening_distribution.as_ref().unwrap().observed_total, 32_475_253);
+        let mexico = world.inspect_population("mexican_republic").unwrap().social.unwrap();
+        assert_eq!(mexico.dimensions["occupation"].assigned_residents, 8_352_122);
+        assert_eq!(mexico.dimensions["language"].assigned_residents, 13_447_810);
+        assert_eq!(mexico.dimensions["religion"].unknown_residents, 1);
+        let durango = world.inspect_population("mx_durango").unwrap().social.unwrap();
+        assert_eq!(durango.dimensions["religion"].direct_opening_distribution.as_ref().unwrap().observed_total, 370_294);
+        let coahuila = world.inspect_population("mx_coahuila").unwrap().social.unwrap();
+        assert_eq!(coahuila.dimensions["occupation"].unknown_residents, 287_792);
+        assert_eq!(coahuila.dimensions["religion"].assigned_residents, 287_792);
     }
 
     #[test]

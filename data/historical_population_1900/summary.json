@@ -47,23 +47,23 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 217,
+  "cited_sources": 219,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
-  "production_roots": 54,
+  "production_roots": 55,
   "partially_located_legacy_roots": 3,
   "documented_people_under_legacy_controls": 674785293,
   "replaced_legacy_roots": 30,
-  "new_roots": 24,
-  "production_people": 1334177537,
-  "production_people_pct_world_estimate": 83.644,
-  "population_outside_evidence_opening_estimate": 260896711,
+  "new_roots": 25,
+  "production_people": 1336973880,
+  "production_people_pct_world_estimate": 83.819,
+  "population_outside_evidence_opening_estimate": 258100368,
   "legacy_only_people": 131094707,
-  "authoritative_total_for_new_game": 1465272244,
-  "roots_with_partitions": 23,
-  "disjoint_leaves": 959,
-  "people_in_partitions": 1210675571,
+  "authoritative_total_for_new_game": 1468068587,
+  "roots_with_partitions": 24,
+  "disjoint_leaves": 965,
+  "people_in_partitions": 1213433732,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -76,13 +76,17 @@
     {
       "unit_id": "kingdom_of_netherlands",
       "people": 158
+    },
+    {
+      "unit_id": "taiwan_under_japan",
+      "people": 38182
     }
   ],
   "partitions_with_explicit_places": 30,
   "people_in_partitions_with_explicit_places": 149701927,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
-  "political_catalogue_members_of_production_groups": 63,
+  "political_catalogue_members_of_production_groups": 64,
   "dated_admin_catalogues": {
     "britain_historic_counties_identity.json": {
       "units": 414,
@@ -292,8 +296,8 @@
   "source_statistical_units": 2388,
   "opening_by_source_type": {
     "territorial_returns": {
-      "roots": 26,
-      "people": 324992493
+      "roots": 27,
+      "people": 327788836
     },
     "historical_world_reconstruction": {
       "roots": 28,
@@ -314,43 +318,43 @@
   "opening_social_coverage": {
     "class": {
       "assigned_people": 8368163,
-      "unknown_people": 1456904081
+      "unknown_people": 1459700424
     },
     "household": {
       "assigned_people": 72890961,
-      "unknown_people": 1392381283
+      "unknown_people": 1395177626
     },
     "housing": {
       "assigned_people": 1655881,
-      "unknown_people": 1463616363
+      "unknown_people": 1466412706
     },
     "language": {
-      "assigned_people": 179994787,
-      "unknown_people": 1285277457
+      "assigned_people": 193442597,
+      "unknown_people": 1274625990
     },
     "legal_estate": {
       "assigned_people": 132020769,
-      "unknown_people": 1333251475
+      "unknown_people": 1336047818
     },
     "literacy": {
-      "assigned_people": 183140727,
-      "unknown_people": 1282131517
+      "assigned_people": 196423839,
+      "unknown_people": 1271644748
     },
     "marital_status": {
-      "assigned_people": 177474988,
-      "unknown_people": 1287797256
+      "assigned_people": 218494758,
+      "unknown_people": 1249573829
     },
     "occupation": {
-      "assigned_people": 59646786,
-      "unknown_people": 1405625458
+      "assigned_people": 67998908,
+      "unknown_people": 1400069679
     },
     "religion": {
-      "assigned_people": 283415274,
-      "unknown_people": 1181856970
+      "assigned_people": 296863083,
+      "unknown_people": 1171205504
     },
     "residence": {
       "assigned_people": 335167810,
-      "unknown_people": 1130104434
+      "unknown_people": 1132900777
     }
   },
   "structural_observations_by_source": {
@@ -392,17 +396,19 @@
     "de_wuerttemberg_1900_age_marital": 107,
     "us_twelfth_census_1900_alaska_hawaii_age": 26,
     "de_baden_1900_age_marital": 101,
+    "it_1901_census_v5_age_and_marital": 36,
     "ah_cisleithania_census_1900_ages": 168,
     "ksh_hungarian_statistical_yearbook_1908": 42,
+    "mx_census_1900_dge_1901": 341,
     "ah_hungarian_census_1900_part10": 18,
     "jp_cabinet_population_1898_original": 23,
     "jp_cabinet_local_occupations_1913_tokyo": 8,
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 736084397,
-  "structure_opening_pool_count": 546,
-  "structure_opening_residents_outside_modeled_pools": 729187847,
+  "structure_opening_pool_controls": 781829121,
+  "structure_opening_pool_count": 577,
+  "structure_opening_residents_outside_modeled_pools": 686239466,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -3394,6 +3400,223 @@
       "observed_date": "1899-12-31"
     },
     {
+      "unit_id": "kingdom_of_italy",
+      "opening_total": 32296914,
+      "observed_unit_id": "kingdom_of_italy",
+      "observed_total": 32447474,
+      "observed_date": "1901-01-01"
+    },
+    {
+      "unit_id": "mx_aguascalientes",
+      "opening_total": 102776,
+      "observed_unit_id": "mx_aguascalientes",
+      "observed_total": 102416,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_baja_california",
+      "opening_total": 46744,
+      "observed_unit_id": "mx_baja_california",
+      "observed_total": 47624,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_campeche",
+      "opening_total": 86800,
+      "observed_unit_id": "mx_campeche",
+      "observed_total": 86542,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_chiapas",
+      "opening_total": 354060,
+      "observed_unit_id": "mx_chiapas",
+      "observed_total": 360799,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_chihuahua",
+      "opening_total": 317149,
+      "observed_unit_id": "mx_chihuahua",
+      "observed_total": 327784,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_coahuila",
+      "opening_total": 287792,
+      "observed_unit_id": "mx_coahuila",
+      "observed_total": 296938,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_colima",
+      "opening_total": 63583,
+      "observed_unit_id": "mx_colima",
+      "observed_total": 65115,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_distrito_federal",
+      "opening_total": 530867,
+      "observed_unit_id": "mx_distrito_federal",
+      "observed_total": 541516,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_durango",
+      "opening_total": 358006,
+      "observed_unit_id": "mx_durango",
+      "observed_total": 370294,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_guanajuato",
+      "opening_total": 1061860,
+      "observed_unit_id": "mx_guanajuato",
+      "observed_total": 1061724,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_guerrero",
+      "opening_total": 469576,
+      "observed_unit_id": "mx_guerrero",
+      "observed_total": 479205,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_hidalgo",
+      "opening_total": 597480,
+      "observed_unit_id": "mx_hidalgo",
+      "observed_total": 605051,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_jalisco",
+      "opening_total": 1146258,
+      "observed_unit_id": "mx_jalisco",
+      "observed_total": 1153891,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_mexico",
+      "opening_total": 919276,
+      "observed_unit_id": "mx_mexico",
+      "observed_total": 934463,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_michoacan",
+      "opening_total": 929377,
+      "observed_unit_id": "mx_michoacan",
+      "observed_total": 935808,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_morelos",
+      "opening_total": 159991,
+      "observed_unit_id": "mx_morelos",
+      "observed_total": 160115,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_nuevo_leon",
+      "opening_total": 324881,
+      "observed_unit_id": "mx_nuevo_leon",
+      "observed_total": 327937,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_oaxaca",
+      "opening_total": 938209,
+      "observed_unit_id": "mx_oaxaca",
+      "observed_total": 948633,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_puebla",
+      "opening_total": 1015126,
+      "observed_unit_id": "mx_puebla",
+      "observed_total": 1021133,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_queretaro",
+      "opening_total": 231761,
+      "observed_unit_id": "mx_queretaro",
+      "observed_total": 232389,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_san_luis_potosi",
+      "opening_total": 574290,
+      "observed_unit_id": "mx_san_luis_potosi",
+      "observed_total": 575432,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_sinaloa",
+      "opening_total": 290512,
+      "observed_unit_id": "mx_sinaloa",
+      "observed_total": 296701,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_sonora",
+      "opening_total": 216709,
+      "observed_unit_id": "mx_sonora",
+      "observed_total": 221682,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_tabasco",
+      "opening_total": 155745,
+      "observed_unit_id": "mx_tabasco",
+      "observed_total": 159834,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_tamaulipas",
+      "opening_total": 216912,
+      "observed_unit_id": "mx_tamaulipas",
+      "observed_total": 218948,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_tepic_later_nayarit",
+      "opening_total": 149882,
+      "observed_unit_id": "mx_tepic_later_nayarit",
+      "observed_total": 150098,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_tlaxcala",
+      "opening_total": 171413,
+      "observed_unit_id": "mx_tlaxcala",
+      "observed_total": 172315,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_veracruz",
+      "opening_total": 962272,
+      "observed_unit_id": "mx_veracruz",
+      "observed_total": 981030,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_yucatan",
+      "opening_total": 307885,
+      "observed_unit_id": "mx_yucatan",
+      "observed_total": 309652,
+      "observed_date": "1900-10-28"
+    },
+    {
+      "unit_id": "mx_zacatecas",
+      "opening_total": 460618,
+      "observed_unit_id": "mx_zacatecas",
+      "observed_total": 462190,
+      "observed_date": "1900-10-28"
+    },
+    {
       "unit_id": "nl1899_pv2000",
       "opening_total": 299602,
       "observed_unit_id": "nl1899_pv2000",
@@ -4487,13 +4710,14 @@
         "cshapes_gw_850",
         "empire_of_japan",
         "korean_empire",
-        "qing_empire"
+        "qing_empire",
+        "taiwan_under_japan"
       ],
-      "production_people": 777904305,
-      "production_pct_of_regional_research_estimate": 86.977,
-      "people_with_opening_subdivision": 741085701,
-      "research_only_units": 27,
-      "research_only_people": 89458537
+      "production_people": 780700648,
+      "production_pct_of_regional_research_estimate": 87.29,
+      "people_with_opening_subdivision": 743843862,
+      "research_only_units": 26,
+      "research_only_people": 86662194
     },
     "Europe": {
       "statistical_units": 29,
@@ -4960,10 +5184,10 @@
         "opening_unit_id": "kingdom_of_italy",
         "research_region": "Europe",
         "opening_control": 32296914,
-        "in_model_pools": 0,
-        "outside_model_pools": 32296914,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 32296914,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 32295479,
+        "modeled_sex_age_unknown": 1435
       },
       {
         "opening_unit_id": "kingdom_of_luxembourg",
@@ -5050,10 +5274,10 @@
         "opening_unit_id": "mexican_republic",
         "research_region": "America",
         "opening_control": 13447810,
-        "in_model_pools": 0,
-        "outside_model_pools": 13447810,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 13447810,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 13423676,
+        "modeled_sex_age_unknown": 24134
       },
       {
         "opening_unit_id": "moroccan_sultanate",
@@ -5200,6 +5424,15 @@
         "modeled_sex_age_unknown": 0
       },
       {
+        "opening_unit_id": "taiwan_under_japan",
+        "research_region": "Asia",
+        "opening_control": 2796343,
+        "in_model_pools": 0,
+        "outside_model_pools": 2796343,
+        "modeled_age_and_sex": 0,
+        "modeled_sex_age_unknown": 0
+      },
+      {
         "opening_unit_id": "united_states_1900",
         "research_region": "America",
         "opening_control": 75454976,
@@ -5230,10 +5463,10 @@
     "by_research_region": {
       "America": {
         "opening_control": 128108928,
-        "in_model_pools": 80821578,
-        "outside_model_pools": 47287350,
-        "modeled_age_and_sex": 80558424,
-        "modeled_sex_age_unknown": 263154
+        "in_model_pools": 94269388,
+        "outside_model_pools": 33839540,
+        "modeled_age_and_sex": 93982100,
+        "modeled_sex_age_unknown": 287288
       },
       "Oceania": {
         "opening_control": 4905385,
@@ -5244,10 +5477,10 @@
       },
       "Europe": {
         "opening_control": 408702638,
-        "in_model_pools": 326895816,
-        "outside_model_pools": 81806822,
-        "modeled_age_and_sex": 325046001,
-        "modeled_sex_age_unknown": 1849815
+        "in_model_pools": 359192730,
+        "outside_model_pools": 49509908,
+        "modeled_age_and_sex": 357341480,
+        "modeled_sex_age_unknown": 1851250
       },
       "Africa": {
         "opening_control": 18751671,
@@ -5264,19 +5497,19 @@
         "modeled_sex_age_unknown": 0
       },
       "Asia": {
-        "opening_control": 802923622,
+        "opening_control": 805719965,
         "in_model_pools": 320264394,
-        "outside_model_pools": 482659228,
+        "outside_model_pools": 485455571,
         "modeled_age_and_sex": 320219074,
         "modeled_sex_age_unknown": 45320
       }
     },
     "world": {
-      "opening_control": 1465272244,
-      "in_model_pools": 736084397,
-      "outside_model_pools": 729187847,
-      "modeled_age_and_sex": 729030788,
-      "modeled_sex_age_unknown": 7053609
+      "opening_control": 1468068587,
+      "in_model_pools": 781829121,
+      "outside_model_pools": 686239466,
+      "modeled_age_and_sex": 774749943,
+      "modeled_sex_age_unknown": 7079178
     }
   },
   "opening_count_basis": {
@@ -5286,12 +5519,12 @@
         "pct_of_research_reference": 0.32
       },
       "published_historical_estimates": {
-        "people": 694739605,
-        "pct_of_research_reference": 43.555
+        "people": 694777787,
+        "pct_of_research_reference": 43.558
       },
       "date_models_from_territorial_returns": {
-        "people": 634333795,
-        "pct_of_research_reference": 39.768
+        "people": 637091956,
+        "pct_of_research_reference": 39.941
       },
       "retained_legacy_estimates": {
         "people": 131094707,
@@ -5939,6 +6172,61 @@
         "sourced_people": 3285131,
         "sourced_basis": "date_models_from_territorial_returns",
         "retained_legacy_people": 0
+      },
+      {
+        "unit_id": "taiwan_under_japan",
+        "source_id": "ft_world_v5",
+        "sourced_people": 38182,
+        "sourced_basis": "published_historical_estimates",
+        "retained_legacy_people": 0
+      },
+      {
+        "unit_id": "tw_register_penghu",
+        "source_id": "tw_governor_general_1900",
+        "sourced_people": 52256,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "taiwan_under_japan"
+      },
+      {
+        "unit_id": "tw_register_taichung",
+        "source_id": "tw_governor_general_1900",
+        "sourced_people": 816079,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "taiwan_under_japan"
+      },
+      {
+        "unit_id": "tw_register_tainan",
+        "source_id": "tw_governor_general_1900",
+        "sourced_people": 1005179,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "taiwan_under_japan"
+      },
+      {
+        "unit_id": "tw_register_taipei",
+        "source_id": "tw_governor_general_1900",
+        "sourced_people": 735922,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "taiwan_under_japan"
+      },
+      {
+        "unit_id": "tw_register_taitung",
+        "source_id": "tw_governor_general_1900",
+        "sourced_people": 49178,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "taiwan_under_japan"
+      },
+      {
+        "unit_id": "tw_register_yilan",
+        "source_id": "tw_governor_general_1900",
+        "sourced_people": 99547,
+        "sourced_basis": "date_models_from_territorial_returns",
+        "retained_legacy_people": 0,
+        "parent_id": "taiwan_under_japan"
       },
       {
         "unit_id": "united_states_1900",

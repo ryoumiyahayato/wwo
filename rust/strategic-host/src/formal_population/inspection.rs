@@ -125,6 +125,7 @@ impl Population {
                 ("russia_1897_reported_confession", "Магометане"),
                 ("india_1901_reported_religion", "Muhammadans"),
                 ("austria_1900_reported_religion", "Muslim"),
+                ("mexico_1900_reported_religion", "Mahometanos"),
             ].iter().filter_map(|(classification, category)| {
                 religion.by_classification.get(classification)?.get(category)
             }).sum();

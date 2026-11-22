@@ -88,13 +88,14 @@
         "cshapes_gw_850",
         "empire_of_japan",
         "korean_empire",
-        "qing_empire"
+        "qing_empire",
+        "taiwan_under_japan"
       ],
-      "production_people": 777904305,
-      "production_pct_of_regional_research_estimate": 86.977,
-      "people_with_opening_subdivision": 741085701,
-      "research_only_units": 27,
-      "research_only_people": 89458537
+      "production_people": 780700648,
+      "production_pct_of_regional_research_estimate": 87.29,
+      "people_with_opening_subdivision": 743843862,
+      "research_only_units": 26,
+      "research_only_people": 86662194
     },
     "Europe": {
       "statistical_units": 29,
@@ -1968,9 +1969,9 @@
       "candidate_polity_ids": [
         "taiwan_under_japan"
       ],
-      "comparison_id": null,
-      "opening_disposition": "research_only",
-      "note": "Residents and foreigners are separately registered. The garrison and Orchid Island lack a comparable complete return."
+      "comparison_id": "taiwan_under_japan",
+      "opening_disposition": "adopted_research_series",
+      "note": "Taiwan and Penghu under Japanese administration. Separate from the Japanese home islands and the Qing control."
     },
     {
       "unit_id": "ft_french_india",
@@ -3967,6 +3968,24 @@
       "research_minus_documented": 426
     },
     {
+      "comparison_id": "taiwan_under_japan",
+      "opening_root_ids": [
+        "taiwan_under_japan"
+      ],
+      "research_unit_ids": [
+        "ft_formosa_taiwan"
+      ],
+      "scope_relation": "adopted_research_series",
+      "note": "Taiwan and Penghu under Japanese administration. Separate from the Japanese home islands and the Qing control.",
+      "research_regions": [
+        "Asia"
+      ],
+      "research_people": 2796343,
+      "documented_opening_people": 2796343,
+      "opening_people_including_retained_balances": 2796343,
+      "research_minus_documented": 0
+    },
+    {
       "comparison_id": "uruguay_1900",
       "opening_root_ids": [
         "uruguay_1900"
@@ -4208,10 +4227,14 @@
       {
         "unit_id": "statistical_area:bosnia_herzegovina_1900",
         "people": 1668263
+      },
+      {
+        "unit_id": "taiwan_under_japan",
+        "people": 2796343
       }
     ],
-    "net_additions": 61332775,
-    "authoritative_opening_population": 1465272244,
+    "net_additions": 64129118,
+    "authoritative_opening_population": 1468068587,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4251,14 +4274,14 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1334177537,
+    "documented_opening_population": 1336973880,
     "untouched_legacy_population": 101880000,
     "retained_unlocated_population": 29214707,
-    "authoritative_opening_population": 1465272244,
-    "published_minus_documented_opening": 260896711,
+    "authoritative_opening_population": 1468068587,
+    "published_minus_documented_opening": 258100368,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
-      "research_only_component_people": 224844706,
+      "research_only_component_people": 222048363,
       "comparisons_by_scope": {
         "comparable_extent": 2063357,
         "scope_unconfirmed": 86844,
@@ -4269,6 +4292,6 @@
       "untouched_legacy_controls": -101880000,
       "unlocated_balances_under_retained_controls": -29214707
     },
-    "published_minus_authoritative_opening": 129802004
+    "published_minus_authoritative_opening": 127005661
   }
 }

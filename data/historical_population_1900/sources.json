@@ -1780,6 +1780,15 @@
     "collection": "india_statistical_abstract_ages"
   },
   {
+    "id": "it_1901_census_v5_age_and_marital",
+    "title": "Censimento della popolazione del Regno al 10 febbraio 1901, vol. V",
+    "publisher": "Ministero di Agricoltura, Industria e Commercio, Direzione generale della statistica",
+    "url": "https://ebiblio.istat.it/digibib/Censimenti%20popolazione/censpop1901/ist7957cp1901_v5_Relazione_sul_metodo_di_esecuzione_e_sui_risultati_del_censimento%2BOCR_ottimizzato.pdf",
+    "locator": "Table XX(b), printed p. 109; methods pp. LVIII–LX; civil status pp. LXIV–LXV.",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "italy_census_1901"
+  },
+  {
     "id": "jp_cabinet_population_1898_original",
     "title": "日本帝國人口統計 明治三十一年",
     "publisher": "Bureau of Statistics, Imperial Cabinet of Japan, March 1901",
@@ -1967,6 +1976,15 @@
       "raw/mauritius_and_rodrigues.tsv"
     ],
     "collection": "mauritius_districts"
+  },
+  {
+    "id": "mx_census_1900_dge_1901",
+    "title": "Censo General de la República Mexicana, verificado el 28 de Octubre de 1900. Resumen General",
+    "publisher": "Dirección General de Estadística",
+    "url": "https://internet.contenidos.inegi.org.mx/contenidos/Productos/prod_serv/contenidos/espanol/bvinegi/productos/historicos/1329/702825410421/702825410421.pdf",
+    "locator": "Cuadro 4, printed pp. 17–20 and Cuadro 12 p. 47 (religion); Cuadro 5, pp. 21–22 (language); Cuadro 6, pp. 23–25 (literacy); Cuadro 7, p. 27 (population); Cuadro 8, pp. 29–33 (age and sex); Cuadro 10, pp. 37–39 (marital status); Cuadro 11, pp. 41–46 (occupation).",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "mexico_census_1900"
   },
   {
     "id": "morocco_1899_statesmans_yearbook",
