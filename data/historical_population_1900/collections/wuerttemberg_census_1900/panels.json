@@ -1,0 +1,16 @@
+[
+  {
+    "id": "wuerttemberg_1900",
+    "published_scope": "Kingdom of Württemberg, population present",
+    "source_id": "de_wuerttemberg_1900_age_marital",
+    "observed_unit_id": "administrative_region:germany_wuerttemberg",
+    "observed_date": "1900-12-01",
+    "locator": "Table F(a), printed p. 18, columns 10 and 11",
+    "definition": "Population present by sex in five age bands for the entire kingdom.",
+    "broad_observation": false,
+    "opening_unit_id": "administrative_region:germany_wuerttemberg",
+    "opening_from_version": 19,
+    "opening_match_population_endpoint": true,
+    "uncertainty": "Age and sex proportions are from the Württemberg census 334 days after the opening. Changes over that interval have no quantified uncertainty."
+  }
+]

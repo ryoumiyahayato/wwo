@@ -1,0 +1,30 @@
+[
+  {
+    "id": "alaska_1900",
+    "published_scope": "Alaska, Twelfth Census",
+    "source_id": "us_twelfth_census_1900_alaska_hawaii_age",
+    "observed_unit_id": "cshapes_gw_3",
+    "observed_date": "1900-06-01",
+    "locator": "Volume II, Table 3, printed pp. 110–111, Alaska",
+    "definition": "Age and sex in the single Alaska census row. Unknown ages retain reported sex. The nominal national census date represents fieldwork from July 1899 through October 1900.",
+    "broad_observation": false,
+    "opening_unit_id": "cshapes_gw_3",
+    "opening_from_version": 19,
+    "opening_match_population_endpoint": true,
+    "uncertainty": "The Alaska age shares come from local census counts. The spread of field dates, the January 1900 conversion and the reasons for unreported ages have no quantified uncertainty."
+  },
+  {
+    "id": "hawaii_1900",
+    "published_scope": "Hawaiian Islands, Twelfth Census",
+    "source_id": "us_twelfth_census_1900_alaska_hawaii_age",
+    "observed_unit_id": "cshapes_gw_4",
+    "observed_date": "1900-06-01",
+    "locator": "Volume II, Table 3, printed pp. 110–111, Hawaii",
+    "definition": "Age and sex in the single Hawaii census row. Unknown ages retain reported sex.",
+    "broad_observation": false,
+    "opening_unit_id": "cshapes_gw_4",
+    "opening_from_version": 19,
+    "opening_match_population_endpoint": true,
+    "uncertainty": "The Hawaii age shares come from local census counts. Changes between January and June 1900 and the reasons for unreported ages have no quantified uncertainty."
+  }
+]

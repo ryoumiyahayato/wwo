@@ -34,6 +34,7 @@
     "nordic_population_1900": 4,
     "philippines": 51,
     "polar_presence": 1,
+    "qing_shaangan_prefectures": 42,
     "romania": 6,
     "russia": 1721,
     "saint_helena_population": 1,
@@ -45,7 +46,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 209,
+  "cited_sources": 214,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -60,7 +61,7 @@
   "legacy_only_people": 135984208,
   "authoritative_total_for_new_game": 1465272244,
   "roots_with_partitions": 23,
-  "disjoint_leaves": 934,
+  "disjoint_leaves": 953,
   "people_in_partitions": 1205786070,
   "unlocated_balances_under_research_controls": [
     {
@@ -287,7 +288,7 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2367,
+  "source_statistical_units": 2388,
   "opening_by_source_type": {
     "territorial_returns": {
       "roots": 26,
@@ -331,12 +332,12 @@
       "unknown_people": 1282131517
     },
     "marital_status": {
-      "assigned_people": 169353453,
-      "unknown_people": 1295918791
+      "assigned_people": 175633120,
+      "unknown_people": 1289639124
     },
     "occupation": {
-      "assigned_people": 57872694,
-      "unknown_people": 1407399550
+      "assigned_people": 59646786,
+      "unknown_people": 1405625458
     },
     "religion": {
       "assigned_people": 283415274,
@@ -382,6 +383,9 @@
     "india_statistical_abstract_1905_age_sex": 48,
     "india_census_cp_states_1901_table_vii": 8,
     "de_prussia_handbook_1903_census_ages": 9,
+    "de_saxony_1900_age_marital": 33,
+    "de_wuerttemberg_1900_age_marital": 6,
+    "us_twelfth_census_1900_alaska_hawaii_age": 26,
     "ah_cisleithania_census_1900_ages": 168,
     "ksh_hungarian_statistical_yearbook_1908": 42,
     "ah_hungarian_census_1900_part10": 18,
@@ -390,9 +394,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 722859880,
-  "structure_opening_pool_count": 535,
-  "structure_opening_residents_outside_modeled_pools": 742412364,
+  "structure_opening_pool_controls": 729353028,
+  "structure_opening_pool_count": 539,
+  "structure_opening_residents_outside_modeled_pools": 735919216,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -1375,10 +1379,24 @@
       "observed_date": "1900-12-01"
     },
     {
+      "unit_id": "administrative_region:germany_sachsen",
+      "opening_total": 4126352,
+      "observed_unit_id": "administrative_region:germany_sachsen",
+      "observed_total": 4202216,
+      "observed_date": "1900-12-01"
+    },
+    {
       "unit_id": "administrative_region:germany_sachsen_weimar",
       "opening_total": 358544,
       "observed_unit_id": "administrative_region:germany_sachsen_weimar",
       "observed_total": 362873,
+      "observed_date": "1900-12-01"
+    },
+    {
+      "unit_id": "administrative_region:germany_wuerttemberg",
+      "opening_total": 2153315,
+      "observed_unit_id": "administrative_region:germany_wuerttemberg",
+      "observed_total": 2169480,
       "observed_date": "1900-12-01"
     },
     {
@@ -2668,6 +2686,20 @@
       "observed_unit_id": "swiss_confederation",
       "observed_total": 3285131,
       "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "cshapes_gw_3",
+      "opening_total": 62288,
+      "observed_unit_id": "cshapes_gw_3",
+      "observed_total": 63592,
+      "observed_date": "1900-06-01"
+    },
+    {
+      "unit_id": "cshapes_gw_4",
+      "opening_total": 151193,
+      "observed_unit_id": "cshapes_gw_4",
+      "observed_total": 154001,
+      "observed_date": "1900-06-01"
     },
     {
       "unit_id": "cshapes_gw_561",
@@ -4576,10 +4608,10 @@
         "opening_unit_id": "cshapes_gw_3",
         "research_region": "America",
         "opening_control": 62288,
-        "in_model_pools": 0,
-        "outside_model_pools": 62288,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 62288,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 45724,
+        "modeled_sex_age_unknown": 16564
       },
       {
         "opening_unit_id": "cshapes_gw_31",
@@ -4603,10 +4635,10 @@
         "opening_unit_id": "cshapes_gw_4",
         "research_region": "Oceania",
         "opening_control": 151193,
-        "in_model_pools": 0,
-        "outside_model_pools": 151193,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 151193,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 150640,
+        "modeled_sex_age_unknown": 553
       },
       {
         "opening_unit_id": "cshapes_gw_402",
@@ -4819,9 +4851,9 @@
         "opening_unit_id": "german_empire",
         "research_region": "Europe",
         "opening_control": 55619152,
-        "in_model_pools": 41170950,
-        "outside_model_pools": 14448202,
-        "modeled_age_and_sex": 41164302,
+        "in_model_pools": 47450617,
+        "outside_model_pools": 8168535,
+        "modeled_age_and_sex": 47443969,
         "modeled_sex_age_unknown": 6648
       },
       {
@@ -5143,23 +5175,23 @@
     "by_research_region": {
       "America": {
         "opening_control": 128108928,
-        "in_model_pools": 80759290,
-        "outside_model_pools": 47349638,
-        "modeled_age_and_sex": 80512700,
-        "modeled_sex_age_unknown": 246590
+        "in_model_pools": 80821578,
+        "outside_model_pools": 47287350,
+        "modeled_age_and_sex": 80558424,
+        "modeled_sex_age_unknown": 263154
       },
       "Oceania": {
         "opening_control": 4905385,
-        "in_model_pools": 796359,
-        "outside_model_pools": 4109026,
-        "modeled_age_and_sex": 792013,
-        "modeled_sex_age_unknown": 4346
+        "in_model_pools": 947552,
+        "outside_model_pools": 3957833,
+        "modeled_age_and_sex": 942653,
+        "modeled_sex_age_unknown": 4899
       },
       "Europe": {
         "opening_control": 408702638,
-        "in_model_pools": 318774281,
-        "outside_model_pools": 89928357,
-        "modeled_age_and_sex": 316924466,
+        "in_model_pools": 325053948,
+        "outside_model_pools": 83648690,
+        "modeled_age_and_sex": 323204133,
         "modeled_sex_age_unknown": 1849815
       },
       "Africa": {
@@ -5186,10 +5218,10 @@
     },
     "world": {
       "opening_control": 1465272244,
-      "in_model_pools": 722859880,
-      "outside_model_pools": 742412364,
-      "modeled_age_and_sex": 720712889,
-      "modeled_sex_age_unknown": 2146991
+      "in_model_pools": 729353028,
+      "outside_model_pools": 735919216,
+      "modeled_age_and_sex": 727188920,
+      "modeled_sex_age_unknown": 2164108
     }
   },
   "opening_count_basis": {

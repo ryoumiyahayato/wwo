@@ -2336,6 +2336,69 @@ mod tests {
     }
 
     #[test]
+    fn historical_shaangan_prefectures_preserve_provinces_and_unknown_attributes() {
+        let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+        for (unit, population, count) in [
+            ("qing_hist_shaanxi", 8_680_861, 11),
+            ("qing_hist_gansu", 6_389_222, 10),
+        ] {
+            let report = world.inspect_population(unit).unwrap();
+            assert_eq!(report.population_total, Some(population));
+            assert_eq!(report.direct_residents, None);
+            assert_eq!(report.children.len(), count);
+            assert_eq!(report.children.iter().map(|child| child.population_total).sum::<u64>(), population);
+        }
+        let scope = world.inspect_population("qing_hist_shaanxi_xian_hanzhong").unwrap();
+        assert_eq!(scope.parent_id, Some("qing_hist_shaanxi"));
+        assert_eq!(scope.population_total, Some(3_279_041));
+        assert_eq!(scope.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        assert_eq!(scope.social.unwrap().dimensions["occupation"].unknown_residents, 3_279_041);
+        assert_eq!(world.population().population_total("qing_empire"), Some(400_000_000));
+    }
+
+    #[test]
+    fn historical_german_civil_status_and_canadian_occupations_match_census_scopes() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let unit = "administrative_region:germany_sachsen";
+        let world = bootstrap.create("country_fra").unwrap();
+        let saxony = world.inspect_population(unit).unwrap();
+        assert_eq!(saxony.population_total, Some(4_126_352));
+        assert_eq!(saxony.structure.unwrap().residents_with_cohort_age_and_sex, 4_126_352);
+        let social = saxony.social.unwrap();
+        assert_eq!(social.dimensions["marital_status"].assigned_residents, 4_126_352);
+        assert_eq!(social.dimensions["marital_status"].by_classification["saxony_1900_reported_marital_status"]["Married"], 1_537_122);
+        let wuerttemberg = world.inspect_population("administrative_region:germany_wuerttemberg").unwrap();
+        assert_eq!(wuerttemberg.population_total, Some(2_153_315));
+        assert_eq!(wuerttemberg.structure.unwrap().residents_with_cohort_age_and_sex, 2_153_315);
+        assert_eq!(wuerttemberg.social.unwrap().dimensions["marital_status"].assigned_residents, 2_153_315);
+
+        let ledger = world.population();
+        let quebec = ledger.social_distribution(Some("ca_quebec_and_unorganized_territories")).unwrap();
+        let occupation = &quebec.dimensions["occupation"];
+        assert_eq!((occupation.assigned_residents, occupation.unknown_residents), (520_818, 1_158_263));
+        let source = occupation.direct_opening_distribution.unwrap();
+        assert_eq!((source.observed_total, source.observed_unknown), (1_701_607, 1_173_802));
+        let canada = ledger.social_distribution(Some("dominion_of_canada")).unwrap();
+        assert_eq!(canada.dimensions["occupation"].assigned_residents, 1_774_092);
+        assert_eq!(ledger.social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 59_646_786);
+        let previous = bootstrap.base_opening_version("country_fra", None, Some(18)).unwrap();
+        assert_eq!(previous.inspect_population(unit).unwrap().structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        assert_eq!(previous.population().social_distribution(Some("dominion_of_canada")).unwrap().dimensions["occupation"].assigned_residents, 0);
+    }
+
+    #[test]
+    fn historical_alaska_and_hawaii_keep_own_age_tables_and_missing_ages() {
+        let world = WorldBootstrap::load().unwrap().create("country_fra").unwrap();
+        for (unit, total, with_age) in [("cshapes_gw_3", 62_288, 45_724), ("cshapes_gw_4", 151_193, 150_640)] {
+            let report = world.inspect_population(unit).unwrap();
+            assert_eq!(report.population_total, Some(total));
+            let structure = report.structure.unwrap();
+            assert_eq!(structure.cohort_residents, total);
+            assert_eq!(structure.residents_with_cohort_age_and_sex, with_age);
+        }
+    }
+
+    #[test]
     fn historical_hungarian_counties_preserve_parent_controls() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let world = bootstrap.create("country_fra").unwrap();
@@ -2372,7 +2435,8 @@ mod tests {
             assert_eq!(social.dimensions[dimension].unknown_residents, 59_051);
         }
         assert_eq!(world.population().population_total("austria_hungary"), Some(45_000_882));
-        assert_eq!(world.population().social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 57_872_694);
+        let prior = bootstrap.base_opening_version("country_fra", None, Some(18)).unwrap();
+        assert_eq!(prior.population().social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 57_872_694);
     }
 
     #[test]

@@ -310,6 +310,51 @@ def canada_structure(pools):
             )
 
 
+def canada_occupation(pools):
+    path = COLLECTIONS / "canada_social_1901" / "occupation_1901_table_i.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        national, *rows = csv.DictReader(stream)
+    classes = [label for label in national if label.endswith(" class")]
+    excluded = "Non-productive class"
+    for row in [national, *rows]:
+        if sum(int(row[label]) for label in classes) != int(row["reported_total"]):
+            raise ValueError(f"Canadian occupation classes do not close for {row['scope']}")
+    if any(sum(int(row[label]) for row in rows) != int(national[label]) for label in classes):
+        raise ValueError("Canadian occupation regions do not sum to Table I national counts")
+
+    combined = "ca_quebec_and_unorganized_territories"
+    source = "ca_fourth_census_1901_occupation_bulletin_xi"
+    regions = defaultdict(list)
+    for row in rows:
+        scope = row["observed_unit_id"]
+        regions[combined if scope in {"ca_quebec", "ca_yukon"} else scope].append(row)
+    population_missing = int(national["observed_population"]) - sum(int(row["observed_population"]) for row in rows)
+    if (population_missing < 0
+            or sum(pools[scope]["endpoint_values"][-1] for scope in regions) != int(national["observed_population"])):
+        raise ValueError("Canadian occupation scopes differ from the national opening census control")
+    for scope, entries in regions.items():
+        pool = pools[scope]
+        total = sum(int(row["observed_population"]) for row in entries)
+        definition = ("Recorded own occupation across the nine occupational classes. Residents without a recorded "
+                      "occupation and residents in the chiefly retired Non-productive class remain unassigned.")
+        if scope == combined:
+            total += population_missing
+            definition += " Quebec and Yukon are counted. The remaining unorganized territories are unassigned."
+        if total != pool["endpoint_values"][-1]:
+            raise ValueError(f"Canadian occupation and population controls differ for {scope}")
+        counts = {label: sum(int(row[label]) for row in entries) for label in classes if label != excluded}
+        pages = ", ".join(sorted({row["printed_page"] for row in entries}))
+        margin = distribution(
+            pool["population_value"], classification="canada_1901_recorded_occupation_classes",
+            source=source, date=CANADA_DATE, observed_unit=scope, scope=pool["name"],
+            locator=f"Bulletin XI, Table I, printed p. {pages}; Volume I, Table I for resident denominators.",
+            total=total, observed_counts=counts, unknown=total - sum(counts.values()),
+            definition=definition,
+        )
+        margin["source_ids"].append("ca_census_1901_vol1_table1")
+        yield scope, "occupation", margin
+
+
 def netherlands_structure(pools):
     census_date = "1900-01-01"
     method = "Use the census counts at the midnight opening without apportionment across territories."
@@ -660,6 +705,26 @@ def prussian_marital_status(pools):
     )
 
 
+def german_state_marital_status(pools, collection, *, classification, source, scope, locator):
+    path = COLLECTIONS / collection / "marital.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        *rows, control = csv.DictReader(stream)
+    unit_id = control["state_id"]
+    unit = pools[unit_id]
+    total = int(control["both"])
+    if (total != unit["endpoint_values"][-1]
+            or any(sum(int(row[sex]) for row in rows) != int(control[sex]) for sex in ("male", "female"))
+            or any(int(row["male"]) + int(row["female"]) != int(row["both"]) for row in [control, *rows])):
+        raise ValueError(f"Civil status and population controls differ for {unit_id}")
+    labels = {"single": "Never married", "married": "Married", "widowed": "Widowed", "divorced": "Divorced"}
+    yield unit_id, "marital_status", distribution(
+        unit["population_value"], classification=classification,
+        source=source, date=control["census_date"], observed_unit=unit_id, scope=scope, locator=locator,
+        total=total, observed_counts={labels[row["marital_status"]]: int(row["both"]) for row in rows},
+        unknown=0, definition="Civil status of all persons present. The never-married category includes children.",
+    )
+
+
 def opening_social(opening_groups, *, version):
     """Return independent person distributions at each source's published scope."""
     pools = {
@@ -721,6 +786,20 @@ def opening_social(opening_groups, *, version):
                                   "Reported own occupational group among people with an independent livelihood. "
                                   "Dependants, persons living from capital or pensions, and other or unknown occupations "
                                   "remain unassigned. The armed forces census category is not a military roster."),
+        )
+    if version >= 19:
+        marginals = chain(
+            marginals, canada_occupation(pools),
+            german_state_marital_status(
+                pools, "saxony_census_1900", classification="saxony_1900_reported_marital_status",
+                source="de_saxony_1900_age_marital", scope="Kingdom of Saxony, population present",
+                locator="Table 3, printed p. 160, all ages row",
+            ),
+            german_state_marital_status(
+                pools, "wuerttemberg_census_1900", classification="wuerttemberg_1900_reported_marital_status",
+                source="de_wuerttemberg_1900_age_marital", scope="Kingdom of Württemberg, population present",
+                locator="Table D, printed p. 16, all ages, entire kingdom",
+            ),
         )
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],

@@ -1,0 +1,11 @@
+observed_unit_id,scope,printed_page,observed_date,observed_population,reported_total,Agricultural class,Domestic and personal class,Fisheries and fishing class,Forestry and lumbering class,Manufacturing and mechanical class,Mining class,Miscellaneous class,Non-productive class,Professional class,Trade and transportation class
+dominion_of_canada,Canada,1,1901-03-31,5371315,1866129,716937,277755,25054,17113,389873,36908,4413,69201,94639,234236
+ca_british_columbia,British Columbia,1,1901-03-31,178657,81986,10339,16317,1947,2699,17096,14067,476,756,4167,14122
+ca_manitoba,Manitoba,1,1901-03-31,255211,87735,47354,12648,308,158,9718,86,200,1841,4547,10875
+ca_new_brunswick,New Brunswick,1,1901-03-31,331120,115712,49469,20543,2515,1615,20219,187,111,3978,5035,12040
+ca_organized_territories,North-west Territories,2,1901-03-31,158940,48567,31988,5084,65,146,3542,696,461,444,2101,4040
+ca_nova_scotia,Nova Scotia,2,1901-03-31,459574,163537,54084,23703,14151,1890,26394,7978,105,8395,6875,19962
+ca_ontario,Ontario,2,1901-03-31,2182947,779316,306431,112232,1276,6404,178939,3817,1546,25895,38311,104465
+ca_prince_edward_island,Prince Edward Island,2,1901-03-31,103259,34725,21274,3767,1133,2,3695,14,16,1146,1240,2438
+ca_quebec,Quebec,3,1901-03-31,1648898,538251,195921,81113,3633,3667,128506,1263,1355,26623,31807,64363
+ca_yukon,Yukon,3,1901-03-31,27219,16300,77,2348,26,532,1764,8800,143,123,556,1931

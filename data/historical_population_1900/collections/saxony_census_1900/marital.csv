@@ -1,0 +1,6 @@
+state_id,census_date,marital_status,both,male,female,locator,source_url
+administrative_region:germany_sachsen,1900-12-01,single,2406052,1209691,1196361,Printed page 160 Table 3 bottom row,https://digital.slub-dresden.de/data/kitodo/ZeitdeKS_351638016-19020000/ZeitdeKS_351638016-19020000_tif/jpegs/00000174.tif.pdf
+administrative_region:germany_sachsen,1900-12-01,married,1565383,782310,783073,Printed page 160 Table 3 bottom row,https://digital.slub-dresden.de/data/kitodo/ZeitdeKS_351638016-19020000/ZeitdeKS_351638016-19020000_tif/jpegs/00000174.tif.pdf
+administrative_region:germany_sachsen,1900-12-01,widowed,219408,47707,171701,Printed page 160 Table 3 bottom row,https://digital.slub-dresden.de/data/kitodo/ZeitdeKS_351638016-19020000/ZeitdeKS_351638016-19020000_tif/jpegs/00000174.tif.pdf
+administrative_region:germany_sachsen,1900-12-01,divorced,11373,3440,7933,Printed page 160 Table 3 bottom row,https://digital.slub-dresden.de/data/kitodo/ZeitdeKS_351638016-19020000/ZeitdeKS_351638016-19020000_tif/jpegs/00000174.tif.pdf
+administrative_region:germany_sachsen,1900-12-01,total,4202216,2043148,2159068,Printed page 160 Table 3 bottom row,https://digital.slub-dresden.de/data/kitodo/ZeitdeKS_351638016-19020000/ZeitdeKS_351638016-19020000_tif/jpegs/00000174.tif.pdf

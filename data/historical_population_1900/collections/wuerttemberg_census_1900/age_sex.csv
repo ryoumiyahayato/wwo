@@ -1,0 +1,7 @@
+panel,label,role,age_min,age_max,both,male,female,census_date,locator,source_url
+wuerttemberg_1900,All ages,total,,,2169480,1052769,1116711,1900-12-01,Printed page 18 Table F(a) Wurttemberg columns 10 and 11,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf
+wuerttemberg_1900,0 to 15,band,0,15,773093,383595,389498,1900-12-01,Printed page 18 Table F(a) Wurttemberg columns 10 and 11,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf
+wuerttemberg_1900,16 to 29,band,16,29,521845,256715,265130,1900-12-01,Printed page 18 Table F(a) Wurttemberg columns 10 and 11,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf
+wuerttemberg_1900,30 to 49,band,30,49,480861,231204,249657,1900-12-01,Printed page 18 Table F(a) Wurttemberg columns 10 and 11,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf
+wuerttemberg_1900,50 to 69,band,50,69,328222,151440,176782,1900-12-01,Printed page 18 Table F(a) Wurttemberg columns 10 and 11,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf
+wuerttemberg_1900,70 and older,band,70,,65459,29815,35644,1900-12-01,Printed page 18 Table F(a) Wurttemberg columns 10 and 11,https://www.statistischebibliothek.de/mir/servlets/MCRFileNodeServlet/BWHeft_derivate_00024787/1111_01903.pdf
