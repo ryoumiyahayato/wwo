@@ -32,6 +32,7 @@
     "definition": "Age in completed years. The 17 age bins close to the printed total and the same census's 1901 Table II-A endpoint. The all-religions table prints no separate unknown-age row.",
     "opening_unit_id": "raj_mysore_state",
     "opening_from_version": 7,
+    "opening_through_version": 22,
     "uncertainty": "The opening control interpolates the Mysore census totals including Bangalore Civil and Military Station. Age and sex shares are held over the shift from March 1901 to January 1900. Changes in cohort composition, age heaping and census error are unquantified.",
     "broad_observation": false
   },

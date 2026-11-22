@@ -49,7 +49,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 223,
+  "cited_sources": 224,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -359,8 +359,8 @@
       "unknown_people": 1171205504
     },
     "residence": {
-      "assigned_people": 335167810,
-      "unknown_people": 1132900777
+      "assigned_people": 367464724,
+      "unknown_people": 1100603863
     }
   },
   "structural_observations_by_source": {
@@ -403,6 +403,7 @@
     "us_twelfth_census_1900_alaska_hawaii_age": 26,
     "de_baden_1900_age_marital": 101,
     "it_1901_census_v5_age_and_marital": 648,
+    "br_dge_1916_1900_age_sex": 440,
     "ah_cisleithania_census_1900_ages": 168,
     "ksh_hungarian_statistical_yearbook_1908": 42,
     "mx_census_1900_dge_1901": 341,
@@ -412,9 +413,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 781829121,
-  "structure_opening_pool_count": 594,
-  "structure_opening_residents_outside_modeled_pools": 686239466,
+  "structure_opening_pool_controls": 798850194,
+  "structure_opening_pool_count": 619,
+  "structure_opening_residents_outside_modeled_pools": 669218393,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -2482,6 +2483,153 @@
       "observed_date": "1900-12-31"
     },
     {
+      "unit_id": "br_alagoas",
+      "opening_total": 635535,
+      "observed_unit_id": "br_alagoas",
+      "observed_total": 649273,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_amazonas",
+      "opening_total": 239605,
+      "observed_unit_id": "br_amazonas",
+      "observed_total": 249756,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_bahia",
+      "opening_total": 2098206,
+      "observed_unit_id": "br_bahia",
+      "observed_total": 2117956,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_ceara",
+      "opening_total": 844797,
+      "observed_unit_id": "br_ceara",
+      "observed_total": 849127,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_espirito_santo",
+      "opening_total": 202429,
+      "observed_unit_id": "br_espirito_santo",
+      "observed_total": 209783,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_federal_district_1900",
+      "opening_total": 674729,
+      "observed_unit_id": "br_federal_district_1900",
+      "observed_total": 691565,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_goias",
+      "opening_total": 252522,
+      "observed_unit_id": "br_goias",
+      "observed_total": 255284,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_maranhao",
+      "opening_total": 492485,
+      "observed_unit_id": "br_maranhao",
+      "observed_total": 499308,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_mato_grosso",
+      "opening_total": 115514,
+      "observed_unit_id": "br_mato_grosso",
+      "observed_total": 118025,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_minas_gerais",
+      "opening_total": 3553569,
+      "observed_unit_id": "br_minas_gerais",
+      "observed_total": 3594471,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_para",
+      "opening_total": 433704,
+      "observed_unit_id": "br_para",
+      "observed_total": 445356,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_paraiba",
+      "opening_total": 487440,
+      "observed_unit_id": "br_paraiba",
+      "observed_total": 490784,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_parana",
+      "opening_total": 319397,
+      "observed_unit_id": "br_parana",
+      "observed_total": 327136,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_pernambuco",
+      "opening_total": 1163406,
+      "observed_unit_id": "br_pernambuco",
+      "observed_total": 1178150,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_piaui",
+      "opening_total": 327678,
+      "observed_unit_id": "br_piaui",
+      "observed_total": 334328,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_rio_de_janeiro",
+      "opening_total": 921136,
+      "observed_unit_id": "br_rio_de_janeiro",
+      "observed_total": 926035,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_rio_grande_do_norte",
+      "opening_total": 273715,
+      "observed_unit_id": "br_rio_grande_do_norte",
+      "observed_total": 274317,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_rio_grande_do_sul",
+      "opening_total": 1123991,
+      "observed_unit_id": "br_rio_grande_do_sul",
+      "observed_total": 1149070,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_santa_catarina",
+      "opening_total": 316649,
+      "observed_unit_id": "br_santa_catarina",
+      "observed_total": 320289,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_sao_paulo",
+      "opening_total": 2192821,
+      "observed_unit_id": "br_sao_paulo",
+      "observed_total": 2282279,
+      "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "br_sergipe",
+      "opening_total": 351745,
+      "observed_unit_id": "br_sergipe",
+      "observed_total": 356264,
+      "observed_date": "1900-12-31"
+    },
+    {
       "unit_id": "ca_british_columbia",
       "opening_total": 168635,
       "observed_unit_id": "ca_british_columbia",
@@ -3840,6 +3988,13 @@
       "observed_date": "1901-03-01"
     },
     {
+      "unit_id": "raj_bangalore_civil_military_station",
+      "opening_total": 90815,
+      "observed_unit_id": "raj_bangalore_civil_military_station",
+      "observed_total": 90815,
+      "observed_date": "1900-01-01"
+    },
+    {
       "unit_id": "raj_baroda_state",
       "opening_total": 2006368,
       "observed_unit_id": "raj_baroda_state_1901_census",
@@ -3924,11 +4079,32 @@
       "observed_date": "1901-03-01"
     },
     {
-      "unit_id": "raj_mysore_state",
-      "opening_total": 5470284,
-      "observed_unit_id": "raj_mysore_state_1901_census",
-      "observed_total": 5539399,
-      "observed_date": "1901-03-01"
+      "unit_id": "raj_mysore_eastern_division",
+      "opening_total": 3926550,
+      "observed_unit_id": "raj_mysore_eastern_division",
+      "observed_total": 3926550,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_mysore_hassan_district",
+      "opening_total": 562313,
+      "observed_unit_id": "raj_mysore_hassan_district",
+      "observed_total": 562313,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_mysore_kadur_district",
+      "opening_total": 359243,
+      "observed_unit_id": "raj_mysore_kadur_district",
+      "observed_total": 359243,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_mysore_shimoga_district",
+      "opening_total": 531363,
+      "observed_unit_id": "raj_mysore_shimoga_district",
+      "observed_total": 531363,
+      "observed_date": "1900-01-01"
     },
     {
       "unit_id": "raj_punjab_comparable",
@@ -4958,10 +5134,10 @@
         "opening_unit_id": "brazil_1900",
         "research_region": "America",
         "opening_control": 17021073,
-        "in_model_pools": 0,
-        "outside_model_pools": 17021073,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 17021073,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 16894202,
+        "modeled_sex_age_unknown": 126871
       },
       {
         "opening_unit_id": "british_isles_1900",
@@ -5588,10 +5764,10 @@
     "by_research_region": {
       "America": {
         "opening_control": 128108928,
-        "in_model_pools": 94269388,
-        "outside_model_pools": 33839540,
-        "modeled_age_and_sex": 93982100,
-        "modeled_sex_age_unknown": 287288
+        "in_model_pools": 111290461,
+        "outside_model_pools": 16818467,
+        "modeled_age_and_sex": 110876302,
+        "modeled_sex_age_unknown": 414159
       },
       "Oceania": {
         "opening_control": 4905385,
@@ -5631,10 +5807,10 @@
     },
     "world": {
       "opening_control": 1468068587,
-      "in_model_pools": 781829121,
-      "outside_model_pools": 686239466,
-      "modeled_age_and_sex": 774749939,
-      "modeled_sex_age_unknown": 7079182
+      "in_model_pools": 798850194,
+      "outside_model_pools": 669218393,
+      "modeled_age_and_sex": 791644141,
+      "modeled_sex_age_unknown": 7206053
     }
   },
   "opening_count_basis": {

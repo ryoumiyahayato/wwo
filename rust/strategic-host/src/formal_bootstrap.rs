@@ -2476,6 +2476,40 @@ mod tests {
     }
 
     #[test]
+    fn historical_brazilian_local_ages_italian_residence_and_mysore_sex_close() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let brazil = world.inspect_population("brazil_1900").unwrap();
+        assert_eq!(brazil.children.len(), 21);
+        let structure = brazil.structure.unwrap();
+        assert_eq!(structure.population_total, 17_021_073);
+        assert_eq!(structure.residents_with_cohort_age_and_sex, 16_894_202);
+        let capital = world.inspect_population("br_federal_district_1900").unwrap();
+        assert_eq!(capital.population_total, Some(674_729));
+        assert!(capital.structure.unwrap().cohorts.iter().filter_map(|cohort| cohort.evidence.as_ref())
+            .all(|source| source.uncertainty.contains("enumeration was annulled")));
+
+        let italy = world.inspect_population("kingdom_of_italy").unwrap().social.unwrap();
+        let residence = &italy.dimensions["residence"];
+        assert_eq!(residence.assigned_residents, 32_296_914);
+        assert_eq!(residence.by_classification["italy_1901_settlement_pattern"].len(), 3);
+        let station = world.inspect_population("raj_bangalore_civil_military_station").unwrap();
+        let station_structure = station.structure.unwrap();
+        assert_eq!(station_structure.population_total, 90_815);
+        let men: u64 = station_structure.cohorts.iter()
+            .filter(|cohort| cohort.sex == Some(crate::formal_population::CohortSex::Male))
+            .map(|cohort| cohort.members).sum();
+        assert_eq!(men, 45_710);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(22)).unwrap();
+        let old_brazil = old.inspect_population("brazil_1900").unwrap();
+        assert_eq!(old_brazil.population_total, Some(17_021_073));
+        assert_eq!(old_brazil.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        assert_eq!(old.inspect_population("kingdom_of_italy").unwrap().social.unwrap()
+                   .dimensions["residence"].assigned_residents, 0);
+    }
+
+    #[test]
     fn historical_baden_survey_adds_age_and_civil_status_without_changing_the_balance() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let unit = "administrative_region:germany_baden";

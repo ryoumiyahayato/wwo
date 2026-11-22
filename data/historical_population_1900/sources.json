@@ -795,6 +795,15 @@
     "collection": "bosnia_herzegovina_population"
   },
   {
+    "id": "br_dge_1916_1900_age_sex",
+    "title": "Annuario Estatistico do Brazil 1908–1912, vol. I",
+    "publisher": "Directoria Geral de Estatistica",
+    "locator": "Printed pp. 270–291, População por idades",
+    "url": "https://biblioteca.ibge.gov.br/visualizacao/periodicos/20/aeb_1908_1912_v1.pdf",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "brazil_census_1900_age"
+  },
+  {
     "id": "uk_general_census_report_1901",
     "title": "Census of England and Wales, 1901. General Report with Appendices",
     "publisher": "General Register Office / HMSO (London, 1904)",
