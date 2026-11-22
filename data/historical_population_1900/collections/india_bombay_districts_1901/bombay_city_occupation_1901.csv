@@ -1,0 +1,25 @@
+order,label,male,female,dependents,page
+1,Administration,13089,163,14087,472
+2,Defence,3677,0,744,472
+3,Service of Native and Foreign States,45,4,22,472
+4,Provision and Care of Animals,666,8,546,472
+5,Agriculture,1737,628,2380,476
+6,"Personal, Household and Sanitary Services",55078,10531,33511,476
+7,"Food, Drink and Stimulants",23438,6295,25062,480
+8,"Light, Firing and Forage",1954,198,2677,484
+9,Buildings,5770,175,5454,488
+10,Vehicles and Vessels,4411,16,4259,488
+11,Supplementary Requirements,8097,127,10433,492
+12,Textile Fabrics and Dress,75774,23258,57122,496
+13,Metals and Precious Stones,9980,48,10667,504
+14,"Glass, Earthen and Stone ware",1187,278,1584,508
+15,"Wood, Cane and Leaves, etc.",11127,428,12877,508
+16,"Drugs, Gums, Dyes, etc.",1439,87,1675,508
+17,Leather,6463,941,5990,512
+18,Commerce,28801,1269,35524,512
+19,Transport and Storage,37932,52,22127,516
+20,Learned and Artistic Professions,17432,1462,27304,520
+21,Sport,262,0,260,524
+22,Earthwork and General Labour,53243,14513,42746,528
+23,Indefinite and Disreputable Occupations,2811,4151,487,528
+24,Independent,12073,4573,12777,528

@@ -66,7 +66,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 282,
+  "cited_sources": 287,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -423,24 +423,24 @@
       "unknown_people": 1314484651
     },
     "literacy": {
-      "assigned_people": 327978086,
-      "unknown_people": 1146619666
+      "assigned_people": 328759400,
+      "unknown_people": 1145838352
     },
     "marital_status": {
-      "assigned_people": 345674617,
-      "unknown_people": 1128923135
+      "assigned_people": 346455931,
+      "unknown_people": 1128141821
     },
     "occupation": {
-      "assigned_people": 240807991,
-      "unknown_people": 1233789761
+      "assigned_people": 241232961,
+      "unknown_people": 1233364791
     },
     "property_declaration": {
       "assigned_people": 32296914,
       "unknown_people": 1442300838
     },
     "religion": {
-      "assigned_people": 471219667,
-      "unknown_people": 1003378085
+      "assigned_people": 472000338,
+      "unknown_people": 1002597414
     },
     "residence": {
       "assigned_people": 412274162,
@@ -4215,14 +4215,14 @@
       "opening_total": 1459811,
       "observed_unit_id": "java_madoera_kediri",
       "observed_total": 1448530,
-      "observed_date": "1900-12-31"
+      "observed_date": "1905-12-31"
     },
     {
       "unit_id": "java_madoera_kedoe_bagelen",
       "opening_total": 2327038,
       "observed_unit_id": "java_madoera_kedoe_bagelen",
       "observed_total": 2315033,
-      "observed_date": "1900-12-31"
+      "observed_date": "1905-12-31"
     },
     {
       "unit_id": "java_madoera_madioen",
@@ -4236,7 +4236,7 @@
       "opening_total": 1732100,
       "observed_unit_id": "java_madoera_madoera",
       "observed_total": 1725913,
-      "observed_date": "1900-12-31"
+      "observed_date": "1905-12-31"
     },
     {
       "unit_id": "java_madoera_pasoeroean_probolinggo",
@@ -7597,8 +7597,8 @@
         "opening_control": 44363679,
         "in_model_pools": 27798112,
         "outside_model_pools": 16565567,
-        "modeled_age_and_sex": 19303037,
-        "modeled_sex_age_unknown": 8495075
+        "modeled_age_and_sex": 24536078,
+        "modeled_sex_age_unknown": 3262034
       },
       {
         "opening_unit_id": "cshapes_gw_920",
@@ -8037,16 +8037,16 @@
         "opening_control": 812681304,
         "in_model_pools": 358353073,
         "outside_model_pools": 454328231,
-        "modeled_age_and_sex": 349615004,
-        "modeled_sex_age_unknown": 8738069
+        "modeled_age_and_sex": 354848045,
+        "modeled_sex_age_unknown": 3505028
       }
     },
     "world": {
       "opening_control": 1474597752,
       "in_model_pools": 889065441,
       "outside_model_pools": 585532311,
-      "modeled_age_and_sex": 875460742,
-      "modeled_sex_age_unknown": 13604699
+      "modeled_age_and_sex": 880693783,
+      "modeled_sex_age_unknown": 8371658
     }
   },
   "opening_count_basis": {

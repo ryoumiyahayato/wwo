@@ -1791,6 +1791,7 @@ def java_madoera_residency_models(balances, version):
     geography, age = java_madoera_residency_demography()
     if units.keys() != geography.keys():
         raise ValueError("Java registration population has a different residency partition from the age tables")
+    report_ages = java_madoera_appendix_ages(geography) if version >= 39 else {}
     age_margins = {}
     if version >= 38:
         path = HERE / "java_madoera" / "java_madoera_1905_indigenous_age_margins.csv"
@@ -1840,11 +1841,26 @@ def java_madoera_residency_models(balances, version):
         locator = "1904 edition, III.III p. 4 and III.V p. 5."
         method = ("Use the December 1900 revised local indigenous and island-wide European-assimilated "
                   "male fractions. Normalize within each island registration and preserve the opening residency totals.")
-        has_ages = region in age or region in age_margins
+        has_ages = region in age or region in age_margins or region in report_ages
         if has_ages:
             source = "nl_cbs_java_population_1906_demography"
             locator += " 1906 edition, III.I.A p. 2 and III.IX pp. 8–9."
-            if region in age:
+            indigenous = local["inlanders"]
+            if region in report_ages:
+                younger_share, coverage = report_ages[region]
+                source = "nl_colonial_report_1907_java_age"
+                locator = "1907 Colonial Report, Appendix A, Table IX pp. 42–43 and Table I pp. 4–5."
+                method += (" Use the original 1905 local age-by-sex cells. Where an age band is pooled, use "
+                           "the sex balance remaining after the separate cells to split the pooled counts.")
+                if coverage < 1:
+                    method += (" Three Madoera districts lack census returns. Keep the documented 253,097 of "
+                               "1,741,022 reference population without ages as an opening unknown share.")
+                    total = int(counts["inlanders"] * coverage + Fraction(1, 2))
+                    indigenous = apportion({sex: Fraction(total * value, counts["inlanders"])
+                                              for sex, value in indigenous.items()}, total)
+                younger = {sex: int(indigenous[sex] * ratio + Fraction(1, 2))
+                           for sex, ratio in younger_share.items()}
+            elif region in age:
                 method += " Apply the December 1905 same-sex under-16 shares to the indigenous registration."
                 younger = {sex: int(Fraction(local["inlanders"][sex] * int(age[region][f"under16_{sex}"]),
                                              int(age[region][f"{sex}_total"])) + Fraction(1, 2))
@@ -1858,10 +1874,10 @@ def java_madoera_residency_models(balances, version):
                 younger_total = int(count * age_margins[region] + Fraction(1, 2))
                 younger = apportion({sex: Fraction(younger_total * local["inlanders"][sex], count)
                                      for sex in SEX_COUNTS}, younger_total)
-            older = {sex: local["inlanders"][sex] - younger[sex] for sex in SEX_COUNTS}
+            older = {sex: indigenous[sex] - younger[sex] for sex in SEX_COUNTS}
             rows.extend((dict(role="band", label="Under 16", age_min=0, age_max=15, **younger),
                          dict(role="band", label="16 and older", age_min=16, age_max=None, **older)))
-            residual = local["europeanen"]
+            residual = {sex: sex_counts[sex] - indigenous[sex] for sex in SEX_COUNTS}
         rows.append(dict(role="band", label="Age unassigned", age_min=None, age_max=None, **residual))
         panel = dict(
             id=unit_id + "_demography", source_id=source, observed_unit_id=unit_id,
@@ -1874,6 +1890,28 @@ def java_madoera_residency_models(balances, version):
         yield opening_age_group(panel, rows, unit_id, population) | dict(
             sex_only=not has_ages, unclassified_opening_residents=population - covered,
         )
+
+
+def java_madoera_appendix_ages(geography):
+    path = HERE / "java_madoera" / "java_madoera_1905_indigenous_appendix_a.csv"
+    bands = ("under16", "printed_16_to_50", "printed_50_plus")
+    models = {}
+    for row in read_csv(path):
+        region = row["region"]
+        counts = {sex: {band: int(row[f"{band}_{sex}"]) for band in bands} for sex in SEX_COUNTS}
+        sex_totals = {sex: int(row[f"{sex}_total"]) for sex in SEX_COUNTS}
+        unmatched = {sex: sex_totals[sex] - sum(counts[sex].values()) for sex in SEX_COUNTS}
+        pooled = sum(int(row[f"{band}_unsplit"]) for band in bands)
+        observed = sum(sex_totals.values())
+        control = int(row["population_control_1905"])
+        if (region in models or min(unmatched.values()) < 0 or sum(unmatched.values()) != pooled
+                or observed != int(geography[region]["total_1905"])
+                or control != observed + int(row["unreturned_population_1905"])):
+            raise ValueError(f"{region}: Colonial Report age cells do not match the local population controls")
+        younger = {sex: counts[sex]["under16"] + Fraction(int(row["under16_unsplit"]) * unmatched[sex], pooled or 1)
+                   for sex in SEX_COUNTS}
+        models[region] = ({sex: younger[sex] / sex_totals[sex] for sex in SEX_COUNTS}, Fraction(observed, control))
+    return models
 
 
 def australian_opening_age_models(panels, balances):

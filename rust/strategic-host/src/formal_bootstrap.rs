@@ -2460,7 +2460,7 @@ mod tests {
         assert_eq!(java.children.len(), 17);
         assert_eq!(java.children.iter().map(|child| child.population_total).sum::<u64>(), 28_092_332);
         let demographic = java.structure.unwrap();
-        assert_eq!(demographic.residents_with_cohort_age_and_sex, 19_303_037);
+        assert_eq!(demographic.residents_with_cohort_age_and_sex, 24_536_078);
         assert_eq!(demographic.unclassified_residents, 294_220);
         let java_status = &java.social.unwrap().dimensions["legal_estate"];
         assert_eq!(java_status.assigned_residents, 28_092_332);
@@ -2473,6 +2473,14 @@ mod tests {
         assert_eq!(cheribon.structure.unwrap().residents_with_cohort_age_and_sex, 0);
         let djokjakarta = current.inspect_population("java_madoera_djokjakarta").unwrap();
         assert_eq!(djokjakarta.structure.unwrap().residents_with_cohort_age_and_sex, 1_020_879);
+        for (scope, expected) in [
+            ("java_madoera_kedoe_bagelen", 2_312_693),
+            ("java_madoera_kediri", 1_445_934),
+            ("java_madoera_madoera", 1_474_414),
+        ] {
+            let local = current.inspect_population(scope).unwrap().structure.unwrap();
+            assert_eq!(local.residents_with_cohort_age_and_sex, expected);
+        }
         let v37 = bootstrap.base_opening_version("country_fra", None, Some(37)).unwrap();
         let previous_java = v37.inspect_population("java_madoera_colonial_population").unwrap();
         assert_eq!(previous_java.structure.unwrap().residents_with_cohort_age_and_sex, 17_078_108);
@@ -2905,11 +2913,33 @@ mod tests {
         assert_eq!(city.account_id, Some("raj_bombay_bombay_city"));
         assert_eq!(city.population_total, Some(781_314));
         assert_eq!(city.structure.unwrap().residents_with_cohort_age_and_sex, 781_295);
+        let social = city.social.unwrap();
+        assert_eq!(social.dimensions["religion"].assigned_residents, 780_671);
+        assert_eq!(social.dimensions["religion"].unknown_residents, 643);
+        assert_eq!(social.dimensions["marital_status"].assigned_residents, 781_314);
+        assert_eq!(social.dimensions["literacy"].assigned_residents, 781_314);
+        assert_eq!(city.dietary_norms[0].residents_with_matching_religion, 156_812);
+        assert_eq!(city.dietary_norms[1].residents_with_matching_religion, 5_394);
         assert!(world.inspect_population("place:karachi").unwrap().population_total.is_none());
         let states = world.inspect_population("raj_bombay_states").unwrap();
         assert_eq!(states.population_total, Some(7_044_776));
         assert_eq!(states.structure.unwrap().residents_with_cohort_age_and_sex, 7_039_427);
         assert_eq!(old.inspect_population("raj_bombay_states").unwrap().population_total, Some(7_021_967));
+    }
+
+    #[test]
+    fn historical_dietary_matches_use_the_opening_version_and_reported_religion() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let prior = bootstrap.base_opening_version("country_fra", None, Some(38)).unwrap();
+        let istanbul = world.inspect_population("ottoman_1897_istanbul").unwrap();
+        assert_eq!(istanbul.dietary_norms[0].residents_with_matching_religion, 520_194);
+        assert_eq!(istanbul.dietary_norms[0].observed_adherents, None);
+        assert!(prior.inspect_population("ottoman_1897_istanbul").unwrap().dietary_norms.is_empty());
+        let arges = world.inspect_population("ro_1899_county_arges").unwrap();
+        assert_eq!(arges.dietary_norms[0].residents_with_matching_religion, 95);
+        assert_eq!(arges.dietary_norms[1].residents_with_matching_religion, 903);
+        assert!(prior.inspect_population("ro_1899_county_arges").unwrap().dietary_norms.is_empty());
     }
 
     #[test]

@@ -1888,6 +1888,49 @@
     "collection": "india_bombay_districts_1901"
   },
   {
+    "id": "india_bombay_city_1901_religion",
+    "title": "Census of India, 1901: Bombay City religions",
+    "publisher": "Government Central Press, Bombay",
+    "url": "https://ignca.gov.in/Asi_data/31004.pdf",
+    "locator": "Vol. XI, Part V pp. 8–9 and 24; Gazetteer of Bombay City and Island, Vol. I, Chapter III, Census of 1901 separates Jews from Others.",
+    "raw_paths": [
+      "bombay_city_religion_1901.csv",
+      "RELIGION.md"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "india_bombay_districts_1901"
+  },
+  {
+    "id": "india_bombay_city_1901_marital_status",
+    "title": "Census of India, 1901, Vol. I-A: Special Tables for Cities",
+    "publisher": "Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924/page/n440/mode/1up",
+    "locator": "Table VII, printed p. 438, Bombay City, columns 5–13.",
+    "raw_path": "bombay_city_marital_status_1901.csv",
+    "rights": "Published historical numeric facts",
+    "collection": "india_bombay_districts_1901"
+  },
+  {
+    "id": "india_bombay_city_1901_literacy",
+    "title": "Census of India, 1901, Vol. I-A: Special Tables for Cities",
+    "publisher": "Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924/page/n448/mode/2up",
+    "locator": "Table VIII, printed pp. 446–447, Bombay City, columns 2–10.",
+    "raw_path": "bombay_city_literacy_1901.csv",
+    "rights": "Published historical numeric facts",
+    "collection": "india_bombay_districts_1901"
+  },
+  {
+    "id": "india_bombay_city_1901_occupation",
+    "title": "Census of India, 1901, Vol. I-A: Special Tables for Cities",
+    "publisher": "Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924/page/n474/mode/1up",
+    "locator": "Table XV, printed pp. 472–528, Bombay City, columns 5–7.",
+    "raw_path": "bombay_city_occupation_1901.csv",
+    "rights": "Published historical numeric facts",
+    "collection": "india_bombay_districts_1901"
+  },
+  {
     "id": "india_census_1901_comparable_area",
     "title": "Census of India, 1901, Vol. I-A, India, Part II, Tables. Government of India, 1903.",
     "publisher": "Government of India, 1903",
@@ -2349,6 +2392,19 @@
       "java_madoera_1905_indigenous_age_sex_matched.csv",
       "java_madoera_1905_indigenous_age_margins.csv",
       "DEMOGRAPHY.md",
+      "JAVA_AGE_FOLLOWUP.md"
+    ],
+    "rights": "Published historical numeric facts",
+    "collection": "java_madoera"
+  },
+  {
+    "id": "nl_colonial_report_1907_java_age",
+    "title": "Koloniaal Verslag 1907, Bijlage A, Java en Madoera",
+    "publisher": "Handelingen der Staten-Generaal, Bijlagen 1907/1908",
+    "url": "https://archive.org/details/UNIVERSITEITLEIDEN-DIG-KOLONIAAL-VERSLAG-1907/page/n219/mode/1up",
+    "locator": "Appendix A, Table IX pp. 42–43 (age and sex), Table I pp. 4–5 (population control and Madoera note h).",
+    "raw_paths": [
+      "java_madoera_1905_indigenous_appendix_a.csv",
       "JAVA_AGE_FOLLOWUP.md"
     ],
     "rights": "Published historical numeric facts",

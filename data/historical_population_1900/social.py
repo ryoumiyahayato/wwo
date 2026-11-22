@@ -917,6 +917,67 @@ def spain_marital_status(pools, observations, version):
         )
 
 
+def bombay_city_social(pools):
+    unit = "raj_bombay_bombay_city"
+    pool = pools[unit]
+    path = COLLECTIONS / "india_bombay_districts_1901" / "bombay_city_religion_1901.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        row, = csv.DictReader(stream)
+    total = int(row["population"])
+    if row["unit_id"] != unit or total != pool["endpoint_values"][-1]:
+        raise ValueError("Bombay City religion does not match its 1901 city census control")
+    yield unit, "religion", distribution(
+        pool["population_value"], classification="india_1901_reported_religion",
+        source="india_bombay_city_1901_religion", date=INDIA_DATE, observed_unit=unit,
+        scope="Bombay City and Island, all persons present on the census date",
+        locator="Census of 1901, Vol. XI, Part V p. 24; Gazetteer of Bombay City and Island, Vol. I, Ch. III.",
+        total=total, unknown=int(row["others"]),
+        observed_counts={category: int(row[category]) for category in
+                         ("Hindus", "Jains", "Parsis", "Muhammadans", "Christians", "Jews")},
+        definition="Six named census religions. The remaining other religions are kept unassigned. "
+                   "The census did not include estimated evacuees.",
+        method=f"{SHARE_METHOD} The effect of migration and plague on religious composition is unquantified.",
+    )
+    with path.with_name("bombay_city_sex_controls.csv").open(encoding="utf8", newline="") as stream:
+        control, = (row for row in csv.DictReader(stream) if row["date"] == INDIA_DATE)
+    for dimension, classification, locator, definition in (
+        ("marital_status", "india_1901_reported_civil_condition", "Table VII p. 438, row 2, columns 5–13",
+         "Census civil condition for both sexes and all ages. The opening uses a separate marginal."),
+        ("literacy", "india_1901_reported_literacy", "Table VIII pp. 446–447, row 2, columns 2–10",
+         "All-age census literacy. Literate residents can read and write in any language."),
+    ):
+        with path.with_name(f"bombay_city_{dimension}_1901.csv").open(encoding="utf8", newline="") as stream:
+            rows = list(csv.DictReader(stream))
+        for sex in ("male", "female"):
+            if sum(int(row[sex]) for row in rows) != int(control[sex]):
+                raise ValueError(f"Bombay City {dimension} does not match the 1901 {sex} control")
+        yield unit, dimension, distribution(
+            pool["population_value"], classification=classification,
+            source=f"india_bombay_city_1901_{dimension}", date=INDIA_DATE, observed_unit=unit,
+            scope="Bombay City and Island, all persons present on the census date",
+            locator=f"Census of India 1901, Vol. I-A, {locator}.", total=total, unknown=0,
+            observed_counts={row["status"]: int(row["male"]) + int(row["female"]) for row in rows},
+            definition=definition,
+            method=f"{SHARE_METHOD} The effect of migration and plague on the distribution is unquantified.",
+        )
+    with path.with_name("bombay_city_occupation_1901.csv").open(encoding="utf8", newline="") as stream:
+        orders = list(csv.DictReader(stream))
+    if ([int(row["order"]) for row in orders] != list(range(1, 25))
+            or tuple(sum(int(row[field]) for row in orders) for field in ("male", "female", "dependents"))
+            != (376_486, 69_205, 330_315)):
+        raise ValueError("Bombay City occupation orders do not match the census worker and dependent controls")
+    workers = {row["label"]: int(row["male"]) + int(row["female"]) for row in orders[:22]}
+    yield unit, "occupation", distribution(
+        pool["population_value"], classification="india_1901_principal_occupation_orders",
+        source="india_bombay_city_1901_occupation", date=INDIA_DATE, observed_unit=unit,
+        scope="Bombay City and Island, actual workers within the census population",
+        locator="Census of India 1901, Vol. I-A, Table XV pp. 472–528, Bombay City, columns 5–7.",
+        total=total, unknown=total - sum(workers.values()), observed_counts=workers,
+        definition="Principal occupation of actual workers, orders I–XXII. Dependents and orders XXIII–XXIV are unassigned.",
+        method=f"{SHARE_METHOD} The effect of migration and plague on the distribution is unquantified.",
+    )
+
+
 def agra_oudh_religion(pools, observations, version):
     categories = (
         ("hindu", "Hindus"), ("sikh", "Sikhs"), ("jain", "Jains"), ("buddhist", "Buddhists"),
@@ -2015,6 +2076,8 @@ def opening_social(opening_groups, observations, *, version):
         marginals = chain(marginals, prussian_census_occupation(pools, version), surigao_occupation(pools["ph_1900_surigao_main_population"]))
     if version >= 38:
         marginals = chain(marginals, french_department_social(pools))
+    if version >= 39:
+        marginals = chain(marginals, bombay_city_social(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

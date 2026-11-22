@@ -1,6 +1,6 @@
 # Java and Madura opening age follow-up
 
-## Djokjakarta and Madioen
+## The v38 Djokjakarta and Madioen model
 
 The 31 December 1905 age lines publish three Indigenous age totals with the sexes pooled. The three totals close to the respective 1905 Indigenous populations, 1,110,814 and 1,342,796. Both areas match the residency names in the December 1900 returns. The returns include the Djokjakarta princely residency, which the Colonial Report excludes from its growth subtotal for directly ruled residencies. Its published 1900 and 1905 Indigenous controls are 1,076,993 and 1,110,814. The Madioen controls are 1,227,761 and 1,342,796. [CBS, Jaarcijfers Koloniën 1906, III.I.A p. 2 and III.IX pp. 8–9](https://seadelt.net/Asset/Source/Document_ID-120_No-01.pdf), [CBS 1911 recapitulation, I.A p. 2 and IX pp. 8–9](https://seadelt.net/Asset/Source/Document_ID-125_No-01.pdf), [1907 Colonial Report, cols. 1–2](https://repository.overheid.nl/frbr/sgd/19071908/0000353862/1/pdf/SGD_19071908_0001730.pdf).
 
@@ -8,11 +8,17 @@ The 31 December 1905 age lines publish three Indigenous age totals with the sexe
 
 The new age-by-sex cells assume equal under-16 shares between the sexes within each residency. The ten existing 1905 joint returns have odds ratios of 1.069–1.286 for younger versus older males relative to females. Applying that range to the two new models, with both margins fixed, gives about 161,634–171,809 males under 16 in Djokjakarta and 280,879–294,676 in Madioen. The proportional model gives 157,937 and 275,865. The change in the female under-16 count has the same magnitude and opposite sign. These ranges indicate sensitivity to sex and age association. No sampling interval or allowance for six years of demographic change can be derived.
 
-## Other local returns
+## v39 original 1905 age returns
 
-Madoera's pooled ages also close to the yearbook's 1905 total of 1,487,925, 15.05% below the 1900 population of 1,751,498. The Colonial Report's 1905 comparison instead gives 1,741,022, 0.60% below 1900. The difference between the two 1905 Madoera totals, 253,097, equals the difference between the two published island totals. The 1908 report mentions fevers and changes in enumeration methods. The yearbook ages remain historical data for the reported subset. Leave the 1,725,213 Indigenous opening residents' age unknown pending a reconciled coverage denominator. [CBS 1906 III.I.A p. 2 and III.IX pp. 8–9](https://seadelt.net/Asset/Source/Document_ID-120_No-01.pdf), [1907 Colonial Report, col. 2](https://repository.overheid.nl/frbr/sgd/19071908/0000353862/1/pdf/SGD_19071908_0001730.pdf), [1908 Colonial Report, cols. 1–2](https://repository.overheid.nl/frbr/sgd/19081909/0000351540/1/pdf/SGD_19081909_0001662.pdf).
+The original age returns in `java_madoera_1905_indigenous_appendix_a.csv` reconcile Kedoe and Kediri by sex. The female Kedoe count under 16 is 517,494 and the male Kediri count is 426,704. The later yearbooks give 517,094 and 326,704. Applying the original same-sex shares to the opening populations assigns ages to 2,312,693 residents in Kedoe and 1,445,934 in Kediri. [Table IX pp. 42–43](https://archive.org/details/UNIVERSITEITLEIDEN-DIG-KOLONIAAL-VERSLAG-1907/page/n219/mode/1up) · [Table I controls and coverage notes p. 5](https://archive.org/details/UNIVERSITEITLEIDEN-DIG-KOLONIAAL-VERSLAG-1907/page/n178/mode/1up)
 
-The 1906 and 1911 yearbook age tables both give 2,322,587 for Kedoe against 2,322,987 in the population table and 1,658,579 for Kediri against 1,758,579. Banjoemas's three pooled ages give 1,480,110 against 1,478,110. Cheribon's biological age cells are missing and the prior registry omits private estates. The 1908 Colonial Report notes errata and publishes clarifications at cols. 301–304. No verified correction for these age cells was identified. [CBS 1911 IX pp. 8–9](https://seadelt.net/Asset/Source/Document_ID-125_No-01.pdf), [1908 Colonial Report](https://repository.overheid.nl/frbr/sgd/19081909/0000351540/1/pdf/SGD_19081909_0001662.pdf).
+For Djokjakarta, Madioen and Madoera, retain the distinct age-by-sex observations. Subtract their sum from each sex control. Split the pooled under-16 count in proportion to the remaining sex totals. Carry the resulting under-16 share to each opening sex and round halves up. The older share is the complement. The original age headings share age 50, so the opening combines the older bands.
+
+Madoera has 1,487,925 people in the age return and a complete geographic population control of 1,741,022. Table I note (h) gives 91,240, 76,506 and 85,351 people in Bangkalan, Arosbaja and Sepoeloe without age returns. Hold the reported coverage fraction at opening, split it by the existing sex totals, and assign ages to 1,474,414 Indigenous residents. The remaining 250,799 Indigenous residents in the opening account keep unknown ages. The time difference, population changes and differences within the unreported fraction have no measured error interval.
+
+Banjoemas remains unassigned. The original Table IX prints 265,551 people in pooled age cells. The residual sex controls total 263,551. The original and the later yearbooks both exceed the population control by 2,000. Cheribon's biological age cells are missing and the prior registry omits private estates.
+
+The five original tables increase opening age coverage by 5,233,041 to 24,536,078. The other 3,556,254 residents retain unknown age.
 
 ## Administrative categories and vital events
 
