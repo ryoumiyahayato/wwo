@@ -1476,7 +1476,7 @@ def argentine_local_distribution(pools, dimension, fields, unknown_field, *, sou
         raise ValueError(f"Argentina {dimension} allocation does not cover the disjoint source jurisdictions")
 
 
-def argentine_occupation(pools):
+def argentine_occupation(pools, version):
     directory = COLLECTIONS / "argentina_age_1895_1914"
     fields = {
         "i_produccion_de_la_materia_prima": "Producción de la materia prima",
@@ -1492,13 +1492,22 @@ def argentine_occupation(pools):
         "maestros_de_escuela_xii": "Maestros de escuela",
         "xiii_bellas_artes": "Bellas artes",
         "xiv_letras_y_ciencias": "Letras y ciencias",
-        "admitted_xv": "Profesiones ambulantes",
-        "admitted_xvi": "Personal de fatiga sin trabajo fijo",
+        "xv_profesiones_ambulantes": "Profesiones ambulantes",
+        "xvi_personal_de_fatiga_que_no_tienen_trabajo_fijo": "Personal de fatiga sin trabajo fijo",
+    }
+    admitted_fields = {
+        "iii_comercio": "admitted_iii",
+        "vi_personal_de_servicio": "admitted_vi",
+        "xv_profesiones_ambulantes": "admitted_xv",
+        "xvi_personal_de_fatiga_que_no_tienen_trabajo_fijo": "admitted_xvi",
     }
     with (directory / "census_geography.csv").open(encoding="utf8", newline="") as stream:
         controls = {row["unit_id"]: int(row["enumerated_1895_05_10"]) for row in csv.DictReader(stream)}
     with (directory / "occupation_1895.csv").open(encoding="utf8", newline="") as stream:
         rows = list(csv.DictReader(stream))
+    if version >= 34:
+        with (directory / "occupation_1895_expansion.csv").open(encoding="utf8", newline="") as stream:
+            rows.extend(csv.DictReader(stream))
     by_source = {}
     consumed = set()
     for row in rows:
@@ -1507,17 +1516,17 @@ def argentine_occupation(pools):
         eligible = int(row["population_14_and_over"])
         if unit_id in by_source or total != controls[unit_id] or not row["locator"]:
             raise ValueError(f"{unit_id}: occupation scope differs from the individually enumerated region")
+        admitted = {field: int(row.get(column, row[field])) for field, column in admitted_fields.items()}
         if (row["observed_date"] != "1895-05-10" or eligible + int(row["outside_tabulated_scope"]) != total
                 or sum(int(value) for field, value in row.items()
                        if field.partition("_")[0] in {"i", "ii", "iii", "iv", "v", "vi", "vii", "viii",
                                                         "ix", "x", "xi", "xii", "xiii", "xiv", "xv", "xvi", "xvii", "xviii"})
                 + int(row["subtotal_shortfall"]) != eligible
                 or int(row["maestros_de_escuela_xii"]) + int(row["estudiantes_xii"]) != int(row["xii_instruccion_y_educacion"])
-                or int(row["admitted_xv"]) > int(row["xv_profesiones_ambulantes"])
-                or int(row["admitted_xvi"]) > int(row["xvi_personal_de_fatiga_que_no_tienen_trabajo_fijo"])):
+                or any(not 0 <= value <= int(row[field]) for field, value in admitted.items())):
             raise ValueError(f"{unit_id}: original census professions and eligibility controls differ")
         owners = int(row["hacendados_i"])
-        occupations = {label: int(row[field]) for field, label in fields.items()}
+        occupations = {label: admitted.get(field, int(row[field])) for field, label in fields.items()}
         occupations[fields["i_produccion_de_la_materia_prima"]] -= owners
         unknown = int(row["observed_unknown"])
         if sum(occupations.values()) + unknown != total or any(count < 0 for count in occupations.values()):
@@ -1553,13 +1562,14 @@ def argentine_occupation(pools):
                        "ambiguous categories and unresolved subtotal differences remain unassigned.",
             **metadata,
         )
-        yield unit_id, "class", distribution(
-            count, classification="argentina_1895_reported_estate_owners",
-            observed_counts={"Hacendados": owners}, unknown=total - owners,
-            definition="Residents enumerated in the Hacendados (rural estate owner) category. "
-                       "Other forms of ownership and social status remain unassigned.",
-            **metadata,
-        )
+        if owners:
+            yield unit_id, "class", distribution(
+                count, classification="argentina_1895_reported_estate_owners",
+                observed_counts={"Hacendados": owners}, unknown=total - owners,
+                definition="Residents enumerated in the Hacendados (rural estate owner) category. "
+                           "Other forms of ownership and social status remain unassigned.",
+                **metadata,
+            )
     if consumed != by_source.keys():
         raise ValueError("Argentine occupation sources have no exclusive opening account")
 
@@ -1765,7 +1775,7 @@ def opening_social(opening_groups, observations, *, version):
             method=SHARE_METHOD + " Changes in age composition and literacy from 1895 are unquantified.",
         ))
     if version >= 33:
-        marginals = chain(marginals, argentine_occupation(pools), java_residency_registration(pools),
+        marginals = chain(marginals, argentine_occupation(pools, version), java_residency_registration(pools),
                           egyptian_urban_literacy(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],

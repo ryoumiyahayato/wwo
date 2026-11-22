@@ -906,10 +906,12 @@ def egypt_provincial_sex_models(opening_balances, observations, age_panels, age_
         )
 
 
-def egypt_age_panels():
+def egypt_age_panels(opening_balances):
     directory = HERE / "egypt_age_1907"
     by_unit = defaultdict(list)
     for row in read_csv(directory / "table_xi_opening_age_sex.csv"):
+        if row["unit_id"] not in opening_balances:
+            continue
         if (row["observation_date"] != "1907-04-29" or
                 int(row["person_count"]) != sum(int(row[sex]) for sex in SEX_COUNTS) or any(
                     int(row[sex]) != int(row[f"{sex}_reported_literate"]) + int(row[f"{sex}_reported_illiterate"])
@@ -1947,7 +1949,7 @@ def opening_structure(opening_groups, observations, *, version=6):
             panels, observations, statistical_aggregates["raj_united_provinces_states"], opening_balances,
         ))
     if version >= 20:
-        egypt_age = egypt_age_panels() if version >= 33 else {}
+        egypt_age = egypt_age_panels(opening_balances) if version >= 33 else {}
         egypt_controls = egypt_age_sex_controls() if version >= 33 else {}
         for unit_id in ("egy_madina_cairo", "egy_madina_alexandria", "egy_markaz_ramleh"):
             if unit_id in egypt_age:

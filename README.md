@@ -13,7 +13,7 @@ Godot 4.6.3 工程、场景和旧回归保存在 [R68 源码归档](https://gith
 
 ## 构建与恢复
 
-Windows x64 使用 Rust MSVC 工具链、MSVC C++ Build Tools 和 Windows SDK。正式构建由 [Main validation](.github/workflows/main-validation.yml) 执行。本机在固定工作树运行 `./rust/strategic-host/tools/wwo-cargo.ps1 check --bin wwo-map-lab`，也可调用 `build`、`test` 或 `run`。入口复用同一个 Cargo target，串行构建，超限时回收对应的可重建构建配置。dev/test 关闭调试信息和增量编译。需要调试器时加 `-DebugSymbols`，使用独立的 `dev-debug` 配置目录。
+Windows x64 使用 Rust MSVC 工具链、MSVC C++ Build Tools 和 Windows SDK。正式构建由 [Main validation](.github/workflows/main-validation.yml) 执行。本机在固定工作树运行 `./rust/strategic-host/tools/wwo-cargo.ps1 check --bin wwo-map-lab`，也可调用 `build`、`test` 或 `run`。入口复用同一个 Cargo target，串行构建。超限时回收对应配置的工程产物，保留共享依赖。dev/test 关闭调试信息、PDB 和增量编译。需要调试器时加 `-DebugSymbols`，使用独立的 `dev-debug` 配置目录。
 
 需要重建 Windows 正式二进制时，在仓库根目录运行以下命令。
 

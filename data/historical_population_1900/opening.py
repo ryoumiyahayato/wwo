@@ -908,7 +908,7 @@ def egypt_opening(observations, version):
     if version >= 20:
         provinces = defaultdict(dict)
         for row in observations:
-            if row["source_id"] == EGYPT_COMPARABLE_PROVINCES:
+            if row["source_id"] == EGYPT_COMPARABLE_PROVINCES and version >= row.get("opening_from_version", 20):
                 provinces[row["unit_id"]][row["date"]] = row
         for unit, endpoints in sorted(provinces.items()):
             before, after = [endpoints[day] for day in dates]
@@ -989,6 +989,16 @@ def egypt_opening(observations, version):
         opening["scope"] = ("Cairo and Alexandria towns, Ramleh markaz in Buheira and six provinces have mutually "
                             "exclusive census territory. The unexplained portion of the legacy national total is "
                             "unlocated. The census and map extents differ near the western oases and southern frontier.")
+    if version >= 34:
+        opening["subdivision_sources"] = [
+            "collections/egypt_comparable_provinces/observations.jsonl",
+            "collections/egypt_age_1907/observations.jsonl",
+        ]
+        opening["scope"] = (
+            "Cairo and Alexandria towns, Ramleh markaz in Buheira and eleven provinces have mutually "
+            "exclusive census territory. The rest of the national control remains geographically unlocated. "
+            "The comparison uses 1897 counts restated for the 1907 territorial definitions."
+        )
     return opening
 
 
@@ -1315,6 +1325,9 @@ def add_qing_prefectures(group, observations, version):
     if version >= 29:
         sources.add("cao_qing_sichuan_prefecture_reconstruction")
         parents.add("qing_hist_sichuan")
+    if version >= 34:
+        sources.add("cao_qing_hubei_shandong_prefecture_reconstruction")
+        parents.update(("qing_hist_hubei", "qing_hist_shandong"))
     dates = group["interpolation_reference_dates"]
     year_to_anchor = dict(zip(group["endpoint_dates"], dates, strict=True))
     prefectures = defaultdict(list)

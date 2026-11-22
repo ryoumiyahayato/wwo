@@ -1,0 +1,11 @@
+[
+  {
+    "id": "cao_qing_hubei_shandong_prefecture_reconstruction",
+    "title": "The Population History of China (1368–1953), Appendix 7",
+    "publisher": "Cao Shuji, Brill, 2024",
+    "url": "https://doi.org/10.1163/9789004688933_025",
+    "locator": "Printed p. 557, Hubei rows, and pp. 561–562, Shandong rows. Use the 1880 and 1910 columns.",
+    "rights": "Published numeric facts",
+    "raw_paths": ["cao_hubei_appendix_7.csv", "cao_shandong_appendix_7.csv", "README.md"]
+  }
+]

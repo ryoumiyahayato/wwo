@@ -55,6 +55,8 @@ function Get-OutputBytes([string] $Path) {
 $profileDirectory = Join-Path $target.FullName $output
 $previousTarget = $env:CARGO_TARGET_DIR
 $previousData = $env:WWO_DATA_DIR
+$previousRustFlags = $env:RUSTFLAGS
+$previousEncodedRustFlags = $env:CARGO_ENCODED_RUSTFLAGS
 $lock = [Threading.Mutex]::new($false, 'Local\WWO-Shared-Cargo-v31')
 $held = $false
 try {
@@ -67,6 +69,15 @@ try {
     if (!$env:WWO_DATA_DIR) {
         $env:WWO_DATA_DIR = Join-Path $worktree 'data'
     }
+    # rustc still requests an MSVC PDB with debug = 0.
+    if (!$DebugSymbols) {
+        $linkFlag = '-Clink-arg=/DEBUG:NONE'
+        if ($previousEncodedRustFlags) {
+            $env:CARGO_ENCODED_RUSTFLAGS = $previousEncodedRustFlags + [char]31 + $linkFlag
+        } else {
+            $env:RUSTFLAGS = "$previousRustFlags $linkFlag".Trim()
+        }
+    }
     $bytes = Get-OutputBytes $profileDirectory
     if ($bytes -gt $budget) {
         $directory = Get-Item -LiteralPath $profileDirectory
@@ -76,7 +87,7 @@ try {
             (Get-ChildItem -LiteralPath $expected -Directory -Recurse -Attributes ReparsePoint)) {
             throw "Unexpected Cargo cache path: $profileDirectory"
         }
-        $running = Get-Process wwo-map-lab, wwo-formal-state -ErrorAction SilentlyContinue |
+        $running = Get-Process -ErrorAction SilentlyContinue |
             Where-Object { $_.Path -like "$expected\*" }
         if ($running) {
             throw "Close the development program in $expected before refreshing its Cargo profile."
@@ -84,23 +95,19 @@ try {
         Write-Host "Cargo $profile cache exceeded $budget bytes ($bytes). Removing project outputs in this profile."
         & cargo clean --workspace --offline --locked --manifest-path $manifest --profile $profile
         if ($LASTEXITCODE) { exit $LASTEXITCODE }
-        $bytes = Get-OutputBytes $profileDirectory
-        if ($bytes -gt $budget) {
-            Write-Host "The remaining $profile dependency cache is $bytes bytes. Refreshing this profile."
-            & cargo clean --offline --locked --manifest-path $manifest --profile $profile
-            if ($LASTEXITCODE) { exit $LASTEXITCODE }
-        }
     }
     & cargo $Command --locked --manifest-path $manifest @profileArguments @CargoArguments
     $code = $LASTEXITCODE
     $bytes = Get-OutputBytes $profileDirectory
     if ($bytes -gt $budget) {
-        Write-Warning "Cargo $profile cache is $bytes bytes. It will be refreshed before its next build."
+        Write-Warning "Cargo $profile cache is $bytes bytes. Only workspace outputs are eligible for automatic retirement."
     }
     exit $code
 } finally {
     $env:CARGO_TARGET_DIR = $previousTarget
     $env:WWO_DATA_DIR = $previousData
+    $env:RUSTFLAGS = $previousRustFlags
+    $env:CARGO_ENCODED_RUSTFLAGS = $previousEncodedRustFlags
     if ($held) { $lock.ReleaseMutex() }
     $lock.Dispose()
 }
