@@ -60,7 +60,7 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 263,
+  "cited_sources": 265,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
@@ -386,8 +386,8 @@
       "unknown_people": 1472941871
     },
     "language": {
-      "assigned_people": 420706069,
-      "unknown_people": 1053891683
+      "assigned_people": 421507756,
+      "unknown_people": 1053089996
     },
     "legal_estate": {
       "assigned_people": 132020769,
@@ -402,8 +402,8 @@
       "unknown_people": 1134879825
     },
     "occupation": {
-      "assigned_people": 104206586,
-      "unknown_people": 1370391166
+      "assigned_people": 194107623,
+      "unknown_people": 1280490129
     },
     "property_declaration": {
       "assigned_people": 32296914,
@@ -461,6 +461,8 @@
     "br_dge_1916_1900_age_sex": 440,
     "es_census_1900_age_marital": 322,
     "india_madras_1901_princely_age_and_religion": 32,
+    "ar_censo_1947_retrospective": 22,
+    "abs_yearbook_1908_census_ages": 189,
     "pt_census_1890": 105,
     "pt_census_1900": 105,
     "be_census_1900_age_and_spoken_languages": 40,
@@ -474,10 +476,52 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 839583189,
-  "structure_opening_pool_count": 827,
-  "structure_opening_residents_outside_modeled_pools": 635014563,
+  "structure_opening_pool_controls": 847824173,
+  "structure_opening_pool_count": 834,
+  "structure_opening_residents_outside_modeled_pools": 626773579,
   "structure_opening_scopes": [
+    {
+      "unit_id": "abs_new_south_wales",
+      "opening_total": 1339272,
+      "observed_unit_id": "abs_new_south_wales",
+      "observed_total": 1339272,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "abs_queensland",
+      "opening_total": 486336,
+      "observed_unit_id": "abs_queensland",
+      "observed_total": 486336,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "abs_south_australia",
+      "opening_total": 359306,
+      "observed_unit_id": "abs_south_australia",
+      "observed_total": 359306,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "abs_tasmania",
+      "opening_total": 172363,
+      "observed_unit_id": "abs_tasmania",
+      "observed_total": 172363,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "abs_victoria",
+      "opening_total": 1188562,
+      "observed_unit_id": "abs_victoria",
+      "observed_total": 1188562,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "abs_western_australia",
+      "opening_total": 170284,
+      "observed_unit_id": "abs_western_australia",
+      "observed_total": 170284,
+      "observed_date": "1900-01-01"
+    },
     {
       "unit_id": "administrative_region:france_ain",
       "opening_total": 350699,
@@ -2542,6 +2586,13 @@
       "observed_unit_id": "ah_upper_austria",
       "observed_total": 810246,
       "observed_date": "1900-12-31"
+    },
+    {
+      "unit_id": "argentina_1900",
+      "opening_total": 4624686,
+      "observed_unit_id": "argentina_1900",
+      "observed_total": 4524861,
+      "observed_date": "1900-01-01"
     },
     {
       "unit_id": "be_census_antwerp",
@@ -6608,19 +6659,19 @@
         "opening_unit_id": "argentina_1900",
         "research_region": "America",
         "opening_control": 4624686,
-        "in_model_pools": 0,
-        "outside_model_pools": 4624686,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 4524861,
+        "outside_model_pools": 99825,
+        "modeled_age_and_sex": 4505257,
+        "modeled_sex_age_unknown": 19604
       },
       {
         "opening_unit_id": "australia_colonies_1900",
         "research_region": "Oceania",
         "opening_control": 3837578,
-        "in_model_pools": 0,
-        "outside_model_pools": 3837578,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "in_model_pools": 3716123,
+        "outside_model_pools": 121455,
+        "modeled_age_and_sex": 3703086,
+        "modeled_sex_age_unknown": 13037
       },
       {
         "opening_unit_id": "austria_hungary",
@@ -7292,17 +7343,17 @@
     "by_research_region": {
       "America": {
         "opening_control": 131491928,
-        "in_model_pools": 111290461,
-        "outside_model_pools": 20201467,
-        "modeled_age_and_sex": 110876302,
-        "modeled_sex_age_unknown": 414159
+        "in_model_pools": 115815322,
+        "outside_model_pools": 15676606,
+        "modeled_age_and_sex": 115381559,
+        "modeled_sex_age_unknown": 433763
       },
       "Oceania": {
         "opening_control": 4905385,
-        "in_model_pools": 947552,
-        "outside_model_pools": 3957833,
-        "modeled_age_and_sex": 942653,
-        "modeled_sex_age_unknown": 4899
+        "in_model_pools": 4663675,
+        "outside_model_pools": 241710,
+        "modeled_age_and_sex": 4645739,
+        "modeled_sex_age_unknown": 17936
       },
       "Europe": {
         "opening_control": 408687464,
@@ -7335,10 +7386,10 @@
     },
     "world": {
       "opening_control": 1474597752,
-      "in_model_pools": 839583189,
-      "outside_model_pools": 635014563,
-      "modeled_age_and_sex": 832146148,
-      "modeled_sex_age_unknown": 7437041
+      "in_model_pools": 847824173,
+      "outside_model_pools": 626773579,
+      "modeled_age_and_sex": 840354491,
+      "modeled_sex_age_unknown": 7469682
     }
   },
   "opening_count_basis": {

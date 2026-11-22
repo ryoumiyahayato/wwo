@@ -1,0 +1,14 @@
+[
+  {
+    "id": "abs_yearbook_1908_census_ages",
+    "title": "Official Year Book of the Commonwealth of Australia 1908",
+    "publisher": "Commonwealth Bureau of Census and Statistics",
+    "url": "https://www.ausstats.abs.gov.au/ausstats/free.nsf/0/5775EAABAC019C27CA257AC2007A66FB/$File/13010_1901_1907%20section%204.pdf#page=24",
+    "locator": "Section IV, §9, printed pp. 164–165",
+    "raw_paths": [
+      "age_sex.csv",
+      "australian_colonies_population_1899_1901.csv"
+    ],
+    "rights": "Published historical numeric facts"
+  }
+]

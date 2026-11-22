@@ -369,6 +369,7 @@ def age_sex_panels():
         HERE / "prussia_census_1900", HERE / "saxony_census_1900", HERE / "wuerttemberg_census_1900",
         HERE / "us_territorial_ages_1900", HERE / "baden_census_1900", HERE / "italy_census_1901",
         HERE / "brazil_census_1900_age", HERE / "spain_census_1900", HERE / "india_remaining_princely_demography",
+        HERE / "argentina_age_1895_1914", HERE / "australia_age_1901",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
@@ -1367,6 +1368,128 @@ def bengal_district_age_models(panels, observations, balances):
         )
 
 
+def argentina_opening_age_model(panels, unit):
+    controls = read_csv(HERE / "argentina_age_1895_1914" / "census_controls.csv")
+    dates = [row["census_date"] for row in controls]
+    early, late = (panels[f"ar_census_{year}_national_age_sex"] for year in ("1895", "1914"))
+    for control, (panel, rows) in zip(controls, (early, late), strict=True):
+        total, = (row for row in rows if row["role"] == "total")
+        adjusted = int(control["population_including_adjustments"])
+        omitted = sum(int(control[key]) for key in ("estimated_omissions", "indigenous_unenumerated_individually",
+                                                     "remote_areas_outside_enumeration"))
+        age_unknown, = (row["both"] for row in rows if row["role"] == "band" and row["age_min"] is None)
+        if (panel["observed_date"] != control["census_date"] or adjusted != total["both"] + omitted
+                or total["both"] != int(control["individual_enumeration"])
+                or age_unknown != int(control["age_unknown"])
+                or any(total[sex] != int(control[sex]) for sex in SEX_COUNTS)):
+            raise ValueError("Argentina age census and coverage controls differ")
+        opening_age_group(panel, rows, unit["unit_id"], total["both"])
+    fraction = opening_fraction(dates)
+    weights = (1 - fraction, fraction)
+    outside_share = sum(weight * Fraction(
+        int(row["population_including_adjustments"]) - int(row["individual_enumeration"]),
+        int(row["population_including_adjustments"]),
+    ) for weight, row in zip(weights, controls, strict=True))
+    total = unit["population_value"]
+    outside = int(total * outside_share + Fraction(1, 2))
+    supported = total - outside
+    bands = [[row for row in rows if row["role"] == "band"] for _, rows in (early, late)]
+    quotas = {}
+    for index, (first, last) in enumerate(zip(*bands, strict=True)):
+        if (first["age_min"], first["age_max"]) != (last["age_min"], last["age_max"]):
+            raise ValueError("Argentina census age intervals differ")
+        for sex in SEX_COUNTS:
+            quotas[index, sex] = supported * sum(
+                weight * Fraction(row[sex], int(control["individual_enumeration"]))
+                for weight, row, control in zip(weights, (first, last), controls, strict=True)
+            )
+    allocations = apportion(quotas, supported)
+    opening_rows = [row | {sex: allocations[index, sex] for sex in SEX_COUNTS}
+                    for index, row in enumerate(bands[1])]
+    opening_control = dict(role="total", both=supported,
+                           **{sex: sum(row[sex] for row in opening_rows) for sex in SEX_COUNTS})
+    model = late[0] | dict(
+        id="argentina_opening_age_model", observed_date=DATE,
+        locator="Vol. I, Cuadro 3, p. 6 (1895 and 1914); Censos Nacionales, p. XXVIII (coverage).",
+        opening_method="Interpolate the census coverage fractions and the age-by-sex shares of the individually enumerated "
+                       "population to 1900-01-01. Leave the modeled share outside personal enumeration unclassified.",
+        uncertainty="At the same opening total, the two endpoint coverage fractions imply 90,287–102,900 people "
+                    "outside personal enumeration. This range does not measure uncertainty in the ages or in the "
+                    "opening total. Age-selective migration did not necessarily evolve linearly.",
+    )
+    group = opening_age_group(model, [opening_control, *opening_rows], unit["unit_id"], total)
+    return group | dict(unclassified_opening_residents=outside)
+
+
+def australian_opening_age_models(panels, balances):
+    directory = HERE / "australia_age_1901"
+    controls = defaultdict(dict)
+    for row in read_csv(directory / "australian_colonies_population_1899_1901.csv"):
+        unit_id, date = row["unit_id"], row["date"]
+        if row["role"] in {"opening_control", "unlocated_balance"}:
+            continue
+        male, female, both = (int(row[key]) for key in ("male", "female", "population"))
+        if date in controls[unit_id] or male + female != both:
+            raise ValueError(f"{unit_id} {date}: inconsistent Australian population and sex controls")
+        controls[unit_id][date] = dict(male=male, female=female, both=both)
+
+    national_controls = controls.pop("abs_australia")
+    for date, national in national_controls.items():
+        if any(sum(local[date][key] for local in controls.values()) != national[key] for key in AGE_COUNTS):
+            raise ValueError(f"{date}: Australian sex totals do not close to national control")
+    _, national_rows = panels["australia_1901_census_australia_age_sex"]
+    local_panels = {panel["observed_unit_id"]: (panel, rows) for panel, rows in panels.values()
+                    if panel["source_id"] == "abs_yearbook_1908_census_ages" and panel["observed_unit_id"] != "abs_australia"}
+    if local_panels.keys() != controls.keys():
+        raise ValueError("Australian local age and sex controls cover different colonies")
+    for national, *local in zip(national_rows, *(rows for _, rows in local_panels.values()), strict=True):
+        if (any(row["label"] != national["label"] or row["role"] != national["role"] for row in local)
+                or any(sum(row[key] for row in local) != national[key] for key in AGE_COUNTS)):
+            raise ValueError(f"Australian colonies do not close to national age row {national['label']}")
+
+    for unit_id, (panel, rows) in local_panels.items():
+        unit = balances[unit_id]
+        dates = unit["source_dates"]
+        first, last = (controls[unit_id][date] for date in dates)
+        if [first["both"], last["both"]] != unit["endpoint_values"]:
+            raise ValueError(f"{unit_id}: the ABS year-end totals differ from the opening endpoints")
+        total = unit["population_value"]
+        fraction = opening_fraction(dates)
+        sex_totals = apportion({sex: first[sex] * (1 - fraction) + last[sex] * fraction
+                                for sex in SEX_COUNTS}, total)
+        census_total, = (row for row in rows if row["role"] == "total")
+        if (any(census_total[key] != controls[unit_id][panel["observed_date"]][key] for key in AGE_COUNTS)
+                or any(sex_totals[sex] != controls[unit_id][DATE][sex] for sex in SEX_COUNTS)):
+            raise ValueError(f"{unit_id}: Australian census or opening sex totals differ")
+        ages = [row for row in rows if row["role"] == "band"]
+        for sex in SEX_COUNTS:
+            if sum(row[sex] for row in ages) != census_total[sex]:
+                raise ValueError(f"{unit_id}: original Australian age rows do not close for {sex}")
+        allocations = {
+            sex: apportion({index: Fraction(row[sex] * sex_totals[sex], census_total[sex])
+                            for index, row in enumerate(ages)}, sex_totals[sex])
+            for sex in SEX_COUNTS
+        }
+        age_rows = [row | {sex: allocations[sex][index] for sex in SEX_COUNTS}
+                    for index, row in enumerate(ages)]
+        opening_rows = [row for row in age_rows if row["age_min"] is not None]
+        opening_rows.append(dict(
+            label="Age not stated", role="band", age_min=None, age_max=None,
+            **{sex: sum(row[sex] for row in age_rows if row["age_min"] is None) for sex in SEX_COUNTS},
+        ))
+        model = panel | dict(
+            id=f"{unit_id}_opening_age_model", observed_date=DATE,
+            locator=f"{panel['locator']}; ABS Historical population, Table 1, columns DJ–DK (sex controls).",
+            opening_method="Interpolate the two ABS year-end sex counts to January 1900. Hold this colony's March 1901 "
+                           "age shares within each sex. Keep the three printed age-not-stated categories unknown.",
+            uncertainty="Census and year-end estimates use the narrower official statistical series and incompletely "
+                        "cover Indigenous residents. The balance in the separate all-resident estimate remains unassigned. "
+                        "Age change and migration during the 15-month interval have no quantified error bounds.",
+        )
+        opening_control = dict(role="total", both=total, **sex_totals)
+        yield opening_age_group(model, [opening_control, *opening_rows], unit_id, total)
+
+
 def opening_structure(opening_groups, observations, *, version=6):
     district_pools = {unit["unit_id"]: unit for group in opening_groups for unit in group["units"]
                       if "district_boundary_source" in unit}
@@ -1433,6 +1556,9 @@ def opening_structure(opening_groups, observations, *, version=6):
     if version >= 27:
         groups.extend(remaining_indian_states_age_models(panels, opening_balances, observations, version))
         groups.extend(bengal_district_age_models(panels, observations, opening_balances))
+    if version >= 30:
+        groups.append(argentina_opening_age_model(panels, opening_balances["argentina_1900"]))
+        groups.extend(australian_opening_age_models(panels, opening_balances))
     if version >= 28:
         groups.extend(taiwan_register_age_models(opening_balances))
         groups.extend(bombay_district_age_models(panels, opening_balances))

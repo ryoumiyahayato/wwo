@@ -35,6 +35,31 @@ def travancore_language(pools, distribution):
     )
 
 
+def cochin_language(pools, distribution):
+    pool = pools[COCHIN]
+    path = COLLECTIONS / "india_social_1901" / "cochin_language_1901.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    first = rows[0]
+    date, locator = first["observed_date"], first["locator"]
+    total = int(first["observed_total"])
+    counts = {row["language"]: int(row["persons"]) for row in rows}
+    if (date != pool["source_dates"][-1] or total != pool["endpoint_values"][-1]
+            or any(row["unit_id"] != COCHIN or row["observed_date"] != date or row["locator"] != locator
+                   or int(row["male"]) + int(row["female"]) != int(row["persons"]) for row in rows)
+            or len(counts) != len(rows) or sum(counts.values()) != total
+            or any(sum(int(row[sex]) for row in rows) != int(first[f"observed_{sex}"])
+                   for sex in ("male", "female"))
+            or int(first["observed_unknown"]) != 0):
+        raise ValueError("Cochin language and population census controls differ")
+    yield COCHIN, "language", distribution(
+        pool["population_value"], classification="india_1901_ordinarily_used_language",
+        source="india_1901_census_cochin_language", date=date, observed_unit=COCHIN,
+        scope=pool["name"], locator=locator, total=total, observed_counts=counts, unknown=0,
+        definition="Ordinarily used language reported to the census. Cultural identity is not inferred.",
+    )
+
+
 def madras_states_religion(pools, distribution, table_definition):
     if TRAVANCORE not in pools:
         return

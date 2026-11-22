@@ -29,7 +29,19 @@
     "publisher": "India Office / HMSO (London, 1905); Digital South Asia Library, University of Chicago",
     "url": "https://dsal.uchicago.edu/statistics/1894_excel/1894.021.XLS",
     "locator": "1901 census of languages ordinarily used. See the territorial cell ranges in india_province_language_1901.csv.",
-    "raw_paths": ["india_province_language_1901.csv", "india_province_language_1901.md"],
+    "raw_paths": [
+      "india_province_language_1901.csv",
+      "india_province_language_1901.md"
+    ],
     "rights": "Numeric facts from the 1905 statistical publication."
+  },
+  {
+    "id": "india_1901_census_cochin_language",
+    "title": "Census of India 1901, Vol. I-A, India, Tables",
+    "publisher": "Government of India",
+    "url": "https://archive.org/details/in.ernet.dli.2015.55924",
+    "locator": "Table X, Part IV, printed p. 198, Cochin State",
+    "raw_path": "cochin_language_1901.csv",
+    "rights": "Published historical numeric facts"
   }
 ]

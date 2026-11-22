@@ -2227,7 +2227,7 @@ mod tests {
         let rest = "raj_central_india_ex_gwalior";
         let before = world.population().social_distribution(Some(central_india)).unwrap();
         assert_eq!(before.population_total, 8_824_834);
-        assert_eq!(before.dimensions["occupation"].assigned_residents, 173_036);
+        assert_eq!(before.dimensions["occupation"].assigned_residents, 4_585_285);
         assert_eq!(before.dimensions["residence"].assigned_residents, before.population_total);
         assert_eq!(before.residents_with_any_attribute_minimum, before.population_total);
         assert_eq!(before.residents_with_any_attribute_maximum, before.population_total);
@@ -2247,7 +2247,7 @@ mod tests {
         let after = world.population().social_distribution(Some(central_india)).unwrap();
         assert_eq!(after.population_total, 8_824_834);
         assert_eq!(after.affected_resident_pools, 2);
-        assert!(after.dimensions["occupation"].assigned_residents < 173_036);
+        assert!(after.dimensions["occupation"].assigned_residents < 4_585_285);
         assert_eq!(after.dimensions["residence"].unknown_residents, 2);
         assert!(after.residents_with_any_attribute_minimum <= after.residents_with_any_attribute_maximum);
         assert_eq!(after.residents_with_any_attribute_maximum, after.population_total);
@@ -2337,6 +2337,46 @@ mod tests {
         assert_eq!(previous.population_total, report.population_total);
         assert_eq!(previous.structure.unwrap().residents_with_cohort_age_and_sex, 0);
         assert_eq!(previous.social.unwrap().dimensions["religion"].assigned_residents, 0);
+    }
+
+    #[test]
+    fn historical_argentine_and_australian_ages_preserve_coverage_gaps() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let old = bootstrap.base_opening_version("country_fra", None, Some(29)).unwrap();
+        assert_eq!(world.population().global_total(), old.population().global_total());
+
+        let argentina = world.inspect_population("argentina_1900").unwrap();
+        assert_eq!(argentina.population_total, Some(4_624_686));
+        let profile = argentina.structure.unwrap();
+        assert_eq!(profile.residents_with_cohort_age_and_sex, 4_505_257);
+        assert_eq!(profile.cohort_residents, 4_524_861);
+        assert_eq!(profile.unclassified_residents, 99_825);
+
+        let australia = world.inspect_population("australia_colonies_1900").unwrap();
+        assert_eq!(australia.population_total, Some(3_837_578));
+        let profile = australia.structure.unwrap();
+        assert_eq!(profile.residents_with_cohort_age_and_sex, 3_703_086);
+        assert_eq!(profile.cohort_residents, 3_716_123);
+        assert_eq!(profile.unclassified_residents, 121_455);
+        let south = world.inspect_population("abs_south_australia").unwrap();
+        assert_eq!(south.population_total, Some(359_306));
+        assert_eq!(south.structure.unwrap().residents_with_cohort_age_and_sex, 358_758);
+
+        for unit in ["argentina_1900", "australia_colonies_1900"] {
+            let before = old.inspect_population(unit).unwrap().structure.unwrap();
+            assert_eq!(before.residents_with_cohort_age_and_sex, 0);
+        }
+        let cochin = world.inspect_population("raj_cochin_state").unwrap().social.unwrap();
+        assert_eq!(cochin.dimensions["language"].assigned_residents, 801_687);
+        assert_eq!(cochin.dimensions["language"].unknown_residents, 0);
+        assert_eq!(cochin.dimensions["occupation"].assigned_residents, 368_764);
+        let bengal = world.inspect_population("raj_bengal_province").unwrap().social.unwrap();
+        assert_eq!(bengal.dimensions["occupation"].assigned_residents, 29_712_198);
+        let agra_oudh = world.inspect_population("raj_agra_oudh").unwrap().social.unwrap();
+        assert_eq!(agra_oudh.dimensions["occupation"].assigned_residents, 22_793_163);
+        let old_bengal = old.inspect_population("raj_bengal_province").unwrap().social.unwrap();
+        assert_eq!(old_bengal.dimensions["occupation"].assigned_residents, 0);
     }
 
     #[test]
@@ -3044,8 +3084,8 @@ mod tests {
         assert_eq!(dutch_social.dimensions["occupation"].assigned_residents, 1_923_577);
         assert_eq!(dutch_social.dimensions["marital_status"].assigned_residents, 5_103_913);
         for (unit, assigned) in [
-            ("raj_central_india_agency", 173_036),
-            ("raj_rajputana_agency", 4_226_945),
+            ("raj_central_india_agency", 4_585_285),
+            ("raj_rajputana_agency", 5_875_312),
         ] {
             let social = world.population().social_distribution(Some(unit)).unwrap();
             assert_eq!(social.dimensions["occupation"].assigned_residents, assigned);
