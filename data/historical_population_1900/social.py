@@ -756,6 +756,75 @@ def german_state_marital_status(pools, collection, *, classification, source, sc
     )
 
 
+def italy_marital_status(pool):
+    path = COLLECTIONS / "italy_census_1901" / "marital.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+    controls = {"male": 16_155_130, "female": 16_320_123}
+    if any(sum(int(row[sex]) for row in rows) != total for sex, total in controls.items()):
+        raise ValueError("Italian census civil status does not close")
+    counts = {row["marital_status"]: int(row["male"]) + int(row["female"]) for row in rows}
+    yield pool["unit_id"], "marital_status", distribution(
+        pool["population_value"], classification="italy_1901_reported_marital_status",
+        source="it_1901_census_v5_age_and_marital", date="1901-02-10", observed_unit=pool["unit_id"],
+        scope="Kingdom of Italy, population present", locator="Vol. V, printed pp. LXIV–LXV",
+        total=sum(controls.values()), observed_counts=counts, unknown=0,
+        definition="Civil status of all persons present. Legally separated persons are included with married persons.",
+    )
+
+
+MEXICO_SOCIAL_TABLES = {
+    "language": ("castellano idiomas_indigenas idiomas_extranjeros",
+                 ("Castellano", "Idiomas Indígenas", "Idiomas Extranjeros"),
+                 "Language classification as published. Indigenous and foreign languages are grouped. "
+                 "The census does not establish individual cultural identity or multilingual margins."),
+    "religion": ("catolicos protestantes mahometanos mormones budistas israelitas griegos sin_culto",
+                 ("Católicos", "Protestantes", "Mahometanos", "Mormones", "Budistas", "Israelitas", "Griegos", "Sin Culto"),
+                 "Reported census religion. Sin Culto is a published category. The table does not report observance."),
+    "literacy": ("saben_leer_y_escribir saben_solo_leer no_saben_leer_ni_escribir_12_and_over "
+                 "no_saben_leer_ni_escribir_under_12",
+                 ("Read and write", "Read only", "Neither read nor write, 12 and older", "Neither read nor write, under 12"),
+                 "Published literacy classification, with persons below 12 separated on the neither category."),
+    "marital_status": ("solteros casados viudos", ("Never married", "Married", "Widowed"),
+                       "Marital status as classified in the original census. Minors are tabulated separately without civil status."),
+    "occupation": ("agricultura mineria industrias transportes comercio fuerzas_publicas administracion_publica "
+                   "profesiones_liberales propietarios_y_rentistas trabajos_domesticos diversas_ocupaciones",
+                   ("Agricultura", "Minería", "Industrias", "Transportes", "Comercio", "Fuerzas Públicas",
+                    "Administración Pública", "Profesiones Liberales", "Propietarios y Rentistas",
+                    "Trabajos Domésticos", "Diversas Ocupaciones"),
+                   "Census occupational categories, including domestic work and property or rent income as originally classified. "
+                   "Domestic work does not imply paid employment. Persons in the unknown profession category remain unassigned."),
+}
+
+
+def mexico_census_social(pools):
+    mexican = {key for key in pools if key.startswith("mx_")}
+    for dimension, (columns, labels, definition) in MEXICO_SOCIAL_TABLES.items():
+        path = COLLECTIONS / "mexico_census_1900" / f"{dimension}.csv"
+        with path.open(encoding="utf8", newline="") as stream:
+            rows = list(csv.DictReader(stream))
+        expected = mexican - ({"mx_coahuila", "mx_queretaro"} if dimension == "occupation" else set())
+        if {row["unit_id"] for row in rows} != expected or len(rows) != len(expected):
+            raise ValueError(f"Unexpected Mexican census scopes for {dimension}")
+        for row in rows:
+            unit_id = row["unit_id"]
+            unit = pools[unit_id]
+            total = int(row["observed_total"])
+            difference = 13 if unit_id == "mx_durango" else 0
+            if unit["endpoint_values"][-1] != total + difference:
+                raise ValueError(f"Mexican census controls differ for {unit_id}")
+            observed_counts = {label: int(row[column]) for label, column in zip(labels, columns.split(), strict=True)}
+            unknown = int(row["observed_unknown"]) + int(row.get("menores_de_edad", 0))
+            yield unit_id, dimension, distribution(
+                unit["population_value"], classification=f"mexico_1900_reported_{dimension}",
+                source=row["source_id"], date=row["observed_date"], observed_unit=unit_id,
+                scope=row["observed_name"], locator=row["locator"], total=total, observed_counts=observed_counts,
+                unknown=unknown, definition=definition,
+                method=SHARE_METHOD + " The change between January and the October census is unquantified."
+                + (" Durango's original census control was 13 below the revised series endpoint." if difference else ""),
+            )
+
+
 def opening_social(opening_groups, *, version):
     """Return independent person distributions at each source's published scope."""
     pools = {
@@ -838,6 +907,8 @@ def opening_social(opening_groups, *, version):
             source="de_baden_1900_age_marital", scope="Grand Duchy of Baden, population present",
             locator="Table II.A.1d, printed p. 40, all ages",
         ), hungarian_crown_work_status(pools))
+    if version >= 21:
+        marginals = chain(marginals, italy_marital_status(pools["kingdom_of_italy"]), mexico_census_social(pools))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))

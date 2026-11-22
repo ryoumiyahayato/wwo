@@ -298,6 +298,56 @@ def regroup_age_rows(rows, target):
         yield band | {field: sum(row[field] for row in selected) for field in AGE_COUNTS}
 
 
+def mexican_age_panels():
+    directory = HERE / "mexico_census_1900"
+    regional = {}
+    for row in read_csv(directory / "regional_age_sex.csv"):
+        regional.setdefault(row["unit_id"], []).append(row)
+    national = read_csv(directory / "national_age_sex.csv")
+    bands = ("age_min", "age_max", "role", "source_age_label")
+    if len(regional) != 30 or len(national) != 10:
+        raise ValueError("Unexpected Mexican age table coverage")
+    band_totals = {tuple(row[key] for key in bands): {sex: int(row[sex]) for sex in AGE_COUNTS}
+                   for row in national}
+    for unit_id, raw in regional.items():
+        if len(raw) != len(band_totals) or {tuple(row[key] for key in bands) for row in raw} != band_totals.keys():
+            raise ValueError(f"Unexpected Mexican age groups for {unit_id}")
+        for row in raw:
+            for sex in AGE_COUNTS:
+                band_totals[tuple(row[key] for key in bands)][sex] -= int(row[sex])
+    if any(any(counts.values()) for counts in band_totals.values()):
+        raise ValueError("Mexican regional age tables do not close to national controls by age and sex")
+    for unit_id, raw in [*regional.items(), ("mexican_republic", national)]:
+        first = raw[0]
+        rows = [dict(
+            label=row["source_age_label"], role=row["role"],
+            age_min=int(row["age_min"]) if row["age_min"] else None,
+            age_max=int(row["age_max"]) if row["age_max"] else None,
+            **{sex: int(row[sex]) for sex in AGE_COUNTS},
+        ) for row in raw]
+        totals = {sex: sum(row[sex] for row in rows) for sex in AGE_COUNTS}
+        if (totals["both"] != int(first["observed_total"])
+                or any(row["both"] != row["male"] + row["female"] for row in rows)):
+            raise ValueError(f"Mexican age table counts differ for {unit_id}")
+        panel = dict(
+            id=f"{unit_id}_1900_age_sex", observed_unit_id=unit_id,
+            observed_date=first["observed_date"], source_id=first["source_id"], published_scope=first["observed_name"],
+            locator="Cuadro 8, printed pp. 29–33; Cuadro 7, p. 27",
+            definition="Census population by published age intervals and sex. Both districts of Baja California are combined.",
+            broad_observation=False, opening_band_roles=["band", "unknown"],
+            opening_method=OPENING_METHOD,
+            uncertainty="Changes in local age and sex between January and the October census are unquantified.",
+        )
+        if unit_id in regional:
+            panel.update(opening_unit_id=unit_id, opening_from_version=21,
+                         opening_match_population_endpoint=True)
+            if unit_id == "mx_durango":
+                panel.update(opening_population_endpoint_difference=13,
+                             uncertainty=panel["uncertainty"] + " The revised Durango population endpoint exceeds "
+                                         "the original census control by 13 persons.")
+        yield panel, [dict(label="Census total", role="total", age_min=None, age_max=None, **totals), *rows]
+
+
 def age_sex_panels():
     panels = json.loads((AGE_SOURCES / "panels.json").read_text(encoding="utf8"))
     panels.extend(json.loads((AGE_SOURCES / "us_census_1900_panels.json").read_text(encoding="utf8")))
@@ -312,7 +362,7 @@ def age_sex_panels():
         HERE / "netherlands_census_1899", HERE / "nordic_population_1900", HERE / "swiss_census_ages",
         HERE / "andaman_census_demography", HERE / "india_princely_age", HERE / "india_statistical_abstract_ages",
         HERE / "prussia_census_1900", HERE / "saxony_census_1900", HERE / "wuerttemberg_census_1900",
-        HERE / "us_territorial_ages_1900", HERE / "baden_census_1900",
+        HERE / "us_territorial_ages_1900", HERE / "baden_census_1900", HERE / "italy_census_1901",
     )
     for source in regional_sources:
         panels.extend(json.loads((source / "panels.json").read_text(encoding="utf8")))
@@ -385,7 +435,8 @@ def age_sex_panels():
             for key in AGE_COUNTS:
                 row[key] = sum(component[key] for component in matched_rows)
             by_panel[panel["id"]].append(row)
-    return [(panel, by_panel[panel["id"]]) for panel in panels] + list(austrian_age_panels()) + list(hungarian_crown_age_panels())
+    return ([(panel, by_panel[panel["id"]]) for panel in panels]
+            + list(austrian_age_panels()) + list(hungarian_crown_age_panels()) + list(mexican_age_panels()))
 
 
 def opening_age_group(panel, rows, unit_id, opening_total):
@@ -742,7 +793,7 @@ def opening_structure(opening_groups, observations, *, version=6):
         if panel.get("opening_match_population_endpoint"):
             balance = opening_balances[unit_id]
             endpoints = balance.get("endpoint_values") or balance["country_endpoint_values"]
-            if endpoints[-1] != model["observed_total"]:
+            if endpoints[-1] != model["observed_total"] + panel.get("opening_population_endpoint_difference", 0):
                 raise ValueError(f"Census age and population controls differ for {unit_id}")
         groups.append(model)
     if version >= 20:

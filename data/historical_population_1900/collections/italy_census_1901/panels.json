@@ -1,0 +1,20 @@
+[
+  {
+    "id": "kingdom_of_italy",
+    "published_scope": "Kingdom of Italy, population present reconstructed to January 1901",
+    "source_id": "it_1901_census_v5_age_and_marital",
+    "observed_unit_id": "kingdom_of_italy",
+    "observed_date": "1901-01-01",
+    "locator": "Table XX(b), printed p. 109, Regno, columns 9–11",
+    "definition": "Census of February 10 reconstructed to January 1, 1901. Add intervening deaths, remove subsequent births. No adjustment for emigration.",
+    "broad_observation": false,
+    "opening_unit_id": "kingdom_of_italy",
+    "opening_from_version": 21,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Hold the Kingdom of Italy's January 1901 observed age and sex proportions in its January 1900 opening balance. Use largest remainders. Preserve unreported ages.",
+    "uncertainty": "The opening control and the reconstructed population have different enumeration methods; changes in age and sex composition over one year are unquantified."
+  }
+]
