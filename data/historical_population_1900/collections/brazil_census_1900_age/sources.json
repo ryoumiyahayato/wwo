@@ -22,5 +22,21 @@
     "locator": "Printed pp. XIII–XVI, historical 1900 return by state, sex and literacy",
     "url": "https://biblioteca.ibge.gov.br/visualizacao/livros/liv31687.pdf#page=15",
     "rights": "Historic public statistical return. Numeric facts transcribed."
+  },
+  {
+    "id": "br_ibge_1958_1900_religion",
+    "title": "A população brasileira, 1872–1950",
+    "publisher": "Instituto Brasileiro de Geografia e Estatística",
+    "locator": "Section II.5, Religião, printed pp. 24–28, 1900 state returns",
+    "url": "https://pt.scribd.com/document/386495743/DADOS-IBGE-A-POPULACAO-BRASILEIRA-1872-1950-pdf",
+    "rights": "Historic public statistical return. Numeric facts transcribed from a publicly viewable reproduction."
+  },
+  {
+    "id": "br_ibge_1960_sc_historical_religion",
+    "title": "Censo demográfico de 1960, vol. I, tomo XV, part 1, Santa Catarina",
+    "publisher": "Instituto Brasileiro de Geografia e Estatística",
+    "locator": "Table 1, printed p. 2, PDF p. 26, 1900 religion return",
+    "url": "https://biblioteca.ibge.gov.br/visualizacao/periodicos/68/cd_1960_v1_t15_p1_sc.pdf#page=26",
+    "rights": "Historic public statistical return. Numeric facts transcribed."
   }
 ]

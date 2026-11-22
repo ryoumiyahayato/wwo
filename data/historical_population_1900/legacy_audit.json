@@ -435,9 +435,9 @@
     "research_candidates": [
       "ft_portugal"
     ],
-    "opening_replacement": 5404156,
+    "opening_replacement": 5388982,
     "legacy_unlocated_balance": null,
-    "replacement_minus_legacy": 4156,
+    "replacement_minus_legacy": -11018,
     "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
@@ -924,10 +924,10 @@
     "research_candidates": [
       "ft_peru"
     ],
-    "opening_replacement": null,
+    "opening_replacement": 3383000,
     "legacy_unlocated_balance": null,
-    "replacement_minus_legacy": null,
-    "status": "legacy_only",
+    "replacement_minus_legacy": -417000,
+    "status": "replaced_for_new_games",
     "comparison": "Arithmetic change in authoritative opening; old census date and territorial inclusions are undocumented."
   },
   {

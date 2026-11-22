@@ -1,0 +1,29 @@
+[
+  {
+    "id": "pe_inei_historical_population_1900",
+    "title": "Estado de la población peruana 2000",
+    "publisher": "Instituto Nacional de Estadística e Informática",
+    "url": "https://proyectos.inei.gob.pe/web/biblioineipub/bancopub/Est/Lib0363/cap1.htm",
+    "locator": "Chapter I, §1.7, Peru estimated total population 1520–2000, 1900 row. Values in thousands; population basis and reference day unspecified."
+  },
+  {
+    "id": "pe_fomento_sinopsis_1899",
+    "title": "Sinopsis geográfica y estadística del Perú, 1895–1898",
+    "publisher": "Ministerio de Fomento",
+    "url": "https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA24",
+    "locator": "Printed pp. 24–27, departmental and coastal province totals, Censo de 1876 and Calculada en 1896. Printed p. 30 refers to the Chilean occupation.",
+    "rights": "Historical government publication, 1899.",
+    "raw_path": "sinopsis_1899_department_population.csv"
+  },
+  {
+    "id": "pe_callao_census_1905",
+    "title": "Censo de la Provincia Constitucional del Callao, 20 de junio de 1905",
+    "publisher": "Ministerio de Fomento",
+    "url": "https://books.google.com.pe/books?id=MalPAAAAMAAJ",
+    "locator": "Población de hecho – Population de fait, columns 3–7, total row.",
+    "rights": "Historical government publication, 1906.",
+    "table_urls": [
+      "https://fuenteshistoricasdelperu.com/wp-content/uploads/2021/03/censo-callao.jpg"
+    ]
+  }
+]

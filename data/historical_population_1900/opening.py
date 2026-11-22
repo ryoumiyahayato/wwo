@@ -13,12 +13,18 @@ EGYPT_COMPARABLE_PROVINCES = "egypt_census_1907_comparable_provinces"
 EGYPT_FAIYUM_SOURCES = {"egypt_faiyum_census_1897", "egypt_faiyum_census_1907"}
 ITALIAN_CIVIL_STATUS_SCOPE = "it_1901_civil_status_scope"
 SPANISH_CIVIL_STATUS_SCOPE = "es_1900_civil_status_scope"
+AGRA_DISTRICT_SOURCE = "india_agra_census_1901_districts"
+AGRA_DISTRICT_BALANCE = "raj_agra_unlocated_table_ii_a"
 
 def sourced_people(group):
     return group["population_value"] - group.get("legacy_unlocated_balance", 0)
 
 def located_people(group):
     return sourced_people(group) - group.get("research_unlocated_balance", 0)
+
+
+def geographic_partitions(group):
+    return [unit for unit in group["units"] if not unit.get("geographically_unlocated")]
 
 
 def apportion(values, total):
@@ -693,6 +699,49 @@ def add_indian_local_areas(group, observations, *, version):
     group["units"] = sorted(units, key=lambda row: row["unit_id"])
 
 
+def add_agra_districts(group, observations):
+    parent = next(unit for unit in group["units"] if unit["unit_id"] == "raj_agra_remainder")
+    rows = [row for row in observations if row["source_id"] == AGRA_DISTRICT_SOURCE
+            or row["unit_id"] == AGRA_DISTRICT_BALANCE]
+    dates = group["endpoint_dates"]
+    places = {row["unit_id"]: row["place_ids"] for row in rows if row.get("place_ids")}
+    children = interpolate_partition(rows, parent, dates)
+    for child in children:
+        child.update(statistical_parent="raj_agra_oudh", date=DATE, place_ids=places.get(child["unit_id"], []),
+                     uncertainty_kind="The comparable district series uses March 1901 boundaries. January 1900 "
+                                      "boundary changes, famine, migration and enumeration error have no quantified interval.")
+        if child["unit_id"] == AGRA_DISTRICT_BALANCE:
+            child["geographically_unlocated"] = True
+    group["units"] = sorted([unit for unit in group["units"] if unit is not parent] + children,
+                            key=lambda row: row["unit_id"])
+
+
+def portuguese_opening(previous, observations):
+    root = previous["unit_id"]
+    dates = ["1890-12-01", "1900-12-01"]
+    sources = {"pt_census_1890", "pt_census_1900"}
+    controls = {row["date"]: row for row in observations if row["unit_id"] == root and row["source_id"] in sources}
+    early, late = [controls[day] for day in dates]
+    endpoints = [early["population_value"], late["population_value"]]
+    fraction = opening_fraction(dates)
+    total = round(endpoints[0] * (1 - fraction) + endpoints[1] * fraction)
+    districts = [row for row in observations if row["parent_id"] == root and row["source_id"] in sources]
+    if len(districts) != 42:
+        raise ValueError("Portuguese census must contain 21 districts at each census date")
+    parent = dict(unit_id=root, name=late["name"], population_value=total, endpoint_values=endpoints)
+    leaves = interpolate_partition(districts, parent, dates)
+    for leaf in leaves:
+        leaf["locator"] = f"{leaf['locator']}; {late['locator']}"
+        leaf["uncertainty_kind"] = ("Districts are paired by historical identity. Lower-level boundary transfers, "
+                                    "enumeration coverage and interpolation error have no quantified interval.")
+    return dict(unit_id=root, date=DATE, population_value=total, source_id=late["source_id"],
+                source_observations=[row["record_id"] for row in (early, late)], locator=f"{early['locator']}; {late['locator']}",
+                method=f"Linearly interpolate the two official population-present census totals, elapsed fraction {fraction}.",
+                scope=late["definition"], endpoint_dates=dates, country_endpoint_values=endpoints,
+                alternative_research_value=previous["population_value"], research_unit_ids=previous["research_unit_ids"],
+                partition_source="collections/portugal_census_1900/observations.jsonl", units=leaves)
+
+
 def legacy_population_control(unit_id):
     legacy = json.loads((HERE.parent/"alpha/historical_world_economy_1900/countries_compact.json").read_text(encoding="utf8"))
     controls = (dict(zip(legacy["field_order"], data)) for data in legacy["rows"])
@@ -1192,6 +1241,19 @@ def groups(observations, version=1):
         add_indian_local_areas(result["cshapes_gw_750"], observations, version=version)
     if version >= 25:
         add_spanish_provinces(result["kingdom_of_spain"], observations)
+    if version >= 26:
+        add_agra_districts(result["cshapes_gw_750"], observations)
+        result["kingdom_of_portugal"] = portuguese_opening(result["kingdom_of_portugal"], observations)
+        peru, = (row for row in observations if row["source_id"] == "pe_inei_historical_population_1900")
+        result["peru_1900"] = dict(
+            unit_id="peru_1900", date=DATE, population_value=peru["population_value"],
+            source_id=peru["source_id"], source_quality=peru["quality"], source_observations=[peru["record_id"]],
+            source_dates=[peru["date"]], locator=peru["locator"], scope=peru["definition"],
+            partition_source="collections/peru_1900_reconstruction/observations.jsonl",
+            method="Use the published annual historical estimate as the opening proxy.",
+            uncertainty_kind="The reference day, population basis, frontier treatment, estimation method and error interval are unpublished.",
+            units=[],
+        )
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

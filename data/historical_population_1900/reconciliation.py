@@ -4,7 +4,7 @@ from datetime import date
 from fractions import Fraction
 
 from geography import DATE, opening_scope_links, research_scope_note
-from opening import located_people, sourced_people
+from opening import geographic_partitions, sourced_people
 
 
 def world_accounts(study, selection, legacy, target):
@@ -64,7 +64,7 @@ def world_accounts(study, selection, legacy, target):
             people_without_polity_candidate=sum(r["population_value"] for r in entries if not r["candidate_polity_ids"]),
             grades=dict(Counter(r["quality"] for r in entries)), production_root_ids=production_roots,
             production_people=production_people, production_pct_of_regional_research_estimate=round(100*production_people/regional_total, 3),
-            people_with_opening_subdivision=sum(located_people(roots[key]) for key in production_roots if roots[key]["units"]),
+            people_with_opening_subdivision=sum(unit["population_value"] for key in production_roots for unit in geographic_partitions(roots[key])),
             research_only_units=len(research_only), research_only_people=sum(r["population_value"] for r in research_only))
 
     component_total = sum(r["population_value"] for r in study)

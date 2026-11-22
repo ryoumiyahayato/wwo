@@ -1,0 +1,211 @@
+panel,label,role,age_min,age_max,both,male,female
+pt_census_1900_kingdom,Population present,total,,,5423132,2591600,2831532
+pt_census_1900_kingdom,De menos de 1 anno,band,0,0,131470,68222,63248
+pt_census_1900_kingdom,De 1 anno,band,1,1,115895,59024,56871
+pt_census_1900_kingdom,De 2 annos,band,2,2,132416,67331,65085
+pt_census_1900_kingdom,De 3 annos,band,3,3,130158,65411,64747
+pt_census_1900_kingdom,De 4 annos,band,4,4,127070,63844,63226
+pt_census_1900_kingdom,De 5 annos,band,5,5,123118,61681,61437
+pt_census_1900_kingdom,De 6 annos,band,6,6,123087,62378,60709
+pt_census_1900_kingdom,De 7 annos,band,7,7,122918,62211,60707
+pt_census_1900_kingdom,De 8 annos,band,8,8,127401,65210,62191
+pt_census_1900_kingdom,De 9 annos,band,9,9,113627,58317,55310
+pt_census_1900_kingdom,De 10 annos,band,10,10,127248,63478,63770
+pt_census_1900_kingdom,De 11 annos,band,11,11,102017,52157,49860
+pt_census_1900_kingdom,De 12 annos,band,12,12,131353,67064,64289
+pt_census_1900_kingdom,De 13 annos,band,13,13,106783,53985,52798
+pt_census_1900_kingdom,De 14 annos,band,14,14,112980,58602,54378
+pt_census_1900_kingdom,De 15 a 19 annos,band,15,19,515863,250945,264918
+pt_census_1900_kingdom,De 20 a 24 annos,band,20,24,465465,216995,248470
+pt_census_1900_kingdom,De 25 a 29 annos,band,25,29,392464,184154,208310
+pt_census_1900_kingdom,De 30 a 34 annos,band,30,34,350400,161878,188522
+pt_census_1900_kingdom,De 35 a 39 annos,band,35,39,305527,141932,163595
+pt_census_1900_kingdom,De 40 a 44 annos,band,40,44,313651,145024,168627
+pt_census_1900_kingdom,De 45 a 49 annos,band,45,49,257936,118814,139122
+pt_census_1900_kingdom,De 50 a 54 annos,band,50,54,274411,123935,150476
+pt_census_1900_kingdom,De 55 a 59 annos,band,55,59,190181,86322,103859
+pt_census_1900_kingdom,De 60 a 64 annos,band,60,64,207495,92234,115261
+pt_census_1900_kingdom,De 65 a 69 annos,band,65,69,116253,51868,64385
+pt_census_1900_kingdom,De 70 a 74 annos,band,70,74,97619,41871,55748
+pt_census_1900_kingdom,De 75 a 79 annos,band,75,79,49439,21564,27875
+pt_census_1900_kingdom,De 80 a 84 annos,band,80,84,32736,13805,18931
+pt_census_1900_kingdom,De 85 a 89 annos,band,85,89,9572,4022,5550
+pt_census_1900_kingdom,De 90 a 94 annos,band,90,94,3192,1134,2058
+pt_census_1900_kingdom,De 95 a 99 annos,band,95,99,952,350,602
+pt_census_1900_kingdom,De 100 ou mais annos,band,100,,316,89,227
+pt_census_1900_kingdom,De idade desconhecida,unknown,,,12119,5749,6370
+pt_census_1890_kingdom,Population present,total,,,5049729,2430339,2619390
+pt_census_1890_kingdom,De menos de 1 anno,band,0,0,115957,58855,57102
+pt_census_1890_kingdom,De 1 anno,band,1,1,108659,55417,53242
+pt_census_1890_kingdom,De 2 annos,band,2,2,120570,61381,59189
+pt_census_1890_kingdom,De 3 annos,band,3,3,123169,61892,61277
+pt_census_1890_kingdom,De 4 annos,band,4,4,121043,60913,60130
+pt_census_1890_kingdom,De 5 annos,band,5,5,118088,60315,57773
+pt_census_1890_kingdom,De 6 annos,band,6,6,116060,58256,57804
+pt_census_1890_kingdom,De 7 annos,band,7,7,109038,55335,53703
+pt_census_1890_kingdom,De 8 annos,band,8,8,112811,57935,54876
+pt_census_1890_kingdom,De 9 annos,band,9,9,98908,50707,48201
+pt_census_1890_kingdom,De 10 annos,band,10,10,115574,58888,56686
+pt_census_1890_kingdom,De 11 annos,band,11,11,90366,46848,43518
+pt_census_1890_kingdom,De 12 annos,band,12,12,115099,59226,55873
+pt_census_1890_kingdom,De 13 annos,band,13,13,96981,49691,47290
+pt_census_1890_kingdom,De 14 annos,band,14,14,106816,55971,50845
+pt_census_1890_kingdom,De 15 a 19 annos,band,15,19,461490,224985,236505
+pt_census_1890_kingdom,De 20 a 24 annos,band,20,24,405477,191244,214233
+pt_census_1890_kingdom,De 25 a 29 annos,band,25,29,365890,169095,196795
+pt_census_1890_kingdom,De 30 a 34 annos,band,30,34,334232,154687,179545
+pt_census_1890_kingdom,De 35 a 39 annos,band,35,39,298009,138791,159218
+pt_census_1890_kingdom,De 40 a 44 annos,band,40,44,308422,144618,163804
+pt_census_1890_kingdom,De 45 a 49 annos,band,45,49,252417,117097,135320
+pt_census_1890_kingdom,De 50 a 54 annos,band,50,54,259298,120256,139042
+pt_census_1890_kingdom,De 55 a 59 annos,band,55,59,172225,77969,94256
+pt_census_1890_kingdom,De 60 a 64 annos,band,60,64,202238,92987,109251
+pt_census_1890_kingdom,De 65 a 69 annos,band,65,69,123351,57088,66263
+pt_census_1890_kingdom,De 70 a 74 annos,band,70,74,96562,44255,52307
+pt_census_1890_kingdom,De 75 a 79 annos,band,75,79,43699,20329,23370
+pt_census_1890_kingdom,De 80 a 84 annos,band,80,84,25146,10798,14348
+pt_census_1890_kingdom,De 85 a 89 annos,band,85,89,8032,3319,4713
+pt_census_1890_kingdom,De 90 a 94 annos,band,90,94,3455,1267,2188
+pt_census_1890_kingdom,De 95 a 99 annos,band,95,99,1188,432,756
+pt_census_1890_kingdom,De 100 ou mais annos,band,100,,294,96,198
+pt_census_1890_kingdom,De idade desconhecida,unknown,,,19165,9396,9769
+pt_census_1900_lisboa,Population present,total,,,709509,360094,349415
+pt_census_1900_lisboa,De menos de 1 anno,band,0,0,15527,8192,7335
+pt_census_1900_lisboa,De 1 anno,band,1,1,13612,6845,6767
+pt_census_1900_lisboa,De 2 annos,band,2,2,15401,7793,7608
+pt_census_1900_lisboa,De 3 annos,band,3,3,15308,7599,7709
+pt_census_1900_lisboa,De 4 annos,band,4,4,14453,7213,7240
+pt_census_1900_lisboa,De 5 annos,band,5,5,14103,7010,7093
+pt_census_1900_lisboa,De 6 annos,band,6,6,13265,6626,6639
+pt_census_1900_lisboa,De 7 annos,band,7,7,14241,7200,7041
+pt_census_1900_lisboa,De 8 annos,band,8,8,13986,6930,7056
+pt_census_1900_lisboa,De 9 annos,band,9,9,13631,6887,6744
+pt_census_1900_lisboa,De 10 annos,band,10,10,14383,7189,7194
+pt_census_1900_lisboa,De 11 annos,band,11,11,12643,6367,6276
+pt_census_1900_lisboa,De 12 annos,band,12,12,14836,7567,7269
+pt_census_1900_lisboa,De 13 annos,band,13,13,13079,6569,6510
+pt_census_1900_lisboa,De 14 annos,band,14,14,13730,7256,6474
+pt_census_1900_lisboa,De 15 a 19 annos,band,15,19,64923,33357,31566
+pt_census_1900_lisboa,De 20 a 24 annos,band,20,24,67929,34960,32969
+pt_census_1900_lisboa,De 25 a 29 annos,band,25,29,62827,32582,30245
+pt_census_1900_lisboa,De 30 a 34 annos,band,30,34,53900,27668,26232
+pt_census_1900_lisboa,De 35 a 39 annos,band,35,39,49017,25547,23470
+pt_census_1900_lisboa,De 40 a 44 annos,band,40,44,43979,23515,20464
+pt_census_1900_lisboa,De 45 a 49 annos,band,45,49,36565,18601,17964
+pt_census_1900_lisboa,De 50 a 54 annos,band,50,54,34399,17674,16725
+pt_census_1900_lisboa,De 55 a 59 annos,band,55,59,22970,11283,11687
+pt_census_1900_lisboa,De 60 a 64 annos,band,60,64,23520,11177,12343
+pt_census_1900_lisboa,De 65 a 69 annos,band,65,69,14097,6536,7561
+pt_census_1900_lisboa,De 70 a 74 annos,band,70,74,10086,4339,5747
+pt_census_1900_lisboa,De 75 a 79 annos,band,75,79,5708,2470,3238
+pt_census_1900_lisboa,De 80 a 84 annos,band,80,84,3472,1326,2146
+pt_census_1900_lisboa,De 85 a 89 annos,band,85,89,1254,482,772
+pt_census_1900_lisboa,De 90 a 94 annos,band,90,94,313,112,201
+pt_census_1900_lisboa,De 95 a 99 annos,band,95,99,116,44,72
+pt_census_1900_lisboa,De 100 ou mais annos,band,100,,29,3,26
+pt_census_1900_lisboa,De idade desconhecida,unknown,,,2207,1175,1032
+pt_census_1900_porto,Population present,total,,,597935,277658,320277
+pt_census_1900_porto,De menos de 1 anno,band,0,0,16419,9042,7377
+pt_census_1900_porto,De 1 anno,band,1,1,13530,6915,6615
+pt_census_1900_porto,De 2 annos,band,2,2,14630,7285,7345
+pt_census_1900_porto,De 3 annos,band,3,3,14966,7642,7324
+pt_census_1900_porto,De 4 annos,band,4,4,14269,7076,7193
+pt_census_1900_porto,De 5 annos,band,5,5,14626,7520,7106
+pt_census_1900_porto,De 6 annos,band,6,6,13751,7098,6653
+pt_census_1900_porto,De 7 annos,band,7,7,14103,7142,6961
+pt_census_1900_porto,De 8 annos,band,8,8,14187,7185,7002
+pt_census_1900_porto,De 9 annos,band,9,9,13051,6689,6362
+pt_census_1900_porto,De 10 annos,band,10,10,14382,7307,7075
+pt_census_1900_porto,De 11 annos,band,11,11,11855,6049,5806
+pt_census_1900_porto,De 12 annos,band,12,12,14963,7525,7438
+pt_census_1900_porto,De 13 annos,band,13,13,12126,6038,6088
+pt_census_1900_porto,De 14 annos,band,14,14,13231,6724,6507
+pt_census_1900_porto,De 15 a 19 annos,band,15,19,59205,28247,30958
+pt_census_1900_porto,De 20 a 24 annos,band,20,24,53740,24123,29617
+pt_census_1900_porto,De 25 a 29 annos,band,25,29,43782,20162,23620
+pt_census_1900_porto,De 30 a 34 annos,band,30,34,40256,18023,22233
+pt_census_1900_porto,De 35 a 39 annos,band,35,39,33714,14913,18801
+pt_census_1900_porto,De 40 a 44 annos,band,40,44,33713,14607,19106
+pt_census_1900_porto,De 45 a 49 annos,band,45,49,25220,10952,14268
+pt_census_1900_porto,De 50 a 54 annos,band,50,54,28723,11636,17087
+pt_census_1900_porto,De 55 a 59 annos,band,55,59,18630,7716,10914
+pt_census_1900_porto,De 60 a 64 annos,band,60,64,20449,7963,12486
+pt_census_1900_porto,De 65 a 69 annos,band,65,69,10278,4126,6152
+pt_census_1900_porto,De 70 a 74 annos,band,70,74,8703,3377,5326
+pt_census_1900_porto,De 75 a 79 annos,band,75,79,4326,1696,2630
+pt_census_1900_porto,De 80 a 84 annos,band,80,84,3443,1292,2151
+pt_census_1900_porto,De 85 a 89 annos,band,85,89,922,357,565
+pt_census_1900_porto,De 90 a 94 annos,band,90,94,372,119,253
+pt_census_1900_porto,De 95 a 99 annos,band,95,99,79,23,56
+pt_census_1900_porto,De 100 ou mais annos,band,100,,30,7,23
+pt_census_1900_porto,De idade desconhecida,unknown,,,2261,1082,1179
+pt_census_1890_lisboa,Population present,total,,,611168,315997,295171
+pt_census_1890_lisboa,De menos de 1 anno,band,0,0,13547,6784,6763
+pt_census_1890_lisboa,De 1 anno,band,1,1,11570,5789,5781
+pt_census_1890_lisboa,De 2 annos,band,2,2,12669,6385,6284
+pt_census_1890_lisboa,De 3 annos,band,3,3,13329,6531,6798
+pt_census_1890_lisboa,De 4 annos,band,4,4,12916,6408,6508
+pt_census_1890_lisboa,De 5 annos,band,5,5,11872,6211,5661
+pt_census_1890_lisboa,De 6 annos,band,6,6,11616,5772,5844
+pt_census_1890_lisboa,De 7 annos,band,7,7,11802,6070,5732
+pt_census_1890_lisboa,De 8 annos,band,8,8,11251,5639,5612
+pt_census_1890_lisboa,De 9 annos,band,9,9,10511,5256,5255
+pt_census_1890_lisboa,De 10 annos,band,10,10,11543,5885,5658
+pt_census_1890_lisboa,De 11 annos,band,11,11,10065,5139,4926
+pt_census_1890_lisboa,De 12 annos,band,12,12,11837,6080,5757
+pt_census_1890_lisboa,De 13 annos,band,13,13,10414,5430,4984
+pt_census_1890_lisboa,De 14 annos,band,14,14,11293,5995,5298
+pt_census_1890_lisboa,De 15 a 19 annos,band,15,19,54845,28182,26663
+pt_census_1890_lisboa,De 20 a 24 annos,band,20,24,57064,31518,25546
+pt_census_1890_lisboa,De 25 a 29 annos,band,25,29,53220,28624,24596
+pt_census_1890_lisboa,De 30 a 34 annos,band,30,34,47098,25468,21630
+pt_census_1890_lisboa,De 35 a 39 annos,band,35,39,41334,21939,19395
+pt_census_1890_lisboa,De 40 a 44 annos,band,40,44,39255,20976,18279
+pt_census_1890_lisboa,De 45 a 49 annos,band,45,49,32016,16461,15555
+pt_census_1890_lisboa,De 50 a 54 annos,band,50,54,32457,16741,15716
+pt_census_1890_lisboa,De 55 a 59 annos,band,55,59,19927,9754,10173
+pt_census_1890_lisboa,De 60 a 64 annos,band,60,64,21416,10350,11066
+pt_census_1890_lisboa,De 65 a 69 annos,band,65,69,14208,6690,7518
+pt_census_1890_lisboa,De 70 a 74 annos,band,70,74,10400,4694,5706
+pt_census_1890_lisboa,De 75 a 79 annos,band,75,79,5032,2218,2814
+pt_census_1890_lisboa,De 80 a 84 annos,band,80,84,2871,1175,1696
+pt_census_1890_lisboa,De 85 a 89 annos,band,85,89,1012,393,619
+pt_census_1890_lisboa,De 90 a 94 annos,band,90,94,397,130,267
+pt_census_1890_lisboa,De 95 a 99 annos,band,95,99,117,37,80
+pt_census_1890_lisboa,De 100 ou mais annos,band,100,,39,10,29
+pt_census_1890_lisboa,De idade desconhecida,unknown,,,2225,1263,962
+pt_census_1890_porto,Population present,total,,,546262,254982,291280
+pt_census_1890_porto,De menos de 1 anno,band,0,0,14239,7227,7012
+pt_census_1890_porto,De 1 anno,band,1,1,12827,6471,6356
+pt_census_1890_porto,De 2 annos,band,2,2,13557,6923,6634
+pt_census_1890_porto,De 3 annos,band,3,3,13813,6966,6847
+pt_census_1890_porto,De 4 annos,band,4,4,13454,6718,6736
+pt_census_1890_porto,De 5 annos,band,5,5,12951,6560,6391
+pt_census_1890_porto,De 6 annos,band,6,6,12866,6589,6277
+pt_census_1890_porto,De 7 annos,band,7,7,12290,6234,6056
+pt_census_1890_porto,De 8 annos,band,8,8,12600,6493,6107
+pt_census_1890_porto,De 9 annos,band,9,9,11089,5717,5372
+pt_census_1890_porto,De 10 annos,band,10,10,12662,6425,6237
+pt_census_1890_porto,De 11 annos,band,11,11,10346,5363,4983
+pt_census_1890_porto,De 12 annos,band,12,12,12226,6369,5857
+pt_census_1890_porto,De 13 annos,band,13,13,10398,5376,5022
+pt_census_1890_porto,De 14 annos,band,14,14,11915,6277,5638
+pt_census_1890_porto,De 15 a 19 annos,band,15,19,51242,25221,26021
+pt_census_1890_porto,De 20 a 24 annos,band,20,24,46092,21338,24754
+pt_census_1890_porto,De 25 a 29 annos,band,25,29,41807,18901,22906
+pt_census_1890_porto,De 30 a 34 annos,band,30,34,37179,16484,20695
+pt_census_1890_porto,De 35 a 39 annos,band,35,39,31249,13896,17353
+pt_census_1890_porto,De 40 a 44 annos,band,40,44,33239,14376,18863
+pt_census_1890_porto,De 45 a 49 annos,band,45,49,25490,10716,14774
+pt_census_1890_porto,De 50 a 54 annos,band,50,54,26262,10833,15429
+pt_census_1890_porto,De 55 a 59 annos,band,55,59,16101,6520,9581
+pt_census_1890_porto,De 60 a 64 annos,band,60,64,19209,7958,11251
+pt_census_1890_porto,De 65 a 69 annos,band,65,69,11303,4773,6530
+pt_census_1890_porto,De 70 a 74 annos,band,70,74,9305,3856,5449
+pt_census_1890_porto,De 75 a 79 annos,band,75,79,4433,1879,2554
+pt_census_1890_porto,De 80 a 84 annos,band,80,84,2948,1176,1772
+pt_census_1890_porto,De 85 a 89 annos,band,85,89,797,289,508
+pt_census_1890_porto,De 90 a 94 annos,band,90,94,352,113,239
+pt_census_1890_porto,De 95 a 99 annos,band,95,99,128,37,91
+pt_census_1890_porto,De 100 ou mais annos,band,100,,37,8,29
+pt_census_1890_porto,De idade desconhecida,unknown,,,1856,900,956

@@ -840,6 +840,24 @@
     "collection": "brazil_census_1900_age"
   },
   {
+    "id": "br_ibge_1958_1900_religion",
+    "title": "A população brasileira, 1872–1950",
+    "publisher": "Instituto Brasileiro de Geografia e Estatística",
+    "locator": "Section II.5, Religião, printed pp. 24–28, 1900 state returns",
+    "url": "https://pt.scribd.com/document/386495743/DADOS-IBGE-A-POPULACAO-BRASILEIRA-1872-1950-pdf",
+    "rights": "Historic public statistical return. Numeric facts transcribed from a publicly viewable reproduction.",
+    "collection": "brazil_census_1900_age"
+  },
+  {
+    "id": "br_ibge_1960_sc_historical_religion",
+    "title": "Censo demográfico de 1960, vol. I, tomo XV, part 1, Santa Catarina",
+    "publisher": "Instituto Brasileiro de Geografia e Estatística",
+    "locator": "Table 1, printed p. 2, PDF p. 26, 1900 religion return",
+    "url": "https://biblioteca.ibge.gov.br/visualizacao/periodicos/68/cd_1960_v1_t15_p1_sc.pdf#page=26",
+    "rights": "Historic public statistical return. Numeric facts transcribed.",
+    "collection": "brazil_census_1900_age"
+  },
+  {
     "id": "uk_general_census_report_1901",
     "title": "Census of England and Wales, 1901. General Report with Appendices",
     "publisher": "General Register Office / HMSO (London, 1904)",
@@ -1658,6 +1676,15 @@
     "collection": "honduras_population"
   },
   {
+    "id": "india_agra_census_1901_districts",
+    "title": "Census of India, 1901, vol. XVI-A, North-Western Provinces and Oudh, Imperial Tables",
+    "publisher": "Census Commissioner for the North-Western Provinces and Oudh",
+    "url": "https://censusindia.gov.in/nada/index.php/catalog/31349/download/34530/140099_1901.pdf#page=10",
+    "locator": "Tables I and II, printed pp. 2–3 and 6, district rows 1–36. Table II p. 5 describes the 1901 boundaries. Table VI pp. 38–40 gives religion by district and p. 37 gives the Almora footnote.",
+    "rights": "Historical census publication. Numerical transcription.",
+    "collection": "india_agra_districts_1901"
+  },
+  {
     "id": "india_census_1901_comparable_area",
     "title": "Census of India, 1901, Vol. I-A, India, Part II, Tables. Government of India, 1903.",
     "publisher": "Government of India, 1903",
@@ -2422,6 +2449,36 @@
     "collection": "nordic_population_1900"
   },
   {
+    "id": "pe_inei_historical_population_1900",
+    "title": "Estado de la población peruana 2000",
+    "publisher": "Instituto Nacional de Estadística e Informática",
+    "url": "https://proyectos.inei.gob.pe/web/biblioineipub/bancopub/Est/Lib0363/cap1.htm",
+    "locator": "Chapter I, §1.7, Peru estimated total population 1520–2000, 1900 row. Values in thousands; population basis and reference day unspecified.",
+    "collection": "peru_1900_reconstruction"
+  },
+  {
+    "id": "pe_fomento_sinopsis_1899",
+    "title": "Sinopsis geográfica y estadística del Perú, 1895–1898",
+    "publisher": "Ministerio de Fomento",
+    "url": "https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA24",
+    "locator": "Printed pp. 24–27, departmental and coastal province totals, Censo de 1876 and Calculada en 1896. Printed p. 30 refers to the Chilean occupation.",
+    "rights": "Historical government publication, 1899.",
+    "raw_path": "sinopsis_1899_department_population.csv",
+    "collection": "peru_1900_reconstruction"
+  },
+  {
+    "id": "pe_callao_census_1905",
+    "title": "Censo de la Provincia Constitucional del Callao, 20 de junio de 1905",
+    "publisher": "Ministerio de Fomento",
+    "url": "https://books.google.com.pe/books?id=MalPAAAAMAAJ",
+    "locator": "Población de hecho – Population de fait, columns 3–7, total row.",
+    "rights": "Historical government publication, 1906.",
+    "table_urls": [
+      "https://fuenteshistoricasdelperu.com/wp-content/uploads/2021/03/censo-callao.jpg"
+    ],
+    "collection": "peru_1900_reconstruction"
+  },
+  {
     "id": "ph_census_1903_vol2",
     "title": "Census of the Philippine Islands, taken under the direction of the Philippine Commission in the year 1903. Volume II: Population",
     "publisher": "U.S. Bureau of the Census / Government Printing Office (1905)",
@@ -2503,6 +2560,24 @@
     "historical_edition_url": "https://religion.antropo.es/_libros/biblioteca/Coran.Ingles.1734.George.Sale.pdf",
     "note": "The norm is attested before 1900. The source has no local practice survey or dated population observation.",
     "collection": "pop_traits"
+  },
+  {
+    "id": "pt_census_1890",
+    "title": "Censo da população do Reino de Portugal no 1.º de Dezembro de 1890",
+    "publisher": "Direcção Geral de Estatística",
+    "url": "https://estatistica.madeira.gov.pt/biblioteca-digital/send/591-biblioteca-digital-social-censos/10257-censo-da-populacao-do-reino-de-portugal-no-1-de-dezembro-de-1890-3-volumes.html",
+    "locator": "Vol. I p. 2, persons and sex; Vol. II pp. 2, 28, 32, ages and sex.",
+    "rights": "Historical census digitized by the Regional Directorate of Statistics of Madeira. Numerical transcription.",
+    "collection": "portugal_census_1900"
+  },
+  {
+    "id": "pt_census_1900",
+    "title": "Censo da população do Reino de Portugal no 1.º de Dezembro de 1900",
+    "publisher": "Direcção Geral de Estatística",
+    "url": "https://estatistica.madeira.gov.pt/biblioteca-digital/send/591-biblioteca-digital-social-censos/10271-censo-da-populacao-do-reino-de-portugal-no-1-de-dezembro-de-1900-3-volumes.html",
+    "locator": "Vol. I pp. 2–3, persons, sex, literacy and civil status; Vol. II pp. 2, 28, 32 and 348–349, age and religion; Vol. III pp. 2–3 and 8–19, occupational groups.",
+    "rights": "Historical census digitized by the Regional Directorate of Statistics of Madeira. Numerical transcription.",
+    "collection": "portugal_census_1900"
   },
   {
     "id": "de_prussia_handbook_1903_census_ages",

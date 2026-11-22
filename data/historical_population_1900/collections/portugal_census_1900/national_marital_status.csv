@@ -1,0 +1,8 @@
+date,status,source_label,both,male,female
+1890-12-01,never_married,Solteiros,3067408,1507269,1560139
+1890-12-01,married,Casados,1669874,828872,841002
+1890-12-01,widowed,Viuvas,312447,94198,218249
+1900-12-01,never_married,Solteiros,3297810,1614003,1683807
+1900-12-01,married,Casados,1787465,882997,904468
+1900-12-01,widowed,Viuvas,335278,93367,241911
+1900-12-01,judicially_separated,Separados judicialmente,2579,1233,1346

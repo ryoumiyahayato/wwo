@@ -59,15 +59,16 @@
         "cuba_occupation_1900",
         "dominion_of_canada",
         "mexican_republic",
+        "peru_1900",
         "republic_of_colombia_1900",
         "united_states_1900",
         "uruguay_1900"
       ],
-      "production_people": 128108928,
-      "production_pct_of_regional_research_estimate": 88.329,
+      "production_people": 131491928,
+      "production_pct_of_regional_research_estimate": 90.662,
       "people_with_opening_subdivision": 115352902,
-      "research_only_units": 28,
-      "research_only_people": 15640315
+      "research_only_units": 27,
+      "research_only_people": 12043655
     },
     "Asia": {
       "statistical_units": 33,
@@ -93,7 +94,7 @@
       ],
       "production_people": 780700648,
       "production_pct_of_regional_research_estimate": 87.29,
-      "people_with_opening_subdivision": 743843862,
+      "people_with_opening_subdivision": 743843568,
       "research_only_units": 26,
       "research_only_people": 86662194
     },
@@ -130,9 +131,9 @@
         "sweden_norway_union",
         "swiss_confederation"
       ],
-      "production_people": 408702638,
-      "production_pct_of_regional_research_estimate": 97.509,
-      "people_with_opening_subdivision": 394950961,
+      "production_people": 408687464,
+      "production_pct_of_regional_research_estimate": 97.505,
+      "people_with_opening_subdivision": 400339943,
       "research_only_units": 9,
       "research_only_people": 10103353
     },
@@ -1602,9 +1603,9 @@
       "candidate_polity_ids": [
         "peru_1900"
       ],
-      "comparison_id": null,
-      "opening_disposition": "research_only",
-      "note": "The political candidates require a review of source coverage and territorial exclusions."
+      "comparison_id": "peru",
+      "opening_disposition": "scope_unconfirmed",
+      "note": "The INEI annual estimate and the Federico–Tena reconstruction are separate national estimates. The INEI table does not describe reference day, census coverage or the treatment of the 1900 frontier."
     },
     {
       "unit_id": "ft_puerto_rico",
@@ -2744,9 +2745,9 @@
       "candidate_polity_ids": [
         "kingdom_of_portugal"
       ],
-      "comparison_id": "kingdom_of_portugal",
-      "opening_disposition": "adopted_research_series",
-      "note": "Metropole plus Madeira and Azores as specified in Appendix I. Overseas possessions separately enumerated."
+      "comparison_id": "portugal",
+      "opening_disposition": "comparable_extent",
+      "note": "Mainland Portugal, the Azores and Madeira, with overseas possessions excluded. The opening interpolates the 1890 and 1900 official census returns of persons present."
     },
     {
       "unit_id": "ft_romania",
@@ -3007,6 +3008,42 @@
     }
   ],
   "opening_comparisons": [
+    {
+      "comparison_id": "peru",
+      "opening_root_ids": [
+        "peru_1900"
+      ],
+      "research_unit_ids": [
+        "ft_peru"
+      ],
+      "scope_relation": "scope_unconfirmed",
+      "note": "The INEI annual estimate and the Federico–Tena reconstruction are separate national estimates. The INEI table does not describe reference day, census coverage or the treatment of the 1900 frontier.",
+      "research_regions": [
+        "America"
+      ],
+      "research_people": 3596660,
+      "documented_opening_people": 3383000,
+      "opening_people_including_retained_balances": 3383000,
+      "research_minus_documented": 213660
+    },
+    {
+      "comparison_id": "portugal",
+      "opening_root_ids": [
+        "kingdom_of_portugal"
+      ],
+      "research_unit_ids": [
+        "ft_portugal"
+      ],
+      "scope_relation": "comparable_extent",
+      "note": "Mainland Portugal, the Azores and Madeira, with overseas possessions excluded. The opening interpolates the 1890 and 1900 official census returns of persons present.",
+      "research_regions": [
+        "Europe"
+      ],
+      "research_people": 5404156,
+      "documented_opening_people": 5388982,
+      "opening_people_including_retained_balances": 5388982,
+      "research_minus_documented": 15174
+    },
     {
       "comparison_id": "alaska_and_mainland_us",
       "opening_root_ids": [
@@ -3840,24 +3877,6 @@
       "research_minus_documented": 0
     },
     {
-      "comparison_id": "kingdom_of_portugal",
-      "opening_root_ids": [
-        "kingdom_of_portugal"
-      ],
-      "research_unit_ids": [
-        "ft_portugal"
-      ],
-      "scope_relation": "adopted_research_series",
-      "note": "Metropole plus Madeira and Azores as specified in Appendix I. Overseas possessions separately enumerated.",
-      "research_regions": [
-        "Europe"
-      ],
-      "research_people": 5404156,
-      "documented_opening_people": 5404156,
-      "opening_people_including_retained_balances": 5404156,
-      "research_minus_documented": 0
-    },
-    {
       "comparison_id": "kingdom_of_serbia",
       "opening_root_ids": [
         "kingdom_of_serbia"
@@ -4071,7 +4090,7 @@
       },
       {
         "unit_id": "kingdom_of_portugal",
-        "people": 4156
+        "people": -11018
       },
       {
         "unit_id": "australia_colonies_1900",
@@ -4110,6 +4129,10 @@
         "people": 124729
       },
       {
+        "unit_id": "peru_1900",
+        "people": -417000
+      },
+      {
         "unit_id": "sultanate_of_zanzibar",
         "people": 0
       },
@@ -4130,7 +4153,7 @@
         "people": -8679
       }
     ],
-    "net_replacements": -7080531,
+    "net_replacements": -7512705,
     "added_opening_accounts": [
       {
         "unit_id": "beylicate_of_tunis",
@@ -4234,7 +4257,7 @@
       }
     ],
     "net_additions": 64129118,
-    "authoritative_opening_population": 1468068587,
+    "authoritative_opening_population": 1467636413,
     "excluded_economic_residuals": [
       {
         "unit_id": "residual:dutch_east_indies",
@@ -4274,24 +4297,24 @@
   "research_to_opening": {
     "published_research_estimate": 1595074248,
     "research_component_sum": 1595074246,
-    "documented_opening_population": 1336973880,
-    "untouched_legacy_population": 101880000,
+    "documented_opening_population": 1340341706,
+    "untouched_legacy_population": 98080000,
     "retained_unlocated_population": 29214707,
-    "authoritative_opening_population": 1468068587,
-    "published_minus_documented_opening": 258100368,
+    "authoritative_opening_population": 1467636413,
+    "published_minus_documented_opening": 254732542,
     "signed_components_of_difference": {
       "published_minus_component_sum": 2,
-      "research_only_component_people": 222048363,
+      "research_only_component_people": 218451703,
       "comparisons_by_scope": {
-        "comparable_extent": 2063357,
-        "scope_unconfirmed": 86844,
+        "scope_unconfirmed": 300504,
+        "comparable_extent": 2078531,
         "partial_extent": 33901376,
         "adopted_research_series": 426
       },
       "opening_without_benchmark_link": 0,
-      "untouched_legacy_controls": -101880000,
+      "untouched_legacy_controls": -98080000,
       "unlocated_balances_under_retained_controls": -29214707
     },
-    "published_minus_authoritative_opening": 127005661
+    "published_minus_authoritative_opening": 127437835
   }
 }

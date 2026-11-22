@@ -127,6 +127,7 @@ impl Population {
                 ("austria_1900_reported_religion", "Muslim"),
                 ("mexico_1900_reported_religion", "Mahometanos"),
                 ("egypt_1897_reported_religion", "Muslim"),
+                ("portugal_1900_reported_religion", "Muslim"),
             ].iter().filter_map(|(classification, category)| {
                 religion.by_classification.get(classification)?.get(category)
             }).sum();

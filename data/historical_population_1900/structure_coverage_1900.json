@@ -1538,7 +1538,7 @@
         ],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "households": {
@@ -1550,7 +1550,7 @@
           "swiss_confederation"
         ],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "housing": {
@@ -1562,7 +1562,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "literacy": {
@@ -1574,7 +1574,7 @@
         ],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "occupation": {
@@ -1585,7 +1585,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "religion": {
@@ -1595,7 +1595,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "education": {
@@ -1603,7 +1603,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "labor_force": {
@@ -1611,7 +1611,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "health": {
@@ -1619,7 +1619,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "military_eligibility": {
@@ -1627,7 +1627,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "language": {
@@ -1637,7 +1637,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       },
       "social_status": {
@@ -1648,7 +1648,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 1468068587,
+        "opening_unknown_people": 1467636413,
         "opening_status": "unknown"
       }
     }
@@ -1758,14 +1758,14 @@
       }
     },
     "America": {
-      "opening_root_count": 18,
+      "opening_root_count": 19,
       "dimensions": {
         "residence": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "households": {
@@ -1773,7 +1773,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "housing": {
@@ -1781,7 +1781,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "literacy": {
@@ -1791,7 +1791,7 @@
           ],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "occupation": {
@@ -1801,7 +1801,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "religion": {
@@ -1809,7 +1809,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "education": {
@@ -1817,7 +1817,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "labor_force": {
@@ -1825,7 +1825,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "health": {
@@ -1833,7 +1833,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "military_eligibility": {
@@ -1841,7 +1841,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "language": {
@@ -1849,7 +1849,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         },
         "social_status": {
@@ -1857,7 +1857,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 128108928,
+          "opening_unknown_people": 131491928,
           "opening_status": "unknown"
         }
       }
@@ -1982,7 +1982,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "households": {
@@ -1994,7 +1994,7 @@
             "swiss_confederation"
           ],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "housing": {
@@ -2006,7 +2006,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "literacy": {
@@ -2016,7 +2016,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "occupation": {
@@ -2024,7 +2024,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "religion": {
@@ -2034,7 +2034,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "education": {
@@ -2042,7 +2042,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "labor_force": {
@@ -2050,7 +2050,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "health": {
@@ -2058,7 +2058,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "military_eligibility": {
@@ -2066,7 +2066,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "language": {
@@ -2076,7 +2076,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         },
         "social_status": {
@@ -2086,7 +2086,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 408702638,
+          "opening_unknown_people": 408687464,
           "opening_status": "unknown"
         }
       }
@@ -2196,14 +2196,14 @@
     }
   },
   "no_unique_research_region": {
-    "opening_root_count": 17,
+    "opening_root_count": 16,
     "dimensions": {
       "residence": {
         "reviewed_panels": [],
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "households": {
@@ -2211,7 +2211,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "housing": {
@@ -2219,7 +2219,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "literacy": {
@@ -2227,7 +2227,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "occupation": {
@@ -2235,7 +2235,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "religion": {
@@ -2243,7 +2243,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "education": {
@@ -2251,7 +2251,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "labor_force": {
@@ -2259,7 +2259,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "health": {
@@ -2267,7 +2267,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "military_eligibility": {
@@ -2275,7 +2275,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "language": {
@@ -2283,7 +2283,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       },
       "social_status": {
@@ -2291,7 +2291,7 @@
         "candidate_panels": [],
         "opening_roots_with_same_extent_dated_panel": [],
         "opening_known_people": null,
-        "opening_unknown_people": 101880000,
+        "opening_unknown_people": 98080000,
         "opening_status": "unknown"
       }
     }
@@ -7296,7 +7296,7 @@
       }
     },
     "kingdom_of_portugal": {
-      "opening_people": 5404156,
+      "opening_people": 5388982,
       "research_regions": [
         "Europe"
       ],
@@ -7306,7 +7306,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "households": {
@@ -7314,7 +7314,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "housing": {
@@ -7322,7 +7322,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "literacy": {
@@ -7330,7 +7330,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "occupation": {
@@ -7338,7 +7338,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "religion": {
@@ -7346,7 +7346,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "education": {
@@ -7354,7 +7354,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "labor_force": {
@@ -7362,7 +7362,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "health": {
@@ -7370,7 +7370,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "military_eligibility": {
@@ -7378,7 +7378,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "language": {
@@ -7386,7 +7386,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         },
         "social_status": {
@@ -7394,7 +7394,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 5404156,
+          "opening_unknown_people": 5388982,
           "opening_status": "unknown"
         }
       }
@@ -8532,15 +8532,17 @@
       }
     },
     "peru_1900": {
-      "opening_people": 3800000,
-      "research_regions": [],
+      "opening_people": 3383000,
+      "research_regions": [
+        "America"
+      ],
       "dimensions": {
         "residence": {
           "reviewed_panels": [],
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "households": {
@@ -8548,7 +8550,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "housing": {
@@ -8556,7 +8558,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "literacy": {
@@ -8564,7 +8566,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "occupation": {
@@ -8572,7 +8574,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "religion": {
@@ -8580,7 +8582,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "education": {
@@ -8588,7 +8590,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "labor_force": {
@@ -8596,7 +8598,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "health": {
@@ -8604,7 +8606,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "military_eligibility": {
@@ -8612,7 +8614,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "language": {
@@ -8620,7 +8622,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         },
         "social_status": {
@@ -8628,7 +8630,7 @@
           "candidate_panels": [],
           "opening_roots_with_same_extent_dated_panel": [],
           "opening_known_people": null,
-          "opening_unknown_people": 3800000,
+          "opening_unknown_people": 3383000,
           "opening_status": "unknown"
         }
       }
