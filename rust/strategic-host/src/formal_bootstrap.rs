@@ -2619,6 +2619,51 @@ mod tests {
     }
 
     #[test]
+    fn historical_portuguese_and_agra_districts_close_without_allocating_unlocated_people() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let portugal = world.inspect_population("kingdom_of_portugal").unwrap();
+        assert_eq!(portugal.children.len(), 21);
+        assert_eq!(portugal.children.iter().map(|child| child.population_total).sum::<u64>(), 5_388_982);
+        let lisboa = world.inspect_population("pt1900_lisboa").unwrap();
+        assert_eq!(lisboa.population_total, Some(700_515));
+        assert!(lisboa.structure.unwrap().cohorts.iter().all(|cohort| {
+            cohort.evidence.as_ref().is_some_and(|evidence| evidence.method.contains("directly observed district"))
+        }));
+        let lisboa = lisboa.social.unwrap();
+        assert_eq!(lisboa.dimensions["occupation"].assigned_residents, 680_949);
+        assert_eq!(lisboa.dimensions["occupation"].unknown_residents, 19_566);
+        assert_eq!(lisboa.dimensions["religion"].unknown_residents, 186);
+        let aveiro = world.inspect_population("pt1900_aveiro").unwrap().structure.unwrap();
+        assert!(aveiro.cohorts.iter().all(|cohort| {
+            cohort.evidence.as_ref().is_some_and(|evidence| evidence.method.contains("deducting Lisboa and Porto"))
+        }));
+
+        let provinces = world.inspect_population("raj_agra_oudh").unwrap();
+        assert_eq!(provinces.children.len(), 49);
+        assert_eq!(provinces.children.iter().map(|child| child.population_total).sum::<u64>(), 47_600_781);
+        let agra = world.inspect_population("raj_agra_agra").unwrap();
+        assert_eq!(agra.population_total, Some(1_053_947));
+        assert_eq!(agra.structure.unwrap().cohort_residents, 1_053_947);
+        assert_eq!(agra.social.unwrap().dimensions["religion"].assigned_residents, 1_053_947);
+        let balance = world.inspect_population("raj_agra_unlocated_table_ii_a").unwrap();
+        assert_eq!(balance.population_total, Some(294));
+        assert_eq!(balance.structure.unwrap().residents_with_cohort_age_and_sex, 0);
+        assert_eq!(balance.social.unwrap().dimensions["religion"].unknown_residents, 294);
+
+        let santa_catarina = world.inspect_population("br_santa_catarina").unwrap().social.unwrap();
+        assert_eq!(santa_catarina.dimensions["religion"].assigned_residents, 301_906);
+        assert_eq!(santa_catarina.dimensions["religion"].unknown_residents, 14_743);
+        let peru = world.inspect_population("peru_1900").unwrap();
+        assert_eq!(peru.population_total, Some(3_383_000));
+        assert!(peru.children.is_empty());
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(25)).unwrap();
+        assert_eq!(old.inspect_population("raj_agra_remainder").unwrap().population_total, Some(34_788_845));
+        assert_eq!(old.inspect_population("peru_1900").unwrap().population_total, Some(3_800_000));
+    }
+
+    #[test]
     fn historical_baden_survey_adds_age_and_civil_status_without_changing_the_balance() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let unit = "administrative_region:germany_baden";

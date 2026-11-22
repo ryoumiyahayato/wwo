@@ -24,6 +24,7 @@
     "french_indochina_population": 14,
     "gold_coast_population": 2,
     "honduras_population": 25,
+    "india_agra_districts_1901": 74,
     "india_comparable": 87,
     "india_local_areas_1901": 43,
     "india_princely_1901": 10,
@@ -37,8 +38,10 @@
     "netherlands_census_1899": 12,
     "nigeria_lagos_population": 3,
     "nordic_population_1900": 4,
+    "peru_1900_reconstruction": 3,
     "philippines": 51,
     "polar_presence": 1,
+    "portugal_census_1900": 44,
     "qing_shaangan_prefectures": 42,
     "romania": 6,
     "russia": 1721,
@@ -52,23 +55,23 @@
     "zanzibar_population": 3,
     "asian_interpolation": 62
   },
-  "cited_sources": 238,
+  "cited_sources": 246,
   "world_midyear": 1601675694,
   "world_jan1_interpolated": 1595074248,
   "research_component_sum_jan1": 1595074246,
-  "production_roots": 55,
+  "production_roots": 56,
   "partially_located_legacy_roots": 3,
   "documented_people_under_legacy_controls": 674785293,
-  "replaced_legacy_roots": 30,
+  "replaced_legacy_roots": 31,
   "new_roots": 25,
-  "production_people": 1336973880,
-  "production_people_pct_world_estimate": 83.819,
-  "population_outside_evidence_opening_estimate": 258100368,
-  "legacy_only_people": 131094707,
-  "authoritative_total_for_new_game": 1468068587,
-  "roots_with_partitions": 26,
-  "disjoint_leaves": 1050,
-  "people_in_partitions": 1264242453,
+  "production_people": 1340341706,
+  "production_people_pct_world_estimate": 84.03,
+  "population_outside_evidence_opening_estimate": 254732542,
+  "legacy_only_people": 127294707,
+  "authoritative_total_for_new_game": 1467636413,
+  "roots_with_partitions": 27,
+  "disjoint_leaves": 1106,
+  "people_in_partitions": 1269631141,
   "unlocated_balances_under_research_controls": [
     {
       "unit_id": "australia_colonies_1900",
@@ -85,13 +88,17 @@
     {
       "unit_id": "taiwan_under_japan",
       "people": 38182
+    },
+    {
+      "unit_id": "raj_agra_unlocated_table_ii_a",
+      "people": 294
     }
   ],
-  "partitions_with_explicit_places": 34,
-  "people_in_partitions_with_explicit_places": 159238489,
+  "partitions_with_explicit_places": 37,
+  "people_in_partitions_with_explicit_places": 162675390,
   "political_catalogue_at_opening": 146,
   "political_catalogue_with_research_candidate": 145,
-  "political_catalogue_members_of_production_groups": 64,
+  "political_catalogue_members_of_production_groups": 65,
   "dated_admin_catalogues": {
     "britain_historic_counties_identity.json": {
       "units": 414,
@@ -298,15 +305,15 @@
   "dated_city_remainders": 751,
   "source_panels_are_nonadditive": true,
   "political_catalogue_with_any_statistical_candidate": 146,
-  "source_statistical_units": 2481,
+  "source_statistical_units": 2541,
   "opening_by_source_type": {
     "territorial_returns": {
-      "roots": 27,
-      "people": 327788836
+      "roots": 29,
+      "people": 336560818
     },
     "historical_world_reconstruction": {
-      "roots": 28,
-      "people": 334399751
+      "roots": 27,
+      "people": 328995595
     },
     "documented_subdivisions_of_legacy_control": {
       "roots": 3,
@@ -323,51 +330,51 @@
   "opening_social_coverage": {
     "class": {
       "assigned_people": 11197505,
-      "unknown_people": 1456871082
+      "unknown_people": 1456438908
     },
     "culture": {
       "assigned_people": 5273225,
-      "unknown_people": 1462795362
+      "unknown_people": 1462363188
     },
     "household": {
       "assigned_people": 72890961,
-      "unknown_people": 1395177626
+      "unknown_people": 1394745452
     },
     "housing": {
       "assigned_people": 1655881,
-      "unknown_people": 1466412706
+      "unknown_people": 1465980532
     },
     "language": {
       "assigned_people": 200073927,
-      "unknown_people": 1267994660
+      "unknown_people": 1267562486
     },
     "legal_estate": {
       "assigned_people": 132020769,
-      "unknown_people": 1336047818
+      "unknown_people": 1335615644
     },
     "literacy": {
-      "assigned_people": 242888766,
-      "unknown_people": 1225179821
+      "assigned_people": 248277748,
+      "unknown_people": 1219358665
     },
     "marital_status": {
-      "assigned_people": 259978255,
-      "unknown_people": 1208090332
+      "assigned_people": 265367237,
+      "unknown_people": 1202269176
     },
     "occupation": {
-      "assigned_people": 93624709,
-      "unknown_people": 1374443878
+      "assigned_people": 98938930,
+      "unknown_people": 1368697483
     },
     "property_declaration": {
       "assigned_people": 32296914,
-      "unknown_people": 1435771673
+      "unknown_people": 1435339499
     },
     "religion": {
-      "assigned_people": 346916174,
-      "unknown_people": 1121152413
+      "assigned_people": 367805145,
+      "unknown_people": 1099831268
     },
     "residence": {
       "assigned_people": 367464724,
-      "unknown_people": 1100603863
+      "unknown_people": 1100171689
     }
   },
   "structural_observations_by_source": {
@@ -412,6 +419,8 @@
     "it_1901_census_v5_age_and_marital": 648,
     "br_dge_1916_1900_age_sex": 440,
     "es_census_1900_age_marital": 322,
+    "pt_census_1890": 105,
+    "pt_census_1900": 105,
     "be_census_1900_age_and_spoken_languages": 40,
     "india_oudh_census_1901_districts": 27,
     "ah_cisleithania_census_1900_ages": 168,
@@ -423,9 +432,9 @@
     "jp_tokyo_prefecture_statistics_1900": 16,
     "england_wales_census_1901_general_report": 1
   },
-  "structure_opening_pool_controls": 823993331,
-  "structure_opening_pool_count": 691,
-  "structure_opening_residents_outside_modeled_pools": 644075256,
+  "structure_opening_pool_controls": 829382019,
+  "structure_opening_pool_count": 747,
+  "structure_opening_residents_outside_modeled_pools": 638254394,
   "structure_opening_scopes": [
     {
       "unit_id": "administrative_region:france_ain",
@@ -4390,10 +4399,402 @@
       "observed_date": "1900-01-01"
     },
     {
-      "unit_id": "raj_agra_remainder",
-      "opening_total": 34788845,
-      "observed_unit_id": "raj_agra_1901_provincial_return",
-      "observed_total": 34858705,
+      "unit_id": "pt1900_angra_do_heroismo",
+      "opening_total": 73224,
+      "observed_unit_id": "pt1900_angra_do_heroismo",
+      "observed_total": 73224,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_aveiro",
+      "opening_total": 301730,
+      "observed_unit_id": "pt1900_aveiro",
+      "observed_total": 301730,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_beja",
+      "opening_total": 163060,
+      "observed_unit_id": "pt1900_beja",
+      "observed_total": 163060,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_braga",
+      "opening_total": 355435,
+      "observed_unit_id": "pt1900_braga",
+      "observed_total": 355435,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_braganca",
+      "opening_total": 184661,
+      "observed_unit_id": "pt1900_braganca",
+      "observed_total": 184661,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_castelo_branco",
+      "opening_total": 215566,
+      "observed_unit_id": "pt1900_castelo_branco",
+      "observed_total": 215566,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_coimbra",
+      "opening_total": 330746,
+      "observed_unit_id": "pt1900_coimbra",
+      "observed_total": 330746,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_evora",
+      "opening_total": 127179,
+      "observed_unit_id": "pt1900_evora",
+      "observed_total": 127179,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_faro",
+      "opening_total": 252762,
+      "observed_unit_id": "pt1900_faro",
+      "observed_total": 252762,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_funchal",
+      "opening_total": 149062,
+      "observed_unit_id": "pt1900_funchal",
+      "observed_total": 149062,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_guarda",
+      "opening_total": 260580,
+      "observed_unit_id": "pt1900_guarda",
+      "observed_total": 260580,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_horta",
+      "opening_total": 55549,
+      "observed_unit_id": "pt1900_horta",
+      "observed_total": 55549,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_leiria",
+      "opening_total": 236791,
+      "observed_unit_id": "pt1900_leiria",
+      "observed_total": 236791,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_lisboa",
+      "opening_total": 700515,
+      "observed_unit_id": "pt1900_lisboa",
+      "observed_total": 700515,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_ponta_delgada",
+      "opening_total": 127455,
+      "observed_unit_id": "pt1900_ponta_delgada",
+      "observed_total": 127455,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_portalegre",
+      "opening_total": 123370,
+      "observed_unit_id": "pt1900_portalegre",
+      "observed_total": 123370,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_porto",
+      "opening_total": 593209,
+      "observed_unit_id": "pt1900_porto",
+      "observed_total": 593209,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_santarem",
+      "opening_total": 280565,
+      "observed_unit_id": "pt1900_santarem",
+      "observed_total": 280565,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_viana_do_castelo",
+      "opening_total": 214544,
+      "observed_unit_id": "pt1900_viana_do_castelo",
+      "observed_total": 214544,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_vila_real",
+      "opening_total": 241748,
+      "observed_unit_id": "pt1900_vila_real",
+      "observed_total": 241748,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "pt1900_viseu",
+      "opening_total": 401231,
+      "observed_unit_id": "pt1900_viseu",
+      "observed_total": 401231,
+      "observed_date": "1900-01-01"
+    },
+    {
+      "unit_id": "raj_agra_agra",
+      "opening_total": 1053947,
+      "observed_unit_id": "raj_agra_agra",
+      "observed_total": 1060528,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_aligarh",
+      "opening_total": 1182534,
+      "observed_unit_id": "raj_agra_aligarh",
+      "observed_total": 1200822,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_allahabad",
+      "opening_total": 1496246,
+      "observed_unit_id": "raj_agra_allahabad",
+      "observed_total": 1489358,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_almora",
+      "opening_total": 460206,
+      "observed_unit_id": "raj_agra_almora",
+      "observed_total": 465893,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_azamgarh",
+      "opening_total": 1552851,
+      "observed_unit_id": "raj_agra_azamgarh",
+      "observed_total": 1529785,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_ballia",
+      "opening_total": 988645,
+      "observed_unit_id": "raj_agra_ballia",
+      "observed_total": 987768,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_banda",
+      "opening_total": 639732,
+      "observed_unit_id": "raj_agra_banda",
+      "observed_total": 631058,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_bareilly",
+      "opening_total": 1084413,
+      "observed_unit_id": "raj_agra_bareilly",
+      "observed_total": 1090117,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_basti",
+      "opening_total": 1839157,
+      "observed_unit_id": "raj_agra_basti",
+      "observed_total": 1846153,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_benares",
+      "opening_total": 886708,
+      "observed_unit_id": "raj_agra_benares",
+      "observed_total": 882084,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_bijnor",
+      "opening_total": 781589,
+      "observed_unit_id": "raj_agra_bijnor",
+      "observed_total": 779951,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_budaun",
+      "opening_total": 1014179,
+      "observed_unit_id": "raj_agra_budaun",
+      "observed_total": 1025753,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_bulandshahr",
+      "opening_total": 1116270,
+      "observed_unit_id": "raj_agra_bulandshahr",
+      "observed_total": 1138101,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_cawnpore",
+      "opening_total": 1253164,
+      "observed_unit_id": "raj_agra_cawnpore",
+      "observed_total": 1258868,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_dehra_dun",
+      "opening_total": 177028,
+      "observed_unit_id": "raj_agra_dehra_dun",
+      "observed_total": 178195,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_etah",
+      "opening_total": 845124,
+      "observed_unit_id": "raj_agra_etah",
+      "observed_total": 863948,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_etawah",
+      "opening_total": 797614,
+      "observed_unit_id": "raj_agra_etawah",
+      "observed_total": 806798,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_farrukhabad",
+      "opening_total": 918025,
+      "observed_unit_id": "raj_agra_farrukhabad",
+      "observed_total": 925812,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_fatehpur",
+      "opening_total": 687872,
+      "observed_unit_id": "raj_agra_fatehpur",
+      "observed_total": 686391,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_garhwal",
+      "opening_total": 427338,
+      "observed_unit_id": "raj_agra_garhwal",
+      "observed_total": 429900,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_ghazipur",
+      "opening_total": 926687,
+      "observed_unit_id": "raj_agra_ghazipur",
+      "observed_total": 913818,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_gorakhpur",
+      "opening_total": 2961364,
+      "observed_unit_id": "raj_agra_gorakhpur",
+      "observed_total": 2957074,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_hamirpur",
+      "opening_total": 464943,
+      "observed_unit_id": "raj_agra_hamirpur",
+      "observed_total": 458542,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_jalaun",
+      "opening_total": 399336,
+      "observed_unit_id": "raj_agra_jalaun",
+      "observed_total": 399726,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_jaunpur",
+      "opening_total": 1210116,
+      "observed_unit_id": "raj_agra_jaunpur",
+      "observed_total": 1202920,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_jhansi",
+      "opening_total": 624515,
+      "observed_unit_id": "raj_agra_jhansi",
+      "observed_total": 616759,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_mainpuri",
+      "opening_total": 821562,
+      "observed_unit_id": "raj_agra_mainpuri",
+      "observed_total": 829357,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_meerut",
+      "opening_total": 1522923,
+      "observed_unit_id": "raj_agra_meerut",
+      "observed_total": 1540175,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_mirzapur",
+      "opening_total": 1091603,
+      "observed_unit_id": "raj_agra_mirzapur",
+      "observed_total": 1082430,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_moradabad",
+      "opening_total": 1190532,
+      "observed_unit_id": "raj_agra_moradabad",
+      "observed_total": 1191993,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_muttra",
+      "opening_total": 757336,
+      "observed_unit_id": "raj_agra_muttra",
+      "observed_total": 763099,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_muzaffarnagar",
+      "opening_total": 865087,
+      "observed_unit_id": "raj_agra_muzaffarnagar",
+      "observed_total": 877188,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_naini_tal",
+      "opening_total": 316532,
+      "observed_unit_id": "raj_agra_naini_tal",
+      "observed_total": 311237,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_pilibhit",
+      "opening_total": 472052,
+      "observed_unit_id": "raj_agra_pilibhit",
+      "observed_total": 470339,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_saharanpur",
+      "opening_total": 1040132,
+      "observed_unit_id": "raj_agra_saharanpur",
+      "observed_total": 1045230,
+      "observed_date": "1901-03-01"
+    },
+    {
+      "unit_id": "raj_agra_shahjahanpur",
+      "opening_total": 921189,
+      "observed_unit_id": "raj_agra_shahjahanpur",
+      "observed_total": 921535,
       "observed_date": "1901-03-01"
     },
     {
@@ -5436,8 +5837,8 @@
     }
   ],
   "structure_unknown_policy": "Original counts stay at their observed scope and date. Compatible opening pools use model allocations. Other pools retain unknown age and sex.",
-  "dated_parent_controls": 523,
-  "dated_parent_controls_arithmetic_closure": 487,
+  "dated_parent_controls": 525,
+  "dated_parent_controls_arithmetic_closure": 489,
   "research_regions": {
     "Africa": {
       "statistical_units": 46,
@@ -5496,15 +5897,16 @@
         "cuba_occupation_1900",
         "dominion_of_canada",
         "mexican_republic",
+        "peru_1900",
         "republic_of_colombia_1900",
         "united_states_1900",
         "uruguay_1900"
       ],
-      "production_people": 128108928,
-      "production_pct_of_regional_research_estimate": 88.329,
+      "production_people": 131491928,
+      "production_pct_of_regional_research_estimate": 90.662,
       "people_with_opening_subdivision": 115352902,
-      "research_only_units": 28,
-      "research_only_people": 15640315
+      "research_only_units": 27,
+      "research_only_people": 12043655
     },
     "Asia": {
       "statistical_units": 33,
@@ -5530,7 +5932,7 @@
       ],
       "production_people": 780700648,
       "production_pct_of_regional_research_estimate": 87.29,
-      "people_with_opening_subdivision": 743843862,
+      "people_with_opening_subdivision": 743843568,
       "research_only_units": 26,
       "research_only_people": 86662194
     },
@@ -5567,9 +5969,9 @@
         "sweden_norway_union",
         "swiss_confederation"
       ],
-      "production_people": 408702638,
-      "production_pct_of_regional_research_estimate": 97.509,
-      "people_with_opening_subdivision": 394950961,
+      "production_people": 408687464,
+      "production_pct_of_regional_research_estimate": 97.505,
+      "people_with_opening_subdivision": 400339943,
       "research_only_units": 9,
       "research_only_people": 10103353
     },
@@ -5846,10 +6248,10 @@
         "opening_unit_id": "cshapes_gw_750",
         "research_region": "Asia",
         "opening_control": 294000000,
-        "in_model_pools": 272782484,
-        "outside_model_pools": 21217516,
-        "modeled_age_and_sex": 272737788,
-        "modeled_sex_age_unknown": 44696
+        "in_model_pools": 272782190,
+        "outside_model_pools": 21217810,
+        "modeled_age_and_sex": 272737492,
+        "modeled_sex_age_unknown": 44698
       },
       {
         "opening_unit_id": "cshapes_gw_780",
@@ -6034,11 +6436,11 @@
       {
         "opening_unit_id": "kingdom_of_portugal",
         "research_region": "Europe",
-        "opening_control": 5404156,
-        "in_model_pools": 0,
-        "outside_model_pools": 5404156,
-        "modeled_age_and_sex": 0,
-        "modeled_sex_age_unknown": 0
+        "opening_control": 5388982,
+        "in_model_pools": 5388982,
+        "outside_model_pools": 0,
+        "modeled_age_and_sex": 5376220,
+        "modeled_sex_age_unknown": 12762
       },
       {
         "opening_unit_id": "kingdom_of_romania",
@@ -6141,10 +6543,10 @@
       },
       {
         "opening_unit_id": "peru_1900",
-        "research_region": null,
-        "opening_control": 3800000,
+        "research_region": "America",
+        "opening_control": 3383000,
         "in_model_pools": 0,
-        "outside_model_pools": 3800000,
+        "outside_model_pools": 3383000,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
       },
@@ -6277,9 +6679,9 @@
     ],
     "by_research_region": {
       "America": {
-        "opening_control": 128108928,
+        "opening_control": 131491928,
         "in_model_pools": 111290461,
-        "outside_model_pools": 16818467,
+        "outside_model_pools": 20201467,
         "modeled_age_and_sex": 110876302,
         "modeled_sex_age_unknown": 414159
       },
@@ -6291,11 +6693,11 @@
         "modeled_sex_age_unknown": 4899
       },
       "Europe": {
-        "opening_control": 408702638,
-        "in_model_pools": 384335867,
-        "outside_model_pools": 24366771,
-        "modeled_age_and_sex": 382464061,
-        "modeled_sex_age_unknown": 1871806
+        "opening_control": 408687464,
+        "in_model_pools": 389724849,
+        "outside_model_pools": 18962615,
+        "modeled_age_and_sex": 387840281,
+        "modeled_sex_age_unknown": 1884568
       },
       "Africa": {
         "opening_control": 18751671,
@@ -6305,26 +6707,26 @@
         "modeled_sex_age_unknown": 4890421
       },
       "no_reviewed_research_region": {
-        "opening_control": 101880000,
+        "opening_control": 98080000,
         "in_model_pools": 0,
-        "outside_model_pools": 101880000,
+        "outside_model_pools": 98080000,
         "modeled_age_and_sex": 0,
         "modeled_sex_age_unknown": 0
       },
       "Asia": {
         "opening_control": 805719965,
-        "in_model_pools": 320264394,
-        "outside_model_pools": 485455571,
-        "modeled_age_and_sex": 320219372,
-        "modeled_sex_age_unknown": 45022
+        "in_model_pools": 320264100,
+        "outside_model_pools": 485455865,
+        "modeled_age_and_sex": 320219076,
+        "modeled_sex_age_unknown": 45024
       }
     },
     "world": {
-      "opening_control": 1468068587,
-      "in_model_pools": 823993331,
-      "outside_model_pools": 644075256,
-      "modeled_age_and_sex": 816767024,
-      "modeled_sex_age_unknown": 7226307
+      "opening_control": 1467636413,
+      "in_model_pools": 829382019,
+      "outside_model_pools": 638254394,
+      "modeled_age_and_sex": 822142948,
+      "modeled_sex_age_unknown": 7239071
     }
   },
   "opening_count_basis": {
@@ -6334,16 +6736,16 @@
         "pct_of_research_reference": 0.32
       },
       "published_historical_estimates": {
-        "people": 694777787,
-        "pct_of_research_reference": 43.558
+        "people": 692756631,
+        "pct_of_research_reference": 43.431
       },
       "date_models_from_territorial_returns": {
-        "people": 637091956,
-        "pct_of_research_reference": 39.941
+        "people": 642480938,
+        "pct_of_research_reference": 40.279
       },
       "retained_legacy_estimates": {
-        "people": 131094707,
-        "pct_of_research_reference": 8.219
+        "people": 127294707,
+        "pct_of_research_reference": 7.98
       }
     },
     "scopes": [
@@ -6741,9 +7143,9 @@
       },
       {
         "unit_id": "kingdom_of_portugal",
-        "source_id": "ft_world_v5",
-        "sourced_people": 5404156,
-        "sourced_basis": "published_historical_estimates",
+        "source_id": "pt_census_1900",
+        "sourced_people": 5388982,
+        "sourced_basis": "date_models_from_territorial_returns",
         "retained_legacy_people": 0
       },
       {
@@ -6913,10 +7315,10 @@
       },
       {
         "unit_id": "peru_1900",
-        "source_id": null,
-        "sourced_people": 0,
-        "sourced_basis": null,
-        "retained_legacy_people": 3800000
+        "source_id": "pe_inei_historical_population_1900",
+        "sourced_people": 3383000,
+        "sourced_basis": "published_historical_estimates",
+        "retained_legacy_people": 0
       },
       {
         "unit_id": "principality_of_bulgaria",

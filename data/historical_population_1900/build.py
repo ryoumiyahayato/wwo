@@ -6,7 +6,7 @@ from collections import Counter, defaultdict
 
 from pathlib import Path
 from geography import catalogue, legacy_audit
-from opening import groups, located_people, sourced_people
+from opening import geographic_partitions, groups, sourced_people
 from social import opening_social
 from structure import age_sex_panels, dimensions, opening_structure
 from structural_coverage import structural_coverage
@@ -17,7 +17,7 @@ from us_municipalities import us_residuals
 HERE = Path(__file__).resolve().parent
 COL = HERE / "collections"
 DATE = "1900-01-01"
-OPENING_VERSION = 25
+OPENING_VERSION = 26
 
 def json_file(name, value):
     (HERE/name).write_text(json.dumps(value, indent=2, ensure_ascii=False)+"\n", encoding="utf8", newline="\n")
@@ -89,7 +89,7 @@ def opening_count_basis(selection, legacy, world_reference):
         elif source.startswith("ft_world_") or source in {
             "cao_qing_provincial_reconstruction", "natal_statistical_yearbook_1909_macdonald",
             "cape_colony_1899_imperial_conference", "zanzibar_statesmans_year_book_1899",
-            "se_scb_population_tab5890",
+            "se_scb_population_tab5890", "pe_inei_historical_population_1900",
         }:
             basis = "published_historical_estimates"
         else:
@@ -243,6 +243,8 @@ def main():
         if r["band"]:
             city_panels[(r["source_id"],r["date"])][r["band"]]+=1
     rem=residuals(observations)
+    located_partitions=[unit for group in parts for unit in geographic_partitions(group)]
+    unlocated_partitions=[unit for group in parts for unit in group["units"] if unit.get("geographically_unlocated")]
     summary=dict(reference_date=DATE,release_status="PARTIAL",research_observations_by_collection=regional_counts,
         cited_sources=len(manifest),world_midyear=controls["1900-07-01"],world_jan1_interpolated=target,
         research_component_sum_jan1=sum(r["population_value"] for r in study),
@@ -252,10 +254,11 @@ def main():
         production_people=total,production_people_pct_world_estimate=round(100*total/target,3),
         population_outside_evidence_opening_estimate=target-total,legacy_only_people=legacy_only,
         authoritative_total_for_new_game=total+legacy_only,
-        roots_with_partitions=len(parts),disjoint_leaves=sum(len(g["units"]) for g in parts),
-        people_in_partitions=sum(located_people(g) for g in parts),
+        roots_with_partitions=len(parts),disjoint_leaves=len(located_partitions),
+        people_in_partitions=sum(unit["population_value"] for unit in located_partitions),
         unlocated_balances_under_research_controls=[dict(unit_id=g["unit_id"], people=g["research_unlocated_balance"])
-            for g in selection if "research_unlocated_balance" in g],
+            for g in selection if "research_unlocated_balance" in g] + [dict(unit_id=unit["unit_id"], people=unit["population_value"])
+            for unit in unlocated_partitions],
         partitions_with_explicit_places=sum(bool(u.get("place_ids")) for g in parts for u in g["units"]),
         people_in_partitions_with_explicit_places=sum(u["population_value"] for g in parts for u in g["units"] if u.get("place_ids")),
         political_catalogue_at_opening=len(areas),political_catalogue_with_research_candidate=sum(bool(r["study_candidates"]) for r in areas),

@@ -1,0 +1,22 @@
+unit_id,name_as_printed,normalized_name,printed_page,provinces,districts,population_1876,population_1896_calculated,historical_scope,source_url
+pe1900_amazonas,Amazonas,Amazonas,24,3,39,34284,70676,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA24
+pe1900_ancash,Ancachs,Áncash,24,7,71,284830,428703,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA24
+pe1900_apurimac,Apurímac,Apurímac,24,5,32,118525,177387,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA24
+pe1900_arequipa,Arequipa,Arequipa,24,7,76,157046,229007,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA24
+pe1900_huanuco,Huánuco,Huánuco,25,3,22,78991,145309,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA25
+pe1900_ayacucho,Ayacucho,Ayacucho,25,6,50,142215,302469,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA25
+pe1900_cajamarca,Cajamarca,Cajamarca,25,7,67,212746,442412,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA25
+pe1900_callao,Callao,Callao,25,1,2,34492,48118,littoral_province,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA25
+pe1900_cusco,Cuzco,Cusco,25,12,65,243032,438646,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA25
+pe1900_huancavelica,Huancavelica,Huancavelica,26,4,27,103069,223796,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA26
+pe1900_ica,Ica,Ica,26,2,13,60255,90962,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA26
+pe1900_junin,Junín,Junín,26,4,37,209759,394393,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA26
+pe1900_lambayeque,Lambayeque,Lambayeque,26,2,19,86738,124091,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA26
+pe1900_la_libertad,Libertad,La Libertad,26,5,45,147336,250931,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA26
+pe1900_lima,Lima,Lima,26,6,69,225800,298106,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA26
+pe1900_moquegua,Moquegua,Moquegua,27,1,10,28785,42694,littoral_province,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA27
+pe1900_loreto,Loreto,Loreto,27,5,32,61905,100596,eastern_boundary_uncertain,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA27
+pe1900_piura,Piura,Piura,27,5,28,135615,213909,includes_tumbes,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA27
+pe1900_puno,Puno,Puno,27,7,76,259449,537345,retained_department,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA27
+pe1900_tacna,Tacna,Tacna,27,3,18,36009,50449,mixed_chilean_occupation,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA27
+pe1900_sinopsis_total,Perú,Perú,27,95,798,2660881,4609999,national_printed,https://books.google.com/books?id=CiswAAAAYAAJ&pg=PA27

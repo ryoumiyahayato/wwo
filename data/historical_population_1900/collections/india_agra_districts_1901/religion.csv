@@ -1,0 +1,45 @@
+unit_id,name,row_role,source_row,population,hindu,sikh,jain,buddhist,parsi,muslim,christian,jewish,arya,brahmo,new_hindu_vedantist
+raj_agra_remainder,N.-W. Provinces (Agra),province,,34858705,29581340,12872,82247,698,450,5027188,90795,25,63081,7,2
+raj_agra_division_meerut,Meerut Division,division,,5979711,4517430,4148,37941,11,34,1357133,29294,2,33718,0,0
+raj_agra_division_agra,Agra Division,division,,5249542,4700825,1332,28205,138,62,494364,13875,2,10736,3,0
+raj_agra_division_rohilkhand,Rohilkhand Division,division,,5479688,4097504,3334,2016,69,41,1337272,24459,0,14993,0,0
+raj_agra_division_allahabad,Allahabad Division,division,,5540702,4996538,278,13240,145,283,513478,14989,2,1747,2,0
+raj_agra_division_benares,Benares Division,division,,5069020,4633244,1984,615,77,16,429153,2949,10,972,0,0
+raj_agra_division_gorakhpur,Gorakhpur Division,division,,6333012,5517681,1646,123,23,6,811338,1721,9,465,0,0
+raj_agra_division_kumaun,Kumaun Division,division,,1207030,1118118,150,107,235,8,84450,3508,0,450,2,2
+raj_agra_dehra_dun,Dehra Dún,district,1,178195,148275,459,303,0,6,24661,3134,2,1355,0,0
+raj_agra_saharanpur,Saháranpur,district,2,1045230,682619,477,5688,1,11,351133,2972,0,2329,0,0
+raj_agra_muzaffarnagar,Muzaffarnagar,district,3,877188,606833,380,10150,9,0,255292,1402,0,3122,0,0
+raj_agra_meerut,Meerut,district,4,1540175,1145728,360,16930,0,3,359895,12203,0,5056,0,0
+raj_agra_bulandshahr,Bulandshahr,district,5,1138101,900169,2356,1541,0,0,217209,4528,0,12298,0,0
+raj_agra_aligarh,Aligarh,district,6,1200822,1033806,116,3329,1,14,148943,5055,0,9558,0,0
+raj_agra_muttra,Muttra,district,7,763099,680096,105,2512,0,16,77087,2262,0,1018,3,0
+raj_agra_agra,Agra,district,8,1060528,915542,120,12953,21,38,123978,5522,0,2354,0,0
+raj_agra_farrukhabad,Farrukhábád,district,9,925812,814658,133,741,117,0,106880,1128,0,2155,0,0
+raj_agra_mainpuri,Mainpuri,district,10,829357,774600,42,5318,0,0,47794,353,0,1250,0,0
+raj_agra_etawah,Etáwah,district,11,806798,757037,153,2337,0,8,46128,245,0,890,0,0
+raj_agra_etah,Etah,district,12,863948,758892,779,4344,0,0,92497,4365,2,3069,0,0
+raj_agra_bareilly,Bareilly,district,13,1090117,819711,364,98,68,8,261492,7148,0,1228,0,0
+raj_agra_bijnor,Bijnor,district,14,779951,497851,1707,1029,0,0,271701,1933,0,5730,0,0
+raj_agra_budaun,Budáun,district,15,1025753,847977,599,161,0,0,168020,6116,0,2880,0,0
+raj_agra_moradabad,Moradabad,district,16,1191993,761259,331,693,0,30,420743,6103,0,2834,0,0
+raj_agra_shahjahanpur,Sháhjahánpur,district,17,921535,783915,184,31,1,3,133892,1863,0,1646,0,0
+raj_agra_pilibhit,Pilibhít,district,18,470339,386791,149,4,0,0,81424,1296,0,675,0,0
+raj_agra_cawnpore,Cawnpore,district,19,1258868,1140628,68,588,0,53,112139,4414,1,977,0,0
+raj_agra_fatehpur,Fatehpur,district,20,686391,606588,15,74,0,4,79372,145,0,193,0,0
+raj_agra_banda,Bánda,district,21,631058,594070,15,362,0,14,36332,186,0,79,0,0
+raj_agra_hamirpur,Hamírpur,district,22,458542,428117,4,59,0,8,30057,272,0,25,0,0
+raj_agra_allahabad,Allahabad,district,23,1489358,1281153,83,1264,129,21,199635,6814,1,256,2,0
+raj_agra_jhansi,Jhánsi,district,24,616759,571684,78,10760,16,177,30899,3064,0,81,0,0
+raj_agra_jalaun,Jalaun,district,25,399726,374298,15,133,0,6,25044,94,0,136,0,0
+raj_agra_benares,Benares,district,26,882084,788841,146,380,77,5,90862,1597,0,176,0,0
+raj_agra_mirzapur,Mirzapur,district,27,1082430,1007919,692,225,0,10,72502,712,0,370,0,0
+raj_agra_jaunpur,Jaunpur,district,28,1202920,1093047,10,0,0,0,109431,116,0,316,0,0
+raj_agra_ghazipur,Gházípur,district,29,913818,822780,705,6,0,1,89759,491,10,66,0,0
+raj_agra_ballia,Ballia,district,30,987768,920657,431,4,0,0,66599,33,0,44,0,0
+raj_agra_gorakhpur,Gorakhpur,district,31,2957074,2658074,116,105,23,5,297019,1443,8,281,0,0
+raj_agra_basti,Basti,district,32,1846153,1546236,75,7,0,0,299688,93,0,54,0,0
+raj_agra_azamgarh,Azamgarh,district,33,1529785,1313371,1455,11,0,1,214631,185,1,130,0,0
+raj_agra_naini_tal,Naini Tál,district,34,311237,233457,104,40,15,4,75988,1417,0,212,0,0
+raj_agra_almora,Almora,district,35,465893,460013,1,2,217,4,4051,1427,0,174,2,2
+raj_agra_garhwal,Garhwál,district,36,429900,424648,45,65,3,0,4411,664,0,64,0,0
