@@ -2372,7 +2372,7 @@ mod tests {
             assert_eq!(social.dimensions[dimension].unknown_residents, 59_051);
         }
         assert_eq!(world.population().population_total("austria_hungary"), Some(45_000_882));
-        assert_eq!(world.social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 57_872_694);
+        assert_eq!(world.population().social_distribution(None).unwrap().dimensions["occupation"].assigned_residents, 57_872_694);
     }
 
     #[test]
