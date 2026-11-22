@@ -625,11 +625,15 @@ def add_italian_regions(group, observations):
     )]
 
 
-def add_indian_local_areas(group, observations):
+def add_indian_local_areas(group, observations, *, version):
     sources = {
         "raj_united_provinces_states": {"india_up_states_census_1901_table_2"},
         "raj_mysore_state": {"india_mysore_census_1901_report", "india_mysore_census_1901_talukwar_table_2"},
     }
+    if version >= 24:
+        sources["raj_agra_oudh"] = {
+            "india_census_1901_comparable_area", "india_oudh_census_1901_districts",
+        }
     rows = defaultdict(list)
     for observation in observations:
         parent_id = observation["parent_id"]
@@ -646,6 +650,8 @@ def add_indian_local_areas(group, observations):
         children = interpolate_partition(rows[parent_id], parent, dates)
         for child in children:
             child.update(statistical_parent=parent_id, date=DATE, uncertainty_kind=uncertainty)
+            if child["unit_id"] == "raj_oudh_lucknow":
+                child["place_ids"] = ["place:lucknow"]
         units.extend(children)
         group["statistical_aggregates"].append(parent | dict(
             source_id=group["source_id"], date=DATE, endpoint_dates=dates,
@@ -1140,7 +1146,7 @@ def groups(observations, version=1):
         result[taiwan["unit_id"]] = taiwan
     if version >= 22:
         add_italian_regions(result["kingdom_of_italy"], observations)
-        add_indian_local_areas(result["cshapes_gw_750"], observations)
+        add_indian_local_areas(result["cshapes_gw_750"], observations, version=version)
     ids = set()
     for root, group in result.items():
         group.setdefault("population_lower",None)

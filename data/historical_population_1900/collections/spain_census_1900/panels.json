@@ -1,0 +1,60 @@
+[
+  {
+    "id": "es_census_1900_nacional",
+    "published_scope": "Spain and northern and western African possessions, population present",
+    "source_id": "es_census_1900_age_marital",
+    "observed_unit_id": "es_census_1900_nacional",
+    "observed_date": "1900-12-31",
+    "locator": "pp. 296–297",
+    "definition": "Census population present, including temporary visitors. Ages use the original age intervals.",
+    "broad_observation": false
+  },
+  {
+    "id": "es_census_1900_ceuta",
+    "published_scope": "Ceuta, population present",
+    "source_id": "es_census_1900_age_marital",
+    "observed_unit_id": "es_census_1900_ceuta",
+    "observed_date": "1900-12-31",
+    "locator": "pp. 64–65",
+    "definition": "Census population present, including temporary visitors. Ages use the original age intervals.",
+    "broad_observation": false
+  },
+  {
+    "id": "es_census_1900_melilla",
+    "published_scope": "Melilla, population present",
+    "source_id": "es_census_1900_age_marital",
+    "observed_unit_id": "es_census_1900_melilla",
+    "observed_date": "1900-12-31",
+    "locator": "pp. 292–293",
+    "definition": "Census population present, including temporary visitors. Ages use the original age intervals.",
+    "broad_observation": false
+  },
+  {
+    "id": "es_census_1900_otras_posesiones",
+    "published_scope": "Other published African possessions, population present",
+    "source_id": "es_census_1900_age_marital",
+    "observed_unit_id": "es_census_1900_otras_posesiones",
+    "observed_date": "1900-12-31",
+    "locator": "pp. 292–293",
+    "definition": "Census population present, including temporary visitors. Ages use the original age intervals.",
+    "broad_observation": false
+  },
+  {
+    "id": "es_census_1900_peninsula_islas",
+    "published_scope": "Peninsular Spain, Balearic Islands and Canary Islands, population present",
+    "source_id": "es_census_1900_age_marital",
+    "observed_unit_id": "es_census_1900_peninsula_islas",
+    "observed_date": "1900-12-31",
+    "locator": "pp. 64–65, 292–293, 296–297",
+    "definition": "Census population present. Subtract Ceuta, Melilla and the remaining African possessions from the published national rows, for each sex and age band.",
+    "broad_observation": false,
+    "opening_unit_id": "kingdom_of_spain",
+    "opening_from_version": 24,
+    "opening_band_roles": [
+      "band",
+      "unknown"
+    ],
+    "opening_method": "Apply the year-end census age-by-sex shares for the peninsula and adjacent islands to the same-scope January 1900 population using integer largest remainders.",
+    "uncertainty": "Change in age and sex shares between January 1 and December 31 is unquantified. No age is imputed for people with age not stated."
+  }
+]

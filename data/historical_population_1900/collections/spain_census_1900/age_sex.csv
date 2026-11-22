@@ -1,0 +1,116 @@
+panel,label,role,age_min,age_max,both,male,female
+es_census_1900_nacional,Habitantes según su edad,total,,,18618086,9087821,9530265
+es_census_1900_nacional,Menos de 5 años,band,0,4,2161052,1091022,1070030
+es_census_1900_nacional,5 años,band,5,5,437192,222619,214573
+es_census_1900_nacional,6 años,band,6,6,429911,214174,215737
+es_census_1900_nacional,7 años,band,7,7,427679,215682,211997
+es_census_1900_nacional,8 años,band,8,8,429412,217572,211840
+es_census_1900_nacional,9 años,band,9,9,388863,195675,193188
+es_census_1900_nacional,10 años,band,10,10,425850,213911,211939
+es_census_1900_nacional,De 11 a 15 años,band,11,15,1858020,934027,923993
+es_census_1900_nacional,De 16 a 20 años,band,16,20,1563971,733430,830541
+es_census_1900_nacional,De 21 a 25 años,band,21,25,1544594,748568,796026
+es_census_1900_nacional,De 26 a 30 años,band,26,30,1496456,713773,782683
+es_census_1900_nacional,De 31 a 35 años,band,31,35,1134632,558679,575953
+es_census_1900_nacional,De 36 a 40 años,band,36,40,1310092,628829,681263
+es_census_1900_nacional,De 41 a 45 años,band,41,45,960102,465900,494202
+es_census_1900_nacional,De 46 a 50 años,band,46,50,1089225,512076,577149
+es_census_1900_nacional,De 51 a 60 años,band,51,60,1579112,753841,825271
+es_census_1900_nacional,De 61 a 70 años,band,61,70,933027,452662,480365
+es_census_1900_nacional,De 71 a 80 años,band,71,80,359319,174815,184504
+es_census_1900_nacional,De 81 a 90 años,band,81,90,64023,28075,35948
+es_census_1900_nacional,De 91 a 100 años,band,91,100,4704,1656,3048
+es_census_1900_nacional,Más de 100 años,band,101,,152,28,124
+es_census_1900_nacional,No consta la edad,unknown,,,20698,10807,9891
+es_census_1900_ceuta,Habitantes según su edad,total,,,13269,8860,4409
+es_census_1900_ceuta,Menos de 5 años,band,0,4,1087,558,529
+es_census_1900_ceuta,5 años,band,5,5,203,95,108
+es_census_1900_ceuta,6 años,band,6,6,195,94,101
+es_census_1900_ceuta,7 años,band,7,7,220,117,103
+es_census_1900_ceuta,8 años,band,8,8,205,102,103
+es_census_1900_ceuta,9 años,band,9,9,184,96,88
+es_census_1900_ceuta,10 años,band,10,10,181,86,95
+es_census_1900_ceuta,De 11 a 15 años,band,11,15,916,449,467
+es_census_1900_ceuta,De 16 a 20 años,band,16,20,1007,595,412
+es_census_1900_ceuta,De 21 a 25 años,band,21,25,2938,2549,389
+es_census_1900_ceuta,De 26 a 30 años,band,26,30,1179,792,387
+es_census_1900_ceuta,De 31 a 35 años,band,31,35,976,713,263
+es_census_1900_ceuta,De 36 a 40 años,band,36,40,1167,813,354
+es_census_1900_ceuta,De 41 a 45 años,band,41,45,708,543,165
+es_census_1900_ceuta,De 46 a 50 años,band,46,50,741,499,242
+es_census_1900_ceuta,De 51 a 60 años,band,51,60,851,517,334
+es_census_1900_ceuta,De 61 a 70 años,band,61,70,324,164,160
+es_census_1900_ceuta,De 71 a 80 años,band,71,80,119,48,71
+es_census_1900_ceuta,De 81 a 90 años,band,81,90,39,21,18
+es_census_1900_ceuta,De 91 a 100 años,band,91,100,3,1,2
+es_census_1900_ceuta,Más de 100 años,band,101,,0,0,0
+es_census_1900_ceuta,No consta la edad,unknown,,,26,8,18
+es_census_1900_melilla,Habitantes según su edad,total,,,8956,5854,3102
+es_census_1900_melilla,Menos de 5 años,band,0,4,825,403,422
+es_census_1900_melilla,5 años,band,5,5,165,81,84
+es_census_1900_melilla,6 años,band,6,6,146,74,72
+es_census_1900_melilla,7 años,band,7,7,154,81,73
+es_census_1900_melilla,8 años,band,8,8,160,82,78
+es_census_1900_melilla,9 años,band,9,9,135,72,63
+es_census_1900_melilla,10 años,band,10,10,161,80,81
+es_census_1900_melilla,De 11 a 15 años,band,11,15,654,291,363
+es_census_1900_melilla,De 16 a 20 años,band,16,20,727,406,321
+es_census_1900_melilla,De 21 a 25 años,band,21,25,2827,2549,278
+es_census_1900_melilla,De 26 a 30 años,band,26,30,681,413,268
+es_census_1900_melilla,De 31 a 35 años,band,31,35,404,250,154
+es_census_1900_melilla,De 36 a 40 años,band,36,40,507,298,209
+es_census_1900_melilla,De 41 a 45 años,band,41,45,339,187,152
+es_census_1900_melilla,De 46 a 50 años,band,46,50,410,245,165
+es_census_1900_melilla,De 51 a 60 años,band,51,60,421,229,192
+es_census_1900_melilla,De 61 a 70 años,band,61,70,158,75,83
+es_census_1900_melilla,De 71 a 80 años,band,71,80,48,16,32
+es_census_1900_melilla,De 81 a 90 años,band,81,90,12,6,6
+es_census_1900_melilla,De 91 a 100 años,band,91,100,5,1,4
+es_census_1900_melilla,Más de 100 años,band,101,,1,0,1
+es_census_1900_melilla,No consta la edad,unknown,,,16,15,1
+es_census_1900_otras_posesiones,Habitantes según su edad,total,,,1456,1142,314
+es_census_1900_otras_posesiones,Menos de 5 años,band,0,4,80,44,36
+es_census_1900_otras_posesiones,5 años,band,5,5,18,7,11
+es_census_1900_otras_posesiones,6 años,band,6,6,15,8,7
+es_census_1900_otras_posesiones,7 años,band,7,7,21,13,8
+es_census_1900_otras_posesiones,8 años,band,8,8,14,7,7
+es_census_1900_otras_posesiones,9 años,band,9,9,13,10,3
+es_census_1900_otras_posesiones,10 años,band,10,10,18,9,9
+es_census_1900_otras_posesiones,De 11 a 15 años,band,11,15,61,30,31
+es_census_1900_otras_posesiones,De 16 a 20 años,band,16,20,80,52,28
+es_census_1900_otras_posesiones,De 21 a 25 años,band,21,25,506,468,38
+es_census_1900_otras_posesiones,De 26 a 30 años,band,26,30,106,88,18
+es_census_1900_otras_posesiones,De 31 a 35 años,band,31,35,97,77,20
+es_census_1900_otras_posesiones,De 36 a 40 años,band,36,40,92,63,29
+es_census_1900_otras_posesiones,De 41 a 45 años,band,41,45,73,58,15
+es_census_1900_otras_posesiones,De 46 a 50 años,band,46,50,70,54,16
+es_census_1900_otras_posesiones,De 51 a 60 años,band,51,60,101,86,15
+es_census_1900_otras_posesiones,De 61 a 70 años,band,61,70,50,37,13
+es_census_1900_otras_posesiones,De 71 a 80 años,band,71,80,20,11,9
+es_census_1900_otras_posesiones,De 81 a 90 años,band,81,90,2,1,1
+es_census_1900_otras_posesiones,De 91 a 100 años,band,91,100,1,1,0
+es_census_1900_otras_posesiones,Más de 100 años,band,101,,0,0,0
+es_census_1900_otras_posesiones,No consta la edad,unknown,,,18,18,0
+es_census_1900_peninsula_islas,Habitantes según su edad,total,,,18594405,9071965,9522440
+es_census_1900_peninsula_islas,Menos de 5 años,band,0,4,2159060,1090017,1069043
+es_census_1900_peninsula_islas,5 años,band,5,5,436806,222436,214370
+es_census_1900_peninsula_islas,6 años,band,6,6,429555,213998,215557
+es_census_1900_peninsula_islas,7 años,band,7,7,427284,215471,211813
+es_census_1900_peninsula_islas,8 años,band,8,8,429033,217381,211652
+es_census_1900_peninsula_islas,9 años,band,9,9,388531,195497,193034
+es_census_1900_peninsula_islas,10 años,band,10,10,425490,213736,211754
+es_census_1900_peninsula_islas,De 11 a 15 años,band,11,15,1856389,933257,923132
+es_census_1900_peninsula_islas,De 16 a 20 años,band,16,20,1562157,732377,829780
+es_census_1900_peninsula_islas,De 21 a 25 años,band,21,25,1538323,743002,795321
+es_census_1900_peninsula_islas,De 26 a 30 años,band,26,30,1494490,712480,782010
+es_census_1900_peninsula_islas,De 31 a 35 años,band,31,35,1133155,557639,575516
+es_census_1900_peninsula_islas,De 36 a 40 años,band,36,40,1308326,627655,680671
+es_census_1900_peninsula_islas,De 41 a 45 años,band,41,45,958982,465112,493870
+es_census_1900_peninsula_islas,De 46 a 50 años,band,46,50,1088004,511278,576726
+es_census_1900_peninsula_islas,De 51 a 60 años,band,51,60,1577739,753009,824730
+es_census_1900_peninsula_islas,De 61 a 70 años,band,61,70,932495,452386,480109
+es_census_1900_peninsula_islas,De 71 a 80 años,band,71,80,359132,174740,184392
+es_census_1900_peninsula_islas,De 81 a 90 años,band,81,90,63970,28047,35923
+es_census_1900_peninsula_islas,De 91 a 100 años,band,91,100,4695,1653,3042
+es_census_1900_peninsula_islas,Más de 100 años,band,101,,151,28,123
+es_census_1900_peninsula_islas,No consta la edad,unknown,,,20638,10766,9872

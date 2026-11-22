@@ -2510,6 +2510,65 @@ mod tests {
     }
 
     #[test]
+    fn historical_oudh_italy_egypt_and_spain_opening_counts_close() {
+        let bootstrap = WorldBootstrap::load().unwrap();
+        let world = bootstrap.create("country_fra").unwrap();
+        let agra_oudh = world.inspect_population("raj_agra_oudh").unwrap();
+        assert_eq!(agra_oudh.children.len(), 13);
+        assert_eq!(agra_oudh.children.iter().map(|child| child.population_total).sum::<u64>(), 47_600_781);
+        assert_eq!(agra_oudh.structure.unwrap().cohort_residents, 47_600_781);
+        let lucknow = world.inspect_population("raj_oudh_lucknow").unwrap();
+        assert_eq!(lucknow.population_total, Some(791_028));
+        assert_eq!(lucknow.parent_id, Some("raj_agra_oudh"));
+        assert_eq!(world.inspect_population("place:lucknow").unwrap().account_id, Some("raj_oudh_lucknow"));
+        assert_eq!(lucknow.structure.as_ref().unwrap().cohort_residents, 791_028);
+        let lucknow_religion = &lucknow.social.unwrap().dimensions["religion"];
+        assert_eq!(lucknow_religion.assigned_residents, 791_028);
+        assert!(lucknow_religion.by_classification["india_1901_reported_religion"].contains_key("Brahmos"));
+
+        let lombardy = world.inspect_population("it_1901_lombardia").unwrap().social.unwrap();
+        let occupation = &lombardy.dimensions["occupation"];
+        let opening = occupation.direct_opening_distribution.as_ref().unwrap();
+        assert_eq!(opening.observed_total, 4_282_728);
+        assert_eq!(occupation.by_classification["italy_1901_reported_occupation"].len(), 6);
+        assert_eq!(occupation.assigned_residents + occupation.unknown_residents, 4_254_990);
+        assert_eq!(lombardy.dimensions["class"].assigned_residents, 0);
+        let property = &lombardy.dimensions["property_declaration"];
+        assert_eq!(property.assigned_residents, 4_254_990);
+        assert_eq!(property.by_classification["italy_1901_registered_real_property"].len(), 4);
+        assert_eq!(lombardy.dimensions["literacy"].assigned_residents, 4_254_990);
+        let piemonte = world.inspect_population("it_1901_piemonte").unwrap().social.unwrap();
+        let industrial_position = &piemonte.dimensions["class"];
+        assert_eq!(industrial_position.by_classification["italy_1901_industrial_position"].len(), 4);
+        assert_eq!(industrial_position.assigned_residents + industrial_position.unknown_residents, 3_308_662);
+
+        let faiyum = world.inspect_population("egy_mudiriya_faiyum").unwrap();
+        let religion = &faiyum.social.unwrap().dimensions["religion"];
+        assert_eq!(religion.unknown_residents, 0);
+        assert_eq!(religion.assigned_residents, faiyum.population_total.unwrap());
+        let norm = &faiyum.dietary_norms[0];
+        assert_eq!(norm.residents_with_matching_religion,
+            religion.by_classification["egypt_1897_reported_religion"]["Muslim"]);
+        assert_eq!(norm.observed_adherents, None);
+
+        let spain = world.inspect_population("kingdom_of_spain").unwrap();
+        assert_eq!(spain.population_total, Some(18_511_807));
+        let spain_structure = spain.structure.unwrap();
+        assert_eq!(spain_structure.cohort_residents, 18_511_807);
+        assert!(spain_structure.cohorts.iter().any(|cohort| cohort.age_years.is_none()));
+        let marriage = &spain.social.unwrap().dimensions["marital_status"];
+        assert_eq!(marriage.assigned_residents + marriage.unknown_residents, 18_511_807);
+        assert_eq!(marriage.unknown_residents, 5_997);
+
+        let old = bootstrap.base_opening_version("country_fra", None, Some(23)).unwrap();
+        assert_eq!(old.population().population_total("raj_oudh_lucknow"), None);
+        assert_eq!(old.population().population_total("raj_agra_oudh"), Some(47_600_781));
+        let old_italy = old.inspect_population("it_1901_lombardia").unwrap().social.unwrap();
+        assert_eq!(old_italy.dimensions["occupation"].assigned_residents, 0);
+        assert!(!old_italy.dimensions.contains_key("property_declaration"));
+    }
+
+    #[test]
     fn historical_baden_survey_adds_age_and_civil_status_without_changing_the_balance() {
         let bootstrap = WorldBootstrap::load().unwrap();
         let unit = "administrative_region:germany_baden";
@@ -2587,7 +2646,8 @@ mod tests {
         let tisza = world.inspect_population("ah_tisza_maros").unwrap().social.unwrap();
         assert_eq!(tisza.dimensions["class"].assigned_residents, 893_916);
         let global = world.population().social_distribution(None).unwrap();
-        assert_eq!(global.dimensions["class"].assigned_residents, 8_368_163);
+        let crown = &global.dimensions["class"].by_classification["hungarian_crown_1900_work_status"];
+        assert_eq!(crown.values().sum::<u64>(), 8_368_163);
         let county = world.inspect_population(report.children[0].unit_id).unwrap();
         assert_eq!(county.social.unwrap().dimensions["class"].assigned_residents, 0);
         let previous = bootstrap.base_opening_version("country_fra", None, Some(19)).unwrap();

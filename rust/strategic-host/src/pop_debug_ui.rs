@@ -260,6 +260,7 @@ impl Panel {
                 "marital_status" => ("婚姻状态", "Marital status"),
                 "household" => ("家庭居住类型", "Household type"),
                 "housing" => ("住房", "Housing"),
+                "property_declaration" => ("登记地产申报", "Registered real property declaration"),
                 _ => continue,
             };
             self.heading(zh, en);

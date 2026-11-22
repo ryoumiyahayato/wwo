@@ -5,7 +5,7 @@ use std::{collections::{BTreeMap, BTreeSet}, io};
 
 const DIMENSIONS: &[&str] = &[
     "occupation", "class", "legal_estate", "language", "culture", "religion", "literacy",
-    "residence", "marital_status", "household", "housing",
+    "residence", "marital_status", "household", "housing", "property_declaration",
 ];
 
 #[derive(Default)]
@@ -127,9 +127,12 @@ impl Population {
             Some(unit) => self.population_total(unit)?,
             None => self.global_total(),
         };
-        let mut dimensions: BTreeMap<_, SocialDimension<'_>> = DIMENSIONS.iter().map(|&key| {
-            (key, SocialDimension { unknown_residents: population_total, ..SocialDimension::default() })
-        }).collect();
+        let has_property_dimension = self.opening_version().is_some_and(|version| version >= 24);
+        let mut dimensions: BTreeMap<_, SocialDimension<'_>> = DIMENSIONS.iter()
+            .copied()
+            .filter(|&key| key != "property_declaration" || has_property_dimension)
+            .map(|key| (key, SocialDimension { unknown_residents: population_total, ..SocialDimension::default() }))
+            .collect();
         let mut coverage = BTreeMap::<&str, (u64, u64, u64)>::new();
         let mut affected_resident_pools = BTreeSet::new();
         for (opening, id, region) in self.opening.iter().flat_map(|opening| {

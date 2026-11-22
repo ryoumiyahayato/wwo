@@ -773,6 +773,68 @@ def italy_marital_status(pool):
     )
 
 
+def spain_marital_status(pool):
+    panel = "es_census_1900_peninsula_islas"
+    collection = COLLECTIONS / "spain_census_1900"
+    with (collection / "marital_status.csv").open(encoding="utf8", newline="") as stream:
+        rows = [row for row in csv.DictReader(stream) if row["panel"] == panel]
+    with (collection / "population_controls.csv").open(encoding="utf8", newline="") as stream:
+        control, = (row for row in csv.DictReader(stream) if row["panel"] == panel)
+    if (any(sum(int(row[sex]) for row in rows) != int(control[sex]) for sex in ("male", "female"))
+            or any(int(row["male"]) + int(row["female"]) != int(row["both"]) for row in [*rows, control])):
+        raise ValueError("Spanish census civil status does not close by sex")
+    counts = {row["label"]: int(row["both"]) for row in rows if row["category"] != "unknown"}
+    unknown, = (int(row["both"]) for row in rows if row["category"] == "unknown")
+    yield pool["unit_id"], "marital_status", distribution(
+        pool["population_value"], classification="spain_1900_reported_marital_status",
+        source="es_census_1900_age_marital", date=control["date"], observed_unit=panel,
+        scope="Population present in the peninsula, the Balearic Islands and the Canary Islands",
+        locator=control["printed_pages"], total=int(control["both"]), observed_counts=counts, unknown=unknown,
+        definition="The census reports civil status for people of all ages. African possessions are removed by category.",
+        method=f"{SHARE_METHOD} The year-end shares are used for January 1; intervening change is unquantified.",
+    )
+
+
+def agra_oudh_religion(pools, observations):
+    categories = (
+        ("hindu", "Hindus"), ("sikh", "Sikhs"), ("jain", "Jains"), ("buddhist", "Buddhists"),
+        ("parsi", "Parsis"), ("muslim", "Muhammadans"), ("christian", "Christians"), ("jewish", "Jews"),
+        ("arya", "Aryas"), ("brahmo", "Brahmos"),
+    )
+    path = COLLECTIONS / "india_local_areas_1901" / "oudh_religion.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            if row["row_role"] != "district":
+                continue
+            unit = row["unit_id"]
+            pool = pools[unit]
+            total = int(row["population"])
+            if pool["endpoint_values"][-1] != total:
+                raise ValueError(f"{unit}: religion and opening census controls differ")
+            yield unit, "religion", distribution(
+                pool["population_value"], classification="india_1901_reported_religion",
+                source="india_oudh_census_1901_districts", date=INDIA_DATE, observed_unit=unit,
+                scope=f"{row['name']} census district, all persons present",
+                locator=f"Table VI, printed pp. 38–40, row {row['source_row']}", total=total, unknown=0,
+                observed_counts={label: int(row[column]) for column, label in categories},
+                definition="District census religion. The distinct published Arya and Brahmo categories are retained.",
+            )
+    unit = "raj_agra_remainder"
+    agra, = (row for row in observations if row["unit_id"] == "raj_agra_1901_provincial_return")
+    pool = pools[unit]
+    total = pool["endpoint_values"][-1]
+    unknown = total - agra["population_value"]
+    if unknown != 294:
+        raise ValueError("Agra religion and comparable-area controls do not reconcile")
+    yield unit, "religion", distribution(
+        pool["population_value"], classification="india_1901_reported_religion",
+        source=agra["source_id"], date=agra["date"], observed_unit=agra["unit_id"], scope=agra["definition"],
+        locator=agra["locator"], total=total, unknown=unknown, observed_counts=agra["religion"],
+        definition="The religious categories include two New Hindu Vedantists reported in a footnote. "
+                   "A further 294 people in the comparative-area control are not attributed to any religion.",
+    )
+
+
 MEXICO_SOCIAL_TABLES = {
     "language": ("castellano idiomas_indigenas idiomas_extranjeros",
                  ("Castellano", "Idiomas Indígenas", "Idiomas Extranjeros"),
@@ -846,6 +908,130 @@ def italian_settlement(pools):
             )
 
 
+def italian_occupation(pools):
+    categories = (
+        "agriculture_fishing_hunting", "industry", "commerce", "domestic_and_street_services",
+        "liberal_professions_and_arts", "no_occupation",
+    )
+    path = COLLECTIONS / "italy_census_1901" / "occupation.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit = row["unit_id"]
+            pool = pools[unit]
+            total = int(row["observed_total"])
+            if pool["endpoint_values"][-1] != total:
+                raise ValueError(f"{unit}: census occupation and opening endpoints differ")
+            for sex in ("male", "female"):
+                cells = [int(row[f"{category}_{sex}"]) for category in categories]
+                if sum(cells) + int(row[f"eligible_occupation_unknown_{sex}"]) != int(row[f"eligible_{sex}"]):
+                    raise ValueError(f"{unit}: {sex} occupational population does not close")
+            yield unit, "occupation", distribution(
+                pool["population_value"], classification="italy_1901_reported_occupation",
+                source="it_1901_census_v4_occupation", date=row["observed_date"], observed_unit=unit,
+                scope=f"{row['source_label']}, census population present",
+                locator=row["locator"], total=total, unknown=int(row["unknown"]),
+                observed_counts={category: int(row[f"{category}_male"]) + int(row[f"{category}_female"])
+                                 for category in categories},
+                definition="Own occupation or reported absence of an occupation, among people born through 1891. "
+                           "The table's unreported occupations and people outside that birth-year scope remain unknown.",
+            )
+
+
+def italian_literacy(pools):
+    path = COLLECTIONS / "italy_census_1901" / "literacy.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit = row["unit_id"]
+            pool = pools[unit]
+            total = int(row["observed_total"])
+            if pool["endpoint_values"][-1] != total:
+                raise ValueError(f"{unit}: census literacy and opening endpoints differ")
+            yield unit, "literacy", distribution(
+                pool["population_value"], classification="italy_1901_reported_reading",
+                source="it_1901_census_v2_literacy", date=row["observed_date"], observed_unit=unit,
+                scope=f"{row['source_label']}, census population present",
+                locator=row["locator"], total=total, unknown=int(row["unknown"]),
+                observed_counts={key: int(row[key]) for key in ("able_to_read", "unable_to_read")},
+                definition="Reported ability to read at all recorded ages. The original table includes "
+                           "the younger birth years. People omitted from the table for unknown age remain unassigned.",
+            )
+
+
+def italian_registered_property(pools):
+    owners = ("registered_land_only", "registered_buildings_only", "registered_land_and_buildings")
+    path = COLLECTIONS / "italy_census_1901" / "registered_property.csv"
+    with path.open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit = row["unit_id"]
+            pool = pools[unit]
+            total = int(row["observed_total"])
+            if pool["endpoint_values"][-1] != total:
+                raise ValueError(f"{unit}: census property and opening endpoints differ")
+            counts = {key: int(row[key]) for key in owners}
+            if sum(counts.values()) != int(row["declared_owners_total"]):
+                raise ValueError(f"{unit}: declared individual owners do not close")
+            remainder = int(row["no_registered_ownership_declaration"])
+            yield unit, "property_declaration", distribution(
+                pool["population_value"], classification="italy_1901_registered_real_property",
+                source="it_1901_census_v4_occupation", date=row["observed_date"], observed_unit=unit,
+                scope=f"{row['source_label']}, census population present",
+                locator=row["locator"], total=total, unknown=0,
+                observed_counts=counts | {"no_registered_ownership_declaration": remainder},
+                definition="Registry ownership by individuals. The aggregate without an ownership declaration "
+                           "includes negative and blank responses. Actual property holdings in that group remain unknown.",
+            )
+
+
+def italian_industrial_position(pools):
+    categories = (
+        "owners_directors_artisans", "home_textile_artisans",
+        "clerks_shop_assistants_commercial_travelers", "foremen_workers_laborers",
+    )
+    collection = COLLECTIONS / "italy_census_1901"
+    with (collection / "occupation.csv").open(encoding="utf8", newline="") as stream:
+        occupation = {row["unit_id"]: row for row in csv.DictReader(stream)}
+    with (collection / "industrial_position.csv").open(encoding="utf8", newline="") as stream:
+        for row in csv.DictReader(stream):
+            unit = row["unit_id"]
+            pool = pools[unit]
+            total = int(row["observed_total"])
+            if pool["endpoint_values"][-1] != total:
+                raise ValueError(f"{unit}: census industrial position and opening endpoints differ")
+            for sex in ("male", "female"):
+                classified = sum(int(row[f"{category}_{sex}"]) for category in categories)
+                if classified != int(row[f"industry_{sex}"]) or classified != int(occupation[unit][f"industry_{sex}"]):
+                    raise ValueError(f"{unit}: {sex} industrial position does not close to the occupational control")
+            yield unit, "class", distribution(
+                pool["population_value"], classification="italy_1901_industrial_position",
+                source="it_1901_census_v5_industrial_position", date=row["observed_date"], observed_unit=unit,
+                scope=f"{row['source_label']}, own industry occupational group",
+                locator=row["locator"], total=total, unknown=int(row["unknown"]),
+                observed_counts={category: int(row[f"{category}_male"]) + int(row[f"{category}_female"])
+                                 for category in categories},
+                definition="Census position within the person's declared industrial occupation. Other occupations, "
+                           "people outside the occupation table and three compartments with conflicting counts remain unknown.",
+            )
+
+
+def egyptian_provincial_religion(pools, observations):
+    source = "egypt_1897_markaz_religion"
+    for row in observations:
+        if row["source_id"] != source:
+            continue
+        unit = row["unit_id"]
+        pool = pools[unit]
+        total = row["population_value"]
+        if pool["endpoint_values"][0] != total:
+            raise ValueError(f"{unit}: provincial religion and opening endpoints differ")
+        yield unit, "religion", distribution(
+            pool["population_value"], classification="egypt_1897_reported_religion",
+            source=source, date=row["date"], observed_unit=unit, scope=row["definition"],
+            locator=row["locator"], total=total, unknown=0, observed_counts=row["religion"],
+            definition="Published province subtotals by religion, including all reported Christian denominations together.",
+            method=f"{SHARE_METHOD} Religious composition changes between June 1897 and January 1900 are unquantified.",
+        )
+
+
 CANADA_ORIGIN_COLUMNS = {
     "British": "british", "French": "french", "German": "german",
     "Indian and h. b.": "indigenous_and_mixed_indigenous",
@@ -874,7 +1060,7 @@ def canada_reported_origin(pools):
             )
 
 
-def opening_social(opening_groups, *, version):
+def opening_social(opening_groups, observations, *, version):
     """Return independent person distributions at each source's published scope."""
     pools = {
         unit["unit_id"]: unit
@@ -963,6 +1149,11 @@ def opening_social(opening_groups, *, version):
         marginals = chain(marginals, canada_reported_origin(pools))
     if version >= 23:
         marginals = chain(marginals, italian_settlement(pools))
+    if version >= 24:
+        marginals = chain(marginals, italian_occupation(pools), italian_literacy(pools),
+                          italian_registered_property(pools), italian_industrial_position(pools),
+                          egyptian_provincial_religion(pools, observations),
+                          spain_marital_status(pools["kingdom_of_spain"]), agra_oudh_religion(pools, observations))
     for pool_id, dimension, marginal in marginals:
         region = regions.setdefault(pool_id, dict(unit_id=pool_id, opening_total=pools[pool_id]["population_value"],
                                                    marginal_distributions={}))
